@@ -32,6 +32,7 @@ public class KRunner {
 	private String _outputFileName;
 	private String _errorFileName;
 	private String _maudeModule;
+	private boolean _createLogs;
 	
 	
 	public KRunner(String[] args) throws Exception, IOException {
@@ -45,6 +46,7 @@ public class KRunner {
 		OptionSpec<File> errorFile = _parser.accepts("errorFile", "File to save any Maude errors").withRequiredArg().required().ofType(File.class);
 		OptionSpec<File> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(File.class);
 		OptionSpec<String> maudeModuleName = _parser.accepts("moduleName", "Final module name").withRequiredArg().required().ofType(String.class);
+		OptionSpec<Void> createLogs = _parser.accepts("createLogs", "Create runtime log files");
 
 		OptionSet options;
 		try {
@@ -58,16 +60,13 @@ public class KRunner {
 			_outputFileName = options.valueOf(outputFile).getCanonicalPath();
 			_errorFileName = options.valueOf(errorFile).getCanonicalPath();
 			_maudeModule = options.valueOf(maudeModuleName);
+			_createLogs = options.has(createLogs);
 		} catch (OptionException e) {
 			System.out.println(e.getMessage() + "\n");
 			usageError();
 		}
 		
-		FileHandler fh = new FileHandler("krunner.log", _append);
-		fh.setFormatter(new SimpleFormatter());
-		_logger = java.util.logging.Logger.getLogger("KRunner");
-		_logger.addHandler(fh);
-		_logger.setUseParentHandlers(false);
+		startLogger();
 		
 		if (!_maudeFile.exists()) {
 			throw new Exception("Maude file " + _maudeFileName + " does not exist.");
@@ -78,9 +77,19 @@ public class KRunner {
 		_logger.info("Maude and command files exist.");
 	}
 	
+	private void startLogger() throws IOException {
+		_logger = java.util.logging.Logger.getLogger("KRunner");
+		if (_createLogs) {
+			FileHandler fh = new FileHandler("krunner.log", _append);
+			fh.setFormatter(new SimpleFormatter());
+			_logger.addHandler(fh);
+		}
+		_logger.setUseParentHandlers(false);
+	}
+	
 	Thread startServer() {
 		_logger.info("Trying to start server on port " + _port);
-		MainServer server = new MainServer(_port);
+		MainServer server = new MainServer(_port, _logger);
 		Thread t = new Thread(server);
 		t.start();
 		while (!server._started) {

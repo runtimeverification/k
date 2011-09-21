@@ -1,7 +1,7 @@
 package commands;
 
 import java.net.Socket;
-
+import java.util.logging.Logger;
 import resources.Resource;
 import resources.ResourceSystem;
 
@@ -11,8 +11,8 @@ public class CommandSeek extends Command {
 	private long ID;
 	private int position;
 
-	public CommandSeek(String[] args, Socket socket) { //, Long maudeId) {
-		super(args, socket); //, maudeId);
+	public CommandSeek(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
+		super(args, socket, logger); //, maudeId);
 		
 		try {
 			ID = Long.parseLong(args[1]);

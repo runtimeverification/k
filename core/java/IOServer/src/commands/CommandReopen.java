@@ -2,6 +2,7 @@ package commands;
 
 import java.net.Socket;
 
+import java.util.logging.Logger;
 import resources.ResourceSystem;
 
 public class CommandReopen extends Command {
@@ -10,8 +11,8 @@ public class CommandReopen extends Command {
 	private long ID;
 	private String[] args;
 	
-	public CommandReopen(String[] args, Socket socket) { //, Long maudeId) {
-		super(args, socket); //, maudeId);
+	public CommandReopen(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
+		super(args, socket, logger); //, maudeId);
 
 		this.args = args;
 		this.uri = args[2];

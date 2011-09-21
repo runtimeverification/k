@@ -1,14 +1,16 @@
 package main;
 
-import log.Logger;
+import java.util.logging.Logger;
 import resources.ResourceSystem;
 
 public class MainServer implements Runnable {
 	public int _port;
 	public boolean _started;
+	private Logger _logger;
 
-	public MainServer(int port) {
+	public MainServer(int port, Logger logger) {
 		_port = port;
+		_logger = logger;
 		try {
 			createDefaultResources();
 		} catch (Exception e) {
@@ -43,14 +45,17 @@ public class MainServer implements Runnable {
 	}
 	
 	void startServer() {
-		IOServer server = new IOServer(_port);
+		IOServer server = new IOServer(_port, _logger);
 		_port = server.port; // in case server changes port
 		_started = true;
 		server.acceptConnections();
 	}
 	
 	public static void main(String[] args) throws Exception {
-		MainServer ms = new MainServer(Integer.parseInt(args[0]));
+		Logger logger = java.util.logging.Logger.getLogger("KRunner");
+		logger.setUseParentHandlers(false);
+		MainServer ms = new MainServer(Integer.parseInt(args[0]), logger);
+		
 		ms.run();
 		//start(Integer.parseInt(args[0]));
 	}

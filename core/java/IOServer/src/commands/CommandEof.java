@@ -1,7 +1,7 @@
 package commands;
 
 import java.net.Socket;
-
+import java.util.logging.Logger;
 import resources.Resource;
 import resources.ResourceSystem;
 
@@ -9,8 +9,8 @@ public class CommandEof extends Command {
 
 	private long ID;
 
-	public CommandEof(String[] args, Socket socket) {
-		super(args, socket);
+	public CommandEof(String[] args, Socket socket, Logger logger) {
+		super(args, socket, logger);
 
 		try {
 			ID = Long.parseLong(args[1]);

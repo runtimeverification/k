@@ -4,22 +4,23 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import log.Logger;
-
+import java.util.logging.Logger;
 import main.IOServer;
 
 public abstract class Command implements Runnable {
 
 	Socket socket;
 	public int maudeId;
+	private Logger _logger;
 
-	public Command(String[] args, Socket socket) { //, Long maudeId) {
+	public Command(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
 		this.socket = socket;
+		_logger = logger;
 //		this.maudeId = maudeId;
 	}
 
 	public void fail(String reason) {
-	    Logger.info(maudeId + " is failing because of " + reason);
+	    _logger.info(maudeId + " is failing because of " + reason);
 		IOServer.fail(Integer.toString(maudeId), reason, socket);
 	}
 
@@ -29,7 +30,7 @@ public abstract class Command implements Runnable {
 			"success#";
 		for (String s : messages)
 			success += s + "#";
-        Logger.info("sending '" + success + "##' to "+ maudeId);
+        _logger.info("sending '" + success + "##' to "+ maudeId);
 		success += "##\n";
 		
 		BufferedWriter output;
@@ -50,4 +51,5 @@ public abstract class Command implements Runnable {
 			e.printStackTrace();
 		}
 	}
+	
 }

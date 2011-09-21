@@ -9,32 +9,20 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.logging.Logger;
 
-import log.Logger;
-
-import commands.Command;
-import commands.CommandClose;
-import commands.CommandEof;
-import commands.CommandFlush;
-import commands.CommandOpen;
-import commands.CommandPeek;
-import commands.CommandPosition;
-import commands.CommandReadbyte;
-import commands.CommandReopen;
-import commands.CommandSeek;
-import commands.CommandUnknown;
-import commands.CommandWritebyte;
-import commands.CommandEnd;
+import commands.*;
 
 public class IOServer {
 	int port;
 	ServerSocket serverSocket;
 	ThreadPoolExecutor pool;
-	// private String END_OF_MESSAGE = "eom";
 	private int POOL_THREADS_SIZE = 10;
+	private Logger _logger;
 
-	public IOServer(int port) {
+	public IOServer(int port, Logger logger) {
 		this.port = port;
+		_logger = logger;
 		pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(POOL_THREADS_SIZE);
 		createServer();
 	}
@@ -44,14 +32,14 @@ public class IOServer {
 			serverSocket = new ServerSocket(port);
 			this.port = serverSocket.getLocalPort();
 		} catch (IOException e) {
-			Logger.severe("Could not listen on port: " + port);
-			Logger.severe("This program will exit with error code: 1");
+			_logger.severe("Could not listen on port: " + port);
+			_logger.severe("This program will exit with error code: 1");
 			System.exit(1);
 		}
 	}
 
 	public void acceptConnections() {
-		Logger.info("Server started at "
+		_logger.info("Server started at "
 				+ serverSocket.getInetAddress() + ": " + port);
 		
 		while (true) {
@@ -59,7 +47,7 @@ public class IOServer {
 			try {
 				// accept
 				clientSocket = serverSocket.accept();
-				Logger.info(clientSocket.toString());
+				_logger.info(clientSocket.toString());
 
 				// parse input
 				Command command = parseCommand(clientSocket);
@@ -69,7 +57,7 @@ public class IOServer {
 					pool.execute(command);
 
 			} catch (IOException e) {
-				Logger.severe("Error accepting connection for client on port "
+				_logger.severe("Error accepting connection for client on port "
 								+ port);
 			}
 		}
@@ -89,7 +77,7 @@ public class IOServer {
 
 			String inputLine = reader.readLine();
 			
-			Logger.info("received request: " + inputLine);
+			_logger.info("received request: " + inputLine);
 			
 			// parse
 			// TODO: here XML should be used...
@@ -99,16 +87,17 @@ public class IOServer {
 			
 			System.arraycopy(args, 1, args1,0, args.length-1);
 			
-			Command command = createCommand(args1, clientSocket);
+			Command command = createCommand(args1, clientSocket, _logger);
             
             command.maudeId = Integer.parseInt(args[0]);
 			return command;
 
 		} catch (IOException e) {
 			return new CommandUnknown(new String[] { e.getLocalizedMessage() },
-					clientSocket);
+					clientSocket, _logger);
 		}
 	}
+
 
 	/***
 	 * Parse the input command which looks like: command#arg1#arg2#...
@@ -116,54 +105,54 @@ public class IOServer {
 	 * @param socket
 	 * @return the corresponding Command(thread or task) for the given command
 	 */
-	private Command createCommand(String[] args, Socket socket) {
+	public Command createCommand(String[] args, Socket socket, Logger logger) {
 
 		// fail if wrong arguments are given
 		String command = null;
-		if (args.length >= 1)
+		if (args.length >= 1) {
 			command = args[0];
-		else 
+		} else {
 			fail("Empty command", socket);
-		
+		}		
 		
 		// switch on command and create appropriate objects
 		if (command.equals("open")) {
-			return new CommandOpen(args, socket); //, maudeId);
+			return new CommandOpen(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("reopen")) {
-			return new CommandReopen(args, socket); //, maudeId);
+			return new CommandReopen(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("close")) {
-			return new CommandClose(args, socket); //, maudeId);
+			return new CommandClose(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("seek")) {
-			return new CommandSeek(args, socket); //, maudeId);
+			return new CommandSeek(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("position")) {
-			return new CommandPosition(args, socket); //, maudeId);
+			return new CommandPosition(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("readbyte")) {
-			return new CommandReadbyte(args, socket); //, maudeId);
+			return new CommandReadbyte(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("writebyte")) {
-			return new CommandWritebyte(args, socket); //, maudeId);
+			return new CommandWritebyte(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("flush")) {
-			return new CommandFlush(args, socket); //, maudeId);
+			return new CommandFlush(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("peek")) {
-			return new CommandPeek(args, socket); //, maudeId);
+			return new CommandPeek(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("eof")) {
-			return new CommandEof(args, socket); //, maudeId);
+			return new CommandEof(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("end")) {
-		    CommandEnd c = new CommandEnd(args, socket);
+		    CommandEnd c = new CommandEnd(args, socket, logger);
 		    c.setPool(pool);
 		    return c;
 		}
 
-		return new CommandUnknown(args, socket); //, (long) 0);
+		return new CommandUnknown(args, socket, logger); //, (long) 0);
 	}
 
 	/***

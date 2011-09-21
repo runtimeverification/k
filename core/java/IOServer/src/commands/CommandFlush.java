@@ -1,7 +1,7 @@
 package commands;
 
 import java.net.Socket;
-
+import java.util.logging.Logger;
 import resources.Resource;
 import resources.ResourceSystem;
 
@@ -10,8 +10,8 @@ public class CommandFlush extends Command {
 
 	private long ID;
 
-	public CommandFlush(String[] args, Socket socket) { //, Long maudeId) {
-		super(args, socket); //, maudeId);
+	public CommandFlush(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
+		super(args, socket, logger); //, maudeId);
 		
 		try {
 			ID = Long.parseLong(args[1]);

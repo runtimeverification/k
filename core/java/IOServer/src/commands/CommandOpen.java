@@ -1,7 +1,7 @@
 package commands;
 
 import java.net.Socket;
-
+import java.util.logging.Logger;
 import resources.ResourceSystem;
 
 
@@ -10,8 +10,8 @@ public class CommandOpen extends Command {
 	private String uri;
 	private String[] args;
 	
-	public CommandOpen(String[] args, Socket socket) { //, Long maudeId) {
-		super(args, socket); //, maudeId);
+	public CommandOpen(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
+		super(args, socket, logger); //, maudeId);
 
 		// uri#attribute1=v1#a2=v2...
 		uri = args[1];
