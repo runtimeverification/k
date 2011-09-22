@@ -3,7 +3,7 @@ mod #TCP-SYNTAX is
 	including #SOCKET .
 	
 	op #error : -> #String .
-	op #containedRequest : #Socket-Configuration -> [#String] .
+	op #containedRequest : #Socket-Configuration -> #String .
 	op #toSend : #String -> #Socket-Msg .
 	op #start : #Nat -> #Socket-Configuration .
 	op #tcpRequest : #String -> #String .
@@ -12,19 +12,19 @@ endm
 
 mod #TCP-CLIENT is
 	including #TCP-SYNTAX .
-        including #CONVERSION .
+    including #CONVERSION .
 	
 	sort #TCPState .
 		
 	op Client : -> #Socket-Cid .
 	op cnum : #Nat -> #Socket-Oid .
-        op #check : #Socket-Oid #String ~> #String .
-        eq #check(cnum(N),S) = #check(Int2String(N), findString(S, "#", 0), S) .
-        op #check : #String #Nat #String ~> #String .
-       ceq #check(SN:#String, P:#Nat, S)
-         = substrString(S, P:#Nat +Nat 1, lengthString(S))
-        if SN:#String = substrString(S,0,P:#Nat) 
-        [print SN:#String ", " S ", " P:#Nat].
+	op #checkAnswer : #Socket-Oid #String ~> #String .
+	eq #checkAnswer(cnum(N),S) = #checkAnswer-aux(Int2String(N), findString(S, "#", 0), S) .
+	op #checkAnswer-aux : #String #Nat #String ~> #String .
+	ceq #checkAnswer-aux(SN:#String, P:#Nat, S)
+			= substrString(S, P:#Nat +Nat 1, lengthString(S))
+		if SN:#String = substrString(S,0,P:#Nat) 
+		[print SN:#String ", " S ", " P:#Nat] .
 	
 	ops idle connecting sending receiving haveAnswer closing connected finished : -> #TCPState [ctor] .
 	
@@ -77,7 +77,7 @@ mod #TCP-CLIENT is
 	[print Me " finished"] .
 	
 	rl #containedRequest(<> #Socket < Me : Client | state: finished,#Socket  answer: S,#Socket  A  >)
-	=> #check(Me, S)
+	=> #checkAnswer(Me, S)
 	[print Me " popping out of socket stuff"] .
 	
 	rl #start(N) => 
@@ -96,31 +96,33 @@ mod #TCP-INTERFACE is
 	op #errorTCPSyntax : #String -> #String .
 	eq #tcpRequest(S:#String) = #tcpRequest(S:#String, counter) .
 
-	op #tcpRequest : #String #Nat -> #String .
+	op #tcpRequest : #String [#Nat] -> #String .
 	eq #tcpRequest(S:#String, N:#Nat) = 
-#check(#containedRequest(#start(N:#Nat) #Socket #toSend(Int2String(N:#Nat) +String "#" +String S:#String +String "\r\n"))) .
+#checkResult(#containedRequest(#start(N:#Nat) #Socket #toSend(Int2String(N:#Nat) +String "#" +String S:#String +String "\r\n"))) .
 
-	op #check : #String -> #String .
+	op #checkResult : #String -> #String .
 	op #getTCPData : #String -> #String .
 
 
-	ceq #check(S:#String) = #getTCPData(substrString(S:#String, lengthString("success#"), lengthString(S:#String)))
+	ceq #checkResult(S:#String) = #getTCPData(substrString(S:#String, lengthString("success#"), lengthString(S:#String)))
 		if substrString(S:#String, 0, lengthString("success#")) ==Bool "success#" [print "full output: " S:#String] .
 
-        ceq #getTCPData(S:#String)
-          = substrString(S:#String, 0, N:#Nat)
-         if N:#Nat := findString(S:#String, "###", 0) .
+	ceq #getTCPData(S:#String)
+			= substrString(S:#String, 0, N:#Nat)
+		if N:#Nat := findString(S:#String, "###", 0) .
 
-         eq #getTCPData(S:#String)
-          = #errorTCPSyntax("Incorrect Output: " +String S:#String) .
+	eq #getTCPData(S:#String)
+		= #errorTCPSyntax("Incorrect Output: " +String S:#String) .
 		
-	ceq #check(S:#String) = #errorTCPSyntax(#getTCPData(substrString(S:#String, lengthString("fail#"), lengthString(S:#String))))
+	ceq #checkResult(S:#String) = #errorTCPSyntax(#getTCPData(substrString(S:#String, lengthString("fail#"), lengthString(S:#String))))
 		if substrString(S:#String, 0, lengthString("fail#")) ==Bool "fail#" [print "full error string: " S:#String] .
 		
-	eq #check("") = #errorTCPSyntax("Unknown error") .
-	eq #check(#error) = #errorTCPSyntax("Unknown error") .
+	eq #checkResult("") = #errorTCPSyntax("Unknown error") .
+	eq #checkResult(#error) = #errorTCPSyntax("Unknown error") .
 
-       op #isTCPError : #String -> #Bool .
-       eq #isTCPError(#errorTCPSyntax(S:#String)) = true .
-       eq #isTCPError(S:#String) = false [owise] .
+	op #isTCPError : #String -> #Bool .
+	eq #isTCPError(#errorTCPSyntax(S:#String)) = true .
+	ceq #isTCPError(S:#String) = false
+		if lengthString(S:#String) >=Int 0 . --- dummy check to make sure it's a real string
+	--- eq #isTCPError(S:#String) = false [owise] . --- unsafe
 endm
