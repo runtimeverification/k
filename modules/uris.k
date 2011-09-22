@@ -16,40 +16,40 @@ module URIS
              | `#ioError ( #String )
             
   syntax KResult ::= `#EOF | #String
-  rule errorTCPSyntax("EOF") => #EOF
+  rule #errorTCPSyntax("EOF") => #EOF
 
   rule <k> #open(S:#String) 
-    => String2Int(tcpRequest("open#" +String S +String "#")) ...</k>
+    => String2Int(#tcpRequest("open#" +String S +String "#")) ...</k>
 
   rule <k> #close(N:#Nat)
-    => String2DotK(tcpRequest("close#" +String Int2String(N) +String "#"))
+    => String2DotK(#tcpRequest("close#" +String Int2String(N) +String "#"))
        ...</k>
 
-  rule String2DotK(errorTCPSyntax(S)) => #ioError(S)
+  rule String2DotK(#errorTCPSyntax(S)) => #ioError(S)
   rule String2DotK(S) => .K if notBool(#isTCPError(S))
   
   rule String2Bool("0") => false
   rule String2Bool("1") => true
 
   rule <k> #flush(N)
-    => String2DotK(tcpRequest("flush#" +String Int2String(N) +String "#"))
+    => String2DotK(#tcpRequest("flush#" +String Int2String(N) +String "#"))
     ...</k>
 
   rule <k> #tell(N)
-    => String2DotK(tcpRequest("position#" +String Int2String(N) +String "#"))
+    => String2DotK(#tcpRequest("position#" +String Int2String(N) +String "#"))
     ...</k>
 
   rule <k> #tell(N)
-    => String2Int(tcpRequest("tell#" +String Int2String(N) +String "#"))
+    => String2Int(#tcpRequest("tell#" +String Int2String(N) +String "#"))
     ...</k>
 
   rule <k> #seek(N,P:#Nat)
-    => String2DotK(tcpRequest("seek#" +String Int2String(N) +String "#"
+    => String2DotK(#tcpRequest("seek#" +String Int2String(N) +String "#"
                               +String Int2String(P) +String "#"))
       ...</k>
 
   rule <k> #reopen(N,S)
-    => String2DotK(tcpRequest("reopen#" +String Int2String(N) +String "#"
+    => String2DotK(#tcpRequest("reopen#" +String Int2String(N) +String "#"
                               +String S +String "#"))
        ...</k>
 
@@ -66,23 +66,23 @@ module URIS
              | `#eof ( )
   rule #readByte() => #fReadByte(#stdin)
   rule <k> #fReadByte(N)
-    => String2Int(tcpRequest("readbyte#" +String Int2String(N) +String "#"))
+    => String2Int(#tcpRequest("readbyte#" +String Int2String(N) +String "#"))
         ...</k>
 
   rule #putByte(B) => #fPutByte(#stdout,B)
   rule <k> #fPutByte(N,B:#Nat)
-    => String2DotK(tcpRequest("writebyte#" +String Int2String(N) +String "#"
+    => String2DotK(#tcpRequest("writebyte#" +String Int2String(N) +String "#"
                               +String Int2String(B) +String "#"))
        ...</k>
 
   rule #peekByte() => #fPeekByte(#stdin)
   rule <k> #fPeekByte(N)
-    => String2Int(tcpRequest("peek#" +String Int2String(N) +String "#"))
+    => String2Int(#tcpRequest("peek#" +String Int2String(N) +String "#"))
        ...</k>
 
   rule #eof() => #fEof(#stdin)
   rule <k> #fEof(N)
-    => String2Bool(tcpRequest("eof#" +String Int2String(N) +String "#"))
+    => String2Bool(#tcpRequest("eof#" +String Int2String(N) +String "#"))
        ...</k>
 
   syntax K ::= `#readChar ( ) 
@@ -181,6 +181,6 @@ module URIS
   rule #checkEmptyK(<k> .K </k>) => .List
 
   syntax K ::= `#end | `#done
-  rule <k> #end => String2DotK(tcpRequest("end#")) ~> #done </k>
+  rule <k> #end => String2DotK(#tcpRequest("end#")) ~> #done </k>
   
 end module

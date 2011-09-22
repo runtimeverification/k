@@ -44,42 +44,42 @@ mod #SOCKET is
   protecting #STRING .
   including #CONFIGURATION .
 
-  op socket : #Nat -> #Socket-Oid [ctor] .
+  op #socket : #Nat -> #Socket-Oid [ctor] .
 
-  op createClientTcpSocket : #Socket-Oid #Socket-Oid #String #Nat -> #Socket-Msg [ctor msg format (b o)] .
-  op createServerTcpSocket : #Socket-Oid #Socket-Oid #Nat #Nat -> #Socket-Msg [ctor msg format (b o)] .
-  op createdSocket : #Socket-Oid #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (m o)] .
+  op #createClientTcpSocket : #Socket-Oid #Socket-Oid #String #Nat -> #Socket-Msg [ctor msg format (b o)] .
+  op #createServerTcpSocket : #Socket-Oid #Socket-Oid #Nat #Nat -> #Socket-Msg [ctor msg format (b o)] .
+  op #createdSocket : #Socket-Oid #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (m o)] .
 
-  op acceptClient : #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (b o)] .
-  op acceptedClient : #Socket-Oid #Socket-Oid #String #Socket-Oid -> #Socket-Msg [ctor msg format (m o)] .
+  op #acceptClient : #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (b o)] .
+  op #acceptedClient : #Socket-Oid #Socket-Oid #String #Socket-Oid -> #Socket-Msg [ctor msg format (m o)] .
 
-  op send : #Socket-Oid #Socket-Oid #String -> #Socket-Msg [ctor msg format (b o)] .
-  op sent : #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (m o)] .
+  op #send : #Socket-Oid #Socket-Oid #String -> #Socket-Msg [ctor msg format (b o)] .
+  op #sent : #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (m o)] .
 
-  op receive : #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (b o)] .
-  op received : #Socket-Oid #Socket-Oid #String -> #Socket-Msg [ctor msg format (m o)] .
+  op #receive : #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (b o)] .
+  op #received : #Socket-Oid #Socket-Oid #String -> #Socket-Msg [ctor msg format (m o)] .
 
-  op closeSocket : #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (b o)] .
-  op closedSocket : #Socket-Oid #Socket-Oid #String -> #Socket-Msg [ctor msg format (m o)] .
+  op #closeSocket : #Socket-Oid #Socket-Oid -> #Socket-Msg [ctor msg format (b o)] .
+  op #closedSocket : #Socket-Oid #Socket-Oid #String -> #Socket-Msg [ctor msg format (m o)] .
 
-  op socketError : #Socket-Oid #Socket-Oid #String -> #Socket-Msg [ctor msg format (r o)] .
+  op #socketError : #Socket-Oid #Socket-Oid #String -> #Socket-Msg [ctor msg format (r o)] .
 
-  op socketManager : -> #Socket-Oid
+  op #socketManager : -> #Socket-Oid
         [special (
            id-hook SocketManagerSymbol
 	   op-hook succSymbol			(sNat_ : #Nat ~> #NzNat)
 	   op-hook stringSymbol			(<Strings> : ~> #String)
-	   op-hook socketOidSymbol		(socket : #Nat ~> #Socket-Oid)
-	   op-hook createClientTcpSocketMsg	(createClientTcpSocket : #Socket-Oid #Socket-Oid #String #Nat ~> #Socket-Msg)
-	   op-hook createServerTcpSocketMsg	(createServerTcpSocket : #Socket-Oid #Socket-Oid #Nat #Nat ~> #Socket-Msg)
-	   op-hook createdSocketMsg		(createdSocket : #Socket-Oid #Socket-Oid #Socket-Oid ~> #Socket-Msg)
-	   op-hook acceptClientMsg		(acceptClient : #Socket-Oid #Socket-Oid ~> #Socket-Msg)
-	   op-hook acceptedClientMsg		(acceptedClient : #Socket-Oid #Socket-Oid #String #Socket-Oid ~> #Socket-Msg)
-	   op-hook sendMsg			(send : #Socket-Oid #Socket-Oid #String ~> #Socket-Msg)
-	   op-hook sentMsg			(sent : #Socket-Oid #Socket-Oid ~> #Socket-Msg)
-	   op-hook receiveMsg			(receive : #Socket-Oid #Socket-Oid ~> #Socket-Msg)
-	   op-hook receivedMsg			(received : #Socket-Oid #Socket-Oid #String ~> #Socket-Msg)
-	   op-hook closeSocketMsg		(closeSocket : #Socket-Oid #Socket-Oid ~> #Socket-Msg)
-	   op-hook closedSocketMsg		(closedSocket : #Socket-Oid #Socket-Oid #String ~> #Socket-Msg)
-	   op-hook socketErrorMsg		(socketError : #Socket-Oid #Socket-Oid #String ~> #Socket-Msg))] .
+	   op-hook socketOidSymbol		(#socket : #Nat ~> #Socket-Oid)
+	   op-hook createClientTcpSocketMsg	(#createClientTcpSocket : #Socket-Oid #Socket-Oid #String #Nat ~> #Socket-Msg)
+	   op-hook createServerTcpSocketMsg	(#createServerTcpSocket : #Socket-Oid #Socket-Oid #Nat #Nat ~> #Socket-Msg)
+	   op-hook createdSocketMsg		(#createdSocket : #Socket-Oid #Socket-Oid #Socket-Oid ~> #Socket-Msg)
+	   op-hook acceptClientMsg		(#acceptClient : #Socket-Oid #Socket-Oid ~> #Socket-Msg)
+	   op-hook acceptedClientMsg		(#acceptedClient : #Socket-Oid #Socket-Oid #String #Socket-Oid ~> #Socket-Msg)
+	   op-hook sendMsg			(#send : #Socket-Oid #Socket-Oid #String ~> #Socket-Msg)
+	   op-hook sentMsg			(#sent : #Socket-Oid #Socket-Oid ~> #Socket-Msg)
+	   op-hook receiveMsg			(#receive : #Socket-Oid #Socket-Oid ~> #Socket-Msg)
+	   op-hook receivedMsg			(#received : #Socket-Oid #Socket-Oid #String ~> #Socket-Msg)
+	   op-hook closeSocketMsg		(#closeSocket : #Socket-Oid #Socket-Oid ~> #Socket-Msg)
+	   op-hook closedSocketMsg		(#closedSocket : #Socket-Oid #Socket-Oid #String ~> #Socket-Msg)
+	   op-hook socketErrorMsg		(#socketError : #Socket-Oid #Socket-Oid #String ~> #Socket-Msg))] .
 endm

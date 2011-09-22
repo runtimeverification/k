@@ -2,11 +2,11 @@
 mod #TCP-SYNTAX is
 	including #SOCKET .
 	
-	op error : -> #String .
-	op containedRequest : #Socket-Configuration -> [#String] .
-	op toSend : #String -> #Socket-Msg .
-	op start : #Nat -> #Socket-Configuration .
-	op tcpRequest : #String -> #String .
+	op #error : -> #String .
+	op #containedRequest : #Socket-Configuration -> [#String] .
+	op #toSend : #String -> #Socket-Msg .
+	op #start : #Nat -> #Socket-Configuration .
+	op #tcpRequest : #String -> #String .
 	op #TCPPORT : -> #Nat .
 endm
 
@@ -18,10 +18,10 @@ mod #TCP-CLIENT is
 		
 	op Client : -> #Socket-Cid .
 	op cnum : #Nat -> #Socket-Oid .
-        op check : #Socket-Oid #String ~> #String .
-        eq check(cnum(N),S) = $check(Int2String(N), findString(S, "#", 0), S) .
-        op $check : #String #Nat #String ~> #String .
-       ceq $check(SN:#String, P:#Nat, S)
+        op #check : #Socket-Oid #String ~> #String .
+        eq #check(cnum(N),S) = #check(Int2String(N), findString(S, "#", 0), S) .
+        op #check : #String #Nat #String ~> #String .
+       ceq #check(SN:#String, P:#Nat, S)
          = substrString(S, P:#Nat +Nat 1, lengthString(S))
         if SN:#String = substrString(S,0,P:#Nat) 
         [print SN:#String ", " S ", " P:#Nat].
@@ -40,50 +40,50 @@ mod #TCP-CLIENT is
 	var C : #Socket-Configuration .
 	var N : #Nat .
 	
-	rl < Me : Client | state: connecting,#Socket A > #Socket createdSocket(Me, socketManager, Server)
+	rl < Me : Client | state: connecting,#Socket A > #Socket #createdSocket(Me, #socketManager, Server)
 	=> < Me : Client | state: connected,#Socket connectedTo: Server,#Socket A >
 	[print Me " connected"] .
 	
 	----- errors
-	eq containedRequest(C #Socket socketError(Me, socketManager, S))
-	= error
+	eq #containedRequest(C #Socket #socketError(Me, #socketManager, S))
+	= #error
 	[print Me " socket error: " S] .
-	eq containedRequest(C #Socket < Me : Client | state: connecting,#Socket  A > #Socket closedSocket(Me, Server, S))
-	= error
+	eq #containedRequest(C #Socket < Me : Client | state: connecting,#Socket  A > #Socket #closedSocket(Me, Server, S))
+	= #error
 	[print Me " error connecting: " S] .
-	eq containedRequest(C #Socket < Me : Client | state: receiving,#Socket  A > #Socket closedSocket(Me, Server, S))
-	= error
+	eq #containedRequest(C #Socket < Me : Client | state: receiving,#Socket  A > #Socket #closedSocket(Me, Server, S))
+	= #error
 	[print Me " error receiving: " S] .
 	-----
 	
-	rl < Me : Client | state: connected,#Socket  connectedTo: Server,#Socket  A > #Socket toSend(S)
-	=> < Me : Client | state: sending,#Socket  connectedTo: Server,#Socket  A > #Socket send(Server, Me, S)
+	rl < Me : Client | state: connected,#Socket  connectedTo: Server,#Socket  A > #Socket #toSend(S)
+	=> < Me : Client | state: sending,#Socket  connectedTo: Server,#Socket  A > #Socket #send(Server, Me, S)
 	[print Me " sending"] .
 	
-	rl < Me : Client | state: sending,#Socket  A > #Socket sent(Me, Server)
-	=> < Me : Client | state: receiving,#Socket  A > #Socket receive(Server, Me)
+	rl < Me : Client | state: sending,#Socket  A > #Socket #sent(Me, Server)
+	=> < Me : Client | state: receiving,#Socket  A > #Socket #receive(Server, Me)
 	[print Me " receiving"] .
 	
-	rl < Me : Client | state: receiving,#Socket  A > #Socket received(Me, Server, S)
+	rl < Me : Client | state: receiving,#Socket  A > #Socket #received(Me, Server, S)
 	=> < Me : Client | state: haveAnswer,#Socket  answer: S,#Socket  A >
 	[print Me " have answer"] .
 	
 	rl < Me : Client | state: haveAnswer,#Socket  connectedTo: Server,#Socket  A > 
-	=> < Me : Client | state: closing,#Socket  connectedTo: Server,#Socket  A > #Socket closeSocket(Server, Me)
+	=> < Me : Client | state: closing,#Socket  connectedTo: Server,#Socket  A > #Socket #closeSocket(Server, Me)
 	[print Me " closing"] .
 	
-	rl < Me : Client | state: closing,#Socket  A  > #Socket closedSocket(Me, Server, S)
+	rl < Me : Client | state: closing,#Socket  A  > #Socket #closedSocket(Me, Server, S)
 	=> < Me : Client | state: finished,#Socket  A  >
 	[print Me " finished"] .
 	
-	rl containedRequest(<> #Socket < Me : Client | state: finished,#Socket  answer: S,#Socket  A  >)
-	=> check(Me, S)
+	rl #containedRequest(<> #Socket < Me : Client | state: finished,#Socket  answer: S,#Socket  A  >)
+	=> #check(Me, S)
 	[print Me " popping out of socket stuff"] .
 	
-	rl start(N) => 
+	rl #start(N) => 
 		<> #Socket
 		< cnum(N) : Client | state: connecting > #Socket
-		createClientTcpSocket(socketManager, cnum(N), "localhost", #TCPPORT) .
+		#createClientTcpSocket(#socketManager, cnum(N), "localhost", #TCPPORT) .
 
 endm
 
@@ -91,36 +91,36 @@ mod #TCP-INTERFACE is
 	including #TCP-SYNTAX .
 	including #TCP-CLIENT .
 	including #COUNTER .
-        including #CONVERSION .
+	including #CONVERSION .
 	
-	op errorTCPSyntax : #String -> #String .
-	eq tcpRequest(S:#String) = $tcpRequest(S:#String, counter) .
+	op #errorTCPSyntax : #String -> #String .
+	eq #tcpRequest(S:#String) = #tcpRequest(S:#String, counter) .
 
-	op $tcpRequest : #String #Nat -> #String .
-        eq $tcpRequest(S:#String, N:#Nat) = 
-check(containedRequest(start(N:#Nat) #Socket toSend(Int2String(N:#Nat) +String "#" +String S:#String +String "\r\n"))) .
+	op #tcpRequest : #String #Nat -> #String .
+	eq #tcpRequest(S:#String, N:#Nat) = 
+#check(#containedRequest(#start(N:#Nat) #Socket #toSend(Int2String(N:#Nat) +String "#" +String S:#String +String "\r\n"))) .
 
-	op check : #String -> #String .
-	op getTCPData : #String -> #String .
+	op #check : #String -> #String .
+	op #getTCPData : #String -> #String .
 
 
-	ceq check(S:#String) = getTCPData(substrString(S:#String, lengthString("success#"), lengthString(S:#String)))
+	ceq #check(S:#String) = #getTCPData(substrString(S:#String, lengthString("success#"), lengthString(S:#String)))
 		if substrString(S:#String, 0, lengthString("success#")) ==Bool "success#" [print "full output: " S:#String] .
 
-        ceq getTCPData(S:#String)
+        ceq #getTCPData(S:#String)
           = substrString(S:#String, 0, N:#Nat)
          if N:#Nat := findString(S:#String, "###", 0) .
 
-         eq getTCPData(S:#String)
-          = errorTCPSyntax("Incorrect Output: " +String S:#String) .
+         eq #getTCPData(S:#String)
+          = #errorTCPSyntax("Incorrect Output: " +String S:#String) .
 		
-	ceq check(S:#String) = errorTCPSyntax(getTCPData(substrString(S:#String, lengthString("fail#"), lengthString(S:#String))))
+	ceq #check(S:#String) = #errorTCPSyntax(#getTCPData(substrString(S:#String, lengthString("fail#"), lengthString(S:#String))))
 		if substrString(S:#String, 0, lengthString("fail#")) ==Bool "fail#" [print "full error string: " S:#String] .
 		
-	eq check("") = errorTCPSyntax("Unknown error") .
-	eq check(error) = errorTCPSyntax("Unknown error") .
+	eq #check("") = #errorTCPSyntax("Unknown error") .
+	eq #check(#error) = #errorTCPSyntax("Unknown error") .
 
        op #isTCPError : #String -> #Bool .
-       eq #isTCPError(errorTCPSyntax(S:#String)) = true .
+       eq #isTCPError(#errorTCPSyntax(S:#String)) = true .
        eq #isTCPError(S:#String) = false [owise] .
 endm
