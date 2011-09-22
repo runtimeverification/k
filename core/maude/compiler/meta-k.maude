@@ -1133,9 +1133,14 @@ fmod META-K-STREAMS is
   including META-TERM-EXTRAS .
   including META-K-MODULE .
   ops stdoutStream stdinStream : -> Term .
+  op ioBuffer : Term -> Term .
   
   eq stdoutStream = '#ostream`(_`)['sNat_['0.#Zero]] .
-  eq stdinStream = '#istream`(_`,_`)['0.#Zero,'"#Int".#String] .
+  eq stdinStream = '#istream`(_`)['0.#Zero] .
+
+  eq ioBuffer(T:Term) = '#buffer`(_`)[T:Term] .
+
+  
 endfm
 
 fmod META-K-COOL is

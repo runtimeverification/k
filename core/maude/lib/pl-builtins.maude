@@ -932,6 +932,9 @@ mod #STRING-EXTRAS is
   op #isWhiteSpace : #Char -> #Bool .
   eq #isWhiteSpace(C) 
    = (asciiString(C) >=Int 9 and-then asciiString(C) <=Int 13)  or-else C ==Bool " " .
+
+  op #isDigit : #Char -> #Bool .
+  eq #isDigit(C) = (asciiString(C) >=Int asciiString("0") and-then asciiString(C) <=Int asciiString("9")) .
 endm
 
 mod PL-BUILTINS is

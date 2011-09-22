@@ -11,4 +11,3 @@ while not(n<=0) do (
   write("\nAdd numbers up to (<=0 to quit)? ");
   n=read();
 )
-write("Done. Enter something to quit: ");

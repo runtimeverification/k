@@ -6,9 +6,9 @@ fmod ADD-EVAL is
   op evalS : -> Qid .
   eq evalS = '#eval .
 
-  ops stdinVariable stdoutVariable : -> Variable .
-  eq stdinVariable = mkVariable('$stdin,List) .
-  eq stdoutVariable = mkVariable('$stdout,List) .
+  ops stdinVariable noIOVariable : -> Variable .
+  eq stdinVariable = mkVariable('$stdin,K) .
+  eq noIOVariable = mkVariable('$noIO,List) .
 
 
   op addEval : Qid Module Term ~> Module .
@@ -29,8 +29,8 @@ fmod ADD-EVAL is
        if '_in_[mkConstant(getName(stdinVariable),K), 'keys_[mkVariable('M,Map)]] = falseCt 
        [none] .)
      (ceq evalS[mkVariable('M,Map)]
-       = evalS[ctor(Map)[itemCtor(Map)[mkConstant(getName(stdoutVariable),K),wrap2K(emptyCt(getType(stdoutVariable)))],mkVariable('M,Map)]]
-       if '_in_[mkConstant(getName(stdoutVariable),K), 'keys_[mkVariable('M,Map)]] = falseCt 
+       = evalS[ctor(Map)[itemCtor(Map)[mkConstant(getName(noIOVariable),K),wrap2K(emptyCt(getType(noIOVariable)))],mkVariable('M,Map)]]
+       if '_in_[mkConstant(getName(noIOVariable),K), 'keys_[mkVariable('M,Map)]] = falseCt 
        [none] .)
    . 
   eq defaultEvalEqs(V,Tl)
@@ -43,7 +43,7 @@ fmod ADD-EVAL is
 
   op evalMap_ : TermList -> TermList .
   eq evalMap(empty) = itemCtor(Map)[mkConstant(getName(stdinVariable), K), wrap2K(stdinVariable)],
-                      itemCtor(Map)[mkConstant(getName(stdoutVariable), K), wrap2K(stdoutVariable)],
+                      itemCtor(Map)[mkConstant(getName(noIOVariable), K), wrap2K(noIOVariable)],
                         mkVariable('AndTheOthers, Map) .
   eq evalMap(V, Tl) = itemCtor(Map)[mkConstant(getName(V),K),wrap2K(V)],evalMap(Tl) .
 
@@ -54,7 +54,7 @@ fmod ADD-EVAL is
 
   op vars2Ops_ : TermList ~> OpDeclSet .
   eq vars2Ops(V,Tl) = (op getName(V) : nil -> K [none] .) vars2Ops(Tl) .
-  eq vars2Ops(empty) = (op getName(stdinVariable) : nil -> K [none] .) (op getName(stdoutVariable) : nil -> K [none] .) .
+  eq vars2Ops(empty) = (op getName(stdinVariable) : nil -> K [none] .) (op getName(noIOVariable) : nil -> K [none] .) .
 
 ---  op $PGM : -> K .
 ---  op eval : Map -> Bag .
@@ -79,8 +79,8 @@ fmod ADD-EVAL is
 
 
   op evalCleanConf : Term [String] -> TermList .
-  eq evalCleanConf(T, "stdin") = mkCollection(List, (stdinVariable, stdinStream)) .
-  eq evalCleanConf(T, "stdout") = mkCollection(List, (stdoutStream, stdoutVariable)) .
+  eq evalCleanConf(T, "stdin") = mkCollection(List, (ioBuffer(stdinVariable), noIOVariable, stdinStream)) .
+  eq evalCleanConf(T, "stdout") = mkCollection(List, (stdoutStream, noIOVariable, ioBuffer(nilK))) .
   eq evalCleanConf(T, S:[String]) = evalCleanConf(T) [owise] .
 
  

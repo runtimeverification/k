@@ -1,0 +1,47 @@
+load blocking-input
+
+mod BLOCKING-INPUT-META is
+  including BLOCKING-INPUT .
+  including META-LEVEL .
+  including COMPILATION-ATTRS .
+  var BlockingInput NoBlockingInput Config : String .  var M : Module .
+  var QBlockingInput QNoBlockingInput QConfig : Qid .
+  op resolveBlockingInput : String String String ~> Module .
+  eq resolveBlockingInput(BlockingInput, NoBlockingInput, Config) 
+   = resolveBlockingInput(qid(BlockingInput), qid(NoBlockingInput), qid(Config)) .
+  op resolveBlockingInput : Qid Qid Qid ~> Module .
+  eq resolveBlockingInput(QBlockingInput,QNoBlockingInput,QConfig) 
+   = resolveBlockingInput(QNoBlockingInput, upModule(QBlockingInput, false), extractConfTerm(upModule(QConfig,false))) .
+  
+  var T : [Term] .
+  op resolveBlockingInput : Qid Module Term ~> Module .
+  eq resolveBlockingInput(QNoBlockingInput,M,T)
+   = if T :: Term then blockingInput(QNoBlockingInput,M,T) else M fi .
+
+  op compileBLOCKING-INPUT : Module AttrSet ~> Module .
+  eq compileBLOCKING-INPUT(M, AS:AttrSet) = resolveBlockingInput(getName(M), M, extractConfTerm(M)) .
+endm
+
+mod BLOCKING-INPUT-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op blocking-input : -> System .
+  op idle : -> State .
+  var Q BlockingInput NoBlockingInput Config : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq blocking-input = [nil, idle, 
+ 'Usage: 'resolveBlockingInput '<SourceModule> '<DestModule> '<ConfigModule> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['resolveBlockingInput BlockingInput NoBlockingInput Config QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(BlockingInput,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('BLOCKING-INPUT-META),
+                        'resolveBlockingInput[upTerm(string(BlockingInput)),upTerm(string(NoBlockingInput)), upTerm(string(Config))])),error) .
+endm
