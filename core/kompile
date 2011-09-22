@@ -1671,6 +1671,7 @@ sub maudify_file {
     
     my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
     print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in file $maude_file\nMaude might not finish...\n") if (!balanced($maudified, '(', ')', '`'));
+	
 #    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
 
 	# put comments back
@@ -1697,7 +1698,7 @@ sub maudify_file {
 
 sub maudify_module {
     (my $file, my $mno, local $_) = @_;
-
+	#print "$mno\n";
     # add K or K-LATEX automatically.
     $_ = addKandKLATEX($_, $file);
 
@@ -1884,8 +1885,20 @@ sub maudify_module {
 
 # Step: check balanced parentheses - maude specific
     my $module_name = $1 if (/k?mod\s+([a-zA-Z\-]+)\s+is/);
-    print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n") if (!balanced($_, '(', ')', '`'));
-
+	
+	if (!balanced($_, '(', ')', '`')) {
+		print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n");
+		print "Looking for line number...";
+		my @lines = split("\n", $_);
+		my $code;
+		do {
+			#print "still not balanced, removing a line...\n";
+			pop(@lines);
+			$code = join("\n", @lines);
+		} while !balanced($code, '(', ')', '`');
+		print "Unbalancing seems to start on the " . scalar(@lines) . " line of the module, starting from the first rule\n";
+	}
+	
     return $_;
 }
 
