@@ -81,18 +81,26 @@ module URIS
   rule #fPrintChar(N,C:#Char) => #fPutByte(N,asciiString(C))
 
   
-  rule #ostream(_) #buffer(.K => Int2String(I)) (ListItem(I:#Int) => .List)
-  rule #ostream(_) #buffer(.K => Float2String(F)) (ListItem(F:#Float) => .List)
-  rule #ostream(_) #buffer(.K => S) (ListItem(S:#String) => .List)
-  rule #ostream(_) #buffer(Buffer:#String => Buffer +String Int2String(I)) (ListItem(I:#Int) => .List)
-  rule #ostream(_) #buffer(Buffer:#String => Buffer +String Float2String(F)) (ListItem(F:#Float) => .List)
-  rule #ostream(_) #buffer(Buffer:#String => Buffer +String S) (ListItem(S:#String) => .List)
-  rule #ostream(N:#Nat) (.List => ListItem(#flush(N))) #buffer("" => .K) 
-  rule #ostream(N:#Nat) (ListItem(.K) => .List)
-  rule #ostream(N:#Nat) (.List =>  ListItem(#fPrintChar(N,substrString(S,0,1))))
-       #buffer(S:#String => substrString(S,1,lengthString(S)))
+  rule #buffer(.K => Int2String(I)) (ListItem(I:#Int) => .List)
+  rule #buffer(.K => Float2String(F)) (ListItem(F:#Float) => .List)
+  rule #buffer(.K => S) (ListItem(S:#String) => .List)
+
+  rule #buffer(Buffer:#String => Buffer +String Int2String(I)) (ListItem(I:#Int) => .List)
+  rule #buffer(Buffer:#String => Buffer +String Float2String(F)) (ListItem(F:#Float) => .List)
+  rule #buffer(Buffer:#String => Buffer +String S) (ListItem(S:#String) => .List)
+
+  // Send first char from the buffer to the server
+  rule #ostream(N:#Nat) (.List =>  ListItem(#fPrintChar(N,substrString(S,0,1)))
+       #removeCharUponAck) #buffer(S:#String)
     if S =/=Bool ""
+  // Flush when the buffer becomes empty
+  rule #ostream(N:#Nat) (.List => ListItem(#flush(N))) #buffer("" => .K)
+
+  rule #ostream(_) (ListItem(.K) => .List) 
+  //consume a char from the buffer only on succesfull communication 
+  rule #ostream(_) (#removeCharUponAck => .List) #buffer(S:#String => substrString(S,1, lengthString(S)))
  
+  syntax List ::= `#removeCharUponAck
   
   syntax List ::= `#parse ( #String , K )
 
@@ -141,6 +149,7 @@ module URIS
     if S =/=Bool ""
   rule #buffer("" => .K) #istream(_)
 
+  // I fthe buffer becomes empty, read from the input stream
   rule #parse(_,_) (.List => ListItem(#fReadChar(N))) #buffer(.K) #istream(N)
 
   syntax List ::= `#istream ( #Nat ) | `#ostream ( #Nat ) 

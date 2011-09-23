@@ -36,8 +36,8 @@ which is labeled $\top$. */
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Stmt </k>
-                  <in stream="stdin" > .List </in>
-                  <out stream="stdout" > .List </out>
+                  <in stream="stdin"> .List </in>
+                  <out stream="stdout"> .List </out>
                   <state color="red"> .Map </state>
                 </T>
 
@@ -70,7 +70,7 @@ has a side condition. */
 //@ \subsubsection{Console input}
   rule <k> read() => I ...</k> <in> ListItem(I) => .List ...</in>
 
-//  This should be generated automatically
+//  This will be generated automatically (eventually)
   rule <k> read() ...</k> <in> (.List => #parse("#Int", .K)) #buffer(_) ...</in>
 
 /*@ \subsection{Boolean Expressions}
