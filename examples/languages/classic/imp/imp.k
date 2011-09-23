@@ -58,7 +58,7 @@ rewriting process will get stuck.  This means that our semantics of
 IMP disallows uses of uninitialized variables.  Variables are initialized
 using the assignment statement whose semantics is defined below. */
 
-  rule [my-rule]: <k> X:#Id => Sigma(X) <_/k> <state> Sigma:Map </state>
+  rule <k> X:#Id => Sigma(X) ...</k> <state> Sigma:Map </state>
 
 /*@ \subsubsection{Arithmetic operators}
 There is nothing special about these, except that the rule for division
@@ -97,7 +97,7 @@ is not defined in $X$, and it changes the current mapping of $X$
 (to point to $I$) in case $\Large\sigma$ is defined in $X$.
 At the same time, the assignment is dissolved. */
 
-  rule <k> X=I:#Int; => . <_/k> <state> Sigma => Sigma[I/X] </state> 
+  rule <k> X=I:#Int; => . ...</k> <state> Sigma => Sigma[I/X] </state>
 
 /*@ \subsubsection{Sequential Composition}
 Sequential composition is simply dissolved into the \K's builtin
@@ -105,7 +105,7 @@ task sequentialization operation.  Like for \texttt{skip}, one is
 free to make this rule structural if one does not want it to count
 as a computational step.  */
 
-  rule S1:Stmt S2:Stmt => S1~>S2
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
@@ -128,11 +128,10 @@ rule below structural.  If one wants this unrolling step to count
 as a computational step (though we beg one to reconsider)
 then one can remove the ``structural'' tag.  */
 
-  rule <k> while B do S => if B then (S while B do S) else skip; <_/k> [structural]
+  rule <k> while B do S => if B then (S while B do S) else skip; ...</k> [structural]
 
 //@ \subsubsection{Output}
-  rule <k> write(I:#Int); => .K ...</k> <out>... .List => ListItem(I) </out>
-  rule <k> write(Str:#String); => .K ...</k> 
-       <out>... .List => ListItem(Str) </out>
+  rule <k> write(I:#Int); => . ...</k> <out>... .List => ListItem(I) </out>
+  rule <k> write(Str:#String); => . ...</k> <out>... .List => ListItem(Str) </out>
 end module
 
