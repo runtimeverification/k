@@ -76,18 +76,6 @@ fmod DEFAULT-TERMS is
   eq $cleanConfL(T,Tl) = cleanConf(T),$cleanConfL(Tl) .
   eq $cleanConfL(empty) = empty .
 
-  op findCell : TermList Qid ~> Term .
-  eq findCell((T,Tl),Q) = findCell((T,Tl),Q,splitKCell(T)) .
-  op findCell : TermList Qid SplitCell ~> Term .
-  eq findCell((T,Tl),Q,SC')
-   = if SC' :: SplitCell then if getName(SC') == Q then T else findCell((Tl,getContents(SC')),Q) fi else $findCell((T,Tl),Q) fi [print SC'] .
-
-  op $findCell : TermList Qid ~> Term .
-  eq $findCell((O[Tl'],Tl),Q) = findCell((Tl,Tl'),Q) .
-  eq $findCell((V,Tl),Q) = findCell(Tl,Q) .
-  eq $findCell((Ct,Tl),Q) = findCell(Tl,Q) .
-  
-
   op defaultTermsRls : RuleSet Term ~> RuleSet .
   eq defaultTermsRls(Rl Rls, T)
    = defaultTermsRls(Rls,T) defaultTermsRl(Rl, T) .

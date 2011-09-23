@@ -70,9 +70,6 @@ has a side condition. */
 //@ \subsubsection{Console input}
   rule <k> read() => I ...</k> <in> ListItem(I) => .List ...</in>
 
-//  This will be generated automatically (eventually)
-  rule <k> read() ...</k> <in> (.List => #parse("#Int", .K)) #buffer(_) ...</in>
-
 /*@ \subsection{Boolean Expressions}
 The rules below are straightforward.  Note the short-circuited semantics
 of \textsf{and}; this is the reason we annotated the syntax of

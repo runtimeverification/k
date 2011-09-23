@@ -593,6 +593,21 @@ fmod K-META-CONFIG is
  ceq getCellType(M, Ty) = Map if sameKind(M, Ty, Map) .
  ceq getCellType(M, Ty) = List if sameKind(M, Ty, List) .
  ceq getCellType(M, Ty) = K if sameKind(M, Ty, K) .
+
+  op findCell : TermList Qid ~> Term .
+  eq findCell((T,Tl),Q) = findCell((T,Tl),Q,splitKCell(T)) .
+  op findCell : TermList Qid SplitCell ~> Term .
+  eq findCell((T,Tl),Q,SC')
+   = if SC' :: SplitCell then if getName(SC') == Q then T else findCell((Tl,getContents(SC')),Q) fi else $findCell((T,Tl),Q) fi [print SC'] .
+
+  op $findCell : TermList Qid ~> Term .
+  eq $findCell((O[Tl'],Tl),Q) = findCell((Tl,Tl'),Q) .
+  eq $findCell((V,Tl),Q) = findCell(Tl,Q) .
+  eq $findCell((Ct,Tl),Q) = findCell(Tl,Q) .
+
+  var Tl Tl' : TermList .  var O : Qid . var V : Variable .
+  var SC' : [SplitCell] .
+
 endfm
 
 fmod K-META-OPEN-CELLS is 

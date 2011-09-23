@@ -25,7 +25,7 @@ load make-all-labels-interface
 load strict-ops2cxt-interface
 load id-to-string-interface
 load result-predicates-interface
----load blocking-input-interface
+load blocking-input-interface
 
 load default-terms-interface
 load context-transformers-interface

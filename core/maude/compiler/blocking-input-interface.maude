@@ -16,7 +16,7 @@ mod BLOCKING-INPUT-META is
   var T : [Term] .
   op resolveBlockingInput : Qid Module Term ~> Module .
   eq resolveBlockingInput(QNoBlockingInput,M,T)
-   = if T :: Term then blockingInput(QNoBlockingInput,M,T) else M fi .
+   = if T :: Term then blockingInput(QNoBlockingInput,M,getInputCell(T)) else M fi .
 
   op compileBLOCKING-INPUT : Module AttrSet ~> Module .
   eq compileBLOCKING-INPUT(M, AS:AttrSet) = resolveBlockingInput(getName(M), M, extractConfTerm(M)) .
