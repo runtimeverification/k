@@ -108,7 +108,6 @@ evalKastIO desk (Kast k) = do
         die $ "Failed to run IO wrapper:\n"
            ++ "java " ++ intercalate " " args
 
-    -- TODO: parse the output
     mmr <- parseMaudeResult <$> T.readFile outFile
 
     return $ mmr
