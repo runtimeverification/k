@@ -608,6 +608,8 @@ fmod K-META-CONFIG is
   var Tl Tl' : TermList .  var O : Qid . var V : Variable .
   var SC' : [SplitCell] .
 
+  op defaultConfig : -> Term .
+  eq defaultConfig = mkCell('k, mkVariable('$PGM,K)) .
 endfm
 
 fmod K-META-OPEN-CELLS is 

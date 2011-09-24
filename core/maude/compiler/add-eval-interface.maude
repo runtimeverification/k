@@ -6,6 +6,7 @@ mod ADD-EVAL-META is
   including META-K-MODULES .
   including META-K-BUILTINS .
   including COMPILATION-ATTRS .
+  including K-META-CONFIG .
 
   var NoAddEval AddEval : String .
   var Q QNoAddEval QAddEval : Qid .
@@ -19,7 +20,7 @@ mod ADD-EVAL-META is
   var T : [Term] . 
   op addEvalTestConf : Qid Module Term ~> Module .
   eq addEvalTestConf(QNoAddEval, M, T) 
-   = if T :: Term then addEval(QNoAddEval, M, T) else M fi .
+   = addEval(QNoAddEval, M, if T :: Term then T else defaultConfig fi) .
 
   op compileADD-EVAL : Module AttrSet ~> Module .
   eq compileADD-EVAL(M, AS:AttrSet) = addEvalTestConf(getName(M), M, extractConfTerm(M)) .
