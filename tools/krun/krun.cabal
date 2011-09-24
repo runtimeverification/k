@@ -16,7 +16,21 @@ Flag static
 Executable krun
   Hs-source-dirs:   src
   Main-is:          krun.hs
-  Build-depends:    base >= 4 && < 5, process, filepath, directory, text, cmdargs, maude >= 0.2.0, failure, data-object, data-object-yaml, hxt, hxt-xpath, language-k
+  Build-depends:
+    base >= 4 && < 5,
+    process,
+    filepath,
+    directory,
+    text,
+    cmdargs,
+    failure,
+    data-object,
+    data-object-yaml,
+    hxt,
+    hxt-xpath,
+    maude >= 0.2.1,
+    language-k
+
 --  ghc-options:      -Wall
 
   if flag(static)
