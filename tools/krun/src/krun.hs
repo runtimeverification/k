@@ -139,12 +139,14 @@ flattenProgram desk pgm = case getParser desk of
 -- the K definition.
 runInternalKast :: Desk -> ProgramSource -> IO Kast
 runInternalKast desk (ProgramSource pgm) = do
-        (tmpFile, tmpHandle) <- openTempFile "." "pgm.in"
+        tmpDir <- getTmpDir
+        (tmpFile, tmpHandle) <- openTempFile tmpDir "pgm.in"
         tmpCanonicalFile <- canonicalizePath tmpFile
         T.hPutStr tmpHandle pgm
         hClose tmpHandle
+        let kastFile = tmpDir </> (takeBaseName tmpFile <.> ".kast")
         let kastArgs = defaultKastArgs desk tmpCanonicalFile
-        let kastFile = replaceExtension tmpFile ".kast"
+                    ++ ["-o", kastFile]
         (ih, oh, eh, ph) <- runInteractiveProcess defaultKastCommand kastArgs Nothing Nothing
         exitCode <- waitForProcess ph
         exists <- doesFileExist kastFile
