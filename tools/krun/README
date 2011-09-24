@@ -1,0 +1,34 @@
+Installation instructions:
+
+These instructions assume you have a sane Haskell build environment (with
+GHC), which means you should have a command called "cabal" in your PATH.
+You should NOT run any of the following commands as root; everything will
+be installed into your home directory.
+
+Get the latest package list from Hackage:
+
+$ cabal update
+
+Install language-k, a library for parsing and pretty-printing K stuff:
+
+$ cd tools/language-k
+$ cabal install
+
+Install krun:
+
+$ cd tools/krun
+$ cabal install
+
+The krun executable will be installed to $HOME/.cabal/bin. Add the
+directory to your PATH so you can run it just by typing "krun":
+
+$ export PATH=$HOME/.cabal/bin:$PATH
+
+Now try krun by going into the imp directory and typing:
+
+$ krun programs/collatzPgm.imp
+
+If you have any trouble installing krun or you see something unexpected
+while following these directions, please email me:
+
+David Lazar <lazar6@illinois.edu>
