@@ -27,3 +27,4 @@
  )
 write("#primes=");
 write(s);
+write("\n");
