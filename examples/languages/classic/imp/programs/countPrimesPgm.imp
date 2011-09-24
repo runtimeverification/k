@@ -27,4 +27,3 @@
  )
 write("#primes=");
 write(s);
-write("\nDone. Enter something to quit: ");

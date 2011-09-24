@@ -14,4 +14,3 @@ while not(m<=2) do (
 )
 write("steps: ");
 write(s);
-write("\nDone. Enter something to quit: ");
