@@ -36,14 +36,19 @@ import Text.XML.HXT.Core hiding (when)
 import Text.XML.HXT.XPath
 
 data KRun = KRun
-    { krunInFile :: FilePath
+    { krunSetVars :: [String]
+    , krunInFile  :: FilePath
+    , krunPgmArgs :: [String]
     } deriving (Eq, Show, Data, Typeable)
 
 kRunInit :: KRun
 kRunInit = KRun
-    { krunInFile = def &= typFile &= argPos 0
+    { krunSetVars = def &= explicit &= name "s" &= name "set" &= typ "VAR=str"
+      &= help "Set VAR to str in the initial configuration"
+    , krunInFile = def &= typFile &= argPos 0
+    , krunPgmArgs = def &= typ "PGM_ARGS" &= args
     } &= help "Execute K definitions."
-      &= summary "krun v0.1.0"
+      &= summary "krun v0.2.0"
 
 main :: IO ()
 main = do
