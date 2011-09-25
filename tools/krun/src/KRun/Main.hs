@@ -30,10 +30,7 @@ import Text.Printf
 import Distribution.Desk.Types
 import Distribution.Desk.Utils
 import Distribution.Desk.Parser
-
--- xpath imports:
-import Text.XML.HXT.Core hiding (when)
-import Text.XML.HXT.XPath
+import KRun.XPath
 
 data KRun = KRun
     { krunSetVars :: [String]
@@ -173,18 +170,6 @@ getTmpDir = do
 trim :: String -> String
 trim = f . f
     where f = reverse . dropWhile isSpace
-
--- TODO: switch back to using runX/IO?
--- TODO: this should not be here.
-xpath :: String -> String -> [String]
-xpath query xmlstr = runLA
-        --readString [] xmlstr
-        (xread
-        >>>
-        getXPathTrees query
-        >>>
-        -- Is this the best thing to do?
-        xshow this) xmlstr
 
 -- Hardcoded defaults:
 -- TODO: get rid of these!
