@@ -1,7 +1,7 @@
 module Distribution.Desk.Types where
 
 data Desk = Desk
-    { name        :: String
+    { pkgName     :: String
     , version     :: String
     , license     :: String
     , synopsis    :: String
