@@ -3,7 +3,7 @@
 {-
 This is prototype code. Don't expect much from it.
 -}
-module KRun.Main where
+module Main where
 
 import Control.Applicative ((<$>))
 import Control.Monad (when)
