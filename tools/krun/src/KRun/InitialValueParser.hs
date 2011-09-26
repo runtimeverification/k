@@ -2,6 +2,7 @@
 module KRun.InitialValueParser where
 
 import Control.Applicative
+import Data.Either
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Text (Text)
@@ -10,9 +11,9 @@ import Data.Attoparsec.Text
 import KRun.Types
 
 parseKeyVals :: [Text] -> Either String (Map Text Kast)
-parseKeyVals txts = do
-    keyVals <- mapM (parseOnly keyVal) txts
-    return $ Map.fromList $ map (\(k, v) -> (k, Kast v)) keyVals
+parseKeyVals txts = case partitionEithers $ map (parseOnly keyVal) txts of
+    ([], rs) -> Right $ Map.fromList $ map (\(k, v) -> (k, Kast v)) rs
+    ((x:xs), _) -> Left x
 
 keyVal = do
     key <- takeWhile1 (/= '=')
