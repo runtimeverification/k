@@ -1,3 +1,2 @@
-load run-compiled
+load halt-test-compiled
 
-rew run('p9) .

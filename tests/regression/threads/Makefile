@@ -1,12 +1,12 @@
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = RUN
+LANGUAGE_NAME = THREADS-TEST
 
 # this are all interesting modules (used to latexify)
 LANGUAGE_MODULES = SEQ THREADS
 
 #this is the basename of the main file
-MAIN_FILE = run
+MAIN_FILE = threads-test
 
 # this is a space-separated list of basename maude files to run
 TESTS = test.m

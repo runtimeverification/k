@@ -1,0 +1,14 @@
+Name:               exp
+Version:            0.1.0
+Synopsis:           Plain integer arithmetic expressions, no identifiers.
+License:            MIT
+License-file:       LICENSE
+Authors:            Traian Serbanuta
+Maintainer:         Traian Serbanuta <tserban2@illinois.edu>
+Tags:               modularity, agent, test
+
+Language:
+  Main-module:      EXP
+  Syntax-module:    EXP
+  Parser:           kast
+  Output-mode:      maude

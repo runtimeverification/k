@@ -1,12 +1,12 @@
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = RUN
+LANGUAGE_NAME = EXP
 
 # this are all interesting modules (used to latexify)
 LANGUAGE_MODULES = EXP
 
 #this is the basename of the main file
-MAIN_FILE = run
+MAIN_FILE = exp
 
 # this is a space-separated list of basename maude files to run
 TESTS = test.m

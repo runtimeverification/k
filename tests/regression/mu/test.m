@@ -1,4 +1,2 @@
-load run-compiled
+load mu-test-compiled
 
-rew run('p7) .
-rew run('p8) .

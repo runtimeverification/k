@@ -1,0 +1,14 @@
+Name:               imp-test
+Version:            0.1.0
+Synopsis:           imperative with lambda
+License:            MIT
+License-file:       LICENSE
+Authors:            Traian Serbanuta
+Maintainer:         Traian Serbanuta <tserban2@illinois.edu>
+Tags:               modularity, agent, test
+
+Language:
+  Main-module:      IMP-TEST
+  Syntax-module:    IMP-TEST
+  Parser:           kast
+  Output-mode:      maude

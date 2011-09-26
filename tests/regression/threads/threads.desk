@@ -1,0 +1,14 @@
+Name:               treads-test
+Version:            0.1.0
+Synopsis:           Threads, imperative and functional features
+License:            MIT
+License-file:       LICENSE
+Authors:            Traian Serbanuta
+Maintainer:         Traian Serbanuta <tserban2@illinois.edu>
+Tags:               modularity, agent, test
+
+Language:
+  Main-module:      THREADS-TEST
+  Syntax-module:    THREADS-TEST
+  Parser:           kast
+  Output-mode:      maude
