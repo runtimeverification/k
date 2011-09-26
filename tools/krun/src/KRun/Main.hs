@@ -59,6 +59,13 @@ main = do
     kmap <- case parseKeyVals $ map T.pack (krunSetVars krun) of
         Left err -> die $ "Unable to parse initial configuration value: " ++ err
         Right kmap -> return kmap
+
+    -- check that lang-compiled.maude exists
+    existsCompiled <- doesFileExist $ compiledFile desk
+    when (not existsCompiled) $
+        die $ "Could not find compiled definition: " ++ compiledFile desk
+           ++ "\nPlease compile the definition by using `make' or `kompile'."
+
     pgm <- ProgramSource <$> T.readFile (krunInFile krun)
     kast <- flattenProgram desk pgm
     mmr <- evalKastIO desk (Map.insert "PGM" kast kmap)
