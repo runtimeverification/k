@@ -11,4 +11,5 @@ Language:
   Main-module:      EXP
   Syntax-module:    EXP
   Parser:           kast
-  Output-mode:      maude
+  Output-mode:      pretty-print
+  Cell-query:       //k
