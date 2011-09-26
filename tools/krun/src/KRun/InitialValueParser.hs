@@ -2,13 +2,14 @@
 module KRun.InitialValueParser where
 
 import Control.Applicative
+import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Attoparsec.Text
 import KRun.Types
 
-parseKeyVals :: [Text] -> Map Text Kast
+parseKeyVals :: [Text] -> Either String (Map Text Kast)
 parseKeyVals txts = do
     keyVals <- mapM (parseOnly keyVal) txts
     return $ Map.fromList $ map (\(k, v) -> (k, Kast v)) keyVals
