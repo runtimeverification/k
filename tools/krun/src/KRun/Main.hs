@@ -10,6 +10,8 @@ import Control.Monad (when)
 import Data.Char (isSpace)
 import Data.Either (rights)
 import Data.List (intercalate)
+import Data.Map (Map)
+import qualified Data.Map as Map
 import Data.Maybe
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -30,6 +32,7 @@ import Text.Printf
 import Distribution.Desk.Types
 import Distribution.Desk.Utils
 import Distribution.Desk.Parser
+import KRun.InitialValueParser
 import KRun.Types
 import KRun.XPath
 
@@ -53,9 +56,12 @@ main = do
     krun <- cmdArgs kRunInit
     deskFile <- findDeskFile "."
     desk <- parseDeskFile deskFile
+    kmap <- case parseKeyVals $ map T.pack (krunSetVars krun) of
+        Left err -> die $ "Unable to parse initial configuration value: " ++ err
+        Right kmap -> return kmap
     pgm <- ProgramSource <$> T.readFile (krunInFile krun)
     kast <- flattenProgram desk pgm
-    mmr <- evalKastIO desk kast
+    mmr <- evalKastIO desk (Map.insert "PGM" kast kmap)
     when (isNothing mmr) $
         die "Maude failed to produce a result"
     let mr = fromJust mmr
@@ -78,17 +84,18 @@ main = do
 --    where evalTerm = printf "#eval('$PGM(.List{K}) |-> (%s))" (T.unpack k)
 
 -- | Evaluate a term using the Java IO wrapper around Maude.
-evalKastIO :: Desk -> Kast -> IO (Maybe MaudeResult)
-evalKastIO desk (Kast k) = do
+evalKastIO :: Desk -> Map Text Kast -> IO (Maybe MaudeResult)
+evalKastIO desk kmap = do
     tmpDir <- getTmpDir
     -- determine files for communicating with the wrapper
     let [cmdFile, outFile, errFile] = map (tmpDir </>) ["maude_in", "maude_out", "maude_err"]
 
     -- write the file from which the wrapper will read the command to execute
     cmdh <- openFile cmdFile WriteMode
-    T.hPutStr cmdh "erew #eval('$PGM(.List{K}) |-> ("
-    T.hPutStr cmdh k
-    T.hPutStr cmdh ")) ."
+    let eval = constructEval kmap
+    T.hPutStr cmdh "erew "
+    T.hPutStr cmdh eval
+    T.hPutStrLn cmdh " ."
     hClose cmdh
 
     -- run the wrapper
@@ -106,6 +113,14 @@ evalKastIO desk (Kast k) = do
     mmr <- parseMaudeResult <$> T.readFile outFile
 
     return $ mmr
+
+constructEval :: Map Text Kast -> Text
+constructEval kmap
+    = (\t -> "#eval(" <> t <> ")")
+    . T.intercalate " "
+    $ Map.foldrWithKey (\k (Kast v) ts ->
+      "'$" <> k <> "(.List{K}) |-> (" <> v <> ")" : ts) [] kmap
+    where (<>) = T.append
 
 getWrapperJar :: IO FilePath
 getWrapperJar = do

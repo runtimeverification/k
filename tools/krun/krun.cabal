@@ -29,7 +29,9 @@ Executable krun
     hxt,
     hxt-xpath,
     maude >= 0.2.1,
-    language-k
+    language-k,
+    containers,
+    attoparsec-text
 
 --  ghc-options:      -Wall
 
