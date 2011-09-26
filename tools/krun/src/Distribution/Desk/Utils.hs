@@ -5,9 +5,15 @@ import Data.Char (toLower)
 import Data.List (intercalate)
 import System.Directory
 import System.FilePath
+import System.IO (hPutStrLn, stderr)
+import System.Exit (exitFailure)
 
 die :: String -> IO a
-die msg = ioError (userError msg)
+--die msg = ioError (userError msg)
+die msg = do
+    hPutStrLn stderr "Error:"
+    hPutStrLn stderr msg
+    exitFailure
 
 lowercase :: String -> String
 lowercase = map toLower
