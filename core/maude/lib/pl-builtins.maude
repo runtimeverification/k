@@ -808,7 +808,7 @@ endm
 
 mod #ID is including #STRING .
   sort #Id .
-  op id : #String -> #Id .
+  op #id_ : #String -> #Id [prec 0] .
 endm
 
 mod #CONVERSION is

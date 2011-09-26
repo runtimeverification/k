@@ -57,10 +57,10 @@ sub get_ast_from_node
 
     $content =~ s/,,$//s;
 
-    # id("identifier")
+    # #id("identifier")
     if ($sort eq '#Id')
     {
-	if ($op =~ /^\s*id/)
+	if ($op =~ /^\s*#id/)
 	{
 	    my $ch = $children->item(1)->getAttributes->getNamedItem("op")->getNodeValue;
 	    return "# $op($ch)(.List{K})";
