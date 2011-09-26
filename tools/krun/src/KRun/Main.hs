@@ -30,6 +30,7 @@ import Text.Printf
 import Distribution.Desk.Types
 import Distribution.Desk.Utils
 import Distribution.Desk.Parser
+import KRun.Types
 import KRun.XPath
 
 data KRun = KRun
@@ -70,14 +71,6 @@ main = do
                 when (null terms) $
                     die $ "Unable to parse strings resulting from cell query as K terms."
                 mapM_ (putStrLn . prettyPrint) terms
-
--- | Type representing a flattened K term.
-newtype Kast = Kast Text
-    deriving Show
-
--- | Type representing uncompiled program source code.
-newtype ProgramSource = ProgramSource Text
-    deriving Show
 
 -- | Rewrites a flattened K term (Kast) in the compiled K definition.
 --evalKast :: Desk -> Kast -> IO (Maybe MaudeResult)
