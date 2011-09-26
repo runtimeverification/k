@@ -1,5 +1,6 @@
 load agent-compiled
 
+---(
 rew run('p1) .
 rew run('p2) .
 rew run('p3) .
@@ -29,3 +30,4 @@ rew run('p26) .
 rew run('p27) .
 rew run('p28) .
 rew run('p29) .
+---)

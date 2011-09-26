@@ -1,0 +1,5 @@
+(lambda x . ( 
+                (spawn ((*x:= *x + 1) ; (rendezvous 1) ));
+                (*x := *x + 1) ;
+                (rendezvous 1) ;
+                (print(*x)))) (ref 1)

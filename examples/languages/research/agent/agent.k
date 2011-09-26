@@ -14,17 +14,7 @@ require /modules/threads
 require /modules/agents
 require /modules/quote-unquote
 
-require ../../../../tests/regression/ids
-require ../../../../tests/regression/exp/programs
-require ../../../../tests/regression/lambda/programs
-require ../../../../tests/regression/mu/programs
-require ../../../../tests/regression/callcc/programs
-require ../../../../tests/regression/halt/programs
-require ../../../../tests/regression/io/programs
-require ../../../../tests/regression/imp/programs
-require ../../../../tests/regression/threads/programs
-require ../../../../tests/regression/agents/programs
-require ../../../../tests/regression/quote-unquote/programs
+require /modules/uris
 
 module AGENT
   imports EXP 
@@ -39,15 +29,14 @@ module AGENT
   imports AGENTS 
   imports QUOTE-UNQUOTE 
 
-   imports EXP-PROGRAMS + LAMBDA-PROGRAMS + MU-PROGRAMS + CALLCC-PROGRAMS
-   imports HALT-PROGRAMS + IO-PROGRAMS + IMP-PROGRAMS 
-   imports THREADS-PROGRAMS + AGENTS-PROGRAMS + QUOTE-UNQUOTE-PROGRAMS
+  imports URIS
+
  configuration
     <T>
       <agent multiplicity="*"> 
           <control>
               <thread multiplicity="*">
-                  <k>.K</k>
+                  <k>$PGM:K</k>
                   <nextId>0</nextId>
                   <holds>.Map</holds>
               </thread>
@@ -66,15 +55,9 @@ module AGENT
       <messages> <message multiplicity="*">
           <from>.K</from> <to>.Set</to> <body>.K</body>
       </message> </messages>
-      <I-O> <in>.List</in> <out>.List</out> </I-O>
+      <I-O> <in stream="stdin">.List</in> <out stream="stdout">.List</out> </I-O>
     </T>
 
   syntax KResult ::= #Id
-
-  syntax Bag ::= run ( KLabel ) | run ( KLabel , List{K} )
-
-  macro run(KL:KLabel) = <T_> <k>KL(.List{K})</k> <_/T>
-  macro run(KL:KLabel,L:List`{K`}) 
-      = <T_> <k> KL(.List{K}) </k> <in>List(L)</in> <_/T>
 end module
 

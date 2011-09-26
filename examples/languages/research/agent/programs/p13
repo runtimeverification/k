@@ -1,0 +1,5 @@
+((lambda f . (callcc (f -5)))( lambda x . (lambda return . ((lambda x . (0 / 0)) (
+          if (0 <= x)
+          then (return 0)
+          else (return 1)
+        ))))) + 3

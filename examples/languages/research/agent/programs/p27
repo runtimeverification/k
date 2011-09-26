@@ -1,0 +1,6 @@
+(((lambda n . lambda c . lambda i .
+   (while (*i <= n) do (
+     (*c := quote(quote(unquote(unquote(*c)))));
+     (*i := *i + 1)
+   ) ;
+   print(eval(*c)))) 5) (ref (quote 1))) (ref 1)
