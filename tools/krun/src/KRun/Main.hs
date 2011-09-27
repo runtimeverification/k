@@ -123,7 +123,7 @@ evalKastIO desk kmap = do
 
 constructEval :: Map Text Kast -> Text
 constructEval kmap
-    = (\t -> "#eval(__(" <> t <> "))")
+    = (\t -> "#eval(__(" <> t <> ",(.).Map))")
     . T.intercalate ","
     $ Map.foldrWithKey (\k (Kast v) ts ->
       "(_|->_(('$" <> k <> "(.List{K})) , (" <> v <> ")))" : ts) [] kmap
