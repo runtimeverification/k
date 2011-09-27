@@ -36,4 +36,4 @@ listOrBagItem = do
     char '('
     item <- takeWhile1 (/= ')')
     char ')'
-    return $ T.concat [ctor, "(# ", item, "(.List{K}))"]
+    return $ T.concat ["wlist(", ctor, "(# ", item, "(.List{K})))(.List{K})"]

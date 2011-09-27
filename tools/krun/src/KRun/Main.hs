@@ -123,10 +123,10 @@ evalKastIO desk kmap = do
 
 constructEval :: Map Text Kast -> Text
 constructEval kmap
-    = (\t -> "#eval(" <> t <> ")")
-    . T.intercalate " "
+    = (\t -> "#eval(__(" <> t <> "))")
+    . T.intercalate ","
     $ Map.foldrWithKey (\k (Kast v) ts ->
-      "'$" <> k <> "(.List{K}) |-> (" <> v <> ")" : ts) [] kmap
+      "(_|->_(('$" <> k <> "(.List{K})) , (" <> v <> ")))" : ts) [] kmap
     where (<>) = T.append
 
 getWrapperJar :: IO FilePath

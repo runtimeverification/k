@@ -4,7 +4,7 @@ fmod ADD-EVAL is
   including META-K-STREAMS .
 
   op evalS : -> Qid .
-  eq evalS = '#eval .
+  eq evalS = '#eval_ .
 
   ops stdinVariable noIOVariable : -> Variable .
   eq stdinVariable = mkVariable('$stdin,K) .
@@ -18,7 +18,7 @@ fmod ADD-EVAL is
   op addEval : Module Term TermList ~> Module .
   eq addEval(M, T, Tl) 
    = addEqs(defaultEvalEqs(Tl) mainEvalEq(evalCleanConf(T), evalMap(Tl)),
-     addOps(vars2Ops(Tl) (op evalS : Map -> Bag [none] .),
+     addOps(vars2Ops(Tl),
             M)) .
 
 

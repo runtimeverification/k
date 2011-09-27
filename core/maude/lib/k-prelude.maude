@@ -422,6 +422,11 @@ mod K-RULES-RESULT is
   op _=>_ : List{KResult} List{KResult} -> List{KResult} [prec 125] .
 endm
 
+mod K-EVAL is 
+  including K-TECHNIQUE .
+  op #eval_ : Map -> Bag .
+endm
+
 --- rule where level
 
 mod K-WHERE is
@@ -537,6 +542,7 @@ mod K is
   including K-RESULT .              --- to express results syntactically
   including K-RULES .               --- to write k rules with in-place rewriting
   including K-CONFIG .              --- to specify the global configuration term
+  including K-EVAL .
   including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
   including K-CONTEXTS .
