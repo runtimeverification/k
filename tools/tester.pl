@@ -8,6 +8,7 @@ use HTML::Entities;
 
 
 my $globalTests = "";
+my $globalTotalTime;
 my $KRUN = catfile($ENV{'K_BASE'},"core","krun");
 
 # first argument is a flag, -p or -f for shouldPass or shouldFail
@@ -37,6 +38,7 @@ close OUT;
 
 
 sub runTest {
+  my $timer =  [gettimeofday];
   my ($fullFilename) = (@_);
 	my $inputFile = "/dev/null";
 	my $expectedOutputFile = $fullFilename;
@@ -60,35 +62,17 @@ sub runTest {
   unlink($actualOutputFile,$actualErrorFile);
 	`$KRUN $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile`;
 	if (-s $actualErrorFile) {
-		error($fullFilename);
+		reportError($fullFilename,$timer);
 	} else {
     my $diffFile = "$baseTestFile.diff$testEnding";
     unlink ($diffFile);
 		`diff $expectedOutputFile $actualOutputFile >$diffFile`;
 		if (-s $diffFile) {
-			failure($fullFilename);
+			reportFailure($fullFilename,$timer);
 		} else {
-			success($fullFilename);
+			reportSuccess($fullFilename,$timer);
 		}
 	}
-}
-
-
-sub error {
-  my ($testFile) = (@_);
-  reportError($testFile, 1, "");
-}
-
-
-sub failure {
-  my ($testFile) = (@_);
-  reportFailure($testFile, 1, "");
-}
-
-
-sub success {
-  my ($testFile) = (@_);
-  reportSuccess($testFile, 1, "");
 }
 
 
@@ -103,7 +87,7 @@ sub reportError {
 	my ($name, $timer, $message) = (@_);
 #	$globalNumError++;
 	my $inner = "<error>$message</error>";
-	print "$name errored\n";
+	print "$name erred\n";
 	return reportAny($name, $timer, $inner);	
 }
 sub reportSuccess {
@@ -116,9 +100,8 @@ sub reportSuccess {
 
 sub reportAny {
 	my ($name, $timer, $inner) = (@_);
-#	my $elapsed = tv_interval( $timer, [gettimeofday]);
-  my $elapsed = 0;
-#	$globalTotalTime += $elapsed;
+	my $elapsed = tv_interval( $timer, [gettimeofday]);
+	$globalTotalTime += $elapsed;
 	$globalTests .= "\t<testcase name='$name' time='$elapsed'>\n";
 #	$globalTests .= "\t\t<measurement><name>Time</name><value>$elapsed</value></measurement>\n";
 	$globalTests .= "\t\t$inner\n";
