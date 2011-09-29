@@ -166,7 +166,8 @@ runInternalKast desk (ProgramSource pgm) = do
         let kastFile = tmpDir </> (takeBaseName tmpFile <.> ".kast")
         let kastArgs = defaultKastArgs desk tmpCanonicalFile
                     ++ ["-o", kastFile]
-        (ih, oh, eh, ph) <- runInteractiveProcess defaultKastCommand kastArgs Nothing Nothing
+        kastExecutable <- getKastExecutable
+        (ih, oh, eh, ph) <- runInteractiveProcess kastExecutable kastArgs Nothing Nothing
         exitCode <- waitForProcess ph
         exists <- doesFileExist kastFile
         when (exitCode /= ExitSuccess || not exists) $
@@ -184,6 +185,11 @@ getTmpDir = do
     createDirectoryIfMissing True tmpDir
     return tmpDir
 
+getKastExecutable :: IO FilePath
+getKastExecutable = do
+    kbase <- getEnv "K_BASE"
+    return $ kbase </> "core" </> "kast"
+
 trim :: String -> String
 trim = f . f
     where f = reverse . dropWhile isSpace
@@ -196,9 +202,6 @@ distDir = ".k"
 
 compiledFile :: Desk -> FilePath
 compiledFile desk = printf "%s-compiled.maude" (lowercase $ getMainModule desk)
-
-defaultKastCommand :: String
-defaultKastCommand = "kast"
 
 defaultKastArgs :: Desk -> FilePath -> [String]
 defaultKastArgs desk pgmFile =
