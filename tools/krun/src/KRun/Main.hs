@@ -100,9 +100,11 @@ evalKastIO desk kmap = do
     -- write the file from which the wrapper will read the command to execute
     cmdh <- openFile cmdFile WriteMode
     let eval = constructEval kmap
+    T.hPutStrLn cmdh "set show command off ."
     T.hPutStr cmdh "erew "
     T.hPutStr cmdh eval
     T.hPutStrLn cmdh " ."
+    T.hPutStrLn cmdh "quit"
     hClose cmdh
 
     -- run the wrapper
