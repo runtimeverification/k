@@ -29,11 +29,8 @@ yamlToDesk object = do
     authors     <- getRequiredText "Authors"     fields
     maintainer  <- getRequiredText "Maintainer"  fields
     tags        <- getOptionalText "Tags"        fields
-    langInfo    <- getLanguageInfo fields
-    return $ Desk name version license synopsis description authors maintainer tags langInfo
 
-getLanguageInfo topFields = do
-    fields <- lookupMapping "Language" topFields
+    -- krun settings:
     sourceDir    <- getOptionalText "Source-dir" fields
     mainModule   <- getRequiredText "Main-module" fields
     syntaxModule <- getRequiredText "Syntax-module" fields
@@ -42,7 +39,9 @@ getLanguageInfo topFields = do
     cellQuery    <- (case outputMode of
                         PrettyPrint -> getRequiredText
                         _           -> getOptionalText) "Cell-query" fields
-    return $ LanguageInfo sourceDir mainModule syntaxModule parser outputMode cellQuery
+    return $ Desk name version license synopsis description authors maintainer tags
+                  sourceDir mainModule syntaxModule parser outputMode cellQuery
+
 
 readParser "kast" = InternalKast
 readParser _ = error "Support for external parser not implemented yet."

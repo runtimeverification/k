@@ -9,11 +9,8 @@ data Desk = Desk
     , authors     :: String
     , maintainer  :: String
     , tags        :: String
-    , langInfo    :: LanguageInfo
-    } deriving Show
-
-data LanguageInfo = LanguageInfo
-    { sourceDir    :: FilePath
+    -- krun settings:
+    , sourceDir    :: FilePath
     , mainModule   :: String
     , syntaxModule :: String
     , parser       :: Parser
@@ -35,16 +32,16 @@ data OutputMode
 -- Accessors
 
 getSyntaxModule :: Desk -> String
-getSyntaxModule (Desk { langInfo = LanguageInfo { syntaxModule = synMod } }) = synMod
+getSyntaxModule (Desk { syntaxModule = synMod }) = synMod
 
 getMainModule :: Desk -> String
-getMainModule (Desk { langInfo = LanguageInfo { mainModule = mainMod } }) = mainMod
+getMainModule (Desk { mainModule = mainMod }) = mainMod
 
 getParser :: Desk -> Parser
-getParser (Desk { langInfo = LanguageInfo { parser = p } }) = p
+getParser (Desk { parser = p }) = p
 
 getOutputMode :: Desk -> OutputMode
-getOutputMode (Desk { langInfo = LanguageInfo { outputMode = om } }) = om
+getOutputMode (Desk { outputMode = om }) = om
 
 getCellQuery :: Desk -> String
-getCellQuery (Desk { langInfo = LanguageInfo { cellQuery = cq } }) = cq
+getCellQuery (Desk { cellQuery = cq }) = cq
