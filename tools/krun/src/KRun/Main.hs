@@ -158,25 +158,25 @@ flattenProgram desk pgm = case getParser desk of
 -- the K definition.
 runInternalKast :: Desk -> ProgramSource -> IO Kast
 runInternalKast desk (ProgramSource pgm) = do
-        tmpDir <- getTmpDir
-        (tmpFile, tmpHandle) <- openTempFile tmpDir "pgm.in"
-        tmpCanonicalFile <- canonicalizePath tmpFile
-        T.hPutStr tmpHandle pgm
-        hClose tmpHandle
-        let kastFile = tmpDir </> (takeBaseName tmpFile <.> ".kast")
-        let kastArgs = defaultKastArgs desk tmpCanonicalFile
-                    ++ ["-o", kastFile]
-        kastExecutable <- getKastExecutable
-        (ih, oh, eh, ph) <- runInteractiveProcess kastExecutable kastArgs Nothing Nothing
-        exitCode <- waitForProcess ph
-        exists <- doesFileExist kastFile
-        when (exitCode /= ExitSuccess || not exists) $
-            die $ "Failed to run kast command:\n"
-               ++ "kast " ++ intercalate " " kastArgs
-        kast <- T.readFile kastFile
-        removeFile kastFile
-        removeFile tmpFile
-        return (Kast kast)
+    tmpDir <- getTmpDir
+    (tmpFile, tmpHandle) <- openTempFile tmpDir "pgm.in"
+    tmpCanonicalFile <- canonicalizePath tmpFile
+    T.hPutStr tmpHandle pgm
+    hClose tmpHandle
+    let kastFile = tmpDir </> (takeBaseName tmpFile <.> ".kast")
+    let kastArgs = defaultKastArgs desk tmpCanonicalFile
+                ++ ["-o", kastFile]
+    kastExecutable <- getKastExecutable
+    (ih, oh, eh, ph) <- runInteractiveProcess kastExecutable kastArgs Nothing Nothing
+    exitCode <- waitForProcess ph
+    exists <- doesFileExist kastFile
+    when (exitCode /= ExitSuccess || not exists) $
+        die $ "Failed to run kast command:\n"
+           ++ "kast " ++ intercalate " " kastArgs
+    kast <- T.readFile kastFile
+    removeFile kastFile
+    removeFile tmpFile
+    return (Kast kast)
 
 getTmpDir :: IO FilePath
 getTmpDir = do
