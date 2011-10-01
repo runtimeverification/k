@@ -7,8 +7,8 @@ Authors:            Grigore Rosu
 Maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
 Tags:               imperative, teaching, classic
 
-Language:
-  Main-module:      IMP
-  Syntax-module:    IMP-SYNTAX
-  Parser:           kast
-  Output-mode:      io
+# krun settings
+Main-module:        IMP
+Syntax-module:      IMP-SYNTAX
+Parser:             kast
+Output-mode:        io
