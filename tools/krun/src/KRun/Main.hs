@@ -38,6 +38,7 @@ import KRun.XPath
 
 data KRun = KRun
     { krunSetVars :: [String]
+    , krunMaudeMode :: Bool
     , krunInFile  :: FilePath
     , krunPgmArgs :: [String]
     } deriving (Eq, Show, Data, Typeable)
@@ -46,6 +47,8 @@ kRunInit :: KRun
 kRunInit = KRun
     { krunSetVars = def &= explicit &= name "s" &= name "set" &= typ "VAR=str"
       &= help "Set VAR to str in the initial configuration"
+    , krunMaudeMode = def &= explicit &= name "m" &= name "maude"
+      &= help "Override the Output-mode to maude"
     , krunInFile = def &= typFile &= argPos 0
     , krunPgmArgs = def &= typ "PGM_ARGS" &= args
     } &= help "Execute K definitions."
@@ -55,7 +58,10 @@ main :: IO ()
 main = do
     krun <- cmdArgs kRunInit
     deskFile <- findDeskFile "."
-    desk <- parseDeskFile deskFile
+    desk' <- parseDeskFile deskFile
+
+    let desk = if krunMaudeMode krun then desk'{ outputMode = Maude } else desk'
+
     kmap <- case parseKeyVals $ map T.pack (krunSetVars krun) of
         Left err -> die $ "Unable to parse initial configuration value: " ++ err
         Right kmap -> return kmap
