@@ -33,6 +33,7 @@ public class KRunner {
 	private String _errorFileName;
 	private String _maudeModule;
 	private boolean _createLogs;
+	private boolean _noServer;
 	
 	
 	public KRunner(String[] args) throws Exception, IOException {
@@ -47,6 +48,7 @@ public class KRunner {
 		OptionSpec<File> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(File.class);
 		OptionSpec<String> maudeModuleName = _parser.accepts("moduleName", "Final module name").withRequiredArg().required().ofType(String.class);
 		OptionSpec<Void> createLogs = _parser.accepts("createLogs", "Create runtime log files");
+		OptionSpec<Void> noServer = _parser.accepts("noServer", "Don't start the IO server");
 
 		OptionSet options;
 		try {
@@ -61,6 +63,7 @@ public class KRunner {
 			_errorFileName = options.valueOf(errorFile).getCanonicalPath();
 			_maudeModule = options.valueOf(maudeModuleName);
 			_createLogs = options.has(createLogs);
+			_noServer = options.has(noServer);
 		} catch (OptionException e) {
 			System.out.println(e.getMessage() + "\n");
 			usageError();
@@ -103,7 +106,9 @@ public class KRunner {
 	}
 
 	public void run() throws Exception {
-		Thread server = startServer();
+		if (!_noServer) {
+			startServer();
+		}
 		
 		String commandTemplate = 
 			"load {0}\n"
