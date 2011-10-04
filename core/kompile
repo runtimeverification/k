@@ -1148,7 +1148,7 @@ sub latexify {
 	close FILE;
 	
 	# call the post-processor for latex
-	my $postprocessor = File::Spec->catfile((File::Basename::fileparse($0))[1], 'postprocess_texcmds.pl');
+	my $postprocessor = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'postprocess_texcmds.pl');
 	my $stat = system("perl $postprocessor $output_file_name thistemp");
 	if (($stat >>= 8) != 0)
 	{
