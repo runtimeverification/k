@@ -21,6 +21,7 @@ check_perl_packages("XML::LibXML::Reader");
 check_perl_packages("Tree::Nary");
 check_perl_packages("Text::Diff");
 
+
 our @checksum_files = (); # used in checksumming kompile program to detect version changes
 push(@checksum_files, File::Spec->catfile((File::Basename::fileparse($0))[1], 'kompile'));
 
@@ -29,6 +30,17 @@ push(@checksum_files, File::Spec->catfile((File::Basename::fileparse($0))[1], 'k
 my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'common_functions.pl');
 require $path;
 push(@checksum_files, $path);
+
+# add lists file
+$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'lists.pl');
+require $path;
+push(@checksum_files, $path);
+
+# add susbsorts
+$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'subsorts.pl');
+require $path;
+push(@checksum_files, $path);
+
 # add unquoting functions file
 $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'unquote.pl');
 require $path;
@@ -465,7 +477,7 @@ my $latex_special = '[\\#\\$\\{\\}\\[\\]\\&\\^\\_\\%\\~\\\\]';
 my $kvar  = "[A-Za-z][A-Za-z0-9]*[']*";
 
 # Pattern matched by K sorts
-my $ksort = "#?[A-Z][A-Za-z0-9\\`\\+\\?\\!#]*(?:\\{[A-Z#][A-Za-z0-9\\`\\+\\?\\!]*\\})?";
+my $ksort = '#?[A-Z#][A-Za-z0-9\`\+\?\!#]*(?:\{[A-Z#][A-Za-z0-9\`\+\?\!]*\,".*?"\})?';
 # TODO: test exhaustively :-)
 
 # Pattern matched by K variables
@@ -492,9 +504,10 @@ my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
 my $tokens_file = "all_tokens.tok";
 my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb tags);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
+$kmaude_keywords_pattern =~ s/\\bsyntax\\b/\\ssyntax\\s/sg;
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 
-my @k_attributes = qw(strict metadata prec format assoc comm id: hybrid gather ditto seqstrict structural transition computational superheat supercool large latex );           
+my @k_attributes = qw(strict metadata prec format assoc comm id: hybrid gather ditto seqstrict structural transition computational superheat generated supercool large latex );           
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $k_sorts = ":Bag:BagItem:#Bool:CellLabel:CellKey:CellAttribute:#Char:#Int:K:KAssignments:KHybridLabel:KLabel:KResult:KResultLabel:KSentence:List:ListItem:List{KResult}:List{K}:Map:MapItem:#Nat:NeBag:NeK:NeList:NeList{KResult}:NeList{K}:NeMap:NeSet:#NzInt:#NzNat:Set:SetItem:#String:#Zero";
@@ -1148,7 +1161,7 @@ sub latexify {
 	close FILE;
 	
 	# call the post-processor for latex
-	my $postprocessor = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'postprocess_texcmds.pl');
+	my $postprocessor = File::Spec->catfile((File::Basename::fileparse($0))[1], 'postprocess_texcmds.pl');
 	my $stat = system("perl $postprocessor $output_file_name thistemp");
 	if (($stat >>= 8) != 0)
 	{
@@ -1619,18 +1632,29 @@ sub maudify_file {
     $indent .= "|   ";
 
     $_ = slurp_k($file, $latex || $png || $pdf || $ps || $crop || $eps);
-    
-    # resolve rule tags
+
+# extract subsorts
+    sorting($_);
+ 
+# resolve rule tags
     $_ = rule_tags($_);
     
     
 # dots issue: change <cell>.</cell> into <cell> . </cell>
     s!<(.*?)>\.</\1>!<$1> \. </$1>!g;
-        
+    
+# lists
+    $_ = solve_lists($_);
+#    print;
+#    exit(1);
+    
 # Replacing dots    
     $_ = replace_dots($_);
+
+    # temp
     my $temporary = $_;
 
+# maudifying     
     my $maudified = "";
     while ( s!^(\s*)($top_level_pattern)(\s*)!!sm ) 
     {
@@ -1671,7 +1695,6 @@ sub maudify_file {
     
     my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
     print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in file $maude_file\nMaude might not finish...\n") if (!balanced($maudified, '(', ')', '`'));
-	
 #    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
 
 	# put comments back
@@ -1698,7 +1721,7 @@ sub maudify_file {
 
 sub maudify_module {
     (my $file, my $mno, local $_) = @_;
-	#print "$mno\n";
+
     # add K or K-LATEX automatically.
     $_ = addKandKLATEX($_, $file);
 
@@ -1738,7 +1761,15 @@ sub maudify_module {
     s!(<\s*\/?\s*[^\s<]+\s*>)(')!$1 $2!g;
 
     # get KLabels
-    s/($string_pattern)/Freeze($&,"STRINGS")/sge;	
+    my $tmp = $_;
+    while ($tmp =~ /(rule|context).*?(?=$kmaude_keywords_pattern)/sg)
+    {
+	my $all = $&;
+	my $alls = $all;
+        $all =~ s/(?<!\,)($string_pattern)/Freeze($&,"STRINGS")/sge;
+	s/\Q$alls\E/$all/s;
+    }
+
     my $decl = getKLabelDeclarations($_);
 
     # unfreeze strings
@@ -1812,7 +1843,15 @@ sub maudify_module {
         # print "FROZEN: $_\n\n";
 
     # freeze all strings before spacifying
-	s/($string_pattern)/Freeze($&,"STRINGS")/sge;
+    my $tmp = $_;
+    while ($tmp =~ /(rule|context|configuration).*?(?=$kmaude_keywords_pattern)/sg)
+    {
+	my $all = $&;
+	my $alls = $all;
+        $all =~ s/(?<!\,)($string_pattern)/Freeze($&,"STRINGS")/sge;
+	s/\Q$alls\E/$all/s;
+    }
+
 	my $klabelss = $decl;		
 	$klabelss =~ s/\s+$//s;		
 	my @kls = split(/\s+/, $klabelss);		
@@ -1885,20 +1924,8 @@ sub maudify_module {
 
 # Step: check balanced parentheses - maude specific
     my $module_name = $1 if (/k?mod\s+([a-zA-Z\-]+)\s+is/);
-	
-	if (!balanced($_, '(', ')', '`')) {
-		print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n");
-		print "Looking for line number...";
-		my @lines = split("\n", $_);
-		my $code;
-		do {
-			#print "still not balanced, removing a line...\n";
-			pop(@lines);
-			$code = join("\n", @lines);
-		} while !balanced($code, '(', ')', '`');
-		print "Unbalancing seems to start on the " . scalar(@lines) . " line of the module, starting from the first rule\n";
-	}
-	
+    print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n") if (!balanced($_, '(', ')', '`'));
+
     return $_;
 }
 
