@@ -26,11 +26,11 @@ push(@checksum_files, File::Spec->catfile((File::Basename::fileparse($0))[1], 'k
 
 
 # add common functions file
-my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
+my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'common_functions.pl');
 require $path;
 push(@checksum_files, $path);
 # add unquoting functions file
-$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'unquote.pl');
+$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'unquote.pl');
 require $path;
 push(@checksum_files, $path);
 
@@ -157,7 +157,7 @@ sub compilation_cleanup
 }
 
 # add configuration parser
-$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'configuration_parser.pl');
+$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'configuration_parser.pl');
 require $path;
 push(@checksum_files, $path);
 

@@ -8,9 +8,9 @@ use File::Spec;
 use File::Basename;
 use Time::HiRes qw( gettimeofday tv_interval);
 # specific imports : common_functions.pl
-my $namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'common_functions.pl');
+my $namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'common_functions.pl');
 require $namespace;
-$namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'ast.pl');
+$namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'ast.pl');
 require $namespace;
 
 my $tstart = [gettimeofday];

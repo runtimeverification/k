@@ -55,7 +55,7 @@ my $session = 0;
 
 # K configuration files
 # my $k_attributes = "k_attributes.xml";
-my $k_attributes = File::Spec->catfile((File::Basename::fileparse($0))[1], 'k_attributes.xml');
+my $k_attributes = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'k_attributes.xml');
 push(@checksum_files, $k_attributes);
 
 # This is specific to $k_attributes configuration file
