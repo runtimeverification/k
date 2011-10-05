@@ -112,7 +112,7 @@ mod #TCP-INTERFACE is
 		if N:#Nat := findString(S:#String, "###", 0) .
 
 	eq #getTCPData(S:#String)
-		= #errorTCPSyntax("Incorrect Output: " +String S:#String) .
+		= #errorTCPSyntax("Incorrect Output: " +String S:#String) [owise] .
 		
 	ceq #checkResult(S:#String) = #errorTCPSyntax(#getTCPData(substrString(S:#String, lengthString("fail#"), lengthString(S:#String))))
 		if substrString(S:#String, 0, lengthString("fail#")) ==Bool "fail#" [print "full error string: " S:#String] .

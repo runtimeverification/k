@@ -15,7 +15,7 @@ module URIS
              | `String2Bool ( #String )
              | `#ioError ( #String )
             
-  syntax KResult ::= `#EOF | #String
+  syntax KResult ::= `#EOF 
   rule #errorTCPSyntax("EOF") => #EOF
 
   rule #open(S:#String) => String2Int(#tcpRequest("open#" +String S +String "#")) 
@@ -52,7 +52,10 @@ module URIS
              | `#putByte ( #Nat )
              | `#eof ( )
   rule #readByte() => #fReadByte(#stdin)
-  rule #fReadByte(N) => String2Int(#tcpRequest("readbyte#" +String Int2String(N) +String "#"))
+  rule #fReadByte(N) => #string2Int(#tcpRequest("readbyte#" +String Int2String(N) +String "#"))
+
+  syntax K ::= `#string2Int ( #String )
+  rule #string2Int(S) => String2Int(S) if lengthString(S) >=Int 0
 
   rule #putByte(B) => #fPutByte(#stdout,B)
   rule #fPutByte(N,B:#Nat)
