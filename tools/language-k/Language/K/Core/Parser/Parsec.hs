@@ -23,6 +23,11 @@ import Internal.Lexer
 parseK :: String -> Either ParseError K
 parseK = parse kterm ""
 
+parseK' :: String -> Either String K
+parseK' s = case parseK s of
+    Left err -> Left (show err)
+    Right k  -> Right k
+
 -- | Reduce clutter while still keeping the types generic.
 type Parser a = (Stream s m Char) => ParsecT s u m a
 
