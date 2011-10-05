@@ -1,6 +1,4 @@
-require /modules/uris
-
-module IMP-SYNTAX imports URIS
+module IMP-SYNTAX
 /*@ The following constructs are given the expected strictnesses, except for
 \textsf{and}, which is only strict in its first argument, because we will
 give it a short-circuited semantics (its second argument will only be
@@ -9,18 +7,18 @@ evaluated when the first evaluates to true). */
   syntax AExp ::= #Id | #Int
                 | AExp + AExp                  [prec 33 gather (E e) strict]
                 | AExp / AExp                  [prec 31 gather (E e) strict]
-                | read ( )
   syntax BExp ::= #Bool
-                | AExp <= AExp                 [prec 37 strict]
+                | AExp <= AExp                 [prec 37 seqstrict]
                 | not BExp                     [prec 53 strict]
                 | BExp and BExp                [prec 55 strict(1)]
-  syntax Stmt ::= skip ;
-                | #Id = AExp ;                 [prec 40 strict(2)]
-                | Stmt Stmt                    [prec 60 gather (e E)]
+  syntax Stmt ::= skip
+                | #Id := AExp                  [prec 40 strict(2)]
+                | Stmt ; Stmt                  [prec 60 gather (e E)]
                 | if BExp then Stmt else Stmt  [prec 59 strict(1)]
                 | while BExp do Stmt           [prec 59]
-                | write ( AExp ) ;             [strict]
-                | write ( #String ) ;          [ditto]
+  syntax Pgm ::= var Ids ; Stmt                [prec 70]
+
+  syntax Ids ::= List{#Id,","} 
 end module
 
 module IMP imports IMP-SYNTAX
@@ -36,8 +34,6 @@ which is labeled $\top$. */
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Stmt </k>
-                  <in stream="stdin"> .List </in>
-                  <out stream="stdout"> .List </out>
                   <state color="red"> .Map </state>
                 </T>
 
@@ -58,7 +54,7 @@ rewriting process will get stuck.  This means that our semantics of
 IMP disallows uses of uninitialized variables.  Variables are initialized
 using the assignment statement whose semantics is defined below. */
 
-  rule <k> X:#Id => Sigma(X) ...</k> <state> Sigma:Map </state>
+  rule <k> X:#Id => I ...</k> <state>... X |-> I ...</state>
 
 /*@ \subsubsection{Arithmetic operators}
 There is nothing special about these, except that the rule for division
@@ -66,9 +62,6 @@ has a side condition. */
 
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
-
-//@ \subsubsection{Console input}
-  rule <k> read() => I ...</k> <in> ListItem(I) => .List ...</in>
 
 /*@ \subsection{Boolean Expressions}
 The rules below are straightforward.  Note the short-circuited semantics
@@ -88,7 +81,7 @@ which needs two rules. */
 The \texttt{skip} is simply dissolved.  One can make this
 rule structural if one does not want it to count as a computational step. */
 
-  rule skip; => .
+  rule skip => .
 
 /*@ \subsubsection{Assignment}
 The assigned variable is updated in the state: ${\Large\sigma}[I/X]$
@@ -97,7 +90,7 @@ is not defined in $X$, and it changes the current mapping of $X$
 (to point to $I$) in case $\Large\sigma$ is defined in $X$.
 At the same time, the assignment is dissolved. */
 
-  rule <k> X=I:#Int; => . ...</k> <state> Sigma => Sigma[I/X] </state>
+  rule <k> X:=I:#Int => . ...</k> <state>... X |-> (_ => I) ...</state>
 
 /*@ \subsubsection{Sequential Composition}
 Sequential composition is simply dissolved into the \K's builtin
@@ -105,7 +98,7 @@ task sequentialization operation.  Like for \texttt{skip}, one is
 free to make this rule structural if one does not want it to count
 as a computational step.  */
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2
+  rule S1:Stmt ; S2:Stmt => S1 ~> S2
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
@@ -128,10 +121,11 @@ rule below structural.  If one wants this unrolling step to count
 as a computational step (though we beg one to reconsider)
 then one can remove the ``structural'' tag.  */
 
-  rule <k> while B do S => if B then (S while B do S) else skip; ...</k> [structural]
+  rule <k> while B do S => if B then (S ; while B do S) else skip ...</k> [structural]
 
-//@ \subsubsection{Output}
-  rule <k> write(I:#Int); => . ...</k> <out>... .List => ListItem(I) </out>
-  rule <k> write(Str:#String); => . ...</k> <out>... .List => ListItem(Str) </out>
+
+  rule <k> var .{","} ; S => S ...</k>
+  rule <k> var (X,Xl:List{#Id,","} => Xl) ; _ ...</k>
+       <state>... . => X |-> 0 ...</state> 
 end module
 

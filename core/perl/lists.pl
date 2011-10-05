@@ -10,9 +10,9 @@ my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax k
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 
 
-my $nelist = "NeList";
-my $elist  = "SemanticList";
-my $list   = "List";
+my $nelist = "SyntacticList";
+my $elist  = "List";
+my $list   = "TranslationList";
 
 my $counter = 7;
 
@@ -30,7 +30,7 @@ sub solve_lists
     
     # presupunem: | syntax Ids ::= List{#Id, ","} [attributes] |
     # iterate through syntax declarations
-    while ($temp =~ /(syntax\s+($ksort)\s*::=\s*($nelist|$list)\{($ksort),"(.*?)"\}(\s+\[.*?\])?)\s*(?=$kmaude_keywords_pattern)/sg)
+    while ($temp =~ /(syntax\s+($ksort)\s*::=\s*($elist)\{($ksort),"(.*?)"\}(\s+\[.*?\])?)\s*(?=$kmaude_keywords_pattern)/sg)
     {
 #	print "Matched: $&\n";
 
@@ -50,12 +50,18 @@ sub solve_lists
 	
 	if (!(defined $declaration_map{$main_sort}))
 	{
-	    $generated_code  .= "\tsyntax $main_sort ::= $decl$all\n";
-	    $generated_code  .= "\tsyntax $nelist$all ::= $list_sort | $list_sort $separator $nelist$all $attributes\n";
-	    $generated_code  .= "\tsyntax $elist$all ::= .$elist$all | $list_sort $separator $elist$all $attributes \n";
-	    $generated_code  .= "\tsyntax $list$all ::= $nelist$all | $elist$all\n";
+            $generated_code .= "\tsort $main_sort\n";
+            $generated_code .= "\tsort $elist$all\n";
+            $generated_code .= "\tsort $list$all\n";
+            $generated_code .= "\tsort $nelist$all\n";
+	    $generated_code  .= "\tsubsort $list$all < $main_sort\n";
+	    $generated_code  .= "\tsubsort  $list_sort < $nelist$all\n";
+	    $generated_code  .= "\top _$separator"."_ :  $list_sort $nelist$all -> $nelist$all $attributes\n";
+	    $generated_code  .= "\top .$elist$all : -> $elist$all\n";
+	    $generated_code  .= "\top _$separator"."_  : $list_sort $elist$all -> $elist$all $attributes\n";
+	    $generated_code  .= "\tsubsorts $nelist$all $elist$all < $list$all\n";
 	    
-	    $generated_code  .= "\tsyntax $elist$all ::= listify$all ( $list$all )\n";
+	    $generated_code  .= "\top listify$all"."_ : $list$all -> $elist$all\n";
 	    
 	    $generated_code  .= "\teq (listify$all(EL$counter:$elist$all)) = (EL$counter)\n"; $counter ++;
 	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort)) = (X$counter:$list_sort $separator .$elist$all)\n"; $counter ++;
@@ -74,9 +80,14 @@ sub solve_lists
             if (! scalar keys(%constructors)) {
               $generated_code .= "  sort Bottom\n";
             }
-            $generated_code .= "syntax $list\{Bottom,\"$separator\"\} ::= $nelist\{Bottom,\"$separator\"\} | $elist\{Bottom,\"$separator\"\}\n";
-            $generated_code .= "syntax $elist\{Bottom,\"$separator\"\} ::= Bottom $separator  $elist\{Bottom,\"$separator\"\}  $attributes\n | .$elist\{\"$separator\"\}\n\n";
-            $generated_code .= "syntax $nelist\{Bottom,\"$separator\"\} ::= Bottom $separator  $nelist\{\"$separator\"\}  $attributes\n | Bottom\n\n";
+            $generated_code .= "  sort $list\{Bottom,\"$separator\"\}\n";
+            $generated_code .= "  sort $elist\{Bottom,\"$separator\"\}\n";
+            $generated_code .= "  sort $nelist\{Bottom,\"$separator\"\}\n";
+            $generated_code .= "subsort $nelist\{Bottom,\"$separator\"\} $elist\{Bottom,\"$separator\"\} < $list\{Bottom,\"$separator\"\}\n";
+            $generated_code .= "op _$separator"."_ : Bottom  $elist\{Bottom,\"$separator\"\} -> $elist\{Bottom,\"$separator\"\} $attributes\n";
+            $generated_code .= "op .\{\"$separator\"\} : ->  $elist\{Bottom,\"$separator\"\}\n";
+            $generated_code .= "op _$separator"."_ : Bottom  $nelist\{Bottom,\"$separator\"\} -> $nelist\{Bottom,\"$separator\"\} $attributes\n";
+            $generated_code .= "subsort Bottom < $nelist\{Bottom,\"$separator\"\}\n";
             $constructors{"\"$separator\""} = "\"$separator\"";
         }
         
@@ -85,7 +96,7 @@ sub solve_lists
             $generated_code .= "  subsort $list\{Bottom, \"$separator\"\} < $list$declaration_map{$main_sort}\n";
             $generated_code .= "  subsort $nelist\{Bottom, \"$separator\"\} < $nelist$declaration_map{$main_sort}\n";
             $generated_code .= "  subsort $elist\{Bottom, \"$separator\"\} < $elist$declaration_map{$main_sort}\n";
-            $generated_code .= "  eq .$elist$declaration_map{$main_sort} = .$elist\{\"$separator\"\}";
+            $generated_code .= "  eq .$elist$declaration_map{$main_sort} = .\{\"$separator\"\}";
         # }
 
 	
@@ -106,9 +117,9 @@ sub solve_lists
 	
 	my $gen_code = "";
 	
-	$gen_code .= "syntax $elist$declaration_map{$sort1} ::= $elist$declaration_map{$sort2}\n";
-	$gen_code .= "syntax $nelist$declaration_map{$sort1} ::= $nelist$declaration_map{$sort2}\n";
-	$gen_code .= "syntax $list$declaration_map{$sort1} ::= $list$declaration_map{$sort2}\n";
+	$gen_code .= "subsort $elist$declaration_map{$sort2} < $elist$declaration_map{$sort1} \n";
+	$gen_code .= "subsort $nelist$declaration_map{$sort2} < $nelist$declaration_map{$sort1}\n";
+	$gen_code .= "subsort $list$declaration_map{$sort2} <  $list$declaration_map{$sort1}\n";
 	$gen_code .= "eq .$elist$declaration_map{$sort1} = .$elist$declaration_map{$sort2}\n";
 
         #print "PROD: $syntax_item\nGEN: $gen_code\n\n";
@@ -141,7 +152,7 @@ sub solve_lists
 	    $gen .= "$macros\n";
 	}
 	
-#	s/\Q$syntax_item\E/$syntax_item\n\n$gen/s;	
+	s/\Q$syntax_item\E/$syntax_item\n\n$gen/s;	
     }
 	    
     $_;
@@ -234,14 +245,14 @@ sub generation
     my $c2 = $counter;
 
     # code generation!
-    $left  =~ s/($mkeys)/{ my $sort = "NeList$declaration_map{$1}"; my $decl = "X$c1:$sort"; $c1 ++; $decl; }/sge;
-    $right =~ s/($mkeys)/{ my $sort = $declaration_map{$1}; my $decl = "listify$sort(X$counter:NeList$sort)"; $c2 ++; $decl; }/sge;
+    $left  =~ s/($mkeys)/{ my $sort = "$nelist$declaration_map{$1}"; my $decl = "X$c1:$sort"; $c1 ++; $decl; }/sge;
+    $right =~ s/($mkeys)/{ my $sort = $declaration_map{$1}; my $decl = "listify$sort(X$counter:$nelist$sort)"; $c2 ++; $decl; }/sge;
     $counter += ($c1 - $counter);
  
 #    print "ARRAY: @array\n($left) = ($right)\n\n";
     
     
-    "($left) = ($right)\n";
+    "($left) = ($right) [metadata \"parser=()\"]\n";
 }
 
 

@@ -1,13 +1,9 @@
-write("Add numbers up to (<=0 to quit)? ");
-n=read();
+var n,s; 
+n:=10;
 while not(n<=0) do (
-  s=0;
+  s:=0;
   while not(n<=0) do (
-    s=s+n;
-    n=n+-1;
+    s:=s+n;
+    n:=n+-1
   )
-  write("sum=");
-  write(s);
-  write("\nAdd numbers up to (<=0 to quit)? ");
-  n=read();
 )

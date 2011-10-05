@@ -12,4 +12,4 @@ Language:
   Syntax-module:    EXP
   Parser:           kast
   Output-mode:      pretty-print
-  Cell-query:       //k
+  Cell-query:       //k/text()

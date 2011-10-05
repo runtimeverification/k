@@ -11,4 +11,4 @@ Tags:               imperative, teaching, classic
 Main-module:        IMP
 Syntax-module:      IMP-SYNTAX
 Parser:             kast
-Output-mode:        io
+Output-mode:        maude
