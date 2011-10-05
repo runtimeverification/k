@@ -1,0 +1,51 @@
+load remove-parser
+
+mod REMOVE-PARSER-METADATA-META is
+  including REMOVE-PARSER .
+  including PARSE-METADATA .
+  var AS : AttrSet . var Str : String .
+  var Op : OpDecl . var Eq : Equation .
+  eq removeParserOp(Op, AS metadata(Str))
+   = removeParserOp(Op, AS metadataParse(Str)) .
+  eq removeParserEq(Eq, AS metadata(Str))
+   = removeParserEq(Eq, AS metadataParse(Str)) .
+endm
+
+mod REMOVE-PARSER-META is
+  including REMOVE-PARSER .
+  including  REMOVE-PARSER-METADATA-META .
+  including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
+  var Syntax CxtStrict : String .  var M : Module .
+  var QSyntax QCxtStrict : Qid .
+  op removeParser : String String ~> Module .
+  eq removeParser(Syntax, CxtStrict) = removeParser(qid(Syntax), qid(CxtStrict)) .
+  op removeParser : Qid Qid ~> Module .
+  eq removeParser(QSyntax,QCxtStrict) 
+   = setName(removeParser(QCxtStrict, upModule(QSyntax, false)), QCxtStrict) .
+
+  op compileREMOVE-PARSER : Module AttrSet ~> Module .
+  eq compileREMOVE-PARSER(M, AS:AttrSet) = removeParser(getName(M),M) .
+endm
+
+mod REMOVE-PARSER-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op remove-parser : -> System .
+  op idle : -> State .
+  var Q Syntax RemovedParsed StrictEq : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq remove-parser = [nil, idle, 'Usage: 'removeParser '<Name> '.] .
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKS is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['removeParser Syntax RemovedParsed QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(Syntax,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('REMOVE-PARSER-META),
+                        'removeParser[upTerm(string(Syntax)),upTerm(string(RemovedParsed))])),error) .
+endm

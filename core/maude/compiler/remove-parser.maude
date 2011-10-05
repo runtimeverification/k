@@ -1,0 +1,66 @@
+mod REMOVE-PARSER is 
+  including CONVERSION .
+  including META-MODULE-EXTRAS .
+  including META-ATTRS .
+  var Str : String . 
+  var AS : AttrSet . 
+  var Q Q' : Qid . var Ty : Type . var Tyl : TypeList . 
+  var Op : OpDecl . var OPDS : OpDeclSet . var Mod : Module .
+  var Eq : Equation . var Eqs : EquationSet .
+  var S S' : Sort . var SS : SortSet .
+  var SSD : SubsortDecl . var SSDS : SubsortDeclSet .
+  var T1 T2 : Term .
+
+  op isParserListSort : String -> Bool .
+  eq isParserListSort(Str)
+   = substr(Str, 0, length("SyntacticList`{")) == "SyntacticList`{" or-else 
+     substr(Str, 0, length("TranslationList`{")) == "TranslationList`{" .
+
+  op semanticListSort : String ~> Sort .
+  eq semanticListSort(Str) 
+   = qid(substr(Str, find(Str,"List",0),length(Str))) .
+
+  op removeParser : Qid Module ~> Module .
+  eq removeParser(Q, Mod) 
+   = setSorts(setSubsorts(setOps(setEqs(Mod, removeParserEqs(getEqs(Mod))), removeParserOps(getOps(Mod))), removeParserSubsorts(getSubsorts(Mod))), removeParserSorts(getSorts(Mod))) .
+
+  op removeParserOps : OpDeclSet ~> OpDeclSet .
+  eq removeParserOps(none) = none .
+  eq removeParserOps(Op OPDS) = removeParserOp(Op, getAttrs(Op)) removeParserOps(OPDS) .
+
+  op removeParserOp : OpDecl AttrSet ~> OpDeclSet .
+  eq removeParserOp(Op, AS pair("parser","")) = none .
+  eq removeParserOp(Op, AS) = Op [owise] .
+
+  op removeParserEqs : EquationSet ~> EquationSet .
+  eq removeParserEqs(none) = none .
+  eq removeParserEqs(Eq Eqs) = removeParserEq(Eq, getAttrs(Eq)) removeParserEqs(Eqs) .
+
+  op removeParserEq : Equation AttrSet ~> EquationSet .
+  eq removeParserEq(Eq, AS pair("parser","")) = none .
+  eq removeParserEq(Eq, AS) = Eq [owise] .
+
+  op removeParserSorts : SortSet ~> SortSet .
+  eq removeParserSorts(none) = none .
+  eq removeParserSorts(S ; SS) 
+   = if isParserListSort(string(S)) then none else S fi 
+     ; removeParserSorts(SS) .
+
+
+  op removeParserSubsorts : SubsortDeclSet ~> SubsortDeclSet .
+  op removeParserSubsort : SubsortDecl ~> SubsortDeclSet .
+  eq removeParserSubsorts(none) = none .
+  eq removeParserSubsorts(SSD SSDS) 
+   = removeParserSubsort(SSD)    removeParserSubsorts(SSDS) .
+
+
+  eq removeParserSubsort(subsort S < S' .) 
+   = if isParserListSort(string(S')) 
+     then none 
+     else if isParserListSort(string(S)) 
+          then (subsort semanticListSort(string(S)) < S' .) 
+          else (subsort S < S' .) 
+          fi 
+     fi .
+endm
+

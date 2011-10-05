@@ -42,8 +42,11 @@ sub solve_lists
 	my $decl        = $3;
 	my $list_sort   = $4;
 	my $separator   = $5;
-	my $attributes  = "";
+	my $attributes  = '[metadata ""]';
 	$attributes     = $6 if defined $6;
+
+        my $parser_attributes = $attributes;
+        $parser_attributes =~ s/metadata "/metadata "parser=() /s;
 	
 	my $all = "\{$list_sort,\"$separator\"\}";
 	my $temp;
@@ -56,16 +59,16 @@ sub solve_lists
             $generated_code .= "\tsort $nelist$all\n";
 	    $generated_code  .= "\tsubsort $list$all < $main_sort\n";
 	    $generated_code  .= "\tsubsort  $list_sort < $nelist$all\n";
-	    $generated_code  .= "\top _$separator"."_ :  $list_sort $nelist$all -> $nelist$all $attributes\n";
+	    $generated_code  .= "\top _$separator"."_ :  $list_sort $nelist$all -> $nelist$all $parser_attributes\n";
 	    $generated_code  .= "\top .$elist$all : -> $elist$all\n";
 	    $generated_code  .= "\top _$separator"."_  : $list_sort $elist$all -> $elist$all $attributes\n";
 	    $generated_code  .= "\tsubsorts $nelist$all $elist$all < $list$all\n";
 	    
-	    $generated_code  .= "\top listify$all"."_ : $list$all -> $elist$all\n";
+	    $generated_code  .= "\top listify$all"."_ : $list$all -> $elist$all [metadata \"parser=()\"]\n";
 	    
-	    $generated_code  .= "\teq (listify$all(EL$counter:$elist$all)) = (EL$counter)\n"; $counter ++;
-	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort)) = (X$counter:$list_sort $separator .$elist$all)\n"; $counter ++;
-	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort $separator NEL$counter:$nelist$all)) = (X$counter:$list_sort $separator listify$all(NEL$counter))\n\n"; $counter ++;
+	    $generated_code  .= "\teq (listify$all(EL$counter:$elist$all)) = (EL$counter) [metadata \"parser=()\"]\n"; $counter ++;
+	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort)) = (X$counter:$list_sort $separator .$elist$all) [metadata \"parser=()\"]\n"; $counter ++;
+	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort $separator NEL$counter:$nelist$all)) = (X$counter:$list_sort $separator listify$all(NEL$counter)) [metadata \"parser=()\"]\n\n"; $counter ++;
 	    
 	    # mark all as defined ..
 	    $declaration_map{$main_sort} = $all;
@@ -86,7 +89,7 @@ sub solve_lists
             $generated_code .= "subsort $nelist\{Bottom,\"$separator\"\} $elist\{Bottom,\"$separator\"\} < $list\{Bottom,\"$separator\"\}\n";
             $generated_code .= "op _$separator"."_ : Bottom  $elist\{Bottom,\"$separator\"\} -> $elist\{Bottom,\"$separator\"\} $attributes\n";
             $generated_code .= "op .\{\"$separator\"\} : ->  $elist\{Bottom,\"$separator\"\}\n";
-            $generated_code .= "op _$separator"."_ : Bottom  $nelist\{Bottom,\"$separator\"\} -> $nelist\{Bottom,\"$separator\"\} $attributes\n";
+            $generated_code .= "op _$separator"."_ : Bottom  $nelist\{Bottom,\"$separator\"\} -> $nelist\{Bottom,\"$separator\"\} $parser_attributes\n";
             $generated_code .= "subsort Bottom < $nelist\{Bottom,\"$separator\"\}\n";
             $constructors{"\"$separator\""} = "\"$separator\"";
         }

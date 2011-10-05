@@ -1,5 +1,6 @@
 mod COMPILE-ONESHOT is
  including MANY-MODULES-META + ADD-EVAL-META + RESOLVE-DITTO-META + COMPLETE-K-SORTS-META + ANONYMOUS-CONSTANTS-META --- + SANITY-CHECKS-META 
++ REMOVE-PARSER-META 
 + SYNTAX-PREDICATES-META + MISSING-SUBSORTS-META + BLOCKING-INPUT-META 
 + DEFAULT-TERMS-META + CONTEXT-TRANSFORMERS-META + OPEN-CELLS-META + ANONYMOUS-VARIABLES-META + MAKE-K-RULES-META + REMOVE-SUBLISTS-META + LISTS-TO-WRAPPERS-META + SYNTAX-TO-K-META + ADD-KPROPER-META + LISTS-TO-K-META
 + SUBSORTS-TO-WRAPPERS-META 
@@ -11,6 +12,7 @@ mod COMPILE-ONESHOT is
 
   op compile1 : Module Qid AttrSet ~> Module .
   eq compile1(M, 'MANY-MODULES, AS) = compileMANY-MODULES(M, AS) .
+  eq compile1(M, 'REMOVE-PARSER, AS) = compileREMOVE-PARSER(M, AS) .
   eq compile1(M, 'ADD-EVAL, AS) = compileADD-EVAL(M, AS) .
   eq compile1(M, 'RESOLVE-DITTO, AS) = compileRESOLVE-DITTO(M, AS) .
   eq compile1(M, 'COMPLETE-K-SORTS, AS) = compileCOMPLETE-K-SORTS(M, AS) .
@@ -40,6 +42,7 @@ mod COMPILE-ONESHOT is
 
   op allSteps : -> QidList .
   eq allSteps = 'MANY-MODULES 
+'REMOVE-PARSER 
 'ADD-EVAL 
 'RESOLVE-DITTO 
 'COMPLETE-K-SORTS 
@@ -97,12 +100,14 @@ fmod COMPILE-META is
   op getPhaseName : Qid ~> QidList .
   eq getPhaseName('MANY-MODULES) 
    = 'flattening 'entire 'definition 'in 'a 'single 'module .
+  eq getPhaseName('REMOVE-PARSER) 
+   = tokenize("removing extra parser stuff") .
   eq getPhaseName('ADD-EVAL) 
-   = tokenize("Adding the eval function") .
+   = tokenize("adding the eval function") .
   eq getPhaseName('RESOLVE-DITTO) 
    = 'Updating 'metadata 'information 'for 'ditto 'operations .
   eq getPhaseName('COMPLETE-K-SORTS) 
-   = tokenize("Subsorting (almost) everything to K") .
+   = tokenize("subsorting (almost) everything to K") .
   eq getPhaseName('ANONYMOUS-CONSTANTS) 
    = tokenize("transforming Anonymous constants into variables") .
 ---  eq getPhaseName('SANITY-CHECKS)
@@ -151,6 +156,7 @@ fmod COMPILE-META is
   op allSteps : -> QidList .
   eq allSteps = 
 'MANY-MODULES 
+'REMOVE-PARSER 
 'ADD-EVAL 
 'RESOLVE-DITTO 
 'COMPLETE-K-SORTS 
