@@ -128,9 +128,9 @@ sub solve_lists
     }
     
     # iterate through syntax declarations
-    while ($temp =~ /(syntax\s+(\S+)\s*::=(.*?))(\s*)(?=$kmaude_keywords_pattern)/sg)
+    while ($temp =~ /(syntax\s+(\S+)\s*::=(.*?(\s*\[\s*metadata.*?\])?))\s*(?=$kmaude_keywords_pattern)/sg)
     {
-	# keep  syntax declaration
+	# keep syntax declaration
 	my $syntax_item = $1;
 	my $main_sort   = $2;
 	my $productions = $3;
@@ -138,7 +138,7 @@ sub solve_lists
 	
 	# productions
 	my @productions = ($productions =~ /(.*?\S.*?(?:\s\|\s|$))/gs);
-	
+
 	# iterate through productions
 	foreach my $production (@productions)
 	{

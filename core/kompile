@@ -1639,7 +1639,6 @@ sub maudify_file {
 # resolve rule tags
     $_ = rule_tags($_);
     
-    
 # dots issue: change <cell>.</cell> into <cell> . </cell>
     s!<(.*?)>\.</\1>!<$1> \. </$1>!g;
     
@@ -1785,7 +1784,7 @@ sub maudify_module {
 # Step: Freeze on-the-fly anonymous variable declarations
     s!_(:$ksort)!?$1!sg;
     s!(\?:$ksort)!Freeze($1,"ANONYMOUS")!ge;
-    # print  "Stage:\n$_\n\n";
+#     print  "Stage:\n$_\n\n";
     
 # Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
 # At the same time, also declare N as a sort if it is not declared already
@@ -1797,8 +1796,8 @@ sub maudify_module {
 	# unfreeze attributes if any
     $_ = Unfreeze("ATTRIBUTES", $_);
     $_ = Unfreeze("MYSTRINGS", $_);
-#     print  "Stage:\n$_\n\n";
-    
+     # print  "Stage:\n$_\n\n";
+
 # Step: Store the on-the-fly variables
     my $vars = on_the_fly_kvars($_);
     #  print  "Stage:\n$_\n\n";
