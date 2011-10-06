@@ -2456,6 +2456,8 @@ sub add_subsorts
 	$supersorts .= "$_ " if ($k_sorts !~ /:$_:/);
     }
     
+#    print "SUPERSORTS: $supersorts\n";
+    
     return if ($supersorts eq "");
     
     # get all supersorts in an array
@@ -2464,45 +2466,45 @@ sub add_subsorts
     # search through all modules
     foreach(@modules)
     {
-		my $cmod = $_;
-		# get sorts for current module
-		my $sortlist = "#" . getModuleSorts($cmod) . "#" if defined(getModuleSorts($cmod));
-		$sortlist =~ s/ /#/g if defined($sortlist);
+	my $cmod = $_;
+	# get sorts for current module
+	my $sortlist = "#" . getModuleSorts($cmod) . "#" if defined(getModuleSorts($cmod));
+	$sortlist =~ s/ /#/g if defined($sortlist);
 	
 #		print "File: " . getModuleFile($_) . ", SORTS: $sortlist\n\n";
-
-		# if this module contains sorts
-		# and it is a module which includes K
-		# then add apropriate subsortations
-		if (defined($sortlist) && includesK($cmod))
-		{
-			# will collect declared sorts
-			my @decllist = ();
-			# search through supersorts all sorts contained by this module
-			foreach my $ss (@ssorts)
-			{
-				push(@decllist, $ss) if ($sortlist =~ /#$ss#/);
-			}
-
-			if (scalar(@decllist) > 0)
-			{
-		        # get module file
-				my $file = getModuleFile($_);
-			
-				# access its maude corresponding file
-				$file =~ s/\.k$/\.maude/;
-
-				# get content
-				my $content = get_file_content("$dir/$file");
+	
+	# if this module contains sorts
+	# and it is a module which includes K
+	# then add apropriate subsortations
+	if (defined($sortlist) && includesK($cmod))
+	{
+	    # will collect declared sorts
+	    my @decllist = ();
+	    # search through supersorts all sorts contained by this module
+	    foreach my $ss (@ssorts)
+	    {
+		push(@decllist, $ss) if ($sortlist =~ /#$ss#/);
+	    }
+	    
+	    if (scalar(@decllist) > 0)
+	    {
+		# get module file
+		my $file = getModuleFile($_);
 		
-				my $o = "@decllist";
-				$content =~ s/mod(\s+)$_(\s.*?)endm/mod$1$_$2 subsorts $o < K \. endm/sg;
-
-				open FILE,">",$file or die "Cannot create $file\n";
-				print FILE $content;
-				close FILE;
-			}
-		}
+		# access its maude corresponding file
+		$file =~ s/\.k$/\.maude/;
+		
+		# get content
+		my $content = get_file_content("$dir/$file");
+		
+		my $o = "@decllist";
+		$content =~ s/mod(\s+)$_(\s.*?)endm/mod$1$_$2 subsorts $o < K \. endm/sg;
+		
+		open FILE,">",$file or die "Cannot create $file\n";
+		print FILE $content;
+		close FILE;
+	    }
+	}
     }
     
 #    print "SUPERSORTS: $supersorts\n";
