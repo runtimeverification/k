@@ -54,7 +54,7 @@ module URIS
   rule #readByte() => #fReadByte(#stdin)
   rule #fReadByte(N) => #string2Int(#tcpRequest("readbyte#" +String Int2String(N) +String "#"))
 
-  syntax K ::= `#string2Int ( #String )
+  syntax K ::= `#string2Int ( K )
   rule #string2Int(S) => String2Int(S) if lengthString(S) >=Int 0
 
   rule #putByte(B) => #fPutByte(#stdout,B)
