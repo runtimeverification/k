@@ -47,6 +47,7 @@ sub solve_lists
 
         my $parser_attributes = $attributes;
         $parser_attributes =~ s/metadata "/metadata "parser=() /s;
+        $attributes =~ s/metadata "/metadata "generated=() /s;
 	
 	my $all = "\{$list_sort,\"$separator\"\}";
 	my $temp;
@@ -60,7 +61,7 @@ sub solve_lists
 	    $generated_code  .= "\tsubsort $list$all < $main_sort\n";
 	    $generated_code  .= "\tsubsort  $list_sort < $nelist$all\n";
 	    $generated_code  .= "\top _$separator"."_ :  $list_sort $nelist$all -> $nelist$all $parser_attributes\n";
-	    $generated_code  .= "\top .$elist$all : -> $elist$all\n";
+	    $generated_code  .= "\top .$elist$all : -> $elist$all [metadata \"generated=()\"]\n";
 	    $generated_code  .= "\top _$separator"."_  : $list_sort $elist$all -> $elist$all $attributes\n";
 	    $generated_code  .= "\tsubsorts $nelist$all $elist$all < $list$all\n";
 	    
@@ -88,7 +89,7 @@ sub solve_lists
             $generated_code .= "  sort $nelist\{Bottom,\"$separator\"\}\n";
             $generated_code .= "subsort $nelist\{Bottom,\"$separator\"\} $elist\{Bottom,\"$separator\"\} < $list\{Bottom,\"$separator\"\}\n";
             $generated_code .= "op _$separator"."_ : Bottom  $elist\{Bottom,\"$separator\"\} -> $elist\{Bottom,\"$separator\"\} $attributes\n";
-            $generated_code .= "op .\{\"$separator\"\} : ->  $elist\{Bottom,\"$separator\"\}\n";
+            $generated_code .= "op .\{\"$separator\"\} : ->  $elist\{Bottom,\"$separator\"\} [metadata \"generated=()\"]\n";
             $generated_code .= "op _$separator"."_ : Bottom  $nelist\{Bottom,\"$separator\"\} -> $nelist\{Bottom,\"$separator\"\} $parser_attributes\n";
             $generated_code .= "subsort Bottom < $nelist\{Bottom,\"$separator\"\}\n";
             $constructors{"\"$separator\""} = "\"$separator\"";
@@ -99,7 +100,7 @@ sub solve_lists
             $generated_code .= "  subsort $list\{Bottom, \"$separator\"\} < $list$declaration_map{$main_sort}\n";
             $generated_code .= "  subsort $nelist\{Bottom, \"$separator\"\} < $nelist$declaration_map{$main_sort}\n";
             $generated_code .= "  subsort $elist\{Bottom, \"$separator\"\} < $elist$declaration_map{$main_sort}\n";
-            $generated_code .= "  eq .$elist$declaration_map{$main_sort} = .\{\"$separator\"\}";
+            $generated_code .= "  eq .$elist$declaration_map{$main_sort} = .\{\"$separator\"\} [metadata \"parser=()\"]";
         # }
 
 	
@@ -123,7 +124,7 @@ sub solve_lists
 	$gen_code .= "subsort $elist$declaration_map{$sort2} < $elist$declaration_map{$sort1} \n";
 	$gen_code .= "subsort $nelist$declaration_map{$sort2} < $nelist$declaration_map{$sort1}\n";
 	$gen_code .= "subsort $list$declaration_map{$sort2} <  $list$declaration_map{$sort1}\n";
-	$gen_code .= "eq .$elist$declaration_map{$sort1} = .$elist$declaration_map{$sort2}\n";
+	$gen_code .= "eq .$elist$declaration_map{$sort1} = .$elist$declaration_map{$sort2} [metadata \"generated=()\"]\n";
 
         #print "PROD: $syntax_item\nGEN: $gen_code\n\n";
 
