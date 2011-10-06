@@ -65,7 +65,7 @@ module IMPPP imports IMPPP-SYNTAX + URIS
   rule <k> read() => I ...</k>
        <in> ListItem(I) => . ...</in> [transition]
 
-  /*@ \texbf{Exchange synchronization construct} */
+  /*@ \textbf{Exchange synchronization construct} */
 
   rule <k> exchange(I1) => I2 ...</k> <k> exchange(I2) => I1 ...</k> [transition]
 
