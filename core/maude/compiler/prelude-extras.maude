@@ -225,15 +225,19 @@ fmod QID-EXTRAS is
   ceq string2qidListAux(St)
     = if F == notFound
       then qid(substr(St, findNonSpace(St), length(St))) 
-      else qid(substr(St, findNonSpace(St), F)) 
+      else if substr(St,0,1) =/= "\""  then
+            qid(substr(St, findNonSpace(St), F)) 
            if substr(St, findNonSpace(St) + F, 1) =/= " "
            then qid(substr(St, findNonSpace(St) + F, 1))
            else nil
            fi 
            string2qidListAux(substr(St, findNonSpace(St) + F + 1, length(St)))
+           else qid(substr(St,0,find(St,"\"",1) + 1))
+           string2qidListAux(substr(St, find(St,"\"",1) + 1, length(St)))
+           fi
       fi
-    if F := myfind(substr(St, findNonSpace(St), length(St)), " (){}[],", 0)
-    [owise] .
+    if F := myfind(substr(St, findNonSpace(St), length(St)), " (){}[],\"", 0)
+    [owise print "St: " St "F: " F] .
   
   op findNonSpace : String -> Nat .
   op findNonSpace : String Nat -> Nat .

@@ -2,6 +2,7 @@ load prelude-extras
 load meta-k
 load metadata-parsing.maude
 load printing
+load remove-parser-interface
 
 mod DECL-META-LATEX-PRINT is
   pr K-META-OPEN-CELLS .
@@ -914,7 +915,7 @@ endm
 
 
 mod LATEX-PRINT-META is
-  including UNIT-META-LATEX-PRINT .
+  including UNIT-META-LATEX-PRINT + REMOVE-PARSER-META .
   sort ProductionType .
   op \textsf{_} : Qid -> Qid [ctor] .
 
@@ -1205,7 +1206,7 @@ endfm)) = tokenize(Str) '\n eMetaLatexPrint(setMbs(setRls(setEqs(M,none),none),n
   eq latexPrint(Q) = $latexPrint(Q,upModule(Q,true)) .
   op $latexPrint : Qid [Module] -> QidList .
   eq $latexPrint(Q, FM) = if FM :: Module 
-     then latexPrint(FM, upModule(Q,false)) 
+     then latexPrint(FM, compileREMOVE-PARSER(upModule(Q,false), none)) 
      else (
        '\begin '`{ 'module '`} '`{ eMetaLatexPrintME(Q) '`} 
           '\mbox '`{ '\sc '\ '\s 'does 'not 'exist 
