@@ -58,7 +58,10 @@ mod REMOVE-PARSER is
    = if isParserListSort(string(S')) 
      then none 
      else if isParserListSort(string(S)) 
-          then (subsort semanticListSort(string(S)) < S' .) 
+          then if S' == K 
+               then none
+               else (subsort semanticListSort(string(S)) < S' .) 
+               fi
           else (subsort S < S' .) 
           fi 
      fi .
