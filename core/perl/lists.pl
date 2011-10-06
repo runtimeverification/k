@@ -18,6 +18,7 @@ my $counter = 7;
 
 my %declaration_map = ();
 my %constructors = ();
+my %declared_list = ();
 
 sub solve_lists
 {
@@ -73,6 +74,7 @@ sub solve_lists
 	    
 	    # mark all as defined ..
 	    $declaration_map{$main_sort} = $all;
+	    $declared_list{"$list_sort:$separator"} = $main_sort;
 	}
 	elsif ($all ne $declaration_map{$main_sort})
 	{
@@ -100,17 +102,65 @@ sub solve_lists
             $generated_code .= "  subsort $list\{Bottom, \"$separator\"\} < $list$declaration_map{$main_sort}\n";
             $generated_code .= "  subsort $nelist\{Bottom, \"$separator\"\} < $nelist$declaration_map{$main_sort}\n";
             $generated_code .= "  subsort $elist\{Bottom, \"$separator\"\} < $elist$declaration_map{$main_sort}\n";
-            $generated_code .= "  eq .$elist$declaration_map{$main_sort} = .\{\"$separator\"\} [metadata \"parser=()\"]";
+            $generated_code .= "  eq .$elist$declaration_map{$main_sort} = .\{\"$separator\"\} [metadata \"parser=()\"]\n\n";
         # }
 
+        my $subs = getSubSorts($list_sort);
+	my $supers = getSuperSorts($list_sort);
+	my @subs = @$subs;
+	my @supers = @$supers;
+	
+#	print "SORT: $list_sort\nSUB: @subs\nSUPER: @supers\n\n";
+	
+#	print "MAP:\n";
+#	while (my ($k, $v) = each (%declared_list))
+#	{
+#	    print "($k, $v)\n";
+#	}
+#       print "ENDMAP\n";
+
+	
+	my $sort2 = $main_sort; 
+
+	foreach my $sort1 (@supers)
+	{
+	    if (defined $declared_list{"$sort1:$separator"})
+	    {
+		my $list1 = "{$sort1,\"$separator\"}";
+		$generated_code .= "subsort $main_sort < " . $declared_list{"$sort1:$separator"} . "\n";
+		$generated_code .= "subsort $elist$declaration_map{$sort2} < $elist$list1 \n";
+		$generated_code .= "subsort $nelist$declaration_map{$sort2} < $nelist$list1\n";
+		$generated_code .= "subsort $list$declaration_map{$sort2} <  $list$list1\n";
+		$generated_code .= "eq .$elist$list1 = .$elist$declaration_map{$sort2} [metadata \"generated=()\"]\n";
+	    }
+	}
+	
+	my $sort1 = $main_sort;
+	foreach  $sort2 (@subs)
+	{
+	    if (defined $declared_list{"$sort2:$separator"})
+	    {
+		my $list2 = "{$sort2,\"$separator\"}";		
+		$generated_code .= "subsort " . $declared_list{"$sort2:$separator"} . " < $main_sort \n";
+		$generated_code .= "subsort $elist$list2 < $elist$declaration_map{$sort1} \n";
+		$generated_code .= "subsort $nelist$list2 < $nelist$declaration_map{$sort1}\n";
+		$generated_code .= "subsort $list$list2 <  $list$declaration_map{$sort1}\n";
+		$generated_code .= "eq .$elist$declaration_map{$sort1} = .$elist$list2 [metadata \"generated=()\"]\n";
+	    }
+	}
+
+	
 	
 	s/\Q$syntax_item\E/\n$generated_code/s;
 
 #	print "Generated:\n$generated_code\n\n";
+	
+	
     }	
 
     # keys: lists sorts
     my $keys = join("|", keys %declaration_map);
+      
     
     # print "Got Here!\n$temp\n";
     while ($temp =~ /(syntax\s+($keys)\s*::=\s*($keys))\s*\[\s*metadata.*?\]\s*(?=$kmaude_keywords_pattern)/sg)
@@ -126,7 +176,7 @@ sub solve_lists
 	$gen_code .= "subsort $list$declaration_map{$sort2} <  $list$declaration_map{$sort1}\n";
 	$gen_code .= "eq .$elist$declaration_map{$sort1} = .$elist$declaration_map{$sort2} [metadata \"generated=()\"]\n";
 
-        #print "PROD: $syntax_item\nGEN: $gen_code\n\n";
+        # print "PROD: $syntax_item\nGEN: $gen_code\n\n";
 
 	s/\Q$syntax_item\E/$syntax_item\n\n$gen_code/s;
     }
