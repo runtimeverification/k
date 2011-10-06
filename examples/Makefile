@@ -21,7 +21,7 @@ TEST_DIRS = algorithms/sort \
 	    languages/research/agent \
 	    languages/research/challenge \
 	    languages/research/kernelC \
-	    #languages/classic/imp/fully-labeled \
+	    languages/classic/imp \
 	    #languages/classic/imp/fully-syntactic \
 	    #languages/classic/imp/labeled-syntax \
 	    #languages/classic/imp/no-syntax 

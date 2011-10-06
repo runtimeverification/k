@@ -175,9 +175,8 @@ for my $token (@all_tokens)
     s/\Q$token\E/ /sg;
 }
 
-
 # collect identifiers
-s/\b([a-zA-Z_\$][a-zA-Z_0-9]*)(?=(\s|$))/
+s/\b([a-zA-Z_\$]\w*)\b/
 {
     push (@identifiers, $1);
     "";

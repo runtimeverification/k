@@ -64,7 +64,7 @@ sub solve_lists
 	    $generated_code  .= "\top _$separator"."_  : $list_sort $elist$all -> $elist$all $attributes\n";
 	    $generated_code  .= "\tsubsorts $nelist$all $elist$all < $list$all\n";
 	    
-	    $generated_code  .= "\top listify$all"."_ : $list$all -> $elist$all [metadata \"parser=()\"]\n";
+	    $generated_code  .= "\top listify$all"."_ : $list$all -> $elist$all [metadata \"parser=()\" prec 0]\n";
 	    
 	    $generated_code  .= "\teq (listify$all(EL$counter:$elist$all)) = (EL$counter) [metadata \"parser=()\"]\n"; $counter ++;
 	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort)) = (X$counter:$list_sort $separator .$elist$all) [metadata \"parser=()\"]\n"; $counter ++;

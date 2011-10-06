@@ -1,0 +1,9 @@
+spawn {
+var x;
+x:=1;
+print(10 + x);print(10 + exchange(x))
+};
+var y;
+y:=2;
+print(20+y);print(20+exchange(y))
+

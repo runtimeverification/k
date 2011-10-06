@@ -36,7 +36,7 @@ endif
 
 # the top target, so the default target
 # compiles the definition, then runs all of the tests
-all: build java
+all: build 
 
 java: 
 	make -C $(K_BASE)/core/java
@@ -80,7 +80,7 @@ crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
 
 
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)
-test: $(COMPILED_FILE) java $(addprefix test-,$(addsuffix .output,$(TESTS)))
+test: $(COMPILED_FILE) $(addprefix test-,$(addsuffix .output,$(TESTS)))
 	@rm -f $(addprefix test-,$(addsuffix .output,$(TESTS)))
 
 true-test: $(COMPILED_FILE).output $(foreach test, $(TESTS), results-$(test).xml) compilation.xml

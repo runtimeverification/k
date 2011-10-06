@@ -1,0 +1,14 @@
+Name:               imp
+Version:            0.1.0
+Synopsis:           A (non-trivial) extension of the classic IMP language
+License:            MIT
+License-file:       LICENSE
+Authors:            Grigore Rosu
+Maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
+Tags:               imperative, teaching
+
+# krun settings
+Main-module:        IMPPP
+Syntax-module:      IMPPP-SYNTAX
+Parser:             kast
+Output-mode:        io
