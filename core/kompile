@@ -2471,7 +2471,7 @@ sub add_subsorts
 	my $sortlist = "#" . getModuleSorts($cmod) . "#" if defined(getModuleSorts($cmod));
 	$sortlist =~ s/ /#/g if defined($sortlist);
 	
-#		print "File: " . getModuleFile($_) . ", SORTS: $sortlist\n\n";
+#	print "File: " . getModuleFile($_) . ", SORTS: $sortlist\n\n";
 	
 	# if this module contains sorts
 	# and it is a module which includes K

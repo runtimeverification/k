@@ -80,6 +80,8 @@ my $klabel_body = "$maude_backquoted\_$maude_backquoted";
 my $klabel = "'$klabel_body(?:[$parentheses\\s\\,])|$klabel_body(?=\\()";
 my $kvar  = "[A-Za-z][A-Za-z0-9]*";
 
+my $k_sorts = ":Bag:BagItem:#Bool:CellLabel:CellKey:CellAttribute:#Char:#Int:K:KAssignments:KHybridLabel:KLabel:KResult:KResultLabel:KSentence:List:ListItem:List{KResult}:List{K}:Map:MapItem:#Nat:NeBag:NeK:NeList:NeList{KResult}:NeList{K}:NeMap:NeSet:#NzInt:#NzNat:Set:SetItem:#String:#Zero";
+
 
 # parametrize break
 my $latex_break = quotemeta("<br/>");
@@ -1297,18 +1299,18 @@ sub register_subsorts
     # get module name
     if (/k?mod\s+(\S*)\s+/)
     {
-		$module = $1;
+	$module = $1;
     }
     
-	my $local = $_;
+    my $local = $_;
 
     # register sorts
     while ($local =~ /sort\s+([^<]*?)\s+\./sg)
     {
-		$sorts_ .= "$1 ";
-		$localsorts .= "$1 ";
-		# only for declarations of sorts
-		$sortMap{$1} = $module;
+	$sorts_ .= "$1 ";
+	$localsorts .= "$1 ";
+	# only for declarations of sorts
+	$sortMap{$1} = $module;
     }
     
     # register subsorts and undeclared sorts
@@ -1380,7 +1382,7 @@ sub includesK
 		}
 		foreach(@mlist)
 		{
-			return 1 if includesK($_);
+		    return 1 if includesK($_);
 		}
     }
 
@@ -1409,12 +1411,19 @@ sub find_super_sorts
     {
 #	print "KEY: $k VALUE: $v\n";
 	my @values = split(/\s+/, $v);
+	my $bool = 0;
 	foreach(@values)
 	{
+#	    print "\tVAL: $k -> $_\n";
 	    $supersorts .= "$_ " if ($supersorts !~ /\s($_)\s/);
+#	    print "\t\tSSS:|$supersorts|\n";
+	    
+	    $bool = 1 if ($k_sorts !~ /:$_:/);
 	}
 	
-	$supersorts .= "$k " if ($supersorts !~ /\s($k)\s/);
+	$supersorts .= "$k " if ($supersorts !~ /\s($k)\s/) && ($bool == 1);
+	
+#	print "\n\n";
     }
     
 #    print "SUPER: $supersorts\n";
