@@ -1404,15 +1404,17 @@ sub find_super_sorts
     }
 
     # add all supersorts to the final list only once
-    my $supersorts = "";
+    my $supersorts = " ";
     while(my ($k, $v) = each %supersortmap)
     {
 #	print "KEY: $k VALUE: $v\n";
 	my @values = split(/\s+/, $v);
 	foreach(@values)
 	{
-	    $supersorts .= "$_ " if ($supersorts !~ /($_)/);
+	    $supersorts .= "$_ " if ($supersorts !~ /\s($_)\s/);
 	}
+	
+	$supersorts .= "$k " if ($supersorts !~ /\s($k)\s/);
     }
     
 #    print "SUPER: $supersorts\n";
