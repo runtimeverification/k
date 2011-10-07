@@ -248,7 +248,7 @@ $_ = Unfreeze("STRINGS", $_);
 
 my $to_reduce = "mod TEST is including $syntax_module .
   sort ParsedPrm .
-  op parse_ : Universal -> ParsedPrm [poly(1) strat(0 1)] .
+  op parse_ : Universal -> ParsedPrm [poly(1)] .
 endm
   
 red parse( $_ ) .

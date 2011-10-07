@@ -2,7 +2,6 @@ load prelude-extras
 load meta-k
 load metadata-parsing.maude
 load printing
-load remove-parser-interface
 
 mod DECL-META-LATEX-PRINT is
   pr K-META-OPEN-CELLS .
@@ -398,6 +397,9 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq op(op F : TyL -> Ty [ metadata(St) AS] .)
    = op(op F : TyL -> Ty [ metadataParse(St) AS] .) [owise] .
 
+  eq op(op F : TyL -> Ty [pair("generated","") AS] .) = empty .
+  eq op(op F : TyL -> Ty [pair("parser","") AS] .) = empty .
+
 ---  eq metadata("builtin wrapper") = none .
 
   op subsort(_, _) : QidList QidList -> Printable .
@@ -476,6 +478,9 @@ var Eq : Equation .  var Eqs : EquationSet .
 
   eq loc(I,N,empty) = empty .
   eq eq(eq T = T' [metadata("simplify")] .) = empty .
+  eq eq(eq T = T' [metadata(Str) AtS] .) 
+   = eq(eq T = T' [metadataParse(Str) AtS] .) [owise] .
+  eq eq(eq T = T' [pair("parser","") AtS] .) = empty .
   eq eq(eq T = T' [AtS] .) = mequation(getLabel(AtS),T,T') [owise] .
   eq eMetaLatexPrint(M, mequation(Str, T, T') Prints)
     = ('\n '\mequation '`{ qid(Str) '`} '`{ eMetaLatexPrint(M, T) 
@@ -915,7 +920,7 @@ endm
 
 
 mod LATEX-PRINT-META is
-  including UNIT-META-LATEX-PRINT + REMOVE-PARSER-META .
+  including UNIT-META-LATEX-PRINT .
   sort ProductionType .
   op \textsf{_} : Qid -> Qid [ctor] .
 
@@ -1206,7 +1211,7 @@ endfm)) = tokenize(Str) '\n eMetaLatexPrint(setMbs(setRls(setEqs(M,none),none),n
   eq latexPrint(Q) = $latexPrint(Q,upModule(Q,true)) .
   op $latexPrint : Qid [Module] -> QidList .
   eq $latexPrint(Q, FM) = if FM :: Module 
-     then latexPrint(FM, compileREMOVE-PARSER(upModule(Q,false), none)) 
+     then latexPrint(FM, (upModule(Q,false))) 
      else (
        '\begin '`{ 'module '`} '`{ eMetaLatexPrintME(Q) '`} 
           '\mbox '`{ '\sc '\ '\s 'does 'not 'exist 
