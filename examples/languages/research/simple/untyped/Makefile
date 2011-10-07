@@ -3,7 +3,7 @@
 LANGUAGE_NAME = SIMPLE-UNTYPED
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = SIMPLE-UNTYPED-SYNTAX SIMPLE-UNTYPED-DESUGARED-SYNTAX SIMPLE-UNTYPED-SEMANTICS SIMPLE-UNTYPED
+LANGUAGE_MODULES = SIMPLE-UNTYPED-SYNTAX SIMPLE-UNTYPED
 
 LATEX_STYLE = bb
 LATEX_TOPMATTER = README.tex
@@ -12,7 +12,7 @@ LATEX_TOPMATTER = README.tex
 MAIN_FILE = simple-untyped
 
 # this is a space-separated list of basename maude files to run
-TESTS = simple-untyped-test.m
+TESTS = 
 
 TOOL_DIR =  $(K_BASE)/tools/
 include $(TOOL_DIR)make-helper.mk
