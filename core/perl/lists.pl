@@ -91,7 +91,7 @@ sub solve_lists
             $generated_code .= "  sort $nelist\{Bottom,\"$separator\"\}\n";
             $generated_code .= "subsort $nelist\{Bottom,\"$separator\"\} $elist\{Bottom,\"$separator\"\} < $list\{Bottom,\"$separator\"\}\n";
             $generated_code .= "op _$separator"."_ : Bottom  $elist\{Bottom,\"$separator\"\} -> $elist\{Bottom,\"$separator\"\} $attributes\n";
-            $generated_code .= "op .\{\"$separator\"\} : ->  $elist\{Bottom,\"$separator\"\} [metadata \"generated=()\"]\n";
+            $generated_code .= "op .List\{\"$separator\"\} : ->  $elist\{Bottom,\"$separator\"\} [metadata \"generated=()\"]\n";
             $generated_code .= "op _$separator"."_ : Bottom  $nelist\{Bottom,\"$separator\"\} -> $nelist\{Bottom,\"$separator\"\} $parser_attributes\n";
             $generated_code .= "subsort Bottom < $nelist\{Bottom,\"$separator\"\}\n";
             $constructors{"\"$separator\""} = "\"$separator\"";
@@ -102,7 +102,7 @@ sub solve_lists
             $generated_code .= "  subsort $list\{Bottom, \"$separator\"\} < $list$declaration_map{$main_sort}\n";
             $generated_code .= "  subsort $nelist\{Bottom, \"$separator\"\} < $nelist$declaration_map{$main_sort}\n";
             $generated_code .= "  subsort $elist\{Bottom, \"$separator\"\} < $elist$declaration_map{$main_sort}\n";
-            $generated_code .= "  eq .$elist$declaration_map{$main_sort} = .\{\"$separator\"\} [metadata \"parser=()\"]\n\n";
+            $generated_code .= "  eq .$elist$declaration_map{$main_sort} = .List\{\"$separator\"\} [metadata \"parser=()\"]\n\n";
         # }
 
         my $subs = getSubSorts($list_sort);

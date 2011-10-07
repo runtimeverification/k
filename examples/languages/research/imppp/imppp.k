@@ -120,7 +120,7 @@ module IMPPP imports IMPPP-SYNTAX + URIS
        <store>... . => N |-> 0 ...</store>
        <nextLoc> N => sNat N </nextLoc>
 
-  rule var .{","} => .
+  rule var .List{","} => .
 
 
   /*@ \textbf{Environment recovery} */

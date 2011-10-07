@@ -1876,11 +1876,11 @@ sub maudify_module {
     
 # Step: Declare the on-the-fly variables
     s/(?=endkm)/$vars?"$vars ":""/se;
-    #  print  "Stage:\n$_\n\n";
+#      print  "Stage:\n$_\n\n";
 
 
 # Step: Change .List into (.).List , etc.
-    s!\.(K|List|Set|Bag|Map)([^\w\{])!(.).$1$2!gs;
+    s/\.(K|List|Set|Bag|Map)(?!(\w|(\s*\{)))/(.).$1/gs;
 #    print  "Stage:\n$_\n\n";
     
 # Step: Replace remaining _ by ? (spaces were put around _ by spacify)

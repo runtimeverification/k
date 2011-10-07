@@ -124,7 +124,7 @@ then one can remove the ``structural'' tag.  */
   rule <k> while B do S => if B then (S ; while B do S) else skip ...</k> [structural]
 
 
-  rule <k> var .{","} ; S => S ...</k>
+  rule <k> var .List{","} ; S => S ...</k>
   rule <k> var (X,Xl:List{#Id,","} => Xl) ; _ ...</k>
        <state>... . => X |-> 0 ...</state> 
 end module
