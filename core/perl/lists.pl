@@ -250,7 +250,8 @@ sub gen_prod
     {
 	if ($pkeys_no == 1)
 	{
-	    push(@generated, generation($production, $main_sort, $pkeys_no, \@prods));
+	    my @set = (); push(@set, 0);
+	    push(@generated, generation($production, $main_sort, $pkeys_no, \@prods, \@set));
 	}
 	else
 	{
