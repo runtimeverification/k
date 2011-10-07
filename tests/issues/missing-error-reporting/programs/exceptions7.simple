@@ -1,0 +1,5 @@
+function main() {
+	var e;
+	try { var x = 2; write(x); throw ( ++x + x ); }
+	catch(e) { write(e); }
+}

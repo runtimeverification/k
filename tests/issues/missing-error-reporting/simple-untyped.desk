@@ -1,0 +1,14 @@
+Name:               simple-untyped
+Version:            0.1.0
+Synopsis:           A not so simple programming language
+License:            MIT
+License-file:       LICENSE
+Authors:            Grigore Rosu
+Maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
+Tags:               imperative, teaching, classic
+
+Language:
+  Main-module:      SIMPLE-UNTYPED
+  Syntax-module:    SIMPLE-UNTYPED-SYNTAX
+  Parser:           kast
+  Output-mode:      maude
