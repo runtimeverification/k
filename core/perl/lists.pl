@@ -316,6 +316,8 @@ sub generation
 	# remove attributes
 	$temp_prod =~ s/\[\s*metadata.*?\]\s*$//sg;
 	
+	return "\n" if $temp_prod =~ /^\s*($ksort)\s*$/;
+
 	my $ttemp = $temp_prod;
 	$ttemp =~ s/($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$list|$mkeys)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
 	my $left = $ttemp;
