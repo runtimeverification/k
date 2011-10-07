@@ -2359,7 +2359,6 @@ sub rule_tags
     
     while ( $all =~ /rule(.*?\s)(?=$kmaude_keywords_pattern)/sg )
     {
-#	print "rule$1\n";
 	
 	my $body = $1;
 	
@@ -2453,14 +2452,24 @@ sub rule_tags
     $_;
 }
     
+sub oper_tags
+{
+    local $_ = shift;
+    
+    my $temp = $_;
+    
+#    while($temp =~ /op(.*?)\[.*?\]\
 
+    $_;
+}
+    
 sub op_tags
 {
     local $_ = shift;
     
     my $attributes = $_;
     my @tagss = ();
-  
+    
     my $spaces = $1 if $attributes =~ /(\s*$)/sg;
     
 #    print "ATTR: $attributes\n";

@@ -1638,7 +1638,7 @@ sub maudify_file {
  
 # resolve rule tags
     $_ = rule_tags($_);
-    
+        
 # dots issue: change <cell>.</cell> into <cell> . </cell>
     s!<(.*?)>\.</\1>!<$1> \. </$1>!g;
     
@@ -2017,15 +2017,23 @@ sub make_ops {
 		my ($space4,$space5) = ("","");
 		$production =~ s/^(\s*)(.*?\S)(\s*)$/
 						{
-							$space4 = $1;
-							$space5 = $3;
-							$2
+						    $space4 = $1;
+						    $space5 = $3;
+						    $2
 						}/se;
 
 # Extracting the list of sorts in the production, then replacing the sorts by "_"
-		my @sorts = ($production =~ m/((?:^|\s)$ksort(?=\s|$))/g);
+#	    print "PROD: $production\n";
+	    my @sorts = ();
+	    while($production =~ m/((?:^|\s)$ksort(?=\s|$))/g)
+	    {
+		push(@sorts, $&);	
+	    }
+	    
+#	    print "PROD: $production\nSORTS: @sorts\n";
 		$production =~ s/(?:^|\s)$ksort(?=\s|$)/_/g;
 		$production =~ s/\s*_\s*/_/gs;
+#	    print "PROD: $production\n";
 
 #	    print "==============================\n";
 #	    print "Production1:\n$production\n";
@@ -2049,8 +2057,8 @@ sub make_ops {
 	    # put the strings back
 	    while ($strings =~ m/!&!&!(\".*?\")/g)
 	    {
-			my $str = $1;
-			$production =~ s/!&!&!/$str/;
+		my $str = $1;
+		$production =~ s/!&!&!/$str/;
 	    }
 	    
 	    
@@ -2095,6 +2103,8 @@ sub make_ops {
 		my $random = fresh("a", "b");
 		unlink($random);
 		$random =~ s/[a-z_]//sg;
+
+# print "SORTS: @sorts\n";
 		if ($latex || $pdf || $ps || $crop || $eps || $png)
 		{
 			$result .= ($production eq "_")
