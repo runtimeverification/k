@@ -315,8 +315,12 @@ sub generation
 	my $temp_prod = $production;
 	# remove attributes
 	$temp_prod =~ s/\[\s*metadata.*?\]\s*$//sg;
+
 	
-	return "\n" if $temp_prod =~ /^\s*($ksort)\s*$/;
+	# stop if terminals not included in production
+	my $tmp_prod = $temp_prod;
+	$tmp_prod =~ s/\b($ksort)\b//sg;
+	return "" if  $tmp_prod =~ /^\s*$/s;
 
 	my $ttemp = $temp_prod;
 	$ttemp =~ s/($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$list|$mkeys)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
