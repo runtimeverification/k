@@ -1644,8 +1644,8 @@ sub maudify_file {
     
 # lists
     $_ = solve_lists($_);
-#    print;
-#    exit;
+    print;
+    exit;
     
 # Replacing dots    
     $_ = replace_dots($_);

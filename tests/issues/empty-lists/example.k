@@ -1,5 +1,5 @@
 
-module ISSUE 
+module EXAMPLE 
 	
         
 	syntax Exp ::= #Id  | let Ids = Exps in { Stmts }
@@ -32,6 +32,6 @@ module ISSUE
         syntax Exps ::= List{Exp,","}
 
         syntax Stmt ::= nop ;
-        syntax Stmts ::= List{Stmt,","}
+        syntax Stmts ::= List{Stmt,""}
         
 end module

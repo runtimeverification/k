@@ -114,10 +114,10 @@ sub solve_lists
         
         # if (defined $constructor{\"$separator\"})
         # {
-            $generated_code .= "  subsort $list\{Bottom, \"$separator\"\} < $list$declaration_map{$main_sort}\n";
-            $generated_code .= "  subsort $nelist\{Bottom, \"$separator\"\} < $nelist$declaration_map{$main_sort}\n";
-            $generated_code .= "  subsort $elist\{Bottom, \"$separator\"\} < $elist$declaration_map{$main_sort}\n";
-            $generated_code .= "  eq .$elist$declaration_map{$main_sort} = .List\{\"$separator\"\} [metadata \"parser=()\"]\n\n";
+	$generated_code .= "  subsort $list\{Bottom, \"$separator\"\} < $list$declaration_map{$main_sort}\n";
+	$generated_code .= "  subsort $nelist\{Bottom, \"$separator\"\} < $nelist$declaration_map{$main_sort}\n";
+	$generated_code .= "  subsort $elist\{Bottom, \"$separator\"\} < $elist$declaration_map{$main_sort}\n";
+	$generated_code .= "  eq .$elist$declaration_map{$main_sort} = .List\{\"$separator\"\} [metadata \"parser=()\"]\n\n";
         # }
 
         my $subs = getSubSorts($list_sort);
@@ -175,9 +175,7 @@ sub solve_lists
 
     # keys: lists sorts
     my $keys = join("|", keys %declaration_map);
-      
     
-    # print "Got Here!\n$temp\n";
     while ($temp =~ /(syntax\s+($keys)\s*::=\s*($keys))\s*\[\s*metadata.*?\]\s*(?=$kmaude_keywords_pattern)/sg)
     {
 	my $syntax_item = $1;
@@ -215,10 +213,9 @@ sub solve_lists
 	    $production =~ s/(\s)\|(\s)/$1$2/gs;
 	    
 	    # get all possible solutions
-	    my $productions_gen = gen_prod($keys, $production);
-	    my $macros = macrofy($productions_gen); # =))))))
+	    my $productions_gen = macrofy(gen_prod($keys, $production, $main_sort));
 #	    print "PROD: $production\nGEN:$macros\n\n";
-	    $gen .= "$macros\n";
+	    $gen .= "$productions_gen\n";
 	}
 	
 	s/\Q$syntax_item\E/$syntax_item\n\n$gen/s;	
@@ -238,6 +235,7 @@ sub gen_prod
 {
     my $keys = shift;
     my $production = shift;
+    my $main_sort = shift;
 #    print "Start\n";
     
 
@@ -252,22 +250,27 @@ sub gen_prod
     {
 	if ($pkeys_no == 1)
 	{
-	    push(@generated, generation($production, \@prods));
+	    push(@generated, generation($production, $main_sort, $pkeys_no, \@prods));
 	}
 	else
 	{
-	    if ($pkeys_no < 30)
+	    if ($pkeys_no < 10)
 	    {
 		my $power = 2**$pkeys_no;	    
 		
 		foreach my $i (0.. ($power - 1))
 		{
 		    my @tmp = ();
+		    my @set = ();
 		    for(my $j = 0; $j < @prods; $j ++)
 		    {
-			push(@tmp, $prods[$j]) if isSet($j, $i);
+			if (isSet($j, $i))
+			{
+			    push(@tmp, $prods[$j]);
+			    push(@set, $j);
+			}
 		    }
-		    push(@generated, generation($production, \@tmp));
+		    push(@generated, generation($production, $main_sort, $pkeys_no, \@tmp, \@set));
 		}
 	    }
 	}
@@ -276,57 +279,152 @@ sub gen_prod
     \@generated;
 }
 
+sub contains
+{
+    my $set = shift;
+    my $number = shift;
+    my @set = @$set;
+    
+    foreach my $s (@set)
+    {
+	return 1 if $s == $number;
+    }
+    
+    return 0;
+}
+
 sub generation
 {
     my $production = shift;
+    my $main_sort = shift;
+    my $pkeys_no = shift;
     my $array = shift;
+    my $set = shift;
+    
     my @array = @$array;
-     
-    if (@array == 0)
+    my $out = "";
+    
+#    print "ARRAY: @array\n" if @array < $pkeys_no;
+    if (@array != 0)
     {
-	    my $temp_prod = $production;
-
+#	print "ARRAY: @array\n";
+	my $mkeys = join("|", @array);
+	
+    	
+	my $temp_prod = $production;
 	# remove attributes
 	$temp_prod =~ s/\[\s*metadata.*?\]\s*$//sg;
 	
-#	$temp_prod =~ s/($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$list)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
+	my $ttemp = $temp_prod;
+	$ttemp =~ s/($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$list|$mkeys)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
+	my $left = $ttemp;
+	my $right = $ttemp;
+	$counter ++;
 	
-#	return $temp_prod;
-	return "\n";
-    }
+	# for syntax generation
+	my $count = 0;
+	$temp_prod =~ s/($mkeys)/
+	{
+	    $count = 0;
+	    my $mk = $1;
+	    while ($count < $pkeys_no)
+	    {
+		if (contains($set, $count) == 1)
+		{
+		    $mk = "";
+		}
+		$count ++;
+	    }
+	    $mk;
+	}/gse;
 	
-    
-    my $mkeys = join("|", @array);
-    
-    my $temp_prod = $production;
+	# left = for macro generation
+	$count = 0;
+	$left =~ s/($mkeys)/
+	{
+	    $count = 0;
+	    my $mk = $1;
+	    while ($count < $pkeys_no)
+	    {
+		if (contains($set, $count) == 1)
+		{
+		    $mk = "";
+		}
+		$count ++;
+	    }
+	    $mk;
+	}/gse;
+	
+	# right = for macro generation
+	$count = -1;
+	$right =~ s/\b($mkeys)\b/
+	{
+	    $count ++;
+	    my $mk = $1;
+	    # extract separator
+	    my $nk = "";
+	    $nk = $& if ($declaration_map{$mk} =~ m!(\".*?\")!sg); # do we have a default separator for lists? :-"
+	    ($declaration_map{$mk} =~ m!(\".*?\")!sg); # isn't perl wonderful ? :-D
 
-    # remove attributes
-    $temp_prod =~ s/\[\s*metadata.*?\]\s*$//sg;
+	    $count = 0;
+	    while ($count < $pkeys_no)
+	    {
+		if (contains($set, $count) == 1)
+		{
+		    $mk = ".List{$nk}";
+		}
+		$count ++;
+	    }
+	    $mk;
+#	    print "SeP: |$nk|   PPP: " . ($declaration_map{$mk} =~ m!(\".*?\")!sg) . "\n";
+#	    contains($set, $count) == 1 ? ".List{$nk}" : $mk ;
+	}/gse;
+	
+
+#	print "Set: @$set\n";
+#	print "TMP: $temp_prod\nLEFT: $left\nRIGHT:$right\n\n";
+
+	$left  =~ s/`//sg;
+	$right =~ s/`//sg;
+	
+	$out .= "\tsyntax $main_sort ::= $temp_prod\n";
+	$out .= "\tmacro ($left) = ($right)\n\n";
+    }
+    
+    return $out;
+    
+#    my $mkeys = join("|", @array);
+    
+#    my $temp_prod = $production;
+
 	
 #    print "Prod: $production\n";
-    return "\n" if $temp_prod =~ /^\s*($ksort)\s*$/;
+#    return "\n" if $temp_prod =~ /^\s*($ksort)\s*$/;
 
-    $temp_prod =~ s/($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$list|$mkeys)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
-    $counter ++;
+#    $temp_prod =~ s/($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$list|$mkeys)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
+#    print "TEMP PROD: $temp_prod\n";
+#    $counter ++;
 	
     # generating  macro
-    my $left  = $temp_prod;
-    my $right = $temp_prod;
+#    my $left  = $temp_prod;
+#    my $right = $temp_prod;
     
-    my $c1 = $counter;
-    my $c2 = $counter;
+#    my $c1 = $counter;
+#    my $c2 = $counter;
 
     # code generation!
-    $left  =~ s/($mkeys)/{ my $sort = "$nelist$declaration_map{$1}"; my $decl = "X$c1:$sort"; $c1 ++; $decl; }/sge;
-    $right =~ s/($mkeys)/{ my $sort = $declaration_map{$1}; my $decl = "listify$sort(X$counter:$nelist$sort)"; $c2 ++; $decl; }/sge;
-    $counter += ($c1 - $counter);
- 
+#    $left  =~ s/($mkeys)/{ my $sort = "$nelist$declaration_map{$1}"; my $decl = "X$c1:$sort"; $c1 ++; $decl; }/sge;
+#    $right =~ s/($mkeys)/{ my $sort = $declaration_map{$1}; my $decl = "listify$sort(X$counter:$nelist$sort)"; $c2 ++; $decl; }/sge;
+#    $counter += ($c1 - $counter);
+#    print "LEFT: $left\n";
+#    print "RIGHT: $right\n\n";
+    
 #    print "ARRAY: @array\n($left) = ($right)\n\n";
     
-    $left =~ s/`/ /sg;
-    $right =~ s/`/ /sg;
+#    $left =~ s/`/ /sg;
+#    $right =~ s/`/ /sg;
     
-    "($left) = ($right) [metadata \"parser=()\"]\n";
+#    "macro ($left) = ($right) [metadata \"parser=()\"]\n";
 }
 
 
@@ -359,7 +457,7 @@ sub macrofy
     
     return "" if @all == 0;
     
-    "macro " . join(" macro ", @all);
+    "@all";
 }
 
 1;
