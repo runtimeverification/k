@@ -80,8 +80,8 @@ kbuiltin = do
 -- | Parse an Id builtin: Id x
 kid :: Parser KLabel
 kid = do
---    symbol "Id"
-    id <- many1 alphaNum
+    symbol "#id_"
+    id <- parens stringLiteral
     return (KId id)
 
 -- | Parse a Nat builtin: Nat 42
