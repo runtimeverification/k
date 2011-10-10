@@ -28,7 +28,7 @@ mod REMOVE-PARSER is
 
   op removeParser : Qid Module EquationSet ~> Module .
   eq removeParser(Q, Mod, Eqs) 
-   = applyParser(setMbs(setRls(setEqs(flatten(Mod),Eqs),none),none), setSorts(setSubsorts(setOps(removeEqs(Mod, Eqs), removeParserOps(getOps(Mod))), removeParserSubsorts(getSubsorts(Mod))), removeParserSorts(getSorts(Mod)))) .
+   = applyParser(setOps(setMbs(setRls(setEqs(flatten(Mod),Eqs),none),none),clearReductionAttrs(getOps(flatten(Mod)))), setSorts(setSubsorts(setOps(removeEqs(Mod, Eqs), removeParserOps(getOps(Mod))), removeParserSubsorts(getSubsorts(Mod))), removeParserSorts(getSorts(Mod)))) .
 
   op applyParser : Module Module ~> Module .
   eq applyParser(Parser, Mod) = setEqs(setMbs(setRls(Mod, applyParserRls(Parser, getRls(Mod))), applyParserMbs(Parser, getMbs(Mod))), applyParserEqs(Parser, getEqs(Mod)))  .
