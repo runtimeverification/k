@@ -19,6 +19,7 @@ my $counter = 7;
 my %declaration_map = ();
 my %constructors = ();
 my %declared_list = ();
+my %list_attributes_map = ();
 
 sub solve_lists
 {
@@ -27,7 +28,6 @@ sub solve_lists
     
     # store generated code
     my $generated_code = "";
-
     
     # presupunem: | syntax Ids ::= List{#Id, ","} [attributes] |
     # iterate through syntax declarations
@@ -53,6 +53,16 @@ sub solve_lists
 	my $all = "\{$list_sort,\"$separator\"\}";
 	my $temp;
 	
+	if (!(defined $list_attributes_map{$separator}))
+	{
+	    $list_attributes_map{$separator} = $attributes;
+	}
+	else 
+	{
+	    $attributes = $list_attributes_map{$separator};
+	}
+
+	
 	if (!(defined $declaration_map{$main_sort}))
 	{
 	    $generated_code .= "syntax $main_sort ::= $list$all\n";
@@ -60,28 +70,13 @@ sub solve_lists
 	    $generated_code .= "syntax $elist$all ::= .$elist$all [metadata \"generated=()\"] \n\t| $list_sort $separator $elist$all $attributes \n\t| listify$all $list$all [metadata \"parser=()\" prec 0]\n";
 	    $generated_code .= "syntax $list$all ::= $nelist$all | $elist$all\n";
 	    
-            # $generated_code .= "\tsort $main_sort\n";
-            # $generated_code .= "\tsort $elist$all\n";
-            # $generated_code .= "\tsort $list$all\n";
-            # $generated_code .= "\tsort $nelist$all\n";
-	    # $generated_code  .= "\tsubsort $list$all < $main_sort\n";
-	    
-	    # $generated_code  .= "\tsubsort  $list_sort < $nelist$all\n";
-	    # $generated_code  .= "\top _$separator"."_ :  $list_sort $nelist$all -> $nelist$all $parser_attributes\n";
-	    
-	    # $generated_code  .= "\top .$elist$all : -> $elist$all [metadata \"generated=()\"]\n";
-	    # $generated_code  .= "\top _$separator"."_  : $list_sort $elist$all -> $elist$all $attributes\n";
-	    # $generated_code  .= "\tsubsorts $nelist$all $elist$all < $list$all\n";
-	    
-	    # $generated_code  .= "\top listify$all"."_ : $list$all -> $elist$all [metadata \"parser=()\" prec 0]\n";
-	    
 	    $generated_code  .= "\teq (listify$all(EL$counter:$elist$all)) = (EL$counter) [metadata \"parser=()\"]\n"; $counter ++;
 	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort)) = (X$counter:$list_sort $separator .$elist$all) [metadata \"parser=()\"]\n"; $counter ++;
 	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort $separator NEL$counter:$nelist$all)) = (X$counter:$list_sort $separator listify$all(NEL$counter)) [metadata \"parser=()\"]\n\n"; $counter ++;
 	    
 	    # mark all as defined ..
 	    $declaration_map{$main_sort} = $all;
-	    $declared_list{"$list_sort:$separator"} = $main_sort;
+	    $declared_list{"$list_sort:$separator"} = $main_sort;	    
 	}
 	elsif ($all ne $declaration_map{$main_sort})
 	{
@@ -101,14 +96,6 @@ sub solve_lists
 	    $generated_code .= "syntax $nelist\{Bottom,\"$separator\"\} ::= Bottom $separator $nelist\{Bottom,\"$separator\"\}$parser_attributes\n";
  	    $generated_code .= "syntax $nelist\{Bottom,\"$separator\"\} ::= Bottom\n";
 	    
-            # $generated_code .= "  sort $list\{Bottom,\"$separator\"\}\n";
-            # $generated_code .= "  sort $elist\{Bottom,\"$separator\"\}\n";
-            # $generated_code .= "  sort $nelist\{Bottom,\"$separator\"\}\n";
-            # $generated_code .= "subsort $nelist\{Bottom,\"$separator\"\} $elist\{Bottom,\"$separator\"\} < $list\{Bottom,\"$separator\"\}\n";
-            # $generated_code .= "op _$separator"."_ : Bottom  $elist\{Bottom,\"$separator\"\} -> $elist\{Bottom,\"$separator\"\} $attributes\n";
-            # $generated_code .= "op .List\{\"$separator\"\} : ->  $elist\{Bottom,\"$separator\"\} [metadata \"generated=()\"]\n";
-            # $generated_code .= "op _$separator"."_ : Bottom  $nelist\{Bottom,\"$separator\"\} -> $nelist\{Bottom,\"$separator\"\} $parser_attributes\n";
-            # $generated_code .= "subsort Bottom < $nelist\{Bottom,\"$separator\"\}\n";
             $constructors{"\"$separator\""} = "\"$separator\"";
         }
         
