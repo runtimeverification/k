@@ -283,7 +283,6 @@ sub gen_prod
 	    #    function X:Id(listify(Y:SyntacticList{#Id,","})) {Z:Stmts} [metadata "generated=()"]
 	    
 	    my $count = -1;
-	    my $replacement = "";
 	    
 	    $right =~ s/($pkeys)/
 	    {
@@ -300,9 +299,9 @@ sub gen_prod
 	    /sge;
 	    
 	    $left = $right;
-	    $left =~ s/\b\listify{.*?}\b//sg;
+	    $left =~ s/listify\{.*?\}//sg;
 	    
-	    print "macro ($left) = ($right) [metadata \"generated=() parser=()\"]\n";
+             print "macro ($left) = ($right) [metadata \"generated=() parser=()\"]\n";
 	    push(@generated, "macro ($left) = ($right) [metadata \"generated=() parser=()\"]");
 	}
     }

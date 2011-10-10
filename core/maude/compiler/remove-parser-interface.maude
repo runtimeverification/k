@@ -7,8 +7,8 @@ mod REMOVE-PARSER-METADATA-META is
   var Op : OpDecl . var Eq : Equation .
   eq removeParserOp(Op, AS metadata(Str))
    = removeParserOp(Op, AS metadataParse(Str)) .
-  eq removeParserEq(Eq, AS metadata(Str))
-   = removeParserEq(Eq, AS metadataParse(Str)) .
+  eq getParserEq(Eq, AS metadata(Str))
+   = getParserEq(Eq, AS metadataParse(Str)) .
 endm
 
 mod REMOVE-PARSER-META is

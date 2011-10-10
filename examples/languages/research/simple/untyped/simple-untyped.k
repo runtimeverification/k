@@ -32,7 +32,7 @@ the first one. */
 
   syntax Decl ::= var Exps ;
                 | function #Id ( Ids ) Stmt
-                | function #Id ( ) Stmt
+//  generated:              | function #Id ( ) Stmt
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -67,7 +67,7 @@ strict in its second argument (for the same reason as the increment). */
                | not Exp           [strict prec 53]
                | Exp [ Exps ] [strict prec 1]
                | sizeOf ( Exp )    [strict]
-               | Exp ( )
+// generated:               | Exp ( )
                | Exp ( Exps ) [strict prec 2]
                | read ( )
                | Exp = Exp         [strict(2) prec 40  gather (e E)]
@@ -144,11 +144,11 @@ declared alone and is initialized. */
 
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X:#Id = E1:Exp to E2:Exp do S)
-      = {var X,.List{","}; X=E1; while X <= E2 do {S X=X+1;}}
-  macro function F:#Id() S = function F(.List{","}) S
-  macro E() = E(.List{","})
-  macro var E,El:List{Exp,","}; = var E,.List{","}; var El;
-  macro var X = E,.List{","}; = var X,.List{","}; X = E;
+      = {var X; X=E1; while X <= E2 do {S X=X+1;}}
+// generated:  macro function F:#Id() S = function F(.List{","}) S
+// generated: macro E() = E(.List{","})
+  macro var E,El:List{Exp,","}; = var E; var El;
+  macro var X = E; = var X; X = E;
 end module
 
 
@@ -314,7 +314,7 @@ soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
   syntax K ::= undefined [latex "\bot"]
 
-  rule <k> var X:#Id,.List{","}; => . ...</k>
+  rule <k> var (X:#Id,Xl => Xl); ...</k>
        <env> Env:Map => Env[L:#Nat/X] </env>
        <store>... . => L|->undefined ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
@@ -332,7 +332,7 @@ Note that, since the dimensions of array declarations can be arbitrary
 expressions, this virtually means that we can dynamically allocate memory in
 SIMPLE by means of array declarations. */
 
-  rule <k> var X[N:#Nat,.List{","}],.List{","}; => . ...</k>
+  rule <k> var X[N:#Nat]; => . ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> array(L +Nat 1, N)
                        L +Nat 1 .. L +Nat 1 +Nat N |-> undefined ...</store>
@@ -344,7 +344,7 @@ This way, we will only need to give semantics to uni-dimensional arrays.
 First, the context rule below is used to request the evaluation of array
 dimensions: */
 
-  context var X[[#]],.List{","};
+  context var X[[#]];
 
 /*@  Upon evaluating the array dimensions, the code generation rule below
 desugars multi-dimensional array declaration to uni-dimensional declarations.
@@ -356,14 +356,14 @@ inside the loop body with fewer dimensions.  The second variable,
 dimension: */
 
   syntax #Id ::= $1 | $2
-  rule var X[N1,N2,Vl],.List{","}; =>
-       var X[N1,.List{","}],.List{","};
+  rule var X[N1,N2,Vl]; =>
+       var X[N1];
        {
-         var $1 = X,.List{","};
+         var $1 = X;
          for $2 = 0 to _-_(N1,1) do   --- stupid parser
          {
-           (var X[N2,Vl],.List{","};)            --- stupid parser
-           $1[$2,.List{","}] = X;
+           (var X[N2,Vl];)            --- stupid parser
+           $1[$2] = X;
          }
        }  [structural]
 
@@ -483,8 +483,8 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 ``there is something there but we don't care what''.
 The semantics of the \texttt{lookup} operation is straightforward. */
 
-  rule V[N1,N2,Vl] => V[N1,.List{","}][N2,Vl] [structural]
-  rule array(L,_)[N,.List{","}] => lookup(L +Int N) [structural]
+  rule V[N1,N2,Vl] => V[N1][N2,Vl] [structural]
+  rule array(L,_)[N] => lookup(L +Int N) [structural]
   syntax K ::= lookup ( #Nat )
   rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [transition]
 
@@ -712,7 +712,7 @@ exception stack.  The three rules below modularly do precisely the above. */
        <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
-  rule <k> throw V; ~> _ => {var X=V,.List{","}; S2} ~> K </k>
+  rule <k> throw V; ~> _ => {var X=V; S2} ~> K </k>
        <control> <xstack> (X,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
        <env> _ => Env </env>
 

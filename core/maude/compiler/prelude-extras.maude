@@ -976,6 +976,14 @@ fmod META-MODULE-EXTRAS is
   eq clearReductionAttrs(strat(Nl:NeNatList) AS) = clearReductionAttrs(AS) .
   eq clearReductionAttrs(AS) = AS [owise] .
 
+  op setLhs : Rule Term -> Rule .
+  eq setLhs(rl T1 => T2 [AS] ., Trm) = (rl Trm => T2 [AS] .) .
+  eq setLhs(crl T1 => T2 if Cond [AS] .,Trm) = (crl Trm => T2 if Cond [AS] .) .
+
+  op setLhs : Equation Term -> Equation .
+  eq setLhs(eq T1 = T2 [AS] ., Trm) = (eq Trm = T2 [AS] .) .
+  eq setLhs(ceq T1 = T2 if Cond [AS] ., Trm) = (ceq Trm = T2 if Cond [AS] .) .
+
   op getLhs : Rule -> Term .
   eq getLhs(rl T1 => T2 [AS] .) = T1 .
   eq getLhs(crl T1 => T2 if Cond [AS] .) = T1 .
@@ -992,6 +1000,14 @@ fmod META-MODULE-EXTRAS is
   eq getRhs(eq T1 = T2 [AS] .) = T2 .
   eq getRhs(ceq T1 = T2 if Cond [AS] .) = T2 .
 
+  op setRhs : Rule Term -> Rule .
+  eq setRhs(rl T1 => T2 [AS] ., Trm) = (rl T1 => Trm [AS] .) .
+  eq setRhs(crl T1 => T2 if Cond [AS] .,Trm) = (crl T1 => Trm if Cond [AS] .) .
+
+  op setRhs : Equation Term -> Equation .
+  eq setRhs(eq T1 = T2 [AS] ., Trm) = (eq T1 = Trm [AS] .) .
+  eq setRhs(ceq T1 = T2 if Cond [AS] ., Trm) = (ceq T1 = Trm if Cond [AS] .) .
+
   op getCond : Rule -> Condition .
   eq getCond(rl T1 => T2 [AS] .) = nil .
   eq getCond(crl T1 => T2 if Cond [AS] .) = Cond .
@@ -1003,6 +1019,10 @@ fmod META-MODULE-EXTRAS is
   op getCond : MembAx -> Condition .
   eq getCond(mb T1 : T [AS] .) = nil .
   eq getCond(cmb T1 : T if Cond [AS] .) = Cond .
+
+  op setTerm : MembAx Term -> MembAx .
+  eq setTerm(mb T1 : T [AS] ., Trm) = (mb Trm : T [AS] .) .
+  eq setTerm(cmb T1 : T if Cond [AS] ., Trm) = (cmb Trm : T if Cond [AS] .) .
 
   op getTerm : MembAx -> Term .
   eq getTerm(mb T1 : T [AS] .) = T1 .

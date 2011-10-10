@@ -1,12 +1,14 @@
 mod REMOVE-PARSER is 
   including CONVERSION .
-  including META-MODULE-EXTRAS .
+  including META-LEVEL-EXTRAS .
   including META-ATTRS .
   var Str : String . 
   var AS : AttrSet . 
   var Q Q' : Qid . var Ty : Type . var Tyl : TypeList . 
-  var Op : OpDecl . var OPDS : OpDeclSet . var Mod : Module .
+  var Op : OpDecl . var OPDS : OpDeclSet . var Parser Mod : Module .
   var Eq : Equation . var Eqs : EquationSet .
+  var Mb : MembAx . var Mbs : MembAxSet .
+  var Rl : Rule . var Rls : RuleSet .
   var S S' : Sort . var SS : SortSet .
   var SSD : SubsortDecl . var SSDS : SubsortDeclSet .
   var T1 T2 : Term .
@@ -22,7 +24,41 @@ mod REMOVE-PARSER is
 
   op removeParser : Qid Module ~> Module .
   eq removeParser(Q, Mod) 
-   = setSorts(setSubsorts(setOps(setEqs(Mod, removeParserEqs(getEqs(Mod))), removeParserOps(getOps(Mod))), removeParserSubsorts(getSubsorts(Mod))), removeParserSorts(getSorts(Mod))) .
+   = removeParser(Q, Mod, getParserEqs(getEqs(Mod)))  .
+
+  op removeParser : Qid Module EquationSet ~> Module .
+  eq removeParser(Q, Mod, Eqs) 
+   = applyParser(setMbs(setRls(setEqs(flatten(Mod),Eqs),none),none), setSorts(setSubsorts(setOps(removeEqs(Mod, Eqs), removeParserOps(getOps(Mod))), removeParserSubsorts(getSubsorts(Mod))), removeParserSorts(getSorts(Mod)))) .
+
+  op applyParser : Module Module ~> Module .
+  eq applyParser(Parser, Mod) = setEqs(setMbs(setRls(Mod, applyParserRls(Parser, getRls(Mod))), applyParserMbs(Parser, getMbs(Mod))), applyParserEqs(Parser, getEqs(Mod)))  .
+
+
+  op applyParserEqs : Module EquationSet ~> EquationSet .
+  eq applyParserEqs(Mod, Eq Eqs) 
+   = applyParserEq(Mod, Eq) applyParserEqs(Mod, Eqs) .
+  eq applyParserEqs(Mod, none) = none .
+
+  op applyParserEq : Module Equation ~> Equation .
+  eq applyParserEq(Mod, Eq) = setLhs(setRhs(Eq,getTerm(metaReduce(Mod,getRhs(Eq)))), getTerm(metaReduce(Mod,getLhs(Eq)))) .
+  
+
+  op applyParserRls : Module RuleSet ~> RuleSet .
+  eq applyParserRls(Mod, Rl Rls) 
+   = applyParserRl(Mod, Rl) applyParserRls(Mod, Rls) .
+  eq applyParserRls(Mod, none) = none .
+
+  op applyParserRl : Module Rule ~> Rule .
+  eq applyParserRl(Mod, Rl) = setLhs(setRhs(Rl,getTerm(metaReduce(Mod,getRhs(Rl)))), getTerm(metaReduce(Mod,getLhs(Rl)))) .
+  
+ op applyParserMbs : Module MembAxSet ~> MembAxSet .
+  eq applyParserMbs(Mod, Mb Mbs) 
+   = applyParserMb(Mod, Mb) applyParserMbs(Mod, Mbs) .
+  eq applyParserMbs(Mod, none) = none .
+
+  op applyParserMb : Module MembAx ~> MembAx .
+  eq applyParserMb(Mod, Mb) = setTerm(Mb,getTerm(metaReduce(Mod,getTerm(Mb)))) .
+  
 
   op removeParserOps : OpDeclSet ~> OpDeclSet .
   eq removeParserOps(none) = none .
@@ -32,13 +68,13 @@ mod REMOVE-PARSER is
   eq removeParserOp(Op, AS pair("parser","")) = none .
   eq removeParserOp(Op, AS) = Op [owise] .
 
-  op removeParserEqs : EquationSet ~> EquationSet .
-  eq removeParserEqs(none) = none .
-  eq removeParserEqs(Eq Eqs) = removeParserEq(Eq, getAttrs(Eq)) removeParserEqs(Eqs) .
+  op getParserEqs : EquationSet ~> EquationSet .
+  eq getParserEqs(none) = none .
+  eq getParserEqs(Eq Eqs) = getParserEq(Eq, getAttrs(Eq)) getParserEqs(Eqs) .
 
-  op removeParserEq : Equation AttrSet ~> EquationSet .
-  eq removeParserEq(Eq, AS pair("parser","")) = none .
-  eq removeParserEq(Eq, AS) = Eq [owise] .
+  op getParserEq : Equation AttrSet ~> EquationSet .
+  eq getParserEq(Eq, AS pair("parser","")) = Eq .
+  eq getParserEq(Eq, AS) = none [owise] .
 
   op removeParserSorts : SortSet ~> SortSet .
   eq removeParserSorts(none) = none .
