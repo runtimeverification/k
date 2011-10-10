@@ -12,6 +12,7 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
       <store color="white"> .Map </store>
       <nextLoc color="gray"> 0 </nextLoc>
     </T>
+    <nextId> 0 </nextId>
 
   kvar L N : #Nat
   kvar E E' : Exp
