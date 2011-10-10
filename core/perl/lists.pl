@@ -264,10 +264,13 @@ sub gen_prod
 	    }
 	}
 	
-	foreach my $i (0 .. ($pkeys_no - 1))
+	my $tmp = $production;
+	
+	$tmp =~ s/\[\s*?metadata.*?\]\s*$//sg;
+	if ($tmp !~ /^\s*($ksort)\s*$/s)
 	{
-	    my $tmp = $production;
-	    $tmp =~ s/\[.*?metadata.*?\]\s*$//sg;
+	    foreach my $i (0 .. ($pkeys_no - 1))
+	    {
 	    
 	    my $left = $tmp;
 	    my $right = $tmp;
@@ -284,25 +287,31 @@ sub gen_prod
 	    
 	    my $count = -1;
 	    
-	    $right =~ s/($pkeys)/
+	    $right =~ s/($ksort)/
 	    {
-		$counter ++; $count ++;
-		if ($count == $i)
+		$counter ++; my $sort = $1;
+		if ($sort =~ m!($pkeys)!sg && $count==($i-1))
 		{
-		   "(listify$declaration_map{$1}(X$counter:$nelist$declaration_map{$1}))";
+		    $count ++;
+		    "(listify$declaration_map{$1}(X$counter:$nelist$declaration_map{$1}))";
 		}
 		else 
 		{
-		    $1;
+		    "X$counter:$1";
 		}
 	    }
 	    /sge;
 	    
+	    $right =~ s/`/ /sg;
+	    
 	    $left = $right;
 	    $left =~ s/listify\{.*?\}//sg;
 	    
-             print "macro ($left) = ($right) [metadata \"generated=() parser=()\"]\n";
+	    
+#	    print "Prod: $production\nPKEYS: $pkeys\nPRODS: @prods\nTMP: $tmp\n";
+#	    print "macro ($left) = ($right) [metadata \"generated=() parser=()\"]\n";
 	    push(@generated, "macro ($left) = ($right) [metadata \"generated=() parser=()\"]");
+	    }
 	}
     }
  
