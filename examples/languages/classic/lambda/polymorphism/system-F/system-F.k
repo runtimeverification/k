@@ -57,6 +57,7 @@ kmod SYSTEM-F-STATIC-SEMANTICS is including SYSTEM-F-SYNTAX + K + SUBSTITUTION
       <tyenv color="blue"> .Map </tyenv>
       <tyvars color="red"> .Set </tyvars>
     </T>
+    <nextId> 0 </nextId>
 
   kvar X : Var
   kvar T T' T1 T2 S : Type
