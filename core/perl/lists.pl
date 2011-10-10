@@ -201,9 +201,10 @@ sub solve_lists
 	    
 	    # get all possible solutions
 	    my $productions_gen = macrofy(gen_prod($keys, $production, $main_sort));
-#	    print "PROD: $production\nGEN:$macros\n\n";
+#	    print "PROD: $production\nGEN:$productions_gen\n\n";
+	    
 	    $gen .= "$productions_gen\n";
-	}
+       	}
 	
 	s/\Q$syntax_item\E/$syntax_item\n\n$gen/s;	
     }
@@ -259,8 +260,50 @@ sub gen_prod
 			}
 		    }
 		    push(@generated, generation($production, $main_sort, $pkeys_no, \@tmp, \@set));
+		}		
+	    }
+	}
+	
+	foreach my $i (0 .. ($pkeys_no - 1))
+	{
+	    my $tmp = $production;
+	    $tmp =~ s/\[.*?metadata.*?\]\s*$//sg;
+	    
+	    my $left = $tmp;
+	    my $right = $tmp;
+	    
+	    my $pkeys = join("|", @prods);
+	    
+            # syntax Stmt ::= function Id(Ids) {Stmts}
+	    
+	    # Ids ::= List{#Id, ","}
+	    # Stmts ::= List{Stmt,""}
+	    
+	    # macro function X:Id(Y:SyntacticList{#Id,","}) {Z:Stmts} = 
+	    #    function X:Id(listify(Y:SyntacticList{#Id,","})) {Z:Stmts} [metadata "generated=()"]
+	    
+	    my $count = -1;
+	    my $replacement = "";
+	    
+	    $right =~ s/($pkeys)/
+	    {
+		$counter ++; $count ++;
+		if ($count == $i)
+		{
+		   "(listify$declaration_map{$1}(X$counter:$nelist$declaration_map{$1}))";
+		}
+		else 
+		{
+		    $1;
 		}
 	    }
+	    /sge;
+	    
+	    $left = $right;
+	    $left =~ s/\b\listify{.*?}\b//sg;
+	    
+	    print "macro ($left) = ($right) [metadata \"generated=() parser=()\"]\n";
+	    push(@generated, "macro ($left) = ($right) [metadata \"generated=() parser=()\"]");
 	}
     }
  
@@ -381,44 +424,11 @@ sub generation
 	$left  =~ s/`//sg;
 	$right =~ s/`//sg;
 	
-	$out .= "\tsyntax $main_sort ::= $temp_prod\n";
-	$out .= "\tmacro ($left) = ($right)\n\n";
+	$out .= "\tsyntax $main_sort ::= $temp_prod [metadata \"generated=()\"]\n";
+	$out .= "\tmacro ($left) = ($right) [metadata \"generated=()\"]\n\n";
     }
     
     return $out;
-    
-#    my $mkeys = join("|", @array);
-    
-#    my $temp_prod = $production;
-
-	
-#    print "Prod: $production\n";
-#    return "\n" if $temp_prod =~ /^\s*($ksort)\s*$/;
-
-#    $temp_prod =~ s/($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$list|$mkeys)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
-#    print "TEMP PROD: $temp_prod\n";
-#    $counter ++;
-	
-    # generating  macro
-#    my $left  = $temp_prod;
-#    my $right = $temp_prod;
-    
-#    my $c1 = $counter;
-#    my $c2 = $counter;
-
-    # code generation!
-#    $left  =~ s/($mkeys)/{ my $sort = "$nelist$declaration_map{$1}"; my $decl = "X$c1:$sort"; $c1 ++; $decl; }/sge;
-#    $right =~ s/($mkeys)/{ my $sort = $declaration_map{$1}; my $decl = "listify$sort(X$counter:$nelist$sort)"; $c2 ++; $decl; }/sge;
-#    $counter += ($c1 - $counter);
-#    print "LEFT: $left\n";
-#    print "RIGHT: $right\n\n";
-    
-#    print "ARRAY: @array\n($left) = ($right)\n\n";
-    
-#    $left =~ s/`/ /sg;
-#    $right =~ s/`/ /sg;
-    
-#    "macro ($left) = ($right) [metadata \"parser=()\"]\n";
 }
 
 
