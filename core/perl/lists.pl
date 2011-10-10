@@ -267,7 +267,7 @@ sub gen_prod
 	my $tmp = $production;
 	
 	$tmp =~ s/\[\s*?metadata.*?\]\s*$//sg;
-	if ($tmp !~ /^\s*($ksort)\s*$/s)
+	if ($tmp !~ /^\s*($ksort)\s*$/s && "@prods" !~ /^\s*$/)
 	{
 	    foreach my $i (0 .. ($pkeys_no - 1))
 	    {
