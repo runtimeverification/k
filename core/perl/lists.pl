@@ -283,7 +283,7 @@ sub gen_prod
 	    
 	    my $count = -1;
 	    
-	    $right =~ s/($ksort)/
+	    $right =~ s/(?<![0-9a-zA-Z`])($ksort)/
 	    {
 		$counter ++; my $sort = $1;
                 if ($sort =~ m!($pkeys)!sg) {
@@ -354,11 +354,11 @@ sub generation
 	
 	# stop if terminals not included in production
 	my $tmp_prod = $temp_prod;
-	$tmp_prod =~ s/\b($ksort)\b//sg;
+	$tmp_prod =~ s/(?<![0-9a-zA-Z`])($ksort)\b//sg;
 	return "" if  $tmp_prod =~ /^\s*$/s;
 
 	my $ttemp = $temp_prod;
-	$ttemp =~ s/($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$list|$mkeys)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
+	$ttemp =~ s/(?<![0-9a-zA-Z`])($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$list|$mkeys)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
 	my $left = $ttemp;
 	my $right = $ttemp;
 	$counter ++;
