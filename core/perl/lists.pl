@@ -65,7 +65,7 @@ sub solve_lists
 	
 	if (!(defined $declaration_map{$main_sort}))
 	{
-	    $generated_code .= "syntax $main_sort ::= $list$all [metadata \"latex=(renameTo $elist\\crlbracket$all)\"]\n";
+	    $generated_code .= "syntax $main_sort ::= $list$all\n";
 	    $generated_code .= "syntax $nelist$all ::= $list_sort [metadata \"generated=()\"] \n\t| $list_sort $separator $nelist$all $parser_attributes\n";
 	    $generated_code .= "syntax $elist$all ::= .$elist$all [metadata \"parser=()\"] \n\t| $list_sort $separator $elist$all $attributes \n\t| listify$all $list$all [metadata \"parser=()\" prec 0]\n";
 	    $generated_code .= "syntax $list$all ::= $nelist$all  [metadata \"generated=()\"] | $elist$all [metadata \"generated=()\"] \n";
