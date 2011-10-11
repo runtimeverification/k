@@ -520,6 +520,7 @@ endm
 
 mod K-BUILTINS is
   including K-TECHNIQUE .
+  including K-RESULT .
   including PL-BUILTINS .
   including #TCP-INTERFACE .
   subsort #Bool < K .
@@ -533,6 +534,9 @@ mod K-BUILTINS is
 
   eq andBool(T1,, T2)
    = T1 andBool T2 .
+
+
+  subsort Bottom < KResult .
 endm
 
 mod K is 

@@ -1,4 +1,4 @@
-
+require /modules/uris
 ------------------------------------
 --- SIMPLE-UNTYPED-SYNTAX module ---
 ------------------------------------
@@ -147,7 +147,7 @@ declared alone and is initialized. */
       = {var X; X=E1; while X <= E2 do {S X=X+1;}}
 // generated:  macro function F:#Id() S = function F(.List{","}) S
 // generated: macro E() = E(.List{","})
-  macro var E,El:List{Exp,","}; = var E; var El;
+  macro var E,E':Exp,El:List{Exp,","}; = var E; var E',El;
   macro var X = E; = var X; X = E;
 end module
 
@@ -158,7 +158,7 @@ end module
 ---------------------------------------
 
 module SIMPLE-UNTYPED
-  imports SIMPLE-UNTYPED-SYNTAX
+  imports SIMPLE-UNTYPED-SYNTAX + URIS
 
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
@@ -222,7 +222,7 @@ as discussed above, we want lists of expressions to evaluate to lists of
 values whenever scheduled for evaluation (by placing them on the top of the
 \textsf{k} cell). */
   
-  syntax KResult ::= Vals
+  syntax KResult ::= Val | Vals
 
 /*@ \section{Configuration}
 The \K configuration of SIMPLE consists of a top level cell, \textsf{T},
@@ -258,7 +258,7 @@ will be initialized with the program to evaluate later. */
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
-                      <k color="green"> $PGM:K </k>
+                      <k color="green"> ($PGM:K ~> execute) </k>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
@@ -271,8 +271,8 @@ will be initialized with the program to evaluate later. */
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
-                  <in color="magenta"> $INPUT:List </in>
-                  <out color="brown"> .List </out>
+                  <in color="magenta" stream="stdin"> .List </in>
+                  <out color="brown" stream="stdout"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
@@ -314,7 +314,7 @@ soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
   syntax K ::= undefined [latex "\bot"]
 
-  rule <k> var (X:#Id,Xl => Xl); ...</k>
+  rule <k> var X:#Id; => . ...</k>
        <env> Env:Map => Env[L:#Nat/X] </env>
        <store>... . => L|->undefined ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
@@ -521,15 +521,20 @@ inconsistent state (since the exception block modifies it, but that
 modification should be irrelevant once the function returns). */
 
   syntax ListItem ::=  ( Map , K , Bag )
-  rule <k> _`(_`)(lambda(Xl,S), Vl:List{Val,","}) ~> K:K => S ~> return(0); </k>
+  rule <k> _`(_`)(lambda(Xl,S), Vl:List{Val,","}) ~> K:K => bindto(Xl,Vl) ~> S ~> return(0); </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
-       <env> Env => GEnv[N..N+Nat|Xl| / getList{K}(Xl)] </env>
+       <env> Env => GEnv </env>
        <genv> GEnv:Map </genv>
-       <store>... . => N..N+Nat|Xl| |-> getList{K}(Vl) ...</store>
-       <nextLoc> N => N +Nat |Xl| </nextLoc>
   rule <k> return(V); ~> _ => V ~> K </k>
        <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
+
+  syntax K ::= bindto ( Ids , Vals )
+  rule <k> bindto((X,Xl=> Xl),(V,Vl => Vl)) ...</k>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> V ...</store>
+       <nextLoc> L => L +Nat 1 </nextLoc>
+  rule <k> bindto(.List{","},.List{","}) => . ...</k>
 
 /*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next input
@@ -757,7 +762,7 @@ the locks themselves ignoring their multiplicity).  As seen below, a lock is
 added to the \textsf{busy} cell as soon as it is acquired for the first time
 by a thread. */
 
-   rule (<thread>... <k>.</k> <holds> H:Map </holds> ...</thread> => .)
+   rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
         <busy> Busy:Set => Busy -Set keys(H) </busy>
 
 /*@ \subsubsection{Acquire lock}
@@ -843,14 +848,6 @@ corresponding store lookup operation. */
 --- Finally, return the address of the desired object member
   rule <k> l-value(lookup(L)) => loc(L) ...</k>
 
-
-/*@ \subsection{Length}
-The following operation calculates the length of a list of identifiers.
-We make the two rules structural so they they do not count as computations. */
-
-  syntax #Nat ::= `| Ids `| [latex "\mid\!{#1}\!\mid"]
-  rule |.List{","}| => 0 [structural]
-  rule |X,Xl| => |Xl| +Nat 1 [structural]
 
 /*@ \subsection{Sequences of locations}
 The following operation expands to the list of natural numbers between two

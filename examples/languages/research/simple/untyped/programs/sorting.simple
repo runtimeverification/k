@@ -1,7 +1,7 @@
 function init(n) {
 	var x[n];
 	for i = 0 to n - 1 do
-	x[i] = i;
+	x[i] = read();
 	return x;
 }
 
@@ -89,7 +89,7 @@ function heapSort(x) {
 }
 
 function main() {
-	var n = 10, x = init(n), f[11];
+	var x = init(read()), f[11];
 	f[ 0] = writeArray;
 	f[ 1] = reverse;
 	f[ 2] = writeArray;

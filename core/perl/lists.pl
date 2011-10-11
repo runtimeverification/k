@@ -66,8 +66,8 @@ sub solve_lists
 	if (!(defined $declaration_map{$main_sort}))
 	{
 	    $generated_code .= "syntax $main_sort ::= $list$all\n";
-	    $generated_code .= "syntax $nelist$all ::= $list_sort \n\t| $list_sort $separator $nelist$all $parser_attributes\n";
-	    $generated_code .= "syntax $elist$all ::= .$elist$all [metadata \"generated=()\"] \n\t| $list_sort $separator $elist$all $attributes \n\t| listify$all $list$all [metadata \"parser=()\" prec 0]\n";
+	    $generated_code .= "syntax $nelist$all ::= $list_sort [metadata \"generated=()\"] \n\t| $list_sort $separator $nelist$all $parser_attributes\n";
+	    $generated_code .= "syntax $elist$all ::= .$elist$all [metadata \"parser=()\"] \n\t| $list_sort $separator $elist$all $attributes \n\t| listify$all $list$all [metadata \"parser=()\" prec 0]\n";
 	    $generated_code .= "syntax $list$all ::= $nelist$all | $elist$all\n";
 	    
 	    $generated_code  .= "\teq (listify$all(EL$counter:$elist$all)) = (EL$counter) [metadata \"parser=()\"]\n"; $counter ++;
@@ -85,10 +85,6 @@ sub solve_lists
 
         if (! defined $constructors{"\"$separator\""})
         {
-            if (! scalar keys(%constructors)) {
-              $generated_code .= "  sort Bottom\n";
-            }
-	    
 	    $generated_code .= "syntax $list\{Bottom,\"$separator\"\} ::= $nelist\{Bottom,\"$separator\"\} | $elist\{Bottom,\"$separator\"\}\n";
 	    $generated_code .= "syntax $elist\{Bottom,\"$separator\"\} ::= Bottom $separator $elist\{Bottom,\"$separator\"\}  $attributes\n";
             $generated_code .= "syntax $elist\{Bottom,\"$separator\"\} ::=  .List\{\"$separator\"\} [metadata \"generated=()\"]\n";
@@ -133,7 +129,7 @@ sub solve_lists
 		$generated_code .= "subsort $elist$declaration_map{$sort2} < $elist$list1 \n";
 		$generated_code .= "subsort $nelist$declaration_map{$sort2} < $nelist$list1\n";
 		$generated_code .= "subsort $list$declaration_map{$sort2} <  $list$list1\n";
-		$generated_code .= "eq .$elist$list1 = .$elist$declaration_map{$sort2} [metadata \"generated=()\"]\n";
+#		$generated_code .= "eq .$elist$list1 = .$elist$declaration_map{$sort2} [metadata \"parser=()\"]\n";
 	    }
 	}
 	
@@ -147,7 +143,7 @@ sub solve_lists
 		$generated_code .= "subsort $elist$list2 < $elist$declaration_map{$sort1} \n";
 		$generated_code .= "subsort $nelist$list2 < $nelist$declaration_map{$sort1}\n";
 		$generated_code .= "subsort $list$list2 <  $list$declaration_map{$sort1}\n";
-		$generated_code .= "eq .$elist$declaration_map{$sort1} = .$elist$list2 [metadata \"generated=()\"]\n";
+#		$generated_code .= "eq .$elist$declaration_map{$sort1} = .$elist$list2 [metadata \"parser=()\"]\n";
 	    }
 	}
 
@@ -174,7 +170,7 @@ sub solve_lists
 	$gen_code .= "subsort $elist$declaration_map{$sort2} < $elist$declaration_map{$sort1} \n";
 	$gen_code .= "subsort $nelist$declaration_map{$sort2} < $nelist$declaration_map{$sort1}\n";
 	$gen_code .= "subsort $list$declaration_map{$sort2} <  $list$declaration_map{$sort1}\n";
-	$gen_code .= "eq .$elist$declaration_map{$sort1} = .$elist$declaration_map{$sort2} [metadata \"generated=()\"]\n";
+#	$gen_code .= "eq .$elist$declaration_map{$sort1} = .$elist$declaration_map{$sort2} [metadata \"generated=()\"]\n";
 
         # print "PROD: $syntax_item\nGEN: $gen_code\n\n";
 
@@ -267,6 +263,8 @@ sub gen_prod
 	my $tmp = $production;
 	
 	$tmp =~ s/\[\s*?metadata.*?\]\s*$//sg;
+	my $pkeys = join("|", @prods);
+	    
 	if ($tmp !~ /^\s*($ksort)\s*$/s && "@prods" !~ /^\s*$/)
 	{
 	    foreach my $i (0 .. ($pkeys_no - 1))
@@ -274,8 +272,6 @@ sub gen_prod
 	    
 	    my $left = $tmp;
 	    my $right = $tmp;
-	    
-	    my $pkeys = join("|", @prods);
 	    
             # syntax Stmt ::= function Id(Ids) {Stmts}
 	    
@@ -290,13 +286,14 @@ sub gen_prod
 	    $right =~ s/($ksort)/
 	    {
 		$counter ++; my $sort = $1;
-		if ($sort =~ m!($pkeys)!sg && $count==($i-1))
-		{
-		    $count ++;
+                if ($sort =~ m!($pkeys)!sg) {
+                  $count ++;
+                  if ($count==$i) {
 		    "(listify$declaration_map{$1}(X$counter:$nelist$declaration_map{$1}))";
-		}
-		else 
-		{
+		  } else {
+                    "X$counter:$1";
+                  }
+                } else {
 		    "X$counter:$1";
 		}
 	    }

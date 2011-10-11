@@ -937,6 +937,11 @@ mod #STRING-EXTRAS is
   eq #isDigit(C) = (asciiString(C) >=Int asciiString("0") and-then asciiString(C) <=Int asciiString("9")) .
 endm
 
+
+mod BOTTOM is
+  sort Bottom .
+endm
+
 mod PL-BUILTINS is
 including #BOOL .
 including #EXT-BOOL .
@@ -953,6 +958,7 @@ including #BOOL .
 including #ID .
 including #IF-THEN-ELSE .
 including #STRING-EXTRAS .
+including BOTTOM .
 endm
 
 ---set include #BOOL on .
