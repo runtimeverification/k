@@ -485,7 +485,7 @@ my $klabel_body = "$maude_backquoted\_$maude_backquoted";
 my $klabel = "\'$klabel_body(?:[$parentheses\\s\\,])|$klabel_body(?=\\()";
 
 # Builtin tokens
-my @builtin_tokens = qw(=> = -> id: .K .List .Set .Bag .Map);
+my @builtin_tokens = qw(=> = -> id: .K .List .Set .Bag .Map true false);
 
 # A default freezer name, to be used as a prefix of frozen strings
 my $default_freezer = "FREEZER";
