@@ -65,10 +65,10 @@ sub solve_lists
 	
 	if (!(defined $declaration_map{$main_sort}))
 	{
-	    $generated_code .= "syntax $main_sort ::= $list$all\n";
+	    $generated_code .= "syntax $main_sort ::= $list$all [metadata \"latex=(renameTo $elist\\crlbracket$all)\"]\n";
 	    $generated_code .= "syntax $nelist$all ::= $list_sort [metadata \"generated=()\"] \n\t| $list_sort $separator $nelist$all $parser_attributes\n";
 	    $generated_code .= "syntax $elist$all ::= .$elist$all [metadata \"parser=()\"] \n\t| $list_sort $separator $elist$all $attributes \n\t| listify$all $list$all [metadata \"parser=()\" prec 0]\n";
-	    $generated_code .= "syntax $list$all ::= $nelist$all | $elist$all\n";
+	    $generated_code .= "syntax $list$all ::= $nelist$all  [metadata \"generated=()\"] | $elist$all [metadata \"generated=()\"] \n";
 	    
 	    $generated_code  .= "\teq (listify$all(EL$counter:$elist$all)) = (EL$counter) [metadata \"parser=()\"]\n"; $counter ++;
 	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort)) = (X$counter:$list_sort $separator .$elist$all) [metadata \"parser=()\"]\n"; $counter ++;
@@ -85,12 +85,12 @@ sub solve_lists
 
         if (! defined $constructors{"\"$separator\""})
         {
-	    $generated_code .= "syntax $list\{Bottom,\"$separator\"\} ::= $nelist\{Bottom,\"$separator\"\} | $elist\{Bottom,\"$separator\"\}\n";
+	    $generated_code .= "syntax $list\{Bottom,\"$separator\"\} ::= $nelist\{Bottom,\"$separator\"\}  [metadata \"generated=()\"] | $elist\{Bottom,\"$separator\"\} [metadata \"generated=()\"] \n";
 	    $generated_code .= "syntax $elist\{Bottom,\"$separator\"\} ::= Bottom $separator $elist\{Bottom,\"$separator\"\}  $attributes\n";
             $generated_code .= "syntax $elist\{Bottom,\"$separator\"\} ::=  .List\{\"$separator\"\} [metadata \"generated=()\"]\n";
             
 	    $generated_code .= "syntax $nelist\{Bottom,\"$separator\"\} ::= Bottom $separator $nelist\{Bottom,\"$separator\"\}$parser_attributes\n";
- 	    $generated_code .= "syntax $nelist\{Bottom,\"$separator\"\} ::= Bottom\n";
+ 	    $generated_code .= "syntax $nelist\{Bottom,\"$separator\"\} ::= Bottom [metadata \"generated=()\"] \n";
 	    
             $constructors{"\"$separator\""} = "\"$separator\"";
         }
