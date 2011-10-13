@@ -145,9 +145,7 @@ declared alone and is initialized. */
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X:#Id = E1:Exp to E2:Exp do S)
       = {var X; X=E1; while X <= E2 do {S X=X+1;}}
-// generated:  macro function F:#Id() S = function F(.List{","}) S
-// generated: macro E() = E(.List{","})
-  macro var E,E':Exp,El:List{Exp,","}; = var E; var E',El;
+  macro var E,E':Exp,El:Exps; = var E; var E',El;
   macro var X = E; = var X; X = E;
 end module
 
@@ -396,7 +394,7 @@ global variable before declaring a local function).  The type checker of
 SIMPLE, also defined in \K (see examples/simple/typed/static),
 discards programs which do not respect this requirement. */
 
-  rule <k> function F:#Id(Xl:List{#Id,","}) S:Stmt => . ...</k>
+  rule <k> function F:#Id(Xl:Ids) S:Stmt => . ...</k>
        <env> Env => Env[L/F] </env>
        <store>... . => L|->lambda(Xl,S) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
@@ -521,7 +519,7 @@ inconsistent state (since the exception block modifies it, but that
 modification should be irrelevant once the function returns). */
 
   syntax ListItem ::=  ( Map , K , Bag )
-  rule <k> _`(_`)(lambda(Xl,S), Vl:List{Val,","}) ~> K:K => bindto(Xl,Vl) ~> S ~> return(0); </k>
+  rule <k> _`(_`)(lambda(Xl,S), Vl:Vals) ~> K:K => bindto(Xl,Vl) ~> S ~> return(0); </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
        <env> Env => GEnv </env>
        <genv> GEnv:Map </genv>
@@ -529,12 +527,13 @@ modification should be irrelevant once the function returns). */
        <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
 
+
   syntax K ::= bindto ( Ids , Vals )
-  rule <k> bindto((X,Xl=> Xl),(V,Vl => Vl)) ...</k>
+  rule <k> bindto((X,Xl:Ids => Xl),(V,Vl:Vals => Vl)) ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.List{","},.List{","}) => . ...</k>
+  rule <k> bindto(.Ids,.Exps) => . ...</k>
 
 /*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next input

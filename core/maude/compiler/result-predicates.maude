@@ -22,7 +22,7 @@ mod RESULT-PREDICATES is
 
   
   op resultPredicate : Qid TypeList AttrSet ~> MembAx .
-  eq resultPredicate(Q, nil, AS) = plugKRule(R{replaceS[kApply(kresultLabel,kApply(mkConstant(Q, KLabel), mkVariable('L,KList))),bool2K(trueCt)],empty, AS metadata(pair("predicate","") pair("KResult",""))}) .
+  eq resultPredicate(Q, nil, AS) = plugKRule(R{replaceS[kApply(kresultLabel,kApply(mkConstant(Q, KLabel), mkVariable('L,KList))),bool2K(trueCt)],empty, AS metadata(pair("predicate","") pair("KResult",""))}) [print "generating the result predicare for " Q] .
   eq resultPredicate(Q, Tyl, AS) = plugKRule(R{replaceS[kApply(kresultLabel, kApply(Q[genVars(Tyl,"KVar")],nilKList)),bool2K(trueCt)],empty,AS metadata(pair("predicate","") pair("KResult",""))}) .
 
   op hybridPredicate : Qid TypeList AttrSet ~> MembAxSet .

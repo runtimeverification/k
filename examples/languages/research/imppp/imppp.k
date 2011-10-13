@@ -115,7 +115,7 @@ module IMPPP imports IMPPP-SYNTAX + URIS
        <env> Rho:Map </env>
 
   /*@ \textbf{Variable declaration} */
-  rule <k> var (X,Xl => Xl:List{#Id,","}) ...</k>
+  rule <k> var (X,Xl => Xl:Ids) ...</k>
        <env> Rho => Rho[N/X] </env> 
        <store>... . => N |-> 0 ...</store>
        <nextLoc> N => sNat N </nextLoc>
