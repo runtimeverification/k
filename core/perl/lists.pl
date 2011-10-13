@@ -62,15 +62,12 @@ sub solve_lists
         my $parser_attributes = $attributes;
         $parser_attributes =~ s/metadata "/metadata " parser=() /s;
 
-        my $elist_attributes = $attributes;
-        $elist_attributes =~ s/metadata "/metadata "parser=($main_sort) /s;
-	
-	
 	if (!(defined $declaration_map{$main_sort}))
 	{
 #	    $generated_code .= "syntax $main_sort ::= $list$all [metadata \"parser=()\"]\n";
+#            $generated_code .= "\n\n//@ \\syntax\{\\nonTerminal\{\\sort\{$main_sort\}\}\}\{\\nonTerminal\{List\\\{\\sort\{$list_sort\},\\myquote\{$separator\}\\\}\}\}\{\}\n\n";
 	    $generated_code .= "syntax $nelist$all ::= $list_sort [metadata \"generated=() parser=()\"] \n\t| $list_sort $separator $nelist$all $parser_attributes\n";
-	    $generated_code .= "syntax $elist$all ::= .$main_sort [metadata \"generated=() parser=()\"] \n\t| $list_sort $separator $elist$all $parser_attributes \n\t| listify$all $list$all [metadata \"generated=() parser=()\" prec 0]\n";
+	    $generated_code .= "syntax $elist$all ::= .$main_sort [metadata \"generated=() parser=() latex=(renameTo \\\\ensuremath\{\\\\dotCt\{$main_sort\}\})\"] \n\t| $list_sort $separator $elist$all $parser_attributes \n\t| listify$all $list$all [metadata \"generated=() parser=()\" prec 0]\n";
 	    $generated_code .= "syntax $list$all ::= $nelist$all  [metadata \"parser=() generated=()\"] | $elist$all [metadata \"parser=() generated=()\"] | $list_sort $separator $list$all $attributes\n";
 	    
 	    $generated_code  .= "\teq (listify$all(X$counter:$list_sort)) = (X$counter:$list_sort $separator .$main_sort) [metadata \"parser=() generated=()\"]\n"; $counter ++;
