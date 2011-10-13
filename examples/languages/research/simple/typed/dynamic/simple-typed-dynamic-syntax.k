@@ -92,7 +92,6 @@ Lists should be eventually builtin; for now, they need to be declared
 
 do not add Bottom as subsort to anything else, like Id, Exp, etc
 */
-  sort Bottom
   syntax List{Bottom}  ::= Bottom | .List{Bottom} [latex "\kdot{\it List\{Bottom\}}"]
                      | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom} strict hybrid]
  

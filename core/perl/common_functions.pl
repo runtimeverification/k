@@ -1453,15 +1453,15 @@ sub find_k_sorts
 
     while ($subs =~ /\s($ksort)\s+<\s+($non_k_sorts)\s/sg) 
     {
-        print "detected sort $1\n";
+      #print "detected sort $1\n";
         $subs =~ s/\s($ksort)\s+<\s+($non_k_sorts)\s/
         {
-          print "replacing sort $1\n";
+        #   print "replacing sort $1\n";
           $non_k_sorts .= "|$1";
           "";
         }/sge;
     }
-    $my_sorts =~ s/(?<![0-9a-zA-Z`])($non_k_sorts)(?![0-9a-zA-Z`])//sg;
+    $my_sorts =~ s/(?<![0-9a-zA-Z`{}])($non_k_sorts)(?![0-9a-zA-Z`{}])//sg;
     $my_sorts =~ s/\s+$//sg;
 #    print "Syntactic Sorts: $my_sorts\n";
     $my_sorts;
