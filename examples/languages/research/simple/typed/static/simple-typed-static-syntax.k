@@ -19,7 +19,6 @@ kmod SIMPLE-TYPED-SYNTAX is
 -----------------------------------------------------------------------------
 --- List{Bottom}  (needed for consistencies)
 --- do not add Bottom as subsort to anything else, like Id, Exp, etc
-  sort Bottom
   syntax List{Bottom}  ::= Bottom | .List{Bottom}
                      | List{Bottom} , List{Bottom} [prec 70 assoc id: .List{Bottom} strict hybrid] 
  
