@@ -148,7 +148,6 @@ which means that once they reach the top of the computation each of their
 elements is evaluated to a result and the obtained list of results is 
 automatically considered to be a result.  */
 
-  sort Bottom 
   syntax List{Bottom} ::= () | Bottom | List{Bottom} , List{Bottom}  [assoc id: () strict hybrid prec 45]
   syntax List{PointerId} ::= PointerId | List{Bottom} | List{PointerId} , List{PointerId} [ditto]
   syntax List{DeclId} ::= DeclId | List{Bottom} | List{DeclId} , List{DeclId} [ditto]
