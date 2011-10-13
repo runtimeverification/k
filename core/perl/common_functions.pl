@@ -82,6 +82,8 @@ my $kvar  = "[A-Za-z][A-Za-z0-9]*";
 
 my $k_sorts = ":Bag:BagItem:#Bool:CellLabel:CellKey:CellAttribute:#Char:#Int:K:KAssignments:KHybridLabel:KLabel:KResult:KResultLabel:KSentence:List:ListItem:List{KResult}:List{K}:Map:MapItem:#Nat:NeBag:NeK:NeList:NeList{KResult}:NeList{K}:NeMap:NeSet:#NzInt:#NzNat:Set:SetItem:#String:#Zero";
 
+my $non_k_sorts = "Bag|BagItem|CellLabel|CellKey|CellAttribute|KAssignments|KHybridLabel|KLabel|KResultLabel|KSentence|List|ListItem|List{KResult}|List{K}|Map|MapItem|NeBag|NeList|NeList{KResult}|NeList{K}|NeMap|NeSet|Set|SetItem";
+
 
 # parametrize break
 my $latex_break = quotemeta("<br/>");
@@ -1435,6 +1437,34 @@ sub find_super_sorts
     # return the list
     $supersorts =~ s/\s+$//;
     $supersorts
+}
+
+sub find_k_sorts
+{
+    my $ksort = "[A-Z#][A-Za-z0-9\\`\\+\\?\\!#]*(?:\\{[A-Z#][A-Za-z0-9\\`\\+\\?\\!]*\\})?";
+    # remove the empty spaces at the end
+    my $my_sorts = $sorts_." ";
+#    print "SORTS: '$my_sorts' SUBSORTS: $subsortations\n";
+
+    # split the list
+    my $subs = $subsortations;
+    $subs =~ s/^/ /s if $subs !~ /^\s/s;
+    $subs =~ s/$/ /s if $subs !~ /\s$/s;
+
+    while ($subs =~ /\s($ksort)\s+<\s+($non_k_sorts)\s/sg) 
+    {
+        print "detected sort $1\n";
+        $subs =~ s/\s($ksort)\s+<\s+($non_k_sorts)\s/
+        {
+          print "replacing sort $1\n";
+          $non_k_sorts .= "|$1";
+          "";
+        }/sge;
+    }
+    $my_sorts =~ s/(?<![0-9a-zA-Z`])($non_k_sorts)(?![0-9a-zA-Z`])//sg;
+    $my_sorts =~ s/\s+$//sg;
+#    print "Syntactic Sorts: $my_sorts\n";
+    $my_sorts;
 }
 
 # given a sort and a set subsortations

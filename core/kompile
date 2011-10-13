@@ -2452,7 +2452,8 @@ sub throw_error
 
 sub add_subsorts
 {
-    my $supersorts = find_super_sorts();
+    my $supersorts = find_k_sorts();
+#    print "SUPERSORTS: $supersorts\n";
     my @modules = split(/\s+/, getModuleList());
     my $dir = cwd;
     
