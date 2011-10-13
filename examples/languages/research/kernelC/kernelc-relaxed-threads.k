@@ -101,6 +101,7 @@ memory does contain $v$ at $a$;
      <mem> .Map </mem> 
      <ptr> .Map </ptr> 
      <next> 1 </next> 
+     <rand> 0 </rand>
   </T> 
   <result multiplicity="?"> "" </result>
 
