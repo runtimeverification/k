@@ -117,7 +117,7 @@ result.  We prefer to tag their units with the corresponding sort to avoid
 confusion.  */
 
 --- List{Id}; the hybrid attribute says that a list of results becomes a result
-  syntax Ids ::= List{#Id,","} [strict hybrid prec 70]
+  syntax Ids ::= List{#Id,","} [prec 70]
 
 --- List{Exp}
   syntax Exps ::= List{Exp,","} [ditto]

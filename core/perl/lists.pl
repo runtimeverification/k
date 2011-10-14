@@ -51,7 +51,7 @@ sub solve_lists
 	
 	if (!(defined $list_attributes_map{$separator}))
 	{
-            $attributes =~ s/metadata "/metadata "generated=() /s;
+            $attributes =~ s/metadata "/metadata "strict=() hybrid=() generated=() /s;
 	    $list_attributes_map{$separator} = $attributes;
 	}
 	else 
