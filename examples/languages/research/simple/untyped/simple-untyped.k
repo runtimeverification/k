@@ -220,7 +220,7 @@ as discussed above, we want lists of expressions to evaluate to lists of
 values whenever scheduled for evaluation (by placing them on the top of the
 \textsf{k} cell). */
   
-  syntax KResult ::= Val | Vals
+  syntax KResult ::= Val 
 
 /*@ \section{Configuration}
 The \K configuration of SIMPLE consists of a top level cell, \textsf{T},

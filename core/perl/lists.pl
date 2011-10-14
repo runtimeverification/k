@@ -127,6 +127,9 @@ sub solve_lists
 
 	foreach my $sort1 (@supers)
 	{
+            if ($sort1 eq "KResult") {
+              $generated_code .= "subsort $main_sort < KResult\n";
+            }
 	    if (defined $declared_list{"$sort1:$separator"})
 	    {
 		my $list1 =  $declared_list{"$sort1:$separator"};
