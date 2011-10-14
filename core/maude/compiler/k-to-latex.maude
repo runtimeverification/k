@@ -398,7 +398,6 @@ var Eq : Equation .  var Eqs : EquationSet .
    = op(op F : TyL -> Ty [ metadataParse(St) AS] .) [owise] .
 
   eq op(op F : TyL -> Ty [pair("generated","") AS] .) = empty .
-  eq op(op F : TyL -> Ty [pair("parser","") AS] .) = empty .
 
 ---  eq metadata("builtin wrapper") = none .
 
