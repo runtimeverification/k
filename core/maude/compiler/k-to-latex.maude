@@ -625,8 +625,9 @@ var Eq : Equation .  var Eqs : EquationSet .
     = ('\kseqstrict '`{ eMetaLatexPrint(NL) '`} '`{ strictCells(QIL) '`}
        ) .
   eq pair("tags","") = none .   
+  eq eMetaLatexPrint(M, pair("parser",Str)) = nil .   
   eq eMetaLatexPrint(M, (pair(Str,"") ))   
-    = ('\kattribute '`{ tokenize(latexify(Str)) '`}) .
+    = ('\kattribute '`{ tokenize(latexify(Str)) '`}) [owise] .
   eq eMetaLatexPrint(M, (pair(Str,Str') ))   
     = ('\kattribute  '`( tokenize(latexify(Str)) '`( tokenize(latexify(Str')) '`) '`}) [owise] .
   eq eMetaLatexPrint(M, (strat(NL) ))

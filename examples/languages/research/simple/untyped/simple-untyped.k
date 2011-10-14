@@ -120,7 +120,7 @@ confusion.  */
   syntax Ids ::= List{#Id,","} [prec 70]
 
 --- List{Exp}
-  syntax Exps ::= List{Exp,","} [ditto]
+  syntax Exps ::= List{Exp,","}
 
 /*@ When a syntactic category extends another syntactic category,
 like our \textit{Exp} which extends \textit{Id}, it is {\em strongly}
@@ -863,7 +863,7 @@ because we want to allow lists of expressions (e.g., function arguments) to
 evaluate to such lists of values.  Note also that we defined lists of values
 as \K results (at the beginning of the SIMPLE semantics module). */
 
-  syntax Vals ::= List{Val,","} [ditto]
+  syntax Vals ::= List{Val,","}
 
 /*@ The semantics of SIMPLE is now complete. */
 end module

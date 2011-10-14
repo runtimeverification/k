@@ -51,7 +51,6 @@ sub solve_lists
 	
 	if (!(defined $list_attributes_map{$separator}))
 	{
-            $attributes =~ s/metadata "/metadata "strict=() hybrid=() generated=() /s;
 	    $list_attributes_map{$separator} = $attributes;
 	}
 	else 
@@ -59,19 +58,18 @@ sub solve_lists
 	    $attributes = $list_attributes_map{$separator};
 	}
 
-        my $gen_attributes = $attributes;
-        $gen_attributes = s/metadata "/metadata " generated=() /s;
 
         my $list_attributes = $attributes;
         $list_attributes =~ s/metadata "/metadata " parser=() /s;
 
-        my $parser_attributes = $gen_attributes;
+        $attributes =~ s/metadata "/metadata "strict=() hybrid=() generated=() /s;
+
+        my $parser_attributes = $attributes;
         $parser_attributes =~ s/metadata "/metadata " parser=() /s;
 
 	if (!(defined $declaration_map{$main_sort}))
 	{
-	    $generated_code .= "syntax $main_sort ::= List\{$list_sort\} $list_attributes\n";
-            $generated_code .= "syntax List\{$list_sort\} ::= dummy$main_sort [metadata \"parser=() generated=()\"]\n";
+	    $generated_code .= "syntax $main_sort ::= List\{$list_sort,\"$separator\"\} $list_attributes\nsort List\{$list_sort,\"$separator\"\}\n";
 #            $generated_code .= "\n\n//@ \\syntax\{\\nonTerminal\{\\sort\{$main_sort\}\}\}\{\\nonTerminal\{List\\\{\\sort\{$list_sort\},\\myquote\{$separator\}\\\}\}\}\{\}\n\n";
 	    $generated_code .= "syntax $nelist$all ::= $list_sort [metadata \"generated=() parser=()\"] \n\t| $list_sort $separator $nelist$all $parser_attributes\n";
 	    $generated_code .= "syntax $elist$all ::= .$main_sort [metadata \"generated=() parser=() latex=(renameTo \\\\ensuremath\{\\\\dotCt\{$main_sort\}\})\"] \n\t| $list_sort $separator $elist$all $parser_attributes \n\t| listify$all $list$all [metadata \"generated=() parser=()\" prec 0]\n";
