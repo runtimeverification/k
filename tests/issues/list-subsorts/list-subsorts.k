@@ -30,3 +30,11 @@ module D
 // generate all lists for Fours
 // subsort the lists for Twos and Threes to those for Fours 
 end module
+
+module E 
+  imports D
+  syntax KResult ::= Four
+// also generate 
+//    syntax KResult ::= Fours | Toos
+end module
+
