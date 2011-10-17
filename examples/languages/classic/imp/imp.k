@@ -5,18 +5,18 @@ give it a short-circuited semantics (its second argument will only be
 evaluated when the first evaluates to true). */
 
   syntax AExp ::= #Id | #Int
-                | AExp + AExp                  [prec 33 gather (E e) strict]
-                | AExp / AExp                  [prec 31 gather (E e) strict]
+                | AExp "+" AExp                  [:prec(33) gather (E e) strict:]
+                | AExp "/" AExp                  [:prec(31) gather (E e) strict:]
   syntax BExp ::= #Bool
-                | AExp <= AExp                 [prec 37 seqstrict]
-                | not BExp                     [prec 53 strict]
-                | BExp and BExp                [prec 55 strict(1)]
-  syntax Stmt ::= skip
-                | #Id := AExp                  [prec 40 strict(2)]
-                | Stmt ; Stmt                  [prec 60 gather (e E)]
-                | if BExp then Stmt else Stmt  [prec 59 strict(1)]
-                | while BExp do Stmt           [prec 59]
-  syntax Pgm ::= var Ids ; Stmt                [prec 70]
+                | AExp "<=" AExp                 [:prec(37) seqstrict:]
+                | "not" BExp                     [:prec(53) strict:]
+                | BExp "and" BExp                [:prec(55) strict(1):]
+  syntax Stmt ::= "skip"
+                | #Id ":=" AExp                  [:prec(40) strict(2):]
+                | Stmt ";" Stmt                  [:prec(60) gather (e E):]
+                | "if" BExp "then" Stmt "else" Stmt  [:prec(59) strict(1):]
+                | "while" BExp "do" Stmt           [:prec(59):]
+  syntax Pgm ::= "var" Ids ";" Stmt                [:prec(70):]
 
   syntax Ids ::= List{#Id,","} 
 end module
@@ -121,7 +121,7 @@ rule below structural.  If one wants this unrolling step to count
 as a computational step (though we beg one to reconsider)
 then one can remove the ``structural'' tag.  */
 
-  rule <k> while B do S => if B then (S ; while B do S) else skip ...</k> [structural]
+  rule <k> while B do S => if B then (S ; while B do S) else skip ...</k> [:structural:]
 
 
   rule <k> var  ; S => S ...</k>

@@ -129,9 +129,9 @@ of {\tt scanf}, first for reading (local) variables, e.g.,
 \verb#scanf("%d",&x)#, and the other for reading into the heap location 
 to which the argument evaluates to.  */ 
 
-  syntax Exp ::= printf ( "%d;" , Exp ) [strict] 
-               | scanf ( "%d" , & Exp )
-               | scanf ( "%d" , Exp ) [strict] 
+  syntax Exp ::= printf ( \"%d;\" , Exp ) [strict] 
+               | scanf ( \"%d\" , & Exp )
+               | scanf ( \"%d\" , Exp ) [strict] 
 
 /*@ \subsubsection{Random}
 The following functions are defined in the standard {\tt stdlib.h} header 

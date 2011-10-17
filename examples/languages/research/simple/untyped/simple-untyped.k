@@ -17,7 +17,7 @@ Each program may use additional identifiers, which need to be declared either
 automatically (when one uses an external parser) or manually
 (when one writes the program). */
 
-  syntax #Id ::= main
+  syntax #Id ::= "main"
 
 /*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and
@@ -30,9 +30,9 @@ arguments.  To avoid having to do that, we add a separate function declaration
 production with explicitly no arguments; this will be shortly desugared into
 the first one. */
 
-  syntax Decl ::= var Exps ;
-                | function #Id ( Ids ) Stmt
-//  generated:              | function #Id ( ) Stmt
+  syntax Decl ::= "var" Exps ";"
+                | "function" #Id "(" Ids ")" Stmt
+//  generated:              | "function" #Id "(" ")" Stmt
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -49,28 +49,28 @@ arguments (because it will get desugared), and the assignment which is only
 strict in its second argument (for the same reason as the increment). */
 
   syntax Exp ::= #Int | #Bool | #Id
-               | ++ Exp            [prec 0]
-               | Exp + Exp         [strict prec 33 gather(E e)]
-               | Exp - Exp         [strict prec 33 gather(E e)]
-               | Exp * Exp         [strict prec 31 gather(E e)]
-               | Exp / Exp         [strict prec 31 gather(E e) superheat]
-               | Exp % Exp         [strict prec 31 gather(E e)]
-               | - Exp             [strict]
-               | Exp < Exp         [strict prec 37]
-               | Exp <= Exp        [strict prec 37]
-               | Exp > Exp         [strict prec 37]
-               | Exp >= Exp        [strict prec 37]
-               | Exp == Exp        [strict prec 37]
-               | Exp != Exp        [strict prec 37]
-               | Exp and Exp       [strict prec 55 gather(E e)]
-               | Exp or Exp        [strict prec 59 gather(E e)]
-               | not Exp           [strict prec 53]
-               | Exp [ Exps ] [strict prec 1]
-               | sizeOf ( Exp )    [strict]
-// generated:               | Exp ( )
-               | Exp ( Exps ) [strict prec 2]
-               | read ( )
-               | Exp = Exp         [strict(2) prec 40  gather (e E)]
+               | "++" Exp            [:prec 0:]
+               | Exp "+" Exp         [:strict prec(33) gather(E e):]
+               | Exp "-" Exp         [:strict prec(33) gather(E e):]
+               | Exp "*" Exp         [:strict prec(31) gather(E e):]
+               | Exp "/" Exp         [:strict prec(31) gather(E e) superheat:]
+               | Exp "%" Exp         [:strict prec(31) gather(E e):]
+               | "-" Exp             [:strict:]
+               | Exp "<" Exp         [:strict prec(37):]
+               | Exp "<=" Exp        [:strict prec(37):]
+               | Exp ">" Exp         [:strict prec(37):]
+               | Exp ">=" Exp        [:strict prec(37):]
+               | Exp "==" Exp        [:strict prec(37):]
+               | Exp "!=" Exp        [:strict prec(37):]
+               | Exp "and" Exp       [:strict prec(55) gather(E e):]
+               | Exp "or" Exp        [:strict prec(59) gather(E e):]
+               | "not" Exp           [:strict prec(53):]
+               | Exp "[" Exps "]" [:strict prec(1):]
+               | "sizeOf" "(" Exp ")"    [:strict:]
+// generated:               | Exp "(" ")"
+               | Exp "(" Exps ")" [:strict prec(2):]
+               | "read" "(" ")"
+               | Exp "=" Exp         [:strict(2) prec(40)  gather (e E):]
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
@@ -87,24 +87,24 @@ particular, the if-then-else construct is strict only in its first argument
 (the if-then construct will be desugared into if-then-else), while the loops
 constructs are not strict in any arguments. */
 
-  syntax Stmt ::= { }
-                | { Stmts }
-                | Exp ;                        [strict prec 45]
-                | if Exp then Stmt else Stmt   [strict(1) prec 90]
-                | if Exp then Stmt             [prec 89]
-                | while Exp do Stmt            [prec 90]
-                | for #Id = Exp to Exp do Stmt  [prec 90]
-                | return Exp ;                 [strict]
-                | write ( Exp ) ;              [strict]
-                | try Stmt catch ( #Id ) Stmt   [prec 90]
-                | throw Exp ;                  [strict]
-                | spawn Stmt                   [prec 90]
-                | acquire Exp ;                [strict]
-                | release Exp ;                [strict]
-                | rendezvous Exp ;             [strict]
+  syntax Stmt ::= "{" "}"
+                | "{" Stmts "}"
+                | Exp ";"                               [:strict prec(45):]
+                | "if" Exp "then" Stmt "else" Stmt      [:strict(1) prec(90):]
+                | "if" Exp "then" Stmt                  [:prec(89):]
+                | "while" Exp "do" Stmt                 [:prec(90):]
+                | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
+                | "return" Exp ";"                      [:strict:]
+                | "write" "(" Exp ")" ";"               [:strict:]
+                | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
+                | "throw" Exp ";"                       [:strict:]
+                | "spawn" Stmt                          [:prec(90):]
+                | "acquire" Exp ";"                     [:strict:]
+                | "release" Exp ";"                     [:strict:]
+                | "rendezvous" Exp ";"                  [:strict:]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts                 [prec 100 gather(e E)]
+                 | Stmts Stmts                          [:prec(100) gather(e E):]
 
 
 /*@ \subsection{Lists}
@@ -117,7 +117,7 @@ result.  We prefer to tag their units with the corresponding sort to avoid
 confusion.  */
 
 --- List{Id}; the hybrid attribute says that a list of results becomes a result
-  syntax Ids ::= List{#Id,","} [prec 70]
+  syntax Ids ::= List{#Id,","} [:prec(70):]
 
 --- List{Exp}
   syntax Exps ::= List{Exp,","}
@@ -188,8 +188,8 @@ because each function is executed in the fixed global environment and
 function definitions cannot be nested). */
 
   syntax Val ::= #Int | #Bool
-               | array ( #Nat , #Nat )
-               | lambda ( Ids , Stmt ) [latex "\lambda{#1}\,.\,{#2}"]
+               | "array" "(" #Nat "," #Nat ")"
+               | "lambda" "(" Ids "," Stmt ")" [:latex("\lambda{#1}\,.\,{#2}"):]
   syntax Exp ::= Val
 
 /*@ The inclusion of values in expressions follows the methodology of
@@ -310,7 +310,7 @@ configuration structure.
 fresh locations is rather low level and hopefully temporary; we intend to
 soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
-  syntax K ::= undefined [latex "\bot"]
+  syntax K ::= "undefined" [:latex("\bot"):]
 
   rule <k> var X:#Id; => . ...</k>
        <env> Env:Map => Env[L:#Nat/X] </env>
@@ -353,7 +353,7 @@ inside the loop body with fewer dimensions.  The second variable,
 \texttt{\$2}, iterates through and initializes each element of the current
 dimension: */
 
-  syntax #Id ::= $1 | $2
+  syntax #Id ::= "$1" | "$2"
   rule var X[N1,N2,Vl]; =>
        var X[N1];
        {
@@ -417,7 +417,7 @@ bound in the global environment and, as seen below, they are executed in that
 same global environment; all these mean, in particular, that the functions
 ``see'' each other, allowing for mutual recursion, etc. */
 
-  syntax K ::= execute
+  syntax K ::= "execute"
   rule <k> execute => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
 /*@ \section{Expressions}
@@ -481,10 +481,10 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 ``there is something there but we don't care what''.
 The semantics of the \texttt{lookup} operation is straightforward. */
 
-  rule V[N1,N2,Vl] => V[N1][N2,Vl] [structural]
-  rule array(L,_)[N] => lookup(L +Int N) [structural]
-  syntax K ::= lookup ( #Nat )
-  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [transition]
+  rule V[N1,N2,Vl] => V[N1][N2,Vl] [:structural:]
+  rule array(L,_)[N] => lookup(L +Int N) [:structural:]
+  syntax K ::= "lookup" "(" #Nat ")"
+  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [:transition:]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -518,7 +518,7 @@ with a return statement inside, which would put the \textsf{xstack} cell in an
 inconsistent state (since the exception block modifies it, but that
 modification should be irrelevant once the function returns). */
 
-  syntax ListItem ::=  ( Map , K , Bag )
+  syntax ListItem ::=  "(" Map "," K "," Bag ")"
   rule <k> _`(_`)(lambda(Xl,S), Vl:Vals) ~> K:K => bindto(Xl,Vl) ~> S ~> return(0); </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
        <env> Env => GEnv </env>
@@ -528,7 +528,7 @@ modification should be irrelevant once the function returns). */
        <env> _ => Env </env>
 
 
-  syntax K ::= bindto ( Ids , Vals )
+  syntax K ::= "bindto" "(" Ids "," Vals ")"
   rule <k> bindto((X,Xl:Ids => Xl),(V,Vl:Vals => Vl)) ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
@@ -545,7 +545,7 @@ input values are given before the program is executed; thus, the rewrite
 process gets stuck if the next computation item is a \texttt{read()} expression
 construct and no input item is available. */
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [transition]
+  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -560,7 +560,7 @@ that \texttt{l-value(...)} eventually evaluates to a location value
 \texttt{loc(...)}. */
 
   context ([#] => l-value([#])) = _
-  rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [transition]
+  rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [:transition:]
 
 
 /*@ \section{Statements}
@@ -577,13 +577,13 @@ environment after the block.  This allows us to have a very simple semantics
 for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps. */
 
-  rule {} => . [structural]
-  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [structural]
+  rule {} => . [:structural:]
+  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
 
 /*@ The basic definition of environment recovery is straightforward: */
 
-  syntax K ::= env ( Map )
-  rule <k> env(Env) => . ...</k> <env> _ => Env </env> [structural]
+  syntax K ::= "env" "(" Map ")"
+  rule <k> env(Env) => . ...</k> <env> _ => Env </env> [:structural:]
 
 /*@  While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop \texttt{while B do S},
@@ -598,7 +598,7 @@ recovery tasks, we only need to keep the last one.  The elegant rule below
 does precisely that, thus abvoiding the unnecessary computation explosion
 problem:  */
 
-  rule (env(_) => .) ~> env(_) [structural]
+  rule (env(_) => .) ~> env(_) [:structural:]
 
 /* In fact, the above follows a common convention in \K for recovery
 operations of cell contents.  More precisely, the conventional meaning of a
@@ -672,7 +672,7 @@ allowed break/continue of loops then we would need a completely different
 semantics, which would also involve the \textsf{control} cell. */
 
   rule <k> while B:Exp do S
-    => if B then {S while B do S} else {} ...</k> [structural]
+    => if B then {S while B do S} else {} ...</k> [:structural:]
 
 /*@ \subsection{Write}
 The write statement appends its evaluated argument (recall that \texttt{write}
@@ -682,7 +682,7 @@ output incrementally, as it is being generated; in semantics, we do not need
 to worry about that and simply collect all the output in the \textsf{out}
 cell. */
 
-  rule <k> write(I); => . ...</k> <out>... . => ListItem(I) </out> [transition]
+  rule <k> write(I); => . ...</k> <out>... . => ListItem(I) </out> [:transition:]
 
 /*@ \subsection{Exceptions}
 SIMPLE allows parametric exceptions, in that one can throw and catch a
@@ -710,8 +710,8 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax ListItem ::= ( #Id , Stmt , K , Map , Bag )
-  syntax K ::= popx
+  syntax ListItem ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
+  syntax K ::= "popx"
   rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
        <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
        <env> Env </env>
@@ -776,7 +776,7 @@ by the two rules below: */
 
    rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
-     if notBool(V in Busy) [transition]
+     if notBool(V in Busy) [:transition:]
    rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
 
 /*@ \subsubsection{Release lock}
@@ -810,7 +810,7 @@ the \textsf{thread} cell, the only way to concretize the rule below to the
 actual configuration of SIMPLE is to include each \textsf{k} cell in a
 \textsf{thread} cell. */
 
-   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> [transition]
+   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> [:transition:]
 
 ----------------------------------------------
 //@ \section{Auxiliary declarations and operations}
@@ -836,8 +836,8 @@ that the array and its index are evaluated, and then the rule for array lookup
 corresponding store lookup operation. */
 
 --- For parsing reasons, we prefer to allow l-value to take a K
-  syntax Exp ::= l-value ( K )
-  syntax Val ::= loc ( #Nat )
+  syntax Exp ::= "l-value" "(" K ")"
+  syntax Val ::= "loc" "(" #Nat ")"
 --- Local variable
   rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
 --- Array element: evaluate the array and its index;
@@ -853,9 +853,9 @@ The following operation expands to the list of natural numbers between two
 given numbers.  The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
 
-  syntax List{K} ::= #Nat .. #Nat
-  rule N1:#Nat..N1 => .List{K} [structural]
-  rule N1..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <Nat N2 [structural]
+  syntax List{K} ::= #Nat ".." #Nat
+  rule N1:#Nat..N1 => .List{K} [:structural:]
+  rule N1..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <Nat N2 [:structural:]
 
 /*@ \subsection{Lists of values}
 We need lists of values as a separate syntactic category

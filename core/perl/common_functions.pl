@@ -2515,9 +2515,12 @@ sub op_tags
     my $keep = "";
     
     # prec
-    $attributes =~ s/\b(prec\s*[0-9]+)/
+    $attributes =~ s/\b(prec\s*\(?\s*[0-9]+\s*\)?)/
     {
-	$keep .= " $1";
+	my $prec = $1;
+	$prec =~ s!\(! !sg;
+	$prec =~ s!\)!!sg;
+	$keep .= " $prec";
 	"";
     }
     /sge;
@@ -2541,9 +2544,10 @@ sub op_tags
     /sge;
 
     # latex
-    $attributes =~ s/\b(latex\s*".*?")/
+    $attributes =~ s/\b(latex\s*\(?".*?"\)?)/
     {
 	local $_ = " $1";
+	s!latex\s*\("(.*?)"\)!{ "latex=(renameTo \\\\" . get_newcommand($1) . ")"; }!se;
 	s!latex\s*"(.*?)"!{ "latex=(renameTo \\\\" . get_newcommand($1) . ")"; }!se;
 	$metadata .= " $_";
 	"";
@@ -2559,10 +2563,20 @@ sub op_tags
     }
     /sge;
 
-    # id
+    # id:
     $attributes =~ s/\b(id\s*:\s+[^\s\]]+)/
     {
 	$keep .= " $1";
+	"";
+    }
+    /sge;
+
+    # id()
+    $attributes =~ s/\b(id\s*\([^\s\]]+\))/
+    {
+	my $id = $1;
+	$id =~ s!id\s*\((.*?)\)!id: $1!sg;
+	$keep .= " $id";
 	"";
     }
     /sge;
@@ -2668,6 +2682,10 @@ sub slurp_k
     
     # get file content
     local $_ = get_file_content($file);
+    
+    # UGLY but useful: remove : from [: :]
+    s/\[\:/[/sg;
+    s/\:\]/\]/sg;
     
     # md5 
     my $digest = md5_hex($_);
@@ -2850,7 +2868,33 @@ sub Unfreeze
 }
 	
 	
+######################
+# syntax with quotes #
+######################
+
+sub remove_quotes
+{
+    local $_ = shift;
+    
+    # freeze attributes
+    s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "QUOTES")/gse;
+    
+    # freeze lists
+    s/List\{.*?\}/Freeze($&, "QUOTES")/gse;
+    
+    s/\bsyntax.*?(?=$kmaude_keywords_pattern)/
+    {
+	my $tmp = $&;
+	$tmp =~ s%(?<!\\)\"%%sg;
+	$tmp =~ s%\\(?=\")%%sg;
+	$tmp;
+    }/gse;
+
+    $_ = Unfreeze("QUOTES", $_);
+    
 	
+    $_;
+}
 	
 1;
 

@@ -51,29 +51,29 @@ kmod FUN-UNTYPED-SEMANTICS is including FUN-DESUGARED-SYNTAX + K
 --- Auxilliary declarations and operations ---
 ----------------------------------------------
 --- List{Val}
-  syntax List{Val} ::= Val | List{Val} , List{Val} [ditto]
+  syntax List{Val} ::= Val | List{Val} "," List{Val} [:ditto:]
   syntax List{Exp} ::= List{Val}
 
 --- Environment recovery
   syntax K ::= env ( Map )
-  rule (env(_) => .) ~> env(_)                                         [structural]    --- tail recursion
-  rule <k> env(Env) => . <_/k> <env> _ => Env </env>                   [structural]
-  rule <k> V ~> (env(Env) => .) <_/k> <env> _ => Env </env>            [structural]
+  rule (env(_) => .) ~> env(_)                                         [:structural:]    --- tail recursion
+  rule <k> env(Env) => . <_/k> <env> _ => Env </env>                   [:structural:]
+  rule <k> V ~> (env(Env) => .) <_/k> <env> _ => Env </env>            [:structural:]
 
 --- bindTo and writeTo
   syntax K ::= bindTo List{Id} | writeTo List{Id}
-  rule <k> () ~> bindTo() => . <_/k>                                   [structural]
+  rule <k> () ~> bindTo() => . <_/k>                                   [:structural:]
   rule <k> ((V=>()),_:List{Val}) ~> bindTo((X=>()),_:List{Id}) <_/k>
        <env> Env => Env[N/X] </env>
        <store_> . => N|->V <_/store>
-       <nextLoc> N:#Nat => sNat N </nextLoc>  if X =/=Bool ()           [structural]
+       <nextLoc> N:#Nat => sNat N </nextLoc>  if X =/=Bool ()           [:structural:]
 
-  rule <k> bindTo() => . <_/k>                                         [structural]
+  rule <k> bindTo() => . <_/k>                                         [:structural:]
   rule <k> bindTo((X=>()),_:List{Id}) <_/k>
        <env> Env => Env[N/X] </env>
-       <nextLoc> N => sNat N </nextLoc>  if X =/=Bool ()               [structural]
+       <nextLoc> N => sNat N </nextLoc>  if X =/=Bool ()               [:structural:]
 
-  rule <k> () ~> writeTo() => . <_/k>                                  [structural]
+  rule <k> () ~> writeTo() => . <_/k>                                  [:structural:]
   rule <k> ((V=>()),_:List{Val}) ~> writeTo((X=>()),_:List{Id}) <_/k>
-          <env_> X|->L <_/env> <store_> . => L|->V <_/store>           [structural]
+          <env_> X|->L <_/env> <store_> . => L|->V <_/store>           [:structural:]
 endkm

@@ -1630,9 +1630,14 @@ sub maudify_file {
     
     print $indent."Processing file $file\n" if $verbose;
     $indent .= "|   ";
-
+	
+    
     $_ = slurp_k($file, $latex || $png || $pdf || $ps || $crop || $eps);
 
+# remove quotes from syntax
+    $_ = remove_quotes($_);
+#    print; exit;
+    
 # extract subsorts
     sorting($_);
  
