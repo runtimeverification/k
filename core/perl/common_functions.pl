@@ -2882,7 +2882,7 @@ sub remove_quotes
     # freeze lists
     s/List\{.*?\}/Freeze($&, "QUOTES")/gse;
     
-    s/\bsyntax.*?(?=$kmaude_keywords_pattern)/
+    s/\bsyntax\b.*?(?=$kmaude_keywords_pattern)/
     {
 	my $tmp = $&;
 	$tmp =~ s%(?<!\\)\"%%sg;
