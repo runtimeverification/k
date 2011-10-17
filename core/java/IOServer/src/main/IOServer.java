@@ -38,29 +38,31 @@ public class IOServer {
 		}
 	}
 
-	public void acceptConnections() {
-		_logger.info("Server started at "
-				+ serverSocket.getInetAddress() + ": " + port);
+	public void acceptConnections() throws IOException {
+		_logger.info("Server started at " + serverSocket.getInetAddress() + ": " + port);
 		
 		while (true) {
 			Socket clientSocket = null;
-			try {
-				// accept
-				clientSocket = serverSocket.accept();
-				_logger.info(clientSocket.toString());
+			clientSocket = serverSocket.accept();
+			_logger.info(clientSocket.toString());
+			String msg = getMessage(clientSocket);
+			Command command = parseCommand(msg, clientSocket);
 
-				// parse input
-				Command command = parseCommand(clientSocket);
-
-				// execute command == append it to pool
-				if (command != null)
-					pool.execute(command);
-
-			} catch (IOException e) {
-				_logger.severe("Error accepting connection for client on port "
-								+ port);
+			// execute command == append it to pool
+			if (command != null) {
+				pool.execute(command);
 			}
 		}
+	}
+	
+	private String getMessage(Socket clientSocket) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+		String inputLine = reader.readLine();
+		if (inputLine == null) {
+			throw new IOException("Tried to read a line, but was already at EOF");
+		}
+		return inputLine;
 	}
 
 	/**
@@ -70,32 +72,23 @@ public class IOServer {
 	 * @param clientSocket
 	 * @return
 	 */
-	private Command parseCommand(Socket clientSocket) {
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					clientSocket.getInputStream()));
-
-			String inputLine = reader.readLine();
-			
-			_logger.info("received request: " + inputLine);
-			
-			// parse
-			// TODO: here XML should be used...
-			// maudeId#command#args#
-			String[] args = inputLine.split("#");
-			String[] args1 = new String[args.length];
-			
-			System.arraycopy(args, 1, args1,0, args.length-1);
-			
-			Command command = createCommand(args1, clientSocket, _logger);
-            
-            command.maudeId = Integer.parseInt(args[0]);
-			return command;
-
-		} catch (IOException e) {
-			return new CommandUnknown(new String[] { e.getLocalizedMessage() },
-					clientSocket, _logger);
-		}
+	private Command parseCommand(String msg, Socket clientSocket) {
+		String inputLine = msg;
+		
+		_logger.info("received request: " + inputLine);
+		
+		// parse
+		// TODO: here XML should be used...
+		// maudeId#command#args#
+		String[] args = inputLine.split("#");
+		String[] args1 = new String[args.length];
+		
+		System.arraycopy(args, 1, args1, 0, args.length-1);
+		
+		Command command = createCommand(args1, clientSocket, _logger);
+		
+		command.maudeId = Integer.parseInt(args[0]);
+		return command;
 	}
 
 

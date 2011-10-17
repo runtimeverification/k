@@ -19,16 +19,14 @@ public class MainServer implements Runnable {
 		}
 	}
 	public void run() {
-		//try {
-			//Main.main(new String[] {Integer.toString(_port)});
-			// System.out.println("Running server");
-			startServer();
-			// System.out.println("Got port");
-			// _started = true;
-		//} catch (Exception e) {
-			// TODO Auto-generated catch block
-		//	e.printStackTrace();
-		//}
+		IOServer server = new IOServer(_port, _logger);
+		_port = server.port; // in case server changes port
+		_started = true;
+		try {
+			server.acceptConnections();
+		} catch (java.io.IOException e) {
+			_logger.severe("Error accepting connection:" + e);
+		}
 	}
 
 	private void createDefaultResources() throws Exception {
@@ -43,14 +41,7 @@ public class MainServer implements Runnable {
 		r = ResourceSystem.getNewResource("stderr:/", null);
 		assert(r == 2);
 	}
-	
-	void startServer() {
-		IOServer server = new IOServer(_port, _logger);
-		_port = server.port; // in case server changes port
-		_started = true;
-		server.acceptConnections();
-	}
-	
+		
 	public static void main(String[] args) throws Exception {
 		Logger logger = java.util.logging.Logger.getLogger("KRunner");
 		logger.setUseParentHandlers(false);

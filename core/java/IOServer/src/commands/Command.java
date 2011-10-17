@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import main.IOServer;
 
 public abstract class Command implements Runnable {
-
 	Socket socket;
 	public int maudeId;
 	private Logger _logger;
@@ -16,7 +15,6 @@ public abstract class Command implements Runnable {
 	public Command(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
 		this.socket = socket;
 		_logger = logger;
-//		this.maudeId = maudeId;
 	}
 
 	public void fail(String reason) {
@@ -26,30 +24,23 @@ public abstract class Command implements Runnable {
 
 	public void succeed(String... messages) {
 
-		String success = maudeId + "#" + 
-			"success#";
-		for (String s : messages)
+		String success = maudeId + "#" + "success#";
+		for (String s : messages) {
 			success += s + "#";
+		}
         _logger.info("sending '" + success + "##' to "+ maudeId);
 		success += "##\n";
 		
 		BufferedWriter output;
 		try {
-			output = new BufferedWriter(new OutputStreamWriter(
-					socket.getOutputStream()));
+			output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
 			// send data back to client and finish
 			output.write(success);
 			output.flush();
-
-			// close everything
-			//output.close();
-			//socket.close();
-			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
 }

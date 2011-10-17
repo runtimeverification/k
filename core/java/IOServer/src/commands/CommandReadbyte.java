@@ -32,15 +32,10 @@ public class CommandReadbyte extends Command {
 
 			// success
 			succeed(new String[] { ascii.toString() });
-		}
-		catch (EOFException eof)
-		{
+		} catch (EOFException eof) {
 			fail("EOF");
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			fail("Cannot read byte from resource " + ID);
 		}
-
 	}
-
 }
