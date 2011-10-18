@@ -120,7 +120,7 @@ defaultConfig mExt = Map.fromList $
     , ("search-pattern", String "=>! B:Bag")
     , ("io", Bool True)
     , ("raw-maude-out", File "/dev/stdout")
-    , ("statistics", Bool True)
+    , ("statistics", Bool False)
     ]
     ++ maybe [] (\ext' -> let ext = dropWhile (== '.') ext' in
          [ ("main-module", String $ map toUpper ext)
