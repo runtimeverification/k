@@ -34,6 +34,17 @@ findDeskFile dir = do
                            ++ "Please use only one of: "
                            ++ intercalate " " (map show l)
 
+findDeskFile' :: FilePath -> IO (Maybe FilePath)
+findDeskFile' dir = do
+    deskFiles <- getFilesWithExt ".desk" dir
+    case deskFiles of
+        []         -> return Nothing
+        [deskFile] -> return $ Just deskFile
+        multiple   -> multiDesk multiple
+
+    where multiDesk l = die $ "Multiple desk files found.\n"
+                           ++ "Please use only one of: "
+                           ++ intercalate " " (map show l)
 
 -- Code copied from Cabal.
 getFilesWithExt :: String -> FilePath -> IO [FilePath]

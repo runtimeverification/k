@@ -1,5 +1,5 @@
 Name:               krun
-Version:            0.2.0
+Version:            0.3.0
 Synopsis:           Execute K definitions (prototype!)
 License:            MIT
 License-file:       LICENSE
@@ -28,7 +28,7 @@ Executable krun
     data-object-yaml,
     hxt,
     hxt-xpath,
-    maude >= 0.2.1,
+    maude >= 0.2.2,
     language-k,
     containers,
     attoparsec-text

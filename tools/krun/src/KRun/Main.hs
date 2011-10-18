@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE ViewPatterns #-}
 {-
 This is prototype code. Don't expect much from it.
 -}
@@ -29,55 +30,73 @@ import System.IO
 import System.Process
 import Text.Printf
 
-import Distribution.Desk.Types
+import Data.Configuration
 import Distribution.Desk.Utils
-import Distribution.Desk.Parser
 import KRun.InitialValueParser
 import KRun.Types
 import KRun.XPath
 
-data KRun = KRun
-    { krunSetVars :: [String]
-    , krunMaudeMode :: Bool
-    , krunInFile  :: FilePath
-    , krunPgmArgs :: [String]
-    } deriving (Eq, Show, Data, Typeable)
-
-kRunInit :: KRun
-kRunInit = KRun
-    { krunSetVars = def &= explicit &= name "s" &= name "set" &= typ "VAR=str"
-      &= help "Set VAR to str in the initial configuration"
-    , krunMaudeMode = def &= explicit &= name "m" &= name "maude"
-      &= help "Override the Output-mode to maude"
-    , krunInFile = def &= typFile &= argPos 0
-    , krunPgmArgs = def &= typ "PGM_ARGS" &= args
-    } &= help "Execute K definitions."
-      &= summary "krun v0.2.0"
-
 main :: IO ()
 main = do
-    krun <- cmdArgs kRunInit
-    deskFile <- findDeskFile "."
-    desk' <- parseDeskFile deskFile
+    argv <- getArgs
+    (argConfig, nonOpts) <- parseOpts argv
 
-    let desk = if krunMaudeMode krun then desk'{ outputMode = Maude } else desk'
+    let (groups, maybePgmFile, pgmExt) =
+          case nonOpts of
+            [] -> ([], Nothing, Nothing)
+            _  -> let file = last nonOpts
+                  in (init nonOpts, Just file, listToMaybe . takeExtension $ file)
+                    where listToMaybe [] = Nothing
+                          listToMaybe xs = Just xs
+    
+    deskFile <- case Map.lookup "desk-file" argConfig of
+        Just (File f) -> return $ Just f
+        Nothing -> findDeskFile' "."
 
-    kmap <- case parseKeyVals $ map T.pack (krunSetVars krun) of
-        Left err -> die $ "Unable to parse initial configuration value: " ++ err
-        Right kmap -> return kmap
+    config <- mkConfig pgmExt deskFile groups argConfig
 
-    -- check that lang-compiled.maude exists
-    existsCompiled <- doesFileExist $ compiledFile desk
+    Bool printHelp <- getVal config "print-help"
+    when (printHelp) $ do
+        putStrLn detailedHelp
+        exitSuccess
+
+    Bool printVersion <- getVal config "print-version"
+    when (printVersion) $ do
+        putStrLn versionStr
+        exitSuccess
+
+    when (isNothing maybePgmFile) $ do
+        usageError ["missing required <file> argument\n"]
+    let pgmFile = fromJust $ maybePgmFile
+        
+    Bool search <- getVal config "search"
+    let kmap = if search then Map.fromList [("noIO", Kast "wlist_(#noIO)(.List{K})")] else Map.empty
+    --kmap <- case parseKeyVals $ map T.pack (krunSetVars krun) of
+    --    Left err -> die $ "Unable to parse initial configuration value: " ++ err
+    --    Right kmap -> return kmap
+
+    File compiledDef <- getVal config "compiled-def"
+    existsCompiled <- doesFileExist compiledDef
     when (not existsCompiled) $
-        die $ "Could not find compiled definition: " ++ compiledFile desk
+        die $ "Could not find compiled definition: " ++ compiledDef
            ++ "\nPlease compile the definition by using `make' or `kompile'."
 
-    pgm <- ProgramSource <$> T.readFile (krunInFile krun)
-    kast <- flattenProgram desk pgm
-    mmr <- evalKastIO desk (Map.insert "PGM" kast kmap)
-    when (isNothing mmr) $
+    pgm <- ProgramSource <$> T.readFile pgmFile
+    kast <- flattenProgram config pgm
+    maybeMaudeResult <- evalKastIO config (Map.insert "PGM" kast kmap)
+    when (isNothing maybeMaudeResult) $
         die "Maude failed to produce a result"
-    let mr = fromJust mmr
+    let maudeResult = fromJust maybeMaudeResult
+
+    File rawMaudeOut <- getVal config "raw-maude-out"
+    T.writeFile rawMaudeOut (resultTerm maudeResult `T.append` "\n")
+
+    Bool printStats <- getVal config "statistics"
+    when printStats $ do
+        -- TODO: make color optional. green:
+        T.putStrLn (T.concat ["\ESC[92m", statistics maudeResult, "\ESC[0m"])
+
+{-
     case getOutputMode desk of
         IOServer -> return ()
         Maude -> T.putStrLn (resultTerm mr)
@@ -90,6 +109,7 @@ main = do
                 when (null terms) $
                     die $ "Unable to parse strings resulting from cell query as K terms."
                 mapM_ (putStrLn . prettyPrint) terms
+-}
 
 -- | Rewrites a flattened K term (Kast) in the compiled K definition.
 --evalKast :: Desk -> Kast -> IO (Maybe MaudeResult)
@@ -97,25 +117,23 @@ main = do
 --    where evalTerm = printf "#eval('$PGM(.List{K}) |-> (%s))" (T.unpack k)
 
 -- | Evaluate a term using the Java IO wrapper around Maude.
-evalKastIO :: Desk -> Map Text Kast -> IO (Maybe MaudeResult)
-evalKastIO desk kmap = do
+evalKastIO :: Config -> Map Text Kast -> IO (Maybe MaudeResult)
+evalKastIO config kmap = do
     tmpDir <- getTmpDir
     -- determine files for communicating with the wrapper
     let [cmdFile, outFile, errFile] = map (tmpDir </>) ["maude_in", "maude_out", "maude_err"]
 
     -- write the file from which the wrapper will read the command to execute
     cmdh <- openFile cmdFile WriteMode
-    let eval = constructEval kmap
+    let cmd = constructMaudeCmd config kmap
     T.hPutStrLn cmdh "set show command off ."
-    T.hPutStr cmdh "erew "
-    T.hPutStr cmdh eval
-    T.hPutStrLn cmdh " ."
+    T.hPutStrLn cmdh cmd
     T.hPutStrLn cmdh "quit"
     hClose cmdh
 
     -- run the wrapper
     jar <- getWrapperJar
-    let args = javaArgs jar ++ wrapperArgs desk tmpDir cmdFile outFile errFile
+    let args = javaArgs jar ++ wrapperArgs config tmpDir cmdFile outFile errFile
     ph <- runProcess "java" args Nothing Nothing Nothing Nothing Nothing
     exitCode <- waitForProcess ph
 
@@ -129,13 +147,17 @@ evalKastIO desk kmap = do
 
     return $ mmr
 
-constructEval :: Map Text Kast -> Text
-constructEval kmap
-    = (\t -> "#eval(__(" <> t <> ",(.).Map))")
-    . T.intercalate ","
-    $ Map.foldrWithKey (\k (Kast v) ts ->
-      "(_|->_(('$" <> k <> "(.List{K})) , (" <> v <> ")))" : ts) [] kmap
-    where (<>) = T.append
+constructMaudeCmd :: Config -> Map Text Kast -> Text
+constructMaudeCmd config kmap = T.pack cmd <> " " <> eval <> " " <> T.pack pat <> " ."
+    where String cmd = config ! "maude-cmd"
+          eval = (\t -> "#eval(__(" <> t <> ",(.).Map))")
+               . T.intercalate ","
+               $ Map.foldrWithKey (\k (Kast v) ts ->
+               "(_|->_(('$" <> k <> "(.List{K})) , (" <> v <> ")))" : ts) [] kmap
+          pat = if search then searchPattern else ""
+              where Bool search = config ! "search"
+                    String searchPattern = config ! "search-pattern"
+          (<>) = T.append
 
 getWrapperJar :: IO FilePath
 getWrapperJar = do
@@ -145,32 +167,35 @@ getWrapperJar = do
 javaArgs :: String -> [String]
 javaArgs wrapperJar = ["-jar", wrapperJar]
 
-wrapperArgs :: Desk -> FilePath -> FilePath -> FilePath -> FilePath -> [String]
-wrapperArgs desk tmpDir cmdFile outFile errFile =
+wrapperArgs :: Config -> FilePath -> FilePath -> FilePath -> FilePath -> [String]
+wrapperArgs config tmpDir cmdFile outFile errFile =
     [ "--commandFile", cmdFile
     , "--errorFile", errFile
-    , "--maudeFile", compiledFile desk
-    , "--moduleName", getMainModule desk
+    , "--maudeFile", compiled
+    , "--moduleName", mainMod
     , "--outputFile", outFile
-    ]
+    ] ++ if io then [] else ["--noServer"]
+    where File compiled  = config ! "compiled-def"
+          String mainMod = config ! "main-module"
+          Bool io = config ! "io"
 
 -- | Flattens a program to a K term.
-flattenProgram :: Desk -> ProgramSource -> IO Kast
-flattenProgram desk pgm = case getParser desk of
-    InternalKast -> runInternalKast desk pgm
+flattenProgram :: Config -> ProgramSource -> IO Kast
+flattenProgram config pgm = case config ! "parser" of
+    String "kast" -> runInternalKast config pgm
     _ -> die "External parser not implemented."
 
 -- | Run the internal parser that turns programs into K terms using
 -- the K definition.
-runInternalKast :: Desk -> ProgramSource -> IO Kast
-runInternalKast desk (ProgramSource pgm) = do
+runInternalKast :: Config -> ProgramSource -> IO Kast
+runInternalKast config (ProgramSource pgm) = do
     tmpDir <- getTmpDir
     (tmpFile, tmpHandle) <- openTempFile tmpDir "pgm.in"
     tmpCanonicalFile <- canonicalizePath tmpFile
     T.hPutStr tmpHandle pgm
     hClose tmpHandle
     let kastFile = tmpDir </> (takeBaseName tmpFile <.> ".kast")
-    let kastArgs = defaultKastArgs desk tmpCanonicalFile
+    let kastArgs = defaultKastArgs config tmpCanonicalFile
                 ++ ["-o", kastFile]
     kastExecutable <- getKastExecutable
     (ih, oh, eh, ph) <- runInteractiveProcess kastExecutable kastArgs Nothing Nothing
@@ -206,12 +231,10 @@ trim = f . f
 distDir :: FilePath
 distDir = ".k"
 
-compiledFile :: Desk -> FilePath
-compiledFile desk = printf "%s-compiled.maude" (lowercase $ getMainModule desk)
-
-defaultKastArgs :: Desk -> FilePath -> [String]
-defaultKastArgs desk pgmFile =
+defaultKastArgs :: Config -> FilePath -> [String]
+defaultKastArgs config pgmFile =
     [ "-pgm", pgmFile
-    , "-lang", lowercase (getMainModule desk)
-    , "-smod", getSyntaxModule desk
-    ]
+    , "-lang", lowercase mainMod
+    , "-smod", syntaxMod
+    ] where String mainMod = config ! "main-module"
+            String syntaxMod = config ! "syntax-module"
