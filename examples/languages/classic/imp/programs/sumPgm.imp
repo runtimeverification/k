@@ -1,4 +1,4 @@
-var n,s; 
+var n,s;
 n:=10;
 while not(n<=0) do (
   s:=0;
