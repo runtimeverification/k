@@ -176,12 +176,12 @@ getConfig ymap = do
     return (Map.fromList conf)
 
 getGroups ymap = do
-    case Y.lookupSequence "Groups" ymap of
+    case Y.lookupSequence "groups" ymap of
         Nothing -> return Map.empty
         Just yseq -> Map.fromList <$> (forM yseq $ \omap -> do
             ymap <- Y.fromMapping omap
-            name <- Y.lookupScalar "Name" ymap
-            let ymap' = filter ((/= "Name") . fst) ymap
+            name <- Y.lookupScalar "name" ymap
+            let ymap' = filter ((/= "name") . fst) ymap
             conf <- getConfig ymap'
             return (name, conf))
 
