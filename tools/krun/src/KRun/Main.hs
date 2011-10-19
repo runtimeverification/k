@@ -40,7 +40,7 @@ import KRun.XPath
 main :: IO ()
 main = do
     argv <- getArgs
-    (argConfig, nonOpts) <- parseOpts argv
+    (argConfig, nonOpts, unrecOpts) <- parseOpts argv
 
     let (groups, maybePgmFile, pgmExt) =
           case nonOpts of
@@ -71,10 +71,10 @@ main = do
     let pgmFile = fromJust $ maybePgmFile
         
     Bool io <- getVal config "io"
-    let kmap = if io then Map.empty else Map.fromList [("noIO", Kast "wlist_(#noIO)(.List{K})")]
-    --kmap <- case parseKeyVals $ map T.pack (krunSetVars krun) of
-    --    Left err -> die $ "Unable to parse initial configuration value: " ++ err
-    --    Right kmap -> return kmap
+    kmap <- case parseKeyVals $ map (T.pack . dropWhile (== '-')) unrecOpts of
+        Left err -> die $ "Unable to parse initial configuration value: " ++ err
+        Right kmap -> return $ kmap `Map.union`
+            if io then Map.empty else Map.fromList [("noIO", Kast "wlist_(#noIO)(.List{K})")]
 
     File compiledDef <- getVal config "compiled-def"
     existsCompiled <- doesFileExist compiledDef

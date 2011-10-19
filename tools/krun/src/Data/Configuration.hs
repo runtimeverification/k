@@ -216,10 +216,10 @@ mkOptDescr (Setting k StringType desc) =
 mkOptDescr (Setting k FileType desc) =
     [ Option [] [k] (ReqArg (\s -> (k, File s)) "FILE") desc]
 
-parseOpts :: [String] -> IO (Config, [String])
-parseOpts argv = case getOpt Permute options argv of
-        (o, n, []) -> return (Map.fromList o, n)
-        (_, _, errs) -> usageError errs 
+parseOpts :: [String] -> IO (Config, [String], [String])
+parseOpts argv = case getOpt' Permute options argv of
+        (o, n, u, []) -> return (Map.fromList o, n, u)
+        (_, _, _, errs) -> usageError errs 
 
 usageError :: [String] -> IO a
 usageError errs = do
