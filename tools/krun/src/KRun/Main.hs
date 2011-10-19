@@ -70,8 +70,8 @@ main = do
         usageError ["missing required <file> argument\n"]
     let pgmFile = fromJust $ maybePgmFile
         
-    Bool search <- getVal config "search"
-    let kmap = if search then Map.fromList [("noIO", Kast "wlist_(#noIO)(.List{K})")] else Map.empty
+    Bool io <- getVal config "io"
+    let kmap = if io then Map.empty else Map.fromList [("noIO", Kast "wlist_(#noIO)(.List{K})")]
     --kmap <- case parseKeyVals $ map T.pack (krunSetVars krun) of
     --    Left err -> die $ "Unable to parse initial configuration value: " ++ err
     --    Right kmap -> return kmap
