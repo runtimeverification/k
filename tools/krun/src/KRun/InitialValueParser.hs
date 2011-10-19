@@ -18,8 +18,23 @@ parseKeyVals txts = case partitionEithers $ map (parseOnly keyVal) txts of
 keyVal = do
     key <- takeWhile1 (/= '=')
     char '='
-    val <- listOrBag
+    val <- try kmap <|> listOrBag
     return (key, val)
+
+kmap = do
+    items <- many1 $ do
+        skipSpace
+        i <- mapItem
+        skipSpace
+        return i
+    let map = T.intercalate "," $ items ++ ["(.).Map"]
+    return $ T.concat ["wmap(__(", map, "))(.List{K})"]
+
+mapItem = do
+    id <- takeWhile1 (/= '|')
+    string "|->"
+    k <- takeWhile1 (/= ' ')
+    return $ T.concat ["_|->_(# #id \"", id, "\"(.List{K}),# ", k, "(.List{K}))"]
 
 listOrBag = do
     items <- many1 $ do
