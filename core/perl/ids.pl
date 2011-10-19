@@ -34,10 +34,10 @@ sub solve_ids
 	{
 	    # Removing the | separator
 	    $production =~ s/(\s)\|(\s)/$1$2/gs;
-            $new_production = $production;
+            $new_production = " $production";
 	    $new_production =~ s/\s*\[\s*metadata "(.*?)"\]//gs;
             $metadata = $1;
-            if ($new_production !~ m/(\s\|^)$ksort/) {
+            if ($new_production !~ /(?<=\s)[A-Z#]/gs) {
 	      $new_production =~ s/\s//gs;
               $gen_prod = "$new_production \[metadata \"$metadata parser=()\"\]";
               $gen_eqs .= " eq $new_production = #id(\"$new_production\") \[metadata \"parser=() generated=()\" \]\n";
