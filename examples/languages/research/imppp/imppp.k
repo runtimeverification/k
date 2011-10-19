@@ -43,7 +43,7 @@ module IMPPP imports IMPPP-SYNTAX + URIS
      <br/>
      <store color="white">.Map</store>
      <nextLoc color="gray">0</nextLoc>
-     <in color="magenta">$IN:List</in>
+     <in color="magenta" stream="stdin">$IN:List</in>
      <out color="Orchid" stream="stdout">.List</out>
     </T>
 
