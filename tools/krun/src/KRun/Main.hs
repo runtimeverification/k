@@ -84,7 +84,24 @@ main = do
 
     pgm <- ProgramSource <$> T.readFile pgmFile
     kast <- flattenProgram config pgm
-    maybeMaudeResult <- evalKastIO config (Map.insert "PGM" kast kmap)
+
+    Bool search <- getVal config "search"
+    if search
+        then searchExecution config kast kmap
+        else standardExecution config kast kmap
+
+
+searchExecution :: Config -> Kast -> Map Text Kast -> IO ()
+searchExecution config kast kmap = do
+    (_, outFile, errFile) <- evalKastIO config (Map.insert "PGM" kast kmap)
+    out <- T.readFile outFile
+    T.putStrLn "Search results:"
+    mapM_ T.putStrLn . drop 1 . T.lines $ out
+
+standardExecution :: Config -> Kast -> Map Text Kast -> IO ()
+standardExecution config kast kmap = do
+    (_, outFile, errFile) <- evalKastIO config (Map.insert "PGM" kast kmap)
+    maybeMaudeResult <- parseMaudeResult <$> T.readFile outFile
     when (isNothing maybeMaudeResult) $
         die "Maude failed to produce a result"
     let maudeResult = fromJust maybeMaudeResult
@@ -131,7 +148,7 @@ main = do
 --    where evalTerm = printf "#eval('$PGM(.List{K}) |-> (%s))" (T.unpack k)
 
 -- | Evaluate a term using the Java IO wrapper around Maude.
-evalKastIO :: Config -> Map Text Kast -> IO (Maybe MaudeResult)
+evalKastIO :: Config -> Map Text Kast -> IO (FilePath, FilePath, FilePath)
 evalKastIO config kmap = do
     tmpDir <- getTmpDir
     -- determine files for communicating with the wrapper
@@ -157,9 +174,7 @@ evalKastIO config kmap = do
         die $ "Failed to run IO wrapper:\n"
            ++ "java " ++ intercalate " " args
 
-    mmr <- parseMaudeResult <$> T.readFile outFile
-
-    return $ mmr
+    return (cmdFile, outFile, errFile)
 
 constructMaudeCmd :: Config -> Map Text Kast -> Text
 constructMaudeCmd config kmap = T.pack cmd <> " " <> eval <> " " <> T.pack pat <> " ."
