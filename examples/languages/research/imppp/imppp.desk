@@ -12,3 +12,9 @@ syntax-module:      IMPPP-SYNTAX
 parser:             kast
 io:                 true
 pretty-maude-out:   /dev/null
+
+groups:
+    - name: search
+      search: true
+      io: false
+      maude-cmd: search
