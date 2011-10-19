@@ -13,6 +13,9 @@ ppK (Kra []) = char '.'
 
 ppKLabel (KInt i) = integer i
 ppKLabel (KId id) = text id
+ppKLabel (KBool True) = text "true"
+ppKLabel (KBool False) = text "false"
+ppKLabel (KString s) = text (show s)
 
 ppKBag (KBag []) = char '.'
 ppKBag (KBag bs) = vsep $ map ppBagItem bs
