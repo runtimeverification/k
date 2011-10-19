@@ -20,6 +20,9 @@ Library
     Data.Attoparsec.Extra
     Data.Attoparsec.Extra.Text
     Internal.Lexer
+    --TODO: remove:
+    Language.K.Core.NewParser
+    Language.K.Core.NewPretty
 
   Build-depends:
     base >= 4 && < 5,
@@ -28,4 +31,6 @@ Library
     attoparsec-text,
     blaze-builder,
     bytestring,
-    text
+    text,
+    ansi-wl-pprint,
+    containers
