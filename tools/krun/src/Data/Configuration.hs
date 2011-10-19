@@ -107,6 +107,7 @@ advancedKSettings =
     , Setting "maude-cmd" StringType "Maude command used to execute the definition (search, erewrite, search, ...)"
     , Setting "search-pattern" StringType "Search pattern"
     , Setting "raw-maude-out" FileType "Where to write the unmodified result term"
+    , Setting "pretty-maude-out" FileType "Where to write the pretty-printed result term"
     ]
 
 -- TODO: resolve defaults
@@ -119,7 +120,8 @@ defaultConfig mExt = Map.fromList $
     , ("search", Bool False)
     , ("search-pattern", String "=>! B:Bag")
     , ("io", Bool True)
-    , ("raw-maude-out", File "/dev/stdout")
+    , ("raw-maude-out", File "/dev/null")
+    , ("pretty-maude-out", File "/dev/stdout")
     , ("statistics", Bool False)
     ]
     ++ maybe [] (\ext' -> let ext = dropWhile (== '.') ext' in

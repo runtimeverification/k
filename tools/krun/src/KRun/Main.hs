@@ -19,8 +19,8 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Foreign.Maude
 import Language.K.CellsToXml (cellsToXml')
-import Language.K.Core.Parser
-import Language.K.Core.Pretty.RaisedMode (prettyPrint)
+import Language.K.Core.NewParser
+import Language.K.Core.NewPretty
 import System.Console.CmdArgs
 import System.Directory
 import System.Environment
@@ -29,6 +29,7 @@ import System.FilePath
 import System.IO
 import System.Process
 import Text.Printf
+import Text.Parsec (parse)
 
 import Data.Configuration
 import Distribution.Desk.Utils
@@ -90,6 +91,19 @@ main = do
 
     File rawMaudeOut <- getVal config "raw-maude-out"
     T.writeFile rawMaudeOut (resultTerm maudeResult `T.append` "\n")
+
+    File prettyMaudeOut <- getVal config "pretty-maude-out"
+    if prettyMaudeOut /= "/dev/null"
+        then do
+            case parse kBag "" (T.unpack $ resultTerm maudeResult) of
+                Left err -> do
+                    putStrLn "Failed to parse result term!"
+                    putStrLn "Attempted to parse:"
+                    T.putStrLn (resultTerm maudeResult)
+                    putStrLn "Got error(s):"
+                    print err
+                Right bag -> printDoc $ ppKBag bag
+        else return ()
 
     Bool printStats <- getVal config "statistics"
     when printStats $ do

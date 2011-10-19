@@ -31,7 +31,8 @@ Executable krun
     maude >= 0.2.2,
     language-k,
     containers,
-    attoparsec-text
+    attoparsec-text,
+    parsec
 
 --  ghc-options:      -Wall
 
