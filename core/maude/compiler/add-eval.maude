@@ -79,8 +79,8 @@ fmod ADD-EVAL is
 
 
   op evalCleanConf : Term [String] -> TermList .
-  eq evalCleanConf(T, "stdin") = mkCollection(List, (ioBuffer(stdinVariable), noIOVariable, stdinStream)) .
-  eq evalCleanConf(T, "stdout") = mkCollection(List, (stdoutStream, noIOVariable, ioBuffer(nilK))) .
+  eq evalCleanConf(T, "stdin") = mkCollection(List, (T, ioBuffer(stdinVariable), noIOVariable, stdinStream)) .
+  eq evalCleanConf(T, "stdout") = mkCollection(List, (stdoutStream, noIOVariable, ioBuffer(nilK),T)) .
   eq evalCleanConf(T, S:[String]) = evalCleanConf(T) [owise] .
 
  
