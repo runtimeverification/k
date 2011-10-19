@@ -31,6 +31,11 @@ my $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'comm
 require $path;
 push(@checksum_files, $path);
 
+# add ids file
+$path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'ids.pl');
+require $path;
+push(@checksum_files, $path);
+
 # add lists file
 $path = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'lists.pl');
 require $path;
@@ -1649,6 +1654,11 @@ sub maudify_file {
     
 # lists
     $_ = solve_lists($_);
+#    print;
+#    exit;
+    
+# lists
+    $_ = solve_ids($_);
 #    print;
 #    exit;
     
