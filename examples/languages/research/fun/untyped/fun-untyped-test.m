@@ -27,7 +27,6 @@ rew run('p24) .
 rew run('p25) .
 rew run('p26-1) .
 rew run('p26-2) .
-q
 rew run('p27-1) .
 rew run('p27-2) .
 rew run('p27-3) .

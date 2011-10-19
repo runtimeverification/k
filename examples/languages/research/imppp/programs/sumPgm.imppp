@@ -1,14 +1,14 @@
 var n,s;
-print("Add numbers up to (<=0 to quit)? ");
-n:=read();
-while not(n<=0) do (
-  s:=0;
-  while not(n<=0) do (
-    s:=s+n;
-    n:=n+-1
-  ) ;
-  print("sum=");
-  print(s);
-  print("\nAdd numbers up to (<=0 to quit)? ");
-  n:=read()
-)
+while true do {
+  print("Add numbers up to (<= 0 to quit)? ");
+  n:=read();
+  if n<=0 then halt
+  else {
+    s:=0;
+    while not(n<=0) do {
+      s:=s+n;
+      n:=n+-1
+    } ;
+    print("Sum = "); print(s); print("\n")
+  }
+}

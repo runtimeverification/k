@@ -13,11 +13,11 @@ evaluated when the first evaluates to true). */
                 | "not" BExp                         [:prec(53) strict:]
                 | BExp "and" BExp                    [:prec(55) strict(1):]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp                      [:prec(40) strict(2):]
-                | Stmt ";" Stmt                      [:prec(60) gather (e E):]
-                | "if" BExp "then" Stmt "else" Stmt  [:prec(59) strict(1):]
-                | "while" BExp "do" Stmt             [:prec(59):]
-  syntax Pgm ::= "var" Ids ";" Stmt                  [:prec(70):]
+                | #Id ":=" AExp                      [:prec(80) strict(2):]
+                | Stmt ";" Stmt                      [:prec(100) gather(e E):]
+                | "if" BExp "then" Stmt "else" Stmt  [:prec(85) strict(1):]
+                | "while" BExp "do" Stmt             [:prec(85):]
+  syntax Pgm ::= "var" Ids ";" Stmt                  [:prec(110):]
 
   syntax Ids ::= List{#Id,","}
 end module

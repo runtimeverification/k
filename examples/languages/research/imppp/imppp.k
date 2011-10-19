@@ -1,29 +1,29 @@
 require /modules/uris
 
 module IMPPP-SYNTAX
-  syntax AExp ::= #Int | #Id
-                | AExp + AExp [gather(E e) prec 33 strict]
-                | AExp / AExp [gather(E e) prec 31 strict]
-                | ++ #Id [prec 0]
-                | read ( )
-                | exchange ( AExp ) [strict]
-
+  syntax AExp ::= #Id | #Int
+                | AExp "+" AExp                      [:prec(33) gather (E e) strict:]
+                | AExp "/" AExp                      [:prec(31) gather (E e) strict:]
   syntax BExp ::= #Bool
-                | AExp <= AExp [prec 37 latex "{#1}\leq{#2}" seqstrict]
-                | not BExp [prec 53 strict]
-                | BExp and BExp [gather(E e) prec 55 strict(1)]
+                | AExp "<=" AExp                     [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
+                | "not" BExp                         [:prec(53) strict:]
+                | BExp "and" BExp                    [:prec(55) strict(1):]
+  syntax Stmt ::= "skip"
+                | #Id ":=" AExp                      [:prec(80) strict(2):]
+                | Stmt ";" Stmt                      [:prec(100) gather(e E):]
+                | "if" BExp "then" Stmt "else" Stmt  [:prec(85) strict(1):]
+                | "while" BExp "do" Stmt             [:prec(85):]
 
-  syntax Stmt ::= skip
-                | #Id := AExp  [prec 80 gather (e E) strict(2)]
-                | Stmt ; Stmt [prec 100 gather(e E)]
-                | if BExp then Stmt else Stmt [strict(1)]
-                | while BExp do Stmt
-                | print ( PExp )  [strict]
-                | halt
-                | spawn Stmt [prec 90]
-                | { }
-                | { Stmt } [gather(&)]
-                | var Ids [prec 70]
+  syntax AExp ::= "++" #Id                           [:prec(0):]
+                | "read" "(" ")"
+                | "exchange" "(" AExp ")"            [:strict:]
+
+  syntax Stmt ::= "print" "(" PExp ")"               [:strict:]
+                | "halt"
+                | "spawn" Stmt                       [:prec(90):]
+                | "{" "}"
+                | "{" Stmt "}"                       [:gather(&):]
+                | "var" Ids                          [:prec(70):]
 
   syntax Ids ::= List{#Id,","}
   syntax PExp ::= AExp | #String 
@@ -43,7 +43,7 @@ module IMPPP imports IMPPP-SYNTAX + URIS
      <br/>
      <store color="white">.Map</store>
      <nextLoc color="gray">0</nextLoc>
-     <in color="magenta" stream="stdin">.List</in>
+     <in color="magenta">$IN:List</in>
      <out color="Orchid" stream="stdout">.List</out>
     </T>
 
