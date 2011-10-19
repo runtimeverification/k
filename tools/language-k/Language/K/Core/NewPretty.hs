@@ -14,10 +14,14 @@ ppK (Kra []) = char '.'
 ppKLabel (KInt i) = integer i
 ppKLabel (KId id) = text id
 
+ppKBag (KBag []) = char '.'
 ppKBag (KBag bs) = vsep $ map ppBagItem bs
 
 ppBagItem (CellItem label content) =
     hang 2 (ppStartTag label <$> (ppCellContent content)) <$> ppEndTag label
+
+ppKList (KList []) = char '.'
+ppKList (KList ks) = vsep $ map ppK ks
 
 ppKMap (KMap m) = vcat . map ppMapItem . toList $ m
 
@@ -25,6 +29,7 @@ ppMapItem (k1, k2) = ppK k1 <+> magenta (text "|->") <+> ppK k2
 
 ppCellContent (KContent k) = ppK k
 ppCellContent (BagContent bag) = ppKBag bag
+ppCellContent (ListContent list) = ppKList list
 ppCellContent (MapContent map) = ppKMap map
 
 ppStartTag label = green $ char '<' <> text label <> char '>'
