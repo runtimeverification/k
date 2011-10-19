@@ -1,0 +1,13 @@
+// This program declares no variables, so it gets stuck if executed normally.
+// To execute it, you need to initialize the configuration through krun.
+// Use a $ map variable, say $STATE:Map, in the <state/> cell in the
+// configuration, and then initialize that variable in krun as follows 
+//   krun --STATE="n|->100  s|->0" programs/sumPgm-novars.imp
+
+while not(n<=0) do (
+  s:=0;
+  while not(n<=0) do (
+    s:=s+n;
+    n:=n+-1
+  )
+)
