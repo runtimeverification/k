@@ -14,8 +14,6 @@ require /modules/threads
 require /modules/agents
 require /modules/quote-unquote
 
-require /modules/uris
-
 module AGENT
   imports EXP 
   imports LAMBDA
@@ -28,8 +26,6 @@ module AGENT
   imports THREADS 
   imports AGENTS 
   imports QUOTE-UNQUOTE 
-
-  imports URIS
 
  configuration
     <T>

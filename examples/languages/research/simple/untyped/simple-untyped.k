@@ -1,4 +1,3 @@
-require /modules/uris
 ------------------------------------
 --- SIMPLE-UNTYPED-SYNTAX module ---
 ------------------------------------
@@ -156,7 +155,7 @@ end module
 ---------------------------------------
 
 module SIMPLE-UNTYPED
-  imports SIMPLE-UNTYPED-SYNTAX + URIS
+  imports SIMPLE-UNTYPED-SYNTAX 
 
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
