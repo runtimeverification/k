@@ -1636,8 +1636,14 @@ sub maudify_file {
     print $indent."Processing file $file\n" if $verbose;
     $indent .= "|   ";
 	
+    open FILE,">","$file.k2slurp" or die "Cannot write $file.k2slurp\n";
+    print FILE "\n\nrequire /modules/uris\nrequire $file\n\n";
+    close FILE;
     
-    $_ = slurp_k($file, $latex || $png || $pdf || $ps || $crop || $eps);
+    $_ = slurp_k("$file.k2slurp", $latex || $png || $pdf || $ps || $crop || $eps);
+
+    unlink("$file.k2slurp");
+
 
 # remove quotes from syntax
     $_ = remove_quotes($_);
@@ -2780,11 +2786,15 @@ sub addKandKLATEX
 	$prelude_sorts =~ s/:/\|/sg;
 	$prelude_sorts =~ s/^\s*\|//;
 	$prelude_sorts =~ s/\|\s*$//;
+        my $k_includes = " including K ";
+        if ($mod ne "URIS") {
+          $k_includes .= "\n including URIS "; 
+        }
 #	print "SORTS: $prelude_sorts\n\n";
 	if ($content =~ /\s(syntax\s+($prelude_sorts)|configuration|rule)\s/sg)
 	{
 		# include K if syntax, configuration or rule keywords are used in module
-		$content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K !sg;
+		$content =~ s!(k?mod\s+\S+\s+is\s)!$1$k_includes!sg;
 
 #		print "MOD: |$mod|\nMDD: |$language_module_name|\n\n";
 		$k_auto_incl = 1 if $mod eq $language_module_name;

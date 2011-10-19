@@ -1,4 +1,3 @@
-require /modules/uris
 
 module IMPPP-SYNTAX
   syntax AExp ::= #Id | #Int
@@ -29,7 +28,7 @@ module IMPPP-SYNTAX
   syntax PExp ::= AExp | #String 
 end module
 
-module IMPPP imports IMPPP-SYNTAX + URIS
+module IMPPP imports IMPPP-SYNTAX
   syntax KResult ::= #Bool | #Int | #String
 
   configuration
