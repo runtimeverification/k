@@ -1,32 +1,34 @@
 module IMP-SYNTAX
-/*@ The following constructs are given the expected strictnesses, except for
+/*@ \section{Syntax}
+The following constructs are given the expected strictnesses, except for
 \textsf{and}, which is only strict in its first argument, because we will
 give it a short-circuited semantics (its second argument will only be
 evaluated when the first evaluates to true). */
 
   syntax AExp ::= #Id | #Int
-                | AExp "+" AExp                  [:prec(33) gather (E e) strict:]
-                | AExp "/" AExp                  [:prec(31) gather (E e) strict:]
+                | AExp "+" AExp                      [:prec(33) gather (E e) strict:]
+                | AExp "/" AExp                      [:prec(31) gather (E e) strict:]
   syntax BExp ::= #Bool
-                | AExp "<=" AExp                 [:prec(37) seqstrict:]
-                | "not" BExp                     [:prec(53) strict:]
-                | BExp "and" BExp                [:prec(55) strict(1):]
+                | AExp "<=" AExp                     [:prec(37) seqstrict:]
+                | "not" BExp                         [:prec(53) strict:]
+                | BExp "and" BExp                    [:prec(55) strict(1):]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp                  [:prec(40) strict(2):]
-                | Stmt ";" Stmt                  [:prec(60) gather (e E):]
+                | #Id ":=" AExp                      [:prec(40) strict(2):]
+                | Stmt ";" Stmt                      [:prec(60) gather (e E):]
                 | "if" BExp "then" Stmt "else" Stmt  [:prec(59) strict(1):]
-                | "while" BExp "do" Stmt           [:prec(59):]
-  syntax Pgm ::= "var" Ids ";" Stmt                [:prec(70):]
+                | "while" BExp "do" Stmt             [:prec(59):]
+  syntax Pgm ::= "var" Ids ";" Stmt                  [:prec(70):]
 
   syntax Ids ::= List{#Id,","} 
 end module
 
-module IMP imports IMP-SYNTAX
-/*@ \section*{Semantics}
+module IMP
+  imports IMP-SYNTAX
+/*@ \section{Semantics}
 This module defines the semantics of IMP.  We first define
 its configuration, then its results, and then its semantic rules. */
 
-/*@ \subsection*{Configuration}
+/*@ \subsection{Configuration}
 The configuration of IMP is trivial: it only contains two cells, one
 for the computation and another for the state.  For good encapsulation
 and clarity, we place the two cells inside another cell, the ``top'' cell
@@ -47,12 +49,10 @@ The \K semantics of each arithmetic construct is defined below.
 We need to do nothing for integers. */
 
 /*@ \subsubsection{Variable Lookup}
-A program variable $X$ is looked up in state $\Large\sigma$ using the
-builtin map lookup operation ${\Large\sigma}(X)$.  Note that this
-operation requires $\Large\sigma$ to be defined in $X$; otherwise the
-rewriting process will get stuck.  This means that our semantics of
-IMP disallows uses of uninitialized variables.  Variables are initialized
-using the assignment statement whose semantics is defined below. */
+A program variable $X$ is looked up in the state by matching a binding
+of the form $X \mapsto I$ in the state cell.  If such a binding does not
+exist, then the rewriting process will get stuck.  Thus our semantics of
+IMP disallows uses of uninitialized variables. */
 
   rule <k> X:#Id => I ...</k> <state>... X |-> I ...</state>
 
@@ -84,11 +84,9 @@ rule structural if one does not want it to count as a computational step. */
   rule skip => .
 
 /*@ \subsubsection{Assignment}
-The assigned variable is updated in the state: ${\Large\sigma}[I/X]$
-adds the mapping $X \mapsto I$ to $\Large\sigma$ in case $\Large\sigma$
-is not defined in $X$, and it changes the current mapping of $X$
-(to point to $I$) in case $\Large\sigma$ is defined in $X$.
-At the same time, the assignment is dissolved. */
+The assigned variable is updated in the state.  The variable is expected
+to be declared, otherwise the semantics will get stuck.  At the same time,
+the assignment is dissolved. */
 
   rule <k> X:=I:#Int => . ...</k> <state>... X |-> (_ => I) ...</state>
 
@@ -123,9 +121,15 @@ then one can remove the ``structural'' tag.  */
 
   rule <k> while B do S => if B then (S ; while B do S) else skip ...</k> [:structural:]
 
+/*@ \subsection{Programs}
+The semantics of an IMP program is that its body statement is executed
+in a state initializing all its global variables to 0.  Since \K's
+syntactic lists are internally interpreted as cons-lists (i.e., lists
+constructed with a head element followed by a tail list), we need to
+distinguish two cases, one when the list is empty and another when the
+list has at least one element.
+*/
 
-  rule <k> var  ; S => S ...</k>
-  rule <k> var (X,Xl:Ids => Xl) ; _ ...</k>
-       <state>... . => X |-> 0 ...</state> 
+  rule <k> var; S => S ...</k>
+  rule <k> var (X,Xl:Ids => Xl); _ ...</k> <state>... . => X |-> 0 ...</state> 
 end module
-
