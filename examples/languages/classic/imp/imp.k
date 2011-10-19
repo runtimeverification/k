@@ -19,7 +19,7 @@ evaluated when the first evaluates to true). */
                 | "while" BExp "do" Stmt             [:prec(59):]
   syntax Pgm ::= "var" Ids ";" Stmt                  [:prec(70):]
 
-  syntax Ids ::= List{#Id,","} 
+  syntax Ids ::= List{#Id,","}
 end module
 
 module IMP
@@ -127,8 +127,7 @@ in a state initializing all its global variables to 0.  Since \K's
 syntactic lists are internally interpreted as cons-lists (i.e., lists
 constructed with a head element followed by a tail list), we need to
 distinguish two cases, one when the list is empty and another when the
-list has at least one element.
-*/
+list has at least one element. */
 
   rule <k> var; S => S ...</k>
   rule <k> var (X,Xl:Ids => Xl); _ ...</k> <state>... . => X |-> 0 ...</state> 
