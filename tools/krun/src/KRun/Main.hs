@@ -182,7 +182,7 @@ constructMaudeCmd config kmap = T.pack cmd <> " " <> eval <> " " <> T.pack pat <
           eval = (\t -> "#eval(__(" <> t <> ",(.).Map))")
                . T.intercalate ","
                $ Map.foldrWithKey (\k (Kast v) ts ->
-               "(_|->_(('$" <> k <> "(.List{K})) , (" <> v <> ")))" : ts) [] kmap
+               "(_|->_((# \"$" <> k <> "\"(.List{K})) , (" <> v <> ")))" : ts) [] kmap
           pat = if search then searchPattern else ""
               where Bool search = config ! "search"
                     String searchPattern = config ! "search-pattern"
