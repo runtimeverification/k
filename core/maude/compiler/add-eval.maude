@@ -18,49 +18,38 @@ fmod ADD-EVAL is
   op addEval : Module Term TermList ~> Module .
   eq addEval(M, T, Tl) 
    = addEqs(defaultEvalEqs(Tl) mainEvalEq(evalCleanConf(T), evalMap(Tl)),
-     addOps(vars2Ops(Tl),
-            M)) .
+            M) .
 
 
   op defaultEvalEqs_ : TermList -> EquationSet .
   eq defaultEvalEqs(empty) 
    = (ceq evalS[mkVariable('M,Map)]
-       = evalS[ctor(Map)[itemCtor(Map)[mkConstant(getName(stdinVariable),K),wrap2K(emptyCt(getType(stdinVariable)))],mkVariable('M,Map)]]
-       if '_in_[mkConstant(getName(stdinVariable),K), 'keys_[mkVariable('M,Map)]] = falseCt 
+       = evalS[ctor(Map)[itemCtor(Map)[stringCt(string(getName(stdinVariable))),wrap2K(emptyCt(getType(stdinVariable)))],mkVariable('M,Map)]]
+       if '_in_[stringCt(string(getName(stdinVariable))), 'keys_[mkVariable('M,Map)]] = falseCt 
        [none] .)
      (ceq evalS[mkVariable('M,Map)]
-       = evalS[ctor(Map)[itemCtor(Map)[mkConstant(getName(noIOVariable),K),wrap2K(emptyCt(getType(noIOVariable)))],mkVariable('M,Map)]]
-       if '_in_[mkConstant(getName(noIOVariable),K), 'keys_[mkVariable('M,Map)]] = falseCt 
+       = evalS[ctor(Map)[itemCtor(Map)[stringCt(string(getName(noIOVariable))),wrap2K(emptyCt(getType(noIOVariable)))],mkVariable('M,Map)]]
+       if '_in_[stringCt(string(getName(noIOVariable))), 'keys_[mkVariable('M,Map)]] = falseCt 
        [none] .)
    . 
   eq defaultEvalEqs(V,Tl)
    = (ceq evalS[mkVariable('M,Map)]
-       = evalS[ctor(Map)[itemCtor(Map)[mkConstant(getName(V),K),wrap2K(emptyCt(getType(V)))],mkVariable('M,Map)]]
-       if '_in_[mkConstant(getName(V),K), 'keys_[mkVariable('M,Map)]] = falseCt 
+       = evalS[ctor(Map)[itemCtor(Map)[stringCt(string(getName(V))),wrap2K(emptyCt(getType(V)))],mkVariable('M,Map)]]
+       if '_in_[stringCt(string(getName(V))), 'keys_[mkVariable('M,Map)]] = falseCt 
        [none] .)
       defaultEvalEqs(Tl) .
 
 
   op evalMap_ : TermList -> TermList .
-  eq evalMap(empty) = itemCtor(Map)[mkConstant(getName(stdinVariable), K), wrap2K(stdinVariable)],
-                      itemCtor(Map)[mkConstant(getName(noIOVariable), K), wrap2K(noIOVariable)],
+  eq evalMap(empty) = itemCtor(Map)[stringCt(string(getName(stdinVariable))), wrap2K(stdinVariable)],
+                      itemCtor(Map)[stringCt(string(getName(noIOVariable))), wrap2K(noIOVariable)],
                         mkVariable('AndTheOthers, Map) .
-  eq evalMap(V, Tl) = itemCtor(Map)[mkConstant(getName(V),K),wrap2K(V)],evalMap(Tl) .
+  eq evalMap(V, Tl) = itemCtor(Map)[stringCt(string(getName(V))),wrap2K(V)],evalMap(Tl) .
 
   op mainEvalEq : TermList TermList -> Equation .
   eq mainEvalEq(empty, Tl) = mainEvalEq(emptyCt(Bag), Tl) .
   eq mainEvalEq(T, Tl)  
    = (eq evalS[mkCollection(Map,Tl)] = T  [none] .) .
-
-  op vars2Ops_ : TermList ~> OpDeclSet .
-  eq vars2Ops(V,Tl) = (op getName(V) : nil -> K [none] .) vars2Ops(Tl) .
-  eq vars2Ops(empty) = (op getName(stdinVariable) : nil -> K [none] .) (op getName(noIOVariable) : nil -> K [none] .) .
-
----  op $PGM : -> K .
----  op eval : Map -> Bag .
----  eq eval($PGM |-> `kWrapper(Sort, ,$PGM:Sort)) = `stripOptionals(Cfg)`
----  eq eval(Map) = eval(Map $PGM |-> kWrapper(`defaultValue(Sort)`)) if $PGM not in keys(Map)
-
 
   op evalCleanConf : Term -> TermList .
   eq evalCleanConf(T) = evalCleanConf(T,splitKCell(T)) .
