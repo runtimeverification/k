@@ -17,8 +17,9 @@ fmod ADD-EVAL is
 
   op addEval : Module Term TermList ~> Module .
   eq addEval(M, T, Tl) 
-   = addEqs(defaultEvalEqs(Tl) mainEvalEq(evalCleanConf(T), evalMap(Tl)),
-            M) .
+   = addSubsorts((subsort String < K .),
+       addEqs(defaultEvalEqs(Tl) mainEvalEq(evalCleanConf(T), evalMap(Tl)),
+            M)) .
 
 
   op defaultEvalEqs_ : TermList -> EquationSet .
