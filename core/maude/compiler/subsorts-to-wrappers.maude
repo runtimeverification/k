@@ -8,7 +8,8 @@ fmod SUBSORTS-TO-WRAPPERS is
  including META-ATTRS .
   var IL : ImportList .
  var OPDS : OpDeclSet .  var Op Op' : OpDecl .
- var SSDS : SubsortDeclSet .  var SSD : SubsortDecl . var S S' : Sort .
+ var SSDS : SubsortDeclSet .  var SSD : SubsortDecl . 
+ var S S' : Sort .  var SS : SortSet .
  var Q O : Qid . var Tl : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
  var AS AS' : AttrSet .  var HL : HookList .
  var MS : ModuleSet . var M M' Flat : Module .  var SSDM : SubsortDeclMap . 
@@ -31,7 +32,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
 
  op subsorts2wrappersDeclare : Module Module SubsortDeclSet SubsortDeclMap ~> Module .
  eq subsorts2wrappersDeclare(M, Flat, SSDS, SSDM)
-  = addOps(filteredProject(SSDM,SSDS), M)  .
+  = addOps(filteredProject(M,SSDM,SSDS), M)  .
  
 
  sorts SubsortDeclMapItem SubsortDeclMap .
@@ -43,14 +44,21 @@ var Mbs : MembAxSet . var Mb : MembAx .
  eq projectFirst((empty).SubsortDeclMap) = none .
  eq projectFirst(SSDM [SSD |-> Op']) = SSD projectFirst(SSDM) .
 
- op filteredProject : SubsortDeclMap SubsortDeclSet -> OpDeclSet .
- eq filteredProject((empty).SubsortDeclMap, SSDS) = none .
- eq filteredProject(SSDM [SSD |-> Op'], SSDS) 
-  = if SSD in SSDS then Op' replaceOp(Op') ruleOps(Op') filteredProject(SSDM,SSDS) 
-    else filteredProject(SSDM,SSDS) fi .
+ op filteredProject : Module SubsortDeclMap SubsortDeclSet -> OpDeclSet .
+ eq filteredProject(M, (empty).SubsortDeclMap, SSDS) = none .
+ eq filteredProject(M, SSDM [SSD |-> Op'], SSDS) 
+  = if SSD in SSDS then Op' replaceOp(M,Op') ruleOps(Op') filteredProject(M,SSDM,SSDS) 
+    else filteredProject(M,SSDM,SSDS) fi .
 
- op replaceOp : OpDecl ~> OpDecl .
- eq replaceOp(op Q : T -> T' [AS] .) = (op replaceS : T T -> T [prec(125)] .) .
+ op replaceOp : Module OpDecl ~> OpDeclSet .
+ eq replaceOp(M, op Q : T -> T' [AS] .) 
+  = replaceOps(Q, T ; getSubsorts(getSubsorts(getSubsorts(M),T))) .
+
+ op replaceOps : Qid SortSet ~> OpDeclSet .
+ eq replaceOps(Q,none) = none .
+ eq replaceOps(Q, T ; SS) 
+  = (op replaceS : T T -> T [prec(125)] .) 
+    replaceOps(Q, SS) .
 
  op ruleOps : OpDecl ~> OpDecl .
  eq ruleOps(op Q : T -> T' [AS] .) = (op symbol kcrl : T K -> '`[KSentence`] [prec(126) format('b 'o 'b 'o 'd)] .) (op symbol krl : T -> '`[KSentence`] [prec(126) format('b 'o 'd)] .) .
@@ -65,7 +73,7 @@ var Mbs : MembAxSet . var Mb : MembAx .
  
  op subsorts2wrappers : Module Module SubsortDeclSet SubsortDeclMap ~> Module .
  eq subsorts2wrappers(M, Flat, SSDS, SSDM)
-  = setMbs(setRls(setEqs(removeSubsorts(addOps(filteredProject(SSDM,SSDS), M),SSDS), subsorts2wrappersEqs(getEqs(M), Flat, getOps(Flat), SSDM)), subsorts2wrappersRls(getRls(M), Flat, getOps(Flat), SSDM)),subsorts2wrappersMbs(getMbs(M), Flat, getOps(Flat), SSDM))  .
+  = setMbs(setRls(setEqs(removeSubsorts(addOps(filteredProject(M, SSDM,SSDS), M),SSDS), subsorts2wrappersEqs(getEqs(M), Flat, getOps(Flat), SSDM)), subsorts2wrappersRls(getRls(M), Flat, getOps(Flat), SSDM)),subsorts2wrappersMbs(getMbs(M), Flat, getOps(Flat), SSDM))  .
  
  op subsorts2wrappers : SubsortDeclSet ~> SubsortDeclMap .
  eq subsorts2wrappers((subsort S < S' .) SSDS)
