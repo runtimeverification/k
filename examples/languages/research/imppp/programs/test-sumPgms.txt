@@ -1,0 +1,75 @@
+Here I explain several testing scenarios for sumPgm, based on the comments
+already available in the sumPgmN.imppp files.  Note that imppp.desk plays no
+role here, so all the above should work without without any imppp.desk file.
+Also, all the following krun commands are given in the imppp/programs
+directory; they should also work from the imppp directory and from any other
+directory provided that one gives the precise path to the program to execute.
+
+We have the following simple variants of kompiling imppp.k:
+
+imppp-1:
+     <in color="magenta"> .List </in>
+     <out color="Orchid"> .List </out>
+
+imppp-2:
+     <in color="magenta"> $IN:List </in>
+     <out color="Orchid"> .List </out>
+
+imppp-3:
+     <in color="magenta" stream="stdin"> .List </in>
+     <out color="Orchid"> .List </out>
+
+imppp-4:
+     <in color="magenta"> .List </in>
+     <out color="Orchid" stream="stdout"> .List </out>
+
+And then we have four more compound variants.  For example
+
+imppp-234:
+     <in color="magenta" stream="stdin"> $IN </in>
+     <out color="Orchid" stream="stdout"> .List </out>
+
+
+(1) sumPgm0.imppp
+(1.1) krun sumPgm0 [--no-io]
+      - imppp-[1234]+: should return a pretty-printed configuration
+(1.2) krun sumPgm0 [--no-io] --no-config
+      - imppp-[1234]+: should return nothing
+
+From now on, --no-config should simply discard the configuration,
+regardless of the other options.  So I don't mention --no-config anymore.
+But in principle, the number of test cases doubles.
+
+(2) sumPgm1.imppp
+(2.1) krun sumPgm1
+      - imppp-[123]+: should return a pretty-printed configuration, with ListItem(55) in <out/>
+      - imppp-4[23]*: should stdout 55, followed by a pretty-printed configuration with empty <out/>
+(2.2) krun sumPgm1 --no-io
+      - imppp-[1234]+: should return a pretty-printed configuration, with ListItem(55) in <out/>
+
+(3) sumPgm2.imppp
+(3.1) krun sumPgm2
+      - imppp-[124]+: should return a stuck pretty-printed configuration, with read() on top of the <k/> cell
+      - imppp-3[2]: should prompt the user for an integer (say 10); then pretty-print configuration with ListItem(55) <out/>
+      - imppp-34[2]: should prompt the user for an integer (say 10); then stdout 55 then pretty-print configuration with empty <out/>
+(3.2) krun sumPgm2 --no-io
+      - imppp-[1234]+: should return a stuck pretty-printed configuration, with read() on top of the <k/> cell
+(3.3) krun sumPgm2 --$IN="ListItem(10) ListItem(20)"
+      - imppp-[14]+: should return a stuck pretty-printed configuration, with read() on top of the <k/> cell
+      - imppp-2[3]: should return a pretty-printed configuration, with ListItem(55) in <out/> and ListItem(20) in <in/>
+      - imppp-24[3]: should stdout 55 followed by a pretty-printed configuration, with empty <out/> and ListItem(20) in <in/>
+      - imppp-3: should prompt the user for an integer (say 10); then pretty-print configuration with ListItem(55) <out/> and ListItem(20) in <in/>
+      - imppp-34: should prompt the user for an integer (say 10); then stdout 55 then pretty-print configuration with empty <out/> and ListItem(20) in <in/>
+(3.4) krun sumPgm2 --$IN="ListItem(10) ListItem(20)" --no-io
+      - imppp-[134]+: should return a stuck pretty-printed configuration, with read() on top of the <k/> cell
+      - imppp-2[34]*: should return a pretty-printed configuration, with ListItem(55) in <out/> and ListItem(20) in <in/>
+
+For all the above and imppp-3[24]*, one should also be able to provide input via piping.
+For example, "echo 10 20 | krun sumPgm2 ..." should work the same way as user prompts 10 when/if asked.
+
+For sumPgm3.imppp, we expect to see similar things as above for sumPgm2.imppp.
+The only additional thngs which should be tested are:
+(4.1) that strings also appear in the <out/> cell when displaying configurations
+(4.2) that one can pass BOTH $IN and stdin, the $IN being consumed first and then the stdin
+(4.3) that if the stdin is passed via a pipe, then the stdin in closed, so program gets stuck on a read() after consuming the $IN and the pipe.
+

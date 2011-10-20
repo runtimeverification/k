@@ -53,8 +53,10 @@ all the various additional cells needed for IMP++.  */
      <br/>
      <store color="white">.Map</store>
      <nextLoc color="gray">0</nextLoc>
-     <in color="magenta" stream="stdin"> $IN:List </in>
-     <out color="Orchid" stream="stdout">.List</out>
+     <in color="magenta"> $IN:List </in>
+     <out color="Orchid">.List</out>
+//     <in color="magenta" stream="stdin"> $IN:List </in>
+//     <out color="Orchid" stream="stdout">.List</out>
     </T>
 
 //@ \subsection{The old IMP constructs}
