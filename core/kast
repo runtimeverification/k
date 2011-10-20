@@ -283,7 +283,7 @@ unlink("programCompile.tmp") if !$verbose;
 unlink($xml_ast) if !$verbose;
 
 
-$out_file = "$fname.kast" if $out_file eq "?";
+$out_file = "/dev/stdout" if $out_file eq "?";
 # saving
 open FILE, ">", "$out_file" or die "Cannot create $out_file\n";
 print FILE $ast;
@@ -351,7 +351,7 @@ sub spacify
 sub usage
 {
     print "Unknown option: @_\n" if @_;
-    print "usage: cast [-pgm] program_name [-pmod program_module] [-cfile compiled_file] -smod syntax_module\n\t[-verbose]\n\n
+    print "usage: kast [-pgm] program_name [-pmod program_module] [-cfile compiled_file]\n\t-smod syntax_module\ [-verbose]\n\n
   Options:
   \t-verbose    : verbose mode
   \t-pgm        : specify the file where the program is.
