@@ -1,0 +1,44 @@
+// This modifies sumPgm1.impp by allowing n to read any value.  However, for
+// this to work we need to provide a list item in the input cell.  One way
+// to do that is to use a configuration variable.  For example, replace the
+// .List from the <in/> cell in the configuration with $IN:List, that is,
+//
+//     <in color="magenta"> $IN:List </in>
+//
+// then re-kompile the definition, and then type in the command:
+//
+//   krun programs/sumPgm2.imppp --IN="ListItem(10)"
+//
+// Another way to do it is to connect the <in/> cell to the
+// the standard input stream, using the XML attribute stream="stdin":
+//
+//     <in color="magenta" stream="stdin"> .List </in>
+// 
+// Then you will be prompted to type in an integer at the standard input
+// when you krun the program.  You can also pipe data in the standard
+// input for krun, for example:
+//
+//   echo 10 | krun programs/sumPgm2.imppp
+//
+// Finally, you can also connect the <out/> cell to the standard output
+// in the configuration declaration using a similar attribute, namely
+//
+//     <out color="Orchid" stream="stdout">.List</out>
+//
+// and then even disable the display of the configuration, thus turning
+// krun into a real interpreter for IMP++.  For example:
+//
+// bash$ krun programs/sumPgm2.imppp --no-config
+// 10
+// 55bash$ 
+
+var n,s;
+n:=read();
+while not(n<=0) do {
+  s:=0;
+  while not(n<=0) do {
+    s:=s+n;
+    n:=n+-1
+  }
+} ;
+print(s)

@@ -1,0 +1,14 @@
+// This is the original IMP program calculating the sum of numbers up to n
+// Calling krun on it should show a configuration containing no threads and
+// two locations in the store, one holding 0 (the n) and one holding 55 (s).
+// The input and output buffers are obviously empty, and the next loc is 2.
+
+var n,s;
+n:=10;
+while not(n<=0) do (
+  s:=0;
+  while not(n<=0) do (
+    s:=s+n;
+    n:=n+-1
+  )
+)

@@ -1,0 +1,15 @@
+// This is a slightly modified version of sumPgm0.impp: it uses blocks and 
+// a print at the end.  When running krun on it, we should see the same
+// result configuration as for sumPgm0.imp, but with ListItem(55) in the
+// out cell.
+
+var n,s;
+n:=10;
+while not(n<=0) do {
+  s:=0;
+  while not(n<=0) do {
+    s:=s+n;
+    n:=n+-1
+  }
+} ;
+print(s)
