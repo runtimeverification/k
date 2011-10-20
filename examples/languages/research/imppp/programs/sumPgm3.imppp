@@ -1,5 +1,5 @@
 // Let us now consider a program which continues to read a number n and print
-// the sum of numbers up to n until n is less then or equal to zero.
+// the sum of numbers up to n, until n is less then or equal to zero.
 // As seen in the previous variants of this program, there are different ways
 // to configure the IMP++ K semantics.  We demonstrate a combination of these.
 //
@@ -10,7 +10,7 @@
 //     <in color="magenta" stream="stdin"> .List </in>
 //     <out color="Orchid" stream="stdout"> .List </out>
 //
-// After kompilation, we can run the semantics like any interactive interpreter:
+// After kompilation, we can run the semantics like any realistic interpreter:
 //
 // bash$ krun programs/sumPgm3.imppp --no-config
 // Add numbers up to (<= 0 to quit)? 10
@@ -25,10 +25,10 @@
 // bash$ echo 10 100 0 25 | krun programs/sumPgm3.imppp --no-config
 // Add numbers up to (<= 0 to quit)? Sum = 55
 // Add numbers up to (<= 0 to quit)? Sum = 5050
-// Add numbers up to (<= 0 to quit)? bash-3.2$ 
+// Add numbers up to (<= 0 to quit)? bash$ 
 //
 // If we want to BOTH pass some initial items in the <in/> cell AND continue
-// to read more items from the standard input, then you can BOTH connect the
+// to read more items from the standard input, then we can BOTH connect the
 // <in/> cell to the standard input AND use a configuration variable.
 // For example:
 //

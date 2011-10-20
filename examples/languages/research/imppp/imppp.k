@@ -1,5 +1,7 @@
-
 module IMPPP-SYNTAX
+//@ \section{Syntax}
+
+//@ \subsection{The old IMP constructs}
   syntax AExp ::= #Id | #Int
                 | AExp "+" AExp                      [:prec(33) gather (E e) strict:]
                 | AExp "/" AExp                      [:prec(31) gather (E e) strict:]
@@ -13,9 +15,9 @@ module IMPPP-SYNTAX
                 | "if" BExp "then" Stmt "else" Stmt  [:prec(85) strict(1):]
                 | "while" BExp "do" Stmt             [:prec(85):]
 
+//@ \subsection{The new IMP++ constructs}
   syntax AExp ::= "++" #Id                           [:prec(0):]
                 | "read" "(" ")"
-                | "exchange" "(" AExp ")"            [:strict:]
 
   syntax Stmt ::= "print" "(" PExp ")"               [:strict:]
                 | "halt"
@@ -24,12 +26,21 @@ module IMPPP-SYNTAX
                 | "{" Stmt "}"                       [:gather(&):]
                 | "var" Ids                          [:prec(70):]
 
+//@ We prefer aliases for lists
   syntax Ids ::= List{#Id,","}
+//@ \textit{PExp} useful for the \texttt{print} statement (either an expression or a string)
   syntax PExp ::= AExp | #String 
 end module
 
+
 module IMPPP imports IMPPP-SYNTAX
+//@ \section{Semantics}
+
   syntax KResult ::= #Bool | #Int | #String
+
+/*@ \subsection{Configuration}
+The original configuration of IMP has been extended to include
+all the various additional cells needed for IMP++.  */
 
   configuration
     <T color="yellow">
@@ -42,88 +53,88 @@ module IMPPP imports IMPPP-SYNTAX
      <br/>
      <store color="white">.Map</store>
      <nextLoc color="gray">0</nextLoc>
-     <in color="magenta" stream="stdin">$IN:List</in>
+     <in color="magenta" stream="stdin"> $IN:List </in>
      <out color="Orchid" stream="stdout">.List</out>
     </T>
 
-  /*@ \textbf{Variable lookup} */
+//@ \subsection{The old IMP constructs}
+
+//@ \subsubsection{Variable lookup}
   rule <k> X:#Id => I ...</k>
        <env>... X |-> N:#Nat ...</env>
        <store>... N |-> I:#Int ...</store> [transition]
 
-  /*@ \textbf{Arithmetic expressions} */
+//@ \subsubsection{Arithmetic constructs}
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
 
-  /*@ \textbf{Variable increment} */
-  rule <k> ++X => I +Int 1 ...</k>
-       <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store> [transition]
-
-  /*@ \textbf{Input} */
-  rule <k> read() => I ...</k>
-       <in> ListItem(I) => . ...</in> [transition]
-
-  /*@ \textbf{Exchange synchronization construct} */
-
-  rule <k> exchange(I1) => I2 ...</k> <k> exchange(I2) => I1 ...</k> [transition]
-
-  /*@ \textbf{Boolean expressions} */
+//@ \subsubsection{Boolean constructs}
   rule I1 <= I2 => I1 <=Int I2
   rule not T:#Bool => notBool T
   rule true and B:BExp => B
   rule false and B => false
 
+//@ \subsubsection{Skip}
   rule skip => .
 
-  /*@ \textbf{Variable assignment} */
+//@ \subsubsection{Variable assignment}
   rule <k> X := I => . ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> (_ => I) ...</store>
 
-   /*@ \textbf{Statement sequentialization} */
-  rule S1:Stmt ; S2:Stmt => S1 ~> S2
+//@ \subsubsection{Sequential composition}
+  rule S1:Stmt ; S2:Stmt => S1 ~> S2 [structural]
 
- /*@ \textbf{Conditional} */
+//@ \subsubsection{Conditional}
   rule if  true then S1 else _  => S1
   rule if false then _  else S2 => S2
 
-  /*@ \textbf{While loop} */
+//@ \subsubsection{While loop}
   rule <k> while B do S:Stmt => if B then S ; while B do S else {} ...</k>
 
-  /*@ \textbf{Output} */
+//@ \subsection{The new IMP++ constructs}
+
+//@ \subsubsection{Variable increment}
+  rule <k> ++X => I +Int 1 ...</k>
+       <env>... X |-> N ...</env>
+       <store>... N |-> (I => I +Int 1) ...</store> [transition]
+
+//@ \subsubsection{Input}
+  rule <k> read() => I ...</k>
+       <in> ListItem(I) => . ...</in> [transition]
+
+//@ \subsubsection{Output}
   rule <k> print(I) => . ...</k>
        <out>... . => ListItem(I) </out>
   rule <k> print(Str:#String) => . ...</k>
        <out>... . => ListItem(Str) </out>
 
-  /*@ \textbf{Halt} */
+//@ \subsubsection{Halt}
   rule <threads>... <k> halt ...</k> ...</threads> => .
 
-  /*@ \textbf{Spawn thread} */
+//@ \subsubsection{Spawn thread}
   rule <k> spawn S => . ...</k>
        <env> Rho </env>
        (. => <thread>... <k> S </k> <env> Rho </env> ...</thread>)
 
-  /*@ \textbf{Dissolve thread} */
+//@ \subsubsection{Terminate thread}
   rule <thread>... <k> .K </k> ...</thread> => .
 
-  /*@ \textbf{Block} */
+//@ \subsubsection{Blocks}
   rule {} => .
   rule <k> {S} => S ~> env(Rho) ...</k>
        <env> Rho:Map </env>
 
-  /*@ \textbf{Variable declaration} */
+//@ \subsubsection{Variable declaration}
+  rule var .Ids => .
   rule <k> var (X,Xl => Xl:Ids) ...</k>
-       <env> Rho => Rho[N/X] </env> 
+       <env> Rho => Rho[N/X] </env>
        <store>... . => N |-> 0 ...</store>
        <nextLoc> N => sNat N </nextLoc>
 
-  rule var .List{","} => .
-
-
-  /*@ \textbf{Environment recovery} */
+//@ \subsubsection{Auxiliary operations}
+//@ Environment recovery
   syntax K ::= env Map
-  rule env(_) ~> env(Rho) => env(Rho) [structural]
+  rule (env(_) => .) ~> env(_) [structural]
   rule <k> env(Rho) => . ...</k> <env> _ => Rho </env> [structural]
 end module

@@ -23,10 +23,10 @@
 // Finally, you can also connect the <out/> cell to the standard output
 // in the configuration declaration using a similar attribute, namely
 //
-//     <out color="Orchid" stream="stdout">.List</out>
+//     <out color="Orchid" stream="stdout"> .List </out>
 //
 // and then even disable the display of the configuration, thus turning
-// krun into a real interpreter for IMP++.  For example:
+// krun into an interactive interpreter for IMP++.  For example:
 //
 // bash$ krun programs/sumPgm2.imppp --no-config
 // 10
