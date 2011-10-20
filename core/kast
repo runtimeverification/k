@@ -25,7 +25,6 @@ my $elapsed = 0;
 my $help;
 
 my $pgm           = "?";
-my $pmod          = "?";
 my $lang          = "?";
 my $syntax_module = "?";
 my $verbose       = 0;
@@ -59,7 +58,6 @@ my $comment = join("|", (
 usage() if (@ARGV < 1 or
     ! GetOptions('help|?' => \$help,
 	'pgm=s'      => \$pgm,
-	'pmod=s'     => \$pmod,
 	'lang=s'     => \$lang,
 	'smod=s'     => \$syntax_module,
 	'o|output=s' => \$out_file,
@@ -91,8 +89,6 @@ if ($suffix eq "")
     exit(1);
 }
 
-# 1. program module
-$pmod = uc($fname) if ($pmod eq "?");
 # 2. compiled file
 $suffix =~ s/^\.//;
 $lang = $suffix if ($lang eq "?");
@@ -351,14 +347,20 @@ sub spacify
 sub usage
 {
     print "Unknown option: @_\n" if @_;
-    print "usage: kast [-pgm] program_name [-pmod program_module] [-cfile compiled_file]\n\t-smod syntax_module\ [-verbose]\n\n
+    print "usage: kast [-pgm] program_name [-cfile compiled_file] [-smod syntax_module]\n\t[-o output_file] [-verbose] \n\n
   Options:
+  \t-pgm        : specifies the file where the program is.
+  \t-lang       : specifies the name of the language.  
+  \t\t<lang>.k must exist and kompile should have been called on it.
+  \t\tThe default value for <lang> is the extensions of <pgm>
+  \t-smod       : specifies the syntax module name
+  \t\tThe default value for <smod> is <LANG>-SYNTAX
+  \t-o[utput]   : specifies the output file
+  \t\tThe default value is /dev/stdout
   \t-verbose    : verbose mode
-  \t-pgm        : specify the file where the program is.
-  \t-pmod       : specify the name of the module which will wrap the program
-  \t-lang       : specify a k compiled file
-  \t-smod       : specify the syntax module name
-  \t-o[utput]   : specify the output file\n\n";
+  \n
+  Currently, kast needs to be called in the directory containing the definition and the definition is assumed to have been kompiled prior to calling kast.\n\n
+  ";
     exit;
 }
 
