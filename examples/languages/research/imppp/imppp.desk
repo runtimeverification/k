@@ -18,6 +18,7 @@ groups:
       do-search: true
       io: false
       maude-cmd: search
+      output-mode: pretty
 
     - name: config
       output-mode: raw
