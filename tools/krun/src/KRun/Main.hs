@@ -96,7 +96,7 @@ searchExecution config kmap = do
     kmap' <- case isterm of
         False -> do
             input <- T.getContents
-            let stdbuf = Kast $ T.concat ["wlist_(#buffer(# \"", input, "\"(.List{K})))(.List{K})"]
+            let stdbuf = Kast $ T.concat ["(# \"", T.replace "\n" "\\n" input, "\"(.List{K}))"]
             return $ Map.insert "stdin" stdbuf kmap
         True -> return kmap
     (_, outFile, errFile) <- evalKastIO config kmap'
