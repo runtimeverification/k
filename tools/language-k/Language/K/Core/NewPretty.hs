@@ -20,12 +20,12 @@ ppKLabel (KString s) = text (show s)
 ppKBag (KBag []) = char '.'
 ppKBag (KBag bs) = vsep $ map ppBagItem bs
 
-ppBagItem (BagItem k) = text "BagItem(" <> ppK k <> char ')'
+ppBagItem (BagItem k) = text "BagItem" <> parens (ppK k)
 ppBagItem (CellItem label content) =
     hang 2 (ppStartTag label <$> (ppCellContent content)) <$> ppEndTag label
 
 ppKList (KList []) = char '.'
-ppKList (KList ks) = vsep $ map (\k -> text "ListItem(" <> ppK k <> char ')') ks
+ppKList (KList ks) = vsep $ map (\k -> text "ListItem" <> parens (ppK k)) ks
 
 ppKMap (KMap m) = vcat . map ppMapItem . toList $ m
 
