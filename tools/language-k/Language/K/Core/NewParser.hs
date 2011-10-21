@@ -17,7 +17,7 @@ kra = emptyK -- <|> TODO
 
 emptyK :: Parser K
 emptyK = do
-    string "(.).K"
+    string "." <|> string "(.).K"
     return $ Kra []
 
 -- | Parse a K application: KLabel(K1,,K2)
@@ -108,11 +108,32 @@ emptyKList = do
     string "(.).List"
     return $ KList []
 
-listItem :: Parser K
-listItem = do
+listItem :: Parser ListItem
+listItem = listItem' <|> try buffer <|> try istream <|> ostream
+
+listItem' :: Parser ListItem
+listItem' = do
     string "ListItem"
     k <- parens k
-    return k
+    return $ ListItem k
+
+buffer :: Parser ListItem
+buffer = do
+    string "#buffer"
+    k <- parens k
+    return $ Buffer k
+
+istream :: Parser ListItem
+istream = do
+    string "#istream"
+    i <- integer
+    return $ IStream i
+
+ostream :: Parser ListItem
+ostream = do
+    string "#ostream"
+    i <- integer
+    return $ IStream i
 
 kMap :: Parser KMap
 kMap = emptyKMap <|> KMap . Map.fromList <$> mapItem `endBy1` spaces

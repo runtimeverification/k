@@ -36,7 +36,14 @@ data KLabelPart
     | Hole
     deriving (Eq, Ord, Show, Data, Typeable)
 
-data KList = KList [K]
+data KList = KList [ListItem]
+    deriving (Eq, Ord, Show, Data, Typeable)
+
+data ListItem
+    = ListItem K
+    | Buffer K
+    | IStream Integer
+    | OStream Integer
     deriving (Eq, Ord, Show, Data, Typeable)
 
 data KBag = KBag [BagItem]
