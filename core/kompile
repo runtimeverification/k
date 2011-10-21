@@ -2407,7 +2407,7 @@ sub spacify {
  
 # Dirty hack: add spaces around anonymous variables, so that they will be properly
 # translated into ? later on
-    $lines =~ s/_/ _ /gs;
+    $lines =~ s/_(?!\.)/ _ /gs;
     
 # Next unfreeze all tokens and return the spacified string
     return Unfreeze($default_freezer, $lines);
