@@ -142,11 +142,6 @@ standardExecution config kast kmap = do
                 mapM_ (putStrLn . prettyPrint) terms
 -}
 
--- | Rewrites a flattened K term (Kast) in the compiled K definition.
---evalKast :: Desk -> Kast -> IO (Maybe MaudeResult)
---evalKast desk (Kast k) = rewrite [compiledFile desk] evalTerm
---    where evalTerm = printf "#eval('$PGM(.List{K}) |-> (%s))" (T.unpack k)
-
 -- | Evaluate a term using the Java IO wrapper around Maude.
 evalKastIO :: Config -> Map Text Kast -> IO (FilePath, FilePath, FilePath)
 evalKastIO config kmap = do
