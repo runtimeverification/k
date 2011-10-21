@@ -96,7 +96,7 @@ commonKSettings :: [Setting]
 commonKSettings =
     [ Setting "main-module" StringType "Name of the main module the program should execute in"
     , Setting "syntax-module" StringType "Name of the syntax module"
-    , Setting "search" BoolType "Search for all possible results"
+    , Setting "do-search" BoolType "Search for all possible results"
     , Setting "io" BoolType "Use real IO when running the definition"
     , Setting "statistics" BoolType "Print Maude's rewrite statistics"
     ]
@@ -116,7 +116,7 @@ defaultConfig mExt = Map.fromList $
     , ("print-version", Bool False)
     , ("parser", String "kast")
     , ("maude-cmd", String "erewrite")
-    , ("search", Bool False)
+    , ("do-search", Bool False)
     , ("search-pattern", String "=>! B:Bag")
     , ("io", Bool True)
     , ("output-mode", String "pretty")

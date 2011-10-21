@@ -86,7 +86,7 @@ main = do
     kast <- flattenProgram config pgm
     let kmap' = Map.insert "PGM" kast kmap
 
-    Bool search <- getVal config "search"
+    Bool search <- getVal config "do-search"
     if search
         then searchExecution config kmap'
         else standardExecution config kmap'
@@ -178,7 +178,7 @@ constructMaudeCmd config kmap = T.pack cmd <> " " <> eval <> " " <> T.pack pat <
                $ Map.foldrWithKey (\k (Kast v) ts ->
                "(_|->_((# \"$" <> k <> "\"(.List{K})) , (" <> v <> ")))" : ts) [] kmap
           pat = if search then searchPattern else ""
-              where Bool search = config ! "search"
+              where Bool search = config ! "do-search"
                     String searchPattern = config ! "search-pattern"
           (<>) = T.append
 
