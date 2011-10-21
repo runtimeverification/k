@@ -120,12 +120,11 @@ standardExecution config kmap = do
 
 printResult :: Config -> Text -> IO ()
 printResult config result = do
-    File rawMaudeOut <- getVal config "raw-maude-out"
-    T.writeFile rawMaudeOut result
-
-    File prettyMaudeOut <- getVal config "pretty-maude-out"
-    if prettyMaudeOut /= "/dev/null"
-        then do
+    String outputMode <- getVal config "output-mode"
+    case outputMode of
+        "none" -> return ()
+        "raw" -> T.putStrLn result
+        "pretty" -> do
             case parse kBag "" (T.unpack result) of
                 Left err -> do
                     putStrLn "Failed to parse result term!"
@@ -134,7 +133,7 @@ printResult config result = do
                     putStrLn "Got error(s):"
                     print err
                 Right bag -> printDoc $ ppKBag bag
-        else return ()
+        s -> die $ "Invalid output-mode setting: " ++ s
 
 printStatistics :: Config -> Text -> IO ()
 printStatistics config stats = do
