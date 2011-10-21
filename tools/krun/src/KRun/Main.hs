@@ -100,9 +100,9 @@ searchExecution config kmap = do
     when (isNothing maybeSearchResults) $
         die $ "Failed to parse search results:\n\n" ++ T.unpack out
     let searchResults = fromJust maybeSearchResults
-    T.putStrLn "Search results:\n"
+    T.putStrLn "Search results:"
     forM_ (zip [1..] searchResults) $ \(i, sr) -> do
-        putStrLn $ "\ESC[94mSolution " ++ show i ++ ", state " ++ show (searchResultState sr) ++ ":\ESC[0m"
+        putStrLn $ "\n\ESC[94mSolution " ++ show i ++ ", state " ++ show (searchResultState sr) ++ ":\ESC[0m"
         printResult config (searchResultTerm sr)
         printStatistics config (searchStatistics sr)
 
