@@ -127,21 +127,6 @@ standardExecution config kast kmap = do
         -- TODO: make color optional. green:
         T.putStrLn (T.concat ["\ESC[92m", statistics maudeResult, "\ESC[0m"])
 
-{-
-    case getOutputMode desk of
-        IOServer -> return ()
-        Maude -> T.putStrLn (resultTerm mr)
-        PrettyPrint -> case cellsToXml' (resultTerm mr) of
-            Left err -> die $ "Failed to convert Maude output to XML: " ++ err
-            Right xmltext -> do
-                let kterms = xpath (getCellQuery desk) (T.unpack xmltext)
-                -- TODO: do "trim" in cellsToXml, if possible
-                let terms = rights (map (parseK . trim) kterms)
-                when (null terms) $
-                    die $ "Unable to parse strings resulting from cell query as K terms."
-                mapM_ (putStrLn . prettyPrint) terms
--}
-
 -- | Evaluate a term using the Java IO wrapper around Maude.
 evalKastIO :: Config -> Map Text Kast -> IO (FilePath, FilePath, FilePath)
 evalKastIO config kmap = do
