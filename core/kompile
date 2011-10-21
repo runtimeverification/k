@@ -219,18 +219,7 @@ my $short_help_message =
 	after \\begin{document} but before first \\begin{module}
 	in the latex file
 
-  Compile only one program options
-  -pgm <filename> : specify the file where the program macro is
-  -cmod <compiled module name> : specify the compiled module 
-     where the language is
-  -cfile <compiled module file> : specify the file containing the 
-     compiled module. If this is missing, <compiled module file> 
-     will be considered LOWCAPS(cmod)-compiled
-  -pmod <module name> : specify the module where the macro is
-     If this is missing, <module name> will be considered ALLCAPS(pgm)
-  -pname <macro name> : specify the name of the macro
-     If this is missing, <macro name> will be considered as being pgm
-  \n";
+ \n";
 
 # next subroutine prints the usage message;
 # $0 is initially bound to the program name, as typed
@@ -603,13 +592,6 @@ my $klabels = "";
 my $kshared = File::Spec->rel2abs(File::Spec->catfile(File::Spec->curdir(), "shared.maude"));
 my $mset = 0;
 
-# variables to compile only one program
-my $compileProgram = 0;
-my $pgm   = "0";	# source file
-my $cfile = "";         # compiled file
-my $cmod  = "0";	# compiled module name
-my $pmod  = "0";	# program module name
-my $pname = "0";	# program name
 
 my $begin_compiled_module = "---K-MAUDE-GENERATED-OUTPUT-BEGIN---";
 my $end_compiled_module   = "---K-MAUDE-GENERATED-OUTPUT-END---";
@@ -654,22 +636,6 @@ foreach (@ARGV) {
     elsif (($output_latex_file eq "?") && !/^-/) {
 	$output_latex_file = $_;
     }
-    elsif (($pgm eq "?") && !/^-/) {
-		$_ =~ s/\.k$//;
-		$pgm = $_;
-	}
-	elsif (($pname eq "?") && !/^-/) {
-		$pname = $_;
-	}
-	elsif (($cfile eq "?") && !/^-/) {
-		$cfile = $_;
-	}
-	elsif (($cmod eq "?") && !/^-/) {
-		$cmod = $_;
-	}
-	elsif (($pmod eq "?") && !/^-/) {
-		$pmod = $_;
-	}
     elsif (/^--?h(elp)?$/) {
 	# Terminates with usage info when asked for help
 		$help = 1;
@@ -744,26 +710,6 @@ foreach (@ARGV) {
     elsif (/^--?superheat$/) {
 		$superheat = 1;
     }
-    elsif (/^--?pgm$/) { # start compile program param check
-		$compileProgram = 1;
-		$pgm = "?";
-    }
-	elsif (/^--?cmod$/) {
-		$compileProgram = 1;
-		$cmod = "?";
-    }
-	elsif (/^--?pmod$/) {
-		$compileProgram = 1;
-		$pmod = "?";
-    }
-    elsif (/^--?pname$/) {
-		$compileProgram = 1;
-		$pname = "?";
-    }
-    elsif (/^--?cfile$/) {
-		$compileProgram = 1;
-		$cfile = "?";
-    } # end compile program param check
     elsif (/^--?style$/) {
 		$style = "?";
     }
@@ -801,10 +747,7 @@ foreach (@ARGV) {
 # print "LANG: $language_file_name\n";
 
 # remove .k dir when a new compilation starts
-File::Path->remove_tree($k_dir) if (!$compileProgram && !$maudify_only);
-
-# if I want to compile only a program
-compile_program() if $compileProgram;
+File::Path->remove_tree($k_dir) if !$maudify_only;
 
 # Extract only language name without path
 $lang_name = basename($language_file_name);
@@ -2543,91 +2486,6 @@ sub add_subsorts
     
 #    print "SUPERSORTS: $supersorts\n";
 #    print "MODULES: @modules\n";
-}
-
-# compile only a single program
-# steps:
-# maudify the file
-# append the $compile text to the end of the maudified file
-# call maude
-# remove maude wrappers
-# write result to $pgm-comipled.maude
-# remove temp files
-# exit kompilation (the action is dedicated, the rest of the actions are ignored)
-sub compile_program
-{
-    if ($pgm eq "0" or $cmod eq "0") {
-	print "To compile a single program you need to specify at least -pgm and -cmod\n";
-	exit();
-    }
-    if ($pmod eq "0") {
-	$pmod = uc $pgm;
-    }
-    if ($pname eq "0") {
-	$pname = $pgm;
-    }
-    if ($cfile eq "")
-    {
-	$cfile =  lc("$cmod-compiled.maude");
-    }
- 
-    # retrieve tokens 
-    $tokens_file = ".k/$tokens_file";
-    if (!(-e $tokens_file))
-    {
-	print "You have to compile the definition first. Also make sure that file $tokens_file exists.\n";
-	exit(1);
-    }
-    
-    @all_tokens = split("\s", get_file_content($tokens_file));
-    # print "TOKENS: @all_tokens\n";
-
-    
-    maudify_file("$pgm.k", "");
-    my $maudified = get_file_content("$pgm.maude");
-    
-    my $compiled =  qx{ sed 2d $cfile};
-    
-    my $compile = 
-      "set include PL-BOOL off .
-  set include BOOL on .
-  load \"$k_tools_dir/" . "prelude-extras\"
-  load \"$k_tools_dir/" . "meta-k\"
-  load \"$k_tools_dir/" . "printing\"
-  load \"$k_tools_dir/" . "metadata-parsing\"
-  
-  load  \"$k_tools_dir/" . "compile-program-interface\"
-  ---(
-      set print attribute on .
-      red in COMPILE-PROGRAM-META : compileProgram(\"$cmod\",\"$pmod\",\"$pname\") .
-      q
-  ---)
-  loop compile-program .
-  (compileProgram $cmod $pmod $pname .)
-  q
-  ";
-	my $tempFile = "programCompile.tmp";
-	# open (MYFILE, ">programCompile.tmp");
-	open MYFILE,">",$tempFile or die "Cannot create $tempFile\n";
-	print MYFILE "load \"$k_prelude\"\n$maudified\nset show advisories off .\n$compiled\nset show advisories on .\n$compile\n";
-	close(MYFILE);
-	# push(@generated_files, $tempFile);
-	
-# run maude with this input
-	my $comp = run_maude("Compiling single program", "in programCompile.tmp");
-# verific? - vezi cum se face verificarea
-	# print "$comp\n";
-	$comp =~ /$begin_compiled_module(.*?)$end_compiled_module/s;
-	# print $1;
-
-	unlink("programCompile.tmp");
-
-	open MYFILE,">","$pgm-compiled.maude" or die "Cannot create $tempFile\n";
-	print MYFILE "load \"$cfile\"\n$1";
-	close(MYFILE);
-#	push(@generated_files, "$pgm-compiled.maude");
-
-	exit();
 }
 
 # Latex top level patterns
