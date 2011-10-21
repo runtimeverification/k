@@ -4,7 +4,7 @@ module IMPPP-SYNTAX
 //@ \subsection{The old IMP constructs}
   syntax AExp ::= #Id | #Int
                 | AExp "+" AExp                      [:prec(33) gather (E e) strict:]
-                | AExp "/" AExp                      [:prec(31) gather (E e) strict:]
+                | AExp "/" AExp                      [:prec(31) gather (E e) superheat strict:]
   syntax BExp ::= #Bool
                 | AExp "<=" AExp                     [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
                 | "not" BExp                         [:prec(53) strict:]
@@ -53,10 +53,10 @@ all the various additional cells needed for IMP++.  */
      <br/>
      <store color="white">.Map</store>
      <nextLoc color="gray">0</nextLoc>
-     <in color="magenta"> $IN:List </in>
-     <out color="Orchid">.List</out>
-//     <in color="magenta" stream="stdin"> $IN:List </in>
-//     <out color="Orchid" stream="stdout">.List</out>
+//     <in color="magenta"> $IN:List </in>
+//     <out color="Orchid"> .List </out>
+     <in color="magenta" stream="stdin"> $IN:List </in>
+     <out color="Orchid" stream="stdout">.List</out>
     </T>
 
 //@ \subsection{The old IMP constructs}
@@ -64,7 +64,7 @@ all the various additional cells needed for IMP++.  */
 //@ \subsubsection{Variable lookup}
   rule <k> X:#Id => I ...</k>
        <env>... X |-> N:#Nat ...</env>
-       <store>... N |-> I:#Int ...</store> [transition]
+       <store>... N |-> I:#Int ...</store> [supercool transition]
 
 //@ \subsubsection{Arithmetic constructs}
   rule I1:#Int + I2:#Int => I1 +Int I2
@@ -82,7 +82,7 @@ all the various additional cells needed for IMP++.  */
 //@ \subsubsection{Variable assignment}
   rule <k> X := I => . ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (_ => I) ...</store>
+       <store>... N |-> (_ => I) ...</store> [transition]
 
 //@ \subsubsection{Sequential composition}
   rule S1:Stmt ; S2:Stmt => S1 ~> S2 [structural]
@@ -99,7 +99,7 @@ all the various additional cells needed for IMP++.  */
 //@ \subsubsection{Variable increment}
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store> [transition]
+       <store>... N |-> (I => I +Int 1) ...</store> [supercool transition]
 
 //@ \subsubsection{Input}
   rule <k> read() => I ...</k>
@@ -107,9 +107,9 @@ all the various additional cells needed for IMP++.  */
 
 //@ \subsubsection{Output}
   rule <k> print(I) => . ...</k>
-       <out>... . => ListItem(I) </out>
+       <out>... . => ListItem(I) </out> [transition]
   rule <k> print(Str:#String) => . ...</k>
-       <out>... . => ListItem(Str) </out>
+       <out>... . => ListItem(Str) </out> [transition]
 
 //@ \subsubsection{Halt}
   rule <threads>... <k> halt ...</k> ...</threads> => .

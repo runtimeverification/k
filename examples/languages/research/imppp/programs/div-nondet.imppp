@@ -1,0 +1,5 @@
+var x;
+x := 1;
+print("x is ");
+print(++x / (++x / x));
+print("\n")
