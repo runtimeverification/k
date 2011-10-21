@@ -7,7 +7,7 @@ This is prototype code. Don't expect much from it.
 module Main where
 
 import Control.Applicative ((<$>))
-import Control.Monad (when)
+import Control.Monad (forM_, when)
 import Data.Char (isSpace)
 import Data.Either (rights)
 import Data.List (intercalate)
@@ -84,48 +84,63 @@ main = do
 
     pgm <- ProgramSource <$> T.readFile pgmFile
     kast <- flattenProgram config pgm
+    let kmap' = Map.insert "PGM" kast kmap
 
     Bool search <- getVal config "search"
     if search
-        then searchExecution config kast kmap
-        else standardExecution config kast kmap
+        then searchExecution config kmap'
+        else standardExecution config kmap'
 
 
-searchExecution :: Config -> Kast -> Map Text Kast -> IO ()
-searchExecution config kast kmap = do
-    (_, outFile, errFile) <- evalKastIO config (Map.insert "PGM" kast kmap)
+searchExecution :: Config -> Map Text Kast -> IO ()
+searchExecution config kmap = do
+    (_, outFile, errFile) <- evalKastIO config kmap
     out <- T.readFile outFile
-    T.putStrLn "Search results:"
-    mapM_ T.putStrLn . drop 1 . T.lines $ out
+    let maybeSearchResults = parseSearchResults out
+    when (isNothing maybeSearchResults) $
+        die $ "Failed to parse search results:\n\n" ++ T.unpack out
+    let searchResults = fromJust maybeSearchResults
+    T.putStrLn "Search results:\n"
+    forM_ (zip [1..] searchResults) $ \(i, sr) -> do
+        putStrLn $ "\ESC[94mSolution " ++ show i ++ ", state " ++ show (searchResultState sr) ++ ":\ESC[0m"
+        printResult config (searchResultTerm sr)
+        printStatistics config (searchStatistics sr)
 
-standardExecution :: Config -> Kast -> Map Text Kast -> IO ()
-standardExecution config kast kmap = do
-    (_, outFile, errFile) <- evalKastIO config (Map.insert "PGM" kast kmap)
+
+standardExecution :: Config -> Map Text Kast -> IO ()
+standardExecution config kmap = do
+    (_, outFile, errFile) <- evalKastIO config kmap
     maybeMaudeResult <- parseMaudeResult <$> T.readFile outFile
     when (isNothing maybeMaudeResult) $
         die "Maude failed to produce a result"
     let maudeResult = fromJust maybeMaudeResult
+    printResult config (resultTerm maudeResult)
+    printStatistics config (statistics maudeResult)
 
+
+printResult :: Config -> Text -> IO ()
+printResult config result = do
     File rawMaudeOut <- getVal config "raw-maude-out"
-    T.writeFile rawMaudeOut (resultTerm maudeResult `T.append` "\n")
+    T.writeFile rawMaudeOut result
 
     File prettyMaudeOut <- getVal config "pretty-maude-out"
     if prettyMaudeOut /= "/dev/null"
         then do
-            case parse kBag "" (T.unpack $ resultTerm maudeResult) of
+            case parse kBag "" (T.unpack result) of
                 Left err -> do
                     putStrLn "Failed to parse result term!"
                     putStrLn "Attempted to parse:"
-                    T.putStrLn (resultTerm maudeResult)
+                    T.putStrLn result
                     putStrLn "Got error(s):"
                     print err
                 Right bag -> printDoc $ ppKBag bag
         else return ()
 
+printStatistics :: Config -> Text -> IO ()
+printStatistics config stats = do
     Bool printStats <- getVal config "statistics"
     when printStats $ do
-        -- TODO: make color optional. green:
-        T.putStrLn (T.concat ["\ESC[92m", statistics maudeResult, "\ESC[0m"])
+        T.putStrLn (T.concat ["\ESC[94m", stats, "\ESC[0m"])
 
 -- | Evaluate a term using the Java IO wrapper around Maude.
 evalKastIO :: Config -> Map Text Kast -> IO (FilePath, FilePath, FilePath)
