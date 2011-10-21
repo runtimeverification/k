@@ -126,13 +126,13 @@ buffer = do
 istream :: Parser ListItem
 istream = do
     string "#istream"
-    i <- integer
+    i <- parens integer
     return $ IStream i
 
 ostream :: Parser ListItem
 ostream = do
     string "#ostream"
-    i <- integer
+    i <- parens integer
     return $ IStream i
 
 kMap :: Parser KMap

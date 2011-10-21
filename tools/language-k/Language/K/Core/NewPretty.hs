@@ -29,11 +29,11 @@ ppKList (KList ls) = vsep $ map ppListItem ls
 
 ppListItem (ListItem k) = text "ListItem" <> parens (ppK k)
 ppListItem (Buffer k) = ppK k
-ppIStream (IStream 0) = angles $ text "stdin"
-ppIStream (IStream i) = angles $ text "istream: " <> integer i
-ppOStream (OStream 1) = angles $ text "stdout"
-ppOStream (OStream 2) = angles $ text "stderr"
-ppOStream (OStream i) = angles $ text "ostream: " <> integer i
+ppListItem (IStream 0) = angles $ text "stdin"
+ppListItem (IStream i) = angles $ text "istream: " <> integer i
+ppListItem (OStream 1) = angles $ text "stdout"
+ppListItem (OStream 2) = angles $ text "stderr"
+ppListItem (OStream i) = angles $ text "ostream: " <> integer i
 
 ppKMap (KMap m) = vcat . map ppMapItem . toList $ m
 
