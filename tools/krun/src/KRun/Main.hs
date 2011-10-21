@@ -210,9 +210,12 @@ runInternalKast config (ProgramSource pgm) = do
     (ih, oh, eh, ph) <- runInteractiveProcess kastExecutable kastArgs Nothing Nothing
     exitCode <- waitForProcess ph
     exists <- doesFileExist kastFile
-    when (exitCode /= ExitSuccess || not exists) $
+    when (exitCode /= ExitSuccess || not exists) $ do
+        err <- hGetContents eh
         die $ "Failed to run kast command:\n"
            ++ "kast " ++ intercalate " " kastArgs
+           ++ "\n\nError output from kast:\n"
+           ++ err
     kast <- T.readFile kastFile
     removeFile kastFile
     removeFile tmpFile
