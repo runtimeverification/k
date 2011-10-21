@@ -11,10 +11,16 @@ main-module:        IMPPP
 syntax-module:      IMPPP-SYNTAX
 parser:             kast
 io:                 true
-pretty-maude-out:   /dev/null
+output-mode:        none
 
 groups:
     - name: search
-      search: true
+      do-search: true
       io: false
       maude-cmd: search
+
+    - name: config
+      output-mode: raw
+
+    - name: no-config
+      output-mode: none
