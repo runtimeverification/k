@@ -105,7 +105,7 @@ advancedKSettings :: [Setting]
 advancedKSettings =
     [ Setting "compiled-def" FileType "Path to the compiled K definition"
     , Setting "maude-cmd" StringType "Maude command used to execute the definition (search, erewrite, search, ...)"
-    , Setting "search-pattern" StringType "Search pattern"
+    , Setting "xsearch-pattern" StringType "Search pattern"
     , Setting "output-mode" StringType "How to display Maude results (options are none, raw, and pretty)"
     ]
 
@@ -117,7 +117,7 @@ defaultConfig mExt = Map.fromList $
     , ("parser", String "kast")
     , ("maude-cmd", String "erewrite")
     , ("do-search", Bool False)
-    , ("search-pattern", String "=>! B:Bag")
+    , ("xsearch-pattern", String "=>! B:Bag")
     , ("io", Bool True)
     , ("output-mode", String "pretty")
     , ("statistics", Bool False)
@@ -226,7 +226,7 @@ usageError errs = do
     exitFailure
 
 usage :: String
-usage = "Usage: krun [groups] [options] <file>"
+usage = "Usage: krun [options] <file>"
 
 detailedHelp :: String
 detailedHelp = usage

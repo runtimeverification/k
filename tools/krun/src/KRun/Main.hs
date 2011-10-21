@@ -10,7 +10,7 @@ import Control.Applicative ((<$>))
 import Control.Monad (forM_, when)
 import Data.Char (isSpace)
 import Data.Either (rights)
-import Data.List (intercalate)
+import Data.List ((\\), intercalate, isInfixOf)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Maybe
@@ -42,14 +42,12 @@ main = do
     argv <- getArgs
     (argConfig, nonOpts, unrecOpts) <- parseOpts argv
 
-    let (groups, maybePgmFile, pgmExt) =
-          case nonOpts of
-            [] -> ([], Nothing, Nothing)
-            _  -> let file = last nonOpts
-                  in (init nonOpts, Just file, listToMaybe . takeExtension $ file)
-                    where listToMaybe [] = Nothing
-                          listToMaybe xs = Just xs
-    
+    let unrecOpts' = map (dropWhile (== '-')) unrecOpts
+    let initVals = filter (elem '=') unrecOpts' 
+    let groups = unrecOpts' \\ initVals
+    let maybePgmFile = listToMaybe nonOpts
+    let pgmExt = takeExtension <$> maybePgmFile
+
     deskFile <- case Map.lookup "desk-file" argConfig of
         Just (File f) -> return $ Just f
         Nothing -> findDeskFile' "."
@@ -71,7 +69,7 @@ main = do
     let pgmFile = fromJust $ maybePgmFile
         
     Bool io <- getVal config "io"
-    kmap <- case parseKeyVals $ map (T.pack . dropWhile (== '-')) unrecOpts of
+    kmap <- case parseKeyVals $ map T.pack initVals of
         Left err -> die $ "Unable to parse initial configuration value: " ++ err
         Right kmap -> return $ kmap `Map.union`
             if io then Map.empty else Map.fromList [("noIO", Kast "wlist_(#noIO)(.List{K})")]
@@ -179,7 +177,7 @@ constructMaudeCmd config kmap = T.pack cmd <> " " <> eval <> " " <> T.pack pat <
                "(_|->_((# \"$" <> k <> "\"(.List{K})) , (" <> v <> ")))" : ts) [] kmap
           pat = if search then searchPattern else ""
               where Bool search = config ! "do-search"
-                    String searchPattern = config ! "search-pattern"
+                    String searchPattern = config ! "xsearch-pattern"
           (<>) = T.append
 
 getWrapperJar :: IO FilePath
