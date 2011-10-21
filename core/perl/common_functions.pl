@@ -2885,7 +2885,8 @@ sub remove_quotes
     s/\bsyntax\b.*?(?=$kmaude_keywords_pattern)/
     {
 	my $tmp = $&;
-	$tmp =~ s%(?<!\\)\"%%sg;
+	$tmp =~ s%(?<!\\)\"%KSYNQUOT%sg;
+	$tmp =~ s%KSYNQUOT(.*?)KSYNQUOT% `$1 %sg;
 	$tmp =~ s%\\(?=\")%%sg;
 	$tmp;
     }/gse;

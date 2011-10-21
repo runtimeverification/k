@@ -2125,6 +2125,7 @@ sub make_ops {
 		unlink($random);
 		$random =~ s/[a-z_]//sg;
 
+                $production =~ s/`/ /gs;
 # print "SORTS: @sorts\n";
 		if ($latex || $pdf || $ps || $crop || $eps || $png)
 		{
