@@ -92,7 +92,14 @@ main = do
 
 searchExecution :: Config -> Map Text Kast -> IO ()
 searchExecution config kmap = do
-    (_, outFile, errFile) <- evalKastIO config kmap
+    isterm <- hIsTerminalDevice stdin
+    kmap' <- case isterm of
+        False -> do
+            input <- T.getContents
+            let stdbuf = Kast $ T.concat ["wlist_(#buffer(# \"", input, "\"(.List{K})))(.List{K})"]
+            return $ Map.insert "stdin" stdbuf kmap
+        True -> return kmap
+    (_, outFile, errFile) <- evalKastIO config kmap'
     out <- T.readFile outFile
     let maybeSearchResults = parseSearchResults out
     when (isNothing maybeSearchResults) $
