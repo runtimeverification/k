@@ -1,0 +1,26 @@
+print-help:             false
+print-version:          false
+statistics:             false
+parser:                 kast
+maude-cmd:              "erewrite"
+output-mode:            pretty
+io:                     false
+do-search:              false
+xsearch-pattern:        "=>! B:Bag"
+
+
+groups:
+  - name:               search
+    description:        Search for all possible behaviors. 
+    maude-cmd:          search
+    io:                 false
+    do-search:          true
+    output-mode:        pretty
+
+  - name:               config
+    description:        Print the configuration to standard out.
+    output-mode:        pretty
+
+  - name:               no-config
+    description:        Do not print the result configuration at all.
+    output-mode:        none
