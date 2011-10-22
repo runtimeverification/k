@@ -5,6 +5,7 @@ kmod PCF-UNTYPED-SYNTAX is including #ID + K-LATEX
 
   syntax Val ::= #Bool
                | #Nat
+               | #Int
                | succ
                | pred
                | zero?
