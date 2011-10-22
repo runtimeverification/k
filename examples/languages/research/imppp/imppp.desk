@@ -12,16 +12,3 @@ syntax-module:      IMPPP-SYNTAX
 parser:             kast
 io:                 true
 output-mode:        none
-
-groups:
-    - name: search
-      do-search: true
-      io: false
-      maude-cmd: search
-      output-mode: pretty
-
-    - name: config
-      output-mode: raw
-
-    - name: no-config
-      output-mode: none
