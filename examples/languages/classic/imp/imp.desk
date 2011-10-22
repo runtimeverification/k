@@ -1,14 +1,14 @@
-Name:               imp
-Version:            0.1.0
-Synopsis:           The classic IMP language taught in PLs courses all over the world
-License:            MIT
-License-file:       LICENSE
-Authors:            Grigore Rosu
-Maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
-Tags:               imperative, teaching, classic
+name:               imp
+version:            0.1.0
+synopsis:           The classic IMP language taught in PLs courses all over the world
+license:            MIT
+authors:            Grigore Rosu
+maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
+tags:               imperative, teaching, classic
 
 # krun settings
-Main-module:        IMP
-Syntax-module:      IMP-SYNTAX
-Parser:             kast
-Output-mode:        maude
+main-module:        IMP
+syntax-module:      IMP-SYNTAX
+parser:             kast
+output-mode:        pretty
+statistics:         false
