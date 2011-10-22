@@ -5,7 +5,7 @@ import Control.Applicative ((<$>))
 import Control.Arrow (first, second)
 import Control.Exception
 import Control.Monad (forM, join)
-import Data.Char (toUpper)
+import Data.Char (toLower, toUpper)
 import Data.List (partition)
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -14,6 +14,7 @@ import qualified Data.Object.Yaml as Y
 import Data.Typeable
 import Prelude hiding (catch)
 import System.Console.GetOpt
+import System.Environment
 import System.Exit
 import System.FilePath
 
@@ -109,24 +110,24 @@ advancedKSettings =
     , Setting "output-mode" StringType "How to display Maude results (options are none, raw, and pretty)"
     ]
 
--- TODO: resolve defaults
-defaultConfig :: Maybe String -> Config
-defaultConfig mExt = Map.fromList $
-    [ ("print-help", Bool False)
-    , ("print-version", Bool False)
-    , ("parser", String "kast")
-    , ("maude-cmd", String "erewrite")
-    , ("do-search", Bool False)
-    , ("xsearch-pattern", String "=>! B:Bag")
-    , ("io", Bool True)
-    , ("output-mode", String "pretty")
-    , ("statistics", Bool False)
+-- | Configuration settings that can be initialized using 
+-- the input program's extension.
+mkExtConfig :: Maybe String -> Config
+mkExtConfig Nothing = Map.empty
+mkExtConfig (Just ext') = let ext = map toUpper . dropWhile (== '.') $ ext in 
+    Map.fromList $
+    [ ("main-module", String ext)
+    , ("syntax-module", String $ ext ++ "-SYNTAX")
     ]
-    ++ maybe [] (\ext' -> let ext = dropWhile (== '.') ext' in
-         [ ("main-module", String $ map toUpper ext)
-         , ("syntax-module", String $ map toUpper ext ++ "-SYNTAX")
-         , ("compiled-def", File $ ext ++ "-compiled.maude")
-         ]) mExt
+
+resolveCompiledDef :: Config -> IO Config
+resolveCompiledDef config = do
+    if Map.member "compiled-def" config
+        then return config
+        else do
+            String mainMod <- getVal config "main-module"
+            return $ Map.insert "compiled-def"
+              (File $ map toLower mainMod ++ "-compiled.maude") config
 
 allSettings :: [Setting]
 allSettings = metadataSettings ++ generalSettings ++ commonKSettings ++ advancedKSettings
@@ -142,22 +143,19 @@ mkConfig :: Maybe String      -- ^ Maybe a file extension to initialize defaults
          -> [String]          -- ^ List of groups to include from the 'ConfigFile'
          -> Config            -- ^ 'Config' generated from command-line arguments
          -> IO Config
-mkConfig mExt mDeskFile groups argsConf = do
-    let defaultConf = [defaultConfig mExt]
-    fgconfs <- case (mDeskFile, groups) of
-        (Nothing, []) -> return []
-        (Nothing, _) -> throwIO $ GroupsWithoutDesk groups
-        (Just file, []) -> do
-            (conf, _) <- parseConfigFile file
-            return [conf]
-        (Just file, _) -> do
-            (conf, groupMap) <- parseConfigFile file
-            gconfs <- forM groups $ \g -> do
-                let mgconf = Map.lookup g groupMap
-                maybe (throwIO $ GroupNotFound groupMap g) return mgconf
-            return $ conf : gconfs
-    let confs = defaultConf ++ fgconfs ++ [argsConf]
-    return $ foldr (flip Map.union) Map.empty confs
+mkConfig mExt mDeskFile groups argsConfig = do
+    let extConfig = mkExtConfig mExt
+    kbase <- getEnv "K_BASE"
+    (defaultConfig, defaultGroups) <- parseConfigFile $ kbase </> "tools" </> "global-defaults.desk"
+    (deskConfig, deskGroups) <- maybe (return (Map.empty, Map.empty)) parseConfigFile mDeskFile
+    let groupMap = deskGroups `Map.union` defaultGroups
+    groupConfigs <- forM groups $ \g -> do
+        let mgconf = Map.lookup g groupMap
+        maybe (throwIO $ GroupNotFound groupMap g) return mgconf
+    let configs = extConfig : defaultConfig : deskConfig : groupConfigs ++ [argsConfig]
+    let config = foldr (flip Map.union) Map.empty configs
+    config' <- resolveCompiledDef config
+    return config'
 
 {- Desk file handling -}
 
