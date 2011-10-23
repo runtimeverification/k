@@ -4,7 +4,7 @@ statistics:             false
 parser:                 kast
 maude-cmd:              "erewrite"
 output-mode:            pretty
-io:                     false
+io:                     true
 do-search:              false
 xsearch-pattern:        "=>! B:Bag"
 
