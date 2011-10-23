@@ -114,7 +114,7 @@ advancedKSettings =
 -- the input program's extension.
 mkExtConfig :: Maybe String -> Config
 mkExtConfig Nothing = Map.empty
-mkExtConfig (Just ext') = let ext = map toUpper . dropWhile (== '.') $ ext in 
+mkExtConfig (Just ext') = let ext = map toUpper . dropWhile (== '.') $ ext' in 
     Map.fromList $
     [ ("main-module", String ext)
     , ("syntax-module", String $ ext ++ "-SYNTAX")
