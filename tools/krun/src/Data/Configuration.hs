@@ -125,9 +125,10 @@ resolveCompiledDef config = do
     if Map.member "compiled-def" config
         then return config
         else do
-            String mainMod <- getVal config "main-module"
-            return $ Map.insert "compiled-def"
-              (File $ map toLower mainMod ++ "-compiled.maude") config
+            case Map.lookup "main-module" config of
+                Just (String mainMod) -> return $ Map.insert "compiled-def"
+                  (File $ map toLower mainMod ++ "-compiled.maude") config
+                _ -> return config
 
 allSettings :: [Setting]
 allSettings = metadataSettings ++ generalSettings ++ commonKSettings ++ advancedKSettings
