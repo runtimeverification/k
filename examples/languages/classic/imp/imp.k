@@ -9,7 +9,7 @@ evaluated when the first evaluates to true). */
                 | AExp "+" AExp                      [:prec(33) gather (E e) strict:]
                 | AExp "/" AExp                      [:prec(31) gather (E e) strict:]
   syntax BExp ::= #Bool
-                | AExp "<=" AExp                     [:prec(37) seqstrict:]
+                | AExp "<=" AExp                     [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
                 | "not" BExp                         [:prec(53) strict:]
                 | BExp "and" BExp                    [:prec(55) strict(1):]
   syntax Stmt ::= "skip"
@@ -35,8 +35,11 @@ and clarity, we place the two cells inside another cell, the ``top'' cell
 which is labeled $\top$. */
 
   configuration <T color="yellow">
-                  <k color="green"> $PGM:Stmt </k>
+                  <k color="green"> $PGM:Pgm </k>
                   <state color="red"> .Map </state>
+// Replace the above with the following when you want to pass an initial
+// state through krun; see example programs/sumPgm-novars.imp.
+//                  <state color="red"> $STATE:Map </state>
                 </T>
 
 /*@ \subsection{Results}
@@ -129,6 +132,6 @@ constructed with a head element followed by a tail list), we need to
 distinguish two cases, one when the list is empty and another when the
 list has at least one element. */
 
-  rule <k> var; S => S ...</k>
+  rule <k> var ; S => S ...</k>
   rule <k> var (X,Xl:Ids => Xl); _ ...</k> <state>... . => X |-> 0 ...</state> 
 end module
