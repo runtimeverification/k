@@ -6,7 +6,7 @@ import Control.Arrow (first, second)
 import Control.Exception
 import Control.Monad (forM, join)
 import Data.Char (toLower, toUpper)
-import Data.List (partition)
+import Data.List (intercalate, partition)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import qualified Data.Object as Y
@@ -231,7 +231,35 @@ detailedHelp :: String
 detailedHelp = usage
             ++ "\n\n"
             ++ concatMap groupHelp optionGroups
+            ++ additionalHelp
     where groupHelp (name, opts) = name ++ "\n" ++ usageInfo "" opts ++ "\n"
+
+additionalHelp :: String
+additionalHelp = intercalate "\n"
+    [ "krun also has several predefined option groups such as --search,"
+    , "--config, and --no-config. These predefined groups can be found in"
+    , "$K_BASE/tools/global-defaults.desk"
+    , ""
+    , "Currently, krun attempts to infer the main-module and syntax-module"
+    , "settings using the input program's file extension. For example, if"
+    , "krun is called on program foo.bar and if these settings are not"
+    , "overridden elsewhere (via the command-line or a .desk file), then"
+    , "krun assumes:"
+    , ""
+    , "main-module: BAR"
+    , "syntax-module: BAR-SYNTAX"
+    , ""
+    , "If the input program lacks a file extension, or if the defaults"
+    , "inferred from the program's file extension are not good enough,"
+    , "main-module and syntax-module MUST be set explicitly."
+    , ""
+    , "Finally, for the time being, krun must be run from the directory that"
+    , "contains the definition's .k directory, which contains essential"
+    , "information on how to parse the input programs. The compiled"
+    , "definition, ${main-module}-compiled.maude by default, is also assumed"
+    , "to be in the current working directory. Future versions of the tool"
+    , "will not have this limitation."
+    ]
 
 versionStr :: String
 versionStr = "krun 0.3.0\nCopyright (C) 2011 David Lazar"
