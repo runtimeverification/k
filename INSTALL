@@ -24,6 +24,9 @@ The K Framework tool depends on the following software:
     * Text::Diff
     * File::Spec::Link
 * *Subversion* for downloading the latest version of K.
+* *Mercurial*, as some of the K tools currently depend on it.
+* *Haskell*, namely *ghc* and *cabal-install* are required for the krun tool.
+* *Java* JDK is required for building the I/O server.
 * *LaTeX* (optional) This is used for typesetting K definitions. Besides basic
   packages, the following (texlive) packages are needed: `bera`, `datetime`, `ec`,
   `fancybox`, `fancyvrb`, `import`, `marginnote`, `microtype`, `ms`, `pdfcomment`, `pgf`,
@@ -111,6 +114,14 @@ Perl dependencies:
     # cpan -i Regexp::Common XML::DOM XML::LibXML::Reader Tree::Nary Text::Diff File::Spec::Link
 	
 
+### Subversion, Mercurial, Haskell, Java
+
+
+They should be available through your distribution's package manager.  
+For debian-based systems this command should suffice:
+  
+    # apt-get install subversion mercurial ghc6 cabal-install openjdk-6-jdk
+
 ## Installing LaTeX
 
 
@@ -162,12 +173,18 @@ directory):
 
     $ export K_BASE=<somedir>/k-framework
 
-To make this change persistent across logins/shells, you will need to add
-the command to a file like `~/.profile` or `~/.bashrc`.
+Then, run the `make` in the K-BASE directory to compile basic tools needed for executing programs.
 
-You might also want to add the `k-framework/core` and `k-framework/tools`
-directories to your system's `PATH` variable if you plan on calling kompile
-directly (without using the `make` tool).
+    $  make -C $K_BASE
+
+You might also want to add the `k-framework/core` directory to your system's 
+`PATH` variable if you plan on calling kompile directly (without using the 
+`make` tool).
+
+    $  export PATH=$PATH:$K_BASE/core
+
+To make the environment changes persistent across logins/shells, you will need 
+to add the above export commands to a file like `~/.profile` or `~/.bashrc`.
 
 
 ## Test your installation

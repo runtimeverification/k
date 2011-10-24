@@ -41,9 +41,9 @@ can be accessed at http://code.google.com/p/k-framework/people/list.
 For detailed installation instructions, please see the INSTALL file. 
 
 As the tool is still under active development, it is recommended that you 
-install K directly from the svn repository and update it regularly using
+install K directly from the svn repository and update it regularly executing
 
-  svn up 
+  svn up && make
 
 from the base directory to benefit of the latest fixes and features.
 
