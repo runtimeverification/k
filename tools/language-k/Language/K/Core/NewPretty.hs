@@ -1,6 +1,9 @@
 module Language.K.Core.NewPretty where
 
+import Data.Char (isAlphaNum)
+import Data.List (intersperse)
 import Data.Map (fromList, toList)
+import qualified Data.Map as Map
 import Language.K.Core.Syntax
 import Text.PrettyPrint.ANSI.Leijen
 
@@ -8,14 +11,28 @@ printDoc doc = do
     putDoc doc
     putStrLn ""
 
-ppK (KApp klabel ks) = ppKLabel klabel
 ppK (Kra []) = char '.'
+ppK (Kra ks) = hsep $ intersperse (yellow $ text "~>") (map ppK ks)
+ppK (KApp klabel []) = ppKLabel klabel
+ppK (KApp (KLabel ss) ks) = hsep $ zipSyntax ss (map ppK ks)
+ppK (KApp klabel ks) = ppKLabel klabel <> parens (hsep $ punctuate comma (map ppK ks))
+
+-- | Combine a KLabel and a list of arguments to form the original syntax.
+zipSyntax (Syntax s : xs) as = bold (text s) : zipSyntax xs as
+zipSyntax (Hole : xs) (a : as)
+    -- Somewhat hackish way to reduce parentheses in output
+    | all isAlphaNum (show a) = a : zipSyntax xs as
+    | otherwise = parens a : zipSyntax xs as
+zipSyntax _ _ = []
 
 ppKLabel (KInt i) = integer i
 ppKLabel (KId id) = text id
 ppKLabel (KBool True) = text "true"
 ppKLabel (KBool False) = text "false"
 ppKLabel (KString s) = text (show s)
+ppKLabel (Freezer s) = text "freezer" <> parens (text s)
+ppKLabel (FreezeVar s) = blue $ text s
+--ppKLabel (FreezeVar s) = text "freezerVar" <> parens (text s)
 
 ppKBag (KBag []) = char '.'
 ppKBag (KBag bs) = vsep $ map ppBagItem bs
@@ -35,7 +52,9 @@ ppListItem (OStream 1) = angles $ text "stdout"
 ppListItem (OStream 2) = angles $ text "stderr"
 ppListItem (OStream i) = angles $ text "ostream: " <> integer i
 
-ppKMap (KMap m) = vcat . map ppMapItem . toList $ m
+ppKMap (KMap m)
+    | m == Map.empty = char '.'
+    | otherwise = vcat . map ppMapItem . toList $ m
 
 ppMapItem (k1, k2) = ppK k1 <+> magenta (text "|->") <+> ppK k2
 

@@ -29,6 +29,8 @@ data KLabel
     | KBool Bool
     | KString String
     | KId String
+    | Freezer String
+    | FreezeVar String
     deriving (Eq, Ord, Show, Data, Typeable)
 
 data KLabelPart

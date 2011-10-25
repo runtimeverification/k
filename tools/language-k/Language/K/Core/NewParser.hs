@@ -13,7 +13,7 @@ k :: Parser K
 k = try kra <|> kApp
 
 kra :: Parser K
-kra = emptyK -- <|> TODO
+kra = emptyK <|> (Kra <$> kApp `sepBy1` (symbol "~>"))
 
 emptyK :: Parser K
 emptyK = do
@@ -152,11 +152,22 @@ mapItem = do
     k2 <- k
     return (k1, k2)
 
-
 -- | Parse a KLabel
 kLabel :: Parser KLabel
-kLabel = quotedKLabel <|> kBuiltin
+kLabel = quotedKLabel <|> try kBuiltin <|> try freezer <|> try freezeVar
        <?> "K label"
+
+freezer :: Parser KLabel
+freezer = do
+    string "freezer"
+    content <- parens stringLiteral
+    return $ Freezer content
+
+freezeVar :: Parser KLabel
+freezeVar = do
+    string "freezeVar"
+    content <- parens stringLiteral
+    return $ FreezeVar content
 
 -- | Parse "quoted" K label: 'Foo___
 quotedKLabel :: Parser KLabel
