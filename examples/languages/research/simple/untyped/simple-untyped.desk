@@ -2,7 +2,6 @@ name:               simple-untyped
 version:            0.1.0
 synopsis:           A not so simple programming language
 license:            MIT
-license-file:       LICENSE
 authors:            Grigore Rosu
 maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
 tags:               imperative, teaching, classic
