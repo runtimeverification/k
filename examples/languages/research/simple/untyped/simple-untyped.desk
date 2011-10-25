@@ -1,14 +1,14 @@
-Name:               simple-untyped
-Version:            0.1.0
-Synopsis:           A not so simple programming language
-License:            MIT
-License-file:       LICENSE
-Authors:            Grigore Rosu
-Maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
-Tags:               imperative, teaching, classic
+name:               simple-untyped
+version:            0.1.0
+synopsis:           A not so simple programming language
+license:            MIT
+license-file:       LICENSE
+authors:            Grigore Rosu
+maintainer:         Grigore Rosu <grosu@cs.uiuc.edu>
+tags:               imperative, teaching, classic
 
 # krun settings
-Main-module:      SIMPLE-UNTYPED
-Syntax-module:    SIMPLE-UNTYPED-SYNTAX
-Parser:           kast
-Output-mode:      io
+main-module:      SIMPLE-UNTYPED
+syntax-module:    SIMPLE-UNTYPED-SYNTAX
+parser:           kast
+output-mode:      none
