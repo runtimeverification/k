@@ -3,3 +3,4 @@ function main() {
 	try { var x = 2; write(x); throw ( ++x + x ); }
 	catch(e) { write(e); }
 }
+// 2 6 or 2 5

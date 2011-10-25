@@ -17,3 +17,4 @@ function main() {
 	x = 5;
 	write(f(x));
 }
+//1 8 120

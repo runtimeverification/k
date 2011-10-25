@@ -10,3 +10,4 @@ function main() {
 	write(e);     // should write 100
 	write(10);
 }
+// 7 100 10

@@ -14,3 +14,5 @@ function foo() {
 	}
 	throw 1;     // should not be reached
 }
+
+// 7

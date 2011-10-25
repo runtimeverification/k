@@ -1,3 +1,5 @@
+// following does not run, because "and" is not shortcut in SIMPLE (though it types)
+
 var x[10];
 
 function init(n) {

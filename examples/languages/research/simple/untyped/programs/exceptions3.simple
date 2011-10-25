@@ -4,3 +4,5 @@ function main() {
 	catch(y) {x = x+1;}
 	write(x);
 }
+
+// 3

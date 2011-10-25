@@ -115,10 +115,7 @@ prototype works, reminding the reader important facts about K in general on
 a by-need basis.
 
 In order to actually interpret or analyze programs using a semantics written in
-K, there needs to be a way to give the programs to the tool.  Currently, the
-simplest way to do this is by introducing a new module that defines programs as
-macros, letting the K tool turn this into its internal representation, and then
-use Maude on the generated code.  We briefly outline the process below.
+K, there needs to be a way to give the programs to the tool.  Currently, the tool uses the syntax module of a definition to generate a parser for that definition which can be used to parse programs and turn them into their corresponding K AST format.  We briefly outline the process below.
 
 (For examples, see the language examples in the /examples directory;
 in particular, /examples/languages/research/simple/untyped is
@@ -128,18 +125,15 @@ familiar and well-documented.)
 
 You may prefer to first define the syntax and then the semantics.
 That is how most of the languages in the examples directory are defined.
+This reduces ambiguities in the parser and therefore might be able to 
+parse more programs.
 For example, suppose that we want to define a language LANGUAGE and that
 we have already defined its syntax in a module LANGUAGE-SYNTAX.
 Before even attempting to define the semantics, it is a good idea
 to test the syntax by parsing a large variety of programs.
-In our generic case, we can introduce a module of the form:
 
-  module LANGUAGE-PROGRAMS
-    imports LANGUAGE-SYNTAX
-    syntax Id ::= f | i | t | x | y | ...
-    syntax Stmts ::= pFactorial | ...
+In the examples provided with the tool, programs are in general kept into a `programs` directory in the directory containing the syntax definition.  Their extension is usually an indicator of the definition they belong to.  For example, the /examples/languages/research/simple/untyped/programs contains programs for the simple-untyped definition, among which `factorial.simple` looks like this:
 
-    macro pFactorial =
       var x;
       function f(y) {
         var t=1;
@@ -152,20 +146,7 @@ In our generic case, we can introduce a module of the form:
         write(f(x));
       }
 
-    ...
-  end module
-
-Obviously, the above program is just an example (borrowed from
-examples/languages/research/simple/untyped); you'll have to write
-programs using the syntax of the language you are defining.  The dots
-"..." above replace possibly more elements of the same type; we only
-included one program in the module above, together with all the syntactic
-constants it needs.  In this approach, unfortunately, you have to
-declare all these syntactic constants by hand, as above.  You can avoid
-this issue by using an external parser, but this is a more advanced
-technique, and we do not describe it here.  You should contact us at
-info@k-framework.org if you want to know more about how to get an external
-parser to work with K.
+If you would like to know more about how to get an external parser to work with K, please contact us at info@k-framework.org .
 
 As explained in the overview paper mentioned above, the entire language
 syntax is automatically included as constructors for the builtin sort
@@ -192,121 +173,56 @@ double-comma ",," (we chose double-comma to avoid conflicts with
 user-defined language syntax, for example comma).  We use ".List{K}"
 for the unit of List{K}.  This way, from an internal representation
 point of view, a language syntax is nothing but a finite set of KLabel
-constants.  For example, the internal representation of the syntactic
-program constant pFactorial above is 'pFactorial(.List{K}).  As a more
-complex example showing elements that need to be escaped, the program
-term itself is represented internally by:
+constants.  The `kast` program can be used to parse a program and see its K ast form.  By running
 
-    '__('var_;('_`,_(Id x(.List{K}))),,'__('function_`(_`)_(Id f(
-    .List{K}),,'_`,_(Id y(.List{K})),,'`{_`}('__('var_;('_`,_('_=_(Id t(.List{
-    K}),,Int 1(.List{K})))),,'__('for_=_to_do_(Id i(.List{K}),,Int 1(.List{K})
-    ,,Id y(.List{K}),,'_;('_=_(Id t(.List{K}),,'_*_(Id t(.List{K}),,Id i(.List{
-    K}))))),,'return_;(Id t(.List{K})))))),,'function_`(`)_(Id main(.List{K}),,
-    '`{_`}('__('_;('_=_(Id x(.List{K}),,Int 5(.List{K}))),,'write`(_`);(
-    '_`(_`)(Id f(.List{K}),,'_`,_('_`(_`)(Id f(.List{K}),,'_`,_(Id x(.List{
-    K})))))))))))
+  kast -lang simple-untyped programs/factorial.simple
+
+one obtains the folowing internal representation of the above program:
+
+  '__('var_;('_`,_(# #id_("x")(.List{K}),,'.List`{","`}(.List{K}))),,
+  '__('function_`(_`)_(# #id_("f")(.List{K}),,'_`,_(# #id_("y")(.List{K}),,
+  '.List`{","`}(.List{K})),,'`{_`}('__('var_;('_`,_('_=_(# #id_("t")(.List{K}),,
+  # 1(.List{K})),,'.List`{","`}(.List{K}))),,'__('`{_`}('__('var_;('_`,_(
+  # #id_("i")(.List{K}),,'.List`{","`}(.List{K}))),,'__('_;('_=_(# #id_("i")(
+  .List{K}),,# 1(.List{K}))),,'while_do_('_<=_(# #id_("i")(.List{K}),,
+  # #id_("y")(.List{K})),,'`{_`}('__('_;('_=_(# #id_("t")(.List{K}),,'_*_(
+  # #id_("t")(.List{K}),,# #id_("i")(.List{K})))),,'_;('_=_(# #id_("i")(
+  .List{K}),,'_+_(# #id_("i")(.List{K}),,# 1(.List{K})))))))))),,'return_;(
+  # #id_("t")(.List{K})))))),,'function_`(_`)_(# #id_("main")(.List{K}),,
+  '.List`{","`}(.List{K}),,'`{_`}('__('_;('_=_(# #id_("x")(.List{K}),,# 5(
+  .List{K}))),,'write`(_`);('_`(_`)(# #id_("f")(.List{K}),,'_`,_('_`(_`)(
+  # #id_("f")(.List{K}),,'_`,_(# #id_("x")(.List{K}),,'.List`{","`}(
+  .List{K}))),,'.List`{","`}(.List{K})))))))))
 
 Our current implementation allows you to use either concrete syntax
 or abstract syntax (as above) in your semantic rules.  We typically prefer
 the concrete syntax, but you may need to use the abstract syntax instead
-when your syntax confuses our current (simplistic) parser.  Unfortunately,
-we currently display only abstract syntax as output of our tool (results,
-or stuck computations, etc.).
-
-In order to enable the internal K representation discussed above, the
-builtin module K needs to be imported directly or indirectly.  The K module
-is imported indirectly as soon as you start the semantics, indicated by the
-use of the "configuration" or "rule" keywords.  It is not imported
-automatically in the syntactic modules.  Thus, since in our generic example
-we did not import the module K explicitly, to test the syntax we need to
-either include the module K as well in LANGUAGE-PROGRAMS, or better to create
-another module which imports both LANGUAGE-PROGRAMS and K.  We prefer the
-latter approach because the inclusion of module K automatically subsorts all
-the syntactic categories to K, which may lead to ambiguous parsing of more
-complex programs; this is, again, a limitation of our current implementation:
-
-  module LANGUAGE
-    imports LANGUAGE-PROGRAMS
-    imports K
-  --- The semantics will be imported later.
-  --- Until then, we have to import K explicitly in order to
-  --- see the internal representation of the programs.
-  endkm
-
-To check the internal representation of the programs defined in
-LANGUAGE-PROGRAMS, first kompile LANGUAGE (type "kompile -v" for instructions
-on how to use kompile), then load the generated Maude module into Maude, and
-then type in Maude commands like
-
-  rewrite ’pFactorial(.List\{K\})
+when your syntax confuses our current (simplistic) parser.  
 
 ## Running Programs
 
-To run programs, you need to create initial configurations holding the
-programs you want to execute and possibly other data, such as, for example,
-the program input.  K gives you complete freedom on how to create the initial
-configurations, which is both good and bad.  Our current approach to
-defining initial configurations is to introduce macros like the following:
-
-  syntax Bag ::= run( KLabel ) | run( KLabel , List )
-  macro run(PgmName:KLabel) =
-        <T_> <k> PgmName(.List{K}) ~> execute </k> <_/T>
-  macro run(PgmName:KLabel, Input:List) =
-        <T_> <k> PgmName(.List{K}) ~> execute <k> <input> Input <input> <_/T>
-
-The two configuration generator operations above are meant to only help
-users initialize the configuration with their programs by just passing
-the program Klabel, and not to be regarded as part of the theoretical
-semantics of the language.  Note that the configurations above use ruptured
-cells, so they take advantage of K's configuration abstraction mechanism:
-they will be automatically completed and initialized to match the declared
-configuration of LANGUAGE.
-
-These helper operators are placed in a module, together with the 
-inclusion of the programs and semantics, e.g.:
-
-  module LANGUAGE is
-    including LANGUAGE-PROGRAMS
-    including LANGUAGE-SEMANTICS
-    ...[above configuration macros]...
-  end module
+The `krun` tool can be used to execute programs, or explore their behaviors.
+What the `krun` tool basically does is (1) to put the internal representation of the program in the initial configuration described in the definition; (2) to call the rewrite engine to execute the program b rewriting the thus obtained initial configuration; and (3) to post-process the output of the rewrite engine and display it in a more appealing format.
 
 The idea now is that we can use the K tool to compile LANGUAGE, and
-then use the Maude backend to execute the program using the semantics.
-To run our sample program "pFactorial", all we need to do is something
+then use `krun` to execute the program using the semantics.
+To run our sample program `factorial`, all we need to do is something
 like this:
 
-  $ kompile language.k
-  $ maude language-compiled.maude 
-                       \||||||||||||||||||/
-                     --- Welcome to Maude ---
-                       /||||||||||||||||||\
-              Maude 2.6 built: Dec  9 2010 18:28:39
-              Copyright 1997-2010 SRI International
-                     Fri Jun 10 13:25:37 2011
-  Maude> rewrite run('pFactorial) .
+  $ kompile simple-untyped.k
+  $ krun programs/factorial.simple
+  6689502913449127057588118054090372586752746333138029810295671352301633557244962989366874165271984981308157637893214090552534408589408121859898481114389650005964960521256960000000000000000000000000000
 
-After which we see: 
-
-  rewrite in LANGUAGE : run('pFactorial) . 
-  rewrites: 6419 in 99ms cpu (99ms real) (64199 rewrites/second) 
-  result BagItem: < T > < out > ListItem(Int 120(.List{K})) </ out > ...
-  [We omit here the contents of the other cells that exist at program 
-  termination, and show only the output.]... </ T > 
 
 If, instead, one wants to search for all possible final states which
 could be obtained upon running the program, then one would need to use
 the command
 
-  Maude> search run('pFactorial) =>! Final:Bag . 
+  $ krun programs/factorial.simple
 
 And we get the result:
 
-  search in SIMPLE-UNTYPED : run('pFactorial) =>! Final:Bag .
-
-  Solution 1 (state 28364)
-  states: 28416
-  rewrites: 224116 in 3089ms cpu (3091ms real) (72540 rewrites/second)
+  Solution 1, state 891:
   Final:Bag --> < T > < out > ListItem(Int 120(.List{K})) </ out > ... </ T >
 
   No more solutions.
@@ -321,18 +237,11 @@ ad literam, so we do not explain it here.  The reader is refered to Maude's
 manual for more information on how to use its LTL model-checker, and again to 
 simple/untyped for an example (showing how to model-check Dekker's algorithm).
 
-You can also put such Maude commands into a single file, and then simply call
-Maude on that file.  See
-  examples/languages/research/simple/untyped/simple-untyped-test.m
-for examples of this.
-
 Important note: when defining programming languages with concurrency and/or
 with constructs evaluating their arguments in non-deterministic order, the
 state-space to be searched can be huge.  To reduce the state-space, you can
 limit the amount of non-determinism by saying explicitly which rules you want
-to count as transitions and which operations you want to evaluate their
-arguments non-deterministically.  This is done by associating tags to rules
-or operations, and then kompiling the definition with certain options
+to count as transitions, which operations should start superheating the computation, and which should cool down the computation to enable a different expression to be scheduled for evaluation.  This is done by associating tags to rules or operations, and then kompiling the definition with certain options
 stating which tags count as transitions and which as non-deterministic steps.
 See, again, the simple/untyped example (the Makefile shows the kompile options).
 
