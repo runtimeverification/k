@@ -13,13 +13,13 @@ mod STRICTCXT2EQS is
   including METADATA-EXTRAS .
   including COMPILATION-ATTRS .
   including META-K-WRAPPERS .
-  var T Trm : Term . var V : Variable .  var Trl : TermList . 
-  var Sort S : Sort .  var Ss : SortSet .
+  var T T1 T2 Trm : Term . var Ct : Constant . var V : Variable .
+  var Trl Trl' : TermList .  var Cond : TermList .  var Cnd : Condition .
+  var Sort S : Sort .  var Ss Ss' : SortSet .
   var AS AS' AS'' : AttrSet . var A : Attr .
   var MAS MAS' : MembAxSet . var Mb : MembAx .
   var Eqs Eqs' : EquationSet . var Rls Rls' : RuleSet . var Q : Qid .
   vars Type Type' Ty : Type .  var OPDS : OpDeclSet . var KCS : KContextSplit .
-  vars T1 T2 : Term . var Cond : TermList .  var Cnd : Condition .
   sort MASEqsPair . var Str : String .
 
   op defaultHeatEqs : SortSet AttrSet -> EquationSet .
@@ -174,8 +174,14 @@ mod STRICTCXT2EQS is
 
   op freezeTerm : Module Term -> Term .
   eq freezeTerm(M, T) = kApply(
-   freezeLabel(untokenize(metaPrettyPrint(M,T, mixfix flat number rat))),
+   freezeLabel(mkFrozenTerms(T)),
    freezeVariables(M, removeHole(noDuplicates(getVars(T))))) .
+
+  op mkFrozenTerms_ : TermList ~> TermList .
+  eq mkFrozenTerms(empty) = empty .
+  eq mkFrozenTerms(Q[Trl],Trl') = Q[mkFrozenTerms(Trl)],mkFrozenTerms(Trl') .
+  eq mkFrozenTerms(Ct,Trl) = Ct,mkFrozenTerms(Trl) .
+  eq mkFrozenTerms(V,Trl) = frozenVariable(V),mkFrozenTerms(Trl) .
 
   op freezeVariables : Module TermList ~> TermList .
   op freezeVariable : Module Variable ~> Variable .
@@ -207,14 +213,14 @@ mod STRICTCXT2EQS is
 
  ceq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss, AS supercools(AS')) 
    = strictCxt2eqs(Syntax, qid(substr(string(Syntax),length("#SUPERCOOL-"), length(string(Syntax)))),
-                   strictCxt2eqs(Flat, getMbs(M), AS supercools(AS')), Ss, AS supercools(AS')) 
+                   strictCxt2eqs(Flat, getMbs(M), AS supercools(AS')), Ss, AS supercools(AS'), getSorts(Flat)) 
   if substr(string(Syntax),0,length("#SUPERCOOL-")) = "#SUPERCOOL-" [print "generate supercool equations" AS'] . 
   eq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss, AS supercools(AS')) 
-   = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M), AS), Ss, AS) [owise print "don't generate supercool eqs: " AS'] . 
+   = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M), AS), Ss, AS,getSorts(Flat)) [owise print "don't generate supercool eqs: " AS'] . 
 
-  op strictCxt2eqs : Qid Qid MASEqsPair SortSet AttrSet ~> Module .
-  eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs, Rls}, Ss, AS) 
-   = addOps(declareResultLabels(Eqs)--- coolOps
+  op strictCxt2eqs : Qid Qid MASEqsPair SortSet AttrSet SortSet ~> Module .
+  eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs, Rls}, Ss, AS, Ss') 
+   = addOps(declareResultLabels(Eqs) declareVarPlaceHolders(Ss')--- coolOps
 ,setMbs(addRls(Rls, addEqs(defaultCoolEqs(Ss, AS) defaultHeatEqs(Ss, AS), 
         addEqs(generateResultEquations(Eqs), addImports((including Syntax . including 'K-STRICTNESS .), setName(emptySModule, StrictEqs))))), MAS)) [print "Syntax: " Syntax "StrictEqs: " StrictEqs] .
 
@@ -226,6 +232,11 @@ mod STRICTCXT2EQS is
   eq declareResultLabels(placeHolder(Q) Eqs) = (op getName(resultLabel(Q)) : nil -> KLabel [none] .) declareResultLabels(Eqs) .
   eq declareResultLabels(Eqs) = none [owise] .
 
+  op declareVarPlaceHolders : SortSet ~> OpDeclSet .
+  eq declareVarPlaceHolders(none) = none .
+  eq declareVarPlaceHolders(S ; Ss') 
+   = (op frozenVariableSy(S) : String -> S [metadata("generated=()")] .) 
+     declareVarPlaceHolders(Ss') .
 
   op generateResultEquations : EquationSet -> EquationSet .
   eq generateResultEquations(placeHolder(Q) Eqs)

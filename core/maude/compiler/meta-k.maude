@@ -799,6 +799,7 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
   including K-META-OPS .
   including K-META-CONFIG .
   var S : String .  var T T' : Term . var Trl : TermList . var Q : Qid .
+  var Ty : Type .  var V : Variable .
 
   op hole : -> Term .
   eq hole = '`[HOLE`]:K .
@@ -807,8 +808,14 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
   eq removeHole((T, Trl)) = if T == hole then removeHole(Trl) else T,removeHole(Trl) fi .
   eq removeHole(empty) = empty .
 
-  op freezeLabel : String -> Term .
-  eq freezeLabel(S) = 'freezer[stringCt(S)] [print "freezing " S] .
+  op freezeLabel : Term -> Term .
+  eq freezeLabel(T) = 'freezer[T] [print "freezing " T] .
+
+  op frozenVariable : Variable -> Term .
+  eq frozenVariable(V) = frozenVariableSy(getType(V))[stringCt(string(V))] .
+
+  op frozenVariableSy : Type ~> Qid .
+  eq frozenVariableSy(Ty) = qid("var" + string(Ty) + "_") .
 
   op freezeVariable : String Term -> Term .
   eq freezeVariable(S, V:Term) = kApply('freezeVar[stringCt(S)],V:Term) .
