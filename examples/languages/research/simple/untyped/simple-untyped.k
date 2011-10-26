@@ -20,18 +20,13 @@ automatically (when one uses an external parser) or manually
 
 /*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and
-for functions.  As our current parser is ``algebraic'', the empty list needs
-to be identifiable as a constant (unlike in CFG grammars, where it can simply
-be the empty string/epsilon production).  Therefore, if only using the first
-syntactic production for function declarations below, one would need to
-explicitly specify the empty list constant for declaring a function with zero
-arguments.  To avoid having to do that, we add a separate function declaration
-production with explicitly no arguments; this will be shortly desugared into
-the first one. */
+for functions. */
+
+  syntax Ids ::= List{#Id,","} [:prec(70):]
+  syntax Exps ::= List{Exp,","}
 
   syntax Decl ::= "var" Exps ";"
                 | "function" #Id "(" Ids ")" Stmt
-//  generated:              | "function" #Id "(" ")" Stmt
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -40,44 +35,42 @@ element.  Arrays can be multidimensional and can hold other arrays, so their
 lookup operation takes a list of expressions as argument and applies to an
 expression (which can in particular be another array lookup), respectively.
 The construct \texttt{sizeof} gives the size of an array in number of elements
-of its first dimension.  Like for the declaration of functions above, we have
-separate syntax for function calls with zero arguments.  Note that almost all
-constructs are strict.  Exceptions are the increment (since its first argument
-gets updated, so it cannot be evaluated), the function call with zero
-arguments (because it will get desugared), and the assignment which is only
-strict in its second argument (for the same reason as the increment). */
+of its first dimension.  Note that almost all constructs are strict.
+Exceptions are the increment (since its first argument gets updated, so it
+cannot be evaluated) and the assignment which is only strict in its second
+argument (for the same reason as the increment). */
 
   syntax Exp ::= #Int | #Bool | #Id
-               | "++" Exp            [:prec 0:]
-               | Exp "+" Exp         [:strict prec(33) gather(E e):]
-               | Exp "-" Exp         [:strict prec(33) gather(E e):]
-               | Exp "*" Exp         [:strict prec(31) gather(E e):]
-               | Exp "/" Exp         [:strict prec(31) gather(E e) superheat:]
-               | Exp "%" Exp         [:strict prec(31) gather(E e):]
-               | "-" Exp             [:strict:]
-               | Exp "<" Exp         [:strict prec(37):]
-               | Exp "<=" Exp        [:strict prec(37):]
-               | Exp ">" Exp         [:strict prec(37):]
-               | Exp ">=" Exp        [:strict prec(37):]
-               | Exp "==" Exp        [:strict prec(37):]
-               | Exp "!=" Exp        [:strict prec(37):]
-               | Exp "and" Exp       [:strict prec(55) gather(E e):]
-               | Exp "or" Exp        [:strict prec(59) gather(E e):]
-               | "not" Exp           [:strict prec(53):]
-               | Exp "[" Exps "]" [:strict prec(1):]
-               | "sizeOf" "(" Exp ")"    [:strict:]
-// generated:               | Exp "(" ")"
-               | Exp "(" Exps ")" [:strict prec(2):]
+               | "++" Exp              [:prec 0:]
+               | Exp "+" Exp           [:strict prec(33) gather(E e):]
+               | Exp "-" Exp           [:strict prec(33) gather(E e):]
+               | Exp "*" Exp           [:strict prec(31) gather(E e):]
+               | Exp "/" Exp           [:strict prec(31) gather(E e):]
+               | Exp "%" Exp           [:strict prec(31) gather(E e):]
+               | "-" Exp               [:strict:]
+               | Exp "<" Exp           [:strict prec(37):]
+               | Exp "<=" Exp          [:strict prec(37):]
+               | Exp ">" Exp           [:strict prec(37):]
+               | Exp ">=" Exp          [:strict prec(37):]
+               | Exp "==" Exp          [:strict prec(37):]
+               | Exp "!=" Exp          [:strict prec(37):]
+               | Exp "and" Exp         [:strict prec(55) gather(E e):]
+               | Exp "or" Exp          [:strict prec(59) gather(E e):]
+               | "not" Exp             [:strict prec(53):]
+               | Exp "[" Exps "]"      [:strict prec(1):]
+               | "sizeOf" "(" Exp ")"  [:strict:]
+               | Exp "(" Exps ")"      [:strict prec(2):]
                | "read" "(" ")"
-               | Exp "=" Exp         [:strict(2) prec(40)  gather (e E):]
+               | Exp "=" Exp           [:strict(2) prec(40)  gather (e E):]
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
-We also syntactically distinguish between empty and non-empty blocks.
-Variables can be declared anywhere inside a block, their scope ending
-with the block.  Expressions are allowed to be used for their side-effects
-only (followed by a semicolon ``\texttt{;}'').  Functions are allowed to
-abruptly return.  The exceptions are parametric, i.e., one can throw a value
+We syntactically distinguish between empty and non-empty blocks, because we
+chose \textit{Stmts} not to be a (``\texttt{;}''-separated) list of
+\textit{Stmt}.  Variables can be declared anywhere inside a block, their scope
+ending with the block.  Expressions are allowed to be used for their side
+effects only (followed by a semicolon ``\texttt{;}'').  Functions are allowed
+to abruptly return.  The exceptions are parametric, i.e., one can throw a value
 which is bound to the variable declared by \texttt{catch}.  Threads can be
 dynamically created and terminated, and can synchronize with \texttt{acquire},
 \texttt{release} and \texttt{rendezvous}.  Note that the strictness attributes
@@ -106,32 +99,6 @@ constructs are not strict in any arguments. */
                  | Stmts Stmts                          [:prec(100) gather(e E):]
 
 
-/*@ \subsection{Lists}
-Currently we have to explicitly declare the syntactic lists in this
-implementation of \K (they will be eventually builtin).
-Note that they are associative, strict and hybrid, which means that once they
-reach the top of the computation each of their elements is evaluated to a
-result and the obtained list of results is automatically considered to be a
-result.  We prefer to tag their units with the corresponding sort to avoid
-confusion.  */
-
---- List{Id}; the hybrid attribute says that a list of results becomes a result
-  syntax Ids ::= List{#Id,","} [:prec(70):]
-
---- List{Exp}
-  syntax Exps ::= List{Exp,","}
-
-/*@ When a syntactic category extends another syntactic category,
-like our \textit{Exp} which extends \textit{Id}, it is {\em strongly}
-recommended that the corresponding lists over the former also extend the
-corresponding lists over the latter; e.g., \textit{List\{Exp\}} above
-extends \textit{List\{Id\}}.  ``Forgetting'' to add such productions
-is one of the most common mistakes users of \K make when using syntactic
-lists, which is one of the reasons for which we intend to automate this
-process and provide builtin lists over any syntactic category in a future
-version of this tool.  Until then, please pay attention to this important
-syntactic detail. */
-
 /*@ \section{Desugared Syntax}
 This part desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
@@ -142,9 +109,8 @@ that there are only \texttt{while} loops, and that each variable is
 declared alone and is initialized. */
 
   macro if E:Exp then S:Stmt = if E then S else {}
-  macro (for X:#Id = E1:Exp to E2:Exp do S)
-      = {var X; X=E1; while X <= E2 do {S X=X+1;}}
-  macro var E,E':Exp,El:Exps; = var E; var E',El;
+  macro (for X:#Id = E1 to E2 do S) = {var X=E1; while X <= E2 do {S X=X+1;}}
+  macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
   macro var X = E; = var X; X = E;
 end module
 
@@ -171,7 +137,7 @@ mostly automatically, except for the special result computations.  Finally,
 the configuration serves as a backbone for the process of configuration
 abstraction which allows users to only mention the relevant cells in each
 semantic rule, the rest of the configuration context being inferred
-automatically. Although the configuration could potentially be automatically
+automatically.  Although the configuration could potentially be automatically
 inferred from the rules, we believe that it is very useful for language
 designers/semanticists to actually think of and design their configuration
 explicitly, so the current implementation of \K requires one to define it. */
@@ -192,8 +158,8 @@ function definitions cannot be nested). */
   syntax Exp ::= Val
 
 /*@ The inclusion of values in expressions follows the methodology of
-syntactic definitions (as, e.g., SOS): extend the syntax of the language
-to encompass all values and additional construct needed in giving semantics.
+syntactic definitions (like, e.g., in SOS): extend the syntax of the language
+to encompass all values and additional constructs needed to give semantics.
 In addition to that, it allows us to write the semantic rules using the
 original syntax of the language, and to parse them with the same (now extended
 with additional values) parser.  If writing the semantics directly on the \K
@@ -213,13 +179,11 @@ computations, namely $\KResult$.  Distinguishing terms of sort $\KResult$ is
 not necessary in theory, but it is crucial in implementations of the \K
 framework, because it allows to distinguish a class of terms as irreducible
 and thus to more efficiently implement the heating/cooling process associated
-to the strictness attributes.  Below we state that all lists of values are
-terms of sort $\KResult$.  We use lists of values instead of values because,
-as discussed above, we want lists of expressions to evaluate to lists of
-values whenever scheduled for evaluation (by placing them on the top of the
-\textsf{k} cell). */
-  
+to the strictness attributes.  Below we state that all values are terms of
+sort $\KResult$. */
+
   syntax KResult ::= Val 
+
 
 /*@ \section{Configuration}
 The \K configuration of SIMPLE consists of a top level cell, \textsf{T},
@@ -249,8 +213,8 @@ One can add more control structures in the \textsf{control} cell, such as a
 stack for break/continue of loops, etc., if the language is extended with more
 control-changing constructs.  Note that all cells except for \textsf{k} are
 also initialized, in that they contain a ground term of their corresponding
-sort.  The \textsf{k} cell needs not be initialized at this level, because it
-will be initialized with the program to evaluate later. */
+sort.  The \textsf{k} cell is initialized with the program that will be passed
+to the \K tool, as indicated by the \textit{\$PGM} variable. */
 
   configuration <T color="red">
                   <threads color="orange">
@@ -273,37 +237,37 @@ will be initialized with the program to evaluate later. */
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
+
 /*@ \section{Declarations and Initialization}
 We start by defining the semantics of declarations (for variables, arrays and
 functions). */
 
 /*@ \subsection{Variable Declaration}
 The SIMPLE syntax was desugared above so that each variable is declared alone
-and its initialization is done as a a separate statement.
-The semantic rule below matches resulting
-variable declarations of the form
-``$\texttt{var}\,X\texttt{;}$'' on top of the \textsf{k} cell (indeed, note that the \textsf{k} cell
-is complete, or round, to the left, and is torn, or ruptured, to the right),
-allocates a fresh location $L$ in the store which is initialized with a special value $\bot$ (indeed,
-the unit ``$\kdot$'', or nothing, is matched anywhere in the map---note the
-tears at both sides---and replaced with the mapping $L\mapsto V$), and binds
-$X$ to $L$ in the local environment shadowing previous declarations of $X$,
-if any.  It is this possible shadowing of $X$ which disallows us to use a
-similar technique for updating the environment as for updating the store, as
-we know that $L$ is not already bound in the store when we add $L \mapsto \bot$.
-We prefer the approach used for updating the store whenever possible, because
-it offers more true concurrency than the latter; indeed, according to the
-concurrent semantics of $K$, the store is not frozen while $L\mapsto \bot$ is
-added to it, while the environment is frozen during the update operation
-$\textit{Env}[L/X]$.  The variable declaration command is also removed from
-the top of the computation cell and the fresh location counter is incremented.
-All the above happen in one transactional step, with the rule below.  Note
-also how configuration abstraction allows us to only mention the needed cells;
-indeed, as the configuration above states, the \textsf{k} and \textsf{env}
-cells are actually located within a \textsf{thread} cell within the
-\textsf{threads} cell, but one needs not mention these: the configuration
-context of the rule is automatically transformed to match the declared
-configuration structure.
+and its initialization is done as a a separate statement.  The semantic rule
+below matches resulting variable declarations of the form
+``$\texttt{var}\,X\texttt{;}$'' on top of the \textsf{k} cell (indeed, note
+that the \textsf{k} cell is complete, or round, to the left, and is torn, or
+ruptured, to the right), allocates a fresh location $L$ in the store which is
+initialized with a special value $\bot$ (indeed, the unit ``$\kdot$'', or
+nothing, is matched anywhere in the map---note the tears at both sides---and
+replaced with the mapping $L\mapsto V$), and binds $X$ to $L$ in the local
+environment shadowing previous declarations of $X$, if any.  It is this
+possible shadowing of $X$ which disallows us to use a similar technique for
+updating the environment as for updating the store, as we know that $L$ is not
+already bound in the store when we add $L \mapsto \bot$.  We prefer the approach
+used for updating the store whenever possible, because it offers more true
+concurrency than the latter; indeed, according to the concurrent semantics of
+$K$, the store is not frozen while $L\mapsto \bot$ is added to it, while the
+environment is frozen during the update operation $\textit{Env}[L/X]$.
+The variable declaration command is also removed from the top of the computation
+cell and the fresh location counter is incremented.  All the above happen in one
+transactional step, with the rule below.  Note also how configuration
+abstraction allows us to only mention the needed cells; indeed, as the
+configuration above states, the \textsf{k} and \textsf{env} cells are actually
+located within a \textsf{thread} cell within the \textsf{threads} cell, but one
+needs not mention these: the configuration context of the rule is automatically
+transformed to match the declared configuration structure.
 
 \paragraph{Note:}{The "trick" with using a \textsf{nextLoc} cell to generate
 fresh locations is rather low level and hopefully temporary; we intend to
@@ -324,7 +288,7 @@ the first one allocated) holding the array reference value.  The array
 reference value \texttt{array(L,N)} states that the array has size $N$ and its
 elements are located contiguously in the store starting with location $L$.
 Recall that $L..L'$ is the list of locations between $L$ and $L'$ and that
-$L..L'\mapsto V$ initializes each location in the list $L..L'$ to value $V$.
+$L..L'\mapsto V$ initializes each location in the list $L..L'$ to $V$.
 Note that, since the dimensions of array declarations can be arbitrary
 expressions, this virtually means that we can dynamically allocate memory in
 SIMPLE by means of array declarations. */
@@ -332,7 +296,7 @@ SIMPLE by means of array declarations. */
   rule <k> var X[N:#Nat]; => . ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> array(L +Nat 1, N)
-                       L +Nat 1 .. L +Nat 1 +Nat N |-> undefined ...</store>
+                       L +Nat 1 .. L +Nat N |-> undefined ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
 /*@ SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we
@@ -390,7 +354,7 @@ whenever functions are invoked, which is consistent with our requirement that
 functions should only be declared at the top.  Thus, if one declares local
 functions, then one may see unexpected behaviors (e.g., when one shadows a
 global variable before declaring a local function).  The type checker of
-SIMPLE, also defined in \K (see examples/simple/typed/static),
+SIMPLE, also defined in \K (see simple/typed/static),
 discards programs which do not respect this requirement. */
 
   rule <k> function F:#Id(Xl:Ids) S:Stmt => . ...</k>
@@ -429,7 +393,9 @@ When a variable $X$ is the first computational task (note the rupture of the
 environment (note the rupture of the \textsf{env} cell at both sides), and
 $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
-  rule <k> X => V:Val ...</k> <env>...X|->L...</env> <store>...L|->V...</store> [transition]
+  rule <k> X => V:Val ...</k>
+       <env>...X|->L...</env>
+       <store>...L|->V...</store> [transition]
 
 /*@ Note that this excludes reading $\bot$, as $\bot$ is not a value.
 */
@@ -475,7 +441,7 @@ below desugars multi-dimensional array access to uni-dimensional array access;
 recall that the array access operation was declared strict, so all
 sub-expressions involved are already values at this stage.  The second rule
 rewrites the array access to a lookup operation at a precise location; we
-prefer to do it this way to avoid locking the store. Recall that ``---'' is an
+prefer to do it this way to avoid locking the store.  Recall that ``---'' is an
 anonymous variable in \K matching any subterm (like in Prolog); informally,
 ``there is something there but we don't care what''.
 The semantics of the \texttt{lookup} operation is straightforward. */
@@ -517,6 +483,7 @@ with a return statement inside, which would put the \textsf{xstack} cell in an
 inconsistent state (since the exception block modifies it, but that
 modification should be irrelevant once the function returns). */
 
+  syntax Vals ::= List{Val,","}
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
   rule <k> _`(_`)(lambda(Xl,S), Vl:Vals) ~> K:K => bindto(Xl,Vl) ~> S ~> return(0); </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
@@ -526,6 +493,10 @@ modification should be irrelevant once the function returns). */
        <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
 
+/*@ The \texttt{bindto} auxilliary construct binds a list of variables to a
+list of values.  Specifically, it allocates a fresh location for each variable,
+binding the variable to that location in the environment and writing the value
+to that location in the store. */
 
   syntax K ::= "bindto" "(" Ids "," Vals ")"
   rule <k> bindto((X,Xl:Ids => Xl),(V,Vl:Vals => Vl)) ...</k>
@@ -536,13 +507,7 @@ modification should be irrelevant once the function returns). */
 
 /*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next input
-value, at the same time discarding the input value from the \textsf{in} cell.
-In an implementation of the SIMPLE language, one would likely want to make the
-input buffer interactive, prompting the user to provide a new value whenever
-needed.  In a semantics, however, it is acceptable to assume that all the
-input values are given before the program is executed; thus, the rewrite
-process gets stuck if the next computation item is a \texttt{read()} expression
-construct and no input item is available. */
+value, at the same time discarding the input value from the \textsf{in} cell. */
 
   rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
 
@@ -591,10 +556,10 @@ is a block.  Then the semantics of blocks above, together with the
 unrolling semantics of the while loop below, will yield a computation
 structure in the \textsf{k} cell that increasingly grows, adding a new
 environment recovery task right in front of the already existing sequence of
-similar environment recovery tasks (this phenomenon is similar to the "tail
-recursion" problem).  Of course, when we have a sequence of environment
+similar environment recovery tasks (this phenomenon is similar to the ``tail
+recursion'' problem).  Of course, when we have a sequence of environment
 recovery tasks, we only need to keep the last one.  The elegant rule below
-does precisely that, thus abvoiding the unnecessary computation explosion
+does precisely that, thus avoiding the unnecessary computation explosion
 problem:  */
 
   rule (env(_) => .) ~> env(_) [:structural:]
@@ -640,7 +605,7 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule S1:Stmt S2:Stmt => S1~>S2
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
@@ -675,11 +640,7 @@ semantics, which would also involve the \textsf{control} cell. */
 
 /*@ \subsection{Write}
 The write statement appends its evaluated argument (recall that \texttt{write}
-was declared strict) to the output list.  Like in the case of the
-\texttt{read()} construct, implementations of SIMPLE may choose to display the
-output incrementally, as it is being generated; in semantics, we do not need
-to worry about that and simply collect all the output in the \textsf{out}
-cell. */
+was declared strict) to the output buffer. */
 
   rule <k> write(I); => . ...</k> <out>... . => ListItem(I) </out> [:transition:]
 
@@ -720,7 +681,7 @@ exception stack.  The three rules below modularly do precisely the above. */
        <env> _ => Env </env>
 
 /*@ The catch statement $S_2$ needs to be executed in the original environment,
-but where the thrown value $V$ was bound to the catch variable $X$.  We here
+but where the thrown value $V$ is bound to the catch variable $X$.  We here
 chose to rely on two previously defined constructs when giving semantics to
 the catch part of the statement: (1) the variable declaration with
 initialization, for binding $X$ for $V$; and (2) the block construct for
@@ -732,16 +693,16 @@ without variable initializers and blocks. */
 /*@ \subsection{Threads}
 SIMPLE's threads can be created and terminated dynamically, and can
 synchronize by acquiring and releasing re-entrant locks and by rendezvous.
-We discuss the 7 rules giving the semantics of these operations below. */
+We discuss the seven rules giving the semantics of these operations below. */
 
 /*@ \subsubsection{Thread creation}
 Threads can be created by any other threads using the ``\texttt{spawn $S$}''
 statement.  The spawn statement is consumed in the creating thread and, at the
-same time, a new thread cell is added to the to the configuration initialized
-with the $S$ statement and sharing the same environment with the spawning
-thread.  Note that the newly created \textsf{thread} cell is torn.  That means
-that the remaining cells are added and initialized automatically as described
-in the definition of SIMPLE's configuration.  This is part of \K's
+same time, a new thread cell is added to the top of the configuration,
+initialized with the $S$ statement and sharing the same environment with the
+spawning thread.  Note that the newly created \textsf{thread} cell is torn.
+That means that the remaining cells are added and initialized automatically as
+described in the definition of SIMPLE's configuration.  This is part of \K's
 configuration abstraction/concretization mechanism. */
 
    rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
@@ -856,14 +817,5 @@ The two rules below are structural, for the same reason as above. */
   rule N1:#Nat..N1 => .List{K} [:structural:]
   rule N1..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <Nat N2 [:structural:]
 
-/*@ \subsection{Lists of values}
-We need lists of values as a separate syntactic category
-because we want to allow lists of expressions (e.g., function arguments) to
-evaluate to such lists of values.  Note also that we defined lists of values
-as \K results (at the beginning of the SIMPLE semantics module). */
-
-  syntax Vals ::= List{Val,","}
-
 /*@ The semantics of SIMPLE is now complete. */
 end module
-
