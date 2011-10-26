@@ -134,7 +134,7 @@ module URIS
     if #isWhiteSpace(C)
   
   syntax List ::= `#convertToken ( #String , #String )
-  rule #convertToken("#Int",S:#String) => ListItem(String2Int(S))
+  rule #convertToken("#Int",S:#String) => ListItem(String2Int(S +String "0") /Int 10)
   rule #convertToken("#Float",S:#String) => ListItem(String2Float(S))
   rule #convertToken("#String",S:#String) => ListItem(S)
 
