@@ -181,7 +181,7 @@ mod STRICTCXT2EQS is
   eq mkFrozenTerms(empty) = empty .
   eq mkFrozenTerms(Q[Trl],Trl') = Q[mkFrozenTerms(Trl)],mkFrozenTerms(Trl') .
   eq mkFrozenTerms(Ct,Trl) = Ct,mkFrozenTerms(Trl) .
-  eq mkFrozenTerms(V,Trl) = frozenVariable(V),mkFrozenTerms(Trl) .
+  eq mkFrozenTerms(V,Trl) = metaVariable(V),mkFrozenTerms(Trl) .
 
   op freezeVariables : Module TermList ~> TermList .
   op freezeVariable : Module Variable ~> Variable .
@@ -189,7 +189,7 @@ mod STRICTCXT2EQS is
    = (freezeVariable(M, V),freezeVariables(M, Trl)) .
   eq freezeVariables(M, empty) = empty .
 
-  eq freezeVariable(M, V) = freezeVariable(string(V),makeK(M,V, getType(V))) .
+  eq freezeVariable(M, V) = freezeVariable(V,makeK(M,V, getType(V))) .
 
   op makeK : Module Variable Type ~> Term . 
   eq makeK(M, V, Type) = makeK(M, V, Type, sortLeq(M, Type, KList)) .
@@ -235,7 +235,8 @@ mod STRICTCXT2EQS is
   op declareVarPlaceHolders : SortSet ~> OpDeclSet .
   eq declareVarPlaceHolders(none) = none .
   eq declareVarPlaceHolders(S ; Ss') 
-   = (op frozenVariableSy(S) : String -> S [metadata("generated=()")] .) 
+   = (op metaVariableSy(S) : String -> S [metadata("generated=()")] .) 
+     (op frozenVariableSy(S) : String -> KLabel [metadata("generated=()")] .) 
      declareVarPlaceHolders(Ss') .
 
   op generateResultEquations : EquationSet -> EquationSet .

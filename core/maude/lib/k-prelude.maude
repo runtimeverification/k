@@ -321,7 +321,6 @@ mod K-STRICTNESS is
   including K-TECHNIQUE .
   including #STRING .
   op freezer : K -> KLabel [strat(0) frozen] .
-  op freezeVar : #String -> KLabel .
 
   op cool : -> KLabel .
   op heat : -> KLabel .

@@ -811,14 +811,22 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
   op freezeLabel : Term -> Term .
   eq freezeLabel(T) = 'freezer[T] [print "freezing " T] .
 
-  op frozenVariable : Variable -> Term .
-  eq frozenVariable(V) = frozenVariableSy(getType(V))[stringCt(string(V))] .
+  op metaVariable : Variable -> Term .
+  eq metaVariable(V) 
+   = metaVariableSy(getType(V))[stringCt(string(getName(V)))] .
+
+  op metaVariableSy : Type ~> Qid .
+  eq metaVariableSy(Ty) = qid("var{" + string(Ty) + "}(_)") .
 
   op frozenVariableSy : Type ~> Qid .
-  eq frozenVariableSy(Ty) = qid("var" + string(Ty) + "_") .
+  eq frozenVariableSy(Ty) = qid("var{" + string(Ty) + "}(_)<-") .
 
-  op freezeVariable : String Term -> Term .
-  eq freezeVariable(S, V:Term) = kApply('freezeVar[stringCt(S)],V:Term) .
+  op frozenVariable : Variable -> Term .
+  eq frozenVariable(V) 
+   = frozenVariableSy(getType(V))[stringCt(string(getName(V)))] .
+
+  op freezeVariable : Variable Term -> Term .
+  eq freezeVariable(V, T) = kApply(frozenVariable(V),T) .
 
   op kWrap : Term -> Term .
   eq kWrap(T) = kWrap(klabel,T) .
