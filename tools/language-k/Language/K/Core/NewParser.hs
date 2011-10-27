@@ -64,7 +64,7 @@ cellItem = do
     return $ CellItem name content
 
 cellContent :: Parser CellContent
-cellContent = try mapContent <|> try bagContent <|> try listContent <|> kContent
+cellContent = try mapContent <|> try bagContent <|> try listContent <|> try setContent <|> kContent
 
 kContent :: Parser CellContent
 kContent = KContent <$> k
@@ -74,6 +74,9 @@ bagContent = BagContent <$> kBag
 
 listContent :: Parser CellContent
 listContent = ListContent <$> kList
+
+setContent :: Parser CellContent
+setContent = SetContent <$> kSet
 
 mapContent :: Parser CellContent
 mapContent = MapContent <$> kMap
@@ -98,7 +101,19 @@ endTag tag = do
     char '>'
     return ()
 
--- TODO: Sets
+kSet :: Parser KSet
+kSet = emptyKSet <|> KSet <$> setItem `endBy1` spaces
+
+emptyKSet :: Parser KSet
+emptyKSet = do
+    string "(.).Set"
+    return $ KSet []
+
+setItem :: Parser K
+setItem = do
+    string "SetItem"
+    k <- parens k
+    return k
 
 kList :: Parser KList
 kList = emptyKList <|> KList <$> listItem `endBy1` spaces
