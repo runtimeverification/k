@@ -1,4 +1,3 @@
-all: 
+all:
 	make -C core/java
-	make -C tools/krun dev-install
-
+	make -C tools/krun
