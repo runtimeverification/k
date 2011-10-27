@@ -1,3 +1,3 @@
 all:
-	make -C core/java
-	make -C tools/krun
+	@make -C core/java
+	@make -C tools/krun
