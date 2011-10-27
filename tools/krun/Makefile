@@ -10,7 +10,7 @@ endif
 	cd ${K_BASE}/tools/maude-hs; cabal install
 	cd ${K_BASE}/tools/language-k; cabal install
 	cd ${K_BASE}/tools/krun; cabal install
-	cp ${HOME}/.cabal/bin/krun ${K_BASE}/core
+	cp ${K_BASE}/tools/krun/dist/build/krun/krun ${K_BASE}/core
 
 clean:
 	cd ${K_BASE}/tools/language-k; cabal clean
