@@ -20,7 +20,7 @@ function multX(v) {
   rendezvous v;
 }
 
-// 120, but also many many other behaviors
+// 120, but also many many other behaviors ...
 
 // The problem here is that "spawn multX(i);" does not evaluate the "i" argument,
 // it only spawns a thread calculating the expression statement "multX(i);".
