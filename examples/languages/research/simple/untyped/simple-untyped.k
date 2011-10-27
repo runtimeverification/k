@@ -40,7 +40,7 @@ Exceptions are the increment (since its first argument gets updated, so it
 cannot be evaluated) and the assignment which is only strict in its second
 argument (for the same reason as the increment). */
 
-  syntax Exp ::= #Int | #Bool | #Id
+  syntax Exp ::= #Int | #Bool | #String | #Id
                | "++" Exp              [:prec 0:]
                | Exp "+" Exp           [:strict prec(33) gather(E e):]
                | Exp "-" Exp           [:strict prec(33) gather(E e):]
@@ -77,7 +77,8 @@ dynamically created and terminated, and can synchronize with \texttt{acquire},
 obey the intended evaluation strategy of the various constructs.  In
 particular, the if-then-else construct is strict only in its first argument
 (the if-then construct will be desugared into if-then-else), while the loops
-constructs are not strict in any arguments. */
+constructs are not strict in any arguments.  The \texttt{print} statement
+constructs is variadic, that is, it takes an arbitrary number of arguments. */
 
   syntax Stmt ::= "{" "}"
                 | "{" Stmts "}"
@@ -87,7 +88,7 @@ constructs are not strict in any arguments. */
                 | "while" Exp "do" Stmt                 [:prec(90):]
                 | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
                 | "return" Exp ";"                      [:strict:]
-                | "write" "(" Exp ")" ";"               [:strict:]
+                | "print" "(" Exps ")" ";"              [:strict:]
                 | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
                 | "throw" Exp ";"                       [:strict:]
                 | "spawn" Stmt                          [:prec(90):]
@@ -152,7 +153,7 @@ $\lambda$-abstractions (we do not need to evaluate functions to closures
 because each function is executed in the fixed global environment and
 function definitions cannot be nested). */
 
-  syntax Val ::= #Int | #Bool
+  syntax Val ::= #Int | #Bool | #String
                | "array" "(" #Nat "," #Nat ")"
                | "lambda" "(" Ids "," Stmt ")" [:latex("\lambda{#1}\,.\,{#2}"):]
   syntax Exp ::= Val
@@ -244,14 +245,14 @@ functions). */
 
 /*@ \subsection{Variable Declaration}
 The SIMPLE syntax was desugared above so that each variable is declared alone
-and its initialization is done as a a separate statement.  The semantic rule
+and its initialization is done as a separate statement.  The semantic rule
 below matches resulting variable declarations of the form
 ``$\texttt{var}\,X\texttt{;}$'' on top of the \textsf{k} cell (indeed, note
 that the \textsf{k} cell is complete, or round, to the left, and is torn, or
 ruptured, to the right), allocates a fresh location $L$ in the store which is
 initialized with a special value $\bot$ (indeed, the unit ``$\kdot$'', or
 nothing, is matched anywhere in the map---note the tears at both sides---and
-replaced with the mapping $L\mapsto V$), and binds $X$ to $L$ in the local
+replaced with the mapping $L\mapsto \bot$), and binds $X$ to $L$ in the local
 environment shadowing previous declarations of $X$, if any.  It is this
 possible shadowing of $X$ which disallows us to use a similar technique for
 updating the environment as for updating the store, as we know that $L$ is not
@@ -397,8 +398,7 @@ $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
        <env>...X|->L...</env>
        <store>...L|->V...</store> [transition]
 
-/*@ Note that this excludes reading $\bot$, as $\bot$ is not a value.
-*/
+/*@ Note that this excludes reading $\bot$, as $\bot$ is not a value. */
 
 /*@ \subsection{Variable/Array increment}
 This is tricky, because we want to allow both {\tt ++x} and {\tt ++a[5]}.
@@ -419,6 +419,7 @@ language constructs to their library counterparts when their arguments become
 values of expected sorts: */
 
   rule I1:#Int + I2:#Int => I1 +Int I2
+  rule Str1:#String + Str2:#String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
   rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
@@ -638,11 +639,14 @@ semantics, which would also involve the \textsf{control} cell. */
   rule <k> while B:Exp do S
     => if B then {S while B do S} else {} ...</k> [:structural:]
 
-/*@ \subsection{Write}
-The write statement appends its evaluated argument (recall that \texttt{write}
-was declared strict) to the output buffer. */
+/*@ \subsection{Print}
+The print statement was strict, so all its arguments are now evaluated
+(recall that \texttt{print} is variadic).  We append each of its evaluated
+arguments to the output buffer, and discard the residual
+\texttt{print} statement with an empty list of arguments. */
 
-  rule <k> write(I); => . ...</k> <out>... . => ListItem(I) </out> [:transition:]
+  rule <k> print(V,Vl => Vl); ...</k> <out>... . => ListItem(V) </out> [:transition:]
+  rule print(); => . [:structural:]
 
 /*@ \subsection{Exceptions}
 SIMPLE allows parametric exceptions, in that one can throw and catch a
@@ -795,16 +799,16 @@ that the array and its index are evaluated, and then the rule for array lookup
 (defined above) rewrites the evaluated array access construct to its
 corresponding store lookup operation. */
 
---- For parsing reasons, we prefer to allow l-value to take a K
+// For parsing reasons, we prefer to allow l-value to take a K
   syntax Exp ::= "l-value" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
---- Local variable
+// Local variable
   rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
---- Array element: evaluate the array and its index;
---- then the array lookup rule above applies.
+// Array element: evaluate the array and its index;
+// then the array lookup rule above applies.
   context l-value(_[[#]])
   context l-value([#][_])
---- Finally, return the address of the desired object member
+// Finally, return the address of the desired object member
   rule <k> l-value(lookup(L)) => loc(L) ...</k>
 
 
@@ -814,8 +818,8 @@ given numbers.  The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N1 => .List{K} [:structural:]
-  rule N1..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
 
 /*@ The semantics of SIMPLE is now complete. */
 end module

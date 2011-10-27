@@ -1,0 +1,32 @@
+// This version of insertion sorting declares the vector in the init function
+// and returns it (actually its reference) to the main function
+
+function init(n) {
+  var x[100];
+  for i = 0 to n - 1 do
+    x[i] = (n-i) + 100;
+  return x;
+}
+
+function printAll(x,n) {
+  for i = 0 to n - 1 do
+  print(" ",x[i]);
+}
+
+function main() {
+  var n = 30, x = init(n);
+  print("The original sequence is");
+  printAll(x,n);
+  print("\nSorting the array using insertion sort ... ");
+  for i = 1 to n - 1 do {
+    var j = i - 1, v = x[i];
+    while (j >= 0) do {
+      if x[j] > v then x[j+1] = x[j];
+      j = j - 1;
+    }
+    x[j+1] = v;
+  }
+  print("Done!\nThe sorted sequence is");
+  printAll(x,n);
+  print("\n");
+}
