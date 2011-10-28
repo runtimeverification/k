@@ -88,6 +88,7 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
                 | "while" Exp "do" Stmt                 [:prec(90):]
                 | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
                 | "return" Exp ";"                      [:strict:]
+                | "return" ";"
                 | "print" "(" Exps ")" ";"              [:strict:]
                 | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
                 | "throw" Exp ";"                       [:strict:]
@@ -113,6 +114,7 @@ declared alone and is initialized. */
   macro (for X:#Id = E1 to E2 do S) = {var X=E1; while X <= E2 do {S X=X+1;}}
   macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
   macro var X = E; = var X; X = E;
+  macro return; = return 0;
 end module
 
 
