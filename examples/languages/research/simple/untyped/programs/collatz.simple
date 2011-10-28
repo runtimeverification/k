@@ -1,31 +1,23 @@
 var n, m;
 
-function divide2(dummy1, r, dummy2) {
-  var q = 0;
-
-  while not r <= 1 do {
-    r = r - 2;
-    q = q + 1;
-  }
-  return q;
-}
-
 function collatz() {
   var s=0;
-  print(n);
+  print("Testing Collatz' conjecture for n = ",n," ... ");
   while n > 1 do {
     s = s+1;
     if n == (n/2)*2
-    then n = divide2(3+n, n, true or false);
+    then n = n/2;
     else n = 3*n+1;
   }
-  return s;
+  print("Done! It took ",s," steps.\n");
 }
 
 function main() {
-  m = 10;
+  print("Testing Collatz' conjecture up to what number? ");
+  m = read();
   for i = 1 to m do {
     n = i;
-    print(collatz());
+    collatz();
   }
+  print("Done.  It appears to hold.\n");
 }
