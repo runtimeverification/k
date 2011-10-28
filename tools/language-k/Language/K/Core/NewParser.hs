@@ -154,7 +154,7 @@ ostream :: Parser ListItem
 ostream = do
     string "#ostream"
     i <- parens integer
-    return $ IStream i
+    return $ OStream i
 
 kMap :: Parser KMap
 kMap = emptyKMap <|> KMap . Map.fromList <$> mapItem `endBy1` spaces
