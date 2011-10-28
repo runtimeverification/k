@@ -396,7 +396,7 @@ $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
   rule <k> X => V:Val ...</k>
        <env>...X|->L...</env>
-       <store>...L|->V...</store> [transition]
+       <store>...L|->V...</store> [:transition:]
 
 /*@ Note that this excludes reading $\bot$, as $\bot$ is not a value. */
 
@@ -411,7 +411,7 @@ to a location value, also introduced below with the auxiliary operations. */
 
   context ++([#] => l-value([#]))
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store> [transition]
+       <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
