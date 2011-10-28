@@ -31,8 +31,10 @@ kmap = do
     return $ T.concat ["wmap(__(", map, "))(.List{K})"]
 
 mapItem = do
-    id <- takeWhile1 (/= '|')
+    id <- takeWhile1 (\x -> x /= ' ' && x /= '|')
+    skipSpace
     string "|->"
+    skipSpace
     k <- takeWhile1 (/= ' ')
     return $ T.concat ["_|->_(# #id \"", id, "\"(.List{K}),# ", k, "(.List{K}))"]
 
