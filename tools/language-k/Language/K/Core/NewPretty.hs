@@ -13,15 +13,36 @@ printDoc doc = do
 
 ppK (Kra []) = char '.'
 ppK (Kra ks) = hsep $ intersperse (yellow $ text "~>") (map ppK ks)
+ppK (KApp (Freezer k) ks) = ppK $ plugFreezer k ks
 ppK (KApp klabel []) = ppKLabel klabel
 ppK (KApp (KLabel ss) ks) = hsep $ zipSyntax ss (map ppK ks)
 ppK (KApp klabel ks) = ppKLabel klabel <> parens (hsep $ punctuate comma (map ppK ks))
+ppK FreezerHole = text "□"
+-- shouldn't happen:
+ppK (FreezerVar s) = red $ text s
+
+plugFreezer :: K -> [K] -> K
+plugFreezer k ks = mapK (plug ks) k
+    where plug :: [K] -> K -> K
+          plug _ (FreezerVar "`[HOLE`]") = FreezerHole
+          plug ks (FreezerVar var) = lookupK var ks
+          plug _ k = k
+
+          lookupK :: String -> [K] -> K
+          -- TODO: unsafe
+          lookupK var ks = head [ k | (KApp (FreezerMap var') [k]) <- ks, var == var' ]
+
+          mapK :: (K -> K) -> K -> K
+          mapK f (KApp label ks) = KApp label (map f ks)
+          mapK f (Kra ks) = Kra (map f ks)
+          mapK f k = k
 
 -- | Combine a KLabel and a list of arguments to form the original syntax.
 zipSyntax (Syntax s : xs) as = bold (text s) : zipSyntax xs as
 zipSyntax (Hole : xs) (a : as)
     -- Somewhat hackish way to reduce parentheses in output
-    | all isAlphaNum (show a) = a : zipSyntax xs as
+    -- TODO: doesn't work well with colors
+    | all isAlphaNum (show a) || show a == "□" = a : zipSyntax xs as
     | otherwise = parens a : zipSyntax xs as
 zipSyntax _ _ = []
 
@@ -30,9 +51,7 @@ ppKLabel (KId id) = text id
 ppKLabel (KBool True) = text "true"
 ppKLabel (KBool False) = text "false"
 ppKLabel (KString s) = text (show s)
-ppKLabel (Freezer s) = text "freezer" <> parens (text s)
-ppKLabel (FreezeVar s) = blue $ text s
---ppKLabel (FreezeVar s) = text "freezerVar" <> parens (text s)
+ppKLabel (Freezer k) = text "freezer" <> parens (ppK k)
 
 ppKBag (KBag []) = char '.'
 ppKBag (KBag bs) = vsep $ map ppBagItem bs

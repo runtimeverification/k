@@ -10,10 +10,10 @@ import Text.Parsec.String
 
 -- | Parse a K term
 k :: Parser K
-k = try kra <|> kApp
+k = try kra <|> try kApp <|> freezerVar
 
 kra :: Parser K
-kra = emptyK <|> (Kra <$> kApp `sepBy1` (symbol "~>"))
+kra = emptyK <|> (Kra <$> kApp `sepBy2` (symbol "~>"))
 
 emptyK :: Parser K
 emptyK = do
@@ -37,6 +37,12 @@ emptyListK = do
     string ".List{K}"
     return []
     <?> "empty list of K"
+
+freezerVar :: Parser K
+freezerVar = do
+    string "var{K}"
+    varName <- parens stringLiteral
+    return $ FreezerVar varName
 
 kBag :: Parser KBag
 kBag = emptyKBag <|> (KBag <$> bagItem `endBy1` spaces)
@@ -169,20 +175,20 @@ mapItem = do
 
 -- | Parse a KLabel
 kLabel :: Parser KLabel
-kLabel = quotedKLabel <|> try kBuiltin <|> try freezer <|> try freezeVar
+kLabel = quotedKLabel <|> try kBuiltin <|> try freezer <|> freezerMap
        <?> "K label"
 
 freezer :: Parser KLabel
 freezer = do
     string "freezer"
-    content <- parens stringLiteral
-    return $ Freezer content
+    k <- parens k
+    return $ Freezer k
 
-freezeVar :: Parser KLabel
-freezeVar = do
-    string "freezeVar"
-    content <- parens stringLiteral
-    return $ FreezeVar content
+freezerMap :: Parser KLabel
+freezerMap = do
+    FreezerVar var <- freezerVar
+    string "<-"
+    return $ FreezerMap var
 
 -- | Parse "quoted" K label: 'Foo___
 quotedKLabel :: Parser KLabel
@@ -245,3 +251,9 @@ maudeIdEscape = char '`' >> oneOf maudeIdSpecialChars
 -- in that they break a sequence of characters into several identifiers.
 maudeIdSpecialChars :: String
 maudeIdSpecialChars = "{}()[],"
+
+-- TODO: move this?
+sepBy2 p sep = do { x <- p
+                  ; xs <- many1 (sep >> p)
+                  ; return (x:xs)
+                  }

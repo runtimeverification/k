@@ -20,6 +20,8 @@ import Data.Map (Map)
 data K
     = KApp KLabel [K]
     | Kra [K]
+    | FreezerVar String
+    | FreezerHole
     deriving (Eq, Ord, Show, Data, Typeable)
 
 data KLabel
@@ -29,8 +31,8 @@ data KLabel
     | KBool Bool
     | KString String
     | KId String
-    | Freezer String
-    | FreezeVar String
+    | Freezer K
+    | FreezerMap String
     deriving (Eq, Ord, Show, Data, Typeable)
 
 data KLabelPart
