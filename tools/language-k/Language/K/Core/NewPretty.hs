@@ -12,7 +12,7 @@ printDoc doc = do
     putStrLn ""
 
 ppK (Kra []) = char '.'
-ppK (Kra ks) = hsep $ intersperse (yellow $ text "~>") (map ppK ks)
+ppK (Kra ks) = hsep $ intersperse (bold . blue $ text "~>") (map ppK ks)
 ppK (KApp (Freezer k) ks) = ppK $ plugFreezer k ks
 ppK (KApp klabel []) = ppKLabel klabel
 ppK (KApp (KLabel ss) ks) = hsep $ zipSyntax ss (map ppK ks)
