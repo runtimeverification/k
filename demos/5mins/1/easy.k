@@ -1,4 +1,4 @@
-module 1 
+module EASY 
   syntax K ::= print ( #String );
 
 //@1  configuration <k> $PGM:K </k>
