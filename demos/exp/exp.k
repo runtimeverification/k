@@ -1,10 +1,11 @@
 module EXP
   configuration 
-    <k> $PGM:K </k>  
+    <k color="green"> $PGM:K </k>  
     <streams>
-      <in stream="stdin"> .List </in> 
-      <out stream="stdout"> .List </out>
+      <in color="magenta" stream="stdin"> .List </in> 
+      <out color="Fuchsia" stream="stdout"> .List </out>
     </streams>
+
 
   // Arithmetics
   syntax KResult ::= #Int 
