@@ -1,20 +1,27 @@
-module EASY 
-  syntax K ::= print ( #String );
+module EASY-SYNTAX
+//0.1
+  syntax Stmt ::= "write" ( #String ) 
+//1.1
+  syntax Stmt ::= Stmt ";" Stmt   // statement sequencing
+end module
 
-//@1  configuration <k> $PGM:K </k>
+//0.2
+
+module EASY imports EASY-SYNTAX
+/*@1  configuration 
+    <k> $PGM:K </k>
+*/
 
 //1
-  configuration <k> $PGM:K </k> <out> .List </out>
+  configuration 
+    <k> $PGM:K </k> 
+    <out> .List </out>
 
-//@2  rule <k> print(S:#String); => . </k> <out> . => ListItem(S) </out>
-
-//1.1
-  syntax K ::= K K   // statement sequencing
-
-//1.2
-  rule K1:K K2:K => K1 ~> K2
+  rule 
+    <k> write(S:#String) => . ...</k> 
+    <out>... . => ListItem(S) </out>
 
 //2
-  rule <k> print(S:#String); => . ...</k> <out>... . => ListItem(S) </out>
-  
+  rule 
+    St1:Stmt ;  St2:Stmt => St1 ~> St2
 end module

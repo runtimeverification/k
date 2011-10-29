@@ -1,2 +1,4 @@
-print("Hello ");
-print("World!");
+write("Hello ");
+write("World!")
+
+

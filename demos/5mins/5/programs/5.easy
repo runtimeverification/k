@@ -1,0 +1,8 @@
+procedure twice(x);
+begin
+  write(x);
+  write(x)
+end;
+
+call twice("Hello ");
+call twice("World!")
