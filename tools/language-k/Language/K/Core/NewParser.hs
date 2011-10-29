@@ -10,7 +10,9 @@ import Text.Parsec.String
 
 -- | Parse a K term
 k :: Parser K
-k = try kra <|> try kApp <|> freezerVar
+k = optParens (try kra <|> try kApp <|> freezerVar)
+
+optParens p = parens p <|> p
 
 kra :: Parser K
 kra = emptyK <|> (Kra <$> kApp `sepBy2` (symbol "~>"))
