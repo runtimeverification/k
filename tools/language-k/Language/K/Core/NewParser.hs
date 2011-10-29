@@ -239,7 +239,10 @@ kBool = do
 -- assume identifiers will not contain '_'  and that '`' will not be used to
 -- escape spaces.
 maudeIdentifier :: Parser String
-maudeIdentifier = many1 maudeIdChar
+maudeIdentifier = concat <$> many1 maudeIdPart
+
+maudeIdPart :: Parser String
+maudeIdPart = (show <$> stringLiteral) <|> ((:[]) <$> maudeIdChar)
 
 maudeIdChar :: Parser Char
 maudeIdChar = noneOf ("`_ " ++ maudeIdSpecialChars) <|> maudeIdEscape
