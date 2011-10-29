@@ -148,5 +148,14 @@ module EASY
 //6.3
   rule
     <thread>... <k> . </k> ...</thread> => .
+
+//7.1
+  syntax K ::= K "-" K
+             | K "*" K
+             | K "<=" K
+             | "if" "(" K ")" "then" K "else" K "fi" ";"  
+
+  syntax KResult ::= #Int | #Bool
+
 end module
 
