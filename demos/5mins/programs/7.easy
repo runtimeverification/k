@@ -1,6 +1,5 @@
 function hello(x){
-  x := "Hello " + x;
-  write(x + "!");
+  write("Hello " + x + "!");
 }
 
 spawn hello("World");

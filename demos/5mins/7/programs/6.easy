@@ -1,8 +1,0 @@
-procedure twice(x);
-begin
-  write(x);
-  write(x)
-end;
-
-spawn twice("Hello ");
-spawn twice("World!")

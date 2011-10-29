@@ -80,7 +80,7 @@ module EASY
     <procs> .Map </procs>
 */
 
-/*@6.3
+/*@5.7
   rule 
     <k> function X:#Id ( Xs:K ) { K:K } => . ...</k>
     <procs>... . => X |->  function X ( Xs ) { K } ...</procs>
@@ -119,6 +119,13 @@ module EASY
 
 //5.6
   syntax K ::= K ; [strict]
+
+//5.7
+  rule 
+    <k> function X:#Id ( Xs:K ) { K:K } => . ...</k>
+    <procs>... . => X |->  function X ( Xs ) { K ~> return "";} ...</procs>
+
+//5.8
   rule R:KResult; => .
 
 //6.1
@@ -139,12 +146,7 @@ module EASY
     (. => <thread>... <k> call X(R); </k> ...</thread>)
 
 //6.3
-  rule 
-    <k> function X:#Id ( Xs:K ) { K:K } => . ...</k>
-    <procs>... . => X |->  function X ( Xs ) { K ~> return ""; } ...</procs>
-  
-//6.4?
   rule
-    <thread>... <k> R:KResult </k> ...</thread> => .
+    <thread>... <k> . </k> ...</thread> => .
 end module
 
