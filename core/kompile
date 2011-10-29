@@ -2661,7 +2661,7 @@ sub addKandKLATEX
 	else
 	{
 		# include only K-LATEX
-		$content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K-LATEX including PL-BUILTINS !sg if !$k_latex;
+		$content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K-LATEX including PL-BUILTINS including K-RESULT !sg if !$k_latex;
 	}
 
 	$content;
