@@ -108,8 +108,8 @@ sub solve_lists
 	$generated_code .= "  eq .$main_sort = .List\{\"$separator\"\} [metadata \"parser=() generated=()\"]\n\n";
         # }
 
-        my $subs = getSubSorts($list_sort);
-	my $supers = getSuperSorts($list_sort);
+        my $subs = getAllSubSorts($list_sort);
+	my $supers = getAllSuperSorts($list_sort);
 	my @subs = @$subs;
 	my @supers = @$supers;
 	

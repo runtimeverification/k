@@ -1844,7 +1844,7 @@ sub maudify_module {
 
 
 # Step: Change .List into (.).List , etc.
-    s/\.(K|List|Set|Bag|Map)(?!(\w|(\s*\{)))/(.).$1/gs;
+    s/\.(K|List|Set|Bag|Map)(?!(`|\w|(\s*\{)))/(.).$1/gs;
 #    print  "Stage:\n$_\n\n";
     
 # Step: Replace remaining _ by ? (spaces were put around _ by spacify)
