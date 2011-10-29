@@ -242,7 +242,7 @@ $_ = Unfreeze("STRINGS", $_);
 # kasting                       #
 #################################
 
-my $to_reduce = "mod TEST is including $syntax_module .
+my $to_reduce = "mod TEST-DO-NOT-USE-THIS-NAME is including $syntax_module .
   sort ParsedPrm .
   op parse_ : Universal -> ParsedPrm [poly(1)] .
 endm
