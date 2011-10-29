@@ -1,0 +1,3 @@
+var x;
+x = "Hello ";
+print(x + "World!");
