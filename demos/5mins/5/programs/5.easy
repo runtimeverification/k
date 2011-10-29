@@ -1,6 +1,6 @@
 function hello(x){
   x := "Hello " + x;
-  return (x + "!")
-};
+  return (x + "!");
+}
 
-write(hello("World"))
+write(call hello("World"));

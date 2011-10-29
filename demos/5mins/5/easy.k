@@ -1,18 +1,18 @@
 module EASY-SYNTAX
 //0.1
-//@2.1  syntax Stmt ::= "write" ( #String ) 
+//@2.1  syntax Stmt ::= "write" ( #String ) ;
 //1.1
-  syntax Stmt ::= Stmt ";" Stmt   [prec 90] // statement sequencing
+  syntax Stmt ::= Stmt  Stmt   [prec 90] // statement sequencing
 //2.1 
-//@3.4  syntax Stmt ::= "write" ( Exp ) 
+//@3.4  syntax Stmt ::= "write" ( Exp ) ;
   syntax Exp ::= #String 
 //@3.5               | Exp + Exp
 //3.1
   syntax Exp ::= #Id
-  syntax Stmt ::= var #Id 
-//@4.6                | #Id := Exp [prec 80]
+  syntax Stmt ::= var #Id ;
+//@4.6                | #Id := Exp ; [prec 80]
 //3.4
-  syntax Stmt ::= "write" ( Exp ) [strict]
+  syntax Stmt ::= "write" ( Exp ) ; [strict]
 //3.5
   syntax Exp ::= Exp + Exp [strict prec 50]
 //3.6
@@ -22,13 +22,13 @@ module EASY-SYNTAX
   syntax Ids ::= List{#Id,","}
   syntax Exps ::= List{Exp,","}
   syntax Stmt ::= function #Id ( Ids ) { Stmt }
-//@4.7                | return Exp
-                | Exp 
-  syntax Exp ::= #Id ( Exps )
+//@4.7                | return Exp ;
+                | Exp ;
+  syntax Exp ::= call #Id ( Exps )
 //4.6
-  syntax Stmt ::= #Id := Exp [prec 80 strict(2)]
+  syntax Stmt ::= #Id := Exp ; [prec 80 strict(2)]
 //4.7
-                | return Exp [strict]
+                | return Exp ; [strict]
 end module
 
 //0.2
@@ -47,12 +47,12 @@ module EASY imports EASY-SYNTAX
 */
 
   rule 
-    <k> write(S:#String) => . ...</k> 
+    <k> write(S:#String) ; => . ...</k> 
     <out>... . => ListItem(S) </out>
 
 //2
   rule 
-    St1:Stmt ;  St2:Stmt => St1 ~> St2
+    St1:Stmt St2:Stmt => St1 ~> St2
 
 //3
   rule
@@ -67,12 +67,12 @@ module EASY imports EASY-SYNTAX
 */
 
   rule 
-    <k> var X:#Id => . ...</k> 
+    <k> var X:#Id; => . ...</k> 
     <env>... .Map => X |-> "" ...</env>
 
 //3.3
   rule 
-    <k> X:#Id := S:#String => . ...</k>
+    <k> X:#Id := S:#String; => . ...</k>
     <env>... X |-> (_ => S) ...</env>   
 
 //3.6
@@ -107,7 +107,7 @@ module EASY imports EASY-SYNTAX
     <fstack> .List </fstack>
 
   rule 
-    <k> X:#Id(Vs:Vals) ~> K => Vs ~> Fn ~> return "" </k>
+    <k> call X:#Id(Vs:Vals) ~> K => Vs ~> Fn ~> return ""; </k>
     <env> Env:Map => . </env>
     <procs>... X |-> Fn:K ...</procs>
     <fstack>... . => frame(K,Env) </fstack>
@@ -125,7 +125,7 @@ module EASY imports EASY-SYNTAX
 
 //5
   rule 
-    <k> return V:Val ~> _ => V ~> K </k>
+    <k> return V:Val ; ~> _ => V ~> K </k>
     <env> _ => Env </env>
     <fstack>... frame(K:K, Env:Map) => . </fstack>
 end module
