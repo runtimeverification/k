@@ -52,6 +52,10 @@ ppKLabel (KBool True) = text "true"
 ppKLabel (KBool False) = text "false"
 ppKLabel (KString s) = text (show s)
 ppKLabel (Freezer k) = text "freezer" <> parens (ppK k)
+ppKLabel (KLabel ss) = hcat $ map ppSyntax ss
+    where ppSyntax (Syntax s) = text s
+          ppSyntax Hole = char '_'
+ppKLabel kl = error $ "No pretty-printer available for: " ++ show kl
 
 ppKBag (KBag []) = char '.'
 ppKBag (KBag bs) = vsep $ map ppBagItem bs
