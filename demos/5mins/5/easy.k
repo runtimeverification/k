@@ -2,7 +2,7 @@ module EASY-SYNTAX
 //0.1
 //@2.1  syntax Stmt ::= "write" ( #String ) 
 //1.1
-  syntax Stmt ::= Stmt ";" Stmt   // statement sequencing
+  syntax Stmt ::= Stmt ";" Stmt   [prec 90] // statement sequencing
 //2.1 
 //@3.4  syntax Stmt ::= "write" ( Exp ) 
   syntax Exp ::= #String 
@@ -10,16 +10,25 @@ module EASY-SYNTAX
 //3.1
   syntax Exp ::= #Id
   syntax Stmt ::= var #Id 
-                | #Id := Exp
+//@4.6                | #Id := Exp [prec 80]
 //3.4
   syntax Stmt ::= "write" ( Exp ) [strict]
 //3.5
-  syntax Exp ::= Exp + Exp [strict]
+  syntax Exp ::= Exp + Exp [strict prec 50]
+//3.6
+  syntax Val ::= #String
+  syntax Exp ::= Val
 //4.1
   syntax Ids ::= List{#Id,","}
   syntax Exps ::= List{Exp,","}
-  syntax Stmt ::= procedure #Id Ids ; begin Stmt end
-                | call #Id Exps
+  syntax Stmt ::= function #Id ( Ids ) { Stmt }
+//@4.7                | return Exp
+                | Exp 
+  syntax Exp ::= #Id ( Exps )
+//4.6
+  syntax Stmt ::= #Id := Exp [prec 80 strict(2)]
+//4.7
+                | return Exp [strict]
 end module
 
 //0.2
@@ -67,7 +76,7 @@ module EASY imports EASY-SYNTAX
     <env>... X |-> (_ => S) ...</env>   
 
 //3.6
-  syntax KResult ::= #String
+  syntax KResult ::= Val
 
 //4
   rule
@@ -75,28 +84,35 @@ module EASY imports EASY-SYNTAX
     <env>... X |-> K ...</env>
 
 //4.2
+/*@4.3
   configuration
     <k> $PGM:K </k> 
     <env> .Map </env> 
     <out> .List </out>
     <procs> .Map </procs>
+*/
 
   rule 
-    <k> procedure X:#Id Xs:Ids ; begin St:Stmt end => . ...</k>
+    <k> function X:#Id(Xs:Ids) { St:Stmt } => . ...</k>
     <procs>... . => X |-> (bindTo(Xs) ~> St) ...</procs>
 
-  syntax K ::= bindTo Ids
+  syntax K ::= bindTo ( Ids )
 
 //4.3
-  rule 
-    <k> call X:#Id Vs:Vals => Vs ~> K ~> env(Env) ...</k>
-    <env> Env:Map => . </env>
-    <procs>... X |-> K:K ...</procs>
+  configuration
+    <k> $PGM:K </k> 
+    <env> .Map </env> 
+    <out> .List </out>
+    <procs> .Map </procs>
+    <fstack> .List </fstack>
 
-  syntax K ::= env ( Map )
-  syntax Val ::= #String
-  syntax Exp ::= Val
-  syntax KResult ::= Val
+  rule 
+    <k> X:#Id(Vs:Vals) ~> K => Vs ~> Fn ~> return "" </k>
+    <env> Env:Map => . </env>
+    <procs>... X |-> Fn:K ...</procs>
+    <fstack>... . => frame(K,Env) </fstack>
+
+  syntax ListItem ::= frame ( K , Map )
   syntax Vals ::= List{Val,","}
 
 //4.4
@@ -109,7 +125,8 @@ module EASY imports EASY-SYNTAX
 
 //5
   rule 
-    <k> env(Env:Map) => . ...</k>
+    <k> return V:Val ~> _ => V ~> K </k>
     <env> _ => Env </env>
+    <fstack>... frame(K:K, Env:Map) => . </fstack>
 end module
 

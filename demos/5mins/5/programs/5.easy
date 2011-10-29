@@ -1,8 +1,6 @@
-procedure twice(x);
-begin
-  write(x);
-  write(x)
-end;
+function hello(x){
+  x := "Hello " + x;
+  return (x + "!")
+};
 
-call twice("Hello ");
-call twice("World!")
+write(hello("World"))
