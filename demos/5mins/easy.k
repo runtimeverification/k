@@ -36,7 +36,7 @@ module EASY
 
 //4.1
   syntax K ::= #Id
-             | "var" K "=" K ";"
+             | "var" K "=" K ";" [strict(2)]
 
 //4.2
 /*@5.2
@@ -46,9 +46,11 @@ module EASY
     <env> .Map </env>
 */
 
+/*@8.2
   rule
     <k> var X:#Id = Str:#String ; => . ...</k>
     <env>... . => X |-> Str ...</k>
+*/
 
 //4.3
    syntax K ::= "write" "(" K ")" ";" [strict]
@@ -77,13 +79,13 @@ module EASY
     <k> $PGM:K </k>
     <out> .List </out>
     <env> .Map </env>
-    <procs> .Map </procs>
+    <functions> .Set </functions>
 */
 
 /*@5.7
   rule 
     <k> function X:#Id ( Xs:K ) { K:K } => . ...</k>
-    <procs>... . => X |->  function X ( Xs ) { K } ...</procs>
+    <functions>... . => SetItem(function X ( Xs ) { K }) ...</functions>
 */
 
 //5.3
@@ -92,7 +94,7 @@ module EASY
     <k> $PGM:K </k>
     <out> .List </out>
     <env> .Map </env>
-    <procs> .Map </procs>
+    <functions> .Set </functions>
     <fstack> .List </fstack>
 */
 
@@ -101,7 +103,7 @@ module EASY
   rule
     <k> call X:#Id ( Rs:KResult ) ~> K:K => bindTo(Xs,Rs) ~> Body </k>
     <env> Env:Map => . </env>
-    <procs>... X |->  function X ( Xs:K ) { Body:K } ...</procs>
+    <functions>... SetItem(function X ( Xs:K ) { Body:K }) ...</functions>
     <fstack>... . => ListItem(frame(K,Env)) </fstack>
 
   syntax K ::= "bindTo" "(" K "," K ")"
@@ -123,7 +125,7 @@ module EASY
 //5.7
   rule 
     <k> function X:#Id ( Xs:K ) { K:K } => . ...</k>
-    <procs>... . => X |->  function X ( Xs ) { K ~> return "";} ...</procs>
+    <functions>... . => SetItem(function X ( Xs ) { K ~> return "";}) ...</functions>
 
 //5.8
   rule R:KResult; => .
@@ -132,6 +134,7 @@ module EASY
   syntax K ::= "spawn" K "(" K ")" ; [strict(2)]
   
 //6.2
+/*@8.3
   configuration 
     <thread multiplicity="*">
       <k> $PGM:K </k>
@@ -139,7 +142,8 @@ module EASY
       <fstack> .List </fstack>
     </thread>
     <out> .List </out>
-    <procs> .Map </procs>
+    <functions> .Set </functions>
+*/
 
   rule
     <k> spawn X:#Id(R:KResult); => . ...</k>
@@ -147,7 +151,7 @@ module EASY
 
 //6.3
   rule
-    <thread>... <k> . </k> ...</thread> => .
+    <thread>... <k> .K </k> ...</thread> => .
 
 //7.1
   syntax K ::= K "-" K [strict]
@@ -171,5 +175,46 @@ module EASY
   rule
     I1:#Int - I2:#Int => I1 +Int (-Int I2)
 
+//7.5
+  rule
+    I1:#Int * I2:#Int => I1 *Int I2
+
+//7.6
+  rule
+    write(I:#Int); => write(Int2String(I));
+
+//8.1
+  syntax K ::= "new" "BlockingQueue" "(" K ")" [strict]
+             | "put" "(" K "," K ")" ";" [strict]
+             | "take" "(" K "," K ")" [strict]
+             | K "," K [strict]
+
+//8.2
+  rule
+    <k> var X:#Id = R:KResult ; => . ...</k>
+    <env>... . => X |-> R ...</k>
+
+//8.3
+  configuration 
+    <thread multiplicity="*">
+      <k> $PGM:K </k>
+      <env> .Map </env>
+      <fstack> .List </fstack>
+    </thread>
+    <out> .List </out>
+    <functions> .Set </functions>
+    <queues> 
+      <queue multiplicity="*">
+        <id> 0 </id>
+        <data> .List </data>
+        <free> 0 </free>
+      </queue>
+      <qid> 0 </qid>
+    </queues>
+
+  rule 
+    <k> new BlockingQueue(Size:#Int) => . ...</k>
+    <qid> N:#Int => N +Int 1 </qid>
+    (. => <queue>... <id> N </id> <free> Size </free> ...</queue>)
 end module
 
