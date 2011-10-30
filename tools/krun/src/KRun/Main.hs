@@ -132,11 +132,9 @@ printResult config result = do
         "pretty" -> do
             case parse kBag "" (T.unpack result) of
                 Left err -> do
-                    putStrLn "Failed to parse result term!"
-                    putStrLn "Attempted to parse:"
+                    putStrLn "Warning: unable to parse/pretty-print result term:"
                     T.putStrLn result
-                    putStrLn "Got error(s):"
-                    print err
+                    putStrLn "(NB: This is not your fault. Pretty-printing is an experimental feature.)"
                 Right bag -> printDoc $ ppKBag bag
         s -> die $ "Invalid output-mode setting: " ++ s
 
