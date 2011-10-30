@@ -163,7 +163,7 @@ kMap = emptyKMap <|> KMap . Map.fromList <$> mapItem `endBy1` spaces
 
 emptyKMap :: Parser KMap
 emptyKMap = do
-    string "(.).Map"
+    string "(.).Map" <|> string "."
     return $ KMap Map.empty
 
 mapItem :: Parser (K, K)
@@ -177,7 +177,7 @@ mapItem = do
 
 -- | Parse a KLabel
 kLabel :: Parser KLabel
-kLabel = quotedKLabel <|> try kBuiltin <|> try freezer <|> freezerMap
+kLabel = quotedKLabel <|> try kBuiltin <|> try freezer <|> try freezerMap <|> wmap
        <?> "K label"
 
 freezer :: Parser KLabel
@@ -191,6 +191,13 @@ freezerMap = do
     FreezerVar var <- freezerVar
     string "<-"
     return $ FreezerMap var
+
+wmap :: Parser KLabel
+wmap = do
+    string "wmap"
+    spaces
+    kmap <- kMap
+    return $ WMap kmap
 
 -- | Parse "quoted" K label: 'Foo___
 quotedKLabel :: Parser KLabel

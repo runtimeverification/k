@@ -33,6 +33,7 @@ data KLabel
     | KId String
     | Freezer K
     | FreezerMap String
+    | WMap KMap
     deriving (Eq, Ord, Show, Data, Typeable)
 
 data KLabelPart
