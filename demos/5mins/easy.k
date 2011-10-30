@@ -153,9 +153,23 @@ module EASY
   syntax K ::= K "-" K [strict]
              | K "*" K [strict]
              | K "<=" K [strict]
-             | "if" "(" K ")" "then" K "else" K "fi" ";"  [strict(1)]
+             | "if" K "{" K "}" "else" "{" K "}"  [strict(1)]
 
   syntax KResult ::= #Int | #Bool
+
+//7.2
+  rule 
+    I1:#Int <= I2:#Int => I1 <=Int I2
+
+//7.3
+  rule
+    if (true) { K:K } else { _ } => K
+  rule
+    if (false) { _ } else { K:K } => K
+
+//7.4
+  rule
+    I1:#Int - I2:#Int => I1 +Int (-Int I2)
 
 end module
 
