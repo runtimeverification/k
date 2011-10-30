@@ -16,7 +16,7 @@ function consumer(n,x) {
   }
 }
 
-var n=3;
+var n=read;
 var q=new BlockingQueue(n);
 spawn producer(n,"Hello ",q);
 spawn producer(n,"World!",q);
