@@ -24,15 +24,15 @@ module EASY
   syntax K ::= K K
 
 //2.2
-  rule
-    K1:K K2:K => K1 ~> K2
+  rule K1:K K2:K 
+    => K1 ~> K2
 
 //3.1
 //@4.4  syntax K ::= K "+" K
 
 //3.2
-  rule 
-    Str1:#String + Str2:#String => Str1 +String Str2
+  rule Str1:#String + Str2:#String 
+    => Str1 +String Str2
 
 //4.1
   syntax K ::= #Id
@@ -128,7 +128,8 @@ module EASY
     <functions>... . => BagItem(function X ( Xs ) { K ~> return "";}) ...</functions>
 
 //5.8
-  rule R:KResult; => .
+  rule R:KResult; 
+    => .
 
 //6.1
   syntax K ::= "spawn" K "(" K ")" ; [strict(2)]
@@ -150,8 +151,8 @@ module EASY
     (. => <thread>... <k> call X(R); </k> ...</thread>)
 
 //6.3
-  rule
-    <thread>... <k> .K </k> ...</thread> => .
+  rule <thread>... <k> .K </k> ...</thread> 
+    => .
 
 //7.1
   syntax K ::= K "-" K [strict]
@@ -162,31 +163,31 @@ module EASY
   syntax KResult ::= #Int | #Bool
 
 //7.2
-  rule 
-    I1:#Int <= I2:#Int => I1 <=Int I2
+  rule I1:#Int <= I2:#Int 
+    => I1 <=Int I2
 
 //7.3
-  rule
-    if (true) { K:K } else { _ } => K
-  rule
-    if (false) { _ } else { K:K } => K
+  rule if (true) { K:K } else { _ } 
+    => K
+  rule if (false) { _ } else { K:K } 
+    => K
 
 //7.4
-  rule
-    I1:#Int - I2:#Int => I1 +Int (-Int I2)
+  rule I1:#Int - I2:#Int 
+    => I1 +Int (-Int I2)
 
 //7.5
-  rule
-    I1:#Int * I2:#Int => I1 *Int I2
+  rule I1:#Int * I2:#Int 
+    => I1 *Int I2
 
 //7.6
-  rule
-    write(I:#Int); => write(Int2String(I));
+  rule write(I:#Int); 
+    => write(Int2String(I));
 
 //8.1
   syntax K ::= "new" "BlockingQueue" "(" K ")" [strict]
              | "put" "(" K "," K ")" ";" [strict]
-             | "take" "(" K "," K ")" [strict]
+             | "take" "(" K ")" [strict]
 //@8.4             | K "," K [strict]
 
 //8.2
@@ -195,6 +196,7 @@ module EASY
     <env>... . => X |-> R ...</k>
 
 //8.3
+/*@8.7
   configuration 
     <thread multiplicity="*">
       <k> $PGM:K </k>
@@ -211,6 +213,7 @@ module EASY
       </queue>
       <qid> 0 </qid>
     </queues>
+*/
 
   rule 
     <k> new BlockingQueue(Size:#Int) => N ...</k>
@@ -219,6 +222,48 @@ module EASY
 
 //8.4
   syntax K ::= K "," K [strict hybrid]
+  
+//8.5
+  rule bindTo((X:#Id,Xs:K),(R:KResult,Rs:KResult))
+    => bindTo(X,R) ~> bindTo(Xs,Rs)  
 
+//8.6
+  rule 
+    <k> put(N:#Int, R:KResult); => . ...</k>
+    <id> N </id>
+    <data>... . => ListItem(R) </data>
+    <free> Size:#Int => Size +Int -1 </free>
+    if Size >Int 0 [transition]
+
+  rule 
+    <k> take(N:#Int) => R ...</k>
+    <id> N </id>
+    <data> ListItem(R) => . ...</data>
+    <free> Size:#Int => Size +Int 1 </free> [transition]
+
+//8.7
+  configuration 
+    <thread multiplicity="*">
+      <k> $PGM:K </k>
+      <env> .Map </env>
+      <fstack> .List </fstack>
+    </thread>
+    <in stream="stdin"> .List </in>
+    <out stream="stdout"> .List </out>
+    <functions> .Bag </functions>
+    <queues> 
+      <queue multiplicity="*">
+        <id> 0 </id>
+        <data> .List </data>
+        <free> 0 </free>
+      </queue>
+      <qid> 0 </qid>
+    </queues>
+
+  syntax K ::= read
+  
+  rule
+    <k> read => I ...</k>
+    <in> ListItem(I:#Int) => . ...</in>
 end module
 
