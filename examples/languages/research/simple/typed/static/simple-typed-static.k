@@ -1,136 +1,124 @@
+----------------------------------
+--- SIMPLE-TYPED-SYNTAX module ---
+----------------------------------
 
-in simple-typed-static-syntax
-in ../simple-typed-programs
+module SIMPLE-TYPED-STATIC-SYNTAX
+  syntax #Id ::= "main"
 
-kmod SIMPLE-TYPED-STATIC-SEMANTICS is including SIMPLE-TYPED-STATIC-DESUGARED-SYNTAX + K 
+  syntax Type ::= "int"
+                | "bool"
+                | "string"
+                | "void"
+                | "array" "of" Type [:prec(1):]
+                | "function" "from" Types "to" Type
+                    [:prec(1) latex "{#1}\rightarrow{#2}":]
+  syntax Types ::= List{Type,","}
 
---- the result of the computation is a list of types
-  syntax KResult ::= List{Type}
+  syntax Decl ::= "var" Exps ";"
+                | "function" #Id "(" Exps ")" ":" Type Stmt
 
---- statement value
-  syntax Type ::= stmt
+  syntax Exp ::= #Int | #Bool | #String | #Id
+               | "++" Exp              [:prec 0:]
+               | Exp "+" Exp           [:strict prec(33) gather(E e):]
+               | Exp "-" Exp           [:strict prec(33) gather(E e):]
+               | Exp "*" Exp           [:strict prec(31) gather(E e):]
+               | Exp "/" Exp           [:strict prec(31) gather(E e):]
+               | Exp "%" Exp           [:strict prec(31) gather(E e):]
+               | "-" Exp               [:strict:]
+               | Exp "<" Exp           [:strict prec(37):]
+               | Exp "<=" Exp          [:strict prec(37):]
+               | Exp ">" Exp           [:strict prec(37):]
+               | Exp ">=" Exp          [:strict prec(37):]
+               | Exp "==" Exp          [:strict prec(37):]
+               | Exp "!=" Exp          [:strict prec(37):]
+               | Exp "and" Exp         [:strict prec(55) gather(E e):]
+               | Exp "or" Exp          [:strict prec(59) gather(E e):]
+               | "not" Exp             [:strict prec(53):]
+               | Exp "[" Exps "]"      [:strict prec(1):]
+               | "sizeOf" "(" Exp ")"  [:strict:]
+               | Exp "(" Exps ")"      [:strict prec(2):]
+               | "read" "(" ")"
+               | Exp "=" Exp           [:strict(2) prec(40)  gather (e E):]
+               | Exp ":" Type          [:prec(10):]
+                                       // allowed only for declarations
+  syntax Exps ::= List{Exp,","}
 
---- with types we can make expressions now
+  syntax Stmt ::= "{" "}"
+                | "{" Stmts "}
+                | Exp ";"                               [:strict prec(45):]
+                | "if" Exp "then" Stmt "else" Stmt      [:strict(1) prec(90):]
+                | "if" Exp "then" Stmt                  [:prec(89):]
+                | "while" Exp "do" Stmt                 [:strict prec(90):]
+                | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
+                | "return" Exp ";"                      [:strict:]
+                | "return" ";"
+                | "print" "(" Exps ")" ";"              [:strict:]
+                | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
+                | "throw" Exp ";"                       [:strict:]
+                | "spawn" Stmt                          [:strict prec(90):]
+                | "acquire" Exp ";"                     [:strict:]
+                | "release" Exp ";"                     [:strict:]
+                | "rendezvous" Exp ";"                  [:strict:]
+
+  syntax Stmts ::= Decl | Stmt
+                 | Stmts Stmts            [:seqstrict prec(100) gather(e E):]
+
+  macro if E:Exp then S:Stmt = if E then S else {}
+  macro (for X = E1 to E2 do S) = {var X:int=E1; while X <= E2 do {S X=X+1;}}
+  macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
+  macro var X:#Id : T:Type = E; = var X : T; X = E;
+end module
+
+
+module SIMPLE-TYPED-STATIC
+  imports SIMPLE-TYPED-STATIC-SYNTAX
+
   syntax Exp ::= Type
---- ... and any list of types is a list of expressions
-  syntax List{Exp} ::= List{Type} 
+  syntax Stmt ::= Type
+  syntax KResult ::= Type
+  syntax K ::= "1st" | "2nd"
 
---- any type is also a statement
-  syntax Stmt ::= Type  
+  configuration <T color="red">
+                   <k color="green"> $PGM:Stmts </k>
+                   <tenv color="cyan"> .Map </tenv>
+                   <return multiplicity="?"> .K </return>
+                   <tasks color="blue" multiplicity="?">
+                     <task multiplicity="*">
+                       <code> .K </code>
+                       <type> .K </type>
+                     </task>
+                   </tasks>
+                   <pass> 1st </pass>
+                </T>
 
+  syntax Type ::= "stmt"
 
-  syntax K ::= Stmts | List{Exp} | List{IdType}
+// empty list of variable declarations when functions with no arguments
+---  rule var; => .K   [: structural:]
 
-  configuration <T> 
-                   <k> .K </k>
-                   <tenv> .Map </tenv>
-                   <return> stmt </return>
-                   <gtenv> .Map </gtenv>
-                </T> 
+  rule <k> var X:#Id : T:Type; => stmt ...</k>
+       <tenv> Rho:Map => Rho[T/X] </tenv>
 
- 
---- first pass: collect function prototypes in gtenv 
-  rule <T> <k> S:Stmt ~> (.K => doneGlobals ~> S) </k> 
-           (.Bag => <gtenv> .Map </gtenv>) 
-       </T>
- 
-  syntax K ::= doneGlobals  --- to mark when the collection of globals completed
+  context var X[[HOLE]] : array of T;
+  rule <k> var X[int] : array of T; => stmt ...</k>
+       <tenv> Rho => Rho[array of T / X] </tenv>
 
---- global variable declaration
-  rule <k> var X:#Id : T:Type ; => stmt <_/k>
-       <gtenv> TEnv:Map => TEnv[T / X] </gtenv>
+  rule <k> function X(XTs:Exps) : T S:Stmt => stmt ...</k>
+       <tenv> Rho => Rho[function from types(XTs) to T / X] </tenv>
+       <pass> 1st </pass>
+       (. => <task> <code> {var XTs; S} </code> <type> T </type> </task>)
 
---- function declaration (and definition)
-  rule <k> function F:#Id(XTl:List{IdType}) : T S => stmt <_/k>
-       <gtenv> TEnv => TEnv[typeList(XTl) -> T / F] </gtenv> [structural] 
+// report: . instead of .K
+  rule <k> stmt </k> <pass> 1st => 2nd </pass>
 
---- when we are done with the first pass (doneGlobals mark), replace gtenv by tenv and start typing the bodies of functions
-  rule <T> <k> stmt ~> doneGlobals => .K <_/k> 
-            ( <gtenv> TEnv </gtenv> 
-              =>
-              <tenv> TEnv </tenv>
-              <return> void </return>
-            ) 
-       </T> 
-
---- expressions evaluation
-  rule I:#Int => int 
-  rule B:#Bool => bool 
-  rule <k> X:#Id => T:Type <_/k>
-       <tenv_> X |-> T <_/tenv> 
-  rule <k> ++ X => int <_/k>
-       <tenv_> X |-> int <_/tenv> 
-  rule int + int => int 
-  rule _-_(int,int) => int 
-  rule int * int => int 
-  rule int / int => int 
-  rule int % int => int 
-  rule - int => int 
-  rule int < int => bool 
-  rule int <= int => bool 
-  rule int > int => bool 
-  rule int >= int => bool 
-  rule T == T => bool 
-  rule T != T => bool 
-  rule bool and bool => bool 
-  rule bool or bool => bool 
-  rule not(bool) => bool 
-  rule _`[`](T)[int] => T 
-  rule sizeOf(T []) => int 
-
---- variable declaration processing
-  rule <k> var X:#Id : T:Type ; => stmt <_/k>
-      <tenv> TEnv:Map => TEnv[T / X] </tenv> 
-  context var X[[HOLE]] : T ; 
-  rule <k> var X[int] : _`[`](T) ; => stmt <_/k>
-       <tenv> TEnv => TEnv[_`[`](T) / X] </tenv> 
-  rule {} => stmt 
-
---- the following is used to wrap an enevironment as a computation
-  syntax K ::= tenv ( Map )
-  rule <k> {S:Stmt} => S ~> tenv(TEnv) <_/k> 
-       <tenv> TEnv </tenv> 
-  rule <k> stmt ~> (tenv(TEnv) => .K) <_/k> 
-          <tenv> _ => TEnv </tenv> 
-
-  rule stmt stmt => stmt 
-  rule <k> X = T ; => stmt <_/k> <tenv_> X |-> T <_/tenv>  
-  context _[[HOLE]] = _ ; 
-  context [HOLE][_] = _ ; 
-  rule _`[`](T)[int] = T ; => stmt 
-  rule T ; => stmt 
-  rule if bool then stmt else stmt => stmt 
-  rule while bool do stmt  => stmt 
-
-  rule <k> function F:#Id(XTl:List`{IdType`}) : T S => S ~> tenv(TEnv)<_/k> 
-       <tenv> TEnv => TEnv[getList{K}(typeList(XTl)) / getList{K}(idList(XTl))] </tenv> 
-       <return> _ => T </return>
-  
-  rule <k> stmt ~> (tenv(TEnv) => .K)<_/k>
-       <tenv> _ => TEnv </tenv> .
-  rule _`(_`)(Tl:List`{Type`} -> T,Tl) => T
-  rule <k> return(T); => stmt <_/k>
-       <return> T </return> 
-  rule read() => int 
-  rule write(int) ; => stmt   
+  rule <k> stmt => S </k> <pass> 2nd </pass> <return> _ => T </return>
+       (<task> <code> S </code> <type> T </type> </task> => .)
 
 
---- translation of a list of typed names into a list of the corresponding untyped names
-  syntax List{Id} ::= idList ( List{IdType} ) 
-  macro idList(.List{Bottom}) = .List{Bottom} 
-  macro idList(X:#Id : T:Type, XTl:List`{IdType`}) = X, idList(XTl) 
+  rule stmt stmt => stmt
 
---- translation of a lists of typed names into a list of the corresponding types
-  syntax List{Type} ::= typeList ( List{IdType} ) 
-  macro typeList(.List{Bottom}) = .List{Bottom} 
-  macro typeList(X : T,XTl) = T,typeList(XTl) 
+  syntax Types ::= "types" "(" Exps ")"    [:prec(1):]
+  rule types() => .Types                   [:structural:]
+  rule types(X : T, XTs) => T, types(XTs)  [:structural:]
 
-endkm
-
-kmod SIMPLE-TYPED-STATIC is including SIMPLE-TYPED-STATIC-SEMANTICS + SIMPLE-TYPED-PROGRAMS 
-  syntax Bag ::= run ( KLabel ) 
-  macro run(K:KLabel) = <T>
-                           <k> K(.List{K}) </k>
-                        </T> 
-endkm
-
+end module
