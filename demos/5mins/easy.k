@@ -79,13 +79,13 @@ module EASY
     <k> $PGM:K </k>
     <out> .List </out>
     <env> .Map </env>
-    <functions> .Set </functions>
+    <functions> .Bag </functions>
 */
 
 /*@5.7
   rule 
     <k> function X:#Id ( Xs:K ) { K:K } => . ...</k>
-    <functions>... . => SetItem(function X ( Xs ) { K }) ...</functions>
+    <functions>... . => BagItem(function X ( Xs ) { K }) ...</functions>
 */
 
 //5.3
@@ -94,7 +94,7 @@ module EASY
     <k> $PGM:K </k>
     <out> .List </out>
     <env> .Map </env>
-    <functions> .Set </functions>
+    <functions> .Bag </functions>
     <fstack> .List </fstack>
 */
 
@@ -103,7 +103,7 @@ module EASY
   rule
     <k> call X:#Id ( Rs:KResult ) ~> K:K => bindTo(Xs,Rs) ~> Body </k>
     <env> Env:Map => . </env>
-    <functions>... SetItem(function X ( Xs:K ) { Body:K }) ...</functions>
+    <functions>... BagItem(function X ( Xs:K ) { Body:K }) ...</functions>
     <fstack>... . => ListItem(frame(K,Env)) </fstack>
 
   syntax K ::= "bindTo" "(" K "," K ")"
@@ -125,7 +125,7 @@ module EASY
 //5.7
   rule 
     <k> function X:#Id ( Xs:K ) { K:K } => . ...</k>
-    <functions>... . => SetItem(function X ( Xs ) { K ~> return "";}) ...</functions>
+    <functions>... . => BagItem(function X ( Xs ) { K ~> return "";}) ...</functions>
 
 //5.8
   rule R:KResult; => .
@@ -142,7 +142,7 @@ module EASY
       <fstack> .List </fstack>
     </thread>
     <out> .List </out>
-    <functions> .Set </functions>
+    <functions> .Bag </functions>
 */
 
   rule
@@ -187,7 +187,7 @@ module EASY
   syntax K ::= "new" "BlockingQueue" "(" K ")" [strict]
              | "put" "(" K "," K ")" ";" [strict]
              | "take" "(" K "," K ")" [strict]
-             | K "," K [strict]
+//@8.4             | K "," K [strict]
 
 //8.2
   rule
@@ -202,7 +202,7 @@ module EASY
       <fstack> .List </fstack>
     </thread>
     <out> .List </out>
-    <functions> .Set </functions>
+    <functions> .Bag </functions>
     <queues> 
       <queue multiplicity="*">
         <id> 0 </id>
@@ -213,8 +213,12 @@ module EASY
     </queues>
 
   rule 
-    <k> new BlockingQueue(Size:#Int) => . ...</k>
+    <k> new BlockingQueue(Size:#Int) => N ...</k>
     <qid> N:#Int => N +Int 1 </qid>
     (. => <queue>... <id> N </id> <free> Size </free> ...</queue>)
+
+//8.4
+  syntax K ::= K "," K [strict hybrid]
+
 end module
 
