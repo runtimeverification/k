@@ -237,9 +237,6 @@ kBool = do
 
 {- Maude identifiers -}
 
--- | Note that this does not capture all Maude identifiers since, for K, we
--- assume identifiers will not contain '_'  and that '`' will not be used to
--- escape spaces.
 maudeIdentifier :: Parser String
 maudeIdentifier = concat <$> many1 maudeIdPart
 
@@ -250,7 +247,7 @@ maudeIdChar :: Parser Char
 maudeIdChar = noneOf ("`_ " ++ maudeIdSpecialChars) <|> maudeIdEscape
 
 maudeIdEscape :: Parser Char
-maudeIdEscape = char '`' >> oneOf maudeIdSpecialChars
+maudeIdEscape = char '`' >> (oneOf maudeIdSpecialChars <|> return ' ')
 
 -- | 3.1: The characters '{', '}', '(', ')', '[', ']' and ',' are special,
 -- in that they break a sequence of characters into several identifiers.
