@@ -196,7 +196,7 @@ wmap :: Parser KLabel
 wmap = do
     string "wmap"
     spaces
-    kmap <- kMap
+    kmap <- optParens kMap
     return $ WMap kmap
 
 -- | Parse "quoted" K label: 'Foo___
