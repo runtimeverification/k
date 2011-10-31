@@ -1204,7 +1204,7 @@ endfm)) = tokenize(Str) '\n eMetaLatexPrint(setMbs(setRls(setEqs(M,none),none),n
    = string2qidList(St) '\n stringList2qidList(StrL) .
   eq stringList2qidList(nil) = nil .
 
-  eq latexPrint(FM, M) = eMetaLatexPrint(setMbs(setRls(setEqs(FM,none),none), none), removeImports(M, (including 'K .) (including 'K-SHARED .) (including 'K-LATEX .) (including 'URIS .)))  [print "red latexPrint((" FM "),(" M ")) ."] .
+  eq latexPrint(FM, M) = eMetaLatexPrint(setMbs(setRls(setEqs(FM,none),none), none), removeImports(M, (including 'K .) (including 'K-SHARED .) (including 'K-RESULT .) (including 'K-LATEX .) (including 'URIS .)))  [print "red latexPrint((" FM "),(" M ")) ."] .
 
 
   op latexPrint : Qid -> QidList .
