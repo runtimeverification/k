@@ -1,0 +1,106 @@
+\setlength{\parindent}{1em}
+\title{SIMPLE --- Typed --- Static}
+\author{Grigore Ro\c{s}u and 
+        Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
+        (\texttt{\{grosu,tserban2\}@illinois.edu})}
+\organization{University of Illinois at Urbana-Champaign}
+
+\maketitle
+
+\begin{latexComment}
+\section{Abstract}
+This is the \K definition of the static semantics of the typed SIMPLE language,
+or in other words, a type system for the typed SIMPLE language in \K.
+We do not re-discuss the various features of the SIMPLE language here.
+The reader is referred to the untyped version of the language for such
+discussions.  We here only focus on the new and interesting problems
+raised by the addition of type declarations, and what it takes to devise
+a type checker for the language.
+
+When designing a type system for a language, no matter within what paradigm,
+we have to decide upon the typing policy that we intend to capture by our
+type system.  Note that we can have multiple type systems
+for the same language, one for which typing policy.  For example, should we
+accept programs which don't have a main function?  Or should we allow functions
+that do not return explicitly?  Or should we allow functions whose type expects
+them to return a value (say an \texttt{int}) to use a plain ``\texttt{return;}''
+statement, which returns no value, like in C?  And so on and so forth.
+Typically, there are two opposite tensions when designing a type system.
+On the one hand, you want your type system to be as permissive as possible,
+that is, to accept as many programs that do not get stuck when executed with
+the untyped semantics as possible; this will keep the programmers using
+your language happy.  On  the other hand, you want your type system to have a
+reasonable performance when implemented; this will keep both the programmers and
+the implementers of your language happy.  For example, a type system that
+rejects programs that could perform division-by-zero is not feasible in general.
+A simple guideline when designing typing policies is to imagine how the
+semantics of the untyped language may get stuck and try to prevent those
+situations from happening.
+
+Before we give the \K type system of SIMPLE formally, we discuss, informally,
+the intended typing policy:
+\begin{itemize}
+\item Each program should contain a \texttt{main} function.  Indeed, the
+untyped SIMPLE semantics will get stuck on any program which does not have a
+\texttt{main} function.
+\item Each primitive value has its own type, which can be \texttt{int}
+\texttt{bool}, or \texttt{string}.  There is also a type \texttt{void} for
+nonexistent values, for example for the result of a function meant to return
+no value (but only be used for its side effects, like a procedure).
+\item The syntax of untyped SIMPLE is extended to allow type declarations for
+all the variables.  This is done in a Pascal-style, following the declared
+variable with a column followed by the type.  For example,
+``\texttt{var x:int;}'' or ``\texttt{var x:int=7, y:int, z:int=x+y;}''.
+\item Arrays of values of type $T$ have the type \texttt{array of $T$} and
+are declared using a syntax similar to the one for simple variables, but
+where the colon and the type follow the dimension of the declared array.
+For example, ``\texttt{var x[10] : array of int;}'', or
+``\texttt{var x[10,20] : array of array of int;}'', or even
+``\texttt{var x : array of array of int;}'' when \texttt{x} is only needed
+as a reference to an array (allocated somewhere else), or even
+``\texttt{var x[10] : array of array of int;}'', as well as any combinations of
+simple variables (with or without initializations) and arrays (with or without
+allocation---given sizes).
+\item Functions taking arguments of type $\it Ts$ (a list of types) and
+returning a result of type $T$ have the type
+\texttt{function from $\it Ts$ to $T$} (displayed as ${\it Ts}\rightarrow T$
+in this generated PDF documentation).  For example, a function taking an
+array of functions from \texttt{int} to \texttt{int} and returning an array
+of \texttt{bool} elements is declared using a syntax of the form
+\begin{verbatim}
+function f(x : array of function from int to int) : array of bool {
+  ...
+}
+\end{verbatim}
+and has the type
+\texttt{function from array of function from int to int to bool}.
+\item We allow any variable declarations and instantiations for them at the
+top level.  Functions can only be declared at the top level.  Each function
+can only access the other functions and variables declared at the top level,
+or its own locally declared variables.  SIMPLE has static scoping.
+\item The various expression and statement constructs take only elements of
+the expected types.
+\item Increment and assignment can operate both on variables and on array
+elements.  For example, if \texttt{f} has type
+\texttt{function from int to array of array of int} and function
+\texttt{g} has the type \texttt{function from int to int}, then the
+increment expression \texttt{++f(7)[g(2),g(3)]} is valid.
+\item The \texttt{for} loops only iterate over counter variables of type
+\texttt{int}, which therefore need not be manually declared; they are
+automatically assumed declared only for the scope of the \texttt{for} and of
+type \texttt{int}.
+\item Functions should only return values of their declared result type.
+To allow more flexibility to the programmers, we allow functions to use
+``\texttt{return;}'' statements to terminate without returning an actual
+value, or to not explicitly use any return statement, regardless of their
+declared return type.  This flexibility can be handy when writing programs
+using certain functions only for their side effect.
+\item For simplicity, we here limit exceptions to only throw integer values.
+This way, we don't need to declare a type for the variable that binds the
+thrown value (similarly to the counter variables in \texttt{for} loops).
+\end{itemize}
+Like in untyped SIMPLE, some constructs can be desugared into a smaller set of
+basic constructs.
+\end{latexComment}
+
+\vspace*{3ex}
