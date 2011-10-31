@@ -93,12 +93,12 @@ module SIMPLE-TYPED-STATIC
 
 // empty list of variable declarations when functions with no arguments
   rule var; => stmt   [: structural:]
-  rule var X:#Id : T:Type; => bindto(X,T)
+  rule var X:#Id : T:Type; => bindto(X,T) ~> stmt
   context var _[[HOLE]] : _;
-  rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> bindto(X,T)
+  rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> bindto(X,T) ~> stmt
 
   rule <k> function X(XTs:Exps) : T S:Stmt => 
-           bindto (X, function from types(XTs) to T) ...</k>
+           bindto (X, function from types(XTs) to T) ~> stmt ...</k>
        <pass> 1st </pass>
        (. => <task> <code> {var XTs; S} </code> <type> T </type> </task>)
 
@@ -179,7 +179,7 @@ module SIMPLE-TYPED-STATIC
   syntax K ::= "bindto" "(" #Id "," Type ")"
              | "checkDepth" "(" Types "," Type ")"
              | "tenv" "(" Map ")"
-  rule <k> bindto(X,T) => stmt ...</k>
+  rule <k> bindto(X,T) => . ...</k>
        <tenv> Rho:Map => Rho[T / X] </tenv>           [:structural:]
   rule checkDepth((int,Ts => Ts), (array of T => T))  [:structural:]
   rule checkDepth(.Types,_) => .K                     [:structural:]
