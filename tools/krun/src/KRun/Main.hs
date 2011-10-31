@@ -102,8 +102,10 @@ searchExecution config kmap = do
     (_, outFile, errFile) <- evalKastIO config kmap'
     out <- T.readFile outFile
     let maybeSearchResults = parseSearchResults out
-    when (isNothing maybeSearchResults) $
-        die $ "Failed to parse search results:\n\n" ++ T.unpack out
+    when (isNothing maybeSearchResults) $ do
+        putStrLn "Unable to parse Maude's search results:\n"
+        T.putStrLn out
+        exitFailure
     let searchResults = fromJust maybeSearchResults
     T.putStrLn "Search results:"
     forM_ (zip [1..] searchResults) $ \(i, sr) -> do
@@ -115,9 +117,12 @@ searchExecution config kmap = do
 standardExecution :: Config -> Map Text Kast -> IO ()
 standardExecution config kmap = do
     (_, outFile, errFile) <- evalKastIO config kmap
-    maybeMaudeResult <- parseMaudeResult <$> T.readFile outFile
-    when (isNothing maybeMaudeResult) $
-        die "Maude failed to produce a result"
+    out <- T.readFile outFile
+    let maybeMaudeResult = parseMaudeResult out
+    when (isNothing maybeMaudeResult) $ do
+        putStrLn "Unable to parse Maude's output:\n"
+        T.putStrLn out
+        exitFailure
     let maudeResult = fromJust maybeMaudeResult
     printResult config (resultTerm maudeResult)
     printStatistics config (statistics maudeResult)
