@@ -77,11 +77,16 @@ fmod ADD-EVAL is
   eq setContents(SC, empty) = setContents(SC, emptyCt(Bag)) .
 
   op checkEmpty : SplitCell TermList -> TermList [strat (2 0 1)] . 
-  eq checkEmpty(SC, empty) = empty .
-  eq checkEmpty(SC, T) = plugCell(setAttributes(setContents(SC,T),initialCellAttrs)) [owise] . 
+  eq checkEmpty(SC, empty) = empty . 
+  eq checkEmpty(SC, T) 
+   = if getVars(T) == empty
+     then empty 
+     else plugCell(setAttributes(setContents(SC,T),initialCellAttrs))
+     fi . 
 
   op $checkEmpty : Qid TermList -> TermList .
   eq $checkEmpty(Q, empty) = empty .
+  ceq $checkEmpty(Q, T) = T if Q == ctor(Bag) .
   eq $checkEmpty(Q, Tl) = Q[Tl] [owise] .
 
   var O Q : Qid . var T : Term . var Tl : TermList .  var V : Variable .

@@ -247,6 +247,7 @@ my $to_reduce = "mod TEST-DO-NOT-USE-THIS-NAME is including $syntax_module .
   op parse_ : Universal -> ParsedPrm [poly(1)] .
 endm
   
+set print mixfix off .
 red parse( $_ ) .
 q";
 
