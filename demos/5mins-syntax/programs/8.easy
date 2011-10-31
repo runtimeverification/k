@@ -1,0 +1,23 @@
+function producer(n,v,x) {
+  if (n<=0) {
+    return "";
+  } else {
+    put(x,v);
+    call producer((n-1),v,x);
+  }
+}
+
+function consumer(n,x) {
+  if (n<=0) {
+    return "";
+  } else {
+    write(take(x));
+    call consumer((n-1),x);
+  }
+}
+
+var n=3;
+var q=new BlockingQueue(n);
+spawn producer(n,"Hello ",q);
+spawn producer(n,"World!",q);
+spawn consumer(n,q);

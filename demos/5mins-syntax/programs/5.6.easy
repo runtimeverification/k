@@ -1,0 +1,5 @@
+function hello(x){
+  write("Hello " + x + "!");
+}
+
+call hello("World");
