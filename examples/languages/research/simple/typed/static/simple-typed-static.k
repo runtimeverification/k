@@ -49,12 +49,13 @@ module SIMPLE-TYPED-STATIC-SYNTAX
                 | "return" Exp ";"                      [:strict:]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [:strict:]
-                | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
+                | "try" Stmt "catch" "(" #Id ")" Stmt   [:strict(1) prec(90):]
                 | "throw" Exp ";"                       [:strict:]
                 | "spawn" Stmt                          [:strict prec(90):]
                 | "acquire" Exp ";"                     [:strict:]
                 | "release" Exp ";"                     [:strict:]
                 | "rendezvous" Exp ";"                  [:strict:]
+// the next highlights an error in kompile (see the .k/simple....maude)
                 | "whatever"
 
   syntax Stmts ::= Decl | Stmt
@@ -78,7 +79,7 @@ module SIMPLE-TYPED-STATIC
   configuration <T color="red">
                    <k color="green"> $PGM:Stmts </k>
                    <tenv color="cyan"> .Map </tenv>
-                   <return multiplicity="?"> .K </return>
+                   <return> .K </return>
                    <tasks color="blue">
                      <task multiplicity="*">
                        <code> .K </code>
@@ -108,6 +109,11 @@ module SIMPLE-TYPED-STATIC
 //@ When ready in second pass, schedule a next task
   rule <k> stmt => S </k> <pass> 2nd </pass> <return> _ => T </return>
        (<task> <code> S </code> <type> T </type> </task> => .)
+
+// When there is no task left in second pass, do some cleanup
+//  rule <k> _:Type </k>
+//      (<tasks> .Bag </tasks> <pass> 2nd </pass> <return> _:Type </return> => .)
+//         [:structural:]
 
 //@ \section{Expressions}
 
@@ -148,12 +154,13 @@ module SIMPLE-TYPED-STATIC
   rule T; => stmt
   rule if bool then stmt else stmt => stmt
   rule while bool do stmt  => stmt
-  rule return T; => stmt
+  rule <k> return T; => stmt ...</k> <return> T </return>
   rule return; => stmt
   rule print(int,Ts => Ts);
   rule print(string,Ts => Ts);
   rule print(); => stmt
-
+  rule try stmt catch(X) S => {var X:int; S}   [:structural:]
+  rule throw int; => stmt
   rule spawn stmt => stmt
   rule acquire T; => stmt
   rule release T; => stmt

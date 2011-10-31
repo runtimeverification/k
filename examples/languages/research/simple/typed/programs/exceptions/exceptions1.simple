@@ -1,7 +1,7 @@
-function main() {
-  var e = 100;
+function main():void {
+  var e:int = 100;
   try {
-    var x = 5;
+    var x:int = 5;
     if (x >= 0) then throw x+2;
     print(20);      // should not be printed
   } catch(e) {

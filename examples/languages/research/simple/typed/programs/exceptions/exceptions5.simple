@@ -1,7 +1,7 @@
-var x;
+var x:int;
 
-function f(y) {
-  var t = 1;
+function f(y:int):int {
+  var t:int = 1;
   try{
     print(t," ");
     throw 5;
@@ -14,7 +14,7 @@ function f(y) {
   return t;
 }
 
-function main() {
+function main():void {
   x = 5;
   print(f(x),"\n");
 }

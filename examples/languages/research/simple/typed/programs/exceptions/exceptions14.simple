@@ -1,4 +1,4 @@
-function main() {
+function main():void {
   try {
     15;
   } catch(e) {

@@ -3,8 +3,8 @@
 // the "superheat" tag to the division and the "supercool" tag to the
 // variable lookup and increment rules.
 
-function main() {
-  var x = 1 ;
+function main():void {
+  var x:int = 1 ;
   print(++ x / (++ x / x),"\n");
 }
 

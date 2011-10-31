@@ -1,7 +1,7 @@
 // This is a poorly synchronized program, which has lots of behaviors.
 
-function main() {
-  var x = 5;
+function main():void {
+  var x:int = 5;
   spawn x=x+2;
   spawn x=x*2;
   spawn x=11;

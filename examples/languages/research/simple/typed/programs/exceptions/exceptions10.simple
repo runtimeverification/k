@@ -1,6 +1,6 @@
-var x;
+var x:int;
 
-function main() {
+function main():void {
   x = 5;
   try {
     throw 3;

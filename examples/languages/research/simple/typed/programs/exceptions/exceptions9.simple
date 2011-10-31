@@ -1,14 +1,14 @@
-var x, y, z;
+var x:int, y:int, z:int;
 
-function g() {
+function g():void {
   throw 15;
 }
 
-function f() {
+function f():void {
   g();
 }
 
-function main() {
+function main():void {
   x = 5;
   y = 10;
 

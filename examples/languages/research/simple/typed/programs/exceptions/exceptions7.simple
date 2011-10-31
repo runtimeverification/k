@@ -1,6 +1,6 @@
-function main() {
-  var e;
-  try { var x = 2; print(x," "); throw ( ++x + x ); }
+function main():void {
+  var e:int;
+  try { var x:int = 2; print(x," "); throw ( ++x + x ); }
   catch(e) { print(e,"\n"); }
 }
 

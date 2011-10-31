@@ -1,19 +1,19 @@
 // This program shows an interesting situation which can happen in many
 // language designs: something which looks correct is actually wrong:
 
-var x;
+var x:int;
 
-function main() {
-  var n = 5;
+function main():void {
+  var n:int = 5;
   x = 1;
-  for i = 1 to n do { var t=i;
+  for i = 1 to n do { var t:int=i;
     spawn multX(t);}
   for i = 1 to n do
     rendezvous i;
   print(x,"\n");
 }
 
-function multX(v) {
+function multX(v:int):void {
   acquire 0;
   x = x*v;
   release 0;

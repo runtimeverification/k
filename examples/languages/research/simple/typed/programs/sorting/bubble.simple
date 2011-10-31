@@ -2,10 +2,10 @@
 // console (first its length, then its elements).  It reads and prints
 // each elements, then it prints the entire array sorted.
 
-var v[100];
+var v[100] : array of int;
 
-function bubbleSort(n) {
-  var t;
+function bubbleSort(n:int):void {
+  var t:int;
   for x = 0 to n - 1 do
     for y = 0 to n - 2 do
       if v[y] > v[y+1] then {
@@ -15,9 +15,9 @@ function bubbleSort(n) {
       }
 }
 
-function main() {
+function main():void {
   print("Length of array = ");
-  var x = read();
+  var x:int = read();
   print("Input each of the ",x," elements of the array\n");
   for y = 0 to (x - 1) do {
     print("Element ",y," = ");

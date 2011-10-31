@@ -1,14 +1,14 @@
 // Program that tests both exceptions and threads.  The threads are not
 // synchronized and indeed manifest into lots of different behaviors.
 
-function main() {
+function main():void {
   spawn {
-    var e;
+    var e:int;
     try {
       try {
         try {
           try {
-            var x = 1;
+            var x:int = 1;
             print(x);
             throw ++x;
           } catch(e) {
@@ -28,12 +28,12 @@ function main() {
     }
   }
   spawn {
-    var e;
+    var e:int;
     try {
       try {
         try {
           try {
-            var x = 1;
+            var x:int = 1;
             print(x);
             throw ++x;
           } catch(e) {

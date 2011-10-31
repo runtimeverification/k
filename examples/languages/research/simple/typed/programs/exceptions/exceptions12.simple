@@ -1,6 +1,6 @@
-var i, j;
+var i:int, j:int;
 
-function main() {
+function main():void {
   i = 0;
   while (++i <= 3) do {
     print(i," ");

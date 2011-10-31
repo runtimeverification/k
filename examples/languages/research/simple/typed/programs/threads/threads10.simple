@@ -1,13 +1,13 @@
 // Normally, one would think that the program below has only two behaviors.
 // However, it has four, due to the race on the output buffer.
 
-function main() {
+function main():void {
   spawn {
-    var x = 2;
+    var x:int = 2;
     print(x," ");
   }
   spawn {
-    var x = 3;
+    var x:int = 3;
     print(x," ");
   }
 }

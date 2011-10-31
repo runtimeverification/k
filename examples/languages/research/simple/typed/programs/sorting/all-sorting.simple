@@ -1,5 +1,5 @@
-function init(n) {
-  var x[n];
+function init(n:int):array of int {
+  var x[n]:array of int;
   print("Type ",n," numbers: ");
   for i = 0 to n - 1 do
     x[i] = read();
@@ -7,32 +7,34 @@ function init(n) {
   return x;
 }
 
-function printArray(x) {
+function printArray(x:array of int):void {
   print("\n");
   for i = 0 to sizeOf(x) - 1 do
     print(x[i]," ");
   print("\n");
 }
 
-function reverse(x) {
-  var n = sizeOf(x);
+function reverse(x:array of int):void {
+  var n:int = sizeOf(x);
   for i = 0 to n/2 - 1 do {
-    var t = x[i];
+    var t:int = x[i];
     x[i] = x[n - i - 1];
     x[n - i - 1] = t;
   }
 }
 
-function map(m,f,x) {
+function map(m : array of string,
+             f : array of function from array of int to void,
+             x : array of int) : void {
   for i = 0 to sizeOf(f) - 1 do {
     print(m[i]);
     f[i](x);
   }
 }
 
-function insertionSort(x) {
+function insertionSort(x:array of int):void {
   for i = 1 to sizeOf(x) - 1 do {
-    var v = x[i], j = i - 1;
+    var v:int = x[i], j:int = i - 1;
     while (j >= 0) do {
       if x[j] > v then x[j+1] = x[j];
       j = j - 1;
@@ -41,19 +43,19 @@ function insertionSort(x) {
   }
 }
 
-function bubbleSort(v) {
-  var n = sizeOf(v);
+function bubbleSort(v:array of int):void {
+  var n:int = sizeOf(v);
   for i = 0 to n - 1 do
     for j = 0 to n - 2 do
       if v[j] > v[j+1] then {
-        var t = v[j+1];
+        var t:int = v[j+1];
         v[j+1] = v[j];
         v[j] = t;
       }
 }
 
-function siftDown(x, root, bottom) {
-  var done = false, maxChild;
+function siftDown(x:array of int, root:int, bottom:int):void {
+  var done:bool = false, maxChild:int;
   while (root*2 <= bottom and not done) do {
     if (root*2 == bottom) then {
       maxChild = root*2;
@@ -65,7 +67,7 @@ function siftDown(x, root, bottom) {
       maxChild = root*2 + 1;
     }
     if (x[root] < x[maxChild]) then {
-      var t = x[root];
+      var t:int = x[root];
       x[root] = x[maxChild];
       x[maxChild] = t;
       root = maxChild;
@@ -76,15 +78,15 @@ function siftDown(x, root, bottom) {
   }
 }
 
-function heapSort(x) {
-  var n = sizeOf(x), i = n/2 - 1;
+function heapSort(x:array of int):void {
+  var n:int = sizeOf(x), i:int = n/2 - 1;
   while (i >= 0) do {
     siftDown(x, i, n - 1);
     i = i - 1;
   }
   i = n - 1;
   while (i >= 1 ) do {
-    var t = x[0];
+    var t:int = x[0];
     x[0] = x[i] ;
     x[i] = t;
     siftDown(x, 0, i - 1);
@@ -92,9 +94,11 @@ function heapSort(x) {
   }
 }
 
-function main() {
+function main():void {
   print("Size of the array to sort = ");
-  var x = init(read()), m[11], f[11];
+  var x:array of int = init(read()),
+      m[11]:array of string,
+      f[11]:array of function from array of int to void;
   m[ 0] = "The original unsorted array is:";
   f[ 0] = printArray;
   m[ 1] = "Reversing the array ... ";

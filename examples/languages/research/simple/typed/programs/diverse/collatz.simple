@@ -1,7 +1,7 @@
 // Program testing Collatz' conjecture up to a user-provided number.
 
-function collatz(n) {
-  var s=0;
+function collatz(n:int):int {
+  var s:int=0;
   print("Testing Collatz' conjecture for n = ",n," ... ");
   while n > 1 do {
     s = s+1;
@@ -12,9 +12,9 @@ function collatz(n) {
   print("Done! It took ",s," steps.\n");
 }
 
-function main() {
+function main():void {
   print("Testing Collatz' conjecture up to what number? ");
-  var m = read();
+  var m:int = read();
   for i = 1 to m do
     collatz(i);
   print("Done.  It appears to hold.\n");

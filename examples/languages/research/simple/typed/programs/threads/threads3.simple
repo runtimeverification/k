@@ -1,7 +1,7 @@
 // This is a well-synchronized program, which has only one behavior.
 
-function main() {
-  var x = 1;
+function main():void {
+  var x:int = 1;
   spawn {
     rendezvous 1;
     print(x," ");
