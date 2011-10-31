@@ -2885,6 +2885,18 @@ sub remove_quotes
     s/\bsyntax\b.*?(?=$kmaude_keywords_pattern)/
     {
 	my $tmp = $&;
+	my $tmp1 = $tmp;
+	
+	my $quotes_number = 0;
+	$quotes_number ++ while $tmp =~ m%(?<!\\)\"%sg;
+	if ($quotes_number % 2 == 1)
+	{
+	    $tmp1 = Unfreeze("QUOTES", $tmp1);
+	    $tmp1 =~ s!(\[[^\]]*?(metadata)[^\]]*?\])!!gs;
+	    print "[Warning] This warning is thrown when quotes around terminals are not balanced. Notice that if you want to use quotes in your syntax use backslash (\) to escape them.";
+	    print "It seems that you forgot a quote (\") in syntax declaration:\n$tmp1\n";
+	}
+	
 	$tmp =~ s%(?<!\\)\"%KSYNQUOT%sg;
 	$tmp =~ s%KSYNQUOT(.*?)KSYNQUOT% `$1 %sg;
 	$tmp =~ s%\\(?=\")%%sg;
