@@ -1,7 +1,3 @@
-----------------------------------
---- SIMPLE-TYPED-SYNTAX module ---
-----------------------------------
-
 module SIMPLE-TYPED-STATIC-SYNTAX
   syntax #Id ::= "main"
 
@@ -18,7 +14,7 @@ module SIMPLE-TYPED-STATIC-SYNTAX
                 | "function" #Id "(" Exps ")" ":" Type Stmt
 
   syntax Exp ::= #Int | #Bool | #String | #Id
-               | "++" Exp              [:prec 0:]
+               | "++" Exp              [:prec(0):]
                | Exp "+" Exp           [:strict prec(33) gather(E e):]
                | Exp "-" Exp           [:strict prec(33) gather(E e):]
                | Exp "*" Exp           [:strict prec(31) gather(E e):]
@@ -38,7 +34,7 @@ module SIMPLE-TYPED-STATIC-SYNTAX
                | "sizeOf" "(" Exp ")"  [:strict:]
                | Exp "(" Exps ")"      [:strict prec(2):]
                | "read" "(" ")"
-               | Exp "=" Exp           [:strict(2) prec(40)  gather (e E):]
+               | Exp "=" Exp           [:strict(2) prec(40) gather (e E):]
                | Exp ":" Type          [:prec(10):]
                                        // allowed only for declarations
   syntax Exps ::= List{Exp,","}
@@ -46,7 +42,7 @@ module SIMPLE-TYPED-STATIC-SYNTAX
   syntax Stmt ::= "{" "}"
                 | "{" Stmts "}
                 | Exp ";"                               [:strict prec(45):]
-                | "if" Exp "then" Stmt "else" Stmt      [:strict(1) prec(90):]
+                | "if" Exp "then" Stmt "else" Stmt      [:strict prec(90):]
                 | "if" Exp "then" Stmt                  [:prec(89):]
                 | "while" Exp "do" Stmt                 [:strict prec(90):]
                 | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
@@ -59,6 +55,7 @@ module SIMPLE-TYPED-STATIC-SYNTAX
                 | "acquire" Exp ";"                     [:strict:]
                 | "release" Exp ";"                     [:strict:]
                 | "rendezvous" Exp ";"                  [:strict:]
+                | "whatever"
 
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts            [:seqstrict prec(100) gather(e E):]
@@ -82,7 +79,7 @@ module SIMPLE-TYPED-STATIC
                    <k color="green"> $PGM:Stmts </k>
                    <tenv color="cyan"> .Map </tenv>
                    <return multiplicity="?"> .K </return>
-                   <tasks color="blue" multiplicity="?">
+                   <tasks color="blue">
                      <task multiplicity="*">
                        <code> .K </code>
                        <type> .K </type>
@@ -94,28 +91,93 @@ module SIMPLE-TYPED-STATIC
   syntax Type ::= "stmt"
 
 // empty list of variable declarations when functions with no arguments
----  rule var; => .K   [: structural:]
+  rule var; => stmt   [: structural:]
+  rule var X:#Id : T:Type; => bindto(X,T)
+  context var _[[HOLE]] : _;
+  rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> bindto(X,T)
 
-  rule <k> var X:#Id : T:Type; => stmt ...</k>
-       <tenv> Rho:Map => Rho[T/X] </tenv>
-
-  context var X[[HOLE]] : array of T;
-  rule <k> var X[int] : array of T; => stmt ...</k>
-       <tenv> Rho => Rho[array of T / X] </tenv>
-
-  rule <k> function X(XTs:Exps) : T S:Stmt => stmt ...</k>
-       <tenv> Rho => Rho[function from types(XTs) to T / X] </tenv>
+  rule <k> function X(XTs:Exps) : T S:Stmt => 
+           bindto (X, function from types(XTs) to T) ...</k>
        <pass> 1st </pass>
        (. => <task> <code> {var XTs; S} </code> <type> T </type> </task>)
 
-// report: . instead of .K
-  rule <k> stmt </k> <pass> 1st => 2nd </pass>
+//@ Switching to second pass if a main function declared
+  rule <k> stmt </k> <tenv>... main |-> function from _ to _ ...</tenv>
+       <pass> 1st => 2nd </pass>
 
+//@ When ready in second pass, schedule a next task
   rule <k> stmt => S </k> <pass> 2nd </pass> <return> _ => T </return>
        (<task> <code> S </code> <type> T </type> </task> => .)
 
+//@ \section{Expressions}
+
+  rule <k> I:#Int => int ...</k>
+  rule <k> B:#Bool => bool ...</k>
+  rule <k> Str:#String => string ...</k>
+  rule <k> X => T ...</k> <tenv>... X |-> T ...</tenv>
+  context ++([HOLE] => l-type([HOLE]))
+  rule ++ int => int
+  rule int + int => int
+  rule string + string => string
+  rule _-_(int,int) => int
+  rule int * int => int
+  rule int / int => int
+  rule int % int => int
+  rule - int => int
+  rule int < int => bool
+  rule int <= int => bool
+  rule int > int => bool
+  rule int >= int => bool
+  rule T == T => bool
+  rule T != T => bool
+  rule bool and bool => bool
+  rule bool or bool => bool
+  rule not(bool) => bool
+  rule (array of T)[int,Ts] => T[Ts]
+  rule T[] => T
+  rule sizeOf(array of T) => int
+  rule _`(_`)(function from Ts to T, Ts) => T
+  rule read() => int
+  context ([HOLE] => l-type([HOLE])) = _
+  rule T=T => T
+
+//@ \section{Statements}
+
+  rule {} => stmt
+  rule <k> {Ss:Stmts} => Ss ~> tenv(Rho) ...</k> <tenv> Rho </tenv>
+  rule T; => stmt
+  rule if bool then stmt else stmt => stmt
+  rule while bool do stmt  => stmt
+  rule return T; => stmt
+  rule return; => stmt
+  rule print(int,Ts => Ts);
+  rule print(string,Ts => Ts);
+  rule print(); => stmt
+
+  rule spawn stmt => stmt
+  rule acquire T; => stmt
+  rule release T; => stmt
+  rule rendezvous_;(T) => stmt
 
   rule stmt stmt => stmt
+
+//@ \section{Auxilliary operations}
+
+  syntax Exp ::= "l-type" "(" Exp ")"
+  rule l-type(X) => X        [:structural:]
+  context l-type(_[[HOLE]])
+  context l-type([HOLE][_])
+  rule l-type(T) => T        [:structural:]
+
+  syntax K ::= "bindto" "(" #Id "," Type ")"
+             | "checkDepth" "(" Types "," Type ")"
+             | "tenv" "(" Map ")"
+  rule <k> bindto(X,T) => stmt ...</k>
+       <tenv> Rho:Map => Rho[T / X] </tenv>           [:structural:]
+  rule checkDepth((int,Ts => Ts), (array of T => T))  [:structural:]
+  rule checkDepth(.Types,_) => .K                     [:structural:]
+  rule <k> stmt ~> (tenv(Rho) => .) ... </k>
+       <tenv> _ => Rho </tenv>                        [:structural:]
 
   syntax Types ::= "types" "(" Exps ")"    [:prec(1):]
   rule types() => .Types                   [:structural:]
