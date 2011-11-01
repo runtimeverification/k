@@ -74,7 +74,7 @@ usage() if defined $help;
 ##############################
 if ($pgm eq "?")
 {
-    if (-e $ARGV[0])
+    if (defined $ARGV[0] && -e $ARGV[0])
     {
 	$pgm  = $ARGV[0];
     }
@@ -114,10 +114,16 @@ if (!(-e $lang))
 
 # get tokens
 my $dir = dirname($lang);
+my $tmplang = $lang;
 $lang = basename($lang);
 
+if (!(-e $tmplang) || $tmplang !~ /\.k(maude)?/)
+{
+    print "Cannot find $tmplang.k!\nPlease make sure $tmplang exists or use option --k-definition.\nType \"kast --help\".\n";exit;
+}
+
 my $tokens_file = File::Spec->catfile($dir, ".k/all_tokens.tok");
-my $tokens = get_file_content($tokens_file);
+my $tokens = get_file_content($tokens_file, "Please kompile a K defintion before using kast.\nType \"kast --help\".\n");
 my @all = split("\n", $tokens);
 @all_tokens = split('\s', shift(@all));
 @all_syntax = split('\s', shift(@all));
@@ -129,8 +135,8 @@ $lang =~ s/\.k(maude)?$//s;
 
 
 # 3. syntax module
-$syntax_module = uc($lang) . "-SYNTAX" if ($syntax_module eq "?");
 $syntax_module = $main_module . "-SYNTAX" if ($syntax_module eq "?" && $main_module ne "?");
+$syntax_module = uc($lang) . "-SYNTAX" if ($syntax_module eq "?");
 
 # message
 print "Tokenizing program ... " if $verbose;
@@ -147,7 +153,7 @@ print "Tokenizing program ... " if $verbose;
 
 
 # get the program
-local $_ = get_file_content($pgm);
+local $_ = get_file_content($pgm, "Please check if $pgm exists!\n");
 my $temp = $_;
 
 # remove comments
@@ -307,7 +313,7 @@ print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
 $t0 = [gettimeofday];
 
 # clean
-unlink("programCompile.tmp") if !$verbose;
+unlink("programCompile.maude") if !$verbose;
 unlink($xml_ast) if !$verbose;
 
 
@@ -386,13 +392,15 @@ Options:
                                The `.k` extension is optional. 
                                The default value of <def> is <pgm> extension
   --main-module <module>   : specifies the main module name
+                               The default value is <DEF> (capitalized K 
+			          definition name)
   --syntax-module <module> : specifies the syntax module name
                                The default value is <DEF>-SYNTAX.
                                If --main-module is used then <module> 
                                is <main-module>-SYNTAX
-  -o[utput] <file>         : set <file> as being the output file
+  --output <file>          : set <file> as being the output file
                                The default value is /dev/stdout
-  -verbose                 : verbose mode\n
+  --verbose                : verbose mode\n
 The definition is assumed to have been kompiled prior to calling kast.\n\n";
 exit;
 }
@@ -413,8 +421,9 @@ sub error
 sub get_file_content
 {
     my $filename = shift;
+    my $rest = "@_";
     
-    open FILEHANDLE, "<", $filename or die "Could not open $filename:\n$!";
+    open FILEHANDLE, "<", $filename or die "Could not open $filename:\n$!\n$rest";
     my @input = <FILEHANDLE>;
     close FILEHANDLE;
 
