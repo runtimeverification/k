@@ -71,6 +71,13 @@ fmod MAKE-K-RULES is
   eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setAttrs(setContents(CSplit, replaceCxt(splitReplace(Flat, getContents(CSplit),1), getHoleReplacement(getContents(CSplit)))),metadata(getAttrs(CSplit)))), M) .
 
   op addReplace : Module Module KRuleSplit Substitution AttrSet ~> Module .
+  eq addReplace(Flat, M,R{T,Cond,AS pair("predicate","")}, Subst, AS')
+   =
+   superCoolName(addEqs(plugEq(normalize(Flat,splitReplace(Flat,
+               T,1)),
+           handleTagSuperCooling(normalize(Flat,splitReplace(Flat,
+                 T,2)),Subst, AS, AS'),
+           metadata(pair("predicate","") AS), makeKCondition(Cond)), M), AS, AS') [owise] . 
   eq addReplace(Flat, M, R{T, Cond, AS A}, Subst, AS' transitions(A AS''))
     = superCoolName(addRls(plugRl(normalize(Flat,splitReplace(Flat, T,1)), handleTagSuperCooling(normalize(Flat,splitReplace(Flat, T,2)), Subst, AS A, AS'), metadata(A AS), makeCondition(Cond)), M), AS A, AS') .
 
