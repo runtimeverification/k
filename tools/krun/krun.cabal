@@ -34,6 +34,8 @@ Executable krun
     attoparsec-text,
     parsec
 
+  ghc-prof-options: -rtsopts -auto-all
+
 --  ghc-options:      -Wall
 
   if flag(static)
