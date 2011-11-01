@@ -31,10 +31,10 @@ the elements of the array start) together with the size of the array;
 the elements of the array can be array references themselves (particularly
 when the array is multi-dimensional).  Array references are ordinary values,
 so they can be assigned to variables and passed/received by functions.
-\item Functions and function references.  Functions can have zero or
+\item Functions and function values.  Functions can have zero or
 more parameters and can return abruptly using a \texttt{return} statement.
 SIMPLE follows a call-by-value parameter passing style, with static scoping.
-Function names evaluate to function references, which hereby become ordinary
+Function names evaluate to function abstractions, which hereby become ordinary
 values in the language, same like the array references.
 \item Blocks with locals.  SIMPLE variables can be declared
 anywhere, their scope being the most nested enclosing block.
@@ -52,9 +52,8 @@ released, as well as through rendezvous.
 
 \end{itemize}
 Like in many other languages, some of SIMPLE's constructs can be
-desugared into a smaller set of basic constructs.  We do that in a 
-dedicated module between the syntax and the semantics, and we only
-give semantics to the core constructs.
+desugared into a smaller set of basic constructs.  We do that at the end
+of the syntax module, and then we only give semantics to the core constructs.
 
 \paragraph{Note:}{
 This definition is commented slightly more than others, because it is

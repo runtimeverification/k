@@ -61,7 +61,7 @@ argument (for the same reason as the increment). */
                | "sizeOf" "(" Exp ")"  [:strict:]
                | Exp "(" Exps ")"      [:strict prec(2):]
                | "read" "(" ")"
-               | Exp "=" Exp           [:strict(2) prec(40)  gather (e E):]
+               | Exp "=" Exp           [:strict(2) prec(40) gather (e E):]
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
@@ -98,7 +98,7 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
                 | "rendezvous" Exp ";"                  [:strict:]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts                          [:prec(100) gather(e E):]
+                 | Stmts Stmts                         [:prec(100) gather(e E):]
 
 
 /*@ \section{Desugared Syntax}
@@ -114,7 +114,6 @@ declared alone and is initialized. */
   macro (for X:#Id = E1 to E2 do S) = {var X=E1; while X <= E2 do {S X=X+1;}}
   macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
   macro var X = E; = var X; X = E;
-  macro return; = return 0;
 end module
 
 
@@ -433,9 +432,9 @@ values of expected sorts: */
   rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==Bool V2
   rule V1 != V2 => V1 =/=Bool V2
-  rule T1:#Bool and T2:#Bool => T1 andBool T2
-  rule T1 or T2 => T1 orBool T2
-  rule not(T:#Bool) => notBool(T)
+  rule B1:#Bool and B2:#Bool => B1 andBool B2
+  rule B1 or B2 => B1 orBool B2
+  rule not(B:#Bool) => notBool(B)
 
 /*@ \subsection{Array lookup}
 Untyped SIMPLE does not check array bounds (the dynamically typed version of
@@ -466,35 +465,38 @@ both the function and its arguments are evaluated to values (the former
 expected to be a $\lambda$-abstraction).  The first rule below matches a
 well-formed function application on top of the computation and performs the
 following steps atomically: it switches to the function body followed by
-``\texttt{return 0;}'' (here 0 is a default return value for the case in which
-the function does not use an explicit return statement); it pushes the
-remaining computation, the current environment, and the current control data
-onto the function stack (the remaining computation can thus also be discarded
-from the computation cell, because an unavoidable subsequent \texttt{return}
-statement---see above---will always recover it from the stack); it switches
-the current environment (which is being pushed on the function stack) to the
-global environment, which is where the free variables in the function body
-should be looked up; it binds the formal parameters to fresh locations in
-the new environment, and stores the actual arguments to those locations in the
-store.  The second rule pops the computation, the environment and the control
-data from the function stack when a \texttt{return} statement is encountered
-as the next computational task, passing the returned value to the popped
-computation (the popped computation was the context in which the returning
-function was called).  Note that the pushing/popping of the control data is
-crucial.  Without it, one may have a function that contains an exception block
-with a return statement inside, which would put the \textsf{xstack} cell in an
-inconsistent state (since the exception block modifies it, but that
-modification should be irrelevant once the function returns). */
+``\texttt{return;}'' (for the case in which the function does not use an
+explicit return statement); it pushes the remaining computation, the current
+environment, and the current control data onto the function stack (the remaining
+computation can thus also be discarded from the computation cell, because an
+unavoidable subsequent \texttt{return} statement---see above---will always
+recover it from the stack); it switches the current environment (which is being
+pushed on the function stack) to the global environment, which is where the free
+variables in the function body should be looked up; it binds the formal
+parameters to fresh locations in the new environment, and stores the actual
+arguments to those locations in the store.  The second rule pops the
+computation, the environment and the control data from the function stack when a
+\texttt{return} statement is encountered as the next computational task, passing
+the returned value to the popped computation (the popped computation was the
+context in which the returning function was called).  Note that the
+pushing/popping of the control data is crucial.  Without it, one may have a
+function that contains an exception block with a return statement inside, which
+would put the \textsf{xstack} cell in an inconsistent state (since the exception
+block modifies it, but that modification should be irrelevant once the function
+returns).  We add an artificial \texttt{nothing} value to the language, which is
+returned by the nulary \texttt{return;} statements. */
 
   syntax Vals ::= List{Val,","}
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
-  rule <k> _`(_`)(lambda(Xl,S), Vl:Vals) ~> K:K => bindto(Xl,Vl) ~> S ~> return(0); </k>
+  rule <k> _`(_`)(lambda(Xl,S), Vl:Vals) ~> K:K => bindto(Xl,Vl) ~> S ~> return; </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
        <env> Env => GEnv </env>
        <genv> GEnv:Map </genv>
   rule <k> return(V); ~> _ => V ~> K </k>
        <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
+  syntax Val ::= "nothing"
+  rule return; => return nothing;   [: structural :]
 
 /*@ The \texttt{bindto} auxilliary construct binds a list of variables to a
 list of values.  Specifically, it allocates a fresh location for each variable,
@@ -553,7 +555,7 @@ computational if one wants them to count as computational steps. */
   rule <k> env(Env) => . ...</k> <env> _ => Env </env> [:structural:]
 
 /*@  While theoretically sufficient, the basic definition for environment
-recovery alone is suboptimal.  Consider a loop \texttt{while B do S},
+recovery alone is suboptimal.  Consider a loop \texttt{while E do S},
 whose semantics (see below) is given by unrolling.  Typically \texttt{S}
 is a block.  Then the semantics of blocks above, together with the
 unrolling semantics of the while loop below, will yield a computation
@@ -638,8 +640,8 @@ below works because our while loops in SIMPLE are indeed very basic.  If we
 allowed break/continue of loops then we would need a completely different
 semantics, which would also involve the \textsf{control} cell. */
 
-  rule <k> while B:Exp do S
-    => if B then {S while B do S} else {} ...</k> [:structural:]
+  rule <k> while E:Exp do S
+    => if E then {S while E do S} else {} ...</k> [:structural:]
 
 /*@ \subsection{Print}
 The print statement was strict, so all its arguments are now evaluated

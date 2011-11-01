@@ -20,7 +20,7 @@ function printArray(a) {
 }
 
 function transArray(a) {
-  var  m = sizeOf(a) - 1,  n = sizeOf(a[0]) - 1, b[n+1,m+1];
+  var  m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1, b[n+1,m+1];
   for i = 0 to m do
     for j = 0 to n do
       b[j,i] = a[i,j];
