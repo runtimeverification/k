@@ -46,13 +46,12 @@ main = do
     let initVals = filter (elem '=') unrecOpts' 
     let groups = unrecOpts' \\ initVals
     let maybePgmFile = listToMaybe nonOpts
-    let pgmExt = takeExtension <$> maybePgmFile
 
     deskFile <- case Map.lookup "desk-file" argConfig of
         Just (File f) -> return $ Just f
         Nothing -> findDeskFile' "."
 
-    config <- mkConfig pgmExt deskFile groups argConfig
+    config <- mkConfig deskFile groups argConfig
 
     Bool printHelp <- getVal config "print-help"
     when (printHelp) $ do

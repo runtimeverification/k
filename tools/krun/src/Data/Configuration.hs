@@ -2,13 +2,14 @@
 module Data.Configuration where
 
 import Control.Applicative ((<$>))
-import Control.Arrow (first, second)
+import Control.Arrow ((&&&), first, second)
 import Control.Exception
 import Control.Monad (forM, join)
 import Data.Char (toLower, toUpper)
-import Data.List (intercalate, partition)
+import Data.List (intercalate, partition, stripPrefix)
 import Data.Map (Map)
 import qualified Data.Map as Map
+import Data.Maybe (catMaybes)
 import qualified Data.Object as Y
 import qualified Data.Object.Yaml as Y
 import Data.Typeable
@@ -17,6 +18,8 @@ import System.Console.GetOpt
 import System.Environment
 import System.Exit
 import System.FilePath
+
+import Distribution.Desk.Utils
 
 type Config = Map String Value
 
@@ -120,6 +123,30 @@ mkExtConfig (Just ext') = let ext = map toUpper . dropWhile (== '.') $ ext' in
     , ("syntax-module", String $ ext ++ "-SYNTAX")
     ]
 
+mkInitConfig :: FilePath -> IO Config
+mkInitConfig dir = do
+    maudeFiles <- getFilesWithExt ".maude" dir
+    let compiledFiles = catMaybes . map splitDef $ maudeFiles
+    case compiledFiles of
+        [] -> return Map.empty
+        [(lang, def)] -> return $ Map.fromList
+            [ ("main-module", String $ map toUpper lang)
+            , ("syntax-module", String $ map toUpper lang ++ "-SYNTAX")
+            , ("compiled-def", File def)
+            ]
+        multiple -> multiDef multiple
+            
+    where splitDef f
+            = let f' = takeFileName f in
+              case stripPrefix (reverse "-compiled.maude") (reverse f') of
+                Nothing -> Nothing
+                Just x -> Just $ (reverse x, f)
+
+          multiDef l = die $ "Multiple compiled definitions found.\n"
+                           ++ "Please use only one of: "
+                           ++ intercalate " " (map show l)
+
+
 resolveCompiledDef :: Config -> IO Config
 resolveCompiledDef config = do
     if Map.member "compiled-def" config
@@ -139,13 +166,13 @@ typeMap = Map.fromList $ map (\s -> (settingName s,  settingType s)) allSettings
 getType :: String -> ValueType
 getType key = Map.findWithDefault StringType key typeMap
 
-mkConfig :: Maybe String      -- ^ Maybe a file extension to initialize defaults
-         -> Maybe FilePath    -- ^ Maybe a path to a config (Desk) file
+mkConfig :: Maybe FilePath    -- ^ Maybe a path to a config (Desk) file
          -> [String]          -- ^ List of groups to include from the 'ConfigFile'
          -> Config            -- ^ 'Config' generated from command-line arguments
          -> IO Config
-mkConfig mExt mDeskFile groups argsConfig = do
-    let extConfig = mkExtConfig mExt
+mkConfig mDeskFile groups argsConfig = do
+--    let extConfig = mkExtConfig mExt
+    initConfig <- mkInitConfig "."
     kbase <- getEnv "K_BASE"
     (defaultConfig, defaultGroups) <- parseConfigFile $ kbase </> "tools" </> "global-defaults.desk"
     (deskConfig, deskGroups) <- maybe (return (Map.empty, Map.empty)) parseConfigFile mDeskFile
@@ -153,7 +180,7 @@ mkConfig mExt mDeskFile groups argsConfig = do
     groupConfigs <- forM groups $ \g -> do
         let mgconf = Map.lookup g groupMap
         maybe (throwIO $ GroupNotFound groupMap g) return mgconf
-    let configs = extConfig : defaultConfig : deskConfig : groupConfigs ++ [argsConfig]
+    let configs = initConfig : defaultConfig : deskConfig : groupConfigs ++ [argsConfig]
     let config = foldr (flip Map.union) Map.empty configs
     config' <- resolveCompiledDef config
     return config'
