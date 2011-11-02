@@ -1,0 +1,29 @@
+class i {
+  var val;  //renamed value to val because token conflict with l-value
+  method i(v) {
+    val = v;
+    return 0;
+  }
+  method m1() {
+    return (new g(val + 9));
+  }
+}
+class g {
+  var a;
+  method g(t) {
+    a = t;
+    return 0;
+  }
+  method print2() { print(a); return 0; }
+}
+class main {
+  method main() {
+    ((new i(1)).m1()).print2();
+    return 0;
+  }
+}
+
+// 15 ???
+// 10
+
+

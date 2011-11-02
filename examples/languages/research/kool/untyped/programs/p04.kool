@@ -1,0 +1,18 @@
+class c {
+  method c() { return 0; }
+  method m1() {
+    return this.m2();
+  }
+  method m2() {
+    return 13;
+  }
+}
+class main {
+  method main() {
+    print((new c()).m1());
+    return 0;
+  }
+}
+
+// 13
+

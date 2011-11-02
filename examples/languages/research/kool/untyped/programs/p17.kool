@@ -1,0 +1,13 @@
+class main {
+  method f(x) {
+    if x <= 1 then return 1; else return(x * (this.f(x - 1)));
+  }
+  method main() {
+    print(this.f(this.f(5)));
+    return 0;
+  }
+}
+
+// (5!)!
+
+

@@ -1,0 +1,35 @@
+class c {
+  var i;
+  var j;
+  method c(x) {
+    i = x;
+    j = ++x;
+    return 0;
+  }
+  method add(d) {
+    i = i+d;
+    j = j-d;
+    return 0;
+  }
+  method print2() {
+    print(i);
+    print(j);
+    return 0;
+  }
+}
+
+class main {
+  var a;
+  var b;
+  var o;
+  method main(){
+    a = 0; b = 0; o = new c(5);
+    o.print2();
+    o.add(3);
+    o.print2();
+    return 0;
+  }
+}
+
+
+// 5 6 8 3

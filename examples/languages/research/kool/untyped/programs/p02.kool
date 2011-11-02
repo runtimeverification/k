@@ -1,0 +1,14 @@
+class c {
+  var a;
+  method c() { a = 5; return 0; }
+  method g() { return a; }
+}
+
+class main {
+  method main() {
+    print((new c()).g());
+    return 0;
+  }
+}
+
+// 5
