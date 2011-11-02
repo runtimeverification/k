@@ -1,0 +1,9 @@
+class main {
+  var a;
+  method main() {
+    a = 1;
+    write(a);
+    return 0;
+  }
+}
+
