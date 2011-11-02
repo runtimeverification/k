@@ -129,8 +129,8 @@ mkInitConfig dir = do
                            ++ "Please use only one of: "
                            ++ intercalate " " (map show l)
 
-resolvedConfig :: FilePath -> Config
-resolvedConfig kDef = Map.fromList
+resolvedConfig :: Value -> Config
+resolvedConfig (File kDef) = Map.fromList
     [ ("compiled-def", File $ kDef ++ "-compiled.maude")
     , ("main-module", String $ map toUpper langName)
     , ("syntax-module", String $ map toUpper langName ++ "-SYNTAX")
@@ -161,8 +161,7 @@ mkConfig mDeskFile groups argsConfig = do
         maybe (throwIO $ GroupNotFound groupMap g) return mgconf
     let configs = initConfig : defaultConfig : deskConfig : groupConfigs ++ [argsConfig]
     let config = foldr (flip Map.union) Map.empty configs
-    File kDef <- getVal config "k-definition"
-    let rconfig = resolvedConfig kDef
+    let rconfig = maybe Map.empty resolvedConfig (Map.lookup "k-definition" config)
     return $ config `Map.union` rconfig
 
 {- Desk file handling -}
@@ -247,25 +246,6 @@ additionalHelp = intercalate "\n"
     , "--config, and --no-config. These predefined groups can be found in"
     , "$K_BASE/tools/global-defaults.desk"
     , ""
-    , "Currently, krun attempts to infer the main-module and syntax-module"
-    , "settings using the input program's file extension. For example, if"
-    , "krun is called on program foo.bar and if these settings are not"
-    , "overridden elsewhere (via the command-line or a .desk file), then"
-    , "krun assumes:"
-    , ""
-    , "main-module: BAR"
-    , "syntax-module: BAR-SYNTAX"
-    , ""
-    , "If the input program lacks a file extension, or if the defaults"
-    , "inferred from the program's file extension are not good enough,"
-    , "main-module and syntax-module MUST be set explicitly."
-    , ""
-    , "Finally, for the time being, krun must be run from the directory that"
-    , "contains the definition's .k directory, which contains essential"
-    , "information on how to parse the input programs. The compiled"
-    , "definition, ${main-module}-compiled.maude by default, is also assumed"
-    , "to be in the current working directory. Future versions of the tool"
-    , "will not have this limitation."
     ]
 
 versionStr :: String
