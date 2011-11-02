@@ -67,7 +67,7 @@ the desired evaluation strategies of the various language constructs .  */
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [:strict:]
                 | "try" Stmt "catch" "(" Exp ")" Stmt   [:prec(90):]
-                    // Exp above allowed only for a typed identifier declaration
+                   // Exp above allowed only for a typed identifier declaration
                 | "throw" Exp ";"                       [:strict:]
                 | "spawn" Stmt                          [:prec(90):]
                 | "acquire" Exp ";"                     [:strict:]
@@ -89,7 +89,23 @@ end module
 module SIMPLE-TYPED-DYNAMIC
   imports SIMPLE-TYPED-DYNAMIC-SYNTAX
 
-//@ \section{Values and results}
+//@ \section{Semantics}
+
+/*@ \subsection{Values and results}
+These are similar to those of untyped SIMPLE, except that the array
+references and the function abstrations now also hold their types.
+These types are needed in order to easily compute the type of any
+value inthe language (see the auxiliary \texttt{typeOf} operation at
+the end of this module).  Note that our more-generous-than-needed
+syntax here allows function abstractions to take a list of expressions
+as parameters; in fact, the semantics will be given in a way that
+those expressions can only be typed identifiers.  Recall that the
+purpose of syntax in a \K definition is not to parse programs in order
+to reject those not satisfying the expected syntactic/typing
+conventions (this is what a static semantics does---see the statically
+typed SIMPLE), but only to parse programs ``enough'' to give them
+semantics.  In other words, the \K syntax is the ``syntax of the
+semantics''.  */
 
   syntax Val ::= #Int | #Bool | #String
                | "array" "(" Type "," #Nat "," #Nat ")"
@@ -98,7 +114,14 @@ module SIMPLE-TYPED-DYNAMIC
   syntax Exp ::= Val
   syntax KResult ::= Val
 
-//@ \section{Configuration}
+/*@ \subsection{Configuration}
+The configuration is almost identical to that of untyped SIMPLE,
+except for a \textsf{return} cell inside the \textsf{control} cell.
+This \textsf{return} cell will hold, like in the static semantics of
+typed SIMPLE, the expected type of the value returned by the function
+being executed.  The contents of this cell will be set whenever a
+function is invoked and will be checked whenever the evaluation of the
+function body encounters an explicit \texttt{return} statement. */
 
   configuration <T color="red">
                   <threads color="orange">
@@ -124,9 +147,20 @@ module SIMPLE-TYPED-DYNAMIC
                 </T>
 
 
-//@ \section{Declarations and Initializations}
+//@ \subsection{Declarations and Initializations}
 
-//@ The ``undefined'' construct is now parameterized by the type.
+/*@ The ``undefined'' construct is now parameterized by a type.
+A main difference between untyped SIMPLE and dynamically typed SIMPLE
+is that the latter assigns a type to each of its locations and that
+type cannot be changed during the execution of the program.  We do not
+do any memory management in our semantic definitions here, so
+locations cannot be reclaimed, garbage collected and/or reused.  Each
+location corresponds precisely to an allocated variable or array
+element, whose type was explicitly or implicitly declared in the
+program and does not change.  It is therefore safe to type each
+location and then never allow that type to change.  The typed
+undefined values effectively assign both a type and an undefined value
+to a location. */
 
   syntax K ::= "undefined" "(" Type ")" [:latex("\bot_{#1}"):]
 
@@ -135,8 +169,10 @@ module SIMPLE-TYPED-DYNAMIC
        <store>... . => L |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
-/*@ Block if the type of an array declaration is not
-of the form \texttt{array of $T$}. */
+/*@ The dynamic semantics of typed array declarations is
+similar to that in untyped SIMPLE, but we have to enforce that the
+type of an array declaration be of the form \texttt{array of $T$}
+and assign the right type ($T$) to the allocated array locations. */
 
   rule <k> var X[N:#Nat] : array of T; => . ...</k> 
        <env> Env => Env[L/X] </env>
@@ -146,7 +182,10 @@ of the form \texttt{array of $T$}. */
 
   context var _[[HOLE]]:_ ;
 
-//@ Make sure all declared variables have the right types.
+/*@ The desugaring of multi-dimensional arrays into unidimensional
+ones is also similar to that in untyped SIMPLE, although we have to
+make sure that all the declared temporary variables have the right
+types. */
 
   syntax #Id ::= "$1" | "$2"
   rule var X[N1,N2,Vs] : array of array of T; =>
@@ -171,13 +210,14 @@ make sure that parameters are well typed when the function is invoked. */
        ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
-//@ When done with the first pass, call \texttt{main()}.
+/*@ \subsection{Calling \texttt{main()}}
+When done with the first pass, call \texttt{main()}. */
 
   syntax K ::= "execute"
   rule <k> execute => main(); </k> <env> Env </env> <genv> . => Env </genv>
 
 
-//@ \section{Expressions}
+//@ \subsection{Expressions and statements}
 
   rule <k> X => V:Val ...</k> <env>...X|->L...</env>
        <store>...L|->V...</store> [:transition:]
@@ -237,7 +277,11 @@ make sure that parameters are well typed when the function is invoked. */
   syntax Val ::= "nothing"
   rule return; => return nothing;   [: structural :]
 
-//@ \section{Statements}
+  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
+
+  context ([HOLE] => l-value([HOLE])) = _
+  rule <k> loc(L)=V => V ...</k> <store>... L |-> (K => V) ...</store>
+    if typeOf(V) ==Bool typeOf(K:K)   [:transition:]
 
   rule {} => . [:structural:]
   rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
@@ -247,8 +291,9 @@ make sure that parameters are well typed when the function is invoked. */
   rule if false then _ else S => S
   rule <k> while E:Exp do S
     => if E then {S while E do S} else {} ...</k> [:structural:]
-// decide if we want to only print integers and strings
-  rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out> [:transition:]
+//@ We only allow printing integers and strings
+  rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out>
+    if typeOf(V) ==Bool int orBool typeOf(V) ==Bool string    [:transition:]
   rule print(); => . [:structural:]
 
   syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
@@ -278,23 +323,19 @@ make sure that parameters are well typed when the function is invoked. */
 
 //@ \subsection{Auxiliary operations}
 
-// For parsing reasons, we prefer to allow l-value to take a K
+//@ \texttt{l-value}
   syntax Exp ::= "l-value" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
-// Local variable
   rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
-// Array element: evaluate the array and its index;
-// then the array lookup rule above applies.
   context l-value(_[[HOLE]])
   context l-value([HOLE][_])
-// Finally, return the address of the desired object member
   rule <k> l-value(lookup(L)) => loc(L) ...</k>
 
+//@ \texttt{lookup}
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store> [:transition:]
 
 //@ \texttt{bindto} also checks the well-formedness of the function parameters
-
   syntax K ::= "bindto" "(" Exps "," Vals ")"
   rule <k> bindto((X : T, XTs:Exps => XTs),(V,Vs:Vals => Vs)) ...</k>
        <env> Env => Env[L/X] </env>
@@ -303,16 +344,12 @@ make sure that parameters are well typed when the function is invoked. */
     if typeOf(V) ==Bool T
   rule <k> bindto(.Exps,.Vals) => . ...</k>
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
-
-  context ([HOLE] => l-value([HOLE])) = _
-  rule <k> loc(L)=V => V ...</k> <store>... L |-> (K => V) ...</store>
-    if typeOf(V) ==Bool typeOf(K:K)   [:transition:]
-
+//@ \texttt{env}
   syntax K ::= "env" "(" Map ")"
   rule <k> env(Env) => . ...</k> <env> _ => Env </env> [:structural:]
   rule (env(_) => .) ~> env(_) [:structural:]
 
+//@ \texttt{typeOf}
   syntax Type ::= "typeOf" "(" K ")"
   rule typeOf(I) => int       [:structural:]
   rule typeOf(B) => bool      [:structural:]
@@ -328,11 +365,10 @@ make sure that parameters are well typed when the function is invoked. */
   rule types() => .Types                   [:structural:]
   rule types(X : T, XTs) => T, types(XTs)  [:structural:]
 
-//@ \subsection{Sequences of locations}
+//@ Sequences of locations
 
   syntax List{K} ::= #Nat ".." #Nat
   rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
   rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
-
 
 end module
