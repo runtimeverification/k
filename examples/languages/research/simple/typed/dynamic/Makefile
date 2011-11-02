@@ -1,9 +1,9 @@
 
-# this is the name of the main maude module 
+# this is the name of the main maude module
 LANGUAGE_NAME = SIMPLE-TYPED-DYNAMIC
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = SIMPLE-TYPED-SYNTAX SIMPLE-TYPED-DYNAMIC-SEMANTICS SIMPLE-TYPED-DYNAMIC
+LANGUAGE_MODULES = SIMPLE-TYPED-DYNAMIC-SYNTAX SIMPLE-TYPED-DYNAMIC
 
 LATEX_STYLE = bb
 

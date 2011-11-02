@@ -223,8 +223,8 @@ semantics.  The auxiliary \texttt{types} operation, defined at the
 end of this module, will ensure that all the ``expressions'' in
 $\it XTs$ are actually nothing but typed identifiers.  */
 
-  rule <k> function X(XTs:Exps) : T S:Stmt => 
-           bindto (X, function from types(XTs) to T) ~> stmt ...</k>
+  rule <k> function F:#Id(XTs:Exps) : T S:Stmt => 
+           bindto (F, function from types(XTs) to T) ~> stmt ...</k>
        <pass> 1 </pass>
        (. => <task> <code> {var XTs; S} </code> <type> T </type> </task>)
 
@@ -252,7 +252,7 @@ and the \textsf{return} cell gets the expected return type. */
   rule <k> stmt => S </k> <pass> 2 </pass> <return> _ => T </return>
        (<task> <code> S </code> <type> T </type> </task> => .)
 
-/*@ \section{Expressions}
+/*@ \subsection{Expressions}
 Now that the entire machinery of the type system is operational, it is
 straightforward to type the various language constructs. */
 
@@ -310,7 +310,7 @@ type as the RHS, which thus becomes the type of the assignment. */
   rule T=T => T
 
 
-/*@ \section{Statements}
+/*@ \subsection{Statements}
 Statements are also straightforward to be given a typing policy now.
 Note that the type environment is recovered after each block (see the
 definition of \texttt{tenv} at the end of this module), that the value
@@ -338,7 +338,7 @@ exceptions can only have integer type. */
 
   rule stmt stmt => stmt
 
-//@ \section{Auxiliary operations}
+//@ \subsection{Auxiliary operations}
 
 /*@ The \texttt{l-type} operation below evaluates to the type of its
 argument, but only if that argument is an l-value, that is, a variable
