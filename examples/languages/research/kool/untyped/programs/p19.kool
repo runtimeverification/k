@@ -1,0 +1,32 @@
+class c {
+  method c() { return 0; }
+  method test() {
+    print(-1);
+    if this instanceOf c1 then print(1);
+    if this instanceOf c2 then print(2);
+    if this instanceOf c3 then print(3);
+    return 0;
+  }
+}
+class c1 extends c {
+  method c1() { return super.c(); }
+}
+class c2 extends c {
+  method c2() { return super.c(); }
+}
+class c3 extends c {
+  method c3() { return super.c(); }
+}
+class main {
+  method main() {
+    (new c()).test();
+    (new c1()).test();
+    (new c2()).test();
+    (new c3()).test();
+    return 0;
+  }
+}
+
+// -1 1 -1 2 -1 3
+
+
