@@ -224,23 +224,19 @@ runInternalKast config (ProgramSource pgm) = do
     tmpCanonicalFile <- canonicalizePath tmpFile
     T.hPutStr tmpHandle pgm
     hClose tmpHandle
-    let kastFile = tmpDir </> (takeBaseName tmpFile <.> ".kast")
     let kastArgs = defaultKastArgs config tmpCanonicalFile
-                ++ ["-o", kastFile]
     kastExecutable <- getKastExecutable
-    (ih, oh, eh, ph) <- runInteractiveProcess kastExecutable kastArgs Nothing Nothing
-    exitCode <- waitForProcess ph
-    exists <- doesFileExist kastFile
-    when (exitCode /= ExitSuccess || not exists) $ do
-        err <- hGetContents eh
-        die $ "Failed to run kast command:\n"
+    (exitCode, kastStdout, kastStderr) <- readProcessWithExitCode kastExecutable kastArgs ""
+    when (not (null kastStderr)) $ do
+        hPutStrLn stderr "Warning: kast reported errors or warnings:"
+        hPutStrLn stderr kastStderr
+    when (exitCode /= ExitSuccess) $ do
+        die $ "Fatal: kast returned a non-zero exit code: " ++ show exitCode
+           ++ "Attempted command:\n"
            ++ "kast " ++ intercalate " " kastArgs
-           ++ "\n\nError output from kast:\n"
-           ++ err
-    kast <- T.readFile kastFile
-    removeFile kastFile
+    let kast = Kast (T.pack kastStdout)
     removeFile tmpFile
-    return (Kast kast)
+    return kast
 
 getTmpDir :: IO FilePath
 getTmpDir = do
@@ -252,7 +248,7 @@ getTmpDir = do
 getKastExecutable :: IO FilePath
 getKastExecutable = do
     kbase <- getEnv "K_BASE"
-    return $ kbase </> "core" </> "kast"
+    return $ kbase </> "core" </> "kast_temp"
 
 trim :: String -> String
 trim = f . f
@@ -266,8 +262,10 @@ distDir = ".k"
 
 defaultKastArgs :: Config -> FilePath -> [String]
 defaultKastArgs config pgmFile =
-    [ "-pgm", pgmFile
-    , "-lang", lowercase mainMod
-    , "-smod", syntaxMod
-    ] where String mainMod = config ! "main-module"
+    [ "--k-definition", kDef
+    , "--main-module", mainMod
+    , "--syntax-module", syntaxMod
+    , pgmFile
+    ] where File kDef = config ! "k-definition"
+            String mainMod = config ! "main-module"
             String syntaxMod = config ! "syntax-module"

@@ -9,7 +9,7 @@ import Data.Char (toLower, toUpper)
 import Data.List (intercalate, partition, stripPrefix)
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.Maybe (catMaybes)
+import Data.Maybe (mapMaybe)
 import qualified Data.Object as Y
 import qualified Data.Object.Yaml as Y
 import Data.Typeable
@@ -98,7 +98,8 @@ generalSettings =
 
 commonKSettings :: [Setting]
 commonKSettings =
-    [ Setting "main-module" StringType "Name of the main module the program should execute in"
+    [ Setting "k-definition" FileType "Path to the K definition (see additional docs for what this means)"
+    , Setting "main-module" StringType "Name of the main module the program should execute in"
     , Setting "syntax-module" StringType "Name of the syntax module"
     , Setting "io" BoolType "Use real IO when running the definition"
     , Setting "statistics" BoolType "Print Maude's rewrite statistics"
@@ -113,49 +114,27 @@ advancedKSettings =
     , Setting "output-mode" StringType "How to display Maude results (options are none, raw, and pretty)"
     ]
 
--- | Configuration settings that can be initialized using 
--- the input program's extension.
-mkExtConfig :: Maybe String -> Config
-mkExtConfig Nothing = Map.empty
-mkExtConfig (Just ext') = let ext = map toUpper . dropWhile (== '.') $ ext' in 
-    Map.fromList $
-    [ ("main-module", String ext)
-    , ("syntax-module", String $ ext ++ "-SYNTAX")
-    ]
-
 mkInitConfig :: FilePath -> IO Config
 mkInitConfig dir = do
     maudeFiles <- getFilesWithExt ".maude" dir
-    let compiledFiles = catMaybes . map splitDef $ maudeFiles
+    let compiledFiles = mapMaybe (stripSuffix "-compiled.maude") maudeFiles
     case compiledFiles of
         [] -> return Map.empty
-        [(lang, def)] -> return $ Map.fromList
-            [ ("main-module", String $ map toUpper lang)
-            , ("syntax-module", String $ map toUpper lang ++ "-SYNTAX")
-            , ("compiled-def", File def)
-            ]
+        [kDef] -> return $ Map.fromList [ ("k-definition", File kDef) ]
         multiple -> multiDef multiple
-            
-    where splitDef f
-            = let f' = takeFileName f in
-              case stripPrefix (reverse "-compiled.maude") (reverse f') of
-                Nothing -> Nothing
-                Just x -> Just $ (reverse x, f)
 
+    where stripSuffix x ys = reverse <$> stripPrefix (reverse x) (reverse ys)
+          
           multiDef l = die $ "Multiple compiled definitions found.\n"
                            ++ "Please use only one of: "
                            ++ intercalate " " (map show l)
 
-
-resolveCompiledDef :: Config -> IO Config
-resolveCompiledDef config = do
-    if Map.member "compiled-def" config
-        then return config
-        else do
-            case Map.lookup "main-module" config of
-                Just (String mainMod) -> return $ Map.insert "compiled-def"
-                  (File $ map toLower mainMod ++ "-compiled.maude") config
-                _ -> return config
+resolvedConfig :: FilePath -> Config
+resolvedConfig kDef = Map.fromList
+    [ ("compiled-def", File $ kDef ++ "-compiled.maude")
+    , ("main-module", String $ map toUpper langName)
+    , ("syntax-module", String $ map toUpper langName ++ "-SYNTAX")
+    ] where langName = takeFileName kDef
 
 allSettings :: [Setting]
 allSettings = metadataSettings ++ generalSettings ++ commonKSettings ++ advancedKSettings
@@ -182,8 +161,9 @@ mkConfig mDeskFile groups argsConfig = do
         maybe (throwIO $ GroupNotFound groupMap g) return mgconf
     let configs = initConfig : defaultConfig : deskConfig : groupConfigs ++ [argsConfig]
     let config = foldr (flip Map.union) Map.empty configs
-    config' <- resolveCompiledDef config
-    return config'
+    File kDef <- getVal config "k-definition"
+    let rconfig = resolvedConfig kDef
+    return $ config `Map.union` rconfig
 
 {- Desk file handling -}
 
