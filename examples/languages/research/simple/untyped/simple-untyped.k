@@ -307,7 +307,7 @@ This way, we will only need to give semantics to uni-dimensional arrays.
 First, the context rule below is used to request the evaluation of array
 dimensions: */
 
-  context var X[[#]];
+  context var X[[HOLE]];
 
 /*@  Upon evaluating the array dimensions, the code generation rule below
 desugars multi-dimensional array declaration to uni-dimensional declarations.
@@ -319,16 +319,16 @@ inside the loop body with fewer dimensions.  The second variable,
 dimension: */
 
   syntax #Id ::= "$1" | "$2"
-  rule var X[N1,N2,Vl]; =>
+  rule var X[N1,N2,Vs]; =>
        var X[N1];
        {
          var $1 = X;
-         for $2 = 0 to _-_(N1,1) do   --- stupid parser
+         for $2 = 0 to _-_(N1,1) do   // stupid parser
          {
-           (var X[N2,Vl];)            --- stupid parser
+           (var X[N2,Vs];)            // stupid parser
            $1[$2] = X;
          }
-       }  [structural]
+       }  [:structural:]
 
 /*@ Ideally, one would like to perform syntactic desugarings like the one
 above before the actual semantics.  Unfortunately, that was not possible in
@@ -359,9 +359,9 @@ global variable before declaring a local function).  The type checker of
 SIMPLE, also defined in \K (see simple/typed/static),
 discards programs which do not respect this requirement. */
 
-  rule <k> function F:#Id(Xl:Ids) S:Stmt => . ...</k>
+  rule <k> function F:#Id(Xs:Ids) S:Stmt => . ...</k>
        <env> Env => Env[L/F] </env>
-       <store>... . => L|->lambda(Xl,S) ...</store>
+       <store>... . => L|->lambda(Xs,S) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
 /*@ When we are done with the first pass (pre-processing), the computation
@@ -410,7 +410,7 @@ The semantics of the auxiliary l-value operation is defined below.
 For now, all we need to know is that it takes an expression and evaluates
 to a location value, also introduced below with the auxiliary operations. */
 
-  context ++([#] => l-value([#]))
+  context ++([HOLE] => l-value([HOLE]))
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
 
@@ -448,7 +448,7 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 ``there is something there but we don't care what''.
 The semantics of the \texttt{lookup} operation is straightforward. */
 
-  rule V[N1,N2,Vl] => V[N1][N2,Vl] [:structural:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
   rule array(L,_)[N] => lookup(L +Int N) [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [:transition:]
@@ -488,7 +488,7 @@ returned by the nulary \texttt{return;} statements. */
 
   syntax Vals ::= List{Val,","}
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
-  rule <k> _`(_`)(lambda(Xl,S), Vl:Vals) ~> K:K => bindto(Xl,Vl) ~> S ~> return; </k>
+  rule <k> _`(_`)(lambda(Xs,S), Vs:Vals) ~> K:K => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
        <env> Env => GEnv </env>
        <genv> GEnv:Map </genv>
@@ -496,7 +496,7 @@ returned by the nulary \texttt{return;} statements. */
        <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
   syntax Val ::= "nothing"
-  rule return; => return nothing;   [: structural :]
+  rule return; => return nothing;   [:structural:]
 
 /*@ The \texttt{bindto} auxilliary construct binds a list of variables to a
 list of values.  Specifically, it allocates a fresh location for each variable,
@@ -504,7 +504,7 @@ binding the variable to that location in the environment and writing the value
 to that location in the store. */
 
   syntax K ::= "bindto" "(" Ids "," Vals ")"
-  rule <k> bindto((X,Xl:Ids => Xl),(V,Vl:Vals => Vl)) ...</k>
+  rule <k> bindto((X,Xs => Xs),(V,Vs:Vals => Vs)) ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
@@ -528,7 +528,7 @@ that appears in an assignment.  Like for the increment, all we need to know is
 that \texttt{l-value(...)} eventually evaluates to a location value
 \texttt{loc(...)}. */
 
-  context ([#] => l-value([#])) = _
+  context ([HOLE] => l-value([HOLE])) = _
   rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [:transition:]
 
 
@@ -649,7 +649,7 @@ The print statement was strict, so all its arguments are now evaluated
 arguments to the output buffer, and discard the residual
 \texttt{print} statement with an empty list of arguments. */
 
-  rule <k> print(V,Vl => Vl); ...</k> <out>... . => ListItem(V) </out> [:transition:]
+  rule <k> print(V,Vs => Vs); ...</k> <out>... . => ListItem(V) </out> [:transition:]
   rule print(); => . [:structural:]
 
 /*@ \subsection{Exceptions}
@@ -758,7 +758,7 @@ so other threads can acquire it if they need to. */
 
    rule <k> release V; => . ...</k> <holds>... V|->(N => _-Int_(N,1)) ...</holds>
      if N >Nat 0
-   --- used prefix notation for -Int because of parsing problems
+   // used prefix notation for -Int because of parsing problems
    rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
         <busy>... SetItem(V)=>. ...</busy>
 
@@ -810,8 +810,8 @@ corresponding store lookup operation. */
   rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
-  context l-value(_[[#]])
-  context l-value([#][_])
+  context l-value(_[[HOLE]])
+  context l-value([HOLE][_])
 // Finally, return the address of the desired object member
   rule <k> l-value(lookup(L)) => loc(L) ...</k>
 
