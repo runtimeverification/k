@@ -5,7 +5,7 @@ module AGENTS imports SEQ
       <agent multiplicity="*"> 
           <me>0</me>
           <parent>-1</parent>
-          <control> <k> .K </k> </control>
+          <control> <k color="green"> .K </k> </control>
       </agent> 
       @latex("\\kBR")
       <nextAgent>1</nextAgent>
@@ -51,8 +51,7 @@ module AGENTS imports SEQ
        (. => <message> <from>N</from> <to>W</to> <body>V</body> </message>)
   rule <message_><to>.Set</to><_/message> => . [structural]
   rule <agent_> <me>N1</me> <k>sendSynch V to N2 => skip<_/k> <_/agent> 
-      @latex("\\kBR")
-       <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent> [large]
+       <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent>
   rule <k>sendSynch V to N2 => skip<_/k>
        <agent_><me>N2</me> <k>receive => V<_/k> <_/agent>
   rule [start-waiting-at-barrier] : <me>N</me> <k>barrier<_/k>

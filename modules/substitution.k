@@ -16,7 +16,7 @@ module SUBSTITUTION
                [prec 0 latex "\sqbracket{\framebox{${#1}$}/{#2}}"]
                
   syntax #Id ::= id #Nat [latex "{\it id}_{\mbox{\scriptsize \ensuremath{#1}}}"] --- to generate fresh names
-  configuration <k> .K </k> <nextId> 0 </nextId>
+  configuration <k color="green"> .K </k> <nextId> 0 </nextId>
 
   rule <k> K'[K/Y] => endVisit(beta K'[K/Y]) <_/k> [structural]
 

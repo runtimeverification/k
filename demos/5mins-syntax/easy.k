@@ -63,7 +63,6 @@ module EASY
   syntax Val ::= #String
   syntax KResult ::= Val
   
-  
 //4.6
   rule
     <k> X:#Id => V ...</k>
@@ -72,9 +71,11 @@ module EASY
 //4.7 maybe revisit eveything and add strict and KResult
 
 //5.1
-   syntax Stmt ::= "function" #Id "(" Exp ")" "{" Stmt "}"
+   syntax Stmt ::= "function" #Id "(" Ids ")" "{" Stmt "}"
                  | "return" Exp ";" [strict]
-   syntax Exp ::= "call" #Id "(" Exp ")" [strict(2)]
+   syntax Exp ::= "call" #Id "(" Exps ")" [strict(2)]
+   syntax Ids ::= List{#Id,","}
+   syntax Exps ::= List{Exp,","}
 
 //5.2
 /*@5.3
@@ -87,7 +88,7 @@ module EASY
 
 /*@5.7
   rule 
-    <k> function X:#Id ( Xs:Exp ) { Body:Stmt } => . ...</k>
+    <k> function X:#Id ( Xs:Ids ) { Body:Stmt } => . ...</k>
     <functions>... . => BagItem(function X ( Xs ) { Body }) ...</functions>
 */
 
@@ -102,19 +103,24 @@ module EASY
 */
 
   syntax K ::= "frame" "(" K "," Map ")"
+  syntax Vals ::= List{Val,","}
 
   rule
-    <k> call X:#Id ( Vs:Val ) ~> K:K => bindTo(Xs,Vs) ~> Body </k>
+    <k> call X:#Id ( Vs:Vals ) ~> K:K => bindTo(Xs,Vs) ~> Body </k>
     <env> Env:Map => . </env>
-    <functions>... BagItem(function X ( Xs:Exp ) { Body:Stmt }) ...</functions>
+    <functions>... BagItem(function X ( Xs:Ids ) { Body:Stmt }) ...</functions>
     <fstack>... . => ListItem(frame(K,Env)) </fstack>
 
-  syntax K ::= "bindTo" "(" K "," K ")"
+  syntax K ::= "bindTo" "(" Ids "," Vals ")"
+
+  rule 
+    <k> bindTo((X:#Id,Xs:Ids => Xs),(V:Val,Vs:Vals => Vs)) ...</k>
+    <env>... . => X |-> V ...</env>
 
 //5.4
-  rule 
-    <k> bindTo(X:#Id,V:Val) => . ...</k>
-    <env>... . => X |-> V ...</env>
+  rule bindTo(,)
+    => .
+    
 
 //5.5
   rule 
@@ -127,7 +133,7 @@ module EASY
 
 //5.7
   rule 
-    <k> function X:#Id ( Xs:Exp ) { Body:Stmt } => . ...</k>
+    <k> function X:#Id ( Xs:Ids ) { Body:Stmt } => . ...</k>
     <functions>... . => BagItem(function X ( Xs ) { Body return "";}) ...</functions>
 
 //5.8
@@ -135,7 +141,7 @@ module EASY
     => .
 
 //6.1
-  syntax Stmt ::= "spawn" #Id "(" Exp ")" ; [strict(2)]
+  syntax Stmt ::= "spawn" #Id "(" Exps ")" ; [strict(2)]
   
 //6.2
 /*@8.3
@@ -150,8 +156,8 @@ module EASY
 */
 
   rule
-    <k> spawn X:#Id(V:Val); => . ...</k>
-    (. => <thread>... <k> call X(V); </k> ...</thread>)
+    <k> spawn X:#Id(Vs:Vals); => . ...</k>
+    (. => <thread>... <k> call X(Vs); </k> ...</thread>)
 
 //6.3
   rule <thread>... <k> .K </k> ...</thread> 
@@ -190,7 +196,6 @@ module EASY
 //8.1
   syntax Exp ::= "new" "BlockingQueue" "(" Exp ")" [strict]
              | "take" "(" Exp ")" [strict]
-//@8.4             | Exp "," Exp [strict]
   syntax Stmt ::= "put" "(" Exp "," Exp ")" ";" [strict]
 
 //8.2
@@ -199,7 +204,7 @@ module EASY
     <env>... . => X |-> V ...</k>
 
 //8.3
-/*@8.7
+/*@8.5
   configuration 
     <thread multiplicity="*">
       <k> $PGM:K </k>
@@ -224,13 +229,6 @@ module EASY
     (. => <queue>... <id> N </id> <free> Size </free> ...</queue>)
 
 //8.4
-  syntax Exp ::= Exp "," Exp [strict hybrid]
-  
-//8.5
-  rule bindTo((X:#Id,Xs:Exp),(V:Val,Rs:Exp))
-    => bindTo(X,V) ~> bindTo(Xs,Rs)  
-
-//8.6
   rule 
     <k> put(N:#Int, V:Val); => . ...</k>
     <id> N </id>
@@ -244,7 +242,7 @@ module EASY
     <data> ListItem(V:Val) => . ...</data>
     <free> Size:#Int => Size +Int 1 </free> [transition]
 
-//8.7
+//8.5
   configuration 
     <thread multiplicity="*">
       <k> $PGM:K </k>
