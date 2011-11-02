@@ -32,7 +32,7 @@ module AGENT
       <agent multiplicity="*"> 
           <control>
               <thread multiplicity="*">
-                  <k>$PGM:K</k>
+                  <k color="green">$PGM:K</k>
                   <nextId>0</nextId>
                   <holds>.Map</holds>
               </thread>
