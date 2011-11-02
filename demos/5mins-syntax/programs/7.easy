@@ -7,4 +7,3 @@ function factorial(x){
 }
 
 write(call factorial(5));
-
