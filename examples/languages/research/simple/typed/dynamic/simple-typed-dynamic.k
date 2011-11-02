@@ -94,6 +94,7 @@ module SIMPLE-TYPED-DYNAMIC
   syntax Val ::= #Int | #Bool | #String
                | "array" "(" Type "," #Nat "," #Nat ")"
                | "lambda" "(" Exps "," Stmt "," Type ")"
+                     [:latex("(\lambda{#1}\,.\,{#2}):{#3}"):]
   syntax Exp ::= Val
   syntax KResult ::= Val
 
@@ -139,11 +140,11 @@ of the form \texttt{array of $T$}. */
 
   rule <k> var X[N:#Nat] : array of T; => . ...</k> 
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(T, L +Nat 1, N)
+       <store>... . => L |-> array(array of T, L +Nat 1, N)
                        L +Nat 1 .. L +Nat N |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
-  context var X[[HOLE]];
+  context var _[[HOLE]]:_ ;
 
 //@ Make sure all declared variables have the right types.
 
@@ -165,7 +166,9 @@ make sure that parameters are well typed when the function is invoked. */
 
   rule <k> function F:#Id(XTs:Exps) : T S:Stmt => . ...</k>
        <env> Env => Env[L/F] </env>
-       <store>... . => L |-> lambda(XTs,S,T) ...</store>
+       <store>...
+         . => L |-> lambda(XTs, S, function from types(XTs) to T)
+       ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
 //@ When done with the first pass, call \texttt{main()}.
@@ -212,7 +215,9 @@ make sure that parameters are well typed when the function is invoked. */
 
   syntax Vals ::= List{Val,","}
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
-  rule <k> _`(_`)(lambda(XTs,S,T),Vs) ~> K => bindto(XTs,Vs) ~> S ~> return; </k>
+  rule <k> _`(_`)(lambda(XTs, S, function from _ to T), Vs) ~> K
+           => bindto(XTs,Vs) ~> S ~> return;
+       </k>
        <control>
          <fstack> . => (Env, K, <return> T' </return> C) ...</fstack>
          <return> T':Type => T </return>
@@ -248,12 +253,12 @@ make sure that parameters are well typed when the function is invoked. */
 
   syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
-  rule <k> (try S1 catch(X : T) S2 => S1 ~> popx) ~> K </k>
-       <control> <xstack> . => (X : T,S2,K,Env,C) ...</xstack> C:Bag </control>
+  rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
+       <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
-  rule <k> throw V; ~> _ => {var X : T = V; S2} ~> K </k>
-       <control> <xstack> (X : T,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
+  rule <k> throw V; ~> _ => {var X:int=V; S2} ~> K </k>
+       <control> <xstack> (X,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
        <env> _ => Env </env>
 
    rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
@@ -313,8 +318,15 @@ make sure that parameters are well typed when the function is invoked. */
   rule typeOf(B) => bool      [:structural:]
   rule typeOf(_:#String) => string  [:structural:]
 
+  rule typeOf(array(T,_,_)) => T  [:structural:]
+  rule typeOf(lambda(_,_,T)) => T  [:structural:]
+
   rule typeOf(undefined(T)) => T [:structural:]
   rule typeOf(nothing) => void  [:structural:]
+
+  syntax Types ::= "types" "(" Exps ")"    [:prec(1):]
+  rule types() => .Types                   [:structural:]
+  rule types(X : T, XTs) => T, types(XTs)  [:structural:]
 
 //@ \subsection{Sequences of locations}
 
