@@ -300,11 +300,11 @@ recovered after new, because new destroys them. */
        <env> Env => . </env>
        <control> C:Bag
          <crntObj> Obj => obj(object,L) </crntObj>
+         <fstack> . => (Env, K, C <crntObj> Obj </crntObj>) ...</fstack>
        </control>
        <nextLoc> L => L +Nat 1 </nextLoc>
        <store>... . => L |-> objEnv(<envStack> object::<env>.Map</env>
                                     </envStack>) ...</store>
-       <fstack> . => (Env, K, C <crntObj> Obj </crntObj>) ...</fstack>
 
 /*@ Create a new object (memory allocation)
 
@@ -435,6 +435,8 @@ class (static scoping). */
   syntax Val ::= "loc" "(" #Nat ")"
 
   rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
+//@ KOOL addiiton: Implicit member access
+  rule <k> l-value(X => _._(this,X)) <_/k> <env> Env </env> if notBool(X in keys(Env))
 
 
   context l-value(_[[HOLE]])

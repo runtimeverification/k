@@ -2,7 +2,7 @@ class main {
   var a;
   method main() {
     a = 1;
-    write(a);
+    print(a);
     return 0;
   }
 }
