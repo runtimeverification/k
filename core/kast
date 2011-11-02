@@ -251,7 +251,7 @@ set print mixfix off .
 red parse( $_ ) .
 q";
 
-my $tempFile = "programCompile.tmp";
+my $tempFile = File::Spec->catfile($dir, "programCompile.tmp");
 open MYFILE,">",$tempFile or die "Cannot create $tempFile\n";
 print MYFILE "load $k_prelude\nload .k\/$lang.maude\n$to_reduce\n";
 close(MYFILE);
@@ -265,7 +265,7 @@ print "Kasting program ...... " if $verbose;
 my $xml_ast = "ast.xml";
 
 # run maude with this input
-my $output = `maude -no-wrap programCompile.tmp -xml-log=$xml_ast`;
+my $output = `maude -no-wrap $tempFile -xml-log=$xml_ast`;
 
 # get ast
 my $ast = get_ast($xml_ast);
@@ -276,7 +276,7 @@ print "DONE [" . sprintf("%.3f", $elapsed) . "s]\n" if $verbose;
 $t0 = [gettimeofday];
 
 # clean
-unlink("programCompile.tmp") if !$verbose;
+unlink($tempFile) if !$verbose;
 unlink($xml_ast) if !$verbose;
 
 
