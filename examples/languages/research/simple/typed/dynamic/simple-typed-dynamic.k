@@ -66,7 +66,8 @@ the desired evaluation strategies of the various language constructs .  */
                 | "return" Exp ";"                      [:strict:]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [:strict:]
-                | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
+                | "try" Stmt "catch" "(" Exp ")" Stmt   [:prec(90):]
+                    // Exp above allowed only for a typed identifier declaration
                 | "throw" Exp ";"                       [:strict:]
                 | "spawn" Stmt                          [:prec(90):]
                 | "acquire" Exp ";"                     [:strict:]
@@ -105,7 +106,7 @@ module SIMPLE-TYPED-DYNAMIC
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
-                        <return color="LimeGreen"> none </return>
+                        <return color="LimeGreen"> .K </return>
                           // holds return type
                        </control>
                       <env color="violet"> .Map </env>
@@ -147,13 +148,13 @@ of the form \texttt{array of $T$}. */
 //@ Make sure all declared variables have the right types.
 
   syntax #Id ::= "$1" | "$2"
-  rule var X[N1,N2,Vl] : array of array of T; =>
+  rule var X[N1,N2,Vs] : array of array of T; =>
        var X[N1] : array of array of T;
        {
          var $1 : array of array of T = X;
          for $2 = 0 to _-_(N1,1) do       // stupid parser
          {
-           (var X[N2,Vl] : array of T;)   // stupid parser
+           (var X[N2,Vs] : array of T;)   // stupid parser
            $1[$2] = X;
          }
        }  [:structural:]
@@ -202,7 +203,7 @@ make sure that parameters are well typed when the function is invoked. */
 
 //@ Check array bounds, as part of the dynamic typing policy.
 
-  rule V[N1,N2,Vl] => V[N1][N2,Vl] [:structural:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
   rule array(_,L,M:#Nat)[N] => lookup(L +Int N)
     if N >=Nat 0 andBool N <Nat M   [:structural:]
   rule sizeOf(array(_,_,N)) => N
@@ -226,7 +227,7 @@ make sure that parameters are well typed when the function is invoked. */
          (<return> T </return> _ => C)
        </control>
        <env> _ => Env </env>
-    if typeOf(V) ==Bool Tp
+    if typeOf(V) ==Bool T
 
   syntax Val ::= "nothing"
   rule return; => return nothing;   [: structural :]
@@ -242,10 +243,10 @@ make sure that parameters are well typed when the function is invoked. */
   rule <k> while E:Exp do S
     => if E then {S while E do S} else {} ...</k> [:structural:]
 // decide if we want to only print integers and strings
-  rule <k> print(V,Vl=>Vl);...</k> <out>... .=>ListItem(V)</out> [:transition:]
+  rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out> [:transition:]
   rule print(); => . [:structural:]
 
-  syntax ListItem ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
+  syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
   rule <k> (try S1 catch(X : T) S2 => S1 ~> popx) ~> K </k>
        <control> <xstack> . => (X : T,S2,K,Env,C) ...</xstack> C:Bag </control>
@@ -307,8 +308,13 @@ make sure that parameters are well typed when the function is invoked. */
   rule <k> env(Env) => . ...</k> <env> _ => Env </env> [:structural:]
   rule (env(_) => .) ~> env(_) [:structural:]
 
+  syntax Type ::= "typeOf" "(" K ")"
+  rule typeOf(I) => int       [:structural:]
+  rule typeOf(B) => bool      [:structural:]
+  rule typeOf(_:#String) => string  [:structural:]
 
-
+  rule typeOf(undefined(T)) => T [:structural:]
+  rule typeOf(nothing) => void  [:structural:]
 
 //@ \subsection{Sequences of locations}
 
