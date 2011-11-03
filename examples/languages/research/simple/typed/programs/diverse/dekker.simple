@@ -1,8 +1,11 @@
 // This is Dekker's algorithm for mutual exclusion.
 // This program is not meant to be executed, it is meant to be model checked.
 
-var flag1:int = 0, flag2:int = 0, turn:int = 1,
-    critical1:int = 0, critical2:int = 0;
+// Unlike in the untyped SIMPLE, we cannot initialize variables anymore
+// when we declare them, so all initializations of the variables below
+// are deferred to the main() function.
+
+var flag1:int, flag2:int, turn:int, critical1:int, critical2:int;
 
 function dekker1():void {
   flag1 = 1; turn = 2;
@@ -27,6 +30,9 @@ function dekker2():void {
 }
 
 function main():void {
+  flag1 = flag2 = critical1 = critical2 = 0;
+  turn = 1;
+
   spawn while(true) do { dekker1(); }
   spawn while(true) do { dekker2(); }
 }

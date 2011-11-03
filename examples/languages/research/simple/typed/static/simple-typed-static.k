@@ -116,27 +116,33 @@ Here we give the type system of SIMPLE using \K.  Like concrete semantics,
 type systems defined in \K are also executable.  However, \K type systems
 turn into type checkers instead of interpreters when executed.
 
-The typing process is done in two passes.  In the first pass the global
-environment is built, which contains type bindings for all the globally
-declared variables and functions.  For functions, the declared types will
-be ``trusted'' during the first pass and simply bound to their corresponding
-function names and placed in the global type environment.  At the same
-time, type-checking tasks that the function bodies indeed respect their
-claimed types are generated.  All these tasks are verified during the second
-pass.  This way, all the global variable and function declarations are
-available in the type environment and can be used in order to type-check each
-function code.  This is consistent with the semantics of untyped SIMPLE,
-where functions can access all the global variables and can call any other
-functions declared in the same program. */
+The typing process is done in two (overlapping) phases.  In the first phase
+the global environment is built, which contains type bindings for all the
+globally declared variables and functions.  For functions, the declared types
+will be ``trusted'' during the first phase and simply bound to their
+corresponding function names and placed in the global type environment.
+At the same time, type-checking tasks that the function bodies indeed respect
+their claimed types are generated.  All these tasks are (concurrently) verified
+during the second phase.  This way, all the global variable and function
+declarations are available in the global type environment and can be used in
+order to type-check each function code.  This is consistent with the semantics
+of untyped SIMPLE, where functions can access all the global variables and can
+call any other functions declared in the same program.  The two phases may
+overlap because of the \K concurrent semantics.  For example, a function task
+can be started while the first phase is still running; moreover, it may even
+complete before the first phase does, namely when all the global variables and
+functions that it needs have already been processed and made available in the
+global environment by the first phase task. */
 
 /*@ \subsection{Extended syntax and results}
 The idea is to start with a configuration holding the program to type in
 one of its cells, then apply rewrite rules on it mixing types and language
 syntax, and eventually obtain a type instead of the original program.  In other
 words, the program ``evaluates'' to its type using the \K rules giving the
-type system of the language.  If this rewriting process gets stuck, then we say
-that the program is not well-typed.  Otherwise the program is well-typed
-(by definition). 
+type system of the language.  In doing so, additional typing tasks for function
+bodies are generated and solved the same way.  If this rewriting process gets
+stuck, then we say that the program is not well-typed.  Otherwise the program
+is well-typed (by definition).
 
 We start by allowing types to be used inside expressions and statements in
 our language.  This way, types can be used together with language syntax in
@@ -150,20 +156,18 @@ results. */
   syntax KResult ::= Type
 
 /*@ \subsection{Configuration}
-The configuration of our type system includes the following cells:
+The configuration of our type system consists of \textsf{task} cells and
+a global type environment.  Each task includes a \textsf{k} cell holding
+the code to type and two optional cells:
 \begin{itemize}
-\item \textsf{k} and \textsf{tenv} cells holding the current fragment of
-program and type environment.  The \textsf{k} cell is initialized with the
-program being passed to \texttt{krun} and the type environment is initially
-empty.
-\item A \textsf{return} cell that holds the return type of the currently 
+\item A \textsf{tenv} cell holding the local type environment.
+\item A \textsf{return} cell holding the return type of the currently 
 checked function.  This is needed in order to check whether return statements
 return values of the expected type.
-\item The \textsf{tasks} cell holds all the type-checking tasks that are being
-generated during the first pass.  Each task holds the code to be verified (the
-function body) together with the expected return type.
-\item The \textsf{pass} cell holds the current pass, which is initially 1.
-\end{itemize} */
+\end{itemize}
+The original program is put in a task containing no return or type environment
+cells (not that the multiplicity of these cells is ``?'', which means that they
+are not automatically included in the initial configuration. */
 
   configuration <T color="red">
                   <task multiplicity="*" color="yellow">
@@ -188,7 +192,9 @@ declarations, including ones where the declared variables are initialized,
 to only these three cases.  The first case is trivial and the second and third
 make use of a \texttt{bindto} helper operation, which takes a variable and a
 type and performs the actual binding in the current type environment cell when
-it reaches the top of the computation.  The third case requires an additional
+it reaches the top of the computation.  Note that \texttt{bindto} applies the
+binding to the local type environment when that exists; otherwise it applies it
+to the global type environment.  The third case requires an additional
 check, namely that the depth of the declared dimension type is smaller than or
 equal to the depth of the declared type (it can be strictly smaller, e.g.,
 when we want the declared array to hold array references).
@@ -203,17 +209,17 @@ The auxiliary operations (e.g., \texttt{checkDepth} and
   rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> bindto(X,T)
 
 /*@ \subsection{Function declarations}
-Functions are allowed to be declared only at the top level.  The 1 in
-the \textsf{pass} cell guarantees that in the rule below, because, as
-seen below, the pass will be changed into 2 once and for all once all
-the top level variable and function declarations are processed.
+Functions are allowed to be declared only at the top level, indicated in
+the rule below by the fact that the \textsf{task} cell holds only a
+\textsf{k} cell.  Indeed, as the rule below shows, generated function body
+tasks also contain \textsf{tenv} and \textsf{return} cells.
 Each function declaration adds a binding of its name to its declared
-function type in the current (global) type environment, but also adds
-a task into the \textsf{tasks} cell.  The task consists of a block
-declaring all the function parameters followed by the function body,
-together with the expected return type of the function.  The code of
-the task makes use of other language constructs (block, variable
-declarations, and sequential composition), so it is not very modular,
+function type in the current (in this case the global) type environment,
+but also adds a task into the \textsf{tasks} cell.  The task consists of
+a typing a the statement declaring all the function parameters followed
+by the function body, together with the expected return type of the function.
+The code of the task makes use of other language constructs (variable
+declaration and sequential composition), so it is not very modular,
 but it is more compact and easier to understand than a more direct
 semantics.  The auxiliary \texttt{types} operation, defined at the
 end of this module, will ensure that all the ``expressions'' in
@@ -229,31 +235,16 @@ $\it XTs$ are actually nothing but typed identifiers.  */
                <return> T </return>
              </task>)
 
-  rule <task>... <k> stmt </k> ...</task> => .
+/*@ Once a task is completed, indicated by the fact that its
+\textsf{k} cell holds only the type \texttt{stmt}, we can dissolve its
+corresponding cell.  Since the task may be the original one and since
+we want to enforce that programs include a main function, we also
+perform a check for \textsf{main} in the global type environment.
+This way, there should be no task cell left in the configuration when
+the program correctly type checks. */
 
-/*@ \subsection{Switching to second pass}
-Once all the global variables and function declarations are processed,
-indicated by the fact that the \textsf{k} cell contains only the type
-\texttt{stmt} (the typing policy of sequential composition given below
-will ensure that we get that when each variable and function
-declaration types to \texttt{stmt}), we can move to the second pass.
-Moreover, we do so only if a function called \texttt{main} exists in
-the type environment, which means that such a function has been
-declared.  Recall that the semantics of untyped SIMPLE was to call its
-\texttt{main} function, so a program without such a function gets
-stuck. */
-
----  rule <k> stmt </k> <tenv>... main |-> function from _ to _ ...</tenv>
----       <pass> 1 => 2 </pass>
-
-/*@ \subsection{Picking new task}
-When the \textsf{k} cell is available during the second pass, we can
-pick a new task from the set of tasks and schedule it for typing.
-That effectively means that the \textsf{k} cell gets the code to type
-and the \textsf{return} cell gets the expected return type. */
-
----  rule <k> stmt => S </k> <pass> 2 </pass> <return> _ => T </return>
----       (<task> <code> S </code> <type> T </type> </task> => .)
+  rule (<task>... <k> stmt </k> ...</task> => .)
+       <gtenv>... main |-> function from _ to _ ...</gtenv>
 
 /*@ \subsection{Expressions}
 Now that the entire machinery of the type system is operational, it is
@@ -269,6 +260,11 @@ implementation, so we restrict their application to the top of the
   rule <k> I:#Int => int ...</k>
   rule <k> B:#Bool => bool ...</k>
   rule <k> Str:#String => string ...</k>
+
+/*@ The are two cases to distinguish for variable lookup: if the
+variable is bound in the local type environment, then look its type up
+there; otherwise, look its type up in the global environment. */
+
   rule <k> X => T ...</k> <tenv>... X |-> T ...</tenv>
   rule <k> X => T ...</k> <gtenv>... X |-> T ...</gtenv> <tenv> Rho </tenv>
     if notBool(X in keys(Rho))
@@ -355,7 +351,11 @@ or an array element. */
   rule l-type(T) => T        [:structural:]
 
 /*@ The two operations below are standard, we use them in many \K
-definitions. */
+definitions.  Note, however, that \texttt{bindto} evaluates to
+\texttt{stmt} and, moreover, that it fist attempts to do the binding
+locally; if a local environment is not available, meaning that one
+attempts to bind a top-level variable or function name, then does the
+binding in the global type environment. */
 
   syntax K ::= "bindto" "(" #Id "," Type ")"
              | "tenv" "(" Map ")"

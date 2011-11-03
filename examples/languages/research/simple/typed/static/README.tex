@@ -49,7 +49,7 @@ nonexistent values, for example for the result of a function meant to return
 no value (but only be used for its side effects, like a procedure).
 \item The syntax of untyped SIMPLE is extended to allow type declarations for
 all the variables.  This is done in a Pascal-style, following the declared
-variable with a column followed by the type.  For example,
+variable with a colon followed by the type.  For example,
 ``\texttt{var x:int;}'' or ``\texttt{var x:int=7, y:int, z:int=x+y;}''.
 \item Arrays of values of type $T$ have the type \texttt{array of $T$} and
 are declared using a syntax similar to the one for simple variables, but
@@ -74,10 +74,17 @@ function f(x : array of function from int to int) : array of bool {
 \end{verbatim}
 and has the type
 \texttt{function from array of function from int to int to bool}.
-\item We allow any variable declarations and instantiations for them at the
-top level.  Functions can only be declared at the top level.  Each function
-can only access the other functions and variables declared at the top level,
-or its own locally declared variables.  SIMPLE has static scoping.
+\item We allow any variable declarations at the top level.  Functions can
+only be declared at the top level.  No other statements are allowed at the
+top level.  In particular we don'l allow declared variables to be initialized.
+That is because our semantics of initialized variables is to first declare
+them and then initialize them using an assignment statement; however,
+assignments are not allowed at the top level in typed SIMPLE.  If you want
+to allow initialization for declared variables at the top level, then you
+have to do it explicitly in the semantics.  For simplicity we don't.
+Each function can only access the other functions and variables declared
+at the top level, or its own locally declared variables.
+SIMPLE has static scoping.
 \item The various expression and statement constructs take only elements of
 the expected types.
 \item Increment and assignment can operate both on variables and on array
@@ -94,7 +101,7 @@ To allow more flexibility to the programmers, we allow functions to use
 ``\texttt{return;}'' statements to terminate without returning an actual
 value, or to not explicitly use any return statement, regardless of their
 declared return type.  This flexibility can be handy when writing programs
-using certain functions only for their side effect.
+using certain functions only for their side effects.
 \item For simplicity, we here limit exceptions to only throw integer values.
 This way, we don't need to declare a type for the variable that binds the
 thrown value (similarly to the counter variables in \texttt{for} loops).
