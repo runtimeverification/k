@@ -166,16 +166,12 @@ function body) together with the expected return type.
 \end{itemize} */
 
   configuration <T color="red">
-                   <k color="green"> $PGM:Stmts </k>
-                   <tenv color="cyan"> .Map </tenv>
-                   <return> .K </return>
-                   <tasks color="blue">
-                     <task multiplicity="*" color="yellow">
-                       <code color="green"> .K </code>
-                       <type> .K </type>
-                     </task>
-                   </tasks>
-                   <pass color="black"> 1 </pass>
+                  <task multiplicity="*" color="yellow">
+                    <k color="green"> $PGM:Stmts </k>
+                    <tenv multiplicity="?" color="cyan"> .Map </tenv>
+                    <return multiplicity="?"> .K </return>
+                  </task>
+                  <gtenv color="blue"> .Map </gtenv>
                 </T>
 
 /*@ \subsection{Variable declarations}
@@ -202,9 +198,9 @@ The auxiliary operations (e.g., \texttt{checkDepth} and
   syntax Type ::= "stmt"
 
   rule var; => stmt   [: structural:]
-  rule var X:#Id : T:Type; => bindto(X,T) ~> stmt
+  rule var X:#Id : T:Type; => bindto(X,T)
   context var _[[HOLE]] : _;
-  rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> bindto(X,T) ~> stmt
+  rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> bindto(X,T)
 
 /*@ \subsection{Function declarations}
 Functions are allowed to be declared only at the top level.  The 1 in
@@ -223,10 +219,17 @@ semantics.  The auxiliary \texttt{types} operation, defined at the
 end of this module, will ensure that all the ``expressions'' in
 $\it XTs$ are actually nothing but typed identifiers.  */
 
-  rule <k> function F:#Id(XTs:Exps) : T S:Stmt => 
-           bindto (F, function from types(XTs) to T) ~> stmt ...</k>
-       <pass> 1 </pass>
-       (. => <task> <code> {var XTs; S} </code> <type> T </type> </task>)
+  rule <task>
+         <k> function F:#Id(XTs:Exps) : T S:Stmt =>
+             bindto (F, function from types(XTs) to T) ...</k>
+       </task>
+       (. => <task>
+               <k> var XTs; S </k>
+               <tenv> . </tenv>
+               <return> T </return>
+             </task>)
+
+  rule <task>... <k> stmt </k> ...</task> => .
 
 /*@ \subsection{Switching to second pass}
 Once all the global variables and function declarations are processed,
@@ -240,8 +243,8 @@ declared.  Recall that the semantics of untyped SIMPLE was to call its
 \texttt{main} function, so a program without such a function gets
 stuck. */
 
-  rule <k> stmt </k> <tenv>... main |-> function from _ to _ ...</tenv>
-       <pass> 1 => 2 </pass>
+---  rule <k> stmt </k> <tenv>... main |-> function from _ to _ ...</tenv>
+---       <pass> 1 => 2 </pass>
 
 /*@ \subsection{Picking new task}
 When the \textsf{k} cell is available during the second pass, we can
@@ -249,8 +252,8 @@ pick a new task from the set of tasks and schedule it for typing.
 That effectively means that the \textsf{k} cell gets the code to type
 and the \textsf{return} cell gets the expected return type. */
 
-  rule <k> stmt => S </k> <pass> 2 </pass> <return> _ => T </return>
-       (<task> <code> S </code> <type> T </type> </task> => .)
+---  rule <k> stmt => S </k> <pass> 2 </pass> <return> _ => T </return>
+---       (<task> <code> S </code> <type> T </type> </task> => .)
 
 /*@ \subsection{Expressions}
 Now that the entire machinery of the type system is operational, it is
@@ -267,6 +270,8 @@ implementation, so we restrict their application to the top of the
   rule <k> B:#Bool => bool ...</k>
   rule <k> Str:#String => string ...</k>
   rule <k> X => T ...</k> <tenv>... X |-> T ...</tenv>
+  rule <k> X => T ...</k> <gtenv>... X |-> T ...</gtenv> <tenv> Rho </tenv>
+    if notBool(X in keys(Rho))
 
 /*@ We want the increment operation to apply to any l-value, including
 array elements, not only to variables.  For that reason, we define the
@@ -354,8 +359,11 @@ definitions. */
 
   syntax K ::= "bindto" "(" #Id "," Type ")"
              | "tenv" "(" Map ")"
-  rule <k> bindto(X,T) => . ...</k>
+  rule <k> bindto(X,T) => stmt ...</k>
        <tenv> Rho:Map => Rho[T / X] </tenv>           [:structural:]
+  rule <task> <k> bindto(X,T) => stmt ...</k> </task>
+       <gtenv> Rho:Map => Rho[T / X] </gtenv>         [:structural:]
+
   rule <k> stmt ~> (tenv(Rho) => .) ... </k>
        <tenv> _ => Rho </tenv>                        [:structural:]
 
