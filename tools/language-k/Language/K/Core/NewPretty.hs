@@ -65,6 +65,9 @@ ppBagItem (BagItem k) = text "BagItem" <> parens (ppK k)
 ppBagItem (CellItem label content) =
     hang 2 (ppStartTag label <$> (ppCellContent content)) <$> ppEndTag label
 
+ppKSet (KSet []) = char '.'
+ppKSet (KSet ks) = vsep $ map ppK ks
+
 ppKList (KList []) = char '.'
 ppKList (KList ls) = vsep $ map ppListItem ls
 
@@ -86,6 +89,8 @@ ppCellContent (KContent k) = ppK k
 ppCellContent (BagContent bag) = ppKBag bag
 ppCellContent (ListContent list) = ppKList list
 ppCellContent (MapContent map) = ppKMap map
+ppCellContent (SetContent set) = ppKSet set
+
 
 ppStartTag label = green $ char '<' <> text label <> char '>'
 ppEndTag label = green $ text "</" <> text label <> char '>'
