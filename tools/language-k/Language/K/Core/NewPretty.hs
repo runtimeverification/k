@@ -73,11 +73,15 @@ ppKList (KList ls) = vsep $ map ppListItem ls
 
 ppListItem (ListItem k) = text "ListItem" <> parens (ppK k)
 ppListItem (Buffer k) = ppK k
+ppListItem (IStream _) = empty
+ppListItem (OStream _) = empty
+{-
 ppListItem (IStream 0) = angles $ text "stdin"
 ppListItem (IStream i) = angles $ text "istream: " <> integer i
 ppListItem (OStream 1) = angles $ text "stdout"
 ppListItem (OStream 2) = angles $ text "stderr"
 ppListItem (OStream i) = angles $ text "ostream: " <> integer i
+-}
 
 ppKMap (KMap m)
     | m == Map.empty = char '.'
