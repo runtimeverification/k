@@ -138,6 +138,8 @@ module URIS
   rule #convertToken("#Float",S:#String) => ListItem(String2Float(S))
   rule #convertToken("#String",S:#String) => ListItem(S)
 
+  rule String2Int("00") => 0
+
   
  /*   C++ -like parsing for ints.
   rule parse("#Int",I:#Int => 10 *Int I +Int String2Int(C)) ListItem(C:#Char)
