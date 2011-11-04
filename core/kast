@@ -424,7 +424,7 @@ OPTIONS:
                              Default: uppercase(`basename <k-definition> .k`)
   
     --syntax-module=STRING   Syntax module in the K definition. 
-                             Default: <main-module>-SYNTAX.\n";
+                             Default: <main-module>-SYNTAX\n";
 
 exit;
 }
