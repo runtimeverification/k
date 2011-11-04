@@ -416,16 +416,15 @@ The K definition is assumed to have been kompiled prior to calling kast
 (see kompile for instructions on how to kompile K definitions).
   
 OPTIONS:
-  --k-definition <def>     : specifies the K definition
-                               The `.k` extension is optional. 
-                               The default value of <def> is <pgm> extension
-  --main-module <module>   : specifies the main module name
-                               The default value is <DEF> (capitalized K 
-			          definition name)
-  --syntax-module <module> : specifies the syntax module name
-                               The default value is <DEF>-SYNTAX.
-                               If --main-module is used then <module> 
-                               is <main-module>-SYNTAX\n";
+  --k-definition <def>     : path to main .k file of the K definition
+                               `.k` extension is optional. 
+                               
+  --main-module <module>   : main module name in <k-definition>
+                               default value is <K-DEFINITION>, that is, the  
+			       up-cased K definition name (without the .k extension)
+  --syntax-module <module> : syntax module name
+                               default value is <K-DEFINITION>-SYNTAX\n";
+
 exit;
 }
 
