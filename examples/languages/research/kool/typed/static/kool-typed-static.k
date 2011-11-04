@@ -92,37 +92,35 @@ module KOOL-TYPED-STATIC
   syntax KResult ::= Type
   
   configuration <T color="red">
-                  <task multiplicity="*" color="yellow">
-                    <k color="green"> $PGM:Stmts </k>
-                    <tenv color="cyan" multiplicity="?"> .Map </tenv>
-                    <return multiplicity="?"> .K </return>
-                    <pass> globalPass </pass>
-                    <crntClass multiplicity="?"> .K </crntClass>
-                  </task>
-                  <class multiplicity="+"> 
+                  <classes> $PGM:Stmts </classes>
+                   <class multiplicity="+"> 
                     <className> object </className>
                     <extends multiplicity="?"> object </extends>
                     <ctenv multiplicity="?"> .Map </ctenv>
-                  </class>
+                    <task multiplicity="*" color="yellow">
+                      <k color="green"> .K </k>
+                      <tenv color="cyan"> .Map </tenv>
+                      <return multiplicity="?"> .K </return>
+                      <pass> classPass </pass>
+                    </task>
+                 </class>
                 </T>
 
-  syntax Pass ::= globalPass | classPass | methodPass 
+  syntax Pass ::= classPass | methodPass 
   syntax K ::= Pass
 
   syntax Type ::= "stmt"
 
-  rule <k> class C:#Id extends C':#Id { Ss:Stmts } => . ...</k> 
-       <pass> globalPass </pass>
+  rule <classes> class C:#Id extends C':#Id { Ss:Stmts } => . ...</classes> 
        (. => <class>... <className> C </className> <extends> C' </extends> 
-             ...</class>)
-       (. => <task>... 
+            <task> 
                 <k>  Ss:Stmts </k>
                 <pass> classPass </pass>
-                <crntClass> C </crntClass>
                 <tenv> .Map </tenv>
-             ...</task>)
+             </task>
+       ...</class>)
 
-  rule <task>... <k> .K </k> <pass> globalPass </pass> ...</task>  => .
+  rule <classes> .K </classes>  => .
 
   rule var X:#Id : T:Type ; => bindto(X,T)
   context var _[[HOLE]] : _;
@@ -130,22 +128,20 @@ module KOOL-TYPED-STATIC
 
   rule <k> method M:#Id(XTs:Exps) : T S:Stmt =>
            bindto(M, function from types(XTs) to T) ...</k>
-       <crntClass> C </crntClass>
+       <pass> classPass </pass>
        (. => <task>
                <k> (var XTs;) S </k>
                <tenv> . </tenv>
                <return> T </return>
-               <crntClass> C </crntClass>
                <pass> methodPass </pass>
              </task>)
 
   rule (<task>... <k> .K </k> <tenv> Rho:Map </tenv> 
-                 <crntClass> C </crntClass> <pass> classPass </pass>
+                 <pass> classPass </pass>
        ...</task> => .)
-       <class>... <className> C </className> 
-                  (. => <ctenv> Rho </ctenv>)
-       ...</class>
+       (. => <ctenv> Rho </ctenv>)
 
+ 
   rule <k> I:#Int => int ...</k>
   rule <k> B:#Bool => bool ...</k>
   rule <k> Str:#String => string ...</k>
@@ -189,24 +185,35 @@ called with arguments of the given type. */
 
 //@ ``this'' types to the current class
   rule <k> this => class C ...</k>
-       <crntClass> C </crntClass>
+       <className> C </className>
 
 /*@ ``super'' types to the parent class.
  Note that for typing concerns super can be considered as an object */
-   rule <k> super => class C' ...</k> <crntClass> C </crntClass>
+   rule <k> super => class C' ...</k> 
        <className> C </className> <extends> C' </extends>
       
 /*@\subsection{Object member access}
 
 Case 1: member declared in current class: */
-  rule <k> _._(class C,X) => T <_/k>
-      <className> C </className> <ctenv_> X |-> T <_/ctenv>
+  rule <k> _._(class C,X) => T ...</k>
+        <className> C </className> <ctenv_> X |-> T ...</ctenv>
+ 
+  rule <k> _._(class C,X) => T ...</k>
+      <class>...
+        <className> C </className> <ctenv_> X |-> T ...</ctenv>
+      ...</class>
  
 /*@ Case 2: member not declared in current class; check parent class.
 This currently assumes there are no cycles in the class hierarchy. */
-  rule <k> _._(class (C1 => C2),X) <_/k>
-      <className> C1:#Id </className> <extends> C2:#Id </extends> 
-      <ctenv> Rho </ctenv>
+  rule <k> _._(class (C1 => C2),X) ...</k>
+       <className> C1:#Id </className> <extends> C2:#Id </extends> 
+       <ctenv> Rho </ctenv>
+      if notBool(X in keys(Rho)) [structural]
+  rule <k> _._(class (C1 => C2),X) ...</k>
+      <class>...
+         <className> C1:#Id </className> <extends> C2:#Id </extends> 
+         <ctenv> Rho </ctenv>
+      ...</class>
       if notBool(X in keys(Rho)) [structural]
 
 /*\subsection{``instanceOf'' and ``cast''}
@@ -238,6 +245,15 @@ we here trust the user. */
   rule stmt stmt => stmt
 
 
+//@\subsection{Clean-Up and Auxiliary Operations}
+  rule <task>... <k> stmt </k> <pass> methodPass </pass> ...</task> => .
+
+  rule <class> 
+         <className> C1 </className> <extends> C2 </extends> 
+         <ctenv> _:Map </ctenv>
+       </class> => .
+
+
   syntax Exp ::= Type "when" Exp  [:strict(2):]
   rule T when true => T
 
@@ -248,7 +264,12 @@ we here trust the user. */
   rule subtype(T,T) => true
   rule <k> subtype(class C1, class C)
         => subtype(class C2, class C) ...</k>
-       <className> C1 </className> <extends> C2 </extends>
+      <class>...
+          <className> C1 </className> <extends> C2 </extends>
+      ...</class>
+  rule <k> subtype(class C1, class C)
+        => subtype(class C2, class C) ...</k>
+          <className> C1 </className> <extends> C2 </extends>
   
 
 /*
@@ -306,7 +327,9 @@ we here trust the user. */
   rule existsType(bool) => true
   rule existsType(string) => true
   rule existsType(void) => true
-  rule <k> existsType(class C) => true ...</k> <className> C </className>
-
+  rule <k> existsType(class C) => true ...</k> 
+      <class>... <className> C </className> ...</class>
+  rule <k> existsType(class C) => true ...</k> 
+       <className> C </className> 
 
 end module
