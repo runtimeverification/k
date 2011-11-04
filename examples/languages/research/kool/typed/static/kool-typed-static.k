@@ -12,7 +12,7 @@ module KOOL-TYPED-STATIC-SYNTAX
                 | "function" "from" Types "to" Type
                     [:prec(1) latex "{#1}\rightarrow{#2}":]
 //@ KOOL addition: types for objects
-  syntax Type ::= "class" #Id
+  syntax Type ::= "class" #Id 
    
   syntax Types ::= List{Type,","}
 
@@ -108,7 +108,7 @@ module KOOL-TYPED-STATIC
                   </classes>
                 </T>
 
-  syntax Pass ::= global | class | method 
+  syntax Pass ::= global | classes | methods 
   syntax K ::= Pass
 
   syntax Type ::= "stmt"
@@ -119,7 +119,7 @@ module KOOL-TYPED-STATIC
              ...</class>)
        (. => <task>... 
                 <k>  Ss:Stmts </k>
-                <kind> class </kind>
+                <kind> classes </kind>
                 <crntClass> C </crntClass>
                 <tenv> .Map </tenv>
              ...</task>)
@@ -134,15 +134,15 @@ module KOOL-TYPED-STATIC
            bindto(M, function from types(XTs) to T) ...</k>
        <crntClass> C </crntClass>
        (. => <task>
-               <k> var XTs; S </k>
+               <k> (var XTs;) S </k>
                <tenv> . </tenv>
                <return> T </return>
                <crntClass> C </crntClass>
-               <kind> method </kind>
+               <kind> methods </kind>
              </task>)
 
   rule (<task>... <k> .K </k> <tenv> Rho:Map </tenv> 
-                 <crntClass> C </crntClass> <kind> class </kind>
+                 <crntClass> C </crntClass> <kind> classes </kind>
        ...</task> => .)
        <class>... <className> C </className> 
                   (. => <ctenv> Rho </ctenv>)
@@ -151,7 +151,7 @@ module KOOL-TYPED-STATIC
   rule <k> I:#Int => int ...</k>
   rule <k> B:#Bool => bool ...</k>
   rule <k> Str:#String => string ...</k>
-  rule <k> X => T ...</k> <tenv>... X |-> T ...</tenv> <kind> method </kind>
+  rule <k> X => T ...</k> <tenv>... X |-> T ...</tenv> <kind> methods </kind>
   rule <k> X => _._(this,X) ...</k> <tenv> Rho </tenv>
     if notBool(X in keys(Rho))
 
@@ -186,7 +186,7 @@ module KOOL-TYPED-STATIC
 /*@ \subsection{``new'' Operator}
 To type ``new'' we only need to check that the class constructor can be
 called with arguments of the given type. */
-  rule new C(Ts) => _._(class C, C (Ts))
+  rule new C(Ts) => _`(_`)(_._((class C), C), Ts)
 
 //@ ``this'' types to the current class
   rule <k> this => class C ...</k>
@@ -214,11 +214,12 @@ This currently assumes there are no cycles in the class hierarchy. */
 As it is hard to check statically whether casting is always safe,
 we here only check that the types are compatible. */
 
-  rule  class C1 instanceOf C2
+  rule  (class C1) instanceOf C2
     => bool when related(class C1,class C2)
 
 --- Casting
-  rule cast T to T' => T when related(T,T')
+  rule cast (class C1) to C2 
+   => (class C2) when related(class C1,class C2)
 
   rule {} => stmt
   rule <k> {Ss:Stmts} => Ss ~> tenv(Rho) ...</k> <tenv> Rho </tenv>
@@ -248,23 +249,24 @@ we here only check that the types are compatible. */
   rule subtype(,) => true
   rule subtype((T,Ts),(T',Ts':Types)) => subtype(T,T') and subtype(Ts,Ts')
   rule subtype(T,T) => true
-  rule <k> subtype(class (C1 => C2), class C) ...</k>
+  rule <k> subtype(class C1, class C)
+        => subtype(class C2, class C) ...</k>
        <className> C1 </className> <extends> C2 </extends>
   
 
   syntax Exp ::= "related" "(" Type "," Type ")"
   rule related(T,T) => true
   rule related(class C1, class C2) 
-    => relatedClass(class C1, class C2, classC1, class C2)
+    => relatedClass(class C1, class C2, class C1, class C2)
 
   syntax Exp ::= "relatedClass" "(" Type "," Type "," Types "," Types ")"
   
   rule relatedClass(T,_,_,(T,Ts')) => true
   rule relatedClass(_,T',(T',Ts),_) => true
-  rule <k> relatedClass(T,_,_,(class C1,Ts') => (class C2,class C1,Ts')) ...</k>
+  rule <k> relatedClass(T,_,_,((class C1),Ts' => (class C2),(class C1),Ts')) ...</k>
        <className> C1 </className> <extends> C2 </extends>
-    if  T =/=Bool class T1
-  rule <k> relatedClass(_,T',(class C1,Ts) => (class C2,class C1,Ts),_) ...</k>
+    if  T =/=Bool (class C1)
+  rule <k> relatedClass(_,T',((class C1),Ts => (class C2),(class C1),Ts),_) ...</k>
        <className> C1 </className> <extends> C2 </extends>
     if  T' =/=Bool class C1
     
@@ -282,15 +284,30 @@ we here only check that the types are compatible. */
 
   rule <k> bindto(X,T) => existsType(T) ...</k>
        <tenv> Rho:Map (. => X |-> T) </tenv>
-       <kind> class </kind>
+       <kind> classes </kind>
     if notBool(X in keys(Rho))
 
   rule <k> bindto(X,T) => existsType(T) ~> stmt ...</k>
        <tenv> Rho:Map => Rho[T/X] </tenv>
-       <kind> method </kind> 
+       <kind> methods </kind> 
+
+   syntax K ::=  "tenv" "(" Map ")"
+
+  rule <k> stmt ~> (tenv(Rho) => .) ... </k>
+       <tenv> _ => Rho </tenv>                        [:structural:]
 
 
   syntax Types ::= "types" "(" Exps ")"    [:prec(1):]
   rule types() => .Types                   [:structural:]
   rule types(X : T, XTs) => T, types(XTs)  [:structural:]
+
+
+ syntax K ::= "existsType" "(" Type ")" 
+  rule existsType(int) => true
+  rule existsType(bool) => true
+  rule existsType(string) => true
+  rule existsType(void) => true
+  rule <k> existsType(class C) => true ...</k> <className> C </className>
+
+
 end module
