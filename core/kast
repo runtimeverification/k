@@ -409,21 +409,23 @@ exit;
 sub usage
 {
 # 12345678123456781234567812345678123456781234567812345678123456781234567812345678
-    print "Usage: kast [OPTIONS] program
+    print "Usage: kast [OPTIONS] <file>
   
-Parses program to a K abstract syntax tree (kast) using default parser.
-The K definition is assumed to have been kompiled prior to calling kast
-(see kompile for instructions on how to kompile K definitions).
+Parses program to a K abstract syntax tree (abbreviated kast) using default
+parser.  The K definition is assumed to have been kompiled prior to calling
+kast (see kompile for instructions on how to kompile K definitions).
   
 OPTIONS:
-  --k-definition <def>     : path to main .k file of the K definition
-                               `.k` extension is optional. 
+  
+    --k-definition=FILE      Path to main .k file of the K definition.
+                             `.k` extension is optional. 
                                
-  --main-module <module>   : main module name in <k-definition>
-                               default value is <K-DEFINITION>, that is, the  
-			       up-cased K definition name (without the .k extension)
-  --syntax-module <module> : syntax module name
-                               default value is <K-DEFINITION>-SYNTAX\n";
+    --main-module=STRING     Main module name in the K definition at <PATH>.
+                             Default value is the up-cased file name 
+                             of the K definition (dropping the path 
+			     to it and the .k extension).
+    --syntax-module=STRING   Syntax module in the K definition at <PATH>. 
+                             Default value is <main-module>-SYNTAX.\n";
 
 exit;
 }
