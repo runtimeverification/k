@@ -17,7 +17,7 @@ module KOOL-TYPED-STATIC-SYNTAX
   syntax Types ::= List{Type,","}
 
   syntax Decl ::= "var" Exps ";"
-//@ KOOL additions: function is renamed into method and classes are introduced.
+//@ KOOL additions: function is renamed into method and classPass are introduced.
   syntax Decl ::= "method" #Id "(" Exps ")" ":" Type Stmt
                 | "class" #Id "{" Stmts "}"
                 | "class" #Id "extends" #Id "{" Stmts "}"
@@ -96,35 +96,33 @@ module KOOL-TYPED-STATIC
                     <k color="green"> $PGM:Stmts </k>
                     <tenv color="cyan" multiplicity="?"> .Map </tenv>
                     <return multiplicity="?"> .K </return>
-                    <kind> global </kind>
+                    <pass> globalPass </pass>
                     <crntClass multiplicity="?"> .K </crntClass>
                   </task>
-                  <classes>
-                    <class multiplicity="+"> 
-                      <className> object </className>
-                      <extends multiplicity="?"> Id:#Id </extends>
-                      <ctenv> .Map </ctenv>
-                    </class>
-                  </classes>
+                  <class multiplicity="+"> 
+                    <className> object </className>
+                    <extends multiplicity="?"> object </extends>
+                    <ctenv multiplicity="?"> .Map </ctenv>
+                  </class>
                 </T>
 
-  syntax Pass ::= global | classes | methods 
+  syntax Pass ::= globalPass | classPass | methodPass 
   syntax K ::= Pass
 
   syntax Type ::= "stmt"
 
   rule <k> class C:#Id extends C':#Id { Ss:Stmts } => . ...</k> 
-       <kind> global </kind>
+       <pass> globalPass </pass>
        (. => <class>... <className> C </className> <extends> C' </extends> 
              ...</class>)
        (. => <task>... 
                 <k>  Ss:Stmts </k>
-                <kind> classes </kind>
+                <pass> classPass </pass>
                 <crntClass> C </crntClass>
                 <tenv> .Map </tenv>
              ...</task>)
 
-  rule <task>... <k> .K </k> <kind> global </kind> ...</task>  => .
+  rule <task>... <k> .K </k> <pass> globalPass </pass> ...</task>  => .
 
   rule var X:#Id : T:Type ; => bindto(X,T)
   context var _[[HOLE]] : _;
@@ -138,11 +136,11 @@ module KOOL-TYPED-STATIC
                <tenv> . </tenv>
                <return> T </return>
                <crntClass> C </crntClass>
-               <kind> methods </kind>
+               <pass> methodPass </pass>
              </task>)
 
   rule (<task>... <k> .K </k> <tenv> Rho:Map </tenv> 
-                 <crntClass> C </crntClass> <kind> classes </kind>
+                 <crntClass> C </crntClass> <pass> classPass </pass>
        ...</task> => .)
        <class>... <className> C </className> 
                   (. => <ctenv> Rho </ctenv>)
@@ -151,8 +149,8 @@ module KOOL-TYPED-STATIC
   rule <k> I:#Int => int ...</k>
   rule <k> B:#Bool => bool ...</k>
   rule <k> Str:#String => string ...</k>
-  rule <k> X => T ...</k> <tenv>... X |-> T ...</tenv> <kind> methods </kind>
-  rule <k> X => _._(this,X) ...</k> <tenv> Rho </tenv>
+  rule <k> X => T ...</k> <tenv>... X |-> T ...</tenv> <pass> methodPass </pass>
+  rule <k> X => _._(this,X) ...</k> <tenv> Rho </tenv> <pass> methodPass </pass>
     if notBool(X in keys(Rho))
 
   context ++([HOLE] => l-type([HOLE]))
@@ -176,7 +174,8 @@ module KOOL-TYPED-STATIC
   rule (array of T)[int,Ts] => T[Ts]
   rule T[] => T
   rule sizeOf(array of T) => int
-  rule _`(_`)(function from Ts to T, Ts':Types) => T when subtype(Ts',Ts)
+  rule <k> _`(_`)(function from Ts to T, Ts':Types) 
+        => T when subtype(Ts',Ts) ...</k> <pass> methodPass </pass>
   rule read() => int
 
   context ([HOLE] => l-type([HOLE])) = _
@@ -212,14 +211,12 @@ This currently assumes there are no cycles in the class hierarchy. */
 
 /*\subsection{``instanceOf'' and ``cast''}
 As it is hard to check statically whether casting is always safe,
-we here only check that the types are compatible. */
+we here trust the user. */
 
-  rule  (class C1) instanceOf C2
-    => bool when related(class C1,class C2)
+  rule  (class C1) instanceOf C2 => bool
 
 --- Casting
-  rule cast (class C1) to C2 
-   => (class C2) when related(class C1,class C2)
+  rule cast (class C1) to C2 => (class C2) 
 
   rule {} => stmt
   rule <k> {Ss:Stmts} => Ss ~> tenv(Rho) ...</k> <tenv> Rho </tenv>
@@ -254,21 +251,23 @@ we here only check that the types are compatible. */
        <className> C1 </className> <extends> C2 </extends>
   
 
-  syntax Exp ::= "related" "(" Type "," Type ")"
-  rule related(T,T) => true
-  rule related(class C1, class C2) 
-    => relatedClass(class C1, class C2, class C1, class C2)
+/*
+  syntax Exp ::= "ordered" "(" Type "," Type ")"
+  rule ordered(T,T) => true
+  rule ordered(class C1, class C2) 
+    => orderedClass(class C1, class C2, class C1, class C2)
 
-  syntax Exp ::= "relatedClass" "(" Type "," Type "," Types "," Types ")"
+  syntax Exp ::= "orderedClass" "(" Type "," Type "," Types "," Types ")"
   
-  rule relatedClass(T,_,_,(T,Ts')) => true
-  rule relatedClass(_,T',(T',Ts),_) => true
-  rule <k> relatedClass(T,_,_,((class C1),Ts' => (class C2),(class C1),Ts')) ...</k>
+  rule orderedClass(T,_,_,(T,Ts')) => true
+  rule orderedClass(_,T',(T',Ts),_) => true
+  rule <k> orderedClass(T,_,_,((class C1),Ts' => (class C2),(class C1),Ts')) ...</k>
        <className> C1 </className> <extends> C2 </extends>
     if  T =/=Bool (class C1)
-  rule <k> relatedClass(_,T',((class C1),Ts => (class C2),(class C1),Ts),_) ...</k>
+  rule <k> orderedClass(_,T',((class C1),Ts => (class C2),(class C1),Ts),_) ...</k>
        <className> C1 </className> <extends> C2 </extends>
     if  T' =/=Bool class C1
+*/
     
   syntax Exp ::= "l-type" "(" Exp ")"
   rule l-type(X) => X        [:structural:]
@@ -284,12 +283,12 @@ we here only check that the types are compatible. */
 
   rule <k> bindto(X,T) => existsType(T) ...</k>
        <tenv> Rho:Map (. => X |-> T) </tenv>
-       <kind> classes </kind>
+       <pass> classPass </pass>
     if notBool(X in keys(Rho))
 
   rule <k> bindto(X,T) => existsType(T) ~> stmt ...</k>
        <tenv> Rho:Map => Rho[T/X] </tenv>
-       <kind> methods </kind> 
+       <pass> methodPass </pass> 
 
    syntax K ::=  "tenv" "(" Map ")"
 
