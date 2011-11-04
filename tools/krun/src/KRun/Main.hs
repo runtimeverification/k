@@ -138,7 +138,7 @@ printResult config result = do
                 Left err -> do
                     putStrLn "Warning: unable to parse/pretty-print result term:"
                     T.putStrLn result
-                    putStrLn "(NB: This is not your fault. Pretty-printing is an experimental feature.)"
+                    putStrLn "(NB: This may not be your fault. Pretty-printing is an experimental feature.)"
                 Right bag -> printDoc $ ppKBag bag
         s -> die $ "Invalid output-mode setting: " ++ s
 
