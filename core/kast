@@ -420,12 +420,11 @@ OPTIONS:
     --k-definition=FILE      Path to main .k file of the K definition.
                              `.k` extension is optional. 
                                
-    --main-module=STRING     Main module name in the K definition at <PATH>.
-                             Default value is the up-cased file name 
-                             of the K definition (dropping the path 
-			     to it and the .k extension).
-    --syntax-module=STRING   Syntax module in the K definition at <PATH>. 
-                             Default value is <main-module>-SYNTAX.\n";
+    --main-module=STRING     Main module in the K definition.
+                             Default: uppercase(`basename <k-definition> .k`)
+  
+    --syntax-module=STRING   Syntax module in the K definition. 
+                             Default: <main-module>-SYNTAX.\n";
 
 exit;
 }
