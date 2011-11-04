@@ -409,8 +409,13 @@ exit;
 sub usage
 {
 # 12345678123456781234567812345678123456781234567812345678123456781234567812345678
-    print "Usage: kast [--pgm] program_name [options] \n
-Options:
+    print "Usage: kast [OPTIONS] program
+  
+Parses program to a K abstract syntax tree (kast) using default parser.
+The K definition is assumed to have been kompiled prior to calling kast
+(see kompile for instructions on how to kompile K definitions).
+  
+OPTIONS:
   --k-definition <def>     : specifies the K definition
                                The `.k` extension is optional. 
                                The default value of <def> is <pgm> extension
@@ -420,8 +425,7 @@ Options:
   --syntax-module <module> : specifies the syntax module name
                                The default value is <DEF>-SYNTAX.
                                If --main-module is used then <module> 
-                               is <main-module>-SYNTAX
-The definition is assumed to have been kompiled prior to calling kast.\n";
+                               is <main-module>-SYNTAX\n";
 exit;
 }
 
