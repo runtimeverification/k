@@ -248,7 +248,7 @@ getTmpDir = do
 getKastExecutable :: IO FilePath
 getKastExecutable = do
     kbase <- getEnv "K_BASE"
-    return $ kbase </> "core" </> "kast_temp"
+    return $ kbase </> "core" </> "kast"
 
 trim :: String -> String
 trim = f . f
