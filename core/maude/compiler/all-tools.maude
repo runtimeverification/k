@@ -5,7 +5,7 @@ load meta-k
 load metadata-parsing
 load printing
 load pure-printing
-load sanity-checks-interface
+---load sanity-checks-interface
 
 load many-modules-interface
 load remove-parser-interface
@@ -18,7 +18,7 @@ load syntax-predicates-interface
 load remove-sublists-interface
 load lists-to-wrappers-interface
 load syntax-to-k-interface
-load add-k-proper-interface
+---load add-k-proper-interface
 load lists-to-k-interface
 load subsorts-to-wrappers-interface
 load homogenous-arguments-interface
