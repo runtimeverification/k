@@ -351,8 +351,8 @@ sub validate_attribute
 
     # report error if $attr_value is not a valid value 
     # for $attr_name attribute according to %xml_attr
-    # print("Value $attr_value is not valid for attribute $attr_name.\n") if $values !~ /\s$attr_value\s/;    
-    error_report($INVALID_VALUE_FOR_ATTRIBUTE_ERROR, $attr_name, $attr_value, $cell) if $values !~ /\s$attr_value\s/;
+    # print("Value |$attr_value| is not valid for attribute |$attr_name|.\nVALS:|$values|\n") if $values !~ /\s\Q$attr_value\E\s/;
+    error_report($INVALID_VALUE_FOR_ATTRIBUTE_ERROR, $attr_name, $attr_value, $cell) if $values !~ /\s\Q$attr_value\E\s/;
 }
 
 
