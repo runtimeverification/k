@@ -35,5 +35,5 @@ load anon-vars-interface
 load make-k-rules-interface
 load strict-cxt2eqs-interface
 
-load compile-program
+---load compile-program
 load compile-chain

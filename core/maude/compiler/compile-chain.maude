@@ -47,7 +47,7 @@ mod COMPILE-ONESHOT is
   eq compile1(M, 'REMOVE-SUBLISTS, AS) = compileREMOVE-SUBLISTS(M, AS) . 
   eq compile1(M, 'LISTS-TO-WRAPPERS, AS) = compileLISTS-TO-WRAPPERS(M, AS) . 
   eq compile1(M, 'SYNTAX-TO-K, AS) = compileSYNTAX-TO-K(M, AS) . 
-  eq compile1(M, 'ADD-KPROPER, AS) = compileADD-KPROPER(M, AS) . 
+---  eq compile1(M, 'ADD-KPROPER, AS) = compileADD-KPROPER(M, AS) . 
   eq compile1(M, 'LISTS-TO-K, AS) = compileLISTS-TO-K(M, AS) . 
   eq compile1(M, 'SUBSORTS-TO-WRAPPERS, AS) = compileSUBSORTS-TO-WRAPPERS(M, AS) . 
   eq compile1(M, 'HOMOGENOUS-ARGUMENTS, AS) = compileHOMOGENOUS-ARGUMENTS(M, AS) . 
