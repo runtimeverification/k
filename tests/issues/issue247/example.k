@@ -8,9 +8,8 @@ module ISSUE
   syntax KResult ::= #Int 
   rule I1:#Int + I2:#Int => I1 +Int I2
 
-  syntax Bag ::= test1 | test2 
-  rule test1 => <k> [3+5,7+9,2+12] </k>
-  rule test2 => <k> [8,16,14] </k>
-  syntax #Bool ::= "equal" "(" Bag "," Bag ")"
-  rule equal(X:Bag,X:Bag) => true
+  syntax #Bool ::= test
+  op check : Bag Bag -> #Bool [strat(1 0) frozen(2)]
+  rule test => check(<k> [3+5,7+9,2+12] </k>,<k> [8,16,14] </k>)
+  rule check(X:Bag,X:Bag) => true
 end module 
