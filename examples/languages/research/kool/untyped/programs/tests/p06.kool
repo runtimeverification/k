@@ -1,0 +1,38 @@
+class node {
+  var left;
+  var right;
+  method node(left,right) {
+// Using l causes the parser to break (l-value?) so I switched to left
+    this.left = left;
+    this.right = right;
+    return 0;
+  }
+  method sum() {
+    return (left.sum() + right.sum());
+  }
+}
+
+class leaf {
+  var val;
+//using value causes the parser to break so I switched to val
+  method leaf(val) {
+    this.val = val;
+    return 0;
+  }
+  method sum() {
+    return val;
+  }
+}
+
+class main {
+  method main() {
+    var o;
+    o = new node(new node(new leaf(3), new leaf(4)), new leaf(5));
+    print(o.sum());
+    return 0;
+  }
+}
+
+// 12
+
+

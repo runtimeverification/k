@@ -1,0 +1,23 @@
+class c1 {
+  method c1() { return 0;}
+  method m1() { return 1; }
+  method m2() { return this.m1(); }
+}
+class c2 extends c1 {
+  method c2() { return 0;}
+  method m1() { return 2; }
+}
+class main {
+  method main() {
+    var o1;
+    var o2;
+    o1 = new c1();
+    o2 = new c2();
+    print(o1.m1());
+    print(o2.m1());
+    print(o2.m2());
+    return 0;
+  }
+}
+
+// 1 2 2 

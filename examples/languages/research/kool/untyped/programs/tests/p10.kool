@@ -1,0 +1,32 @@
+class c1 {
+  var x;
+  var y;
+  method c1() { return 0;}
+  method setx1(v) { x = v; return 0;}
+  method sety1(v) { y = v; return 0;}
+  method getx1() { return x; }
+  method gety1() { return y; }
+}
+class c2 extends c1 {
+  var y;
+  method c2() { return 0;}
+  method sety2(v) { y = v; return 0;}
+  method getx2() { return x; }
+  method gety2() { return y; }
+}
+class main {
+  method main() {
+    var o2;
+    o2 = new c2();
+    o2.setx1(11);
+    o2.sety1(12); 
+    o2.sety2(99);
+    print(o2.getx1());
+    print(o2.gety1());
+    print(o2.getx2());
+    print(o2.gety2());
+    return 0;
+  }
+}
+
+// 11 12 11  99
