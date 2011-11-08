@@ -62,13 +62,15 @@ sub runTest {
 	#print "$KRUN $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile\n";
 	unlink($actualOutputFile,$actualErrorFile);
 	`$KRUN $krunFlag $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile`;
+        `echo >> $actualOutputFile`;
 	if (-s $actualErrorFile) {
 		reportError($fullFilename,$timer);
 	} else {
     my $diffFile = "$baseTestFile.diff$testEnding";
-    unlink ($diffFile);
-		`diff $expectedOutputFile $actualOutputFile >$diffFile`;
+    unlink ($diffFile);\
+		`echo | cat $expectedOutputFile - |  diff -B - $actualOutputFile  >$diffFile`;
 		if (-s $diffFile) {
+                        
 			reportFailure($fullFilename,$timer);
 		} else {
 			reportSuccess($fullFilename,$timer);
