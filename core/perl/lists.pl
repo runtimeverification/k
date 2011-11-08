@@ -96,6 +96,8 @@ sub solve_lists
             
 	    $generated_code .= "syntax ${nelist}List\{Bottom,\"$separator\"\} ::= Bottom $separator ${nelist}List\{Bottom,\"$separator\"\}$parser_attributes\n";
  	    $generated_code .= "syntax ${nelist}List\{Bottom,\"$separator\"\} ::= Bottom [metadata \"parser=() generated=()\"] \n";
+
+            $generated_code .= "subsort Bottom ${list}List\{Bottom,\"$separator\"\} < KResult\n";
 	    
             $constructors{"\"$separator\""} = "\"$separator\"";
         }
