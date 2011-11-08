@@ -72,15 +72,21 @@ sub getTestMapping {
 	while (my $line = <IN>) {
 		chomp $line;
 		my $reduce = "rew|rewrite|red|reduce|erew|erewrite";
-		my $pattern = "^($reduce) (.*) \\. ---@ ([^ ]*) (.*)\$";
+		my $pattern = "^($reduce) (.*) \\.[ ]+---@ ([^ ]*) (.*)\$";
 		my $simplePattern = "^($reduce) (.*) \\.[^.]*\$";
 		if ($line =~ /$pattern/) {
+			# print "$line\n";
+			# print "LHS: $2\n";
+			# print "Name: $3\n";
+			# print "RHS: $4\n";
 			if (!exists $testMapping{$2}){
 				$testMapping{$2} = [$3, $4];
 			} else {
 				reportError("unknown", 0, "You have two identical tests.");
 			}
 		} elsif ($line =~ /$simplePattern/) {
+			# print "$line\n";
+			# print "LHS: $2\n";
 			if (!exists $testMapping{$2}){
 				$testMapping{$2} = ["unnamedTest$unnamedTestNum", ""];
 				$unnamedTestNum++;
@@ -88,6 +94,7 @@ sub getTestMapping {
 				reportError("unknown", 0, "You have two identical tests.");
 			}
 		}
+		
 	}
 	close(IN);
 	return %testMapping;
