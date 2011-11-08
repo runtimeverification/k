@@ -14,14 +14,14 @@ TEST_DIRS = algorithms/sort \
 	    languages/research/simple/untyped \
 	    languages/research/simple/typed/dynamic \
 	    languages/research/simple/typed/static \
-	    languages/research/skool/typed/dynamic \
-	    languages/research/skool/typed/static \
-	    languages/research/skool/untyped \
+	    languages/research/kool/untyped \
 	    languages/research/fun/untyped \
 	    languages/research/agent \
 	    languages/research/challenge \
 	    languages/research/kernelC \
 	    languages/classic/imp \
+		#languages/research/kool/typed/static \
+		#languages/research/kool/typed/dynamic \
 	    #languages/classic/imp/fully-syntactic \
 	    #languages/classic/imp/labeled-syntax \
 	    #languages/classic/imp/no-syntax 
@@ -35,6 +35,9 @@ build:
 
 test: 
 	@for d in $(TEST_DIRS); do  echo Testing $$d ; if ! make -C $$d test ; then echo FAILURE! in $$d; exit 1; fi; done
+	
+test-krun: 
+	@for d in $(TEST_DIRS); do  echo Testing $$d ; if ! make -C $$d krun-test ; then echo FAILURE! in $$d; exit 1; fi; done
 
 pdf: 
 	@for d in $(TEST_DIRS); do  echo Typesetting $$d ; if ! make -C $$d pdf ; then echo FAILURE! in $$d; exit 1; fi; done
