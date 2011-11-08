@@ -97,6 +97,11 @@ results-%.xml: % test-%.output
 compilation.xml: $(COMPILED_FILE).output
 	@perl $(TOOL_DIR)/createXMLCompilationOutput.pl $(notdir $(realpath .)).compilation $(COMPILED_FILE).output > $@
 #$(COMPILED_FILE).output
+
+krun-results: $(foreach var,  $(IO_TESTS), $(var)/krun-results.xml)
+
+%/krun-results.xml: $(COMPILED_FILE).output
+	perl $(K_BASE)/tools/tester.pl -d $* -f $(IO_TEST_FLAG)
 	
 # used to force targets to run
 force: ;

@@ -15,14 +15,15 @@ my $KRUN = catfile($ENV{'K_BASE'},"core","krun");
 # second argument is a directory to test
 my $numArgs = $#ARGV + 1; # +1 because there is one too few
 #print "$numArgs\n";
-if ($numArgs != 2) {
-	die "Not precise command line arguments. Usage $0 -d <directory> "
+if ($numArgs != 4) {
+	die "Not precise command line arguments. Usage $0 -d <directory> -f <krun flag>"
 }
 
 
 my $directory = $ARGV[1];
+my $krunFlag = $ARGV[3];
 my $testSuite = $directory;
-my $outputFilename = catfile($directory,"results.xml");
+my $outputFilename = catfile($directory,"krun-results.xml");
 
 my @files = <$directory/*>;
 foreach my $fullFilename (@files) {
@@ -59,8 +60,8 @@ sub runTest {
 	my $actualOutputFile = "$baseTestFile.stdout$testEnding";
 	my $actualErrorFile = "$baseTestFile.stderr$testEnding";
 	#print "$KRUN $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile\n";
-  unlink($actualOutputFile,$actualErrorFile);
-	`$KRUN $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile`;
+	unlink($actualOutputFile,$actualErrorFile);
+	`$KRUN $krunFlag $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile`;
 	if (-s $actualErrorFile) {
 		reportError($fullFilename,$timer);
 	} else {
