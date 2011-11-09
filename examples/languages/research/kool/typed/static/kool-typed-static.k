@@ -12,14 +12,15 @@ module KOOL-TYPED-STATIC-SYNTAX
                 | "function" "from" Types "to" Type
                     [:prec(1) latex "{#1}\rightarrow{#2}":]
 //@ KOOL addition: types for objects
-  syntax Type ::= "class" #Id 
+  syntax Type ::= "class" #Id [prec 1]
    
   syntax Types ::= List{Type,","}
 
   syntax Decl ::= "var" Exps ";"
-//@ KOOL additions: function is renamed into method and classPass are introduced.
+//@ KOOL additions: function is renamed into method and classes are introduced.
   syntax Decl ::= "method" #Id "(" Exps ")" ":" Type Stmt
-                | "class" #Id "{" Stmts "}"
+                | "method" #Id "(" Exps ")" Stmt
+                | "class" #Id "{" Stmts "}" [prec 0]
                 | "class" #Id "extends" #Id "{" Stmts "}"
 
   syntax Exp ::= #Int | #Bool | #String | #Id
@@ -47,11 +48,11 @@ module KOOL-TYPED-STATIC-SYNTAX
                | Exp ":" Type          [:prec(10):]
                                        // allowed only for declarations
 
-// Kool additions: new, this, super, object space, instanceOf, cast
+//@ Kool additions: new, this, super, object space, instanceOf, cast
   syntax Exp ::= "new" #Id "(" Exps ")" [:strict(2) prec(1):]
                | "this"
                | "super"
-               | Exp "." #Id            [:prec(0):]
+               | Exp "." #Id            [:prec(2) strict(1):]
                | Exp "instanceOf" #Id   [:prec(0) strict(1):]
                | "cast" Exp "to" #Id    [:prec(0) strict(1):]
 
@@ -81,6 +82,7 @@ module KOOL-TYPED-STATIC-SYNTAX
   macro (for X:#Id = E1 to E2 do S) = {var X:int=E1; while X <= E2 do {S X=X+1;}}
   macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
   macro class C:#Id {Ss:Stmts} = class C extends object {Ss}
+  macro method X:#Id (Es:Exps) S:Stmt = method X(Es) : void S
 end module 
 
 
@@ -90,10 +92,14 @@ module KOOL-TYPED-STATIC
   syntax Exp ::= Type
   syntax Stmt ::= Type
   syntax KResult ::= Type
+  syntax #Id ::= "koolTestMain"
   
   configuration <T color="red">
-                  <classes> $PGM:Stmts </classes>
-                   <class multiplicity="+"> 
+                  <classes> $PGM:Stmts 
+                      class_`{_`}(koolTestMain, 
+                          method koolTestMain() { new main(); }) 
+                  </classes>
+                  <class multiplicity="+"> 
                     <className> object </className>
                     <extends multiplicity="?"> object </extends>
                     <ctenv multiplicity="?"> .Map </ctenv>
@@ -103,7 +109,9 @@ module KOOL-TYPED-STATIC
                       <return multiplicity="?"> .K </return>
                       <pass> classPass </pass>
                     </task>
-                 </class>
+                  </class>
+                  <toParse> .Set </toParse>
+                  <out stream="stdout"> .List </out>
                 </T>
 
   syntax Pass ::= classPass | methodPass 
@@ -114,17 +122,23 @@ module KOOL-TYPED-STATIC
   rule <classes> class C:#Id extends C':#Id { Ss:Stmts } => . ...</classes> 
        (. => <class>... <className> C </className> <extends> C' </extends> 
             <task> 
-                <k>  Ss:Stmts </k>
+                <k>  stmt Ss:Stmts </k>
                 <pass> classPass </pass>
                 <tenv> .Map </tenv>
              </task>
        ...</class>)
+      <toParse>... . => SetItem(C) </toParse>
 
-  rule <classes> .K </classes>  => .
+  rule <classes> Ss:Stmts Ss':Stmts => Ss ~> Ss' ...</classes>
+  rule (<classes> .K </classes>  <toParse> . </toParse> => .)
+       <out>... . => ListItem("Done\n") </out>
 
+  rule var; => stmt
   rule var X:#Id : T:Type ; => bindto(X,T)
   context var _[[HOLE]] : _;
   rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> bindto(X,T)
+  rule <k> var X:#Id : T:Type = E:Exp ; => __(var X : T;, _;(X=E)) ...</k>
+       <pass> methodPass </pass>
 
   rule <k> method M:#Id(XTs:Exps) : T S:Stmt =>
            bindto(M, function from types(XTs) to T) ...</k>
@@ -136,7 +150,7 @@ module KOOL-TYPED-STATIC
                <pass> methodPass </pass>
              </task>)
 
-  rule (<task>... <k> .K </k> <tenv> Rho:Map </tenv> 
+  rule (<task>... <k> stmt </k> <tenv> Rho:Map </tenv> 
                  <pass> classPass </pass>
        ...</task> => .)
        (. => <ctenv> Rho </ctenv>)
@@ -181,7 +195,7 @@ module KOOL-TYPED-STATIC
 /*@ \subsection{``new'' Operator}
 To type ``new'' we only need to check that the class constructor can be
 called with arguments of the given type. */
-  rule new C(Ts) => _`(_`)(_._((class C), C), Ts)
+  rule new C(Ts) => class C when sameType(void,_`(_`)(_._((class C), C), Ts))
 
 //@ ``this'' types to the current class
   rule <k> this => class C ...</k>
@@ -190,7 +204,7 @@ called with arguments of the given type. */
 /*@ ``super'' types to the parent class.
  Note that for typing concerns super can be considered as an object */
    rule <k> super => class C' ...</k> 
-       <className> C </className> <extends> C' </extends>
+        <extends> C' </extends>
       
 /*@\subsection{Object member access}
 
@@ -225,7 +239,7 @@ we here trust the user. */
 --- Casting
   rule cast (class C1) to C2 => (class C2) 
 
-  rule {} => stmt
+  rule {} => {stmt} // to make it work for methods with empty body 
   rule <k> {Ss:Stmts} => Ss ~> tenv(Rho) ...</k> <tenv> Rho </tenv>
   rule T; => stmt
   rule if bool then stmt else stmt => stmt
@@ -251,17 +265,28 @@ we here trust the user. */
   rule <class> 
          <className> C1 </className> <extends> C2 </extends> 
          <ctenv> _:Map </ctenv>
-       </class> => .
+       </class> 
+       <toParse>... SetItem(C1) => . ...</toParse> 
 
 
-  syntax Exp ::= Type "when" Exp  [:strict(2):]
-  rule T when true => T
+/*@\subsection{Conditional Pass}  
+Allows the process to continue only if the expression evaluates to true.
+Useful for checking side conditions to typing rules.
+*/
 
-  syntax Exp ::= "subtype" "(" Types "," Types ")"
+  syntax KResult ::= "True"
+  syntax K ::= K "when" K  [:strict(2):]
+  rule K:K when True => K
 
-  rule subtype(,) => true
-  rule subtype((T,Ts),(T',Ts':Types)) => subtype(T,T') and subtype(Ts,Ts')
-  rule subtype(T,T) => true
+/*@\subsection{Subtyping constraints}
+The subclass relation introduces a subtyping relation.  
+*/
+  syntax K ::= "subtype" "(" Types "," Types ")"
+
+  rule subtype(,) => True
+  rule subtype((T1:Type,T2:Type,Ts),(T1':Type,T2':Type,Ts':Types))
+    => subtype((T2,Ts),(T2',Ts')) when subtype(T1,T1')
+  rule subtype(T,T) => True
   rule <k> subtype(class C1, class C)
         => subtype(class C2, class C) ...</k>
       <class>...
@@ -272,42 +297,45 @@ we here trust the user. */
           <className> C1 </className> <extends> C2 </extends>
   
 
-/*
-  syntax Exp ::= "ordered" "(" Type "," Type ")"
-  rule ordered(T,T) => true
-  rule ordered(class C1, class C2) 
-    => orderedClass(class C1, class C2, class C1, class C2)
+  syntax K ::= "sameType" "(" K "," K ")" [strict]
+  rule sameType(T,T) => True 
 
-  syntax Exp ::= "orderedClass" "(" Type "," Type "," Types "," Types ")"
-  
-  rule orderedClass(T,_,_,(T,Ts')) => true
-  rule orderedClass(_,T',(T',Ts),_) => true
-  rule <k> orderedClass(T,_,_,((class C1),Ts' => (class C2),(class C1),Ts')) ...</k>
-       <className> C1 </className> <extends> C2 </extends>
-    if  T =/=Bool (class C1)
-  rule <k> orderedClass(_,T',((class C1),Ts => (class C2),(class C1),Ts),_) ...</k>
-       <className> C1 </className> <extends> C2 </extends>
-    if  T' =/=Bool class C1
-*/
-    
+/*@  Since now any id can be used as the type of a class, we need to check
+that the the types used in the program actually exists */
+  syntax K ::= "existsType" "(" Types ")" 
+
+  rule existsType(T,T',Ts) => existsType(T',Ts) when existsType(T)
+  rule existsType() => True
+  rule existsType(int) => True
+  rule existsType(bool) => True
+  rule existsType(string) => True
+  rule existsType(void) => True
+  rule <k> existsType(class C) => True ...</k> 
+      <class>... <className> C </className> ...</class>
+  rule <k> existsType(class C) => True ...</k> 
+       <className> C </className> 
+  rule existsType(function from Ts to T) => existsType(T,Ts)
+  rule existsType(array of T) => existsType(T)
+
+
+//@\subsection{Auxiliary operators from typing SIMPLE}
   syntax Exp ::= "l-type" "(" Exp ")"
   rule l-type(X) => X        [:structural:]
-  context l-type(_[[HOLE]])
-  context l-type([HOLE][_])
-  rule l-type(T) => T        [:structural:]
+  rule l-type(_._(E,X)) => _._(E,X)    [:structural:]
+  rule l-type(E[Es:Exps]) => E[Es]        [:structural:]
 
   syntax K ::= "checkDepth" "(" Types "," Type ")"
   rule checkDepth((int,Ts => Ts), (array of T => T))  [:structural:]
   rule checkDepth(.Types,_) => .K                     [:structural:]
 
-  syntax K ::= "bindto" "(" #Id "," Type ")"
+  syntax Stmt ::= "bindto" "(" #Id "," Type ")"
 
-  rule <k> bindto(X,T) => existsType(T) ...</k>
+  rule <k> bindto(X,T) => stmt when existsType(T) ...</k>
        <tenv> Rho:Map (. => X |-> T) </tenv>
        <pass> classPass </pass>
     if notBool(X in keys(Rho))
 
-  rule <k> bindto(X,T) => existsType(T) ~> stmt ...</k>
+  rule <k> bindto(X,T) => stmt when existsType(T) ...</k>
        <tenv> Rho:Map => Rho[T/X] </tenv>
        <pass> methodPass </pass> 
 
@@ -321,15 +349,5 @@ we here trust the user. */
   rule types() => .Types                   [:structural:]
   rule types(X : T, XTs) => T, types(XTs)  [:structural:]
 
-
- syntax K ::= "existsType" "(" Type ")" 
-  rule existsType(int) => true
-  rule existsType(bool) => true
-  rule existsType(string) => true
-  rule existsType(void) => true
-  rule <k> existsType(class C) => true ...</k> 
-      <class>... <className> C </className> ...</class>
-  rule <k> existsType(class C) => true ...</k> 
-       <className> C </className> 
 
 end module

@@ -1,0 +1,70 @@
+class a {
+  var i:int, j:int;
+  method a() {
+    j = ++i+1;
+  }
+  method aa():int {
+    j = ++i+1;
+    return j;
+  }
+  method f():int {
+    return aa();
+  }
+  method g():int {
+    return f();
+  }
+  method h():int {
+    return i+j;
+  }
+}
+
+class b extends a {
+  var j:int, k:int;
+  method aa():int {
+    return bb();
+  }
+  method b() {
+    super.a();
+    j = 10;
+    k = j+1;
+  }
+  method bb():int {
+    k = ++j+1;
+    return k;
+  }
+  method g():int {
+    return super.h();
+  }
+  method h():int {
+    return g();
+  }
+}
+
+class c extends b {
+  method aa():int {
+    return super.aa();
+  }
+  method bb():int {
+    return super.bb();
+  }
+  method c() {
+    i = 100;
+    j = i+1;
+    k = j+1;
+  }
+  method g():int {
+    return i+k*j;
+  }
+}
+
+class main {
+  method p(o:class a) {
+    print(o.f(), o.g(), o.h());
+  }
+  method main() {
+    p(new a());
+    p(new b());
+    p(new c());
+  }
+}
+

@@ -1,0 +1,24 @@
+class i {
+  var value:int;
+  method i(v:int) {
+    value = v;
+  }
+  method m1():class g {
+    return (new g(value+9));  // creates and returns an object
+  }
+}
+
+class g {
+  var a:int;
+  method g(t:int) {
+    a = t;
+  }
+  method print2() { print(a); }
+}
+
+class main {
+  method main() {
+    ((new i(1)).m1()).print2();
+  }
+}
+

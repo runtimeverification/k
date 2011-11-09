@@ -346,9 +346,7 @@ argument, but only if that argument is an l-value, that is, a variable
 or an array element. */
   syntax Exp ::= "l-type" "(" Exp ")"
   rule l-type(X) => X        [:structural:]
-  context l-type(_[[HOLE]])
-  context l-type([HOLE][_])
-  rule l-type(T) => T        [:structural:]
+  rule l-type(E:Exp[Es:Exps]) => E[Es]        [:structural:]
 
 /*@ The two operations below are standard, we use them in many \K
 definitions.  Note, however, that \texttt{bindto} evaluates to

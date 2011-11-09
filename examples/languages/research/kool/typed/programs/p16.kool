@@ -1,0 +1,26 @@
+class i {
+  var f:int;
+  method i(v:int) {
+    f = v;
+  }
+  method get():int { return f; }
+}
+
+class g {
+  var o:class i;
+  method g(obj:class i) {
+    o = obj;
+  }
+  method do1():int {
+    var f:int = 9;
+    return (o.get());
+  }
+}
+
+class main {
+  method main() {
+    var t:class i = new i(1), y:class g = new g(t);  // passes an object
+    print(y.do1());
+  }
+}
+

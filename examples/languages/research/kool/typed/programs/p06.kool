@@ -1,0 +1,39 @@
+class a {
+  var x:int;
+  method a() {
+    x=2;
+  }
+  method m1(x:int):bool {
+    return (this.x) == x;  // this types, because this.x looked up statically
+    // this.x therefore refers to the x:int field in a
+  }
+  method c():int {
+    return x;
+  }
+}
+
+class b extends a {
+  var x:bool;
+  method b() {
+    x=false;
+    super.a();
+  }
+}
+class main {
+  method main() {
+    var o[5]:array of class a, p[4]:array of class b, b:bool ;
+    o[0] = new a();
+    o[1] = new b();
+    p[3] = new b();
+    p[2] = new b();
+    o[3] = o[1];
+    o[4] = p[3];
+    b = o[4].m1(3);
+    if (not b) then {
+      print(p[3].c());
+    }
+    if (not p[2].m1(2)) then {
+      print(p[2].c());
+    }
+  }
+}

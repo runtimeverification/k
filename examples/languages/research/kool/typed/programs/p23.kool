@@ -1,0 +1,29 @@
+class c1 {
+  var v:int;
+  method c1() { v=7;++v; }
+  method m0():int  { return v; }
+  method m1():int  { return -v; }
+}
+
+class c2 {
+  var v:int;
+  method c2(x:int) { v=x; }
+  method m0():int  { return v; }
+  method m1():int  { return -v; }
+}
+
+class main {
+  method main() {
+    var o1:class c1 = new c1(), o2:class c2 = new c2(1);
+    print(o1.m0());
+    o1.m0 = o1.m1;
+    print(o1.m0());
+    o1.m0 = o2.m0;
+    print(o1.m0());
+    o1.m0 = o2.m1;
+    print(o1.m0());
+    o2.c2(3);
+    print(o1.m0());
+  }
+}
+

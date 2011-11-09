@@ -1,0 +1,114 @@
+class sorting {
+  var input[100]:array of int, data[100]:array of int, n:int;
+
+  method sorting(x:int) {
+    n=x;
+  }
+
+  method read2() {
+    for i = 0 to n - 1 do {
+      input[i] = read();
+    }
+  }
+
+  method init() {
+    for i = 0 to n - 1 do
+      data[i] = input[i];
+  }
+
+  method print2() {
+    for i = 0 to n - 1 do
+      print(data[i]);
+  }
+
+  method insertionSort() {
+    for i = 1 to n - 1 do {
+      var j:int, done:bool, t:int = data[i];
+      done = false;
+      j = i - 1;
+      while (j >= 0) and not done do {
+        if (data[j] > t) then {
+          data[j+1] = data[j];
+          j = j - 1;
+        } else {
+          done = true;
+        }
+      }
+      data[j+1] = t;
+    }
+  }
+
+  method bubbleSort() {
+    var t:int;
+    for i = 0 to n - 1 do {
+      for j = 0 to n - 2 do {
+        if data[j] > data[j+1] then {
+          t = data[j+1];
+          data[j+1] = data[j];
+          data[j] = t;
+        }
+      }
+    }
+  }
+
+  method siftDown(root:int, bottom:int) {
+    var done:bool=false, maxChild:int, t:int;
+    while (root*2 <= bottom and not done) do {
+      if (root*2 == bottom) then {
+        maxChild = root*2;
+      } else if (data[root*2] > data[root*2+1]) then {
+        maxChild = root*2;
+      } else { 
+        maxChild = root*2+1; 
+      }
+      if (data[root] < data[maxChild]) then {
+        t = data[root];
+        data[root] = data[maxChild];
+        data[maxChild] = t;
+        root = maxChild;
+      } else { 
+        done = true; 
+      }
+    }
+  }
+
+  method heapSort(){
+    var t:int, i:int = (n/2) - 1;
+    while (i >= 0) do {
+      this.siftDown(i, n - 1);
+      i = i - 1;
+    }
+    i = n - 1;
+    while (i >= 1 ) do {
+      t = data[0];
+      data[0] = data[i];
+      data[i] = t;
+      this.siftDown(0, i - 1);
+      i = i - 1;
+    }
+  }
+}
+
+class main {
+  method main() {
+    var s:class sorting = new sorting(read());
+    s.read2();
+
+    s.init();
+    s.insertionSort();
+    s.print2();
+
+    print(-1);
+
+    s.init();
+    s.bubbleSort();
+    s.print2();
+
+    print(-1);
+
+    s.init();
+    s.heapSort();
+    s.print2();
+  }
+}
+
