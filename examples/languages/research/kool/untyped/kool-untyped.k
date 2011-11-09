@@ -85,10 +85,10 @@ module KOOL-UNTYPED
                | "array" "(" #Nat "," #Nat ")"
 /*@ KOOL additions:  lambda now takes current object as first argument.
 
-Also introducing the object reference ``obj'' and the object value ``objEnv''.*/
+Also introducing the object value ``obj''.*/
   syntax Val ::= "lambda" "(" K "," Ids "," Stmt ")"
-               | "obj" "(" #Id "," #Nat ")"
-               | "objEnv" "(" Bag ")"
+               | "obj" "(" Bag ")"
+               | "objRef" "(" #Id "," #Nat ")" 
 
   syntax Exp ::= Val
 
@@ -99,14 +99,19 @@ Also introducing the object reference ``obj'' and the object value ``objEnv''.*/
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
                       <k color="green"> ($PGM:K ~> execute) </k>
+                      <env color="violet"> .Map </env>
+                      <holds color="black"> .Map </holds>
+                      <br/>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
 // KOOL addition
-                        <crntObj color="Fuchsia"> .K </crntObj>
+                        <crntObj color="Fuchsia"> 
+                           <crntClass> object </crntClass> 
+                           <envStack> .List </envStack>
+                           <location multiplicity="?"> .K </location>
+                        </crntObj>
                       </control>
-                      <env color="violet"> .Map </env>
-                      <holds color="black"> .Map </holds>
                     </thread>
                   </threads>
                   <br/>
@@ -162,9 +167,10 @@ to their code. This way, we can easily allow objects to pass and change their
 methods (see p23). */
 
   rule <k> method F:#Id(Xs:Ids) S:Stmt => . ...</k>
-       <crntObj> Obj:K </crntObj>
+       <crntClass> Class:#Id </crntClass>
+       <location> OL:#Nat </location>
        <env> Env => Env[L/F] </env>
-       <store>... . => L|->lambda(Obj,Xs,S) ...</store>
+       <store>... . => L|->lambda(objRef(Class,OL),Xs,S) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
 //@ \subsection{Class declaration}       
@@ -242,16 +248,14 @@ environment. */
 
   context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
 
-  rule <k> '_`(_`)(('_._(obj(_,L),,X) 
-        => lookupMember(Envs:BagItem, X)),,_) ...</k>
-       <store>... L |-> objEnv(Envs) ...</store>
+  rule <k> '_`(_`)(('_._(obj(Obj <envStack> EStack </envStack>),,X) 
+        => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
 
 //@ Case 2.2: called through super, so static dispatch from parent class
   rule <k> '_`(_`)(('_._(super,,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
-       <crntObj> obj(Class:#Id,L) </crntObj>
-       <store>... L |-> objEnv(<envStack>... (Class :: EnvC) EStack </envStack>)
-       ...</store>
+       <crntClass> Class:#Id </crntClass>
+       <envStack>... ListItem(Class :: EnvC) EStack </envStack>
 
 /*@ Eventually, each of the rules above produces a lookup(L) instead of 
 the method. When that happens, just lookup the function value at location L. */
@@ -260,13 +264,15 @@ the method. When that happens, just lookup the function value at location L. */
        <store>... L |-> V ...</store>
 
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
-  rule <k> _`(_`)(lambda(Obj:K,Xs:Ids,S:Stmt), Vs:Vals) ~> K:K 
+  rule <k> _`(_`)(lambda(objRef(Class,OL:#Nat),Xs:Ids,S:Stmt), Vs:Vals) ~> K:K 
         => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> C:Bag 
           <fstack> . => (Env,K,C <crntObj> Obj' </crntObj>) ...</fstack> 
-          <crntObj> Obj':K => Obj </crntObj>
+          <crntObj> Obj':Bag => <crntClass>Class</crntClass> Obj </crntObj>
         </control>
        <env> Env => . </env>
+       <store>... OL |-> obj(<crntClass>_:#Id</crntClass>Obj:Bag) ...</store>
+
 
   rule <k> return(V); ~> _ => V ~> K </k>
        <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
@@ -296,15 +302,16 @@ The current environment and object are stored on the stack and
 recovered after new, because new destroys them. */
 
   rule <k> new Class(Vs) ~> K 
-        => create(Class) ~> _`(_`)(Class,Vs); return this; </k>
+        => create(Class) ~> storeObj ~> _`(_`)(Class,Vs); return this; </k>
        <env> Env => . </env>
        <control> C:Bag
-         <crntObj> Obj => obj(object,L) </crntObj>
+         <crntObj> Obj => <crntClass> object </crntClass>
+                          <envStack> ListItem(object::<env>.Map</env>) </envStack>
+                          <location> L </location>
+         </crntObj>
          <fstack> . => (Env, K, C <crntObj> Obj </crntObj>) ...</fstack>
        </control>
        <nextLoc> L => L +Nat 1 </nextLoc>
-       <store>... . => L |-> objEnv(<envStack> object::<env>.Map</env>
-                                    </envStack>) ...</store>
 
 /*@ Create a new object (memory allocation)
 
@@ -328,10 +335,8 @@ Even though "create" is an auxilliary operation, it is used only here. */
   syntax K ::= "addEnvLayer"
   rule <k> addEnvLayer => . ...</k>
        <env> Env => . </env>
-       <crntObj> obj(Class,L) </crntObj>
-       <store>... L |-> objEnv(<envStack> . => (Class::<env>Env</env>)
-                               ...</envStack>) 
-       ...</store>
+       <crntClass> Class </crntClass>
+       <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack> 
 
 /*@ Set the current class of the current object.
 This is necessary to be done at each layer, because the current object is 
@@ -340,10 +345,15 @@ declarations above). */
 
   syntax K ::= "setCrntClass" "(" #Id ")" 
   rule <k> setCrntClass(Class) => . ...</k>
-       <crntObj> obj((_ => Class),_) </crntObj>
+       <crntClass> _ => Class </crntClass>
+
+  syntax K ::= storeObj
+  rule <k> storeObj => . ...</k>
+       <crntObj> Obj (<location> L </location> => .) </crntObj>
+       <store>... . => L |-> obj(Obj) ...</store>
 
 //@ Self reference via "this"
-  rule <k> this => Obj ...</k>  
+  rule <k> this => obj(Obj) ...</k>  
        <crntObj> Obj </crntObj>
 
 /*@ \subsection{Object member access}
@@ -354,31 +364,28 @@ Then evaluate the object expression and lookup member starting with current
 class (static scoping). */
 
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
-  rule <k> _._(obj(Class,L),X) 
-        => lookupMember(<envStack> (Class :: EnvC) EStack </envStack>, X)
+  rule <k> _._(obj(<crntClass> Class </crntClass> <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X) 
+        => lookupMember(<envStack> ListItem(Class :: EnvC) EStack </envStack>, X)
        ...</k>
-       <store>... L |-> objEnv(<envStack>...(Class :: EnvC) EStack </envStack>) 
-       ...</store>
 
 //@ Case 2: member access through super
-  rule <k> _._((super => obj(Class2,L)),X) ...</k>
-       <crntObj> obj(Class1,L) </crntObj>
+  rule <k> _._((super => obj(Obj  <crntClass> Class2 </crntClass>)),X) ...</k>
+       <crntObj> Obj <crntClass> Class1 </crntClass> </crntObj>
        <className> Class1 </className>
        <extends> Class2 </extends>
 
 
 //@ instanceOf
-  rule  <k>  (obj(_,L) => V) instanceOf Class ...</k>
-       <store>... L |-> V ...</store>
-  rule objEnv(<envStack> Class::_ ...</envStack>) instanceOf Class 
+  rule obj((_ <envStack> ListItem(Class::_) ...</envStack>)) instanceOf Class 
     => true
-  rule objEnv(<envStack> Class1::_ => . ...</envStack>) instanceOf Class2 
+  rule obj((_ <envStack> ListItem(Class1::_) => . ...</envStack>)) instanceOf Class2 
     if Class1 =/=Bool Class2
-  rule objEnv(<envStack> .List </envStack>) instanceOf Class
+  rule obj((_ <envStack> .List </envStack>)) instanceOf Class
     => false
  
 //@ Unsafe casting    
-  rule <k> cast obj(_,L) to Class => obj(Class,L) ...</k>
+  rule <k> cast obj((<crntClass> _:K </crntClass> Obj)) to Class 
+        => obj(<crntClass> Class </crntClass> Obj) ...</k>
 
   rule {} => . [:structural:]
   rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
@@ -449,26 +456,24 @@ where L points to the actual member value.
 Note that object values are envStack cells, and that lookupMember takes such
 cells as first argument; these cells are also defined below.*/
   context l-value(_._([HOLE],_))
-  rule <k> l-value(_._(obj(Class,L), X)
-        => lookupMember(<envStack>(Class :: EnvC:BagItem) EStack:List
+  rule <k> l-value(_._(obj(<crntClass>Class </crntClass> 
+                           <envStack>...ListItem(Class :: EnvC) EStack </envStack>), X)
+        => lookupMember(<envStack>ListItem(Class :: EnvC:BagItem) EStack:List
                         </envStack>, X)) 
        ...</k>
-       <store>... L |-> objEnv(<envStack>...(Class :: EnvC) EStack </envStack>) 
-       ...</store>
   
   rule <k> l-value(lookup(L)) => loc(L) ...</k>
 
-  syntax CellLabel ::= "envStack"       --- cell holding a stack, or List
-  syntax ListItem ::= #Id "::" BagItem   
+  syntax K ::= #Id "::" BagItem   
   // Id is the class name, BagItem is its corresp. environment
   syntax K ::= "lookupMember" "(" BagItem "," #Id ")"  
   // BagItem is the envStack cell, Id is the member name
 
 // First look for the member in the top environment; if found then done.
-  rule lookupMember(<envStack> _ :: <env>... X|->L ...</env> ...</envStack>,X) 
+  rule lookupMember(<envStack> ListItem(_ :: <env>... X|->L ...</env>) ...</envStack>,X) 
     => lookup(L)
 /// Otherwise, recurse through the object environment stack
-  rule lookupMember(<envStack> _ :: <env> Env </env>  => . ...</envStack>, X)
+  rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)  => . ...</envStack>, X)
     if notBool(X in keys(Env)) [structural]
 
 
