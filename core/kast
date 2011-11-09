@@ -256,11 +256,11 @@ my @ordered_ids = reverse length_sort(@identifiers);
 s/(?<!\\)".*?(?<!\\)"/Freeze($&, "STRINGS")/sge;
 for my $id (@ordered_ids)
 {
-    s/(?<![a-zA-Z_0-9])($id)(?![a-zA-Z_0-9])/#id("$1")/sg;
+    s/(?<![a-zA-Z_0-9])($id)(?![a-zA-Z_0-9])/#id\_("$1")/sg;
 }
 
 # freeze also the construct #id("identifier")
-s/#id\((?<!\\)".*?(?<!\\)"\)/Freeze($&, "STRINGS")/sge;
+s/#id\_\((?<!\\)".*?(?<!\\)"\)/Freeze($&, "STRINGS")/sge;
 
 # spacify
 my @tks = (@all_tokens, @all_syntax);

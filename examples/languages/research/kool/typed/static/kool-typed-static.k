@@ -292,9 +292,11 @@ The subclass relation introduces a subtyping relation.
       <class>...
           <className> C1 </className> <extends> C2 </extends>
       ...</class>
-  rule <k> subtype(class C1, class C)
+    if C1 =/=Bool C
+rule <k> subtype(class C1, class C)
         => subtype(class C2, class C) ...</k>
           <className> C1 </className> <extends> C2 </extends>
+    if C1 =/=Bool C
   
 
   syntax K ::= "sameType" "(" K "," K ")" [strict]

@@ -91,6 +91,7 @@ fmod MAKE-K-RULES is
   eq handleTagSuperCooling(T, Subst, A AS, AS' supercools(A AS'')) = T[Subst] .
   eq handleTagSuperCooling(T, Subst, AS, AS' supercools(pair("default","") AS'')) = T[Subst] .
   eq handleTagSuperCooling(T, Subst, AS, AS') = T [owise] .
+  eq handleTagSuperCooling(errorT(Err:[Term],Cxt:Term,Msg:String), Subst, AS, AS') =  errorT(Err:[Term],Cxt:Term,Msg:String) .
 
   op makeCondition : TermList -> Condition .
   eq makeCondition(empty) = nil .
@@ -104,9 +105,11 @@ fmod MAKE-K-RULES is
   eq superCoolName(M, A AS, AS' supercools(A AS'')) = setName(M, '#SUPERCOOL) .
   eq superCoolName(M, AS, AS' supercools(pair("default","") AS'')) = setName(M, '#SUPERCOOL) .
   eq superCoolName(M, AS, AS') = M [owise] .
+  eq superCoolName(errorM(Atts:AttrSet,Msg:String,Err:[Term],Cxt:Term,ErrMod:Module), AS, AS') = errorM(Atts:AttrSet,Msg:String,Err:[Term],Cxt:Term,ErrMod:Module) .
 
   op setCoolName : Module Qid -> Module .
   eq setCoolName(M, Q) = setCoolName(M, Q, getName(M)) .
+  eq setCoolName(errorM(Atts:AttrSet,Msg:String,Err:[Term],Cxt:Term,ErrMod:Module), Q) = errorM(Atts:AttrSet,Msg:String,Err:[Term],Cxt:Term,ErrMod:Module) .
   
   op setCoolName : Module Qid Qid -> Module .
   eq setCoolName(M, Q, '#SUPERCOOL) = setName(M, qid("#SUPERCOOL-" + string(Q))) .
