@@ -33,13 +33,14 @@ function map(m,f,x) {
 function insertionSort(x) {
   for i = 1 to sizeOf(x) - 1 do {
     var v = x[i], j = i - 1;
-    try {
-      while (j >= 0) do {
-        if x[j] > v then x[j+1] = x[j]; else throw 0;
-        j = j - 1;
-      }
-    } catch(e) {j = j - 1 ; }
-    x[j+1] = v;
+    while (j > 0 and x[j] > v) do {  // doing the loop only up to 1
+      x[j + 1] = x[j];
+      j = j - 1;
+    }
+    if (x[0] > v) then { 
+      x[1] = x[0];
+      x[0] = v;
+    } else x[j+1] = v;
   }
 }
 
