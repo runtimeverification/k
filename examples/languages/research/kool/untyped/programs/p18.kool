@@ -29,12 +29,7 @@ class sorting {
 
   method insertionSort() {
     for i = 1 to n - 1 do {
-      var j;
-      var done;
-      var t;
-      t = data[i];
-      done = false;
-      j = i - 1;
+      var j=i-1, done=false, t=data[i];
       while (j >= 0) and not done do
         if data[j] > t
           then {
@@ -60,10 +55,7 @@ class sorting {
   }
 
   method siftDown(root, bottom) {
-    var done;
-    var maxChild;
-    var t;
-    done = false;
+    var done=false, maxChild, t;
 
     while (root*2 <= bottom and not done) do {
       if (root*2 == bottom) then {
@@ -85,9 +77,7 @@ class sorting {
   }
 
   method heapSort(){
-    var t;
-    var i;
-    i = (n/2) - 1;
+    var t, i = (n/2) - 1;
     while (i >= 0) do {
       this.siftDown(i, n - 1);
       i = i - 1;
@@ -106,8 +96,7 @@ class sorting {
 
 class main {
   method main() {
-    var s;
-    s = new sorting(read());
+    var s = new sorting(read());
     s.read2();
 
     s.init();

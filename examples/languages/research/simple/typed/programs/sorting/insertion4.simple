@@ -20,11 +20,14 @@ function main():void {
   print("\nSorting the array using insertion sort ... ");
   for i = 1 to n - 1 do {
     var j:int = i - 1, v:int = x[i];
-    while (j >= 0) do {
-      if x[j] > v then x[j+1] = x[j];
+    while (j > 0 and x[j] > v) do {  // doing the loop only up to 1
+      x[j + 1] = x[j];
       j = j - 1;
     }
-    x[j+1] = v;
+    if (x[0] > v) then { 
+      x[1] = x[0];
+      x[0] = v;
+    } else x[j+1] = v;
   }
   print("Done!\nThe sorted sequence is");
   printAll(x,n);
