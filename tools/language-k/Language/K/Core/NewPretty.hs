@@ -56,6 +56,7 @@ ppKLabel (KLabel ss) = hcat $ map ppSyntax ss
     where ppSyntax (Syntax s) = text s
           ppSyntax Hole = char '_'
 ppKLabel (WMap kmap) = ppKMap kmap
+ppKLabel (WBag kbag) = ppKBag kbag
 ppKLabel kl = error $ "No pretty-printer available for: " ++ show kl
 
 ppKBag (KBag []) = char '.'

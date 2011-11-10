@@ -177,7 +177,7 @@ mapItem = do
 
 -- | Parse a KLabel
 kLabel :: Parser KLabel
-kLabel = quotedKLabel <|> try kBuiltin <|> try freezer <|> try freezerMap <|> wmap
+kLabel = quotedKLabel <|> try kBuiltin <|> try freezer <|> try freezerMap <|> try wmap <|> wbag
        <?> "K label"
 
 freezer :: Parser KLabel
@@ -198,6 +198,13 @@ wmap = do
     spaces
     kmap <- optParens kMap
     return $ WMap kmap
+
+wbag :: Parser KLabel
+wbag = do
+    string "wbag"
+    spaces
+    kbag <- optParens kBag
+    return $ WBag kbag
 
 -- | Parse "quoted" K label: 'Foo___
 quotedKLabel :: Parser KLabel
