@@ -69,7 +69,11 @@ ppKSet (KSet []) = char '.'
 ppKSet (KSet ks) = vsep $ map ppK ks
 
 ppKList (KList []) = char '.'
-ppKList (KList ls) = vsep $ map ppListItem ls
+ppKList (KList ls) = vsep [ ppListItem l | l <- ls, not (isStream l) ]
+
+isStream (IStream _) = True
+isStream (OStream _) = True
+isStream _ = False
 
 ppListItem (ListItem k) = text "ListItem" <> parens (ppK k)
 ppListItem (Buffer k) = ppK k
