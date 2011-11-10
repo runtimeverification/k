@@ -924,10 +924,10 @@ if ($crop == 1 && !@crop_modules) {
 sub default_pdf
 {
     my ($option, $lg) = @_;
-    print "Warning: No module given after option $option.\nChoosing default modules $lg and $lg-SYNTAX.\n";
+    print "Warning: No module given after option $option.\nChoosing default modules $lg-SYNTAX and $lg.\n";
     my @md = ();
-    push(@md, $lg);
     push(@md, "$lg-SYNTAX");
+    push(@md, $lg);
     
     return \@md;
 }
