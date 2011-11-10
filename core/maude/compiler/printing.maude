@@ -98,10 +98,10 @@ fmod DECL-META-PRETTY-PRINT is
   vars Lt R N OpenPars ClosingPars : Nat .
 
   eq getParsAux(St, Lt, R)
-    = if findOut(St, ",", "{", "}", Lt) == notFound
+    = if findOut(St, "`,", "{", "}", Lt) == notFound
       then qid(substr(St, Lt, sd(findClosing(St, "{", "}", Lt), Lt)))
-      else (qid(substr(St, Lt, sd(findOut(St, ",", "{", "}", Lt), Lt))),
-            getParsAux(St, findOut(St, ",", "{", "}", Lt) + 1, R))
+      else (qid(substr(St, Lt, sd(findOut(St, "`,", "{", "}", Lt) + 1, Lt))),
+            getParsAux(St, findOut(St, "`,", "{", "}", Lt) + 2, R))
       fi .
 
   ---- finds a pattern out of balanced parentheses 
