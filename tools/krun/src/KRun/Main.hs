@@ -204,10 +204,12 @@ wrapperArgs config tmpDir cmdFile outFile errFile =
     , "--maudeFile", compiled
     , "--moduleName", mainMod
     , "--outputFile", outFile
-    ] ++ if io then [] else ["--noServer"]
+    ] ++ (if io then [] else ["--noServer"])
+      ++ (if log then ["--createLogs"] else [])
     where File compiled  = config ! "compiled-def"
           String mainMod = config ! "main-module"
           Bool io = config ! "io"
+          Bool log = config ! "log-io"
 
 -- | Flattens a program to a K term.
 flattenProgram :: Config -> ProgramSource -> IO Kast

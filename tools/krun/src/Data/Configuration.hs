@@ -112,6 +112,7 @@ advancedKSettings =
     , Setting "maude-cmd" StringType "Maude command used to execute the definition (search, erewrite, search, ...)"
     , Setting "xsearch-pattern" StringType "Search pattern"
     , Setting "output-mode" StringType "How to display Maude results (options are none, raw, and pretty)"
+    , Setting "log-io" BoolType "Tell the IO server to create logs"
     ]
 
 mkInitConfig :: FilePath -> IO Config
