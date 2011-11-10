@@ -34,3 +34,5 @@ Library
     text,
     ansi-wl-pprint,
     containers
+
+  ghc-prof-options: -auto-all
