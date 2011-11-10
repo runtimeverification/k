@@ -864,35 +864,8 @@ if ($style eq "?") {
     terminate("Option -style requires that a style be given right after");
 }
 
-# Check that at least one module name was given with -latex option
-if ($latex == 1 && !@latexify_modules) {
-    terminate("At least one module name must be given right after -latex");
-}
 
-# Check that at least one module name was given with -pdf option
-if ($pdf == 1 && !@pdf_modules) {
-    terminate("At least one module name must be given right after -pdf");
-}
 
-# Check that at least one module name was given with -ps option
-if ($ps == 1 && !@ps_modules) {
-    terminate("At least one module name must be given right after -ps");
-}
-
-# Check that at least one module name was given with -eps option
-if ($eps == 1 && !@eps_modules) {
-    terminate("At least one module name must be given right after -eps");
-}
-
-# Check that at least one module name was given with -png option
-if ($png == 1 && !@png_modules) {
-    terminate("At least one module name must be given right after -png");
-}
-
-# Check that at least one module name was given with -crop option
-if ($crop == 1 && !@crop_modules) {
-    terminate("At least one module name must be given right after -crop");
-}
 # Create the module name, if not already given, by capitalizing the file name
     if ($language_module_name eq "") {
 	$language_module_name = uc($language_file_name);
@@ -902,6 +875,62 @@ if ($crop == 1 && !@crop_modules) {
 
 # Check the file for syntax errors
     setVerbose() if $verbose;
+
+
+
+# Check that at least one module name was given with -latex option
+if ($latex == 1 && !@latexify_modules) {
+    my $deftemp = default_pdf("-latex", $language_module_name);
+    @latexify_modules = @$deftemp;
+#    print "@latexify_modules\n";
+#    terminate("At least one module name must be given right after -latex");
+}
+
+# Check that at least one module name was given with -pdf option
+if ($pdf == 1 && !@pdf_modules) {
+    my $deftemp = default_pdf("-pdf", $language_module_name);
+    @pdf_modules = @$deftemp;
+#    terminate("At least one module name must be given right after -pdf");
+}
+
+# Check that at least one module name was given with -ps option
+if ($ps == 1 && !@ps_modules) {
+    my $deftemp = default_pdf("-ps", $language_module_name);
+    @ps_modules = @$deftemp;
+#    terminate("At least one module name must be given right after -ps");
+}
+
+# Check that at least one module name was given with -eps option
+if ($eps == 1 && !@eps_modules) {
+    my $deftemp = default_pdf("-eps", $language_module_name);
+    @eps_modules = @$deftemp;
+#    terminate("At least one module name must be given right after -eps");
+}
+
+# Check that at least one module name was given with -png option
+if ($png == 1 && !@png_modules) {
+    my $deftemp = default_pdf("-png", $language_module_name);
+    @png_modules = @$deftemp;
+#    terminate("At least one module name must be given right after -png");
+}
+
+# Check that at least one module name was given with -crop option
+if ($crop == 1 && !@crop_modules) {
+    my $deftemp = default_pdf("-crop", $language_module_name);
+    @crop_modules = @$deftemp;
+#    terminate("At least one module name must be given right after -crop");
+}
+
+sub default_pdf
+{
+    my ($option, $lg) = @_;
+    print "Warning: No module given after option $option.\nChoosing default modules $lg and $lg-SYNTAX.\n";
+    my @md = ();
+    push(@md, $lg);
+    push(@md, "$lg-SYNTAX");
+    
+    return \@md;
+}
     
 # build inclusion trees
 appendFileInTree("$language_file_name", "");
