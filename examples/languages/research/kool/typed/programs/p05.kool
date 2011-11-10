@@ -14,9 +14,9 @@ class b extends a {
 class main extends b {
   method m1(y:int):int {
     return  y+x ;
+// stucks when evaluating x as the constructor of b was never called
   }
   method main() {
     print(m1(4));
   }
 }
-

@@ -81,6 +81,7 @@ module KOOL-TYPED-DYNAMIC-SYNTAX
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X:#Id = E1 to E2 do S) = {var X:int=E1; while X <= E2 do {S X=X+1;}}
   macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
+  macro var X : T:Type = E; = var X : T; X = E;
   macro class C:#Id {Ss:Stmts} = class C extends object {Ss}
   macro method X:#Id (Es:Exps) S:Stmt = method X(Es) : void S
 end module

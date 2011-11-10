@@ -22,8 +22,7 @@ class colorpoint extends point {
   method setColor(c:int):void {
     color = c;
   }
-  method printColor():int {  // it is OK to have a return type and no return value
-    // a value will be automatically generated (0 here)
+  method printColor() {
     print(color);
   }
 }

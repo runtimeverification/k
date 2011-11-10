@@ -1,6 +1,7 @@
 class a {
   var i:int, j:int;
   method a() {
+    i = 0;
     j = ++i+1;
   }
   method aa():int {
@@ -59,7 +60,7 @@ class c extends b {
 
 class main {
   method p(o:class a) {
-    print(o.f(), o.g(), o.h());
+    print(o.f());print(o.g());print(o.h());
   }
   method main() {
     p(new a());
