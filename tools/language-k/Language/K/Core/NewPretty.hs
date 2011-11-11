@@ -97,6 +97,7 @@ ppCellContent (BagContent bag) = ppKBag bag
 ppCellContent (ListContent list) = ppKList list
 ppCellContent (MapContent map) = ppKMap map
 ppCellContent (SetContent set) = ppKSet set
+ppCellContent (NoParse str) = red (char '(') <> text str <> red (char ')')
 
 
 ppStartTag label = green $ char '<' <> text label <> char '>'

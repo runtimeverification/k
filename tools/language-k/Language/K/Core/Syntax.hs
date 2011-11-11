@@ -75,4 +75,5 @@ data CellContent
     | BagContent KBag
     | SetContent KSet
     | MapContent KMap
+    | NoParse String
     deriving (Eq, Ord, Show, Data, Typeable)

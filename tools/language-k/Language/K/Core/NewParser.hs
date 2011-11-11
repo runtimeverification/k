@@ -67,12 +67,12 @@ bagItem' = do
 cellItem :: Parser BagItem
 cellItem = do
     name <- startTag
-    content <- cellContent
+    content <- cellContent name
     endTag name
     return $ CellItem name content
 
-cellContent :: Parser CellContent
-cellContent = try mapContent <|> try bagContent <|> try listContent <|> try setContent <|> kContent
+cellContent :: String -> Parser CellContent
+cellContent name = try mapContent <|> try bagContent <|> try listContent <|> try setContent <|> try kContent <|> noParse name
 
 kContent :: Parser CellContent
 kContent = KContent <$> k
@@ -88,6 +88,9 @@ setContent = SetContent <$> kSet
 
 mapContent :: Parser CellContent
 mapContent = MapContent <$> kMap
+
+noParse :: String -> Parser CellContent
+noParse name = NoParse <$> manyTill anyChar (try . lookAhead $ endTag name)
 
 startTag :: Parser String
 startTag = do
