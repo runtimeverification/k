@@ -39,11 +39,9 @@ plugFreezer k ks = mapK (plug ks) k
 
 -- | Combine a KLabel and a list of arguments to form the original syntax.
 zipSyntax (Syntax s : xs) as = bold (text s) : zipSyntax xs as
-zipSyntax (Hole : xs) (a : as)
-    -- Somewhat hackish way to reduce parentheses in output
-    -- TODO: doesn't work well with colors
-    | all isAlphaNum (show a) || show a == "□" = a : zipSyntax xs as
-    | otherwise = parens a : zipSyntax xs as
+-- TODO: need original precedences, etc to get the parentheses right.
+-- For now, simply don't add any parentheses to the output.
+zipSyntax (Hole : xs) (a : as) =  a : zipSyntax xs as
 zipSyntax _ _ = []
 
 ppKLabel (KInt i) = integer i
