@@ -10,12 +10,19 @@ import Text.Parsec.String
 
 -- | Parse a K term
 k :: Parser K
-k = try kra <|> try kApp <|> freezerVar
+k = kra <|> freezerVar
 
 optParens p = parens p <|> p
 
 kra :: Parser K
-kra = emptyK <|> (Kra <$> kApp `sepBy2` (symbol "~>"))
+kra = emptyK <|> kra'
+
+kra' :: Parser K
+kra' = do
+    ks <- kApp `sepBy1` (symbol "~>")
+    case ks of
+        [k] -> return k
+        _   -> return $ Kra ks
 
 emptyK :: Parser K
 emptyK = do
