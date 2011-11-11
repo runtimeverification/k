@@ -7,6 +7,7 @@ output-mode:            pretty
 io:                     true
 do-search:              false
 xsearch-pattern:        "=>! B:Bag"
+log-io:                 false
 
 
 groups:
