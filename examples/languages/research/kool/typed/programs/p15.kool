@@ -1,10 +1,10 @@
 class i {
-  var value:int;
+  var val:int;
   method i(v:int) {
-    value = v;
+    val = v;
   }
   method m1():class g {
-    return (new g(value+9));  // creates and returns an object
+    return (new g(val+9));  // creates and returns an object
   }
 }
 

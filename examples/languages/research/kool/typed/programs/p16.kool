@@ -8,8 +8,8 @@ class i {
 
 class g {
   var o:class i;
-  method g(obj:class i) {
-    o = obj;
+  method g(o:class i) {
+    this.o = o;
   }
   method do1():int {
     var f:int = 9;
@@ -19,7 +19,7 @@ class g {
 
 class main {
   method main() {
-    var t:class i = new i(1), y:class g = new g(t);  // passes an object
+    var t:class i = new i(1), y:class g = new g(t);  // passes an oect
     print(y.do1());
   }
 }
