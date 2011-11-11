@@ -68,7 +68,7 @@ module KOOL-TYPED-DYNAMIC-SYNTAX
                 | "return" Exp ";"                      [:strict:]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [:strict:]
-                | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
+                | "try" Stmt "catch" "(" Exp ")" Stmt   [:prec(90):]
                 | "throw" Exp ";"                       [:strict:]
                 | "spawn" Stmt                          [:prec(90):]
                 | "acquire" Exp ";"                     [:strict:]
@@ -412,12 +412,12 @@ class (static scoping). */
 
   syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
-  rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
-       <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
+  rule <k> (try S1 catch(X : T) S2 => S1 ~> popx) ~> K </k>
+       <control> <xstack> . => (X : T,S2,K,Env,C) ...</xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
-  rule <k> throw V; ~> _ => {var X:int=V; S2} ~> K </k>
-       <control> <xstack> (X,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
+  rule <k> throw V; ~> _ => if subtype(typeOf(V), T) then {var X : T=V; S2} else throw V; ~> K </k>
+       <control> <xstack> (X : T,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
        <env> _ => Env </env>
 
    rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
@@ -519,7 +519,7 @@ Useful for checking side conditions to typing rules.
 /*@\subsection{Subtyping constraints}
 The subclass relation introduces a subtyping relation.  
 */
-  syntax K ::= "subtype" "(" Types "," Types ")"
+  syntax Exp ::= "subtype" "(" Types "," Types ")"
 
   rule subtype(,) => true
   rule subtype((T1:Type,T2:Type,Ts:Types),(T1':Type,T2':Type,Ts':Types))
