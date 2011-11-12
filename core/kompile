@@ -928,6 +928,7 @@ sub default_pdf
     my @md = ();
     push(@md, "$lg-SYNTAX");
     push(@md, $lg);
+    $topmatter = 'README.tex' if $topmatter eq "";
     
     return \@md;
 }
