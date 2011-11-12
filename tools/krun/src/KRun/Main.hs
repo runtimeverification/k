@@ -35,7 +35,7 @@ import Data.Configuration
 import Distribution.Desk.Utils
 import KRun.InitialValueParser
 import KRun.Types
-import KRun.XPath
+--import KRun.XPath
 
 main :: IO ()
 main = do
