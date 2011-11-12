@@ -2,7 +2,7 @@ install:
 	@${MAKE} try-install || (echo -e '\e[91mNOTE: Please type `make clean` followed by `cabal update` and try again before reporting any errors.\e[0m'; false)
 
 try-install:
-ifneq (,$(shell ls $$K_BASE/tools/maude-hs 2>/dev/null))
+ifneq (,$(shell ls ${K_BASE}/tools/maude-hs 2>/dev/null))
 	@cd ${K_BASE}/tools/maude-hs; hg pull -u 
 else
 	@hg clone http://code.google.com/p/maude-hs ${K_BASE}/tools/maude-hs
