@@ -12,6 +12,17 @@ endif
 	@cd ${K_BASE}/tools/krun; cabal install
 	@cp ${K_BASE}/tools/krun/dist/build/krun/krun ${K_BASE}/core
 
+debug-vars:
+	@echo "K_BASE is set to:"
+	@echo ${K_BASE}
+	@echo "Testing if ${K_BASE}/tools/maude-hs exists:"
+ifneq (,$(wildcard ${K_BASE}/tools/maude-hs))
+	@echo "It exists."
+else
+	@echo "It does not exist."
+endif
+	
+
 clean:
 	cd ${K_BASE}/tools/language-k; cabal clean
 	cd ${K_BASE}/tools/krun; cabal clean
