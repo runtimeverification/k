@@ -54,19 +54,13 @@ class c extends b {
 }
 class main {
   method p(o) {
-    print(o.f());
-    print(o.g());
-    print(o.h());
-    return 0;
+    print(o.f(), " ", o.g(), " ", o.h(), "\n");
   }
   method main() {
     this.p(new a());
     this.p(new b());
     this.p(new c());
-    return 0;
   }
 }
 
 // 2 2 3 11 3 3 102 10402 10402  ???
-
-

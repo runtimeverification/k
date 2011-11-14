@@ -1,53 +1,45 @@
 
 module KOOL-UNTYPED-SYNTAX
 
-  syntax #Id ::= "main"
-//@ KOOL addition:  the ``object'' class.  
-  syntax #Id ::= "object"
+/*@ \section{Syntax}
+The syntax of KOOL extends that of SIMPLE with object-oriented constructs.
+We start by first including the syntax of SIMPLE that stays unchanged,
+followed by the specific changes and additions of KOOL. */
 
+/*@ \subsection{Syntax from SIMPLE}
+The syntax below is taken ad litteram from SIMPLE.
+We removed from the \K annotated syntax of SIMPLE two constructs, namely
+the one for function declarations (because we want to call them methods now)
+and the one for function application (because application is not strict in the
+first argument anymore---needs to initiate dynamic method dispatch). */
+
+  syntax #Id ::= "main"
   syntax Ids ::= List{#Id,","} [:prec(70):]
   syntax Exps ::= List{Exp,","}
-
   syntax Decl ::= "var" Exps ";"
 
-//@ KOOL additions: function is renamed into method and classes are introduced.
-  syntax Decl ::= "method" #Id "(" Ids ")" Stmt
-                | "class" #Id "{" Stmts "}"
-                | "class" #Id "extends" #Id "{" Stmts "}"
-
   syntax Exp ::= #Int | #Bool | #String | #Id
-               | "++" Exp               [:prec(0):]
-               | Exp "+" Exp            [:strict prec(33) gather(E e):]
-               | Exp "-" Exp            [:strict prec(33) gather(E e):]
-               | Exp "*" Exp            [:strict prec(31) gather(E e):]
-               | Exp "/" Exp            [:strict prec(31) gather(E e):]
-               | Exp "%" Exp            [:strict prec(31) gather(E e):]
-               | "-" Exp                [:strict:]
-               | Exp "<" Exp            [:strict prec(37):]
-               | Exp "<=" Exp           [:strict prec(37):]
-               | Exp ">" Exp            [:strict prec(37):]
-               | Exp ">=" Exp           [:strict prec(37):]
-               | Exp "==" Exp           [:strict prec(37):]
-               | Exp "!=" Exp           [:strict prec(37):]
-               | Exp "and" Exp          [:strict prec(55) gather(E e):]
-               | Exp "or" Exp           [:strict prec(59) gather(E e):]
-               | "not" Exp              [:strict prec(53):]
-               | Exp "[" Exps "]"       [:strict prec(1):]
-               | "sizeOf" "(" Exp ")"   [:strict:]
-//@ KOOL addition: unlike in SIMPLE, application is only strict(2) 
-  syntax Exp ::=  Exp "(" Exps ")"       [:strict(2) prec(2):]
+               | "++" Exp              [:prec(0):]
+               | Exp "+" Exp           [:strict prec(33) gather(E e):]
+               | Exp "-" Exp           [:strict prec(33) gather(E e):]
+               | Exp "*" Exp           [:strict prec(31) gather(E e):]
+               | Exp "/" Exp           [:strict prec(31) gather(E e):]
+               | Exp "%" Exp           [:strict prec(31) gather(E e):]
+               | "-" Exp               [:strict:]
+               | Exp "<" Exp           [:strict prec(37):]
+               | Exp "<=" Exp          [:strict prec(37):]
+               | Exp ">" Exp           [:strict prec(37):]
+               | Exp ">=" Exp          [:strict prec(37):]
+               | Exp "==" Exp          [:strict prec(37):]
+               | Exp "!=" Exp          [:strict prec(37):]
+               | Exp "and" Exp         [:strict prec(55) gather(E e):]
+               | Exp "or" Exp          [:strict prec(59) gather(E e):]
+               | "not" Exp             [:strict prec(53):]
+               | Exp "[" Exps "]"      [:strict prec(1):]
+               | "sizeOf" "(" Exp ")"  [:strict:]
                | "read" "(" ")"
-               | Exp "=" Exp            [:strict(2) prec(40) gather (e E):]
+               | Exp "=" Exp           [:strict(2) prec(40) gather (e E):]
 
-// Kool additions: new, this, super, object space, instanceOf, cast
-  syntax Exp ::= "new" #Id "(" Exps ")" [:strict(2) prec(1):]
-               | "this"
-               | "super"
-               | Exp "." #Id            [:prec(1):]
-               | Exp "instanceOf" #Id   [:prec(0) strict(1):]
-               | "cast" Exp "to" #Id    [:prec(0) strict(1):]
-                 
-              
   syntax Stmt ::= "{" "}"
                 | "{" Stmts "}"
                 | Exp ";"                               [:strict prec(45):]
@@ -68,32 +60,64 @@ module KOOL-UNTYPED-SYNTAX
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts                         [:prec(100) gather(e E):]
 
-
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X:#Id = E1 to E2 do S) = {var X=E1; while X <= E2 do {S X=X+1;}}
   macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
   macro var X = E; = var X; X = E;
-//@ KOOL addition:  all classes extend the ``object'' class.  
+
+/*@ \subsection{KOOL Additional Syntax}
+We now introduce the new syntax of KOOL, which extends that of SIMPLE
+above.  First, we need a new dedicated identifier, \texttt{object}, for the
+default top-most class.  Second, we rename the \texttt{function} keyword of
+SIMPLE into \texttt{method}.  Third, we add syntax for class declarations
+together with a macro making classes which extend nothing to extend
+\texttt{object}.  Fourth, we change the strictness attribute of application
+into \texttt{strict(2)}.  Finally, we add syntax and corresponding strictness
+for the KOOL object-oriented constructs. */
+
+  syntax #Id ::= "object"
+
+  syntax Decl ::= "method" #Id "(" Ids ")" Stmt
+
+  syntax Decl ::= "class" #Id "{" Stmts "}"
+                | "class" #Id "extends" #Id "{" Stmts "}"
   macro class Class:#Id {Ss:Stmts} = class Class extends object {Ss}
+
+  syntax Exp ::=  Exp "(" Exps ")"       [:strict(2) prec(2):]
+
+  syntax Exp ::= "new" #Id "(" Exps ")" [:strict(2) prec(1):]
+               | "this"
+               | "super"
+               | Exp "." #Id            [:prec(1):]
+               | Exp "instanceOf" #Id   [:prec(0) strict(1):]
+               | "cast" Exp "to" #Id    [:prec(0) strict(1):]
 end module
 
 
 module KOOL-UNTYPED
   imports KOOL-UNTYPED-SYNTAX
 
-  syntax Val ::= #Int | #Bool | #String
-               | "array" "(" #Nat "," #Nat ")"
-/*@ KOOL additions:  lambda now takes current object as first argument.
+/*@ \section{Semantics}
+We first discuss the new configuration of KOOL, which extends that of
+SIMPLE, then we include the semantics of the constructs borrowed from
+SIMPLE, and then we discuss the semantics of the additional KOOL
+constructs. */
 
-Also introducing the object value ``obj''.*/
-  syntax Val ::= "lambda" "(" K "," Ids "," Stmt ")"
-               | "obj" "(" Bag ")"
-               | "objRef" "(" #Id "," #Nat ")" 
-
-  syntax Exp ::= Val
-
-  syntax KResult ::= Val
-
+/*@ \subsection{Configuration}
+KOOL adds two nested cells to the configuration of SIMPLE.
+The cell \textsf{crntObj} holds data pertaining to the current object,
+that is, the object environment in which the code currently in cell
+\textsf{k} executed: \textsf{crntClass} holds the current class (which
+can change as methods of the current object are invoked );
+\textsf{envStack} holds the stack of environments as a list,
+each layer corresponding to one class in the objects' instance class
+hierarchy; \textsf{location}, which is optional, holds the location in
+the store where the current object is or has to be located (this is
+useful both for closures and for the semantics of object creation).
+The cell \textsf{classes} holds all the declared classes, each class
+being held in its own \textsf{class} cell which contains a name
+(\textsf{className}), a parent (\textsf{extends}), and the actual
+member declarations (\textsf{declarations}). */
 
   configuration <T color="red">
                   <threads color="orange">
@@ -121,7 +145,7 @@ Also introducing the object value ``obj''.*/
                   <in color="magenta" stream="stdin"> .List </in>
                   <out color="brown" stream="stdout"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
-// KOOL addition                  
+// KOOL addition
                   <br/>
                   <classes color="Fuchsia">
                      <class multiplicity="*" color="Fuchsia">
@@ -131,6 +155,25 @@ Also introducing the object value ``obj''.*/
                      </class>
                   </classes>
                 </T>
+
+/*@ \subsection{Semantics from SIMPLE}
+The semantics below is taken over from SIMPLE unchanged.
+The semantics of function declaration and invocation, including the
+use of the special \texttt{lambda} abstraction value, needs to change
+in order to account for the fact that methods are now invoked into
+their object's environment.  The semantics of function return actually
+stays unchanged.  Also, the semantics of program initialization is 
+different: now we have to create an instance of the \texttt{main}
+class which also calls the constructor \texttt{main()}, while in
+SIMPLE we only had to invoke the function \texttt{main()}. */
+
+  syntax Val ::= #Int | #Bool | #String
+               | "array" "(" #Nat "," #Nat ")"
+  syntax Vals ::= List{Val,","}
+
+  syntax Exp ::= Val
+
+  syntax KResult ::= Val
 
   syntax K ::= "undefined" [:latex("\bot"):]
 
@@ -144,8 +187,6 @@ Also introducing the object value ``obj''.*/
        <store>... . => L |-> array(L +Nat 1, N)
                        L +Nat 1 .. L +Nat N |-> undefined ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
-
-  syntax Vals ::= List{Val,","}
 
   context var X[[HOLE]];
 
@@ -161,39 +202,11 @@ Also introducing the object value ``obj''.*/
          }
        }  [:structural:]
 
-/*@ \subsection{Method declaration}
-Like in SIMPLE, method names are added to the environment and bound 
-to their code. This way, we can easily allow objects to pass and change their
-methods (see p23). */
-
-  rule <k> method F:#Id(Xs:Ids) S:Stmt => . ...</k>
-       <crntClass> Class:#Id </crntClass>
-       <location> OL:#Nat </location>
-       <env> Env => Env[L/F] </env>
-       <store>... . => L|->lambda(objRef(Class,OL),Xs,S) ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
-
-//@ \subsection{Class declaration}       
-  rule <k> class Class1:#Id extends Class2:#Id { Ss:Stmts } => . <_/k>
-       <classes>... (. => <class>
-                            <className> Class1 </className>
-                            <extends> Class2 </extends>
-                            <declarations> Ss </declarations>
-                        </class>)
-       ...</classes>
-
   syntax K ::= "execute"
-  rule <k> execute => new main(); </k> <env> . </env>
 
   rule <k> X => V:Val ...</k>
        <env>...X|->L...</env>
        <store>...L|->V...</store> [:transition:]
-
-// KOOL addition       
-// to avoid parsing ambiguity, use _._(this,X) instead of this.X
-  rule <k> X => _._(this,X) ...</k>
-       <env> Env </env>
-    if notBool(X in keys(Env))
 
   context ++([HOLE] => l-value([HOLE]))
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
@@ -222,6 +235,144 @@ methods (see p23). */
   rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [:transition:]
 
   rule sizeOf(array(_,N)) => N
+
+/*@ The semantics of return, as well as the definition of
+\texttt{bindto}, stay unchanged */
+  rule <k> return(V); ~> _ => V ~> K </k>
+       <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
+       <env> _ => Env </env>
+  syntax Val ::= "nothing"
+  rule return; => return nothing;   [:structural:]
+
+  syntax K ::= "bindto" "(" Ids "," Vals ")"
+  rule <k> bindto((X,Xs => Xs),(V,Vs:Vals => Vs)) ...</k>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> V ...</store>
+       <nextLoc> L => L +Nat 1 </nextLoc>
+  rule <k> bindto(.Ids,.Exps) => . ...</k>
+
+  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
+
+  context ([HOLE] => l-value([HOLE])) = _
+  rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [:transition:]
+
+  rule {} => . [:structural:]
+  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
+
+  syntax K ::= "env" "(" Map ")"
+  rule <k> env(Env) => . ...</k> <env> _ => Env </env> [:structural:]
+
+  rule (env(_) => .) ~> env(_) [:structural:]
+
+  rule S1:Stmt S2:Stmt => S1 ~> S2
+
+  rule V; => .
+
+  rule if  true then S else _ => S
+  rule if false then _ else S => S
+
+  rule <k> while E:Exp do S
+    => if E then {S while E do S} else {} ...</k> [:structural:]
+
+  rule <k> print(V,Vs => Vs); ...</k> <out>... . => ListItem(V) </out> [:transition:]
+  rule print(); => . [:structural:]
+
+  syntax ListItem ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
+  syntax K ::= "popx"
+  rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
+       <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
+       <env> Env </env>
+  rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
+  rule <k> throw V; ~> _ => {var X=V; S2} ~> K </k>
+       <control> <xstack> (X,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
+       <env> _ => Env </env>
+
+   rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
+        (. => <thread>... <k> S </k> <env> Env </env> ...</thread>)
+   rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
+        <busy> Busy:Set => Busy -Set keys(H) </busy>
+   rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
+        <busy> Busy (. => SetItem(V)) </busy>
+     if notBool(V in Busy) [:transition:]
+   rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
+   rule <k> release V; => . ...</k> <holds>... V|->(N => _-Int_(N,1)) ...</holds>
+     if N >Nat 0
+   // used prefix notation for -Int because of parsing problems
+   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
+        <busy>... SetItem(V)=>. ...</busy>
+   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> [:transition:]
+
+  syntax Exp ::= "l-value" "(" K ")"
+  syntax Val ::= "loc" "(" #Nat ")"
+  rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
+  context l-value(_[[HOLE]])
+  context l-value([HOLE][_])
+  rule <k> l-value(lookup(L)) => loc(L) ...</k>
+
+  syntax List{K} ::= #Nat ".." #Nat
+  rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
+
+
+/*@ \subsection{KOOL Additional Semantics}
+We next define the semantics of the additional KOOL features. */
+
+/*@ \subsubsection{Additional values}
+We need to add two more values to the language, namely objects and
+method closures.  An object value consists of an \texttt{obj}-wrapped
+bag containing the current class of the object and the environment
+stack of the object; the current class of an object will always be one
+of the classes mapped to an environment in the environment stack of
+the object.  A method closure encapsulates the method's parameters and
+code, as well as the ``object context'' in which the method code
+should execute.  This object context includes the current class of the
+object (the first argument of \texttt{closure}) and the object
+environment stack (located in the object stored at the location
+specified as the second argument of \texttt{closure}). */
+
+  syntax Val ::= "obj" "(" Bag ")"
+               | "closure" "(" #Id "," #Nat "," Ids "," Stmt ")"
+
+/*@ \subsubsection{Class declaration}
+Initially, the classes forming the program are moved into their
+corresponding cells: */
+
+  rule <k> class Class1:#Id extends Class2:#Id { Ss:Stmts } => . <_/k>
+       <classes>... (. => <class>
+                            <className> Class1 </className>
+                            <extends> Class2 </extends>
+                            <declarations> Ss </declarations>
+                        </class>)
+       ...</classes>
+
+/*@ \subsubsection{Program initialization}
+Once all the classes are processed as above, the computation item
+\texttt{execute}, which was placed right after the program in the
+initial configuration, is reached.  In SIMPLE, the program was
+initialized by calling the method \texttt{main()}.  In KOOL, the
+program is initialized by creating an object of class \texttt{main}.
+This will also implicitly call the method \texttt{main()} (the
+\texttt{main} class constructor). */
+
+  rule <k> execute => new main(); </k> <env> . </env>
+
+/*@ \subsubsection{Method declaration}
+Like in SIMPLE, method names are added to the environment and bound 
+to their code.  This way, we can easily allow objects to pass and change their
+methods (see p23). */
+
+  rule <k> method F:#Id(Xs:Ids) S:Stmt => . ...</k>
+       <crntClass> Class:#Id </crntClass>
+       <location> OL:#Nat </location>
+       <env> Env => Env[L/F] </env>
+       <store>... . => L|->closure(Class,OL,Xs,S) ...</store>
+       <nextLoc> L => L +Nat 1 </nextLoc>
+
+// KOOL addition       
+// to avoid parsing ambiguity, use _._(this,X) instead of this.X
+  rule <k> X => _._(this,X) ...</k>
+       <env> Env </env>
+    if notBool(X in keys(Env))
 
 /*@\subsection{Method call}
 SKOOL has dynamic method dispatch, like most OO languages.
@@ -264,7 +415,7 @@ the method. When that happens, just lookup the function value at location L. */
        <store>... L |-> V ...</store>
 
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
-  rule <k> _`(_`)(lambda(objRef(Class,OL:#Nat),Xs:Ids,S:Stmt), Vs:Vals) ~> K:K 
+  rule <k> _`(_`)(closure(Class,OL:#Nat,Xs:Ids,S:Stmt), Vs:Vals) ~> K:K 
         => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> C:Bag 
           <fstack> . => (Env,K,C <crntObj> Obj' </crntObj>) ...</fstack> 
@@ -272,26 +423,6 @@ the method. When that happens, just lookup the function value at location L. */
         </control>
        <env> Env => . </env>
        <store>... OL |-> obj(<crntClass>_:#Id</crntClass>Obj:Bag) ...</store>
-
-
-  rule <k> return(V); ~> _ => V ~> K </k>
-       <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
-       <env> _ => Env </env>
-
-  syntax Val ::= "nothing"
-  rule return; => return nothing;   [:structural:]
-
-  syntax K ::= "bindto" "(" Ids "," Vals ")"
-  rule <k> bindto((X,Xs => Xs),(V,Vs:Vals => Vs)) ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> V ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.Ids,.Exps) => . ...</k>
-
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
-
-  context ([HOLE] => l-value([HOLE])) = _
-  rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [:transition:]
 
        
 /*@ \subsection{New}
@@ -387,67 +518,8 @@ class (static scoping). */
   rule <k> cast obj((<crntClass> _:K </crntClass> Obj)) to Class 
         => obj(<crntClass> Class </crntClass> Obj) ...</k>
 
-  rule {} => . [:structural:]
-  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
-
-  syntax K ::= "env" "(" Map ")"
-  rule <k> env(Env) => . ...</k> <env> _ => Env </env> [:structural:]
-
-  rule (env(_) => .) ~> env(_) [:structural:]
-
-  rule S1:Stmt S2:Stmt => S1 ~> S2
-
-  rule V; => .
-
-  rule if  true then S else _ => S
-  rule if false then _ else S => S
-
-  rule <k> while E:Exp do S
-    => if E then {S while E do S} else {} ...</k> [:structural:]
-
-  rule <k> print(V,Vs => Vs); ...</k> <out>... . => ListItem(V) </out> [:transition:]
-  rule print(); => . [:structural:]
-
-  syntax ListItem ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
-  syntax K ::= "popx"
-  rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
-       <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
-       <env> Env </env>
-  rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
-  rule <k> throw V; ~> _ => {var X=V; S2} ~> K </k>
-       <control> <xstack> (X,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
-       <env> _ => Env </env>
-
-   rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
-        (. => <thread>... <k> S </k> <env> Env </env> ...</thread>)
-
-   rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
-        <busy> Busy:Set => Busy -Set keys(H) </busy>
-
-   rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
-        <busy> Busy (. => SetItem(V)) </busy>
-     if notBool(V in Busy) [:transition:]
-   rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
-
-   rule <k> release V; => . ...</k> <holds>... V|->(N => _-Int_(N,1)) ...</holds>
-     if N >Nat 0
-   // used prefix notation for -Int because of parsing problems
-   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
-        <busy>... SetItem(V)=>. ...</busy>
-
-   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> [:transition:]
-
-
-  syntax Exp ::= "l-value" "(" K ")"
-  syntax Val ::= "loc" "(" #Nat ")"
-
-  rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
-//@ KOOL addiiton: Implicit member access
+//@ KOOL addition: Implicit member access
   rule <k> l-value(X => _._(this,X)) <_/k> <env> Env </env> if notBool(X in keys(Env))
-
-
-  context l-value(_[[HOLE]])
-  context l-value([HOLE][_])
 
 /*@\paragraph{Explicit member access}
 First evaluate the object, then lookup its corresponding member staticaly.
@@ -462,8 +534,6 @@ cells as first argument; these cells are also defined below.*/
                         </envStack>, X)) 
        ...</k>
   
-  rule <k> l-value(lookup(L)) => loc(L) ...</k>
-
   syntax K ::= #Id "::" BagItem   
   // Id is the class name, BagItem is its corresp. environment
   syntax K ::= "lookupMember" "(" BagItem "," #Id ")"  
@@ -475,12 +545,6 @@ cells as first argument; these cells are also defined below.*/
 /// Otherwise, recurse through the object environment stack
   rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)  => . ...</envStack>, X)
     if notBool(X in keys(Env)) [structural]
-
-
-
-  syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
 
 end module
 
