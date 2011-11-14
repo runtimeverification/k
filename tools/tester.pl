@@ -45,8 +45,8 @@ sub runTest {
 	my $expectedOutputFile = $fullFilename;
 	my ($baseFilename, $dirname, $suffix) = fileparse($fullFilename,qr/\.out(\.[0-9]+)?/);
 	$suffix =~ /\.out(\.[0-9]+)?/;
-  my $testEnding = $1;
-  #print "Suffix: $suffix\n";
+	my $testEnding = $1;
+	# print "Suffix: $suffix\n";
 	my $pgmFile = catfile($dirname,"..",$baseFilename);
 	my $baseTestFile = catfile($dirname,$baseFilename);
 	if ($suffix eq "") { 
@@ -54,15 +54,16 @@ sub runTest {
 		next; 
 	}
 	#print "Processing $baseFilename version $suffix\n";
-	if ($suffix ne ".out") {
-		$inputFile = "$baseTestFile.in$testEnding";
+	my $possibleInFile = "$baseTestFile.in$testEnding";
+	if (-e $possibleInFile) {
+		$inputFile = $possibleInFile;
 	} 
 	my $actualOutputFile = "$baseTestFile.stdout$testEnding";
 	my $actualErrorFile = "$baseTestFile.stderr$testEnding";
-	#print "$KRUN $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile\n";
+	# print "$KRUN $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile\n";
 	unlink($actualOutputFile,$actualErrorFile);
 	`$KRUN $krunFlag $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile`;
-        `echo >> $actualOutputFile`;
+	`echo >> $actualOutputFile`;
 	if (-s $actualErrorFile) {
 		reportError($fullFilename,$timer);
 	} else {
@@ -70,7 +71,6 @@ sub runTest {
     unlink ($diffFile);\
 		`echo | cat $expectedOutputFile - |  diff -B - $actualOutputFile  >$diffFile`;
 		if (-s $diffFile) {
-                        
 			reportFailure($fullFilename,$timer);
 		} else {
 			reportSuccess($fullFilename,$timer);
