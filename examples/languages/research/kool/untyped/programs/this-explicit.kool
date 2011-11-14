@@ -1,5 +1,7 @@
+// Testing the explicit use of "this"
+
 class c {
-  method c() { return 0; }
+  method c() {}
   method m1() {
     return this.m2();
   }
@@ -7,12 +9,11 @@ class c {
     return 13;
   }
 }
+
 class main {
   method main() {
-    print((new c()).m1());
-    return 0;
+    print((new c()).m1(), "\n");
   }
 }
 
 // 13
-

@@ -1,4 +1,4 @@
-// This program tests super in combination with dynamic method dispatch.
+// Testing super in combination with dynamic method dispatch
 
 class a {
   var i;
@@ -9,10 +9,10 @@ class a {
     return j;
   }
   method f() {
-    return this.a();
+    return a();
   }
   method g() {
-    return this.f();
+    return f();
   }
   method h() {
     return (i + j);
@@ -35,7 +35,7 @@ class b extends a {
     return super.h();
   }
   method h() {
-    return this.g();	   
+    return g();	   
   }
 }
 
