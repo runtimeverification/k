@@ -16,7 +16,7 @@ TESTS =
 
 
 # this is a space separated list of directories containing io_tests
-IO_TESTS = programs/tests
+IO_TESTS =
 
 # this is a flag used when calling krun to be used when doing io_tests
 IO_TEST_FLAG = "--output-mode=none"
