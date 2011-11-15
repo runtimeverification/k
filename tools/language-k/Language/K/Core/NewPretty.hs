@@ -1,7 +1,8 @@
+{-# LANGUAGE PatternGuards #-}
 module Language.K.Core.NewPretty where
 
 import Data.Char (isAlphaNum)
-import Data.List (intersperse)
+import Data.List (intersperse, stripPrefix)
 import Data.Map (fromList, toList)
 import qualified Data.Map as Map
 import Language.K.Core.Syntax
@@ -13,6 +14,12 @@ printDoc doc = do
 
 ppK (Kra []) = char '.'
 ppK (Kra ks) = hsep $ intersperse (bold . blue $ text "~>") (map ppK ks)
+-- ugly special-case for Lists to avoid pretty-printing .List{"X"}
+ppK (KApp klabel [k, KApp emptyList []])
+    | Just cons1 <- getListCons klabel
+    , Just cons2 <- getListCons emptyList
+    , cons1 == cons2
+    = ppK k
 ppK (KApp (Freezer k) ks) = ppK $ plugFreezer k ks
 ppK (KApp klabel []) = ppKLabel klabel
 ppK (KApp (KLabel ss) ks) = hsep $ zipSyntax ss (map ppK ks)
@@ -20,6 +27,15 @@ ppK (KApp klabel ks) = ppKLabel klabel <> parens (hsep $ punctuate comma (map pp
 ppK FreezerHole = text "□"
 -- shouldn't happen:
 ppK (FreezerVar s) = red $ text s
+
+getListCons :: KLabel -> Maybe String
+getListCons (KLabel [Syntax l]) = do
+    x <- stripPrefix ".List{" l
+    case reads x of
+        [(str, "}")] -> return str
+        _ -> Nothing
+getListCons (KLabel [Hole, Syntax l, Hole]) = Just l
+getListCons _ = Nothing
 
 plugFreezer :: K -> [K] -> K
 plugFreezer k ks = mapK (plug ks) k
@@ -50,6 +66,8 @@ ppKLabel (KBool True) = text "true"
 ppKLabel (KBool False) = text "false"
 ppKLabel (KString s) = text (show s)
 ppKLabel (Freezer k) = text "freezer" <> parens (ppK k)
+-- don't print .List{"X"}:
+ppKLabel kl | Just _ <- getListCons kl = empty
 ppKLabel (KLabel ss) = hcat $ map ppSyntax ss
     where ppSyntax (Syntax s) = text s
           ppSyntax Hole = char '_'
