@@ -1,14 +1,12 @@
-Name:               pcf-untyped
-Version:            0.1.0
-Synopsis:           Plotkin's Programming Computable Functions (PCF)
-License:            MIT
-Authors:            David Lazar
-Maintainer:         David Lazar <lazar6@illinois.edu>
-Tags:               lambda-calculus, call-by-value, classic
+name:               pcf-untyped
+version:            0.1.0
+synopsis:           Plotkin's Programming Computable Functions (PCF)
+license:            MIT
+authors:            David Lazar
+maintainer:         David Lazar <lazar6@illinois.edu>
+tags:               lambda-calculus, call-by-value, classic
 
-Language:
-  Main-module:      PCF-UNTYPED
-  Syntax-module:    PCF-UNTYPED-SYNTAX
-  Parser:           kast
-  Output-mode:      pretty-print
-  Cell-query:       "//k/text()"
+main-module:        PCF-UNTYPED
+syntax-module:      PCF-UNTYPED-SYNTAX
+parser:             kast
+output-mode:        pretty
