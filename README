@@ -3,16 +3,15 @@
 K is an executable semantic framework in which programming languages, calculi,
 as well as type systems or formal analysis tools can be defined by making use of
 configurations, computations and rules.
-
-*Configurations* organize the system/program state in units called cells,
-which are labeled and can be nested.  *Computations* carry "computational
-meaning" as special nested list structures sequentializing computational tasks,
-such as fragments of program; in particular, computations extend the original
-language or calculus syntax.  *K (rewrite) rules* generalize conventional
-rewrite rules by making it explicit which parts of the term they read-only,
-write-only, or do not care about. This distinction makes K a suitable framework
-for defining truly concurrent languages or calculi even in the presence of
-sharing.
+- Configurations organize the system/program state in units called cells,
+  which are labeled and can be nested.  
+- Computations carry "computational meaning" as special nested list structures 
+  sequentializing computational tasks, such as fragments of program; in 
+  particular, computations extend the original language or calculus syntax.  
+- K (rewrite) rules generalize conventional rewrite rules by making it explicit 
+  which parts of the term they read-only, write-only, or do not care about. This 
+  distinction makes K a suitable framework for defining truly concurrent 
+  languages or calculi even in the presence of sharing.
 
 Since computations can be handled like any other terms in a rewriting
 environment, that is, they can be matched, moved from one place to another in
@@ -66,11 +65,11 @@ examples/README for instructions on how to do it.
 
 # How It Works
 
-We recommend the K overview paper
+We recommend the K overview paper:
 
   An overview of the K semantic framework Grigore Rosu, Traian-Florin Serbanuta
-Journal of Logic and Algebraic Programming, Volume 79(6), pp 397-434. 2010
-http://dx.doi.org/10.1016/j.jlap.2010.03.012
+  Journal of Logic and Algebraic Programming, Volume 79(6), pp 397-434. 2010
+  http://dx.doi.org/10.1016/j.jlap.2010.03.012
 
 for a broader understanding of K.  Here we only discuss how our current K
 prototype works, reminding the reader important facts about K in general on a
@@ -82,9 +81,9 @@ tool uses the syntax module of a definition to generate a parser for that
 definition which can be used to parse programs and turn them into their
 corresponding K-AST (KAST) format.  We briefly outline the process below.
 
-(For examples, see the language examples in the /examples directory; in
+For examples, see the language examples in the /examples directory; in
 particular, /examples/languages/research/simple/untyped is familiar and
-well-documented.)
+well-documented.
 
 ## Parsing Programs
 
@@ -113,8 +112,9 @@ representation as computations of sort K is irrelevant in the theory of K.
 However, it becomes quite relevant in implementations of K tools, because we
 want to use the defined language syntax as much as possible in the semantics,
 which means that we need to combine a parser for the defined language with a
-parser for K in order to parse the semantic rules, which is a non-trivial
-engineering endeavor.
+parser for K in order to parse the semantic rules.  If you would like to know 
+more about how to get an external parser to work with K, please contact us at 
+info@k-framework.org .
 
 In our current implementation of K, the internal representation of the syntactic
 terms follows the simple abstract-syntax-tree (AST) syntax:
@@ -134,12 +134,12 @@ from the /examples/languages/research/simple directory, one obtains the internal
 representation of the factorial program:
 
   '__('function_`(_`)_(# #id_("factorial")(.List{K}),,'_`,_(# 
-  #id_("y")(.List{K}),,'.List`{","`}(.List{K})),,'`{_`}('__('var_;('_`,_(' 
-  _=_(# #id_("t")(.List{K}),,# 
+  #id_("y")(.List{K}),,'.List`{","`}(.List{K})),,'`{_`}('__('var_;('_`,_('_=_
+  (# #id_("t")(.List{K}),,# 
   1(.List{K})),,'.List`{","`}(.List{K}))),,'__('print`(_`);('_`,_(# 
   "Factorial of "(.List{K}),,'_`,_(# #id_("y")(.List{K}),,'_`,_(# " is: 
-  "(.List{K}),,'.List`{","`}(.List{K}))))),,'__('`{_`}('__('var_;('_`,_('_ 
-  =_(# #id_("i")(.List{K}),,# 
+  "(.List{K}),,'.List`{","`}(.List{K}))))),,'__('`{_`}('__('var_;('_`,_('_=_
+  (# #id_("i")(.List{K}),,# 
   1(.List{K})),,'.List`{","`}(.List{K}))),,'while_do_('_<=_(# 
   #id_("i")(.List{K}),,# #id_("y")(.List{K})),,'`{_`}('__('_;('_=_(# 
   #id_("t")(.List{K}),,'_*_(# #id_("t")(.List{K}),,# 
@@ -149,8 +149,8 @@ representation of the factorial program:
   #id_("main")(.List{K}),,'.List`{","`}(.List{K}),,'`{_`}('__('print`(_`); 
   ('_`,_(# "Input a natural number: 
   "(.List{K}),,'.List`{","`}(.List{K}))),,'print`(_`);('_`,_('_`(_`)(# 
-  #id_("factorial")(.List{K}),,'_`,_('read`(`)(.List{K}),,'.List`{","`}(.L 
-  ist{K}))),,'_`,_(# "\n"(.List{K}),,'.List`{","`}(.List{K})))))))) 
+  #id_("factorial")(.List{K}),,'_`,_('read`(`)(.List{K}),,'.List`{","`}
+  (.List{K}))),,'_`,_(# "\n"(.List{K}),,'.List`{","`}(.List{K})))))))) 
 
 Typically, one does not need to run the `kast` program directly, as it will be
 run by the `krun` program (below) when necessary.  However, running it directly
@@ -161,8 +161,6 @@ syntax (as above) in your semantic rules.  We typically prefer the concrete
 syntax, but you may need to use the abstract syntax instead when your syntax
 confuses our current (simplistic) parser.
 
-If you would like to know more about how to get an external parser to work with
-K, please contact us at info@k-framework.org .
 
 ## Running Programs
 
@@ -183,7 +181,8 @@ The idea now is that we can use the K tool to compile LANGUAGE, and then use
   Factorial of 5 is: 120
 
 The --no-config option tells krun not to display the configuration.  Instead, it
-only displays output produced by the program.
+only displays output produced by the program.  Try running it without this
+option to see the resulting configuration.
 
 If instead of executing, one wants to search for all possible final states which
 could be obtained upon running the program, then one would need to use the 
@@ -205,11 +204,11 @@ And we get the result:
 
 Similarly, if you want to model check a non-deterministic or concurrent program,
 then you can use Maude's builtin LTL model-checker.  In order to do that, you
-need to define state predicates (or better say configuration predicates).  This
-is a bit technical but it follows Maude's approach ad literam, so we do not
-explain it here.  The reader is refered to Maude's manual for more information
-on how to use its LTL model-checker, and again to simple/untyped for an example
-(showing how to model-check Dekker's algorithm).
+need to define state predicates (more appropriately called configuration 
+predicates).  This is a bit technical but it follows Maude's approach ad 
+literam, so we do not explain it here.  The reader is refered to Maude's manual 
+for more information on how to use its LTL model-checker, and again to
+simple/untyped for an example (showing how to model-check Dekker's algorithm).
 
 Important note: when defining programming languages with concurrency and/or with
 constructs evaluating their arguments in non-deterministic order, the
