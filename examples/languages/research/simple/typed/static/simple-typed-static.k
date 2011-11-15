@@ -269,16 +269,16 @@ there; otherwise, look its type up in the global environment. */
   rule <k> X => T ...</k> <gtenv>... X |-> T ...</gtenv> <tenv> Rho </tenv>
     if notBool(X in keys(Rho))
 
-/*@ We want the increment operation to apply to any l-value, including
+/*@ We want the increment operation to apply to any lvalue, including
 array elements, not only to variables.  For that reason, we define the
 following special context which extracts the type of the argument of
-the increment operation only if that argument is an l-value.
+the increment operation only if that argument is an lvalue.
 Otherwise the rewriting process gets stuck.  See the definition of
-\texttt{l-type} at the end of this module.  The type of the l-value is
+\texttt{ltype} at the end of this module.  The type of the lvalue is
 expected to be an integer in order to be allowed to be incremented, as
 seen in the rule ``\texttt{++ int => int}'' below. */
 
-  context ++([HOLE] => l-type([HOLE]))
+  context ++([HOLE] => ltype([HOLE]))
   rule ++ int => int
   rule int + int => int
   rule string + string => string
@@ -304,10 +304,10 @@ seen in the rule ``\texttt{++ int => int}'' below. */
 
 /*@ The special context and the rule for assignment below are similar
 to those for the increment operation above: the LHS of the assignment
-must be an l-value and, in that case, it must have the same
+must be an lvalue and, in that case, it must have the same
 type as the RHS, which thus becomes the type of the assignment. */
 
-  context ([HOLE] => l-type([HOLE])) = _
+  context ([HOLE] => ltype([HOLE])) = _
   rule T=T => T
 
 
@@ -341,12 +341,12 @@ exceptions can only have integer type. */
 
 //@ \subsection{Auxiliary operations}
 
-/*@ The \texttt{l-type} operation below evaluates to the type of its
-argument, but only if that argument is an l-value, that is, a variable
+/*@ The \texttt{ltype} operation below evaluates to the type of its
+argument, but only if that argument is an lvalue, that is, a variable
 or an array element. */
-  syntax Exp ::= "l-type" "(" Exp ")"
-  rule l-type(X) => X        [:structural:]
-  rule l-type(E:Exp[Es:Exps]) => E[Es]        [:structural:]
+  syntax Exp ::= "ltype" "(" Exp ")"
+  rule ltype(X) => X        [:structural:]
+  rule ltype(E:Exp[Es:Exps]) => E[Es]        [:structural:]
 
 /*@ The two operations below are standard, we use them in many \K
 definitions.  Note, however, that \texttt{bindto} evaluates to

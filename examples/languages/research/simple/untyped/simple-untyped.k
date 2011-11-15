@@ -41,7 +41,7 @@ cannot be evaluated) and the assignment which is only strict in its second
 argument (for the same reason as the increment). */
 
   syntax Exp ::= #Int | #Bool | #String | #Id
-               | "++" Exp              [:prec 0:]
+               | "++" Exp              [:prec(0):]
                | Exp "+" Exp           [:strict prec(33) gather(E e):]
                | Exp "-" Exp           [:strict prec(33) gather(E e):]
                | Exp "*" Exp           [:strict prec(31) gather(E e):]
@@ -157,6 +157,7 @@ function definitions cannot be nested). */
   syntax Val ::= #Int | #Bool | #String
                | "array" "(" #Nat "," #Nat ")"
                | "lambda" "(" Ids "," Stmt ")" [:latex("\lambda{#1}\,.\,{#2}"):]
+  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
 
 /*@ The inclusion of values in expressions follows the methodology of
@@ -319,7 +320,7 @@ inside the loop body with fewer dimensions.  The second variable,
 dimension: */
 
   syntax #Id ::= "$1" | "$2"
-  rule var X[N1,N2,Vs]; =>
+  rule var X[N1,N2,Vs:Vals]; =>
        var X[N1];
        {
          var $1 = X;
@@ -403,14 +404,14 @@ $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
 /*@ \subsection{Variable/Array increment}
 This is tricky, because we want to allow both {\tt ++x} and {\tt ++a[5]}.
-Therefore, we need to extract the l-value of the expression to increment.
+Therefore, we need to extract the lvalue of the expression to increment.
 To do that, we state that the expression to increment should be wrapped
-by the auxiliary ``l-value'' operation and then evaluated.
-The semantics of the auxiliary l-value operation is defined below.
+by the auxiliary ``lvalue'' operation and then evaluated.
+The semantics of the auxiliary lvalue operation is defined below.
 For now, all we need to know is that it takes an expression and evaluates
 to a location value, also introduced below with the auxiliary operations. */
 
-  context ++([HOLE] => l-value([HOLE]))
+  context ++([HOLE] => lvalue([HOLE]))
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
 
@@ -486,7 +487,6 @@ block modifies it, but that modification should be irrelevant once the function
 returns).  We add an artificial \texttt{nothing} value to the language, which is
 returned by the nulary \texttt{return;} statements. */
 
-  syntax Vals ::= List{Val,","}
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
   rule <k> _`(_`)(lambda(Xs,S), Vs:Vals) ~> K:K => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
@@ -523,12 +523,12 @@ semi-colon ``\texttt{;}'' (see the semantics for expression statements below).
 Like for the increment, we want to allow assignments not only to variables but
 also to array elements, e.g., \texttt{e1[e2] = e3} where \texttt{e1} evaluates
 to an array reference, \texttt{e2} to a natural number, and \texttt{e3} to any 
-value.  Thus, we first compute the l-value of the left-hand-side expression
+value.  Thus, we first compute the lvalue of the left-hand-side expression
 that appears in an assignment.  Like for the increment, all we need to know is
-that \texttt{l-value(...)} eventually evaluates to a location value
+that \texttt{lvalue(...)} eventually evaluates to a location value
 \texttt{loc(...)}. */
 
-  context ([HOLE] => l-value([HOLE])) = _
+  context ([HOLE] => lvalue([HOLE])) = _
   rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [:transition:]
 
 
@@ -784,16 +784,16 @@ actual configuration of SIMPLE is to include each \textsf{k} cell in a
 //@ \section{Auxiliary declarations and operations}
 ----------------------------------------------
 
-/*@ \subsection{l-value and loc}
+/*@ \subsection{lvalue and loc}
 For convenience in giving the semantics of constructs like the increment and
 the assignment, that we want to operate the same way on variables and on
-array elements, we used an auxiliary \texttt{l-value($E$)} construct which was
-expected to evaluate to the l-value of the expression $E$.  This is only
-defined when $E$ has an l-value, that is, when $E$ is either a variable or
-evaluates to an array element.  \texttt{l-value($E$)} evaluates to a value of
+array elements, we used an auxiliary \texttt{lvalue($E$)} construct which was
+expected to evaluate to the lvalue of the expression $E$.  This is only
+defined when $E$ has an lvalue, that is, when $E$ is either a variable or
+evaluates to an array element.  \texttt{lvalue($E$)} evaluates to a value of
 the form \texttt{loc($L$)}, where $L$ is the location where the value of $E$
 can be found; for clarity, we use \texttt{loc} to structurally distinguish
-natural numbers from location values.  In giving semantics to \texttt{l-value}
+natural numbers from location values.  In giving semantics to \texttt{lvalue}
 there are two cases to consider.  (1) If $E$ is a variable, then all we need
 to do is to grab its location from the environment.  (2) If $E$ is an array
 element, then we first evaluate the array and its index in order to identify
@@ -803,17 +803,17 @@ that the array and its index are evaluated, and then the rule for array lookup
 (defined above) rewrites the evaluated array access construct to its
 corresponding store lookup operation. */
 
-// For parsing reasons, we prefer to allow l-value to take a K
-  syntax Exp ::= "l-value" "(" K ")"
+// For parsing reasons, we prefer to allow lvalue to take a K
+  syntax Exp ::= "lvalue" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
 // Local variable
-  rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
+  rule <k> lvalue(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
-  context l-value(_[[HOLE]])
-  context l-value([HOLE][_])
+  context lvalue(_[[HOLE]])
+  context lvalue([HOLE][_])
 // Finally, return the address of the desired object member
-  rule <k> l-value(lookup(L)) => loc(L) ...</k>
+  rule <k> lvalue(lookup(L)) => loc(L) ...</k>
 
 
 /*@ \subsection{Sequences of locations}

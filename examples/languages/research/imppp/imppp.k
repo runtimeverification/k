@@ -3,32 +3,36 @@ module IMPPP-SYNTAX
 
 //@ \subsection{The old IMP constructs}
   syntax AExp ::= #Id | #Int
-                | AExp "+" AExp                      [:prec(33) gather (E e) strict:]
-                | AExp "/" AExp                      [:prec(31) gather (E e) superheat strict:]
+                | AExp "+" AExp    [:prec(33) gather (E e) strict:]
+                | AExp "/" AExp    [:prec(31) gather (E e) superheat strict:]
   syntax BExp ::= #Bool
-                | AExp "<=" AExp                     [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
-                | "not" BExp                         [:prec(53) strict:]
-                | BExp "and" BExp                    [:prec(55) strict(1):]
+                | AExp "<=" AExp   [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
+                | "not" BExp       [:prec(53) strict:]
+                | BExp "and" BExp  [:prec(55) strict(1):]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp                      [:prec(80) strict(2):]
-                | Stmt ";" Stmt                      [:prec(100) gather(e E):]
-                | "if" BExp "then" Stmt "else" Stmt  [:prec(85) strict(1):]
-                | "while" BExp "do" Stmt             [:prec(85):]
+                | #Id ":=" AExp    [:prec(80) strict(2):]
+                | Stmt ";" Stmt    [:prec(100) gather(e E):]
+                | "if" BExp
+                  "then" Stmt
+                  "else" Stmt      [:prec(85) strict(1):]
+                | "while" BExp
+                  "do" Stmt        [:prec(85):]
 
 //@ \subsection{The new IMP++ constructs}
-  syntax AExp ::= "++" #Id                           [:prec(0):]
+  syntax AExp ::= "++" #Id               [:prec(0):]
                 | "read" "(" ")"
 
-  syntax Stmt ::= "print" "(" PExp ")"               [:strict:]
+  syntax Stmt ::= "print" "(" PExp ")"   [:strict:]
                 | "halt"
-                | "spawn" Stmt                       [:prec(90):]
+                | "spawn" Stmt           [:prec(90):]
                 | "{" "}"
-                | "{" Stmt "}"                       [:gather(&):]
-                | "var" Ids                          [:prec(70):]
+                | "{" Stmt "}"           [:gather(&):]
+                | "var" Ids              [:prec(70):]
 
 //@ We prefer aliases for lists
   syntax Ids ::= List{#Id,","}
-//@ \textit{PExp} useful for the \texttt{print} statement (either an expression or a string)
+/*@ \textit{PExp} useful for the \texttt{print} statement (either an
+expression or a string) */
   syntax PExp ::= AExp | #String 
 end module
 

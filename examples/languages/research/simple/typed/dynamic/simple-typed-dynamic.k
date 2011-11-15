@@ -222,7 +222,7 @@ When done with the first pass, call \texttt{main()}. */
   rule <k> X => V:Val ...</k> <env>...X|->L...</env>
        <store>...L|->V...</store> [:transition:]
 
-  context ++([HOLE] => l-value([HOLE]))
+  context ++([HOLE] => lvalue([HOLE]))
 
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
@@ -279,7 +279,7 @@ When done with the first pass, call \texttt{main()}. */
 
   rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
 
-  context ([HOLE] => l-value([HOLE])) = _
+  context ([HOLE] => lvalue([HOLE])) = _
   rule <k> loc(L)=V => V ...</k> <store>... L |-> (K => V) ...</store>
     if typeOf(V) ==Bool typeOf(K:K)   [:transition:]
 
@@ -323,13 +323,13 @@ When done with the first pass, call \texttt{main()}. */
 
 //@ \subsection{Auxiliary operations}
 
-//@ \texttt{l-value}
-  syntax Exp ::= "l-value" "(" K ")"
+//@ \texttt{lvalue}
+  syntax Exp ::= "lvalue" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
-  rule <k> l-value(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
-  context l-value(_[[HOLE]])
-  context l-value([HOLE][_])
-  rule <k> l-value(lookup(L)) => loc(L) ...</k>
+  rule <k> lvalue(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
+  context lvalue(_[[HOLE]])
+  context lvalue([HOLE][_])
+  rule <k> lvalue(lookup(L)) => loc(L) ...</k>
 
 //@ \texttt{lookup}
   syntax K ::= "lookup" "(" #Nat ")"
