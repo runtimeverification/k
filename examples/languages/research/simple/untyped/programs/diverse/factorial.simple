@@ -9,6 +9,6 @@ function factorial(y) {
 }
 
 function main() {
-  print("Input a natural numer: ");
+  print("Input a natural number: ");
   print(factorial(read()),"\n");
 }
