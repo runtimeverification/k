@@ -1,0 +1,36 @@
+class A {
+  var c;
+  method A() {
+    c = 0;
+  }
+  method inc() {
+    ++c;
+  }
+}
+
+class B {
+  var a = new A(), m = a.inc, x = 0;
+  method B() {
+    print(a.c, " ");
+    m();
+    print(a.c, "\n");
+  }
+  method getM() {
+    return m;
+  }
+}
+
+class main {
+  var f;
+  method main() {
+    var b = new B();
+    var t = f = b.getM();
+    f();
+    print(b.a.c, "\n");
+    t();
+    print(b.a.c, "\n");
+// We would also like to write the call below, but currently the semantics expects
+// a member access expression as argument of function application.
+//    (b.getM())();
+  }
+}
