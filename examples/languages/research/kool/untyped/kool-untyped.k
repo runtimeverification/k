@@ -139,7 +139,6 @@ member declarations (\textsf{declarations}). */
                     </thread>
                   </threads>
                   <br/>
-                  <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
                   <in color="magenta" stream="stdin"> .List </in>
@@ -202,8 +201,6 @@ SIMPLE we only had to invoke the function \texttt{main()}. */
          }
        }  [:structural:]
 
-  syntax K ::= "execute"
-
   rule <k> X => V:Val ...</k>
        <env>...X|->L...</env>
        <store>...L|->V...</store> [:transition:]
@@ -254,7 +251,7 @@ SIMPLE we only had to invoke the function \texttt{main()}. */
   rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
 
   context ([HOLE] => lvalue([HOLE])) = _
-  rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [:transition:]
+  rule <k> loc(L)=V => V...</k> <store>...L|->(_=>V)...</store> [:transition:]
 
   rule {} => . [:structural:]
   rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
@@ -274,7 +271,7 @@ SIMPLE we only had to invoke the function \texttt{main()}. */
   rule <k> while E:Exp do S
     => if E then {S while E do S} else {} ...</k> [:structural:]
 
-  rule <k> print(V,Vs => Vs); ...</k> <out>... . => ListItem(V) </out> [:transition:]
+  rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out> [:transition:]
   rule print(); => . [:structural:]
 
   syntax ListItem ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
@@ -294,13 +291,14 @@ SIMPLE we only had to invoke the function \texttt{main()}. */
    rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
      if notBool(V in Busy) [:transition:]
-   rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
-   rule <k> release V; => . ...</k> <holds>... V|->(N => _-Int_(N,1)) ...</holds>
+   rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
+   rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
      if N >Nat 0
    // used prefix notation for -Int because of parsing problems
    rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
         <busy>... SetItem(V)=>. ...</busy>
-   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> [:transition:]
+   rule <k> rendezvous V; => . ...</k>
+        <k> rendezvous V; => . ...</k> [:transition:]
 
   syntax Exp ::= "lvalue" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
@@ -353,6 +351,7 @@ program is initialized by creating an object of class \texttt{main}.
 This will also implicitly call the method \texttt{main()} (the
 \texttt{main} class constructor). */
 
+  syntax K ::= "execute"
   rule <k> execute => new main(); </k> <env> . </env>
 
 /*@ The semantics of \texttt{new} (defined shortly) requires the
@@ -362,7 +361,6 @@ of \texttt{var} from SIMPLE, but method declarations need a new
 semantics.  This is defined next.  */
 
 /*@ \subsection{Method declaration}
-
 Like in SIMPLE, method names are added to the environment and bound
 to their code.  However, unlike in SIMPLE where each method was
 executed in the same environment, namely the program global
@@ -405,9 +403,10 @@ creation task in the rule below will do---its rule is defined shortly).  */
         => create(Class) ~> storeObj ~> _`(_`)(Class,Vs); return this; </k>
        <env> Env => . </env>
        <control> C:Bag
-         <crntObj> Obj => <crntClass> object </crntClass>
-                          <envStack> ListItem(object::<env>.Map</env>) </envStack>
-                          <location> L </location>
+         <crntObj> Obj
+                => <crntClass> object </crntClass>
+                   <envStack> ListItem(object::<env>.Map</env>) </envStack>
+                   <location> L </location>
          </crntObj>
          <fstack> . => (Env, K, C <crntObj> Obj </crntObj>) ...</fstack>
        </control>
@@ -483,17 +482,16 @@ current object is not altered by \texttt{super}, so future method
 invocations see the entire object, as needed for dynamic method dispatch. */
 
 // To avoid parsing ambiguity, use _._(this,X) instead of this.X
-  rule <k> X => _._(this,X) ...</k>
-       <env> Env </env>
+  rule <k> X => _._(this,X) ...</k> <env> Env </env>
     if notBool(X in keys(Env))
 
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
   rule <k> _._(obj(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X)
-        => lookupMember(<envStack> ListItem(Class :: EnvC) EStack </envStack>, X)
+        => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
        ...</k>
 
-  rule <k> _._(super,X) => lookupMember(<envStack> EStack </envStack>, X) ...</k>
+  rule <k> _._(super,X) => lookupMember(<envStack>EStack</envStack>, X)...</k>
        <crntClass> Class:#Id </crntClass>
        <envStack>... ListItem(Class :: EnvC) EStack </envStack>
 
@@ -537,7 +535,7 @@ context. */
   rule <k> '_`(_`)(('_._(super,,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
        <crntClass> Class:#Id </crntClass>
-       <envStack>... ListItem(Class :: EnvC) EStack </envStack>
+       <envStack>... ListItem(Class :: _) EStack </envStack>
 
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
 instead of the method.  When that happens, just lookup the method
@@ -565,7 +563,8 @@ that came with the semantics of SIMPLE that we borrowed.  */
 
   rule obj((_ <envStack> ListItem(Class::_) ...</envStack>)) instanceOf Class 
     => true
-  rule obj((_ <envStack> ListItem(Class1::_) => . ...</envStack>)) instanceOf Class2 
+  rule obj((_ <envStack> ListItem(Class1::_)
+                      => . ...</envStack>)) instanceOf Class2 
     if Class1 =/=Bool Class2
   rule obj((_ <envStack> .List </envStack>)) instanceOf Class
     => false
@@ -592,11 +591,14 @@ always explicit, the evaluation context enforces the object to be
 evaluated, and finally the second rule initiates the lookup for the
 member's location based on the current class of the object. */
 
-  rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env> if notBool(X in keys(Env))
+  rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
+    if notBool(X in keys(Env))
 
   context lvalue(_._([HOLE],_))
-  rule <k> lvalue(_._(obj(<crntClass>Class </crntClass> 
-                           <envStack>...ListItem(Class :: EnvC) EStack </envStack>), X)
+  rule <k> lvalue(_._(obj(<crntClass> Class </crntClass> 
+                          <envStack>...
+                            ListItem(Class :: EnvC) EStack
+                          </envStack>), X)
         => lookupMember(<envStack>ListItem(Class :: EnvC:BagItem) EStack:List
                         </envStack>, X)) 
        ...</k>
@@ -609,10 +611,11 @@ member's location based on the current class of the object. */
   // BagItem is the envStack cell, Id is the member name
 
 // First look for the member in the top environment; if found then done.
-  rule lookupMember(<envStack> ListItem(_ :: <env>... X|->L ...</env>) ...</envStack>,X) 
-    => lookup(L)
-/// Otherwise, recurse through the object environment stack
-  rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)  => . ...</envStack>, X)
+  rule lookupMember(<envStack> ListItem(_ :: <env>...X|->L...</env>)
+                    ...</envStack>,X) => lookup(L)
+// Otherwise, recurse through the object environment stack
+  rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)
+                            => . ...</envStack>, X)
     if notBool(X in keys(Env)) [structural]
 
 end module

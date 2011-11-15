@@ -66,8 +66,7 @@ the desired evaluation strategies of the various language constructs .  */
                 | "return" Exp ";"                      [:strict:]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [:strict:]
-                | "try" Stmt "catch" "(" Exp ")" Stmt   [:prec(90):]
-                   // Exp above allowed only for a typed identifier declaration
+                | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
                 | "throw" Exp ";"                       [:strict:]
                 | "spawn" Stmt                          [:prec(90):]
                 | "acquire" Exp ";"                     [:strict:]
@@ -111,6 +110,7 @@ semantics''.  */
                | "array" "(" Type "," #Nat "," #Nat ")"
                | "lambda" "(" Exps "," Stmt "," Type ")"
                      [:latex("(\lambda{#1}\,.\,{#2}):{#3}"):]
+  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val
 
@@ -219,7 +219,8 @@ When done with the first pass, call \texttt{main()}. */
 
 //@ \subsection{Expressions and statements}
 
-  rule <k> X => V:Val ...</k> <env>...X|->L...</env>
+  rule <k> X => V:Val ...</k>
+       <env>...X|->L...</env>
        <store>...L|->V...</store> [:transition:]
 
   context ++([HOLE] => lvalue([HOLE]))
@@ -253,7 +254,6 @@ When done with the first pass, call \texttt{main()}. */
 
 //@ Define function call and return together, to see their relationship.
 
-  syntax Vals ::= List{Val,","}
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
   rule <k> _`(_`)(lambda(XTs, S, function from _ to T), Vs) ~> K
            => bindto(XTs,Vs) ~> S ~> return;
@@ -313,13 +313,14 @@ When done with the first pass, call \texttt{main()}. */
    rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
      if notBool(V in Busy)   [:transition:]
-   rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
-   rule <k> release V; => . ...</k> <holds>... V|->(N => _-Int_(N,1)) ...</holds>
+   rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
+   rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
      if N >Nat 0
    // used prefix notation for -Int because of parsing problems
    rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
         <busy>... SetItem(V)=>. ...</busy>
-   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> [:transition:]
+   rule <k> rendezvous V; => . ...</k>
+        <k> rendezvous V; => . ...</k> [:transition:]
 
 //@ \subsection{Auxiliary operations}
 
