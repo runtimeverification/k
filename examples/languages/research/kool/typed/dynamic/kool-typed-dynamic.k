@@ -519,21 +519,6 @@ can indeed be cast to the claimed type. */
                             => . ...</envStack>, X)
     if notBool(X in keys(Env)) [:structural:]
 
-
-//@ \texttt{bindto} also checks the well-formedness of the function parameters
-  syntax K ::= "bindto" "(" Exps "," Vals ")"
-  rule <k> (. => X = V;) ~> bindto((X : T, XTs:Exps => XTs),(V,Vs:Vals => Vs)) 
-      ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> undefined(T) ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.Exps,.Vals) => . ...</k>
-
-//@ \texttt{typeOf} for the additional values
-  rule typeOf(obj(_ <envStack> ListItem(Class::_) ...</envStack>))
-    => class Class [:structural:]
-  rule typeOf(closure(_,_,_,_,T)) => T  [:structural:]
-
 /*@ \subsection{Assignment}
 Typed KOOL allows to assign subtype instance values to supertype
 lvalues. */
@@ -560,6 +545,20 @@ lvalues. */
        </control>
        <env> _ => Env </env>
 
+
+//@ \texttt{bindto} also checks the well-formedness of the function parameters
+  syntax K ::= "bindto" "(" Exps "," Vals ")"
+  rule <k> (. => X = V;) ~> bindto((X : T, XTs:Exps => XTs),(V,Vs:Vals => Vs)) 
+      ...</k>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> undefined(T) ...</store>
+       <nextLoc> L => L +Nat 1 </nextLoc>
+  rule <k> bindto(.Exps,.Vals) => . ...</k>
+
+//@ \texttt{typeOf} for the additional values
+  rule typeOf(obj(_ <envStack> ListItem(Class::_) ...</envStack>))
+    => class Class [:structural:]
+  rule typeOf(closure(_,_,_,_,T)) => T  [:structural:]
 
 /*@\subsection{Conditional Pass}  
 Allows the process to continue only if the expression evaluates to true.
