@@ -1,14 +1,14 @@
 # Overview
 
 K is an executable semantic framework in which programming languages, calculi,
-as well as type systems or formal analysis tools can be defined making use of
+as well as type systems or formal analysis tools can be defined by making use of
 configurations, computations and rules.
 
-* *Configurations* organize the system/program state in units called cells,
-which are labeled and can be nested.  * *Computations* carry "computational
+*Configurations* organize the system/program state in units called cells,
+which are labeled and can be nested.  *Computations* carry "computational
 meaning" as special nested list structures sequentializing computational tasks,
 such as fragments of program; in particular, computations extend the original
-language or calculus syntax.  * *K (rewrite) rules* generalize conventional
+language or calculus syntax.  *K (rewrite) rules* generalize conventional
 rewrite rules by making it explicit which parts of the term they read-only,
 write-only, or do not care about. This distinction makes K a suitable framework
 for defining truly concurrent languages or calculi even in the presence of
@@ -26,7 +26,7 @@ The k-framework.googlecode project, also called the "K prototype" from here on,
 is a prototype implementation of the K Framework written in Maude and using
 Maude to give a rewriting executable semantics to K definitions.
 
-The K prototype is developed by a joint team of faculty and students from
+The K prototype is developed by a joint team of faculty and students from the
 University of Illinois at Urbana-Champaign (the FSL group, led by professor
 Grigore Rosu), and University Alexandru Ioan Cuza, Iasi, Romania (the FMSE
 group, led by professor Dorel Lucanu).
@@ -37,14 +37,13 @@ can be accessed at http://code.google.com/p/k-framework/people/list.
 
 # Installation
 
-For detailed installation instructions, please see the INSTALL file. 
+As the tool is still a research prototype, the easiest way to run it is to use
+the virtual machine we provide at:
 
-As the tool is still under active development, it is recommended that you
-install K directly from the svn repository and update it regularly executing
+  https://code.google.com/p/k-framework/wiki/Downloads
 
-  svn up && make
-
-from the base directory to benefit of the latest fixes and features.
+If you would rather install the tool on your machine directly, please see the 
+INSTALL file for detailed installation instructions.
 
 
 # Usage
@@ -52,7 +51,7 @@ from the base directory to benefit of the latest fixes and features.
 The languages defined so far using the K framework can be found in the examples
 directory. For example, the directory
 
- examples/languages/research/simple 
+  examples/languages/research/simple 
 
 contains 2 directories, namely "untyped" containing the definition of the
 untyped version of the language, and "typed" which in turn contains three
@@ -63,37 +62,6 @@ information is maintained in the environment.
 
 We encourage you to contribute with examples to our distribution.  Please see
 examples/README for instructions on how to do it.
-
-## When writing new definitions
-
-It is recommended that the name of the main module of a definition is the
-capitalized version of the name of the file containing it.
-
-When adding new rules to a definition, keep in mind the following important
-restrictions: (1) avoid defining multiple constructs with the same name, except
-for the case below; (2) in rules, any construct should be applied on terms of
-the syntactic types the construct was declared to accept (that is, no subterm
-appearing in any rule should parse to a kind); if desired, overload the
-operations to extend their range.
-
-To compile a definition: execute the `kompile` script passing as parameter the
-name of the file containing the main module.  If the compilation succeeds, the
-output would be placed in name-of-the-file-compiled.maude. Currently, the script
-has only been tested on Unix-like systems, including MacOSX.
-
-Recommendations on running the script: * The Maude executable should be on the
-path and should be named `maude`; moreover, the environment variable `MAUDE_LIB`
-should point to the location where `prelude.maude` resides * The `kompile`
-script should also be on the path * The `kompile` script should not be moved
-from the `core` directory * The `kompile` script should be run from the
-directory where the definition resides.
-
-Assuming the above suggestions were followed, to compile the untyped version of
-the simple language mentioned above, execute
-
-  kompile simple-untyped
-
-in the `examples/research/simple/untyped` directory.
 
 
 # How It Works
@@ -112,7 +80,7 @@ In order to actually interpret or analyze programs using a semantics written in
 K, there needs to be a way to give the programs to the tool.  Currently, the
 tool uses the syntax module of a definition to generate a parser for that
 definition which can be used to parse programs and turn them into their
-corresponding K AST format.  We briefly outline the process below.
+corresponding K-AST (KAST) format.  We briefly outline the process below.
 
 (For examples, see the language examples in the /examples directory; in
 particular, /examples/languages/research/simple/untyped is familiar and
@@ -128,18 +96,11 @@ already defined its syntax in a module LANGUAGE-SYNTAX.  Before even attempting
 to define the semantics, it is a good idea to test the syntax by parsing a large
 variety of programs.
 
-In the examples provided with the tool, programs are in general kept into a
+In the examples provided with the tool, programs are generally kept in a
 `programs` directory in the directory containing the syntax definition.  Their
 extension is usually an indicator of the definition they belong to.  For
-example, the /examples/languages/research/simple/untyped/programs contains
-programs for the simple-untyped definition, among which `factorial.simple` looks
-like this:
-
-      var x; function f(y) { var t=1; for i = 1 to y do t = t*i; return t; }
-function main() { x = 5; write(f(x)); }
-
-If you would like to know more about how to get an external parser to work with
-K, please contact us at info@k-framework.org .
+example, the /examples/languages/research/simple/untyped/programs directory 
+contains programs for the simple-untyped definition.
 
 As explained in the overview paper mentioned above, the entire language syntax
 is automatically included as constructors for the builtin sort K of computation
@@ -165,38 +126,50 @@ double-comma ",," (we chose double-comma to avoid conflicts with user-defined
 language syntax, for example comma).  We use ".List{K}" for the unit of List{K}.
 This way, from an internal representation point of view, a language syntax is
 nothing but a finite set of KLabel constants.  The `kast` program can be used to
-parse a program and see its K ast form.  By running
+parse a program and see its KAST form.  By running
 
-  kast -lang simple-untyped programs/factorial.simple
+  $ kast --k-definition=simple-untyped programs/diverse/factorial.simple
 
-one obtains the folowing internal representation of the above program:
+from the /examples/languages/research/simple directory, one obtains the internal
+representation of the factorial program:
 
-  '__('var_;('_`,_(# #id_("x")(.List{K}),,'.List`{","`}(.List{K}))),,
-'__('function_`(_`)_(# #id_("f")(.List{K}),,'_`,_(# #id_("y")(.List{K}),,
-'.List`{","`}(.List{K})),,'`{_`}('__('var_;('_`,_('_=_(# #id_("t")(.List{K}),,
-  # 1(.List{K})),,'.List`{","`}(.List{K}))),,'__('`{_`}('__('var_;('_`,_(
-  # #id_("i")(.List{K}),,'.List`{","`}(.List{K}))),,'__('_;('_=_(# #id_("i")(
-  .List{K}),,# 1(.List{K}))),,'while_do_('_<=_(# #id_("i")(.List{K}),,
-  # #id_("y")(.List{K})),,'`{_`}('__('_;('_=_(# #id_("t")(.List{K}),,'_*_(
-  # #id_("t")(.List{K}),,# #id_("i")(.List{K})))),,'_;('_=_(# #id_("i")(
-  .List{K}),,'_+_(# #id_("i")(.List{K}),,# 1(.List{K})))))))))),,'return_;(
-  # #id_("t")(.List{K})))))),,'function_`(_`)_(# #id_("main")(.List{K}),,
-  '.List`{","`}(.List{K}),,'`{_`}('__('_;('_=_(# #id_("x")(.List{K}),,# 5(
-.List{K}))),,'write`(_`);('_`(_`)(# #id_("f")(.List{K}),,'_`,_('_`(_`)(
-  # #id_("f")(.List{K}),,'_`,_(# #id_("x")(.List{K}),,'.List`{","`}(
-  .List{K}))),,'.List`{","`}(.List{K})))))))))
+  '__('function_`(_`)_(# #id_("factorial")(.List{K}),,'_`,_(# 
+  #id_("y")(.List{K}),,'.List`{","`}(.List{K})),,'`{_`}('__('var_;('_`,_(' 
+  _=_(# #id_("t")(.List{K}),,# 
+  1(.List{K})),,'.List`{","`}(.List{K}))),,'__('print`(_`);('_`,_(# 
+  "Factorial of "(.List{K}),,'_`,_(# #id_("y")(.List{K}),,'_`,_(# " is: 
+  "(.List{K}),,'.List`{","`}(.List{K}))))),,'__('`{_`}('__('var_;('_`,_('_ 
+  =_(# #id_("i")(.List{K}),,# 
+  1(.List{K})),,'.List`{","`}(.List{K}))),,'while_do_('_<=_(# 
+  #id_("i")(.List{K}),,# #id_("y")(.List{K})),,'`{_`}('__('_;('_=_(# 
+  #id_("t")(.List{K}),,'_*_(# #id_("t")(.List{K}),,# 
+  #id_("i")(.List{K})))),,'_;('_=_(# #id_("i")(.List{K}),,'_+_(# 
+  #id_("i")(.List{K}),,# 1(.List{K}))))))))),,'return_;(# 
+  #id_("t")(.List{K}))))))),,'function_`(_`)_(# 
+  #id_("main")(.List{K}),,'.List`{","`}(.List{K}),,'`{_`}('__('print`(_`); 
+  ('_`,_(# "Input a natural number: 
+  "(.List{K}),,'.List`{","`}(.List{K}))),,'print`(_`);('_`,_('_`(_`)(# 
+  #id_("factorial")(.List{K}),,'_`,_('read`(`)(.List{K}),,'.List`{","`}(.L 
+  ist{K}))),,'_`,_(# "\n"(.List{K}),,'.List`{","`}(.List{K})))))))) 
+
+Typically, one does not need to run the `kast` program directly, as it will be
+run by the `krun` program (below) when necessary.  However, running it directly
+can be useful to test your syntax.
 
 Our current implementation allows you to use either concrete syntax or abstract
 syntax (as above) in your semantic rules.  We typically prefer the concrete
 syntax, but you may need to use the abstract syntax instead when your syntax
-confuses our current (simplistic) parser.  
+confuses our current (simplistic) parser.
+
+If you would like to know more about how to get an external parser to work with
+K, please contact us at info@k-framework.org .
 
 ## Running Programs
 
 The `krun` tool can be used to execute programs, or explore their behaviors.
 What the `krun` tool basically does is (1) to put the internal representation of
 the program in the initial configuration described in the definition; (2) to
-call the rewrite engine to execute the program b rewriting the thus obtained
+call the rewrite engine to execute the program by rewriting the thus obtained
 initial configuration; and (3) to post-process the output of the rewrite engine
 and display it in a more appealing format.
 
@@ -204,21 +177,31 @@ The idea now is that we can use the K tool to compile LANGUAGE, and then use
 `krun` to execute the program using the semantics.  To run our sample program
 `factorial`, all we need to do is something like this:
 
-  $ kompile simple-untyped.k $ krun programs/factorial.simple 120
+  $ kompile simple-untyped.k
+  $ krun --no-config programs/diverse/factorial.simple
+  Input a natural number: 5
+  Factorial of 5 is: 120
 
+The --no-config option tells krun not to display the configuration.  Instead, it
+only displays output produced by the program.
 
-If, instead, one wants to search for all possible final states which could be
-obtained upon running the program, then one would need to use the command
+If instead of executing, one wants to search for all possible final states which
+could be obtained upon running the program, then one would need to use the 
+command:
 
-  $ krun programs/factorial.simple
+  $ echo "5" | krun --search programs/diverse/factorial.simple
 
 And we get the result:
+  Search results:
+  
+  Solution 1, state 51:
+  <T> 
+    ...
+    <out> "Input a natural number: Factorial of 5 is: 120\n" </out>
+	... 
+  </T>
 
-  Solution 1, state 891: Final:Bag --> < T > < out > ListItem(Int 120(.List{K}))
-</ out > ... </ T >
-
-  No more solutions.  states: 28416 rewrites: 224454 in 3093ms cpu (3095ms real)
-(72555 rewrites/second)
+  No more solutions.
 
 Similarly, if you want to model check a non-deterministic or concurrent program,
 then you can use Maude's builtin LTL model-checker.  In order to do that, you

@@ -224,6 +224,13 @@ developing and testing them.
 
 # Problems / Questions
 
+As the tool is still under active development, it it is recommended that you
+update it regularly by executing
+
+    $ svn up && make
+
+from the base directory to benefit of the latest fixes and features.
+
 If you experience any problems installing K, please do not hesitate to contact
 the development team at <k-user@cs.uiuc.edu>.  Also, please let us know about 
 installation steps you had to perform that we did not mention.
