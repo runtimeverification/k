@@ -1,7 +1,7 @@
 module KRun.Utils where
 
 import Control.Monad (filterM)
-import Data.Char (toLower)
+import Data.Char (isSpace, toLower)
 import Data.List (intercalate)
 import System.Directory
 import System.FilePath
@@ -17,6 +17,10 @@ die msg = do
 
 lowercase :: String -> String
 lowercase = map toLower
+
+trim :: String -> String
+trim = f . f
+    where f = reverse . dropWhile isSpace
 
 -- Code copied from Cabal.
 findDeskFile :: FilePath -> IO FilePath

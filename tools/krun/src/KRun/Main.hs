@@ -6,7 +6,6 @@ module Main where
 
 import Control.Applicative ((<$>))
 import Control.Monad (forM_, when)
-import Data.Char (isSpace)
 import Data.Either (rights)
 import Data.List ((\\), intercalate, isInfixOf)
 import Data.Map (Map)
@@ -250,10 +249,6 @@ getKastExecutable :: IO FilePath
 getKastExecutable = do
     kbase <- getEnv "K_BASE"
     return $ kbase </> "core" </> "kast"
-
-trim :: String -> String
-trim = f . f
-    where f = reverse . dropWhile isSpace
 
 -- Hardcoded defaults:
 -- TODO: get rid of these!
