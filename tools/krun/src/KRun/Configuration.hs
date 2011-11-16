@@ -155,7 +155,6 @@ mkConfig :: Maybe FilePath    -- ^ Maybe a path to a config (Desk) file
          -> Config            -- ^ 'Config' generated from command-line arguments
          -> IO Config
 mkConfig mDeskFile groups argsConfig = do
---    let extConfig = mkExtConfig mExt
     initConfig <- mkInitConfig "."
     kbase <- getEnv "K_BASE"
     (defaultConfig, defaultGroups) <- parseConfigFile $ kbase </> "tools" </> "global-defaults.desk"

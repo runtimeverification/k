@@ -9,7 +9,6 @@ import System.IO (hPutStrLn, stderr)
 import System.Exit (exitFailure)
 
 die :: String -> IO a
---die msg = ioError (userError msg)
 die msg = do
     hPutStrLn stderr "Error:"
     hPutStrLn stderr msg
