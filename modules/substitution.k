@@ -1,12 +1,20 @@
 require k-visitor
 
+module BINDING
+  syntax Binding ::=  "[" #Id "]" #Id [:prec 99 gather(e &) latex "{#1}.{#2}":]
+/*@ Binding just takes ids here as they woul dneed to be part of the 
+epxressions syntax anyway.
+*/
+end module
+  
+
 module SUBSTITUTION 
   imports K-VISITOR
+  imports BINDING
 ---beta-substitution definition using the K AST visitor pattern
 ---assuming the binding operator is [_]_
   syntax K ::= #Id  | #Nat
-//   We will use the labeled form for it to allow user to define their own syntax
-//             | [ #Id ] K [latex "{#1}.{#2}"]
+             | "[" #Id "]" K [:ditto:]
              | K [ K / #Id ] [prec 0]
              | beta K [ K / #Id ]
                [prec 0 latex "{#1}\sqbracket{\framebox{${#2}$}/{#3}}"]
