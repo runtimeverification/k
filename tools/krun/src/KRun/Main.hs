@@ -32,6 +32,10 @@ import KRun.InitialValueParser
 import KRun.Types
 --import KRun.XPath
 
+-- | Where krun can create files.
+workDirectory :: FilePath
+workDirectory = ".k"
+
 main :: IO ()
 main = do
     argv <- getArgs
@@ -212,52 +216,34 @@ wrapperArgs config tmpDir cmdFile outFile errFile =
 -- | Flattens a program to a K term.
 flattenProgram :: Config -> ProgramSource -> IO Kast
 flattenProgram config pgm = case config ! "parser" of
-    String "kast" -> runInternalKast config pgm
+    String "kast" -> runKast config pgm
     _ -> die "External parser not implemented."
 
 -- | Run the internal parser that turns programs into K terms using
 -- the K definition.
-runInternalKast :: Config -> ProgramSource -> IO Kast
-runInternalKast config (ProgramSource pgm) = do
+runKast :: Config -> ProgramSource -> IO Kast
+runKast config (ProgramSource pgm) = do
     tmpDir <- getTmpDir
     (tmpFile, tmpHandle) <- openTempFile tmpDir "pgm.in"
     tmpCanonicalFile <- canonicalizePath tmpFile
     T.hPutStr tmpHandle pgm
     hClose tmpHandle
-    let kastArgs = defaultKastArgs config tmpCanonicalFile
+    let args = kastArgs config tmpCanonicalFile
     kastExecutable <- getKastExecutable
-    (exitCode, kastStdout, kastStderr) <- readProcessWithExitCode kastExecutable kastArgs ""
+    (exitCode, kastStdout, kastStderr) <- readProcessWithExitCode kastExecutable args ""
     when (not (null kastStderr)) $ do
         hPutStrLn stderr "Warning: kast reported errors or warnings:"
         hPutStrLn stderr kastStderr
     when (exitCode /= ExitSuccess) $ do
         die $ "Fatal: kast returned a non-zero exit code: " ++ show exitCode
            ++ "\nAttempted command:\n"
-           ++ "kast " ++ intercalate " " kastArgs
+           ++ "kast " ++ intercalate " " args
     let kast = Kast (T.pack kastStdout)
     removeFile tmpFile
     return kast
 
-getTmpDir :: IO FilePath
-getTmpDir = do
-    cwd <- getCurrentDirectory
-    let tmpDir = cwd </> distDir </> "krun_tmp"
-    createDirectoryIfMissing True tmpDir
-    return tmpDir
-
-getKastExecutable :: IO FilePath
-getKastExecutable = do
-    kbase <- getEnv "K_BASE"
-    return $ kbase </> "core" </> "kast"
-
--- Hardcoded defaults:
--- TODO: get rid of these!
-
-distDir :: FilePath
-distDir = ".k"
-
-defaultKastArgs :: Config -> FilePath -> [String]
-defaultKastArgs config pgmFile =
+kastArgs :: Config -> FilePath -> [String]
+kastArgs config pgmFile =
     [ "--k-definition", kDef
     , "--main-module", mainMod
     , "--syntax-module", syntaxMod
@@ -265,3 +251,15 @@ defaultKastArgs config pgmFile =
     ] where File kDef = config ! "k-definition"
             String mainMod = config ! "main-module"
             String syntaxMod = config ! "syntax-module"
+
+getKastExecutable :: IO FilePath
+getKastExecutable = do
+    kbase <- getEnv "K_BASE"
+    return $ kbase </> "core" </> "kast"
+
+getTmpDir :: IO FilePath
+getTmpDir = do
+    cwd <- getCurrentDirectory
+    let tmpDir = cwd </> workDirectory </> "krun_tmp"
+    createDirectoryIfMissing True tmpDir
+    return tmpDir
