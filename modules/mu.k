@@ -1,11 +1,8 @@
-require substitution
+require lambda
 
-module MU imports SUBSTITUTION
-  syntax K ::= mu #Id . K [latex "\mu{#1}.{#2}"]
-             | aMu K [latex "\mu{#1}"]
-
-  macro mu X:#Id . E:K = aMu([X]E)
+module MU imports LAMBDA
+  syntax K ::= mu K [prec 100 latex "\mu{#1}"]
 
 ---Fix point operator (through beta-substitution)
-  rule <k> aMu ([X]E) => E[aMu ([X]E) / X]<_/k>
+  rule <k> (mu[X:#Id] E:K) => E[(mu[X] E) / X] ...</k>
 end module

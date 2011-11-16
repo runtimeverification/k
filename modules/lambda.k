@@ -1,12 +1,11 @@
 require substitution
 
 module LAMBDA imports SUBSTITUTION
-  syntax K ::= lambda #Id . K [latex "\lambda{#1}.{#2}"]
-             | K K  [strict]
+  syntax KResult ::= #Id 
+                   | "lambda" K       [: prec 100 latex "\lambda{#1}" :]
+  syntax K ::= "[" #Id "]"  K         [: latex "{#1}.{#2}" prec 99 gather(e &):]
+             | K K                    [:strict prec 0 gather (E e):]
 
-  syntax KResult ::= aLambda K [latex "\lambda{#1}"]
-
-  macro lambda X:#Id . E:K = aLambda([X]E)
 ---Function application (through beta-substitution)
-  rule <k> aLambda([X]E) E':KResult => E[E' / X]<_/k>
+  rule <k> (lambda[X:#Id] E:K) V:KResult => E[V / X] ...</k>
 end module

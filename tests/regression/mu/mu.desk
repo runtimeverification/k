@@ -7,8 +7,7 @@ Authors:            Traian Serbanuta
 Maintainer:         Traian Serbanuta <tserban2@illinois.edu>
 Tags:               modularity, agent, test
 
-Language:
-  Main-module:      MU-TEST
-  Syntax-module:    MU-TEST
-  Parser:           kast
-  Output-mode:      maude
+main-module:      MU-TEST
+syntax-module:    MU-TEST
+parser:           kast
+output-mode:      pretty

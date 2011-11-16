@@ -7,6 +7,8 @@ module IO imports SEQ
              | read
              | print K [strict]
   
-   rule <k>read => I:#Int<_/k> <in>ListItem(I) => .<_/in>
-   rule <k>print V:KResult => skip <_/k> <out_>. => ListItem(V)</out>
+   rule <k> read => I:#Int ...</k> 
+        <in> ListItem(I) => . ...</in>
+   rule <k> print V:KResult => skip ...</k> 
+        <out>... . => ListItem(V) </out>
 end module

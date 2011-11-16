@@ -1,1 +1,0 @@
-((fun z -> (z z)) fun x -> fun y -> (x y))

@@ -1,1 +1,1 @@
-x mu f . lambda x . (f x)
+x (mu[f] lambda[x] (f x))

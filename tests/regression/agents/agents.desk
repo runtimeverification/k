@@ -7,8 +7,7 @@ Authors:            Traian Serbanuta
 Maintainer:         Traian Serbanuta <tserban2@illinois.edu>
 Tags:               modularity, agent, test
 
-Language:
-  Main-module:      AGENTS-TEST
-  Syntax-module:    AGENTS-TEST
-  Parser:           kast
-  Output-mode:      io
+main-module:      AGENTS-TEST
+syntax-module:    AGENTS-TEST
+parser:           kast
+output-mode:      pretty

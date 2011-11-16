@@ -33,6 +33,6 @@ module AGENTS-TEST is including AGENTS + THREADS + WHILE + IO + REF + LAMBDA + E
       <messages> <message multiplicity="*">
           <from>.K</from> <to>.Set</to> <body>.K</body>
       </message> </messages>
-      <I-O> <in stream="stdin">.List</in> <out stream="stdout">.List</out> </I-O>
+      <IO> <in stream="stdin">.List</in> <out stream="stdout">.List</out> </IO>
     </T>
 end module
