@@ -3,7 +3,7 @@ require /modules/substitution
 module LAMBDA-SYNTAX imports BINDING
 
   syntax Exp ::= Val
-               | Exp Exp                [:strict gather(E e):]
+               | Exp Exp                [:seqstrict gather(E e):]
 
   syntax Val ::= "lambda" Binding       [:prec 100 latex "\lambda{#1}":]
                | #Id

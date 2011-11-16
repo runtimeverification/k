@@ -515,6 +515,7 @@ mod K-LATEX is
   including #STRING .
   op @latex : #String -> BagItem .
   ops latex_ : #String -> [KSentence] [prec 126 format(b o d)] .
+  op k-result : K -> K .
 endm
 
 mod K-BUILTINS is
