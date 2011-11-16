@@ -67,6 +67,9 @@ main = do
         usageError ["missing required <file> argument\n"]
     let pgmFile = fromJust $ maybePgmFile
 
+    when (Map.notMember "compiled-def" config) $
+        die $ "Could not find a compiled K definition."
+
     File compiledDef <- getVal config "compiled-def"
     existsCompiled <- doesFileExist compiledDef
     when (not existsCompiled) $
