@@ -66,6 +66,10 @@ main = do
         usageError ["missing required <file> argument\n"]
     let pgmFile = fromJust $ maybePgmFile
 
+    existsPgmFile <- doesFileExist pgmFile
+    when (not existsPgmFile) $ do
+        die $ "Program file does not exist: " ++ pgmFile
+
     when (Map.notMember "compiled-def" config) $
         die $ "Could not find a compiled K definition."
 
