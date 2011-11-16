@@ -22,7 +22,6 @@ Executable krun
     filepath,
     directory,
     text,
-    cmdargs,
     failure,
     data-object,
     data-object-yaml,

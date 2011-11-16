@@ -21,7 +21,6 @@ import Foreign.Maude
 import Language.K.CellsToXml (cellsToXml')
 import Language.K.Core.NewParser
 import Language.K.Core.NewPretty
-import System.Console.CmdArgs
 import System.Directory
 import System.Environment
 import System.Exit
