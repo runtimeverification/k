@@ -66,18 +66,18 @@ main = do
     when (isNothing maybePgmFile) $ do
         usageError ["missing required <file> argument\n"]
     let pgmFile = fromJust $ maybePgmFile
-        
-    Bool io <- getVal config "io"
-    kmap <- case parseKeyVals $ map T.pack initVals of
-        Left err -> die $ "Unable to parse initial configuration value: " ++ err
-        Right kmap -> return $ kmap `Map.union`
-            if io then Map.empty else Map.fromList [("noIO", Kast "wlist_(#noIO)(.List{K})")]
 
     File compiledDef <- getVal config "compiled-def"
     existsCompiled <- doesFileExist compiledDef
     when (not existsCompiled) $
         die $ "Could not find compiled definition: " ++ compiledDef
            ++ "\nPlease compile the definition by using `make' or `kompile'."
+
+    Bool io <- getVal config "io"
+    kmap <- case parseKeyVals $ map T.pack initVals of
+        Left err -> die $ "Unable to parse initial configuration value: " ++ err
+        Right kmap -> return $ kmap `Map.union`
+            if io then Map.empty else Map.fromList [("noIO", Kast "wlist_(#noIO)(.List{K})")]
 
     pgm <- ProgramSource <$> T.readFile pgmFile
     kast <- flattenProgram config pgm
