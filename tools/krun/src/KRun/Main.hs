@@ -237,7 +237,7 @@ runInternalKast config (ProgramSource pgm) = do
         hPutStrLn stderr kastStderr
     when (exitCode /= ExitSuccess) $ do
         die $ "Fatal: kast returned a non-zero exit code: " ++ show exitCode
-           ++ "Attempted command:\n"
+           ++ "\nAttempted command:\n"
            ++ "kast " ++ intercalate " " kastArgs
     let kast = Kast (T.pack kastStdout)
     removeFile tmpFile
