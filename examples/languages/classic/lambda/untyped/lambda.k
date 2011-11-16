@@ -8,7 +8,7 @@ module LAMBDA-SYNTAX imports BINDING
   syntax Val ::= "lambda" Binding       [:prec 100 latex "\lambda{#1}":]
                | #Id
 
-  syntax Binding ::= "[" #Id "]" Exp    [:ditto:]
+  syntax Binding ::= "[" #Id "]" Exp    [:ditto latex "{#1}.{#2}":]
 //Usual lambda-calculi '.' cannot currently be used for parsing issues.
 //However, the binding operator is transformed into "." when typesetting.
 end module
