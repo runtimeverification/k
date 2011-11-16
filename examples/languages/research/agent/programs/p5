@@ -1,1 +1,1 @@
-((lambda x . x + 7) 10)
+(lambda[x] x + 7) 10

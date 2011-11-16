@@ -1,4 +1,4 @@
-(lambda x . ( 
+(lambda[x] ( 
                 (spawn ((rendezvous 1) ; (print(*x)) ; (rendezvous 2))) ;
                 (spawn ((rendezvous 3) ; (print(*x)) ; (rendezvous 4))) ;
                 (print(*x)) ;

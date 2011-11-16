@@ -51,7 +51,7 @@ module AGENT
       <messages> <message multiplicity="*">
           <from>.K</from> <to>.Set</to> <body>.K</body>
       </message> </messages>
-      <I-O> <in stream="stdin">.List</in> <out stream="stdout">.List</out> </I-O>
+      <IO> <in stream="stdin">.List</in> <out stream="stdout">.List</out> </IO>
     </T>
 
   syntax KResult ::= #Id

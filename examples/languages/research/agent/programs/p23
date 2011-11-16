@@ -1,4 +1,4 @@
-(lambda x .  (
+(lambda[x]  (
   (while (*x <= 3) do (
     (newAgent (
       (print me);
