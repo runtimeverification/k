@@ -75,32 +75,34 @@ main = do
         die $ "Could not find compiled definition: " ++ compiledDef
            ++ "\nPlease compile the definition by using `make' or `kompile'."
 
-    Bool io <- getVal config "io"
     kmap <- case parseKeyVals $ map T.pack initVals of
         Left err -> die $ "Unable to parse initial configuration value: " ++ err
-        Right kmap -> return $ kmap `Map.union`
-            if io then Map.empty else Map.fromList [("noIO", Kast "wlist_(#noIO)(.List{K})")]
+        Right kmap -> return kmap
+
+    Bool io <- getVal config "io"
+    kmap' <- if io then return kmap else do
+        isterm <- hIsTerminalDevice stdin
+        kmap' <- case isterm of
+            False -> do
+                input <- T.getContents
+                let stdbuf = Kast $ T.concat ["(# \"", T.replace "\n" "\\n" input, "\"(.List{K}))"]
+                return $ Map.insert "stdin" stdbuf kmap
+            True -> return kmap
+        return $ Map.insert "noIO" (Kast "wlist_(#noIO)(.List{K})") kmap'
 
     pgm <- ProgramSource <$> T.readFile pgmFile
     kast <- flattenProgram config pgm
-    let kmap' = Map.insert "PGM" kast kmap
+    let kmap'' = Map.insert "PGM" kast kmap'
 
     Bool search <- getVal config "do-search"
     if search
-        then searchExecution config kmap'
-        else standardExecution config kmap'
+        then searchExecution config kmap''
+        else standardExecution config kmap''
 
 
 searchExecution :: Config -> Map Text Kast -> IO ()
 searchExecution config kmap = do
-    isterm <- hIsTerminalDevice stdin
-    kmap' <- case isterm of
-        False -> do
-            input <- T.getContents
-            let stdbuf = Kast $ T.concat ["(# \"", T.replace "\n" "\\n" input, "\"(.List{K}))"]
-            return $ Map.insert "stdin" stdbuf kmap
-        True -> return kmap
-    (_, outFile, errFile) <- evalKastIO config kmap'
+    (_, outFile, errFile) <- evalKastIO config kmap
     out <- T.readFile outFile
     let maybeSearchResults = parseSearchResults out
     when (isNothing maybeSearchResults) $ do
