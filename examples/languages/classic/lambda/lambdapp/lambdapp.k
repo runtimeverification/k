@@ -8,7 +8,7 @@ module LAMBDAPP-SYNTAX
                | "letrec" #Id "=" Exp "in" Exp  
   syntax Val ::= #Int | #Bool
 
-  syntax #Id ::= "+" | "*" | "<=" | "ite" | "callcc"
+  syntax #Id ::= "+" | "*" | "/" | "<=" | "ite" | "callcc"
 
 //@ Desugaring let constructs into more basic ones
   macro (letrec X = E in E') = (let X = (mu[X] E) in E')
@@ -29,6 +29,7 @@ module LAMBDAPP
 //@Arithmetic
   rule + I1:#Int I2:#Int => I1 +Int I2
   rule * I1:#Int I2:#Int => I1 *Int I2
+  rule / I1:#Int I2:#Int => I1 /Int I2
   rule <= I1:#Int I2:#Int => I1 <=Int I2
 
 //@Conditional
@@ -52,8 +53,9 @@ module LAMBDAPP
        <in> ListItem(I:#Int) => . ...</in>
 
 
-  rule [print] : <k> print I => I ...</k>
-       <out>... . => ListItem(I) </out>
+  syntax #Id ::= "dummy"
+  rule [print] : <k> print I => (lambda[dummy]dummy) ...</k>
+       <out>... (. => ListItem(I)) </out>
 
 /*@ 
  Since our evaluation strategy is topmost call-by-value, we need to add 

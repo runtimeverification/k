@@ -1,0 +1,1 @@
+(mu[printAll]lambda[x]print x printAll)  1 2 3 4 5 6
