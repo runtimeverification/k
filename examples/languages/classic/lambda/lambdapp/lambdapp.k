@@ -10,8 +10,9 @@ module LAMBDAPP-SYNTAX
 
   syntax #Id ::= "+" | "*" | "<=" | "ite" | "callcc"
 
-  macro (let X:#Id = E:Exp in E':Exp) = (lambda[X] E') E
+//@ Desugaring let constructs into more basic ones
   macro (letrec X = E in E') = (let X = (mu[X] E) in E')
+  macro (let X:#Id = E:Exp in E':Exp) = (lambda[X] E') E
 
 //@ I/O additions
   syntax Exp ::= "read"
@@ -58,8 +59,9 @@ module LAMBDAPP
  Since our evaluation strategy is topmost call-by-value, we need to add 
  the predicate below to specify that an id applied to a value is a value,
  thus allowing the evaluation of the second argument for arithmetic operators.
- However, we want exclude if-then-else from the ids because evaluating
+ However, we want exclude if-then-else from these ids because evaluating
  its branches might lead to non-termination in the presence of $\mu$.
+ We also exclude print as it is side-effecting.
 */
   rule 'k-result(X:#Id V:Val) => true 
    if X =/=Bool print andBool X =/=Bool ite
