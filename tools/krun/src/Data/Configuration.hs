@@ -19,7 +19,7 @@ import System.Environment
 import System.Exit
 import System.FilePath
 
-import Distribution.Desk.Utils
+import KRun.Utils
 
 type Config = Map String Value
 

@@ -28,7 +28,7 @@ import Text.Printf
 import Text.Parsec (parse)
 
 import Data.Configuration
-import Distribution.Desk.Utils
+import KRun.Utils
 import KRun.InitialValueParser
 import KRun.Types
 --import KRun.XPath

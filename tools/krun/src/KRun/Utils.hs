@@ -1,4 +1,4 @@
-module Distribution.Desk.Utils where
+module KRun.Utils where
 
 import Control.Monad (filterM)
 import Data.Char (toLower)
