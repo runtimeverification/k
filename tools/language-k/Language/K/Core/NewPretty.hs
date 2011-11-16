@@ -22,7 +22,7 @@ ppK (KApp klabel [k, KApp emptyList []])
     = ppK k
 ppK (KApp (Freezer k) ks) = ppK $ plugFreezer k ks
 ppK (KApp klabel []) = ppKLabel klabel
-ppK (KApp (KLabel ss) ks) = hsep $ zipSyntax ss (map ppK ks)
+ppK (KApp (KLabel ss) ks) = hsep $ zipSyntax ss ks
 ppK (KApp klabel ks) = ppKLabel klabel <> parens (hsep $ punctuate comma (map ppK ks))
 ppK FreezerHole = text "□"
 -- shouldn't happen:
@@ -54,11 +54,16 @@ plugFreezer k ks = mapK (plug ks) k
           mapK f k = k
 
 -- | Combine a KLabel and a list of arguments to form the original syntax.
-zipSyntax (Syntax s : xs) as = bold (text s) : zipSyntax xs as
+zipSyntax (Syntax s : xs) ks = bold (text s) : zipSyntax xs ks
 -- TODO: need original precedences, etc to get the parentheses right.
 -- For now, simply don't add any parentheses to the output.
-zipSyntax (Hole : xs) (a : as) =  a : zipSyntax xs as
+zipSyntax (Hole : xs) (k : ks)
+    | needsParens k = parens (ppK k) : zipSyntax xs ks
+    | otherwise = ppK k : zipSyntax xs ks
 zipSyntax _ _ = []
+
+needsParens (KApp (KLabel [Syntax _, Hole]) _) = True
+needsParens _ = False
 
 ppKLabel (KInt i) = integer i
 ppKLabel (KId id) = text id
