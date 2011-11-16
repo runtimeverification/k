@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-module Data.Configuration where
+module KRun.Configuration where
 
 import Control.Applicative ((<$>))
 import Control.Arrow ((&&&), first, second)

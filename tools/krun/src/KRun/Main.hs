@@ -27,7 +27,7 @@ import System.Process
 import Text.Printf
 import Text.Parsec (parse)
 
-import Data.Configuration
+import KRun.Configuration
 import KRun.Utils
 import KRun.InitialValueParser
 import KRun.Types
