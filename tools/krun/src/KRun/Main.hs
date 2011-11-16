@@ -18,7 +18,6 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Foreign.Maude
-import Language.K.CellsToXml (cellsToXml')
 import Language.K.Core.NewParser
 import Language.K.Core.NewPretty
 import System.Directory
