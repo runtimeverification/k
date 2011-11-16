@@ -132,10 +132,14 @@ mkInitConfig dir = do
 
 resolvedConfig :: Value -> Config
 resolvedConfig (File kDef) = Map.fromList
-    [ ("compiled-def", File $ kDef ++ "-compiled.maude")
-    , ("main-module", String $ map toUpper langName)
-    , ("syntax-module", String $ map toUpper langName ++ "-SYNTAX")
-    ] where langName = takeFileName kDef
+    [ ("compiled-def", File $ kDef' ++ "-compiled.maude")
+    , ("main-module", String langName)
+    , ("syntax-module", String $ langName ++ "-SYNTAX")
+    ] where kDef' = dropKExt kDef
+            langName = map toUpper (takeFileName kDef')
+
+dropKExt :: FilePath -> FilePath
+dropKExt f = if takeExtension f == ".k" then dropExtension f else f
 
 allSettings :: [Setting]
 allSettings = metadataSettings ++ generalSettings ++ commonKSettings ++ advancedKSettings
