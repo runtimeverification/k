@@ -1,102 +1,81 @@
----------------------------------
---- FUN-UNTYPED-SYNTAX module ---
----------------------------------
 
---- TO DO: Change kmod ... endkm with module ... end module when the reported bug is fixed
-kmod FUN-SYNTAX
+module FUN-UNTYPED-SYNTAX
 
-/*@ \section{Syntax}
-As explained above, FUN is an expression language, so every language construct
-ends up being an expression construct (directly or indirectly).  We also allow
-lists over identifiers and over expressions, like in most of our other languages,
-which make FUN more user friendly.  Finally, as seen below, we define a syntax
-which is more permissive that it should (that is, the builtin parser of our tool
-may parse even incorrect programs as terms of sort \texttt{Exp}).  If one does
-not like that, then one can use an external parser or one can define a type
-checker/inferences (see fun/type-inference).  Note, however, that there is no
-way one can define a grammar that parses precisely the well-typed FUN programs,
-simply because those programs do not form a context-free language (the
-simply-typed $\lambda$-calculus well-typed expressions already do not form a
-context-free language).  */
+  syntax Exp ::= #Int | #Bool | #String | #Id
+               | Exp "+" Exp           [:strict prec(33) gather(E e):]
+               | Exp "-" Exp           [:strict prec(33) gather(E e):]
+               | Exp "*" Exp           [:strict prec(31) gather(E e):]
+               | Exp "/" Exp           [:strict prec(31) gather(E e):]
+               | Exp "%" Exp           [:strict prec(31) gather(E e):]
+               | "-" Exp               [:strict:]
+               | Exp "<" Exp           [:strict prec(37):]
+               | Exp "<=" Exp          [:strict prec(37):]
+               | Exp ">" Exp           [:strict prec(37):]
+               | Exp ">=" Exp          [:strict prec(37):]
+               | Exp "==" Exp          [:strict prec(37):]
+               | Exp "!=" Exp          [:strict prec(37):]
+               | Exp "and" Exp         [:strict prec(55) gather(E e):]
+               | Exp "or" Exp          [:strict prec(59) gather(E e):]
+               | "not" Exp             [:strict prec(53):]
 
-/*@ The first group of expression constructs are the same as those of the SIMPLE
-language, so we do not discuss them anymore here. */
-
-  syntax Exp ::= #Int | #Bool
-               | #Id
-               | Exp "+" Exp                [:strict prec(33) gather(E e):]
-               | Exp "-" Exp                [:strict prec(33) gather(E e):]
-               | Exp "*" Exp                [:strict prec(31) gather(E e):]
-               | Exp "/" Exp                [:strict prec(31) gather(E e):]
-               | Exp "%" Exp                [:strict prec(31) gather(E e):]
-               | "-" Exp                    [:strict:]
-               | Exp "<" Exp                [:strict prec(37):]
-               | Exp "<=" Exp               [:strict prec(37):]
-               | Exp ">" Exp                [:strict prec(37):]
-               | Exp ">=" Exp               [:strict prec(37):]
-               | Exp "==" Exp               [:strict prec(37):]
-               | Exp "!=" Exp               [:strict prec(37):]
-               | Exp "and" Exp              [:strict prec(55) gather(E e):]
-               | Exp "or" Exp               [:strict prec(59) gather(E e):]
-               | "not" Exp                  [:strict prec(53):]
-
-/*@ The next group defines the usual functional constructs, namely function
-abstraction, function application, let and letrec binders, and conditional.
-
-*/
-  syntax Exp ::= "fun" List{Exp} "->" Exp
-               | Exp List{Exp}      [:strict prec(10) gather(E e):]
-               | List{Exp} "=" List{Exp}    [:prec(53):]   --- Bindings
-               | "let" Exp "in" Exp
-               | "letrec" Exp "in" Exp
-               | "if" Exp "then" Exp "else" Exp [:strict(1):]
-
-               | "[" "]"
-               | "[" List{Exp} "]"            [:strict hybrid prec(0):]
-               | "car" Exp                  [:strict prec(0):]
-               | "cdr" Exp                  [:strict prec(0):]
-               | "null?" Exp                [:strict prec(0):]
-               | "cons" Exp Exp             [:strict:]
-
-               | "ref" Exp                  [:strict:]
+  syntax Exp ::= "fun" Ids "->" Exp
+               | Exp Exps               [:strict prec(10) gather(E e):]
+---               | Exp "=" Exp           [:prec(53):]   --- Bindings
+               | "let" Ids "=" Exps "in" Exp [:strict(2):]
+               | "letrec" Ids "=" Exps "in" Exp
+               | "if" Exp
+                 "then" Exp
+                 "else" Exp            [:strict(1):]
+// Tuples
+---               | "<" Exps ">"          [:strict hybrid prec(0):]
+// Lists
+               | "[" Exps "]"          [:strict hybrid prec(0):]
+               | "car" Exp             [:strict prec(0):]
+               | "cdr" Exp             [:strict prec(0):]
+               | "null?" Exp           [:strict prec(0):]
+               | "cons" Exp Exp        [:strict:]
+// References
+               | "ref" Exp             [:strict:]
                | "&" #Id
-               | "*" Exp                    [:strict:]
-               | Exp ":=" Exp               [:strict:]
-               | Exp ";" Exp                [:seqstrict prec(110) gather(e E):]
+               | "*" Exp               [:strict:]
+               | Exp ":=" Exp          [:strict:]
+               | Exp ";" Exp           [:seqstrict prec(110) gather(e E):]
+// Callcc
+               | "callcc" Exp          [:strict:]
 
-               | "callcc" Exp               [:strict:]
+  syntax Ids  ::= List{#Id,","}
+  syntax Exps ::= List{Exp,","}
 
------------------------------------------------------------------------------
---- Lists should be eventually builtin; for now, they need to be declared ---
------------------------------------------------------------------------------
---- List{Id}
-  syntax List{Id} ::= #Id
-                    | "(" ")"
-                    | List{Id} "," List{Id} [:strict hybrid assoc id(`(`)) prec(70):]
+---  macro fun E1:Exp E2:Exp -> E:Exp = fun E1 -> fun E2 -> E
+---  macro (E1 E2 = E) = (E1 = fun E2 -> E)
+//  macro (Xs1:Ids = Es1:Exps) and (Xs2:Ids = Es2:Exps)
+//      = ((Xs1,Xs2) = (Es1,Es2))
+end module
 
---- List{Exp}
-  syntax List{Exp} ::= Exp | List{Id} | List{Exp} "," List{Exp} [:ditto:]
------------------------------------------------------------------------------
 
-  macro fun E1:Exp E2:Exp -> E:Exp = fun E1 -> fun E2 -> E
-  macro (E1 El:List{Exp} = E2) = (E1 = fun El -> E2)
-  macro (Xl1:List{Id} = El1:List{Exp}) and (Xl2:List{Id} = El2:List{Exp}) = ((Xl1,Xl2) = (El1,El2))
-  macro [] = [()]
-endkm
-
-module FUN-UNTYPED imports FUN-SYNTAX
+module FUN-UNTYPED
+  imports FUN-UNTYPED-SYNTAX
   syntax Val ::= #Int | #Bool
+  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
-  syntax K ::= List{Exp}
-  syntax KResult ::= List{Val}
+  syntax KResult ::= Val
 
-  configuration <T>  <k> .K </k>
-                     <env> .Map </env>
-                     <store> .Map </store>
-                     <nextLoc> 0 </nextLoc>
+//@ \subsection{Configuration}
+
+  configuration <T>  <k color="green"> $PGM:Exp </k>
+                     <env color="violet"> .Map </env>
+                     <store color="white"> .Map </store>
+                     <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
-  rule <k> X:#Id => V:Val ...</k> <env>... X|->L:#Nat ...</env> <store>... L|->V ...</store>
+//@ \subsection{Lookup}
+
+  rule <k> X:#Id => V:Val ...</k>
+       <env>... X |-> L:#Nat ...</env>
+       <store>... L |-> V ...</store>
+
+//@ \subsection{Arithmetic expressions}
+
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
@@ -112,63 +91,102 @@ module FUN-UNTYPED imports FUN-SYNTAX
   rule T1:#Bool and T2:#Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
   rule not(T:#Bool) => notBool(T)
-  syntax Val ::= closure ( Map , List{Id} , Exp )
-  rule <k> fun Xl:List{Id} -> E:Exp => closure(Env:Map,Xl,E) ...</k> <env> Env </env> 
-  rule <k> closure(Env,Xl,E) Vl:List{Val} => Vl ~> bindTo(Xl) ~> E ~> env(Env') ...</k> <env> Env':Map => Env </env>
-  rule <k> let Xl = El:List{Exp} in E => El ~> bindTo(Xl) ~> E ~> env(Env) ...</k> <env> Env </env>
-  rule <k> letrec Xl = El in E => bindTo(Xl) ~> El ~> writeTo(Xl) ~> E ~> env(Env) ...</k> <env> Env </env>
-  syntax Val ::= cc ( Map , K )
-  rule <k> (callcc V => V cc(Env,K)) ~> K </k> <env> Env </env> 
-  rule <k> cc(Env,K:K) V ~> _ => V ~> K </k> <env> _ => Env </env> 
+
+//@ \subsection{Functions and Closures}
+
+  syntax Val ::= "closure" "(" Map "," Ids "," Exp ")"
+  rule <k> fun Xs:Ids -> E:Exp => closure(Rho:Map,Xs,E) ...</k>
+       <env> Rho </env>
+  rule <k> closure(Rho,Xs,E) Vs:Vals
+        => bindTo(Xs,Vs) ~> E ~> env(Rho') ...</k>
+       <env> Rho':Map => Rho </env>
+
+//@ \subsection{Let}
+
+  rule <k> let Xs = Vs:Vals in E
+        => bindTo(Xs,Vs) ~> E ~> env(Rho) ...</k>
+       <env> Rho </env>
+
+//@ \subsection{Letrec}
+
+  rule <k> letrec Xs = Es:Exps in E
+        => bind(Xs) ~> assignTo(Xs,Es) ~> E ~> env(Rho) ...</k>
+       <env> Rho </env>
+
+//@ \subsection{Callcc}
+
+  syntax Val ::= "cc" "(" Map "," K ")"
+  rule <k> (callcc V => V cc(Rho,K)) ~> K </k> <env> Rho </env> 
+  rule <k> cc(Rho,K:K) V ~> _ => V ~> K </k> <env> _ => Rho </env> 
+
+//@ \subsection{Conditional}
+
   rule if  true then E else _ => E
   rule if false then _ else E => E 
-  rule car [V,_:List{Val}] => V
-  rule cdr [_:Val,Vl] => [Vl]
-  rule null? [()] => true
-  rule null? [_:Val,_:List{Val}] => false
-  rule cons V [Vl] => [V,Vl]
-  rule <k> ref V => L ...</k> <store>... . => L|->V ...</store> <nextLoc> L => sNat L </nextLoc>
+
+//@ \subsection{Lists}
+
+  rule car [V,_:Vals] => V
+  rule cdr [_:Val,Vs] => [Vs]
+  rule null? [] => true
+  rule null? [_:Val,_:Vals] => false
+  rule cons V [Vs] => [V,Vs]
+
+//@ \subsection{References}
+
+  rule <k> ref V => L ...</k>
+       <store>... . => L |-> V ...</store>
+       <nextLoc> L => sNat L </nextLoc>
   rule <k> &X => L ...</k> <env>... X|->L ...</env>
   rule <k> *L => V ...</k> <store>... L|->V ...</store>
   rule <k> L:=V => V  ...</k> <store>... L|->(_=>V) ...</store>
   rule V1; V2 => V2
 
-----------------------------------------------
---- Auxilliary declarations and operations ---
-----------------------------------------------
---- List{Val}
-  syntax List{Val} ::= Val | List{Val} "," List{Val} [:ditto:]
-  syntax List{Exp} ::= List{Val}
 
---- Environment recovery
-  syntax K ::= env ( Map )
-  rule (env(_) => .) ~> env(_)                                         [:structural:]    --- tail recursion
-  rule <k> env(Env) => . ...</k> <env> _ => Env </env>                   [:structural:]
-  rule <k> V ~> (env(Env) => .) ...</k> <env> _ => Env </env>            [:structural:]
+//@ \subsection{Auxilliary operations}
 
---- bindTo and writeTo
-  syntax K ::= bindTo List{Id} | writeTo List{Id}
-  rule <k> () ~> bindTo() => . ...</k>                                   [:structural:]
-  rule <k> ((V=>()),_:List{Val}) ~> bindTo((X=>()),_:List{Id}) ...</k>
-       <env> Env => Env[N/X] </env>
-       <store>... . => N|->V ...</store>
-       <nextLoc> N:#Nat => sNat N </nextLoc>  if X =/=Bool ()           [:structural:]
+//@ \subsubsection{Environment recovery}
 
-  rule <k> bindTo() => . ...</k>                                         [:structural:]
-  rule <k> bindTo((X=>()),_:List{Id}) ...</k>
-       <env> Env => Env[N/X] </env>
-       <nextLoc> N => sNat N </nextLoc>  if X =/=Bool ()               [:structural:]
+  syntax K ::= "env" "(" Map ")"
+  rule (env(_) => .) ~> env(_)            [:structural:]    --- tail recursion
+  rule <k> env(Rho) => . ...</k>
+       <env> _ => Rho </env>              [:structural:]
+  rule <k> V ~> (env(Rho) => .) ...</k>
+       <env> _ => Rho </env>              [:structural:]
 
-  rule <k> () ~> writeTo() => . ...</k>                                  [:structural:]
-  rule <k> ((V=>()),_:List{Val}) ~> writeTo((X=>()),_:List{Id}) ...</k>
-          <env>... X|->L ...</env> <store>... . => L|->V ...</store>           [:structural:]
+//@ \subsubsection{bindTo and bind}
+
+  syntax K ::= "bindTo" "(" Ids "," Vals ")" | "bind" "(" Ids ")"
+
+  rule <k> bindTo(.Ids,.Vals) => . ...</k>             [:structural:]
+  rule <k> bindTo((X,Xs => Xs),(V,Vs => Vs)) ...</k>
+       <env> Rho => Rho[N/X] </env>
+       <store>... . => N |-> V ...</store>
+       <nextLoc> N:#Nat => sNat N </nextLoc>              [:structural:]
+
+  rule <k> bind(.Ids) => . ...</k>                      [:structural:]
+  rule <k> bind(X,Xs => Xs) ...</k>
+       <env> Rho => Rho[N/X] </env>
+       <nextLoc> N => sNat N </nextLoc>                   [:structural:]
+
+//@ \subsubsection{assignTo}
+
+  syntax K ::= "assignTo" "(" Ids "," Exps ")"  [:strict(2):]
+
+  rule <k> assignTo(.Ids,.Vals) => . ...</k>            [:structural:]
+  rule <k> assignTo((X,Xs => Xs),(V,Vs => Vs)) ...</k>
+       <env>... X |-> L ...</env>
+       <store>... . => L |-> V ...</store>                [:structural:]
+
 end module
 
-***( add the following as well, in macros
+***(
 
   syntax Exp ::= try Exp catch ( #Id ) Exp
 --- assume that continuation and value are not free in E and E'
   macro try E catch(X:#Id) E':Exp
-      = callcc (fun continuation -> (fun throw -> E:Exp)(fun value -> continuation ((fun X -> E') value)))
+      = callcc (fun continuation
+                -> (fun throw -> E:Exp)
+                     (fun value -> continuation ((fun X -> E') value)))
 
 ***)
