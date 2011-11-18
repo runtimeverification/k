@@ -164,3 +164,11 @@ module FUN-UNTYPED imports FUN-SYNTAX
           <env>... X|->L ...</env> <store>... . => L|->V ...</store>           [:structural:]
 end module
 
+***( add the following as well, in macros
+
+  syntax Exp ::= try Exp catch ( #Id ) Exp
+--- assume that continuation and value are not free in E and E'
+  macro try E catch(X:#Id) E':Exp
+      = callcc (fun continuation -> (fun throw -> E:Exp)(fun value -> continuation ((fun X -> E') value)))
+
+***)
