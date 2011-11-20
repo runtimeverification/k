@@ -1,33 +1,36 @@
 module K-VISITOR imports K-WRAPPERS
-  syntax K ::= visit List{K} applying KLabel if label in Set 
-    [latex "\mbox{apply }{#2}\mbox{ to }{#3}\mbox{ in }{#1}"]
+  syntax K ::= "visit" List{K} "applying" KLabel "if" KLabel
+    [latex "\mbox{apply }{#2}\mbox{ in }{#1}\mbox{ if }{#3}"]
+             | "visiting" List{K} "applying" KLabel "if" KLabel
+    [latex "\mbox{apply }{#2}\mbox{ in }{#1}\mbox{ if }{#3}"]
   --- "boxed" versions of the K constructors (all of them are strict)
   syntax K ::= K visitedL(~>) K [latex "{#1}\framebox{$\kra$}{#2}" strict]
              | K visitedL(,,) K [latex "{#1}\framebox{$,\!\!,$}{#2}" strict]
   syntax KResult ::= visitedK List{K}  [latex "\framebox{${#1}$}"]
 
-  rule visit Label(Kl) applying A if label in Labels SetItem(wklabel(Label))
-    => A(Label(Kl)) [structural]
-  rule visit Label(Kl) applying A if label in Labels
-    => visitedL(Label)(visit Kl applying A if label in Labels)
-    if notBool(wklabel(Label) in Labels)  
+  rule visit Kl applying A if Pred:KLabel
+    => if Pred(Kl) ==Bool true then A(Kl) else visiting Kl applying A if Pred fi
+   [structural]
+
+  rule visiting Label(Kl) applying A if Pred
+    => visitedL(Label)(visit Kl applying A if Pred)
     [structural]
     
-  rule visit . applying A:KLabel if label in Labels:Set => visitedK(.) 
+  rule visiting . applying A:KLabel if Pred => visitedK(.) 
     [structural]
-  rule visit K1 ~> K2 applying A if label in Labels 
-    => visit K1 applying A if label in Labels
+  rule visiting K1 ~> K2 applying A if Pred 
+    => visit K1 applying A if Pred
     visitedL(~>) 
-       visit K2 applying A if label in Labels
+       visit K2 applying A if Pred
     if K1 =/=Bool . andBool  K2 =/=Bool . 
     [structural]
-  rule visit .List{K} applying A if label in Labels 
+  rule visiting .List{K} applying A if Pred 
     => visitedK(.List{K}) 
     [structural]
-  rule visit K1,,NeKl:NeList`{K`} applying A if label in Labels
-    => visit K1 applying A if label in Labels
+  rule visiting K1,,NeKl:NeList`{K`} applying A if Pred
+    => visit K1 applying A if Pred
     visitedL(,,) 
-       visit NeKl applying A if label in Labels
+       visit NeKl applying A if Pred
     [structural]
     
   syntax KLabel ::= visitedL ( KLabel ) [latex "\framebox{#1}"]

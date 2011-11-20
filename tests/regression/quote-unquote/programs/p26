@@ -1,1 +1,1 @@
-(lambda[c] ((lambda[b] print(eval(b))) (quote(quote(unquote(unquote(lift c))))))) 10
+(\c.((\b.print(eval(b))) (quote(quote(unquote(unquote(lift c))))))) 10

@@ -1,4 +1,4 @@
-(lambda[x]  (
+(\x.  (
   (while (*x <= 3) do (
     (newAgent (print receive)) ;
     (*x := *x + 1)

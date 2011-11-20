@@ -1,1 +1,1 @@
-(lambda[z] z z) (lambda[x]lambda[y] x y)
+(\z.z z) (\x.\y.x y)

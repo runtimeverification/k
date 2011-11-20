@@ -7,7 +7,7 @@ require /modules/lambda
 require /modules/mu
 
 module IO-TEST imports IO + MU + LAMBDA + IF + EXP
-  configuration <T> <k> $PGM:K </k>  <nextId> 0 </nextId>
+  configuration <T> <k> $PGM:K </k>
                 <in stream="stdin"> .List </in> 
                 <out stream="stdout"> .List </out> </T>
 end module

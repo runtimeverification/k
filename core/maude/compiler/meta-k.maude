@@ -415,6 +415,13 @@ fmod K-META-CONFIG is
   eq removeConfTerm((mb 'configuration_[T] : 'KSentence [AS] .) MAS) = MAS .
   eq removeConfTerm(MAS) = MAS [owise] .
   
+  op setConfTerm : Module Term -> Module .
+  eq setConfTerm(M, T) = setMbs(M,setConfTerm(getMbs(M), T)) .
+  op setConfTerm : MembAxSet Term -> MembAxSet .
+  eq setConfTerm((mb 'configuration_[T1] : 'KSentence [AS] .) MAS, T2) 
+   = (mb 'configuration_[T2] : 'KSentence [AS] .) MAS .
+  eq setConfTerm(MAS, T) = MAS [owise] .
+  
   sort Ellipses .
   ops none : -> Ellipses .
   op error : -> [Ellipses] .

@@ -1,20 +1,9 @@
 require k-visitor
 
-module BINDING
-  syntax Binding ::=  "[" #Id "]" #Id [:prec 99 gather(e &) latex "{#1}.{#2}":]
-/*@ Binding just takes ids here as they woul dneed to be part of the 
-epxressions syntax anyway.
-*/
-end module
-  
-
 module SUBSTITUTION 
   imports K-VISITOR
-  imports BINDING
 ---beta-substitution definition using the K AST visitor pattern
----assuming the binding operator is [_]_
   syntax K ::= #Id  | #Nat
-             | "[" #Id "]" K [:ditto:]
              | K [ K / #Id ] [prec 0]
              | beta K [ K / #Id ]
                [prec 0 latex "{#1}\sqbracket{\framebox{${#2}$}/{#3}}"]
@@ -23,7 +12,12 @@ module SUBSTITUTION
                
   syntax KLabel ::= beta [ K / #Id ] 
                [prec 0 latex "\sqbracket{\framebox{${#1}$}/{#2}}"]
+                  | isBinder
+                  | isBinder or #Id
                
+  rule isBinder or X(X) => true
+  rule isBinder or X(K) => true if isBinder(K)
+  
   syntax #Id ::= id #Nat  --- to generate fresh names
   rule id N:#Nat => #id ("id" +String Int2String(N))
   configuration <k color="green"> .K </k> <nextId> 0 </nextId>
@@ -32,8 +26,8 @@ module SUBSTITUTION
 
   rule beta[K/Y](Y) => visitedK(K) [structural]  ---this does the actual substitution
 
-  rule <k> beta[K/Y]('`[_`]_(X:#Id,,K')) => 
-           visitedL('`[_`]_)(visitedK(id(N)) 
+  rule <k> beta[K/Y](L:KLabel(X:#Id,,K')) => 
+           visitedL(L)(visitedK(id(N)) 
                 visitedL(,,) eval (beta K' [id(N)/X]), then apply [K/Y])
       <_/k> <nextId>N:#Nat => sNat N</nextId>
 ---    if Y =/=Bool X [structural] ---renaming bound variables
@@ -41,6 +35,6 @@ module SUBSTITUTION
 
   macro beta K':K [K:K/Y:#Id] 
       = visit K' applying beta[K/Y] 
-                       if label in SetItem(wklabel('`[_`]_)) SetItem(wklabel(getKLabel(Y)))
+                       if isBinder or Y
 
 end module

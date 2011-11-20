@@ -1,23 +1,22 @@
 require /modules/substitution
 
-module LAMBDA-SYNTAX imports BINDING
+module LAMBDA-SYNTAX 
 
   syntax Exp ::= Val
                | Exp Exp                [:seqstrict gather(E e):]
 
-  syntax Val ::= "lambda" Binding       [:prec 100 latex "\lambda{#1}":]
+  syntax Val ::= "lambda" #Id . Exp       [:prec 100 latex "\lambda{#1}.{#2}":]
                | #Id
-
-  syntax Binding ::= "[" #Id "]" Exp    [:ditto latex "{#1}.{#2}":]
-//Usual lambda-calculi '.' cannot currently be used for parsing issues.
-//However, the binding operator is transformed into "." when typesetting.
 end module
 
 module LAMBDA imports LAMBDA-SYNTAX + SUBSTITUTION
  
- configuration <k> $PGM:Exp </k> <nextId> 0 </nextId>
+ configuration <k> $PGM:Exp </k>
  syntax KResult ::= Val  
 
 //@ $\beta$-substitution
-  rule <k> (lambda[X:#Id] E:Exp) V:Val => E[V / X] ...</k>
+  rule <k> (lambda X:#Id.E:Exp) V:Val => E[V / X] ...</k>
+
+
+  rule isBinder(lambda X.E) => true
 end module

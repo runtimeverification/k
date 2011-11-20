@@ -7,9 +7,7 @@ Authors:            Traian Serbanuta
 Maintainer:         Traian Serbanuta <tserban2@illinois.edu>
 Tags:               modularity, agent, test
 
-Language:
-  Main-module:      EXP
-  Syntax-module:    EXP
-  Parser:           kast
-  Output-mode:      pretty-print
-  Cell-query:       //k/text()
+main-module:      EXP
+syntax-module:    EXP
+parser:           kast
+output-mode:      pretty

@@ -1,1 +1,1 @@
-callcc (lambda[k] (k 7) + 5)
+callcc (\k.(k 7) + 5)

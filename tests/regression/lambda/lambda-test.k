@@ -4,5 +4,5 @@ require /modules/exp
 require /modules/if
 
 module LAMBDA-TEST imports LAMBDA + EXP + IF
-  configuration <T> <k> $PGM:K </k> <nextId> 0 </nextId> </T>
+  configuration <k> $PGM:K </k>
 end module

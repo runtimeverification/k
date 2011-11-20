@@ -1,4 +1,4 @@
-   ((((lambda[n] lambda[c] lambda[i] lambda[x]
+   ((((\n.\c.\i.\x.
    ((while (*i <= n) do (
      (*c := quote(unquote(*c) + x)) ;
      (*i := *i + 1)

@@ -3,7 +3,7 @@ require ../untyped/lambda
 module LAMBDAPP-SYNTAX
   imports LAMBDA-SYNTAX
   
-  syntax Exp ::= "mu" #Id "." Exp       [:prec 100 latex "\mu{#1}.{#2}":] 
+  syntax Exp ::= "mu" Binding       [:prec 100 latex "\mu{#1}":] 
                | "let" #Id "=" Exp "in" Exp  
                | "letrec" #Id "=" Exp "in" Exp  
   syntax Val ::= #Int | #Bool
@@ -11,8 +11,8 @@ module LAMBDAPP-SYNTAX
   syntax #Id ::= "+" | "*" | "/" | "<=" | "ite" | "callcc"
 
 //@ Desugaring let constructs into more basic ones
-  macro (letrec X = E in E') = (let X = (mu X.E) in E')
-  macro (let X:#Id = E:Exp in E':Exp) = (lambda X.E') E
+  macro (letrec X = E in E') = (let X = (mu[X] E) in E')
+  macro (let X:#Id = E:Exp in E':Exp) = (lambda[X] E') E
 
 //@ I/O additions
   syntax Exp ::= "read"
@@ -24,7 +24,7 @@ module LAMBDAPP
   imports LAMBDAPP-SYNTAX + LAMBDA
 
 //@Recursion
-  rule <k> (mu X:#Id.E:Exp) => E[(mu X.E) / X] ...</k>
+  rule <k> (mu[X:#Id] E:Exp) => E[(mu[X] E) / X] ...</k>
 
 //@Arithmetic
   rule + I1:#Int I2:#Int => I1 +Int I2
@@ -47,13 +47,14 @@ module LAMBDAPP
   configuration <k> $PGM:Exp </k>
                 <in stream="stdin"> .List </in>
                 <out stream="stdout"> .List </out>
+                <nextId> 0 </nextId>
 
   rule <k> read => I ...</k> 
        <in> ListItem(I:#Int) => . ...</in>
 
 
   syntax #Id ::= "dummy"
-  rule [print] : <k> print I => (lambda dummy.dummy) ...</k>
+  rule [print] : <k> print I => (lambda[dummy]dummy) ...</k>
        <out>... (. => ListItem(I)) </out>
 
 /*@ 
@@ -66,8 +67,4 @@ module LAMBDAPP
 */
   rule 'k-result(X:#Id V:Val) => true 
    if X =/=Bool print andBool X =/=Bool ite
-
-  rule isBinder(mu X.E) => true
-
-  rule isBinder(mu X.E) => true
 end module

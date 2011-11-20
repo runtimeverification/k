@@ -18,7 +18,7 @@ fmod MANY-MODULES is
 
   op manyModules : Module ModuleSet  Term ~> Module .
   eq manyModules(M, M' MS, T) 
-   = if T :: Term then manyModules(addModule(removeConfTerm(setImports(M',nil)),M), MS, T) else manyModules(addModule(setImports(M',nil),M), MS, extractConfTerm(M')) fi [owise print T] .
-  eq manyModules(M, empty, T) = M .
+   = if T :: Term then manyModules(addModule(removeConfTerm(setImports(M',nil)),M), MS, if getName(M') == 'SUBSTITUTION then ctor(Bag)[T,mkCell('nextId,mkConstant('0,Int))] else T fi) else manyModules(addModule(setImports(M',nil),M), MS, extractConfTerm(M')) fi [owise print T] .
+  eq manyModules(M, empty, T) = if T :: Term then setConfTerm(M, T) else M fi .
 endfm
 

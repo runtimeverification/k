@@ -1,4 +1,4 @@
- ((lambda[y] lambda[z] (send z to y))
-          (newAgent(((lambda[y] (sendSynch me to y)) (receiveFrom parent)) ; 
+ ((\y. \z. (send z to y))
+          (newAgent(((\y. (sendSynch me to y)) (receiveFrom parent)) ; 
                     (spawn haltAgent) ; (print(receive))))) 
-           (newAgent(((lambda[z] ((send 17 to z) ; (print(z)))) receive)))
+           (newAgent(((\z. ((send 17 to z) ; (print(z)))) receive)))

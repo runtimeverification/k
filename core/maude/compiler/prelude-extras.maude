@@ -292,6 +292,9 @@ fmod META-TERM-EXTRAS is
   op String : -> Sort .
   eq String = '#String .
 
+  op Int : -> Sort .
+  eq Int = '#Int .
+
   op Id : -> Sort .
   eq Id = '#Id .
 

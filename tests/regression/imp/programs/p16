@@ -1,4 +1,4 @@
-((lambda[x]lambda[y] ((while(2<=*y) do (
+((\x.\y. ((while(2<=*y) do (
           (*x:= (*x * *y));
           (*y:=(*y+-1))
        )); *x)) (ref 1)) (ref 5) 

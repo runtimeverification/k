@@ -7,8 +7,7 @@ Authors:            Traian Serbanuta
 Maintainer:         Traian Serbanuta <tserban2@illinois.edu>
 Tags:               modularity, agent, test
 
-Language:
-  Main-module:      CALLCC-TEST
-  Syntax-module:    CALLCC-TEST
-  Parser:           kast
-  Output-mode:      maude
+main-module:      CALLCC-TEST
+syntax-module:    CALLCC-TEST
+parser:           kast
+output-mode:      pretty

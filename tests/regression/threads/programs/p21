@@ -1,4 +1,4 @@
-(lambda[x] ( 
+(\x.( 
                 (spawn ((acquire(x)) ; (rendezvous 1) ; (*x:= *x + 1) ; (halt(0)) ));
                 (rendezvous 1) ;
                 (acquire(x)) ;

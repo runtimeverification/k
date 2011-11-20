@@ -12,5 +12,5 @@ require /modules/while
 require /modules/uris
 
 module QUOTE-UNQUOTE-TEST imports QUOTE-UNQUOTE + IO + WHILE + REF + MU + LAMBDA + EXP + URIS
-  configuration <T><k> $PGM:K </k> <nextId>0</nextId> <mem>.Map</mem> <nextLoc>0</nextLoc><in stream="stdin">.List</in><out stream="stdout">.List</out></T>
+  configuration <T><k> $PGM:K </k> <mem>.Map</mem> <nextLoc>0</nextLoc><in stream="stdin">.List</in><out stream="stdout">.List</out></T>
 end module

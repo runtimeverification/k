@@ -14,7 +14,7 @@ require /modules/uris
 module THREADS-TEST imports THREADS + WHILE + REF + IO + LAMBDA + HALT + EXP + URIS
   configuration <T> 
                 <thread multiplicity="*"> 
-                  <k> $PGM:K </k> <nextId> 0 </nextId> <holds> .Map </holds>
+                  <k> $PGM:K </k> <holds> .Map </holds>
                 </thread>
                 <in stream="stdin"> .List </in> 
                 <out stream="stdout"> .List </out>

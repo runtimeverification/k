@@ -6,5 +6,5 @@ require /modules/lambda
 require /modules/mu
 
 module HALT-TEST imports HALT + MU + LAMBDA + IF + EXP 
-  configuration <T> <k> $PGM:K </k> <nextId> 0 </nextId> </T>
+  configuration <k> $PGM:K </k>
 end module

@@ -18,7 +18,6 @@ module AGENTS-TEST is including AGENTS + THREADS + WHILE + IO + REF + LAMBDA + E
           <control>
               <thread multiplicity="*">
                   <k>$PGM:K</k>
-                  <nextId>0</nextId>
                   <holds>.Map</holds>
                   <mem>.Map</mem> <nextLoc>0</nextLoc>
               </thread>
