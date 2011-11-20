@@ -14,6 +14,8 @@ module LAMBDA imports LAMBDA-SYNTAX + SUBSTITUTION
  configuration <k> $PGM:Exp </k>
  syntax KResult ::= Val  
 
+  context lambda[_] `[HOLE`]:Exp
+
 //@ $\beta$-substitution
   rule <k> (lambda X:#Id.E:Exp) V:Val => E[V / X] ...</k>
 
