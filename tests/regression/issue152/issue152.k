@@ -9,10 +9,12 @@ kmod ISSUE152 is including HASKELL-SYNTAX + K + K-VISITOR
   macro test1 = NegApp (Lit (Int 42))
 
   syntax K ::= translate K
-  syntax KLabel ::= count
+  syntax KLabel ::= count | predicate
   syntax Bag ::= finished
 
-  macro translate K = visit K applying count if label in SetItem(wklabel('NegApp_))
+  rule predicate(NegApp K:K) => true
+
+  macro translate K = visit K applying count if predicate
 
   rule <k> K:K => endVisit translate K </k>  <stage> 0 => 1 </stage>
   rule <k_> count(NegApp K) => visitedL('NegApp_)(translate K) <_/k> <counter> N:#Nat => sNat N </counter>
