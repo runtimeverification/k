@@ -107,7 +107,7 @@ constructs. */
 KOOL adds two nested cells to the configuration of SIMPLE.
 The cell \textsf{crntObj} holds data pertaining to the current object,
 that is, the object environment in which the code currently in cell
-\textsf{k} executed: \textsf{crntClass} holds the current class (which
+\textsf{k} executes: \textsf{crntClass} holds the current class (which
 can change as methods of the current object are invoked );
 \textsf{envStack} holds the stack of environments as a list,
 each layer corresponding to one class in the objects' instance class
@@ -162,10 +162,21 @@ The semantics of function declaration and invocation, including the
 use of the special \texttt{lambda} abstraction value, needs to change
 in order to account for the fact that methods are now invoked into
 their object's environment.  The semantics of function return actually
-stays unchanged.  Also, the semantics of program initialization is 
+stays unchanged.  Also, the semantics of program initialization is
 different: now we have to create an instance of the \texttt{main}
 class which also calls the constructor \texttt{main()}, while in
-SIMPLE we only had to invoke the function \texttt{main()}. */
+SIMPLE we only had to invoke the function \texttt{main()}. 
+Finally, the semantics of thread spawning needs to change, too: the
+parent thread needs to also share its object environment with the
+spawned thread (in addition to its local environment, like in SIMPLE).
+This is needed in order to be able to spawn method invokations under
+dynamic method dispatch; for example, ``\texttt{spawn run();}'' will
+need to look up the method \texttt{run()} in the newly created thread,
+operation which will most likely fail unless the child thread shares
+the same object environment as the parent thread.  Note that the
+\texttt{spawn} statement of KOOL is more permissive than the threads
+of Java.  In fact, the latter can be implemented in terms of
+\texttt{spawn}---see the program \texttt{threads.kool} for a sketch.  */
 
   syntax Val ::= #Int | #Bool | #String
                | "arrayRef" "(" #Nat "," #Nat ")"
@@ -285,21 +296,23 @@ SIMPLE we only had to invoke the function \texttt{main()}. */
        <control> <xstack> (X,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
        <env> _ => Env </env>
 
-   rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
-        (. => <thread>... <k> S </k> <env> Env </env> ...</thread>)
-   rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
-        <busy> Busy:Set => Busy -Set keys(H) </busy>
-   rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
-        <busy> Busy (. => SetItem(V)) </busy>
-     if notBool(V in Busy) [:transition:]
-   rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
-   rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
-     if N >Nat 0
-   // used prefix notation for -Int because of parsing problems
-   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
-        <busy>... SetItem(V)=>. ...</busy>
-   rule <k> rendezvous V; => . ...</k>
-        <k> rendezvous V; => . ...</k> [:transition:]
+/*@ thread spawning needs a new semantics, but the other concurrency
+constructs keep their semantics from SIMPLE. */
+//  rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
+//       (. => <thread>... <k> S </k> <env> Env </env> ...</thread>)
+  rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
+       <busy> Busy:Set => Busy -Set keys(H) </busy>
+  rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
+       <busy> Busy (. => SetItem(V)) </busy>
+    if notBool(V in Busy) [:transition:]
+  rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
+  rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
+    if N >Nat 0
+  // used prefix notation for -Int because of parsing problems
+  rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
+       <busy>... SetItem(V)=>. ...</busy>
+  rule <k> rendezvous V; => . ...</k>
+       <k> rendezvous V; => . ...</k> [:transition:]
 
   syntax Exp ::= "lvalue" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
@@ -312,6 +325,30 @@ SIMPLE we only had to invoke the function \texttt{main()}. */
   rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
   rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
 
+
+/*@ \subsection{Changes to SIMPLE Semantics}
+When we extend a language, sometimes we need to do more than just add
+new language constructs and semantics for them.  Sometimes we want to
+also extend the semantics of existing language constructs, in order to
+get more from them. */
+
+/*@ \subsubsection{Spawn}
+In our case here, we want to extend the semantics of \texttt{spawn} to
+also share the current object environment with the child thread, in
+addition to the current environment.  This extension will allow us to
+also use method invocations in the spawned statements, which will be
+thus looked up as expected, using dynamic method dispatch.  This
+lookup operation would fail if the child thread did not have access to
+its parent's object environment. */
+
+  rule <thread>... <k> spawn S => . ...</k>
+                   <env> Env </env>
+                   <crntObj> Obj </crntObj>
+       ...</thread>
+       (. => <thread>... <k> S </k>
+                         <env> Env </env>
+                         <crntObj> Obj </crntObj>
+             ...</thread>)
 
 //@ We next define the semantics of the additional KOOL features.
 
