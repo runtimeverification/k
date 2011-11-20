@@ -130,8 +130,9 @@ member declarations (\textsf{declarations}). */
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
 // KOOL addition
+                        <br/>
                         <crntObj color="Fuchsia"> 
-                           <crntClass> object </crntClass> 
+                           <crntClass> object </crntClass>
                            <envStack> .List </envStack>
                            <location multiplicity="?"> .K </location>
                         </crntObj>
@@ -349,7 +350,9 @@ initial configuration, is reached.  In SIMPLE, the program was
 initialized by calling the method \texttt{main()}.  In KOOL, the
 program is initialized by creating an object of class \texttt{main}.
 This will also implicitly call the method \texttt{main()} (the
-\texttt{main} class constructor). */
+\texttt{main} class constructor).  The emptiness of the \textsf{env}
+cell below is just a sanity check, to make sure that the user has not
+declared anything but classes at the top level of the program. */
 
   syntax K ::= "execute"
   rule <k> execute => new main(); </k> <env> . </env>
@@ -364,10 +367,10 @@ semantics.  This is defined next.  */
 Like in SIMPLE, method names are added to the environment and bound
 to their code.  However, unlike in SIMPLE where each method was
 executed in the same environment, namely the program global
-environment, a method in KOOL need to be executed into its object's
+environment, a method in KOOL needs to be executed into its object's
 environment.  Thus, methods evaluate to closures, which encapsulate
-the current state of the object (i.e., its current class and its
-environment stack) in addition to method's parameters and body.
+their object's context (i.e., the current class and environment stack
+of the object) in addition to method's parameters and body.
 This approach to bind method names to method closures in the
 environment will also allow objects to pass their methods to other
 objects, to dynamically change their methods by assigning them other
@@ -397,7 +400,10 @@ The rule below also initializes the object creation process by
 emptying the local environment and the current object, and allocating
 a location in the store where the created object will be eventually
 stored (this is what the ``\texttt{storeObj}'' task after the object
-creation task in the rule below will do---its rule is defined shortly).  */
+creation task in the rule below will do---its rule is defined
+shortly).  The location where the object will be stored is also made
+available in the \textsf{crntObj} cell, so that method closures can
+refer to it (see rule above). */
 
   rule <k> new Class(Vs) ~> K 
         => create(Class) ~> storeObj ~> _`(_`)(Class,Vs); return this; </k>
@@ -428,16 +434,18 @@ members (both fields and methods) of that class. */
        <declarations> Ss </declarations>
   rule <k> create(object) => . ...</k>
 
-/*@ Set the current class of the current object.
-This is necessary to be done at each layer, because the current object is 
-enclosed as part of the method closure values (see the semantics of method 
-declarations above). */
+/*@ Set the current class of the current object.  This is necessary to
+be done at each layer, because the current class of the object is
+enclosed as part of the method closure values (see the semantics of
+method declarations above). */
 
   syntax K ::= "setCrntClass" "(" #Id ")" 
   rule <k> setCrntClass(Class) => . ...</k>
        <crntClass> _ => Class </crntClass>
 
-//@ Add a new tagged environment layer to the current object.
+/*@ Add a new tagged environment layer to the current object and get
+ready for the next layer by clearing the environment (note that
+\texttt{create} expects the environment to be empty). */
 
   syntax K ::= "addEnvLayer"
   rule <k> addEnvLayer => . ...</k>
@@ -445,7 +453,12 @@ declarations above). */
        <crntClass> Class </crntClass>
        <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack> 
 
-//@ Store the created object at the location reserved by \texttt{new}.
+/*@ Store the created object at the location reserved by \texttt{new}.
+Note that the location reserved by \texttt{new} was temporarily stored
+in the \textsf{crntObj} cell precisely for this purpose.  Now that the
+newly created object is stored at its location and that all method
+closures are aware of it, the location is unnecessary and thus we
+delete it from the \textsf{crntObj} cell. */
 
   syntax K ::= storeObj
   rule <k> storeObj => . ...</k>
@@ -454,7 +467,7 @@ declarations above). */
 
 
 /*@ \subsection{Self reference}
-The semantics of \texttt{this} is straighforward: evaluate to the
+The semantics of \texttt{this} is straightforward: evaluate to the
 current object. */
 
   rule <k> this => obj(Obj) ...</k>  
@@ -469,7 +482,7 @@ already lookup a sole name in the local environment.  The first rule
 below reduces implicit member access to explicit access when the name
 cannot be found in the local environment.  There are two cases to
 analyze for explicit object member access, depending upon whether the
-object is a propoer object or it is just a redirection to the parent
+object is a proper object or it is just a redirection to the parent
 class via the construct \texttt{super}.  In the first case, we
 evaluate the object expression and lookup the member starting with
 current class (static scoping).  Note the use of the conditional
@@ -477,7 +490,7 @@ evaluation context.  In the second case, we just lookup the member
 starting with the superclass of the current class.  In both cases,
 the \texttt{lookupMember} task eventually yields a \texttt{lookup(L)}
 task for some appropriate location \texttt{L}, which will be further
-solved with the correspongin rule borrowed from SIMPLE.  Note that the
+solved with the corresponding rule borrowed from SIMPLE.  Note that the
 current object is not altered by \texttt{super}, so future method
 invocations see the entire object, as needed for dynamic method dispatch. */
 
@@ -507,10 +520,14 @@ cases except for method access in a proper object (i.e., not
 if it was not in a method invocation position.  When it is a member
 access (the third rule below), we look it up starting with the
 instance class of the corresponding object.  This ensures dynamic
-dispatch for methods; it actually dynamicaly dispatches field
+dispatch for methods; it actually dynamically dispatches field
 accesses, too, which is correct in KOOL, because one can assign method
 closures to fields and the field appeared in a method invocation
-context. */
+context.  The last context declaration below says that method
+applications are also allowed as first argument to applications; that
+is because methods are allowed to return methods in KOOL, since is
+higher-order.  If that is the case, then we want to evaluate the
+method call.  */
 
   rule <k> _`(_`)((X => V),_) ...</k>
        <env>... X |-> L ...</env>
@@ -537,29 +554,34 @@ context. */
        <crntClass> Class:#Id </crntClass>
        <envStack>... ListItem(Class :: _) EStack </envStack>
 
+  context '_`(_`)(`[HOLE`]:K,,_) if getKLabel `[HOLE`]:K ==Bool '_`(_`)
+
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
 instead of the method.  When that happens, just lookup the method
 closure value at location \texttt{L}.  The semantics of closure
-application is then as expected: local environment and control a
+application is then as expected: the local environment and control are
 stacked, then we switch to closure's class and object environment and
 execute the method body.  The \texttt{bindto} construct is the one
-that came with the semantics of SIMPLE that we borrowed.  */
+that came with the semantics of SIMPLE that we borrowed (see above).  */
 
   rule <k> '_`(_`)((lookup(L) => V),,_) ...</k>
        <store>... L |-> V ...</store>
 
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
-  rule <k> _`(_`)(closure(Class,OL:#Nat,Xs:Ids,S:Stmt), Vs:Vals) ~> K:K 
+  rule <k> _`(_`)(closure(Class,OL:#Nat,Xs:Ids,S:Stmt), Vs:Vals) ~> K:K
         => bindto(Xs,Vs) ~> S ~> return; </k>
-       <control> C:Bag 
-          <fstack> . => (Env,K,C <crntObj> Obj' </crntObj>) ...</fstack> 
+       <control> C:Bag
+          <fstack> . => (Env,K,C <crntObj> Obj' </crntObj>) ...</fstack>
           <crntObj> Obj':Bag => <crntClass>Class</crntClass> Obj </crntObj>
         </control>
        <env> Env => . </env>
        <store>... OL |-> obj(<crntClass>_:#Id</crntClass>Obj:Bag) ...</store>
-       
 
-//@ \subsection{Instance Of}
+
+/*@ \subsection{Instance Of}
+Searches the object environment for a layer corresponding to the
+desired class.  It returns \texttt{true} iff it can find the class,
+otherwise it returns \texttt{false}; it never gets stuck.  */
 
   rule obj((_ <envStack> ListItem(Class::_) ...</envStack>)) instanceOf Class 
     => true
@@ -603,10 +625,12 @@ member's location based on the current class of the object. */
                         </envStack>, X)) 
        ...</k>
   
-//@ \subsection{Lookup member}
+/*@ \subsection{Lookup member}
+Searches for the given member in the given environment stack, starting
+with the most concrete class and going up in the hierarchy. */
 
-  syntax K ::= #Id "::" BagItem   
-  // Id is the class name, BagItem is its corresp. environment
+  syntax K ::= #Id "::" BagItem
+  // Id is the class name, BagItem is its corresponding environment
   syntax K ::= "lookupMember" "(" BagItem "," #Id ")"  
   // BagItem is the envStack cell, Id is the member name
 
@@ -619,4 +643,3 @@ member's location based on the current class of the object. */
     if notBool(X in keys(Env)) [structural]
 
 end module
-

@@ -5,3 +5,5 @@ class main {
     print("Hello world!\n");
   }
 }
+
+// Hello world!

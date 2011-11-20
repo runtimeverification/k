@@ -12,15 +12,15 @@ class c {
 }
 
 class c1 extends c {
-  method c1() { return super.c(); }
+  method c1() {}
 }
 
 class c2 extends c {
-  method c2() { return super.c(); }
+  method c2() {}
 }
 
 class c3 extends c {
-  method c3() { return super.c(); }
+  method c3() {}
 }
 
 class main {

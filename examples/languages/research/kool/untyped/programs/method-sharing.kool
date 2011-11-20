@@ -1,3 +1,6 @@
+// This program shows how method closures can be returned by other
+// methods, bound to local variables, and then invoked.
+
 class A {
   var c;
   method A() {
@@ -13,7 +16,7 @@ class B {
   method B() {
     print(a.c, " ");
     m();
-    print(a.c, "\n");
+    print(a.c, " ");
   }
   method getM() {
     return m;
@@ -26,11 +29,12 @@ class main {
     var b = new B();
     var t = f = b.getM();
     f();
-    print(b.a.c, "\n");
+    print(b.a.c, " ");
     t();
+    print(b.a.c, " ");
+    (b.getM())();                 // shows the higher-order aspect of KOOL
     print(b.a.c, "\n");
-// We would also like to write the call below, but currently the semantics expects
-// a member access expression as argument of function application.
-//    (b.getM())();
   }
 }
+
+// 0 1 2 3 4

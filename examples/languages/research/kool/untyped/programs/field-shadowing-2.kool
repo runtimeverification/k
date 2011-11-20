@@ -13,7 +13,7 @@ class g {
   method g(o) {
     this.o = o;
   }
-  method do1() {
+  method d() {
     var f = 9;
     return (o.get());
   }
@@ -22,7 +22,7 @@ class g {
 class main {
   method main() {
     var t = new i(1), y = new g(t);
-    print(y.do1(), "\n");
+    print(y.d(), "\n");
   }
 }
 
