@@ -365,7 +365,7 @@ object (the first argument of \texttt{closure}) and the object
 environment stack (located in the object stored at the location
 specified as the second argument of \texttt{closure}). */
 
-  syntax Val ::= "obj" "(" Bag ")"
+  syntax Val ::= "objRef" "(" Bag ")"
                | "closure" "(" #Id "," #Nat "," Ids "," Stmt ")"
 
 /*@ \subsection{Class declaration}
@@ -500,14 +500,14 @@ delete it from the \textsf{crntObj} cell. */
   syntax K ::= storeObj
   rule <k> storeObj => . ...</k>
        <crntObj> Obj (<location> L </location> => .) </crntObj>
-       <store>... . => L |-> obj(Obj) ...</store>
+       <store>... . => L |-> objRef(Obj) ...</store>
 
 
 /*@ \subsection{Self reference}
 The semantics of \texttt{this} is straightforward: evaluate to the
 current object. */
 
-  rule <k> this => obj(Obj) ...</k>  
+  rule <k> this => objRef(Obj) ...</k>  
        <crntObj> Obj </crntObj>
 
 
@@ -536,7 +536,7 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     if notBool(X in keys(Env))
 
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
-  rule <k> _._(obj(<crntClass> Class </crntClass>
+  rule <k> _._(objRef(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X)
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
        ...</k>
@@ -584,7 +584,7 @@ method call or the array access.  */
 
   context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
 
-  rule <k> '_`(_`)(('_._(obj(Obj <envStack> EStack </envStack>),,X) 
+  rule <k> '_`(_`)(('_._(objRef(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
 
   rule <k> '_`(_`)(('_._(super,,X) 
@@ -615,7 +615,7 @@ that came with the semantics of SIMPLE that we borrowed (see above).  */
           <crntObj> Obj':Bag => <crntClass>Class</crntClass> Obj </crntObj>
         </control>
        <env> Env => . </env>
-       <store>... OL |-> obj(<crntClass>_:#Id</crntClass>Obj:Bag) ...</store>
+       <store>... OL |-> objRef(<crntClass>_:#Id</crntClass>Obj:Bag) ...</store>
 
 
 /*@ \subsection{Instance Of}
@@ -623,12 +623,12 @@ Searches the object environment for a layer corresponding to the
 desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it never gets stuck.  */
 
-  rule obj((_ <envStack> ListItem(Class::_) ...</envStack>)) instanceOf Class 
+  rule objRef((_ <envStack>ListItem(Class::_)...</envStack>)) instanceOf Class
     => true
-  rule obj((_ <envStack> ListItem(Class1::_)
+  rule objRef((_ <envStack> ListItem(Class1::_)
                       => . ...</envStack>)) instanceOf Class2 
     if Class1 =/=Bool Class2
-  rule obj((_ <envStack> .List </envStack>)) instanceOf Class
+  rule objRef((_ <envStack> .List </envStack>)) instanceOf Class
     => false
  
 /*@ \subsection{Cast}
@@ -640,8 +640,8 @@ available.  Moreover, the execution may complete successfully even
 in the presence of invalid casts, provided that each accessed member
 during the current execution is, or happens to be, available.  */
 
-  rule <k> cast obj((<crntClass> _:K </crntClass> Obj)) to Class
-        => obj(<crntClass> Class </crntClass> Obj) ...</k>
+  rule <k> cast objRef((<crntClass> _:K </crntClass> Obj)) to Class
+        => objRef(<crntClass> Class </crntClass> Obj) ...</k>
 
 /*@ \subsection{Objects as lvalues}
 The current machinery borrowed with the semantics of SIMPLE allows us
@@ -657,7 +657,7 @@ member's location based on the current class of the object. */
     if notBool(X in keys(Env))
 
   context lvalue(_._([HOLE],_))
-  rule <k> lvalue(_._(obj(<crntClass> Class </crntClass> 
+  rule <k> lvalue(_._(objRef(<crntClass> Class </crntClass> 
                           <envStack>...
                             ListItem(Class :: EnvC) EStack
                           </envStack>), X)
