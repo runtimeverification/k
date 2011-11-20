@@ -1,0 +1,11 @@
+var n,s,q;
+
+print("Testing Collatz' conjecture for? ");
+n := read(); 
+while not(n <= 1) do {
+  s := s + 1;
+  q := n/2 ;
+  if n <= q+q then {n := q} 
+  else {n := n+n+n+1}
+} ;
+print("It takes "); print(s); print(" steps\n ")

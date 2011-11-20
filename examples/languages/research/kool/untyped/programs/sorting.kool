@@ -1,109 +1,136 @@
-// Some sorting algorithms
+// This program defines a class Sorting which includes several sorting
+// algorithms.  It also illustrates how method closures can be stored
+// in an array and then executed one by one (see method map in main).
 
-class sorting {
-  var input[100], data[100], n;
+class Sorting {
+  var array, size;
 
-  method sorting(x) {
-    n = x;
+  method Sorting(n) {
+    var x[n];
+    print("Type ",n," numbers: ");
+    for i = 0 to n - 1 do
+      x[i] = read();
+    print("Finished reading the ",n," numbers\n");
+    array = x;
+    size = n;
   }
 
-  method read2() {
-    for i = 0 to (n - 1) do {
-      print("input[",i,"] = ");
-      input[i] = read();
-    }
-  }
-
-  method init() {
-    for i = 0 to (n - 1) do
-      data[i] = input[i];
-  }
-
-  method print2() {
-    for i = 0 to (n - 1) do
-      print(data[i], " ");
+  method printArray() {
+    print("\n");
+    for i = 0 to size-1 do
+      print(array[i]," ");
     print("\n");
   }
 
+  method reverse() {
+    for i = 0 to size/2 - 1 do {
+      var t = array[i];
+      array[i] = array[size - i - 1];
+      array[size - i - 1] = t;
+    }
+  }
+
   method insertionSort() {
-    for i = 1 to n - 1 do {
-      var j=i-1, done=false, t=data[i];
-      while (j >= 0) and not done do
-        if data[j] > t
-          then {
-            data[j+1] = data[j];
-            j = j - 1;
-          }
-        else done = true;
-      data[j + 1] = t;
+    for i = 1 to size-1 do {
+      var v = array[i], j = i - 1;
+      while (j > 0 and array[j] > v) do {  // doing the loop only up to 1
+        array[j + 1] = array[j];
+        j = j - 1;
+      }
+      if (array[0] > v) then {
+        array[1] = array[0];
+        array[0] = v;
+      } else array[j+1] = v;
     }
   }
 
   method bubbleSort() {
-    var t;
-    for i = 0 to n - 1 do
-      for j = 0 to n - 2 do
-        if data[j] > data[j+1] then {
-          t = data[j+1];
-          data[j+1] = data[j];
-          data[j] = t;
+    for i = 0 to size - 1 do
+      for j = 0 to size - 2 do
+        if array[j] > array[j+1] then {
+          var t = array[j+1];
+          array[j+1] = array[j];
+          array[j] = t;
         }
   }
 
   method siftDown(root, bottom) {
-    var done=false, maxChild, t;
-
+    var done = false, maxChild;
     while (root*2 <= bottom and not done) do {
       if (root*2 == bottom) then {
-        maxChild = root * 2;
+        maxChild = root*2;
       }
-      else if (data[root * 2] > data[root * 2 + 1]) then {
-        maxChild = root * 2;
+      else if (array[root*2] > array[root*2 + 1]) then {
+        maxChild = root*2;
       }
-      else { maxChild = root * 2 + 1; }
-      if (data[root] < data[maxChild]) then {
-        t = data[root];
-        data[root] = data[maxChild];
-        data[maxChild] = t;
+      else {
+        maxChild = root*2 + 1;
+      }
+      if (array[root] < array[maxChild]) then {
+        var t = array[root];
+        array[root] = array[maxChild];
+        array[maxChild] = t;
         root = maxChild;
       }
-      else { done = true; }
+      else {
+        done = true;
+      }
     }
   }
 
-  method heapSort(){
-    var t, i = (n/2) - 1;
+  method heapSort() {
+    var i = size/2 - 1;
     while (i >= 0) do {
-      this.siftDown(i, n - 1);
+      siftDown(i, size - 1);
       i = i - 1;
     }
-    i = n - 1;
+    i = size - 1;
     while (i >= 1 ) do {
-      t = data[0];
-      data[0] = data[i];
-      data[i] = t;
-      this.siftDown(0, i - 1);
+      var t = array[0];
+      array[0] = array[i] ;
+      array[i] = t;
+      siftDown(0, i - 1);
       i = i - 1;
     }
   }
+
 }
 
+
 class main {
+
+  method map(m,f) {
+    for i = 0 to sizeOf(f) - 1 do {
+      print(m[i]);
+      (f[i])();
+    }
+  }
+
   method main() {
-    print("n = ");
-    var s = new sorting(read());
-    s.read2();
-
-    s.init();
-    s.insertionSort();
-    s.print2();
-
-    s.init();
-    s.bubbleSort();
-    s.print2();
-
-    s.init();
-    s.heapSort();
-    s.print2();
+    print("Size of the array to sort = ");
+    var s = new Sorting(read()), m[11], f[11];
+    m[ 0] = "The original unsorted array is:";
+    f[ 0] = s.printArray;
+    m[ 1] = "Reversing the array ... ";
+    f[ 1] = s.reverse;
+    m[ 2] = "Done!\nThe reversed array is:";
+    f[ 2] = s.printArray;
+    m[ 3] = "Sorting the array using insertion sort ... ";
+    f[ 3] = s.insertionSort;
+    m[ 4] = "Done!\nThe resulting array is:";
+    f[ 4] = s.printArray;
+    m[ 5] = "Reversing the array ... ";
+    f[ 5] = s.reverse;
+    m[ 6] = "Done!\nSorting the array using bubble sort ... ";
+    f[ 6] = s.bubbleSort;
+    m[ 7] = "Done!\nThe resulting array is:";
+    f[ 7] = s.printArray;
+    m[ 8] = "Reversing the array ... ";
+    f[ 8] = s.reverse;
+    m[ 9] = "Done!\nSorting the array using heap sort ... ";
+    f[ 9] = s.heapSort;
+    m[10] = "Done!\nThe resulting array is:";
+    f[10] = s.printArray;
+    map(m,f);
   }
 }

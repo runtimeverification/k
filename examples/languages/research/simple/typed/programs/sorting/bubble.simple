@@ -2,7 +2,7 @@
 // console (first its length, then its elements).  It reads and prints
 // each elements, then it prints the entire array sorted.
 
-var v[100] : array of int;
+var v[100] : arrayOf int;
 
 function bubbleSort(n:int):void {
   var t:int;

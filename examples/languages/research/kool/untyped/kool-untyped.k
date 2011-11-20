@@ -168,7 +168,7 @@ class which also calls the constructor \texttt{main()}, while in
 SIMPLE we only had to invoke the function \texttt{main()}. */
 
   syntax Val ::= #Int | #Bool | #String
-               | "array" "(" #Nat "," #Nat ")"
+               | "arrayRef" "(" #Nat "," #Nat ")"
   syntax Vals ::= List{Val,","}
 
   syntax Exp ::= Val
@@ -184,7 +184,7 @@ SIMPLE we only had to invoke the function \texttt{main()}. */
 
   rule <k> var X[N:#Nat]; => . ...</k>
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(L +Nat 1, N)
+       <store>... . => L |-> arrayRef(L +Nat 1, N)
                        L +Nat 1 .. L +Nat N |-> undefined ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
@@ -228,11 +228,11 @@ SIMPLE we only had to invoke the function \texttt{main()}. */
   rule not(B:#Bool) => notBool(B)
 
   rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
-  rule array(L,_)[N] => lookup(L +Int N) [:structural:]
+  rule arrayRef(L,_)[N] => lookup(L +Int N) [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [:transition:]
 
-  rule sizeOf(array(_,N)) => N
+  rule sizeOf(arrayRef(_,N)) => N
 
 /*@ The semantics of return, as well as the definition of
 \texttt{bindto}, stay unchanged */
@@ -524,10 +524,11 @@ dispatch for methods; it actually dynamically dispatches field
 accesses, too, which is correct in KOOL, because one can assign method
 closures to fields and the field appeared in a method invocation
 context.  The last context declaration below says that method
-applications are also allowed as first argument to applications; that
-is because methods are allowed to return methods in KOOL, since is
+applications or array accesses are also allowed as first argument to
+applications; that is because methods are allowed to return methods
+and arrays are allowed to hold methods in KOOL, since it is
 higher-order.  If that is the case, then we want to evaluate the
-method call.  */
+method call or the array access.  */
 
   rule <k> _`(_`)((X => V),_) ...</k>
        <env>... X |-> L ...</env>
@@ -554,7 +555,9 @@ method call.  */
        <crntClass> Class:#Id </crntClass>
        <envStack>... ListItem(Class :: _) EStack </envStack>
 
-  context '_`(_`)(`[HOLE`]:K,,_) if getKLabel `[HOLE`]:K ==Bool '_`(_`)
+  context '_`(_`)(`[HOLE`]:K,,_)
+       if getKLabel `[HOLE`]:K ==Bool '_`(_`) orBool
+          getKLabel `[HOLE`]:K ==Bool '_`[_`]
 
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
 instead of the method.  When that happens, just lookup the method

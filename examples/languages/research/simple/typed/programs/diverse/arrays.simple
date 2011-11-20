@@ -1,6 +1,6 @@
 // This program tests multi-dimensional arrays.
 
-function readArray(a : array of array of int) : void {
+function readArray(a : arrayOf arrayOf int) : void {
   var m:int = sizeOf(a) - 1, n:int = sizeOf(a[0]) - 1;
   for i = 0 to m do {
     print("Line ",i+1," (",n+1," elements): ");
@@ -9,7 +9,7 @@ function readArray(a : array of array of int) : void {
   }
 }
 
-function printArray(a : array of array of int) : void {
+function printArray(a : arrayOf arrayOf int) : void {
   var m:int = sizeOf(a) - 1, n:int = sizeOf(a[0]) - 1;
   for i = 0 to m do {
     print("Line ",i+1," (",n+1," elements):");
@@ -19,19 +19,19 @@ function printArray(a : array of array of int) : void {
   }
 }
 
-function transArray(a : array of array of int) : array of array of int {
+function transArray(a : arrayOf arrayOf int) : arrayOf arrayOf int {
   var  m:int = sizeOf(a) - 1, n:int = sizeOf(a[0]) - 1,
-       b[n+1,m+1] : array of array of int;
+       b[n+1,m+1] : arrayOf arrayOf int;
   for i = 0 to m do
     for j = 0 to n do
       b[j,i] = a[i,j];
   return b;
 }
 
-function mulArray(a : array of array of int,
-                  b : array of array of int) : array of array of int{
+function mulArray(a : arrayOf arrayOf int,
+                  b : arrayOf arrayOf int) : arrayOf arrayOf int{
   var m:int = sizeOf(a) - 1, n:int = sizeOf(b) - 1, p:int = sizeOf(b[0]) - 1,
-      c[m+1,p+1] : array of array of int;
+      c[m+1,p+1] : arrayOf arrayOf int;
   for i=0 to m do
     for j=0 to p do {
       c[i,j] = 0;
@@ -43,7 +43,7 @@ function mulArray(a : array of array of int,
 
 function main() : void {
   print("Input the number of lines and columns (two natural numbers): ");
-  var x:int = read(), y:int = read(), a[x,y] : array of array of int;
+  var x:int = read(), y:int = read(), a[x,y] : arrayOf arrayOf int;
   readArray(a);
   print("Your matrix is:\n");
   printArray(a);

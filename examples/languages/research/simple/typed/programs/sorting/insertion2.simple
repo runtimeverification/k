@@ -1,7 +1,7 @@
 // This program fixes the problem of insertion1.simple,
 // by replacing the "and" with a conditional inside the loop
 
-var x[100] : array of int;
+var x[100] : arrayOf int;
 
 function init(n:int):void {
   for i = 0 to n - 1 do

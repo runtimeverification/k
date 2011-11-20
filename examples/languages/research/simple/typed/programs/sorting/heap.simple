@@ -2,7 +2,7 @@
 // console (first its length, then its elements).  It reads and prints
 // each elements, then it prints the entire array sorted
 
-var v[100] : array of int;
+var v[100] : arrayOf int;
 
 function siftDown(root:int, bottom:int):void {
   var done:bool = false, maxChild:int, temp:int;

@@ -1,7 +1,7 @@
 // The following program gets stuck, because "and" is not
 // shortcircuited in SIMPLE (though it types)
 
-var x[100] : array of int;
+var x[100] : arrayOf int;
 
 function init(n:int):void {
   for i = 0 to n - 1 do

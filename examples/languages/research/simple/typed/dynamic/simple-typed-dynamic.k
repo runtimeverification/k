@@ -15,7 +15,7 @@ the desired evaluation strategies of the various language constructs .  */
                 | "bool"
                 | "string"
                 | "void"
-                | "array" "of" Type [:prec(1):]
+                | "arrayOf" Type [:prec(1):]
                 | "function" "from" Types "to" Type
                     [:prec(1) latex "{#1}\rightarrow{#2}":]
   syntax Types ::= List{Type,","}
@@ -107,7 +107,7 @@ semantics.  In other words, the \K syntax is the ``syntax of the
 semantics''.  */
 
   syntax Val ::= #Int | #Bool | #String
-               | "array" "(" Type "," #Nat "," #Nat ")"
+               | "arrayRef" "(" Type "," #Nat "," #Nat ")"
                | "lambda" "(" Exps "," Stmt "," Type ")"
                      [:latex("(\lambda{#1}\,.\,{#2}):{#3}"):]
   syntax Vals ::= List{Val,","}
@@ -174,9 +174,9 @@ similar to that in untyped SIMPLE, but we have to enforce that the
 type of an array declaration be of the form \texttt{array of $T$}
 and assign the right type ($T$) to the allocated array locations. */
 
-  rule <k> var X[N:#Nat] : array of T; => . ...</k> 
+  rule <k> var X[N:#Nat] : arrayOf T; => . ...</k> 
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(array of T, L +Nat 1, N)
+       <store>... . => L |-> arrayRef(arrayOf T, L +Nat 1, N)
                        L +Nat 1 .. L +Nat N |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
@@ -188,13 +188,13 @@ make sure that all the declared temporary variables have the right
 types. */
 
   syntax #Id ::= "$1" | "$2"
-  rule var X[N1,N2,Vs] : array of array of T; =>
-       var X[N1] : array of array of T;
+  rule var X[N1,N2,Vs] : arrayOf arrayOf T; =>
+       var X[N1] : arrayOf arrayOf T;
        {
-         var $1 : array of array of T = X;
+         var $1 : arrayOf arrayOf T = X;
          for $2 = 0 to _-_(N1,1) do       // stupid parser
          {
-           (var X[N2,Vs] : array of T;)   // stupid parser
+           (var X[N2,Vs] : arrayOf T;)   // stupid parser
            $1[$2] = X;
          }
        }  [:structural:]
@@ -248,9 +248,9 @@ When done with the first pass, call \texttt{main()}. */
 //@ Check array bounds, as part of the dynamic typing policy.
 
   rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
-  rule array(_,L,M:#Nat)[N] => lookup(L +Int N)
+  rule arrayRef(_,L,M:#Nat)[N] => lookup(L +Int N)
     if N >=Nat 0 andBool N <Nat M   [:structural:]
-  rule sizeOf(array(_,_,N)) => N
+  rule sizeOf(arrayRef(_,_,N)) => N
 
 //@ Define function call and return together, to see their relationship.
 
@@ -356,7 +356,7 @@ When done with the first pass, call \texttt{main()}. */
   rule typeOf(B) => bool      [:structural:]
   rule typeOf(_:#String) => string  [:structural:]
 
-  rule typeOf(array(T,_,_)) => T  [:structural:]
+  rule typeOf(arrayRef(T,_,_)) => T  [:structural:]
   rule typeOf(lambda(_,_,T)) => T  [:structural:]
 
   rule typeOf(undefined(T)) => T [:structural:]

@@ -155,7 +155,7 @@ because each function is executed in the fixed global environment and
 function definitions cannot be nested). */
 
   syntax Val ::= #Int | #Bool | #String
-               | "array" "(" #Nat "," #Nat ")"
+               | "arrayRef" "(" #Nat "," #Nat ")"
                | "lambda" "(" Ids "," Stmt ")" [:latex("\lambda{#1}\,.\,{#2}"):]
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
@@ -288,17 +288,18 @@ The \K semantics of the uni-dimensional array declaration is somehow similar
 to the above declaration of ordinary variables.  $N+1$ locations are allocated
 in the store for an array of size $N$, the additional location (chosen to be
 the first one allocated) holding the array reference value.  The array
-reference value \texttt{array(L,N)} states that the array has size $N$ and its
-elements are located contiguously in the store starting with location $L$.
-Recall that $L..L'$ is the list of locations between $L$ and $L'$ and that
-$L..L'\mapsto V$ initializes each location in the list $L..L'$ to $V$.
-Note that, since the dimensions of array declarations can be arbitrary
-expressions, this virtually means that we can dynamically allocate memory in
-SIMPLE by means of array declarations. */
+reference value \texttt{arrayRef(L,N)} states that the array has size
+$N$ and its elements are located contiguously in the store starting
+with location $L$.  Recall that $L..L'$ is the list of locations
+between $L$ and $L'$ and that $L..L'\mapsto V$ initializes each
+location in the list $L..L'$ to $V$.  Note that, since the dimensions
+of array declarations can be arbitrary expressions, this virtually
+means that we can dynamically allocate memory in SIMPLE by means of
+array declarations. */
 
   rule <k> var X[N:#Nat]; => . ...</k>
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(L +Nat 1, N)
+       <store>... . => L |-> arrayRef(L +Nat 1, N)
                        L +Nat 1 .. L +Nat N |-> undefined ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
@@ -450,7 +451,7 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 The semantics of the \texttt{lookup} operation is straightforward. */
 
   rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
-  rule array(L,_)[N] => lookup(L +Int N) [:structural:]
+  rule arrayRef(L,_)[N] => lookup(L +Int N) [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [:transition:]
 
@@ -458,7 +459,7 @@ The semantics of the \texttt{lookup} operation is straightforward. */
 The size of the array is stored in the array reference value, and the
 \texttt{sizeOf} construct was declared strict, so: */
 
-  rule sizeOf(array(_,N)) => N
+  rule sizeOf(arrayRef(_,N)) => N
 
 /*@ \subsection{Function call}
 Function application was strict in both its arguments, so we can assume that

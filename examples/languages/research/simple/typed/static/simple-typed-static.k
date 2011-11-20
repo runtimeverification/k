@@ -14,7 +14,7 @@ The lists of types are useful for function arguments. */
                 | "bool"
                 | "string"
                 | "void"
-                | "array" "of" Type [:prec(1):]
+                | "arrayOf" Type [:prec(1):]
                 | "function" "from" Types "to" Type
                     [:prec(1) latex "{#1}\rightarrow{#2}":]
   syntax Types ::= List{Type,","}
@@ -296,9 +296,9 @@ seen in the rule ``\texttt{++ int => int}'' below. */
   rule bool and bool => bool
   rule bool or bool => bool
   rule not(bool) => bool
-  rule (array of T)[int,Ts] => T[Ts]
+  rule (arrayOf T)[int,Ts] => T[Ts]
   rule T[] => T
-  rule sizeOf(array of T) => int
+  rule sizeOf(arrayOf T) => int
   rule _`(_`)(function from Ts to T, Ts) => T
   rule read() => int
 
@@ -367,12 +367,12 @@ binding in the global type environment. */
 
 /*@ The operation below makes sure that the list of types passed as
 its first argument are all integers and there is sufficient
-``\texttt{array of}'' depth in the second argument type to justify
+``\texttt{arrayOf}'' depth in the second argument type to justify
 them.  Recall from above that this operation is used to check
 whether a particular array declaration type-checks. */
 
   syntax K ::= "checkDepth" "(" Types "," Type ")"
-  rule checkDepth((int,Ts => Ts), (array of T => T))  [:structural:]
+  rule checkDepth((int,Ts => Ts), (arrayOf T => T))   [:structural:]
   rule checkDepth(.Types,_) => .K                     [:structural:]
 
 /*@ Finally, the operation below ensures that its argument is a list
