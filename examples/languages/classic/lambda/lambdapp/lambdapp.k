@@ -23,7 +23,7 @@ end module
 module LAMBDAPP
   imports LAMBDAPP-SYNTAX + LAMBDA
 
-//@ Recursion
+//@Recursion
   rule <k> (mu X:#Id.E:Exp) => E[(mu X.E) / X] ...</k>
 
 //@Arithmetic
@@ -48,7 +48,7 @@ module LAMBDAPP
                 <in stream="stdin"> .List </in>
                 <out stream="stdout"> .List </out>
 
-  rule <k> read => I ...</k>
+  rule <k> read => I ...</k> 
        <in> ListItem(I:#Int) => . ...</in>
 
 
