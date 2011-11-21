@@ -1,0 +1,19 @@
+// Testing the implicit use of "this"
+
+class c {
+  method c() {}
+  method m1():int {
+    return m2();
+  }
+  method m2():int {
+    return 13;
+  }
+}
+
+class main {
+  method main() {
+    print((new c()).m1(), "\n");
+  }
+}
+
+// 13

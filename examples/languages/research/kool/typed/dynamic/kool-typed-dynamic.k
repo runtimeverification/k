@@ -107,7 +107,7 @@ has the form \textit{\#Id:Type}. */
   syntax Exp ::= "new" #Id "(" Exps ")" [:strict(2) prec(1):]
                | "this"
                | "super"
-               | Exp "." #Id            [:prec(2):]
+               | Exp "." #Id            [:prec(1):]
                | Exp "instanceOf" #Id   [:prec(0) strict(1):]
                | "cast" Exp "to" #Id    [:prec(0) strict(1):]
 

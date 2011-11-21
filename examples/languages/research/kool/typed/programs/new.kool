@@ -1,0 +1,15 @@
+// Testing new and method invocation.
+
+class c {
+  var a:int = 5;
+  method c() {}
+  method g():int { return a; }
+}
+
+class main {
+  method main() {
+    print("a = ", (new c()).g(), "\n");
+  }
+}
+
+// a = 5

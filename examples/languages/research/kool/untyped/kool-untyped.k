@@ -15,7 +15,7 @@ first argument anymore---needs to initiate dynamic method dispatch). */
 
   syntax #Id ::= "main"
   syntax Ids ::= List{#Id,","} [:prec(70):]
-  syntax Exps ::= List{Exp,","}
+
   syntax Decl ::= "var" Exps ";"
 
   syntax Exp ::= #Int | #Bool | #String | #Id
@@ -39,6 +39,7 @@ first argument anymore---needs to initiate dynamic method dispatch). */
                | "sizeOf" "(" Exp ")"  [:strict:]
                | "read" "(" ")"
                | Exp "=" Exp           [:strict(2) prec(40) gather (e E):]
+  syntax Exps ::= List{Exp,","}
 
   syntax Stmt ::= "{" "}"
                 | "{" Stmts "}"
@@ -58,7 +59,7 @@ first argument anymore---needs to initiate dynamic method dispatch). */
                 | "rendezvous" Exp ";"                  [:strict:]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts                         [:prec(100) gather(e E):]
+                 | Stmts Stmts                      [:prec(100) gather(e E):]
 
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X:#Id = E1 to E2 do S) = {var X=E1; while X <= E2 do {S X=X+1;}}
