@@ -1,5 +1,5 @@
 class sorting {
-  var input[100]:array of int, data[100]:array of int, n:int;
+  var input[100]:arrayOf int, data[100]:arrayOf int, n:int;
 
   method sorting(x:int) {
     n=x;

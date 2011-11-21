@@ -55,4 +55,3 @@ module AGENT
 
   syntax KResult ::= #Id
 end module
-

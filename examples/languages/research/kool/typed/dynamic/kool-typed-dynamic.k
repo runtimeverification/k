@@ -11,9 +11,8 @@ Like in untyped KOOL, we removed from the \K annotated syntax of
 SIMPLE the construct for function declarations (because we want to
 call them methods now) and the one for function application (because
 application is not strict in the first argument anymore due to dynamic
-method dispatch).  Moreover, we removed the syntax of
-\texttt{try-catch} from that of SIMPLE, because we want to have typed
-exceptions in KOOL. */
+method dispatch).  Moreover, we removed the syntax of \texttt{try-catch}
+from that of SIMPLE, because we want to have typed exceptions in KOOL. */
 
   syntax #Id ::= "main"
 
@@ -21,7 +20,7 @@ exceptions in KOOL. */
                 | "bool"
                 | "string"
                 | "void"
-                | "array" "of" Type [:prec(1):]
+                | "arrayOf" Type [:prec(1):]
                 | "function" "from" Types "to" Type
                     [:prec(1) latex "{#1}\rightarrow{#2}":]
   syntax Types ::= List{Type,","}
@@ -127,7 +126,7 @@ from SIMPLE whose smeantics had to change. */
 /*@ \subsection{Configuration}
 The configuration of dynamically typed KOOL is almost identical to
 that of its untyped variant.  The only difference is the cell
-\textsf{return}, inside that \textsf{control} cell, whose role is to
+\textsf{return}, inside the \textsf{control} cell, whose role is to
 hold the expected return type of the invoked method.  That is because
 we want to dynamically check that the value that a method returns has
 the expected type. */
@@ -144,6 +143,7 @@ the expected type. */
                         <xstack color="purple"> .List </xstack>
                         <return color="LimeGreen"> .K </return>
                           // holds return type
+                        <br/>
                         <crntObj color="Fuchsia"> 
                           <crntClass> object </crntClass> 
                           <envStack> .List </envStack>
@@ -177,10 +177,12 @@ SIMPLE constructs can be made more general, such as that of the
 return statement and of the the assignment.  Finally, since the
 exceptions are now typed, they also need a different semantics.  We
 removed all these from the imported semantics of SIMPLE below and gave
-their typed KOOL semantics right after. */
+their typed KOOL semantics right after, together with the extended
+semantics of thread spawning (which is identical to that of untyped
+KOOL).  */
 
   syntax Val ::= #Int | #Bool | #String
-               | "array" "(" Type "," #Nat "," #Nat ")"
+               | "arrayRef" "(" Type "," #Nat "," #Nat ")"
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val
@@ -192,22 +194,22 @@ their typed KOOL semantics right after. */
        <store>... . => L |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
-  rule <k> var X[N:#Nat] : array of T; => . ...</k> 
+  rule <k> var X[N:#Nat] : arrayOf T; => . ...</k> 
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(array of T, L +Nat 1, N)
+       <store>... . => L |-> arrayRef(arrayOf T, L +Nat 1, N)
                        L +Nat 1 .. L +Nat N |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
   context var _[[HOLE]]:_ ;
 
   syntax #Id ::= "$1" | "$2"
-  rule var X[N1,N2,Vs] : array of array of T; =>
-       var X[N1] : array of array of T;
+  rule var X[N1,N2,Vs] : arrayOf arrayOf T; =>
+       var X[N1] : arrayOf arrayOf T;
        {
-         var $1 : array of array of T = X;
+         var $1 : arrayOf arrayOf T = X;
          for $2 = 0 to _-_(N1,1) do       // stupid parser
          {
-           (var X[N2,Vs] : array of T;)   // stupid parser
+           (var X[N2,Vs] : arrayOf T;)   // stupid parser
            $1[$2] = X;
          }
        }  [:structural:]
@@ -219,6 +221,7 @@ their typed KOOL semantics right after. */
   context ++([HOLE] => lvalue([HOLE]))
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
+
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule Str1:#String + Str2:#String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
@@ -235,10 +238,12 @@ their typed KOOL semantics right after. */
   rule B1:#Bool and B2:#Bool => B1 andBool B2
   rule B1 or B2 => B1 orBool B2
   rule not(B:#Bool) => notBool(B)
+
   rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
-  rule array(_,L,M:#Nat)[N] => lookup(L +Int N)
+  rule arrayRef(_,L,M:#Nat)[N] => lookup(L +Int N)
     if N >=Nat 0 andBool N <Nat M   [:structural:]
-  rule sizeOf(array(_,_,N)) => N
+
+  rule sizeOf(arrayRef(_,_,N)) => N
 
   syntax Val ::= "nothing"
   rule return; => return nothing;   [:structural:]
@@ -259,21 +264,19 @@ their typed KOOL semantics right after. */
     if typeOf(V) ==Bool int orBool typeOf(V) ==Bool string    [:transition:]
   rule print(); => . [:structural:]
 
-   rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
-        (. => <thread>... <k> S </k> <env> Env </env> ...</thread>)
-   rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
-        <busy> Busy:Set => Busy -Set keys(H) </busy>
-   rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
-        <busy> Busy (. => SetItem(V)) </busy>
-     if notBool(V in Busy)   [:transition:]
-   rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
-   rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
-     if N >Nat 0
-   // used prefix notation for -Int because of parsing problems
-   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
-        <busy>... SetItem(V)=>. ...</busy>
-   rule <k> rendezvous V; => . ...</k>
-        <k> rendezvous V; => . ...</k> [:transition:]
+  rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
+       <busy> Busy:Set => Busy -Set keys(H) </busy>
+  rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
+       <busy> Busy (. => SetItem(V)) </busy>
+    if notBool(V in Busy)   [:transition:]
+  rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
+  rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
+    if N >Nat 0
+  // used prefix notation for -Int because of parsing problems
+  rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
+       <busy>... SetItem(V)=>. ...</busy>
+  rule <k> rendezvous V; => . ...</k>
+       <k> rendezvous V; => . ...</k> [:transition:]
 
 // Auxiliary operations
 
@@ -294,7 +297,7 @@ their typed KOOL semantics right after. */
   rule typeOf(I) => int       [:structural:]
   rule typeOf(B) => bool      [:structural:]
   rule typeOf(_:#String) => string  [:structural:]
-  rule typeOf(array(T,_,_)) => T  [:structural:]
+  rule typeOf(arrayRef(T,_,_)) => T  [:structural:]
   rule typeOf(undefined(T)) => T [:structural:]
   rule typeOf(nothing) => void  [:structural:]
 
@@ -306,12 +309,71 @@ their typed KOOL semantics right after. */
   rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
   rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
 
+/*@ \subsection{Changes to SIMPLE Semantics}
+We extend/change the semantics of several SIMPLE constructs in order
+to take advantage of the richer KOOL semantic infrastructure and thus
+get more from the existing SIMPLE constructs. */
+
+/*@ \subsubsection{Spawn}
+Like in untyped KOOL. */
+
+  rule <thread>... <k> spawn S => . ...</k>
+                   <env> Env </env>
+                   <crntObj> Obj </crntObj>
+       ...</thread>
+       (. => <thread>... <k> S </k>
+                         <env> Env </env>
+                         <crntObj> Obj </crntObj>
+             ...</thread>)
+
+/*@ \subsubsection{Assignment}
+Typed KOOL allows to assign subtype instance values to supertype
+lvalues. */
+
+  rule <k> loc(L)=V
+        => subtype(typeOf(V),typeOf(K))~>true?~>upcast(V,typeOf(K:K))...</k> 
+       <store>... L|->(K=>upcast(V,typeOf(K))) ...</store> [:transition:]
+
+/*@ \subsubsection{Typed exceptions}
+Exceptions are propagated now until a catch that can bind them is
+encountered.
+*/
+
+  syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
+  syntax K ::= "popx"
+  rule <k> (try S1 catch(X : T) S2 => S1 ~> popx) ~> K </k>
+       <control> <xstack> . => (X : T,S2,K,Env,C) ...</xstack> C:Bag </control>
+       <env> Env </env>
+  rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
+  rule <k> throw V; ~> _
+        => if subtype(typeOf(V), T)
+           then {var X : T=V; S2}
+           else throw V; ~> K </k>
+       <control>
+         <xstack> (X : T,S2,K,Env,C) => . ...</xstack>
+         (_ => C)
+       </control>
+       <env> _ => Env </env>
+
+
+/*@ \subsubsection{bindTo}
+\texttt{bindto} also checks the well-formedness of the function
+parameters */
+
+  syntax K ::= "bindto" "(" Exps "," Vals ")"
+  rule <k> (. => X = V;) ~> bindto((X : T, XTs:Exps => XTs),(V,Vs:Vals => Vs)) 
+      ...</k>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> undefined(T) ...</store>
+       <nextLoc> L => L +Nat 1 </nextLoc>
+  rule <k> bindto(.Exps,.Vals) => . ...</k>
+
 
 /*@ \subsection{Additional values}
-The only addition to KOOL's values is that closures are now typed
+The only change to untyped KOOL's values is that closures are now typed
 (their last argument holds their type). */
 
-  syntax Val ::= "obj" "(" Bag ")"
+  syntax Val ::= "objRef" "(" Bag ")"
                | "closure" "(" #Id "," #Nat "," Exps "," Stmt "," Type ")"
 
 /*@ \subsection{Class declaration}       
@@ -392,12 +454,12 @@ those in untyped KOOL. */
   syntax K ::= storeObj
   rule <k> storeObj => . ...</k>
        <crntObj> Obj (<location> L </location> => .) </crntObj>
-       <store>... . => L |-> obj(Obj) ...</store>
+       <store>... . => L |-> objRef(Obj) ...</store>
 
 /*@ \subsection{Self reference}
 Like in untyped KOOL. */
 
-  rule <k> this => obj(Obj) ...</k>
+  rule <k> this => objRef(Obj) ...</k>
        <crntObj> Obj </crntObj>
 
 /*@ \subsection{Object member access}
@@ -406,7 +468,7 @@ Like in untyped KOOL. */
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
     if notBool(X in keys(Env))
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
-  rule <k> _._(obj(<crntClass> Class </crntClass>
+  rule <k> _._(objRef(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X) 
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
        ...</k>
@@ -432,13 +494,17 @@ rules below are identical to those in untyped KOOL. */
 
   context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
 
-  rule <k> '_`(_`)(('_._(obj(Obj <envStack> EStack </envStack>),,X) 
+  rule <k> '_`(_`)(('_._(objRef(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
 
   rule <k> '_`(_`)(('_._(super,,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
        <crntClass> Class:#Id </crntClass>
        <envStack>... ListItem(Class :: _) EStack </envStack>
+
+  context '_`(_`)(`[HOLE`]:K,,_)
+       if getKLabel `[HOLE`]:K ==Bool '_`(_`) orBool
+          getKLabel `[HOLE`]:K ==Bool '_`[_`]
 
   rule <k> '_`(_`)((lookup(L) => V),,_) ...</k>
        <store>... L |-> V ...</store>
@@ -461,14 +527,14 @@ and then pop it when the method returns. */
           <return> T':Type => T </return>
         </control>
        <env> Env => . </env>
-       <store>... OL |-> obj(<crntClass>_:#Id</crntClass>Obj:Bag) ...</store>
+       <store>...OL |-> objRef(<crntClass>_:#Id</crntClass>Obj:Bag)...</store>
 
 /*@ At method return, we have to check that the type of the returned
 value is a subtype of the expected return type.  Moreover, if that is
 the case, then we also upcast the returned value to one of the
 expected type. */
 
-   rule <k> return V; ~> _ => upcast(V,T) when subtype(typeOf(V),T) ~> K </k>
+   rule <k> return V; ~> _ => subtype(typeOf(V),T)~>true?~>upcast(V,T)~>K </k>
        <control>
          <fstack> (Env,K,C) => . ...</fstack>
          (<return> T </return> _ => C)
@@ -479,29 +545,30 @@ expected type. */
 /*@ \subsection{Instance Of}
 Like in untyped KOOL. */
 
-  rule obj((_ <envStack> ListItem(Class::_) ...</envStack>)) instanceOf Class 
+  rule objRef((_ <envStack>ListItem(Class::_)...</envStack>)) instanceOf Class 
     => true
-  rule obj((_ <envStack> ListItem(Class1::_)
+  rule objRef((_ <envStack> ListItem(Class1::_)
                       => . ...</envStack>)) instanceOf Class2 
     if Class1 =/=Bool Class2
-  rule obj((_ <envStack> .List </envStack>)) instanceOf Class
+  rule objRef((_ <envStack> .List </envStack>)) instanceOf Class
     => false
  
 /*@ \subsection{Cast}
 Unlike in untyped KOOL, in typed KOOL we actually check that an object
 can indeed be cast to the claimed type. */
 
-  rule <k> cast obj((<crntClass> _:K </crntClass> Obj)) to Class 
-        => obj(<crntClass> Class </crntClass> Obj)
-           when obj(Obj) instanceOf Class ...</k>
+  rule <k> cast objRef((<crntClass> _:K </crntClass> Obj)) to Class 
+        => objRef(Obj) instanceOf Class ~> true?
+             ~> objRef(<crntClass> Class </crntClass> Obj) ...</k>
 
-//@ \subsection{Objects as lvalues}
+/*@ \subsection{Objects as lvalues}
+Like in untyped KOOL. */
 
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
     if notBool(X in keys(Env))
 
   context lvalue(_._([HOLE],_))
-  rule <k> lvalue(_._(obj(<crntClass> Class </crntClass> 
+  rule <k> lvalue(_._(objRef(<crntClass> Class </crntClass> 
                            <envStack>...
                              ListItem(Class :: EnvC) EStack
                            </envStack>), X)
@@ -509,72 +576,34 @@ can indeed be cast to the claimed type. */
                         </envStack>, X)) 
        ...</k>
 
-//@ \subsection{Lookup member}
+/*@ \subsection{Lookup member}
+Like in untyped KOOL. */
 
-  syntax K ::= #Id "::" BagItem   
-  syntax K ::= "lookupMember" "(" BagItem "," #Id ")"  
+  syntax K ::= #Id "::" BagItem
+  syntax K ::= "lookupMember" "(" BagItem "," #Id ")"
   rule lookupMember(<envStack> ListItem(_ :: <env>...X|->L...</env>)
                     ...</envStack>,X) => lookup(L)
   rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)
                             => . ...</envStack>, X)
     if notBool(X in keys(Env)) [:structural:]
 
-/*@ \subsection{Assignment}
-Typed KOOL allows to assign subtype instance values to supertype
-lvalues. */
+//@ \subsection{Auxilliary operations and rules}
 
-  rule <k> loc(L)=V 
-        => upcast(V,typeOf(K:K)) when subtype(typeOf(V),typeOf(K)) ...</k> 
-       <store>... L|->(K=>upcast(V,typeOf(K))) ...</store> [:transition:]
+/*@ \subsubsection{\texttt{typeOf}}
+\texttt{typeOf} for the additional values. */
 
-//@ \subsection{Typed exceptions}
-
-  syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
-  syntax K ::= "popx"
-  rule <k> (try S1 catch(X : T) S2 => S1 ~> popx) ~> K </k>
-       <control> <xstack> . => (X : T,S2,K,Env,C) ...</xstack> C:Bag </control>
-       <env> Env </env>
-  rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
-  rule <k> throw V; ~> _
-        => if subtype(typeOf(V), T)
-           then {var X : T=V; S2}
-           else throw V; ~> K </k>
-       <control>
-         <xstack> (X : T,S2,K,Env,C) => . ...</xstack>
-         (_ => C)
-       </control>
-       <env> _ => Env </env>
-
-
-//@ \texttt{bindto} also checks the well-formedness of the function parameters
-  syntax K ::= "bindto" "(" Exps "," Vals ")"
-  rule <k> (. => X = V;) ~> bindto((X : T, XTs:Exps => XTs),(V,Vs:Vals => Vs)) 
-      ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> undefined(T) ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.Exps,.Vals) => . ...</k>
-
-//@ \texttt{typeOf} for the additional values
-  rule typeOf(obj(_ <envStack> ListItem(Class::_) ...</envStack>))
+  rule typeOf(objRef(_ <envStack> ListItem(Class::_) ...</envStack>))
     => class Class [:structural:]
   rule typeOf(closure(_,_,_,_,T)) => T  [:structural:]
 
-/*@\subsection{Conditional Pass}  
-Allows the process to continue only if the expression evaluates to true.
-Useful for checking side conditions to typing rules. */
-
-  syntax K ::= K "when" K  [:strict(2):]
-  rule K:K when true => K
-
-/*@\subsection{Subtyping constraints}
+/*@ \subsubsection{Subtyping constraints}
 The subclass relation introduces a subtyping relation. */
 
   syntax Exp ::= "subtype" "(" Types "," Types ")"
 
   rule subtype(,) => true
   rule subtype((T1:Type,T2:Type,Ts:Types),(T1':Type,T2':Type,Ts':Types))
-    => subtype((T2,Ts),(T2',Ts')) when subtype(T1,T1')
+    => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))
   rule subtype(T,T) => true
   rule <k> subtype(class Class1:#Id, class Class)
         => subtype(class Class2, class Class) ...</k>
@@ -587,13 +616,21 @@ The subclass relation introduces a subtyping relation. */
           <className> Class1 </className> <extends> Class2 </extends>
     if Class1 =/=Bool Class
 
-
-//@\subsection{UpCasting}
+/*@ \subsubsection{UpCasting}
+Performs unsafe upcasting.  One should only use it combination with
+the subtype relation above.  */
 
   syntax Val ::= upcast( Val , Type )
-  rule upcast(obj(<crntClass> _:K </crntClass> Obj),class Class) 
-       => obj(<crntClass> Class </crntClass> Obj)
+  rule upcast(objRef(<crntClass> _:K </crntClass> Obj), class Class) 
+       => objRef(<crntClass> Class </crntClass> Obj)
     [:structural:]
   rule upcast(V,T) => V if typeOf(V) ==Bool T  [:structural:]
+
+/*@ \subsubsection{Generic guard}
+A generic computational guard (should be builtin): it allows the
+computation to continue only if a prefix guard evaluates to true.  */
+
+  syntax K ::= "true?"
+  rule true ~> true? => .
 
 end module

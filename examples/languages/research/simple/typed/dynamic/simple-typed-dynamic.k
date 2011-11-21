@@ -74,7 +74,7 @@ the desired evaluation strategies of the various language constructs .  */
                 | "rendezvous" Exp ";"                  [:strict:]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts                         [:prec(100) gather(e E):]
+                 | Stmts Stmts                      [:prec(100) gather(e E):]
 
 //@ We use the same desugaring macros like in typed SIMPLE
 

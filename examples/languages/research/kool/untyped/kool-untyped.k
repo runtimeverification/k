@@ -615,7 +615,7 @@ that came with the semantics of SIMPLE that we borrowed (see above).  */
           <crntObj> Obj':Bag => <crntClass>Class</crntClass> Obj </crntObj>
         </control>
        <env> Env => . </env>
-       <store>... OL |-> objRef(<crntClass>_:#Id</crntClass>Obj:Bag) ...</store>
+       <store>...OL |-> objRef(<crntClass>_:#Id</crntClass>Obj:Bag)...</store>
 
 
 /*@ \subsection{Instance Of}

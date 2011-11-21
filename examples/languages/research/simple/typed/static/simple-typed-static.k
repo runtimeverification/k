@@ -1,3 +1,4 @@
+
 module SIMPLE-TYPED-STATIC-SYNTAX
 
 /*@ \section{Syntax}
