@@ -161,7 +161,7 @@ evalKastIO :: Config -> Map Text Kast -> IO (FilePath, FilePath, FilePath)
 evalKastIO config kmap = do
     tmpDir <- getTmpDir
     -- determine files for communicating with the wrapper
-    let [cmdFile, outFile, errFile] = map (tmpDir </>) ["maude_in", "maude_out", "maude_err"]
+    let [cmdFile, outFile, errFile] = map (tmpDir </>) ["maude_in.maude", "maude_out", "maude_err"]
 
     -- write the file from which the wrapper will read the command to execute
     cmdh <- openFile cmdFile WriteMode
@@ -230,7 +230,7 @@ flattenProgram config pgm = case config ! "parser" of
 runKast :: Config -> ProgramSource -> IO Kast
 runKast config (ProgramSource pgm) = do
     tmpDir <- getTmpDir
-    (tmpFile, tmpHandle) <- openTempFile tmpDir "pgm.in"
+    (tmpFile, tmpHandle) <- openTempFile tmpDir "pgm.maude"
     tmpCanonicalFile <- canonicalizePath tmpFile
     T.hPutStr tmpHandle pgm
     hClose tmpHandle
