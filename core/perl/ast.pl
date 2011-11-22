@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use XML::DOM;
 
+my $kind="";
+
 sub get_ast
 {
     # get file
@@ -23,6 +25,10 @@ sub get_ast
     $result = $result->item(0)->getChildNodes()->item(1);
  
     local $_ = get_ast_from_node($result);
+    if ($kind ne "") 
+    {
+      die("Subterm $kind does not parse correctly");
+    }
     
     # remove parse_
     s/^\'parse_\(//sg;
@@ -30,7 +36,6 @@ sub get_ast
 
     $_;
 }
-
 
 sub get_ast_from_node
 {
@@ -41,6 +46,7 @@ sub get_ast_from_node
     
     my $op = $attrs->getNamedItem("op")->getNodeValue;
     my $sort = $attrs->getNamedItem("sort")->getNodeValue;
+#    print "\t SORT: $sort";
     
     my $content = "";
     for my $i (0 .. $children->getLength - 1)
@@ -96,6 +102,11 @@ sub get_ast_from_node
     
     # empty appliances default
     return "'$op(.List{K})" if ($content =~ /^\s*$/);
+
+    if ($sort =~ /^\[/ && $kind eq "") 
+    {
+      $kind = "'$op($content)";
+    }
     
     "'$op($content)";
 }

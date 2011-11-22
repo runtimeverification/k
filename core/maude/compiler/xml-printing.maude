@@ -1,0 +1,811 @@
+***(
+    This file is part of the K-Maude tool
+
+    Copyright (C) 2009 K Developement Team <k-list@cs.illinois.edu>
+
+    This file is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+***)
+fmod XML-MOD-NAME-TO-QID is
+  pr META-MODULE-EXTRAS .
+  pr QID-EXTRAS .
+
+  op xmlHeader2Qid :  -> Qid .
+  op xmlHeader2QidList : Header -> QidList .
+  op xmlParameterDecl2Qid : ParameterDecl -> Qid .
+  op xmlParameterDecl2QidList : ParameterDecl -> QidList .
+  op xmlParameterDeclList2Qid : ParameterDeclList -> Qid .
+  op xmlParameterDeclList2QidList : ParameterDeclList -> QidList .
+
+  vars QI X : Qid .
+  var  QIL : QidList .
+  vars ME ME' : ModuleExpression .
+  var  PDL : ParameterDeclList .
+  var  PD : ParameterDecl .
+
+  eq xmlHeader2Qid(QI) = QI .
+  eq xmlHeader2Qid(nullHeader) = ' .
+---  eq xmlHeader2Qid(pd(X :: ME)) = qidList2Qid(xmlHeader2QidList(pd(X :: ME))) .
+---  eq xmlHeader2QidList(pd(X :: ME)) = X ':: xmlHeader2QidList(ME) .
+
+  eq xmlHeader2QidList(QI) = QI .
+  eq xmlHeader2QidList(nullHeader) = ' .
+
+  eq xmlHeader2Qid((ME { PDL })) = qidList2Qid(xmlHeader2QidList((ME { PDL }))) .
+  ceq xmlHeader2QidList((ME { PDL })) 
+    = (if QI == '\s then QIL else QIL QI fi 
+       '`{ xmlParameterDecl2QidList(PDL) '`} ) 
+    if QIL QI := xmlHeader2QidList(ME) .
+ 
+  eq xmlParameterDecl2Qid(X :: ME) = qidList2Qid(X ':: xmlHeader2Qid(ME)) .
+
+  eq xmlParameterDeclList2Qid(PDL)
+    = qidList2Qid(xmlParameterDeclList2QidList(PDL)) .
+
+  eq xmlParameterDeclList2QidList(X :: ME) = X ':: xmlHeader2QidList(ME) .
+  eq xmlParameterDeclList2QidList((X :: ME, PDL))
+    = xmlParameterDeclList2QidList(X :: ME) '`, xmlParameterDeclList2QidList(PDL)
+    [owise] .
+endfm
+
+
+fmod XML-DECL-META-PRETTY-PRINT is
+  pr META-MODULE-EXTRAS .
+  pr META-LEVEL .
+  pr CONVERSION .
+  pr NAT-LIST .
+  pr QID-EXTRAS .
+  pr PARSE-METADATA .
+  pr K-META-OPEN-CELLS .
+  pr META-K-RULES .
+  pr META-K-CONTEXTS .
+
+  ---- name of a sort (the name of S{P1, ..., Pn} is S)
+  op getName : Sort -> Qid .
+  eq getName(S:Sort) 
+    = if xmlFindOpening(string(S:Sort), "{", "}", sd(length(string(S:Sort)), 2))
+           == notFound
+      then S:Sort
+      else qid(substr(string(S:Sort), 
+                      0, 
+                      xmlFindOpening(string(S:Sort), 
+                        "{", "}", 
+                        sd(length(string(S:Sort)), 2))))
+      fi .
+
+  ---- parameters of a sort (the parameters of S{P1, ..., Pn} are P1 ... Pn)
+  op xmlGetPars : Sort -> ParameterList [memo] .
+  op xmlGetParsAux : String Nat Nat -> ParameterList .
+
+  eq xmlGetPars(S:Sort) 
+    = if xmlFindOpening(string(S:Sort), "{", "}", sd(length(string(S:Sort)), 2))
+           == notFound
+      then empty
+      else xmlGetParsAux(string(S:Sort), 
+             xmlFindOpening(string(S:Sort), 
+               "{", "}", sd(length(string(S:Sort)), 2)) + 1,
+             length(string(S:Sort)))
+      fi .
+
+  var  St Pattern OpenPar ClosingPar : String .
+  vars Lt R N OpenPars ClosingPars : Nat .
+
+  eq xmlGetParsAux(St, Lt, R)
+    = if xmlFindOut(St, ",", "{", "}", Lt) == notFound
+      then qid(substr(St, Lt, sd(xmlFindClosing(St, "{", "}", Lt), Lt)))
+      else (qid(substr(St, Lt, sd(xmlFindOut(St, ",", "{", "}", Lt), Lt))),
+            xmlGetParsAux(St, xmlFindOut(St, ",", "{", "}", Lt) + 1, R))
+      fi .
+
+  ---- finds a pattern out of balanced parentheses 
+  ---- xmlFindOut("S{P1, P2{P21, P22}, P3}", ",", "{", "}", 6) returns 18, not 12
+  op xmlFindOut : String String String String Nat -> FindResult .
+  op xmlFindOut : String String String String Nat Nat -> FindResult .
+
+  eq xmlFindOut(St, Pattern, OpenPar, ClosingPar, N)
+    = xmlFindOut(St, Pattern, OpenPar, ClosingPar, 0, N) .
+
+  eq xmlFindOut(St, Pattern, OpenPar, ClosingPar, OpenPars, N)
+    = if N >= length(St)
+      then notFound
+      else if OpenPars == 0 and-then substr(St, N, length(Pattern)) == Pattern
+           then N
+           else if substr(St, N, length(OpenPar)) == OpenPar
+                then xmlFindOut(St, Pattern, OpenPar, ClosingPar, 
+                       OpenPars + 1, N + 1)
+                else if substr(St, N, length(ClosingPar)) == ClosingPar
+                     then xmlFindOut(St, Pattern, OpenPar, ClosingPar, 
+                            sd(OpenPars, 1), N + 1)
+                     else xmlFindOut(St, Pattern, OpenPar, ClosingPar, 
+                            OpenPars, N + 1)
+                     fi
+                fi
+           fi
+      fi .
+
+  ---- finds the first closing unbalanced parenthesis 
+  ---- xmlFindOut("P1, P2{P21, P22}, P3}", "{", "}", 6) returns 21, not 16
+  op xmlFindClosing : String String String Nat -> FindResult .
+  op xmlFindClosing : String String String Nat Nat -> FindResult .
+
+  eq xmlFindClosing(St, OpenPar, ClosingPar, N)
+    = xmlFindClosing(St, OpenPar, ClosingPar, 0, N) .
+
+  eq xmlFindClosing(St, OpenPar, ClosingPar, OpenPars, N)
+    = if N >= length(St)
+      then notFound
+      else if OpenPars == 0 
+              and-then substr(St, N, length(ClosingPar)) == ClosingPar
+           then N
+           else if substr(St, N, length(OpenPar)) == OpenPar
+                then xmlFindClosing(St, OpenPar, ClosingPar, 
+                       OpenPars + 1, N + 1)
+                else if substr(St, N, length(ClosingPar)) == ClosingPar
+                     then xmlFindClosing(St, OpenPar, ClosingPar, 
+                            sd(OpenPars, 1), N + 1)
+                     else xmlFindClosing(St, OpenPar, ClosingPar, 
+                            OpenPars, N + 1)
+                     fi
+                fi
+           fi
+      fi .
+
+  ---- finds the last opening unbalanced parenthesis 
+  ---- xmlFindOpening("S{P1, P2{P21, P22}, P3}", "{", "}", 21) returns 1, not 8
+  op xmlFindOpening : String String String Nat -> FindResult .
+  op xmlFindOpening : String String String Nat Nat -> FindResult .
+
+  eq xmlFindOpening(St, OpenPar, ClosingPar, N)
+    = xmlFindOpening(St, OpenPar, ClosingPar, 0, N) .
+
+  eq xmlFindOpening(St, OpenPar, ClosingPar, ClosingPars, N)
+    = if N == 0
+      then notFound
+      else if ClosingPars == 0 
+              and-then substr(St, N, length(ClosingPar)) == OpenPar
+           then N
+           else if substr(St, N, length(OpenPar)) == ClosingPar
+                then xmlFindOpening(St, OpenPar, ClosingPar, 
+                       ClosingPars + 1, sd(N, 1))
+                else if substr(St, N, length(ClosingPar)) == OpenPar
+                     then xmlFindOpening(St, OpenPar, ClosingPar, 
+                            sd(ClosingPars, 1), sd(N, 1))
+                     else xmlFindOpening(St, OpenPar, ClosingPar, 
+                            ClosingPars, sd(N, 1))
+                     fi
+                fi
+           fi
+      fi .
+
+
+  op xmlGetSort : Kind -> Sort .
+  eq xmlGetSort(K:Kind) 
+    = if xmlFindOut(string(K:Kind), "`,", "{", "}", 0) == notFound
+      then qid(substr(string(K:Kind), 
+                      2, 
+                      sd(length(string(K:Kind)), 4)))
+      else qid(substr(string(K:Kind), 
+                      2, 
+                      sd(xmlFindOut(string(K:Kind), "`,", "{", "}", 0), 2)))
+      fi .
+
+
+  op xmlViewExp2Qid : ViewExp -> Qid .
+  op xmlParameterList2Qid : ParameterList -> Qid .
+  op xmlViewExp2QidList : ViewExp -> QidList .
+  op xmlParameterList2QidList : ParameterList -> QidList .
+
+  var  P : ViewExp .
+  var  PL : NeParameterList .
+
+  eq xmlParameterList2QidList(P) = xmlViewExp2QidList(P) .
+  ceq xmlParameterList2QidList((P, PL))
+    = (if QI == '`) then QIL QI  else QIL QI fi) 
+      '`, xmlParameterList2QidList(PL)
+    if QIL QI := xmlViewExp2QidList(P).
+
+  eq xmlViewExp2QidList(V{PL})
+    = (xmlViewExp2QidList(V) '`{ xmlParameterList2QidList(PL) '`}) .
+  ceq xmlViewExp2QidList(VE ;; VE')
+    = (xmlViewExp2QidList(VE) '; xmlViewExp2QidList(VE')) 
+    if VE =/= mtViewExp /\ VE' =/= mtViewExp .
+  eq xmlViewExp2QidList(V) = V .
+ 
+  eq xmlParameterList2Qid(P) = xmlViewExp2Qid(P) .
+  eq xmlParameterList2Qid((P, PL))
+    = qid(string(xmlViewExp2Qid(P)) + ", " + string(xmlParameterList2Qid(PL))) .
+
+  eq xmlViewExp2Qid(VE) = qidList2Qid(xmlViewExp2QidList(VE)) .
+
+
+  op xmlEMetaPrettyPrint : Sort -> QidList .
+  op xmlEMetaPrettyPrint : SortSet -> QidList .
+  op xmlEMetaPrettyPrint : TypeList -> QidList .
+  op xmlEMetaPrettyPrint : SubsortDeclSet -> QidList .
+  op xmlEMetaPrettyPrint : Module OpDeclSet -> QidList .
+  op xmlEMetaPrettyPrintVars : OpDeclSet -> QidList .
+  op xmlEMetaPrettyPrint : Module MembAxSet -> QidList .
+  op xmlEMetaPrettyPrint : Module EquationSet -> QidList .
+  op xmlEMetaPrettyPrint : Module RuleSet -> QidList .
+  op xmlEMetaPrettyPrint : Module Condition -> QidList .
+  op xmlEMetaPrettyPrint : Module Term -> QidList .
+
+  eq xmlEMetaPrettyPrint(U, MAS) = xmlEMetaPrettyPrint(U, MAS, true) .
+  eq xmlEMetaPrettyPrint(U, EqS) = xmlEMetaPrettyPrint(U, EqS, true) .
+  eq xmlEMetaPrettyPrint(U, RlS) = xmlEMetaPrettyPrint(U, RlS, true) .
+  eq xmlEMetaPrettyPrint(U, Cond) = xmlEMetaPrettyPrint(U, Cond, true) .
+  eq xmlEMetaPrettyPrint(U, T) = xmlEMetaPrettyPrint(U, T, true) .
+
+  op xmlEMetaPrettyPrint : Module MembAxSet Bool -> QidList .
+  op xmlEMetaPrettyPrint : Module EquationSet Bool -> QidList .
+  op xmlEMetaPrettyPrint : Module RuleSet Bool -> QidList .
+  op xmlEMetaPrettyPrint : Module Condition Bool -> QidList .
+  op xmlEMetaPrettyPrint : Module Term Bool -> QidList .
+
+  ---- error handling
+  eq metaPrettyPrint(M, T, POS:PrintOptionSet) 
+    = 'Module getName(M) 'contains 'errors. .
+
+  op xmlEMetaPrettyPrintCell : Module SplitCell Sort Bool -> QidList .
+  eq xmlEMetaPrettyPrintCell(M, SC, Ty, B)
+   = qid("<" + string(getName(SC))) xmlEMetaPrettyPrintCellAttrs(getAttributes(SC)) qid("type=\"" + string(Ty) + "\">")  '\s xmlEMetaPrettyPrint(Ty, M, getContents(SC), B) '\s qid("</" + string(getName(SC)) + ">") . 
+
+  op xmlEMetaPrettyPrint : Sort Module Term Bool -> QidList .
+ ceq xmlEMetaPrettyPrint(Ty, M, Q[Tl], B)
+   = xmlEMetaPrettyPrintL(Ty, M, Tl, B, if Ty == (K).Sort then ('\s '~> '\s) else nil fi) 
+  if Q = ctor(Ty) .
+ ceq xmlEMetaPrettyPrint(Ty, M, Ct, B) = '.
+  if Ct = emptyCt(Ty)  .
+ ceq xmlEMetaPrettyPrint('Bag, M, T, B)
+   = xmlEMetaPrettyPrintCell(M, SC,  getCellType(M,leastSort(M, getContents(SC))), B)
+  if SC := splitKCell(T) .
+
+ ceq xmlEMetaPrettyPrint(Ty, M, Q[T1,T2], B)
+   = '`( xmlEMetaPrettyPrint(Ty, M, T1, B) '\s '=> '\s xmlEMetaPrettyPrint(Ty, M, T2, B) '`) 
+  if Q = replaceS .
+
+ ceq xmlEMetaPrettyPrint('K, M, Q[T1,T2], B)
+   = xmlEMetaPrettyPrint(KLabel, M, T1, B) '`( xmlEMetaPrettyPrint(K, M, T2, B) '`)
+  if Q = kApplyS .
+
+ ceq xmlEMetaPrettyPrint('K, M, Q[Tl], B)
+   = xmlEMetaPrettyPrintL('K, M, Tl, B, ('`, '\s))
+  if Q = kListS .
+
+
+  eq xmlEMetaPrettyPrint(Ty, M, T, B)
+   = xmlEMetaPrettyPrint(M, T, B) [owise] .
+
+  
+  op xmlEMetaPrettyPrintL : Sort Module TermList Bool QidList -> QidList .
+  eq xmlEMetaPrettyPrintL(Ty, M, empty, B, QIL) = nil .
+  eq xmlEMetaPrettyPrintL(Ty, M, T, B, QIL) = xmlEMetaPrettyPrint(Ty, M, T, B) .
+ eq xmlEMetaPrettyPrintL(Ty, M, (T,NTl), B, QIL) = xmlEMetaPrettyPrint(Ty, M, T, B) QIL xmlEMetaPrettyPrintL(Ty, M, NTl, B, QIL) .
+
+
+  op xmlEMetaPrettyPrintCellAttrs : AttrSet -> QidList .
+  eq xmlEMetaPrettyPrintCellAttrs(ellipses |-> none AtS)
+   = xmlEMetaPrettyPrintCellAttrs(AtS) .
+  eq xmlEMetaPrettyPrintCellAttrs(multiplicity |-> one AtS)
+   = xmlEMetaPrettyPrintCellAttrs(AtS) .
+  eq xmlEMetaPrettyPrintCellAttrs(AK |-> AV AtS)
+   = qid(xmlEMetaPrettyPrintCellAttrKey(AK) + "=\"" + xmlEMetaPrettyPrintCellAttrVal(AV) + "\"") '\s xmlEMetaPrettyPrintCellAttrs(AtS) [owise] . 
+  eq xmlEMetaPrettyPrintCellAttrs(none) = nil .
+
+
+  op xmlEMetaPrettyPrintCellAttrKey : AttrKey -> String .
+  eq xmlEMetaPrettyPrintCellAttrKey(AK) = string(symbolAK AK) .
+  op xmlEMetaPrettyPrintCellAttrVal : AttrVal -> String .
+  eq xmlEMetaPrettyPrintCellAttrVal(Str) = Str .
+  eq xmlEMetaPrettyPrintCellAttrVal(Ellipses) = symbolES Ellipses .
+  eq xmlEMetaPrettyPrintCellAttrVal(Multiplicity) = symbolM Multiplicity .
+
+  var AK : AttrKey .  var AV : AttrVal .  var SC : SplitCell .
+  var Multiplicity : Multiplicity . var Ellipses : Ellipses . 
+  var Q : Qid .  var NTl : NeTermList .  var Tl : TermList .
+  var Ct : Constant .  var T1 T2 : Term .
+
+
+  eq xmlEMetaPrettyPrint(U, T, false) = metaPrettyPrint(U, T, format number rat) [owise] .
+  eq xmlEMetaPrettyPrint(U, T, true) = metaPrettyPrint(U, T) [owise] .
+ 
+  op xmlEMetaPrettyPrint : Module AttrSet -> QidList .
+  op xmlEMetaPrettyPrint : NatList -> QidList .
+  op xmlEMetaPrettyPrint : ViewExp -> QidList .
+  op xmlEMetaPrettyPrint : Module HookList -> QidList .
+
+  vars QI QI' QI'' F V L : Qid .
+  var  QIL : QidList .
+  var  M : Module .
+  var  U : Module .
+  vars VE VE' : ViewExp .
+  vars SS : SortSet .
+  vars S S' : Sort .
+  var  TyL : TypeList .
+  var  Ty : Type .
+  var  SSDS : SubsortDeclSet .
+  var  OPDS : OpDeclSet .
+  var  AtS : AttrSet .
+  var  MAS : MembAxSet .
+  var  EqS : EquationSet .
+  var  RlS : RuleSet .
+  var  Hk : Hook .
+  var  HkL : HookList .
+  var  I : Int .
+  var  NL : NatList .
+  vars T T' T'' T3 : Term .
+  var  Cond : Condition .
+  var B : Bool .
+  var Str Str1 Str2 : String .
+
+---  ceq xmlEMetaPrettyPrint(VE) = viewExp2QidList(VE) if not VE :: TypeList .
+
+  --- eq xmlEMetaPrettyPrint(Ty) = Ty .
+
+  eq xmlEMetaPrettyPrint(S)
+    = if xmlGetPars(S) == empty
+      then S
+      else getName(S) '`{ xmlParameterList2QidList(xmlGetPars(S)) '`}
+      fi .
+  eq xmlEMetaPrettyPrint(K:Kind) = '`[ xmlEMetaPrettyPrint(xmlGetSort(K:Kind)) '`] . 
+
+  eq xmlEMetaPrettyPrint((S ; SS)) 
+    = (xmlEMetaPrettyPrint(S) xmlEMetaPrettyPrint(SS))
+    [owise] .
+  eq xmlEMetaPrettyPrint((none).SortSet) = nil .
+
+  eq xmlEMetaPrettyPrint(Ty TyL) 
+    = xmlEMetaPrettyPrint(Ty) xmlEMetaPrettyPrint(TyL) 
+    [owise] .
+  eq xmlEMetaPrettyPrint((nil).TypeList) = nil .
+
+  eq xmlEMetaPrettyPrint(((subsort S < S' .) SSDS))
+    = ( 
+       'subsort xmlEMetaPrettyPrint(S) 
+           '< xmlEMetaPrettyPrint(S') '.  '\n
+       xmlEMetaPrettyPrint(SSDS)) .
+  eq xmlEMetaPrettyPrint((none).SubsortDeclSet) = nil .
+ 
+  eq xmlEMetaPrettyPrint(M, ((op F : TyL -> Ty [AtS metadata(Str)] .) OPDS))
+   = xmlEMetaPrettyPrint(M, (op F : TyL -> Ty [AtS metadataParse(Str)] .) OPDS) .
+
+  eq xmlEMetaPrettyPrint(M, ((op F : nil -> 'KLabel [AtS] .) OPDS))
+   = xmlEMetaPrettyPrint(M, OPDS) .
+
+  eq xmlEMetaPrettyPrint(M, ((op F : nil -> 'CellLabel [AtS] .) OPDS))
+   = xmlEMetaPrettyPrint(M, OPDS) .
+
+  eq xmlEMetaPrettyPrint(M, ((op '_=>_ : Ty Ty -> Ty [AtS] .) OPDS))
+   = xmlEMetaPrettyPrint(M, OPDS) .
+
+  eq xmlEMetaPrettyPrint(M, ((op 'rule_ : Ty -> '`[KSentence`] [AtS] .) OPDS))
+   = xmlEMetaPrettyPrint(M, OPDS) .
+
+  eq xmlEMetaPrettyPrint(M, ((op 'rule_if_ : Ty 'K -> '`[KSentence`] [AtS] .) OPDS))
+   = xmlEMetaPrettyPrint(M, OPDS) .
+
+  eq xmlEMetaPrettyPrint(M, ((op F : TyL -> Ty [AtS pair(Str,"builtin")] .) OPDS))
+   = xmlEMetaPrettyPrint(M, OPDS) .
+
+
+  eq xmlEMetaPrettyPrint(M, ((op F : TyL -> Ty [none] .) OPDS))
+    = ( 
+       'op F ': xmlEMetaPrettyPrint(TyL) 
+       '-> xmlEMetaPrettyPrint(Ty) '.  '\n
+       xmlEMetaPrettyPrint(M, OPDS)) [owise] .
+  eq xmlEMetaPrettyPrint(M, ((op F : TyL -> Ty [AtS] .) OPDS))
+    = ( 
+       'op F ': xmlEMetaPrettyPrint(TyL) 
+       '-> xmlEMetaPrettyPrint(Ty) 
+         '`[ xmlEMetaPrettyPrint(M, AtS) '`]  '. '\n
+       
+       xmlEMetaPrettyPrint(M, OPDS))
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, (none).OpDeclSet)  = nil .
+
+  eq xmlEMetaPrettyPrintVars((op F : nil -> Ty [none] .) OPDS)
+    = ( 'var F ': xmlEMetaPrettyPrint(Ty) '. 
+       xmlEMetaPrettyPrintVars(OPDS)) .
+  eq xmlEMetaPrettyPrintVars((none).OpDeclSet)  = nil .
+
+ ceq xmlEMetaPrettyPrint(M, Mb MAS, B)
+   = (xmlEMetaPrettyPrintConfig(M, T, B)  xmlEMetaPrettyPrint(M, MAS, B)) 
+  if T := extractConfTerm(Mb) .
+
+ ceq xmlEMetaPrettyPrint(M, Mb MAS, B)
+   = (xmlEMetaPrettyPrintContext(M, KCS, B)  xmlEMetaPrettyPrint(M, MAS, B)) 
+  if KCS := splitKContext(Mb) .
+
+ ceq xmlEMetaPrettyPrint(M, Mb MAS, B)
+   = (xmlEMetaPrettyPrintRule(M, KRS, B)  xmlEMetaPrettyPrint(M, MAS, B)) 
+  if KRS := splitKRule(Mb) .
+
+  op xmlEMetaPrettyPrintContext : Module KContextSplit Bool -> QidList .
+  eq xmlEMetaPrettyPrintContext(M, KCS, B) = ('\s '\s 'context '\s xmlEMetaPrettyPrint(getCellType(M,leastSort(M,getContents(KCS))),M,getContents(KCS),B) if getCondition(KCS) == empty then nil else '\s 'if '\s xmlEMetaPrettyPrint(getCellType(M,leastSort(M,getCondition(KCS))), M, getCondition(KCS), B) fi if getAttrs(KCS) == none then nil else '\s '`[ '\s xmlEMetaPrettyPrint(M, metadataParse(getAttrs(KCS))) '`] fi '\n) .
+
+  op xmlEMetaPrettyPrintRule : Module KRuleSplit Bool -> QidList .
+  eq xmlEMetaPrettyPrintRule(M, KRS, B) = ('\s '\s 'rule '\s xmlEMetaPrettyPrint(getCellType(M,leastSort(M,getContents(KRS))),M,getContents(KRS),B) if getCondition(KRS) == empty then nil else '\s 'if '\s xmlEMetaPrettyPrint(getCellType(M,leastSort(M,getCondition(KRS))), M, getCondition(KRS), B) fi if getAttrs(KRS) == none then nil else '\s '`[ '\s xmlEMetaPrettyPrint(M, metadataParse(getAttrs(KRS))) '`] fi '\n) .
+
+  op xmlEMetaPrettyPrintConfig : Module Term Bool -> QidList .
+  eq xmlEMetaPrettyPrintConfig(M, T, B) = ('\s '\s 'configuration '\s xmlEMetaPrettyPrint(getCellType(M,leastSort(M,T)), M, T, B) '\n) .
+
+
+  var KCS : KContextSplit .  var KRS : KRuleSplit .   var Mb : MembAx .
+
+  eq xmlEMetaPrettyPrint(M, (mb T : S [none] .) MAS, B)
+    = ( 'mb xmlEMetaPrettyPrint(M, T, B) 
+                   ': xmlEMetaPrettyPrint(S) '.  '\n
+       xmlEMetaPrettyPrint(M, MAS, B)) [owise] .
+  eq xmlEMetaPrettyPrint(M, (mb T : S [AtS] .) MAS, B)
+    = ( 'mb xmlEMetaPrettyPrint(M, T, B) 
+                   ': xmlEMetaPrettyPrint(S) 
+                '`[ xmlEMetaPrettyPrint(M, AtS) '`]  '.  '\n
+       xmlEMetaPrettyPrint(M, MAS, B)) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, (cmb T : S if Cond [none] .) MAS, B)
+    = ( 'cmb xmlEMetaPrettyPrint(M, T, B) 
+                   ': xmlEMetaPrettyPrint(S) 
+         'if xmlEMetaPrettyPrint(M, Cond, B) '.  '\n
+       xmlEMetaPrettyPrint(M, MAS, B)) .
+  eq xmlEMetaPrettyPrint(M, (cmb T : S if Cond [AtS] .) MAS, B)
+    = ( 'cmb xmlEMetaPrettyPrint(M, T, B) 
+                   ': xmlEMetaPrettyPrint(S) 
+         'if xmlEMetaPrettyPrint(M, Cond, B) 
+            '`[ xmlEMetaPrettyPrint(M, AtS) '`]  '. '\n 
+       xmlEMetaPrettyPrint(M, MAS, B)) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, (none).MembAxSet, B) = nil .
+
+  eq xmlEMetaPrettyPrint(M, ((eq T = T' [none] .) EqS), B)
+    = ( 'eq  xmlEMetaPrettyPrint(M, T, B) 
+         '=  xmlEMetaPrettyPrint(M, T', B)  '.  '\n
+       
+       xmlEMetaPrettyPrint(M, EqS, B)) .
+  eq xmlEMetaPrettyPrint(M, ((eq T = T' [AtS] .) EqS), B)
+    = ( 'eq  xmlEMetaPrettyPrint(M, T, B) 
+         '=  xmlEMetaPrettyPrint(M, T', B) 
+            '`[ xmlEMetaPrettyPrint(M, AtS) '`]  '.  '\n
+       xmlEMetaPrettyPrint(M, EqS, B)) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, ((ceq T = T' if Cond [none] .) EqS), B)
+    = ( 'ceq  xmlEMetaPrettyPrint(M, T, B) 
+         '=  xmlEMetaPrettyPrint(M, T', B) 
+         'if  xmlEMetaPrettyPrint(M, Cond, B)  '. '\n
+       
+       xmlEMetaPrettyPrint(M, EqS, B)) .
+  eq xmlEMetaPrettyPrint(M, ((ceq T = T' if Cond [AtS] .) EqS), B)
+    = ( 'ceq  xmlEMetaPrettyPrint(M, T, B) 
+         '=  xmlEMetaPrettyPrint(M, T', B) 
+         'if  xmlEMetaPrettyPrint(M, Cond, B) 
+            '`[ xmlEMetaPrettyPrint(M, AtS) '`]  '.  '\n
+       xmlEMetaPrettyPrint(M, EqS, B)) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, (none).EquationSet, B) = nil .
+
+  eq xmlEMetaPrettyPrint(M, ((rl T => T' [none] .) RlS), B)
+    = ( 'rl  xmlEMetaPrettyPrint(M, T, B) 
+         '=>  xmlEMetaPrettyPrint(M, T', B)  '. '\n
+       
+       xmlEMetaPrettyPrint(M, RlS, B)) .
+  eq xmlEMetaPrettyPrint(M, ((rl T => T' [AtS] .) RlS), B)
+    = ( 'rl  xmlEMetaPrettyPrint(M, T, B) 
+         '=>  xmlEMetaPrettyPrint(M, T', B) 
+            '`[ xmlEMetaPrettyPrint(M, AtS) '`]  '. '\n
+       xmlEMetaPrettyPrint(M, RlS, B)) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, ((crl T => T' if Cond [none] .) RlS), B)
+    = ( 'crl  xmlEMetaPrettyPrint(M, T, B) 
+         '=>  xmlEMetaPrettyPrint(M, T', B) 
+         'if  xmlEMetaPrettyPrint(M, Cond, B)  '. '\n
+       
+       xmlEMetaPrettyPrint(M, RlS, B)) .
+  eq xmlEMetaPrettyPrint(M, ((crl T => T' if Cond [AtS] .) RlS), B)
+    = ( 'crl  xmlEMetaPrettyPrint(M, T, B) 
+         '=>  xmlEMetaPrettyPrint(M, T', B) 
+         'if  xmlEMetaPrettyPrint(M, Cond, B) 
+            '`[ xmlEMetaPrettyPrint(M, AtS) '`]  '.  '\n
+       xmlEMetaPrettyPrint(M, RlS, B)) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, (none).RuleSet, B) = nil .
+
+---(
+  eq xmlEMetaPrettyPrint(M, T = 'true.Bool /\ Cond, B)
+   =  (xmlEMetaPrettyPrint(M, T, B)
+      '/\ xmlEMetaPrettyPrint(M, Cond, B)) 
+    [owise] .
+---)
+  eq xmlEMetaPrettyPrint(M, T = T' /\ Cond, B)
+    = (xmlEMetaPrettyPrint(M, T, B) '= xmlEMetaPrettyPrint(M, T', B) 
+      '/\ xmlEMetaPrettyPrint(M, Cond, B)) ---if T' =/= 'true.Bool 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, T : S /\ Cond, B)
+    = (xmlEMetaPrettyPrint(M, T, B) ': xmlEMetaPrettyPrint(S) 
+      '/\ xmlEMetaPrettyPrint(M, Cond, B)) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, T := T' /\ Cond, B)
+    = (xmlEMetaPrettyPrint(M, T, B) ':= xmlEMetaPrettyPrint(M, T', B) 
+      '/\ xmlEMetaPrettyPrint(M, Cond, B)) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, T => T' /\ Cond, B)
+    = (xmlEMetaPrettyPrint(M, T, B) '=> xmlEMetaPrettyPrint(M, T', B) 
+      '/\ xmlEMetaPrettyPrint(M, Cond, B)) 
+    [owise] .
+---(
+  eq xmlEMetaPrettyPrint(M, T = 'true.Bool, B) 
+    = xmlEMetaPrettyPrint(M, T, B) .
+---)
+  eq xmlEMetaPrettyPrint(M, T = T', B) 
+    = (xmlEMetaPrettyPrint(M, T, B) '= xmlEMetaPrettyPrint(M, T', B))  .
+  eq xmlEMetaPrettyPrint(M, T : S, B) 
+    = (xmlEMetaPrettyPrint(M, T, B) ': xmlEMetaPrettyPrint(S)) .
+  eq xmlEMetaPrettyPrint(M, T := T', B) 
+    = (xmlEMetaPrettyPrint(M, T, B) ':= xmlEMetaPrettyPrint(M, T', B)) .
+  eq xmlEMetaPrettyPrint(M, T => T', B) 
+    = (xmlEMetaPrettyPrint(M, T, B) '=> xmlEMetaPrettyPrint(M, T', B)) .
+
+  eq xmlEMetaPrettyPrint(M, (assoc AtS))  
+    = ('assoc xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (comm AtS))   
+    = ('comm xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (memo AtS))   
+    = ('memo xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (idem AtS))   
+    = ('idem xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (id(T) AtS))
+    = ('id: xmlEMetaPrettyPrint(M, T) xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (right-id(T) AtS))
+    = ('right 'id: xmlEMetaPrettyPrint(M, T) xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (left-id(T) AtS))
+    = ('left 'id: xmlEMetaPrettyPrint(M, T) xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (poly(NL) AtS))
+    = ('poly '`( xmlEMetaPrettyPrint(NL) '`) 
+       xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (strat(NL) AtS))
+    = ('strat '`( xmlEMetaPrettyPrint(NL) '`) 
+       xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (memo AtS))   
+    = ('memo xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (prec(I) AtS))
+    = ('prec xmlEMetaPrettyPrint(I) xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (gather(QIL) AtS))
+    = ('gather '`( QIL '`) xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (format(QIL) AtS))
+    = ('format '`( QIL '`) xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (ctor AtS))   
+    = ('ctor xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (frozen(NL) AtS)) 
+    = ('frozen '`( xmlEMetaPrettyPrint(NL) '`) 
+       xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (iter AtS))   
+    = ('iter xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (special(HkL) AtS))
+    = ('special '`( xmlEMetaPrettyPrint(M, HkL) '`) 
+       xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (config AtS))   
+    = ('config xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (object AtS))   
+    = ('object xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (msg AtS))   
+    = ('msg xmlEMetaPrettyPrint(M, AtS)) .
+
+  eq xmlEMetaPrettyPrint(M, (label(QI) AtS))
+    = ('label QI xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (metadata(St) AtS))
+    = ('metadata qid("\"" + St + "\"") 
+       xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (nonexec AtS))
+    = ('nonexec xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (owise AtS))
+    = ('owise xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (print(QIL) AtS))
+    = ('print QIL xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (pair(Str1,"") AtS))   
+    = (qid(Str1) xmlEMetaPrettyPrint(M, AtS)) .
+  eq xmlEMetaPrettyPrint(M, (pair(Str1,Str2) AtS))   
+   = xmlEMetaPrettyPrintPair(M, pair(Str1, Str2))  '\s xmlEMetaPrettyPrint(M, AtS)  [owise] .
+
+  op xmlEMetaPrettyPrintPair : Module Attr -> QidList [strat(0 1)] .
+  eq xmlEMetaPrettyPrintPair(M, pair(Str1, Str2))  
+   = xmlEMetaPrettyPrintPair(M, Str1, Str2) . 
+
+  op xmlEMetaPrettyPrintPair : Module String String -> QidList .
+  eq xmlEMetaPrettyPrintPair(M, Str1, "")  
+   = qid(Str1) .
+  eq xmlEMetaPrettyPrintPair(M, Str1, Str2)  
+   = qid(Str1) '`( tokenize(Str2) '`) [owise] .
+
+  eq xmlEMetaPrettyPrint(M, (karity(N) AtS)) 
+    = xmlEMetaPrettyPrint(M, metaPair("arity",string(N,10)) AtS) .
+  
+  eq xmlEMetaPrettyPrint(M, kstrict(NL,QI) AtS) = xmlEMetaPrettyPrintPair(M, pair(string(QI) + "-strict", IntList2String(NL))) '\s  xmlEMetaPrettyPrint(M, AtS) .  
+  eq xmlEMetaPrettyPrint(M, seqkstrict(NL,QI) AtS) = xmlEMetaPrettyPrintPair(M, metaPair(string(QI) + "-seqstrict", IntList2String(NL))) '\s xmlEMetaPrettyPrint(M, AtS) .  
+  eq xmlEMetaPrettyPrint(M, klocation(Str) AtS) = (xmlEMetaPrettyPrintPair(M, pair("location", Str)) '\s  xmlEMetaPrettyPrint(M, AtS)) .
+
+
+  eq xmlEMetaPrettyPrint(M, (none).AttrSet) = nil .
+
+  ceq xmlEMetaPrettyPrint(M, (Hk HkL)) 
+    = (xmlEMetaPrettyPrint(M, Hk) xmlEMetaPrettyPrint(M, HkL)) 
+    if HkL =/= nil .
+  eq xmlEMetaPrettyPrint(M, id-hook(QI, nil)) = ('id-hook QI) .
+  eq xmlEMetaPrettyPrint(M, id-hook(QI, QIL))
+    = ('id-hook QI '`( QIL '`) ) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, op-hook(QI, QI', nil, QI''))
+    = ('op-hook QI '`( QI' ': '~> QI'' '`) ) .
+  eq xmlEMetaPrettyPrint(M, op-hook(QI, QI', QIL, QI''))
+    = ('op-hook QI '`( QI' ': QIL '~> QI'' '`) ) 
+    [owise] .
+  eq xmlEMetaPrettyPrint(M, term-hook(QI, T))
+    = ('term-hook QI '`( xmlEMetaPrettyPrint(M, T) '`) ) .
+
+  eq xmlEMetaPrettyPrint((I NL)) = (qid(string(I, 10)) xmlEMetaPrettyPrint(NL)) .
+  eq xmlEMetaPrettyPrint((nil).NatList) = nil .
+
+endfm
+
+fmod XML-MODULE-META-PRETTY-PRINT is
+  pr META-LEVEL .
+  ---pr RENAMING-EXPR-EVALUATION .
+  pr XML-DECL-META-PRETTY-PRINT .
+  pr XML-MOD-NAME-TO-QID .
+
+  op xmlEMetaPrettyPrint : Module Module -> QidList .
+
+  op xmlEMetaPrettyPrint : Module Module -> QidList .
+  op xmlEMetaPrettyPrint : Header -> QidList .
+  op xmlEMetaPrettyPrint : ParameterDeclList -> QidList .
+  op xmlEMetaPrettyPrint : ImportList -> QidList .
+
+  var  M : Module .
+  vars QI F F' L L' : Qid .
+  var  QIL : QidList .
+  var  ME : ModuleExpression .
+  vars S S' : Sort .
+  var  Ty : Type .
+  var  TyL : TypeList .
+  var  SS : SortSet .
+  var  PD : ParameterDecl .
+  var  PDL : ParameterDeclList .
+  vars IL IL' : ImportList .
+  var  SSDS : SubsortDeclSet .
+  var  OPDS : OpDeclSet .
+  var  MAS : MembAxSet .
+  var  EqS : EquationSet .
+  var  RlS : RuleSet .
+  var  U : Module .
+  var  AtS : AttrSet .
+---  var  MN : ModuleName .
+
+  ceq xmlEMetaPrettyPrint(ME) 
+    = if QI == '`) or QI == '`] or QI == '`} 
+      then QIL QI 
+      else QIL QI 
+      fi
+    if QIL QI := xmlHeader2QidList(ME) .
+
+---  eq xmlEMetaPrettyPrint(W:[Module], unitError(QIL)) = QIL .
+---  eq xmlEMetaPrettyPrint(unitError(QIL), noModule) = QIL .
+---  eq xmlEMetaPrettyPrint(noModule, noModule) = nil .
+  eq xmlEMetaPrettyPrint(M, mod ME is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
+    = ('\n '---K-MAUDE-GENERATED-OUTPUT-BEGIN--- '\n          
+       'module xmlEMetaPrettyPrint(ME)
+          xmlEMetaPrettyPrint(IL) 
+           nil
+          xmlEMetaPrettyPrint(SSDS) 
+          xmlEMetaPrettyPrint(M, OPDS)
+          xmlEMetaPrettyPrint(M, MAS) 
+        'end 'module '\n '---K-MAUDE-GENERATED-OUTPUT-END----- '\n) .
+  eq xmlEMetaPrettyPrint(M, mod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
+    = ( 
+       'mod xmlEMetaPrettyPrint(ME) (if PDL == nil 
+                                      then nil
+                                      else '`{ xmlEMetaPrettyPrint(PDL) '`} 
+                                      fi) 'is 
+          xmlEMetaPrettyPrint(IL) 
+          (if SS == none
+           then nil
+           else ( 'sorts xmlEMetaPrettyPrint(SS) '. )
+           fi) 
+          xmlEMetaPrettyPrint(SSDS) 
+          xmlEMetaPrettyPrint(M, OPDS) 
+          xmlEMetaPrettyPrint(M, MAS) 
+          xmlEMetaPrettyPrint(M, EqS) 
+          xmlEMetaPrettyPrint(M, RlS) 
+        'endm '\n) .
+---(
+  eq xmlEMetaPrettyPrint(M, th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth)
+    = ( 
+       'th xmlEMetaPrettyPrint(MN) 'is 
+          xmlEMetaPrettyPrint(IL) 
+          (if SS == none
+           then nil
+           else ( 'sorts xmlEMetaPrettyPrint(SS) '. )
+           fi) 
+          xmlEMetaPrettyPrint(SSDS) 
+          xmlEMetaPrettyPrint(M, OPDS)
+          xmlEMetaPrettyPrint(M, MAS) 
+          xmlEMetaPrettyPrint(M, EqS) 
+          xmlEMetaPrettyPrint(M, RlS) 
+        'endth '\n) .
+---)
+  eq xmlEMetaPrettyPrint(M, fmod ME is IL sorts SS . SSDS OPDS MAS EqS endfm)
+    = ( 
+       'fmod xmlEMetaPrettyPrint(ME) 'is 
+           xmlEMetaPrettyPrint(IL) 
+           (if SS == none
+            then nil
+            else ( 'sorts xmlEMetaPrettyPrint(SS) '. )
+            fi)  
+           xmlEMetaPrettyPrint(SSDS) 
+           xmlEMetaPrettyPrint(M, OPDS)
+           xmlEMetaPrettyPrint(M, MAS) 
+           xmlEMetaPrettyPrint(M, EqS) 
+        'endfm '\n) .
+  eq xmlEMetaPrettyPrint(M, fmod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS endfm)
+    = ( 
+       'fmod xmlEMetaPrettyPrint(ME) (if PDL == nil 
+                                       then nil
+                                       else '`{ xmlEMetaPrettyPrint(PDL) '`} 
+                                       fi) 'is 
+           xmlEMetaPrettyPrint(IL) 
+           (if SS == none
+            then nil
+            else ( 'sorts xmlEMetaPrettyPrint(SS) '. )
+            fi)  
+           xmlEMetaPrettyPrint(SSDS)          
+           xmlEMetaPrettyPrint(M, OPDS)
+           xmlEMetaPrettyPrint(M, MAS)          
+           xmlEMetaPrettyPrint(M, EqS) 
+        'endfm '\n) .
+---(
+  eq xmlEMetaPrettyPrint(M, fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth)
+    = ( 
+       'fth xmlEMetaPrettyPrint(MN) 'is 
+          xmlEMetaPrettyPrint(IL)
+          (if SS == none
+           then nil
+           else ( 'sorts xmlEMetaPrettyPrint(SS) '. )
+           fi)  
+          xmlEMetaPrettyPrint(SSDS) 
+          xmlEMetaPrettyPrint(M, OPDS)
+          xmlEMetaPrettyPrint(M, MAS) 
+          xmlEMetaPrettyPrint(M, EqS) 
+        'endfth '\n) .
+---)
+
+  eq xmlEMetaPrettyPrint((including ME .) IL)
+    = ( 'imports xmlEMetaPrettyPrint(ME)  '\n
+       xmlEMetaPrettyPrint(IL)) .
+  eq xmlEMetaPrettyPrint((extending ME .) IL)
+    = ( 'extending xmlEMetaPrettyPrint(ME) '.  '\n
+       xmlEMetaPrettyPrint(IL)) .
+  eq xmlEMetaPrettyPrint((protecting ME .) IL)
+    = ( 
+       'protecting xmlEMetaPrettyPrint(ME) '. '\n xmlEMetaPrettyPrint(IL)) .
+  eq xmlEMetaPrettyPrint((nil).ImportList) = nil .
+
+  eq xmlEMetaPrettyPrint((QI :: ME, PDL))
+    = (QI '::  xmlEMetaPrettyPrint(ME) '`, xmlEMetaPrettyPrint(PDL))
+    [owise] .
+  eq xmlEMetaPrettyPrint((QI :: ME)) = (QI '::  xmlEMetaPrettyPrint(ME)) .
+  eq xmlEMetaPrettyPrint((nil).ParameterDeclList) = (nil).QidList .
+
+  op xmlEMetaPrettyPrint : ModuleExpression -> QidList .
+  eq xmlEMetaPrettyPrint(QI + ME:ModuleExpression)
+    = QI '+ xmlEMetaPrettyPrint(ME:ModuleExpression) .
+
+endfm
+
+
