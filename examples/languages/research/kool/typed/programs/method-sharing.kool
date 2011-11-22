@@ -18,7 +18,7 @@ class B {
     m();
     print(a.c, " ");
   }
-  method getM() : (function from to void) {
+  method getM() : function from to void {
     return m;
   }
 }
@@ -27,7 +27,7 @@ class main {
   var f : (function from to void);
   method main() {
     var b : class B = new B();
-    var t : (function from to void) = f = b.getM();
+    var t : function from to void = f = b.getM();
     f();
     print(b.a.c, " ");
     t();
