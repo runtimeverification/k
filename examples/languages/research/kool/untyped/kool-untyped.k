@@ -114,7 +114,7 @@ can change as methods of the current object are invoked );
 each layer corresponding to one class in the objects' instance class
 hierarchy; \textsf{location}, which is optional, holds the location in
 the store where the current object is or has to be located (this is
-useful both for methodClosures and for the semantics of object creation).
+useful both for method closures and for the semantics of object creation).
 The cell \textsf{classes} holds all the declared classes, each class
 being held in its own \textsf{class} cell which contains a name
 (\textsf{className}), a parent (\textsf{extends}), and the actual
@@ -355,7 +355,7 @@ its parent's object environment. */
 
 /*@ \subsection{Object and method closures}
 We need to add two more values to the language, namely objects and
-method methodClosures.  An object value consists of an \texttt{objectClosure}-wrapped
+method closures.  An object value consists of an \texttt{objectClosure}-wrapped
 bag containing the current class of the object and the environment
 stack of the object; the current class of an object will always be one
 of the classes mapped to an environment in the environment stack of
@@ -406,13 +406,13 @@ Like in SIMPLE, method names are added to the environment and bound
 to their code.  However, unlike in SIMPLE where each method was
 executed in the same environment, namely the program global
 environment, a method in KOOL needs to be executed into its object's
-environment.  Thus, methods evaluate to methodClosures, which encapsulate
+environment.  Thus, methods evaluate to closures, which encapsulate
 their object's context (i.e., the current class and environment stack
 of the object) in addition to method's parameters and body.
-This approach to bind method names to method methodClosures in the
+This approach to bind method names to method closures in the
 environment will also allow objects to pass their methods to other
 objects, to dynamically change their methods by assigning them other
-method methodClosures, and even to allow all these to be done from other
+method closures, and even to allow all these to be done from other
 objects.  This gives the KOOL programmer a lot of power; one should
 use this power wisely, though, because programs can become easily
 hard to understand and reason about if one overuses these features. */
@@ -440,7 +440,7 @@ a location in the store where the created object will be eventually
 stored (this is what the ``\texttt{storeObj}'' task after the object
 creation task in the rule below will do---its rule is defined
 shortly).  The location where the object will be stored is also made
-available in the \textsf{crntObj} cell, so that method methodClosures can
+available in the \textsf{crntObj} cell, so that method closures can
 refer to it (see rule above). */
 
   rule <k> new Class(Vs) ~> K 
@@ -495,7 +495,7 @@ ready for the next layer by clearing the environment (note that
 Note that the location reserved by \texttt{new} was temporarily stored
 in the \textsf{crntObj} cell precisely for this purpose.  Now that the
 newly created object is stored at its location and that all method
-methodClosures are aware of it, the location is unnecessary and thus we
+closures are aware of it, the location is unnecessary and thus we
 delete it from the \textsf{crntObj} cell. */
 
   syntax K ::= storeObj
@@ -560,7 +560,7 @@ access (the third rule below), we look it up starting with the
 instance class of the corresponding object.  This ensures dynamic
 dispatch for methods; it actually dynamically dispatches field
 accesses, too, which is correct in KOOL, because one can assign method
-methodClosures to fields and the field appeared in a method invocation
+closures to fields and the field appeared in a method invocation
 context.  The last context declaration below says that method
 applications or array accesses are also allowed as first argument to
 applications; that is because methods are allowed to return methods
