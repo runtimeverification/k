@@ -246,7 +246,7 @@ sub gen_prod
 #    print "PROD: $production\n";
     
     while ($production =~ /($keys)/sg) { $pkeys_no ++; push(@prods, $1); }    
-#    print "PKEYS: $pkeys_no\n";
+#    print "PROD: $production\nPKEYS: $pkeys_no\n\n";
 
     my @generated = ();
     if ($pkeys_no > 0)
@@ -453,7 +453,12 @@ sub generation
 	$left  =~ s/`//sg;
 	$right =~ s/`//sg;
 	
+#	print "SET: @$set\nP_KEYS: $pkeys_no\n";
 #	print "syntax $main_sort ::= $temp_prod [metadata \"parser=() generated=()\" $prec]\n";
+	if ($temp_prod !~ /($ksort)/sg)
+	{
+	    $prec = "";
+	}
 	$out .= "\tsyntax $main_sort ::= $temp_prod [metadata \"parser=() generated=()\" $prec]\n";
 	$out .= "\tmacro ($left) = ($right) [metadata \"parser=() generated=()\"]\n\n";
     }
