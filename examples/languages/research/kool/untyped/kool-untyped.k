@@ -114,7 +114,7 @@ can change as methods of the current object are invoked );
 each layer corresponding to one class in the objects' instance class
 hierarchy; \textsf{location}, which is optional, holds the location in
 the store where the current object is or has to be located (this is
-useful both for closures and for the semantics of object creation).
+useful both for methodClosures and for the semantics of object creation).
 The cell \textsf{classes} holds all the declared classes, each class
 being held in its own \textsf{class} cell which contains a name
 (\textsf{className}), a parent (\textsf{extends}), and the actual
@@ -353,21 +353,21 @@ its parent's object environment. */
 
 //@ We next define the semantics of the additional KOOL features.
 
-/*@ \subsection{Additional values}
+/*@ \subsection{Object and method closures}
 We need to add two more values to the language, namely objects and
-method closures.  An object value consists of an \texttt{obj}-wrapped
+method methodClosures.  An object value consists of an \texttt{objectClosure}-wrapped
 bag containing the current class of the object and the environment
 stack of the object; the current class of an object will always be one
 of the classes mapped to an environment in the environment stack of
-the object.  A method closure encapsulates the method's parameters and
+the object.  A method methodClosure encapsulates the method's parameters and
 code, as well as the ``object context'' in which the method code
 should execute.  This object context includes the current class of the
-object (the first argument of \texttt{closure}) and the object
+object (the first argument of \texttt{methodClosure}) and the object
 environment stack (located in the object stored at the location
-specified as the second argument of \texttt{closure}). */
+specified as the second argument of \texttt{methodClosure}). */
 
-  syntax Val ::= "objRef" "(" Bag ")"
-               | "closure" "(" #Id "," #Nat "," Ids "," Stmt ")"
+  syntax Val ::= "objectClosure" "(" Bag ")"
+               | "methodClosure" "(" #Id "," #Nat "," Ids "," Stmt ")"
 
 /*@ \subsection{Class declaration}
 Initially, the classes forming the program are moved into their
@@ -406,13 +406,13 @@ Like in SIMPLE, method names are added to the environment and bound
 to their code.  However, unlike in SIMPLE where each method was
 executed in the same environment, namely the program global
 environment, a method in KOOL needs to be executed into its object's
-environment.  Thus, methods evaluate to closures, which encapsulate
+environment.  Thus, methods evaluate to methodClosures, which encapsulate
 their object's context (i.e., the current class and environment stack
 of the object) in addition to method's parameters and body.
-This approach to bind method names to method closures in the
+This approach to bind method names to method methodClosures in the
 environment will also allow objects to pass their methods to other
 objects, to dynamically change their methods by assigning them other
-method closures, and even to allow all these to be done from other
+method methodClosures, and even to allow all these to be done from other
 objects.  This gives the KOOL programmer a lot of power; one should
 use this power wisely, though, because programs can become easily
 hard to understand and reason about if one overuses these features. */
@@ -421,7 +421,7 @@ hard to understand and reason about if one overuses these features. */
        <crntClass> Class:#Id </crntClass>
        <location> OL:#Nat </location>
        <env> Env => Env[L/F] </env>
-       <store>... . => L|->closure(Class,OL,Xs,S) ...</store>
+       <store>... . => L|->methodClosure(Class,OL,Xs,S) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
 /*@ \subsection{New}
@@ -440,7 +440,7 @@ a location in the store where the created object will be eventually
 stored (this is what the ``\texttt{storeObj}'' task after the object
 creation task in the rule below will do---its rule is defined
 shortly).  The location where the object will be stored is also made
-available in the \textsf{crntObj} cell, so that method closures can
+available in the \textsf{crntObj} cell, so that method methodClosures can
 refer to it (see rule above). */
 
   rule <k> new Class(Vs) ~> K 
@@ -474,7 +474,7 @@ members (both fields and methods) of that class. */
 
 /*@ Set the current class of the current object.  This is necessary to
 be done at each layer, because the current class of the object is
-enclosed as part of the method closure values (see the semantics of
+enclosed as part of the method methodClosure values (see the semantics of
 method declarations above). */
 
   syntax K ::= "setCrntClass" "(" #Id ")" 
@@ -495,20 +495,20 @@ ready for the next layer by clearing the environment (note that
 Note that the location reserved by \texttt{new} was temporarily stored
 in the \textsf{crntObj} cell precisely for this purpose.  Now that the
 newly created object is stored at its location and that all method
-closures are aware of it, the location is unnecessary and thus we
+methodClosures are aware of it, the location is unnecessary and thus we
 delete it from the \textsf{crntObj} cell. */
 
   syntax K ::= storeObj
   rule <k> storeObj => . ...</k>
        <crntObj> Obj (<location> L </location> => .) </crntObj>
-       <store>... . => L |-> objRef(Obj) ...</store>
+       <store>... . => L |-> objectClosure(Obj) ...</store>
 
 
 /*@ \subsection{Self reference}
 The semantics of \texttt{this} is straightforward: evaluate to the
 current object. */
 
-  rule <k> this => objRef(Obj) ...</k>  
+  rule <k> this => objectClosure(Obj) ...</k>  
        <crntObj> Obj </crntObj>
 
 
@@ -537,7 +537,7 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     if notBool(X in keys(Env))
 
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
-  rule <k> _._(objRef(<crntClass> Class </crntClass>
+  rule <k> _._(objectClosure(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X)
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
        ...</k>
@@ -560,7 +560,7 @@ access (the third rule below), we look it up starting with the
 instance class of the corresponding object.  This ensures dynamic
 dispatch for methods; it actually dynamically dispatches field
 accesses, too, which is correct in KOOL, because one can assign method
-closures to fields and the field appeared in a method invocation
+methodClosures to fields and the field appeared in a method invocation
 context.  The last context declaration below says that method
 applications or array accesses are also allowed as first argument to
 applications; that is because methods are allowed to return methods
@@ -585,7 +585,7 @@ method call or the array access.  */
 
   context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
 
-  rule <k> '_`(_`)(('_._(objRef(Obj <envStack> EStack </envStack>),,X) 
+  rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
 
   rule <k> '_`(_`)(('_._(super,,X) 
@@ -599,9 +599,9 @@ method call or the array access.  */
 
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
 instead of the method.  When that happens, just lookup the method
-closure value at location \texttt{L}.  The semantics of closure
+methodClosure value at location \texttt{L}.  The semantics of methodClosure
 application is then as expected: the local environment and control are
-stacked, then we switch to closure's class and object environment and
+stacked, then we switch to methodClosure's class and object environment and
 execute the method body.  The \texttt{bindto} construct is the one
 that came with the semantics of SIMPLE that we borrowed (see above).  */
 
@@ -609,14 +609,15 @@ that came with the semantics of SIMPLE that we borrowed (see above).  */
        <store>... L |-> V ...</store>
 
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
-  rule <k> _`(_`)(closure(Class,OL:#Nat,Xs:Ids,S:Stmt), Vs:Vals) ~> K:K
+  rule <k> _`(_`)(methodClosure(Class,OL:#Nat,Xs:Ids,S:Stmt), Vs:Vals) ~> K:K
         => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> C:Bag
           <fstack> . => (Env,K,C <crntObj> Obj' </crntObj>) ...</fstack>
           <crntObj> Obj':Bag => <crntClass>Class</crntClass> Obj </crntObj>
         </control>
        <env> Env => . </env>
-       <store>...OL |-> objRef(<crntClass>_:#Id</crntClass>Obj:Bag)...</store>
+       <store>... OL |-> objectClosure(<crntClass>_:#Id</crntClass>Obj:Bag) 
+       ...</store>
 
 
 /*@ \subsection{Instance Of}
@@ -624,12 +625,12 @@ Searches the object environment for a layer corresponding to the
 desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it never gets stuck.  */
 
-  rule objRef((_ <envStack>ListItem(Class::_)...</envStack>)) instanceOf Class
-    => true
-  rule objRef((_ <envStack> ListItem(Class1::_)
+  rule objectClosure((_ <envStack>ListItem(Class::_)...</envStack>)) 
+        instanceOf Class => true
+  rule objectClosure((_ <envStack> ListItem(Class1::_)
                       => . ...</envStack>)) instanceOf Class2 
     if Class1 =/=Bool Class2
-  rule objRef((_ <envStack> .List </envStack>)) instanceOf Class
+  rule objectClosure((_ <envStack> .List </envStack>)) instanceOf Class
     => false
  
 /*@ \subsection{Cast}
@@ -641,8 +642,8 @@ available.  Moreover, the execution may complete successfully even
 in the presence of invalid casts, provided that each accessed member
 during the current execution is, or happens to be, available.  */
 
-  rule <k> cast objRef((<crntClass> _:K </crntClass> Obj)) to Class
-        => objRef(<crntClass> Class </crntClass> Obj) ...</k>
+  rule <k> cast objectClosure((<crntClass> _:K </crntClass> Obj)) to Class
+        => objectClosure(<crntClass> Class </crntClass> Obj) ...</k>
 
 /*@ \subsection{Objects as lvalues}
 The current machinery borrowed with the semantics of SIMPLE allows us
@@ -658,7 +659,7 @@ member's location based on the current class of the object. */
     if notBool(X in keys(Env))
 
   context lvalue(_._([HOLE],_))
-  rule <k> lvalue(_._(objRef(<crntClass> Class </crntClass> 
+  rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
                           <envStack>...
                             ListItem(Class :: EnvC) EStack
                           </envStack>), X)
