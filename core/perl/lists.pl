@@ -207,7 +207,7 @@ sub solve_lists
 	    
 	    # get all possible solutions
 	    my $productions_gen = macrofy(gen_prod($keys, $production, $main_sort));
-#	    print "PROD: $production\nGEN:$productions_gen\n\n";
+	    # print "PROD: $production\nGEN:$productions_gen\n\n";
 	    
 	    $gen .= "$productions_gen\n";
        	}
@@ -235,8 +235,17 @@ sub gen_prod
 
     my $pkeys_no = 0;
     my @prods = ();
-    while ($production =~ /($keys)/sg) { $pkeys_no ++; push(@prods, $1); }
+
+    # Extract prec if any and remove attributes
+    my $prec = "";
+    if ($production =~ /prec\s*\(\s*([0-9]+)\s*\)/s)
+    {
+	$prec = " $1";
+#	print "Got: $1\n";
+    }
+#    print "PROD: $production\n";
     
+    while ($production =~ /($keys)/sg) { $pkeys_no ++; push(@prods, $1); }    
 #    print "PKEYS: $pkeys_no\n";
 
     my @generated = ();
@@ -245,7 +254,7 @@ sub gen_prod
 	if ($pkeys_no == 1)
 	{
 	    my @set = (); push(@set, 0);
-	    push(@generated, generation($production, $main_sort, $pkeys_no, \@prods, \@set));
+	    push(@generated, generation($production, $main_sort, $pkeys_no, \@prods, \@set, $prec));
 	}
 	else
 	{
@@ -265,7 +274,7 @@ sub gen_prod
 			    push(@set, $j);
 			}
 		    }
-		    push(@generated, generation($production, $main_sort, $pkeys_no, \@tmp, \@set));
+		    push(@generated, generation($production, $main_sort, $pkeys_no, \@tmp, \@set, $prec));
 		}		
 	    }
 	}
@@ -273,6 +282,7 @@ sub gen_prod
 	my $tmp = $production;
 	
 	$tmp =~ s/\[\s*?metadata.*?\]\s*$//sg;
+
 	my $pkeys = join("|", @prods);
 	    
 	if ($tmp !~ /^\s*($ksort)\s*$/s && "@prods" !~ /^\s*$/)
@@ -317,7 +327,8 @@ sub gen_prod
 	    
 #	    print "Prod: $production\nPKEYS: $pkeys\nPRODS: @prods\nTMP: $tmp\n";
 #	    print "macro ($left) = ($right) [metadata \"generated=() parser=()\"]\n";
-	    push(@generated, "macro ($left) = ($right) [metadata \"generated=() parser=()\"]");
+	    my $parser_attr = "[metadata \"generated=() parser=()\"]";
+	    push(@generated, "macro ($left) = ($right) $parser_attr");
 	    }
 	}
     }
@@ -346,6 +357,9 @@ sub generation
     my $pkeys_no = shift;
     my $array = shift;
     my $set = shift;
+    my $prec = shift;
+
+    $prec = "prec $prec" if (defined $prec && $prec ne "");
     
     my @array = @$array;
     my $out = "";
@@ -439,7 +453,8 @@ sub generation
 	$left  =~ s/`//sg;
 	$right =~ s/`//sg;
 	
-	$out .= "\tsyntax $main_sort ::= $temp_prod [metadata \"parser=() generated=()\"]\n";
+#	print "syntax $main_sort ::= $temp_prod [metadata \"parser=() generated=()\" $prec]\n";
+	$out .= "\tsyntax $main_sort ::= $temp_prod [metadata \"parser=() generated=()\" $prec]\n";
 	$out .= "\tmacro ($left) = ($right) [metadata \"parser=() generated=()\"]\n\n";
     }
     
