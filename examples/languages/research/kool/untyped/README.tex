@@ -17,18 +17,19 @@ ignoring several intricate aspects of types in the
 presence of objects.  A program consists of a set of class declarations.
 Each class can extend at most one other class (KOOL is single-inheritance).
 A class can declare a set of fields and a set of methods, all public and
-called the class' members.
+called the class' \textit{members}.
 Specifically, KOOL includes the following features:
 \begin{itemize}
 \item Class declarations, where a class may or may not extend another class.
 In case a class does not explicitly extend another class, then it is assumed
 that it extends the default top-most and empty (i.e., no members)
 class called \texttt{object}.  Each class is required to declare precisely one
-homonymous method, called its constructor.  Each valid program should contain
-one class called \texttt{main}, whose constructor, \texttt{main()}, takes no
-arguments.  The execution of a program consists of creating an object instance
-of class \texttt{main} and invoking the constructor \texttt{main()} on it,
-that is, of executing ``\texttt{new main();}''.
+homonymous method, called its \textit{constructor}.  Each valid
+program should contain one class named \texttt{main}, whose
+constructor, \texttt{main()}, takes no arguments.  The execution of a
+program consists of creating an object instance of class \texttt{main}
+and invoking the constructor \texttt{main()} on it, that is, of
+executing ``\texttt{new main();}''.
 \item All features of SIMPLE (see
 {\footnotesize\texttt{examples/languages/research/simple/untyped}}),
 that is, multidimensional arrays, function (here called ``method'')
@@ -72,7 +73,7 @@ class of the object is a subclass of \texttt{C}.  In untyped KOOL we
 do not want to perform this check because we want to allow the
 programmer maximum of flexibility: if one always accesses only
 available members, then the program can execute successfully despite
-the wrong cast.
+the potentially unsafe cast.
 \end{itemize}
 
 There are some specific aspects of KOOL that need to be discussed.
@@ -103,7 +104,7 @@ to lookup the member \texttt{x} when we write \texttt{e.x} and
 depending on whether \texttt{e.x} occurs in a method invocation
 context (i.e., \texttt{e.x(...)}) or in a field context.  KOOL has
 dynamic method dispatch, so if \texttt{e.x} is invoked as a method
-then \texttt{x} will be searched starting with the instance class of
+then \texttt{x} will be searched for starting with the instance class of
 the object value to which \texttt{e} evaluates.  If \texttt{e.x}
 occurs in a non-method-invocation context then \texttt{x} will be
 treated as a field (although it may hold a method closure due to the

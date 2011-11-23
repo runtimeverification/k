@@ -100,14 +100,17 @@ module KOOL-UNTYPED
 
 /*@ \section{Semantics}
 We first discuss the new configuration of KOOL, which extends that of
-SIMPLE, then we include the semantics of the constructs borrowed from
-SIMPLE, and then we discuss the semantics of the additional KOOL
-constructs. */
+SIMPLE.  Then we include the semantics of the constructs borrowed from
+SIMPLE unchanged; we refrain from discussing those, because they were
+already discussed in the \K definition of SIMPLE.  Then we discuss
+changes to SIMPLE's semantics, more precisely a slight extension to
+the semantics of \texttt{spawn}.  Finally, we discuss in detail the
+semantics of the additional KOOL constructs. */
 
 /*@ \subsection{Configuration}
 KOOL adds two nested cells to the configuration of SIMPLE.
 The cell \textsf{crntObj} holds data pertaining to the current object,
-that is, the object environment in which the code currently in cell
+that is, the object environment in which the code in cell
 \textsf{k} executes: \textsf{crntClass} holds the current class (which
 can change as methods of the current object are invoked );
 \textsf{envStack} holds the stack of environments as a list,
@@ -157,7 +160,7 @@ member declarations (\textsf{declarations}). */
                   </classes>
                 </T>
 
-/*@ \subsection{Semantics from SIMPLE}
+/*@ \subsection{Unchanged Semantics from SIMPLE}
 The semantics below is taken over from SIMPLE unchanged.
 The semantics of function declaration and invocation, including the
 use of the special \texttt{lambda} abstraction value, needs to change
@@ -173,8 +176,8 @@ spawned thread (in addition to its local environment, like in SIMPLE).
 This is needed in order to be able to spawn method invokations under
 dynamic method dispatch; for example, ``\texttt{spawn run();}'' will
 need to look up the method \texttt{run()} in the newly created thread,
-operation which will most likely fail unless the child thread shares
-the same object environment as the parent thread.  Note that the
+operation which will most likely fail unless the child thread sees
+the object environment of the parent thread.  Note that the
 \texttt{spawn} statement of KOOL is more permissive than the threads
 of Java.  In fact, the latter can be implemented in terms of
 \texttt{spawn}---see the program \texttt{threads.kool} for a sketch.  */
@@ -354,17 +357,18 @@ its parent's object environment. */
 //@ We next define the semantics of the additional KOOL features.
 
 /*@ \subsection{Object and method closures}
-We need to add two more values to the language, namely objects and
-method closures.  An object value consists of an \texttt{objectClosure}-wrapped
-bag containing the current class of the object and the environment
-stack of the object; the current class of an object will always be one
-of the classes mapped to an environment in the environment stack of
-the object.  A method methodClosure encapsulates the method's parameters and
-code, as well as the ``object context'' in which the method code
-should execute.  This object context includes the current class of the
-object (the first argument of \texttt{methodClosure}) and the object
-environment stack (located in the object stored at the location
-specified as the second argument of \texttt{methodClosure}). */
+We need to add two more values to the language, namely object and
+method closures.  An object value consists of an
+\texttt{objectClosure}-wrapped bag containing the current class of the
+object and the environment stack of the object.  The current class of
+an object will always be one of the classes mapped to an environment
+in the environment stack of the object.  A method closure encapsulates
+the method's parameters and code, as well as the object context in
+which the method code should execute.  This object context includes
+the current class of the object (the first argument of
+\texttt{methodClosure}) and the object environment stack (located in
+the object stored at the location specified as the second argument of
+\texttt{methodClosure}). */
 
   syntax Val ::= "objectClosure" "(" Bag ")"
                | "methodClosure" "(" #Id "," #Nat "," Ids "," Stmt ")"
@@ -472,18 +476,19 @@ members (both fields and methods) of that class. */
        <declarations> Ss </declarations>
   rule <k> create(object) => . ...</k>
 
-/*@ Set the current class of the current object.  This is necessary to
-be done at each layer, because the current class of the object is
-enclosed as part of the method methodClosure values (see the semantics of
-method declarations above). */
+/*@ The next operation sets the current class of the current object.
+This is necessary to be done at each layer, because the current class
+of the object is enclosed as part of the method closures
+(see the semantics of method declarations above). */
 
   syntax K ::= "setCrntClass" "(" #Id ")" 
   rule <k> setCrntClass(Class) => . ...</k>
        <crntClass> _ => Class </crntClass>
 
-/*@ Add a new tagged environment layer to the current object and get
-ready for the next layer by clearing the environment (note that
-\texttt{create} expects the environment to be empty). */
+/*@ The next operation adds a new tagged environment layer to the
+current object and gets ready for the next layer by clearing the
+environment (note that \texttt{create} expects the environment to be
+empty). */
 
   syntax K ::= "addEnvLayer"
   rule <k> addEnvLayer => . ...</k>
@@ -491,12 +496,13 @@ ready for the next layer by clearing the environment (note that
        <crntClass> Class </crntClass>
        <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack> 
 
-/*@ Store the created object at the location reserved by \texttt{new}.
-Note that the location reserved by \texttt{new} was temporarily stored
-in the \textsf{crntObj} cell precisely for this purpose.  Now that the
-newly created object is stored at its location and that all method
-closures are aware of it, the location is unnecessary and thus we
-delete it from the \textsf{crntObj} cell. */
+/*@ The following operation stores the created object at the location
+reserved by \texttt{new}.  Note that the location reserved by
+\texttt{new} was temporarily stored in the \textsf{crntObj} cell
+precisely for this purpose.  Now that the newly created object is
+stored at its location and that all method closures are aware of it,
+the location is unnecessary and thus we delete it from the
+\textsf{crntObj} cell. */
 
   syntax K ::= storeObj
   rule <k> storeObj => . ...</k>
@@ -598,12 +604,13 @@ method call or the array access.  */
           getKLabel `[HOLE`]:K ==Bool '_`[_`]
 
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
-instead of the method.  When that happens, just lookup the method
-methodClosure value at location \texttt{L}.  The semantics of methodClosure
-application is then as expected: the local environment and control are
-stacked, then we switch to methodClosure's class and object environment and
-execute the method body.  The \texttt{bindto} construct is the one
-that came with the semantics of SIMPLE that we borrowed (see above).  */
+task as a replacement for the method.  When that happens, we just
+lookup the method closure at location \texttt{L}.  The semantics
+of \texttt{methodClosure} is then as expected: the local environment
+and control are stacked, then we switch to method closure's class and
+object environment and execute the method body.  The \texttt{bindto}
+construct is the one that came with the semantics of SIMPLE that we
+borrowed (see above).  */
 
   rule <k> '_`(_`)((lookup(L) => V),,_) ...</k>
        <store>... L |-> V ...</store>
@@ -625,12 +632,12 @@ Searches the object environment for a layer corresponding to the
 desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it never gets stuck.  */
 
-  rule objectClosure((_ <envStack>ListItem(Class::_)...</envStack>)) 
+  rule objectClosure(_ <envStack>ListItem(Class::_)...</envStack>)
         instanceOf Class => true
-  rule objectClosure((_ <envStack> ListItem(Class1::_)
-                      => . ...</envStack>)) instanceOf Class2 
+  rule objectClosure(_ <envStack> ListItem(Class1::_)
+                      => . ...</envStack>) instanceOf Class2 
     if Class1 =/=Bool Class2
-  rule objectClosure((_ <envStack> .List </envStack>)) instanceOf Class
+  rule objectClosure(_ <envStack> .List </envStack>) instanceOf Class
     => false
  
 /*@ \subsection{Cast}
@@ -642,7 +649,7 @@ available.  Moreover, the execution may complete successfully even
 in the presence of invalid casts, provided that each accessed member
 during the current execution is, or happens to be, available.  */
 
-  rule <k> cast objectClosure((<crntClass> _:K </crntClass> Obj)) to Class
+  rule <k> cast objectClosure(<crntClass> _:K </crntClass> Obj) to Class
         => objectClosure(<crntClass> Class </crntClass> Obj) ...</k>
 
 /*@ \subsection{Objects as lvalues}
