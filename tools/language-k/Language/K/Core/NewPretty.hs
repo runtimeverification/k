@@ -62,8 +62,17 @@ zipSyntax (Hole : xs) (k : ks)
     | otherwise = ppK k : zipSyntax xs ks
 zipSyntax _ _ = []
 
-needsParens (KApp (KLabel [Syntax _, Hole]) _) = True
-needsParens _ = False
+--needsParens (KApp (KLabel [Syntax _, Hole]) _) = True
+needsParens (KApp (KLabel [Syntax _, Hole, Syntax s]) _)
+    | s == ")" || s == "}" || s == "]" = False
+needsParens (KApp kl []) = not (isBuiltin kl)
+needsParens _ = True
+
+isBuiltin (KInt _) = True
+isBuiltin (KString _) = True
+isBuiltin (KBool _) = True
+isBuiltin (KId _) = True
+isBuiltin _ = False
 
 ppKLabel (KInt i) = integer i
 ppKLabel (KId id) = text id
