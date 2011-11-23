@@ -572,6 +572,8 @@ my $output_latex_file = "";
 my $topmatter = "";
 my $unquote = 0;
 my $xml = 0;
+my $pxml = 0;
+my $xmlTo = 0;
 my $flat = 0;
 my $shared = 0;
 my $k_auto_incl = 0;
@@ -722,7 +724,12 @@ foreach (@ARGV) {
      elsif (/^--?x(ml)?$/)
     {
 		$xml = 1;
-		$additionalMaudeFlags .= " -xml-log=$maude_xml_file "
+                $pxml = 1;
+    }
+    elsif ($pxml)
+    {
+      $xmlTo = $_;
+      $pxml = 0;
     }
     elsif (/^-prelude$/)
     {
@@ -1445,21 +1452,6 @@ sub compile {
 		unlink($maude_xml_file);
 		$_ = "$begin_compiled_module$unquotedOutput$end_compiled_module";
     }
-    elsif ($xml)
-    {
-      my $compile_supercools = "\"$flag_supercool\"";
-      my $compile_transitions = "\"$flag_transition\"";
-      my $compile_superheats = "\"$flag_superheat\"";    
-      my $action = "(pcompile $language_module_name MANY-MODULES transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)";
-      $_ = run_maude("Compiling the definition ... ",
-        "load $k_prelude\n",
-        "load $language_file_name\n",
-        "load $k_all_tools\n",
-        "rew in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'MANY-MODULES,\n",
-        "supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\"))) .\n",
-        "quit\n");		
-      rename($maude_xml_file,"all-modules.xml");
-    } 
     else
     {
     my $compile_supercools = "\"$flag_supercool\"";
@@ -1467,6 +1459,7 @@ sub compile {
     my $compile_superheats = "\"$flag_superheat\"";    
     my $action = "(compile $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)";
     $action = "(purify $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $pure;
+    $action = "(xcompile $language_module_name $xmlTo transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $xml;
 	$_ = run_maude("Compiling the definition ... ",
 		"load $k_prelude\n",
 	    "load $language_file_name\n",

@@ -102,6 +102,7 @@ fmod COMPILE-META is
   including STRING-EXTRAS .
   including MODULE-META-PRETTY-PRINT .
   including PURE-MODULE-META-PRETTY-PRINT .
+  including XML-MODULE-META-PRETTY-PRINT .
   including PARSE-METADATA .
   including COMPILATION-ATTRS .
 
@@ -229,6 +230,8 @@ fmod COMPILE-META is
 
   op purePrint : [Module] -> QidList .
   eq purePrint(M) = pureEMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
+  op xmlPrint : [Module] -> QidList .
+  eq xmlPrint(M) = xmlEMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
   op print : [Module] -> QidList .
   eq print(M) = eMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
   op generateError : Module Qid [Module] -> [Module] .
@@ -256,6 +259,7 @@ mod COMPILE-LOOP is
 
   eq print(moduleError(QIL)) = QIL .
   eq purePrint(moduleError(QIL)) = QIL .
+  eq xmlPrint(moduleError(QIL)) = QIL .
   rl ['compile Q 'transitions QStr 'superheats QComp 'supercools QSuper QIL, idle, QIL'] 
    => [QIL, idle, print(compile(Q, transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper))))] [print QStr QComp QSuper] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
@@ -269,6 +273,10 @@ mod COMPILE-LOOP is
 
   rl ['purify Q QIL, idle, QIL'] 
    => [QIL, idle, purePrint(extractModule(pcompile(Q,'RESULT-PREDICATES,  transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))),'PURE-K-TECHNIQUE))] .
+
+  rl ['xcompile Q Q' 'transitions QStr 'superheats QComp 'supercools QSuper QIL, idle, QIL']
+  => [QIL, idle, xmlPrint(pcompile(Q, Q', transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper))))] .
+
 
   var AS : AttrSet .  var QStr QComp QSuper : Qid .
 endm

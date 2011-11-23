@@ -5,6 +5,7 @@ load meta-k
 load metadata-parsing
 load printing
 load pure-printing
+load xml-printing
 ---load sanity-checks-interface
 
 load many-modules-interface
