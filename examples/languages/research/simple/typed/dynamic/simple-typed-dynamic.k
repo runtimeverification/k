@@ -171,7 +171,7 @@ to a location. */
 
 /*@ The dynamic semantics of typed array declarations is
 similar to that in untyped SIMPLE, but we have to enforce that the
-type of an array declaration be of the form \texttt{array of $T$}
+type of an array declaration be of the form \texttt{arrayOf $T$}
 and assign the right type ($T$) to the allocated array locations. */
 
   rule <k> var X[N:#Nat] : arrayOf T; => . ...</k> 
@@ -362,12 +362,13 @@ When done with the first pass, call \texttt{main()}. */
   rule typeOf(undefined(T)) => T [:structural:]
   rule typeOf(nothing) => void   [:structural:]
 
+/*@ Recall that lists of the form "a,b,c" are a syntactic convenience,
+which eventually are translated into cons-lists "(a,(b,(c,.)))".
+Unfortunately, the current K tool is not able to cons-listify
+the RHSes of the rules below, so we have to do it manually.  */
   syntax Types ::= "types" "(" Exps ")"    [:prec(1):]
-//  rule types() => .Types                   [:structural:]
-//  rule types(X : T, XTs) => T, types(XTs)  [:structural:]
-
-  rule types() => void                                         [:structural:]
-  rule types(X : T) => T                                       [:structural:]
+  rule types() => void,.Types                          [:structural:]
+  rule types(X : T) => T,.Types                        [:structural:]
   rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
 
 

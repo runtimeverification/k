@@ -1,10 +1,9 @@
-var x:int; //, a[10]:arrayOf int;
+var x:int, a[10]:arrayOf int;
 
 function incx():void {
   ++x;
 }
 
-***(
 function zero():int {
   return 0;
 }
@@ -16,13 +15,11 @@ function id(x:int):int {
 function double(x:int):int {
   return 2*x;
 }
-***)
 
 function hoincx(): function from void to void {
   return incx;
 }
 
-***(
 function hozero(): function from void to int {
   return zero;
 }
@@ -71,7 +68,7 @@ function printall():void {
   print("\n");
 }
 
-function main1():void {
+function main():void {
   x = 0;
   for i=0 to sizeOf(a)-1 do
     a[i]=i;
@@ -86,9 +83,4 @@ function main1():void {
         app2(hoid2(hoid()),7)," ", app2(hoid2(hodouble()),7),"\n");
   map(double,a);
   printall();
-}
-***)
-
-function main():void {
-  hoid0(hoincx());
 }

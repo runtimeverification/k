@@ -301,6 +301,8 @@ seen in the rule ``\texttt{++ int => int}'' below. */
   rule T[] => T
   rule sizeOf(arrayOf T) => int
   rule _`(_`)(function from Ts to T, Ts) => T
+    if Ts =/=Bool .Types
+  rule _`(_`)(function from void to T, .Types) => T
   rule read() => int
 
 /*@ The special context and the rule for assignment below are similar
@@ -380,8 +382,10 @@ whether a particular array declaration type-checks. */
 of typed identifiers (as needed for the parameters in function
 declarations) and it rewrites to the list of their types. */
 
+//@ The operation below is defined like in dynamically typed SIMPLE
   syntax Types ::= "types" "(" Exps ")"    [:prec(1):]
-  rule types() => .Types                   [:structural:]
-  rule types(X : T, XTs) => T, types(XTs)  [:structural:]
+  rule types() => void,.Types                          [:structural:]
+  rule types(X : T) => T,.Types                        [:structural:]
+  rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
 
 end module
