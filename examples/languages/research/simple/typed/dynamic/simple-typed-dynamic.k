@@ -357,14 +357,19 @@ When done with the first pass, call \texttt{main()}. */
   rule typeOf(_:#String) => string  [:structural:]
 
   rule typeOf(arrayRef(T,_,_)) => T  [:structural:]
-  rule typeOf(lambda(_,_,T)) => T  [:structural:]
+  rule typeOf(lambda(_,_,T)) => T    [:structural:]
 
   rule typeOf(undefined(T)) => T [:structural:]
-  rule typeOf(nothing) => void  [:structural:]
+  rule typeOf(nothing) => void   [:structural:]
 
   syntax Types ::= "types" "(" Exps ")"    [:prec(1):]
-  rule types() => .Types                   [:structural:]
-  rule types(X : T, XTs) => T, types(XTs)  [:structural:]
+//  rule types() => .Types                   [:structural:]
+//  rule types(X : T, XTs) => T, types(XTs)  [:structural:]
+
+  rule types() => void                                         [:structural:]
+  rule types(X : T) => T                                       [:structural:]
+  rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
+
 
 //@ Sequences of locations
 

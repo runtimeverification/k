@@ -1,9 +1,10 @@
-var x:int, a[10]:arrayOf int;
+var x:int; //, a[10]:arrayOf int;
 
 function incx():void {
   ++x;
 }
 
+***(
 function zero():int {
   return 0;
 }
@@ -15,12 +16,14 @@ function id(x:int):int {
 function double(x:int):int {
   return 2*x;
 }
+***)
 
-function hoincx(): function from  to void {
+function hoincx(): function from void to void {
   return incx;
 }
 
-function hozero(): function from  to int {
+***(
+function hozero(): function from void to int {
   return zero;
 }
 
@@ -32,11 +35,11 @@ function hodouble(): function from int to int {
   return double;
 }
 
-function hoid0(f : function from  to void) : function from  to void {
+function hoid0(f : function from void to void) : function from void to void {
   return f;
 }
 
-function hoid1(f : function from  to int) : function from  to int {
+function hoid1(f : function from void to int) : function from void to int {
   return f;
 }
 
@@ -44,11 +47,11 @@ function hoid2(f : function from int to int) : function from int to int {
   return f;
 }
 
-function app0(f : function from  to void) : void {
+function app0(f : function from void to void) : void {
   f();
 }
 
-function app1(f : function from  to int) : int {
+function app1(f : function from void to int) : int {
   return f();
 }
 
@@ -68,7 +71,7 @@ function printall():void {
   print("\n");
 }
 
-function main():void {
+function main1():void {
   x = 0;
   for i=0 to sizeOf(a)-1 do
     a[i]=i;
@@ -83,4 +86,9 @@ function main():void {
         app2(hoid2(hoid()),7)," ", app2(hoid2(hodouble()),7),"\n");
   map(double,a);
   printall();
+}
+***)
+
+function main():void {
+  hoid0(hoincx());
 }
