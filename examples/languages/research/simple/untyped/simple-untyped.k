@@ -1,6 +1,3 @@
-------------------------------------
---- SIMPLE-UNTYPED-SYNTAX module ---
-------------------------------------
 
 module SIMPLE-UNTYPED-SYNTAX
 
@@ -118,10 +115,6 @@ end module
 
 
 
----------------------------------------
---- SIMPLE-UNTYPED-SEMANTICS module ---
----------------------------------------
-
 module SIMPLE-UNTYPED
   imports SIMPLE-UNTYPED-SYNTAX 
 
@@ -156,7 +149,8 @@ function definitions cannot be nested). */
 
   syntax Val ::= #Int | #Bool | #String
                | "arrayRef" "(" #Nat "," #Nat ")"
-               | "lambda" "(" Ids "," Stmt ")" [:latex("\lambda{#1}\,.\,{#2}"):]
+               | "lambda" "(" Ids "," Stmt ")"
+                   [:latex("\lambda{#1}\,.\,{#2}"):]
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
 
@@ -242,41 +236,45 @@ to the \K tool, as indicated by the \textit{\$PGM} variable. */
 
 
 /*@ \section{Declarations and Initialization}
-We start by defining the semantics of declarations (for variables, arrays and
-functions). */
+We start by defining the semantics of declarations (for variables,
+arrays and functions). */
 
 /*@ \subsection{Variable Declaration}
-The SIMPLE syntax was desugared above so that each variable is declared alone
-and its initialization is done as a separate statement.  The semantic rule
-below matches resulting variable declarations of the form
-``$\texttt{var}\,X\texttt{;}$'' on top of the \textsf{k} cell (indeed, note
-that the \textsf{k} cell is complete, or round, to the left, and is torn, or
-ruptured, to the right), allocates a fresh location $L$ in the store which is
-initialized with a special value $\bot$ (indeed, the unit ``$\kdot$'', or
-nothing, is matched anywhere in the map---note the tears at both sides---and
-replaced with the mapping $L\mapsto \bot$), and binds $X$ to $L$ in the local
-environment shadowing previous declarations of $X$, if any.  It is this
-possible shadowing of $X$ which disallows us to use a similar technique for
-updating the environment as for updating the store, as we know that $L$ is not
-already bound in the store when we add $L \mapsto \bot$.  We prefer the approach
-used for updating the store whenever possible, because it offers more true
-concurrency than the latter; indeed, according to the concurrent semantics of
-$K$, the store is not frozen while $L\mapsto \bot$ is added to it, while the
-environment is frozen during the update operation $\textit{Env}[L/X]$.
-The variable declaration command is also removed from the top of the computation
-cell and the fresh location counter is incremented.  All the above happen in one
-transactional step, with the rule below.  Note also how configuration
-abstraction allows us to only mention the needed cells; indeed, as the
-configuration above states, the \textsf{k} and \textsf{env} cells are actually
-located within a \textsf{thread} cell within the \textsf{threads} cell, but one
-needs not mention these: the configuration context of the rule is automatically
-transformed to match the declared configuration structure.
+The SIMPLE syntax was desugared above so that each variable is
+declared alone and its initialization is done as a separate statement.
+The semantic rule below matches resulting variable declarations of the
+form ``$\texttt{var}\,X\texttt{;}$'' on top of the \textsf{k} cell
+(indeed, note that the \textsf{k} cell is complete, or round, to the
+left, and is torn, or ruptured, to the right), allocates a fresh
+location $L$ in the store which is initialized with a special value
+$\bot$ (indeed, the unit ``$\kdot$'', or nothing, is matched anywhere
+in the map---note the tears at both sides---and replaced with the
+mapping $L\mapsto \bot$), and binds $X$ to $L$ in the local
+environment shadowing previous declarations of $X$, if any.  It is
+this possible shadowing of $X$ which disallows us to use a similar
+technique for updating the environment as for updating the store, as
+we know that $L$ is not already bound in the store when we add $L
+\mapsto \bot$.  We prefer the approach used for updating the store
+whenever possible, because it offers more true concurrency than the
+latter; indeed, according to the concurrent semantics of $K$, the
+store is not frozen while $L\mapsto \bot$ is added to it, while the
+environment is frozen during the update operation
+$\textit{Env}[L/X]$.  The variable declaration command is also removed
+from the top of the computation cell and the fresh location counter is
+incremented.  All the above happen in one transactional step, with the
+rule below.  Note also how configuration abstraction allows us to only
+mention the needed cells; indeed, as the configuration above states,
+the \textsf{k} and \textsf{env} cells are actually located within a
+\textsf{thread} cell within the \textsf{threads} cell, but one needs
+not mention these: the configuration context of the rule is
+automatically transformed to match the declared configuration
+structure.
 
 \paragraph{Note:}{The "trick" with using a \textsf{nextLoc} cell to generate
 fresh locations is rather low level and hopefully temporary; we intend to
 soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
-  syntax K ::= "undefined" [:latex("\bot"):]
+  syntax K ::= "undefined"  [:latex("\bot"):]
 
   rule <k> var X:#Id; => . ...</k>
        <env> Env:Map => Env[L:#Nat/X] </env>
@@ -399,7 +397,7 @@ $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
   rule <k> X => V:Val ...</k>
        <env>...X|->L...</env>
-       <store>...L|->V...</store> [:transition:]
+       <store>...L|->V...</store>  [:transition:]
 
 /*@ Note that this excludes reading $\bot$, as $\bot$ is not a value. */
 
@@ -414,12 +412,12 @@ to a location value, also introduced below with the auxiliary operations. */
 
   context ++([HOLE] => lvalue([HOLE]))
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
+       <store>... L |-> (I => I +Int 1) ...</store>  [:transition:]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
-language constructs to their library counterparts when their arguments become
-values of expected sorts: */
+language constructs to their library counterparts when their arguments
+become values of expected sorts: */
 
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule Str1:#String + Str2:#String => Str1 +String Str2
@@ -450,10 +448,10 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 ``there is something there but we don't care what''.
 The semantics of the \texttt{lookup} operation is straightforward. */
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
-  rule arrayRef(L,_)[N] => lookup(L +Int N) [:structural:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs]  [:structural:]
+  rule arrayRef(L,_)[N] => lookup(L +Int N)  [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
-  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [:transition:]
+  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store>  [:transition:]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -462,34 +460,39 @@ The size of the array is stored in the array reference value, and the
   rule sizeOf(arrayRef(_,N)) => N
 
 /*@ \subsection{Function call}
-Function application was strict in both its arguments, so we can assume that
-both the function and its arguments are evaluated to values (the former
-expected to be a $\lambda$-abstraction).  The first rule below matches a
-well-formed function application on top of the computation and performs the
-following steps atomically: it switches to the function body followed by
-``\texttt{return;}'' (for the case in which the function does not use an
-explicit return statement); it pushes the remaining computation, the current
-environment, and the current control data onto the function stack (the remaining
-computation can thus also be discarded from the computation cell, because an
-unavoidable subsequent \texttt{return} statement---see above---will always
-recover it from the stack); it switches the current environment (which is being
-pushed on the function stack) to the global environment, which is where the free
-variables in the function body should be looked up; it binds the formal
-parameters to fresh locations in the new environment, and stores the actual
+Function application was strict in both its arguments, so we can
+assume that both the function and its arguments are evaluated to
+values (the former expected to be a $\lambda$-abstraction).  The first
+rule below matches a well-formed function application on top of the
+computation and performs the following steps atomically: it switches
+to the function body followed by ``\texttt{return;}'' (for the case in
+which the function does not use an explicit return statement); it
+pushes the remaining computation, the current environment, and the
+current control data onto the function stack (the remaining
+computation can thus also be discarded from the computation cell,
+because an unavoidable subsequent \texttt{return} statement---see
+above---will always recover it from the stack); it switches the
+current environment (which is being pushed on the function stack) to
+the global environment, which is where the free variables in the
+function body should be looked up; it binds the formal parameters to
+fresh locations in the new environment, and stores the actual
 arguments to those locations in the store.  The second rule pops the
-computation, the environment and the control data from the function stack when a
-\texttt{return} statement is encountered as the next computational task, passing
-the returned value to the popped computation (the popped computation was the
-context in which the returning function was called).  Note that the
-pushing/popping of the control data is crucial.  Without it, one may have a
-function that contains an exception block with a return statement inside, which
-would put the \textsf{xstack} cell in an inconsistent state (since the exception
-block modifies it, but that modification should be irrelevant once the function
-returns).  We add an artificial \texttt{nothing} value to the language, which is
-returned by the nulary \texttt{return;} statements. */
+computation, the environment and the control data from the function
+stack when a \texttt{return} statement is encountered as the next
+computational task, passing the returned value to the popped
+computation (the popped computation was the context in which the
+returning function was called).  Note that the pushing/popping of the
+control data is crucial.  Without it, one may have a function that
+contains an exception block with a return statement inside, which
+would put the \textsf{xstack} cell in an inconsistent state (since the
+exception block modifies it, but that modification should be
+irrelevant once the function returns).  We add an artificial
+\texttt{nothing} value to the language, which is returned by the
+nulary \texttt{return;} statements. */
 
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
-  rule <k> _`(_`)(lambda(Xs,S), Vs:Vals) ~> K:K => bindto(Xs,Vs) ~> S ~> return; </k>
+  rule <k> _`(_`)(lambda(Xs,S), Vs:Vals) ~> K:K
+        => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
        <env> Env => GEnv </env>
        <genv> GEnv:Map </genv>
@@ -499,10 +502,10 @@ returned by the nulary \texttt{return;} statements. */
   syntax Val ::= "nothing"
   rule return; => return nothing;   [:structural:]
 
-/*@ The \texttt{bindto} auxilliary construct binds a list of variables to a
-list of values.  Specifically, it allocates a fresh location for each variable,
-binding the variable to that location in the environment and writing the value
-to that location in the store. */
+/*@ The \texttt{bindto} auxilliary construct binds a list of variables
+to a list of values.  Specifically, it allocates a fresh location for
+each variable, binding the variable to that location in the
+environment and writing the value to that location in the store. */
 
   syntax K ::= "bindto" "(" Ids "," Vals ")"
   rule <k> bindto((X,Xs => Xs),(V,Vs:Vals => Vs)) ...</k>
@@ -512,10 +515,11 @@ to that location in the store. */
   rule <k> bindto(.Ids,.Exps) => . ...</k>
 
 /*@ \subsection{Read}
-The \texttt{read()} expression construct simply evaluates to the next input
-value, at the same time discarding the input value from the \textsf{in} cell. */
+The \texttt{read()} expression construct simply evaluates to the next
+input value, at the same time discarding the input value from the
+\textsf{in} cell. */
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
+  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in>  [:transition:]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -530,7 +534,8 @@ that \texttt{lvalue(...)} eventually evaluates to a location value
 \texttt{loc(...)}. */
 
   context ([HOLE] => lvalue([HOLE])) = _
-  rule <k> loc(L)=V => V ...</k> <store>... L|->(_=>V) ...</store> [:transition:]
+  rule <k> loc(L)=V => V ...</k>
+       <store>... L|->(_=>V) ...</store> [:transition:]
 
 
 /*@ \section{Statements}
@@ -548,12 +553,12 @@ for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps. */
 
   rule {} => . [:structural:]
-  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
+  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env>  [:structural:]
 
 /*@ The basic definition of environment recovery is straightforward: */
 
   syntax K ::= "env" "(" Map ")"
-  rule <k> env(Env) => . ...</k> <env> _ => Env </env> [:structural:]
+  rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [:structural:]
 
 /*@  While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop \texttt{while E do S},
@@ -568,7 +573,7 @@ recovery tasks, we only need to keep the last one.  The elegant rule below
 does precisely that, thus avoiding the unnecessary computation explosion
 problem:  */
 
-  rule (env(_) => .) ~> env(_) [:structural:]
+  rule (env(_) => .) ~> env(_)  [:structural:]
 
 /* In fact, the above follows a common convention in \K for recovery
 operations of cell contents.  More precisely, the conventional meaning of a
@@ -642,16 +647,17 @@ allowed break/continue of loops then we would need a completely different
 semantics, which would also involve the \textsf{control} cell. */
 
   rule <k> while E:Exp do S
-    => if E then {S while E do S} else {} ...</k> [:structural:]
+    => if E then {S while E do S} else {} ...</k>  [:structural:]
 
 /*@ \subsection{Print}
-The print statement was strict, so all its arguments are now evaluated
-(recall that \texttt{print} is variadic).  We append each of its evaluated
-arguments to the output buffer, and discard the residual
+The \texttt{print} statement was strict, so all its arguments are now
+evaluated (recall that \texttt{print} is variadic).  We append each of
+its evaluated arguments to the output buffer, and discard the residual
 \texttt{print} statement with an empty list of arguments. */
 
-  rule <k> print(V,Vs => Vs); ...</k> <out>... . => ListItem(V) </out> [:transition:]
-  rule print(); => . [:structural:]
+  rule <k> print(V,Vs => Vs); ...</k>
+       <out>... . => ListItem(V) </out>  [:transition:]
+  rule print(); => .                     [:structural:]
 
 /*@ \subsection{Exceptions}
 SIMPLE allows parametric exceptions, in that one can throw and catch a
@@ -757,7 +763,8 @@ is to decrement the lock counter.
 from its \textsf{holds} cell and also from the the shared \textsf{busy} cell,
 so other threads can acquire it if they need to. */
 
-   rule <k> release V; => . ...</k> <holds>... V|->(N => _-Int_(N,1)) ...</holds>
+   rule <k> release V; => . ...</k>
+        <holds>... V|->(N => _-Int_(N,1)) ...</holds>
      if N >Nat 0
    // used prefix notation for -Int because of parsing problems
    rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
@@ -779,7 +786,8 @@ the \textsf{thread} cell, the only way to concretize the rule below to the
 actual configuration of SIMPLE is to include each \textsf{k} cell in a
 \textsf{thread} cell. */
 
-   rule <k> rendezvous V; => . ...</k> <k> rendezvous V; => . ...</k> [:transition:]
+   rule <k> rendezvous V; => . ...</k>
+        <k> rendezvous V; => . ...</k>  [:transition:]
 
 ----------------------------------------------
 //@ \section{Auxiliary declarations and operations}
@@ -823,8 +831,8 @@ given numbers.  The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2  [:structural:]
+  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2  [:structural:]
 
 /*@ The semantics of SIMPLE is now complete. */
 end module

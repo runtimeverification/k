@@ -1,7 +1,0 @@
-{
-  var x;
-  x:=read();
-  spawn x:=x+1;
-  spawn x:=x+10;
-  print(x)
-}

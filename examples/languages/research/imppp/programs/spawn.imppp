@@ -1,0 +1,16 @@
+// To see the various behaviors (10) of this concurrent program, make sure
+// you use the --search option with krun.  However, since this program
+// takes a user input and since search cannot be interactive, you have
+// to provide the input before the program executes.  This can be done
+// either using a configuration variable (see sumPgm-2.imppp, sumPgm-3.imppp),
+// or, alteratively and more easily here, using your OS piping:
+//
+//   echo 10 | krun programs/spawn.imppp --search
+//
+
+var x;
+print("x = ");
+x:=read();
+spawn x:=x+1;
+spawn x:=x+10;
+print(x,"\n")

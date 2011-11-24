@@ -1,5 +1,5 @@
 var n,s,i; 
-print("n=");
+print("n = ");
 n := read();
 s := 0;
 i := n;
@@ -7,6 +7,4 @@ while 1 <= i do {
   s := s+i;
   i := i+-1
 } ;
-print("Sum: "); print(s);
-print("\nAverage: "); print(s/n);
-print("\n")
+print("Sum: ", s, "\nAverage: ", s/n, "\n")

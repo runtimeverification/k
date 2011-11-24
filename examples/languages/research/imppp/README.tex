@@ -1,0 +1,52 @@
+\setlength{\parindent}{1em}
+\title{IMP++}
+\author{Grigore Ro\c{s}u (\texttt{grosu@illinois.edu})}
+\organization{University of Illinois at Urbana-Champaign}
+
+\maketitle
+
+\begin{latexComment}
+\section{Abstract}
+This is the \K semantic definition of the IMP++ language.
+IMP++ extends the IMP language with the features listed below.  We
+strongly recommend the reader to familiarize with IMP and its \K
+definition before proceeding.
+\begin{itemize}
+\item Strings and concatenation of strings.  Strings are useful
+for the \texttt{print} statement, which is discussed below.  For
+string concatenation, we use the same \texttt{+} construct that we use
+for addition.
+\item Variable increment.  We only add a preincrement construct:
+\texttt{++x} increments variable \texttt{x} and evaluates to the
+incremented value.  Variable increment makes the evaluation of
+expressions to have side effects, and thus the evaluation strategies
+of the various language constructs to matter in what regards the set
+of possible program behaviors.
+\item Input and output.  IMP++ adds a \texttt{read()} expression
+construct which reads an integer number and evaluates to it, and 
+a variadic (i.e., it has an arbitrary number of arguments) statement
+construct \texttt{print(e1,e2,...,en)} which evaluates its arguments
+and then outputs their values.  Note that the \K tool allows to
+connect the input and output cells to the standard input and output
+buffers, this way compiling the language definition into an
+interactive interpreter.
+\item Abrupt termination.  The \texttt{halt} statement simply halts
+the program.  The \K tool shows the resulting configuration, as if the
+program terminated normally.
+\item Dynamic threads. The statement \texttt{spawn s} starts a new
+concurrent thread that executes statement \texttt{s}.  The newly
+created thread is given at creation time the {\em environment} of its
+parent, so it can access all its parent's variables.  This allows for
+the parent thread and the child thread to communicate; it also allows
+for races and ``unexpected'' behaviors, so be careful.
+\item Blocks and local variables.  IMP++ allows blocks enclosed by 
+curly brackets.  Also, IMP's global variable declaration construct is
+generalized to be used anywhere as a statement, not only at the
+begining of the program.  As expected, the scope of the declared
+variables is from their declaration point till the end of the most
+nested enclosing block.
+\end{itemize}
+
+\end{latexComment}
+
+\vspace*{3ex}
