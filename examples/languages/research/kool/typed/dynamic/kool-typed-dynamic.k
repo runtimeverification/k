@@ -254,7 +254,7 @@ KOOL).  */
 
   rule {} => . [:structural:]
   rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
-  rule S1:Stmt S2:Stmt => S1 ~> S2
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [:structural:]
   rule V; => .
   rule if  true then S else _ => S
   rule if false then _ else S => S
@@ -366,7 +366,7 @@ parameters */
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.Exps,.Vals) => . ...</k>
+  rule <k> bindto(.Exps,.Vals) => . ...</k>  [:structural:]
 
 
 /*@ \subsection{Additional values}
@@ -385,13 +385,13 @@ Like in untyped KOOL. */
                             <extends> Class2 </extends>
                             <declarations> Ss </declarations>
                         </class>)
-       ...</classes>
+       ...</classes>  [:structural:]
 
 /*@ \subsection{Program initialization}
 Like in untyped KOOL. */
 
   syntax K ::= "execute"
-  rule <k> execute => new main(); </k> <env> . </env>
+  rule <k> execute => new main(); </k> <env> . </env>  [:structural:]
 
 /*@ \subsection{Method declaration}
 Methods are now typed and we need to store their types in their
@@ -438,18 +438,19 @@ those in untyped KOOL. */
         => create(Class1) ~> setCrntClass(Class) ~> Ss ~> addEnvLayer ...</k>
        <className> Class </className>
        <extends> Class1 </extends>
-       <declarations> Ss </declarations>
-  rule <k> create(object) => . ...</k>
+       <declarations> Ss </declarations>  [:structural:]
+  rule <k> create(object) => . ...</k>    [:structural:]
 
   syntax K ::= "setCrntClass" "(" #Id ")" 
   rule <k> setCrntClass(Class) => . ...</k>
-       <crntClass> _ => Class </crntClass>
+       <crntClass> _ => Class </crntClass>  [:structural:]
 
   syntax K ::= "addEnvLayer"
   rule <k> addEnvLayer => . ...</k>
        <env> Env => . </env>
        <crntClass> Class </crntClass>
        <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack> 
+    [:structural:]
 
   syntax K ::= storeObj
   rule <k> storeObj => . ...</k>
@@ -466,15 +467,16 @@ Like in untyped KOOL. */
 Like in untyped KOOL. */
 
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
-    if notBool(X in keys(Env))
+    if notBool(X in keys(Env))  [:structural:]
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
   rule <k> _._(objRef(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X) 
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
-       ...</k>
+       ...</k>  [:structural:]
   rule <k> _._(super,X) => lookupMember(<envStack>EStack</envStack>,X)...</k>
        <crntClass> Class:#Id </crntClass>
        <envStack>... ListItem(Class :: EnvC) EStack </envStack>
+    [:structural:]
 
 
 /*@\subsection{Method invocation}
@@ -490,17 +492,19 @@ rules below are identical to those in untyped KOOL. */
 
   rule <k> _`(_`)((X => _._(this,X)),_) ...</k>
        <env> Env </env>
-    if notBool(X in keys(Env))
+    if notBool(X in keys(Env))  [:structural:]
 
   context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
 
   rule <k> '_`(_`)(('_._(objRef(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
+    [:structural:]
 
   rule <k> '_`(_`)(('_._(super,,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
        <crntClass> Class:#Id </crntClass>
        <envStack>... ListItem(Class :: _) EStack </envStack>
+    [:structural:]
 
   context '_`(_`)(`[HOLE`]:K,,_)
        if getKLabel `[HOLE`]:K ==Bool '_`(_`) orBool
@@ -549,7 +553,7 @@ Like in untyped KOOL. */
     => true
   rule objRef((_ <envStack> ListItem(Class1::_)
                       => . ...</envStack>)) instanceOf Class2 
-    if Class1 =/=Bool Class2
+    if Class1 =/=Bool Class2  [:structural:]
   rule objRef((_ <envStack> .List </envStack>)) instanceOf Class
     => false
  
@@ -560,12 +564,13 @@ can indeed be cast to the claimed type. */
   rule <k> cast objRef((<crntClass> _:K </crntClass> Obj)) to Class 
         => objRef(Obj) instanceOf Class ~> true?
              ~> objRef(<crntClass> Class </crntClass> Obj) ...</k>
+    [:structural:]
 
 /*@ \subsection{Objects as lvalues}
 Like in untyped KOOL. */
 
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
-    if notBool(X in keys(Env))
+    if notBool(X in keys(Env))  [:structural:]
 
   context lvalue(_._([HOLE],_))
   rule <k> lvalue(_._(objRef(<crntClass> Class </crntClass> 
@@ -574,7 +579,7 @@ Like in untyped KOOL. */
                            </envStack>), X)
         => lookupMember(<envStack>ListItem(Class :: EnvC:BagItem) EStack:List
                         </envStack>, X)) 
-       ...</k>
+       ...</k>  [:structural:]
 
 /*@ \subsection{Lookup member}
 Like in untyped KOOL. */
@@ -582,10 +587,10 @@ Like in untyped KOOL. */
   syntax K ::= #Id "::" BagItem
   syntax K ::= "lookupMember" "(" BagItem "," #Id ")"
   rule lookupMember(<envStack> ListItem(_ :: <env>...X|->L...</env>)
-                    ...</envStack>,X) => lookup(L)
+                    ...</envStack>,X) => lookup(L)  [:structural:]
   rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)
                             => . ...</envStack>, X)
-    if notBool(X in keys(Env)) [:structural:]
+    if notBool(X in keys(Env))                      [:structural:]
 
 //@ \subsection{Auxilliary operations and rules}
 
@@ -601,20 +606,20 @@ The subclass relation introduces a subtyping relation. */
 
   syntax Exp ::= "subtype" "(" Types "," Types ")"
 
-  rule subtype(,) => true
+  rule subtype(,) => true  [:structural:]
   rule subtype((T1:Type,T2:Type,Ts:Types),(T1':Type,T2':Type,Ts':Types))
-    => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))
-  rule subtype(T,T) => true
+    => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))  [:structural:]
+  rule subtype(T,T) => true  [:structural:]
   rule <k> subtype(class Class1:#Id, class Class)
         => subtype(class Class2, class Class) ...</k>
       <class>...
           <className> Class1 </className> <extends> Class2 </extends>
       ...</class>
-    if Class1 =/=Bool Class
+    if Class1 =/=Bool Class  [:structural:]
   rule <k> subtype(class Class1, class Class)
         => subtype(class Class2, class Class) ...</k>
           <className> Class1 </className> <extends> Class2 </extends>
-    if Class1 =/=Bool Class
+    if Class1 =/=Bool Class  [:structural:]
 
 /*@ \subsubsection{UpCasting}
 Performs unsafe upcasting.  One should only use it combination with
@@ -631,6 +636,6 @@ A generic computational guard (should be builtin): it allows the
 computation to continue only if a prefix guard evaluates to true.  */
 
   syntax K ::= "true?"
-  rule true ~> true? => .
+  rule true ~> true? => .  [:structural:]
 
 end module

@@ -262,7 +262,7 @@ of Java.  In fact, the latter can be implemented in terms of
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.Ids,.Exps) => . ...</k>
+  rule <k> bindto(.Ids,.Exps) => . ...</k>  [:structural:]
 
   rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
 
@@ -277,7 +277,7 @@ of Java.  In fact, the latter can be implemented in terms of
 
   rule (env(_) => .) ~> env(_) [:structural:]
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [:structural:]
 
   rule V; => .
 
@@ -320,10 +320,11 @@ constructs keep their semantics from SIMPLE. */
 
   syntax Exp ::= "lvalue" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
-  rule <k> lvalue(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
+  rule <k> lvalue(X) => loc(L:#Nat) ...</k>
+       <env>... X|->L ...</env>  [:structural:]
   context lvalue(_[[HOLE]])
   context lvalue([HOLE][_])
-  rule <k> lvalue(lookup(L)) => loc(L) ...</k>
+  rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
 
   syntax List{K} ::= #Nat ".." #Nat
   rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
@@ -383,7 +384,7 @@ corresponding cells: */
                             <extends> Class2 </extends>
                             <declarations> Ss </declarations>
                         </class>)
-       ...</classes>
+       ...</classes>  [:structural:]
 
 /*@ \subsection{Program initialization}
 Once all the classes are processed as above, the computation item
@@ -397,7 +398,7 @@ cell below is just a sanity check, to make sure that the user has not
 declared anything but classes at the top level of the program. */
 
   syntax K ::= "execute"
-  rule <k> execute => new main(); </k> <env> . </env>
+  rule <k> execute => new main(); </k> <env> . </env>  [:structural:]
 
 /*@ The semantics of \texttt{new} (defined shortly) requires the
 execution of all the class' declarations (and also of its superclasses').
@@ -473,8 +474,8 @@ members (both fields and methods) of that class. */
         => create(Class1) ~> setCrntClass(Class) ~> Ss ~> addEnvLayer ...</k>
        <className> Class </className>
        <extends> Class1 </extends>
-       <declarations> Ss </declarations>
-  rule <k> create(object) => . ...</k>
+       <declarations> Ss </declarations>  [:structural:]
+  rule <k> create(object) => . ...</k>    [:structural:]
 
 /*@ The next operation sets the current class of the current object.
 This is necessary to be done at each layer, because the current class
@@ -483,7 +484,7 @@ of the object is enclosed as part of the method closures
 
   syntax K ::= "setCrntClass" "(" #Id ")" 
   rule <k> setCrntClass(Class) => . ...</k>
-       <crntClass> _ => Class </crntClass>
+       <crntClass> _ => Class </crntClass>  [:structural:]
 
 /*@ The next operation adds a new tagged environment layer to the
 current object and gets ready for the next layer by clearing the
@@ -495,6 +496,7 @@ empty). */
        <env> Env => . </env>
        <crntClass> Class </crntClass>
        <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack> 
+    [:structural:]
 
 /*@ The following operation stores the created object at the location
 reserved by \texttt{new}.  Note that the location reserved by
@@ -540,18 +542,18 @@ invocations see the entire object, as needed for dynamic method dispatch. */
 
 // To avoid parsing ambiguity, use _._(this,X) instead of this.X
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
-    if notBool(X in keys(Env))
+    if notBool(X in keys(Env))  [:structural:]
 
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
   rule <k> _._(objectClosure(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X)
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
-       ...</k>
+       ...</k>  [:structural:]
 
   rule <k> _._(super,X) => lookupMember(<envStack>EStack</envStack>, X)...</k>
        <crntClass> Class:#Id </crntClass>
        <envStack>... ListItem(Class :: EnvC) EStack </envStack>
-
+    [:structural:]
 
 /*@\subsection{Method invocation}
 Unlike in SIMPLE, in KOOL application was declared strict only in its
@@ -580,7 +582,7 @@ method call or the array access.  */
 
   rule <k> _`(_`)((X => _._(this,X)),_) ...</k>
        <env> Env </env>
-    if notBool(X in keys(Env))
+    if notBool(X in keys(Env))  [:structural:]
 
 --- We would like to write the rule above as
 ---   rule <k> (X => _._(this,X))(_) <_/k>
@@ -593,11 +595,13 @@ method call or the array access.  */
 
   rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
+    [:structural:]
 
   rule <k> '_`(_`)(('_._(super,,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
        <crntClass> Class:#Id </crntClass>
        <envStack>... ListItem(Class :: _) EStack </envStack>
+    [:structural:]
 
   context '_`(_`)(`[HOLE`]:K,,_)
        if getKLabel `[HOLE`]:K ==Bool '_`(_`) orBool
@@ -636,7 +640,7 @@ otherwise it returns \texttt{false}; it never gets stuck.  */
         instanceOf Class => true
   rule objectClosure(_ <envStack> ListItem(Class1::_)
                       => . ...</envStack>) instanceOf Class2 
-    if Class1 =/=Bool Class2
+    if Class1 =/=Bool Class2  [:structural:]
   rule objectClosure(_ <envStack> .List </envStack>) instanceOf Class
     => false
  
@@ -663,7 +667,7 @@ evaluated, and finally the second rule initiates the lookup for the
 member's location based on the current class of the object. */
 
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
-    if notBool(X in keys(Env))
+    if notBool(X in keys(Env))  [:structural:]
 
   context lvalue(_._([HOLE],_))
   rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
@@ -672,7 +676,7 @@ member's location based on the current class of the object. */
                           </envStack>), X)
         => lookupMember(<envStack>ListItem(Class :: EnvC:BagItem) EStack:List
                         </envStack>, X)) 
-       ...</k>
+       ...</k>  [:structural:]
   
 /*@ \subsection{Lookup member}
 Searches for the given member in the given environment stack, starting
@@ -685,10 +689,10 @@ with the most concrete class and going up in the hierarchy. */
 
 // First look for the member in the top environment; if found then done.
   rule lookupMember(<envStack> ListItem(_ :: <env>...X|->L...</env>)
-                    ...</envStack>,X) => lookup(L)
+                    ...</envStack>,X) => lookup(L)  [:structural:]
 // Otherwise, recurse through the object environment stack
   rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)
                             => . ...</envStack>, X)
-    if notBool(X in keys(Env)) [structural]
+    if notBool(X in keys(Env))                      [:structural:]
 
 end module

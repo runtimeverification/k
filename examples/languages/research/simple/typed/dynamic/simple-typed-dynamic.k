@@ -214,7 +214,8 @@ make sure that parameters are well typed when the function is invoked. */
 When done with the first pass, call \texttt{main()}. */
 
   syntax K ::= "execute"
-  rule <k> execute => main(); </k> <env> Env </env> <genv> . => Env </genv>
+  rule <k> execute => main(); </k>
+       <env> Env </env> <genv> . => Env </genv>  [:structural:]
 
 
 //@ \subsection{Expressions and statements}
@@ -285,7 +286,7 @@ When done with the first pass, call \texttt{main()}. */
 
   rule {} => . [:structural:]
   rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
-  rule S1:Stmt S2:Stmt => S1 ~> S2
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [:structural:]
   rule V; => .
   rule if  true then S else _ => S
   rule if false then _ else S => S
@@ -327,10 +328,11 @@ When done with the first pass, call \texttt{main()}. */
 //@ \texttt{lvalue}
   syntax Exp ::= "lvalue" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
-  rule <k> lvalue(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
+  rule <k> lvalue(X) => loc(L:#Nat) ...</k>
+       <env>... X|->L ...</env>  [:structural:]
   context lvalue(_[[HOLE]])
   context lvalue([HOLE][_])
-  rule <k> lvalue(lookup(L)) => loc(L) ...</k>
+  rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
 
 //@ \texttt{lookup}
   syntax K ::= "lookup" "(" #Nat ")"
@@ -343,7 +345,7 @@ When done with the first pass, call \texttt{main()}. */
        <store>... . => L |-> V ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
     if typeOf(V) ==Bool T
-  rule <k> bindto(.Exps,.Vals) => . ...</k>
+  rule <k> bindto(.Exps,.Vals) => . ...</k>  [:structural:]
 
 //@ \texttt{env}
   syntax K ::= "env" "(" Map ")"

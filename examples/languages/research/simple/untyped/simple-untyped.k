@@ -383,7 +383,8 @@ same global environment; all these mean, in particular, that the functions
 ``see'' each other, allowing for mutual recursion, etc. */
 
   syntax K ::= "execute"
-  rule <k> execute => main(); </k> <env> Env </env> <genv> . => Env </genv>
+  rule <k> execute => main(); </k>
+       <env> Env </env> <genv> . => Env </genv>  [:structural:]
 
 /*@ \section{Expressions}
 We next define the \K semantics of all the expression constructs, in the
@@ -512,7 +513,7 @@ environment and writing the value to that location in the store. */
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.Ids,.Exps) => . ...</k>
+  rule <k> bindto(.Ids,.Exps) => . ...</k>  [:structural:]
 
 /*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next
@@ -605,8 +606,8 @@ Sequential composition is desugared into \K's builtin sequentialization
 operation (recall that, like in C, the semi-colon ``\texttt{;}'' is not a
 statement separator in SIMPLE---it is either a statement terminator or a
 construct for a statement from an expression).  The rule below is
-computational, so it does count as a computational step.  One can make it
-structural if one does not want it to count as a step.  Note that \K allows
+structural, so it does not count as a computational step.  One can make it
+computational if one wants it to count as a step.  Note that \K allows
 to define the semantics of SIMPLE in such a way that statements eventually
 dissolve from the top of the computation when they are completed; this is in
 sharp contrast to (artificially) ``evaluating'' them to a special
@@ -616,7 +617,7 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [:structural:]
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
@@ -816,13 +817,14 @@ corresponding store lookup operation. */
   syntax Exp ::= "lvalue" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
 // Local variable
-  rule <k> lvalue(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
+  rule <k> lvalue(X) => loc(L:#Nat) ...</k>
+       <env>... X|->L ...</env>  [:structural:]
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
   context lvalue(_[[HOLE]])
   context lvalue([HOLE][_])
 // Finally, return the address of the desired object member
-  rule <k> lvalue(lookup(L)) => loc(L) ...</k>
+  rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
 
 
 /*@ \subsection{Sequences of locations}

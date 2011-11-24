@@ -37,7 +37,8 @@ SIMPLE follows a call-by-value parameter passing style, with static scoping.
 Function names evaluate to function abstractions, which hereby become ordinary
 values in the language, same like the array references.
 \item Blocks with locals.  SIMPLE variables can be declared
-anywhere, their scope being the most nested enclosing block.
+anywhere, their scope being from the place where they are declared
+until the end of the most nested enclosing block.
 \item Input/Output.  The expression \texttt{read()} evaluates to the
 next value in the input buffer, and the statement \texttt{write(e)}
 evaluates \texttt{e} and outputs its value to the output buffer.  The
@@ -58,6 +59,8 @@ of the syntax module, and then we only give semantics to the core constructs.
 \paragraph{Note:}{
 This definition is commented slightly more than others, because it is
 intended to be one of the first that the new user of \K sees.
+We recommend the beginner user to first check the \K definitions of
+IMP and IMP++ and then continue with the semantics of SIMPLE below.
 For a quick introduction to the \K prototype, you are referred to
 the README file at the root of this k-framework distribution.  If you are
 interested in reading more about \K, please check the following paper:
