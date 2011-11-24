@@ -6,19 +6,20 @@ give it a short-circuited semantics (its second argument will only be
 evaluated when the first evaluates to true). */
 
   syntax AExp ::= #Id | #Int
-                | AExp "+" AExp                      [:prec(33) gather (E e) strict:]
-                | AExp "/" AExp                      [:prec(31) gather (E e) strict:]
+                | AExp "+" AExp           [:prec(33) gather (E e) strict:]
+                | AExp "/" AExp           [:prec(31) gather (E e) strict:]
   syntax BExp ::= #Bool
-                | AExp "<=" AExp                     [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
-                | "not" BExp                         [:prec(53) strict:]
-                | BExp "and" BExp                    [:prec(55) strict(1):]
+                | AExp "<=" AExp   [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
+                | "not" BExp              [:prec(53) strict:]
+                | BExp "and" BExp         [:prec(55) strict(1):]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp                      [:prec(80) strict(2):]
-                | Stmt ";" Stmt                      [:prec(100) gather(e E):]
-                | "if" BExp "then" Stmt "else" Stmt  [:prec(85) strict(1):]
-                | "while" BExp "do" Stmt             [:prec(85):]
-  syntax Pgm ::= "var" Ids ";" Stmt                  [:prec(110):]
-
+                | #Id ":=" AExp           [:prec(80) strict(2):]
+                | Stmt ";" Stmt           [:prec(100) gather(e E):]
+                | "if" BExp
+                  "then" Stmt
+                  "else" Stmt             [:prec(85) strict(1):]
+                | "while" BExp "do" Stmt  [:prec(85):]
+  syntax Pgm ::= "var" Ids ";" Stmt       [:prec(110):]
   syntax Ids ::= List{#Id,","}
 end module
 
@@ -38,7 +39,7 @@ which is labeled $\top$. */
                   <k color="green"> $PGM:Pgm </k>
                   <state color="red"> .Map </state>
 // Replace the above with the following when you want to pass an initial
-// state through krun; see example programs/sumPgm-novars.imp.
+// state through krun; see commented example programs/sumPgm-novars.imp.
 //                  <state color="red"> $STATE:Map </state>
                 </T>
 
@@ -81,8 +82,8 @@ There is one rule per statement construct except for the conditional,
 which needs two rules. */
 
 /*@ \subsubsection{Skip}
-The \texttt{skip} is simply dissolved.  One can make this
-rule structural if one does not want it to count as a computational step. */
+The \texttt{skip} is simply dissolved.  You can make this rule
+structural if you do not want it to count as a computational step. */
 
   rule skip => .
 
@@ -95,11 +96,10 @@ the assignment is dissolved. */
 
 /*@ \subsubsection{Sequential Composition}
 Sequential composition is simply dissolved into the \K's builtin
-task sequentialization operation.  Like for \texttt{skip}, one is
-free to make this rule structural if one does not want it to count
-as a computational step.  */
+task sequentialization operation.  You can make this rule computational
+(i.e., not structural) if you want it to count as a computational step.  */
 
-  rule S1:Stmt ; S2:Stmt => S1 ~> S2
+  rule S1:Stmt ; S2:Stmt => S1 ~> S2 [:structural:]
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
@@ -118,11 +118,12 @@ application of rewrite rules; this is in contrast to structural
 operational semantics (SOS), where one needs to explicitly give
 permission (through conditional rules) to reductions inside
 constructs' arguments.  Also note that we preferred to make the
-rule below structural.  If one wants this unrolling step to count
-as a computational step (though we beg one to reconsider)
-then one can remove the ``structural'' tag.  */
+rule below structural.  If you want this unrolling step to count
+as a computational step (though we beg you to reconsider)
+then you can remove the ``structural'' tag.  */
 
-  rule <k> while B do S => if B then (S ; while B do S) else skip ...</k> [:structural:]
+  rule <k> while B do S => if B then (S ; while B do S) else skip ...</k>
+       [:structural:]
 
 /*@ \subsection{Programs}
 The semantics of an IMP program is that its body statement is executed
@@ -132,6 +133,6 @@ constructed with a head element followed by a tail list), we need to
 distinguish two cases, one when the list is empty and another when the
 list has at least one element. */
 
-  rule <k> var ; S => S ...</k>
-  rule <k> var (X,Xl:Ids => Xl); _ ...</k> <state>... . => X |-> 0 ...</state> 
+  rule <k> var ; S => S ...</k>    [:structural:]
+  rule <k> var (X,Xs:Ids => Xs); _ ...</k> <state>... . => X |-> 0 ...</state>
 end module
