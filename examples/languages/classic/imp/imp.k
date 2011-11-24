@@ -34,7 +34,7 @@ its configuration, then its results, and then its semantic rules. */
 The configuration of IMP is trivial: it only contains two cells, one
 for the computation and another for the state.  For good encapsulation
 and clarity, we place the two cells inside another cell, the ``top'' cell
-which is labeled $\top$.  The configuration variable {\em $\PGM} tells
+which is labeled $\top$.  The configuration variable {\em \$PGM} tells
 the \K tool where to place the program after parsing.  The ``$\kdot$''
 in the \textsf{state} cell is \K's way to say ``nothing''.
 Technically, it is a constant which is the unit (or identity) of all
@@ -169,7 +169,7 @@ list has at least one element.  We prefer to make the first rule
 structural, thinking of dissolving the residual empty \texttt{var}
 declaration as a structural cleanup rather than as a computational step. */
 
-  rule <k> var ; S => S ...</k>    [:structural:]
   rule <k> var (X,Xs:Ids => Xs); _ ...</k>
        <state>... . => X |-> 0 ...</state>
+  rule <k> var .Ids; S => S ...</k>    [:structural:]
 end module
