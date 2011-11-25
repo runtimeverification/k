@@ -9,33 +9,35 @@
 
 \begin{latexComment}
 \section{Abstract}
-This is the \K definition of the static semantics of the typed SIMPLE language,
-or in other words, a type system for the typed SIMPLE language in \K.
-We do not re-discuss the various features of the SIMPLE language here.
-The reader is referred to the untyped version of the language for such
-discussions.  We here only focus on the new and interesting problems
-raised by the addition of type declarations, and what it takes to devise
-a type checker for the language.
+This is the \K definition of the static semantics of the typed SIMPLE
+language, or in other words, a type system for the typed SIMPLE
+language in \K.  We do not re-discuss the various features of the
+SIMPLE language here.  The reader is referred to the untyped version of
+the language for such discussions.  We here only focus on the new and
+interesting problems raised by the addition of type declarations, and
+what it takes to devise a type checker for the language.
 
-When designing a type system for a language, no matter within what paradigm,
-we have to decide upon the typing policy that we intend to capture by our
-type system.  Note that we can have multiple type systems
-for the same language, one for which typing policy.  For example, should we
-accept programs which don't have a main function?  Or should we allow functions
-that do not return explicitly?  Or should we allow functions whose type expects
-them to return a value (say an \texttt{int}) to use a plain ``\texttt{return;}''
-statement, which returns no value, like in C?  And so on and so forth.
-Typically, there are two opposite tensions when designing a type system.
-On the one hand, you want your type system to be as permissive as possible,
-that is, to accept as many programs that do not get stuck when executed with
-the untyped semantics as possible; this will keep the programmers using
-your language happy.  On  the other hand, you want your type system to have a
-reasonable performance when implemented; this will keep both the programmers and
-the implementers of your language happy.  For example, a type system that
-rejects programs that could perform division-by-zero is not feasible in general.
-A simple guideline when designing typing policies is to imagine how the
-semantics of the untyped language may get stuck and try to prevent those
-situations from happening.
+When designing a type system for a language, no matter in what
+paradigm, we have to decide upon the intended typing policy.  Note
+that we can have multiple type systems for the same language, one for
+each typing policy.  For example, should we accept programs which
+don't have a main function?  Or should we allow functions that do not
+return explicitly?  Or should we allow functions whose type expects 
+them to return a value (say an \texttt{int}) to use a plain
+``\texttt{return;}'' statement, which returns no value, like in C?
+And so on and so forth.  Typically, there are two opposite tensions
+when designing a type system.  On the one hand, you want your type
+system to be as permissive as possible, that is, to accept as many
+programs that do not get stuck when executed with the untyped
+semantics as possible; this will keep the programmers using your
+language happy.  On  the other hand, you want your type system to have
+a reasonable performance when implemented; this will keep both the
+programmers and the implementers of your language happy.  For example,
+a type system that rejects programs that could perform
+division-by-zero is not feasible in general.  A simple guideline when
+designing typing policies is to imagine how the semantics of the
+untyped language may get stuck and try to prevent those situations
+from happening.
 
 Before we give the \K type system of SIMPLE formally, we discuss, informally,
 the intended typing policy:
