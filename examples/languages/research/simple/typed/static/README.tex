@@ -53,14 +53,14 @@ no value (but only be used for its side effects, like a procedure).
 all the variables.  This is done in a Pascal-style, following the declared
 variable with a colon followed by the type.  For example,
 ``\texttt{var x:int;}'' or ``\texttt{var x:int=7, y:int, z:int=x+y;}''.
-\item Arrays of values of type $T$ have the type \texttt{array of $T$} and
+\item Arrays of values of type $T$ have the type \texttt{arrayOf $T$} and
 are declared using a syntax similar to the one for simple variables, but
 where the colon and the type follow the dimension of the declared array.
-For example, ``\texttt{var x[10] : array of int;}'', or
-``\texttt{var x[10,20] : array of array of int;}'', or even
-``\texttt{var x : array of array of int;}'' when \texttt{x} is only needed
+For example, ``\texttt{var x[10]:arrayOf int;}'', or
+``\texttt{var x[10,20]:arrayOf arrayOf int;}'', or even
+``\texttt{var x:arrayOf arrayOf int;}'' when \texttt{x} is only needed
 as a reference to an array (allocated somewhere else), or even
-``\texttt{var x[10] : array of array of int;}'', as well as any combinations of
+``\texttt{var x[10]:arrayOf arrayOf int;}'', as well as any combinations of
 simple variables (with or without initializations) and arrays (with or without
 allocation---given sizes).
 \item Functions taking arguments of type $\it Ts$ (a list of types) and
@@ -70,12 +70,12 @@ in this generated PDF documentation).  For example, a function taking an
 array of functions from \texttt{int} to \texttt{int} and returning an array
 of \texttt{bool} elements is declared using a syntax of the form
 \begin{verbatim}
-function f(x : array of function from int to int) : array of bool {
+function f(x:arrayOf function from int to int):arrayOf bool {
   ...
 }
 \end{verbatim}
 and has the type
-\texttt{function from array of function from int to int to bool}.
+\texttt{function from arrayOf function from int to int to bool}.
 \item We allow any variable declarations at the top level.  Functions can
 only be declared at the top level.  No other statements are allowed at the
 top level.  In particular we don'l allow declared variables to be initialized.
@@ -91,7 +91,7 @@ SIMPLE has static scoping.
 the expected types.
 \item Increment and assignment can operate both on variables and on array
 elements.  For example, if \texttt{f} has type
-\texttt{function from int to array of array of int} and function
+\texttt{function from int to arrayOf arrayOf int} and function
 \texttt{g} has the type \texttt{function from int to int}, then the
 increment expression \texttt{++f(7)[g(2),g(3)]} is valid.
 \item The \texttt{for} loops only iterate over counter variables of type
@@ -99,7 +99,7 @@ increment expression \texttt{++f(7)[g(2),g(3)]} is valid.
 automatically assumed declared only for the scope of the \texttt{for} and of
 type \texttt{int}.
 \item Functions should only return values of their declared result type.
-To allow more flexibility to the programmers, we allow functions to use
+To give the programmers more flexibility, we allow functions to use
 ``\texttt{return;}'' statements to terminate without returning an actual
 value, or to not explicitly use any return statement, regardless of their
 declared return type.  This flexibility can be handy when writing programs

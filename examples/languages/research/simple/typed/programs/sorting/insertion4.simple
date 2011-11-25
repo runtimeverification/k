@@ -1,20 +1,20 @@
 // This version of insertion sorting declares the vector in the init function
 // and returns it (actually its reference) to the main function
 
-function init(n:int) : array Of int {
-  var x[100]:array Of int;
+function init(n:int) : arrayOf int {
+  var x[100]:arrayOf int;
   for i = 0 to n - 1 do
     x[i] = (n-i) + 100;
   return x;
 }
 
-function printAll(x:array Of int, n:int):void {
+function printAll(x:arrayOf int, n:int):void {
   for i = 0 to n - 1 do
   print(" ",x[i]);
 }
 
 function main():void {
-  var n:int = 30, x:array Of int = init(n);
+  var n:int = 30, x:arrayOf int = init(n);
   print("The original sequence is");
   printAll(x,n);
   print("\nSorting the array using insertion sort ... ");
