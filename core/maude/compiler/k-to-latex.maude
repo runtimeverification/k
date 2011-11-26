@@ -1052,7 +1052,7 @@ mod LATEX-PRINT-META is
   eq \textsf{'==} = '= .
   eq \textsf{Q} = Q [owise] .
   eq \myquote{Str} 
-   = '\myquote '`{ printStr(replaceAll(latexify(replace(substr(Str,1, _-_(length(Str), 2)),"\\","\\textbackslash")),("\\n" |-> "\\textbackslash n", "\"" |-> "\\mysinglequote{}", "_" |-> "\\_"))) '`} .
+   = '\myquote '`{ printStr(replaceAll(latexify(replace(substr(Str,1, _-_(length(Str), 2)),"\\","\\textbackslash ")),("\"" |-> "\\mysinglequote{}", "_" |-> "\\_"))) '`} .
   op printQid : Qid -> QidList .
   eq printQid(Q) 
    = if Q == ' then nil else 
