@@ -1,5 +1,6 @@
 mod COMPILE-ONESHOT is
- including MANY-MODULES-META + ADD-EVAL-META + RESOLVE-DITTO-META + COMPLETE-K-SORTS-META + ANONYMOUS-CONSTANTS-META --- + SANITY-CHECKS-META 
+ including MANY-MODULES-META + ADD-EVAL-META + RESOLVE-DITTO-META + COMPLETE-K-SORTS-META + ANONYMOUS-CONSTANTS-META 
+--- + SANITY-CHECKS-META 
 + REMOVE-PARSER-META 
 + SYNTAX-PREDICATES-META 
 + MISSING-SUBSORTS-META 
@@ -20,7 +21,7 @@ mod COMPILE-ONESHOT is
 + STRICTOPS2CXT-META 
 + STRICTCXT2EQS-META 
 + RESULT-PREDICATES-META 
-+ ID-TO-STRING-META 
+--- + ID-TO-STRING-META 
 + PARSE-METADATA .
 
   op compile : Module QidList AttrSet ~> Module .
@@ -54,7 +55,7 @@ mod COMPILE-ONESHOT is
   eq compile1(M, 'MAKE-ALL-LABELS, AS) = compileMAKE-ALL-LABELS(M, AS) . 
   eq compile1(M, 'STRICTOPS2CXT, AS) = compileSTRICTOPS2CXT(M, AS) . 
   eq compile1(M, 'STRICTCXT2EQS, AS) = compileSTRICTCXT2EQS(M, AS) . 
-  eq compile1(M, 'ID-TO-STRING, AS) = compileID-TO-STRING(M, AS) . 
+---  eq compile1(M, 'ID-TO-STRING, AS) = compileID-TO-STRING(M, AS) . 
   eq compile1(M, 'RESULT-PREDICATES, AS) = compileRESULT-PREDICATES(M, AS) . 
 
   op allSteps : -> QidList .
@@ -62,7 +63,8 @@ mod COMPILE-ONESHOT is
 'ADD-EVAL 
 'RESOLVE-DITTO 
 'COMPLETE-K-SORTS 
-'ANONYMOUS-CONSTANTS --- 'SANITY-CHECKS 
+'ANONYMOUS-CONSTANTS
+--- 'SANITY-CHECKS 
 'REMOVE-PARSER 
 --- 'SYNTAX-PREDICATES
 'MISSING-SUBSORTS
@@ -75,7 +77,7 @@ mod COMPILE-ONESHOT is
 'HOMOGENOUS-ARGUMENTS  
 'MAKE-ALL-LABELS 
 'STRICTOPS2CXT 
-'ID-TO-STRING 
+--- 'ID-TO-STRING 
 'ANONYMOUS-VARIABLES 
 'RESULT-PREDICATES
 'BLOCKING-INPUT
@@ -101,7 +103,7 @@ fmod COMPILE-META is
   including META-MODULE-EXTRAS .
   including STRING-EXTRAS .
   including MODULE-META-PRETTY-PRINT .
-  including PURE-MODULE-META-PRETTY-PRINT .
+---  including PURE-MODULE-META-PRETTY-PRINT .
   including XML-MODULE-META-PRETTY-PRINT .
   including PARSE-METADATA .
   including COMPILATION-ATTRS .
@@ -171,8 +173,8 @@ fmod COMPILE-META is
    = tokenize("generating Strictness Axioms") .
   eq getPhaseName('STRICTCXT2EQS)
    = tokenize("generating Strictness Equations") .
-  eq getPhaseName('ID-TO-STRING)
-   = tokenize("generating equations for Id2String") .
+---  eq getPhaseName('ID-TO-STRING)
+---   = tokenize("generating equations for Id2String") .
 
   op allSteps : -> QidList .
   eq allSteps = 
@@ -196,7 +198,7 @@ fmod COMPILE-META is
 'MAKE-ALL-LABELS 
 
 'STRICTOPS2CXT 
-'ID-TO-STRING 
+--- 'ID-TO-STRING 
 'ANONYMOUS-VARIABLES 
 'RESULT-PREDICATES
 
@@ -228,8 +230,8 @@ fmod COMPILE-META is
    = moduleError('`[ 'ERROR '`] 'Error:  tokenize(getLocation(AS)) '\s '\s 'Compilation 'phase: '\r Q '\o 'Reason: tokenize(Str) '\s '\s '\r 'Trm: '\o eMetaPrettyPrint(M,Trm) '\t '\r 'Context: '\o eMetaPrettyPrint(M, Cxt) '`[ 'ENDERROR '`]) .
   eq $compile(M, Q, M', QIL, AS)  = if M' :: Module and-then wellFormed(M') then compile(M', QIL, AS) else generateError(M,Q,M') fi [owise] .
 
-  op purePrint : [Module] -> QidList .
-  eq purePrint(M) = pureEMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
+---  op purePrint : [Module] -> QidList .
+---  eq purePrint(M) = pureEMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
   op xmlPrint : [Module] -> QidList .
   eq xmlPrint(M) = xmlEMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
   op print : [Module] -> QidList .
@@ -258,7 +260,7 @@ mod COMPILE-LOOP is
   eq compile(Q) = compile(Q, supercools(none) transitions(none) superheats(none)) .
 
   eq print(moduleError(QIL)) = QIL .
-  eq purePrint(moduleError(QIL)) = QIL .
+---  eq purePrint(moduleError(QIL)) = QIL .
   eq xmlPrint(moduleError(QIL)) = QIL .
   rl ['compile Q 'transitions QStr 'superheats QComp 'supercools QSuper QIL, idle, QIL'] 
    => [QIL, idle, print(compile(Q, transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper))))] [print QStr QComp QSuper] .
@@ -271,8 +273,8 @@ mod COMPILE-LOOP is
   rl ['pcompile Q Q' QIL, idle, QIL'] 
    => [QIL, idle, print(pcompile(Q,Q', transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))) )] .
 
-  rl ['purify Q QIL, idle, QIL'] 
-   => [QIL, idle, purePrint(extractModule(pcompile(Q,'RESULT-PREDICATES,  transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))),'PURE-K-TECHNIQUE))] .
+---  rl ['purify Q QIL, idle, QIL'] 
+---   => [QIL, idle, purePrint(extractModule(pcompile(Q,'RESULT-PREDICATES,  transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))),'PURE-K-TECHNIQUE))] .
 
   rl ['xcompile Q Q' 'transitions QStr 'superheats QComp 'supercools QSuper QIL, idle, QIL']
   => [QIL, idle, xmlPrint(pcompile(Q, Q', transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper))))] .

@@ -885,6 +885,7 @@ ceq String2Int(S:#String) = I:#Int if I:#Int := String2Rat(S:#String,10) .
                           (#DecFloat : #Int #String #Int ~> #DecFloat))] .
 
   op Id2String : #Id -> #String .
+  eq Id2String(#id(Str:#String)) = Str:#String .
 endm
 
 mod #QID is

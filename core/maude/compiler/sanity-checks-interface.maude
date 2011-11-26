@@ -6,6 +6,7 @@ mod SANITY-CHECKS-META is
   including MODULE-META-PRETTY-PRINT .
   including META-MODULE-EXTRAS .
   including PARSE-METADATA .
+  including COMPILATION-ATTRS .
   
   var NoInSane : String .  var Flat M : Module .  var MM : [Module] .
   var Trm : Term . var T : Type .  var Mb : MembAx . var Eq : Equation . var Rl : Rule . var N : Nat .  var Op : OpDecl .  var AS : AttrSet .  var Tl : TypeList .  var Ops : OpDeclSet .

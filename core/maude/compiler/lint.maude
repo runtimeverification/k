@@ -12,26 +12,24 @@ load sanity-checks-interface
 mod COMPILE-ONESHOT is
  including MANY-MODULES-META + RESOLVE-DITTO-META + COMPLETE-K-SORTS-META + ANONYMOUS-CONSTANTS-META + SANITY-CHECKS-META .
 
+  var AS : AttrSet .
 
-  op compile : Module QidList ~> Module .
-  eq compile(M, nil) = M .
-  eq compile(M, Q QIL) = compile(compile1(M,Q), QIL) .
+  op compile : Module QidList AttrSet ~> Module .
+  eq compile(M, nil,AS) = M .
+  eq compile(M, Q QIL, AS) = compile(compile1(M,Q, AS), QIL, AS) .
 
-  op compile1 : Module Qid ~> Module .
-  eq compile1(M, 'MANY-MODULES) = compileMANY-MODULES(M) .
-  eq compile1(M, 'RESOLVE-DITTO) = compileRESOLVE-DITTO(M) .
-  eq compile1(M, 'COMPLETE-K-SORTS) = compileCOMPLETE-K-SORTS(M) .
-  eq compile1(M, 'ANONYMOUS-CONSTANTS) = compileANONYMOUS-CONSTANTS(M) . 
-  eq compile1(M, 'SANITY-CHECKS) = compileSANITY-CHECKS(M) . 
+  op compile1 : Module Qid AttrSet ~> Module .
+  eq compile1(M, 'MANY-MODULES, AS) = compileMANY-MODULES(M,AS) .
+  eq compile1(M, 'RESOLVE-DITTO, AS) = compileRESOLVE-DITTO(M,AS) .
+  eq compile1(M, 'COMPLETE-K-SORTS, AS) = compileCOMPLETE-K-SORTS(M,AS) .
+  eq compile1(M, 'ANONYMOUS-CONSTANTS, AS) = compileANONYMOUS-CONSTANTS(M,AS) . 
+  eq compile1(M, 'SANITY-CHECKS, AS) = compileSANITY-CHECKS(M,AS) . 
 
   op allSteps : -> QidList .
   eq allSteps = 'MANY-MODULES 'RESOLVE-DITTO 'COMPLETE-K-SORTS 'ANONYMOUS-CONSTANTS 'SANITY-CHECKS .
   
   op compile : Module ~> Module .  
-  eq compile(M) = compile(M, allSteps) .
-  
-  op partialCompile : Module Qid ~> Module .
-  eq partialCompile(M,Q) = compile(M, upTo(allSteps,Q)) .
+  eq compile(M) = compile(M, allSteps,transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))) .
   
   var M : Module . var Q : Qid . var QIL : QidList .
 endm

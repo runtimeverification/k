@@ -4,9 +4,9 @@ load prelude-extras
 load meta-k
 load metadata-parsing
 load printing
-load pure-printing
+--- load pure-printing
 load xml-printing
----load sanity-checks-interface
+--- load sanity-checks-interface
 
 load many-modules-interface
 load remove-parser-interface
@@ -25,7 +25,7 @@ load subsorts-to-wrappers-interface
 load homogenous-arguments-interface
 load make-all-labels-interface
 load strict-ops2cxt-interface
-load id-to-string-interface
+--- load id-to-string-interface
 load result-predicates-interface
 load blocking-input-interface
 
@@ -36,5 +36,5 @@ load anon-vars-interface
 load make-k-rules-interface
 load strict-cxt2eqs-interface
 
-load compile-program
+--- load compile-program
 load compile-chain
