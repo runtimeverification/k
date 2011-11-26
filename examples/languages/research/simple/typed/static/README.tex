@@ -53,9 +53,10 @@ no value (but only be used for its side effects, like a procedure).
 all the variables.  This is done in a Pascal-style, following the declared
 variable with a colon followed by the type.  For example,
 ``\texttt{var x:int;}'' or ``\texttt{var x:int=7, y:int, z:int=x+y;}''.
-\item Arrays of values of type $T$ have the type \texttt{arrayOf $T$} and
-are declared using a syntax similar to the one for simple variables, but
-where the colon and the type follow the dimension of the declared array.
+\item Arrays of values of type $T$ have the type \texttt{arrayOf $T$}
+(displayed as $T[\,]$ in this generated PDF) and are declared using a
+syntax similar to the one for simple variables, but where the colon
+and the type follow the dimension of the declared array.
 For example, ``\texttt{var x[10]:arrayOf int;}'', or
 ``\texttt{var x[10,20]:arrayOf arrayOf int;}'', or even
 ``\texttt{var x:arrayOf arrayOf int;}'' when \texttt{x} is only needed

@@ -15,9 +15,9 @@ The lists of types are useful for function arguments. */
                 | "bool"
                 | "string"
                 | "void"
-                | "arrayOf" Type [:prec(1):]
+                | "arrayOf" Type [:prec(1) latex "{#1}\texttt{\char91\char93}":]
                 | "function" "from" Types "to" Type
-                    [:prec(1) latex "{#1}\rightarrow{#2}":]
+                    [:prec(1) latex "({#1}\ \texttt{->}\ {#2})":]
   syntax Types ::= List{Type,","}
 
 /*@ \subsection{Declarations}
@@ -199,7 +199,7 @@ we want the declared array to hold array references).  */
 
   syntax Type ::= "stmt"
 
-  rule var; => stmt   [: structural:]
+  rule var .Types; => stmt   [: structural:]
 
   rule <task> <k> var X : T; => stmt ...</k> </task>
        <gtenv> Rho:Map => Rho[T / X] </gtenv>
@@ -236,7 +236,7 @@ function.  The \texttt{types} operation ensures that all the
                <return> T </return>
              </task>)                                  [:structural:]
   syntax Types ::= "types" "(" Exps ")"                [:prec(1):]
-  rule types() => void,.Types                          [:structural:]
+  rule types(.Exps) => void,.Types                          [:structural:]
   rule types(X : T) => T,.Types                        [:structural:]
   rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
 
@@ -303,7 +303,7 @@ integer in order to be allowed to be incremented, as seen in the rule
   rule bool or bool => bool
   rule not(bool) => bool
   rule (arrayOf T)[int,Ts] => T[Ts]
-  rule T[] => T
+  rule T[.Types] => T
   rule sizeOf(arrayOf T) => int
   rule _`(_`)(function from Ts to T, Ts) => T
     if Ts =/=Bool .Types
@@ -338,7 +338,7 @@ exceptions can only have integer type. */
   rule <k> return T; => stmt ...</k> <return> T </return>
   rule return; => stmt
   rule print(T,Ts => Ts);  if T ==Bool int orBool T ==Bool string
-  rule print(); => stmt
+  rule print(.Types); => stmt
   rule try stmt catch(X) S => {var X:int; S}
     [:structural:]
   rule throw int; => stmt

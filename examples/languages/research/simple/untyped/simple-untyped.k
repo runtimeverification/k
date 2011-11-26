@@ -658,7 +658,7 @@ its evaluated arguments to the output buffer, and discard the residual
 
   rule <k> print(V,Vs => Vs); ...</k>
        <out>... . => ListItem(V) </out>  [:transition:]
-  rule print(); => .                     [:structural:]
+  rule print(.Vals); => .                [:structural:]
 
 /*@ \subsection{Exceptions}
 SIMPLE allows parametric exceptions, in that one can throw and catch a

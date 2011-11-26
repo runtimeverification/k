@@ -20,9 +20,10 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
                 | "bool"
                 | "string"
                 | "void"
-                | "arrayOf" Type [:prec(1):]
+                | "arrayOf" Type
+                    [:prec(1) latex "{#1}\texttt{\char91\char93}":]
                 | "function" "from" Types "to" Type
-                    [:prec(1) latex "{#1}\rightarrow{#2}":]
+                    [:prec(1) latex "({#1}\ \texttt{->}\ {#2})":]
   syntax Types ::= List{Type,","}
 
   syntax Decl ::= "var" Exps ";"
@@ -82,13 +83,14 @@ The KOOL syntactic extensions below are almost identical to their
 untyped variants in untyped KOOL.  The only difference is that we add
 a new type construct for class types and that now methods take typed
 arguments (we achieved this the same way as in typed SIMPLE) and can
-also have an explicit return type.  A macro adds an explicit type
-\texttt{void} whenever a return type is not given (e.g., one may not
-want to give a return type for constructors).  The syntax of typed
+also have an explicit return type.  As a convenience to the
+programmer, a macro adds an explicit type \texttt{void} whenever a
+return type is not provided (e.g., one may not want to write a return
+type for constructors in KOOL typed programs).  The syntax of typed
 exceptions differs from that of typed SIMPLE in that the variable
 bound by \texttt{catch} is now expected to be typed (we use
-\textit{Exp}, but we only give semantics for the case when it
-has the form \textit{\#Id:Type}. */
+\textit{Exp}, but we only give semantics for the case when it has the
+form \textit{\#Id:Type}. */
 
   syntax #Id ::= "object"
 
@@ -98,7 +100,7 @@ has the form \textit{\#Id:Type}. */
                 | "method" #Id "(" Exps ")" Stmt
   macro method X:#Id (Es:Exps) S:Stmt = method X(Es) : void S
 
-  syntax Decl ::= "class" #Id "{" Stmts "}" [prec 0]
+  syntax Decl ::= "class" #Id "{" Stmts "}"
                 | "class" #Id "extends" #Id "{" Stmts "}"
   macro class C:#Id {Ss:Stmts} = class C extends object {Ss}
 
@@ -262,7 +264,7 @@ KOOL).  */
     => if E then {S while E do S} else {} ...</k> [:structural:]
   rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out>
     if typeOf(V) ==Bool int orBool typeOf(V) ==Bool string    [:transition:]
-  rule print(); => . [:structural:]
+  rule print(.Vals); => . [:structural:]
 
   rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
        <busy> Busy:Set => Busy -Set keys(H) </busy>
@@ -282,10 +284,11 @@ KOOL).  */
 
   syntax Exp ::= "lvalue" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"
-  rule <k> lvalue(X) => loc(L:#Nat) ...</k> <env>... X|->L ...</env>
+  rule <k> lvalue(X) => loc(L:#Nat) ...</k>
+       <env>... X|->L ...</env>  [:structural:]
   context lvalue(_[[HOLE]])
   context lvalue([HOLE][_])
-  rule <k> lvalue(lookup(L)) => loc(L) ...</k>
+  rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store> [:transition:]
   syntax K ::= "env" "(" Map ")"
@@ -294,16 +297,17 @@ KOOL).  */
 
 // typeOf
   syntax Type ::= "typeOf" "(" K ")"
-  rule typeOf(I) => int       [:structural:]
-  rule typeOf(B) => bool      [:structural:]
-  rule typeOf(_:#String) => string  [:structural:]
+  rule typeOf(I) => int              [:structural:]
+  rule typeOf(B) => bool             [:structural:]
+  rule typeOf(_:#String) => string   [:structural:]
   rule typeOf(arrayRef(T,_,_)) => T  [:structural:]
-  rule typeOf(undefined(T)) => T [:structural:]
-  rule typeOf(nothing) => void  [:structural:]
+  rule typeOf(undefined(T)) => T     [:structural:]
+  rule typeOf(nothing) => void       [:structural:]
 
-  syntax Types ::= "types" "(" Exps ")"    [:prec(1):]
-  rule types() => .Types                   [:structural:]
-  rule types(X : T, XTs) => T, types(XTs)  [:structural:]
+  syntax Types ::= "types" "(" Exps ")"                [:prec(1):]
+  rule types(.Exps) => void,.Types                     [:structural:]
+  rule types(X : T) => T,.Types                        [:structural:]
+  rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
 
   syntax List{K} ::= #Nat ".." #Nat
   rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
@@ -327,17 +331,15 @@ Like in untyped KOOL. */
              ...</thread>)
 
 /*@ \subsubsection{Assignment}
-Typed KOOL allows to assign subtype instance values to supertype
-lvalues. */
+Typed KOOL allows to assign subtype instance values to supertype lvalues. */
 
   rule <k> loc(L)=V
         => subtype(typeOf(V),typeOf(K))~>true?~>upcast(V,typeOf(K:K))...</k> 
-       <store>... L|->(K=>upcast(V,typeOf(K))) ...</store> [:transition:]
+       <store>... L |-> (K=>upcast(V,typeOf(K))) ...</store>  [:transition:]
 
 /*@ \subsubsection{Typed exceptions}
 Exceptions are propagated now until a catch that can bind them is
-encountered.
-*/
+encountered. */
 
   syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
@@ -373,8 +375,8 @@ parameters */
 The only change to untyped KOOL's values is that closures are now typed
 (their last argument holds their type). */
 
-  syntax Val ::= "objRef" "(" Bag ")"
-               | "closure" "(" #Id "," #Nat "," Exps "," Stmt "," Type ")"
+  syntax Val ::= "objectClosure" "(" Bag ")"
+               | "methodClosure" "(" #Id "," #Nat "," Exps "," Stmt "," Type ")"
 
 /*@ \subsection{Class declaration}       
 Like in untyped KOOL. */
@@ -404,7 +406,7 @@ the only difference is the addition of the types.  */
        <location> OL:#Nat </location>
        <env> Env => Env[L/F] </env>
        <store>... 
-         .  => L|->closure(Class,OL,XTs,S, function from types(XTs) to T)
+         .  => L|->methodClosure(Class,OL,XTs,S, function from types(XTs) to T)
        ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
@@ -455,12 +457,12 @@ those in untyped KOOL. */
   syntax K ::= storeObj
   rule <k> storeObj => . ...</k>
        <crntObj> Obj (<location> L </location> => .) </crntObj>
-       <store>... . => L |-> objRef(Obj) ...</store>
+       <store>... . => L |-> objectClosure(Obj) ...</store>
 
 /*@ \subsection{Self reference}
 Like in untyped KOOL. */
 
-  rule <k> this => objRef(Obj) ...</k>
+  rule <k> this => objectClosure(Obj) ...</k>
        <crntObj> Obj </crntObj>
 
 /*@ \subsection{Object member access}
@@ -469,7 +471,7 @@ Like in untyped KOOL. */
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
     if notBool(X in keys(Env))  [:structural:]
   context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
-  rule <k> _._(objRef(<crntClass> Class </crntClass>
+  rule <k> _._(objectClosure(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X) 
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
        ...</k>  [:structural:]
@@ -496,7 +498,7 @@ rules below are identical to those in untyped KOOL. */
 
   context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
 
-  rule <k> '_`(_`)(('_._(objRef(Obj <envStack> EStack </envStack>),,X) 
+  rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
     [:structural:]
 
@@ -517,11 +519,11 @@ rules below are identical to those in untyped KOOL. */
 
 /*@ Closure application needs to also set a new return type in the
 \textsf{return} cell, in order for the values returned by its body to
-be checked against the return type of the method.  To this correctly,
+be checked against the return type of the method.  To do this correctly,
 we also need to stack the current status of the \textsf{return} cell
 and then pop it when the method returns. */
 
-  rule <k> _`(_`)(closure(Class,OL:#Nat,XTs,S:Stmt, function from _ to T),
+  rule <k> _`(_`)(methodClosure(Class,OL:#Nat,XTs,S:Stmt,function from _ to T),
                   Vs:Vals) ~> K:K
         => bindto(XTs,Vs) ~> S ~> return; </k>
        <control> C:Bag 
@@ -531,7 +533,8 @@ and then pop it when the method returns. */
           <return> T':Type => T </return>
         </control>
        <env> Env => . </env>
-       <store>...OL |-> objRef(<crntClass>_:#Id</crntClass>Obj:Bag)...</store>
+       <store>... OL |-> objectClosure(<crntClass>_:#Id</crntClass>Obj:Bag)
+       ...</store>
 
 /*@ At method return, we have to check that the type of the returned
 value is a subtype of the expected return type.  Moreover, if that is
@@ -549,21 +552,21 @@ expected type. */
 /*@ \subsection{Instance Of}
 Like in untyped KOOL. */
 
-  rule objRef((_ <envStack>ListItem(Class::_)...</envStack>)) instanceOf Class 
-    => true
-  rule objRef((_ <envStack> ListItem(Class1::_)
-                      => . ...</envStack>)) instanceOf Class2 
+  rule objectClosure((_ <envStack>ListItem(Class::_)...</envStack>))
+        instanceOf Class => true
+  rule objectClosure((_ <envStack> ListItem(Class1::_)
+                       => . ...</envStack>)) instanceOf Class2 
     if Class1 =/=Bool Class2  [:structural:]
-  rule objRef((_ <envStack> .List </envStack>)) instanceOf Class
+  rule objectClosure((_ <envStack> .List </envStack>)) instanceOf Class
     => false
  
 /*@ \subsection{Cast}
-Unlike in untyped KOOL, in typed KOOL we actually check that an object
+Unlike in untyped KOOL, in typed KOOL we actually check that the object
 can indeed be cast to the claimed type. */
 
-  rule <k> cast objRef((<crntClass> _:K </crntClass> Obj)) to Class 
-        => objRef(Obj) instanceOf Class ~> true?
-             ~> objRef(<crntClass> Class </crntClass> Obj) ...</k>
+  rule <k> cast objectClosure((<crntClass> _:K </crntClass> Obj)) to Class 
+        => objectClosure(Obj) instanceOf Class ~> true?
+             ~> objectClosure(<crntClass> Class </crntClass> Obj) ...</k>
     [:structural:]
 
 /*@ \subsection{Objects as lvalues}
@@ -573,7 +576,7 @@ Like in untyped KOOL. */
     if notBool(X in keys(Env))  [:structural:]
 
   context lvalue(_._([HOLE],_))
-  rule <k> lvalue(_._(objRef(<crntClass> Class </crntClass> 
+  rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
                            <envStack>...
                              ListItem(Class :: EnvC) EStack
                            </envStack>), X)
@@ -597,37 +600,31 @@ Like in untyped KOOL. */
 /*@ \subsubsection{\texttt{typeOf}}
 \texttt{typeOf} for the additional values. */
 
-  rule typeOf(objRef(_ <envStack> ListItem(Class::_) ...</envStack>))
+  rule typeOf(objectClosure(_ <envStack> ListItem(Class::_) ...</envStack>))
     => class Class [:structural:]
-  rule typeOf(closure(_,_,_,_,T)) => T  [:structural:]
+  rule typeOf(methodClosure(_,_,_,_,T)) => T  [:structural:]
 
 /*@ \subsubsection{Subtyping constraints}
 The subclass relation introduces a subtyping relation. */
 
   syntax Exp ::= "subtype" "(" Types "," Types ")"
 
-  rule subtype(,) => true  [:structural:]
-  rule subtype((T1:Type,T2:Type,Ts:Types),(T1':Type,T2':Type,Ts':Types))
-    => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))  [:structural:]
   rule subtype(T,T) => true  [:structural:]
-  rule <k> subtype(class Class1:#Id, class Class)
-        => subtype(class Class2, class Class) ...</k>
-      <class>...
-          <className> Class1 </className> <extends> Class2 </extends>
-      ...</class>
-    if Class1 =/=Bool Class  [:structural:]
   rule <k> subtype(class Class1, class Class)
         => subtype(class Class2, class Class) ...</k>
           <className> Class1 </className> <extends> Class2 </extends>
     if Class1 =/=Bool Class  [:structural:]
+  rule subtype((T1:Type,T2:Type,Ts:Types),(T1':Type,T2':Type,Ts':Types))
+    => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))  [:structural:]
+  rule subtype(.Types,.Types) => true  [:structural:]
 
 /*@ \subsubsection{UpCasting}
 Performs unsafe upcasting.  One should only use it combination with
 the subtype relation above.  */
 
   syntax Val ::= upcast( Val , Type )
-  rule upcast(objRef(<crntClass> _:K </crntClass> Obj), class Class) 
-       => objRef(<crntClass> Class </crntClass> Obj)
+  rule upcast(objectClosure(<crntClass> _:K </crntClass> Obj), class Class) 
+       => objectClosure(<crntClass> Class </crntClass> Obj)
     [:structural:]
   rule upcast(V,T) => V if typeOf(V) ==Bool T  [:structural:]
 

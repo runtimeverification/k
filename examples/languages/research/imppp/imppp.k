@@ -251,7 +251,7 @@ may compete on the output buffer; we want to capture all behaviors. */
   syntax Vals ::= List{Val,","}
   rule <k> print(V:Val,Vs:Vals => Vs) ...</k>
        <out>... . => ListItem(V) </out>  [:transition:]
-  rule print() => .                      [:structural:]
+  rule print(.Vals) => .                 [:structural:]
 
 /*@ \subsubsection{Halt}
 The \texttt{halt} statement discards the entire contents of the

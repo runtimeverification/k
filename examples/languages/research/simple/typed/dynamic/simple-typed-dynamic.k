@@ -15,9 +15,10 @@ the desired evaluation strategies of the various language constructs .  */
                 | "bool"
                 | "string"
                 | "void"
-                | "arrayOf" Type [:prec(1):]
+                | "arrayOf" Type
+                    [:prec(1) latex "{#1}\texttt{\char91\char93}":]
                 | "function" "from" Types "to" Type
-                    [:prec(1) latex "{#1}\rightarrow{#2}":]
+                    [:prec(1) latex "({#1}\ \texttt{->}\ {#2})":]
   syntax Types ::= List{Type,","}
 
 //@ \subsection{Declarations}
@@ -294,8 +295,8 @@ When done with the first pass, call \texttt{main()}. */
     => if E then {S while E do S} else {} ...</k> [:structural:]
 //@ We only allow printing integers and strings
   rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out>
-    if typeOf(V) ==Bool int orBool typeOf(V) ==Bool string    [:transition:]
-  rule print(); => . [:structural:]
+    if typeOf(V) ==Bool int orBool typeOf(V) ==Bool string  [:transition:]
+  rule print(.Vals); => .  [:structural:]
 
   syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
@@ -354,22 +355,22 @@ When done with the first pass, call \texttt{main()}. */
 
 //@ \texttt{typeOf}
   syntax Type ::= "typeOf" "(" K ")"
-  rule typeOf(I) => int       [:structural:]
-  rule typeOf(B) => bool      [:structural:]
-  rule typeOf(_:#String) => string  [:structural:]
+  rule typeOf(I) => int              [:structural:]
+  rule typeOf(B) => bool             [:structural:]
+  rule typeOf(_:#String) => string   [:structural:]
 
   rule typeOf(arrayRef(T,_,_)) => T  [:structural:]
   rule typeOf(lambda(_,_,T)) => T    [:structural:]
 
-  rule typeOf(undefined(T)) => T [:structural:]
-  rule typeOf(nothing) => void   [:structural:]
+  rule typeOf(undefined(T)) => T     [:structural:]
+  rule typeOf(nothing) => void       [:structural:]
 
 /*@ Recall that lists of the form "a,b,c" are a syntactic convenience,
 which eventually are translated into cons-lists "(a,(b,(c,.)))".
 Unfortunately, the current K tool is not able to cons-listify
 the RHSes of the rules below, so we have to do it manually.  */
-  syntax Types ::= "types" "(" Exps ")"    [:prec(1):]
-  rule types() => void,.Types                          [:structural:]
+  syntax Types ::= "types" "(" Exps ")"                [:prec(1):]
+  rule types(.Exps) => void,.Types                     [:structural:]
   rule types(X : T) => T,.Types                        [:structural:]
   rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
 

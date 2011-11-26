@@ -190,7 +190,7 @@ of Java.  In fact, the latter can be implemented in terms of
 
   syntax KResult ::= Val
 
-  syntax K ::= "undefined" [:latex("\bot"):]
+  syntax K ::= "undefined"  [:latex("\bot"):]
 
   rule <k> var X:#Id; => . ...</k>
        <env> Env:Map => Env[L:#Nat/X] </env>
@@ -242,10 +242,10 @@ of Java.  In fact, the latter can be implemented in terms of
   rule B1 or B2 => B1 orBool B2
   rule not(B:#Bool) => notBool(B)
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
-  rule arrayRef(L,_)[N] => lookup(L +Int N) [:structural:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs]           [:structural:]
+  rule arrayRef(L,_)[N] => lookup(L +Int N)  [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
-  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store> [:transition:]
+  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store>  [:transition:]
 
   rule sizeOf(arrayRef(_,N)) => N
 
@@ -264,18 +264,18 @@ of Java.  In fact, the latter can be implemented in terms of
        <nextLoc> L => L +Nat 1 </nextLoc>
   rule <k> bindto(.Ids,.Exps) => . ...</k>  [:structural:]
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
+  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in>    [:transition:]
 
   context ([HOLE] => lvalue([HOLE])) = _
-  rule <k> loc(L)=V => V...</k> <store>...L|->(_=>V)...</store> [:transition:]
+  rule <k> loc(L)=V => V...</k> <store>...L|->(_=>V)...</store>  [:transition:]
 
   rule {} => . [:structural:]
-  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
+  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env>   [:structural:]
 
   syntax K ::= "env" "(" Map ")"
-  rule <k> env(Env) => . ...</k> <env> _ => Env </env> [:structural:]
+  rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [:structural:]
 
-  rule (env(_) => .) ~> env(_) [:structural:]
+  rule (env(_) => .) ~> env(_)  [:structural:]
 
   rule S1:Stmt S2:Stmt => S1 ~> S2  [:structural:]
 
@@ -287,8 +287,9 @@ of Java.  In fact, the latter can be implemented in terms of
   rule <k> while E:Exp do S
     => if E then {S while E do S} else {} ...</k> [:structural:]
 
-  rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out> [:transition:]
-  rule print(); => . [:structural:]
+  rule <k> print(V,Vs => Vs);...</k> <out>... . => ListItem(V) </out>
+    [:transition:]
+  rule print(.Vals); => .   [:structural:]
 
   syntax ListItem ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
@@ -316,7 +317,7 @@ constructs keep their semantics from SIMPLE. */
   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
        <busy>... SetItem(V)=>. ...</busy>
   rule <k> rendezvous V; => . ...</k>
-       <k> rendezvous V; => . ...</k> [:transition:]
+       <k> rendezvous V; => . ...</k>  [:transition:]
 
   syntax Exp ::= "lvalue" "(" K ")"
   syntax Val ::= "loc" "(" #Nat ")"

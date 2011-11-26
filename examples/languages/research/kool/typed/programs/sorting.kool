@@ -99,7 +99,7 @@ class Sorting {
 
 class main {
 
-  method map(m : arrayOf string, f : arrayOf function from to void) {
+  method map(m : arrayOf string, f : arrayOf function from void to void) {
     for i = 0 to sizeOf(f) - 1 do {
       print(m[i]);
       (f[i])();
@@ -110,7 +110,7 @@ class main {
     print("Size of the array to sort = ");
     var s : class Sorting = new Sorting(read()),
         m[11] : arrayOf string,
-        f[11] : arrayOf function from to void;
+        f[11] : arrayOf function from void to void;
     m[ 0] = "The original unsorted array is:";
     f[ 0] = s.printArray;
     m[ 1] = "Reversing the array ... ";
