@@ -1,3 +1,0 @@
-load pAccount-compiled
-search[1] run('pAccount) =>! < T > B:Bag </ T > .
-q

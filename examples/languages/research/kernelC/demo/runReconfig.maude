@@ -1,3 +1,0 @@
-load pReconfig-compiled
-rewrite[100] run('pReconfig) .
-q

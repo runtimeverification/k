@@ -18,11 +18,11 @@ module FUN-UNTYPED-SYNTAX
                | Exp "or" Exp          [:strict prec(59) gather(E e):]
                | "not" Exp             [:strict prec(53):]
 
-  syntax Exp ::= "fun" Ids "->" Exp
+  syntax Exp ::= "fun" Exps "->" Exp
                | Exp Exps               [:strict prec(10) gather(E e):]
----               | Exp "=" Exp           [:prec(53):]   --- Bindings
-               | "let" Ids "=" Exps "in" Exp [:strict(2):]
-               | "letrec" Ids "=" Exps "in" Exp
+               | Exps "=" Exps           [:prec(53):]   --- Bindings
+               | "let" Exp "in" Exp
+               | "letrec" Exp "in" Exp
                | "if" Exp
                  "then" Exp
                  "else" Exp            [:strict(1):]
@@ -46,10 +46,10 @@ module FUN-UNTYPED-SYNTAX
   syntax Ids  ::= List{#Id,","}
   syntax Exps ::= List{Exp,","}
 
----  macro fun E1:Exp E2:Exp -> E:Exp = fun E1 -> fun E2 -> E
----  macro (E1 E2 = E) = (E1 = fun E2 -> E)
-//  macro (Xs1:Ids = Es1:Exps) and (Xs2:Ids = Es2:Exps)
-//      = ((Xs1,Xs2) = (Es1,Es2))
+  macro fun E1:Exp E2:Exp -> E:Exp = fun E1 -> fun E2 -> E
+  macro (E1:Exp E2:Exp = E) = (E1 = fun E2 -> E)
+  macro (X:#Id = E:Exp) and (Xs:Ids = Es:Exps)
+      = ((X,Xs) = (E,Es))
 end module
 
 
@@ -103,8 +103,8 @@ module FUN-UNTYPED
 
 //@ \subsection{Let}
 
-  rule <k> let Xs = Vs:Vals in E
-        => bindTo(Xs,Vs) ~> E ~> env(Rho) ...</k>
+  rule <k> let Xs = Es:Exps in E
+        => bindTo(Xs,Es) ~> E ~> env(Rho) ...</k>
        <env> Rho </env>
 
 //@ \subsection{Letrec}
@@ -156,7 +156,8 @@ module FUN-UNTYPED
 
 //@ \subsubsection{bindTo and bind}
 
-  syntax K ::= "bindTo" "(" Ids "," Vals ")" | "bind" "(" Ids ")"
+  syntax K ::= "bindTo" "(" Ids "," Exps ")"        [:strict(2):]
+             | "bind" "(" Ids ")"
 
   rule <k> bindTo(.Ids,.Vals) => . ...</k>             [:structural:]
   rule <k> bindTo((X,Xs => Xs),(V,Vs => Vs)) ...</k>
