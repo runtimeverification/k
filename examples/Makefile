@@ -18,8 +18,8 @@ TEST_DIRS = algorithms/sort \
 	    languages/research/fun/untyped \
 	    languages/research/agent \
 	    languages/research/challenge \
-	    languages/research/kernelC \
 	    languages/classic/imp \
+#	    languages/research/kernelC \
 		#languages/research/kool/typed/static \
 		#languages/research/kool/typed/dynamic \
 	    #languages/classic/imp/fully-syntactic \
