@@ -255,6 +255,7 @@ sub gen_prod
 	$pkeys_no ++;
     }    
 #    print "PROD: $production\nPKEYS: $pkeys_no\n\n";
+#    print "nPKEYS: $pkeys_no\n\n";
 
     my @generated = ();
     if ($pkeys_no > 0)
@@ -362,9 +363,9 @@ sub generation
     my @array = @$array;
     my $out = "";
 
-    
-#    print "ARRAY: @array\n" if @array < $pkeys_no;
-    if (@array != 0)
+   
+#    print "PRODUCTION: $production\nARRAY: @array\n"; # if @array < $pkeys_no;
+    if (@array != 0 && scalar @$set != 0)
     {
 #	print "ARRAY: @array\n";
 	my $mkeys = join("|", @array);
@@ -374,9 +375,9 @@ sub generation
 	$temp_prod =~ s/\[\s*metadata.*?\]\s*$//sg;
 
 	# stop if terminals not included in production
-	my $tmp_prod = $temp_prod;
-	$tmp_prod =~ s/(?<![0-9a-zA-Z`])($ksort)\b//sg;
-	return "" if  $tmp_prod =~ /^\s*$/s;
+#	my $tmp_prod = $temp_prod;
+#	$tmp_prod =~ s/(?<![0-9a-zA-Z`])($ksort)\b//sg;
+#	return "" if  $tmp_prod =~ /^\s*$/s;
 
 	my $ttemp = $temp_prod;
 	$ttemp =~ s/(?<![0-9a-zA-Z`])($ksort)/{ my $t = $1; $counter ++; $t !~ m!($nelist|$elist|$mkeys)! ? getvar($t) . "$counter:$t" : "$t" ; }/sge;
@@ -477,13 +478,16 @@ sub generation
 	$out .= "\tsyntax $main_sort ::= $temp_prod [metadata \"parser=() generated=()\" $prec]\n";
 	$out .= "\tmacro ($left) = ($right) [metadata \"parser=() generated=()\"]\n\n";
 	
-	$out = "" if $bad;
+
+
+	$out = "" if ($bad == 1);
 #        print "SET: @$set\nARR: @array\n\n";
-        $out = "" if @$set == 0;
+#        $out = "" if (scalar @$set) == 0;
     }
     
 #    print "Gen: $out\n\n\n";
     
+#  print "PROD: $production\n\n$out\n\n";
     return $out;
 }
 
