@@ -168,6 +168,10 @@ sub solve_lists
 
     # keys: lists sorts
     my $keys = join("|", keys %declaration_map);
+    if ($keys eq "") {
+#      print "ALL: $_";
+      return $_;
+    }
 #    
 #    while ($temp =~ /(syntax\s+($keys)\s*::=\s*($keys))\s*\[\s*metadata.*?\]\s*(?=$kmaude_keywords_pattern)/sg)
 #    {
@@ -241,11 +245,15 @@ sub gen_prod
     if ($production =~ /prec\s*\(\s*([0-9]+)\s*\)/s)
     {
 	$prec = " $1";
-#	print "Got: $1\n";
     }
-#    print "PROD: $production\n";
-    
-    while ($production =~ /($keys)/sg) { $pkeys_no ++; push(@prods, $1); }    
+
+    my $temp = $production;
+    $temp =~ s/\[\s*?metadata.*?\]\s*$//sg;
+
+    while ($temp =~ /($keys)/sg) { 
+	push(@prods, $1);
+	$pkeys_no ++;
+    }    
 #    print "PROD: $production\nPKEYS: $pkeys_no\n\n";
 
     my @generated = ();
@@ -268,11 +276,8 @@ sub gen_prod
 		    my @set = ();
 		    for(my $j = 0; $j < @prods; $j ++)
 		    {
-			if (isSet($j, $i))
-			{
-			    push(@tmp, $prods[$j]);
-			    push(@set, $j);
-			}
+			push(@tmp, $prods[$j]);
+			push(@set, $j) if isSet($j, $i);
 		    }
 		    push(@generated, generation($production, $main_sort, $pkeys_no, \@tmp, \@set, $prec));
 		}		
@@ -290,52 +295,44 @@ sub gen_prod
 	    foreach my $i (0 .. ($pkeys_no - 1))
 	    {
 	    
-	    my $left = $tmp;
-	    my $right = $tmp;
-	    
-            # syntax Stmt ::= function Id(Ids) {Stmts}
-	    
-	    # Ids ::= List{#Id, ","}
-	    # Stmts ::= List{Stmt,""}
-	    
-	    # macro function X:Id(Y:SyntacticList{#Id,","}) {Z:Stmts} = 
-	    #    function X:Id(listify(Y:SyntacticList{#Id,","})) {Z:Stmts} [metadata "generated=()"]
-	    
-	    my $count = -1;
-	    
-	    $right =~ s/(?<![0-9a-zA-Z`])($ksort)/
-	    {
-		$counter ++; my $sort = $1;
-                if ($sort =~ m!($pkeys)!sg) {
-                  $count ++;
-                  if ($count==$i) {
-		    "(listify$1(X$counter:$nelist$1))";
-		  } else {
-                    "X$counter:$1";
-                  }
-                } else {
-		    "X$counter:$1";
+		my $left = $tmp;
+		my $right = $tmp;
+		
+		my $count = -1;
+		
+		$right =~ s/(?<![0-9a-zA-Z`])($ksort)/
+		{
+		    $counter ++; my $sort = $1;
+		    if ($sort =~ m!($pkeys)!sg) {
+			$count ++;
+			if ($count==$i) {
+			    "(listify$1(X$counter:$nelist$1))";
+			} else {
+			    "X$counter:$1";
+			}
+		    } else {
+			"X$counter:$1";
+		    }
 		}
-	    }
-	    /sge;
-	    
-	    $right =~ s/`/ /sg;
-	    
-	    $left = $right;
-	    $left =~ s/listify[^(]*//sg;
-	    
+		/sge;
+		
+		$right =~ s/`/ /sg;
+		
+		$left = $right;
+		$left =~ s/listify[^(]*//sg;
+		    
 	    
 #	    print "Prod: $production\nPKEYS: $pkeys\nPRODS: @prods\nTMP: $tmp\n";
 #	    print "macro ($left) = ($right) [metadata \"generated=() parser=()\"]\n";
-	    my $parser_attr = "[metadata \"generated=() parser=()\"]";
-	    push(@generated, "macro ($left) = ($right) $parser_attr");
+		my $parser_attr = "[metadata \"generated=() parser=()\"]";
+		push(@generated, "macro ($left) = ($right) $parser_attr");
 	    }
 	}
     }
- 
+	
     \@generated;
 }
-
+    
 sub contains
 {
     my $set = shift;
@@ -359,10 +356,12 @@ sub generation
     my $set = shift;
     my $prec = shift;
 
+    
     $prec = "prec $prec" if (defined $prec && $prec ne "");
     
     my @array = @$array;
     my $out = "";
+
     
 #    print "ARRAY: @array\n" if @array < $pkeys_no;
     if (@array != 0)
@@ -370,12 +369,10 @@ sub generation
 #	print "ARRAY: @array\n";
 	my $mkeys = join("|", @array);
 	
-    	
 	my $temp_prod = $production;
 	# remove attributes
 	$temp_prod =~ s/\[\s*metadata.*?\]\s*$//sg;
 
-	
 	# stop if terminals not included in production
 	my $tmp_prod = $temp_prod;
 	$tmp_prod =~ s/(?<![0-9a-zA-Z`])($ksort)\b//sg;
@@ -387,64 +384,82 @@ sub generation
 	my $right = $ttemp;
 	$counter ++;
 	
-	# for syntax generation
+	# check terminals around list sorts
+	my $bad = 0;
 	my $count = 0;
+	while ($temp_prod =~ /($mkeys)/sg)
+	{
+	    # check if list sort has terminals around
+	    # print "ALL:$temp_prod\n$`:$&:$'\n";
+	    my $pre  = $`; 
+	    my $post = $'; 
+            $pre =~ s!\s+$!!sg; 
+            $post =~ s!^\s+!!sg;
+#            print "check(@$set; $count)=" . contains($set, $count) . "\n";
+	    if (contains($set, $count) && (($pre =~ m!($ksort)\s*$!s) || ($post =~ m&^\s*($ksort)&s) || $pre eq "" || $post eq "" ))
+	    {
+		$bad = 1;
+	    }
+
+            $count ++;
+	}
+	
+	
+	# for syntax generation
+	$count = 0;
 	$temp_prod =~ s/($mkeys)/
 	{
-	    $count = 0;
 	    my $mk = $1;
-	    while ($count < $pkeys_no)
+	    	    
+	    if (contains($set, $count))
 	    {
-		if (contains($set, $count) == 1)
-		{
-		    $mk = "";
-		}
-		$count ++;
+		$mk = "";
 	    }
+	    $count ++;
 	    $mk;
-	}/gse;
+        }/gse;
 	
 	# left = for macro generation
+        my $var_counter = 0;
 	$count = 0;
 	$left =~ s/($mkeys)/
 	{
-	    $count = 0;
 	    my $mk = $1;
-	    while ($count < $pkeys_no)
+	    
+	    if (contains($set, $count))
 	    {
-		if (contains($set, $count) == 1)
-		{
-		    $mk = "";
-		}
-		$count ++;
+		$mk = "";
 	    }
-	    $mk;
-	}/gse;
-	
-	# right = for macro generation
-	$count = -1;
-	$right =~ s/\b($mkeys)\b/
-	{
+	    else
+	    {
+		$mk = "ListSortVar" . ($counter ++) . ":$mk"; $var_counter++;
+	    }
 	    $count ++;
+	    $mk;
+        }/gse;
+	
+        $counter -= $var_counter;
+
+	# right = for macro generation
+	$count = 0;
+	$right =~ s/($mkeys)/
+	{
 	    my $mk = $1;
-	    # extract separator
 	    my $nk = "";
 	    $nk = $& if ($declaration_map{$mk} =~ m!(\".*?\")!sg); # do we have a default separator for lists? :-"
 	    ($declaration_map{$mk} =~ m!(\".*?\")!sg); # isn't perl wonderful ? :-D
 
-	    $count = 0;
-	    while ($count < $pkeys_no)
+	    if (contains($set, $count))
 	    {
-		if (contains($set, $count) == 1)
-		{
-		    $mk = ".List{$nk}";
-		}
-		$count ++;
+		$mk = ".List{$nk}";
 	    }
+	    else 
+	    {
+		$mk = " ListSortVar" . ($counter ++) . ":$mk";
+	    }
+	    $count ++;
 	    $mk;
-#	    print "SeP: |$nk|   PPP: " . ($declaration_map{$mk} =~ m!(\".*?\")!sg) . "\n";
-#	    contains($set, $count) == 1 ? ".List{$nk}" : $mk ;
-	}/gse;
+        }/gse;
 	
 
 #	print "Set: @$set\n";
@@ -461,7 +476,13 @@ sub generation
 	}
 	$out .= "\tsyntax $main_sort ::= $temp_prod [metadata \"parser=() generated=()\" $prec]\n";
 	$out .= "\tmacro ($left) = ($right) [metadata \"parser=() generated=()\"]\n\n";
+	
+	$out = "" if $bad;
+#        print "SET: @$set\nARR: @array\n\n";
+        $out = "" if @$set == 0;
     }
+    
+#    print "Gen: $out\n\n\n";
     
     return $out;
 }
