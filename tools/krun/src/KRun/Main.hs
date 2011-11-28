@@ -178,10 +178,18 @@ evalKastIO config kmap = do
     exitCode <- waitForProcess ph
 
     -- did the wrapper run correctly?
-    exists <- doesFileExist outFile
-    when (exitCode /= ExitSuccess || not exists) $
+    existsOut <- doesFileExist outFile
+    when (exitCode /= ExitSuccess || not existsOut) $
         die $ "Failed to run IO wrapper:\n"
            ++ "java " ++ intercalate " " args
+
+    existsErr <- doesFileExist errFile
+    when existsErr $ do
+        err <- readFile errFile
+        if null err then return () else do
+            putStrLn "Fatal: Maude produced warnings or errors:"
+            putStrLn err
+            exitFailure
 
     return (cmdFile, outFile, errFile)
 
