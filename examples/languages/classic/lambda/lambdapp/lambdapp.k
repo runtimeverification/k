@@ -3,7 +3,7 @@ require ../untyped/lambda
 module LAMBDAPP-SYNTAX
   imports LAMBDA-SYNTAX
   
-  syntax Exp ::= "mu" #Id "." Exp       [:prec 100 latex "\mu{#1}.{#2}":] 
+  syntax Exp ::= "mu" #Id "." Exp       [:binder prec 100 latex "\mu{#1}.{#2}":] 
                | "let" #Id "=" Exp "in" Exp  
                | "letrec" #Id "=" Exp "in" Exp  
   syntax Val ::= #Int | #Bool
@@ -67,7 +67,4 @@ module LAMBDAPP
   rule 'k-result(X:#Id V:Val) => true 
    if X =/=Bool print andBool X =/=Bool ite
 
-  rule isBinder(mu X.E) => true
-
-  rule isBinder(mu X.E) => true
 end module

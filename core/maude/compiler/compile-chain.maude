@@ -1,5 +1,8 @@
 mod COMPILE-ONESHOT is
- including MANY-MODULES-META + ADD-EVAL-META + RESOLVE-DITTO-META + COMPLETE-K-SORTS-META + ANONYMOUS-CONSTANTS-META 
+ including MANY-MODULES-META 
++ ADD-EVAL-META 
++ RESOLVE-BINDER-META
++ RESOLVE-DITTO-META + COMPLETE-K-SORTS-META + ANONYMOUS-CONSTANTS-META 
 --- + SANITY-CHECKS-META 
 + REMOVE-PARSER-META 
 + SYNTAX-PREDICATES-META 
@@ -33,6 +36,7 @@ mod COMPILE-ONESHOT is
   eq compile1(M, 'REMOVE-PARSER, AS) = compileREMOVE-PARSER(M, AS) .
   eq compile1(M, 'ADD-EVAL, AS) = compileADD-EVAL(M, AS) .
   eq compile1(M, 'RESOLVE-DITTO, AS) = compileRESOLVE-DITTO(M, AS) .
+  eq compile1(M, 'RESOLVE-BINDER, AS) = compileRESOLVE-BINDER(M, AS) .
   eq compile1(M, 'COMPLETE-K-SORTS, AS) = compileCOMPLETE-K-SORTS(M, AS) .
   eq compile1(M, 'ANONYMOUS-CONSTANTS, AS) = compileANONYMOUS-CONSTANTS(M, AS) . 
 ---  eq compile1(M, 'SANITY-CHECKS, AS) = compileSANITY-CHECKS(M, AS) . 
@@ -62,6 +66,7 @@ mod COMPILE-ONESHOT is
   eq allSteps = 'MANY-MODULES 
 'ADD-EVAL 
 'RESOLVE-DITTO 
+'RESOLVE-BINDER 
 'COMPLETE-K-SORTS 
 'ANONYMOUS-CONSTANTS
 --- 'SANITY-CHECKS 
@@ -129,6 +134,8 @@ fmod COMPILE-META is
    = tokenize("adding the eval function") .
   eq getPhaseName('RESOLVE-DITTO) 
    = 'Updating 'metadata 'information 'for 'ditto 'operations .
+  eq getPhaseName('RESOLVE-BINDER) 
+   = 'Updating 'metadata 'information 'for 'ditto 'operations .
   eq getPhaseName('COMPLETE-K-SORTS) 
    = tokenize("subsorting (almost) everything to K") .
   eq getPhaseName('ANONYMOUS-CONSTANTS) 
@@ -181,6 +188,7 @@ fmod COMPILE-META is
 'MANY-MODULES 
 'ADD-EVAL 
 'RESOLVE-DITTO 
+'RESOLVE-BINDER 
 'COMPLETE-K-SORTS 
 'ANONYMOUS-CONSTANTS 
 'REMOVE-PARSER 

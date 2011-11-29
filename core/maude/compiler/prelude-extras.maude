@@ -1050,6 +1050,12 @@ fmod META-MODULE-EXTRAS is
   eq getAttrs(rl T1 => T2 [AS] .) = AS .
   eq getAttrs(crl T1 => T2 if Cond [AS] .) = AS .
 
+  op op2term : OpDecl -> Term .
+  eq op2term(op Q : nil -> T [AS] .)
+   = mkConstant(Q,T) .
+  eq op2term(op Q : NTl -> T [AS] .)
+   = Q[genVars(NTl,"X",1)] .
+
 
   op genXVars : TypeList -> TermList .
   eq genXVars(nil) = empty .

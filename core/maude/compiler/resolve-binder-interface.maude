@@ -1,0 +1,44 @@
+load resolve-binder
+
+mod RESOLVE-BINDER-META is
+  including RESOLVE-BINDER .
+  including META-LEVEL-EXTRAS .
+  including META-K-MODULES .
+  including META-K-BUILTINS .
+  including COMPILATION-ATTRS .
+
+  var NoResolveBinder ResolveBinder : String .
+  var Q QNoResolveBinder QResolveBinder : Qid .
+  var M : Module .
+  op resolveBinder : String String ~> Module .
+  eq resolveBinder(NoResolveBinder, ResolveBinder) = resolveBinder(qid(NoResolveBinder), qid(ResolveBinder)) .
+  op resolveBinder : Qid Qid ~> Module .
+  eq resolveBinder(QNoResolveBinder,QResolveBinder) = resolveBinder(QResolveBinder,  upModule(QNoResolveBinder, false)) .
+
+  op compileRESOLVE-BINDER : Module AttrSet ~> Module .
+  eq compileRESOLVE-BINDER(M, AS:AttrSet) = resolveBinder(getName(M), M) .
+endm
+
+mod RESOLVE-BINDER-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op resolve-binder : -> System .
+  op idle : -> State .
+  var Q NoResolveBinder ResolveBinder : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq resolve-binder = [nil, idle, 
+ 'Usage: 'resolveBinder '<Name> '<Suffix> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['resolveBinder NoResolveBinder ResolveBinder QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(NoResolveBinder,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('RESOLVE-BINDER-META),
+                        'resolveBinder[upTerm(string(NoResolveBinder)),upTerm(string(ResolveBinder))])),error) .
+endm

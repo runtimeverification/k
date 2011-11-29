@@ -9,6 +9,7 @@ load xml-printing
 --- load sanity-checks-interface
 
 load many-modules-interface
+load resolve-binder-interface
 load remove-parser-interface
 load add-eval-interface
 load resolve-ditto-interface

@@ -36,7 +36,7 @@ fmod K-META-OPS is including META-TERM-EXTRAS + K-SORTS .
   op kra_ : TermList -> Term .
   eq kra(Trl1,'_~>_[Trl],Trl2) = kra(Trl1,Trl,Trl2) .
   eq kra(empty) = nilK .
-  eq kra(T) = T [owise] .
+  eq kra(T) = T [owise]  .
   eq kra(Trl) = '_~>_[Trl] [owise] .
  
   op klabel : -> Qid .
@@ -1191,3 +1191,12 @@ fmod META-K-COOL is
   var Q : Qid .
 endfm
 
+
+fmod META-K-BINDER is
+  including K-META-OPS .
+  including META-TERM-EXTRAS .
+  op binder : Term -> Term .
+  eq binder(T) = kApply(mkConstant('isBinder,KLabel), T) .
+
+  var T : Term .
+endfm
