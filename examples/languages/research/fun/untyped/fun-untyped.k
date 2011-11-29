@@ -46,6 +46,9 @@ module FUN-UNTYPED-SYNTAX
   syntax Ids  ::= List{#Id,","}
   syntax Exps ::= List{Exp,","}
 
+  syntax Exps ::= "(" ")"
+  macro () = .Exps
+
   macro fun E1:Exp E2:Exp -> E:Exp = fun E1 -> fun E2 -> E
   macro (E1:Exp E2:Exp = E) = (E1 = fun E2 -> E)
   macro (X:#Id = E:Exp) and (Xs:Ids = Es:Exps)
