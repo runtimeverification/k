@@ -2705,11 +2705,25 @@ sub slurp_k
     {
 	my $import = $2;
 
-	$import =~ s!^\.\/!!s;
-	$import =~ s!^\/!!s;
-
+	if (!File::Spec->file_name_is_absolute($import))
+	{
+	    $import =~ s!^\.\/!!s;
+	    $import =~ s!^\/!!s;
+	}
+	
 	# case 1: import modules relative to $file
-	my $path = get_full_name_custom(File::Spec->catfile($file_dir, $import));
+#	print "BEFORE: $file_dir, $import\n";
+	my $path;
+	if (File::Spec->file_name_is_absolute($import))
+	{
+#	    print "AROUND!\n";
+	    $path = $import;
+	}
+	else
+	{
+	    $path = get_full_name_custom(File::Spec->catfile($file_dir, $import));
+	}
+#	print "PATH: $path\n";
 	if (-e $path)
 	{
 	    slurp_k($path, $latex_);
