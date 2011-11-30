@@ -1,7 +1,7 @@
 // Building and traversing a tree.
 
 class sum {
-  method sum() {}  // this is not really needed here in dynamically typed
+  method sum():int {}  // this is not really needed here in dynamically typed
                    // KOOL; in statically typed KOOL, it needs to be there
                    // and, moreover, to be consistently typed in extensions
 }

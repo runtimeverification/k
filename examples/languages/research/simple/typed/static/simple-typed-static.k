@@ -114,7 +114,7 @@ end module
 module SIMPLE-TYPED-STATIC
   imports SIMPLE-TYPED-STATIC-SYNTAX
 
-/*@ \section{Type System}
+/*@ \section{Static semantics}
 Here we give the type system of SIMPLE using \K.  Like concrete
 semantics, type systems defined in \K are also executable.  However,
 \K type systems turn into type checkers instead of interpreters when
@@ -186,7 +186,7 @@ subcells. */
                     </task>
                   </tasks>
                   <gtenv color="blue"> .Map </gtenv>
-                  <out stream="stdout"> .List </out>
+                  <out color="brown" stream="stdout"> .List </out>
                 </T>
 
 /*@ \subsection{Variable declarations}
@@ -224,9 +224,11 @@ references). */
     if notBool(X in keys(Rho))
 
   rule <task> <k> var X : T;
-               => error("Global identifier \"" + Id2String(X)
-                        + "\" declared twice!\n") ...</k> </task>
+               => stuck(var X : T;) ...</k> </task>
        <gtenv>...X|->_...</gtenv>
+       <out>... .=> ListItem("Global identifier \"" +String Id2String(X)
+                             +String "\" declared twice!\n") </out>
+    [:structural:]
 
   rule <k> var X:#Id : T:Type; => stmt ...</k>
        <tenv> Rho:Map => Rho[T / X] </tenv>
@@ -261,20 +263,17 @@ XTs$ are actually nothing but typed identifiers. */
   rule types(X : T) => T,.Types                        [:structural:]
   rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
 
-/*@ Once the entire program is processed, generating appropriate tasks
-to type check its function bodies, we can dissolve the main
+/*@ Once the entire program is processed (generating appropriate tasks
+to type check its function bodies), we can dissolve the main
 \textsf{task} cell (the one holding only a \textsf{k} subcell).  Since
 we want to enforce that programs include a main function, we also
-perform a check for \textsf{main} in the global type environment
-(remove this check if you do not want your type system to reject
-programs without a \texttt{main} function). */
+generate a function task executing \texttt{main()} to ensure that it
+types (remove this task creation if you do not want your type system
+to reject programs without a \texttt{main} function). */
 
-  rule (<task> <k> stmt </k> </task> => .)
-       <gtenv>...main |-> function from void to void...</gtenv>  [:structural:]
-
-  rule <task> <k> stmt => error("No main():void function!\n") </k> </task>
-       <gtenv> Rho </gtenv>
-    if notBool(Rho(main) ==Bool function from void to void)
+  rule <task> <k> stmt => main(); </k>
+              (. => <tenv> . </tenv> <return> void </return>)
+       </task>
     [:structural:]
 
 /*@ Similarly, once a non-main task (i.e., one which also contains
@@ -285,8 +284,11 @@ there should be no task cell left in the configuration when the
 program correctly type checks, so we can also issue a corresponding
 success message. */
 
-  rule <task> <k>stmt</k> Rest:Bag </task> => .
-    if notBool(Rest ==Bool .)  [:structural:]
+  rule <task>...
+         <k> stmt </k>
+         <tenv>_:Map</tenv>  // only to ensure this is a function task
+       ...</task> => .
+
   rule (<tasks> .Bag </tasks> => .)
        <out>... . => ListItem("Type checked!\n") </out>
     [:structural:]
@@ -311,9 +313,10 @@ there; otherwise, look its type up in the global environment. */
   rule <k> X => T ...</k> <tenv> Rho </tenv> <gtenv>... X |-> T ...</gtenv> 
     if notBool(X in keys(Rho))
 
-  rule <k> X => error("Identifier \"" + Id2String(X) + "\" not declared!")
-       ...</k>
+  rule <k> X => stuck(X) ...</k>
        <tenv> Rho </tenv> <gtenv> Rho':Map </gtenv>
+       <out>... . => ListItem("Identifier \"" +String Id2String(X)
+                         +String "\" not declared!") </out>
     if notBool(X in keys(Rho) keys(Rho'))
 
 /*@ We want the increment operation to apply to any lvalue, including
@@ -373,9 +376,14 @@ function is allowed to only print integers and strings.  The thrown
 exceptions can only have integer type. */
 
   rule {} => stmt
-  rule <task> <k> {Ss:Stmts} => stmt ...</k> Rest </task>
-       (. => <task> <k> Ss </k> Rest </task>)
-    if notBool(Rest ==Bool .)
+  rule <task>
+         <k> {Ss:Stmts} => stmt ...</k>
+         <tenv> Rho </tenv> Rest:Bag  // this ensures function task
+       </task>
+       (. => <task>
+               <k> Ss:Stmts </k>
+               <tenv> Rho </tenv> Rest:Bag
+             </task>)
   rule T; => stmt
   rule if bool then stmt else stmt => stmt
   rule while bool do stmt  => stmt
@@ -383,8 +391,7 @@ exceptions can only have integer type. */
   rule return; => stmt
   rule print(T,Ts => Ts);  if T ==Bool int orBool T ==Bool string
   rule print(.Types); => stmt
-  rule try stmt catch(X) S => {var X:int; S}
-    [:structural:]
+  rule try stmt catch(X) S => {var X:int; S}  [:structural:]
   rule throw int; => stmt
   rule spawn stmt => stmt
   rule acquire T; => stmt
@@ -393,10 +400,11 @@ exceptions can only have integer type. */
 
   rule stmt stmt => stmt
 
-//@ Error reporting
-  syntax K ::= "error" "(" Exp ")" [:strict:]
-             | "stuck"
-  rule <k> error(Str) => stuck ...</k>
-       <out>... . => ListItem(Str) </out>
+/*@ An auxiliary \texttt{stuck} construct, displayed as a frame in
+the generated PDF, used to stuck computations with whatever
+computation we want as argument.  This should be generic, part of the
+\K framework. */
+
+  syntax K ::= "stuck" "(" K ")"  [:latex "\framebox{${#1}$}":]
 
 end module

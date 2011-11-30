@@ -1,4 +1,5 @@
 // Testing cast
+// This program should execute but should not type check
 
 class A {
   var x:int;
@@ -26,7 +27,7 @@ class main {
     var b : class B = new B(), a : class A = cast b to A;
     print("b.x = ", b.x, "\n");
     print("a.x = ", a.x, "\n");
-    print("a.getB() = ", a.getB(), "\n");
+    print("a.getB() = ", a.getB(), "\n");  // this should not type check
     print("a.getA() = ", a.getA(), "\n");
   }
 }

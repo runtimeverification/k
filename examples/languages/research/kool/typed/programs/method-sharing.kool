@@ -12,8 +12,11 @@ class A {
 }
 
 class B {
-  var a : class A = new A(), m : function from void to void = a.inc, x:int = 0;
+  var a : class A, m : function from void to void, x:int;
   method B() {
+    a = new A();
+    m = a.inc;
+    x = 0;
     print(a.c, " ");
     m();
     print(a.c, " ");

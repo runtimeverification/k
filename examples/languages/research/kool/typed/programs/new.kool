@@ -1,8 +1,8 @@
 // Testing new and method invocation.
 
 class c {
-  var a:int = 5;
-  method c() {}
+  var a:int;
+  method c() { a = 5; }
   method g():int { return a; }
 }
 

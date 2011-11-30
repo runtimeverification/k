@@ -15,10 +15,6 @@ class point {
 
 class colorpoint extends point {
   var color:int;
-  method colorpoint(initx:int, inity:int) {
-    x = initx;
-    y = inity;
-  }
   method colorpoint(initx:int,inity:int,initcolor:int) {
     this.point(initx, inity);
     color = initcolor;

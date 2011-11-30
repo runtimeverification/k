@@ -170,7 +170,7 @@ the expected type. */
                   </classes>
                 </T>
 
-/*@ \subsection{Semantics from SIMPLE}
+/*@ \subsection{Unchanged Semantics from SIMPLE}
 The semantics below is taken over from dynamically typed SIMPLE
 unchanged.  Like for untyped KOOL, the semantics of function/method
 declaration and invocation, and of program initialization needs to
@@ -334,8 +334,9 @@ Like in untyped KOOL. */
 Typed KOOL allows to assign subtype instance values to supertype lvalues. */
 
   rule <k> loc(L)=V
-        => subtype(typeOf(V),typeOf(K))~>true?~>upcast(V,typeOf(K:K))...</k> 
-       <store>... L |-> (K=>upcast(V,typeOf(K))) ...</store>  [:transition:]
+        => subtype(typeOf(V),typeOf(K)) ~> true?
+           ~> unsafeCast(V,typeOf(K:K))...</k>
+       <store>...L|->(K => unsafeCast(V,typeOf(K)))...</store>  [:transition:]
 
 /*@ \subsubsection{Typed exceptions}
 Exceptions are propagated now until a catch that can bind them is
@@ -357,7 +358,6 @@ encountered. */
        </control>
        <env> _ => Env </env>
 
-
 /*@ \subsubsection{bindTo}
 \texttt{bindto} also checks the well-formedness of the function
 parameters */
@@ -371,12 +371,12 @@ parameters */
   rule <k> bindto(.Exps,.Vals) => . ...</k>  [:structural:]
 
 
-/*@ \subsection{Additional values}
+/*@ \subsection{Object and method closures}
 The only change to untyped KOOL's values is that closures are now typed
 (their last argument holds their type). */
 
-  syntax Val ::= "objectClosure" "(" Bag ")"
-               | "methodClosure" "(" #Id "," #Nat "," Exps "," Stmt "," Type ")"
+ syntax Val ::= "objectClosure" "(" Bag ")"
+              | "methodClosure" "(" #Id "," #Nat "," Exps "," Stmt "," Type ")"
 
 /*@ \subsection{Class declaration}       
 Like in untyped KOOL. */
@@ -541,7 +541,8 @@ value is a subtype of the expected return type.  Moreover, if that is
 the case, then we also upcast the returned value to one of the
 expected type. */
 
-   rule <k> return V; ~> _ => subtype(typeOf(V),T)~>true?~>upcast(V,T)~>K </k>
+   rule <k> return V; ~> _ 
+         => subtype(typeOf(V),T) ~> true? ~> unsafeCast(V,T)~> K </k>
        <control>
          <fstack> (Env,K,C) => . ...</fstack>
          (<return> T </return> _ => C)
@@ -612,21 +613,21 @@ The subclass relation introduces a subtyping relation. */
   rule subtype(T,T) => true  [:structural:]
   rule <k> subtype(class Class1, class Class)
         => subtype(class Class2, class Class) ...</k>
-          <className> Class1 </className> <extends> Class2 </extends>
+       <className> Class1 </className> <extends> Class2 </extends>
     if Class1 =/=Bool Class  [:structural:]
   rule subtype((T1:Type,T2:Type,Ts:Types),(T1':Type,T2':Type,Ts':Types))
     => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))  [:structural:]
   rule subtype(.Types,.Types) => true  [:structural:]
 
-/*@ \subsubsection{UpCasting}
-Performs unsafe upcasting.  One should only use it combination with
+/*@ \subsubsection{Unsafe Casting}
+Performs unsafe casting.  One should only use it in combination with
 the subtype relation above.  */
 
-  syntax Val ::= upcast( Val , Type )
-  rule upcast(objectClosure(<crntClass> _:K </crntClass> Obj), class Class) 
-       => objectClosure(<crntClass> Class </crntClass> Obj)
+  syntax Val ::= unsafeCast( Val , Type )
+  rule unsafeCast(objectClosure(<crntClass>_:K </crntClass> Obj), class Class)
+    => objectClosure(<crntClass> Class </crntClass> Obj)
     [:structural:]
-  rule upcast(V,T) => V if typeOf(V) ==Bool T  [:structural:]
+  rule unsafeCast(V,T) => V if typeOf(V) ==Bool T  [:structural:]
 
 /*@ \subsubsection{Generic guard}
 A generic computational guard (should be builtin): it allows the
