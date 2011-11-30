@@ -13,11 +13,11 @@ kmod LANG-SYNTAX is including #INT + #ID
 --- List{Id}
 
 
-  syntax List{Id} ::= #Id | List{Id} , List{Id} [prec 70 assoc]
+  syntax Ids ::= List{#Id,","} 
 
-  syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto]
+  syntax Exps ::= List{Exp,","}
 
-  syntax Exp ::= #Id ( List{Exp} )
+  syntax Exp ::= #Id ( Exps )
 
 
 -----------------------------------------------------------------------------
@@ -25,8 +25,6 @@ endkm
 
 
 kmod LANG-SEMANTICS is including LANG-SYNTAX + K + #CONVERSION
-
-  syntax K ::= List{Exp} 
 
  configuration
     <T>
