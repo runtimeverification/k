@@ -1,0 +1,24 @@
+   var fib,loc;
+   fib = newAgent
+   {
+     var m, c, cod;
+     m = receive;
+     send & c to head m;
+     cod = eval receiveFrom head m;
+     aspect cod();
+     var f;
+     f = mu f . lambda x .
+             if x <= 1 then { return x; } else {
+               var f1,f2;
+               spawn {f1 = f(x+-1); rendezvous & f1;}
+               spawn {f2 = f(x+-2); rendezvous & f2;}
+               rendezvous & f1; rendezvous & f2;
+               return f1+f2;
+             };
+     send [f(head tail m),c] to head m;
+   };
+   send [me,5] to fib;
+   loc = lift receiveFrom fib;
+   send quote (lambda () . {acquire unquote loc; *unquote loc = *unquote loc + 1; release unquote loc;}) to fib;
+   print (head( receiveFrom fib));
+

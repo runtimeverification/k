@@ -1,0 +1,8 @@
+var x,y,z;
+                x = 1; 
+                y = newAgent(var y; y = receiveFrom parent; 
+                     sendSynch me to y; spawn haltAgent; print(receive);); 
+                z = newAgent(var z; z = receive; 
+                     send 17 to z; print(z););
+                send z to y;
+

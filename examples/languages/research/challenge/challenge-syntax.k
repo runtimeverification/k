@@ -1,4 +1,4 @@
-kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
+module CHALLENGE-SYNTAX 
 --- There are two main syntactic categories, Exp and Stmt
 
 --- Basic constructs for expressions
@@ -15,7 +15,7 @@ kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
                | Exp and Exp [gather(E e) prec 55 strict(1)]    --- boolean conjunction
 
 --- Variable declarations
-  syntax Stmt ::= var List{Id} ; [prec 2]
+  syntax Stmt ::= var Ids ; [prec 2]
 
 --- Variable assignment
   syntax Stmt ::= Exp = Exp ; [prec 80 gather(e E) strict(2)]
@@ -42,8 +42,7 @@ kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
   syntax Stmt ::= free Exp ; [strict]
 
 --- Lists
-  syntax Exp ::= [ ]
-               | [ List{Exp} ] [prec 0 seqstrict hybrid]
+  syntax Exp ::= [ Exps ] [prec 0 seqstrict hybrid]
                | Exp : Exp     [strict]
                | head Exp      [prec 0 strict]
                | tail Exp      [prec 0 strict]
@@ -52,9 +51,8 @@ kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
   syntax Stmt ::= aspect Stmt [prec 90]
 
 --- Functions
-  syntax Exp ::= lambda List{Id} . Stmt [latex "\lambda{#1}.{#2}"]
-                | Exp ( )
-                | Exp ( List{Exp} )     [prec 2 strict]
+  syntax Exp ::= lambda Ids . Stmt [latex "\lambda{#1}.{#2}"]
+                | Exp ( Exps )     [prec 2 strict]
   syntax Stmt ::= return Exp ;          [strict]
 
 --- Fixed point
@@ -95,20 +93,12 @@ kmod CHALLENGE-SYNTAX is including #INT + #FLOAT + #ID
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
---- List{Id}
-  syntax List{Id} ::= #Id | ( ) | List{Id} , List{Id} [prec 70 assoc id: () strict hybrid]
+  syntax Ids ::= List{#Id,","} 
 --- List{Exp}
-  syntax List{Exp} ::= Exp | List{Id} | List{Exp} , List{Exp} [ditto]
-endkm
+  syntax Exps ::= List{Exp,","}
 
-
-kmod CHALLENGE-DESUGARED-SYNTAX is including CHALLENGE-SYNTAX 
-------------------------------------------------------------------------------------
---- This module desugars some of SIMPLE's language constructs into the core ones ---
---- The idea is that we only want to give semantics to the core constructs,      ---
---- so we get rid of the derived ones asap (before we start the semantics        ---
-------------------------------------------------------------------------------------
-  macro E() = E(())
   macro mu X:#Id.E:Exp = (lambda().{var X; X=E; return X;})()
-  macro [] = [()]
-endkm
+
+  syntax Ids ::= "(" ")"
+  macro () = .Ids
+end module

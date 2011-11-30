@@ -1,0 +1,2 @@
+print((mu f . lambda x . if 2 <= x then return(f(x+-1) *x ); else return(x);)(10));
+

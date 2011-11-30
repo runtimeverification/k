@@ -1,5 +1,5 @@
 load challenge-compiled
-
+---(
 rew run('p1) .
 rew run('p2) .
 ---search run('p3) =>! B:Bag .
@@ -39,4 +39,5 @@ rew run('p29, (# 5(.List{K}),,# 3(.List{K}),,# 7(.List{K}),,# 2(.List{K}),,# 9(.
 
 
 rew run('baris) .
+---)
 q

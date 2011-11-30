@@ -1,10 +1,9 @@
 in challenge-syntax
-in challenge-programs
 
-kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSION 
+module CHALLENGE imports CHALLENGE-SYNTAX 
   syntax Val ::= #Bool | #Int | #Float
   syntax Exp ::= Val
-  syntax KResult ::= List{Val}
+  syntax KResult ::= Val
 
   configuration
     <T>
@@ -12,7 +11,7 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
         <agent multiplicity="*" color="red"> 
           <threads>
             <thread multiplicity="*">
-              <k>.K</k>
+              <k>$PGM:K</k>
               <env>.Map</env>
               <fstack>.List</fstack>
               <holds>.Map</holds>
@@ -39,8 +38,8 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
         </message>
       </messages>
       <IO>
-        <in>.List</in>
-        <out>.List</out>
+        <in stream="stdin">.List</in>
+        <out stream="stdout">.List</out>
       </IO>
     </T>
 
@@ -69,8 +68,11 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
   rule  false and E => false
 
 --- Variable declaration
-  rule <k>var Xl:List{Id}; => .<_/k> <env>Env => Env[N..N+Nat|Xl| / getList{K}(Xl)]</env>
-       <store_>. => N..N+Nat|Xl| |-> 0<_/store> <nextLoc>N:#Nat => N +Nat |Xl|</nextLoc>
+  rule <k>var X:#Id,Xs:Ids; => var Xs; ...</k> 
+       <env>Env => Env[N / X]</env>
+       <store>... . => N |-> 0 ...</store> 
+       <nextLoc>N:#Nat => N +Nat 1</nextLoc>
+  rule <k> var; => . ...</k>
 
 --- Variable lookup
   rule <k>X:#Id=>K:K<_/k> <env>X|->N<_/env> <store>N|->K<_/store>
@@ -105,21 +107,32 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
   rule <k>*N=V; => .<_/k> <store>N|->(_=>V)<_/store>
 
 --- Lists
-  rule V:[Vl:List{Val}] => [V,Vl]
-  rule head [V,Vl] => V
-  rule tail [V,Vl] => [Vl]
+  rule V:[Vs:Vals] => [V,Vs]
+  rule head [V,Vs] => V
+  rule tail [V,Vs] => [Vs]
 
 --- Aspects
   rule <k>aspect S => .<_/k> <aspect>_=>S</aspect>
 
 --- Functions
-  syntax Val ::= closure-lambda ( List{Id} , Stmt , Map ) [latex "{\it closure}_\lambda({#1},{#2},{#3})"]
-  rule <k>lambda Xl.S1 => closure-lambda(Xl,(S2 S1),Env)<_/k> <env>Env:Map</env> <aspect>S2</aspect>
-  syntax ListItem ::= ( K , Map )
-  rule <k> _`(_`)(closure-lambda(Xl,S,Env),Vl) ~> K => S return 0;</k>
-       <env>Env':Map => Env[N..N+Nat|Xl|/getList{K}(Xl)]</env> <fstack>.=>(K,Env')<_/fstack>
-       <store>.=> N..N+Nat|Xl| |-> getList{K}(Vl)<_/store> <nextLoc>N => N +Nat |Xl|</nextLoc>
-  rule <k>return V;~>_ => V~>K</k> <env>_=>Env</env> <fstack>(K,Env)=>.<_/fstack>
+  syntax Val ::= closure-lambda ( Ids , Stmt , Map ) [latex "{\it closure}_\lambda({#1},{#2},{#3})"]
+  rule <k>lambda Xs.S1 => closure-lambda(Xs,(S2 S1),Env)<_/k> <env>Env:Map</env> <aspect>S2</aspect>
+  syntax K ::= "frame" "(" K "," Map ")"
+  rule <k> _`(_`)(closure-lambda(Xs,S,Env),Vs) ~> K 
+        => bindto(Xs,Vs) ~> S return 0;</k>
+       <env> Env':Map => Env </env> 
+       <fstack> . => ListItem(frame(K,Env')) ...</fstack>
+
+  syntax K ::= "bindto" "(" Ids "," Vals ")"
+  rule <k> bindto((X,Xs => Xs),(V,Vs:Vals => Vs)) ...</k>
+       <env> Env => Env[N/X] </env>
+       <store>... . => N |-> V ...</store>
+       <nextLoc> N => N +Nat 1 </nextLoc>
+  rule <k> bindto(.Ids,.Exps) => . ...</k>  [:structural:]
+
+  rule <k>return V;~>_ => V~>K</k> 
+       <env>_=>Env</env> 
+       <fstack>ListItem(frame(K,Env)) => . ...</fstack>
 
 --- Callcc
   syntax Val ::= cc ( K , Map , List ) [latex "{\it cc}({#1},{#2},{#3})"]
@@ -206,29 +219,19 @@ kmod CHALLENGE-SEMANTICS is including CHALLENGE-DESUGARED-SYNTAX + K + #CONVERSI
 --- environment recovery
   syntax K ::= env ( Map )
   rule env(_)~>env(Env) => env(Env) [structural]
-  rule <k>env(Env)=>.<_/k> <env>_=>Env</env> [structural]
+  rule <k>env(Env)=>. ...</k> <env>_=>Env</env> [structural]
   rule V ~> env(Env) => env(Env) ~> V [structural]
-
---- List{Val}
-  syntax List{Val} ::= Val | List{Val} , List{Val} [ditto]
-  syntax List{Exp} ::= List{Val}
-
---- length
-  syntax #Nat ::= `| List{Id} `|
-  rule |()| => 0 [structural]
-  rule |X,Xl| => sNat|Xl| [structural]
 
 --- generate sequence of locations
   syntax List{K} ::= #Nat .. #Nat
   rule N1..N1 => .List{K} [structural]
   rule N1..N2 => N1,,sNat N1..N2 [structural]
-endkm
 
-kmod CHALLENGE is including CHALLENGE-SEMANTICS + CHALLENGE-PROGRAMS 
-  syntax Bag ::= run ( KLabel ) | run ( KLabel , List{K} )
-  rule run(KL:KLabel) => run(KL,.List{K}) [structural]
-  rule run(KL,L:List{K}) => <T_> <k>KL(.List{K})</k> <in>List(L)</in> <_/T> [structural]
-endkm
+
+--- List{Val}
+  syntax Vals ::= List{Val,","} 
+end module
+
 
 
 
