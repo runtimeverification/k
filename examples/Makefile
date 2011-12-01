@@ -5,9 +5,10 @@ TEST_DIRS = algorithms/sort \
 	    algorithms/sudoku/2-with-counters \
 	    algorithms/sudoku/3-with-decrement \
 	    algorithms/sudoku/4-with-squares \
-	    languages/classic/exp/untyped \
+	    languages/classic/exp/untyped/environment \
+	    languages/classic/exp/untyped/substitution \
 	    languages/classic/lambda/simply-typed \
-	    languages/classic/pcf/untyped \
+	    languages/classic/pcf/untyped/ \
 	    languages/classic/lambda/polymorphism/system-F \
 	    languages/research/imppp \
 	    languages/research/simple/untyped \
