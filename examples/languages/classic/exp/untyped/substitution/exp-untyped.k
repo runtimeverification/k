@@ -1,0 +1,115 @@
+require /modules/substitution
+
+module EXP-UNTYPED-SYNTAX
+
+/*@ \section{Syntax}
+EXP is an expression language, so it has only one syntactic category,
+\textit{Exp}.  The syntax of EXP consists of conventional arithmetic
+constructs and conventional higher-order functional constructs.  All
+these constructs are very basic and simple, pushed to the essence of
+the notion that they are attempting to capture.  */
+
+/*@ \subsection{Arithmetic constructs}
+These are identical to those in imperative and object oriented
+languages, for example see IMP, IMPP, SIMPLE, KOOL\@. */
+
+  syntax Val ::= #Int | #Bool | #Id
+  syntax Exp ::= Val 
+               | Exp "+" Exp                [:strict prec 33 gather(E e):]
+               | Exp "-" Exp                [:strict prec 33 gather(E e):]
+               | Exp "*" Exp                [:strict prec 31 gather(E e):]
+               | Exp "/" Exp                [:strict prec 31 gather(E e):]
+               | Exp "%" Exp                [:strict prec 31 gather(E e):]
+               | "-" Exp                    [:strict:]
+               | Exp "<" Exp                [:strict prec 37:]
+               | Exp "<=" Exp               [:strict prec 37:]
+               | Exp ">" Exp                [:strict prec 37:]
+               | Exp ">=" Exp               [:strict prec 37:]
+               | Exp "==" Exp               [:strict prec 37:]
+               | Exp "!=" Exp               [:strict prec 37:]
+               | Exp "and" Exp              [:strict prec 55 gather(E e):]
+               | Exp "or" Exp               [:strict prec 59 gather(E e):]
+               | "not" Exp                  [:strict prec 53:]
+
+/*@ \subsection{Functional constructs}
+The constructs below are well-known: \texttt{lambda} and concatenation
+of expressions are the function abstraction and application,
+\texttt{if} is the conditional construct which here can take any
+expressions as branches, \texttt{mu} is the usual recursive binder, 
+and \texttt{let} and \texttt{letrec} are the usual functional derived
+constructs which can be desugared as shown in the two macros below. */
+
+  syntax Val ::= "lambda" #Id "." Exp       [:binder latex "\lambda{#1}.{#2}":]
+  syntax Exp ::= Exp Exp                    [:strict prec 10 gather(E e):]
+               | "if" Exp "then" Exp "else" Exp [:strict(1):]
+               | "mu" #Id "." Exp           [:binder latex "\mu{#1}.{#2}":]
+               | "let" #Id "=" Exp "in" Exp
+               | "letrec" #Id #Id "=" Exp in Exp
+
+/*@ \subsection{Desugaring macros}
+The desugaring rules below are standard, although note that we do not
+want to apply them when we do type inference.  That is because we
+want our type inferencer to be {\em let} polymorphic. */
+
+  macro let X:#Id = E:Exp in E':Exp = (lambda X . E') E
+  macro (letrec F:#Id X = E in E') = (let F = mu F . (lambda X . E) in E')
+
+end module
+
+
+module EXP-UNTYPED
+  imports EXP-UNTYPED-SYNTAX + SUBSTITUTION
+
+/*@ \section{Semantics}
+The EXP semantics below is substitution-based. */
+
+/*@ \subsection{Values and results}
+Like in IMP, we prefer to define values as a distinguished subsyntactic
+category of \textit{Exp}, as opposed to defining them directly as \K
+results. */
+
+  syntax KResult ::= Val
+
+/*@ \subsection{Configuration}
+The configuration below is standard for trivial environment-based
+semantics.  For example, it is identical to that of IMP\@. */
+
+  configuration <k color="green"> $PGM:Exp </k>
+
+/*@ \subsection{Arithmetic constructs}
+The rules below are taken over, unchanged, from the semantics of IMP\@. */
+
+  rule I1:#Int + I2:#Int => I1 +Int I2
+  rule _-_(I1,I2) => _-Int_(I1,I2)
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
+  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0
+  rule - I:#Int => -Int I
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
+  rule V1:Val == V2:Val => V1 ==Bool V2
+  rule V1 != V2 => V1 =/=Bool V2
+  rule T1:#Bool and T2:#Bool => T1 andBool T2
+  rule T1 or T2 => T1 orBool T2
+  rule not(T:#Bool) => notBool(T)
+
+//@ \subsection{$\beta$-reduction}
+
+  rule <k> (lambda X:#Id . E:Exp) V:Val => E[V/X]  ...</k>
+
+/*@ \subsection{Conditional}
+The two rules below are straightforward, almost identical to those in
+IMP\@.  The only difference is that in EXP the conditional is an
+expression, rather than a statement, construct. */
+
+  rule if  true then E else  _  => E
+  rule if false then  _  else E => E
+
+/*@ \subsection{$\mu$-unrolling}
+To prevent non-termination, we only unroll $\mu$ when in redex-position. */
+
+  rule <k> mu X . E => E[(mu X.E) / X] ...</k>
+
+end module
