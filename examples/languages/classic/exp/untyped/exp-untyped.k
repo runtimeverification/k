@@ -13,21 +13,21 @@ These are identical to those in imperative and object oriented
 languages, for example see IMP, IMPP, SIMPLE, KOOL\@. */
 
   syntax Exp ::= #Int | #Bool | #Id
-               | Exp "+" Exp                [strict prec 33 gather(E e)]
-               | Exp "-" Exp                [strict prec 33 gather(E e)]
-               | Exp "*" Exp                [strict prec 31 gather(E e)]
-               | Exp "/" Exp                [strict prec 31 gather(E e)]
-               | Exp "%" Exp                [strict prec 31 gather(E e)]
-               | "-" Exp                    [strict]
-               | Exp "<" Exp                [strict prec 37]
-               | Exp "<=" Exp               [strict prec 37]
-               | Exp ">" Exp                [strict prec 37]
-               | Exp ">=" Exp               [strict prec 37]
-               | Exp "==" Exp               [strict prec 37]
-               | Exp "!=" Exp               [strict prec 37]
-               | Exp "and" Exp              [strict prec 55 gather(E e)]
-               | Exp "or" Exp               [strict prec 59 gather(E e)]
-               | "not" Exp                  [strict prec 53]
+               | Exp "+" Exp                [:strict prec 33 gather(E e):]
+               | Exp "-" Exp                [:strict prec 33 gather(E e):]
+               | Exp "*" Exp                [:strict prec 31 gather(E e):]
+               | Exp "/" Exp                [:strict prec 31 gather(E e):]
+               | Exp "%" Exp                [:strict prec 31 gather(E e):]
+               | "-" Exp                    [:strict:]
+               | Exp "<" Exp                [:strict prec 37:]
+               | Exp "<=" Exp               [:strict prec 37:]
+               | Exp ">" Exp                [:strict prec 37:]
+               | Exp ">=" Exp               [:strict prec 37:]
+               | Exp "==" Exp               [:strict prec 37:]
+               | Exp "!=" Exp               [:strict prec 37:]
+               | Exp "and" Exp              [:strict prec 55 gather(E e):]
+               | Exp "or" Exp               [:strict prec 59 gather(E e):]
+               | "not" Exp                  [:strict prec 53:]
 
 /*@ \subsection{Functional constructs}
 The constructs below are well-known: \texttt{lambda} and concatenation
@@ -37,10 +37,10 @@ expressions as branches, \texttt{mu} is the usual recursive binder,
 and \texttt{let} and \texttt{letrec} are the usual functional derived
 constructs which can be desugared as shown in the two macros below. */
 
-  syntax Exp ::= "lambda" #Id "." Exp       [latex "\lambda{#1}.{#2}"]
-               | Exp Exp                    [strict prec 10 gather(E e)]
-               | "if" Exp "then" Exp "else" Exp [strict(1)]
-               | "mu" #Id "." Exp           [latex "\mu{#1}.{#2}"]
+  syntax Exp ::= "lambda" #Id "." Exp       [:latex "\lambda{#1}.{#2}":]
+               | Exp Exp                    [:strict prec 10 gather(E e):]
+               | "if" Exp "then" Exp "else" Exp [:strict(1):]
+               | "mu" #Id "." Exp           [:latex "\mu{#1}.{#2}":]
                | "let" #Id "=" Exp "in" Exp
                | "letrec" #Id #Id "=" Exp in Exp
 
