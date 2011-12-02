@@ -1948,7 +1948,7 @@ sub make_ops {
 #	print "Frozen: $_\n";
     $_ = Unfreeze("ATTRIBUTES", $_);
     $_ = Unfreeze("MYSTRINGS", $_);
-#	print "Unfrozen: $_\n";
+#    print "Unfrozen: $_\n";
 #    print "make_ops:\n$_\nat line $sno\n";
 
 # 	keep temporary four counting lines

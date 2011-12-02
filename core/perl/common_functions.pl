@@ -2889,9 +2889,14 @@ sub Unfreeze
 sub remove_quotes
 {
     local $_ = shift;
+
+    # freeze latex
+    s/latex\(\".*?\"\)/Freeze($&, "LTXATTR")/gse;
+    
     
     # freeze attributes
-    s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "QUOTES")/gse;
+    s/(\[\s*metadata.*?\])/Freeze($&, "QUOTES")/gse;
+    
     
     # freeze lists
     s/List\{.*?\}/Freeze($&, "QUOTES")/gse;
@@ -2918,7 +2923,7 @@ sub remove_quotes
     }/gse;
 
     $_ = Unfreeze("QUOTES", $_);
-    
+    $_ = Unfreeze("LTXATTR", $_);
 	
     $_;
 }
