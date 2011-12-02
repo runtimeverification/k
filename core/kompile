@@ -1538,7 +1538,9 @@ sub run_maude {
     if ($err =~ /\[ERROR\](.*?)\[ENDERROR\]/sg || $out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
 	print "[ERROR] $1\n";
-	print "Check $k_dir/$error_file to find all errors.\n";
+        if ($err ne "") {
+ 	  print "Check $k_dir/$error_file to find additional errors.\n";
+        }
 	return -1;
     }
     elsif ($err =~ /[^\s]/)
