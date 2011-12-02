@@ -403,7 +403,7 @@ fmod META-K-ERROR is
   op errorEq : [Term] Term String AttrSet -> [Equation] .
   op errorRl : [Term] Term String AttrSet -> [Rule] .
   op errorM : AttrSet String [Term] Term Module -> [Module] .
-  eq Q[Trms,errorT(Trm, Cxt, Str),Trms'] = errorT(Trm, Q[Trms,Cxt,Trms'], Str) [print "errorT propagated past " Q] .
+  eq Q[Trms:[TermList],errorT(Trm, Cxt, Str),Trms':[TermList]] = errorT(Trm, Cxt, Str + " -> " + string(Q)) [print "errorT propagated past " Q] .
 
 
  ceq errorM(AS, "no suitable least sorts found", Q[Trms, ETrm, Trms'], Cxt, M)
