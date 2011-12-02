@@ -291,7 +291,7 @@ endfm
 fmod META-K-RULES is including K-SORTS .
   including META-MODULE-EXTRAS .
   including META-K-CONDITION .
-  var O Q : Qid . var T T' T1 T2 Trm Cxt : Term . var S : Type . var C : Term . 
+  var O Q : Qid . var T T' T1 T2 Trm : Term . var Cxt : String . var S : Type . var C : Term . 
   var Cond Cond' Tl : TermList . var N : Nat . var V : Variable . var Ct : Constant .
   var AS : AttrSet .  var RK : KRuleKind . var Str : String . 
   var Op : OpDecl .  var OPDS : OpDeclSet .
@@ -337,7 +337,7 @@ fmod META-K-RULES is including K-SORTS .
   op setContents : KRuleSplit Term -> KRuleSplit .
   eq setContents(R{T,Cond,AS}, T') = R{T',Cond,AS} .
   eq setContents(R{T,Cond,AS}, errorT(Trm,Cxt,Str)) 
-   = R{errorT(Trm,T,Str),Cond,AS} .
+   = R{errorT(Trm,Cxt,Str),Cond,AS} .
 
   op setCondition : KRuleSplit TermList -> KRuleSplit .
   eq setCondition(R{T,Cond,AS}, Cond') = R{T,Cond',AS} .
@@ -362,7 +362,7 @@ fmod META-K-RULES is including K-SORTS .
 
 
   op checkReplaceFreeTl : Module TermList ~> TermList .
-  eq checkReplaceFreeTl(M, (O[Tl], Tl')) = if O == replaceS then errorT(O[Tl],mkVariable('`[`], leastSort(M,nth(Tl,0))), "K local rewrite could not be eliminated here.  maybe you have a rewrite within another rewrite?"), Tl' else $checkReplaceFreeTl(M, O[checkReplaceFreeTl(M, Tl)],Tl') fi .
+  eq checkReplaceFreeTl(M, (O[Tl], Tl')) = if O == replaceS then errorT(O[Tl],"", "K local rewrite could not be eliminated here.  maybe you have a rewrite within another rewrite?"), Tl' else $checkReplaceFreeTl(M, O[checkReplaceFreeTl(M, Tl)],Tl') fi .
   eq checkReplaceFreeTl(M, (Ct,Tl')) = Ct, checkReplaceFreeTl(M,Tl') .
   eq checkReplaceFreeTl(M, (V,Tl')) = V, checkReplaceFreeTl(M,Tl') .
   eq checkReplaceFreeTl(M, empty) = empty .
@@ -384,7 +384,8 @@ fmod K-META-CONFIG is
   var Q Q' : Qid .  var B B' : Multiplicity . var E E' : Ellipses .  var M : Module .  
   var AS AS' : AttrSet .  var MAS : MembAxSet .  var S : Sort .  var Str : String .
   var SC : SplitCell .
-  var Trm Cxt : Term .
+  var Trm : Term .
+  var Cxt : String .
 
 
   op attrsCtorS : -> Qid . eq attrsCtorS = '__ .
@@ -545,7 +546,7 @@ fmod K-META-CONFIG is
 
   op plugCell : SplitCell -> Term .
   eq plugCell({T,Contents,AS}) = symbolE none[plugAttributes(T,AS - initialCellAttrs),Contents,T] .
-  eq plugCell({T,errorT(Trm, Cxt, Str),AS}) = errorT(Trm,  symbolE none[plugAttributes(T,AS - initialCellAttrs),Cxt,T], Str) .
+  eq plugCell({T,errorT(Trm, Cxt, Str),AS}) = errorT(Trm,  Cxt + " -> cell", Str) .
 
 
   op plugAttributes : Term AttrSet ~> Term .
@@ -927,7 +928,8 @@ fmod META-K-CONTEXTS is including K-SORTS .
 
 
   var O : Qid . var Ct : Constant . var V : Variable .
-  var T1 T2 Cxt : Term . var Tl Tl' : TermList .   var Str : String .
+  var T1 T2 : Term . var Cxt : String . 
+  var Tl Tl' : TermList .   var Str : String .
 
   op replaceCxt : Term Term -> Term .
   eq replaceCxt(T1, T2) = 'wrap-with[T1,T2] .

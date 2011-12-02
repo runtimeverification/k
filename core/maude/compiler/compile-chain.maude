@@ -120,7 +120,7 @@ fmod COMPILE-META is
 
   op compile : Qid AttrSet ~> Module .
   eq compile(Q, AS) = compile(upModule(Q, false), AS) [print "compiling module " Q " with attributes " AS] .
-  eq compile(Q, AS:[AttrSet]) = errorM(none, "Could not parse compilation attributes", '`[`]:K, '`[`]:K, upModule(Q, false)) [print "Could not parse compilation attributes: " AS:[AttrSet]] .
+  eq compile(Q, AS:[AttrSet]) = errorM(none, "Could not parse compilation attributes", '`[`]:K, "", upModule(Q, false)) [print "Could not parse compilation attributes: " AS:[AttrSet]] .
 
   op pcompile : Qid Qid AttrSet ~> Module .
   eq pcompile(Q, Q', AS) = partialCompile(upModule(Q, false), Q', AS) .
@@ -235,7 +235,7 @@ fmod COMPILE-META is
   op $compile : Module Qid Module QidList AttrSet ~> Module .
   eq $compile(M, Q, moduleError(QIL), QIL', AS) = moduleError(QIL) .
   eq $compile(M, Q, errorM(AS, Str, Trm, Cxt, M'), QIL', AS')
-   = moduleError('`[ 'ERROR '`] 'Error:  tokenize(getLocation(AS)) '\s '\s 'Compilation 'phase: '\r Q '\o 'Reason: tokenize(Str) '\s '\s '\r 'Trm: '\o eMetaPrettyPrint(M,Trm) '\t '\r 'Context: '\o eMetaPrettyPrint(M, Cxt) '`[ 'ENDERROR '`]) .
+   = moduleError('`[ 'ERROR '`] tokenize(Str) '\n '\s '\r 'Term: '\o eMetaPrettyPrint(M,Trm) '\n '\s '\r 'Context: '\o tokenize(Cxt) '\n 'Location: tokenize(getLocation(AS)) '\n '\s 'Compilation 'phase: '\r Q '\o '`[ 'ENDERROR '`]) .
   eq $compile(M, Q, M', QIL, AS)  = if M' :: Module and-then wellFormed(M') then compile(M', QIL, AS) else generateError(M,Q,M') fi [owise] .
 
 ---  op purePrint : [Module] -> QidList .
@@ -250,7 +250,8 @@ fmod COMPILE-META is
    print(M) 
 ) [print "not well formed module " M'].
 
-  var Q Q' : Qid . var QIL QIL' : QidList . var M : Module .  var M' : [Module] .  var Trm Cxt : Term .  var AS AS' : AttrSet .  var Str : String .
+  var Q Q' : Qid . var QIL QIL' : QidList . var M : Module .  var M' : [Module] .  var Trm : Term .  var Cxt : String . 
+  var AS AS' : AttrSet .  var Str : String .
 endfm
 
 mod COMPILE-LOOP is

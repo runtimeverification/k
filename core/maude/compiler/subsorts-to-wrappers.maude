@@ -171,7 +171,7 @@ ceq findPurifyRedex('if_then_else_fi[Trm,T1,T2], T, M, OPDS, SSDM)
  if sortLeq(M, leastSortsT(M, Trm), Bool) [print "if " Trm " then " T1 " else " T2 " fi. target type: " T] .
 
  eq findPurifyRedex(Trm, errorS(Trm', T, Str), M, OPDS, SSDM)
-  = errorT(Trm, '`[`]:K, Str) .
+  = errorT(Trm, "", Str) .
 
 ---(
 ceq findPurifyRedex(Q[T1,T2], T, M ,OPDS, SSDM)

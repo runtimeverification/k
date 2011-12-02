@@ -25,7 +25,7 @@ fmod DEFAULT-TERMS is
   eq substitute(T,Q,errorT(Trm, Cxt, Str))
    = errorT(Trm,Cxt,Str) .
 
-  var Trm Cxt : Term . var Str : String .
+  var Trm : Term . var Cxt : String . var Str : String .
 
   op $substitute : Term Qid Term -> TermBool .
   eq $substitute(T, Q, T')  = $substitute(T,Q,T',splitKCell(T)) .
@@ -141,7 +141,7 @@ fmod DEFAULT-TERMS is
   eq mkDefaultTerm((T,Tl),T') = mkDefaultTerm(T,Tl,T',splitKCell(T)) .
   
   eq mkDefaultTerm(Tl,errorT(Trm, Cxt, Str))
-   = errorT(Trm,'`[`]:Bag,Str) .
+   = errorT(Trm,"",Str) .
 
   op mkDefaultTerm : Term TermList Term SplitCell ~> Term .
   eq mkDefaultTerm(T,Tl, T', SC')
@@ -151,5 +151,5 @@ fmod DEFAULT-TERMS is
  ceq $mkDefaultTerm(Q[Tl],Tl',T) = mkDefaultTerm((Tl,Tl'),T)
   if Q == ctor(Bag) .
  ceq $mkDefaultTerm(Ct, Tl, T) = mkDefaultTerm(Tl,T) if Ct = emptyCt(Bag) .
-  eq $mkDefaultTerm(T', Tl, T) = errorT(T,T,"Default terms accept open cells only for Bag cells.") .
+  eq $mkDefaultTerm(T', Tl, T) = errorT(T,"","Default terms accept open cells only for Bag cells.") .
 endfm

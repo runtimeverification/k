@@ -121,7 +121,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   op $solveEach : Term SplitCell KConf -> [Term] .
   eq $solveEach(T, SC, KC') 
    = if getSons(KC') == none then T else plugCell(setContents(SC, contextTransformT(getLevel(KC') + 1, getContents(SC), getConf(KC')))) fi .
-  eq $solveEach(T,SC, KC:[KConf]) = errorT(T, '`[`]:BagItem, "Cell " + string(getName(SC)) + " is not at the right level in the configuration.  Check the initial configuration for the definition matches the rule.") .
+  eq $solveEach(T,SC, KC:[KConf]) = errorT(T, "", "Cell " + string(getName(SC)) + " is not at the right level in the configuration.  Check the initial configuration for the definition matches the rule.") .
   
   op solveEachL : TermList KConf -> [TermList] .
   eq solveEachL((T, Tl), KC) = solveEach(T,KC),solveEachL(Tl,KC) .
@@ -135,7 +135,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
    = errorT(T,Cxt,Str) .
 
 
-  var Cxt : Term . var Str : String .
+  var Cxt : String . var Str : String .
   
   op mergeLevels : TermSetLevels KConf -> Term .
   eq mergeLevels({N,TS}, KC) = finalMultiplicity({N, TS}, KC) .

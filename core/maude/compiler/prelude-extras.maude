@@ -319,7 +319,7 @@ fmod META-TERM-EXTRAS is
 ---   = substr(string(getName(C)),1, _-_(length(string(getName(C))),2))
   if getType(C) == String or-else getType(C) == Char .
 
-  op errorT : [Term] Term String -> [Term] .
+  op errorT : [Term] String String -> [Term] .
  op errorS : Term Type String -> [Type] .
 
   var V : Variable . var Trl' Trl Trl'' : TermList .  var Tr Tr' : Term .
@@ -372,7 +372,7 @@ fmod META-TERM-EXTRAS is
 
   op mkVariable : Qid Type -> Variable .
   eq mkVariable(Q, T) = qid(string(Q) + ":" + string(T)) .
-  eq mkVariable(Q, errorS(Tr, T, Str)) = errorT(Tr, '`[`]:K, Str) .
+  eq mkVariable(Q, errorS(Tr, T, Str)) = errorT(Tr, "", Str) .
 
 
   op nth : TermList Nat ~> Term .
@@ -398,12 +398,12 @@ fmod META-K-ERROR is
   op termError : QidList -> [Term] .
   
   op errorAS :  String String -> [Attr] .
-  op errorMb : [Term] Term String AttrSet -> [MembAx] .
+  op errorMb : [Term] String String AttrSet -> [MembAx] .
   op errorOp : String AttrSet -> [OpDecl] .
-  op errorEq : [Term] Term String AttrSet -> [Equation] .
-  op errorRl : [Term] Term String AttrSet -> [Rule] .
-  op errorM : AttrSet String [Term] Term Module -> [Module] .
-  eq Q[Trms:[TermList],errorT(Trm, Cxt, Str),Trms':[TermList]] = errorT(Trm, Cxt, Str + " -> " + string(Q)) [print "errorT propagated past " Q] .
+  op errorEq : [Term] String String AttrSet -> [Equation] .
+  op errorRl : [Term] String String AttrSet -> [Rule] .
+  op errorM : AttrSet String [Term] String Module -> [Module] .
+  eq Q[Trms:[TermList],errorT(Trm, Cxt, Str),Trms':[TermList]] = errorT(Trm, Cxt + " -> " + string(Q), Str) [print "errorT propagated past " Q] .
 
 
  ceq errorM(AS, "no suitable least sorts found", Q[Trms, ETrm, Trms'], Cxt, M)
@@ -414,38 +414,38 @@ fmod META-K-ERROR is
 
   eq (mb errorT(Trm,Cxt,Str) : Type [AS] .) = errorMb(Trm,Cxt,Str,AS) [print "errorT propagated past mb"] .
   eq (cmb errorT(Trm,Cxt,Str) : Type if Cond [AS] .) = errorMb(Trm,Cxt,Str,AS)  [print "errorT propagated past cmb"] .
-  eq (cmb Trm : Type if Cond [AS errorAS(Str, Str')] .) = errorMb('`[`]:K,'`[`]:K,Str' + " '" + Str + "'",AS) .
-  eq (mb Trm : Type [AS errorAS(Str, Str')] .) = errorMb('`[`]:K,'`[`]:K,Str' + " '" + Str + "'",AS) .
+  eq (cmb Trm : Type if Cond [AS errorAS(Str, Str')] .) = errorMb('`[`]:K,"",Str' + " '" + Str + "'",AS) .
+  eq (mb Trm : Type [AS errorAS(Str, Str')] .) = errorMb('`[`]:K,"",Str' + " '" + Str + "'",AS) .
   eq (ceq errorT(Trm,Cxt,Str) = Trm' if Cond [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (ceq Trm' = errorT(Trm,Cxt,Str) if Cond [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (eq errorT(Trm,Cxt,Str) = Trm' [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (eq Trm' = errorT(Trm,Cxt,Str) [AS] .) = errorEq(Trm,Cxt,Str,AS) .
-  eq (ceq Trm = Trm' if Cond [AS errorAS(Str, Str')] .) = errorEq('`[`]:K,'`[`]:K,Str' + " '" + Str + "'",AS) .
-  eq (eq Trm = Trm' [AS errorAS(Str, Str')] .) = errorEq('`[`]:K,'`[`]:K,Str' + " '" + Str + "'",AS) .
+  eq (ceq Trm = Trm' if Cond [AS errorAS(Str, Str')] .) = errorEq('`[`]:K,"",Str' + " '" + Str + "'",AS) .
+  eq (eq Trm = Trm' [AS errorAS(Str, Str')] .) = errorEq('`[`]:K,"",Str' + " '" + Str + "'",AS) .
   eq (crl errorT(Trm,Cxt,Str) => Trm' if Cond [AS] .) = errorRl(Trm,Cxt,Str,AS) .
   eq (crl Trm' => errorT(Trm,Cxt,Str) if Cond [AS] .) = errorRl(Trm,Cxt,Str,AS) .
   eq (rl errorT(Trm,Cxt,Str) => Trm' [AS] .) = errorRl(Trm,Cxt,Str,AS) .
   eq (rl Trm' => errorT(Trm,Cxt,Str) [AS] .) = errorRl(Trm,Cxt,Str,AS) .
   eq (crl Trm' => errorT(Trm,Cxt,Str) if Cond [AS] .) = errorRl(Trm,Cxt,Str,AS) .
-  eq (crl Trm => Trm' if Cond [AS errorAS(Str, Str')] .) = errorRl('`[`]:K,'`[`]:K,Str' + " '" + Str + "'",AS) .
-  eq (rl Trm => Trm' [AS errorAS(Str, Str')] .) = errorRl('`[`]:K,'`[`]:K,Str' + " '" + Str + "'",AS) .
-  eq mod Q is Including sorts Sorts . Subsorts (errorOp(Str,AS) OPDS) ( Mbs) Eqs Rls endm = errorM(AS, Str, '`[`]:K, '`[`]:K, mod Q is Including sorts Sorts . Subsorts OPDS none none none endm)  [print "errorT propagated to module"] .
+  eq (crl Trm => Trm' if Cond [AS errorAS(Str, Str')] .) = errorRl('`[`]:K,"",Str' + " '" + Str + "'",AS) .
+  eq (rl Trm => Trm' [AS errorAS(Str, Str')] .) = errorRl('`[`]:K,"",Str' + " '" + Str + "'",AS) .
+  eq mod Q is Including sorts Sorts . Subsorts (errorOp(Str,AS) OPDS) ( Mbs) Eqs Rls endm = errorM(AS, Str, '`[`]:K, "", mod Q is Including sorts Sorts . Subsorts OPDS none none none endm)  [print "errorT propagated to module"] .
   eq errorOp(Str, AS) errorOp(Str', AS') = errorOp(Str, AS) .
   eq mod Q is Including sorts Sorts . Subsorts OPDS (errorMb(Trm,Cxt,Str,AS) Mbs) Eqs Rls endm = errorM(AS, Str, Trm, Cxt, mod Q is Including sorts Sorts . Subsorts OPDS none none none endm)  [print "errorT propagated to module"] .
   eq mod Q is Including sorts Sorts . Subsorts OPDS ( Mbs) (errorEq(Trm,Cxt,Str,AS) Eqs) Rls endm = errorM(AS, Str, Trm, Cxt, mod Q is Including sorts Sorts . Subsorts OPDS none none none endm) .
   eq mod Q is Including sorts Sorts . Subsorts OPDS ( Mbs) ( Eqs) (errorRl(Trm,Cxt,Str,AS)Rls) endm = errorM(AS, Str, Trm, Cxt, mod Q is Including sorts Sorts . Subsorts OPDS none none none endm) .
 
   op checkModule : Module ~> Module .
-  eq checkModule(M) = if wellFormed(M) then M else errorM(none, "Module obtained but not well-formed", upTerm(M), '`[`]:Qid, upModule('META-MODULE, false)) fi .
+  eq checkModule(M) = if wellFormed(M) then M else errorM(none, "Module obtained but not well-formed", upTerm(M), "", upModule('META-MODULE, false)) fi .
   op checkTerm : Module Term ~> Term .
-  eq checkTerm(M,Trm) = if wellFormed(M,Trm) then Trm else errorT(Trm,mkVariable('`[`],'Univesal),"Term not well formed") fi .
+  eq checkTerm(M,Trm) = if wellFormed(M,Trm) then Trm else errorT(Trm,"","Term not well formed") fi .
 
   op analyzeCoreDump : Module [Module] -> [Module] .
 ---  eq analyzeCoreDump(M, U?) = analyzeCoreDump(M, upTerm(U?)) .
 
 
 
-  vars Trm Trm' Cxt : [Term] . vars Trms Trms' : TermList . var Q : Qid . var Str Str' : String . var Including : ImportList . var Cond : Condition .
+  vars Trm Trm' : [Term] . var Cxt : String . vars Trms Trms' : TermList . var Q : Qid . var Str Str' : String . var Including : ImportList . var Cond : Condition .
   var AS AS' : AttrSet .  var Subsorts : SubsortDeclSet . var OPDS : OpDeclSet . var Mbs : [MembAxSet] . var Eqs : [EquationSet] . 
   var Rls : [RuleSet] . vars Sorts : SortSet .  var ETrm : Term .
   var Type : Type .  var Types : TypeList . var M : Module .
@@ -686,7 +686,7 @@ fmod META-MODULE-EXTRAS is
 
 
   op setRls : [Module] [RuleSet] -> [Module] .
-  var U? : [Module] .  var Cxt : Term . var Str : String .
+  var U? : [Module] .  var Cxt : String . var Str : String .
 
   eq setRls(mod H is IL sorts SS . SSDS OPDS MAS EqS RlS endm, RlS')
     = mod H is IL sorts SS . SSDS OPDS MAS EqS RlS' endm .
@@ -723,11 +723,11 @@ fmod META-MODULE-EXTRAS is
   eq addMbs(MAS, U) = setMbs(U, (MAS getMbs(U))) .
   eq addEqs(EqS, U) = setEqs(U, (EqS getEqs(U))) .
   eq addEqs(EqS1:[EquationSet] 
-       errorEq(T:[Term], Cxt:[Term], Str:String, AS), U)
-   = errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], U) .
+       errorEq(T:[Term], Cxt:String, Str:String, AS), U)
+   = errorM(AS:AttrSet, Str:String, T:[Term], Cxt:String, U) .
   eq addRls(RlS, U) = setRls(U, (RlS getRls(U))) .
-  eq addRls(errorRl(Cxt:[Term], T:[Term], Str:String, AS:AttrSet), U) 
-   = errorM(AS:AttrSet, Str:String, T:[Term], Cxt:[Term], U) .
+  eq addRls(errorRl(T:[Term], Cxt:String, Str:String, AS:AttrSet), U) 
+   = errorM(AS:AttrSet, Str:String, T:[Term], Cxt:String, U) .
   eq addImports(IL, U) = setImports(U, (getImports(U) IL)) .
 
   eq emptyFModule 
@@ -1085,8 +1085,8 @@ fmod META-MODULE-EXTRAS is
     then (mb Trm : T [AS] .)
     else (cmb Trm : T if Cond [AS] .)
     fi .
- eq plugMb(errorT(T1':[Term], T2':[Term], Str:String), T, AS, Cond)
-  = errorMb(T1':[Term], T2':[Term], Str:String, AS) .
+ eq plugMb(errorT(T1':[Term], Cxt:String, Str:String), T, AS, Cond)
+  = errorMb(T1':[Term], Cxt:String, Str:String, AS) .
 
  op plugEq : Term Term AttrSet Condition ~> Equation .
  eq plugEq(T1, T2, AS, Cond) 
@@ -1094,10 +1094,10 @@ fmod META-MODULE-EXTRAS is
     then (eq T1 = T2 [AS] .) 
     else (ceq T1 = T2 if Cond [AS] .) 
     fi .
- eq plugEq(errorT(T1':[Term], T2':[Term], Str:String), T2, AS, Cond)
-  = errorEq(T1':[Term], T2':[Term], Str:String, AS) .
- eq plugEq(T1, errorT(T1':[Term], T2':[Term], Str:String), AS, Cond)
-  = errorEq(T1':[Term], T2':[Term], Str:String, AS) .
+ eq plugEq(errorT(T1':[Term], Cxt:String, Str:String), T2, AS, Cond)
+  = errorEq(T1':[Term], Cxt:String, Str:String, AS) .
+ eq plugEq(T1, errorT(T1':[Term], Cxt:String, Str:String), AS, Cond)
+  = errorEq(T1':[Term], Cxt:String, Str:String, AS) .
 
  op plugRl : Term Term AttrSet Condition ~> Rule .
  eq plugRl(T1, T2, AS, Cond) 
@@ -1105,10 +1105,10 @@ fmod META-MODULE-EXTRAS is
     then (rl T1 => T2 [AS] .) 
     else (crl T1 => T2 if Cond [AS] .) 
     fi .
- eq plugRl(errorT(T1':[Term], T2':[Term], Str:String), T2, AS, Cond)
-  = errorRl(T1':[Term], T2':[Term], Str:String, AS) .
- eq plugRl(T1, errorT(T1':[Term], T2':[Term], Str:String), AS, Cond)
-  = errorRl(T1':[Term], T2':[Term], Str:String, AS) .
+ eq plugRl(errorT(T1':[Term], Cxt:String, Str:String), T2, AS, Cond)
+  = errorRl(T1':[Term], Cxt:String, Str:String, AS) .
+ eq plugRl(T1, errorT(T1':[Term], Cxt:String, Str:String), AS, Cond)
+  = errorRl(T1':[Term], Cxt:String, Str:String, AS) .
 
 
 
@@ -1435,8 +1435,8 @@ fmod META-LEVEL-EXTRAS is
 
   op normalize : Module Term -> Term .
   eq normalize(M, Trm) = getTerm(metaReduce(M, Trm)) .
-  eq normalize(M, errorT(T1:[Term], T2:[Term], Str:String)) 
-   =  errorT(T1:[Term], T2:[Term], Str:String) .
+  eq normalize(M, errorT(T1:[Term], Cxt:String, Str:String)) 
+   =  errorT(T1:[Term], Cxt:String, Str:String) .
 
   var Nl1 Nl2 Nl' : NatList .
   var TS : TypeSet .
