@@ -17,17 +17,17 @@ mod SYNTAX-PREDICATES is
    = syntaxPreds(M, Flat, removeSorts(lesserSorts(Flat, K), NeK ; K), makeSubsorts(Flat,getSorts(Flat),getSorts(Flat)), getOps(Flat)) .
 
   op syntaxPreds : Module Module SortSet  SubsortDeclSet OpDeclSet -> Module .
-  eq syntaxPreds(M, Flat, SS, SSDS, OPDS) = syntaxPreds(M, Flat, SS, builtinSorts(M, SS), listSorts(M, SS), SSDS, OPDS) .
+  eq syntaxPreds(M, Flat, SS, SSDS, OPDS) = syntaxPreds(M, Flat, SS \ builtinSorts(M,SS), builtinSorts(M, SS), SSDS, OPDS) .
 
-  op syntaxPreds : Module Module SortSet SortSet SortSet SubsortDeclSet OpDeclSet -> Module .
-  eq syntaxPreds(M, Flat, SS, BSS, LSS, SSDS, OPDS)
+  op syntaxPreds : Module Module SortSet SortSet SubsortDeclSet OpDeclSet -> Module .
+  eq syntaxPreds(M, Flat, SS, BSS, SSDS, OPDS)
    = addMbs(syntaxPreds(getSubsorts(SSDS, SS)) 
-              syntaxPreds(getOps(OPDS, SS)), 
+              syntaxPreds(getOps(OPDS, SS)) 
+              builtinSyntaxPreds(BSS),
             setOps( 
-                   addSubsorts(generateSubsorts(createListSorts(Flat, LSS), K),
-                               addSorts('PreK ; createListSorts(Flat, LSS), M))
+                  M
                   ,
-                  syntaxPreds(SS) syntaxOps(M, Flat, SS, BSS, LSS, getOps(M))
+                  syntaxPreds(SS ; BSS) syntaxOps(M, Flat, SS ; BSS, getOps(M))
                   )) .
 
  op syntaxPreds : OpDeclSet ~> MembAxSet .
@@ -42,36 +42,28 @@ mod SYNTAX-PREDICATES is
  eq syntaxPreds((none).OpDeclSet) = none .
 
 
-  op syntaxOps : Module Module SortSet SortSet SortSet OpDeclSet ~> OpDeclSet .
-  eq syntaxOps(M, Flat, SS, BSS, LSS, Op OPDS)
-   = syntaxOp(M, Flat, SS, BSS, LSS, Op)
-     syntaxOps(M, Flat, SS, BSS, LSS, OPDS) .
-  eq syntaxOps(M, Flat, SS, BSS, LSS, none) = none .
+  op syntaxOps : Module Module SortSet OpDeclSet ~> OpDeclSet .
+  eq syntaxOps(M, Flat, SS, Op OPDS)
+   = syntaxOp(M, Flat, SS, Op)
+     syntaxOps(M, Flat, SS, OPDS) .
+  eq syntaxOps(M, Flat, SS, none) = none .
 
   
-  op syntaxOp : Module Module SortSet SortSet SortSet OpDecl ~> OpDecl .
-  eq syntaxOp(M, Flat, SS, BSS, LSS, (op Q : Tl -> T [AS] .))
-   = (op Q : syntaxTl(M, Flat, SS, BSS, LSS, Tl) -> syntaxT(M, Flat, SS, BSS, LSS, T) [syntaxAS(M, Flat, SS, BSS, LSS, AS)] .) . 
+  op syntaxOp : Module Module SortSet OpDecl ~> OpDecl .
+  eq syntaxOp(M, Flat, SS, (op Q : Tl -> T [AS] .))
+   = (op Q : syntaxTl(M, Flat, SS, Tl) -> syntaxT(M, Flat, SS, T) [AS] .) . 
 
 
-  op syntaxAS : Module Module SortSet SortSet SortSet AttrSet ~> AttrSet .
-  eq syntaxAS(M, Flat, SS, BSS, LSS, id(Ct) AS) = id(mkConstant(getName(Ct), createListSort(M,getType(Ct)))) AS .
-  eq syntaxAS(M, Flat, SS, BSS, LSS, AS) = AS [owise] .
 
-
-  op syntaxTl : Module Module SortSet SortSet SortSet TypeList ~> TypeList .
-  eq syntaxTl(M, Flat, SS, BSS, LSS, T Tl) 
-   = syntaxT(M, Flat, SS, BSS, LSS, T) 
-     syntaxTl(M, Flat, SS, BSS, LSS, Tl)  .
-  eq syntaxTl(M, Flat, SS, BSS, LSS, nil) = nil .
+  op syntaxTl : Module Module SortSet TypeList ~> TypeList .
+  eq syntaxTl(M, Flat, SS, T Tl) 
+   = syntaxT(M, Flat, SS, T) 
+     syntaxTl(M, Flat, SS, Tl)  .
+  eq syntaxTl(M, Flat, SS, nil) = nil .
      
-  op syntaxT : Module Module SortSet SortSet SortSet Type ~> Type .
-  eq syntaxT(M, Flat, SS, BSS, LSS, T) 
-   = if T in SS 
-     then if T in LSS 
-          then createListSort(M, T)
-          else K fi
-     else T fi .
+  op syntaxT : Module Module SortSet Type ~> Type .
+  eq syntaxT(M, Flat, SS, T) 
+   = if T in SS then K else T fi .
 
 
  op syntaxPreds : SubsortDeclSet ~> MembAxSet .
@@ -79,6 +71,12 @@ mod SYNTAX-PREDICATES is
   = plugKRule(R{replaceS[kApply(predicateLabel(S'),mkVariable(S,S)),trueCt],empty, metadata(pair("predicate",""))}) 
     syntaxPreds(SSDS) .
  eq syntaxPreds((none).SubsortDeclSet) = none .
+
+ op builtinSyntaxPreds : SortSet ~> MembAxSet .
+ eq builtinSyntaxPreds(S ; SS) 
+  = plugKRule(R{replaceS[kApply(predicateLabel(S),mkVariable(S,S)),trueCt],empty, metadata(pair("predicate",""))})  
+    builtinSyntaxPreds(SS) .
+ eq builtinSyntaxPreds(none) = none .
 
   op syntaxPreds : SortSet ~> OpDeclSet .
   eq syntaxPreds(S ; SS) 
@@ -90,6 +88,6 @@ mod SYNTAX-PREDICATES is
   var T : Type . var NeTyl : NeTypeList .  var Tl : TypeList .
 
   var OPDS : OpDeclSet . var Op : OpDecl .  var AS : AttrSet .
-  var SSDS : SubsortDeclSet .  var SS BSS LSS : SortSet . var S S' : Sort .
+  var SSDS : SubsortDeclSet .  var SS BSS : SortSet . var S S' : Sort .
   var M Flat : Module .
 endm

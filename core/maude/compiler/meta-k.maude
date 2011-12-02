@@ -74,6 +74,7 @@ fmod META-K-BUILTINS is
   eq builtinSorts(M:Module) = builtinSorts(getSorts(flatten(M:Module))) .
   op builtinSorts : SortSet -> SortSet [memo] .
   eq builtinSorts(S ; SS) = if substr(string(S),0,1) == "#" then S ; builtinSorts(SS) else  builtinSorts(SS) fi .
+  eq builtinSorts(none) = none .
 
   op builtinModules : ~> SortSet .
   eq builtinModules = none .

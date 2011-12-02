@@ -1,7 +1,17 @@
 require k-visitor
 
+module BINDER is
+  syntax KLabel ::= isBinder
+                  | isBinder or #Id
+  syntax K ::= #Id
+
+  rule isBinder or X(X:#Id) => true
+  rule isBinder or X(K:K) => true if isBinder(K)
+end module
+
 module SUBSTITUTION 
   imports K-VISITOR
+  imports BINDER
 ---beta-substitution definition using the K AST visitor pattern
   syntax K ::= #Id  | #Nat
              | K [ K / #Id ] [prec 0]
@@ -12,14 +22,9 @@ module SUBSTITUTION
                
   syntax KLabel ::= beta [ K / #Id ] 
                [prec 0 latex "\sqbracket{\framebox{${#1}$}/{#2}}"]
-                  | isBinder
-                  | isBinder or #Id
                
-  rule isBinder or X(X) => true
-  rule isBinder or X(K) => true if isBinder(K)
-  
   syntax #Id ::= id #Nat  --- to generate fresh names
-  rule id N:#Nat => #id ("id" +String Int2String(N))
+  rule id N:#Nat => #id ("_id" +String Int2String(N))
   configuration <k color="green"> .K </k> <nextId> 0 </nextId>
 
   rule <k> K'[K/Y] => endVisit(beta K'[K/Y]) <_/k> [structural]

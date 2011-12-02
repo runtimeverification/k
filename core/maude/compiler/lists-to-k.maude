@@ -221,6 +221,8 @@ ceq lists2kOp((op Q' : nil -> T [AS] .), CTORS (subsort T' < T .) |-> Q[Trm])
   = wrapList(mkKLabelSort(K,metadataParse(metadataString(getAttrs(getListConstructor(OPDS,T))))), Trm', lists2kT(Trm, T, M, OPDS, CTORS (subsort T' < T .) |-> Trm')) .
  eq lists2kT(Q[Trms], T, M, OPDS, CTORS, Op)
   = Q[lists2kTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, CTORS)] [owise] .
+ eq lists2kT(Trm, T, M, OPDS, CTORS, errorSOp(Trm', T', Str))
+  = errorT(Trm', mkVariable('`[`],T'), Str) [owise] .
 
  op lists2kCV : Term Type CTORSMap ~> Term .
  eq lists2kCV(C, T, CTORS (subsort T' < T .) |-> Q[C])

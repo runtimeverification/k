@@ -1028,7 +1028,7 @@ mod LATEX-PRINT-META is
   ceq printVariable(St) 
     =  if I:[Int] :: Nat 
        then printIndexedVariable(substr(St, 0, _-_(length(St), 1)), St') 
-       else if St' == "'" then ('\ensuremath '`{ printVariable(substr(St,0,_-_(length(St),1))) '' '`}) else string2qidList(St) fi fi
+       else if St' == "'" then (printVariable(substr(St,0,_-_(length(St),1))) '') else string2qidList(St) fi fi
    if St' := substr(St, _-_(length(St),1), 1)
    /\ I:[Int] := rat(St',10) .
 
@@ -1036,7 +1036,7 @@ mod LATEX-PRINT-META is
   ceq printIndexedVariable(St, St'')
     =  if I:[Int] :: Nat 
        then printIndexedVariable(substr(St, 0, _-_(length(St),1)), St'' + St') 
-       else '\ensuremath '`{  '`{ printVariable(St) '`} '_ '`{ string2qidList(St'') '`} '`} fi
+       else '`{ printVariable(St) '`} '_ '`{ string2qidList(St'') '`} fi
    if St' := substr(St, _-_(length(St), 1), 1)
    /\ I:[Int] := rat(St',10) .
 
