@@ -126,6 +126,10 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   eq latexify(S) = replaceAll(replaceAll(S,( "{" |-> "\\{", "}" |-> "\\}")),("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&" |-> "\\&", ---("_" |-> "\\_",---)
  "'" |-> "", "`" |-> "", ---("\\" |-> "$\\backslash$",---) "~" |-> "\\mbox{\\~{}}", "^" |-> "\\mbox{\\^{}}")) .
  
+  op latexString : String -> String .
+  eq latexString(S)
+   = replaceAll(latexify(replace(S,"\\","\\textbackslash ")),("\"" |-> "\\mysinglequote{}", "_" |-> "\\_")) .
+
 
   var Q : Qid . var QIL : QidList .
   op untokenize : QidList -> String .

@@ -627,9 +627,9 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq pair("tags","") = none .   
   eq eMetaLatexPrint(M, pair("parser",Str)) = nil .   
   eq eMetaLatexPrint(M, (pair(Str,"") ))   
-    = ('\kattribute '`{ tokenize(latexify(Str)) '`}) [owise] .
+    = ('\kattribute '`{ tokenize(latexString(Str)) '`}) [owise] .
   eq eMetaLatexPrint(M, (pair(Str,Str') ))   
-    = ('\kattribute  '`( tokenize(latexify(Str)) '`( tokenize(latexify(Str')) '`) '`}) [owise] .
+    = ('\kattribute  '`( tokenize(latexString(Str)) '`( tokenize(latexString(Str')) '`) '`}) [owise] .
   eq eMetaLatexPrint(M, (strat(NL) ))
     = ('\kstrat '`{ eMetaLatexPrint(NL) '`} 
        ) .
@@ -875,7 +875,7 @@ mod UNIT-META-LATEX-PRINT is
   eq eMetaLatexPrintPL(QI) = \moduleName{QI} .
   var Q : Qid .
   op \moduleName{_} : Qid -> Qid .
-  eq eMetaLatexPrintME(Q) = \moduleName{latexify(Q)} .
+  eq eMetaLatexPrintME(Q) = \moduleName{Q} .
 
   op renamingSet2QidList : RenamingSet -> QidList .
   eq renamingSet2QidList(((op F to F' [AtS]), RS:RenamingSet))
@@ -1052,7 +1052,7 @@ mod LATEX-PRINT-META is
   eq \textsf{'==} = '= .
   eq \textsf{Q} = Q [owise] .
   eq \myquote{Str} 
-   = '\myquote '`{ printStr(replaceAll(latexify(replace(substr(Str,1, _-_(length(Str), 2)),"\\","\\textbackslash ")),("\"" |-> "\\mysinglequote{}", "_" |-> "\\_"))) '`} .
+   = '\myquote '`{ printStr(latexString(substr(Str,1, _-_(length(Str), 2)))) '`} .
   op printQid : Qid -> QidList .
   eq printQid(Q) 
    = if Q == ' then nil else 
@@ -1162,19 +1162,19 @@ mod LATEX-PRINT-META is
 
   var Cnd : Term .
   eq eMetaLatexPrint(M, (rule(Str, R{T, empty, AS})) Prints)
-    = ('\n '\krule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
+    = ('\n '\krule '`{ printStr(latexString(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} '`{ '`} '`{ eMetaLatexPrint(M, AS) '`}
        eMetaLatexPrint(M, Prints)) [owise] .
   eq eMetaLatexPrint(M, (rule(Str, R{T, Cnd, AS})) Prints)
-    = ('\n '\krule '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
+    = ('\n '\krule '`{ printStr(latexString(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`}  '`{  eMetaLatexPrint(M, AS) '`}
        eMetaLatexPrint(M, Prints)) [owise] .
   eq eMetaLatexPrint(M, (context(Str, C{T, empty, AS})) Prints)
-    = ('\n '\kcontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
+    = ('\n '\kcontext '`{ printStr(latexString(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} '`{ '`} '`{  eMetaLatexPrint(M, AS) '`}
        eMetaLatexPrint(M, Prints)) [owise] .
   eq eMetaLatexPrint(M, (context(Str, C{T, Cnd, AS})) Prints)
-    = ('\n '\kcontext '`{ printStr(latexify(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
+    = ('\n '\kcontext '`{ printStr(latexString(Str)) '`} '`{ '\ensuremath printTerm(M, T) 
                    '`} '`{ '\ensuremath printTerm(M, Cnd) '`} '`{  eMetaLatexPrint(M, AS) '`}
        eMetaLatexPrint(M, Prints)) [owise] .
 
