@@ -50,7 +50,7 @@ module FUN-UNTYPED-SYNTAX
   macro () = .Exps
 
   macro fun E1:Exp E2:Exp -> E:Exp = fun E1 -> fun E2 -> E
-  macro (E1:Exp E2:Exp = E) = (E1 = fun E2 -> E)
+  macro (E1:Exp Es:Exps = E) = (E1 = fun Es -> E)
   macro (X:#Id = E:Exp) and (Xs:Ids = Es:Exps)
       = ((X,Xs) = (E,Es))
 end module
