@@ -98,8 +98,8 @@ generalSettings =
 
 commonKSettings :: [Setting]
 commonKSettings =
-    [ Setting "k-definition" FileType "Path to the K definition (see additional docs for what this means)"
-    , Setting "main-module" StringType "Name of the main module the program should execute in"
+    [ Setting "k-definition" FileType "Path to the K definition"
+    , Setting "main-module" StringType "Module the program should execute in"
     , Setting "syntax-module" StringType "Name of the syntax module"
     , Setting "io" BoolType "Use real IO when running the definition"
     , Setting "statistics" BoolType "Print Maude's rewrite statistics"
@@ -109,9 +109,9 @@ advancedKSettings :: [Setting]
 advancedKSettings =
     [ Setting "compiled-def" FileType "Path to the compiled K definition"
     , Setting "do-search" BoolType "Search for all possible results"
-    , Setting "maude-cmd" StringType "Maude command used to execute the definition (search, erewrite, search, ...)"
+    , Setting "maude-cmd" StringType "Maude command used to execute the definition"
     , Setting "xsearch-pattern" StringType "Search pattern"
-    , Setting "output-mode" StringType "How to display Maude results (options are none, raw, and pretty)"
+    , Setting "output-mode" StringType "How to display Maude results (none, raw, pretty)"
     , Setting "log-io" BoolType "Tell the IO server to create logs"
     ]
 
