@@ -62,7 +62,7 @@ module EXP-TYPE-INFERENCE
                      <tenv color="LightSkyBlue"> .Map </tenv>
                      <unification>
                        <eqns>
-                         <eqn multiplicity="*"> .Set </eqn>
+                         <eqn multiplicity="*"> .K </eqn>
                        </eqns>
                        <mgu> .Map </mgu>
                      </unification>
@@ -72,22 +72,21 @@ module EXP-TYPE-INFERENCE
   rule <k> I:#Int => int ...</k>
   rule <k> B:#Bool => bool ...</k>
   rule <k> X:#Id => T:Type ...</k> <tenv>... X |-> T ...</tenv>
-  rule <k> L:KLabel(T1:Type,,T2:Type) => ((T1,T2) = (int,int)) ~> int ...</k>
+  rule <k> L:KLabel(T1:Type,,T2:Type) => (T1,T2 = int,int) ~> int ...</k>
     if L ==Bool '_+_ orBool L ==Bool '_-_ orBool
        L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_
   rule <k> - T => (T = int) ~> int ...</k>
-  rule <k> L(T1,,T2) => bool ...</k>
-       (. => <eqn> T1 = int </eqn> <eqn> T2 = int </eqn>)
+  rule <k> L(T1,,T2) => (T1,T2 = int,int) ~> bool ...</k>
     if L ==Bool '_<_ orBool L ==Bool '_<=_ orBool L ==Bool '_>_ orBool
        L ==Bool '_>=_ orBool L ==Bool '_==_ orBool L ==Bool '_!=_
-  rule <k> L(T1,,T2) => ((T1,T2) = (bool,bool)) ~> bool ...</k>
+  rule <k> L(T1,,T2) => (T1,T2 = bool,bool) ~> bool ...</k>
     if L ==Bool '_and_ orBool L ==Bool '_or_
   rule <k> not T => (T = bool) ~> bool ...</k>
-  rule <k> if T then T1 else T2 => ((T,T1) = (bool,T2)) ~> T1 ...</k>
+  rule <k> if T then T1 else T2 => (T,T1 = bool,T2) ~> T1 ...</k>
 
-  rule <k> lambda X . E:Exp => (Tv:TypeVar -> E) ~> tenv(TEnv:Map) ...</k>
+  rule <k> lambda X . E:Exp => E ~> (Tv -> []) ~> tenv(TEnv:Map) ...</k>
           <tenv> TEnv => TEnv[Tv/X] </tenv>
-          <nextType> Tv => Tv +Type 1 </nextType>
+          <nextType> Tv:TypeVar => Tv +Type 1 </nextType>
   rule <k> T1 T2 => (T1 = (T2 -> Tv)) ~> Tv ...</k>
        <nextType> Tv => Tv +Type 1 </nextType>
 
@@ -98,7 +97,7 @@ module EXP-TYPE-INFERENCE
   rule <k> let X = T in E => E ~> tenv(TEnv) ...</k>
        <eqns> .Bag </eqns> <mgu> Theta:Map </mgu>
        <tenv> TEnv
-        => TEnv[((forall (ftv(Theta[T]) -- ftv(Theta[types(TEnv)]))) Theta[T])
+        => TEnv[((forall (ftv(Theta[T]) \ ftv(Theta[types(TEnv)]))) Theta[T])
                    / X]
        </tenv>
 
@@ -130,7 +129,7 @@ module EXP-TYPE-INFERENCE
                    | TypeVar "+Type" #Nat [:latex("{#1}+_{\it Type}{#2}"):]
   syntax TypeVars ::= List{TypeVar,","}
   syntax Type ::= BasicType | TypeVar
----                | Type "->" Type
+                | Type "->" Type
   syntax Types ::= List{Type,","}
   syntax TypeSchema ::= Type
                       | "(" "forall" TypeVars ")" Type
@@ -145,7 +144,7 @@ module EXP-TYPE-INFERENCE
   rule ftv(BT:BasicType) => .TypeVars
   rule ftv(Tv:TypeVar) => Tv
   rule ftv(T1:Type -> T2:Type) => mergeVars(ftv(T1),ftv(T2))
-  rule ftv((forall Tvs:TypeVars) T:Type) => ftv(T) -- Tvs
+  rule ftv((forall Tvs:TypeVars) T:Type) => ftv(T) \ Tvs
   rule ftv(.TypeSchemas) => .TypeVars
   rule ftv(TS1:TypeSchema,TS2:TypeSchema,TSs:TypeSchemas)
     => mergeVars(ftv(TS1),ftv(TS2,TSs))
@@ -156,12 +155,12 @@ module EXP-TYPE-INFERENCE
   rule mergeVars(Tv1:TypeVar,(Tv2:TypeVar,Tvs:TypeVars))
     => if Tv1 ==Bool Tv2 then Tv2,Tvs else Tv2,mergeVars(Tv1,Tvs) fi
 
-  syntax TypeVars ::= TypeVars "--" TypeVars  [:latex("{#1}\setminus{#2}"):]
-  rule (Tv1,Tv2,Tvs) -- Tvs' => mergeVars((Tv1 -- Tvs'),((Tv2,Tvs) -- Tvs'))
-  rule .TypeVars -- _ => .TypeVars
-  rule Tv1 -- (Tv2,Tvs2:TypeVars)
-    => if Tv1 ==Bool Tv2 then .TypeVars else Tv1 -- Tvs2 fi
-  rule Tv1 -- .TypeVars => Tv1,.TypeVars
+  syntax TypeVars ::= TypeVars \ TypeVars  [:latex("{#1}\setminus{#2}"):]
+  rule (Tv1,Tv2,Tvs) \ Tvs' => mergeVars((Tv1 \ Tvs'),((Tv2,Tvs) \ Tvs'))
+  rule .TypeVars \ _ => .TypeVars
+  rule Tv1 \ (Tv2,Tvs2:TypeVars)
+    => if Tv1 ==Bool Tv2 then .TypeVars else Tv1 \ Tvs2 fi
+  rule Tv1 \ .TypeVars => Tv1,.TypeVars
 
   syntax #Nat ::= "|" TypeVars "|"
   rule |Tv,Tvs| => 1 +Nat |Tvs| 
@@ -177,10 +176,10 @@ module EXP-TYPE-INFERENCE
   syntax Type ::= Type "[" Types "/" TypeVars "]"  [:prec(2):]
 
   rule T[.Types / .TypeVars] => T
-  rule T[T1,T2,Ts / Tv1,Tv2,Tvs] => T[T1 / Tv1][T2,Ts / Tv2,Tvs]
+  rule T[T1,T2,Ts:Types / Tv1,Tv2,Tvs] => T[T1 / Tv1][T2,Ts / Tv2,Tvs]
   rule BT[T / Tv] => BT
   rule Tv':TypeVar[T / Tv] => if Tv' ==Bool Tv then T else Tv' fi
-  rule (T1 -> T2)[T / Tv] => T1[T / Tv] -> T2[T / Tv]
+  rule (T1 -> T2)[T / Tv] => (T1[T / Tv]) -> (T2[T / Tv])
 
 
 
@@ -191,13 +190,16 @@ module EXP-TYPE-INFERENCE
 
 
   syntax Exps ::= List{Exp,","}
-  syntax K ::= Exp "->" Exp [:strict hybrid:]
-             | Exps = Exps  [:strict:]
+  syntax K ::= TypeVar "->" "[]"
+             | Exps = Exps  [:strict prec(100):]
+
+  rule T ~> (Tv -> []) => Tv -> T
 
   rule <k> Ts:Types = Ts':Types => . ...</k>
        (. => <eqn> Theta[Ts] = Theta[Ts'] </eqn>)
        <mgu> Theta </mgu>
 
+***(
   rule <eqn> Ts = Ts </eqn> => .
 
   rule <eqn> (T1,T2,Ts) = (T1':Type,T2':Type,Ts') </eqn>
@@ -206,9 +208,10 @@ module EXP-TYPE-INFERENCE
   rule <eqn> (T1 -> T2) = (T1' -> T2') </eqn>
     => <eqn> T1 = T1' </eqn> <eqn> T2 = T2' </eqn>
 
-  rule <eqn> Tv = T </eqn>
-    => <mgu>... . => Tv|->T ...</mgu>
+  rule (<eqn> Tv = T </eqn> => .)
+       <mgu>... . => Tv |-> T ...</mgu>
     if notBool (Tv in T)
+***)
 
   syntax Types ::= Map "[" Types "]"
 
