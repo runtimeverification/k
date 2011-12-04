@@ -85,7 +85,7 @@ semantics.  For example, it is identical to that of IMP\@. */
 
 Our semantics is call-by-value, meaning we only reduce application or unroll 
 $\mu$ when they are in redex positions, which in \K is equivalent to being 
-at the top of the computation cell.
+at the top of the $\mall{}{k}{}$ cell.
 */
 
   rule <k> (lambda X:#Id . E:Exp) V:Val => E[V/X]  ...</k>
@@ -105,11 +105,19 @@ The rules below are taken over, unchanged, from the semantics of IMP\@. */
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
-  rule V1:Val == V2:Val => V1 ==Bool V2
   rule V1 != V2 => V1 =/=Bool V2
   rule T1:#Bool and T2:#Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
   rule not(T:#Bool) => notBool(T)
+
+/*@ \subsection{Equality test}
+  In this substitution-based definition we need to be careful when defining
+equality, as ids are also values here.
+  To avoid having diferent rules for diferent types of values, we chose here
+to only reduce equality when in redex position, i.e., at the top of the 
+$\mall{}{k}{}$ cell.*/
+  
+  rule <k> V1:Val == V2:Val => V1 ==Bool V2 ...</k>
 
 /*@ \subsection{Conditional}
 The two rules below are straightforward, almost identical to those in
