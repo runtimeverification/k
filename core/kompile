@@ -1441,7 +1441,7 @@ sub compile {
 			$errorSet = 1;
 		}
 		if ($errorSet) {
-			print "ERROR:\n";
+			print "[ERROR]: ";
 			print "Aborting the compilation\n";
 			my $unquotedOutput = unquote($maude_xml_file);
 			print "$unquotedOutput\n";
@@ -1477,9 +1477,9 @@ sub compile {
 
 # If the keyword "Error" begins a line in the output, then extract and report the error message
     if (/^Error: (.*?)Bye/sm) {
-	print "ERROR:\n";
-	print $1;
+	print "[ERROR]:\n";
 	print "Aborting the compilation\n";
+	print $1;
 	exit(1);
     }
 
@@ -1498,7 +1498,7 @@ sub compile {
 
 # Otherwise there must be some error that the script is now aware of, so show the whole thing
     else {
-	print "Unknown ERROR: cannot parse the output below (returned by the compiler):\n$_\n" if $_ ne "-1";
+	print "[ERROR]: cannot parse the output below (returned by the compiler):\n$_\n" if $_ ne "-1";
 	print "Aborting the compilation\n";
 	exit(1);
     }
@@ -1572,24 +1572,36 @@ sub run_maude {
     if ($? == 0) {
 	if (-s $error_file) {
 	    open FILE,"<",$error_file or die "Cannot open $k_dir/$error_file\n";
-	    print "ERROR:\n";
+	    print "[ERROR]: ";
 	    my $i = -1;
 	    while (<FILE>) {
 		++$i;
 		my $err_msg = "";
-		my $size = 180;
-		$err_msg = "... (check /$k_dir\/$error_file to find the complete error)\n" if length($_) > $size;
-		if ($i < 10) {
-		    print substr($_, 0, $size) . $err_msg;
+		my $size = 77;
+		$err_msg = "...\nCheck \/$k_dir\/$error_file to find the complete error\n" if length($_) > $size;
+		if ($i < 4) {
+		    my $m = $_;
+		    
+		    # remove Warning:
+		    $m =~ s/Warning://;		    
+		    
+		    # specific maude error: missing module
+		    $m = "$&\nSuggestion: If module exists then try -l(ang) option.\n" if $m =~ m!no\s+module\s+.*?\.!sg;
+
+		    # undeclared sorts
+		    $m = "$&\nSuggestion: Use syntax declaration for this sort.\n" if $m =~ m!undeclared\s+sort\s+.*?\.!sg;
+		    
+		    print substr($m, 0, $size) . $err_msg;
 		}
 		else {
 		    $_ = substr($_, 0, $size) . $err_msg;
 		    last;
 		}
 	    }
+	    
 	    if (<FILE>) {++$i;}
 	    close FILE;
-	    print "...\nCheck /$k_dir\/$error_file for the remaining errors\n" if $i==11;
+	    print "...\nCheck /$k_dir\/$error_file for the remaining errors.\n" if $i==11;
 	    print printErrorFromOut();
 	    print "Aborting the compilation\n";
 	    exit(1);
@@ -1632,7 +1644,6 @@ sub maudify_file {
     $_ = slurp_k("$file.k2slurp", $latex || $png || $pdf || $ps || $crop || $eps);
 
     unlink("$file.k2slurp");
-
 
 # remove quotes from syntax
     $_ = remove_quotes($_);
@@ -1703,7 +1714,7 @@ sub maudify_file {
     if ($file =~ /\.maude/) { return; }
     
     my $maude_file = ($file =~ /^(.*)\.k(?:maude)?$/)[0].".maude";
-    print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in file $maude_file\nMaude might not finish...\n") if (!balanced($maudified, '(', ')', '`'));
+#    print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in file $maude_file\nMaude might not finish...\n") if (!balanced($maudified, '(', ')', '`'));
 #    print "Warning: Unbalanced parentheses in file $maude_file\nMaude might not finish...\n" if (!balanced($maudified, '(', ')', '`'));
 
 	# put comments back
@@ -1806,7 +1817,7 @@ sub maudify_module {
 	# unfreeze attributes if any
     $_ = Unfreeze("ATTRIBUTES", $_);
     $_ = Unfreeze("MYSTRINGS", $_);
-     # print  "Stage:\n$_\n\n";
+    # print  "Stage:\n$_\n\n";
 
 # Step: Store the on-the-fly variables
     my $vars = on_the_fly_kvars($_);
@@ -1881,7 +1892,7 @@ sub maudify_module {
         $_ = Unfreeze("SUBSORTS", $_);
         $_ = Unfreeze("SORTS", $_);
 
-# print "$_\n\n";
+#  print "$_\n\n";
 #	print "============================\n\n\n";
     
 # Step: Declare the on-the-fly variables

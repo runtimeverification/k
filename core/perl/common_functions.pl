@@ -1628,7 +1628,6 @@ sub line_numbers
 	my $space = "";
 	my $bool = 0;
 	
-#	print "RULE: $rule\n";
 	$rule =~ s/(?<=\s)\[([^\[]*?)\](\s*)$/
 	{ 
 	    $attr = $1; 
@@ -1788,13 +1787,6 @@ sub line_numbers
 sub add_line_numbers
 {
     (local $_, my $file) = (shift, shift);
-
-    s/($comment)/
-    {
-	local $_=$1;
-	s!\S!!gs;
-	$_;
-    }/gsme; 
     
     my $temp;
     s/(?<!\S)((rule|syntax|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
@@ -2788,6 +2780,9 @@ sub pre_process
     my $file = shift;
 
     # Step: replace module with kmod and
+          # freeze strings
+          s/($string_pattern)/Freeze($&,"YSTRINGS")/sge;
+          
           # freeze comments
           s/($comment)/Freeze($&, "CMTS")/sge;
     
@@ -2806,14 +2801,22 @@ sub pre_process
 
           # unfreeze comments
           $_ = Unfreeze("CMTS", $_);
+          # unfreeze comments
+          $_ = Unfreeze("YSTRINGS", $_);
+    
     
     # Step: resolve latex comments
     $_ = solve_latex($_) if $latex_;
+
+          # freeze strings
+          s/($string_pattern)/Freeze($&,"YSTRINGS")/sge;
 
     # save comments
     my ($noComments, $myComments) = remove_comments($_);
     $_ = $noComments;
     
+          # unfreeze comments
+          $_ = Unfreeze("YSTRINGS", $_);
 
     # add line numbers metadata
     $_ = add_line_numbers($_, $file);
