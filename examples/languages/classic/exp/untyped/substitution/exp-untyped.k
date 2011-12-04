@@ -40,7 +40,7 @@ and \texttt{let} and \texttt{letrec} are the usual functional derived
 constructs which can be desugared as shown in the two macros below.
 The {\color{blue}binder} annotation for the $\lambda$ and $\mu$ constructs 
 tells our generic substitution (defined in module SUBSTITUTION) that these
-constructs bind their first agfument in the second and thus need are subject
+constructs bind their first argument in the second and thus need are subject
 to $\alpha$-conversion.
  */
 
