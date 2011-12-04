@@ -1,17 +1,22 @@
 require /modules/substitution
 
-module EXP-UNTYPED-SYNTAX
+module EXP-UNTYPED-SUBSTITUTION-SYNTAX
 
 /*@ \section{Syntax}
 EXP is an expression language, so it has only one syntactic category,
 \textit{Exp}.  The syntax of EXP consists of conventional arithmetic
 constructs and conventional higher-order functional constructs.  All
 these constructs are very basic and simple, pushed to the essence of
-the notion that they are attempting to capture.  */
+the notion that they are attempting to capture. */
 
 /*@ \subsection{Arithmetic constructs}
 These are identical to those in imperative and object oriented
-languages, for example see IMP, IMPP, SIMPLE, KOOL\@. */
+languages, for example see IMP, IMPP, SIMPLE, KOOL, but note that in
+this substitution-based definition of EXP we prefer to make explicit a
+subcategory of \textit{Exp} values here in the syntax (in other
+definitions, particularly in environment-based ones, we introduce
+values as part of the semantics).  Note that identifiers are values.
+$\lambda$-abstractions will also be defined as values shortly. */
 
   syntax Val ::= #Int | #Bool | #Id
   syntax Exp ::= Val 
@@ -35,14 +40,17 @@ languages, for example see IMP, IMPP, SIMPLE, KOOL\@. */
 The constructs below are well-known: \texttt{lambda} and concatenation
 of expressions are the function abstraction and application,
 \texttt{if} is the conditional construct which here can take any
-expressions as branches, \texttt{mu} is the usual recursive binder, 
+expressions as branches, \texttt{mu} is the usual recursive binder,
 and \texttt{let} and \texttt{letrec} are the usual functional derived
 constructs which can be desugared as shown in the two macros below.
-The {\color{blue}binder} annotation for the $\lambda$ and $\mu$ constructs 
-tells our generic substitution (defined in module SUBSTITUTION) that these
-constructs bind their first argument in the second and thus need are subject
-to $\alpha$-conversion.
- */
+The {\color{blue}binder} annotation for the $\lambda$ and $\mu$ constructs
+tells our generic substitution (defined in module
+\texttt{SUBSTITUTION}, which is imported in the semantic module below)
+that these constructs bind their first argument in the second and thus
+are subject to $\alpha$-conversion (to avoid variable-capture).  Note
+that the \texttt{lambda} construct yields a value, while the
+\texttt{mu} construct does not.  Also, note that application is strict
+in both arguments, to capture the fact that EXP is call-by-value. */
 
   syntax Val ::= "lambda" #Id "." Exp       [:binder latex "\lambda{#1}.{#2}":]
   syntax Exp ::= Exp Exp                    [:strict prec 10 gather(E e):]
@@ -53,8 +61,8 @@ to $\alpha$-conversion.
 
 /*@ \subsection{Desugaring macros}
 The desugaring rules below are standard, although note that we do not
-want to apply them when we do type inference.  That is because we
-want our type inferencer to be {\em let} polymorphic. */
+want to apply them when we do type inference (because we want our type
+inferencer to be {\em let} polymorphic). */
 
   macro let X:#Id = E:Exp in E':Exp = (lambda X . E') E
   macro (letrec F:#Id X = E in E') = (let F = mu F . (lambda X . E) in E')
@@ -62,38 +70,31 @@ want our type inferencer to be {\em let} polymorphic. */
 end module
 
 
-module EXP-UNTYPED
-  imports EXP-UNTYPED-SYNTAX + SUBSTITUTION
+module EXP-UNTYPED-SUBSTITUTION
+  imports EXP-UNTYPED-SUBSTITUTION-SYNTAX + SUBSTITUTION
 
 /*@ \section{Semantics}
-The EXP semantics below is substitution-based. */
+Since our \K definition here is substitution-based, there is no need to
+lookup variables (variables are simply substituted when needed) and no
+need to give a semantics to $\lambda$-abstractions (they are simply
+applied via the $\beta$-reduction rule). */
 
 /*@ \subsection{Values and results}
-Like in IMP, we prefer to define values as a distinguished subsyntactic
-category of \textit{Exp}, as opposed to defining them directly as \K
-results. */
+We have to tell the \K tool that values should be regarded as results
+of computations. */
 
   syntax KResult ::= Val
 
 /*@ \subsection{Configuration}
-The configuration below is standard for trivial environment-based
-semantics.  For example, it is identical to that of IMP\@. */
+The one-cell configuration below is standard for simple
+substitution-based semantics. */
 
   configuration <k color="green"> $PGM:Exp </k>
 
-/*@ \subsection{$\beta$-reduction and $\mu$-unrolling}
-
-Our semantics is call-by-value, meaning we only reduce application or unroll 
-$\mu$ when they are in redex positions, which in \K is equivalent to being 
-at the top of the $\mall{}{k}{}$ cell.
-*/
-
-  rule <k> (lambda X:#Id . E:Exp) V:Val => E[V/X]  ...</k>
-
-  rule <k> mu X . E => E[(mu X.E) / X] ...</k>
-
 /*@ \subsection{Arithmetic constructs}
-The rules below are taken over, unchanged, from the semantics of IMP\@. */
+The block of rules below are taken over, unchanged, from the semantics
+of IMP\@.  The rules for equality test need to be restricted to only
+apply in context, so they were given separate semantics underneath. */
 
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
@@ -105,19 +106,28 @@ The rules below are taken over, unchanged, from the semantics of IMP\@. */
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
-  rule V1 != V2 => V1 =/=Bool V2
   rule T1:#Bool and T2:#Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
   rule not(T:#Bool) => notBool(T)
 
 /*@ \subsection{Equality test}
-  In this substitution-based definition we need to be careful when defining
-equality, as ids are also values here.
-  To avoid having diferent rules for diferent types of values, we chose here
-to only reduce equality when in redex position, i.e., at the top of the 
-$\mall{}{k}{}$ cell.*/
-  
+In this substitution-based definition we need to be careful when
+defining equality, as ids are also values.  To be safe, we restrict
+the semantics of equality only to redex positions, i.e., at the top of
+the \textsf{k} cell. */
+
   rule <k> V1:Val == V2:Val => V1 ==Bool V2 ...</k>
+  rule <k> V1 != V2 => V1 =/=Bool V2 ...</k>
+
+/*@ \subsection{$\beta$-reduction and $\mu$-unrolling}
+
+Since our semantics is call-by-value, we only reduce application or
+unroll $\mu$ when they are in redex positions, which in \K is
+equivalent to being at the top of the \textsf{k} cell. */
+
+  rule <k> (lambda X:#Id . E:Exp) V:Val => E[V/X]  ...</k>
+
+  rule <k> mu X . E => E[(mu X.E) / X] ...</k>
 
 /*@ \subsection{Conditional}
 The two rules below are straightforward, almost identical to those in

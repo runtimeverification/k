@@ -1,5 +1,5 @@
 \setlength{\parindent}{1em}
-\title{EXP --- Untyped Dynamic Semantics}
+\title{EXP --- Untyped --- Substitution-Based}
 \author{Grigore Ro\c{s}u and
         Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
 	(\texttt{\{grosu,tserban2\}@illinois.edu})}
@@ -17,12 +17,12 @@ seminal paper on type inference below:
 Robin Milner. A theory of type polymorphism in programming.
 {\em Journal of Computer and System Sciences}, 17(3):348-375, 1978.
 \end{quote}
-EXP captures the essence of functional languages, providing basic
-artihmetic expression constructs, $\lambda$ and $\mu$ abstractions,
-function application, a conditional, and (derived) \texttt{let} and
-\texttt{letrec} binders.
+EXP is a call-by-value language which captures the essence of
+functional languages, providing basic arithmetic expression
+constructs, $\lambda$ and $\mu$ abstractions, function application, a
+conditional, and (derived) \texttt{let} and \texttt{letrec} binders.
+This definition is substitution-based. An alternative,
+environment-based \K definition is also available.
 \end{latexComment}
 
 \vspace*{3ex}
-
-
