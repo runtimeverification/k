@@ -50,6 +50,19 @@ module FUN-UNTYPED-SYNTAX
   macro fun E1:Exp E2:Exp -> E:Exp = fun E1 -> fun E2 -> E
   macro (E1:Exp Es:Exps = E) = (E1 = fun Es -> E)
   macro (X:#Id = E:Exp) and (Xs:Ids = Es:Exps) = ((X,Xs) = (E,Es))
+
+
+// Exceptions by reduction to callcc
+
+  syntax Exp ::= "try" Exp "catch" "(" #Id ")" Exp
+  syntax #Id ::= "$continuation" | "$value" | "throw"
+
+--- assume that continuation and value are not free in E and E'
+  macro try E catch(X:#Id) E':Exp
+      = callcc (fun $continuation
+                -> (fun throw -> E:Exp)
+                     (fun $value -> $continuation ((fun X -> E') $value)))
+
 end module
 
 
@@ -148,9 +161,7 @@ module FUN-UNTYPED
 //@ \subsubsection{Environment recovery}
 
   syntax K ::= "env" "(" Map ")"
-  rule (env(_) => .) ~> env(_)            [:structural:]    --- tail recursion
-  rule <k> env(Rho) => . ...</k>
-       <env> _ => Rho </env>              [:structural:]
+  rule (env(_) => .) ~> env(_)            [:structural:]   --- tail recursion
   rule <k> V ~> (env(Rho) => .) ...</k>
        <env> _ => Rho </env>              [:structural:]
 
@@ -180,14 +191,3 @@ module FUN-UNTYPED
        <store>... . => L |-> V ...</store>                [:structural:]
 
 end module
-
-***(
-
-  syntax Exp ::= try Exp catch ( #Id ) Exp
---- assume that continuation and value are not free in E and E'
-  macro try E catch(X:#Id) E':Exp
-      = callcc (fun continuation
-                -> (fun throw -> E:Exp)
-                     (fun value -> continuation ((fun X -> E') value)))
-
-***)
