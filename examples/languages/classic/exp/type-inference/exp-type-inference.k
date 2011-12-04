@@ -66,12 +66,13 @@ module EXP-TYPE-INFERENCE
                        </eqns>
                        <mgu> .Map </mgu>
                      </unification>
-                     <nextType> tvar(0) </nextType>
+                     <nextType> tv(0) </nextType>
                 </T>
 
   rule <k> I:#Int => int ...</k>
   rule <k> B:#Bool => bool ...</k>
   rule <k> X:#Id => T:Type ...</k> <tenv>... X |-> T ...</tenv>
+
   rule <k> L:KLabel(T1:Type,,T2:Type) => (T1,T2 = int,int) ~> int ...</k>
     if L ==Bool '_+_ orBool L ==Bool '_-_ orBool
        L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_
@@ -81,12 +82,13 @@ module EXP-TYPE-INFERENCE
        L ==Bool '_>=_ orBool L ==Bool '_==_ orBool L ==Bool '_!=_
   rule <k> L(T1,,T2) => (T1,T2 = bool,bool) ~> bool ...</k>
     if L ==Bool '_and_ orBool L ==Bool '_or_
+
   rule <k> not T => (T = bool) ~> bool ...</k>
   rule <k> if T then T1 else T2 => (T,T1 = bool,T2) ~> T1 ...</k>
 
   rule <k> lambda X . E:Exp => E ~> (Tv -> []) ~> tenv(TEnv:Map) ...</k>
           <tenv> TEnv => TEnv[Tv/X] </tenv>
-          <nextType> Tv:TypeVar => Tv +Type 1 </nextType>
+          <nextType> Tv => Tv +Type 1 </nextType>
   rule <k> T1 T2 => (T1 = (T2 -> Tv)) ~> Tv ...</k>
        <nextType> Tv => Tv +Type 1 </nextType>
 
@@ -97,14 +99,48 @@ module EXP-TYPE-INFERENCE
   rule <k> let X = T in E => E ~> tenv(TEnv) ...</k>
        <eqns> .Bag </eqns> <mgu> Theta:Map </mgu>
        <tenv> TEnv
-        => TEnv[((forall (ftv(Theta[T]) \ ftv(Theta[types(TEnv)]))) Theta[T])
+        => TEnv[((forall diff(ftv(Theta[T]),ftv(types(TEnv)))) Theta[T])
                    / X]
        </tenv>
 
-  rule <k> X => T[|Tvs| from Tv / Tvs] ...</k>
+  rule <k> X => T[|Tvs| from Tv /* Tvs] ...</k>
        <tenv>... X |-> (forall Tvs) T ...</tenv>
        <nextType> Tv => Tv +Type | Tvs | </nextType>
 
+
+  rule <k> T => Theta[T] </k> (<eqns> .Bag </eqns> => .) <mgu> Theta </mgu>
+
+
+
+// Unification
+
+  rule <k> Ts:Types = Ts':Types => . ...</k>
+       (. => <eqn> Theta[Ts]* = Theta[Ts']* </eqn>)
+       <mgu> Theta:Map </mgu>
+
+  rule <eqn> Ts = Ts </eqn> => .
+
+  rule <eqn> (T1,T2,Ts) = (T1':Type,T2':Type,Ts') </eqn>
+    => <eqn> T1 = T1' </eqn> <eqn> (T2,Ts) = (T2',Ts') </eqn>
+
+  rule <eqn> (T1 -> T2) = (T1' -> T2') </eqn>
+    => <eqn> T1 = T1' </eqn> <eqn> T2 = T2' </eqn>
+
+  rule <eqn> (T = Tv) => (Tv = T) </eqn>
+    if typeVar(Tv) andBool notBool(typeVar(T))
+
+  rule <eqns> Eqns:Bag <eqn> Tv = T </eqn> => refine(Eqns,Tv,T) </eqns>
+       <mgu> Theta => Tv |-> T refine(Theta,Tv,T) </mgu>
+    if notBool(Tv inType T)
+
+  syntax Map ::= "refine" "(" Map "," Type "," Type ")"
+  rule refine(.Map,_,_) => .Map
+  rule refine(Tv'|->T' Theta, Tv, T) => Tv'|->T'[T/Tv] refine(Theta,Tv,T)
+
+  syntax Bag ::= "refine" "(" Bag "," Type "," Type ")"
+  rule refine(.Bag,Tv,T) => .Bag
+  rule refine(<eqn> T1 = T2 </eqn> Eqns, Tv, T)
+    => <eqn> T1[T/Tv] = T2[T/Tv] </eqn> refine(Eqns,Tv,T)
 
 
 ------------------------
@@ -120,105 +156,92 @@ module EXP-TYPE-INFERENCE
   eq types(X |-> T TEnv) = T,types(TEnv)
   eq types(.Map) = .Types
 
-
-
-
-  syntax BasicType ::= "int"
-                     | "bool"
-  syntax TypeVar ::= "tvar" "(" #Nat ")"
-                   | TypeVar "+Type" #Nat [:latex("{#1}+_{\it Type}{#2}"):]
-  syntax TypeVars ::= List{TypeVar,","}
-  syntax Type ::= BasicType | TypeVar
-                | Type "->" Type
-  syntax Types ::= List{Type,","}
-  syntax TypeSchema ::= Type
-                      | "(" "forall" TypeVars ")" Type
-                          [:latex("(\forall{#1}){#2}"):]
-  syntax TypeSchemas ::= List{TypeSchema,","}
-
-  rule tvar(N:#Nat) +Type M:#Nat = tvar(N +Nat M)  [:structural:]
-
---- free type variables
-
-  syntax TypeVars ::= "ftv" "(" TypeSchemas ")"
-  rule ftv(BT:BasicType) => .TypeVars
-  rule ftv(Tv:TypeVar) => Tv
-  rule ftv(T1:Type -> T2:Type) => mergeVars(ftv(T1),ftv(T2))
-  rule ftv((forall Tvs:TypeVars) T:Type) => ftv(T) \ Tvs
-  rule ftv(.TypeSchemas) => .TypeVars
-  rule ftv(TS1:TypeSchema,TS2:TypeSchema,TSs:TypeSchemas)
-    => mergeVars(ftv(TS1),ftv(TS2,TSs))
-
-  syntax TypeVars ::= "mergeVars" "(" TypeVars "," TypeVars ")"
-  rule mergeVars(.TypeVars,Tvs':TypeVars) => Tvs'
-  rule mergeVars((Tv1,Tv2,Tvs => Tv2,Tvs),(Tvs' => mergeVars(Tv1,Tvs')))
-  rule mergeVars(Tv1:TypeVar,(Tv2:TypeVar,Tvs:TypeVars))
-    => if Tv1 ==Bool Tv2 then Tv2,Tvs else Tv2,mergeVars(Tv1,Tvs) fi
-
-  syntax TypeVars ::= TypeVars \ TypeVars  [:latex("{#1}\setminus{#2}"):]
-  rule (Tv1,Tv2,Tvs) \ Tvs' => mergeVars((Tv1 \ Tvs'),((Tv2,Tvs) \ Tvs'))
-  rule .TypeVars \ _ => .TypeVars
-  rule Tv1 \ (Tv2,Tvs2:TypeVars)
-    => if Tv1 ==Bool Tv2 then .TypeVars else Tv1 \ Tvs2 fi
-  rule Tv1 \ .TypeVars => Tv1,.TypeVars
-
-  syntax #Nat ::= "|" TypeVars "|"
-  rule |Tv,Tvs| => 1 +Nat |Tvs| 
-  rule |.TypeVars| => 0 
-
-  syntax TypeVars ::= #Nat "from" TypeVar
-  rule 0 from Tv => .TypeVars
-  rule (sNat N:#Nat) from tvar(M:#Nat) => tvar(M),(N from tvar(sNat M))
-
---- type substitution: T[Ts / Tvs] substitutes list of
---- type variables Tvs for list of types Ts in T
-
-  syntax Type ::= Type "[" Types "/" TypeVars "]"  [:prec(2):]
-
-  rule T[.Types / .TypeVars] => T
-  rule T[T1,T2,Ts:Types / Tv1,Tv2,Tvs] => T[T1 / Tv1][T2,Ts / Tv2,Tvs]
-  rule BT[T / Tv] => BT
-  rule Tv':TypeVar[T / Tv] => if Tv' ==Bool Tv then T else Tv' fi
-  rule (T1 -> T2)[T / Tv] => (T1[T / Tv]) -> (T2[T / Tv])
-
-
-
-  syntax #Bool ::= TypeVar "in" Type
-  rule Tv in BT => false 
-  rule Tv in Tv' => Tv ==Bool Tv' 
-  rule Tv in (T1 -> T2) => (Tv in T1) orBool (Tv in T2)
-
-
   syntax Exps ::= List{Exp,","}
-  syntax K ::= TypeVar "->" "[]"
-             | Exps = Exps  [:strict prec(100):]
+  syntax K ::= Type "->" "[]"
+             | Exps "=" Exps  [:strict prec(100):]
 
   rule T ~> (Tv -> []) => Tv -> T
 
-  rule <k> Ts:Types = Ts':Types => . ...</k>
-       (. => <eqn> Theta[Ts] = Theta[Ts'] </eqn>)
-       <mgu> Theta </mgu>
 
-***(
-  rule <eqn> Ts = Ts </eqn> => .
 
-  rule <eqn> (T1,T2,Ts) = (T1':Type,T2':Type,Ts') </eqn>
-       <eqn> T1 = T1' </eqn> <eqn> (T2,Ts) = (T2',Ts') </eqn>
 
-  rule <eqn> (T1 -> T2) = (T1' -> T2') </eqn>
-    => <eqn> T1 = T1' </eqn> <eqn> T2 = T2' </eqn>
+  syntax Type ::= "int" | "bool"        // basic types
+                | "tv" #Nat             // type variables
+                | Type "->" Type        // function type
+  syntax Types ::= List{Type,","}
 
-  rule (<eqn> Tv = T </eqn> => .)
-       <mgu>... . => Tv |-> T ...</mgu>
-    if notBool (Tv in T)
-***)
+  syntax #Bool ::= "basicType" "(" Type ")"
+                 | "typeVar" "(" Type ")"
+  rule basicType(int) => true   [:structural:]
+  rule basicType(bool) => true  [:structural:]
+  rule typeVar(T) => getKLabel(T) ==Bool 'tv_  [:structural:]
 
-  syntax Types ::= Map "[" Types "]"
+  syntax TypeSchema ::= Type
+                      | "(" "forall" Types ")" Type
+                          [:latex("(\forall{#1}){#2}"):]
+  syntax TypeSchemas ::= List{TypeSchema,","}
 
-  rule .Map[T] => T
-  rule (Tv |-> T':Type Theta)[T] => Theta[T[T' / Tv]] 
+  syntax Type ::= Type "+Type" #Nat [:latex("{#1}+_{\it Type}{#2}"):]
+  rule tv(N:#Nat) +Type M:#Nat => tv(N +Nat M)  [:structural:]
 
----  rule Theta[.Types] => .Types
----  rule Theta[T1,T2,Ts:Types] => Theta[T1],Theta[T2,Ts]
+// Free type variables.  These should be generic and builtin, for all binders.
+  syntax Types ::= "ftv" "(" TypeSchemas ")"
+  rule ftv(BT:Type) => .Types if basicType(BT)
+  rule ftv(Tv:Type) => Tv,.Types if typeVar(Tv)
+  rule ftv(T1:Type -> T2:Type) => union(ftv(T1),ftv(T2))
+  rule ftv((forall Tvs:Types) T:Type) => diff(ftv(T),Tvs)
+  rule ftv(.TypeSchemas) => .Types
+  rule ftv(TS1:TypeSchema,TS2:TypeSchema,TSs:TypeSchemas)
+    => union(ftv(TS1),ftv(TS2,TSs))
+
+// The operations below should be generic and builtin, for all lists
+  syntax Types ::= "union" "(" Types "," Types ")"
+                 | "diff" "(" Types "," Types ")"
+                 | "insert" "(" Type "," Types ")"
+                 | "delete" "(" Type "," Types ")"
+  syntax #Nat ::= "|" Types "|"
+  rule union(.Types,Ts':Types) => Ts'
+  rule union((T,Ts:Types),Ts') => union(Ts,insert(T,Ts'))
+  rule diff(Ts,.Types) => Ts
+  rule diff(Ts,(T,Ts')) => diff(delete(T,Ts),Ts')
+  rule insert(T,.Types) => T,.Types
+  rule insert(T,(T',Ts)) => if T ==Bool T' then T',Ts else T',insert(T,Ts) fi
+  rule delete(T,.Types) => .Types
+  rule delete(T,(T',Ts)) => if T ==Bool T' then Ts else T',delete(T,Ts) fi
+  rule |T,Ts| => 1 +Nat |Ts|
+  rule |.Types| => 0
+
+// This should be generalized and builtin: fresh name generator
+  syntax Types ::= #Nat "from" Type
+  rule 0 from tv(_) => .Types
+  rule (sNat N:#Nat) from tv(M:#Nat) => tv(M),(N from tv(sNat M))
+
+// This could also be generic: subterm relation?
+  syntax #Bool ::= Type "inType" Type [:latex("{#1}\in_{\it Type}{#2}"):]
+  rule Tv inType BT  => false if typeVar(Tv) andBool basicType(BT)
+  rule Tv inType Tv' => Tv ==Bool Tv' if typeVar(Tv) andBool typeVar(Tv')
+  rule Tv inType (T1 -> T2) => (Tv inType T1) orBool (Tv inType T2)
+
+// Type substitution: T[Ts /* Tvs] substitutes list of types Ts for
+// list of type variables Tvs.  T[T' / Tv] substitutes type T' for type
+// variable Tv in T.  These should also be generic and builtin.
+  syntax Type ::= Type "[" Types "/*" Types "]"  [:prec(2):]
+                | Type "[" Type  "/"  Type  "]"  [:prec(2):]  // auxilliary
+  rule T[.Types /* .Types] => T
+  rule T[T1,Ts:Types /* Tv,Tvs] => T[T1 / Tv][Ts /* Tvs]
+  rule BT[T / Tv] => BT if basicType(BT) andBool typeVar(Tv)
+  rule Tv':Type[T / Tv] => if Tv' ==Bool Tv then T else Tv' fi
+    if typeVar(Tv')
+  rule (T1 -> T2)[T / Tv] => T1[T / Tv] -> T2[T / Tv]
+
+// Map application.  Should be generic and builtin.
+  syntax Types ::= Map "[" Types "]*"  [:prec(1):]
+  syntax Type  ::= Map "[" Type  "]"   [:prec(1):]
+
+  rule .[T] => T
+  rule (Tv |-> T':Type Theta)[T] => Theta[T[T'/Tv]]
+
+  rule Theta[.Types]* => .Types
+  rule Theta[T,Ts:Types]* => Theta[T],Theta[Ts]*
 
 end module
