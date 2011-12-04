@@ -238,7 +238,7 @@ reading the next integer from the input buffer, and different choices
 for the next transition can lead to different behaviors. */
 
   rule <k> read() => I ...</k>
-       <in> ListItem(I) => . ...</in>  [transition]
+       <in> ListItem(I) => . ...</in>  [:transition:]
 
 /*@ \subsubsection{Print}
 The \texttt{print} statement was strict, so all its arguments are now
