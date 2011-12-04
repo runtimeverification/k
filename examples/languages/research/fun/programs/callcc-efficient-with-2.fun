@@ -1,4 +1,4 @@
---- the following is also efficient and uses try/catch
+// the following is also efficient and uses try/catch
 
 let f l = try (
             letrec aux l =

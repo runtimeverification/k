@@ -17,17 +17,15 @@ module FUN-UNTYPED-SYNTAX
                | Exp "and" Exp         [:strict prec(55) gather(E e):]
                | Exp "or" Exp          [:strict prec(59) gather(E e):]
                | "not" Exp             [:strict prec(53):]
-
-  syntax Exp ::= "fun" Exps "->" Exp
-               | Exp Exps               [:strict prec(10) gather(E e):]
-               | Exps "=" Exps           [:prec(53):]   --- Bindings
+// Functional
+               | "fun" Exps "->" Exp
+               | Exp Exps              [:strict prec(10) gather(E e):]
+               | Exps "=" Exps         [:prec(53):]   --- Bindings
                | "let" Exp "in" Exp
                | "letrec" Exp "in" Exp
                | "if" Exp
                  "then" Exp
                  "else" Exp            [:strict(1):]
-// Tuples
----               | "<" Exps ">"          [:strict hybrid prec(0):]
 // Lists
                | "[" Exps "]"          [:strict hybrid prec(0):]
                | "car" Exp             [:strict prec(0):]
@@ -36,7 +34,7 @@ module FUN-UNTYPED-SYNTAX
                | "cons" Exp Exp        [:strict:]
 // References
                | "ref" Exp             [:strict:]
-               | "&" #Id
+               | "&" #Id               [:prec(0):]
                | "*" Exp               [:strict:]
                | Exp ":=" Exp          [:strict:]
                | Exp ";" Exp           [:seqstrict prec(110) gather(e E):]
@@ -51,8 +49,7 @@ module FUN-UNTYPED-SYNTAX
 
   macro fun E1:Exp E2:Exp -> E:Exp = fun E1 -> fun E2 -> E
   macro (E1:Exp Es:Exps = E) = (E1 = fun Es -> E)
-  macro (X:#Id = E:Exp) and (Xs:Ids = Es:Exps)
-      = ((X,Xs) = (E,Es))
+  macro (X:#Id = E:Exp) and (Xs:Ids = Es:Exps) = ((X,Xs) = (E,Es))
 end module
 
 
