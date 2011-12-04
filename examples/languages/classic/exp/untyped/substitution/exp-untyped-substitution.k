@@ -10,9 +10,9 @@ these constructs are very basic and simple, pushed to the essence of
 the notion that they are attempting to capture. */
 
 /*@ \subsection{Arithmetic constructs}
-These are identical to those in imperative and object oriented
-languages, for example see IMP, IMPP, SIMPLE, KOOL, but note that in
-this substitution-based definition of EXP we prefer to make explicit a
+These are similar to those in imperative and object oriented
+languages (for example see IMP) but note that in this
+substitution-based definition of EXP we prefer to make explicit a
 subcategory of \textit{Exp} values here in the syntax (in other
 definitions, particularly in environment-based ones, we introduce
 values as part of the semantics).  Note that identifiers are values.
@@ -53,8 +53,8 @@ that the \texttt{lambda} construct yields a value, while the
 in both arguments, to capture the fact that EXP is call-by-value. */
 
   syntax Val ::= "lambda" #Id "." Exp       [:binder latex "\lambda{#1}.{#2}":]
-  syntax Exp ::= Exp Exp                    [:strict prec 10 gather(E e):]
-               | "if" Exp "then" Exp "else" Exp [:strict(1):]
+  syntax Exp ::= "if" Exp "then" Exp "else" Exp [:strict(1):]
+               | Exp Exp                    [:strict prec 10 gather(E e):]
                | "mu" #Id "." Exp           [:binder latex "\mu{#1}.{#2}":]
                | "let" #Id "=" Exp "in" Exp
                | "letrec" #Id #Id "=" Exp in Exp
@@ -119,6 +119,14 @@ the \textsf{k} cell. */
   rule <k> V1:Val == V2:Val => V1 ==Bool V2 ...</k>
   rule <k> V1 != V2 => V1 =/=Bool V2 ...</k>
 
+/*@ \subsection{Conditional}
+The two rules below are straightforward, almost identical to those in
+IMP\@.  The only difference is that in EXP the conditional is an
+expression, rather than a statement, construct. */
+
+  rule if  true then E else  _  => E
+  rule if false then  _  else E => E
+
 /*@ \subsection{$\beta$-reduction and $\mu$-unrolling}
 
 Since our semantics is call-by-value, we only reduce application or
@@ -128,13 +136,5 @@ equivalent to being at the top of the \textsf{k} cell. */
   rule <k> (lambda X:#Id . E:Exp) V:Val => E[V/X]  ...</k>
 
   rule <k> mu X . E => E[(mu X.E) / X] ...</k>
-
-/*@ \subsection{Conditional}
-The two rules below are straightforward, almost identical to those in
-IMP\@.  The only difference is that in EXP the conditional is an
-expression, rather than a statement, construct. */
-
-  rule if  true then E else  _  => E
-  rule if false then  _  else E => E
 
 end module

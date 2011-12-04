@@ -1,12 +1,12 @@
 
-module EXP-UNTYPED-SYNTAX
+module EXP-UNTYPED-ENVIRONMENT-SYNTAX
 
 /*@ \section{Syntax}
-EXP is an expression language, so it has only one syntactic category,
-\textit{Exp}.  The syntax of EXP consists of conventional arithmetic
-constructs and conventional higher-order functional constructs.  All
-these constructs are very basic and simple, pushed to the essence of
-the notion that they are attempting to capture.  */
+Unlike in the substitution-based definition, in this environment-based
+definition of EXP we can defer the definition of the syntactic
+subcategory of values to the semantics.  Since identifiers are not
+values anymore, we do not need to restrict the semantics of equality
+testing to redex positions anymore. */
 
 /*@ \subsection{Arithmetic constructs}
 These are identical to those in imperative and object oriented
@@ -30,24 +30,18 @@ languages, for example see IMP, IMPP, SIMPLE, KOOL\@. */
                | "not" Exp                  [:strict prec 53:]
 
 /*@ \subsection{Functional constructs}
-The constructs below are well-known: \texttt{lambda} and concatenation
-of expressions are the function abstraction and application,
-\texttt{if} is the conditional construct which here can take any
-expressions as branches, \texttt{mu} is the usual recursive binder, 
-and \texttt{let} and \texttt{letrec} are the usual functional derived
-constructs which can be desugared as shown in the two macros below. */
+Unlike in the substitution-based definition, \texttt{lambda} is now an
+expression rather than a value construct.  As seen in the semantics,
+$\lambda$-abstractions will evaluate closures.  We desugar
+\texttt{let} and \texttt{letrec} the same way as in the
+substitution-based definition. */
 
-  syntax Exp ::= "lambda" #Id "." Exp       [:latex "\lambda{#1}.{#2}":]
+  syntax Exp ::= "if" Exp "then" Exp "else" Exp [:strict(1):]
+               | "lambda" #Id "." Exp       [:latex "\lambda{#1}.{#2}":]
                | Exp Exp                    [:strict prec 10 gather(E e):]
-               | "if" Exp "then" Exp "else" Exp [:strict(1):]
                | "mu" #Id "." Exp           [:latex "\mu{#1}.{#2}":]
                | "let" #Id "=" Exp "in" Exp
                | "letrec" #Id #Id "=" Exp in Exp
-
-/*@ \subsection{Desugaring macros}
-The desugaring rules below are standard, although note that we do not
-want to apply them when we do type inference.  That is because we
-want our type inferencer to be {\em let} polymorphic. */
 
   macro let X:#Id = E:Exp in E':Exp = (lambda X . E') E
   macro (letrec F:#Id X = E in E') = (let F = mu F . (lambda X . E) in E')
@@ -55,8 +49,8 @@ want our type inferencer to be {\em let} polymorphic. */
 end module
 
 
-module EXP-UNTYPED
-  imports EXP-UNTYPED-SYNTAX
+module EXP-UNTYPED-ENVIRONMENT
+  imports EXP-UNTYPED-ENVIRONMENT-SYNTAX
 
 /*@ \section{Semantics}
 The EXP semantics below is environment-based, so \texttt{lambda} and
@@ -105,6 +99,14 @@ The rules below are taken over, unchanged, from the semantics of IMP\@. */
   rule T1 or T2 => T1 orBool T2
   rule not(T:#Bool) => notBool(T)
 
+/*@ \subsection{Conditional}
+The two rules below are straightforward, almost identical to those in
+IMP\@.  The only difference is that in EXP the conditional is an
+expression, rather than a statement, construct. */
+
+  rule if  true then E else  _  => E
+  rule if false then  _  else E => E
+
 /*@ \subsection{$\lambda$-abstraction and application}
 $\lambda$-abstractions evaluate to {\em closures} (first rule below),
 which hold the environment in which the $\lambda$-abstraction was
@@ -137,17 +139,8 @@ when programs are in a tail recursive form. */
 
   syntax K ::= "env" "(" Map ")"
   rule <k> V ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>  [:structural:]
-
   rule (env(_) => .) ~> env(_)                                 [:structural:]
 
-
-/*@ \subsection{Conditional}
-The two rules below are straightforward, almost identical to those in
-IMP\@.  The only difference is that in EXP the conditional is an
-expression, rather than a statement, construct. */
-
-  rule if  true then E else  _  => E
-  rule if false then  _  else E => E
 
 /*@ \subsection{Recursion abstraction}
 The $\mu$-abstraction needs its own closure.  It may look like all
