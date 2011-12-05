@@ -1600,8 +1600,7 @@ sub maudify_file {
 
 # remove quotes from syntax
     $_ = remove_quotes($_);
-#    print; exit;
-    
+
 # extract subsorts
     sorting($_);
  

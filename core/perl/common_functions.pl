@@ -36,16 +36,15 @@ my $warnings_file = fresh("kompile_warnings", ".txt");
 # ));
 
 my $comment = join("|", (
-    "\\/\\/.*?\n",                                                                                                                    
-    "\\/\\*.*?\\*\\/",                                                                                                                
-    "---\\(.*?---\\)",                                                                                                        
-    "---.*?\n",                                                                                                               
-    "\\*\\*\\*\\(.*?\\*\\*\\*\\)",                                                                                            
-    "\\*\\*\\*.*?\n"                                                                                                          
+    "\\/\\/.*?\n",
+    "\\/\\*.*?\\*\\/",
+    "---\\(.*?---\\)",
+    "---.*?\n",
+    "\\*\\*\\*\\(.*?\\*\\*\\*\\)",
+    "\\*\\*\\*.*?\n"
 ));    
 
 my $string_pattern = "\(?<![^\\\\]\\\\\)\".*?\(?<![^\\\\]\\\\\)\"";
-
 my $latex_comment = join("|", (
         "\\/\\/@(.*?)(?=\n)",
         "\\/\\*@(.*?)\\*\\/",	
@@ -1715,7 +1714,7 @@ sub line_numbers
 	#		print "PROD: $productions_string\n";
 	
 			my $counter = 1;	
-			while ($productions_string =~ /(.*?\S.*?(?:\s\|\s|$))/gs)
+			while ($productions_string =~ /(.*?\S.*?(?:\s\|\s+|$))/gs)
 			{
 				# process each production
 				my $production = $1;
@@ -1727,10 +1726,10 @@ sub line_numbers
 				$production =~ s/($string_pattern)/Freeze($&,"MYS")/sge;
 				$production =~ s/(\[[^\[\]]*\]\s*\|?\s*)$/                                                                                    
 				{
-					if (op_attribute($1)) {
-						$attributes = $1;
-						"";
-					} else {$1;}
+				    if (op_attribute($1)) {
+					$attributes = $1;
+					"";
+				    } else {$1;}
 				}
 				/se;
 				$production = Unfreeze("MYS", $production); 
@@ -1765,10 +1764,8 @@ sub line_numbers
 				    $production =~ s/(\|\s*$)/$attributes $1/s;
 				}
 
-#					print "PRODUCTION: $production\n\n";
-
-				$new_prod .= $production;
-			}
+				$new_prod = "$new_prod$production";
+			   }
 
 			$original_syntax =~ s/\Q$productions_string\E/$new_prod/sg;
 		}
@@ -1795,7 +1792,7 @@ sub add_line_numbers
     }
     $temp/sge;
     
-#	print ;
+#    print ;
 
     $_;
 }
@@ -2782,10 +2779,10 @@ sub pre_process
     # Step: replace module with kmod and
           # freeze strings
           s/($string_pattern)/Freeze($&,"YSTRINGS")/sge;
-          
+
           # freeze comments
           s/($comment)/Freeze($&, "CMTS")/sge;
-    
+
     # Step: remove tags
     s!tags(\s.*?\S)(\s*)(?=$kmaude_keywords_pattern|CMTS)!{parse_tags($1);"$2";}!sge;
     
@@ -2803,7 +2800,6 @@ sub pre_process
           $_ = Unfreeze("CMTS", $_);
           # unfreeze comments
           $_ = Unfreeze("YSTRINGS", $_);
-    
     
     # Step: resolve latex comments
     $_ = solve_latex($_) if $latex_;
@@ -2910,16 +2906,19 @@ sub remove_quotes
 	my $tmp1 = $tmp;
 	
 	my $quotes_number = 0;
-	$quotes_number ++ while $tmp =~ m%(?<!\\)\"%sg;
+	$quotes_number ++ while $tmp =~ m%\"(?:[^\\\"]|\\.)*\"%sg;
 	if ($quotes_number % 2 == 1)
 	{
 	    $tmp1 = Unfreeze("QUOTES", $tmp1);
 	    $tmp1 =~ s!(\[[^\]]*?(metadata)[^\]]*?\])!!gs;
-	    print "[Warning] This warning is thrown when quotes around terminals are not balanced. Notice that if you want to use quotes in your syntax use backslash (\) to escape them.";
+	    print "[Warning] This warning is thrown when quotes around terminals are not balanced.\nNotice that if you want to use quotes in your syntax \nuse backslash (\) to escape them.\n";
 	    print "It seems that you forgot a quote (\") in syntax declaration:\n$tmp1\n";
 	}
-	
+
 	$tmp =~ s%(?<!\\)\"%KSYNQUOT%sg;
+	# Special case for \\"
+	$tmp =~ s%(?<=\\\\)\"%KSYNQUOT%sg;
+
 	$tmp =~ s%KSYNQUOT(.*?)KSYNQUOT% `$1 %sg;
 	$tmp =~ s%\\(?=\")%%sg;
 	$tmp;
@@ -2927,7 +2926,7 @@ sub remove_quotes
 
     $_ = Unfreeze("QUOTES", $_);
     $_ = Unfreeze("LTXATTR", $_);
-	
+
     $_;
 }
 
@@ -2962,7 +2961,7 @@ sub parse_maude_error
 	}
 	else
 	{
-	    $msg .= $&;    
+	    $msg .= $& . "\n";    
 	}
 	
 	last if ($max_lines --)== 0;
