@@ -27,7 +27,8 @@ sub get_ast
     local $_ = get_ast_from_node($result);
     if ($kind ne "") 
     {
-      die("Subterm $kind does not parse correctly");
+	print"Subterm $kind";
+	exit(1);
     }
     
     # remove parse_
@@ -105,7 +106,7 @@ sub get_ast_from_node
 
     if ($sort =~ /^\[/ && $kind eq "") 
     {
-      $kind = "'$op($content)";
+      $kind = "'$op($content) parses to kind $sort.\nIt seems that Maude is unable to parse this subterm.\nThis could be a problem in you semantics.\n";
     }
     
     "'$op($content)";
