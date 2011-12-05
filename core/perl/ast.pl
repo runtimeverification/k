@@ -106,7 +106,7 @@ sub get_ast_from_node
 
     if ($sort =~ /^\[/ && $kind eq "") 
     {
-      $kind = "'$op($content) parses to kind $sort.\nIt seems that Maude is unable to parse this subterm.\nThis could be a problem in you semantics.\n";
+      $kind = "'$op($content) parses to kind $sort.\nIt seems that Maude is unable to parse this subterm.\nThis could be a problem in your semantics.\n";
     }
     
     "'$op($content)";
