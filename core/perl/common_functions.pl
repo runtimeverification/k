@@ -2906,7 +2906,11 @@ sub remove_quotes
 	my $tmp1 = $tmp;
 	
 	my $quotes_number = 0;
-	$quotes_number ++ while $tmp =~ m%\"(?:[^\\\"]|\\.)*\"%sg;
+	$quotes_number ++ while $tmp =~ m%(?<!\\)\"%sg;
+	$quotes_number ++ while $tmp =~ m%(?<=\\\\)\"%sg;
+	
+#	print "QUOTES:$quotes_number\n";
+	
 	if ($quotes_number % 2 == 1)
 	{
 	    $tmp1 = Unfreeze("QUOTES", $tmp1);
