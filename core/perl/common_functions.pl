@@ -2930,6 +2930,52 @@ sub remove_quotes
 	
     $_;
 }
+
+    
+#######################################################
+#   Parsing Maude error messages                      #
+#######################################################
+    
+
+sub parse_maude_error
+{
+    local $_ = shift;
+    my $error_file = shift;
+    
+    
+    my $err = "";
+    if (countlines($_) > 5)
+    {
+	$err = "Check .k/$error_file to find all errors.\n";
+    }
+    
+    # replace Warning: Error: and <automatic>:
+    s/(Warning:\s*|Error:\s*|<automatic>:\s*)//sg;
+
+    my $max_lines = 7;
+    my $msg = "";
+    while (/.*?(?=\n)/gs)
+    {
+	if (length $& > 77)
+	{
+	    $msg .= substr($&, 0, 77) . "...\n";
+	}
+	else
+	{
+	    $msg .= $&;    
+	}
 	
+	last if ($max_lines --)== 0;
+    }
+    
+    if (length $err > 0)
+    {
+	return $msg . "...\n" . $err;
+    }
+    else {
+	return $msg;
+    }
+}
+  
 1;
 

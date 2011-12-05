@@ -1535,82 +1535,35 @@ sub run_maude {
 #    print "ERR: " . get_file_content($error_file) . "\n\n";
 #    print "OUT: " . get_file_content($output_file) . "\n\n";
     
+    if (($status >>= 8) != 0)
+    {
+	print "Failed to run maude.\nExit status $status.\nTo reproduce run `maude $k_dir/$input_file`.\n";
+	return -1 ;
+    }
+
     if ($err =~ /\[ERROR\](.*?)\[ENDERROR\]/sg || $out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
-	print "[ERROR] $1\n";
+	print "[ERROR]: $1\n";
         if ($err ne "") {
  	  print "Check $k_dir/$error_file to find additional errors.\n";
         }
 	return -1;
     }
-    elsif ($err =~ /[^\s]/)
-    {
-	if (countlines($err) > 5)
-	{
-	    print "$&" if $err =~ /(.*?\n)(.*?\n)(.*?\n)(.*?\n)(.*?\n)/sg;
-	    print "Check $k_dir/$error_file to find all errors.\n";
-	}
-#	else { print $err; }
-#		return -1;
-    }
+    
     if ($out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
-	print "[ERROR] $1\n";
+	print "[ERROR]: $1\n";
 	return -1;
     }
-
-    
-    if (($status >>= 8) != 0)
-    {
-	$err = get_file_content($error_file);
-	$err =~ s/\n.*?$//sg;
-	# print "$err\nFailed to run maude.\nExit status $status.\n" ;
-	return -1 ;
-	# exit(1);
-    }
-
+        
     if ($? == 0) {
 	if (-s $error_file) {
-	    open FILE,"<",$error_file or die "Cannot open $k_dir/$error_file\n";
-	    print "[ERROR]: ";
-	    my $i = -1;
-	    while (<FILE>) {
-		++$i;
-		my $err_msg = "";
-		my $size = 77;
-		$err_msg = "...\nCheck \/$k_dir\/$error_file to find the complete error\n" if length($_) > $size;
-		if ($i < 4) {
-		    my $m = $_;
-		    
-		    # remove Warning:
-		    $m =~ s/Warning://;		    
-		    
-		    # specific maude error: missing module
-		    $m = "$&\nSuggestion: If module exists then try -l(ang) option.\n" if $m =~ m!no\s+module\s+.*?\.!sg;
-
-		    # undeclared sorts
-		    $m = "$&\nSuggestion: Use syntax declaration for this sort.\n" if $m =~ m!undeclared\s+sort\s+.*?\.!sg;
-		    
-		    print substr($m, 0, $size) . $err_msg;
-		}
-		else {
-		    $_ = substr($_, 0, $size) . $err_msg;
-		    last;
-		}
-	    }
-	    
-	    if (<FILE>) {++$i;}
-	    close FILE;
-	    print "...\nCheck /$k_dir\/$error_file for the remaining errors.\n" if $i==11;
-	    print printErrorFromOut();
-	    print "Aborting the compilation\n";
+	    local $_ = get_file_content($error_file);
+	    print "[MAUDE ERROR]: " . parse_maude_error($_, $error_file);
 	    exit(1);
 	}
 	print "DONE\n" if $verbose;
-	local $/=undef;
-	open FILE,"<",$output_file or die "Cannot open $output_file\n";
-	local $_ = <FILE>;
-	close FILE;
+	local $_ =  get_file_content($output_file);
 	clean();
 	return $_;
     }
