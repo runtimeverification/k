@@ -1,5 +1,0 @@
-function hello(x){
-  return "Hello " + x + "!";
-}
-
-write(call hello("World"));

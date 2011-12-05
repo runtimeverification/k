@@ -1,22 +1,19 @@
 
-kmod COMMON is
-	including K 
-	including K-CONTEXTS 
-	including K-PROPER
+module COMMON 
 	
-	syntax Bag ::= test
-				| eval K
+	syntax Bag ::= "test"
+				| "eval" K
 
-	syntax K ::= foo
-				| bar
+	syntax K ::= "foo"
+				| "bar"
 	
 	configuration 
-		< k > .K </ k >
-		< cell * > .Bag </ cell * >
+		<k> .K </k>
+		<cell multiplicity="*"> .Bag </cell>
 	
 	macro test = eval(foo)
 
 	rule 
-		< k > foo => bar </ k >
-		(.Bag => < cell >... .Bag ...</ cell >)
-endkm
+		<k> foo => bar </k>
+		(.Bag => <cell>... .Bag ...</cell>)
+end module

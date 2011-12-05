@@ -1,9 +1,0 @@
-function factorial(x){
-  if (x<=1) {
-   return 1;
-  } else {
-   return call factorial(x-1)*x;
-  }
-}
-
-write(call factorial(5));

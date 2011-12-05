@@ -1,7 +1,0 @@
-function hello(x){
-  write("Hello " + x + "!");
-}
-
-spawn hello("World");
-spawn hello("K");
-
