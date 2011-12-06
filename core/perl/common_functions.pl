@@ -2903,6 +2903,8 @@ sub remove_quotes
     s/\bsyntax\b.*?(?=$kmaude_keywords_pattern)/
     {
 	my $tmp = $&;
+	$tmp =~s!\\\\!\\!sg;
+	
 	my $tmp1 = $tmp;
 	
 	my $quotes_number = 0;
