@@ -1454,14 +1454,14 @@ sub compile {
     }
     else
     {
-    my $compile_supercools = "\"$flag_supercool\"";
-    my $compile_transitions = "\"$flag_transition\"";
-    my $compile_superheats = "\"$flag_superheat\"";    
-    my $action = "(compile $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)";
-    $action = "(purify $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $pure;
-    $action = "(xcompile $language_module_name $xmlTo transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $xml;
+	my $compile_supercools = "\"$flag_supercool\"";
+	my $compile_transitions = "\"$flag_transition\"";
+	my $compile_superheats = "\"$flag_superheat\"";    
+	my $action = "(compile $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)";
+	$action = "(purify $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $pure;
+	$action = "(xcompile $language_module_name $xmlTo transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $xml;
 	$_ = run_maude("Compiling the definition ... ",
-		"load $k_prelude\n",
+	    "load $k_prelude\n",
 	    "load $language_file_name\n",
 	    "load $k_all_tools\n",
             "---(\n",
@@ -1471,10 +1471,17 @@ sub compile {
             "---)\n",
 	    "loop compile .\n",
 	    "$action\n",
-	    "quit\n");		
-		unlink($maude_xml_file);
+	    "quit\n");
+	
+	
+	unlink($maude_xml_file);
     }
 
+    # remove KMAIN-
+    $kmain = uc($kmain);
+    s/$kmain//s;
+#    print;
+    
 # If the keyword "Error" begins a line in the output, then extract and report the error message
     if (/^Error: (.*?)Bye/sm) {
 	print "[ERROR]:\n";
