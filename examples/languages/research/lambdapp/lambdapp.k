@@ -1,4 +1,4 @@
-require ../untyped/lambda
+require /examples/languages/classic/lambda/untyped/lambda
 
 module LAMBDAPP-SYNTAX
   imports LAMBDA-SYNTAX

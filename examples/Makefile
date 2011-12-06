@@ -11,7 +11,6 @@ TEST_DIRS = \
 	    languages/classic/exp/type-inference \
 	    languages/classic/imp \
 	    languages/classic/lambda/untyped \
-	    languages/classic/lambda/lambdapp \
 	    languages/classic/lambda/polymorphism/simply-subtyped \
 	    languages/classic/lambda/polymorphism/system-F \
 	    languages/classic/lambda/simply-typed \
@@ -23,6 +22,7 @@ TEST_DIRS = \
 	    languages/research/kool/typed/static \
 	    languages/research/kool/typed/dynamic \
 	    languages/research/kool/untyped \
+	    languages/research/lambdapp \
 	    languages/research/simple/untyped \
 	    languages/research/simple/typed/dynamic \
 	    languages/research/simple/typed/static \
