@@ -32,7 +32,7 @@ languages, for example see IMP, IMPP, SIMPLE, KOOL\@. */
 /*@ \subsection{Functional constructs}
 Unlike in the substitution-based definition, \texttt{lambda} is now an
 expression rather than a value construct.  As seen in the semantics,
-$\lambda$-abstractions will evaluate closures.  We desugar
+$\lambda$-abstractions will evaluate to closures.  We desugar
 \texttt{let} and \texttt{letrec} the same way as in the
 substitution-based definition. */
 
