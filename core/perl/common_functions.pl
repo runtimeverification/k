@@ -2966,7 +2966,7 @@ sub parse_maude_error
 	}
 	else
 	{
-	    $msg .= $& . "\n";    
+	    $msg .= $&;    
 	}
 	
 	last if ($max_lines --)== 0;
