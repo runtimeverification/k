@@ -2690,7 +2690,7 @@ sub slurp_k
     s/(kmod.*?endkm)/Freeze($&, "KMOD")/sge;
     
     # recurse
-    s/^\s*(in|load|require)\s+(\S+?)(?=\n)/
+    s/^\s*(in|load|require)\s+(\S+?)\s*(?=\n)/
     {
 	my $import = $2;
 
