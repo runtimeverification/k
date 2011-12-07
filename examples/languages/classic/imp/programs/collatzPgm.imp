@@ -1,5 +1,8 @@
+// Tests the Collatz conjecture for numbers up to m and writes
+// the total number of steps (for all numbers up to m) in s.
+
 var m,s,n,q,r;
-m:=10;
+m:=100;
 s:=0;
 while not(m<=2) do (
   n:=m;
@@ -12,3 +15,5 @@ while not(m<=2) do (
       then n:=n+n+n+1 else n:=q
   )
 )
+
+// s should be 3141 when m is initialized to 100
