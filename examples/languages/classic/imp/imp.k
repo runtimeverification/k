@@ -59,7 +59,7 @@ displayed as $\leq$ everywhere in the generated PDF.  Currently, the
 
 /*@ An IMP program declares a set of variables and then executes a
 statement in the state obtained after initializing all those variables
-to 0.  The IMPPP language removes this top-level program construct of
+to 0.  The IMP++ language removes this top-level program construct of
 IMP and adds instead variable declaration as a statement construct,
 which can be used anywhere in the program, not only at the top level.
 \K provides builtin support for generic syntactic lists: 
@@ -189,7 +189,7 @@ A \K configuration serves as a backbone for the process of {\em configuration
 abstraction} which allows users to only mention the relevant cells in each
 semantic rule, the rest of the configuration context being inferred
 automatically.  The importance of configuration abstraction will
-become clear when we define more complex languages (even in IMPPP).
+become clear when we define more complex languages (even in IMP++).
 IMP does not need it.
 
 The configuration of IMP is trivial: it only contains two cells, one
