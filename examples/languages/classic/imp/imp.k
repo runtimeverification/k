@@ -140,7 +140,7 @@ on \K). */
 /*@ Before we move to the definition of the IMP configuration, we
 would like to recall a few general facts about \K, particularly about
 its computation structures and the relationship between strictness and
-\K results.  Computation structures, called ``computations'' for
+\K results.  Computation structures, called {\em computations} for
 simplicity, extend the abstract syntax of your language with a list
 structure using $\kra$ (read  ``followed by'' or ``and then'', and
 written \texttt{\texttildelow>} in ASCII) as a separator.  \K provides
@@ -168,8 +168,8 @@ $$
 The first rule pulls $E$ out of its context for processing when it is
 not a result, and the second rule plugs it back into its context once
 it becomes a result (after rewriting with other rules in the semantics).
-We call rules of the first type above ``heating rules'' and rules of
-the second type ``cooling rules''.  Similar rules are generated for
+We call rules of the first type above {\em heating rules} and rules of
+the second type {\em cooling rules}.  Similar rules are generated for
 other \K (evaluation) context declarations in more complex languages.
 
 Thus the values/results are needed to know when to stop
