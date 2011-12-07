@@ -31,7 +31,7 @@ sub solve_lists
     
     # presupunem: | syntax Ids ::= List{#Id, ","} [attributes] |
     # iterate through syntax declarations
-    while ($temp =~ /(syntax\s+($ksort)\s*::=\s*List\{($ksort),"(.*?)"\}(\s+\[.*?\])?)\s*(?=$kmaude_keywords_pattern)/sg)
+    while ($temp =~ /(syntax\s+($ksort)\s*::=\s*List\{\s*($ksort)\s*,\s*"(.*?)"\s*\}(\s+\[.*?\])?)\s*(?=$kmaude_keywords_pattern)/sg)
     {
 #	print "Matched: $&\n";
 
