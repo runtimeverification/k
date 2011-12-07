@@ -42,20 +42,20 @@ displayed as $\leq$ everywhere in the generated PDF.  Currently, the
 ``\texttt{while (x>=0) (x:=x/2; y:=x)}''). */
 
   syntax AExp ::= #Int | #Id
-                | AExp "+" AExp      [:prec(33) gather (E e) strict:]
-                | AExp "/" AExp      [:prec(31) gather (E e) strict:]
+                | AExp "+" AExp    [:prec(33) gather (E e) strict:]
+                | AExp "/" AExp    [:prec(31) gather (E e) strict:]
   syntax BExp ::= #Bool
-                | AExp "<=" AExp     [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
-                | "not" BExp         [:prec(53) strict:]
-                | BExp "and" BExp    [:prec(55) strict(1):]
+                | AExp "<=" AExp   [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
+                | "not" BExp       [:prec(53) strict:]
+                | BExp "and" BExp  [:prec(55) strict(1):]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp      [:prec(80) strict(2):]
-                | Stmt ";" Stmt      [:prec(100) gather(e E):]
+                | #Id ":=" AExp    [:prec(80) strict(2):]
+                | Stmt ";" Stmt    [:prec(100) gather(e E):]
                 | "if" BExp
                   "then" Stmt
-                  "else" Stmt        [:prec(85) strict(1):]
+                  "else" Stmt      [:prec(85) strict(1):]
                 | "while" BExp
-                  "do" Stmt          [:prec(85):]
+                  "do" Stmt        [:prec(85):]
 
 /*@ An IMP program declares a set of variables and then executes a
 statement in the state obtained after initializing all those variables
@@ -302,7 +302,8 @@ The assigned variable is updated in the state.  The variable is expected
 to be declared, otherwise the semantics will get stuck.  At the same time,
 the assignment is dissolved. */
 
-  rule [assignment]: <k> X := I:#Int => . ...</k> <state>... X|->(_ => I) ...</state>
+  rule [assignment]:
+    <k> X := I:#Int => . ...</k> <state>... X|->(_ => I) ...</state>
 
 /*@ \subsubsection{Sequential composition}
 Sequential composition is simply structurally translated into \K's
@@ -336,7 +337,8 @@ conditional rules) to reductions inside constructs' arguments.  Also
 note that we preferred to make the rule below structural. */
 
   rule [while]:
-    <k> while B do S => if B then (S ; while B do S) else skip ...</k>  [:structural:]
+    <k> while B do S => if B then (S ; while B do S) else skip ...</k>
+    [:structural:]
 
 /*@ \subsection{Programs}
 The semantics of an IMP program is that its body statement is executed
