@@ -232,7 +232,11 @@ definitions and can be used by different \K tools in different ways. */
 
 /*@
 Before we continue, we would like to remind the reader that the
-compact \K notation above is desugared by the tool into an ordinary
+compact \K rule above, written in ASCII notation as
+\begin{verbatim}
+rule <k> X => I ...</k> <state>... X |-> I ...</state>
+\end{verbatim}
+is desugared by the tool into an ordinary
 rewrite rule:
 \begin{verbatim}
 rule <k> X ~> Rest </k> <state> Before (X |-> I) After </state>
@@ -243,7 +247,7 @@ explicitly declared as shared and what is not, the semantics of \K can
 actually be reduced to the semantics of rewriting logic with only
 rules of the form
 $$
-\textit{left} \ \Rightarrow\ \text{right} \ \ \textsf{if} \ \textit{condition}
+\textit{left} \ \Rightarrow\ \textit{right} \ \ \textsf{if} \ \textit{condition}
 $$
 with \textit{condition} a Boolean condition (involving no rewrite
 steps). */
@@ -268,7 +272,7 @@ arithmetic and Boolean constructs. */
 /*@ \subsection{Boolean expressions}
 The rules below are straightforward.  Note the short-circuited semantics
 of \textsf{and}; this is the reason we annotated the syntax of
-\textsf{and} with the \K attribute "strict(1)" instead of "strict".
+\textsf{and} with the \K attribute \texttt{strict(1)} instead of \texttt{strict}.
 The particular name of a variable in a rule is sometimes irrelevant,
 as it happens in the second rule for \texttt{and} below.  \K allows us
 to use anonymous variables, written as underscores like in Prolog. */
@@ -301,7 +305,7 @@ the assignment is dissolved. */
   rule [assignment]: <k> X := I:#Int => . ...</k> <state>... X|->(_ => I) ...</state>
 
 /*@ \subsubsection{Sequential composition}
-Sequential composition is simply structurally translated into the \K's
+Sequential composition is simply structurally translated into \K's
 builtin task sequentialization operation.  You can make this rule
 computational (i.e., remove the \texttt{structural} attribute) if you
 want it to count as a computational step.  Recall that the semantics
