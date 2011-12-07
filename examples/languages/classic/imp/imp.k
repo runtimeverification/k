@@ -59,7 +59,10 @@ displayed as $\leq$ everywhere in the generated PDF.  Currently, the
 
 /*@ An IMP program declares a set of variables and then executes a
 statement in the state obtained after initializing all those variables
-to 0.  \K provides builtin support for generic syntactic lists:
+to 0.  The IMPPP language removes this top-level program construct of
+IMP and adds instead variable declaration as a statement construct,
+which can be used anywhere in the program, not only at the top level.
+\K provides builtin support for generic syntactic lists: 
 $\textit{List}\{\textit{Nonterminal},\textit{terminal}\}$ stands for
 \textit{terminal}-separated lists of \textit{Nonterminal} elements;
 the lists can also be empty, that is, IMP programs declaring no
@@ -93,7 +96,7 @@ end module
 module IMP
   imports IMP-SYNTAX
 /*@ \section{Semantics}
-This module defines the semantics of IMP.  
+This module defines the semantics of IMP\@.  
 Before you start adding semantic rules to a \K definition, you need to
 define the basic semantic infrastructure consisting of definitions for
 {\em values/results} and the {\em configuration}. */
@@ -201,10 +204,10 @@ the list, set, multiset, etc., structures in \K.  */
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
                   <state color="red"> .Map </state>
-// Replace the above with the following when you want to pass an initial
-// state through krun; see commented example programs/sumPgm-novars.imp.
-//                  <state color="red"> $STATE:Map </state>
                 </T>
+// Replace the above <state/> cell with the following when you want to pass
+// an initial state through krun; see program programs/sumPgm-novars.imp.
+//                  <state color="red"> $STATE:Map </state>
 
 
 /*@ \subsection{Arithmetic expressions}
@@ -255,7 +258,9 @@ generated PDF document. Note that the variables appearing in these
 rules have integer sort.  That means that these rules will only be
 applied after the arguments of the  arithmetic constructs are fully
 evaluated to \K results; this will happen thanks to their strictness
-attributes declared as annotations in the syntax module above. */
+attributes declared as annotations in the syntax module above.  For
+demonstration purposes, we do not label the trivial rules below for
+arithmetic and Boolean constructs. */
 
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
@@ -293,16 +298,16 @@ The assigned variable is updated in the state.  The variable is expected
 to be declared, otherwise the semantics will get stuck.  At the same time,
 the assignment is dissolved. */
 
-  rule [assignment]: <k> X:=I:#Int => . ...</k> <state>... X |-> (_ => I) ...</state>
+  rule [assignment]: <k> X := I:#Int => . ...</k> <state>... X|->(_ => I) ...</state>
 
 /*@ \subsubsection{Sequential composition}
-Sequential composition is simply dissolved into the \K's builtin
-task sequentialization operation.  You can make this rule computational
-(i.e., remove the \texttt{structural} attribute) if you want it to
-count as a computational step.  Recall that the semantics of a program
-in a programming language defined in \K is the transition system
-obtained from the initial configuration holding that program and
-counting only the steps corresponding to computational rules as
+Sequential composition is simply structurally translated into the \K's
+builtin task sequentialization operation.  You can make this rule
+computational (i.e., remove the \texttt{structural} attribute) if you
+want it to count as a computational step.  Recall that the semantics
+of a program in a programming language defined in \K is the transition
+system obtained from the initial configuration holding that program
+and counting only the steps corresponding to computational rules as
 transitions (i.e., hiding the structural rules as unobservable, or
 internal steps). */
 
@@ -324,9 +329,7 @@ framework, so one needs to structurally inhibit the application of
 rewrite rules; this is in contrast to structural operational semantics
 (SOS), where one needs to explicitly give permission (through
 conditional rules) to reductions inside constructs' arguments.  Also
-note that we preferred to make the rule below structural.  If you want
-this unrolling step to count as a computational step (though we beg
-you to reconsider) then you can remove the ``structural'' tag.  */
+note that we preferred to make the rule below structural. */
 
   rule [while]:
     <k> while B do S => if B then (S ; while B do S) else skip ...</k>  [:structural:]

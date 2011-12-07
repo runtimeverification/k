@@ -1,13 +1,13 @@
-// This program calculates in s the sum of numbers from 1 to n.
+// This program calculates in sum the sum of numbers from 1 to n.
 
-var n,s;
-n:=100;
-while not(n<=0) do (
-  s:=0;
-  while not(n<=0) do (
-    s:=s+n;
-    n:=n+-1
+var n, sum;
+n := 10;
+while not(n <= 0) do (
+  sum:=0;
+  while not(n <= 0) do (
+    sum := sum + n;
+    n := n + -1
   )
 )
 
-// s should be 5050 when n is 100
+// sum should be 5050 when n is 100

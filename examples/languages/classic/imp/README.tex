@@ -10,7 +10,7 @@
 This is the \K semantic definition of the classic IMP language.
 IMP is considered a folklore language, without an official inventor,
 and has been used in many textbooks and papers, often with slight
-syntactic variations and often without being called IMP.  It includes
+syntactic variations and often without being called IMP\@.  It includes
 the most basic imperative language constructs, namely basic constructs
 for arithmetic and Boolean expressions, and variable assignment,
 conditional, while loop and sequential composition constructs for statements.
@@ -25,10 +25,29 @@ distribution.  If you are interested in reading more about \K, please
 check the following paper:
 \begin{quote}
 Grigore Ro\c su, Traian-Florin \c Serb\u anu\c t\u a:
-\href{http://dx.doi.org/10.1016/j.jlap.2010.03.012}{An overview of the K semantic framework}.
+\href{http://dx.doi.org/10.1016/j.jlap.2010.03.012}
+     {An overview of the K semantic framework}.
 
 Journal of Logic and Algebraic Programming, 79(6): 397-434 (2010)
 \end{quote}
+}
+
+\paragraph{Note:}{
+\K follows the
+\href{https://en.wikipedia.org/wiki/Literate_programming}{literate
+programming} approach.  The various semantic features defined in a \K
+module can be reordered at will and can be commented using normal
+comments like in C/C++/Java.  If those comments start with
+`\texttt{@}' preceeded by no space (e.g.,
+`\texttt{//@ {\textbackslash}section\{Variable declarations\}}')
+then they are interpreted as formal Latex documentation by the
+\texttt{kompile} tool when used with the option \texttt{--pdf}
+(or \texttt{--latex}).
+While comments are useful in general, they can annoy the expert user
+of \K.  To turn them off, you can do one of the following (unless you
+want to remove them manually): (1) Use an editor which can hide or
+color conventional C-like comments; or (2) Run the \K pre-processor
+(kpp), which removes all comments.
 }
 
 \end{latexComment}
