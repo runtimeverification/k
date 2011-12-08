@@ -3,7 +3,7 @@
 LANGUAGE_NAME = IMP
 
 # this is the name of the interesting modules (used by make latex/pdf) 
-LANGUAGE_MODULES = IMP-SYNTAX IMP
+LANGUAGE_MODULES =
 
 # include the contents of this file right after \begin{document}
 LATEX_TOPMATTER = README.tex
