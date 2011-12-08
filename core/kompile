@@ -1569,7 +1569,9 @@ sub run_maude {
     if ($? == 0) {
 	if (-s $error_file) {
 	    local $_ = get_file_content($error_file);
-	    print wrap("", "", "[MAUDE ERROR]: " . parse_maude_error($_, $error_file));
+	    my $lfn = $language_file_name;
+	    $lfn =~ s/$kmain//sg;
+	    print wrap("", "", "[MAUDE ERROR]: " . parse_maude_error($_, $error_file, $lfn));
 	    exit(1);
 	}
 	print "DONE\n" if $verbose;
