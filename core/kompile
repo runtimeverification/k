@@ -67,7 +67,7 @@ my $kmain = "kmain-";
 my $input_file  = fresh("kompile_in", ".maude");
 my $error_file  = fresh("kompile_err", ".txt");
 my $output_file = fresh("kompile_out", ".txt");
-my $temp_file   = fresh("kompile_tmp", ".txt");
+my $temp_file   = fresh("kompile_tmp", ".maude");
 my $maude_xml_file   = fresh("kompile_xml", ".xml");
 
 
@@ -934,7 +934,7 @@ if ($crop == 1 && !@crop_modules) {
 sub default_pdf
 {
     my ($option, $lg) = @_;
-    print "Warning: No module given after option $option.\nChoosing default modules $lg-SYNTAX and $lg.\n";
+    print "Choosing default modules $lg-SYNTAX and $lg.\n";
     my @md = ();
     push(@md, "$lg-SYNTAX");
     push(@md, $lg);
