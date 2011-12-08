@@ -4,27 +4,27 @@
 // 2) Run the K pre-processor (kpp) on this file to remove all comments.
 
 module IMP-SYNTAX
-/*@ \K provides modules for grouping syntactic and semantic features
-of language definitions.  While there are no rigid requirements or
-even guidelines on how to group features, we often put the syntax of
-languages in separate modules, so we can experiment with parsing
-programs before we attempt to give our languages semantics. */
-
 /*@ \section{Syntax}
+This module defines the syntax of IMP\@.
 Syntax in \K is defined using the familiar BNF notation, with
 terminals enclosed in quotes and nonterminals starting with capital
 letters, except for the builtin nonterminals which start with
 ``\textit{\#}''.  To ease reading, the quotes around the terminals are
 not displayed in the generated PDFs.  Productions can have attributes,
 which can define the evaluation strategy of the corresponding
-constructs (the \texttt{strict} attribute), or help the parser with
-operator precedences and grouping (the \texttt{prec} and
-\texttt{gather} attributes), or instruct the PDF generator how to
-display the various constructs (the \texttt{latex} attribute), etc. 
-The following constructs are given the expected strictness attributes,
-except for \textsf{and}, which is only strict in its first argument,
-because we will give it a short-circuited semantics (its second
-argument will only be evaluated when the first evaluates to true).
+constructs (the \texttt{strict} and \texttt{seqstrict} attributes), or
+help the parser with operator precedences and grouping (the
+\texttt{prec} and \texttt{gather} attributes), or instruct the PDF
+generator how to display the various constructs (the \texttt{latex}
+attribute), etc.  The following constructs are given the expected
+strictness attributes, except for \texttt{<=} and \textsf{and}, for
+demonstration purposes.  The former is defined to be
+\texttt{seqstrict}, which means that it evaluates its arguments in
+order, from left to right.  The \texttt{strict} operators can evaluate
+their arguments in any (fully interleaved) orders.  The latter is only
+strict in its first argument, because we will give it a
+short-circuited semantics (its second argument will only be evaluated
+when the first evaluates to true). 
 The parsing attributes, which are not displayed in the generated PDFs
 (also to ease reading), are taken over from Maude; please consult
 Maude's manual for their meaning.  For example, \texttt{prec(...)}
@@ -108,7 +108,10 @@ define the basic semantic infrastructure consisting of definitions for
 IMP only has two types of values: integers and Booleans.  We here use
 the \K builtin variants for both of them, noting that you are free to
 define  your own values if you don't like the builtins (e.g., the
-builtin integers and operations on them are arbitrary precision, etc.). */
+builtin integers and operations on them are arbitrary precision,
+etc.).  The file \texttt{k-framework/core/maude/lib/pl-builtins.maude}
+contains the (Maude) definitions of all the current builtins offered
+by the \K tool. */
 
   syntax Val ::= #Int | #Bool
 
@@ -214,10 +217,7 @@ the list, set, multiset, etc., structures in \K.  */
 
 
 /*@ \subsection{Arithmetic expressions}
-The \K semantics of each arithmetic construct is defined below.
-We need to do nothing for those arithmetic expression constructs which
-are already values, namely for integers and Booleans, because they are
-already evaluated. */
+The \K semantics of each arithmetic construct is defined below. */
 
 /*@ \subsubsection{Variable lookup}
 A program variable $X$ is looked up in the state by matching a binding
@@ -346,7 +346,10 @@ internal steps). */
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
-when its condition evaluates to \texttt{true} or to \texttt{false}. */
+when its condition evaluates to \texttt{true} or to \texttt{false}.
+Recall that the conditional was annotatated with the attribute
+\texttt{strict(1)} in the syntax module above, so only its first
+argument is allowed to be evaluated. */
 
   rule [if-true]:  if true then S:Stmt else _ => S
   rule [if-false]: if false then _ else S => S
@@ -392,5 +395,5 @@ not for the rest of the computation. */
        <k> var (X,Xs:Ids => Xs); _ </k>
        <state> Rho:Map (. => X |-> 0) </state>
     if notBool(X in keys(Rho))
-  rule [program2-no-vars]: <k> var .Ids; S => S </k>  [structural]
+  rule [program-no-vars]: <k> var .Ids; S => S </k>  [structural]
 end module

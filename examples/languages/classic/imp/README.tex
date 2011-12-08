@@ -50,6 +50,37 @@ color conventional C-like comments; or (2) Run the \K pre-processor
 (kpp), which removes all comments.
 }
 
+\paragraph{Note:}{
+The \K tool provides modules for grouping language features.  While
+there are no rigid requirements or even guidelines on how to group
+features, we often put the language syntax in a separate module, so we
+can experiment with parsing programs before we attempt to give our
+language a semantics.  In the case of IMP, we call its syntax module
+\texttt{IMP-SYNAX} and its semantics module \texttt{IMP}.  To compile
+the IMP language definition into Maude, pass the \texttt{imp.k}
+(extension is optional) file to \texttt{kompile}:
+\begin{verbatim}
+$ kompile imp.k
+\end{verbatim}
+To compile it to a PDF document for vizialization, use the command:
+\begin{verbatim}
+$ kompile imp.k --pdf
+\end{verbatim}
+To run programs, simply pass the program to \texttt{krun} in the
+directory where \texttt{imp.k} is:
+\begin{verbatim}
+$ krun programs/sumPgm.imp
+\end{verbatim}
+In general, the above commands work as shown for any language, say
+LANG, provided that you replace \texttt{IMP} by \texttt{LANG} and
+\texttt{imp} by \texttt{lang}, and provided that you type these
+commands in the directory where your language definition
+\texttt{lang.k} is.  If you want to use different naming
+conventions or to call these commands from other places, then type
+``\texttt{kompile -\,\!-help}'' and ``\texttt{krun -\,\!-help}'' for
+instructions.
+}
+
 \end{latexComment}
 
 \vspace*{3ex}
