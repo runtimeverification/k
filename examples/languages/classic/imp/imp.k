@@ -42,26 +42,29 @@ displayed as $\leq$ everywhere in the generated PDF.  Currently, the
 ``\texttt{while (x>=0) (x:=x/2; y:=x)}''). */
 
   syntax AExp ::= #Int | #Id
-                | AExp "+" AExp    [:prec(33) gather (E e) strict:]
-                | AExp "/" AExp    [:prec(31) gather (E e) strict:]
+                | AExp "+" AExp    [prec(33) gather (E e) strict]
+                | AExp "/" AExp    [prec(31) gather (E e) strict]
   syntax BExp ::= #Bool
-                | AExp "<=" AExp   [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
-                | "not" BExp       [:prec(53) strict:]
-                | BExp "and" BExp  [:prec(55) strict(1):]
+                | AExp "<=" AExp   [prec(37) seqstrict latex("{#1}\leq{#2}")]
+                | "not" BExp       [prec(53) strict]
+                | BExp "and" BExp  [prec(55) strict(1)]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp    [:prec(80) strict(2):]
-                | Stmt ";" Stmt    [:prec(100) gather(e E):]
+                | #Id ":=" AExp    [prec(80) strict(2)]
+                | Stmt ";" Stmt    [prec(100) gather(e E)]
                 | "if" BExp
                   "then" Stmt
-                  "else" Stmt      [:prec(85) strict(1):]
+                  "else" Stmt      [prec(85) strict(1)]
                 | "while" BExp
-                  "do" Stmt        [:prec(85):]
+                  "do" Stmt        [prec(85)]
 
 /*@ An IMP program declares a set of variables and then executes a
 statement in the state obtained after initializing all those variables
-to 0.  The IMP++ language removes this top-level program construct of
-IMP and adds instead variable declaration as a statement construct,
-which can be used anywhere in the program, not only at the top level.
+to 0.  IMP does not allow variable declarations anywhere else except
+through this construct, at the top-level of the program.  Other
+languages provided with this \K distribution (see, e.g., the IMP++
+language) remove this top-level program construct of IMP and add
+instead variable declaration as a statement construct, which can be
+used anywhere in the program, not only at the top level.
 \K provides builtin support for generic syntactic lists: 
 $\textit{List}\{\textit{Nonterminal},\textit{terminal}\}$ stands for
 \textit{terminal}-separated lists of \textit{Nonterminal} elements;
@@ -71,7 +74,7 @@ instantiate and use the \K builtin lists, you should alias each
 instance with a (typically fresh) nonterminal in your syntax, like we
 do below with the \textit{Ids}. */
 
-  syntax Pgm ::= "var" Ids ";" Stmt  [:prec(110):]
+  syntax Pgm ::= "var" Ids ";" Stmt  [prec(110)]
   syntax Ids ::= List{#Id,","}
 
 /*@ Before we move to the \K semantics, we would like to make some
@@ -240,7 +243,7 @@ is desugared by the tool into an ordinary
 rewrite rule:
 \begin{verbatim}
 rule <k> X ~> Rest </k> <state> Before (X |-> I) After </state>
-  => <k> I         </k> <state> Before (X |-> I) After </state>
+  => <k> I ~> Rest </k> <state> Before (X |-> I) After </state>
 \end{verbatim}
 Except for its true concurrency semantics, which relies on what is
 explicitly declared as shared and what is not, the semantics of \K can
@@ -264,7 +267,30 @@ applied after the arguments of the  arithmetic constructs are fully
 evaluated to \K results; this will happen thanks to their strictness
 attributes declared as annotations in the syntax module above.  For
 demonstration purposes, we do not label the trivial rules below for
-arithmetic and Boolean constructs. */
+arithmetic and Boolean constructs. 
+
+For the rest of this \K definition, recall that \K is a
+context-insensitive rewriting framework, that is, rewrite rules can
+apply wherever they match.  If you want a particular rewrite step to
+not take place unless it is in the right place, then you have to add
+more context to the rule so that it will not match.  For example, the
+first rule below will rewrite \texttt{3+7} to \texttt{10} no matter
+where it is located in the program.  If you want such reductions
+to only take place when they reach a position which can be evaluated
+according to the declared (through strictness attributes or evaluation
+contexts) evaluation strategies of the various language constructs,
+then you should modify the rules below to also match the begining of
+the \textsf{k} cell (e.g., ``\texttt{<k> I1 + I2 => I1 +Int I2 ...</k>}'',
+etc.).  Note that this is in sharp contrast to structural operational
+semantics (SOS), where one needs to explicitly give permission
+(through conditional rules) to reductions inside language constructs'
+arguments.  In general, we prefer to not inhibit the application of
+rewrite steps when unnecessary, because that also inhibits \K's
+potential for concurrent rewriting, but some language designers may
+get confused (or not like it) even when safe rewrites are applied in
+places of the program where they were not supposed to.  Those are free
+to modify the rules below to always match at the top of the \textsf{k}
+cell. */
 
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
@@ -316,7 +342,7 @@ and counting only the steps corresponding to computational rules as
 transitions (i.e., hiding the structural rules as unobservable, or
 internal steps). */
 
-  rule [sequential]: S1:Stmt ; S2:Stmt => S1 ~> S2 [:structural:]
+  rule [sequential]: S1:Stmt ; S2:Stmt => S1 ~> S2  [structural]
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
@@ -329,16 +355,13 @@ when its condition evaluates to \texttt{true} or to \texttt{false}. */
 We give the semantics of the \texttt{while} loop by unrolling.
 Note that the unrolling takes place only when the loop statement
 reaches the top of the computation cell; otherwise the unrolling
-process may not terminate.  Recall that \K is a rewriting
-framework, so one needs to structurally inhibit the application of
-rewrite rules; this is in contrast to structural operational semantics
-(SOS), where one needs to explicitly give permission (through
-conditional rules) to reductions inside constructs' arguments.  Also
-note that we preferred to make the rule below structural. */
+process may not terminate (recall that \K is a context-insensitive
+rewriting framework, not a reduction-based one).  Also, note that we
+preferred to make the rule below structural. */
 
   rule [while]:
     <k> while B do S => if B then (S ; while B do S) else skip ...</k>
-    [:structural:]
+    [structural]
 
 /*@ \subsection{Programs}
 The semantics of an IMP program is that its body statement is executed
@@ -369,5 +392,5 @@ not for the rest of the computation. */
        <k> var (X,Xs:Ids => Xs); _ </k>
        <state> Rho:Map (. => X |-> 0) </state>
     if notBool(X in keys(Rho))
-  rule [program2-no-vars]: <k> var .Ids; S => S </k>    [:structural:]
+  rule [program2-no-vars]: <k> var .Ids; S => S </k>  [structural]
 end module
