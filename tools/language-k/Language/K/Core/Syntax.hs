@@ -66,7 +66,7 @@ data BagItem
 data KSet = KSet [K]
     deriving (Eq, Ord, Show, Data, Typeable)
 
-data KMap = KMap (Map K K)
+data KMap = KMap [(K, K)]
     deriving (Eq, Ord, Show, Data, Typeable)
 
 data CellContent

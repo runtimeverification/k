@@ -169,12 +169,12 @@ ostream = do
     return $ OStream i
 
 kMap :: Parser KMap
-kMap = emptyKMap <|> KMap . Map.fromList <$> mapItem `endBy1` spaces
+kMap = emptyKMap <|> KMap <$> mapItem `endBy1` spaces
 
 emptyKMap :: Parser KMap
 emptyKMap = do
     string "(.).Map" <|> string "."
-    return $ KMap Map.empty
+    return $ KMap []
 
 mapItem :: Parser (K, K)
 mapItem = do
