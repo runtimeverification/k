@@ -34,7 +34,8 @@ use Switch;
 use File::Spec;
 use XML::DOM;
 
-
+use Text::Wrap;
+$Text::Wrap::columns = 75;
 
 
 #########
@@ -713,7 +714,7 @@ sub generate_error
     my $line = shift;
     my $message = shift;
 
-    return "[$type][$code] in [$file] @ [$line]: [$message]\n";
+    return wrap("", "", "[$type][$code] in [$file] @ [$line]: [$message]\n");
 }
 
 

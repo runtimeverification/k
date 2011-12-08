@@ -10,6 +10,9 @@ use Cwd;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use English;
 
+use Text::Wrap;
+$Text::Wrap::columns = 20;
+
 BEGIN {
     unshift (@INC, (File::Basename::fileparse($0))[1]);
 }
@@ -1441,8 +1444,7 @@ sub compile {
 			$errorSet = 1;
 		}
 		if ($errorSet) {
-			print "[ERROR]: ";
-			print "Aborting the compilation\n";
+			print wrap("", "", "[ERROR]: Aborting the compilation\n");
 			my $unquotedOutput = unquote($maude_xml_file);
 			print "$unquotedOutput\n";
 			unlink($maude_xml_file);
@@ -1484,8 +1486,7 @@ sub compile {
     
 # If the keyword "Error" begins a line in the output, then extract and report the error message
     if (/^Error: (.*?)Bye/sm) {
-	print "[ERROR]:\n";
-	print "Aborting the compilation\n";
+	print wrap("", "", "[ERROR]: Aborting the compilation\n");
 	print $1;
 	exit(1);
     }
@@ -1505,8 +1506,8 @@ sub compile {
 
 # Otherwise there must be some error that the script is now aware of, so show the whole thing
     else {
-	print "[ERROR]: cannot parse the output below (returned by the compiler):\n$_\n" if $_ ne "-1";
-	print "Aborting the compilation\n";
+	print wrap("","","[ERROR]: cannot parse the output below (returned by the compiler):\n$_\n") if $_ ne "-1";
+	print wrap("", "", "Aborting the compilation\n");
 	exit(1);
     }
 }
@@ -1544,29 +1545,29 @@ sub run_maude {
     
     if (($status >>= 8) != 0)
     {
-	print "Failed to run maude.\nExit status $status.\nTo reproduce run `maude $k_dir/$input_file`.\n";
+	print wrap("", "", "Failed to run maude.\nExit status $status.\nTo reproduce run `maude $k_dir/$input_file`.\n");
 	return -1 ;
     }
 
     if ($err =~ /\[ERROR\](.*?)\[ENDERROR\]/sg || $out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
-	print "[ERROR]: $1\n";
+	print wrap("", "", "[ERROR]: $1\n");
         if ($err ne "") {
- 	  print "Check $k_dir/$error_file to find additional errors.\n";
+ 	  print wrap("", "", "Check $k_dir/$error_file to find additional errors.\n");
         }
 	return -1;
     }
     
     if ($out =~ /\[ERROR\](.*?)\[ENDERROR\]/sg)
     {
-	print "[ERROR]: $1\n";
+	print wrap("", "", "[ERROR]: $1\n");
 	return -1;
     }
         
     if ($? == 0) {
 	if (-s $error_file) {
 	    local $_ = get_file_content($error_file);
-	    print "[MAUDE ERROR]: " . parse_maude_error($_, $error_file);
+	    print wrap("", "", "[MAUDE ERROR]: " . parse_maude_error($_, $error_file));
 	    exit(1);
 	}
 	print "DONE\n" if $verbose;
@@ -1575,8 +1576,7 @@ sub run_maude {
 	return $_;
     }
     else {
-	print "\nMaude cannot be detected: the command $maude_path does not execute\n";
-	print "Aborting the compilation\n";
+	print wrap("", "", "\nMaude cannot be detected: the command $maude_path does not execute\nAborting the compilation\n");
 	clean();
 	exit(1);
     }
@@ -1662,8 +1662,8 @@ sub maudify_file {
     {
 #        print "ERROR: Cannot finish processing $file\n";
 #        print "ERROR: The following text does not parse:\n$_";
-	print generate_error("ERROR", 1, $file, "unknown line", "Cannot finish processing $file\n");
-	print generate_error("ERROR", 1, $file, "unknown line", "The following text does not parse:\n$_");
+	print wrap("", "", generate_error("ERROR", 1, $file, "unknown line", "Cannot finish processing $file\n"));
+	print wrap("", "", generate_error("ERROR", 1, $file, "unknown line", "The following text does not parse:\n$_"));
         exit(1);
     }
     
@@ -1718,10 +1718,10 @@ sub maudify_module {
     
     
     my $mname = $1 if /kmod\s+(\S+)/sg;
-    if (!$k_auto_incl && $mname eq $language_module_name && !includesK($language_module_name))
-    {
+#    if (!$k_auto_incl && $mname eq $language_module_name && !includesK($language_module_name))
+#    {
 	$require_k_main = 1;
-    }
+#    }
     
 # Step: [#] and  [HOLE] -> `[HOLE`] 
     s!\[#\]!`[HOLE`]!sg;
@@ -1903,7 +1903,7 @@ sub maudify_module {
 
 # Step: check balanced parentheses - maude specific
     my $module_name = $1 if (/k?mod\s+([a-zA-Z\-]+)\s+is/);
-    print generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n") if (!balanced($_, '(', ')', '`'));
+    print wrap("", "", generate_error("WARNING", 1, $file, "unknown line", "Unbalanced parentheses in module $module_name\nMaude might not finish.\n")) if (!balanced($_, '(', ')', '`'));
 
     return $_;
 }
@@ -1934,13 +1934,13 @@ sub make_ops {
 # Report error and stop if the BNF form is not respected
 	if (!defined($bnf)){
 #		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
-		print generate_error("ERROR", 1, $file, "unknown line", "Syntactic categories must contain \"::=\" at line:\n$_\n");
+		print wrap("", "", generate_error("ERROR", 1, $file, "unknown line", "Syntactic categories must contain \"::=\" at line:\n$_\n"));
 		exit(1);
 	}
 
 # Report error and stop if the sort name does not match $ksort
 	if ($result_sort !~ /^$ksort$/) {
-	    print generate_error("ERROR", 1, $file, "unknown line", "Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\nSyntactic categories must currently match this pattern\n");
+	    print wrap("", "", generate_error("ERROR", 1, $file, "unknown line", "Sort \"$result_sort\" does not match the pattern \"$ksort\" in\n$_\nSyntactic categories must currently match this pattern\n"));
 	    exit(1);
 	}
 
@@ -2201,7 +2201,7 @@ sub on_the_fly_kvars {
     {
 	if ($kvar_decls{$1}) {
 	    if ($kvar_decls{$1} ne $2) {
-		print "WARNING: Variable $1 declared with two distinct sorts ($kvar_decls{$1} and $2)\n" if $verbose; 
+		print wrap("", "", "WARNING: Variable $1 declared with two distinct sorts ($kvar_decls{$1} and $2)\n") if $verbose;
 #		exit(1);
 	    }
 	} 
@@ -2426,7 +2426,7 @@ sub set {
 sub throw_error
 {
     my $err = shift;
-    print "$err\n";
+    print wrap("", "", "$err\n");
     exit(1);
 }
 
@@ -2515,20 +2515,20 @@ sub add_subsorts
 # Stores all latex comments in some data structures
 sub store_intermodule_latex
 {
-	local $_ = shift;
-
-	while (/(\/\*)@(before|after)=([a-zA-Z\-]+)\s(.*?)\*\//sg)
-	{
-		$module_before{$3} = $4 if $2 eq "before";
-		$module_after{$3} = $4 if $2 eq "after";
-	}
-
-	while (/(\/\/)@(before|after)=([a-zA-Z\-]+)\s(.*?)(?=\n)/sg)
-	{
-		$module_before{$3} = $4 if $2 eq "before";
-		$module_after{$3} = $4 if $2 eq "after";
-	}
-	
+    local $_ = shift;
+    
+    while (/(\/\*)@(before|after)=([a-zA-Z\-]+)\s(.*?)\*\//sg)
+    {
+	$module_before{$3} = $4 if $2 eq "before";
+	$module_after{$3} = $4 if $2 eq "after";
+    }
+    
+    while (/(\/\/)@(before|after)=([a-zA-Z\-]+)\s(.*?)(?=\n)/sg)
+    {
+	$module_before{$3} = $4 if $2 eq "before";
+	$module_after{$3} = $4 if $2 eq "after";
+    }
+    
 }
 
 # Args: latex file content
@@ -2569,7 +2569,7 @@ sub check_perl_packages
 
 	if (!$found)
 	{
-		print "[ERROR] Perl package $pack is not installed.\n";
+		print wrap("", "", "[ERROR] Perl package $pack is not installed.\n");
 		exit(1);
 	}
 	else
@@ -2589,11 +2589,11 @@ sub check_maude_instalation
 
 	if ( m!command\s+not\s+found!sg )
 	{
-		print "Maude command doesn't execute. Please install maude or set maude directory in PATH.\n";
+		print wrap("", "", "Maude command doesn't execute. Please install maude or set maude directory in PATH.\n");
 
 		if ($maude_lib eq "")
 		{
-			print "Also variable MAUDE_LIB is not set. Please check instalation instructions for maude.\n";
+			print wrap("", "", "Also variable MAUDE_LIB is not set. Please check instalation instructions for maude.\n");
 		}
 
 		exit(1);
@@ -2601,7 +2601,7 @@ sub check_maude_instalation
 
 	if ($maude_lib eq "")
 	{
-		print "Variable MAUDE_LIB is not set and maude cannot find prelude.maude.\nPlease check installation instructions for maude.\n";
+		print wrap("", "", "Variable MAUDE_LIB is not set and maude cannot find prelude.maude.\nPlease check installation instructions for maude.\n");
 		exit(1);
 	}
 }

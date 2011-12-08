@@ -7,6 +7,12 @@ use Getopt::Long;
 use File::Spec;
 use File::Basename;
 use Time::HiRes qw( gettimeofday tv_interval);
+
+
+use Text::Wrap;
+$Text::Wrap::columns = 75;
+
+
 # specific imports : common_functions.pl
 my $namespace = File::Spec->catfile((File::Basename::fileparse($0))[1], 'perl', 'common_functions.pl');
 require $namespace;
@@ -80,7 +86,7 @@ if ($pgm eq "?")
     }
     else
     {
-	print "If option -pgm is not used then kast program considers the FIRST argument as being the program file. If this file is not found, it returns this error.\n";
+	print wrap("", "", "If option -pgm is not used then kast program considers the FIRST argument as being the program file. If this file is not found, it returns this error.\n");
 	exit(1);
     }
 }
@@ -88,7 +94,7 @@ if ($pgm eq "?")
 my ($fname, $path, $suffix) = fileparse($pgm, qr/\.[^.]*/);
 if ($suffix eq "")
 {
-    print "Cannot infer lang name. Please make sure that $fname has the form \"program_name.lang\" (e.g. helloworld.c).\n \"lang\" (e.g \"c\") is the name of your language; both \"lang.k\" and \"lang-compiled.maude\" must exist.\n";
+    print wrap("", "", "Cannot infer lang name. Please make sure that $fname has the form \"program_name.lang\" (e.g. helloworld.c).\n \"lang\" (e.g \"c\") is the name of your language; both \"lang.k\" and \"lang-compiled.maude\" must exist.\n");
     exit(1);
 }
 
@@ -106,7 +112,7 @@ if (!(-e $lang))
     }
     else
     {
-	print "Cannot find $lang.k! Please make sure $lang.k exists.\n";
+	print wrap("", "", "Cannot find $lang.k! Please make sure $lang.k exists.\n");
 	exit(1);
     }
 }
@@ -119,11 +125,11 @@ $lang = basename($lang);
 
 if (!(-e $tmplang) || $tmplang !~ /\.k(maude)?/)
 {
-    print "Cannot find $tmplang.k!\nPlease make sure $tmplang exists or use option --k-definition.\nType \"kast --help\".\n";exit;
+    print wrap("", "", "Cannot find $tmplang.k!\nPlease make sure $tmplang exists or use option --k-definition.\nType \"kast --help\".\n"); exit;
 }
 
 my $tokens_file = File::Spec->catfile($dir, ".k/all_tokens.tok");
-my $tokens = get_file_content($tokens_file, "Please kompile a K defintion before using kast.\nType \"kast --help\".\n");
+my $tokens = get_file_content($tokens_file, wrap("", "", "Please kompile a K defintion before using kast.\nType \"kast --help\".\n"));
 my @all = split("\n", $tokens);
 @all_tokens = split('\s', shift(@all));
 @all_syntax = split('\s', shift(@all));

@@ -6,6 +6,8 @@ use File::Basename;
 use File::Temp qw / tempfile /;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 
+use Text::Wrap;
+$Text::Wrap::columns = 75;
 
 our @checksum_files; # used in checksumming kompile program to detect version changes
 my $path = ".";
@@ -18,7 +20,10 @@ BEGIN {
 use lib $path;
 use Regexp::Common;
 use Tree::Nary;
-  
+
+my $tab1 = "";
+my $tab2 = "";
+
 my $k_base =  File::Spec->catfile((File::Basename::fileparse($0))[1], "..");
 my $maude = "maude";
 my $language_file_name = "?";
@@ -397,12 +402,12 @@ sub syntax_verification
     # extract configuration string from .kmaude file
     if ($lines =~ m/(?<!mb)\s+configuration\s*(.+?)(\s|\n)+(?=(rule|op|ops|eq|---|context|subsort|subsorts|configuration|syntax|macro|endkm)(\s|\n)+)/s)
     {
-		$lines = $1;
+	$lines = $1;
     }
     else
     {
-		warning("INFO: File $language_file_name does not contain configuration definition.\n") if $verbose;
-		return;
+	warning("INFO: File $language_file_name does not contain configuration definition.\n") if $verbose;
+	return;
     }
 
 #	print "LINES: $lines\n";
@@ -493,8 +498,7 @@ sub write_warnings
 	open FILE, ">", $warnings_file or die "Cannot open/create warnings file.\n";
 	print FILE $warnings;
 	close $warnings;
-	print $display_warnings;
-	print "...\nCheck $warnings_file for the remaining warnings\n" if $i >= 10;             
+	print wrap("", "", $display_warnings . " ...\nCheck $warnings_file for the remaining warnings\n") if $i >= 10;
     }
 }
 
@@ -562,7 +566,7 @@ sub printErrorFromOut()
     
 	if (/error(.*?)\n/isg)
 	{
-	    "Error $1";
+	    wrap("", "", "Error $1");
 	}
     }
     else 
@@ -608,7 +612,7 @@ sub get_full_name
     if ($file =~ /\.(k?(maude)?|m)$/) {
 	if (! -e $file) {
 #		print("File $file does not exist\n");
-		print generate_error("ERROR", 1, $file, "unknown line", "file $file does not exist");
+		print wrap("", "", generate_error("ERROR", 1, $file, "unknown line", "file $file does not exist"));
 		exit(1);
 	}
 	return $file;
@@ -634,7 +638,7 @@ sub get_full_name
 	# Otherwise error: we only allow files with extensions .k, .kmaude or .maude
 	else {
 #		print("Neither of $file.k, $file.kmaude, or $file.maude exist\n");
-		print generate_error("ERROR", 1, "$file.k", "unknown line", "Neither of $file.k, $file.kmaude, or $file.maude exist");
+		print wrap("", "", generate_error("ERROR", 1, "$file.k", "unknown line", "Neither of $file.k, $file.kmaude, or $file.maude exist"));
 		exit(1);
 	}
     }
@@ -1656,7 +1660,7 @@ sub line_numbers
 	
 	if ($attr eq "")
         {
-           $rule .= " [metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
+	    $rule .= " [metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
             $rule .= " [metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]$space" if $rule_size > 1;
         }
         else
@@ -2239,7 +2243,7 @@ sub check_incompatible
 			s/result\s+[a-zA-Z]+:(.*?)(?=\n)/{$list2 = $1;}/se;
 
 #			print "Error: $sort1 and $sort2 have the same kind.\nThis error may occur when $sort1 and $sort2 have common lesser sorts.\nLesser sorts for $sort1: $list1\nLesser sorts for $sort2: $list2\n\n";
-			print generate_error("ERROR", 1, $file, "unknown line", "$sort1 and $sort2 have the same kind.\nThis error may occur when $sort1 and $sort2 have common lesser sorts.\nLesser sorts for $sort1: $list1\nLesser sorts for $sort2: $list2");
+			print wrap("", "", generate_error("ERROR", 1, $file, "unknown line", "$sort1 and $sort2 have the same kind.\nThis error may occur when $sort1 and $sort2 have common lesser sorts.\nLesser sorts for $sort1: $list1\nLesser sorts for $sort2: $list2"));
 			exit(1);
 		}
 	}
@@ -2311,7 +2315,7 @@ sub maudify
 	return File::Spec->catfile($k_base, "$m_import.maude");
     }
     
-    print generate_error("ERROR", 1, $file, "unknown line", "File $import needed by $file cannot be found! Please check if the path is correct.");
+    print wrap("", "", generate_error("ERROR", 1, $file, "unknown line", "File $import needed by $file cannot be found! Please check if the path is correct."));
 }
 
 sub process_tags
@@ -2624,7 +2628,7 @@ sub op_tags
     
     if ($attributes =~ /\S/sg)
     {
-	print "[ERROR] at $metadata: Undeclared tag(s): \"$attributes\"\n";
+	print wrap("", "", "[ERROR] at $metadata: Undeclared tag(s): \"$attributes\"\n");
 	exit(1);
     }
     
@@ -2728,7 +2732,7 @@ sub slurp_k
 	    }
 	    else
 	    {
-		print "[ERROR] Cannot import file $import in $file\n";
+		print wrap("", "", "[ERROR] Cannot import file $import in $file\n");
 		exit(1);
 	    }
 	}
@@ -2915,8 +2919,7 @@ sub remove_quotes
 	{
 	    $tmp1 = Unfreeze("QUOTES", $tmp1);
 	    $tmp1 =~ s!(\[[^\]]*?(metadata)[^\]]*?\])!!gs;
-	    print "[Warning] This warning is thrown when quotes around terminals are not balanced.\nNotice that if you want to use quotes in your syntax \nuse backslash (\) to escape them.\n";
-	    print "It seems that you forgot a quote (\") in syntax declaration:\n$tmp1\n";
+	    print wrap("", "", "[Warning] This warning is thrown when quotes around terminals are not balanced. Notice that if you want to use quotes in your syntax use backslash (\) to escape them. It seems that you forgot a quote (\") in syntax declaration:\n$tmp1\n");
 	}
 
 	$tmp =~ s%(?<!\\)\"%KSYNQUOT%sg;
@@ -2954,7 +2957,7 @@ sub parse_maude_error
     }
     
     # replace Warning: Error: and <automatic>:
-    s/(Warning:\s*|Error:\s*|<automatic>:\s*)//sg;
+    s/Warning:(\s*)/Error:$1/sg;
 
     my $max_lines = 7;
     my $msg = "";
@@ -2972,12 +2975,19 @@ sub parse_maude_error
 	last if ($max_lines --)== 0;
     }
     
+#    my $msg1 = "Maude rejected generated file .k/$error_file.\n";
+#    $msg1 .= "This usually indicates similar problems in your definition.";
+#    $msg1 .= " Error\nmessage(s) below including line numbers refer to generated file.\n";
+#    $msg1 .= "You can look in the .k/$error_file at the line numbers\nreported and you'll find the original location of the \ncorresponding K statement in metadata location attribute.";
+ 
+    my $msg1 = "Maude rejected generated file .k/$error_file. This usually indicates similar problems in your definition. Error message(s) below including line numbers refer to generated file. You can look in the .k/$error_file at the line numbers reported and you'll find the original location of the corresponding K statement in metadata location attribute.";
+ 
     if (length $err > 0)
     {
-	return $msg . "...\n" . $err;
+	return $msg1 . "\n\n" . $msg . "...\n" . $err;
     }
     else {
-	return $msg;
+	return $msg1 . "\n\n" . $msg;
     }
 }
   
