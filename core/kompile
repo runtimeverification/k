@@ -11,7 +11,7 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use English;
 
 use Text::Wrap;
-$Text::Wrap::columns = 20;
+$Text::Wrap::columns = 75;
 
 BEGIN {
     unshift (@INC, (File::Basename::fileparse($0))[1]);
@@ -1037,6 +1037,8 @@ if (!$maudify_only) {
     # add missing subsortations to K
     add_subsorts();
 
+#    exit(1);
+    
     if ($latex || $pdf || $ps || $eps || $png || $crop) 
     {
 	make_latexify() if $latex;
