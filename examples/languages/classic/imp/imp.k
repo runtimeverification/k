@@ -279,7 +279,7 @@ where it is located in the program.  If you want such reductions
 to only take place when they reach a position which can be evaluated
 according to the declared (through strictness attributes or evaluation
 contexts) evaluation strategies of the various language constructs,
-then you should modify the rules below to also match the begining of
+then you should modify the rules below to also match the beginning of
 the \textsf{k} cell (e.g., ``\texttt{<k> I1 + I2 => I1 +Int I2 ...</k>}'',
 etc.).  Note that this is in sharp contrast to structural operational
 semantics (SOS), where one needs to explicitly give permission
@@ -347,7 +347,7 @@ internal steps). */
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
 when its condition evaluates to \texttt{true} or to \texttt{false}.
-Recall that the conditional was annotatated with the attribute
+Recall that the conditional was annotated with the attribute
 \texttt{strict(1)} in the syntax module above, so only its first
 argument is allowed to be evaluated. */
 
