@@ -53,13 +53,19 @@ This way, \texttt{letrec} will also be polymorphic. */
   macro (letrec F:#Id X:#Id = E:Exp in E':Exp)
       = (let F = mu F . (lambda X . E) in E')
 
+  syntax Exps ::= List{Exp,","}
+//  syntax Exps ::= List{Exp,","}
 end module
 
 
 module TYPES
+  imports EXP-TYPE-INFERENCE-SYNTAX
 // This module should eventually be builtin and provided by the K
 // framework tool.  Most type checkers/inferencers are expected to
 // need it.  For now, we give it to the \K tool manually.
+// Moreover, it needs to import EXP-TYPE-INFERENCE-SYNTAX
+// (to have the entire list context in case you want to add
+// List{Exp,","} later on; this is a current tool limitation).
 // Please let us know if you'd like to have additional primitives here.
 
   syntax KResult ::= Type
@@ -155,7 +161,6 @@ end module
 
 
 module EXP-TYPE-INFERENCE
-  imports EXP-TYPE-INFERENCE-SYNTAX
   imports TYPES
 
 /*@ Note that the module \texttt{TYPES} was included above.  This
