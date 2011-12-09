@@ -12,7 +12,7 @@
 //
 // After kompilation, we can run the semantics like any realistic interpreter:
 //
-// bash$ krun programs/sumPgm3.imppp --no-config
+// bash$ krun programs/sumPgm-3.imppp --no-config
 // Add numbers up to (<= 0 to quit)? 10
 // Sum = 55
 // Add numbers up to (<= 0 to quit)? 100
@@ -22,7 +22,7 @@
 //
 // or
 //
-// bash$ echo 10 100 0 25 | krun programs/sumPgm3.imppp --no-config
+// bash$ echo 10 100 0 25 | krun programs/sumPgm-3.imppp --no-config
 // Add numbers up to (<= 0 to quit)? Sum = 55
 // Add numbers up to (<= 0 to quit)? Sum = 5050
 // Add numbers up to (<= 0 to quit)? bash$ 
@@ -34,9 +34,9 @@
 //
 //     <in color="magenta" stream="stdin"> $IN:List </in>
 //
-// and then, after kompilation,
+// and then, after re-kompilation,
 //
-// bash$ krun programs/sumPgm3.imppp --no-config --IN="ListItem(10) ListItem(100)"
+// bash$ krun programs/sumPgm-3.imppp --no-config --IN="ListItem(10) ListItem(100)"
 // Add numbers up to (<= 0 to quit)? Sum = 55
 // Add numbers up to (<= 0 to quit)? Sum = 5050
 // Add numbers up to (<= 0 to quit)? 24
@@ -44,17 +44,17 @@
 // Add numbers up to (<= 0 to quit)? 0
 // bash$
 
-var n,s;
+var n, s;
 while true do {
   print("Add numbers up to (<= 0 to quit)? ");
-  n:=read();
-  if n<=0 then halt
+  n := read();
+  if (n <= 0) then halt
   else {
-    s:=0;
-    while not(n<=0) do {
-      s:=s+n;
-      n:=n+-1
+    s := 0;
+    while not(n <= 0) do {
+      s := s + n;
+      n := n + -1
     } ;
-    print("Sum = "); print(s); print("\n")
+    print("Sum = ", s, "\n")
   }
 }

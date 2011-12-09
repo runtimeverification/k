@@ -3,7 +3,10 @@
 LANGUAGE_NAME = IMPPP
 
 # this are all interesting modules (used to latexify)
-LANGUAGE_MODULES = IMPPP-SYNTAX IMPPP
+LANGUAGE_MODULES =
+
+# include the contents of this file right after \begin{document}
+LATEX_TOPMATTER = README.tex
 
 #this is the basename of the main file
 MAIN_FILE = imppp

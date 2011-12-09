@@ -8,38 +8,38 @@ instead add a variable declaration statement construct. */
 
 /*@ \subsection{The old IMP constructs}
 The following constructs are taken over from IMP.  For execution
-purposes, we add the ``superheat'' attribute to addition and division.
-This attribute has no theoretical significance, in that it does not
-affect the semantics of the language in any way.  It only has
+purposes, we add the \texttt{superheat} attribute to addition and
+division.  This attribute has no theoretical significance, in that it
+does not affect the semantics of the language in any way.  It only has
 practical relevance, specific to our implementation of the \K tool.
-Specifically, it tells the tool that the ``\verb|--search|'' option
+Specifically, it tells the tool that the \texttt{-\,\!-search} option
 should exhaustively explore all the non-deterministic behaviors due to
 the strictness of the corresponding language construct.  Without it,
 for performance reasons the \K tool chooses an arbitrary but fixed
 order to evaluate the arguments of the strict language construct, thus
 losing behaviors due to missed interleavings.  This aspect was
 irrelevant in IMP, because its expressions had no side effects, but it
-becomes relevant in IMP++.  Note that the ``superheat'' attribute
-pairs with corresponding ``supercool'' attributes of rules (see the
+becomes relevant in IMP++.  Note that the \texttt{superheat} attribute
+pairs with corresponding \texttt{supercool} attributes of rules (see the
 variable lookup and increment rules below).  These two attributes
 together tell the \K tool to exhaustively explore the space of
 interleavings between the supercool and the superheat points. */
 
   syntax AExp ::= #Id | #Int
-                | AExp "+" AExp    [:prec(33) gather (E e) superheat strict:]
-                | AExp "/" AExp    [:prec(31) gather (E e) superheat strict:]
+                | AExp "+" AExp    [prec(33) gather (E e) superheat strict]
+                | AExp "/" AExp    [prec(31) gather (E e) superheat strict]
   syntax BExp ::= #Bool
-                | AExp "<=" AExp   [:prec(37) seqstrict latex("{#1}\leq{#2}"):]
-                | "not" BExp       [:prec(53) strict:]
-                | BExp "and" BExp  [:prec(55) strict(1):]
+                | AExp "<=" AExp   [prec(37) seqstrict latex("{#1}\leq{#2}")]
+                | "not" BExp       [prec(53) strict]
+                | BExp "and" BExp  [prec(55) strict(1)]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp    [:prec(80) strict(2):]
-                | Stmt ";" Stmt    [:prec(100) gather(e E):]
+                | #Id ":=" AExp    [prec(80) strict(2)]
+                | Stmt ";" Stmt    [prec(100) gather(e E)]
                 | "if" BExp
                   "then" Stmt
-                  "else" Stmt      [:prec(85) strict(1):]
+                  "else" Stmt      [prec(85) strict(1)]
                 | "while" BExp
-                  "do" Stmt        [:prec(85):]
+                  "do" Stmt        [prec(85)]
   syntax Ids ::= List{#Id,","}
 
 /*@ \subsection{The new IMP++ constructs}
@@ -49,16 +49,16 @@ argument.  It is also strict, which means that the entire list of
 expressions, that is, each expression in the list, will be evaluated. */
 
   syntax AExp ::= #String
-                | "++" #Id               [:prec(0):]
+                | "++" #Id               [prec(0)]
                 | "read" "(" ")"
   syntax AExps ::= List{AExp,","}
 
-  syntax Stmt ::= "print" "(" AExps ")"  [:strict:]
+  syntax Stmt ::= "print" "(" AExps ")"  [strict]
                 | "halt"
-                | "spawn" Stmt           [:prec(90):]
+                | "spawn" Stmt           [prec(90)]
                 | "{" "}"
-                | "{" Stmt "}"           [:gather(&):]
-                | "var" Ids              [:prec(70):]
+                | "{" Stmt "}"           [gather(&)]
+                | "var" Ids              [prec(70)]
 end module
 
 
@@ -82,11 +82,11 @@ numbers. */
 /*@ \subsection{Configuration}
 The original configuration of IMP has been extended to include
 all the various additional cells needed for IMP++.  As explained
-above, the IMP state is now split into environment and a store.
+above, the IMP state is now split into an environment and a store.
 Moreover, each thread has its own environment, so it knows where all
 the variables that it has access to (that includes its locally
 declared variables as well as the variables of its parent thread) are
-located in the store.  The stored is shared by all threads.  Note that
+located in the store.  The store is shared by all threads.  Note that
 the \textsf{thread} cell has multiplicity ``*'', meaning that there
 could be zero, one or more instances of that cell in the configuration
 at any given time; this multiplicity information is irrelevant here,
@@ -110,11 +110,17 @@ programs, both of IMP and IMP++).  */
      <br/>
      <store color="white"> .Map </store>
      <nextLoc color="gray"> 0 </nextLoc>
+     <in color="magenta"> .List </in>
+     <out color="Orchid"> .List </out>
+    </T>
+// Replace the <in/> and <out/> cells with the next two in order to
+// initialize the input buffer through krun
 //     <in color="magenta"> $IN:List </in>
 //     <out color="Orchid"> .List </out>
-     <in color="magenta" stream="stdin"> $IN:List </in>
-     <out color="Orchid" stream="stdout"> .List </out>
-    </T>
+// Replace the <in/> and <out/> cells with the next two to connect the
+// input/output buffers to stdin/stdout and also allow input through krun
+//     <in color="magenta" stream="stdin"> $IN:List </in>
+//     <out color="Orchid" stream="stdout"> .List </out>
 
 /*@ \subsection{The old IMP constructs}
 The semantics of the old IMP constructs is almost identical to their
@@ -130,10 +136,11 @@ configuration above.  Configuration abstraction is crucial for
 modularity: we do not need to revisit the existing rules when we
 change the configuration (changes in the configuration are needed,
 e.g., to accommodate new language features).  As explained above when
-we discussed the ``superheat'' attribute to syntactic constructs, we
-annotate the variable lookup rule with the attribute ``supercool''.
-This effectively tells the \K tool to exhaustively explore all the
-behaviors due to the non-determinism of addition and division.
+we discussed the \texttt{superheat} attribute to syntactic constructs,
+we annotate the variable lookup rule with the attribute
+\texttt{supercool}.  This effectively tells the \K tool to
+exhaustively explore all the behaviors due to the non-determinism of
+addition and division.
 
 The superheating and supercooling attributes/tags to syntactic
 constructs and rules therefore allow us to more effectively use the \K
@@ -145,16 +152,16 @@ more threads are about to access the same location in the store and at
 least one of these accesses is a write (i.e., an instance of the
 variable assignment rule), there is a high chance that different
 choices for the next transition lead to different program behaviors.
-While in theory all the non-structural rules count as computational
-steps and hereby as transitions in the transition system (or Kripke
-structure) associated to the program, in practice that may yield a
-tremendous number of step interleavings to consider.  Most of these
-interleavings are behaviorally equivalent for most purposes.  For
-example, the fact that a thread computes a step $8\texttt{+}3
+While in the theory of \K all the non-structural rules count as
+computational steps and hereby as transitions in the transition system
+(or Kripke structure) associated to the program, in practice that may
+yield a tremendous number of step interleavings to consider.  Most of
+these interleavings are behaviorally equivalent for most purposes.
+For example, the fact that a thread computes a step $8\texttt{+}3
 \Rightarrow 11$ is likely irrelevant for the other threads, so one may
 not want to consider it as an observable transition in the space of
 interleavings.  Since the \K tool cannot know which transitions need
-to be explored and which do not, its approach to let the user say it
+to be explored and which do not, its approach is to let the user say it
 explicitly.  The rules tagged with ``transition'', like the variable
 lookup and assignment rules below, are the only ones considered when
 exploring a program's state space (with search or model-checking).
@@ -164,15 +171,16 @@ reader to the \K semantics of IMP for their meaning.  */
 
 // Values and results
 
-  syntax Val ::= #Int | #Bool
-  syntax AExp ::= Val
-  syntax KResult ::= Val
+//  syntax Val ::= #Int | #Bool
+//  syntax AExp ::= Val
+//  syntax KResult ::= Val
+  syntax KResult ::= #Int | #Bool
 
 // Variable lookup
 
   rule <k> X:#Id => I ...</k>
        <env>... X |-> N:#Nat ...</env>
-       <store>... N |-> I:#Int ...</store>  [:supercool transition:]
+       <store>... N |-> I:#Int ...</store>  [supercool transition]
 
 // Arithmetic constructs
 
@@ -218,7 +226,8 @@ Second, we give the semantics of IMP++ string concatenation (which
 uses the already existing addition symbol \texttt{+} from IMP) by
 reduction to the builtin string concatenation operation. */
 
-  syntax Val ::= #String
+//  syntax Val ::= #String
+  syntax KResult ::= #String
   rule Str1:#String + Str2:#String => Str1 +String Str2
 
 /*@ \subsubsection{Variable increment}
@@ -228,7 +237,7 @@ in the computation and in the non-determinism due to thread interleavings. */
 
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store>  [:supercool transition:]
+       <store>... N |-> (I => I +Int 1) ...</store>  [supercool transition]
 
 /*@ \subsubsection{Read}
 The \texttt{read()} construct evaluates to the first integer in the
@@ -238,7 +247,7 @@ reading the next integer from the input buffer, and different choices
 for the next transition can lead to different behaviors. */
 
   rule <k> read() => I ...</k>
-       <in> ListItem(I) => . ...</in>  [:transition:]
+       <in> ListItem(I) => . ...</in>  [transition]
 
 /*@ \subsubsection{Print}
 The \texttt{print} statement was strict, so all its arguments are now
@@ -248,10 +257,12 @@ the residual \texttt{print} statement with an empty list of
 arguments.  This rule is also a transition, because different threads
 may compete on the output buffer; we want to capture all behaviors. */
 
-  syntax Vals ::= List{Val,","}
-  rule <k> print(V:Val,Vs:Vals => Vs) ...</k>
-       <out>... . => ListItem(V) </out>  [:transition:]
-  rule print(.Vals) => .                 [:structural:]
+//  syntax Vals ::= List{Val,","}
+  rule <k> print(I:#Int,AEs:AExps => AEs) ...</k>
+       <out>... . => ListItem(I) </out>    [transition]
+  rule <k> print(Str:#String,AEs => AEs) ...</k>
+       <out>... . => ListItem(Str) </out>  [transition]
+  rule print(.AExps) => .                  [structural]
 
 /*@ \subsubsection{Halt}
 The \texttt{halt} statement discards the entire contents of the
@@ -282,7 +293,7 @@ When the computation of a thread is empty, the thread is dissolved.
 This rule can be regarded as a configuration cleanup operation, so it
 needs not count as a computational step; we therefore tag it structural. */
 
-  rule <thread>... <k> .K </k> ...</thread> => .  [:structural:]
+  rule <thread>... <k> .K </k> ...</thread> => .  [structural]
 
 /*@ \subsubsection{Blocks}
 Empty blocks dissolve, like the \texttt{skip} statement of IMP.  For
@@ -295,9 +306,9 @@ environment.  This rule can also be structural, because what it
 effectively does is to take a snapshot of the current environment;
 this operation is arguably not a computational step. */
 
-  rule {} => .                           [:structural:]
+  rule {} => .                           [structural]
   rule <k> {S} => S ~> env(Rho) ...</k>
-       <env> Rho:Map </env>              [:structural:]
+       <env> Rho:Map </env>              [structural]
 
 /*@ \subsubsection{Variable declaration}
 We allocate a new location for each newly declared variable and
@@ -307,7 +318,7 @@ initialize it with 0, without worrying about memory reuse. */
        <env> Rho => Rho[N/X] </env>
        <store>... . => N |-> 0 ...</store>
        <nextLoc> N => N +Int 1 </nextLoc>
-  rule var .Ids => .                        [:structural:]
+  rule var .Ids => .                        [structural]
 
 /*@ \subsubsection{Auxiliary operations}
 We only have one auxiliary operation in IMP++, the environment
@@ -320,7 +331,7 @@ are structural, because we do not want them to count as computational
 steps in the transition system of a program. */
 
   syntax K ::= env Map
-  rule (env(_) => .) ~> env(_)                         [:structural:]
-  rule <k> env(Rho) => . ...</k> <env> _ => Rho </env> [:structural:]
+  rule (env(_) => .) ~> env(_)                          [structural]
+  rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>  [structural]
 
 end module

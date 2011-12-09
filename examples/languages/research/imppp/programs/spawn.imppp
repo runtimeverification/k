@@ -1,3 +1,6 @@
+// Make sure you first read and execute the sumPgm programs before this one.
+// For best output, we recommend kompiling IMP++ with IO, as in sumPgm-3.imppp
+//
 // To see the various behaviors (10) of this concurrent program, make sure
 // you use the --search option with krun.  However, since this program
 // takes a user input and since search cannot be interactive, you have
@@ -5,7 +8,7 @@
 // either using a configuration variable (see sumPgm-2.imppp, sumPgm-3.imppp),
 // or, alteratively and more easily here, using your OS piping:
 //
-//   echo 10 | krun programs/spawn.imppp --search
+//   echo 25 | krun programs/spawn.imppp --search
 //
 
 var x;

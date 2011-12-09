@@ -16,10 +16,10 @@ definition before proceeding.
 for the \texttt{print} statement, which is discussed below.  For
 string concatenation, we use the same \texttt{+} construct that we use
 for addition.
-\item Variable increment.  We only add a preincrement construct:
+\item Variable increment.  We only add a pre-increment construct:
 \texttt{++x} increments variable \texttt{x} and evaluates to the
 incremented value.  Variable increment makes the evaluation of
-expressions to have side effects, and thus the evaluation strategies
+expressions have side effects, and thus the evaluation strategies
 of the various language constructs to matter in what regards the set
 of possible program behaviors.
 \item Input and output.  IMP++ adds a \texttt{read()} expression
@@ -42,9 +42,23 @@ for races and ``unexpected'' behaviors, so be careful.
 \item Blocks and local variables.  IMP++ allows blocks enclosed by 
 curly brackets.  Also, IMP's global variable declaration construct is
 generalized to be used anywhere as a statement, not only at the
-begining of the program.  As expected, the scope of the declared
+beginning of the program.  As expected, the scope of the declared
 variables is from their declaration point till the end of the most
 nested enclosing block.
+\end{itemize}
+
+\section{What You Will Learn Here}
+
+\begin{itemize}
+\item How to define a less trivial language in \K, as explained above.
+\item How to use the \texttt{superheat} and \texttt{supercool}
+attributes of the \K tool to exhaustively explore the space of
+interleavings between various points in a program.
+\item How to connect certain cells in the configuration to the
+standard input and standard output, and thus turn the \texttt{krun}
+tool into an interactive interpreter for the defined language.
+\item How to exhaustively search for the non-deterministic behaviors
+of a program using the \texttt{-\,\!-search} option of \texttt{krun}.
 \end{itemize}
 
 \end{latexComment}

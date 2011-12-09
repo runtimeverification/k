@@ -1,3 +1,13 @@
+// Make sure you first read and execute the sumPgm programs before this one.
+// For best output, we recommend kompiling IMP++ with IO, as in sumPgm-3.imppp
+//
+// This is a simple program which has several behaviors: it can evaluate to
+// 0, 1, 2, 3, as well as to undefined (reaches a division-by-zero: 3/0).
+// To see these different behaviors, krun it with the --search option:
+//
+//   krun programs/div-nondet.imppp --search
+//
+
 var x;
 x := 1;
 print("++x / (++x / x) = ", ++x / (++x / x), "\n")
