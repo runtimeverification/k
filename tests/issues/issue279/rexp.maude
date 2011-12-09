@@ -1,0 +1,64 @@
+mod REXP is protecting #BOOL .
+
+  sort Set{Obj} .
+  op emptyObj : -> Set{Obj} .
+  op _;;_ : Set{Obj} Set{Obj} -> Set{Obj} [assoc comm id: emptyObj] .
+
+  sorts Var Alph Rexp .
+  subsort Var < Alph < Rexp .
+  vars A B : Alph .
+  vars R R1 R2 : Rexp . 
+  var DRL RL : List{Rexp} .
+
+  ops epsilon empty : -> Rexp .
+  ops (_++_) (_x_) : Rexp Rexp -> Rexp [assoc comm] .
+  ops (_#_) : Rexp Rexp -> Rexp [gather (E e)] .
+  op _* : Rexp -> Rexp .
+  op !_ : Var -> Alph .
+
+  op _==Rexp_ : Rexp Rexp -> #Bool .
+
+  *** derivatives
+  op _`{_`} : Rexp Alph -> Rexp .
+  ceq B { A } = epsilon if (A ==Rexp B) .
+  ceq B { A } = empty if notBool (A ==Rexp B) .
+---  eq epsilon { A } = empty .
+---  eq empty { A } = empty .
+  ceq ( R1 # R2 ){ A } = ((R1 { A }) # R2) ++ (R2 { A })
+     if epsIn R1 = true .
+  ceq ( R1 # R2 ){ A } = (R1 { A }) # R2 
+     if epsIn R1 = false .
+  eq ( R1 ++ R2 ){ A } = (R1 { A }) ++ (R2 { A }) .
+  eq (R1 x R2) { A } = (R1 { A }) x (R2 {A}) .
+  eq R * { A } = (R { A }) # (R *) .     
+
+
+  op epsIn_ : Rexp -> #Bool . 
+  eq epsIn A = false .
+  eq epsIn epsilon = true .
+  eq epsIn empty = false .
+  eq epsIn ! A = notBool epsIn A .  
+  eq epsIn ( R1 # R2 ) =  epsIn R1 andBool  epsIn R2 .
+  eq epsIn ( R1 ++ R2 ) = epsIn R1 orBool  epsIn R2 .
+  eq epsIn (R1 x R2) = epsIn R1 andBool  epsIn R2 . 
+  eq epsIn R * = true .
+
+
+  *** auxiliary data structures
+  sort List{Rexp} .
+  subsort Rexp < List{Rexp} .
+  op emptyList : -> List{Rexp} .
+  op _;;;_ : List{Rexp} List{Rexp} -> List{Rexp} [assoc comm id: emptyList] .
+  op _==List{Rexp}_ : List{Rexp} List{Rexp} -> #Bool .
+
+  op _in_ : Rexp List{Rexp} -> #Bool .
+  eq R in emptyList = false .
+  eq R in (R1 ;;; RL) = (R ==Rexp R1) orBool (R in RL ) . 
+
+  op !_ : List{Rexp} -> List{Rexp} .
+  eq !(emptyList) = emptyList .
+  ceq !(R ;;; RL) = !(R) ;;; !(RL) if notBool (RL ==List{Rexp} emptyList) .
+
+endm
+
+ 
