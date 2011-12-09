@@ -1,4 +1,13 @@
-Installation instructions:
+## Installation instructions:
+
+Just type 'make'. You will need mercurial installed, and a sane Haskell
+environment.
+
+
+## Old installation instructions:
+
+NOTE: The instructions below are out of date! Please use the provided Makefile
+to build and install krun.
 
 These instructions assume you have a sane Haskell build environment (with
 GHC), which means you should have a command called "cabal" in your PATH.
@@ -27,6 +36,9 @@ $ export PATH=$HOME/.cabal/bin:$PATH
 Now try krun by going into the imp directory and typing:
 
 $ krun programs/collatzPgm.imp
+
+
+## Contact:
 
 If you have any trouble installing krun or you see something unexpected
 while following these directions, please email me:
