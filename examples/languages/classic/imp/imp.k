@@ -188,11 +188,7 @@ IMP does not need it.
 The configuration of IMP is trivial: it only contains two cells, one
 for the computation and another for the state.  For good encapsulation
 and clarity, we place the two cells inside another cell, the ``top'' cell
-which is labeled $\top$.  The configuration variable {\em \$PGM} tells
-the \K tool where to place the program after parsing.  The ``$\kdot$''
-in the \textsf{state} cell is \K's way to say ``nothing''.
-Technically, it is a constant which is the unit (or identity) of all
-the list, set, multiset, etc., structures in \K.  */
+which is labeled $\top$. */
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
@@ -201,7 +197,30 @@ the list, set, multiset, etc., structures in \K.  */
 // Replace the above <state/> cell with the following when you want to pass
 // an initial state through krun; see program programs/sumPgm-novars.imp.
 //                  <state color="red"> $STATE:Map </state>
+// Make sure you rekompile the definition before calling krun.
 
+/*@ The configuration variable {\em \$PGM} tells the \K tool where to
+place the program.  More precisely, the command
+``\texttt{krun program}'' parses the program and places the resulting
+\K abstract syntax tree in the \textsf{k} cell before invoking the
+semantic rules described in the sequel.  The ``$\kdot$'' in the
+\textsf{state} cell, written \texttt{.Map} in ASCII in the
+\texttt{imp.k} file, is \K's way to say ``nothing''.  Technically, it
+is a constant which is the unit, or identity, of all maps in \K
+(similar dot units exist for other \K structures, such as lists, sets,
+multi-sets, etc.).  Sometimes we want to customize the initial
+configuration before executing a program.  Then we can use
+custom configuration variables, whose name starts with {\em \$} like
+that of {\em \$PGM}.  For example, we can replace the
+$\kdot$ contents of the \textsf{state} cell with configuration
+map variable {\em \$STATE}.  This allows you to pass your desired
+initial state to \texttt{krun} in addition to the program, such as in
+the following command requesting \texttt{krun} to execute
+a program in a state binding $n$ to 0 and $s$ to 10:
+\begin{verbatim}
+krun programs/sumPgm-novars.imp --STATE="n|->0 s|->10"
+\end{verbatim}
+*/
 
 /*@ \subsection{Arithmetic expressions}
 The \K semantics of each arithmetic construct is defined below. */
