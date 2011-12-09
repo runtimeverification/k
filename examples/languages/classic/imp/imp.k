@@ -105,43 +105,30 @@ define the basic semantic infrastructure consisting of definitions for
 {\em values/results} and the {\em configuration}. */
 
 /*@ \subsection{Values and results}
-IMP only has two types of values: integers and Booleans.  We here use
-the \K builtin variants for both of them, noting that you are free to
-define  your own values if you don't like the builtins (e.g., the
-builtin integers and operations on them are arbitrary precision,
-etc.).  The file \texttt{k-framework/core/maude/lib/pl-builtins.maude}
+IMP only has two types of values, or results of computations: integers
+and Booleans.  We here use the \K builtin variants for both of them,
+noting that you are free to define your own values if these are not
+suitable for your language (e.g., the builtin integers and operations
+on them are arbitrary precision, etc.).
+The file \texttt{k-framework/core/maude/lib/pl-builtins.maude}
 contains the (Maude) definitions of all the current builtins offered
-by the \K tool. */
-
-  syntax Val ::= #Int | #Bool
-
-/*@ Although unnecessary here, it is insightful and useful to
-understand the relationship between your language's values and other
+by the \K tool.  Although unnecessary here, it is insightful and useful
+to understand the relationship between your language's values and other
 syntactic categories.  It is often the case that values form a
 subset of the existing language syntax, like here, but sometimes that
 is not immediately obvious and sometimes even not true by default (for
 example, when defining functional languages we may add closures as
 values, even though closures were not expressions in the original
-language).  When that is the case, in order for the semantics to be
-given smoothly and uniformly, you may need to extend your language's
+language).  When that happens, in order for the semantics to be
+given smoothly and uniformly you may need to extend your language's
 original syntactic categories with the new values.  This is not needed
 for our IMP semantics here, since its values are trivial and already
-part of the original syntax.
+part of the original syntax.  Nevertheless, we still have to tell the
+\K tool that it should interpret our intended values as results of
+computations (note that this is not automatic, since sometimes other
+syntactic categories are results; e.g., types when defining a type system). */
 
-We have to tell the \K tool that it should interpret values as results
-of computations (note that this is not automatic, since sometimes
-other syntactic categories are results; e.g., types when defining a
-type system).  In this case, since IMP is so simple, we could have
-also directly said that integers and Booleans are \K results, without
-declaring the syntactic category \textit{Val}.  In general, it is good
-practice to add the values of your language as a separate syntactic
-category and then instruct the \K tool that those are the results of
-your computations.  The main reason for doing so is that the values of
-your language will stay the same no matter what semantic style you
-choose (thus you make your definition more generic and less dependent
-on \K). */
-
-  syntax KResult ::= Val
+  syntax KResult ::= #Int | #Bool
 
 /*@ Before we move to the definition of the IMP configuration, we
 would like to recall a few general facts about \K, particularly about
