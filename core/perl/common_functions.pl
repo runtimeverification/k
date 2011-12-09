@@ -2949,12 +2949,13 @@ sub parse_maude_error
     local $_ = shift;
     my $error_file = shift;
     my $maude_file = shift;
-    
-    my $err = "";
-    if (countlines($_) > 5)
+
+    if (!(-e $maude_file))
     {
-	$err = "Check .k/$error_file to find all errors.\n";
+	$maude_file .= ".maude";
     }
+    
+    my $err = "Check .k/$error_file to find all errors.\n";
     
     # replace Warning: Error: and <automatic>:
     s/Warning:(\s*)/Error:$1/sg;
