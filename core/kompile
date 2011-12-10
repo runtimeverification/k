@@ -1835,8 +1835,8 @@ sub maudify_module {
 	s/\Q$alls\E/$all/s;
     }
 
-	my $klabelss = $decl;		
-	$klabelss =~ s/\s+$//s;		
+    my $klabelss = $decl;		
+    $klabelss =~ s/\s+$//s;		
 	my @kls = split(/\s+/, $klabelss);		
 	foreach my $kl (@kls)		
 	{		
@@ -1846,16 +1846,21 @@ sub maudify_module {
         s/(subsorts?\s+.*?)(\s+)(?=$kmaude_keywords_pattern|STRINGS|ATTR|KLABEL)/{Freeze($1, "SUBSORTS") . $2;}/sge;
         s/(sorts?\s+.*?)(\s+)(?=$kmaude_keywords_pattern|STRINGS|ATTR|KLABEL|SUBSORTS)/{Freeze($1, "SORTS") . $2;}/sge;
 
+    # freeze configuration
+    s/\$[A-Z]+/{Freeze($&, "PVAR");}/sge;
+
 # print ;
         $_ = spacify($_);
 
+        $_ = Unfreeze("PVAR", $_);
 	$_ = Unfreeze("ATTR", $_);
 	$_ = Unfreeze("STRINGS", $_);
 	$_ = Unfreeze("KLABEL", $_);
         $_ = Unfreeze("SUBSORTS", $_);
         $_ = Unfreeze("SORTS", $_);
 
-#  print "$_\n\n";
+
+# print "$_\n\n";
 #	print "============================\n\n\n";
     
 # Step: Declare the on-the-fly variables
