@@ -1,4 +1,4 @@
-mod REXP is protecting #BOOL .
+mod #REXP is protecting #BOOL .
 
   sort Set{Obj} .
   op emptyObj : -> Set{Obj} .
