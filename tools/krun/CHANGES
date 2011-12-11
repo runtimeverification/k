@@ -1,0 +1,39 @@
+December 11, 2011:
+
+krun has several new options:
+
+--color/--no-color enables/disables color output.
+
+--parens/--no-parens enables/disables parentheses in the output. With
+parentheses enabled, krun uses a very simple heuristic for removing *some*
+unneeded parentheses. The heuristic is:
+
+Parens are not added around built-in literals like 42, x, and "foo". Parens
+are also omitted for any label that has syntax on the outside.  That is, any
+label that starts or ends with an underscore will have parens added: _+_,
+if_then_else_, lambda_._. Parens are omitted otherwise: `(_`),
+if_then_else_fi, while_do_od.
+
+--parser <string> can be used to specify an external parser. <string> can be
+any command (with options) that accepts a filename as its last argument and
+prints a kast term to standard out.
+
+
+November 10, 2011:
+
+krun now has a --log-io option which tells the IO wrapper
+--createLogs. This will create a krunner.log file in the current
+directory which is useful for debugging IO errors.
+
+I've decided to stop trying to guess the position of parentheses when
+pretty-printing syntax. Now, I simply don't add any parentheses to the
+output, meaning it will look better in most cases, but there's little
+chance that the results are re-parseable by Maude/kast.
+
+The coolest new change is the addition of what some people call
+"island parsing". If krun fails to parse the contents of a cell, it
+will keep going to the next cell. The pretty-printer displays an
+unparseable string as the string surrounded by red parentheses. To see
+an example of this, type "krun programs/sorting/insertion1.simple" in
+simple/untyped. Overall, this means krun is a lot less likely to fail
+at parsing.
