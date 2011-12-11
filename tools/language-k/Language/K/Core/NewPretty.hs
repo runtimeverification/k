@@ -123,9 +123,12 @@ zipSyntax (Hole : xs) (k : ks)
 zipSyntax _ _ = return []
 
 --needsParens (KApp (KLabel [Syntax _, Hole]) _) = True
-needsParens (KApp (KLabel [Syntax _, Hole, Syntax s]) _)
-    | s == ")" || s == "}" || s == "]" = False
+--needsParens (KApp (KLabel [Syntax _, Hole, Syntax s]) _)
+--    | s == ")" || s == "}" || s == "]" = False
 needsParens (KApp kl []) = not (isBuiltin kl)
+needsParens (KApp (KLabel kls) ks) = not (isSyntax (head kls) && isSyntax (last kls))
+    where isSyntax (Syntax _) = True
+          isSyntax _ = False
 needsParens FreezerHole = False
 needsParens _ = True
 
