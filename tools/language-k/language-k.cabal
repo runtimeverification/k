@@ -33,7 +33,7 @@ Library
     blaze-builder,
     bytestring,
     text,
-    ansi-wl-pprint,
+    ansi-wl-pprint >= 0.6,
     containers
 
   ghc-prof-options: -auto-all
