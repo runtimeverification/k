@@ -147,7 +147,9 @@ printResult config result = do
                     putStrLn "Warning: unable to parse/pretty-print result term:"
                     T.putStrLn result
                     putStrLn "(NB: This may not be your fault. Pretty-printing is an experimental feature.)"
-                Right bag -> printDoc $ ppKBag bag
+                Right bag -> do
+                    Bool color <- getVal config "color"
+                    prettyPrint (PrettyConfig color) bag
         s -> die $ "Invalid output-mode setting: " ++ s
 
 printStatistics :: Config -> Text -> IO ()

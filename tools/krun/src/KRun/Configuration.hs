@@ -103,6 +103,7 @@ commonKSettings =
     , Setting "syntax-module" StringType "Name of the syntax module"
     , Setting "io" BoolType "Use real IO when running the definition"
     , Setting "statistics" BoolType "Print Maude's rewrite statistics"
+    , Setting "color" BoolType "Use colors in output"
     ]
 
 advancedKSettings :: [Setting]
