@@ -1,32 +1,91 @@
 {-# LANGUAGE PatternGuards #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Language.K.Core.NewPretty where
 
+import Control.Applicative ((<$>))
 import Data.Char (isAlphaNum)
 import Data.List (intersperse, stripPrefix)
 import Data.Map (fromList, toList)
 import qualified Data.Map as Map
+import Data.Monoid
 import Language.K.Core.Syntax
-import Text.PrettyPrint.ANSI.Leijen
+import qualified Text.PrettyPrint.ANSI.Leijen as PP
+import Control.Monad.Reader
 
-printDoc doc = do
-    putDoc doc
+prettyPrint :: (Pretty a) => PrettyConfig -> a -> IO ()
+prettyPrint conf p = do
+    PP.putDoc $ runReader (runKPP $ pretty p) conf
     putStrLn ""
 
-ppK (Kra []) = char '.'
-ppK (Kra ks) = hsep $ intersperse (bold . blue $ text "~>") (map ppK ks)
--- ugly special-case for Lists to avoid pretty-printing .List{"X"}
-ppK (KApp klabel [k, KApp emptyList []])
-    | Just cons1 <- getListCons klabel
-    , Just cons2 <- getListCons emptyList
-    , cons1 == cons2
-    = ppK k
-ppK (KApp (Freezer k) ks) = ppK $ plugFreezer k ks
-ppK (KApp klabel []) = ppKLabel klabel
-ppK (KApp (KLabel ss) ks) = hsep $ zipSyntax ss ks
-ppK (KApp klabel ks) = ppKLabel klabel <> parens (hsep $ punctuate comma (map ppK ks))
-ppK FreezerHole = text "□"
--- shouldn't happen:
-ppK (FreezerVar s) = red $ text s
+-- | Configuration for the pretty-printer
+data PrettyConfig = PrettyConfig
+    { useColor :: Bool
+    } deriving (Eq, Ord, Show)
+
+-- | Pretty-printer monad
+newtype KPP a = KPP
+    { runKPP :: Reader PrettyConfig a
+    } deriving (Functor, Monad, MonadReader PrettyConfig)
+
+instance Monoid (KPP PP.Doc) where
+    mempty = empty
+    mappend = liftM2 mappend
+
+
+-- monadic variants of the pretty-printer combinators:
+infixr 6 <>
+(<>) :: (Monoid a) => a -> a -> a
+(<>) = mappend
+
+(<+>) = liftM2 (PP.<+>)
+(<$$>) = liftM2 (PP.<$$>)
+
+char = return . PP.char
+text = return . PP.text
+empty = return PP.empty
+comma = return PP.comma
+integer i = return $ PP.integer i
+parens = liftM PP.parens 
+hang i = liftM (PP.hang i)
+hsep = liftM PP.hsep
+vsep = liftM PP.vsep
+hcat = liftM PP.hcat
+vcat = liftM PP.vcat
+punctuate = liftM2 PP.punctuate
+
+-- | Print color depending on the configuration.
+color :: (PP.Doc -> PP.Doc) -> KPP PP.Doc -> KPP PP.Doc
+color c doc = do
+    uc <- asks useColor
+    if uc then fmap c doc else doc
+
+bold = color PP.bold
+red = color PP.red
+blue = color PP.blue
+green = color PP.green
+magenta = color PP.magenta
+
+class Pretty a where
+    pretty :: a -> KPP PP.Doc
+
+instance Pretty K where
+    pretty (Kra []) = char '.'
+    pretty (Kra ks) = hsep . sequence $ intersperse karr (map pretty ks)
+        where karr = bold . blue $ (text "~>")
+    -- ugly special-case for Lists to avoid pretty-printing .List{"X"}
+    pretty (KApp klabel [k, KApp emptyList []])
+        | Just cons1 <- getListCons klabel
+        , Just cons2 <- getListCons emptyList
+        , cons1 == cons2
+        = pretty k
+    pretty (KApp (Freezer k) ks) = pretty $ plugFreezer k ks
+    pretty (KApp klabel []) = pretty klabel
+    pretty (KApp (KLabel ss) ks) = hsep $ zipSyntax ss ks
+    pretty (KApp klabel ks) = pretty klabel <> parens (hsep $ punctuate comma (mapM pretty ks))
+    pretty FreezerHole = text "□"
+    -- shouldn't happen:
+    pretty (FreezerVar s) = red $ text s
 
 getListCons :: KLabel -> Maybe String
 getListCons (KLabel [Syntax l]) = do
@@ -54,13 +113,14 @@ plugFreezer k ks = mapK (plug ks) k
           mapK f k = k
 
 -- | Combine a KLabel and a list of arguments to form the original syntax.
-zipSyntax (Syntax s : xs) ks = bold (text s) : zipSyntax xs ks
+zipSyntax :: [KLabelPart] -> [K] -> KPP [PP.Doc]
+zipSyntax (Syntax s : xs) ks = liftM2 (:) (bold (text s)) (zipSyntax xs ks)
 -- TODO: need original precedences, etc to get the parentheses right.
 -- For now, simply don't add any parentheses to the output.
 zipSyntax (Hole : xs) (k : ks)
-    | needsParens k = parens (ppK k) : zipSyntax xs ks
-    | otherwise = ppK k : zipSyntax xs ks
-zipSyntax _ _ = []
+    | needsParens k = liftM2 (:) (parens $ pretty k) (zipSyntax xs ks)
+    | otherwise = liftM2 (:) (pretty k) (zipSyntax xs ks)
+zipSyntax _ _ = return []
 
 --needsParens (KApp (KLabel [Syntax _, Hole]) _) = True
 needsParens (KApp (KLabel [Syntax _, Hole, Syntax s]) _)
@@ -74,42 +134,50 @@ isBuiltin (KBool _) = True
 isBuiltin (KId _) = True
 isBuiltin _ = False
 
-ppKLabel (KInt i) = integer i
-ppKLabel (KId id) = text id
-ppKLabel (KBool True) = text "true"
-ppKLabel (KBool False) = text "false"
-ppKLabel (KString s) = text (show s)
-ppKLabel (Freezer k) = text "freezer" <> parens (ppK k)
--- don't print .List{"X"}:
-ppKLabel kl | Just _ <- getListCons kl = empty
-ppKLabel (KLabel ss) = hcat $ map ppSyntax ss
-    where ppSyntax (Syntax s) = text s
-          ppSyntax Hole = char '_'
-ppKLabel (WMap kmap) = ppKMap kmap
-ppKLabel (WBag kbag) = ppKBag kbag
-ppKLabel kl = error $ "No pretty-printer available for: " ++ show kl
+instance Pretty KLabel where
+    pretty (KInt i) = integer i
+    pretty (KId id) = text id
+    pretty (KBool True) = text "true"
+    pretty (KBool False) = text "false"
+    pretty (KString s) = text (show s)
+    pretty (Freezer k) = text "freezer" <> parens (pretty k)
+    -- don't print .List{"X"}:
+    pretty kl | Just _ <- getListCons kl = empty
+    pretty (KLabel ss) = hcat $ mapM ppSyntax ss
+        where ppSyntax (Syntax s) = text s
+              ppSyntax Hole = char '_'
+    pretty (WMap kmap) = pretty kmap
+    pretty (WBag kbag) = pretty kbag
+    pretty kl = error $ "No pretty-printer available for: " ++ show kl
 
-ppKBag (KBag []) = char '.'
-ppKBag (KBag bs) = vsep $ map ppBagItem bs
+instance Pretty KBag where
+    pretty (KBag []) = char '.'
+    pretty (KBag bs) = vsep $ mapM pretty bs
 
-ppBagItem (BagItem k) = text "BagItem" <> parens (ppK k)
-ppBagItem (CellItem label content) =
-    hang 2 (ppStartTag label <$> (ppCellContent content)) <$> ppEndTag label
+instance Pretty BagItem where
+    pretty (BagItem k) = text "BagItem" <> parens (pretty k)
+    pretty (CellItem label content) =
+        hang 2 (ppStartTag label <$$> pretty content) <$$> ppEndTag label
 
-ppKSet (KSet []) = char '.'
-ppKSet (KSet ks) = vsep $ map ppK ks
+ppStartTag label = green $ char '<' <> text label <> char '>'
+ppEndTag label = green $ text "</" <> text label <> char '>'
 
-ppKList (KList []) = char '.'
-ppKList (KList ls) = vsep [ ppListItem l | l <- ls, not (isStream l) ]
+instance Pretty KSet where
+    pretty (KSet []) = char '.'
+    pretty (KSet ks) = vsep $ mapM pretty ks
 
-isStream (IStream _) = True
-isStream (OStream _) = True
-isStream _ = False
+instance Pretty KList where
+    pretty (KList []) = char '.'
+    pretty (KList ls) = vsep $ sequence [ pretty l | l <- ls, not (isStream l) ]
+        where isStream (IStream _) = True
+              isStream (OStream _) = True
+              isStream _ = False
 
-ppListItem (ListItem k) = text "ListItem" <> parens (ppK k)
-ppListItem (Buffer k) = ppK k
-ppListItem (IStream _) = empty
-ppListItem (OStream _) = empty
+instance Pretty ListItem where
+    pretty (ListItem k) = text "ListItem" <> parens (pretty k)
+    pretty (Buffer k) = pretty k
+    pretty (IStream _) = empty
+    pretty (OStream _) = empty
 {-
 ppListItem (IStream 0) = angles $ text "stdin"
 ppListItem (IStream i) = angles $ text "istream: " <> integer i
@@ -118,22 +186,23 @@ ppListItem (OStream 2) = angles $ text "stderr"
 ppListItem (OStream i) = angles $ text "ostream: " <> integer i
 -}
 
-ppKMap (KMap m)
-    | null m = char '.'
-    | otherwise = vcat . map ppMapItem $ m
+instance Pretty KMap where
+    pretty (KMap m)
+        | null m = char '.'
+        | otherwise = vcat $ mapM pretty m
 
-ppMapItem (k1, k2) = ppK k1 <+> magenta (text "|->") <+> ppK k2
+-- MapItem
+instance Pretty (K, K) where
+    pretty (k1, k2) = pretty k1 <+> magenta (text "|->") <+> pretty k2
 
-ppCellContent (KContent k) = ppK k
-ppCellContent (BagContent bag) = ppKBag bag
-ppCellContent (ListContent list) = ppKList list
-ppCellContent (MapContent map) = ppKMap map
-ppCellContent (SetContent set) = ppKSet set
-ppCellContent (NoParse str) = red (char '(') <> text str <> red (char ')')
+instance Pretty CellContent where
+    pretty (KContent k) = pretty k
+    pretty (BagContent bag) = pretty bag
+    pretty (ListContent list) = pretty list
+    pretty (MapContent map) = pretty map
+    pretty (SetContent set) = pretty set
+    pretty (NoParse str) = red (char '(') <> text str <> red (char ')')
 
-
-ppStartTag label = green $ char '<' <> text label <> char '>'
-ppEndTag label = green $ text "</" <> text label <> char '>'
 
 
 {- Some test cases: -}

@@ -26,6 +26,7 @@ Library
 
   Build-depends:
     base >= 4 && < 5,
+    mtl,
     parsec > 3,
     attoparsec,
     attoparsec-text,
