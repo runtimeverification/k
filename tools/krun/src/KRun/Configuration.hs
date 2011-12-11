@@ -101,6 +101,7 @@ commonKSettings =
     [ Setting "k-definition" FileType "Path to the K definition"
     , Setting "main-module" StringType "Module the program should execute in"
     , Setting "syntax-module" StringType "Name of the syntax module"
+    , Setting "parser" StringType "Command used to parse programs (default: kast)"
     , Setting "io" BoolType "Use real IO when running the definition"
     , Setting "statistics" BoolType "Print Maude's rewrite statistics"
     , Setting "color" BoolType "Use colors in output"

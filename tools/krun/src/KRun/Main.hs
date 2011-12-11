@@ -94,8 +94,7 @@ main = do
             True -> return kmap
         return $ Map.insert "noIO" (Kast "wlist_(#noIO)(.List{K})") kmap'
 
-    pgm <- ProgramSource <$> T.readFile pgmFile
-    kast <- flattenProgram config pgm
+    kast <- flattenProgram config pgmFile
     let kmap'' = Map.insert "PGM" kast kmap'
 
     Bool search <- getVal config "do-search"
@@ -231,21 +230,33 @@ wrapperArgs config tmpDir cmdFile outFile errFile =
           Bool log = config ! "log-io"
 
 -- | Flattens a program to a K term.
-flattenProgram :: Config -> ProgramSource -> IO Kast
-flattenProgram config pgm = case config ! "parser" of
-    String "kast" -> runKast config pgm
-    _ -> die "External parser not implemented."
+flattenProgram :: Config -> FilePath -> IO Kast
+flattenProgram config pgmFile = do
+    String parser <- getVal config "parser"
+    case parser of
+        "kast" -> runKast config pgmFile
+        parseCmd -> runParser config parseCmd pgmFile
+
+
+-- | Run an external parser.
+runParser :: Config -> String -> FilePath -> IO Kast
+runParser config parseCmd pgmFile = do
+    let cmd = parseCmd ++ " " ++ pgmFile
+    (ih, oh, eh, ph) <- runInteractiveCommand cmd
+    hSetBinaryMode oh False
+    exitCode <- waitForProcess ph
+    when (exitCode /= ExitSuccess) $
+        die $ "Fatal: parser returned a non-zero exit code: " ++ show exitCode
+           ++ "\nAttempted command:\n"
+           ++ cmd
+    ts <- T.hGetContents oh
+    return $ Kast ts
 
 -- | Run the internal parser that turns programs into K terms using
 -- the K definition.
-runKast :: Config -> ProgramSource -> IO Kast
-runKast config (ProgramSource pgm) = do
-    tmpDir <- getTmpDir
-    (tmpFile, tmpHandle) <- openTempFile tmpDir "pgm.maude"
-    tmpCanonicalFile <- canonicalizePath tmpFile
-    T.hPutStr tmpHandle pgm
-    hClose tmpHandle
-    let args = kastArgs config tmpCanonicalFile
+runKast :: Config -> FilePath -> IO Kast
+runKast config pgmFile = do
+    let args = kastArgs config pgmFile
     kastExecutable <- getKastExecutable
     (exitCode, kastStdout, kastStderr) <- readProcessWithExitCode kastExecutable args ""
     when (not (null kastStderr)) $ do
@@ -256,7 +267,6 @@ runKast config (ProgramSource pgm) = do
            ++ "\nAttempted command:\n"
            ++ "kast " ++ intercalate " " args
     let kast = Kast (T.pack kastStdout)
-    removeFile tmpFile
     return kast
 
 kastArgs :: Config -> FilePath -> [String]
