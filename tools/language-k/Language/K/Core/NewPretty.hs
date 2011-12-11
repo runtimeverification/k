@@ -122,9 +122,6 @@ zipSyntax (Hole : xs) (k : ks)
     | otherwise = liftM2 (:) (pretty k) (zipSyntax xs ks)
 zipSyntax _ _ = return []
 
---needsParens (KApp (KLabel [Syntax _, Hole]) _) = True
---needsParens (KApp (KLabel [Syntax _, Hole, Syntax s]) _)
---    | s == ")" || s == "}" || s == "]" = False
 needsParens (Kra []) = False
 needsParens (KApp kl []) = not (isBuiltin kl)
 needsParens (KApp (KLabel kls) ks) = not (isSyntax (head kls) && isSyntax (last kls))
