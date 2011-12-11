@@ -126,6 +126,7 @@ zipSyntax _ _ = return []
 needsParens (KApp (KLabel [Syntax _, Hole, Syntax s]) _)
     | s == ")" || s == "}" || s == "]" = False
 needsParens (KApp kl []) = not (isBuiltin kl)
+needsParens FreezerHole = False
 needsParens _ = True
 
 isBuiltin (KInt _) = True
