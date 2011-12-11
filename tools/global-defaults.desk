@@ -8,6 +8,7 @@ io:                     true
 do-search:              false
 xsearch-pattern:        "=>! B:Bag"
 log-io:                 false
+color:                  true
 
 
 groups:
