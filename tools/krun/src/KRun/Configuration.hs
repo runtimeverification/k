@@ -104,6 +104,7 @@ commonKSettings =
     , Setting "io" BoolType "Use real IO when running the definition"
     , Setting "statistics" BoolType "Print Maude's rewrite statistics"
     , Setting "color" BoolType "Use colors in output"
+    , Setting "parens" BoolType "Show parentheses in output"
     ]
 
 advancedKSettings :: [Setting]

@@ -149,7 +149,8 @@ printResult config result = do
                     putStrLn "(NB: This may not be your fault. Pretty-printing is an experimental feature.)"
                 Right bag -> do
                     Bool color <- getVal config "color"
-                    prettyPrint (PrettyConfig color) bag
+                    Bool parens <- getVal config "parens"
+                    prettyPrint (PrettyConfig color (not parens)) bag
         s -> die $ "Invalid output-mode setting: " ++ s
 
 printStatistics :: Config -> Text -> IO ()
