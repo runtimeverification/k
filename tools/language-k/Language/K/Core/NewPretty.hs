@@ -21,6 +21,7 @@ prettyPrint conf p = do
 -- | Configuration for the pretty-printer
 data PrettyConfig = PrettyConfig
     { useColor :: Bool
+    , noParens :: Bool
     } deriving (Eq, Ord, Show)
 
 -- | Pretty-printer monad
@@ -116,10 +117,10 @@ plugFreezer k ks = mapK (plug ks) k
 zipSyntax :: [KLabelPart] -> [K] -> KPP [PP.Doc]
 zipSyntax (Syntax s : xs) ks = liftM2 (:) (bold (text s)) (zipSyntax xs ks)
 -- TODO: need original precedences, etc to get the parentheses right.
--- For now, simply don't add any parentheses to the output.
-zipSyntax (Hole : xs) (k : ks)
-    | needsParens k = liftM2 (:) (parens $ pretty k) (zipSyntax xs ks)
-    | otherwise = liftM2 (:) (pretty k) (zipSyntax xs ks)
+zipSyntax (Hole : xs) (k : ks) = do
+    np <- asks noParens
+    let f = if np || not (needsParens k) then id else parens
+    liftM2 (:) (f $ pretty k) (zipSyntax xs ks)
 zipSyntax _ _ = return []
 
 needsParens (Kra []) = False
