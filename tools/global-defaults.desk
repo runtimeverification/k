@@ -9,7 +9,7 @@ do-search:              false
 xsearch-pattern:        "=>! B:Bag"
 log-io:                 false
 color:                  true
-parens:                 true
+parens:                 false
 
 
 groups:
