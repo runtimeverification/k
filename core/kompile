@@ -874,7 +874,7 @@ if ($style eq "?") {
     terminate("Option -style requires that a style be given right after");
 }
 
-
+$language_file_name = basename($language_file_name);
 
 # Create the module name, if not already given, by capitalizing the file name
     if ($language_module_name eq "") {
@@ -951,7 +951,7 @@ recurseIntoFiles($language_file_name);
 if ($flat && $maudify_only)
 {
     $language_file_name =~ s/\.k(maude)?$//;
-	flattening($language_file_name);
+    flattening($language_file_name);
     $language_file_name .= "-flat.k";
 }
 
@@ -959,8 +959,8 @@ if ($flat && $maudify_only)
 if ($flat && !$maudify_only)
 {
     $language_file_name =~ s/\.k(maude)?$//;
-	flattening($language_file_name);
-	exit(0);
+    flattening($language_file_name);
+    exit(0);
 }
 
 
@@ -1002,7 +1002,7 @@ if (!$compile_only) {
 	}
     }
     
-    
+
 #    print_header("Done with maudifying $language_file_name") if $verbose;
     print_header("Data resulting from maudifying $language_file_name") if $verbose;
     print "Sorts:\n------\n@all_sorts\n\n" if $verbose;
@@ -1022,11 +1022,9 @@ if (!$maudify_only) {
     $language_file_name =~ s/\.maude$//;
     $language_file_name =~ s/\.k(maude)?$//;
 
-
 # Checking whether Maude is available
     # run_maude("Detecting Maude ... ", "quit\n");
     check_maude_instalation();	
-
 
     # Check incompatible sorts
     check_incompatible($language_file_name, $language_module_name) if (!($latex || $pdf || $ps || $eps || $crop || $png || $maudify_only));
@@ -1037,8 +1035,6 @@ if (!$maudify_only) {
     # add missing subsortations to K
     add_subsorts();
 
-#    exit(1);
-    
     if ($latex || $pdf || $ps || $eps || $png || $crop) 
     {
 	make_latexify() if $latex;
@@ -1409,8 +1405,8 @@ sub compile {
 
 # File name where the compiled output will be stored:
     my $output_file_name = "$language_file_name-compiled.maude";
-
-	my $old_language_file = $language_file_name;
+    
+    my $old_language_file = $language_file_name;
 	my $old_language_module = $language_module_name;
 	if ($require_k_main)
 	{
@@ -1423,8 +1419,8 @@ sub compile {
 		close TEMP;
 		push(@generated_files, $language_file_name);
 	}
-
-# # Compiling the input module $language_module_name
+   
+# Compiling the input module $language_module_name
     if ($unquote) {
        
 		# If unquote is set then do some changes
@@ -1606,7 +1602,6 @@ sub maudify_file {
     close FILE;
     
     $_ = slurp_k("$file.k2slurp", $latex || $png || $pdf || $ps || $crop || $eps);
-
     unlink("$file.k2slurp");
 
 # remove quotes from syntax
@@ -1701,7 +1696,6 @@ sub maudify_file {
 	push(@generated_files, $tokens_file);
     }
 }
-
 sub maudify_module {
     (my $file, my $mno, local $_) = @_;
 
@@ -2457,8 +2451,6 @@ sub add_subsorts
 	$supersorts .= "$_ " if ($k_sorts !~ /:$_:/);
     }
     
-#    print "SUPERSORTS: $supersorts\n";
-    
     return if ($supersorts eq "");
     
     # get all supersorts in an array
@@ -2496,7 +2488,9 @@ sub add_subsorts
 		$file =~ s/\.k$/\.maude/;
 		
 		# get content
-		my $content = get_file_content("$dir/$file");
+		my $cpath = "$dir/$file";
+		$cpath = $file if (File::Spec->file_name_is_absolute($file));
+		my $content = get_file_content($cpath);
 		
 		my $o = "@decllist";
                 if ($o ne "") {
@@ -2514,10 +2508,10 @@ sub add_subsorts
 }
 
 # Latex top level patterns
-#my $latex_top_level_pattern = join("|", (
+# my $latex_top_level_pattern = join("|", (
 #		"\\/\\/@(before|after)=([a-zA-Z\-]+)\s(.*?)(?=\n)",
 #		"\\/\\*@(before|after)=([a-zA-Z\-]+)\s(.*?)\\*\\/"
-#));
+# ));
 
 # Args: k file content
 # Return: void
