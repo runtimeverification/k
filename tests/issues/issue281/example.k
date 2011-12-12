@@ -15,7 +15,7 @@ module CINK-SYNTAX is
 //               | #Id "(" ")" [:prec 0:]
                | Decl
 
-  syntax Id ::= "main"
+  syntax #Id ::= "main"
 
   /*@ \subsubsection*{Statements.} */
   syntax Stmt ::= Exp ; [:prec 45 strict:]
