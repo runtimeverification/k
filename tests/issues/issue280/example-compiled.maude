@@ -1,4 +1,4 @@
---- Compiler checksum: d0591e016f01acf105ce18153838468e
+--- Compiler checksum: 41f4c4753f9290c9c313bc5d05542201
 load /Users/dlucanu/k-framework/tags/latest/core/maude/compiler/../lib/k-prelude
 
 mod ISSUE is including K-TECHNIQUE .
@@ -6,7 +6,6 @@ including K-CONFIG .
 including K-POLYMORPHIC-VARIABLES .
 including K-WHERE .
 including K-DESTRUCTORS .
-including #REXP .
 including #TCP-INTERFACE .
 including #BOOL .
 including #EXT-BOOL .
@@ -25,6 +24,7 @@ including MAUDE-IF-THEN-ELSE .
 including K-RESULT-LABELS .
 including K-STRICTNESS .
 op #eval_ : Map -> Bag .
+op 'k-result : -> KLabel .
 op Bag_ : List{K}-> Bag .
 op List_ : List{K}-> List .
 op _inList`{K`}_ : K List{K}-> #Bool .
@@ -43,16 +43,50 @@ op #_ : #Bool -> KLabel[metadata "wrapper=(builtin)"].
 op #_ : #DecFloat -> KLabel[metadata "wrapper=(builtin)"].
 op #_ : #Float -> KLabel[metadata "wrapper=(builtin)"].
 op #_ : #Id -> KLabel[metadata "wrapper=(builtin)"].
-op #_ : #Rat -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #Int -> KLabel[metadata "wrapper=(builtin)"].
 op #_ : #Socket-AttributeSet -> KLabel[metadata "wrapper=(builtin)"].
 op #_ : #Socket-Cid -> KLabel[metadata "wrapper=(builtin)"].
 op #_ : #Socket-Configuration -> KLabel[metadata "wrapper=(builtin)"].
 op #_ : #Socket-Oid -> KLabel[metadata "wrapper=(builtin)"].
 op #_ : #String -> KLabel[metadata "wrapper=(builtin)"].
 op #_ : #TCPState -> KLabel[metadata "wrapper=(builtin)"].
-op #_ : List{Rexp}-> KLabel[metadata "wrapper=(builtin)"].
-op #_ : Set{Obj}-> KLabel[metadata "wrapper=(builtin)"].
+op #buffer`(_`) : K -> List[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:149:1)"].
+op #convertToken`(_`,_`) : #String #String -> List[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:136:1)"].
+op #istream`(_`) : #Nat -> List[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:160:1)"].
+op #noIO : -> List[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:161:1)"].
+op #ostream`(_`) : #Nat -> List[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:160:2)"].
+op #parse`(_`,_`) : #String K -> List[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:108:1)"].
+op #removeCharUponAck : -> List[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:106:1)"].
+op #stderr : -> #Nat[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:45:3)"].
+op #stdin : -> #Nat[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:43:1)"].
+op #stdout : -> #Nat[metadata "location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:44:2)"].
 op $hasMapping : Map K -> #Bool[metadata "latex=(renameTo \$hasMapping\mybracket{_,_})"].
+op '#EOF : -> KLabel[metadata "KResultLabel=() arity=(0) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:18:1)"].
+op '#charString`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:78:1)"].
+op '#close`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:6:6)"].
+op '#eof`(`) : -> KLabel[metadata "arity=(0) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:53:4)"].
+op '#fEof`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:7:7)"].
+op '#fPeekByte`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:11:11)"].
+op '#fPrintChar`(_`,_`) : -> KLabel[metadata "arity=(2) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:82:2)"].
+op '#fPutByte`(_`,_`) : -> KLabel[metadata "arity=(2) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:13:13)"].
+op '#fReadByte`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:12:12)"].
+op '#fReadChar`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:74:2)"].
+op '#flush`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:8:8)"].
+op '#ioError`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:16:16)"].
+op '#open`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:4:4)"].
+op '#peekByte`(`) : -> KLabel[metadata "arity=(0) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:51:2)"].
+op '#printChar`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:81:1)"].
+op '#putByte`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:52:3)"].
+op '#readByte`(`) : -> KLabel[metadata "arity=(0) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:50:1)"].
+op '#readChar`(`) : -> KLabel[metadata "arity=(0) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:73:1)"].
+op '#reopen`(_`,_`) : -> KLabel[metadata "arity=(2) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:5:5)"].
+op '#seek`(_`,_`) : -> KLabel[metadata "arity=(2) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:10:10)"].
+op '#string2Int`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:57:1)"].
+op '#tell`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:9:9)"].
+op '.List`{","`} : -> KLabel[metadata "KResultLabel=() arity=(0) generated=()"].
+op 'String2Bool`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:15:15)"].
+op 'String2DotK`(_`) : -> KLabel[metadata "arity=(1) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:14:14)"].
+op '_`,_ : -> KLabel[metadata "KHybridLabel=() arity=(2) strict=() hybrid=() generated=() location=(/Users/dlucanu/k-framework/trunk/tests/issues/issue280/example.k:4:1)"].
 op 'headList`{K`}_ : -> KLabel[metadata "arity=(1) latex=(renameTo head\subscript`{`{\scriptstyle\it`{`}List`{K`}`}`}mybracket`{_`})"].
 op 'substKLabel : -> KLabel[metadata "arity=(3)"].
 op Set_ : List{K}-> Set[metadata "latex=(renameTo {\it{}Set}\mybracket{_})"].
@@ -64,6 +98,7 @@ op _`[_/_`] : Map K K -> Map[prec 0].
 op _`[_/_`] : Map List{K}List{K}-> Map[prec 0].
 op _`[_`] : Map Map -> Map[prec 0].
 op _`[undef/_`] : Map List{K}-> Map[metadata "latex=(renameTo _[\ensuremath{\bot\;}/_])"].
+op id2K`(ids`) : -> List{K}[metadata "location=(/Users/dlucanu/k-framework/trunk/tests/issues/issue280/example.k:6:1)"].
 op lengthList`{K`}_ : List{K}-> #Nat[metadata "latex=(renameTo length\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
 op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex=(renameTo tail\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
 op var`{#Bool`}`(_`) : #String -> #Bool[metadata "generated=()"].
@@ -114,8 +149,6 @@ op var`{#TCPState`}`(_`) : #String -> #TCPState[metadata "generated=()"].
 op var`{#TCPState`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 op var`{#Zero`}`(_`) : #String -> #Zero[metadata "generated=()"].
 op var`{#Zero`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
-op var`{Alph`}`(_`) : #String -> Alph[metadata "generated=()"].
-op var`{Alph`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 op var`{BagItem`}`(_`) : #String -> BagItem[metadata "generated=()"].
 op var`{BagItem`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 op var`{Bag`}`(_`) : #String -> Bag[metadata "generated=()"].
@@ -140,8 +173,6 @@ op var`{ListItem`}`(_`) : #String -> ListItem[metadata "generated=()"].
 op var`{ListItem`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 op var`{List`{K`}`}`(_`) : #String -> List{K}[metadata "generated=()"].
 op var`{List`{K`}`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
-op var`{List`{Rexp`}`}`(_`) : #String -> List{Rexp}[metadata "generated=()"].
-op var`{List`{Rexp`}`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 op var`{List`}`(_`) : #String -> List[metadata "generated=()"].
 op var`{List`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 op var`{MapItem`}`(_`) : #String -> MapItem[metadata "generated=()"].
@@ -158,16 +189,10 @@ op var`{NeMap`}`(_`) : #String -> NeMap[metadata "generated=()"].
 op var`{NeMap`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 op var`{NeSet`}`(_`) : #String -> NeSet[metadata "generated=()"].
 op var`{NeSet`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
-op var`{Rexp`}`(_`) : #String -> Rexp[metadata "generated=()"].
-op var`{Rexp`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 op var`{SetItem`}`(_`) : #String -> SetItem[metadata "generated=()"].
 op var`{SetItem`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
-op var`{Set`{Obj`}`}`(_`) : #String -> Set{Obj}[metadata "generated=()"].
-op var`{Set`{Obj`}`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 op var`{Set`}`(_`) : #String -> Set[metadata "generated=()"].
 op var`{Set`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
-op var`{Var`}`(_`) : #String -> Var[metadata "generated=()"].
-op var`{Var`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
 eq #eval_(__(AndTheOthers:Map,__(_|->_(_`(_`)(#_("$PGM"),.List`{K`}),$PGM:K),__(_|->_(_`(_`)(#_("$noIO"),.List`{K`}),_`(_`)(wlist_($noIO:List),.List`{K`})),_|->_(_`(_`)(#_("$stdin"),.List`{K`}),$stdin:K)))))= <_>_</_>(k,$PGM:K,k).
 eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
 eq Bag_(.List`{K`})=(.).Bag .
@@ -181,6 +206,8 @@ eq _-Bag_(__(Bag:Bag,BagItem:BagItem),Bag':Bag)= if_then_else_fi(_in_(BagItem:Ba
 eq _-Set_(.,Set:Set)=(.).Set .
 eq _-Set_(__(SetItem:SetItem,Set:Set),Set':Set)= if_then_else_fi(_in_(SetItem:SetItem,Set':Set),_-Set_(Set:Set,Set':Set),__(SetItem:SetItem,_-Set_(Set:Set,Set':Set))).
 eq _`(_`)('headList`{K`}_,_`(_`)(kList("wklist_"),_`,`,_(K:K,Ks:List{K})))= K:K .
+eq _`(_`)('k-result,.List`{K`})= _`(_`)(#_(true),.List`{K`}).
+eq _`(_`)('k-result,_`,`,_(K1:K,_`,`,_(K2:K,L:List{K})))= _`(_`)(andBool,_`,`,_(_`(_`)('k-result,K1:K),_`(_`)('k-result,_`,`,_(K2:K,L:List{K})))).
 eq _`(_`)('substKLabel,_`,`,_(.,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))=(.).K .
 eq _`(_`)('substKLabel,_`,`,_(_`(_`)(Label1:KLabel,Ks:List{K}),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _`(_`)(Label2:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
 eq _`(_`)('substKLabel,_`,`,_(_~>_(K1:KItem,_~>_(K2:KItem,K:K)),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _~>_(_`(_`)('substKLabel,_`,`,_(K1:KItem,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),_~>_(_`(_`)('substKLabel,_`,`,_(K2:KItem,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),_`(_`)('substKLabel,_`,`,_(K:K,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))))).
@@ -219,9 +246,56 @@ ceq #eval_(M:Map)= #eval_(__(M:Map,_|->_(_`(_`)(#_("$PGM"),.List`{K`}),.)))if _i
 ceq #eval_(M:Map)= #eval_(__(M:Map,_|->_(_`(_`)(#_("$noIO"),.List`{K`}),_`(_`)(wlist_(.),.List`{K`}))))if _in_(_`(_`)(#_("$noIO"),.List`{K`}),keys_(M:Map))= false .
 ceq #eval_(M:Map)= #eval_(__(M:Map,_|->_(_`(_`)(#_("$stdin"),.List`{K`}),.)))if _in_(_`(_`)(#_("$stdin"),.List`{K`}),keys_(M:Map))= false .
 ceq _`(_`)('substKLabel,_`,`,_(_`(_`)(Label:KLabel,Ks:List{K}),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _`(_`)(Label:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel))if _=/=Bool_(Label1:KLabel,Label:KLabel)= true .
+eq #stderr = 2[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:48)"].
+eq #stdin = 0[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:46)"].
+eq #stdout = 1[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:47)"].
+eq #convertToken`(_`,_`)("#Float",S:#String)= ListItem(_`(_`)(#_(String2Float(S:#String)),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:138)"].
+eq #convertToken`(_`,_`)("#Int",S:#String)= ListItem(_`(_`)(#_(_/Int_(String2Int(_+String_(S:#String,"0")),10)),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:137)"].
+eq #convertToken`(_`,_`)("#String",S:#String)= ListItem(_`(_`)(#_(S:#String),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:139)"].
 eq $hasMapping(M:Map,D:K)= false[owise].
 eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,_`,`,_(K:K,NKs:NeList{K})),Ks:List{K})),Rest:K),k)= <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(NKs:NeList{K},Ks:List{K})),Rest:K),k)[owise].
 eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,K:K),_`,`,_(Ks:List{K},_`(_`)(heated,Ks':List{K})))),Rest:K),k)= <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(Ks:List{K},_`(_`)(heated,_`,`,_(Ks':List{K},K:K)))),Rest:K),k)[owise].
+eq String2Int("00")= 0[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:141)"].
+eq __(#noIO,#istream`(_`)(?2:#Nat))=(.).List[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:162)"].
+eq __(#buffer`(_`)(.),ListItem(_`(_`)(#_(F:#Float),.List`{K`})))= #buffer`(_`)(_`(_`)(#_(Float2String(F:#Float)),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:88)"].
+eq __(#buffer`(_`)(.),ListItem(_`(_`)(#_(I:#Int),.List`{K`})))= #buffer`(_`)(_`(_`)(#_(Int2String(I:#Int)),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:87)"].
+eq __(#buffer`(_`)(.),ListItem(_`(_`)(#_(S:#String),.List`{K`})))= #buffer`(_`)(_`(_`)(#_(S:#String),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:89)"].
+eq __(#buffer`(_`)(_`(_`)(#_(""),.List`{K`})),#istream`(_`)(?2:#Nat))= __(#buffer`(_`)(.),#istream`(_`)(?2:#Nat))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:155)"].
+eq __(#buffer`(_`)(_`(_`)(#_(Buffer:#String),.List`{K`})),ListItem(_`(_`)(#_(F:#Float),.List`{K`})))= #buffer`(_`)(_`(_`)(#_(_+String_(Buffer:#String,Float2String(F:#Float))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:92)"].
+eq __(#buffer`(_`)(_`(_`)(#_(Buffer:#String),.List`{K`})),ListItem(_`(_`)(#_(I:#Int),.List`{K`})))= #buffer`(_`)(_`(_`)(#_(_+String_(Buffer:#String,Int2String(I:#Int))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:91)"].
+eq __(#buffer`(_`)(_`(_`)(#_(Buffer:#String),.List`{K`})),ListItem(_`(_`)(#_(S:#String),.List`{K`})))= #buffer`(_`)(_`(_`)(#_(_+String_(Buffer:#String,S:#String)),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:93)"].
+eq __(#ostream`(_`)(?2:#Nat),#noIO)=(.).List[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:163)"].
+eq __(#ostream`(_`)(?2:#Nat),ListItem(.))= #ostream`(_`)(?2:#Nat)[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:102)"].
+eq __(#ostream`(_`)(N:#Nat),#buffer`(_`)(_`(_`)(#_(""),.List`{K`})))= __(#ostream`(_`)(N:#Nat),__(ListItem(_`(_`)('#flush`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))),#buffer`(_`)(.)))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:100)"].
+eq __(#parse`(_`,_`)("#Char",?3:K),ListItem(_`(_`)(#_(C:#Char),.List`{K`})))= ListItem(_`(_`)(#_(C:#Char),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:119)"].
+eq __(#ostream`(_`)(?5:#Nat),__(#removeCharUponAck,#buffer`(_`)(_`(_`)(#_(S:#String),.List`{K`}))))= __(#ostream`(_`)(?5:#Nat),#buffer`(_`)(_`(_`)(#_(substrString(S:#String,1,lengthString(S:#String))),.List`{K`})))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:104)"].
+eq __(#parse`(_`,_`)(?5:#String,?6:K),__(#buffer`(_`)(.),#istream`(_`)(N:#Nat)))= __(#parse`(_`,_`)(?5:#String,?6:K),__(ListItem(_`(_`)('#fReadChar`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))),__(#buffer`(_`)(.),#istream`(_`)(N:#Nat))))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:158)"].
+eq _`(_`)('#charString`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))= _`(_`)(#_(charString(N:#Nat)),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:79)"].
+eq _`(_`)('#close`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))= _`(_`)('String2DotK`(_`),_`(_`)(#_(#tcpRequest(_+String_(_+String_("close#",Int2String(N:#Nat)),"#"))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:23)"].
+eq _`(_`)('#eof`(`),.List`{K`})= _`(_`)('#fEof`(_`),_`(_`)(#_(#stdin),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:69)"].
+eq _`(_`)('#fEof`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))= _`(_`)('String2Bool`(_`),_`(_`)(#_(#tcpRequest(_+String_(_+String_("eof#",Int2String(N:#Nat)),"#"))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:70-71)"].
+eq _`(_`)('#fPeekByte`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))= _`(_`)(#_(String2Int(#tcpRequest(_+String_(_+String_("peek#",Int2String(N:#Nat)),"#")))),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:66-67)"].
+eq _`(_`)('#fPrintChar`(_`,_`),_`,`,_(_`(_`)(#_(N:#Nat),.List`{K`}),_`(_`)(#_(C:#Char),.List`{K`})))= _`(_`)('#fPutByte`(_`,_`),_`,`,_(_`(_`)(#_(N:#Nat),.List`{K`}),_`(_`)(#_(asciiString(C:#Char)),.List`{K`})))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:84)"].
+eq _`(_`)('#fPutByte`(_`,_`),_`,`,_(_`(_`)(#_(N:#Nat),.List`{K`}),_`(_`)(#_(B:#Nat),.List`{K`})))= _`(_`)('String2DotK`(_`),_`(_`)(#_(#tcpRequest(_+String_(_+String_(_+String_(_+String_("writebyte#",Int2String(N:#Nat)),"#"),Int2String(B:#Nat)),"#"))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:61-63)"].
+eq _`(_`)('#fReadByte`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))= _`(_`)('#string2Int`(_`),_`(_`)(#_(#tcpRequest(_+String_(_+String_("readbyte#",Int2String(N:#Nat)),"#"))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:55)"].
+eq _`(_`)('#fReadChar`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))= _`(_`)('#charString`(_`),_`(_`)('#fReadByte`(_`),_`(_`)(#_(N:#Nat),.List`{K`})))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:76)"].
+eq _`(_`)('#flush`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))= _`(_`)('String2DotK`(_`),_`(_`)(#_(#tcpRequest(_+String_(_+String_("flush#",Int2String(N:#Nat)),"#"))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:31)"].
+eq _`(_`)('#open`(_`),_`(_`)(#_(S:#String),.List`{K`}))= _`(_`)(#_(String2Int(#tcpRequest(_+String_(_+String_("open#",S:#String),"#")))),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:21)"].
+eq _`(_`)('#peekByte`(`),.List`{K`})= _`(_`)('#fPeekByte`(_`),_`(_`)(#_(#stdin),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:65)"].
+eq _`(_`)('#printChar`(_`),_`(_`)(#_(C:#Char),.List`{K`}))= _`(_`)('#fPrintChar`(_`,_`),_`,`,_(_`(_`)(#_(#stdout),.List`{K`}),_`(_`)(#_(C:#Char),.List`{K`})))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:83)"].
+eq _`(_`)('#putByte`(_`),_`(_`)(#_(B:#Nat),.List`{K`}))= _`(_`)('#fPutByte`(_`,_`),_`,`,_(_`(_`)(#_(#stdout),.List`{K`}),_`(_`)(#_(B:#Nat),.List`{K`})))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:60)"].
+eq _`(_`)('#readByte`(`),.List`{K`})= _`(_`)('#fReadByte`(_`),_`(_`)(#_(#stdin),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:54)"].
+eq _`(_`)('#readChar`(`),.List`{K`})= _`(_`)('#fReadChar`(_`),_`(_`)(#_(#stdin),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:75)"].
+eq _`(_`)('#reopen`(_`,_`),_`,`,_(_`(_`)(#_(N:#Nat),.List`{K`}),_`(_`)(#_(S:#String),.List`{K`})))= _`(_`)('String2DotK`(_`),_`(_`)(#_(#tcpRequest(_+String_(_+String_(_+String_(_+String_("reopen#",Int2String(N:#Nat)),"#"),S:#String),"#"))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:40-41)"].
+eq _`(_`)('#seek`(_`,_`),_`,`,_(_`(_`)(#_(N:#Nat),.List`{K`}),_`(_`)(#_(P:#Nat),.List`{K`})))= _`(_`)('String2DotK`(_`),_`(_`)(#_(#tcpRequest(_+String_(_+String_(_+String_(_+String_("seek#",Int2String(N:#Nat)),"#"),Int2String(P:#Nat)),"#"))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:37-38)"].
+eq _`(_`)('#tell`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))= _`(_`)('String2DotK`(_`),_`(_`)(#_(#tcpRequest(_+String_(_+String_("position#",Int2String(N:#Nat)),"#"))),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:33)"].
+eq _`(_`)('#tell`(_`),_`(_`)(#_(N:#Nat),.List`{K`}))= _`(_`)(#_(String2Int(#tcpRequest(_+String_(_+String_("tell#",Int2String(N:#Nat)),"#")))),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:35)"].
+eq _`(_`)('String2Bool`(_`),_`(_`)(#_("0"),.List`{K`}))= _`(_`)(#_(false),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:28)"].
+eq _`(_`)('String2Bool`(_`),_`(_`)(#_("1"),.List`{K`}))= _`(_`)(#_(true),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:29)"].
+eq _`(_`)('String2DotK`(_`),_`(_`)(#_(#errorTCPSyntax(S:#String)),.List`{K`}))= _`(_`)('#ioError`(_`),_`(_`)(#_(S:#String),.List`{K`}))[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:25)"].
+eq _`(_`)('k-result,_`(_`)('#EOF,L:List{K}))= _`(_`)(#_(true),.List`{K`})[metadata "KResult=() arity=(0) location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:18:1) predicate=()"].
+eq _`(_`)('k-result,_`(_`)('.List`{","`},L:List{K}))= _`(_`)(#_(true),.List`{K`})[metadata "KResult=() arity=(0) generated=() predicate=()"].
+eq _`(_`)(#_(#errorTCPSyntax("EOF")),.List`{K`})= _`(_`)('#EOF,.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:19)"].
 eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
 eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
 eq _inList`{K`}_(K:K,Ks:List{K})= false[owise].
@@ -230,4 +304,17 @@ eq _in_(K:K,Bag:Bag)= false[owise].
 eq _in_(K:K,Set:Set)= false[owise].
 eq _in_(SetItem:SetItem,Set:Set)= false[owise].
 eq inKList(K:K,K':K)= false[owise].
+ceq <_>_</_>(k,_~>_(_`(_`)('_`,_,_`,`,_(K1:K,Kcxt:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:K,_~>_(_`(_`)(freezer(_`(_`)('_`,_,_`,`,_(var`{K`}`(_`)("K1"),var`{K`}`(_`)("`[HOLE`]")))),_`(_`)(var`{K`}`(_`)<-("K1"),K1:K)),Rest:K)),k)if _`(_`)(#_(_=/=Bool_(_`(_`)('k-result,Kcxt:K),_`(_`)(#_(true),.List`{K`}))),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "generated=() heating=(normal) hybrid=() location=(/Users/dlucanu/k-framework/trunk/tests/issues/issue280/example.k:4:1)"].
+ceq <_>_</_>(k,_~>_(_`(_`)('_`,_,_`,`,_(Kcxt:K,K2:K)),Rest:K),k)= <_>_</_>(k,_~>_(Kcxt:K,_~>_(_`(_`)(freezer(_`(_`)('_`,_,_`,`,_(var`{K`}`(_`)("`[HOLE`]"),var`{K`}`(_`)("K2")))),_`(_`)(var`{K`}`(_`)<-("K2"),K2:K)),Rest:K)),k)if _`(_`)(#_(_=/=Bool_(_`(_`)('k-result,Kcxt:K),_`(_`)(#_(true),.List`{K`}))),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "generated=() heating=(normal) hybrid=() location=(/Users/dlucanu/k-framework/trunk/tests/issues/issue280/example.k:4:1)"].
+ceq <_>_</_>(k,_~>_(Kcxt:KItem,_~>_(_`(_`)(freezer(_`(_`)('_`,_,_`,`,_(var`{K`}`(_`)("K1"),var`{K`}`(_`)("`[HOLE`]")))),_`(_`)(var`{K`}`(_`)<-("K1"),K1:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_`,_,_`,`,_(K1:K,Kcxt:KItem)),Rest:K),k)if _`(_`)('k-result,Kcxt:KItem)= _`(_`)(#_(true),.List`{K`})[metadata "cooling=() generated=() hybrid=() location=(/Users/dlucanu/k-framework/trunk/tests/issues/issue280/example.k:4:1)"].
+ceq <_>_</_>(k,_~>_(Kcxt:KItem,_~>_(_`(_`)(freezer(_`(_`)('_`,_,_`,`,_(var`{K`}`(_`)("`[HOLE`]"),var`{K`}`(_`)("K2")))),_`(_`)(var`{K`}`(_`)<-("K2"),K2:K)),Rest:K)),k)= <_>_</_>(k,_~>_(_`(_`)('_`,_,_`,`,_(Kcxt:KItem,K2:K)),Rest:K),k)if _`(_`)('k-result,Kcxt:KItem)= _`(_`)(#_(true),.List`{K`})[metadata "cooling=() generated=() hybrid=() location=(/Users/dlucanu/k-framework/trunk/tests/issues/issue280/example.k:4:1)"].
+ceq __(#ostream`(_`)(N:#Nat),#buffer`(_`)(_`(_`)(#_(S:#String),.List`{K`})))= __(#ostream`(_`)(N:#Nat),__(ListItem(_`(_`)('#fPrintChar`(_`,_`),_`,`,_(_`(_`)(#_(N:#Nat),.List`{K`}),_`(_`)(#_(substrString(S:#String,0,1)),.List`{K`})))),__(#removeCharUponAck,#buffer`(_`)(_`(_`)(#_(S:#String),.List`{K`})))))if _`(_`)(#_(_=/=Bool_(S:#String,"")),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:96-98)"].
+ceq __(#parse`(_`,_`)(?7:#String,_`(_`)(#_(S:#String),.List`{K`})),ListItem(_`(_`)(#_(C:#Char),.List`{K`})))= #parse`(_`,_`)(?7:#String,_`(_`)(#_(_+String_(S:#String,C:#Char)),.List`{K`}))if _`(_`)(#_(notBool_(#isWhiteSpace(C:#Char))),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:129-130)"].
+ceq __(#parse`(_`,_`)(?8:#String,?9:K),#buffer`(_`)(_`(_`)(#_(S:#String),.List`{K`})))= __(#parse`(_`,_`)(?8:#String,?9:K),__(ListItem(_`(_`)(#_(substrString(S:#String,0,1)),.List`{K`})),#buffer`(_`)(_`(_`)(#_(substrString(S:#String,1,lengthString(S:#String))),.List`{K`}))))if _`(_`)(#_(_=/=Bool_(S:#String,"")),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:152-154)"].
+ceq __(#parse`(_`,_`)(S:#String,.),ListItem(_`(_`)(#_(C:#Char),.List`{K`})))= #parse`(_`,_`)(S:#String,.)if _`(_`)(#_(_andBool_(#isWhiteSpace(C:#Char),_=/=Bool_(S:#String,"#Char"))),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:122-123)"].
+ceq __(#parse`(_`,_`)(S:#String,.),ListItem(_`(_`)(#_(C:#Char),.List`{K`})))= __(#parse`(_`,_`)(S:#String,_`(_`)(#_(""),.List`{K`})),ListItem(_`(_`)(#_(C:#Char),.List`{K`})))if _`(_`)(#_(_andBool_(notBool_(#isWhiteSpace(C:#Char)),_=/=Bool_(S:#String,"#Char"))),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:127-128)"].
+ceq __(#parse`(_`,_`)(SType:#String,_`(_`)(#_(S:#String),.List`{K`})),ListItem(_`(_`)(#_(C:#Char),.List`{K`})))= #convertToken`(_`,_`)(SType:#String,S:#String)if _`(_`)(#_(#isWhiteSpace(C:#Char)),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:133-134)"].
+ceq _`(_`)('#string2Int`(_`),_`(_`)(#_(S:#String),.List`{K`}))= _`(_`)(#_(String2Int(S:#String)),.List`{K`})if _`(_`)(#_(_>=Int_(lengthString(S:#String),0)),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:58)"].
+ceq _`(_`)('String2DotK`(_`),_`(_`)(#_(S:#String),.List`{K`}))=(.).K if _`(_`)(#_(notBool_(#isTCPError(S:#String))),.List`{K`})= _`(_`)(#_(true),.List`{K`})[metadata "default=() location=(/Users/dlucanu/k-framework/tags/latest/modules/uris.k:26)"].
+ceq _`(_`)('k-result,_`(_`)('_`,_,L:List{K}))= _`(_`)(#_(true),.List`{K`})if _`(_`)('k-result,L:List{K})= _`(_`)(#_(true),.List`{K`})[metadata "KHybrid=() arity=(2) generated=() hybrid=() k-strict=() location=(/Users/dlucanu/k-framework/trunk/tests/issues/issue280/example.k:4:1) predicate=()"].
 endm

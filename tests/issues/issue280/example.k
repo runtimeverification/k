@@ -1,9 +1,9 @@
 
 module ISSUE is 
 
-  syntax ListId ::= List{#Id,","}
+  syntax Ids ::= List{#Id,","}
 
-  syntax List{K} ::= `List`{K`} ( ListId )
+  syntax List{K} ::= id2K ( ids )
 
 end module
 

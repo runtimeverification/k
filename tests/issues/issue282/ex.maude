@@ -1,0 +1,9 @@
+mod #EX is protecting #INT .
+
+  sorts #S1 #S2 .
+
+  op f : #S1 -> #S2 . 
+
+endm
+
+ 
