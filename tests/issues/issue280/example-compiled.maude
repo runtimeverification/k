@@ -1,0 +1,233 @@
+--- Compiler checksum: d0591e016f01acf105ce18153838468e
+load /Users/dlucanu/k-framework/tags/latest/core/maude/compiler/../lib/k-prelude
+
+mod ISSUE is including K-TECHNIQUE .
+including K-CONFIG .
+including K-POLYMORPHIC-VARIABLES .
+including K-WHERE .
+including K-DESTRUCTORS .
+including #REXP .
+including #TCP-INTERFACE .
+including #BOOL .
+including #EXT-BOOL .
+including #NAT .
+including #INT .
+including #RAT .
+including #FLOAT .
+including #STRING .
+including #CONVERSION .
+including #RANDOM .
+including #COUNTER .
+including #ID .
+including #STRING-EXTRAS .
+including K-WRAPPERS-LABELS .
+including MAUDE-IF-THEN-ELSE .
+including K-RESULT-LABELS .
+including K-STRICTNESS .
+op #eval_ : Map -> Bag .
+op Bag_ : List{K}-> Bag .
+op List_ : List{K}-> List .
+op _inList`{K`}_ : K List{K}-> #Bool .
+op _in_ : BagItem Bag -> #Bool .
+op _in_ : K Bag -> #Bool .
+op _in_ : K Set -> #Bool .
+op _in_ : SetItem Set -> #Bool .
+op _|->_ : List{K}List{K}-> Map .
+op andBool : -> KLabel .
+op inKList : K K -> #Bool .
+op k-cool : -> CellLabel .
+op keys_ : Map -> Set .
+op lengthList_ : List -> #Nat .
+op substList`{K`}Label`(_`,_`,_`) : List{K}KLabel KLabel -> List{K}.
+op #_ : #Bool -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #DecFloat -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #Float -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #Id -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #Rat -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #Socket-AttributeSet -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #Socket-Cid -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #Socket-Configuration -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #Socket-Oid -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #String -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : #TCPState -> KLabel[metadata "wrapper=(builtin)"].
+op #_ : List{Rexp}-> KLabel[metadata "wrapper=(builtin)"].
+op #_ : Set{Obj}-> KLabel[metadata "wrapper=(builtin)"].
+op $hasMapping : Map K -> #Bool[metadata "latex=(renameTo \$hasMapping\mybracket{_,_})"].
+op 'headList`{K`}_ : -> KLabel[metadata "arity=(1) latex=(renameTo head\subscript`{`{\scriptstyle\it`{`}List`{K`}`}`}mybracket`{_`})"].
+op 'substKLabel : -> KLabel[metadata "arity=(3)"].
+op Set_ : List{K}-> Set[metadata "latex=(renameTo {\it{}Set}\mybracket{_})"].
+op _-Bag_ : Bag Bag -> Bag[metadata "latex=(renameTo _-\subscript{{\scriptstyle\it{}Bag}}_)"].
+op _-Set_ : Set Set -> Set[metadata "latex=(renameTo _-\subscript{{\scriptstyle\it{}Set}}_)"].
+op _`(_`) : Map K -> K[prec 0].
+op _`(_`) : Map List{K}-> List{K}[prec 0].
+op _`[_/_`] : Map K K -> Map[prec 0].
+op _`[_/_`] : Map List{K}List{K}-> Map[prec 0].
+op _`[_`] : Map Map -> Map[prec 0].
+op _`[undef/_`] : Map List{K}-> Map[metadata "latex=(renameTo _[\ensuremath{\bot\;}/_])"].
+op lengthList`{K`}_ : List{K}-> #Nat[metadata "latex=(renameTo length\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+op tailList`{K`}_ : NeList{K}-> List{K}[metadata "latex=(renameTo tail\subscript{{\scriptstyle\it{}List{K}}}mybracket{_})"].
+op var`{#Bool`}`(_`) : #String -> #Bool[metadata "generated=()"].
+op var`{#Bool`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Char`}`(_`) : #String -> #Char[metadata "generated=()"].
+op var`{#Char`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#DecFloat`}`(_`) : #String -> #DecFloat[metadata "generated=()"].
+op var`{#DecFloat`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#FiniteFloat`}`(_`) : #String -> #FiniteFloat[metadata "generated=()"].
+op var`{#FiniteFloat`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Float`}`(_`) : #String -> #Float[metadata "generated=()"].
+op var`{#Float`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Id`}`(_`) : #String -> #Id[metadata "generated=()"].
+op var`{#Id`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Int`}`(_`) : #String -> #Int[metadata "generated=()"].
+op var`{#Int`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Nat`}`(_`) : #String -> #Nat[metadata "generated=()"].
+op var`{#Nat`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#NzInt`}`(_`) : #String -> #NzInt[metadata "generated=()"].
+op var`{#NzInt`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#NzNat`}`(_`) : #String -> #NzNat[metadata "generated=()"].
+op var`{#NzNat`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#NzRat`}`(_`) : #String -> #NzRat[metadata "generated=()"].
+op var`{#NzRat`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#PosRat`}`(_`) : #String -> #PosRat[metadata "generated=()"].
+op var`{#PosRat`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Rat`}`(_`) : #String -> #Rat[metadata "generated=()"].
+op var`{#Rat`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Socket-AttributeSet`}`(_`) : #String -> #Socket-AttributeSet[metadata "generated=()"].
+op var`{#Socket-AttributeSet`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Socket-Attribute`}`(_`) : #String -> #Socket-Attribute[metadata "generated=()"].
+op var`{#Socket-Attribute`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Socket-Cid`}`(_`) : #String -> #Socket-Cid[metadata "generated=()"].
+op var`{#Socket-Cid`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Socket-Configuration`}`(_`) : #String -> #Socket-Configuration[metadata "generated=()"].
+op var`{#Socket-Configuration`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Socket-Msg`}`(_`) : #String -> #Socket-Msg[metadata "generated=()"].
+op var`{#Socket-Msg`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Socket-Object`}`(_`) : #String -> #Socket-Object[metadata "generated=()"].
+op var`{#Socket-Object`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Socket-Oid`}`(_`) : #String -> #Socket-Oid[metadata "generated=()"].
+op var`{#Socket-Oid`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Socket-Portal`}`(_`) : #String -> #Socket-Portal[metadata "generated=()"].
+op var`{#Socket-Portal`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#String`}`(_`) : #String -> #String[metadata "generated=()"].
+op var`{#String`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#TCPState`}`(_`) : #String -> #TCPState[metadata "generated=()"].
+op var`{#TCPState`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{#Zero`}`(_`) : #String -> #Zero[metadata "generated=()"].
+op var`{#Zero`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{Alph`}`(_`) : #String -> Alph[metadata "generated=()"].
+op var`{Alph`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{BagItem`}`(_`) : #String -> BagItem[metadata "generated=()"].
+op var`{BagItem`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{Bag`}`(_`) : #String -> Bag[metadata "generated=()"].
+op var`{Bag`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{CellAttribute`}`(_`) : #String -> CellAttribute[metadata "generated=()"].
+op var`{CellAttribute`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{CellKey`}`(_`) : #String -> CellKey[metadata "generated=()"].
+op var`{CellKey`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{CellLabel`}`(_`) : #String -> CellLabel[metadata "generated=()"].
+op var`{CellLabel`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{KAssignments`}`(_`) : #String -> KAssignments[metadata "generated=()"].
+op var`{KAssignments`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{KItem`}`(_`) : #String -> KItem[metadata "generated=()"].
+op var`{KItem`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{KLabel`}`(_`) : #String -> KLabel[metadata "generated=()"].
+op var`{KLabel`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{KSentence`}`(_`) : #String -> KSentence[metadata "generated=()"].
+op var`{KSentence`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{K`}`(_`) : #String -> K[metadata "generated=()"].
+op var`{K`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{ListItem`}`(_`) : #String -> ListItem[metadata "generated=()"].
+op var`{ListItem`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{List`{K`}`}`(_`) : #String -> List{K}[metadata "generated=()"].
+op var`{List`{K`}`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{List`{Rexp`}`}`(_`) : #String -> List{Rexp}[metadata "generated=()"].
+op var`{List`{Rexp`}`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{List`}`(_`) : #String -> List[metadata "generated=()"].
+op var`{List`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{MapItem`}`(_`) : #String -> MapItem[metadata "generated=()"].
+op var`{MapItem`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{Map`}`(_`) : #String -> Map[metadata "generated=()"].
+op var`{Map`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{NeBag`}`(_`) : #String -> NeBag[metadata "generated=()"].
+op var`{NeBag`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{NeList`{K`}`}`(_`) : #String -> NeList{K}[metadata "generated=()"].
+op var`{NeList`{K`}`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{NeList`}`(_`) : #String -> NeList[metadata "generated=()"].
+op var`{NeList`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{NeMap`}`(_`) : #String -> NeMap[metadata "generated=()"].
+op var`{NeMap`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{NeSet`}`(_`) : #String -> NeSet[metadata "generated=()"].
+op var`{NeSet`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{Rexp`}`(_`) : #String -> Rexp[metadata "generated=()"].
+op var`{Rexp`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{SetItem`}`(_`) : #String -> SetItem[metadata "generated=()"].
+op var`{SetItem`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{Set`{Obj`}`}`(_`) : #String -> Set{Obj}[metadata "generated=()"].
+op var`{Set`{Obj`}`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{Set`}`(_`) : #String -> Set[metadata "generated=()"].
+op var`{Set`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+op var`{Var`}`(_`) : #String -> Var[metadata "generated=()"].
+op var`{Var`}`(_`)<- : #String -> KLabel[metadata "generated=()"].
+eq #eval_(__(AndTheOthers:Map,__(_|->_(_`(_`)(#_("$PGM"),.List`{K`}),$PGM:K),__(_|->_(_`(_`)(#_("$noIO"),.List`{K`}),_`(_`)(wlist_($noIO:List),.List`{K`})),_|->_(_`(_`)(#_("$stdin"),.List`{K`}),$stdin:K)))))= <_>_</_>(k,$PGM:K,k).
+eq $hasMapping(__(M:Map,_|->_(D:K,R:K)),D:K)= true .
+eq Bag_(.List`{K`})=(.).Bag .
+eq Bag_(_`,`,_(K:K,Ks:List{K}))= __(BagItem(K:K),Bag_(Ks:List{K})).
+eq List_(.List`{K`})=(.).List .
+eq List_(_`,`,_(K:K,Ks:List{K}))= __(ListItem(K:K),List_(Ks:List{K})).
+eq Set_(.List`{K`})=(.).Set .
+eq Set_(_`,`,_(K:K,Ks:List{K}))= __(SetItem(K:K),Set_(Ks:List{K})).
+eq _-Bag_(.,Bag:Bag)=(.).Bag .
+eq _-Bag_(__(Bag:Bag,BagItem:BagItem),Bag':Bag)= if_then_else_fi(_in_(BagItem:BagItem,Bag':Bag),_-Bag_(Bag:Bag,Bag':Bag),__(BagItem:BagItem,_-Bag_(Bag:Bag,Bag':Bag))).
+eq _-Set_(.,Set:Set)=(.).Set .
+eq _-Set_(__(SetItem:SetItem,Set:Set),Set':Set)= if_then_else_fi(_in_(SetItem:SetItem,Set':Set),_-Set_(Set:Set,Set':Set),__(SetItem:SetItem,_-Set_(Set:Set,Set':Set))).
+eq _`(_`)('headList`{K`}_,_`(_`)(kList("wklist_"),_`,`,_(K:K,Ks:List{K})))= K:K .
+eq _`(_`)('substKLabel,_`,`,_(.,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))=(.).K .
+eq _`(_`)('substKLabel,_`,`,_(_`(_`)(Label1:KLabel,Ks:List{K}),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _`(_`)(Label2:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
+eq _`(_`)('substKLabel,_`,`,_(_~>_(K1:KItem,_~>_(K2:KItem,K:K)),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _~>_(_`(_`)('substKLabel,_`,`,_(K1:KItem,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),_~>_(_`(_`)('substKLabel,_`,`,_(K2:KItem,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),_`(_`)('substKLabel,_`,`,_(K:K,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))))).
+eq _`(_`)(Map:Map,.List`{K`})= .List`{K`} .
+eq _`(_`)(Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`,`,_(_`(_`)(Map:Map,K1:K),_`(_`)(Map:Map,NList1:NeList{K})).
+eq _`(_`)(andBool,_`,`,_(_`(_`)(#_(T1:#Bool),.List`{K`}),_`(_`)(#_(T2:#Bool),.List`{K`})))= _`(_`)(#_(_andBool_(T1:#Bool,T2:#Bool)),.List`{K`}).
+eq _`(_`)(andBool,_`,`,_(_`(_`)(#_(T1:#Bool),.List`{K`}),_`,`,_(_`(_`)(#_(T2:#Bool),.List`{K`}),NeKList:NeList{K})))= _`(_`)(andBool,_`,`,_(_`(_`)(#_(_andBool_(T1:#Bool,T2:#Bool)),.List`{K`}),NeKList:NeList{K})).
+eq _`(_`)(__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= K2:K .
+eq _`[_/_`](Map:Map,K2:K,_`,`,_(K1:K,NList1:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K2:K,K1:K),K2:K,NList1:NeList{K}).
+eq _`[_/_`](Map:Map,List:List{K},.List`{K`})= Map:Map .
+eq _`[_/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= _`[_/_`](_`[_/_`](Map:Map,K1:K,K2:K),NList1:NeList{K},NList2:NeList{K}).
+eq _`[_/_`](__(Map:Map,_|->_(K1:K,K2:K)),K2':K,K1:K)= __(Map:Map,_|->_(K1:K,K2':K)).
+eq _`[_`](__(Map:Map,_|->_(K1:K,K2:K)),__(Map':Map,_|->_(K1:K,K2':K)))= __(_`[_`](Map:Map,Map':Map),_|->_(K1:K,K2':K)).
+eq _`[undef/_`](Map:Map,.List`{K`})= Map:Map .
+eq _`[undef/_`](Map:Map,_`,`,_(K1:K,NList1:NeList{K}))= _`[undef/_`](_`[undef/_`](Map:Map,K1:K),NList1:NeList{K}).
+eq _`[undef/_`](__(Map:Map,_|->_(K1:K,K2:K)),K1:K)= Map:Map .
+eq _inList`{K`}_(K:K,_`,`,_(Ks:List{K},_`,`,_(K:K,Ks':List{K})))= true .
+eq _in_(BagItem:BagItem,__(Bag:Bag,BagItem:BagItem))= true .
+eq _in_(K:K,__(Bag:Bag,BagItem(K:K)))= true .
+eq _in_(K:K,__(Set:Set,SetItem(K:K)))= true .
+eq _in_(SetItem:SetItem,__(SetItem:SetItem,Set:Set))= true .
+eq _|->_(.List`{K`},List:List{K})=(.).Map .
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),K2:K)= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},K2:K)).
+eq _|->_(_`,`,_(K1:K,NList1:NeList{K}),_`,`,_(K2:K,NList2:NeList{K}))= __(_|->_(K1:K,K2:K),_|->_(NList1:NeList{K},NList2:NeList{K})).
+eq inKList(K:K,_~>_(K1:K,_~>_(K:K,K2:K)))= true .
+eq keys_(.)=(.).Set .
+eq keys_(__(Map:Map,_|->_(K1:K,K2:K)))= __(SetItem(K1:K),keys_(Map:Map)).
+eq lengthList_(.)= 0 .
+eq lengthList_(__(LItem:ListItem,List:List))= sNat_(lengthList_(List:List)).
+eq lengthList`{K`}_(.List`{K`})= 0 .
+eq lengthList`{K`}_(_`,`,_(K:K,Ks:List{K}))= sNat_(lengthList`{K`}_(Ks:List{K})).
+eq substList`{K`}Label`(_`,_`,_`)(.List`{K`},Label1:KLabel,Label2:KLabel)= .List`{K`} .
+eq substList`{K`}Label`(_`,_`,_`)(_`,`,_(K:K,Ks:List{K}),Label1:KLabel,Label2:KLabel)= _`,`,_(_`(_`)('substKLabel,_`,`,_(K:K,_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`})))),substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel)).
+eq tailList`{K`}_(_`,`,_(K:K,Ks:List{K}))= Ks:List{K}.
+ceq #eval_(M:Map)= #eval_(__(M:Map,_|->_(_`(_`)(#_("$PGM"),.List`{K`}),.)))if _in_(_`(_`)(#_("$PGM"),.List`{K`}),keys_(M:Map))= false .
+ceq #eval_(M:Map)= #eval_(__(M:Map,_|->_(_`(_`)(#_("$noIO"),.List`{K`}),_`(_`)(wlist_(.),.List`{K`}))))if _in_(_`(_`)(#_("$noIO"),.List`{K`}),keys_(M:Map))= false .
+ceq #eval_(M:Map)= #eval_(__(M:Map,_|->_(_`(_`)(#_("$stdin"),.List`{K`}),.)))if _in_(_`(_`)(#_("$stdin"),.List`{K`}),keys_(M:Map))= false .
+ceq _`(_`)('substKLabel,_`,`,_(_`(_`)(Label:KLabel,Ks:List{K}),_`,`,_(_`(_`)(wklabel_(Label1:KLabel),.List`{K`}),_`(_`)(wklabel_(Label2:KLabel),.List`{K`}))))= _`(_`)(Label:KLabel,substList`{K`}Label`(_`,_`,_`)(Ks:List{K},Label1:KLabel,Label2:KLabel))if _=/=Bool_(Label1:KLabel,Label:KLabel)= true .
+eq $hasMapping(M:Map,D:K)= false[owise].
+eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,_`,`,_(K:K,NKs:NeList{K})),Ks:List{K})),Rest:K),k)= <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(NKs:NeList{K},Ks:List{K})),Rest:K),k)[owise].
+eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,K:K),_`,`,_(Ks:List{K},_`(_`)(heated,Ks':List{K})))),Rest:K),k)= <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(Ks:List{K},_`(_`)(heated,_`,`,_(Ks':List{K},K:K)))),Rest:K),k)[owise].
+eq _`[_/_`](Map:Map,K2:K,K1:K)= __(Map:Map,_|->_(K1:K,K2:K))[owise].
+eq _`[_`](Map:Map,Map':Map)= __(Map:Map,Map':Map)[owise].
+eq _inList`{K`}_(K:K,Ks:List{K})= false[owise].
+eq _in_(BagItem:BagItem,Bag:Bag)= false[owise].
+eq _in_(K:K,Bag:Bag)= false[owise].
+eq _in_(K:K,Set:Set)= false[owise].
+eq _in_(SetItem:SetItem,Set:Set)= false[owise].
+eq inKList(K:K,K':K)= false[owise].
+endm
