@@ -4,22 +4,22 @@ mod #REXP is protecting #BOOL .
   op emptyObj : -> Set{Obj} .
   op _;;_ : Set{Obj} Set{Obj} -> Set{Obj} [assoc comm id: emptyObj] .
 
-  sorts Var Alph Rexp .
-  subsort Var < Alph < Rexp .
-  vars A B : Alph .
-  vars R R1 R2 : Rexp . 
+  sorts #Var #Alph #Rexp .
+  subsort #Var < #Alph < #Rexp .
+  vars A B : #Alph .
+  vars R R1 R2 : #Rexp . 
   var DRL RL : List{Rexp} .
 
-  ops epsilon empty : -> Rexp .
-  ops (_++_) (_x_) : Rexp Rexp -> Rexp [assoc comm] .
-  ops (_#_) : Rexp Rexp -> Rexp [gather (E e)] .
-  op _* : Rexp -> Rexp .
-  op !_ : Var -> Alph .
+  ops epsilon empty : -> #Rexp .
+  ops (_++_) (_x_) : #Rexp #Rexp -> #Rexp [assoc comm] .
+  ops (_#_) : #Rexp #Rexp -> #Rexp [gather (E e)] .
+  op _* : #Rexp -> #Rexp .
+  op !_ : #Var -> #Alph .
 
-  op _==Rexp_ : Rexp Rexp -> #Bool .
+  op _==Rexp_ : #Rexp #Rexp -> #Bool .
 
   *** derivatives
-  op _`{_`} : Rexp Alph -> Rexp .
+  op _`{_`} : #Rexp #Alph -> #Rexp .
   ceq B { A } = epsilon if (A ==Rexp B) .
   ceq B { A } = empty if notBool (A ==Rexp B) .
 ---  eq epsilon { A } = empty .
@@ -33,7 +33,7 @@ mod #REXP is protecting #BOOL .
   eq R * { A } = (R { A }) # (R *) .     
 
 
-  op epsIn_ : Rexp -> #Bool . 
+  op epsIn_ : #Rexp -> #Bool . 
   eq epsIn A = false .
   eq epsIn epsilon = true .
   eq epsIn empty = false .
@@ -46,12 +46,12 @@ mod #REXP is protecting #BOOL .
 
   *** auxiliary data structures
   sort List{Rexp} .
-  subsort Rexp < List{Rexp} .
+  subsort #Rexp < List{Rexp} .
   op emptyList : -> List{Rexp} .
   op _;;;_ : List{Rexp} List{Rexp} -> List{Rexp} [assoc comm id: emptyList] .
   op _==List{Rexp}_ : List{Rexp} List{Rexp} -> #Bool .
 
-  op _in_ : Rexp List{Rexp} -> #Bool .
+  op _in_ : #Rexp List{Rexp} -> #Bool .
   eq R in emptyList = false .
   eq R in (R1 ;;; RL) = (R ==Rexp R1) orBool (R in RL ) . 
 
