@@ -39,15 +39,18 @@ programming} approach.  The various semantic features defined in a \K
 module can be reordered at will and can be commented using normal
 comments like in C/C++/Java.  If those comments start with
 `\texttt{@}' preceded by no space (e.g.,
-`\texttt{//@ {\textbackslash}section\{Variable declarations\}}')
-then they are interpreted as formal Latex documentation by the
-\texttt{kompile} tool when used with the option \texttt{--pdf}
-(or \texttt{--latex}).
+`\texttt{//@ {\textbackslash}section\{Variable declarations\}}'
+or
+`\texttt{/*@ {\textbackslash}section\{Variable declarations\} */}')
+then they are interpreted as formal \LaTeX\ documentation by the
+\texttt{kompile} tool when used with the option \texttt{-\,\!-pdf}
+(or \texttt{-\,\!-latex}).
 While comments are useful in general, they can annoy the expert user
 of \K.  To turn them off, you can do one of the following (unless you
 want to remove them manually): (1) Use an editor which can hide or
 color conventional C-like comments; or (2) Run the \K pre-processor
-(kpp), which removes all comments.
+(kpp) on the ASCII .k file, which outputs (to stdout) a variant of the
+\K definition with no comments.
 }
 
 \paragraph{Note:}{
@@ -86,7 +89,7 @@ instructions.
 \begin{itemize}
 \item Basic notions about \K and how to write simple \K definitions.
 \item How to define a simple programming language in \K.
-\item How to use the \K tool for compilation to Maude and to Latex/PDF.
+\item How to use the \K tool for compilation to Maude and to \LaTeX/PDF.
 \item How to use the \K tool to execute programs using the semantics.
 \item How to customize the initial configuration using configuration
 variables and initializing them with \texttt{krun}.

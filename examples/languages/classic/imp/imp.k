@@ -16,15 +16,16 @@ constructs (the \texttt{strict} and \texttt{seqstrict} attributes), or
 help the parser with operator precedences and grouping (the
 \texttt{prec} and \texttt{gather} attributes), or instruct the PDF
 generator how to display the various constructs (the \texttt{latex}
-attribute), etc.  The following constructs are given the expected
-strictness attributes, except for \texttt{<=} and \textsf{and}, for
-demonstration purposes.  The former is defined to be
-\texttt{seqstrict}, which means that it evaluates its arguments in
-order, from left to right.  The \texttt{strict} operators can evaluate
-their arguments in any (fully interleaved) orders.  The latter is only
-strict in its first argument, because we will give it a
-short-circuited semantics (its second argument will only be evaluated
-when the first evaluates to true). 
+attribute), etc.
+
+The following constructs are given the expected strictness attributes,
+except for \texttt{<=} and \textsf{and}, for demonstration purposes.
+The former is defined to be \texttt{seqstrict}, which means that it
+evaluates its arguments in order, from left to right.  The
+\texttt{strict} operators can evaluate their arguments in any (fully
+interleaved) orders.  The latter is only strict in its first argument,
+because we will give it a short-circuited semantics (its second
+argument will only be evaluated when the first evaluates to true).
 The parsing attributes, which are not displayed in the generated PDFs
 (also to ease reading), are taken over from Maude; please consult
 Maude's manual for their meaning.  For example, \texttt{prec(...)}
@@ -33,9 +34,9 @@ is taken into account when parsing programs and rules (the lower the
 precedence the tighter the binding).  Also, \texttt{gather(...)} is
 used for grouping reasons; for example, \texttt{gather(E e)} means
 left-associative and \texttt{gather(e E)} means right-associative.
-The \K tool also allows us to associate Latex attributes to
+The \K tool also allows us to associate \LaTeX\ attributes to
 constructs, telling the PDF generator how to display them.  For
-example, the \texttt{<=} construct below has the attribute
+example, \texttt{<=} has the attribute
 \texttt{latex("\{\#1\}\textbackslash{leq}\{\#2\}")}, which makes it be
 displayed as $\leq$ everywhere in the generated PDF.  Currently, the
 \K tool allows parentheses to be used for grouping (e.g.,
@@ -78,22 +79,22 @@ do below with the \textit{Ids}. */
   syntax Ids ::= List{#Id,","}
 
 /*@ Before we move to the \K semantics, we would like to make some
-clarifications regarding the \K syntactic declarations and its builtin
-parser in general.  First, you should not expect magic from these in
-terms of parsing.  While the \K parser can parse many non-trivial
-languages (see, for example, the KOOL language), it was never meant to
-be a substitute for real parsers.  We often call the syntax defined in
-\K ``the syntax of the semantics'', to highlight the fact that its
-role is to serve as a convenient notation when writing the semantics,
-not as a means to define concrete syntax of arbitrarily complex
-programming languages.  See the KERNELC language for an example on how
-to connect an external parser for concrete syntax to the \K tool.
-Second, since we use the same \K parser to also parse the semantic
-rules below, we use the same \texttt{syntax} keyword to define
-additional syntax needed exclusively for the semantics.  We will
-discuss other particularities of the \K syntax on a by-need basis, as
-we define more complex languages (see other \K language definitions
-coming with this distribution of the \K tool). */
+clarifications regarding the \K syntactic declarations and the current
+builtin parser in general.  First, you should not expect magic from
+these in terms of parsing.  While the \K parser can parse many
+non-trivial languages (see, for example, the KOOL language), it was
+never meant to be a substitute for real parsers.  We often call the
+syntax defined in \K ``the syntax of the semantics'', to highlight the
+fact that its role is to serve as a convenient notation when writing
+the semantics, not as a means to define concrete syntax of arbitrarily
+complex programming languages.  See the KERNELC language for an
+example on how to connect an external parser for concrete syntax to
+the \K tool.  Second, since we use the same \K parser to also parse
+the semantic rules below, we use the same \texttt{syntax} keyword to
+define additional syntax needed exclusively for the semantics.  We
+will discuss other particularities of the \K syntax on a by-need
+basis, as we define more complex languages (see other \K language
+definitions coming with this distribution of the \K tool). */
 end module
 
 module IMP
@@ -158,12 +159,45 @@ E \kra X \texttt{:=}\ \square \ \ \Rightarrow \ \ X\ \texttt{:=}\ E
 \ \ \textsf{if} \ \ E\in\KResult
 \end{array}
 $$
-The first rule pulls $E$ out of its context for processing when it is
+The first rule above pulls $E$ out of its context for processing when it is
 not a result, and the second rule plugs it back into its context once
 it becomes a result (after rewriting with other rules in the semantics).
 We call rules of the first type above {\em heating rules} and rules of
 the second type {\em cooling rules}.  Similar rules are generated for
-other \K (evaluation) context declarations in more complex languages.
+other arguments in which operations are strict.  When operations are
+strict only in some of their arguments, the corresponding positions of
+the arguments in which they are strict are explicitly enumerated in
+the argument of the \texttt{strict} attribute, e.g.,
+\texttt{strict(2)} like above, or \texttt{strict(2 3)} for an
+operation strict in its second and third arguments, etc.
+If an operation is simply declared \texttt{strict} then it means that
+it is strict in all its arguments.  The same holds true for sequential
+strictness, declared with the keyword \texttt{seqstrict}.  In both
+cases, we assume the arguments enumerated from left-to-right.  In the
+case of \texttt{strict} the order is irrelevant, but it is relevant
+for \texttt{seqstrict}.  For example, the default heating/cooling rules
+associated to the sequentially strict \texttt{<=} construct above are:
+$$
+\begin{array}{l}
+E_1 \leq E_2 \ \ \Rightarrow \ \ E_1 \kra \square \leq E_2
+\ \ \textsf{if} \ \ E_1\not\in\KResult \\
+E_1 \kra \square \leq E_2 \ \ \Rightarrow \ \ E_1 \leq E_2
+\ \ \textsf{if} \ \ E_1\in\KResult \\
+E_1 \leq E_2 \ \ \Rightarrow \ \ E_2 \kra E_1 \leq \square
+\ \ \textsf{if} \ \ E_1\in\KResult \ \wedge \ E_2 \not\in\KResult \\
+E_2 \kra E_1 \leq \square \ \ \Rightarrow \ \ E_1 \leq E_2
+\ \ \textsf{if} \ \ E_1\in\KResult \ \wedge \ E_2 \in \KResult
+\end{array}
+$$
+Note that $E_2$ above is pulled for evaluation only after $E_1$ is
+fully evaluated.  Similar heating/cooling rules are also automatically
+associated to \K (evaluation) context declarations in more complex
+languages.  It is easy to see that such heating/cooling rules can
+easily lead to non-determinism, since the same term may be heated many
+different ways; these different evaluation orders may lead to
+different behaviors in some languages (not in IMP, because its
+expressions do not have side effects, but we will experiments with
+non-determinism in its successor, IMP++).
 
 Thus the values/results are needed to know when to stop
 applying the heating rules and then to start applying the cooling
@@ -266,7 +300,7 @@ There is nothing special about these, except that the rule for division
 has a side condition.  The operations with subscripts in the right-hand
 sides of the rules are builtin and come with the corresponding builtin
 sort; they are actually written like \texttt{+Int} in ASCII, but they
-have Latex attributes to be displayed like $+_{\it Int}$ in the
+have \LaTeX\ attributes to be displayed like $+_{\it Int}$ in the
 generated PDF document. Note that the variables appearing in these
 rules have integer sort.  That means that these rules will only be
 applied after the arguments of the  arithmetic constructs are fully
