@@ -26,11 +26,11 @@ mod #TCP-CLIENT is
 		if SN:#String = substrString(S,0,P:#Nat) 
 		[print SN:#String ", " S ", " P:#Nat] .
 	
-	ops idle connecting sending receiving haveAnswer closing connected finished : -> #TCPState [ctor] .
+	ops #idle #connecting #sending #receiving #haveAnswer #closing #connected #finished : -> #TCPState [ctor] .
 	
-	op state:_ : #TCPState -> #Socket-Attribute [ctor] .
+	op #state:_ : #TCPState -> #Socket-Attribute [ctor] .
 	op answer:_ : #String -> #Socket-Attribute [ctor] .
-	op connectedTo:_ : #Socket-Oid -> #Socket-Attribute [ctor] .
+	op #connectedTo:_ : #Socket-Oid -> #Socket-Attribute [ctor] .
 	
 		
 	vars Me Server : #Socket-Oid .
@@ -40,49 +40,49 @@ mod #TCP-CLIENT is
 	var C : #Socket-Configuration .
 	var N : #Nat .
 	
-	rl < Me : Client | state: connecting,#Socket A > #Socket #createdSocket(Me, #socketManager, Server)
-	=> < Me : Client | state: connected,#Socket connectedTo: Server,#Socket A >
+	rl < Me : Client | #state: #connecting,#Socket A > #Socket #createdSocket(Me, #socketManager, Server)
+	=> < Me : Client | #state: #connected,#Socket #connectedTo: Server,#Socket A >
 	[print Me " connected"] .
 	
 	----- errors
 	eq #containedRequest(C #Socket #socketError(Me, #socketManager, S))
 	= #error
 	[print Me " socket error: " S] .
-	eq #containedRequest(C #Socket < Me : Client | state: connecting,#Socket  A > #Socket #closedSocket(Me, Server, S))
+	eq #containedRequest(C #Socket < Me : Client | #state: #connecting,#Socket  A > #Socket #closedSocket(Me, Server, S))
 	= #error
 	[print Me " error connecting: " S] .
-	eq #containedRequest(C #Socket < Me : Client | state: receiving,#Socket  A > #Socket #closedSocket(Me, Server, S))
+	eq #containedRequest(C #Socket < Me : Client | #state: #receiving,#Socket  A > #Socket #closedSocket(Me, Server, S))
 	= #error
 	[print Me " error receiving: " S] .
 	-----
 	
-	rl < Me : Client | state: connected,#Socket  connectedTo: Server,#Socket  A > #Socket #toSend(S)
-	=> < Me : Client | state: sending,#Socket  connectedTo: Server,#Socket  A > #Socket #send(Server, Me, S)
+	rl < Me : Client | #state: #connected,#Socket  #connectedTo: Server,#Socket  A > #Socket #toSend(S)
+	=> < Me : Client | #state: #sending,#Socket  #connectedTo: Server,#Socket  A > #Socket #send(Server, Me, S)
 	[print Me " sending"] .
 	
-	rl < Me : Client | state: sending,#Socket  A > #Socket #sent(Me, Server)
-	=> < Me : Client | state: receiving,#Socket  A > #Socket #receive(Server, Me)
+	rl < Me : Client | #state: #sending,#Socket  A > #Socket #sent(Me, Server)
+	=> < Me : Client | #state: #receiving,#Socket  A > #Socket #receive(Server, Me)
 	[print Me " receiving"] .
 	
-	rl < Me : Client | state: receiving,#Socket  A > #Socket #received(Me, Server, S)
-	=> < Me : Client | state: haveAnswer,#Socket  answer: S,#Socket  A >
+	rl < Me : Client | #state: #receiving,#Socket  A > #Socket #received(Me, Server, S)
+	=> < Me : Client | #state: #haveAnswer,#Socket  answer: S,#Socket  A >
 	[print Me " have answer"] .
 	
-	rl < Me : Client | state: haveAnswer,#Socket  connectedTo: Server,#Socket  A > 
-	=> < Me : Client | state: closing,#Socket  connectedTo: Server,#Socket  A > #Socket #closeSocket(Server, Me)
+	rl < Me : Client | #state: #haveAnswer,#Socket  #connectedTo: Server,#Socket  A > 
+	=> < Me : Client | #state: #closing,#Socket  #connectedTo: Server,#Socket  A > #Socket #closeSocket(Server, Me)
 	[print Me " closing"] .
 	
-	rl < Me : Client | state: closing,#Socket  A  > #Socket #closedSocket(Me, Server, S)
-	=> < Me : Client | state: finished,#Socket  A  >
+	rl < Me : Client | #state: #closing,#Socket  A  > #Socket #closedSocket(Me, Server, S)
+	=> < Me : Client | #state: #finished,#Socket  A  >
 	[print Me " finished"] .
 	
-	rl #containedRequest(<> #Socket < Me : Client | state: finished,#Socket  answer: S,#Socket  A  >)
+	rl #containedRequest(<> #Socket < Me : Client | #state: #finished,#Socket  answer: S,#Socket  A  >)
 	=> #checkAnswer(Me, S)
 	[print Me " popping out of socket stuff"] .
 	
 	rl #start(N) => 
 		<> #Socket
-		< cnum(N) : Client | state: connecting > #Socket
+		< cnum(N) : Client | #state: #connecting > #Socket
 		#createClientTcpSocket(#socketManager, cnum(N), "localhost", #TCPPORT) .
 
 endm
