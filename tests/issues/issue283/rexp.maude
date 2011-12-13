@@ -1,0 +1,153 @@
+mod #REXP is protecting #INT .
+
+
+  sorts #Var #Alph #Rexp .
+  subsort #Var < #Alph < #Rexp .
+  vars A B : #Alph .
+  vars R R1 R2 : #Rexp . 
+  var DRL RL : #List{Rexp} .
+  vars O O' O1 O2 : #IntBot .
+  var LO : #Set{Obj} .
+  vars ST ST' ST1 ST2 DST : #Set{Tuple} .
+  vars T T' T1 T2 : #Tuple . 
+  var H : #Heap .
+
+  sort #IntBot .
+  subsort #Int < #IntBot .
+  op bot : -> #IntBot .
+
+  op _!=Int_ : #IntBot #IntBot -> #Bool [ditto] .
+  eq I:#Int !=Int bot = true  .
+  eq bot !=Int I:#Int = true  .
+  eq bot !=Int bot = false .
+
+
+  sort #Set{Obj} .
+  subsort #IntBot < #Set{Obj} .
+  op emptyObj : -> #Set{Obj} .
+  op _;SO_ : #Set{Obj} #Set{Obj} -> #Set{Obj} [assoc comm id: emptyObj] .
+
+
+  ops epsilon empty : -> #Rexp .
+  ops (_++_) (_x_) : #Rexp #Rexp -> #Rexp [assoc comm] .
+  ops (_#_) : #Rexp #Rexp -> #Rexp [gather (E e)] .
+  op _* : #Rexp -> #Rexp .
+  op !_ : #Var -> #Alph .
+
+  op _==Rexp_ : #Rexp #Rexp -> #Bool .
+  eq R1 ==Rexp R1 = true .
+  eq R1 ==Rexp R2 = false [owise] .
+
+  *** derivatives
+  op _`{_`} : #Rexp #Alph -> #Rexp .
+  ceq B { A } = epsilon if (A ==Rexp B) .
+  ceq B { A } = empty if notBool (A ==Rexp B) .
+---  eq epsilon { A } = empty .
+---  eq empty { A } = empty .
+  ceq ( R1 # R2 ){ A } = ((R1 { A }) # R2) ++ (R2 { A })
+     if epsIn R1 = true .
+  ceq ( R1 # R2 ){ A } = (R1 { A }) # R2 
+     if epsIn R1 = false .
+  eq ( R1 ++ R2 ){ A } = (R1 { A }) ++ (R2 { A }) .
+  eq (R1 x R2) { A } = (R1 { A }) x (R2 {A}) .
+  eq R * { A } = (R { A }) # (R *) .     
+
+  eq empty ++ R = R .
+  eq empty # R = empty .
+  eq epsilon # R = R .
+  eq R ++ R = R . 
+
+  op epsIn_ : #Rexp -> #Bool . 
+  eq epsIn A = false .
+  eq epsIn epsilon = true .
+  eq epsIn empty = false .
+  eq epsIn ! A = notBool epsIn A .  
+  eq epsIn ( R1 # R2 ) =  epsIn R1 andBool  epsIn R2 .
+  eq epsIn ( R1 ++ R2 ) = epsIn R1 orBool  epsIn R2 .
+  eq epsIn (R1 x R2) = epsIn R1 andBool  epsIn R2 . 
+  eq epsIn R * = true .
+
+
+  op exception : #Rexp -> #Bool .
+  eq exception(empty) = true .
+  eq exception(epsilon) = true .
+  eq exception(R1 ++ R2) = true .
+  eq exception(R) = false [owise] .
+
+  *** auxiliary data structures
+
+  sort #List{Rexp} .
+  subsort #Rexp < #List{Rexp} .
+  op emptyList : -> #List{Rexp} .
+  op _;LR_ : #List{Rexp} #List{Rexp} -> #List{Rexp} [assoc comm id: emptyList] .
+
+  op _==List{Rexp}_ : #List{Rexp} #List{Rexp} -> #Bool .
+
+  op _inLR_ : #Rexp #List{Rexp} -> #Bool .
+  eq R inLR emptyList = false .
+  eq R inLR (R1 ;LR RL) = (R ==Rexp R1) orBool (R inLR RL ) . 
+
+  op !_ : #List{Rexp} -> #List{Rexp} .
+  eq !(emptyList) = emptyList .
+  ceq !(R ;LR RL) = !(R) ;LR !(RL) if notBool (RL ==List{Rexp} emptyList) .
+
+  sorts #Tuple #Set{Tuple} .
+  subsort #Tuple  < #Set{Tuple} .
+  op `(_,_`) : #IntBot #Rexp -> #Tuple .
+  op `(_,_,_`) : #IntBot #Rexp #List{Rexp} -> #Tuple .
+  op emptyTuples : -> #Set{Tuple} .
+  op _;ST_ : #Set{Tuple} #Set{Tuple} -> #Set{Tuple} [assoc comm id: emptyTuples] .
+  eq T ;ST T = T .
+
+  op _==Tuple_ : #Tuple #Tuple -> #Bool [comm] .
+  eq T ==Tuple T = true .
+  eq T1 ==Tuple T2 = false [owise] .
+
+  op _in_ : #Tuple #Set{Tuple} -> #Bool .
+  eq T in emptyTuples = false .
+  eq T in (T1:#Tuple ;ST ST) = (T ==Tuple T1:#Tuple) orBool (T in ST ) . 
+
+  op _==Set{Tuple}_ : #Set{Tuple} #Set{Tuple} -> #Bool [comm] .
+  eq ST ==Set{Tuple} ST = true .
+  eq ST1 ==Set{Tuple} ST2 = false [owise] .
+  
+  sort #Heap #HeapObj #SatConfig .
+  subsort #Heap #HeapObj < #SatConfig .
+  op <_;_;_> : #Heap #Set{Tuple} #Set{Tuple} -> #Tuple .
+  op [_,_] : #Heap #Set{Obj} -> #HeapObj . 
+
+  op obj : #Heap -> #Set{Obj} .
+
+  *** satisfaction for regular expressions
+
+  op _|=_ : #SatConfig #Rexp -> #Bool .
+
+  ops var fld : -> #List{Rexp} .
+
+  eq H |= R = ([H, obj(H)] |= R) .
+
+  eq [H, emptyObj] |= R = true .
+
+  eq [H, O ;SO LO] |= R = notBool(< H ; (O, R) ; emptyTuples > ==Set{Tuple} emptyTuples) andBool [H, LO] |= R .
+
+***  emptyTuples plays the role of "ff"
+*** < H ; emptyTuples ; DST > plays the role of "tt"
+
+  ceq < H ; (O, R) ; DST > = < H ; emptyTuples ; DST > 
+      if (O, R) in DST .
+
+  ceq < H ; (O, R) ; DST > = < H ; (O, R, var ;LR fld ;LR !(var)) ; DST ;ST (O, R) > 
+      if notBool ((O, R) in DST) .
+
+  ceq  < H ; (O, R, (A ;LR RL)) ;ST ST ; DST >
+       =
+       < H ; (O, R, A) ;ST ST ; DST > ;ST < H ; (O, R, RL) ;ST ST ; DST > 
+       if notBool(RL ==List{Rexp} emptyList) .
+
+   eq  < H ; (O, epsilon, A) ; DST > = < H ; emptyTuples ; DST > .
+
+ eq  < H ; (O, R, A) ; DST > = emptyTuples [owise] .
+
+endm
+
+ 
