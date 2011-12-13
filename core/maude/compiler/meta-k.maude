@@ -459,6 +459,15 @@ fmod K-META-CONFIG is
   eq symbolM some = "+" .
   eq symbolM any = "*" .  
   eq symbolM one = "" .
+
+
+  op symbolS_ : Multiplicity ~> String .
+  eq symbolS maybe = "maybe" .
+  eq symbolS some = "some" .
+  eq symbolS any = "any" .  
+  eq symbolS one = "one" .
+
+
   op error : -> [AttrVal] .
   op error : -> [AttrKey] .
 

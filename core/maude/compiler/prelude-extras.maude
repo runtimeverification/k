@@ -119,6 +119,10 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   eq tokenize("") = nil .
   eq tokenize(S) = qid(S) [owise] .
 
+  op indent : Nat -> QidList .
+  eq indent(0) = nil .
+  eq indent(s(N)) = '\s '\s indent(N) .
+
   op latexify : Qid -> Qid .
   eq latexify(Q) = qid(latexify(string(Q))) .
   
@@ -126,6 +130,10 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   eq latexify(S) = replaceAll(replaceAll(S,( "{" |-> "\\{", "}" |-> "\\}")),("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&" |-> "\\&", ---("_" |-> "\\_",---)
  "'" |-> "", "`" |-> "", ---("\\" |-> "$\\backslash$",---) "~" |-> "\\mbox{\\~{}}", "^" |-> "\\mbox{\\^{}}")) .
  
+  op xmlString : String -> String .
+  eq xmlString(S)
+   = S .
+
   op latexString : String -> String .
   eq latexString(S)
    = replaceAll(latexify(replace(S,"\\","\\textbackslash ")),("\"" |-> "\\mysinglequote{}", "_" |-> "\\_")) .
