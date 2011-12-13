@@ -1123,6 +1123,9 @@ fmod META-K-LEAST-SORTS is
 --- eq leastSortsT(M, Trm, none, errorT(Trm',T) ; TlSK) = errorT(Trm',T) .
  eq leastSortsT(M, 'context_[Trm], none, TlSK) 
   = errorS('context_[Trm],leastSort(M, Trm), "All contexts should have sort K") [owise] .
+ eq leastSortsT(M, Trm, none, errorS(Trm', T, Str) ; TlSK)
+  = errorS(Trm', T, Str) 
+    [print "Error errorS(" Trm' ", " T ", " Str ") in " TlSK] .
  eq leastSortsT(M, Trm, none, TlSK) = errorS(Trm, leastSort(M,Trm),"no suitable least sorts found") [owise print "no sorts found. generating error. unchecked " TlSK] .
 
  eq leastSortsT(M, Trm, SS, SS', TlSK) = leastSortsT(M, Trm, SS ; SS', TlSK)  .

@@ -1278,7 +1278,8 @@ fmod META-LEVEL-EXTRAS is
   eq lubSorts(M, S, T) = T [owise] .
   eq lubSorts(M, T, S') = T [owise] .
  ceq lubSorts(M, T, T') = completeName(M,T) if sameKind(M, T, T') [owise] .
-  eq lubSorts(M, errorS(Trm, T, Str), T') = errorS(Trm, T, Str) .
+  eq lubSorts(M, errorS(Trm, T, Str), T':[Type]) = errorS(Trm, T, Str) .
+  eq lubSorts(M, T':[Type], errorS(Trm, T, Str)) = errorS(Trm, T, Str) .
 
   op minimalSort : Module SortSet ~> SortSet .
   ceq minimalSort(M, S ; S' ; SS) = minimalSort(M, S' ; SS) if sortLeq(M, S',S) .
