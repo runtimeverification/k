@@ -130,9 +130,11 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   eq latexify(S) = replaceAll(replaceAll(S,( "{" |-> "\\{", "}" |-> "\\}")),("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&" |-> "\\&", ---("_" |-> "\\_",---)
  "'" |-> "", "`" |-> "", ---("\\" |-> "$\\backslash$",---) "~" |-> "\\mbox{\\~{}}", "^" |-> "\\mbox{\\^{}}")) .
  
+  op xmlString : Qid -> String .
+  eq xmlString(Q) = xmlString(string(Q)) .
   op xmlString : String -> String .
   eq xmlString(S)
-   = S .
+   = replaceAll(S, ("<" |-> "&lt;", ">" |-> "&gt;", "'" |-> "&apos;", "\"" |-> "&quot;", "&" |-> "&amp;")) .
 
   op latexString : String -> String .
   eq latexString(S)
