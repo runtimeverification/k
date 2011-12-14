@@ -2185,8 +2185,8 @@ sub run_maude_
 
 	# call maude
     
-    my $input = File::Spec->rel2abs($input_file);
-	my $result = `$maude $input 2>&1`;
+#    my $input = File::Spec->rel2abs($input_file);
+	my $result = `$maude $input_file 2>&1`;
 
 	# clean
 	unlink $input_file;
