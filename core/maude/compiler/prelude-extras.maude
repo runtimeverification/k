@@ -134,7 +134,7 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   eq xmlString(Q) = xmlString(string(Q)) .
   op xmlString : String -> String .
   eq xmlString(S)
-   = replaceAll(S, ("<" |-> "&lt;", ">" |-> "&gt;", "'" |-> "&apos;", "\"" |-> "&quot;", "&" |-> "&amp;")) .
+   = replaceAll(replaceAll(S, ("&" |-> "&amp;")), ("<" |-> "&lt;", ">" |-> "&gt;", "'" |-> "&apos;", "\"" |-> "&quot;"))  .
 
   op latexString : String -> String .
   eq latexString(S)

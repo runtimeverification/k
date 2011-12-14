@@ -514,9 +514,9 @@ var Eq : Equation .  var Eqs : EquationSet .
   op printAttributes : Module AttrSet -> QidList .
   eq printAttributes(M, none) = nil .
   eq printAttributes(M, AS) = ( 
-         indent(3) '<attributes> '\n
+         indent(3) '<metadata> '\n
            eMetaXMLPrint(M, AS, 4) 
-         indent(3) '</attributes> '\n) [owise] . 
+         indent(3) '</metadata> '\n) [owise] . 
  
  op printCondition : Module Condition -> QidList .
   eq printCondition(M, nil) = nil .
@@ -715,7 +715,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaXMLPrint(M, (nonexec ), N)
     = ('\knonexec '`{ '`}) .
   eq eMetaXMLPrint(M, (owise ), N)
-    = ('\kowise '`{ '`}) .
+   = (indent(N) '<attribute 'key="owise" '/> '\n) .
   eq eMetaXMLPrint(M, (print(QIL) ), N)
     = ('\kprint '`{ QIL '`}) .
 
@@ -922,7 +922,7 @@ mod XML-PRINT-META is
 
   op printTerminal : Qid -> QidList .
   eq printTerminal(Q) 
-   = '<terminal tokenize("value=\"" + xmlString(Q) + "\" ") '/> '\n 
+   = indent(3) '<terminal tokenize("value=\"" + xmlString(Q) + "\" ") '/> '\n 
   [print "terminal " Q] .
 
   op xmlTerminal : Qid -> Bool .
@@ -1122,9 +1122,9 @@ mod XML-PRINT-META is
 
 ---  op eMetaXMLPrint : ProductionType -> QidList .
   eq (\nterminal{Ty}) 
-   = '<nonTerminal tokenize("name=\"" + xmlString(Ty) + "\" ") '/> '\n .
+   = indent(3) '<nonTerminal tokenize("name=\"" + xmlString(Ty) + "\" ") '/> '\n .
   eq (\terminal{Q}) 
-   = '<terminal tokenize("value=\"" + xmlString(Q) + "\" ") '/> '\n .
+   = indent(3) '<terminal tokenize("value=\"" + xmlString(Q) + "\" ") '/> '\n .
   eq \sort{Q} = '\sort '`{ printSortQid(Q) '`} .
 
   op printSortQid : Qid -> QidList .
