@@ -27,7 +27,7 @@ Executable krun
     data-object-yaml,
 --    hxt,
 --    hxt-xpath,
-    maude >= 0.2.2,
+--    maude >= 0.2.2,
     language-k,
     containers,
     attoparsec-text,
