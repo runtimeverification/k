@@ -26,4 +26,4 @@ endif
 clean:
 	cd ${K_BASE}/tools/language-k; cabal clean
 	cd ${K_BASE}/tools/krun; cabal clean
-	rm -rf ${K_BASE}/tools/maude-hs
+#	rm -rf ${K_BASE}/tools/maude-hs
