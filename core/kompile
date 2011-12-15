@@ -495,6 +495,7 @@ my $k_tools_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'maude
 my $k_base =  File::Spec->catfile((File::Basename::fileparse($0))[1], "..");
 my $k_all_tools = File::Spec->catfile($k_tools_dir,"all-tools");
 my $k_to_latex = File::Spec->catfile($k_tools_dir,"k-to-latex");
+my $k_to_xml = File::Spec->catfile($k_tools_dir,"k-to-xml");
 my $k_latex_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'latex');
 my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
 
@@ -1035,6 +1036,7 @@ if (!$maudify_only) {
     # add missing subsortations to K
     add_subsorts();
 
+
     if ($latex || $pdf || $ps || $eps || $png || $crop) 
     {
 	make_latexify() if $latex;
@@ -1044,7 +1046,12 @@ if (!$maudify_only) {
 	make_png() if $png;
 	make_crop() if $crop;
     }
-    else {
+    elsif ($xml)
+    {
+      xmlify();
+    } 
+    else
+    {
 	compile();
     }
 }
@@ -1062,6 +1069,57 @@ sub print_header {
     print "\n$starred_line\n$text\n$starred_line\n\n";
 }
 
+sub xmlify {
+    
+# Assumes $language_file_name is a file name with no extension
+
+    print_header("Generate xml version for module $language_module_name from language definition $language_file_name") if $verbose;
+
+# 
+#    $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
+#		   "load $k_prelude\n",
+##		   "show module META-MODULE .\n",
+#		   "show module K-TECHNIQUE .\n",
+#		   "quit\n");
+#    
+#    s/^Bye.//gms;
+#    s/(\[[^\[\]]*?)comm([^\[\]]*?\])/$1$2/gms;
+#
+#    open FILE,">",$temp_file or die "Cannot create $temp_file\n";
+#    print FILE;
+#    close FILE;
+#    print "Temporary modules META-MODULE and K-TECHNIQUE written in $temp_file\n" if $verbose;
+#
+    my $xml_output = $_ =
+	run_maude("Calling the Maude XML-ifier ... ",
+		  "load \"$k_prelude\"\n",
+		  "load \"$language_file_name\"\n",
+#		  "set show advisories off .\n",
+#		  "load $temp_file\n",
+#		  "select META-LEVEL .\n",
+#		  "select $language_module_name .\n",
+#		  "set show advisories on .\n",
+		  "load \"$k_to_xml\n",
+		  "--- set print attribute on .\n",
+                  "--- red xmlPrint('$language_module_name,'$xmlTo) .\n",
+                  "--- quit\n",
+		  "loop xml-print .\n",
+		  "(print $language_module_name $xmlTo .)\n",
+		  "quit\n");
+    
+
+        $xml_output =~ s/Bye\.//gs; 
+
+# File name where the compiled output will be stored:
+	my $output_file_name = "$lang_name.xml";
+	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
+
+	print FILE "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n\n";
+	print FILE "<definition xmlns=\"edu.uiuc.fsl.k.kil\">\n";
+	print FILE $xml_output;
+	print FILE "</definition>\n";
+	close FILE;
+}
 
 sub latexify {
     
@@ -1082,7 +1140,7 @@ sub latexify {
 
 # 
     $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
-		   "load $k_prelude\n",
+		   "load \"$k_prelude\"\n",
 #		   "show module META-MODULE .\n",
 		   "show module K-TECHNIQUE .\n",
 		   "quit\n");
@@ -1097,14 +1155,14 @@ sub latexify {
 
     my $latex_output = $_ =
 	run_maude("Calling the Maude Latex-ifier ... ",
-		  "load $k_prelude\n",
-		  "load $language_file_name\n",
+		  "load \"$k_prelude\"\n",
+		  "load \"$language_file_name\"\n",
 		  "set show advisories off .\n",
-		  "load $temp_file\n",
+		  "load \"$temp_file\"\n",
 		  "select META-LEVEL .\n",
 		  "select $language_module_name .\n",
 		  "set show advisories on .\n",
-		  "load $k_to_latex\n",
+		  "load \"$k_to_latex\"\n",
 		  "--- set print attribute on .\n",
 		  "loop latex-print .\n",
 		  map("(print $_ .)\n", @modules),
@@ -1396,8 +1454,8 @@ sub compile {
 #    exit(1);
 # Testing whether the input module $language_module_name exists
     run_maude("Testing if the input module $language_module_name exists ... ",
-			"load $k_prelude\n",
-	      "load $language_file_name\n",
+			"load \"$k_prelude\"\n",
+	      "load \"$language_file_name\"\n",
 	      "show module $language_module_name .\n",
 	      "quit\n");
 
@@ -1425,9 +1483,9 @@ sub compile {
        
 		# If unquote is set then do some changes
 		$_ = run_maude("Compiling the definition ... ",
-			"load $k_prelude\n",
-			"load $language_file_name\n",
-			"load $k_all_tools\n",
+			"load \"$k_prelude\"\n",
+			"load \"$language_file_name\"\n",
+			"load \"$k_all_tools\"\n",
 			"set print attribute off .\n",
 			"rew compile('$language_module_name, supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\"))) .\n",
 			"quit\n");
@@ -1459,11 +1517,11 @@ sub compile {
 	my $compile_superheats = "\"$flag_superheat\"";    
 	my $action = "(compile $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)";
 	$action = "(purify $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $pure;
-	$action = "(xcompile $language_module_name $xmlTo transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $xml;
+#	$action = "(xcompile $language_module_name $xmlTo transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $xml;
 	$_ = run_maude("Compiling the definition ... ",
-	    "load $k_prelude\n",
-	    "load $language_file_name\n",
-	    "load $k_all_tools\n",
+	    "load \"$k_prelude\"\n",
+	    "load \"$language_file_name\"\n",
+	    "load \"$k_all_tools\"\n",
             "---(\n",
             "rew in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'???,\n",
             "supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\"))) .\n",
@@ -1494,7 +1552,7 @@ sub compile {
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	#	print FILE "\*\*\*\(\n$k_license\n\)\*\*\*\n\n\n";	
 	print FILE "--- Compiler checksum: " . get_checksum() . "\n";
-	print FILE "load $k_prelude\n";
+	print FILE "load \"$k_prelude\"\n";
 	print FILE $1;
 	close FILE;
 	push(@generated_files, $output_file_name);

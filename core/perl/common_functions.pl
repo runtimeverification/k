@@ -2205,7 +2205,7 @@ sub check_incompatible
 	
 	# get the output from maude and then parse it.
 	local $_ = run_maude_("running maude ..",
-			"load $file\n",
+			"load \"$file\"\n",
 			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'Map) . \n",
 			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'List) . \n",
 			"red in META-LEVEL : sameKind(upModule('$module, true), 'K, 'Bag) . \n",
@@ -2233,7 +2233,7 @@ sub check_incompatible
 			my ($sort1, $sort2) = ($1, $2);
 
 			local $_ = run_maude_("running maude...",
-					"load $file\n",
+					"load \"$file\"\n",
 					"red in META-LEVEL : lesserSorts(upModule('$module, true), '$sort1) . \n",
 					"red in META-LEVEL : lesserSorts(upModule('$module, true), '$sort2) . \n",
 					"q" );
