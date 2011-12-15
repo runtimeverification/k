@@ -92,10 +92,10 @@ test-%.output: % $(COMPILED_FILE)
 #@cat $@
 	
 results-%.xml: % test-%.output
-	@perl $(TOOL_DIR)/createXMLTestOutput.pl $(notdir $(realpath .)).$(basename $(notdir $*)) $* test-$*.output > $@
+	@perl $(TOOL_DIR)/createXMLTestOutput.pl "$(notdir $(realpath .)).$(basename $(notdir $*))" $* test-$*.output > $@
 	
 compilation.xml: $(COMPILED_FILE).output
-	@perl $(TOOL_DIR)/createXMLCompilationOutput.pl $(notdir $(realpath .)).compilation $(COMPILED_FILE).output > $@
+	@perl $(TOOL_DIR)/createXMLCompilationOutput.pl "$(notdir $(realpath .)).compilation" $(COMPILED_FILE).output > $@
 #$(COMPILED_FILE).output
 
 krun-test: $(foreach var,  $(IO_TESTS), $(var)/krun-results.xml)
