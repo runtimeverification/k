@@ -1,1 +1,1 @@
-Main-Class: main.Main
+Main-Class: main.MainServer

@@ -43,8 +43,8 @@ public class KRunner {
 		OptionSpec<File> maudeFile = _parser.accepts("maudeFile", "Maude file to run").withRequiredArg().required().ofType(File.class);
 		OptionSpec<Integer> port = _parser.accepts("port", "Port to use for IO server").withRequiredArg().ofType(Integer.class).defaultsTo(0);
 		OptionSpec<Boolean> append = _parser.accepts("appendLogs", "Whether or not messages should be appended to log files").withRequiredArg().ofType(Boolean.class).defaultsTo(false);
-		OptionSpec<File> outputFile = _parser.accepts("outputFile", "File to save resulting term").withRequiredArg().required().ofType(File.class);
-		OptionSpec<File> errorFile = _parser.accepts("errorFile", "File to save any Maude errors").withRequiredArg().required().ofType(File.class);
+		OptionSpec<File> outputFile = _parser.accepts("outputFile", "File to save resulting term").withRequiredArg().ofType(File.class).defaultsTo(new File("/dev/stdout"));
+		OptionSpec<File> errorFile = _parser.accepts("errorFile", "File to save any Maude errors").withRequiredArg().ofType(File.class).defaultsTo(new File("/dev/stdout"));
 		OptionSpec<File> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(File.class);
 		OptionSpec<String> maudeModuleName = _parser.accepts("moduleName", "Final module name").withRequiredArg().required().ofType(String.class);
 		OptionSpec<Void> createLogs = _parser.accepts("createLogs", "Create runtime log files");
