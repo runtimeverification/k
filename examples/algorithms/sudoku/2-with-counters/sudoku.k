@@ -32,7 +32,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
        <square> <si>I</si> <sj>J</sj> <sc_>V |-> (sNat(Ns:#Nat)=>Ns)<_/sc> </square>
        <line> <lx>X2</lx> <lc_>V |-> (sNat(Nl:#Nat)=>Nl)<_/lc> </line>
        <column> <cy>Y2</cy> <cc_>V |-> (sNat(Nc:#Nat)=>Nc)<_/cc> </column>
-    if (X1 ==Bool X2 orBool Y1 ==Bool Y2 orBool
+    when (X1 ==Bool X2 orBool Y1 ==Bool Y2 orBool
        X1 /Nat 3 ==Bool X2 /Nat 3 andBool Y1 /Nat 3 ==Bool Y2 /Nat 3) [structural]
 
 --- the rule above can be replaced by the one below, but then kompilation becomes very slow
@@ -43,7 +43,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
                <si>I</si> <sj>J</sj> <sc_>V |-> (sNat(Ns:#Nat)=>Ns)<_/sc>
                <lx>X2</lx> <lc_>V |-> (sNat(Nl:#Nat)=>Nl)<_/lc>
                <cy>Y2</cy> <cc_>V |-> (sNat(Nc:#Nat)=>Nc)<_/cc>
-    if (X1 ==Bool X2 orBool Y1 ==Bool Y2 orBool
+    when (X1 ==Bool X2 orBool Y1 ==Bool Y2 orBool
        X1 /Nat 3 ==Bool X2 /Nat 3 andBool Y1 /Nat 3 ==Bool Y2 /Nat 3) [structural]
 ***)
 

@@ -9,7 +9,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
 --- naked single
   rule <cell> <x>X1:#Nat</x> <y>Y1:#Nat</y> <v>B:BagItem</v> </cell>
        <cell> <x>X2:#Nat</x> <y>Y2:#Nat</y> <v_>B=>.<_/v> </cell>
-    if (X1 ==Bool X2 orBool Y1 ==Bool Y2 orBool
+    when (X1 ==Bool X2 orBool Y1 ==Bool Y2 orBool
        X1 /Nat 3 ==Bool X2 /Nat 3 andBool Y1 /Nat 3 ==Bool Y2 /Nat 3) [structural]
 
 --- nondeterministic choice (purposely only in 2-val cells; worked in all examples like that)

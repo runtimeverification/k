@@ -30,7 +30,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
        <cell_> <x>X1:#Nat</x> <y>Y1:#Nat</y> <v>B:BagItem</v> <_/cell>
        <cell>  <x>X2:#Nat</x> <y>Y2:#Nat</y> <i>I:#Nat</i> <j>J:#Nat</j> <v_>B=>.<_/v> </cell>
        (.Bag => <decrement> <di>I</di> <dj>J</dj> <dx>X2</dx> <dy>Y2</dy> <dv>B</dv> </decrement>)
-    if (X1 ==Bool X2 orBool Y1 ==Bool Y2 orBool
+    when (X1 ==Bool X2 orBool Y1 ==Bool Y2 orBool
        X1 /Nat 3 ==Bool X2 /Nat 3 andBool Y1 /Nat 3 ==Bool Y2 /Nat 3)
   [structural]
 
