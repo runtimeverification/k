@@ -424,8 +424,8 @@ become values of expected sorts: */
   rule Str1:#String + Str2:#String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
   rule - I => -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
@@ -752,7 +752,7 @@ by the two rules below: */
 
    rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
-     if notBool(V in Busy) [:transition:]
+     when notBool(V in Busy) [:transition:]
    rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
 
 /*@ \subsubsection{Release lock}
@@ -766,7 +766,7 @@ so other threads can acquire it if they need to. */
 
    rule <k> release V; => . ...</k>
         <holds>... V|->(N => _-Int_(N,1)) ...</holds>
-     if N >Nat 0
+     when N >Nat 0
    // used prefix notation for -Int because of parsing problems
    rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
         <busy>... SetItem(V)=>. ...</busy>
@@ -833,8 +833,8 @@ given numbers.  The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2  [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2  [:structural:]
+  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2  [:structural:]
+  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2  [:structural:]
 
 /*@ The semantics of SIMPLE is now complete. */
 end module
