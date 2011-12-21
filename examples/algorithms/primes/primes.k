@@ -3,8 +3,8 @@
 kmod PRIMES is
   configuration <primes> .Bag </primes>
   syntax K ::= #NzNat
-  rule <primes_> BagItem(N:#NzNat) (BagItem(M:#NzNat)=>.) <_/primes>
-    if N dividesNat M
+  rule <primes>... BagItem(N:#NzNat) (BagItem(M:#NzNat)=>.) ...</primes>
+    when N dividesNat M
 endkm
 
 kmod RUN is including PRIMES
