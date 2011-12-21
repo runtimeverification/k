@@ -74,7 +74,7 @@ kmod SYSTEM-F-STATIC-SEMANTICS is including SYSTEM-F-SYNTAX + K + SUBSTITUTION
   rule <k> X => T <_/k>
        <tyenv_> X |-> T <_/tyenv>
        <tyvars> Tvs </tyvars>
-       if freeVars(T) -Set Tvs ==Bool .
+      when freeVars(T) -Set Tvs ==Bool .
 
   /*@ \subsection*{Lambda abstractions}
   */

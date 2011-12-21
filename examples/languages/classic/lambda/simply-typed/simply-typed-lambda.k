@@ -6,8 +6,8 @@ kmod SUBSTITUTION is
   syntax K ::= #Id 
   
   rule X[K/X] => K [structural]
-  rule KL:KLabel(L:List`{K`})[K:K/X:#Id] => KL(L[K/-/X]) if KL(L) =/=Bool X [structural]
-  rule (K1:K ~> K2:K)[K/X] => (K1[K/X]) ~> (K2[K/X]) if K1 =/=Bool .K andBool K2 =/=Bool .K [structural]
+  rule KL:KLabel(L:List`{K`})[K:K/X:#Id] => KL(L[K/-/X]) when KL(L) =/=Bool X [structural]
+  rule (K1:K ~> K2:K)[K/X] => (K1[K/X]) ~> (K2[K/X]) when K1 =/=Bool .K andBool K2 =/=Bool .K [structural]
   rule (K1,,L)[K/-/X] => (K1[K/X]),,(L[K/-/X]) [structural]
   rule .K[K/X] => .K [structural]
   rule .List{K}[K/-/X] => .List{K} [structural]
