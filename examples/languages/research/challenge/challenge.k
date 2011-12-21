@@ -54,10 +54,10 @@ module CHALLENGE imports CHALLENGE-SYNTAX
   rule  _*_(I1,F2) => Int2Float(I1) *Float F2  
   rule  _*_(F1,I2) => F1 *Float Int2Float(I2)  
   rule  _*_(F1,F2) => F1 *Float F2  
-  rule  I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
-  rule  I1 / F2 => Int2Float(I1) /Float F2  if F2 =/=Bool 0.0 
-  rule  F1 / I2 => F1 /Float Int2Float(I2)  if I2 =/=Bool 0 
-  rule  F1 / F2 => F1 /Float F2  if F2 =/=Bool 0.0 
+  rule  I1 / I2 => I1 /Int I2  when I2 =/=Bool 0 
+  rule  I1 / F2 => Int2Float(I1) /Float F2  when F2 =/=Bool 0.0 
+  rule  F1 / I2 => F1 /Float Int2Float(I2)  when I2 =/=Bool 0 
+  rule  F1 / F2 => F1 /Float F2  when F2 =/=Bool 0.0 
   rule  I1 <= I2 => I1 <=Int I2  
   rule  I1 <= F2 => Int2Float(I1) <=Float F2  
   rule  F1 <= I2 => F1 <=Float Int2Float(I2)  
@@ -149,7 +149,7 @@ module CHALLENGE imports CHALLENGE-SYNTAX
    rule (<thread_> <k>.K</k> <fstack>.List</fstack> <holds>Holds:Map</holds> <_/thread> => .)
         <busy>Busy:Set => Busy -Set keys(Holds)</busy>
    rule <k>acquire V; => .<_/k> <holds_>. => V|->0<_/holds> <busy>Busy (.=>SetItem(V))</busy>
-     if notBool(V in Busy)
+     when notBool(V in Busy)
    rule <k>acquire V; => .<_/k> <holds_>V|->(N => sNat N)<_/holds>
    rule <k>release V; => .<_/k> <holds_>V|->(sNat N => N)<_/holds>
    rule <k>release V; => .<_/k> <holds_>V|->0 => .<_/holds> <busy_>SetItem(V)=>.<_/busy>
@@ -173,8 +173,8 @@ module CHALLENGE imports CHALLENGE-SYNTAX
        <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent>
   rule <k>sendSynch V to N2; => .<_/k> <agent_><me>N2</me> <k>receive => V<_/k> <_/agent>
   rule <me>N</me> <threads> <thread_><k>barrier;<_/k> <_/thread> </threads> <barrier>true</barrier>
-       <waiting>W (. => SetItem(N))</waiting> if notBool(N in W)
-  rule <barrier>true=>false</barrier> <waiting>W</waiting> <world>W</world> if W =/=Bool .
+       <waiting>W (. => SetItem(N))</waiting> when notBool(N in W)
+  rule <barrier>true=>false</barrier> <waiting>W</waiting> <world>W</world> when W =/=Bool .
   rule <me>N</me> <k>barrier; => .<_/k> <barrier>false</barrier> <waiting_>SetItem(N)=>.<_/waiting>
   rule <barrier>false => true</barrier> <waiting>.Set</waiting>
 
@@ -201,14 +201,14 @@ module CHALLENGE imports CHALLENGE-SYNTAX
   rule quoteit[sNat(N)](unquote(E)) => box('unquote_)(quoteit[N](E))
   rule quoteit[N](.) => code(.) [structural]
   rule quoteit[N]((K1:K ~> K2:K)) => quoteit[N](K1) box(~>) quoteit[N](K2)
-    if K1 =/=Bool . andBool K2 =/=Bool .
+    when K1 =/=Bool . andBool K2 =/=Bool .
   rule code(K1) box(~>) code(K2) => code((K1 ~> K2))
   rule quoteit[N](Label(Kl:List`{K`})) => box(Label)(quoteit[N](Kl))
-    if Label =/=Bool 'quote_ andBool Label =/=Bool 'unquote_
+    when Label =/=Bool 'quote_ andBool Label =/=Bool 'unquote_
   rule box(Label)(code(Kl)) => code(Label(Kl))
   rule quoteit[N](.List{K}) => code(.List{K})
   rule quoteit[N]((Kl1:List`{K`},, Kl2:List`{K`})) => quoteit[N](Kl1) box(,,) quoteit[N](Kl2)
-    if Kl1 =/=Bool .List{K} andBool Kl2 =/=Bool .List{K}
+    when Kl1 =/=Bool .List{K} andBool Kl2 =/=Bool .List{K}
   rule code(Kl1) box(,,) code(Kl2) => code((Kl1,, Kl2))
   rule lift V => code(V)
   rule eval code(K) => K
