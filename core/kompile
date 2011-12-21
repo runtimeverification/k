@@ -26,6 +26,7 @@ check_perl_packages("Text::Diff");
 
 
 our @checksum_files = (); # used in checksumming kompile program to detect version changes
+our $random;
 push(@checksum_files, File::Spec->catfile((File::Basename::fileparse($0))[1], 'kompile'));
 
 
@@ -935,10 +936,10 @@ if ($crop == 1 && !@crop_modules) {
 sub default_pdf
 {
     my ($option, $lg) = @_;
-    print "Choosing default modules $lg-SYNTAX and $lg.\n";
+#    print "Choosing default modules $lg-SYNTAX and $lg.\n";
     my @md = ();
-    push(@md, "$lg-SYNTAX");
-    push(@md, $lg);
+#    push(@md, "$lg-SYNTAX");
+#    push(@md, $lg);
     $topmatter = 'README.tex' if $topmatter eq "" && (-e "README.tex");
     
     return \@md;
@@ -1125,6 +1126,12 @@ sub latexify {
     
     my ($format, @modules) = @_;
   
+    if (@modules == 0)
+    {
+	my $modules_ref = get_all_modules();
+	@modules = @$modules_ref;
+    }
+    
     foreach(@modules)
     {
 	if (!exist($_))
@@ -1139,29 +1146,30 @@ sub latexify {
     print_header("Generate $format version for module $language_module_name from language definition $language_file_name") if $verbose;
 
 # 
-    $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
-		   "load \"$k_prelude\"\n",
+#    $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
+#		   "load $k_prelude\n",
 #		   "show module META-MODULE .\n",
-		   "show module K-TECHNIQUE .\n",
-		   "quit\n");
+#		   "show module K-TECHNIQUE .\n",
+#		   "quit\n");
     
-    s/^Bye.//gms;
-    s/(\[[^\[\]]*?)comm([^\[\]]*?\])/$1$2/gms;
+#    s/^Bye.//gms;
+#    s/(\[[^\[\]]*?)comm([^\[\]]*?\])/$1$2/gms;
 
-    open FILE,">",$temp_file or die "Cannot create $temp_file\n";
-    print FILE;
-    close FILE;
-    print "Temporary modules META-MODULE and K-TECHNIQUE written in $temp_file\n" if $verbose;
+#    open FILE,">",$temp_file or die "Cannot create $temp_file\n";
+#    print FILE;
+#    close FILE;
+#    print "Temporary modules META-MODULE and K-TECHNIQUE written in $temp_file\n" if $verbose;
 
+#    print "@modules\n";
     my $latex_output = $_ =
 	run_maude("Calling the Maude Latex-ifier ... ",
 		  "load \"$k_prelude\"\n",
 		  "load \"$language_file_name\"\n",
-		  "set show advisories off .\n",
-		  "load \"$temp_file\"\n",
-		  "select META-LEVEL .\n",
-		  "select $language_module_name .\n",
-		  "set show advisories on .\n",
+#		  "set show advisories off .\n",
+#		  "load $temp_file\n",
+#		  "select META-LEVEL .\n",
+#		  "select $language_module_name .\n",
+#		  "set show advisories on .\n",
 		  "load \"$k_to_latex\"\n",
 		  "--- set print attribute on .\n",
 		  "loop latex-print .\n",
@@ -1306,12 +1314,19 @@ sub get_file_content
     return join("", @input);
 }
 
+sub latex_success_msg
+{
+    my ($file_ext, @modules) = @_;
+    print "Generated $file_ext which contains modules: @modules\n" if (@modules > 0);
+    print "Generated $file_ext which contains the language definition.\n" if (@modules == 0);
+}
+
 # generates latex if $latex
 sub make_latexify
 {
     latexify("latex", @latexify_modules);
     rename("$lang_name-latex.tex", "$output_latex_file.tex");
-    print "Generated $lang_name.tex which contains modules: @latexify_modules\n";
+    latex_success_msg("$lang_name.tex", @latexify_modules);
 }
 
 sub get_pdf_crop
@@ -1341,7 +1356,7 @@ sub make_pdf
     # Generate eps
     get_pdf_crop("pdf", @pdf_modules);
     rename("$lang_name-pdf.pdf", "$output_latex_file.pdf");
-    print "Generated $lang_name.pdf which contains modules: @pdf_modules\n";
+    latex_success_msg("$lang_name.pdf", @pdf_modules);
 }
 
 # generate ps if $ps
@@ -1355,7 +1370,7 @@ sub make_ps
     
     # rename ps file
     rename("$lang_name-ps.ps", "$output_latex_file.ps");
-    print "Generated $lang_name.ps which contains modules: @ps_modules\n";
+    latex_success_msg("$lang_name.ps", @ps_modules);
     
     # delete auxialiary files if not verbose
     unlink("$lang_name-ps.pdf") if !$verbose;
@@ -1375,8 +1390,8 @@ sub make_eps
     
     # rename eps file
     rename("$lang_name-eps.eps", "$output_latex_file.eps");
-    print "Generated $lang_name.eps which contains modules: @eps_modules\n";
-
+    latex_success_msg("$lang_name.eps", @eps_modules);
+    
     unlink("$lang_name-eps.pdf") if !$verbose;
     unlink("$lang_name-eps.ps") if !$verbose;
 }
@@ -1391,8 +1406,8 @@ sub make_png
 
     # rename png file
     rename("$lang_name-png.png", "$output_latex_file.png");
-    print "Generated $lang_name.png which contains modules: @png_modules\n";
-
+    latex_success_msg("$lang_name.png", @png_modules);
+    
     # delete auxialiary files if not verbose
     unlink("$lang_name-png.eps") if !$verbose;
     unlink("$lang_name-png.pdf") if !$verbose;
@@ -1430,7 +1445,7 @@ print "Calling make_crop\n";
 
     # print message
     rename("$lang_name-crop-crop.pdf", "$output_latex_file-crop.pdf");
-    print "Generated $lang_name-crop.pdf which contains modules: @crop_modules\n";
+    latex_success_msg("$lang_name-crop.pdf", @crop_modules);
     
     # delete auxialiary files if not verbose
     unlink("$lang_name-crop.pdf") if !$verbose && ($lang_name ne $output_latex_file);
