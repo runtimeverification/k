@@ -27,6 +27,7 @@ check_perl_packages("Text::Diff");
 
 our @checksum_files = (); # used in checksumming kompile program to detect version changes
 our $random;
+our $preamble = "";
 push(@checksum_files, File::Spec->catfile((File::Basename::fileparse($0))[1], 'kompile'));
 
 
@@ -1176,13 +1177,19 @@ sub latexify {
 		  map("(print $_ .)\n", @modules),
 #		  "(print $language_module_name .)\n",
 		  "quit\n");
-    
-    s/\\begin{module}.*?\\end{module}//gms;
-    my @l_modules = ($latex_output =~ /(\\begin{module}.*?\\end{module})/gms);
-    if (@l_modules && !/\\begin{module}/) {
+
+#    s/\\begin{module}.*?\\end{module}//gms;
+    my @l_modules = ();
+    while ($latex_output =~ /((\\begin{module}.*?\\end{module})|(\\begin{commentModule}.*?\\end{commentModule}))/gs)
+    {
+#	print "ADD: $1\n\n==========================\n\n\n\n";
+	push(@l_modules, $1);
+    }
+
+    if (@l_modules > 0) # && !(($_ =~ m/\\begin\{module\}/) || ($_ =~ m/\\begin\{commentModule\}/))) 
+    {
 	print "Latex style used: $style\n" if $verbose;
 	
-
 # File name where the compiled output will be stored:
 	my $output_file_name = "$lang_name-$format.tex";
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
@@ -1193,21 +1200,25 @@ sub latexify {
 	
 	my $abs_filename = $language_file_name;
 	$abs_filename =~ s/\..*?$//;
-    if (-e "$abs_filename.sty") {
-	   print FILE "\\input{$abs_filename.sty}\n";
-    }
+	if (-e "$abs_filename.sty") {
+	    print FILE "\\input{$abs_filename.sty}\n";
+	}
+
+	print FILE "$preamble\n";
+	
 	print FILE join("\n",@newcommands)."\n";
 
 	print FILE "\n\n\\begin{document}\n";
 	print FILE "\\begin{kdefinition}\n\n";
+	print FILE "\n\\maketitle\n\n" if $preamble ne "";
 	
 	# insert $topmatter here
 	if ($topmatter ne "")
 	{
-		my $header = get_file_content($topmatter);
-	        print FILE "% begin latex header \n";
-		print FILE "$header\n";
-		print FILE "% end latex header \n\n";
+	    my $header = get_file_content($topmatter);
+	    print FILE "% begin latex header \n";
+	    print FILE "$header\n";
+	    print FILE "% end latex header \n\n";
 	}
 
 	my $latex_temp = join("\\newpage", @l_modules)."\n";

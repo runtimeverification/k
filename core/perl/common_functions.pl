@@ -10,6 +10,7 @@ use Text::Wrap;
 $Text::Wrap::columns = 75;
 
 our @checksum_files; # used in checksumming kompile program to detect version changes
+our $preamble;
 my $path = ".";
 
 BEGIN {
@@ -2818,6 +2819,12 @@ sub pre_process
         # Freeze modules
     s/(kmod.*?endkm)/Freeze($&, "KMOD")/sge;
     
+    s/\/\*!preamble(.*?)\*\//
+    {
+	$preamble = $1;
+	""
+    }/sme;
+
     s/(\/\/@.*?$)/
     {
 #	print "Comment: $1\n";
@@ -2842,7 +2849,7 @@ sub pre_process
     # collect all modules
     while(/kmod\s+([A-Z0-9\-]+)\s+.*?endkm/sg)
     {
-	push(@modules, $1);
+	push(@modules, $1) if ($1 ne "URIS" && $1 ne "K-VISITOR" && $1 ne "SUBSTITUTION");
     }
     
     # Step: resolve latex comments
