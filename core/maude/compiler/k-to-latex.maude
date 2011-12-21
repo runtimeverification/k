@@ -1208,7 +1208,10 @@ endfm)) = tokenize(Str) '\n eMetaLatexPrint(setMbs(setRls(setEqs(M,none),none),n
 
   op latexPrintComment : Module Module -> QidList .
   eq latexPrintComment(FM,M) 
-   = eMetaLatexPrint(setMbs(setRls(setEqs(FM,none),none),none), mbs(getMbs(M))) [print "module " M] .
+   = ( '\begin '`{ 'commentModule '`} '\n
+eMetaLatexPrint(setMbs(setRls(setEqs(FM,none),none),none), mbs(getMbs(M))) 
+            '\n '\end '`{ 'commentModule '`} '\n) 
+ [print "module " M] .
 
 
 
