@@ -22,7 +22,7 @@ including SKOOL-TYPED-SYNTAX
   syntax CellLabel ::= env 
 
   rule lookupMember(<envStack> _ :: <env> Env:Map </env>  => . <_/envStack>, X:#Id)
-    if notBool(X in keys(Env)) [structural]
+    when notBool(X in keys(Env)) [structural]
 
 
 endkm

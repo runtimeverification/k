@@ -7,7 +7,7 @@ kmod ISSUE033A is
   syntax K ::= testa ( Map , Type , #Nat )  | #Bool
 
  rule testa(Cache:Map, T:Type, N:#Nat) => true
-   if notBool($hasMapping(Cache:Map, arrayType(T:Type, N:#Nat)))
+   when notBool($hasMapping(Cache:Map, arrayType(T:Type, N:#Nat)))
 endkm
 
 kmod ISSUE033B is 
@@ -18,7 +18,8 @@ kmod ISSUE033B is
  syntax BaseValue ::= #Bool
  syntax #Id ::= a
  rule testb(LM:Map,SN:#Nat,V:BaseValue,F:#Id) => true
-  if notBool $hasMapping(LM:Map, kpair(F:#Id, List(case(SN:#Nat, V:BaseValue))))
+  when notBool $hasMapping(LM:Map, 
+            kpair(F:#Id, List(case(SN:#Nat, V:BaseValue))))
 endkm
 
 kmod ISSUE033 is including ISSUE033B + ISSUE033A
