@@ -15,8 +15,8 @@ my $KRUN = catfile($ENV{'K_BASE'},"core","krun");
 # second argument is a directory to test
 my $numArgs = $#ARGV + 1; # +1 because there is one too few
 #print "$numArgs\n";
-if ($numArgs != 4) {
-	die "Not precise command line arguments. Usage $0 -d <directory> -f <krun flag>"
+if ($numArgs != 6) {
+	die "Not precise command line arguments. Usage $0 -d <directory> -f <krun flag> -n <suitename>"
 }
 
 

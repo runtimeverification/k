@@ -16,7 +16,8 @@ TESTS =
 
 # this is a space separated list of directories containing io_tests
 IO_TESTS = programs/diverse/tests
-
+# this is the name the tests will be grouped under
+IO_TESTSUITE_NAME = $(MAIN_FILE)
 # this is a flag used when calling krun to be used when doing io_tests
 IO_TEST_FLAG = "--output-mode=none"
 
