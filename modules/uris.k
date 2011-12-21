@@ -23,7 +23,7 @@ module URIS
   rule #close(N:#Nat) => String2DotK(#tcpRequest("close#" +String Int2String(N) +String "#"))
 
   rule String2DotK(#errorTCPSyntax(S)) => #ioError(S)
-  rule String2DotK(S) => .K if notBool(#isTCPError(S))
+  rule String2DotK(S) => .K when notBool(#isTCPError(S))
   
   rule String2Bool("0") => false
   rule String2Bool("1") => true
@@ -55,7 +55,7 @@ module URIS
   rule #fReadByte(N) => #string2Int(#tcpRequest("readbyte#" +String Int2String(N) +String "#"))
 
   syntax K ::= `#string2Int ( K )
-  rule #string2Int(S) => String2Int(S) if lengthString(S) >=Int 0
+  rule #string2Int(S) => String2Int(S) when lengthString(S) >=Int 0
 
   rule #putByte(B) => #fPutByte(#stdout,B)
   rule #fPutByte(N,B:#Nat)
@@ -95,7 +95,7 @@ module URIS
   // Send first char from the buffer to the server
   rule #ostream(N:#Nat) (.List =>  ListItem(#fPrintChar(N,substrString(S,0,1)))
        #removeCharUponAck) #buffer(S:#String)
-    if S =/=Bool ""
+    when S =/=Bool ""
   // Flush when the buffer becomes empty
   rule #ostream(N:#Nat) (.List => ListItem(#flush(N))) #buffer("" => .K)
 
@@ -120,18 +120,18 @@ module URIS
 
   // Skipping initial whitespace if reading more than a character
   rule #parse(S:#String,.K) (ListItem(C:#Char) => .List) 
-    if S =/=Bool "#Char" andBool #isWhiteSpace(C)
+    when S =/=Bool "#Char" andBool #isWhiteSpace(C)
 
 
   // Read a token
   rule #parse(S:#String,.K => "") ListItem(C:#Char) 
-    if S =/=Bool "#Char" andBool notBool(#isWhiteSpace(C))
+    when S =/=Bool "#Char" andBool notBool(#isWhiteSpace(C))
   rule #parse(_, S:#String => S:#String +String C) (ListItem(C:#Char) => .List) 
-    if notBool(#isWhiteSpace(C))
+    when notBool(#isWhiteSpace(C))
 
   // Upon encountering again whitespace, convert token
   rule #parse(SType:#String,S:#String) ListItem(C:#Char) => #convertToken(SType, S)
-    if #isWhiteSpace(C)
+    when #isWhiteSpace(C)
   
   syntax List ::= `#convertToken ( #String , #String )
   rule #convertToken("#Int",S:#String) => ListItem(String2Int(S +String "0") /Int 10)
@@ -143,7 +143,7 @@ module URIS
   
  /*   C++ -like parsing for ints.
   rule parse("#Int",I:#Int => 10 *Int I +Int String2Int(C)) ListItem(C:#Char)
-    if #isDigit(C:#Char)
+    when #isDigit(C:#Char)
   */
 
   syntax List ::= `#buffer ( K )
@@ -151,7 +151,7 @@ module URIS
   // Initial input string is assumed wrapped in an #buffer wrapper an one character is retreved from it at a time
   rule #parse(_,_) (.List => ListItem(substrString(S,0,1))) 
        #buffer(S:#String => substrString(S,1,lengthString(S)))
-    if S =/=Bool ""
+    when S =/=Bool ""
   rule #buffer("" => .K) #istream(_)
 
   // I fthe buffer becomes empty, read from the input stream

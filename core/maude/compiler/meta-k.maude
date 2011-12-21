@@ -302,7 +302,7 @@ fmod META-K-RULES is including K-SORTS .
 
   ops symbol_ : KRuleKind -> Qid .
   eq symbol krl = 'rule_ .
-  eq symbol kcrl = 'rule_if_ .  
+  eq symbol kcrl = 'rule_when_ .  
 
   op replaceS : -> Qid .
   eq replaceS = '_=>_ .
@@ -887,7 +887,7 @@ fmod META-K-CONTEXTS is including K-SORTS .
 
   ops symbol_ : KContextKind -> Qid .
   eq symbol kcxt = 'context_ .
-  eq symbol kccxt = 'context_if_ .  
+  eq symbol kccxt = 'context_when_ .  
 
   op getKContextKind : Qid ~> KContextKind . 
   eq getKContextKind(Q) = if Q == symbol kcxt then kcxt else if Q == symbol kccxt then kccxt else cxterror(Q) fi fi .
@@ -1144,9 +1144,9 @@ fmod META-K-LEAST-SORTS is
 
  eq $leastSortsT(M, 'configuration_[Trm], S) = 'KSentence .
  eq $leastSortsT(M, 'rule_[Trm], S) = 'KSentence .
-ceq $leastSortsT(M, 'rule_if_[Trms], S T') = 'KSentence if sortLeq(M,T',K).
+ceq $leastSortsT(M, 'rule_when_[Trms], S T') = 'KSentence if sortLeq(M,T',K).
 ceq $leastSortsT(M, 'context_[Trm], S) = 'KSentence if sortLeq(M,S,'K) .
-ceq $leastSortsT(M, 'context_if_[Trms], S T') = 'KSentence if sortLeq(M,T',K).
+ceq $leastSortsT(M, 'context_when_[Trms], S T') = 'KSentence if sortLeq(M,T',K).
 
 ceq $leastSortsT(M, Q[T1,T2], T T') 
   = leastSortsRed(M, Q[T1,T2], leastSort(M, Q[T1,T2]), --- removeBuiltins(

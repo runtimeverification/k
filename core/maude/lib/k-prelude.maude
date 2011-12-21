@@ -342,7 +342,7 @@ mod K-CONTEXTS is
   including K-TECHNIQUE .
   including K-SENTENCE .
   ops context_ : K -> [KSentence] [prec 126] .
-  ops context_if_ : K K -> [KSentence] [prec 126] .
+  ops context_when_ : K K -> [KSentence] [prec 126] .
   op wrap-with : K K -> K .
 endm
 
@@ -396,12 +396,12 @@ mod K-RULES is
   ops rule_ : List -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : Bag -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : Set -> [KSentence] [prec 126 format(b o d)] .
-  ops rule_if_ : KLabel K -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : List{K} K -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : Map K -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : List K -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : Bag K -> [KSentence] [prec 126 format(b o b o d)] .
-  ops rule_if_ : Set K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : KLabel K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : List{K} K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : Map K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : List K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : Bag K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : Set K -> [KSentence] [prec 126 format(b o b o d)] .
 --- TODO: and a mixing of structural/bidirectional attributes
   op _=>_ : K K -> K [prec 125] .
   op _=>_ : KLabel KLabel -> KLabel [prec 125] .

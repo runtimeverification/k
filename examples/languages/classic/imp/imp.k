@@ -333,7 +333,7 @@ to modify the rules below to always match at the top of the \textsf{k}
 cell. */
 
   rule I1:#Int + I2:#Int => I1 +Int I2
-  rule I1 / I2 => I1 /Int I2  if I2 =/=Bool 0 
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Bool 0 
 
 /*@ \subsection{Boolean expressions}
 The rules below are straightforward.  Note the short-circuited semantics
@@ -434,6 +434,6 @@ not for the rest of the computation. */
   rule [program-still-vars]:
        <k> var (X,Xs:Ids => Xs); _ </k>
        <state> Rho:Map (. => X |-> 0) </state>
-    if notBool(X in keys(Rho))
+    when notBool(X in keys(Rho))
   rule [program-no-vars]: <k> var .Ids; S => S </k>  [structural]
 end module
