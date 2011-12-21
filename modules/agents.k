@@ -56,9 +56,9 @@ module AGENTS imports SEQ
        <agent_><me>N2</me> <k>receive => V<_/k> <_/agent>
   rule [start-waiting-at-barrier] : <me>N</me> <k>barrier<_/k>
        <barrier>true</barrier> <waiting>W (. => SetItem(N))</waiting> 
-    if notBool(SetItem(N) in W)
+    when notBool(SetItem(N) in W)
   rule [lifting-barrier] : <barrier>true=>false</barrier> <waiting>W</waiting> <world>W</world> 
-    if W =/=Bool .
+    when W =/=Bool .
   rule [leave-barrier] : <me>N</me> <k>barrier => skip<_/k> <barrier>false</barrier>
        <waiting_>(SetItem(N) => .)<_/waiting>
   rule [lowering-barrier] : <barrier>false => true</barrier> <waiting>.Set</waiting>

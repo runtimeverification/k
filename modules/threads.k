@@ -23,7 +23,7 @@ module THREADS imports SEQ
                                           => V|->0<_/holds> 
        <busy>Busy (.
                 => SetItem(V))</busy>
-    if notBool(V in Busy) [transition]
+    when notBool(V in Busy) [transition]
   rule [reentrant-acquire] : <k>acquire V 
                              => skip<_/k> <holds_>V|->(N:#Nat 
                                                     => sNat N)<_/holds>
