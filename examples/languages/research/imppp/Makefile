@@ -6,7 +6,7 @@ LANGUAGE_NAME = IMPPP
 LANGUAGE_MODULES =
 
 # include the contents of this file right after \begin{document}
-LATEX_TOPMATTER = README.tex
+LATEX_TOPMATTER =
 
 #this is the basename of the main file
 MAIN_FILE = imppp

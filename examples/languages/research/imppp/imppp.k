@@ -169,7 +169,7 @@ Moreover, each thread has its own environment, so it knows where all
 the variables that it has access to (that includes its locally
 declared variables as well as the variables of its parent thread) are
 located in the store.  The store is shared by all threads.  For
-simplicity, we assume a sequenatially consistent memory model in
+simplicity, we assume a sequentially consistent memory model in
 IMP++.  Note that the \textsf{thread} cell has multiplicity ``*'',
 meaning that there could be zero, one or more instances of that cell
 in the configuration at any given time.  This multiplicity information
@@ -264,7 +264,7 @@ inferred (and added by the \K tool at compile time) from the
 definition of the configuration above, as there is only one correct
 way to complete the configuration context of these rules in order to
 match the configuration declared above.  To better understand what we
-mean by ``correct way'', you are refered to the journal \K overview
+mean by ``correct way'', you are referred to the journal \K overview
 paper, mentioned in the abstract of the IMP definition (note that
 ``configuration abstraction'' was called ``context transforming'' in
 that paper).  In our case here, it means that the \textsf{k} and
@@ -379,13 +379,13 @@ can be reduced with semantic rules) to the front of the computation,
 then reduce it, then use cooling rules to reconstruct a term over the
 original syntax of the language, then heat again and
 non-deterministically pick another redex, and so on and so forth
-without losing any oportunities to apply semantic rules.
+without losing any opportunities to apply semantic rules.
 Nevertheless, these unrestricted heating/cooling rules may create an
-immense, often infeasibly large space of possibilities to analyze.
+immense, often unfeasibly large space of possibilities to analyze.
 Super-heating/cooling implement an optimization which works well with
 other implementation choices made in the current \K tool.  Recall from
 the detailed description of the IMP language semantics that
-(theoretical) reversible rules like above are resticted to complementary
+(theoretical) reversible rules like above are restricted to complementary
 conditional rules of the form
 $$
 \begin{array}{l}
@@ -411,7 +411,7 @@ More precisely, whenever a rule tagged \texttt{supercool} is applied,
 the \K tool will continue to apply (unrestricted) cooling rules on the
 resulting computation disregarding the membership to $\KResult$ side
 condition, thus plugging everything back into its context,
-until no construct tagged \texttt{superhead} is left uncooled.  This
+until no construct tagged \texttt{superheat} is left uncooled.  This
 way, the heating rules now have the possibility to pick another
 evaluation order for the cooled fragment of computation.  This way, we
 can think of super-heating/cooling as marking fragments of computation
@@ -470,7 +470,7 @@ reduction to the builtin string concatenation operation. */
 Like variable lookup, this is also a supercool transition: we want it
 to count both in the non-determinism due to strict operations above it
 in the computation and in the non-determinism due to thread
-interleavings.  This rule also relies on \K's configurationa
+interleavings.  This rule also relies on \K's configuration
 abstraction. Without abstraction, you would have to also include the
 \textsf{thread} and \textsf{threads} cells. */
 
@@ -499,7 +499,8 @@ only these and define the \texttt{print} statement to only print
 {\em Printable} elements.  Alternatively, we could have had two
 similar rules, one for integers and one for strings.  The first rule
 below is a transition, because different threads may compete on the
-output buffer and we want to capture all behaviors. */
+output buffer and we want to capture all behaviors.  The second is
+structural for obvious reasons. */
 
   syntax Printable ::= #Int | #String
   rule <k> print(P:Printable,AEs:AExps => AEs) ...</k>
@@ -542,7 +543,7 @@ definition of KERNELC.  Note that the rule below does not need to be
 tagged as a transition, because the creation of the thread itself does
 not interfere with the execution of other threads.  Also, note that \K's
 configuration abstraction is at heavy work here, in two different places.
-First, the parrent thread's \textsf{k} and \textsf{env} cells are wrapped
+First, the parent thread's \textsf{k} and \textsf{env} cells are wrapped
 within a \textsf{thread} cell.  Second, the child thread's \textsf{k}
 and \textsf{env} cells are also wrapped within a \textsf{thread} cell.
 Why that way and not putting all these four cells together within the
@@ -574,12 +575,27 @@ needs not count as a computational step; we therefore tag it structural. */
 Empty blocks dissolve, like the \texttt{skip} statement of IMP.  For
 demonstration purposes, we tag it as a structural rule.  The body
 statement of a non-empty block is executed normally, making sure that
-the environment at the block entry point is saved in the computation
-to be recovered after the block body statement.  This is necessary
-because blocks can declare new variables, thus destroying the original
-environment.  This rule can also be structural, because what it
-effectively does is to take a snapshot of the current environment;
-this operation is arguably not a computational step. */
+the environment at the block entry point is saved in the computation,
+in order to be recovered after the block body statement.  This step is
+necessary because blocks can declare new variables having the same
+name as variables which already exist in the environment, and our
+semantics of variable declarations is to update the environment map in
+the declared variable with a fresh location.  Thus, variables which
+are shadowed lose their original binding, which is why we take a
+snapshot of the environment at block entrance and place it after the
+block body (see the semantics of environment recovery at the end of
+this module).  Note that any store updates through variables which are
+not declared locally are kept at the end of the block, since the store
+is not saved/restored.  An alternative to this environment save/restore
+approach is to actually maintain a stack of environments and to push a
+new layer at block entrance and pop it at block exit.  The variable
+lookup/assign/increment operations then also need to change, so we do
+not prefer that non-modular approach. Compilers solve this problem by
+statically renaming all local variables into fresh ones, to
+completely eliminate shadowing and thus environment
+saving/restoring.  The second rule below can also be structural,
+because what it effectively does is to take a snapshot of the current
+environment; this operation is arguably not a computational step. */
 
   rule {} => .                           [structural]
   rule <k> {S} => S ~> env(Rho) ...</k>
