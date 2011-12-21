@@ -9,10 +9,10 @@ kmod RUN is including DIJKSTRA-PROGRAMS
   macro run(Graph:Set,x:#Id) = <graph> Graph </graph> 
                               <shortest> x |-> 0 </shortest>
 
-  rule <graph_> x -_-> _ <_/graph>  
+  rule <graph>... x -_-> _ ...</graph>  
        <shortest> M:Map (. => x |-> infty) </shortest> 
-    if notBool(x in keys(M))   [structural]
-  rule <graph_> _ -_-> x <_/graph>  
+    when notBool(x in keys(M))   [structural]
+  rule <graph>... _ -_-> x ...</graph>  
        <shortest> M:Map (. => x |-> infty) </shortest> 
-    if notBool(x in keys(M))   [structural]
+    when notBool(x in keys(M))   [structural]
 endkm
