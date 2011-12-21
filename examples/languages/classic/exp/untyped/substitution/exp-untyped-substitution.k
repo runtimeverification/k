@@ -99,8 +99,8 @@ apply in context, so they were given separate semantics underneath. */
   rule I1:#Int + I2:#Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
   rule - I:#Int => -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2

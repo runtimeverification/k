@@ -91,8 +91,8 @@ module TYPES
 
 // Free type variables.  These should be generic and builtin, for all binders.
   syntax Types ::= "ftv" "(" TypeSchemas ")"
-  rule ftv(BT:Type) => .Types if basicType(BT)
-  rule ftv(Tv:Type) => Tv,.Types if typeVar(Tv)
+  rule ftv(BT:Type) => .Types when basicType(BT)
+  rule ftv(Tv:Type) => Tv,.Types when typeVar(Tv)
   rule ftv(T1:Type -> T2:Type) => union(ftv(T1),ftv(T2))
   rule ftv((forall Tvs:Types) T:Type) => diff(ftv(T),Tvs)
   rule ftv(.TypeSchemas) => .Types
@@ -124,8 +124,8 @@ module TYPES
 
 // This could also be generic: subterm relation?
   syntax #Bool ::= Type "inType" Type [:latex("{#1}\in_{\it Type}{#2}"):]
-  rule Tv inType BT  => false if typeVar(Tv) andBool basicType(BT)
-  rule Tv inType Tv' => Tv ==Bool Tv' if typeVar(Tv) andBool typeVar(Tv')
+  rule Tv inType BT  => false when typeVar(Tv) andBool basicType(BT)
+  rule Tv inType Tv' => Tv ==Bool Tv' when typeVar(Tv) andBool typeVar(Tv')
   rule Tv inType (T1 -> T2) => (Tv inType T1) orBool (Tv inType T2)
 
 // Type substitution: T[Ts / Tvs]* substitutes list of types Ts for
@@ -135,9 +135,9 @@ module TYPES
                 | Type "[" Type  "/"  Type  "]"  [:prec(2):]  // auxiliary
   rule T[.Types / .Types]* => T
   rule T[T1,Ts:Types / Tv,Tvs]* => T[T1 / Tv][Ts / Tvs]*
-  rule BT[T / Tv] => BT if basicType(BT) andBool typeVar(Tv)
+  rule BT[T / Tv] => BT when basicType(BT) andBool typeVar(Tv)
   rule Tv':Type[T / Tv] => if Tv' ==Bool Tv then T else Tv' fi
-    if typeVar(Tv')
+    when typeVar(Tv')
   rule (T1 -> T2)[T / Tv] => T1[T / Tv] -> T2[T / Tv]
 
 // Map application.  Should be generic and builtin.
@@ -222,14 +222,14 @@ arithmetic constructs. */
   rule <k> X:#Id => T:Type ...</k> <tenv>... X |-> T ...</tenv>
 
   rule <k> L:KLabel(T1:Type,,T2:Type) => (T1,T2 = int,int) ~> int ...</k>
-    if L ==Bool '_+_ orBool L ==Bool '_-_ orBool
+    when L ==Bool '_+_ orBool L ==Bool '_-_ orBool
        L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_
   rule <k> - T => (T = int) ~> int ...</k>
   rule <k> L(T1,,T2) => (T1,T2 = int,int) ~> bool ...</k>
-    if L ==Bool '_<_ orBool L ==Bool '_<=_ orBool L ==Bool '_>_ orBool
+    when L ==Bool '_<_ orBool L ==Bool '_<=_ orBool L ==Bool '_>_ orBool
        L ==Bool '_>=_ orBool L ==Bool '_==_ orBool L ==Bool '_!=_
   rule <k> L(T1,,T2) => (T1,T2 = bool,bool) ~> bool ...</k>
-    if L ==Bool '_and_ orBool L ==Bool '_or_
+    when L ==Bool '_and_ orBool L ==Bool '_or_
 
   rule <k> not T => (T = bool) ~> bool ...</k>
   rule <k> if T then T1 else T2 => (T,T1 = bool,T2) ~> T1 ...</k>
@@ -358,7 +358,7 @@ appear in the equations. */
     => <eqn> T1 = T1' </eqn> <eqn> T2 = T2' </eqn>
 
   rule <eqn> (T = Tv) => (Tv = T) </eqn>
-    if typeVar(Tv) andBool notBool(typeVar(T))
+    when typeVar(Tv) andBool notBool(typeVar(T))
 
 /*@ When an equation contains a variable, it can be added as a binding
 to the mgu.  While we know that the variables in the domain of the mgu
@@ -371,7 +371,7 @@ remaining equations by applying the new mgu binding to them. */
 
   rule <eqns> Eqns:Bag <eqn> Tv = T </eqn> => refine(Eqns,Tv,T) </eqns>
        <mgu> Theta => Tv |-> T refine(Theta,Tv,T) </mgu>
-    if notBool(Tv inType T)
+    when notBool(Tv inType T)
 
   syntax Map ::= "refine" "(" Map "," Type "," Type ")"
   rule refine(.Map,_,_) => .Map
