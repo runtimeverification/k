@@ -6,7 +6,7 @@ module BINDER is
   syntax K ::= #Id
 
   rule isBinder or X(X:#Id) => true
-  rule isBinder or X(K:K) => true if isBinder(K)
+  rule isBinder or X(K:K) => true when isBinder(K)
 end module
 
 module SUBSTITUTION 
@@ -35,7 +35,7 @@ module SUBSTITUTION
            visitedL(L)(visitedK(id(N)) 
                 visitedL(,,) eval (beta K' [id(N)/X]), then apply [K/Y])
       <_/k> <nextId>N:#Nat => sNat N</nextId>
----    if Y =/=Bool X [structural] ---renaming bound variables
+---   when Y =/=Bool X [structural] ---renaming bound variables
   rule eval visitedK(K'), then apply [ K / Y ] => beta K'[K/Y] [structural]
 
   macro beta K':K [K:K/Y:#Id] 

@@ -22,7 +22,7 @@ module K-VISITOR imports K-WRAPPERS
     => visit K1 applying A if Pred
     visitedL(~>) 
        visit K2 applying A if Pred
-    if K1 =/=Bool . andBool  K2 =/=Bool . 
+   when K1 =/=Bool . andBool  K2 =/=Bool . 
     [structural]
   rule visiting .List{K} applying A if Pred 
     => visitedK(.List{K}) 
