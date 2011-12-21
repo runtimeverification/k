@@ -65,6 +65,6 @@ module LAMBDAPP
  We also exclude print as it is side-effecting.
 */
   rule 'k-result(X:#Id V:Val) => true 
-   if X =/=Bool print andBool X =/=Bool ite
+   when X =/=Bool print andBool X =/=Bool ite
 
 end module

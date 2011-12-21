@@ -228,8 +228,8 @@ KOOL).  */
   rule Str1:#String + Str2:#String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
   rule - I => -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
@@ -243,7 +243,7 @@ KOOL).  */
 
   rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
   rule arrayRef(_,L,M:#Nat)[N] => lookup(L +Int N)
-    if N >=Nat 0 andBool N <Nat M   [:structural:]
+    when N >=Nat 0 andBool N <Nat M   [:structural:]
 
   rule sizeOf(arrayRef(_,_,N)) => N
 
@@ -263,17 +263,17 @@ KOOL).  */
   rule <k> while E:Exp do S
     => if E then {S while E do S} else {} ...</k> [:structural:]
   rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out>
-    if typeOf(V) ==Bool int orBool typeOf(V) ==Bool string    [:transition:]
+    when typeOf(V) ==Bool int orBool typeOf(V) ==Bool string    [:transition:]
   rule print(.Vals); => . [:structural:]
 
   rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
        <busy> Busy:Set => Busy -Set keys(H) </busy>
   rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
        <busy> Busy (. => SetItem(V)) </busy>
-    if notBool(V in Busy)   [:transition:]
+    when notBool(V in Busy)   [:transition:]
   rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
   rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
-    if N >Nat 0
+    when N >Nat 0
   // used prefix notation for -Int because of parsing problems
   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
        <busy>... SetItem(V)=>. ...</busy>
@@ -310,8 +310,8 @@ KOOL).  */
   rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural:]
 
 /*@ \subsection{Changes to SIMPLE Semantics}
 We extend/change the semantics of several SIMPLE constructs in order
@@ -469,8 +469,8 @@ Like in untyped KOOL. */
 Like in untyped KOOL. */
 
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
-    if notBool(X in keys(Env))  [:structural:]
-  context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
+    when notBool(X in keys(Env))  [:structural:]
+  context ('_._(`[HOLE`]:K,,_)) when (`[HOLE`]:K =/=Bool super)
   rule <k> _._(objectClosure(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X) 
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
@@ -494,9 +494,9 @@ rules below are identical to those in untyped KOOL. */
 
   rule <k> _`(_`)((X => _._(this,X)),_) ...</k>
        <env> Env </env>
-    if notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [:structural:]
 
-  context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
+  context '_`(_`)('_._(`[HOLE`]:K,,_),,_) when `[HOLE`]:K =/=Bool super 
 
   rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
@@ -509,7 +509,7 @@ rules below are identical to those in untyped KOOL. */
     [:structural:]
 
   context '_`(_`)(`[HOLE`]:K,,_)
-       if getKLabel `[HOLE`]:K ==Bool '_`(_`) orBool
+       when getKLabel `[HOLE`]:K ==Bool '_`(_`) orBool
           getKLabel `[HOLE`]:K ==Bool '_`[_`]
 
   rule <k> '_`(_`)((lookup(L) => V),,_) ...</k>
@@ -557,7 +557,7 @@ Like in untyped KOOL. */
         instanceOf Class => true
   rule objectClosure((_ <envStack> ListItem(Class1::_)
                        => . ...</envStack>)) instanceOf Class2 
-    if Class1 =/=Bool Class2  [:structural:]
+    when Class1 =/=Bool Class2  [:structural:]
   rule objectClosure((_ <envStack> .List </envStack>)) instanceOf Class
     => false
  
@@ -574,7 +574,7 @@ can indeed be cast to the claimed type. */
 Like in untyped KOOL. */
 
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
-    if notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [:structural:]
 
   context lvalue(_._([HOLE],_))
   rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
@@ -594,7 +594,7 @@ Like in untyped KOOL. */
                     ...</envStack>,X) => lookup(L)  [:structural:]
   rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)
                             => . ...</envStack>, X)
-    if notBool(X in keys(Env))                      [:structural:]
+    when notBool(X in keys(Env))                      [:structural:]
 
 //@ \subsection{Auxilliary operations and rules}
 
@@ -614,7 +614,7 @@ The subclass relation introduces a subtyping relation. */
   rule <k> subtype(class Class1, class Class)
         => subtype(class Class2, class Class) ...</k>
        <className> Class1 </className> <extends> Class2 </extends>
-    if Class1 =/=Bool Class  [:structural:]
+    when Class1 =/=Bool Class  [:structural:]
   rule subtype((T1:Type,T2:Type,Ts:Types),(T1':Type,T2':Type,Ts':Types))
     => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))  [:structural:]
   rule subtype(.Types,.Types) => true  [:structural:]
@@ -627,7 +627,7 @@ the subtype relation above.  */
   rule unsafeCast(objectClosure(<crntClass>_:K </crntClass> Obj), class Class)
     => objectClosure(<crntClass> Class </crntClass> Obj)
     [:structural:]
-  rule unsafeCast(V,T) => V if typeOf(V) ==Bool T  [:structural:]
+  rule unsafeCast(V,T) => V when typeOf(V) ==Bool T  [:structural:]
 
 /*@ \subsubsection{Generic guard}
 A generic computational guard (should be builtin): it allows the

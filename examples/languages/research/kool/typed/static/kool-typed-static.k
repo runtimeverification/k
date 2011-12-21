@@ -249,7 +249,7 @@ although the function tasks are now called method tasks. */
   rule if bool then stmt else stmt => stmt
   rule while bool do stmt  => stmt
   rule return; => stmt
-  rule print(T,Ts => Ts);  if T ==Bool int orBool T ==Bool string
+  rule print(T,Ts => Ts);  when T ==Bool int orBool T ==Bool string
   rule print(.Types); => stmt
   rule spawn stmt => stmt
   rule acquire T; => stmt
@@ -293,7 +293,7 @@ at the end of this module). */
 
   rule <k> var X : T ; => checkType(T) ~> stmt ...</k>
        <ctenvT> Rho (. => X|->T) </ctenvT>
-    if notBool(X in keys(Rho))
+    when notBool(X in keys(Rho))
 
   rule <k> var X : T; => stuck(var X : T;) ...</k>
        <ctenvT>... X|->_ ...</ctenvT>
@@ -377,7 +377,7 @@ checks for cycles. */
        <class>...
          <className> C </className> <extends> C' </extends>
        ...</class>
-    if notBool(C' in Classes)  [:structural:]
+    when notBool(C' in Classes)  [:structural:]
 
 // similarly, we should not need to mention the classes cell below
   rule <T> (<classes>... <className> C </className>
@@ -438,7 +438,7 @@ is co-variant in the codomain and contra-variant in the domain). */
        <className> C </className>
        <extends> C' </extends>
        <ctenv> Rho </ctenv>
-    if notBool(M in keys(Rho))
+    when notBool(M in keys(Rho))
     [:structural:]
 
   rule checkMethod(_,_,object) => .
@@ -496,7 +496,7 @@ fifth rule below reports an error when the \texttt{object} class is
 reached. */
 
   rule <k> X => _._(this,X) ...</k> <tenv> Rho </tenv>
-    if notBool(X in keys(Rho))
+    when notBool(X in keys(Rho))
 
   rule ltype(_._(E,X)) => _._(E,X)  [:structural:]
 
@@ -506,7 +506,7 @@ reached. */
   rule <k> _._(class (C1 => C2),X) ...</k>
        <className> C1:#Id </className> <extends> C2:#Id </extends>
        <ctenv> Rho </ctenv>
-    if notBool(X in keys(Rho))  [:structural:]
+    when notBool(X in keys(Rho))  [:structural:]
 
   rule <k> _._(class object,X) => stuck(_._(class object,X)) ...</k>
        <inClass> C </inClass>
@@ -612,7 +612,7 @@ The subclass relation introduces a subtyping relation.
   rule <k> checkSubtype(class C1, class C)
         => checkSubtype(class C2, class C) ...</k>
           <className> C1 </className> <extends> C2 </extends>
-    if C1 =/=Bool C
+    when C1 =/=Bool C
   rule checkSubtype(function from Ts to T, function from Ts' to T')
     => checkSubtype((T,Ts'),(T',Ts))
 

@@ -229,8 +229,8 @@ of Java.  In fact, the latter can be implemented in terms of
   rule Str1:#String + Str2:#String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
   rule - I => -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
@@ -309,10 +309,10 @@ constructs keep their semantics from SIMPLE. */
        <busy> Busy:Set => Busy -Set keys(H) </busy>
   rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
        <busy> Busy (. => SetItem(V)) </busy>
-    if notBool(V in Busy) [:transition:]
+    when notBool(V in Busy) [:transition:]
   rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
   rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
-    if N >Nat 0
+    when N >Nat 0
   // used prefix notation for -Int because of parsing problems
   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
        <busy>... SetItem(V)=>. ...</busy>
@@ -328,8 +328,8 @@ constructs keep their semantics from SIMPLE. */
   rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural:]
 
 
 /*@ \subsection{Changes to SIMPLE Semantics}
@@ -543,9 +543,9 @@ invocations see the entire object, as needed for dynamic method dispatch. */
 
 // To avoid parsing ambiguity, use _._(this,X) instead of this.X
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
-    if notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [:structural:]
 
-  context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
+  context ('_._(`[HOLE`]:K,,_)) when (`[HOLE`]:K =/=Bool super)
   rule <k> _._(objectClosure(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X)
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
@@ -583,7 +583,7 @@ method call or the array access.  */
 
   rule <k> _`(_`)((X => _._(this,X)),_) ...</k>
        <env> Env </env>
-    if notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [:structural:]
 
 --- We would like to write the rule above as
 ---   rule <k> (X => _._(this,X))(_) <_/k>
@@ -592,7 +592,7 @@ method call or the array access.  */
 --- but, unfortunately, our current Maude-based parser does not allow it
 --- Same applies to other rules
 
-  context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
+  context '_`(_`)('_._(`[HOLE`]:K,,_),,_) when `[HOLE`]:K =/=Bool super 
 
   rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
@@ -605,7 +605,7 @@ method call or the array access.  */
     [:structural:]
 
   context '_`(_`)(`[HOLE`]:K,,_)
-       if getKLabel `[HOLE`]:K ==Bool '_`(_`) orBool
+       when getKLabel `[HOLE`]:K ==Bool '_`(_`) orBool
           getKLabel `[HOLE`]:K ==Bool '_`[_`]
 
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
@@ -641,7 +641,7 @@ otherwise it returns \texttt{false}; it never gets stuck.  */
         instanceOf Class => true
   rule objectClosure(_ <envStack> ListItem(Class1::_)
                       => . ...</envStack>) instanceOf Class2 
-    if Class1 =/=Bool Class2  [:structural:]
+    when Class1 =/=Bool Class2  [:structural:]
   rule objectClosure(_ <envStack> .List </envStack>) instanceOf Class
     => false
  
@@ -668,7 +668,7 @@ evaluated, and finally the second rule initiates the lookup for the
 member's location based on the current class of the object. */
 
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
-    if notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [:structural:]
 
   context lvalue(_._([HOLE],_))
   rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
@@ -694,6 +694,6 @@ with the most concrete class and going up in the hierarchy. */
 // Otherwise, recurse through the object environment stack
   rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)
                             => . ...</envStack>, X)
-    if notBool(X in keys(Env))                      [:structural:]
+    when notBool(X in keys(Env))                      [:structural:]
 
 end module

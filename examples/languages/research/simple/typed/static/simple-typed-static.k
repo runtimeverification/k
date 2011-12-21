@@ -221,7 +221,7 @@ references). */
 
   rule <task> <k> var X : T; => stmt ...</k> </task>
        <gtenv> Rho:Map (. => X|->T) </gtenv>
-    if notBool(X in keys(Rho))
+    when notBool(X in keys(Rho))
 
   rule <task> <k> var X : T;
                => stuck(var X : T;) ...</k> </task>
@@ -311,13 +311,13 @@ there; otherwise, look its type up in the global environment. */
 
   rule <k> X => T ...</k> <tenv>... X |-> T ...</tenv>
   rule <k> X => T ...</k> <tenv> Rho </tenv> <gtenv>... X |-> T ...</gtenv> 
-    if notBool(X in keys(Rho))
+    when notBool(X in keys(Rho))
 
   rule <k> X => stuck(X) ...</k>
        <tenv> Rho </tenv> <gtenv> Rho':Map </gtenv>
        <out>... . => ListItem("Identifier \"" +String Id2String(X)
                          +String "\" not declared!") </out>
-    if notBool(X in keys(Rho) keys(Rho'))
+    when notBool(X in keys(Rho) keys(Rho'))
 
 /*@ We want the increment operation to apply to any lvalue, including
 array elements, not only to variables.  For that reason, we define a
@@ -353,7 +353,7 @@ integer in order to be allowed to be incremented, as seen in the rule
   rule T[.Types] => T
   rule sizeOf(arrayOf T) => int
   rule _`(_`)(function from Ts to T, Ts) => T
-    if Ts =/=Bool .Types
+    when Ts =/=Bool .Types
   rule _`(_`)(function from void to T, .Types) => T
   rule read() => int
 
@@ -389,7 +389,7 @@ exceptions can only have integer type. */
   rule while bool do stmt  => stmt
   rule <k> return T; => stmt ...</k> <return> T </return>
   rule return; => stmt
-  rule print(T,Ts => Ts);  if T ==Bool int orBool T ==Bool string
+  rule print(T,Ts => Ts);  when T ==Bool int orBool T ==Bool string
   rule print(.Types); => stmt
   rule try stmt catch(X) S => {var X:int; S}  [:structural:]
   rule throw int; => stmt

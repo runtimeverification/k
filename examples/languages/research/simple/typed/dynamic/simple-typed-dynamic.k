@@ -234,8 +234,8 @@ When done with the first pass, call \texttt{main()}. */
   rule Str1:#String + Str2:#String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 if I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 if I2 =/=Bool 0
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
   rule - I => -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
@@ -251,7 +251,7 @@ When done with the first pass, call \texttt{main()}. */
 
   rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
   rule arrayRef(_,L,M:#Nat)[N] => lookup(L +Int N)
-    if N >=Nat 0 andBool N <Nat M   [:structural:]
+    when N >=Nat 0 andBool N <Nat M   [:structural:]
   rule sizeOf(arrayRef(_,_,N)) => N
 
 //@ Define function call and return together, to see their relationship.
@@ -274,7 +274,7 @@ When done with the first pass, call \texttt{main()}. */
          (<return> T </return> _ => C)
        </control>
        <env> _ => Env </env>
-    if typeOf(V) ==Bool T
+    when typeOf(V) ==Bool T
 
   syntax Val ::= "nothing"
   rule return; => return nothing;   [: structural :]
@@ -283,7 +283,7 @@ When done with the first pass, call \texttt{main()}. */
 
   context ([HOLE] => lvalue([HOLE])) = _
   rule <k> loc(L)=V => V ...</k> <store>... L |-> (K => V) ...</store>
-    if typeOf(V) ==Bool typeOf(K:K)   [:transition:]
+    when typeOf(V) ==Bool typeOf(K:K)   [:transition:]
 
   rule {} => . [:structural:]
   rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
@@ -295,7 +295,7 @@ When done with the first pass, call \texttt{main()}. */
     => if E then {S while E do S} else {} ...</k> [:structural:]
 //@ We only allow printing integers and strings
   rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out>
-    if typeOf(V) ==Bool int orBool typeOf(V) ==Bool string  [:transition:]
+    when typeOf(V) ==Bool int orBool typeOf(V) ==Bool string  [:transition:]
   rule print(.Vals); => .  [:structural:]
 
   syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
@@ -314,10 +314,10 @@ When done with the first pass, call \texttt{main()}. */
         <busy> Busy:Set => Busy -Set keys(H) </busy>
    rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
-     if notBool(V in Busy)   [:transition:]
+     when notBool(V in Busy)   [:transition:]
    rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
    rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
-     if N >Nat 0
+     when N >Nat 0
    // used prefix notation for -Int because of parsing problems
    rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
         <busy>... SetItem(V)=>. ...</busy>
@@ -345,7 +345,7 @@ When done with the first pass, call \texttt{main()}. */
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
-    if typeOf(V) ==Bool T
+    when typeOf(V) ==Bool T
   rule <k> bindto(.Exps,.Vals) => . ...</k>  [:structural:]
 
 //@ \texttt{env}
@@ -378,7 +378,7 @@ the RHSes of the rules below, so we have to do it manually.  */
 //@ Sequences of locations
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              if N1  >Nat N2 [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 if N1 <=Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural:]
 
 end module
