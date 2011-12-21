@@ -25,7 +25,7 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
   rule pred (sNat N) => N
 
   rule zero? 0 => true
-  rule zero? N => false if N >Nat 0
+  rule zero? N => false when N >Nat 0
 
   rule cond true E E' => E
   rule cond false E E' => E'
