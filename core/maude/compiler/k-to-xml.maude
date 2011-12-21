@@ -426,6 +426,8 @@ var Eq : Equation .  var Eqs : EquationSet .
   var Sort Sort' : Sort .
   eq ss(subsort Sort < Sort' .) = subsort(\nterminal{Sort}, \nterminal{Sort'}) .
 
+  eq op(op Q : nil -> Ty [AS] .)
+   = syntax(Ty, \terminal{Q}, #Types(0) AS) [owise] .
   eq op(op Q : TyL -> Ty [AS] .)
    = syntax(Ty,
       mergeTypes(splitMixFix(string(Q)), TyL), #Types(arity(TyL)) AS)
