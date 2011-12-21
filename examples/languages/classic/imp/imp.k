@@ -10,9 +10,7 @@
 \organization{University of Illinois at Urbana-Champaign}
 */
 
-/*@
-
-\section{Abstract}
+/*@ \section{Abstract}
 This is the \K semantic definition of the classic IMP language.
 IMP is considered a folklore language, without an official inventor,
 and has been used in many textbooks and papers, often with slight
@@ -26,7 +24,7 @@ Since IMP is so simple, we will use its semantics as an opportunity to
 explain some of the main features of the \K  prototype tool.  Other
 features will be explained in other \K definitions coming as part of
 this distribution.  For a quick introduction to the \K prototype, you
-are referred to the README file at the root of this k-framework
+are referred to the README file at the root of this
 distribution.  If you are interested in reading more about \K, please
 check the following paper:
 \begin{quote}
@@ -45,9 +43,9 @@ programming} approach.  The various semantic features defined in a \K
 module can be reordered at will and can be commented using normal
 comments like in C/C++/Java.  If those comments start with
 `\texttt{@}' preceded by no space (e.g.,
-`\texttt{// @ {\textbackslash}section\{Variable declarations\}}'
+`\texttt{//{@} {\textbackslash}section\{Variable declarations\}}'
 or
-`\texttt{/* @ {\textbackslash}section\{Variable declarations\} * /}')
+`\texttt{/*{@} {\textbackslash}section\{Variable declarations\} {*}/}')
 then they are interpreted as formal \LaTeX\ documentation by the
 \texttt{kompile} tool when used with the option \texttt{-\,\!-pdf}
 (or \texttt{-\,\!-latex}).
@@ -100,9 +98,8 @@ instructions.
 \item How to customize the initial configuration using configuration
 variables and initializing them with \texttt{krun}.
 \end{itemize}
-
-\vspace*{3ex}
 */
+
 
 module IMP-SYNTAX
 /*@ \section{Syntax}
@@ -199,14 +196,27 @@ will discuss other particularities of the \K syntax on a by-need
 basis, as we define more complex languages (see other \K language
 definitions coming with this distribution of the \K tool). */
 
-
 module IMP
   imports IMP-SYNTAX
 /*@ \section{Semantics}
 This module defines the semantics of IMP\@.  
 Before you start adding semantic rules to a \K definition, you need to
 define the basic semantic infrastructure consisting of definitions for
-{\em values/results} and the {\em configuration}. */
+{\em values/results} and the {\em configuration}.  The semantic rules,
+or the {\em \K rules}, are of two types: {\em structural} and
+{\em computational}.  Intuitively, structural rules rearrange the
+configuration so that computational rules can apply.  Structural rules
+therefore do not count as computational steps.  A \K semantics can be
+though of as a generator of transition systems or Kripke structures,
+one for each program.  It is only the computational rules that create
+steps, or transitions, in the corresponding transition systems or
+Kripke structures, the structural rules being unobservable at this
+level.  By default, rules are assumed computational.  If you want to
+explicitly make a rule structural, then you should include the
+tag/attribute \texttt{structural} in square brackets right after the
+rule.  These attributes may be taken into account by different \K
+tools, so it is highly recommended to spend a moment after each rule
+and think whether you want it to be structural or computational.  */
 
 /*@ \subsection{Values and results}
 IMP only has two types of values, or results of computations: integers
@@ -244,16 +254,17 @@ written \texttt{\texttildelow>} in ASCII) as a separator.  \K provides
 a distinguished sort, $K$, for computations.  The extension of the
 abstract syntax of your language into computations is done
 automatically when you declare constructs using the \texttt{syntax}
-keyword, so the \K semantic rules can now uniformly operate only on 
+keyword, so the \K semantic rules can uniformly operate only on 
 terms of sort $K$.  The intuition for computation structures of the
 form $t_1 \kra t_2 \kra \cdots \kra t_n$ is that the listed tasks are
 to be processed in order.  The initial computation typically contains
 the original program as its sole task, but rules can then modify it
-into sequences of tasks.  The strictness attributes that we use as
-syntactic annotations to language constructs in \K actually correspond
+into task sequences.  The strictness attributes, used as
+annotations to language constructs, actually correspond
 to rules over computations.  For example, the \texttt{strict(2)}
 attribute of the assignment statement above corresponds to the
-following two rules, which are generated automatically by the \K tool:
+following two structural rules, which are generated automatically by
+the \K tool:
 $$
 \begin{array}{l}
 X \texttt{:=}\ E \ \ \Rightarrow \ \ E \kra X \ \texttt{:=}\ \square
@@ -325,7 +336,7 @@ IMP does not need it.
 The configuration of IMP is trivial: it only contains two cells, one
 for the computation and another for the state.  For good encapsulation
 and clarity, we place the two cells inside another cell, the ``top'' cell
-which is labeled $\top$. */
+which is labeled \textsf{T}. */
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
@@ -499,7 +510,7 @@ argument is allowed to be evaluated. */
 
 /*@ \subsubsection{While loop}
 We give the semantics of the \texttt{while} loop by unrolling.
-Note that the unrolling takes place only when the loop statement
+The unrolling takes place only when the loop statement
 reaches the top of the computation cell; otherwise the unrolling
 process may not terminate (recall that \K is a context-insensitive
 rewriting framework, not a reduction-based one).  Also, note that we
