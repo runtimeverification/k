@@ -5,7 +5,7 @@ use Time::HiRes qw(gettimeofday tv_interval);
 use File::Basename;
 use Text::Diff;
 use HTML::Entities;
-
+use XML::LibXML;
 
 my $globalTests = "";
 my $globalTotalTime;
@@ -61,19 +61,32 @@ sub runTest {
 	my $actualOutputFile = "$baseTestFile.stdout$testEnding";
 	my $actualErrorFile = "$baseTestFile.stderr$testEnding";
 	# print "$KRUN $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile\n";
-	unlink($actualOutputFile,$actualErrorFile);
+	unlink($actualOutputFile, $actualErrorFile);
+	if (!-e $pgmFile) {
+		return reportError($fullFilename, $timer, "Test expected file $pgmFile to exist, but it doesn't");
+	}
 	`$KRUN $krunFlag $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile`;
 	`echo >> $actualOutputFile`;
 	if (-s $actualErrorFile) {
-		reportError($fullFilename,$timer);
+		return reportError($fullFilename, $timer);
 	} else {
-    my $diffFile = "$baseTestFile.diff$testEnding";
-    unlink ($diffFile);\
+		my $diffFile = "$baseTestFile.diff$testEnding";
+		unlink ($diffFile);
 		`echo | cat $expectedOutputFile - |  diff -B - $actualOutputFile  >$diffFile`;
 		if (-s $diffFile) {
-			reportFailure($fullFilename,$timer);
+			my $diff = `cat $diffFile`;
+			my $expected = `cat $expectedOutputFile`;
+			my $message = "Here is expected:\n";
+			$message .= "---------------\n";
+			$message .= "$expected\n";
+			$message .= "---------------\n";
+			$message .= "Here is the diff:\n";
+			$message .= "---------------\n";
+			$message .= "$diff\n";
+			$message .= "---------------\n";
+			return reportFailure($fullFilename, $timer, $message);
 		} else {
-			reportSuccess($fullFilename,$timer);
+			return reportSuccess($fullFilename,$timer);
 		}
 	}
 }
@@ -82,6 +95,7 @@ sub runTest {
 sub reportFailure {
 	my ($name, $timer, $message) = (@_);
 #	$globalNumFailed++;
+	$message = encode($message);
 	my $inner = "<failure>$message</failure>";
 	print "$name failed\n";
 	return reportAny($name, $timer, $inner);	
@@ -89,6 +103,7 @@ sub reportFailure {
 sub reportError {
 	my ($name, $timer, $message) = (@_);
 #	$globalNumError++;
+	$message = encode($message);
 	my $inner = "<error>$message</error>";
 	print "$name erred\n";
 	return reportAny($name, $timer, $inner);	
@@ -96,6 +111,7 @@ sub reportError {
 sub reportSuccess {
 	my ($name, $timer, $message) = (@_);
 #	$globalNumPassed++;
+	$message = encode($message);
 	my $inner = "$message";
 	print "$name passed\n";
 	return reportAny($name, $timer, $inner);	
@@ -111,3 +127,9 @@ sub reportAny {
 	$globalTests .= "\t</testcase>\n";
 }
 
+sub encode {
+	my ($str) = (@_);
+	my $doc = XML::LibXML::Document->new('1.0', 'UTF-8');
+	my $node = $doc->createTextNode($str);
+	return $node->toString();
+}
