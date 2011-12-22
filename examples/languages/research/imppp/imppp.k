@@ -1,4 +1,4 @@
-/*!preamble
+/*!
 \setlength{\parindent}{1em}
 \title{IMP++}
 \author{Grigore Ro\c{s}u (\texttt{grosu@illinois.edu})}

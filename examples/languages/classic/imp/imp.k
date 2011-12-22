@@ -3,7 +3,7 @@
 // 1) Use an editor which can hide or color comments (K uses standard comments)
 // 2) Run the K pre-processor (kpp) on this file to remove all comments.
 
-/*!preamble
+/*!
 \setlength{\parindent}{1em}
 \title{IMP}
 \author{Grigore Ro\c{s}u (\texttt{grosu@illinois.edu})}

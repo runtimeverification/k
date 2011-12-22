@@ -2819,7 +2819,7 @@ sub pre_process
         # Freeze modules
     s/(kmod.*?endkm)/Freeze($&, "KMOD")/sge;
     
-    s/\/\*!preamble(.*?)\*\//
+    s/\/\*!(.*?)\*\//
     {
 	$preamble = $1;
 	""
