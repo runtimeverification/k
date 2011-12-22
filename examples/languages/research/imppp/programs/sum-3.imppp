@@ -12,7 +12,7 @@
 //
 // After kompilation, we can run the semantics like any realistic interpreter:
 //
-// bash$ krun programs/sumPgm-3.imppp --no-config
+// bash$ krun programs/sum-3.imppp --no-config
 // Add numbers up to (<= 0 to quit)? 10
 // Sum = 55
 // Add numbers up to (<= 0 to quit)? 100
@@ -22,7 +22,7 @@
 //
 // or
 //
-// bash$ echo 10 100 0 25 | krun programs/sumPgm-3.imppp --no-config
+// bash$ echo 10 100 0 25 | krun programs/sum-3.imppp --no-config
 // Add numbers up to (<= 0 to quit)? Sum = 55
 // Add numbers up to (<= 0 to quit)? Sum = 5050
 // Add numbers up to (<= 0 to quit)? bash$ 
@@ -36,7 +36,7 @@
 //
 // and then, after re-kompilation,
 //
-// bash$ krun programs/sumPgm-3.imppp --no-config --IN="ListItem(10) ListItem(100)"
+// bash$ krun programs/sum-3.imppp --no-config --IN="ListItem(10) ListItem(100)"
 // Add numbers up to (<= 0 to quit)? Sum = 55
 // Add numbers up to (<= 0 to quit)? Sum = 5050
 // Add numbers up to (<= 0 to quit)? 24

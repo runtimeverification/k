@@ -1,6 +1,6 @@
-// This is a slightly modified version of sumPgm-0.impp: it uses blocks and 
+// This is a slightly modified version of sum-0.imppp: it uses blocks and 
 // a print at the end.  When running krun on it, we should see the same
-// result configuration as for sumPgm0.imp, but with ListItem(55) in the
+// result configuration as for sum-0.imp, but with ListItem(55) in the
 // out cell.
 
 var n, s;
