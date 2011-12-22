@@ -1,7 +1,19 @@
-// Warning: this is a heavily commented K definition.  To turn off
-// the comments, you can do one of the following (or remove them manually):
-// 1) Use an editor which can hide or color comments (K uses standard comments)
-// 2) Run the K pre-processor (kpp) on this file to remove all comments.
+//
+// WARNING
+//
+// This is a heavily commented K definition, part of the K
+// tutorial.  To turn off the comments, you can do one of the
+// following (or remove them manually):
+//   1) Use an editor which can hide or color comments (K uses
+//      standard comments)
+//   2) Run the K pre-processor (kpp) on this file to remove all
+//      comments.
+// Moreover, since the purpose of the tutorial is to teach you K, the
+// language definition below may not be configured optimally as is.
+// For example, the initial configuration has no configuration variables.
+// Thus, some example programs may not run well with the provided
+// configuration.  You will be required to configure the K definition
+// appropriately and then rekompile it in order to run those programs.
 
 /*!
 \setlength{\parindent}{1em}
@@ -207,7 +219,7 @@ or the {\em \K rules}, are of two types: {\em structural} and
 {\em computational}.  Intuitively, structural rules rearrange the
 configuration so that computational rules can apply.  Structural rules
 therefore do not count as computational steps.  A \K semantics can be
-though of as a generator of transition systems or Kripke structures,
+thought of as a generator of transition systems or Kripke structures,
 one for each program.  It is only the computational rules that create
 steps, or transitions, in the corresponding transition systems or
 Kripke structures, the structural rules being unobservable at this

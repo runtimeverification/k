@@ -5,13 +5,11 @@
 //
 //                  <state color="red"> $STATE:Map </state>
 //
-// and then initialize that variable in krun as follows
-//   krun --STATE="n|->100 s|->0" programs/sumPgm-novars.imp
+// and then (after rekompilation) initialize that variable in krun as follows
+//   krun --STATE="n|->100 s|->0" programs/sum-novars.imp
 
+s:=0;
 while not(n<=0) do (
-  s:=0;
-  while not(n<=0) do (
-    s:=s+n;
-    n:=n+-1
-  )
+  s:=s+n;
+  n:=n+-1
 )
