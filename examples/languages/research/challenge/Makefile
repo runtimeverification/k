@@ -3,7 +3,7 @@
 LANGUAGE_NAME = CHALLENGE
 
 # these are the interesting modules in the language (used by make latex/pdf)
-LANGUAGE_MODULES = CHALLENGE-SYNTAX CHALLENGE-DESUGARED-SYNTAX CHALLENGE-SEMANTICS CHALLENGE
+LANGUAGE_MODULES = CHALLENGE-SYNTAX CHALLENGE
 
 #this is the basename of the main file
 MAIN_FILE = challenge
