@@ -1,3 +1,21 @@
+//
+// WARNING
+//
+// This is a heavily commented K definition, part of the K
+// tutorial.  To turn off the comments, you can do one of the
+// following (or remove them manually):
+//   1) Use an editor which can hide or color comments (K uses
+//      standard comments)
+//   2) Run the K pre-processor (kpp) on this file to remove all
+//      comments.
+// Moreover, since the purpose of the tutorial is to teach you K, the
+// language definition below may not be configured optimally as is.
+// For example, the initial configuration has no configuration
+// variables, the input/output cell are not connected to the IO, etc.
+// Thus, some example programs may not run well with the provided
+// configuration.  You will be required to configure the K definition
+// appropriately and then rekompile
+
 /*!
 \setlength{\parindent}{1em}
 \title{IMP++}
@@ -8,20 +26,20 @@
 /*@ \section{Abstract}
 This is the \K semantic definition of the IMP++ language.
 IMP++ extends the IMP language with the features listed below.  We
-strongly recommend the reader to familiarize with IMP and its \K
-definition before proceeding.
-\begin{itemize}
-\item Strings and concatenation of strings.  Strings are useful
+strongly recommend you to first familiarize yourself with the IMP
+language and its \K definition before proceeding.
+\begin{description}
+\item [Strings and concatenation of strings.]  Strings are useful
 for the \texttt{print} statement, which is discussed below.  For
 string concatenation, we use the same \texttt{+} construct that we use
 for addition.
-\item Variable increment.  We only add a pre-increment construct:
+\item [Variable increment.]  We only add a pre-increment construct:
 \texttt{++x} increments variable \texttt{x} and evaluates to the
 incremented value.  Variable increment makes the evaluation of
 expressions have side effects, and thus makes the evaluation strategies
 of the various language constructs have an influence on the set
 of possible program behaviors.
-\item Input and output.  IMP++ adds a \texttt{read()} expression
+\item [Input and output.]  IMP++ adds a \texttt{read()} expression
 construct which reads an integer number and evaluates to it, and 
 a variadic (i.e., it has an arbitrary number of arguments) statement
 construct \texttt{print(e1,e2,...,en)} which evaluates its arguments
@@ -29,13 +47,13 @@ and then outputs their values.  Note that the \K tool allows to
 connect the input and output cells to the standard input and output
 buffers, this way compiling the language definition into an
 interactive interpreter.
-\item Abrupt termination.  The \texttt{halt} statement simply halts
+\item [Abrupt termination.]  The \texttt{halt} statement simply halts
 the program.  The \K tool shows the resulting configuration, as if the
 program terminated normally.  We therefore assume that an external
 observer does not care whether the program terminates normally or
 abruptly, same like with \texttt{exit} statements in conventional
-programming languages like C.
-\item Dynamic threads. The statement \texttt{spawn s} starts a new
+programming languages like C\@.
+\item [Dynamic threads.] The statement \texttt{spawn s} starts a new
 concurrent thread that executes statement \texttt{s}.  The newly
 created thread is given at creation time the {\em environment} of its
 parent, so it can access all its parent's variables.  This allows for
@@ -43,22 +61,24 @@ the parent thread and the child thread to communicate; it also allows
 for races and ``unexpected'' behaviors, so be careful.
 For simplicity, we here assume a sequentially consistent shared memory
 model.  To experiment with other memory models, see the definition of
-KERNELC.
-\item Blocks and local variables.  IMP++ allows blocks enclosed by 
+KERNELC\@.
+\item [Blocks and local variables.]  IMP++ allows blocks enclosed by 
 curly brackets.  Also, IMP's global variable declaration construct is
 generalized to be used anywhere as a statement, not only at the
 beginning of the program.  As expected, the scope of the declared
 variables is from their declaration point till the end of the most
 nested enclosing block.
-\end{itemize}
+\end{description}
 
 \section{What You Will Learn Here}
 
 \begin{itemize}
 \item How to define a less trivial language in \K, as explained above.
 \item How to use the \texttt{superheat} and \texttt{supercool}
-attributes of the \K tool to exhaustively explore the space of
-interleavings between various points in a program.
+attributes of the \K tool to exhaustively explore the non-determinism
+due to underspecified evaluation strategies.
+\item How to use the \texttt{transition} attribute of the \K tool to
+exhaustively explore the non-determinism due to concurrency.
 \item How to connect certain cells in the configuration to the
 standard input and standard output, and thus turn the \texttt{krun}
 tool into an interactive interpreter for the defined language.
@@ -70,14 +90,14 @@ of a program using the \texttt{-\,\!-search} option of \texttt{krun}.
 
 module IMPPP-SYNTAX
 /*@ \section{Syntax}
-IMP++ adds several syntactic constructs to IMP.  Also, since the
+IMP++ adds several syntactic constructs to IMP\@.  Also, since the
 variable declaration construct is generalized to be used anywhere a
 statement can be used, not only at the beginning of the program, we
 need to remove the previous global variable declaration of IMP and
 instead add a variable declaration statement construct. */
 
 /*@ \subsection{The old IMP constructs}
-The following constructs are taken over from IMP.  For execution
+The following constructs are taken over from IMP\@.  For execution
 purposes, we add the \texttt{superheat} attribute to addition and
 division.  This attribute has no theoretical significance, in that it
 does not affect the semantics of the language in any way.  It only has
@@ -90,7 +110,7 @@ reasons the \K tool chooses an arbitrary but fixed order to evaluate
 the arguments of the strict language construct, thus possibly losing
 behaviors due to missed interleavings. This aspect was irrelevant in
 IMP, because its expressions had no side effects, but it becomes
-relevant in IMP++.  As explained in more detail below, the
+relevant in IMP++\@.  As explained in more detail below, the
 \texttt{superheat} attribute pairs with corresponding
 \texttt{supercool} attributes of rules (see the variable lookup and
 increment rules below).  These two attributes together tell the \K
@@ -122,13 +142,14 @@ expressions, that is, each expression in the list, will be evaluated.
 Note also that we have a special \texttt{\{\}} construct for empty
 blocks, in addition to a general \texttt{\{$\it Stmt$\}} block
 construct; we need both because we imported the syntax of statements
-from IMP unchanged, and IMP does not provide empty statements.  To
-have only one block construct, the latter, we would need to define
-semicolon-separated lists of statements with a construct of the form
-``${\it Stmts} ::= {\it List}\{{\it Stmt},{\it ";"}\}$'', and then define
-the syntax of blocks as \texttt{\{$\it Stmts$\}}.  However, several
-other changes would be needed in order to do that, so we prefer to
-keep two different syntactic constructs for blocks, instead. */
+from IMP unchanged, and IMP does not provide empty statements
+(\texttt{skip} is not empty).  To have only one block construct, we
+would need to define semicolon-separated lists of statements with a
+construct of the form
+``${\it Stmts} ::= {\it List}\{{\it Stmt},{\it ";"}\}$'',
+and then define the syntax of blocks as \texttt{\{$\it Stmts$\}}.
+However, several other changes would be needed in order to do that, so
+we prefer to keep two different syntactic constructs for blocks. */
 
   syntax AExp ::= #String
                 | "++" #Id               [prec(0)]
@@ -144,34 +165,32 @@ keep two different syntactic constructs for blocks, instead. */
 end module
 
 
-
 module IMPPP
   imports IMPPP-SYNTAX
 /*@ \section{Semantics}
-We next give the semantics of IMP++.  We start by first defining its
+We next give the semantics of IMP++\@.  We start by first defining its
 configuration, then we give the semantics of all the constructs
 borrowed from IMP, and finally the semantics of the new IMP++
-constructs.  To facilitate the semantics of threads, more specifically
+constructs. */
+
+/*@ \subsection{Configuration}
+The original configuration of IMP has been extended to include
+all the various additional cells needed for IMP++\@.
+To facilitate the semantics of threads, more specifically
 to naturally give them access to their parent's variables, we prefer a
-(rather conventional) semantics based on a split of the program state
-into an {\em environment} and a {\em store}.  An environment maps
+(rather conventional) split of the program state into an
+{\em environment} and a {\em store}.  An environment maps
 variable names into {\em locations}, while a store maps locations
 into values.  Stores are also sometimes called ``states'', or
 ``heaps'', or ``memory'', in the literature.  Like values, locations
 can be anything.  For simplicity, here we assume they are natural
-numbers. */
-
-/*@ \subsection{Configuration}
-The original configuration of IMP has been extended to include
-all the various additional cells needed for IMP++.  As explained
-above, the IMP state is now split into an environment and a store.
-Moreover, each thread has its own environment, so it knows where all
-the variables that it has access to (that includes its locally
-declared variables as well as the variables of its parent thread) are
-located in the store.  The store is shared by all threads.  For
+numbers. Moreover, each thread has its own environment, so it knows
+where all the variables that it has access to are located in the store
+(that includes its locally declared variables as well as the variables
+of its parent thread).  The store is shared by all threads.  For
 simplicity, we assume a sequentially consistent memory model in
-IMP++.  Note that the \textsf{thread} cell has multiplicity ``*'',
-meaning that there could be zero, one or more instances of that cell
+IMP++\@.  Note that the \textsf{thread} cell has multiplicity ``*'',
+meaning that there could be zero, one, or more instances of that cell
 in the configuration at any given time.  This multiplicity information
 is important for \K's {\em configuration abstraction} process, which
 will be explained shortly.  In short, it tells \K how to complete
@@ -179,8 +198,8 @@ rules which, in order to increase the modularity of the definition,
 choose to not mention the entire configuration context.  The
 \textsf{nextLoc} cell holds the next available store location,
 needed for the semantics of variable declarations.
-the \textsf{in} and \textsf{out} cells
-hold the input and the output buffers, as lists of items. */
+The \textsf{in} and \textsf{out} cells
+hold the input and the output buffers as lists of items. */
 
   configuration
     <T color="yellow">
@@ -193,8 +212,10 @@ hold the input and the output buffers, as lists of items. */
      <br/>
      <store color="white"> .Map </store>
      <nextLoc color="gray"> 0 </nextLoc>
-     <in color="magenta"> .List </in>
-     <out color="Orchid"> .List </out>
+     <in color="magenta" stream="stdin"> $IN:List </in>
+     <out color="Orchid" stream="stdout"> .List </out>
+//     <in color="magenta"> .List </in>
+//     <out color="Orchid"> .List </out>
     </T>
 // Replace the <in/> and <out/> cells with the next two in order to
 // initialize the input buffer through krun
@@ -275,7 +296,7 @@ it gives us the possibility to write our definitions in a way that may
 not require us to revisit existing rules when we change the configuration.
 Changes in the configuration are quite frequent in practice, typically
 needed in order to accommodate new language features.  For example,
-imagine that we initially did not have threads in IMP++.  There
+imagine that we initially did not have threads in IMP++\@.  There
 would be no need for the \textsf{thread} and \textsf{threads} cells in
 the configuration then, the cells \textsf{k} and \textsf{env} being simply
 placed at the top level in the \textsf{T} cell, together with the
@@ -284,10 +305,9 @@ same.  Thus, configuration abstraction allows you to not have to
 modify your rules when you make structural changes in your language
 configuration.
 
-As explained above when
-we discussed the \texttt{superheat} attribute to syntactic constructs,
-we annotate the variable lookup rule with the attribute
-\texttt{supercool}.  This effectively tells the \K tool to
+As explained above when we discussed the \texttt{superheat} attribute
+to syntactic constructs, we annotate the variable lookup rule with the
+attribute \texttt{supercool}.  This effectively tells the \K tool to
 exhaustively explore all the behaviors due to the non-determinism of
 addition and division.  We will discuss how supercooling and
 superheating work in our current implementation of the \K framework
@@ -338,11 +358,11 @@ reader to the \K semantics of IMP for their meaning. */
 
   rule <k> X := I => . ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (_ => I) ...</store> [transition]
+       <store>... N |-> (_ => I) ...</store>  [transition]
 
 // Sequential composition
 
-  rule S1:Stmt ; S2:Stmt => S1 ~> S2 [structural]
+  rule S1:Stmt ; S2:Stmt => S1 ~> S2  [structural]
 
 // Conditional
 
@@ -362,7 +382,7 @@ you take full advantage of them.
 As already mentioned, super-heating/cooling play no theoretical or
 foundational role in \K.  Theoretically, the heating/cooling rules in
 \K are fully reversible and unconstrained by side conditions as we
-showed in the semantics of IMP.  For example, the theoretical
+showed in the semantics of IMP\@.  For example, the theoretical
 heating/cooling rules corresponding to the \texttt{strict} attribute
 of division are the following:
 $$
@@ -446,9 +466,10 @@ interleavings are behaviorally equivalent for most purposes. For
 example, the fact that a thread computes a step $8\texttt{+}3
 \Rightarrow 11$ is likely irrelevant for the other threads, so one may
 not want to consider it as an observable transition in the space of
-interleavings.  Since the \K tool cannot know which transitions need
-to be explored and which do not, its approach is to let the user say
-it explicitly.  The rules tagged with \texttt{transition}, like the
+interleavings.  Since the K tool cannot know without help which
+transitions need to be explored and which do not, our approach is to
+let the user say so explicitly with a ``transition'' attribute.
+The rules tagged with \texttt{transition}, like the
 variable lookup and assignment rules above, are the only ones
 considered as transitions when exploring a program's transition system
 (with search or model-checking). */
@@ -497,15 +518,17 @@ empty list of arguments.  We only want to allow printing integers and
 strings, so we define a {\em Printable} syntactic category including
 only these and define the \texttt{print} statement to only print
 {\em Printable} elements.  Alternatively, we could have had two
-similar rules, one for integers and one for strings.  The first rule
-below is a transition, because different threads may compete on the
-output buffer and we want to capture all behaviors.  The second is
-structural for obvious reasons. */
+similar rules, one for integers and one for strings.  Recall that,
+currently, \K's lists are cons-lists, so we cannot simply rewrite the
+head of a list ($P$) into a list ($\kdot$).  The first rule below is a
+transition, because different threads may compete on the output buffer
+and we want to capture all behaviors.  The second rule is structural
+because we do not want it to count as a computational step. */
 
   syntax Printable ::= #Int | #String
   rule <k> print(P:Printable,AEs:AExps => AEs) ...</k>
-       <out>... . => ListItem(P) </out>    [transition]
-  rule print(.AExps) => .                  [structural]
+       <out>... . => ListItem(P) </out>  [transition]
+  rule print(.AExps) => .  [structural]
 // Luckily, the above worked this time.  However, we sometimes need
 // to help K's parser, telling it explicitly what is a subsort of
 // what, with productions like the one below.
@@ -530,8 +553,7 @@ returned normally or abruptly using a \texttt{return} statement).
 Note again the configuration abstraction at work: the \textsf{k} cell
 will be automatically embedded in a \textsf{thread} cell. */
 
-  rule <threads>... <k> halt ...</k> ...</threads>
-    => <threads> .Bag </threads>
+  rule <threads>... <k> halt ...</k> ...</threads> => <threads> .Bag </threads>
 
 /*@ \subsubsection{Spawn thread}
 A spawned thread is passed its parent's environment at creation time.
@@ -539,7 +561,7 @@ The \texttt{spawn} statement in the parent thread is immediately
 dissolved so the parent thread can continue its execution.  We only
 consider a sequentially consistent shared memory model for IMP++, but
 other memory models can also be defined in \K; see, for example, the
-definition of KERNELC.  Note that the rule below does not need to be
+definition of KERNELC\@.  Note that the rule below does not need to be
 tagged as a transition, because the creation of the thread itself does
 not interfere with the execution of other threads.  Also, note that \K's
 configuration abstraction is at heavy work here, in two different places.
@@ -572,7 +594,7 @@ needs not count as a computational step; we therefore tag it structural. */
   rule <thread>... <k> .K </k> ...</thread> => .  [structural]
 
 /*@ \subsubsection{Blocks}
-Empty blocks dissolve, like the \texttt{skip} statement of IMP.  For
+Empty blocks dissolve, like the \texttt{skip} statement of IMP\@.  For
 demonstration purposes, we tag it as a structural rule.  The body
 statement of a non-empty block is executed normally, making sure that
 the environment at the block entry point is saved in the computation,
@@ -597,9 +619,8 @@ saving/restoring.  The second rule below can also be structural,
 because what it effectively does is to take a snapshot of the current
 environment; this operation is arguably not a computational step. */
 
-  rule {} => .                           [structural]
-  rule <k> {S} => S ~> env(Rho) ...</k>
-       <env> Rho:Map </env>              [structural]
+  rule {} => .  [structural]
+  rule <k> {S} => S ~> env(Rho) ...</k> <env> Rho:Map </env>  [structural]
 
 /*@ \subsubsection{Variable declaration}
 We allocate a new location for each newly declared variable and
@@ -609,7 +630,7 @@ initialize it with 0. */
        <env> Rho => Rho[N/X] </env>
        <store>... . => N |-> 0 ...</store>
        <nextLoc> N => N +Int 1 </nextLoc>
-  rule var .Ids => .                        [structural]
+  rule var .Ids => .  [structural]
 
 /*@ \subsubsection{Auxiliary operations}
 We only have one auxiliary operation in IMP++, the environment
@@ -622,7 +643,7 @@ are structural, because we do not want them to count as computational
 steps in the transition system of a program. */
 
   syntax K ::= "env" "(" Map ")"
-  rule (env(_) => .) ~> env(_)                          [structural]
+  rule (env(_) => .) ~> env(_)  [structural]
   rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>  [structural]
 
 end module
