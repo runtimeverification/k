@@ -631,7 +631,7 @@ erase_temp();
 foreach (@ARGV) {
     if (($language_file_name eq "?") && !/^-/) {
 #	$language_file_name = $_;
-	$language_file_name = getFullName($_);
+	$language_file_name = get_full_name($_);
     }
     elsif (($language_module_name eq "?") && !/^-/) {
 	$language_module_name = $_;
