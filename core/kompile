@@ -190,6 +190,7 @@ my $short_help_message =
   -h (or -help) : print this message and exit
   -v (or -verbose) : verbose mode
   -m (or -maudify) : only maudify, do not kompile
+  -c (or -compile) : only compile, do not maudify
   -lint : only maudify and sanity checks, do not kompile
   -l (or -lang or -language) <module_name> : start module
   -file : the input source file (optional)
