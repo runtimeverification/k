@@ -139,8 +139,9 @@ printResult config result = do
     String outputMode <- getVal config "output-mode"
     case outputMode of
         "none" -> return ()
-        "raw" -> T.putStrLn result
+        "raw" -> T.putStrLn "" >> T.putStrLn result
         "pretty" -> do
+            T.putStrLn ""
             case parse kBag "" (T.unpack result) of
                 Left err -> do
                     putStrLn "Warning: unable to parse/pretty-print result term:"
