@@ -202,7 +202,7 @@ KOOL).  */
                        L +Nat 1 .. L +Nat N |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
-  context var _[[HOLE]]:_ ;
+  context var _[HOLE]:_ ;
 
   syntax #Id ::= "$1" | "$2"
   rule var X[N1,N2,Vs] : arrayOf arrayOf T; =>
@@ -220,7 +220,7 @@ KOOL).  */
        <env>...X|->L...</env>
        <store>...L|->V...</store> [:transition:]
 
-  context ++([HOLE] => lvalue([HOLE]))
+  context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
 
@@ -252,7 +252,7 @@ KOOL).  */
 
   rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
 
-  context ([HOLE] => lvalue([HOLE])) = _
+  context (HOLE => lvalue(HOLE)) = _
 
   rule {} => . [:structural:]
   rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
@@ -286,8 +286,8 @@ KOOL).  */
   syntax Val ::= "loc" "(" #Nat ")"
   rule <k> lvalue(X) => loc(L:#Nat) ...</k>
        <env>... X|->L ...</env>  [:structural:]
-  context lvalue(_[[HOLE]])
-  context lvalue([HOLE][_])
+  context lvalue(_[HOLE])
+  context lvalue(HOLE[_])
   rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store> [:transition:]
@@ -470,7 +470,7 @@ Like in untyped KOOL. */
 
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
     when notBool(X in keys(Env))  [:structural:]
-  context ('_._(`[HOLE`]:K,,_)) when (`[HOLE`]:K =/=Bool super)
+  context ('_._(HOLE:K,,_)) when (HOLE:K =/=Bool super)
   rule <k> _._(objectClosure(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X) 
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
@@ -496,7 +496,7 @@ rules below are identical to those in untyped KOOL. */
        <env> Env </env>
     when notBool(X in keys(Env))  [:structural:]
 
-  context '_`(_`)('_._(`[HOLE`]:K,,_),,_) when `[HOLE`]:K =/=Bool super 
+  context '_`(_`)('_._(HOLE:K,,_),,_) when HOLE:K =/=Bool super 
 
   rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
@@ -508,9 +508,9 @@ rules below are identical to those in untyped KOOL. */
        <envStack>... ListItem(Class :: _) EStack </envStack>
     [:structural:]
 
-  context '_`(_`)(`[HOLE`]:K,,_)
-       when getKLabel `[HOLE`]:K ==Bool '_`(_`) orBool
-          getKLabel `[HOLE`]:K ==Bool '_`[_`]
+  context '_`(_`)(HOLE:K,,_)
+       when getKLabel HOLE:K ==Bool '_`(_`) orBool
+          getKLabel HOLE:K ==Bool '_`[_`]
 
   rule <k> '_`(_`)((lookup(L) => V),,_) ...</k>
        <store>... L |-> V ...</store>
@@ -576,7 +576,7 @@ Like in untyped KOOL. */
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
     when notBool(X in keys(Env))  [:structural:]
 
-  context lvalue(_._([HOLE],_))
+  context lvalue(_._(HOLE,_))
   rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
                            <envStack>...
                              ListItem(Class :: EnvC) EStack

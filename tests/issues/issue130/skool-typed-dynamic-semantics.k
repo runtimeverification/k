@@ -79,7 +79,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
        [large]
 
 --- Array declaration
-  context var X[[HOLE]] : T ;
+  context var X[HOLE] : T ;
   rule [decl-array]:
        <k> var X[N:Nat] : T[]; => . <_/k> 
        <env> Env => Env[L/X] </env>@latex("\\kBR")
@@ -143,7 +143,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- The semantics of the auxilliary l-value operation is defined below.
 --- For now, all we need to know is that it takes an expression and evaluates
 --- to a location value, also introduced below with the auxilliary operations.
-  context ++([HOLE] => l-value([HOLE]))
+  context ++(HOLE => l-value(HOLE))
 --- l-value eventually produces a location value:
   rule [increment]:
        <k> ++loc(L) => I +Int 1 <_/k>
@@ -195,7 +195,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- Case 2.1: called through a proper object (not super), so dynamic dispatch
 --- Then evaluate the object espression and lookup method from top of its environment
-  context '_`(_`)('_._(`[HOLE`]:K,,_),,_) if `[HOLE`]:K =/=Bool super 
+  context '_`(_`)('_._(HOLE:K,,_),,_) if HOLE:K =/=Bool super 
   rule <k> '_`(_`)(('_._(obj(_,L),,X) => lookupMember(Envs:BagItem, X)),,_) <_/k>
        <store_> L |-> objEnv(Envs) <_/store>
 
@@ -300,7 +300,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 
 --- Case 1: member access through a proper object (not super)
 --- Then evaluate the object expression and lookup member starting with current class (static scoping)
-  context ('_._(`[HOLE`]:K,,_)) if (`[HOLE`]:K =/=Bool super)
+  context ('_._(HOLE:K,,_)) if (HOLE:K =/=Bool super)
   rule <k> _._(obj(C,L),X) => lookupMember(<envStack>  (C :: EnvC) EStack </envStack>, X) <_/k>@latex("\\kBR")
        <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
        [large]
@@ -346,7 +346,7 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- Like for increment, we first compute the l-value of the left-hand-side.
 --- Then we cast the assigned value to the type at that l-value
 --- (i.e., the type of the value stored there, because we do not change the types of store cells).
-  context ([HOLE] => l-value([HOLE]))=_;
+  context (HOLE => l-value(HOLE))=_;
   rule [assignment]:
        <k> loc(L)=V1; => . <_/k>
        <store_> L |-> (V2 => upcast(V1,typeOf(V2))) <_/store>@latex("\\kBR")
@@ -426,15 +426,15 @@ kmod SKOOL-TYPED-DYNAMIC-SEMANTICS is including SKOOL-TYPED-DYNAMIC-DESUGARED-SY
 --- Implicit member access
   rule <k> l-value(X => _._(this,X)) <_/k> <env> Env </env> if notBool(X in keys(Env))
 --- Array element: evaluate the array and its index; then the array lookup rule above applies.
-  context l-value(_[[HOLE]])
-  context l-value([HOLE][_])
+  context l-value(_[HOLE])
+  context l-value(HOLE[_])
 --- Explicit member access
 --- First evaluate the object, then lookup its corresponding member staticaly.
 --- lookupMember is defined below; it evaluates to a lookup(L), also defined below,
 --- where L points to the actual member value.
 --- Note that object values are envStack cells, and that lookupMember takes such
 --- cells as first argument; these cells are also defined below.
-  context l-value(_._([HOLE],_))
+  context l-value(_._(HOLE,_))
   rule <k> l-value(_._(obj(C,L), X) => lookupMember(<envStack>(C :: EnvC:BagItem) EStack:List</envStack>, X)) <_/k>@latex("\\kBR")
        <store_> L |-> objEnv(<envStack_> (C :: EnvC) EStack </envStack>) <_/store>
    [large]

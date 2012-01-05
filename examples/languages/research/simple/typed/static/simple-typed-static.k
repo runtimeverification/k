@@ -233,7 +233,7 @@ references). */
   rule <k> var X:#Id : T:Type; => stmt ...</k>
        <tenv> Rho:Map => Rho[T / X] </tenv>
 
-  context var _[[HOLE]] : _;
+  context var _[HOLE] : _;
   rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;  [:structural:]
   syntax K ::= "checkDepth" "(" Types "," Type ")"
   rule checkDepth((int,Ts => Ts), (arrayOf T => T))   [:structural:]
@@ -331,7 +331,7 @@ integer in order to be allowed to be incremented, as seen in the rule
   rule ltype(X) => X                   [:structural:]
   rule ltype(E:Exp[Es:Exps]) => E[Es]  [:structural:]
 
-  context ++([HOLE] => ltype([HOLE]))
+  context ++(HOLE => ltype(HOLE))
   rule ++ int => int
   rule int + int => int
   rule string + string => string
@@ -362,7 +362,7 @@ to those for increment: the LHS of the assignment must be an lvalue
 and, in that case, it must have the same type as the RHS, which then
 becomes the type of the assignment. */
 
-  context ([HOLE] => ltype([HOLE])) = _
+  context (HOLE => ltype(HOLE)) = _
   rule T=T => T
 
 

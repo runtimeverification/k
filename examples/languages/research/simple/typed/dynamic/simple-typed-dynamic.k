@@ -181,7 +181,7 @@ and assign the right type ($T$) to the allocated array locations. */
                        L +Nat 1 .. L +Nat N |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
-  context var _[[HOLE]]:_ ;
+  context var _[HOLE]:_ ;
 
 /*@ The desugaring of multi-dimensional arrays into unidimensional
 ones is also similar to that in untyped SIMPLE, although we have to
@@ -225,7 +225,7 @@ When done with the first pass, call \texttt{main()}. */
        <env>...X|->L...</env>
        <store>...L|->V...</store> [:transition:]
 
-  context ++([HOLE] => lvalue([HOLE]))
+  context ++(HOLE => lvalue(HOLE))
 
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
@@ -281,7 +281,7 @@ When done with the first pass, call \texttt{main()}. */
 
   rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
 
-  context ([HOLE] => lvalue([HOLE])) = _
+  context (HOLE => lvalue(HOLE)) = _
   rule <k> loc(L)=V => V ...</k> <store>... L |-> (K => V) ...</store>
     when typeOf(V) ==Bool typeOf(K:K)   [:transition:]
 
@@ -331,8 +331,8 @@ When done with the first pass, call \texttt{main()}. */
   syntax Val ::= "loc" "(" #Nat ")"
   rule <k> lvalue(X) => loc(L:#Nat) ...</k>
        <env>... X|->L ...</env>  [:structural:]
-  context lvalue(_[[HOLE]])
-  context lvalue([HOLE][_])
+  context lvalue(_[HOLE])
+  context lvalue(HOLE[_])
   rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
 
 //@ \texttt{lookup}

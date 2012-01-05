@@ -457,7 +457,7 @@ endm
 mod K-POLYMORPHIC-VARIABLES is
   including K-TECHNIQUE .
   op ? : -> Anonymous [poly(0)] .
-  op [HOLE] : -> Anonymous [poly(0)] .
+  op HOLE : -> Anonymous [poly(0)] .
 endm
 
 mod K-CELL-ATTRS is

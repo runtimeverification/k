@@ -184,7 +184,7 @@ typed SIMPLE, so we do not discuss them much here. */
   syntax Type ::= "stmt"
 
   rule var .Types; => stmt   [: structural:]
-  context var _[[HOLE]] : _;
+  context var _[HOLE] : _;
   rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;  [:structural:]
   syntax K ::= "checkDepth" "(" Types "," Type ")"
   rule checkDepth((int,Ts => Ts), (arrayOf T => T))   [:structural:]
@@ -210,7 +210,7 @@ semantics, the \texttt{types(...)} operation stays the same. */
   rule ltype(X) => X                   [:structural:]
   rule ltype(E:Exp[Es:Exps]) => E[Es]  [:structural:]
 
-  context ++([HOLE] => ltype([HOLE]))
+  context ++(HOLE => ltype(HOLE))
   rule ++ int => int
   rule int + int => int
   rule string + string => string
@@ -232,7 +232,7 @@ semantics, the \texttt{types(...)} operation stays the same. */
   rule T[.Types] => T
   rule sizeOf(arrayOf T) => int
   rule read() => int
-  context ([HOLE] => ltype([HOLE])) = _
+  context (HOLE => ltype(HOLE)) = _
 
   rule {} => stmt
 /*@ Typing of blocks is the same as in statically typed SIMPLE,

@@ -286,7 +286,7 @@ This way, we will only need to give semantics to uni-dimensional arrays.
 First, the context rule below is used to request the evaluation of array
 dimensions: */
 
-  context var X[[HOLE]];
+  context var X[HOLE];
 
 /*@  Upon evaluating the array dimensions, the code generation rule below
 desugars multi-dimensional array declaration to uni-dimensional declarations.
@@ -390,7 +390,7 @@ The semantics of the auxiliary lvalue operation is defined below.
 For now, all we need to know is that it takes an expression and evaluates
 to a location value, also introduced below with the auxiliary operations. */
 
-  context ++([HOLE] => lvalue([HOLE]))
+  context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store>  [:transition:]
 
@@ -513,7 +513,7 @@ that appears in an assignment.  Like for the increment, all we need to know is
 that \texttt{lvalue(...)} eventually evaluates to a location value
 \texttt{loc(...)}. */
 
-  context ([HOLE] => lvalue([HOLE])) = _
+  context (HOLE => lvalue(HOLE)) = _
   rule <k> loc(L)=V => V ...</k>
        <store>... L|->(_=>V) ...</store> [:transition:]
 
@@ -800,8 +800,8 @@ corresponding store lookup operation. */
        <env>... X|->L ...</env>  [:structural:]
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
-  context lvalue(_[[HOLE]])
-  context lvalue([HOLE][_])
+  context lvalue(_[HOLE])
+  context lvalue(HOLE[_])
 // Finally, return the address of the desired object member
   rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
 

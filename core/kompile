@@ -1806,9 +1806,6 @@ sub maudify_module {
 	$require_k_main = 1;
 #    }
     
-# Step: [#] and  [HOLE] -> `[HOLE`] 
-    s!\[#\]!`[HOLE`]!sg;
-#    s!\[HOLE\]!`[HOLE`]!sg;
     
     
 # Step: resolve macros
@@ -2301,7 +2298,9 @@ sub on_the_fly_kvars {
     /gse;
     my $kvars = "";
     while (my ($key,$val) = each %kvar_decls) {
+      if ($key ne "HOLE") {
 	$kvars .= "kvar $key : $val ";
+      }
     }
     
     return $kvars;

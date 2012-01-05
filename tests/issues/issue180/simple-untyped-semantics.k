@@ -60,7 +60,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 //@ \subsection*{Variable declaration}
 
 //@ \subsection*{Array declaration}
-  context var X:#Id[_,`[HOLE`]:Exp,_];
+  context var X:#Id[_,HOLE:Exp,_];
   rule <k> var X[N:#Nat]; => . <_/k>
        <env> Env:Map => Env[L/X] </env>
        <store_> . => (L |-> array(sNat L, N)) sNat L..sNat L+Nat N |-> 0 <_/store>
@@ -103,7 +103,7 @@ kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
  For now, all we need to know is that it takes an expression and evaluates
  to a location value, also introduced below with the auxilliary operations.
 */
-  context ++([HOLE] => l-value([HOLE]))
+  context ++(HOLE => l-value(HOLE))
   rule <k> ++loc(L) => I:#Int +Int 1 <_/k>
        <store_> L |-> (I => I +Int 1) <_/store>
 
@@ -154,8 +154,8 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
 --- Local variable
   rule <k> l-value(X) => loc(L:#Nat) <_/k> <env_> X|->L <_/env>
 --- Array element: evaluate the array and its index; then the array lookup rule above applies.
-  context l-value(_[_,`[HOLE`]:Exp,_])
-  context l-value([HOLE][_])
+  context l-value(_[_,HOLE:Exp,_])
+  context l-value(HOLE[_])
 --- Finally, return the address of the desired object member
   rule <k> l-value(lookup(L)) => loc(L) <_/k>
 

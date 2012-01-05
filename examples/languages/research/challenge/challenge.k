@@ -103,7 +103,7 @@ module CHALLENGE imports CHALLENGE-SYNTAX
        <store>. => N2..N1 +Nat N2 |-> 0<_/store> <nextLoc>N2 => N1 +Nat N2</nextLoc>
   rule <k>free(N2); => .<_/k> <ptr>N2|->N1 => .<_/ptr>
        <store>Store:Map => Store[undef/N2..N1 +Nat N2]</store>
-  context *[HOLE]=_;
+  context *HOLE=_;
   rule <k>*N=V; => .<_/k> <store>N|->(_=>V)<_/store>
 
 --- Lists
@@ -190,7 +190,7 @@ module CHALLENGE imports CHALLENGE-SYNTAX
   syntax K ::= K box(~>) K [latex "{#1}\framebox{$\kra$}{#2}" strict]
              | K box(,,) K [latex "{#1}\framebox{,,}{#2}" strict]
 
-  context box(Label:KLabel)(_,,`[HOLE`]:K,,_)
+  context box(Label:KLabel)(_,,HOLE:K,,_)
 
 ---  op 'quote_  : -> KLabel[metadata "generated label"]
 ---  op 'unquote_ : -> KLabel[metadata "generated label"]
@@ -258,7 +258,7 @@ end module
 
 ---(
 ---mu just for functions
-   context mu_.[HOLE] 
+   context mu_.HOLE 
    rule <k>mu X.closure-lambda(Y,S,Env) => closure-lambda(Y,S,Env[N/X])<_/k>
         <store>. => N|->closure-lambda(Y,S,Env[N/X])<_/store> <nextLoc>N => sNat N</nextLoc>
 ---)

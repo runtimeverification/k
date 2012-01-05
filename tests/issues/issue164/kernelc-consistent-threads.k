@@ -29,7 +29,7 @@ kmod KERNELC-CONSISTENT-THREADS is including KERNELC-THREADS-SYNTAX
        <locks_> N |-> T => . <_/locks>
 
 
-  context 'spawn_('_`(_`)(_,,`[HOLE`]:K)) 
+  context 'spawn_('_`(_`)(_,,HOLE:K)) 
   rule <k> 'spawn_('_`(_`)(X:Id,,Vl:List{Val})) => T <_/k> 
        <next> T:Nat => T +Int 1 </next> 
        (. => <thread_> <k>'_`(_`)(X,,Vl)</k> <id> T </id> <_/thread>) 

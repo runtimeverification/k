@@ -70,7 +70,7 @@ kmod KERNELC-SEMANTICS is
     <fstack> . => X # Env:Map # K:K <_/fstack>
   [structural large]
 
-  context int _ = [HOLE]
+  context int _ = HOLE
   rule <k> int X => void <_/k> 
        <env_> . => (X |-> undef) <_/env> 
   [structural]
@@ -95,8 +95,8 @@ kmod KERNELC-SEMANTICS is
 
   rule <k> srandom(I) => void <_/k>
 
-  context *[HOLE]=_
-  context (*[HOLE])++
+  context *HOLE=_
+  context (*HOLE)++
   
   syntax Val ::= Int | void 
   syntax Exp ::= Val 

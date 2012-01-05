@@ -172,7 +172,7 @@ fmod META-K-MODULE is
     op '_`(_`) : KHybridLabel NeProperList -> KProper [none] .
     op '_`(_`) : KHybridLabel ResultList -> KResult [none] .
     op '_~>_ : K K -> K [none] .
-    op '`[HOLE`] : nil -> K [none] .
+    op 'HOLE : nil -> K [none] .
     op '_`(_`) : 'Map K -> K [none] .
     
   ) .
@@ -668,7 +668,7 @@ fmod META-ANONYMOUS-VARIABLE is
 
 
   op getAnonConsts : Module ~> TypeSet .
-  eq getAnonConsts(M) = '`[HOLE`] ; '? . ---getAnonConsts(getOps(M)) .
+  eq getAnonConsts(M) = 'HOLE ; '? . ---getAnonConsts(getOps(M)) .
 
   op getAnonConsts : OpDeclSet ~> SortSet .
   eq getAnonConsts(Op OPDS) = getAnonConsts(Op, OPDS) .
@@ -820,7 +820,7 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
   var Ty : Type .  var V : Variable .
 
   op hole : -> Term .
-  eq hole = '`[HOLE`]:K .
+  eq hole = 'HOLE:K .
 
   op removeHole : TermList ~> TermList .
   eq removeHole((T, Trl)) = if T == hole then removeHole(Trl) else T,removeHole(Trl) fi .

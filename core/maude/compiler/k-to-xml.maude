@@ -951,8 +951,8 @@ mod XML-PRINT-META is
   var Q Q' : Qid . var Ql : QidList .
   
   eq \constant{'?}{QIL} = \variable{'AnyVar}{QIL} .
-  eq \constant{'`[HOLE`]}{QIL} = \variable{'`[HOLE`]}{QIL}.
-  eq \variable{'`[HOLE`]}{QIL} = \variable{'\ensuremath`{\square`}}{QIL} .
+  eq \constant{'HOLE}{QIL} = \variable{'HOLE}{QIL}.
+  eq \variable{'HOLE}{QIL} = \variable{'\ensuremath`{\square`}}{QIL} .
   eq \variable{'?}{QIL} = \variable{'AnyVar}{QIL} .
   eq \variable{'AnyVar}{QIL} = '\AnyVar '`{ printSortQid(QIL) '`} .
   
