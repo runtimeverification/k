@@ -49,6 +49,8 @@ comma = return PP.comma
 integer i = return $ PP.integer i
 parens = liftM PP.parens 
 hang i = liftM (PP.hang i)
+nest i = liftM (PP.nest i)
+align = liftM PP.align
 hsep = liftM PP.hsep
 vsep = liftM PP.vsep
 hcat = liftM PP.hcat
@@ -161,7 +163,7 @@ instance Pretty KBag where
 instance Pretty BagItem where
     pretty (BagItem k) = text "BagItem" <> parens (pretty k)
     pretty (CellItem label content) =
-        hang 2 (ppStartTag label <$$> pretty content) <$$> ppEndTag label
+        align (nest 2 (ppStartTag label <$$> pretty content) <$$> ppEndTag label)
 
 ppStartTag label = green $ char '<' <> text label <> char '>'
 ppEndTag label = green $ text "</" <> text label <> char '>'
