@@ -9,7 +9,7 @@ module REF imports SEQ
              | * K [strict]
              | K := K [strict(2)]
 
-  context * [HOLE] := _
+  context * HOLE := _
   rule <k> ref V:KResult => N:#Nat <_/k> 
        <mem_> . => N |-> V <_/mem> <nextLoc> N => sNat N </nextLoc> 
   rule <k> * N => V <_/k> <mem_> N |-> V <_/mem> [transition]
