@@ -84,7 +84,8 @@ instance Pretty K where
     pretty (KApp klabel []) = pretty klabel
     pretty (KApp (KLabel ss) ks) = hsep $ zipSyntax ss ks
     pretty (KApp klabel ks) = pretty klabel <> parens (hsep $ punctuate comma (mapM pretty ks))
-    pretty FreezerHole = text "□"
+    --pretty FreezerHole = text "□"
+    pretty FreezerHole = text "HOLE"
     -- shouldn't happen:
     pretty (FreezerVar s) = red $ text s
 
