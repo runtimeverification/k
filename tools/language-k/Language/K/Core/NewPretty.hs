@@ -101,7 +101,7 @@ getListCons _ = Nothing
 plugFreezer :: K -> [K] -> K
 plugFreezer k ks = mapK (plug ks) k
     where plug :: [K] -> K -> K
-          plug _ (FreezerVar "`[HOLE`]") = FreezerHole
+          plug _ (FreezerVar "HOLE") = FreezerHole
           plug ks (FreezerVar var) = lookupK var ks
           plug _ k = k
 
