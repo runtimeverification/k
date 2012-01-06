@@ -128,6 +128,12 @@ zipSyntax _ _ = return []
 
 needsParens (Kra []) = False
 needsParens (KApp kl []) = not (isBuiltin kl)
+-- ugly special-case for Lists again
+needsParens (KApp klabel [k, KApp emptyList []])
+    | Just cons1 <- getListCons klabel
+    , Just cons2 <- getListCons emptyList
+    , cons1 == cons2
+    = False
 needsParens (KApp (KLabel kls) ks) = not (isSyntax (head kls) && isSyntax (last kls))
     where isSyntax (Syntax _) = True
           isSyntax _ = False
