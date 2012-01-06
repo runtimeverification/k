@@ -1245,7 +1245,7 @@ sub build_module_tree
     
 	my $temp = $_;
 
-    while ($temp =~ m/including([A-Z\s\-\+]+)/sg)
+    while ($temp =~ m/including([A-Z0-9\s\-\+]+)/sg)
     {
 		$req = "$1";
 		$req =~ s/^\s*//g;

@@ -231,12 +231,12 @@ my $short_help_message =
 sub terminate {
     print "\nERROR: $_[0]\n\n" if defined $_[0];
     print "Usage: 
-  $0 (-option)* <source_file>[.k|.kmaude|.maude] (-option)*
+  kompile (-option)* <source_file>[.k|.kmaude|.maude] (-option)*
 
   $short_help_message" if (!$verbose && !$help);
 
     print "Usage:
-  $0 (-option)* <source_file>[.k|.kmaude|.maude] (-option)*
+  kompile (-option)* <source_file>[.k|.kmaude|.maude] (-option)*
   
   This program takes a K language definition and translates
   it into a Maude executable specification.  The input K
@@ -2736,7 +2736,7 @@ sub addKandKLATEX
 	my $mod = $1 if $content =~ /kmod\s+(.*?)\s/sg;
 
 	# get list of imported modules
-	while ( $content =~ /\s+including([\sA-Z\-+]*)/sgm )
+	while ( $content =~ /\s+including([\sA-Z0-9\-+]*)/sgm )
 	{
 		$k = 1 if $1 =~ /\sK\s/sg;
 		$k_latex = 1 if $1 =~ /\sK-LATEX\s/sg;
