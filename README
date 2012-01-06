@@ -217,9 +217,8 @@ limit the amount of non-determinism by saying explicitly which rules you want to
 count as transitions, which operations should start superheating the
 computation, and which should cool down the computation to enable a different
 expression to be scheduled for evaluation.  This is done by associating tags to
-rules or operations, and then kompiling the definition with certain options
-stating which tags count as transitions and which as non-deterministic steps.
-See, again, the simple/untyped example (the Makefile shows the kompile options).
+rules or operations.  See the "transition", "superheating", and "supercooling"
+tags used and described in the imppp example.
 
 
 # Reporting Issues/Bugs/Feature requests

@@ -198,7 +198,7 @@ directory and have all of the test cases pass.
 If the above step succeeded, K can already generate LaTeX code for definitions.
 Executing
 
-    $ make latex
+    $ kompile <language> --latex
 
 in one of the examples directories, e.g., 
 
@@ -214,7 +214,7 @@ good-looking PDFs which are nicer to read than their ASCII counterparts.
 To test whether the generation of PDFs works, either use `pdflatex` to compile
 the `.tex` file obtained above, or execute
 
-    $ make pdf
+    $ kompile <language> --pdf
 
 in the `examples/languages/research/simple/untyped` directory.
 
