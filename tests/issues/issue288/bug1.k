@@ -5,7 +5,7 @@ module  BUG1-SYNTAX
 	   
   syntax Pgm ::= "program" Exp ";"
 		  
-  syntax K ::= Exp		  
+//  syntax K ::= Exp		  
   
 end module
 		  
