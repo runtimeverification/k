@@ -1,7 +1,7 @@
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-module Language.K.Core.NewPretty where
+module Language.K.Core.Prettier where
 
 import Control.Applicative ((<$>))
 import Data.Char (isAlphaNum)
@@ -13,8 +13,8 @@ import Language.K.Core.Syntax
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import Control.Monad.Reader
 
-prettyPrint :: (Pretty a) => PrettyConfig -> a -> IO ()
-prettyPrint conf p = do
+prettierPrint :: (Pretty a) => PrettyConfig -> a -> IO ()
+prettierPrint conf p = do
     PP.putDoc $ runReader (runKPP $ pretty p) conf
     putStrLn ""
 

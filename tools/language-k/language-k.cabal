@@ -15,11 +15,11 @@ Library
   Exposed-modules:
     Language.K.CellsToXml
     Language.K.Core.Parser
+    Language.K.Core.Prettier
     Language.K.Core.Syntax
     Data.Attoparsec.Extra
     Data.Attoparsec.Extra.Text
     Internal.Lexer
-    Language.K.Core.NewPretty
 
   Build-depends:
     base >= 4 && < 5,
