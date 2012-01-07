@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Language.K.Core.NewParser where
+module Language.K.Core.Parser where
 
 import Control.Applicative ((<$>))
 import qualified Data.Map as Map

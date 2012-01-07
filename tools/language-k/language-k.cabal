@@ -14,11 +14,11 @@ Library
 
   Exposed-modules:
     Language.K.CellsToXml
+    Language.K.Core.Parser
+    Language.K.Core.Syntax
     Data.Attoparsec.Extra
     Data.Attoparsec.Extra.Text
     Internal.Lexer
-    --TODO: remove:
-    Language.K.Core.NewParser
     Language.K.Core.NewPretty
 
   Build-depends:
