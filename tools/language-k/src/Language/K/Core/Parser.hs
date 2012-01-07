@@ -276,9 +276,3 @@ maudeIdEscape = char '`' >> (oneOf maudeIdSpecialChars <|> return ' ')
 -- in that they break a sequence of characters into several identifiers.
 maudeIdSpecialChars :: String
 maudeIdSpecialChars = "{}()[],"
-
--- TODO: move this?
-sepBy2 p sep = do { x <- p
-                  ; xs <- many1 (sep >> p)
-                  ; return (x:xs)
-                  }
