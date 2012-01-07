@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Language.K.Core.Parser where
 
 import Control.Applicative ((<$>))
