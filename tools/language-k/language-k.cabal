@@ -13,11 +13,6 @@ Library
   Hs-source-dirs:   src
 
   Exposed-modules:
-    Language.K.Core.Parser
-    Language.K.Core.Parser.Parsec
-    Language.K.Core.Syntax
-    Language.K.Core.Pretty.KMode
-    Language.K.Core.Pretty.RaisedMode
     Language.K.CellsToXml
     Data.Attoparsec.Extra
     Data.Attoparsec.Extra.Text
