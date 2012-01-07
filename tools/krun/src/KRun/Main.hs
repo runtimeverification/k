@@ -15,8 +15,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Foreign.Maude
-import Language.K.Core.NewParser
-import Language.K.Core.NewPretty
+import Language.K.Core
 import System.Directory
 import System.Environment
 import System.Exit
@@ -150,7 +149,7 @@ printResult config result = do
                 Right bag -> do
                     Bool color <- getVal config "color"
                     Bool parens <- getVal config "parens"
-                    prettyPrint (PrettyConfig color (not parens)) bag
+                    prettierPrint (PrettyConfig color (not parens)) bag
         s -> die $ "Invalid output-mode setting: " ++ s
 
 printStatistics :: Config -> Text -> IO ()
