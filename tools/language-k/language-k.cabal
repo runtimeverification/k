@@ -4,7 +4,7 @@ Synopsis:           Parsing tools for the K semantic framework.
 License:            MIT
 License-file:       LICENSE
 Author:             David Lazar
-Maintainer:         lazar6@illinois.edu
+Maintainer:         David Lazar <lazar6@illinois.edu>
 Category:           Language
 Build-type:         Simple
 Cabal-version:      >=1.2
@@ -13,22 +13,23 @@ Library
   Hs-source-dirs:   src
 
   Exposed-modules:
-    Language.K.CellsToXml
     Language.K.Core
+    Language.K.Core.Syntax
     Language.K.Core.Parser
     Language.K.Core.Pretty
     Language.K.Core.Prettier
-    Language.K.Core.Syntax
-    Data.Attoparsec.Extra.Text
     Internal.Lexer
+
+    -- CellToXml exports:
+    Language.K.CellsToXml
+    Data.Attoparsec.Extra.Text
 
   Build-depends:
     base >= 4 && < 5,
     mtl,
     parsec > 3,
-    attoparsec-text,
-    text,
     ansi-wl-pprint >= 0.6,
-    containers
+    text,
+    attoparsec-text
 
   ghc-prof-options: -auto-all

@@ -6,8 +6,6 @@ module Language.K.Core.Prettier where
 import Control.Applicative ((<$>))
 import Data.Char (isAlphaNum)
 import Data.List (intersperse, stripPrefix)
-import Data.Map (fromList, toList)
-import qualified Data.Map as Map
 import Data.Monoid
 import Language.K.Core.Syntax
 import qualified Text.PrettyPrint.ANSI.Leijen as PP

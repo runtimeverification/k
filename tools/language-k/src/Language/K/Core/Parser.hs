@@ -2,7 +2,6 @@
 module Language.K.Core.Parser where
 
 import Control.Applicative ((<$>))
-import qualified Data.Map as Map
 import Language.K.Core.Syntax
 import Internal.Lexer
 import Text.Parsec

@@ -15,7 +15,6 @@
 module Language.K.Core.Syntax where
 
 import Data.Data
-import Data.Map (Map)
 
 data K
     = KApp KLabel [K]
