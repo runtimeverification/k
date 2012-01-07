@@ -16,6 +16,7 @@ Library
     Language.K.CellsToXml
     Language.K.Core
     Language.K.Core.Parser
+    Language.K.Core.Pretty
     Language.K.Core.Prettier
     Language.K.Core.Syntax
     Data.Attoparsec.Extra.Text
