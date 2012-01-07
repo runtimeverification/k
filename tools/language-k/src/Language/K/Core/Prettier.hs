@@ -3,8 +3,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Language.K.Core.Prettier where
 
-import Control.Applicative ((<$>))
-import Data.Char (isAlphaNum)
 import Data.List (intersperse, stripPrefix)
 import Data.Monoid
 import Language.K.Core.Syntax
