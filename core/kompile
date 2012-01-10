@@ -207,7 +207,8 @@ my $short_help_message =
   -prelude file.m(aude) : specifies the k-prelude file
   -flat : slurp all k or kmaude files into one k file 
   -u (or -unquote) : unquote the maude meta-terms to increase speed
-  
+  -lib : specify an user defined builtin file
+
   Latex options
   -latex : maudifies/compiles for generating latex output
   -pdf : maudifies/compiles for generating pdf output
@@ -576,6 +577,7 @@ my $language_file_name = "";
 my $lang_name = "";
 my $output_latex_file = "";
 my $topmatter = "";
+my $lib = "";
 my $unquote = 0;
 my $xml = 0;
 my $pxml = 0;
@@ -692,6 +694,9 @@ foreach (@ARGV) {
     elsif (/^--?output$/) {
 		$output_latex_file = "?";
     }
+    elsif (/^--?lib$/) {
+		$lib = "?";
+    }
     elsif (/^--?latex$/) {
 		$latex = 1;
     }
@@ -743,11 +748,15 @@ foreach (@ARGV) {
     }
     elsif ($shared)
     {
-		$k_prelude = File::Spec->rel2abs($_);
-		$shared = 0;
-	}
+	$k_prelude = File::Spec->rel2abs($_);
+	$shared = 0;
+    }
+    elsif ($lib eq "?" && !/^-/)
+    {
+	$lib = $_;
+    }
     elsif (/^-/) {
-		terminate("Unknown option $_");
+	terminate("Unknown option $_");
     }
     elsif (($latex || $pdf || $ps || $eps || $png || $crop) && /[A-Z\-]+/)
     {
@@ -763,6 +772,7 @@ foreach (@ARGV) {
     }
 }
 
+# print "Lib: $lib\n";
 # print "LANG: $language_file_name\n";
 
 # remove .k dir when a new compilation starts
@@ -1580,6 +1590,7 @@ sub compile {
 	#	print FILE "\*\*\*\(\n$k_license\n\)\*\*\*\n\n\n";	
 	print FILE "--- Compiler checksum: " . get_checksum() . "\n";
 	print FILE "load \"$k_prelude\"\n";
+	print FILE "load $lib\n" if ($lib ne "" && $lib ne "?");
 	print FILE $1;
 	close FILE;
 	push(@generated_files, $output_file_name);

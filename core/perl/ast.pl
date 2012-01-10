@@ -5,6 +5,7 @@ use warnings;
 use XML::DOM;
 
 my $kind="";
+my $k_prelude = File::Spec->catfile($ENV{K_BASE}, "core", "maude", "lib", "k-prelude");
 
 sub get_ast
 {
@@ -99,17 +100,48 @@ sub get_ast_from_node
     }
     
     # builtin sorts default
-    return "# $op(.List{K})" if ($sort =~ /^#/);
+    my $allksorts = get_builtin_sorts();
+    if ($allksorts =~ /\Q$sort\E/sg)
+    {
+	return "# $op(.List{K})" 	
+    }
+    elsif ($sort =~ /^#/sg)
+    {
+	return "# $op(" . flat($content) . ")(.List{K})";
+    }
     
     # empty appliances default
     return "'$op(.List{K})" if ($content =~ /^\s*$/);
 
     if ($sort =~ /^\[/ && $kind eq "") 
     {
-      $kind = "'$op($content) parses to kind $sort.\nIt seems that Maude is unable to parse this subterm.\nThis could be a problem in your semantics.\n";
+	$kind = "'$op($content) parses to kind $sort.\nIt seems that Maude is unable to parse this subterm.\nThis could be a problem in your semantics.\n";
     }
     
     "'$op($content)";
+}
+
+sub flat
+{
+    my $r = shift;
+#    print "RECV: $r\n";
+    $r =~ s/#\s//sg;
+    $r =~ s/\(.List\{K\}\)//sg;
+    $r =~ s/,,/,/sg;
+    $r;
+}
+
+sub get_builtin_sorts
+{
+    my $tmp = "tempfile.maude";
+    open FILE,">", $tmp or die "Cannot create $tmp\n"; 
+    print FILE "in $k_prelude\nred in META-LEVEL : getSorts(upModule('K, true)) .\nq\n";
+    close FILE;
+    
+    my $out = `maude $tmp`;
+
+    unlink($tmp);
+    return $out;
 }
 
 1;
