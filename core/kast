@@ -179,7 +179,8 @@ s/(?<!\\)".*?(?<!\\)"//sg;
 my @temp = ();
 for my $syntax_item (@all_syntax)
 {
-    my @keywords = split("[^a-zA-Z]+", $syntax_item);
+    my @keywords = split("[^a-zA-Z0-9]+", $syntax_item);
+#    print "@keywords\n";
     for my $kwd (@keywords)
     {
 	push(@temp, $kwd);
