@@ -180,7 +180,7 @@ my @temp = ();
 for my $syntax_item (@all_syntax)
 {
     my @keywords = split("\\b[^a-zA-Z0-9]+\\b", $syntax_item);
-    print "@keywords\n";
+#    print "@keywords\n";
     for my $kwd (@keywords)
     {
 	push(@temp, $kwd);
