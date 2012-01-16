@@ -68,7 +68,9 @@ sub runTest {
 	`$KRUN $krunFlag $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile`;
 	`echo >> $actualOutputFile`;
 	if (-s $actualErrorFile) {
-		return reportError($fullFilename, $timer);
+		my $errMsg = `cat $actualErrorFile`;
+		$errMsg = "Here is the error message:\n" . "---------------\n" . $errMsg ."---------------\n";
+		return reportError($fullFilename, $timer, $errMsg);
 	} else {
 		my $diffFile = "$baseTestFile.diff$testEnding";
 		unlink ($diffFile);
