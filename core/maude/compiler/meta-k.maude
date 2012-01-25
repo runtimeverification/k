@@ -424,6 +424,23 @@ fmod K-META-CONFIG is
    = (mb 'configuration_[T2] : 'KSentence [AS] .) MAS .
   eq setConfTerm(MAS, T) = MAS [owise] .
   
+  sort KConfigSplit .
+  op Cfg{_,_} : Term AttrSet -> KConfigSplit .
+
+  op splitKConfig : MembAx ~> KConfigSplit .
+  eq splitKConfig((mb 'configuration_[T] : 'KSentence [AS] .)) 
+   = Cfg{T,AS} .
+
+  op plugKConfig : KConfigSplit -> MembAx .
+  eq plugKConfig(Cfg{T,AS})
+   = (mb 'configuration_[T] : 'KSentence [AS] .) .
+
+  op getContents : KConfigSplit -> Term .
+  eq getContents(Cfg{T,AS}) = T .
+  
+  op setContents : KConfigSplit Term -> KConfigSplit .
+  eq setContents(Cfg{T1,AS},T2) = Cfg{T2,AS} .
+
   sort Ellipses .
   ops none : -> Ellipses .
   op error : -> [Ellipses] .
@@ -801,7 +818,7 @@ fmod META-K-LABELS is
   op andBool_ : TermList -> TermList .
   eq andBool(empty) = empty .
   eq andBool(Trm) = Trm .
-  eq andBool(Trl) = kApply(mkConstant('andBool,KLabel),kList(Trl)) .
+  eq andBool(Trl) = kApply(mkConstant('andBool,KLabel),kList(Trl)) [owise] .
 
   op neqBool : Term Term -> Term .
   eq neqBool(T1, T2) = bool2K('_=/=Bool_[T1,T2]) .
