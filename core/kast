@@ -92,7 +92,7 @@ if ($pgm eq "?")
 }
 
 my ($fname, $path, $suffix) = fileparse($pgm, qr/\.[^.]*/);
-if ($suffix eq "")
+if ($suffix eq "" && $lang eq "")
 {
     print wrap("", "", "Cannot infer lang name. Please make sure that $fname has the form \"program_name.lang\" (e.g. helloworld.c).\n \"lang\" (e.g \"c\") is the name of your language; both \"lang.k\" and \"lang-compiled.maude\" must exist.\n");
     exit(1);
