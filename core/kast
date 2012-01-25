@@ -92,17 +92,23 @@ if ($pgm eq "?")
 }
 
 my ($fname, $path, $suffix) = fileparse($pgm, qr/\.[^.]*/);
-if ($suffix eq "" && $lang eq "")
-{
-    print wrap("", "", "Cannot infer lang name. Please make sure that $fname has the form \"program_name.lang\" (e.g. helloworld.c).\n \"lang\" (e.g \"c\") is the name of your language; both \"lang.k\" and \"lang-compiled.maude\" must exist.\n");
-    exit(1);
-}
+# if ($suffix eq "")
+# {
+#    print wrap("", "", "Cannot infer lang name. Please make sure that $fname has the form \"program_name.lang\" (e.g. helloworld.c).\n \"lang\" (e.g \"c\") is the name of your language; both \"lang.k\" and \"lang-compiled.maude\" must exist.\n");
+#    exit(1);
+# }
 
 # 2. compiled file
 $suffix =~ s/^\.//;
 $lang = $suffix if ($lang eq "?");
 
+if ($lang eq "?" || $lang =~ /^\s*$/sg)
+{
+    print wrap("", "", "Cannot infer language/definition name.\nPlease try --k-definition option or put an extension to your program.\n");
+    exit(1);
+}
 
+# print "LANG: $lang\n";
 # search for $lang.k
 if (!(-e $lang))
 {
