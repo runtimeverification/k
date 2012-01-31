@@ -205,7 +205,7 @@ hold the input and the output buffers as lists of items. */
     <T color="yellow">
       <threads color="orange">
         <thread multiplicity="*" color="red">
-          <k color="green"> $PGM:Stmt </k>
+          <k color="green"> $PGM:K </k>
           <env color="LightSkyBlue"> .Map </env>
         </thread>
      </threads>
@@ -362,7 +362,7 @@ reader to the \K semantics of IMP for their meaning. */
 
 // Sequential composition
 
-  rule S1:Stmt ; S2:Stmt => S1 ~> S2  [structural]
+  rule S1:K ; S2:K => S1 ~> S2  [structural]
 
 // Conditional
 
@@ -371,7 +371,7 @@ reader to the \K semantics of IMP for their meaning. */
 
 // While loop
 
-  rule <k> while B do S:Stmt => if B then S ; while B do S else {} ...</k>
+  rule <k> while B do S:K => if B then S ; while B do S else {} ...</k>
 
 /*@ Before we continue with the semantics of the specific IMP++
 constructs, let us discuss in a bit more detail how
