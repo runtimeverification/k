@@ -4,6 +4,7 @@ fmod DEFAULT-TERMS is
   including META-ANONYMOUS-VARIABLE . 
   including K-META-OPEN-CELLS .
   including INT .
+  including PARSE-METADATA .
   var M : Module .  var T T' T1 T2 : Term . var O Q : Qid .  var Ct : Constant . 
   var Tl Tl' : TermList .  var N : Nat .
   var Ss : SortSet .  var V : Variable .  var B B' : Bool .

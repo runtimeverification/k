@@ -12,14 +12,6 @@ fmod PARSE-METADATA-BASIC  is
   op metadataStrippedParse : String -> AttrSet .
   eq metadataStrippedParse("") = none .
 
-  op metadataParse : AttrSet -> AttrSet .
-  eq metadataParse(AS metadata(S) AS') = AS metadataParse(S) AS' .
-  eq metadataParse(AS) = AS [owise] .
-  op metadataParse : MembAx -> MembAx .
-  op metadataParse : OpDecl -> OpDecl .
-  eq metadataParse(mb Trm : Sort [AS] .) = (mb Trm : Sort [metadataParse(AS)] .) .
-  eq metadataParse(op Q : TyL -> Ty [AS] .) =  (op Q : TyL -> Ty [metadataParse(AS)] .).
-
  ceq metadataStrippedParse(S)
    = pair(substr(S, 0,N1),substr(S, N1 + 2, _-_(N2, N1 + 2))) 
      metadataParse(substr(S, N2 + 1, length(S)))

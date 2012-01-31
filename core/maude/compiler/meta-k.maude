@@ -65,6 +65,9 @@ fmod K-META-OPS is including META-TERM-EXTRAS + K-SORTS .
 
   ops bool2K : Term -> Term .
    eq bool2K(T) = kApply(mkSubsortWrapper(Bool,K)[T],nilKList) .
+
+  ops string2K : Term -> Term .
+   eq string2K(T) = kApply(mkSubsortWrapper(String,K)[T],nilKList) .
 endfm
 
 fmod META-K-BUILTINS is
@@ -103,11 +106,29 @@ fmod META-ATTRS is
   op metadata : AttrSet -> AttrSet .
   op metadataParse : String -> AttrSet .
   op pair : String String -> Attr .
+
+  op metadataParse : AttrSet -> AttrSet .
+  eq metadataParse(AS metadata(S) AS') = AS metadataParse(S) AS' .
+  eq metadataParse(AS) = AS [owise] .
+
+  op metadataParse : MembAx -> MembAx .
+  eq metadataParse(mb Trm : Sort [AS] .) = (mb Trm : Sort [metadataParse(AS)] .) .
+
+  op metadataParse : OpDecl -> OpDecl .
+  eq metadataParse(op Q : TyL -> Ty [AS] .) =  (op Q : TyL -> Ty [metadataParse(AS)] .).
+
+
   eq metadata(pair(Key,Value) AS) 
    = metadata(metadata(metaPair(Key,Value)) AS) .
-  eq metadata(metadata(S) AS) = metadata(S) AS [owise] .
-  eq metadata(AS) = AS [owise] .
-  var S : String .  var AS : AttrSet . var Key Value : String .
+  eq metadata(metadata(S) AS) = metadata(S) AS [owise print "Metadata: " S "Attributes not transformed: " AS] .
+  eq metadata(AS) = AS [owise print "Attributes not transformed: " AS] .
+
+  op metadata : OpDecl -> OpDecl .
+  eq metadata(op Q : Tyl -> Ty [AS] .)
+   = (op Q : Tyl -> Ty [metadata(AS)] .) . 
+  var Q : Qid . var Tyl TyL : TypeList . var Ty : Type .  var Sort : Sort .
+  var S : String .  var AS AS' : AttrSet . var Key Value : String .
+  var Trm : Term .
 
   op metaPair : String String -> Attr .
   eq metaPair(Key,Value) = metadata(Key + "=(" + Value + ")") .
@@ -291,6 +312,7 @@ endfm
 fmod META-K-RULES is including K-SORTS .
   including META-MODULE-EXTRAS .
   including META-K-CONDITION .
+  including META-ATTRS .
   var O Q : Qid . var T T' T1 T2 Trm : Term . var Cxt : String . var S : Type . var C : Term . 
   var Cond Cond' Tl : TermList . var N : Nat . var V : Variable . var Ct : Constant .
   var AS : AttrSet .  var RK : KRuleKind . var Str : String . 
@@ -320,9 +342,9 @@ fmod META-K-RULES is including K-SORTS .
   
   op splitKRule : MembAx ~> KRuleSplit .
  ceq splitKRule((mb Q[T] : S [AS] .))
-   = R{T,empty,AS} if S := KSentence /\ Q = symbol krl . 
+   = R{T,empty,metadataParse(AS)} if S := KSentence /\ Q = symbol krl . 
  ceq splitKRule((mb Q[T,C] : S [AS] .))
-   = R{T,C,AS} if S := KSentence /\ Q = symbol kcrl . 
+   = R{T,C,metadataParse(AS)} if S := KSentence /\ Q = symbol kcrl . 
 
   op getContents : KRuleSplit -> Term .
   op getCondition : KRuleSplit -> TermList .
@@ -343,8 +365,8 @@ fmod META-K-RULES is including K-SORTS .
   eq setCondition(R{T,Cond,AS}, Cond') = R{T,Cond',AS} .
 
   op plugKRule : KRuleSplit ~> MembAx .
-  eq plugKRule(R{T,empty,AS}) = (mb symbol(krl)[T] : KSentence [AS] .) .
-  eq plugKRule(R{T,C,AS}) = (mb symbol(kcrl)[T,C] : KSentence [AS] .) [owise] .
+  eq plugKRule(R{T,empty,AS}) = (mb symbol(krl)[T] : KSentence [metadata(AS)] .) .
+  eq plugKRule(R{T,C,AS}) = (mb symbol(kcrl)[T,C] : KSentence [metadata(AS)] .) [owise] .
   eq plugKRule(R{errorT(Trm,Cxt,Str),Cond,AS})
    = errorMb(Trm, Cxt, Str, AS) .
 
@@ -429,11 +451,11 @@ fmod K-META-CONFIG is
 
   op splitKConfig : MembAx ~> KConfigSplit .
   eq splitKConfig((mb 'configuration_[T] : 'KSentence [AS] .)) 
-   = Cfg{T,AS} .
+   = Cfg{T,metadataParse(AS)} .
 
   op plugKConfig : KConfigSplit -> MembAx .
   eq plugKConfig(Cfg{T,AS})
-   = (mb 'configuration_[T] : 'KSentence [AS] .) .
+   = (mb 'configuration_[T] : 'KSentence [metadata(AS)] .) .
 
   op getContents : KConfigSplit -> Term .
   eq getContents(Cfg{T,AS}) = T .
@@ -886,7 +908,7 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
    eq kresultLabel = resultLabel(klabel) .
    
    op resultLabel : Qid -> Term .
-   eq resultLabel(Q) = mkConstant(mkKLabel(qid(string(Q) + "-result")),KLabel) .
+   eq resultLabel(Q) = mkConstant(qid("is" + firstCaps(string(Q)) + "Result"),KLabel) .
 endfm
 
 
@@ -915,9 +937,9 @@ fmod META-K-CONTEXTS is including K-SORTS .
   
   op splitKContext : MembAx ~> KContextSplit .
  ceq splitKContext((mb Q[T] : S [AS] .))
-   = C{T,empty,AS} if S := KSentence /\ Q = symbol kcxt . 
+   = C{T,empty,metadataParse(AS)} if S := KSentence /\ Q = symbol kcxt . 
  ceq splitKContext((mb Q[T,C] : S [AS] .))
-   = C{T,C,AS} if S := KSentence /\ Q = symbol kccxt . 
+   = C{T,C,metadataParse(AS)} if S := KSentence /\ Q = symbol kccxt . 
 
   op getContents : KContextSplit -> Term .
   op getCondition : KContextSplit -> TermList .
@@ -940,9 +962,9 @@ fmod META-K-CONTEXTS is including K-SORTS .
   eq setCondition(C{T,Cond,AS}, Cond') = C{T,Cond',AS} .
 
   op plugKContext : KContextSplit ~> MembAx .
-  eq plugKContext(C{T,empty,AS}) = (mb symbol(kcxt)[T] : KSentence [AS] .) .
-  eq plugKContext(C{T,C,AS}) = (mb symbol(kccxt)[T,C] : KSentence [AS] .) [owise] .
-  eq plugKContext(C{errorT(T, Cxt, Str), Cond, AS})
+  eq plugKContext(C{T,empty,AS}) = (mb symbol(kcxt)[T] : KSentence [metadata(AS)] .) .
+  eq plugKContext(C{T,C,AS}) = (mb symbol(kccxt)[T,C] : KSentence [metadata(AS)] .) [owise] .
+  eq plugKContext(C{errorT(T, Cxt, Str), Cond, metadata(AS)})
    = errorMb(T, Cxt, Str, AS) .
 
   op getHoleReplacement_ : TermList ~> Term .
@@ -1211,7 +1233,6 @@ fmod META-K-STREAMS is
 
   eq ioBuffer(T:Term) = '#buffer`(_`)[T:Term] .
 
-  
 endfm
 
 fmod META-K-COOL is

@@ -8,7 +8,7 @@ kmod DIJKSTRA is including NAT-INF
   
   rule <graph>... x1 -w:#Nat-> x2 ...</graph> 
        <shortest>... 
-          x1:#Id |-> c1:#Nat  x2:#Id |-> (c2:#NatInf => c1 +Nat w) 
+          x1:#Id |-> c1:#Nat  x2:#Id |-> (c2:NatInf => c1 +Nat w) 
        ...</shortest>
-    when w +Nat c1 <Nat c2
+    when (w + c1) < c2
 endkm

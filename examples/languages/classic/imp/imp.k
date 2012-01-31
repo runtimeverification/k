@@ -351,7 +351,7 @@ and clarity, we place the two cells inside another cell, the ``top'' cell
 which is labeled \textsf{T}. */
 
   configuration <T color="yellow">
-                  <k color="green"> $PGM:Pgm </k>
+                  <k color="green"> $PGM:K </k>
                   <state color="red"> .Map </state>
                 </T>
 // Replace the above <state/> cell with the following when you want to pass
@@ -508,7 +508,7 @@ and counting only the steps corresponding to computational rules as
 transitions (i.e., hiding the structural rules as unobservable, or
 internal steps). */
 
-  rule [sequential]: S1:Stmt ; S2:Stmt => S1 ~> S2  [structural]
+  rule [sequential]: S1:K ; S2:K => S1 ~> S2  [structural]
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
@@ -517,7 +517,7 @@ Recall that the conditional was annotated with the attribute
 \texttt{strict(1)} in the syntax module above, so only its first
 argument is allowed to be evaluated. */
 
-  rule [if-true]:  if true then S:Stmt else _ => S
+  rule [if-true]:  if true then S:K else _ => S
   rule [if-false]: if false then _ else S => S
 
 /*@ \subsubsection{While loop}

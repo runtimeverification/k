@@ -2,7 +2,6 @@
 kmod COMMON is
 	including K 
 	including K-CONTEXTS 
-	including K-PROPER
 endkm
 
 kmod ISSUE134A is

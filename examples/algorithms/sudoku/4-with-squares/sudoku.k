@@ -135,7 +135,7 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
                 addColumn(Bs, N %Nat 9, Columns))
   [structural]
 
-  rule mkConfig(_,_,81,Squares,Lines,Columns)
+  rule mkConfig(_:NeBag,_,81,Squares,Lines,Columns)
     => <T_> <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns> <_/T>
   [structural]
 

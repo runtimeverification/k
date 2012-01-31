@@ -190,6 +190,11 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
   eq allCaps(S) = replace(S, ("a" |-> "A", "b" |-> "B", "c" |-> "C", "d" |-> "D", "e" |-> "E", "f" |-> "F", "g" |-> "G", "h" |-> "H", "i" |-> "I", "j" |-> "J", "k" |-> "K", "l" |-> "K", "m" |-> "M", "n" |-> "N", "o" |-> "O", "p" |-> "P", "q" |-> "Q", "r" |-> "R", "s" |-> "S", "t" |-> "T", "u" |-> "U", "v" |-> "V", "w" |-> "W", "x" |-> "X", "y" |-> "Y", "z" |-> "Z")) .
 
 
+  op firstCaps : String -> String .
+  eq firstCaps("") = "" .
+  eq firstCaps(S) = allCaps(substr(S,0,1)) + substr(S,1,length(S)) .
+
+
   op smallCaps : String -> String .
   eq smallCaps(S) = replace(S, ("A" |-> "a", "B" |-> "b", "C" |-> "c", "D" |-> "d", "E" |-> "e", "F" |-> "f", "G" |-> "g", "H" |-> "h", "I" |-> "i", "J" |-> "j", "K" |-> "k", "L" |-> "k", "M" |-> "m", "N" |-> "n", "O" |-> "o", "P" |-> "p", "Q" |-> "q", "R" |-> "r", "S" |-> "s", "T" |-> "t", "U" |-> "u", "V" |-> "v", "W" |-> "w", "X" |-> "x", "Y" |-> "y", "Z" |-> "z")) .
 
@@ -531,17 +536,6 @@ fmod META-MODULE-EXTRAS is
   op removeSubsorts : Module SubsortDeclSet -> Module .
   eq removeSubsorts(M, SSDS) 
    = setSubsorts(M, removeSubsorts(getSubsorts(M),SSDS)) .
-
-  op removeAllSubsorts : SubsortDeclSet SortSet -> SubsortDeclSet .
-  eq removeAllSubsorts(SSDS (subsort S < S' .), S ; SS)
-   = removeAllSubsorts(SSDS, S ; SS) .
-  eq removeAllSubsorts(SSDS (subsort S < S' .), S' ; SS)
-   = removeAllSubsorts(SSDS, S' ; SS) .
-  eq removeAllSubsorts(SSDS, SS) = SSDS [owise] .
-
-  op removeAllSubsorts : Module SortSet -> Module .
-  eq removeAllSubsorts(M, SS) 
-   = setSubsorts(M, removeAllSubsorts(getSubsorts(M),SS)) .
   
   op removeOps : OpDeclSet OpDeclSet -> OpDeclSet .
   eq removeOps(OPDS (op Q : Tl -> T [AS] .), OPDS' (op Q : Tl -> T [AS'] .))
@@ -1249,6 +1243,9 @@ fmod META-LEVEL-EXTRAS is
    = (op Q : Tl' -> T' [AS] .) [owise print "Op found: " Q " : " Tl' " -> " T] .
   
   op $findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
+ ceq $findOp(M, OPDS (op Q : nil -> T' [AS] .), Q, nil, T)
+   = (op Q : nil -> T' [AS] .) 
+  if sameKind(M, T, T') .
  ceq $findOp(M, OPDS (op Q : T' T' -> T' [AS assoc] .), Q, Tl, S)
    = (op Q : T' T' -> T' [AS assoc] .) 
   if sortLeq(M,S,T') and-then sortsLeq(M,Tl, dup(T',arity(Tl)))  [print "Op found: " Q " : " T' T' " -> " T'].
@@ -1357,6 +1354,9 @@ fmod META-LEVEL-EXTRAS is
   op flatten : Module ModuleSet ~> Module .
   eq flatten(M, empty) = M .
   eq flatten(M, M' MS) = flatten(addModule(setImports(M',nil),M), MS) .
+
+  op maximalSorts : Module Sort -> SortSet [ditto] .
+  eq maximalSorts(M, S) = maximalSorts(M, getKind(M,S)) .
 
   op getMaximalSorts : Module SortSet -> SortSet .
   eq getMaximalSorts(M, none) = none .

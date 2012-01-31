@@ -5,6 +5,7 @@ fmod BLOCKING-INPUT is
   including K-META-OPEN-CELLS .
   including INT .
   including META-K-STREAMS .
+  including PARSE-METADATA .
   var M : Module .  var T T' T1 T2 : Term . var O Q : Qid .  var Ct : Constant . 
   var Tl Tl' : TermList .  var N : Nat .  var Ty : Type .
   var Ss : SortSet .  var V : Variable .  var B B' : Bool .
@@ -78,5 +79,7 @@ fmod BLOCKING-INPUT is
 
   op parseTerm : String Term -> Term .
   eq parseTerm(Str:String,T)
-   = '#parse`(_`,_`)[stringCt(Str:String),nilK] .
+   = '#parse`(_`,_`)[string2K(stringCt(Str:String)),nilK] .
+
+
 endfm

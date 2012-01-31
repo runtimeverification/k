@@ -1,9 +1,7 @@
 kmod SKOOL-TYPED-SYNTAX is 
 
 --- List{Id}
-  syntax List{Id}  ::= #Id | .List{Bottom} [latex "\kdot{\it List\{Bottom\}}"]
-
-                     | List{Id} , List{Id}  [prec 70 assoc id: .List{Bottom} strict hybrid]
+  syntax Ids  ::= List{#Id,","} [prec 70]
 
 endkm
 

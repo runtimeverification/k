@@ -683,7 +683,7 @@ member's location based on the current class of the object. */
 Searches for the given member in the given environment stack, starting
 with the most concrete class and going up in the hierarchy. */
 
-  syntax K ::= #Id "::" BagItem
+  syntax K ::= #Id "::" Bag
   // Id is the class name, BagItem is its corresponding environment
   syntax K ::= "lookupMember" "(" BagItem "," #Id ")"  
   // BagItem is the envStack cell, Id is the member name

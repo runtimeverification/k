@@ -104,7 +104,7 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
                 addColumn(Bs, N %Nat 9, Columns),
                 Cells <cell> <i>(N /Nat 9) /Nat 3</i> <j>(N %Nat 9) /Nat 3</j> <x>N /Nat 9</x> <y>N %Nat 9</y> <v>Bs</v> </cell>)
        [structural]
-  rule mkConfig(_,_,81,Squares,Lines,Columns,Cells)
+  rule mkConfig(_:NeBag,_,81,Squares,Lines,Columns,Cells)
     => <T_> <cells>Cells</cells> <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns> <_/T> [structural]
 
   rule addSquare(Bs,I:#Nat,J:#Nat, <square> <si>I':#Nat</si> <sj>J':#Nat</sj> <sc>Map:Map</sc> </square> Squares)

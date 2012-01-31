@@ -4,6 +4,7 @@ fmod CONTEXT-TRANSFORMERS is
   including META-ANONYMOUS-VARIABLE . 
   including K-META-OPEN-CELLS .
   including INT .
+  including PARSE-METADATA .
   var M : Module .  var T T' : Term . var O Q : Qid .  var Ct : Constant . 
   var Tl Tl' : TermList .  var N : Nat .
   var Ss : SortSet .  var V : Variable .

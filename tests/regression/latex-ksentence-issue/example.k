@@ -3,7 +3,6 @@
 kmod ISSUE is
 	including K 
 	including K-CONTEXTS 
-	including K-PROPER
 	
 	op test1 : -> KLabel
 	eq test1 = 'SomeLabel

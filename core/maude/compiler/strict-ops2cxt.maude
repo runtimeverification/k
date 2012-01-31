@@ -66,8 +66,11 @@ mod STRICTOPS2CXT is
    = seqstrictOps2cxtMbsAux(Q, nil, NInts, Q', I', AS) .
 --- if arity is unspecified
   eq seqstrictOps2cxtMbs(Q, nil, Q', -1, AS)
-   = (mb 'context_[kApply(Q, (mkVariable('Kl,ResultList),
-         hole, mkVariable('Kl2,KList)))] : KSentence [metadata(removeOpAttrs(AS) strictCell(Q'))] .) .
+   = plugKContext(C{kApply(Q, (mkVariable('Kl,KList),
+         hole, mkVariable('Kl2,KList))),
+         kApply(resultLabel(Q'),mkVariable('Kl,KList)),
+        metadata(removeOpAttrs(AS) strictCell(Q'))}) .
+--- a (mb  : KSentence [metadata(removeOpAttrs(AS) strictCell(Q'))] .) .
 --- if arity is specified and not 0
   eq seqstrictOps2cxtMbs(Q, nil, Q', NA, AS)
    = seqstrictOps2cxtMbs(Q, seq(1,NA), Q', NA, AS)  .

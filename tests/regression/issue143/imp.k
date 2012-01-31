@@ -23,7 +23,7 @@ kmod IMP-SYNTAX is
                 | if BExp then Stmt else Stmt [prec 59 format (b o bni n++i bn--i n++i --) strict(1)]
                 | while BExp do Stmt [prec 59 format (b o b n++i --)]
   syntax Pgm ::=  var IdList ; Stmt [prec 70 format (nb o d ni d)]
-  syntax IdList ::= #Id | .IdList | IdList , IdList [assoc id: .IdList]
+  syntax IdList ::= List{#Id,","}
 endkm
 
 kmod IMP-PROGRAMS is including IMP-SYNTAX 

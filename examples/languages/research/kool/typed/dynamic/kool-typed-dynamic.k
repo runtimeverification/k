@@ -588,7 +588,7 @@ Like in untyped KOOL. */
 /*@ \subsection{Lookup member}
 Like in untyped KOOL. */
 
-  syntax K ::= #Id "::" BagItem
+  syntax K ::= #Id "::" Bag
   syntax K ::= "lookupMember" "(" BagItem "," #Id ")"
   rule lookupMember(<envStack> ListItem(_ :: <env>...X|->L...</env>)
                     ...</envStack>,X) => lookup(L)  [:structural:]

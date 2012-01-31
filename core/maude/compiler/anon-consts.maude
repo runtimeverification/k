@@ -14,7 +14,8 @@ fmod ANONYMOUS-CONSTANTS is
   var TLS : TypeListSet .  var Tl : TypeList .  var NeTl : NeTypeList .  var T : Type .
   var V : Variable . var Ct : Constant . var Cond : Condition .
   var N : Nat .  var AS : AttrSet .  
-  var SS : TypeSet .
+  var SS : TypeSet .  var S S' : Sort . 
+
   op resolveAnonymousConsts : Qid Module Module ~> Module .
   eq resolveAnonymousConsts(Q, M, Flat) 
    = resolveAnonymousConsts(Q, M , Flat, getAnonConsts(Flat)) .
@@ -51,6 +52,28 @@ fmod ANONYMOUS-CONSTANTS is
   eq resolveConstsRl(M, SS, (crl Trm => Trm' if Cond [AS] .))
    = (crl resolveConstsT(M,SS, Trm) => Trm' if Cond [AS] .) .
 
+  op resolveConstsT : Module TypeSet Term ~> Term .
+  eq resolveConstsT(M, SS, Q[Trms])
+   = Q[resolveConstsTl(M, SS, Trms)] .
+  
+  eq resolveConstsT(M, SS, V) = V .
+  eq resolveConstsT(M, SS, Ct)
+   = if getName(Ct) in SS 
+     then  mkVariable(getName(Ct), fixK(M, getName(Ct), maximalSorts(M,getType(Ct)))) 
+     else Ct 
+     fi .
+
+  op fixK : Module Qid Type ~> Type .
+  eq fixK(M, Q, T) = if sortLeq(M,K,T) then K else T fi . 
+  eq fixK(M, Q, S ; S' ; SS) 
+   = if intersection(S ; S' ; SS, ksorts ; klistSorts) =/= none then K else
+    errorS(mkConstant(Q,S), S, "multiple maximal sorts, e.g., '" + string(S) + "' or '" + string(S') + "'.") fi .
+
+  op resolveConstsTl : Module SortSet TermList ~> TermList .
+  eq resolveConstsTl(M, SS, empty) = empty .
+  eq resolveConstsTl(M, SS, (Trm, Trms)) = resolveConstsT(M, SS, Trm),resolveConstsTl(M, SS, Trms) .
+
+---(
   op resolveConstsT : Module TypeSet Term ~> Term .
   eq resolveConstsT(M, SS, Trm) =  resolveConstsT(M, Trm, 0, none, SS) .
 
@@ -89,4 +112,5 @@ fmod ANONYMOUS-CONSTANTS is
   eq checkCommonType(T, none) = T .
   eq checkCommonType(T, T Tl ; TLS) = checkCommonType(T, TLS) .
   eq checkCommonType(T, TLS) = errorS('`[`].K, T, "Cannot get common type") .
+---)
 endfm

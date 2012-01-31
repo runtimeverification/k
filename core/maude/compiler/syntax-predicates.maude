@@ -22,7 +22,7 @@ mod SYNTAX-PREDICATES is
 
   op syntaxPreds : Module Module SortSet SortSet SubsortDeclSet OpDeclSet -> Module .
   eq syntaxPreds(M, Flat, SS, BSS, SSDS, OPDS)
-   = removeSorts(removeAllSubsorts(setMbs(setOps( 
+   = removeSorts(removeSyntaxSubsorts(setMbs(setOps( 
                   setEqs(M,syntaxPredsEqs(SS, getEqs(M)))
                   ,
                   syntaxPreds(SS ; BSS) syntaxOps(M, Flat, SS ; BSS, getOps(M))
@@ -32,6 +32,20 @@ mod SYNTAX-PREDICATES is
               getMbs(M))
               builtinSyntaxPreds(BSS)
             ), SS), SS) .
+
+
+
+  op removeSyntaxSubsorts : SubsortDeclSet SortSet -> SubsortDeclSet .
+  eq removeSyntaxSubsorts(SSDS (subsort S < S' .), S ; SS)
+   = removeSyntaxSubsorts(SSDS, S ; SS) .
+  eq removeSyntaxSubsorts(SSDS (subsort S < S' .), S' ; SS)
+   = if isBuiltin(S) then (subsort S < K .) removeSyntaxSubsorts(SSDS, S' ; SS) else removeSyntaxSubsorts(SSDS, S' ; SS) fi .
+  eq removeSyntaxSubsorts(SSDS, SS) = SSDS [owise] .
+
+  op removeSyntaxSubsorts : Module SortSet -> Module .
+  eq removeSyntaxSubsorts(M, SS) 
+   = setSubsorts(M, removeSyntaxSubsorts(getSubsorts(M),SS)) .
+
 
 
  op syntaxPredsMbs : SortSet MembAxSet ~> MembAxSet .
@@ -148,7 +162,7 @@ ceq syntaxPredsMb(SS,Mb)
   
   op syntaxOp : Module Module SortSet OpDecl ~> OpDecl .
   eq syntaxOp(M, Flat, SS, (op Q : Tyl -> Ty [AS] .))
-   = (op Q : syntaxTyl(M, Flat, SS, Tyl) -> syntaxRTy(M, Flat, SS, Ty) [AS] .) . 
+   = (op Q : syntaxTyl(M, Flat, SS, Tyl) -> syntaxRTy(M, Flat, SS, Ty) [AS ---(metadata(removeHybrid(metadataParse(AS))))] .) . 
 
   op syntaxTyl : Module Module SortSet TypeList ~> TypeList .
   eq syntaxTyl(M, Flat, SS, Ty Tyl) 
@@ -163,6 +177,12 @@ ceq syntaxPredsMb(SS,Mb)
   op syntaxRTy : Module Module SortSet Type ~> Type .
   eq syntaxRTy(M, Flat, SS, Ty) 
    = if isBuiltin(Ty) then Ty else syntaxTy(M, Flat, SS, Ty) fi .
+
+---(
+  op removeHybrid : AttrSet -> AttrSet .
+  eq removeHybrid(AS pair("hybrid","")) = AS .
+  eq removeHybrid(AS) = AS [owise] .
+---)
 
  op syntaxPreds : SubsortDeclSet ~> MembAxSet .
  eq syntaxPreds((subsort S < S' .) SSDS)

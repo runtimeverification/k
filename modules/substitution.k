@@ -25,7 +25,8 @@ module SUBSTITUTION
                
   syntax #Id ::= id #Nat  --- to generate fresh names
   rule id N:#Nat => #id ("_id" +String Int2String(N))
-  configuration <k color="green"> .K </k> <nextId> 0 </nextId>
+
+  syntax CellLabel ::= "nextId"
 
   rule <k> K'[K/Y] => endVisit(beta K'[K/Y]) <_/k> [structural]
 
