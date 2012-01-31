@@ -68,11 +68,13 @@ fmod MAKE-ALL-LABELS is
 
  op hybridOps : OpDeclOpDeclSetMap -> MembAxSet .
  eq hybridOps((Op |-> OPDS) OPDM)
-  = hybridOp(OPDS) hybridOps(OPDM) .
+  = hybridOp(OPDS) hybridOps(OPDM) [print "hybrid ops start " Op " |-> " OPDS " hybrid ops end"] .
  eq hybridOps(empty) = none .
 
  op hybridOp : OpDeclSet -> MembAxSet .
  eq hybridOp(none) = none .
+ eq hybridOp(op Q : nil -> T [AS metadata(Str:String)] .)
+  = hybridOp(op Q : nil -> T [AS metadataParse(Str:String)] .) .
  eq hybridOp(op Q : nil -> T [AS pair("hybrid","")] .)
   = plugKRule(R{replaceS[kApply(kresultLabel,kApply(mkConstant(Q, KLabel), mkVariable('L,KList))),bool2K(trueCt)],kApply(kresultLabel,mkVariable('L,KList)), AS (pair("predicate","") pair("KHybrid",""))})  .
  eq hybridOp(OPDS) = none [owise] .
