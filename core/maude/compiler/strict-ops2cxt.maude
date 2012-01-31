@@ -81,11 +81,17 @@ mod STRICTOPS2CXT is
 --- if arity is unspecified 
   eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints', Q', -1, AS)
    =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', Q', -1, AS)
-     (mb 'context_[kApply(Q, (makeSSVars(1, sortAbs(Ints I), I, AS), mkVariable('Kl,KList)))] : KSentence [metadata(removeOpAttrs(AS) strictCell(Q'))] .) .
+     plugKContext(C{kApply(Q, (makeSSVars(1, I, I, AS), mkVariable('Kl,KList))), makeResultCond(Q',Ints), metadata(removeOpAttrs(AS) strictCell(Q'))}) .
 --- if arity is specified and not 0
   eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints', Q', NA, AS)
    =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', Q', NA, AS)
-     (mb 'context_[kApply(Q, (makeSSVars(1, sortAbs(Ints I), I, AS), makeKVars(seq(s(abs(last(sortAbs(Ints I)))), NA), K)))] : KSentence [metadata(removeOpAttrs(AS) strictCell(Q'))] .) .
+     plugKContext(C{kApply(Q, (makeSSVars(1, I, I, AS), makeKVars(seq(s(abs(last(sortAbs(Ints I)))), NA), K))), 
+ makeResultCond(Q',Ints), metadata(removeOpAttrs(AS) strictCell(Q'))}) .
+
+
+  op makeResultCond : Qid IntList ~> TermList .
+  eq makeResultCond(Q, nil) = empty .
+  eq makeResultCond(Q, Ints) = kApply(resultLabel(Q), genIndexedVars(Ints, K)) .
 
   op makeSSVars : Nat IntList Int AttrSet ~> TermList .
   eq makeSSVars(N, nil, I, AS) = empty .

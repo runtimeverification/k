@@ -1080,6 +1080,13 @@ fmod META-MODULE-EXTRAS is
   eq genXVars(nil) = empty .
   eq genXVars(T Tl) = mkVariable('X,T),genXVars(Tl) .
 
+
+  op genIndexedVars : IntList Sort -> TermList .
+  eq genIndexedVars(nil, S) = empty .
+  eq genIndexedVars(N Nl, S) 
+   = mkVariable(qid(string(S) + string(N, 10)), S), 
+     genIndexedVars(Nl, S) .
+
   op genVars : TypeList String -> TermList .
   eq genVars(Tl, Str) = genVars(Tl, Str, 1) .
 
