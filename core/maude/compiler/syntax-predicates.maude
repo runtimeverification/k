@@ -22,7 +22,7 @@ mod SYNTAX-PREDICATES is
 
   op syntaxPreds : Module Module SortSet SortSet SubsortDeclSet OpDeclSet -> Module .
   eq syntaxPreds(M, Flat, SS, BSS, SSDS, OPDS)
-   = removeSorts(removeSyntaxSubsorts(setMbs(setOps( 
+   = removeImports(removeSorts(removeSyntaxSubsorts(setMbs(setOps( 
                   setEqs(M,syntaxPredsEqs(SS, getEqs(M)))
                   ,
                   syntaxPreds(SS ; BSS) syntaxOps(M, Flat, SS ; BSS, getOps(M))
@@ -31,7 +31,7 @@ mod SYNTAX-PREDICATES is
               syntaxPreds(getOps(OPDS, SS)) 
               getMbs(M))
               builtinSyntaxPreds(BSS)
-            ), SS), SS) .
+            ), SS), SS), (including 'K-RESULT .)) .
 
 
 

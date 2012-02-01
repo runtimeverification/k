@@ -293,12 +293,12 @@ mod K-RESULT is
 endm
 
 
+---(
 mod K-RESULT-LABELS is
   including K-TECHNIQUE .
   op 'k-result : -> KLabel .
 endm
 
----(
 --- KProper Level
 
 mod K-PROPER is
@@ -416,6 +416,7 @@ mod K-RULES is
   op _=>_ : Set Set -> Set [prec 125] .
 endm
 
+---(
 mod K-RULES-RESULT is
   including K-RULES .
   including K-RESULT .
@@ -423,13 +424,14 @@ mod K-RULES-RESULT is
 ---  op _=>_ : KResultLabel KResultLabel -> KResultLabel [prec 125] .
   op _=>_ : List{KResult} List{KResult} -> List{KResult} [prec 125] .
 endm
+---)
 
 mod K-EVAL is 
   including K-TECHNIQUE .
   op #eval_ : Map -> Bag .
 endm
 
---- rule where level
+---( rule where level
 
 mod K-WHERE is
   including K-SENTENCE .
@@ -444,6 +446,8 @@ mod K-WHERE is
   op _::=_ : Set Set -> KAssignments .
   op _where_ : [KSentence] KAssignments -> [KSentence] [prec 127 format (o b o d)] .
 endm
+
+---)
 
 
 mod K-CONDITION-SEARCH is
@@ -553,7 +557,6 @@ mod K is
   including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
   including K-CONTEXTS .
-  including K-WHERE .
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
   including K-EXTRAS .              --- defines a KLabel substitution 
   including K-LISTK-EXTRAS .
