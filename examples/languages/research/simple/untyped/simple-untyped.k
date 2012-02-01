@@ -338,7 +338,7 @@ global variable before declaring a local function).  The type checker of
 SIMPLE, also defined in \K (see simple/typed/static),
 discards programs which do not respect this requirement. */
 
-  rule <k> function F:#Id(Xs:Ids) S:Stmt => . ...</k>
+  rule <k> function F:#Id(Xs:Ids) S:K => . ...</k>
        <env> Env => Env[L/F] </env>
        <store>... . => L|->lambda(Xs,S) ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
@@ -375,9 +375,9 @@ When a variable $X$ is the first computational task (note the rupture of the
 environment (note the rupture of the \textsf{env} cell at both sides), and
 $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
-  rule <k> X => V:Val ...</k>
+  rule <k> X => K:K ...</k>
        <env>...X|->L...</env>
-       <store>...L|->V...</store>  [:transition:]
+       <store>...L|->K...</store>  [:transition:]
 
 /*@ Note that this excludes reading $\bot$, as $\bot$ is not a value. */
 
@@ -431,7 +431,7 @@ The semantics of the \texttt{lookup} operation is straightforward. */
   rule V[N1,N2,Vs] => V[N1][N2,Vs]  [:structural:]
   rule arrayRef(L,_)[N] => lookup(L +Int N)  [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
-  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store>  [:transition:]
+  rule <k> lookup(L) => K ...</k> <store>...L|->K...</store>  [:transition:]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -476,7 +476,7 @@ nulary \texttt{return;} statements. */
        <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
        <env> Env => GEnv </env>
        <genv> GEnv:Map </genv>
-  rule <k> return(V); ~> _ => V ~> K </k>
+  rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
   syntax Val ::= "nothing"
@@ -596,7 +596,7 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [:structural:]
+  rule <k> S1:K S2:K => S1 ~> S2  ...</k> [:structural:]
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
