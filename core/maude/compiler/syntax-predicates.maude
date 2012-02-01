@@ -172,7 +172,7 @@ ceq syntaxPredsMb(SS,Mb)
      
   op syntaxTy : Module Module SortSet Type ~> Type .
   eq syntaxTy(M, Flat, SS, Ty) 
-   = if Ty in SS then K else Ty fi .
+   = if Ty in SS then K else if Ty == ResultList then KList else Ty fi fi .
 
   op syntaxRTy : Module Module SortSet Type ~> Type .
   eq syntaxRTy(M, Flat, SS, Ty) 
