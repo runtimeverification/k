@@ -156,7 +156,7 @@ mod #META-MODULE is
   sort #NeTypeMetaList #TypeMetaList .
   subsorts #TypeMeta < #NeTypeMetaList < #TypeMetaList < #QidList .
   subsorts #NeTypeMetaList < #NeQidList .
-  op nilTML : -> #TypeMetaList [ctor] .
+  op nilQidList : -> #TypeMetaList [ditto] .
   op _plQidList_ : #TypeMetaList #TypeMetaList -> #TypeMetaList [ctor ditto] .
   op _plQidList_ : #NeTypeMetaList #TypeMetaList -> #NeTypeMetaList [ctor ditto] .
   op _plQidList_ : #TypeMetaList #NeTypeMetaList -> #NeTypeMetaList [ctor ditto] .
@@ -270,7 +270,7 @@ mod #META-MODULE is
     [ctor format (d d d d d d s d d s d)] .
   op noneOPDS : -> #OpDeclSet [ctor] .
   op _OPDS_ : #OpDeclSet #OpDeclSet -> #OpDeclSet
-    [ctor assoc comm id: noneOPDS] .
+    [ctor assoc comm id: noneOPDS format (i n ni d)] .
   eq O:#OpDecl OPDS O:#OpDecl = O:#OpDecl .
 
 *** conditions
