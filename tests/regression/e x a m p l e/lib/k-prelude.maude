@@ -278,10 +278,10 @@ mod K-RESULT is
   subsort List{KResult} < List{K} .
   subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
 
+---(
   op _`,`,_ : List{KResult} List{KResult} -> List{KResult} [ditto] .
   op _`,`,_ : NeList{KResult} List{KResult} -> NeList{KResult} [ditto] .
   op _`,`,_ : List{KResult} NeList{KResult} -> NeList{KResult} [ditto] .
-
 
   sorts KResultLabel KHybridLabel .
 
@@ -289,9 +289,11 @@ mod K-RESULT is
   
   op _`(_`) : KResultLabel List{K} -> KResult [ditto] .
   op _`(_`) : KHybridLabel List{KResult} -> KResult [ditto] .
+---)
 endm
 
 
+---(
 mod K-RESULT-LABELS is
   including K-TECHNIQUE .
   op 'k-result : -> KLabel .
@@ -314,6 +316,7 @@ mod K-PROPER is
   op _`,`,_ : List{K} NeKProperList -> NeKProperList [ditto] .
   op _`(_`) : KHybridLabel NeKProperList -> KProper [ditto] .
 endm
+---)
 
 --- Strictness Level
 
@@ -413,20 +416,22 @@ mod K-RULES is
   op _=>_ : Set Set -> Set [prec 125] .
 endm
 
+---(
 mod K-RULES-RESULT is
   including K-RULES .
   including K-RESULT .
   op _=>_ : KResult KResult -> KResult [prec 125] .
-  op _=>_ : KResultLabel KResultLabel -> KResultLabel [prec 125] .
+---  op _=>_ : KResultLabel KResultLabel -> KResultLabel [prec 125] .
   op _=>_ : List{KResult} List{KResult} -> List{KResult} [prec 125] .
 endm
+---)
 
 mod K-EVAL is 
   including K-TECHNIQUE .
   op #eval_ : Map -> Bag .
 endm
 
---- rule where level
+---( rule where level
 
 mod K-WHERE is
   including K-SENTENCE .
@@ -441,6 +446,8 @@ mod K-WHERE is
   op _::=_ : Set Set -> KAssignments .
   op _where_ : [KSentence] KAssignments -> [KSentence] [prec 127 format (o b o d)] .
 endm
+
+---)
 
 
 mod K-CONDITION-SEARCH is
@@ -457,7 +464,7 @@ endm
 mod K-POLYMORPHIC-VARIABLES is
   including K-TECHNIQUE .
   op ? : -> Anonymous [poly(0)] .
-  op [HOLE] : -> Anonymous [poly(0)] .
+  op HOLE : -> Anonymous [poly(0)] .
 endm
 
 mod K-CELL-ATTRS is
@@ -550,7 +557,6 @@ mod K is
   including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
   including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
   including K-CONTEXTS .
-  including K-WHERE .
   including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
   including K-EXTRAS .              --- defines a KLabel substitution 
   including K-LISTK-EXTRAS .
