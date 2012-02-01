@@ -340,6 +340,8 @@ fmod META-TERM-EXTRAS is
 
   op errorT : [Term] String String -> [Term] .
  op errorS : Term Type String -> [Type] .
+ op errorSOp : Term Type String -> [OpDecl] .
+
 
   var V : Variable . var Trl' Trl Trl'' : TermList .  var Tr Tr' : Term .
   var C : Constant . var Nz : NzNat . var N : Nat .  var Q : Qid .
@@ -935,6 +937,8 @@ fmod META-MODULE-EXTRAS is
   op getTypes : Nat OpDecl ~> TypeList .
   eq getTypes(N, (op Q : Tl -> T [AS] .))
    = getTypes(N,Tl, arity(Tl), AS) .
+  eq getTypes(N, errorSOp(Trm, T, Str))
+   = errorS(Trm, T, Str) .
 
   op getTypes : Nat TypeList Nat AttrSet ~> TypeList .
   eq getTypes(N,Tl,N,AS) = Tl .
@@ -1217,8 +1221,6 @@ fmod META-LEVEL-EXTRAS is
    = sortLeq(M, T', T) and-then sortsLeq(M, Tl', Tl) 
   [owise] .
   eq sortsLeq(M, nil,nil) = true .
-
- op errorSOp : Term Type String -> [OpDecl] .
 
   op findOp : Module OpDeclSet Qid TypeList Type ~> OpDecl .
 

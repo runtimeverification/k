@@ -160,7 +160,8 @@ ceq subsorts2wrappersMb(Mb, M, OPDS, SSDM)
   = findPurifyRedex(Trm,T, M, OPDS, SSDM),
     findPurifyRedexes(Trms,Tl,M,OPDS, SSDM) [print "findPurifyRedex(" Trm ", " T ")"].
  eq findPurifyRedexes(empty, nil, M, OPDS, SSDM) = empty .
-
+ eq findPurifyRedexes(Trms, errorS(Trm', T, Str),M,OPDS, SSDM)
+  = errorT(Trm', "", Str + "; Type: " + string(T)) .
 
  op findPurifyRedexCond : TermList Module OpDeclSet SubsortDeclMap ~> TermList .
  eq findPurifyRedexCond(empty, M, OPDS, SSDM) = empty .
