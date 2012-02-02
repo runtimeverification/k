@@ -84,6 +84,14 @@ sub get_ast_from_node
 	return "# $op(.List{K})";
     }
 # print "RUN2: Op: $op; Sort: $sort; Content: $content\n";
+
+    # simple integers
+    if ($sort eq '#Int' || $sort eq '#Zero')
+    {
+	return "# $op(.List{K})";
+    }
+
+# print "RUN21: Op: $op; Sort: $sort; Content: $content\n";
     
     # numbers
     # naturals
