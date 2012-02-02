@@ -19,7 +19,7 @@ including SKOOL-TYPED-SYNTAX
   syntax K ::= lookupMember ( BagItem , #Id )  --- BagItem is the envStack cell, Id is the member name
   syntax CellLabel ::= env 
 
-  rule lookupMember(<envStack> _ :: <env> Env:Map </env>  => . <_/envStack>, X:#Id)
+  rule lookupMember(<envStack> _:#Id :: <env> Env:Map </env>  => . <_/envStack>, X:#Id)
     when notBool(X in keys(Env)) [structural]
 
 
