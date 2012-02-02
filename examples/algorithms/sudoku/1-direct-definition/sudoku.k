@@ -21,7 +21,7 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
 --- [_] transforms a sudoku board given as list into a K configuration
   syntax Bag ::= [ List{K} ] | mkCells ( #Nat , List{K} )   --- transforms sudoku board into configuration
   macro [Vl:List{K}] = <T> mkCells(0,Vl) </T>
-  macro mkCells(_,.List{K}) = .Bag
+  macro mkCells(_:#Nat,.List{K}) = .Bag
   macro mkCells(N:#Nat,(V:K,,Vl:List{K}))
       = <cell> <x>N /Nat 9</x> <y>N %Nat 9</y> <v>BagItem(V)</v> </cell> mkCells(sNat(N),Vl)
 

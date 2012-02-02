@@ -119,7 +119,7 @@ module TYPES
 
 // This should be generalized and builtin: fresh name generator
   syntax Types ::= #Nat "from" Type
-  rule 0 from tv(_) => .Types
+  rule 0 from tv(_:#Nat) => .Types
   rule (sNat N:#Nat) from tv(M:#Nat) => tv(M),(N from tv(sNat M))
 
 // This could also be generic: subterm relation?

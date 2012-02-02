@@ -79,7 +79,7 @@ fmod BLOCKING-INPUT is
 
   op parseTerm : String Term -> Term .
   eq parseTerm(Str:String,T)
-   = '#parse`(_`,_`)[string2K(stringCt(Str:String)),nilK] .
+   = '#parse`(_`,_`)[stringCt(Str:String),nilK] .
 
 
 endfm

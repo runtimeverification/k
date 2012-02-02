@@ -245,7 +245,7 @@ KOOL).  */
   rule arrayRef(_,L,M:#Nat)[N] => lookup(L +Int N)
     when N >=Nat 0 andBool N <Nat M   [:structural:]
 
-  rule sizeOf(arrayRef(_,_,N)) => N
+  rule sizeOf(arrayRef(_,_:#Nat,N)) => N
 
   syntax Val ::= "nothing"
   rule return; => return nothing;   [:structural:]
@@ -300,7 +300,7 @@ KOOL).  */
   rule typeOf(I) => int              [:structural:]
   rule typeOf(B) => bool             [:structural:]
   rule typeOf(_:#String) => string   [:structural:]
-  rule typeOf(arrayRef(T,_,_)) => T  [:structural:]
+  rule typeOf(arrayRef(T,_:#Nat,_:#Nat)) => T  [:structural:]
   rule typeOf(undefined(T)) => T     [:structural:]
   rule typeOf(nothing) => void       [:structural:]
 
@@ -576,7 +576,7 @@ Like in untyped KOOL. */
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
     when notBool(X in keys(Env))  [:structural:]
 
-  context lvalue(_._(HOLE,_))
+  context lvalue(_._(HOLE,_:#Id))
   rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
                            <envStack>...
                              ListItem(Class :: EnvC) EStack
@@ -590,9 +590,9 @@ Like in untyped KOOL. */
 
   syntax K ::= #Id "::" Bag
   syntax K ::= "lookupMember" "(" BagItem "," #Id ")"
-  rule lookupMember(<envStack> ListItem(_ :: <env>...X|->L...</env>)
+  rule lookupMember(<envStack> ListItem(_:#Id :: <env>...X|->L...</env>)
                     ...</envStack>,X) => lookup(L)  [:structural:]
-  rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)
+  rule lookupMember(<envStack> ListItem(_:#Id :: <env> Env </env>)
                             => . ...</envStack>, X)
     when notBool(X in keys(Env))                      [:structural:]
 
@@ -603,7 +603,7 @@ Like in untyped KOOL. */
 
   rule typeOf(objectClosure(_ <envStack> ListItem(Class::_) ...</envStack>))
     => class Class [:structural:]
-  rule typeOf(methodClosure(_,_,_,_,T)) => T  [:structural:]
+  rule typeOf(methodClosure(_:#Id,_:#Nat,_,_,T)) => T  [:structural:]
 
 /*@ \subsubsection{Subtyping constraints}
 The subclass relation introduces a subtyping relation. */

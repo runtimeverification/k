@@ -243,11 +243,11 @@ of Java.  In fact, the latter can be implemented in terms of
   rule not(B:#Bool) => notBool(B)
 
   rule V[N1,N2,Vs] => V[N1][N2,Vs]           [:structural:]
-  rule arrayRef(L,_)[N] => lookup(L +Int N)  [:structural:]
+  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => V ...</k> <store>...L|->V...</store>  [:transition:]
 
-  rule sizeOf(arrayRef(_,N)) => N
+  rule sizeOf(arrayRef(_:#Nat,N)) => N
 
 /*@ The semantics of return, as well as the definition of
 \texttt{bindto}, stay unchanged */
@@ -670,7 +670,7 @@ member's location based on the current class of the object. */
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
     when notBool(X in keys(Env))  [:structural:]
 
-  context lvalue(_._(HOLE,_))
+  context lvalue(_._(HOLE,_:#Id))
   rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
                           <envStack>...
                             ListItem(Class :: EnvC) EStack
@@ -689,10 +689,10 @@ with the most concrete class and going up in the hierarchy. */
   // BagItem is the envStack cell, Id is the member name
 
 // First look for the member in the top environment; if found then done.
-  rule lookupMember(<envStack> ListItem(_ :: <env>...X|->L...</env>)
+  rule lookupMember(<envStack> ListItem(_:#Id :: <env>...X|->L...</env>)
                     ...</envStack>,X) => lookup(L)  [:structural:]
 // Otherwise, recurse through the object environment stack
-  rule lookupMember(<envStack> ListItem(_ :: <env> Env </env>)
+  rule lookupMember(<envStack> ListItem(_:#Id :: <env> Env </env>)
                             => . ...</envStack>, X)
     when notBool(X in keys(Env))                      [:structural:]
 

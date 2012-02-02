@@ -252,7 +252,7 @@ When done with the first pass, call \texttt{main()}. */
   rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
   rule arrayRef(_,L,M:#Nat)[N] => lookup(L +Int N)
     when N >=Nat 0 andBool N <Nat M   [:structural:]
-  rule sizeOf(arrayRef(_,_,N)) => N
+  rule sizeOf(arrayRef(_,_:#Nat,N)) => N
 
 //@ Define function call and return together, to see their relationship.
 
@@ -359,7 +359,7 @@ When done with the first pass, call \texttt{main()}. */
   rule typeOf(B) => bool             [:structural:]
   rule typeOf(_:#String) => string   [:structural:]
 
-  rule typeOf(arrayRef(T,_,_)) => T  [:structural:]
+  rule typeOf(arrayRef(T,_:#Nat,_:#Nat)) => T  [:structural:]
   rule typeOf(lambda(_,_,T)) => T    [:structural:]
 
   rule typeOf(undefined(T)) => T     [:structural:]

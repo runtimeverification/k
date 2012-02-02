@@ -441,7 +441,7 @@ is co-variant in the codomain and contra-variant in the domain). */
     when notBool(M in keys(Rho))
     [:structural:]
 
-  rule checkMethod(_,_,object) => .
+  rule checkMethod(_:#Id,_,object) => .
 
 
 /*@ \subsection{New}
@@ -545,7 +545,7 @@ type correctly. */
 
   rule try stmt catch(X : class C) S => {var X : class C; S}
     [:structural:]
-  rule throw class _; => stmt
+  rule throw class _:#Id ; => stmt
 
 
 /*@ \subsection{Cleanup tasks}
