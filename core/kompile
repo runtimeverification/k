@@ -2745,6 +2745,10 @@ sub addKandKLATEX
 
 	# extract module name
 	my $mod = $1 if $content =~ /kmod\s+(.*?)\s/sg;
+ 
+	if ($mod =~ /^#/){
+		return $content;
+	}
 
 	# get list of imported modules
 	while ( $content =~ /\s+including([\sA-Z0-9\-+]*)/sgm )
@@ -2778,5 +2782,5 @@ sub addKandKLATEX
 		$content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K-LATEX including PL-BUILTINS including K-RESULT !sg if !$k_latex;
 	}
 
-	$content;
+	return $content;
 }
