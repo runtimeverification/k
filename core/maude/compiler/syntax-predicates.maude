@@ -166,7 +166,7 @@ ceq syntaxPredsMb(SS,Mb)
 
   op syntaxTyl : Module Module SortSet TypeList ~> TypeList .
   eq syntaxTyl(M, Flat, SS, Ty Tyl) 
-   = syntaxTy(M, Flat, SS, Ty) 
+   = syntaxRTy(M, Flat, SS, Ty) 
      syntaxTyl(M, Flat, SS, Tyl)  .
   eq syntaxTyl(M, Flat, SS, nil) = nil .
      

@@ -99,9 +99,9 @@ module URIS
   // Flush when the buffer becomes empty
   rule #ostream(N:#Nat) (.List => ListItem(#flush(N))) #buffer("" => .K)
 
-  rule #ostream(_) (ListItem(.K) => .List) 
+  rule #ostream(_:#Nat) (ListItem(.K) => .List) 
   //consume a char from the buffer only on succesfull communication 
-  rule #ostream(_) (#removeCharUponAck => .List) #buffer(S:#String => substrString(S,1, lengthString(S)))
+  rule #ostream(_:#Nat) (#removeCharUponAck => .List) #buffer(S:#String => substrString(S,1, lengthString(S)))
  
   syntax List ::= `#removeCharUponAck
   
@@ -126,7 +126,7 @@ module URIS
   // Read a token
   rule #parse(S:#String,.K => "") ListItem(C:#Char) 
     when S =/=Bool "#Char" andBool notBool(#isWhiteSpace(C))
-  rule #parse(_, S:#String => S:#String +String C) (ListItem(C:#Char) => .List) 
+  rule #parse(_:#String, S:#String => S:#String +String C) (ListItem(C:#Char) => .List) 
     when notBool(#isWhiteSpace(C))
 
   // Upon encountering again whitespace, convert token
@@ -149,16 +149,16 @@ module URIS
   syntax List ::= `#buffer ( K )
 
   // Initial input string is assumed wrapped in an #buffer wrapper an one character is retreved from it at a time
-  rule #parse(_,_) (.List => ListItem(substrString(S,0,1))) 
+  rule #parse(_:#String,_) (.List => ListItem(substrString(S,0,1))) 
        #buffer(S:#String => substrString(S,1,lengthString(S)))
     when S =/=Bool ""
-  rule #buffer("" => .K) #istream(_)
+  rule #buffer("" => .K) #istream(_:#Nat)
 
   // I fthe buffer becomes empty, read from the input stream
-  rule #parse(_,_) (.List => ListItem(#fReadChar(N))) #buffer(.K) #istream(N)
+  rule #parse(_:#String,_) (.List => ListItem(#fReadChar(N))) #buffer(.K) #istream(N)
 
   syntax List ::= `#istream ( #Nat ) | `#ostream ( #Nat ) 
   syntax List ::= `#noIO
-  rule #noIO #istream(_) => .List
-  rule #ostream(_) #noIO => .List
+  rule #noIO #istream(_:#Nat) => .List
+  rule #ostream(_:#Nat) #noIO => .List
 end module
