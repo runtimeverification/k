@@ -79,7 +79,7 @@ sub get_ast_from_node
 # print "RUN1: Op: $op; Sort: $sort; Content: $content\n";
     
     # simple strings
-    if ($sort eq '#String')
+    if ($sort eq '#String' || $sort eq '#Char')
     {
 	return "# $op(.List{K})";
     }
