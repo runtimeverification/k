@@ -104,16 +104,16 @@ sub get_ast_from_node
 # print "RUN4: Op: $op; Sort: $sort; Content: $content\n";
     
     # builtin sorts default
-    my $allksorts = get_builtin_sorts();
-    $allksorts = $1 if ($allksorts =~ m/NeSortSet:(.*?Bye)\./sg);
+#    my $allksorts = get_builtin_sorts();
+#    $allksorts = $1 if ($allksorts =~ m/NeSortSet:(.*?Bye)\./sg);
 #    print "ALL: $allksorts\n\n";
-    if ($allksorts =~ m/\'\Q$sort\E/sg)
-    {
+#    if ($allksorts =~ m/\'\Q$sort\E/sg && )
+#    {
 #	print "\n$sort matched in $allksorts\n\n";
 #	print "RUN41: Op: $op; Sort: $sort; Content: $content\n";
-	return "# $op(.List{K})" 	
-    }
-    elsif ($sort =~ /^#/sg)
+#	return "# $op(.List{K})" 	
+#    }
+    if ($sort =~ /^#/sg)
     {
 #	print "RUN41: Op: $op; Sort: $sort; Content: $content\n";
 	return "# $op(" . flat($content) . ")(.List{K})";
