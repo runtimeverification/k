@@ -429,7 +429,7 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 The semantics of the \texttt{lookup} operation is straightforward. */
 
   rule V[N1,N2,Vs] => V[N1][N2,Vs]  [:structural:]
-  rule arrayRef(L,_)[N] => lookup(L +Int N)  [:structural:]
+  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => K ...</k> <store>...L|->K...</store>  [:transition:]
 
@@ -437,7 +437,7 @@ The semantics of the \texttt{lookup} operation is straightforward. */
 The size of the array is stored in the array reference value, and the
 \texttt{sizeOf} construct was declared strict, so: */
 
-  rule sizeOf(arrayRef(_,N)) => N
+  rule sizeOf(arrayRef(_:#Nat,N)) => N
 
 /*@ \subsection{Function call}
 Function application was strict in both its arguments, so we can
