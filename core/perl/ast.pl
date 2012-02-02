@@ -62,7 +62,7 @@ sub get_ast_from_node
 	    $content .= get_ast_from_node($child) . ",,";
 	}
     }
-# print "Op: $op; Sort: $sort; Content: $content\n";
+#  print "Op: $op; Sort: $sort; Content: $content\n";
     $content =~ s/,,$//s;
 
     # #id("identifier")
@@ -106,10 +106,11 @@ sub get_ast_from_node
     # builtin sorts default
     my $allksorts = get_builtin_sorts();
     $allksorts = $1 if ($allksorts =~ m/NeSortSet:(.*?Bye)\./sg);
-    if ($allksorts =~ /\Q\'$sort\E/sg)
+#    print "ALL: $allksorts\n\n";
+    if ($allksorts =~ m/\'\Q$sort\E/sg)
     {
 #	print "\n$sort matched in $allksorts\n\n";
-#	print "RUN41: Op: $op; Sort: $sort; Content: $content\n";      
+#	print "RUN41: Op: $op; Sort: $sort; Content: $content\n";
 	return "# $op(.List{K})" 	
     }
     elsif ($sort =~ /^#/sg)
