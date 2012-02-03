@@ -6,8 +6,9 @@ mod SYNTAX-PREDICATES is
   including METADATA-EXTRAS .
   including META-K-MODULE .
   including K-META-OPS .
-  including  META-K-PREDICATES .
+  including META-K-PREDICATES .
   including META-K-CONTEXTS .
+  including META-ANONYMOUS-VARIABLE .
  
   op syntaxPreds : Module -> Module .
   eq syntaxPreds(M)
@@ -94,7 +95,8 @@ ceq syntaxPredsMb(SS,Mb)
   op syntaxVars : SortSet TermList ~> TermList .
   eq syntaxVars(SS, empty) = empty .
   eq syntaxVars(SS, (V,Trms))
-   = if getType(V) in SS or-else getType(V) == ResultList
+   = if getName(V) =/= anyVarS and-then 
+        (getType(V) in SS or-else getType(V) == ResultList)
      then V,syntaxVars(SS, Trms) else syntaxVars(SS, Trms) fi .
 
   op syntaxCondition_ : TermList ~> TermList .

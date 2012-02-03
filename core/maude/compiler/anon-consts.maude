@@ -52,6 +52,7 @@ fmod ANONYMOUS-CONSTANTS is
   eq resolveConstsRl(M, SS, (crl Trm => Trm' if Cond [AS] .))
    = (crl resolveConstsT(M,SS, Trm) => Trm' if Cond [AS] .) .
 
+---(
   op resolveConstsT : Module TypeSet Term ~> Term .
   eq resolveConstsT(M, SS, Q[Trms])
    = Q[resolveConstsTl(M, SS, Trms)] .
@@ -72,8 +73,9 @@ fmod ANONYMOUS-CONSTANTS is
   op resolveConstsTl : Module SortSet TermList ~> TermList .
   eq resolveConstsTl(M, SS, empty) = empty .
   eq resolveConstsTl(M, SS, (Trm, Trms)) = resolveConstsT(M, SS, Trm),resolveConstsTl(M, SS, Trms) .
+---)
 
----(
+---()
   op resolveConstsT : Module TypeSet Term ~> Term .
   eq resolveConstsT(M, SS, Trm) =  resolveConstsT(M, Trm, 0, none, SS) .
 
@@ -112,5 +114,5 @@ fmod ANONYMOUS-CONSTANTS is
   eq checkCommonType(T, none) = T .
   eq checkCommonType(T, T Tl ; TLS) = checkCommonType(T, TLS) .
   eq checkCommonType(T, TLS) = errorS('`[`].K, T, "Cannot get common type") .
----)
+---()
 endfm
