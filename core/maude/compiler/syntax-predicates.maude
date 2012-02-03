@@ -85,7 +85,7 @@ ceq syntaxPredsMb(SS,Mb)
   eq flattenSyntaxT(SS, empty) = empty .
   eq flattenSyntaxT(SS, (CV, Trms'))  
    = if getType(CV) in SS 
-     then setType(CV, NeK)
+     then setType(CV, K)
      else if getType(CV) == ResultList 
           then setType(CV, KList)
           else CV 
@@ -95,7 +95,7 @@ ceq syntaxPredsMb(SS,Mb)
   op syntaxVars : SortSet TermList ~> TermList .
   eq syntaxVars(SS, empty) = empty .
   eq syntaxVars(SS, (V,Trms))
-   = if getName(V) =/= anyVarS and-then 
+   = if isAnyVar(V) == false and-then 
         (getType(V) in SS or-else getType(V) == ResultList)
      then V,syntaxVars(SS, Trms) else syntaxVars(SS, Trms) fi .
 
@@ -108,7 +108,7 @@ ceq syntaxPredsMb(SS,Mb)
   eq $syntaxCondition(V, Trms) 
    = if getType(V) == ResultList 
      then kApply(predicateLabel(KResult), setType(V,KList))
-     else kApply(predicateLabel(getType(V)),setType(V,NeK)) 
+     else kApply(predicateLabel(getType(V)),setType(V,K)) 
      fi,syntaxCondition(Trms) .
 
 

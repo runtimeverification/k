@@ -688,7 +688,7 @@ fmod META-ANONYMOUS-VARIABLE is
   including CONVERSION .
   var T : Type . var N : Nat .  var Str : String .
   var M : Module .  var Op : OpDecl . var OPDS : OpDeclSet . 
-  var Q : Qid .   var AS : AttrSet .
+  var Q : Qid .   var AS : AttrSet .  var V : Variable .
 
   op anyVarS : -> Qid .
   eq anyVarS = '? .
@@ -698,6 +698,10 @@ fmod META-ANONYMOUS-VARIABLE is
 
   op anyVar : Type -> Variable .
   eq anyVar(T) = qid(string(anyVarS) + ":" + string(T)) .
+
+  op isAnyVar : Variable -> Bool .
+  eq isAnyVar(V) 
+   = substr(string(getName(V)),0,length(string(anyVarS))) == string(anyVarS) .
 
   op anyVar : Nat Type -> Variable .
   eq anyVar(N,T) = anyVar("",N,T) .
