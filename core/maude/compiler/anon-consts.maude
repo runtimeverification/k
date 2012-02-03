@@ -90,7 +90,7 @@ fmod ANONYMOUS-CONSTANTS is
    = if getName(Ct) in SS then mkVariable(getName(Ct), fixHole(M,getName(Ct),getNthType(N, TLS))) else Ct fi .
 
   op fixHole : Module Qid Type ~> Type .
-  eq fixHole(M,Q,T) = if Q == getName(hole) and-then sortLeq(M,K,T) then K else T fi . 
+  eq fixHole(M,Q,T) = if Q == getName(hole) then K else T fi . 
   eq fixHole(M, Q, errorS(Trm, T, Str)) 
    = errorS(mkConstant(Q,T), T, Str) .
 
