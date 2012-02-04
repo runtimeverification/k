@@ -156,7 +156,7 @@ mod #META-MODULE is
   sort #NeTypeMetaList #TypeMetaList .
   subsorts #TypeMeta < #NeTypeMetaList < #TypeMetaList < #QidList .
   subsorts #NeTypeMetaList < #NeQidList .
-  op nilQidList : -> #TypeMetaList [ditto] .
+  op nilQidList : -> #TypeMetaList [ctor] .
   op _plQidList_ : #TypeMetaList #TypeMetaList -> #TypeMetaList [ctor ditto] .
   op _plQidList_ : #NeTypeMetaList #TypeMetaList -> #NeTypeMetaList [ctor ditto] .
   op _plQidList_ : #TypeMetaList #NeTypeMetaList -> #NeTypeMetaList [ctor ditto] .
