@@ -87,12 +87,16 @@ fmod ANONYMOUS-CONSTANTS is
    = Q[resolveConstsTl(M,Trms, 0,maximalAritySet(M,Q[Trms]), SS)] [owise] . 
   eq resolveConstsT(M, V, N, TLS, SS) = V .
   eq resolveConstsT(M, Ct, N, TLS, SS) 
-   = if getName(Ct) in SS then mkVariable(getName(Ct), fixHole(M,getName(Ct),getNthType(N, TLS))) else Ct fi .
+   = if getName(Ct) in SS then mkVariable(fixAnon(getName(Ct)), fixHole(M,getName(Ct),getNthType(N, TLS))) else Ct fi .
 
   op fixHole : Module Qid Type ~> Type .
   eq fixHole(M,Q,T) = if Q == getName(hole) then K else T fi . 
   eq fixHole(M, Q, errorS(Trm, T, Str)) 
    = errorS(mkConstant(Q,T), T, Str) .
+
+  op fixAnon : Qid -> Qid .
+  eq fixAnon(Q) 
+   = if Q == anyVarS then qid(string(anyVarS) + string(anyVarS)) else Q fi .
 
   op resolveConstsTl : Module TermList Nat TypeListSet TypeSet ~> TermList .
   eq resolveConstsTl(M, empty, N, TLS, SS) = empty .

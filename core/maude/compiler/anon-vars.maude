@@ -60,9 +60,7 @@ fmod ANONYMOUS-VARIABLES is
   op resolveVarsT : Module Term Nat ~> TermsNat .
   eq resolveVarsT(M, Q[Tl], N)
    = resolveVarsT(M, Q, resolveVarsTl(M,Tl,{empty,N})) .
- ceq resolveVarsT(M, V, N) = {anyVar(N,getType(V)), N + 1}
-  if getName(V) = anyVarS .
-  eq resolveVarsT(M, V, N) = {V,N} [owise] .
+  eq resolveVarsT(M, V, N) = if isAnyVar(V) then {anyVar(getName(V),N,getType(V)), N + 1} else {V,N} fi .
   eq resolveVarsT(M, Ct, N) = {Ct,N}  .
 
   op resolveVarsT : Module Qid TermsNat ~> TermsNat .

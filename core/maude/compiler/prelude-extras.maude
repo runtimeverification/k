@@ -1046,6 +1046,14 @@ fmod META-MODULE-EXTRAS is
   eq getCond(mb T1 : T [AS] .) = nil .
   eq getCond(cmb T1 : T if Cond [AS] .) = Cond .
 
+
+  op _`[_`] : Condition Substitution ~> Condition .
+  eq (nil).Condition[Subst] = (nil).Condition .
+  eq (T1 = T2 /\ Cond)[Subst] = ((T1[Subst]) = (T2[Subst]) /\ (Cond[Subst])) .
+  eq (T1 := T2 /\ Cond)[Subst] = ((T1[Subst]) := (T2[Subst]) /\ (Cond[Subst])) .
+  eq (T1 => T2 /\ Cond)[Subst] = ((T1[Subst]) => (T2[Subst]) /\ (Cond[Subst])) .
+  eq (Trm : T /\ Cond)[Subst] = ((Trm[Subst]) : T /\ (Cond[Subst])) .
+
   op setTerm : MembAx Term -> MembAx .
   eq setTerm(mb T1 : T [AS] ., Trm) = (mb Trm : T [AS] .) .
   eq setTerm(cmb T1 : T if Cond [AS] ., Trm) = (cmb Trm : T if Cond [AS] .) .
@@ -1109,6 +1117,10 @@ fmod META-MODULE-EXTRAS is
   eq nth(T Tl, 0) = T .
   eq nth(T Tl, s(N)) = nth(Tl, N) .
 
+ op _[_] : MembAx Substitution ~> MembAx .
+ eq Mb[Subst] = plugMb(getTerm(Mb)[Subst],getType(Mb),getAttrs(Mb), 
+                       getCond(Mb)[Subst]) .
+
  op plugMb : Term Type AttrSet Condition -> MembAx .
  eq plugMb(Trm, T, AS, Cond) 
   = if Cond == nil
@@ -1117,6 +1129,10 @@ fmod META-MODULE-EXTRAS is
     fi .
  eq plugMb(errorT(T1':[Term], Cxt:String, Str:String), T, AS, Cond)
   = errorMb(T1':[Term], Cxt:String, Str:String, AS) .
+
+ op _[_] : Equation Substitution ~> Equation .
+ eq Eq[Subst] = plugEq(getLhs(Eq)[Subst],getRhs(Eq)[Subst],getAttrs(Eq), 
+                       getCond(Eq)[Subst]) .
 
  op plugEq : Term Term AttrSet Condition ~> Equation .
  eq plugEq(T1, T2, AS, Cond) 
@@ -1128,6 +1144,10 @@ fmod META-MODULE-EXTRAS is
   = errorEq(T1':[Term], Cxt:String, Str:String, AS) .
  eq plugEq(T1, errorT(T1':[Term], Cxt:String, Str:String), AS, Cond)
   = errorEq(T1':[Term], Cxt:String, Str:String, AS) .
+
+ op _[_] : Rule Substitution ~> Rule .
+ eq Rl[Subst] = plugRl(getLhs(Rl)[Subst],getRhs(Rl)[Subst],getAttrs(Rl), 
+                       getCond(Rl)[Subst]) .
 
  op plugRl : Term Term AttrSet Condition ~> Rule .
  eq plugRl(T1, T2, AS, Cond) 
@@ -1158,6 +1178,7 @@ fmod META-MODULE-EXTRAS is
   var Tl Tl' : TypeList .  var NTl : NeTypeList .  var T T' : Type . 
   var AS AS' : AttrSet .  var Attr : Attr .
   var NNl : NeNatList . var Nl : NatList . var N N' : Nat .
+  var Subst : Substitution .
 endfm
 
 fmod METADATA-EXTRAS is

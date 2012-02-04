@@ -16,7 +16,7 @@ mod SYNTAX-PREDICATES is
 
   op syntaxPreds : Module Module -> Module .
   eq syntaxPreds(M, Flat)
-   = syntaxPreds(M, Flat, removeSorts(lesserSorts(Flat, K), NeK ; K), makeSubsorts(Flat,getSorts(Flat),getSorts(Flat)), getOps(Flat)) .
+   = syntaxPreds(M, Flat, removeSorts(lesserSorts(Flat, K), KItem ; K), makeSubsorts(Flat,getSorts(Flat),getSorts(Flat)), getOps(Flat)) .
 
   op syntaxPreds : Module Module SortSet  SubsortDeclSet OpDeclSet -> Module .
   eq syntaxPreds(M, Flat, SS, SSDS, OPDS) = syntaxPreds(M, Flat, SS \ builtinSorts(M,SS), builtinSorts(M, SS), SSDS, OPDS) .
@@ -51,53 +51,82 @@ mod SYNTAX-PREDICATES is
 
  op syntaxPredsMbs : SortSet MembAxSet ~> MembAxSet .
  eq syntaxPredsMbs(SS, Mbs Mb)
-  =  syntaxPredsMbs(SS, Mbs) syntaxPredsMb(SS, Mb) .
+  =  syntaxPredsMbs(SS, Mbs) syntaxPredsMb(SS, noPredsDuplicates(syntaxVars(SS, getPredsVars(getTerm(Mb)))), Mb) .
  eq syntaxPredsMbs(SS, none) = none .
 
- op syntaxPredsMb : SortSet MembAx ~> MembAx .
-ceq syntaxPredsMb(SS,Mb)
-  = syntaxPredsKRl(SS, KRS, syntaxPredsT(SS, getContents(KRS)), syntaxCondition(syntaxVars(SS, noDuplicates(getVars(getContents(KRS))))))
+ op syntaxPredsMb : SortSet TermList MembAx ~> MembAx .
+ eq syntaxPredsMb(SS, Trms, Mb)
+  = $syntaxPredsMb(SS, Trms, mkKItems(getKItems(Trms), Mb)) .
+
+ op $syntaxPredsMb : SortSet TermList MembAx ~> MembAx .
+ceq $syntaxPredsMb(SS,Trms,Mb)
+  = syntaxPredsKRl(SS, KRS, syntaxPredsT(SS, getContents(KRS)), syntaxCondition((Trms)))
  if KRS := splitKRule(Mb) [print "syntaxPredsMb splitKRule " KRS].
-ceq syntaxPredsMb(SS,Mb)
-  = syntaxPredsKCxt(SS, KCS, syntaxPredsT(SS, getContents(KCS)), syntaxCondition(syntaxVars(SS, noDuplicates(getVars(getContents(KCS))))))
+ceq $syntaxPredsMb(SS,Trms,Mb)
+  = syntaxPredsKCxt(SS, KCS, syntaxPredsT(SS, getContents(KCS)), syntaxCondition((Trms))) 
  if KCS := splitKContext(Mb) .
-ceq syntaxPredsMb(SS,Mb)
+ceq $syntaxPredsMb(SS,Trms,Mb)
   = plugKConfig(setContents(KCfgS,syntaxPredsT(SS, getContents(KCfgS))))
  if KCfgS := splitKConfig(Mb) .
 ---(
  eq syntaxPredsMb(SS,Mb)
-  = plugMb(syntaxPredsT(SS,getTerm(Mb)), getType(Mb), getAttrs(Mb), mkBaseCondition(syntaxCondition(syntaxVars(SS, noDuplicates(getVars(getTerm(Mb)))))) /\ syntaxPredsCond(SS, getCond(Mb))) [owise] .
+  = plugMb(syntaxPredsT(SS,getTerm(Mb)), getType(Mb), getAttrs(Mb), mkBaseCondition(syntaxCondition(syntaxVars(SS, (getPredsVars(getTerm(Mb)))))) /\ syntaxPredsCond(SS, getCond(Mb))) [owise] .
 ---)
 
+ op kitem : Variable -> Term .
+
+ op getPredsVars : TermList -> TermList .
+ eq getPredsVars(Trms) = $getPredsVars(Trms, 'dummy) .
+
+ op $getPredsVars : TermList Qid -> TermList .
+ eq $getPredsVars((Q[Trms],Trms'),Q')
+  = if Q == replaceS then $getPredsVars((Trms, Trms'), Q') 
+    else $getPredsVars(Trms,Q),$getPredsVars(Trms',Q') fi .
+ eq $getPredsVars((V,Trms),Q) 
+  = if Q == kraS then kitem(V) else V fi,$getPredsVars(Trms, Q) .
+ eq $getPredsVars((Ct,Trms),Q) = $getPredsVars(Trms,Q) .
+ eq $getPredsVars(empty,Q) = empty .
 
  op syntaxPredsKCxt : SortSet KContextSplit Term TermList ~> MembAx .
- eq syntaxPredsKCxt(SS, KCS, Trm, Trms) = plugKContext(setCondition(setContents(KCS, Trm), andBool(flattenSyntaxT(SS, getCondition(KCS)),Trms))) .
+ eq syntaxPredsKCxt(SS, KCS, Trm, Trms) = plugKContext(setCondition(setContents(KCS, Trm), andBool(flattenSyntaxT(SS, getCondition(KCS),'dummy),Trms))) .
 
  op syntaxPredsKRl : SortSet KRuleSplit Term TermList ~> MembAx .
- eq syntaxPredsKRl(SS, KRS, Trm, Trms) = plugKRule(setCondition(setContents(KRS, Trm), andBool(flattenSyntaxT(SS, getCondition(KRS)),Trms))) .
+ eq syntaxPredsKRl(SS, KRS, Trm, Trms) = plugKRule(setCondition(setContents(KRS, Trm), andBool(flattenSyntaxT(SS, getCondition(KRS), 'dummy),Trms))) .
 
 
  op syntaxPredsT : SortSet Term ~> Term .
- eq syntaxPredsT(SS, Trm) = flattenSyntaxT(SS, Trm) .
+ eq syntaxPredsT(SS, Trm) = flattenSyntaxT(SS, Trm, 'dummy) .
 
-  op flattenSyntaxT : SortSet TermList ~> TermList .
-  eq flattenSyntaxT(SS, (Q[Trms],Trms')) = Q[flattenSyntaxT(SS, Trms)],flattenSyntaxT(SS, Trms') .
-  eq flattenSyntaxT(SS, empty) = empty .
-  eq flattenSyntaxT(SS, (CV, Trms'))  
+  op flattenSyntaxT : SortSet TermList Qid ~> TermList .
+  eq flattenSyntaxT(SS, (Q[Trms],Trms'), Q') 
+   = Q[flattenSyntaxT(SS, Trms, if Q == replaceS then Q' else Q fi)],
+     flattenSyntaxT(SS, Trms', Q') .
+  eq flattenSyntaxT(SS, empty, Q) = empty .
+  eq flattenSyntaxT(SS, (CV, Trms'), Q)  
    = if getType(CV) in SS 
-     then setType(CV, K)
+     then setType(CV, if Q == kraS then KItem else K fi)
      else if getType(CV) == ResultList 
           then setType(CV, KList)
           else CV 
           fi
-     fi, flattenSyntaxT(SS, Trms') .
+     fi, flattenSyntaxT(SS, Trms', Q) .
 
   op syntaxVars : SortSet TermList ~> TermList .
   eq syntaxVars(SS, empty) = empty .
   eq syntaxVars(SS, (V,Trms))
-   = if isAnyVar(V) == false and-then 
+   = if isAnyAnyVar(V) == false and-then 
         (getType(V) in SS or-else getType(V) == ResultList)
      then V,syntaxVars(SS, Trms) else syntaxVars(SS, Trms) fi .
+  eq syntaxVars(SS, (kitem(V), Trms))
+   = kitem(syntaxVars(SS, V)),  syntaxVars(SS, Trms)  .
+ 
+  eq kitem(empty) = empty .
+
+
+  op isAnyAnyVar : Variable -> Bool .
+  eq isAnyAnyVar(V)
+   = substr(string(getName(V)),0,3 * length(string(anyVarS))) 
+     == string(anyVarS) + string(anyVarS) + string(anyVarS) .
 
   op syntaxCondition_ : TermList ~> TermList .
   eq syntaxCondition(empty) = empty .
@@ -110,13 +139,22 @@ ceq syntaxPredsMb(SS,Mb)
      then kApply(predicateLabel(KResult), setType(V,KList))
      else kApply(predicateLabel(getType(V)),setType(V,K)) 
      fi,syntaxCondition(Trms) .
-
+  eq $syntaxCondition(kitem(V), Trms)
+   = kApply(predicateLabel(getType(V)), setType(V,KItem)) .
 
 
  op syntaxPredsEqs : SortSet EquationSet ~> EquationSet .
  eq syntaxPredsEqs(SS, Eqs Eq)
-  =  syntaxPredsEqs(SS, Eqs) plugEq(syntaxPredsT(SS, getLhs(Eq)), syntaxPredsT(SS, getRhs(Eq)), getAttrs(Eq), mkBaseCondition(syntaxCondition(syntaxVars(SS, noDuplicates(getVars(getLhs(Eq)))))) /\ syntaxPredsCond(SS, getCond(Eq))) .
+  =  syntaxPredsEqs(SS, Eqs) syntaxPredsEq(SS, noPredsDuplicates(syntaxVars(SS, getPredsVars(getLhs(Eq)))), Eq) .
  eq syntaxPredsEqs(SS, none) = none .
+
+ op syntaxPredsEq : SortSet TermList Equation ~> Equation .
+ eq syntaxPredsEq(SS, Trms, Eq)
+  = $syntaxPredsEq(SS, Trms, mkKItems(getKItems(Trms), Eq)) .
+
+ op $syntaxPredsEq : SortSet TermList Equation ~> Equation .
+ eq $syntaxPredsEq(SS, Trms, Eq)
+  = plugEq(syntaxPredsT(SS, getLhs(Eq)), syntaxPredsT(SS, getRhs(Eq)), getAttrs(Eq), mkBaseCondition(syntaxCondition((Trms))) /\ syntaxPredsCond(SS, getCond(Eq))) .
 
 
  op mkBaseCondition : TermList ~> Condition .
@@ -138,9 +176,6 @@ ceq syntaxPredsMb(SS,Mb)
   = syntaxPredsT(SS, Trm) : Ty
     /\ syntaxPredsCond(SS, Cond) .
  eq syntaxPredsCond(SS, nil) = nil .
-
-
-
 
 
  op syntaxPreds : OpDeclSet ~> MembAxSet .
@@ -204,7 +239,27 @@ ceq syntaxPredsMb(SS,Mb)
      syntaxPreds(SS) .
   eq syntaxPreds((none).SortSet) = none .
   
-  var Q : Qid .  var Ct : Constant .
+  --- eliminates term/variable duplicates (keeps only the leftmost occurrences
+  op noPredsDuplicates : TermList -> TermList .
+  eq noPredsDuplicates((Trms,Trm,Trms',Trm,Trms'')) = noPredsDuplicates((Trms,Trm,Trms',Trms'')) .
+  eq noPredsDuplicates((Trms,kitem(Trm),Trms',Trm,Trms'')) = noPredsDuplicates((Trms,kitem(Trm),Trms',Trms'')) .
+  eq noPredsDuplicates((Trms,Trm,Trms',kitem(Trm),Trms'')) = noPredsDuplicates((Trms,Trms',kitem(Trm),Trms'')) .
+  eq noPredsDuplicates(Trms) = Trms [owise] .
+
+  op getKItems_ : TermList ~> TermList .
+  eq getKItems(empty) = empty .
+  eq getKItems(V,Trms) = getKItems(Trms) .
+  eq getKItems(kitem(V),Trms) = V,getKItems(Trms) .
+
+  op mkKItems : TermList MembAx -> MembAx .
+  eq mkKItems(empty, Mb) = Mb .
+  eq mkKItems((V, Trms), Mb) = mkKItems(Trms, Mb[V <- setType(V,KItem)]) .
+
+  op mkKItems : TermList Equation -> Equation .
+  eq mkKItems(empty, Eq) = Eq .
+  eq mkKItems((V, Trms), Eq) = mkKItems(Trms, Eq[V <- setType(V,KItem)]) .
+
+  var Q Q' : Qid .  var Ct : Constant .
   var Ty : Type . var NeTyl : NeTypeList .  var Tyl : TypeList .
 
   var OPDS : OpDeclSet . var Op : OpDecl .  var AS : AttrSet .
@@ -213,6 +268,6 @@ ceq syntaxPredsMb(SS,Mb)
   var Mbs : MembAxSet .  var Mb : MembAx . 
   var Eqs : EquationSet .  var Eq : Equation . 
   var Trm Trm1 Trm2 : Term .   var CV : Term . var V : Variable .
-  var Trms Trms' : TermList .  var NTrms : NeTermList .  var Cond : Condition .
+  var Trms Trms' Trms'' : TermList .  var NTrms : NeTermList .  var Cond : Condition .
   var KRS : KRuleSplit . var KCS : KContextSplit .  var KCfgS : KConfigSplit .
 endm

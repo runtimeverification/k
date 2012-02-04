@@ -50,8 +50,8 @@ mod STRICTCXT2EQS is
       [metadata(pair("supercool","start"))] .)
      (eq mkCell(S, kApply(coolLabel,mkVariable('zk,K))) = mkCell(S, mkVariable('zk,K))
       [metadata(pair("supercool","end"))] .) 
-     (eq kWrap(S, kra(kApply(coolLabel,mkVariable('zk,K)),mkVariable('Next,NeK)))
-       = kWrap(S, kApply(coolLabel,kra(mkVariable('zk,K),mkVariable('Next,NeK))))
+     (eq kWrap(S, kra(kApply(coolLabel,mkVariable('zk,K)),mkVariable('Next,KItem)))
+       = kWrap(S, kApply(coolLabel,kra(mkVariable('zk,K),mkVariable('Next,KItem))))
       [owise metadata(pair("supercool", "next"))] .) 
      defaultCoolEqs(Ss) .
   eq defaultCoolEqs(none) 
@@ -110,8 +110,8 @@ mod STRICTCXT2EQS is
   eq heating(M, T1, T2, Q, Cond, AS, AS')
    = {none, 
     (eq T2[hole <- T2[hole <- mkVariable('KCxt,K)]] = T2[hole <- mkVariable('KCxt,K)] [metadata(pair("heating","idem"))] .)
-    heatEqs(Q, T1[hole <- kra(mkVariable('Kcxt1,NeK),mkVariable('Kcxt2,NeK),mkVariable('Kcxt3,K))], kra(mkVariable('Kcxt1,NeK),mkVariable('Kcxt2,NeK),mkVariable('Kcxt3,K),  freezeTerm(M, T1)),  makeKCondition(andBool(strictCond(kra(mkVariable('Kcxt1,NeK),mkVariable('Kcxt2,NeK),mkVariable('Kcxt3,K)),Q),Cond[hole <- kra(mkVariable('Kcxt1,NeK),mkVariable('Kcxt2,NeK),mkVariable('Kcxt3,K))])), AS, AS',"normal")
-    heatEqs(Q, T1[hole <- mkVariable('Kcxt,NeK)], kra(T2[hole <- mkVariable('Kcxt,NeK)], freezeTerm(M, T1)), makeKCondition(andBool(strictCond(mkVariable('Kcxt,NeK),Q),Cond[hole <- mkVariable('Kcxt,NeK)])), AS, AS',"wrapped"), none} [owise] .
+    heatEqs(Q, T1[hole <- kra(mkVariable('Kcxt1,KItem),mkVariable('Kcxt2,KItem),mkVariable('Kcxt3,K))], kra(mkVariable('Kcxt1,KItem),mkVariable('Kcxt2,KItem),mkVariable('Kcxt3,K),  freezeTerm(M, T1)),  makeKCondition(andBool(strictCond(kra(mkVariable('Kcxt1,KItem),mkVariable('Kcxt2,KItem),mkVariable('Kcxt3,K)),Q),Cond[hole <- kra(mkVariable('Kcxt1,KItem),mkVariable('Kcxt2,KItem),mkVariable('Kcxt3,K))])), AS, AS',"normal")
+    heatEqs(Q, T1[hole <- mkVariable('Kcxt,KItem)], kra(T2[hole <- mkVariable('Kcxt,KItem)], freezeTerm(M, T1)), makeKCondition(andBool(strictCond(mkVariable('Kcxt,KItem),Q),Cond[hole <- mkVariable('Kcxt,KItem)])), AS, AS',"wrapped"), none} [owise] .
 
 
   op heatSuffix : -> TermList .
@@ -127,9 +127,9 @@ mod STRICTCXT2EQS is
    
   op coolingEqs : Module Term Term Qid AttrSet -> EquationSet .
   eq coolingEqs(M, T1, T2, Q, AS)
-   =  (ceq kWrap(Q, kra(mkVariable('Kcxt,NeK), freezeTerm(M, T1)))
-         = kWrap(Q, T1[hole <- mkVariable('Kcxt,NeK)])
-        if strictCondTerm(mkVariable('Kcxt,NeK),Q) = bool2K(trueCt)
+   =  (ceq kWrap(Q, kra(mkVariable('Kcxt,KItem), freezeTerm(M, T1)))
+         = kWrap(Q, T1[hole <- mkVariable('Kcxt,KItem)])
+        if strictCondTerm(mkVariable('Kcxt,KItem),Q) = bool2K(trueCt)
        [metadata(AS pair("cooling",""))] .) 
      placeHolder(Q) .
 

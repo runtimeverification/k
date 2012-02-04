@@ -193,7 +193,7 @@ ceq homogenousT(Q[T1, T2], T, M, OPDS, OPDM)
  eq processOps(M, none, Wrappers, Homogenous) = homogenous(Homogenous) .
 
  op notKSorts : OpDecl ~> NatList .
- eq notKSorts(op Q : Tl -> T [AS] .) = notMatchingSortsList(Tl,K ; KResult ; NeK) .
+ eq notKSorts(op Q : Tl -> T [AS] .) = notMatchingSortsList(Tl,K ; KResult ; KItem) .
  
  op processOps : Module OpDeclSet OpDecl OpDeclSet OpDeclSet NatList ~> OpDeclWrapListMap . 
  eq processOps(M, OPDS, Op, Wrappers, Homogenous, nil)
