@@ -20,6 +20,7 @@ public class MaudeTask extends Thread {
 	private String _outputFile;
 	private String _errorFile;
 	private Process _maudeProcess;
+	public int returnValue;
 
 	public MaudeTask(String command, String outputFile, String errorFile, Logger parentLogger) {
 		_command = command;
@@ -36,6 +37,7 @@ public class MaudeTask extends Thread {
 			writeOutput();
 			writeError();
 			_maudeProcess.waitFor();
+			returnValue = _maudeProcess.exitValue();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -118,15 +118,16 @@ public class KRunner {
 			+ "load {3}\n"
 			;
 		String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
-		Thread maude = new MaudeTask(command, _outputFileName, _errorFileName, _logger);
+		MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName, _logger);
 		
 		maude.start();
 		_logger.info("Maude started");
 		_logger.info("Maude command:\n" + command);
 		
 		maude.join();
+		int returnValue = maude.returnValue;
 		
-		System.exit(0);
+		System.exit(returnValue);
 	}
 	
 	public static void main(String[] args) throws IOException, Exception {
