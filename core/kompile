@@ -66,10 +66,14 @@ my $maude_path = 'maude';
 # These are useful for debugging
 my $k_dir = ".k";
 my $kmain = "kmain-";
-my $input_file  = fresh("kompile_in", ".maude");
-my $error_file  = fresh("kompile_err", ".txt");
-my $output_file = fresh("kompile_out", ".txt");
-my $temp_file   = fresh("kompile_tmp", ".maude");
+# my $input_file  = fresh("kompile_in", ".maude");
+# my $error_file  = fresh("kompile_err", ".txt");
+# my $output_file = fresh("kompile_out", ".txt");
+# my $temp_file   = fresh("kompile_tmp", ".maude");
+my $input_file  = "kompile_in.maude";
+my $error_file  = "kompile_err.txt";
+my $output_file = "kompile_out.txt";
+my $temp_file   = "kompile_tmp.maude";
 my $maude_xml_file   = fresh("kompile_xml", ".xml");
 
 
