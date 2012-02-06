@@ -1866,7 +1866,7 @@ sub maudify_module {
 	# freeze strings and attributes
     s/($string_pattern)/Freeze($&,"MYSTRINGS")/sge;
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTRIBUTES")/gse;
-    s!(syntax\s+.*?)(\s)(?=$kmaude_keywords_pattern)!make_ops( (countlines($`) == 0 ? $mno : countlines($`) + $mno - 1), $file, $1) . "$2"!gse;
+    s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops( (countlines($`) == 0 ? $mno : countlines($`) + $mno - 1), $file, $1)!gse;
 
 	# unfreeze attributes if any
     $_ = Unfreeze("ATTRIBUTES", $_);
