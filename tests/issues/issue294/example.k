@@ -1,6 +1,6 @@
 module ISSUE 
-	syntax K ::= test1 "(" #Int "," #Nat ")" | test2
-	rule test1(I:#Int, N:#Nat) => test2 
-		when I:#Int +Nat N:#Nat >=Int N:#Nat
-		[structural]
+  op ifFromArrayInBounds : #Int #Int #Nat -> #Bool 
+  rule ifFromArrayInBounds(Offset:#Int,I:#Int, Len:#Nat)
+    => true
+  when Offset:#Int +Int I:#Int <=Nat Len:#Nat
 end module
