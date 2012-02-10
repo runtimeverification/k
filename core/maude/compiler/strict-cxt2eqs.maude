@@ -246,5 +246,11 @@ mod STRICTCXT2EQS is
    = generateResultEquations(Eqs) (eq kApply(resultLabel(Q),mkVariable('L,KList)) = bool2K(falseCt) [owise] .) .
 ---)
   eq generateResultEquations(Eqs) = Eqs [owise] .
+
+
+
+--- HOLE rules
+  eq 'HOLE.K =  kApply(freezeLabel(mkFrozenTerms(hole)),empty) .
+
 endm
 

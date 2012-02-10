@@ -278,6 +278,8 @@ mod K-RESULT is
   subsort List{KResult} < List{K} .
   subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
 
+  op isKResult : -> KLabel .
+
 ---(
   op _`,`,_ : List{KResult} List{KResult} -> List{KResult} [ditto] .
   op _`,`,_ : NeList{KResult} List{KResult} -> NeList{KResult} [ditto] .
@@ -347,6 +349,8 @@ mod K-CONTEXTS is
   ops context_ : K -> [KSentence] [prec 126] .
   ops context_when_ : K K -> [KSentence] [prec 126] .
   op wrap-with : K K -> K .
+
+  op HOLE : -> K .
 endm
 
 ---( Quoted Labels for syntax
@@ -464,7 +468,6 @@ endm
 mod K-POLYMORPHIC-VARIABLES is
   including K-TECHNIQUE .
   op ? : -> Anonymous [poly(0)] .
-  op HOLE : -> Anonymous [poly(0)] .
 endm
 
 mod K-CELL-ATTRS is

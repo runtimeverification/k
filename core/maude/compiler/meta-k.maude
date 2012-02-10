@@ -715,7 +715,7 @@ fmod META-ANONYMOUS-VARIABLE is
 
 
   op getAnonConsts : Module ~> TypeSet .
-  eq getAnonConsts(M) = 'HOLE ; '? . ---getAnonConsts(getOps(M)) .
+  eq getAnonConsts(M) = '? . ---getAnonConsts(getOps(M)) .
 
   op getAnonConsts : OpDeclSet ~> SortSet .
   eq getAnonConsts(Op OPDS) = getAnonConsts(Op, OPDS) .
