@@ -12,7 +12,7 @@ fmod SUBSORTS-TO-WRAPPERS is
  var OPDS : OpDeclSet .  var Op Op' : OpDecl .
  var SSDS : SubsortDeclSet .  var SSD : SubsortDecl . 
  var S S' : Sort .  var SS : SortSet .
- var Q O : Qid . var Tl : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
+ var Q O : Qid . var Tl Tl' : TypeList . var T T' T'' : Type .  var NTl : NeTypeList .
  var AS AS' : AttrSet .  var HL : HookList .
  var MS : ModuleSet . var M M' Flat : Module .  var SSDM : SubsortDeclMap . 
  var Trm Trm' : Term . var Trms : TermList . var V : Variable . var C : Constant .
@@ -199,6 +199,9 @@ ceq findPurifyRedex(Q[T1,T2], T, M ,OPDS, SSDM)
  eq kPurifyTerms((Trm,Trms), T Tl, M, OPDS, SSDM)
   = kPurifyTerm(Trm,T,M,OPDS,SSDM), kPurifyTerms(Trms,Tl, M,OPDS,SSDM) .
  eq kPurifyTerms(empty,nil,M,OPDS,SSDM) = empty .
+
+ eq kPurifyTerms(Trms, Tl errorS(Trm', T, Str) Tl', M, OPDS, SSDM)
+  = errorT(Trm', "", Str + "; Type: " + string(T)) .
 
  op kPurifyTerm : Term Type Module OpDeclSet SubsortDeclMap -> Term .
  eq kPurifyTerm(Trm, T, M, OPDS, SSDM) 
