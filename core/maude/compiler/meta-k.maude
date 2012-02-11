@@ -867,7 +867,7 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
   var Ty : Type .  var V : Variable .
 
   op hole : -> Term .
-  eq hole = 'HOLE:K .
+  eq hole = 'HOLE.K .
 
   op removeHole : TermList ~> TermList .
   eq removeHole((T, Trl)) = if T == hole then removeHole(Trl) else T,removeHole(Trl) fi .

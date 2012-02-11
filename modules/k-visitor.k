@@ -34,7 +34,7 @@ module K-VISITOR imports K-WRAPPERS
     [structural]
     
   syntax KLabel ::= visitedL ( KLabel ) [latex "\framebox{#1}"]
-  context visitedL(Label:KLabel)(_,,HOLE:K,,_)
+  context visitedL(Label:KLabel)(_,,HOLE,,_)
 
   syntax K ::= endVisit K [strict latex "{\it unbox}({#1})"]
   rule endVisit(visitedK(K:K)) => K [structural] 

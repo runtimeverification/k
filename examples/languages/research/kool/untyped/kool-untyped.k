@@ -545,7 +545,7 @@ invocations see the entire object, as needed for dynamic method dispatch. */
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
     when notBool(X in keys(Env))  [:structural:]
 
-  context ('_._(HOLE:K,,_)) when (HOLE:K =/=Bool super)
+  context ('_._(HOLE,,_)) when (HOLE =/=Bool super)
   rule <k> _._(objectClosure(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X)
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
@@ -592,7 +592,7 @@ method call or the array access.  */
 --- but, unfortunately, our current Maude-based parser does not allow it
 --- Same applies to other rules
 
-  context '_`(_`)('_._(HOLE:K,,_),,_) when HOLE:K =/=Bool super 
+  context '_`(_`)('_._(HOLE,,_),,_) when HOLE =/=Bool super 
 
   rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
@@ -604,9 +604,9 @@ method call or the array access.  */
        <envStack>... ListItem(Class :: _) EStack </envStack>
     [:structural:]
 
-  context '_`(_`)(HOLE:K,,_)
-       when getKLabel HOLE:K ==Bool '_`(_`) orBool
-          getKLabel HOLE:K ==Bool '_`[_`]
+  context '_`(_`)(HOLE,,_)
+       when getKLabel HOLE ==Bool '_`(_`) orBool
+          getKLabel HOLE ==Bool '_`[_`]
 
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
 task as a replacement for the method.  When that happens, we just

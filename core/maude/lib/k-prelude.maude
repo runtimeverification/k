@@ -280,50 +280,18 @@ mod K-RESULT is
 
   op isKResult : -> KLabel .
 
----(
-  op _`,`,_ : List{KResult} List{KResult} -> List{KResult} [ditto] .
-  op _`,`,_ : NeList{KResult} List{KResult} -> NeList{KResult} [ditto] .
-  op _`,`,_ : List{KResult} NeList{KResult} -> NeList{KResult} [ditto] .
-
-  sorts KResultLabel KHybridLabel .
-
-  subsorts KResultLabel KHybridLabel < KLabel .
-  
-  op _`(_`) : KResultLabel List{K} -> KResult [ditto] .
-  op _`(_`) : KHybridLabel List{KResult} -> KResult [ditto] .
----)
 endm
 
-
----(
-mod K-RESULT-LABELS is
+mod K-HOLE is
   including K-TECHNIQUE .
-  op 'k-result : -> KLabel .
+  op HOLE : -> K .
 endm
 
---- KProper Level
-
-mod K-PROPER is
-  including K-RESULT .
-  sort KProper .
-  subsort KProper < KItem K .
---- next line is useful only if not using <k> wrappers for strictness
----  op _~>_ : KProper K -> KProper [ditto] .
-  sort NeKProperList .
-  subsort KProper < NeKProperList < NeList{K} .  
-  sort KProperLabel .
-  subsort KProperLabel < KLabel .
-  op _`(_`) : KProperLabel List{K} -> KProper [ditto] .
-  op _`,`,_ : NeKProperList List{K} -> NeKProperList [ditto] .
-  op _`,`,_ : List{K} NeKProperList -> NeKProperList [ditto] .
-  op _`(_`) : KHybridLabel NeKProperList -> KProper [ditto] .
-endm
----)
 
 --- Strictness Level
 
 mod K-STRICTNESS is 
-  including K-TECHNIQUE .
+  including K-HOLE .
   including #STRING .
   op freezer : K -> KLabel [strat(0) frozen] .
 
@@ -332,10 +300,6 @@ mod K-STRICTNESS is
   op heated : -> KLabel .
   op redex : -> KLabel .
 
----(
-  eq heat(redex(K),,Ks,,heated(Ks')) = heat(Ks,, heated(Ks',,K)) [owise] .
-  eq heat(redex(K,,NKs),,Ks) = heat(NKs,,Ks) [owise] .
----)
   eq heat(heated(K)) = K .
   rl heat(heated(Ks,,K,,Ks')) => K
      [metadata "superheat=(choice)"] .
@@ -344,23 +308,12 @@ mod K-STRICTNESS is
 endm
 
 mod K-CONTEXTS is
-  including K-TECHNIQUE .
+  including K-HOLE .
   including K-SENTENCE .
   ops context_ : K -> [KSentence] [prec 126] .
   ops context_when_ : K K -> [KSentence] [prec 126] .
   op wrap-with : K K -> K .
-
-  op HOLE : -> K .
 endm
-
----( Quoted Labels for syntax
-
-mod K-QUOTED-LABELS is
-  including K-TECHNIQUE .
-  including #QID .
-  subsort Qid < KLabel .
-endm
----)
 
 --- KLabel-Wrappers level
 
@@ -420,39 +373,11 @@ mod K-RULES is
   op _=>_ : Set Set -> Set [prec 125] .
 endm
 
----(
-mod K-RULES-RESULT is
-  including K-RULES .
-  including K-RESULT .
-  op _=>_ : KResult KResult -> KResult [prec 125] .
----  op _=>_ : KResultLabel KResultLabel -> KResultLabel [prec 125] .
-  op _=>_ : List{KResult} List{KResult} -> List{KResult} [prec 125] .
-endm
----)
 
 mod K-EVAL is 
   including K-TECHNIQUE .
   op #eval_ : Map -> Bag .
 endm
-
----( rule where level
-
-mod K-WHERE is
-  including K-SENTENCE .
-  including K-TECHNIQUE .
-  sort KAssignments .
-  
-  op _/\_ : KAssignments KAssignments -> KAssignments [gather (e E)] .
-  op _::=_ : List{K} List{K} -> KAssignments .
-  op _::=_ : KLabel KLabel -> KAssignments .
-  op _::=_ : List List -> KAssignments .
-  op _::=_ : Bag Bag -> KAssignments .
-  op _::=_ : Set Set -> KAssignments .
-  op _where_ : [KSentence] KAssignments -> [KSentence] [prec 127 format (o b o d)] .
-endm
-
----)
-
 
 mod K-CONDITION-SEARCH is
   including K-TECHNIQUE .

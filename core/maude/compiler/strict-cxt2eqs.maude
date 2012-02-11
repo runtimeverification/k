@@ -250,7 +250,7 @@ mod STRICTCXT2EQS is
 
 
 --- HOLE rules
-  eq 'HOLE.K =  kApply(freezeLabel(mkFrozenTerms(hole)),empty) .
+---  eq 'HOLE.K =  kApply(freezeLabel(mkFrozenTerms(hole)),empty) .
 
 endm
 

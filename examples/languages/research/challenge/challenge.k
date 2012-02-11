@@ -190,7 +190,7 @@ module CHALLENGE imports CHALLENGE-SYNTAX
   syntax K ::= K box(~>) K [latex "{#1}\framebox{$\kra$}{#2}" strict]
              | K box(,,) K [latex "{#1}\framebox{,,}{#2}" strict]
 
-  context box(Label:KLabel)(_,,HOLE:K,,_)
+  context box(Label:KLabel)(_,,HOLE,,_)
 
 ---  op 'quote_  : -> KLabel[metadata "generated label"]
 ---  op 'unquote_ : -> KLabel[metadata "generated label"]
