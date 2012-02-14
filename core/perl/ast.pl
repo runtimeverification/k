@@ -85,6 +85,13 @@ sub get_ast_from_node
     }
 # print "RUN2: Op: $op; Sort: $sort; Content: $content\n";
 
+    # booleans
+    if ($sort eq '#Bool')
+    {
+	return "# $op(.List{K})";
+    }
+
+    
     # simple integers
     if ($sort eq '#Int' || $sort eq '#Zero')
     {
