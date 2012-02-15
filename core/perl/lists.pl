@@ -62,7 +62,7 @@ sub solve_lists
         my $list_attributes = $attributes;
         $list_attributes =~ s/metadata "/metadata " parser=() /s;
 
-        $attributes =~ s/metadata "/metadata "strict=() hybrid=() generated=() /s;
+        $attributes =~ s/metadata "/metadata "hybrid=() generated=() /s;
 
         my $parser_attributes = $attributes;
         $parser_attributes =~ s/metadata "/metadata " parser=() /s;
