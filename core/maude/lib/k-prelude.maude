@@ -98,6 +98,10 @@ mod K-LISTK-EXTRAS is
   eq K inList{K} (Ks,,K,,Ks') = true .
   eq K inList{K} Ks = false [owise] .
 
+  op List{K}ToK_ : List{K} -> K .
+  eq List{K}ToK(.List{K}) = . .
+  eq List{K}ToK(K,,Ks) = K ~> List{K}ToK(Ks) .
+
 endm
 
 mod K-EXTRAS is
