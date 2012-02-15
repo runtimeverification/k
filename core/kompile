@@ -1210,8 +1210,7 @@ sub latexify {
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	print FILE "\\documentclass{article}\n" if !$draft;
 	print FILE "\\documentclass[draft]{article}\n" if $draft;
-	print FILE "\\usepackage{import}\n";
-	print FILE "\\import{$k_latex_dir/}{k2latex.$style.sty}\n";
+	print FILE "\\usepackage[poster]{$k_latex_dir/k}\n";
 	
 	my $abs_filename = $language_file_name;
 	$abs_filename =~ s/\..*?$//;
