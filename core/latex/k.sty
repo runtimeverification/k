@@ -269,21 +269,6 @@
   }
 }
 
-% The comment environment.
-\newenvironment{latexComment}{%
-  \begin{Sbox}%
-    \begin{minipage}{50em}%
-      \addtolength{\parskip}{.5\baselineskip}%
-}{%
-    \end{minipage}%
-  \end{Sbox}%
-  \bigskip%
-  \begin{tikzpicture}
-    \node[comment]{\TheSbox};
-  \end{tikzpicture}%
-  \k@markPosition%
-  \medskip%
-}
 
 % Macros for use in the comments.
 \newcommand{\K}{\mbox{$\mathbb{K}$}\xspace}
@@ -313,10 +298,16 @@
 
 % K Blocks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newenvironment{kblock}[1][]{%
-\smallskip%
+\newlength{\kblock@indent}
+\newenvironment{kblock}[1][\k@style]{%
+\ifk@tight%
+\small%
+\fi%
+\medskip%
 \newcommand{\kblock@arg}{#1}%
+\setlength{\kblock@indent}{\parindent}%
 \ifthenelse{\equal{#1}{bubble}}{%
+\setlength{\parindent}{0in}%
 \renewcommand{\kall}{\ball}%
 \renewcommand{\kallLarge}{\ballLarge}%
 \renewcommand{\kprefix}{\bprefix}%
@@ -325,6 +316,7 @@
 \renewcommand{\kdot}{\bdot}%
 \renewcommand{\AnyVar}{\bAnyVar}%
 }{\ifthenelse{\equal{#1}{math}}{%
+\setlength{\parindent}{0in}%
 \renewcommand{\kall}{\mall}%
 \renewcommand{\kallLarge}{\mallLarge}%
 \renewcommand{\kprefix}{\mprefix}%
@@ -357,7 +349,9 @@
   \medskip%
 }{%
 {\small\par}\smallskip%
-}}
+}%
+\setlength{\parindent}{\kblock@indent}%
+}
 
 % Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -703,8 +697,10 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
                                 anchor=center,
                                 text width=\k@cellContentWidth,
                                 text height=\k@cellContentHeight,
-                                rounded rectangle west arc=#4,
-                                rounded rectangle east arc=#5] {};
+rectangle,rectangle
+%                                rounded rectangle west arc=#4,
+%                                rounded rectangle east arc=#5
+] {};
       }
     \end{pgfonlayer}
 
