@@ -105,7 +105,11 @@ plugFreezer k ks = mapK (plug ks) k
 
           lookupK :: String -> [K] -> K
           -- TODO: unsafe
-          lookupK var ks = head [ k | (KApp (FreezerMap var') [k]) <- ks, var == var' ]
+          lookupK var ks =
+            let rs = [ k | (KApp (FreezerMap var') [k]) <- ks, var == var' ]
+            in case rs of
+                [] -> error $ "unable to find mapping for variable " ++ var
+                (r:_) -> r
 
           mapK :: (K -> K) -> K -> K
           mapK f (KApp label ks) = KApp label (map f ks)
