@@ -8,7 +8,7 @@ import Text.Parsec.String
 
 -- | Parse a K term
 k :: Parser K
-k = kra <|> freezerVar
+k = kra <|> freezerVar <|> freezerHole
 
 optParens p = parens p <|> p
 
@@ -50,6 +50,11 @@ freezerVar = do
     string "var{K}"
     varName <- parens stringLiteral
     return $ FreezerVar varName
+
+freezerHole :: Parser K
+freezerHole = do
+    string "HOLE"
+    return FreezerHole
 
 kBag :: Parser KBag
 kBag = emptyKBag <|> (KBag <$> bagItem `endBy1` spaces)
