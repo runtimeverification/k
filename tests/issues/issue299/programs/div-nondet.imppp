@@ -1,0 +1,23 @@
+// Make sure you first read and execute the sum programs before
+// this one.  For best output, we recommend kompiling IMP++ with IO,
+// as described in sum-3.imppp 
+//
+// This is a simple program which has several behaviors: it can evaluate to
+// 0, 1, 2, 3, as well as to undefined (reaches a division-by-zero: 3/0).
+// To see these different behaviors, krun it with the --search option:
+//
+//   krun programs/div-nondet.imppp --search
+//
+// Running krun without the --search option multiple times on a
+// non-deterministic program may, unfortunately, not show a different
+// behavior each time as you would expect.  That happens because the
+// underlying rewrite engine optimizes the execution by picking a
+// specific order for applying the rewrite rules, which is optimal
+// according to its criteria.  From a user perspective, that order
+// should be regarded as arbitrary but fixed.  We are planning on
+// adding a --random option to krun, which will result in slightly
+// slower but random application of rules.
+
+var x;
+x := 1;
+print("++x / (++x / x) = ", ++x / (++x / x), "\n")
