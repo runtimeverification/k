@@ -154,7 +154,7 @@ we prefer to keep two different syntactic constructs for blocks. */
   syntax AExp ::= #String
                 | "++" #Id               [prec(0)]
                 | "read" "(" ")"
-  syntax AExps ::= List{AExp,","}
+  syntax AExps ::= List{AExp,","}        [strict]
 
   syntax Stmt ::= "print" "(" AExps ")"  [strict]
                 | "halt"
