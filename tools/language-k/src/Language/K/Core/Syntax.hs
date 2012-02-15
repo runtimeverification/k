@@ -34,6 +34,7 @@ data KLabel
     | FreezerMap String
     | WMap KMap
     | WBag KBag
+    | WKList String
     deriving (Eq, Ord, Show, Data, Typeable)
 
 data KLabelPart

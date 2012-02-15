@@ -161,6 +161,7 @@ instance Pretty KLabel where
               ppSyntax Hole = char '_'
     pretty (WMap kmap) = pretty kmap
     pretty (WBag kbag) = pretty kbag
+    pretty (WKList str) = empty  -- TODO: good enough for now
     pretty kl = error $ "No pretty-printer available for: " ++ show kl
 
 instance Pretty KBag where
