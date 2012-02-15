@@ -5,7 +5,7 @@ LANGUAGE_NAME = FUN-UNTYPED
 # the interesting modules we want to visualize
 LANGUAGE_MODULES = FUN-UNTYPED-SYNTAX FUN-UNTYPED
 
-LATEX_STYLE = bb
+LATEX_STYLE = bubble
 LATEX_TOPMATTER = README.tex
 
 #this is the basename of the main file

@@ -19,7 +19,7 @@ COMPILED_FILE = $(MAIN_FILE)-compiled.maude
 # CROP_PDF_FILE = $(MAIN_FILE)-crop.pdf
 # EPS_FILES = $(MAIN_FILE)-ps-001.eps
 # PNG_FILES = $(EPS_FILES).png
-LATEX_STYLE ?= bb
+LATEX_STYLE ?= bubble
 LANGUAGE_FILE = $(or $(shell if [ -e $(MAIN_FILE).k ]; then echo $(MAIN_FILE).k; fi), $(or $(shell if [ -e $(MAIN_FILE).kmaude ]; then echo $(MAIN_FILE).kmaude; fi), $(shell if [ -e $(MAIN_FILE).maude ]; then echo $(MAIN_FILE).maude; fi)))
 
 COMPILE_OPTIONS ?= $(DRAFT)

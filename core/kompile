@@ -574,7 +574,7 @@ my @all_tokens = @builtin_tokens;
 my @all_syntax = ();
 
 # variables to store command line arguments
-my $style = "bb";
+my $style = "bubble";
 my $compile_only = 0;
 my $language_module_name = "";
 my $language_file_name = "";
@@ -1210,7 +1210,7 @@ sub latexify {
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	print FILE "\\documentclass{article}\n" if !$draft;
 	print FILE "\\documentclass[draft]{article}\n" if $draft;
-	print FILE "\\usepackage[poster]{$k_latex_dir/k}\n";
+	print FILE "\\usepackage[poster,style=$style]{$k_latex_dir/k}\n";
 	
 	my $abs_filename = $language_file_name;
 	$abs_filename =~ s/\..*?$//;

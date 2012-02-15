@@ -5,7 +5,7 @@ LANGUAGE_NAME = SYSTEM-F
 # this are all interesting modules (used to latexify)
 LANGUAGE_MODULES = SYSTEM-F-SYNTAX SYSTEM-F-STATIC-SEMANTICS SYSTEM-F-PROGRAMS SYSTEM-F
 
-LATEX_STYLE = bb
+LATEX_STYLE = bubble
 LATEX_TOPMATTER = topmatter.tex
 
 #this is the basename of the main file

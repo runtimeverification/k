@@ -6,7 +6,7 @@
 # this are all interesting modules (used to latexify)
 #LANGUAGE_MODULES = 
 
-LATEX_STYLE = bb
+LATEX_STYLE = bubble
 
 # this is the basename of the main file
 # MAIN_FILE = ocl-syntax

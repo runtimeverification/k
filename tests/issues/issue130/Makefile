@@ -5,7 +5,7 @@ LANGUAGE_NAME = SKOOL-TYPED-DYNAMIC
 # this are all interesting modules (used to latexify)
 LANGUAGE_MODULES = SKOOL-TYPED-SYNTAX SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX SKOOL-TYPED-DYNAMIC-SEMANTICS SKOOL-TYPED-DYNAMIC
 
-LATEX_STYLE = bb
+LATEX_STYLE = bubble
 
 #this is the basename of the main file
 MAIN_FILE = skool-typed-dynamic

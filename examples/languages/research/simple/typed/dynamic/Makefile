@@ -5,7 +5,7 @@ LANGUAGE_NAME = SIMPLE-TYPED-DYNAMIC
 # this are all interesting modules (used to latexify)
 LANGUAGE_MODULES = SIMPLE-TYPED-DYNAMIC-SYNTAX SIMPLE-TYPED-DYNAMIC
 
-LATEX_STYLE = bb
+LATEX_STYLE = bubble
 LATEX_TOPMATTER = README.tex
 
 #this is the basename of the main file

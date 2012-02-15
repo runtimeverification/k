@@ -5,7 +5,7 @@ LANGUAGE_NAME = SIMPLE-TYPED-STATIC
 # this are all interesting modules (used to latexify)
 LANGUAGE_MODULES = SIMPLE-TYPED-STATIC-SYNTAX SIMPLE-TYPED-STATIC
 
-LATEX_STYLE = bb
+LATEX_STYLE = bubble
 LATEX_TOPMATTER = README.tex
 
 #this is the basename of the main file
