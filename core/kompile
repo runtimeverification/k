@@ -1701,10 +1701,10 @@ sub maudify_file {
     close FILE;
     
     # crazy functions
-    s/\b$comment\b/Freeze($&, "CMT")/sg;
-    s/\bdefine\b/syntax/sg;
-    s/\bdeclare\b/rule/sg;
-    $_ = Unfreeze("CMT", $_);
+#    s/\b$comment\b/Freeze($&, "CMT")/sg;
+#    s/\bdefine\b/syntax/sg;
+#    s/\bdeclare\b/rule/sg;
+#    $_ = Unfreeze("CMT", $_);
     
     $_ = slurp_k("$file.k2slurp", $latex || $png || $pdf || $ps || $crop || $eps);
     unlink("$file.k2slurp");
