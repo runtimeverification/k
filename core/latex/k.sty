@@ -11,16 +11,34 @@
 } 
 
 
-\DeclareBoolOption{bubble}
-\DeclareBoolOption{math}
-\DeclareBoolOption{poster}
-\DeclareBoolOption{tight}
-\DeclareComplementaryOption{paper}{poster}
-\DeclareStringOption[bubble]{style}
+\DeclareStringOption[bubble]{style}  % the default style for cells & stuff
+\DeclareBoolOption{tight}  % whether (bubble) cells should be tight or not
+\DeclareBoolOption{poster}  % to generate a poster from the definition
 \ProcessKeyvalOptions*
 
+% Usage Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Next command uses the default style (bubble) with tight edges for cells. 
+% \usepackage[tight]{k}
+%
+% Next command changes the default style to mathematic cells.
+% \usepackage[style=math]{k}
+%
+% Next command enables poster mode with mathematic cells
+% \usepackage[style=math,poster]{k}  
+%
+%
+% Use next command to temporary change the default style inside a definition
+% \begin{k}[math]
+%  . . .
+% \end{k}
+% If the default was set to math, use bubble instead of math above.
+
+% Some exported commands (useful for manually writing K):
+% \kall, \kprefix, \ksuffix, and \kmiddle are used to specify cells which are 
+% either complete, open to the right, open to the left, and open both ways,
+% respectively .
+
 \ifthenelse{\equal{\k@style}{bubble}}{
-\k@bubbletrue
 \newcommand{\kall}{\ball}
 \newcommand{\kallLarge}{\ballLarge}
 \newcommand{\kprefix}{\bprefix}
@@ -29,7 +47,6 @@
 \newcommand{\kdot}{\bdot}
 \newcommand{\AnyVar}{\bAnyVar}
 }{% else, assume default style is math
-\k@mathtrue
 \newcommand{\kall}{\mall}
 \newcommand{\kallLarge}{\mallLarge}
 \newcommand{\kprefix}{\mprefix}
@@ -594,12 +611,12 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 
 %%% Mathematical notation.
 
-\newcommand{\mall}[3]{\langle{#3}\rangle_{\sf #2}}
-\newcommand{\mallLarge}[3]{\left\langle\begin{array}{c}#3\end{array}\right\rangle_{{\sf #2}}}
+\newcommand{\mall}[3]{{\color{#1!50!black}\langle}{#3}{\color{#1!50!black}\rangle_{\sf #2}}}
+\newcommand{\mallLarge}[3]{{\color{#1!50!black}\left\langle{\color{black}\begin{array}{c}#3\end{array}}\right\rangle_{{\sf #2}}}}
 \newcommand{\ellipses}{\mathrel{\cdot\!\!\cdot\!\!\cdot}}
-\newcommand{\mprefix}[3]{\mall{#1}{#2}{{#3}\ \ellipses}}
-\newcommand{\msuffix}[3]{\mall{#1}{#2}{\ellipses\ {#3}}}
-\newcommand{\mmiddle}[3]{\mall{#1}{#2}{\ellipses\ {#3}\ \ellipses}}
+\newcommand{\mprefix}[3]{\mall{#1}{#2}{{#3}\ {\color{#1!50!black}\ellipses}}}
+\newcommand{\msuffix}[3]{\mall{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}}}
+\newcommand{\mmiddle}[3]{\mall{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}\ {\color{#1!50!black}\ellipses}}}
 \newcommand{\mdot}{\cdot}
 \newcommand{\mAnyVar}[1]{\_}
 

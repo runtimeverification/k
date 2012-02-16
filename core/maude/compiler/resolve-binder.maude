@@ -23,6 +23,8 @@ fmod RESOLVE-BINDER is
   = (eq binder(op2term(op Q : Tl -> T [AS pair("binder","")] .))
       = trueCt [metadata(removeOpAttrs(AS) pair("binder",""))] .) .
  eq resolveBinderOp(Op) = none [owise] .
+ eq resolveBinderOp(errorOp(Str, AS)) 
+  =  errorEq('`[`]:K,"",Str,AS) .
 
  op resolveBinderMeta : Qid String OpDeclSet ~> String .
  eq resolveBinderMeta(Q,Str, (op Q : Tl -> T [AS] .) OPDS)
