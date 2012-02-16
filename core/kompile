@@ -507,7 +507,7 @@ my $k_latex_dir = File::Spec->catfile((File::Basename::fileparse($0))[1], 'latex
 my $k_prelude = File::Spec->catfile($k_tools_dir,"..","lib","k-prelude");
 
 my $tokens_file = "all_tokens.tok";
-my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb tags define declare);
+my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb tags);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 $kmaude_keywords_pattern =~ s/\\bsyntax\\b/\\ssyntax\\s/sg;
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
