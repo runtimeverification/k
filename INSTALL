@@ -24,7 +24,6 @@ The K Framework tool depends on the following software:
     * Text::Diff
     * File::Spec::Link
 * *Subversion* for downloading the latest version of K.
-* *Mercurial*, as some of the K tools currently depend on it.
 * *Haskell*, namely *ghc* and *cabal-install* are required for the krun tool.
 * *Java* JDK is required for building the I/O server.
 * *LaTeX* (optional) This is used for typesetting K definitions. Besides basic
