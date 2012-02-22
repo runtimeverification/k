@@ -208,7 +208,7 @@ mod #NAT is
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
-  op _dividesNat_ : #NzNat #Nat -> #Bool
+  op _dividesNat_ : #Nat #Nat -> #Bool
         [prec 51 metadata "latex=(renameTo _divides\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (divides)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
