@@ -385,7 +385,7 @@ mod #INT is
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
-  op _dividesInt_ : #NzInt #Int -> #Bool
+  op _dividesInt_ : #Int #Int -> #Bool
         [prec 51 metadata "latex=(renameTo _divides\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (divides)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
