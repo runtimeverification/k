@@ -30,7 +30,7 @@ Executable krun
 --    maude >= 0.2.2,
     language-k,
     containers,
-    attoparsec,
+    attoparsec >= 0.10.0.0,
     parsec
 
   ghc-prof-options: -rtsopts -auto-all
