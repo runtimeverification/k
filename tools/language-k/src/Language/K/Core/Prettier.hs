@@ -4,7 +4,7 @@
 module Language.K.Core.Prettier where
 
 import Data.List (intersperse, stripPrefix)
-import Data.Monoid
+import qualified Data.Monoid as M
 import Language.K.Core.Syntax
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import Control.Monad.Reader
@@ -25,15 +25,15 @@ newtype KPP a = KPP
     { runKPP :: Reader PrettyConfig a
     } deriving (Functor, Monad, MonadReader PrettyConfig)
 
-instance Monoid (KPP PP.Doc) where
+instance M.Monoid (KPP PP.Doc) where
     mempty = empty
-    mappend = liftM2 mappend
+    mappend = liftM2 M.mappend
 
 
 -- monadic variants of the pretty-printer combinators:
 infixr 6 <>
-(<>) :: (Monoid a) => a -> a -> a
-(<>) = mappend
+(<>) :: (M.Monoid a) => a -> a -> a
+(<>) = M.mappend
 
 (<+>) = liftM2 (PP.<+>)
 (<$$>) = liftM2 (PP.<$$>)

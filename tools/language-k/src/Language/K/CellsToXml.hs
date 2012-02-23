@@ -59,7 +59,7 @@ cellsToXml' = eitherResult . cellsToXml
 -- | Parses several cells that make up K output.  The result is wrapped in a
 -- \<root\> element because valid XML documents have only one root.
 koutput :: Parser Text
-koutput = xmlify "root" <$> many (spaces >> cell)
+koutput = xmlify "root" <$> many1 (spaces >> cell)
 
 -- | Parses a single cell and converts it to valid XML.
 cell :: Parser Text

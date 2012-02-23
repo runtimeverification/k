@@ -30,6 +30,6 @@ Library
     parsec > 3,
     ansi-wl-pprint >= 0.6,
     text,
-    attoparsec-text
+    attoparsec
 
   ghc-prof-options: -auto-all
