@@ -40,7 +40,7 @@ module K-SYNTAX
   syntax ModuleIds ::= List{#Id,"+"}
   syntax Imports ::= List{Import,""}
   syntax Sentences ::= List{Sentence,""}
-  syntax Sentence ::= "syntax" Syntax "[" Attrs "]"
+  syntax Sentence ::= "syntax" Syntax
     | "macro" Term "=" Term
     | "context" Term ("when" KTerm)? ("[" Attrs "]")?
     | "configuration" BagTerms
@@ -56,6 +56,13 @@ module K-SYNTAX
                 | "CellLabel" | "KResult"
  
   syntax Sorts ::= List{Sort,""}
+
+  syntax Terminal ::= #String
+  syntax CFGSymbol ::= Sort | Terminal
+  syntax ProdTerm ::= List{CGFSymbol,""}
+  syntax Production ::= ProdTerm  ("[" Attrs "]")?
+
+  syntax Syntax ::= List{Production,"|"}
 
   syntax Term ::= ListTerms | BagTerms | MapTerms | ListTerms | SetTerms
                 | KLabelTerm | CellLabelTerm | KListTerms
