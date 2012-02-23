@@ -148,6 +148,7 @@ isBuiltin (KId _) = True
 isBuiltin _ = False
 
 instance Pretty KLabel where
+    pretty (KSym i) = text "sym(" <> integer i <> text ")" -- TODO
     pretty (KInt i) = integer i
     pretty (KId id) = text id
     pretty (KBool True) = text "true"

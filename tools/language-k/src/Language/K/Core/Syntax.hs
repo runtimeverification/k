@@ -35,6 +35,7 @@ data KLabel
     | WMap KMap
     | WBag KBag
     | WKList String
+    | KSym Integer -- TODO: not really a thing
     deriving (Eq, Ord, Show, Data, Typeable)
 
 data KLabelPart

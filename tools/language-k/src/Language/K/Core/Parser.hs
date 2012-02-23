@@ -240,7 +240,7 @@ kLabelPart = syntax <|> hole
 kBuiltin :: Parser KLabel
 kBuiltin = do
     symbol "#"
-    try kBool <|> kInt <|> kId <|> kString
+    try kBool <|> kInt <|> kId <|> kString <|> kSym
     <?> "K builtin"
 
 -- | Parse an Id builtin: Id x
@@ -267,6 +267,12 @@ kBool :: Parser KLabel
 kBool = do
     b <- (symbol "true" >> return True) <|> (symbol "false" >> return False)
     return (KBool b)
+
+kSym :: Parser KLabel
+kSym = do
+    symbol "sym"
+    i <- parens integer
+    return $ KSym i
 
 {- Maude identifiers -}
 
