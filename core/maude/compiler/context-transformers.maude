@@ -141,6 +141,8 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   op mergeLevels : TermSetLevels KConf -> Term .
   eq mergeLevels({N,TS}, KC) = finalMultiplicity({N, TS}, KC) .
   eq mergeLevels({N, emptyTS} || TSLs, KC) = mergeLevels(TSLs, KC) [owise] .
+  eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, B, 'NONE, Ds, KC'} KC)
+   = errorT(T, "", "Cell <" + string(Q) + "> appears multiple times at the top level but its multipliciy does not allow that. Check the initial configuration for the definition matches the rule.") .
   eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, B, Q', Ds, KC'} KC)
    = mergeLevels(upgrade(N, Q', getMultiplicity(getConfElement(Q', KC)), getSons(getConfElement(Q', KC)), qt(Q, B', T),TS) || TSLs, {Q, Level, B, Q', Ds, KC'} KC) [owise] .
   op upgrade : Nat Qid Bool SortSet TermSet TermSet -> TermSetLevels .
