@@ -36,6 +36,7 @@ data KLabel
     | WBag KBag
     | WKList String
     | KSym Integer -- TODO: not really a thing
+    | KLoc Integer KLabel -- TODO: ^
     deriving (Eq, Ord, Show, Data, Typeable)
 
 data KLabelPart

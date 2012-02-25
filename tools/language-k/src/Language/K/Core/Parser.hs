@@ -240,7 +240,7 @@ kLabelPart = syntax <|> hole
 kBuiltin :: Parser KLabel
 kBuiltin = do
     symbol "#"
-    try kBool <|> kInt <|> kId <|> kString <|> kSym
+    try kBool <|> kInt <|> kId <|> kString <|> try kSym <|> kLoc
     <?> "K builtin"
 
 -- | Parse an Id builtin: Id x
@@ -273,6 +273,17 @@ kSym = do
     symbol "sym"
     i <- parens integer
     return $ KSym i
+
+-- # (0 +Nat sym(1))(.List{K})
+kLoc :: Parser KLabel
+kLoc = do
+    loc <- parens loc'
+    return loc
+    where loc' = do i <- integer
+                    symbol "+Nat"
+                    s <- kSym
+                    return $ KLoc i s
+
 
 {- Maude identifiers -}
 
