@@ -165,13 +165,14 @@ directory.
 
 ## Install the K Framework
 
-To complete the installation of the K Framework, set the `K_BASE` environment
+To complete the installation of the K Framework, export and set the `K_BASE` environment
 variable to the absolute path of the `k-framework` directory (be sure to
 replace <somedir> with the directory that contains the `k-framework`
 directory):
 
     $ export K_BASE=<somedir>/k-framework
 
+Make sure to export it and not just set it!
 Then, run the `make` in the K-BASE directory to compile basic tools needed for executing programs.
 
     $  make -C $K_BASE
