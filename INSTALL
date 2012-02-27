@@ -77,12 +77,12 @@ and other packages needed to build and compile software:
 
 Next, install some of the K Framework's Perl dependencies:
 
-    # apt-get install libregexp-common-perl libxml-libxml-perl libxml-dom-perl libtext-diff-perl
+    # apt-get install libregexp-common-perl libxml-libxml-perl libxml-dom-perl libtext-diff-perl libfile-copy-link-perl
 
 Unfortunately, Debian does not include a package for the Tree::Nary Perl
 module, so it must be installed manually:
 
-    # cpan -i Tree::Nary File::Spec::Link
+    # cpan -i Tree::Nary
 
 Now you're ready to jump to the section on downloading K.
 
