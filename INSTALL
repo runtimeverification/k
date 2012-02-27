@@ -165,6 +165,8 @@ directory.
 
 ## Install the K Framework
 
+NOTE: Do not run the following commands as root or using sudo!
+
 To complete the installation of the K Framework, export and set the `K_BASE` environment
 variable to the absolute path of the `k-framework` directory (be sure to
 replace <somedir> with the directory that contains the `k-framework`
