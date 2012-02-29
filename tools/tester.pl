@@ -54,6 +54,7 @@ sub runTest {
 		next; 
 	}
 	#print "Processing $baseFilename version $suffix\n";
+	print "$fullFilename... ";
 	my $possibleInFile = "$baseTestFile.in$testEnding";
 	if (-e $possibleInFile) {
 		$inputFile = $possibleInFile;
@@ -99,7 +100,7 @@ sub reportFailure {
 #	$globalNumFailed++;
 	$message = encode($message);
 	my $inner = "<failure>$message</failure>";
-	print "$name failed\n";
+	print "failed\n";
 	return reportAny($name, $timer, $inner);	
 }
 sub reportError {
@@ -107,7 +108,7 @@ sub reportError {
 #	$globalNumError++;
 	$message = encode($message);
 	my $inner = "<error>$message</error>";
-	print "$name erred\n";
+	print "erred\n";
 	return reportAny($name, $timer, $inner);	
 }
 sub reportSuccess {
@@ -115,7 +116,7 @@ sub reportSuccess {
 #	$globalNumPassed++;
 	$message = encode($message);
 	my $inner = "$message";
-	print "$name passed\n";
+	print "passed\n";
 	return reportAny($name, $timer, $inner);	
 }
 
