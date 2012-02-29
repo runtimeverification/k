@@ -242,15 +242,14 @@ flattenProgram config pgmFile = do
 runParser :: Config -> String -> FilePath -> IO Kast
 runParser config parseCmd pgmFile = do
     let cmd = parseCmd ++ " " ++ pgmFile
-    (ih, oh, eh, ph) <- runInteractiveCommand cmd
-    hSetBinaryMode oh False
-    exitCode <- waitForProcess ph
+    (exitCode, out, err) <- readProcessWithExitCode "/bin/sh" ["-c", cmd] []
     when (exitCode /= ExitSuccess) $
         die $ "Fatal: parser returned a non-zero exit code: " ++ show exitCode
            ++ "\nAttempted command:\n"
            ++ cmd
-    ts <- T.hGetContents oh
-    return $ Kast ts
+           ++ "\nstderr output:\n"
+           ++ err
+    return $ Kast (T.pack out)
 
 -- | Run the internal parser that turns programs into K terms using
 -- the K definition.
