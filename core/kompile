@@ -481,7 +481,7 @@ my $latex_special = '[\\#\\$\\{\\}\\[\\]\\&\\^\\_\\%\\~\\\\]';
 my $kvar  = "[A-Za-z][A-Za-z0-9]*[']*";
 
 # Pattern matched by K sorts
-my $ksort = '#?[A-Z][A-Za-z0-9\`\+\?\!#]*(?:\{#?[A-Z][A-Za-z0-9\`\+\?\!]*(\,".*?")?\})?';
+our $ksort = '#?[A-Z][A-Za-z0-9\`\+\?\!#]*(?:\{#?[A-Z][A-Za-z0-9\`\+\?\!]*(\,".*?")?\})?';
 # TODO: test exhaustively :-)
 
 # Pattern matched by K variables
@@ -1700,14 +1700,11 @@ sub maudify_file {
     print FILE "\n\nrequire /modules/uris\nrequire $file\n\n";
     close FILE;
     
-    # crazy functions
-#    s/\b$comment\b/Freeze($&, "CMT")/sg;
-#    s/\bdefine\b/syntax/sg;
-#    s/\bdeclare\b/rule/sg;
-#    $_ = Unfreeze("CMT", $_);
-    
     $_ = slurp_k("$file.k2slurp", $latex || $png || $pdf || $ps || $crop || $eps);
     unlink("$file.k2slurp");
+
+# crazy functions
+    $_ = process_functions($_);
 
 # remove quotes from syntax
     $_ = remove_quotes($_);

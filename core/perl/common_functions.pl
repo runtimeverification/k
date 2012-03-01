@@ -76,6 +76,7 @@ my $top_level_pattern = join("|", (
 
 my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb tags);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
+our $ksort = '#?[A-Z][A-Za-z0-9\`\+\?\!#]*(?:\{#?[A-Z][A-Za-z0-9\`\+\?\!]*(\,".*?")?\})?';
 
 my $parentheses = "\Q{}[]()\E";
 my $maude_backquoted = "(?:`\\(|`\\)|`\\{|`\\}|`\\[|`\\]|`\\,|_|[^$parentheses\\s\\,\\`])*";
@@ -3035,6 +3036,43 @@ sub parse_maude_error
 	return $msg1 . "\n" . $msg . "\n" . $msg2;
     }
 }
-  
-1;
 
+#################
+### functions ###
+#################
+my $declarekwd = "declare";
+my $definekwd = "define";
+
+sub process_functions
+{
+	local $_ = shift;
+
+	# Handle define and declare separately because
+	# they need different sort processing.
+	# And, of course, people often change their mind...
+	
+	# declarations (declare) are changed into ops
+	s/(?<=\n)(\s*)\b($declarekwd\b.*?)(?=($declarekwd|$definekwd|$kmaude_keywords_pattern))/
+	{
+		my $declaration = $2;
+		my $spaces = $1;
+		$declaration =~ s!^($declarekwd)!op!s;
+		$declaration =~ s!$ksort!K!sg;
+		$declaration =~ s!(\s*)$! [metadata "function=()"]$1!s;
+		"$spaces$declaration";
+	}/sge;
+
+	# definitions (define) are changed into rules
+	s/(?<=\n)(\s*)\b($definekwd\b.*?)(?=($declarekwd|$definekwd|$kmaude_keywords_pattern))/
+	{
+		my $declaration = $1;
+		my $spaces = $1;
+		$declaration =~ s!^($definekwd)!rule!s;
+		$declaration =~ s!(\s*)$! [metadata "function=()"]$1!s;
+		"$spaces$declaration";
+	}/sge;
+	
+	$_;
+}
+
+1;
