@@ -3045,14 +3045,14 @@ my $definekwd = "define";
 
 sub process_functions
 {
-	local $_ = shift;
+	my $var = shift;
 
 	# Handle define and declare separately because
 	# they need different sort processing.
 	# And, of course, people often change their mind...
 	
 	# declarations (declare) are changed into ops
-	s/(?<=\n)(\s*)\b($declarekwd\b.*?)(?=($declarekwd|$definekwd|$kmaude_keywords_pattern))/
+	$var =~ s/(?<=\n)(\s*)\b($declarekwd\b.*?)(?=($declarekwd|$definekwd|$kmaude_keywords_pattern))/
 	{
 		my $declaration = $2;
 		my $spaces = $1;
@@ -3063,7 +3063,7 @@ sub process_functions
 	}/sge;
 
 	# definitions (define) are changed into rules
-	s/(?<=\n)(\s*)\b($definekwd\b.*?)(?=($declarekwd|$definekwd|$kmaude_keywords_pattern))/
+	$var =~ s/(?<=\n)(\s*)\b($definekwd\b.*?)(?=($declarekwd|$definekwd|$kmaude_keywords_pattern))/
 	{
 		my $declaration = $1;
 		my $spaces = $1;
@@ -3072,7 +3072,7 @@ sub process_functions
 		"$spaces$declaration";
 	}/sge;
 	
-	$_;
+	$var;
 }
 
 1;
