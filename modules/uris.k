@@ -5,15 +5,15 @@ module URIS
              | `#reopen ( #Nat , #String ) 
              | `#close ( #Nat ) 
              | `#fEof ( #Nat )
-             | `#flush ( #Nat )
              | `#tell ( #Nat ) 
              | `#seek ( #Nat , #Nat )
              | `#fPeekByte ( #Nat )
              | `#fReadByte ( #Nat ) 
-             | `#fPutByte ( #Nat , #Nat )
-             | `String2DotK ( #String ) 
              | `String2Bool ( #String )
              | `#ioError ( #String )
+
+  declare #fPutByte : #Nat  #Nat -> K
+  declare #flush : #Nat -> K
             
   syntax KResult ::= `#EOF 
   rule #errorTCPSyntax("EOF") => #EOF
@@ -22,13 +22,14 @@ module URIS
 
   rule #close(N:#Nat) => String2DotK(#tcpRequest("close#" +String Int2String(N) +String "#"))
 
-  rule String2DotK(#errorTCPSyntax(S)) => #ioError(S)
-  rule String2DotK(S) => .K when notBool(#isTCPError(S))
+  declare String2DotK : #String -> K
+  define String2DotK(#errorTCPSyntax(S)) => #ioError(S)
+  define String2DotK(S) => .K when notBool(#isTCPError(S))
   
   rule String2Bool("0") => false
   rule String2Bool("1") => true
 
-  rule #flush(N) => String2DotK(#tcpRequest("flush#" +String Int2String(N) +String "#"))
+  define #flush(N) => String2DotK(#tcpRequest("flush#" +String Int2String(N) +String "#"))
 
   rule #tell(N) => String2DotK(#tcpRequest("position#" +String Int2String(N) +String "#"))
 
@@ -58,7 +59,8 @@ module URIS
   rule #string2Int(S) => String2Int(S) when lengthString(S) >=Int 0
 
   rule #putByte(B) => #fPutByte(#stdout,B)
-  rule #fPutByte(N,B:#Nat)
+
+  define #fPutByte(N,B:#Nat)
     => String2DotK(#tcpRequest("writebyte#" +String Int2String(N) +String "#"
                               +String Int2String(B) +String "#"))
 
@@ -78,10 +80,11 @@ module URIS
   syntax K ::= `#charString ( K ) 
   rule #charString(N:#Nat) => charString(N)
 
-  syntax K ::= `#printChar ( K ) 
-             | `#fPrintChar ( #Nat , K ) 
-  rule #printChar(C) => #fPrintChar(#stdout,C)
-  rule #fPrintChar(N,C:#Char) => #fPutByte(N,asciiString(C))
+  declare #printChar : K -> K 
+  define #printChar(C) => #fPrintChar(#stdout,C)
+
+  declare #fPrintChar : #Nat K -> K 
+  define #fPrintChar(N,C:#Char) => #fPutByte(N,asciiString(C))
 
   
   rule #buffer(.K => Int2String(I)) (ListItem(I:#Int) => .List)

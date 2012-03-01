@@ -1694,6 +1694,18 @@ sub line_numbers
  #            $temp =~ s/\Q$macro\E/$macro [metadata "location($file:$macro_line)"]/s;
  		return "$macro [metadata \"location=($file:$macro_line)\"]" . $spaces;
      }
+     elsif ($2 eq "op")
+     {
+       my $op = $1;
+       my $op_line = countlines($`);
+       my $location = "location=($file:$op_line)";
+       if ($op =~ /metadata "/sg) {
+         $op =~ s/metadata "/metadata "$location /sg;
+       } else {
+         $op = $op . " [metadata \"location=($file:$op_line)\"]";
+       }
+       return $op . $spaces;
+     }
 	elsif ($2 eq "mb")
 	{
 	    # mb latex from latex comments
@@ -1794,7 +1806,7 @@ sub add_line_numbers
     (local $_, my $file) = (shift, shift);
     
     my $temp;
-    s/(?<!\S)((rule|syntax|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
+    s/(?<!\S)((rule|syntax|op|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
     {
 	$temp = line_numbers($1, $2, $3, $file);
     }
@@ -2688,6 +2700,8 @@ sub slurp_k
     my $digest = md5_hex($_);
     return "\n" if file_loaded($digest);
     
+    $_ = process_functions($_);
+
     # global pre-processing
     $_ = pre_process($_, $latex_, $file);
     
@@ -3058,7 +3072,7 @@ sub process_functions
 		my $spaces = $1;
 #		print "M1: $declaration\n";
 		$declaration =~ s!^($declarekwd)!op!s;
-		$declaration =~ s!$ksort!K!sg;
+#		$declaration =~ s!$ksort!K!sg;
 		$declaration =~ s!(\s*)$! [metadata "function=()"]$1!s;
 		"$spaces$declaration";
 	}/sge;

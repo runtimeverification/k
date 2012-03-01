@@ -1716,7 +1716,7 @@ sub maudify_file {
     unlink("$file.k2slurp");
 
 # crazy functions
-    $_ = process_functions($_);
+#    $_ = process_functions($_);
 
 # remove quotes from syntax
     $_ = remove_quotes($_);

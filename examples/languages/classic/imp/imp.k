@@ -522,11 +522,7 @@ argument is allowed to be evaluated. */
 
 /*@ \subsubsection{While loop}
 We give the semantics of the \texttt{while} loop by unrolling.
-The unrolling takes place only when the loop statement
-reaches the top of the computation cell; otherwise the unrolling
-process may not terminate (recall that \K is a context-insensitive
-rewriting framework, not a reduction-based one).  Also, note that we
-preferred to make the rule below structural. */
+Note that we preferred to make the rule below structural. */
 
   rule [while]:
     while B do S => if B then (S ; while B do S) else skip
