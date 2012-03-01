@@ -529,7 +529,7 @@ rewriting framework, not a reduction-based one).  Also, note that we
 preferred to make the rule below structural. */
 
   rule [while]:
-    <k> while B do S => if B then (S ; while B do S) else skip ...</k>
+    while B do S => if B then (S ; while B do S) else skip
     [structural]
 
 /*@ \subsection{Programs}

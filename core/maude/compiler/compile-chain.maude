@@ -259,28 +259,28 @@ mod COMPILE-LOOP is
   var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
 
   op compile : Qid -> [Module] .
-  eq compile(Q) = compile(Q, supercools(none) transitions(none) superheats(none)) .
+  eq compile(Q) = compile(Q, supercools(none) transitions(none) superheats(none) functions(pair("function",""))) .
 
   eq print(moduleError(QIL)) = QIL .
 ---  eq purePrint(moduleError(QIL)) = QIL .
 ---  eq xmlPrint(moduleError(QIL)) = QIL .
-  rl ['compile Q 'transitions QStr 'superheats QComp 'supercools QSuper QIL, idle, QIL'] 
-   => [QIL, idle, print(compile(Q, transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper))))] [print QStr QComp QSuper] .
+  rl ['compile Q 'transitions QStr 'superheats QComp 'supercools QSuper 'functions QFun QIL, idle, QIL'] 
+   => [QIL, idle, print(compile(Q, transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) functions(metadataQParse(QFun))))] [print QStr QComp QSuper QFun] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', transitions(none) superheats(none) supercools(none)) )] .
+   => [QIL, idle, print(pcompile(Q,Q', transitions(none) superheats(none) supercools(none) functions(pair("function",""))))] .
 
   op metadataQParse : Qid -> AttrSet .
   eq metadataQParse(Q) = metadataParse(substr(string(Q),1,_-_(length(string(Q)),2))) .
 
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))) )] .
+   => [QIL, idle, print(pcompile(Q,Q', transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool","")) functions(pair("function",""))) )] .
 
 ---  rl ['purify Q QIL, idle, QIL'] 
 ---   => [QIL, idle, purePrint(extractModule(pcompile(Q,'RESULT-PREDICATES,  transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))),'PURE-K-TECHNIQUE))] .
 
----  rl ['xcompile Q Q' 'transitions QStr 'superheats QComp 'supercools QSuper QIL, idle, QIL']
----  => [QIL, idle, xmlPrint(pcompile(Q, Q', transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper))))] .
+---  rl ['xcompile Q Q' 'transitions QStr 'superheats QComp 'supercools QSuper 'functions QFun QIL, idle, QIL']
+---  => [QIL, idle, xmlPrint(pcompile(Q, Q', transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) functions(metadataQParse(QFun))))] .
 
 
-  var AS : AttrSet .  var QStr QComp QSuper : Qid .
+  var AS : AttrSet .  var QStr QComp QSuper QFun : Qid .
 endm

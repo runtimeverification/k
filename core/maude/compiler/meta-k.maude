@@ -112,7 +112,7 @@ fmod META-ATTRS is
   op pair : String String -> Attr .
 
   op metadataParse : AttrSet -> AttrSet .
-  eq metadataParse(AS metadata(S) AS') = AS metadataParse(S) AS' .
+  eq metadataParse(AS metadata(S) AS') = AS metadataParse(S) AS' [print "Parsed: " S "Not parsed: " AS AS'] .
   eq metadataParse(AS) = AS [owise] .
 
   op metadataParse : MembAx -> MembAx .
@@ -124,6 +124,8 @@ fmod META-ATTRS is
 
   eq metadata(pair(Key,Value) AS) 
    = metadata(metadata(metaPair(Key,Value)) AS) .
+  eq metadata(metadata(S) metadata(S') AS)
+   = metadata(metadata(S + " " + S') AS) .
   eq metadata(metadata(S) AS) = metadata(S) AS [owise print "Metadata: " S "Attributes not transformed: " AS] .
   eq metadata(AS) = AS [owise print "Attributes not transformed: " AS] .
 
@@ -131,7 +133,7 @@ fmod META-ATTRS is
   eq metadata(op Q : Tyl -> Ty [AS] .)
    = (op Q : Tyl -> Ty [metadata(AS)] .) . 
   var Q : Qid . var Tyl TyL : TypeList . var Ty : Type .  var Sort : Sort .
-  var S : String .  var AS AS' : AttrSet . var Key Value : String .
+  var S S' : String .  var AS AS' : AttrSet . var Key Value : String .
   var Trm : Term .
 
   op metaPair : String String -> Attr .
@@ -1072,6 +1074,7 @@ fmod COMPILATION-ATTRS is
   op supercools : AttrSet -> Attr .
   op transitions : AttrSet -> Attr .
   op superheats : AttrSet -> Attr .
+  op functions : AttrSet -> Attr .
 endfm
 
 fmod K-ATTRS is 

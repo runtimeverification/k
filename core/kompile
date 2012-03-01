@@ -86,9 +86,11 @@ my $k_prelude_loaded = 0;
 # K tags variables
 my $flag_supercool = "supercool=()";
 my $flag_transition = "transition=()";
+my $flag_function = "function=() predicate=()";
 my $flag_superheat = "superheat=()";
 my $supercool = 0;
 my $transition = 0;
+my $function = 0;
 my $superheat = 0;
 my $pure = 0;
 my $flag = 0;
@@ -512,7 +514,7 @@ my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 $kmaude_keywords_pattern =~ s/\\bsyntax\\b/\\ssyntax\\s/sg;
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 
-my @k_attributes = qw(binder strict metadata prec format assoc comm id: hybrid gather ditto parser seqstrict structural transition computational superheat generated supercool large latex );           
+my @k_attributes = qw(binder strict metadata prec format assoc comm id: hybrid gather ditto parser seqstrict structural transition function computational superheat generated supercool large latex );           
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $k_sorts = ":Bag:BagItem:#Bool:CellLabel:CellKey:CellAttribute:#Char:#Int:K:KAssignments:KHybridLabel:KLabel:KResult:KResultLabel:KSentence:List:ListItem:List{KResult}:List{K}:Map:MapItem:#Nat:NeBag:NeK:NeList:NeList{KResult}:NeList{K}:NeMap:NeSet:#NzInt:#NzNat:Set:SetItem:#String:#Zero";
@@ -725,6 +727,9 @@ foreach (@ARGV) {
     elsif (/^--?transition$/) {
 		$transition = 1;
     }
+    elsif (/^--?anywhere$/) {
+		$function = 1;
+    }
     elsif (/^--?superheat$/) {
 		$superheat = 1;
     }
@@ -767,7 +772,7 @@ foreach (@ARGV) {
 	# do nothing
 	#	print "MODULES: $_\n";
     }
-    elsif ($supercool || $transition || $superheat)
+    elsif ($supercool || $transition || $superheat || $function)
     {
     	# do nothing
     }
@@ -844,6 +849,11 @@ if ($args =~ /--?crop\s+($modules_list)/)
 if ($args =~ /\-\-?supercool\s(.*)/s)
 {
 	$flag_supercool = process_tags($1);
+}
+
+if ($args =~ /\-\-?anywhere\s(.*)/s)
+{
+	$flag_function = $flag_function . " " . process_tags($1);
 }
 
 if ($args =~ /\-\-?transition\s(.*)/s)
@@ -1527,7 +1537,8 @@ sub compile {
 			"load \"$language_file_name\"\n",
 			"load \"$k_all_tools\"\n",
 			"set print attribute off .\n",
-			"rew compile('$language_module_name, supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\"))) .\n",
+			"rew compile('$language_module_name, supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\"))
+functions(metadataParse(\"$flag_function\"))) .\n",
 			"quit\n");
 		
 		my @lines = split(/\n/, $_);
@@ -1555,16 +1566,17 @@ sub compile {
 	my $compile_supercools = "\"$flag_supercool\"";
 	my $compile_transitions = "\"$flag_transition\"";
 	my $compile_superheats = "\"$flag_superheat\"";    
-	my $action = "(compile $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)";
-	$action = "(purify $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $pure;
-#	$action = "(xcompile $language_module_name $xmlTo transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools .)" if $xml;
+	my $compile_functions = "\"$flag_function\"";
+	my $action = "(compile $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools functions $compile_functions .)";
+	$action = "(purify $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools functions $compile_functions .)" if $pure;
+#	$action = "(xcompile $language_module_name $xmlTo transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools functions $compile_functions  .)" if $xml;
 	$_ = run_maude("Compiling the definition ... ",
 	    "load \"$k_prelude\"\n",
 	    "load \"$language_file_name\"\n",
 	    "load \"$k_all_tools\"\n",
             "---(\n",
             "rew in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'???,\n",
-            "supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\"))) .\n",
+            "supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\")) functions(metadataParse(\"$flag_function\"))) .\n",
             "quit\n",
             "---)\n",
 	    "loop compile .\n",
