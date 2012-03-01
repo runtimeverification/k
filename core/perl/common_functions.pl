@@ -74,7 +74,7 @@ my $top_level_pattern = join("|", (
                     "(?:in|load|require)\\s+\\S+"
     ));
 
-my @kmaude_keywords = qw(context rule macro eq ceq configuration op ops syntax kvar sort sorts subsort subsorts including kmod endkm mb tags);
+my @kmaude_keywords = qw(context rule define macro eq ceq configuration op ops syntax declare kvar sort sorts subsort subsorts including kmod endkm mb tags);
 my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 our $ksort = '#?[A-Z][A-Za-z0-9\`\+\?\!#]*(?:\{#?[A-Z][A-Za-z0-9\`\+\?\!]*(\,".*?")?\})?';
 
@@ -1619,23 +1619,14 @@ my @k_attributes = qw(binder strict metadata prec format assoc comm id hybrid ga
 my $k_attributes_pattern = join("|",  @k_attributes);
 
 
-sub line_numbers
+sub add_metadata
 {
-    my ($statement, $operation, $spaces, $file) = (shift, shift, shift, shift);
-
-#	print "CHECK: $statement\n";
-
-    if ( $operation eq "rule" or $operation eq "context" )
-    {
-        my ($rule, $spaces) = ($statement, $spaces);
-        my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
-
-#        $rule =~ s!\[([^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?)\](?=\s*)$!{$attr = $1;}""!gse;
+        my ($statement, $data) = (shift, shift);
 	my $attr = "";
 	my $space = "";
 	my $bool = 0;
 	
-	$rule =~ s/(?<=\s)\[([^\[]*?)\](\s*)$/
+	$statement =~ s/(?<=\s)\[([^\[]*?)\](\s*)$/
 	{ 
 	    $attr = $1; 
 	    $space = $2;
@@ -1656,7 +1647,7 @@ sub line_numbers
 	
 	if ($bool == 0 && $attr ne "")
 	{
-	    $rule .= "[$attr]$space";
+	    $statement .= "[$attr]$space";
 	    $attr = "";
 	}
 	
@@ -1664,24 +1655,40 @@ sub line_numbers
 	
 	if ($attr eq "")
         {
-	    $rule .= " [metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
-            $rule .= " [metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]$space" if $rule_size > 1;
+	    $statement .= " [metadata \"$data\"]$space"; 
         }
         else
         {
 	    if ($attr =~ /metadata/sg)
 	    {
-		my $loc = ($rule_size + $rule_line - 1);
-		$attr =~ s/(metadata\s+")/$1location=($file:$rule_line) /sg if $rule_size == 0 || $rule_size == 1;
-                $attr =~ s/(metadata\s+")/$1location=($file:$rule_line-$loc) /sg if $rule_size > 1;
-                $rule .= "[$attr]$space";
+		$attr =~ s/(metadata\s+")/$1$data /sg;
+                $statement .= "[$attr]$space";
             }
             else
             {
-		$rule .= "[$attr metadata \"location=($file:$rule_line)\"]$space" if $rule_size == 0 || $rule_size == 1;
-		$rule .= "[$attr metadata \"location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")\"]$space" if $rule_size > 1;
+		$statement .= "[$attr metadata \"$data\"]$space";
 	    }
         }
+        return $statement;
+}
+
+sub line_numbers
+{
+    my ($statement, $operation, $spaces, $file) = (shift, shift, shift, shift);
+
+#	print "CHECK: $statement\n";
+
+    if ( $operation eq "rule" or $operation eq "define" or $operation eq "context" or $operation eq "op" or $operation eq "declare")
+    {
+        my ($rule, $spaces) = ($statement, $spaces);
+        my ($tmp, $rule_line, $rule_size) = ($rule, countlines("$`"), countlines("$rule"));
+        if ($rule_size > 1) 
+        {
+          $rule = add_metadata($rule, "location=($file:$rule_line-" . ($rule_size + $rule_line - 1) . ")");
+        } else {
+          $rule = add_metadata($rule, "location=($file:$rule_line)");
+        }
+#        $rule =~ s!\[([^\]]*?(?<=(\s|\[))($k_attributes_pattern)(?=(\s|\]))[^\]]*?)\](?=\s*)$!{$attr = $1;}""!gse;
       
 #        print "Rule: $rule\n\n\n";
         return $rule . $spaces;
@@ -1692,19 +1699,7 @@ sub line_numbers
          my $macro = $1;
          my $macro_line = countlines($`);
  #            $temp =~ s/\Q$macro\E/$macro [metadata "location($file:$macro_line)"]/s;
- 		return "$macro [metadata \"location=($file:$macro_line)\"]" . $spaces;
-     }
-     elsif ($2 eq "op")
-     {
-       my $op = $1;
-       my $op_line = countlines($`);
-       my $location = "location=($file:$op_line)";
-       if ($op =~ /metadata "/sg) {
-         $op =~ s/metadata "/metadata "$location /sg;
-       } else {
-         $op = $op . " [metadata \"location=($file:$op_line)\"]";
-       }
-       return $op . $spaces;
+ 		return add_metadata($macro, "location=($file:$macro_line)") . $spaces;
      }
 	elsif ($2 eq "mb")
 	{
@@ -1806,7 +1801,7 @@ sub add_line_numbers
     (local $_, my $file) = (shift, shift);
     
     my $temp;
-    s/(?<!\S)((rule|syntax|op|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
+    s/(?<!\S)((rule|define|syntax|op|declare|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
     {
 	$temp = line_numbers($1, $2, $3, $file);
     }
@@ -2369,7 +2364,7 @@ sub get_checksum
 #########################
 
 # predefined tags
-my @tags = split(",", "metadata,location,ditto,parser,latex,hybrid,arity,seqstrict,strict,binder,wrapping,structural,transition,supercool,superheat,computational,large,tag");
+my @tags = split(",", "metadata,location,ditto,parser,latex,hybrid,arity,seqstrict,strict,binder,wrapping,structural,transition,supercool,superheat,computational,large,tag,frozen");
 
 
 sub get_tags
@@ -2700,8 +2695,6 @@ sub slurp_k
     my $digest = md5_hex($_);
     return "\n" if file_loaded($digest);
     
-    $_ = process_functions($_);
-
     # global pre-processing
     $_ = pre_process($_, $latex_, $file);
     
@@ -3073,7 +3066,7 @@ sub process_functions
 #		print "M1: $declaration\n";
 		$declaration =~ s!^($declarekwd)!op!s;
 #		$declaration =~ s!$ksort!K!sg;
-		$declaration =~ s!(\s*)$! [metadata "function=()"]$1!s;
+		$declaration = add_metadata($declaration, "function=()");
 		"$spaces$declaration";
 	}/sge;
 
@@ -3082,9 +3075,9 @@ sub process_functions
 	{
 		my $declaration = $2;
 		my $spaces = $1;
-#		print "M2: $declaration\n";
 		$declaration =~ s!^($definekwd)!rule!s;
-		$declaration =~ s!(\s*)$! [metadata "function=()"]$1!s;
+		$declaration = add_metadata($declaration, "function=()");
+		print "M2: $declaration\n";
 		"$spaces$declaration";
 	}/sge;
 	

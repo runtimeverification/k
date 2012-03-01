@@ -1,6 +1,6 @@
 module ISSUE 
 
-   declare sum : #Int #Int -> #Int
+   declare sum : K K -> K
    define sum(X:#Int,0) => X
    define sum(0,Y:#Int) => Y
    define sum(X:#Int,Y:#Int) => X +Int Y
