@@ -3052,10 +3052,11 @@ sub process_functions
 	# And, of course, people often change their mind...
 	
 	# declarations (declare) are changed into ops
-	$var =~ s/(?<=\n)(\s*)\b($declarekwd\b.*?)(?=($declarekwd|$definekwd|$kmaude_keywords_pattern))/
+	$var =~ s/(?<=\n)(\s*)($declarekwd\b.*?)(?=\n\s*($declarekwd|$definekwd|$kmaude_keywords_pattern))/
 	{
 		my $declaration = $2;
 		my $spaces = $1;
+#		print "M1: $declaration\n";
 		$declaration =~ s!^($declarekwd)!op!s;
 		$declaration =~ s!$ksort!K!sg;
 		$declaration =~ s!(\s*)$! [metadata "function=()"]$1!s;
@@ -3063,10 +3064,11 @@ sub process_functions
 	}/sge;
 
 	# definitions (define) are changed into rules
-	$var =~ s/(?<=\n)(\s*)\b($definekwd\b.*?)(?=($declarekwd|$definekwd|$kmaude_keywords_pattern))/
+	$var =~ s/(?<=\n)(\s*)($definekwd\b.*?)(?=\n\s*($declarekwd|$definekwd|$kmaude_keywords_pattern))/
 	{
-		my $declaration = $1;
+		my $declaration = $2;
 		my $spaces = $1;
+#		print "M2: $declaration\n";
 		$declaration =~ s!^($definekwd)!rule!s;
 		$declaration =~ s!(\s*)$! [metadata "function=()"]$1!s;
 		"$spaces$declaration";
