@@ -155,10 +155,10 @@ ceq syntaxPredsMb(SS,Mb)
  eq syntaxPreds((op '<Floats> : nil -> Ty [AS] .) OPDS)
   = syntaxPreds(OPDS) .
  eq syntaxPreds((op Q : nil -> Ty [AS] .) OPDS)
-   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),mkConstant(Q,Ty)),trueCt],empty, removeOpAttrs(AS) metadata(pair("structural","") pair("predicate",""))}) 
+   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),mkConstant(Q,Ty)),trueCt],empty, removeOpAttrs(AS) metadata(pair("structural","") pair("predicate",string((Ty))))}) 
      syntaxPreds(OPDS) [owise] .
  eq syntaxPreds((op Q : NeTyl -> Ty [AS] .) OPDS)
-   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),Q[genVars(Universal2K(NeTyl), "Is", 1)]),trueCt],empty, removeOpAttrs(AS) metadata(pair("predicate",""))}) 
+   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),Q[genVars(Universal2K(NeTyl), "Is", 1)]),trueCt],empty, removeOpAttrs(AS) metadata(pair("predicate",string((Ty))))}) 
      syntaxPreds(OPDS) .
  eq syntaxPreds((none).OpDeclSet) = none .
 
@@ -196,19 +196,19 @@ ceq syntaxPredsMb(SS,Mb)
 
  op syntaxPreds : SubsortDeclSet ~> MembAxSet .
  eq syntaxPreds((subsort S < S' .) SSDS)
-  = plugKRule(R{replaceS[kApply(predicateLabel(S'),mkVariable(S,S)),trueCt],empty, metadata(pair("predicate",""))}) 
+  = plugKRule(R{replaceS[kApply(predicateLabel(S'),mkVariable(S,S)),trueCt],empty, metadata(pair("predicate",string((S'))))}) 
     syntaxPreds(SSDS) .
  eq syntaxPreds((none).SubsortDeclSet) = none .
 
  op builtinSyntaxPreds : SortSet ~> MembAxSet .
  eq builtinSyntaxPreds(S ; SS) 
-  = plugKRule(R{replaceS[kApply(predicateLabel(S),mkVariable(S,S)),trueCt],empty, metadata(pair("predicate",""))})  
+  = plugKRule(R{replaceS[kApply(predicateLabel(S),mkVariable(S,S)),trueCt],empty, metadata(pair("predicate",string((S))))})  
     builtinSyntaxPreds(SS) .
  eq builtinSyntaxPreds(none) = none .
 
   op syntaxPreds : SortSet ~> OpDeclSet .
   eq syntaxPreds(S ; SS) 
-   = (op predicateLabelS(S) : nil -> KLabel [metadata(pair("predicate", ""))] .) 
+   = (op predicateLabelS(S) : nil -> KLabel [metadata(pair("predicate", string((S))))] .) 
      syntaxPreds(SS) .
   eq syntaxPreds((none).SortSet) = none .
   

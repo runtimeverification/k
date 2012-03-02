@@ -58,12 +58,12 @@ mod STRICTOPS2CXT is
    = (mb 'context_[kApply(Q, (mkVariable('Kl1,KList), hole, mkVariable('Kl2,KList)))] 
          : KSentence [metadata(removeOpAttrs(AS) strictCell(Q'))] .) .
   eq strictOps2cxtMbs(Q, s(N), Q', -1, AS)
-   =  (mb 'context_[kApply(Q, (makeKVars(seq(1,N), K), hole, mkVariable('Kl,KList)))] : KSentence [metadata(removeOpAttrs(AS) strictCell(Q'))] .) [owise] .
+   =  (mb 'context_[kApply(Q, (makeKVars(seq(1,N), K), hole, mkVariable('Kl,KList)))] : KSentence [metadata(removeOpAttrs(AS) strictCell(Q') pair("hole",string(s(N),10)))] .) [owise] .
 --- if arity is specified and not 0
   eq strictOps2cxtMbs(Q, nil, Q', NA, AS)
    = strictOps2cxtMbs(Q, seq(1,NA), Q', NA, AS) .
   eq strictOps2cxtMbs(Q, s(N), Q', NA, AS)
-   = (mb 'context_[kApply(Q, (makeKVars(seq(1,N), K), hole, makeKVars(seq(s(s(N)),NA), K)))] : KSentence [metadata(removeOpAttrs(AS) strictCell(Q'))] .) [owise] .
+   = (mb 'context_[kApply(Q, (makeKVars(seq(1,N), K), hole, makeKVars(seq(s(s(N)),NA), K)))] : KSentence [metadata(removeOpAttrs(AS) strictCell(Q') pair("hole",string(s(N),10)))] .) [owise] .
   
 
   op seqstrictOps2cxtMbs  : Qid NatList Qid Nat AttrSet ~> MembAxSet .
@@ -87,12 +87,12 @@ mod STRICTOPS2CXT is
 --- if arity is unspecified 
   eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints', Q', -1, AS)
    =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', Q', -1, AS)
-     plugKContext(C{kApply(Q, (makeSSVars(1, I, I, AS), mkVariable('Kl,KList))), makeResultCond(Q',Ints), metadata(removeOpAttrs(AS) strictCell(Q'))}) .
+     plugKContext(C{kApply(Q, (makeSSVars(1, I, I, AS), mkVariable('Kl,KList))), makeResultCond(Q',Ints), metadata(removeOpAttrs(AS) strictCell(Q') pair("hole",string(I,10)))}) .
 --- if arity is specified and not 0
   eq seqstrictOps2cxtMbsAux(Q, Ints, I Ints', Q', NA, AS)
    =  seqstrictOps2cxtMbsAux(Q, Ints I, Ints', Q', NA, AS)
      plugKContext(C{kApply(Q, (makeSSVars(1, I, I, AS), makeKVars(seq(s(I), NA), K))), 
- makeResultCond(Q',Ints), metadata(removeOpAttrs(AS) strictCell(Q'))}) .
+ makeResultCond(Q',Ints), metadata(removeOpAttrs(AS) strictCell(Q') pair("hole",string(I, 10)))}) .
 
 
   op makeResultCond : Qid IntList ~> TermList .

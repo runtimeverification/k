@@ -8,6 +8,7 @@ fmod MAKE-K-RULES is
   including PARSE-METADATA .
   including COMPILATION-ATTRS .
   var M Flat : Module .  var T T1 T2 Trm : Term .  var Cond : TermList .
+  var Cnd : Condition .
   var Cxt : String .
   var AS AS' AS'' : AttrSet .  var A : Attr .
   var C : Term . var S : Sort .  var Ss : SortSet . var Subst : Substitution .
@@ -72,24 +73,34 @@ fmod MAKE-K-RULES is
   eq addCxtReplace(Flat, M, CSplit) = addMbs(plugKContext(setAttrs(setContents(CSplit, replaceCxt(splitReplace(Flat, getContents(CSplit),1), getHoleReplacement(getContents(CSplit)))),metadata(getAttrs(CSplit)))), M) .
 
   op addReplace : Module Module KRuleSplit Substitution AttrSet ~> Module .
-  eq addReplace(Flat, M,R{T,Cond,AS pair("predicate","")}, Subst, AS')
-   =
-   superCoolName(addEqs(plugEq(normalize(Flat,splitReplace(Flat,
-               T,1)),
-           handleTagSuperCooling(normalize(Flat,splitReplace(Flat,
-                 T,2)),Subst, AS, AS'),
-           metadata(pair("predicate","") AS), makeKCondition(Cond)), M), AS, AS') [owise] . 
-  eq addReplace(Flat, M, R{T, Cond, AS A}, Subst, AS' transitions(A AS''))
-    = superCoolName(addRls(plugRl(addK(Flat, AS A, AS', normalize(Flat,splitReplace(Flat, T,1))), handleTagSuperCooling(addK(Flat, AS A, AS', normalize(Flat,splitReplace(Flat, T,2))), Subst, AS A, AS'), metadata(A AS), makeCondition(Cond)), M), AS A, AS') .
+  eq addReplace(Flat, M, R{T,Cond,AS}, Subst, AS')
+   = $addReplace(M, addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,1))), handleTagSuperCooling(addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,2))), Subst, AS, AS'), makeCondition(Cond), AS, AS') .
 
-  eq addReplace(Flat, M, R{T, Cond, AS}, Subst, AS' transitions(pair("default","") AS''))
-    = superCoolName(addRls(plugRl(addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,1))), handleTagSuperCooling(addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,2))), Subst, AS, AS'), metadata(pair("default","") AS), makeCondition(Cond)), M), AS, AS') [owise] .
+  op $addReplace : Module Term Term Condition AttrSet AttrSet ~> Module .
+  eq $addReplace(M, T1, T2, Cnd, AS pair("predicate",Str), AS')
+   = addStructural(M, T1, T2, Cnd, AS pair("predicate",Str), AS') .
+  eq $addReplace(M, T1, T2, Cnd, AS pair("function",Str), AS')
+   = addStructural(M, T1, T2, Cnd, AS pair("function",Str), AS') .
+  eq $addReplace(M, T1, T2, Cnd, AS A, transitions(A AS'') AS')
+   = addTransition(M, T1, T2, Cnd, AS A, AS') .
+  eq $addReplace(M, T1, T2, Cnd, AS pair(Str,Str':String), transitions(pair(Str, Str'':String) AS'') AS')
+   = addTransition(M, T1, T2, Cnd, AS pair(Str, Str':String), AS') .
+  eq $addReplace(M, T1, T2, Cnd, AS, transitions(pair("default","") AS'') AS')
+   = addTransition(M, T1, T2, Cnd, AS pair("default",""), AS') .
+  eq $addReplace(M, T1, T2, Cnd, AS, AS')
+   = addStructural(M, T1, T2, Cnd, AS pair("default",""), AS') [owise] .
+  
+  op addStructural : Module Term Term Condition AttrSet AttrSet ~> Module .  
+  eq addStructural(M, T1, T2, Cnd, AS, AS')
+   = superCoolName(addEqs(plugEq(T1,T2,metadata(AS),Cnd), M), AS, AS') .
 
- eq addReplace(Flat, M,R{T,Cond,AS}, Subst, AS')
-   = superCoolName(addEqs(plugEq(addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,1))), handleTagSuperCooling(addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,2))),Subst, AS, AS'), metadata(pair("default","") AS), makeKCondition(Cond)), M), AS, AS') [print "Term: " T ", Attributes: " AS ", Compilation Attributes: " AS' owise] . 
+  op addTransition : Module Term Term Condition AttrSet AttrSet ~> Module .  
+  eq addTransition(M, T1, T2, Cnd, AS, AS')
+   = superCoolName(addRls(plugRl(T1,T2,metadata(AS),Cnd), M), AS, AS') .
 
   op handleTagSuperCooling : Term Substitution AttrSet AttrSet -> Term .
   eq handleTagSuperCooling(T, Subst, A AS, AS' supercools(A AS'')) = T[Subst] .
+  eq handleTagSuperCooling(T, Subst, pair(Str,Str':String) AS, AS' supercools(pair(Str,Str'':String) AS'')) = T[Subst] .
   eq handleTagSuperCooling(T, Subst, AS, AS' supercools(pair("default","") AS'')) = T[Subst] .
   eq handleTagSuperCooling(T, Subst, AS, AS') = T [owise] .
   eq handleTagSuperCooling(errorT(Err:[Term],Cxt:String,Msg:String), Subst, AS, AS') =  errorT(Err:[Term],Cxt:String,Msg:String) .
@@ -103,6 +114,7 @@ fmod MAKE-K-RULES is
 
 
   op superCoolName : Module AttrSet AttrSet -> Module .
+  eq superCoolName(M, pair(Str,Str':String) AS, AS' supercools(pair(Str,Str'':String) AS'')) = setName(M, '#SUPERCOOL) .
   eq superCoolName(M, A AS, AS' supercools(A AS'')) = setName(M, '#SUPERCOOL) .
   eq superCoolName(M, AS, AS' supercools(pair("default","") AS'')) = setName(M, '#SUPERCOOL) .
   eq superCoolName(M, AS, AS') = M [owise] .
@@ -119,6 +131,7 @@ fmod MAKE-K-RULES is
 
   op addK : Module AttrSet AttrSet Term -> Term .
   eq addK(Flat, A AS, functions(A AS') AS'', T) = T .
+  eq addK(Flat, pair(Str,Str':String) AS, functions(pair(Str,Str'':String) AS') AS'', T) = T .
   eq addK(Flat, AS, AS', T) = if getKind(Flat, leastSort(Flat, T)) == getKind(Flat, K) then kWrap(T) else T fi [owise print "Attributes: "
 AS "\n\t" AS'] .
 
