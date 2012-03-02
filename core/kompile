@@ -474,7 +474,7 @@ my $maude_backquoted = "(?:`\\(|`\\)|`\\{|`\\}|`\\[|`\\]|`\\,|_|[^$parentheses\\
 # Latex #
 #########
 #my $latex_special = "[\\#\\$\\{\\}\\[\\]\\&\\^\\_\\%\\~\\\\]";
-my $latex_special = '[\\#\\$\\{\\}\\[\\]\\&\\_\\%\\~\\\\]';
+my $latex_special = '[\\#\\{\\}\\&\\_\\%]';
 
 #####
 # K #
@@ -2230,8 +2230,11 @@ sub make_latex {
     s/(\W)`/$1/gsm;
     s/`(\W)/$1/gsm;
     s/`/ /gsm;
+    s/\\/\\textbackslash /gsm;
     s/($latex_special)/\\$1/gsm;
     s/\^/\\mbox{\\^{}}/gsm;
+    s/\$/\\mbox{\\textdollar{}}/gsm;
+    s/\~/\\ensuremath\\sim{}/gsm;
     return $_;
 }
 

@@ -11,7 +11,6 @@ MAIN_FILE = example
 # this is a space-separated list of basename maude files to run
 TESTS = test.m
 
-COMPILE_OPTIONS = -anywhere = "anywhere" 
 LATEX_STYLE = mm
 
 TOOL_DIR =  $(K_BASE)/tools/

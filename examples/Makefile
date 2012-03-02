@@ -1,4 +1,5 @@
 TEST_DIRS = \
+	    ../tests/regression/pdf-special-chars \
 	    algorithms/dijkstra \
 	    algorithms/primes \
 	    algorithms/sort \
