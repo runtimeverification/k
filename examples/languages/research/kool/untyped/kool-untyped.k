@@ -277,7 +277,7 @@ of Java.  In fact, the latter can be implemented in terms of
 
   rule (env(_) => .) ~> env(_)  [:structural:]
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [:structural:]
+  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [:structural:]
 
   rule V; => .
 
@@ -293,7 +293,7 @@ of Java.  In fact, the latter can be implemented in terms of
 
   syntax ListItem ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
-  rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
+  rule <k> (try S1:Stmt catch(X) S2:Stmt => S1 ~> popx) ~> K </k>
        <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
@@ -685,14 +685,15 @@ with the most concrete class and going up in the hierarchy. */
 
   syntax K ::= #Id "::" Bag
   // Id is the class name, BagItem is its corresponding environment
-  syntax K ::= "lookupMember" "(" BagItem "," #Id ")"  
+
+  declare lookupMember : BagItem #Id -> K
   // BagItem is the envStack cell, Id is the member name
 
 // First look for the member in the top environment; if found then done.
-  rule lookupMember(<envStack> ListItem(_:#Id :: <env>...X|->L...</env>)
+  define lookupMember(<envStack> ListItem(_:#Id :: <env>...X|->L...</env>)
                     ...</envStack>,X) => lookup(L)  [:structural:]
 // Otherwise, recurse through the object environment stack
-  rule lookupMember(<envStack> ListItem(_:#Id :: <env> Env </env>)
+  define lookupMember(<envStack> ListItem(_:#Id :: <env> Env </env>)
                             => . ...</envStack>, X)
     when notBool(X in keys(Env))                      [:structural:]
 
