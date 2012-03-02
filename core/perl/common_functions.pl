@@ -1748,11 +1748,12 @@ sub line_numbers
 				}
 				/se;
 				$production = Unfreeze("MYS", $production); 
+				$attributes = Unfreeze("MYS", $attributes); 
 
 				# compute line number
 				my $absolute_line = $prematch_lines + $pre - 1;
 
-				# print "Production1: $production &$attributes&\n";
+                                # print "Production1: $production &$attributes&\n";
 
 				# if there are already some attributes then add metadata if other metadata is there
 				$attributes =~ s/metadata(\s+)\"(.*?)\"/metadata$1\"$2 location=($file:$absolute_line:$counter)\" / if ($attributes ne "" && $attributes =~ /metadata/);      
