@@ -8,6 +8,6 @@ kmod ISSUE is
 	
 	syntax K ::= test
 	
-	rule test => 'foo-foo(.List{K}) [structural]
-	rule ('foo-foo => 'bar)(.List{K}) [structural]
+	define test => 'foo-foo(.List{K}) [structural]
+	define ('foo-foo => 'bar)(.List{K}) [structural]
 endkm

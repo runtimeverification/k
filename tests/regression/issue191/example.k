@@ -4,7 +4,7 @@ kmod ISSUE is
 	syntax K ::= foo #String
 	syntax K ::= #String
 	
-	rule test1 => foo "bar 'char" [structural]
-	rule test2 => foo "bar\"" [structural]
-	rule test3 => foo "bar\"bim" [structural]
+	define test1 => foo "bar 'char" [structural]
+	define test2 => foo "bar\"" [structural]
+	define test3 => foo "bar\"bim" [structural]
 endkm

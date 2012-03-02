@@ -21,13 +21,13 @@ module NON-K-STRICTNESS
 
    rule <type> I:#Int => int ...</type>
    rule <type> F:#Float => float ...</type>
-   rule L:KLabel(int,, int) => int 
+   rule <type> L:KLabel(int,, int) => int ...</type>
       when L ==Bool '_+_ orBool L ==Bool '_*_ orBool L ==Bool '_/_
-   rule L:KLabel(float,, float) => float 
+   rule <type> L:KLabel(float,, float) => float ...</type>
       when L ==Bool '_+_ orBool L ==Bool '_*_ orBool L ==Bool '_/_
-   rule integer(T:Type) => int 
+   rule <type> integer(T:Type) => int ...</type>
       when T ==Bool int orBool T ==Bool float 
-   rule float(T:Type) => float 
+   rule <type> float(T:Type) => float ...</type>
       when T ==Bool int orBool T ==Bool float 
 
 
@@ -40,11 +40,11 @@ module NON-K-STRICTNESS
    rule <type> L:KLabel(L1:List{K},,typeError(K:K),,L2:List{K})
             => typeError(L(K)) ...</type>
 
-   rule integer(F:#Float) => Float2Int(F)
-   rule integer(I:#Int) => I
+   define integer(F:#Float) => Float2Int(F)
+   define integer(I:#Int) => I
 
-   rule float(F:#Float) => F
-   rule float(I:#Int) => Int2Float(I)
+   define float(F:#Float) => F
+   define float(I:#Int) => Int2Float(I)
 
    rule I1:#Int + I2:#Int => I1 +Int I2
    rule I1:#Int * I2:#Int => I1 *Int I2
@@ -54,7 +54,7 @@ module NON-K-STRICTNESS
    rule F1:#Float * F2:#Float => F1 *Float F2
    rule F1:#Float / F2:#Float => F1 /Float F2
 
-   rule eval(int) => correct
+   rule <type> eval(int) => correct </type>
   
    rule <k> P:Pgm </k> <type> . => P </type>
    rule <k> eval(E:Exp) => E </k> <type> correct </type>
