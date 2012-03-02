@@ -130,8 +130,8 @@ fmod MAKE-K-RULES is
 
 
   op addK : Module AttrSet AttrSet Term -> Term .
-  eq addK(Flat, A AS, functions(A AS') AS'', T) = T .
-  eq addK(Flat, pair(Str,Str':String) AS, functions(pair(Str,Str'':String) AS') AS'', T) = T .
+  eq addK(Flat, A AS, anywheres(A AS') AS'', T) = T .
+  eq addK(Flat, pair(Str,Str':String) AS, anywheres(pair(Str,Str'':String) AS') AS'', T) = T .
   eq addK(Flat, AS, AS', T) = if getKind(Flat, leastSort(Flat, T)) == getKind(Flat, K) then kWrap(T) else T fi [owise print "Attributes: "
 AS "\n\t" AS'] .
 

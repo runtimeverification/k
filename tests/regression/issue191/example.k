@@ -6,5 +6,5 @@ kmod ISSUE is
 	
 	define test1 => foo "bar 'char" [structural]
 	define test2 => foo "bar\"" [structural]
-	define test3 => foo "bar\"bim" [structural]
+	rule test3 => foo "bar\"bim" [structural anywhere]
 endkm
