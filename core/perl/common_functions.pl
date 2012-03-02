@@ -3077,7 +3077,7 @@ sub process_functions
 		my $spaces = $1;
 		$declaration =~ s!^($definekwd)!rule!s;
 		$declaration = add_metadata($declaration, "function=()");
-		print "M2: $declaration\n";
+#		print "M2: $declaration\n";
 		"$spaces$declaration";
 	}/sge;
 	

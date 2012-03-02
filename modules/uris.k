@@ -8,12 +8,12 @@ module URIS
              | `#tell ( #Nat ) 
              | `#seek ( #Nat , #Nat )
              | `#fPeekByte ( #Nat )
-             | `#fReadByte ( #Nat ) 
              | `String2Bool ( #String )
              | `#ioError ( #String )
 
   declare #fPutByte : #Nat  #Nat -> K
   declare #flush : #Nat -> K
+  declare #fReadByte : #Nat -> K
             
   syntax KResult ::= `#EOF 
   rule #errorTCPSyntax("EOF") => #EOF
@@ -53,10 +53,11 @@ module URIS
              | `#putByte ( #Nat )
              | `#eof ( )
   rule #readByte() => #fReadByte(#stdin)
-  rule #fReadByte(N) => #string2Int(#tcpRequest("readbyte#" +String Int2String(N) +String "#"))
 
-  syntax K ::= `#string2Int ( K )
-  rule #string2Int(S) => String2Int(S) when lengthString(S) >=Int 0
+  define #fReadByte(N) => #string2Int(#tcpRequest("readbyte#" +String Int2String(N) +String "#"))
+
+  declare #string2Int : K -> K
+  define #string2Int(S) => String2Int(S) when lengthString(S) >=Int 0
 
   rule #putByte(B) => #fPutByte(#stdout,B)
 
@@ -72,13 +73,14 @@ module URIS
   rule #fEof(N)
     => String2Bool(#tcpRequest("eof#" +String Int2String(N) +String "#"))
 
-  syntax K ::= `#readChar ( ) 
-             | `#fReadChar ( #Nat )
-  rule #readChar() => #fReadChar(#stdin)
-  rule #fReadChar(N) => #charString(#fReadByte(N))
+  declare  #readChar() : -> K 
+  define #readChar() => #fReadChar(#stdin)
 
-  syntax K ::= `#charString ( K ) 
-  rule #charString(N:#Nat) => charString(N)
+  declare #fReadChar : #Nat -> K
+  define #fReadChar(N) => #charString(#fReadByte(N))
+
+  declare #charString : K -> K 
+  define #charString(N:#Nat) => charString(N)
 
   declare #printChar : K -> K 
   define #printChar(C) => #fPrintChar(#stdout,C)
