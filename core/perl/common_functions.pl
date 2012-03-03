@@ -2365,7 +2365,7 @@ sub get_checksum
 #########################
 
 # predefined tags
-my @tags = split(",", "metadata,location,ditto,prec,parser,latex,hybrid,arity,seqstrict,strict,binder,wrapping,structural,anywhere,transition,supercool,superheat,computational,large,tag,frozen");
+my @tags = split(",", "metadata,location,ditto,prec,parser,latex,hybrid,arity,seqstrict,strict,binder,wrapping,structural,anywhere,transition,supercool,superheat,computational,large,tag,strat,frozen");
 
 
 sub get_tags
@@ -2540,6 +2540,22 @@ sub op_tags
     }
     /sge;
     
+    # strat
+    $attributes =~ s/\b(strat\s*\(.*?\))/
+    {
+	$keep .= " $1";
+	"";
+    }
+    /sge;
+
+    # frozen
+    $attributes =~ s/\b(frozen\s*\(.*?\))/
+    {
+	$keep .= " $1";
+	"";
+    }
+    /sge;
+
     # gather
     $attributes =~ s/\b(gather\s*\(.*?\))/
     {

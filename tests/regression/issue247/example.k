@@ -1,6 +1,6 @@
 module ISSUE-SYNTAX
 	syntax Exp  ::= #Int | Exp "+" Exp [strict] | "[" Exps "]" [strict]
-        syntax Exps ::= List{Exp,","} [prec 120]
+        syntax Exps ::= List{Exp,","} [prec(120)]
 end module
 
 module ISSUE
