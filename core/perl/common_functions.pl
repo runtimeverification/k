@@ -1655,20 +1655,20 @@ sub add_metadata
 	
 	if ($attr eq "")
         {
-	    $statement .= " [metadata \"$data\"]$space"; 
+	    $attr = "metadata \"$data\""; 
         }
         else
         {
 	    if ($attr =~ /metadata/sg)
 	    {
 		$attr =~ s/(metadata\s+")/$1$data /sg;
-                $statement .= "[$attr]$space";
             }
             else
             {
-		$statement .= "[$attr metadata \"$data\"]$space";
+		$attr .= "metadata \"$data\"";
 	    }
         }
+        $statement .= " ".op_tags($attr).$space;
         return $statement;
 }
 
@@ -2365,7 +2365,7 @@ sub get_checksum
 #########################
 
 # predefined tags
-my @tags = split(",", "metadata,location,ditto,parser,latex,hybrid,arity,seqstrict,strict,binder,wrapping,structural,anywhere,transition,supercool,superheat,computational,large,tag,frozen");
+my @tags = split(",", "metadata,location,ditto,prec,parser,latex,hybrid,arity,seqstrict,strict,binder,wrapping,structural,anywhere,transition,supercool,superheat,computational,large,tag,frozen");
 
 
 sub get_tags
