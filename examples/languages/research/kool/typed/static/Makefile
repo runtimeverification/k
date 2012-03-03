@@ -16,10 +16,12 @@ TESTS =
 
 
 # this is a space separated list of directories containing io_tests
-IO_TESTS =
-
+IO_TESTS = regression/tests
+# this is the name the tests will be grouped under
+IO_TESTSUITE_NAME = $(MAIN_FILE)
 # this is a flag used when calling krun to be used when doing io_tests
-IO_TEST_FLAG = "--output-mode=none"
+IO_TEST_FLAG = "--no-color --output-mode=none"
+
 
 
 TOOL_DIR =  $(K_BASE)/tools/

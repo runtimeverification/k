@@ -23,7 +23,7 @@ the \K strictness attributes and the desugaring macros. */
                     [:prec(1) latex "{#1}\texttt{\char91\char93}":]
                 | "function" "from" Types "to" Type
                     [:prec(1) latex "({#1}\ \texttt{->}\ {#2})":]
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","}  [:strict:]
 
   syntax Decl ::= "var" Exps ";"
 
@@ -186,6 +186,7 @@ typed SIMPLE, so we do not discuss them much here. */
   rule var .Types; => stmt   [: structural:]
   context var _[HOLE] : _;
   rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;  [:structural:]
+
   syntax K ::= "checkDepth" "(" Types "," Type ")"
   rule checkDepth((int,Ts => Ts), (arrayOf T => T))   [:structural:]
   rule checkDepth(.Types,_) => .K                     [:structural:]
@@ -193,10 +194,10 @@ typed SIMPLE, so we do not discuss them much here. */
 /*@ Although functions turn into methods and get a slightly different
 semantics, the \texttt{types(...)} operation stays the same. */
 
-  syntax Types ::= "types" "(" Exps ")"                [:prec(1):]
-  rule types(.Exps) => void,.Types                     [:structural:]
-  rule types(X : T) => T,.Types                        [:structural:]
-  rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
+  declare types : Exps -> Types 
+  define types(.Exps) => void,.Types                    
+  define types(X : T, .Exps) => T,.Types                      
+  define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)
 
   rule <k> I:#Int => int ...</k>
   rule <k> B:#Bool => bool ...</k>
@@ -521,8 +522,8 @@ Methods can be applied on values of more concrete types than their
 arguments.  The second rule below ensures that the empty list of
 arguments is treated as a value of type \texttt{void}. */
 
-  rule <k> _`(_`)(function from Ts to T, Ts':Types)
-        => checkSubtype(Ts',Ts) ~> T ...</k>
+  rule <k> _`(_`)(function from Ts to T, (T':Type,Ts':Types))
+        => checkSubtype((T',Ts'),Ts) ~> T ...</k>
   rule _`(_`)(function from void to T, .Types) => T
 
 

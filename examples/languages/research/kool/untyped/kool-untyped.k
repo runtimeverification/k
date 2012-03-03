@@ -14,7 +14,7 @@ and the one for function application (because application is not strict in the
 first argument anymore---needs to initiate dynamic method dispatch). */
 
   syntax #Id ::= "main"
-  syntax Ids ::= List{#Id,","} [:prec(70):]
+  syntax Ids ::= List{#Id,","} [:prec(70) strict:]
 
   syntax Decl ::= "var" Exps ";"
 

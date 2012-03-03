@@ -24,7 +24,7 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
                     [:prec(1) latex "{#1}\texttt{\char91\char93}":]
                 | "function" "from" Types "to" Type
                     [:prec(1) latex "({#1}\ \texttt{->}\ {#2})":]
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","}      [:strict:]
 
   syntax Decl ::= "var" Exps ";"
 
@@ -70,7 +70,7 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
                 | "rendezvous" Exp ";"                  [:strict:]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts            [:seqstrict prec(100) gather(e E):]
+                 | Stmts Stmts            [:prec(100) gather(e E):]
 
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X = E1 to E2 do S) = {var X:int=E1; while X <= E2 do {S X=X+1;}}
@@ -143,7 +143,7 @@ the expected type. */
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
-                        <return color="LimeGreen"> .K </return>
+                        <return color="LimeGreen"> void </return>
                           // holds return type
                         <br/>
                         <crntObj color="Fuchsia"> 
@@ -256,7 +256,7 @@ KOOL).  */
 
   rule {} => . [:structural:]
   rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [:structural:]
+  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [:structural:]
   rule V; => .
   rule if  true then S else _ => S
   rule if false then _ else S => S
@@ -296,18 +296,18 @@ KOOL).  */
   rule (env(_) => .) ~> env(_) [:structural:]
 
 // typeOf
-  syntax Type ::= "typeOf" "(" K ")"
-  rule typeOf(I) => int              [:structural:]
-  rule typeOf(B) => bool             [:structural:]
-  rule typeOf(_:#String) => string   [:structural:]
-  rule typeOf(arrayRef(T,_:#Nat,_:#Nat)) => T  [:structural:]
-  rule typeOf(undefined(T)) => T     [:structural:]
-  rule typeOf(nothing) => void       [:structural:]
+  declare typeOf :  K -> Type
+  define typeOf(I) => int              
+  define typeOf(B) => bool            
+  define typeOf(_:#String) => string 
+  define typeOf(arrayRef(T,_:#Nat,_:#Nat)) => T
+  define typeOf(undefined(T)) => T  
+  define typeOf(nothing) => void   
 
-  syntax Types ::= "types" "(" Exps ")"                [:prec(1):]
-  rule types(.Exps) => void,.Types                     [:structural:]
-  rule types(X : T) => T,.Types                        [:structural:]
-  rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
+  declare types : Exps ->  Types 
+  define types(.Exps) => void,.Types  
+  define types(X : T,.Exps) => T,.Types
+  define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)
 
   syntax List{K} ::= #Nat ".." #Nat
   rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural:]
@@ -344,7 +344,7 @@ encountered. */
 
   syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
-  rule <k> (try S1 catch(X : T) S2 => S1 ~> popx) ~> K </k>
+  rule <k> (try S1:Stmt catch(X : T) S2:Stmt => S1 ~> popx) ~> K </k>
        <control> <xstack> . => (X : T,S2,K,Env,C) ...</xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
@@ -430,8 +430,8 @@ those in untyped KOOL. */
                    <location> L </location>
          </crntObj>
          <return> T => class Class </return>
-         <fstack> . => (Env, K, C <return> T </return> 
-                                  <crntObj> Obj </crntObj>) ...</fstack>
+         <fstack> . => ListItem((Env, K, C <return> T </return> 
+                                  <crntObj> Obj </crntObj>)) ...</fstack>
        </control>
        <nextLoc> L => L +Nat 1 </nextLoc>
 
@@ -515,7 +515,7 @@ rules below are identical to those in untyped KOOL. */
   rule <k> '_`(_`)((lookup(L) => V),,_) ...</k>
        <store>... L |-> V ...</store>
 
-  syntax ListItem ::=  "(" Map "," K "," Bag ")"
+  syntax K ::=  "(" Map "," K "," Bag ")"
 
 /*@ Closure application needs to also set a new return type in the
 \textsf{return} cell, in order for the values returned by its body to
@@ -527,8 +527,8 @@ and then pop it when the method returns. */
                   Vs:Vals) ~> K:K
         => bindto(XTs,Vs) ~> S ~> return; </k>
        <control> C:Bag 
-          <fstack> . => (Env,K,C <crntObj> Obj' </crntObj>
-                                 <return> T' </return>) ...</fstack> 
+          <fstack> . => ListItem((Env,K,C <crntObj> Obj' </crntObj>
+                                 <return> T' </return>)) ...</fstack> 
           <crntObj> Obj':Bag => <crntClass>Class</crntClass> Obj </crntObj>
           <return> T':Type => T </return>
         </control>
@@ -544,7 +544,7 @@ expected type. */
    rule <k> return V; ~> _ 
          => subtype(typeOf(V),T) ~> true? ~> unsafeCast(V,T)~> K </k>
        <control>
-         <fstack> (Env,K,C) => . ...</fstack>
+         <fstack> ListItem((Env,K,C)) => . ...</fstack>
          (<return> T </return> _ => C)
        </control>
        <env> _ => Env </env>
@@ -589,21 +589,21 @@ Like in untyped KOOL. */
 Like in untyped KOOL. */
 
   syntax K ::= #Id "::" Bag
-  syntax K ::= "lookupMember" "(" BagItem "," #Id ")"
-  rule lookupMember(<envStack> ListItem(_:#Id :: <env>...X|->L...</env>)
-                    ...</envStack>,X) => lookup(L)  [:structural:]
-  rule lookupMember(<envStack> ListItem(_:#Id :: <env> Env </env>)
+  declare lookupMember : BagItem #Id -> K 
+  define lookupMember(<envStack> ListItem(_:#Id :: <env>...X|->L...</env>)
+                    ...</envStack>,X) => lookup(L) 
+  define lookupMember(<envStack> ListItem(_:#Id :: <env> Env </env>)
                             => . ...</envStack>, X)
-    when notBool(X in keys(Env))                      [:structural:]
+    when notBool(X in keys(Env))                  
 
 //@ \subsection{Auxilliary operations and rules}
 
 /*@ \subsubsection{\texttt{typeOf}}
 \texttt{typeOf} for the additional values. */
 
-  rule typeOf(objectClosure(_ <envStack> ListItem(Class::_) ...</envStack>))
-    => class Class [:structural:]
-  rule typeOf(methodClosure(_:#Id,_:#Nat,_,_,T)) => T  [:structural:]
+  define typeOf(objectClosure(_ <envStack> ListItem(Class::_) ...</envStack>))
+    => class Class
+  define typeOf(methodClosure(_:#Id,_:#Nat,_,_,T)) => T 
 
 /*@ \subsubsection{Subtyping constraints}
 The subclass relation introduces a subtyping relation. */
@@ -623,11 +623,10 @@ The subclass relation introduces a subtyping relation. */
 Performs unsafe casting.  One should only use it in combination with
 the subtype relation above.  */
 
-  syntax Val ::= unsafeCast( Val , Type )
-  rule unsafeCast(objectClosure(<crntClass>_:K </crntClass> Obj), class Class)
+  declare unsafeCast : Val Type -> Val
+  define unsafeCast(objectClosure(<crntClass>_:K </crntClass> Obj), class Class)
     => objectClosure(<crntClass> Class </crntClass> Obj)
-    [:structural:]
-  rule unsafeCast(V,T) => V when typeOf(V) ==Bool T  [:structural:]
+  define unsafeCast(V,T) => V when typeOf(V) ==Bool T 
 
 /*@ \subsubsection{Generic guard}
 A generic computational guard (should be builtin): it allows the
