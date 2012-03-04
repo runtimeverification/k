@@ -15,14 +15,15 @@ my $KRUN = catfile($ENV{'K_BASE'},"core","krun");
 # second argument is a directory to test
 my $numArgs = $#ARGV + 1; # +1 because there is one too few
 #print "$numArgs\n";
-if ($numArgs != 6) {
-	die "Not precise command line arguments. Usage $0 -d <directory> -f <krun flag> -n <suitename>"
+if ($numArgs != 8) {
+	die "Not precise command line arguments. Usage $0 -d <directory> -f <krun flag> -n <suitename> -timeout <seconds>"
 }
 
 
 my $directory = $ARGV[1];
 my $krunFlag = $ARGV[3];
 my $testSuite = $ARGV[5];
+my $timeout = $ARGV[7];
 my $outputFilename = catfile($directory,"krun-results.xml");
 
 my @files = <$directory/*>;
@@ -66,7 +67,7 @@ sub runTest {
 	if (!-e $pgmFile) {
 		return reportError($fullFilename, $timer, "Test expected file $pgmFile to exist, but it doesn't");
 	}
-	`$KRUN $krunFlag $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile`;
+	`timeout $timeout $KRUN $krunFlag $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile`;
 	`echo >> $actualOutputFile`;
 	if (-s $actualErrorFile) {
 		my $errMsg = `cat $actualErrorFile`;
