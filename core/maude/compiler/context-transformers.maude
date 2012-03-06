@@ -130,7 +130,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
 
   op bringToSameLevel : NzNat Term KConf -> Term .
   eq bringToSameLevel(Level, T, KC) 
-   = mergeLevels(levelize(Level, term2Set(T, KC), KC), KC) .
+   = mergeLevels(levelize(Level, term2Set(T, KC), KC), KC)  [print "Context transforming " T " to level " Level] .
   
   eq bringToSameLevel(Level, errorT(T,Cxt,Str),KC)
    = errorT(T,Cxt,Str) .
@@ -146,10 +146,11 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, B, Q', Ds, KC'} KC)
    = mergeLevels(upgrade(N, Q', getMultiplicity(getConfElement(Q', KC)), getSons(getConfElement(Q', KC)), qt(Q, B', T),TS) || TSLs, {Q, Level, B, Q', Ds, KC'} KC) [owise] .
   op upgrade : Nat Qid Bool SortSet TermSet TermSet -> TermSetLevels .
-  eq upgrade(N, Q', B, Q ; Ds, TS, qt(Q, B', T) && TS')
-   = upgrade(N, Q', B, Q ; Ds, TS && qt(Q, B', T), TS') .
+ ceq upgrade(N, Q', B, Q ; Ds, TS, qt(Q, B', T) && TS')
+   = upgrade(N, Q', B, Q ; Ds, TS && qt(Q, B', T), TS') 
+  if B' == true or-else not(Q in TS) .
   eq upgrade(s(N), Q', B, Ds, TS, TS') 
-   = {s(N), TS'} || {N, qt(Q', B, resolveMultiplicity(Q', B, TS))} [owise] .
+   = {s(N), TS'} || {N, qt(Q', B, resolveMultiplicity(Q', B, TS))} [owise print "upgraded " TS' "; still solving multiplicity for " TS] .
 
   op finalMultiplicity : TermSetLevel KConf -> Term .
   eq finalMultiplicity({s(N), qt(Q, false, T) &&  qt(Q, false, T') && TS'}, KC)
@@ -238,7 +239,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   var TS TS' : TermSet . var TSLs : TermSetLevels .
   eq levelize(Level, emptyTS, KC) = nilTSL .
   eq levelize(s(Level), VS:VariableSet, KC) = {Level, VS:VariableSet} [owise] .
-  eq levelize(N, TS, KC) = levelize(N, TS, emptyTS, KC) [owise] .
+  eq levelize(N, TS, KC) = levelize(N, TS, emptyTS, KC) [owise print "Levelizing to " N " terms " TS] .
   op levelize : Nat TermSet TermSet KConf -> TermSetLevels .
   eq levelize(Level, qt(Q, B', T) && TS, TS', {Q, Level, B, Q', Ds, KC'} KC)
    = levelize(Level, TS, qt(Q, B', T) && TS', {Q, Level, B, Q', Ds, KC'} KC) .
