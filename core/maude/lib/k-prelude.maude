@@ -84,9 +84,9 @@ mod K-LISTK-EXTRAS is
   including K-TECHNIQUE .
   var Ks Ks' : List{K} .  var K : K .
 
-  op lengthList{K}_ : List{K} -> #Int [metadata "latex=(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
+  op lengthList{K}_ : List{K} -> #Nat [metadata "latex=(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
   eq lengthList{K}(.List`{K`}) = 0 .
-  eq lengthList{K}(K:K,,Ks) = lengthList{K}(Ks) +Int 1 . 
+  eq lengthList{K}(K:K,,Ks) = lengthList{K}(Ks) +Nat 1 . 
 
   op headList{K}_ : NeList{K} -> K [metadata "latex=(renameTo head\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
   op tailList{K}_ : NeList{K} -> List{K} [metadata "latex=(renameTo tail\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
@@ -227,9 +227,9 @@ mod K-LIST-EXTRAS is
   eq List(.List{K}) = . .
   eq List(K,,Ks) = ListItem(K) List(Ks) .
 
-  op lengthList_ : List -> #Int .
+  op lengthList_ : List -> #Nat .
   eq lengthList(.).List = 0 .
-  eq lengthList(LItem List) = lengthList(List) +Int 1 .
+  eq lengthList(LItem List) = lengthList(List) +Nat 1 .
 
   --- op getFromList`{K`}(_,_) : List{K} #NzNat -> K .
   --- eq getFromList{K}((K,,Ks),1) = K .
