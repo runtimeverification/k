@@ -157,7 +157,7 @@ ceq syntaxPredsMb(SS,Mb)
   = none .
  eq syntaxPred((op Q : nil -> Ty [AS] .), AS')
    = plugKRule(R{replaceS[kApply(predicateLabel(Ty),mkConstant(Q,Ty)),trueCt],empty, removeOpAttrs(AS) metadata(pair("structural","") pair("predicate",metadataString((Ty))))}) [owise] .
- eq syntaxPreds((op Q : NeTyl -> Ty [AS] .), AS')
+ eq syntaxPred((op Q : NeTyl -> Ty [AS] .), AS')
    = plugKRule(R{replaceS[kApply(predicateLabel(Ty),Q[genVars(Universal2K(NeTyl), "Is", 1)]),trueCt],empty, removeOpAttrs(AS) metadata(pair("predicate",metadataString((Ty))))}) [owise] .
 
   op syntaxOps : Module Module SortSet OpDeclSet ~> OpDeclSet .
