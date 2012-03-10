@@ -9,27 +9,28 @@ mod SYNTAX-PREDICATES is
   including META-K-PREDICATES .
   including META-K-CONTEXTS .
   including META-ANONYMOUS-VARIABLE .
+  including COMPILATION-ATTRS .
  
-  op syntaxPreds : Module -> Module .
-  eq syntaxPreds(M)
-   = syntaxPreds(M, flatten(M)) .
+  op syntaxPreds : Module AttrSet -> Module .
+  eq syntaxPreds(M, AS)
+   = syntaxPreds(M, flatten(M), AS) .
 
-  op syntaxPreds : Module Module -> Module .
-  eq syntaxPreds(M, Flat)
-   = syntaxPreds(M, Flat, removeSorts(lesserSorts(Flat, K), KItem ; K), makeSubsorts(Flat,getSorts(Flat),getSorts(Flat)), getOps(Flat)) .
+  op syntaxPreds : Module Module AttrSet -> Module .
+  eq syntaxPreds(M, Flat, AS)
+   = syntaxPreds(M, Flat, removeSorts(lesserSorts(Flat, K), KItem ; K), makeSubsorts(Flat,getSorts(Flat),getSorts(Flat)), getOps(Flat), AS) .
 
-  op syntaxPreds : Module Module SortSet  SubsortDeclSet OpDeclSet -> Module .
-  eq syntaxPreds(M, Flat, SS, SSDS, OPDS) = syntaxPreds(M, Flat, SS \ builtinSorts(M,SS), builtinSorts(M, SS), SSDS, OPDS) .
+  op syntaxPreds : Module Module SortSet SubsortDeclSet OpDeclSet AttrSet -> Module .
+  eq syntaxPreds(M, Flat, SS, SSDS, OPDS, AS) = syntaxPreds(M, Flat, SS \ builtinSorts(M,SS), builtinSorts(M, SS), SSDS, OPDS, AS) .
 
-  op syntaxPreds : Module Module SortSet SortSet SubsortDeclSet OpDeclSet -> Module .
-  eq syntaxPreds(M, Flat, SS, BSS, SSDS, OPDS)
+  op syntaxPreds : Module Module SortSet SortSet SubsortDeclSet OpDeclSet AttrSet -> Module .
+  eq syntaxPreds(M, Flat, SS, BSS, SSDS, OPDS, AS)
    = removeImports(removeSorts(removeSyntaxSubsorts(setMbs(setOps( 
                   setEqs(M,syntaxPredsEqs(SS, getEqs(M)))
                   ,
                   syntaxPreds(SS ; BSS) syntaxOps(M, Flat, SS ; BSS, getOps(M))
                   ),
             syntaxPredsMbs(SS, syntaxPreds(getSubsorts(SSDS, SS)) 
-              syntaxPreds(getOps(OPDS, SS)) 
+              syntaxPreds(getOps(OPDS, SS), AS) 
               getMbs(M))
               builtinSyntaxPreds(BSS)
             ), SS), SS), (including 'K-RESULT .)) .
@@ -99,13 +100,10 @@ ceq syntaxPredsMb(SS,Mb)
         (getType(V) in SS or-else getType(V) == ResultList)
      then V,syntaxVars(SS, Trms) else syntaxVars(SS, Trms) fi .
 
-
   op isAnyAnyVar : Variable -> Bool .
   eq isAnyAnyVar(V)
    = substr(string(getName(V)),0,3 * length(string(anyVarS))) 
      == string(anyVarS) + string(anyVarS) + string(anyVarS) .
-
-
 
   op syntaxCondition_ : TermList ~> TermList .
   eq syntaxCondition(empty) = empty .
@@ -119,19 +117,15 @@ ceq syntaxPredsMb(SS,Mb)
      else kApply(predicateLabel(getType(V)),setType(V,KItem)) 
      fi,syntaxCondition(Trms) .
 
-
-
  op syntaxPredsEqs : SortSet EquationSet ~> EquationSet .
  eq syntaxPredsEqs(SS, Eqs Eq)
   =  syntaxPredsEqs(SS, Eqs) plugEq(syntaxPredsT(SS, getLhs(Eq)), syntaxPredsT(SS, getRhs(Eq)), getAttrs(Eq), mkBaseCondition(syntaxCondition(syntaxVars(SS, noDuplicates(getVars(getLhs(Eq)))))) /\ syntaxPredsCond(SS, getCond(Eq))) .
  eq syntaxPredsEqs(SS, none) = none .
 
-
  op mkBaseCondition : TermList ~> Condition .
  eq mkBaseCondition(empty) = nil .
  eq mkBaseCondition(Trm) = (Trm = trueCt) .
  
-
  op syntaxPredsCond : SortSet Condition ~> Condition .
  eq syntaxPredsCond(SS, Trm1 = Trm2 /\ Cond)
   = syntaxPredsT(SS, Trm1) = syntaxPredsT(SS, Trm2)
@@ -147,21 +141,24 @@ ceq syntaxPredsMb(SS,Mb)
     /\ syntaxPredsCond(SS, Cond) .
  eq syntaxPredsCond(SS, nil) = nil .
 
+ op syntaxPreds : OpDeclSet AttrSet ~> MembAxSet .
+ eq syntaxPreds(Op OPDS, AS)
+  = syntaxPred(Op, AS)  syntaxPreds(OPDS, AS) .
+ eq syntaxPreds((none).OpDeclSet, AS) = none .
 
-
-
-
- op syntaxPreds : OpDeclSet ~> MembAxSet .
- eq syntaxPreds((op '<Floats> : nil -> Ty [AS] .) OPDS)
-  = syntaxPreds(OPDS) .
- eq syntaxPreds((op Q : nil -> Ty [AS] .) OPDS)
-   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),mkConstant(Q,Ty)),trueCt],empty, removeOpAttrs(AS) metadata(pair("structural","") pair("predicate",metadataString((Ty))))}) 
-     syntaxPreds(OPDS) [owise] .
- eq syntaxPreds((op Q : NeTyl -> Ty [AS] .) OPDS)
-   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),Q[genVars(Universal2K(NeTyl), "Is", 1)]),trueCt],empty, removeOpAttrs(AS) metadata(pair("predicate",metadataString((Ty))))}) 
-     syntaxPreds(OPDS) .
- eq syntaxPreds((none).OpDeclSet) = none .
-
+ op syntaxPred : OpDecl AttrSet ~> MembAxSet .
+ eq syntaxPred((op Q : Tyl -> Ty [AS metadata(Str)] .), AS')
+  = syntaxPred((op Q : Tyl -> Ty [AS metadataParse(Str)] .), AS') .
+ eq syntaxPred((op Q : Tyl -> Ty [A AS] .), defineds(A AS') AS'')
+  = none .
+ eq syntaxPred((op Q : Tyl -> Ty [pair(Str, Str') AS] .), defineds(pair(Str, Str'') AS') AS'')
+  = none .
+ eq syntaxPred((op '<Floats> : nil -> Ty [AS] .), AS')
+  = none .
+ eq syntaxPred((op Q : nil -> Ty [AS] .), AS')
+   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),mkConstant(Q,Ty)),trueCt],empty, removeOpAttrs(AS) metadata(pair("structural","") pair("predicate",metadataString((Ty))))}) [owise] .
+ eq syntaxPreds((op Q : NeTyl -> Ty [AS] .), AS')
+   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),Q[genVars(Universal2K(NeTyl), "Is", 1)]),trueCt],empty, removeOpAttrs(AS) metadata(pair("predicate",metadataString((Ty))))}) [owise] .
 
   op syntaxOps : Module Module SortSet OpDeclSet ~> OpDeclSet .
   eq syntaxOps(M, Flat, SS, Op OPDS)
@@ -169,7 +166,6 @@ ceq syntaxPredsMb(SS,Mb)
      syntaxOps(M, Flat, SS, OPDS) .
   eq syntaxOps(M, Flat, SS, none) = none .
 
-  
   op syntaxOp : Module Module SortSet OpDecl ~> OpDecl .
   eq syntaxOp(M, Flat, SS, (op Q : Tyl -> Ty [AS] .))
    = (op Q : syntaxTyl(M, Flat, SS, Tyl) -> syntaxRTy(M, Flat, SS, Ty) [AS ---(metadata(removeHybrid(metadataParse(AS))))] .) . 
@@ -216,10 +212,11 @@ ceq syntaxPredsMb(SS,Mb)
   op metadataString : Qid -> String .
   eq metadataString(Q) = replaceAll(string(Q), ("\"" |-> "'", "`" |-> "")) .
   
-  var Q : Qid .  var Ct : Constant .  var Str : String .
+  var Q : Qid .  var Ct : Constant .  var Str Str' Str'' : String .
   var Ty : Type . var NeTyl : NeTypeList .  var Tyl : TypeList .
 
-  var OPDS : OpDeclSet . var Op : OpDecl .  var AS : AttrSet .
+  var OPDS : OpDeclSet . var Op : OpDecl .  
+  var AS AS' AS'' : AttrSet . var A : Attr .
   var SSDS : SubsortDeclSet .  var SS BSS : SortSet . var S S' : Sort .
   var M Flat : Module .
   var Mbs : MembAxSet .  var Mb : MembAx . 

@@ -259,21 +259,21 @@ mod COMPILE-LOOP is
   var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
 
   op compile : Qid -> [Module] .
-  eq compile(Q) = compile(Q, supercools(none) transitions(none) superheats(none) anywheres(pair("function",""))) .
+  eq compile(Q) = compile(Q, supercools(none) transitions(none) superheats(none) anywheres(none)) .
 
   eq print(moduleError(QIL)) = QIL .
 ---  eq purePrint(moduleError(QIL)) = QIL .
 ---  eq xmlPrint(moduleError(QIL)) = QIL .
-  rl ['compile Q 'transitions QStr 'superheats QComp 'supercools QSuper 'anywheres QFun QIL, idle, QIL'] 
-   => [QIL, idle, print(compile(Q, transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) anywheres(metadataQParse(QFun))))] [print QStr QComp QSuper QFun] .
+  rl ['compile Q 'transitions QStr 'superheats QComp 'supercools QSuper 'anywheres QFun 'defineds QDef QIL, idle, QIL'] 
+   => [QIL, idle, print(compile(Q, transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) anywheres(metadataQParse(QFun)) defineds(metadataQParse(QDef))))] [print QStr QComp QSuper QFun QDef] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', transitions(none) superheats(none) supercools(none) anywheres(pair("function",""))))] .
+   => [QIL, idle, print(pcompile(Q,Q', transitions(none) superheats(none) supercools(none) anywheres(none) defineds(none)))] .
 
   op metadataQParse : Qid -> AttrSet .
   eq metadataQParse(Q) = metadataParse(substr(string(Q),1,_-_(length(string(Q)),2))) .
 
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool","")) anywheres(pair("function",""))) )] .
+   => [QIL, idle, print(pcompile(Q,Q', transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool","")) anywheres(pair("function","")pair("predicate","")pair("anywhere","")) defineds(pair("function","")pair("predicate","")pair("defined",""))) )] .
 
 ---  rl ['purify Q QIL, idle, QIL'] 
 ---   => [QIL, idle, purePrint(extractModule(pcompile(Q,'RESULT-PREDICATES,  transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))),'PURE-K-TECHNIQUE))] .
@@ -282,5 +282,5 @@ mod COMPILE-LOOP is
 ---  => [QIL, idle, xmlPrint(pcompile(Q, Q', transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) anywheres(metadataQParse(QFun))))] .
 
 
-  var AS : AttrSet .  var QStr QComp QSuper QFun : Qid .
+  var AS : AttrSet .  var QStr QComp QSuper QFun QDef : Qid .
 endm

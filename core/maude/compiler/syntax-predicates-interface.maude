@@ -8,10 +8,10 @@ mod SYNTAX-PREDICATES-META is
   op syntaxPredicates : String ~> Module .
   eq syntaxPredicates(Syntax) = syntaxPredicates(qid(Syntax)) .
   op syntaxPredicates : Qid ~> Module .
-  eq syntaxPredicates(QSyntax) = syntaxPreds(upModule(QSyntax, false)) .
+  eq syntaxPredicates(QSyntax) = syntaxPreds(upModule(QSyntax, false),none) .
   
   op compileSYNTAX-PREDICATES : Module AttrSet ~> Module .
-  eq compileSYNTAX-PREDICATES(M, AS:AttrSet) = syntaxPreds(M) .
+  eq compileSYNTAX-PREDICATES(M, AS:AttrSet) = syntaxPreds(M,AS:AttrSet) .
 endm
 
 mod SYNTAX-PREDICATES-LOOP is 

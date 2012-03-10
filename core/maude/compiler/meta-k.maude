@@ -1075,6 +1075,7 @@ fmod COMPILATION-ATTRS is
   op transitions : AttrSet -> Attr .
   op superheats : AttrSet -> Attr .
   op anywheres : AttrSet -> Attr .
+  op defineds : AttrSet -> Attr .
 endfm
 
 fmod K-ATTRS is 

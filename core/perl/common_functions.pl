@@ -1615,7 +1615,7 @@ sub uniq
 #       line numbers metadata                 #
 ###############################################
 
-my @k_attributes = qw(binder strict metadata prec format assoc comm id hybrid gather ditto parser seqstrict structural anywhere transition supercool superheat large latex);
+my @k_attributes = qw(binder strict metadata prec format assoc comm id hybrid gather extends ditto parser seqstrict structural anywhere defined transition supercool superheat large latex);
 my $k_attributes_pattern = join("|",  @k_attributes);
 
 
@@ -2365,7 +2365,7 @@ sub get_checksum
 #########################
 
 # predefined tags
-my @tags = split(",", "metadata,location,ditto,prec,parser,latex,hybrid,arity,seqstrict,strict,binder,wrapping,structural,anywhere,transition,supercool,superheat,computational,large,tag,strat,frozen");
+my @tags = split(",", "metadata,location,ditto,prec,parser,latex,hybrid,arity,extends,seqstrict,strict,binder,wrapping,structural,anywhere,defined,transition,supercool,superheat,computational,large,tag,strat,frozen");
 
 
 sub get_tags

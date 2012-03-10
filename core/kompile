@@ -88,10 +88,12 @@ my $flag_supercool = "supercool=()";
 my $flag_transition = "transition=()";
 my $flag_functions = "function=() predicate=()";
 my $flag_anywhere = $flag_functions . " anywhere=()";
+my $flag_defined = $flag_functions . " defined=()";
 my $flag_superheat = "superheat=()";
 my $supercool = 0;
 my $transition = 0;
 my $anywhere = 0;
+my $defined = 0;
 my $superheat = 0;
 my $pure = 0;
 my $flag = 0;
@@ -515,7 +517,7 @@ my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 $kmaude_keywords_pattern =~ s/\\bsyntax\\b/\\ssyntax\\s/sg;
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 
-my @k_attributes = qw(binder strict metadata prec format assoc comm id: hybrid gather ditto parser seqstrict structural transition anywhere function computational superheat generated supercool large latex );           
+my @k_attributes = qw(binder strict metadata prec format assoc comm id: hybrid gather ditto extends parser seqstrict structural transition anywhere defined function computational superheat generated supercool large latex );           
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $k_sorts = ":Bag:BagItem:#Bool:CellLabel:CellKey:CellAttribute:#Char:#Int:K:KAssignments:KHybridLabel:KLabel:KResult:KResultLabel:KSentence:List:ListItem:List{KResult}:List{K}:Map:MapItem:#Nat:NeBag:NeK:NeList:NeList{KResult}:NeList{K}:NeMap:NeSet:#NzInt:#NzNat:Set:SetItem:#String:#Zero";
@@ -728,6 +730,9 @@ foreach (@ARGV) {
     elsif (/^--?transition$/) {
 		$transition = 1;
     }
+    elsif (/^--?defined$/) {
+		$defined = 1;
+    }
     elsif (/^--?anywhere$/) {
 		$anywhere = 1;
     }
@@ -773,7 +778,7 @@ foreach (@ARGV) {
 	# do nothing
 	#	print "MODULES: $_\n";
     }
-    elsif ($supercool || $transition || $superheat || $anywhere)
+    elsif ($supercool || $transition || $superheat || $anywhere || $defined)
     {
     	# do nothing
     }
@@ -850,6 +855,11 @@ if ($args =~ /--?crop\s+($modules_list)/)
 if ($args =~ /\-\-?supercool\s(.*)/s)
 {
 	$flag_supercool = process_tags($1);
+}
+
+if ($args =~ /\-\-?defined\s(.*)/s)
+{
+	$flag_defined = $flag_functions . " " . process_tags($1);
 }
 
 if ($args =~ /\-\-?anywhere\s(.*)/s)
@@ -1539,7 +1549,9 @@ sub compile {
 			"load \"$k_all_tools\"\n",
 			"set print attribute off .\n",
 			"rew compile('$language_module_name, supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\"))
-anywheres(metadataParse(\"$flag_anywhere\"))) .\n",
+anywheres(metadataParse(\"$flag_anywhere\"))
+defineds(metadataParse(\"$flag_defined\"))
+) .\n",
 			"quit\n");
 		
 		my @lines = split(/\n/, $_);
@@ -1568,16 +1580,17 @@ anywheres(metadataParse(\"$flag_anywhere\"))) .\n",
 	my $compile_transitions = "\"$flag_transition\"";
 	my $compile_superheats = "\"$flag_superheat\"";    
 	my $compile_anywheres = "\"$flag_anywhere\"";
-	my $action = "(compile $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools anywheres $compile_anywheres .)";
-	$action = "(purify $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools anywheres $compile_anywheres .)" if $pure;
-#	$action = "(xcompile $language_module_name $xmlTo transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools anywheres $compile_anywheres  .)" if $xml;
+	my $compile_defineds = "\"$flag_defined\"";
+	my $action = "(compile $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools anywheres $compile_anywheres defineds $compile_defineds .)";
+	$action = "(purify $language_module_name transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools anywheres $compile_anywheres defineds $compile_defineds .)" if $pure;
+#	$action = "(xcompile $language_module_name $xmlTo transitions $compile_transitions superheats $compile_superheats supercools $compile_supercools anywheres $compile_anywheres defineds $compile_defineds  .)" if $xml;
 	$_ = run_maude("Compiling the definition ... ",
 	    "load \"$k_prelude\"\n",
 	    "load \"$language_file_name\"\n",
 	    "load \"$k_all_tools\"\n",
             "---(\n",
             "rew in COMPILE-ONESHOT : partialCompile(upModule('$language_module_name , false),'???,\n",
-            "supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\")) anywheres(metadataParse(\"$flag_anywhere\"))) .\n",
+            "supercools(metadataParse(\"$flag_supercool\")) transitions(metadataParse(\"$flag_transition\")) superheats(metadataParse(\"$flag_superheat\")) anywheres(metadataParse(\"$flag_anywhere\")) defineds(metadataParse(\"$flag_defined\"))) .\n",
             "quit\n",
             "---)\n",
 	    "loop compile .\n",
@@ -2222,7 +2235,7 @@ sub make_ops {
 
 sub op_attribute {
 	local ($_) = @_;
-	/strict|prec|hybrid|gather|metadata|latex|ditto|format|assoc|comm|id:/;
+	/strict|extends|prec|hybrid|gather|metadata|latex|ditto|format|assoc|comm|id:/;
 }
 
 
