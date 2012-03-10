@@ -2627,13 +2627,16 @@ sub op_tags
     /sge;
     
     
-
 #    print "1-ATTR: $attributes\n";
     # first: collect tag:mytag declarations in @tags
-    $attributes =~ s/\btag\s*:\s*([^(?<!`)\(\s\]]+((?<!`)\(.*?(?<!`)\))?)/
+    # $attributes =~ s/\btag\s*:\s*([^(?<!`)\(\s\]]+((?<!`)\(.*?(?<!`)\))?)/
+    $attributes =~ s/\b\s*([^(?<!`)\(\s\]]+((?<!`)\(.*?(?<!`)\))?)/
     {
-	push(@tags, $1);
-	push(@tagss, $1);
+	my $tg = $1;
+	$tg =~ s!\(\"!(!sg;
+	$tg =~ s!\"\)!)!sg;
+	push(@tags, $tg);
+	push(@tagss, $tg);
 	"";
     }
     /sge;
