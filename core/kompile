@@ -517,8 +517,8 @@ my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 $kmaude_keywords_pattern =~ s/\\bsyntax\\b/\\ssyntax\\s/sg;
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 
-my @k_attributes = qw(binder strict metadata prec format assoc comm id: hybrid gather ditto extends parser seqstrict structural transition anywhere defined function computational superheat generated supercool large latex );
-my $k_attributes_pattern = join("|",  @k_attributes);
+my @k_attributes = qw(binder strict metadata prec format assoc comm id: hybrid gather ditto extends hook parser seqstrict structural transition anywhere defined function computational superheat generated supercool large latex );           
+my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $k_sorts = ":Bag:BagItem:#Bool:CellLabel:CellKey:CellAttribute:#Char:#Int:K:KAssignments:KHybridLabel:KLabel:KResult:KResultLabel:KSentence:List:ListItem:List{KResult}:List{K}:Map:MapItem:#Nat:NeBag:NeK:NeList:NeList{KResult}:NeList{K}:NeMap:NeSet:#NzInt:#NzNat:Set:SetItem:#String:#Zero";
 
@@ -1893,7 +1893,6 @@ sub maudify_module {
 # At the same time, also declare N as a sort if it is not declared already
 	# freeze strings and attributes
     s/($string_pattern)/Freeze($&,"MYSTRINGS")/sge;
-
     s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTRIBUTES")/gse;
     s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops( (countlines($`) == 0 ? $mno : countlines($`) + $mno - 1), $file, $1)!gse;
 
@@ -2063,8 +2062,8 @@ sub make_ops {
 # Report error and stop if the BNF form is not respected
 	if (!defined($bnf)){
 #		print "ERROR: Syntactic categories must contain \"::=\" at line:\n$_\n";
-	    print wrap("", "", generate_error("ERROR", 1, $file, "unknown line", "Syntactic categories must contain \"::=\" at line:\n$_\n"));
-	    exit(1);
+		print wrap("", "", generate_error("ERROR", 1, $file, "unknown line", "Syntactic categories must contain \"::=\" at line:\n$_\n"));
+		exit(1);
 	}
 
 # Report error and stop if the sort name does not match $ksort
@@ -2236,7 +2235,7 @@ sub make_ops {
 
 sub op_attribute {
 	local ($_) = @_;
-	/strict|extends|prec|hybrid|gather|metadata|latex|ditto|format|assoc|comm|id:/;
+	/strict|hook|extends|prec|hybrid|gather|metadata|latex|ditto|format|assoc|comm|id:/;
 }
 
 
