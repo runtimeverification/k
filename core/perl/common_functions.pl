@@ -2706,9 +2706,6 @@ sub slurp_k
     # get file content
     local $_ = get_file_content($file);
     
-    # do not touch the builtins
-        s/mod\s+\#[A-Z].*?endm/Freeze($&, "BUILTINMODULE")/sge;
-    
     # UGLY but useful: remove : from [: :]
     s/\[\:/[/sg;
     s/\:\]/\]/sg;
@@ -2716,6 +2713,9 @@ sub slurp_k
     # md5 
     my $digest = md5_hex($_);
     return "\n" if file_loaded($digest);
+    
+    # do not touch the builtins
+        s/mod\s+\#[A-Z].*?endm/Freeze($&, "BUILTINMODULE")/sge;
     
     # global pre-processing
     $_ = pre_process($_, $latex_, $file);
