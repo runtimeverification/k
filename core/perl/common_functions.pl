@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/bin/env perl -w
 use strict;
 use warnings;
 use File::Spec;
@@ -1802,7 +1802,7 @@ sub add_line_numbers
     (local $_, my $file) = (shift, shift);
     
     my $temp;
-    s/(?<!\S)((rule|define|syntax|op|declare|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
+    s/(?<!\S)((rule|define|syntax|op|ops|declare|macro|context|configuration|mb)\s+.*?)(\s+)(?=$kmaude_keywords_pattern)/
     {
 	$temp = line_numbers($1, $2, $3, $file);
     }
@@ -1822,13 +1822,10 @@ sub add_line_no_mb
     
     while($temp =~ /(mb\s+(configuration)\s.*?)(\s\.\s+)(?=($kmaude_keywords_pattern|var|op|mb|eq|ceq|endm))/sg)
     {
-#	print "Around\n\n$&\n\n\n";
 	my ($content, $end, $line) = ($1, $3, $lines + countlines($`));
 	s/\Q$content$end\E/$content [metadata "location=($file:$line)"]$end/sg;
     }
  
-     
-#    print "$_\n\n";
     return $_;
 }
 
@@ -2502,6 +2499,8 @@ sub op_tags
 {
     local $_ = shift;
     
+#    print "TO: $_\n";
+    
     my $attributes = $_;
     my @tagss = ();
     
@@ -2707,6 +2706,9 @@ sub slurp_k
     # get file content
     local $_ = get_file_content($file);
     
+    # do not touch the builtins
+        s/mod\s+\#[A-Z].*?endm/Freeze($&, "BUILTINMODULE")/sge;
+    
     # UGLY but useful: remove : from [: :]
     s/\[\:/[/sg;
     s/\:\]/\]/sg;
@@ -2777,6 +2779,8 @@ sub slurp_k
     # put a header
 #    $_ = header($file) . $_;
     
+    $_ = Unfreeze("BUILTINMODULE", $_);
+	
     # return
     $_;
 }
