@@ -1,0 +1,70 @@
+mod RESOLVE-HOOKS is 
+  including CONVERSION .
+  including META-MODULE-EXTRAS .
+  including NAT-LIST-EXTRAS .
+  including STRICT-ATTRS .
+  including K-STRICTNESS-OPS .
+  including META-K-CONTEXTS .
+  including K-SORTS .
+  including META-K-LABELS .
+  including K-META-LISTS .
+  including METADATA-EXTRAS .
+  var Str : String .  var Ints Ints' : IntList .  var NInts : NeIntList . var I I' : Int .
+  var Nats Nats' : NatList . var NNats : NeNatList . var Attr : Attr .
+  var AS : AttrSet . var N N' M : Nat . var NA : NzNat .  var Tl : TermList .
+  var Q Q' : Qid . var NQIL : NeQidList . var Ty : Type . var Tyl : TypeList . 
+  var Op : OpDecl . var OPDS : OpDeclSet . var Mod : Module .
+  var Wrapper : Term .
+
+  op resolveHooks : Qid Module ~> Module .
+  eq resolveHooks(Q, Mod) 
+   = setMbs(setImports(setName(emptySModule, Q), (including getName(Mod) .) including 'K-CONTEXTS .), resolveHooksOps(getOps(Mod))) .
+
+  op resolveHooksOps : OpDeclSet ~> MembAxSet .
+  eq resolveHooksOps(none) = none .
+  eq resolveHooksOps(Op OPDS) = resolveHooksOp(Op) resolveHooksOps(OPDS) .
+
+ op resolveHooksOp : OpDecl ~> EquationSet .
+  eq resolveHooksOp(op Q : nil -> Ty [AS metadata(Str)] .)
+   = resolveHooksOp(op Q : nil -> Ty [AS metadataParse(Str)] .) .
+  eq resolveHooksOp(op Q : nil -> Ty [AS pair("hook",Str)])
+   = resolveHooks(Q, AS, parseHooks(Str)) .
+  eq resolveHooksOp(Op) = none [owise] .
+  eq resolveHooksOp(errorOp(Str, AS)) 
+   = errorMb('`[`]:K,"",Str,AS) .
+
+  op resolveHooks : Qid AttrSet HookList -> EquationSet .
+  eq resolveHooks(Q, AS, nil) = none .
+  eq resolveHooks(Q, AS, H HL) 
+   = resolveHook(Q, AS, H) resolveHooks(Q, AS, HL) .
+  
+  op resolveHook : Qid AttrSet Hook -> Equation .
+  eq resolveHook(Q, AS, hookOp(QM, QO))
+   = resolveHook(Q. AS, upModule(QM, true), QO) .
+
+  op resolveHook : Qid AttrSet Module Qid -> Equation .
+  eq resolveHook(Q. AS, M, QO) 
+   = resolveHook(Q, AS, maximalArityOp(M, getNamedOps(M,QO))) .
+
+  op resolveHook : Qid AttrSet OpDecl .
+  eq resolveHook(Q, AS, op QO : Tl -> T [AS'] .)
+   = resolveHook(Q, AS, QO, genVars(Tl,"Hk"),  T) .
+
+  op resolveHook : Qid AttrSet Qid TermList Type -> Equation .
+  eq resolveHook(Q, AS, QO, Terms,  T) .
+   = (eq kApply(Q, mkKList(Terms))
+       =  kApply(mkSubsortWrapper(T,KLabel)[QO[Terms]],nilKList) [metadata(removeOpAttrs(AS) pair("hook",string(QO)))] .)
+
+  op mkKList_ : TermList ~> TermList .
+  eq mkKList(empty) = empty .
+  eq mkKList(V, Terms) 
+   = kApply(mkSubsortWrapper(getType(V),KLabel)[V],nilKList), mkKList(Terms) .
+
+  op parseHooks : String -> HookList .
+  eq parseHooks(Str) = parseHooks(tokenize(stripSpaces(Str))) .
+
+  op parseHooks : QidList -> HookList .
+  eq parseHooks(Q QIL) = hookOp(getName(Q),getType(Q)) parseHooks(QIL) .
+  eq parseHooks(nil) = nil .
+endm
+

@@ -612,6 +612,15 @@ fmod META-MODULE-EXTRAS is
   op getOps : Module SortSet -> OpDeclSet .
   eq getOps(M, SS) = getOps(getOps(M), SS) .
 
+  op getNamedOps : Module Qid -> OpDeclSet .
+  eq getNamedOps(M, Q) = getNamedOps(getOps(M), Q) .
+ 
+  op getNamedOps : OpDeclSet Qid -> OpDeclSet .
+  eq getNamedOps(OPDS (op Q' : Tl -> T [AS] .), Q) 
+   = if Q == Q' then  (op Q' : Tl -> T [AS] .) getNamedOps(OPDS, Q)
+     else getNamedOps(OPDS, Q) fi .
+  eq getNamedOps(none, Q) = none .
+ 
   op emptyFModule : -> FModule .
   op emptySModule : -> SModule .
 
@@ -1285,6 +1294,20 @@ fmod META-LEVEL-EXTRAS is
  ceq $findOp(M, OPDS (op Q : Tl' -> T' [AS] .), Q, Tl, T)
    = (op Q : mergeTypes(Tl, Tl', 1, getPoly(AS)) -> mergeTypes(T, T', 0, getPoly(AS)) [AS] .)
   if sortsLeq(M, T' Tl, T Tl', 0, getPoly(AS)) [owise print "Op found: " Q Tl Tl' T T'] . 
+
+
+  op maximalArityOp : Module OpDeclSet -> OpDecl .
+  eq maximalArityOp(M, Op) = Op .
+  ceq maximalArityOp(M, (op Q : Tl -> T [AS] . op Q' : Tl' -> T' [AS'] .) OPDS) 
+    = maximalArityOp(M, (op Q : Tl -> T [AS] .) OPDS) 
+   if sortsLeq(M, Tl' T', Tl T) .
+  eq maximalArityOp(M, (op Q : Tl -> T [AS] .) Op OPDS)
+   = errorOp("Cannot find maximal operation for '" + string(Q) + "'",AS) .
+  
+
+
+
+
 
   op getTopOp : Module Term ~> OpDecl .
   eq getTopOp(M, Q[Trms]) = (op Q : getTermKinds(M, Trms) -> getTermKind(M, Q[Trms]) [none] .) .

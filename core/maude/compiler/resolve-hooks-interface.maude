@@ -1,0 +1,39 @@
+load resolve-hooks
+
+mod RESOLVE-HOOKS-META is
+  including RESOLVE-HOOKS .
+  including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
+  var Syntax Hooks : String .  var M : Module .
+  var QSyntax QHooks : Qid .
+  op resolveHooks : String String ~> Module .
+  eq resolveHooks(Syntax, Hooks) = resolveHooks(qid(Syntax), qid(Hooks)) .
+  op resolveHooks : Qid Qid ~> Module .
+  eq resolveHooks(QSyntax,QHooks) 
+   = setName(addModule(setImports(resolveHooks(QHooks, upModule(QSyntax, true)), including 'K-CONTEXTS .), upModule(QSyntax, false)), QHooks) .
+
+  op compileRESOLVE-HOOKS : Module AttrSet ~> Module .
+  eq compileRESOLVE-HOOKS(M, AS:AttrSet) = addModule(setImports(resolveHooks(getName(M),flatten(M)),including 'K-CONTEXTS .),M) .
+endm
+
+mod RESOLVE-HOOKS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op resolve-hooks : -> System .
+  op idle : -> State .
+  var Q Syntax StrictCxt StrictEq : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq resolve-hooks = [nil, idle, 'Usage: 'resolveHooks '<Name> '.] .
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKS is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['resolveHooks Syntax StrictCxt QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(Syntax,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('RESOLVE-HOOKS-META),
+                        'resolveHooks[upTerm(string(Syntax)),upTerm(string(StrictCxt))])),error) .
+endm
