@@ -140,7 +140,6 @@ printResult config result = do
         "none" -> return ()
         "raw" -> T.putStrLn "" >> T.putStrLn result
         "pretty" -> do
-            T.putStrLn ""
             case parse kBag "" (T.unpack result) of
                 Left err -> do
                     putStrLn "Warning: unable to parse/pretty-print result term:"
