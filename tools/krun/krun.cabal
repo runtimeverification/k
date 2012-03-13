@@ -24,7 +24,7 @@ Executable krun
     text,
     failure,
     data-object,
-    data-object-yaml,
+    data-object-yaml <= 0.3.3.6,
 --    hxt,
 --    hxt-xpath,
 --    maude >= 0.2.2,
