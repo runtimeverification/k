@@ -125,6 +125,9 @@ zipSyntax (Hole : xs) (k : ks) = do
     np <- asks noParens
     let f = if np || not (needsParens k) then id else parens
     liftM2 (:) (f $ pretty k) (zipSyntax xs ks)
+zipSyntax [] ks@(_ : _) = do
+    listk <- parens . hsep . sequence $ intersperse (text ",,") (map pretty ks)  
+    return [listk]
 zipSyntax _ _ = return []
 
 needsParens (Kra []) = False
