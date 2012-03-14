@@ -203,7 +203,7 @@ of Java.  In fact, the latter can be implemented in terms of
                        L +Nat 1 .. L +Nat N |-> undefined ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
-  context var X[HOLE];
+  context var X[HOLE],.Exps;
 
   syntax #Id ::= "$1" | "$2"
   rule var X[N1,N2,Vs:Vals]; =>
@@ -242,8 +242,8 @@ of Java.  In fact, the latter can be implemented in terms of
   rule B1 or B2 => B1 orBool B2
   rule not(B:#Bool) => notBool(B)
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs]           [:structural:]
-  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [:structural:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs]           [:structural anywhere:]
+  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [:structural anywhere:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => V ...</k> <store>...L|->V...</store>  [:transition:]
 
@@ -328,8 +328,8 @@ constructs keep their semantics from SIMPLE. */
   rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural anywhere:]
+  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural anywhere:]
 
 
 /*@ \subsection{Changes to SIMPLE Semantics}

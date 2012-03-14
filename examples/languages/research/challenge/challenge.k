@@ -1,7 +1,7 @@
 in challenge-syntax
 
 module CHALLENGE imports CHALLENGE-SYNTAX 
-  syntax Val ::= #Bool | #Int | #Float
+  syntax Val ::= #Bool | #Int | #Float 
   syntax Exp ::= Val
   syntax KResult ::= Val
 
@@ -17,7 +17,7 @@ module CHALLENGE imports CHALLENGE-SYNTAX
               <holds>.Map</holds>
             </thread>
           </threads>
-          <aspect>.K</aspect>
+          <aspect>{}</aspect>
           <busy>.Set</busy>
           <store>.Map</store>
           <nextLoc>0</nextLoc>

@@ -93,7 +93,7 @@ module CHALLENGE-SYNTAX
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
-  syntax Ids ::= List{#Id,","} 
+  syntax Ids ::= List{#Id,","} [strict]
 --- List{Exp}
   syntax Exps ::= List{Exp,","}
 
