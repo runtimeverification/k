@@ -1,5 +1,4 @@
 module URIS 
-  imports #TCP-INTERFACE 
   syntax K ::= #String | #Int | #Float
              | `#open ( #String ) 
              | `#reopen ( #Nat , #String ) 

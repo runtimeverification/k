@@ -29,7 +29,7 @@ load context-transformers-interface
 load open-cells-interface
 load make-k-rules-interface
 load strict-cxt2eqs-interface
---- load resolve-hooks-interface
+load resolve-hooks-interface
 
 --- load compile-program
 load compile-chain
