@@ -5,8 +5,8 @@ module BINDER is
                   | isBinder or #Id
   syntax K ::= #Id
 
-  rule isBinder or X(X:#Id) => true
-  rule isBinder or X(K:K) => true when isBinder(K)
+  define isBinder or X(X:#Id) => true
+  define isBinder or X(K:K) => true when isBinder(K)
 end module
 
 module SUBSTITUTION 
