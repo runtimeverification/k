@@ -428,8 +428,8 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 ``there is something there but we don't care what''.
 The semantics of the \texttt{lookup} operation is straightforward. */
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs]  [:structural:]
-  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [:structural:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs]  [:structural anywhere:]
+  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [:structural anywhere:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => K ...</k> <store>...L|->K...</store>  [:transition:]
 
@@ -470,14 +470,14 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax ListItem ::=  "(" Map "," K "," Bag ")"
+  syntax K ::=  "(" Map "," K "," Bag ")"
   rule <k> _`(_`)(lambda(Xs,S), Vs:Vals) ~> K:K
         => bindto(Xs,Vs) ~> S ~> return; </k>
-       <control> <fstack> . => (Env,K,C) ...</fstack> C:Bag </control>
+       <control> <fstack> . => ListItem((Env,K,C)) ...</fstack> C:Bag </control>
        <env> Env => GEnv </env>
        <genv> GEnv:Map </genv>
   rule <k> return(V:Val); ~> _ => V ~> K </k>
-       <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
+       <control> <fstack> ListItem((Env,K,C)) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
   syntax Val ::= "nothing"
   rule return; => return nothing;   [:structural:]
@@ -665,14 +665,14 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax ListItem ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
+  syntax K ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
   rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
-       <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
+       <control> <xstack> . => ListItem((X,S2,K,Env,C)) ...</xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
   rule <k> throw V; ~> _ => {var X=V; S2} ~> K </k>
-       <control> <xstack> (X,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
+       <control> <xstack> ListItem((X,S2,K,Env,C)) => . ...</xstack> (_ => C) </control>
        <env> _ => Env </env>
 
 /*@ The catch statement $S_2$ needs to be executed in the original environment,
@@ -812,8 +812,8 @@ given numbers.  The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2  [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2  [:structural:]
+  define N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2  [:structural:]
+  define N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2  [:structural:]
 
 /*@ The semantics of SIMPLE is now complete. */
 end module

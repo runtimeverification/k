@@ -4,8 +4,11 @@
 var x[100];
 
 function init(n) {
+  print("\nEnter ");
+  print(n);
+  print(" elements, separated by whitespace\n");
   for i = 0 to n - 1 do
-    x[i] = (n - i) + 100;
+    x[i] = read();
 }
 
 function printAll(n) {
@@ -14,7 +17,8 @@ function printAll(n) {
 }
 
 function main() {
-  var n=30;
+  print("How many elements (n <= 100)? n=");
+  var n=read();
   init(n);
   print("The original sequence is");
   printAll(n);
