@@ -190,16 +190,20 @@ ceq labelsT(Q[T1,T2], T, M, OPDS, OPDM)
 
  op processOp : OpDecl ~> OpDeclSet .
   
- eq processOp(op Q : T -> T' [AS metadata(Str)] .)
-  = processOp(op Q : T -> T' [AS metadataParse(Str)] .) .
+ eq processOp(op Q : Tl -> T [AS metadata(Str)] .)
+  = processOp(op Q : Tl -> T [AS metadataParse(Str)] .) .
  eq processOp(op Q : T -> T' [AS pair("wrapper", "builtin")] .)
   = (op Q : T -> KLabel ---(mkKLabelSort(T',none))
          [(AS  pair("wrapper", "builtin"))] .) .
  eq processOp(op Q : T -> T' [AS pair("wrapper", "list")] .)
   = none .
  eq processOp(op Q : Tl -> T [AS] .)
-  = (op mkKLabel(Q) : nil -> KLabel ---(mkKLabelSort(T,AS))
+  = (op mkKLabel(Q,AS) : nil -> KLabel ---(mkKLabelSort(T,AS))
        [(removeNaryAttrs(AS) pair("arity", string(arity(Tl),10)))] .) [owise] .
+
+  op mkKLabel : Qid AttrSet -> Qid .
+  eq mkKLabel(Q, pair("klabel",Str) AS) = mkKLabel(qid(Str)) .
+  eq mkKLabel(Q, AS) = mkKLabel(Q) [owise print "Same label " Q " Attrs: " AS] .
 endfm
 
 

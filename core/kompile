@@ -517,7 +517,7 @@ my $kmaude_keywords_pattern = join("|",map("\\b$_\\b",@kmaude_keywords));
 $kmaude_keywords_pattern =~ s/\\bsyntax\\b/\\ssyntax\\s/sg;
 my $kmaude_kwds_pattern = join("|", @kmaude_keywords);
 
-my @k_attributes = qw(binder strict metadata prec format assoc comm id: hybrid gather ditto extends hook parser seqstrict structural transition anywhere defined function computational superheat generated supercool large latex );           
+my @k_attributes = qw(binder strict klabel metadata prec format assoc comm id: hybrid gather ditto extends hook parser seqstrict structural transition anywhere defined function computational superheat generated supercool large latex );           
 my $k_attributes_pattern = join("|",  @k_attributes);   
 
 my $k_sorts = ":Bag:BagItem:#Bool:CellLabel:CellKey:CellAttribute:#Char:#Int:K:KAssignments:KHybridLabel:KLabel:KResult:KResultLabel:KSentence:List:ListItem:List{KResult}:List{K}:Map:MapItem:#Nat:NeBag:NeK:NeList:NeList{KResult}:NeList{K}:NeMap:NeSet:#NzInt:#NzNat:Set:SetItem:#String:#Zero";
@@ -2235,7 +2235,7 @@ sub make_ops {
 
 sub op_attribute {
 	local ($_) = @_;
-	/strict|hook|extends|prec|hybrid|gather|metadata|latex|ditto|format|assoc|comm|id:/;
+	/strict|hook|extends|prec|hybrid|gather|klabel|metadata|latex|ditto|format|assoc|comm|id:/;
 }
 
 

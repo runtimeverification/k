@@ -60,7 +60,7 @@ syn keyword maudeSorts      CellLabel ListItem BagItem SetItem MapItem
 syn keyword maudeAttrs      assoc comm idem iter id left-id right-id strat memo
 syn keyword maudeAttrs      prec gather format ctor config object msg frozen
 syn keyword maudeAttrs      poly special label metadata owise nonexec ditto
-syn keyword maudeAttrs      seqstrict strict hybrid structural transition bidirectional large superheat supercool binder  multiplicity color anywhere hook extends
+syn keyword maudeAttrs      seqstrict strict hybrid structural transition bidirectional large superheat supercool binder  multiplicity color anywhere hook extends klabel
 syn keyword maudeAttrs      latex
 
 syn match maudeStatements   "_" 
