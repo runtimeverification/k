@@ -26,7 +26,7 @@ TEST_DIRS = \
 	    languages/research/simple/untyped \
 	    languages/research/simple/typed/dynamic \
 	    languages/research/simple/typed/static \
-	    languages/research/ocl \
+
 
 
 .PHONY: all build test clean
