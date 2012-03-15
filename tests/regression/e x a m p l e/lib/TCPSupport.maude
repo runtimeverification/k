@@ -87,7 +87,7 @@ mod #TCP-CLIENT is
 
 endm
 
-mod #TCP-INTERFACE is
+mod #TCP is
 	including #TCP-SYNTAX .
 	including #TCP-CLIENT .
 	including #COUNTER .

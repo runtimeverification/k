@@ -529,7 +529,7 @@ mod K-BUILTINS is
   including K-TECHNIQUE .
   including K-RESULT .
   including PL-BUILTINS .
-  including #TCP-INTERFACE .
+  including #TCP .
   subsort #Bool < K .
   op andBool : -> KLabel .
 
