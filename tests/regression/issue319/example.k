@@ -8,8 +8,8 @@ module ISSUE
 	syntax KResult ::= res1 | res2
 	syntax KLabel ::= "'mylabel" [hybrid]
 	
-	rule test1 => foo('mylabel(res1))
-	rule test2 => foo('mylabel(res1,, res2))
+	rule test1 => foo('mylabel(res1)) [anywhere]
+	rule test2 => foo('mylabel(res1,, res2)) [anywhere]
 	
-	rule foo(V:KResult) => done
+	rule foo(V:KResult) => done [anywhere]
 end module

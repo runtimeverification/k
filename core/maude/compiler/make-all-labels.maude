@@ -60,24 +60,26 @@ fmod MAKE-ALL-LABELS is
    setEqs(
    setMbs(
        M 
-    , hybridOps(OPDM) labelsMbs(Flat, getOps(Flat), OPDM, getMbs(M)))
+    , hybridOps(OPDM) hybridLabels(getOps(Flat,KLabel)) labelsMbs(Flat, getOps(Flat), OPDM, getMbs(M)))
     , labelsEqs(Flat, getOps(Flat), OPDM, getEqs(M)))
     , labelsRls(Flat, getOps(Flat), OPDM, getRls(M)))
   .
 
-
  op hybridOps : OpDeclOpDeclSetMap -> MembAxSet .
  eq hybridOps((Op |-> OPDS) OPDM)
-  = hybridOp(OPDS) hybridOps(OPDM) [print "hybrid ops start " Op " |-> " OPDS " hybrid ops end"] .
+  = hybridLabels(OPDS) hybridOps(OPDM) [print "hybrid ops start " Op " |-> " OPDS " hybrid ops end"] .
  eq hybridOps(empty) = none .
 
- op hybridOp : OpDeclSet -> MembAxSet .
- eq hybridOp(none) = none .
- eq hybridOp(op Q : nil -> T [AS metadata(Str:String)] .)
-  = hybridOp(op Q : nil -> T [AS metadataParse(Str:String)] .) .
- eq hybridOp(op Q : nil -> T [AS pair("hybrid","")] .)
+ op hybridLabels : OpDeclSet -> MembAxSet .
+ eq hybridLabels(none) = none .
+ eq hybridLabels(Op OPDS) = hybridLabel(Op) hybridLabels(OPDS) .
+
+ op hybridLabel : OpDecl -> MembAxSet .
+ eq hybridLabel(op Q : nil -> T [AS metadata(Str:String)] .)
+  = hybridLabel(op Q : nil -> T [AS metadataParse(Str:String)] .) .
+ eq hybridLabel(op Q : nil -> T [AS pair("hybrid","")] .)
   = plugKRule(R{replaceS[kApply(kresultLabel,kApply(mkConstant(Q, KLabel), mkVariable('L,KList))),bool2K(trueCt)],kApply(kresultLabel,mkVariable('L,KList)), AS (pair("predicate","") pair("KHybrid",""))})  .
- eq hybridOp(OPDS) = none [owise] .
+ eq hybridLabel(Op) = none [owise] .
 
 
  op labelsMbs : Module OpDeclSet OpDeclOpDeclSetMap MembAxSet ~> MembAxSet .
