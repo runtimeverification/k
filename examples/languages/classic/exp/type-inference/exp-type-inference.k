@@ -79,7 +79,7 @@ module TYPES
 
   syntax #Bool ::= "basicType" "(" Type ")"
                  | "typeVar" "(" Type ")"
-  rule typeVar(T) => getKLabel(T) ==Bool 'tv_  [:structural:]
+  rule typeVar(T) => getKLabel(T) ==Bool 'tv_  [:structural anywhere:]
 
   syntax TypeSchema ::= Type
                       | "(" "forall" Types ")" Type
@@ -87,17 +87,17 @@ module TYPES
   syntax TypeSchemas ::= List{TypeSchema,","}
 
   syntax Type ::= Type "+Type" #Nat [:latex("{#1}+_{\it Type}{#2}"):]
-  rule tv(N:#Nat) +Type M:#Nat => tv(N +Nat M)  [:structural:]
+  rule tv(N:#Nat) +Type M:#Nat => tv(N +Nat M)  [:structural anywhere:]
 
 // Free type variables.  These should be generic and builtin, for all binders.
   syntax Types ::= "ftv" "(" TypeSchemas ")"
-  rule ftv(BT:Type) => .Types when basicType(BT)
-  rule ftv(Tv:Type) => Tv,.Types when typeVar(Tv)
-  rule ftv(T1:Type -> T2:Type) => union(ftv(T1),ftv(T2))
-  rule ftv((forall Tvs:Types) T:Type) => diff(ftv(T),Tvs)
-  rule ftv(.TypeSchemas) => .Types
+  rule ftv(BT:Type) => .Types when basicType(BT) [anywhere]
+  rule ftv(Tv:Type) => Tv,.Types when typeVar(Tv) [anywhere]
+  rule ftv(T1:Type -> T2:Type) => union(ftv(T1),ftv(T2)) [anywhere]
+  rule ftv((forall Tvs:Types) T:Type) => diff(ftv(T),Tvs) [anywhere]
+  rule ftv(.TypeSchemas) => .Types [anywhere]
   rule ftv(TS1:TypeSchema,TS2:TypeSchema,TSs:TypeSchemas)
-    => union(ftv(TS1),ftv(TS2,TSs))
+    => union(ftv(TS1),ftv(TS2,TSs)) [anywhere]
 
 // The operations below should be generic and builtin, for all lists
   syntax Types ::= "union" "(" Types "," Types ")"
@@ -106,57 +106,57 @@ module TYPES
                  | "insert" "(" Type "," Types ")"
                  | "delete" "(" Type "," Types ")"
   syntax #Nat ::= "|" Types "|"
-  rule union(.Types,Ts':Types) => Ts'
-  rule union((T,Ts:Types),Ts') => union(Ts,insert(T,Ts'))
-  rule diff(Ts,.Types) => Ts
-  rule diff(Ts,(T,Ts')) => diff(delete(T,Ts),Ts')
-  rule insert(T,.Types) => T,.Types
-  rule insert(T,(T',Ts)) => if T ==Bool T' then T',Ts else T',insert(T,Ts) fi
-  rule delete(T,.Types) => .Types
-  rule delete(T,(T',Ts)) => if T ==Bool T' then Ts else T',delete(T,Ts) fi
-  rule |T,Ts| => 1 +Nat |Ts|
-  rule |.Types| => 0
+  rule union(.Types,Ts':Types) => Ts' [anywhere]
+  rule union((T,Ts:Types),Ts') => union(Ts,insert(T,Ts')) [anywhere]
+  rule diff(Ts,.Types) => Ts [anywhere]
+  rule diff(Ts,(T,Ts')) => diff(delete(T,Ts),Ts') [anywhere]
+  rule insert(T,.Types) => T,.Types [anywhere]
+  rule insert(T,(T',Ts)) => if T ==Bool T' then T',Ts else T',insert(T,Ts) fi [anywhere]
+  rule delete(T,.Types) => .Types [anywhere]
+  rule delete(T,(T',Ts)) => if T ==Bool T' then Ts else T',delete(T,Ts) fi [anywhere]
+  rule |T,Ts| => 1 +Nat |Ts| [anywhere]
+  rule |.Types| => 0 [anywhere]
 
 // This should be generalized and builtin: fresh name generator
   syntax Types ::= #Nat "from" Type
-  rule 0 from tv(_:#Nat) => .Types
-  rule (sNat N:#Nat) from tv(M:#Nat) => tv(M),(N from tv(sNat M))
+  rule 0 from tv(_:#Nat) => .Types [anywhere]
+  rule (sNat N:#Nat) from tv(M:#Nat) => tv(M),(N from tv(sNat M)) [anywhere]
 
 // This could also be generic: subterm relation?
   syntax #Bool ::= Type "inType" Type [:latex("{#1}\in_{\it Type}{#2}"):]
-  rule Tv inType BT  => false when typeVar(Tv) andBool basicType(BT)
-  rule Tv inType Tv' => Tv ==Bool Tv' when typeVar(Tv) andBool typeVar(Tv')
-  rule Tv inType (T1 -> T2) => (Tv inType T1) orBool (Tv inType T2)
+  rule Tv inType BT  => false when typeVar(Tv) andBool basicType(BT) [anywhere]
+  rule Tv inType Tv' => Tv ==Bool Tv' when typeVar(Tv) andBool typeVar(Tv') [anywhere]
+  rule Tv inType (T1 -> T2) => (Tv inType T1) orBool (Tv inType T2) [anywhere]
 
 // Type substitution: T[Ts / Tvs]* substitutes list of types Ts for
 // list of type variables Tvs.  T[T' / Tv] substitutes type T' for type
 // variable Tv in T.  These should also be generic and builtin.
   syntax Type ::= Type "[" Types "/" Types "]*"  [:prec(2):]
                 | Type "[" Type  "/"  Type  "]"  [:prec(2):]  // auxiliary
-  rule T[.Types / .Types]* => T
-  rule T[T1,Ts:Types / Tv,Tvs]* => T[T1 / Tv][Ts / Tvs]*
-  rule BT[T / Tv] => BT when basicType(BT) andBool typeVar(Tv)
+  rule T[.Types / .Types]* => T [anywhere]
+  rule T[T1,Ts:Types / Tv,Tvs]* => T[T1 / Tv][Ts / Tvs]* [anywhere]
+  rule BT[T / Tv] => BT when basicType(BT) andBool typeVar(Tv) [anywhere]
   rule Tv':Type[T / Tv] => if Tv' ==Bool Tv then T else Tv' fi
-    when typeVar(Tv')
-  rule (T1 -> T2)[T / Tv] => T1[T / Tv] -> T2[T / Tv]
+    when typeVar(Tv') [anywhere]
+  rule (T1 -> T2)[T / Tv] => T1[T / Tv] -> T2[T / Tv] [anywhere]
 
 // Map application.  Should be generic and builtin.
   syntax Types ::= Map "[" Types "]*"  [:prec(1):]
   syntax Type  ::= Map "[" Type  "]"   [:prec(1):]
 
-  rule .[T] => T
-  rule (Tv |-> T':Type Theta:Map)[T] => Theta[T[T'/Tv]]
+  rule .[T] => T [anywhere]
+  rule (Tv |-> T':Type Theta:Map)[T] => Theta[T[T'/Tv]] [anywhere]
 
-  rule Theta[.Types]* => .Types
-  rule Theta[T,Ts:Types]* => Theta[T],Theta[Ts]*
+  rule Theta[.Types]* => .Types [anywhere]
+  rule Theta[T,Ts:Types]* => Theta[T],Theta[Ts]* [anywhere]
 
 // Next should probably be generic in some way, for all maps ...
 // although note that it does something specific for type schemas.
 // This was just a trick, to save us from defining map application on schemas
   syntax Types ::= "types" "(" Map ")"
-  rule types(X:#Id |-> T TEnv:Map) => T,types(TEnv)
-  rule types(X |-> (forall_)T TEnv) => T,types(TEnv)
-  rule types(.Map) => .Types
+  rule types(X:#Id |-> T TEnv:Map) => T,types(TEnv) [anywhere]
+  rule types(X |-> (forall_)T TEnv) => T,types(TEnv) [anywhere]
+  rule types(.Map) => .Types [anywhere]
 end module
 
 
@@ -184,8 +184,8 @@ We do need, however, to declare our basic types.  The operation
 
   syntax Exp ::= Type
   syntax Type ::= "int" | "bool"        // basic types
-  rule basicType(int) => true   [:structural:]
-  rule basicType(bool) => true  [:structural:]
+  rule basicType(int) => true   [:structural anywhere:]
+  rule basicType(bool) => true  [:structural anywhere:]
 
 /*@ \subsection{Configuration}
 Besides the \textsf{k} and \textsf{tenv} cells that are also present
@@ -195,7 +195,7 @@ variables.  The cell \textsf{unification} holds a cell \textsf{eqns}
 with equations that need to be solved, and a cell \textsf{mgu} which
 holds the current most-general unifier. */
 
-  configuration <T color="yellow">
+  configuration <T color="yellow" multiplicity="?">
                   <k color="green"> $PGM:Exp </k>
                   <tenv color="LightSkyBlue"> .Map </tenv>
                   <unification color="black">
@@ -206,6 +206,11 @@ holds the current most-general unifier. */
                   </unification>
                   <nextType> tv(0) </nextType>
                 </T>
+				<resultType multiplicity="?"> .K </resultType>
+				
+  // termination rule; useful for making sure program finished.  
+  // Can be removed when we have better krun tools for displaying final config
+  rule <T>... <k> T:Type </k> ...</T> => <resultType> T </resultType>
 
 /*@ \subsection{Arithmetic expressions}
 Primitive values rewrite to their types.  Arithmetic constructs, which
@@ -243,7 +248,7 @@ type.  At the same time, we recover the type environment. */
   rule <k> lambda X . E:Exp => E ~> (Tv -> []) ~> tenv(TEnv) ...</k>
           <tenv> TEnv:Map => TEnv[Tv/X] </tenv>
           <nextType> Tv:Type => Tv +Type 1 </nextType>
-  rule T ~> (Tv -> []) => Tv -> T
+  rule T ~> (Tv -> []) => Tv -> T [anywhere]
 
 // usual environment recovery
   syntax K ::= "tenv" "(" Map ")"
@@ -273,7 +278,7 @@ of the mu-bound variable. */
   rule <k> mu X . E => E ~> (Tv = []) ~> Tv ~> tenv(TEnv) ...</k>
           <tenv> TEnv => TEnv[Tv / X] </tenv>
           <nextType> (Tv => Tv +Type 1) </nextType>
-  rule T ~> (Tv = []) => Tv = T
+  rule T ~> (Tv = []) => Tv = T [anywhere]
 
 /*@ \subsection{Let}
 The trickiest part of Milner's W procedure is how to type the
@@ -374,13 +379,13 @@ remaining equations by applying the new mgu binding to them. */
     when notBool(Tv inType T)
 
   syntax Map ::= "refine" "(" Map "," Type "," Type ")"
-  rule refine(.Map,_,_) => .Map
-  rule refine(Tv':Type|->T':Type Theta, Tv, T)
+  define refine(.Map,_,_) => .Map
+  define refine(Tv':Type|->T':Type Theta, Tv, T)
     => Tv'|->T'[T/Tv] refine(Theta,Tv,T)
 
   syntax Bag ::= "refine" "(" Bag "," Type "," Type ")"
-  rule refine(.Bag,Tv,T) => .Bag
-  rule refine(<eqn> T1 = T2 </eqn> Eqns, Tv, T)
+  define refine(.Bag,Tv,T) => .Bag
+  define refine(<eqn> T1 = T2 </eqn> Eqns, Tv, T)
     => <eqn> T1[T/Tv] = T2[T/Tv] </eqn> refine(Eqns,Tv,T)
 
 end module
