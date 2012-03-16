@@ -1,0 +1,29 @@
+// Test returning objects in methods and then invoking methods on them
+
+class i {
+  var val:int;
+  method i(v:int) {
+    val = v;
+  }
+  method m1() : class g {
+    return (new g(val + 9));
+  }
+}
+
+class g {
+  var a:int;
+  method g(t:int) {
+    a = t;
+  }
+  method print2() { print(a, "\n"); }
+}
+
+class main {
+  method main() {
+    ((new i(1)).m1()).print2();
+  }
+}
+
+// 10
+
+

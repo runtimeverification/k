@@ -1,0 +1,43 @@
+// This program shows how method closures can be returned by other
+// methods, bound to local variables, and then invoked.
+
+class A {
+  var c:int;
+  method A() {
+    c = 0;
+  }
+  method inc() {
+    ++c;
+  }
+}
+
+class B {
+  var a : class A, m : function from void to void, x:int;
+  method B() {
+    a = new A();
+    m = a.inc;
+    x = 0;
+    print(a.c, " ");
+    m();
+    print(a.c, " ");
+  }
+  method getM() : function from void to void {
+    return m;
+  }
+}
+
+class main {
+  var f : function from void to void;
+  method main() {
+    var b : class B = new B();
+    var t : function from void to void = f = b.getM();
+    f();
+    print(b.a.c, " ");
+    t();
+    print(b.a.c, " ");
+    (b.getM())();                 // shows the higher-order aspect of KOOL
+    print(b.a.c, "\n");
+  }
+}
+
+// 0 1 2 3 4

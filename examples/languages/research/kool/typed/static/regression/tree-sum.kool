@@ -1,0 +1,38 @@
+// Building and traversing a tree.
+
+class sum {
+  method sum():int {}  // this is not really needed here in dynamically typed
+                   // KOOL; in statically typed KOOL, it needs to be there
+                   // and, moreover, to be consistently typed in extensions
+}
+
+class node extends sum {
+  var left : class sum, right : class sum;
+  method node(left : class sum, right : class sum) {
+    this.left = left;
+    this.right = right;
+  }
+  method sum():int {
+    return (left.sum() + right.sum());
+  }
+}
+
+class leaf extends sum {
+  var val:int;
+  method leaf(val:int) {
+    this.val = val;
+  }
+  method sum():int {
+    return val;
+  }
+}
+
+class main {
+  method main() {
+    var o : class node;
+    o = new node(new node(new leaf(3), new leaf(4)), new leaf(5));
+    print(o.sum(), "\n");
+  }
+}
+
+// 12

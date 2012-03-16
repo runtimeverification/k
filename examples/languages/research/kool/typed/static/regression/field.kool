@@ -1,0 +1,15 @@
+// Testing field initialization and access.
+// Works when executed, but does not work when type checked for the
+// same reason as in SIMPLE typed: the body of a class allows to
+// define only field declarations and methods, no other statements.
+// The initialized variable declarations desugar into a variable
+// declaration and an assignment statement.
+
+class main {
+  var a:int = 3;
+  method main() {
+    print("a = ", a, "\n");
+  }
+}
+
+// a = 3

@@ -1,0 +1,44 @@
+class point {
+  var x:int, y:int;
+  method point(initx:int, inity:int) {
+    x = initx;
+    y = inity;
+  }
+  method move(dx:int, dy:int) {
+    x = x+dx;
+    y = y+dy;
+  }
+  method printLocation() {
+    print("x = ", x, ", ", "y = ", y, "\n");
+  }
+}
+
+class colorpoint extends point {
+  var color:int;
+  method colorpoint(initx:int,inity:int,initcolor:int) {
+    this.point(initx, inity);
+    color = initcolor;
+  }
+  method setColor(c:int) {
+    color = c;
+  }
+  method printColor() {
+    print("color = ", color, "\n");
+  }
+}
+
+class main {
+  method main() {
+    var p : class point = new point(3,4),
+        cp : class colorpoint = new colorpoint(10,20,87);
+    p.move(1,2);
+    p.printLocation();
+    cp.move(7, 8);
+    cp.printLocation();
+    cp.printColor();
+  }
+}
+
+// x = 4, y = 6
+// x = 17, y = 28
+// color = 87
