@@ -1,0 +1,5 @@
+var x;
+print("x = ");
+x:=read();
+spawn print(x,"\n");
+y:=5
