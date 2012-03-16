@@ -224,8 +224,8 @@ module CHALLENGE imports CHALLENGE-SYNTAX
 
 --- generate sequence of locations
   syntax List{K} ::= #Nat .. #Nat
-  rule N1..N1 => .List{K} [structural]
-  rule N1..N2 => N1,,sNat N1..N2 [structural]
+  rule N1..N1 => .List{K} [structural anywhere]
+  rule N1..N2 => N1,,sNat N1..N2 [structural anywhere]
 
 
 --- List{Val}
