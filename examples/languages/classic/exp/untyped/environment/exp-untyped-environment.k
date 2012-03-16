@@ -70,12 +70,18 @@ results. */
 The configuration below is standard for trivial environment-based
 semantics.  For example, it is identical to that of IMP\@. */
 
-  configuration <T color="yellow">
+  configuration <T color="yellow" multiplicity="?">
                   <k color="green"> $PGM:Exp </k>
                      <env color="LightSkyBlue"> .Map </env>
                      <store color="white"> .Map </store>
                      <nextLoc color="gray"> 0 </nextLoc>
                 </T>
+				<result multiplicity="?"> .K </result>
+  
+  // termination rule; useful for making sure program finished.  
+  // Can be removed when we have better krun tools for displaying final config
+  rule <T>... <k> V:Val </k> ...</T> => <result> V </result>
+
 
 /*@ \subsection{Arithmetic constructs}
 The rules below are taken over, unchanged, from the semantics of IMP\@. */

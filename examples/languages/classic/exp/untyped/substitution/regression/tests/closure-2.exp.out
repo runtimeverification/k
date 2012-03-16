@@ -1,0 +1,3 @@
+<k>
+  lambda _id0 . lambda _id2 . lambda x . x lambda x . x
+</k>

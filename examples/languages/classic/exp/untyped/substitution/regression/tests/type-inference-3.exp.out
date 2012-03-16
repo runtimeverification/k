@@ -1,0 +1,3 @@
+<k>
+  lambda x . lambda f . lambda d . x f x + 1 lambda x . x
+</k>

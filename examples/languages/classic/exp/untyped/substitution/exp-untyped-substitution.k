@@ -90,6 +90,10 @@ The one-cell configuration below is standard for simple
 substitution-based semantics. */
 
   configuration <k color="green"> $PGM:Exp </k>
+  
+  // termination rule; useful for making sure program finished.  
+  // Can be removed when we have better krun tools for displaying final config
+  rule <k> V:Val </k> (<nextId> _:K </nextId> => .)
 
 /*@ \subsection{Arithmetic constructs}
 The block of rules below are taken over, unchanged, from the semantics
