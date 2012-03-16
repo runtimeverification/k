@@ -199,11 +199,17 @@ identical to that in EXP or IMP\@. */
 
 //@ \subsection{Configuration}
 
-  configuration <T>  <k color="green"> $PGM:Exp </k>
+  configuration <T multiplicity="?">  <k color="green"> $PGM:Exp </k>
                      <env color="violet"> .Map </env>
                      <store color="white"> .Map </store>
                      <nextLoc color="gray"> 0 </nextLoc>
                 </T>
+				<result multiplicity="?"> .K </result>
+
+  // termination rule; useful for making sure program finished.  
+  // Can be removed when we have better krun tools for displaying final config
+  rule <T>... <k> V:Val </k> ...</T> => <result> V </result>
+
 
 //@ \subsection{Lookup}
 

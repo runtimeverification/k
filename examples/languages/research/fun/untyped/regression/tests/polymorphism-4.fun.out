@@ -1,0 +1,3 @@
+<result>
+  closure( . , x , let y = x in y )
+</result>
