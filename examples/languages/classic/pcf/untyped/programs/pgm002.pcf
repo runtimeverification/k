@@ -1,0 +1,1 @@
+(mu f . lambda x . lambda y . cond (zero? x) 0 (add (f (pred x) y) y)) (succ (succ (succ 0))) (pred (succ 0))
