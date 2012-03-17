@@ -90,7 +90,7 @@ consider the cases where function declarations have the form
                | "if" Exp
                  "then" Exp
                  "else" Exp            [:strict(1):]
-  syntax Exps ::= List{Exp,","}
+  syntax Exps ::= List{Exp,","}        [:strict:]
   syntax Ids  ::= List{#Id,","}
   macro fun Es1:Exps Es2:Exps -> E:Exp = fun Es1 -> fun Es2 -> E
   macro (E1:Exp Es:Exps = E) = (E1 = fun Es -> E)
@@ -326,6 +326,7 @@ The semantics of lists below is self-explanatory. */
   rule null? [] => true
   rule null? [_:Val,_:Vals] => false
   rule cons V [Vs] => [V,Vs]
+  define 'isVal([Vs:Vals]) => true
 
 /*@ \subsection{References}
 The semantics of references is also self-explanatory, noting that
