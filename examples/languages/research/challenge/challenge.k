@@ -150,11 +150,11 @@ module CHALLENGE imports CHALLENGE-SYNTAX
    rule (<thread_> <k>.K</k> <fstack>.List</fstack> <holds>Holds:Map</holds> <_/thread> => .)
         <busy>Busy:Set => Busy -Set keys(Holds)</busy>
    rule <k>acquire V; => .<_/k> <holds_>. => V|->0<_/holds> <busy>Busy (.=>SetItem(V))</busy>
-     when notBool(V in Busy)
-   rule <k>acquire V; => .<_/k> <holds_>V|->(N => sNat N)<_/holds>
+     when notBool(V in Busy) [transition] 
+   rule <k>acquire V; => .<_/k> <holds_>V|->(N => sNat N)<_/holds> [transition]
    rule <k>release V; => .<_/k> <holds_>V|->(sNat N => N)<_/holds>
    rule <k>release V; => .<_/k> <holds_>V|->0 => .<_/holds> <busy_>SetItem(V)=>.<_/busy>
-   rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k>
+   rule <k>rendezvous V; => .<_/k> <k>rendezvous V; => .<_/k> [transition]
 
 --- Agents
   rule <agent_> <k>newAgent S => N2<_/k> <me>N1</me> <_/agent> <world_>. => SetItem(N2)<_/world>
@@ -164,25 +164,25 @@ module CHALLENGE imports CHALLENGE-SYNTAX
   rule <k>parent => N<_/k> <parent>N</parent>
   rule <me>N1</me> <k>send V to N2; => .<_/k>
        (. => <message> <from>N1</from> <to>SetItem(N2)</to> <body>V</body> </message>)
-  rule <me>N</me> <k>receive=>V<_/k> <message_> <to_>SetItem(N)=>.<_/to> <body>V</body> <_/message>
+  rule <me>N</me> <k>receive=>V<_/k> <message_> <to_>SetItem(N)=>.<_/to> <body>V</body> <_/message> [transition]
   rule <me>N1</me> <k>receiveFrom N2 => V<_/k>
-       <message> <from>N2</from> <to_>SetItem(N1) => .<_/to> <body>V</body> </message>
+       <message> <from>N2</from> <to_>SetItem(N1) => .<_/to> <body>V</body> </message> [transition]
   rule <me>N</me> <k>broadcast V; => .<_/k> <world>W:Set</world>
        (. => <message> <from>N</from> <to>W</to> <body>V</body> </message>)
   rule <message_><to>.Set</to><_/message> => . [structural]
   rule <agent_> <me>N1</me> <k>sendSynch V to N2; => .<_/k> <_/agent>
-       <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent>
-  rule <k>sendSynch V to N2; => .<_/k> <agent_><me>N2</me> <k>receive => V<_/k> <_/agent>
+       <agent_><me>N2</me> <k>receiveFrom N1 => V<_/k> <_/agent> [transition]
+  rule <k>sendSynch V to N2; => .<_/k> <agent_><me>N2</me> <k>receive => V<_/k> <_/agent> [transition]
   rule <me>N</me> <threads> <thread_><k>barrier;<_/k> <_/thread> </threads> <barrier>true</barrier>
-       <waiting>W (. => SetItem(N))</waiting> when notBool(N in W)
+       <waiting>W (. => SetItem(N))</waiting> when notBool(N in W) [transition]
   rule <barrier>true=>false</barrier> <waiting>W</waiting> <world>W</world> when W =/=Bool .
   rule <me>N</me> <k>barrier; => .<_/k> <barrier>false</barrier> <waiting_>SetItem(N)=>.<_/waiting>
   rule <barrier>false => true</barrier> <waiting>.Set</waiting>
 
 --- Abrupt termination (of thread, of agent, of system)
-  rule <k>haltThread;~>_ => .</k> <fstack>_=>.List</fstack>
-  rule <threads_> <k>haltAgent;<_/k> <_/threads> => <threads>.Bag</threads>
-  rule <agents_><k>haltSystem;<_/k><_/agents>=> <agents>.Bag</agents>
+  rule <k>haltThread;~>_ => .</k> <fstack>_=>.List</fstack>  [transition]
+  rule <threads_> <k>haltAgent;<_/k> <_/threads> => <threads>.Bag</threads> [transition]
+  rule <agents_><k>haltSystem;<_/k><_/agents>=> <agents>.Bag</agents> [transition]
 
 --- Code generation (via reflection)
   syntax KLabel ::= quoteit[ #Nat ] [latex "{\it quote}_{\scriptstyle{#1}}"]
