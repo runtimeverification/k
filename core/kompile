@@ -2205,7 +2205,9 @@ sub make_ops {
 	$attributes = op_tags($attributes);
 	
         # store the syntax production
-        push(@all_syntax, $production);
+        my $prod_tokens = $production;
+        $prod_tokens =~ s/[_{}()[\],`]/ /sg;
+        push(@all_syntax, $prod_tokens);
 
 # Generate the Maude replacement of the K syntactic construct
 		my $random = fresh("a", "b");

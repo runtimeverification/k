@@ -5,14 +5,14 @@ module QUOTE-UNQUOTE imports K-VISITOR
              | "unquote" K
              | "lift" K    [strict]
              | "eval" K    [strict]
-             | "mQuote" "(" K "," #Nat ")" [latex "{\it quote}({#1},{#2})"]
-  syntax KLabel ::= "isQuote"
 
-  rule isQuote(quote K) => true
-  rule isQuote(unquote K) => true
+  declare isQuote : K -> K
+  define isQuote(quote K) => true
+  define isQuote(unquote K) => true
 
-  rule mQuote(K,N) 
-    => visit K applying quoteit[N] if isQuote
+  declare mQuote : K #Nat -> K [latex "{\it quote}({#1},{#2})"]
+  define mQuote(K,N) 
+    => visit K applying quoteit[N] if 'isQuote
     [structural]
 
 --- Code generation (via reflection)
