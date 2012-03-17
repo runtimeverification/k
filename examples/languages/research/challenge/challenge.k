@@ -110,6 +110,7 @@ module CHALLENGE imports CHALLENGE-SYNTAX
   rule V:[Vs:Vals] => [V,Vs]
   rule head [V,Vs] => V
   rule tail [V,Vs] => [Vs]
+  define 'isVal([Vs:Vals]) => true
 
 --- Aspects
   rule <k>aspect S => .<_/k> <aspect>_=>S</aspect>

@@ -867,10 +867,23 @@ fmod META-K-LABELS is
   var OPDS OPDS' : OpDeclSet .  var Op : OpDecl .  var AS : AttrSet .
 endfm
 
+fmod META-K-PREDICATES is
+  including META-TERM-EXTRAS .
+  including META-K-MODULE .
+  var S : Sort .
+  op predicateLabelS : Sort -> Qid .
+  eq predicateLabelS(S) = qid("'is" + string(S)) .
+
+  op predicateLabel : Sort -> Constant .
+  eq predicateLabel(S) = mkConstant(predicateLabelS(S), KLabel) .
+endfm
+
+
 fmod K-STRICTNESS-OPS is including META-LEVEL .
   including META-K-LABELS .
   including K-META-OPS .
   including K-META-CONFIG .
+  including META-K-PREDICATES .
   var S : String .  var T T' : Term . var Trl : TermList . var Q : Qid .
   var Ty : Type .  var V : Variable .
 
@@ -924,7 +937,7 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
    eq kresultLabel = resultLabel(klabel) .
    
    op resultLabel : Qid -> Term .
-   eq resultLabel(Q) = mkConstant(qid("is" + firstCaps(string(Q)) + "Result"),KLabel) .
+   eq resultLabel(Q) = predicateLabel(qid(firstCaps(string(Q)) + "Result")) .
 endfm
 
 
@@ -1226,17 +1239,6 @@ ceq $leastSortsT(M, Q[T1,T2], T T')
   var T T' T'' : Type . var S : Sort .   var Tl : TypeList .
   var SS SS' : SortSet . var NSS : NeSortSet . var TS : TypeSet .
   var TlS : TypeListSet .  var TlSK : [TypeListSet] .  var Str : String .
-endfm
-
-fmod META-K-PREDICATES is
-  including META-TERM-EXTRAS .
-  including META-K-MODULE .
-  var S : Sort .
-  op predicateLabelS : Sort -> Qid .
-  eq predicateLabelS(S) = qid("is" + string(S)) .
-
-  op predicateLabel : Sort -> Constant .
-  eq predicateLabel(S) = mkConstant(predicateLabelS(S), KLabel) .
 endfm
 
 
