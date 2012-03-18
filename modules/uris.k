@@ -57,6 +57,7 @@ module URIS
 
   declare #string2Int : K -> K
   define #string2Int(S) => String2Int(S) when lengthString(S) >=Int 0
+  define #string2Int(#EOF) => #EOF
 
   define #putByte(B) => #fPutByte(#stdout,B)
 
@@ -79,7 +80,8 @@ module URIS
   define #fReadChar(N) => #charString(#fReadByte(N))
 
   declare #charString : K -> K 
-  rule #charString(N:#Nat) => charString(N) [anywhere]
+  define #charString(N:#Nat) => charString(N) 
+  define #charString(#EOF) => #EOF
 
   declare #printChar : K -> K 
   rule #printChar(C) => #fPrintChar(#stdout,C) [anywhere]
@@ -135,6 +137,8 @@ module URIS
   // Upon encountering again whitespace, convert token
   rule #parse(SType:#String,S:#String) ListItem(C:#Char) => #convertToken(SType, S)
     when #isWhiteSpace(C)
+
+  rule (#parse(SType:#String,S:#String) => #convertToken(SType, S)) ListItem(#EOF)
   
   syntax List ::= `#convertToken ( #String , #String )
   rule #convertToken("#Int",S:#String) => ListItem(String2Int(S +String "0") /Int 10)
