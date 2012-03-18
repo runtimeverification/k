@@ -62,7 +62,7 @@ sub runTest {
 	} 
 	my $actualOutputFile = "$baseTestFile.stdout$testEnding";
 	my $actualErrorFile = "$baseTestFile.stderr$testEnding";
-	# print "$KRUN $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile\n";
+        # print "\n$KRUN $krunFlag $pgmFile < $inputFile > $actualOutputFile 2> $actualErrorFile\n";
 	unlink($actualOutputFile, $actualErrorFile);
 	if (!-e $pgmFile) {
 		return reportError($fullFilename, $timer, "Test expected file $pgmFile to exist, but it doesn't");
