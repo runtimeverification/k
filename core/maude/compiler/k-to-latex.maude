@@ -296,7 +296,7 @@ var Eq : Equation .  var Eqs : EquationSet .
 ---)
   ceq printTerm(U, '_`(_`)[Q,T]) = printTerm(U,Q'[T])
    if substr(string(getName(Q)),0,1) = "'" 
-   /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) [owise] .
+   /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) [owise print "Transforming label " Q " into operation " Q'] .
 
   op getNat : String -> [Nat] .
   var Str : String .
@@ -324,6 +324,7 @@ var Eq : Equation .  var Eqs : EquationSet .
  ceq printTerm1(U,Q[NeTl,T])
    = printTerm(U,Q[Q[NeTl],T])
   if mixfix(Q) /\ size(splitMixFix(string(Q))) = 3 /\ 1 < countTerms(NeTl) [owise print "normalizing"] .
+---()
   ceq printTerm1(U, F[NeTl]) 
    =  '`{ printTerm(U, if mixfix(Q) 
     then merge(splitMixFix(string(Q)), NeTl)
@@ -332,6 +333,14 @@ var Eq : Equation .  var Eqs : EquationSet .
      else prefixOp(Q, merge('`( genCommas(countTerms(NeTl)) '`), NeTl))
     fi fi) '`} 
   if Q := getRenamedQid(F, relatedOps(U, getTopOp(U, F[NeTl]), getOps(U))) [owise] .
+---()
+  eq printTerm1(U, Q[NeTl])
+   =  '`{ printTerm(U, if mixfix(Q) 
+    then merge(splitMixFix(string(Q)), NeTl)
+    else if latexCmd(Q) 
+     then latexOp(Q, merge(genQids(s countTerms(NeTl), '), NeTl))
+     else prefixOp(Q, merge('`( genCommas(countTerms(NeTl)) '`), NeTl))
+    fi fi) '`} [owise] .
   eq printTerm(M, T:[Term]) = 'error 
      [owise print "error in Print Term for " T:[Term]] .
  

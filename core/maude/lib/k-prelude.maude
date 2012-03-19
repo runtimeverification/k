@@ -281,9 +281,6 @@ mod K-RESULT is
   op .List{K} : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
   subsort List{KResult} < List{K} .
   subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
-
-  op isKResult : -> KLabel .
-
 endm
 
 mod K-HOLE is

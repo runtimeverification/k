@@ -1310,7 +1310,7 @@ fmod META-LEVEL-EXTRAS is
 
 
   op getTopOp : Module Term ~> OpDecl .
-  eq getTopOp(M, Q[Trms]) = (op Q : getTermKinds(M, Trms) -> getTermKind(M, Q[Trms]) [none] .) .
+  eq getTopOp(M, Q[Trms]) = (op Q : getTermKinds(M, Trms) -> 'Universal [poly(0)] .) .
   eq getTopOp(M, Ct) = (op getName(Ct) : nil -> getType(Ct) [none] .) .
 
   op getTermKind : Module Term -> Type .
