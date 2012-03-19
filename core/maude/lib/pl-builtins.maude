@@ -740,7 +740,8 @@ mod #STRING is
 
 ---  op notFound : -> FindResult [ctor] .
 
-  op asciiString : #Char -> #Nat
+  --- should be #Char -> #Nat, but too restrictive type system
+  op asciiString : #String -> #Nat
         [special (id-hook StringOpSymbol (ascii)
                   op-hook stringSymbol (<Strings> : ~> #Char)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat))] .

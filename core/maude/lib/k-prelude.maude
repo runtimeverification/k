@@ -82,6 +82,9 @@ endm
 --- extra stuff usefull for the K technique
 mod K-LISTK-EXTRAS is
   including K-TECHNIQUE .
+  including #STRING .
+  subsort #Nat < K .
+  
   var Ks Ks' : List{K} .  var K : K .
 
   op lengthList{K}_ : List{K} -> #Nat [metadata "latex=(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
@@ -101,6 +104,14 @@ mod K-LISTK-EXTRAS is
   op List{K}ToK_ : List{K} -> K .
   eq List{K}ToK(.List{K}) = . .
   eq List{K}ToK(K,,Ks) = K ~> List{K}ToK(Ks) .
+  
+  op StringToList{K}_ : #String -> K .
+  eq StringToList{K}("") = .List{K} .
+  ceq StringToList{K}(S:#String)
+	= asciiString(substrString(S:#String, 0, 1))
+	,, StringToList{K}(substrString(S:#String, 1, lengthString(S:#String)))
+	if S:#String =/=Bool "" . 
+  
 
 endm
 
