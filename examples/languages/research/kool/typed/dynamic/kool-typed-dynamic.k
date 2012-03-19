@@ -202,7 +202,7 @@ KOOL).  */
                        L +Nat 1 .. L +Nat N |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
-  context var _[HOLE]:_ ;
+  context var X[HOLE] : T, .Exps ;
 
   syntax #Id ::= "$1" | "$2"
   rule var X[N1,N2,Vs] : arrayOf arrayOf T; =>
