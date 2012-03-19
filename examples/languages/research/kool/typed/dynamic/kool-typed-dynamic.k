@@ -241,9 +241,9 @@ KOOL).  */
   rule B1 or B2 => B1 orBool B2
   rule not(B:#Bool) => notBool(B)
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural anywhere:]
   rule arrayRef(_,L,M:#Nat)[N] => lookup(L +Int N)
-    when N >=Nat 0 andBool N <Nat M   [:structural:]
+    when N >=Nat 0 andBool N <Nat M   [:structural anywhere:]
 
   rule sizeOf(arrayRef(_,_:#Nat,N)) => N
 
@@ -288,7 +288,7 @@ KOOL).  */
        <env>... X|->L ...</env>  [:structural:]
   context lvalue(_[HOLE])
   context lvalue(HOLE[_])
-  rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
+  rule lvalue(lookup(L)) => loc(L) [:structural:]
   syntax K ::= "lookup" "(" #Nat ")"
   rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store> [:transition:]
   syntax K ::= "env" "(" Map ")"
@@ -310,8 +310,8 @@ KOOL).  */
   define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural:]
+  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural anywhere:]
+  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural anywhere:]
 
 /*@ \subsection{Changes to SIMPLE Semantics}
 We extend/change the semantics of several SIMPLE constructs in order

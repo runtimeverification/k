@@ -584,7 +584,7 @@ thread cell will add a new thread cell next to it, which is consistent
 with the declared configuration cell multiplicity. */
 
   rule <k> spawn S => . ...</k> <env> Rho </env>
-       (. => <k> S </k> <env> Rho </env>)
+       (. => <thread>... <k> S </k> <env> Rho </env> ...</thread>)
 
 /*@ \subsubsection{Terminate thread}
 When the computation of a thread is empty, the thread is dissolved.

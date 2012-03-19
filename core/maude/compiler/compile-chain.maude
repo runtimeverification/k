@@ -219,6 +219,7 @@ fmod COMPILE-META is
   
   op compile : Module AttrSet ~> Module .  
   eq compile(M, AS) = compile(M, allSteps, AS) .
+  eq compile(upModule(Q, B:Bool), AS) = moduleError('`[ 'ERROR '`] '\s 'Module '\r Q '\o  'could 'not 'be 'found) .
   
   op partialCompile : Module Qid AttrSet ~> Module .
   eq partialCompile(M,Q, AS) = compile(M, upTo(allSteps,Q), AS) .
