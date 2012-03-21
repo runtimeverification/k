@@ -1,0 +1,95 @@
+%% Grammar for the K language
+module K3Syntax
+imports Common %% For Comments and whitespace
+
+exports
+context-free start-symbols
+	Start
+
+context-free syntax
+	Require* KModule*	-> Start {cons("KModuleList")}
+	"require" STRING	-> Require {cons("Require")}
+
+	%% K Module syntax
+	"module" ModName KModHeader KSentence* "endmodule" -> KModule {cons("KModule")}
+	"interface" ModName KModHeader KSentence* "endinterface" -> KModule {cons("KInterface")}
+	KModHeaderItem* 	-> KModHeader {cons("KModHeader")}
+	"including" KModExp -> KModHeaderItem {cons("Including")}
+	{ModName "+"}+ 		-> KModExp {cons("ModuleSum")}
+	MODNAME				-> ModName {cons("ModName")}
+
+	%% K Sentences
+	"configuration"		HIDDEN+	-> KSentence {cons("Config")}
+	"rule"				HIDDEN+	-> KSentence {cons("Rule")}
+	"context"			HIDDEN+	-> KSentence {cons("Context")}
+
+	"syntax" SORTID "::=" {Prod1 ">"}+	-> KSentence {cons("Syntax")}
+	
+context-free syntax
+	"left:" {Prod2 "|"}+ -> Prod1 {cons("LeftOrList")}
+	"right:" {Prod2 "|"}+ -> Prod1 {cons("RightOrList")}
+	"non-assoc:" {Prod2 "|"}+ -> Prod1 {cons("NonAssocOrList")}
+	{Prod2 "|"}+ -> Prod1 {cons("OrList")}
+
+	SyntaxElement+	-> Prod2 {cons("Prod")}
+	SyntaxElement+	"[" {Tag ","}+ "]" -> Prod2 {cons("AnnoProd")}
+	STRING		-> SyntaxElement {cons("Terminal")}
+	SORTID		-> SyntaxElement {cons("Sort")}
+	"List{" BASICID "," STRING "}" -> SyntaxElement {cons("List")}
+
+	%%COMPOSEDID	-> NonTerminal {cons("SyntaxCID")}
+
+	KEY							-> Tag {cons("Tag")}
+	KEY "(" TAGCONTENT ")"		-> Tag {cons("TagParam")}
+	KEY "(" STRING ")"			-> Tag {cons("TagParam")}
+
+
+lexical syntax
+	[A-Za-z\-]				-> TAG
+	TAG+					-> KEY
+	TC*						-> TAGCONTENT
+	~[\n\r\(\)\"]			-> TC
+	"(" TAGCONTENT ")"		-> TC
+
+lexical restrictions
+	TAGCONTENT	-/- ~[\(\)]
+	KEY			-/- [A-Za-z\-]
+
+
+lexical syntax
+	COMPOSEDID	-> SORTID
+	BASICID		-> SORTID
+
+	~[\t\n\r\ ]+	-> HIDDEN
+
+	"rule"			-> HIDDEN {reject}
+	"syntax"		-> HIDDEN {reject}
+	"context"		-> HIDDEN {reject}
+	"configuration"	-> HIDDEN {reject}
+	"endmodule"		-> HIDDEN {reject}
+	"endinterface"	-> HIDDEN {reject}
+	"#"?[A-Z\-]+	-> MODNAME
+
+	%% String declaration
+	"\"" StringChar* "\"" -> STRING
+	~[\"\n]				-> StringChar
+	"\\\""				-> StringChar
+	BackSlashChar		-> StringChar
+	"\\"				-> BackSlashChar
+
+	"#"?[A-Z][a-zA-Z0-9]* -> BASICID
+	[A-Z][a-zA-Z0-9]* "{" "#"?[A-Z][a-zA-Z0-9]* "}" -> COMPOSEDID
+
+	[0-9]+			-> NAT
+
+
+lexical restrictions
+	HIDDEN			-/- ~[\t\n\r\ ]
+	MODNAME			-/- [A-Z\-]
+	BackSlashChar	-/- [\"]
+	BASICID 		-/- [a-zA-Z0-9\{\}]
+	%%COMPOSEDID		-/- [a-zA-Z0-9\{\}]
+	NAT				-/- [0-9]
+
+
+

@@ -1,0 +1,88 @@
+%% Grammar for the K language
+module K3
+imports Common %% For Comments and whitespace
+imports KTechnique
+imports KBuiltinsBasic
+imports Integration
+
+
+exports
+context-free start-symbols
+	Start
+
+context-free syntax
+	KSentence+	-> Start {cons("KSentenceList")}
+	%% K Sentences
+	%%"macro" Bag "=" Bag			-> KSimpleSentence {cons("Macro")}
+	"configuration" Bag			-> KSentence {cons("Config")}
+	"rule" Label K				-> KSimpleSentence {cons("K1Rule")}
+	"rule" Label List			-> KSimpleSentence {cons("List1Rule")}
+	"rule" Label Bag			-> KSimpleSentence {cons("Bag1Rule")}
+	"rule" Label ListDlKDr		-> KSimpleSentence {cons("ListDlKDr1Rule")}
+	"rule" Label Set			-> KSimpleSentence {cons("Set1Rule")}
+	"rule" Label Map			-> KSimpleSentence {cons("Map1Rule")}
+	"context" K					-> KSimpleSentence {cons("Context")}
+	%%"predicate" K				-> KSimpleSentence {cons("Predicate")}
+
+
+	KSimpleSentence "when" K "[" TagList "]"-> KSentence {cons("AttributedCondSentence"), prefer}
+	KSimpleSentence "when" K				-> KSentence {cons("CondSentence")}
+	KSimpleSentence "[" TagList "]"			-> KSentence {cons("AttributedSentence")}
+	KSimpleSentence							-> KSentence {avoid}
+	
+
+	"<" CellLabel CellProperty* ">" A "</" CellLabel ">"	-> BagItem {cons("Bag1ClosedCell")}
+	"..." B 	-> A {cons("LeftCell")}
+	B -> A {avoid}
+	CellContents "..." -> B {cons("RightCell")}
+	CellContents -> B {avoid}
+
+
+	K		-> CellContents %%{cons("K")}
+	Map		-> CellContents %%{cons("Map")}
+	Bag		-> CellContents %%{cons("Bag")}
+	Set		-> CellContents %%{cons("Set")}
+	List	-> CellContents %%{cons("List")}
+
+	DzDzID "=" DzDzSTRING -> CellProperty {cons("CellProperty")}
+	%%CellProperty* -> CellProperties %%{cons("CellProperties")}
+
+	CellLabel "=>" CellLabel	-> CellLabel {non-assoc, cons("CellLabelRewrite")}
+
+						-> Label {cons("NoLabel")}
+	"[" LABEL "]" ":"	-> Label {cons("Label")}
+
+
+						-> TagList {cons("NoTags")}
+	Tag					-> TagList
+	TagList "," TagList -> TagList {left, cons("TagList")}
+	
+
+	KEY							-> Tag {cons("Tag")}
+	KEY "(" TAGCONTENT ")"		-> Tag {cons("TagParam")}
+	KEY "(" DzDzSTRING ")"		-> Tag {cons("TagParam")}
+lexical syntax
+	[A-Za-z\-]				-> TAG
+	TAG+					-> KEY
+	TC*						-> TAGCONTENT
+	~[\n\r\(\)\"]			-> TC
+	"(" TAGCONTENT ")"		-> TC
+
+lexical restrictions
+	TAGCONTENT	-/- ~[\(\)]
+	KEY			-/- [A-Za-z\-]
+
+lexical syntax
+	[A-Z][a-zA-Z0-9]* -> BASICID
+	[A-Za-z] ~[\<\>\_\ \n\r\t]*	-> CellLabel
+	[A-Z\-]+				-> ModName
+	~[\[\]\_\ \n\r\t]+		-> LABEL
+
+lexical restrictions
+	BASICID 	-/- [a-zA-Z0-9\{\}]
+	CellLabel	-/- ~[\<\>\_\ \t\n\r]
+	LABEL		-/- ~[\[\]\_\ \n\r\t]
+	ModName		-/- [A-Z\-]
+
+
+

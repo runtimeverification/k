@@ -1,0 +1,14 @@
+module K3Disamb-Completions
+
+imports K3Disamb-Completions.generated
+
+completions
+                                                                   
+  // This file is used to define content completion.               
+  //                                                               
+  // See the imported file for a brief introduction and examples.  
+                                                                   
+
+completions
+                                             
+  // Syntax completion:                      

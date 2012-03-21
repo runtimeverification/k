@@ -1,0 +1,7 @@
+var n, sum;
+n := 100;
+sum:=0;
+while not n <= 0 do (
+  sum := sum + n;
+  n := n + -1
+)

@@ -1,0 +1,290 @@
+module Integration
+
+imports Common
+imports KTechnique
+imports KBuiltinsBasic
+
+exports
+
+context-free priorities
+{
+	K "in" Set -> K {cons("DzBool19Builtin")}
+	SetItem "in" Set -> K {cons("DzBool120Builtin")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	K "in" Bag -> K {cons("DzBool124Builtin")}
+	BagItem "in" Bag -> K {cons("DzBool125Builtin")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	"lengthList" List -> K {cons("DzInt127Builtin")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	"wklabel" K -> K {cons("KLabel128Builtin")}
+	"wcelllabel" K -> K {cons("KLabel129Builtin")}
+	"kList" K -> K {cons("KLabel130Builtin")}
+	"wbag" Bag -> K {cons("KLabel132Builtin")}
+	"wset" Set -> K {cons("KLabel133Builtin")}
+	"wlist" List -> K {cons("KLabel134Builtin")}
+	"wmap" Map -> K {cons("KLabel135Builtin")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	K "=/=Bool" K -> K {cons("DzBool1NEqBuiltin")}
+	K "==Bool" K -> K {cons("DzBool1EqBuiltin")}
+	"notBool" K -> K {cons("DzBool1NotBoolBuiltin")}
+} > {
+	K "andBool" K -> K {left, cons("DzBool1AndBuiltin")}
+} > {
+	K "orBool" K -> K {left, cons("DzBool1OrBuiltin")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	"-Int" K -> K {cons("DzInt1IntUMinusBuiltin")}
+} > { left:
+	K "*Int" K -> K {left, cons("DzInt1IntMulBuiltin")}
+	K "/Int" K -> K {left, cons("DzInt1IntDivBuiltin")}
+	K "%Int" K -> K {left, cons("DzInt1IntModBuiltin")}
+} > { left:
+	K "+Int" K -> K {left, cons("DzInt1IntPlusBuiltin")}
+	K "-Int" K -> K {left, cons("DzInt1IntMinusBuiltin")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{ non-assoc:
+	K "<Int" K -> K {cons("DzBool1IntLTBuiltin")}
+	K "<=Int" K -> K {cons("DzBool1IntLTEBuiltin")}
+	K ">Int" K -> K {cons("DzBool1IntGTBuiltin")}
+	K ">=Int" K -> K {cons("DzBool1IntGTEBuiltin")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	K "+String" K -> K {left, cons("DzString1StrPlusBuiltin")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	K "," K -> K {right, cons("Ids1ListSyn")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	K "," K -> K {right, cons("Ids1ListSyn")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	"function" InsertDzK "(" InsertDzK ")" K -> K {cons("Ddecl1FuncDeclSyn")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	"++" K -> K {cons("Exp1PrefixPPSyn")}
+} > {
+	K "[" InsertDzK "]" -> K {cons("Exp1ArraySyn")}
+} > {
+	K "(" InsertDzK ")" -> K {cons("Exp1FuncCallSyn")}
+	"-" K -> K {cons("Exp1UMinusSyn")}
+} > { left:
+	K "*" K -> K {left, cons("Exp1MulSyn")}
+	K "/" K -> K {left, cons("Exp1DivSyn")}
+	K "%" K -> K {left, cons("Exp1ModSyn")}
+} > { left:
+	K "+" K -> K {left, cons("Exp1PlusSyn")}
+	K "-" K -> K {left, cons("Exp1MinusSyn")}
+} > { non-assoc:
+	K "<" K -> K {non-assoc, cons("Exp1LTSyn")}
+	K "<=" K -> K {non-assoc, cons("Exp1LTESyn")}
+	K ">" K -> K {non-assoc, cons("Exp1GTSyn")}
+	K ">=" K -> K {non-assoc, cons("Exp1GTESyn")}
+	K "==" K -> K {non-assoc, cons("Exp1EQSyn")}
+	K "!=" K -> K {non-assoc, cons("Exp1NEQSyn")}
+} > {
+	"not" K -> K {cons("Exp1NotSyn")}
+} > { left:
+	K "and" K -> K {left, cons("Exp1AndSyn")}
+	K "or" K -> K {left, cons("Exp1OrSyn")}
+} > {
+	K "=" K -> K {right, cons("Exp1AssignSyn")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	K ";" -> K {cons("Stmt1Stmt2ExpSyn")}
+	"if" InsertDzK "then" InsertDzK "else" K -> K {prefer, cons("Stmt1IfThnElsSyn")}
+	"if" InsertDzK "then" K -> K {cons("Stmt1IfThnSyn")}
+	"while" InsertDzK "do" K -> K {cons("Stmt1WhileSyn")}
+	"for" InsertDzK "=" InsertDzK "to" InsertDzK "do" K -> K {cons("Stmt1ForSyn")}
+	"try" InsertDzK "catch" "(" InsertDzK ")" K -> K {cons("Stmt1TrySyn")}
+	"spawn" K -> K {cons("Stmt1SpawnSyn")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	K K -> K {right, cons("Stmts1LstStmtsSyn")}
+} > {
+	K "=>" K -> K
+}
+
+context-free priorities
+{
+	K "," K -> K {right, cons("Ids1ListSyn")}
+} > {
+	K "=>" K -> K
+}
+
+context-free syntax
+	K -> InsertDzK
+	Map "(" K ")" -> K {cons("K10Builtin")}
+	Map "[" Map "]" -> MapDz {cons("Map12Builtin")}
+	Map "[" ListDlKDr "/" ListDlKDr "]" -> MapDz {cons("Map13Builtin")}
+	Map "[" "undef" "/" ListDlKDr "]" -> MapDz {cons("Map14Builtin")}
+	Map "(" ListDlKDr ")" -> ListDlKDrDz {cons("ListDlKDr15Builtin")}
+	"keys" Map -> SetDz {cons("Set16Builtin")}
+	"Set" ListDlKDr -> SetDz {cons("Set17Builtin")}
+	Set "-Set" Set -> SetDz {cons("Set18Builtin")}
+	"Bag" ListDlKDr -> BagDz {cons("Bag122Builtin")}
+	Bag "-Bag" Bag -> BagDz {cons("Bag123Builtin")}
+	"List" ListDlKDr -> ListDz {cons("List126Builtin")}
+	"wrap-with" -> K {cons("KLabel136Builtin")}
+	"Int" "(" K ")" -> K {cons("KLabel137Builtin")}
+	"Id" "(" K ")" -> K {cons("KLabel138Builtin")}
+	"Float" "(" K ")" -> K {cons("KLabel139Builtin")}
+	"Bool" "(" K ")" -> K {cons("KLabel140Builtin")}
+	".Ids" -> K {cons("Ids1Empty")}
+	".Exps" -> K {cons("Exps1Empty")}
+	"var" K ";" -> K {cons("Ddecl1VarDeclSyn")}
+	"sizeOf" "(" K ")" -> K {cons("Exp1SizeSyn")}
+	"read" "(" ")" -> K {cons("Exp1Exp1ReadSyn")}
+	"{" "}" -> K {cons("Stmt1BlockEmptySyn")}
+	"{" K "}" -> K {cons("Stmt1BlockSyn")}
+	"return" K ";" -> K {cons("Stmt1ReturnSyn")}
+	"return" ";" -> K {cons("Stmt1Return2Syn")}
+	"write" "(" K ")" ";" -> K {cons("Stmt1WriteSyn")}
+	"throw" K ";" -> K {cons("Stmt1ThrowSyn")}
+	"acquire" K ";" -> K {cons("Stmt1AcquireSyn")}
+	"release" K ";" -> K {cons("Stmt1ReleaseSyn")}
+	"rendezvous" K ";" -> K {cons("Stmt1RendezvousSyn")}
+	"print" "(" K ")" ";" -> K {cons("Stmt1PrintSyn")}
+	"arrayRef" "(" K "," K ")" -> K {cons("Val1ArrayRefSyn")}
+	"lambda" "(" K "," K ")" -> K {cons("Val1LambdaSyn")}
+	".Vals" -> K {cons("Vals1Empty")}
+	"undefined" -> K {cons("K1UndefinedSyn")}
+	"execute" -> K {cons("K1ExecuteSyn")}
+	"lookup" "(" K ")" -> K {cons("K1LookupSyn")}
+	"(" Map "," K "," Bag ")" -> ListItem {cons("ListItem1MKBSyn")}
+	"nothing" -> K {cons("Val1NothingSyn")}
+	"bindto" "(" K "," K ")" -> K {cons("K1BindToSyn")}
+	"env" "(" Map ")" -> K {cons("K1EnvSyn")}
+	"(" K "," K "," K "," Map "," Bag ")" -> ListItem {cons("ListItem1ISKMBSyn")}
+	"popx" -> K {cons("K1PopxSyn")}
+	"lvalue" "(" K ")" -> K {cons("Exp1LValueSyn")}
+	"loc" "(" K ")" -> K {cons("Val1LocSyn")}
+	K ".." K -> ListDlKDrDz {cons("ListDlKDr1DotDotSyn")}
+
+
+	VARID  ":" "Start"        -> K            {cons("Start12Var")}
+	VARID  ":" "#Id"        -> K            {cons("DzId12Var")}
+	VARID  ":" "Decl"        -> K            {cons("Ddecl12Var")}
+	VARID  ":" "Stmts"        -> K            {cons("Stmts12Var")}
+	VARID  ":" "KResult"        -> K            {cons("KResult12Var")}
+	VARID  ":" "Vals"        -> K            {cons("Vals12Var")}
+	VARID  ":" "#String"        -> K            {cons("DzString12Var")}
+	VARID  ":" "Exp"        -> K            {cons("Exp12Var")}
+	VARID  ":" "#Int"        -> K            {cons("DzInt12Var")}
+	VARID  ":" "Stmt"        -> K            {cons("Stmt12Var")}
+	VARID  ":" "KLabel"        -> K            {cons("KLabel12Var")}
+	VARID  ":" "Val"        -> K            {cons("Val12Var")}
+	VARID  ":" "Ids"        -> K            {cons("Ids12Var")}
+	VARID  ":" "#Bool"        -> K            {cons("DzBool12Var")}
+	VARID  ":" "Exps"        -> K            {cons("Exps12Var")}
+
+	"HOLE" ":" "Start"      -> K            {cons("Start12Hole")}
+	"HOLE" ":" "#Id"      -> K            {cons("DzId12Hole")}
+	"HOLE" ":" "Decl"      -> K            {cons("Ddecl12Hole")}
+	"HOLE" ":" "Stmts"      -> K            {cons("Stmts12Hole")}
+	"HOLE" ":" "KResult"      -> K            {cons("KResult12Hole")}
+	"HOLE" ":" "Vals"      -> K            {cons("Vals12Hole")}
+	"HOLE" ":" "#String"      -> K            {cons("DzString12Hole")}
+	"HOLE" ":" "Exp"      -> K            {cons("Exp12Hole")}
+	"HOLE" ":" "#Int"      -> K            {cons("DzInt12Hole")}
+	"HOLE" ":" "Stmt"      -> K            {cons("Stmt12Hole")}
+	"HOLE" ":" "KLabel"      -> K            {cons("KLabel12Hole")}
+	"HOLE" ":" "Val"      -> K            {cons("Val12Hole")}
+	"HOLE" ":" "Ids"      -> K            {cons("Ids12Hole")}
+	"HOLE" ":" "#Bool"      -> K            {cons("DzBool12Hole")}
+	"HOLE" ":" "Exps"      -> K            {cons("Exps12Hole")}
+
+
+	DzInt		-> K
+	DzBool		-> K
+	DzId		-> K
+	DzString	-> K
+
+	DzDzInt		-> DzInt	{cons("DzInt1Const")}
+	DzDzBool	-> DzBool	{cons("DzBool1Const")}
+	DzDzId		-> DzId		{cons("DzId1Const")}
+	DzDzString	-> DzString	{cons("DzString1Const")}
+
+	DzDzINT		-> DzDzInt
+	DzDzBOOL	-> DzDzBool
+	DzDzSTRING	-> DzDzString
+
+lexical syntax
+	"true" -> DzDzBool
+	"false" -> DzDzBool
+	"main" -> DzDzId
+	"$1" -> DzDzId
+	"$2" -> DzDzId
+lexical restrictions
+	"==" -/- [B].[o].[o].[l]
+	"-" -/- [I].[n].[t]
+	"or" -/- [B].[o].[o].[l]
+	">" -/- [I].[n].[t]
+	"+" -/- [S].[t].[r].[i].[n].[g]
+	"*" -/- [I].[n].[t]
+	"-" -/- [S].[e].[t]
+	"not" -/- [B].[o].[o].[l]
+	"/" -/- [I].[n].[t]
+	"<=" -/- [I].[n].[t]
+	"-" -/- [B].[a].[g]
+	"and" -/- [B].[o].[o].[l]
+	">=" -/- [I].[n].[t]
+	"+" -/- [I].[n].[t]
+	"%" -/- [I].[n].[t]
+	"<" -/- [I].[n].[t]
+

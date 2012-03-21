@@ -1,0 +1,509 @@
+load pl-builtins.maude
+load socket.maude
+load TCPSupport
+load k-model-checker.maude
+--- load pl-meta-level
+
+--- Level 0
+
+mod K-TECHNIQUE is 
+  including #INT .
+
+  var K : K . var Ks : List{K} .
+  var LItem : ListItem .  var List : List .
+
+  sorts KItem K .
+  subsorts KItem < K .
+  op . : -> K .
+  op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
+
+  sorts List{K} NeList{K} .
+
+  subsort K < NeList{K} < List{K} .
+  op .List{K} : -> List{K} [metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
+
+  op _`,`,_ : List{K} List{K} -> List{K} [assoc id: .List`{K`} prec 121 metadata "latex=(renameTo _\\ensuremath{,\\!\\!,}_)"] .
+  --- One should not modify the precedence above.  
+  --- Might cause the compilation to fail.
+  op _`,`,_ : NeList{K} List{K} -> NeList{K} [ditto] .
+  op _`,`,_ : List{K} NeList{K} -> NeList{K} [ditto] .
+
+
+  sorts KLabel .
+
+  op _`(_`) : KLabel List{K} -> KItem [prec 0 gather(& &)] .
+
+  sort ListItem List NeList .
+  subsort ListItem < NeList < List .
+  subsort ListItem < List .
+  op . : -> List .
+  op ListItem : K -> ListItem  [metadata "latex=(renameTo _)"] .
+  op __ : List List -> List [assoc id: .] .
+  op __ : NeList List -> NeList [ditto] .
+  op __ : List NeList -> NeList [ditto] .
+  
+  sort BagItem Bag NeBag .
+  subsort BagItem < NeBag < Bag .
+  subsort BagItem < Bag .
+  op . : -> Bag .
+  op BagItem : K -> BagItem [metadata "latex=(renameTo _)"] .
+  op __ : Bag Bag -> Bag [assoc comm id: .] .
+  op __ : NeBag Bag -> NeBag [ditto] .
+
+  sort SetItem Set NeSet .
+  subsort SetItem < NeSet < Set .
+  subsort SetItem < Set .
+  op . : -> Set .
+  op SetItem : K -> SetItem [metadata "latex=(renameTo _)"] .
+  op __ : Set Set -> Set [assoc comm id: .] .
+  op __ : NeSet Set -> NeSet [ditto] .
+
+  eq SI:SetItem SI:SetItem = SI:SetItem .
+
+  sort MapItem Map NeMap .
+  subsort MapItem < NeMap < Map .
+  subsort MapItem < Map .
+  op . : -> Map .
+  op _|->_ : K K -> MapItem [metadata "latex=(renameTo _\\ensuremath{\\mapsto}_)"] .
+  op __ : Map Map -> Map [assoc comm id: . prec 120] .
+  op __ : NeMap Map -> NeMap [ditto] .
+
+  sort CellLabel .
+
+  op <_>_</_> : CellLabel K CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel List CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Bag CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Set CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Map CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+
+  ops k T : -> CellLabel .
+endm
+
+--- extra stuff usefull for the K technique
+mod K-LISTK-EXTRAS is
+  including K-TECHNIQUE .
+  including #STRING .
+  subsort #Nat < K .
+  
+  var Ks Ks' : List{K} .  var K : K .
+
+  op lengthList{K}_ : List{K} -> #Nat [metadata "latex=(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
+  eq lengthList{K}(.List`{K`}) = 0 .
+  eq lengthList{K}(K:K,,Ks) = lengthList{K}(Ks) +Nat 1 . 
+
+  op headList{K}_ : NeList{K} -> K [metadata "latex=(renameTo head\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
+  op tailList{K}_ : NeList{K} -> List{K} [metadata "latex=(renameTo tail\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
+
+  eq headList{K}(K:K,,Ks) = K:K .
+  eq tailList{K}(K:K,,Ks) = Ks .
+
+  op _inList{K}_ : K List{K} -> #Bool .
+  eq K inList{K} (Ks,,K,,Ks') = true .
+  eq K inList{K} Ks = false [owise] .
+
+  op List{K}ToK_ : List{K} -> K .
+  eq List{K}ToK(.List{K}) = . .
+  eq List{K}ToK(K,,Ks) = K ~> List{K}ToK(Ks) .
+  
+  op StringToList{K}_ : #String -> K .
+  eq StringToList{K}("") = .List{K} .
+  ceq StringToList{K}(S:#String)
+	= asciiString(substrString(S:#String, 0, 1))
+	,, StringToList{K}(substrString(S:#String, 1, lengthString(S:#String)))
+	if S:#String =/=Bool "" . 
+  
+
+endm
+
+mod K-EXTRAS is
+  including K-TECHNIQUE .
+  var Ks : List{K} .  var K : K .
+  var Label1 Label2 Label : KLabel .
+ 
+  op substKLabel : K KLabel KLabel -> K .
+  op substList{K}Label`(_`,_`,_`) : List{K} KLabel KLabel -> List{K} .
+  eq substList{K}Label(.List{K},Label1, Label2) = .List{K} .
+  eq substList{K}Label((K,,Ks), Label1, Label2) 
+   = substKLabel(K,Label1,Label2),,  substList{K}Label(Ks, Label1, Label2) .
+
+  eq substKLabel(Label1(Ks), Label1, Label2) 
+   = Label2(substList{K}Label(Ks,Label1,Label2)) .
+ ceq substKLabel(Label(Ks), Label1, Label2) 
+   = Label(substList{K}Label(Ks,Label1,Label2)) if Label1 =/=Bool Label .
+  eq substKLabel((K1:KItem ~> K2:KItem ~> K), Label1, Label2)
+   = substKLabel(K1:KItem, Label1, Label2) ~> substKLabel(K2:KItem, Label1, Label2) ~> substKLabel(K, Label1, Label2) .
+  eq substKLabel(., Label1, Label2) = . .
+endm
+
+
+mod K-MAP-EXTRAS is
+  including K-TECHNIQUE .
+  including #BOOL .
+  var Map Map' : Map .  var List : List{K} . var NList1 NList2 : NeList{K} .
+  vars K1 K2 K2' K : K .
+
+  op _(_) : Map K -> K [prec 0] .
+  eq (Map K1 |-> K2)(K1) = K2 .
+
+  op _[_/_] : Map K K -> Map [prec 0] .
+
+  eq (Map K1 |-> K2)[K2' / K1] = Map K1 |-> K2' .
+  eq Map[K2 / K1] = Map K1 |-> K2 [owise] .
+
+  op _[_] : Map Map -> Map [prec 0] .
+  eq (Map K1 |-> K2)[Map' K1 |-> K2'] = Map[Map'] K1 |-> K2' .
+  eq Map[Map'] = Map Map' [owise] .
+    op _|->_ : List{K} List{K} -> Map [ditto] .
+  eq (K1,,NList1) |-> (K2,, NList2) = (K1 |-> K2) (NList1 |-> NList2) .
+  eq (K1,,NList1) |-> K2 = (K1 |-> K2) (NList1 |-> K2) .
+  eq .List`{K`} |-> List = . .
+
+  op _(_) : Map List{K} -> List{K} [prec 0] .
+  eq Map((K1,,NList1)) = Map(K1),,Map(NList1) .
+  eq Map(.List{K}) = .List{K} .
+
+
+  op _[_/_] : Map List{K} List{K} -> Map [ditto] .
+  eq Map[(K1,,NList1) / (K2,, NList2)] = (Map[K1 / K2])[NList1 / NList2] .
+  eq Map[K2 / (K1,,NList1)] = (Map[K2 / K1])[K2 / NList1] .
+  eq Map[List / .List`{K`}] = Map .
+
+
+  op _[undef/_] : Map List{K} -> Map [metadata "latex=(renameTo _[\\ensuremath{\\bot\\;}/_])"] .
+  eq Map[undef/ K1,,NList1] = Map[undef/ K1][undef/ NList1] .
+  eq Map[undef/ .List{K}] = Map .
+  eq (Map K1 |-> K2)[undef/ K1] = Map .
+---  eq Map[undef/ K] = Map [owise] .
+
+
+  
+  op $hasMapping : Map K -> #Bool   [metadata "latex=(renameTo \\$hasMapping\\mybracket{_,_})"] .
+  eq $hasMapping ((M:Map (D:K |-> R:K)), D:K) = true .
+  eq $hasMapping (M:Map, D:K) = false [owise] .
+
+  op keys_ : Map -> Set .
+  eq keys(Map (K1 |-> K2)) = SetItem(K1) keys(Map) .
+  eq keys(.) = . .
+endm
+
+mod K-SET-EXTRAS is
+  including K-TECHNIQUE .
+  including #IF-THEN-ELSE .
+  var K : K . var Ks : List{K} . var Set Set' : Set . var SetItem : SetItem .
+  op Set_ : List{K} -> Set [metadata "latex=(renameTo {\\it{}Set}\\mybracket{_})"] .
+  eq Set(.List{K}) = . .
+  eq Set(K,, Ks) = SetItem(K) Set(Ks) .
+
+  op _in_ : K Set -> #Bool .
+  eq K in Set SetItem(K) = true .
+  eq K in Set = false [owise] .
+
+  op _in_ : SetItem Set -> #Bool .
+  eq SetItem in Set SetItem = true .
+  eq SetItem in Set = false [owise] .
+
+  op _-Set_ : Set Set -> Set [metadata "latex=(renameTo _-\\subscript{{\\scriptstyle\\it{}Set}}_)"] .
+  eq . -Set Set = . .
+  eq (SetItem Set) -Set Set' = if SetItem in Set' then Set -Set Set' else SetItem (Set -Set Set') fi .
+endm
+
+mod K-BAG-EXTRAS is
+  including K-TECHNIQUE .
+  including #IF-THEN-ELSE .
+  var K : K . var Bag Bag' : Bag . var BagItem : BagItem .  var Ks : List{K} .
+  op Bag_ : List{K} -> Bag .
+  eq Bag(.List{K}) = . .
+  eq Bag(K,, Ks) = BagItem(K) Bag(Ks) .
+  
+  op _in_ : K Bag -> #Bool .
+  eq K in Bag BagItem(K) = true .
+  eq K in Bag = false [owise] .
+
+  op _in_ : BagItem Bag -> #Bool .
+  eq BagItem in Bag BagItem = true .
+  eq BagItem in Bag = false [owise] .
+
+  op _-Bag_ : Bag Bag -> Bag [metadata "latex=(renameTo _-\\subscript{{\\scriptstyle\\it{}Bag}}_)"] .
+  eq . -Bag Bag = . .
+  eq (BagItem Bag) -Bag Bag' = if BagItem in Bag' then Bag -Bag Bag' else BagItem (Bag -Bag Bag') fi .
+endm
+
+mod K-LIST-EXTRAS is
+  including K-TECHNIQUE .
+  including #BOOL .
+
+  var K K1 K2 K' : K .  var Ks Ks' : List{K} .  var LItem : ListItem .  var List : List .  var N : #NzNat .
+
+  op List_ : List{K} -> List .
+  eq List(.List{K}) = . .
+  eq List(K,,Ks) = ListItem(K) List(Ks) .
+
+  op lengthList_ : List -> #Nat .
+  eq lengthList(.).List = 0 .
+  eq lengthList(LItem List) = lengthList(List) +Nat 1 .
+
+  --- op getFromList`{K`}(_,_) : List{K} #NzNat -> K .
+  --- eq getFromList{K}((K,,Ks),1) = K .
+  --- eq getFromList{K}((K,,Ks),sNat N) = getFromList{K}(Ks,N) .
+
+  --- this does not belong here
+  op inKList : K K -> #Bool .
+  eq inKList(K, (K1 ~> K ~> K2)) = true .
+  eq inKList(K, K') = false [owise] .
+endm
+
+
+mod K-DESTRUCTORS is
+  including K-LIST-EXTRAS .
+  op getKLabel_ : K -> KLabel [metadata "latex=(renameTo getKLabel\\mybracket{_})"] .
+  op getList`{K`}_ : K -> List{K} [metadata "latex=(renameTo _)"]  .
+  --- op getKArg : K #NzNat -> K  .
+  op eraseKLabel : KLabel List{K} -> List{K} .
+  var L L' : KLabel .  var Ks : List{K} .  var NeKs1 NeKs2 : NeList{K} .  var N : #NzNat .
+  eq getKLabel(L(Ks)) = L .
+  eq getList{K}(L(Ks)) = Ks .
+  --- eq getKArg(L(Ks),N) = getFromList{K}(Ks,N) .
+  eq eraseKLabel(L, L(Ks)) = eraseKLabel(L,Ks) .
+  eq eraseKLabel(L,L'(Ks)) = L'(eraseKLabel(L,Ks)) [owise] .
+  eq eraseKLabel(L, (NeKs1,,NeKs2)) = eraseKLabel(L, NeKs1),,eraseKLabel(L, NeKs2) .
+  eq eraseKLabel(L,.List{K}) = .List{K} .
+  eq eraseKLabel(L,.) = . .
+endm
+
+--- K notation starts from here on
+
+mod K-SENTENCE is
+  sort KSentence . 
+endm
+
+
+--- KResult level
+mod K-RESULT is
+  including K-TECHNIQUE .
+  var K : K . var Ks : List{K} .
+  var LItem : ListItem .  var List : List .
+
+  sorts KResult .
+  subsorts KResult < KItem < K .
+  subsorts KResult < K .
+
+  sorts List{KResult} NeList{KResult} .
+
+  op .List{K} : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
+  subsort List{KResult} < List{K} .
+  subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
+endm
+
+mod K-HOLE is
+  including K-TECHNIQUE .
+  op HOLE : -> K .
+endm
+
+
+--- Strictness Level
+
+mod K-STRICTNESS is 
+  including K-HOLE .
+  including #STRING .
+  op freezer : K -> KLabel [strat(0) frozen] .
+
+  op cool : -> KLabel .
+  op heat : -> KLabel .
+  op heated : -> KLabel .
+  op redex : -> KLabel .
+
+  eq heat(heated(K)) = K .
+  rl heat(heated(Ks,,K,,Ks')) => K
+     [metadata "superheat=(choice)"] .
+
+  vars K : K . var Ks Ks' : List{K} .  var NKs : NeList{K} .
+endm
+
+mod K-CONTEXTS is
+  including K-HOLE .
+  including K-SENTENCE .
+  ops context_ : K -> [KSentence] [prec 126] .
+  ops context_when_ : K K -> [KSentence] [prec 126] .
+  op wrap-with : K K -> K .
+endm
+
+--- KLabel-Wrappers level
+
+mod K-WRAPPERS-LABELS is
+  including K-TECHNIQUE .
+  including #STRING .
+  op wklabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
+  op wcelllabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
+  op kList : #String -> KLabel [metadata "wrapper=(list)"] .
+  op wbag_ : Bag -> KLabel [metadata "wrapper=(builtin)"] .
+  op wset_ : Set -> KLabel [metadata "wrapper=(builtin)"] .
+  op wlist_ : List -> KLabel [metadata "wrapper=(builtin)"] .
+  op wmap_ : Map -> KLabel [metadata "wrapper=(builtin)"] .
+  op 'wrap-with : -> KLabel .
+endm
+
+
+--- K-Wrappers level
+
+mod K-WRAPPERS is
+  including K-TECHNIQUE .
+  op wklabel_ : KLabel -> K [metadata "wrapper=(builtin)"] .
+  op wcelllabel_ : CellLabel -> K [metadata "wrapper=(builtin)"] .
+  op wklist_ : List{K} -> K [metadata "wrapper=(list)"] .
+  op wset_ : Set -> K [metadata "wrapper=(builtin)"] .
+  op wbag_ : Bag -> K [metadata "wrapper=(builtin)"] .
+  op wlist_ : List -> K [metadata "wrapper=(builtin)"] .
+  op wmap_ : Map -> K [metadata "wrapper=(builtin)"] .
+endm
+
+---- K Rules Level 
+
+mod K-RULES is
+  including K-SENTENCE .
+  including #BOOL .
+  including K-TECHNIQUE .
+  ops rule_ : KLabel -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_ : List{K} -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_ : Map -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_ : List -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_ : Bag -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_ : Set -> [KSentence] [prec 126 format(b o d)] .
+  ops rule_when_ : KLabel K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : List{K} K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : Map K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : List K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : Bag K -> [KSentence] [prec 126 format(b o b o d)] .
+  ops rule_when_ : Set K -> [KSentence] [prec 126 format(b o b o d)] .
+--- TODO: and a mixing of structural/bidirectional attributes
+  op _=>_ : K K -> K [prec 125] .
+  op _=>_ : KLabel KLabel -> KLabel [prec 125] .
+  op _=>_ : CellLabel CellLabel -> CellLabel [prec 125] .
+  op _=>_ : List{K} List{K} -> List{K} [prec 125] .
+  op _=>_ : Map Map -> Map [prec 125] .
+  op _=>_ : List List -> List [prec 125] .
+  op _=>_ : Bag Bag -> Bag [prec 125] .
+  op _=>_ : Set Set -> Set [prec 125] .
+endm
+
+
+mod K-EVAL is 
+  including K-TECHNIQUE .
+  op #eval_ : Map -> Bag .
+endm
+
+mod K-CONDITION-SEARCH is
+  including K-TECHNIQUE .
+  op search_ : List{K} -> #Bool .
+  op search_ : KLabel -> #Bool .
+  op search_ : List -> #Bool .
+  op search_ : Bag -> #Bool .
+  op search_ : Set -> #Bool .
+endm
+
+--- Anonymous variables level
+
+mod K-POLYMORPHIC-VARIABLES is
+  including K-TECHNIQUE .
+  op ? : -> Anonymous [poly(0)] .
+endm
+
+mod K-CELL-ATTRS is
+  including K-TECHNIQUE .
+  including #STRING .
+  sort CellAttribute CellKey  .
+
+  op __ : CellLabel CellAttribute -> CellLabel .
+  op _=_ : CellKey #String -> CellAttribute .
+endm  
+
+
+--- ... level
+mod K-OPEN-CELLS is
+  including K-CELL-ATTRS .
+  op <_>..._...</_> : CellLabel K CellLabel -> BagItem [prec 0] .
+  op <_>..._...</_> : CellLabel List CellLabel -> BagItem [prec 0] .
+  op <_>..._...</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
+  op <_>..._...</_> : CellLabel Set CellLabel -> BagItem [prec 0] .
+  op <_>..._...</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel K CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel List CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel Set CellLabel -> BagItem [prec 0] .
+  op <_>..._</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel K CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel List CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel Bag CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel Set CellLabel -> BagItem [prec 0] .
+  op <_>_...</_> : CellLabel Map CellLabel -> BagItem [prec 0] .
+  op ellipses : -> CellKey .
+endm
+
+---- Context transformers level
+
+mod K-CONFIG is
+  including K-CELL-ATTRS .
+  including K-SENTENCE .
+  op configuration_ : Bag -> [KSentence] [prec 127] .
+  op multiplicity : -> CellKey .
+  op stream : -> CellKey .
+  op color : -> CellKey .
+---(
+  op _* : CellLabel -> CellLabel .
+  op _? : CellLabel -> CellLabel .
+  op _+ : CellLabel -> CellLabel .
+---)
+endm
+
+--- Latex Annotations
+
+mod K-LATEX is
+  including K-TECHNIQUE .
+  including K-SENTENCE .
+  including #STRING .
+  op @latex : #String -> BagItem .
+  ops latex_ : #String -> [KSentence] [prec 126 format(b o d)] .
+  op k-result : K -> K .
+endm
+
+mod K-BUILTINS is
+  including K-TECHNIQUE .
+  including K-RESULT .
+  including PL-BUILTINS .
+  including #TCP .
+  subsort #Bool #Int #String #Float #Id < K .
+  op andBool : -> KLabel .
+
+  var NeKList : NeList{K} .
+  var T1 T2 : #Bool .
+
+  eq andBool(T1,, T2,, NeKList)
+   = andBool(T1 andBool T2,, NeKList) .
+
+  eq andBool(T1,, T2)
+   = T1 andBool T2 .
+
+
+  subsort Bottom < KResult .
+endm
+
+mod K is 
+  including K-TECHNIQUE .
+  including K-WRAPPERS .
+  including K-BUILTINS .
+  including K-RESULT .              --- to express results syntactically
+  including K-RULES .               --- to write k rules with in-place rewriting
+  including K-CONFIG .              --- to specify the global configuration term
+  including K-EVAL .
+  including K-POLYMORPHIC-VARIABLES . --- defines the ? polmorfic constant
+  including K-OPEN-CELLS .          --- defines open cells like <_>..._...</_> 
+  including K-CONTEXTS .
+  including K-DESTRUCTORS .         --- defines getKLabel and getList{K} for K
+  including K-EXTRAS .              --- defines a KLabel substitution 
+  including K-LISTK-EXTRAS .
+  including K-LIST-EXTRAS .
+  including K-MAP-EXTRAS .          --- operations on Maps
+  including K-BAG-EXTRAS .          --- operations on Bags
+  including K-SET-EXTRAS .          --- operations on Sets
+  including K-LATEX .
+endm
+

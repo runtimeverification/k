@@ -1,0 +1,10 @@
+function main() {
+  try {
+    15;
+  } catch(e) {
+    print(e);   // should not print this
+  }
+  print(42,"\n");
+}
+
+// 42

@@ -1,0 +1,13 @@
+module lib/analysis-auto.generated
+
+signature
+  constructors
+    
+
+
+imports
+  include/K3Syntax
+
+
+rules
+

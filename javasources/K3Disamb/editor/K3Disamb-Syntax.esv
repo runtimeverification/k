@@ -1,0 +1,9 @@
+module K3Disamb-Syntax
+
+imports K3Disamb-Syntax.generated
+
+language
+                                                                   
+  // This file can be used for custom syntax rules.                
+  //                                                               
+  // See the imported file for a brief introduction and examples.  

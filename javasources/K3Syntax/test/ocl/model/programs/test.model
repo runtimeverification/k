@@ -1,0 +1,30 @@
+model us : authors {
+
+object dorel : professor  
+  {
+    name : string = "Lucanu";
+    post : position = fullProfessor;
+    manuscript : paper = {this};
+  };
+  
+object vlad : researcher  
+  {
+    name : string = "Rusu";
+    manuscript : paper = {this};
+  };
+  
+
+
+object this : paper  
+  {
+    title : string = "Towards a Formal Semantics for OCL in K";
+    isSubmitted : bool = true;
+    author : researcher = {dorel, vlad};
+    venue : journal = {entcs};
+  };
+  
+object entcs: journal   
+  { 
+    name : string = "K'11";
+  }    
+}

@@ -1,0 +1,152 @@
+%% Grammar for the K language
+module KTechnique
+imports Common %% For Comments and whitespace
+imports KBuiltinsBasic
+
+exports
+context-free priorities
+{
+	".K"		-> K {cons("K12Empty"), prefer}
+	"."			-> K {cons("K1Empty")}
+	K "~>" K	-> K {left, cons("K1Seq")}
+	".List{K}"	-> ListDlKDrDz {cons("ListDlKDr12Empty")}
+	ListDlKDrDz   ",," ListDlKDrDz	-> ListDlKDrDz {left, cons("ListDlKDr1List")}
+	KLabel "(" ListDlKDr ")"	-> K {cons("K1App")}
+} > { non-assoc:
+	K "=>" K	-> K {non-assoc, cons("K1Rewrite")}
+	ListDlKDr  "=>" ListDlKDr	-> ListDlKDrDz {non-assoc, cons("ListDlKDr1Rewrite")}
+}
+context-free syntax
+	K					-> ListDlKDrDz %%{cons("ListOfK3K")}
+	"HOLE"				-> K {cons("K1Hole")}
+	"HOLE" ":" "K"		-> K {cons("K12Hole")}
+	"(" ListDlKDr ")"	-> ListDlKDr {bracket}
+	"(" K ")"			-> K {bracket}
+	ListDlKDrDz			-> ListDlKDr {cons("ListDlKDr1ListOfKWrap")}
+
+context-free priorities
+{
+	".List"					-> ListDz {cons("List12Empty"), prefer}
+	"."						-> ListDz {cons("List1Empty")}
+	"ListItem" "(" K ")"	-> ListItem {cons("ListItem1LIKItem")}
+	ListItem				-> ListDz
+	ListDz ListDz			-> ListDz {left, cons("List1List")}
+} > {
+	List "=>" List			-> ListDz {non-assoc, cons("List1Rewrite")}
+}
+context-free syntax
+	"(" List ")"			-> ListDz {bracket}
+	ListDz					-> List {cons("List1ListWrap")}
+
+context-free priorities
+{
+	".Bag"				-> BagDz {cons("Bag12Empty"), prefer}
+	"."					-> BagDz {cons("Bag1Empty")}
+	BagItem				-> BagDz
+	"BagItem" "(" K ")" -> BagItem {cons("BagItem1BIKItem")}
+	%%BagItem+			-> Bag {cons("BagList")}
+	BagDz BagDz			-> BagDz {left, cons("Bag1List")}
+} > {
+	Bag "=>" Bag		-> BagDz {non-assoc, cons("Bag1Rewrite")}
+}
+context-free syntax
+	%%"(" BagItem ")"	-> BagItem {bracket}
+	"(" Bag ")"			-> BagDz {bracket}
+	BagDz				-> Bag {cons("Bag1BagWrap")}
+
+context-free priorities
+{
+	".Set"				-> SetDz {cons("Set12Empty"), prefer}
+	"."					-> SetDz {cons("Set1Empty")}
+	"SetItem" "(" K ")" -> SetItem {cons("SetItem1SIKItem")}
+	%%SetItem+			-> Set {cons("SetList")}
+	SetItem				-> SetDz %%{cons("Set3SetItem")}
+	SetDz SetDz			-> SetDz {left, cons("Set1List")}
+} > {
+	Set "=>" Set		-> SetDz {non-assoc, cons("Set1Rewrite")}
+}
+context-free syntax
+	%%"(" SetItem ")"		-> SetItem {bracket}
+	"(" Set ")"				-> SetDz {bracket}
+	SetDz					-> Set {cons("Set1SetWrap")}
+
+context-free priorities
+{
+	".Map"			-> MapDz {cons("Map12Empty"), prefer}
+	"."				-> MapDz {cons("Map1Empty")}
+	MapItem			-> MapDz %%{cons("Map3MapItem")}  %% Does SDF supports subsorting closure? I believe it generates ambiguities
+	"MapItem" "(" K "," K ")"	-> MapItem {cons("MapItem1KKItem")}
+	ListDlKDr "|->" ListDlKDr	-> MapItem {cons("MapItem1LKLKItem")}
+	%%K "|->" K					-> MapItem {cons("MapItem1MapsTo")}
+	MapDz   MapDz				-> MapDz {left, cons("Map1List")}
+	%%Map "[" K "/" K "]"		-> Map {cons("Map1MapReplaceK")}
+} > {
+	Map "=>" Map			-> MapDz {non-assoc, cons("Map1Rewrite")}
+}
+context-free syntax
+	%%"(" MapItem ")"		-> MapItem {bracket}
+	"(" Map ")"				-> MapDz {bracket}
+	MapDz					-> Map {cons("Map1MapWrap")}
+
+context-free syntax
+	%% TODO: Variables Dunno what to do with the variables
+	%% VarId ":" Type		-> Variable {cons("TypedVar")}
+	VARID ":" "List"		-> ListDz {cons("List12Var")}
+	VARID					-> ListDz {cons("List1Var")}
+	VARID ":" "ListItem"	-> ListDz {cons("ListItem12Var")}
+	VARID					-> ListDz {cons("ListItem1Var")}
+	VARID ":" "Set"			-> SetDz {cons("Set12Var")}
+	VARID					-> SetDz {cons("Set1Var")}
+	VARID ":" "SetItem"		-> SetDz {cons("SetItem12Var")}
+	VARID					-> SetDz {cons("SetItem1Var")}
+	VARID ":" "Bag"			-> BagDz {cons("Bag12Var")}
+	VARID					-> BagDz {cons("Bag1Var")}
+	VARID ":" "BagItem"		-> BagDz {cons("BagItem12Var")}
+	VARID					-> BagDz {cons("BagItem1Var")}
+	VARID ":" "Map"			-> MapDz {cons("Map12Var")}
+	VARID					-> MapDz {cons("Map1Var")}
+	VARID ":" "MapItem"		-> MapDz {cons("MapItem12Var")}
+	VARID					-> MapDz {cons("MapItem1Var")}
+	VARID ":" "K"			-> K {cons("K12Var")}
+	VARID					-> K {cons("K1Var")}
+	VARID ":" "List{K}"		-> ListDlKDrDz {cons("ListDlKDr12Var")}
+	VARID					-> ListDlKDrDz {cons("ListDlKDr1Var")}
+
+lexical syntax
+	%% rejects
+	%%"K"			-> ID {reject}
+	%%"List"		-> ID {reject}
+	"ListItem"		-> VARID {reject}
+	%%"Bag"			-> ID {reject}
+	"BagItem"		-> VARID {reject}
+	%%"Set"			-> ID {reject}
+	"SetItem"		-> VARID {reject}
+	%%"Map"			-> ID {reject}
+	"MapItem"		-> VARID {reject}
+	%%"keys"			-> ID {reject}
+	%%"hasMapping"	-> ID {reject}
+
+lexical restrictions
+	".List"		-/- [a-zA-Z0-9\{\}]
+	".ListItem"	-/- [a-zA-Z0-9]
+	".Map"		-/- [a-zA-Z0-9]
+	".MapItem"	-/- [a-zA-Z0-9]
+	".Set"		-/- [a-zA-Z0-9]
+	".SetItem"	-/- [a-zA-Z0-9]
+	".Bag"		-/- [a-zA-Z0-9]
+	".BagItem"	-/- [a-zA-Z0-9]
+	".K"		-/- [a-zA-Z0-9]
+	".List{K}"	-/- [a-zA-Z0-9]
+
+	"List"		-/- [a-zA-Z0-9]
+	"ListItem"	-/- [a-zA-Z0-9]
+	"Map"		-/- [a-zA-Z0-9]
+	"MapItem"	-/- [a-zA-Z0-9]
+	"Set"		-/- [a-zA-Z0-9]
+	"SetItem"	-/- [a-zA-Z0-9]
+	"Bag"		-/- [a-zA-Z0-9]
+	"BagItem"	-/- [a-zA-Z0-9]
+	"K"			-/- [a-zA-Z0-9]
+	"List{K}"	-/- [a-zA-Z0-9]
+	"."			-/- [a-zA-Z0-9\.]
+

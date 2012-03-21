@@ -1,0 +1,9 @@
+module K3Syntax-Folding
+
+imports K3Syntax-Folding.generated
+
+folding
+  
+  // This file can be used for custom folding rules.
+  //
+  // See the imported file for a brief introduction and examples.

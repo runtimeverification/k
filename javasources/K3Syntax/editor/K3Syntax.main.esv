@@ -1,0 +1,16 @@
+module K3Syntax.main
+
+imports K3Syntax-Builders K3Syntax-Colorer K3Syntax-Completions K3Syntax-Folding K3Syntax-Outliner K3Syntax-References K3Syntax-Syntax
+
+language General properties
+                  
+  name          : K3Syntax
+  id            : K3Syntax
+  extends       : Root
+                  
+  description   : "Spoofax/IMP-generated editor for the K3Syntax language"
+  url           : http://strategoxt.org
+                  
+  extensions    : k
+  table         : include/K3Syntax.tbl
+  start symbols : Start

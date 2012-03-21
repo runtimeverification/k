@@ -1,0 +1,28 @@
+fmod RESOLVE-DITTO is
+ including METADATA-EXTRAS .
+ including META-K-MODULE .
+ including STRING-EXTRAS .
+
+  var Q : Qid . var M : Module . var N : Nat . var Op : OpDecl . var Ops OPDS : OpDeclSet .
+  var Tl : TypeList .  var T : Type . var AS : AttrSet . var Str Str' : String .
+
+ op resolveDitto : Qid Module ~> Module .
+ eq resolveDitto(Q, M) 
+  = setName(setOps(M, resolveDittoOps(getOps(M), getOps(M))), Q) .
+
+ op resolveDittoOps : OpDeclSet OpDeclSet ~> OpDeclSet .
+ eq resolveDittoOps(Ops Op, OPDS)
+  =  resolveDittoOps(Ops, OPDS) resolveDittoOp(Op, find(metadataString(getAttrs(Op)),"ditto", 0), OPDS) .
+ eq resolveDittoOps(none, OPDS)  = none .
+
+ op resolveDittoOp : OpDecl FindResult OpDeclSet ~> OpDecl .
+ eq resolveDittoOp(Op, notFound, OPDS) = Op .
+ eq resolveDittoOp((op Q : Tl -> T [metadata(Str) AS] .), N, OPDS)
+  = (op Q : Tl -> T [AS metadata(resolveDittoMeta(Q, replace(Str, "ditto", ""), OPDS))] .) .
+ eq resolveDittoOp(Op, N, OPDS) = Op [owise] .
+
+ op resolveDittoMeta : Qid String OpDeclSet ~> String .
+ eq resolveDittoMeta(Q,Str, (op Q : Tl -> T [AS] .) OPDS)
+  = resolveDittoMeta(Q, Str + " " + replace(metadataString(AS),"ditto", ""), OPDS) .
+ eq resolveDittoMeta(Q, Str, OPDS) = Str [owise] .
+endfm

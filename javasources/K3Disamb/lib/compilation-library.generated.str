@@ -1,0 +1,143 @@
+module lib/compilation-library.generated
+
+imports
+  libstratego-lib
+  lib/editor-common.generated
+  lib/index-library.generated
+  lib/analysis-library.generated
+  
+rules // Extension points
+    
+  // Should compile given analysed ast.
+  index-compile-ast(|file, subfile, project-path) = fail
+  
+rules // Compilation
+  
+  index-schedule-compilation:
+    <with(?(_, _, _) | "(ast, path, project-path) tuple expected")> -> None()
+    with
+      queue-strategy(|"index-compilation", "Compiling!")
+    
+  index-compilation:
+    (ast, path, project-path) -> <index-compilation(|path, project-path)> ast
+  
+  index-compilation(|path, project-path):
+    ast -> None()
+    with
+      // Init
+      full-path := $[[project-path]/[path]];
+      language  := <index-origin-language> ast;
+      index-setup(|language, [project-path], full-path)
+    with
+      // Determine the files to compile by looking at changed files.
+      diffs         := <analyze-get-diffs>;
+      files         := <map(index-compilation-restore-read-file)> diffs;
+      filteredFiles := <make-set> <remove-all(index-compilation-filter-file)> files;
+      
+      // Clean compile time reads.
+      <filter(index-compilation-clean-reads)> filteredFiles;
+      
+      <set-total-work-units> <length> filteredFiles;
+      
+      // Compile the files
+      <filter(index-compilation-file(|language, project-path); complete-work-unit)> filteredFiles;
+      
+      // Clean diffs
+      analyze-clean-diff
+
+  index-compilation-file(|language, project-path):
+    (file, subfile) -> None()
+    with
+      // Parse and analyze ast.
+      ast                                 := <parse-file> file;
+      AnalysedResult(ast', _, _, _, _, _) := <analyze-top-internal(|Compile(), language, file)> (ast, file, project-path)
+    with
+      {| Index-ReadSet:
+        readSet := <new-iset>;
+        rules(Index-ReadSet: _ -> readSet);
+        
+        // Compile file
+        <index-compile-ast(|file, subfile, project-path)> ast';
+        
+        // Store compile-time reads.
+        reads := <iset-elements> readSet;
+        <index-add-all(|<index-compilation-file-tuple> (file, subfile))> reads
+      |}
+
+  index-compilation-filter-file = 
+    ?(<id>, _); (is-test-file <+ index-is-fake-file <+ not(file-exists))
+
+rules // Compile time reads
+
+  index-compilation-restore-read-file:
+    (file, subfile) -> (file', subfile)
+    with
+      file' := <string-replace(|<index-compilation-read-path>, "")> file
+      
+  index-compilation-clean-reads = 
+    ?(file, subfile); index-compilation-file-tuple; index-clear-file
+      
+  index-compilation-file-tuple:
+    (file, subfile) -> ($[[<index-compilation-read-path>]/[file]], subfile)
+    
+  index-compilation-read-path =
+    !"/.internal/reads/compile"
+    
+signature constructors // On save handling
+
+  CommitAndCompile : List(UriPart) -> Summary
+  CommitAndCompile : Namespace
+    
+rules // On save handling
+  
+  commit-and-compile:
+    (_, path, project-path) -> <id>
+    with
+      index-commit
+    with
+      index-schedule-compilation
+  
+  index-on-save:
+    (ast, _, _, path, project-path) -> None()
+    with
+      if 0 := <analysis-count> then
+        disable-commit-and-compile;
+        <commit-and-compile> (ast, path, project-path)
+      else
+        enable-commit-and-compile
+      end
+      
+  post-analyze-top(|phase, language, full-path):
+    _ -> <id>
+    with
+      if Editor() := phase then 
+          scheduledAnalyses := <analysis-count>
+      else
+        scheduledAnalyses := -1
+      end
+    with
+      if 0 := scheduledAnalyses; check-commit-and-compile then
+        disable-commit-and-compile;
+        commit-and-compile
+      end
+      
+  analysis-count = 
+    prim("SSL_EXT_queue_analysis_count")
+      
+  enable-commit-and-compile:
+    _ -> <id>
+    with
+      <index-add-all(|<index-commit-and-compile-path>)> [CommitAndCompile([CommitAndCompile(), ".internal"])]
+      
+  disable-commit-and-compile:
+    _ -> <id>
+    with
+      <index-clear-file> <index-commit-and-compile-path>
+      
+  check-commit-and-compile:
+    _ -> <id>
+    where
+        <index-get> CommitAndCompile([CommitAndCompile(), ".internal"])
+      
+  index-commit-and-compile-path =
+    !"/.internal/commit-and-compile"

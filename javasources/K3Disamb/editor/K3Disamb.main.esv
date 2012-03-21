@@ -1,0 +1,17 @@
+module K3Disamb.main
+
+imports K3Disamb-Builders K3Disamb-Colorer K3Disamb-Completions K3Disamb-Folding K3Disamb-Outliner K3Disamb-References K3Disamb-Syntax
+
+language General properties
+                  
+  name          : K3Disamb
+  id            : K3Disamb
+  extends       : Root
+                  
+  description   : "Spoofax/IMP-generated editor for the K3Disamb language"
+  url           : http://strategoxt.org
+                  
+  extensions    : k3
+  table         : include/K3Disamb.tbl
+  start symbols : Start
+  disambiguator : disambig0

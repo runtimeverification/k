@@ -1,0 +1,811 @@
+***(
+    This file is part of the K-Maude tool
+
+    Copyright (C) 2009 K Developement Team <k-list@cs.illinois.edu>
+
+    This file is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+***)
+fmod PURE-MOD-NAME-TO-QID is
+  pr META-MODULE-EXTRAS .
+  pr QID-EXTRAS .
+
+  op pureHeader2Qid :  -> Qid .
+  op pureHeader2QidList : Header -> QidList .
+  op pureParameterDecl2Qid : ParameterDecl -> Qid .
+  op pureParameterDecl2QidList : ParameterDecl -> QidList .
+  op pureParameterDeclList2Qid : ParameterDeclList -> Qid .
+  op pureParameterDeclList2QidList : ParameterDeclList -> QidList .
+
+  vars QI X : Qid .
+  var  QIL : QidList .
+  vars ME ME' : ModuleExpression .
+  var  PDL : ParameterDeclList .
+  var  PD : ParameterDecl .
+
+  eq pureHeader2Qid(QI) = QI .
+  eq pureHeader2Qid(nullHeader) = ' .
+---  eq pureHeader2Qid(pd(X :: ME)) = qidList2Qid(pureHeader2QidList(pd(X :: ME))) .
+---  eq pureHeader2QidList(pd(X :: ME)) = X ':: pureHeader2QidList(ME) .
+
+  eq pureHeader2QidList(QI) = QI .
+  eq pureHeader2QidList(nullHeader) = ' .
+
+  eq pureHeader2Qid((ME { PDL })) = qidList2Qid(pureHeader2QidList((ME { PDL }))) .
+  ceq pureHeader2QidList((ME { PDL })) 
+    = (if QI == '\s then QIL else QIL QI fi 
+       '`{ pureParameterDecl2QidList(PDL) '`} ) 
+    if QIL QI := pureHeader2QidList(ME) .
+ 
+  eq pureParameterDecl2Qid(X :: ME) = qidList2Qid(X ':: pureHeader2Qid(ME)) .
+
+  eq pureParameterDeclList2Qid(PDL)
+    = qidList2Qid(pureParameterDeclList2QidList(PDL)) .
+
+  eq pureParameterDeclList2QidList(X :: ME) = X ':: pureHeader2QidList(ME) .
+  eq pureParameterDeclList2QidList((X :: ME, PDL))
+    = pureParameterDeclList2QidList(X :: ME) '`, pureParameterDeclList2QidList(PDL)
+    [owise] .
+endfm
+
+
+fmod PURE-DECL-META-PRETTY-PRINT is
+  pr META-MODULE-EXTRAS .
+  pr META-LEVEL .
+  pr CONVERSION .
+  pr NAT-LIST .
+  pr QID-EXTRAS .
+  pr PARSE-METADATA .
+  pr K-META-OPEN-CELLS .
+  pr META-K-RULES .
+  pr META-K-CONTEXTS .
+
+  ---- name of a sort (the name of S{P1, ..., Pn} is S)
+  op getName : Sort -> Qid .
+  eq getName(S:Sort) 
+    = if pureFindOpening(string(S:Sort), "{", "}", sd(length(string(S:Sort)), 2))
+           == notFound
+      then S:Sort
+      else qid(substr(string(S:Sort), 
+                      0, 
+                      pureFindOpening(string(S:Sort), 
+                        "{", "}", 
+                        sd(length(string(S:Sort)), 2))))
+      fi .
+
+  ---- parameters of a sort (the parameters of S{P1, ..., Pn} are P1 ... Pn)
+  op pureGetPars : Sort -> ParameterList [memo] .
+  op pureGetParsAux : String Nat Nat -> ParameterList .
+
+  eq pureGetPars(S:Sort) 
+    = if pureFindOpening(string(S:Sort), "{", "}", sd(length(string(S:Sort)), 2))
+           == notFound
+      then empty
+      else pureGetParsAux(string(S:Sort), 
+             pureFindOpening(string(S:Sort), 
+               "{", "}", sd(length(string(S:Sort)), 2)) + 1,
+             length(string(S:Sort)))
+      fi .
+
+  var  St Pattern OpenPar ClosingPar : String .
+  vars Lt R N OpenPars ClosingPars : Nat .
+
+  eq pureGetParsAux(St, Lt, R)
+    = if pureFindOut(St, ",", "{", "}", Lt) == notFound
+      then qid(substr(St, Lt, sd(pureFindClosing(St, "{", "}", Lt), Lt)))
+      else (qid(substr(St, Lt, sd(pureFindOut(St, ",", "{", "}", Lt), Lt))),
+            pureGetParsAux(St, pureFindOut(St, ",", "{", "}", Lt) + 1, R))
+      fi .
+
+  ---- finds a pattern out of balanced parentheses 
+  ---- pureFindOut("S{P1, P2{P21, P22}, P3}", ",", "{", "}", 6) returns 18, not 12
+  op pureFindOut : String String String String Nat -> FindResult .
+  op pureFindOut : String String String String Nat Nat -> FindResult .
+
+  eq pureFindOut(St, Pattern, OpenPar, ClosingPar, N)
+    = pureFindOut(St, Pattern, OpenPar, ClosingPar, 0, N) .
+
+  eq pureFindOut(St, Pattern, OpenPar, ClosingPar, OpenPars, N)
+    = if N >= length(St)
+      then notFound
+      else if OpenPars == 0 and-then substr(St, N, length(Pattern)) == Pattern
+           then N
+           else if substr(St, N, length(OpenPar)) == OpenPar
+                then pureFindOut(St, Pattern, OpenPar, ClosingPar, 
+                       OpenPars + 1, N + 1)
+                else if substr(St, N, length(ClosingPar)) == ClosingPar
+                     then pureFindOut(St, Pattern, OpenPar, ClosingPar, 
+                            sd(OpenPars, 1), N + 1)
+                     else pureFindOut(St, Pattern, OpenPar, ClosingPar, 
+                            OpenPars, N + 1)
+                     fi
+                fi
+           fi
+      fi .
+
+  ---- finds the first closing unbalanced parenthesis 
+  ---- pureFindOut("P1, P2{P21, P22}, P3}", "{", "}", 6) returns 21, not 16
+  op pureFindClosing : String String String Nat -> FindResult .
+  op pureFindClosing : String String String Nat Nat -> FindResult .
+
+  eq pureFindClosing(St, OpenPar, ClosingPar, N)
+    = pureFindClosing(St, OpenPar, ClosingPar, 0, N) .
+
+  eq pureFindClosing(St, OpenPar, ClosingPar, OpenPars, N)
+    = if N >= length(St)
+      then notFound
+      else if OpenPars == 0 
+              and-then substr(St, N, length(ClosingPar)) == ClosingPar
+           then N
+           else if substr(St, N, length(OpenPar)) == OpenPar
+                then pureFindClosing(St, OpenPar, ClosingPar, 
+                       OpenPars + 1, N + 1)
+                else if substr(St, N, length(ClosingPar)) == ClosingPar
+                     then pureFindClosing(St, OpenPar, ClosingPar, 
+                            sd(OpenPars, 1), N + 1)
+                     else pureFindClosing(St, OpenPar, ClosingPar, 
+                            OpenPars, N + 1)
+                     fi
+                fi
+           fi
+      fi .
+
+  ---- finds the last opening unbalanced parenthesis 
+  ---- pureFindOpening("S{P1, P2{P21, P22}, P3}", "{", "}", 21) returns 1, not 8
+  op pureFindOpening : String String String Nat -> FindResult .
+  op pureFindOpening : String String String Nat Nat -> FindResult .
+
+  eq pureFindOpening(St, OpenPar, ClosingPar, N)
+    = pureFindOpening(St, OpenPar, ClosingPar, 0, N) .
+
+  eq pureFindOpening(St, OpenPar, ClosingPar, ClosingPars, N)
+    = if N == 0
+      then notFound
+      else if ClosingPars == 0 
+              and-then substr(St, N, length(ClosingPar)) == OpenPar
+           then N
+           else if substr(St, N, length(OpenPar)) == ClosingPar
+                then pureFindOpening(St, OpenPar, ClosingPar, 
+                       ClosingPars + 1, sd(N, 1))
+                else if substr(St, N, length(ClosingPar)) == OpenPar
+                     then pureFindOpening(St, OpenPar, ClosingPar, 
+                            sd(ClosingPars, 1), sd(N, 1))
+                     else pureFindOpening(St, OpenPar, ClosingPar, 
+                            ClosingPars, sd(N, 1))
+                     fi
+                fi
+           fi
+      fi .
+
+
+  op pureGetSort : Kind -> Sort .
+  eq pureGetSort(K:Kind) 
+    = if pureFindOut(string(K:Kind), "`,", "{", "}", 0) == notFound
+      then qid(substr(string(K:Kind), 
+                      2, 
+                      sd(length(string(K:Kind)), 4)))
+      else qid(substr(string(K:Kind), 
+                      2, 
+                      sd(pureFindOut(string(K:Kind), "`,", "{", "}", 0), 2)))
+      fi .
+
+
+  op pureViewExp2Qid : ViewExp -> Qid .
+  op pureParameterList2Qid : ParameterList -> Qid .
+  op pureViewExp2QidList : ViewExp -> QidList .
+  op pureParameterList2QidList : ParameterList -> QidList .
+
+  var  P : ViewExp .
+  var  PL : NeParameterList .
+
+  eq pureParameterList2QidList(P) = pureViewExp2QidList(P) .
+  ceq pureParameterList2QidList((P, PL))
+    = (if QI == '`) then QIL QI  else QIL QI fi) 
+      '`, pureParameterList2QidList(PL)
+    if QIL QI := pureViewExp2QidList(P).
+
+  eq pureViewExp2QidList(V{PL})
+    = (pureViewExp2QidList(V) '`{ pureParameterList2QidList(PL) '`}) .
+  ceq pureViewExp2QidList(VE ;; VE')
+    = (pureViewExp2QidList(VE) '; pureViewExp2QidList(VE')) 
+    if VE =/= mtViewExp /\ VE' =/= mtViewExp .
+  eq pureViewExp2QidList(V) = V .
+ 
+  eq pureParameterList2Qid(P) = pureViewExp2Qid(P) .
+  eq pureParameterList2Qid((P, PL))
+    = qid(string(pureViewExp2Qid(P)) + ", " + string(pureParameterList2Qid(PL))) .
+
+  eq pureViewExp2Qid(VE) = qidList2Qid(pureViewExp2QidList(VE)) .
+
+
+  op pureEMetaPrettyPrint : Sort -> QidList .
+  op pureEMetaPrettyPrint : SortSet -> QidList .
+  op pureEMetaPrettyPrint : TypeList -> QidList .
+  op pureEMetaPrettyPrint : SubsortDeclSet -> QidList .
+  op pureEMetaPrettyPrint : Module OpDeclSet -> QidList .
+  op pureEMetaPrettyPrintVars : OpDeclSet -> QidList .
+  op pureEMetaPrettyPrint : Module MembAxSet -> QidList .
+  op pureEMetaPrettyPrint : Module EquationSet -> QidList .
+  op pureEMetaPrettyPrint : Module RuleSet -> QidList .
+  op pureEMetaPrettyPrint : Module Condition -> QidList .
+  op pureEMetaPrettyPrint : Module Term -> QidList .
+
+  eq pureEMetaPrettyPrint(U, MAS) = pureEMetaPrettyPrint(U, MAS, true) .
+  eq pureEMetaPrettyPrint(U, EqS) = pureEMetaPrettyPrint(U, EqS, true) .
+  eq pureEMetaPrettyPrint(U, RlS) = pureEMetaPrettyPrint(U, RlS, true) .
+  eq pureEMetaPrettyPrint(U, Cond) = pureEMetaPrettyPrint(U, Cond, true) .
+  eq pureEMetaPrettyPrint(U, T) = pureEMetaPrettyPrint(U, T, true) .
+
+  op pureEMetaPrettyPrint : Module MembAxSet Bool -> QidList .
+  op pureEMetaPrettyPrint : Module EquationSet Bool -> QidList .
+  op pureEMetaPrettyPrint : Module RuleSet Bool -> QidList .
+  op pureEMetaPrettyPrint : Module Condition Bool -> QidList .
+  op pureEMetaPrettyPrint : Module Term Bool -> QidList .
+
+  ---- error handling
+  eq metaPrettyPrint(M, T, POS:PrintOptionSet) 
+    = 'Module getName(M) 'contains 'errors. .
+
+  op pureEMetaPrettyPrintCell : Module SplitCell Sort Bool -> QidList .
+  eq pureEMetaPrettyPrintCell(M, SC, Ty, B)
+   = qid("<" + string(getName(SC))) pureEMetaPrettyPrintCellAttrs(getAttributes(SC)) qid("type=\"" + string(Ty) + "\">")  '\s pureEMetaPrettyPrint(Ty, M, getContents(SC), B) '\s qid("</" + string(getName(SC)) + ">") . 
+
+  op pureEMetaPrettyPrint : Sort Module Term Bool -> QidList .
+ ceq pureEMetaPrettyPrint(Ty, M, Q[Tl], B)
+   = pureEMetaPrettyPrintL(Ty, M, Tl, B, if Ty == (K).Sort then ('\s '~> '\s) else nil fi) 
+  if Q = ctor(Ty) .
+ ceq pureEMetaPrettyPrint(Ty, M, Ct, B) = '.
+  if Ct = emptyCt(Ty)  .
+ ceq pureEMetaPrettyPrint('Bag, M, T, B)
+   = pureEMetaPrettyPrintCell(M, SC,  getCellType(M,leastSort(M, getContents(SC))), B)
+  if SC := splitKCell(T) .
+
+ ceq pureEMetaPrettyPrint(Ty, M, Q[T1,T2], B)
+   = '`( pureEMetaPrettyPrint(Ty, M, T1, B) '\s '=> '\s pureEMetaPrettyPrint(Ty, M, T2, B) '`) 
+  if Q = replaceS .
+
+ ceq pureEMetaPrettyPrint('K, M, Q[T1,T2], B)
+   = pureEMetaPrettyPrint(KLabel, M, T1, B) '`( pureEMetaPrettyPrint(K, M, T2, B) '`)
+  if Q = kApplyS .
+
+ ceq pureEMetaPrettyPrint('K, M, Q[Tl], B)
+   = pureEMetaPrettyPrintL('K, M, Tl, B, ('`, '\s))
+  if Q = kListS .
+
+
+  eq pureEMetaPrettyPrint(Ty, M, T, B)
+   = pureEMetaPrettyPrint(M, T, B) [owise] .
+
+  
+  op pureEMetaPrettyPrintL : Sort Module TermList Bool QidList -> QidList .
+  eq pureEMetaPrettyPrintL(Ty, M, empty, B, QIL) = nil .
+  eq pureEMetaPrettyPrintL(Ty, M, T, B, QIL) = pureEMetaPrettyPrint(Ty, M, T, B) .
+ eq pureEMetaPrettyPrintL(Ty, M, (T,NTl), B, QIL) = pureEMetaPrettyPrint(Ty, M, T, B) QIL pureEMetaPrettyPrintL(Ty, M, NTl, B, QIL) .
+
+
+  op pureEMetaPrettyPrintCellAttrs : AttrSet -> QidList .
+  eq pureEMetaPrettyPrintCellAttrs(ellipses |-> none AtS)
+   = pureEMetaPrettyPrintCellAttrs(AtS) .
+  eq pureEMetaPrettyPrintCellAttrs(multiplicity |-> one AtS)
+   = pureEMetaPrettyPrintCellAttrs(AtS) .
+  eq pureEMetaPrettyPrintCellAttrs(AK |-> AV AtS)
+   = qid(pureEMetaPrettyPrintCellAttrKey(AK) + "=\"" + pureEMetaPrettyPrintCellAttrVal(AV) + "\"") '\s pureEMetaPrettyPrintCellAttrs(AtS) [owise] . 
+  eq pureEMetaPrettyPrintCellAttrs(none) = nil .
+
+
+  op pureEMetaPrettyPrintCellAttrKey : AttrKey -> String .
+  eq pureEMetaPrettyPrintCellAttrKey(AK) = string(symbolAK AK) .
+  op pureEMetaPrettyPrintCellAttrVal : AttrVal -> String .
+  eq pureEMetaPrettyPrintCellAttrVal(Str) = Str .
+  eq pureEMetaPrettyPrintCellAttrVal(Ellipses) = symbolES Ellipses .
+  eq pureEMetaPrettyPrintCellAttrVal(Multiplicity) = symbolM Multiplicity .
+
+  var AK : AttrKey .  var AV : AttrVal .  var SC : SplitCell .
+  var Multiplicity : Multiplicity . var Ellipses : Ellipses . 
+  var Q : Qid .  var NTl : NeTermList .  var Tl : TermList .
+  var Ct : Constant .  var T1 T2 : Term .
+
+
+  eq pureEMetaPrettyPrint(U, T, false) = metaPrettyPrint(U, T, format number rat) [owise] .
+  eq pureEMetaPrettyPrint(U, T, true) = metaPrettyPrint(U, T) [owise] .
+ 
+  op pureEMetaPrettyPrint : Module AttrSet -> QidList .
+  op pureEMetaPrettyPrint : NatList -> QidList .
+  op pureEMetaPrettyPrint : ViewExp -> QidList .
+  op pureEMetaPrettyPrint : Module HookList -> QidList .
+
+  vars QI QI' QI'' F V L : Qid .
+  var  QIL : QidList .
+  var  M : Module .
+  var  U : Module .
+  vars VE VE' : ViewExp .
+  vars SS : SortSet .
+  vars S S' : Sort .
+  var  TyL : TypeList .
+  var  Ty : Type .
+  var  SSDS : SubsortDeclSet .
+  var  OPDS : OpDeclSet .
+  var  AtS : AttrSet .
+  var  MAS : MembAxSet .
+  var  EqS : EquationSet .
+  var  RlS : RuleSet .
+  var  Hk : Hook .
+  var  HkL : HookList .
+  var  I : Int .
+  var  NL : NatList .
+  vars T T' T'' T3 : Term .
+  var  Cond : Condition .
+  var B : Bool .
+  var Str Str1 Str2 : String .
+
+---  ceq pureEMetaPrettyPrint(VE) = viewExp2QidList(VE) if not VE :: TypeList .
+
+  --- eq pureEMetaPrettyPrint(Ty) = Ty .
+
+  eq pureEMetaPrettyPrint(S)
+    = if pureGetPars(S) == empty
+      then S
+      else getName(S) '`{ pureParameterList2QidList(pureGetPars(S)) '`}
+      fi .
+  eq pureEMetaPrettyPrint(K:Kind) = '`[ pureEMetaPrettyPrint(pureGetSort(K:Kind)) '`] . 
+
+  eq pureEMetaPrettyPrint((S ; SS)) 
+    = (pureEMetaPrettyPrint(S) pureEMetaPrettyPrint(SS))
+    [owise] .
+  eq pureEMetaPrettyPrint((none).SortSet) = nil .
+
+  eq pureEMetaPrettyPrint(Ty TyL) 
+    = pureEMetaPrettyPrint(Ty) pureEMetaPrettyPrint(TyL) 
+    [owise] .
+  eq pureEMetaPrettyPrint((nil).TypeList) = nil .
+
+  eq pureEMetaPrettyPrint(((subsort S < S' .) SSDS))
+    = ( 
+       'subsort pureEMetaPrettyPrint(S) 
+           '< pureEMetaPrettyPrint(S') '.  '\n
+       pureEMetaPrettyPrint(SSDS)) .
+  eq pureEMetaPrettyPrint((none).SubsortDeclSet) = nil .
+ 
+  eq pureEMetaPrettyPrint(M, ((op F : TyL -> Ty [AtS metadata(Str)] .) OPDS))
+   = pureEMetaPrettyPrint(M, (op F : TyL -> Ty [AtS metadataParse(Str)] .) OPDS) .
+
+  eq pureEMetaPrettyPrint(M, ((op F : nil -> 'KLabel [AtS] .) OPDS))
+   = pureEMetaPrettyPrint(M, OPDS) .
+
+  eq pureEMetaPrettyPrint(M, ((op F : nil -> 'CellLabel [AtS] .) OPDS))
+   = pureEMetaPrettyPrint(M, OPDS) .
+
+  eq pureEMetaPrettyPrint(M, ((op '_=>_ : Ty Ty -> Ty [AtS] .) OPDS))
+   = pureEMetaPrettyPrint(M, OPDS) .
+
+  eq pureEMetaPrettyPrint(M, ((op 'rule_ : Ty -> '`[KSentence`] [AtS] .) OPDS))
+   = pureEMetaPrettyPrint(M, OPDS) .
+
+  eq pureEMetaPrettyPrint(M, ((op 'rule_if_ : Ty 'K -> '`[KSentence`] [AtS] .) OPDS))
+   = pureEMetaPrettyPrint(M, OPDS) .
+
+  eq pureEMetaPrettyPrint(M, ((op F : TyL -> Ty [AtS pair(Str,"builtin")] .) OPDS))
+   = pureEMetaPrettyPrint(M, OPDS) .
+
+
+  eq pureEMetaPrettyPrint(M, ((op F : TyL -> Ty [none] .) OPDS))
+    = ( 
+       'op F ': pureEMetaPrettyPrint(TyL) 
+       '-> pureEMetaPrettyPrint(Ty) '.  '\n
+       pureEMetaPrettyPrint(M, OPDS)) [owise] .
+  eq pureEMetaPrettyPrint(M, ((op F : TyL -> Ty [AtS] .) OPDS))
+    = ( 
+       'op F ': pureEMetaPrettyPrint(TyL) 
+       '-> pureEMetaPrettyPrint(Ty) 
+         '`[ pureEMetaPrettyPrint(M, AtS) '`]  '. '\n
+       
+       pureEMetaPrettyPrint(M, OPDS))
+    [owise] .
+  eq pureEMetaPrettyPrint(M, (none).OpDeclSet)  = nil .
+
+  eq pureEMetaPrettyPrintVars((op F : nil -> Ty [none] .) OPDS)
+    = ( 'var F ': pureEMetaPrettyPrint(Ty) '. 
+       pureEMetaPrettyPrintVars(OPDS)) .
+  eq pureEMetaPrettyPrintVars((none).OpDeclSet)  = nil .
+
+ ceq pureEMetaPrettyPrint(M, Mb MAS, B)
+   = (pureEMetaPrettyPrintConfig(M, T, B)  pureEMetaPrettyPrint(M, MAS, B)) 
+  if T := extractConfTerm(Mb) .
+
+ ceq pureEMetaPrettyPrint(M, Mb MAS, B)
+   = (pureEMetaPrettyPrintContext(M, KCS, B)  pureEMetaPrettyPrint(M, MAS, B)) 
+  if KCS := splitKContext(Mb) .
+
+ ceq pureEMetaPrettyPrint(M, Mb MAS, B)
+   = (pureEMetaPrettyPrintRule(M, KRS, B)  pureEMetaPrettyPrint(M, MAS, B)) 
+  if KRS := splitKRule(Mb) .
+
+  op pureEMetaPrettyPrintContext : Module KContextSplit Bool -> QidList .
+  eq pureEMetaPrettyPrintContext(M, KCS, B) = ('\s '\s 'context '\s pureEMetaPrettyPrint(getCellType(M,leastSort(M,getContents(KCS))),M,getContents(KCS),B) if getCondition(KCS) == empty then nil else '\s 'if '\s pureEMetaPrettyPrint(getCellType(M,leastSort(M,getCondition(KCS))), M, getCondition(KCS), B) fi if getAttrs(KCS) == none then nil else '\s '`[ '\s pureEMetaPrettyPrint(M, metadataParse(getAttrs(KCS))) '`] fi '\n) .
+
+  op pureEMetaPrettyPrintRule : Module KRuleSplit Bool -> QidList .
+  eq pureEMetaPrettyPrintRule(M, KRS, B) = ('\s '\s 'rule '\s pureEMetaPrettyPrint(getCellType(M,leastSort(M,getContents(KRS))),M,getContents(KRS),B) if getCondition(KRS) == empty then nil else '\s 'if '\s pureEMetaPrettyPrint(getCellType(M,leastSort(M,getCondition(KRS))), M, getCondition(KRS), B) fi if getAttrs(KRS) == none then nil else '\s '`[ '\s pureEMetaPrettyPrint(M, metadataParse(getAttrs(KRS))) '`] fi '\n) .
+
+  op pureEMetaPrettyPrintConfig : Module Term Bool -> QidList .
+  eq pureEMetaPrettyPrintConfig(M, T, B) = ('\s '\s 'configuration '\s pureEMetaPrettyPrint(getCellType(M,leastSort(M,T)), M, T, B) '\n) .
+
+
+  var KCS : KContextSplit .  var KRS : KRuleSplit .   var Mb : MembAx .
+
+  eq pureEMetaPrettyPrint(M, (mb T : S [none] .) MAS, B)
+    = ( 'mb pureEMetaPrettyPrint(M, T, B) 
+                   ': pureEMetaPrettyPrint(S) '.  '\n
+       pureEMetaPrettyPrint(M, MAS, B)) [owise] .
+  eq pureEMetaPrettyPrint(M, (mb T : S [AtS] .) MAS, B)
+    = ( 'mb pureEMetaPrettyPrint(M, T, B) 
+                   ': pureEMetaPrettyPrint(S) 
+                '`[ pureEMetaPrettyPrint(M, AtS) '`]  '.  '\n
+       pureEMetaPrettyPrint(M, MAS, B)) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, (cmb T : S if Cond [none] .) MAS, B)
+    = ( 'cmb pureEMetaPrettyPrint(M, T, B) 
+                   ': pureEMetaPrettyPrint(S) 
+         'if pureEMetaPrettyPrint(M, Cond, B) '.  '\n
+       pureEMetaPrettyPrint(M, MAS, B)) .
+  eq pureEMetaPrettyPrint(M, (cmb T : S if Cond [AtS] .) MAS, B)
+    = ( 'cmb pureEMetaPrettyPrint(M, T, B) 
+                   ': pureEMetaPrettyPrint(S) 
+         'if pureEMetaPrettyPrint(M, Cond, B) 
+            '`[ pureEMetaPrettyPrint(M, AtS) '`]  '. '\n 
+       pureEMetaPrettyPrint(M, MAS, B)) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, (none).MembAxSet, B) = nil .
+
+  eq pureEMetaPrettyPrint(M, ((eq T = T' [none] .) EqS), B)
+    = ( 'eq  pureEMetaPrettyPrint(M, T, B) 
+         '=  pureEMetaPrettyPrint(M, T', B)  '.  '\n
+       
+       pureEMetaPrettyPrint(M, EqS, B)) .
+  eq pureEMetaPrettyPrint(M, ((eq T = T' [AtS] .) EqS), B)
+    = ( 'eq  pureEMetaPrettyPrint(M, T, B) 
+         '=  pureEMetaPrettyPrint(M, T', B) 
+            '`[ pureEMetaPrettyPrint(M, AtS) '`]  '.  '\n
+       pureEMetaPrettyPrint(M, EqS, B)) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, ((ceq T = T' if Cond [none] .) EqS), B)
+    = ( 'ceq  pureEMetaPrettyPrint(M, T, B) 
+         '=  pureEMetaPrettyPrint(M, T', B) 
+         'if  pureEMetaPrettyPrint(M, Cond, B)  '. '\n
+       
+       pureEMetaPrettyPrint(M, EqS, B)) .
+  eq pureEMetaPrettyPrint(M, ((ceq T = T' if Cond [AtS] .) EqS), B)
+    = ( 'ceq  pureEMetaPrettyPrint(M, T, B) 
+         '=  pureEMetaPrettyPrint(M, T', B) 
+         'if  pureEMetaPrettyPrint(M, Cond, B) 
+            '`[ pureEMetaPrettyPrint(M, AtS) '`]  '.  '\n
+       pureEMetaPrettyPrint(M, EqS, B)) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, (none).EquationSet, B) = nil .
+
+  eq pureEMetaPrettyPrint(M, ((rl T => T' [none] .) RlS), B)
+    = ( 'rl  pureEMetaPrettyPrint(M, T, B) 
+         '=>  pureEMetaPrettyPrint(M, T', B)  '. '\n
+       
+       pureEMetaPrettyPrint(M, RlS, B)) .
+  eq pureEMetaPrettyPrint(M, ((rl T => T' [AtS] .) RlS), B)
+    = ( 'rl  pureEMetaPrettyPrint(M, T, B) 
+         '=>  pureEMetaPrettyPrint(M, T', B) 
+            '`[ pureEMetaPrettyPrint(M, AtS) '`]  '. '\n
+       pureEMetaPrettyPrint(M, RlS, B)) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, ((crl T => T' if Cond [none] .) RlS), B)
+    = ( 'crl  pureEMetaPrettyPrint(M, T, B) 
+         '=>  pureEMetaPrettyPrint(M, T', B) 
+         'if  pureEMetaPrettyPrint(M, Cond, B)  '. '\n
+       
+       pureEMetaPrettyPrint(M, RlS, B)) .
+  eq pureEMetaPrettyPrint(M, ((crl T => T' if Cond [AtS] .) RlS), B)
+    = ( 'crl  pureEMetaPrettyPrint(M, T, B) 
+         '=>  pureEMetaPrettyPrint(M, T', B) 
+         'if  pureEMetaPrettyPrint(M, Cond, B) 
+            '`[ pureEMetaPrettyPrint(M, AtS) '`]  '.  '\n
+       pureEMetaPrettyPrint(M, RlS, B)) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, (none).RuleSet, B) = nil .
+
+---(
+  eq pureEMetaPrettyPrint(M, T = 'true.Bool /\ Cond, B)
+   =  (pureEMetaPrettyPrint(M, T, B)
+      '/\ pureEMetaPrettyPrint(M, Cond, B)) 
+    [owise] .
+---)
+  eq pureEMetaPrettyPrint(M, T = T' /\ Cond, B)
+    = (pureEMetaPrettyPrint(M, T, B) '= pureEMetaPrettyPrint(M, T', B) 
+      '/\ pureEMetaPrettyPrint(M, Cond, B)) ---if T' =/= 'true.Bool 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, T : S /\ Cond, B)
+    = (pureEMetaPrettyPrint(M, T, B) ': pureEMetaPrettyPrint(S) 
+      '/\ pureEMetaPrettyPrint(M, Cond, B)) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, T := T' /\ Cond, B)
+    = (pureEMetaPrettyPrint(M, T, B) ':= pureEMetaPrettyPrint(M, T', B) 
+      '/\ pureEMetaPrettyPrint(M, Cond, B)) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, T => T' /\ Cond, B)
+    = (pureEMetaPrettyPrint(M, T, B) '=> pureEMetaPrettyPrint(M, T', B) 
+      '/\ pureEMetaPrettyPrint(M, Cond, B)) 
+    [owise] .
+---(
+  eq pureEMetaPrettyPrint(M, T = 'true.Bool, B) 
+    = pureEMetaPrettyPrint(M, T, B) .
+---)
+  eq pureEMetaPrettyPrint(M, T = T', B) 
+    = (pureEMetaPrettyPrint(M, T, B) '= pureEMetaPrettyPrint(M, T', B))  .
+  eq pureEMetaPrettyPrint(M, T : S, B) 
+    = (pureEMetaPrettyPrint(M, T, B) ': pureEMetaPrettyPrint(S)) .
+  eq pureEMetaPrettyPrint(M, T := T', B) 
+    = (pureEMetaPrettyPrint(M, T, B) ':= pureEMetaPrettyPrint(M, T', B)) .
+  eq pureEMetaPrettyPrint(M, T => T', B) 
+    = (pureEMetaPrettyPrint(M, T, B) '=> pureEMetaPrettyPrint(M, T', B)) .
+
+  eq pureEMetaPrettyPrint(M, (assoc AtS))  
+    = ('assoc pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (comm AtS))   
+    = ('comm pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (memo AtS))   
+    = ('memo pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (idem AtS))   
+    = ('idem pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (id(T) AtS))
+    = ('id: pureEMetaPrettyPrint(M, T) pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (right-id(T) AtS))
+    = ('right 'id: pureEMetaPrettyPrint(M, T) pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (left-id(T) AtS))
+    = ('left 'id: pureEMetaPrettyPrint(M, T) pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (poly(NL) AtS))
+    = ('poly '`( pureEMetaPrettyPrint(NL) '`) 
+       pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (strat(NL) AtS))
+    = ('strat '`( pureEMetaPrettyPrint(NL) '`) 
+       pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (memo AtS))   
+    = ('memo pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (prec(I) AtS))
+    = ('prec pureEMetaPrettyPrint(I) pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (gather(QIL) AtS))
+    = ('gather '`( QIL '`) pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (format(QIL) AtS))
+    = ('format '`( QIL '`) pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (ctor AtS))   
+    = ('ctor pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (frozen(NL) AtS)) 
+    = ('frozen '`( pureEMetaPrettyPrint(NL) '`) 
+       pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (iter AtS))   
+    = ('iter pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (special(HkL) AtS))
+    = ('special '`( pureEMetaPrettyPrint(M, HkL) '`) 
+       pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (config AtS))   
+    = ('config pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (object AtS))   
+    = ('object pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (msg AtS))   
+    = ('msg pureEMetaPrettyPrint(M, AtS)) .
+
+  eq pureEMetaPrettyPrint(M, (label(QI) AtS))
+    = ('label QI pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (metadata(St) AtS))
+    = ('metadata qid("\"" + St + "\"") 
+       pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (nonexec AtS))
+    = ('nonexec pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (owise AtS))
+    = ('owise pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (print(QIL) AtS))
+    = ('print QIL pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (pair(Str1,"") AtS))   
+    = (qid(Str1) pureEMetaPrettyPrint(M, AtS)) .
+  eq pureEMetaPrettyPrint(M, (pair(Str1,Str2) AtS))   
+   = pureEMetaPrettyPrintPair(M, pair(Str1, Str2))  '\s pureEMetaPrettyPrint(M, AtS)  [owise] .
+
+  op pureEMetaPrettyPrintPair : Module Attr -> QidList [strat(0 1)] .
+  eq pureEMetaPrettyPrintPair(M, pair(Str1, Str2))  
+   = pureEMetaPrettyPrintPair(M, Str1, Str2) . 
+
+  op pureEMetaPrettyPrintPair : Module String String -> QidList .
+  eq pureEMetaPrettyPrintPair(M, Str1, "")  
+   = qid(Str1) .
+  eq pureEMetaPrettyPrintPair(M, Str1, Str2)  
+   = qid(Str1) '`( tokenize(Str2) '`) [owise] .
+
+  eq pureEMetaPrettyPrint(M, (karity(N) AtS)) 
+    = pureEMetaPrettyPrint(M, metaPair("arity",string(N,10)) AtS) .
+  
+  eq pureEMetaPrettyPrint(M, kstrict(NL,QI) AtS) = pureEMetaPrettyPrintPair(M, pair(string(QI) + "-strict", IntList2String(NL))) '\s  pureEMetaPrettyPrint(M, AtS) .  
+  eq pureEMetaPrettyPrint(M, seqkstrict(NL,QI) AtS) = pureEMetaPrettyPrintPair(M, metaPair(string(QI) + "-seqstrict", IntList2String(NL))) '\s pureEMetaPrettyPrint(M, AtS) .  
+  eq pureEMetaPrettyPrint(M, klocation(Str) AtS) = (pureEMetaPrettyPrintPair(M, pair("location", Str)) '\s  pureEMetaPrettyPrint(M, AtS)) .
+
+
+  eq pureEMetaPrettyPrint(M, (none).AttrSet) = nil .
+
+  ceq pureEMetaPrettyPrint(M, (Hk HkL)) 
+    = (pureEMetaPrettyPrint(M, Hk) pureEMetaPrettyPrint(M, HkL)) 
+    if HkL =/= nil .
+  eq pureEMetaPrettyPrint(M, id-hook(QI, nil)) = ('id-hook QI) .
+  eq pureEMetaPrettyPrint(M, id-hook(QI, QIL))
+    = ('id-hook QI '`( QIL '`) ) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, op-hook(QI, QI', nil, QI''))
+    = ('op-hook QI '`( QI' ': '~> QI'' '`) ) .
+  eq pureEMetaPrettyPrint(M, op-hook(QI, QI', QIL, QI''))
+    = ('op-hook QI '`( QI' ': QIL '~> QI'' '`) ) 
+    [owise] .
+  eq pureEMetaPrettyPrint(M, term-hook(QI, T))
+    = ('term-hook QI '`( pureEMetaPrettyPrint(M, T) '`) ) .
+
+  eq pureEMetaPrettyPrint((I NL)) = (qid(string(I, 10)) pureEMetaPrettyPrint(NL)) .
+  eq pureEMetaPrettyPrint((nil).NatList) = nil .
+
+endfm
+
+fmod PURE-MODULE-META-PRETTY-PRINT is
+  pr META-LEVEL .
+  ---pr RENAMING-EXPR-EVALUATION .
+  pr PURE-DECL-META-PRETTY-PRINT .
+  pr PURE-MOD-NAME-TO-QID .
+
+  op pureEMetaPrettyPrint : Module Module -> QidList .
+
+  op pureEMetaPrettyPrint : Module Module -> QidList .
+  op pureEMetaPrettyPrint : Header -> QidList .
+  op pureEMetaPrettyPrint : ParameterDeclList -> QidList .
+  op pureEMetaPrettyPrint : ImportList -> QidList .
+
+  var  M : Module .
+  vars QI F F' L L' : Qid .
+  var  QIL : QidList .
+  var  ME : ModuleExpression .
+  vars S S' : Sort .
+  var  Ty : Type .
+  var  TyL : TypeList .
+  var  SS : SortSet .
+  var  PD : ParameterDecl .
+  var  PDL : ParameterDeclList .
+  vars IL IL' : ImportList .
+  var  SSDS : SubsortDeclSet .
+  var  OPDS : OpDeclSet .
+  var  MAS : MembAxSet .
+  var  EqS : EquationSet .
+  var  RlS : RuleSet .
+  var  U : Module .
+  var  AtS : AttrSet .
+---  var  MN : ModuleName .
+
+  ceq pureEMetaPrettyPrint(ME) 
+    = if QI == '`) or QI == '`] or QI == '`} 
+      then QIL QI 
+      else QIL QI 
+      fi
+    if QIL QI := pureHeader2QidList(ME) .
+
+---  eq pureEMetaPrettyPrint(W:[Module], unitError(QIL)) = QIL .
+---  eq pureEMetaPrettyPrint(unitError(QIL), noModule) = QIL .
+---  eq pureEMetaPrettyPrint(noModule, noModule) = nil .
+  eq pureEMetaPrettyPrint(M, mod ME is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
+    = ('\n '---K-MAUDE-GENERATED-OUTPUT-BEGIN--- '\n          
+       'module pureEMetaPrettyPrint(ME)
+          pureEMetaPrettyPrint(IL) 
+           nil
+          pureEMetaPrettyPrint(SSDS) 
+          pureEMetaPrettyPrint(M, OPDS)
+          pureEMetaPrettyPrint(M, MAS) 
+        'end 'module '\n '---K-MAUDE-GENERATED-OUTPUT-END----- '\n) .
+  eq pureEMetaPrettyPrint(M, mod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
+    = ( 
+       'mod pureEMetaPrettyPrint(ME) (if PDL == nil 
+                                      then nil
+                                      else '`{ pureEMetaPrettyPrint(PDL) '`} 
+                                      fi) 'is 
+          pureEMetaPrettyPrint(IL) 
+          (if SS == none
+           then nil
+           else ( 'sorts pureEMetaPrettyPrint(SS) '. )
+           fi) 
+          pureEMetaPrettyPrint(SSDS) 
+          pureEMetaPrettyPrint(M, OPDS) 
+          pureEMetaPrettyPrint(M, MAS) 
+          pureEMetaPrettyPrint(M, EqS) 
+          pureEMetaPrettyPrint(M, RlS) 
+        'endm '\n) .
+---(
+  eq pureEMetaPrettyPrint(M, th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth)
+    = ( 
+       'th pureEMetaPrettyPrint(MN) 'is 
+          pureEMetaPrettyPrint(IL) 
+          (if SS == none
+           then nil
+           else ( 'sorts pureEMetaPrettyPrint(SS) '. )
+           fi) 
+          pureEMetaPrettyPrint(SSDS) 
+          pureEMetaPrettyPrint(M, OPDS)
+          pureEMetaPrettyPrint(M, MAS) 
+          pureEMetaPrettyPrint(M, EqS) 
+          pureEMetaPrettyPrint(M, RlS) 
+        'endth '\n) .
+---)
+  eq pureEMetaPrettyPrint(M, fmod ME is IL sorts SS . SSDS OPDS MAS EqS endfm)
+    = ( 
+       'fmod pureEMetaPrettyPrint(ME) 'is 
+           pureEMetaPrettyPrint(IL) 
+           (if SS == none
+            then nil
+            else ( 'sorts pureEMetaPrettyPrint(SS) '. )
+            fi)  
+           pureEMetaPrettyPrint(SSDS) 
+           pureEMetaPrettyPrint(M, OPDS)
+           pureEMetaPrettyPrint(M, MAS) 
+           pureEMetaPrettyPrint(M, EqS) 
+        'endfm '\n) .
+  eq pureEMetaPrettyPrint(M, fmod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS endfm)
+    = ( 
+       'fmod pureEMetaPrettyPrint(ME) (if PDL == nil 
+                                       then nil
+                                       else '`{ pureEMetaPrettyPrint(PDL) '`} 
+                                       fi) 'is 
+           pureEMetaPrettyPrint(IL) 
+           (if SS == none
+            then nil
+            else ( 'sorts pureEMetaPrettyPrint(SS) '. )
+            fi)  
+           pureEMetaPrettyPrint(SSDS)          
+           pureEMetaPrettyPrint(M, OPDS)
+           pureEMetaPrettyPrint(M, MAS)          
+           pureEMetaPrettyPrint(M, EqS) 
+        'endfm '\n) .
+---(
+  eq pureEMetaPrettyPrint(M, fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth)
+    = ( 
+       'fth pureEMetaPrettyPrint(MN) 'is 
+          pureEMetaPrettyPrint(IL)
+          (if SS == none
+           then nil
+           else ( 'sorts pureEMetaPrettyPrint(SS) '. )
+           fi)  
+          pureEMetaPrettyPrint(SSDS) 
+          pureEMetaPrettyPrint(M, OPDS)
+          pureEMetaPrettyPrint(M, MAS) 
+          pureEMetaPrettyPrint(M, EqS) 
+        'endfth '\n) .
+---)
+
+  eq pureEMetaPrettyPrint((including ME .) IL)
+    = ( 'imports pureEMetaPrettyPrint(ME)  '\n
+       pureEMetaPrettyPrint(IL)) .
+  eq pureEMetaPrettyPrint((extending ME .) IL)
+    = ( 'extending pureEMetaPrettyPrint(ME) '.  '\n
+       pureEMetaPrettyPrint(IL)) .
+  eq pureEMetaPrettyPrint((protecting ME .) IL)
+    = ( 
+       'protecting pureEMetaPrettyPrint(ME) '. '\n pureEMetaPrettyPrint(IL)) .
+  eq pureEMetaPrettyPrint((nil).ImportList) = nil .
+
+  eq pureEMetaPrettyPrint((QI :: ME, PDL))
+    = (QI '::  pureEMetaPrettyPrint(ME) '`, pureEMetaPrettyPrint(PDL))
+    [owise] .
+  eq pureEMetaPrettyPrint((QI :: ME)) = (QI '::  pureEMetaPrettyPrint(ME)) .
+  eq pureEMetaPrettyPrint((nil).ParameterDeclList) = (nil).QidList .
+
+  op pureEMetaPrettyPrint : ModuleExpression -> QidList .
+  eq pureEMetaPrettyPrint(QI + ME:ModuleExpression)
+    = QI '+ pureEMetaPrettyPrint(ME:ModuleExpression) .
+
+endfm
+
+

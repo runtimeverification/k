@@ -1,0 +1,42 @@
+load homogenous-arguments
+
+mod HOMOGENOUS-ARGUMENTS-META is
+  including HOMOGENOUS-ARGUMENTS .
+  including META-LEVEL-EXTRAS .
+  including META-K-MODULES .
+  including META-K-BUILTINS .
+  including COMPILATION-ATTRS .
+  var NoHomogenousArgs HomogenousArgs : String .  var M : Module .
+  var Q QNoHomogenousArgs QHomogenousArgs : Qid .  var IL : ImportList .
+  op makeHomogenousArgs : String String ~> Module .
+  eq makeHomogenousArgs(NoHomogenousArgs, HomogenousArgs) = makeHomogenousArgs(qid(NoHomogenousArgs), qid(HomogenousArgs)) .
+  op makeHomogenousArgs : Qid Qid ~> Module .
+  eq makeHomogenousArgs(QNoHomogenousArgs,QHomogenousArgs) = makeHomogenousArgs(QHomogenousArgs, upModule(QNoHomogenousArgs, false), upModule(QNoHomogenousArgs, true), empty) .
+
+  op compileHOMOGENOUS-ARGUMENTS : Module AttrSet ~> Module .
+  eq compileHOMOGENOUS-ARGUMENTS(M, AS:AttrSet) = setName(makeHomogenousArgs(getName(M), M, flatten(M), empty), getName(M)) .
+endm
+
+mod HOMOGENOUS-ARGUMENTS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op homogenous-arguments : -> System .
+  op idle : -> State .
+  var Q NoHomogenousArgs HomogenousArgs : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq homogenous-arguments = [nil, idle, 
+ 'Usage: 'makeHomogenousArgs '<Name> '<Suffix> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['makeHomogenousArgs NoHomogenousArgs HomogenousArgs QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(NoHomogenousArgs,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('HOMOGENOUS-ARGUMENTS-META),
+                        'makeHomogenousArgs[upTerm(string(NoHomogenousArgs)),upTerm(string(HomogenousArgs))])),error) .
+endm

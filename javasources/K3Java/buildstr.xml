@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="allstr" name="K3Java Build requriements">
+	<!-- This is an automatic way of compiling K3.
+	To be able to call this script, you will first have to install the appropriate version of
+	the stratego-sdf bundle found here: http://strategoxt.org/Stratego/StrategoDownload
+	Don't forget to set up the propper execution rights for those programs.
+	-->
+
+	<target name="allstr" depends="k2syntax, k3" />
+
+	<target name="k2syntax">
+		<java failonerror="true" dir="../K3Syntax/trans/" jar="${basedir}/../../release/bin/strategoxt.jar" fork="true">
+			<arg line="-i xmlify.str -o K2Str -la stratego-sglr --lib -I .. -p k2parser.lib --clean" />
+		</java>
+		<delete>
+			<fileset dir="src/k2parser/lib">
+				<include name="*.java" />
+				<include name="K3Syntax.tbl" />
+			</fileset>
+		</delete>
+		<copy todir="src/k2parser/lib/">
+			<fileset dir="../K3Syntax/trans/K2Str">
+				<include name="*" />
+			</fileset>
+		</copy>
+		<delete file="../K3Syntax/trans/K2Str.rtree" />
+		<delete file="../K3Syntax/trans/K2Str.dep" />
+		<delete dir="../K3Syntax/trans/K2Str" />
+	</target>
+
+	<target name="k3">
+		<java failonerror="true" dir="../K3Disamb/trans/" jar="${basedir}/../../release/bin/strategoxt.jar" fork="true">
+			<arg line="-i starter.str -o K3Str -la stratego-sglr --lib -I .. -p k3parser.lib --clean" />
+		</java>
+		<delete>
+			<fileset dir="src/k3parser/lib">
+				<include name="*.java" />
+				<exclude name="string_trim_last_one_0_0.java" />
+				<exclude name="string_unescape_sort_0_0.java" />
+			</fileset>
+		</delete>
+		<copy todir="src/k3parser/lib/">
+			<fileset dir="../K3Disamb/trans/K3Str">
+				<include name="*" />
+			</fileset>
+		</copy>
+
+		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/Common.sdf" />
+		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/K3Disamb.sdf" />
+		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/KBuiltinsBasic.sdf" />
+		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/KTechnique.sdf" />
+
+		<delete file="../K3Disamb/trans/K3Str.rtree" />
+		<delete file="../K3Disamb/trans/K3Str.dep" />
+		<delete dir="../K3Disamb/trans/K3Str" />
+	</target>
+
+</project>

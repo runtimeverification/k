@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?eclipse version="3.0"?>
+
+<plugin>
+       <extension point="org.eclipse.imp.runtime.languageDescription">
+          <language extensions="k3" description="K3Disamb" language="K3Disamb" derivedFrom="DynamicRoot" validator="K3Disamb.K3DisambValidator" validatorClass="K3Disamb.K3DisambValidator"></language>
+       </extension>
+       <extension id="K3Disamb.parser" name="K3Disamb Parser" point="org.eclipse.imp.runtime.parser">
+          <parser class="K3Disamb.K3DisambParseController" language="K3Disamb">
+          </parser>
+       </extension>    
+    </plugin>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="jar" name="Create Runnable Jar for Project K2Java">
+	<target name="jar">
+		<delete file="../../release/bin/k3.jar" failonerror="false" />
+		<jar destfile="../../release/bin/k3.jar" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="main.Main"/>
+				<attribute name="Class-Path" value=". strategoxt.jar"/>
+			</manifest>
+			<fileset dir="./bin"/>
+			<!--<zipfileset excludes="META-INF/*.SF" src="./lib/strategoxt.jar"/> -->
+			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2-javadoc.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2-sources.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2.jar"/>
+			<fileset dir="../Kil2Maude/bin"/>
+		</jar>
+	</target>
+</project>

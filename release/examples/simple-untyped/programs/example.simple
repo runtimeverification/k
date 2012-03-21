@@ -1,0 +1,16 @@
+// Program testing Collatz' conjecture up to a user-provided number.
+
+var m = 5;
+var c;
+var d;
+
+function doi(a, b) {
+	c = a;
+	d = b;
+}
+/**/
+function main() {
+	m = 10;
+	c = 11;
+	doi(m, 2);
+}

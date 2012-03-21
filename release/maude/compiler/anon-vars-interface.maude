@@ -1,0 +1,42 @@
+load anon-vars
+
+mod ANONYMOUS-VARIABLES-META is
+  including ANONYMOUS-VARIABLES .
+  including META-LEVEL .
+  including COMPILATION-ATTRS .
+  var AnonVars NoAnonVars : String .  var M : Module .
+  var QAnonVars QNoAnonVars : Qid .
+  op resolveAnonVars : String String ~> Module .
+  eq resolveAnonVars(AnonVars, NoAnonVars) 
+   = resolveAnonVars(qid(AnonVars), qid(NoAnonVars)) .
+  op resolveAnonVars : Qid Qid ~> Module .
+  eq resolveAnonVars(QAnonVars,QNoAnonVars) 
+   = resolveAnonymousVars(QNoAnonVars, upModule(QAnonVars, false)) .
+
+  op compileANONYMOUS-VARIABLES : Module AttrSet ~> Module .
+  eq compileANONYMOUS-VARIABLES(M, AS:AttrSet) = resolveAnonymousVars(getName(M), M) .
+endm
+
+mod ANONYMOUS-VARIABLES-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op anon-vars : -> System .
+  op idle : -> State .
+  var Q AnonVars NoAnonVars : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq anon-vars = [nil, idle, 
+ 'Usage: 'resolveAnonVars '<SourceModule> '<DestModule> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module .
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['resolveAnonVars AnonVars NoAnonVars QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(AnonVars,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('ANONYMOUS-VARIABLES-META),
+                        'resolveAnonVars[upTerm(string(AnonVars)),upTerm(string(NoAnonVars))])),error) .
+endm
