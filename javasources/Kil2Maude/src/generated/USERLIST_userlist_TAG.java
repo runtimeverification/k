@@ -44,10 +44,10 @@ public class USERLIST_userlist_TAG extends Tag {
 		}
 		
 		decl += "subsort "+listSort+" < K .\n";
-		decl += "op is"+listSort+" : -> KLabel .\n";
-		decl += "eq is"+listSort+"(.List`{\""+separator+"\"`}) = true .\n";
-//		decl += "eq is"+listSort+"(( X:" + sort + " " + separator + " L:"+listSort+" )) = true .\n";
-		decl += "eq is"+listSort+"(_" + StringUtil.escape(separator) + "_( X:" + sort + ", L:" + listSort + " )) = true .\n";
+		decl += "op 'is"+listSort+" : -> KLabel .\n";
+		decl += "eq 'is"+listSort+"(.List`{\""+separator+"\"`}) = true .\n";
+//		decl += "eq 'is"+listSort+"(( X:" + sort + " " + separator + " L:"+listSort+" )) = true .\n";
+		decl += "eq 'is"+listSort+"(_" + StringUtil.escape(separator) + "_( X:" + sort + ", L:" + listSort + " )) = true .\n";
 		
 		return decl;
 	}
