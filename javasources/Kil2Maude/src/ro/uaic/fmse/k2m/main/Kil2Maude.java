@@ -57,10 +57,10 @@ public class Kil2Maude {
 		// String env = System.getenv("K_BASE");
 		String path = new File(Kil2Maude.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
 		if (!path.endsWith(".jar"))
-			path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/release/bin/k3.jar";
+			path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/dist/bin/java/k3.jar";
 		try {
 			String decodedPath = URLDecoder.decode(path, "UTF-8");
-			File parent = new File(decodedPath).getParentFile().getParentFile();
+			File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile();
 			if (windowfy)
 				return windowfyPath(parent.getAbsolutePath());
 			else

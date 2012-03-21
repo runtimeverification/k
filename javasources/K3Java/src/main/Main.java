@@ -104,7 +104,7 @@ public class Main {
 						if (dotk.exists()) {
 							File defXml = new File(dotk.getCanonicalPath() + "/def.xml");
 							if (!defXml.exists()) {
-								k.utils.Error.report("You have to compile de the definition before you can kast!");
+								k.utils.Error.report("Could not find the compiled definition in: " + dotk);
 							}
 
 							Document doc = XmlLoader.getXMLDoc(FileUtil.getFileContent(defXml.getAbsolutePath()));

@@ -6,7 +6,12 @@ signature
 
 
 imports
-  include/K3Disamb
 
 
 rules
+
+  nam-get-def(|n) =
+    fail
+
+  nam-annotate-use(|n) =
+    fail

@@ -24,7 +24,7 @@
 	- create the path for the AntPropertyHelper
 	- compile the AntPropertyHelper
 	-->
-	<property name="build.strategoxt.sdf" value="${basedir}/../../release/bin/native/${osNativesDir}/" />
+	<property name="build.strategoxt.sdf" value="${basedir}/../../dist/bin/native/${osNativesDir}/" />
 
 	<!-- call both targets -->
 	<target name="allsig" depends="k3syntaxsig, k3sig" />

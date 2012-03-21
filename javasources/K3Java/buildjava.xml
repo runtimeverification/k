@@ -4,7 +4,7 @@
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="K3Java">
+<project basedir="." default="build" name="K3Java-java">
     <property environment="env"/>
     <property name="Kil2Maude.location" value="../Kil2Maude"/>
     <property name="debuglevel" value="source,lines,vars"/>
@@ -15,7 +15,7 @@
     </path>
     <path id="K3Java.classpath">
         <pathelement location="bin"/>
-        <pathelement location="../../release/bin/strategoxt.jar"/>
+        <pathelement location="../../dist/bin/java/strategoxt.jar"/>
         <pathelement location="lib/commons-cli-1.2-javadoc.jar"/>
         <pathelement location="lib/commons-cli-1.2-sources.jar"/>
         <pathelement location="lib/commons-cli-1.2.jar"/>
@@ -48,11 +48,11 @@
     </target>
     <target depends="init" name="build-project">
         <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
             <src path="src"/>
             <classpath refid="K3Java.classpath"/>
         </javac>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
             <src path="lib/resources"/>
             <classpath refid="K3Java.classpath"/>
         </javac>

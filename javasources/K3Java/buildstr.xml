@@ -9,7 +9,7 @@
 	<target name="allstr" depends="k2syntax, k3" />
 
 	<target name="k2syntax">
-		<java failonerror="true" dir="../K3Syntax/trans/" jar="${basedir}/../../release/bin/strategoxt.jar" fork="true">
+		<java failonerror="true" dir="../K3Syntax/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i xmlify.str -o K2Str -la stratego-sglr --lib -I .. -p k2parser.lib --clean" />
 		</java>
 		<delete>
@@ -29,7 +29,7 @@
 	</target>
 
 	<target name="k3">
-		<java failonerror="true" dir="../K3Disamb/trans/" jar="${basedir}/../../release/bin/strategoxt.jar" fork="true">
+		<java failonerror="true" dir="../K3Disamb/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i starter.str -o K3Str -la stratego-sglr --lib -I .. -p k3parser.lib --clean" />
 		</java>
 		<delete>

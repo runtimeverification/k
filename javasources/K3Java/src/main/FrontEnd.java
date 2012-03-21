@@ -132,13 +132,13 @@ public class FrontEnd {
 
 			File dotk = new File(f.getParent() + "/.k");
 
-			String load = "load \"" + Kil2Maude.getKBase(true) + "/maude/lib/k-prelude\"\n";
+			String load = "load \"" + Kil2Maude.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 
 			String compile = load
 					+ maudified
 					+ " load \""
 					+ Kil2Maude.getKBase(true)
-					+ "/maude/compiler/all-tools\"\n loop compile .\n(compile "
+					+ "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile "
 					+ mainModule
 					+ " transitions \"transition=()\" superheats \"superheat=()\" supercools \"supercool=()\" anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 

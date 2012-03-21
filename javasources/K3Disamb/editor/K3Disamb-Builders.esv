@@ -20,13 +20,4 @@ builders
 
 refactorings
 
-  pretty-print : pp-k3disamb-string
-
-  refactoring ID : "Rename Entity" = rename-entity (source) (cursor)
-    shortcut : "org.eclipse.jdt.ui.edit.text.java.rename.element"
-    input
-      identifier : "new name" = ""
-
-  
-
   on save : index-on-save
