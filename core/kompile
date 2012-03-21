@@ -1151,10 +1151,10 @@ sub xmlify {
 	my $output_file_name = "$lang_name.xml";
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 
-	print FILE "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n\n";
-	print FILE "<definition xmlns=\"edu.uiuc.fsl.k.kil\">\n";
+	print FILE "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\" ?>\n\n";
+	print FILE "<def mainFile=\"$lang_name\" mainModule=\"$language_module_name\" >\n";
 	print FILE $xml_output;
-	print FILE "</definition>\n";
+	print FILE "</def>\n";
 	close FILE;
 }
 
