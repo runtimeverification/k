@@ -11,7 +11,7 @@ module LAMBDAPP-SYNTAX
 
   syntax #Id ::= "+" | "*" | "/" | "<=" | "ite" | "callcc"
 
-//@ Desugaring conditional into ite with thunks. Assuming that "$thunk" cannot be used in programs
+//@ Desugaring conditional into ite with thunks. Assuming that ``\$thunk'' cannot be used in programs
   syntax #Id ::= "$thunk"
   macro if E:Exp then E1:Exp else E2:Exp 
     = (ite E (lambda $thunk . E1) (lambda $thunk . E2)) $thunk
@@ -39,6 +39,7 @@ module LAMBDAPP
 
 //@Conditional
   syntax #Id ::= "t" | "e" 
+  // this does not prevent the user from using t and e as #Id in programs
   rule ite true => lambda t . lambda e . t 
   rule ite false => lambda t. lambda e . e
 
@@ -59,6 +60,7 @@ module LAMBDAPP
 
 
   syntax #Id ::= "dummy"
+  // Again, this does not prevent the user from using dummy as #Id in programs
   rule [print] : <k> print I => (lambda dummy.dummy) ...</k>
        <out>... (. => ListItem(I)) </out>
 
