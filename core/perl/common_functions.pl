@@ -3044,9 +3044,9 @@ sub parse_maude_error
     my $msg = "";
     while (/.*?(?=\n)/gs)
     {
-	if (length $& > 77)
+	if (length $& > 277)
 	{
-	    $msg .= substr($&, 0, 77) . "...\n";
+	    $msg .= substr($&, 0, 277) . "...\n";
 	}
 	else
 	{
