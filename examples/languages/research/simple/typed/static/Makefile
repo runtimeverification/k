@@ -15,7 +15,7 @@ MAIN_FILE = simple-typed-static
 TESTS = simple-typed-static-test.maude
 
 # this is a space separated list of directories containing io_tests
-IO_TESTS = regression/tests
+IO_TESTS = regression/diverse/tests
 # this is the name the tests will be grouped under
 IO_TESTSUITE_NAME = $(MAIN_FILE)
 # this is a flag used when calling krun to be used when doing io_tests
