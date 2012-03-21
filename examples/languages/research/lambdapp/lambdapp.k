@@ -24,7 +24,7 @@ module LAMBDAPP
   imports LAMBDAPP-SYNTAX + LAMBDA
 
 //@Recursion
-  rule <k> (mu X:#Id.E:Exp) => E[(mu X.E) / X] ...</k>
+  rule (mu X:#Id.E:Exp) => E[(mu X.E) / X]
 
 //@Arithmetic
   rule + I1:#Int I2:#Int => I1 +Int I2
@@ -33,8 +33,8 @@ module LAMBDAPP
   rule <= I1:#Int I2:#Int => I1 <=Int I2
 
 //@Conditional
-  rule ite true E _ => E
-  rule ite false _ E => E
+  rule (ite true => lambda dummy.dummy) ~> C:KItem ~> (_:KItem => .) 
+  rule (ite false => lambda dummy.dummy) ~> (_:KItem => .) ~> C:KItem
 
 //@Call/CC
   syntax Val ::= "cc" "(" K ")"
@@ -64,7 +64,7 @@ module LAMBDAPP
  its branches might lead to non-termination in the presence of $\mu$.
  We also exclude print as it is side-effecting.
 */
-  rule 'k-result(X:#Id V:Val) => true 
+  define 'isKResult(X:#Id V:Val) => true 
    when X =/=Bool print andBool X =/=Bool ite
 
 end module

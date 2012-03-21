@@ -1,4 +1,6 @@
 //Using Call/CC to implement return
-+ ((lambda f.callcc (f -5))(lambda x.lambda return.(lambda x./ 0 0) (
+print(+ ((lambda f.callcc (f -5))(lambda x.lambda return.(lambda x./ 0 0) (
           ite (<= 0 x) (return 0) (return 1)
-        ))) 6
+        ))) 6)
+
+// should yield 7 under call-by-value semantics
