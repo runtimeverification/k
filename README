@@ -1,15 +1,17 @@
-1. This is a readme file for the developer.
+1. This is a readme file for the developers.
 
 2. Install
-checkout this directory in your desired location and update your $PATH to /release/bin directory so you can test.
+checkout this directory in your desired location and update your $PATH to /dist/bin directory so you can test.
 
 3. Work on java code
-Open eclipse with the spoofax plug-in installed and set your workspace to /java.
-You can run the K3Java project to test the main functionalities directly from eclipse, or you can build the .jar binaries by calling ant on /java/K3Java/buld.xml
+Open eclipse with the spoofax plug-in installed and set your workspace to /javasources.
+Go to File->Import->General->Existing projects into workspace, and select all of the projects from /javasources.
+You can run the K3Java project to test the main functionalities directly from eclipse (main project is K3Java), or you can build the .jar binaries by calling ant on /javasources/K3Java/buld.xml
 
 4. Work on maude code
-Build the .jar binaries by calling ant on /java/K3Java/buld.xml.
-Modify the maude files found in /release/maude
+Build the .jar binaries by calling ant on /javasources/K3Java/buld.xml.
+Modify the maude files found in /dist/bin/maude
 
 5. Build the final release zip
-Call ant on /buildrelease.xml
+Call ant on /buildrelease.xml - not yet implemented (anyone?)
+Or you can just zip the /dist folder after you have built the /javasources.
