@@ -1,0 +1,13 @@
+// Program which has infinitely many bahaviors.
+
+var x:int, y:int;
+
+function main():void {
+  x = 1;
+  y = 0;
+  spawn x = 0;
+  while (1 <= x) do {
+    y = y+1;
+  }
+  print(y,"\n");
+}

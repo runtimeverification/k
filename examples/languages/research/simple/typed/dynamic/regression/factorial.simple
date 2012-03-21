@@ -1,0 +1,12 @@
+function factorial(y : int) : int {
+  var t : int = 1;
+  print("Factorial of ",y," is: ");
+  for i = 1 to y do
+    t = t*i;
+  return t;
+}
+
+function main() : void {
+  print("Input a natural numer: ");
+  print(factorial(read()),"\n");
+}

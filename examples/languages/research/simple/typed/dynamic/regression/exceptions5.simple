@@ -1,0 +1,22 @@
+var x:int;
+
+function f(y:int):int {
+  var t:int = 1;
+  try{
+    print(t," ");
+    throw 5;
+    print(8);      // not reachable
+  } catch(p) {
+    print(p+10," ");
+  }
+  for i = 1 to y do
+    t = t*i;
+  return t;
+}
+
+function main():void {
+  x = 5;
+  print(f(x),"\n");
+}
+
+// 1 15 120
