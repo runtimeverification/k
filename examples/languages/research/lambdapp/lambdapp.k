@@ -11,9 +11,10 @@ module LAMBDAPP-SYNTAX
 
   syntax #Id ::= "+" | "*" | "/" | "<=" | "ite" | "callcc"
 
-//@ Desugaring conditional into ite with thunks. Assuming that "$ite" cannot be declared
+//@ Desugaring conditional into ite with thunks. Assuming that "$thunk" cannot be used in programs
+  syntax #Id ::= "$thunk"
   macro if E:Exp then E1:Exp else E2:Exp 
-    = (ite E (lambda #id "$ite" . E1) (lambda #id "$ite" . E2)) #id "$ite"
+    = (ite E (lambda $thunk . E1) (lambda $thunk . E2)) $thunk
 
 //@ Desugaring let constructs into more basic ones
   macro (letrec X = E in E') = (let X = (mu X.E) in E')
@@ -69,7 +70,6 @@ module LAMBDAPP
  its branches might lead to non-termination in the presence of $\mu$.
  We also exclude print as it is side-effecting.
 */
-  define 'isKResult(X:#Id V:Val) => true 
+  define 'isVal(X:#Id V:Val) => true 
    when X =/=Bool print andBool X =/=Bool ite
-
 end module
