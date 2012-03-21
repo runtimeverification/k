@@ -6,9 +6,14 @@ module LAMBDAPP-SYNTAX
   syntax Exp ::= "mu" #Id "." Exp       [:binder prec 100 latex "\mu{#1}.{#2}":] 
                | "let" #Id "=" Exp "in" Exp  
                | "letrec" #Id "=" Exp "in" Exp  
+               | "if" Exp "then" Exp "else" Exp
   syntax Val ::= #Int | #Bool
 
   syntax #Id ::= "+" | "*" | "/" | "<=" | "ite" | "callcc"
+
+//@ Desugaring conditional into ite with thunks. Assuming that "$ite" cannot be declared
+  macro if E:Exp then E1:Exp else E2:Exp 
+    = (ite E (lambda #id "$ite" . E1) (lambda #id "$ite" . E2)) #id "$ite"
 
 //@ Desugaring let constructs into more basic ones
   macro (letrec X = E in E') = (let X = (mu X.E) in E')
@@ -17,7 +22,6 @@ module LAMBDAPP-SYNTAX
 //@ I/O additions
   syntax Exp ::= "read"
   syntax #Id ::= "print"
-
 end module
 
 module LAMBDAPP
@@ -33,8 +37,9 @@ module LAMBDAPP
   rule <= I1:#Int I2:#Int => I1 <=Int I2
 
 //@Conditional
-  rule (ite true => lambda dummy.dummy) ~> C:KItem ~> (_:KItem => .) 
-  rule (ite false => lambda dummy.dummy) ~> (_:KItem => .) ~> C:KItem
+  syntax #Id ::= "t" | "e" 
+  rule ite true => lambda t . lambda e . t 
+  rule ite false => lambda t. lambda e . e
 
 //@Call/CC
   syntax Val ::= "cc" "(" K ")"
