@@ -80,7 +80,7 @@ public class MaudeRun {
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("Cannot execute maude. Please check if maude installed and MAUDE_LIB is set.\nIf maude is installed then 'maude' command should execute from command line.");
+			System.out.println("Cannot execute maude. Please check if maude installed and it is in your PATH.\nIf maude is installed then 'maude' command should execute from command line with no warnings.");
 			System.exit(1);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
