@@ -1,2 +1,1 @@
-rule   <k> X + Y </k>
-
+  rule var X = E, .Exps; => var X, .Exps; X = E;

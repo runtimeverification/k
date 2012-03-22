@@ -71,9 +71,9 @@ module SIMPLE-UNTYPED
 
   // coming from macros
   rule if E:Exp then S:Stmt => if E then S else {}
-  rule (for X:#Id = E1 to E2 do S) => {var ((X=E1), .Exps); while X <= E2 do {S X = (X + 1);}}
-  rule var (E1:Exp, E2:Exp, Es:Exps); => var (E1, .Exps); var (E2, Es);
-  rule var ((X = E), .Exps); => ((var (X, .Exps);) (X = E;))
+  rule (for X:#Id = E1 to E2 do S) => {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
+  rule var X = E, .Exps; => var X, .Exps; X = E;)
 
 
 
@@ -111,28 +111,28 @@ module SIMPLE-UNTYPED
   syntax K ::= "undefined"  [cons("K1UndefinedSyn")]
 
 
-  rule <k> var (X:#Id, .Exps); => . ...</k>
+  rule <k> var X:#Id, .Exps; => . ...</k>
        <env> Env:Map => Env[L:#Int/X] </env>
        <store>... . => L|->undefined ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
-  rule <k> var ((X[N:#Int, .Exps]), .Exps); => . ...</k>
+  rule <k> var X[N:#Int, .Exps], .Exps; => . ...</k>
        <env> Env => Env:Map[L/X:#Id] </env>
        <store>... . => L |-> arrayRef(L +Int 1, N)
                        (L +Int 1) .. (L +Int N) |-> undefined ...</store>
        <nextLoc> L => (L:#Int +Int 1) +Int N </nextLoc>
 
 
-  context var ((X:#Id[HOLE]), .Exps);
+  context var X:#Id[HOLE], .Exps;
 
   syntax #Id ::= "$1" | "$2"
-  rule var ((X:#Id[N1:#Int,N2:#Int,Vs:Vals]), .Exps); =>
-       var ((X[N1]), .Exps);
+  rule var X:#Id[N1:#Int,N2:#Int,Vs:Vals], .Exps; =>
+       var X[N1], .Exps;
        {
-         var (($1 = X), .Exps);
+         var $1 = X, .Exps;
          for $2 = 0 to N1 - 1 do   // stupid parser
          {
-           var ((X[N2,Vs]), .Exps);            // stupid parser
+           var X[N2,Vs], .Exps;            // stupid parser
            $1[$2] = X;
          }
        }  [structural]
@@ -246,7 +246,7 @@ module SIMPLE-UNTYPED
        <control> <xstack> . => (X:#Id,S2,K,Env,C) ...</xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
-  rule <k> throw V; ~> _ => {var ((X:#Id=V), .Exps); S2} ~> K </k>
+  rule <k> throw V; ~> _ => {var X:#Id=V, .Exps; S2} ~> K </k>
        <control> <xstack> (X:#Id,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
        <env> _ => Env </env>
 
@@ -294,4 +294,4 @@ module SIMPLE-UNTYPED
   rule N1:#Int..N2:#Int => .List{K}              when N1  >Int N2  [structural]
   rule N1:#Int..N2:#Int => N1 ,, (N1 +Int 1)..N2 when N1 <=Int N2  [structural]
 
-endmodule
+endmodule 

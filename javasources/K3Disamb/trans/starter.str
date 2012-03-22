@@ -128,18 +128,18 @@ rules
 	// How to test - the disambiguator rule calls testMe5 which disambiguates - then press "Gen XML" to generate XML
 	initMe =
 		where(
-		<importSbs>  ["a.exe", "../K2Syntax/test/.k/Integration.sbs"] ;
-		<importCons> ["a.exe", "../K2Syntax/test/.k/Integration.cons"] ;
-		<importTbl>  ["a.exe", "../K2Syntax/test/.k/def/K3.tbl"] ;
-		<importCells>["a.exe", "../K2Syntax/test/.k/Integration.cells"] ;
-		<importDitto>["a.exe", "../K2Syntax/test/.k/Integration.ditto"])
+		<importSbs>  ["a.exe", "../K3Syntax/test/.k/Integration.sbs"] ;
+		<importCons> ["a.exe", "../K3Syntax/test/.k/Integration.cons"] ;
+		<importTbl>  ["a.exe", "../K3Syntax/test/.k/def/K3Dist.tbl"] ;
+		<importCells>["a.exe", "../K3Syntax/test/.k/Integration.cells"] ;
+		<importDitto>["a.exe", "../K3Syntax/test/.k/Integration.ditto"])
 
 	testMe5 =
 		where(
-		<importSbs>  ["a.exe", "../K2Syntax/test/.k/Integration.sbs"] ;
-		<importCons> ["a.exe", "../K2Syntax/test/.k/Integration.cons"] ;
-		<importCells>["a.exe", "../K2Syntax/test/.k/Integration.cells"] ;
-		<importDitto>["a.exe", "../K2Syntax/test/.k/Integration.ditto"]) ;
+		<importSbs>  ["a.exe", "../K3Syntax/test/.k/Integration.sbs"] ;
+		<importCons> ["a.exe", "../K3Syntax/test/.k/Integration.cons"] ;
+		<importCells>["a.exe", "../K3Syntax/test/.k/Integration.cells"] ;
+		<importDitto>["a.exe", "../K3Syntax/test/.k/Integration.ditto"]) ;
 		all(all(testDisambig))
 
 	disambig0 = disambig2 <+ testMe5

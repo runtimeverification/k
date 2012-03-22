@@ -11,3 +11,8 @@ imports
 
 rules
 
+  nam-get-def(|n) =
+    fail
+
+  nam-annotate-use(|n) =
+    fail

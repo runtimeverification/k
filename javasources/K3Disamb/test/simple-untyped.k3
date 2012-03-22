@@ -51,7 +51,7 @@
        <store>... . => L|->lambda(Xs,S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
-  rule <k> execute => main(); </k>
+  rule <k> execute => main(.Exps); </k>
        <env> Env </env> <genv> . => Env </genv>  [structural]
 
   rule <k> X => V:Val ...</k>

@@ -11,7 +11,7 @@ context-free priorities
 	K "in" Set -> K {cons("DzBool19Builtin")}
 	SetItem "in" Set -> K {cons("DzBool120Builtin")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
@@ -19,14 +19,14 @@ context-free priorities
 	K "in" Bag -> K {cons("DzBool124Builtin")}
 	BagItem "in" Bag -> K {cons("DzBool125Builtin")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
 {
 	"lengthList" List -> K {cons("DzInt127Builtin")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
@@ -39,7 +39,7 @@ context-free priorities
 	"wlist" List -> K {cons("KLabel134Builtin")}
 	"wmap" Map -> K {cons("KLabel135Builtin")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
@@ -52,7 +52,7 @@ context-free priorities
 } > {
 	K "orBool" K -> K {left, cons("DzBool1OrBuiltin")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
@@ -66,7 +66,7 @@ context-free priorities
 	K "+Int" K -> K {left, cons("DzInt1IntPlusBuiltin")}
 	K "-Int" K -> K {left, cons("DzInt1IntMinusBuiltin")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
@@ -76,35 +76,35 @@ context-free priorities
 	K ">Int" K -> K {cons("DzBool1IntGTBuiltin")}
 	K ">=Int" K -> K {cons("DzBool1IntGTEBuiltin")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
 {
 	K "+String" K -> K {left, cons("DzString1StrPlusBuiltin")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
 {
 	K "," K -> K {right, cons("Ids1ListSyn")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
 {
 	K "," K -> K {right, cons("Ids1ListSyn")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
 {
 	"function" InsertDzK "(" InsertDzK ")" K -> K {cons("Ddecl1FuncDeclSyn")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
@@ -137,7 +137,7 @@ context-free priorities
 } > {
 	K "=" K -> K {right, cons("Exp1AssignSyn")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
@@ -150,21 +150,21 @@ context-free priorities
 	"try" InsertDzK "catch" "(" InsertDzK ")" K -> K {cons("Stmt1TrySyn")}
 	"spawn" K -> K {cons("Stmt1SpawnSyn")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
 {
 	K K -> K {right, cons("Stmts1LstStmtsSyn")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free priorities
 {
 	K "," K -> K {right, cons("Ids1ListSyn")}
 } > {
-	K "=>" K -> K
+	K "~>" K -> K
 }
 
 context-free syntax
@@ -223,15 +223,17 @@ context-free syntax
 	VARID  ":" "Stmts"        -> K            {cons("Stmts12Var")}
 	VARID  ":" "KResult"        -> K            {cons("KResult12Var")}
 	VARID  ":" "Vals"        -> K            {cons("Vals12Var")}
+	VARID  ":" "#Float"        -> K            {cons("DzFloat12Var")}
 	VARID  ":" "#String"        -> K            {cons("DzString12Var")}
 	VARID  ":" "Exp"        -> K            {cons("Exp12Var")}
 	VARID  ":" "#Int"        -> K            {cons("DzInt12Var")}
-	VARID  ":" "Stmt"        -> K            {cons("Stmt12Var")}
-	VARID  ":" "KLabel"        -> K            {cons("KLabel12Var")}
-	VARID  ":" "Val"        -> K            {cons("Val12Var")}
+	VARID  ":" "CellLabel"        -> K            {cons("CellLabel12Var")}
 	VARID  ":" "Ids"        -> K            {cons("Ids12Var")}
 	VARID  ":" "#Bool"        -> K            {cons("DzBool12Var")}
 	VARID  ":" "Exps"        -> K            {cons("Exps12Var")}
+	VARID  ":" "KLabel"        -> K            {cons("KLabel12Var")}
+	VARID  ":" "Stmt"        -> K            {cons("Stmt12Var")}
+	VARID  ":" "Val"        -> K            {cons("Val12Var")}
 
 	"HOLE" ":" "Start"      -> K            {cons("Start12Hole")}
 	"HOLE" ":" "#Id"      -> K            {cons("DzId12Hole")}
@@ -239,15 +241,17 @@ context-free syntax
 	"HOLE" ":" "Stmts"      -> K            {cons("Stmts12Hole")}
 	"HOLE" ":" "KResult"      -> K            {cons("KResult12Hole")}
 	"HOLE" ":" "Vals"      -> K            {cons("Vals12Hole")}
+	"HOLE" ":" "#Float"      -> K            {cons("DzFloat12Hole")}
 	"HOLE" ":" "#String"      -> K            {cons("DzString12Hole")}
 	"HOLE" ":" "Exp"      -> K            {cons("Exp12Hole")}
 	"HOLE" ":" "#Int"      -> K            {cons("DzInt12Hole")}
-	"HOLE" ":" "Stmt"      -> K            {cons("Stmt12Hole")}
-	"HOLE" ":" "KLabel"      -> K            {cons("KLabel12Hole")}
-	"HOLE" ":" "Val"      -> K            {cons("Val12Hole")}
+	"HOLE" ":" "CellLabel"      -> K            {cons("CellLabel12Hole")}
 	"HOLE" ":" "Ids"      -> K            {cons("Ids12Hole")}
 	"HOLE" ":" "#Bool"      -> K            {cons("DzBool12Hole")}
 	"HOLE" ":" "Exps"      -> K            {cons("Exps12Hole")}
+	"HOLE" ":" "KLabel"      -> K            {cons("KLabel12Hole")}
+	"HOLE" ":" "Stmt"      -> K            {cons("Stmt12Hole")}
+	"HOLE" ":" "Val"      -> K            {cons("Val12Hole")}
 
 
 	DzInt		-> K
@@ -287,4 +291,4 @@ lexical restrictions
 	"+" -/- [I].[n].[t]
 	"%" -/- [I].[n].[t]
 	"<" -/- [I].[n].[t]
-
+ 
