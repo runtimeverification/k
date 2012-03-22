@@ -1,2 +1,2 @@
-java -jar %~dp0k3.jar -kast %*
+java -jar "%~dp0java\k3.jar" -kast %*
 

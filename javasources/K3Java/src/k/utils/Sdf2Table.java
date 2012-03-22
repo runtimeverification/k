@@ -11,13 +11,8 @@ public class Sdf2Table {
 
 		try {
 			File f = null;
-			String basePath;
+			String basePath = Kil2Maude.getKBase(false);
 
-			if (Kil2Maude.isDebugMode())
-				basePath = Kil2Maude.getKBase(false);
-			else
-				basePath = "./";
-				
 			if (isUnixOS()) {
 				f = new File(basePath + "/bin/native/linux/sdf2table");
 				f.setExecutable(true, false);
