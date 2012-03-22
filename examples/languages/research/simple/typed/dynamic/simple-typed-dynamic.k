@@ -19,7 +19,7 @@ the desired evaluation strategies of the various language constructs .  */
                     [:prec(1) latex "{#1}\texttt{\char91\char93}":]
                 | "function" "from" Types "to" Type
                     [:prec(1) latex "({#1}\ \texttt{->}\ {#2})":]
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","}  [strict]
 
 //@ \subsection{Declarations}
 
@@ -131,7 +131,7 @@ function body encounters an explicit \texttt{return} statement. */
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
-                        <return color="LimeGreen"> .K </return>
+                        <return color="LimeGreen"> void </return>
                           // holds return type
                        </control>
                       <env color="violet"> .Map </env>
@@ -181,7 +181,7 @@ and assign the right type ($T$) to the allocated array locations. */
                        L +Nat 1 .. L +Nat N |-> undefined(T) ...</store>
        <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
 
-  context var _[HOLE]:_ ;
+  context var _[HOLE]:_,.Exps ;
 
 /*@ The desugaring of multi-dimensional arrays into unidimensional
 ones is also similar to that in untyped SIMPLE, although we have to
@@ -249,19 +249,19 @@ When done with the first pass, call \texttt{main()}. */
 
 //@ Check array bounds, as part of the dynamic typing policy.
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs] [:anywhere:]
   rule arrayRef(_,L,M:#Nat)[N] => lookup(L +Int N)
-    when N >=Nat 0 andBool N <Nat M   [:structural:]
+    when N >=Nat 0 andBool N <Nat M   [:anywhere:]
   rule sizeOf(arrayRef(_,_:#Nat,N)) => N
 
 //@ Define function call and return together, to see their relationship.
 
-  syntax ListItem ::=  "(" Map "," K "," Bag ")"
+  syntax K ::=  "(" Map "," K "," Bag ")"
   rule <k> _`(_`)(lambda(XTs, S, function from _ to T), Vs) ~> K
            => bindto(XTs,Vs) ~> S ~> return;
        </k>
        <control>
-         <fstack> . => (Env, K, <return> T' </return> C) ...</fstack>
+         <fstack> . => ListItem((Env, K, <return> T' </return> C)) ...</fstack>
          <return> T':Type => T </return>
          C:Bag
        </control>
@@ -270,7 +270,7 @@ When done with the first pass, call \texttt{main()}. */
 
   rule <k> return V; ~> _ => V ~> K </k>
        <control>
-         <fstack> (Env,K,C) => . ...</fstack>
+         <fstack> ListItem((Env,K,C)) => . ...</fstack>
          (<return> T </return> _ => C)
        </control>
        <env> _ => Env </env>
@@ -287,7 +287,7 @@ When done with the first pass, call \texttt{main()}. */
 
   rule {} => . [:structural:]
   rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [:structural:]
+  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [:structural:]
   rule V; => .
   rule if  true then S else _ => S
   rule if false then _ else S => S
@@ -298,14 +298,14 @@ When done with the first pass, call \texttt{main()}. */
     when typeOf(V) ==Bool int orBool typeOf(V) ==Bool string  [:transition:]
   rule print(.Vals); => .  [:structural:]
 
-  syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
+  syntax K ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
-  rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
-       <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
+  rule <k> (try S1:Stmt catch(X) S2:Stmt => S1 ~> popx) ~> K </k>
+       <control> <xstack> . => ListItem((X,S2,K,Env,C)) ...</xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
   rule <k> throw V; ~> _ => {var X:int=V; S2} ~> K </k>
-       <control> <xstack> (X,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
+       <control> <xstack> ListItem((X,S2,K,Env,C)) => . ...</xstack> (_ => C) </control>
        <env> _ => Env </env>
 
    rule <thread>... <k> spawn S => . ...</k> <env> Env </env> ...</thread>
@@ -354,31 +354,31 @@ When done with the first pass, call \texttt{main()}. */
   rule (env(_) => .) ~> env(_) [:structural:]
 
 //@ \texttt{typeOf}
-  syntax Type ::= "typeOf" "(" K ")"
-  rule typeOf(I) => int              [:structural:]
-  rule typeOf(B) => bool             [:structural:]
-  rule typeOf(_:#String) => string   [:structural:]
+  declare typeOf : K -> Type
+  define typeOf(I) => int
+  define typeOf(B) => bool
+  define typeOf(_:#String) => string
 
-  rule typeOf(arrayRef(T,_:#Nat,_:#Nat)) => T  [:structural:]
-  rule typeOf(lambda(_,_,T)) => T    [:structural:]
+  define typeOf(arrayRef(T,_:#Nat,_:#Nat)) => T
+  define typeOf(lambda(_,_,T)) => T
 
-  rule typeOf(undefined(T)) => T     [:structural:]
-  rule typeOf(nothing) => void       [:structural:]
+  define typeOf(undefined(T)) => T
+  define typeOf(nothing) => void
 
 /*@ Recall that lists of the form "a,b,c" are a syntactic convenience,
 which eventually are translated into cons-lists "(a,(b,(c,.)))".
 Unfortunately, the current K tool is not able to cons-listify
 the RHSes of the rules below, so we have to do it manually.  */
-  syntax Types ::= "types" "(" Exps ")"                [:prec(1):]
-  rule types(.Exps) => void,.Types                     [:structural:]
-  rule types(X : T) => T,.Types                        [:structural:]
-  rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
+  declare types : Exps -> Types
+  define types(.Exps) => void,.Types 
+  define types(X : T,.Exps) => T,.Types
+  define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)
 
 
 //@ Sequences of locations
 
   syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural:]
+  define N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2
+  define N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2
 
 end module

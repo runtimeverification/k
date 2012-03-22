@@ -19,7 +19,7 @@ The lists of types are useful for function arguments. */
                     [:prec(1) latex "{#1}\texttt{\char91\char93}":]
                 | "function" "from" Types "to" Type
                     [:prec(1) latex "({#1}\ \texttt{->}\ {#2})":]
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","} [strict]
 
 /*@ \subsection{Declarations}
 Variable and function declarations are allowed to have a more generous
@@ -182,7 +182,7 @@ subcells. */
                     <task multiplicity="*" color="yellow">
                       <k color="green"> $PGM:Stmts </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
-                      <return multiplicity="?"> .K </return>
+                      <return multiplicity="?"> void </return>
                     </task>
                   </tasks>
                   <gtenv color="blue"> .Map </gtenv>
@@ -233,7 +233,7 @@ references). */
   rule <k> var X:#Id : T:Type; => stmt ...</k>
        <tenv> Rho:Map => Rho[T / X] </tenv>
 
-  context var _[HOLE] : _;
+  context var _[HOLE] : _,.Exps;
   rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;  [:structural:]
   syntax K ::= "checkDepth" "(" Types "," Type ")"
   rule checkDepth((int,Ts => Ts), (arrayOf T => T))   [:structural:]
@@ -258,10 +258,10 @@ XTs$ are actually nothing but typed identifiers. */
                <tenv> . </tenv>
                <return> T </return>
              </task>)                                  [:structural:]
-  syntax Types ::= "types" "(" Exps ")"                [:prec(1):]
-  rule types(.Exps) => void,.Types                     [:structural:]
-  rule types(X : T) => T,.Types                        [:structural:]
-  rule types(X : T, E:Exp, Es:Exps) => T, types(E,Es)  [:structural:]
+  declare types : Exps -> Types 
+  define types(.Exps) => void,.Types
+  define types(X : T,.Exps) => T,.Types
+  define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)
 
 /*@ Once the entire program is processed (generating appropriate tasks
 to type check its function bodies), we can dissolve the main
