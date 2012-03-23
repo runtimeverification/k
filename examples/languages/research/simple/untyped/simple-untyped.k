@@ -19,7 +19,7 @@ automatically (when one uses an external parser) or manually
 There are two types of declarations: for variables (including arrays) and
 for functions. */
 
-  syntax Ids ::= List{#Id,","} [:prec(70) strict:]
+  syntax Ids ::= List{#Id,","} [prec(70) strict]
   syntax Exps ::= List{Exp,","}
 
   syntax Decl ::= "var" Exps ";"
@@ -38,27 +38,27 @@ cannot be evaluated) and the assignment which is only strict in its second
 argument (for the same reason as the increment). */
 
   syntax Exp ::= #Int | #Bool | #String | #Id
-               | "++" Exp              [:prec(0):]
-               | Exp "+" Exp           [:strict prec(33) gather(E e):]
-               | Exp "-" Exp           [:strict prec(33) gather(E e):]
-               | Exp "*" Exp           [:strict prec(31) gather(E e):]
-               | Exp "/" Exp           [:strict prec(31) gather(E e):]
-               | Exp "%" Exp           [:strict prec(31) gather(E e):]
-               | "-" Exp               [:strict:]
-               | Exp "<" Exp           [:strict prec(37):]
-               | Exp "<=" Exp          [:strict prec(37):]
-               | Exp ">" Exp           [:strict prec(37):]
-               | Exp ">=" Exp          [:strict prec(37):]
-               | Exp "==" Exp          [:strict prec(37):]
-               | Exp "!=" Exp          [:strict prec(37):]
-               | Exp "and" Exp         [:strict prec(55) gather(E e):]
-               | Exp "or" Exp          [:strict prec(59) gather(E e):]
-               | "not" Exp             [:strict prec(53):]
-               | Exp "[" Exps "]"      [:strict prec(1):]
-               | "sizeOf" "(" Exp ")"  [:strict:]
-               | Exp "(" Exps ")"      [:strict prec(2):]
+               | "++" Exp              [prec(0)]
+               | Exp "+" Exp           [strict prec(33) gather(E e)]
+               | Exp "-" Exp           [strict prec(33) gather(E e)]
+               | Exp "*" Exp           [strict prec(31) gather(E e)]
+               | Exp "/" Exp           [strict prec(31) gather(E e)]
+               | Exp "%" Exp           [strict prec(31) gather(E e)]
+               | "-" Exp               [strict]
+               | Exp "<" Exp           [strict prec(37)]
+               | Exp "<=" Exp          [strict prec(37)]
+               | Exp ">" Exp           [strict prec(37)]
+               | Exp ">=" Exp          [strict prec(37)]
+               | Exp "==" Exp          [strict prec(37)]
+               | Exp "!=" Exp          [strict prec(37)]
+               | Exp "and" Exp         [strict prec(55) gather(E e)]
+               | Exp "or" Exp          [strict prec(59) gather(E e)]
+               | "not" Exp             [strict prec(53)]
+               | Exp "[" Exps "]"      [strict prec(1)]
+               | "sizeOf" "(" Exp ")"  [strict]
+               | Exp "(" Exps ")"      [strict prec(2)]
                | "read" "(" ")"
-               | Exp "=" Exp           [:strict(2) prec(40) gather (e E):]
+               | Exp "=" Exp           [strict(2) prec(40) gather (e E)]
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
@@ -79,23 +79,23 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
 
   syntax Stmt ::= "{" "}"
                 | "{" Stmts "}"
-                | Exp ";"                               [:strict prec(45):]
-                | "if" Exp "then" Stmt "else" Stmt      [:strict(1) prec(90):]
-                | "if" Exp "then" Stmt                  [:prec(89):]
-                | "while" Exp "do" Stmt                 [:prec(90):]
-                | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
-                | "return" Exp ";"                      [:strict:]
+                | Exp ";"                               [strict prec(45)]
+                | "if" Exp "then" Stmt "else" Stmt      [strict(1) prec(90)]
+                | "if" Exp "then" Stmt                  [prec(89)]
+                | "while" Exp "do" Stmt                 [prec(90)]
+                | "for" #Id "=" Exp "to" Exp "do" Stmt  [prec(90)]
+                | "return" Exp ";"                      [strict]
                 | "return" ";"
-                | "print" "(" Exps ")" ";"              [:strict:]
-                | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
-                | "throw" Exp ";"                       [:strict:]
-                | "spawn" Stmt                          [:prec(90):]
-                | "acquire" Exp ";"                     [:strict:]
-                | "release" Exp ";"                     [:strict:]
-                | "rendezvous" Exp ";"                  [:strict:]
+                | "print" "(" Exps ")" ";"              [strict]
+                | "try" Stmt "catch" "(" #Id ")" Stmt   [prec(90)]
+                | "throw" Exp ";"                       [strict]
+                | "spawn" Stmt                          [prec(90)]
+                | "acquire" Exp ";"                     [strict]
+                | "release" Exp ";"                     [strict]
+                | "rendezvous" Exp ";"                  [strict]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts                         [:prec(100) gather(e E):]
+                 | Stmts Stmts                         [prec(100) gather(e E)]
 
 
 /*@ \section{Desugared Syntax}
@@ -147,7 +147,7 @@ languages, we finally tell the tool that values are \K results. */
   syntax Val ::= #Int | #Bool | #String
                | "arrayRef" "(" #Nat "," #Nat ")"
                | "lambda" "(" Ids "," Stmt ")"
-                   [:latex("\lambda{#1}\,.\,{#2}"):]
+                   [latex("\lambda{#1}\,.\,{#2}")]
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val 
@@ -253,7 +253,7 @@ structure.
 fresh locations is rather low level and hopefully temporary; we intend to
 soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
-  syntax K ::= "undefined"  [:latex("\bot"):]
+  syntax K ::= "undefined"  [latex("\bot")]
 
   rule <k> var X:#Id; => . ...</k>
        <env> Env:Map => Env[L:#Nat/X] </env>
@@ -286,7 +286,7 @@ This way, we will only need to give semantics to uni-dimensional arrays.
 First, the context rule below is used to request the evaluation of array
 dimensions: */
 
-  context var X[HOLE];
+  context var X[HOLE],.Exps;
 
 /*@  Upon evaluating the array dimensions, the code generation rule below
 desugars multi-dimensional array declaration to uni-dimensional declarations.
@@ -307,7 +307,7 @@ dimension: */
            (var X[N2,Vs];)            // stupid parser
            $1[$2] = X;
          }
-       }  [:structural:]
+       }  [structural]
 
 /*@ Ideally, one would like to perform syntactic desugarings like the one
 above before the actual semantics.  Unfortunately, that was not possible in
@@ -363,7 +363,7 @@ same global environment; all these mean, in particular, that the functions
 
   syntax K ::= "execute"
   rule <k> execute => main(); </k>
-       <env> Env </env> <genv> . => Env </genv>  [:structural:]
+       <env> Env </env> <genv> . => Env </genv>  [structural]
 
 /*@ \section{Expressions}
 We next define the \K semantics of all the expression constructs, in the
@@ -377,7 +377,7 @@ $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
   rule <k> X => K:K ...</k>
        <env>...X|->L...</env>
-       <store>...L|->K...</store>  [:transition:]
+       <store>...L|->K...</store>  [transition]
 
 /*@ Note that this excludes reading $\bot$, as $\bot$ is not a value. */
 
@@ -392,7 +392,7 @@ to a location value, also introduced below with the auxiliary operations. */
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store>  [:transition:]
+       <store>... L |-> (I => I +Int 1) ...</store>  [transition]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
@@ -428,10 +428,10 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 ``there is something there but we don't care what''.
 The semantics of the \texttt{lookup} operation is straightforward. */
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs]  [:structural anywhere:]
-  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [:structural anywhere:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs]  [structural anywhere]
+  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [structural anywhere]
   syntax K ::= "lookup" "(" #Nat ")"
-  rule <k> lookup(L) => K ...</k> <store>...L|->K...</store>  [:transition:]
+  rule <k> lookup(L) => K ...</k> <store>...L|->K...</store>  [transition]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -480,7 +480,7 @@ nulary \texttt{return;} statements. */
        <control> <fstack> ListItem((Env,K,C)) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
   syntax Val ::= "nothing"
-  rule return; => return nothing;   [:structural:]
+  rule return; => return nothing;   [structural]
 
 /*@ The \texttt{bindto} auxilliary construct binds a list of variables
 to a list of values.  Specifically, it allocates a fresh location for
@@ -492,14 +492,14 @@ environment and writing the value to that location in the store. */
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.Ids,.Exps) => . ...</k>  [:structural:]
+  rule <k> bindto(.Ids,.Exps) => . ...</k>  [structural]
 
 /*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next
 input value, at the same time discarding the input value from the
 \textsf{in} cell. */
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in>  [:transition:]
+  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in>  [transition]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -515,7 +515,7 @@ that \texttt{lvalue(...)} eventually evaluates to a location value
 
   context (HOLE => lvalue(HOLE)) = _
   rule <k> loc(L)=V => V ...</k>
-       <store>... L|->(_=>V) ...</store> [:transition:]
+       <store>... L|->(_=>V) ...</store> [transition]
 
 
 /*@ \section{Statements}
@@ -532,13 +532,13 @@ environment after the block.  This allows us to have a very simple semantics
 for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps. */
 
-  rule {} => . [:structural:]
-  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env>  [:structural:]
+  rule {} => . [structural]
+  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env>  [structural]
 
 /*@ The basic definition of environment recovery is straightforward: */
 
   syntax K ::= "env" "(" Map ")"
-  rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [:structural:]
+  rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [structural]
 
 /*@  While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop \texttt{while E do S},
@@ -553,7 +553,7 @@ recovery tasks, we only need to keep the last one.  The elegant rule below
 does precisely that, thus avoiding the unnecessary computation explosion
 problem:  */
 
-  rule (env(_) => .) ~> env(_)  [:structural:]
+  rule (env(_) => .) ~> env(_)  [structural]
 
 /* In fact, the above follows a common convention in \K for recovery
 operations of cell contents.  More precisely, the conventional meaning of a
@@ -596,7 +596,7 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule <k> S1:K S2:K => S1 ~> S2  ...</k> [:structural:]
+  rule <k> S1:K S2:K => S1 ~> S2  ...</k> [structural]
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
@@ -627,7 +627,7 @@ allowed break/continue of loops then we would need a completely different
 semantics, which would also involve the \textsf{control} cell. */
 
   rule <k> while E:Exp do S
-    => if E then {S while E do S} else {} ...</k>  [:structural:]
+    => if E then {S while E do S} else {} ...</k>  [structural]
 
 /*@ \subsection{Print}
 The \texttt{print} statement was strict, so all its arguments are now
@@ -636,8 +636,8 @@ its evaluated arguments to the output buffer, and discard the residual
 \texttt{print} statement with an empty list of arguments. */
 
   rule <k> print(V,Vs => Vs); ...</k>
-       <out>... . => ListItem(V) </out>  [:transition:]
-  rule print(.Vals); => .                [:structural:]
+       <out>... . => ListItem(V) </out>  [transition]
+  rule print(.Vals); => .                [structural]
 
 /*@ \subsection{Exceptions}
 SIMPLE allows parametric exceptions, in that one can throw and catch a
@@ -731,7 +731,7 @@ by the two rules below: */
 
    rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
-     when notBool(V in Busy) [:transition:]
+     when notBool(V in Busy) [transition]
    rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
 
 /*@ \subsubsection{Release lock}
@@ -767,7 +767,7 @@ actual configuration of SIMPLE is to include each \textsf{k} cell in a
 \textsf{thread} cell. */
 
    rule <k> rendezvous V; => . ...</k>
-        <k> rendezvous V; => . ...</k>  [:transition:]
+        <k> rendezvous V; => . ...</k>  [transition]
 
 ----------------------------------------------
 //@ \section{Auxiliary declarations and operations}
@@ -797,13 +797,13 @@ corresponding store lookup operation. */
   syntax Val ::= "loc" "(" #Nat ")"
 // Local variable
   rule <k> lvalue(X) => loc(L:#Nat) ...</k>
-       <env>... X|->L ...</env>  [:structural:]
+       <env>... X|->L ...</env>  [structural]
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
   context lvalue(_[HOLE])
   context lvalue(HOLE[_])
 // Finally, return the address of the desired object member
-  rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
+  rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [structural]
 
 
 /*@ \subsection{Sequences of locations}
@@ -812,8 +812,8 @@ given numbers.  The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
 
   syntax List{K} ::= #Nat ".." #Nat
-  define N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2  [:structural:]
-  define N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2  [:structural:]
+  define N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2  [structural]
+  define N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2  [structural]
 
 /*@ The semantics of SIMPLE is now complete. */
 end module
