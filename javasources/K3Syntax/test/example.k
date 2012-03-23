@@ -1,6 +1,7 @@
 
 module MOD-SYNTAX
-	syntax List{K} ::= "main"
+	
+	rule 'asdf(X)
 	
 
 endmodule

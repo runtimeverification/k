@@ -73,7 +73,7 @@ module SIMPLE-UNTYPED
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:#Id = E1 to E2 do S) => {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
-  rule var X = E, .Exps; => var X, .Exps; X = E;)
+  rule var X = E, .Exps; => var X, .Exps; X = E;
 
 
 
@@ -130,9 +130,9 @@ module SIMPLE-UNTYPED
        var X[N1], .Exps;
        {
          var $1 = X, .Exps;
-         for $2 = 0 to N1 - 1 do   // stupid parser
+         for $2 = 0 to N1 - 1 do   // no longer a stupid parser
          {
-           var X[N2,Vs], .Exps;            // stupid parser
+           var X[N2,Vs], .Exps;    // no longer a stupid parser
            $1[$2] = X;
          }
        }  [structural]
