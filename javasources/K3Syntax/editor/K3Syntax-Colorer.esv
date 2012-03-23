@@ -9,8 +9,9 @@ colorer
   // See the imported file for a brief introduction and examples.     
   
   STRING: 64 0 192
-  SORTID: red
+  //SORTID: red
   KEY: darkgreen
+  TAGCONTENT: orange
   layout: 128 158 128 italic
 
 /*
