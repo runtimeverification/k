@@ -638,7 +638,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaLatexPrint(M, (pair(Str,"") ))   
     = ('\kattribute '`{ tokenize(latexString(Str)) '`}) [owise] .
   eq eMetaLatexPrint(M, (pair(Str,Str') ))   
-    = ('\kattribute  '`( tokenize(latexString(Str)) '`( tokenize(latexString(Str')) '`) '`}) [owise] .
+    = ('\kattribute  '`{ tokenize(latexString(Str)) '`( tokenize(latexString(Str')) '`) '`}) [owise] .
   eq eMetaLatexPrint(M, (strat(NL) ))
     = ('\kstrat '`{ eMetaLatexPrint(NL) '`} 
        ) .
