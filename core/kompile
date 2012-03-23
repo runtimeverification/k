@@ -1112,31 +1112,32 @@ sub xmlify {
 
     print_header("Generate xml version for module $language_module_name from language definition $language_file_name") if $verbose;
 
-# 
-#    $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
-#		   "load $k_prelude\n",
-##		   "show module META-MODULE .\n",
-#		   "show module K-TECHNIQUE .\n",
-#		   "quit\n");
-#    
-#    s/^Bye.//gms;
-#    s/(\[[^\[\]]*?)comm([^\[\]]*?\])/$1$2/gms;
-#
-#    open FILE,">",$temp_file or die "Cannot create $temp_file\n";
-#    print FILE;
-#    close FILE;
-#    print "Temporary modules META-MODULE and K-TECHNIQUE written in $temp_file\n" if $verbose;
-#
-    my $xml_output = $_ =
+ 
+    $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
+		   "load $k_prelude\n",
+#		   "show module META-MODULE .\n",
+		   "show module K-TECHNIQUE .\n",
+		   "quit\n");
+    
+    s/^Bye.//gms;
+    s/(\[[^\[\]]*?)comm([^\[\]]*?\])/$1$2/gms;
+
+    open FILE,">",$temp_file or die "Cannot create $temp_file\n";
+    print FILE;
+    close FILE;
+    print "Temporary modules META-MODULE and K-TECHNIQUE written in $temp_file\n" if $verbose;
+
+   my $xml_output = $_ =
 	run_maude("Calling the Maude XML-ifier ... ",
 		  "load \"$k_prelude\"\n",
 		  "load \"$language_file_name\"\n",
-#		  "set show advisories off .\n",
-#		  "load $temp_file\n",
-#		  "select META-LEVEL .\n",
-#		  "select $language_module_name .\n",
-#		  "set show advisories on .\n",
-		  "load \"$k_to_xml\n",
+		  "set show advisories off .\n",
+		  "load $temp_file\n",
+		  "select META-LEVEL .\n",
+                  "select K-WRAPPERS-LABELS .\n",
+		  "select $language_module_name .\n",
+		  "set show advisories on .\n",
+		  "load \"$k_to_xml\"\n",
 		  "--- set print attribute on .\n",
                   "--- red xmlPrint('$language_module_name,'$xmlTo) .\n",
                   "--- quit\n",
