@@ -170,6 +170,17 @@ rules
 		where children := <all(to-xml)> b
 		where loc := <getLocAsString>
 
+	to-xml1:
+		K1App(a, b) -> $[<KApp sort="K" loc="[loc]">
+							<label loc="[<getLocAsString> a]">
+								[<to-xml> a]
+							</label>
+							[<to-xml> b]
+		</KApp>
+		]
+		where mydebug(!"KApp: ")
+		where loc := <getLocAsString>
+
 
 	to-xml2:
 		a#(b) -> $[<empty sort="[sort]" loc="[loc]"/>

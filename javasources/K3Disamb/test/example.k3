@@ -1,3 +1,1 @@
-rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
-       <busy> Busy (. => SetItem(V)) </busy>
-    when notBool(V in Busy) [transition]
+rule ('asdf => X)(A)

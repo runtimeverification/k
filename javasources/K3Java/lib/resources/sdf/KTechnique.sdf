@@ -23,6 +23,7 @@ context-free syntax
 	"(" ListDlKDr ")"	-> ListDlKDr {bracket}
 	"(" K ")"			-> K {bracket}
 	ListDlKDrDz			-> ListDlKDr {cons("ListDlKDr1ListOfKWrap")}
+	KLabel "=>" KLabel	-> KLabel {cons("KLabel1Rewrite")}
 
 context-free priorities
 {
@@ -111,6 +112,8 @@ context-free syntax
 	VARID					-> K {cons("K1Var")}
 	VARID ":" "List{K}"		-> ListDlKDrDz {cons("ListDlKDr12Var")}
 	VARID					-> ListDlKDrDz {cons("ListDlKDr1Var")}
+	VARID ":" "KLabel"		-> KLabel {cons("KLabel12Var")}
+	VARID					-> KLabel {cons("KLabel1Var")}
 
 lexical syntax
 	%% rejects
