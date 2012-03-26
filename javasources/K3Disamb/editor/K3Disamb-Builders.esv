@@ -20,4 +20,4 @@ builders
 
 refactorings
 
-  on save : index-on-save
+  //on save : index-on-save

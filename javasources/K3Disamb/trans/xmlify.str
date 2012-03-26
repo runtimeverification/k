@@ -62,11 +62,27 @@ rules
 
 	to-xml1:
 		Context(x1) -> $[<context loc="[loc]">
-			[x1']
+							<body>
+								[x1']
+							</body>
 		</context>
 		]
 		where mydebug(!"Context: ")
 		where x1' := <to-xml> x1
+		where loc := <getLocAsString>
+	to-xml1:
+		CondSentence(Context(x1), cond) -> $[<context loc="[loc]">
+												<body>
+													[x1']
+												</body>
+												<cond>
+													[cond']
+												</cond>
+		</context>
+		]
+		where mydebug(!"Context: ")
+		where x1' := <to-xml> x1
+		where cond' := <to-xml> cond
 		where loc := <getLocAsString>
 
 	to-xml1:
@@ -280,7 +296,7 @@ rules
 						[children]
 		</amb>
 		]
-		where debug(!"XmlifyingAmb: ")
+		where mydebug(!"XmlifyingAmb: ")
 		where children := <all(to-xml)> b
 		where loc := <getLocAsString>
 

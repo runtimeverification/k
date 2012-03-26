@@ -67,6 +67,13 @@ interface K-WRAPPERS-LABELS
 					| "wrap-with"
 	
 endinterface
+
+
+interface K-DESTRUCTORS
+	syntax KLabel ::= "getKLabel" K
+
+endinterface
+
 /*
 interface K-WRAPPERS
 	including K-TECHNIQUE

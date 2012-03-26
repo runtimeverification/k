@@ -1,1 +1,3 @@
-  rule var X = E, .Exps; => var X, .Exps; X = E;
+rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
+       <busy> Busy (. => SetItem(V)) </busy>
+    when notBool(V in Busy) [transition]

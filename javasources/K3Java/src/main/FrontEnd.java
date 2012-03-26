@@ -74,7 +74,7 @@ public class FrontEnd {
 				sw.printIntermediate("File Gen Def    = ");
 
 			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3");
+				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3Disamb");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Generate TBLDef = ");
@@ -83,7 +83,7 @@ public class FrontEnd {
 			k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
 			k3parser.KParser.ImportDitto(dotk.getAbsolutePath() + "/Integration.ditto");
 			k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
-			k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3.tbl");
+			k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Importing Files = ");

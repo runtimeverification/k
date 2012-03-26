@@ -36,7 +36,7 @@ strategies
 
 	removeCellAmb2(|cellName) = // if directly under a cell there is an ambiguity
 		where(<one(?(cellName, sort))> <MemoMyCells>) ;		// look for that cell in the known cells
-		try(filterLess(|sort))
+		try(filterLess(|<getMaxSort> sort))
 		aa = ?sort ;(
 				?amb(xs2) ;
 			where(rez := <filter(isSubsort(|sort))> xs2) ;	// filter the sorts that are lower or eq with the cell type
@@ -73,3 +73,11 @@ strategies
 
 	isSubsort2(|a, b) =
 		where(<one(?(a, b))> <MemoMySbs>)
+
+	getMaxSort =
+		?sort ; repeat(getMaxSort2)
+	getMaxSort2:
+		a -> bb
+		where MemoMySbs ; one({b: ?(b, a) ; bb := b})
+		where not(!bb => "List{K}")
+

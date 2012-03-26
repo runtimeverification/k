@@ -15,6 +15,7 @@ endinterface
 interface #PL-BOOL
   syntax #Bool ::= K "=/=Bool" K            [cons("DzBool1NEqBuiltin")] // these sorts should be Universal, not K
                  | K "==Bool"  K            [cons("DzBool1EqBuiltin")]
+                 | KLabel "==Bool"  KLabel  [cons("DzBool1EqKLBuiltin")]
                  | "notBool" #Bool 	        [cons("DzBool1NotBoolBuiltin")]
                  > #Bool "andBool" #Bool    [left, cons("DzBool1AndBuiltin")]
                  > #Bool "orBool"  #Bool    [left, cons("DzBool1OrBuiltin")]
