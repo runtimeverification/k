@@ -148,6 +148,7 @@ sub save_content_in_file
     close FILE;
 }
 
+
 sub getTag
 {
     uc(shift) . "_$_" . "_TAG";

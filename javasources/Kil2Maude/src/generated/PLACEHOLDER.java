@@ -21,4 +21,11 @@ public class PLACEHOLDER extends Tag {
 	public String toMaude() throws Exception {
 		return super.toMaude();
 	}
+	
+	@Override
+	public String toAst() throws Exception
+	{
+		// TODO Auto-generated method stub
+		return super.toAst();
+	}
 }
