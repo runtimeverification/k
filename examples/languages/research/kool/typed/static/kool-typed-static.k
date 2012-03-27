@@ -20,57 +20,57 @@ the \K strictness attributes and the desugaring macros. */
                 | "string"
                 | "void"
                 | "arrayOf" Type
-                    [:prec(1) latex "{#1}\texttt{\char91\char93}":]
+                    [prec(1) latex "{#1}\texttt{\char91\char93}"]
                 | "function" "from" Types "to" Type
-                    [:prec(1) latex "({#1}\ \texttt{->}\ {#2})":]
-  syntax Types ::= List{Type,","}  [:strict:]
+                    [prec(1) latex "({#1}\ \texttt{->}\ {#2})"]
+  syntax Types ::= List{Type,","}  [strict]
 
   syntax Decl ::= "var" Exps ";"
 
   syntax Exp ::= #Int | #Bool | #String | #Id
-               | "++" Exp              [:prec(0):]
-               | Exp "+" Exp           [:strict prec(33) gather(E e):]
-               | Exp "-" Exp           [:strict prec(33) gather(E e):]
-               | Exp "*" Exp           [:strict prec(31) gather(E e):]
-               | Exp "/" Exp           [:strict prec(31) gather(E e):]
-               | Exp "%" Exp           [:strict prec(31) gather(E e):]
-               | "-" Exp               [:strict:]
-               | Exp "<" Exp           [:strict prec(37):]
-               | Exp "<=" Exp          [:strict prec(37):]
-               | Exp ">" Exp           [:strict prec(37):]
-               | Exp ">=" Exp          [:strict prec(37):]
-               | Exp "==" Exp          [:strict prec(37):]
-               | Exp "!=" Exp          [:strict prec(37):]
-               | Exp "and" Exp         [:strict prec(55) gather(E e):]
-               | Exp "or" Exp          [:strict prec(59) gather(E e):]
-               | "not" Exp             [:strict prec(53):]
-               | Exp "[" Exps "]"      [:strict prec(1):]
-               | "sizeOf" "(" Exp ")"  [:strict:]
-               | Exp "(" Exps ")"      [:strict prec(2):]
+               | "++" Exp              [prec(0)]
+               | Exp "+" Exp           [strict prec(33) gather(E e)]
+               | Exp "-" Exp           [strict prec(33) gather(E e)]
+               | Exp "*" Exp           [strict prec(31) gather(E e)]
+               | Exp "/" Exp           [strict prec(31) gather(E e)]
+               | Exp "%" Exp           [strict prec(31) gather(E e)]
+               | "-" Exp               [strict]
+               | Exp "<" Exp           [strict prec(37)]
+               | Exp "<=" Exp          [strict prec(37)]
+               | Exp ">" Exp           [strict prec(37)]
+               | Exp ">=" Exp          [strict prec(37)]
+               | Exp "==" Exp          [strict prec(37)]
+               | Exp "!=" Exp          [strict prec(37)]
+               | Exp "and" Exp         [strict prec(55) gather(E e)]
+               | Exp "or" Exp          [strict prec(59) gather(E e)]
+               | "not" Exp             [strict prec(53)]
+               | Exp "[" Exps "]"      [strict prec(1)]
+               | "sizeOf" "(" Exp ")"  [strict]
+               | Exp "(" Exps ")"      [strict prec(2)]
                | "read" "(" ")"
-               | Exp "=" Exp           [:strict(2) prec(40) gather (e E):]
-               | Exp ":" Type          [:prec(10):]
+               | Exp "=" Exp           [strict(2) prec(40) gather (e E)]
+               | Exp ":" Type          [prec(10)]
                                        // allowed only for declarations
   syntax Exps ::= List{Exp,","}
 
   syntax Stmt ::= "{" "}"
                 | "{" Stmts "}"
-                | Exp ";"                               [:strict prec(45):]
-                | "if" Exp "then" Stmt "else" Stmt      [:strict prec(90):]
-                | "if" Exp "then" Stmt                  [:prec(89):]
-                | "while" Exp "do" Stmt                 [:strict prec(90):]
-                | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
-                | "return" Exp ";"                      [:strict:]
+                | Exp ";"                               [strict prec(45)]
+                | "if" Exp "then" Stmt "else" Stmt      [strict prec(90)]
+                | "if" Exp "then" Stmt                  [prec(89)]
+                | "while" Exp "do" Stmt                 [strict prec(90)]
+                | "for" #Id "=" Exp "to" Exp "do" Stmt  [prec(90)]
+                | "return" Exp ";"                      [strict]
                 | "return" ";"
-                | "print" "(" Exps ")" ";"              [:strict:]
-                | "throw" Exp ";"                       [:strict:]
-                | "spawn" Stmt                          [:strict prec(90):]
-                | "acquire" Exp ";"                     [:strict:]
-                | "release" Exp ";"                     [:strict:]
-                | "rendezvous" Exp ";"                  [:strict:]
+                | "print" "(" Exps ")" ";"              [strict]
+                | "throw" Exp ";"                       [strict]
+                | "spawn" Stmt                          [strict prec(90)]
+                | "acquire" Exp ";"                     [strict]
+                | "release" Exp ";"                     [strict]
+                | "rendezvous" Exp ";"                  [strict]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts            [:seqstrict prec(100) gather(e E):]
+                 | Stmts Stmts            [seqstrict prec(100) gather(e E)]
 
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X = E1 to E2 do S) = {var X:int=E1; while X <= E2 do {S X=X+1;}}
@@ -94,14 +94,14 @@ typed before the actual construct can be typed. */
                 | "class" #Id "extends" #Id "{" Stmts "}"
   macro class C:#Id {Ss:Stmts} = class C extends object {Ss}
 
-  syntax Exp ::= "new" #Id "(" Exps ")" [:strict(2) prec(1):]
+  syntax Exp ::= "new" #Id "(" Exps ")" [strict(2) prec(1)]
                | "this"
                | "super"
-               | Exp "." #Id            [:prec(1) strict(1):]
-               | Exp "instanceOf" #Id   [:prec(0) strict(1):]
-               | "cast" Exp "to" #Id    [:prec(0) strict(1):]
+               | Exp "." #Id            [prec(1) strict(1)]
+               | Exp "instanceOf" #Id   [prec(0) strict(1)]
+               | "cast" Exp "to" #Id    [prec(0) strict(1)]
 
-  syntax Stmt ::= "try" Stmt "catch" "(" Exp ")" Stmt   [:strict(1) prec(90):]
+  syntax Stmt ::= "try" Stmt "catch" "(" Exp ")" Stmt   [strict(1) prec(90)]
 end module 
 
 
@@ -183,13 +183,13 @@ typed SIMPLE, so we do not discuss them much here. */
   
   syntax Type ::= "stmt"
 
-  rule var .Types; => stmt   [: structural:]
+  rule var .Types; => stmt   [ structural]
   context var _[HOLE] : _;
-  rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;  [:structural:]
+  rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;  [structural]
 
   syntax K ::= "checkDepth" "(" Types "," Type ")"
-  rule checkDepth((int,Ts => Ts), (arrayOf T => T))   [:structural:]
-  rule checkDepth(.Types,_) => .K                     [:structural:]
+  rule checkDepth((int,Ts => Ts), (arrayOf T => T))   [structural]
+  rule checkDepth(.Types,_) => .K                     [structural]
 
 /*@ Although functions turn into methods and get a slightly different
 semantics, the \texttt{types(...)} operation stays the same. */
@@ -208,8 +208,8 @@ semantics, the \texttt{types(...)} operation stays the same. */
   rule <k> X => T ...</k> <tenv>... X |-> T ...</tenv>
 
   syntax Exp ::= "ltype" "(" Exp ")"
-  rule ltype(X) => X                   [:structural:]
-  rule ltype(E:Exp[Es:Exps]) => E[Es]  [:structural:]
+  rule ltype(X) => X                   [structural]
+  rule ltype(E:Exp[Es:Exps]) => E[Es]  [structural]
 
   context ++(HOLE => ltype(HOLE))
   rule ++ int => int
@@ -302,7 +302,7 @@ at the end of this module). */
        <out>... . => ListItem("Member \"" +String Id2String(X)
                               +String "\" declared twice in class \""
                               +String Id2String(C) +String "\"!\n") </out>
-    [:structural:]
+    [structural]
 
 /*@ \subsubsection{Assignment}
 A more concrete value is allowed to be assigned to a more abstract
@@ -345,7 +345,7 @@ instance of this rule). */
                 <k> checkType(class C') ~> Ss:Stmts </k>
                 <inClass> C </inClass>
                 <ctenvT> . </ctenvT>
-             </task>)  [:structural:]
+             </task>)  [structural]
 
 //@ \subsubsection{Check for unique class names}
 
@@ -358,7 +358,7 @@ instance of this rule). */
            _:Bag => .)
            <out>... . => ListItem("Class \"" +String Id2String(C)
                                   +String "\" declared twice!\n") </out>
-       </T>  [:structural:]
+       </T>  [structural]
 
 /*@ \subsubsection{Check for cycles in class hierarchy}
 We check for cycles in the class hierarchy by transitively closing the
@@ -369,16 +369,15 @@ superclass relation, the second transitively closes it, and the third
 checks for cycles. */
 
   rule <extends> C </extends>
-       <extendsAll> . => SetItem(C) </extendsAll>  [:structural:]
+       <extendsAll> . => SetItem(C) </extendsAll>  [structural]
 
   rule <class>...
-         <extends> C </extends>
-         <extendsAll> Classes:Set (. => SetItem(C')) </extendsAll>
+         <extendsAll> SetItem(C) Classes:Set (. => SetItem(C')) </extendsAll>
        ...</class>
        <class>...
          <className> C </className> <extends> C' </extends>
        ...</class>
-    when notBool(C' in Classes)  [:structural:]
+    when notBool(C' in (SetItem(C) Classes))  [structural]
 
 // similarly, we should not need to mention the classes cell below
   rule <T> (<classes>... <className> C </className>
@@ -387,7 +386,7 @@ checks for cycles. */
            _:Bag => .)
            <out>... . => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
-       </T>  [:structural:]
+       </T>  [structural]
 
 
 /*@ \subsection{Method declaration}
@@ -418,7 +417,7 @@ for example, inside other methods). */
                <tenv> .Map </tenv>
                <return> T </return>
              </task>)
-    [:structural:]
+    [structural]
 
 /*@ The \texttt{checkMethod} operation below searches to see whether
 the current method overrides some other method in some superclass.
@@ -433,14 +432,14 @@ is co-variant in the codomain and contra-variant in the domain). */
   rule <k> checkMethod(M,T,C) => checkSubtype(T,T') ...</k>
        <className> C </className>
        <ctenv>... M |-> T' ...</ctenv>
-    [:structural:]
+    [structural]
 
   rule <k> checkMethod(M,T,(C => C')) ...</k>
        <className> C </className>
        <extends> C' </extends>
        <ctenv> Rho </ctenv>
     when notBool(M in keys(Rho))
-    [:structural:]
+    [structural]
 
   rule checkMethod(_:#Id,_,object) => .
 
@@ -499,7 +498,7 @@ reached. */
   rule <k> X => _._(this,X) ...</k> <tenv> Rho </tenv>
     when notBool(X in keys(Rho))
 
-  rule ltype(_._(E,X)) => _._(E,X)  [:structural:]
+  rule ltype(_._(E,X)) => _._(E,X)  [structural]
 
   rule <k> _._(class C,X) => T ...</k>
        <className> C </className> <ctenv>... X |-> T ...</ctenv>
@@ -507,14 +506,14 @@ reached. */
   rule <k> _._(class (C1 => C2),X) ...</k>
        <className> C1:#Id </className> <extends> C2:#Id </extends>
        <ctenv> Rho </ctenv>
-    when notBool(X in keys(Rho))  [:structural:]
+    when notBool(X in keys(Rho))  [structural]
 
   rule <k> _._(class object,X) => stuck(_._(class object,X)) ...</k>
        <inClass> C </inClass>
        <out>... . => ListItem("Member \"" +String Id2String(X)
                               +String "\" not declared! (see class \""
                               +String Id2String(C) +String "\")\n") </out>
-    [:structural:]
+    [structural]
 
 
 /*@\subsection{Method invocation}
@@ -545,7 +544,7 @@ only check that the \texttt{try} and the \texttt{catch} statements
 type correctly. */
 
   rule try stmt catch(X : class C) S => {var X : class C; S}
-    [:structural:]
+    [structural]
   rule throw class _:#Id ; => stmt
 
 
@@ -572,7 +571,7 @@ the \textsf{tasks} cell has been removed. */
                     <return> void </return>
                     <inClass> main </inClass>)
        </task>
-    [:structural:]
+    [structural]
 
 // discard class task when done, adding a ctenv in class
 
@@ -583,19 +582,19 @@ the \textsf{tasks} cell has been removed. */
         </task> => .)
         <className> C </className>
         (. => <ctenv> Rho </ctenv>)
-    [:structural:]
+    [structural]
 
 // discard method task when done
   rule <task>...
          <k> stmt </k>
          <tenv>_:Map</tenv>  // only to ensure that this is a method task
        ...</task> => .
-    [:structural:]
+    [structural]
 
 // cleanup tasks and output a success message when done
   rule (<tasks> .Bag </tasks> => .)
        <out>... . => ListItem("All typing tasks completed.\n") </out>
-    [:structural:]
+    [structural]
 
 
 
@@ -635,9 +634,9 @@ that the types used in the program actually exists */
 
 
 //@ These should be generic, belonging to the K framework
-  syntax K ::= "stuck" "(" K ")"  [:latex "\framebox{${#1}$}":]
+  syntax K ::= "stuck" "(" K ")"  [latex "\framebox{${#1}$}"]
   syntax K ::= "discard"
-  rule _:KResult ~> discard => .  [:structural:]
+  rule _:KResult ~> discard => .  [structural]
 
 end module
 
