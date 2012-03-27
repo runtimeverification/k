@@ -1,0 +1,39 @@
+class Exception {
+  var v:int;
+  method Exception(v:int) {
+    print("Exception ", v, " thrown!\n");
+    this.v = v;
+  }
+  method get():int {
+    return v;
+  }
+}
+
+class Exception2 extends Exception {
+  method Exception2(v:int) {
+    Exception(v);
+  }
+}
+
+class main {
+
+  method foo() {
+    try {
+      throw new Exception(5);
+      print(17);                           // should not be printed
+    } catch(e : class Exception2) {
+      throw new Exception(e.get() + 2);    // should not be reached
+    }
+    throw new Exception(-1);               // should not be reached
+  }
+
+  method main() {
+    try
+      foo();
+    catch(e : class Exception)
+      print(e.get(),"\n");  // should print 5
+  }
+
+}
+
+// 5

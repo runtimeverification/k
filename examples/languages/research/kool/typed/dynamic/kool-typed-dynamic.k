@@ -618,6 +618,8 @@ The subclass relation introduces a subtyping relation. */
   rule subtype((T1:Type,T2:Type,Ts:Types),(T1':Type,T2':Type,Ts':Types))
     => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))  [:structural:]
   rule subtype(.Types,.Types) => true  [:structural:]
+  rule subtype(class object, class Class) => false 
+    when Class =/=Bool object [:structural:]
 
 /*@ \subsubsection{Unsafe Casting}
 Performs unsafe casting.  One should only use it in combination with
