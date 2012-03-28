@@ -13,17 +13,17 @@ Each program may use additional identifiers, which need to be declared either
 automatically (when one uses an external parser) or manually
 (when one writes the program). */
 
-  syntax #Id ::= "main"
+//  syntax #Id ::= "main"
 
 /*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and
 for functions. */
 
-  syntax Ids ::= List{#Id,","} [prec(70) strict]
+  syntax Ids ::= List{Id,","} [prec(70) strict]
   syntax Exps ::= List{Exp,","}
 
   syntax Decl ::= "var" Exps ";"
-                | "function" #Id "(" Ids ")" Stmt
+                | "function" Id "(" Ids ")" Stmt
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -37,7 +37,7 @@ Exceptions are the increment (since its first argument gets updated, so it
 cannot be evaluated) and the assignment which is only strict in its second
 argument (for the same reason as the increment). */
 
-  syntax Exp ::= #Int | #Bool | #String | #Id
+  syntax Exp ::= Int | Bool | String | Id
                | "++" Exp              [prec(0)]
                | Exp "+" Exp           [strict prec(33) gather(E e)]
                | Exp "-" Exp           [strict prec(33) gather(E e)]
@@ -83,11 +83,11 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
                 | "if" Exp "then" Stmt "else" Stmt      [strict(1) prec(90)]
                 | "if" Exp "then" Stmt                  [prec(89)]
                 | "while" Exp "do" Stmt                 [prec(90)]
-                | "for" #Id "=" Exp "to" Exp "do" Stmt  [prec(90)]
+                | "for" Id "=" Exp "to" Exp "do" Stmt  [prec(90)]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
-                | "try" Stmt "catch" "(" #Id ")" Stmt   [prec(90)]
+                | "try" Stmt "catch" "(" Id ")" Stmt   [prec(90)]
                 | "throw" Exp ";"                       [strict]
                 | "spawn" Stmt                          [prec(90)]
                 | "acquire" Exp ";"                     [strict]
@@ -108,7 +108,7 @@ that there are only \texttt{while} loops, and that each variable is
 declared alone and is initialized. */
 
   macro if E:Exp then S:Stmt = if E then S else {}
-  macro (for X:#Id = E1 to E2 do S) = {var X=E1; while X <= E2 do {S X=X+1;}}
+  macro (for X:Id = E1 to E2 do S) = {var X=E1; while X <= E2 do {S X=X+1;}}
   macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
   macro var X = E; = var X; X = E;
 end module
@@ -144,8 +144,8 @@ because each function is executed in the fixed global environment and
 function definitions cannot be nested).  Like in IMP and other
 languages, we finally tell the tool that values are \K results. */
 
-  syntax Val ::= #Int | #Bool | #String
-               | "arrayRef" "(" #Nat "," #Nat ")"
+  syntax Val ::= Int | Bool | String
+               | "arrayRef" "(" Nat "," Nat ")"
                | "lambda" "(" Ids "," Stmt ")"
                    [latex("\lambda{#1}\,.\,{#2}")]
   syntax Vals ::= List{Val,","}
@@ -255,10 +255,10 @@ soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
   syntax K ::= "undefined"  [latex("\bot")]
 
-  rule <k> var X:#Id; => . ...</k>
-       <env> Env:Map => Env[L:#Nat/X] </env>
+  rule <k> var X:Id; => . ...</k>
+       <env> Env:Map => Env[L:Nat/X] </env>
        <store>... . => L|->undefined ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ \subsection{Array Declaration}
 The \K semantics of the uni-dimensional array declaration is somehow similar
@@ -274,11 +274,11 @@ of array declarations can be arbitrary expressions, this virtually
 means that we can dynamically allocate memory in SIMPLE by means of
 array declarations. */
 
-  rule <k> var X[N:#Nat]; => . ...</k>
+  rule <k> var X[N:Nat]; => . ...</k>
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> arrayRef(L +Nat 1, N)
-                       L +Nat 1 .. L +Nat N |-> undefined ...</store>
-       <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
+       <store>... . => L |-> arrayRef(L +Int 1, N)
+                       L +Int 1 .. L +Int N |-> undefined ...</store>
+       <nextLoc> L => L +Int 1 +Int N </nextLoc>
 
 /*@ SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we
 desugar them all into uni-dimensional arrays by code transformation.
@@ -297,7 +297,7 @@ inside the loop body with fewer dimensions.  The second variable,
 \texttt{\$2}, iterates through and initializes each element of the current
 dimension: */
 
-  syntax #Id ::= "$1" | "$2"
+  syntax Id ::= "$1" | "$2"
   rule var X[N1,N2,Vs:Vals]; =>
        var X[N1];
        {
@@ -338,10 +338,10 @@ global variable before declaring a local function).  The type checker of
 SIMPLE, also defined in \K (see simple/typed/static),
 discards programs which do not respect this requirement. */
 
-  rule <k> function F:#Id(Xs:Ids) S:K => . ...</k>
+  rule <k> function F:Id(Xs:Ids) S:K => . ...</k>
        <env> Env => Env[L/F] </env>
        <store>... . => L|->lambda(Xs,S) ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ When we are done with the first pass (pre-processing), the computation
 cell \textsf{k} contains only the token \texttt{execute} (see the module
@@ -362,7 +362,7 @@ same global environment; all these mean, in particular, that the functions
 ``see'' each other, allowing for mutual recursion, etc. */
 
   syntax K ::= "execute"
-  rule <k> execute => main(); </k>
+  rule <k> execute => String2Id("main")(); </k>
        <env> Env </env> <genv> . => Env </genv>  [structural]
 
 /*@ \section{Expressions}
@@ -391,7 +391,7 @@ For now, all we need to know is that it takes an expression and evaluates
 to a location value, also introduced below with the auxiliary operations. */
 
   context ++(HOLE => lvalue(HOLE))
-  rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
+  rule <k> ++loc(L) => I:Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store>  [transition]
 
 /*@ \subsection{Arithmetic operators}
@@ -399,22 +399,22 @@ There is nothing special about the following rules.  They rewrite the
 language constructs to their library counterparts when their arguments
 become values of expected sorts: */
 
-  rule I1:#Int + I2:#Int => I1 +Int I2
-  rule Str1:#String + Str2:#String => Str1 +String Str2
+  rule I1:Int + I2:Int => I1 +Int I2
+  rule Str1:String + Str2:String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
   rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
   rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
-  rule - I => -Int I
+  rule - I => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==Bool V2
   rule V1 != V2 => V1 =/=Bool V2
-  rule B1:#Bool and B2:#Bool => B1 andBool B2
+  rule B1:Bool and B2:Bool => B1 andBool B2
   rule B1 or B2 => B1 orBool B2
-  rule not(B:#Bool) => notBool(B)
+  rule not(B:Bool) => notBool(B)
 
 /*@ \subsection{Array lookup}
 Untyped SIMPLE does not check array bounds (the dynamically typed version of
@@ -429,15 +429,15 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 The semantics of the \texttt{lookup} operation is straightforward. */
 
   rule V[N1,N2,Vs] => V[N1][N2,Vs]  [structural anywhere]
-  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [structural anywhere]
-  syntax K ::= "lookup" "(" #Nat ")"
+  rule arrayRef(L,_:Nat)[N] => lookup(L +Int N)  [structural anywhere]
+  syntax K ::= "lookup" "(" Nat ")"
   rule <k> lookup(L) => K ...</k> <store>...L|->K...</store>  [transition]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
 \texttt{sizeOf} construct was declared strict, so: */
 
-  rule sizeOf(arrayRef(_:#Nat,N)) => N
+  rule sizeOf(arrayRef(_:Nat,N)) => N
 
 /*@ \subsection{Function call}
 Function application was strict in both its arguments, so we can
@@ -491,7 +491,7 @@ environment and writing the value to that location in the store. */
   rule <k> bindto((X,Xs => Xs),(V,Vs:Vals => Vs)) ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
   rule <k> bindto(.Ids,.Exps) => . ...</k>  [structural]
 
 /*@ \subsection{Read}
@@ -665,7 +665,7 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax K ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
+  syntax K ::= "(" Id "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
   rule <k> (try S1 catch(X) S2 => S1 ~> popx) ~> K </k>
        <control> <xstack> . => ListItem((X,S2,K,Env,C)) ...</xstack> C:Bag </control>
@@ -732,7 +732,7 @@ by the two rules below: */
    rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
      when notBool(V in Busy) [transition]
-   rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Nat 1) ...</holds>
+   rule <k> acquire V; => . ...</k> <holds>... V|->(N => N +Int 1) ...</holds>
 
 /*@ \subsubsection{Release lock}
 Similarly, there are two corresponding cases to distinguish when a thread
@@ -745,7 +745,7 @@ so other threads can acquire it if they need to. */
 
    rule <k> release V; => . ...</k>
         <holds>... V|->(N => _-Int_(N,1)) ...</holds>
-     when N >Nat 0
+     when N >Int 0
    // used prefix notation for -Int because of parsing problems
    rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
         <busy>... SetItem(V)=>. ...</busy>
@@ -794,9 +794,9 @@ corresponding store lookup operation. */
 
 // For parsing reasons, we prefer to allow lvalue to take a K
   syntax Exp ::= "lvalue" "(" K ")"
-  syntax Val ::= "loc" "(" #Nat ")"
+  syntax Val ::= "loc" "(" Nat ")"
 // Local variable
-  rule <k> lvalue(X) => loc(L:#Nat) ...</k>
+  rule <k> lvalue(X) => loc(L:Nat) ...</k>
        <env>... X|->L ...</env>  [structural]
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
@@ -811,9 +811,9 @@ The following operation expands to the list of natural numbers between two
 given numbers.  The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
 
-  syntax List{K} ::= #Nat ".." #Nat
-  define N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2  [structural]
-  define N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2  [structural]
+  syntax List{K} ::= Nat ".." Nat
+  define N1:Nat..N2:Nat => .List{K}              when N1  >Int N2  [structural]
+  define N1:Nat..N2:Nat => N1 ,, (N1 +Int 1)..N2 when N1 <=Int N2  [structural]
 
 /*@ The semantics of SIMPLE is now complete. */
 end module

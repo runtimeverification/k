@@ -21,8 +21,8 @@ module SUBSTITUTION
   syntax KLabel ::= beta [ K / Id ] 
                [prec 0 latex "\sqbracket{\framebox{${#1}$}/{#2}}"]
                
-  declare id_ : Int -> Id  --- to generate fresh names
-  define id N:Int => String2Id("_id" +String Int2String(N))
+  declare id_ : Nat -> Id  --- to generate fresh names
+  define id N:Nat => String2Id("_id" +String Int2String(N))
 
   syntax CellLabel ::= "nextId"
 
@@ -33,7 +33,7 @@ module SUBSTITUTION
   rule <k> beta[K/Y](L:KLabel(X:Id,,K')) => 
            visitedL(L)(visitedK(id(N)) 
                 visitedL(,,) eval (beta K' [id(N)/X]), then apply [K/Y])
-      <_/k> <nextId>N:Int => N +Int 1 </nextId>
+      <_/k> <nextId>N:Nat => N +Int 1 </nextId>
 ---   when Y =/=Bool X [structural] ---renaming bound variables
   rule eval visitedK(K'), then apply [ K / Y ] => beta K'[K/Y] [structural]
 

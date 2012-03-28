@@ -1,6 +1,8 @@
-require /modules/builtins/string
+require string
+require k-equal
 module TCP-HOOKS
   imports STRING-HOOKS
+  imports K-EQUAL-HOOKS
   syntax TCPAnswer ::= "#EOF" | String | "#tcpError" "(" String ")"
   define 'isKResult(#EOF) => true 
 
@@ -9,7 +11,9 @@ module TCP-HOOKS
 
   declare #checkTCPAnswer : String -> TCPAnswer
   define #checkTCPAnswer(S:String) 
-      => #EOF when #isTCPError(S) andBool "EOF" ==String #retrieveTCPError(S) 
+      => #if #isTCPError(S) #then #tcpError(#retrieveTCPError(S)) #else S #fi
+
+  define #tcpError("EOF") => #EOF
 
   declare ##tcpRequest : String -> String [hook(#TCP:#tcpRequest)]
   declare #isTCPError : String -> Bool [hook(#TCP:#isTCPError)]
