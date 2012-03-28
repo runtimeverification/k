@@ -137,8 +137,10 @@ sub sorting
 	    $production =~ s/MEDATA\S+//s;
 	    $production =~ s/\s*(?<!`)\|\s*//s;
 	    
+            # print "\nPRODUCTION: $production  ";
 	    if ($production =~ /^\s*($ksort)\s*$/)
 	    {
+              # print "SUBSORTS: $1 < $main_sort";
 		# !!! store both subsorts and supersorts
 		store($main_sort, $1);
 	    }

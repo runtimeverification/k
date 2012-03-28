@@ -3,10 +3,10 @@ require /modules/substitution
 module LAMBDA-SYNTAX 
 
   syntax Exp ::= Val
-               | Exp Exp            [:seqstrict gather(E e):]
+               | Exp Exp            [seqstrict gather(E e)]
 
-  syntax Val ::= "lambda" #Id . Exp [:binder prec 100 latex "\lambda{#1}.{#2}":]
-               | #Id
+  syntax Val ::= "lambda" Id . Exp [binder prec(100) latex "\lambda{#1}.{#2}"]
+               | Id
 end module
 
 module LAMBDA imports LAMBDA-SYNTAX + SUBSTITUTION
@@ -15,6 +15,5 @@ module LAMBDA imports LAMBDA-SYNTAX + SUBSTITUTION
  syntax KResult ::= Val  
 
 //@ $\beta$-substitution
-  rule <k> (lambda X:#Id.E:Exp) V:Val => E[V / X] ...</k>
-
+  rule (lambda X:Id.E:Exp) V:Val => E[V / X]
 end module

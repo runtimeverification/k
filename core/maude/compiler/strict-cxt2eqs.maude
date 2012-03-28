@@ -205,7 +205,7 @@ mod STRICTCXT2EQS is
 
   op strictCond : Term Qid ~> Term .
   eq strictCond(T, Q)
-   = neqBool(strictCondTerm(T,Q),bool2K(trueCt)) .
+   = neqK(strictCondTerm(T,Q),bool2K(trueCt)) .
   
 
   op strictCxt2eqs : Qid Qid Module Module SortSet AttrSet ~> Module .

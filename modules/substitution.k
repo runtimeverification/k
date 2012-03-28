@@ -2,10 +2,9 @@ require k-visitor
 
 module BINDER is
   syntax KLabel ::= isBinder
-                  | isBinder or #Id
-  syntax K ::= #Id
+                  | isBinder or Id
 
-  define isBinder or X(X:#Id) => true
+  define isBinder or X(X:Id) => true
   define isBinder or X(K:K) => true when isBinder(K)
 end module
 
@@ -13,18 +12,17 @@ module SUBSTITUTION
   imports K-VISITOR
   imports BINDER
 ---beta-substitution definition using the K AST visitor pattern
-  syntax K ::= #Id  | #Nat
-             | K [ K / #Id ] [prec 0]
-             | beta K [ K / #Id ]
+  syntax K ::= K [ K / Id ] [prec 0]
+             | beta K [ K / Id ]
                [prec 0 latex "{#1}\sqbracket{\framebox{${#2}$}/{#3}}"]
-             | eval K , then apply [ K / #Id ]  
+             | eval K , then apply [ K / Id ]  
                [prec 0 strict(1) latex "eval({#1})\sqbracket{\framebox{${#2}$}/{#3}}"]
                
-  syntax KLabel ::= beta [ K / #Id ] 
+  syntax KLabel ::= beta [ K / Id ] 
                [prec 0 latex "\sqbracket{\framebox{${#1}$}/{#2}}"]
                
-  syntax #Id ::= id #Nat  --- to generate fresh names
-  rule id N:#Nat => #id ("_id" +String Int2String(N))
+  declare id_ : Int -> Id  --- to generate fresh names
+  define id N:Int => String2Id("_id" +String Int2String(N))
 
   syntax CellLabel ::= "nextId"
 
@@ -32,14 +30,14 @@ module SUBSTITUTION
 
   rule beta[K/Y](Y) => visitedK(K) [structural]  ---this does the actual substitution
 
-  rule <k> beta[K/Y](L:KLabel(X:#Id,,K')) => 
+  rule <k> beta[K/Y](L:KLabel(X:Id,,K')) => 
            visitedL(L)(visitedK(id(N)) 
                 visitedL(,,) eval (beta K' [id(N)/X]), then apply [K/Y])
-      <_/k> <nextId>N:#Nat => sNat N</nextId>
+      <_/k> <nextId>N:Int => N +Int 1 </nextId>
 ---   when Y =/=Bool X [structural] ---renaming bound variables
   rule eval visitedK(K'), then apply [ K / Y ] => beta K'[K/Y] [structural]
 
-  macro beta K':K [K:K/Y:#Id] 
+  macro beta K':K [K:K/Y:Id] 
       = visit K' applying beta[K/Y] 
                        if isBinder or Y
 

@@ -1352,20 +1352,33 @@ sub register_subsorts
 
 }
 
-my $deep = 0;
 
 sub getAllModules
 {
-	$deep ++;
+  my $mod = shift;
+  return recursiveGetAllModules($mod, 0);
+}
+
+sub recursiveGetAllModules
+{
     my $mod = shift;
+    my $depth = shift;
     my $lsorts = "";
     $lsorts = $sortMod{$mod} if (defined($sortMod{$mod}));
+    # printf("\n%${depth}s%s: %s","",$mod, $lsorts);
     
     my @incl = split(/\s+/, $moduleMap{$mod}) if defined($moduleMap{$mod});
     
     foreach (@incl)
     {
-        $lsorts .= " " . getAllModules($_) if $deep < 300;	
+      if ($depth < 300) 
+      {	 
+        $lsorts .= " " . recursiveGetAllModules($_,$depth+1);
+      }
+      else
+      {
+        die("Module inclusion tree too deep. Check for cycles, please.");
+      } 
     }
     
 #	print "DEEP: $deep\n";
@@ -2881,7 +2894,7 @@ sub pre_process
     # collect all modules
     while(/kmod\s+([A-Z0-9\-]+)\s+.*?endkm/sg)
     {
-	push(@modules, $1) if ($1 ne "URIS" && $1 ne "K-VISITOR" && $1 ne "SUBSTITUTION");
+	push(@modules, $1) if ($1 ne "URIS" && $1 ne "K-VISITOR" && $1 ne "SUBSTITUTION" && $1 !~ /-HOOKS$/);
     }
     
     # Step: resolve latex comments

@@ -1265,10 +1265,10 @@ fmod META-LEVEL-EXTRAS is
   if S == String or-else S == Char or-else S == FiniteFloat .
   eq findOp(M, OPDS, '_=>_, T T', T'')
    =  (op '_=>_ : T'' T'' -> T'' [none] .) .
-  eq findOp(M, OPDS, '_==Bool_, T T', T'')
-   =  (op '_==Bool_ : dup(lubSorts(M,T,T'),2) -> Bool [none] .) .
-  eq findOp(M, OPDS, '_=/=Bool_, T T', T'')
-   =  (op '_=/=Bool_ : dup(lubSorts(M,T,T'),2) -> Bool [none] .) [print "_=/=Bool_: " T "\/" T' ] .
+---  eq findOp(M, OPDS, '_==Bool_, T T', T'')
+---   =  (op '_==Bool_ : dup(lubSorts(M,T,T'),2) -> Bool [none] .) .
+---  eq findOp(M, OPDS, '_=/=Bool_, T T', T'')
+---   =  (op '_=/=Bool_ : dup(lubSorts(M,T,T'),2) -> Bool [none] .) [print "_=/=Bool_: " T "\/" T' ] .
  ceq findOp(M, OPDS (op 'sNat_ : Tl' -> T' [AS] .), Q, Tl, T)
    =  (op 'sNat_ : Tl' -> T' [AS] .)
   if substr(string(Q), 0, length("sNat_^")) = "sNat_^" .
@@ -1295,6 +1295,12 @@ fmod META-LEVEL-EXTRAS is
    = (op Q : mergeTypes(Tl, Tl', 1, getPoly(AS)) -> mergeTypes(T, T', 0, getPoly(AS)) [AS] .)
   if sortsLeq(M, T' Tl, T Tl', 0, getPoly(AS)) [owise print "Op found: " Q Tl Tl' T T'] . 
 
+  op maximalArityOp : Module OpDeclSet Nat -> OpDecl .
+ ceq maximalArityOp(M, (op Q : Tl -> T [AS] .) OPDS, N)
+   = maximalArityOp(M, OPDS, N)
+  if arity(Tl) =/= N .
+  eq maximalArityOp(M, OPDS, N) = maximalArityOp(M, OPDS) [owise] .
+
 
   op maximalArityOp : Module OpDeclSet -> OpDecl .
   eq maximalArityOp(M, Op) = Op .
@@ -1302,7 +1308,9 @@ fmod META-LEVEL-EXTRAS is
     = maximalArityOp(M, (op Q : Tl -> T [AS] .) OPDS) 
    if sortsLeq(M, Tl' T', Tl T) .
   eq maximalArityOp(M, (op Q : Tl -> T [AS] .) Op OPDS)
-   = errorOp("Cannot find maximal operation for '" + string(Q) + "'",AS) .
+   = errorOp("Multiple maximal ops for '" + string(Q) + "'",AS) .
+  eq maximalArityOp(M, none)
+   = errorOp("No ops found for",none) .
   
 
 

@@ -152,15 +152,15 @@ displayed as $\leq$ everywhere in the generated PDF.  Currently, the
 \K tool allows parentheses to be used for grouping (e.g.,
 ``\texttt{while (x>=0) (x:=x/2; y:=x)}''). */
 
-  syntax AExp ::= #Int | #Id
+  syntax AExp ::= Int | Id
                 | AExp "+" AExp    [prec(33) gather (E e) strict]
                 | AExp "/" AExp    [prec(31) gather (E e) strict]
-  syntax BExp ::= #Bool
+  syntax BExp ::= Bool
                 | AExp "<=" AExp   [prec(37) seqstrict latex("{#1}\leq{#2}")]
                 | "not" BExp       [prec(53) strict]
                 | BExp "and" BExp  [prec(55) strict(1)]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp    [prec(80) strict(2)]
+                | Id ":=" AExp    [prec(80) strict(2)]
                 | Stmt ";" Stmt    [prec(100) gather(e E)]
                 | "if" BExp
                   "then" Stmt
@@ -186,7 +186,7 @@ instance with a (typically fresh) nonterminal in your syntax, like we
 do below with the \textit{Ids}. */
 
   syntax Pgm ::= "var" Ids ";" Stmt  [prec(110)]
-  syntax Ids ::= List{#Id,","}
+  syntax Ids ::= List{Id,","}
 
 end module
 
@@ -254,7 +254,7 @@ part of the original syntax.  Nevertheless, we still have to tell the
 computations (note that this is not automatic, since sometimes other
 syntactic categories are results; e.g., types when defining a type system). */
 
-  syntax KResult ::= #Int | #Bool
+  syntax KResult ::= Int | Bool
 
 /*@ Before we move to the definition of the IMP configuration, we
 would like to recall a few general facts about \K, particularly about
@@ -397,7 +397,7 @@ In \K you can name rules; for example, we named the lookup rule below
 \texttt{lookup}.  The rule names help to increase the clarity of your
 definitions and can be used by different \K tools in different ways. */
 
-  rule [lookup]: <k> X:#Id => I ...</k> <state>... X |-> I ...</state>
+  rule [lookup]: <k> X:Id => I ...</k> <state>... X |-> I ...</state>
 
 /*@
 Before we continue, we would like to remind the reader that the
@@ -458,8 +458,8 @@ places of the program where they were not supposed to.  Those are free
 to modify the rules below to always match at the top of the \textsf{k}
 cell. */
 
-  rule I1:#Int + I2:#Int => I1 +Int I2
-  rule I1 / I2 => I1 /Int I2  when I2 =/=Bool 0 
+  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0 
 
 /*@ \subsection{Boolean expressions}
 The rules below are straightforward.  Note the short-circuited semantics
@@ -470,7 +470,7 @@ as it happens in the second rule for \texttt{and} below.  \K allows us
 to use anonymous variables, written as underscores like in Prolog. */
 
   rule I1 <= I2 => I1 <=Int I2
-  rule not(T:#Bool) => notBool T
+  rule not(T:Bool) => notBool T
   rule true and B:BExp => B
   rule false and _ => false
 
@@ -495,7 +495,7 @@ to be declared, otherwise the semantics will get stuck.  At the same time,
 the assignment is dissolved. */
 
   rule [assignment]:
-    <k> X := I:#Int => . ...</k> <state>... X|->(_ => I) ...</state>
+    <k> X := I:Int => . ...</k> <state>... X|->(_ => I) ...</state>
 
 /*@ \subsubsection{Sequential composition}
 Sequential composition is simply structurally translated into \K's

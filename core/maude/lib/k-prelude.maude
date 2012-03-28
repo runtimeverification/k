@@ -7,7 +7,8 @@ load k-model-checker.maude
 --- Level 0
 
 mod K-TECHNIQUE is 
-  including #INT .
+  including #INT-INTERFACE .
+  including #BOOL-INTERFACE .
 
   var K : K . var Ks : List{K} .
   var LItem : ListItem .  var List : List .
@@ -82,14 +83,14 @@ endm
 --- extra stuff usefull for the K technique
 mod K-LISTK-EXTRAS is
   including K-TECHNIQUE .
-  including #STRING .
+  including #STRING-INTERFACE .
   subsort #Nat < K .
   
   var Ks Ks' : List{K} .  var K : K .
 
   op lengthList{K}_ : List{K} -> #Nat [metadata "latex=(renameTo length\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] . 
   eq lengthList{K}(.List`{K`}) = 0 .
-  eq lengthList{K}(K:K,,Ks) = lengthList{K}(Ks) +Nat 1 . 
+  eq lengthList{K}(K:K,,Ks) = sNat(lengthList{K}(Ks)) . 
 
   op headList{K}_ : NeList{K} -> K [metadata "latex=(renameTo head\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
   op tailList{K}_ : NeList{K} -> List{K} [metadata "latex=(renameTo tail\\subscript{{\\scriptstyle\\it{}List\{K\}}}\mybracket{_})"] .
@@ -105,14 +106,14 @@ mod K-LISTK-EXTRAS is
   eq List{K}ToK(.List{K}) = . .
   eq List{K}ToK(K,,Ks) = K ~> List{K}ToK(Ks) .
   
+***(
   op StringToList{K}_ : #String -> K .
   eq StringToList{K}("") = .List{K} .
   ceq StringToList{K}(S:#String)
 	= asciiString(substrString(S:#String, 0, 1))
 	,, StringToList{K}(substrString(S:#String, 1, lengthString(S:#String)))
 	if S:#String =/=Bool "" . 
-  
-
+***)
 endm
 
 mod K-EXTRAS is
@@ -128,8 +129,8 @@ mod K-EXTRAS is
 
   eq substKLabel(Label1(Ks), Label1, Label2) 
    = Label2(substList{K}Label(Ks,Label1,Label2)) .
- ceq substKLabel(Label(Ks), Label1, Label2) 
-   = Label(substList{K}Label(Ks,Label1,Label2)) if Label1 =/=Bool Label .
+  eq substKLabel(Label(Ks), Label1, Label2) 
+   = Label(substList{K}Label(Ks,Label1,Label2)) [owise] .
   eq substKLabel((K1:KItem ~> K2:KItem ~> K), Label1, Label2)
    = substKLabel(K1:KItem, Label1, Label2) ~> substKLabel(K2:KItem, Label1, Label2) ~> substKLabel(K, Label1, Label2) .
   eq substKLabel(., Label1, Label2) = . .
@@ -138,7 +139,6 @@ endm
 
 mod K-MAP-EXTRAS is
   including K-TECHNIQUE .
-  including #BOOL .
   var Map Map' : Map .  var List : List{K} . var NList1 NList2 : NeList{K} .
   vars K1 K2 K2' K : K .
 
@@ -188,7 +188,6 @@ endm
 
 mod K-SET-EXTRAS is
   including K-TECHNIQUE .
-  including #IF-THEN-ELSE .
   var K : K . var Ks : List{K} . var Set Set' : Set . var SetItem : SetItem .
   op Set_ : List{K} -> Set [metadata "latex=(renameTo {\\it{}Set}\\mybracket{_})"] .
   eq Set(.List{K}) = . .
@@ -203,13 +202,12 @@ mod K-SET-EXTRAS is
   eq SetItem in Set = false [owise] .
 
   op _-Set_ : Set Set -> Set [metadata "latex=(renameTo _-\\subscript{{\\scriptstyle\\it{}Set}}_)"] .
-  eq . -Set Set = . .
-  eq (SetItem Set) -Set Set' = if SetItem in Set' then Set -Set Set' else SetItem (Set -Set Set') fi .
+  eq (SetItem Set) -Set (SetItem Set') = Set -Set (SetItem Set') .
+  eq Set -Set Set' = Set [owise] .
 endm
 
 mod K-BAG-EXTRAS is
   including K-TECHNIQUE .
-  including #IF-THEN-ELSE .
   var K : K . var Bag Bag' : Bag . var BagItem : BagItem .  var Ks : List{K} .
   op Bag_ : List{K} -> Bag .
   eq Bag(.List{K}) = . .
@@ -224,13 +222,12 @@ mod K-BAG-EXTRAS is
   eq BagItem in Bag = false [owise] .
 
   op _-Bag_ : Bag Bag -> Bag [metadata "latex=(renameTo _-\\subscript{{\\scriptstyle\\it{}Bag}}_)"] .
-  eq . -Bag Bag = . .
-  eq (BagItem Bag) -Bag Bag' = if BagItem in Bag' then Bag -Bag Bag' else BagItem (Bag -Bag Bag') fi .
+  eq (BagItem Bag) -Bag (BagItem Bag') = Bag -Bag (BagItem Bag') .
+  eq Bag -Bag Bag' = Bag [owise] .
 endm
 
 mod K-LIST-EXTRAS is
   including K-TECHNIQUE .
-  including #BOOL .
 
   var K K1 K2 K' : K .  var Ks Ks' : List{K} .  var LItem : ListItem .  var List : List .  var N : #NzNat .
 
@@ -240,7 +237,7 @@ mod K-LIST-EXTRAS is
 
   op lengthList_ : List -> #Nat .
   eq lengthList(.).List = 0 .
-  eq lengthList(LItem List) = lengthList(List) +Nat 1 .
+  eq lengthList(LItem List) = sNat(lengthList(List)) .
 
   --- op getFromList`{K`}(_,_) : List{K} #NzNat -> K .
   --- eq getFromList{K}((K,,Ks),1) = K .
@@ -304,7 +301,7 @@ endm
 
 mod K-STRICTNESS is 
   including K-HOLE .
-  including #STRING .
+  including #STRING-INTERFACE .
   op freezer : K -> KLabel [strat(0) frozen] .
 
   op cool : -> KLabel .
@@ -331,7 +328,7 @@ endm
 
 mod K-WRAPPERS-LABELS is
   including K-TECHNIQUE .
-  including #STRING .
+  including #STRING-INTERFACE .
   op wklabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
   op wcelllabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
   op kList : #String -> KLabel [metadata "wrapper=(list)"] .
@@ -360,7 +357,6 @@ endm
 
 mod K-RULES is
   including K-SENTENCE .
-  including #BOOL .
   including K-TECHNIQUE .
   ops rule_ : KLabel -> [KSentence] [prec 126 format(b o d)] .
   ops rule_ : List{K} -> [KSentence] [prec 126 format(b o d)] .
@@ -409,7 +405,7 @@ endm
 
 mod K-CELL-ATTRS is
   including K-TECHNIQUE .
-  including #STRING .
+  including #STRING-INTERFACE .
   sort CellAttribute CellKey  .
 
   op __ : CellLabel CellAttribute -> CellLabel .
@@ -459,30 +455,29 @@ endm
 mod K-LATEX is
   including K-TECHNIQUE .
   including K-SENTENCE .
-  including #STRING .
+  including #STRING-INTERFACE .
   op @latex : #String -> BagItem .
   ops latex_ : #String -> [KSentence] [prec 126 format(b o d)] .
   op k-result : K -> K .
+endm
+
+mod #K-EQUAL-INTERFACE is
+endm
+
+mod #K-EQUAL is
+  including #BOOL .
+  including K-TECHNIQUE .
+  op _==K_ : K K -> #Bool .
+  eq K1:K ==K K2:K = K1:K ==Universal K2:K .
 endm
 
 mod K-BUILTINS is
   including K-TECHNIQUE .
   including K-RESULT .
   including PL-BUILTINS .
-  including #TCP .
+  including #K-EQUAL-INTERFACE .
+  including #TCP-INTERFACE .
   subsort #Bool #Int #String #Float #Id < K .
-  op andBool : -> KLabel .
-
-  var NeKList : NeList{K} .
-  var T1 T2 : #Bool .
-
-  eq andBool(T1,, T2,, NeKList)
-   = andBool(T1 andBool T2,, NeKList) .
-
-  eq andBool(T1,, T2)
-   = T1 andBool T2 .
-
-
   subsort Bottom < KResult .
 endm
 

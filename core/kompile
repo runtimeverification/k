@@ -2571,7 +2571,6 @@ sub throw_error
 sub add_subsorts
 {
     my $supersorts = find_k_sorts();
-#    print "SUPERSORTS: $supersorts\n";
     my @modules = split(/\s+/, getModuleList());
     my $dir = cwd;
     
@@ -2586,6 +2585,7 @@ sub add_subsorts
     }
     
     return if ($supersorts eq "");
+    # print "\nSUPERSORTS: $supersorts";
     
     # get all supersorts in an array
     my @ssorts = split(/\s+/, $supersorts);
@@ -2594,9 +2594,12 @@ sub add_subsorts
     foreach(@modules)
     {
 	my $cmod = $_;
+        # print "\n$cmod: ";
 	# get sorts for current module
 	my $sortlist = "#" . getModuleSorts($cmod) . "#" if defined(getModuleSorts($cmod));
 	$sortlist =~ s/ /#/g if defined($sortlist);
+
+        # print "$sortlist";
 	
 #	print "File: " . getModuleFile($_) . ", SORTS: $sortlist\n\n";
 	
@@ -2627,6 +2630,7 @@ sub add_subsorts
 		my $content = get_file_content($cpath);
 		
 		my $o = "@decllist";
+                # print "Module: $_ o: $o\n";
                 if ($o ne "") {
                     $content =~ s/mod(\s+)$_(\s.*?)endm/mod$1$_$2 subsorts $o < K \. endm/sg;
                   }
@@ -2803,7 +2807,7 @@ sub addKandKLATEX
 	$prelude_sorts =~ s/^\s*\|//;
 	$prelude_sorts =~ s/\|\s*$//;
         my $k_includes = " including K ";
-        if ($mod ne "URIS") {
+        if ($mod ne "URIS" && $mod !~ /-HOOKS$/) {
           $k_includes .= "\n including URIS "; 
         }
 #	print "SORTS: $prelude_sorts\n\n";
@@ -2816,10 +2820,17 @@ sub addKandKLATEX
 		$k_auto_incl = 1 if $mod eq $language_module_name;
 	}
 	else
-	{
-		# include only K-LATEX
-		$content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K-LATEX including PL-BUILTINS including K-RESULT !sg if !$k_latex;
-	}
+        {
+          if ($mod !~ /-HOOKS$/)
+          {
+            # include only K-LATEX
+            $content =~ s!(k?mod\s+\S+\s+is\s)!$1 including K-LATEX including BUILTIN-SYNTAX-HOOKS including K-RESULT !sg if !$k_latex;
+          }
+          else
+          {
+            $content =~ s!(k?mod\s+\S+\s+is\s)!$1 including PL-BUILTINS !sg;
+          }
+        }
 
 	return $content;
 }
