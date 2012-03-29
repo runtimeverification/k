@@ -38,6 +38,6 @@ public class EMPTY_empty_TAG extends Tag {
 		if (Maude.sortToSeparator.containsKey(sort))
 			return "'.List`{\"" + Maude.sortToSeparator.get(sort) + "\"`}(.List{K})";
 
-		throw new Exception("Could not find a list sort " + sort + "!");
+		throw new Exception("Could not find a list of sort " + sort + "!");
 	}
 }
