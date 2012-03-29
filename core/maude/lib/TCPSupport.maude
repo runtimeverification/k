@@ -2,8 +2,8 @@
 mod #TCP-SYNTAX is
 	including #SOCKET .
 	
-	op #error : -> #String .
-	op #containedRequest : #Socket-Configuration -> #String .
+	op #error : -> [#String] .
+	op #containedRequest : #Socket-Configuration -> [#String] .
 	op #toSend : #String -> #Socket-Msg .
 	op #start : #Nat -> #Socket-Configuration .
 	op #tcpRequest : #String -> #String .
@@ -102,7 +102,7 @@ mod #TCP is
 
 	eq #tcpRequest(S:#String) = #tcpRequest(S:#String, counter) .
 
-	op #tcpRequest : #String [#Nat] -> #String .
+	op #tcpRequest : #String [#Nat] -> [#String] .
 	eq #tcpRequest(S:#String, N:#Nat) = 
 #checkResult(#containedRequest(#start(N:#Nat) #Socket #toSend(int2String(N:#Nat) +String "#" +String S:#String +String "\r\n"))) .
 

@@ -54,7 +54,8 @@ fmod BLOCKING-INPUT is
   op blockingInputKR : KRuleSplit Qid Ellipses Term ~> MembAxSet .
  ceq blockingInputKR(KRS, Q, right, T) 
    = plugKRule(setContents(KRS, blockingInputTerm(getContents(KRS), Q, getType(V)))) 
-  if '_=>_['ListItem['_`(_`)['#_[V],'.List`{K`}.List`{K`}]],'..List] := T .
+  if '_=>_['ListItem[V],'..List] := T .
+---  if '_=>_['ListItem['_`(_`)['#_[V],'.List`{K`}.List`{K`}]],'..List] := T .
   eq  blockingInputKR(KRS, Q, E:Ellipses, T) = none [owise print T " or " E:Ellipses " did not match "] . 
 
   op blockingInputTerm : Term Qid Type ~> Term .

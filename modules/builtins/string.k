@@ -34,20 +34,19 @@ module STRING-HOOKS
   declare _=/=String_ : String String -> Bool
   define S1:String =/=String S2:String => notBool(S1 ==String S2)
 
-  declare #isWhiteSpace : String -> Bool 
-  define #isWhiteSpace(C:String) 
+  sort Char
+  declare isChar : String -> Bool
+  define isChar(S:String) => lengthString(S) ==Int 1 
+
+  declare #isWhiteSpace : Char -> Bool 
+  define #isWhiteSpace(C:Char) 
       => (asciiString(C) >=Int 9 andBool asciiString(C) <=Int 13)  
            orBool (C ==String " ")
-    when isChar(C)
 
-  declare #isDigit : String -> Bool
+  declare #isDigit : Char -> Bool
   define #isDigit(C) 
       => (asciiString(C) >=Int asciiString("0")) 
            andBool (asciiString(C) <=Int asciiString("9")) 
-    when isChar(C)
-
-  declare isChar : String -> Bool
-  define isChar(S:String) => lengthString(S) ==Int 1 
 end module
 
 
