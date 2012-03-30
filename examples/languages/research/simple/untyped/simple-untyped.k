@@ -274,7 +274,7 @@ of array declarations can be arbitrary expressions, this virtually
 means that we can dynamically allocate memory in SIMPLE by means of
 array declarations. */
 
-  rule <k> var X[N:Nat]; => . ...</k>
+  rule <k> var X[N:Nat,.Exps],.Exps; => . ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> arrayRef(L +Int 1, N)
                        L +Int 1 .. L +Int N |-> undefined ...</store>
@@ -298,14 +298,14 @@ inside the loop body with fewer dimensions.  The second variable,
 dimension: */
 
   syntax Id ::= "$1" | "$2"
-  rule var X[N1,N2,Vs:Vals]; =>
-       var X[N1];
+  rule var X[N1,N2,Vs:Vals],.Exps; =>
+       var X[N1,.Exps],.Exps;
        {
          var $1 = X;
          for $2 = 0 to _-_(N1,1) do   // stupid parser
          {
-           (var X[N2,Vs];)            // stupid parser
-           $1[$2] = X;
+           (var X[N2,Vs],.Exps;)            // stupid parser
+           $1[$2,.Exps] = X;
          }
        }  [structural]
 
@@ -403,15 +403,15 @@ become values of expected sorts: */
   rule Str1:String + Str2:String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Int 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Int 0
   rule - I => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
-  rule V1:Val == V2:Val => V1 ==Bool V2
-  rule V1 != V2 => V1 =/=Bool V2
+  rule V1:Val == V2:Val => V1 ==K V2
+  rule V1 != V2 => V1 =/=K V2
   rule B1:Bool and B2:Bool => B1 andBool B2
   rule B1 or B2 => B1 orBool B2
   rule not(B:Bool) => notBool(B)
@@ -428,8 +428,8 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 ``there is something there but we don't care what''.
 The semantics of the \texttt{lookup} operation is straightforward. */
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs]  [structural anywhere]
-  rule arrayRef(L,_:Nat)[N] => lookup(L +Int N)  [structural anywhere]
+  rule V[N1,N2,Vs] => V[N1,.Exps][N2,Vs]  [structural anywhere]
+  rule arrayRef(L,_:Nat)[N,.Exps] => lookup(L +Int N)  [structural anywhere]
   syntax K ::= "lookup" "(" Nat ")"
   rule <k> lookup(L) => K ...</k> <store>...L|->K...</store>  [transition]
 
