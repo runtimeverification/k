@@ -53,5 +53,5 @@ module AGENT
       <IO> <in stream="stdin">.List</in> <out stream="stdout">.List</out> </IO>
     </T>
 
-  syntax KResult ::= #Id
+  syntax KResult ::= Id
 end module

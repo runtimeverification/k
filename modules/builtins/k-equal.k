@@ -8,4 +8,17 @@ module K-EQUAL-HOOKS
   declare #if_#then_#else_#fi : Bool K K -> K 
   define #if true #then K:K #else _ #fi => K
   define #if false #then _ #else K:K #fi => K
+
+  declare _<=Set_ : Set Set -> Bool
+  define SetItem(K:K) Set1:Set <=Set SetItem(K) Set2:Set => Set1 <=Set Set2
+  define .Set <=Set Set:Set => true
+  define SetItem(K:K) Set1:Set <=Set Set2:Set => false
+  when notBool (K in Set2)
+
+  declare _==Set_ : Set Set -> Bool
+  define Set1:Set ==Set Set2:Set => (Set1 <=Set Set2) andBool (Set2 <=Set Set1)
+
+  declare _=/=Set_ : Set Set -> Bool
+  define Set1:Set =/=Set Set2:Set => notBool(Set1 ==Set Set2)
+
 end module
