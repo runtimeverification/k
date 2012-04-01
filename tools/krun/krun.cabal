@@ -31,7 +31,7 @@ Executable krun
     language-k,
     containers,
     attoparsec >= 0.10.0.0,
-    parsec
+    parsec >= 3.1.2
 
   ghc-prof-options: -rtsopts -auto-all
 
