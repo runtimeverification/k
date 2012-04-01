@@ -733,6 +733,10 @@ mod #FLOAT is
   var X Y : #Float .
   var Z : #FiniteFloat .
   eq X =[Z]Float Y = absFloat(X -Float Y) <Float Z .
+
+  op _==Float_ : #Float #Float -> #Bool .
+  eq F1:#Float ==Float F2:#Float = F1:#Float ==Universal F2:#Float .
+
 endm
 
 

@@ -2,7 +2,7 @@ module CHALLENGE-SYNTAX
 --- There are two main syntactic categories, Exp and Stmt
 
 --- Basic constructs for expressions
-  syntax Exp ::= #Bool | #Int | #Float | #Id
+  syntax Exp ::= Bool | Int | Float | Id
 
 --- Basic arithmetic and boolean operations; they will work with both integers and floats
 --- NOTE: can add more here
@@ -21,7 +21,7 @@ module CHALLENGE-SYNTAX
   syntax Stmt ::= Exp "=" Exp ";" [prec 80 gather(e E) strict(2)]
 
 --- Variable increment
-  syntax Exp ::= "++" #Id [prec 0]
+  syntax Exp ::= "++" Id [prec 0]
 
 --- Basic statement constructs
   syntax Stmt ::= "{" "}"
@@ -36,7 +36,7 @@ module CHALLENGE-SYNTAX
   syntax Stmt ::= "print" Exp ";" [strict]
 
 --- Memory allocation and pointers
-  syntax Exp ::= "&" #Id
+  syntax Exp ::= "&" Id
                | "*" Exp       [strict]
                | "malloc" Exp  [strict]
   syntax Stmt ::= "free" Exp ";" [strict]
@@ -56,7 +56,7 @@ module CHALLENGE-SYNTAX
   syntax Stmt ::= "return" Exp ";"          [strict]
 
 --- Fixed point
-  syntax Exp ::= "mu" #Id "." Exp [latex "\mu{#1}.{#2}"]
+  syntax Exp ::= "mu" Id "." Exp [latex "\mu{#1}.{#2}"]
 
 --- Callcc
   syntax Exp ::= "callcc" Exp [prec 50 strict]
@@ -93,11 +93,11 @@ module CHALLENGE-SYNTAX
 -----------------------------------------------------------------------------
 --- Lists should be eventually builtin; for now, they need to be declared ---
 -----------------------------------------------------------------------------
-  syntax Ids ::= List{#Id,","} [strict]
+  syntax Ids ::= List{Id,","} [strict]
 --- List{Exp}
   syntax Exps ::= List{Exp,","}
 
-  macro mu X:#Id.E:Exp = (lambda().{var X; X=E; return X;})()
+  macro mu X:Id.E:Exp = (lambda().{var X; X=E; return X;})()
 
   syntax Ids ::= "(" ")"
   macro () = .Ids

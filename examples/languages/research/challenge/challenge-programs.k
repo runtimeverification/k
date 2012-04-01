@@ -1,6 +1,6 @@
 kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
 
-  syntax #Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z 
+  syntax Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z 
 
   syntax Exp ::= p1
   macro p1 = 3+5
@@ -55,7 +55,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
  
  
   syntax Stmt ::= p9
-  syntax #Id ::= odd | even | odd-calls | even-calls
+  syntax Id ::= odd | even | odd-calls | even-calls
   macro p9 = var odd,even,odd-calls,even-calls;
           aspect (odd-calls = odd-calls+1;)
           odd = lambda x . (if not(0 <= x) then return even(x+1); else if not(x <= 0) then return even(x+-1); else return false;);
@@ -74,7 +74,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
   macro p11 = var y; y = 0; var f; f = lambda x . if (x <= 0) then return y; else {var y; y = 1; return f(x+-1);}; print(f(1));
 
   syntax Stmt ::= p12
-  syntax #Id ::= goto | exit
+  syntax Id ::= goto | exit
   macro p12 = var goto,n; print(callcc (lambda exit . ((callcc (lambda k . (goto = k;))); if n <= 10 then (n = n+1;) else (exit (n);) return goto(0);)));
 
   syntax Stmt ::= p13
@@ -179,7 +179,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
    print(eval(quote(1+2+unquote(x)+4+5)));
 
   syntax Stmt ::= p23
-  syntax #Id ::= genpow | cube
+  syntax Id ::= genpow | cube
   macro p23 = {
    var genpow;
    genpow = lambda n . {
@@ -194,7 +194,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
  }
 
   syntax Stmt ::= p24
-  syntax #Id ::= f1 | f2 | fib | loc | cod | sender
+  syntax Id ::= f1 | f2 | fib | loc | cod | sender
   macro p24 =
    var fib,loc;
    fib = newAgent
@@ -221,7 +221,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
    print receiveFrom fib;
 
   syntax Stmt ::= p25 | p26
-  syntax #Id ::= input | array | fix | split | splitl | merge | mergeSort | selectionSort  | list2array | array2list
+  syntax Id ::= input | array | fix | split | splitl | merge | mergeSort | selectionSort  | list2array | array2list
               | length | sorting | left | right | mergeSortAgent
   macro p25 = 
     var l, selectionSort, list2array, length, array2list, sorting, mergeSortAgent; 
@@ -391,7 +391,7 @@ kmod CHALLENGE-PROGRAMS is including CHALLENGE-SYNTAX
  
 
   syntax Stmt ::= p29
-  syntax #Id ::= in
+  syntax Id ::= in
   macro p29 = 
     var in, exit, g, length, array, a, n, i, j, t, x, y, mergeSortAgent;
     in = [];

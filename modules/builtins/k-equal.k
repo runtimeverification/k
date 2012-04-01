@@ -21,4 +21,10 @@ module K-EQUAL-HOOKS
   declare _=/=Set_ : Set Set -> Bool
   define Set1:Set =/=Set Set2:Set => notBool(Set1 ==Set Set2)
 
+  declare  _==List{K}_ : List`{K`} List`{K`} -> Bool
+  define LK1:List{K} ==List{K} LK2:List{K} => 'dummy(LK1) ==K 'dummy(LK2)
+
+  declare  _=/=List{K}_ : List`{K`} List`{K`} -> Bool
+  define LK1:List{K} =/=List{K} LK2:List{K}  => notBool(LK1 ==List{K} LK2)
+
 end module
