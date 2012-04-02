@@ -13,7 +13,7 @@ borrowed unchanged from SIMPLE and then add the KOOL new constructs. */
 The syntax below is taken over unchanged from SIMPLE, including all
 the \K strictness attributes and the desugaring macros. */
 
-  syntax #Id ::= "main"
+  syntax Id ::= "main"
 
   syntax Type ::= "int"
                 | "bool"
@@ -27,7 +27,7 @@ the \K strictness attributes and the desugaring macros. */
 
   syntax Decl ::= "var" Exps ";"
 
-  syntax Exp ::= #Int | #Bool | #String | #Id
+  syntax Exp ::= Int | Bool | String | Id
                | "++" Exp              [prec(0)]
                | Exp "+" Exp           [strict prec(33) gather(E e)]
                | Exp "-" Exp           [strict prec(33) gather(E e)]
@@ -59,7 +59,7 @@ the \K strictness attributes and the desugaring macros. */
                 | "if" Exp "then" Stmt "else" Stmt      [strict prec(90)]
                 | "if" Exp "then" Stmt                  [prec(89)]
                 | "while" Exp "do" Stmt                 [strict prec(90)]
-                | "for" #Id "=" Exp "to" Exp "do" Stmt  [prec(90)]
+                | "for" Id "=" Exp "to" Exp "do" Stmt  [prec(90)]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -75,31 +75,31 @@ the \K strictness attributes and the desugaring macros. */
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X = E1 to E2 do S) = {var X:int=E1; while X <= E2 do {S X=X+1;}}
   macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
-  macro var X:#Id : T:Type = E; = var X : T; X = E;
+  macro var X:Id : T:Type = E; = var X : T; X = E;
 
 
 /*@ \subsection{KOOL Additional Syntax}
 Note the strictness attributes, telling which arguments need to be
 typed before the actual construct can be typed. */
 
-  syntax #Id ::= "object"
+  syntax Id ::= "object"
 
-  syntax Type ::= "class" #Id [prec 1]
+  syntax Type ::= "class" Id [prec 1]
    
-  syntax Decl ::= "method" #Id "(" Exps ")" ":" Type Stmt
-                | "method" #Id "(" Exps ")" Stmt
-  macro method X:#Id (Es:Exps) S:Stmt = method X(Es) : void S
+  syntax Decl ::= "method" Id "(" Exps ")" ":" Type Stmt
+                | "method" Id "(" Exps ")" Stmt
+  macro method X:Id (Es:Exps) S:Stmt = method X(Es) : void S
 
-  syntax Decl ::= "class" #Id "{" Stmts "}"
-                | "class" #Id "extends" #Id "{" Stmts "}"
-  macro class C:#Id {Ss:Stmts} = class C extends object {Ss}
+  syntax Decl ::= "class" Id "{" Stmts "}"
+                | "class" Id "extends" Id "{" Stmts "}"
+  macro class C:Id {Ss:Stmts} = class C extends object {Ss}
 
-  syntax Exp ::= "new" #Id "(" Exps ")" [strict(2) prec(1)]
+  syntax Exp ::= "new" Id "(" Exps ")" [strict(2) prec(1)]
                | "this"
                | "super"
-               | Exp "." #Id            [prec(1) strict(1)]
-               | Exp "instanceOf" #Id   [prec(0) strict(1)]
-               | "cast" Exp "to" #Id    [prec(0) strict(1)]
+               | Exp "." Id            [prec(1) strict(1)]
+               | Exp "instanceOf" Id   [prec(0) strict(1)]
+               | "cast" Exp "to" Id    [prec(0) strict(1)]
 
   syntax Stmt ::= "try" Stmt "catch" "(" Exp ")" Stmt   [strict(1) prec(90)]
 end module 
@@ -199,9 +199,9 @@ semantics, the \texttt{types(...)} operation stays the same. */
   define types(X : T, .Exps) => T,.Types                      
   define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)
 
-  rule <k> I:#Int => int ...</k>
-  rule <k> B:#Bool => bool ...</k>
-  rule <k> Str:#String => string ...</k>
+  rule <k> I:Int => int ...</k>
+  rule <k> B:Bool => bool ...</k>
+  rule <k> Str:String => string ...</k>
 
 //@ Local type environment lookup also stays the same.
 
@@ -250,7 +250,7 @@ although the function tasks are now called method tasks. */
   rule if bool then stmt else stmt => stmt
   rule while bool do stmt  => stmt
   rule return; => stmt
-  rule print(T,Ts => Ts);  when T ==Bool int orBool T ==Bool string
+  rule print(T,Ts => Ts);  when T ==K int orBool T ==K string
   rule print(.Types); => stmt
   rule spawn stmt => stmt
   rule acquire T; => stmt
@@ -271,7 +271,7 @@ The operation \texttt{checkType}, defined at the end of this module,
 checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
-  rule <k> var X:#Id : T:Type; => checkType(T) ~> stmt ...</k>
+  rule <k> var X:Id : T:Type; => checkType(T) ~> stmt ...</k>
        <tenv> Rho:Map => Rho[T / X] </tenv>
 
 /*@ \subsubsection{Class member declaration}
@@ -335,7 +335,7 @@ instance of this rule). */
 // There seems to be some error with the configuration concretization,
 // as the rule below does not work when rewriting . to both the task
 // and the class cells; I had to include two separate . rewrites
-  rule <task> <k> class C:#Id extends C':#Id { Ss:Stmts }
+  rule <task> <k> class C:Id extends C':Id { Ss:Stmts }
                => stmt ...</k> </task>
        (. => <class>...
                <className> C </className>
@@ -404,7 +404,7 @@ rule below is to structurally ensure that the method declaration takes
 place in a class task (we do not want to allow methods to be declared,
 for example, inside other methods). */
 
-  rule <k> method M:#Id(XTs:Exps) : T S:Stmt
+  rule <k> method M:Id(XTs:Exps) : T S:Stmt
         => checkMethod(M, function from types(XTs) to T, C')
            ~> var M : function from types(XTs) to T; ...</k>
        <inClass> C </inClass>
@@ -427,7 +427,7 @@ below can only be function types.  See the definition of
 \texttt{checkSubtype} on function types at the end of this module (it
 is co-variant in the codomain and contra-variant in the domain). */
 
-  syntax K ::= "checkMethod" "(" #Id "," Type "," #Id ")"
+  syntax K ::= "checkMethod" "(" Id "," Type "," Id ")"
 
   rule <k> checkMethod(M,T,C) => checkSubtype(T,T') ...</k>
        <className> C </className>
@@ -441,7 +441,7 @@ is co-variant in the codomain and contra-variant in the domain). */
     when notBool(M in keys(Rho))
     [structural]
 
-  rule checkMethod(_:#Id,_,object) => .
+  rule checkMethod(_:Id,_,object) => .
 
 
 /*@ \subsection{New}
@@ -504,7 +504,7 @@ reached. */
        <className> C </className> <ctenv>... X |-> T ...</ctenv>
 
   rule <k> _._(class (C1 => C2),X) ...</k>
-       <className> C1:#Id </className> <extends> C2:#Id </extends>
+       <className> C1:Id </className> <extends> C2:Id </extends>
        <ctenv> Rho </ctenv>
     when notBool(X in keys(Rho))  [structural]
 
@@ -532,7 +532,7 @@ the programmer is simply trusted from a typing perspective.  Dynamic
 semantics or implementations of the language may insert a runtime
 check for the casting. */
 
-  rule  (class C1:#Id) instanceOf C2:#Id => bool
+  rule  (class C1:Id) instanceOf C2:Id => bool
   rule cast (class C1) to C2 => (class C2) 
 
 
@@ -545,7 +545,7 @@ type correctly. */
 
   rule try stmt catch(X : class C) S => {var X : class C; S}
     [structural]
-  rule throw class _:#Id ; => stmt
+  rule throw class _:Id ; => stmt
 
 
 /*@ \subsection{Cleanup tasks}
@@ -612,7 +612,7 @@ The subclass relation introduces a subtyping relation.
   rule <k> checkSubtype(class C1, class C)
         => checkSubtype(class C2, class C) ...</k>
           <className> C1 </className> <extends> C2 </extends>
-    when C1 =/=Bool C
+    when C1 =/=K C
   rule checkSubtype(function from Ts to T, function from Ts' to T')
     => checkSubtype((T,Ts'),(T',Ts))
 
@@ -637,6 +637,8 @@ that the types used in the program actually exists */
   syntax K ::= "stuck" "(" K ")"  [latex "\framebox{${#1}$}"]
   syntax K ::= "discard"
   rule _:KResult ~> discard => .  [structural]
+
+  define Id2String(main) => "main"
 
 end module
 
