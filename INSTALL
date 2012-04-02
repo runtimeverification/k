@@ -200,12 +200,9 @@ directory and have all of the test cases pass.
 If the above step succeeded, K can already generate LaTeX code for definitions.
 Executing
 
-    $ kompile <language> --latex
+    $ kompile simple-untyped --latex
 
-in one of the examples directories, e.g., 
-
-    examples/languages/research/simple/untyped
-
+in the `examples/languages/research/simple/untyped` directory
 should produce a file `simple-untyped.tex` containing the LaTeX code 
 corresponding to the definition.
 
@@ -216,10 +213,9 @@ good-looking PDFs which are nicer to read than their ASCII counterparts.
 To test whether the generation of PDFs works, either use `pdflatex` to compile
 the `.tex` file obtained above, or execute
 
-    $ kompile <language> --pdf
+    $ kompile simple-untyped --pdf
 
 in the `examples/languages/research/simple/untyped` directory.
-
 This should generate a PDF of the `SIMPLE-UNTYPED` definition which is a good
 starting point for understanding more about K definitions and the process of
 developing and testing them.
