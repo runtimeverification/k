@@ -30,16 +30,8 @@ public class CELL_cell_TAG extends Tag {
 	@Override
 	public String toMaude() throws Exception {
 		String label = getElement().getAttribute(Constants.LABEL_label_ATTR);
-//		String opened = getElement().getAttribute("opened");
 
 		String labell = "<_>_</_>";
-		
-//		if (opened.equals("left"))
-//			labell ="<_>..._</_>";
-//		if (opened.equals("right"))
-//			labell ="<_>_...</_>";
-//		if (opened.equals("both"))
-//			labell ="<_>..._...</_>";
 		
 		String head = "", start = "", end = "";
 		for(String attr : cellattributes)

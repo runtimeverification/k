@@ -39,6 +39,18 @@ public class MODULE_module_TAG extends Tag {
 			clabels += ": -> CellLabel .";
 		}
 
+		// K labels
+		Set<String> kLabels = getKLabels();
+		String klabels = "ops ";
+		if (kLabels == null || kLabels.size() == 0)
+			klabels = "";
+		else {
+			for (String label : kLabels)
+				klabels += label + " ";
+			klabels += ": -> KLabel .";
+		}
+
+		
 		// subsorts to K
 		Set<String> sorts = getSorts();
 		String subsorts = "";
@@ -53,7 +65,7 @@ public class MODULE_module_TAG extends Tag {
 		}
 
 		
-		return "mod " + getModuleName() + " is\n" + content + "\n" + clabels+ "\n" 
+		return "mod " + getModuleName() + " is\n" + content + "\n" + clabels+ "\n" + klabels + "\n" 
 				+ subsorts + "\nendm";
 	}
 

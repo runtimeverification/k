@@ -49,16 +49,6 @@ public abstract class Tag implements IMaude, IAst {
 
 	public String processToMaudeAsSeparatedList(String separator)
 			throws Exception {
-//		String out = "";
-//		List<Tag> children = getChildren();
-//		for (Tag tag : children) {
-//			if (tag != null)
-//				out += tag.toMaude() + separator;
-//		}
-//		
-//		if (out.equals(""))
-//			return out;
-//		return out.substring(0, out.length() - separator.length());
 		return processToMaudeAsSeparatedListExceptions(separator, new LinkedList<String>());
 	}
 
@@ -76,20 +66,22 @@ public abstract class Tag implements IMaude, IAst {
 		return out.substring(0, out.length() - separator.length());
 	}
 	
-	public Set<String> getCellLabels() {
-		Set<String> labels = new HashSet<String>();
-		
+	public String processToASTAsSeparatedList(String separator)
+			throws Exception {
+		String out = "";
 		List<Tag> children = getChildren();
-		for (Tag tag : children)
-			labels.addAll(tag.getCellLabels());
+		for (Tag tag : children) {
+			if (tag != null)
+				out += tag.toAst() + separator;
+		}
 		
-		String label = getCellLabel();
-		if (label != null)
-			labels.add(this.getCellLabel());
-
-		return labels;
+		if (out.equals(""))
+			return out;
+		return out.substring(0, out.length() - separator.length());
 	}
 
+
+	
 	public Tag getFirstChildByName(String name) {
 		List<Tag> children = getChildren();
 		for (Tag tag : children)
@@ -108,12 +100,52 @@ public abstract class Tag implements IMaude, IAst {
 
 	}
 
+	
+
+	
+	// retrieve cell labels
 	public String getCellLabel() {
 		if (getElement().getNodeName().equals(Constants.CELL_cell_TAG))
 			return getElement().getAttribute(Constants.LABEL_label_ATTR);
 		return null;
 	}
+	
+	public Set<String> getCellLabels() {
+		Set<String> labels = new HashSet<String>();
+		
+		List<Tag> children = getChildren();
+		for (Tag tag : children)
+			labels.addAll(tag.getCellLabels());
+		
+		String label = getCellLabel();
+		if (label != null)
+			labels.add(this.getCellLabel());
 
+		return labels;
+	}
+
+	// KLabels
+	public Set<String> getKLabels() {
+		Set<String> klabels = new HashSet<String>();
+		
+		List<Tag> children = getChildren();
+		for (Tag tag : children)
+			klabels.addAll(tag.getKLabels());
+		
+		String klabel = getKLabel();
+		if (klabel != null)
+			klabels.add(this.getKLabel());
+
+		return klabels;
+	}
+	
+	private String getKLabel() {
+		if (getElement().getNodeName().equals(Constants.CONST_const_TAG) && getElement().getAttribute(Constants.SORT_sort_ATTR).equals("KLabel"))
+			return getElement().getAttribute(Constants.VALUE_value_ATTR);
+		return null;
+	}
+
+	// retrieve sorts
 	public String getSort()
 	{
 		if(getElement().getNodeName().equals(Constants.SORT_sort_TAG))
@@ -134,20 +166,6 @@ public abstract class Tag implements IMaude, IAst {
 			sorts.add(this.getSort());
 
 		return sorts;
-	}
-
-	public String processToASTAsSeparatedList(String separator)
-			throws Exception {
-		String out = "";
-		List<Tag> children = getChildren();
-		for (Tag tag : children) {
-			if (tag != null)
-				out += tag.toAst() + separator;
-		}
-		
-		if (out.equals(""))
-			return out;
-		return out.substring(0, out.length() - separator.length());
 	}
 
 	
