@@ -3,10 +3,6 @@ TEST_DIRS = \
 	    algorithms/dijkstra \
 	    algorithms/primes \
 	    algorithms/sort \
-	    algorithms/sudoku/1-direct-definition \
-	    algorithms/sudoku/2-with-counters \
-	    algorithms/sudoku/3-with-decrement \
-	    algorithms/sudoku/4-with-squares \
 	    languages/classic/exp/untyped/environment \
 	    languages/classic/exp/untyped/substitution \
 	    languages/classic/exp/type-inference \
@@ -26,6 +22,10 @@ TEST_DIRS = \
 	    languages/research/simple/untyped \
 	    languages/research/simple/typed/dynamic \
 	    languages/research/simple/typed/static \
+	    algorithms/sudoku/1-direct-definition \
+	    algorithms/sudoku/2-with-counters \
+	    algorithms/sudoku/3-with-decrement \
+	    algorithms/sudoku/4-with-squares \
 
 
 
