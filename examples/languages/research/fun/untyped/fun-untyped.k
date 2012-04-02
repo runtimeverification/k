@@ -10,22 +10,22 @@ call-with-current-continuation (callcc).  */
 The constructs below are standard; they are present in almost all our
 \K language definitions. */
 
-  syntax Exp ::= #Int | #Bool | #String | #Id
-               | Exp "+" Exp           [:strict prec(33) gather(E e):]
-               | Exp "-" Exp           [:strict prec(33) gather(E e):]
-               | Exp "*" Exp           [:strict prec(31) gather(E e):]
-               | Exp "/" Exp           [:strict prec(31) gather(E e):]
-               | Exp "%" Exp           [:strict prec(31) gather(E e):]
-               | "-" Exp               [:strict:]
-               | Exp "<" Exp           [:strict prec(37):]
-               | Exp "<=" Exp          [:strict prec(37):]
-               | Exp ">" Exp           [:strict prec(37):]
-               | Exp ">=" Exp          [:strict prec(37):]
-               | Exp "==" Exp          [:strict prec(37):]
-               | Exp "!=" Exp          [:strict prec(37):]
-               | Exp "and" Exp         [:strict prec(55) gather(E e):]
-               | Exp "or" Exp          [:strict prec(59) gather(E e):]
-               | "not" Exp             [:strict prec(53):]
+  syntax Exp ::= Int | Bool | String | Id
+               | Exp "+" Exp           [strict prec(33) gather(E e)]
+               | Exp "-" Exp           [strict prec(33) gather(E e)]
+               | Exp "*" Exp           [strict prec(31) gather(E e)]
+               | Exp "/" Exp           [strict prec(31) gather(E e)]
+               | Exp "%" Exp           [strict prec(31) gather(E e)]
+               | "-" Exp               [strict]
+               | Exp "<" Exp           [strict prec(37)]
+               | Exp "<=" Exp          [strict prec(37)]
+               | Exp ">" Exp           [strict prec(37)]
+               | Exp ">=" Exp          [strict prec(37)]
+               | Exp "==" Exp          [strict prec(37)]
+               | Exp "!=" Exp          [strict prec(37)]
+               | Exp "and" Exp         [strict prec(55) gather(E e)]
+               | Exp "or" Exp          [strict prec(59) gather(E e)]
+               | "not" Exp             [strict prec(53)]
 
 /*@ \subsection{Functional constructs}
 The following constructs are like those of EXP, but slightly more
@@ -83,18 +83,18 @@ consider the cases where function declarations have the form
 (and similarly for \texttt{letrec}). */
 
   syntax Exp ::= "fun" Exps "->" Exp
-               | Exps Exps             [:strict prec(10) gather(E e):]
-               | Exps "=" Exps         [:prec(53):]   --- Bindings
+               | Exps Exps             [strict prec(10) gather(E e)]
+               | Exps "=" Exps         [prec(53)]   --- Bindings
                | "let" Exp "in" Exp
                | "letrec" Exp "in" Exp
                | "if" Exp
                  "then" Exp
-                 "else" Exp            [:strict(1):]
-  syntax Exps ::= List{Exp,","}        [:strict:]
-  syntax Ids  ::= List{#Id,","}
+                 "else" Exp            [strict(1)]
+  syntax Exps ::= List{Exp,","}        [strict]
+  syntax Ids  ::= List{Id,","}
   macro fun Es1:Exps Es2:Exps -> E:Exp = fun Es1 -> fun Es2 -> E
   macro (E1:Exp Es:Exps = E) = (E1 = fun Es -> E)
-  macro (X:#Id = E:Exp) and (Xs:Ids = Es:Exps) = ((X,Xs) = (E,Es))
+  macro (X:Id = E:Exp) and (Xs:Ids = Es:Exps) = ((X,Xs) = (E,Es))
 
 /*@ We want to allow the syntax \texttt{()} for the empty list of
 expressions/identifiers in FUN programs, so we also add it to the
@@ -114,11 +114,11 @@ if the list is empty, \texttt{null?} checks whether the list is empty,
 and \texttt{cons} is the dual of \texttt{car} and \texttt{cdr}
 together, that is, it places an element in from of a list. */
 
-  syntax Exp ::= "[" Exps "]"          [:strict hybrid prec(0):]
-               | "car" Exp             [:strict prec(0):]
-               | "cdr" Exp             [:strict prec(0):]
-               | "null?" Exp           [:strict prec(0):]
-               | "cons" Exp Exp        [:strict:]
+  syntax Exp ::= "[" Exps "]"          [strict hybrid prec(0)]
+               | "car" Exp             [strict prec(0)]
+               | "cdr" Exp             [strict prec(0)]
+               | "null?" Exp           [strict prec(0)]
+               | "cons" Exp Exp        [strict]
 
 /*@ \subsection{References}
 The construct \texttt{ref} takes an expression, evaluates it and
@@ -136,11 +136,11 @@ construct, which is sequentially strict.  This evaluates to the value
 of its second argument; the value of the first argument is lost (which
 has therefore been evaluated only for its side effects. */
 
-  syntax Exp ::= "ref" Exp             [:strict:]
-               | "&" #Id               [:prec(0):]
-               | "*" Exp               [:strict:]
-               | Exp ":=" Exp          [:strict:]
-               | Exp ";" Exp           [:seqstrict prec(110) gather(e E):]
+  syntax Exp ::= "ref" Exp             [strict]
+               | "&" Id               [prec(0)]
+               | "*" Exp               [strict]
+               | Exp ":=" Exp          [strict]
+               | Exp ";" Exp           [seqstrict prec(110) gather(e E)]
 
 /*@ \subsection{Call-with-current-continuation}
 Call-with-current-continuation, named \texttt{callcc} in FUN, is a
@@ -157,19 +157,12 @@ get back in time to that point.  If you like games, it is like saving
 the game now (so you can work on your homework!) and then continuing
 the game tomorrow or whenever you wish. */
 
-  syntax Exp ::= "callcc" Exp          [:strict:]
+  syntax Exp ::= "callcc" Exp          [strict]
 
 /*@ To highlight the power of callcc, we include exceptions in FUN by
 simply desugaring them to callcc using a macro. */
 
-  syntax Exp ::= "try" Exp "catch" "(" #Id ")" Exp
-  syntax #Id ::= "$continuation" | "$value" | "throw"
-
---- assume that continuation and value are not free in E and E'
-  macro try E catch(X:#Id) E':Exp
-      = callcc (fun $continuation
-                -> (fun throw -> E:Exp)
-                     (fun $value -> $continuation ((fun X -> E') $value)))
+  syntax Exp ::= "try" Exp "catch" "(" Id ")" Exp
 
 end module
 
@@ -187,12 +180,13 @@ grabs the reference of variable \texttt{x}, and this is easier to
 define in an environment-based style; and second, environment-based
 definitions tend to be more efficient when executed in \K\@. */
 
+
 /*@ \subsection{Values and results}
 We only define integers and Booleans as values here, but will add more
 values later.  We only discuss the features whose semantics is not
 identical to that in EXP or IMP\@. */
 
-  syntax Val ::= #Int | #Bool
+  syntax Val ::= Int | Bool
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val
@@ -213,27 +207,27 @@ identical to that in EXP or IMP\@. */
 
 //@ \subsection{Lookup}
 
-  rule <k> X:#Id => V:Val ...</k>
-       <env>... X |-> L:#Nat ...</env>
+  rule <k> X:Id => V:Val ...</k>
+       <env>... X |-> L:Nat ...</env>
        <store>... L |-> V ...</store>
 
 //@ \subsection{Arithmetic expressions}
 
-  rule I1:#Int + I2:#Int => I1 +Int I2
+  rule I1:Int + I2:Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
-  rule - I:#Int => -Int I
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Int 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Int 0
+  rule - I:Int => _-Int_(0,I)
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
-  rule V1:Val == V2:Val => V1 ==Bool V2
-  rule V1 != V2 => V1 =/=Bool V2
-  rule T1:#Bool and T2:#Bool => T1 andBool T2
+  rule V1:Val == V2:Val => V1 ==K V2
+  rule V1 != V2 => V1 =/=K V2
+  rule T1:Bool and T2:Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
-  rule not(T:#Bool) => notBool(T)
+  rule not(T:Bool) => notBool(T)
 
 /*@ \subsection{Functions and Closures}
 The semantics of function and application below follow the same
@@ -313,6 +307,18 @@ execution normally. */
   rule <k> (callcc V => V cc(Rho,K)) ~> K </k> <env> Rho </env> 
   rule <k> cc(Rho,K:K) V ~> _ => V ~> K </k> <env> _ => Rho </env> 
 
+/*@ \subsection{Try-catch construct} - desugars into callcc */
+
+  syntax Id ::= "$continuation" | "$value" --- | "throw"
+
+--- assume that continuation and value are not free in E and E'
+  rule try E catch(X:Id) E':Exp
+      => callcc (fun $continuation
+                -> (fun (String2Id("throw")) -> E:Exp)
+                     (fun $value -> $continuation ((fun X -> E') $value)))
+  [structural]
+
+
 //@ \subsection{Conditional}
 
   rule if  true then E else _ => E
@@ -343,7 +349,7 @@ substitution-based approach. */
 
   rule <k> ref V => L ...</k>
        <store>... . => L |-> V ...</store>
-       <nextLoc> L => sNat L </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
   rule <k> &X => L ...</k> <env>... X|->L ...</env>
   rule <k> *L => V ...</k> <store>... L|->V ...</store>
   rule <k> L:=V => V  ...</k> <store>... L|->(_=>V) ...</store>
@@ -359,33 +365,33 @@ and \texttt{letrec} above. */
 //@ \subsubsection{Environment recovery}
 
   syntax K ::= "env" "(" Map ")"
-  rule (env(_) => .) ~> env(_)            [:structural:]   --- tail recursion
+  rule (env(_) => .) ~> env(_)            [structural]   --- tail recursion
   rule <k> V ~> (env(Rho) => .) ...</k>
-       <env> _ => Rho </env>              [:structural:]
+       <env> _ => Rho </env>              [structural]
 
 //@ \subsubsection{bindTo and bind}
 
-  syntax K ::= "bindTo" "(" Ids "," Exps ")"        [:strict(2):]
+  syntax K ::= "bindTo" "(" Ids "," Exps ")"        [strict(2)]
              | "bind" "(" Ids ")"
 
-  rule <k> bindTo(.Ids,.Vals) => . ...</k>             [:structural:]
+  rule <k> bindTo(.Ids,.Vals) => . ...</k>             [structural]
   rule <k> bindTo((X,Xs => Xs),(V,Vs => Vs)) ...</k>
        <env> Rho => Rho[N/X] </env>
        <store>... . => N |-> V ...</store>
-       <nextLoc> N:#Nat => sNat N </nextLoc>              [:structural:]
+       <nextLoc> N:Nat => N +Int 1 </nextLoc>              [structural]
 
-  rule <k> bind(.Ids) => . ...</k>                      [:structural:]
+  rule <k> bind(.Ids) => . ...</k>                      [structural]
   rule <k> bind(X,Xs => Xs) ...</k>
        <env> Rho => Rho[N/X] </env>
-       <nextLoc> N => sNat N </nextLoc>                   [:structural:]
+       <nextLoc> N => N +Int 1 </nextLoc>                   [structural]
 
 //@ \subsubsection{assignTo}
 
-  syntax K ::= "assignTo" "(" Ids "," Exps ")"  [:strict(2):]
+  syntax K ::= "assignTo" "(" Ids "," Exps ")"  [strict(2)]
 
-  rule <k> assignTo(.Ids,.Vals) => . ...</k>            [:structural:]
+  rule <k> assignTo(.Ids,.Vals) => . ...</k>            [structural]
   rule <k> assignTo((X,Xs => Xs),(V,Vs => Vs)) ...</k>
        <env>... X |-> L ...</env>
-       <store>... . => L |-> V ...</store>                [:structural:]
+       <store>... . => L |-> V ...</store>                [structural]
 
 end module
