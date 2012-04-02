@@ -1,6 +1,6 @@
 kmod PCF-UNTYPED-PROGRAMS is including PCF-UNTYPED-SEMANTICS
 
-  syntax #Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m
+  syntax Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m
               | n | o | p | q | r | s | t | u | v | w | x | y | z
 
   syntax Exp ::= add | multiply | eleven | fibonacci | factorial | fastfactorial
@@ -44,7 +44,7 @@ kmod PCF-UNTYPED-PROGRAMS is including PCF-UNTYPED-SEMANTICS
   macro pgm018 = factorial 6 // SLOW! ~30 seconds on my machine
 
   syntax Exp ::= fastmultiply Exp Exp [strict]
-  rule fastmultiply N:#Nat M:#Nat => N:#Nat *Nat M:#Nat
+  rule fastmultiply N:Nat M:Nat => N:Nat *Int M:Nat
 
   macro fastfactorial = mu f . lambda x . cond (zero? x) 1 (fastmultiply x (f (pred x)))
   macro pgm019 = fastfactorial 0

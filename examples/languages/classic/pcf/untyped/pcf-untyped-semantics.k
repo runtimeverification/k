@@ -1,4 +1,4 @@
-kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
+module PCF-UNTYPED-SEMANTICS imports PCF-UNTYPED-SYNTAX
   /*@ \section*{Dynamic semantics}
   This module captures the dynamic semantics of PCF.
   */
@@ -13,19 +13,18 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
       <nextLoc color="gray"> 0 </nextLoc>
     </T>
 
-  kvar L N : #Nat
+  kvar L N : Nat
   kvar E E' : Exp
-  kvar X : #Id
+  kvar X : Id
   kvar V : Val
 
   //@ \textbf{Basic constructs}
-  rule succ N => N +Nat 1
+  rule succ N => N +Int 1
 
-  rule pred 0 => 0
-  rule pred (sNat N) => N
+  rule pred N => #if N >Int 0 #then N -Int 1 #else 0 #fi 
 
   rule zero? 0 => true
-  rule zero? N => false when N >Nat 0
+  rule zero? N => false when N >Int 0
 
   rule cond true E E' => E
   rule cond false E E' => E'
@@ -38,21 +37,21 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
        <store_> L |-> E <_/store>
 
   //@ \textbf{$\lambda$-abstraction}
-  syntax Val ::= closure-lambda ( Map , #Id , Exp ) [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
+  syntax Val ::= closure-lambda ( Map , Id , Exp ) [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
   rule <k> lambda X . E => closure-lambda(Env, X, E) <_/k>
        <env> Env </env> 
 
   rule <k> closure-lambda(Env, X, E) V => E ~> env(Env') <_/k>
        <env> Env' =>  Env[L / X] </env>
        <store_> . => L |-> V <_/store>
-       <nextLoc> L => L +Nat 1 </nextLoc> 
+       <nextLoc> L => L +Int 1 </nextLoc> 
 
   //@ \textbf{$\mu$-abstraction}
   syntax Exp ::= closure-mu ( Map , Exp ) [latex "\textsf{closure}_\mu({#1},{#2})"]
   rule <k> mu X . E => closure-mu(Env[L / X], E) <_/k>
        <env> Env </env>
        <store_> . => L |-> closure-mu(Env[L / X], E) <_/store>
-       <nextLoc> L => L +Nat 1 </nextLoc> 
+       <nextLoc> L => L +Int 1 </nextLoc> 
 
   rule <k> closure-mu(Env, E) => E ~> env(Env') <_/k>
        <env> Env' => Env </env> 
@@ -63,4 +62,4 @@ kmod PCF-UNTYPED-SEMANTICS is including PCF-UNTYPED-SYNTAX + K
        <env> _ => Env </env>
        [structural]
 
-endkm
+end module

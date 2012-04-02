@@ -1,11 +1,10 @@
-kmod PCF-UNTYPED-SYNTAX is including #ID + K-LATEX
+module PCF-UNTYPED-SYNTAX 
   /*@ \section*{Syntax}
   This module defines the syntax for PCF.
   */
 
-  syntax Val ::= #Bool
-               | #Nat
-               | #Int
+  syntax Val ::= Bool
+               | Int
                | succ
                | pred
                | zero?
@@ -14,10 +13,10 @@ kmod PCF-UNTYPED-SYNTAX is including #ID + K-LATEX
   us a call-by-name variant of PCF.
   */
   syntax Exp ::= Val
-               | #Id
+               | Id
                | Exp Exp            [strict prec 10 gather(E e)]
-               | lambda #Id . Exp    [latex "\lambda{#1}\mathbin{.}{#2}"]
-               | mu #Id . Exp        [latex "\mu{#1}\mathbin{.}{#2}"]
+               | lambda Id . Exp    [latex "\lambda{#1}\mathbin{.}{#2}"]
+               | mu Id . Exp        [latex "\mu{#1}\mathbin{.}{#2}"]
                | cond Exp Exp Exp   [strict(1)]
 
-endkm
+end module
