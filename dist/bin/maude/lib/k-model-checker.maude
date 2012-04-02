@@ -168,8 +168,8 @@ mod #LTL-SIMPLIFIER is
   ceq p LTL\/ q = LTLTrue if LTL~ p <= q .
   ceq p LTLU q = q if p <= q .
   ceq p LTLR q = q if q <= p .
-  ceq p LTLU q = LTLTrue LTLU q if p =/=Bool LTLTrue /\ LTL~ q <= p .
-  ceq p LTLR q = LTLFalse LTLR q if p =/=Bool LTLFalse /\ q <= LTL~ p .
+  ceq p LTLU q = LTLTrue LTLU q if p =/=Universal LTLTrue /\ LTL~ q <= p .
+  ceq p LTLR q = LTLFalse LTLR q if p =/=Universal LTLFalse /\ q <= LTL~ p .
   ceq p LTLU (q LTLU r) = q LTLU r if p <= q .
   ceq p LTLR (q LTLR r) = q LTLR r if q <= p .
 endm

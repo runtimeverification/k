@@ -638,7 +638,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaLatexPrint(M, (pair(Str,"") ))   
     = ('\kattribute '`{ tokenize(latexString(Str)) '`}) [owise] .
   eq eMetaLatexPrint(M, (pair(Str,Str') ))   
-    = ('\kattribute  '`( tokenize(latexString(Str)) '`( tokenize(latexString(Str')) '`) '`}) [owise] .
+    = ('\kattribute  '`{ tokenize(latexString(Str)) '`( tokenize(latexString(Str')) '`) '`}) [owise] .
   eq eMetaLatexPrint(M, (strat(NL) ))
     = ('\kstrat '`{ eMetaLatexPrint(NL) '`} 
        ) .
@@ -1108,7 +1108,7 @@ mod LATEX-PRINT-META is
   ceq latexCmd(Q) = substr(Str,0,1) == "\\" and-then all-letters(substr(Str,1,length(Str))) 
    if Str := string(Q) [print "testying for LaTeX " Str] .
 
-   var Str : String . var N : Nat . var Nz : NzNat . var NeTl : NeTermList .
+   var Str Str' : String . var N : Nat . var Nz : NzNat . var NeTl : NeTermList .
   var I : Int .
   ceq splitMixFix(Str) 
     = \textsf{qid(substr(Str, 0, N))} splitMixFix(substr(Str, N + 1, length(Str)))
@@ -1170,6 +1170,15 @@ mod LATEX-PRINT-META is
        eMetaLatexPrint(M, Prints)) .
 
   var Cnd : Term .
+  eq eMetaLatexPrint(M, (rule(Str, R{T, empty, AS pair("function",Str')})) Prints)
+    = ('\n '\kdefine '`{ printStr(latexString(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
+                   '`} '`{ '`} '`{ eMetaLatexPrint(M, AS) '`}
+       eMetaLatexPrint(M, Prints)) [owise] .
+  eq eMetaLatexPrint(M, (rule(Str, R{T, Cnd, AS pair("function",Str')})) Prints)
+    = ('\n '\kdefine '`{ printStr(latexString(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
+                   '`} '`{ '\ensuremath printTerm(M, Cnd) '`}  '`{  eMetaLatexPrint(M, AS) '`}
+       eMetaLatexPrint(M, Prints)) [owise] .
+
   eq eMetaLatexPrint(M, (rule(Str, R{T, empty, AS})) Prints)
     = ('\n '\krule '`{ printStr(latexString(Str)) '`} '`{ '\ensuremath printTerm0(M, T, AS) 
                    '`} '`{ '`} '`{ eMetaLatexPrint(M, AS) '`}

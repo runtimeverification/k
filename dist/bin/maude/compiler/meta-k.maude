@@ -853,16 +853,19 @@ fmod META-K-LABELS is
   
   var Trl : TermList .  var Trm T1 T2 : Term .
 
+  op andBoolL : -> Term .
+  eq andBoolL = mkConstant(''#andBool,KLabel) .
+
   op andBool_ : TermList -> TermList .
   eq andBool(empty) = empty .
   eq andBool(Trm) = Trm .
-  eq andBool(Trl) = kApply(mkConstant('andBool,KLabel),kList(Trl)) [owise] .
+  eq andBool(Trl) = kApply(andBoolL,kList(Trl)) [owise] .
 
-  op neqBool : Term Term -> Term .
-  eq neqBool(T1, T2) = bool2K('_=/=Bool_[T1,T2]) .
+  op neqK : Term Term -> Term .
+  eq neqK(T1, T2) = kApply(mkConstant(''_=/=K_,KLabel),(T1,T2)) .
 
-  op eqBool : Term Term -> Term .
-  eq eqBool(T1, T2) = bool2K('_==Bool_[T1,T2]) .
+  op eqK : Term Term -> Term .
+  eq eqK(T1, T2) = kApply(mkConstant(''_==K_,KLabel),(T1,T2)) .
 
   var OPDS OPDS' : OpDeclSet .  var Op : OpDecl .  var AS : AttrSet .
 endfm

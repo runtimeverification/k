@@ -17,6 +17,7 @@ mod RESOLVE-HOOKS is
   var Op : OpDecl . var OPDS : OpDeclSet . var M : Module .
   var I : Qid . var IL : ImportList .
   var HL : HookList . var H : Hook .
+  var N : Nat .
 
   op resolveHooks : Qid Module ~> Module .
   eq resolveHooks(Q, M) 
@@ -52,12 +53,16 @@ mod RESOLVE-HOOKS is
    = resolveHook(Q, AS, upModule(QM, true), QO) .
 
   op resolveHook : Qid AttrSet Module Qid -> Equation .
+  eq resolveHook(Q, AS karity(N), M, QO) 
+   = resolveHook(Q, AS karity(N), maximalArityOp(M, getNamedOps(M,QO), N)) .
   eq resolveHook(Q, AS, M, QO) 
-   = resolveHook(Q, AS, maximalArityOp(M, getNamedOps(M,QO))) .
+   = resolveHook(Q, AS, maximalArityOp(M, getNamedOps(M,QO))) [owise] .
 
   op resolveHook : Qid AttrSet OpDecl -> Equation .
   eq resolveHook(Q, AS, op QO : Tyl -> Ty [AS'] .)
    = resolveHook(Q, AS, QO, genVars(Tyl,"Hk"),  Ty) .
+  eq resolveHook(Q, AS, errorOp(Str:String,AS'))
+   = errorEq('`[`]:K,"",Str + " while looking up hooks for " + string(Q) + ".",AS) .
 
   op resolveHook : Qid AttrSet Qid TermList Type -> Equation .
   eq resolveHook(Q, AS, QO, Terms,  Ty) 
@@ -67,7 +72,10 @@ mod RESOLVE-HOOKS is
   op mkKList_ : TermList ~> TermList .
   eq mkKList(empty) = empty .
   eq mkKList(V, Terms) 
-   = kApply(mkSubsortWrapper(getType(V),KLabel)[V],nilKList), mkKList(Terms) .
+   = if getType(V) == K 
+        then V 
+        else kApply(mkSubsortWrapper(getType(V),KLabel)[V],nilKList) 
+     fi, mkKList(Terms) .
 
   op parseHooks : String -> HookList .
   eq parseHooks(Str) = parseHooks(tokenize(stripSpaces(Str))) .

@@ -36,7 +36,7 @@ fmod MAKE-ALL-LABELS is
 
  op makeAllLabels : Qid Module Module ModuleSet ~> Module .
  eq makeAllLabels(Q, M, Flat, MS)
-  = makeAllLabels(setName(suffixImports(Q,removeImports(M, including 'K-QUOTED-LABELS . including '#IF-THEN-ELSE .),allLabelsImports(MS)), qid(string(getName(M)) + string(Q))), Flat, processOps(pseudoKOps(getOps(Flat)))) .
+  = makeAllLabels(setName(suffixImports(Q,removeImports(M, including 'K-QUOTED-LABELS .),allLabelsImports(MS)), qid(string(getName(M)) + string(Q))), Flat, processOps(pseudoKOps(getOps(Flat)))) .
 
  op makeAllLabels : Module Module OpDeclOpDeclSetMap ~> Module .
  eq makeAllLabels(M, Flat, OPDM) 
@@ -45,7 +45,7 @@ fmod MAKE-ALL-LABELS is
 
  op makeAllLabels : Module Module OpDeclSet OpDeclSet OpDeclOpDeclSetMap ~> Module .
  eq makeAllLabels(M, Flat, OPDS, OPDS', OPDM)
-  = addImports(including 'MAUDE-IF-THEN-ELSE .,applyLabels(addOps(OPDS', removeOps(M, OPDS getAuxKLabels(getOps(M), OPDS'))), Flat, OPDM)) [print "Projected Ops: " OPDS'] .
+  = applyLabels(addOps(OPDS', removeOps(M, OPDS getAuxKLabels(getOps(M), OPDS'))), Flat, OPDM) [print "Projected Ops: " OPDS'] .
 
  op filteredProject : OpDeclOpDeclSetMap OpDeclSet -> OpDeclSet .
  eq filteredProject((empty).OpDeclOpDeclSetMap, OPDS) = none .

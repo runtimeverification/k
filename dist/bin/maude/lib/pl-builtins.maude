@@ -23,46 +23,32 @@ set include BOOL off .
 set show advisories off .
 
 
-mod #BOOL is
+mod #BOOL-INTERFACE is
   sort #Bool .
   op true : -> #Bool [ctor special (id-hook SystemTrue)] .
   op false : -> #Bool [ctor special (id-hook SystemFalse)] .
-  op _==Bool_ : Universal Universal -> #Bool [poly (1 2) prec 51  metadata "latex=(renameTo _$=$\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
-    id-hook EqualitySymbol
-    term-hook equalTerm (true)
-    term-hook notEqualTerm (false))] .
-  op _=/=Bool_ : Universal Universal -> #Bool [poly (1 2) prec 51 metadata "latex=(renameTo _$\\neq$\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
-    id-hook EqualitySymbol
-    term-hook equalTerm (false)
-    term-hook notEqualTerm (true))] .
-
-  op _andBool_ : #Bool #Bool -> #Bool [assoc comm prec 55  metadata "latex=(renameTo _$\\wedge$\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
-  op _orBool_ : #Bool #Bool -> #Bool [assoc comm prec 59   metadata "latex=(renameTo _$\\vee$\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
-  op _xorBool_ : #Bool #Bool -> #Bool [assoc comm prec 57] .
-  op notBool_ : #Bool -> #Bool [prec 53 metadata "latex=(renameTo $\\neg$\\subscript{{\\scriptstyle\\it{}Bool}}_)"] .
-  op _impliesBool_ : #Bool #Bool -> #Bool [gather (e E) prec 61] .
-  vars A B C : #Bool .
-  eq true andBool A = A .
-  eq false andBool A = false .
-  eq A andBool A = A .
-  eq false xorBool A = A .
-  eq A xorBool A = false .
-  eq A andBool (B xorBool C) = A andBool B xorBool A andBool C .
-  eq notBool A = A xorBool true .
-  eq A orBool B = A andBool B xorBool A xorBool B .
-  eq A impliesBool B = notBool(A xorBool A andBool B) .
 endm
 
-mod #IF-THEN-ELSE is including #BOOL .
-  op if_then_else_fi : #Bool Universal Universal -> Universal [poly (2 3 0)] .
-endm
-
-mod MAUDE-IF-THEN-ELSE is including #BOOL .
+mod #BOOL is  including #BOOL-INTERFACE .
   op if_then_else_fi : #Bool Universal Universal -> Universal 
     [poly (2 3 0) special (
     id-hook BranchSymbol
     term-hook 1 (true)
     term-hook 2 (false))] .
+  op _==Universal_ : Universal Universal -> #Bool [poly (1 2) prec 51  metadata "latex=(renameTo _$=$\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
+    id-hook EqualitySymbol
+    term-hook equalTerm (true)
+    term-hook notEqualTerm (false))] .
+  op _=/=Universal_ : Universal Universal -> #Bool [poly (1 2) prec 51 metadata "latex=(renameTo _$\\neq$\\subscript{{\\scriptstyle\\it{}Bool}}_)" special (
+    id-hook EqualitySymbol
+    term-hook equalTerm (false)
+    term-hook notEqualTerm (true))] .
+
+  op _==Bool_ : #Bool #Bool -> #Bool .
+  eq B1:#Bool ==Bool B2:#Bool = B1:#Bool ==Universal B2:#Bool .
+endm
+
+mod #EXT-BOOL-INTERFACE is
 endm
 
 mod #EXT-BOOL is
@@ -77,8 +63,7 @@ mod #EXT-BOOL is
 endm
 
 
-mod #NAT is
-  protecting #BOOL .
+mod #NAT-INTERFACE is
   sorts #Zero #NzNat #Nat .
   subsort #Zero #NzNat < #Nat .
   op 0 : -> #Zero [ctor] .
@@ -87,7 +72,11 @@ mod #NAT is
         [ctor iter metadata "latex=(renameTo s\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook SuccSymbol
                   term-hook zeroTerm (0))] .
+endm
 
+mod #NAT is
+  protecting #BOOL .
+  protecting #NAT-INTERFACE .
   op _+Nat_ : #NzNat #Nat -> #NzNat
         [assoc comm prec 33 metadata "latex=(renameTo _\\ensuremath{{}+}\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook ACU_NumberOpSymbol (+)
@@ -216,25 +205,30 @@ mod #NAT is
                   term-hook falseTerm (false))] .
 endm
 
-mod #INT is
-  protecting #NAT .
+mod #INT-INTERFACE is
+  protecting #NAT-INTERFACE .
   sorts #NzInt #Int .
   subsorts #NzNat < #NzInt #Nat < #Int .
   subsort #Zero #NzNat < #Int . 
 
-  op -Int_ : #NzNat -> #NzInt
+  op --Int_ : #NzNat -> #NzInt
         [ctor metadata "latex=(renameTo \\ensuremath{-{}}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook MinusSymbol
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
-  op -Int_ : #NzInt -> #NzInt [ditto] .
-  op -Int_ : #Int -> #Int [ditto] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
+  op --Int_ : #NzInt -> #NzInt [ditto] .
+  op --Int_ : #Int -> #Int [ditto] .
+endm
+
+mod #INT is 
+  protecting #INT-INTERFACE .
+  protecting #NAT .
 
   op _+Int_ : #Int #Int -> #Int
         [assoc comm prec 33  metadata "latex=(renameTo _\\ensuremath{{}+}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (+)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op _+Int_ : #NzNat #Nat -> #NzNat [ditto] .
   op _+Int_ : #Nat #Nat -> #Nat [ditto] .
 
@@ -243,13 +237,13 @@ mod #INT is
         [prec 33 gather (E e)   metadata "latex=(renameTo _\\ensuremath{{}-}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (-)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
 
   op _*Int_ : #NzInt #NzInt -> #NzInt
         [assoc comm prec 31     metadata "latex=(renameTo _*\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (*)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op _*Int_ : #Int #Int -> #Int [ditto] .
  op _*Int_ : #NzNat #NzNat -> #NzNat [ditto] .
   op _*Int_ : #Nat #Nat -> #Nat [ditto] .
@@ -258,19 +252,19 @@ mod #INT is
         [prec 31 gather (E e)   metadata "latex=(renameTo _\\ensuremath{{}\\div}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (quo)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
 
   op _%Int_ : #Int #Int -> #Int
         [prec 31 gather (E e)  metadata "latex=(renameTo _\\%\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (rem)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
 
   op _^Int_ : #Int #Nat -> #Int
         [prec 29 gather (E e) metadata "latex=(renameTo _\\ensuremath{\\mathbin{\\char`\\^}}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (^)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op _^Int_ : #NzInt #Nat -> #NzInt [ditto] .
   op _^Int_ : #Nat #Nat -> #Nat [ditto] .
   op _^Int_ : #NzNat #Nat -> #NzNat [ditto] .
@@ -279,28 +273,28 @@ mod #INT is
         [metadata "latex=(renameTo \\ensuremath{\\vert}_\\ensuremath{\\vert}\\subscript{{\\scriptstyle\\it{}Int}})"
 			special (id-hook NumberOpSymbol (abs) 
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op absInt : #Int -> #Nat [ditto] .
 
   op gcdInt : #NzInt #Int -> #NzNat
         [assoc comm
          special (id-hook ACU_NumberOpSymbol (gcd)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op gcdInt : #Int #Int -> #Nat [ditto] .
 
   op lcmInt : #NzInt #NzInt -> #NzNat
         [assoc comm
          special (id-hook ACU_NumberOpSymbol (lcm)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op lcmInt : #Int #Int -> #Nat [ditto] .
 
   op minInt : #NzInt #NzInt -> #NzInt
         [assoc comm
          special (id-hook ACU_NumberOpSymbol (min)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op minInt : #Int #Int -> #Int [ditto] .
   op minInt : #NzNat #NzNat -> #NzNat [ditto] .
   op minInt : #Nat #Nat -> #Nat [ditto] .
@@ -310,7 +304,7 @@ mod #INT is
         [assoc comm
          special (id-hook ACU_NumberOpSymbol (max)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op maxInt : #Int #Int -> #Int [ditto] .
   op maxInt : #NzNat #Int -> #NzNat [ditto] .
   op maxInt : #Nat #Int -> #Nat [ditto] .
@@ -319,45 +313,45 @@ mod #INT is
    [metadata "latex=(renameTo {\\raise.17ex\\hbox{$\\scriptstyle\\sim$}}\\subscript{{\\scriptstyle\\it{}Int}}_)"
         special (id-hook NumberOpSymbol (~)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
 
   op _xorInt_ : #Int #Int -> #Int
         [assoc comm prec 55 metadata "latex=(renameTo _xor\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (xor)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
 
   op _&Int_ : #Nat #Int -> #Nat
         [assoc comm prec 53 metadata "latex=(renameTo _\\ensuremath{{}\\&}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (&)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op _&Int_ : #Int #Int -> #Int [ditto] .
 
   op _|Int_ : #NzInt #Int -> #NzInt
         [assoc comm prec 57  metadata "latex=(renameTo _\\ensuremath{{}|}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook ACU_NumberOpSymbol (|)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
   op _|Int_ : #Int #Int -> #Int [ditto] .
 
   op _>>Int_ : #Int #Nat -> #Int
         [prec 35 gather (E e) metadata "latex=(renameTo _\\ensuremath{{}\\gg}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (>>)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
 
   op _<<Int_ : #Int #Nat -> #Int
         [prec 35 gather (E e) metadata "latex=(renameTo _\\ensuremath{{}\\ll}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (<<)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
 
   op _<Int_ : #Int #Int -> #Bool
         [prec 37  metadata "latex=(renameTo _\\ensuremath{<}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (<)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
@@ -365,7 +359,7 @@ mod #INT is
         [prec 37   metadata "latex=(renameTo _\\ensuremath{\\leq}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (<=)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
@@ -373,7 +367,7 @@ mod #INT is
         [prec 37   metadata "latex=(renameTo _\\ensuremath{>}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (>)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
@@ -381,7 +375,7 @@ mod #INT is
         [prec 37  metadata "latex=(renameTo _\\ensuremath{\\geq}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (>=)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
@@ -389,10 +383,11 @@ mod #INT is
         [prec 51 metadata "latex=(renameTo _divides\\subscript{{\\scriptstyle\\it{}Nat}}_)"
          special (id-hook NumberOpSymbol (divides)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
 
+---(
   op _==Int_ : #Int #Int -> #Bool [prec 37 metadata "latex=(renameTo _==\\subscript{{\\scriptstyle\\it{}Int}}_)"] .
   op _!=Int_ : #Int #Int -> #Bool [prec 37 metadata "latex=(renameTo _!=\\subscript{{\\scriptstyle\\it{}Int}}_)"] .
   ceq I1 ==Int I2 = true if I1 >=Int I2 andBool I2 >=Int I1 .
@@ -400,11 +395,16 @@ mod #INT is
   eq I1 !=Int I2 = notBool(I1 ==Int I2) .
 
   vars I1 I2 : #Int .
+---)
+
+  op _==Int_ : #Int #Int -> #Bool .
+  eq I1:#Int ==Int I2:#Int = I1:#Int ==Universal I2:#Int .
 endm
 
 
-mod #RAT is
-  protecting #INT .
+
+mod #RAT-INTERFACE is
+  protecting #INT-INTERFACE .
   sorts #PosRat #NzRat #Rat .
   subsorts #NzInt < #NzRat #Int < #Rat .
   subsorts #NzNat < #PosRat < #NzRat .
@@ -413,8 +413,19 @@ mod #RAT is
         [ctor prec 31 gather (E e)
          special (id-hook DivisionSymbol
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int))] .
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
 
+  op _/Rat_ : #NzNat #NzNat -> #PosRat [ctor ditto] .
+  op _/Rat_ : #PosRat #PosRat -> #PosRat [ditto] .
+  op _/Rat_ : #NzRat #NzRat -> #NzRat [ditto] .
+  op _/Rat_ : #Rat #NzRat -> #Rat [ditto] .
+  op --Int_ : #NzRat -> #NzRat [ditto] .
+  op --Int_ : #Rat -> #Rat [ditto] .
+endm
+
+mod #RAT is
+  protecting #RAT-INTERFACE .
+  protecting #INT .
   var I J : #NzInt .
   var N M : #NzNat .
   var K : #Int .
@@ -422,22 +433,16 @@ mod #RAT is
   var Q : #NzRat .
   var R  R1 R2 : #Rat .
 
-  op _/Rat_ : #NzNat #NzNat -> #PosRat [ctor ditto] .
-  op _/Rat_ : #PosRat #PosRat -> #PosRat [ditto] .
-  op _/Rat_ : #NzRat #NzRat -> #NzRat [ditto] .
-  op _/Rat_ : #Rat #NzRat -> #Rat [ditto] .
   eq 0 /Rat Q = 0 .
-  eq I /Rat -Int N = -Int I /Rat N .
+  eq I /Rat --Int N = --Int I /Rat N .
   eq (I /Rat N) /Rat (J /Rat M) = (I *Int M) /Rat (J *Int N) .
   eq (I /Rat N) /Rat J = I /Rat (J *Int N) .
   eq I /Rat (J /Rat M) = (I *Int M) /Rat J .
 
   op -Rat_ : #NzRat -> #NzRat .
   op -Rat_ : #Rat -> #Rat  .
-  eq -Rat R = -Int R .
-  op -Int_ : #NzRat -> #NzRat [ditto] .
-  op -Int_ : #Rat -> #Rat [ditto] .
-  eq -Int (I /Rat N) = -Int I /Rat N .
+  eq -Rat R = --Int R .
+  eq --Int (I /Rat N) = --Int I /Rat N .
 
   op _+Rat_ : #PosRat #PosRat -> #PosRat [assoc comm prec 33 metadata "latex=(renameTo _\\ensuremath{{}+}\\subscript{{\\scriptstyle\\it{}Rat}}_)"] .
   op _+Rat_ : #PosRat #Nat -> #PosRat [ditto] .
@@ -578,19 +583,22 @@ mod #RAT is
   eq ceilingRat(K) = K .
   eq floorRat(N /Rat M) = N /Int M .
   eq ceilingRat(N /Rat M) = ((N +Int M) -Int 1) /Int M .
-  eq floorRat(-Int N /Rat M) = -Int ceilingRat(N /Rat M) .
-  eq ceilingRat(-Int N /Rat M) = -Int floorRat(N /Rat M) .
+  eq floorRat(--Int N /Rat M) = --Int ceilingRat(N /Rat M) .
+  eq ceilingRat(--Int N /Rat M) = --Int floorRat(N /Rat M) .
 endm
 
-mod #FLOAT is
-  protecting #BOOL .
+mod #FLOAT-INTERFACE is
   sorts #FiniteFloat #Float .
   subsort #FiniteFloat < #Float .
 
 *** pseudo constructor for the set of double precision floats
   op <Floats> : -> #FiniteFloat [special (id-hook FloatSymbol)] .
   op <Floats> : -> #Float [ditto] .
+endm
 
+mod #FLOAT is
+  protecting #BOOL .
+  protecting #FLOAT-INTERFACE .
   op -Float_ : #Float -> #Float
         [prec 15 metadata "latex=(renameTo \\ensuremath{-{}}\\subscript{{\\scriptstyle\\it{}Float}}_)"
          special (id-hook FloatOpSymbol (-)
@@ -725,11 +733,14 @@ mod #FLOAT is
   var X Y : #Float .
   var Z : #FiniteFloat .
   eq X =[Z]Float Y = absFloat(X -Float Y) <Float Z .
+
+  op _==Float_ : #Float #Float -> #Bool .
+  eq F1:#Float ==Float F2:#Float = F1:#Float ==Universal F2:#Float .
+
 endm
 
 
-mod #STRING is
-  protecting #INT .
+mod #STRING-INTERFACE is
   sorts #String #Char .
   subsort #Char < #String .
 ---  subsort #Int < FindResult .
@@ -737,7 +748,11 @@ mod #STRING is
 *** pseudo constructor for the infinite set of strings
   op <Strings> : -> #Char [special (id-hook StringSymbol)] .
   op <Strings> : -> #String [ditto] .
+endm
 
+mod #STRING is
+  protecting #STRING-INTERFACE .
+  protecting #INT .
 ---  op notFound : -> FindResult [ctor] .
 
   --- should be #Char -> #Nat, but too restrictive type system
@@ -805,22 +820,35 @@ mod #STRING is
                   op-hook stringSymbol (<Strings> : ~> #String)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
+
+  op _==String_ : #String #String -> #Bool .
+  eq S1:#String ==String S2:#String = S1:#String ==Universal S2:#String .
 endm
 
-mod #ID is including #STRING .
+mod #ID-INTERFACE is 
+  including #STRING-INTERFACE .
   sort #Id .
-  op #id_ : #String -> #Id [prec 0] .
+  op #id_ : #String -> #Id [ctor prec 0] .
+endm
+
+mod #ID is 
+  including #ID-INTERFACE .
+  including #STRING .
+endm
+
+mod #CONVERSION-INTERFACE is
+  protecting #INT-INTERFACE .
+  protecting #STRING-INTERFACE .
+  sort #DecFloat .
+  op #DecFloat : #Int #String #Int -> #DecFloat [ctor] .
 endm
 
 mod #CONVERSION is
+  protecting #CONVERSION-INTERFACE .
   protecting #ID .
   protecting #RAT .
   protecting #FLOAT .
   protecting #STRING .
-  sort #DecFloat .
-  op #DecFloat : #Int #String #Int -> #DecFloat [ctor] .
-
-
   op Bool2Int : #Bool -> #Int .
   eq Bool2Int(true) = 1 . 
   eq Bool2Int(false) = 0 .
@@ -829,49 +857,49 @@ mod #CONVERSION is
         [special (id-hook FloatOpSymbol (float)
                   op-hook floatSymbol (<Floats> : ~> #Float)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   op-hook divisionSymbol (_/Rat_ : #NzInt #NzNat ~> #NzRat))] .
   
-  op Int2Float : #Int -> #Float [metadata "latex=(renameTo {\\it{}Int2Float})"] .
-  eq Int2Float(I:#Int) = Rat2Float(I:#Int) .
+  op int2Float : #Int -> #Float [metadata "latex=(renameTo {\\it{}int2Float})"] .
+  eq int2Float(I:#Int) = Rat2Float(I:#Int) .
 
   op Float2Rat : #Float -> #Rat
         [special (id-hook FloatOpSymbol (rat)
                   op-hook floatSymbol (<Floats> : ~> #Float)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   op-hook divisionSymbol (_/Rat_ : #NzInt #NzNat ~> #NzRat))] .
 
-  op Float2Int : #Float -> #Int .
-  eq Float2Int(F:#Float) = truncRat(Float2Rat(floorFloat(F:#Float))) .
+  op float2Int : #Float -> #Int .
+  eq float2Int(F:#Float) = truncRat(Float2Rat(floorFloat(F:#Float))) .
 
   op Rat2String : #Rat #NzNat -> #String
         [special (id-hook StringOpSymbol (string)
                   op-hook stringSymbol (<Strings> : ~> #String)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   op-hook divisionSymbol (_/Rat_ : #NzInt #NzNat ~> #NzRat))] .
 
-  op Int2String : #Int -> #String .
-  eq Int2String(I:#Int) = Rat2String(I:#Int,10) .
+  op int2String : #Int -> #String .
+  eq int2String(I:#Int) = Rat2String(I:#Int,10) .
 
   op String2Rat : #String #NzNat -> #Rat
         [special (id-hook StringOpSymbol (rat)
                   op-hook stringSymbol (<Strings> : ~> #String)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   op-hook divisionSymbol (_/Rat_ : #NzInt #NzNat ~> #NzRat))] .
 
-  op String2Int : #String -> #Int .
-ceq String2Int(S:#String) = I:#Int if I:#Int := String2Rat(S:#String,10) .
+  op string2Int : #String -> #Int .
+ceq string2Int(S:#String) = I:#Int if I:#Int := String2Rat(S:#String,10) .
  
 
-  op Float2String : #Float -> #String
+  op float2String : #Float -> #String
         [special (id-hook StringOpSymbol (string)
                   op-hook stringSymbol (<Strings> : ~> #String)
                   op-hook floatSymbol (<Floats> : ~> #Float))] .
 
-  op String2Float : #String -> #Float
+  op string2Float : #String -> #Float
         [special (id-hook StringOpSymbol (float)
                   op-hook stringSymbol (<Strings> : ~> #String)
                   op-hook floatSymbol (<Floats> : ~> #Float))] .
@@ -881,12 +909,15 @@ ceq String2Int(S:#String) = I:#Int if I:#Int := String2Rat(S:#String,10) .
                   op-hook stringSymbol (<Strings> : ~> #String)
                   op-hook floatSymbol (<Floats> : ~> #Float)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (-Int_ : #NzNat ~> #Int)
+                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   op-hook decFloatSymbol 
                           (#DecFloat : #Int #String #Int ~> #DecFloat))] .
 
-  op Id2String : #Id -> #String .
-  eq Id2String(#id(Str:#String)) = Str:#String .
+  op id2String : #Id -> #String .
+  eq id2String(#id(Str:#String)) = Str:#String .
+
+  op string2Id : #String -> #Id .
+  eq string2Id(Str:#String) = #id(Str:#String) .
 endm
 
 mod #QID is
@@ -908,15 +939,22 @@ mod #QID is
 endm
 
 
+mod #RANDOM-INTERFACE is
+endm
 
 mod #RANDOM is
+  protecting #RANDOM-INTERFACE .
   protecting #NAT .
   op randomRandom : #Nat -> #Nat
         [special (id-hook RandomOpSymbol
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat))] .
 endm
 
+mod #COUNTER-INTERFACE is
+endm
+
 mod #COUNTER is
+  protecting #COUNTER-INTERFACE .
   protecting #NAT .
   op counter : -> [#Nat] [special (
     id-hook CounterSymbol
@@ -925,41 +963,24 @@ mod #COUNTER is
   eq kcounter = counter .
 endm
 
-mod #STRING-EXTRAS is
-  including #STRING .
-  including #EXT-BOOL .
-  including #INT .
-  var C : #Char .
-
-  op #isWhiteSpace : #Char -> #Bool .
-  eq #isWhiteSpace(C) 
-   = (asciiString(C) >=Int 9 and-then asciiString(C) <=Int 13)  or-else C ==Bool " " .
-
-  op #isDigit : #Char -> #Bool .
-  eq #isDigit(C) = (asciiString(C) >=Int asciiString("0") and-then asciiString(C) <=Int asciiString("9")) .
-endm
-
-
 mod BOTTOM is
   sort Bottom .
 endm
 
 mod PL-BUILTINS is
-including #BOOL .
-including #EXT-BOOL .
-including #NAT .
-including #INT .
-including #RAT .
-including #FLOAT .
-including #STRING .
-including #CONVERSION .
+including #BOOL-INTERFACE .
+including #EXT-BOOL-INTERFACE .
+including #NAT-INTERFACE .
+including #INT-INTERFACE .
+including #RAT-INTERFACE .
+including #FLOAT-INTERFACE .
+including #STRING-INTERFACE .
+including #CONVERSION-INTERFACE .
 ---including #QID .
-including #RANDOM .
-including #COUNTER .
-including #BOOL .
-including #ID .
-including #IF-THEN-ELSE .
-including #STRING-EXTRAS .
+including #RANDOM-INTERFACE .
+including #COUNTER-INTERFACE .
+including #BOOL-INTERFACE .
+including #ID-INTERFACE .
 including BOTTOM .
 endm
 
