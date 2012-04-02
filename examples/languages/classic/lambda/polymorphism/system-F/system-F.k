@@ -11,7 +11,7 @@ kmod SYSTEM-F-SYNTAX is
   */
   syntax BasicType ::= bool | int
 
-  syntax TypeVar ::= #Id
+  syntax TypeVar ::= Id
 
   // TODO: the precedences and gatherings need to be adjusted to avoid excess
   // parenthesis
@@ -62,7 +62,7 @@ kmod SYSTEM-F-STATIC-SEMANTICS is including SYSTEM-F-SYNTAX + K + SUBSTITUTION
   kvar X : Var
   kvar T T' T1 T2 S : Type
   kvar BT : BasicType
-  kvar Tv : #Id
+  kvar Tv : Id
   kvar Tvs : Set
   kvar E E' : Exp
   kvar Env : Map
@@ -74,7 +74,7 @@ kmod SYSTEM-F-STATIC-SEMANTICS is including SYSTEM-F-SYNTAX + K + SUBSTITUTION
   rule <k> X => T <_/k>
        <tyenv_> X |-> T <_/tyenv>
        <tyvars> Tvs </tyvars>
-      when freeVars(T) -Set Tvs ==Bool .
+      when freeVars(T) -Set Tvs ==Set .
 
   /*@ \subsection*{Lambda abstractions}
   */
@@ -121,7 +121,7 @@ kmod SYSTEM-F-PROGRAMS is including SYSTEM-F-STATIC-SEMANTICS
   This module defines a few programs for testing the definition.
   */
 
-  syntax #Id ::= s | t | t1 | t2 | t3
+  syntax Id ::= s | t | t1 | t2 | t3
   syntax Var ::= b | f | g | i | x | y | z
 
   syntax Exp ::= compose | compose2 | lambdaxx | ctrue | cfalse | cnot

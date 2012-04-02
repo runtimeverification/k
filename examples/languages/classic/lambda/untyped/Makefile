@@ -9,7 +9,7 @@ LANGUAGE_NAME = LAMBDA
 MAIN_FILE = lambda
 
 # this is a space-separated list of basename maude files to run
-TESTS = 
+# TESTS = 
 
 # this is a space separated list of directories containing io_tests
 IO_TESTS = programs/tests
