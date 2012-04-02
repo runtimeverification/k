@@ -12,7 +12,7 @@ testing to redex positions anymore. */
 These are identical to those in imperative and object oriented
 languages, for example see IMP, IMPP, SIMPLE, KOOL\@. */
 
-  syntax Exp ::= #Int | #Bool | #Id
+  syntax Exp ::= Int | Bool | Id
                | Exp "+" Exp                [:strict prec 33 gather(E e):]
                | Exp "-" Exp                [:strict prec 33 gather(E e):]
                | Exp "*" Exp                [:strict prec 31 gather(E e):]
@@ -37,14 +37,14 @@ $\lambda$-abstractions will evaluate to closures.  We desugar
 substitution-based definition. */
 
   syntax Exp ::= "if" Exp "then" Exp "else" Exp [:strict(1):]
-               | "lambda" #Id "." Exp       [:latex "\lambda{#1}.{#2}":]
+               | "lambda" Id "." Exp       [:latex "\lambda{#1}.{#2}":]
                | Exp Exp                    [:strict prec 10 gather(E e):]
-               | "mu" #Id "." Exp           [:latex "\mu{#1}.{#2}":]
-               | "let" #Id "=" Exp "in" Exp
-               | "letrec" #Id #Id "=" Exp in Exp
+               | "mu" Id "." Exp           [:latex "\mu{#1}.{#2}":]
+               | "let" Id "=" Exp "in" Exp
+               | "letrec" Id Id "=" Exp in Exp
 
-  macro let X:#Id = E:Exp in E':Exp = (lambda X . E') E
-  macro (letrec F:#Id X = E in E') = (let F = mu F . (lambda X . E) in E')
+  macro let X:Id = E:Exp in E':Exp = (lambda X . E') E
+  macro (letrec F:Id X = E in E') = (let F = mu F . (lambda X . E) in E')
 
 end module
 
@@ -62,7 +62,7 @@ IMP, we prefer to define values as a distinguished subsyntactic
 category of \textit{Exp}, as opposed to defining them directly as \K
 results. */
 
-  syntax Val ::= #Int | #Bool
+  syntax Val ::= Int | Bool
   syntax Exp ::= Val
   syntax KResult ::= Val
 
@@ -86,24 +86,24 @@ semantics.  For example, it is identical to that of IMP\@. */
 /*@ \subsection{Arithmetic constructs}
 The rules below are taken over, unchanged, from the semantics of IMP\@. */
 
-  rule <k> X:#Id => E:Exp ...</k>
-       <env>... X |-> L:#Nat ...</env>
+  rule <k> X:Id => E:Exp ...</k>
+       <env>... X |-> L:Nat ...</env>
        <store>... L |-> E ...</store>
-  rule I1:#Int + I2:#Int => I1 +Int I2
+  rule I1:Int + I2:Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
-  rule - I:#Int => -Int I
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Int 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Int 0
+  rule - I:Int => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
-  rule V1:Val == V2:Val => V1 ==Bool V2
-  rule V1 != V2 => V1 =/=Bool V2
-  rule T1:#Bool and T2:#Bool => T1 andBool T2
+  rule V1:Val == V2:Val => V1 ==K V2
+  rule V1 != V2 => V1 =/=K V2
+  rule T1:Bool and T2:Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
-  rule not(T:#Bool) => notBool(T)
+  rule not(T:Bool) => notBool(T)
 
 /*@ \subsection{Conditional}
 The two rules below are straightforward, almost identical to those in
@@ -134,14 +134,14 @@ the fourth rule below ensures that only the last environment-recovery
 operation is kept in the computation, so the computation will not grow
 when programs are in a tail recursive form. */
 
-  syntax Val ::= "closure-lambda" "(" Map "," #Id "," Exp ")"
+  syntax Val ::= "closure-lambda" "(" Map "," Id "," Exp ")"
                    [:latex "\textsf{closure}_\lambda({#1},{#2},{#3})":]
   rule <k> lambda X . E => closure-lambda(Rho:Map,X,E) ...</k>
        <env> Rho </env>
   rule <k> closure-lambda(Rho,X,E) V:Val => E ~> env(Rho') ...</k>
        <env> Rho':Map =>  Rho[L/X] </env>
        <store_> . => L|->V <_/store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
   syntax K ::= "env" "(" Map ")"
   rule <k> V ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>  [:structural:]
@@ -172,7 +172,7 @@ conditional. */
   rule <k> mu X . E => closure-mu(Rho[L/X],E) ...</k>
        <env> Rho </env>
        <store>... . => L |-> closure-mu(Rho[L/X],E) ...</store>
-       <nextLoc> L => sNat L </nextLoc>
+       <nextLoc> L =>  L +Int 1 </nextLoc>
   rule <k> closure-mu(Rho,E) => E ~> env(Rho') ...</k>
        <env> Rho' => Rho </env>
 
@@ -183,7 +183,7 @@ conditional. */
   rule <k> mu X . E => E ~> env(Rho) ...</k>
        <env> Rho => Rho[L/X] </env>
        <store_> . => L |-> mu X . E <_/store>
-       <nextLoc> L => L +Nat 1 </nextLoc> 
+       <nextLoc> L => L +Int 1 </nextLoc> 
 ***)
 
 end module

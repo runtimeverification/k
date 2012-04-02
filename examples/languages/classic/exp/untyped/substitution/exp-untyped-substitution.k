@@ -18,7 +18,7 @@ definitions, particularly in environment-based ones, we introduce
 values as part of the semantics).  Note that identifiers are values.
 $\lambda$-abstractions will also be defined as values shortly. */
 
-  syntax Val ::= #Int | #Bool | #Id
+  syntax Val ::= Int | Bool | Id
   syntax Exp ::= Val 
                | Exp "+" Exp                [:strict prec 33 gather(E e):]
                | Exp "-" Exp                [:strict prec 33 gather(E e):]
@@ -52,20 +52,20 @@ that the \texttt{lambda} construct yields a value, while the
 \texttt{mu} construct does not.  Also, note that application is strict
 in both arguments, to capture the fact that EXP is call-by-value. */
 
-  syntax Val ::= "lambda" #Id "." Exp       [:binder latex "\lambda{#1}.{#2}":]
+  syntax Val ::= "lambda" Id "." Exp       [:binder latex "\lambda{#1}.{#2}":]
   syntax Exp ::= "if" Exp "then" Exp "else" Exp [:strict(1):]
                | Exp Exp                    [:strict prec 10 gather(E e):]
-               | "mu" #Id "." Exp           [:binder latex "\mu{#1}.{#2}":]
-               | "let" #Id "=" Exp "in" Exp
-               | "letrec" #Id #Id "=" Exp in Exp
+               | "mu" Id "." Exp           [:binder latex "\mu{#1}.{#2}":]
+               | "let" Id "=" Exp "in" Exp
+               | "letrec" Id Id "=" Exp in Exp
 
 /*@ \subsection{Desugaring macros}
 The desugaring rules below are standard, although note that we do not
 want to apply them when we do type inference (because we want our type
 inferencer to be {\em let} polymorphic). */
 
-  macro let X:#Id = E:Exp in E':Exp = (lambda X . E') E
-  macro (letrec F:#Id X = E in E') = (let F = mu F . (lambda X . E) in E')
+  macro let X:Id = E:Exp in E':Exp = (lambda X . E') E
+  macro (letrec F:Id X = E in E') = (let F = mu F . (lambda X . E) in E')
 
 end module
 
@@ -100,19 +100,19 @@ The block of rules below are taken over, unchanged, from the semantics
 of IMP\@.  The rules for equality test need to be restricted to only
 apply in context, so they were given separate semantics underneath. */
 
-  rule I1:#Int + I2:#Int => I1 +Int I2
+  rule I1:Int + I2:Int => I1 +Int I2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
-  rule - I:#Int => -Int I
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Int 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Int 0
+  rule - I:Int => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
-  rule T1:#Bool and T2:#Bool => T1 andBool T2
+  rule T1:Bool and T2:Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
-  rule not(T:#Bool) => notBool(T)
+  rule not(T:Bool) => notBool(T)
 
 /*@ \subsection{Equality test}
 In this substitution-based definition we need to be careful when
@@ -120,8 +120,8 @@ defining equality, as ids are also values.  To be safe, we restrict
 the semantics of equality only to redex positions, i.e., at the top of
 the \textsf{k} cell. */
 
-  rule <k> V1:Val == V2:Val => V1 ==Bool V2 ...</k>
-  rule <k> V1 != V2 => V1 =/=Bool V2 ...</k>
+  rule <k> V1:Val == V2:Val => V1 ==K V2 ...</k>
+  rule <k> V1 != V2 => V1 =/=K V2 ...</k>
 
 /*@ \subsection{Conditional}
 The two rules below are straightforward, almost identical to those in
@@ -137,7 +137,7 @@ Since our semantics is call-by-value, we only reduce application or
 unroll $\mu$ when they are in redex positions, which in \K is
 equivalent to being at the top of the \textsf{k} cell. */
 
-  rule <k> (lambda X:#Id . E:Exp) V:Val => E[V/X]  ...</k>
+  rule <k> (lambda X:Id . E:Exp) V:Val => E[V/X]  ...</k>
 
   rule <k> mu X . E => E[(mu X.E) / X] ...</k>
 
