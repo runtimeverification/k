@@ -1,5 +1,5 @@
 
-kmod ISSUE is
+module ISSUE is
 	
 	ops foo1 foo2 : -> K
 	
@@ -57,4 +57,4 @@ kmod ISSUE is
 			< k > foo2 </ k >
 		...</ T >
 		=> finish2
-endkm
+end module

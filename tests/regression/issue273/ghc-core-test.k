@@ -1,4 +1,4 @@
-module GHC-CORE-TEST-SYNTAX is
+module GHC-CORE-TEST-SYNTAX
 
     syntax Aexp ::= Qvar
                   | "(" Exp ")"
@@ -23,6 +23,6 @@ module GHC-CORE-TEST-SYNTAX is
 
 end module
 
-module GHC-CORE-TEST is
-    including GHC-CORE-TEST-SYNTAX
+module GHC-CORE-TEST 
+    imports GHC-CORE-TEST-SYNTAX
 end module

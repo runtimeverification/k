@@ -1,5 +1,5 @@
 
-kmod ISSUE is
+module ISSUE is
 	including K 
 	including K-CONTEXTS 
 	including K-PROPER
@@ -37,4 +37,4 @@ kmod ISSUE is
 	rule test1 =>
 		<T>... <staticSemantics>... .Bag ...</staticSemantics> ...</T>
 		
-endkm
+end module

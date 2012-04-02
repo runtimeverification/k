@@ -1,4 +1,4 @@
-kmod QUOTE-UNQUOTE-PROGRAMS is including QUOTE-UNQUOTE + IO + WHILE + REF + MU + LAMBDA + EXP + IDS
+module QUOTE-UNQUOTE-PROGRAMS imports QUOTE-UNQUOTE + IO + WHILE + REF + MU + LAMBDA + EXP + IDS
   op p25 : -> K
   macro p25 = 
    ((((lambda n . lambda c . lambda i . lambda x .
@@ -38,4 +38,4 @@ kmod QUOTE-UNQUOTE-PROGRAMS is including QUOTE-UNQUOTE + IO + WHILE + REF + MU +
               else (quote (_*_(x,(unquote (genpow (n + -1))))))
             ))) 3))
    )
-endkm
+end module

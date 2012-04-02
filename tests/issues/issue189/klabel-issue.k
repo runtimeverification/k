@@ -1,5 +1,5 @@
 
-kmod KLABEL-ISSUE is 
+module KLABEL-ISSUE is 
     syntax Exp ::= Int
                  | { List{Field} }
 
@@ -12,4 +12,4 @@ kmod KLABEL-ISSUE is
     syntax Exp ::= test01
 
     macro test01 = { a = 10 }
-endkm
+end module

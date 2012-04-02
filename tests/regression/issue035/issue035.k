@@ -1,5 +1,5 @@
 
 
-kmod ISSUE035 is including K
+module ISSUE035 
   context 'if(HOLE,,_)
-endkm
+end module

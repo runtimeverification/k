@@ -2811,7 +2811,7 @@ sub addKandKLATEX
           $k_includes .= "\n including URIS "; 
         }
 #	print "SORTS: $prelude_sorts\n\n";
-	if ($content =~ /\s(syntax\s+($prelude_sorts)|configuration|rule)\s/sg)
+	if ($content =~ /\s(syntax\s+($prelude_sorts)|configuration|rule|context|define)\s/sg)
 	{
 		# include K if syntax, configuration or rule keywords are used in module
 		$content =~ s!(k?mod\s+\S+\s+is\s)!$1$k_includes!sg;

@@ -1,6 +1,5 @@
 
-kmod ISSUE is
-	including K
+module ISSUE
 	
 	syntax KResult ::= Nat | Int // it's necessary to include ints AND nats
 	
@@ -16,4 +15,4 @@ kmod ISSUE is
 	define collapse(<k>foo(N:Nat, N:Nat)</k>) => 31337
 	
 	rule <k> bar => 5 ...</k> [structural]
-endkm
+end module

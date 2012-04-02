@@ -6,7 +6,7 @@ in skool-typed-dynamic-semantics
 --- SKOOL-UNTYPED module ---
 ----------------------------
 
-kmod SKOOL-TYPED-DYNAMIC is
+module SKOOL-TYPED-DYNAMIC is
   including SKOOL-TYPED-DYNAMIC-SEMANTICS
 
   syntax Bag ::= run ( KLabel )
@@ -20,7 +20,7 @@ kmod SKOOL-TYPED-DYNAMIC is
                    354654364356,,4357643576)
            </in>
         <_/T> 
-endkm
+end module
 
 
 

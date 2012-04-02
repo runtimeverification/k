@@ -1,5 +1,5 @@
 
-kmod OCL-SYNTAX is
+module OCL-SYNTAX is
 
 
   syntax Var ::= Id
@@ -21,7 +21,7 @@ kmod OCL-SYNTAX is
 
 // Expressions : Boolean
 
-syntax BExp ::= #Bool | Var 
+syntax BExp ::= Bool | Var 
                | AExp < AExp         [strict]
                | AExp <= AExp        [strict]
                | AExp > AExp         [strict]
@@ -59,16 +59,16 @@ syntax CExp ::= empty
 
 
 
-endkm
+end module
 
-kmod ASSOC is including OCL-SYNTAX
+module ASSOC imports OCL-SYNTAX
 // merge with OCL semantics
 // the results of evaluating OCL expressions
 
 syntax KResult ::= ValSet 
 syntax CExp ::= ValSet 
 syntax AExp ::= Int
-syntax BExp ::= #Bool
+syntax BExp ::= Bool
 
 
 
@@ -76,7 +76,7 @@ syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid assoc comm id: .ValSet]
                 | ValSet `Inter ValSet
                 | ValSet `Diff ValSet
 
-syntax Val ::= #Bool | Int  | instVal ( Bag ) // or better, instVal(BagItem)
+syntax Val ::= Bool | Int  | instVal ( Bag ) // or better, instVal(BagItem)
 
-endkm
+end module
 

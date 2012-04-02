@@ -1,12 +1,12 @@
 
 
 
-kmod OCL-SOLVER is 
-  syntax Formula ::=  `True | `False | forAll ( Id : Id `| #Bool )
+module OCL-SOLVER is 
+  syntax Formula ::=  `True | `False | forAll ( Id : Id `| Bool )
   syntax Builtins ::= Formula 
-endkm
+end module
 
-kmod META-MODEL is including OCL-SOLVER
+module META-MODEL imports OCL-SOLVER
 
   syntax Id ::= object
 
@@ -41,9 +41,9 @@ kmod META-MODEL is including OCL-SOLVER
                   </models>
                 </T>
     
-endkm
+end module
 
-kmod META-AUTOMATON is including META-MODEL
+module META-AUTOMATON imports META-MODEL
 
 
   syntax Bag ::= metaAutomaton 
@@ -116,10 +116,10 @@ kmod META-AUTOMATON is including META-MODEL
           <_/attributes>
        </instance> 
 
-endkm
+end module
 
 
-kmod AN-AUTOMATON is including META-AUTOMATON
+module AN-AUTOMATON imports META-AUTOMATON
 
   syntax Id ::= a | b | eps | s0 | s1 | t1 | t2 | t3 
 
@@ -180,9 +180,9 @@ kmod AN-AUTOMATON is including META-AUTOMATON
     </instance>
   </model>
 
-endkm
+end module
 
-kmod XSPEM is including AN-AUTOMATON 
+module XSPEM imports AN-AUTOMATON 
   
   syntax Bag ::= initConfig
 
@@ -192,6 +192,6 @@ kmod XSPEM is including AN-AUTOMATON
            anAutomaton
         <_/T>
 
-endkm
+end module
 
 

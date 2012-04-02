@@ -1,23 +1,13 @@
 
-kmod COMMON is
-	including K 
-	including K-CONTEXTS 
-endkm
-
-kmod ISSUE134A is
-	including COMMON
-	op test1 : -> KLabel
-	eq test1 = 'SomeLabel
-endkm
+module COMMON 
+  syntax Bag ::= "start" | "good" | "bad"
+  declare test : Int -> K
+  rule test(I:Int) => I %Int 5
 
 
-kmod ISSUE134B is
-	including COMMON
-	op test2 : -> KLabel
-	eq test2 = 'SomeLabel
-endkm
 
-kmod ISSUE134 is
-	including ISSUE134A
-	including ISSUE134B
-endkm
+
+  rule start => <k> test(7) </k>
+  rule <k> 2 </k> => good
+  rule <k> I:Int </k> => bad when I =/=Int 2
+end module

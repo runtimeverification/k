@@ -1,13 +1,11 @@
-kmod OTHERMODULE is
-	including K
+module OTHERMODULE
 	syntax K ::= foo-foo
 	syntax K ::= bar
-endkm
-kmod ISSUE is
-	including OTHERMODULE
-	
+end module
+
+module ISSUE imports OTHERMODULE
 	syntax K ::= test
 	
 	define test => 'foo-foo(.List{K}) [structural]
 	define ('foo-foo => 'bar)(.List{K}) [structural]
-endkm
+end module

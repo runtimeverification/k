@@ -22,20 +22,20 @@ module NON-K-STRICTNESS
    rule <type> I:Int => int ...</type>
    rule <type> F:Float => float ...</type>
    rule <type> L:KLabel(int,, int) => int ...</type>
-      when L ==Bool '_+_ orBool L ==Bool '_*_ orBool L ==Bool '_/_
+      when L ==KLabel '_+_ orBool L ==KLabel '_*_ orBool L ==KLabel '_/_
    rule <type> L:KLabel(float,, float) => float ...</type>
-      when L ==Bool '_+_ orBool L ==Bool '_*_ orBool L ==Bool '_/_
+      when L ==KLabel '_+_ orBool L ==KLabel '_*_ orBool L ==KLabel '_/_
    rule <type> integer(T:Type) => int ...</type>
-      when T ==Bool int orBool T ==Bool float 
+      when T ==KLabel int orBool T ==KLabel float 
    rule <type> float(T:Type) => float ...</type>
-      when T ==Bool int orBool T ==Bool float 
+      when T ==KLabel int orBool T ==KLabel float 
 
 
 // Error handling
    rule <type> L:KLabel(int,, float) => typeError(L(int,, float)) ...</type>
-      when L ==Bool '_+_ orBool L ==Bool '_*_ orBool L ==Bool '_/_
+      when L ==KLabel '_+_ orBool L ==KLabel '_*_ orBool L ==KLabel '_/_
    rule <type> L:KLabel(float,, int) => typeError(L(int,, float)) ...</type>
-      when L ==Bool '_+_ orBool L ==Bool '_*_ orBool L ==Bool '_/_
+      when L ==KLabel '_+_ orBool L ==KLabel '_*_ orBool L ==KLabel '_/_
    
    rule <type> L:KLabel(L1:List{K},,typeError(K:K),,L2:List{K})
             => typeError(L(K)) ...</type>

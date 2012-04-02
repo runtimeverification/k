@@ -1,26 +1,26 @@
-kmod SKOOL-TYPED-SYNTAX is 
+module SKOOL-TYPED-SYNTAX
 
 --- List{Id}
   syntax Ids  ::= List{Id,","} [prec 70]
 
-endkm
+end module
 
 
 
-kmod ISSUE is
+module ISSUE
 --------------------------------------------
 --- SKOOL-TYPED-DYNAMIC-SEMANTICS module ---
 --------------------------------------------
 
-including SKOOL-TYPED-SYNTAX 
+imports SKOOL-TYPED-SYNTAX 
 
-  syntax CellLabel ::= envStack       --- cell holding a stack, or List
-  syntax ListItem ::= Id :: BagItem   --- Id is the class name, BagItem is its corresp. environment
-  syntax K ::= lookupMember ( BagItem , Id )  --- BagItem is the envStack cell, Id is the member name
-  syntax CellLabel ::= env 
+  syntax CellLabel ::= "envStack"       --- cell holding a stack, or List
+  syntax ListItem ::= Id "::" BagItem   --- Id is the class name, BagItem is its corresp. environment
+  declare lookupMember : BagItem Id -> K  --- BagItem is the envStack cell, Id is the member name
+  syntax CellLabel ::= "env" 
 
-  rule lookupMember(<envStack> _:Id :: <env> Env:Map </env>  => . <_/envStack>, X:Id)
-    when notBool(X in keys(Env)) [structural]
+  define lookupMember(<envStack> _:Id :: <env> Env:Map </env>  => . <_/envStack>, X:Id)
+    when notBool(X in keys(Env))
 
 
-endkm
+end module

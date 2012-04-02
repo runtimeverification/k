@@ -2,7 +2,7 @@
 --- SIMPLE-UNTYPED-SYNTAX module ---
 ------------------------------------
 
-kmod SIMPLE-UNTYPED-SYNTAX is including #INT + #ID + K-LATEX
+module SIMPLE-UNTYPED-SYNTAX imports #INT + #ID + K-LATEX
 
 /*@ \subsection*{Identifiers}
 The special identifier for the function ``main'' belongs to all programs.
@@ -37,7 +37,7 @@ its first argument gets updated, so it cannot be evaluated), the function call
 with zero arguments (because it will get desugared), and the assignment which
 is only strict in its second argument (for the same reason as the increment).
 */
-  syntax Exp ::= Int | #Bool | Id
+  syntax Exp ::= Int | Bool | Id
                | ++ Exp            [prec 0]
                | Exp [ List{Exp} ] [strict prec 1] 
                | Exp ( )
@@ -91,10 +91,10 @@ We prefer to tag their units with the corresponding sort to avoid confusion.
   syntax List{Exp} ::= Exp
                      | List{Id}
                      | List{Exp} , List{Exp} [ditto]
-endkm
+end module
 
 
-kmod SIMPLE-UNTYPED-DESUGARED-SYNTAX is including SIMPLE-UNTYPED-SYNTAX 
+module SIMPLE-UNTYPED-DESUGARED-SYNTAX imports SIMPLE-UNTYPED-SYNTAX 
 /*@
 This module desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
@@ -108,4 +108,4 @@ initialized.
   macro E:Exp() = E(.List{Id})
   macro var E,E':Exp,El:List{Exp}; = var E; var E',El;
   macro var X:Id; = var X=0;
-endkm
+end module

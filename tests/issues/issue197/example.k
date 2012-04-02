@@ -1,5 +1,5 @@
 
-kmod ISSUE is
+module ISSUE is
 	
 	syntax Exp ::= Int | Exp + Exp
 	syntax List{Exp} ::= Exp | () | Exp , Exp [strict assoc hybrid id: ()]
@@ -13,4 +13,4 @@ kmod ISSUE is
 	// Advisory: <automatic>: collapse at top of E1:List{Exp},E2:List{Exp} may cause it to match more than you expect.
 	rule E1:Exp , ?:Exp => E1:Exp [structural]
 	
-endkm
+end module

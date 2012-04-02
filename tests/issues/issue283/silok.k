@@ -34,7 +34,7 @@ end module
 
 require rexp
 
-module K-ADDONS is including #REXP 
+module K-ADDONS imports #REXP 
 
 /*
 /*@ {\it IntBot} = $\mathbb{Z}\cup\{\bot\}$
@@ -46,7 +46,7 @@ module K-ADDONS is including #REXP
 /*@ Extending $!=_{\it Int}$ for {\it IntBot}
 */
 */
-  syntax #Bool ::= IntBot "!=Int" IntBot [ditto]
+  syntax Bool ::= IntBot "!=Int" IntBot [ditto]
   eq I:Int !=Int bot = true  --- [structural]
   eq bot !=Int I:Int = true  --- [structural]
   eq bot !=Int bot = false   --- [structural]
@@ -107,7 +107,7 @@ end module
 ***SILOK***
 ***********
 
-module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
+module SILOK imports SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 
 //@ \subsection{Code for Basics}
 
@@ -663,7 +663,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 
   syntax #Rexp ::= Id
   syntax #Heap ::= "map2heap" "(" Map ")"
-  syntax #Bool ::= Map "|=" #Rexp
+  syntax Bool ::= Map "|=" #Rexp
   rule (map2heap(Map)) |= R:#Rexp => (Map |= R) [structural]
 
   syntax #Set{Obj} ::= "obj" "(" Map ")"
@@ -728,7 +728,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 
 
   syntax Prop ::= "le" "(" Int ")" | `True | `False
-  syntax #Bool ::= Map `|= Prop
+  syntax Bool ::= Map `|= Prop
 
   syntax Int ::= size ( Map ) 
 

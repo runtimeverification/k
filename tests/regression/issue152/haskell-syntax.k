@@ -4,16 +4,16 @@
 
 
 
-kmod HASKELL-SYNTAX is
+module HASKELL-SYNTAX
 
     syntax K ::= Literal
                | Exp
                | Int
 
-    syntax Literal ::= `Int K
+    syntax Literal ::= "Int" K
 
-    syntax Exp ::=  `Lit K
-                 | `NegApp K
+    syntax Exp ::=  "Lit" K
+                 | "NegApp" K
 
 
-endkm
+end module

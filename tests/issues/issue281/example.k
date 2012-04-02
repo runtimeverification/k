@@ -40,7 +40,7 @@ module CINK-SYNTAX is
   syntax Exps ::= List{Exp, ","}
 end module
 
-kmod CINK-DESUGARED-SYNTAX is including CINK-SYNTAX 
+module CINK-DESUGARED-SYNTAX imports CINK-SYNTAX 
 /*@
   Some statements or expression are syntactic sugars.
   Their semantics is given by desugaring.
@@ -51,9 +51,9 @@ kmod CINK-DESUGARED-SYNTAX is including CINK-SYNTAX
 // macro _`(`)`{_`}(Decl:Decl, Stmts:Stmts) = Decl (.Bottom) { Stmts }
 //  macro void X:Id = int X
 //  macro (int X = E ;) = int X ; X = E ;
-endkm
+end module
 
-module ISSUE is including CINK-SYNTAX
+module ISSUE imports CINK-SYNTAX
 
   syntax Val ::= Int | "void" 
   syntax Exp ::= Val 

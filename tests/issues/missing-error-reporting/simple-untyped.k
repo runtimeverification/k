@@ -48,7 +48,7 @@ gets updated, so it cannot be evaluated), the function call with zero
 arguments (because it will get desugared), and the assignment which is only
 strict in its second argument (for the same reason as the increment). */
 
-  syntax Exp ::= Int | #Bool | Id
+  syntax Exp ::= Int | Bool | Id
                | ++ Exp            [prec 0]
                | Exp + Exp         [strict prec 33 gather(E e)]
                | Exp - Exp         [strict prec 33 gather(E e)]
@@ -189,7 +189,7 @@ $\lambda$-abstractions (we do not need to evaluate functions to closures
 because each function is executed in the fixed global environment and
 function definitions cannot be nested). */
 
-  syntax Val ::= Int | #Bool
+  syntax Val ::= Int | Bool
                | array ( Nat , Nat )
                | lambda ( Ids , Stmt ) [latex "\lambda{#1}\,.\,{#2}"]
   syntax Exp ::= Val
@@ -467,9 +467,9 @@ values of expected sorts: */
   rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==Bool V2
   rule V1 != V2 => V1 =/=Bool V2
-  rule T1:#Bool and T2:#Bool => T1 andBool T2
+  rule T1:Bool and T2:Bool => T1 andBool T2
   rule T1 or T2 => T1 orBool T2
-  rule not(T:#Bool) => notBool(T)
+  rule not(T:Bool) => notBool(T)
 
 /*@ \subsection{Array lookup}
 Untyped SIMPLE does not check array bounds (the dynamically typed version of

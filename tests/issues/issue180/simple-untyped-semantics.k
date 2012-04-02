@@ -2,7 +2,7 @@
 --- SIMPLE-UNTYPED-SEMANTICS module ---
 ---------------------------------------
 
-kmod SIMPLE-UNTYPED-SEMANTICS is including SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
+module SIMPLE-UNTYPED-SEMANTICS imports SIMPLE-UNTYPED-DESUGARED-SYNTAX + K
 
 -------------------------------------------------------------
 /*@ \subsubsection*{Values} that various fragments of programs evaluate to */
@@ -191,4 +191,4 @@ We prefer to use a helper computation item, lookup, to avoid locking the store *
 
 //@ \subsection*{Pairing construct} Nedeed for stacking
   syntax ListItem ::=  ( Map , K )
-endkm
+end module

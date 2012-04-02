@@ -1,6 +1,6 @@
 
 
-kmod ISSUE033A is 
+module ISSUE033A
   syntax KResult ::= Type
   syntax Type ::= arrayType ( Type , Nat )
                 | bool
@@ -8,9 +8,9 @@ kmod ISSUE033A is
 
  define testa(Cache:Map, T:Type, N:Nat) => true
    when notBool($hasMapping(Cache:Map, arrayType(T:Type, N:Nat)))
-endkm
+end module
 
-kmod ISSUE033B is 
+module ISSUE033B is 
  syntax K ::= kpair ( K , List )
             | case ( Nat ,  BaseValue ) 
             | Nat | BaseValue | Id
@@ -21,10 +21,10 @@ kmod ISSUE033B is
   when notBool $hasMapping(LM:Map, 
             kpair(F:Id, List(case(SN:Nat, V:BaseValue))))
 
-endkm
+end module
 
-kmod ISSUE033 is including ISSUE033B + ISSUE033A
+module ISSUE033 imports ISSUE033B + ISSUE033A
   syntax K ::= test 
   macro test = 'both(testa(.,bool,0),,testb(.,0,false,a)) 
   define 'both(true,,true) => true
-endkm
+end module

@@ -47,7 +47,7 @@ gets updated, so it cannot be evaluated), the function call with zero
 arguments (because it will get desugared), and the assignment which is only
 strict in its second argument (for the same reason as the increment). */
 
-  syntax Exp ::= Int | #Bool | Id
+  syntax Exp ::= Int | Bool | Id
                | ++ Exp            [prec 0]
                | Exp + Exp         [strict prec 33 gather(E e)]
                | Exp - Exp         [strict prec 33 gather(E e)]

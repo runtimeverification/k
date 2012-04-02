@@ -1,4 +1,4 @@
-kmod TEST is including K
+module TEST imports K
 
   syntax K ::= workshop
 
@@ -7,4 +7,4 @@ kmod TEST is including K
       <k color="green"> workshop </k>
     </T>
 
-endkm
+end module

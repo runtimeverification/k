@@ -1,5 +1,4 @@
-kmod NULLARYHYBRID is
-    including K
+module NULLARYHYBRID 
 
     syntax K ::= foo [hybrid]
-endkm
+end module

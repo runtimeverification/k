@@ -1,6 +1,6 @@
 require ex.maude
 
-module ISSUE is including #EX
+module ISSUE imports #EX
 
   syntax #S2 ::= "f" "(" Map ")" 
 

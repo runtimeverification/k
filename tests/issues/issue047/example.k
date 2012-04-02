@@ -7,7 +7,7 @@ module SKOOL-UNTYPED-SYNTAX
   syntax Id ::= main | object
  
   syntax Exp  ::= 
-                 Var | Int | #Bool
+                 Var | Int | Bool
 
   syntax ClassDecl ::= class Id extends Id { Stmts }
 --- </OO stuff addded>

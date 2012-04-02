@@ -10,7 +10,7 @@ require ocl-syntax
   A model is represented by a cell including instances of the classes. For each instance, we have
   cells with the name of the instance, the name of the class owner, and the values of the attributes.
 */
-kmod META-MODEL is including OCL-SYNTAX
+module META-MODEL imports OCL-SYNTAX
 
   
 
@@ -75,7 +75,7 @@ syntax Id ::= object | undefined // to be extended later with class and instance
                 </T>
 
  
-endkm
+end module
 
 
 

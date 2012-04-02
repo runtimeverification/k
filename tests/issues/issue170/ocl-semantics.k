@@ -1,13 +1,13 @@
 require dsml
  // require substitution
-kmod OCL-SEMANTICS is including META-MODEL + OCL-SYNTAX  // + SUBSTITUTION
+module OCL-SEMANTICS imports META-MODEL + OCL-SYNTAX  // + SUBSTITUTION
 
 // the results of evaluating OCL expressions
 
 syntax KResult ::= ValSet 
 syntax CExp ::= ValSet 
 syntax AExp ::= Int
-syntax BExp ::= #Bool
+syntax BExp ::= Bool
 
 syntax K ::= Id
 
@@ -17,7 +17,7 @@ syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid gather(E e) comm id: .Va
 
 syntax Val ::= ScalarVal | InstVal
 
-syntax ScalarVal ::= #Bool | Int  
+syntax ScalarVal ::= Bool | Int  
 
 syntax InstVal ::=  instVal ( Bag ) // or better, instVal(BagItem)
 
@@ -42,7 +42,7 @@ rule .ValSet Diff V:ValSet => .ValSet [structural]
 rule V Diff .ValSet => V [structural]
 
 
-syntax #Bool ::= Val  inValSet  ValSet 
+syntax Bool ::= Val  inValSet  ValSet 
 rule v  inValSet  (v V) => true [structural]
 rule v  inValSet  (v':Val V) => v  inValSet  V if notBool(v ==Bool v') [structural] 
 rule v  inValSet  .ValSet => false [structural]
@@ -67,7 +67,7 @@ rule A1 >= A2 => A1 >=Int A2
 rule A1 = A2 => A1 ==Int A2 
 rule A1 <> A2 => notBool (A1 ==Int A2)
 
-rule B1:#Bool and B2:#Bool => B1 andBool B2
+rule B1:Bool and B2:Bool => B1 andBool B2
 rule B1 or B2 => B1 orBool B2
 rule B1 implies B2 => (notBool B1) orBool B2 
 rule B1 equiv B2 => B1 ==Bool B2
@@ -251,7 +251,7 @@ rule makeInstVal(ALLNAMES,
     if notBool isPresent(INSTNAME',ALLNAMES)
 */
 
-syntax #Bool ::= isIn ( Id , Set{Id} )
+syntax Bool ::= isIn ( Id , Set{Id} )
 rule isIn (XX:Id , (XX , NAMES:Set{Id}) ) => true [structural]
  rule isIn (XX, (XX':Id ,  NAMES)) => isIn(XX,  NAMES) if notBool (XX ==Bool XX') [structural]
 rule isIn (XX, .Set{Id}) => false [structural]
@@ -296,7 +296,7 @@ rule <k> if false then C1 else C2 endif => C2 <_/k>
 
 
 // subset predicate
-syntax #Bool ::= subset ( ValSet , ValSet ) 
+syntax Bool ::= subset ( ValSet , ValSet ) 
 rule subset(.ValSet,  V:ValSet) => true 
 rule subset((v:Val V), V':ValSet) => if (v  inValSet  V') then subset(V,V') else false fi //NB Maude's if!
 
@@ -306,9 +306,9 @@ rule card(.ValSet) => 0
 rule card(v V) => 1 +Int card(V)
 
 
-endkm
+end module
 
-kmod TEST is including OCL-SEMANTICS
+module TEST imports OCL-SEMANTICS
 
 syntax Id ::=  a | b | modelM | attr1 | attr2 | attr3 
 
@@ -365,4 +365,4 @@ macro testConfig =
   </T>
 
 
-endkm 
+end module 

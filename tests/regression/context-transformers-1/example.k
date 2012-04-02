@@ -1,5 +1,5 @@
 
-kmod CONTEXT-TRANSFORMERS-TEST is
+module CONTEXT-TRANSFORMERS-TEST
   configuration
     <T>  
       <threads> <thread multiplicity="*"> <k> .K </k> </thread> </threads> 
@@ -21,5 +21,5 @@ kmod CONTEXT-TRANSFORMERS-TEST is
                 </T>
 
   rule <T_> <out> ListItem(5) </out> <_/T> => end
-endkm
+end module
 

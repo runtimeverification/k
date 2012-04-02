@@ -11,7 +11,7 @@ require /modules/threads
 
 require /modules/uris
 
-module AGENTS-TEST is including AGENTS + THREADS + WHILE + IO + REF + LAMBDA + EXP + URIS
+module AGENTS-TEST imports AGENTS + THREADS + WHILE + IO + REF + LAMBDA + EXP + URIS
   configuration
     <T>
       <agent multiplicity="*"> 

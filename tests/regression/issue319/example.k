@@ -3,9 +3,9 @@ module ISSUE
 	configuration
 		<k> .K </k>
 		
-	syntax K ::= test1 | test2 | done
+	syntax K ::= "test1" | "test2" | "done"
 	syntax K ::= "foo" "(" K ")" [strict]
-	syntax KResult ::= res1 | res2
+	syntax KResult ::= "res1" | "res2"
 	syntax KLabel ::= "'mylabel" [hybrid]
 	
 	rule test1 => foo('mylabel(res1)) [anywhere]

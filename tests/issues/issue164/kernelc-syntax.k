@@ -1,5 +1,5 @@
 --- 33 C language constructs
-kmod KERNELC-SYNTAX is
+module KERNELC-SYNTAX is
   including #INT +  #ID
 ---arithmetic expresions
   syntax Exp ::= Int | Id | DeclId
@@ -69,9 +69,9 @@ kmod KERNELC-SYNTAX is
   syntax List{PointerId} ::= PointerId | List{Bottom} | List{PointerId} , List{PointerId} [ditto]
   syntax List{DeclId} ::= DeclId | List{Bottom} | List{DeclId} , List{DeclId} [ditto]
   syntax List{Exp} ::= Exp | List{PointerId} | List{DeclId} |  List{Exp} , List{Exp} [ditto]
-endkm
+end module
 
-kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX 
+module KERNELC-DESUGARED-SYNTAX imports KERNELC-SYNTAX 
   macro ! E:Exp = E ? 0 : 1
   macro E1:Exp && E2:Exp = E1 ? E2 : 0
   macro E1 || E2 = E1 ? 1 : E2
@@ -88,7 +88,7 @@ kmod KERNELC-DESUGARED-SYNTAX is including KERNELC-SYNTAX
   macro (int X:Id = E ;) = int X ; X = E ;
   macro stdio.h = {} 
   macro stdlib.h = {}
-endkm
+end module
 
 
 

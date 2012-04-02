@@ -2,7 +2,7 @@
 // require k-visitor
 require /modules/substitution
 
-kmod OCL-SYNTAX is including K  + #ID + #INT  + #BOOL  + SUBSTITUTION
+module OCL-SYNTAX imports K  + #ID + #INT  + #BOOL  + SUBSTITUTION
 
 
   syntax Var ::= Id
@@ -27,7 +27,7 @@ kmod OCL-SYNTAX is including K  + #ID + #INT  + #BOOL  + SUBSTITUTION
 
 // Expressions : Boolean
 
-syntax BExp ::= #Bool | Var 
+syntax BExp ::= Bool | Var 
                | AExp < AExp         [strict]
                | AExp <= AExp        [strict]
                | AExp > AExp         [strict]
@@ -78,4 +78,4 @@ syntax Attr ::= a1 | a2 | a3
 
 
 
-endkm
+end module

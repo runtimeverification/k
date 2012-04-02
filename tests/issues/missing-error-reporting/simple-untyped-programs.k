@@ -3,7 +3,7 @@
 --- and then to test the semantics.                             ---
 -------------------------------------------------------------------
 
-kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
+module SIMPLE-UNTYPED-PROGRAMS imports SIMPLE-UNTYPED-SYNTAX
   syntax Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m 
               | n | o | p | q | r | s | t | u | v | w | x | y | z 
               | main | divide2 | collatz | dummy1 | dummy2 | init | reverse 
@@ -912,4 +912,4 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
          spawn while(true) do { dekker2(); }
        }
 
-endkm
+end module

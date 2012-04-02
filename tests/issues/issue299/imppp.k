@@ -3,7 +3,7 @@ module IMPPP-SYNTAX
   syntax AExp ::= Id | Int
                 | AExp "+" AExp    [prec(33) gather (E e) strict]
                 | AExp "/" AExp    [prec(31) gather (E e) strict]
-  syntax BExp ::= #Bool
+  syntax BExp ::= Bool
                 | AExp "<=" AExp   [prec(37) seqstrict latex("{#1}\leq{#2}")]
                 | "not" BExp       [prec(53) strict]
                 | BExp "and" BExp  [prec(55) strict(1)]
@@ -47,7 +47,7 @@ module IMPPP
      <in color="magenta"> $IN:List </in>
      <out color="Orchid"> .List </out>
     </T>
-  syntax KResult ::= Int | #Bool
+  syntax KResult ::= Int | Bool
 
 
   rule <k> X:Id => I ...</k>
@@ -60,7 +60,7 @@ module IMPPP
 
 
   rule I1 <= I2 => I1 <=Int I2
-  rule not T:#Bool => notBool T
+  rule not T:Bool => notBool T
   rule true and B:BExp => B
   rule false and B => false
 

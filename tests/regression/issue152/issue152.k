@@ -1,7 +1,7 @@
 in haskell-syntax.k
 in /modules/k-visitor.k
 
-kmod ISSUE152 is including HASKELL-SYNTAX + K + K-VISITOR 
+module ISSUE152 imports HASKELL-SYNTAX + K-VISITOR 
 
   configuration <T> <k> .K </k> <counter> 0 </counter> <stage> 0 </stage> </T>
 
@@ -23,4 +23,4 @@ kmod ISSUE152 is including HASKELL-SYNTAX + K + K-VISITOR
   syntax Bag ::= [[ KLabel ]]
   macro [[KL:KLabel]] = <T_> <k> KL(.List{K}) </k> <_/T>
 
-endkm
+end module

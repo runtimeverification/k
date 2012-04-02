@@ -8,10 +8,10 @@ in simple-untyped-semantics
 -----------------------------------------
 
 
-kmod SIMPLE-UNTYPED is including SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS 
+module SIMPLE-UNTYPED imports SIMPLE-UNTYPED-SEMANTICS + SIMPLE-UNTYPED-PROGRAMS 
   syntax Bag ::= run ( KLabel )
   macro run(PgmName:KLabel) =
           <T_>
              <k> PgmName(.List{K}) ~> execute </k>
           <_/T>
-endkm
+end module

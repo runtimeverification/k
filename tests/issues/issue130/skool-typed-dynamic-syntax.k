@@ -2,7 +2,7 @@
 --- SKOOL-TYPED-SYNTAX module ---
 ---------------------------------
 
-kmod SKOOL-TYPED-SYNTAX is including #INT + #ID 
+module SKOOL-TYPED-SYNTAX imports #INT + #ID 
 
 --- Identifiers
 --- Special identifiers for the class and method "main", and for the class "object"
@@ -122,10 +122,10 @@ kmod SKOOL-TYPED-SYNTAX is including #INT + #ID
   syntax List{Top} ::= Top | List{Type} | List{VarType} | List{Exp} 
                      | List{Top} , List{Top} [ditto]
 
-endkm
+end module
 
 
-kmod SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX is including SKOOL-TYPED-SYNTAX
+module SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX imports SKOOL-TYPED-SYNTAX
 -------------------------------------------------------------------------------
 --- This module desugars some of SKOOL's language constructs into core ones ---
 --- The idea is that we only want to give semantics to core constructs,     ---
@@ -142,4 +142,4 @@ kmod SKOOL-TYPED-DYNAMIC-DESUGARED-SYNTAX is including SKOOL-TYPED-SYNTAX
   macro O:Exp . F() = O . F(.List{Bottom}) 
   macro new C:Id() = new C(.List{Bottom})
   macro class C {Ss:Stmts} = class C extends object {Ss}
-endkm
+end module

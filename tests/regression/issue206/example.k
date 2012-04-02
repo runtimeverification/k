@@ -1,6 +1,5 @@
 
-kmod ISSUE is
-	including K
+module ISSUE
         sort C
 
 	op vpair : K K -> C [metadata "hybrid=() strict=()"] 
@@ -17,4 +16,4 @@ kmod ISSUE is
 
         rule <k> a => b <_/k>
      
-endkm
+end module

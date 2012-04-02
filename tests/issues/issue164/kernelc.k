@@ -3,7 +3,7 @@ load kernelc-syntax
 load kernelc-semantics
 load kernelc-threads-syntax
 load kernelc-consistent-threads
-kmod KERNELC is including KERNELC-SYNTAX + KERNELC-CONSISTENT-THREADS
+module KERNELC imports KERNELC-SYNTAX + KERNELC-CONSISTENT-THREADS
 ---running a program identified by its name, maybe with an input list
   syntax Bag ::= run ( KLabel ) 
                | run ( KLabel , List{K} )
@@ -17,4 +17,4 @@ kmod KERNELC is including KERNELC-SYNTAX + KERNELC-CONSISTENT-THREADS
   rule <T_> <threads> .Bag </threads> <out> S:String </out> <_/T> 
     => <result> S </result> [structural]
 
-endkm
+end module

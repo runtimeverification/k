@@ -1,7 +1,7 @@
 
 
-kmod ISSUE146 is
-  syntax K ::= Id | String | test
-  syntax Id ::= tRuE
+module ISSUE146
+  syntax K ::= Id | String | "test"
+  syntax Id ::= "tRuE"
   define test => Id2String(tRuE)
-endkm
+end module

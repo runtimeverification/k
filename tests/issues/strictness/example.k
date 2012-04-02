@@ -1,5 +1,5 @@
 
-kmod ISSUE is
+module ISSUE is
     tags nerd local
 	syntax K ::= K + K [strict(1) nerd]
                   |  K * K [strict nerd]
@@ -31,4 +31,4 @@ kmod ISSUE is
      syntax Bag ::= start | end 
    rule start => <k> test </k> <out> . </out>
    rule <k> K:K </k> <out> ListItem(2) ListItem(1) ListItem(3) </out> => end
-endkm
+end module
