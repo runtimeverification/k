@@ -26,9 +26,9 @@ module NON-K-STRICTNESS
    rule <type> L:KLabel(float,, float) => float ...</type>
       when L ==KLabel '_+_ orBool L ==KLabel '_*_ orBool L ==KLabel '_/_
    rule <type> integer(T:Type) => int ...</type>
-      when T ==KLabel int orBool T ==KLabel float 
+      when T ==K int orBool T ==K float 
    rule <type> float(T:Type) => float ...</type>
-      when T ==KLabel int orBool T ==KLabel float 
+      when T ==K int orBool T ==K float 
 
 
 // Error handling

@@ -1535,7 +1535,7 @@ sub compile {
 		
 		open TEMP, ">", $language_file_name or die "Cannot open $language_file_name";
 		print TEMP "in $old_language_file\n";
-		print TEMP "mod $language_module_name is including K + $old_language_module . endm\n";
+		print TEMP "mod $language_module_name is including URIS + $old_language_module . endm\n";
 		close TEMP;
 		push(@generated_files, $language_file_name);
 	}
