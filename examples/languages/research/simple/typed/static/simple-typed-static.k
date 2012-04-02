@@ -5,8 +5,6 @@ module SIMPLE-TYPED-STATIC-SYNTAX
 The syntax of typed SIMPLE extends that of untyped SIMPLE with support
 for declaring types to variables and functions. */
 
-  syntax #Id ::= "main"
-
 /*@ \subsection{Types}
 Primitive, array and function types, as well as lists (or tuples) of types.
 The lists of types are useful for function arguments. */
@@ -37,7 +35,7 @@ languages like this one, in practice you are expected to use external
 parsers for complex languages. */
 
   syntax Decl ::= "var" Exps ";"
-                | "function" #Id "(" Exps ")" ":" Type Stmt
+                | "function" Id "(" Exps ")" ":" Type Stmt
 
 /*@ \subsection{Expressions}
 The syntax of expressions is identical to that in untyped SIMPLE,
@@ -45,7 +43,7 @@ except for the last construct in the sequence below.  That is allowed
 exclusively only for parsing declarations, as described above.  It
 will be given no semantics. */
 
-  syntax Exp ::= #Int | #Bool | #String | #Id
+  syntax Exp ::= Int | Bool | String | Id
                | "++" Exp              [:prec(0):]
                | Exp "+" Exp           [:strict prec(33) gather(E e):]
                | Exp "-" Exp           [:strict prec(33) gather(E e):]
@@ -87,11 +85,11 @@ type the actual construct. */
                 | "if" Exp "then" Stmt "else" Stmt      [:strict prec(90):]
                 | "if" Exp "then" Stmt                  [:prec(89):]
                 | "while" Exp "do" Stmt                 [:strict prec(90):]
-                | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
+                | "for" Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
                 | "return" Exp ";"                      [:strict:]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [:strict:]
-                | "try" Stmt "catch" "(" #Id ")" Stmt   [:strict(1) prec(90):]
+                | "try" Stmt "catch" "(" Id ")" Stmt   [:strict(1) prec(90):]
                 | "throw" Exp ";"                       [:strict:]
                 | "spawn" Stmt                          [:strict prec(90):]
                 | "acquire" Exp ";"                     [:strict:]
@@ -107,7 +105,7 @@ course, including the types of the involved variables. */
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X = E1 to E2 do S) = {var X:int=E1; while X <= E2 do {S X=X+1;}}
   macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
-  macro var X:#Id : T:Type = E; = var X : T; X = E;
+  macro var X:Id : T:Type = E; = var X : T; X = E;
 end module
 
 
@@ -230,7 +228,7 @@ references). */
                              +String "\" declared twice!\n") </out>
     [:structural:]
 
-  rule <k> var X:#Id : T:Type; => stmt ...</k>
+  rule <k> var X:Id : T:Type; => stmt ...</k>
        <tenv> Rho:Map => Rho[T / X] </tenv>
 
   context var _[HOLE] : _,.Exps;
@@ -251,7 +249,7 @@ together with the expected return type of the function.  The
 \texttt{types} operation ensures that all the ``expressions'' in $\it
 XTs$ are actually nothing but typed identifiers. */
 
-  rule <task> <k> function F:#Id(XTs:Exps) : T S:Stmt
+  rule <task> <k> function F:Id(XTs:Exps) : T S:Stmt
                => var F : function from types(XTs) to T; ...</k> </task>
        (. => <task>
                <k> var XTs; S </k>
@@ -271,7 +269,7 @@ generate a function task executing \texttt{main()} to ensure that it
 types (remove this task creation if you do not want your type system
 to reject programs without a \texttt{main} function). */
 
-  rule <task> <k> stmt => main(); </k>
+  rule <task> <k> stmt => String2Id("main")(); </k>
               (. => <tenv> . </tenv> <return> void </return>)
        </task>
     [:structural:]
@@ -301,9 +299,9 @@ by rewriting, that would get into conflict with the internals of our
 implementation, so we restrict their application to the top of the
 \textsf{k} cell. */
 
-  rule <k> I:#Int => int ...</k>
-  rule <k> B:#Bool => bool ...</k>
-  rule <k> Str:#String => string ...</k>
+  rule <k> I:Int => int ...</k>
+  rule <k> B:Bool => bool ...</k>
+  rule <k> Str:String => string ...</k>
 
 /*@ The are two cases to distinguish for variable lookup: if the
 variable is bound in the local type environment, then look its type up
@@ -353,7 +351,7 @@ integer in order to be allowed to be incremented, as seen in the rule
   rule T[.Types] => T
   rule sizeOf(arrayOf T) => int
   rule _`(_`)(function from Ts to T, Ts) => T
-    when Ts =/=Bool .Types
+    when Ts =/=K .Types
   rule _`(_`)(function from void to T, .Types) => T
   rule read() => int
 
@@ -389,7 +387,7 @@ exceptions can only have integer type. */
   rule while bool do stmt  => stmt
   rule <k> return T; => stmt ...</k> <return> T </return>
   rule return; => stmt
-  rule print(T,Ts => Ts);  when T ==Bool int orBool T ==Bool string
+  rule print(T,Ts => Ts);  when T ==K int orBool T ==K string
   rule print(.Types); => stmt
   rule try stmt catch(X) S => {var X:int; S}  [:structural:]
   rule throw int; => stmt
