@@ -386,7 +386,7 @@ public class Definition implements Cloneable {
 		if (startSorts.size() == 0) {
 			for (Sort s : userSort) {
 				if (!s.getSortName().equals("Start"))
-					sdf += "	" + s + "		-> Start\n";
+					sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + "		-> Start\n";
 			}
 		}
 
