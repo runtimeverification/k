@@ -34,7 +34,7 @@ public class DEFINE_define_TAG extends Tag {
 		tags = processToMaudeAsSeparatedListExceptions("", exceptions);
 
 		// construct metadata
-		String metadata = "[metadata \"location=" + location + " " + tags + "\"]";
+		String metadata = "[metadata \"function=() location=" + location + " " + tags + "\"]";
 		
 		// construct the rule body
 		List<String> ignore = new LinkedList<String>();
