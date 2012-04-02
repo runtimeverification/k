@@ -1,6 +1,6 @@
 
 module ISSUE
-	syntax K ::= "test1" | "test2" | "test"
+	syntax K ::= "test1" | "test2" | "test3"
 	syntax K ::= "foo" String
 	syntax K ::= String
 	

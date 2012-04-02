@@ -1,10 +1,9 @@
-COMPILE_OPTIONS = -prelude lib/k-prelude.maude
 
 # this is the name of the main maude module 
-LANGUAGE_NAME = ISSUE284
+LANGUAGE_NAME = EXAMPLE
 
 # this is the name of the interesting modules (used by make latex/pdf) 
-LANGUAGE_MODULES = ISSUE284
+LANGUAGE_MODULES = EXAMPLE
 
 #this is the basename of the main file
 MAIN_FILE = example

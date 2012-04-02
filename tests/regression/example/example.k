@@ -1,5 +1,5 @@
 
-module COMMON 
+module EXAMPLE 
   syntax Bag ::= "start" | "good" | "bad"
   declare test : Int -> K
   rule test(I:Int) => I %Int 5
