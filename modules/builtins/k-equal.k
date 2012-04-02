@@ -27,4 +27,7 @@ module K-EQUAL-HOOKS
   declare  _=/=List{K}_ : List`{K`} List`{K`} -> Bool
   define LK1:List{K} =/=List{K} LK2:List{K}  => notBool(LK1 ==List{K} LK2)
 
+  declare _==KLabel_ : KLabel KLabel -> Bool
+  define '_==KLabel_(K1:K,,K2:K) => K1 ==K K2
+
 end module

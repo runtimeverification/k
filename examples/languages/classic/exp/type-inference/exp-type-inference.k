@@ -16,7 +16,7 @@ argument (since the bound expression still needs to be typed). */
 /*@ \subsection{Arithmetic constructs}
 Identical to those in untyped EXP, including their \K annotations. */
 
-  syntax Exp ::= #Int | #Bool | #Id
+  syntax Exp ::= Int | Bool | Id
                | Exp "+" Exp                    [:strict prec 33 gather(E e):]
                | Exp "-" Exp                    [:strict prec 33 gather(E e):]
                | Exp "*" Exp                    [:strict prec 31 gather(E e):]
@@ -39,18 +39,18 @@ strictness of \texttt{let} changed to \texttt{strict(2)}.  Indeed,
 since we do not desugar it anymore, we give it its own evaluation
 strategy now. */
 
-  syntax Exp ::= "lambda" #Id "." Exp           [:latex "\lambda{#1}.{#2}":]
+  syntax Exp ::= "lambda" Id "." Exp           [:latex "\lambda{#1}.{#2}":]
                | Exp Exp                        [:strict prec 10 gather(E e):]
                | "if" Exp "then" Exp "else" Exp [:strict:]
-               | "mu" #Id "." Exp               [:latex "\mu{#1}.{#2}":]
-               | "let" #Id "=" Exp "in" Exp     [:strict(2):]
-               | "letrec" #Id #Id "=" Exp in Exp
+               | "mu" Id "." Exp               [:latex "\mu{#1}.{#2}":]
+               | "let" Id "=" Exp "in" Exp     [:strict(2):]
+               | "letrec" Id Id "=" Exp in Exp
 
 /*@ \subsection{Desugaring macros}
 We only keep the desugaring of \texttt{letrec} into a \texttt{let}.
 This way, \texttt{letrec} will also be polymorphic. */
 
-  macro (letrec F:#Id X:#Id = E:Exp in E':Exp)
+  macro (letrec F:Id X:Id = E:Exp in E':Exp)
       = (let F = mu F . (lambda X . E) in E')
 
   syntax Exps ::= List{Exp,","}
@@ -70,24 +70,21 @@ module TYPES
 
   syntax KResult ::= Type
 
-// #Id should be added automatically as a subsort to K.
-  syntax K ::= #Id
-
-  syntax Type ::= "tv" #Nat             // type variables
+  syntax Type ::= "tv" Nat             // type variables
                 | Type "->" Type        // function type
   syntax Types ::= List{Type,","}
 
-  syntax #Bool ::= "basicType" "(" Type ")"
+  syntax Bool ::= "basicType" "(" Type ")"
                  | "typeVar" "(" Type ")"
-  rule typeVar(T) => getKLabel(T) ==Bool 'tv_  [:structural anywhere:]
+  rule typeVar(T) => getKLabel(T) ==KLabel 'tv_  [:structural anywhere:]
 
   syntax TypeSchema ::= Type
                       | "(" "forall" Types ")" Type
                           [:latex("(\forall{#1}){#2}"):]
   syntax TypeSchemas ::= List{TypeSchema,","}
 
-  syntax Type ::= Type "+Type" #Nat [:latex("{#1}+_{\it Type}{#2}"):]
-  rule tv(N:#Nat) +Type M:#Nat => tv(N +Nat M)  [:structural anywhere:]
+  syntax Type ::= Type "+Type" Nat [:latex("{#1}+_{\it Type}{#2}"):]
+  rule tv(N:Nat) +Type M:Nat => tv(N +Int M)  [:structural anywhere:]
 
 // Free type variables.  These should be generic and builtin, for all binders.
   syntax Types ::= "ftv" "(" TypeSchemas ")"
@@ -105,27 +102,28 @@ module TYPES
                      [:latex("{#1}-_{\it Types}{#2}"):]
                  | "insert" "(" Type "," Types ")"
                  | "delete" "(" Type "," Types ")"
-  syntax #Nat ::= "|" Types "|"
+  syntax Nat ::= "|" Types "|"
   rule union(.Types,Ts':Types) => Ts' [anywhere]
   rule union((T,Ts:Types),Ts') => union(Ts,insert(T,Ts')) [anywhere]
   rule diff(Ts,.Types) => Ts [anywhere]
   rule diff(Ts,(T,Ts')) => diff(delete(T,Ts),Ts') [anywhere]
   rule insert(T,.Types) => T,.Types [anywhere]
-  rule insert(T,(T',Ts)) => if T ==Bool T' then T',Ts else T',insert(T,Ts) fi [anywhere]
+  rule insert(T,(T',Ts)) => #if T ==K T' #then T',Ts #else T',insert(T,Ts) #fi [anywhere]
   rule delete(T,.Types) => .Types [anywhere]
-  rule delete(T,(T',Ts)) => if T ==Bool T' then Ts else T',delete(T,Ts) fi [anywhere]
-  rule |T,Ts| => 1 +Nat |Ts| [anywhere]
+  rule delete(T,(T',Ts)) => #if T ==K T' #then Ts #else T',delete(T,Ts) #fi [anywhere]
+  rule |T,Ts| => 1 +Int |Ts| [anywhere]
   rule |.Types| => 0 [anywhere]
 
 // This should be generalized and builtin: fresh name generator
-  syntax Types ::= #Nat "from" Type
-  rule 0 from tv(_:#Nat) => .Types [anywhere]
-  rule (sNat N:#Nat) from tv(M:#Nat) => tv(M),(N from tv(sNat M)) [anywhere]
+  syntax Types ::= Nat "from" Type
+  define 0 from tv(_:Nat) => .Types
+  define N:Nat from tv(M:Nat) => tv(M),((N -Int 1) from tv(M +Int 1)) 
+  when N >Int 0
 
 // This could also be generic: subterm relation?
-  syntax #Bool ::= Type "inType" Type [:latex("{#1}\in_{\it Type}{#2}"):]
+  syntax Bool ::= Type "inType" Type [:latex("{#1}\in_{\it Type}{#2}"):]
   rule Tv inType BT  => false when typeVar(Tv) andBool basicType(BT) [anywhere]
-  rule Tv inType Tv' => Tv ==Bool Tv' when typeVar(Tv) andBool typeVar(Tv') [anywhere]
+  rule Tv inType Tv' => Tv ==K Tv' when typeVar(Tv) andBool typeVar(Tv') [anywhere]
   rule Tv inType (T1 -> T2) => (Tv inType T1) orBool (Tv inType T2) [anywhere]
 
 // Type substitution: T[Ts / Tvs]* substitutes list of types Ts for
@@ -136,7 +134,7 @@ module TYPES
   rule T[.Types / .Types]* => T [anywhere]
   rule T[T1,Ts:Types / Tv,Tvs]* => T[T1 / Tv][Ts / Tvs]* [anywhere]
   rule BT[T / Tv] => BT when basicType(BT) andBool typeVar(Tv) [anywhere]
-  rule Tv':Type[T / Tv] => if Tv' ==Bool Tv then T else Tv' fi
+  rule Tv':Type[T / Tv] => #if Tv' ==K Tv #then T #else Tv' #fi
     when typeVar(Tv') [anywhere]
   rule (T1 -> T2)[T / Tv] => T1[T / Tv] -> T2[T / Tv] [anywhere]
 
@@ -154,7 +152,7 @@ module TYPES
 // although note that it does something specific for type schemas.
 // This was just a trick, to save us from defining map application on schemas
   syntax Types ::= "types" "(" Map ")"
-  rule types(X:#Id |-> T TEnv:Map) => T,types(TEnv) [anywhere]
+  rule types(X:Id |-> T TEnv:Map) => T,types(TEnv) [anywhere]
   rule types(X |-> (forall_)T TEnv) => T,types(TEnv) [anywhere]
   rule types(.Map) => .Types [anywhere]
 end module
@@ -222,19 +220,19 @@ solved by the unification procedure.  To save space and time, in the
 rules below we match the \K labels corresponding to some of the
 arithmetic constructs. */
 
-  rule <k> I:#Int => int ...</k>
-  rule <k> B:#Bool => bool ...</k>
-  rule <k> X:#Id => T:Type ...</k> <tenv>... X |-> T ...</tenv>
+  rule <k> I:Int => int ...</k>
+  rule <k> B:Bool => bool ...</k>
+  rule <k> X:Id => T:Type ...</k> <tenv>... X |-> T ...</tenv>
 
   rule <k> L:KLabel(T1:Type,,T2:Type) => (T1,T2 = int,int) ~> int ...</k>
-    when L ==Bool '_+_ orBool L ==Bool '_-_ orBool
-       L ==Bool '_*_ orBool L ==Bool '_/_ orBool L ==Bool '_%_
+    when L ==KLabel '_+_ orBool L ==KLabel '_-_ orBool
+       L ==KLabel '_*_ orBool L ==KLabel '_/_ orBool L ==KLabel '_%_
   rule <k> - T => (T = int) ~> int ...</k>
   rule <k> L(T1,,T2) => (T1,T2 = int,int) ~> bool ...</k>
-    when L ==Bool '_<_ orBool L ==Bool '_<=_ orBool L ==Bool '_>_ orBool
-       L ==Bool '_>=_ orBool L ==Bool '_==_ orBool L ==Bool '_!=_
+    when L ==KLabel '_<_ orBool L ==KLabel '_<=_ orBool L ==KLabel '_>_ orBool
+       L ==KLabel '_>=_ orBool L ==KLabel '_==_ orBool L ==KLabel '_!=_
   rule <k> L(T1,,T2) => (T1,T2 = bool,bool) ~> bool ...</k>
-    when L ==Bool '_and_ orBool L ==Bool '_or_
+    when L ==KLabel '_and_ orBool L ==KLabel '_or_
 
   rule <k> not T => (T = bool) ~> bool ...</k>
   rule <k> if T then T1 else T2 => (T,T1 = bool,T2) ~> T1 ...</k>

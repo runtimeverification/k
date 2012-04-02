@@ -58,7 +58,7 @@ module FLOAT-HOOKS
       [latex "{\\it{}Int2Float}" hook(#CONVERSION:int2Float)]
 
   declare Float2Int : Float -> Int
-      [latex "{\\it{}float2Int}" hook(#CONVERSION:float2Int)]
+      [latex "{\\it{}Float2Int}" hook(#CONVERSION:float2Int)]
 
 
 end module
