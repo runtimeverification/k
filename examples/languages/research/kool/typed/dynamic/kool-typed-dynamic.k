@@ -14,63 +14,63 @@ application is not strict in the first argument anymore due to dynamic
 method dispatch).  Moreover, we removed the syntax of \texttt{try-catch}
 from that of SIMPLE, because we want to have typed exceptions in KOOL. */
 
-  syntax #Id ::= "main"
+  syntax Id ::= "main"
 
   syntax Type ::= "int"
                 | "bool"
                 | "string"
                 | "void"
                 | "arrayOf" Type
-                    [:prec(1) latex "{#1}\texttt{\char91\char93}":]
+                    [prec(1) latex "{#1}\texttt{\char91\char93}"]
                 | "function" "from" Types "to" Type
-                    [:prec(1) latex "({#1}\ \texttt{->}\ {#2})":]
-  syntax Types ::= List{Type,","}      [:strict:]
+                    [prec(1) latex "({#1}\ \texttt{->}\ {#2})"]
+  syntax Types ::= List{Type,","}      [strict]
 
   syntax Decl ::= "var" Exps ";"
 
-  syntax Exp ::= #Int | #Bool | #String | #Id
-               | "++" Exp              [:prec(0):]
-               | Exp "+" Exp           [:strict prec(33) gather(E e):]
-               | Exp "-" Exp           [:strict prec(33) gather(E e):]
-               | Exp "*" Exp           [:strict prec(31) gather(E e):]
-               | Exp "/" Exp           [:strict prec(31) gather(E e):]
-               | Exp "%" Exp           [:strict prec(31) gather(E e):]
-               | "-" Exp               [:strict:]
-               | Exp "<" Exp           [:strict prec(37):]
-               | Exp "<=" Exp          [:strict prec(37):]
-               | Exp ">" Exp           [:strict prec(37):]
-               | Exp ">=" Exp          [:strict prec(37):]
-               | Exp "==" Exp          [:strict prec(37):]
-               | Exp "!=" Exp          [:strict prec(37):]
-               | Exp "and" Exp         [:strict prec(55) gather(E e):]
-               | Exp "or" Exp          [:strict prec(59) gather(E e):]
-               | "not" Exp             [:strict prec(53):]
-               | Exp "[" Exps "]"      [:strict prec(1):]
-               | "sizeOf" "(" Exp ")"  [:strict:]
+  syntax Exp ::= Int | Bool | String | Id
+               | "++" Exp              [prec(0)]
+               | Exp "+" Exp           [strict prec(33) gather(E e)]
+               | Exp "-" Exp           [strict prec(33) gather(E e)]
+               | Exp "*" Exp           [strict prec(31) gather(E e)]
+               | Exp "/" Exp           [strict prec(31) gather(E e)]
+               | Exp "%" Exp           [strict prec(31) gather(E e)]
+               | "-" Exp               [strict]
+               | Exp "<" Exp           [strict prec(37)]
+               | Exp "<=" Exp          [strict prec(37)]
+               | Exp ">" Exp           [strict prec(37)]
+               | Exp ">=" Exp          [strict prec(37)]
+               | Exp "==" Exp          [strict prec(37)]
+               | Exp "!=" Exp          [strict prec(37)]
+               | Exp "and" Exp         [strict prec(55) gather(E e)]
+               | Exp "or" Exp          [strict prec(59) gather(E e)]
+               | "not" Exp             [strict prec(53)]
+               | Exp "[" Exps "]"      [strict prec(1)]
+               | "sizeOf" "(" Exp ")"  [strict]
                | "read" "(" ")"
-               | Exp "=" Exp           [:strict(2) prec(40) gather (e E):]
-               | Exp ":" Type          [:prec(10):]
+               | Exp "=" Exp           [strict(2) prec(40) gather (e E)]
+               | Exp ":" Type          [prec(10)]
                                        // allowed only for declarations
   syntax Exps ::= List{Exp,","}
 
   syntax Stmt ::= "{" "}"
                 | "{" Stmts "}"
-                | Exp ";"                               [:strict prec(45):]
-                | "if" Exp "then" Stmt "else" Stmt      [:strict(1) prec(90):]
-                | "if" Exp "then" Stmt                  [:prec(89):]
-                | "while" Exp "do" Stmt                 [:prec(90):]
-                | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
-                | "return" Exp ";"                      [:strict:]
+                | Exp ";"                               [strict prec(45)]
+                | "if" Exp "then" Stmt "else" Stmt      [strict(1) prec(90)]
+                | "if" Exp "then" Stmt                  [prec(89)]
+                | "while" Exp "do" Stmt                 [prec(90)]
+                | "for" Id "=" Exp "to" Exp "do" Stmt  [prec(90)]
+                | "return" Exp ";"                      [strict]
                 | "return" ";"
-                | "print" "(" Exps ")" ";"              [:strict:]
-                | "throw" Exp ";"                       [:strict:]
-                | "spawn" Stmt                          [:prec(90):]
-                | "acquire" Exp ";"                     [:strict:]
-                | "release" Exp ";"                     [:strict:]
-                | "rendezvous" Exp ";"                  [:strict:]
+                | "print" "(" Exps ")" ";"              [strict]
+                | "throw" Exp ";"                       [strict]
+                | "spawn" Stmt                          [prec(90)]
+                | "acquire" Exp ";"                     [strict]
+                | "release" Exp ";"                     [strict]
+                | "rendezvous" Exp ";"                  [strict]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts            [:prec(100) gather(e E):]
+                 | Stmts Stmts            [prec(100) gather(e E)]
 
   macro if E:Exp then S:Stmt = if E then S else {}
   macro (for X = E1 to E2 do S) = {var X:int=E1; while X <= E2 do {S X=X+1;}}
@@ -90,30 +90,30 @@ type for constructors in KOOL typed programs).  The syntax of typed
 exceptions differs from that of typed SIMPLE in that the variable
 bound by \texttt{catch} is now expected to be typed (we use
 \textit{Exp}, but we only give semantics for the case when it has the
-form \textit{\#Id:Type}. */
+form \textit{\Id:Type}. */
 
-  syntax #Id ::= "object"
+  syntax Id ::= "object"
 
-  syntax Type ::= "class" #Id [prec 1]
+  syntax Type ::= "class" Id [prec 1]
 
-  syntax Decl ::= "method" #Id "(" Exps ")" ":" Type Stmt
-                | "method" #Id "(" Exps ")" Stmt
-  macro method X:#Id (Es:Exps) S:Stmt = method X(Es) : void S
+  syntax Decl ::= "method" Id "(" Exps ")" ":" Type Stmt
+                | "method" Id "(" Exps ")" Stmt
+  macro method X:Id (Es:Exps) S:Stmt = method X(Es) : void S
 
-  syntax Decl ::= "class" #Id "{" Stmts "}"
-                | "class" #Id "extends" #Id "{" Stmts "}"
-  macro class C:#Id {Ss:Stmts} = class C extends object {Ss}
+  syntax Decl ::= "class" Id "{" Stmts "}"
+                | "class" Id "extends" Id "{" Stmts "}"
+  macro class C:Id {Ss:Stmts} = class C extends object {Ss}
 
-  syntax Exp ::= Exp "(" Exps ")"      [:strict(2) prec(2):]
+  syntax Exp ::= Exp "(" Exps ")"      [strict(2) prec(2)]
 
-  syntax Exp ::= "new" #Id "(" Exps ")" [:strict(2) prec(1):]
+  syntax Exp ::= "new" Id "(" Exps ")" [strict(2) prec(1)]
                | "this"
                | "super"
-               | Exp "." #Id            [:prec(1):]
-               | Exp "instanceOf" #Id   [:prec(0) strict(1):]
-               | "cast" Exp "to" #Id    [:prec(0) strict(1):]
+               | Exp "." Id            [prec(1)]
+               | Exp "instanceOf" Id   [prec(0) strict(1)]
+               | "cast" Exp "to" Id    [prec(0) strict(1)]
 
-  syntax Stmt ::= "try" Stmt "catch" "(" Exp ")" Stmt   [:prec(90):]
+  syntax Stmt ::= "try" Stmt "catch" "(" Exp ")" Stmt   [prec(90)]
 end module
 
 module KOOL-TYPED-DYNAMIC
@@ -183,28 +183,28 @@ their typed KOOL semantics right after, together with the extended
 semantics of thread spawning (which is identical to that of untyped
 KOOL).  */
 
-  syntax Val ::= #Int | #Bool | #String
-               | "arrayRef" "(" Type "," #Nat "," #Nat ")"
+  syntax Val ::= Int | Bool | String
+               | "arrayRef" "(" Type "," Nat "," Nat ")"
   syntax Vals ::= List{Val,","}
-  syntax Exp ::= Val
+  syntax Exp ::= Val | Nat 
   syntax KResult ::= Val
 
-  syntax K ::= "undefined" "(" Type ")" [:latex("\bot_{#1}"):]
+  syntax K ::= "undefined" "(" Type ")" [latex("\bot_{#1}")]
 
-  rule <k> var X:#Id : T:Type; => . ...</k>
-       <env> Env:Map => Env[L:#Nat/X] </env>
+  rule <k> var X:Id : T:Type; => . ...</k>
+       <env> Env:Map => Env[L:Nat/X] </env>
        <store>... . => L |-> undefined(T) ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
-  rule <k> var X[N:#Nat] : arrayOf T; => . ...</k> 
+  rule <k> var X[N:Nat] : arrayOf T; => . ...</k> 
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> arrayRef(arrayOf T, L +Nat 1, N)
-                       L +Nat 1 .. L +Nat N |-> undefined(T) ...</store>
-       <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
+       <store>... . => L |-> arrayRef(arrayOf T, L +Int 1, N)
+                       L +Int 1 .. L +Int N |-> undefined(T) ...</store>
+       <nextLoc> L => L +Int 1 +Int N </nextLoc>
 
   context var X[HOLE] : T, .Exps ;
 
-  syntax #Id ::= "$1" | "$2"
+  syntax Id ::= "$1" | "$2"
   rule var X[N1,N2,Vs] : arrayOf arrayOf T; =>
        var X[N1] : arrayOf arrayOf T;
        {
@@ -214,93 +214,93 @@ KOOL).  */
            (var X[N2,Vs] : arrayOf T;)   // stupid parser
            $1[$2] = X;
          }
-       }  [:structural:]
+       }  [structural]
 
   rule <k> X => V:Val ...</k>
        <env>...X|->L...</env>
-       <store>...L|->V...</store> [:transition:]
+       <store>...L|->V...</store> [transition]
 
   context ++(HOLE => lvalue(HOLE))
-  rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
+  rule <k> ++loc(L) => I:Int +Int 1 ...</k>
+       <store>... L |-> (I => I +Int 1) ...</store> [transition]
 
-  rule I1:#Int + I2:#Int => I1 +Int I2
-  rule Str1:#String + Str2:#String => Str1 +String Str2
+  rule I1:Int + I2:Int => I1 +Int I2
+  rule Str1:String + Str2:String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
-  rule - I => -Int I
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Int 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Int 0
+  rule - I => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
-  rule V1:Val == V2:Val => V1 ==Bool V2
-  rule V1 != V2 => V1 =/=Bool V2
-  rule B1:#Bool and B2:#Bool => B1 andBool B2
+  rule V1:Val == V2:Val => V1 ==K V2
+  rule V1 != V2 => V1 =/=K V2
+  rule B1:Bool and B2:Bool => B1 andBool B2
   rule B1 or B2 => B1 orBool B2
-  rule not(B:#Bool) => notBool(B)
+  rule not(B:Bool) => notBool(B)
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs] [:structural anywhere:]
-  rule arrayRef(_,L,M:#Nat)[N] => lookup(L +Int N)
-    when N >=Nat 0 andBool N <Nat M   [:structural anywhere:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs] [structural anywhere]
+  rule arrayRef(_,L,M:Nat)[N] => lookup(L +Int N)
+    when N >=Int 0 andBool N <Int M   [structural anywhere]
 
-  rule sizeOf(arrayRef(_,_:#Nat,N)) => N
+  rule sizeOf(arrayRef(_,_:Nat,N)) => N
 
   syntax Val ::= "nothing"
-  rule return; => return nothing;   [:structural:]
+  rule return; => return nothing;   [structural]
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [:transition:]
+  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [transition]
 
   context (HOLE => lvalue(HOLE)) = _
 
-  rule {} => . [:structural:]
-  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [:structural:]
-  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [:structural:]
+  rule {} => . [structural]
+  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env> [structural]
+  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [structural]
   rule V; => .
   rule if  true then S else _ => S
   rule if false then _ else S => S
   rule <k> while E:Exp do S
-    => if E then {S while E do S} else {} ...</k> [:structural:]
+    => if E then {S while E do S} else {} ...</k> [structural]
   rule <k> print(V,Vs=>Vs);...</k> <out>... .=>ListItem(V)</out>
-    when typeOf(V) ==Bool int orBool typeOf(V) ==Bool string    [:transition:]
-  rule print(.Vals); => . [:structural:]
+    when typeOf(V) ==K int orBool typeOf(V) ==K string    [transition]
+  rule print(.Vals); => . [structural]
 
   rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
        <busy> Busy:Set => Busy -Set keys(H) </busy>
   rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
        <busy> Busy (. => SetItem(V)) </busy>
-    when notBool(V in Busy)   [:transition:]
-  rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
+    when notBool(V in Busy)   [transition]
+  rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Int 1)...</holds>
   rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
-    when N >Nat 0
+    when N >Int 0
   // used prefix notation for -Int because of parsing problems
   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
        <busy>... SetItem(V)=>. ...</busy>
   rule <k> rendezvous V; => . ...</k>
-       <k> rendezvous V; => . ...</k> [:transition:]
+       <k> rendezvous V; => . ...</k> [transition]
 
 // Auxiliary operations
 
   syntax Exp ::= "lvalue" "(" K ")"
-  syntax Val ::= "loc" "(" #Nat ")"
-  rule <k> lvalue(X) => loc(L:#Nat) ...</k>
-       <env>... X|->L ...</env>  [:structural:]
+  syntax Val ::= "loc" "(" Nat ")"
+  rule <k> lvalue(X) => loc(L:Nat) ...</k>
+       <env>... X|->L ...</env>  [structural]
   context lvalue(_[HOLE])
   context lvalue(HOLE[_])
-  rule lvalue(lookup(L)) => loc(L) [:structural:]
-  syntax K ::= "lookup" "(" #Nat ")"
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store> [:transition:]
+  rule lvalue(lookup(L)) => loc(L) [structural]
+  syntax K ::= "lookup" "(" Nat ")"
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store> [transition]
   syntax K ::= "env" "(" Map ")"
-  rule <k> env(Env) => . ...</k> <env> _ => Env </env> [:structural:]
-  rule (env(_) => .) ~> env(_) [:structural:]
+  rule <k> env(Env) => . ...</k> <env> _ => Env </env> [structural]
+  rule (env(_) => .) ~> env(_) [structural]
 
 // typeOf
   declare typeOf :  K -> Type
   define typeOf(I) => int              
   define typeOf(B) => bool            
-  define typeOf(_:#String) => string 
-  define typeOf(arrayRef(T,_:#Nat,_:#Nat)) => T
+  define typeOf(_:String) => string 
+  define typeOf(arrayRef(T,_:Nat,_:Nat)) => T
   define typeOf(undefined(T)) => T  
   define typeOf(nothing) => void   
 
@@ -309,9 +309,9 @@ KOOL).  */
   define types(X : T,.Exps) => T,.Types
   define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)
 
-  syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural anywhere:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural anywhere:]
+  syntax List{K} ::= Nat ".." Nat
+  rule N1:Nat..N2:Nat => .List{K}              when N1  >Int N2 [structural anywhere]
+  rule N1:Nat..N2:Nat => N1 ,, (N1 +Int 1)..N2 when N1 <=Int N2 [structural anywhere]
 
 /*@ \subsection{Changes to SIMPLE Semantics}
 We extend/change the semantics of several SIMPLE constructs in order
@@ -336,7 +336,7 @@ Typed KOOL allows to assign subtype instance values to supertype lvalues. */
   rule <k> loc(L)=V
         => subtype(typeOf(V),typeOf(K)) ~> true?
            ~> unsafeCast(V,typeOf(K:K))...</k>
-       <store>...L|->(K => unsafeCast(V,typeOf(K)))...</store>  [:transition:]
+       <store>...L|->(K => unsafeCast(V,typeOf(K)))...</store>  [transition]
 
 /*@ \subsubsection{Typed exceptions}
 Exceptions are propagated now until a catch that can bind them is
@@ -367,8 +367,8 @@ parameters */
       ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> undefined(T) ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.Exps,.Vals) => . ...</k>  [:structural:]
+       <nextLoc> L => L +Int 1 </nextLoc>
+  rule <k> bindto(.Exps,.Vals) => . ...</k>  [structural]
 
 
 /*@ \subsection{Object and method closures}
@@ -376,24 +376,24 @@ The only change to untyped KOOL's values is that closures are now typed
 (their last argument holds their type). */
 
  syntax Val ::= "objectClosure" "(" Bag ")"
-              | "methodClosure" "(" #Id "," #Nat "," Exps "," Stmt "," Type ")"
+              | "methodClosure" "(" Id "," Nat "," Exps "," Stmt "," Type ")"
 
 /*@ \subsection{Class declaration}       
 Like in untyped KOOL. */
 
-  rule <k> class Class1:#Id extends Class2:#Id { Ss:Stmts } => . <_/k>
+  rule <k> class Class1:Id extends Class2:Id { Ss:Stmts } => . <_/k>
        <classes>... (. => <class>
                             <className> Class1 </className>
                             <extends> Class2 </extends>
                             <declarations> Ss </declarations>
                         </class>)
-       ...</classes>  [:structural:]
+       ...</classes>  [structural]
 
 /*@ \subsection{Program initialization}
 Like in untyped KOOL. */
 
   syntax K ::= "execute"
-  rule <k> execute => new main(); </k> <env> . </env>  [:structural:]
+  rule <k> execute => new main(); </k> <env> . </env>  [structural]
 
 /*@ \subsection{Method declaration}
 Methods are now typed and we need to store their types in their
@@ -401,14 +401,14 @@ closures, so that their type contract can be checked at invocation
 time.  The rule below is conceptually similar to that of untyped KOOL;
 the only difference is the addition of the types.  */
 
-  rule <k> method F:#Id(XTs:Exps) : T S:Stmt => . ...</k>
-       <crntClass> Class:#Id </crntClass>
-       <location> OL:#Nat </location>
+  rule <k> method F:Id(XTs:Exps) : T S:Stmt => . ...</k>
+       <crntClass> Class:Id </crntClass>
+       <location> OL:Nat </location>
        <env> Env => Env[L/F] </env>
        <store>... 
          .  => L|->methodClosure(Class,OL,XTs,S, function from types(XTs) to T)
        ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
 
 /*@ \subsection{New}
@@ -433,26 +433,26 @@ those in untyped KOOL. */
          <fstack> . => ListItem((Env, K, C <return> T </return> 
                                   <crntObj> Obj </crntObj>)) ...</fstack>
        </control>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
   syntax K ::= "create" "(" K ")"
   rule <k> create(Class)
         => create(Class1) ~> setCrntClass(Class) ~> Ss ~> addEnvLayer ...</k>
        <className> Class </className>
        <extends> Class1 </extends>
-       <declarations> Ss </declarations>  [:structural:]
-  rule <k> create(object) => . ...</k>    [:structural:]
+       <declarations> Ss </declarations>  [structural]
+  rule <k> create(object) => . ...</k>    [structural]
 
-  syntax K ::= "setCrntClass" "(" #Id ")" 
+  syntax K ::= "setCrntClass" "(" Id ")" 
   rule <k> setCrntClass(Class) => . ...</k>
-       <crntClass> _ => Class </crntClass>  [:structural:]
+       <crntClass> _ => Class </crntClass>  [structural]
 
   syntax K ::= "addEnvLayer"
   rule <k> addEnvLayer => . ...</k>
        <env> Env => . </env>
        <crntClass> Class </crntClass>
        <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack> 
-    [:structural:]
+    [structural]
 
   syntax K ::= storeObj
   rule <k> storeObj => . ...</k>
@@ -469,16 +469,16 @@ Like in untyped KOOL. */
 Like in untyped KOOL. */
 
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
-    when notBool(X in keys(Env))  [:structural:]
-  context ('_._(HOLE,,_)) when (HOLE =/=Bool super)
+    when notBool(X in keys(Env))  [structural]
+  context ('_._(HOLE,,_)) when (HOLE =/=K super)
   rule <k> _._(objectClosure(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X) 
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
-       ...</k>  [:structural:]
+       ...</k>  [structural]
   rule <k> _._(super,X) => lookupMember(<envStack>EStack</envStack>,X)...</k>
-       <crntClass> Class:#Id </crntClass>
+       <crntClass> Class:Id </crntClass>
        <envStack>... ListItem(Class :: EnvC) EStack </envStack>
-    [:structural:]
+    [structural]
 
 
 /*@\subsection{Method invocation}
@@ -494,23 +494,23 @@ rules below are identical to those in untyped KOOL. */
 
   rule <k> _`(_`)((X => _._(this,X)),_) ...</k>
        <env> Env </env>
-    when notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [structural]
 
-  context '_`(_`)('_._(HOLE,,_),,_) when HOLE =/=Bool super 
+  context '_`(_`)('_._(HOLE,,_),,_) when HOLE =/=K super 
 
   rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
-    [:structural:]
+    [structural]
 
   rule <k> '_`(_`)(('_._(super,,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
-       <crntClass> Class:#Id </crntClass>
+       <crntClass> Class:Id </crntClass>
        <envStack>... ListItem(Class :: _) EStack </envStack>
-    [:structural:]
+    [structural]
 
   context '_`(_`)(HOLE,,_)
-       when getKLabel HOLE ==Bool '_`(_`) orBool
-          getKLabel HOLE ==Bool '_`[_`]
+       when getKLabel HOLE ==KLabel '_`(_`) orBool
+          getKLabel HOLE ==KLabel '_`[_`]
 
   rule <k> '_`(_`)((lookup(L) => V),,_) ...</k>
        <store>... L |-> V ...</store>
@@ -523,7 +523,7 @@ be checked against the return type of the method.  To do this correctly,
 we also need to stack the current status of the \textsf{return} cell
 and then pop it when the method returns. */
 
-  rule <k> _`(_`)(methodClosure(Class,OL:#Nat,XTs,S:Stmt,function from _ to T),
+  rule <k> _`(_`)(methodClosure(Class,OL:Nat,XTs,S:Stmt,function from _ to T),
                   Vs:Vals) ~> K:K
         => bindto(XTs,Vs) ~> S ~> return; </k>
        <control> C:Bag 
@@ -533,7 +533,7 @@ and then pop it when the method returns. */
           <return> T':Type => T </return>
         </control>
        <env> Env => . </env>
-       <store>... OL |-> objectClosure(<crntClass>_:#Id</crntClass>Obj:Bag)
+       <store>... OL |-> objectClosure(<crntClass>_:Id</crntClass>Obj:Bag)
        ...</store>
 
 /*@ At method return, we have to check that the type of the returned
@@ -557,7 +557,7 @@ Like in untyped KOOL. */
         instanceOf Class => true
   rule objectClosure((_ <envStack> ListItem(Class1::_)
                        => . ...</envStack>)) instanceOf Class2 
-    when Class1 =/=Bool Class2  [:structural:]
+    when Class1 =/=K Class2  [structural]
   rule objectClosure((_ <envStack> .List </envStack>)) instanceOf Class
     => false
  
@@ -568,31 +568,31 @@ can indeed be cast to the claimed type. */
   rule <k> cast objectClosure((<crntClass> _:K </crntClass> Obj)) to Class 
         => objectClosure(Obj) instanceOf Class ~> true?
              ~> objectClosure(<crntClass> Class </crntClass> Obj) ...</k>
-    [:structural:]
+    [structural]
 
 /*@ \subsection{Objects as lvalues}
 Like in untyped KOOL. */
 
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
-    when notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [structural]
 
-  context lvalue(_._(HOLE,_:#Id))
+  context lvalue(_._(HOLE,_:Id))
   rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
                            <envStack>...
                              ListItem(Class :: EnvC) EStack
                            </envStack>), X)
         => lookupMember(<envStack>ListItem(Class :: EnvC:BagItem) EStack:List
                         </envStack>, X)) 
-       ...</k>  [:structural:]
+       ...</k>  [structural]
 
 /*@ \subsection{Lookup member}
 Like in untyped KOOL. */
 
-  syntax K ::= #Id "::" Bag
-  declare lookupMember : BagItem #Id -> K 
-  define lookupMember(<envStack> ListItem(_:#Id :: <env>...X|->L...</env>)
+  syntax K ::= Id "::" Bag
+  declare lookupMember : BagItem Id -> K 
+  define lookupMember(<envStack> ListItem(_:Id :: <env>...X|->L...</env>)
                     ...</envStack>,X) => lookup(L) 
-  define lookupMember(<envStack> ListItem(_:#Id :: <env> Env </env>)
+  define lookupMember(<envStack> ListItem(_:Id :: <env> Env </env>)
                             => . ...</envStack>, X)
     when notBool(X in keys(Env))                  
 
@@ -603,23 +603,23 @@ Like in untyped KOOL. */
 
   define typeOf(objectClosure(_ <envStack> ListItem(Class::_) ...</envStack>))
     => class Class
-  define typeOf(methodClosure(_:#Id,_:#Nat,_,_,T)) => T 
+  define typeOf(methodClosure(_:Id,_:Nat,_,_,T)) => T 
 
 /*@ \subsubsection{Subtyping constraints}
 The subclass relation introduces a subtyping relation. */
 
   syntax Exp ::= "subtype" "(" Types "," Types ")"
 
-  rule subtype(T,T) => true  [:structural:]
+  rule subtype(T,T) => true  [structural]
   rule <k> subtype(class Class1, class Class)
         => subtype(class Class2, class Class) ...</k>
        <className> Class1 </className> <extends> Class2 </extends>
-    when Class1 =/=Bool Class  [:structural:]
+    when Class1 =/=K Class  [structural]
   rule subtype((T1:Type,T2:Type,Ts:Types),(T1':Type,T2':Type,Ts':Types))
-    => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))  [:structural:]
-  rule subtype(.Types,.Types) => true  [:structural:]
+    => subtype(T1,T1') ~> true? ~> subtype((T2,Ts),(T2',Ts'))  [structural]
+  rule subtype(.Types,.Types) => true  [structural]
   rule subtype(class object, class Class) => false 
-    when Class =/=Bool object [:structural:]
+    when Class =/=K object [structural]
 
 /*@ \subsubsection{Unsafe Casting}
 Performs unsafe casting.  One should only use it in combination with
@@ -628,13 +628,13 @@ the subtype relation above.  */
   declare unsafeCast : Val Type -> Val
   define unsafeCast(objectClosure(<crntClass>_:K </crntClass> Obj), class Class)
     => objectClosure(<crntClass> Class </crntClass> Obj)
-  define unsafeCast(V,T) => V when typeOf(V) ==Bool T 
+  define unsafeCast(V,T) => V when typeOf(V) ==K T 
 
 /*@ \subsubsection{Generic guard}
 A generic computational guard (should be builtin): it allows the
 computation to continue only if a prefix guard evaluates to true.  */
 
   syntax K ::= "true?"
-  rule true ~> true? => .  [:structural:]
+  rule true ~> true? => .  [structural]
 
 end module
