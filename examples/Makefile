@@ -13,15 +13,15 @@ TEST_DIRS = \
 	    languages/classic/pcf/untyped \
 	    languages/research/agent \
 	    languages/research/challenge \
-	    languages/research/fun/untyped \
 	    languages/research/imppp \
-	    languages/research/kool/typed/static \
-	    languages/research/kool/typed/dynamic \
-	    languages/research/kool/untyped \
 	    languages/research/lambdapp \
 	    languages/research/simple/untyped \
 	    languages/research/simple/typed/dynamic \
 	    languages/research/simple/typed/static \
+	    languages/research/kool/typed/static \
+	    languages/research/kool/typed/dynamic \
+	    languages/research/kool/untyped \
+	    languages/research/fun/untyped \
 	    algorithms/sudoku/1-direct-definition \
 	    algorithms/sudoku/2-with-counters \
 	    algorithms/sudoku/3-with-decrement \
