@@ -1,6 +1,6 @@
 
 module IMPPP-SYNTAX
-  syntax AExp ::= #Id | #Int
+  syntax AExp ::= Id | Int
                 | AExp "+" AExp    [prec(33) gather (E e) strict]
                 | AExp "/" AExp    [prec(31) gather (E e) strict]
   syntax BExp ::= #Bool
@@ -8,17 +8,17 @@ module IMPPP-SYNTAX
                 | "not" BExp       [prec(53) strict]
                 | BExp "and" BExp  [prec(55) strict(1)]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp    [prec(80) strict(2)]
+                | Id ":=" AExp    [prec(80) strict(2)]
                 | Stmt ";" Stmt    [prec(100) gather(e E)]
                 | "if" BExp
                   "then" Stmt
                   "else" Stmt      [prec(85) strict(1)]
                 | "while" BExp
                   "do" Stmt        [prec(85)]
-  syntax Ids ::= List{#Id,","}
+  syntax Ids ::= List{Id,","}
 
-  syntax AExp ::= #String
-                | "++" #Id               [prec(0)]
+  syntax AExp ::= String
+                | "++" Id               [prec(0)]
                 | "read" "(" ")"
   syntax AExps ::= List{AExp,","}     [strict]
 
@@ -47,15 +47,15 @@ module IMPPP
      <in color="magenta"> $IN:List </in>
      <out color="Orchid"> .List </out>
     </T>
-  syntax KResult ::= #Int | #Bool
+  syntax KResult ::= Int | #Bool
 
 
-  rule <k> X:#Id => I ...</k>
-       <env>... X |-> N:#Nat ...</env>
-       <store>... N |-> I:#Int ...</store>
+  rule <k> X:Id => I ...</k>
+       <env>... X |-> N:Nat ...</env>
+       <store>... N |-> I:Int ...</store>
 
 
-  rule I1:#Int + I2:#Int => I1 +Int I2
+  rule I1:Int + I2:Int => I1 +Int I2
   rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
 
 
@@ -86,9 +86,9 @@ module IMPPP
   rule <k> while B do S:K => if B then S ; while B do S else {} ...</k>
 
 
-//  syntax Val ::= #String
-  syntax KResult ::= #String
-  rule Str1:#String + Str2:#String => Str1 +String Str2
+//  syntax Val ::= String
+  syntax KResult ::= String
+  rule Str1:String + Str2:String => Str1 +String Str2
 
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
@@ -96,7 +96,7 @@ module IMPPP
   rule <k> read() => I ...</k>
        <in> ListItem(I) => . ...</in>
 
-  syntax Printable ::= #Int | #String
+  syntax Printable ::= Int | String
   rule <k> print(P:Printable,AEs:AExps => AEs) ...</k>
        <out>... . => ListItem(P) </out>
   rule print(.AExps) => .  [structural]

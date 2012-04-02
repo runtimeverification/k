@@ -1,2 +1,2 @@
-load run-compiled
+load agents-test-compiled
 

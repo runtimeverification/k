@@ -8,7 +8,7 @@ kmod HASKELL-SYNTAX is
 
     syntax K ::= Literal
                | Exp
-               | #Int
+               | Int
 
     syntax Literal ::= `Int K
 

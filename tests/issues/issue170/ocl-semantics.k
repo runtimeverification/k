@@ -6,10 +6,10 @@ kmod OCL-SEMANTICS is including META-MODEL + OCL-SYNTAX  // + SUBSTITUTION
 
 syntax KResult ::= ValSet 
 syntax CExp ::= ValSet 
-syntax AExp ::= #Int
+syntax AExp ::= Int
 syntax BExp ::= #Bool
 
-syntax K ::= #Id
+syntax K ::= Id
 
 syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid gather(E e) comm id: .ValSet]
                 | ValSet `Inter ValSet
@@ -17,16 +17,16 @@ syntax ValSet ::= .ValSet | Val | ValSet ValSet [hybrid gather(E e) comm id: .Va
 
 syntax Val ::= ScalarVal | InstVal
 
-syntax ScalarVal ::= #Bool | #Int  
+syntax ScalarVal ::= #Bool | Int  
 
 syntax InstVal ::=  instVal ( Bag ) // or better, instVal(BagItem)
 
 // sets of identifiers
-syntax Set{Id}  ::= #Id | .Set{Id} 
+syntax Set{Id}  ::= Id | .Set{Id} 
                      | Set{Id} , Set{Id} [assoc comm id: .Set{Id}  hybrid] 
 
 // the various kinds of attributes in instances
-syntax K ::= typedVal ( Val , ScalarType ) | typedName ( #Id , Class ) | 
+syntax K ::= typedVal ( Val , ScalarType ) | typedName ( Id , Class ) | 
              typedSetOfInstName ( Set{Id} , ClassTypeCol ) | typedSetOfVal ( ValSet , ScalarTypeCol )
 
 
@@ -50,7 +50,7 @@ rule v  inValSet  .ValSet => false [structural]
 
 
 // semantics of arithmetical expressions
-rule A1:#Int + A2:#Int => A1 +Int A2
+rule A1:Int + A2:Int => A1 +Int A2
 rule A1 * A2 => A1 *Int A2
 rule A1 / A2 => A1 /Int A2 if notBool (A2 ==Int 0)
 
@@ -92,7 +92,7 @@ rule <k> empty => .ValSet <_/k>
 
 // rules Class .allInstances
 rule <k> (C:Class .allInstances) => collectInstances(C,INST:Bag) <_/k> 
-         <model> <modelName> MN:#Id </modelName> // _ leads to ambiguity
+         <model> <modelName> MN:Id </modelName> // _ leads to ambiguity
             INST:Bag
          </model> [structural] 
 
@@ -104,7 +104,7 @@ rule collectInstances(C:Class, .Bag) => .ValSet
 
 rule collectInstances(C, 
                         (<instance> 
-                             <instName> INAME:#Id </instName> 
+                             <instName> INAME:Id </instName> 
                              <ofClass> C </ofClass>
                              <attributes> ATTR:Map </attributes>
                          </instance> 
@@ -144,7 +144,7 @@ rule <k> (.ValSet # AT:Attr) => VV:ValSet <_/k> <temp> VV => .ValSet </temp>
 rule <k> (
           instVal(
                    <instance>
-                     <instName> BIDON:#Id </instName>
+                     <instName> BIDON:Id </instName>
                      <ofClass> BIDULE:Class </ofClass>
                      <attributes_> AT|-> typedVal(vv:Val, TT:ScalarType)<_/attributes>        
                   </instance>
@@ -164,9 +164,9 @@ rule <k> (
 rule <k>  (
           instVal(
                    <instance>
-                     <instName> BIDON:#Id </instName>
+                     <instName> BIDON:Id </instName>
                      <ofClass> BIDULE:Class </ofClass>
-                     <attributes_> AT|-> typedName(INSNAME:#Id, OF:Class) <_/attributes>
+                     <attributes_> AT|-> typedName(INSNAME:Id, OF:Class) <_/attributes>
                                        // handles synonymous instances in different classes
                   </instance>
                  )
@@ -199,7 +199,7 @@ rule <k>  (
 rule <k>  (
           instVal(
                    <instance>
-                     <instName> BIDON:#Id </instName>
+                     <instName> BIDON:Id </instName>
                      <ofClass> BIDULE:Class </ofClass>
                      <attributes_> AT|-> typedSetOfInstName(ISET:Set{Id}, OFCOL:ClassTypeCol) <_/attributes>
                   </instance>
@@ -208,7 +208,7 @@ rule <k>  (
           ) # AT
        =>  VV:ValSet # AT 
     <_/k>
-<model> <modelName> toto:#Id </modelName>
+<model> <modelName> toto:Id </modelName>
 ALLINSTANCES:Bag
 </model>
 <temp_> .ValSet =>
@@ -221,7 +221,7 @@ rule makeInstVal(ALLNAMES:Set{Id}, .Bag) => .ValSet
 
 rule makeInstVal(ALLNAMES,
                   <instance>
-                     <instName> INSTNAME:#Id </instName> 
+                     <instName> INSTNAME:Id </instName> 
                      <ofClass> OFTHECLASS:Class </ofClass>
                      <attributes> ATR </attributes>
                   </instance> REMAINING:Bag) 
@@ -242,7 +242,7 @@ rule makeInstVal(ALLNAMES,
 /*
 rule makeInstVal(ALLNAMES,  
                   <instance>
-                     <instName> INSTNAME':#Id </instName> 
+                     <instName> INSTNAME':Id </instName> 
                      <ofClass> OFTHECLASS:Class </ofClass>
                      <attributes> ATR </attributes>
                   </instance> REMAINING:Bag) 
@@ -251,9 +251,9 @@ rule makeInstVal(ALLNAMES,
     if notBool isPresent(INSTNAME',ALLNAMES)
 */
 
-syntax #Bool ::= isIn ( #Id , Set{Id} )
-rule isIn (XX:#Id , (XX , NAMES:Set{Id}) ) => true [structural]
- rule isIn (XX, (XX':#Id ,  NAMES)) => isIn(XX,  NAMES) if notBool (XX ==Bool XX') [structural]
+syntax #Bool ::= isIn ( Id , Set{Id} )
+rule isIn (XX:Id , (XX , NAMES:Set{Id}) ) => true [structural]
+ rule isIn (XX, (XX':Id ,  NAMES)) => isIn(XX,  NAMES) if notBool (XX ==Bool XX') [structural]
 rule isIn (XX, .Set{Id}) => false [structural]
 
 
@@ -263,7 +263,7 @@ rule isIn (XX, .Set{Id}) => false [structural]
 rule <k>  (
           instVal(
                    <instance>
-                     <instName> BIDON:#Id </instName>
+                     <instName> BIDON:Id </instName>
                      <ofClass> BIDULE:Class </ofClass>
                      <attributes_> AT|-> typedSetOfVal(VVV:ValSet, OFCOL2:ScalarTypeCol) <_/attributes>
                   </instance>
@@ -301,7 +301,7 @@ rule subset(.ValSet,  V:ValSet) => true
 rule subset((v:Val V), V':ValSet) => if (v  inValSet  V') then subset(V,V') else false fi //NB Maude's if!
 
 // auxiliary : card predicate
-syntax #Int ::= card ( ValSet )
+syntax Int ::= card ( ValSet )
 rule card(.ValSet) => 0
 rule card(v V) => 1 +Int card(V)
 
@@ -310,12 +310,12 @@ endkm
 
 kmod TEST is including OCL-SEMANTICS
 
-syntax #Id ::=  a | b | modelM | attr1 | attr2 | attr3 
+syntax Id ::=  a | b | modelM | attr1 | attr2 | attr3 
 
 syntax Class ::=  classA | classB | classZ
 
 /*
-syntax #Id ::= a | b | `M
+syntax Id ::= a | b | `M
 syntax Class ::= `A | `B | `Z
 syntax Attr ::=  attr1 | attr2 | attr3 
 

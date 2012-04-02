@@ -1,6 +1,6 @@
 module ISSUE 
 	syntax KResult ::= t "(" Set "," K ")"
-	syntax K ::= fromArray "(" #Int "," #Nat ")"
+	syntax K ::= fromArray "(" Int "," Nat ")"
 	syntax #Bool ::= hasUnionMarker "(" KResult ")"
 	
 	syntax K ::= test1 | test2 | answer | foo | bar1 | bar2 | baz

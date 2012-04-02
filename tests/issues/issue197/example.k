@@ -1,7 +1,7 @@
 
 kmod ISSUE is
 	
-	syntax Exp ::= #Int | Exp + Exp
+	syntax Exp ::= Int | Exp + Exp
 	syntax List{Exp} ::= Exp | () | Exp , Exp [strict assoc hybrid id: ()]
 	syntax K ::= test1 | test2
 	

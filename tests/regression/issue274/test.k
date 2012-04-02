@@ -1,4 +1,4 @@
 module TEST is
   including K
-    syntax Ids ::= List{ #Id, "," }
+    syntax Ids ::= List{ Id, "," }
 end module

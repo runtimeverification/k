@@ -1,6 +1,6 @@
 kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 
-  syntax #Id ::=  x
+  syntax Id ::=  x
 
   syntax Stmts ::= pTestND
 

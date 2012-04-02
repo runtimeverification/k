@@ -2,14 +2,14 @@
 
 module SKOOL-UNTYPED-SYNTAX 
 
-  syntax Var ::= #Id 
+  syntax Var ::= Id 
 
-  syntax #Id ::= main | object
+  syntax Id ::= main | object
  
   syntax Exp  ::= 
-                 Var | #Int | #Bool
+                 Var | Int | #Bool
 
-  syntax ClassDecl ::= class #Id extends #Id { Stmts }
+  syntax ClassDecl ::= class Id extends Id { Stmts }
 --- </OO stuff addded>
 
   syntax Stmt ::=
@@ -70,8 +70,8 @@ module SKOOL-UNTYPED imports SKOOL-UNTYPED-SEMANTICS
   syntax KLabel ::= kpgm
 
 --- a class traversal
-  rule <k> kpgm(class C1:#Id extends C2:#Id { Ss:Stmts }) => kpgm(Ss) <_/k>
-       <class> C:#Id => C1 </class>
+  rule <k> kpgm(class C1:Id extends C2:Id { Ss:Stmts }) => kpgm(Ss) <_/k>
+       <class> C:Id => C1 </class>
        <pgm_> . => <classes_>
                            <className> C1 </className>          
                            <extends> C2 </extends>

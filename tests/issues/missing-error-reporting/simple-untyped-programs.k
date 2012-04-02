@@ -4,7 +4,7 @@
 -------------------------------------------------------------------
 
 kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
-  syntax #Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m 
+  syntax Id ::= a | b | c | d | e | f | g | h | i | j | k | l | m 
               | n | o | p | q | r | s | t | u | v | w | x | y | z 
               | main | divide2 | collatz | dummy1 | dummy2 | init | reverse 
               | printAll | writeArray | insertionSort | bubbleSort | siftDown 
@@ -426,7 +426,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 --- 7 100 10
 
 
-  syntax #Id ::= foo
+  syntax Id ::= foo
   syntax Stmts ::= pExceptions2
   macro pExceptions2 =
     function main() {
@@ -695,7 +695,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 
 --- programs to test dynamic threads and synchronization
 
-  syntax #Id ::= factorialOf | multX
+  syntax Id ::= factorialOf | multX
   syntax Stmts ::= pThreads1
   macro pThreads1 =
     var x;
@@ -875,7 +875,7 @@ kmod SIMPLE-UNTYPED-PROGRAMS is including SIMPLE-UNTYPED-SYNTAX
 
 
 --- Dekker's algorithm; not meant to be executed, but only model checked
-  syntax #Id ::= task1 | task2 | dekker1 | dekker2 | flag1 | flag2
+  syntax Id ::= task1 | task2 | dekker1 | dekker2 | flag1 | flag2
               | critical1 | critical2 | turn
   syntax Stmts ::= pDekker
   macro pDekker =

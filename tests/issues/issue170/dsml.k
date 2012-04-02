@@ -17,7 +17,7 @@ kmod META-MODEL is including OCL-SYNTAX
  
  // syntax K ::= undefined  
 
-  // syntax ListItem ::= #Id : KLabel [prec 20] 
+  // syntax ListItem ::= Id : KLabel [prec 20] 
 
 
 /*
@@ -44,7 +44,7 @@ kmod META-MODEL is including OCL-SYNTAX
 */
 
 
-syntax #Id ::= object | undefined // to be extended later with class and instance names
+syntax Id ::= object | undefined // to be extended later with class and instance names
 
 
 

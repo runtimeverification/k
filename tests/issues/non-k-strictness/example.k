@@ -1,6 +1,6 @@
 
 module NON-K-STRICTNESS
-    syntax Exp ::= #Int | #Float
+    syntax Exp ::= Int | Float
                  | Exp "+" Exp [strict strict[type]]
 ---                 | Exp "+" Exp [metadata "k-strict=() type-strict=()"]
                  | Exp "*" Exp [seqstrict strict[type]]
@@ -19,16 +19,16 @@ module NON-K-STRICTNESS
    syntax Type ::= "int" | "float" | "correct" | "typeError" "(" K ")"
    syntax Exp ::= Type 
 
-   syntax Result ::= #Int | #Float
----   syntax KResult ::= #Int | #Float
+   syntax Result ::= Int | Float
+---   syntax KResult ::= Int | Float
 
    syntax Result[type] ::= Type
 ---   syntax TypeResult ::= Type
 
    configuration <k> .K </k> <type> .K </type> 
 
-   rule <type> I:#Int => int ...</type>
-   rule <type> F:#Float => float ...</type>
+   rule <type> I:Int => int ...</type>
+   rule <type> F:Float => float ...</type>
    rule L:KLabel(int,, int) => int 
       when L ==Bool '_+_ orBool L ==Bool '_*_ orBool L ==Bool '_/_
    rule L:KLabel(float,, float) => float 
@@ -48,19 +48,19 @@ module NON-K-STRICTNESS
    rule <type> L:KLabel(L1:List{K},,typeError(K:K),,L2:List{K})
             => typeError(L(K)) ...</type>
 
-   rule integer(F:#Float) => Float2Int(F)
-   rule integer(I:#Int) => I
+   rule integer(F:Float) => Float2Int(F)
+   rule integer(I:Int) => I
 
-   rule float(F:#Float) => F
-   rule float(I:#Int) => Int2Float(I)
+   rule float(F:Float) => F
+   rule float(I:Int) => Int2Float(I)
 
-   rule I1:#Int + I2:#Int => I1 +Int I2
-   rule I1:#Int * I2:#Int => I1 *Int I2
-   rule I1:#Int / I2:#Int => I1 /Int I2
+   rule I1:Int + I2:Int => I1 +Int I2
+   rule I1:Int * I2:Int => I1 *Int I2
+   rule I1:Int / I2:Int => I1 /Int I2
 
-   rule F1:#Float + F2:#Float => F1 +Float F2
-   rule F1:#Float * F2:#Float => F1 *Float F2
-   rule F1:#Float / F2:#Float => F1 /Float F2
+   rule F1:Float + F2:Float => F1 +Float F2
+   rule F1:Float * F2:Float => F1 *Float F2
+   rule F1:Float / F2:Float => F1 /Float F2
 
    rule eval(int) => correct
   
@@ -76,6 +76,6 @@ module NON-K-STRICTNESS
    rule  test4 => <k> eval(integer(3 + 5.2)) </k> <type> .K </type>
    rule  test5 => <k> eval(integer(float(3) + 5.2)) </k> <type> .K </type>
 
-   rule <k> I:#Int </k> <type> correct </type> => good
+   rule <k> I:Int </k> <type> correct </type> => good
    rule <k> _:K </k> <type> typeError(_) </type> => bad
 end module

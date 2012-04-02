@@ -18,8 +18,8 @@ module GHC-CORE-TEST-SYNTAX is
     syntax Ty ::= Bty
                 | Bty "->" Ty
 
-    syntax Tyvar ::= "tv(" #Id ")"
-    syntax Qvar ::= "qv(" #Id ")"
+    syntax Tyvar ::= "tv(" Id ")"
+    syntax Qvar ::= "qv(" Id ")"
 
 end module
 

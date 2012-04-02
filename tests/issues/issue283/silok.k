@@ -8,7 +8,7 @@
 module SILOK-SYNTAX is 
   
 
-  syntax Ids ::= List{#Id,","}
+  syntax Ids ::= List{Id,","}
 
   syntax Pgm ::= "gvars:" Ids "lvars:" Ids "flds:" Ids "{" Procs "}"
 
@@ -17,18 +17,18 @@ module SILOK-SYNTAX is
 
   syntax ProcId ::= "main" | "breakpoint" | "p0" | "p1" | "p2" | "p3" | "p4"
 
-  syntax #Id ::= "new"  
+  syntax Id ::= "new"  
 
-  syntax FExp ::= #Id | #Id "." #Id [prec 40 gather(e E)]
+  syntax FExp ::= Id | Id "." Id [prec 40 gather(e E)]
 
-  syntax BExp ::= #Id "=" #Id [prec 43] | #Id "/=" #Id [prec 43]
+  syntax BExp ::= Id "=" Id [prec 43] | Id "/=" Id [prec 43]
 
   syntax B ::= FExp ":=" FExp              [prec 45]
                | B ";" B                   [prec 50 gather(e E)] 
                | "[" BExp "]" B            [prec 45]
                | B + B                     [prec 48]
                | ProcId
-               | "read" "(" #Id ")"
+               | "read" "(" Id ")"
                | "skip"
 end module
 
@@ -39,16 +39,16 @@ module K-ADDONS is including #REXP
 /*
 /*@ {\it IntBot} = $\mathbb{Z}\cup\{\bot\}$
 */
-  syntax #IntBot ::= #Int | bot
+  syntax IntBot ::= Int | bot
 
-  syntax Builtins ::= #IntBot
+  syntax Builtins ::= IntBot
 
 /*@ Extending $!=_{\it Int}$ for {\it IntBot}
 */
 */
-  syntax #Bool ::= #IntBot "!=Int" #IntBot [ditto]
-  eq I:#Int !=Int bot = true  --- [structural]
-  eq bot !=Int I:#Int = true  --- [structural]
+  syntax #Bool ::= IntBot "!=Int" IntBot [ditto]
+  eq I:Int !=Int bot = true  --- [structural]
+  eq bot !=Int I:Int = true  --- [structural]
   eq bot !=Int bot = false   --- [structural]
 
 //@ Intersection of two sets
@@ -59,7 +59,7 @@ module K-ADDONS is including #REXP
   eq Set1 nSet Set2 = .Set [owise]
 
 //@ Cardinal of a set
-  syntax #Int ::= "|" Set "|"
+  syntax Int ::= "|" Set "|"
   eq | . | = 0 
   eq | SetItem:SetItem Set:Set | = 1 +Int | Set |
 
@@ -117,7 +117,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
                | "lvars" | "gvars" | "flds" 
                 
 //@ The computational atoms are to be included in {\it KResult}
-  syntax KResult ::= #IntBot | #Id 
+  syntax KResult ::= IntBot | Id 
 
 //@ Wrappers for various sorts used as elements of {\it K}
   syntax K ::= "klist" "(" List{K} ")" 
@@ -127,7 +127,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 */
   syntax List{K} ::= "id2listk" "(" Ids ")"
 
-  rule id2listk(_`,_(Id:#Id,LI:Ids)) => Id ,, id2listk(LI) 
+  rule id2listk(_`,_(Id:Id,LI:Ids)) => Id ,, id2listk(LI) 
        if LI =/=Bool .List{","} [structural]
   rule id2listk(Id) => Id [structural]
   rule id2listk(.List{","}) => .List{K} [structural]
@@ -137,8 +137,8 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 //@ \subsection{General Underwires for Abstraction}
 
 //@ Formatting logical variables
-  syntax #Id ::= "v"                  *** dangerous!!!
-  syntax K ::= #Id "-" #Int
+  syntax Id ::= "v"                  *** dangerous!!!
+  syntax K ::= Id "-" Int
 
 /*@ ${\tt frz}(g) \equiv g'$ \\
     ${\tt frzs}(g_1..g_n) \equiv g'_1..g'_n$
@@ -152,8 +152,8 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 /*@ ${\tt firstNotIn}\ {\it Set}\ {\tt start}\ I = 
 {\it min}\{ n\in \mathbb{N} | n\notin {\it Set}, n\geq I\}$
 */
-  syntax #Int ::= "firstNotIn" Set "start" #Int
-  rule firstNotIn Set start I:#Int => I
+  syntax Int ::= "firstNotIn" Set "start" Int
+  rule firstNotIn Set start I:Int => I
   if notBool (SetItem(I) in Set) 
   [structural]
   rule firstNotIn Set start I => firstNotIn Set start I +Int 1
@@ -162,7 +162,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 
 /*@ {\tt firstNotIn} {\it Set} = {\it min}\{$n\in \mathbb{N} | n\notin {\it Set}$\}
 */
-  syntax #Int ::= "firstNotIn" Set 
+  syntax Int ::= "firstNotIn" Set 
   rule firstNotIn Set => firstNotIn Set start 0 [structural]
 
 
@@ -174,11 +174,11 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
      ${\tt seqListFstNotIn}(I,{\it Set}, N)$ = 
     helper for ${\tt listFirstNotIn}\ {\it Set}\ {\tt start}\ I\ {\tt count}\ N$
 */
-  syntax List{K} ::= "listFirstNotIn" Set "count" #Int
-  syntax List{K} ::= "listFirstNotIn" Set "start" #Int "count" #Int
-  syntax List{K} ::= "seqListFstNotIn" "(" #Int "," Set "," #Int ")"
+  syntax List{K} ::= "listFirstNotIn" Set "count" Int
+  syntax List{K} ::= "listFirstNotIn" Set "start" Int "count" Int
+  syntax List{K} ::= "seqListFstNotIn" "(" Int "," Set "," Int ")"
 
-  rule listFirstNotIn Set count N:#Int => listFirstNotIn Set start 0 count N 
+  rule listFirstNotIn Set count N:Int => listFirstNotIn Set start 0 count N 
   [structural]
 
   rule listFirstNotIn Set start I count 0 => .List{K}
@@ -199,15 +199,15 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 ---(OBSOLETE
 /*@ {\tt nextFree}$(K,I,{\it Set})$ = 
 */
-  syntax #IntBot ::= "nextFree" "(" K "," #Int "," Set ")" 
-  rule nextFree(IB:K, N:#Int, Set) => IB 
+  syntax IntBot ::= "nextFree" "(" K "," Int "," Set ")" 
+  rule nextFree(IB:K, N:Int, Set) => IB 
   if | Set -Set SetItem(bot) | ==Int N
   [structural]
   rule nextFree(IB, N, Set) => firstNotIn Set
   if | Set -Set SetItem(bot) | <Int N 
   [structural]
 
-  syntax #IntBot ::= "nextFreeValue" "(" K "," #Int "," Map ")"
+  syntax IntBot ::= "nextFreeValue" "(" K "," Int "," Map ")"
   rule nextFreeValue(IB, N, Map) => nextFree(IB, N, values Map) 
   [structural]
 ---)
@@ -218,8 +218,8 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
        the set of the first $N$ integers greater than $I$ not in ${\it Set}$\\
  (these are defined for type convenience and for efficiency reasons)
 */
-  syntax Set ::= "setFirstNotIn" Set "card" #Int
-  syntax Set ::= "setFirstNotIn" Set "start" #Int "card" #Int
+  syntax Set ::= "setFirstNotIn" Set "card" Int
+  syntax Set ::= "setFirstNotIn" Set "start" Int "card" Int
 
   rule setFirstNotIn Set card N => setFirstNotIn Set start 0 card N
   [structural]
@@ -456,11 +456,11 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
     ${\tt undefFrzCP}\ H\ {\tt start}\ I = H[v'_I..:=\bot..]$ 
     (helper for {\tt updateFrzCP})   
 */
-  syntax Map ::= "updateCP" Map "with" List{K} "index" #Int
-  syntax Map ::= "updateFrzCP" Map "with" List{K} "index" #Int
-  syntax Map ::= "undefFrzCP" Map "start" #Int
+  syntax Map ::= "updateCP" Map "with" List{K} "index" Int
+  syntax Map ::= "updateFrzCP" Map "with" List{K} "index" Int
+  syntax Map ::= "undefFrzCP" Map "start" Int
 
-  rule updateCP Map with K:K,,LKs index I:#Int 
+  rule updateCP Map with K:K,,LKs index I:Int 
        => 
        updateCP Map[K/(v-I)] with LKs index (I +Int 1)
   [structural]
@@ -468,7 +468,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
   [structural]
 
 *** hereon modification: need to update to bot all other freezes - DONE
-  rule updateFrzCP Map with K:K,,LKs index I:#Int 
+  rule updateFrzCP Map with K:K,,LKs index I:Int 
        => 
        updateFrzCP Map[K/frz(v-I)] with LKs index (I +Int 1)
   [structural]
@@ -661,7 +661,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 
   syntax K ::= #Rexp | #Set{Tuple} | #SatConfig | #Set{Obj}
 
-  syntax #Rexp ::= #Id
+  syntax #Rexp ::= Id
   syntax #Heap ::= "map2heap" "(" Map ")"
   syntax #Bool ::= Map "|=" #Rexp
   rule (map2heap(Map)) |= R:#Rexp => (Map |= R) [structural]
@@ -678,7 +678,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
   syntax Prop ::= #Rexp
 
   rule Map |= True => true [structural]
-  rule Map |= le(I:#Int) => size(Map) <=Int I  [structural]
+  rule Map |= le(I:Int) => size(Map) <=Int I  [structural]
 
   syntax #Tuple ::= "<" Map ";" #Set{Tuple} ";" #Set{Tuple} ">"
   macro < map2heap(Map) ; DST:#Set{Tuple} ; DST':#Set{Tuple} > = < Map ; DST ; DST' > 
@@ -701,7 +701,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 /*
   ceq  < (X |-> O') H ; (O, R, ! X) ; DST > = < (X |-> O) H ; (O, R { ! X }) ; DST > if not exception(R) and (O =/= O') .
 */
-  rule  < X |-> VX':#IntBot Map ; `(_`,_`,_`)(VX, R, ! X) ; DST >
+  rule  < X |-> VX':IntBot Map ; `(_`,_`,_`)(VX, R, ! X) ; DST >
         =>
         < (X |-> VX) Map ; `(_`,_`)(X, R { ! X }) ; DST >
         if _andBool_(notBool exception(R), (VX !=Int VX'))
@@ -727,10 +727,10 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 
 
 
-  syntax Prop ::= "le" "(" #Int ")" | `True | `False
+  syntax Prop ::= "le" "(" Int ")" | `True | `False
   syntax #Bool ::= Map `|= Prop
 
-  syntax #Int ::= size ( Map ) 
+  syntax Int ::= size ( Map ) 
 
   rule size(.) => 0 [structural]
 
@@ -843,14 +843,14 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
   
   rule [assignment] : 
     <master_>
-       <k> X:#Id := Y:#Id => check <_/k>
+       <k> X:Id := Y:Id => check <_/k>
        <heap> (H X |-> VX Y |-> VY ) => (H X |-> VY Y |-> VY )  </heap>
     <_/master>
    
 
   rule [assignment-special-case] :
     <master_>
-       <k> X:#Id:=X:#Id => . <_/k>
+       <k> X:Id:=X:Id => . <_/k>
 //       <heap_> X|->_ <_/heap>
     <_/master>
 
@@ -859,10 +859,10 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
   rule [control-conditional-equal] :
     <master_>
        <k> [X=Y]B:B => B <_/k>
-       <heap> X|->VX:#IntBot Y|->VX H </heap>
+       <heap> X|->VX:IntBot Y|->VX H </heap>
     <_/master>
 ---  rule <k> [X=Y]B:B => . <_/k>
----       <heap_> X|->VX:#IntBot Y|->VY:#IntBot <_/heap>
+---       <heap_> X|->VX:IntBot Y|->VY:IntBot <_/heap>
 ---  if VX !=Int VY
   rule  [conditional-equal-special-case] :
     <master_>
@@ -873,11 +873,11 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
   rule  [control-conditional-notEqual] :
     <master_>
        <k> [X/=Y]B:B => B <_/k>
-       <heap_> X|->VX:#IntBot Y|->VY:#IntBot <_/heap>
+       <heap_> X|->VX:IntBot Y|->VY:IntBot <_/heap>
     <_/master>
   if VX !=Int VY
 ---  rule <k> [X/=Y]B:B => . <_/k>
----       <heap_> X|->V:#IntBot Y|->V <_/heap>
+---       <heap_> X|->V:IntBot Y|->V <_/heap>
 
 /*
   rule [control-nondet-choice-1] : <master_> <k> B1+B2 => B1 <_/k> <_/master>
@@ -912,7 +912,7 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 
   rule [object-creation] :
     <master_>
-       <k> X:#Id :=new => check <_/k>
+       <k> X:Id :=new => check <_/k>
        <heap> H:Map 
               => 
               H[ONew/X][(mould (ONew|->bot) into H(F))/F]
@@ -924,18 +924,18 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 
   rule [assignment-field-rhs] :
     <master_>
-       <k> _:=_(X:#Id, _._(Y:#Id ,Fld:#Id)) => check <_/k>
-       <heap> X |-> (VX => V) Y|->VY:#IntBot 
-              Fld |-> wkbag(<hf> VY|->V:#IntBot HF:Map </hf>)
+       <k> _:=_(X:Id, _._(Y:Id ,Fld:Id)) => check <_/k>
+       <heap> X |-> (VX => V) Y|->VY:IntBot 
+              Fld |-> wkbag(<hf> VY|->V:IntBot HF:Map </hf>)
               H
        </heap> 
     <_/master>
 
   rule  [assignment-field-rhs-special-case] :
     <master_>
-       <k> _:=_(X:#Id, _._(X:#Id ,Fld:#Id)) => check <_/k>
-       <heap> X |-> (VX:#IntBot => V) 
-              Fld |-> wkbag(<hf> VX |-> V:#IntBot HF </hf>)
+       <k> _:=_(X:Id, _._(X:Id ,Fld:Id)) => check <_/k>
+       <heap> X |-> (VX:IntBot => V) 
+              Fld |-> wkbag(<hf> VX |-> V:IntBot HF </hf>)
               H
        </heap> 
     <_/master>
@@ -943,20 +943,20 @@ module SILOK is including SILOK-SYNTAX + K-ADDONS // + SILOK-PROGRAMS
 
  rule  [assignment-field-lhs] :
    <master_>
-      <k> _:=_( _._(X:#Id , Fld:#Id), Y:#Id) => check <_/k>
+      <k> _:=_( _._(X:Id , Fld:Id), Y:Id) => check <_/k>
 ---      <heap_> Fld|-> wkbag(<hf>M:Map => M[VY/VX]</hf>) 
       <heap> Fld|-> wkbag(<hf> VX |-> (V => VY) HF </hf>) 
-             X|->VX:#IntBot Y|->VY:#IntBot 
+             X|->VX:IntBot Y|->VY:IntBot 
              H
       </heap> 
    <_/master>
 
  rule  [assignment-field-lhs-special-case] :
    <master_>
-      <k> ( X:#Id . Fld:#Id := X:#Id) => check <_/k>
+      <k> ( X:Id . Fld:Id := X:Id) => check <_/k>
 ---      <heap_> Fld|-> wkbag(<hf>M:Map => M[VX/VX]</hf>) 
       <heap> Fld|-> wkbag(<hf> VX |-> (V => VX) HF </hf>) 
-             X|->VX:#IntBot 
+             X|->VX:IntBot 
              H
       </heap>
    <_/master>

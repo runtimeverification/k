@@ -1,6 +1,6 @@
 module  BUG1-SYNTAX
 
-  syntax Exp ::= #Int
+  syntax Exp ::= Int
                | Exp "+" Exp [prec(33) gather(E e) seqstrict]
 	   
   syntax Pgm ::= "program" Exp ";"
@@ -14,6 +14,6 @@ module  BUG1
 		    
  //  configuration <T> <k> $PGM:Pgm </k> <state> .Map </state> </T>
 
-  syntax KResult ::= #Int
+  syntax KResult ::= Int
   
 end module

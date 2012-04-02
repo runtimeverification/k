@@ -9,7 +9,7 @@ LANGUAGE_MODULES = SEQ AGENTS
 MAIN_FILE = agents-test
 
 # this is a space-separated list of basename maude files to run
-TESTS = test.m
+# TESTS = test.m
 
 TOOL_DIR =  $(K_BASE)/tools/
 include $(TOOL_DIR)make-helper.mk

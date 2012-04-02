@@ -5,20 +5,20 @@ require /modules/substitution
 kmod OCL-SYNTAX is including K  + #ID + #INT  + #BOOL  + SUBSTITUTION
 
 
-  syntax Var ::= #Id
-  syntax Class ::= #Id  // the actual classes depend on a given metamodel..
+  syntax Var ::= Id
+  syntax Class ::= Id  // the actual classes depend on a given metamodel..
   syntax ScalarType ::= int | bool // may need to add strings as well
   syntax ScalarTypeCol ::= col`(int`) | col`(bool`) 
   syntax ClassTypeCol ::=  col`(Class`) 
   syntax Type ::= ScalarType | Class | ScalarTypeCol | ClassTypeCol
-  syntax Attr ::= #Id
+  syntax Attr ::= Id
 
 
 
 
 
 // Expressions : Arithmetical
-  syntax AExp ::= #Int | Var 
+  syntax AExp ::= Int | Var 
                | AExp + AExp         [strict]
                | AExp * AExp         [strict]
                | AExp / AExp         [strict]
@@ -74,7 +74,7 @@ syntax Class ::= c1 | c2
 syntax Attr ::= a1 | a2 | a3
 */
 
- syntax #Id ::= x | y | z
+ syntax Id ::= x | y | z
 
 
 

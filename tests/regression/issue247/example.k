@@ -1,12 +1,12 @@
 module ISSUE-SYNTAX
-	syntax Exp  ::= #Int | Exp "+" Exp [strict] | "[" Exps "]" [strict]
+	syntax Exp  ::= Int | Exp "+" Exp [strict] | "[" Exps "]" [strict]
         syntax Exps ::= List{Exp,","} [prec(120)]
 end module
 
 module ISSUE
   imports ISSUE-SYNTAX
-  syntax KResult ::= #Int 
-  define I1:#Int + I2:#Int => I1 +Int I2
+  syntax KResult ::= Int 
+  define I1:Int + I2:Int => I1 +Int I2
 
   syntax Bool ::= test | "True" | "False"
   op check : Bag Bag -> Bool [strat(1 0) frozen(2)]

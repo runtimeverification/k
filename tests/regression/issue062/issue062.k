@@ -3,7 +3,7 @@
 kmod ISSUE062 is 
 
 	
-	syntax Exp ::= #Int
+	syntax Exp ::= Int
                | ! Exp
                | ? Exp
 

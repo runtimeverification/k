@@ -2,7 +2,7 @@
 module EXAMPLE 
 	
         
-	syntax Exp ::= #Id  | let Ids = Exps in { Stmts }
+	syntax Exp ::= Id  | let Ids = Exps in { Stmts }
 
 /*
    syntax Exp ::= let = in { }
@@ -28,7 +28,7 @@ module EXAMPLE
 
 */    
 
-        syntax Ids ::= List{#Id,","}
+        syntax Ids ::= List{Id,","}
         syntax Exps ::= List{Exp,","}
 
         syntax Stmt ::= nop ;

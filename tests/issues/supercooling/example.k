@@ -5,12 +5,12 @@ kmod ISSUE is
                   | print K [strict]
                   | test
         
-        syntax KResult ::= #Int
+        syntax KResult ::= Int
 
         configuration <k> .K </k> <out> .List </out>
 
 
-  rule <k> print I:#Int => 0 ...</k> <out>... . => ListItem(I) </out> [local]
+  rule <k> print I:Int => 0 ...</k> <out>... . => ListItem(I) </out> [local]
   rule 0 + 0 => 0
 
 
