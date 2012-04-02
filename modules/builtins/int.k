@@ -51,4 +51,7 @@ module INT-HOOKS
   sort Nat  // ::= {I:Int | I >=Int 0}
   declare isNat : Int -> Bool
   define isNat(I:Int) => I >=Int 0 
+
+  declare _dividesInt_ : Int Int -> Bool
+  define I1:Int dividesInt I2:Int => I2 %Int I1 ==Int 0
 end module 

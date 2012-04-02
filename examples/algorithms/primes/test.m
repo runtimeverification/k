@@ -1,5 +1,5 @@
 load primes-compiled
 
-rew run(5) .
-rew run(15) .
-rew run(100) .
+rew run(# 5(.List{K})) .
+rew run(# 15(.List{K})) .
+rew run(# 100(.List{K})) .
