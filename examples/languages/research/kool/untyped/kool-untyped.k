@@ -13,56 +13,56 @@ the one for function declarations (because we want to call them methods now)
 and the one for function application (because application is not strict in the
 first argument anymore---needs to initiate dynamic method dispatch). */
 
-  syntax #Id ::= "main"
-  syntax Ids ::= List{#Id,","} [:prec(70) strict:]
+  syntax Id ::= "main"
+  syntax Ids ::= List{Id,","} [prec(70) strict]
 
   syntax Decl ::= "var" Exps ";"
 
-  syntax Exp ::= #Int | #Bool | #String | #Id
-               | "++" Exp              [:prec(0):]
-               | Exp "+" Exp           [:strict prec(33) gather(E e):]
-               | Exp "-" Exp           [:strict prec(33) gather(E e):]
-               | Exp "*" Exp           [:strict prec(31) gather(E e):]
-               | Exp "/" Exp           [:strict prec(31) gather(E e):]
-               | Exp "%" Exp           [:strict prec(31) gather(E e):]
-               | "-" Exp               [:strict:]
-               | Exp "<" Exp           [:strict prec(37):]
-               | Exp "<=" Exp          [:strict prec(37):]
-               | Exp ">" Exp           [:strict prec(37):]
-               | Exp ">=" Exp          [:strict prec(37):]
-               | Exp "==" Exp          [:strict prec(37):]
-               | Exp "!=" Exp          [:strict prec(37):]
-               | Exp "and" Exp         [:strict prec(55) gather(E e):]
-               | Exp "or" Exp          [:strict prec(59) gather(E e):]
-               | "not" Exp             [:strict prec(53):]
-               | Exp "[" Exps "]"      [:strict prec(1):]
-               | "sizeOf" "(" Exp ")"  [:strict:]
+  syntax Exp ::= Int | Bool | String | Id
+               | "++" Exp              [prec(0)]
+               | Exp "+" Exp           [strict prec(33) gather(E e)]
+               | Exp "-" Exp           [strict prec(33) gather(E e)]
+               | Exp "*" Exp           [strict prec(31) gather(E e)]
+               | Exp "/" Exp           [strict prec(31) gather(E e)]
+               | Exp "%" Exp           [strict prec(31) gather(E e)]
+               | "-" Exp               [strict]
+               | Exp "<" Exp           [strict prec(37)]
+               | Exp "<=" Exp          [strict prec(37)]
+               | Exp ">" Exp           [strict prec(37)]
+               | Exp ">=" Exp          [strict prec(37)]
+               | Exp "==" Exp          [strict prec(37)]
+               | Exp "!=" Exp          [strict prec(37)]
+               | Exp "and" Exp         [strict prec(55) gather(E e)]
+               | Exp "or" Exp          [strict prec(59) gather(E e)]
+               | "not" Exp             [strict prec(53)]
+               | Exp "[" Exps "]"      [strict prec(1)]
+               | "sizeOf" "(" Exp ")"  [strict]
                | "read" "(" ")"
-               | Exp "=" Exp           [:strict(2) prec(40) gather (e E):]
+               | Exp "=" Exp           [strict(2) prec(40) gather (e E)]
   syntax Exps ::= List{Exp,","}
 
   syntax Stmt ::= "{" "}"
                 | "{" Stmts "}"
-                | Exp ";"                               [:strict prec(45):]
-                | "if" Exp "then" Stmt "else" Stmt      [:strict(1) prec(90):]
-                | "if" Exp "then" Stmt                  [:prec(89):]
-                | "while" Exp "do" Stmt                 [:prec(90):]
-                | "for" #Id "=" Exp "to" Exp "do" Stmt  [:prec(90):]
-                | "return" Exp ";"                      [:strict:]
+                | Exp ";"                               [strict prec(45)]
+                | "if" Exp "then" Stmt "else" Stmt      [strict(1) prec(90)]
+                | "if" Exp "then" Stmt                  [prec(89)]
+                | "while" Exp "do" Stmt                 [prec(90)]
+                | "for" Id "=" Exp "to" Exp "do" Stmt  [prec(90)]
+                | "return" Exp ";"                      [strict]
                 | "return" ";"
-                | "print" "(" Exps ")" ";"              [:strict:]
-                | "try" Stmt "catch" "(" #Id ")" Stmt   [:prec(90):]
-                | "throw" Exp ";"                       [:strict:]
-                | "spawn" Stmt                          [:prec(90):]
-                | "acquire" Exp ";"                     [:strict:]
-                | "release" Exp ";"                     [:strict:]
-                | "rendezvous" Exp ";"                  [:strict:]
+                | "print" "(" Exps ")" ";"              [strict]
+                | "try" Stmt "catch" "(" Id ")" Stmt   [prec(90)]
+                | "throw" Exp ";"                       [strict]
+                | "spawn" Stmt                          [prec(90)]
+                | "acquire" Exp ";"                     [strict]
+                | "release" Exp ";"                     [strict]
+                | "rendezvous" Exp ";"                  [strict]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts                      [:prec(100) gather(e E):]
+                 | Stmts Stmts                      [prec(100) gather(e E)]
 
   macro if E:Exp then S:Stmt = if E then S else {}
-  macro (for X:#Id = E1 to E2 do S) = {var X=E1; while X <= E2 do {S X=X+1;}}
+  macro (for X:Id = E1 to E2 do S) = {var X=E1; while X <= E2 do {S X=X+1;}}
   macro var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
   macro var X = E; = var X; X = E;
 
@@ -76,22 +76,22 @@ together with a macro making classes which extend nothing to extend
 into \texttt{strict(2)}.  Finally, we add syntax and corresponding strictness
 for the KOOL object-oriented constructs. */
 
-  syntax #Id ::= "object"
+  syntax Id ::= "object"
 
-  syntax Decl ::= "method" #Id "(" Ids ")" Stmt
+  syntax Decl ::= "method" Id "(" Ids ")" Stmt
 
-  syntax Decl ::= "class" #Id "{" Stmts "}"
-                | "class" #Id "extends" #Id "{" Stmts "}"
-  macro class Class:#Id {Ss:Stmts} = class Class extends object {Ss}
+  syntax Decl ::= "class" Id "{" Stmts "}"
+                | "class" Id "extends" Id "{" Stmts "}"
+  macro class Class:Id {Ss:Stmts} = class Class extends object {Ss}
 
-  syntax Exp ::=  Exp "(" Exps ")"       [:strict(2) prec(2):]
+  syntax Exp ::=  Exp "(" Exps ")"       [strict(2) prec(2)]
 
-  syntax Exp ::= "new" #Id "(" Exps ")" [:strict(2) prec(1):]
+  syntax Exp ::= "new" Id "(" Exps ")" [strict(2) prec(1)]
                | "this"
                | "super"
-               | Exp "." #Id            [:prec(1):]
-               | Exp "instanceOf" #Id   [:prec(0) strict(1):]
-               | "cast" Exp "to" #Id    [:prec(0) strict(1):]
+               | Exp "." Id            [prec(1)]
+               | Exp "instanceOf" Id   [prec(0) strict(1)]
+               | "cast" Exp "to" Id    [prec(0) strict(1)]
 end module
 
 
@@ -182,30 +182,30 @@ the object environment of the parent thread.  Note that the
 of Java.  In fact, the latter can be implemented in terms of
 \texttt{spawn}---see the program \texttt{threads.kool} for a sketch.  */
 
-  syntax Val ::= #Int | #Bool | #String
-               | "arrayRef" "(" #Nat "," #Nat ")"
+  syntax Val ::= Int | Bool | String
+               | "arrayRef" "(" Nat "," Nat ")"
   syntax Vals ::= List{Val,","}
 
-  syntax Exp ::= Val
+  syntax Exp ::= Val | Nat
 
   syntax KResult ::= Val
 
-  syntax K ::= "undefined"  [:latex("\bot"):]
+  syntax K ::= "undefined"  [latex("\bot")]
 
-  rule <k> var X:#Id; => . ...</k>
-       <env> Env:Map => Env[L:#Nat/X] </env>
+  rule <k> var X:Id; => . ...</k>
+       <env> Env:Map => Env[L:Nat/X] </env>
        <store>... . => L|->undefined ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
-  rule <k> var X[N:#Nat]; => . ...</k>
+  rule <k> var X[N:Nat]; => . ...</k>
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> arrayRef(L +Nat 1, N)
-                       L +Nat 1 .. L +Nat N |-> undefined ...</store>
-       <nextLoc> L => L +Nat 1 +Nat N </nextLoc>
+       <store>... . => L |-> arrayRef(L +Int 1, N)
+                       L +Int 1 .. L +Int N |-> undefined ...</store>
+       <nextLoc> L => L +Int 1 +Int N </nextLoc>
 
   context var X[HOLE],.Exps;
 
-  syntax #Id ::= "$1" | "$2"
+  syntax Id ::= "$1" | "$2"
   rule var X[N1,N2,Vs:Vals]; =>
        var X[N1];
        {
@@ -215,39 +215,39 @@ of Java.  In fact, the latter can be implemented in terms of
            (var X[N2,Vs];)            // stupid parser
            $1[$2] = X;
          }
-       }  [:structural:]
+       }  [structural]
 
   rule <k> X => V:Val ...</k>
        <env>...X|->L...</env>
-       <store>...L|->V...</store> [:transition:]
+       <store>...L|->V...</store> [transition]
 
   context ++(HOLE => lvalue(HOLE))
-  rule <k> ++loc(L) => I:#Int +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store> [:transition:]
+  rule <k> ++loc(L) => I:Int +Int 1 ...</k>
+       <store>... L |-> (I => I +Int 1) ...</store> [transition]
 
-  rule I1:#Int + I2:#Int => I1 +Int I2
-  rule Str1:#String + Str2:#String => Str1 +String Str2
+  rule I1:Int + I2:Int => I1 +Int I2
+  rule Str1:String + Str2:String => Str1 +String Str2
   rule _-_(I1,I2) => _-Int_(I1,I2)
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=Bool 0
-  rule - I => -Int I
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Int 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=Int 0
+  rule - I => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2
   rule I1 >= I2 => I1 >=Int I2
-  rule V1:Val == V2:Val => V1 ==Bool V2
-  rule V1 != V2 => V1 =/=Bool V2
-  rule B1:#Bool and B2:#Bool => B1 andBool B2
+  rule V1:Val == V2:Val => V1 ==K V2
+  rule V1 != V2 => V1 =/=K V2
+  rule B1:Bool and B2:Bool => B1 andBool B2
   rule B1 or B2 => B1 orBool B2
-  rule not(B:#Bool) => notBool(B)
+  rule not(B:Bool) => notBool(B)
 
-  rule V[N1,N2,Vs] => V[N1][N2,Vs]           [:structural anywhere:]
-  rule arrayRef(L,_:#Nat)[N] => lookup(L +Int N)  [:structural anywhere:]
-  syntax K ::= "lookup" "(" #Nat ")"
-  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store>  [:transition:]
+  rule V[N1,N2,Vs] => V[N1][N2,Vs]           [structural anywhere]
+  rule arrayRef(L,_:Nat)[N] => lookup(L +Int N)  [structural anywhere]
+  syntax K ::= "lookup" "(" Nat ")"
+  rule <k> lookup(L) => V ...</k> <store>...L|->V...</store>  [transition]
 
-  rule sizeOf(arrayRef(_:#Nat,N)) => N
+  rule sizeOf(arrayRef(_:Nat,N)) => N
 
 /*@ The semantics of return, as well as the definition of
 \texttt{bindto}, stay unchanged */
@@ -255,29 +255,29 @@ of Java.  In fact, the latter can be implemented in terms of
        <control> <fstack> (Env,K,C) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
   syntax Val ::= "nothing"
-  rule return; => return nothing;   [:structural:]
+  rule return; => return nothing;   [structural]
 
   syntax K ::= "bindto" "(" Ids "," Vals ")"
   rule <k> bindto((X,Xs => Xs),(V,Vs:Vals => Vs)) ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
-  rule <k> bindto(.Ids,.Exps) => . ...</k>  [:structural:]
+       <nextLoc> L => L +Int 1 </nextLoc>
+  rule <k> bindto(.Ids,.Exps) => . ...</k>  [structural]
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in>    [:transition:]
+  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in>    [transition]
 
   context (HOLE => lvalue(HOLE)) = _
-  rule <k> loc(L)=V => V...</k> <store>...L|->(_=>V)...</store>  [:transition:]
+  rule <k> loc(L)=V => V...</k> <store>...L|->(_=>V)...</store>  [transition]
 
-  rule {} => . [:structural:]
-  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env>   [:structural:]
+  rule {} => . [structural]
+  rule <k> {Ss:Stmts} => Ss~>env(Env) ...</k> <env> Env </env>   [structural]
 
   syntax K ::= "env" "(" Map ")"
-  rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [:structural:]
+  rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [structural]
 
-  rule (env(_) => .) ~> env(_)  [:structural:]
+  rule (env(_) => .) ~> env(_)  [structural]
 
-  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [:structural:]
+  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [structural]
 
   rule V; => .
 
@@ -285,13 +285,13 @@ of Java.  In fact, the latter can be implemented in terms of
   rule if false then _ else S => S
 
   rule <k> while E:Exp do S
-    => if E then {S while E do S} else {} ...</k> [:structural:]
+    => if E then {S while E do S} else {} ...</k> [structural]
 
   rule <k> print(V,Vs => Vs);...</k> <out>... . => ListItem(V) </out>
-    [:transition:]
-  rule print(.Vals); => .   [:structural:]
+    [transition]
+  rule print(.Vals); => .   [structural]
 
-  syntax ListItem ::= "(" #Id "," Stmt "," K "," Map "," Bag ")"
+  syntax ListItem ::= "(" Id "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
   rule <k> (try S1:Stmt catch(X) S2:Stmt => S1 ~> popx) ~> K </k>
        <control> <xstack> . => (X,S2,K,Env,C) ...</xstack> C:Bag </control>
@@ -309,27 +309,27 @@ constructs keep their semantics from SIMPLE. */
        <busy> Busy:Set => Busy -Set keys(H) </busy>
   rule <k> acquire V; => . ...</k> <holds>... . => V|->0 ...</holds>
        <busy> Busy (. => SetItem(V)) </busy>
-    when notBool(V in Busy) [:transition:]
-  rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Nat 1)...</holds>
+    when notBool(V in Busy) [transition]
+  rule <k> acquire V; => . ...</k> <holds>...V|->(N => N +Int 1)...</holds>
   rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
-    when N >Nat 0
+    when N >Int 0
   // used prefix notation for -Int because of parsing problems
   rule <k> release V; => . ...</k> <holds>... V|->0 => . ...</holds>
        <busy>... SetItem(V)=>. ...</busy>
   rule <k> rendezvous V; => . ...</k>
-       <k> rendezvous V; => . ...</k>  [:transition:]
+       <k> rendezvous V; => . ...</k>  [transition]
 
   syntax Exp ::= "lvalue" "(" K ")"
-  syntax Val ::= "loc" "(" #Nat ")"
-  rule <k> lvalue(X) => loc(L:#Nat) ...</k>
-       <env>... X|->L ...</env>  [:structural:]
+  syntax Val ::= "loc" "(" Nat ")"
+  rule <k> lvalue(X) => loc(L:Nat) ...</k>
+       <env>... X|->L ...</env>  [structural]
   context lvalue(_[HOLE])
   context lvalue(HOLE[_])
-  rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [:structural:]
+  rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [structural]
 
-  syntax List{K} ::= #Nat ".." #Nat
-  rule N1:#Nat..N2:#Nat => .List{K}              when N1  >Nat N2 [:structural anywhere:]
-  rule N1:#Nat..N2:#Nat => N1 ,, (N1 +Nat 1)..N2 when N1 <=Nat N2 [:structural anywhere:]
+  syntax List{K} ::= Nat ".." Nat
+  rule N1:Nat..N2:Nat => .List{K}              when N1  >Int N2 [structural anywhere]
+  rule N1:Nat..N2:Nat => N1 ,, (N1 +Int 1)..N2 when N1 <=Int N2 [structural anywhere]
 
 
 /*@ \subsection{Changes to SIMPLE Semantics}
@@ -373,19 +373,19 @@ the object stored at the location specified as the second argument of
 \texttt{methodClosure}). */
 
   syntax Val ::= "objectClosure" "(" Bag ")"
-               | "methodClosure" "(" #Id "," #Nat "," Ids "," Stmt ")"
+               | "methodClosure" "(" Id "," Nat "," Ids "," Stmt ")"
 
 /*@ \subsection{Class declaration}
 Initially, the classes forming the program are moved into their
 corresponding cells: */
 
-  rule <k> class Class1:#Id extends Class2:#Id { Ss:Stmts } => . <_/k>
+  rule <k> class Class1:Id extends Class2:Id { Ss:Stmts } => . <_/k>
        <classes>... (. => <class>
                             <className> Class1 </className>
                             <extends> Class2 </extends>
                             <declarations> Ss </declarations>
                         </class>)
-       ...</classes>  [:structural:]
+       ...</classes>  [structural]
 
 /*@ \subsection{Program initialization}
 Once all the classes are processed as above, the computation item
@@ -399,7 +399,7 @@ cell below is just a sanity check, to make sure that the user has not
 declared anything but classes at the top level of the program. */
 
   syntax K ::= "execute"
-  rule <k> execute => new main(); </k> <env> . </env>  [:structural:]
+  rule <k> execute => new main(); </k> <env> . </env>  [structural]
 
 /*@ The semantics of \texttt{new} (defined shortly) requires the
 execution of all the class' declarations (and also of its superclasses').
@@ -423,12 +423,12 @@ objects.  This gives the KOOL programmer a lot of power; one should
 use this power wisely, though, because programs can become easily
 hard to understand and reason about if one overuses these features. */
 
-  rule <k> method F:#Id(Xs:Ids) S:Stmt => . ...</k>
-       <crntClass> Class:#Id </crntClass>
-       <location> OL:#Nat </location>
+  rule <k> method F:Id(Xs:Ids) S:Stmt => . ...</k>
+       <crntClass> Class:Id </crntClass>
+       <location> OL:Nat </location>
        <env> Env => Env[L/F] </env>
        <store>... . => L|->methodClosure(Class,OL,Xs,S) ...</store>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ \subsection{New}
 The semantics of \texttt{new} consists of two actions: memory
@@ -460,7 +460,7 @@ refer to it (see rule above). */
          </crntObj>
          <fstack> . => (Env, K, C <crntObj> Obj </crntObj>) ...</fstack>
        </control>
-       <nextLoc> L => L +Nat 1 </nextLoc>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ The creation of a new object (the memory allocation part only) is
 a recursive process, requiring to first create an object for the
@@ -475,17 +475,17 @@ members (both fields and methods) of that class. */
         => create(Class1) ~> setCrntClass(Class) ~> Ss ~> addEnvLayer ...</k>
        <className> Class </className>
        <extends> Class1 </extends>
-       <declarations> Ss </declarations>  [:structural:]
-  rule <k> create(object) => . ...</k>    [:structural:]
+       <declarations> Ss </declarations>  [structural]
+  rule <k> create(object) => . ...</k>    [structural]
 
 /*@ The next operation sets the current class of the current object.
 This is necessary to be done at each layer, because the current class
 of the object is enclosed as part of the method closures
 (see the semantics of method declarations above). */
 
-  syntax K ::= "setCrntClass" "(" #Id ")" 
+  syntax K ::= "setCrntClass" "(" Id ")" 
   rule <k> setCrntClass(Class) => . ...</k>
-       <crntClass> _ => Class </crntClass>  [:structural:]
+       <crntClass> _ => Class </crntClass>  [structural]
 
 /*@ The next operation adds a new tagged environment layer to the
 current object and gets ready for the next layer by clearing the
@@ -497,7 +497,7 @@ empty). */
        <env> Env => . </env>
        <crntClass> Class </crntClass>
        <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack> 
-    [:structural:]
+    [structural]
 
 /*@ The following operation stores the created object at the location
 reserved by \texttt{new}.  Note that the location reserved by
@@ -543,18 +543,18 @@ invocations see the entire object, as needed for dynamic method dispatch. */
 
 // To avoid parsing ambiguity, use _._(this,X) instead of this.X
   rule <k> X => _._(this,X) ...</k> <env> Env </env>
-    when notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [structural]
 
-  context ('_._(HOLE,,_)) when (HOLE =/=Bool super)
+  context ('_._(HOLE,,_)) when (HOLE =/=K super)
   rule <k> _._(objectClosure(<crntClass> Class </crntClass>
                    <envStack>...ListItem(Class :: EnvC) EStack </envStack>),X)
         => lookupMember(<envStack>ListItem(Class :: EnvC) EStack</envStack>, X)
-       ...</k>  [:structural:]
+       ...</k>  [structural]
 
   rule <k> _._(super,X) => lookupMember(<envStack>EStack</envStack>, X)...</k>
-       <crntClass> Class:#Id </crntClass>
+       <crntClass> Class:Id </crntClass>
        <envStack>... ListItem(Class :: EnvC) EStack </envStack>
-    [:structural:]
+    [structural]
 
 /*@\subsection{Method invocation}
 Unlike in SIMPLE, in KOOL application was declared strict only in its
@@ -583,7 +583,7 @@ method call or the array access.  */
 
   rule <k> _`(_`)((X => _._(this,X)),_) ...</k>
        <env> Env </env>
-    when notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [structural]
 
 --- We would like to write the rule above as
 ---   rule <k> (X => _._(this,X))(_) <_/k>
@@ -592,21 +592,21 @@ method call or the array access.  */
 --- but, unfortunately, our current Maude-based parser does not allow it
 --- Same applies to other rules
 
-  context '_`(_`)('_._(HOLE,,_),,_) when HOLE =/=Bool super 
+  context '_`(_`)('_._(HOLE,,_),,_) when HOLE =/=K super 
 
   rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
-    [:structural:]
+    [structural]
 
   rule <k> '_`(_`)(('_._(super,,X) 
         => lookupMember(<envStack> EStack </envStack>, X)),,_) ...</k>
-       <crntClass> Class:#Id </crntClass>
+       <crntClass> Class:Id </crntClass>
        <envStack>... ListItem(Class :: _) EStack </envStack>
-    [:structural:]
+    [structural]
 
   context '_`(_`)(HOLE,,_)
-       when getKLabel HOLE ==Bool '_`(_`) orBool
-          getKLabel HOLE ==Bool '_`[_`]
+       when getKLabel HOLE ==KLabel '_`(_`) orBool
+          getKLabel HOLE ==KLabel '_`[_`]
 
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
 task as a replacement for the method.  When that happens, we just
@@ -621,14 +621,14 @@ borrowed (see above).  */
        <store>... L |-> V ...</store>
 
   syntax ListItem ::=  "(" Map "," K "," Bag ")"
-  rule <k> _`(_`)(methodClosure(Class,OL:#Nat,Xs:Ids,S:Stmt), Vs:Vals) ~> K:K
+  rule <k> _`(_`)(methodClosure(Class,OL:Nat,Xs:Ids,S:Stmt), Vs:Vals) ~> K:K
         => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> C:Bag
           <fstack> . => (Env,K,C <crntObj> Obj' </crntObj>) ...</fstack>
           <crntObj> Obj':Bag => <crntClass>Class</crntClass> Obj </crntObj>
         </control>
        <env> Env => . </env>
-       <store>... OL |-> objectClosure(<crntClass>_:#Id</crntClass>Obj:Bag) 
+       <store>... OL |-> objectClosure(<crntClass>_:Id</crntClass>Obj:Bag) 
        ...</store>
 
 
@@ -641,7 +641,7 @@ otherwise it returns \texttt{false}; it never gets stuck.  */
         instanceOf Class => true
   rule objectClosure(_ <envStack> ListItem(Class1::_)
                       => . ...</envStack>) instanceOf Class2 
-    when Class1 =/=Bool Class2  [:structural:]
+    when Class1 =/=K Class2  [structural]
   rule objectClosure(_ <envStack> .List </envStack>) instanceOf Class
     => false
  
@@ -668,33 +668,33 @@ evaluated, and finally the second rule initiates the lookup for the
 member's location based on the current class of the object. */
 
   rule <k> lvalue(X => _._(this,X)) <_/k> <env> Env </env>
-    when notBool(X in keys(Env))  [:structural:]
+    when notBool(X in keys(Env))  [structural]
 
-  context lvalue(_._(HOLE,_:#Id))
+  context lvalue(_._(HOLE,_:Id))
   rule <k> lvalue(_._(objectClosure(<crntClass> Class </crntClass> 
                           <envStack>...
                             ListItem(Class :: EnvC) EStack
                           </envStack>), X)
         => lookupMember(<envStack>ListItem(Class :: EnvC:BagItem) EStack:List
                         </envStack>, X)) 
-       ...</k>  [:structural:]
+       ...</k>  [structural]
   
 /*@ \subsection{Lookup member}
 Searches for the given member in the given environment stack, starting
 with the most concrete class and going up in the hierarchy. */
 
-  syntax K ::= #Id "::" Bag
+  syntax K ::= Id "::" Bag
   // Id is the class name, BagItem is its corresponding environment
 
-  declare lookupMember : BagItem #Id -> K
+  declare lookupMember : BagItem Id -> K
   // BagItem is the envStack cell, Id is the member name
 
 // First look for the member in the top environment; if found then done.
-  define lookupMember(<envStack> ListItem(_:#Id :: <env>...X|->L...</env>)
-                    ...</envStack>,X) => lookup(L)  [:structural:]
+  define lookupMember(<envStack> ListItem(_:Id :: <env>...X|->L...</env>)
+                    ...</envStack>,X) => lookup(L)  [structural]
 // Otherwise, recurse through the object environment stack
-  define lookupMember(<envStack> ListItem(_:#Id :: <env> Env </env>)
+  define lookupMember(<envStack> ListItem(_:Id :: <env> Env </env>)
                             => . ...</envStack>, X)
-    when notBool(X in keys(Env))                      [:structural:]
+    when notBool(X in keys(Env))                      [structural]
 
 end module
