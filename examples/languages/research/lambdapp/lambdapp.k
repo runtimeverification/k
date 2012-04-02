@@ -3,43 +3,43 @@ require /examples/languages/classic/lambda/untyped/lambda
 module LAMBDAPP-SYNTAX
   imports LAMBDA-SYNTAX
   
-  syntax Exp ::= "mu" #Id "." Exp       [:binder prec 100 latex "\mu{#1}.{#2}":] 
-               | "let" #Id "=" Exp "in" Exp  
-               | "letrec" #Id "=" Exp "in" Exp  
+  syntax Exp ::= "mu" Id "." Exp       [binder prec 100 latex "\mu{#1}.{#2}"] 
+               | "let" Id "=" Exp "in" Exp  
+               | "letrec" Id "=" Exp "in" Exp  
                | "if" Exp "then" Exp "else" Exp
-  syntax Val ::= #Int | #Bool
+  syntax Val ::= Int | Bool
 
-  syntax #Id ::= "+" | "*" | "/" | "<=" | "ite" | "callcc"
+  syntax Id ::= "+" | "*" | "/" | "<=" | "ite" | "callcc"
 
 //@ Desugaring conditional into ite with thunks. Assuming that ``\$thunk'' cannot be used in programs
-  syntax #Id ::= "$thunk"
+  syntax Id ::= "$thunk"
   macro if E:Exp then E1:Exp else E2:Exp 
     = (ite E (lambda $thunk . E1) (lambda $thunk . E2)) $thunk
 
 //@ Desugaring let constructs into more basic ones
   macro (letrec X = E in E') = (let X = (mu X.E) in E')
-  macro (let X:#Id = E:Exp in E':Exp) = (lambda X.E') E
+  macro (let X:Id = E:Exp in E':Exp) = (lambda X.E') E
 
 //@ I/O additions
   syntax Exp ::= "read"
-  syntax #Id ::= "print"
+  syntax Id ::= "print"
 end module
 
 module LAMBDAPP
   imports LAMBDAPP-SYNTAX + LAMBDA
 
 //@Recursion
-  rule (mu X:#Id.E:Exp) => E[(mu X.E) / X]
+  rule (mu X:Id.E:Exp) => E[(mu X.E) / X]
 
 //@Arithmetic
-  rule + I1:#Int I2:#Int => I1 +Int I2
-  rule * I1:#Int I2:#Int => I1 *Int I2
-  rule / I1:#Int I2:#Int => I1 /Int I2
-  rule <= I1:#Int I2:#Int => I1 <=Int I2
+  rule + I1:Int I2:Int => I1 +Int I2
+  rule * I1:Int I2:Int => I1 *Int I2
+  rule / I1:Int I2:Int => I1 /Int I2
+  rule <= I1:Int I2:Int => I1 <=Int I2
 
 //@Conditional
-  syntax #Id ::= "t" | "e" 
-  // this does not prevent the user from using t and e as #Id in programs
+  syntax Id ::= "t" | "e" 
+  // this does not prevent the user from using t and e as Id in programs
   rule ite true => lambda t . lambda e . t 
   rule ite false => lambda t. lambda e . e
 
@@ -56,11 +56,11 @@ module LAMBDAPP
                 <out stream="stdout"> .List </out>
 
   rule <k> read => I ...</k> 
-       <in> ListItem(I:#Int) => . ...</in>
+       <in> ListItem(I:Int) => . ...</in>
 
 
-  syntax #Id ::= "dummy"
-  // Again, this does not prevent the user from using dummy as #Id in programs
+  syntax Id ::= "dummy"
+  // Again, this does not prevent the user from using dummy as Id in programs
   rule [print] : <k> print I => (lambda dummy.dummy) ...</k>
        <out>... (. => ListItem(I)) </out>
 
@@ -72,6 +72,6 @@ module LAMBDAPP
  its branches might lead to non-termination in the presence of $\mu$.
  We also exclude print as it is side-effecting.
 */
-  define 'isVal(X:#Id V:Val) => true 
-   when X =/=Bool print andBool X =/=Bool ite
+  define 'isVal(X:Id V:Val) => true 
+   when X =/=K print andBool X =/=K ite
 end module

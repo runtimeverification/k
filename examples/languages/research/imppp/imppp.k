@@ -117,22 +117,22 @@ increment rules below).  These two attributes together tell the \K
 tool to exhaustively explore the space of interleavings between the
 supercool and the superheat points in the computation. */
 
-  syntax AExp ::= #Id | #Int
+  syntax AExp ::= Id | Int
                 | AExp "+" AExp    [prec(33) gather (E e) superheat strict]
                 | AExp "/" AExp    [prec(31) gather (E e) superheat strict]
-  syntax BExp ::= #Bool
+  syntax BExp ::= Bool
                 | AExp "<=" AExp   [prec(37) seqstrict latex("{#1}\leq{#2}")]
                 | "not" BExp       [prec(53) strict]
                 | BExp "and" BExp  [prec(55) strict(1)]
   syntax Stmt ::= "skip"
-                | #Id ":=" AExp    [prec(80) strict(2)]
+                | Id ":=" AExp    [prec(80) strict(2)]
                 | Stmt ";" Stmt    [prec(100) gather(e E)]
                 | "if" BExp
                   "then" Stmt
                   "else" Stmt      [prec(85) strict(1)]
                 | "while" BExp
                   "do" Stmt        [prec(85)]
-  syntax Ids ::= List{#Id,","}     [strict]
+  syntax Ids ::= List{Id,","}     [strict]
 
 /*@ \subsection{The new IMP++ constructs}
 The syntax of the new IMP++ constructs is self-explanatory.
@@ -151,8 +151,8 @@ and then define the syntax of blocks as \texttt{\{$\it Stmts$\}}.
 However, several other changes would be needed in order to do that, so
 we prefer to keep two different syntactic constructs for blocks. */
 
-  syntax AExp ::= #String
-                | "++" #Id               [prec(0)]
+  syntax AExp ::= String
+                | "++" Id               [prec(0)]
                 | "read" "(" ")"
   syntax AExps ::= List{AExp,","}
 
@@ -330,23 +330,23 @@ semantics of the old IMP constructs below.
 Below we list the semantics of the old IMP constructs, referring the
 reader to the \K semantics of IMP for their meaning. */
 
-  syntax KResult ::= #Int | #Bool
+  syntax KResult ::= Int | Bool
 
 // Variable lookup
 
-  rule <k> X:#Id => I ...</k>
-       <env>... X |-> N:#Nat ...</env>
-       <store>... N |-> I:#Int ...</store>  [supercool transition]
+  rule <k> X:Id => I ...</k>
+       <env>... X |-> N:Nat ...</env>
+       <store>... N |-> I:Int ...</store>  [supercool transition]
 
 // Arithmetic constructs
 
-  rule I1:#Int + I2:#Int => I1 +Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=Bool 0
+  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1 / I2 => I1 /Int I2 when I2 =/=Int 0
 
 // Boolean constructs
 
   rule I1 <= I2 => I1 <=Int I2
-  rule not T:#Bool => notBool T
+  rule not T:Bool => notBool T
   rule true and B:BExp => B
   rule false and B => false
 
@@ -483,9 +483,9 @@ Second, we give the semantics of IMP++ string concatenation (which
 uses the already existing addition symbol \texttt{+} from IMP) by
 reduction to the builtin string concatenation operation. */
 
-//  syntax Val ::= #String
-  syntax KResult ::= #String
-  rule Str1:#String + Str2:#String => Str1 +String Str2
+//  syntax Val ::= String
+  syntax KResult ::= String
+  rule Str1:String + Str2:String => Str1 +String Str2
 
 /*@ \subsubsection{Variable increment}
 Like variable lookup, this is also a supercool transition: we want it
@@ -525,7 +525,7 @@ transition, because different threads may compete on the output buffer
 and we want to capture all behaviors.  The second rule is structural
 because we do not want it to count as a computational step. */
 
-  syntax Printable ::= #Int | #String
+  syntax Printable ::= Int | String
   rule <k> print(P:Printable,AEs:AExps => AEs) ...</k>
        <out>... . => ListItem(P) </out>  [transition]
   rule print(.AExps) => .  [structural]
