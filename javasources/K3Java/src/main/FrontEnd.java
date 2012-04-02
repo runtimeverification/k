@@ -131,9 +131,13 @@ public class FrontEnd {
 			File f = mainFile.getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");
-
+			
 			String load = "load \"" + Kil2Maude.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
-
+			
+			// load libraries if any
+			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + Kil2Maude.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n"; 
+			load += maudeLib;
+			
 			String compile = load
 					+ maudified
 					+ " load \""

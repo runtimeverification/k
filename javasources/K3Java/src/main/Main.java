@@ -21,6 +21,12 @@ public class Main {
 			GlobalSettings.verbose = true;
 		}
 
+		// set lib if any
+		if (cmd.hasOption("lib"))
+		{
+			GlobalSettings.lib = cmd.getOptionValue("lib");
+		}
+		
 		// options: help
 		if (cmd.hasOption("help")) {
 			k.utils.Error.helpExit(op.getHelp(), op.getOptions());

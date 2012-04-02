@@ -58,12 +58,18 @@ public class OptionsParser {
 		// Option prelude = new Option("prelude", true, "Load a different prelude file.");
 		// preludeGroup.addOption(prelude);
 
+		 // lib
+		 OptionGroup libGroup = new OptionGroup();
+		 Option lib = new Option("lib", true, "Specify extra-libraries for compile/runtime.");
+		 libGroup.addOption(lib);
+
 		// add options
 		options.addOptionGroup(verb);
 		options.addOptionGroup(main);
 		options.addOptionGroup(langGroup);
 		options.addOptionGroup(tex);
 		options.addOptionGroup(tex2);
+		options.addOptionGroup(libGroup);
 	}
 
 	public CommandLine parse(String[] cmd) {
