@@ -39,4 +39,5 @@ public class Tag {
 	public final static String label = "label";
 	public final static String listSeparator = "separator";
 	public final static String interfaceTag = "interface";
+	public final static String define = "define";
 }

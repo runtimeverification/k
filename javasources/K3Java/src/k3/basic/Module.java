@@ -74,6 +74,8 @@ public class Module extends Term implements java.io.Serializable, Cloneable {
 				sentences.add(new Rule(children.item(i), filename));
 			} else if (children.item(i).getNodeName().equals(Tag.context)) {
 				sentences.add(new Context(children.item(i), filename));
+			} else if (children.item(i).getNodeName().equals(Tag.define)) {
+				sentences.add(new Define(children.item(i), filename));
 			} else if (children.item(i).getNodeName().equals(Tag.configuration)) {
 				sentences.add(new Configuration(children.item(i), filename));
 			} else if (children.item(i).getNodeName().equals(Tag.imports)) {

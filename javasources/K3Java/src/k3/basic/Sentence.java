@@ -2,7 +2,7 @@ package k3.basic;
 
 public abstract class Sentence extends Term {
 	public enum SentenceType {
-		RULE, CONFIGURATION, CONTEXT, INCLUDING, SYNTAX;
+		RULE, CONFIGURATION, CONTEXT, INCLUDING, SYNTAX, DEFINE;
 	}
 
 	public SentenceType getType() {

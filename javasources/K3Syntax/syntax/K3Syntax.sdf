@@ -22,9 +22,10 @@ context-free syntax
 	"configuration"		HIDDEN+	-> KSentence {cons("Config")}
 	"rule"				HIDDEN+	-> KSentence {cons("Rule")}
 	"context"			HIDDEN+	-> KSentence {cons("Context")}
+	"define"			HIDDEN+	-> KSentence {cons("Define")}
 
 	"syntax" SORTID "::=" {Prod1 ">"}+	-> KSentence {cons("Syntax")}
-	
+
 context-free syntax
 	"left:" {Prod2 "|"}+ -> Prod1 {cons("LeftOrList")}
 	"right:" {Prod2 "|"}+ -> Prod1 {cons("RightOrList")}
@@ -64,6 +65,7 @@ lexical syntax
 
 	"rule"			-> HIDDEN {reject}
 	"syntax"		-> HIDDEN {reject}
+	"define"		-> HIDDEN {reject}
 	"context"		-> HIDDEN {reject}
 	"configuration"	-> HIDDEN {reject}
 	"endmodule"		-> HIDDEN {reject}
