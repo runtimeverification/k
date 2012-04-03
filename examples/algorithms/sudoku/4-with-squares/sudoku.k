@@ -39,24 +39,24 @@ end module
 module SUDOKU-RULES imports SUDOKU-CONFIGURATION
 --- naked single: square
   rule
-       <cell_> <v>B:BagItem</v> <_/cell>
-       <x>X:Nat</x> <y>Y:Nat</y> <v_>B=>.<_/v> (.Bag => <sdec>B</sdec>)
+       <cell>...  <v>B:BagItem</v>  ...</cell>
+       <x>X:Nat</x> <y>Y:Nat</y> <v>... B=>. ...</v> (.Bag => <sdec>B</sdec>)
        <lx>X</lx>  (.Bag => <ldec>B</ldec>)
        <cy>Y</cy>  (.Bag => <cdec>B</cdec>)
   [structural]
 
 --- naked single: line
   rule
-       <square_> <x>X</x> <v>B</v> <_/square>
-       <x>X</x> <y>Y</y> <v_>B=>.<_/v> (.Bag => <sdec>B</sdec>)
+       <square>...  <x>X</x> <v>B</v>  ...</square>
+       <x>X</x> <y>Y</y> <v>... B=>. ...</v> (.Bag => <sdec>B</sdec>)
        <lx>X</lx>  (.Bag => <ldec>B</ldec>)
        <cy>Y</cy>  (.Bag => <cdec>B</cdec>)
   [structural]
 
 --- naked single: column
   rule
-       <square_> <y>Y</y> <v>B</v> <_/square>
-       <x>X</x> <y>Y</y> <v_>B=>.<_/v> (.Bag => <sdec>B</sdec>)
+       <square>...  <y>Y</y> <v>B</v>  ...</square>
+       <x>X</x> <y>Y</y> <v>... B=>. ...</v> (.Bag => <sdec>B</sdec>)
        <lx>X</lx>  (.Bag => <ldec>B</ldec>)
        <cy>Y</cy>  (.Bag => <cdec>B</cdec>)
   [structural]
@@ -65,7 +65,7 @@ module SUDOKU-RULES imports SUDOKU-CONFIGURATION
 --- hidden single: square
   rule
        <x>X:Nat</x> <y>Y:Nat</y> <v>BagItem(V:Nat) (Bs:NeBag=>.)</v>
-       <sc_>V|->1<_/sc>  (.Bag => <sdec>Bs</sdec>)
+       <sc>... V|->1 ...</sc>  (.Bag => <sdec>Bs</sdec>)
        <lx>X</lx>  (.Bag => <ldec>Bs</ldec>)
        <cy>Y</cy>  (.Bag => <cdec>Bs</cdec>)
   [structural]
@@ -74,7 +74,7 @@ module SUDOKU-RULES imports SUDOKU-CONFIGURATION
   rule
        <x>X:Nat</x> <y>Y:Nat</y> <v>BagItem(V) (Bs=>.)</v>
        (.Bag => <sdec>Bs</sdec>)
-       <lx>X</lx> <lc_>V|->1<_/lc>  (.Bag => <ldec>Bs</ldec>)
+       <lx>X</lx> <lc>... V|->1 ...</lc>  (.Bag => <ldec>Bs</ldec>)
        <cy>Y</cy>  (.Bag => <cdec>Bs</cdec>)
   [structural]
 
@@ -83,7 +83,7 @@ module SUDOKU-RULES imports SUDOKU-CONFIGURATION
        <x>X:Nat</x> <y>Y:Nat</y> <v>BagItem(V) (Bs=>.)</v>
        (.Bag => <sdec>Bs</sdec>)
        <lx>X</lx>  (.Bag => <ldec>Bs</ldec>)
-       <cy>Y</cy> <cc_>V|->1<_/cc>  (.Bag => <cdec>Bs</cdec>)
+       <cy>Y</cy> <cc>... V|->1 ...</cc>  (.Bag => <cdec>Bs</cdec>)
   [structural]
 
 --- nondeterministic choice (purposely only in 2-val cells; worked in all examples like that)
@@ -95,17 +95,17 @@ module SUDOKU-RULES imports SUDOKU-CONFIGURATION
 
 
 --- square decrement
-  rule <sdec_>BagItem(V:Nat)=>.<_/sdec> <sc_>V |-> ((N:Nat)=>N -Int 1)<_/sc>   
+  rule <sdec>... BagItem(V:Nat)=>. ...</sdec> <sc>... V |-> ((N:Nat)=>N -Int 1) ...</sc>   
   when N >Int 0 [structural]
   rule <sdec> .Bag </sdec> => . [structural]
 
 --- line decrement
-  rule <ldec_>BagItem(V:Nat)=>.<_/ldec> <lc_>V |-> ((N)=>N -Int 1)<_/lc>    
+  rule <ldec>... BagItem(V:Nat)=>. ...</ldec> <lc>... V |-> ((N)=>N -Int 1) ...</lc>    
   when N >Int 0 [structural]
   rule <ldec> .Bag </ldec> => . [structural]
 
 --- column decrement
-  rule <cdec_>BagItem(V:Nat)=>.<_/cdec> <cc_>V |-> ((N)=>N -Int 1)<_/cc>
+  rule <cdec>... BagItem(V:Nat)=>. ...</cdec> <cc>... V |-> ((N)=>N -Int 1) ...</cc>
   when N >Int 0 [structural]
   rule <cdec> .Bag </cdec> => . [structural]
 end module
@@ -139,45 +139,45 @@ module SUDOKU-INTERFACE imports SUDOKU-CONFIGURATION
   [structural]
 
   rule mkConfig(_:NeBag,_,81,Squares,Lines,Columns)
-    => <T_> <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns> <_/T>
+    => <T>...  <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns>  ...</T>
   [structural]
 
   rule addSquare(Bs, I:Nat, J:Nat, X:Nat, Y:Nat,
-                 <square_> <i>I:Nat</i> <j>J:Nat</j> <sc>Map:Map</sc> <cells>Cells:Bag</cells> <_/square> Squares)
-       => <square_> <i>I</i> <j>J</j> <sc>inc(Bs,Map)</sc>
-                     <cells> Cells <cell> <x>X</x> <y>Y</y> <v>Bs</v> </cell> </cells> <_/square> Squares
+                 <square>...  <i>I:Nat</i> <j>J:Nat</j> <sc>Map:Map</sc> <cells>Cells:Bag</cells>  ...</square> Squares)
+       => <square>...  <i>I</i> <j>J</j> <sc>inc(Bs,Map)</sc>
+                     <cells> Cells <cell> <x>X</x> <y>Y</y> <v>Bs</v> </cell> </cells>  ...</square> Squares
   rule addSquare(Bs, I:Nat, J:Nat, X:Nat, Y:Nat,
-                 <square_> <i>I':Nat</i> <j>J':Nat</j> <sc>Map:Map</sc> <cells>Cells:Bag</cells> <_/square> Squares)
-       => <square_> <i>I'</i> <j>J'</j> <sc>Map</sc> <cells>Cells</cells> <_/square> addSquare(Bs,I,J,X,Y,Squares) 
+                 <square>...  <i>I':Nat</i> <j>J':Nat</j> <sc>Map:Map</sc> <cells>Cells:Bag</cells>  ...</square> Squares)
+       => <square>...  <i>I'</i> <j>J'</j> <sc>Map</sc> <cells>Cells</cells>  ...</square> addSquare(Bs,I,J,X,Y,Squares) 
   when I =/=Int I' orBool J =/=Int J'
   [structural]
 
   rule addSquare(Bs,I,J,X,Y,.Bag)
-    => <square_> <i>I</i> <j>J</j> <sc>inc(Bs,initMap)</sc> <cells> <cell> <x>X</x> <y>Y</y> <v>Bs</v> </cell> </cells> <_/square>
+    => <square>...  <i>I</i> <j>J</j> <sc>inc(Bs,initMap)</sc> <cells> <cell> <x>X</x> <y>Y</y> <v>Bs</v> </cell> </cells>  ...</square>
   [structural]
 
-  rule addLine(Bs,X:Nat, <line_> <lx>X:Nat</lx> <lc>Map</lc> <_/line> Lines)
-    => <line_> <lx>X</lx> <lc>inc(Bs,Map)</lc> <_/line> Lines
-  rule addLine(Bs,X:Nat, <line_> <lx>X':Nat</lx> <lc>Map</lc> <_/line> Lines)
-       => <line_> <lx>X'</lx> <lc>Map</lc> <_/line> addLine(Bs,X,Lines) 
+  rule addLine(Bs,X:Nat, <line>...  <lx>X:Nat</lx> <lc>Map</lc>  ...</line> Lines)
+    => <line>...  <lx>X</lx> <lc>inc(Bs,Map)</lc>  ...</line> Lines
+  rule addLine(Bs,X:Nat, <line>...  <lx>X':Nat</lx> <lc>Map</lc>  ...</line> Lines)
+       => <line>...  <lx>X'</lx> <lc>Map</lc>  ...</line> addLine(Bs,X,Lines) 
   when X =/=Int X'
   [structural]
 
-  rule addLine(Bs,X,.Bag) => <line_> <lx>X</lx> <lc>inc(Bs,initMap)</lc> <_/line> [structural]
+  rule addLine(Bs,X,.Bag) => <line>...  <lx>X</lx> <lc>inc(Bs,initMap)</lc>  ...</line> [structural]
 
-  rule addColumn(Bs,Y:Nat, <column_> <cy>Y:Nat</cy> <cc>Map</cc> <_/column> Columns)
-    =>  <column_> <cy>Y</cy> <cc>inc(Bs,Map)</cc> <_/column> Columns
-  rule addColumn(Bs,Y:Nat, <column_> <cy>Y':Nat</cy> <cc>Map</cc> <_/column> Columns)
-    => <column_> <cy>Y'</cy> <cc>Map</cc> <_/column> addColumn(Bs,Y,Columns) 
+  rule addColumn(Bs,Y:Nat, <column>...  <cy>Y:Nat</cy> <cc>Map</cc>  ...</column> Columns)
+    =>  <column>...  <cy>Y</cy> <cc>inc(Bs,Map)</cc>  ...</column> Columns
+  rule addColumn(Bs,Y:Nat, <column>...  <cy>Y':Nat</cy> <cc>Map</cc>  ...</column> Columns)
+    => <column>...  <cy>Y'</cy> <cc>Map</cc>  ...</column> addColumn(Bs,Y,Columns) 
   when Y =/=Int Y'
   [structural]
-  rule addColumn(Bs,Y,.Bag) => <column_> <cy>Y</cy> <cc>inc(Bs,initMap)</cc> <_/column> [structural]
+  rule addColumn(Bs,Y,.Bag) => <column>...  <cy>Y</cy> <cc>inc(Bs,initMap)</cc>  ...</column> [structural]
 
   rule inc((BagItem(V)=>.)_, V|->(N=>(N +Int 1))_) [structural]
   rule inc(.Bag,Map) => Map [structural]
 
 --- Unfeasible configurations
-  rule <T_> <cell_> <v> .Bag </v> <_/cell> <_/T> => .Bag [structural]
+  rule <T>...  <cell>...  <v> .Bag </v>  ...</cell>  ...</T> => .Bag [structural]
 end module
 
 module SUDOKU imports SUDOKU-RULES + SUDOKU-INTERFACE

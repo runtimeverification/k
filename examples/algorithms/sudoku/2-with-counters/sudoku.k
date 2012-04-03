@@ -1,6 +1,6 @@
 
 
-kmod SUDOKU-CONFIGURATION is including INT-HOOKS
+module SUDOKU-CONFIGURATION imports INT-HOOKS
   syntax MapItem ::= Nat |-> BagItem
 
 --- I wish I was able to use the same cell names below (lx -> x, etc.), but didn't work
@@ -20,17 +20,17 @@ kmod SUDOKU-CONFIGURATION is including INT-HOOKS
                     <columns> <column multiplicity="*"> <cy>0</cy> <cc>.Map</cc> </column> </columns>
                   </data-structures>
                 </T>
-endkm
+end module
 
-kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
+module SUDOKU-RULES imports SUDOKU-CONFIGURATION
 --- naked single: square
 
   rule
-       <cell_> <x>X1:Nat</x> <y>Y1:Nat</y> <v>BagItem(V:Nat)</v> <_/cell>
-       <cell>  <x>X2:Nat</x> <y>Y2:Nat</y> <i>I:Nat</i> <j>J:Nat</j> <v_>BagItem(V)=>.<_/v> </cell>
-       <square> <si>I</si> <sj>J</sj> <sc_>V |-> ((Ns:Nat)=>Ns -Int 1)<_/sc> </square>
-       <line> <lx>X2</lx> <lc_>V |-> ((Nl:Nat)=>Nl -Int 1)<_/lc> </line>
-       <column> <cy>Y2</cy> <cc_>V |-> ((Nc:Nat)=>Nc -Int 1)<_/cc> </column>
+       <cell>...  <x>X1:Nat</x> <y>Y1:Nat</y> <v>BagItem(V:Nat)</v>  ...</cell>
+       <cell>  <x>X2:Nat</x> <y>Y2:Nat</y> <i>I:Nat</i> <j>J:Nat</j> <v>... BagItem(V)=>. ...</v> </cell>
+       <square> <si>I</si> <sj>J</sj> <sc>... V |-> ((Ns:Nat)=>Ns -Int 1) ...</sc> </square>
+       <line> <lx>X2</lx> <lc>... V |-> ((Nl:Nat)=>Nl -Int 1) ...</lc> </line>
+       <column> <cy>Y2</cy> <cc>... V |-> ((Nc:Nat)=>Nc -Int 1) ...</cc> </column>
     when (X1 ==Int X2 orBool Y1 ==Int Y2 orBool
        X1 /Int 3 ==Int X2 /Int 3 andBool Y1 /Int 3 ==Int Y2 /Int 3)
        andBool Ns >Int 0 andBool Nl >Int 0 andBool Nc >Int 0 [structural]
@@ -38,11 +38,11 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
 --- the rule above can be replaced by the one below, but then kompilation becomes very slow
 ***(
   rule
-       <cell_> <x>X1:Nat</x> <y>Y1:Nat</y> <v>BagItem(V:Nat)</v> <_/cell>
-               <x>X2:Nat</x> <y>Y2:Nat</y> <i>I:Nat</i> <j>J:Nat</j> <v_>BagItem(V)=>.<_/v>
-               <si>I</si> <sj>J</sj> <sc_>V |-> ((Ns:Nat)=>Ns -Int 1)<_/sc>
-               <lx>X2</lx> <lc_>V |-> ((Nl:Nat)=>Nl -Int 1)<_/lc>
-               <cy>Y2</cy> <cc_>V |-> ((Nc:Nat)=>Nc -Int 1)<_/cc>
+       <cell>...  <x>X1:Nat</x> <y>Y1:Nat</y> <v>BagItem(V:Nat)</v>  ...</cell>
+               <x>X2:Nat</x> <y>Y2:Nat</y> <i>I:Nat</i> <j>J:Nat</j> <v>... BagItem(V)=>. ...</v>
+               <si>I</si> <sj>J</sj> <sc>... V |-> ((Ns:Nat)=>Ns -Int 1) ...</sc>
+               <lx>X2</lx> <lc>... V |-> ((Nl:Nat)=>Nl -Int 1) ...</lc>
+               <cy>Y2</cy> <cc>... V |-> ((Nc:Nat)=>Nc -Int 1) ...</cc>
     when (X1 ==Int X2 orBool Y1 ==Int Y2 orBool
        X1 /Int 3 ==Int X2 /Int 3 andBool Y1 /Int 3 ==Int Y2 /Int 3)
         andBool Ns >Int 0 andBool Nl >Int 0 andBool Nc >Int 0 [structural]
@@ -50,39 +50,39 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
 
 --- hidden single: square
   rule [hidden-square] :
-       <cell> <i>I</i> <j>J</j> <x>X:Nat</x> <y>Y:Nat</y> <v_>BagItem(V) (BagItem(V':Nat)=>.)<_/v> </cell>
-       <square> <si>I</si> <sj>J</sj> <sc_>V|->1 V'|->((Ns)=>Ns -Int 1)<_/sc> </square>
-       <line>   <lx>X</lx> <lc_>V' |-> ((Nl:Nat)=>Nl -Int 1)<_/lc> </line>
-       <column> <cy>Y</cy> <cc_>V' |-> ((Nc:Nat)=>Nc -Int 1)<_/cc> </column>
+       <cell> <i>I</i> <j>J</j> <x>X:Nat</x> <y>Y:Nat</y> <v>... BagItem(V) (BagItem(V':Nat)=>.) ...</v> </cell>
+       <square> <si>I</si> <sj>J</sj> <sc>... V|->1 V'|->((Ns)=>Ns -Int 1) ...</sc> </square>
+       <line>   <lx>X</lx> <lc>... V' |-> ((Nl:Nat)=>Nl -Int 1) ...</lc> </line>
+       <column> <cy>Y</cy> <cc>... V' |-> ((Nc:Nat)=>Nc -Int 1) ...</cc> </column>
   when Ns >Int 0 andBool Nl >Int 0 andBool Nc >Int 0 [structural]
 
 --- hidden single: line
   rule [hidden-line] :
-       <cell> <i>I</i> <j>J</j> <x>X</x> <y>Y</y> <v_>BagItem(V) (BagItem(V')=>.)<_/v> </cell>
-       <square> <si>I</si> <sj>J</sj> <sc_>V'|->((Ns)=>Ns -Int 1)<_/sc> </square>
-       <line>   <lx>X</lx> <lc_>V|->1 V' |-> ((Nl:Nat)=>Nl -Int 1)<_/lc> </line>
-       <column> <cy>Y</cy> <cc_>V' |-> ((Nc:Nat)=>Nc -Int 1)<_/cc> </column>
+       <cell> <i>I</i> <j>J</j> <x>X</x> <y>Y</y> <v>... BagItem(V) (BagItem(V')=>.) ...</v> </cell>
+       <square> <si>I</si> <sj>J</sj> <sc>... V'|->((Ns)=>Ns -Int 1) ...</sc> </square>
+       <line>   <lx>X</lx> <lc>... V|->1 V' |-> ((Nl:Nat)=>Nl -Int 1) ...</lc> </line>
+       <column> <cy>Y</cy> <cc>... V' |-> ((Nc:Nat)=>Nc -Int 1) ...</cc> </column>
        when Ns >Int 0 andBool Nl >Int 0 andBool Nc >Int 0  [structural]
 
 --- hidden single: column
   rule [hidden-column] :
-       <cell> <i>I</i> <j>J</j> <x>X</x> <y>Y</y> <v_>BagItem(V) (BagItem(V')=>.)<_/v> </cell>
-       <square> <si>I</si> <sj>J</sj> <sc_>V'|->((Ns)=>Ns -Int 1)<_/sc> </square>
-       <line>   <lx>X</lx> <lc_>V' |-> ((Nl:Nat)=>Nl -Int 1)<_/lc> </line>
-       <column> <cy>Y</cy> <cc_>V|->1 V' |-> ((Nc:Nat)=>Nc -Int 1)<_/cc> </column>
+       <cell> <i>I</i> <j>J</j> <x>X</x> <y>Y</y> <v>... BagItem(V) (BagItem(V')=>.) ...</v> </cell>
+       <square> <si>I</si> <sj>J</sj> <sc>... V'|->((Ns)=>Ns -Int 1) ...</sc> </square>
+       <line>   <lx>X</lx> <lc>... V' |-> ((Nl:Nat)=>Nl -Int 1) ...</lc> </line>
+       <column> <cy>Y</cy> <cc>... V|->1 V' |-> ((Nc:Nat)=>Nc -Int 1) ...</cc> </column>
        when Ns >Int 0 andBool Nl >Int 0 andBool Nc >Int 0  [structural]
 
 --- nondeterministic choice (purposely only in 2-val cells; worked in all examples like that)
   rule [choose] :
        <cell> <i>I</i> <j>J</j> <x>X</x> <y>Y</y> <v>BagItem(V) (BagItem(V')=>.)</v> </cell>
-       <square> <si>I</si> <sj>J</sj> <sc_>V'|->((Ns)=>Ns -Int 1)<_/sc> </square>
-       <line>   <lx>X</lx> <lc_>V' |-> ((Nl)=>Nl -Int 1)<_/lc> </line>
-       <column> <cy>Y</cy> <cc_>V' |-> ((Nc)=>Nc -Int 1)<_/cc> </column>
+       <square> <si>I</si> <sj>J</sj> <sc>... V'|->((Ns)=>Ns -Int 1) ...</sc> </square>
+       <line>   <lx>X</lx> <lc>... V' |-> ((Nl)=>Nl -Int 1) ...</lc> </line>
+       <column> <cy>Y</cy> <cc>... V' |-> ((Nc)=>Nc -Int 1) ...</cc> </column>
        when Ns >Int 0 andBool Nl >Int 0 andBool Nc >Int 0 
   [transition]
-endkm
+end module
 
-kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
+module SUDOKU-INTERFACE imports SUDOKU-CONFIGURATION
   syntax Map ::= initMap
   macro initMap     = 1|->0  2|->0  3|->0  4|->0  5|->0  6|->0  7|->0  8|->0  9|->0
 
@@ -111,7 +111,7 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
                 Cells <cell> <i>(N /Int 9) /Int 3</i> <j>(N %Int 9) /Int 3</j> <x>N /Int 9</x> <y>N %Int 9</y> <v>Bs</v> </cell>)
        [structural]
   rule mkConfig(_:NeBag,_,81,Squares,Lines,Columns,Cells)
-    => <T_> <cells>Cells</cells> <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns> <_/T> [structural]
+    => <T>...  <cells>Cells</cells> <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns>  ...</T> [structural]
 
   rule addSquare(Bs,I:Nat,J:Nat, <square> <si>I:Nat</si> <sj>J:Nat</sj> <sc>Map:Map</sc> </square> Squares)
      =>  <square> <si>I</si> <sj>J</sj> <sc>inc(Bs,Map)</sc> </square> Squares [structural]
@@ -141,10 +141,10 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
   rule inc(.Bag,Map) => Map [structural]
 
 --- Unfeasible configurations
-  rule <T_> <cell_> <v> .Bag </v> <_/cell> <_/T> => .Bag [structural]
-endkm
+  rule <T>...  <cell>...  <v> .Bag </v>  ...</cell>  ...</T> => .Bag [structural]
+end module
 
-kmod SUDOKU is including SUDOKU-RULES + SUDOKU-INTERFACE
+module SUDOKU imports SUDOKU-RULES + SUDOKU-INTERFACE
    syntax Bag ::= easy
   macro easy = [
 0,,0,,4,, 7,,2,,0,, 9,,0,,0,,
@@ -189,4 +189,4 @@ kmod SUDOKU is including SUDOKU-RULES + SUDOKU-INTERFACE
 0,,4,,0,, 0,,0,,0,, 0,,0,,7,,
 0,,0,,7,, 0,,0,,0,, 3,,0,,0
 ]
-endkm
+end module

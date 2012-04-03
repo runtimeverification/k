@@ -24,11 +24,11 @@ module SUDOKU-CONFIGURATION
                 </T>
 end module
 
-module SUDOKU-RULES is including SUDOKU-CONFIGURATION
+module SUDOKU-RULES imports SUDOKU-CONFIGURATION
 --- naked single
   rule
-       <cell_> <x>X1:Nat</x> <y>Y1:Nat</y> <v>B:BagItem</v> <_/cell>
-       <cell>  <x>X2:Nat</x> <y>Y2:Nat</y> <i>I:Nat</i> <j>J:Nat</j> <v_>B=>.<_/v> </cell>
+       <cell>...  <x>X1:Nat</x> <y>Y1:Nat</y> <v>B:BagItem</v>  ...</cell>
+       <cell>  <x>X2:Nat</x> <y>Y2:Nat</y> <i>I:Nat</i> <j>J:Nat</j> <v>... B=>. ...</v> </cell>
        (.Bag => <decrement> <di>I</di> <dj>J</dj> <dx>X2</dx> <dy>Y2</dy> <dv>B</dv> </decrement>)
     when (X1 ==Int X2 orBool Y1 ==Int Y2 orBool
        X1 /Int 3 ==Int X2 /Int 3 andBool Y1 /Int 3 ==Int Y2 /Int 3)
@@ -37,36 +37,36 @@ module SUDOKU-RULES is including SUDOKU-CONFIGURATION
 --- hidden single: square
   rule [hidden-square] :
        <cell> <i>I</i> <j>J</j> <x>X:Nat</x> <y>Y:Nat</y> <v>BagItem(V:Nat) (Bs:NeBag=>.)</v> </cell>
-       <square> <si>I</si> <sj>J</sj> <sc_>V|->1<_/sc> </square>
+       <square> <si>I</si> <sj>J</sj> <sc>... V|->1 ...</sc> </square>
        (.Bag => <decrement> <di>I</di> <dj>J</dj> <dx>X</dx> <dy>Y</dy> <dv>Bs</dv> </decrement>)
   [structural]
 
 --- hidden single: line
   rule [hidden-line] :
        <cell> <i>I</i> <j>J</j> <x>X</x> <y>Y</y> <v>BagItem(V) (Bs=>.)</v> </cell>
-       <line>   <lx>X</lx> <lc_>V|->1<_/lc> </line>
+       <line>   <lx>X</lx> <lc>... V|->1 ...</lc> </line>
        (.Bag => <decrement> <di>I</di> <dj>J</dj> <dx>X</dx> <dy>Y</dy> <dv>Bs</dv> </decrement>)
   [structural]
 
 --- hidden single: column
   rule [hidden-column] :
        <cell> <i>I</i> <j>J</j> <x>X</x> <y>Y</y> <v>BagItem(V) (Bs=>.)</v> </cell>
-       <column> <cy>Y</cy> <cc_>V|->1<_/cc> </column>
+       <column> <cy>Y</cy> <cc>... V|->1 ...</cc> </column>
        (.Bag => <decrement> <di>I</di> <dj>J</dj> <dx>X</dx> <dy>Y</dy> <dv>Bs</dv> </decrement>)
   [structural]
 
 --- decrement: non-empty
   rule
-       <decrement> <di>I</di> <dj>J</dj> <dx>X</dx> <dy>Y</dy> <dv_>BagItem(V)=>.<_/dv> </decrement>
-       <square> <si>I</si> <sj>J</sj> <sc_>V |-> ((Ns:Nat)=>Ns -Int 1)<_/sc> </square>
-       <line> <lx>X</lx> <lc_>V |-> ((Nl:Nat)=>Nl -Int 1)<_/lc> </line>
-       <column> <cy>Y</cy> <cc_>V |-> ((Nc:Nat)=>Nc -Int 1)<_/cc> </column>
+       <decrement> <di>I</di> <dj>J</dj> <dx>X</dx> <dy>Y</dy> <dv>... BagItem(V)=>. ...</dv> </decrement>
+       <square> <si>I</si> <sj>J</sj> <sc>... V |-> ((Ns:Nat)=>Ns -Int 1) ...</sc> </square>
+       <line> <lx>X</lx> <lc>... V |-> ((Nl:Nat)=>Nl -Int 1) ...</lc> </line>
+       <column> <cy>Y</cy> <cc>... V |-> ((Nc:Nat)=>Nc -Int 1) ...</cc> </column>
    when Ns >Int 0 andBool Nl >Int 0 andBool Nc >Int 0
   [structural]
 
 --- decrement: empty
   rule
-       <decrement_> <dv>.Bag</dv> <_/decrement> => .
+       <decrement>...  <dv>.Bag</dv>  ...</decrement> => .
   [structural]
 
 --- nondeterministic choice (purposely only in 2-val cells; worked in all examples like that)
@@ -76,7 +76,7 @@ module SUDOKU-RULES is including SUDOKU-CONFIGURATION
   [transition]
 end module
 
-module SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
+module SUDOKU-INTERFACE imports SUDOKU-CONFIGURATION
   syntax Map ::= initMap
   macro initMap     = 1|->0  2|->0  3|->0  4|->0  5|->0  6|->0  7|->0  8|->0  9|->0
 
@@ -105,7 +105,7 @@ module SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
                 Cells <cell> <i>(N /Int 9) /Int 3</i> <j>(N %Int 9) /Int 3</j> <x>N /Int 9</x> <y>N %Int 9</y> <v>Bs</v> </cell>)
        [structural]
   rule mkConfig(_:NeBag,_,81,Squares,Lines,Columns,Cells)
-    => <T_> <cells>Cells</cells> <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns> <_/T> [structural]
+    => <T>...  <cells>Cells</cells> <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns>  ...</T> [structural]
 
   rule addSquare(Bs,I:Nat,J:Nat, <square> <si>I:Nat</si> <sj>J:Nat</sj> <sc>Map:Map</sc> </square> Squares)
        => <square> <si>I</si> <sj>J</sj> <sc>inc(Bs,Map)</sc> </square> Squares
@@ -134,10 +134,10 @@ module SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
   rule inc(.Bag,Map) => Map [structural]
 
 --- Unfeasible configurations
-  rule <T_> <cell_> <v> .Bag </v> <_/cell> <_/T> => .Bag [structural]
+  rule <T>...  <cell>...  <v> .Bag </v>  ...</cell>  ...</T> => .Bag [structural]
 end module
 
-module SUDOKU is including SUDOKU-RULES + SUDOKU-INTERFACE
+module SUDOKU imports SUDOKU-RULES + SUDOKU-INTERFACE
    syntax Bag ::= easy
   macro easy = [
 0,,0,,4,, 7,,2,,0,, 9,,0,,0,,
