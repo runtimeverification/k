@@ -90,7 +90,7 @@ type for constructors in KOOL typed programs).  The syntax of typed
 exceptions differs from that of typed SIMPLE in that the variable
 bound by \texttt{catch} is now expected to be typed (we use
 \textit{Exp}, but we only give semantics for the case when it has the
-form \textit{\Id:Type}. */
+form \textit{Id:Type}. */
 
   syntax Id ::= "object"
 
