@@ -113,9 +113,9 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
     => <T_> <cells>Cells</cells> <squares>Squares</squares> <lines>Lines</lines> <columns>Columns</columns> <_/T> [structural]
 
   rule addSquare(Bs,I:Nat,J:Nat, <square> <si>I:Nat</si> <sj>J:Nat</sj> <sc>Map:Map</sc> </square> Squares)
-       <square> <si>I</si> <sj>J</sj> <sc>inc(Bs,Map)</sc> </square> Squares [structural]
+     =>  <square> <si>I</si> <sj>J</sj> <sc>inc(Bs,Map)</sc> </square> Squares [structural]
   rule addSquare(Bs,I:Nat,J:Nat, <square> <si>I':Nat</si> <sj>J':Nat</sj> <sc>Map:Map</sc> </square> Squares)
-       <square> <si>I'</si> <sj>J'</sj> <sc>Map</sc> </square> addSquare(Bs,I,J,Squares) 
+    =>   <square> <si>I'</si> <sj>J'</sj> <sc>Map</sc> </square> addSquare(Bs,I,J,Squares) 
     when I =/=Int I' orBool J =/=Int J' [structural]
   rule addSquare(Bs,I,J,.Bag) => <square> <si>I</si> <sj>J</sj> <sc>inc(Bs,initMap)</sc> </square> [structural]
 
@@ -123,7 +123,7 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
     => <line> <lx>X</lx> <lc>inc(Bs,Map)</lc> </line> Lines [structural]
 
   rule addLine(Bs,X:Nat, <line> <lx>X':Nat</lx> <lc>Map</lc> </line> Lines)
-       <line> <lx>X'</lx> <lc>Map</lc> </line> addLine(Bs,X,Lines) 
+   =>   <line> <lx>X'</lx> <lc>Map</lc> </line> addLine(Bs,X,Lines) 
    when X =/=Int X' [structural]
 
   rule addLine(Bs,X,.Bag) => <line> <lx>X</lx> <lc>inc(Bs,initMap)</lc> </line> [structural]
@@ -132,7 +132,7 @@ kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION
     => <column> <cy>Y</cy> <cc>inc(Bs,Map)</cc> </column> Columns [structural]
 
   rule addColumn(Bs,Y:Nat, <column> <cy>Y':Nat</cy> <cc>Map</cc> </column> Columns)
-       <column> <cy>Y'</cy> <cc>Map</cc> </column> addColumn(Bs,Y,Columns) 
+      => <column> <cy>Y'</cy> <cc>Map</cc> </column> addColumn(Bs,Y,Columns) 
       when Y =/=Int Y' [structural]
   rule addColumn(Bs,Y,.Bag) => <column> <cy>Y</cy> <cc>inc(Bs,initMap)</cc> </column> [structural]
 
