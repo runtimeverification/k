@@ -12,7 +12,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
        X1 /Int 3 ==Int X2 /Int 3 andBool Y1 /Int 3 ==Int Y2 /Int 3) [structural]
 
 --- nondeterministic choice (purposely only in 2-val cells; worked in all examples like that)
-  rule <cell_> <v> B (_:BagItem => .) </v> <_/cell>
+  rule <cell_> <v> B (_:BagItem => .) </v> <_/cell> [transition]
 endkm
 
 kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION

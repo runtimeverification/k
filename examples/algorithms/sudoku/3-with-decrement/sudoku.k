@@ -73,6 +73,7 @@ module SUDOKU-RULES is including SUDOKU-CONFIGURATION
   rule [choose] :
        <cell> <i>I</i> <j>J</j> <x>X</x> <y>Y</y> <v>BagItem(V) (B=>.)</v> </cell>
        (.Bag => <decrement> <di>I</di> <dj>J</dj> <dx>X</dx> <dy>Y</dy> <dv>B</dv> </decrement>)
+  [transition]
 end module
 
 module SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION

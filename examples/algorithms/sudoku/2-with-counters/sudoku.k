@@ -79,6 +79,7 @@ kmod SUDOKU-RULES is including SUDOKU-CONFIGURATION
        <line>   <lx>X</lx> <lc_>V' |-> ((Nl)=>Nl -Int 1)<_/lc> </line>
        <column> <cy>Y</cy> <cc_>V' |-> ((Nc)=>Nc -Int 1)<_/cc> </column>
        when Ns >Int 0 andBool Nl >Int 0 andBool Nc >Int 0 
+  [transition]
 endkm
 
 kmod SUDOKU-INTERFACE is including SUDOKU-CONFIGURATION

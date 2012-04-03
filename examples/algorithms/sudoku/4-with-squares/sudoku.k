@@ -91,6 +91,7 @@ module SUDOKU-RULES imports SUDOKU-CONFIGURATION
        <x>X</x> <y>Y</y> <v>_:BagItem (B=>.)</v>  (.Bag => <sdec>B</sdec>)
        <lx>X</lx>  (.Bag => <ldec>B</ldec>)
        <cy>Y</cy>  (.Bag => <cdec>B</cdec>)
+  [transition]
 
 
 --- square decrement
