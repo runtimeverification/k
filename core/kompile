@@ -1969,9 +1969,13 @@ sub maudify_module {
     # freeze configuration
     s/\$[A-Z]+/{Freeze($&, "PVAR");}/sge;
 
+    # freeze the variable declarations
+    s/$kvar:$ksort/{Freeze($&, "VARDECL")}/sge;
+
 # print ;
         $_ = spacify($_);
-
+	
+	$_ = Unfreeze("VARDECL", $_);
         $_ = Unfreeze("PVAR", $_);
 	$_ = Unfreeze("ATTR", $_);
 	$_ = Unfreeze("STRINGS", $_);
