@@ -1,6 +1,1 @@
-define lookupMember(<envStack> ListItem(_:#Id :: <env>...X|->L...</env>)
-                    ...</envStack>,X) => .K  [structural]
-// Otherwise, recurse through the object environment stack
-  define lookupMember(<envStack> ListItem(_:#Id :: <env> Env </env>)
-                            => . ...</envStack>, X)
-	    when notBool(X in keys(Env))                      [structural]
+rule ('asdf => X)(A)

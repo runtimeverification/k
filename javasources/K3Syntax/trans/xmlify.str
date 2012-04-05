@@ -241,13 +241,6 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml:
-		Define(x1) -> $[<define loc="[loc]" value="[x1']" />
-		]
-		where mydebug(!"Define: ")
-		where x1' := <get-original-sentence>
-		where loc := <getLocAsString>
-
-	to-xml:
 		Tag(x) -> $[<tag key="[x]" loc="[loc]" />
 		]
 		where loc := <getLocAsString>

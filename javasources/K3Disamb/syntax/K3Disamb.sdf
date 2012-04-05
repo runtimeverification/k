@@ -21,7 +21,6 @@ context-free syntax
 	"rule" Label ListDlKDr		-> KSimpleSentence {cons("ListDlKDr1Rule")}
 	"rule" Label Set			-> KSimpleSentence {cons("Set1Rule")}
 	"rule" Label Map			-> KSimpleSentence {cons("Map1Rule")}
-	"define" Label K			-> KSimpleSentence {cons("Define")}
 	"context" K					-> KSimpleSentence {cons("Context")}
 	%%"predicate" K				-> KSimpleSentence {cons("Predicate")}
 

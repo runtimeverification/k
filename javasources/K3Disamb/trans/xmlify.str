@@ -86,64 +86,6 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml1:
-		Define(x1, x2) -> $[<define sort="K" loc="[loc]" [label]>
-							<body>
-								[x2']
-							</body>
-		</define>
-		]
-		where mydebug(!"Define: ")
-		where label := <to-xml> x1
-		where x2' := <to-xml> x2
-		where loc := <getLocAsString>
-	to-xml1:
-		CondSentence(Define(x1, x2), cond) -> $[<define sort="K" loc="[loc]" [label]>
-												<body>
-													[x2']
-												</body>
-												<cond>
-													[cond']
-												</cond>
-		</define>
-		]
-		where mydebug(!"Define: ")
-		where label := <to-xml> x1
-		where x2' := <to-xml> x2
-		where cond' := <to-xml> cond
-		where loc := <getLocAsString>
-	to-xml1:
-		AttributedSentence(Define(x1, x2), d) -> $[<define sort="K" [label] loc="[loc]">
-					<body>
-						[children]
-					</body>
-					<annos>
-						[<to-xml> d]
-					</annos>
-		</define>
-		]
-		where mydebug(!"Define: ")
-		where label := <to-xml> x1
-		where children := <to-xml> x2
-		where loc := <getLocAsString>
-	to-xml1:
-		AttributedCondSentence(Define(x1, x2), c, d) -> $[<define sort="K" [label] loc="[loc]">
-					<body>
-						[children]
-					</body>
-					<cond>
-						[<to-xml> c]
-					</cond>
-					<annos>
-						[<to-xml> d]
-					</annos>
-		</define>
-		]
-		where mydebug(!"Define: ")
-		where label := <to-xml> x1
-		where children := <to-xml> x2
-		where loc := <getLocAsString>
-
-	to-xml1:
 		Tag(x) -> $[<tag key="[x]" loc="[loc]" />
 		]
 		where loc := <getLocAsString>
@@ -335,7 +277,7 @@ rules
 		where sort2 := <getSort> a
 		where sort  := <?"List{K}" < !"ListOfK" + id> sort2
 		where loc := <getLocAsString>
-
+		
 	to-xml2:	// sort items
 		a#([b]) -> $[<[sort] sort="[sort]" loc="[loc]">
 						[<to-xml> b]

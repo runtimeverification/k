@@ -19,8 +19,6 @@
    Rule.1:iter               -- _1,
    Context                   -- V  [H  [KW["context"]] _1],
    Context.1:iter            -- _1,
-   Define                    -- V  [H  [KW["define"]] _1],
-   Define.1:iter             -- _1,
    Syntax                    -- KW["syntax"] _1 KW["::="] _2,
    Syntax.2:iter-sep         -- _1 KW[">"],
    LeftOrList                -- V  [H  [KW["left:"]] _1],

@@ -747,9 +747,6 @@ public class Definition implements Cloneable {
 			} else if (s.getType() == SentenceType.CONTEXT) {
 				Context c = (Context) s;
 				c.parse();
-			} else if (s.getType() == SentenceType.DEFINE) {
-				Define c = (Define) s;
-				c.parse();
 			}
 		}
 	}
