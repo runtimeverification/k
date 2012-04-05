@@ -2242,7 +2242,7 @@ sub make_ops {
 
 sub op_attribute {
 	local ($_) = @_;
-	/strict|hook|extends|prec|hybrid|gather|klabel|metadata|latex|ditto|format|assoc|comm|id:/;
+	/strict|hook|extends|prec|hybrid|gather|klabel|metadata|latex|ditto|format|assoc|comm|id:|function/;
 }
 
 
