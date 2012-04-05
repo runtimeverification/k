@@ -21,7 +21,8 @@ module SUBSTITUTION
   syntax KLabel ::= beta [ K / Id ] 
                [prec 0 latex "\sqbracket{\framebox{${#1}$}/{#2}}"]
                
-  declare id_ : Nat -> Id  --- to generate fresh names
+  syntax Id ::= "id" Nat  [function]   --- to generate fresh names
+---  declare id_ : Nat -> Id  --- to generate fresh names
   define id N:Nat => String2Id("_id" +String Int2String(N))
 
   syntax CellLabel ::= "nextId"

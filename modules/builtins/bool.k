@@ -5,21 +5,28 @@ end module
 module BOOL-HOOKS
   imports BOOL-SYNTAX-HOOKS
  
-  declare _==Bool_ : Bool Bool -> Bool [hook(#BOOL:_==Bool_)]
+---  declare _==Bool_ : Bool Bool -> Bool 
+  syntax Bool ::= Bool "==Bool" Bool   [function hook(#BOOL:_==Bool_)]
 
-  declare _=/=Bool_ : Bool Bool -> Bool
+---  declare _=/=Bool_ : Bool Bool -> Bool
+  syntax Bool ::= Bool "=/=Bool" Bool   [function]
   define B1:Bool =/=Bool B2:Bool => notBool(B1 ==Bool B2)
 
-  declare _andBool_ : Bool Bool -> Bool
-        [prec(55) gather(E e) latex "{#1}\wedge_{\scriptstyle\it Bool}{#2}"]
-  declare _orBool_ : Bool Bool -> Bool  
-        [prec(59) gather(E e) latex "{#1}\vee_{\scriptstyle\it Bool}{#2}"]
-  declare _xorBool_ : Bool Bool -> Bool 
-        [prec(57) gather(E e)]
-  declare notBool_ : Bool -> Bool 
-        [prec(53) latex "\neg_{\scriptstyle\it Bool}{#1}"]
-  declare _impliesBool_ : Bool Bool -> Bool
-        [prec(61) gather(e E)]
+---  declare _andBool_ : Bool Bool -> Bool
+  syntax Bool ::= Bool "andBool" Bool
+        [function prec(55) gather(E e) latex "{#1}\wedge_{\scriptstyle\it Bool}{#2}"]
+---  declare _orBool_ : Bool Bool -> Bool
+  syntax Bool ::= Bool "orBool" Bool  
+        [function prec(59) gather(E e) latex "{#1}\vee_{\scriptstyle\it Bool}{#2}"]
+---  declare _xorBool_ : Bool Bool -> Bool
+  syntax Bool ::= Bool "xorBool" Bool 
+        [function prec(57) gather(E e)]
+---  declare notBool_ : Bool -> Bool
+  syntax Bool ::= "notBool" Bool 
+        [function prec(53) latex "\neg_{\scriptstyle\it Bool}{#1}"]
+---  declare _impliesBool_ : Bool Bool -> Bool
+  syntax Bool ::= Bool "impliesBool" Bool
+        [function prec(61) gather(e E)]
 
   define true orBool B:Bool => true
   define false orBool B:Bool => B 
