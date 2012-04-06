@@ -418,6 +418,7 @@ fmod META-K-ERROR is
   op moduleError : QidList -> [Module] .
   op termError : QidList -> [Term] .
   
+  op errorCond : [Term] String String -> [Condition] .
   op errorAS :  String String -> [Attr] .
   op errorMb : [Term] String String AttrSet -> [MembAx] .
   op errorOp : String AttrSet -> [OpDecl] .
@@ -426,6 +427,8 @@ fmod META-K-ERROR is
   op errorM : AttrSet String [Term] String Module -> [Module] .
   eq Q[Trms:[TermList],errorT(Trm, Cxt, Str),Trms':[TermList]] = errorT(Trm, Cxt + " -> " + string(Q), Str) [print "errorT propagated past " Q] .
 
+ eq (errorT(Trm, Cxt, Str) = Trm') = errorCond(Trm, Cxt + " -> _=_", Str) .
+ eq errorCond(Trm, Cxt, Str) /\ T1:[Term] = T2:[Term] = errorCond(Trm, Cxt, Str) . 
 
  ceq errorM(AS, "no suitable least sorts found", Q[Trms, ETrm, Trms'], Cxt, M)
    = errorM(AS,  "no suitable least sorts found", ETrm, Cxt, M)
@@ -437,6 +440,7 @@ fmod META-K-ERROR is
   eq (cmb errorT(Trm,Cxt,Str) : Type if Cond [AS] .) = errorMb(Trm,Cxt,Str,AS)  [print "errorT propagated past cmb"] .
   eq (cmb Trm : Type if Cond [AS errorAS(Str, Str')] .) = errorMb('`[`]:K,"",Str' + " '" + Str + "'",AS) .
   eq (mb Trm : Type [AS errorAS(Str, Str')] .) = errorMb('`[`]:K,"",Str' + " '" + Str + "'",AS) .
+  eq (ceq Trm1:[Term] = Trm' if errorCond(Trm, Cxt, Str) [AS] .) = errorEq(Trm,Cxt + " -> ceq_if_.",Str,AS) .
   eq (ceq errorT(Trm,Cxt,Str) = Trm' if Cond [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (ceq Trm' = errorT(Trm,Cxt,Str) if Cond [AS] .) = errorEq(Trm,Cxt,Str,AS) .
   eq (eq errorT(Trm,Cxt,Str) = Trm' [AS] .) = errorEq(Trm,Cxt,Str,AS) .
