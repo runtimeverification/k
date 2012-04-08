@@ -3,9 +3,9 @@ module ISSUE
 	
 	syntax KResult ::= Nat | Int // it's necessary to include ints AND nats
 	
-	declare test1 : -> K
+	syntax K ::= "test1"                  [function]
 	
-	declare collapse : Bag -> K
+        syntax K ::= "collapse" "(" Bag ")"   [function klabel(collapse)]
 	syntax K ::= bar
 	
 	syntax K ::= foo ( Nat , K ) // change Nat to K and it works

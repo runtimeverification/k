@@ -686,7 +686,7 @@ with the most concrete class and going up in the hierarchy. */
   syntax K ::= Id "::" Bag
   // Id is the class name, BagItem is its corresponding environment
 
-  declare lookupMember : BagItem Id -> K
+  syntax K ::= "lookupMember" "(" BagItem "," Id ")"   [function klabel(lookupMember)]
   // BagItem is the envStack cell, Id is the member name
 
 // First look for the member in the top environment; if found then done.

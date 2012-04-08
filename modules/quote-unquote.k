@@ -7,12 +7,10 @@ module QUOTE-UNQUOTE imports K-VISITOR
              | "eval" K    [strict]
 
   syntax K ::= "isQuote" "(" K ")"  [function klabel(isQuote)]
---- declare isQuote : K -> K
   define isQuote(quote K) => true
   define isQuote(unquote K) => true
 
   syntax K ::= "mQuote" "(" K "," Nat ")" [function klabel(mQuote) latex "{\it quote}({#1},{#2})"]
----  declare mQuote : K Nat -> K [latex "{\it quote}({#1},{#2})"]
   define mQuote(K,N) 
     => visit K applying quoteit[N] if 'isQuote
     [structural]

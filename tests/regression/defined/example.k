@@ -1,9 +1,9 @@
 module ISSUE 
         syntax Exp ::= Int 
-        declare _/_ : Exp Exp -> Exp
+        syntax Exp ::= Exp "/" Exp   [function]
         define I1:Int / I2:Int => I1 /Int I2 when I2 =/=Int 0
 
-        declare _*_ : Exp Exp -> Exp
+        syntax Exp ::= Exp "*" Exp   [function]
         define 0 * _:Exp => 0
         define _:Exp * 0 => 0
         define I1:Int * I2:Int => I1 *Int I2

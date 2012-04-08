@@ -17,9 +17,7 @@ module URIS
   syntax K ::= "#fPutByte" "(" Int "," Int ")"   [function klabel(#fPutByte)]
              | "#flush" "(" Int ")"              [function klabel(#flush)]
              | "#fReadByte" "(" Int ")"          [function klabel(#fReadByte)]
----  declare #fPutByte : Int  Int -> K
----  declare #flush : Int -> K
----  declare #fReadByte : Int -> K
+
             
   define #open(S:String) => String2Int(#tcpRequest("open#" +String S +String "#")) 
 
@@ -27,7 +25,6 @@ module URIS
       => String2DotK(#tcpRequest("close#" +String Int2String(N) +String "#"))
 
   syntax K ::= "String2DotK" "(" String ")"  [function klabel(String2DotK)]
----  declare String2DotK : String -> K
   define String2DotK(S) => #ioError(#retrieveTCPError(S)) when #isTCPError(S)
   define String2DotK(S) => .K when notBool(#isTCPError(S))
   
@@ -66,7 +63,7 @@ module URIS
       => #string2Int(#tcpRequest("readbyte#" +String Int2String(N) +String "#"))
 
   syntax K ::= "#string2Int" "(" K ")"   [function klabel(#string2Int)]
----  declare #string2Int : K -> K
+
   define #string2Int(S) => String2Int(S) when lengthString(S) >=Int 0
   define #string2Int(#EOF) => #EOF
 
@@ -89,21 +86,17 @@ module URIS
   define #readChar() => #fReadChar(#stdin)
 
   syntax K ::= "#fReadChar" "(" Int ")"   [function klabel(#fReadChar)]
----  declare #fReadChar : Int -> K
   define #fReadChar(N) => #charString(#fReadByte(N))
 
   syntax K ::= "#charString" "(" K ")"   [function klabel(#charString)]
----  declare #charString : K -> K 
   define #charString(N:Int) => charString(N) 
   define #charString(#EOF) => #EOF
 
   syntax K ::= "#printChar" "(" K ")"   [function klabel(#printChar)]
----  declare #printChar : K -> K 
   rule #printChar(C) => #fPrintChar(#stdout,C)
   when isChar(C) [anywhere]
 
   syntax K ::= "#fPrintChar" "(" Int "," K ")"   [function klabel(#fPrintChar)]
----  declare #fPrintChar : Int K -> K 
   rule #fPrintChar(N,C:String) => #fPutByte(N,asciiString(C)) 
   when isChar(C) [anywhere]
 

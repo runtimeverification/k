@@ -296,7 +296,7 @@ KOOL).  */
   rule (env(_) => .) ~> env(_) [structural]
 
 // typeOf
-  declare typeOf :  K -> Type
+  syntax Type ::= "typeOf" "(" K ")"   [function klabel(typeOf)]
   define typeOf(I) => int              
   define typeOf(B) => bool            
   define typeOf(_:String) => string 
@@ -304,7 +304,7 @@ KOOL).  */
   define typeOf(undefined(T)) => T  
   define typeOf(nothing) => void   
 
-  declare types : Exps ->  Types 
+  syntax Types ::= "types" "(" Exps ")"   [function klabel(types)]
   define types(.Exps) => void,.Types  
   define types(X : T,.Exps) => T,.Types
   define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)
@@ -589,7 +589,7 @@ Like in untyped KOOL. */
 Like in untyped KOOL. */
 
   syntax K ::= Id "::" Bag
-  declare lookupMember : BagItem Id -> K 
+  syntax K ::= "lookupMember" "(" BagItem "," Id ")"   [function klabel(lookupMember)]
   define lookupMember(<envStack> ListItem(_:Id :: <env>...X|->L...</env>)
                     ...</envStack>,X) => lookup(L) 
   define lookupMember(<envStack> ListItem(_:Id :: <env> Env </env>)
@@ -625,7 +625,7 @@ The subclass relation introduces a subtyping relation. */
 Performs unsafe casting.  One should only use it in combination with
 the subtype relation above.  */
 
-  declare unsafeCast : Val Type -> Val
+  syntax Val ::= "unsafeCast" "(" Val "," Type ")"   [function klabel(unsafeCast)]
   define unsafeCast(objectClosure(<crntClass>_:K </crntClass> Obj), class Class)
     => objectClosure(<crntClass> Class </crntClass> Obj)
   define unsafeCast(V,T) => V when typeOf(V) ==K T 

@@ -194,7 +194,7 @@ typed SIMPLE, so we do not discuss them much here. */
 /*@ Although functions turn into methods and get a slightly different
 semantics, the \texttt{types(...)} operation stays the same. */
 
-  declare types : Exps -> Types 
+  syntax Types ::= "types" "(" Exps ")"   [function klabel(types)]
   define types(.Exps) => void,.Types                    
   define types(X : T, .Exps) => T,.Types                      
   define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)

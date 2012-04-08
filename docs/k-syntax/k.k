@@ -46,7 +46,6 @@ module K-SYNTAX
     | "configuration" BagTerms
     | "rule" Term ("when" KTerm)? ("[" Attrs "]")?
     | "tags"  Ids
-    | "declare" #Id ":" Sorts "->" Sort ("[" Attrs "]")? 
     | "define" Term ("when" KTerm)? ("[" Attrs "]")?
     | LatexComment
 
@@ -125,7 +124,7 @@ module K-SYNTAX
    syntax Attrs ::= List{Attr,""}
    
    syntax Attr ::= AttrKey "(" #Text ")"
-   syntax AttrKey ::= #Id | "strict" | "seqstrict" | "hybrid" 
+   syntax AttrKey ::= #Id | "strict" | "seqstrict" | "hybrid" | "function"
                     | "structural" | "transition" | "superheat" | "supercool"
                     | "latex" | "large"
                     | "binder"

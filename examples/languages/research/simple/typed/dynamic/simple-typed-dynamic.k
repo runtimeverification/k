@@ -352,7 +352,7 @@ When done with the first pass, call \texttt{main()}. */
   rule (env(_) => .) ~> env(_) [structural]
 
 //@ \texttt{typeOf}
-  declare typeOf : K -> Type
+  syntax Type ::= "typeOf" "(" K ")"   [function klabel(typeOf)]
   define typeOf(I) => int
   define typeOf(B) => bool
   define typeOf(_:String) => string
@@ -367,7 +367,7 @@ When done with the first pass, call \texttt{main()}. */
 which eventually are translated into cons-lists "(a,(b,(c,.)))".
 Unfortunately, the current K tool is not able to cons-listify
 the RHSes of the rules below, so we have to do it manually.  */
-  declare types : Exps -> Types
+  syntax Types ::= "types" "(" Exps ")"   [function klabel(types)]
   define types(.Exps) => void,.Types 
   define types(X : T,.Exps) => T,.Types
   define types(X : T, E:Exp, Es:Exps) => T, types(E,Es)

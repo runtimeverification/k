@@ -1,6 +1,6 @@
 module ISSUE 
 
-   declare sum : K K -> K
+   syntax K ::= "sum" "(" K "," K ")"   [function klabel(sum)]
    define sum(X:Int,0) => X
    define sum(0,Y:Int) => Y
    define sum(X:Int,Y:Int) => X +Int Y

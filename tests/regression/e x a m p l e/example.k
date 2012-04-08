@@ -1,7 +1,7 @@
 
 module EXAMPLE 
   syntax Bag ::= "start" | "good" | "bad"
-  declare test : Int -> K
+  syntax K ::= "test" "(" Int ")"   [function klabel(test)]
   rule test(I:Int) => I %Int 5
 
 
