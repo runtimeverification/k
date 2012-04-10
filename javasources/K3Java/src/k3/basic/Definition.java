@@ -108,7 +108,7 @@ public class Definition implements Cloneable {
 		file = new File(filepath);
 
 		if (!file.exists()) {
-			file = new File(Kil2Maude.getKBase(false) + "/lib/" + inclFile);
+			file = new File(Kil2Maude.getKBase(false) + "/include/" + inclFile);
 			if (file.exists()) {
 				return new File(file.getCanonicalPath());
 			}
