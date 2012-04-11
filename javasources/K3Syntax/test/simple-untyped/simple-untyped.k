@@ -1,7 +1,7 @@
 require "built-ins.k"
 
 module SIMPLE-UNTYPED-SYNTAX
-  including K
+  imports K
   syntax Start ::= Stmts
   syntax Ids ::= List{#Id,","} [strict, cons("Ids1ListSyn"), hybrid]
   syntax Exps ::=  List{Exp,","} [cons("Exps1ListSyn")]
@@ -67,7 +67,7 @@ endmodule
 
 
 module SIMPLE-UNTYPED
-  including SIMPLE-UNTYPED-SYNTAX
+  imports SIMPLE-UNTYPED-SYNTAX
 
   // coming from macros
   rule if E:Exp then S:Stmt => if E then S else {}

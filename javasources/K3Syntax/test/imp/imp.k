@@ -1,7 +1,7 @@
 require "built-ins.k"
 
 module IMP-SYNTAX
-  including K
+  imports K
 
   syntax AExp ::= #Int | #Id
   				| AExp "/" AExp [left, strict]
@@ -28,7 +28,7 @@ endmodule
 
 
 module IMP
-  including IMP-SYNTAX
+  imports IMP-SYNTAX
 
   configuration <T> 
   					<k> PGM : K </k>

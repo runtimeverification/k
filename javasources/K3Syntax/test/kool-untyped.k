@@ -1,7 +1,7 @@
 require "built-ins.k"
 
 module KOOL-UNTYPED-SYNTAX
-  including K
+  imports K
 
   syntax Start ::= Stmts
   syntax Ids ::= List{#Id,","} [strict, cons("Ids1ListSyn"), hybrid]
@@ -11,11 +11,12 @@ module KOOL-UNTYPED-SYNTAX
 
   syntax Exp ::= #Int | #Bool | #String | #Id
                | "++" Exp              [prec(0)]
-               | Exp "+" Exp           [strict /*prec(33) gather(E e)*/]
-               | Exp "-" Exp           [strict /*prec(33) gather(E e)*/]
+               | Exp "[" Exps "]"      [strict /*prec(1)*/]
                | Exp "*" Exp           [strict /*prec(31) gather(E e)*/]
                | Exp "/" Exp           [strict /*prec(31) gather(E e)*/]
                | Exp "%" Exp           [strict /*prec(31) gather(E e)*/]
+               | Exp "+" Exp           [strict /*prec(33) gather(E e)*/]
+               | Exp "-" Exp           [strict /*prec(33) gather(E e)*/]
                | "-" Exp               [strict]
                | Exp "<" Exp           [strict /*prec(37)*/]
                | Exp "<=" Exp          [strict /*prec(37)*/]
@@ -23,13 +24,12 @@ module KOOL-UNTYPED-SYNTAX
                | Exp ">=" Exp          [strict /*prec(37)*/]
                | Exp "==" Exp          [strict /*prec(37)*/]
                | Exp "!=" Exp          [strict /*prec(37)*/]
+               | Exp "=" Exp           [strict(2) /*prec(40) gather (e E)*/]
                | Exp "and" Exp         [strict /*prec(55) gather(E e)*/]
                | Exp "or" Exp          [strict /*prec(59) gather(E e)*/]
                | "not" Exp             [strict /*prec(53)*/]
-               | Exp "[" Exps "]"      [strict /*prec(1)*/]
                | "sizeOf" "(" Exp ")"  [strict]
                | "read" "(" ")"
-               | Exp "=" Exp           [strict(2) /*prec(40) gather (e E)*/]
 
   syntax Stmt ::= "{" "}"
                 | "{" Stmts "}"
@@ -69,17 +69,17 @@ module KOOL-UNTYPED-SYNTAX
 endmodule
 
 module KOOL-UNTYPED
-  including KOOL-UNTYPED-SYNTAX
-  
+  imports KOOL-UNTYPED-SYNTAX
+
   syntax #Id ::= "main"  
-  
+
   // coming from macros
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:#Id = E1 to E2 do S) => {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
   rule var X = E, .Exps; => var X, .Exps; X = E;
-    
-  rule class Class:#Id {Ss:Stmts} => class Class extends object {Ss}  
+
+  rule class Class:#Id {Ss:Stmts} => class Class extends object {Ss}
 
   configuration <T color="red">
                   <threads color="orange">

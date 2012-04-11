@@ -14,7 +14,7 @@ context-free syntax
 	"module" ModName KModHeader KSentence* "endmodule" -> KModule {cons("KModule")}
 	"interface" ModName KModHeader KSentence* "endinterface" -> KModule {cons("KInterface")}
 	KModHeaderItem* 	-> KModHeader {cons("KModHeader")}
-	"including" KModExp -> KModHeaderItem {cons("Including")}
+	"imports" KModExp -> KModHeaderItem {cons("Including")}
 	{ModName "+"}+ 		-> KModExp {cons("ModuleSum")}
 	MODNAME				-> ModName {cons("ModName")}
 

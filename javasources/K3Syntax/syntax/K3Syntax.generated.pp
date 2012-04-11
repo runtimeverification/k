@@ -9,7 +9,7 @@
    KInterface.3:iter-star    -- _1,
    KModHeader                -- _1,
    KModHeader.1:iter-star    -- _1,
-   Including                 -- KW["including"] _1,
+   Including                 -- KW["imports"] _1,
    ModuleSum                 -- _1,
    ModuleSum.1:iter-sep      -- _1 KW["+"],
    ModName                   -- _1,

@@ -1,3 +1,5 @@
+require "builtins/builtins.k"
+
 interface K-MAP-EXTRAS
 	including K-TECHNIQUE
 	including #BOOL
