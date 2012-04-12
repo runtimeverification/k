@@ -1,2 +1,12 @@
-  rule (<thread> .K </thread> => .)
-        
+  rule <k> 1 ~> 2 ~> 3 ~> 4 ~> 5</k>
+
+  rule
+  <k1> .K </k>
+  <k2> .K </k>
+  <k3> .K </k>
+  <k4> .K </k>
+  <k5> .K </k>
+  <k6> .K </k>
+  <k7> .K </k>
+  
+  rule 'asdf(1 ,, 2 ,, 3) ~> 'asdf(1)

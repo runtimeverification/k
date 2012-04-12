@@ -15,7 +15,7 @@ context-free syntax
 	%% K Sentences
 	%%"macro" Bag "=" Bag			-> KSimpleSentence {cons("Macro")}
 	"configuration" Bag			-> KSentence {cons("Config")}
-	"rule" Label K				-> KSimpleSentence {cons("K1Rule")}
+	%%"rule" Label K				-> KSimpleSentence {cons("K1Rule")}
 	"rule" Label List			-> KSimpleSentence {cons("List1Rule")}
 	"rule" Label Bag			-> KSimpleSentence {cons("Bag1Rule")}
 	"rule" Label ListDlKDr		-> KSimpleSentence {cons("ListDlKDr1Rule")}

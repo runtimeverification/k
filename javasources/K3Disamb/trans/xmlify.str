@@ -41,22 +41,6 @@ rules
 		where prop := <all(to-xml)> b'
 		where loc := <getLocAsString>
 
-	to-xml1:	// with wrappers, remove the constructor for lists
-		List1List(a, b) -> $[[<to-xml>a]
-		[<to-xml>b]]
-	to-xml1:
-		Bag1List(a, b) -> $[[<to-xml>a]
-		[<to-xml>b]]
-	to-xml1:
-		Set1List(a, b) -> $[[<to-xml>a]
-		[<to-xml>b]]
-	to-xml1:
-		Map1List(a, b) -> $[[<to-xml>a]
-		[<to-xml>b]]
-	to-xml1:
-		ListDlKDr1List(a, b) -> $[[<to-xml>a]
-		[<to-xml>b]]
-
 	to-xml1:
 		CellProperty(a, b) -> $[[<id>""] [a]=[<xmlStringEscapeToString>b]]
 
@@ -267,17 +251,17 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:	// sort wrappers
-		a#([b]) -> $[<[sort] sort="[sort2]" loc="[loc]">
+		a#(b) -> $[<[sort] sort="[sort2]" loc="[loc]">
 						[children]
 		</[sort]>
 		]
-		where <string-ends-with(|"Wrap")> a
-		where mydebug(!"Wrap: ")
-		where children := <to-xml> b
+		where <string-ends-with(|"List")> a
+		where mydebug(!"1List: ")
+		where children := <all(to-xml)> b
 		where sort2 := <getSort> a
 		where sort  := <?"List{K}" < !"ListOfK" + id> sort2
 		where loc := <getLocAsString>
-		
+
 	to-xml2:	// sort items
 		a#([b]) -> $[<[sort] sort="[sort]" loc="[loc]">
 						[<to-xml> b]

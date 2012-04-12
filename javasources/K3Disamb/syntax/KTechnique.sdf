@@ -9,89 +9,80 @@ context-free priorities
 	".K"		-> K {cons("K12Empty"), prefer}
 	"."			-> K {cons("K1Empty")}
 	K "~>" K	-> K {left, cons("K1Seq")}
-	".List{K}"	-> ListDlKDrDz {cons("ListDlKDr12Empty")}
-	ListDlKDrDz   ",," ListDlKDrDz	-> ListDlKDrDz {left, cons("ListDlKDr1List")}
+	".List{K}"	-> ListDlKDr {cons("ListDlKDr12Empty")}
+	ListDlKDr   ",," ListDlKDr	-> ListDlKDr {left, cons("ListDlKDr1List")}
 	KLabel "(" ListDlKDr ")"	-> K {cons("K1App")}
 } > { non-assoc:
 	K "=>" K	-> K {non-assoc, cons("K1Rewrite")}
-	ListDlKDr  "=>" ListDlKDr	-> ListDlKDrDz {non-assoc, cons("ListDlKDr1Rewrite")}
+	ListDlKDr  "=>" ListDlKDr	-> ListDlKDr {non-assoc, cons("ListDlKDr1Rewrite")}
 }
 context-free syntax
-	K					-> ListDlKDrDz %%{cons("ListOfK3K")}
+	K					-> ListDlKDr %%{cons("ListOfK3K")}
 	"HOLE"				-> K {cons("K1Hole")}
 	"HOLE" ":" "K"		-> K {cons("K12Hole")}
 	"(" ListDlKDr ")"	-> ListDlKDr {bracket}
 	"(" K ")"			-> K {bracket}
-	ListDlKDrDz			-> ListDlKDr {cons("ListDlKDr1ListOfKWrap")}
 	KLabel "=>" KLabel	-> KLabel {cons("KLabel1Rewrite")}
 
 context-free priorities
 {
-	".List"					-> ListDz {cons("List12Empty"), prefer}
-	"."						-> ListDz {cons("List1Empty")}
+	".List"					-> List {cons("List12Empty"), prefer}
+	"."						-> List {cons("List1Empty")}
 	"ListItem" "(" K ")"	-> ListItem {cons("ListItem1LIKItem")}
-	ListItem				-> ListDz
-	ListDz ListDz			-> ListDz {left, cons("List1List")}
+	ListItem				-> List
+	List List				-> List {left, cons("List1List")}
 } > {
-	List "=>" List			-> ListDz {non-assoc, cons("List1Rewrite")}
+	List "=>" List			-> List {non-assoc, cons("List1Rewrite")}
 }
 context-free syntax
 	"(" List ")"			-> List {bracket}
-	"(" ListDz ")"			-> ListDz {bracket}
-	ListDz					-> List {cons("List1ListWrap")}
 
 context-free priorities
 {
-	".Bag"				-> BagDz {cons("Bag12Empty"), prefer}
-	"."					-> BagDz {cons("Bag1Empty")}
-	BagItem				-> BagDz
+	".Bag"				-> Bag {cons("Bag12Empty"), prefer}
+	"."					-> Bag {cons("Bag1Empty")}
+	BagItem				-> Bag
 	"BagItem" "(" K ")" -> BagItem {cons("BagItem1BIKItem")}
 	%%BagItem+			-> Bag {cons("BagList")}
-	BagDz BagDz			-> BagDz {left, cons("Bag1List")}
+	Bag Bag				-> Bag {left, cons("Bag1List")}
 } > {
-	Bag "=>" Bag		-> BagDz {non-assoc, cons("Bag1Rewrite")}
+	Bag "=>" Bag		-> Bag {non-assoc, cons("Bag1Rewrite")}
 }
 context-free syntax
 	%%"(" BagItem ")"	-> BagItem {bracket}
 	"(" Bag ")"			-> Bag {bracket}
-	"(" BagDz ")"		-> BagDz {bracket}
-	BagDz				-> Bag {cons("Bag1BagWrap")}
 
 context-free priorities
 {
-	".Set"				-> SetDz {cons("Set12Empty"), prefer}
-	"."					-> SetDz {cons("Set1Empty")}
+	".Set"				-> Set {cons("Set12Empty"), prefer}
+	"."					-> Set {cons("Set1Empty")}
 	"SetItem" "(" K ")" -> SetItem {cons("SetItem1SIKItem")}
 	%%SetItem+			-> Set {cons("SetList")}
-	SetItem				-> SetDz %%{cons("Set3SetItem")}
-	SetDz SetDz			-> SetDz {left, cons("Set1List")}
+	SetItem				-> Set %%{cons("Set3SetItem")}
+	Set Set				-> Set {left, cons("Set1List")}
 } > {
-	Set "=>" Set		-> SetDz {non-assoc, cons("Set1Rewrite")}
+	Set "=>" Set		-> Set {non-assoc, cons("Set1Rewrite")}
 }
 context-free syntax
 	%%"(" SetItem ")"		-> SetItem {bracket}
 	"(" Set ")"				-> Set {bracket}
-	"(" SetDz ")"			-> SetDz {bracket}
-	SetDz					-> Set {cons("Set1SetWrap")}
 
 context-free priorities
 {
-	".Map"			-> MapDz {cons("Map12Empty"), prefer}
-	"."				-> MapDz {cons("Map1Empty")}
-	MapItem			-> MapDz %%{cons("Map3MapItem")}  %% Does SDF supports subsorting closure? I believe it generates ambiguities
+	".Map"			-> Map {cons("Map12Empty"), prefer}
+	"."				-> Map {cons("Map1Empty")}
+	MapItem			-> Map %%{cons("Map3MapItem")}  %% Does SDF supports subsorting closure? I believe it generates ambiguities
 	"MapItem" "(" K "," K ")"	-> MapItem {cons("MapItem1KKItem")}
 	ListDlKDr "|->" ListDlKDr	-> MapItem {cons("MapItem1LKLKItem")}
 	%%K "|->" K					-> MapItem {cons("MapItem1MapsTo")}
-	MapDz   MapDz				-> MapDz {left, cons("Map1List")}
+	Map   Map				-> Map {left, cons("Map1List")}
 	%%Map "[" K "/" K "]"		-> Map {cons("Map1MapReplaceK")}
 } > {
-	Map "=>" Map			-> MapDz {non-assoc, cons("Map1Rewrite")}
+	Map "=>" Map			-> Map {non-assoc, cons("Map1Rewrite")}
 }
 context-free syntax
 	%%"(" MapItem ")"		-> MapItem {bracket}
 	"(" Map ")"				-> Map {bracket}
-	"(" MapDz ")"			-> MapDz {bracket}
-	MapDz					-> Map {cons("Map1MapWrap")}
 
 context-free syntax
 	%% TODO: Variables Dunno what to do with the variables

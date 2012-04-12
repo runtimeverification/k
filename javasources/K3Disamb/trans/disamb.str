@@ -24,14 +24,13 @@ strategies
 		flatten-amb-2 ;
 		//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
 		disambigCellTypes ;
-		topdown(try(remDuplicateRules)) ;
 		emphasizeVars ;
 		type-inferenceTypeSystem ;
 		chooseBestFitRec ;
 		type-inferenceSupremum ;
 		var-type-inference2 ; // new type inference where I correct the first type inference
 		topdown(try(correctRewrite)) ;
-		flattenKSequence
+		flattenKLists
 		 /**///;
 		//where(ts2 := <term-size> ; !(ts2, <div> (<mul>(ts2, 100.0) ,ts1), <div> (<mul>(ts2, 100.0) ,ts)) ; debug(!"FinalSize(,%,%): "))
 
@@ -43,19 +42,28 @@ strategies
 		type-inferenceTypeSystem ;
 		type-inferenceSupremum ;
 		chooseBestFitRec ;
-		flattenKSequence
+		flattenKLists
 
 
 	mydisambiguate2 = all(mydisambiguate)
 
-	flattenKSequence = topdown(try(fks2))
+	flattenKLists = bottomup(try(fks2)) ; bottomup(try(flists2))
 	fks2:
-		K1Seq(a, b) -> "K1Seq"#(<flatten-list> [<fks3> a, <fks3> b])
-	fks3 = try(fks4)
-	fks4:
-		K1Seq(a, b) -> [<fks3> a, <fks3> b]
+		K1Seq(a, b) -> "K1Seq"#(<flatten-list> [a', b'])
+		where a' := <try(fks3)> a
+		where b' := <try(fks3)> b
+	fks3:
+		"K1Seq"#(a) -> a
 
+	flists2:
+		a#([b, c]) -> a#(<flatten-list> [b', c'])
+		where <string-ends-with(|"1List")> a
+		where b' := <try(flists3(|a))> b
+		where c' := <try(flists3(|a))> c
 
+	flists3(|a):
+		a#(b) -> b
+		
 
 	// manual corrections
 	correctDitto =	// correct the ditto constructs
@@ -66,11 +74,6 @@ strategies
 	replaceDitto2(|children):
 		x -> x#(children)
 
-
-	remDuplicateRules:	// remove ListOfK1Rule when K1Rule is present
-		amb([K1Rule(a, b), ListDlKDr1Rule(_, _)]) -> K1Rule(a, b)
-	remDuplicateRules:
-		amb([ListDlKDr1Rule(_, _), K1Rule(a, b)]) -> K1Rule(a, b)
 
 	correctRewrite:	// K1Rewrite must bind as low as possible, this why choose it to be as high as possible in the AST
 		amb(x) -> K1Rewrite(a, b)
