@@ -31,6 +31,7 @@ public class KRunner {
 	private boolean _append;
 	private String _outputFileName;
 	private String _errorFileName;
+	private String _xmlFileName;
 	private String _maudeModule;
 	private boolean _createLogs;
 	private boolean _noServer;
@@ -45,6 +46,7 @@ public class KRunner {
 		OptionSpec<Boolean> append = _parser.accepts("appendLogs", "Whether or not messages should be appended to log files").withRequiredArg().ofType(Boolean.class).defaultsTo(false);
 		OptionSpec<File> outputFile = _parser.accepts("outputFile", "File to save resulting term").withRequiredArg().ofType(File.class).defaultsTo(new File("/dev/stdout"));
 		OptionSpec<File> errorFile = _parser.accepts("errorFile", "File to save any Maude errors").withRequiredArg().ofType(File.class).defaultsTo(new File("/dev/stdout"));
+		OptionSpec<File> xmlFile = _parser.accepts("xmlFile", "File to save Maude's XML log").withRequiredArg().ofType(File.class).defaultsTo(new File("/dev/null"));
 		OptionSpec<File> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(File.class);
 		OptionSpec<String> maudeModuleName = _parser.accepts("moduleName", "Final module name").withRequiredArg().required().ofType(String.class);
 		OptionSpec<Void> createLogs = _parser.accepts("createLogs", "Create runtime log files");
@@ -61,6 +63,7 @@ public class KRunner {
 			_append = options.valueOf(append);
 			_outputFileName = options.valueOf(outputFile).getCanonicalPath();
 			_errorFileName = options.valueOf(errorFile).getCanonicalPath();
+			_xmlFileName = options.valueOf(xmlFile).getCanonicalPath();
 			_maudeModule = options.valueOf(maudeModuleName);
 			_createLogs = options.has(createLogs);
 			_noServer = options.has(noServer);
@@ -118,7 +121,7 @@ public class KRunner {
 			+ "load {3}\n"
 			;
 		String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
-		MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName, _logger);
+		MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName, _xmlFileName, _logger);
 		
 		maude.start();
 		_logger.info("Maude started");
