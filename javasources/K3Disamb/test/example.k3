@@ -1,1 +1,2 @@
-rule ('asdf => X)(A)
+  rule (<thread> .K </thread> => .)
+        

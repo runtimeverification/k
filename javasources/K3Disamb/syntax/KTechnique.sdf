@@ -36,7 +36,8 @@ context-free priorities
 	List "=>" List			-> ListDz {non-assoc, cons("List1Rewrite")}
 }
 context-free syntax
-	"(" List ")"			-> ListDz {bracket}
+	"(" List ")"			-> List {bracket}
+	"(" ListDz ")"			-> ListDz {bracket}
 	ListDz					-> List {cons("List1ListWrap")}
 
 context-free priorities
@@ -52,7 +53,8 @@ context-free priorities
 }
 context-free syntax
 	%%"(" BagItem ")"	-> BagItem {bracket}
-	"(" Bag ")"			-> BagDz {bracket}
+	"(" Bag ")"			-> Bag {bracket}
+	"(" BagDz ")"		-> BagDz {bracket}
 	BagDz				-> Bag {cons("Bag1BagWrap")}
 
 context-free priorities
@@ -68,7 +70,8 @@ context-free priorities
 }
 context-free syntax
 	%%"(" SetItem ")"		-> SetItem {bracket}
-	"(" Set ")"				-> SetDz {bracket}
+	"(" Set ")"				-> Set {bracket}
+	"(" SetDz ")"			-> SetDz {bracket}
 	SetDz					-> Set {cons("Set1SetWrap")}
 
 context-free priorities
@@ -86,7 +89,8 @@ context-free priorities
 }
 context-free syntax
 	%%"(" MapItem ")"		-> MapItem {bracket}
-	"(" Map ")"				-> MapDz {bracket}
+	"(" Map ")"				-> Map {bracket}
+	"(" MapDz ")"			-> MapDz {bracket}
 	MapDz					-> Map {cons("Map1MapWrap")}
 
 context-free syntax
