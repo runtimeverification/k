@@ -1,4 +1,4 @@
-require "built-ins.k"
+require "../builtins/builtins.k"
 
 module IMP-SYNTAX
   imports K

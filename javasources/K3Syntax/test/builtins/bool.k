@@ -17,25 +17,25 @@ module BOOL-HOOKS
 				  Bool "==Bool" Bool		[function, left, hook(#BOOL:_==Bool_)]
 				| Bool "=/=Bool" Bool		[function, left]
 
-  rule true orBool B:Bool => true
-  rule false orBool B:Bool => B 
+  rule true orBool B:Bool => true [function, anywhere]
+  rule false orBool B:Bool => B [function, anywhere]
 
-  rule true andBool A:Bool => A:Bool
-  rule false andBool A:Bool => false
+  rule true andBool A:Bool => A:Bool [function, anywhere]
+  rule false andBool A:Bool => false [function, anywhere]
 
-  rule false xorBool A:Bool => A:Bool
-  rule A:Bool xorBool A:Bool => false
+  rule false xorBool A:Bool => A:Bool [function, anywhere]
+  rule A:Bool xorBool A:Bool => false [function, anywhere]
 
-  rule notBool true => false
-  rule notBool false => true
+  rule notBool true => false [function, anywhere]
+  rule notBool false => true [function, anywhere]
 
-  rule true impliesBool B:Bool => B
-  rule false impliesBool _:Bool => true
+  rule true impliesBool B:Bool => B [function, anywhere]
+  rule false impliesBool _:Bool => true [function, anywhere]
 
 
   syntax KLabel ::= "'#andBool" // People should not be using this
 
-  rule '#andBool((true => .List{K}),, _)
-  rule '#andBool(true) => true 
-  rule '#andBool(false,, _) => false
+  rule '#andBool((true => .List{K}),, _) [function, anywhere]
+  rule '#andBool(true) => true  [function, anywhere]
+  rule '#andBool(false,, _) => false [function, anywhere]
 endmodule

@@ -26,7 +26,7 @@ module FLOAT-HOOKS
 				| Float "==Float" Float		[function, left, latex("{#1}\mathrel{==_{\scriptstyle\it Float}}{#2}"), hook(#FLOAT:_==Float_)]
 				| Float "=/=Float" Float	[function, left, latex("{#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2}")]
 
-  rule F1:Float =/=Float F2:Float => notBool(F1 ==Float F2)
+  rule F1:Float =/=Float F2:Float => notBool(F1 ==Float F2) [function, anywhere]
 
   syntax Float ::= "Int2Float" "(" Int ")"	[function, klabel(Int2Float), latex("{\\it{}Int2Float}"), hook(#CONVERSION:int2Float)]
   syntax Int ::= "Float2Int" "(" Float ")"	[function, klabel(Float2Int), latex("{\\it{}Float2Int}"), hook(#CONVERSION:float2Int)]

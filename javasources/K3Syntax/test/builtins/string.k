@@ -31,22 +31,22 @@ module STRING-HOOKS
   syntax Id ::= "String2Id" "(" String ")"		 [function, klabel(String2Id), hook(#CONVERSION:string2Id)]
 
   syntax Bool ::= String "=/=String" String      [function]
-  rule S1:String =/=String S2:String => notBool(S1 ==String S2)
+  rule S1:String =/=String S2:String => notBool(S1 ==String S2) [function, anywhere]
 
   //sort Char
 
   syntax Bool ::= "isChar" "(" String ")"        [function, klabel(isChar)]
-  rule isChar(S:String) => lengthString(S) ==Int 1 
+  rule isChar(S:String) => lengthString(S) ==Int 1 [function, anywhere]
 
   syntax Bool ::= "#isWhiteSpace" "(" Char ")"   [function, klabel(#isWhiteSpace)]
-  rule #isWhiteSpace(C:Char) 
+  rule #isWhiteSpace(C:Char)
       => (asciiString(C) >=Int 9 andBool asciiString(C) <=Int 13)  
-           orBool (C ==String " ")
+           orBool (C ==String " ") [function, anywhere]
 
   syntax Bool ::= "#isDigit" "(" Char ")"        [function, klabel(#isDigit)]
   rule #isDigit(C) 
       => (asciiString(C) >=Int asciiString("0")) 
-           andBool (asciiString(C) <=Int asciiString("9")) 
+           andBool (asciiString(C) <=Int asciiString("9")) [function, anywhere]
 endmodule
 
 
