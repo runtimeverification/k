@@ -1,4 +1,4 @@
-require "../builtins/builtins.k"
+require "../k-prelude.k"
 
 module IMP-SYNTAX
   imports K
@@ -64,7 +64,7 @@ module IMP
 
   rule [program-still-vars]:
   	 	<k> var X:#Id, Xs:Ids; S => var Xs; S ...</k>
-  	 	<env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
+  	    <env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
 
   rule [program-no-vars]: <k> var .Ids ; S => S ...</k> [structural]
 

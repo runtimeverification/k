@@ -87,26 +87,26 @@ context-free syntax
 context-free syntax
 	%% TODO: Variables Dunno what to do with the variables
 	%% VarId ":" Type		-> Variable {cons("TypedVar")}
-	VARID ":" "List"		-> ListDz {cons("List12Var")}
-	VARID					-> ListDz {cons("List1Var")}
-	VARID ":" "ListItem"	-> ListDz {cons("ListItem12Var")}
-	VARID					-> ListDz {cons("ListItem1Var")}
-	VARID ":" "Set"			-> SetDz {cons("Set12Var")}
-	VARID					-> SetDz {cons("Set1Var")}
-	VARID ":" "SetItem"		-> SetDz {cons("SetItem12Var")}
-	VARID					-> SetDz {cons("SetItem1Var")}
-	VARID ":" "Bag"			-> BagDz {cons("Bag12Var")}
-	VARID					-> BagDz {cons("Bag1Var")}
-	VARID ":" "BagItem"		-> BagDz {cons("BagItem12Var")}
-	VARID					-> BagDz {cons("BagItem1Var")}
-	VARID ":" "Map"			-> MapDz {cons("Map12Var")}
-	VARID					-> MapDz {cons("Map1Var")}
-	VARID ":" "MapItem"		-> MapDz {cons("MapItem12Var")}
-	VARID					-> MapDz {cons("MapItem1Var")}
+	VARID ":" "List"		-> List {cons("List12Var")}
+	VARID					-> List {cons("List1Var")}
+	VARID ":" "ListItem"	-> List {cons("ListItem12Var")}
+	VARID					-> List {cons("ListItem1Var")}
+	VARID ":" "Set"			-> Set {cons("Set12Var")}
+	VARID					-> Set {cons("Set1Var")}
+	VARID ":" "SetItem"		-> Set {cons("SetItem12Var")}
+	VARID					-> Set {cons("SetItem1Var")}
+	VARID ":" "Bag"			-> Bag {cons("Bag12Var")}
+	VARID					-> Bag {cons("Bag1Var")}
+	VARID ":" "BagItem"		-> Bag {cons("BagItem12Var")}
+	VARID					-> Bag {cons("BagItem1Var")}
+	VARID ":" "Map"			-> Map {cons("Map12Var")}
+	VARID					-> Map {cons("Map1Var")}
+	VARID ":" "MapItem"		-> Map {cons("MapItem12Var")}
+	VARID					-> Map {cons("MapItem1Var")}
 	VARID ":" "K"			-> K {cons("K12Var")}
 	VARID					-> K {cons("K1Var")}
-	VARID ":" "List{K}"		-> ListDlKDrDz {cons("ListDlKDr12Var")}
-	VARID					-> ListDlKDrDz {cons("ListDlKDr1Var")}
+	VARID ":" "List{K}"		-> ListDlKDr {cons("ListDlKDr12Var")}
+	VARID					-> ListDlKDr {cons("ListDlKDr1Var")}
 	VARID ":" "KLabel"		-> KLabel {cons("KLabel12Var")}
 	VARID					-> KLabel {cons("KLabel1Var")}
 

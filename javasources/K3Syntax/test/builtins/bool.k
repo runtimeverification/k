@@ -33,7 +33,7 @@ module BOOL-HOOKS
   rule false impliesBool _:Bool => true [function, anywhere]
 
 
-  syntax KLabel ::= "'#andBool" // People should not be using this
+  //syntax KLabel ::= "'#andBool" // People should not be using this
 
   rule '#andBool((true => .List{K}),, _) [function, anywhere]
   rule '#andBool(true) => true  [function, anywhere]

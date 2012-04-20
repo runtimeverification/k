@@ -1,4 +1,4 @@
-require "built-ins.k"
+require "../k-prelude.k"
 
 module SIMPLE-UNTYPED-SYNTAX
   imports K
@@ -167,7 +167,7 @@ module SIMPLE-UNTYPED
   rule I1:#Int * I2:#Int => I1 *Int I2
   rule I1:#Int / I2:#Int => I1 /Int I2 when I2 =/=Bool 0
   rule I1:#Int % I2:#Int => I1 %Int I2 when I2 =/=Bool 0
-  rule - I:#Int => -Int I
+  rule - I:#Int => 0 -Int I
   rule I1:#Int < I2:#Int => I1 <Int I2
   rule I1:#Int <= I2:#Int => I1 <=Int I2
   rule I1:#Int > I2:#Int => I1 >Int I2

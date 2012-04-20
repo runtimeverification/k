@@ -205,14 +205,8 @@ public class Definition implements Cloneable {
 				System.exit(0);
 			} else if (!p.isSubsort()) {
 				sdf += "	" + getSDFProds(p.getItems()) + "-> ";
-				Sort s = p.getProdSort();
 				if (p.getProdSort().isBaseSort()) {
-					if (s.getSortName().equals("Map") || s.getSortName().equals("Set") || s.getSortName().equals("Bag") || s.getSortName().equals("List")
-							|| s.getSortName().equals("List{K}")) {
-						sdf += StringUtil.escapeSortName(p.getProdSort().getSortName()) + "Dz";
-					} else {
 						sdf += StringUtil.escapeSortName(p.getProdSort().getSortName());
-					}
 				} else
 					sdf += "K";
 				sdf += getSDFAttributes(p.getAttributes()) + "\n";

@@ -2,7 +2,7 @@ require "builtins/builtins.k"
 
 interface K-MAP-EXTRAS
 	imports K-TECHNIQUE
-	imports #BOOL
+	imports BOOL
 
 	syntax K ::= Map "(" K ")" [prec(0)]
 
@@ -17,33 +17,33 @@ endinterface
 
 interface K-SET-EXTRAS
 	imports K-TECHNIQUE
-	imports #IF-THEN-ELSE
+	imports IF-THEN-ELSE
 
 	syntax Set ::= "Set" List{K}
 				 | Set "-Set" Set
 
-	syntax #Bool ::= K "in" Set
-				   | SetItem "in" Set	
+	syntax Bool ::= K "in" Set
+			      | SetItem "in" Set	
 
 endinterface
 
 interface K-BAG-EXTRAS
 	imports K-TECHNIQUE
-	imports #IF-THEN-ELSE
+	imports IF-THEN-ELSE
 
 	syntax Bag ::= "Bag" List{K}
 				 | Bag "-Bag" Bag
-	syntax #Bool ::= K "in" Bag
-				   | BagItem "in" Bag
+	syntax Bool ::= K "in" Bag
+				  | BagItem "in" Bag
 endinterface
 
 interface K-LIST-EXTRAS
 	imports K-TECHNIQUE
-	imports #BOOL
+	imports BOOL
 
 	syntax List ::= "List" List{K}
 
-	syntax #Int ::= "lengthList" List
+	syntax Int ::= "lengthList" List
 endinterface
 
 interface K-RESULT
@@ -57,11 +57,11 @@ endinterface
 
 interface K-WRAPPERS-LABELS
 	imports K-TECHNIQUE
-	imports #STRING
+	imports STRING
 
 	syntax KLabel ::= "wklabel" KLabel
 					| "wcelllabel" CellLabel
-					| "kList" #String
+					| "kList" String
 					| "wbag" Bag
 					| "wset" Set
 					| "wlist" List

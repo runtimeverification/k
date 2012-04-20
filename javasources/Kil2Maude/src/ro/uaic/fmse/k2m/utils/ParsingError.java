@@ -23,7 +23,7 @@ public class ParsingError
 		{
 			Element amb = (Element)ambs.item(i);
 			
-			System.out.println("Ambiguity at " + amb.getAttribute(Constants.LOC_loc_ATTR));
+			System.out.println("Ambiguity at " + amb.getAttribute(Constants.LOC_loc_ATTR) + " file: " + amb.getAttribute("filename"));
 			
 		}
 		
