@@ -42,6 +42,11 @@ module STRING-HOOKS
         [function klabel(Id2String) hook(#CONVERSION:id2String)]
   syntax Id ::= "String2Id" "(" String ")"
         [function klabel(String2Id) hook(#CONVERSION:string2Id)]
+		
+  syntax Int ::= "String2Rat" "(" String "," Int ")"
+        [function klabel(String2Int) hook(#CONVERSION:string2Base)]
+  syntax Int ::= "Rat2String" "(" Int "," Int ")"
+        [function klabel(String2Int) hook(#CONVERSION:base2String)]
 
   syntax Bool ::= String "=/=String" String      [function]
   define S1:String =/=String S2:String => notBool(S1 ==String S2)

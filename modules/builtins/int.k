@@ -66,6 +66,11 @@ module INT-HOOKS
     when I1:Int >=Int I2:Int
   define maxInt(I1:Int, I2:Int) => I2:Int
     when I1:Int <Int I2:Int
+  syntax Bool ::= "minInt" "(" Int "," Int ")" [function]
+  define minInt(I1:Int, I2:Int) => I2:Int
+    when I1:Int >=Int I2:Int
+  define minInt(I1:Int, I2:Int) => I1:Int
+    when I1:Int <Int I2:Int
 	
   syntax Bool ::= Int "<<Int" Int [function hook(#INT:_<<Int_)]
   syntax Bool ::= Int ">>Int" Int [function hook(#INT:_>>Int_)]
@@ -73,4 +78,6 @@ module INT-HOOKS
   syntax Bool ::= Int "|Int" Int [function hook(#INT:_|Int_)]
   syntax Bool ::= Int "^Int" Int [function hook(#INT:_^Int_)]
   syntax Bool ::= Int "dividesInt" Int [function hook(#INT:_dividesInt_)]
+  syntax Bool ::= Int "xorInt" Int [function hook(#INT:_xorInt_)]
+  syntax Bool ::= "~Int" Int [function hook(#INT:~Int_)]
 end module 

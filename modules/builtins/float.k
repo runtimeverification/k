@@ -60,5 +60,16 @@ module FLOAT-HOOKS
   syntax Int ::= "Float2Int" "(" Float ")"
       [function klabel(Float2Int) latex "{\\it{}Float2Int}" hook(#CONVERSION:float2Int)]
 
+  syntax Float ::= "sqrtFloat" "(" Float ")" [function hook(#FLOAT:sqrtFloat)]
+  syntax Float ::= "logFloat" "(" Float ")" [function hook(#FLOAT:logFloat)]
+  syntax Float ::= "expFloat" "(" Float ")" [function hook(#FLOAT:expFloat)]
+  syntax Float ::= "atanFloat" "(" Float ")" [function hook(#FLOAT:atanFloat)]
+  syntax Float ::= "acosFloat" "(" Float ")" [function hook(#FLOAT:acosFloat)]
+  syntax Float ::= "asinFloat" "(" Float ")" [function hook(#FLOAT:asinFloat)]
+  syntax Float ::= "tanFloat" "(" Float ")" [function hook(#FLOAT:tanFloat)]
+  syntax Float ::= "cosFloat" "(" Float ")" [function hook(#FLOAT:cosFloat)]
+  syntax Float ::= "sinFloat" "(" Float ")" [function hook(#FLOAT:sinFloat)]
+  syntax Float ::= "atan2Float" "(" Float "," Float ")" [function hook(#FLOAT:atanFloat)]
+  syntax Float ::= "floorFloat" "(" Float ")" [function hook(#FLOAT:floorFloat)]
 
 end module

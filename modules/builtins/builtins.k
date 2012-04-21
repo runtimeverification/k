@@ -4,6 +4,7 @@ require float
 require string
 require tcp
 require k-equal
+require random
 
 module BUILTIN-SYNTAX-HOOKS
   imports BOOL-SYNTAX-HOOKS 
@@ -20,4 +21,5 @@ module BUILTIN-HOOKS
   imports STRING-HOOKS
   imports TCP-HOOKS
   imports K-EQUAL-HOOKS
+  imports RANDOM-HOOKS
 end module

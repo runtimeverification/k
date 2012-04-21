@@ -882,6 +882,9 @@ mod #CONVERSION is
 
   op int2String : #Int -> #String .
   eq int2String(I:#Int) = Rat2String(I:#Int,10) .
+  
+  op base2String : #Int #NzNat -> #String .
+  eq base2String(I:#Int, N:#NzNat) = Rat2String(I:#Int, N:#NzNat) .
 
   op String2Rat : #String #NzNat -> #Rat
         [special (id-hook StringOpSymbol (rat)
@@ -889,6 +892,9 @@ mod #CONVERSION is
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
                   op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   op-hook divisionSymbol (_/Rat_ : #NzInt #NzNat ~> #NzRat))] .
+				  
+  op string2Base : #String #NzNat -> #Int .
+ceq string2Base(S:#String, N:#NzNat) = I:#Int if I:#Int := String2Rat(S:#String, N:#NzNat) .				  
 
   op string2Int : #String -> #Int .
 ceq string2Int(S:#String) = I:#Int if I:#Int := String2Rat(S:#String,10) .
