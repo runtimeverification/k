@@ -1353,37 +1353,45 @@ sub register_subsorts
 
 }
 
-
+# my %seenModules = ();
+# these subroutines actually get all sorts for a given module
 sub getAllModules
 {
   my $mod = shift;
-  return recursiveGetAllModules($mod, 0);
+  # %seenModules = ();
+  my $hashref = {};
+  recursiveGetAllModules($mod, $hashref, 0);
+  my @sortsArray = keys %$hashref;
+  my $sorts = "@sortsArray";
+  # print "$mod: $sorts\n";
+  return $sorts;
 }
 
-sub recursiveGetAllModules
-{
-    my $mod = shift;
-    my $depth = shift;
-    my $lsorts = "";
-    $lsorts = $sortMod{$mod} if (defined($sortMod{$mod}));
-    # printf("\n%${depth}s%s: %s","",$mod, $lsorts);
-    
-    my @incl = split(/\s+/, $moduleMap{$mod}) if defined($moduleMap{$mod});
-    
-    foreach (@incl)
-    {
-      if ($depth < 300) 
-      {	 
-        $lsorts .= " " . recursiveGetAllModules($_,$depth+1);
-      }
-      else
-      {
-        die("Module inclusion tree too deep. Check for cycles, please.");
-      } 
-    }
+sub recursiveGetAllModules {
+	my $mod = shift;
+	my $hashref = shift;
+	my $depth = shift;
+	my $lsorts = "";
+	$lsorts = $sortMod{$mod} if (defined($sortMod{$mod}));
+	my @sorts = split(/\s+/, $lsorts);
+	for my $sort (@sorts) {
+		$hashref->{$sort} = 1;
+	}
+	# printf("\n%${depth}s%s: %s", "", $mod, $lsorts);
+	# if ($seenModules{$mod}) {return "";}  # no need to recurse if we've already seen it
+	# $seenModules{$mod} = 1;
+	my @incl = split(/\s+/, $moduleMap{$mod}) if defined($moduleMap{$mod});
+	
+	foreach my $submod (@incl) {
+		if ($depth < 300) {	 
+			recursiveGetAllModules($submod, $hashref, $depth+1);
+		} else {
+			die("Module inclusion tree too deep. Check for cycles, please.");
+		} 
+	}
     
 #	print "DEEP: $deep\n";
-    $lsorts;
+	# return $lsorts;
 }
 
 # return true if module includes K

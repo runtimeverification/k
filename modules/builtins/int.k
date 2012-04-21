@@ -54,4 +54,23 @@ module INT-HOOKS
 
   syntax Bool ::= Int "dividesInt" Int    [function]
   define I1:Int dividesInt I2:Int => I2 %Int I1 ==Int 0
+  
+  syntax Bool ::= "absInt" Int [function]
+  define absInt(I:Int) => I:Int
+    when I:Int >=Int 0
+  define absInt(I:Int) => 0 -Int I:Int
+    when I:Int <Int 0
+	
+  syntax Bool ::= "maxInt" "(" Int "," Int ")" [function]
+  define maxInt(I1:Int, I2:Int) => I1:Int
+    when I1:Int >=Int I2:Int
+  define maxInt(I1:Int, I2:Int) => I2:Int
+    when I1:Int <Int I2:Int
+	
+  syntax Bool ::= Int "<<Int" Int [function hook(#INT:_<<Int_)]
+  syntax Bool ::= Int ">>Int" Int [function hook(#INT:_>>Int_)]
+  syntax Bool ::= Int "&Int" Int [function hook(#INT:_&Int_)]
+  syntax Bool ::= Int "|Int" Int [function hook(#INT:_|Int_)]
+  syntax Bool ::= Int "^Int" Int [function hook(#INT:_^Int_)]
+  syntax Bool ::= Int "dividesInt" Int [function hook(#INT:_dividesInt_)]
 end module 
