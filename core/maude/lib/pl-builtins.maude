@@ -591,7 +591,7 @@ mod #FLOAT-INTERFACE is
   sorts #FiniteFloat #Float .
   subsort #FiniteFloat < #Float .
 
-*** pseudo constructor for the set of double precision floats
+--- pseudo constructor for the set of double precision floats
   op <Floats> : -> #FiniteFloat [special (id-hook FloatSymbol)] .
   op <Floats> : -> #Float [ditto] .
 endm
@@ -745,7 +745,7 @@ mod #STRING-INTERFACE is
   subsort #Char < #String .
 ---  subsort #Int < FindResult .
 
-*** pseudo constructor for the infinite set of strings
+--- pseudo constructor for the infinite set of strings
   op <Strings> : -> #Char [special (id-hook StringSymbol)] .
   op <Strings> : -> #String [ditto] .
 endm
@@ -924,7 +924,7 @@ mod #QID is
   protecting #STRING .
   sort #Qid .
 
-*** pseudo constructor for the infinite set of quoted identifiers
+--- pseudo constructor for the infinite set of quoted identifiers
   op <Qids> : -> #Qid [special (id-hook QuotedIdentifierSymbol)] .
 
   op string : #Qid -> #String 

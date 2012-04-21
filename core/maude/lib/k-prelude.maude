@@ -239,6 +239,14 @@ mod K-LIST-EXTRAS is
   eq lengthList(.).List = 0 .
   eq lengthList(LItem List) = sNat(lengthList(List)) .
 
+  op _in_ : K List -> #Bool .
+  eq K in List ListItem(K) = true .
+  eq K in List = false [owise] .
+
+  op _in_ : ListItem List -> #Bool .
+  eq LItem in List LItem = true .
+  eq LItem in List = false [owise] .
+  
   --- op getFromList`{K`}(_,_) : List{K} #NzNat -> K .
   --- eq getFromList{K}((K,,Ks),1) = K .
   --- eq getFromList{K}((K,,Ks),sNat N) = getFromList{K}(Ks,N) .
