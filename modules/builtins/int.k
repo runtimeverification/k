@@ -50,7 +50,8 @@ module INT-HOOKS
 
   sort Nat  // ::= {I:Int | I >=Int 0}
   syntax Bool ::= "isNat" "(" Int ")"     [function klabel(isNat)]
-  define isNat(I:Int) => I >=Int 0 
+  define isNat(I:Int) => true // the old definition broke any custom 'isNat()s
+    when I >=Int 0 
 
   syntax Bool ::= Int "dividesInt" Int    [function]
   define I1:Int dividesInt I2:Int => I2 %Int I1 ==Int 0
