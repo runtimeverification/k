@@ -1,5 +1,6 @@
 require "bool.k"
 module INT-SYNTAX-HOOKS
+  imports K
   syntax Int ::= #Int
 endmodule
 

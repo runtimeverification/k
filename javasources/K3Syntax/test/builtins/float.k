@@ -1,6 +1,7 @@
 require "bool.k"
 require "int.k"
 module FLOAT-SYNTAX-HOOKS
+  imports K
   syntax Float ::= #Float
 endmodule
 
