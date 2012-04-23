@@ -3,13 +3,13 @@ package ro.uaic.info.fmse.main;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import ro.uaic.info.fmse.ca.Configuration;
 import ro.uaic.info.fmse.ca.Node;
 import ro.uaic.info.fmse.ca.Rule;
 import ro.uaic.info.fmse.ca.filters.CompletenessFilter;
-import ro.uaic.info.fmse.ca.filters.IFilter;
+import ro.uaic.info.fmse.ca.filters.AbstractMappingFilter;
+import ro.uaic.info.fmse.ca.filters.OccurenceFilter;
 
 public class ConfigurationInferencer {
 
@@ -22,39 +22,49 @@ public class ConfigurationInferencer {
 	public Rule inferConfigurationForRule(Rule rule) {
 
 		// detect mappings for rule
-		List<Map<Integer, Integer>> mappings = detectMappings(rule);
+		LinkedList<HashMap<Integer, Integer>> lmappings = detectMappings(rule.getLeft());
+		LinkedList<HashMap<Integer, Integer>> rmappings = detectMappings(rule.getRight());
 
-		System.out.println("Before: " + mappings);
-		
+		System.out.println("Before: " + lmappings);
+		System.out.println("Before: " + rmappings);
+
 		// apply filters
 		CompletenessFilter cfilter = new CompletenessFilter();
-		mappings = acceptFilter(cfilter, rule, mappings);
-	
-		System.out.println("After: " + mappings);
-		
-		
-//		System.out.println("====================================");
-//		System.out.println(configuration);
-//		System.out.println(mappings);
-//		System.out.println(rule);
-//		System.out.println("====================================\n\n\n");
+		lmappings = acceptFilter(cfilter, rule, lmappings, "left");
+		// rmappings = acceptFilter(cfilter, rule, rmappings);
 
+		OccurenceFilter ofilter = new OccurenceFilter();
+		lmappings = acceptFilter(ofilter, rule, lmappings, "left");
+		rmappings = acceptFilter(ofilter, rule, rmappings, "right");
 		
+		System.out.println("After: " + lmappings);
+		System.out.println("After: " + rmappings);
+
+//		 System.out.println("====================================");
+//		 System.out.println(configuration);
+//		 System.out.println(rule);
+//		 System.out.println("LEFT: " + lmappings);
+//		 System.out.println("RIGHT: " + rmappings);
+//		 System.out.println("====================================\n\n\n");
+
 		// TODO: compute the rule
 		return rule;
 	}
 
-	public List<Map<Integer, Integer>> acceptFilter(IFilter filter, Rule rule, List<Map<Integer, Integer>> mappings)
-	{
-		return filter.filter(configuration, rule, mappings);
+	public LinkedList<HashMap<Integer, Integer>> acceptFilter(AbstractMappingFilter filter, Rule rule,
+			LinkedList<HashMap<Integer, Integer>> lmappings, String side) {
+		return filter.filter(configuration, rule, lmappings, side);
 	}
-	
-	private List<Map<Integer, Integer>> detectMappings(Rule rule) {
 
-		List<Map<Integer, Integer>> mappings = new LinkedList<Map<Integer, Integer>>();
-		for (Node l : rule.getLhs()) {
+	public LinkedList<HashMap<Integer, Integer>> detectMappings(List<Node> side) {
+
+//		System.out.println("THELIST: " + side);
+		LinkedList<HashMap<Integer, Integer>> mappings = new LinkedList<HashMap<Integer, Integer>>();
+		for (Node l : side) {
 			List<Integer> ml = configuration.searchIds(l);
-			if (ml != null) {
+//			System.out.println("Search: " + l.getLabel() + " Found: " + ml);
+//			System.out.println("Status: " + mappings);
+			if (ml != null && ml.size() > 0) {
 				if (mappings.size() == 0) {
 					for (Integer mli : ml) {
 						HashMap<Integer, Integer> newmap = new HashMap<Integer, Integer>();
@@ -62,13 +72,21 @@ public class ConfigurationInferencer {
 						mappings.add(newmap);
 					}
 				} else {
-					for (Map<Integer, Integer> map : mappings) {
-						for (Integer mli : ml) {
-							map.put(l.getID(), mli);
-						}
+					@SuppressWarnings("unchecked")
+					LinkedList<HashMap<Integer, Integer>> tempMappings = (LinkedList<HashMap<Integer, Integer>>)mappings.clone();
+					mappings.clear();
+					
+					for (Integer mli : ml) {
+						for (HashMap<Integer, Integer> map : tempMappings) {
+							@SuppressWarnings("unchecked")
+							HashMap<Integer, Integer> tempMap = (HashMap<Integer, Integer>)map.clone();
+							tempMap.put(l.getID(), mli);
+							mappings.add(tempMap);
+						}						
 					}
 				}
 			}
+//			System.out.println("MPS: " + mappings + "\n\n");
 		}
 
 		return mappings;

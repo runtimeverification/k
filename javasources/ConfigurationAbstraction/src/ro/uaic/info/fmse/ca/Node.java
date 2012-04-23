@@ -27,7 +27,7 @@ public class Node {
 		setData(data);
 	}
 
-	public int getID() {
+	public Integer getID() {
 		return ID;
 	}
 
@@ -63,6 +63,15 @@ public class Node {
 		this.data = data;
 	}
 
+	public void appendChildren(Node... child)
+	{
+		if (children == null)
+			children = new LinkedList<Node>();
+		
+		for (Node c : child)
+			children.add(c);
+	}
+	
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 

@@ -13,6 +13,16 @@ public class Rule {
 	List<Node> lhs, rhs, left, right;
 	Map<Integer, Integer> left2right, right2left;
 
+	public Rule(List<Node> lhs, List<Node> rhs, List<Node> left,
+			List<Node> right) {
+		this.lhs = lhs;
+		this.rhs = rhs;
+		this.left = left;
+		this.right = right;
+		left2right = null;
+		right2left = null;
+	}
+
 	public Rule(Element rule) {
 
 		// init
@@ -38,9 +48,9 @@ public class Rule {
 			for (Node rh : rhs)
 				addParent(rh, null);
 
-//		// create the left to right map
-//		mapSide("left");
-//		mapSide("right");
+		// // create the left to right map
+		// mapSide("left");
+		// mapSide("right");
 
 		// System.out.println("\n\n\n\nCreated: rule ");
 		// for(Node lh : this.left)
@@ -52,20 +62,20 @@ public class Rule {
 		// System.out.println(XMLPrettyPrinter.prettyFormat(rule));
 	}
 
-//	private void mapSide(String side) {
-//		if (side.equals("left")) {
-//			for (Node left : this.left)
-//				for (Node right : this.right)
-//					if (left.getData().equals(right.getData()))
-//						left2right.put(left.getID(), right.getID());
-//		}
-//		if (side.equals("left")) {
-//			for (Node right : this.right)
-//				for (Node left : this.left)
-//					if (left.getData().equals(right.getData()))
-//						right2left.put(right.getID(), left.getID());
-//		}
-//	}
+	// private void mapSide(String side) {
+	// if (side.equals("left")) {
+	// for (Node left : this.left)
+	// for (Node right : this.right)
+	// if (left.getData().equals(right.getData()))
+	// left2right.put(left.getID(), right.getID());
+	// }
+	// if (side.equals("left")) {
+	// for (Node right : this.right)
+	// for (Node left : this.left)
+	// if (left.getData().equals(right.getData()))
+	// right2left.put(right.getID(), left.getID());
+	// }
+	// }
 
 	private Node createEmptyNodeFromElement(Element cell) {
 		Node node = null;
@@ -121,8 +131,8 @@ public class Rule {
 			for (Node root : this.rhs)
 				out += root.display("");
 
-		out += "Left: " + left2right + "\nRight: " + right2left;
-
+		// out += "\nLeft: " + left2right + "\nRight: " + right2left;
+		out += "L: " + left + "\nR: " + right;
 		return out;
 	}
 
@@ -140,5 +150,36 @@ public class Rule {
 
 	public List<Node> getRight() {
 		return right;
+	}
+
+	public boolean siblings(Integer i1, Integer i2, String side) {
+
+		if (i1 == i2)
+			return false; 
+		
+		Node node1 = null, node2 = null;
+		List<Node> list = this.left;
+		if (side.equals("right"))
+			list = this.right;
+
+		for (Node node : list) {
+			if (node.getID() == i1)
+				node1 = node;
+			if (node.getID() == i2)
+				node2 = node;
+		}
+
+		if (node1 != null && node2 != null) {
+			Node p1 = node1.getParent();
+			Node p2 = node2.getParent();
+			if (p1 == null && p2 == null)
+				return true;
+			if (p1 == null || p2 == null)
+				return false;
+			if (p1.getID() == p2.getID())
+				return true;
+		}
+		
+		return false;
 	}
 }

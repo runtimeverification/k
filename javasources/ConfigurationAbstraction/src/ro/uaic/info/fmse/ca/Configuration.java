@@ -19,6 +19,13 @@ public class Configuration {
 	// multiplicity map
 	private Map<Integer, Integer> mmap;
 
+	public Configuration(List<Node> roots, List<Node> nodes, Map<Integer, Integer> mmap)
+	{
+		this.roots = roots;
+		this.nodes = nodes;
+		this.mmap = mmap;
+	}
+	
 	public Configuration(Element configuration) {
 		mmap = new HashMap<Integer, Integer>();
 		nodes = new LinkedList<Node>();
@@ -28,7 +35,15 @@ public class Configuration {
 	public Integer multiplicity(Node node) {
 		return mmap.get(node.getID());
 	}
+	
+	public Integer multiplicity(Integer entry) {
+		if (entry == null)
+			return -1;
+		
+		return mmap.get(entry) == null ? 1 : mmap.get(entry) ;
+	}
 
+	
 	private void initFromXML(Element configuration) {
 
 		// create nodes from XML
