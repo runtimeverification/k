@@ -23,11 +23,9 @@ public class KAPP_KApp_TAG extends Tag {
 	public String toMaude() throws Exception {
 		
 		List<String> exceptions = new LinkedList<String>();
-		exceptions.add(Constants.LISTOFK_ListOfK_TAG);
-		String theLabel = processToMaudeAsSeparatedListExceptions("", exceptions);
-		
-		exceptions = new LinkedList<String>();
 		exceptions.add(Constants.LABEL_label_TAG);
+		String theLabel = processToMaudeAsSeparatedList("", exceptions);
+		
 		String theListOfK = processToMaudeAsSeparatedListExceptions(",,", exceptions);
 		
 		return theLabel + "(" + theListOfK + ")";

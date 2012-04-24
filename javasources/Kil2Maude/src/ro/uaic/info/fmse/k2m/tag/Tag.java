@@ -65,6 +65,20 @@ public abstract class Tag implements IMaude, IAst {
 			return out;
 		return out.substring(0, out.length() - separator.length());
 	}
+
+	public String processToMaudeAsSeparatedList(String separator, List<String> getList)
+			throws Exception {
+		String out = "";
+		List<Tag> children = getChildren();
+		for (Tag tag : children) {
+			if (tag != null && getList.contains(tag.element.getNodeName()))
+				out += tag.toMaude() + separator;
+		}
+		
+		if (out.equals(""))
+			return out;
+		return out.substring(0, out.length() - separator.length());
+	}
 	
 	public String processToASTAsSeparatedList(String separator)
 			throws Exception {
