@@ -51,7 +51,7 @@ module STRING-HOOKS
   syntax Bool ::= String "=/=String" String      [function]
   define S1:String =/=String S2:String => notBool(S1 ==String S2)
 
-  sort Char
+  syntax Char ::= dummyChar
 
   syntax Bool ::= "isChar" "(" String ")"        [function klabel(isChar)]
   define isChar(S:String) => lengthString(S) ==Int 1 
