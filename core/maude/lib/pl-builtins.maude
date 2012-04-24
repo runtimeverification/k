@@ -871,7 +871,10 @@ mod #CONVERSION is
                   op-hook divisionSymbol (_/Rat_ : #NzInt #NzNat ~> #NzRat))] .
 
   op float2Int : #Float -> #Int .
-  eq float2Int(F:#Float) = truncRat(Float2Rat(floorFloat(F:#Float))) .
+  --- eq float2Int(F:#Float) = truncRat(Float2Rat(floorFloat(F:#Float))) .
+  --- supposed to round toward 0, not away from it
+  eq float2Int(F:#Float) = truncRat(Float2Rat(F:#Float)) .
+  
 
   op Rat2String : #Rat #NzNat -> #String
         [special (id-hook StringOpSymbol (string)

@@ -880,7 +880,7 @@ rectangle,rectangle
 }
 
 %%% Rules.
-
+\newcommand{\ruleAttributes}[1]{\hfill[#1]}
 \newcommand{\kdefine}[4]{%
   \par\indent\hbox{%
     \k@ruleLabel{#1}{define}\hspace{1em}$#2$%
@@ -890,10 +890,11 @@ rectangle,rectangle
   }%
   \k@markPosition%
   \ifthenelse{\equal{#4}{}}{}{%  
-   \hfill[#4]% 
+   \ruleAttributes{#4}% 
   }%
   \bigskip%
 }
+
 \newcommand{\krule}[4]{%
   \par\indent\hbox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
@@ -903,7 +904,7 @@ rectangle,rectangle
   }%
   \k@markPosition%
   \ifthenelse{\equal{#4}{}}{}{%  
-   \hfill[#4]% 
+   \ruleAttributes{#4}% 
   }%
   \bigskip%
 }
