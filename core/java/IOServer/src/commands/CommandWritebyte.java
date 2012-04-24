@@ -17,7 +17,9 @@ public class CommandWritebyte extends Command {
 
 		try {
 			ID = Long.parseLong(args[1]);
-			ascii = Byte.parseByte(args[2]);
+			// ascii = Byte.parseByte(args[2]);
+			int signedByte = Integer.parseInt(args[2]);
+			ascii = (byte)signedByte;
 		} catch (NumberFormatException nfe) {
 			fail("write operation aborted: " + nfe.getLocalizedMessage());
 		}
