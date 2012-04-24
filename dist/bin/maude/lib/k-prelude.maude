@@ -285,7 +285,7 @@ mod K-RESULT is
   subsorts KResult < K .
 
   sorts List{KResult} NeList{KResult} .
-
+  op 'isKResult : -> KLabel .
   op .List{K} : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
   subsort List{KResult} < List{K} .
   subsort KResult < NeList{KResult} < List{KResult} NeList{K} .

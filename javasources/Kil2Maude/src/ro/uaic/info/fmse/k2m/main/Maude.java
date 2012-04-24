@@ -105,6 +105,7 @@ public class Maude {
 
 		declaredSorts = new HashSet<String>();
 		declaredSorts.add("K");
+		declaredSorts.add("KLabel");
 		declaredSorts.add("Map");
 		declaredSorts.add("Set");
 		declaredSorts.add("List");

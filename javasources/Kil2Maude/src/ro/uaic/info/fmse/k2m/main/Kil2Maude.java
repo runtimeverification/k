@@ -100,7 +100,7 @@ public class Kil2Maude {
 			String fileName = defFile.getName().substring(0, defFile.getName().length() - 2);
 
 			ast = "load ../" + fileName + "-compiled.maude\n";
-			ast += "set show command off .\n erewrite #eval(__((_|->_((# \"PGM\"(.List{K})) , (\n\n";
+			ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.List{K})) , (\n\n";
 			ast += maude.getAst(program);
 			ast += "\n\n))),(.).Map))  .\n quit\n";
 		} catch (Exception e) {

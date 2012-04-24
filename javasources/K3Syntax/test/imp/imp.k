@@ -2,6 +2,10 @@ require "../k-prelude.k"
 
 module IMP-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
+  
+  syntax Id ::= #Id
+  syntax Int ::= #Int
+  syntax Bool ::= #Bool
 
   syntax AExp ::= Int | Id
   				| AExp "/" AExp [left, strict]
@@ -28,7 +32,7 @@ endmodule
 
 
 module IMP
-  imports IMP-SYNTAX + K
+  imports IMP-SYNTAX + BUILTIN-HOOKS
 
   configuration <T> 
   					<k> $PGM : K </k>
