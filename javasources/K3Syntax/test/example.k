@@ -1,7 +1,8 @@
 
 module MOD-SYNTAX
 	
-	rule 'asdf(X)
+  syntax K ::= #Id "::" Bag
+		     | "lookupMember" "(" BagItem "," #Id ")" [declare]
 	
 
 endmodule

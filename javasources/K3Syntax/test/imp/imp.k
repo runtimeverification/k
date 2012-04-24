@@ -1,54 +1,54 @@
 require "../k-prelude.k"
 
 module IMP-SYNTAX
-  imports K + BUILTIN-HOOKS
+  imports BUILTIN-SYNTAX-HOOKS
 
-  syntax AExp ::= #Int | #Id
+  syntax AExp ::= Int | Id
   				| AExp "/" AExp [left, strict]
   				> AExp "+" AExp [left, strict]
   				| "(" AExp ")"  [bracket]
 
-  syntax BExp ::= #Bool
+  syntax BExp ::= Bool
   				| AExp "<=" AExp  [seqstrict]
   				| "not" BExp      [strict]
   				> BExp "and" BExp [left, strict(1)]
   				| "(" BExp ")"    [bracket]
 
   syntax Stmt ::= "skip"
-  				| #Id ":=" AExp   [strict(2)]
+  				| Id ":=" AExp   [strict(2)]
   				| "if" BExp "then" Stmt "else" Stmt [strict(1)]
   				| "while" BExp "do" Stmt
   				> Stmt ";" Stmt   [left]
   				| "(" Stmt ")"    [bracket]
 
   syntax Pgm ::= "var" Ids ";" Stmt
-  syntax Ids ::= List{#Id, ","}
+  syntax Ids ::= List{Id, ","}
   syntax Start ::= Pgm  
 endmodule
 
 
 module IMP
-  imports IMP-SYNTAX
+  imports IMP-SYNTAX + K
 
   configuration <T> 
-  					<k> PGM : K </k>
+  					<k> $PGM : K </k>
   					<env> .Map </env>
   				</T>
 
 
-  syntax KResult ::= #Int | #Bool
+  syntax KResult ::= Int | Bool
 
-  rule [lookup] :  	<k> X:#Id => I:#Int ...</k>
+  rule [lookup] :  	<k> X:Id => I:Int ...</k>
   					<env>... X |-> I ...</env> 
 
-  rule [assignment]: <k> X:#Id := I:#Int => . ...</k>
+  rule [assignment]: <k> X:Id := I:Int => . ...</k>
   					<env>... X |-> (_ => I) ...</env>
 
-  rule [addition] : I1:#Int + I2:#Int => I1 +Int I2 
-  rule [division] : I1:#Int / I2:#Int => I1 /Int I2 when I2 =/=Bool 0
+  rule [addition] : I1:Int + I2:Int => I1 +Int I2 
+  rule [division] : I1:Int / I2:Int => I1 /Int I2 when I2 =/=Bool 0
 
-  rule [leq] : I1:#Int <= I2:#Int => I1 <=Int I2
-  rule [not] : not T:#Bool => notBool T
+  rule [leq] : I1:Int <= I2:Int => I1 <=Int I2
+  rule [not] : not T:Bool => notBool T
   rule [and-true] : true and B:BExp => B
   rule [and-false]: false and B:BExp => false
 
@@ -63,7 +63,7 @@ module IMP
 
 
   rule [program-still-vars]:
-  	 	<k> var X:#Id, Xs:Ids; S => var Xs; S ...</k>
+  	 	<k> var X:Id, Xs:Ids; S => var Xs; S ...</k>
   	    <env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
 
   rule [program-no-vars]: <k> var .Ids ; S => S ...</k> [structural]
