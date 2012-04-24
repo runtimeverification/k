@@ -947,7 +947,7 @@ mod LATEX-PRINT-META is
   ops mergeT mergeQ : QidList TermList -> Term .
 
   op printTerminal : Qid -> QidList .
-  eq printTerminal(Q) = if Q == ' then nil else if latexTerminal(Q) then printQid(Q) else ('\mathrel '`{ '\terminal '`{ if Q == '\enspace then nil else printQid(Q) fi '`} '`}) fi fi [print "terminal " Q] .
+  eq printTerminal(Q) = if Q == ' then nil else if Q == '`( or-else Q == '`, or-else Q == '`) then Q else if latexTerminal(Q) then printQid(Q) else ('\mathrel '`{ '\terminal '`{ if Q == '\enspace then nil else printQid(Q) fi '`} '`}) fi fi fi [print "terminal " Q] .
 
   op latexTerminal : Qid -> Bool .
   eq latexTerminal(Q) = (substr(string(Q), _-_(length(string(Q)), 1), 1) == "{" and substr(string(Q), _-_(length(string(Q)), 2), 1) == "`")  or-else (substr(string(Q), 1, 1) == "}" and substr(string(Q), 0, 1) == "`") .
