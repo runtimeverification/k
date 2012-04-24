@@ -1,4 +1,4 @@
-package ro.uaic.fmse.k2m.utils;
+package ro.uaic.info.fmse.k2m.utils;
 
 import generated.Constants;
 

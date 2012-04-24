@@ -1,9 +1,10 @@
-package ro.uaic.fmse.k2m.main;
+package ro.uaic.info.fmse.k2m.main;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import ro.uaic.fmse.k2m.utils.FileUtil;
+
+import ro.uaic.info.fmse.k2m.utils.FileUtil;
 
 public class Kil2Maude {
 

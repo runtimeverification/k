@@ -1,4 +1,4 @@
-package ro.uaic.fmse.k2m.main;
+package ro.uaic.info.fmse.k2m.main;
 
 public class StringUtil {
 

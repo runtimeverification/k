@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.w3c.dom.Element;
 
-import ro.uaic.fmse.k2m.main.StringUtil;
-import ro.uaic.fmse.k2m.tag.NotGeneratedConstants;
-import ro.uaic.fmse.k2m.tag.Tag;
+import ro.uaic.info.fmse.k2m.main.StringUtil;
+import ro.uaic.info.fmse.k2m.tag.NotGeneratedConstants;
+import ro.uaic.info.fmse.k2m.tag.Tag;
 
 /**
  * @author andrei.arusoaie

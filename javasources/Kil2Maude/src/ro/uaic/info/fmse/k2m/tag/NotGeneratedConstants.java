@@ -1,4 +1,4 @@
-package ro.uaic.fmse.k2m.tag;
+package ro.uaic.info.fmse.k2m.tag;
 
 public class NotGeneratedConstants {
 

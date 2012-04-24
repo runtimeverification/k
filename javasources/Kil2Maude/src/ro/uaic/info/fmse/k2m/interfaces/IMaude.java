@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ro.uaic.fmse.k2m.interfaces;
+package ro.uaic.info.fmse.k2m.interfaces;
 
 
 

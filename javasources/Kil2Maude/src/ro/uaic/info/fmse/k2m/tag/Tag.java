@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ro.uaic.fmse.k2m.tag;
+package ro.uaic.info.fmse.k2m.tag;
 
 import generated.Constants;
 import generated.TagFactory;
@@ -16,8 +16,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import ro.uaic.fmse.k2m.interfaces.IAst;
-import ro.uaic.fmse.k2m.interfaces.IMaude;
+import ro.uaic.info.fmse.k2m.interfaces.IAst;
+import ro.uaic.info.fmse.k2m.interfaces.IMaude;
 
 /**
  * @author andrei.arusoaie

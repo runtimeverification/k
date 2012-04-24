@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ro.uaic.fmse.k2m.main;
+package ro.uaic.info.fmse.k2m.main;
 
 import generated.Constants;
 import generated.TagFactory;
@@ -25,10 +25,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import ro.uaic.fmse.k2m.preprocessor.Preprocessor;
-import ro.uaic.fmse.k2m.tag.NotGeneratedConstants;
-import ro.uaic.fmse.k2m.tag.Tag;
-import ro.uaic.fmse.k2m.utils.ParsingError;
+import ro.uaic.info.fmse.k2m.preprocessor.Preprocessor;
+import ro.uaic.info.fmse.k2m.tag.NotGeneratedConstants;
+import ro.uaic.info.fmse.k2m.tag.Tag;
+import ro.uaic.info.fmse.k2m.utils.ParsingError;
 
 
 /**
