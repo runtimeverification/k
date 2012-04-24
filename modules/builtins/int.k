@@ -48,7 +48,7 @@ module INT-HOOKS
   syntax Bool ::= Int "=/=Int" Int        [function]
   define I1:Int =/=Int I2:Int => notBool(I1 ==Int I2)
 
-  sort Nat  // ::= {I:Int | I >=Int 0}
+  syntax Nat ::= dummyNat // ::= {I:Int | I >=Int 0}
   syntax Bool ::= "isNat" "(" Int ")"     [function klabel(isNat)]
   define isNat(I:Int) => true // the old definition broke any custom 'isNat()s
     when I >=Int 0 
