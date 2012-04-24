@@ -1,8 +1,10 @@
 package k.utils;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
-import ro.uaic.fmse.k2m.main.Kil2Maude;
+import ro.uaic.info.fmse.k2m.main.Kil2Maude;
 
 public class Sdf2Table {
 

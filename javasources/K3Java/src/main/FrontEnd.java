@@ -1,10 +1,20 @@
 package main;
 
-import java.io.*;
-import k.utils.*;
+import java.io.File;
+import java.io.IOException;
+
+import k.utils.FileUtil;
+import k.utils.GlobalSettings;
+import k.utils.MaudeRun;
+import k.utils.ResourceExtractor;
+import k.utils.Sdf2Table;
+import k.utils.Stopwatch;
+import k.utils.XmlLoader;
 import k3.basic.Definition;
+
 import org.w3c.dom.Document;
-import ro.uaic.fmse.k2m.main.Kil2Maude;
+
+import ro.uaic.info.fmse.k2m.main.Kil2Maude;
 
 public class FrontEnd {
 
