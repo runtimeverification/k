@@ -4,7 +4,7 @@ module K-EQUAL-HOOKS
 
   syntax Bool ::= K "==K" K           [function, hook(#K-EQUAL:_==K_)]
   syntax Bool ::= K "=/=K" K          [function]
-  rule K1:K =/=K K2:K => notBool(K1 ==K K2)
+  rule K1:K =/=K K2:K => notBool(K1 ==K K2) [function, anywhere]
 
 
   syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function]
