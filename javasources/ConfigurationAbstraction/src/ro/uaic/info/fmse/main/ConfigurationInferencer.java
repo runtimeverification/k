@@ -10,6 +10,7 @@ import ro.uaic.info.fmse.ca.Rule;
 import ro.uaic.info.fmse.ca.filters.CompletenessFilter;
 import ro.uaic.info.fmse.ca.filters.AbstractMappingFilter;
 import ro.uaic.info.fmse.ca.filters.OccurenceFilter;
+import ro.uaic.info.fmse.ca.filters.StructuralFilter;
 
 public class ConfigurationInferencer {
 
@@ -21,12 +22,15 @@ public class ConfigurationInferencer {
 
 	public Rule inferConfigurationForRule(Rule rule) {
 
+		System.out.println(configuration);
+		System.out.println(rule);
+		
 		// detect mappings for rule
 		LinkedList<HashMap<Integer, Integer>> lmappings = detectMappings(rule.getLeft());
 		LinkedList<HashMap<Integer, Integer>> rmappings = detectMappings(rule.getRight());
 
 		System.out.println("Before: " + lmappings);
-		System.out.println("Before: " + rmappings);
+//		System.out.println("Before: " + rmappings);
 
 		// apply filters
 		CompletenessFilter cfilter = new CompletenessFilter();
@@ -35,10 +39,14 @@ public class ConfigurationInferencer {
 
 		OccurenceFilter ofilter = new OccurenceFilter();
 		lmappings = acceptFilter(ofilter, rule, lmappings, "left");
-		rmappings = acceptFilter(ofilter, rule, rmappings, "right");
+//		rmappings = acceptFilter(ofilter, rule, rmappings, "right");
+		
+		StructuralFilter sfilter = new StructuralFilter();
+		lmappings = acceptFilter(sfilter, rule, lmappings, "left");
+//		rmappings = acceptFilter(sfilter, rule, rmappings, "right");
 		
 		System.out.println("After: " + lmappings);
-		System.out.println("After: " + rmappings);
+//		System.out.println("After: " + rmappings);
 
 //		 System.out.println("====================================");
 //		 System.out.println(configuration);

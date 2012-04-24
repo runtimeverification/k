@@ -129,4 +129,11 @@ public class Configuration {
 		return result;
 	}
 
+	public Node searchNode(Integer cId) {
+		for (Node n : nodes)
+			if (cId == n.getID())
+				return n;
+		return null;
+	}
+
 }

@@ -1,7 +1,9 @@
 package ro.uaic.info.fmse.ca;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import ro.uaic.info.fmse.utils.Generator;
 
@@ -69,7 +71,10 @@ public class Node {
 			children = new LinkedList<Node>();
 		
 		for (Node c : child)
+		{
 			children.add(c);
+			c.setParent(this);
+		}
 	}
 	
 	@Override
@@ -120,4 +125,23 @@ public class Node {
 			return "Node: " + label + " id: " + ID + " parent: null children: " + children ;
 		return "Node: " + label + " id: " + ID + " parent: " + parent.getLabel() + " children: " + children;
 		}
+
+	public Set<Integer> getAncestors() {
+		return getAncestors(this);
+	}
+
+	private Set<Integer> getAncestors(Node node) {
+		
+		Set<Integer> set = new HashSet<Integer>();
+		if (node == null)
+			return set;
+		
+		if(node.parent != null)
+		{
+			set.add(node.parent.getID());
+			set.addAll(getAncestors(node.parent));
+		}
+		
+		return set;
+	}
 }
