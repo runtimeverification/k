@@ -6,6 +6,7 @@ module SIMPLE-UNTYPED-SYNTAX
   syntax Id ::= #Id
   syntax Int ::= #Int
   syntax Bool ::= #Bool
+  syntax String ::= #String
 
   syntax Start ::= Stmts
   syntax Ids ::= List{Id,","} [strict, cons("Ids1ListSyn"), hybrid]
@@ -89,7 +90,7 @@ module SIMPLE-UNTYPED
                | "lambda" "(" Ids "," Stmt ")"  [cons("Val1LambdaSyn")]
   syntax Vals ::= List{Val,","} [cons("Vals1ListSyn")]
   syntax Exp ::= Val
-  syntax KResult ::= Val 
+  syntax KResult ::= Val
 
   configuration <T color="red">
                   <threads color="orange">

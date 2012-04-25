@@ -204,7 +204,8 @@ public class FrontEnd {
 				String parsed = k3parser.KParser.ParseProgramString(content);
 				Document doc = XmlLoader.getXMLDoc(parsed);
 
-				XmlLoader.reportErrors(doc.getFirstChild());
+				XmlLoader.addFilename(doc.getFirstChild(), mainFile.getAbsolutePath());
+				XmlLoader.reportErrors(doc);
 				XmlLoader.writeXmlFile(doc, dotk.getAbsolutePath() + "/pgm.xml");
 			} catch (Exception e) {
 				e.printStackTrace();

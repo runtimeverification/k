@@ -170,6 +170,7 @@ public class Maude {
 		NodeList nodes = xml.getFirstChild().getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++)
 			if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
+				System.out.println(nodes.item(i).getNodeName());
 				list.add(TagFactory.createTag((Element) nodes.item(i), consMap));
 			}
 

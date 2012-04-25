@@ -44,7 +44,7 @@ public class Rule extends Sentence {
 			xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
 			XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(location, 0), XmlLoader.getLocNumber(location, 1));
 			XmlLoader.addFilename(xmlTerm, filename);
-			XmlLoader.reportErrors(xmlTerm);
+			XmlLoader.reportErrors(doc);
 
 			old.getParentNode().replaceChild(old.getOwnerDocument().importNode(xmlTerm, true), old);
 

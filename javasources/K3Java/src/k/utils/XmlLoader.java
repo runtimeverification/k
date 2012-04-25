@@ -63,9 +63,12 @@ public class XmlLoader {
 		return null;
 	}
 
-	public static void reportErrors(Node nodeElem) {
+	public static void reportErrors(Document doc) {
 		// report any error that xml parser returns
-		if (nodeElem.getNodeName().equals(Tag.error)) {
+		NodeList nl = doc.getElementsByTagName("error");
+		
+		if (nl.getLength() > 0) {
+			Node nodeElem = nl.item(0);
 			String attr = nodeElem.getAttributes().getNamedItem(Tag.value).getNodeValue();
 			NodeList ch = nodeElem.getChildNodes();
 			for (int i = 0; i < ch.getLength(); i++) {
