@@ -13,6 +13,8 @@
 			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2-sources.jar"/>
 			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2.jar"/>
 			<fileset dir="../Kil2Maude/bin"/>
+			<fileset dir="../KUtils/bin"/>
+			<fileset dir="../KPreprocessor/bin"/>
 		</jar>
 	</target>
 </project>
