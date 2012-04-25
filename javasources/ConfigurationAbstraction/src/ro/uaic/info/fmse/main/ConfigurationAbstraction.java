@@ -21,16 +21,23 @@ public class ConfigurationAbstraction {
 	private static CAManager manager;
 
 	public static void main(String[] args) {
-		if (args.length >= 1)
-			FileUtil.saveInFile("/home/andrei.arusoaie/Desktop/tmp.xml", XMLPrettyPrinter.prettyFormat(applyOnKilFile(args[0])));
+		long time = System.currentTimeMillis();
+		Document  docs = applyOnKilFile(args[0]);
+		System.out.println("Total: " + (System.currentTimeMillis() - time) + " milliseconds.");
+	//	if (args.length >= 1)
+	//		FileUtil.saveInFile("/home/andrei.arusoaie/Desktop/tmp.xml", XMLPrettyPrinter.prettyFormat(docs));
+	//	System.out.println(System.currentTimeMillis() - time + " milliseconds.");
 	}
 
 	public static Document applyOnKilFile(String KILFile) {
 		String absolutePath = new File(KILFile).getAbsolutePath();
 
+		long time = System.currentTimeMillis();
 		// retrieve the document
 		Document doc = getDocument(absolutePath);
-
+		System.out.println("Doc: " + (System.currentTimeMillis() - time) + " milliseconds.");
+		time = System.currentTimeMillis();
+		
 		// retrieve the configuration
 		NodeList configurations = doc.getElementsByTagName("config");
 		if (configurations.getLength() != 1) {
@@ -41,13 +48,18 @@ public class ConfigurationAbstraction {
 			Element config = (Element) configurations.item(0);
 			manager = new CAManager(config);
 		}
-
+		
+		System.out.println("Load configuration: " + (System.currentTimeMillis() - time) + " milliseconds.");
+		time = System.currentTimeMillis();
+		
 		// retrieve the rules and apply context transformers on it
 		NodeList rules = doc.getElementsByTagName("rule");
 		for (int i = 0; i < rules.getLength(); i++) {
 			rules.item(i).getParentNode().replaceChild(transformRuleElement((Element) rules.item(i)),rules.item(i));
 		}
-
+		System.out.println("Transform all rules: " + (System.currentTimeMillis() - time) + " milliseconds.");
+		time = System.currentTimeMillis();
+		
 		return doc;
 	}
 

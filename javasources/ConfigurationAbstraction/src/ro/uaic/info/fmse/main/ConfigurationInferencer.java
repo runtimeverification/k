@@ -22,14 +22,14 @@ public class ConfigurationInferencer {
 
 	public Rule inferConfigurationForRule(Rule rule) {
 
-		System.out.println(configuration);
-		System.out.println(rule);
+//		System.out.println(configuration);
+	//	System.out.println(rule);
 		
 		// detect mappings for rule
 		LinkedList<HashMap<Integer, Integer>> lmappings = detectMappings(rule.getLeft());
 		LinkedList<HashMap<Integer, Integer>> rmappings = detectMappings(rule.getRight());
 
-		System.out.println("Before: " + lmappings);
+//		System.out.println("Before: " + lmappings);
 //		System.out.println("Before: " + rmappings);
 
 		// apply filters
@@ -45,7 +45,7 @@ public class ConfigurationInferencer {
 		lmappings = acceptFilter(sfilter, rule, lmappings, "left");
 //		rmappings = acceptFilter(sfilter, rule, rmappings, "right");
 		
-		System.out.println("After: " + lmappings);
+//		System.out.println("After: " + lmappings);
 //		System.out.println("After: " + rmappings);
 
 //		 System.out.println("====================================");
