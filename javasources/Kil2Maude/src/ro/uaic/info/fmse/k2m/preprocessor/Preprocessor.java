@@ -11,6 +11,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ro.uaic.info.fmse.k2m.tag.NotGeneratedConstants;
+import ro.uaic.info.fmse.utils.strings.StringUtil;
 
 public class Preprocessor {
 
@@ -133,6 +134,8 @@ public class Preprocessor {
 					}
 				}
 
+				klabel = StringUtil.escape(klabel);
+				
 				if (klabel.equals(""))
 					production.setAttribute(NotGeneratedConstants.ISSUBSORT,
 							"true");

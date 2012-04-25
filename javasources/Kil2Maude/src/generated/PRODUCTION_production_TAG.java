@@ -4,12 +4,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.k2m.main.StringUtil;
 import ro.uaic.info.fmse.k2m.tag.NotGeneratedConstants;
 import ro.uaic.info.fmse.k2m.tag.Tag;
+import ro.uaic.info.fmse.utils.strings.StringUtil;
 
 /**
  * @author andrei.arusoaie
