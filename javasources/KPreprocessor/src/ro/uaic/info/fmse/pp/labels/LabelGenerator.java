@@ -8,7 +8,7 @@ import org.w3c.dom.NodeList;
 public class LabelGenerator {
 
 	private static final String PRODUCTION = "production";
-	private static final String ATTRIBUTES = "annos";
+	private static final String ATTRIBUTES = "attributes";
 	private static final String TAG = "tag";
 	private static final String KLABEL = "klabel";
 	private static final String KEY = "key";
@@ -22,7 +22,7 @@ public class LabelGenerator {
 	public Document generateKLabels(Document doc) {
 		// get all the productions and check them
 		NodeList productions = doc.getElementsByTagName(PRODUCTION);
-
+		
 		for (int i = 0; i < productions.getLength(); i++) {
 			Element production = (Element) productions.item(i);
 
