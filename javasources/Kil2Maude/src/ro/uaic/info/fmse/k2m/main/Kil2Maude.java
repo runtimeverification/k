@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
-import ro.uaic.info.fmse.k2m.utils.FileUtil;
+import ro.uaic.info.fmse.utils.file.FileUtil;
 
 public class Kil2Maude {
 
@@ -12,9 +12,8 @@ public class Kil2Maude {
 	 * @param args
 	 * @throws Exception
 	 */
+	// DO NOT USE THIS MAIN: IT HAS BEEN WRITTEN ONLY FOR EASY TESTING IN ECLIPSE
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
-
 		if (args.length == 1) {
 			String file = args[0];
 			// System.out.println(new File(file).exists());
@@ -24,13 +23,6 @@ public class Kil2Maude {
 					+ getKBase(true)
 					+ "/core/maude/compiler/all-tools\"\n loop compile .\n(compile SIMPLE-UNTYPED transitions \"transition=()\" superheats \"superheat=()\" supercools \"supercool=()\" .)\n quit\n";
 			FileUtil.saveInFile("maudified.maude", load + KILFiletoMEL(file).trim() + "\n" + compile);
-		} else if (args.length == 2) {
-			// String definition = FileUtil.readFileAsString(args[0]);
-			// String program = FileUtil.readFileAsString(args[1]);
-
-			// String ast = KILProgram2Maude(definition, program);
-
-			// FileUtil.saveInFile("pgm.maude", ast);
 		} else {
 			System.out.println("You must provide exactly one argument: <KIL> file name.");
 		}

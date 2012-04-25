@@ -1,4 +1,4 @@
-package ro.uaic.info.fmse.k2m.utils;
+package ro.uaic.info.fmse.utils.file;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;

@@ -6,8 +6,6 @@ package ro.uaic.info.fmse.k2m.main;
 import generated.Constants;
 import generated.TagFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -15,20 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import ro.uaic.info.fmse.k2m.preprocessor.Preprocessor;
 import ro.uaic.info.fmse.k2m.tag.NotGeneratedConstants;
 import ro.uaic.info.fmse.k2m.tag.Tag;
-import ro.uaic.info.fmse.k2m.utils.ParsingError;
+import ro.uaic.info.fmse.utils.xml.XML;
 
 
 /**
@@ -47,11 +40,8 @@ public class Maude {
 	public static Map<String, String> sortToSeparator;
 
 	public Maude(String kil) {
-		doc = getDocument(kil);
+		doc = XML.getDocument(kil);
 
-		// before continuing, first check the errors.
-		ParsingError.check(doc);
-		
 		// preprocessor
 		Preprocessor preprocessor = new Preprocessor();
 		doc = preprocessor.process(doc);
@@ -64,24 +54,6 @@ public class Maude {
 
 		// initialize others
 		init();
-	}
-
-	private Document getDocument(String xmlContent) {
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db;
-			db = dbf.newDocumentBuilder();
-			Document doc = db.parse(new ByteArrayInputStream(xmlContent.getBytes()));
-			return doc;
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return null;
 	}
 
 	private void initSortToSeparator()
@@ -188,10 +160,10 @@ public class Maude {
 
 	public String getAst(String pgmKil) throws Exception {
 
-		Document xml = getDocument(pgmKil);
+		Document xml = XML.getDocument(pgmKil);
 
 		// check the thing..
-		ParsingError.check(xml);
+		// ParsingError.check(xml);
 		
 		List<Tag> list = new LinkedList<Tag>();
 
