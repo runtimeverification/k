@@ -25,7 +25,11 @@ public class RULE_rule_TAG extends Tag {
 		
 		// retrieve rule location
 		String location = "";
+		String filename = "";
+		filename = getElement().getAttribute(Constants.FILENAME_filename_ATTR);
 		location = getElement().getAttribute(Constants.LOC_loc_ATTR);
+		location = location.replaceFirst("\\(", "(" + filename + ":");
+		location = location.replaceAll(",", ":");
 		
 		// retrieve the other attributes
 		String tags = "";

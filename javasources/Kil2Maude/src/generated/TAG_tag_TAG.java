@@ -27,6 +27,8 @@ public class TAG_tag_TAG extends Tag {
 		// ignore latex and cons for now
 		if (tag.equals("latex"))
 			return "";
+		if (tag.equals("klabel"))
+			return "";
 		if (tag.equals("cons"))
 			return "";
 		

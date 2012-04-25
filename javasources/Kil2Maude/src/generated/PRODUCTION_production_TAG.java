@@ -49,7 +49,11 @@ public class PRODUCTION_production_TAG extends Tag {
 			String maudeLabel = getElement().getAttribute(NotGeneratedConstants.LABEL);
 			String sort = getElement().getAttribute(NotGeneratedConstants.MAINSORT);
 			String location = getElement().getAttribute(Constants.LOC_loc_ATTR);
-			
+			String filename = getElement().getAttribute(Constants.FILENAME_filename_ATTR);
+			filename = (filename == null) ? "" : (getElement().getAttribute(Constants.FILENAME_filename_ATTR) + ":");
+			location = location.replaceFirst("\\(", "(" + filename);
+			location = location.replaceAll(",", ":");
+
 			// ignore list
 			List<String> ignore = new LinkedList<String>();
 			ignore.add(Constants.SORT_sort_TAG);
