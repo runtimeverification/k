@@ -5,6 +5,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ro.uaic.info.fmse.utils.strings.StringUtil;
+
 public class LabelGenerator {
 
 	private static final String PRODUCTION = "production";
@@ -47,14 +49,14 @@ public class LabelGenerator {
 				if (!declared) {
 					// compute the production label by concatenating "_" instead
 					// of sorts and the terminal values.
-					String generatedLabel = computeKLabel(production);
+					String generatedLabel = StringUtil.escape(computeKLabel(production));
 					if (!generatedLabel.equals("")) { // subsorts are ignored
 						// append a new tag element with the generated cons
 						Element element = doc.createElement(TAG);
 
 						// set it up
 						element.setAttribute(KEY, KLABEL);
-						element.setAttribute(VALUE, computeKLabel(production));
+						element.setAttribute(VALUE, generatedLabel);
 						element.setAttribute(LOCATION, "generated");
 
 						// append it as a child of attribute

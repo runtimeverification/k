@@ -120,7 +120,7 @@ public class Maude {
 			{
 				String label = production.getAttribute(NotGeneratedConstants.LABEL);
 				cons = cons.substring(1, cons.length() - 1);
-				label = StringUtil.escape(label);
+				// label = StringUtil.escape(label);
 				consMap.put(cons, label);
 			}
 		}		

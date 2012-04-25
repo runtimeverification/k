@@ -8,7 +8,6 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.k2m.tag.NotGeneratedConstants;
 import ro.uaic.info.fmse.k2m.tag.Tag;
-import ro.uaic.info.fmse.utils.strings.StringUtil;
 
 /**
  * @author andrei.arusoaie
@@ -61,7 +60,7 @@ public class PRODUCTION_production_TAG extends Tag {
 			String metadata = " [metadata \"" + tags + " location="
 					+ location + "\"]";
 			
-			return "op " + StringUtil.escape(maudeLabel) + " : " + getSubSorts() + " -> " + sort + metadata + " .\n";
+			return "op " + maudeLabel + " : " + getSubSorts() + " -> " + sort + metadata + " .\n";
 		}
 		
 		return "";
