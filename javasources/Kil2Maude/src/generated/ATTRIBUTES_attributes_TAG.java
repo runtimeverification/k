@@ -11,14 +11,21 @@ import ro.uaic.info.fmse.k2m.tag.Tag;
  * @author andrei.arusoaie
  *
  */
-public class ANNOS_annos_TAG extends Tag {
+public class ATTRIBUTES_attributes_TAG extends Tag {
 
-	public ANNOS_annos_TAG(Element element, Map<String, String> consMap) {
+	public ATTRIBUTES_attributes_TAG(Element element, Map<String, String> consMap) {
 		super(element, consMap);
 	}
 	
 	@Override
 	public String toMaude() throws Exception {
 		return processToMaudeAsSeparatedList(" ");
+	}
+	
+	@Override
+	public String toAst() throws Exception
+	{
+		// TODO Auto-generated method stub
+		return super.toAst();
 	}
 }

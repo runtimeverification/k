@@ -39,7 +39,7 @@ public class PRODUCTION_production_TAG extends Tag {
 			List<String> ignore = new LinkedList<String>();
 			ignore.add(Constants.SORT_sort_TAG);
 			ignore.add(Constants.TERMINAL_terminal_TAG);
-			ignore.add(Constants.ANNOS_annos_TAG);
+			ignore.add(Constants.ATTRIBUTES_attributes_TAG);
 
 			String thelist = processToMaudeAsSeparatedListExceptions("", ignore);
 			return thelist;

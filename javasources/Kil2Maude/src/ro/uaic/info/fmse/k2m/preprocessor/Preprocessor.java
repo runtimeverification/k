@@ -32,7 +32,7 @@ public class Preprocessor {
 			Element production = (Element) productions.item(i);
 
 			NodeList annotations = production
-					.getElementsByTagName(Constants.ANNOS_annos_TAG);
+					.getElementsByTagName(Constants.ATTRIBUTES_attributes_TAG);
 			for (int j = 0; j < annotations.getLength(); j++) {
 				Element annotation = (Element) annotations.item(j);
 
@@ -160,7 +160,7 @@ public class Preprocessor {
 			Element production = (Element)productions.item(i);
 			Element annotation = null;
 			
-			NodeList annotations = production.getElementsByTagName(Constants.ANNOS_annos_TAG);
+			NodeList annotations = production.getElementsByTagName(Constants.ATTRIBUTES_attributes_TAG);
 			for (int j = 0; j < annotations.getLength();)
 			{
 				// there should be only one annotation per production

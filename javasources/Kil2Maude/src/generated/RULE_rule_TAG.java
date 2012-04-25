@@ -43,7 +43,7 @@ public class RULE_rule_TAG extends Tag {
 		
 		// construct the rule body
 		List<String> ignore = new LinkedList<String>();
-		ignore.add(Constants.ANNOS_annos_TAG);
+		ignore.add(Constants.ATTRIBUTES_attributes_TAG);
 		return "mb rule " + processToMaudeAsSeparatedListExceptions(" ", ignore) + " : KSentence " + metadata + " .";
 		
 	}
