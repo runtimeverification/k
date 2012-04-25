@@ -8,4 +8,5 @@ public class NotGeneratedConstants {
 	public static final String ISSUBSORT = "isSubsort";
 	public static final String MAINSORT = "mainSort";
 	public static final String CONS = "cons";
+	public static final String KLABEL = "klabel";
 }
