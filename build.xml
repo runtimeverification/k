@@ -5,7 +5,7 @@
 	<target name="all">
 		<ant antfile="${javasources}/K3Java/build.xml" dir="${javasources}/K3Java"/>
 	</target>
-	
+
 	<target name="clean">
 		<delete>
 			<fileset dir="${javasources}/K3Java/src/k2parser/lib">
@@ -17,7 +17,7 @@
 		<delete file="${javasources}/K3Syntax/trans/K2Str.dep" />
 		<delete dir="${javasources}/K3Syntax/trans/K2Str" />
 		<delete dir="${javasources}/K3Syntax/include" />
-		
+
 		<delete>
 			<fileset dir="${javasources}/K3Java/src/k3parser/lib">
 				<include name="*.java" />
@@ -34,7 +34,7 @@
 		<delete dir="${javasources}/KUtils/bin" />
 		<delete dir="${javasources}/KPreprocessor/bin" />
 		<delete dir="${javasources}/Kil2Maude/bin" />
-		
+
 		<delete file="${javasources}/../dist/bin/java/k3.jar"/>
 		<delete file="k3.zip"/>
 	</target>

@@ -2,6 +2,11 @@ require "../k-prelude.k"
 
 module SIMPLE-UNTYPED-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
+
+  syntax Id ::= #Id
+  syntax Int ::= #Int
+  syntax Bool ::= #Bool
+
   syntax Start ::= Stmts
   syntax Ids ::= List{Id,","} [strict, cons("Ids1ListSyn"), hybrid]
   syntax Exps ::=  List{Exp,","} [cons("Exps1ListSyn")]
@@ -67,7 +72,7 @@ endmodule
 
 
 module SIMPLE-UNTYPED
-  imports SIMPLE-UNTYPED-SYNTAX + K + URIS + BUILTIN-HOOKS
+  imports SIMPLE-UNTYPED-SYNTAX + BUILTIN-HOOKS
 
   // coming from macros
   rule if E:Exp then S:Stmt => if E then S else {}
@@ -89,7 +94,7 @@ module SIMPLE-UNTYPED
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
-                      <k color="green"> (PGM:K ~> execute) </k>
+                      <k color="green"> ($PGM:K ~> execute) </k>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>

@@ -87,7 +87,7 @@ rules
 	to-xml-error:
 		error(a, b*) -> $[<?xml version="1.0" encoding="UTF-8" ?>
 		<T>
-			<error value="[<xmlStringEscapeToString>a]">
+			<error value="[<xmlStringEscapeFromString>a]">
 				[b']
 			</error>
 		</T>
@@ -96,7 +96,7 @@ rules
 
 	to-xml-error:
 		localized(a, b) ->
-			$[<localized message="[<xmlStringEscapeToString>a]" filename="[<xmlStringEscapeToString>x]" loc="[loc]" />
+			$[<localized message="[<xmlStringEscape>a]" filename="[<xmlStringEscapeFromString>x]" loc="[loc]" />
 			]
 		where (!b => (x, area(y1, y2, y3, y4, y5, y6))) <+ (!b => area-in-file(x, area(y1, y2, y3, y4, y5, y6)))
 		where loc := <write-to-string> (y1, y2, y3, y4)
@@ -104,7 +104,7 @@ rules
 	to-xml-error-open:
 		[a, b] -> $[<?xml version="1.0" encoding="UTF-8" ?>
 		<error value="Open error">
-			<file value="[<xmlStringEscapeToString>b]" />
+			<file value="[<xmlStringEscapeFromString>b]" />
 		</error>
 		]
 
@@ -116,7 +116,7 @@ rules
 	mydebug(a) = id//debug(a)
 	// xmlify - starts from here
 	xmlStringEscape         = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\"", "&quot;")
-	xmlStringEscapeToString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
+	xmlStringEscapeFromString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
 	getLocAsString        = (prim("SSL_EXT_origin_location", <id>) ; write-to-string) <+ !"(0,0,0,0)"
 	get-original-sentence = prim("SSL_EXT_origin_text", <id>) ; xmlStringEscape ; escape
 

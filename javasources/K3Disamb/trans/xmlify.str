@@ -42,7 +42,7 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml1:
-		CellProperty(a, b) -> $[[<id>""] [a]=[<xmlStringEscapeToString>b]]
+		CellProperty(a, b) -> $[[<id>""] [a]=[<xmlStringEscapeFromString>b]]
 
 	to-xml1:
 		Context(x1) -> $[<context loc="[loc]">
