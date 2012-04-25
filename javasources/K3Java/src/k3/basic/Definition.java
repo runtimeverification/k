@@ -872,16 +872,16 @@ public class Definition implements Cloneable {
 									el.setAttribute("loc", "generated");
 									el.setAttribute("value", "\"" + cons + "\"");
 
-									Node annos = p.xmlTerm.getLastChild().getPreviousSibling();
+									Node attributes = p.xmlTerm.getLastChild().getPreviousSibling();
 
-									// if the production doesn't have an annos tag, add it manually
-									if (!annos.getNodeName().equals(Tag.attributes)) {
-										Element annos2 = p.xmlTerm.getOwnerDocument().createElement(Tag.attributes);
-										p.xmlTerm.appendChild(annos2);
-										annos = annos2;
+									// if the production doesn't have an attributes tag, add it manually
+									if (!attributes.getNodeName().equals(Tag.attributes)) {
+										Element attributes2 = p.xmlTerm.getOwnerDocument().createElement(Tag.attributes);
+										p.xmlTerm.appendChild(attributes2);
+										attributes = attributes2;
 									}
 
-									annos.appendChild(el);
+									attributes.appendChild(el);
 								} else {
 									// check if the provided cons is correct
 									String cons = p.getAttributes().get("cons");

@@ -1,9 +1,6 @@
 module Common
 
 exports
-context-free syntax
-	VARID		-> Variable
-
 lexical syntax
 	[\ \t\n\r] -> LAYOUT
 
@@ -32,8 +29,5 @@ context-free restrictions
 	LAYOUT? -/- [\ \t\n\r]
 	LAYOUT? -/- [\/].[\/]
 	LAYOUT? -/- [\/].[\*]
-lexical restrictions
-	"+" -/- [I].[n].[t]
-
 
 

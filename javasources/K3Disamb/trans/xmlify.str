@@ -114,9 +114,9 @@ rules
 					<cond>
 						[<to-xml> c]
 					</cond>
-					<annos>
+					<attributes>
 						[<to-xml> d]
-					</annos>
+					</attributes>
 		</rule>
 		]
 		where <string-ends-with(|"Rule")> a
@@ -132,9 +132,9 @@ rules
 					<body>
 						[children]
 					</body>
-					<annos>
+					<attributes>
 						[<to-xml> d]
-					</annos>
+					</attributes>
 		</rule>
 		]
 		where <string-ends-with(|"Rule")> a

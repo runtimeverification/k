@@ -194,9 +194,9 @@ rules
 	to-xml:	// print an annotated production rule
 		AnnoProd(a*, b*) -> $[<production loc="[loc]">
 								[a'*]
-								<annos>
+								<attributes>
 									[b'*]
-								</annos>
+								</attributes>
 						</production>
 						]
 		where mydebug(!"AnnoProd: ")

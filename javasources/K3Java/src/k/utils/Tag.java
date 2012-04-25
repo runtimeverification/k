@@ -23,7 +23,7 @@ public class Tag {
 	public final static String assoc = "assoc";
 	public final static String production = "production";
 	public final static String priority = "priority";
-	public final static String attributes = "annos";
+	public final static String attributes = "attributes";
 	public final static String ditto = "ditto";
 	public final static String prec = "prec";
 	public final static String gather = "gather";
