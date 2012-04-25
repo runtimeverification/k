@@ -15,6 +15,7 @@ import k3.basic.Definition;
 import org.w3c.dom.Document;
 
 import ro.uaic.info.fmse.k2m.main.Kil2Maude;
+import ro.uaic.info.fmse.pp.Preprocessor;
 
 public class FrontEnd {
 
@@ -108,7 +109,11 @@ public class FrontEnd {
 			// ----------------------------------- parse rules
 			def.parseRules();
 
-			XmlLoader.writeXmlFile(def.getDefAsXML(), dotk.getAbsolutePath() + "/def.xml");
+			// ----------------------------------- preprocessiong steps
+			Preprocessor preprocessor = new Preprocessor();
+			Document preprocessedDef = preprocessor.run(def.getDefAsXML());
+			
+			XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Rules   = ");
