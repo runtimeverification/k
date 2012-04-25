@@ -115,33 +115,37 @@ public class Preprocessor {
 
 			NodeList tags = getTags(production);
 
-			String klabel = "";
-			for(int j = 0; j < tags.getLength(); j++)
-				if (((Element)tags.item(j)).getAttribute(Constants.KEY_key_ATTR).equals("klabel"))
-					klabel = ((Element)tags.item(j)).getAttribute(Constants.VALUE_value_ATTR);
-					
+			if (tags != null) {
+				String klabel = "";
+				for (int j = 0; j < tags.getLength(); j++)
+					if (((Element) tags.item(j)).getAttribute(
+							Constants.KEY_key_ATTR).equals("klabel"))
+						klabel = ((Element) tags.item(j))
+								.getAttribute(Constants.VALUE_value_ATTR);
 
-			// detect list production
-			boolean isList = false;
-			NodeList children = productions.item(i).getChildNodes();
-			for (int j = 0; j < children.getLength(); j++) {
-				if (children.item(j).getNodeName()
-						.equals(Constants.USERLIST_userlist_TAG)) {
-					isList = true;
+				// detect list production
+				boolean isList = false;
+				NodeList children = productions.item(i).getChildNodes();
+				for (int j = 0; j < children.getLength(); j++) {
+					if (children.item(j).getNodeName()
+							.equals(Constants.USERLIST_userlist_TAG)) {
+						isList = true;
+					}
 				}
-			}
-			
-			if (klabel.equals(""))
-				production
-						.setAttribute(NotGeneratedConstants.ISSUBSORT, "true");
-			else if (isList) {
-				production.setAttribute(NotGeneratedConstants.ISLIST, "true");
-				production
-						.setAttribute(NotGeneratedConstants.LABEL, klabel);
-			} else {
-				production
-						.setAttribute(NotGeneratedConstants.LABEL, klabel);
-				production.setAttribute(NotGeneratedConstants.ISOP, "true");
+
+				if (klabel.equals(""))
+					production.setAttribute(NotGeneratedConstants.ISSUBSORT,
+							"true");
+				else if (isList) {
+					production.setAttribute(NotGeneratedConstants.ISLIST,
+							"true");
+					production
+							.setAttribute(NotGeneratedConstants.LABEL, klabel);
+				} else {
+					production
+							.setAttribute(NotGeneratedConstants.LABEL, klabel);
+					production.setAttribute(NotGeneratedConstants.ISOP, "true");
+				}
 			}
 		}
 
@@ -151,7 +155,7 @@ public class Preprocessor {
 	private NodeList getTags(Element production) {
 		NodeList attributes = production
 				.getElementsByTagName(Constants.ATTRIBUTES_attributes_TAG);
-		for (int i = 0; i < attributes.getLength(); ) {
+		for (int i = 0; i < attributes.getLength();) {
 			// assume that production has only "one" attribute tag.
 			return ((Element) attributes.item(i))
 					.getElementsByTagName(Constants.TAG_tag_TAG);
