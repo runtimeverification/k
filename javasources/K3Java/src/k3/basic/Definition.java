@@ -86,6 +86,7 @@ public class Definition implements Cloneable {
 					Document doc = XmlLoader.getXMLDoc(parsed);
 					// TODO: add filenames for better error reporting
 					XmlLoader.reportErrors(doc.getFirstChild().getFirstChild().getNextSibling());
+					XmlLoader.addFilename(doc.getFirstChild(), file.getAbsolutePath());
 
 					NodeList xmlIncludes = doc.getDocumentElement().getElementsByTagName(Tag.require);
 					for (int i = 0; i < xmlIncludes.getLength(); i++) {

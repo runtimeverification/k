@@ -56,7 +56,8 @@ public class Configuration extends Sentence {
 			// replace the old xml node with the newly parsed sentence
 			Node old = xmlTerm;
 			xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-			XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(location, 0), XmlLoader.getLocNumber(location, 1), filename);
+			XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(location, 0), XmlLoader.getLocNumber(location, 1));
+			XmlLoader.addFilename(xmlTerm, filename);
 			XmlLoader.reportErrors(xmlTerm);
 
 			old.getParentNode().replaceChild(old.getOwnerDocument().importNode(xmlTerm, true), old);

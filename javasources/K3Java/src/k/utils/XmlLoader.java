@@ -83,7 +83,7 @@ public class XmlLoader {
 
 	}
 
-	public static Node updateLocation(Node node, int startLine, int startCol, String filename) {
+	public static Node updateLocation(Node node, int startLine, int startCol) {
 		if (Node.ELEMENT_NODE == node.getNodeType()) {
 			NamedNodeMap attr = node.getAttributes();
 			Node item = attr.getNamedItem(Tag.location);
@@ -110,10 +110,6 @@ public class XmlLoader {
 
 				String newLoc = "(" + loc0 + "," + loc1 + "," + loc2 + "," + loc3 + ")";
 				item.setNodeValue(newLoc);
-
-				Element e = (Element) node;
-				// TODO: don't add filename during testing, it takes too much space
-				 e.setAttribute("filename", filename);
 			}
 		}
 		NodeList list = node.getChildNodes();
@@ -122,7 +118,28 @@ public class XmlLoader {
 			Node childNode = list.item(i);
 
 			// Visit child node
-			updateLocation(childNode, startLine, startCol, filename);
+			updateLocation(childNode, startLine, startCol);
+		}
+		return node;
+	}
+
+	public static Node addFilename(Node node, String filename) {
+		if (Node.ELEMENT_NODE == node.getNodeType()) {
+			NamedNodeMap attr = node.getAttributes();
+			Node item = attr.getNamedItem(Tag.location);
+			if (item != null) {
+				Element e = (Element) node;
+				// TODO: don't add filename during testing, it takes too much space
+				e.setAttribute("filename", filename);
+			}
+		}
+		NodeList list = node.getChildNodes();
+		for (int i = 0; i < list.getLength(); i++) {
+			// Get child node
+			Node childNode = list.item(i);
+
+			// Visit child node
+			addFilename(childNode, filename);
 		}
 		return node;
 	}
