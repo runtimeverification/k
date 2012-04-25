@@ -4,18 +4,24 @@
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="Kil2Maude">
+<project basedir="." default="build" name="KPreprocessor">
     <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="D:/work/eclisespoofax"/>
     <property name="K3Java.location" value="../K3Java"/>
     <property name="KUtils.location" value="../KUtils"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
+    <path id="JUnit 4.libraryclasspath">
+        <pathelement location="${ECLIPSE_HOME}/plugins/org.junit_4.8.1.v4_8_1_v20100427-1100/junit.jar"/>
+        <pathelement location="${ECLIPSE_HOME}/plugins/org.hamcrest.core_1.1.0.v20090501071000.jar"/>
+    </path>
     <path id="KUtils.classpath">
         <pathelement location="${KUtils.location}/bin"/>
     </path>
-    <path id="Kil2Maude.classpath">
+    <path id="KPreprocessor.classpath">
         <pathelement location="bin"/>
+        <path refid="JUnit 4.libraryclasspath"/>
         <path refid="KUtils.classpath"/>
     </path>
     <target name="init">
@@ -41,7 +47,7 @@
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
             <src path="src"/>
-            <classpath refid="Kil2Maude.classpath"/>
+            <classpath refid="KPreprocessor.classpath"/>
         </javac>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">

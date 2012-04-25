@@ -13,9 +13,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import ro.uaic.info.fmse.k2m.utils.FileUtil;
-import ro.uaic.info.fmse.utils.XMLPrettyPrinter;
-
 public class ConfigurationAbstraction {
 
 	private static CAManager manager;

@@ -4,19 +4,16 @@
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="Kil2Maude">
+<project basedir="." default="build" name="KUtils">
     <property environment="env"/>
-    <property name="K3Java.location" value="../K3Java"/>
-    <property name="KUtils.location" value="../KUtils"/>
+    <property name="ConfigurationAbstraction.location" value="../ConfigurationAbstraction"/>
+    <property name="KPreprocessor.location" value="../KPreprocessor"/>
+    <property name="Kil2Maude.location" value="../Kil2Maude"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
     <path id="KUtils.classpath">
-        <pathelement location="${KUtils.location}/bin"/>
-    </path>
-    <path id="Kil2Maude.classpath">
         <pathelement location="bin"/>
-        <path refid="KUtils.classpath"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -30,22 +27,22 @@
     <target name="clean">
         <delete dir="bin"/>
     </target>
-    <target depends="clean" name="cleanall">
-        <ant antfile="build.xml" dir="${KUtils.location}" inheritAll="false" target="clean"/>
-    </target>
+    <target depends="clean" name="cleanall"/>
     <target depends="build-subprojects,build-project" name="build"/>
-    <target name="build-subprojects">
-        <ant antfile="build.xml" dir="${KUtils.location}" inheritAll="false" target="build-project"/>
-    </target>
+    <target name="build-subprojects"/>
     <target depends="init" name="build-project">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
             <src path="src"/>
-            <classpath refid="Kil2Maude.classpath"/>
+            <classpath refid="KUtils.classpath"/>
         </javac>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
-        <ant antfile="build.xml" dir="${K3Java.location}" inheritAll="false" target="clean"/>
-        <ant antfile="build.xml" dir="${K3Java.location}" inheritAll="false" target="build"/>
+        <ant antfile="build.xml" dir="${ConfigurationAbstraction.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${ConfigurationAbstraction.location}" inheritAll="false" target="build"/>
+        <ant antfile="build.xml" dir="${KPreprocessor.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${KPreprocessor.location}" inheritAll="false" target="build"/>
+        <ant antfile="build.xml" dir="${Kil2Maude.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${Kil2Maude.location}" inheritAll="false" target="build"/>
     </target>
 </project>
