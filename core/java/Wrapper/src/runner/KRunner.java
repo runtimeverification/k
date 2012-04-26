@@ -35,6 +35,7 @@ public class KRunner {
 	private String _maudeModule;
 	private boolean _createLogs;
 	private boolean _noServer;
+	private String _logfileName;
 	
 	
 	public KRunner(String[] args) throws Exception, IOException {
@@ -49,6 +50,7 @@ public class KRunner {
 		OptionSpec<File> xmlFile = _parser.accepts("xmlFile", "File to save Maude's XML log").withRequiredArg().ofType(File.class).defaultsTo(new File("/dev/null"));
 		OptionSpec<File> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(File.class);
 		OptionSpec<String> maudeModuleName = _parser.accepts("moduleName", "Final module name").withRequiredArg().required().ofType(String.class);
+		OptionSpec<String> logfileName = _parser.accepts("logfileName", "Logfile name").withRequiredArg().required().ofType(String.class).defaultsTo("krunner.log");
 		OptionSpec<Void> createLogs = _parser.accepts("createLogs", "Create runtime log files");
 		OptionSpec<Void> noServer = _parser.accepts("noServer", "Don't start the IO server");
 
@@ -66,6 +68,7 @@ public class KRunner {
 			_xmlFileName = options.valueOf(xmlFile).getCanonicalPath();
 			_maudeModule = options.valueOf(maudeModuleName);
 			_createLogs = options.has(createLogs);
+			_logfileName = options.valueOf(logfileName);
 			_noServer = options.has(noServer);
 		} catch (OptionException e) {
 			System.out.println(e.getMessage() + "\n");
@@ -86,7 +89,7 @@ public class KRunner {
 	private void startLogger() throws IOException {
 		_logger = java.util.logging.Logger.getLogger("KRunner");
 		if (_createLogs) {
-			FileHandler fh = new FileHandler("krunner.log", _append);
+			FileHandler fh = new FileHandler(_logfileName, _append);
 			fh.setFormatter(new SimpleFormatter());
 			_logger.addHandler(fh);
 		}
