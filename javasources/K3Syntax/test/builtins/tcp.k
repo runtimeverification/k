@@ -3,7 +3,7 @@ require "k-equal.k"
 module TCP-HOOKS
   imports STRING-HOOKS
   imports K-EQUAL-HOOKS
-  imports #TCP-INTERFACE + K
+  imports #TCP-INTERFACE
   syntax TCPAnswer ::= "#EOF" | String | "#tcpError" "(" String ")"
   rule 'isKResult(#EOF) => true [function, anywhere]
 

@@ -3,7 +3,7 @@ require "int.k"
 require "float.k"
 
 module STRING-SYNTAX-HOOKS
-  imports #STRING-INTERFACE + K
+  imports #STRING-INTERFACE
   syntax String ::= #String
 endmodule
 

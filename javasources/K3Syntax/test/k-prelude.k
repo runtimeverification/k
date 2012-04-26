@@ -1,8 +1,12 @@
 require "builtins/builtins.k"
 
+interface K-TECHNIQUE
+	// all in SDF directly
+endinterface
+
 interface K-MAP-EXTRAS
 	imports K-TECHNIQUE
-	imports BOOL
+	//imports BOOL
 
 	syntax K ::= Map "(" K ")" [prec(0)]
 
@@ -17,7 +21,7 @@ endinterface
 
 interface K-SET-EXTRAS
 	imports K-TECHNIQUE
-	imports IF-THEN-ELSE
+	//imports IF-THEN-ELSE
 
 	syntax Set ::= "Set" List{K}
 				 | Set "-Set" Set
@@ -29,7 +33,7 @@ endinterface
 
 interface K-BAG-EXTRAS
 	imports K-TECHNIQUE
-	imports IF-THEN-ELSE
+	//imports IF-THEN-ELSE
 
 	syntax Bag ::= "Bag" List{K}
 				 | Bag "-Bag" Bag
@@ -39,7 +43,7 @@ endinterface
 
 interface K-LIST-EXTRAS
 	imports K-TECHNIQUE
-	imports BOOL
+	//imports BOOL
 
 	syntax List ::= "List" List{K}
 
@@ -92,21 +96,21 @@ endinterface
 
 interface K
   imports K-TECHNIQUE
-  imports K-WRAPPERS
-  imports K-BUILTINS
-  imports K-RESULT             // to express results syntactically
-  imports K-RULES              // to write k rules with in-place rewriting
-  imports K-CONFIG             // to specify the global configuration term
-  imports K-EVAL
-  imports K-POLYMORPHIC-VARIABLES // defines the ? polmorfic constant
-  imports K-OPEN-CELLS            // defines open cells like <_>..._...</_> 
-  imports K-CONTEXTS  
+  //imports K-WRAPPERS
+  //imports K-BUILTINS
+  //imports K-RESULT             // to express results syntactically
+  //imports K-RULES              // to write k rules with in-place rewriting
+  //imports K-CONFIG             // to specify the global configuration term
+  //imports K-EVAL
+  //imports K-POLYMORPHIC-VARIABLES // defines the ? polmorfic constant
+  //imports K-OPEN-CELLS            // defines open cells like <_>..._...</_> 
+  //imports K-CONTEXTS  
   imports K-DESTRUCTORS           // defines getKLabel and getList{K} for K
-  imports K-EXTRAS                // defines a KLabel substitution 
-  imports K-LISTK-EXTRAS  
+  //imports K-EXTRAS                // defines a KLabel substitution 
+  //imports K-LISTK-EXTRAS  
   imports K-LIST-EXTRAS  
   imports K-MAP-EXTRAS            // operations on Maps
   imports K-BAG-EXTRAS            // operations on Bags
   imports K-SET-EXTRAS            // operations on Sets
-  imports K-LATEX  
+  //imports K-LATEX  
 endinterface

@@ -1,5 +1,5 @@
 module ID-SYNTAX-HOOKS
-  imports #ID-INTERFACE + K
+  imports #ID-INTERFACE
   syntax Id ::= #Id 
 endmodule
 

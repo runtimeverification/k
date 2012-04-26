@@ -1,5 +1,5 @@
 module BOOL-SYNTAX-HOOKS
-  imports #BOOL-INTERFACE + K
+  imports #BOOL-INTERFACE
   syntax Bool ::= #Bool
 endmodule
 

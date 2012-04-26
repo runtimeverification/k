@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -218,7 +219,7 @@ public class Definition implements Cloneable {
 			} else if (!p.isSubsort()) {
 				sdf += "	" + getSDFProds(p.getItems()) + "-> ";
 				if (p.getProdSort().isBaseSort()) {
-						sdf += StringUtil.escapeSortName(p.getProdSort().getSortName());
+					sdf += StringUtil.escapeSortName(p.getProdSort().getSortName());
 				} else
 					sdf += "K";
 				sdf += getSDFAttributes(p.getAttributes()) + "\n";
@@ -272,6 +273,7 @@ public class Definition implements Cloneable {
 		sdf += "imports Common\n";
 		sdf += "imports KBuiltinsBasic\n";
 		sdf += "exports\n\n";
+		sdf += "context-free syntax\n";
 
 		List<Production> outsides = new ArrayList<Production>();
 		List<Production> constants = new ArrayList<Production>();
@@ -280,8 +282,36 @@ public class Definition implements Cloneable {
 		Set<Sort> listSorts = new HashSet<Sort>(); // list of sorts declared as being list
 		Set<Sort> userSort = new HashSet<Sort>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
 
-		for (Module m : modules) {
-			if (m.getModuleName().endsWith("SYNTAX")) {
+		// gather modules for syntax
+		Module mainSyntax = modulesMap.get(mainModule + "-SYNTAX");
+		Set<Module> synMods = new HashSet<Module>();
+		List<Module> synQue = new LinkedList<Module>();
+
+		synQue.add(mainSyntax);
+		if (mainSyntax == null) {
+			Error.silentReport("Could not find a module for program syntax: " + mainModule + "-SYNTAX");
+		} else {
+
+			while (!synQue.isEmpty()) {
+				Module m = synQue.remove(0);
+				if (!synMods.contains(m)) {
+					synMods.add(m);
+					List<Sentence> ss = m.getSentences();
+					for (Sentence s : ss)
+						if (s.getType() == SentenceType.INCLUDING) {
+							String mname = ((Including) s).getIncludedModuleName();
+							Module mm = modulesMap.get(mname);
+							// if the module starts with # it means it is predefined in maude
+							if (!mname.startsWith("#"))
+								if (mm != null)
+									synQue.add(mm);
+								else
+									Error.silentReport("Could not find module: " + mname + " imported from: " + m.getModuleName());
+						}
+				}
+			}
+
+			for (Module m : synMods) {
 				for (Sentence s : m.getSentences()) {
 					if (s.getType() == SentenceType.SYNTAX) {
 						Syntax syn = (Syntax) s;
@@ -357,75 +387,74 @@ public class Definition implements Cloneable {
 					}
 				}
 			}
-		}
 
-		sdf += "context-free start-symbols\n";
-		sdf += "	Start\n";
-		sdf += "context-free syntax\n";
+			sdf += "context-free start-symbols\n";
+			sdf += "	Start\n";
+			sdf += "context-free syntax\n";
 
-		for (Production p : outsides) {
-			if (p.isListDecl()) {
-				UserList si = (UserList) p.getItems().get(0);
-				sdf += "	{" + StringUtil.escapeSortName(si.getSort().getSortName()) + " \"" + si.getTerminal() + "\"}* -> "
-						+ StringUtil.escapeSortName(p.getProdSort().getSortName()) + " {cons(\"" + p.getAttributes().get("cons") + "\")}\n";
-			} else {
-				sdf += "	";
-				List<Item> items = p.getItems();
-				for (int i = 0; i < items.size(); i++) {
-					Item itm = items.get(i);
-					if (itm.getType() == ItemType.TERMINAL) {
-						Terminal t = (Terminal) itm;
-						sdf += "\"" + t.getTerminal() + "\" ";
-					} else if (itm.getType() == ItemType.SORT) {
-						Sort srt = (Sort) itm;
-						sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
+			for (Production p : outsides) {
+				if (p.isListDecl()) {
+					UserList si = (UserList) p.getItems().get(0);
+					sdf += "	{" + StringUtil.escapeSortName(si.getSort().getSortName()) + " \"" + si.getTerminal() + "\"}* -> " + StringUtil.escapeSortName(p.getProdSort().getSortName()) + " {cons(\"" + p.getAttributes().get("cons") + "\")}\n";
+				} else {
+					sdf += "	";
+					List<Item> items = p.getItems();
+					for (int i = 0; i < items.size(); i++) {
+						Item itm = items.get(i);
+						if (itm.getType() == ItemType.TERMINAL) {
+							Terminal t = (Terminal) itm;
+							sdf += "\"" + t.getTerminal() + "\" ";
+						} else if (itm.getType() == ItemType.SORT) {
+							Sort srt = (Sort) itm;
+							sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
+						}
 					}
+					sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+					sdf += getSDFAttributes(p.getAttributes()) + "\n";
 				}
-				sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
-				sdf += getSDFAttributes(p.getAttributes()) + "\n";
 			}
-		}
-		for (Sort ss : sorts)
-			sdf += "	" + StringUtil.escapeSortName(ss.getSortName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getSortName()) + "\n";
+			for (Sort ss : sorts)
+				sdf += "	" + StringUtil.escapeSortName(ss.getSortName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getSortName()) + "\n";
 
-		sdf += "\n%% start symbols\n";
-		if (startSorts.size() == 0) {
-			for (Sort s : userSort) {
-				if (!s.getSortName().equals("Start"))
-					sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + "		-> Start\n";
+			sdf += "\n%% start symbols\n";
+			if (startSorts.size() == 0) {
+				for (Sort s : userSort) {
+					if (!s.getSortName().equals("Start"))
+						sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + "		-> Start\n";
+				}
 			}
-		}
 
-		sdf += "\n\n";
-		sdf += "	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n";
-		sdf += "	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n";
-		sdf += "	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n";
-		sdf += "	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n";
+			sdf += "\n\n";
+			sdf += "	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n";
+			sdf += "	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n";
+			sdf += "	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n";
+			sdf += "	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n";
 
-		sdf += "\n";
-		sdf += "	DzDzINT		-> DzDzInt\n";
-		sdf += "	DzDzID		-> DzDzId\n";
-		sdf += "	DzDzBOOL	-> DzDzBool\n";
-		sdf += "	DzDzSTRING	-> DzDzString\n";
+			sdf += "\n";
+			sdf += "	DzDzINT		-> DzDzInt\n";
+			sdf += "	DzDzID		-> DzDzId\n";
+			sdf += "	DzDzBOOL	-> DzDzBool\n";
+			sdf += "	DzDzSTRING	-> DzDzString\n";
 
-		sdf += "\n";
+			sdf += "\n";
 
-		sdf += "lexical syntax\n";
-		for (Production p : constants) {
-			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "\n";
-		}
-
-		sdf += "\n\n";
-
-		for (Terminal t : getTerminals(true)) {
-			if (t.getTerminal().matches("[a-zA-Z][a-zA-Z0-9]*")) {
-				sdf += "	\"" + t.getTerminal() + "\" -> DzDzID {reject}\n";
+			sdf += "lexical syntax\n";
+			for (Production p : constants) {
+				sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "\n";
 			}
+
+			sdf += "\n\n";
+
+			for (Terminal t : getTerminals(true)) {
+				if (t.getTerminal().matches("[a-zA-Z][a-zA-Z0-9]*")) {
+					sdf += "	\"" + t.getTerminal() + "\" -> DzDzID {reject}\n";
+				}
+			}
+
+			sdf += "\n";
+			sdf += getFollowRestrictionsForTerminals(true);
+
 		}
-
-		sdf += "\n";
-		sdf += getFollowRestrictionsForTerminals(true);
-
 		return sdf + "\n";
 	}
 
