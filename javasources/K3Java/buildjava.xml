@@ -6,9 +6,9 @@
               as the first entry and export the buildfile again. -->
 <project basedir="." default="build" name="K3Java">
     <property environment="env"/>
-    <property name="ECLIPSE_HOME" value="D:/work/eclisespoofax"/>
     <property name="workspace_loc:K3Syntax/test" value="../K3Syntax/test"/>
     <property name="KUtils.location" value="../KUtils"/>
+    <property name="KPreprocessor.location" value="../KPreprocessor"/>
     <property name="Kil2Maude.location" value="../Kil2Maude"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
@@ -20,6 +20,10 @@
         <pathelement location="${Kil2Maude.location}/bin"/>
         <path refid="KUtils.classpath"/>
     </path>
+    <path id="KPreprocessor.classpath">
+        <pathelement location="${KPreprocessor.location}/bin"/>
+        <path refid="KUtils.classpath"/>
+    </path>
     <path id="K3Java.classpath">
         <pathelement location="bin"/>
         <pathelement location="../../dist/bin/java/strategoxt.jar"/>
@@ -27,6 +31,7 @@
         <pathelement location="lib/commons-cli-1.2-sources.jar"/>
         <pathelement location="lib/commons-cli-1.2.jar"/>
         <path refid="Kil2Maude.classpath"/>
+        <path refid="KPreprocessor.classpath"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -48,11 +53,13 @@
     </target>
     <target depends="clean" name="cleanall">
         <ant antfile="build.xml" dir="${KUtils.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${KPreprocessor.location}" inheritAll="false" target="clean"/>
         <ant antfile="build.xml" dir="${Kil2Maude.location}" inheritAll="false" target="clean"/>
     </target>
     <target depends="build-subprojects,build-project" name="build"/>
     <target name="build-subprojects">
         <ant antfile="build.xml" dir="${KUtils.location}" inheritAll="false" target="build-project"/>
+        <ant antfile="build.xml" dir="${KPreprocessor.location}" inheritAll="false" target="build-project"/>
         <ant antfile="build.xml" dir="${Kil2Maude.location}" inheritAll="false" target="build-project"/>
     </target>
     <target depends="init" name="build-project">
@@ -65,12 +72,5 @@
             <src path="lib/resources"/>
             <classpath refid="K3Java.classpath"/>
         </javac>
-    </target>
-    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
-    <target name="Main - Def">
-        <java classname="main.Main" dir="${workspace_loc:K3Syntax/test}" failonerror="true" fork="yes">
-            <arg line="-m -v simple-untyped/simple-untyped.k"/>
-            <classpath refid="K3Java.classpath"/>
-        </java>
     </target>
 </project>

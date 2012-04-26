@@ -1,4 +1,1 @@
-  rule '#andBool((true => .List{K}),, _) [function, anywhere]
-  rule '#andBool(true) => true  [function, anywhere]
-  rule '#andBool(false,, _) => false [function, anywhere]
-  
+rule <env> X:K |-> Y:K </env>

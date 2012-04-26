@@ -297,7 +297,7 @@ module SIMPLE-UNTYPED
 
 
   syntax List{K} ::= Int ".." Int [cons("ListDlKDr1DotDotSyn")]
-  rule N1:Int..N2:Int => .List{K}              when N1  >Int N2  [structural]
-  rule N1:Int..N2:Int => N1 ,, (N1 +Int 1)..N2 when N1 <=Int N2  [structural]
+  rule N1:Int..N2:Int => .List{K}              when N1  >Int N2  [structural, function, anywhere]
+  rule N1:Int..N2:Int => N1 ,, (N1 +Int 1)..N2 when N1 <=Int N2  [structural, function, anywhere]
 
 endmodule 
