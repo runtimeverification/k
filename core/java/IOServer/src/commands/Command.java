@@ -42,5 +42,10 @@ public abstract class Command implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		try {
+			socket.close();
+		} catch (Exception e) {
+			_logger.info("failed to close socket");
+		}
 	}
 }
