@@ -62,6 +62,9 @@ public class LabelGenerator {
 						// append it as a child of attribute
 						attribute.appendChild(element);
 					}
+					else {
+						production.setAttribute("isSubsort", "true");
+					}
 				}
 			}
 		}
