@@ -5,6 +5,7 @@ endmodule
 
 module BOOL-HOOKS
   imports BOOL-SYNTAX-HOOKS
+  imports K
  
 
   rule B1:Bool =/=Bool B2:Bool => notBool(B1 ==Bool B2)
