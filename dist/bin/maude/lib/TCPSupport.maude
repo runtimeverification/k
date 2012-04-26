@@ -7,7 +7,8 @@ mod #TCP-SYNTAX is
 	op #toSend : #String -> #Socket-Msg .
 	op #start : #Nat -> #Socket-Configuration .
 	op #tcpRequest : #String -> #String .
-	op #TCPPORT : -> #Nat .
+	op #TCPPORT : -> [#Nat] .
+	eq #TCPPORT = 7500 [owise] . --- default in case there is no other port set
 endm
 
 mod #TCP-CLIENT is

@@ -229,7 +229,11 @@ endm
 mod K-LIST-EXTRAS is
   including K-TECHNIQUE .
 
-  var K K1 K2 K' : K .  var Ks Ks' : List{K} .  var LItem : ListItem .  var List : List .  var N : #NzNat .
+  var K K1 K2 K' : K .  
+  var Ks Ks' : List{K} .  
+  var LItem : ListItem .  
+  var List List' : List .  
+  var N : #NzNat .
 
   op List_ : List{K} -> List .
   eq List(.List{K}) = . .
@@ -239,6 +243,14 @@ mod K-LIST-EXTRAS is
   eq lengthList(.).List = 0 .
   eq lengthList(LItem List) = sNat(lengthList(List)) .
 
+  op _in_ : K List -> #Bool .
+  eq K in List ListItem(K) List' = true .
+  eq K in List = false [owise] .
+
+  op _in_ : ListItem List -> #Bool .
+  eq LItem in List LItem List' = true .
+  eq LItem in List = false [owise] .
+  
   --- op getFromList`{K`}(_,_) : List{K} #NzNat -> K .
   --- eq getFromList{K}((K,,Ks),1) = K .
   --- eq getFromList{K}((K,,Ks),sNat N) = getFromList{K}(Ks,N) .
@@ -285,7 +297,7 @@ mod K-RESULT is
   subsorts KResult < K .
 
   sorts List{KResult} NeList{KResult} .
-  op 'isKResult : -> KLabel .
+
   op .List{K} : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
   subsort List{KResult} < List{K} .
   subsort KResult < NeList{KResult} < List{KResult} NeList{K} .
