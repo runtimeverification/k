@@ -42,8 +42,7 @@ public class IOServer {
 		_logger.info("Server started at " + serverSocket.getInetAddress() + ": " + port);
 		
 		while (true) {
-			Socket clientSocket = null;
-			clientSocket = serverSocket.accept();
+			Socket clientSocket = serverSocket.accept();
 			_logger.info(clientSocket.toString());
 			String msg = getMessage(clientSocket);
 			Command command = parseCommand(msg, clientSocket);

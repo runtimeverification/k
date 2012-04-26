@@ -31,7 +31,7 @@ public abstract class Command implements Runnable {
         _logger.info("sending '" + success + "##' to "+ maudeId);
 		success += "##\n";
 		
-		BufferedWriter output;
+		BufferedWriter output = null;
 		try {
 			output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
@@ -39,13 +39,16 @@ public abstract class Command implements Runnable {
 			output.write(success);
 			output.flush();
 		} catch (Exception e) {
+			_logger.info("failed to respond to client " + maudeId);
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
+			_logger.info("Closing client socket for " + maudeId);
+			//if (output != null) {output.close();}
 			socket.close();
 		} catch (Exception e) {
-			_logger.info("failed to close socket");
+			_logger.info("failed to close socket for " + maudeId);
 		}
 	}
 }
