@@ -9,7 +9,9 @@ LANGUAGE_MODULES = ISSUE
 MAIN_FILE = example
 
 # this is a space-separated list of basename maude files to run
-TESTS = test.m
+TESTS = 
+
+COMPILE_OPTIONS = -pdf
 
 LATEX_STYLE = mm
 
