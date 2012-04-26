@@ -53,6 +53,11 @@ public class OptionsParser {
 		Option lang = new Option("l", "lang", true, "start module");
 		langGroup.addOption(lang);
 
+		//language module name
+		OptionGroup langSynGroup = new OptionGroup();
+		Option langSyn = new Option("synmod", "syntax-module", true, "start module for syntax");
+		langSynGroup.addOption(langSyn);
+
 		// language module name
 		// OptionGroup preludeGroup = new OptionGroup();
 		// Option prelude = new Option("prelude", true, "Load a different prelude file.");
@@ -67,6 +72,7 @@ public class OptionsParser {
 		options.addOptionGroup(verb);
 		options.addOptionGroup(main);
 		options.addOptionGroup(langGroup);
+		options.addOptionGroup(langSynGroup);
 		options.addOptionGroup(tex);
 		options.addOptionGroup(tex2);
 		options.addOptionGroup(libGroup);

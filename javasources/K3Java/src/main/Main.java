@@ -22,11 +22,12 @@ public class Main {
 		}
 
 		// set lib if any
-		if (cmd.hasOption("lib"))
-		{
+		if (cmd.hasOption("lib")) {
 			GlobalSettings.lib = cmd.getOptionValue("lib");
 		}
-		
+		if (cmd.hasOption("syntax-module"))
+			GlobalSettings.synModule = cmd.getOptionValue("syntax-module");
+
 		// options: help
 		if (cmd.hasOption("help")) {
 			k.utils.Error.helpExit(op.getHelp(), op.getOptions());

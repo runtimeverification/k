@@ -283,13 +283,18 @@ public class Definition implements Cloneable {
 		Set<Sort> userSort = new HashSet<Sort>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
 
 		// gather modules for syntax
-		Module mainSyntax = modulesMap.get(mainModule + "-SYNTAX");
+		String mainSynModName;
+		if (GlobalSettings.synModule == null)
+			mainSynModName = mainModule + "-SYNTAX";
+		else
+			mainSynModName = GlobalSettings.synModule;
+		Module mainSyntax = modulesMap.get(mainSynModName);
 		Set<Module> synMods = new HashSet<Module>();
 		List<Module> synQue = new LinkedList<Module>();
 
 		synQue.add(mainSyntax);
 		if (mainSyntax == null) {
-			Error.silentReport("Could not find a module for program syntax: " + mainModule + "-SYNTAX");
+			Error.silentReport("Could not find a module for program syntax: " + mainSynModName);
 		} else {
 
 			while (!synQue.isEmpty()) {
