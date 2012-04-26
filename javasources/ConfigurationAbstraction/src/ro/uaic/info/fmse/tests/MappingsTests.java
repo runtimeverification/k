@@ -3,7 +3,7 @@ package ro.uaic.info.fmse.tests;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Test;
+// import org.junit.Test;
 
 import ro.uaic.info.fmse.ca.Configuration;
 import ro.uaic.info.fmse.ca.Rule;
@@ -11,7 +11,7 @@ import ro.uaic.info.fmse.main.ConfigurationInferencer;
 
 public class MappingsTests {
 
-	@Test
+//	@Test
 	public final void testDetectMappings() {
 
 		ro.uaic.info.fmse.tests.Test test = new ro.uaic.info.fmse.tests.Test();
