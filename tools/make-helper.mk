@@ -20,6 +20,7 @@ COMPILED_FILE = $(MAIN_FILE)-compiled.maude
 # EPS_FILES = $(MAIN_FILE)-ps-001.eps
 # PNG_FILES = $(EPS_FILES).png
 LATEX_STYLE ?= bubble
+PACKAGE_OPTIONS ?= poster,style=bubble
 LANGUAGE_FILE = $(or $(shell if [ -e $(MAIN_FILE).k ]; then echo $(MAIN_FILE).k; fi), $(or $(shell if [ -e $(MAIN_FILE).kmaude ]; then echo $(MAIN_FILE).kmaude; fi), $(shell if [ -e $(MAIN_FILE).maude ]; then echo $(MAIN_FILE).maude; fi)))
 
 COMPILE_OPTIONS ?= $(DRAFT)
@@ -52,31 +53,32 @@ $(COMPILED_FILE).output: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) $(ADDITIO
 
 # this should build the latex
 latex: $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -latex $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -package-options "$(PACKAGE_OPTIONS)" -latex $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
+#	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -latex $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the pdf
 pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -pdf $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -package-options "$(PACKAGE_OPTIONS)" -pdf $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the pdf in draft mode
 pdfdraft:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -pdf $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS) -draft
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -package-options "$(PACKAGE_OPTIONS)" -pdf $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS) -draft
 
 # this should build the png
 png:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -png $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -package-options "$(PACKAGE_OPTIONS)" -png $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the eps
 eps:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -eps $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -package-options "$(PACKAGE_OPTIONS)" -eps $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the ps
 ps:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -ps $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -package-options "$(PACKAGE_OPTIONS)" -ps $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 # this should build the crop-pdf
 crop-pdf:  $(LANGUAGE_FILE) $(TOOL_DIR_FILES) $(K_FILES) Makefile
-	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -style $(LATEX_STYLE) -crop $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
+	$(KCOMPILE) $(LANGUAGE_FILE) -l $(LANGUAGE_NAME) -package-options "$(PACKAGE_OPTIONS)" -crop $(LANGUAGE_MODULES) $(LATEX_EXTRA_ARGS)
 
 
 # to satisfy the target "test", it needs to satisfy the targets "test-a test-b test-c" for a b c \in $(TESTS)

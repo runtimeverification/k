@@ -39,19 +39,19 @@
 % respectively .
 
 \ifthenelse{\equal{\k@style}{bubble}}{
-\newcommand{\kall}{\ball}
-\newcommand{\kallLarge}{\ballLarge}
-\newcommand{\kprefix}{\bprefix}
-\newcommand{\ksuffix}{\bsuffix}
-\newcommand{\kmiddle}{\bmiddle}
+\newcommand{\kall}[3][white]{\ball{#1}{#2}{#3}}
+\newcommand{\kallLarge}[3][white]{\ballLarge{#1}{#2}{#3}}
+\newcommand{\kprefix}[3][white]{\bprefix{#1}{#2}{#3}}
+\newcommand{\ksuffix}[3][white]{\bsuffix{#1}{#2}{#3}}
+\newcommand{\kmiddle}[3][white]{\bmiddle{#1}{#2}{#3}}
 \newcommand{\kdot}{\bdot}
 \newcommand{\AnyVar}{\bAnyVar}
 }{% else, assume default style is math
-\newcommand{\kall}{\mall}
-\newcommand{\kallLarge}{\mallLarge}
-\newcommand{\kprefix}{\mprefix}
-\newcommand{\ksuffix}{\msuffix}
-\newcommand{\kmiddle}{\mmiddle}
+\newcommand{\kall}[3][white]{\mall{#1}{#2}{#3}}
+\newcommand{\kallLarge}[3][white]{\mallLarge{#1}{#2}{#3}}
+\newcommand{\kprefix}[3][white]{\mprefix{#1}{#2}{#3}}
+\newcommand{\ksuffix}[3][white]{\msuffix{#1}{#2}{#3}}
+\newcommand{\kmiddle}[3][white]{\mmiddle{#1}{#2}{#3}}
 \newcommand{\kdot}{\mdot}
 \newcommand{\AnyVar}{\mAnyVar}
 }
@@ -596,11 +596,11 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 }}
 \newcommand{\kra}{\curvearrowright}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
-\newcommand{\constant}[2]{%
-  \k@withTooltip{\text{\sffamily #1}}{Constant Sort: #2}%
+\newcommand{\constant}[2][none]{%
+  \k@withTooltip{\text{\sffamily #2}}{Constant Sort: #1}%
 }
-\newcommand{\variable}[2]{%
-\k@withTooltip{\text{\ensuremath{\it #1}}\/}{Variable Sort: #2}%
+\newcommand{\variable}[2][none]{%
+\k@withTooltip{\text{\ensuremath{\it #2}}\/}{Variable Sort: #1}%
 }
 
 \newcommand{\displayGreek}[1]{%

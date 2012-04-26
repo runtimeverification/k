@@ -1025,9 +1025,9 @@ mod LATEX-PRINT-META is
 ---  eq \wrapping{Q} = 'wrapping printQid(Q) .
   eq \renameTo{'AnyVar} = 'renameTo .
   eq \renameTo{Q} = 'renameTo printOpQid(Q) [owise] .
-  eq \variable{Q}{QIL} = '\variable '`{ printVariable(replaceAll(string(Q), ("$" |-> "\\$"))) '`} '`{ printSortQid(QIL) '`}  [owise] .
+  eq \variable{Q}{QIL} = '\variable '`[ printSortQid(QIL) '`] '`{ printVariable(replaceAll(string(Q), ("$" |-> "\\$"))) '`}  [owise] .
   eq \constant{'.}{QIL} = '\dotCt '`{ printSortQid(QIL) '`} .
-  eq \constant{Q}{QIL} = '\constant '`{ printQid(Q) '`} '`{ printSortQid(QIL) '`} [owise] .
+  eq \constant{Q}{QIL} = '\constant '`[ printSortQid(QIL) '`] '`{ printQid(Q) '`} [owise] .
   eq printTerm(M, prefixOp(Q, T))
    = '\prefixOp '`{ printQid(Q)  '`} printTerm(M, T) .
   eq printTerm(M, latexOp(Q,T)) = Q printTerm(M,T) .
@@ -1079,7 +1079,7 @@ mod LATEX-PRINT-META is
      else if Ellipses == both then '\kmiddle
      else '\kall 
      fi fi fi 
-     '`{ getColor(M,getName(Ct)) '`} '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} [print "printing cell " Ct] .
+     '`[ getColor(M,getName(Ct)) '`] '`{ getName(Ct) '`} '`{ printTerm(M, T) '`} [print "printing cell " Ct] .
 
   eq printTerm(M, \reduce{T1}{T2}) = if getName(M) == 'STRUCTURAL then '\reduceS else '\reduce fi '`{ printTerm(M, T1) '`} '`{ printTerm(M, T2) '`} .
   eq printTerm(M, \value{T}) = '\kvalue '`{ printTerm(M, T) '`} .
@@ -1149,7 +1149,7 @@ mod LATEX-PRINT-META is
     if SC := splitKCell(T)  .
 
    eq printConfig(M, \configCell{Q}{T}{AS})
-    =  '\kallLarge '`{ getColor(M,Q) '`} '`{ Q if AS[multiplicity] == one then nil else qid(symbolM(AS[multiplicity])) fi  '`} '`{ printConfig(M,T) '`} [owise] .
+    =  '\kallLarge '`[ getColor(M,Q) '`] '`{ Q if AS[multiplicity] == one then nil else qid(symbolM(AS[multiplicity])) fi  '`} '`{ printConfig(M,T) '`} [owise] .
    eq printConfig(M, Q[Tl]) 
     = if Q == ctor(Bag) then printConfigL(M,Tl) else printTerm(M,Q[Tl]) fi [owise print "Escaping to terms if Q is not __. Q: " Q "[" Tl "]"] .
    eq printConfig(M, C) 

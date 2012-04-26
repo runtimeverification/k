@@ -227,7 +227,8 @@ my $short_help_message =
   -crop : maudifies/compiles for generating a nice crop-pdf output
   
   The following options make sense only when Latex options are used:
-  -style : useful for typesetting (optional)
+  -style : useful for typesetting (optional, deprecated)
+  -package-options : pass <package-options> to k.sty 
   -output output_file : specifies the name of the generated (latex) file
   -draft : include [draft] in\ documentclass
   -topmatter : includes the content of the argument file
@@ -580,6 +581,7 @@ my @all_syntax = ();
 
 # variables to store command line arguments
 my $style = "bubble";
+my $package_options = "poster,style=$style";
 my $compile_only = 0;
 my $language_module_name = "";
 my $language_file_name = "";
@@ -649,6 +651,10 @@ foreach (@ARGV) {
     }
     elsif (($style eq "?") && !/^-/) {
 	$style = $_;
+        $package_options = "$package_options,style=$style";
+    }
+    elsif (($package_options eq "?") && !/^-/) {
+	$package_options = $_;
     }
     elsif (($topmatter eq "?") && !/^-/) {
 	$topmatter = $_;
@@ -741,6 +747,9 @@ foreach (@ARGV) {
     }
     elsif (/^--?style$/) {
 		$style = "?";
+    }
+    elsif (/^--?package-options$/) {
+		$package_options = "?";
     }
     elsif (/^--?u(nquote)?$/)
     {
@@ -910,6 +919,11 @@ if ($language_module_name eq "?") {
 # Check that a $style was indeed given if -style option was used
 if ($style eq "?") {
     terminate("Option -style requires that a style be given right after");
+}
+
+# Check that $package_options were indeed specified if -package-options option was used
+if ($package_options eq "?") {
+    terminate("Option -package-options requires that an options string be given right after");
 }
 
 $language_file_name = basename($language_file_name);
@@ -1226,13 +1240,14 @@ sub latexify {
     if (@l_modules > 0) # && !(($_ =~ m/\\begin\{module\}/) || ($_ =~ m/\\begin\{commentModule\}/))) 
     {
 	print "Latex style used: $style\n" if $verbose;
+	print "k.sty options used: $package_options\n" if $verbose;
 	
 # File name where the compiled output will be stored:
 	my $output_file_name = "$lang_name-$format.tex";
 	open FILE,">",$output_file_name or die "Cannot create $output_file_name\n";
 	print FILE "\\documentclass{article}\n" if !$draft;
 	print FILE "\\documentclass[draft]{article}\n" if $draft;
-	print FILE "\\usepackage[poster,style=$style]{$k_latex_dir/k}\n";
+	print FILE "\\usepackage[$package_options]{$k_latex_dir/k}\n";
 	
 	my $abs_filename = $language_file_name;
 	$abs_filename =~ s/\..*?$//;
@@ -2191,8 +2206,33 @@ sub make_ops {
 	    {
 		my $latex_text = $production;
 		my $counter = 0;
-		$latex_text =~ s/([^_]+)/"\\terminal\{".make_latex($1)."\}"/gse;
-		$latex_text =~ s/_/$counter++;"{#$counter}"/ges;
+                my @tokens = split /_/,$latex_text;
+                $latex_text = "";
+                foreach my $token (@tokens) {
+                  $token = make_latex($token);
+                  if ($token =~ /[,\(\)\[\]]/) {
+                    $token =~ s/([^,\(\)\[\]]*)([,\(\)\[\]]|$)/{
+                      if ($2 eq "" and $1 ne "") {
+                        "\\terminal\{$1\}";
+                      } elsif ($1 ne "") {
+                        "\{\\terminal\{$1\}\}$2";
+                      } else {
+                        "$1$2";
+                      }
+                    }/gse;
+                  } else {
+                    $token = "\\terminal\{$token\}";
+                  }
+#                 $token = "\\terminal\{$token\}";
+                  if ($counter != 0) {
+                    $latex_text .= "{#$counter}";
+                  }
+                  $counter++;
+                  $latex_text .= $token;
+                
+                }
+#		$latex_text =~ s/([^_]+)/"\\terminal\{".make_latex($1)."\}"/gse;
+#               $latex_text =~ s/_/$counter++;"{#$counter}"/ges;
 		$latex_text =~ s/"/&!&!&!/g;
                 if ($attributes eq "") 
                 {
