@@ -2,6 +2,15 @@
 <project basedir="." default="all" name="K3 Build file">
 
 	<property location="javasources" name="javasources"/>
+
+	<target name="java">
+		<ant antfile="${javasources}/K3Java/buildjava.xml" dir="${javasources}/K3Java"/>
+	</target>
+
+	<target name="jar">
+		<ant antfile="${javasources}/K3Java/buildjar.xml" dir="${javasources}/K3Java"/>
+	</target>
+	
 	<target name="all">
 		<ant antfile="${javasources}/K3Java/build.xml" dir="${javasources}/K3Java"/>
 	</target>
