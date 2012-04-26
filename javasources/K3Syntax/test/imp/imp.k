@@ -3,10 +3,6 @@ require "../k-prelude.k"
 module IMP-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
   
-  syntax Id ::= #Id
-  syntax Int ::= #Int
-  syntax Bool ::= #Bool
-
   syntax AExp ::= Int | Id
   				| AExp "/" AExp [left, strict]
   				> AExp "+" AExp [left, strict]

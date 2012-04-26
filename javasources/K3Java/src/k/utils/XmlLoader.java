@@ -133,7 +133,7 @@ public class XmlLoader {
 			if (item != null) {
 				Element e = (Element) node;
 				// TODO: don't add filename during testing, it takes too much space
-				//e.setAttribute("filename", filename);
+				e.setAttribute("filename", filename);
 			}
 		}
 		NodeList list = node.getChildNodes();
