@@ -3020,7 +3020,7 @@ sub remove_quotes
 	{
 	    $tmp1 = Unfreeze("QUOTES", $tmp1);
 	    $tmp1 =~ s!(\[[^\]]*?(metadata)[^\]]*?\])!!gs;
-	    print wrap("", "", "[Warning] This warning is thrown when quotes around terminals are not balanced. Notice that if you want to use quotes in your syntax use backslash (\) to escape them. It seems that you forgot a quote (\") in syntax declaration:\n$tmp1\n");
+	    print wrap("", "", "[Warning] This warning is thrown when quotes around terminals are not balanced. Notice that if you want to use quotes in your syntax use backslash (\\) to escape them. It seems that you forgot a quote (\") in syntax declaration:\n$tmp1\n");
 	}
 
 	$tmp =~ s%(?<!\\)\"%KSYNQUOT%sg;
