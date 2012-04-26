@@ -323,6 +323,23 @@
 \newcommand{\kLarge}[1]{\left(\begin{array}{@{}c@{}}#1\end{array}\right)}
 \newcommand{\kBR}{\\}
 
+% Builtins %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\builtinEqBool}[2]{{#1}==_{\scriptstyle\it Bool}{#2}}
+\newcommand{\builtinNeqBool}[2]{{#1}!=_{\scriptstyle\it Bool}{#2}}
+
+\newcommand{\builtinAnd}[2]{{#1}\wedge_{\scriptstyle\it Bool}{#2}}
+\newcommand{\builtinOr}[2]{{#1}\vee_{\scriptstyle\it Bool}{#2}}
+\newcommand{\builtinXor}[2]{{#1}\oplus_{\scriptstyle\it Bool}{#2}}
+\newcommand{\builtinNot}[1]{\neg_{\scriptstyle\it Bool}{#1}}
+\newcommand{\builtinImplies}[2]{{#1}\Rightarrow_{\scriptstyle\it Bool}{#2}}
+
+\newcommand{\builtinIntPlus}[2]{{#1}\mathrel{+_{\scriptstyle\it Int}}{#2}}
+\newcommand{\builtinIntMinus}[2]{{#1}\mathrel{-_{\scriptstyle\it Int}}{#2}}
+\newcommand{\builtinIntTimes}[2]{{#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}}
+\newcommand{\builtinIntDiv}[2]{{#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}}
+\newcommand{\builtinIntMod}[2]{{#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}}
+
 
 % K Blocks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -8,23 +8,23 @@ module INT-HOOKS
   imports BOOL-HOOKS
 
   syntax Int ::= Int "+Int" Int 
-      [function prec(33) gather(E e) latex "{#1}\mathrel{+_{\scriptstyle\it Int}}{#2}"
+      [function prec(33) gather(E e) latex "\builtinIntPlus{#1}{#2}"
        hook(#INT:_+Int_)]
 
   syntax Int ::= Int "-Int" Int 
-      [function prec(33) gather(E e) latex "{#1}\mathrel{-_{\scriptstyle\it Int}}{#2}"
+      [function prec(33) gather(E e) latex "\builtinIntMinus{#1}{#2}"
        hook(#INT:_-Int_)]
 
   syntax Int ::= Int "*Int" Int 
-      [function prec(31) gather(E e) latex "{#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}"
+      [function prec(31) gather(E e) latex "\builtinIntTimes{#1}{#2}"
        hook(#INT:_*Int_)]
 
   syntax Int ::= Int "/Int" Int 
-      [function prec(31) gather(E e) latex "{#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}"
+      [function prec(31) gather(E e) latex "\builtinIntDiv{#1}{#2}"
        hook(#INT:_/Int_)]
 
   syntax Int ::= Int "%Int" Int 
-      [function prec(31) gather(E e) latex "{#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}"
+      [function prec(31) gather(E e) latex "\builtinIntMod{#1}{#2}"
        hook(#INT:_%Int_)]
 
   syntax Bool ::= Int "<=Int" Int 
