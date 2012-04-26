@@ -950,7 +950,7 @@ mod LATEX-PRINT-META is
   eq printTerminal(Q) = printTerminal(Q, true) .
 
   op printTerminal : Qid Bool -> QidList .
-  eq printTerminal(Q, B:Bool) = if Q == ' then nil else if Q == '`( or-else Q == '`, or-else Q == '`) then Q else if latexTerminal(Q) then printQid(Q) else ('\mathrel '`{ if B:Bool then '\terminal else '\terminalNoSpace fi '`{ if Q == '\enspace then nil else printQid(Q) fi '`} '`}) fi fi fi [print "terminal " Q] .
+  eq printTerminal(Q, B:Bool) = if Q == ' then nil else if Q == '`( or-else Q == '`, or-else Q == '`) then Q else if latexTerminal(Q) then printQid(Q) else (if B:Bool then '\mathrel '`{  '\terminal else '\terminalNoSpace fi '`{ if Q == '\enspace then nil else printQid(Q) fi '`} (if B:Bool then '`} else nil fi)) fi fi fi [print "terminal " Q] .
 
   op latexTerminal : Qid -> Bool .
   eq latexTerminal(Q) = (substr(string(Q), _-_(length(string(Q)), 1), 1) == "{" and substr(string(Q), _-_(length(string(Q)), 2), 1) == "`")  or-else (substr(string(Q), 1, 1) == "}" and substr(string(Q), 0, 1) == "`") .
