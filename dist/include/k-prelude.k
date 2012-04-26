@@ -1,6 +1,6 @@
 require "builtins/builtins.k"
 
-interface K-MAP-EXTRAS a
+interface K-MAP-EXTRAS
 	imports K-TECHNIQUE
 	imports BOOL
 
