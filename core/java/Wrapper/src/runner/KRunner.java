@@ -50,7 +50,7 @@ public class KRunner {
 		OptionSpec<File> xmlFile = _parser.accepts("xmlFile", "File to save Maude's XML log").withRequiredArg().ofType(File.class).defaultsTo(new File("/dev/null"));
 		OptionSpec<File> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(File.class);
 		OptionSpec<String> maudeModuleName = _parser.accepts("moduleName", "Final module name").withRequiredArg().required().ofType(String.class);
-		OptionSpec<String> logfileName = _parser.accepts("logfileName", "Logfile name").withRequiredArg().required().ofType(String.class).defaultsTo("krunner.log");
+		OptionSpec<String> logfileName = _parser.accepts("logfileName", "Logfile name").withRequiredArg().ofType(String.class).defaultsTo("krunner.log");
 		OptionSpec<Void> createLogs = _parser.accepts("createLogs", "Create runtime log files");
 		OptionSpec<Void> noServer = _parser.accepts("noServer", "Don't start the IO server");
 
