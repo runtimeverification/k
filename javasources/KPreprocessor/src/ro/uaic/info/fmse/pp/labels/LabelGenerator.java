@@ -24,20 +24,20 @@ public class LabelGenerator {
 	public Document generateKLabels(Document doc) {
 		// get all the productions and check them
 		NodeList productions = doc.getElementsByTagName(PRODUCTION);
-		
+
 		for (int i = 0; i < productions.getLength(); i++) {
 			Element production = (Element) productions.item(i);
 
 			// theoretically there should be only one such tag
 			NodeList attributes = production.getElementsByTagName(ATTRIBUTES);
-
+			Element attribute = null;
+			boolean declared = false;
 			for (int j = 0; j < attributes.getLength(); j++) {
-				Element attribute = (Element) attributes.item(j);
+				attribute = (Element) attributes.item(j);
 
 				// check if the user already declared a klabel
 				NodeList tags = attribute.getElementsByTagName(TAG);
 
-				boolean declared = false;
 				for (int k = 0; k < tags.getLength(); k++) {
 					Element tag = (Element) tags.item(k);
 
@@ -45,28 +45,35 @@ public class LabelGenerator {
 					if (key.equals(KLABEL))
 						declared = true;
 				}
+			}
+			
+			
+			if (!declared) {
+				// compute the production label by concatenating "_" instead
+				// of sorts and the terminal values.
 
-				if (!declared) {
-					// compute the production label by concatenating "_" instead
-					// of sorts and the terminal values.
-					String generatedLabel = StringUtil.escape(computeKLabel(production));
-					if (!generatedLabel.equals("")) { // subsorts are ignored
-						// append a new tag element with the generated cons
-						Element element = doc.createElement(TAG);
+				String generatedLabel = StringUtil.escape(computeKLabel(production));
+				if (!generatedLabel.equals("")) { // subsorts are ignored
+					// append a new tag element with the generated cons
+					Element element = doc.createElement(TAG);
 
-						// set it up
-						element.setAttribute(KEY, KLABEL);
-						element.setAttribute(VALUE, generatedLabel);
-						element.setAttribute(LOCATION, "generated");
+					// set it up
+					element.setAttribute(KEY, KLABEL);
+					element.setAttribute(VALUE, generatedLabel);
+					element.setAttribute(LOCATION, "generated");
 
-						// append it as a child of attribute
-						attribute.appendChild(element);
+					// append it as a child of attribute
+					if (attribute == null)
+					{
+						attribute = doc.createElement(ATTRIBUTES);
+						production.appendChild(attribute);
 					}
-					else {
-						production.setAttribute("isSubsort", "true");
-					}
+					attribute.appendChild(element);
+				} else {
+					production.setAttribute("isSubsort", "true");
 				}
 			}
+
 		}
 
 		return doc;
