@@ -947,7 +947,10 @@ mod LATEX-PRINT-META is
   ops mergeT mergeQ : QidList TermList -> Term .
 
   op printTerminal : Qid -> QidList .
-  eq printTerminal(Q) = if Q == ' then nil else if Q == '`( or-else Q == '`, or-else Q == '`) then Q else if latexTerminal(Q) then printQid(Q) else ('\mathrel '`{ '\terminal '`{ if Q == '\enspace then nil else printQid(Q) fi '`} '`}) fi fi fi [print "terminal " Q] .
+  eq printTerminal(Q) = printTerminal(Q, true) .
+
+  op printTerminal : Qid Bool -> QidList .
+  eq printTerminal(Q, B:Bool) = if Q == ' then nil else if Q == '`( or-else Q == '`, or-else Q == '`) then Q else if latexTerminal(Q) then printQid(Q) else ('\mathrel '`{ if B:Bool then '\terminal else '\terminalNoSpace fi '`{ if Q == '\enspace then nil else printQid(Q) fi '`} '`}) fi fi fi [print "terminal " Q] .
 
   op latexTerminal : Qid -> Bool .
   eq latexTerminal(Q) = (substr(string(Q), _-_(length(string(Q)), 1), 1) == "{" and substr(string(Q), _-_(length(string(Q)), 2), 1) == "`")  or-else (substr(string(Q), 1, 1) == "}" and substr(string(Q), 0, 1) == "`") .
@@ -957,7 +960,7 @@ mod LATEX-PRINT-META is
    = if Q == '\enspace  then nil else printTerminal(Q) fi .
 
   eq mergeTypes(Q, nil) = printTerminal(Q) .
-  eq mergeTypes(Q, NTyl) = printTerminal(Q) mergeTypes('`( genCommas(arity(NTyl)) '`), NTyl) .
+  eq mergeTypes(Q, NTyl) = printTerminal(Q,false) mergeTypes('`( genCommas(arity(NTyl)) '`), NTyl) .
   eq mergeTypes(Q Ql, NTyl) 
    = printEndTerminal(Q) mergeTypesT(Ql, NTyl) [owise] .
 
