@@ -120,7 +120,7 @@ the solution.
     => printStr(Id2String(X)) ~> printStr("(") ~> printLits(Lit,Lits) ~> printStr(")") 
   rule printLits(Lit:Literal,Lit':Literal,Lits:Literals) 
     => printLit(Lit) ~> printStr(", ") ~> printLits(Lit',Lits)
-  rule printLits(Lit:Literal) => printLit(Lit)
+  rule printLits(Lit:Literal,.Literals) => printLit(Lit)
 
   rule <k> printStr(Str:String) => . ...</k>
       <solution>... . => ListItem(Str) </solution>
