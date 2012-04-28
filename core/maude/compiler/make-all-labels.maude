@@ -162,7 +162,7 @@ ceq labelsT(Q[T1,T2], T, M, OPDS, OPDM)
  eq labelsT(Q[Trms], T, M, OPDS, OPDM (Op |-> (op Q' : nil -> T' [AS] .)), Op)
   =  kApply(mkConstant(Q',T'), labelsTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, OPDM (Op |-> (op Q' : nil -> T' [AS] .)))) .
  eq labelsT(Q[Trm], T, M, OPDS, OPDM (Op |-> (op Q' : T' -> T'' [AS] .)), Op)
-  =  kApply(Q'[labelsT(Trm, T', M, OPDS, OPDM (Op |-> (op Q : T' -> T'' [AS] .)))],empty) [owise] .
+  =  kApply(Q'[labelsT(Trm, T', M, OPDS, OPDM (Op |-> (op Q' : T' -> T'' [AS] .)))],empty) [owise] .
  eq labelsT(Q[Trms], T, M, OPDS, OPDM, Op)
   = Q[labelsTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, OPDM)] [owise] .
  eq labelsT(C, T, M, OPDS, OPDM (Op |-> (op Q' : nil -> T' [AS] .)), Op)
