@@ -28,7 +28,7 @@ kmap = do
         skipSpace
         return i
     let map = T.intercalate "," $ items ++ ["(.).Map"]
-    return $ T.concat ["wmap(__(", map, "))(.List{K})"]
+    return $ T.concat ["Map2KLabel(__(", map, "))(.List{K})"]
 
 mapItem = do
     id <- takeWhile1 (\x -> x /= ' ' && x /= '|')
@@ -45,7 +45,7 @@ klist = do
         skipSpace
         return i
     let list = T.intercalate "," $ items ++ ["(.).List"]
-    return $ T.concat ["wlist(__(", list, "))(.List{K})"]
+    return $ T.concat ["List2KLabel(__(", list, "))(.List{K})"]
 
 -- TODO: assuming lists/bags of numbers for now.
 -- Strings or chars with ')' in them will break.

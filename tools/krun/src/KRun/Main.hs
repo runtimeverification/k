@@ -91,7 +91,7 @@ main = do
                 let stdbuf = Kast $ T.concat ["(# \"", T.replace "\n" "\\n" input, "\"(.List{K}))"]
                 return $ Map.insert "stdin" stdbuf kmap
             True -> return kmap
-        return $ Map.insert "noIO" (Kast "wlist_(#noIO)(.List{K})") kmap'
+        return $ Map.insert "noIO" (Kast "List2KLabel_(#noIO)(.List{K})") kmap'
 
     kast <- flattenProgram config pgmFile
     let kmap'' = Map.insert "PGM" kast kmap'

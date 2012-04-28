@@ -38,6 +38,13 @@ module BOOL-HOOKS
   define true impliesBool B:Bool => B
   define false impliesBool _:Bool => true
 
+  syntax Bool ::= K "orElseBool" K [function  prec(59) gather(E e)]
+  define true orElseBool _ => true
+  define false orElseBool K:K => K
+
+  syntax Bool ::= K "andThenBool" K [function  prec(59) gather(E e)]
+  define false andThenBool _ => false
+  define true andThenBool K:K => K
 
   syntax KLabel ::= "'#andBool" // People should not be using this
 
