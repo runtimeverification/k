@@ -765,14 +765,25 @@ fmod META-K-WRAPPERS is
 
   op getWrapper : Type ~> Qid .
   eq getWrapper(T) 
-   = if T == 'KLabel then 'wklabel_ else
-     if T == 'CellLabel then 'wcelllabel_ else
-     if T == 'List`{K`} then 'wklist_ else
-     if T == 'Set or-else T == 'SetItem then 'wset_ else
-     if T == 'Bag or-else T == 'BagItem then 'wbag_ else
-     if T == 'List or-else T == 'ListItem then 'wlist_ else
-     if T == 'Map or-else T == 'MapItem then 'wmap_ else '_
+   = if T == 'KLabel then 'KLabel2K_ else
+     if T == 'CellLabel then 'CellLabel2K_ else
+     if T == 'List`{K`} then 'List`{K`}2K_ else
+     if T == 'Set or-else T == 'SetItem then 'Set2K_ else
+     if T == 'Bag or-else T == 'BagItem then 'Bag2K_ else
+     if T == 'List or-else T == 'ListItem then 'List2K_ else
+     if T == 'Map or-else T == 'MapItem then 'Map2K_ else '_
      fi fi fi fi fi fi fi .
+
+  op labelWrapper : Type ~> Qid .
+  eq labelWrapper(T)
+   = if T == 'KLabel then 'KLabel2KLabel_ else
+     if T == 'CellLabel then 'CellLabel2KLabel_ else
+     if T == 'Set or-else T == 'SetItem then 'Set2KLabel_ else
+     if T == 'Bag or-else T == 'BagItem then 'Bag2KLabel_ else
+     if T == 'List or-else T == 'ListItem then 'List2KLabel_ else
+     if T == 'Map or-else T == 'MapItem then 'Map2KLabel_ else '#_
+     fi fi fi fi fi fi .
+
      
   op isWrapped : OpDeclSet Type -> Bool .
   eq isWrapped(OPDS (op Q : T -> T' [AS] .), T) = true .

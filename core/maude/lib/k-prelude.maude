@@ -341,13 +341,13 @@ endm
 mod K-WRAPPERS-LABELS is
   including K-TECHNIQUE .
   including #STRING-INTERFACE .
-  op wklabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
-  op wcelllabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
+  op KLabel2KLabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
+  op CellLabel2KLabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
   op kList : #String -> KLabel [metadata "wrapper=(list)"] .
-  op wbag_ : Bag -> KLabel [metadata "wrapper=(builtin)"] .
-  op wset_ : Set -> KLabel [metadata "wrapper=(builtin)"] .
-  op wlist_ : List -> KLabel [metadata "wrapper=(builtin)"] .
-  op wmap_ : Map -> KLabel [metadata "wrapper=(builtin)"] .
+  op Bag2KLabel_ : Bag -> KLabel [metadata "wrapper=(builtin)"] .
+  op Set2KLabel_ : Set -> KLabel [metadata "wrapper=(builtin)"] .
+  op List2KLabel_ : List -> KLabel [metadata "wrapper=(builtin)"] .
+  op Map2KLabel_ : Map -> KLabel [metadata "wrapper=(builtin)"] .
   op 'wrap-with : -> KLabel .
 endm
 
@@ -356,13 +356,13 @@ endm
 
 mod K-WRAPPERS is
   including K-TECHNIQUE .
-  op wklabel_ : KLabel -> K [metadata "wrapper=(builtin)"] .
-  op wcelllabel_ : CellLabel -> K [metadata "wrapper=(builtin)"] .
-  op wklist_ : List{K} -> K [metadata "wrapper=(list)"] .
-  op wset_ : Set -> K [metadata "wrapper=(builtin)"] .
-  op wbag_ : Bag -> K [metadata "wrapper=(builtin)"] .
-  op wlist_ : List -> K [metadata "wrapper=(builtin)"] .
-  op wmap_ : Map -> K [metadata "wrapper=(builtin)"] .
+  op KLabel2K_ : KLabel -> K [metadata "wrapper=(builtin)"] .
+  op CellLabel2K_ : CellLabel -> K [metadata "wrapper=(builtin)"] .
+  op List{K}2K_ : List{K} -> K [metadata "wrapper=(list)"] .
+  op Set2K_ : Set -> K [metadata "wrapper=(builtin)"] .
+  op Bag2K_ : Bag -> K [metadata "wrapper=(builtin)"] .
+  op List2K_ : List -> K [metadata "wrapper=(builtin)"] .
+  op Map2K_ : Map -> K [metadata "wrapper=(builtin)"] .
 endm
 
 ---- K Rules Level 
