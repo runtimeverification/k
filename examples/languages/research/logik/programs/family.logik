@@ -15,4 +15,6 @@ parents(X,X);
 parents(A,B):-
   ancestor(A,B);
 
-?-ancestor(nathan,A);
+pr(l(X)) :- ancestor(_1,X), ancestor(X,_2);
+
+?- pr(Y);
