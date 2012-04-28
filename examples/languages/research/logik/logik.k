@@ -11,7 +11,8 @@ module LOGIK-SYNTAX
   syntax Pgm ::= Clause Pgm [prec 90]
                | Query
 
-  macro X:Id,Lits:Literals = X(),Lits
+/*@ Normalizing the definition. 
+Almost complete --- See additional rule in the semantics module. */
   macro Lit:Literal; = Lit :-;
   macro X:Id :- Lits:Literals; = X() :- Lits;
 
@@ -22,7 +23,7 @@ module LOGIK-SEMANTICS
   imports UNIFICATION
 
  configuration
-   <T>
+   <T multiplicity="?">
     <substitution> .K </substitution>
     <clauses>
           .Bag
@@ -32,20 +33,22 @@ module LOGIK-SEMANTICS
     </k>
     <nextVar> 0 </nextVar>
    </T>
-   <solution multiplicity="?"> .K </solution>
+   <solution stream="stdout"> .List </solution>
 
   syntax Id ::= UnificationVar
 
-//@ Defining as unification variables all Ids starting with a small letter
-  define 'isUnificationVar(K) => true when asciiString(substrString(Id2String(K),0,1)) <Int 96
 
-//@ Final rule for extracting the solution
-  rule <T>... <substitution> K:K </substitution> <k> .Literals </k> ...</T>
-    => <solution> K </solution>
+//@ Defining as unification variables all Ids starting with a small letter
+  define 'isUnificationVar(K:K) => true when asciiString(substrString(Id2String(K),0,1)) <Int 96
+
+//@ Normalizing all ids which are not used for unification
+  rule X:Id,Lits:Literals => X(),Lits 
+  when 'isUnificationVar(X) =/=K true
+  [anywhere]
 
 //@ Find a clause with the same name and generate a fresh version of it
   rule <k> (.K => alpha(Clause)) 
-          ~> (_`(_`)(X:Id,ArgsKs:Literals),_:Literals) </k> 
+          ~> (_`(_`)(X:Id,Args:Literals),_:Literals) </k> 
       <clauses>... BagItem(Clause) ...</clauses>
   where Clause = _`(_`)(X,Params:Literals) :- Body:Literals;
   [transition]
@@ -95,4 +98,33 @@ the solution.
 
   rule <k> subst(Eqns:List{K}) ~> (initSolution => .K) ...</k>
        <substitution> .K => subst(Eqns) </substitution>
+
+/*@ printing the solution and disolving the rest. */
+
+//@ Final rule for extracting the solution
+  rule <substitution> K:K </substitution> <k> .Literals => print(K) </k>
+
+  rule <T>... <k> .K </k> ...</T> => .
+
+   syntax K ::= "print" "(" K ")" | "printStr" "(" String ")" | "printEqn" "(" K ")" | "printLit" "(" K ")" | "printLits" "(" K ")"
+
+  rule print(subst(K,,Eqns:List{K}))
+    => printEqn(K) ~> print(subst(Eqns))
+  rule print(subst(.List{K})) => .
+
+  rule printEqn(eqn(X:Id,,Lit:Literal)) => printStr(Id2String(X)) ~> printStr(" |-> ") ~> printLit(Lit) ~> printStr(";  ")
+
+  rule printLit(X:Id) => printStr(Id2String(X))
+  rule printLit(X:Id()) => printStr(Id2String(X)) 
+  rule printLit(_`(_`)(X:Id,(Lit:Literal,Lits:Literals))) 
+    => printStr(Id2String(X)) ~> printStr("(") ~> printLits(Lit,Lits) ~> printStr(")") 
+  rule printLits(Lit:Literal,Lit':Literal,Lits:Literals) 
+    => printLit(Lit) ~> printStr(", ") ~> printLits(Lit',Lits)
+  rule printLits(Lit:Literal) => printLit(Lit)
+
+  rule <k> printStr(Str:String) => . ...</k>
+      <solution>... . => ListItem(Str) </solution>
+
+
+  define Id2String(freshVar(N:Int)) => "_" +String Int2String(N) .
 end module
