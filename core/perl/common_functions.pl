@@ -2969,7 +2969,7 @@ sub Freeze
     my ($string, $marker) = (shift, shift);
     my $md5_custom = md5_hex($string);
 	# print "$md5_custom\n";
-    # $md5_custom =~ s/([a-z])/int(rand(9))/sge;
+    $md5_custom =~ s/([a-z])/int(rand(9))/sge;
 	# print "$md5_custom\n";
     my $frozen_string = $marker . $md5_custom; # join("", map(ord, split('',md5($string))));
     $freeze_map{$marker}{$frozen_string} = $string;
@@ -2984,9 +2984,8 @@ sub Unfreeze
 	my $marker_map = $freeze_map{$marker};
 	if (defined $marker_map) {
 		my %map = %$marker_map;
-
-		# $all =~ s/($marker([0-9]{32}))/defined $map{$1}?$map{$1}:$1/gse;
-		$all =~ s/($marker(?:[a-f0-9]{32}))/$map{$1}/gse;
+		#$all =~ s/($marker([0-9]{32}))/defined $map{$1}?$map{$1}:$1/gse;
+		$all =~ s/($marker(?:[0-9]{32}))/$map{$1}/gse;
 	}
 	return $all;
 }
