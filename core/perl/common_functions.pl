@@ -1372,18 +1372,22 @@ sub recursiveGetAllModules {
 	my $hashref = shift;
 	my $depth = shift;
 	my $lsorts = "";
-	$lsorts = $sortMod{$mod} if (defined($sortMod{$mod}));
-	my @sorts = split(/\s+/, $lsorts);
-	for my $sort (@sorts) {
-		$hashref->{$sort} = 1;
+	if (defined($sortMod{$mod})) {
+		$lsorts = $sortMod{$mod};
+		my @sorts = split(/\s+/, $lsorts);
+		for my $sort (@sorts) {
+			$hashref->{$sort} = 1;
+		}
+		return; # no need to recurse if we've already seen this module
 	}
+	
 	# printf("\n%${depth}s%s: %s", "", $mod, $lsorts);
 	# if ($seenModules{$mod}) {return "";}  # no need to recurse if we've already seen it
 	# $seenModules{$mod} = 1;
 	my @incl = split(/\s+/, $moduleMap{$mod}) if defined($moduleMap{$mod});
 	
 	foreach my $submod (@incl) {
-		if ($depth < 300) {	 
+		if ($depth < 300) {
 			recursiveGetAllModules($submod, $hashref, $depth+1);
 		} else {
 			die("Module inclusion tree too deep. Check for cycles, please.");
@@ -2964,25 +2968,27 @@ sub Freeze
 {
     my ($string, $marker) = (shift, shift);
     my $md5_custom = md5_hex($string);
-    $md5_custom =~ s/([a-z])/int(rand(9))/sge;
+	# print "$md5_custom\n";
+    # $md5_custom =~ s/([a-z])/int(rand(9))/sge;
+	# print "$md5_custom\n";
     my $frozen_string = $marker . $md5_custom; # join("", map(ord, split('',md5($string))));
     $freeze_map{$marker}{$frozen_string} = $string;
-    
+    # print "$frozen_string\n";
     return $frozen_string;
 }
 	
 # unfreezing (newest version) : use digest - md5
 sub Unfreeze
 {
-    my ($marker, $all) = (shift, shift);
-    my $marker_map = $freeze_map{$marker};
-    if (defined $marker_map)
-    {
-	my %map = %$marker_map;
-	
-	$all =~ s/($marker([a-f0-9]{32}))/defined $map{$1}?$map{$1}:$1/gse;
-    }
-    return $all;
+	my ($marker, $all) = (shift, shift);
+	my $marker_map = $freeze_map{$marker};
+	if (defined $marker_map) {
+		my %map = %$marker_map;
+
+		# $all =~ s/($marker([0-9]{32}))/defined $map{$1}?$map{$1}:$1/gse;
+		$all =~ s/($marker(?:[a-f0-9]{32}))/$map{$1}/gse;
+	}
+	return $all;
 }
 	
 	

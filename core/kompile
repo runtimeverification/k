@@ -1868,30 +1868,13 @@ sub maudify_module {
     
     
 # Step: resolve macros
-    s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
-    s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!resolve_where_macro($1)!gse;
-    $_ = Unfreeze("ATTR", $_);
+	$_ = resolveMacros($_);
     
 # Step: desugar latex newline <br/>
     $_ = desugar_latex($_);
 
 # Step: Add whitespace between cell and Klabel
-    s!(<\s*\/?\s*[^\s<]+\s*>)(')!$1 $2!g;
-
-    # get KLabels
-    my $tmp = $_;
-    while ($tmp =~ /(rule|context).*?(?=$kmaude_keywords_pattern)/sg)
-    {
-	my $all = $&;
-	my $alls = $all;
-        $all =~ s/(?<!\,)($string_pattern)/Freeze($&,"STRINGS")/sge;
-	s/\Q$alls\E/$all/s;
-    }
-
-    my $decl = getKLabelDeclarations($_);
-
-    # unfreeze strings
-    $_ = Unfreeze("STRINGS", $_);
+	($_, my $decl) = addWhitespaceBetweenCellAndLabel($_);
 
 # Step: Add to @all_sorts all sorts defined in  k-prelude
     add_kprelude_sorts($k_prelude, dirname($k_prelude)) if !$k_prelude_loaded;
@@ -1907,32 +1890,14 @@ sub maudify_module {
     
 # Step: Desugar syntax N ::= Prod1 | Prod2 | ... | Prodn
 # At the same time, also declare N as a sort if it is not declared already
-	# freeze strings and attributes
-    s/($string_pattern)/Freeze($&,"MYSTRINGS")/sge;
-    s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTRIBUTES")/gse;
-    s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops( (countlines($`) == 0 ? $mno : countlines($`) + $mno - 1), $file, $1)!gse;
-
-	# unfreeze attributes if any
-    $_ = Unfreeze("ATTRIBUTES", $_);
-    $_ = Unfreeze("MYSTRINGS", $_);
-    # print  "Stage:\n$_\n\n";
+	$_ = desugarMultipleProductions($_, $mno, $file);
 
 # Step: Store the on-the-fly variables
     my $vars = on_the_fly_kvars($_);
     #  print  "Stage:\n$_\n\n";
     
 # Step: Reduce cell notation with _ to cell notation with ...
-    s/\sops?\s(.*?):/Freeze($&,"OPS")/gse;
-    
-    # Sub-step: _ -> ... : Deprecated!
-    s!<(\s*[^\s<]+\s*)_\s*>!<$1>... !gs;
-    s!<\s*_(\s*/\s*[^\s>]+\s*)>! ...<$1>!gs;
-    
-    # Sub-step: <> ... goes into <>... 
-    s!(<\s*[^\s>]+\s*>)\s*(\.\.\.)!$1$2 !gs;
-    s!(\.\.\.)\s*(<\s*\/\s*[^\s>]+\s*>)! $1$2!gs;
-
-    $_ = Unfreeze("OPS", $_);
+	$_ = underscoreToEllipses($_);
 #    print  "Stage:\n$_\n\n";
     
 # Step: Declare cell labels as operations
@@ -1940,64 +1905,11 @@ sub maudify_module {
 #    print  "Stage:\n$_\n\n";
     
 # Step: Add the module's newly defined tokens to @tokens
-	my $klabelss = $decl . getDeclLabels();		
-	$klabelss =~ s/\s+$//s;		
-	my @kls = split(/\s+/, $klabelss);		
-# print "LABELS: @kls\n\n";
-	foreach my $kl (@kls)		
-	{
-	    if ( $kl =~ /'/sg )
-            {
-		s/(\Q$kl\E)/Freeze($kl, "KLABEL1")/sge;		
-	    }
-       }
-       add_tokens($_);
-       $_ = Unfreeze("KLABEL1", $_);
+	$_ = addNewTokens($_, $decl);
 #     print  "Stage:\n$_\n\n";
     
 # Step: Add missing spaces around tokens
-	# freeze all attributes
-	s/((?<!`)\[\s*($k_attributes_pattern).*?(?<!`)\])(\s*)(?=$kmaude_keywords_pattern)/{Freeze($1, "ATTR").$3;}/gse;
-        # print "FROZEN: $_\n\n";
-
-    # freeze all strings before spacifying
-    my $tmp = $_;
-    while ($tmp =~ /(rule|context|configuration).*?(?=$kmaude_keywords_pattern)/sg)
-    {
-	my $all = $&;
-	my $alls = $all;
-        $all =~ s/(?<!\,)($string_pattern)/Freeze($&,"STRINGS")/sge;
-	s/\Q$alls\E/$all/s;
-    }
-
-    my $klabelss = $decl;		
-    $klabelss =~ s/\s+$//s;		
-	my @kls = split(/\s+/, $klabelss);		
-	foreach my $kl (@kls)		
-	{		
-		s/(\Q$kl\E)/Freeze($kl, "KLABEL")/sge;		
-	}
-
-        s/(subsorts?\s+.*?)(\s+)(?=$kmaude_keywords_pattern|STRINGS|ATTR|KLABEL)/{Freeze($1, "SUBSORTS") . $2;}/sge;
-        s/(sorts?\s+.*?)(\s+)(?=$kmaude_keywords_pattern|STRINGS|ATTR|KLABEL|SUBSORTS)/{Freeze($1, "SORTS") . $2;}/sge;
-
-    # freeze configuration
-    s/\$[A-Z]+/{Freeze($&, "PVAR");}/sge;
-
-    # freeze the variable declarations
-    s/$kvar:$ksort/{Freeze($&, "VARDECL")}/sge;
-
-# print ;
-        $_ = spacify($_);
-	
-	$_ = Unfreeze("VARDECL", $_);
-        $_ = Unfreeze("PVAR", $_);
-	$_ = Unfreeze("ATTR", $_);
-	$_ = Unfreeze("STRINGS", $_);
-	$_ = Unfreeze("KLABEL", $_);
-        $_ = Unfreeze("SUBSORTS", $_);
-        $_ = Unfreeze("SORTS", $_);
-
+	$_ = addMissingSpacesAroundTokens($_, $decl);
 
 # print "$_\n\n";
 #	print "============================\n\n\n";
@@ -2017,19 +1929,7 @@ sub maudify_module {
     
 
 # Step: Change K statements into Maude statements
-	# freeze attributes first.. because sending parameters is dangerous: see ":"!!!
-	s/((?<!`)\[\s*($k_attributes_pattern).*?(?<!`)\])(\s*)(?=$kmaude_keywords_pattern)/{Freeze($1, "ATTR").$3;}/gse;
-#	s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
-	
-	# also freeze rule names
-	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
-
-
-    # maudify
-    s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!k2maude($1)!gse;
-
-	# unfreeze if there are still frozen attributes
-	$_ = Unfreeze("ATTR", $_);
+	$_ = changeKStatementsToMaude($_);
 #	print  "Stage:\n$_\n\n";
    
 # Step: Unfreeze everything still frozen
@@ -2038,12 +1938,12 @@ sub maudify_module {
     # print  "Stage:\n$_\n\n";
 
 # Step: Add KLabel generated definitions - do that in shared.k for now
-    if ($decl ne "")
-    {
-	$klabels .= $decl;
-	s!mod(\s+)([\S]+)(\s+)is(\s+)!"mod$1$2$3is including K-SHARED .$4"!se;
-	$mset = 1;
-    }
+	if ($decl ne "")
+	{
+		$klabels .= $decl;
+		s!mod(\s+)([\S]+)(\s+)is(\s+)!"mod$1$2$3is including K-SHARED .$4"!se;
+		$mset = 1;
+	}
 #    print  "Stage:\n$_\n\n";
 
 # Step: register all subsort relations
@@ -2055,6 +1955,149 @@ sub maudify_module {
 
     return $_;
 }
+
+sub resolveMacros {
+	local ($_) = (@_);
+	s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
+    s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!resolve_where_macro($1)!gse;
+    return Unfreeze("ATTR", $_);
+}
+
+sub addWhitespaceBetweenCellAndLabel {
+	local ($_) = (@_);
+    s!(<\s*\/?\s*[^\s<]+\s*>)(')!$1 $2!g;
+
+    # get KLabels
+    my $tmp = $_;
+    while ($tmp =~ /(rule|context).*?(?=$kmaude_keywords_pattern)/sg)
+    {
+		my $all = $&;
+		my $alls = $all;
+		$all =~ s/(?<!\,)($string_pattern)/Freeze($&,"STRINGS")/sge;
+		s/\Q$alls\E/$all/s;
+    }
+
+    my $decl = getKLabelDeclarations($_);
+
+    # unfreeze strings
+    return (Unfreeze("STRINGS", $_), $decl);
+}
+
+sub desugarMultipleProductions {
+	my ($in, $mno, $file) = (@_);
+	$_ = $in;
+	# freeze strings and attributes
+    s/($string_pattern)/Freeze($&,"MYSTRINGS")/sge;
+    s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTRIBUTES")/gse;
+    s!(syntax\s+.*?)(?=$kmaude_keywords_pattern)!make_ops( (countlines($`) == 0 ? $mno : countlines($`) + $mno - 1), $file, $1)!gse;
+
+	# unfreeze attributes if any
+    $_ = Unfreeze("ATTRIBUTES", $_);
+    $_ = Unfreeze("MYSTRINGS", $_);
+	return $_;
+    # print  "Stage:\n$_\n\n";
+}
+
+sub underscoreToEllipses {
+	local ($_) = (@_);
+    s/\sops?\s(.*?):/Freeze($&,"OPS")/gse;
+    
+    # Sub-step: _ -> ... : Deprecated!
+    s!<(\s*[^\s<]+\s*)_\s*>!<$1>... !gs;
+    s!<\s*_(\s*/\s*[^\s>]+\s*)>! ...<$1>!gs;
+    
+    # Sub-step: <> ... goes into <>... 
+    s!(<\s*[^\s>]+\s*>)\s*(\.\.\.)!$1$2 !gs;
+    s!(\.\.\.)\s*(<\s*\/\s*[^\s>]+\s*>)! $1$2!gs;
+
+    $_ = Unfreeze("OPS", $_);
+	return $_;
+}
+
+sub addNewTokens {
+	my ($in, $decl) = (@_);
+	$_ = $in;
+	
+	my $klabelss = $decl . getDeclLabels();		
+	$klabelss =~ s/\s+$//s;		
+	my @kls = split(/\s+/, $klabelss);		
+# print "LABELS: @kls\n\n";
+	foreach my $kl (@kls) {
+		if ( $kl =~ /'/sg ) {
+			s/(\Q$kl\E)/Freeze($kl, "KLABEL1")/sge;		
+		}
+	}
+	add_tokens($_);
+	$_ = Unfreeze("KLABEL1", $_);
+	return $_;
+}
+
+sub addMissingSpacesAroundTokens {
+	my ($in, $decl) = (@_);
+	$_ = $in;
+	# freeze all attributes
+	s/((?<!`)\[\s*($k_attributes_pattern).*?(?<!`)\])(\s*)(?=$kmaude_keywords_pattern)/{Freeze($1, "ATTR").$3;}/gse;
+        # print "FROZEN: $_\n\n";
+
+    # freeze all strings before spacifying
+    my $tmp = $_;
+    while ($tmp =~ /(rule|context|configuration).*?(?=$kmaude_keywords_pattern)/sg)
+    {
+		my $all = $&;
+		my $alls = $all;
+		$all =~ s/(?<!\,)($string_pattern)/Freeze($&,"STRINGS")/sge;
+		s/\Q$alls\E/$all/s;
+    }
+
+    my $klabelss = $decl;		
+    $klabelss =~ s/\s+$//s;		
+	my @kls = split(/\s+/, $klabelss);		
+	foreach my $kl (@kls)		
+	{		
+		s/(\Q$kl\E)/Freeze($kl, "KLABEL")/sge;		
+	}
+
+	s/(subsorts?\s+.*?)(\s+)(?=$kmaude_keywords_pattern|STRINGS|ATTR|KLABEL)/{Freeze($1, "SUBSORTS") . $2;}/sge;
+	s/(sorts?\s+.*?)(\s+)(?=$kmaude_keywords_pattern|STRINGS|ATTR|KLABEL|SUBSORTS)/{Freeze($1, "SORTS") . $2;}/sge;
+
+    # freeze configuration
+    s/\$[A-Z]+/{Freeze($&, "PVAR");}/sge;
+
+    # freeze the variable declarations
+    s/$kvar:$ksort/{Freeze($&, "VARDECL")}/sge;
+
+# print ;
+	$_ = spacify($_);
+
+	$_ = Unfreeze("VARDECL", $_);
+	$_ = Unfreeze("PVAR", $_);
+	$_ = Unfreeze("ATTR", $_);
+	$_ = Unfreeze("STRINGS", $_);
+	$_ = Unfreeze("KLABEL", $_);
+	$_ = Unfreeze("SUBSORTS", $_);
+	$_ = Unfreeze("SORTS", $_);
+	return $_;
+}
+
+sub changeKStatementsToMaude {
+	my ($in) = (@_);
+	$_ = $in;
+	# freeze attributes first.. because sending parameters is dangerous: see ":"!!!
+	s/((?<!`)\[\s*($k_attributes_pattern).*?(?<!`)\])(\s*)(?=$kmaude_keywords_pattern)/{Freeze($1, "ATTR").$3;}/gse;
+#	s/(\[[^\]]*?($k_attributes_pattern)[^\]]*?\])/Freeze($&, "ATTR")/gse;
+	
+	# also freeze rule names
+	s!(?<=rule\s)(\s*\[.*?\])!Freeze($&, "NAMES")!sge;
+
+    # maudify
+    s!((?:$kmaude_keywords_pattern).*?)(?=(?:$kmaude_keywords_pattern|$))!k2maude($1)!gse;
+
+	# unfreeze if there are still frozen attributes
+	$_ = Unfreeze("ATTR", $_);
+	return $_;
+}
+
+
 
 
 # Takes a syntax statement and extracts sorts, subsorts and operations
@@ -2524,26 +2567,26 @@ sub spacify {
 #    print "TOKENS: @all\n\n";
     
 # First associate each token with a distinct number
-    foreach my $token (@all_tokens) {
-	$array[$i] = $token;
-	$index{$token} = $i++;
-    }
+	foreach my $token (@all_tokens) {
+		$array[$i] = $token;
+		$index{$token} = $i++;
+	}
 
 # Then create a dag as a an array of arrays over indexes
-    for $i (0..$#array) {
-	(my $token_pattern = $array[$i]) =~ s/([$special_perl_chars])/\\$1/g;
-	$dag[$i] = [map($index{$_}, grep(/.$token_pattern|$token_pattern./, @all_tokens))];
-    }
+	for $i (0..$#array) {
+		(my $token_pattern = $array[$i]) =~ s/([$special_perl_chars])/\\$1/g;
+		$dag[$i] = [map($index{$_}, grep(/.$token_pattern|$token_pattern./, @all_tokens))];
+	}
 
 # Freeze all excluded substrings, which we do NOT want to be spacified
     $lines =~ s/($exclude)/Freeze($1, $default_freezer)/gmse;
     
 # Spacify and then freeze each token in reversed topological order
 # This way, we are sure that a subtoken of a token will never be spacified
-    foreach my $token (map($array[$_], reverse(topological_sort(@dag)))) {
-	(my $token_pattern = $token) =~ s/([$special_perl_chars])/\\$1/g;
-	$lines =~ s/(.)($token_pattern)((?=.))/add_spaces($1,$2,$3)/gse;
-    }
+	foreach my $token (map($array[$_], reverse(topological_sort(@dag)))) {
+		(my $token_pattern = $token) =~ s/([$special_perl_chars])/\\$1/g;
+		$lines =~ s/(.)($token_pattern)((?=.))/add_spaces($1,$2,$3)/gse;
+	}
  
 # Dirty hack: add spaces around anonymous variables, so that they will be properly
 # translated into ? later on
