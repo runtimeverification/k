@@ -207,14 +207,14 @@ freezerMap = do
 
 wmap :: Parser KLabel
 wmap = do
-    string "wmap"
+    string "Map2KLabel"
     spaces
     kmap <- optParens kMap
     return $ WMap kmap
 
 wbag :: Parser KLabel
 wbag = do
-    string "wbag"
+    string "Bag2KLabel"
     spaces
     kbag <- optParens kBag
     return $ WBag kbag
