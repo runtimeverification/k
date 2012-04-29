@@ -126,5 +126,5 @@ the solution.
       <solution>... . => ListItem(Str) </solution>
 
 
-  define Id2String(freshVar(N:Int)) => "_" +String Int2String(N) .
+  define Id2String(freshVar(N:Int)) => "_" +String Int2String(N)
 end module
