@@ -3,6 +3,8 @@ require /modules/unification
 module LOGIK-SYNTAX
   syntax Literal ::=  Id 
                    | Id "(" Literals ")" [prec 0]
+                   | "[" Literals "]"
+                   | "[" Literals "|" Literal "]"
   syntax Literals ::= List{Literal,","} [prec 60]
 
   syntax Clause ::=  Literal ";"  [prec 80]
@@ -15,6 +17,11 @@ module LOGIK-SYNTAX
 Almost complete --- See additional rule in the semantics module. */
   macro Lit:Literal; = Lit :-;
   macro X:Id :- Lits:Literals; = X() :- Lits;
+
+  macro [.Literals | L:Literal ] = L
+  macro [L:Literal,Lits:Literals] = [L | [Lits]]
+  macro [L1:Literal,L2:Literal,Lits:Literals|L':Literal]
+      = [L1|[L2|[Lits|L']]]
 
 end module
 
@@ -106,13 +113,14 @@ the solution.
 
   rule <T>... <k> .K </k> ...</T> => .
 
-   syntax K ::= "print" "(" K ")" | "printStr" "(" String ")" | "printEqn" "(" K ")" | "printLit" "(" K ")" | "printLits" "(" K ")"
+   syntax K ::= "print" "(" K ")" | "printStr" "(" String ")" | "printEqn" "(" K ")" | "printLit" "(" K ")" | "printLits" "(" K ")" | "printList" "(" K ")"
 
   rule print(subst(K,,Eqns:List{K}))
     => printEqn(K) ~> print(subst(Eqns))
   rule print(subst(.List{K})) => .
 
   rule printEqn(eqn(X:Id,,Lit:Literal)) => printStr(Id2String(X)) ~> printStr(" |-> ") ~> printLit(Lit) ~> printStr(";  ")
+
 
   rule printLit(X:Id) => printStr(Id2String(X))
   rule printLit(X:Id()) => printStr(Id2String(X)) 
@@ -125,6 +133,19 @@ the solution.
   rule <k> printStr(Str:String) => . ...</k>
       <solution>... . => ListItem(Str) </solution>
 
+  rule printLit([]) => printStr("[]")
+  rule printLit([Lit:Literal|Lit':Literal])
+    => printStr("[") ~> printList([Lit:Literal|Lit':Literal]) ~> printStr("]")
+
+  rule printList([Lit:Literal|[]]) => printLit(Lit)
+  rule printList([Lit1:Literal|[Lit2:Literal|Lit':Literal]])
+    => printLit(Lit1) ~> printStr(", ") ~> printList([Lit2|Lit'])
+
+  rule printList([Lit:Literal|Lit':Literal])
+    => printLit(Lit) ~> printStr(" | ") ~> printLit(Lit')
+  when Lit' =/=K [.Literals]
+
+  
 
   define Id2String(freshVar(N:Int)) => "_" +String Int2String(N)
 end module

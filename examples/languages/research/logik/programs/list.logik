@@ -1,9 +1,9 @@
-append(nil,L,L);
-append(cons(H,T),L1,cons(H,L2)) :- append(T,L1,L2);
+append([],L,L);
+append([H|T],L1,[H|L2]) :- append(T,L1,L2);
 
-// ?- append(nil,L1,L1);
- ?- append(nil,L1,L2);
-// ?- append(cons(a,cons(b,nil)), cons(a,nil), L);
+// ?- append([],L1,L1);
+// ?- append([],L1,L2);
+?- append([a,b], [a], L);
 // ?- append(L1, cons(a,L2), cons(a,cons(b,cons(a,nil))));
 // the query below has an infinite number of solutions
 // ?- append(L1, cons(a,L2), cons(a,cons(b,cons(a,L3))));  
