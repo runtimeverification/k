@@ -3,7 +3,9 @@
 
 \RequirePackage{kvoptions}
 \RequirePackage{ifthen}
-
+% \RequirePackage{etoolbox}
+% \RequirePackage{etextools} % for xifstrequal
+% \RequirePackage{stringstrings} % for \stringlength
 
 \SetupKeyvalOptions{ 
  family=k, 
@@ -431,13 +433,11 @@
 % Syntax rules.
 \newlength{\syntaxlength}  % The amount of indention for continued rules.
 
-\newcommand{\syntax}[3]{\par\indent%
-\hbox{%
+\newcommand{\syntax}[3]{\rulebox{%
 \mbox{\scshape syntax}\hspace{1em}$#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
 }\k@markPosition%
 }
-\newcommand{\syntaxCont}[3]{\par\indent%
-\hbox{%
+\newcommand{\syntaxCont}[3]{\rulebox{%
   $\setlength{\syntaxlength}{\widthof{$\mathrel{::=}$}}%
   \setlength{\syntaxlength}{.5\syntaxlength}%
   \addtolength{\syntaxlength}{\widthof{\mbox{\scshape syntax}\hspace{1em}$#1$}}%
@@ -462,6 +462,8 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 \newcommand{\kcomm}{comm}
 \newcommand{\khybrid}{{\color{blue}hybrid}}
 %\newcommand{\klabel}[1]{}
+% \newcommand{\ignoreThisLabel}{} % this is used to figure out whether we should ignore an attribute (like the name)
+%\newcommand{\kattribute}[1]{\xifstrequal{#1}{\ignoreThisLabel}{}{{\color{blue}#1}}}
 \newcommand{\kattribute}[1]{{\color{blue}#1}}
 \newcommand{\kid}[1]{id: {#1}}
 \newcommand{\kditto}{ditto}
@@ -495,7 +497,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 \newcommand{\kconfig}[1]{\par%
   {\sc configuration:}%
   \begin{quote}
-    \par\indent\hbox{\ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}}\k@markPosition%
+    \rulebox{\ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}}\k@markPosition%
   \end{quote}%
 }
 
@@ -869,8 +871,10 @@ rectangle,rectangle
   \ifthenelse{\equal{#1}{}}{\mbox{\scshape #2}}{\k@withTooltip{\mbox{\scshape #2}}{Rule Label: #1}}%
 }
 
+\newcommand{\rulebox}[1]{\par\indent\hbox{#1}}
+
 \newcommand{\kequation}[2]{%
-  \par\indent\hbox{%
+  \rulebox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   }%
   \k@markPosition%
@@ -883,14 +887,14 @@ rectangle,rectangle
   \bigskip%
 }
 \newcommand{\mequation}[3]{%
-  \par\indent\hbox{%
+  \rulebox{%
     \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
   }%
   \k@markPosition%
   \bigskip%
 }
 \newcommand{\cmequation}[4]{%
-  \par\indent\hbox{%
+  \rulebox{%
     \k@ruleLabel{#1}{equation}\hspace{1em}$#2 = #3$%
     \when{#4}%
   }%
@@ -901,7 +905,7 @@ rectangle,rectangle
 %%% Rules.
 \newcommand{\ruleAttributes}[1]{\hfill[#1]}
 \newcommand{\kdefine}[4]{%
-  \par\indent\hbox{%
+  \rulebox{%
     \k@ruleLabel{#1}{define}\hspace{1em}$#2$%
   }%
   \ifthenelse{\equal{#3}{}}{}{%
@@ -909,13 +913,13 @@ rectangle,rectangle
   }%
   \k@markPosition%
   \ifthenelse{\equal{#4}{}}{}{%  
-   \ruleAttributes{#4}% 
+   \ruleAttributes{#4}%
   }%
   \bigskip%
 }
 
 \newcommand{\krule}[4]{%
-  \par\indent\hbox{%
+  \rulebox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   }%
   \ifthenelse{\equal{#3}{}}{}{%
@@ -928,14 +932,14 @@ rectangle,rectangle
   \bigskip%
 }
 \newcommand{\mrule}[3]{%
-  \par\indent\hbox{%
+  \rulebox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
   }%
   \k@markPosition%
   \bigskip%
 }
 \newcommand{\cmrule}[4]{%
-  \par\indent\hbox{%
+  \rulebox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
     \when{#4}%
   }%
