@@ -50,6 +50,7 @@ mod K-TECHNIQUE is
   op BagItem : K -> BagItem [metadata "latex=(renameTo _)"] .
   op __ : Bag Bag -> Bag [assoc comm id: .] .
   op __ : NeBag Bag -> NeBag [ditto] .
+  op _|->_ : K Bag -> BagItem .
 
   sort SetItem Set NeSet .
   subsort SetItem < NeSet < Set .
@@ -453,6 +454,7 @@ mod K-CONFIG is
   including K-SENTENCE .
   op configuration_ : Bag -> [KSentence] [prec 127] .
   op multiplicity : -> CellKey .
+  op type : -> CellKey .
   op stream : -> CellKey .
   op color : -> CellKey .
 ---(

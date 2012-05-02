@@ -432,6 +432,8 @@ fmod K-META-CONFIG is
   eq multiplicityKeyS = 'multiplicity .
   op ellipsesKeyS : -> Qid .
   eq ellipsesKeyS = 'ellipses .
+  op typeKeyS : -> Qid .
+  eq typeKeyS = 'type .
 
 
   op extractConfTerm : Module ~> Term .
@@ -496,11 +498,12 @@ fmod K-META-CONFIG is
 
   op _|->_ : AttrKey AttrVal -> Attr [prec 0] .
   op cellLabel:_ : Term -> Attr .
-  ops connectTo multiplicity ellipses color : -> AttrKey  .
+  ops connectTo type multiplicity ellipses color : -> AttrKey  .
   subsort Multiplicity Ellipses String < AttrVal .
   
   op symbolAK_ : AttrKey ~> Qid .
   eq symbolAK multiplicity = 'multiplicity .
+  eq symbolAK type = 'type .
   eq symbolAK connectTo = 'stream .
   eq symbolAK ellipses = 'ellipses .
   eq symbolAK color = 'color .
@@ -527,12 +530,13 @@ fmod K-META-CONFIG is
   if Q = attrCtorS /\ getType(MKey) = CellKey .
 
   op getAttributeKey_ : Qid -> AttrKey .
-  eq getAttributeKey(Q) = if Q == symbolAK multiplicity then multiplicity else if Q == symbolAK color then color else if Q == symbolAK ellipses then ellipses else if Q == symbolAK connectTo then connectTo else error fi fi fi fi .
+  eq getAttributeKey(Q) = if Q == symbolAK multiplicity then multiplicity else if Q == symbolAK color then color else if Q == symbolAK ellipses then ellipses else if Q == symbolAK connectTo then connectTo else if Q == symbolAK type then type else error fi fi fi fi fi .
 
   op parseAttributeVal : AttrKey String ~> AttrVal .
   eq parseAttributeVal(color, Str) = Str .
   eq parseAttributeVal(ellipses, Str) = getEllipsesValue(Str) .
   eq parseAttributeVal(multiplicity, Str) = getMultiplicityValue(Str) .
+  eq parseAttributeVal(type, Str) = Str .
   eq parseAttributeVal(connectTo, Str) = Str .
 
   op parseAttributes : Term -> AttrSet .
@@ -544,7 +548,7 @@ fmod K-META-CONFIG is
 
   
   op initialCellAttrs : -> AttrSet .
-  eq initialCellAttrs = multiplicity |-> one ellipses |-> none color |-> "black" connectTo |-> "" .
+  eq initialCellAttrs = multiplicity |-> one ellipses |-> none color |-> "black" connectTo |-> "" type |-> "" .
 
   op _[[_]] : AttrSet AttrSet ~> AttrSet .
   eq (AK |-> AV  AS)[[AK |-> AV' AS']] = (AK |-> AV' AS)[[AS']] .
@@ -599,6 +603,10 @@ fmod K-META-CONFIG is
   op getConnection : SplitCell ~> String .
   eq getConnection({T,Contents,AS}) = AS[connectTo] .
 
+  op getType : SplitCell ~> String .
+  eq getType({T,Contents,AS}) = AS[type] .
+
+
   op getMultiplicity : SplitCell -> Multiplicity .
   eq getMultiplicity({T,Contents,AS}) = AS[multiplicity] .
   op setMultiplicity : SplitCell Multiplicity -> SplitCell .
@@ -607,6 +615,7 @@ fmod K-META-CONFIG is
   op plugCell : SplitCell -> Term .
   eq plugCell({T,Contents,AS}) = symbolE none[plugAttributes(T,AS - initialCellAttrs),Contents,T] .
   eq plugCell({T,errorT(Trm, Cxt, Str),AS}) = errorT(Trm,  Cxt + " -> cell", Str) .
+
 
 
   op plugAttributes : Term AttrSet ~> Term .
@@ -619,6 +628,7 @@ fmod K-META-CONFIG is
   eq mkString(ellipses, E) = symbolES(E) .
   eq mkString(multiplicity, B) = symbolM(B) .
   eq mkString(connectTo, Str) = Str .
+  eq mkString(type, Str) = Str .
 
 
   op getAttributes : SplitCell -> AttrSet .

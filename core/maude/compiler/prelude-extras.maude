@@ -408,6 +408,9 @@ fmod META-TERM-EXTRAS is
   op setType : Term Type ~> Term .
   eq setType(C, T) = mkConstant(getName(C), T) .
   eq setType(V, T) = mkVariable(getName(V), T) .
+
+  op kind : Sort -> Kind .
+  eq kind(Sort:Sort) = qid("[" + string(Sort:Sort) + "]") .
 endfm
 
 

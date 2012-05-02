@@ -19,7 +19,10 @@ fmod CONTEXT-TRANSFORMERS is
   
   op contextTransformers : Qid Module Term ~> Module .
   var IL : ImportList . var SSDS : SubsortDeclSet . 
-  eq contextTransformers(Q, M, T) = removeImports(setName(contextTransformers1(setMbs(M, contextTransformMbs(removeConfTerm(getMbs(M)),getConf(T)))),Q),(including 'K-CONFIG .)) [print "Applying context transformers."] . 
+  eq contextTransformers(Q, M, T) = contextTransformers(Q, M, getConf(T)) .
+  op contextTransformers : Qid Module KConf ~> Module .
+  eq contextTransformers(Q, M, KC) 
+   = removeImports(setName(contextTransformers1(addEqs(mapEqs(KC), setMbs(M, contextTransformMbs(removeConfTerm(getMbs(M)),KC)))),Q),(including 'K-CONFIG .)) [print "Applying context transformers."] . 
 
   op contextTransformers1 : [Module] -> [Module] .
   eq contextTransformers1(M) = M [print "Context transformers applied succesfully."] .
@@ -28,7 +31,7 @@ fmod CONTEXT-TRANSFORMERS is
   sort KConf KConfElement . 
   subsort KConfElement < KConf .
   var KC KC' : KConf . var Cond : TermList .
-  op {_,_,_,_,_,_} : Qid Nat Bool Qid Descendants KConf -> KConfElement .
+  op {_,_,_,_,_,_} : Qid Nat AttrSet Qid Descendants KConf -> KConfElement .
 --- KConfElement ::= { 
 ---  CellLabel(Qid),
 ---  Level(Nat),
@@ -38,33 +41,33 @@ fmod CONTEXT-TRANSFORMERS is
 ---  SubConfiguration(KConf)
 --- } 
   op getMultiplicity : KConfElement -> Bool .
-  eq getMultiplicity({Q, Level, B, Q', Ds, KC'}) = B .
+  eq getMultiplicity({Q, Level, AS, Q', Ds, KC'}) = (AS[multiplicity] == any or-else AS[multiplicity] == some) .
 
   op getLevel : KConfElement ~> Nat .
-  eq getLevel({Q, N, B, Q', Ds, KC'}) = N .
+  eq getLevel({Q, N, AS, Q', Ds, KC'}) = N .
 
   op getSons : KConfElement -> SortSet .
-  eq getSons({Q, Level, B, Q', Ss, KC'}) = Ss .
-  eq getSons({Q, Level, B, Q', Ds, KC'}) = none [owise] .
+  eq getSons({Q, Level, AS, Q', Ss, KC'}) = Ss .
+  eq getSons({Q, Level, AS, Q', Ds, KC'}) = none [owise] .
 
   op getDefaultValue : KConfElement -> Term .
-  eq getDefaultValue({Q, Level, B, Q', default(T), KC'}) = T .
-  eq getDefaultValue({Q, Level, B, Q', Ds, KC'}) = emptyCt(Bag) .
+  eq getDefaultValue({Q, Level, AS, Q', default(T), KC'}) = T .
+  eq getDefaultValue({Q, Level, AS, Q', Ds, KC'}) = emptyCt(Bag) .
 
   op getConf : KConfElement -> KConf .
-  eq getConf({Q, Level, B, Q', Ds, KC'}) = KC' .
+  eq getConf({Q, Level, AS, Q', Ds, KC'}) = KC' .
  
   op getConfElement : Qid KConf ~> KConfElement .
-  eq getConfElement(Q,  {Q, N, B, Q', Ds, KC'} KC) = {Q, N, B, Q', Ds, KC'} .
+  eq getConfElement(Q,  {Q, N, AS, Q', Ds, KC'} KC) = {Q, N, AS, Q', Ds, KC'} .
 
   op __ : KConf KConf -> KConf [assoc comm id: none] .
   op none : -> KConf .
   op getConf : Term -> KConf .
   eq getConf(T) = getConfL('NONE, 1, getConfList(T)) .
 ---  eq getConf(T) = none [print T] .
-  op getConf : Qid Bool Nat Qid TermList -> KConf .
+  op getConf : Qid AttrSet Nat Qid TermList -> KConf .
   var Q' : Qid .
-  eq getConf(Q, B, N, Q', Tl) = {Q, N, B, Q', getCellNames(Tl), getConfL(Q, N + 1, Tl)} getConfL(Q, N + 1, Tl) .
+  eq getConf(Q, AS, N, Q', Tl) = {Q, N, AS, Q', getCellNames(Tl), getConfL(Q, N + 1, Tl)} getConfL(Q, N + 1, Tl) .
 
   op getCellNames_ : TermList ~> Descendants .
  ceq getCellNames(T, Tl) 
@@ -81,7 +84,7 @@ fmod CONTEXT-TRANSFORMERS is
 
   op getConfL : Qid Nat TermList -> KConf .
  ceq getConfL(Q, N, (T, Tl))
-   = getConf(getName(SC), getMultiplicity(SC) == some or getMultiplicity(SC) == any, N, Q, getConfList(getContents(SC))) getConfL(Q, N, Tl) 
+   = getConf(getName(SC), getAttributes(SC), N, Q, getConfList(getContents(SC))) getConfL(Q, N, Tl) 
   if SC := splitKCell(T) .
   eq getConfL(Q, N, Tl) = none [owise] .
 
@@ -103,7 +106,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   eq contextTransformMbs(none, KC) = none [print "Done. Configuration used: " KC] .
 
   op contextTransformT : Int Term KConf -> [Term] .
-  var Level : NzNat . var B B' : Bool .
+  var Level : NzNat . var B B' : Bool .  var AS AS' : AttrSet .
   eq contextTransformT(Level, T,KC) 
    = bringToSameLevel(Level,solveEach(T, KC),KC)  .
   eq contextTransformT(I:[Int], T, KC) = T [owise print "cannot bring " T " to  level " I:[Int]] . 
@@ -141,10 +144,10 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   op mergeLevels : TermSetLevels KConf -> Term .
   eq mergeLevels({N,TS}, KC) = finalMultiplicity({N, TS}, KC) .
   eq mergeLevels({N, emptyTS} || TSLs, KC) = mergeLevels(TSLs, KC) [owise] .
-  eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, B, 'NONE, Ds, KC'} KC)
+  eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, AS, 'NONE, Ds, KC'} KC)
    = errorT(T, "", "Cell <" + string(Q) + "> appears multiple times at the top level but its multipliciy does not allow that. Check the initial configuration for the definition matches the rule.") .
-  eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, B, Q', Ds, KC'} KC)
-   = mergeLevels(upgrade(N, Q', getMultiplicity(getConfElement(Q', KC)), getSons(getConfElement(Q', KC)), qt(Q, B', T),TS) || TSLs, {Q, Level, B, Q', Ds, KC'} KC) [owise] .
+  eq mergeLevels({N, qt(Q, B', T) && TS} || TSLs, {Q, Level, AS, Q', Ds, KC'} KC)
+   = mergeLevels(upgrade(N, Q', getMultiplicity(getConfElement(Q', KC)), getSons(getConfElement(Q', KC)), qt(Q, B', T),TS) || TSLs, {Q, Level, AS, Q', Ds, KC'} KC) [owise] .
   op upgrade : Nat Qid Bool SortSet TermSet TermSet -> TermSetLevels .
  ceq upgrade(N, Q', B, Q ; Ds, TS, qt(Q, B', T) && TS')
    = upgrade(N, Q', B, Q ; Ds, TS && qt(Q, B', T), TS') 
@@ -155,10 +158,10 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   op finalMultiplicity : TermSetLevel KConf -> Term .
   eq finalMultiplicity({s(N), qt(Q, false, T) &&  qt(Q, false, T') && TS'}, KC)
    = mergeLevels({s(N), qt(Q, false, T) &&  qt(Q, false, T') && TS'} || {N, emptyTS}, KC) .
-  vars Level' : Nat  . vars B1 B1' : Bool . var Ds' : Descendants . 
-  vars KC1 KC1' : KConf . vars QP QP' : Qid .
-  ceq finalMultiplicity({s(N), qt(Q, B, T) && qt(Q', B', T') && TS},  {Q, Level, B1, QP, Ds, KC1} {Q', Level', B1', QP', Ds', KC1'} KC)
-    = mergeLevels({s(N), qt(Q, B, T) && qt(Q', B', T') && TS} || {N, emptyTS},  {Q, Level, B1, QP, Ds, KC1} {Q', Level', B1', QP', Ds', KC1'} KC) 
+  vars Level' : Nat  . vars B1 B1' : Bool .  var AS1 AS1' : AttrSet .
+  var Ds' : Descendants .  vars KC1 KC1' : KConf . vars QP QP' : Qid .
+  ceq finalMultiplicity({s(N), qt(Q, B, T) && qt(Q', B', T') && TS},  {Q, Level, AS1, QP, Ds, KC1} {Q', Level', AS1', QP', Ds', KC1'} KC)
+    = mergeLevels({s(N), qt(Q, B, T) && qt(Q', B', T') && TS} || {N, emptyTS},  {Q, Level, AS1, QP, Ds, KC1} {Q', Level', AS1', QP', Ds', KC1'} KC) 
    if QP =/= QP' .
 
   eq finalMultiplicity({N, TS}, KC) = flattenTS(TS) [owise] .
@@ -241,8 +244,8 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   eq levelize(s(Level), VS:VariableSet, KC) = {Level, VS:VariableSet} [owise] .
   eq levelize(N, TS, KC) = levelize(N, TS, emptyTS, KC) [owise print "Levelizing to " N " terms " TS] .
   op levelize : Nat TermSet TermSet KConf -> TermSetLevels .
-  eq levelize(Level, qt(Q, B', T) && TS, TS', {Q, Level, B, Q', Ds, KC'} KC)
-   = levelize(Level, TS, qt(Q, B', T) && TS', {Q, Level, B, Q', Ds, KC'} KC) .
+  eq levelize(Level, qt(Q, B', T) && TS, TS', {Q, Level, AS, Q', Ds, KC'} KC)
+   = levelize(Level, TS, qt(Q, B', T) && TS', {Q, Level, AS, Q', Ds, KC'} KC) .
   eq levelize(Level, TS, TS', KC) 
    = levelize(Level + 1, TS, KC) || {Level,TS'} [owise] .
 
@@ -267,4 +270,24 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
 
 
   eq min(Level, L:[Int]) = Level [owise] .
+
+
+  var KCE : KConfElement .
+
+  op mapEqs : KConf -> EquationSet .
+  eq mapEqs({Q, N, AS, Q', Ds, KC'} KC) 
+   = if AS[type] == "Map" then mapEq(Q, KC') mapEqs(KC) else mapEqs(KC) fi [print Q " has attributes " AS] .
+  eq mapEqs(none) = none .
+
+  op mapEq : Qid KConf -> EquationSet .
+  eq mapEq(Q', {Q, N, AS, Q', Ds, KC} KC') = generateKeyEq(Q, KC) [print "map eq"] .  --- assuming only one element (item *) inside of the map
+  
+  var Item Key : Qid .
+
+  op generateKeyEq : Qid KConf -> EquationSet .
+ ceq generateKeyEq(Item, {Key, N, AS, Item, Ds, KC} KC')
+   = (eq mkCell(Item, mkCollection(Bag,(mkCell(Key,mkVariable('Key,kind(K))),mkVariable('Value,kind(Bag))))) 
+       = itemCtor(Map)[mkVariable('Key,kind(K)),mkVariable('Value,kind(Bag))] 
+      [metadata("generated=(BagMap)")] .)
+  if AS[type] = "Key" .
 endfm

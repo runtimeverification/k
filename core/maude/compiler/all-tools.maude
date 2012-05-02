@@ -27,6 +27,7 @@ load blocking-input-interface
 load default-terms-interface
 load context-transformers-interface
 load open-cells-interface
+load apply-mapeqs-interface
 load make-k-rules-interface
 load strict-cxt2eqs-interface
 load resolve-hooks-interface

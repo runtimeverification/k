@@ -352,7 +352,11 @@ which is labeled \textsf{T}. */
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:K </k>
-                  <state color="red"> .Map </state>
+                  <state color="red" type="Map"> 
+                    <item multiplicity="*"> 
+                      <id type="Key"> .K </id> <value> .K </value>
+                    </item> 
+                  </state>
                 </T>
 // Replace the above <state/> cell with the following when you want to pass
 // an initial state through krun; see program programs/sumPgm-novars.imp.
@@ -397,7 +401,7 @@ In \K you can name rules; for example, we named the lookup rule below
 \texttt{lookup}.  The rule names help to increase the clarity of your
 definitions and can be used by different \K tools in different ways. */
 
-  rule [lookup]: <k> X:Id => I ...</k> <state>... X |-> I ...</state>
+  rule [lookup]: <k> X:Id => I ...</k> <id> X </id> <value> I </value>
 
 /*@
 Before we continue, we would like to remind the reader that the
@@ -495,7 +499,7 @@ to be declared, otherwise the semantics will get stuck.  At the same time,
 the assignment is dissolved. */
 
   rule [assignment]:
-    <k> X := I:Int => . ...</k> <state>... X|->(_ => I) ...</state>
+    <k> X := I:Int => . ...</k> <id> X </id> <value> _ => I </value>
 
 /*@ \subsubsection{Sequential composition}
 Sequential composition is simply structurally translated into \K's
@@ -555,7 +559,14 @@ not for the rest of the computation. */
 
   rule [program-still-vars]:
        <k> var (X,Xs:Ids => Xs); _ </k>
-       <state> Rho:Map (. => X |-> 0) </state>
+       <state> Rho:Bag 
+           (. => <item> <id> X </id> <value> 0 </value> </item>) 
+       </state>
     when notBool(X in keys(Rho))
   rule [program-no-vars]: <k> var .Ids; S => S </k>  [structural]
+
+
+  syntax Set ::= "keys" "(" Bag ")"
+  rule keys((<item> <id> X </id> _ </item> => .) _) (. => SetItem(X))
+  rule keys(.Bag) => .Set
 end module

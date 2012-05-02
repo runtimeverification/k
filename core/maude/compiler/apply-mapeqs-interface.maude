@@ -1,0 +1,48 @@
+load apply-mapeqs
+
+mod APPLY-MAPEQS-METADATA-META is
+  including APPLY-MAPEQS .
+  including PARSE-METADATA .
+  var AS : AttrSet . var Str : String .  var Eq : Equation .
+  eq getMapEq(Eq, AS metadata(Str))
+   = getMapEq(Eq, AS metadataParse(Str)) .
+endm
+
+mod APPLY-MAPEQS-META is
+  including APPLY-MAPEQS .
+  including  APPLY-MAPEQS-METADATA-META .
+  including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
+  var Syntax MapEqs : String .  var M : Module .
+  var QSyntax QMapEqs : Qid .
+  op applyMapEqs : String String ~> Module .
+  eq applyMapEqs(Syntax, MapEqs) = applyMapEqs(qid(Syntax), qid(MapEqs)) .
+  op applyMapEqs : Qid Qid ~> Module .
+  eq applyMapEqs(QSyntax,QMapEqs) 
+   = setName(applyMapEqs(QMapEqs, upModule(QSyntax, false)), QMapEqs) .
+
+  op compileAPPLY-MAPEQS : Module AttrSet ~> Module .
+  eq compileAPPLY-MAPEQS(M, AS:AttrSet) = applyMapEqs(getName(M),M) .
+endm
+
+mod APPLY-MAPEQS-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op apply-mapeqs : -> System .
+  op idle : -> State .
+  var Q Syntax RemovedParsed StrictEq : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq apply-mapeqs = [nil, idle, 'Usage: 'applyMapEqs '<Name> '.] .
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKS is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : Module [Module] -> QidList .
+  var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
+  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
+  crl ['applyMapEqs Syntax RemovedParsed QIL, idle, QIL'] 
+   => [QIL, idle, print(upModule(Syntax,false), FM )] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('APPLY-MAPEQS-META),
+                        'applyMapEqs[upTerm(string(Syntax)),upTerm(string(RemovedParsed))])),error) .
+endm
