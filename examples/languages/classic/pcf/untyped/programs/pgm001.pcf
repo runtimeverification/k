@@ -1,1 +1,3 @@
-(mu f . lambda x . lambda y . cond (zero? x) 0 (add (f (pred x) y) y)) 7 9
+(lambda addd . ((mu foo . lambda xx . lambda yy . cond (zero? xx) 0 (addd (foo (pred xx) yy) yy)) 7 9)) (mu foo . lambda xx . lambda yy . cond (zero? xx) yy (succ (foo (pred xx) yy)))
+
+

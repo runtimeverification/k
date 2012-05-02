@@ -9,7 +9,13 @@ module PCF-UNTYPED-SEMANTICS imports PCF-UNTYPED-SYNTAX
     <T color="yellow">
       <k color="LightGreen"> $PGM:Exp </k>
       <env color="LightSkyBlue"> .Map </env>
-      <store color="white"> .Map </store>
+      // <store color="white"> .Map </store>
+	  <store color="red" type="Map"> 
+		<item multiplicity="*"> 
+		  <loc type="Key"> .K </loc>
+		  <value> .K </value>
+		</item> 
+	  </store>
       <nextLoc color="gray"> 0 </nextLoc>
     </T>
 
@@ -34,7 +40,9 @@ module PCF-UNTYPED-SEMANTICS imports PCF-UNTYPED-SYNTAX
   //@ \textbf{Variable lookup}
   rule <k> X => E <_/k>
        <env_> X |-> L <_/env>
-       <store_> L |-> E <_/store>
+       // <store_> L |-> E <_/store>
+       <loc> L </loc>
+       <value> E </value>
 
   //@ \textbf{$\lambda$-abstraction}
   syntax Val ::= closure-lambda ( Map , Id , Exp ) [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
@@ -43,14 +51,27 @@ module PCF-UNTYPED-SEMANTICS imports PCF-UNTYPED-SYNTAX
 
   rule <k> closure-lambda(Env, X, E) V => E ~> env(Env') <_/k>
        <env> Env' =>  Env[L / X] </env>
-       <store_> . => L |-> V <_/store>
+       // <store_> . => L |-> V <_/store>
+	   (. => 
+	       <item>
+	           <loc> L </loc>
+               <value> V </value>
+		   </item>
+	   )
        <nextLoc> L => L +Int 1 </nextLoc> 
 
   //@ \textbf{$\mu$-abstraction}
   syntax Exp ::= closure-mu ( Map , Exp ) [latex "\textsf{closure}_\mu({#1},{#2})"]
   rule <k> mu X . E => closure-mu(Env[L / X], E) <_/k>
        <env> Env </env>
-       <store_> . => L |-> closure-mu(Env[L / X], E) <_/store>
+       // <store_> . => L |-> closure-mu(Env[L / X], E) <_/store>
+	   (. 
+	       => 
+		   <item>
+	           <loc> L </loc>
+               <value> closure-mu(Env[L / X], E) </value>
+		   </item>
+	   )
        <nextLoc> L => L +Int 1 </nextLoc> 
 
   rule <k> closure-mu(Env, E) => E ~> env(Env') <_/k>

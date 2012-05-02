@@ -17,6 +17,6 @@ module PCF-UNTYPED imports PCF-UNTYPED-PROGRAMS
 
   syntax Bag ::= getResult Bag
   syntax CellLabel ::= result
-  macro getResult <T_> <k> KR:KResult </k> <_/T> = <result> KR:KResult </result>
+  rule <T_> <k> KR:KResult </k> <_/T> => <result> KR:KResult </result>
 
 end module
