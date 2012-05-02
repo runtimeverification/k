@@ -5,10 +5,12 @@
 
 	<target name="java">
 		<ant antfile="${javasources}/K3Java/buildjava.xml" dir="${javasources}/K3Java"/>
+		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun"/>
 	</target>
 
 	<target name="jar">
 		<ant antfile="${javasources}/K3Java/buildjar.xml" dir="${javasources}/K3Java"/>
+		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun"/>
 	</target>
 	
 	<target name="all">
