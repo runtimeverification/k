@@ -11,12 +11,9 @@ context-free syntax
 	"require" STRING	-> Require {cons("Require")}
 
 	%% K Module syntax
-	"module" ModName KModHeader KSentence* "endmodule" -> KModule {cons("KModule")}
-	"interface" ModName KModHeader KSentence* "endinterface" -> KModule {cons("KInterface")}
-	KModHeaderItem* 	-> KModHeader {cons("KModHeader")}
-	"imports" KModExp -> KModHeaderItem {cons("Including")}
-	{ModName "+"}+ 		-> KModExp {cons("ModuleSum")}
-	MODNAME				-> ModName {cons("ModName")}
+	"module" MODNAME KModHeaderItem* KSentence* "endmodule" -> KModule {cons("KModule")}
+	"interface" MODNAME KModHeaderItem* KSentence* "endinterface" -> KModule {cons("KInterface")}
+	"imports" MODNAME	-> KModHeaderItem {cons("Imports")}
 
 	%% K Sentences
 	"configuration"		HIDDEN+	-> KSentence {cons("Config")}
@@ -24,7 +21,7 @@ context-free syntax
 	"context"			HIDDEN+	-> KSentence {cons("Context")}
 
 	"syntax" SORTID "::=" {Prod1 ">"}+	-> KSentence {cons("Syntax")}
-	
+
 context-free syntax
 	"left:" {Prod2 "|"}+ -> Prod1 {cons("LeftOrList")}
 	"right:" {Prod2 "|"}+ -> Prod1 {cons("RightOrList")}

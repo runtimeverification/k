@@ -116,31 +116,33 @@ rules
 		]
 
 	to-xml:
-		KModule(ModName(x1), x2, x3*) ->
+		KModule(x1, x2*, x3*) ->
 			$[<module value="[x1]" loc="[loc]" type="module">
-				<imports>[imports]</imports>
+				[x2'*]
 				[x3'*]
 			</module>
 			]
 		where mydebug(!"KModule: ")
+		where x2'* := <all(to-xml)> x2*		// transform all of the sentences in a module
 		where x3'* := <all(to-xml)> x3*		// transform all of the sentences in a module
 		where loc := <getLocAsString>	// get all of the production rules
-		where imports := <collect-all(?ModName(_)) ; all(to-xml)> x2	// get all of the imports
 
 	to-xml:
-		KInterface(ModName(x1), x2, x3*) ->
+		KInterface(x1, x2*, x3*) ->
 			$[<module value="[x1]" loc="[loc]" type="interface">
-				<imports>[imports]</imports>
+				[x2'*]
 				[x3'*]
 			</module>
 			]
 		where mydebug(!"KModule: ")
+		where x2'* := <all(to-xml)> x2*		// transform all of the sentences in a module
 		where x3'* := <all(to-xml)> x3*		// transform all of the sentences in a module
 		where loc := <getLocAsString>	// get all of the production rules
-		where imports := <collect-all(?ModName(_)) ; all(to-xml)> x2	// get all of the imports
 
 	to-xml:
-		ModName(x1) -> $[<moduleImport value="[x1]" />]
+		Imports(x1) -> $[<import name="[x1]" loc="[locs]"/>
+		]
+		where locs := <getLocAsString> x1
 
 	to-xml:
 		Syntax(x1, x2*) -> $[<syntax loc="[loc]">

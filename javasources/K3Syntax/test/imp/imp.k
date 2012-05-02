@@ -28,7 +28,8 @@ endmodule
 
 
 module IMP
-  imports IMP-SYNTAX + BUILTIN-HOOKS
+  imports IMP-SYNTAX
+  imports BUILTIN-HOOKS
 
   configuration <T> 
   					<k> $PGM : K </k>

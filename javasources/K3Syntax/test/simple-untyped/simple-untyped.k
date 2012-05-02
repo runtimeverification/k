@@ -73,7 +73,8 @@ endmodule
 
 
 module SIMPLE-UNTYPED
-  imports SIMPLE-UNTYPED-SYNTAX + BUILTIN-HOOKS
+  imports SIMPLE-UNTYPED-SYNTAX
+  imports BUILTIN-HOOKS
 
   // coming from macros
   rule if E:Exp then S:Stmt => if E then S else {}

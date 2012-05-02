@@ -15,6 +15,8 @@
 	
 	<target name="all">
 		<ant antfile="${javasources}/K3Java/build.xml" dir="${javasources}/K3Java"/>
+		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun"/>
+		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun"/>
 	</target>
 
 	<target name="clean">
