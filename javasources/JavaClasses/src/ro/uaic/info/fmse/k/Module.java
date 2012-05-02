@@ -12,26 +12,27 @@ import ro.uaic.info.fmse.utils.xml.XML;
 public class Module extends DefinitionItem {
 	String name;
 	List<ModuleItem> items;
+	String type;
 
 	public Module(Element element) {
 		super(element);
-		
+
 		name = element.getAttribute(Constants.VALUE_value_ATTR);
+		type = element.getAttribute(Constants.TYPE_type_ATTR);
 		items = new LinkedList<ModuleItem>();
 
 		List<Element> elements = XML.getChildrenElements(element);
-		for(Element e : elements)
-		{
-			items.add((ModuleItem)JavaClassesFactory.getTerm(e));
+		for (Element e : elements) {
+			items.add((ModuleItem) JavaClassesFactory.getTerm(e));
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		String content = "";
 		for (ModuleItem i : items)
 			content += i + " \n";
 
-		return "module " + name + "\n" + content + "\nendmodule";
+		return type + " " + name + "\n" + content + "\nend" + type;
 	}
 }

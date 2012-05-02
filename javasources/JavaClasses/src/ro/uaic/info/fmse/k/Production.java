@@ -58,6 +58,6 @@ public class Production extends ASTNode{
 		if (attributes.equals(""))
 			return content;
 		return content + "[" + attributes + "]";
-	};
+	}
 
 }

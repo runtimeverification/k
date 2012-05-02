@@ -9,8 +9,8 @@ public abstract class Sentence extends ModuleItem {
 		super(element);
 		// TODO Auto-generated constructor stub
 	}
-	Term term;
-	Map<String, ?> tags;
-	Condition condition = null;
+	Term body;
+	Term condition = null;
+	Map<String, String> attributes;
 
 }

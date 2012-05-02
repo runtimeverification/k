@@ -2,11 +2,15 @@ package ro.uaic.info.fmse.loader;
 
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.k.Cell;
+import ro.uaic.info.fmse.k.Configuration;
+import ro.uaic.info.fmse.k.Context;
 import ro.uaic.info.fmse.k.Definition;
 import ro.uaic.info.fmse.k.Import;
 import ro.uaic.info.fmse.k.Module;
 import ro.uaic.info.fmse.k.PriorityBlock;
 import ro.uaic.info.fmse.k.Production;
+import ro.uaic.info.fmse.k.Rule;
 import ro.uaic.info.fmse.k.Sort;
 import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.k.Terminal;
@@ -28,7 +32,7 @@ public class JavaClassesFactory {
 		if (Constants.PRODUCTION.equals(element.getNodeName()))
 			return new Production(element);
 		if (Constants.RULE.equals(element.getNodeName()))
-			return null;
+			return new Rule(element);
 		if (Constants.BODY.equals(element.getNodeName()))
 			return null;
 		if (Constants.REWRITE.equals(element.getNodeName()))
@@ -68,9 +72,9 @@ public class JavaClassesFactory {
 		if (Constants.USERLIST.equals(element.getNodeName()))
 			return null;
 		if (Constants.CONFIG.equals(element.getNodeName()))
-			return null;
+			return new Configuration(element);
 		if (Constants.CELL.equals(element.getNodeName()))
-			return null;
+			return new Cell(element);
 		if (Constants.BAG.equals(element.getNodeName()))
 			return null;
 		if (Constants.KSEQUENCE.equals(element.getNodeName()))
@@ -84,7 +88,7 @@ public class JavaClassesFactory {
 		if (Constants.MAP.equals(element.getNodeName()))
 			return null;
 		if (Constants.CONTEXT.equals(element.getNodeName()))
-			return null;
+			return new Context(element);
 		if (Constants.HOLE.equals(element.getNodeName()))
 			return null;
 		if (Constants.LISTITEM.equals(element.getNodeName()))
