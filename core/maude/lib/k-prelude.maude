@@ -50,7 +50,7 @@ mod K-TECHNIQUE is
   op BagItem : K -> BagItem [metadata "latex=(renameTo _)"] .
   op __ : Bag Bag -> Bag [assoc comm id: .] .
   op __ : NeBag Bag -> NeBag [ditto] .
-  op _|->_ : K Bag -> BagItem .
+  op BagMapItem : K Bag -> BagItem .
 
   sort SetItem Set NeSet .
   subsort SetItem < NeSet < Set .

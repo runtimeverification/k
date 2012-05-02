@@ -643,7 +643,7 @@ fmod K-META-CONFIG is
   op mkCellLabel : Qid -> Constant . 
   eq mkCellLabel(Q) = qid(string(Q) + ".CellLabel") .
 
-  ops Map Bag List Set : -> Sort .
+  ops Map Bag List Set BagMap : -> Sort .
   eq Map = 'Map . eq Bag = 'Bag . eq List = 'List . eq Set = 'Set .
   op CellLabel : -> Sort .
   eq CellLabel = 'CellLabel .
@@ -657,7 +657,7 @@ fmod K-META-CONFIG is
   eq ctor(S) = if S == Bag then '__ else if S == Map then '__ else if S == List then '__ else if S == K then '_~>_ else if S == Set then '__ else 'error fi fi fi fi fi .
   
   op itemCtor : Sort -> Qid .
-  eq itemCtor(S) = if S == Bag then 'BagItem else if S == Map then '_|->_ else if S == List then 'ListItem else if S == Set then 'SetItem else 'error fi fi fi fi .
+  eq itemCtor(S) = if S == Bag then 'BagItem else if S == Map then '_|->_ else if S == List then 'ListItem else if S == Set then 'SetItem else if S == BagMap then 'BagMapItem else 'error fi fi fi fi fi .
 
   op mkCollection : Sort TermList ~> Term .
   eq mkCollection(S, empty) = emptyCt(S) .

@@ -287,7 +287,7 @@ ceq getConfList((Q[Tl],Tl')) = (getConfList(Tl),getConfList(Tl'))
   op generateKeyEq : Qid KConf -> EquationSet .
  ceq generateKeyEq(Item, {Key, N, AS, Item, Ds, KC} KC')
    = (eq mkCell(Item, mkCollection(Bag,(mkCell(Key,mkVariable('Key,kind(K))),mkVariable('Value,kind(Bag))))) 
-       = itemCtor(Map)[mkVariable('Key,kind(K)),mkVariable('Value,kind(Bag))] 
+       = itemCtor(BagMap)[mkVariable('Key,kind(K)),mkVariable('Value,kind(Bag))] 
       [metadata("generated=(BagMap)")] .)
   if AS[type] = "Key" .
 endfm
