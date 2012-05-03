@@ -13,6 +13,10 @@ public class Terminal extends Term implements ProductionItem {
 		terminal = element.getAttribute(Constants.VALUE_value_ATTR);
 	}
 
+	public ProductionType getType() {
+		return ProductionType.TERMINAL;
+	}
+
 	@Override
 	public String toString() {
 		return "\"" + terminal + "\"";

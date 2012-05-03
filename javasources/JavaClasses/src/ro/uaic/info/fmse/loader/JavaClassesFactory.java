@@ -25,7 +25,7 @@ public class JavaClassesFactory {
 		if (Constants.REWRITE.equals(element.getNodeName()))
 			return new Rewrite(element);
 		if (Constants.TERM.equals(element.getNodeName()))
-			return null;
+			return new TermCons(element, false);
 		if (Constants.VAR.equals(element.getNodeName()))
 			return new Variable(element);
 		if (Constants.TERMINAL.equals(element.getNodeName()))
@@ -49,7 +49,7 @@ public class JavaClassesFactory {
 		if (Constants.SETITEM.equals(element.getNodeName()))
 			return null;
 		if (Constants.BUILTINOP.equals(element.getNodeName()))
-			return null;
+			return new TermCons(element, true);
 		if (Constants.USERLIST.equals(element.getNodeName()))
 			return new UserList(element);
 		if (Constants.CONFIG.equals(element.getNodeName()))

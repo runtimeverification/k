@@ -16,6 +16,10 @@ public class UserList extends ASTNode implements ProductionItem {
 		separator = element.getAttribute(Constants.SEPARATOR_separator_ATTR);
 	}
 
+	public ProductionType getType() {
+		return ProductionType.USERLIST;
+	}
+
 	@Override
 	public String toString() {
 		return "List{" + sort + ",\"" + separator + "\"} ";

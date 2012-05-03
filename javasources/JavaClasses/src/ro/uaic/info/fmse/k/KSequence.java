@@ -14,7 +14,7 @@ public class KSequence extends Collection {
 			if (i == contents.size() -1)
 				content += contents.get(i);
 			else
-				content += contents.get(i) + " ~>";
+				content += contents.get(i) + "~> ";
 		}
 		return content;
 	}

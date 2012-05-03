@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
+import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.utils.xml.XML;
@@ -37,6 +38,8 @@ public class Production extends ASTNode {
 				attributes.put(e.getAttribute(Constants.KEY_key_ATTR), e.getAttribute(Constants.VALUE_value_ATTR));
 			}
 		}
+		if (attributes.containsKey(Constants.CONS_cons_ATTR))
+			DefinitionHelper.conses.put(attributes.get(Constants.CONS_cons_ATTR), this);
 	}
 
 	public String toString() {
@@ -56,39 +59,37 @@ public class Production extends ASTNode {
 			return content;
 		return content + "[" + attributes + "]";
 	}
+
 	@Override
 	public String toMaude() {
 		String content = "";
-		for (ProductionItem pi : items)
-		{
+		for (ProductionItem pi : items) {
 			if (pi instanceof Sort)
 				content += pi + " ";
 		}
 
 		return content.trim();
 	}
-	
-	public String getLabel()
-	{
+
+	public String getLabel() {
 		return attributes.get("klabel");
 	}
-	
-	public String getMetadata()
-	{
+
+	public String getMetadata() {
 		java.util.List<String> reject = new LinkedList<String>();
 		reject.add("cons");
 		reject.add("klabel");
 		reject.add("latex");
-		
+
 		String attributes = "";
 		for (Entry<String, String> entry : this.attributes.entrySet()) {
 			if (!reject.contains(entry.getKey()))
-			attributes += " " + entry.getKey() + "=(" + entry.getValue() + ")";
+				attributes += " " + entry.getKey() + "=(" + entry.getValue() + ")";
 		}
-		
+
 		// append locations too
 		attributes += " location=" + getMaudeLocation();
-		
+
 		return attributes.trim();
 	}
 }
