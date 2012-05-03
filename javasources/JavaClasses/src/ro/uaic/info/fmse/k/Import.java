@@ -17,4 +17,9 @@ public class Import extends ModuleItem {
 	public String toString() {
 		return "  imports " + name;
 	}
+	
+	@Override
+	public String toMaude() {
+		return "including " + name;
+	}
 }

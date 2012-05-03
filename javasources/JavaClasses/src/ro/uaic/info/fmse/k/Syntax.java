@@ -39,4 +39,29 @@ public class Syntax extends ModuleItem{
 		
 		return "  syntax " + sort + " ::= " + blocks + "\n";
 	}
+	
+	@Override
+	public String toMaude() {
+		
+		String contents = "";
+		for (PriorityBlock pb : priorityBlocks)
+		{
+			for(Production p : pb.productions)
+			{
+				// subsort case
+				if (p.items.size() == 1 && (p.items.get(0) instanceof Sort))
+				{
+					ProductionItem item = p.items.get(0);
+					if (item instanceof Sort)
+						contents += "subsort " + p.items.get(0) + " < " + sort + " .\n";
+				}
+				else
+				{
+					contents += "op " + p.getLabel() + " : " + p.toMaude() + " -> " + sort + " .\n";
+				}
+			}
+		}
+		
+		return contents;
+	}
 }

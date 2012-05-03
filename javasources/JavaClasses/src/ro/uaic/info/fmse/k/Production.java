@@ -56,4 +56,20 @@ public class Production extends ASTNode {
 			return content;
 		return content + "[" + attributes + "]";
 	}
+	@Override
+	public String toMaude() {
+		String content = "";
+		for (ProductionItem pi : items)
+		{
+			if (pi instanceof Sort)
+				content += pi + " ";
+		}
+
+		return content.trim();
+	}
+	
+	public String getLabel()
+	{
+		return attributes.get("klabel");
+	}
 }

@@ -19,4 +19,9 @@ public class Sort extends ASTNode implements ProductionItem{
 	public String toString() {
 		return sort;
 	}
+	
+	@Override
+	public String toMaude() {
+		return sort;
+	}
 }

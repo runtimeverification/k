@@ -24,7 +24,7 @@ public class Definition extends ASTNode {
 		mainModule = element.getAttribute(Constants.MAINMODULE);
 		// mainSyntaxModule = element.getAttribute(Constants.MAINSYNTAXMODULE);
 		items = new LinkedList<DefinitionItem>();
-		
+
 		List<Element> elements = XML.getChildrenElements(element);
 		for (Element e : elements)
 			items.add((DefinitionItem) JavaClassesFactory.getTerm(e));
@@ -37,5 +37,15 @@ public class Definition extends ASTNode {
 			content += di + " \n";
 
 		return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
+	}
+
+	@Override
+	public String toMaude() {
+		String content = "";
+
+		for (DefinitionItem di : items)
+			content += di.toMaude() + "\n";
+
+		return content;
 	}
 }

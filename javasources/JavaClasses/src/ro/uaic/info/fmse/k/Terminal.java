@@ -17,4 +17,9 @@ public class Terminal extends Term implements ProductionItem {
 	public String toString() {
 		return "\"" + terminal + "\"";
 	}
+	
+	@Override
+	public String toMaude() {
+		return "";
+	}
 }
