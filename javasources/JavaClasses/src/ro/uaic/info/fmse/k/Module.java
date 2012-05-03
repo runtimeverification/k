@@ -1,6 +1,6 @@
 package ro.uaic.info.fmse.k;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -19,7 +19,7 @@ public class Module extends DefinitionItem {
 
 		name = element.getAttribute(Constants.VALUE_value_ATTR);
 		type = element.getAttribute(Constants.TYPE_type_ATTR);
-		items = new LinkedList<ModuleItem>();
+		items = new ArrayList<ModuleItem>();
 
 		List<Element> elements = XML.getChildrenElements(element);
 		for (Element e : elements) {

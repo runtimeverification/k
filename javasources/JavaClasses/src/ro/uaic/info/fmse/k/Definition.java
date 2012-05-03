@@ -1,6 +1,6 @@
 package ro.uaic.info.fmse.k;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -23,7 +23,7 @@ public class Definition extends ASTNode {
 		mainFile = element.getAttribute(Constants.MAINFILE);
 		mainModule = element.getAttribute(Constants.MAINMODULE);
 		// mainSyntaxModule = element.getAttribute(Constants.MAINSYNTAXMODULE);
-		items = new LinkedList<DefinitionItem>();
+		items = new ArrayList<DefinitionItem>();
 
 		List<Element> elements = XML.getChildrenElements(element);
 		for (Element e : elements)

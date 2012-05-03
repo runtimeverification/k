@@ -27,7 +27,7 @@ public class JavaClassesFactory {
 		if (Constants.TERM.equals(element.getNodeName()))
 			return null;
 		if (Constants.VAR.equals(element.getNodeName()))
-			return null;
+			return new Variable(element);
 		if (Constants.TERMINAL.equals(element.getNodeName()))
 			return new Terminal(element);
 		if (Constants.ATTRIBUTES.equals(element.getNodeName()))
@@ -59,7 +59,7 @@ public class JavaClassesFactory {
 		if (Constants.BAG.equals(element.getNodeName()))
 			return new Bag(element);
 		if (Constants.KSEQUENCE.equals(element.getNodeName()))
-			return null;
+			return new KSequence(element);
 		if (Constants.MAPITEM.equals(element.getNodeName()))
 			return null;
 		if (Constants.KEY.equals(element.getNodeName()))
