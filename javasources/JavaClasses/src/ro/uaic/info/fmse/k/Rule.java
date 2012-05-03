@@ -62,4 +62,9 @@ public class Rule extends Sentence {
 		}
 		return content + attributes;
 	}
+	
+	@Override
+	public String toMaude() {
+		return "mb rule " + super.toMaude();
+	}
 }

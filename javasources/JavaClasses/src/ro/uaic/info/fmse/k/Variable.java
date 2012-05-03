@@ -17,4 +17,9 @@ public class Variable extends Term {
 	public String toString() {
 		return name + ":" + sort + " ";
 	}
+	
+	@Override
+	public String toMaude() {
+		return name + ":" + sort;
+	}
 }

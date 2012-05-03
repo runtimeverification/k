@@ -48,4 +48,9 @@ public class Context extends Sentence {
 		}
 		return content + attributes;
 	}
+	
+	@Override
+	public String toMaude() {
+		return "mb context " + super.toMaude();
+	}
 }

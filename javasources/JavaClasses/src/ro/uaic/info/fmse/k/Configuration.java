@@ -1,5 +1,7 @@
 package ro.uaic.info.fmse.k;
 
+import java.util.HashMap;
+
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
@@ -10,6 +12,7 @@ public class Configuration extends Sentence {
 	public Configuration(Element element) {
 		super(element);
 		this.body = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+		this.attributes = new HashMap<String, String>();
 	}
 
 	public String toString() {
@@ -20,6 +23,6 @@ public class Configuration extends Sentence {
 	
 	@Override
 	public String toMaude() {
-		return "mb configuration " + body.toMaude() + " : KSentence [metadata \"" + getMaudeLocation() + "\"] .";
+		return "mb configuration " + super.toMaude();
 	}
 }

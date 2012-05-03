@@ -35,6 +35,7 @@ public abstract class Collection extends Term {
 		String content = "";
 		
 		for (Term term : contents)
+			if (term != null)
 			content += term.toMaude() + ",";
 		
 		if(content.length() > 1)
