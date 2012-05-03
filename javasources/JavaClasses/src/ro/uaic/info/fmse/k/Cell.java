@@ -50,7 +50,7 @@ public class Cell extends Term {
 				content += this.contents + "...";
 			} else if (elipses.equals("both")) {
 				content += "..." + this.contents + "...";
-			}
+			} else content += this.contents;
 		}
 		return content + "</" + this.label + "> ";
 	}

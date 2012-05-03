@@ -8,7 +8,6 @@ public abstract class Term extends ASTNode {
 
 	public Term(Element element) {
 		super(element);
-		// TODO Auto-generated constructor stub
 	}
 
 }

@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.loader;
 
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.k.Bag;
 import ro.uaic.info.fmse.k.Cell;
 import ro.uaic.info.fmse.k.Configuration;
 import ro.uaic.info.fmse.k.Context;
@@ -10,6 +11,7 @@ import ro.uaic.info.fmse.k.Import;
 import ro.uaic.info.fmse.k.Module;
 import ro.uaic.info.fmse.k.PriorityBlock;
 import ro.uaic.info.fmse.k.Production;
+import ro.uaic.info.fmse.k.Rewrite;
 import ro.uaic.info.fmse.k.Rule;
 import ro.uaic.info.fmse.k.Sort;
 import ro.uaic.info.fmse.k.Syntax;
@@ -36,7 +38,7 @@ public class JavaClassesFactory {
 		if (Constants.BODY.equals(element.getNodeName()))
 			return null;
 		if (Constants.REWRITE.equals(element.getNodeName()))
-			return null;
+			return new Rewrite(element);
 		if (Constants.LEFT.equals(element.getNodeName()))
 			return null;
 		if (Constants.TERM.equals(element.getNodeName()))
@@ -76,7 +78,7 @@ public class JavaClassesFactory {
 		if (Constants.CELL.equals(element.getNodeName()))
 			return new Cell(element);
 		if (Constants.BAG.equals(element.getNodeName()))
-			return null;
+			return new Bag(element);
 		if (Constants.KSEQUENCE.equals(element.getNodeName()))
 			return null;
 		if (Constants.MAPITEM.equals(element.getNodeName()))
