@@ -11,7 +11,9 @@ public class Context extends Sentence {
 
 	public Context(Element element) {
 		super(element);
-		this.body = (Term) JavaClassesFactory.getTerm(XML.getChildrenElementsByTagName(element, Constants.BODY).get(0));
+		Element elm = XML.getChildrenElementsByTagName(element, Constants.BODY).get(0);
+		Element elmBody = XML.getChildrenElements(elm).get(0);
+		this.body = (Term) JavaClassesFactory.getTerm(elmBody);
 
 		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.COND);
 		if (its.size() > 0)
@@ -33,13 +35,17 @@ public class Context extends Sentence {
 		content += this.body + " ";
 
 		String attributes = "";
-		for (Entry<String, String> entry : this.attributes.entrySet()) {
-			String value = entry.getValue();
-			if (!value.equals(""))
-				value = "(" + value + ")";
+		if (!this.attributes.isEmpty()) {
+			attributes += "[";
+			for (Entry<String, String> entry : this.attributes.entrySet()) {
+				String value = entry.getValue();
+				if (!value.equals(""))
+					value = "(" + value + ")";
 
-			attributes += " " + entry.getKey() + value;
+				attributes += " " + entry.getKey() + value;
+			}
+			attributes += "]";
 		}
-		return content + "[" + attributes + "]";
+		return content + attributes;
 	}
 }

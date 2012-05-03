@@ -2,21 +2,7 @@ package ro.uaic.info.fmse.loader;
 
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.k.Bag;
-import ro.uaic.info.fmse.k.Cell;
-import ro.uaic.info.fmse.k.Configuration;
-import ro.uaic.info.fmse.k.Context;
-import ro.uaic.info.fmse.k.Definition;
-import ro.uaic.info.fmse.k.Import;
-import ro.uaic.info.fmse.k.Module;
-import ro.uaic.info.fmse.k.PriorityBlock;
-import ro.uaic.info.fmse.k.Production;
-import ro.uaic.info.fmse.k.Rewrite;
-import ro.uaic.info.fmse.k.Rule;
-import ro.uaic.info.fmse.k.Sort;
-import ro.uaic.info.fmse.k.Syntax;
-import ro.uaic.info.fmse.k.Terminal;
-import ro.uaic.info.fmse.k.UserList;
+import ro.uaic.info.fmse.k.*;
 import ro.uaic.info.fmse.parsing.ASTNode;
 
 public class JavaClassesFactory {
@@ -49,7 +35,7 @@ public class JavaClassesFactory {
 		if (Constants.TAG.equals(element.getNodeName()))
 			return null;
 		if (Constants.CONST.equals(element.getNodeName()))
-			return null;
+			return new Constant(element);
 		if (Constants.KAPP.equals(element.getNodeName()))
 			return null;
 		if (Constants.LABEL.equals(element.getNodeName()))
@@ -57,7 +43,7 @@ public class JavaClassesFactory {
 		if (Constants.LISTOFK.equals(element.getNodeName()))
 			return null;
 		if (Constants.EMPTY.equals(element.getNodeName()))
-			return null;
+			return new Empty(element);
 		if (Constants.SET.equals(element.getNodeName()))
 			return null;
 		if (Constants.SETITEM.equals(element.getNodeName()))

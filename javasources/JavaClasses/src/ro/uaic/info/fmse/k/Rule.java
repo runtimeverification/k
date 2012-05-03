@@ -43,19 +43,23 @@ public class Rule extends Sentence {
 	public String toString() {
 		String content = "  rule ";
 
-		if (this.label != null)
+		if (this.label != null && !this.label.equals(""))
 			content += "[" + this.label + "]: ";
-		
+
 		content += this.body + " ";
 
 		String attributes = "";
-		for (Entry<String, String> entry : this.attributes.entrySet()) {
-			String value = entry.getValue();
-			if (!value.equals(""))
-				value = "(" + value + ")";
+		if (!this.attributes.isEmpty()) {
+			attributes += "[";
+			for (Entry<String, String> entry : this.attributes.entrySet()) {
+				String value = entry.getValue();
+				if (!value.equals(""))
+					value = "(" + value + ")";
 
-			attributes += " " + entry.getKey() + value;
+				attributes += " " + entry.getKey() + value;
+			}
+			attributes += "]";
 		}
-		return content + "[" + attributes + "]";
+		return content + attributes;
 	}
 }
