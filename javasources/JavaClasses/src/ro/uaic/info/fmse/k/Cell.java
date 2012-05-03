@@ -53,4 +53,24 @@ public class Cell extends Term {
 		}
 		return content + "</" + this.label + "> ";
 	}
+	
+	@Override
+	public String toMaude() {
+		String labell = "<_>_</_>";
+		
+		String head = "", start = "", end = "";
+		for(Entry<String, String> entry : attributes.entrySet())
+			if (!entry.getValue().equals(""))
+			{
+				start += "__(";
+				end += ",_=_(" + entry.getKey() + ",\""+ entry.getValue() + "\"))";
+			}
+		
+		head = start + label + end;
+		
+		// TODO: CHECK THIS AGAIN -> THE CONTENTS SHOULD NOT BE NULL
+		if (contents!=null)
+			return labell + "(" + head + ", " + contents.toMaude() + ", " + label + ")";
+		return labell + "(" + head + ", " + contents + ", " + label + ")";
+	}
 }

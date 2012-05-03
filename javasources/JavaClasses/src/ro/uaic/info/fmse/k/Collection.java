@@ -29,4 +29,18 @@ public abstract class Collection extends Term {
 			content += t;
 		return content;
 	}
+	
+	@Override
+	public String toMaude() {
+		String content = "";
+		
+		for (Term term : contents)
+			content += term.toMaude() + ",";
+		
+		if(content.length() > 1)
+			content = content.substring(0, content.length()-1);
+		
+		return "__(" + content + ")";
+	}
+
 }
