@@ -17,4 +17,9 @@ public class Configuration extends Sentence {
 		content += this.body + " ";
 		return content;
 	}
+	
+	@Override
+	public String toMaude() {
+		return "mb configuration " + body.toMaude() + " : KSentence [metadata \"" + getMaudeLocation() + "\"] .";
+	}
 }

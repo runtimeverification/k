@@ -13,4 +13,12 @@ public abstract class ASTNode extends IMaude{
 		this.filename = element.getAttribute(Constants.FILENAME_filename_ATTR);
 		this.location = element.getAttribute(Constants.LOC_loc_ATTR);
 	}
+	
+	public String getMaudeLocation()
+	{
+		String location = this.location;
+		location = location.replaceAll(",", ":");
+		location = location.replaceFirst("\\(", "(" + this.filename + ":");
+		return location;
+	}
 }

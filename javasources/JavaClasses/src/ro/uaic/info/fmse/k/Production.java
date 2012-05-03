@@ -72,4 +72,23 @@ public class Production extends ASTNode {
 	{
 		return attributes.get("klabel");
 	}
+	
+	public String getMetadata()
+	{
+		java.util.List<String> reject = new LinkedList<String>();
+		reject.add("cons");
+		reject.add("klabel");
+		reject.add("latex");
+		
+		String attributes = "";
+		for (Entry<String, String> entry : this.attributes.entrySet()) {
+			if (!reject.contains(entry.getKey()))
+			attributes += " " + entry.getKey() + "=(" + entry.getValue() + ")";
+		}
+		
+		// append locations too
+		attributes += " location=" + getMaudeLocation();
+		
+		return attributes.trim();
+	}
 }

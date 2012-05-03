@@ -6,8 +6,8 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.parsing.ASTNode;
 
 public class UserList extends ASTNode implements ProductionItem {
-	String sort;
-	String separator;
+	protected String sort;
+	protected String separator;
 
 	public UserList(Element element) {
 		super(element);
