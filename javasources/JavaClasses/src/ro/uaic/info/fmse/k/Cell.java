@@ -45,11 +45,11 @@ public class Cell extends Term {
 
 		if (elipses != null && !elipses.equals("none")) {
 			if (elipses.equals("left")) {
-				content += "..." + this.contents;
+				content += "... " + this.contents + " ";
 			} else if (elipses.equals("right")) {
-				content += this.contents + "...";
+				content += " " + this.contents + " ...";
 			} else if (elipses.equals("both")) {
-				content += "..." + this.contents + "...";
+				content += "... " + this.contents + " ...";
 			} else content += this.contents;
 		}
 		return content + "</" + this.label + "> ";

@@ -14,7 +14,7 @@ public class LoadDefinitionTest {
 
 	@Test
 	public void testGetTerm() {
-		String file = "/home/andrei.arusoaie/work/k3/javasources/K3Syntax/test/simple-untyped/.k/def.xml";
+		String file = "d:/work/dir cu spatii/k3/javasources/K3Syntax/test/imp/.k/def.xml";
 		Document doc = XML.getDocument(FileUtil.readFileAsString(file));
 		ASTNode out = JavaClassesFactory.getTerm(doc.getDocumentElement());
 		System.out.println(out);

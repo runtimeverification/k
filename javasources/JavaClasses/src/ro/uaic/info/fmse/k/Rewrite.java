@@ -14,8 +14,12 @@ public class Rewrite extends Term {
 	public Rewrite(Element element) {
 		super(element);
 		
-		left = (Term) JavaClassesFactory.getTerm(XML.getChildrenElementsByTagName(element, Constants.LEFT).get(0));
-		right = (Term) JavaClassesFactory.getTerm(XML.getChildrenElementsByTagName(element, Constants.RIGHT).get(0));
+		Element temp = XML.getChildrenElementsByTagName(element, Constants.LEFT).get(0);
+		temp = XML.getChildrenElements(temp).get(0);
+		left = (Term) JavaClassesFactory.getTerm(temp);
+		temp = XML.getChildrenElementsByTagName(element, Constants.RIGHT).get(0);
+		temp = XML.getChildrenElements(temp).get(0);
+		right = (Term) JavaClassesFactory.getTerm(temp);
 	}
 
 	@Override

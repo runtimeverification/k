@@ -16,6 +16,7 @@ import ro.uaic.info.fmse.k.Rule;
 import ro.uaic.info.fmse.k.Sort;
 import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.k.Terminal;
+import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.parsing.ASTNode;
 
 public class JavaClassesFactory {
@@ -35,17 +36,11 @@ public class JavaClassesFactory {
 			return new Production(element);
 		if (Constants.RULE.equals(element.getNodeName()))
 			return new Rule(element);
-		if (Constants.BODY.equals(element.getNodeName()))
-			return null;
 		if (Constants.REWRITE.equals(element.getNodeName()))
 			return new Rewrite(element);
-		if (Constants.LEFT.equals(element.getNodeName()))
-			return null;
 		if (Constants.TERM.equals(element.getNodeName()))
 			return null;
 		if (Constants.VAR.equals(element.getNodeName()))
-			return null;
-		if (Constants.RIGHT.equals(element.getNodeName()))
 			return null;
 		if (Constants.TERMINAL.equals(element.getNodeName()))
 			return new Terminal(element);
@@ -67,12 +62,10 @@ public class JavaClassesFactory {
 			return null;
 		if (Constants.SETITEM.equals(element.getNodeName()))
 			return null;
-		if (Constants.COND.equals(element.getNodeName()))
-			return null;
 		if (Constants.BUILTINOP.equals(element.getNodeName()))
 			return null;
 		if (Constants.USERLIST.equals(element.getNodeName()))
-			return null;
+			return new UserList(element);
 		if (Constants.CONFIG.equals(element.getNodeName()))
 			return new Configuration(element);
 		if (Constants.CELL.equals(element.getNodeName()))
@@ -98,6 +91,7 @@ public class JavaClassesFactory {
 		if (Constants.DEFINITION.equals(element.getNodeName()))
 			return new Definition(element);
 
+		System.out.println(">>> " + element.getNodeName() + " <<< - unimplemented yet");
 		return null;
 	}
 }

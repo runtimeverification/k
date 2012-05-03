@@ -5,18 +5,19 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.parsing.ASTNode;
 
-public class Sort extends ASTNode implements ProductionItem{
-
+public class UserList extends ASTNode implements ProductionItem {
 	String sort;
+	String separator;
 
-	public Sort(Element element) {
+	public UserList(Element element) {
 		super(element);
-		
+
 		sort = element.getAttribute(Constants.VALUE_value_ATTR);
+		separator = element.getAttribute(Constants.SEPARATOR_separator_ATTR);
 	}
-	
+
 	@Override
 	public String toString() {
-		return sort;
+		return "List{" + sort + ",\"" + separator + "\"} ";
 	}
 }

@@ -15,7 +15,7 @@ public class Context extends Sentence {
 
 		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.COND);
 		if (its.size() > 0)
-			this.condition = (Term) JavaClassesFactory.getTerm(its.get(0));
+			this.condition = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
 
 		attributes = new HashMap<String, String>();
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
@@ -29,7 +29,7 @@ public class Context extends Sentence {
 	}
 
 	public String toString() {
-		String content = "context ";
+		String content = "  context ";
 		content += this.body + " ";
 
 		String attributes = "";

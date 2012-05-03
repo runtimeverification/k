@@ -12,12 +12,14 @@ public class Rule extends Sentence {
 
 	public Rule(Element element) {
 		super(element);
-		this.body = (Term) JavaClassesFactory.getTerm(XML.getChildrenElementsByTagName(element, Constants.BODY).get(0));
+		Element elm = XML.getChildrenElementsByTagName(element, Constants.BODY).get(0);
+		Element elmBody = XML.getChildrenElements(elm).get(0);
+		this.body = (Term) JavaClassesFactory.getTerm(elmBody);
 		setLabel(element.getAttribute(Constants.LABEL));
 
 		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.COND);
 		if (its.size() > 0)
-			this.condition = (Term) JavaClassesFactory.getTerm(its.get(0));
+			this.condition = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
 
 		attributes = new HashMap<String, String>();
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
@@ -39,7 +41,7 @@ public class Rule extends Sentence {
 	}
 
 	public String toString() {
-		String content = "rule ";
+		String content = "  rule ";
 
 		if (this.label != null)
 			content += "[" + this.label + "]: ";

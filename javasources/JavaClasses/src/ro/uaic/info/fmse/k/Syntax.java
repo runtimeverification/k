@@ -37,6 +37,6 @@ public class Syntax extends ModuleItem{
 		if (blocks.length() > 2)
 			blocks = blocks.substring(0, blocks.length() -3);
 		
-		return "syntax " + sort + " ::= " + blocks + "\n";
+		return "  syntax " + sort + " ::= " + blocks + "\n";
 	}
 }

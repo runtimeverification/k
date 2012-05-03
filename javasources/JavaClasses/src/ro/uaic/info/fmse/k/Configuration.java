@@ -13,7 +13,7 @@ public class Configuration extends Sentence {
 	}
 
 	public String toString() {
-		String content = "configuration ";
+		String content = "  configuration ";
 		content += this.body + " ";
 		return content;
 	}
