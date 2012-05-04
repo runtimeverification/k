@@ -30,24 +30,20 @@ public class JavaClassesFactory {
 			return new Variable(element);
 		if (Constants.TERMINAL.equals(element.getNodeName()))
 			return new Terminal(element);
-		if (Constants.ATTRIBUTES.equals(element.getNodeName()))
-			return null;
-		if (Constants.TAG.equals(element.getNodeName()))
-			return null;
 		if (Constants.CONST.equals(element.getNodeName()))
 			return new Constant(element);
 		if (Constants.KAPP.equals(element.getNodeName()))
 			return null;
 		if (Constants.LABEL.equals(element.getNodeName()))
-			return null;
+			return null; // TODO: is this still available?
 		if (Constants.LISTOFK.equals(element.getNodeName()))
 			return null;
 		if (Constants.EMPTY.equals(element.getNodeName()))
 			return new Empty(element);
 		if (Constants.SET.equals(element.getNodeName()))
-			return null;
+			return new Set(element);
 		if (Constants.SETITEM.equals(element.getNodeName()))
-			return null;
+			return new SetItem(element);
 		if (Constants.BUILTINOP.equals(element.getNodeName()))
 			return new TermCons(element, true);
 		if (Constants.USERLIST.equals(element.getNodeName()))
@@ -58,22 +54,20 @@ public class JavaClassesFactory {
 			return new Cell(element);
 		if (Constants.BAG.equals(element.getNodeName()))
 			return new Bag(element);
+		if (Constants.BAGITEM.equals(element.getNodeName()))
+			return new BagItem(element);
 		if (Constants.KSEQUENCE.equals(element.getNodeName()))
 			return new KSequence(element);
 		if (Constants.MAPITEM.equals(element.getNodeName()))
-			return null;
-		if (Constants.KEY.equals(element.getNodeName()))
-			return null;
-		if (Constants.VALUE.equals(element.getNodeName()))
-			return null;
+			return new MapItem(element);
 		if (Constants.MAP.equals(element.getNodeName()))
-			return null;
+			return new Map(element);
 		if (Constants.CONTEXT.equals(element.getNodeName()))
 			return new Context(element);
 		if (Constants.HOLE.equals(element.getNodeName()))
-			return null;
+			return new Hole(element);
 		if (Constants.LISTITEM.equals(element.getNodeName()))
-			return null;
+			return new ListItem(element);
 		if (Constants.DEFINITION.equals(element.getNodeName()))
 			return new Definition(element);
 
