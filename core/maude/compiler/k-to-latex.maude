@@ -1124,7 +1124,7 @@ mod LATEX-PRINT-META is
   var P : Printable . var Prints : Printables .
   eq eMetaLatexPrint(M, loc(N,I,P) Prints) = eMetaLatexPrint(M, P Prints) [print Prints] .
   eq eMetaLatexPrint(M, syntax(QIL, QIL', #Types(N) AS) Prints)
-   = ('\n '\syntax '`{ QIL '`} '`{ QIL' '`} '`{ eMetaLatexPrint(M, N, AS)  '`} eMetaLatexPrintQ(M, QIL, Prints)) [owise] .
+   = ('\n '\begin '`{ 'syntaxBlock '`} '\syntax '`{ QIL '`} '`{ QIL' '`} '`{ eMetaLatexPrint(M, N, AS)  '`} eMetaLatexPrintQ(M, QIL, Prints)) [owise] .
 ---  eq \subsort{QIL}{QIL'} = \syntax{QIL'}{QIL}{none} .
 
 
@@ -1133,7 +1133,7 @@ mod LATEX-PRINT-META is
   eq eMetaLatexPrintQ(M, QIL, syntax(QIL, QIL', #Types(N) AS) Prints)
    = ('\n '\syntaxCont '`{ QIL '`} '`{ 
       QIL' '`} '`{ eMetaLatexPrint(M, N, AS) '`} eMetaLatexPrintQ(M, QIL, Prints)) .
-  eq eMetaLatexPrintQ(M, QIL, Prints) = eMetaLatexPrint(M, Prints) [owise] . 
+  eq eMetaLatexPrintQ(M, QIL, Prints) = ( '\end '`{ 'syntaxBlock '`} eMetaLatexPrint(M, Prints)) [owise] . 
 
   var F : Qid .  var TyL : TypeList . var AtS : AttrSet .
 

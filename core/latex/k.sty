@@ -350,11 +350,9 @@
 \ifk@tight%
 \small%
 \fi%
-\medskip%
 \newcommand{\kblock@arg}{#1}%
 \setlength{\kblock@indent}{\parindent}%
 \ifthenelse{\equal{#1}{bubble}}{%
-\setlength{\parindent}{0in}%
 \renewcommand{\kall}{\ball}%
 \renewcommand{\kallLarge}{\ballLarge}%
 \renewcommand{\kprefix}{\bprefix}%
@@ -363,7 +361,6 @@
 \renewcommand{\kdot}{\bdot}%
 \renewcommand{\AnyVar}{\bAnyVar}%
 }{\ifthenelse{\equal{#1}{math}}{%
-\setlength{\parindent}{0in}%
 \renewcommand{\kall}{\mall}%
 \renewcommand{\kallLarge}{\mallLarge}%
 \renewcommand{\kprefix}{\mprefix}%
@@ -378,7 +375,6 @@
     \begin{minipage}{50em}%
       \addtolength{\parskip}{.5\baselineskip}%
 \else%
-  \bigskip%
 \fi%
 }{%
 }}}%
@@ -387,17 +383,15 @@
 \ifk@poster%
     \ \end{minipage}%
   \end{Sbox}%
-  \bigskip%
   \begin{tikzpicture}
     \node[comment]{\TheSbox};
   \end{tikzpicture}%
   \k@markPosition%
 \fi%
-  \medskip%
 }{%
-{\small\par}\smallskip%
 }%
 \setlength{\parindent}{\kblock@indent}%
+\par\ \par%
 }
 
 % Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -406,20 +400,21 @@
   \par\noindent%
   \text{\scshape module #1}%
   \setlength{\parindent}{1em}%
+  \par\ \par%
 }{%
   \par\noindent\text{\scshape end module}%
-  \vspace{3ex}
+  \par\ \par%
 }
 
 \newenvironment{commentModule}{%
   \setlength{\parindent}{1em}%
-  \par
+  \par\ \par%
 }{%
-  \vspace{3ex}
+  \par\ \par%
 }
 
 \newcommand{\moduleName}[1]{#1}
-\newcommand{\including}[1]{\par\text{\scshape imports}\ #1}
+\newcommand{\including}[1]{\par\text{\scshape imports}\ #1\par\ \par}
 \newcommand{\modulePlus}{$+$}
 
 
@@ -437,7 +432,7 @@
 \mbox{\scshape syntax}\hspace{1em}$#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
 }\k@markPosition%
 }
-\newcommand{\syntaxCont}[3]{\rulebox{%
+\newcommand{\syntaxCont}[3]{\par\indent\rulebox{%
   $\setlength{\syntaxlength}{\widthof{$\mathrel{::=}$}}%
   \setlength{\syntaxlength}{.5\syntaxlength}%
   \addtolength{\syntaxlength}{\widthof{\mbox{\scshape syntax}\hspace{1em}$#1$}}%
@@ -448,6 +443,9 @@
 \newcommand{\syntaxContL}[3]{{\small%\par\indent%
 $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 }}
+
+
+\newenvironment{syntaxBlock}{\par\indent\ }{\par\ \par}
 
 
 % Non-terminals.
@@ -495,19 +493,14 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 % Configuration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newcommand{\kconfig}[1]{\par%
-  {\sc configuration:}%
-  \begin{quote}
-    \rulebox{\ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}}\k@markPosition%
-  \end{quote}%
+  {\sc configuration:}\par%
+    \ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}\k@markPosition%
+  \par\ \par%
 }
 
 \newcommand{\kconfigb}[1]{\begin{kblock}\kconfig{#1}\end{kblock}}
 
 % Cells %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\newcommand{\cellDecl}[2]{\par%
-  \text{\scshape cell:} $#1$ wraps $#2$%
-}
 
 \ifk@poster
 %%% Tooltips.
@@ -851,7 +844,7 @@ rectangle,rectangle
 %%% Context
 
 % Context.
-\newcommand{\kcontext}[4]{\par%
+\newcommand{\kcontext}[4]{\wrapRules{%
   \text{\scshape context:} $#2$%
   \ifthenelse{\equal{#3}{}}{}{%
     \when{#3}%
@@ -860,7 +853,7 @@ rectangle,rectangle
    [#4]% 
   }%
   \k@markPosition%
-  \bigskip%
+  }%
 }
 
 \newcommand{\kcontextb}[4]{\begin{kblock}\kcontext{#1}{#2}{#3}{#4}\end{kblock}}
@@ -871,38 +864,27 @@ rectangle,rectangle
   \ifthenelse{\equal{#1}{}}{\mbox{\scshape #2}}{\k@withTooltip{\mbox{\scshape #2}}{Rule Label: #1}}%
 }
 
-\newcommand{\rulebox}[1]{\par\indent\hbox{#1}}
+\newcommand{\rulebox}[1]{\hbox{#1}}
 
-\newcommand{\kequation}[2]{%
-  \rulebox{%
-    \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
-  }%
-  \k@markPosition%
-  \bigskip%
-}
-\newcommand{\kcequation}[3]{\par\indent%
-  \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
-  \when{#3}
-  \k@markPosition%
-  \bigskip%
-}
 \newcommand{\mequation}[3]{%
+  \wrapRules{%
   \rulebox{%
     \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
   }%
   \k@markPosition%
-  \bigskip%
+  }%
 }
 \newcommand{\cmequation}[4]{%
+  \wrapRules{%
   \rulebox{%
-    \k@ruleLabel{#1}{equation}\hspace{1em}$#2 = #3$%
+    \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
     \when{#4}%
   }%
   \k@markPosition%
-  \bigskip%
+  }%
 }
 
-\newcommand{\wrapRules}[1]{#1}
+\newcommand{\wrapRules}[1]{\par\indent#1\par\ \par}
 %%% Rules.
 \newcommand{\ruleAttributes}[1]{\hfill[#1]}
 \newcommand{\kdefine}[4]{%
@@ -917,7 +899,6 @@ rectangle,rectangle
   \ifthenelse{\equal{#4}{}}{}{%  
    \ruleAttributes{#4}%
   }%
-  \bigskip%
   }%
 }
 
@@ -933,26 +914,26 @@ rectangle,rectangle
   \ifthenelse{\equal{#4}{}}{}{%  
    \ruleAttributes{#4}% 
   }%
-  \bigskip%
-}
-}
-\newcommand{\mrule}[3]{%
-  \rulebox{%
-    \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
-  }%
-  \k@markPosition%
-  \bigskip%
-}
-\newcommand{\cmrule}[4]{%
-  \rulebox{%
-    \k@ruleLabel{#1}{rule}\hspace{1em}$#2 \Rightarrow #3$%
-    \when{#4}%
-  }%
-  \k@markPosition%
-  \bigskip%
+}%
 }
 
 \newcommand{\kruleb}[4]{\begin{kblock}\krule{#1}{#2}{#3}{#4}\end{kblock}}
+
+
+\ifk@poster
+\newcommand{\myskip}{\bigskip}
+\else
+\renewcommand{\when}[1]{\par{}\hspace{2em} when \ensuremath{#1}}
+\renewcommand{\ruleAttributes}[1]{\par{}\hspace{2em} [#1]}
+\renewcommand{\rulebox}[1]{\parbox[b]{\columnwidth}{#1}}
+\renewcommand{\wrapRules}[1]{\par{\parbox[b]{\columnwidth}{#1}}\par\ \par}
+\renewcommand{\k@ruleLabel}[2]{%
+  \ifthenelse{\equal{#1}{\textbackslash !}}{\mbox{\scshape #2}}{\k@withTooltip{\mbox{\scshape #2 \kattribute{#1}}}{Rule Label: #1}}\\%
+% \global\def\ignoreThisLabel{#1}%
+}
+\newcommand{\myskip}{\smallskip}
+\fi
+
 
 \makeatother
 
