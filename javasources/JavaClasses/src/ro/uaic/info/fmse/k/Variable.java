@@ -20,6 +20,8 @@ public class Variable extends Term {
 	
 	@Override
 	public String toMaude() {
+		if (name.equals("_"))
+			return "?:" + sort;
 		return name + ":" + sort;
 	}
 }

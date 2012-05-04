@@ -18,6 +18,6 @@ public class Hole extends Term {
 	
 	@Override
 	public String toMaude() {
-		return "[]:" + sort;
+		return "HOLE:" + sort;
 	}
 }
