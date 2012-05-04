@@ -17,7 +17,7 @@ public class LoadDefinitionTest {
 		String file = "d:/work/dir cu spatii/k3/javasources/K3Syntax/test/imp/.k/def.xml";
 		Document doc = XML.getDocument(FileUtil.readFileAsString(file));
 		ASTNode out = JavaClassesFactory.getTerm(doc.getDocumentElement());
-		System.out.println(out);
+		System.out.println(out.toMaude());
 		
 		assertTrue(doc != null);
 	}

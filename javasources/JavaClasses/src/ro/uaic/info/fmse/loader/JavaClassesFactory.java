@@ -33,11 +33,11 @@ public class JavaClassesFactory {
 		if (Constants.CONST.equals(element.getNodeName()))
 			return new Constant(element);
 		if (Constants.KAPP.equals(element.getNodeName()))
-			return null;
+			return new KApp(element);
 		if (Constants.LABEL.equals(element.getNodeName()))
 			return null; // TODO: is this still available?
 		if (Constants.LISTOFK.equals(element.getNodeName()))
-			return null;
+			return new ListOfK(element);
 		if (Constants.EMPTY.equals(element.getNodeName()))
 			return new Empty(element);
 		if (Constants.SET.equals(element.getNodeName()))
