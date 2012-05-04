@@ -902,9 +902,11 @@ rectangle,rectangle
   \bigskip%
 }
 
+\newcommand{\wrapRules}[1]{#1}
 %%% Rules.
 \newcommand{\ruleAttributes}[1]{\hfill[#1]}
 \newcommand{\kdefine}[4]{%
+\wrapRules{%
   \rulebox{%
     \k@ruleLabel{#1}{define}\hspace{1em}$#2$%
   }%
@@ -916,9 +918,11 @@ rectangle,rectangle
    \ruleAttributes{#4}%
   }%
   \bigskip%
+  }%
 }
 
 \newcommand{\krule}[4]{%
+\wrapRules{%
   \rulebox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
   }%
@@ -930,6 +934,7 @@ rectangle,rectangle
    \ruleAttributes{#4}% 
   }%
   \bigskip%
+}
 }
 \newcommand{\mrule}[3]{%
   \rulebox{%
