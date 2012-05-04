@@ -2536,8 +2536,7 @@ sub add_sorts {
     local $_ = shift;
 
 # Extracting all the defined sorts
-    my @sorts = /\ssorts?((?:\s+$ksort)+)\s+(?=\.|$kmaude_keywords_pattern)/gs;
-
+    my @sorts = /\ssorts?((?:\s+$ksort\b)+)\s+(?=\.|$kmaude_keywords_pattern)/gs;
 
     @sorts = split(/\s+/, "@sorts");
 	
