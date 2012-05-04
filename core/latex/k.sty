@@ -47,7 +47,7 @@
 \newcommand{\ksuffix}[3][white]{\bsuffix{#1}{#2}{#3}}
 \newcommand{\kmiddle}[3][white]{\bmiddle{#1}{#2}{#3}}
 \newcommand{\kdot}{\bdot}
-\newcommand{\AnyVar}{\bAnyVar}
+\newcommand{\AnyVar}[1][]{\bAnyVar{#1}}
 }{% else, assume default style is math
 \newcommand{\kall}[3][white]{\mall{#1}{#2}{#3}}
 \newcommand{\kallLarge}[3][white]{\mallLarge{#1}{#2}{#3}}
@@ -385,7 +385,7 @@
 }{%
 \ifthenelse{\equal{\kblock@arg}{text}}{%
 \ifk@poster%
-    \end{minipage}%
+    \ \end{minipage}%
   \end{Sbox}%
   \bigskip%
   \begin{tikzpicture}
