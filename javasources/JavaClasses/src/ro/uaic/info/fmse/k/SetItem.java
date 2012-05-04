@@ -16,4 +16,9 @@ public class SetItem extends Term {
 	public String toString() {
 		return this.item.toString();
 	}
+	
+	@Override
+	public String toMaude() {
+		return "SetItem(" + item.toMaude() + ")";
+	}
 }

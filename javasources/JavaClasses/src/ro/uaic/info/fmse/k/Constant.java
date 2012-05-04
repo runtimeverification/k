@@ -16,4 +16,9 @@ public class Constant extends Term {
 	public String toString() {
 		return value + " ";
 	}
+	
+	@Override
+	public String toMaude() {
+		return value;
+	}
 }

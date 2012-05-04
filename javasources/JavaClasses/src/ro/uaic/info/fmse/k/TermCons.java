@@ -49,4 +49,21 @@ public class TermCons extends Term {
 
 		return str;
 	}
+	
+	@Override
+	public String toMaude() {
+		Production pr = DefinitionHelper.conses.get("\"" + cons + "\"");
+		String cons = pr.getLabel();
+		
+		String contents = "";
+		for (Term term : this.contents)
+			if (term != null)
+			contents += term.toMaude() + ",";
+			else contents += term + ",";
+		
+		if (contents.length() >= 1)
+			contents = "(" + contents.substring(0, contents.length() -1) + ")"; 
+		
+		return cons + contents;
+	}
 }

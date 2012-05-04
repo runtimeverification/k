@@ -26,4 +26,12 @@ public class Rewrite extends Term {
 	public String toString() {
 		return left + " => " + right;
 	}
+	
+	@Override
+	public String toMaude() {
+		String left = this.left == null ? "null" : this.left.toMaude();
+		String right = this.right == null ? "null" : this.right.toMaude();
+		
+		return "_=>_(" + left + "," + right + ")";
+	}
 }

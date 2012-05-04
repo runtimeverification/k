@@ -9,5 +9,10 @@ public class ModuleItem extends ASTNode{
 	public ModuleItem(Element element) {
 		super(element);
 	}
+
+	@Override
+	public String toMaude() {
+		return "moduleItem";
+	}
 	
 }

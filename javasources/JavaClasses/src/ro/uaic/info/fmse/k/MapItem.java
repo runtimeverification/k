@@ -24,4 +24,9 @@ public class MapItem extends Term {
 	public String toString() {
 		return this.key + " |->" + this.value;
 	}
+	
+	@Override
+	public String toMaude() {
+		return "_|->_(" + key + "," + value + ")";
+	}
 }

@@ -14,4 +14,9 @@ public class Empty extends Term {
 	public String toString() {
 		return "." + sort + " ";
 	}
+	
+	@Override
+	public String toMaude() {
+		return "." + sort;
+	}
 }

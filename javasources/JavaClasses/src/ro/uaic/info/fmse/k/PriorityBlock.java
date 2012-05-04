@@ -38,5 +38,10 @@ public class PriorityBlock extends ASTNode{
 			return content;
 		return assoc + ": " + content;
 	}
+
+	@Override
+	public String toMaude() {
+		return "production";
+	}
 	
 }

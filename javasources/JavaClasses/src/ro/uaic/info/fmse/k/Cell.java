@@ -71,6 +71,6 @@ public class Cell extends Term {
 		// TODO: CHECK THIS AGAIN -> THE CONTENTS SHOULD NOT BE NULL
 		if (contents!=null)
 			return labell + "(" + head + ", " + contents.toMaude() + ", " + label + ")";
-		return labell + "(" + head + ", " + contents + ", " + label + ")";
+		return labell + "(" + head + ", " + null + ", " + label + ")";
 	}
 }

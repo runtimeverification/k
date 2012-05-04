@@ -16,4 +16,10 @@ public class ListItem extends Term {
 	public String toString() {
 		return this.item.toString();
 	}
+	
+	@Override
+	public String toMaude() {
+		return "ListItem(" + item.toMaude() + ")";
+	}
+
 }

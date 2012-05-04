@@ -24,4 +24,9 @@ public class UserList extends ASTNode implements ProductionItem {
 	public String toString() {
 		return "List{" + sort + ",\"" + separator + "\"} ";
 	}
+	
+	@Override
+	public String toMaude() {
+		return "";
+	}
 }

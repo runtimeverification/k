@@ -16,4 +16,10 @@ public class BagItem extends Term {
 	public String toString() {
 		return this.item.toString();
 	}
+	
+	@Override
+	public String toMaude() {
+		return "BagItem(" + item.toMaude() + ")";
+	}
+
 }
