@@ -29,8 +29,8 @@ module BOOL-HOOKS
   define true andBool A:Bool => A:Bool
   define false andBool A:Bool => false
 
+  define true xorBool A:Bool => notBool A:Bool
   define false xorBool A:Bool => A:Bool
-  define A:Bool xorBool A:Bool => false
 
   define notBool true => false
   define notBool false => true
