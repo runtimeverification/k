@@ -4,6 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
+import ro.uaic.info.fmse.parsing.Visitor;
 
 public class Terminal extends ProductionItem {
 
@@ -22,7 +23,7 @@ public class Terminal extends ProductionItem {
 	public String toString() {
 		return "\"" + terminal + "\"";
 	}
-	
+
 	@Override
 	public String toMaude() {
 		return "";
@@ -33,5 +34,9 @@ public class Terminal extends ProductionItem {
 		Element terminal = doc.createElement(Constants.TERMINAL);
 		terminal.setTextContent(this.terminal);
 		return terminal;
+	}
+
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

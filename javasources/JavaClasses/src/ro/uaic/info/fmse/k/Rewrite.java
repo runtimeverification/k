@@ -4,6 +4,7 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 
@@ -34,4 +35,10 @@ public class Rewrite extends Term {
 		
 		return "_=>_(" + left + "," + right + ")";
 	}
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+		left.accept(visitor);
+		right.accept(visitor);
+	}
+
 }

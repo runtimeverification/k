@@ -7,13 +7,15 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Configuration extends Sentence {
 
 	public Configuration(Element element) {
 		super(element);
-		this.body = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+		this.body = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(
+				element).get(0));
 		this.attributes = new HashMap<String, String>();
 	}
 
@@ -22,7 +24,7 @@ public class Configuration extends Sentence {
 		content += this.body + " ";
 		return content;
 	}
-	
+
 	@Override
 	public String toMaude() {
 		return "mb configuration " + super.toMaude();
@@ -34,5 +36,11 @@ public class Configuration extends Sentence {
 		configuration.setTextContent("notimplementedyet");
 		return configuration;
 
+	}
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+		body.accept(visitor);
 	}
 }

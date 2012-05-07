@@ -8,6 +8,8 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
+import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.utils.strings.StringUtil;
 import ro.uaic.info.fmse.utils.xml.XML;
@@ -52,12 +54,20 @@ public class Syntax extends ModuleItem {
 		String contents = "";
 		for (PriorityBlock pb : priorityBlocks) {
 			for (Production p : pb.productions) {
+
+				if (!MaudeHelper.declaredSorts.contains(sort.toString())) {
+					// contents += "sort " + sort.toString() + " . ";
+					MaudeHelper.declaredSorts.add(sort.toString());
+				}
+
 				// subsort case
 				if (p.items.size() == 1 && (p.items.get(0) instanceof Sort)) {
 					ProductionItem item = p.items.get(0);
-					if (item instanceof Sort)
+					if (item instanceof Sort) {
 						contents += "subsort " + p.items.get(0) + " < " + sort
 								+ " .\n";
+
+					}
 				} else if (p.items.size() == 1
 						&& (p.items.get(0) instanceof UserList)) {
 					// user declared lists case
@@ -74,19 +84,24 @@ public class Syntax extends ModuleItem {
 								+ "\"`}) = true .\nop 'isKResult : -> KLabel [metadata \"generated-label=()\"] .\n";
 						MaudeHelper.separators.add(list.separator);
 					}
-					
-					contents += "subsort "+list.sort+" < K .\n";
-					contents += "op 'is"+list.sort+" : -> KLabel .\n";
-					contents += "eq 'is"+list.sort+"(.List`{\""+list.separator+"\"`}) = true .\n";
-					contents += "eq 'is"+list.sort+"(_" + StringUtil.escape(list.separator) + "_( X:" + sort + ", L:" + list.sort + " )) = true .\n";
+
+					contents += "subsort " + list.sort + " < K .\n";
+					contents += "op 'is" + list.sort + " : -> KLabel .\n";
+					contents += "eq 'is" + list.sort + "(.List`{\""
+							+ list.separator + "\"`}) = true .\n";
+					contents += "eq 'is" + list.sort + "(_"
+							+ StringUtil.escape(list.separator) + "_( X:"
+							+ sort + ", L:" + list.sort + " )) = true .\n";
 				} else {
 					String metadata = p.getMetadata();
-					
+
 					if (metadata.equals(""))
 						contents += "op " + p.getLabel() + " : " + p.toMaude()
-							+ " -> " + sort + " .\n";
-					else contents += "op " + p.getLabel() + " : " + p.toMaude()
-							+ " -> " + sort + " [metadata \"" + metadata + "\"] .\n";
+								+ " -> " + sort + " .\n";
+					else
+						contents += "op " + p.getLabel() + " : " + p.toMaude()
+								+ " -> " + sort + " [metadata \"" + metadata
+								+ "\"] .\n";
 				}
 			}
 		}
@@ -97,11 +112,26 @@ public class Syntax extends ModuleItem {
 	@Override
 	public Element toXml(Document doc) {
 		Element syntax = doc.createElement(Constants.SYNTAX);
-		
+
 		syntax.appendChild(sort.toXml(doc));
 		for (PriorityBlock pb : priorityBlocks)
 			syntax.appendChild(pb.toXml(doc));
-		
+
 		return syntax;
 	}
+
+	@Override
+	public List<String> getAllSorts() {
+		List<String> sorts = new LinkedList<String>();
+		sorts.add(sort.toString());
+		return sorts;
+	}
+
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+		sort.accept(visitor);
+		for (ASTNode di : this.priorityBlocks)
+			di.accept(visitor);
+	}
+
 }

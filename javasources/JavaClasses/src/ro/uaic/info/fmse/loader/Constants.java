@@ -3,6 +3,7 @@
  */
 package ro.uaic.info.fmse.loader;
 
+
 /**
  * @author andrei.arusoaie
  *
@@ -70,6 +71,6 @@ public class Constants {
 	public static final String LABEL_label_ATTR = "label";
 	public static final String MULTIPLICITY_multiplicity_ATTR = "multiplicity";
 	public static final String ELLIPSES_ellipses_ATTR = "ellipses";
-
-
+	public static final String SHARED = "SHARED";
+	public static final String KLABEL = "KLabel";
 }

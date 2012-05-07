@@ -4,6 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
+import ro.uaic.info.fmse.parsing.Visitor;
 
 public class Sort extends ProductionItem {
 
@@ -34,7 +35,11 @@ public class Sort extends ProductionItem {
 		// TODO Auto-generated method stub
 		Element sort = doc.createElement(Constants.SORT);
 		sort.setTextContent(this.sort);
-		
+
 		return sort;
+	}
+
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

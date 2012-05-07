@@ -1,7 +1,9 @@
 package ro.uaic.info.fmse.k;
 
 import org.w3c.dom.Element;
+
 import ro.uaic.info.fmse.loader.Constants;
+import ro.uaic.info.fmse.parsing.Visitor;
 
 public class Constant extends Term {
 	String sort;
@@ -16,9 +18,21 @@ public class Constant extends Term {
 	public String toString() {
 		return value + " ";
 	}
-	
+
 	@Override
 	public String toMaude() {
 		return value;
+	}
+
+	public String getSort() {
+		return sort;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

@@ -10,7 +10,7 @@ public abstract class Term extends ASTNode {
 	public Term(Element element) {
 		super(element);
 	}
-	
+
 	@Override
 	public String toMaude() {
 		return "";

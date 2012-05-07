@@ -4,6 +4,7 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class MapItem extends Term {
@@ -12,7 +13,8 @@ public class MapItem extends Term {
 
 	public MapItem(Element element) {
 		super(element);
-		Element elm = XML.getChildrenElementsByTagName(element, Constants.KEY).get(0);
+		Element elm = XML.getChildrenElementsByTagName(element, Constants.KEY)
+				.get(0);
 		Element elmBody = XML.getChildrenElements(elm).get(0);
 		this.key = (Term) JavaClassesFactory.getTerm(elmBody);
 
@@ -24,9 +26,16 @@ public class MapItem extends Term {
 	public String toString() {
 		return this.key + " |->" + this.value;
 	}
-	
+
 	@Override
 	public String toMaude() {
 		return "_|->_(" + key.toMaude() + "," + value.toMaude() + ")";
+	}
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+		key.accept(visitor);
+		value.accept(visitor);
 	}
 }

@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.k;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
+import ro.uaic.info.fmse.parsing.Visitor;
 
 public class Variable extends Term {
 	String name;
@@ -17,11 +18,15 @@ public class Variable extends Term {
 	public String toString() {
 		return name + ":" + sort + " ";
 	}
-	
+
 	@Override
 	public String toMaude() {
 		if (name.equals("_"))
 			return "?:" + sort;
 		return name + ":" + sort;
+	}
+
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

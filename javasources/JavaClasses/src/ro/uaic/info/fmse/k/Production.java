@@ -12,6 +12,7 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
+import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Production extends ASTNode {
@@ -25,7 +26,8 @@ public class Production extends ASTNode {
 		strings.add(Constants.SORT);
 		strings.add(Constants.TERMINAL);
 		strings.add(Constants.USERLIST);
-		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, strings);
+		java.util.List<Element> its = XML.getChildrenElementsByTagName(element,
+				strings);
 
 		items = new LinkedList<ProductionItem>();
 		for (Element e : its)
@@ -37,11 +39,13 @@ public class Production extends ASTNode {
 		if (its.size() > 0) {
 			its = XML.getChildrenElements(its.get(0));
 			for (Element e : its) {
-				attributes.put(e.getAttribute(Constants.KEY_key_ATTR), e.getAttribute(Constants.VALUE_value_ATTR));
+				attributes.put(e.getAttribute(Constants.KEY_key_ATTR),
+						e.getAttribute(Constants.VALUE_value_ATTR));
 			}
 		}
 		if (attributes.containsKey(Constants.CONS_cons_ATTR))
-			DefinitionHelper.conses.put(attributes.get(Constants.CONS_cons_ATTR), this);
+			DefinitionHelper.conses.put(
+					attributes.get(Constants.CONS_cons_ATTR), this);
 	}
 
 	public String toString() {
@@ -86,7 +90,8 @@ public class Production extends ASTNode {
 		String attributes = "";
 		for (Entry<String, String> entry : this.attributes.entrySet()) {
 			if (!reject.contains(entry.getKey()))
-				attributes += " " + entry.getKey() + "=(" + entry.getValue() + ")";
+				attributes += " " + entry.getKey() + "=(" + entry.getValue()
+						+ ")";
 		}
 
 		// append locations too
@@ -97,16 +102,22 @@ public class Production extends ASTNode {
 
 	@Override
 	public Element toXml(Document doc) {
-		
+
 		Element production = doc.createElement(Constants.PRODUCTION);
-		
-		for(ProductionItem pi : items)
+
+		for (ProductionItem pi : items)
 			if (pi.toXml(doc) != null)
-			production.appendChild(pi.toXml(doc));
-		
+				production.appendChild(pi.toXml(doc));
+
 		Element attributes = doc.createElement(Constants.ATTRIBUTES);
 		production.appendChild(attributes);
-		
+
 		return production;
+	}
+
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+		for (ASTNode di : items)
+			di.accept(visitor);
 	}
 }

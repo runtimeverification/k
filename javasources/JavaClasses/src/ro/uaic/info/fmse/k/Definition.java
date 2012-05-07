@@ -9,6 +9,9 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
+import ro.uaic.info.fmse.parsing.KLabelsVisitor;
+import ro.uaic.info.fmse.parsing.Visitor;
+import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Definition extends ASTNode {
@@ -47,24 +50,48 @@ public class Definition extends ASTNode {
 		for (DefinitionItem di : items)
 			content += di.toMaude() + "\n";
 
-		return content;
+		String klabels = "";
+		this.accept(new KLabelsVisitor());
+		for (String kl : MaudeHelper.kLabels) {
+			klabels += kl + " ";
+		}
+		klabels = klabels.trim();
+		if (!klabels.equals(""))
+			klabels = "ops " + klabels + " : -> KLabel .\n";
+
+		String sorts = "";
+		for (String s : MaudeHelper.declaredSorts)
+			if (!MaudeHelper.basicSorts.contains(s))
+				sorts += s + " ";
+		sorts = sorts.trim();
+		if (!sorts.equals(""))
+			sorts = "sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
+
+		return "mod " + Constants.SHARED + " is\n  including K .\n  " + klabels
+				+ "  \n  " + sorts + "\nendm\n" + content;
 	}
 
 	@Override
 	public Element toXml(Document doc) {
-		
+
 		// create <definition> element, together with attributes
 		Element definition = doc.createElement(Constants.DEFINITION);
 		definition.setAttribute(Constants.MAINFILE, mainFile);
 		definition.setAttribute(Constants.MAINMODULE, mainModule);
 		definition.setAttribute(Constants.MAINSYNTAXMODULE, mainSyntaxModule);
-		
+
 		// collect all the other items
-		for(DefinitionItem di : items)
-		{
+		for (DefinitionItem di : items) {
 			definition.appendChild(di.toXml(doc));
 		}
-		
+
 		return definition;
+	}
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+		for (DefinitionItem di : items)
+			di.accept(visitor);
 	}
 }
