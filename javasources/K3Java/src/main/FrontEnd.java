@@ -151,6 +151,7 @@ public class FrontEnd {
 			File dotk = new File(f.getParent() + "/.k");
 
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
+			load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";
 
 			// load libraries if any
 			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
