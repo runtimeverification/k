@@ -10,6 +10,7 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Visitor;
+import ro.uaic.info.fmse.transitions.maude.CellLabelsVisitor;
 import ro.uaic.info.fmse.transitions.maude.KLabelsVisitor;
 import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.utils.xml.XML;
@@ -50,25 +51,39 @@ public class Definition extends ASTNode {
 		for (DefinitionItem di : items)
 			content += di.toMaude() + "\n";
 
+		// klabels
 		String klabels = "";
-		this.accept(new KLabelsVisitor());
-		for (String kl : MaudeHelper.kLabels) {
+		KLabelsVisitor labelsVisitor = new KLabelsVisitor();
+		this.accept(labelsVisitor);
+		for (String kl : labelsVisitor.kLabels) {
 			klabels += kl + " ";
 		}
 		klabels = klabels.trim();
 		if (!klabels.equals(""))
-			klabels = "ops " + klabels + " : -> KLabel .\n";
+			klabels = "  ops " + klabels + " : -> KLabel .\n";
 
+		// cellLabels visitor
+		String cellLabels = "";
+		CellLabelsVisitor cellLabelsVisitor = new CellLabelsVisitor();
+		this.accept(cellLabelsVisitor);
+		for (String cellLabel : cellLabelsVisitor.cellLabels) {
+			cellLabels += cellLabel + " ";
+		}
+		cellLabels = cellLabels.trim();
+		if (!cellLabels.equals(""))
+			cellLabels = "  ops " + cellLabels + " : -> CellLabel .\n";
+
+		// sorts & automatic subsortation to K
 		String sorts = "";
 		for (String s : MaudeHelper.declaredSorts)
 			if (!MaudeHelper.basicSorts.contains(s))
 				sorts += s + " ";
 		sorts = sorts.trim();
 		if (!sorts.equals(""))
-			sorts = "sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
+			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
 
-		return "mod " + Constants.SHARED + " is\n  including K .\n  " + klabels
-				+ "  \n  " + sorts + "\nendm\n" + content;
+		return "mod " + Constants.SHARED + " is\n  including K .\n" + klabels
+				+ sorts + cellLabels + "\nendm\n" + content;
 	}
 
 	@Override

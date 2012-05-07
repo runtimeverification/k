@@ -75,16 +75,19 @@ public class Syntax extends ModuleItem {
 					String metadata = (p.getMetadata() + " hybrid=()").trim();
 					if (!MaudeHelper.separators.contains(list.separator)) {
 						contents += "op _" + StringUtil.escape(list.separator)
-								+ "_ : K K -> K [prec 120 metadata=\""
+								+ "_ : K K -> K [prec 120 metadata \""
 								+ metadata + "\"] .\n";
 						contents += "op .List`{\"" + list.separator
 								+ "\"`} : -> K .\n";
+						contents += "eq ." + sort + " = .List`{\"" + list.separator
+								+ "\"`} .\n";
 						contents += "eq 'isKResult(.List`{\""
 								+ list.separator
 								+ "\"`}) = true .\nop 'isKResult : -> KLabel [metadata \"generated-label=()\"] .\n";
 						MaudeHelper.separators.add(list.separator);
 					}
 
+					contents += "op ." + sort + " : -> " + sort + " .\n";
 					contents += "subsort " + list.sort + " < K .\n";
 					contents += "op 'is" + list.sort + " : -> KLabel .\n";
 					contents += "eq 'is" + list.sort + "(.List`{\""

@@ -92,4 +92,9 @@ public class Cell extends Term {
 					+ label + ")";
 		return labell + "(" + head + ", " + null + ", " + label + ")";
 	}
+
+	public String getLabel() {
+		return label;
+	}
+	
 }
