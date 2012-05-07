@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import k.utils.FileUtil;
 import k.utils.GlobalSettings;
+import k.utils.KPaths;
 import k.utils.MaudeRun;
 import k.utils.ResourceExtractor;
 import k.utils.Sdf2Table;
@@ -13,8 +14,8 @@ import k.utils.XmlLoader;
 import k3.basic.Definition;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.k2m.main.Kil2Maude;
 import ro.uaic.info.fmse.pp.Preprocessor;
 
 public class FrontEnd {
@@ -112,13 +113,15 @@ public class FrontEnd {
 			// ----------------------------------- preprocessiong steps
 			Preprocessor preprocessor = new Preprocessor();
 			Document preprocessedDef = preprocessor.run(def.getDefAsXML());
-			
+
 			XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Rules   = ");
 
-			String maudified = Kil2Maude.KILFiletoMEL(dotk.getAbsolutePath() + "/def.xml");
+			String maudified = new ro.uaic.info.fmse.k.Definition((Element)preprocessedDef.getFirstChild()).toMaude();
+				
+			//Kil2Maude.KILFiletoMEL();
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
 
@@ -146,19 +149,14 @@ public class FrontEnd {
 			File f = mainFile.getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");
-			
-			String load = "load \"" + Kil2Maude.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
-			
+
+			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
+
 			// load libraries if any
-			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + Kil2Maude.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n"; 
+			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
 			load += maudeLib;
-			
-			String compile = load
-					+ maudified
-					+ " load \""
-					+ Kil2Maude.getKBase(true)
-					+ "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile "
-					+ mainModule
+
+			String compile = load + maudified + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + mainModule
 					+ " transitions \"transition=()\" superheats \"superheat=()\" supercools \"supercool=()\" anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
@@ -219,10 +217,10 @@ public class FrontEnd {
 			String definition = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def.xml");
 			String program = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm.xml");
 
-			System.out.println(Kil2Maude.KILProgram2Ast(definition, program));
-			String pgmMaude = Kil2Maude.KILProgram2Maude(definition, program, defFile);
+			//TODO: System.out.println(Kil2Maude.KILProgram2Ast(definition, program));
+			//TODO: String pgmMaude = Kil2Maude.KILProgram2Maude(definition, program, defFile);
 
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.maude", pgmMaude);
+			//TODO: FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.maude", pgmMaude);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Maudify Program = ");

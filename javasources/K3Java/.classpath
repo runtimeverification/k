@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="lib/commons-cli-1.2-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Kil2Maude"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/KPreprocessor"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JavaClasses"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

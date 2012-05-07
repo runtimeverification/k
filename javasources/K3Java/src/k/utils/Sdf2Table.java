@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import ro.uaic.info.fmse.k2m.main.Kil2Maude;
-
 public class Sdf2Table {
 
 	public static void run_sdf2table(File startDir, String mainFile) {
@@ -13,7 +11,7 @@ public class Sdf2Table {
 
 		try {
 			File f = null;
-			String basePath = Kil2Maude.getKBase(false);
+			String basePath = KPaths.getKBase(false);
 
 			if (isUnixOS()) {
 				f = new File(basePath + "/bin/native/linux/sdf2table");

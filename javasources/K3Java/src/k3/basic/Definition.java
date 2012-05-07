@@ -17,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import k.utils.Error;
 import k.utils.FileUtil;
 import k.utils.GlobalSettings;
+import k.utils.KPaths;
 import k.utils.StringUtil;
 import k.utils.Tag;
 import k.utils.XmlLoader;
@@ -29,8 +30,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import ro.uaic.info.fmse.k2m.main.Kil2Maude;
 
 public class Definition implements Cloneable {
 	private List<Module> modules;
@@ -121,7 +120,7 @@ public class Definition implements Cloneable {
 		file = new File(filepath);
 
 		if (!file.exists()) {
-			file = new File(Kil2Maude.getKBase(false) + "/include/" + inclFile);
+			file = new File(KPaths.getKBase(false) + "/include/" + inclFile);
 			if (file.exists()) {
 				return new File(file.getCanonicalPath());
 			}
