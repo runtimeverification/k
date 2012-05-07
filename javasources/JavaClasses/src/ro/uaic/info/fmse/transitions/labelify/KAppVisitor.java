@@ -18,13 +18,15 @@ public class KAppVisitor extends Visitor {
 
 	@Override
 	public void visit(ASTNode astNode) {
+		String l = astNode.getLocation();
+		String f = astNode.getFilename();
 		if (astNode instanceof TermCons) {
 			TermCons tc = (TermCons) astNode;
 			Production ppp = DefinitionHelper.conses.get("\"" + tc.getCons() + "\"");
 			String klabel = ppp.getLabel();
 			Term tempChildren;
 			if (tc.getContents().size() == 0)
-				tempChildren = new Empty(tc.getLocation(), tc.getFilename(), "List{K}");
+				tempChildren = new Empty(l, f, "List{K}");
 			else if (tc.getContents().size() == 1) {
 				KAppVisitor tempKapp = new KAppVisitor();
 				Term trm = tc.getContents().get(0);
@@ -37,12 +39,10 @@ public class KAppVisitor extends Visitor {
 					term.accept(tempKapp);
 					tempChildren = tempKapp.kappTerm;
 				}
-				tempChildren = new ListOfK(tc.getLocation(), tc.getFilename(), tempChildrenList);
+				tempChildren = new ListOfK(l, f, tempChildrenList);
 			}
-			kappTerm = new KApp(tc.getLocation(), tc.getFilename(), new Constant(tc.getLocation(), tc.getFilename(), "KLabel", klabel), tempChildren);
+			kappTerm = new KApp(l, f, new Constant(l, f, "KLabel", klabel), tempChildren);
 		} else {
-			String l = astNode.getLocation();
-			String f = astNode.getFilename();
 			kappTerm = new KApp(l, f, new Constant(l, f, "KLabel", "NAN"), new Empty(l, f, "List{K}"));
 		}
 	}
