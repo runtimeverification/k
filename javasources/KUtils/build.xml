@@ -7,6 +7,7 @@
 <project basedir="." default="build" name="KUtils">
     <property environment="env"/>
     <property name="ConfigurationAbstraction.location" value="../ConfigurationAbstraction"/>
+    <property name="JavaClasses.location" value="../JavaClasses"/>
     <property name="KPreprocessor.location" value="../KPreprocessor"/>
     <property name="Kil2Maude.location" value="../Kil2Maude"/>
     <property name="debuglevel" value="source,lines,vars"/>
@@ -40,6 +41,8 @@
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
         <ant antfile="build.xml" dir="${ConfigurationAbstraction.location}" inheritAll="false" target="clean"/>
         <ant antfile="build.xml" dir="${ConfigurationAbstraction.location}" inheritAll="false" target="build"/>
+        <ant antfile="build.xml" dir="${JavaClasses.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${JavaClasses.location}" inheritAll="false" target="build"/>
         <ant antfile="build.xml" dir="${KPreprocessor.location}" inheritAll="false" target="clean"/>
         <ant antfile="build.xml" dir="${KPreprocessor.location}" inheritAll="false" target="build"/>
         <ant antfile="build.xml" dir="${Kil2Maude.location}" inheritAll="false" target="clean"/>
