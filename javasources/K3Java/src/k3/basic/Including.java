@@ -6,7 +6,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 public class Including extends Sentence {
-	private static final long serialVersionUID = 1L;
 	String includedModuleName;
 	
 	public Including clone() {
@@ -23,7 +22,7 @@ public class Including extends Sentence {
 
 	public Including(Node node) {
 		NamedNodeMap attr = node.getAttributes();
-		Node item = attr.getNamedItem(Tag.value);
+		Node item = attr.getNamedItem(Tag.name);
 		includedModuleName = item.getNodeValue();
 	}
 

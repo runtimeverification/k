@@ -10,10 +10,14 @@ public abstract class ASTNode implements IMaude, IXML, Visitable {
 	protected String location;
 	protected String filename;
 
+	public ASTNode(String location, String filename) {
+		this.location = location;
+		this.filename = filename;
+	}
+
 	public ASTNode(Element element) {
 		if (element != null) {
-			this.filename = element
-					.getAttribute(Constants.FILENAME_filename_ATTR);
+			this.filename = element.getAttribute(Constants.FILENAME_filename_ATTR);
 			this.location = element.getAttribute(Constants.LOC_loc_ATTR);
 		}
 	}
@@ -24,6 +28,22 @@ public abstract class ASTNode implements IMaude, IXML, Visitable {
 		location = location.replaceFirst("\\(", "(" + this.filename + ":");
 		return location;
 	}
-	
+
 	public abstract void accept(Visitor visitor);
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
 }

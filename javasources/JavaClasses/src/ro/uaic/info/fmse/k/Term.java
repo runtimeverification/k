@@ -7,6 +7,10 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.parsing.ASTNode;
 
 public abstract class Term extends ASTNode {
+	public Term(String location, String filename) {
+		super(location, filename);
+	}
+
 	public Term(Element element) {
 		super(element);
 	}

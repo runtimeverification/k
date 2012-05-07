@@ -8,6 +8,11 @@ import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 public class Empty extends Term {
 	String sort;
 
+	public Empty(String location, String filename, String sort) {
+		super(location, filename);
+		this.sort = sort;
+	}
+	
 	public Empty(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);

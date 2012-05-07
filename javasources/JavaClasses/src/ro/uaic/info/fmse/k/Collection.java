@@ -1,5 +1,6 @@
 package ro.uaic.info.fmse.k;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,6 +13,12 @@ import ro.uaic.info.fmse.utils.xml.XML;
 public abstract class Collection extends Term {
 
 	protected java.util.List<Term> contents;
+
+	public Collection(String location, String filename, java.util.List<Term> contents) {
+		super(location, filename);
+		this.contents = new ArrayList<Term>();
+		this.contents.addAll(contents);
+	}
 
 	public Collection(Element element) {
 		super(element);

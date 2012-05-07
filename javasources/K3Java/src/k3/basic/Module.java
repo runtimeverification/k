@@ -16,13 +16,13 @@ public class Module extends Term implements java.io.Serializable, Cloneable {
 	public Module clone() {
 		Module m = new Module();
 		m.copy(this);
-		
+
 		m.moduleName = moduleName;
 		m.type = type;
 		for (String incl : includes) {
 			m.includes.add(incl);
 		}
-		
+
 		for (Sentence s : sentences) {
 			m.sentences.add(s.clone());
 		}
@@ -77,12 +77,9 @@ public class Module extends Term implements java.io.Serializable, Cloneable {
 			} else if (children.item(i).getNodeName().equals(Tag.configuration)) {
 				sentences.add(new Configuration(children.item(i), filename));
 			} else if (children.item(i).getNodeName().equals(Tag.imports)) {
-				NodeList importedModules = ((Element) children.item(i)).getElementsByTagName(Tag.module_import);
-				for (int j = 0; j < importedModules.getLength(); j++) {
-					Including incl = new Including(importedModules.item(j));
-					includes.add(incl.getIncludedModuleName());
-					sentences.add(incl);
-				}
+				Including incl = new Including(children.item(i));
+				includes.add(incl.getIncludedModuleName());
+				sentences.add(incl);
 			}
 		}
 	}

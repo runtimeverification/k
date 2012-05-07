@@ -9,6 +9,12 @@ import ro.uaic.info.fmse.utils.xml.XML;
 public class KApp extends Term {
 	Term label;
 	Term child;
+	
+	public KApp(String location, String filename, Term label, Term child) {
+		super(location, filename);
+		this.label = label;
+		this.child = child;
+	}
 
 	public KApp(Element element) {
 		super(element);

@@ -3,12 +3,11 @@ package k.utils;
 public class Tag {
 
 	public final static String require = "require";
-	public final static String imports = "imports";
+	public final static String imports = "import";
 	public final static String value = "value";
 	public final static String maxSort = "maxSort";
 	public final static String str = "str";
 	public final static String module = "module";
-	public final static String module_import = "moduleImport";
 	public final static String tokens = "tokens";
 	public final static String terminal = "terminal";
 	public final static String separator = "separator";
@@ -36,6 +35,7 @@ public class Tag {
 	public final static String color = "color";
 	public final static String tag = "tag";
 	public final static String key = "key";
+	public final static String name = "name";
 	public final static String label = "label";
 	public final static String listSeparator = "separator";
 	public final static String interfaceTag = "interface";

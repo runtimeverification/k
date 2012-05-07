@@ -1,7 +1,7 @@
 require "k-prelude.k"
 
 module IMP-SYNTAX
-  imports BUILTIN-SYNTAX-HOOKS
+  imports BUILTIN-SYNTAX-HOOKS 
   
   syntax AExp ::= Int | Id
   				| AExp "/" AExp [left, strict]

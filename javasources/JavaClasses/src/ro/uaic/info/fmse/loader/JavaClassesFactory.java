@@ -34,8 +34,6 @@ public class JavaClassesFactory {
 			return new Constant(element);
 		if (Constants.KAPP.equals(element.getNodeName()))
 			return new KApp(element);
-		if (Constants.LABEL.equals(element.getNodeName()))
-			return null; // TODO: is this still available?
 		if (Constants.LISTOFK.equals(element.getNodeName()))
 			return new ListOfK(element);
 		if (Constants.EMPTY.equals(element.getNodeName()))
@@ -71,7 +69,7 @@ public class JavaClassesFactory {
 		if (Constants.DEFINITION.equals(element.getNodeName()))
 			return new Definition(element);
 
-		System.out.println(">>> " + element.getNodeName() + " <<< - unimplemented yet");
+		System.out.println(">>> " + element.getNodeName() + " <<< - unimplemented yet: JavaClassesFactory");
 		return null;
 	}
 }

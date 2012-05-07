@@ -1,5 +1,4 @@
 require "k-prelude.k"
-require "built-ins.k"
 
 module MODEL
 	
@@ -18,7 +17,7 @@ module MODEL
 endmodule
 
 module OCL-SYNTAX
-	including K
+	imports K
 		
 
 	syntax Object ::= #Id "::" #Id
@@ -68,7 +67,7 @@ module OCL-SYNTAX
 endmodule
 
 module OCL
-  including OCL-SYNTAX
+  imports OCL-SYNTAX
   
   syntax KResult ::= #Int | #Bool | #String | Object | #Float | Collection
   

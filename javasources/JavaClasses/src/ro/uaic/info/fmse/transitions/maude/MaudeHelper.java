@@ -32,6 +32,4 @@ public class MaudeHelper {
 		
 		return basic;
 	}
-	
-	
 }

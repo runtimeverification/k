@@ -9,6 +9,12 @@ public class Constant extends Term {
 	String sort;
 	String value;
 
+	public Constant(String location, String filename, String sort, String value) {
+		super(location, filename);
+		this.sort = sort;
+		this.value = value;
+	}
+
 	public Constant(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);

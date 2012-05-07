@@ -3,6 +3,10 @@ package ro.uaic.info.fmse.k;
 import org.w3c.dom.Element;
 
 public class ListOfK extends Collection {
+	public ListOfK(String location, String filename, java.util.List<Term> contents) {
+		super(location, filename, contents);
+	}
+
 	public ListOfK(Element element) {
 		super(element);
 	}

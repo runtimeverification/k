@@ -1,4 +1,4 @@
-require "../k-prelude.k"
+require "k-prelude.k"
 
 module SIMPLE-UNTYPED-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS

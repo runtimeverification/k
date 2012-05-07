@@ -40,4 +40,20 @@ public class UserList extends ProductionItem {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
+	public String getSort() {
+		return sort;
+	}
+
+	public void setSort(String sort) {
+		this.sort = sort;
+	}
+
+	public String getSeparator() {
+		return separator;
+	}
+
+	public void setSeparator(String separator) {
+		this.separator = separator;
+	}
 }
