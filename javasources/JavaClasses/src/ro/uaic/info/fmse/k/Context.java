@@ -2,6 +2,8 @@ package ro.uaic.info.fmse.k;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
@@ -52,5 +54,12 @@ public class Context extends Sentence {
 	@Override
 	public String toMaude() {
 		return "mb context " + super.toMaude();
+	}
+
+	@Override
+	public Element toXml(Document doc) {
+		Element context = doc.createElement(Constants.CONTEXT);
+		context.setTextContent("notimplementedyet");
+		return context;
 	}
 }

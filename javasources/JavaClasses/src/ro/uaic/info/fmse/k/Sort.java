@@ -1,11 +1,11 @@
 package ro.uaic.info.fmse.k;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
-import ro.uaic.info.fmse.parsing.ASTNode;
 
-public class Sort extends ASTNode implements ProductionItem {
+public class Sort extends ProductionItem {
 
 	String sort;
 
@@ -26,6 +26,15 @@ public class Sort extends ASTNode implements ProductionItem {
 
 	@Override
 	public String toMaude() {
+		return sort;
+	}
+
+	@Override
+	public Element toXml(Document doc) {
+		// TODO Auto-generated method stub
+		Element sort = doc.createElement(Constants.SORT);
+		sort.setTextContent(this.sort);
+		
 		return sort;
 	}
 }

@@ -49,6 +49,11 @@ public class Constants {
 	public static final String HOLE = "hole";
 	public static final String LISTITEM = "ListItem";
 	public static final String DEFINITION = "def";
+	public static final String MAINFILE = "mainFile";
+	public static final String MAINMODULE = "mainModule";
+	public static final String MAINSYNTAXMODULE = "mainSyntaxModule";
+	public static final String NAME = "name";
+	public static final String PREDICATE = "predicate";
 
 	//Attributes constants
 	public static final String VALUE_value_ATTR = "value";
@@ -65,9 +70,6 @@ public class Constants {
 	public static final String LABEL_label_ATTR = "label";
 	public static final String MULTIPLICITY_multiplicity_ATTR = "multiplicity";
 	public static final String ELLIPSES_ellipses_ATTR = "ellipses";
-	public static final String MAINFILE = "mainFile";
-	public static final String MAINMODULE = "mainModule";
-	public static final String MAINSYNTAXMODULE = "mainSyntaxModule";
 
 
 }

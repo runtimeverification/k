@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
@@ -64,7 +66,7 @@ public class Production extends ASTNode {
 	public String toMaude() {
 		String content = "";
 		for (ProductionItem pi : items) {
-			if (pi instanceof Sort)
+			if (pi.getType().equals(ProductionType.SORT))
 				content += pi + " ";
 		}
 
@@ -91,5 +93,20 @@ public class Production extends ASTNode {
 		attributes += " location=" + getMaudeLocation();
 
 		return attributes.trim();
+	}
+
+	@Override
+	public Element toXml(Document doc) {
+		
+		Element production = doc.createElement(Constants.PRODUCTION);
+		
+		for(ProductionItem pi : items)
+			if (pi.toXml(doc) != null)
+			production.appendChild(pi.toXml(doc));
+		
+		Element attributes = doc.createElement(Constants.ATTRIBUTES);
+		production.appendChild(attributes);
+		
+		return production;
 	}
 }

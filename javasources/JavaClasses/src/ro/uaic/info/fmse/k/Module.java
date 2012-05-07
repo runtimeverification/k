@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.k;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
@@ -45,5 +46,19 @@ public class Module extends DefinitionItem {
 			content += mi.toMaude() + "\n";
 		
 		return "mod " + name + " is\n" + content + "\nendm";
+	}
+
+	@Override
+	public Element toXml(Document doc) {
+		Element module = doc.createElement(Constants.MODULE);
+		
+		Element name = doc.createElement(Constants.NAME);
+		name.setTextContent(this.name);
+		module.appendChild(name);
+		
+		for(ModuleItem mi : items)
+			module.appendChild(mi.toXml(doc));
+				
+		return module;
 	}
 }

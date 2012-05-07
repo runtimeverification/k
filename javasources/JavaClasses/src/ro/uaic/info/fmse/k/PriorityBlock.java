@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.k;
 
 import java.util.LinkedList;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
@@ -42,6 +43,16 @@ public class PriorityBlock extends ASTNode{
 	@Override
 	public String toMaude() {
 		return "production";
+	}
+
+	@Override
+	public Element toXml(Document doc) {
+		Element priority = doc.createElement(Constants.PRIORITY);
+		
+		for(Production p : productions)
+			priority.appendChild(p.toXml(doc));
+		
+		return priority;
 	}
 	
 }

@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.k;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
@@ -91,5 +92,16 @@ public class Syntax extends ModuleItem {
 		}
 
 		return contents;
+	}
+
+	@Override
+	public Element toXml(Document doc) {
+		Element syntax = doc.createElement(Constants.SYNTAX);
+		
+		syntax.appendChild(sort.toXml(doc));
+		for (PriorityBlock pb : priorityBlocks)
+			syntax.appendChild(pb.toXml(doc));
+		
+		return syntax;
 	}
 }

@@ -4,8 +4,9 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.transitions.maude.IMaude;
+import ro.uaic.info.fmse.transitions.xml.IXML;
 
-public abstract class ASTNode implements IMaude{
+public abstract class ASTNode implements IMaude, IXML{
 	protected String location;
 	protected String filename;
 
