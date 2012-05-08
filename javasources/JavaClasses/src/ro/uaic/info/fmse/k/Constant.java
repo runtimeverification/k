@@ -9,6 +9,10 @@ public class Constant extends Term {
 	String sort;
 	String value;
 
+	public Constant(String location, String filename) {
+		super(location, filename);
+	}
+
 	public Constant(String location, String filename, String sort, String value) {
 		super(location, filename);
 		this.sort = sort;
@@ -36,6 +40,14 @@ public class Constant extends Term {
 
 	public String getValue() {
 		return value;
+	}
+
+	public void setSort(String sort) {
+		this.sort = sort;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 	public void accept(Visitor visitor) {

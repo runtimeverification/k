@@ -5,6 +5,9 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.parsing.ASTNode;
 
 public abstract class ModuleItem extends ASTNode {
+	public ModuleItem(String location, String filename) {
+		super(location, filename);
+	}
 
 	public ModuleItem(Element element) {
 		super(element);

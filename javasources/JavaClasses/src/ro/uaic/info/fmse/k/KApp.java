@@ -9,7 +9,11 @@ import ro.uaic.info.fmse.utils.xml.XML;
 public class KApp extends Term {
 	Term label;
 	Term child;
-	
+
+	public KApp(String location, String filename) {
+		super(location, filename);
+	}
+
 	public KApp(String location, String filename, Term label, Term child) {
 		super(location, filename);
 		this.label = label;
@@ -40,5 +44,21 @@ public class KApp extends Term {
 		visitor.visit(this);
 		label.accept(visitor);
 		child.accept(visitor);
+	}
+
+	public Term getLabel() {
+		return label;
+	}
+
+	public void setLabel(Term label) {
+		this.label = label;
+	}
+
+	public Term getChild() {
+		return child;
+	}
+
+	public void setChild(Term child) {
+		this.child = child;
 	}
 }

@@ -9,20 +9,22 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.parsing.Visitor;
 
 public abstract class Sentence extends ModuleItem {
-	public Sentence(Element element) {
-		super(element);
-		// TODO Auto-generated constructor stub
-	}
-
 	Term body;
 	Term condition = null;
 	Map<String, String> attributes;
 
+	public Sentence(String location, String filename) {
+		super(location, filename);
+	}
+
+	public Sentence(Element element) {
+		super(element);
+	}
+
 	@Override
 	public String toMaude() {
 		if (body != null)
-			return body.toMaude() + " : KSentence [metadata \"" + getMetadata()
-					+ "\"] .";
+			return body.toMaude() + " : KSentence [metadata \"" + getMetadata() + "\"] .";
 		return " : KSentence [metadata \"" + getMetadata() + "\"] .";
 	}
 
@@ -35,8 +37,7 @@ public abstract class Sentence extends ModuleItem {
 		String attributes = "";
 		for (Entry<String, String> entry : this.attributes.entrySet()) {
 			if (!reject.contains(entry.getKey()))
-				attributes += " " + entry.getKey() + "=(" + entry.getValue()
-						+ ")";
+				attributes += " " + entry.getKey() + "=(" + entry.getValue() + ")";
 		}
 
 		// append locations too
@@ -51,5 +52,29 @@ public abstract class Sentence extends ModuleItem {
 		body.accept(visitor);
 		if (condition != null)
 			condition.accept(visitor);
+	}
+
+	public Term getBody() {
+		return body;
+	}
+
+	public void setBody(Term body) {
+		this.body = body;
+	}
+
+	public Term getCondition() {
+		return condition;
+	}
+
+	public void setCondition(Term condition) {
+		this.condition = condition;
+	}
+
+	public Map<String, String> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(Map<String, String> attributes) {
+		this.attributes = attributes;
 	}
 }

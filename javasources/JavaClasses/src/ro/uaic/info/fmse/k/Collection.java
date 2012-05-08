@@ -1,6 +1,5 @@
 package ro.uaic.info.fmse.k;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,10 +13,8 @@ public abstract class Collection extends Term {
 
 	protected java.util.List<Term> contents;
 
-	public Collection(String location, String filename, java.util.List<Term> contents) {
+	public Collection(String location, String filename) {
 		super(location, filename);
-		this.contents = new ArrayList<Term>();
-		this.contents.addAll(contents);
 	}
 
 	public Collection(Element element) {
@@ -56,5 +53,13 @@ public abstract class Collection extends Term {
 		visitor.visit(this);
 		for (Term di : contents)
 			di.accept(visitor);
+	}
+
+	public java.util.List<Term> getContents() {
+		return contents;
+	}
+
+	public void setContents(java.util.List<Term> contents) {
+		this.contents = contents;
 	}
 }

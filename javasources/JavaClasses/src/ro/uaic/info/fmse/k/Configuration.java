@@ -12,10 +12,13 @@ import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Configuration extends Sentence {
 
+	public Configuration(String location, String filename) {
+		super(location, filename);
+	}
+
 	public Configuration(Element element) {
 		super(element);
-		this.body = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(
-				element).get(0));
+		this.body = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
 		this.attributes = new HashMap<String, String>();
 	}
 
