@@ -86,8 +86,9 @@ public class Syntax extends ModuleItem {
 					contents += "op ." + sort + " : -> " + sort + " .\n";
 					contents += "subsort " + list.sort + " < K .\n";
 					contents += "op 'is" + list.sort + " : -> KLabel .\n";
-					contents += "eq 'is" + list.sort + "(.List`{\"" + list.separator + "\"`}) = true .\n";
-					contents += "eq 'is" + list.sort + "(_" + StringUtil.escape(list.separator) + "_( X:" + sort + ", L:" + list.sort + " )) = true .\n";
+					contents += "op 'is" + sort + " : -> KLabel .\n";
+					contents += "eq 'is" + sort + "(.List`{\"" + list.separator + "\"`}) = true .\n";
+					contents += "eq 'is" + sort + "(_" + StringUtil.escape(list.separator) + "_( X:" + list.sort + ", L:" + sort + " )) = true .\n";
 				} else {
 					String metadata = p.getMetadata();
 

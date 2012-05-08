@@ -2,7 +2,16 @@ package ro.uaic.info.fmse.transitions.labelify;
 
 import java.util.ArrayList;
 
-import ro.uaic.info.fmse.k.*;
+import ro.uaic.info.fmse.k.Bag;
+import ro.uaic.info.fmse.k.BagItem;
+import ro.uaic.info.fmse.k.Configuration;
+import ro.uaic.info.fmse.k.Constant;
+import ro.uaic.info.fmse.k.Empty;
+import ro.uaic.info.fmse.k.KApp;
+import ro.uaic.info.fmse.k.ListOfK;
+import ro.uaic.info.fmse.k.Production;
+import ro.uaic.info.fmse.k.Term;
+import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
@@ -79,10 +88,8 @@ public class KAppFactory {
 			Empty emp = (Empty) astNode;
 			if (MaudeHelper.basicSorts.contains(emp.getSort()))
 				return emp;
-			// search for the separator for the empty list
-			String separator = DefinitionHelper.listSeparators.get(emp.getSort());
-			
-			Constant cst = new Constant(l,f, "KLabel", "'.List`{\"" + separator + "\"`}");
+
+			Constant cst = new Constant(l, f, "KLabel", "'." + emp.getSort() + "");
 			return new KApp(l, f, cst, empty);
 		}
 

@@ -123,9 +123,9 @@ public class FrontEnd {
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Rules   = ");
 
-			String maudified = new ro.uaic.info.fmse.k.Definition((Element)preprocessedDef.getFirstChild()).toMaude();
-				
-			//Kil2Maude.KILFiletoMEL();
+			String maudified = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild()).toMaude();
+
+			// Kil2Maude.KILFiletoMEL();
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
 
@@ -155,7 +155,7 @@ public class FrontEnd {
 			File dotk = new File(f.getParent() + "/.k");
 
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
-//			load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";
+			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";
 
 			// load libraries if any
 			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
@@ -221,7 +221,7 @@ public class FrontEnd {
 
 			String definition = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def.xml");
 			String program = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm.xml");
-			
+
 			Document doc = ro.uaic.info.fmse.utils.xml.XML.getDocument(definition);
 			ASTNode out = JavaClassesFactory.getTerm(doc.getDocumentElement());
 
@@ -232,7 +232,7 @@ public class FrontEnd {
 			String kast = kapp.toMaude();
 
 			System.out.println(kast);
-			
+
 			String ast;
 			ast = "load ../" + defFile.getName().substring(0, defFile.getName().length() - 2) + "-compiled.maude\n";
 			ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.List{K})) , (\n\n";
