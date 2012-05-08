@@ -38,7 +38,7 @@ public class Cell extends Term {
 		attributes = new HashMap<String, String>();
 
 		for (int i = 0; i < its.getLength(); i++) {
-			if (!its.item(i).getNodeName().equals(Constants.FILENAME_filename_ATTR) && !its.item(i).getNodeName().equals(Constants.LOC_loc_ATTR) && !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
+			if (!its.item(i).getNodeName().equals(Constants.FILENAME_filename_ATTR) && !its.item(i).getNodeName().equals(Constants.LOC_loc_ATTR) //&& !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
 					&& !its.item(i).getNodeName().equals(Constants.SORT_sort_ATTR) && !its.item(i).getNodeName().equals(Constants.LABEL_label_ATTR)) {
 				attributes.put(its.item(i).getNodeName(), its.item(i).getNodeValue());
 			}
