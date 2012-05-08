@@ -76,6 +76,10 @@ public class Production extends ASTNode {
 	}
 
 	public String getLabel() {
+		return attributes.get("prefixlabel");
+	}
+
+	public String getKLabel() {
 		return attributes.get("klabel");
 	}
 
@@ -84,6 +88,7 @@ public class Production extends ASTNode {
 		reject.add("cons");
 		reject.add("klabel");
 		reject.add("latex");
+		reject.add("prefixlabel");
 
 		String attributes = "";
 		for (Entry<String, String> entry : this.attributes.entrySet()) {

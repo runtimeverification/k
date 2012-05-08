@@ -21,6 +21,10 @@ public class Main {
 			GlobalSettings.verbose = true;
 		}
 
+		if (cmd.hasOption("nofilename")) {
+			GlobalSettings.noFilename = true;
+		}
+
 		// set lib if any
 		if (cmd.hasOption("lib")) {
 			GlobalSettings.lib = cmd.getOptionValue("lib");

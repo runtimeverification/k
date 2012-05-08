@@ -30,6 +30,11 @@ public class OptionsParser {
 		verb.addOption(help);
 		verb.addOption(verbose);
 
+		// verbose and help
+		OptionGroup nofile = new OptionGroup();
+		Option nofileopt = new Option("nofile", "nofilename", false, "don't include the long filenames in the XML.");
+		nofile.addOption(nofileopt);
+
 		// latex
 		OptionGroup tex = new OptionGroup();
 		// Option pdf = new Option("pdf", false, "generate pdf from definition");
@@ -76,6 +81,7 @@ public class OptionsParser {
 		options.addOptionGroup(tex);
 		options.addOptionGroup(tex2);
 		options.addOptionGroup(libGroup);
+		options.addOptionGroup(nofile);
 	}
 
 	public CommandLine parse(String[] cmd) {

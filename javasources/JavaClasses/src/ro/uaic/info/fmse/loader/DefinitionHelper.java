@@ -6,4 +6,5 @@ import ro.uaic.info.fmse.k.Production;
 
 public class DefinitionHelper {
 	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
+	public static java.util.Map<String, String> listSeparators = new HashMap<String, String>();
 }

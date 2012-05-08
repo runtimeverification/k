@@ -16,7 +16,11 @@ import k3.basic.Definition;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.pp.Preprocessor;
+import ro.uaic.info.fmse.tests.XML;
+import ro.uaic.info.fmse.transitions.labelify.KAppFactory;
 
 public class FrontEnd {
 
@@ -217,11 +221,25 @@ public class FrontEnd {
 
 			String definition = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def.xml");
 			String program = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm.xml");
+			
+			Document doc = ro.uaic.info.fmse.utils.xml.XML.getDocument(definition);
+			ASTNode out = JavaClassesFactory.getTerm(doc.getDocumentElement());
 
-			//TODO: System.out.println(Kil2Maude.KILProgram2Ast(definition, program));
-			//TODO: String pgmMaude = Kil2Maude.KILProgram2Maude(definition, program, defFile);
+			Document doc2 = ro.uaic.info.fmse.utils.xml.XML.getDocument(program);
+			out = JavaClassesFactory.getTerm((Element) doc2.getDocumentElement().getFirstChild().getNextSibling());
 
-			//TODO: FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.maude", pgmMaude);
+			ASTNode kapp = KAppFactory.getTerm(out);
+			String kast = kapp.toMaude();
+
+			System.out.println(kast);
+			
+			String ast;
+			ast = "load ../" + defFile.getName().substring(0, defFile.getName().length() - 2) + "-compiled.maude\n";
+			ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.List{K})) , (\n\n";
+			ast += kast;
+			ast += "\n\n))),(.).Map))  .\n quit\n";
+
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.maude", ast);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Maudify Program = ");

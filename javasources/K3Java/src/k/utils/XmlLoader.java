@@ -66,7 +66,7 @@ public class XmlLoader {
 	public static void reportErrors(Document doc) {
 		// report any error that xml parser returns
 		NodeList nl = doc.getElementsByTagName("error");
-		
+
 		if (nl.getLength() > 0) {
 			Node nodeElem = nl.item(0);
 			String attr = nodeElem.getAttributes().getNamedItem(Tag.value).getNodeValue();
@@ -133,7 +133,8 @@ public class XmlLoader {
 			if (item != null) {
 				Element e = (Element) node;
 				// TODO: don't add filename during testing, it takes too much space
-				e.setAttribute("filename", filename);
+				if (!GlobalSettings.noFilename)
+					e.setAttribute("filename", filename);
 			}
 		}
 		NodeList list = node.getChildNodes();

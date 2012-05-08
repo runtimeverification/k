@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/KPreprocessor"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JavaClasses"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/KUtils"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

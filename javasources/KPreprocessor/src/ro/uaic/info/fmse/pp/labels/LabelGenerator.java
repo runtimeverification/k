@@ -13,6 +13,7 @@ public class LabelGenerator {
 	private static final String ATTRIBUTES = "attributes";
 	private static final String TAG = "tag";
 	private static final String KLABEL = "klabel";
+	private static final String PREFIXLABEL = "prefixlabel";
 	private static final String KEY = "key";
 	private static final String SORT = "sort";
 	private static final String TERMINAL = "terminal";
@@ -46,34 +47,37 @@ public class LabelGenerator {
 						declared = true;
 				}
 			}
-			
-			
-			if (!declared) {
-				// compute the production label by concatenating "_" instead
-				// of sorts and the terminal values.
 
-				String generatedLabel = StringUtil.escape(computeKLabel(production));
-				if (!generatedLabel.equals("")) { // subsorts are ignored
-					// append a new tag element with the generated cons
-					Element element = doc.createElement(TAG);
+			String generatedLabel = StringUtil.escape(computeKLabel(production));
+			if (!generatedLabel.equals("")) { // subsorts are ignored
+				// append a new tag element with the generated cons
+				Element element = doc.createElement(TAG);
+				element.setAttribute(KEY, PREFIXLABEL);
+				element.setAttribute(VALUE, generatedLabel);
+				element.setAttribute(LOCATION, "generated");
 
-					// set it up
-					element.setAttribute(KEY, KLABEL);
-					element.setAttribute(VALUE, generatedLabel);
-					element.setAttribute(LOCATION, "generated");
+				if (attribute == null) {
+					attribute = doc.createElement(ATTRIBUTES);
+					production.appendChild(attribute);
+				}
+				attribute.appendChild(element);
+				if (!declared) {
+					// compute the production label by concatenating "_" instead
+					// of sorts and the terminal values.
 
-					// append it as a child of attribute
-					if (attribute == null)
-					{
-						attribute = doc.createElement(ATTRIBUTES);
-						production.appendChild(attribute);
+					if (!generatedLabel.equals("")) { // subsorts are ignored
+						// append a new tag element with the generated cons
+						element = doc.createElement(TAG);
+						element.setAttribute(KEY, KLABEL);
+						element.setAttribute(VALUE, "'" + generatedLabel);
+						element.setAttribute(LOCATION, "generated");
+						// append it as a child of attribute
+						attribute.appendChild(element);
+					} else {
+						production.setAttribute("isSubsort", "true");
 					}
-					attribute.appendChild(element);
-				} else {
-					production.setAttribute("isSubsort", "true");
 				}
 			}
-
 		}
 
 		return doc;
@@ -91,8 +95,7 @@ public class LabelGenerator {
 					maudeLabel += "_";
 					sortNo++;
 				} else if (children.item(j).getNodeName().equals(TERMINAL)) {
-					maudeLabel += ((Element) children.item(j))
-							.getAttribute(VALUE);
+					maudeLabel += ((Element) children.item(j)).getAttribute(VALUE);
 					terminalNo++;
 				} else if (children.item(j).getNodeName().equals(USERLIST)) {
 					Element ulist = (Element) children.item(j);
