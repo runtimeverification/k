@@ -106,6 +106,6 @@ public class LabelGenerator {
 		if (sortNo == 1 && terminalNo == 0)
 			return "";
 
-		return "'" + maudeLabel;
+		return maudeLabel;
 	}
 }
