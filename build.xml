@@ -66,4 +66,15 @@
 		<echo message="You must build the project before you can release it." />
 	</target>
 
+
+	<property location="dist/examples" name="examples"/>
+	<property location="dist/bin/kompile" name="kompile"/>
+
+	<target name="compile">
+	        <exec executable="${kompile}">
+		    <arg value="${examples}/imp/imp.k"/>
+		</exec>
+	</target>
+
+
 </project>
