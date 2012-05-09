@@ -1,6 +1,8 @@
 require /modules/unification
 
 module LOGIK-SYNTAX
+  syntax Id ::= "fail"
+
   syntax Literal ::=  Id 
                    | Id "(" Literals ")" [prec 0]
                    | "[" Literals "]"
@@ -35,17 +37,26 @@ module LOGIK-SEMANTICS
     <spec type="Map">
       <predicate multiplicity="*">
         <name type="Key">
-          .K
+          ""
         </name>
         <clauses>
           .List
         </clauses>
       </blocks>
     </program>
+    <bstack>
+      .List
+    </bstack>
+    <current>
+      <alternatives multiplicity="?">
+         .List
+      </alternatives>
+    </current>
     <k>
       $PGM:K
     </k>
     <nextVar> 0 </nextVar>
+    <input stream="stdin"> .List </input>
    </T>
    <solution stream="stdout"> .List </solution>
 
@@ -62,22 +73,38 @@ module LOGIK-SEMANTICS
 
 //@ Find a clause with the same name and generate a fresh version of it
   rule <k> (.K => alpha(Clause)) 
-          ~> (_`(_`)(X:Id,Args:Literals),_:Literals) </k> 
-      <clauses>... BagItem(Clause) ...</clauses>
-  where Clause = _`(_`)(X,Params:Literals) :- Body:Literals;
-  [transition]
+          ~> Lits:Literals </k> 
+      <alternatives> (ListItem(Clause:K) => .) ...</alternatives>
+  
+  rule <k>  (. =>  getAlternatives(key(String2Id(X), #(Params))) ~> _`(_`)(X:Id,Params:Literals),Lits:Literals </k>
+       <current> . </current>
+  rule <k> getAlternatives(Key:String) => . ...</k>
+      <predicate> <name> Key </name> <clauses> Clauses:List </clauses> 
+      </predicate>
+      (. => <alternatives> Clauses </alternatives>)
+  rule <k> getAlternatives(Key:String) => . ...</k>
+       (. => <alternatives> .List </alternatives>)
+       <program> Preds:Bag </program>
+  when notBool(Key in keys(Preds))
 
 
 /*@ Unify the goal with the clause head and replace the goal with the clause body.
 */
-  rule Lit:Literal :- Lits:Literals; ~> Lit':Literal,Lits':Literals
-    => unify(Lit,Lit') ~> Lits @ Lits'
+  rule (Lit:Literal :- Lits:Literals; => unify(Lit,Lit') ~> addLiterals(Lits))
+       ~> Lit':Literal,Lits':Literals
 
 //@ if the unification succeeded, apply the mgu to the goals and the solution.
-  rule <k> subst(Eqns:List{K}) ~> Lits:Literals 
-        => applySubst(subst(Eqns),Lits) </k> 
-       <substitution> K':K => applySubst(subst(Eqns),K') </substitution>
+  rule <k> subst(Eqns:List{K}) ~> addLiterals(Lits:Literals) ~> Lit':Literal,Lits':Literals
+        => applySubst(subst(Eqns),Lits @ Lits') </k> 
+       <substitution> K:K => applySubst(subst(Eqns),K) </substitution>
+       (<alternatives> Clauses:List </alternatives> => .)
+       <bstack>... . => ((Lit',Lits'),Clauses,K') </bstack>
 
+
+//@ 
+  rule <k> backtrack(Str:String) => backtrackMessage(Str) ~> Lits </k>
+       <substitution> _ => K </substitution> 
+       <alternatives> _ => Clauses </alternatives>
 
  syntax K ::= "alpha" "(" K ")" | "applyAlpha" "(" K ")"
  
@@ -96,9 +123,31 @@ module LOGIK
 //@ Initialization
 
 //@ Add clauses to the set of clauses
-  rule <k> Clause Pgm:K => Pgm </k>
-       <clauses>... . => BagItem(Clause) ...</clauses>
+  rule <k> Clause Pgm:K 
+        => addClause(key(String2Id(X), #(Params)), Clause) ~> Pgm</k>
   where Clause =  _`(_`)(X:Id,Params:Literals) :- Body:Literals;
+
+  rule <k> addClause(Key:String, Clause:K) ...</k>
+       <predicate> <name> Key </name> 
+          <clauses>... . => ListItem(Clause) </clauses>
+       </predicate>
+
+  rule <k> addClause(Key:String, Clause) ...</k>
+      <definition> Preds:Bag 
+         (. => <predicate> <name> Key </name> 
+                 <clauses> ListItem(K) </clauses>
+               </predicate>)
+      </definition>
+
+  syntax Int ::= "#" "(" Literals ")" [function]
+  define #() => 0
+  define #(L:Literal,Lits:Literals) => 1 +Int #(Lits)
+   
+  syntax String ::= "key" "(" String "," Int ")" [function]
+  define key(Key:String, Arity:Int) => Key +String "/" +String Int2String(Arity)
+
+  
+
 
 /*@ To preserve the variables in the query we generate a substitution mapping 
 them to fresh variables, then we save this substitution as the current solution,
@@ -116,7 +165,16 @@ the solution.
 /*@ printing the solution and disolving the rest. */
 
 //@ Final rule for extracting the solution
-  rule <substitution> K:K </substitution> <k> .Literals => print(K) </k>
+  rule <substitution> K:K </substitution> <k> .Literals => print(K) ~> backtrack(read) </k>
+
+  syntax K ::= "backtrack" "(" K ")" [strict]
+
+
+  rule backtrack("") => .
+  rule backtrack(";") => fail,.Literals
+
+  rule <k> read => C ...</k>
+       <input> ListItem(C:String) => . ...</input>
 
   rule <T>... <k> .K </k> ...</T> => .
 

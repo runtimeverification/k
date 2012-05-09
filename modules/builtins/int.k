@@ -83,4 +83,8 @@ module INT-HOOKS
   syntax Int ::= Int "^Int" Int [function hook(#INT:_^Int_)]
   syntax Int ::= Int "xorInt" Int [function hook(#INT:_xorInt_)]
   syntax Int ::= "~Int" Int [function hook(#INT:~Int_)]
+
+  syntax Int ::= "Bool2Int" "(" Bool ")"
+  rule Bool2Int(true) => 1
+  rule Bool2Int(false) => 0 [function]
 end module 

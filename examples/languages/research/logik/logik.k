@@ -7,16 +7,16 @@ module LOGIK-SYNTAX
                    | "[" Literals "|" Literal "]"
   syntax Literals ::= List{Literal,","} [prec 60]
 
-  syntax Clause ::=  Literal ";"  [prec 80]
-                  | Literal ":-" Literals ";" [prec 70]
-  syntax Query ::= "?-" Literals ";" [prec 70]
+  syntax Clause ::=  Literal "."  [prec 80]
+                  | Literal ":-" Literals "." [prec 70]
+  syntax Query ::= "?-" Literals "." [prec 70]
   syntax Pgm ::= Clause Pgm [prec 90]
                | Query
 
 /*@ Normalizing the definition. 
 Almost complete --- See additional rule in the semantics module. */
-  macro Lit:Literal; = Lit :-;
-  macro X:Id :- Lits:Literals; = X() :- Lits;
+  macro Lit:Literal. = Lit :-.
+  macro X:Id :- Lits:Literals. = X() :- Lits.
 
   macro [.Literals | L:Literal ] = L
   macro [L:Literal,Lits:Literals] = [L | [Lits]]
@@ -57,13 +57,12 @@ module LOGIK-SEMANTICS
   rule <k> (.K => alpha(Clause)) 
           ~> (_`(_`)(X:Id,Args:Literals),_:Literals) </k> 
       <clauses>... BagItem(Clause) ...</clauses>
-  where Clause = _`(_`)(X,Params:Literals) :- Body:Literals;
+  where Clause = _`(_`)(X,Params:Literals) :- Body:Literals.
   [transition]
 
 
-/*@ Unify the goal with the clause head and replace the goal with the clause body.
-*/
-  rule Lit:Literal :- Lits:Literals; ~> Lit':Literal,Lits':Literals
+/*@ Unify the goal with the clause head and replace the goal with the clause body.  */
+  rule Lit:Literal :- Lits:Literals. ~> Lit':Literal,Lits':Literals
     => unify(Lit,Lit') ~> Lits @ Lits'
 
 //@ if the unification succeeded, apply the mgu to the goals and the solution.
@@ -91,7 +90,7 @@ module LOGIK
 //@ Add clauses to the set of clauses
   rule <k> Clause Pgm:K => Pgm </k>
        <clauses>... . => BagItem(Clause) ...</clauses>
-  where Clause =  _`(_`)(X:Id,Params:Literals) :- Body:Literals;
+  where Clause =  _`(_`)(X:Id,Params:Literals) :- Body:Literals.
 
 /*@ To preserve the variables in the query we generate a substitution mapping 
 them to fresh variables, then we save this substitution as the current solution,
@@ -100,7 +99,7 @@ the solution.
 */
   syntax K ::= initSolution
 
-  rule <k> ?- Lits:Literals; 
+  rule <k> ?- Lits:Literals. 
         => getAlpha(Lits) ~> initSolution ~> applyAlpha(Lits) </k>
 
   rule <k> subst(Eqns:List{K}) ~> (initSolution => .K) ...</k>
