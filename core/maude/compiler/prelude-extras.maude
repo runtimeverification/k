@@ -114,10 +114,16 @@ fmod STRING-EXTRAS is including MAP{String, String} + LIST{String} .
 
   op tokenize : String -> QidList .
   ceq tokenize(S) 
-    = qid(substr(S,0,N)) tokenize(stripSpaces(substr(S, N + 1, length(S))))
+    = tokenize(substr(S,0,N)) tokenize(stripSpaces(substr(S, N + 1, length(S))))
    if N := find(S, " ", 0) . 
   eq tokenize("") = nil .
   eq tokenize(S) = qid(S) [owise] .
+
+  op tokenizeXML : String -> QidList .
+  eq tokenizeXML(S) = tokenize(replaceAll(replace(S, "`",""),("(" |-> " ( ", ")" |-> " ) ", "{" |-> " { ", "}" |-> " } ", "," |-> " , ", "[" |-> " [ ", "]" |-> " ] "))) .
+
+  op qstring : Qid -> String .
+  eq qstring(Q) = replace(string(Q), "`", "") .
 
   op indent : Nat -> QidList .
   eq indent(N) = nil .

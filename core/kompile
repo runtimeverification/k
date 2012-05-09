@@ -1120,11 +1120,29 @@ sub print_header {
     print "\n$starred_line\n$text\n$starred_line\n\n";
 }
 
+
 sub xmlify {
+    
+    my ($format, @modules) = @_;
+  
+    if (@modules == 0)
+    {
+	my $modules_ref = get_all_modules();
+	@modules = @$modules_ref;
+    }
+    
+    foreach(@modules)
+    {
+	if (!exist($_))
+	  {
+	      print "Module $_ doesn't exist in your defintion.\n" if emptyModuleList();
+	      exit(1) if emptyModuleList();
+	  }
+    }
     
 # Assumes $language_file_name is a file name with no extension
 
-    print_header("Generate xml version for module $language_module_name from language definition $language_file_name") if $verbose;
+    print_header("Generate cml version for module $language_module_name from language definition $language_file_name") if $verbose;
 
  
     $_ = run_maude("Getting modules META-MODULE and K-TECHNIQUE ... ",
@@ -1141,7 +1159,8 @@ sub xmlify {
     close FILE;
     print "Temporary modules META-MODULE and K-TECHNIQUE written in $temp_file\n" if $verbose;
 
-   my $xml_output = $_ =
+#    print "@modules\n";
+       my $xml_output = $_ =
 	run_maude("Calling the Maude XML-ifier ... ",
 		  "load \"$k_prelude\"\n",
 		  "load \"$language_file_name\"\n",
@@ -1149,14 +1168,14 @@ sub xmlify {
 		  "load $temp_file\n",
 		  "select META-LEVEL .\n",
                   "select K-WRAPPERS-LABELS .\n",
-		  "select $language_module_name .\n",
+		  map("select $_ .\n", @modules),
 		  "set show advisories on .\n",
 		  "load \"$k_to_xml\"\n",
 		  "--- set print attribute on .\n",
                   "--- red xmlPrint('$language_module_name,'$xmlTo) .\n",
                   "--- quit\n",
 		  "loop xml-print .\n",
-		  "(print $language_module_name $xmlTo .)\n",
+		  map("(print $_ .)\n", @modules),
 		  "quit\n");
     
 
@@ -1172,6 +1191,7 @@ sub xmlify {
 	print FILE "</def>\n";
 	close FILE;
 }
+
 
 sub latexify {
     

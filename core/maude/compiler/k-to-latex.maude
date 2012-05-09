@@ -221,7 +221,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaLatexPrint(U, (empty).Printables) = nil . 
 
   var NeTl : NeTermList .  var C : Constant . var Q : Qid . vars T1 T2 : Term .
-  var V : Variable .
+  var V : Variable .  var Tl : TermList .
   op printTerm : Module Term -> QidList .
   op printTermL : Module NeTermList -> QidList .
   eq printTermL(U,(T,NeTl)) = printTerm(U,T) '`, printTermL(U,NeTl) .
@@ -244,9 +244,12 @@ var Eq : Equation .  var Eqs : EquationSet .
   op \myquote{_} : String -> QidList .
 
   ceq printTerm(U,C) = \myquote{string(getName(C))} if getType(C) == String or getType(C) == Char  .
+  eq printTerm(U,addParens(C)) = printTerm(U,C) . 
+  
   
   eq printTerm(U,C) = \constant{getName(getOps(U),getName(C), getType(C))}{getType(C)} [owise] .
   eq printTerm(U,V) = \variable{ getName(V) }{getType(V)} .
+  eq printTerm(U,addParens(V)) = printTerm(U,V) . 
 
   op getName : OpDeclSet Qid Type -> Qid .
   eq getName( (op Q : nil -> Ty [AS metadata(Str) ] .) OPDS, Q, Ty)
@@ -272,28 +275,40 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq getName(Q, AS1 klatex(AS2 krenameTo(Q') ) ) = Q' [print Q " renamed to " Q'].
   eq getName(Q, AS) = latexify(Q) [owise] .
 
+  op addParens : Term -> Term .
+  eq addParens(addParens(T)) = addParens(T) .
+
 ---  eq printTerm(U,Q[NeTl]) 
 ---   = Q '`( printTermL(U, NeTl) '`) .
   ceq  printTerm(U,T)
     =  printTerm(U,\kcell{Label}{Contents}{AS[ellipses]})
     if {Label, Contents, AS} := splitKCell(T) .
+  ceq  printTerm(U,addParens(T))
+    =  printTerm(U,\kcell{Label}{Contents}{AS[ellipses]})
+    if {Label, Contents, AS} := splitKCell(T) .
+
 
   var Ellipses : Ellipses .
 
   ceq printTerm(U,Q[T1,T2]) = 
      printTerm(U,\reduce{T1}{T2}) 
    if Q = replaceS .
+  ceq printTerm(U,addParens(Q[T1,T2])) = 
+     printTerm(U,\reduce{T1}{T2}) 
+   if Q = replaceS .
+  ceq printTerm(U, addParens(Q['0.#Zero])) = printTerm(U, qid(string(N,10) + ".#Nat")) 
+   if N := getNat(string(Q)) .
   ceq printTerm(U, Q['0.#Zero]) = printTerm(U, qid(string(N,10) + ".#Nat")) 
    if N := getNat(string(Q)) .
+  ceq printTerm(U, addParens('_`(_`)[Q,'_`,`,_[NeTl]])) = printTerm(U,addParens(Q'[NeTl]))
+   if substr(string(getName(Q)),0,1) = "'" 
+   /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) .
   ceq printTerm(U, '_`(_`)[Q,'_`,`,_[NeTl]]) = printTerm(U,Q'[NeTl])
    if substr(string(getName(Q)),0,1) = "'" 
    /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) .
----(
-  ceq printTerm(U, '_`(_`)[Ct,T]) = printTerm(U,Ct)
-   if sortLeq(U,getType(Ct),KLabel) /\ T = nilKList .
-  ceq printTerm(U, '_`(_`)[V,T]) = printTerm(U,V)
-   if sortLeq(U,getType(V),KLabel) /\ T = nilKList .
----)
+  ceq printTerm(U, addParens('_`(_`)[Q,T])) = printTerm(U,addParens(Q'[T]))
+   if substr(string(getName(Q)),0,1) = "'" 
+   /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) [owise print "Transforming label " Q " into operation " Q'] .
   ceq printTerm(U, '_`(_`)[Q,T]) = printTerm(U,Q'[T])
    if substr(string(getName(Q)),0,1) = "'" 
    /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) [owise print "Transforming label " Q " into operation " Q'] .
@@ -316,27 +331,81 @@ var Eq : Equation .  var Eqs : EquationSet .
   op printTerm1 : Module Term -> QidList .
 
  ceq printTerm1(U, Q[Ct]) = tokenize(getString(Ct)) if Q == latexS .
+ ceq printTerm1(U, addParens(Q[Ct])) = tokenize(getString(Ct)) if Q == latexS .
+ ceq printTerm1(U, addParens('__[Tl1:TermList, Q[Ct], Tl2:TermList]))
+   = printTerm(U,merge(genQids(s countTerms(Tl1:TermList), '\somespace), Tl1:TermList))
+     tokenize(getString(Ct))
+     printTerm(U,merge(genQids(s countTerms(Tl2:TermList), '\somespace), Tl2:TermList)) 
+  if Q == latexS .
  ceq printTerm1(U, '__[Tl1:TermList, Q[Ct], Tl2:TermList])
    = printTerm(U,merge(genQids(s countTerms(Tl1:TermList), '\somespace), Tl1:TermList))
      tokenize(getString(Ct))
      printTerm(U,merge(genQids(s countTerms(Tl2:TermList), '\somespace), Tl2:TermList))
   if Q == latexS .
+ ceq printTerm1(U,addParens(Q[NeTl,T]))
+   = printTerm(U,addParens(Q[Q[NeTl],T]))
+  if mixfix(Q) /\ size(splitMixFix(string(Q))) = 3 /\ 1 < countTerms(NeTl) [owise print "normalizing"] .
  ceq printTerm1(U,Q[NeTl,T])
    = printTerm(U,Q[Q[NeTl],T])
   if mixfix(Q) /\ size(splitMixFix(string(Q))) = 3 /\ 1 < countTerms(NeTl) [owise print "normalizing"] .
 ---()
+  eq printTerm1(U, addParens('__[NeTl]))
+   = printTerm1(U, '__[NeTl]) [owise] .
+  ceq printTerm1(U, addParens(F[NeTl])) 
+   =  addParens?(F, '`()
+   '`{ printTerm(U, if mixfix(Q) 
+    then merge((splitMixFix(string(Q))), addParensL?(Q,NeTl))
+    else if latexCmd(Q) 
+     then latexOp(Q, merge(genQids(s countTerms(NeTl), '), addParensL?(F,NeTl)))
+     else prefixOp(Q, merge('`( genCommas(countTerms(NeTl)) '`), NeTl))
+    fi fi) '`} 
+     addParens?(F, '`))
+  if Q := getRenamedQid(F, relatedOps(U, getTopOp(U, F[NeTl]), getOps(U))) [owise] .
   ceq printTerm1(U, F[NeTl]) 
    =  '`{ printTerm(U, if mixfix(Q) 
-    then merge(splitMixFix(string(Q)), NeTl)
+    then merge(splitMixFix(string(Q)), addParensL?(Q,NeTl))
     else if latexCmd(Q) 
-     then latexOp(Q, merge(genQids(s countTerms(NeTl), '), NeTl))
+     then latexOp(Q, merge(genQids(s countTerms(NeTl), '), addParensL?(F, NeTl)))
      else prefixOp(Q, merge('`( genCommas(countTerms(NeTl)) '`), NeTl))
     fi fi) '`} 
   if Q := getRenamedQid(F, relatedOps(U, getTopOp(U, F[NeTl]), getOps(U))) [owise] .
 ---()
+
+  op addParensL? : Qid TermList -> TermList .
+  eq addParensL?(Q, Tl) = if mixfix(Q) then addParensL(splitMixFix(string(Q)), Tl) else Tl fi .
+
+  op addParensL : QidList TermList -> TermList .
+  eq addParensL(F Q Q' QIL, (T, Tl)) = addParensT(F, Q, T), addParensL(Q Q' QIL, Tl) .
+  eq addParensL(F Q, (T, Tl)) = addParensT(F, Q, T), addParensL(F Q, Tl) .
+  eq addParensL(QIL, empty) = empty .
+
+  op addParensT : Qid Qid Term -> Term .
+  eq addParensT('\enspace, Q, T) = addParens(T) .
+  eq addParensT(Q, '\enspace, T) = addParens(T) .
+  eq addParensT(F, Q, T) = T .
+  
+
+
+  op addParens? : Qid Qid -> QidList .
+  eq addParens?(F, Q) = if mixfix(F) then addParens??(splitMixFix(string(F)), Q)
+    else nil fi .
+ 
+  op addParens?? : QidList Qid -> QidList .
+  eq addParens??('\enspace QIL, Q) = Q .
+  eq addParens??(QIL '\enspace , Q) = Q .
+  eq addParens??(QIL, Q) = nil [owise] .
+
+
+  eq printTerm1(U, addParens(Q[NeTl]))
+   =  '`{ printTerm(U, if mixfix(Q) 
+    then merge(addParens(splitMixFix(string(Q))), addParensL?(Q, NeTl))
+    else if latexCmd(Q) 
+     then latexOp(Q, merge(genQids(s countTerms(NeTl), '), NeTl))
+     else prefixOp(Q, merge('`( genCommas(countTerms(NeTl)) '`), NeTl))
+    fi fi) '`} [owise] .
   eq printTerm1(U, Q[NeTl])
    =  '`{ printTerm(U, if mixfix(Q) 
-    then merge(splitMixFix(string(Q)), NeTl)
+    then merge(splitMixFix(string(Q)), addParensL?(Q, NeTl))
     else if latexCmd(Q) 
      then latexOp(Q, merge(genQids(s countTerms(NeTl), '), NeTl))
      else prefixOp(Q, merge('`( genCommas(countTerms(NeTl)) '`), NeTl))
@@ -935,15 +1004,27 @@ mod LATEX-PRINT-META is
   op \textsf{_} : Qid -> Qid [ctor] .
 
   var Ty : Type . var Tyl : TypeList . var NTyl : NeTypeList .
-  eq printTerm(M, merge(Q Ql, NeTl))
+  eq printTerm(M, merge(addParens('\enspace Ql), Tl))
+   = '`( printTerm(M, merge('\enspace Ql, Tl)) '`) .
+  eq printTerm(M, merge(addParens(Ql '\enspace), Tl))
+   = '`( printTerm(M, merge(Ql '\enspace, Tl)) '`) .
+  eq printTerm(M, merge(Q Ql, (T, Tl)))
    = printEndTerminal(Q)
-     printTerm(M, mergeT(Ql,NeTl)) .
+     printTerm(M, mergeT(Ql,(T, Tl))) .
   eq printTerm(M, mergeT(Ql,(T, Tl)))
    = '`{ printTerm(M, T) '`} printTerm(M, mergeQ(Ql, Tl)) .
   eq printTerm(M, mergeQ(Q, empty)) 
    = printEndTerminal(Q) .
-  eq printTerm(M, mergeQ(Q Ql,NeTl)) 
-   = printTerminal(Q) printTerm(M, mergeT(Ql, NeTl)) .
+  eq printTerm(M, mergeQ(Q Ql,(T, Tl))) 
+   = printTerminal(Q) printTerm(M, mergeT(Ql, (T, Tl))) .
+
+
+---(
+  op checkParens : QidList Term -> Term .
+  eq checkParens('\enspace, T) = addParens(T) .
+  eq checkParens(', T) = addParens(T) .
+  eq checkParens(Ql, T) = T [owise] .
+---)
 
   ops mergeT mergeQ : QidList TermList -> Term .
 
@@ -1035,6 +1116,9 @@ mod LATEX-PRINT-META is
   eq printTerm(M, prefixOp(Q, T))
    = '\prefixOp '`{ printQid(Q)  '`} printTerm(M, T) .
   eq printTerm(M, latexOp(Q,T)) = Q printTerm(M,T) .
+  eq addParens(prefixOp(Q,T)) = prefixOp(Q,T) .
+  eq addParens(latexOp(Q,T)) = latexOp(Q,T) .
+ 
 
   vars St St' St'' : String .
   op printVariable : String -> QidList .
@@ -1087,7 +1171,7 @@ mod LATEX-PRINT-META is
 
   eq printTerm(M, \reduce{T1}{T2}) = if getName(M) == 'STRUCTURAL then '\reduceS else '\reduce fi '`{ printTerm(M, T1) '`} '`{ printTerm(M, T2) '`} .
   eq printTerm(M, \value{T}) = '\kvalue '`{ printTerm(M, T) '`} .
-
+  
   op getColor : Module Qid -> Qid .
   eq getColor(M, Q) 
    = getColor(getOps(M), Q, 'CellLabel) [print "getting color for " Q] .
