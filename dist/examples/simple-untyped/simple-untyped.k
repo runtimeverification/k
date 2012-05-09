@@ -47,7 +47,7 @@ module SIMPLE-UNTYPED-SYNTAX
   syntax Stmt ::= "{" "}"				[cons("Stmt1BlockEmptySyn")]
                 | "{" Stmts "}"			[cons("Stmt1BlockSyn")]
                 | Exp ";"			  	[strict, cons("Stmt1Stmt2ExpSyn")]
-                | "if" Exp "then" Stmt "else" Stmt		[prefer, strict(1), cons("Stmt1IfThnElsSyn")]
+                | "if" Exp "then" Stmt "else" Stmt		[avoid, strict(1), cons("Stmt1IfThnElsSyn")]
                 | "if" Exp "then" Stmt					[cons("Stmt1IfThnSyn")]
                 | "while" Exp "do" Stmt					[cons("Stmt1WhileSyn")]
                 | "for" Id "=" Exp "to" Exp "do" Stmt	[cons("Stmt1ForSyn")]
@@ -80,7 +80,8 @@ module SIMPLE-UNTYPED
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:Id = E1 to E2 do S) => {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
-  rule var X = E, .Exps; => var X, .Exps; X = E;
+  rule [unroll-var]: var X = E, .Exps; => var X, .Exps; X = E;
+[structural, anywhere]
 
 
 
@@ -172,15 +173,15 @@ module SIMPLE-UNTYPED
   rule Str1:String + Str2:String => Str1 +String Str2
   rule I1:Int - I2:Int => I1 -Int I2
   rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=Bool 0
-  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=Bool 0
+  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
+  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
   rule - I:Int => 0 -Int I
   rule I1:Int < I2:Int => I1 <Int I2
   rule I1:Int <= I2:Int => I1 <=Int I2
   rule I1:Int > I2:Int => I1 >Int I2
   rule I1:Int >= I2:Int => I1 >=Int I2
-  rule V1:Val == V2:Val => V1 ==Bool V2
-  rule V1:Val != V2:Val => V1 =/=Bool V2
+  rule V1:Val == V2:Val => V1 ==K V2
+  rule V1:Val != V2:Val => V1 =/=K V2
   rule B1:Bool and B2:Bool => B1 andBool B2
   rule B1:Bool or B2:Bool => B1 orBool B2
   rule not(B:Bool) => notBool(B)
