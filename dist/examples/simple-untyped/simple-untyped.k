@@ -107,7 +107,7 @@ module SIMPLE-UNTYPED
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
-                  <in color="magenta" > .List </in>
+                  <in color="magenta" > $IN:List </in>
                   <out color="brown" > .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
@@ -132,13 +132,13 @@ module SIMPLE-UNTYPED
 
   syntax #Id ::= "$1" | "$2"
   rule var X:Id[N1:Int,N2:Int,Vs:Vals], .Exps; =>
-       var X[N1], .Exps;
+       var X[N1, .Exps], .Exps;
        {
          var $1 = X, .Exps;
          for $2 = 0 to N1 - 1 do   // no longer a stupid parser
          {
            var X[N2,Vs], .Exps;    // no longer a stupid parser
-           $1[$2] = X;
+           $1[$2, .Exps] = X;
          }
        }  [structural]
 
@@ -184,8 +184,8 @@ module SIMPLE-UNTYPED
   rule not(B:Bool) => notBool(B)
 
 
-  rule V[N1,N2,Vs] => V[N1, .Exps][N2,Vs]  [structural]
-  rule arrayRef(L,_:Int)[N] => lookup(L:Int +Int N:Int)  [structural]
+  rule V:Val[N1:Int,N2:Int,Vs:Vals] => V[N1, .Exps][N2,Vs]  [structural, anywhere]
+  rule arrayRef(L,_:Int)[N, .Exps] => lookup(L:Int +Int N:Int)  [structural, anywhere]
   syntax K ::= "lookup" "(" Int ")" [cons("K1LookupSyn")]
   rule <k> lookup(L:Int) => V:Val ...</k> <store>...L|->V...</store>  [transition]
 
