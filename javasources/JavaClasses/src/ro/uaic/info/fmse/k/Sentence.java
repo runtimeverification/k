@@ -23,8 +23,13 @@ public abstract class Sentence extends ModuleItem {
 
 	@Override
 	public String toMaude() {
+		
+		String cond = "";
+		if (condition != null)
+			cond = "when " + condition.toMaude();
+		
 		if (body != null)
-			return body.toMaude() + " : KSentence [metadata \"" + getMetadata() + "\"] .";
+			return body.toMaude() + " " + cond + " : KSentence [metadata \"" + getMetadata() + "\"] .";
 		return " : KSentence [metadata \"" + getMetadata() + "\"] .";
 	}
 
