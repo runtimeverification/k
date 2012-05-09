@@ -74,14 +74,14 @@ public class KAppFactory {
 				term2.setSort(term1.getSort());
 				term2.setValue(term1.getValue());
 				return term2;
-			} else if (term1.getSort().equals("#Id")) {
+			} else /*if (term1.getSort().equals("#Id")) {
 				KApp term4 = new KApp(l, f);
 				term4.setLabel(new Constant(l, f, "KLabel", "#id_"));
 				term4.setChild(new Constant(l, f, term1.getSort(), "\"" + term1.getValue() + "\""));
 				termVal = term4;
 			} else if (term1.getSort().equals("#String") || term1.getSort().equals("#Int") || term1.getSort().equals("#Float") || term1.getSort().equals("#Bool")) {
-				termVal = term1;
-			}
+			*/	termVal = term1;
+			//}
 
 			return new KApp(l, f, new KApp(l, f, new Constant(l, f, "KLabel", "#_"), termVal), empty);
 		} else if (astNode instanceof Empty) {

@@ -2,7 +2,6 @@ package ro.uaic.info.fmse.transitions.maude;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -10,11 +9,12 @@ public class MaudeHelper {
 
 	public static List<String> separators = new ArrayList<String>();
 	public static Set<String> declaredSorts = new HashSet<String>();
-	public static List<String> basicSorts = getBasicSorts();
+	public static Set<String> basicSorts = getBasicSorts();
 	public static Set<String> kLabels = new HashSet<String>();
+	public static Set<String> constantSorts = getConstantSorts();
 	
-	private static List<String> getBasicSorts() {
-		List<String> basic = new LinkedList<String>();
+	private static Set<String> getBasicSorts() {
+		Set<String> basic = new HashSet<String>();
 		
 		basic.add("Bag");
 		basic.add("K");
@@ -34,6 +34,19 @@ public class MaudeHelper {
 		basic.add("#Float");
 		basic.add("#Rat");
 		basic.add("#Int");
+		
+		return basic;
+	}
+
+	private static Set<String> getConstantSorts() {
+		Set<String> basic = new HashSet<String>();
+		
+		basic.add("#Id");
+		basic.add("#String");
+		basic.add("#Float");
+		basic.add("#Rat");
+		basic.add("#Int");
+		basic.add("KLabel");
 		
 		return basic;
 	}

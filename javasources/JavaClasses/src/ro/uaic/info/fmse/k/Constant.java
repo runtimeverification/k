@@ -31,6 +31,9 @@ public class Constant extends Term {
 
 	@Override
 	public String toMaude() {
+		if (sort.equals("#Id"))
+			return "#id \"" + value + "\"";
+
 		return value;
 	}
 

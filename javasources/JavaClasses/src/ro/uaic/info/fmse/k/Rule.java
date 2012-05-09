@@ -72,7 +72,15 @@ public class Rule extends Sentence {
 
 	@Override
 	public String toMaude() {
-		return "mb rule " + super.toMaude();
+		
+		String sentence = super.toMaude();
+		
+		if (this.label != null && !this.label.equals(""))
+		{
+			sentence = sentence.replaceFirst("metadata", "label " + label + " metadata");
+		}
+		
+		return "mb rule " + sentence;
 	}
 
 	@Override
