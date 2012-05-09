@@ -19,7 +19,7 @@ public class Hole extends Term {
 
 	@Override
 	public String toMaude() {
-		return "HOLE:" + sort;
+		return "HOLE";
 	}
 
 	@Override
