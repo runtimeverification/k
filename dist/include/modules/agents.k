@@ -1,35 +1,36 @@
-require seq
+require "seq.k"
 
-module AGENTS imports SEQ
+module AGENTS
+  imports SEQ
   configuration
       <agent multiplicity="*"> 
           <me>0</me>
           <parent>-1</parent>
           <control> <k color="green"> .K </k> </control>
       </agent> 
-      @latex("\\kBR")
+      //@latex("\\kBR")
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting> 
-      @latex("\\kBR")
+      //@latex("\\kBR")
       <messages> <message multiplicity="*">
           <from>.K</from> <to>.Set</to> <body>.K</body>
       </message> </messages>
       
-  syntax K ::= newAgent K
-             | me
-             | parent
-             | receive
-             | receiveFrom K     [strict]
-             | send K to K       [strict]
-             | sendSynch K to K  [strict]
-             | barrier        
-             | broadcast K       [strict]
-             | haltAgent
+  syntax K ::= "newAgent" K
+             | "me"
+             | "parent"
+             | "receive"
+             | "receiveFrom" K     [strict]
+             | "send" K "to" K       [strict]
+             | "sendSynch" K "to" K  [strict]
+             | "barrier"        
+             | "broadcast" K       [strict]
+             | "haltAgent"
              | Int
              | Bool
 
---- Agents
+  // Agents
   rule [agent-creation] : <agent>...  <k>newAgent S:K => N2:Nat ...</k> <me>N1:Nat</me> 
         ...</agent> <world>... . => SetItem(N2) ...</world> @latex("\\kBR")
        (. => <agent>... <me>N2</me><parent>N1</parent><k>S</k> ...</agent>) 
@@ -62,4 +63,4 @@ module AGENTS imports SEQ
   rule [leave-barrier] : <me>N</me> <k>barrier => skip ...</k> <barrier>false</barrier>
        <waiting>... (SetItem(N) => .) ...</waiting>
   rule [lowering-barrier] : <barrier>false => true</barrier> <waiting>.Set</waiting>
-end module
+endmodule

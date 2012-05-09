@@ -1,14 +1,16 @@
-require seq
+require "seq.k"
 
-module THREADS imports SEQ
+module THREADS
+  imports SEQ
   configuration <thread multiplicity="*"> 
-                  <k> .K </k> <holds> .Map </holds>
+                  <k> .K </k>
+                  <holds> .Map </holds>
                 </thread>
                 <busy> .Set </busy>
-  syntax K ::= spawn K       [prec 90]
-             | acquire K     [strict]
-             | release K     [strict]
-             | rendezvous K  [strict]
+  syntax K ::= "spawn" K       [prec(90)]
+             | "acquire" K     [strict]
+             | "release" K     [strict]
+             | "rendezvous" K  [strict]
              | Nat
 
   rule [spawn-thread] : 
@@ -50,4 +52,4 @@ module THREADS imports SEQ
        <k>rendezvous V 
           => skip ...</k> <k>rendezvous V 
                              => skip ...</k>  [transition]
-end module
+endmodule
