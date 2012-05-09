@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -135,21 +136,24 @@ public class Main {
 	public static void resolveOption(String optionName, String lang, CommandLine cmd) {
 		//TODO the problem with syntax-module and main-module may arise from fileName variable that shouldn't be initialized with lang
 		// because of this K.main_module and K.syntax_module are computed wrong (see line 315-316)
-		System.out.println("resolveOption >> K.k_definition="+ K.k_definition);
-		//String fileName = FileUtil.getFilename(K.k_definition, ".", K.fileSeparator);
-		//String fileName = FileUtil.dropExtension(K.k_definition, ".", K.fileSeparator);
-		String fileName = lang;
+		//System.out.println("resolvesOption >> K.k_definition="+ K.k_definition);
+		String s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
+		int sep = s.lastIndexOf(K.fileSeparator);
+		String str = s.substring(sep + 1).toUpperCase();
+		
 		if (optionName == "compiled-def") {
 			if (cmd.hasOption("k-definition")) {
-				String s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
 				K.compiled_def = s + "-compiled.maude";
+				//System.out.println("resolvesOption >> K.K.compiled_def="+ K.compiled_def);
 			} else {
 				K.compiled_def = initOptions(K.userdir, lang);
 			}
 		} else if (optionName == "main-module") {
-			K.main_module = fileName.toUpperCase();
+			K.main_module = str;
+			//System.out.println("resolvesOption >> K.main-module="+ K.main_module);
 		} else if (optionName == "syntax-module") {
-			K.syntax_module = fileName + "-SYNTAX";
+			K.syntax_module = str + "-SYNTAX";
+			//System.out.println("resolvesOption >> K.syntax-module="+ K.syntax_module);
 		}
 	}
 
@@ -163,9 +167,6 @@ public class Main {
 		try {
 			// Parse the program arguments
 
-			// by default
-			K.k_definition = new File(K.userdir).getCanonicalPath();
-
 			if (cmd.hasOption('h') || cmd.hasOption('?')) {
 				K.help = true;
 			}
@@ -178,7 +179,8 @@ public class Main {
 			}
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
-				// System.out.println("k-definition=" + K.k_definition);
+				K.k_definition = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
+				//System.out.println("k-definition=" + K.k_definition);
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");
@@ -288,7 +290,11 @@ public class Main {
 			String pgm = FileUtil.getFilename(K.pgm, ".", K.fileSeparator);
 			String lang = FileUtil.getExtension(K.pgm, ".");
 
+			// by default
+			K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
+			
 			initOptions(K.userdir, lang);
+
 			if (!cmd.hasOption("compiled-def")) {
 				resolveOption("compiled-def", lang, cmd);
 			}
@@ -313,11 +319,11 @@ public class Main {
 			// rp.execute("kast", "--k-definition=" + K.k_base + "/examples/languages/classic/"+ lang + "/" + lang, K.k_base + "/examples/languages/classic/" + lang + "/programs/" + pgm + "." +
 			// lang);
 			
-            System.out.println("K.k_definition="+ K.k_definition);
+            /*System.out.println("K.k_definition="+ K.k_definition);
             System.out.println("K.syntax_module="+ K.syntax_module);
-            System.out.println("K.main_module="+ K.main_module);
+            System.out.println("K.main_module="+ K.main_module);*/
             
-			String kastCmd = new String();
+			/*String kastCmd = new String();
 			if (cmd.hasOption("k-definition")) {
 				kastCmd += "--k-definition=" + K.k_definition;
 			}
@@ -326,9 +332,11 @@ public class Main {
 			}
 			if (cmd.hasOption("--syntax-module")) {
 				kastCmd += " " + "--syntax-module=" + K.syntax_module;
-			}
+			}*/
+
 			if (K.parser.equals("kast")) {
-				rp.execute("perl", K.kast, kastCmd, "-pgm=" + K.pgm);
+				//rp.execute("perl", K.kast, kastCmd, "-pgm=" + K.pgm);
+				rp.execute(new String[] { K.kast, "--k-definition="+ K.k_definition, "--main-module="+ K.main_module, "--syntax-module="+ K.syntax_module, "-pgm="+ K.pgm });
 				/* rp.execute("kast", "--k-definition=" + K.k_base + "/examples/languages/research/" + lang + "/" + lang, K.k_base + "/examples/languages/research/" + lang + "/programs/" + pgm + "." +
 				 * lang); */
 			} else {
@@ -376,14 +384,14 @@ public class Main {
 
 			File outFile = FileUtil.createMaudeFile(K.maude_out);
 			if (K.log_io) {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", lang.toUpperCase(), "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(),
+				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(),
 						"--createLogs" });
 			}
 			if (!K.io) {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", lang.toUpperCase(), "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(),
+				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(),
 						"--noServer" });
 			} else {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", lang.toUpperCase(), "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath() });
+				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath() });
 			}
 			PrettyPrintOutput p = new PrettyPrintOutput();
 			String input = K.userdir + K.fileSeparator + K.maude_output;

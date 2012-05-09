@@ -258,7 +258,7 @@ public class FileUtil {
 	}
 	
 	public static String dropKExtension(String fullPath, String extensionSeparator, String pathSeparator) {
-		if (getExtension(fullPath, ".") == "k") {
+		if (getExtension(fullPath, ".").equals("k")) {
 			return dropExtension(fullPath, extensionSeparator, pathSeparator);
 		}
 		else {
