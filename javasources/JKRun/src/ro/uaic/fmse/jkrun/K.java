@@ -22,7 +22,7 @@ public class K {
 	public static String maude = "maude";
 
 	// kast
-	public static String kast = k_base + "/core/kast";
+	public static String kast = k_base + "/dist/bin/kast";
 
 	public static String maude_io_cmd = "io-cmd.maude";
 	public static String maude_output = "maudeoutput.xml";
