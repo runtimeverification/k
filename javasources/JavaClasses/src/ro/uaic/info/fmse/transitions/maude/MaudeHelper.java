@@ -29,6 +29,11 @@ public class MaudeHelper {
 		basic.add("KLabel");
 		basic.add("List{K}");
 		basic.add("KResult");
+		basic.add("#Id");
+		basic.add("#String");
+		basic.add("#Float");
+		basic.add("#Rat");
+		basic.add("#Int");
 		
 		return basic;
 	}
