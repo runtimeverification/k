@@ -69,10 +69,39 @@
 
 	<property location="dist/examples" name="examples"/>
 	<property location="dist/bin/kompile" name="kompile"/>
+	<property location="dist/bin/kast" name="kast"/>
+	<property location="dist/bin/krun" name="krun"/>
 
 	<target name="compile">
 	        <exec executable="${kompile}">
 		    <arg value="${examples}/imp/imp.k"/>
+		</exec>
+	        <exec executable="${krun}">
+		    <arg value="${examples}/imp/programs/sum.imp"/>
+		    <arg value="--parser"/>
+		    <arg value="${kast}"/>
+		    <arg value="--compiled-def"/>
+		    <arg value="${examples}/imp/imp-compiled.maude"/>
+		    <arg value="--syntax-module"/>
+		    <arg value="IMP-SYNTAX"/>
+		</exec>
+	        <exec executable="${krun}">
+		    <arg value="${examples}/imp/programs/collatz.imp"/>
+		    <arg value="--parser"/>
+		    <arg value="${kast}"/>
+		    <arg value="--compiled-def"/>
+		    <arg value="${examples}/imp/imp-compiled.maude"/>
+		    <arg value="--syntax-module"/>
+		    <arg value="IMP-SYNTAX"/>
+		</exec>
+	        <exec executable="${krun}">
+		    <arg value="${examples}/imp/programs/countPrimes.imp"/>
+		    <arg value="--parser"/>
+		    <arg value="${kast}"/>
+		    <arg value="--compiled-def"/>
+		    <arg value="${examples}/imp/imp-compiled.maude"/>
+		    <arg value="--syntax-module"/>
+		    <arg value="IMP-SYNTAX"/>
 		</exec>
 	</target>
 
