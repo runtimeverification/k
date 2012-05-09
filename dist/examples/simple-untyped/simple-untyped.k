@@ -80,10 +80,7 @@ module SIMPLE-UNTYPED
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:Id = E1 to E2 do S) => {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
-  rule [unroll-var]: var X = E, .Exps; => var X, .Exps; X = E;
-[structural, anywhere]
-
-
+  rule var X = E, .Exps; => var X, .Exps; X = E;
 
   syntax #Id ::= "main"
 
