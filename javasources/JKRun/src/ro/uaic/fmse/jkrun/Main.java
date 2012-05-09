@@ -48,7 +48,7 @@ public class Main {
 	}
 
 	public static void printVersion() {
-		System.out.println("JKrun 0.1.0\n" + "Copyright (C) 2012 Necula Emilian");
+		System.out.println("JKrun 0.1.0\n" + "Copyright (C) 2012 Necula Emilian & Raluca");
 	}
 
 	public static void printStatistics() {
@@ -110,9 +110,6 @@ public class Main {
 			for (File maudeFile : maudeFiles) {
 				String fullPath = maudeFile.getCanonicalPath();
 				path_ = FileUtil.dropExtension(fullPath, ".", K.fileSeparator);
-				// System.out.println("path_="+ path_);
-				// compiledFile = path_ + "-compiled.maude";
-				// fileName = FileUtil.getFilename(compiledFile, ".", K.fileSeparator);
 				int sep = path_.lastIndexOf(K.fileSeparator);
 				fileName = path_.substring(sep + 1);
 				if (fileName.startsWith(lang)) {
@@ -134,26 +131,20 @@ public class Main {
 	}
 
 	public static void resolveOption(String optionName, String lang, CommandLine cmd) {
-		//TODO the problem with syntax-module and main-module may arise from fileName variable that shouldn't be initialized with lang
-		// because of this K.main_module and K.syntax_module are computed wrong (see line 315-316)
-		//System.out.println("resolvesOption >> K.k_definition="+ K.k_definition);
 		String s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
 		int sep = s.lastIndexOf(K.fileSeparator);
 		String str = s.substring(sep + 1).toUpperCase();
-		
+
 		if (optionName == "compiled-def") {
 			if (cmd.hasOption("k-definition")) {
 				K.compiled_def = s + "-compiled.maude";
-				//System.out.println("resolvesOption >> K.K.compiled_def="+ K.compiled_def);
 			} else {
 				K.compiled_def = initOptions(K.userdir, lang);
 			}
 		} else if (optionName == "main-module") {
 			K.main_module = str;
-			//System.out.println("resolvesOption >> K.main-module="+ K.main_module);
 		} else if (optionName == "syntax-module") {
 			K.syntax_module = str + "-SYNTAX";
-			//System.out.println("resolvesOption >> K.syntax-module="+ K.syntax_module);
 		}
 	}
 
@@ -180,7 +171,7 @@ public class Main {
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
 				K.k_definition = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
-				//System.out.println("k-definition=" + K.k_definition);
+				// System.out.println("k-definition=" + K.k_definition);
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");
@@ -291,8 +282,10 @@ public class Main {
 			String lang = FileUtil.getExtension(K.pgm, ".");
 
 			// by default
-			K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
-			
+			if (!cmd.hasOption("k-definition")) {
+				K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
+			}
+
 			initOptions(K.userdir, lang);
 
 			if (!cmd.hasOption("compiled-def")) {
@@ -304,7 +297,7 @@ public class Main {
 			if (!cmd.hasOption("syntax-module")) {
 				resolveOption("syntax-module", lang, cmd);
 			}
-			
+
 			if (K.compiled_def == null) {
 				Error.report("\nCould not find a compiled K definition.");
 			}
@@ -313,37 +306,29 @@ public class Main {
 				Error.report("\nCould not find compiled definition: " + K.compiled_def + "\nPlease compile the definition by using `make' or `kompile'.");
 			}
 
+			/*System.out.println("K.k_definition=" + K.k_definition);
+			System.out.println("K.syntax_module=" + K.syntax_module);
+			System.out.println("K.main_module=" + K.main_module);*/
+
+			/* String kastCmd = new String(); if (cmd.hasOption("k-definition")) { kastCmd += "--k-definition=" + K.k_definition; } if (cmd.hasOption("main-module")) { kastCmd += " " +
+			 * "--main-module=" + K.main_module; } if (cmd.hasOption("--syntax-module")) { kastCmd += " " + "--syntax-module=" + K.syntax_module; } */
+
 			// in KAST variable we obtain the output from running kast process on a program defined in K
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
 			// rp.execute("kast", "--k-definition=" + K.k_base + "/examples/languages/classic/"+ lang + "/" + lang, K.k_base + "/examples/languages/classic/" + lang + "/programs/" + pgm + "." +
 			// lang);
-			
-            /*System.out.println("K.k_definition="+ K.k_definition);
-            System.out.println("K.syntax_module="+ K.syntax_module);
-            System.out.println("K.main_module="+ K.main_module);*/
-            
-			/*String kastCmd = new String();
-			if (cmd.hasOption("k-definition")) {
-				kastCmd += "--k-definition=" + K.k_definition;
-			}
-			if (cmd.hasOption("main-module")) {
-				kastCmd += " " + "--main-module=" + K.main_module;
-			}
-			if (cmd.hasOption("--syntax-module")) {
-				kastCmd += " " + "--syntax-module=" + K.syntax_module;
-			}*/
 
 			if (K.parser.equals("kast")) {
-				//rp.execute("perl", K.kast, kastCmd, "-pgm=" + K.pgm);
-				rp.execute(new String[] { K.kast, "--k-definition="+ K.k_definition, "--main-module="+ K.main_module, "--syntax-module="+ K.syntax_module, "-pgm="+ K.pgm });
+				// rp.execute("perl", K.kast, kastCmd, "-pgm=" + K.pgm);
+				rp.execute(new String[] { K.kast, "--k-definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 				/* rp.execute("kast", "--k-definition=" + K.k_base + "/examples/languages/research/" + lang + "/" + lang, K.k_base + "/examples/languages/research/" + lang + "/programs/" + pgm + "." +
 				 * lang); */
 			} else {
 				System.out.println("The external parser to be used is:" + K.parser);
 				// code to execute the external parser
-				/* String[] commands = new String[] {K.parser , ""}; rp.execute(commands); */
-				System.exit(0);
+				rp.execute(new String[] { K.parser, "--k-definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
+				// System.exit(0);
 			}
 			if (rp.getStdout() != null) {
 				KAST = rp.getStdout();
@@ -384,12 +369,10 @@ public class Main {
 
 			File outFile = FileUtil.createMaudeFile(K.maude_out);
 			if (K.log_io) {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(),
-						"--createLogs" });
+				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--createLogs" });
 			}
 			if (!K.io) {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(),
-						"--noServer" });
+				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--noServer" });
 			} else {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath() });
 			}
@@ -440,9 +423,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-
-		/* Map<String, String> env = System.getenv(); for (String envName : env.keySet()) { System.out.format("%s=%s%n", envName, env.get(envName)); } */
-
+		
 		execute_Krun(args);
 	}
 
