@@ -19,7 +19,6 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.pp.Preprocessor;
-import ro.uaic.info.fmse.tests.XML;
 import ro.uaic.info.fmse.transitions.labelify.KAppFactory;
 
 public class FrontEnd {
