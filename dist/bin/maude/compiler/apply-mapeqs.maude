@@ -1,0 +1,62 @@
+mod APPLY-MAPEQS is 
+  including CONVERSION .
+  including META-LEVEL-EXTRAS .
+  including META-ATTRS .
+  var Str : String . 
+  var AS AS' : AttrSet . 
+  var Q Q' : Qid . var Ty Ty' : Type . var Tyl : TypeList . 
+  var Op : OpDecl . var OPDS : OpDeclSet . var MapEqs Mod : Module .
+  var Eq : Equation . var Eqs : EquationSet .
+  var Mb : MembAx . var Mbs : MembAxSet .
+  var Rl : Rule . var Rls : RuleSet .
+  var S S' : Sort . var SS : SortSet .
+  var SSD : SubsortDecl . var SSDS : SubsortDeclSet .
+  var T1 T2 : Term .
+
+  op applyMapEqs : Qid Module ~> Module .
+  eq applyMapEqs(Q, Mod) 
+   = applyMapEqs(Q, Mod, getMapEqs(getEqs(Mod)))  .
+
+  op applyMapEqs : Qid Module EquationSet ~> Module .
+  eq applyMapEqs(Q, Mod, Eqs) 
+   = applyMapEqs(setOps(setMbs(setRls(setEqs(flatten(Mod),Eqs),none),none),clearReductionAttrs(getOps(flatten(Mod)))), removeEqs(Mod, Eqs)) .
+
+  op applyMapEqs : Module Module ~> Module .
+  eq applyMapEqs(MapEqs, Mod) = setEqs(setMbs(setRls(Mod, applyMapEqsRls(MapEqs, getRls(Mod))), applyMapEqsMbs(MapEqs, getMbs(Mod))), applyMapEqsEqs(MapEqs, getEqs(Mod)))  .
+
+
+  op applyMapEqsEqs : Module EquationSet ~> EquationSet .
+  eq applyMapEqsEqs(Mod, Eq Eqs) 
+   = applyMapEqsEq(Mod, Eq) applyMapEqsEqs(Mod, Eqs) .
+  eq applyMapEqsEqs(Mod, none) = none .
+
+  op applyMapEqsEq : Module Equation ~> Equation .
+  eq applyMapEqsEq(Mod, Eq) = setLhs(setRhs(Eq,getTerm(metaReduce(Mod,getRhs(Eq)))), getTerm(metaReduce(Mod,getLhs(Eq)))) .
+  
+
+  op applyMapEqsRls : Module RuleSet ~> RuleSet .
+  eq applyMapEqsRls(Mod, Rl Rls) 
+   = applyMapEqsRl(Mod, Rl) applyMapEqsRls(Mod, Rls) .
+  eq applyMapEqsRls(Mod, none) = none .
+
+  op applyMapEqsRl : Module Rule ~> Rule .
+  eq applyMapEqsRl(Mod, Rl) = setLhs(setRhs(Rl,getTerm(metaReduce(Mod,getRhs(Rl)))), getTerm(metaReduce(Mod,getLhs(Rl)))) .
+  
+ op applyMapEqsMbs : Module MembAxSet ~> MembAxSet .
+  eq applyMapEqsMbs(Mod, Mb Mbs) 
+   = applyMapEqsMb(Mod, Mb) applyMapEqsMbs(Mod, Mbs) .
+  eq applyMapEqsMbs(Mod, none) = none .
+
+  op applyMapEqsMb : Module MembAx ~> MembAx .
+  eq applyMapEqsMb(Mod, Mb) = setTerm(Mb,getTerm(metaReduce(Mod,getTerm(Mb)))) .
+  
+  op getMapEqs : EquationSet ~> EquationSet .
+  eq getMapEqs(none) = none .
+  eq getMapEqs(Eq Eqs) = getMapEq(Eq, getAttrs(Eq)) getMapEqs(Eqs) .
+
+  op getMapEq : Equation AttrSet ~> EquationSet .
+  eq getMapEq(Eq, AS pair("generated","BagMap")) = Eq .
+  eq getMapEq(Eq, AS) = none [owise] .
+
+ endm
+

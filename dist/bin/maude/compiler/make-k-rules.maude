@@ -89,6 +89,10 @@ fmod MAKE-K-RULES is
    = addTransition(M, T1, T2, Cnd, AS pair("default",""), AS') .
   eq $addReplace(M, T1, T2, Cnd, AS, AS')
    = addStructural(M, T1, T2, Cnd, AS pair("default",""), AS') [owise] .
+  eq $addReplace(M, errorT(Err:[Term],Cxt:String,Msg:String), T2:[Term], Cnd:[Condition], AS, AS')
+   = errorM(AS,Msg:String,Err:[Term],Cxt:String,M) .
+  eq $addReplace(M, T2:[Term], errorT(Err:[Term],Cxt:String,Msg:String), Cnd:[Condition], AS, AS')
+   = errorM(AS,Msg:String,Err:[Term],Cxt:String,M) .
   
   op addStructural : Module Term Term Condition AttrSet AttrSet ~> Module .  
   eq addStructural(M, T1, T2, Cnd, AS, AS')
@@ -134,6 +138,7 @@ fmod MAKE-K-RULES is
   eq addK(Flat, pair(Str,Str':String) AS, anywheres(pair(Str,Str'':String) AS') AS'', T) = T .
   eq addK(Flat, AS, AS', T) = if getKind(Flat, leastSort(Flat, T)) == getKind(Flat, K) then kWrap(T) else T fi [owise print "Attributes: "
 AS "\n\t" AS'] .
+  eq addK(Flat, AS, AS', errorT(Err:[Term],Cxt:String,Msg:String)) = errorT(Err:[Term],Cxt:String,Msg:String) .
 
   var CSplit : KContextSplit .
 endfm

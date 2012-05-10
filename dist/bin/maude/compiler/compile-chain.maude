@@ -11,6 +11,7 @@ mod COMPILE-ONESHOT is
 + DEFAULT-TERMS-META 
 + CONTEXT-TRANSFORMERS-META 
 + OPEN-CELLS-META 
++ APPLY-MAPEQS-META
 + ANONYMOUS-VARIABLES-META 
 + MAKE-K-RULES-META 
 --- + REMOVE-SUBLISTS-META
@@ -48,6 +49,7 @@ mod COMPILE-ONESHOT is
   eq compile1(M, 'DEFAULT-TERMS, AS) = compileDEFAULT-TERMS(M, AS) . 
   eq compile1(M, 'CONTEXT-TRANSFORMERS, AS) = compileCONTEXT-TRANSFORMERS(M, AS) . 
   eq compile1(M, 'OPEN-CELLS, AS) = compileOPEN-CELLS(M, AS) . 
+  eq compile1(M, 'APPLY-MAPEQS, AS) = compileAPPLY-MAPEQS(M, AS) . 
   eq compile1(M, 'ANONYMOUS-VARIABLES, AS) = compileANONYMOUS-VARIABLES(M, AS) . 
   eq compile1(M, 'MAKE-K-RULES, AS) = compileMAKE-K-RULES(M, AS) . 
 ---  eq compile1(M, 'REMOVE-SUBLISTS, AS) = compileREMOVE-SUBLISTS(M, AS) . 
@@ -88,6 +90,7 @@ mod COMPILE-ONESHOT is
 'DEFAULT-TERMS 
 'CONTEXT-TRANSFORMERS 
 'OPEN-CELLS 
+'APPLY-MAPEQS
 'MAKE-K-RULES 
 'STRICTCXT2EQS 
 'RESOLVE-HOOKS 
@@ -156,6 +159,8 @@ fmod COMPILE-META is
    = tokenize("applying Context Transformers") .
   eq getPhaseName('OPEN-CELLS)
    = tokenize("transforming open cells to normal cells through anonymous variables") .
+  eq getPhaseName('APPLY-MAPEQS)
+   = tokenize("converting map bag items into key |-> item pairs") .
   eq getPhaseName('ANONYMOUS-VARIABLES)
    = tokenize( "resolving Anonymous Variables") .
   eq getPhaseName( 'MAKE-K-RULES)
@@ -212,6 +217,7 @@ fmod COMPILE-META is
 'DEFAULT-TERMS 
 'CONTEXT-TRANSFORMERS 
 'OPEN-CELLS 
+'APPLY-MAPEQS
 'MAKE-K-RULES 
 'STRICTCXT2EQS 
 'RESOLVE-HOOKS 
