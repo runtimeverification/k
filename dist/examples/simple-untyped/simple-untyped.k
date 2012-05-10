@@ -1,4 +1,5 @@
 require "k-prelude.k"
+require "modules/uris.k"
 
 module SIMPLE-UNTYPED-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
@@ -75,6 +76,7 @@ endmodule
 module SIMPLE-UNTYPED
   imports SIMPLE-UNTYPED-SYNTAX
   imports BUILTIN-HOOKS
+  imports URIS
 
   // coming from macros
   rule if E:Exp then S:Stmt => if E then S else {}
@@ -107,8 +109,8 @@ module SIMPLE-UNTYPED
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
-                  <in color="magenta" > $IN:List </in>
-                  <out color="brown" > .List </out>
+                  <in color="magenta" stream="stdin"> .List </in>
+                  <out color="brown" stream="stdout"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
@@ -212,7 +214,7 @@ module SIMPLE-UNTYPED
        <nextLoc> L => L:Int +Int 1 </nextLoc>
   rule <k> bindto(.Ids,.Exps) => . ...</k>  [structural]
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in>  [transition]
+  rule <k> read() => I:Int ...</k> <in> ListItem(I) => . ...</in>  [transition]
 
 
   context (HOLE => lvalue(HOLE)) = _
