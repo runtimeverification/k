@@ -57,8 +57,8 @@ module IMPPP
 //     <br/>
      <store color="white"> .Map </store>
      <nextLoc color="gray"> 0 </nextLoc>
-     <in color="magenta" > $IN:List </in>
-     <out color="Orchid" > .List </out>
+     <in color="magenta" stream="stdin">  .List </in>
+     <out color="Orchid" stream="stdout"> .List </out>
     </T>
 
   syntax KResult ::= Int | Bool
