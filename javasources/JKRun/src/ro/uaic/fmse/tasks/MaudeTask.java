@@ -2,15 +2,13 @@ package ro.uaic.fmse.tasks;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 public class MaudeTask extends Thread {
 	// private static final String LOG_FILE = "maude.log";

@@ -27,7 +27,8 @@ public class Production extends ASTNode {
 		strings.add(Constants.SORT);
 		strings.add(Constants.TERMINAL);
 		strings.add(Constants.USERLIST);
-		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, strings);
+		java.util.List<Element> its = XML.getChildrenElementsByTagName(element,
+				strings);
 
 		items = new ArrayList<ProductionItem>();
 		for (Element e : its)
@@ -39,11 +40,13 @@ public class Production extends ASTNode {
 		if (its.size() > 0) {
 			its = XML.getChildrenElements(its.get(0));
 			for (Element e : its) {
-				attributes.put(e.getAttribute(Constants.KEY_key_ATTR), e.getAttribute(Constants.VALUE_value_ATTR));
+				attributes.put(e.getAttribute(Constants.KEY_key_ATTR),
+						e.getAttribute(Constants.VALUE_value_ATTR));
 			}
 		}
 		if (attributes.containsKey(Constants.CONS_cons_ATTR))
-			DefinitionHelper.conses.put(attributes.get(Constants.CONS_cons_ATTR), this);
+			DefinitionHelper.conses.put(
+					attributes.get(Constants.CONS_cons_ATTR), this);
 	}
 
 	public String toString() {
@@ -80,20 +83,23 @@ public class Production extends ASTNode {
 	}
 
 	public String getKLabel() {
-		return attributes.get("klabel");
+		if (attributes.containsKey("klabel"))
+			return attributes.get("klabel");
+		return attributes.get("kgeneratedlabel");
 	}
 
 	public String getMetadata() {
 		java.util.List<String> reject = new LinkedList<String>();
 		reject.add("cons");
-		reject.add("klabel");
+		reject.add("kgeneratedlabel");
 		reject.add("latex");
 		reject.add("prefixlabel");
 
 		String attributes = "";
 		for (Entry<String, String> entry : this.attributes.entrySet()) {
 			if (!reject.contains(entry.getKey()))
-				attributes += " " + entry.getKey() + "=(" + entry.getValue() + ")";
+				attributes += " " + entry.getKey() + "=(" + entry.getValue()
+						+ ")";
 		}
 
 		// append locations too

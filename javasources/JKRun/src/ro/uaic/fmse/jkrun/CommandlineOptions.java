@@ -27,12 +27,12 @@ public class CommandlineOptions {
 		Option help2 = new Option("?", false, "Display the detailed help message and quit");
 		Option version = new Option("v", "version", false, "Display the version number and quit");
 		Option desk_file = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("desk-file").withDescription("Set Desk file path, instead of searching for it").create();
-
+		
 		options.addOption(help1); optionList.add(help1);
 		options.addOption(help2); optionList.add(help2);
 		options.addOption(version); optionList.add(version);
 		options.addOption(desk_file); optionList.add(desk_file);
-
+		
 		// Common K options
 		Option pgm = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("pgm").withDescription("Name of the program to execute").create();
 		Option k_definition = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("k-definition").withDescription("Path to the K definition").create();
@@ -84,9 +84,11 @@ public class CommandlineOptions {
 		// for debugger
 		Option debug = OptionBuilder.hasArg(false).withLongOpt("debug").withDescription("Run an execution in debug mode").create();
 		Option rule_labels = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("rule-labels").withDescription("A list of labels associated to rules for breakpoint execution").create();
+		Option trace = new Option("trace", false, "Set trace on.");
 
 		options.addOption(debug); optionList.add(debug);
 		options.addOption(rule_labels); optionList.add(rule_labels);
+		options.addOption(trace); optionList.add(trace);
 
 	}
 

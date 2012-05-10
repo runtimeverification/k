@@ -13,6 +13,7 @@ public class LabelGenerator {
 	private static final String ATTRIBUTES = "attributes";
 	private static final String TAG = "tag";
 	private static final String KLABEL = "klabel";
+	private static final String KGENERATEDLABEL = "kgeneratedlabel";
 	private static final String PREFIXLABEL = "prefixlabel";
 	private static final String KEY = "key";
 	private static final String SORT = "sort";
@@ -68,7 +69,7 @@ public class LabelGenerator {
 					if (!generatedLabel.equals("")) { // subsorts are ignored
 						// append a new tag element with the generated cons
 						element = doc.createElement(TAG);
-						element.setAttribute(KEY, KLABEL);
+						element.setAttribute(KEY, KGENERATEDLABEL);
 						element.setAttribute(VALUE, "'" + generatedLabel);
 						element.setAttribute(LOCATION, "generated");
 						// append it as a child of attribute

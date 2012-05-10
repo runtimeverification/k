@@ -1,22 +1,19 @@
 // make && java -jar wrapperAndServer.jar --maudefile blah
 package ro.uaic.fmse.runner;
 
-import java.io.IOException;
-import java.util.List;
 import java.io.File;
+import java.io.IOException;
 import java.text.MessageFormat;
-
-import main.MainServer;
-import ro.uaic.fmse.tasks.MaudeTask;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+import main.MainServer;
+import ro.uaic.fmse.tasks.MaudeTask;
 
 public class KRunner {
 	// private String _maudeCommand = "maude";

@@ -3,16 +3,13 @@ package ro.uaic.fmse.jkrun;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.Option;
 
 import ro.uaic.fmse.runner.KRunner;
 
@@ -245,6 +242,10 @@ public class Main {
 				K.debug = true;
 				Error.report("You have to provide some labels in order to start debugging.");
 			}
+			if (cmd.hasOption("trace"))
+			{
+				K.trace = true;
+			}
 
 			if (cmd.hasOption("pgm")) {
 				K.pgm = new File(cmd.getOptionValue("pgm")).getCanonicalPath();
@@ -357,6 +358,10 @@ public class Main {
 			} else {
 				s = "set show command off ." + K.lineSeparator + "erew #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
 			}
+			
+			if (K.trace)
+				s = "set trace on ." + K.lineSeparator + s;
+			
 			FileUtil.createFile(K.maude_io_cmd, s);
 
 			/* String compiled_file = new String(); if (cmd.hasOption("compiled-def")) { compiled_file = K.compiled_def; } else { compiled_file = K.k_base + K.fileSeparator + "examples" +

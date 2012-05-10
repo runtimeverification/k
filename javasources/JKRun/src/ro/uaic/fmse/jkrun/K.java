@@ -1,7 +1,5 @@
 package ro.uaic.fmse.jkrun;
 
-import java.util.Arrays;
-import java.util.List;
 
 public class K {
 
@@ -53,5 +51,6 @@ public class K {
 	public static boolean parens = false;
 	public static boolean log_io = false;
 	public static boolean debug = false;
+	public static boolean trace = false;
 
 }
