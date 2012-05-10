@@ -1,1 +1,2 @@
-rule <env> X:K |-> Y:K </env>
+  rule "seek#" +String A:String +String "#"
+                              +String B:String +String "#" 

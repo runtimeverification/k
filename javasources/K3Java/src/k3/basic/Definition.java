@@ -262,6 +262,12 @@ public class Definition implements Cloneable {
 			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "\n";
 		}
 
+		for (Terminal t : getTerminals(false)) {
+			if (t.getTerminal().matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
+				sdf += "	\"" + t.getTerminal() + "\" -> VARID {reject}\n";
+			}
+		}
+
 		sdf += getFollowRestrictionsForTerminals(false);
 
 		return sdf + "\n";

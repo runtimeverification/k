@@ -14,9 +14,9 @@ module STRING-HOOKS
   imports ID-HOOKS
 
 
-  syntax String ::= String "+String" String	[function, prec(33), gather(E e), latex("{#1}+_{\scriptstyle\it String}{#2}"), hook(#STRING:_+String_)]
+  syntax String ::= String "+String" String	[function, left, prec(33), gather(E e), latex("{#1}+_{\scriptstyle\it String}{#2}"), hook(#STRING:_+String_)]
 
-  syntax Bool ::= String "==String" String [function, hook(#STRING:_==String_)]
+  syntax Bool ::= String "==String" String [function, left, hook(#STRING:_==String_)]
 
   syntax Int ::= "lengthString" "(" String ")" [function, klabel(lengthString), hook(#STRING:lengthString)]
   syntax String ::= "charString" "(" Int ")"   [function, klabel(charString), hook(#STRING:charString)]
@@ -31,7 +31,7 @@ module STRING-HOOKS
   syntax String ::= "Id2String" "(" Id ")"		 [function, klabel(Id2String), hook(#CONVERSION:id2String)]
   syntax Id ::= "String2Id" "(" String ")"		 [function, klabel(String2Id), hook(#CONVERSION:string2Id)]
 
-  syntax Bool ::= String "=/=String" String      [function]
+  syntax Bool ::= String "=/=String" String      [function, left]
   rule S1:String =/=String S2:String => notBool(S1 ==String S2) [function, anywhere]
 
 

@@ -89,7 +89,7 @@ public class Configuration extends Sentence {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			Error.report("Cannot parse configuration: " + e);
+			Error.report("Cannot parse configuration: " + e.getLocalizedMessage() + " at: " + this.location + " in file: " + this.filename);
 		}
 
 		parsed = true;

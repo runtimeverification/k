@@ -50,7 +50,7 @@ public class Rule extends Sentence {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			Error.report("Cannot parse rule: " + e.getLocalizedMessage());
+			Error.report("Cannot parse rule: " + e.getLocalizedMessage() + " at: " + this.location + " in file: " + this.filename);
 		}
 	}
 

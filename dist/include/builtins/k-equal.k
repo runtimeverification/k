@@ -13,7 +13,7 @@ module K-EQUAL-HOOKS
 
   syntax Bool ::= Set "<=Set" Set    [function]
   rule SetItem(K:K) Set1:Set <=Set SetItem(K) Set2:Set => Set1 <=Set Set2 [function, anywhere]
-  rule .Set <=Set Set:Set => true [function, anywhere]
+  rule .Set <=Set _:Set => true [function, anywhere]
   rule SetItem(K:K) Set1:Set <=Set Set2:Set => false
                             when notBool (K in Set2) [function, anywhere]
 

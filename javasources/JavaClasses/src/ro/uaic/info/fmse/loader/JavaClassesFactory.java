@@ -66,6 +66,8 @@ public class JavaClassesFactory {
 			return new Hole(element);
 		if (Constants.LISTITEM.equals(element.getNodeName()))
 			return new ListItem(element);
+		if (Constants.LIST.equals(element.getNodeName()))
+			return new List(element);
 		if (Constants.DEFINITION.equals(element.getNodeName()))
 			return new Definition(element);
 
