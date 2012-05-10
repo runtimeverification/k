@@ -72,7 +72,7 @@ public class Definition implements Cloneable {
 	 * 
 	 * @param filepath
 	 */
-	public void slurp(File file) {
+	public void slurp(File file, boolean firstTime) {
 		if (!file.exists()) {
 			Error.externalReport("Could not find file: " + file.getAbsolutePath());
 		}
@@ -87,13 +87,21 @@ public class Definition implements Cloneable {
 					XmlLoader.addFilename(doc.getFirstChild(), file.getAbsolutePath());
 					XmlLoader.reportErrors(doc);
 
+					if (firstTime) {
+						// add automatically the autoinclude.k file
+						if (GlobalSettings.verbose)
+							System.out.println("Including file: " + "autoinclude.k");
+						File newFilePath = buildInclPath(file, "autoinclude.k");
+						slurp(newFilePath, false);
+					}
+
 					NodeList xmlIncludes = doc.getDocumentElement().getElementsByTagName(Tag.require);
 					for (int i = 0; i < xmlIncludes.getLength(); i++) {
 						String inclFile = xmlIncludes.item(i).getAttributes().getNamedItem("value").getNodeValue();
 						if (GlobalSettings.verbose)
 							System.out.println("Including file: " + inclFile);
 						File newFilePath = buildInclPath(file, inclFile);
-						slurp(newFilePath);
+						slurp(newFilePath, false);
 					}
 
 					NodeList xmlModules = doc.getDocumentElement().getElementsByTagName(Tag.module);

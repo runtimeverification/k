@@ -1,4 +1,4 @@
-require "k-prelude.k"
+//require "k-prelude.k"
 
 module IMP-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS 

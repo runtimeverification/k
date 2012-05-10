@@ -82,7 +82,7 @@ public class Definition extends ASTNode {
 		if (!sorts.equals(""))
 			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
 
-		return "mod " + Constants.SHARED + " is\n  including K .\n" + klabels
+		return "mod " + Constants.SHARED + " is\n  including K + URIS .\n" + klabels
 				+ sorts + cellLabels + "\nendm\n" + content;
 	}
 

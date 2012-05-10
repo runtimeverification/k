@@ -1,5 +1,5 @@
-require "k-prelude.k"
-require "modules/uris.k"
+//require "k-prelude.k"
+//require "modules/uris.k"
 
 module SIMPLE-UNTYPED-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS

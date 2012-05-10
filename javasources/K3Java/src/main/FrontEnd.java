@@ -36,7 +36,7 @@ public class FrontEnd {
 
 			// ------------------------------------- basic parsing
 			Definition def = new Definition();
-			def.slurp(f);
+			def.slurp(f, true);
 			def.setMainModule(mainModule);
 			def.setMainFile(mainFile);
 			def.addConsToProductions();
