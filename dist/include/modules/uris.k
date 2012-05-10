@@ -24,7 +24,7 @@ module URIS
   rule #close(N:Int) 
       => String2DotK(#tcpRequest("close#" +String Int2String(N) +String "#")) [function, anywhere]
 
-  syntax K ::= "String2DotK" "(" String ")"  [function klabel(String2DotK)]
+  syntax K ::= "String2DotK" "(" String ")"  [function, klabel(String2DotK)]
   rule String2DotK(S) => #ioError(#retrieveTCPError(S)) when #isTCPError(S) [function, anywhere]
   rule String2DotK(S) => .K when notBool(#isTCPError(S)) [function, anywhere]
   
@@ -62,7 +62,7 @@ module URIS
   rule #fReadByte(N) 
       => #string2Int(#tcpRequest("readbyte#" +String Int2String(N) +String "#")) [function, anywhere]
 
-  syntax K ::= "#string2Int" "(" K ")"   [function klabel(#string2Int)]
+  syntax K ::= "#string2Int" "(" K ")"   [function, klabel(#string2Int)]
 
   rule #string2Int(S) => String2Int(S) when lengthString(S) >=Int 0 [function, anywhere]
   rule #string2Int(#EOF) => #EOF [function, anywhere]
@@ -88,15 +88,15 @@ module URIS
   syntax K ::= "#fReadChar" "(" Int ")"   [function, klabel(#fReadChar)]
   rule #fReadChar(N) => #charString(#fReadByte(N)) [function, anywhere]
 
-  syntax K ::= "#charString" "(" K ")"   [function klabel(#charString)]
+  syntax K ::= "#charString" "(" K ")"   [function, klabel(#charString)]
   rule #charString(N:Int) => charString(N) [function, anywhere]
   rule #charString(#EOF) => #EOF [function, anywhere]
 
-  syntax K ::= "#printChar" "(" K ")"   [function klabel(#printChar)]
+  syntax K ::= "#printChar" "(" K ")"   [function, klabel(#printChar)]
   rule #printChar(C) => #fPrintChar(#stdout,C)
         when isChar(C) [anywhere]
 
-  syntax K ::= "#fPrintChar" "(" Int "," K ")"   [function klabel(#fPrintChar)]
+  syntax K ::= "#fPrintChar" "(" Int "," K ")"   [function, klabel(#fPrintChar)]
   rule #fPrintChar(N,C:String) => #fPutByte(N,asciiString(C)) 
         when isChar(C) [anywhere]
 
@@ -119,9 +119,9 @@ module URIS
   // consume a char from the buffer only on succesfull communication 
   rule #ostream(_:Int) (#removeCharUponAck => .List) #buffer(S:String => substrString(S,1, lengthString(S)))
  
-  syntax List ::= `#removeCharUponAck
+  syntax List ::= "#removeCharUponAck"
   
-  syntax List ::= `#parse ( String , K )
+  syntax List ::= "#parse" "(" String "," K ")"
 
 /*
   // base values for each type
@@ -176,8 +176,8 @@ module URIS
   // I fthe buffer becomes empty, read from the input stream
   rule #parse(_:String,_) (.List => ListItem(#fReadChar(N))) #buffer(.K) #istream(N)
 
-  syntax List ::= `#istream ( Int ) | `#ostream ( Int ) 
-  syntax List ::= `#noIO
+  syntax List ::= "#istream" "(" Int ")" | "#ostream" "(" Int ")" 
+  syntax List ::= "#noIO"
   rule #noIO #istream(_:Int) => .List
   rule #ostream(_:Int) #noIO => .List
 endmodule

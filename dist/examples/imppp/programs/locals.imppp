@@ -1,0 +1,19 @@
+// This program shows how variables can be shadowed by local variables
+// declared in blocks within their scope, and how environments are
+// correctly recovered after blocks.
+
+var x;
+x := 1;
+print("Top x is ", x, "\n");
+{
+  var x;
+  x := 2;
+  print("Nested x is ", x, "\n");
+  while (++x <= 10) do {
+    var x;
+    x := 7;
+    print("Inner x is ",x,"\n")
+  };
+  print("Nested x is ", x, "\n")
+};
+print("Top x is ", x, "\n")
