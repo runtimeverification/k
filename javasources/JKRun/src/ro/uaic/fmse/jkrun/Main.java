@@ -157,7 +157,7 @@ public class Main {
 		CommandLine cmd = cmd_options.parse(cmds);
 		try {
 			// Parse the program arguments
-
+            
 			if (cmd.hasOption('h') || cmd.hasOption('?')) {
 				K.help = true;
 			}
@@ -171,7 +171,7 @@ public class Main {
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
 				K.k_definition = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
-				// System.out.println("k-definition=" + K.k_definition);
+				//System.out.println("k-definition=" + K.k_definition);
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");
@@ -321,7 +321,8 @@ public class Main {
 
 			if (K.parser.equals("kast")) {
 				// rp.execute("perl", K.kast, kastCmd, "-pgm=" + K.pgm);
-				rp.execute(new String[] { K.kast, "--k-definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
+				//rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
+				rp.execute(new String[] { K.kast, K.pgm });
 				/* rp.execute("kast", "--k-definition=" + K.k_base + "/examples/languages/research/" + lang + "/" + lang, K.k_base + "/examples/languages/research/" + lang + "/programs/" + pgm + "." +
 				 * lang); */
 			} else {

@@ -87,7 +87,7 @@ public class RunProcess {
 
 			// if some errors occurred (if something was written on the stderr stream)
 			if (!s2.equals("")) {
-				System.out.println("Some errors occurred.." + s2);
+				System.out.println("RunProcess: Some errors occurred.." + s2);
 				this.setErr(s2);
 				System.exit(1);
 			}
