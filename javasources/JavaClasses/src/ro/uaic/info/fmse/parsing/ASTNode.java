@@ -29,7 +29,7 @@ public abstract class ASTNode implements IMaude, IXML, Visitable {
 		return location;
 	}
 
-	public abstract void accept(Visitor visitor);
+	public abstract void all(Visitor visitor);
 
 	public String getLocation() {
 		return location;
@@ -46,6 +46,4 @@ public abstract class ASTNode implements IMaude, IXML, Visitable {
 	public void setFilename(String filename) {
 		this.filename = filename;
 	}
-
-	public abstract void all(Visitor visitor);
 }

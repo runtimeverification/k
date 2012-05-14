@@ -16,11 +16,6 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
-
-	@Override
 	public void all(Visitor visitor) {
 	}
 }

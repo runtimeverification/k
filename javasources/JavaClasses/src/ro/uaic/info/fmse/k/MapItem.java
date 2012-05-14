@@ -32,13 +32,6 @@ public class MapItem extends Term {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		key.accept(visitor);
-		value.accept(visitor);
-	}
-
-	@Override
 	public void all(Visitor visitor) {
 		key = (Term) visitor.visit(key);
 		value = (Term) visitor.visit(value);

@@ -23,11 +23,6 @@ public class SetItem extends Term {
 		return "SetItem(" + item.toMaude() + ")";
 	}
 
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		item.accept(visitor);
-	}
-
 	@Override
 	public void all(Visitor visitor) {
 		item = (Term) visitor.visit(item);

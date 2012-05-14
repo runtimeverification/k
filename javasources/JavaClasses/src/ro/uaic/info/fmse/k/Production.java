@@ -118,12 +118,6 @@ public class Production extends ASTNode {
 		return production;
 	}
 
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		for (ASTNode di : items)
-			di.accept(visitor);
-	}
-
 	public java.util.List<ProductionItem> getItems() {
 		return items;
 	}

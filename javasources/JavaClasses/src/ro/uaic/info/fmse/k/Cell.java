@@ -21,12 +21,6 @@ public class Cell extends Term {
 		super(location, filename);
 	}
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		contents.accept(visitor);
-	}
-
 	public Cell(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);

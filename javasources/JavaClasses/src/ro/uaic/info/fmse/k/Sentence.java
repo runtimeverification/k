@@ -51,14 +51,6 @@ public abstract class Sentence extends ModuleItem {
 		return attributes.trim();
 	}
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		body.accept(visitor);
-		if (condition != null)
-			condition.accept(visitor);
-	}
-
 	public Term getBody() {
 		return body;
 	}

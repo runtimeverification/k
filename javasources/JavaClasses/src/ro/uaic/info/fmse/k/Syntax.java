@@ -124,13 +124,6 @@ public class Syntax extends ModuleItem {
 		return sorts;
 	}
 
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		sort.accept(visitor);
-		for (ASTNode di : this.priorityBlocks)
-			di.accept(visitor);
-	}
-
 	@Override
 	public void all(Visitor visitor) {
 		sort = (Sort) visitor.visit(sort);

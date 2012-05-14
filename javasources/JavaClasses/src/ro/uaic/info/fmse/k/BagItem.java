@@ -27,12 +27,6 @@ public class BagItem extends Term {
 		return "BagItem(" + item.toMaude() + ")";
 	}
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		item.accept(visitor);
-	}
-
 	public Term getItem() {
 		return item;
 	}

@@ -25,13 +25,8 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
-
-	@Override
 	public void all(Visitor visitor) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

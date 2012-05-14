@@ -57,13 +57,6 @@ public class PriorityBlock extends ASTNode {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		for (ASTNode di : productions)
-			di.accept(visitor);
-	}
-
-	@Override
 	public void all(Visitor visitor) {
 		for (int i = 0; i < this.productions.size(); i++) {
 			Production elem = (Production) visitor.visit(this.productions.get(i));

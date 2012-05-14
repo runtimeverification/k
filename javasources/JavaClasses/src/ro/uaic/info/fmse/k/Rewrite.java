@@ -35,12 +35,6 @@ public class Rewrite extends Term {
 		return "_=>_(" + left + "," + right + ")";
 	}
 
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		left.accept(visitor);
-		right.accept(visitor);
-	}
-
 	@Override
 	public void all(Visitor visitor) {
 		left = (Term) visitor.visit(left);

@@ -48,20 +48,18 @@ public class Definition extends ASTNode {
 	public String toMaude() {
 		String content = "";
 
-		
 		String uris = "";
-		for (DefinitionItem di : items)
-		{
-//			if (di instanceof Module && ((Module)di).name.equals("URIS"))
-//					uris = di.toMaude();
-//			else 
-				content += di.toMaude() + " \n";
+		for (DefinitionItem di : items) {
+			// if (di instanceof Module && ((Module)di).name.equals("URIS"))
+			// uris = di.toMaude();
+			// else
+			content += di.toMaude() + " \n";
 		}
 
 		// klabels
 		String klabels = "";
 		KLabelsVisitor labelsVisitor = new KLabelsVisitor();
-		this.accept(labelsVisitor);
+		labelsVisitor.visit(this);
 		for (String kl : labelsVisitor.kLabels) {
 			klabels += kl + " ";
 		}
@@ -72,7 +70,7 @@ public class Definition extends ASTNode {
 		// cellLabels visitor
 		String cellLabels = "";
 		CellLabelsVisitor cellLabelsVisitor = new CellLabelsVisitor();
-		this.accept(cellLabelsVisitor);
+		cellLabelsVisitor.visit(this);
 		for (String cellLabel : cellLabelsVisitor.cellLabels) {
 			cellLabels += cellLabel + " ";
 		}
@@ -82,8 +80,7 @@ public class Definition extends ASTNode {
 
 		// sorts & automatic subsortation to K
 		String sorts = "";
-		for (String s : MaudeHelper.declaredSorts)
-		{
+		for (String s : MaudeHelper.declaredSorts) {
 			if (!MaudeHelper.basicSorts.contains(s))
 				sorts += s + " ";
 		}
@@ -91,9 +88,9 @@ public class Definition extends ASTNode {
 		if (!sorts.equals(""))
 			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
 
-		String  shared = "mod " + Constants.SHARED + " is\n  including K .\n" + klabels + sorts + cellLabels + "\nendm";
+		String shared = "mod " + Constants.SHARED + " is\n  including K .\n" + klabels + sorts + cellLabels + "\nendm";
 
-		return  uris + "\n" + shared + "\n" + content;
+		return uris + "\n" + shared + "\n" + content;
 	}
 
 	@Override
@@ -111,13 +108,6 @@ public class Definition extends ASTNode {
 		}
 
 		return definition;
-	}
-
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		for (DefinitionItem di : items)
-			di.accept(visitor);
 	}
 
 	@Override

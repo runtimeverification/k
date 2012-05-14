@@ -24,12 +24,6 @@ public class ListItem extends Term {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		item.accept(visitor);
-	}
-
-	@Override
 	public void all(Visitor visitor) {
 		item = (Term) visitor.visit(item);
 	}

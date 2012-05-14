@@ -40,11 +40,6 @@ public class Empty extends Term {
 		return ".List`{\"" + separator + "\"`}";
 	}
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
-
 	public String getSort() {
 		return sort;
 	}

@@ -38,11 +38,6 @@ public class Import extends ModuleItem {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
-
-	@Override
 	public void all(Visitor visitor) {
 	}
 }

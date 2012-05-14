@@ -48,13 +48,6 @@ public abstract class Collection extends Term {
 		return "__(" + content + ")";
 	}
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		for (Term di : contents)
-			di.accept(visitor);
-	}
-
 	public java.util.List<Term> getContents() {
 		return contents;
 	}

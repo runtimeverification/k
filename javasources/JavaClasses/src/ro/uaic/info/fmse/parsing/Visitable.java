@@ -1,7 +1,5 @@
 package ro.uaic.info.fmse.parsing;
 
 public interface Visitable {
-
-	public void accept(Visitor visitor);
-
+	public void all(Visitor visitor);
 }

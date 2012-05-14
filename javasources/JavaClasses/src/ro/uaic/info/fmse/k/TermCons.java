@@ -9,7 +9,6 @@ import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -69,12 +68,6 @@ public class TermCons extends Term {
 			contents = "(" + contents.substring(0, contents.length() - 1) + ")";
 
 		return cons + contents;
-	}
-
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		for (ASTNode di : contents)
-			di.accept(visitor);
 	}
 
 	public String getSort() {

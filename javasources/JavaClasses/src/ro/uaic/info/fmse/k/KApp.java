@@ -39,13 +39,6 @@ public class KApp extends Term {
 		return label.toMaude() + "(" + child.toMaude() + ") ";
 	}
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-		label.accept(visitor);
-		child.accept(visitor);
-	}
-
 	public Term getLabel() {
 		return label;
 	}
