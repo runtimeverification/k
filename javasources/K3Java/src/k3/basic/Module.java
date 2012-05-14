@@ -12,6 +12,7 @@ public class Module extends Term implements java.io.Serializable, Cloneable {
 	private String moduleName;
 	private Set<String> includes = new HashSet<String>();
 	private String type = "";
+	private boolean predefined = false;
 
 	public Module clone() {
 		Module m = new Module();
@@ -98,5 +99,15 @@ public class Module extends Term implements java.io.Serializable, Cloneable {
 
 	public String getType() {
 		return type;
+	}
+
+	public void setPredefined(boolean predefined) {
+		this.predefined = predefined;
+		Element elm = (Element) this.xmlTerm;
+		elm.setAttribute("predefined", predefined + "");
+	}
+
+	public boolean isPredefined() {
+		return predefined;
 	}
 }

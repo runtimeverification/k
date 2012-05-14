@@ -108,6 +108,10 @@ public class Definition implements Cloneable {
 
 					for (int i = 0; i < xmlModules.getLength(); i++) {
 						Module km = new Module(xmlModules.item(i), cannonicalPath);
+						// set the module type as predefined if it is located in the /include directory
+						// used later when including SHARED module
+						if (file.getAbsolutePath().startsWith(new File(KPaths.getKBase(false) + "/include/").getAbsolutePath()))
+							km.setPredefined(true);
 						modules.add(km);
 						modulesMap.put(km.getModuleName(), km);
 					}
