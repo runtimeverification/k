@@ -1,12 +1,5 @@
-require "k-prelude.k"
-
 module SIMPLE-UNTYPED-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
-
-  syntax Id ::= #Id
-  syntax Int ::= #Int
-  syntax Bool ::= #Bool
-  syntax String ::= #String
 
   syntax Start ::= Stmts
   syntax Ids ::= List{Id,","} [strict, cons("Ids1ListSyn"), hybrid]
@@ -78,9 +71,9 @@ module SIMPLE-UNTYPED
 
   // coming from macros
   rule if E:Exp then S:Stmt => if E then S else {}
-  rule (for X:Id = E1 to E2 do S) => {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
-  rule var X = E, .Exps; => var X, .Exps; X = E;
+  rule (for X:Id = E1 to E2 do S) => {var X=E1; while X <= E2 do {S X = (X + 1);}}
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
+  rule var X = E; => var X; X = E;
 
   syntax #Id ::= "main"
 
@@ -116,28 +109,28 @@ module SIMPLE-UNTYPED
   syntax K ::= "undefined"  [cons("K1UndefinedSyn")]
 
 
-  rule <k> var X:Id, .Exps; => . ...</k>
+  rule <k> var X:Id; => . ...</k>
        <env> Env:Map => Env[L:Int/X] </env>
        <store>... . => L|->undefined ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
-  rule <k> var X[N:Int, .Exps], .Exps; => . ...</k>
+  rule <k> var X[N:Int]; => . ...</k>
        <env> Env => Env:Map[L/X:Id] </env>
        <store>... . => L |-> arrayRef(L +Int 1, N)
                        (L +Int 1) .. (L +Int N) |-> undefined ...</store>
        <nextLoc> L => (L:Int +Int 1) +Int N </nextLoc>
 
 
-  context var X:Id[HOLE], .Exps;
+  context var X:Id[HOLE];
 
   syntax #Id ::= "$1" | "$2"
-  rule var X:Id[N1:Int,N2:Int,Vs:Vals], .Exps; =>
-       var X[N1], .Exps;
+  rule var X:Id[N1:Int,N2:Int,Vs:Vals]; =>
+       var X[N1];
        {
-         var $1 = X, .Exps;
+         var $1 = X;
          for $2 = 0 to N1 - 1 do   // no longer a stupid parser
          {
-           var X[N2,Vs], .Exps;    // no longer a stupid parser
+           var X[N2,Vs];    // no longer a stupid parser
            $1[$2] = X;
          }
        }  [structural]
@@ -184,7 +177,7 @@ module SIMPLE-UNTYPED
   rule not(B:Bool) => notBool(B)
 
 
-  rule V[N1,N2,Vs] => V[N1, .Exps][N2,Vs]  [structural]
+  rule V[N1:Int,N2:Int,Vs:Vals] => V[N1][N2,Vs]  [structural]
   rule arrayRef(L,_:Int)[N] => lookup(L:Int +Int N:Int)  [structural]
   syntax K ::= "lookup" "(" Int ")" [cons("K1LookupSyn")]
   rule <k> lookup(L:Int) => V:Val ...</k> <store>...L|->V...</store>  [transition]
@@ -251,7 +244,7 @@ module SIMPLE-UNTYPED
        <control> <xstack> . => (X:Id,S2,K,Env,C) ...</xstack> C:Bag </control>
        <env> Env </env>
   rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
-  rule <k> throw V; ~> _ => {var X:Id=V, .Exps; S2} ~> K </k>
+  rule <k> throw V; ~> _ => {var X:Id=V; S2} ~> K </k>
        <control> <xstack> (X:Id,S2,K,Env,C) => . ...</xstack> (_ => C) </control>
        <env> _ => Env </env>
 
