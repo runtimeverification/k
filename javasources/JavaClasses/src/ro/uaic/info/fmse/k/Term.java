@@ -20,6 +20,7 @@ public abstract class Term extends ASTNode {
 
 	public Term(Element element) {
 		super(element);
+		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 	}
 
 	@Override
