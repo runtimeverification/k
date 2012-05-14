@@ -30,6 +30,14 @@ public class TermCons extends Term {
 			contents.add((Term) JavaClassesFactory.getTerm(e));
 	}
 
+	public TermCons(String location, String filename, String psort, String listCons, List<Term> genContents) {
+		super(location, filename);
+		sort = psort;
+		cons = listCons;
+		builtin = false;
+		contents = genContents;
+	}
+
 	public String toString() {
 		String str = "";
 		Production pr = DefinitionHelper.conses.get("\"" + cons + "\"");
