@@ -17,12 +17,14 @@ public class Module extends DefinitionItem {
 	String name;
 	List<ModuleItem> items;
 	String type;
+	boolean predefined;
 
 	public Module(Element element) {
 		super(element);
 
 		name = element.getAttribute(Constants.VALUE_value_ATTR);
 		type = element.getAttribute(Constants.TYPE_type_ATTR);
+		predefined = element.getAttribute(Constants.PREDEFINED).equals("true") ? true : false;
 		items = new ArrayList<ModuleItem>();
 
 		List<Element> elements = XML.getChildrenElements(element);
@@ -47,7 +49,8 @@ public class Module extends DefinitionItem {
 
 		String content = "";
 
-		items.add(0, new Import(Constants.SHARED));
+		if (!predefined)
+			items.add(0, new Import(Constants.SHARED));
 
 		// apppend labels module
 		// List<String> mkl = getModuleKLabels();
