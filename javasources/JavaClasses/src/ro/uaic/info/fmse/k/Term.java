@@ -11,7 +11,7 @@ public abstract class Term extends ASTNode {
 
 	public Term(String location, String filename, String sort) {
 		super(location, filename);
-		this.sort = sort;
+		setSort(sort);
 	}
 
 	public Term(String location, String filename) {
@@ -26,5 +26,13 @@ public abstract class Term extends ASTNode {
 	public Element toXml(Document doc) {
 		Element term = doc.createElement(Constants.TERM);
 		return term;
+	}
+
+	public String getSort() {
+		return sort;
+	}
+
+	private void setSort(String sort) {
+		this.sort = sort;
 	}
 }
