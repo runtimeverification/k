@@ -92,19 +92,19 @@ The rules below are taken over, unchanged, from the semantics of IMP\@. */
        <env>... X |-> L:Nat ...</env>
        <store>... L |-> E ...</store>
   rule I1:Int + I2:Int => I1 +Int I2
-  rule _-_(I1,I2) => _-Int_(I1,I2)
-  rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=Int 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=Int 0
+  rule _-_(I1:Int,I2:Int) => _-Int_(I1,I2)
+  rule I1:Int * I2:Int => I1 *Int I2
+  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=Int 0
+  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=Int 0
   rule - I:Int => 0 -Int I
-  rule I1 < I2 => I1 <Int I2
-  rule I1 <= I2 => I1 <=Int I2
-  rule I1 > I2 => I1 >Int I2
-  rule I1 >= I2 => I1 >=Int I2
+  rule I1:Int < I2:Int => I1 <Int I2
+  rule I1:Int <= I2:Int => I1 <=Int I2
+  rule I1:Int > I2:Int => I1 >Int I2
+  rule I1:Int >= I2:Int => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==K V2
-  rule V1 != V2 => V1 =/=K V2
+  rule V1:Val != V2:Val => V1 =/=K V2
   rule T1:Bool and T2:Bool => T1 andBool T2
-  rule T1 or T2 => T1 orBool T2
+  rule T1:Bool or T2:Bool => T1 orBool T2
   rule not(T:Bool) => notBool(T)
 
 /*@ \subsection{Conditional}
@@ -138,15 +138,15 @@ when programs are in a tail recursive form. */
 
   syntax Val ::= "closure-lambda" "(" Map "," Id "," Exp ")"
                    [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
-  rule <k> lambda X . E => closure-lambda(Rho:Map,X,E) ...</k>
+  rule <k> lambda X:Id . E:Exp => closure-lambda(Rho:Map,X,E) ...</k>
        <env> Rho </env>
-  rule <k> closure-lambda(Rho,X,E) V:Val => E ~> env(Rho') ...</k>
+  rule <k> closure-lambda(Rho:Map,X:Id,E:Exp) V:Val => E ~> env(Rho') ...</k>
        <env> Rho':Map =>  Rho[L/X] </env>
        <store_> . => L|->V <_/store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
   syntax K ::= "env" "(" Map ")"
-  rule <k> V ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>  [:structural:]
+  rule <k> V:Val ~> (env(Rho:Map) => .) ...</k> <env> _ => Rho </env>  [:structural:]
   rule (env(_) => .) ~> env(_)                                 [:structural:]
 
 
@@ -171,11 +171,11 @@ conditional. */
 
   syntax Exp ::= "closure-mu" "(" Map "," Exp ")"
                    [latex "\textsf{closure}_\mu({#1},{#2})"]
-  rule <k> mu X . E => closure-mu(Rho[L/X],E) ...</k>
+  rule <k> mu X:Id . E:Exp => closure-mu(Rho:Map[L:Nat/X],E) ...</k>
        <env> Rho </env>
        <store>... . => L |-> closure-mu(Rho[L/X],E) ...</store>
        <nextLoc> L =>  L +Int 1 </nextLoc>
-  rule <k> closure-mu(Rho,E) => E ~> env(Rho') ...</k>
+  rule <k> closure-mu(Rho:Map,E:Exp) => E ~> env(Rho':Map) ...</k>
        <env> Rho' => Rho </env>
 
 /*
