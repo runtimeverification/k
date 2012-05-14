@@ -203,7 +203,7 @@ module SIMPLE-UNTYPED
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V:Val ...</store>
        <nextLoc> L => L:Int +Int 1 </nextLoc>
-  rule <k> bindto(.Ids,.Exps) => . ...</k>  [structural]
+  rule <k> bindto(.Ids,.Vals) => . ...</k>  [structural]
 
   rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in>  [transition]
 

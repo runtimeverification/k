@@ -16,6 +16,7 @@ import k3.basic.Definition;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.AmbFilter;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
@@ -128,6 +129,7 @@ public class FrontEnd {
 
 			new AmbFilter().visit(javaDef);
 			new CollectSubsortsVisitor().visit(javaDef);
+			new EmptyListsVisitor().visit(javaDef);
 
 			String maudified = javaDef.toMaude();
 
