@@ -44,7 +44,7 @@ module IMP
   					<env>... X |-> (_ => I) ...</env>
 
   rule [addition] : I1:Int + I2:Int => I1 +Int I2 
-  rule [division] : I1:Int / I2:Int => I1 /Int I2 when I2 =/=Bool 0
+  rule [division] : I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
 
   rule [leq] : I1:Int <= I2:Int => I1 <=Int I2
   rule [not] : not T:Bool => notBool T
