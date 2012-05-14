@@ -2,14 +2,14 @@ require "k-prelude.k"
 require "modules/uris.k"
 //require "modules/substitution.k"
 
-module AUTO-INCLUDED-MODULE-SYNTAX
+interface AUTO-INCLUDED-MODULE-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
 
-endmodule
+endinterface
 
-module AUTO-INCLUDED-MODULE
+interface AUTO-INCLUDED-MODULE
   imports BUILTIN-SYNTAX
   imports K
   imports URIS
 
-endmodule
+endinterface
