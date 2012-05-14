@@ -44,6 +44,8 @@ public class Production extends ASTNode {
 		}
 		if (attributes.containsKey(Constants.CONS_cons_ATTR))
 			DefinitionHelper.conses.put(attributes.get(Constants.CONS_cons_ATTR), this);
+		//if (items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST)
+			
 	}
 
 	public String toString() {

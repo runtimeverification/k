@@ -6,11 +6,8 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.loader.Constants;
-import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.utils.strings.StringUtil;
@@ -19,6 +16,22 @@ import ro.uaic.info.fmse.utils.xml.XML;
 public class Syntax extends ModuleItem {
 	Sort sort;
 	java.util.List<PriorityBlock> priorityBlocks;
+
+	public Sort getSort() {
+		return sort;
+	}
+
+	public void setSort(Sort sort) {
+		this.sort = sort;
+	}
+
+	public java.util.List<PriorityBlock> getPriorityBlocks() {
+		return priorityBlocks;
+	}
+
+	public void setPriorityBlocks(java.util.List<PriorityBlock> priorityBlocks) {
+		this.priorityBlocks = priorityBlocks;
+	}
 
 	public Syntax(Element element) {
 		super(element);
@@ -32,12 +45,6 @@ public class Syntax extends ModuleItem {
 		List<Element> priorities = XML.getChildrenElementsByTagName(element, Constants.PRIORITY);
 		for (Element priority : priorities)
 			priorityBlocks.add((PriorityBlock) JavaClassesFactory.getTerm(priority));
-
-		// this should not fail
-		if (priorityBlocks.get(0).productions.get(0).items.get(0).getType() == ProductionType.USERLIST) {
-			UserList ul = (UserList) priorityBlocks.get(0).productions.get(0).items.get(0);
-			DefinitionHelper.listSeparators.put(sort.sort, ul.separator);
-		}
 	}
 
 	@Override

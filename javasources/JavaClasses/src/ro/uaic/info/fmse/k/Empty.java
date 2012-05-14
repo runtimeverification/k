@@ -36,8 +36,9 @@ public class Empty extends Term {
 				return "." + sort;
 		}
 		// search for the separator for the empty list
-		String separator = DefinitionHelper.listSeparators.get(getSort());
-		return ".List`{\"" + separator + "\"`}";
+		Production prd = DefinitionHelper.listConses.get(getSort());
+		UserList ul = (UserList) prd.getItems().get(0);
+		return ".List`{\"" + ul.separator + "\"`}";
 	}
 
 	public String getSort() {
