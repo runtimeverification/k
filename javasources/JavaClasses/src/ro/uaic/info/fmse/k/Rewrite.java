@@ -7,14 +7,13 @@ import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
-
 public class Rewrite extends Term {
 	Term left;
 	Term right;
 
 	public Rewrite(Element element) {
 		super(element);
-		
+
 		Element temp = XML.getChildrenElementsByTagName(element, Constants.LEFT).get(0);
 		temp = XML.getChildrenElements(temp).get(0);
 		left = (Term) JavaClassesFactory.getTerm(temp);
@@ -27,18 +26,24 @@ public class Rewrite extends Term {
 	public String toString() {
 		return left + " => " + right;
 	}
-	
+
 	@Override
 	public String toMaude() {
 		String left = this.left == null ? "null" : this.left.toMaude();
 		String right = this.right == null ? "null" : this.right.toMaude();
-		
+
 		return "_=>_(" + left + "," + right + ")";
 	}
+
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 		left.accept(visitor);
 		right.accept(visitor);
 	}
 
+	@Override
+	public void all(Visitor visitor) {
+		left = (Term) visitor.visit(left);
+		right = (Term) visitor.visit(right);
+	}
 }

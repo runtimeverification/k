@@ -106,10 +106,19 @@ public class Module extends DefinitionItem {
 
 		return module;
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 		for (ModuleItem mi : this.items)
 			mi.accept(visitor);
+	}
+
+	@Override
+	public void all(Visitor visitor) {
+		for (int i = 0; i < this.items.size(); i++) {
+			ModuleItem elem = (ModuleItem) visitor.visit(this.items.get(i));
+			this.items.set(i, elem);
+		}
 	}
 }

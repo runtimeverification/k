@@ -56,4 +56,8 @@ public class Constant extends Term {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
+	@Override
+	public void all(Visitor visitor) {
+	}
 }

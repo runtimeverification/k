@@ -56,4 +56,8 @@ public class UserList extends ProductionItem {
 	public void setSeparator(String separator) {
 		this.separator = separator;
 	}
+
+	@Override
+	public void all(Visitor visitor) {
+	}
 }

@@ -10,15 +10,15 @@ import ro.uaic.info.fmse.parsing.Visitor;
 public class CellLabelsVisitor extends Visitor {
 
 	public Set<String> cellLabels = new HashSet<String>();
-	
+
 	@Override
-	public void visit(ASTNode astNode) {
+	public ASTNode visit(ASTNode astNode) {
 		// I don't like this
-		if (astNode instanceof Cell)
-		{
+		if (astNode instanceof Cell) {
 			Cell cell = (Cell) astNode;
 			cellLabels.add(cell.getLabel());
 		}
+		astNode.all(this);
+		return astNode;
 	}
-
 }

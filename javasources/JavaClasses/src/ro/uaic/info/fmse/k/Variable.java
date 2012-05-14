@@ -29,4 +29,8 @@ public class Variable extends Term {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
+	@Override
+	public void all(Visitor visitor) {
+	}
 }

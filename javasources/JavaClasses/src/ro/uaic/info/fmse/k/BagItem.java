@@ -40,4 +40,9 @@ public class BagItem extends Term {
 	public void setItem(Term item) {
 		this.item = item;
 	}
+
+	@Override
+	public void all(Visitor visitor) {
+		item = (Term) visitor.visit(item);
+	}
 }

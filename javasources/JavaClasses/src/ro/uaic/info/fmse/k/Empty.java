@@ -52,4 +52,8 @@ public class Empty extends Term {
 	public void setSort(String sort) {
 		this.sort = sort;
 	}
+
+	@Override
+	public void all(Visitor visitor) {
+	}
 }

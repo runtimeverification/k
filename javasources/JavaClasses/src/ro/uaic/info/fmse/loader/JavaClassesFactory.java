@@ -79,7 +79,7 @@ public class JavaClassesFactory {
 			for (ASTNode variant : amb.getContents()) {
 				if (variant instanceof TermCons) {
 					TermCons tc = (TermCons) variant;
-					Production prod = DefinitionHelper.conses.get(tc.getCons());
+					Production prod = DefinitionHelper.conses.get("\"" + tc.getCons() + "\"");
 					if (prod != null) {
 						for (ProductionItem i : prod.getItems())
 							msg += i + " ";

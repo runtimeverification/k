@@ -41,4 +41,8 @@ public class Import extends ModuleItem {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
+	@Override
+	public void all(Visitor visitor) {
+	}
 }

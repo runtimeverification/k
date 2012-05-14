@@ -1,4 +1,3 @@
-//require "k-prelude.k"
 
 module IMP-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS 
@@ -29,8 +28,6 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports BUILTIN-HOOKS
-  imports K
 
   configuration <T> 
   					<k> $PGM : K </k>

@@ -13,8 +13,7 @@ public class MapItem extends Term {
 
 	public MapItem(Element element) {
 		super(element);
-		Element elm = XML.getChildrenElementsByTagName(element, Constants.KEY)
-				.get(0);
+		Element elm = XML.getChildrenElementsByTagName(element, Constants.KEY).get(0);
 		Element elmBody = XML.getChildrenElements(elm).get(0);
 		this.key = (Term) JavaClassesFactory.getTerm(elmBody);
 
@@ -37,5 +36,11 @@ public class MapItem extends Term {
 		visitor.visit(this);
 		key.accept(visitor);
 		value.accept(visitor);
+	}
+
+	@Override
+	public void all(Visitor visitor) {
+		key = (Term) visitor.visit(key);
+		value = (Term) visitor.visit(value);
 	}
 }

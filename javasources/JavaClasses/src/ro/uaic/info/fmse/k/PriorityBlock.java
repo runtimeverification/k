@@ -20,11 +20,9 @@ public class PriorityBlock extends ASTNode {
 		super(element);
 
 		this.productions = new LinkedList<Production>();
-		java.util.List<Element> productions = XML.getChildrenElementsByTagName(
-				element, Constants.PRODUCTION);
+		java.util.List<Element> productions = XML.getChildrenElementsByTagName(element, Constants.PRODUCTION);
 		for (Element production : productions)
-			this.productions.add((Production) JavaClassesFactory
-					.getTerm(production));
+			this.productions.add((Production) JavaClassesFactory.getTerm(production));
 
 		assoc = element.getAttribute(Constants.ASSOC_assoc_ATTR);
 	}
@@ -63,5 +61,13 @@ public class PriorityBlock extends ASTNode {
 		visitor.visit(this);
 		for (ASTNode di : productions)
 			di.accept(visitor);
+	}
+
+	@Override
+	public void all(Visitor visitor) {
+		for (int i = 0; i < this.productions.size(); i++) {
+			Production elem = (Production) visitor.visit(this.productions.get(i));
+			this.productions.set(i, elem);
+		}
 	}
 }

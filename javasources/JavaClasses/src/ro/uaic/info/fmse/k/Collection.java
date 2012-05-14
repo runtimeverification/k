@@ -62,4 +62,12 @@ public abstract class Collection extends Term {
 	public void setContents(java.util.List<Term> contents) {
 		this.contents = contents;
 	}
+
+	@Override
+	public void all(Visitor visitor) {
+		for (int i = 0; i < this.contents.size(); i++) {
+			Term elem = (Term) visitor.visit(this.contents.get(i));
+			this.contents.set(i, elem);
+		}
+	}
 }

@@ -11,8 +11,7 @@ public class SetItem extends Term {
 
 	public SetItem(Element element) {
 		super(element);
-		this.item = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(
-				element).get(0));
+		this.item = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
 	}
 
 	public String toString() {
@@ -27,5 +26,10 @@ public class SetItem extends Term {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 		item.accept(visitor);
+	}
+
+	@Override
+	public void all(Visitor visitor) {
+		item = (Term) visitor.visit(item);
 	}
 }

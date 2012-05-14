@@ -61,4 +61,10 @@ public class KApp extends Term {
 	public void setChild(Term child) {
 		this.child = child;
 	}
+
+	@Override
+	public void all(Visitor visitor) {
+		this.label = (Term) visitor.visit(label);
+		this.child = (Term) visitor.visit(child);
+	}
 }

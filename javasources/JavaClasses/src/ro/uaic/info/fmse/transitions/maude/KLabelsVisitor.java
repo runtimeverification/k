@@ -10,14 +10,16 @@ import ro.uaic.info.fmse.parsing.Visitor;
 
 public class KLabelsVisitor extends Visitor {
 
-	public Set<String> kLabels = new HashSet<String>(); 
-	
+	public Set<String> kLabels = new HashSet<String>();
+
 	@Override
-	public void visit(ASTNode astNode) {
+	public ASTNode visit(ASTNode astNode) {
 		if (astNode instanceof Constant) {
 			Constant constant = (Constant) astNode;
 			if (constant.getSort().equals(Constants.KLABEL))
 				kLabels.add(constant.getValue());
 		}
+		astNode.all(this);
+		return astNode;
 	}
 }

@@ -46,4 +46,6 @@ public abstract class ASTNode implements IMaude, IXML, Visitable {
 	public void setFilename(String filename) {
 		this.filename = filename;
 	}
+
+	public abstract void all(Visitor visitor);
 }

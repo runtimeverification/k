@@ -4,9 +4,7 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.parsing.Visitor;
 
-public class LiterateDefinitionComment extends DefinitionItem implements
-		LiterateComment {
-
+public class LiterateDefinitionComment extends DefinitionItem implements LiterateComment {
 	public LiterateDefinitionComment(Element element) {
 		super(element);
 		// TODO Auto-generated constructor stub
@@ -20,5 +18,9 @@ public class LiterateDefinitionComment extends DefinitionItem implements
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public void all(Visitor visitor) {
 	}
 }

@@ -23,11 +23,11 @@ public abstract class Sentence extends ModuleItem {
 
 	@Override
 	public String toMaude() {
-		
+
 		String cond = "";
 		if (condition != null)
 			cond = "when " + condition.toMaude();
-		
+
 		if (body != null)
 			return body.toMaude() + " " + cond + " : KSentence [metadata \"" + getMetadata() + "\"] .";
 		return " : KSentence [metadata \"" + getMetadata() + "\"] .";
@@ -81,5 +81,12 @@ public abstract class Sentence extends ModuleItem {
 
 	public void setAttributes(Map<String, String> attributes) {
 		this.attributes = attributes;
+	}
+
+	@Override
+	public void all(Visitor visitor) {
+		this.body = (Term) visitor.visit(body);
+		if (this.condition != null)
+			this.condition = (Term) visitor.visit(condition);
 	}
 }

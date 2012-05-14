@@ -82,8 +82,7 @@ public class Definition extends ASTNode {
 		if (!sorts.equals(""))
 			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
 
-		return "mod " + Constants.SHARED + " is\n  including K + URIS .\n" + klabels
-				+ sorts + cellLabels + "\nendm\n" + content;
+		return "mod " + Constants.SHARED + " is\n  including K + URIS .\n" + klabels + sorts + cellLabels + "\nendm\n" + content;
 	}
 
 	@Override
@@ -108,5 +107,13 @@ public class Definition extends ASTNode {
 		visitor.visit(this);
 		for (DefinitionItem di : items)
 			di.accept(visitor);
+	}
+
+	@Override
+	public void all(Visitor visitor) {
+		for (int i = 0; i < this.items.size(); i++) {
+			DefinitionItem di = (DefinitionItem) visitor.visit(this.items.get(i));
+			this.items.set(i, di);
+		}
 	}
 }

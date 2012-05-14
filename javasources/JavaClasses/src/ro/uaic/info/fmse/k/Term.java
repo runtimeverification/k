@@ -7,17 +7,19 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.parsing.ASTNode;
 
 public abstract class Term extends ASTNode {
+	String sort;
+
+	public Term(String location, String filename, String sort) {
+		super(location, filename);
+		this.sort = sort;
+	}
+
 	public Term(String location, String filename) {
 		super(location, filename);
 	}
 
 	public Term(Element element) {
 		super(element);
-	}
-
-	@Override
-	public String toMaude() {
-		return "";
 	}
 
 	@Override

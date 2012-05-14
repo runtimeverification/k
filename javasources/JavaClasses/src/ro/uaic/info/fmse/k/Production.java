@@ -27,8 +27,7 @@ public class Production extends ASTNode {
 		strings.add(Constants.SORT);
 		strings.add(Constants.TERMINAL);
 		strings.add(Constants.USERLIST);
-		java.util.List<Element> its = XML.getChildrenElementsByTagName(element,
-				strings);
+		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, strings);
 
 		items = new ArrayList<ProductionItem>();
 		for (Element e : its)
@@ -40,13 +39,11 @@ public class Production extends ASTNode {
 		if (its.size() > 0) {
 			its = XML.getChildrenElements(its.get(0));
 			for (Element e : its) {
-				attributes.put(e.getAttribute(Constants.KEY_key_ATTR),
-						e.getAttribute(Constants.VALUE_value_ATTR));
+				attributes.put(e.getAttribute(Constants.KEY_key_ATTR), e.getAttribute(Constants.VALUE_value_ATTR));
 			}
 		}
 		if (attributes.containsKey(Constants.CONS_cons_ATTR))
-			DefinitionHelper.conses.put(
-					attributes.get(Constants.CONS_cons_ATTR), this);
+			DefinitionHelper.conses.put(attributes.get(Constants.CONS_cons_ATTR), this);
 	}
 
 	public String toString() {
@@ -98,8 +95,7 @@ public class Production extends ASTNode {
 		String attributes = "";
 		for (Entry<String, String> entry : this.attributes.entrySet()) {
 			if (!reject.contains(entry.getKey()))
-				attributes += " " + entry.getKey() + "=(" + entry.getValue()
-						+ ")";
+				attributes += " " + entry.getKey() + "=(" + entry.getValue() + ")";
 		}
 
 		// append locations too
@@ -142,5 +138,13 @@ public class Production extends ASTNode {
 
 	public void setAttributes(java.util.Map<String, String> attributes) {
 		this.attributes = attributes;
+	}
+
+	@Override
+	public void all(Visitor visitor) {
+		for (int i = 0; i < this.items.size(); i++) {
+			ProductionItem elem = (ProductionItem) visitor.visit(this.items.get(i));
+			this.items.set(i, elem);
+		}
 	}
 }
