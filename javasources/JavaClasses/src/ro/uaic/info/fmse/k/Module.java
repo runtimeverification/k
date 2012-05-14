@@ -17,7 +17,7 @@ public class Module extends DefinitionItem {
 	String name;
 	List<ModuleItem> items;
 	String type;
-	boolean predefined;
+	boolean predefined = false;
 
 	public Module(Element element) {
 		super(element);
@@ -49,21 +49,9 @@ public class Module extends DefinitionItem {
 
 		String content = "";
 
+		items.add(0, new Import(Constants.SHARED));
 		if (!predefined)
-			items.add(0, new Import(Constants.SHARED));
-
-		// apppend labels module
-		// List<String> mkl = getModuleKLabels();
-		// if (mkl != null && mkl.size() > 0)
-		// {
-		// items.add(0, new Import(Constants.SHARED));
-		// }
-		//
-		// List<String> sorts = getAllSorts();
-		// if (sorts != null && sorts.size() > 0)
-		// {
-		// items.add(0, new Import(Constants.SHARED));
-		// }
+			items.add(0, new Import("URIS"));
 
 		for (ModuleItem mi : items) {
 			content += mi.toMaude() + "\n";

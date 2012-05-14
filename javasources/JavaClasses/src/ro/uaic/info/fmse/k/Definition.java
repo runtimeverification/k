@@ -48,8 +48,15 @@ public class Definition extends ASTNode {
 	public String toMaude() {
 		String content = "";
 
+		
+		String uris = "";
 		for (DefinitionItem di : items)
-			content += di.toMaude() + "\n";
+		{
+//			if (di instanceof Module && ((Module)di).name.equals("URIS"))
+//					uris = di.toMaude();
+//			else 
+				content += di.toMaude() + " \n";
+		}
 
 		// klabels
 		String klabels = "";
@@ -76,13 +83,17 @@ public class Definition extends ASTNode {
 		// sorts & automatic subsortation to K
 		String sorts = "";
 		for (String s : MaudeHelper.declaredSorts)
+		{
 			if (!MaudeHelper.basicSorts.contains(s))
 				sorts += s + " ";
+		}
 		sorts = sorts.trim();
 		if (!sorts.equals(""))
 			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
 
-		return "mod " + Constants.SHARED + " is\n  including K + URIS .\n" + klabels + sorts + cellLabels + "\nendm\n" + content;
+		String  shared = "mod " + Constants.SHARED + " is\n  including K .\n" + klabels + sorts + cellLabels + "\nendm";
+
+		return  uris + "\n" + shared + "\n" + content;
 	}
 
 	@Override
