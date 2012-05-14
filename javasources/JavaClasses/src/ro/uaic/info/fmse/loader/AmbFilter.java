@@ -1,12 +1,14 @@
 package ro.uaic.info.fmse.loader;
 
-import ro.uaic.info.fmse.k.*;
+import ro.uaic.info.fmse.k.Ambiguity;
+import ro.uaic.info.fmse.k.Production;
+import ro.uaic.info.fmse.k.ProductionItem;
+import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.parsing.ASTNode;
+import ro.uaic.info.fmse.parsing.Visitor;
 
-public class AmbFilter {
-	public Term noAmbTerm;
-
-	public static ASTNode getTerm(ASTNode astNode) {
+public class AmbFilter extends Visitor {
+	public ASTNode visit(ASTNode astNode) {
 		if (astNode instanceof Ambiguity) {
 			Ambiguity amb = (Ambiguity) astNode;
 			String msg = "Warning! Parsing ambiguity at: " + amb.getLocation() + " in file: " + amb.getFilename() + "\n";
@@ -15,7 +17,7 @@ public class AmbFilter {
 			for (ASTNode variant : amb.getContents()) {
 				if (variant instanceof TermCons) {
 					TermCons tc = (TermCons) variant;
-					Production prod = DefinitionHelper.conses.get(tc.getCons());
+					Production prod = DefinitionHelper.conses.get("\"" + tc.getCons() + "\"");
 					for (ProductionItem i : prod.getItems())
 						msg += i + " ";
 					msg += "(" + tc.getCons() + "), ";
@@ -27,11 +29,10 @@ public class AmbFilter {
 			msg += "    Arbitrarily choosing the first.";
 			ro.uaic.info.fmse.utils.errors.Error.silentReport(msg);
 
-		} else {
-			// TODO: visit every single node
+			astNode = amb.getContents().get(0);
 		}
 
-		// TODO: return something
-		return null;
+		astNode.all(this);
+		return astNode;
 	}
 }

@@ -16,6 +16,7 @@ import k3.basic.Definition;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.loader.AmbFilter;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.pp.Preprocessor;
@@ -121,8 +122,12 @@ public class FrontEnd {
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Rules   = ");
+			
+			ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
+			
+			javaDef.all(new AmbFilter());
 
-			String maudified = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild()).toMaude();
+			String maudified = javaDef.toMaude();
 
 			// Kil2Maude.KILFiletoMEL();
 
