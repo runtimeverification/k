@@ -71,7 +71,7 @@ rules
 
 	to-xml-error:
 		localized(a, b) ->
-			$[<localized message="[<xmlStringEscapeToString>a]" filename="[<xmlStringEscapeToString>x]" loc="[loc]" />
+			$[<localized message="[<xmlStringEscape>a]" filename="[<xmlStringEscape>x]" loc="[loc]" />
 			]
 		where (!b => (x, area(y1, y2, y3, y4, y5, y6))) <+ (!b => area-in-file(x, area(y1, y2, y3, y4, y5, y6)))
 		where loc := <write-to-string> (y1, y2, y3, y4)
@@ -79,7 +79,7 @@ rules
 	to-xml-error-open:
 		[a, b] -> $[<?xml version="1.0" encoding="UTF-8" ?>
 		<error value="Open error">
-			<file value="[<xmlStringEscapeToString>b]" />
+			<file value="[<xmlStringEscape>b]" />
 		</error>
 		]
 
