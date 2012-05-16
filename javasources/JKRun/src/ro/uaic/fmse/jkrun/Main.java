@@ -311,21 +311,13 @@ public class Main {
 			System.out.println("K.syntax_module=" + K.syntax_module);
 			System.out.println("K.main_module=" + K.main_module);*/
 
-			/* String kastCmd = new String(); if (cmd.hasOption("k-definition")) { kastCmd += "--k-definition=" + K.k_definition; } if (cmd.hasOption("main-module")) { kastCmd += " " +
-			 * "--main-module=" + K.main_module; } if (cmd.hasOption("--syntax-module")) { kastCmd += " " + "--syntax-module=" + K.syntax_module; } */
-
 			// in KAST variable we obtain the output from running kast process on a program defined in K
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
-			// rp.execute("kast", "--k-definition=" + K.k_base + "/examples/languages/classic/"+ lang + "/" + lang, K.k_base + "/examples/languages/classic/" + lang + "/programs/" + pgm + "." +
-			// lang);
 
 			if (K.parser.equals("kast")) {
-				// rp.execute("perl", K.kast, kastCmd, "-pgm=" + K.pgm);
 				//rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 				rp.execute(new String[] { K.kast, K.pgm });
-				/* rp.execute("kast", "--k-definition=" + K.k_base + "/examples/languages/research/" + lang + "/" + lang, K.k_base + "/examples/languages/research/" + lang + "/programs/" + pgm + "." +
-				 * lang); */
 			} else {
 				System.out.println("The external parser to be used is:" + K.parser);
 				// code to execute the external parser
@@ -335,13 +327,6 @@ public class Main {
 			if (rp.getStdout() != null) {
 				KAST = rp.getStdout();
 			}
-
-			/* //create a file called temp.maude in which we copy the content from the imp-compiled.maude file and then append at the end of the file the following line
-			 * "rew #eval (_`(_`) (#_(\"$PGM\"),.List{K}) |-> " + KAST + ") ." String s1 = K.userdir + "/temp.maude"; String s2 = K.k_base + "/examples/languages/classic/" + lang + "/" + lang +
-			 * "-compiled.maude"; //String s2 = K.k_base + "/examples/languages/research/" + lang + "/" + lang + "-compiled.maude"; //String s2 = K.k_base +
-			 * "/examples/languages/classic/imp/imp-compiled.maude"; String s3 = "rew #eval (_`(_`) (#_(\"$PGM\"),.List{K}) |-> " + KAST + ") ."; FileUtil.copyFile(s1, s2, s3);
-			 * 
-			 * //call maude process on the temp.maude file we previously created and obtain the output of execution in an XML file format Maude.run_maude(new String[] {"load "+ s1}); */
 
 			// run IOServer
 			String s = new String();
@@ -363,15 +348,6 @@ public class Main {
 				s = "set trace on ." + K.lineSeparator + s;
 			
 			FileUtil.createFile(K.maude_io_cmd, s);
-
-			/* String compiled_file = new String(); if (cmd.hasOption("compiled-def")) { compiled_file = K.compiled_def; } else { compiled_file = K.k_base + K.fileSeparator + "examples" +
-			 * K.fileSeparator + "languages" + K.fileSeparator + "research" + K.fileSeparator + lang + K.fileSeparator + lang + "-compiled.maude";
-			 * 
-			 * delims = "[.]"; tokens = K.k_definition.split(delims); String kDef = tokens[0]; compiled_file = kDef + "-compiled.maude"; compiled_file = FileUtil.getFilename(K.k_definition, ".",
-			 * K.fileSeparator); } */
-
-			// String jar_file = K.k_base + K.fileSeparator + "core" + K.fileSeparator + "java" + K.fileSeparator + "wrapperAndServer.jar";
-			// String content = "java -jar " + jar_file + " --maudeFile " + compiled_file + " --moduleName " + lang.toUpperCase() + " --commandFile io-cmd.maude";
 
 			File outFile = FileUtil.createMaudeFile(K.maude_out);
 			if (K.log_io) {
@@ -406,11 +382,11 @@ public class Main {
 			}
 
 			// save the pretty-printed output of jkrun in a file
-			FileUtil.createFile(K.krun_output, prettyOutput);
+			//FileUtil.createFile(K.krun_output, prettyOutput);
 
 			// delete temporary files
-			// FileUtil.deleteFile(K.maude_io_cmd);
-			// FileUtil.deleteFile(K.maude_output);
+			 FileUtil.deleteFile(K.maude_io_cmd);
+			 FileUtil.deleteFile(K.maude_output);
 
 			System.exit(1);
 
@@ -430,7 +406,10 @@ public class Main {
 
 	public static void main(String[] args) {
 		
+		/*String kbase = KPaths.getKBase(false);
+		System.out.println("K_BASE=" + kbase);*/
 		execute_Krun(args);
+		
 	}
 
 }

@@ -44,9 +44,9 @@ public class RunProcess {
 			pb.directory(new File(K.userdir));
 
 			// set environment variables for this process
-			Map<String, String> environment = pb.environment();
+			/*Map<String, String> environment = pb.environment();
 			environment.put("PATH", System.getenv("PATH"));
-			environment.put("K_BASE", System.getenv("K_BASE"));
+			environment.put("K_BASE", System.getenv("K_BASE"));*/
 			// environment.put("PERL", K.perl);
 
 			// start process

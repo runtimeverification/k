@@ -9,7 +9,8 @@ public class K {
 	public static String userdir = System.getProperty("user.dir");
 	public static String fileSeparator = System.getProperty("file.separator");
 	public static String lineSeparator = System.getProperty("line.separator");
-	public static String k_base = System.getenv("K_BASE");
+	//public static String k_base = System.getenv("K_BASE");
+	public static String k_base = KPaths.getKBase(false);
 
 	public static String kdir = userdir + fileSeparator + ".k";
 	public static String maude_in = kdir + fileSeparator + "maude_in.txt";
@@ -20,7 +21,7 @@ public class K {
 	public static String maude = "maude";
 
 	// kast
-	public static String kast = "kast";
+	public static String kast = k_base + K.fileSeparator + "bin" + K.fileSeparator + "kast";
 
 	public static String maude_io_cmd = "io-cmd.maude";
 	public static String maude_output = "maudeoutput.xml";
