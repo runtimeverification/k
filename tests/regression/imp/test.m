@@ -1,2 +1,0 @@
-load imp-test-compiled
-

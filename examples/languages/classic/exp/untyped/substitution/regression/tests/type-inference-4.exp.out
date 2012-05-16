@@ -1,3 +1,0 @@
-<k>
-  lambda x . lambda f . lambda z . f x 0 lambda y . x y
-</k>

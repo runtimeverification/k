@@ -1,0 +1,15 @@
+var m, s, n, q, r;
+m := 100;
+s := 0;
+while not m <= 2 do (
+  n := m;
+  m := m + -1;
+  while not n <= 1 do (
+    s := s + 1;
+    q := n / 2;
+    r := q + q + 1;
+    if r <= n
+    then n := n + n + n + 1
+    else n := q
+  )
+)

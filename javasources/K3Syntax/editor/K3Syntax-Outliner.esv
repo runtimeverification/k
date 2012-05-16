@@ -1,0 +1,9 @@
+module K3Syntax-Outliner
+
+imports K3Syntax-Outliner.generated
+
+outliner
+  
+  // This file can be used for custom outliner rules.
+  //
+  // See the imported file for a brief introduction and examples.

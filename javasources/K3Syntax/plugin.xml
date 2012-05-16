@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?eclipse version="3.0"?>
+
+<plugin>
+       <extension point="org.eclipse.imp.runtime.languageDescription">
+          <language extensions="k" description="K3Syntax" language="K3Syntax" derivedFrom="DynamicRoot" validator="K3Syntax.K3SyntaxValidator" validatorClass="K3Syntax.K3SyntaxValidator"></language>
+       </extension>
+       <extension id="K3Syntax.parser" name="K3Syntax Parser" point="org.eclipse.imp.runtime.parser">
+          <parser class="K3Syntax.K3SyntaxParseController" language="K3Syntax">
+          </parser>
+       </extension>    
+    </plugin>

@@ -1,0 +1,103 @@
+module disambSup
+
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libstratego-sglr
+
+	include/K3Disamb
+	starter
+	disambCells
+
+strategies
+
+	// TODO: small corretion - do sort inference for everything, if the base construct is the same?
+	type-inferenceSupremum =
+		topdown(try(chooseAmb))
+
+	chooseAmb:
+		amb(x) -> rez2
+		where poset := <MemoMySbs>
+		where rez := <isectSorts> x
+		where rez2 := <if <lt>(<length> rez, 2) then  !<last> rez else !amb(rez) end>
+
+	match1var = ?c#(xs) ;
+				where(<string-ends-with(|"1Var")> c)  			// match on a term that ends with "1Var"
+
+	isectSorts: // filter every element - if it has a smaller sort as sibling => no match
+		z -> z'
+		where z' := <filter(filterMatch(|z))> z
+
+	filterMatch(|tot) =
+		?x#(y) ;
+		where(not(<one(matchSibling(|x))> tot))
+
+
+	matchSibling(|nd) =
+		?x#(_) ;
+		where(x1 := <getSort> x) ;
+		where(x2 := <getSort> nd) ;
+		MemoMySbs ; one(?(x1, x2))
+
+
+	getSort:
+		x -> y
+		where y := <string-trim-last-one ; string-unescape-sort> x
+
+
+	external string-unescape-sort(|)
+	external string-trim-last-one(|)
+	
+/* using the java implementation for now
+	string-unescape-sort:
+		x -> y
+		where y := <string-replace(|"Dz", "#") ; string-replace(|"Dd", "D")> x
+
+	string-trim-last-one:
+		x -> y
+		where a   := <string-tokenize-keep-all(|['1'])> x
+		where len := <length> a
+		where b   := <take(|<add>(len, -2))> a
+		where y   := <concat-strings> b
+*/
+
+	getTerma:	// get the sort from a node name
+		x -> y
+		where not(<string-ends-with(|"Syn")> x)
+		where <?[_, y | b]> <string-tokenize(|['1'])> x
+	getTerma:	// get the sort from a node name
+		x -> x
+		where <string-ends-with(|"Syn") <+ string-ends-with(|"SynList")> x
+
+	// type inference like the type system in a parser, but more forgiving
+	type-inferenceTypeSystem =
+		topdown(try(applyTypes))
+
+	applyTypes:		// apply the type system only to the productions declared by the user
+		a#(b) -> a#(c)
+		where MemoMyCons ; one(?(a, _, sortList))
+		where c := <zip(applyFilter)> (sortList, b)
+
+	applyFilter =
+		applyFilter2 <+ removeType 
+
+	applyFilter2:	// apply the filter under rewrites too, TODO: under brackes and more...
+		(sort, K1Rewrite(x, y)) -> K1Rewrite(<applyFilter> (sort, x), <applyFilter> (sort, y))
+
+	applyFilter2:
+		(sort, amb(x)) -> rez2
+		where poset := <MemoMySbs>
+		where rez := <filter(isSubsort(|sort))> x
+		where rez2 := <if <lt>(<length> rez, 1) then
+							!amb(x)
+						else
+							if <lt>(<length> rez, 2) then !<last> rez else !amb(rez) end
+						end>
+
+	removeType:
+		(_, a) -> a
+
+
+
+

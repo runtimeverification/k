@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="jar" name="Create Runnable Jar for Project K2Java">
+	<target name="jar">
+		<jar destfile="strj.jar" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="run"/>
+				<attribute name="Class-Path" value=". ../../../release/bin/strategoxt.jar"/>
+			</manifest>
+			<fileset dir="org.strategoxt.strj"/>
+		</jar>
+	</target>
+</project>

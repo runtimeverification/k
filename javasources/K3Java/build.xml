@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="alllocal" name="K3Java all">
+
+	<import file="buildsig.xml" />
+	<import file="buildstr.xml" />
+	<import file="buildjava.xml" />
+	<import file="buildjar.xml" />
+
+	<target name="alllocal" depends="allsig,allstr,build,jar" />
+
+</project>

@@ -1,0 +1,158 @@
+module disamb
+
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libstratego-sglr
+
+	include/K3Disamb
+	xmlify
+	disambCells
+	disambEmph
+	disambSup
+	disambVar
+	disambFit
+	starter
+
+strategies
+
+	mydisambiguate =
+		//where(ts := <term-size> ; debug(!"InitialSize____________________________: ")) ;
+		correctDitto ;
+		flatten-amb-top ;
+		flatten-amb-2 ;
+		//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
+		disambigCellTypes ;
+		emphasizeVars ;
+		type-inferenceTypeSystem ;
+		chooseBestFitRec ;
+		type-inferenceSupremum ;
+		var-type-inference2 ; // new type inference where I correct the first type inference
+		topdown(try(correctRewrite)) ;
+		flattenKLists
+		 /**///;
+		//where(ts2 := <term-size> ; !(ts2, <div> (<mul>(ts2, 100.0) ,ts1), <div> (<mul>(ts2, 100.0) ,ts)) ; debug(!"FinalSize(,%,%): "))
+
+
+	mydisambiguateConfig =
+		correctDitto ;
+		flatten-amb-top ;
+		flatten-amb-2 ;
+		type-inferenceTypeSystem ;
+		type-inferenceSupremum ;
+		chooseBestFitRec ;
+		flattenKLists
+
+
+	mydisambiguate2 = all(mydisambiguate)
+
+	flattenKLists = bottomup(try(fks2)) ; bottomup(try(flists2))
+	fks2:
+		K1Seq(a, b) -> "K1Seq"#(<flatten-list> [a', b'])
+		where a' := <try(fks3)> a
+		where b' := <try(fks3)> b
+	fks3:
+		"K1Seq"#(a) -> a
+
+	flists2:
+		a#([b, c]) -> a#(<flatten-list> [b', c'])
+		where <string-ends-with(|"1List")> a
+		where b' := <try(flists3(|a))> b
+		where c' := <try(flists3(|a))> c
+
+	flists3(|a):
+		a#(b) -> b
+		
+
+	// manual corrections
+	correctDitto =	// correct the ditto constructs
+		bottomup(try(replaceDitto))
+	replaceDitto:
+		a#(b) -> amb(<all(replaceDitto2(|b))> c)
+		where MemoMyDitto ; one(?(a, c))
+	replaceDitto2(|children):
+		x -> x#(children)
+
+
+	correctRewrite:	// K1Rewrite must bind as low as possible, this why choose it to be as high as possible in the AST
+		amb(x) -> K1Rewrite(a, b)
+		where <one(?K1Rewrite(a, b))> x
+		where not(<one(?ListDlKDr1Rewrite(_, _))> x)
+
+	correctRewrite:	// K1Rewrite must bind as low as possible, this why choose it to be as high as possible in the AST
+		amb(x) -> ListDlKDr1Rewrite(a, b)
+		where <one(?ListDlKDr1Rewrite(a, b))> x
+		where not(<one(?K1Rewrite(_, _))> x)
+
+	correctRewrite:
+		amb(x) -> Map1Rewrite(a, b)
+		where <one(?Map1Rewrite(a, b))> x
+
+	correctRewrite:
+		amb(x) -> List1Rewrite(a, b)
+		where <one(?List1Rewrite(a, b))> x
+
+	correctRewrite:
+		amb(x) -> Set1Rewrite(a, b)
+		where <one(?Set1Rewrite(a, b))> x
+
+	correctRewrite:
+		amb(x) -> Bag1Rewrite(a, b)
+		where <one(?Bag1Rewrite(a, b))> x
+
+
+strategies  // restructure the ambs - thanks Lennart Kats
+	flatten-amb-top =
+			topdown(repeat(ambr)) ;
+			bottomup(try(flatten-amb))
+
+	ambr : amb([amb(x)| z]) -> amb(<union> (x, z)) // first try a simple implode - this may be faster
+
+	flatten-amb:
+		amb(a*) -> amb(a'*)
+		with a'* := <map(try(extract-ambs)); flatten-list ; nub> a*
+
+	extract-ambs:
+		amb(a*) -> a*
+
+	flatten-amb-2 =
+		topdown(try(down-with-ambs))
+
+	down-with-ambs:
+        amb(a*) -> x
+		where rez := <down-with-ambs-list> a*
+		where x := <if <lt>(<length> rez, 2) then !<last> rez else !amb(rez) end>
+
+	down-with-ambs-list =
+		down-with-ambs-list-1 <+ down-with-ambs-list-2
+
+	down-with-ambs-list-1:
+		[parent#(child) | tail] -> <flatten-amb-top> [grouped | <down-with-ambs-list> tail']
+		where matching-children := <filter(fetch-child(|parent))> tail
+		where not(!matching-children => [])
+		where grouped := parent#( <merge(|matching-children)> child )
+		where tail'   := <filter(not(fetch-child(|parent)))> tail
+
+	down-with-ambs-list-2:
+		[a | tail] -> [a | <down-with-ambs-list> tail]
+
+	down-with-ambs-list-2:
+		[] -> []
+
+	fetch-child(|parent):
+		parent#(child) -> child
+
+	merge(|group):
+		[a| tail] -> [amb([a | first]) | <merge(|group')> tail]
+		where first := <filter(\[x | _] -> x\)> group
+		where group' := <filter(\[_ | x] -> x\)> group
+		where not(!group' => [[]|_])
+
+	merge(|group):
+		[a| tail] -> [amb([a | first])]
+		where first := <filter(\[x | _] -> x\)> group
+		where group' := <filter(\[_ | x] -> x\)> group
+		where !group' => [[]|_]
+
+// end - thanks Lennart Kats

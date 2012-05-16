@@ -1,1 +1,0 @@
-(mu foo . lambda xx . cond (zero? xx) true (cond (foo (pred xx)) false true)) 8

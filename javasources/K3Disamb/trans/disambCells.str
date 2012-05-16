@@ -1,0 +1,83 @@
+module disambCells
+
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libstratego-sglr
+
+	include/K3Disamb
+	disambSup
+	starter
+
+strategies
+
+	//disambiguate cell types
+	disambigCellTypes =	
+		topdown(normalizeCell ; try(removeCellAmb)) //;
+		//where(<debug(!"CellTypes: ")> cellTypes)
+
+
+	removeCellAmb:	// replace the old cell with a new cell with les problems
+		Bag1ClosedCell(x1, x2, x3, x4) -> Bag1ClosedCell(x1, x2, new3, x4)
+		where
+			new3 := <removeCellAmb2(|x1)> x3
+
+	normalizeCell =
+		normalizeCellMiddle <+ normalizeCellPrefix <+ normalizeCellSufix <+ id
+	normalizeCellMiddle:
+		Bag1ClosedCell(x1, x2, LeftCell(RightCell(x3)), x4) -> Bag1ClosedCell(x1, /*x2, x3, x4)*/<flatten-list> [x2, CellProperty("ellipses", "\"both\"")], x3, x4)
+	normalizeCellPrefix:
+		Bag1ClosedCell(x1, x2, RightCell(x3), x4) -> Bag1ClosedCell(x1, /*x2, x3, x4)*/ <flatten-list> [x2, CellProperty("ellipses", "\"right\"")], x3, x4)
+	normalizeCellSufix:
+		Bag1ClosedCell(x1, x2, LeftCell(x3), x4) -> Bag1ClosedCell(x1, /*x2, x3, x4)*/ <flatten-list> [x2, CellProperty("ellipses", "\"left\"")], x3, x4)
+
+
+
+	removeCellAmb2(|cellName) = // if directly under a cell there is an ambiguity
+		where(<one(?(cellName, sort))> <MemoMyCells>) ;		// look for that cell in the known cells
+		try(filterLess(|<getMaxSort> sort))
+		aa = ?sort ;(
+				?amb(xs2) ;
+			where(rez := <filter(isSubsort(|sort))> xs2) ;	// filter the sorts that are lower or eq with the cell type
+			if <lt>(<length> rez, 2) then  !<last> rez else !amb(rez) end)
+
+	isectSorts2: // filter every element - if it has a smaller sort as sibling => no match
+		z -> z'
+		where
+			z' := <filter(filterMatch2(|z))> z
+
+	filterMatch2(|tot) =
+		?x#(_) ;
+		where(not(<one(matchSibling2(|x))> tot)) // don't match if you find a smaller sort
+
+
+	matchSibling2(|nd) =
+		?x#(_) ;
+		where(x1 := <getSort> x) ;
+		where(x2 := <getSort> nd) ;
+		MemoMySbs ; one(?(x2, x1))
+
+
+	filterLess(|sort):		// match on an amb and keep only the lesser sorts
+		amb(x) -> rez2
+		where rez := <filter(isSubsort(|sort))> x
+		where rez2 := <if <lt>(<length> rez, 2) then  !<last> rez else !amb(rez) end>
+
+	isSubsort(|sort) =
+		where (?x#(_) ;									// match on the name of the term
+		where (sort2 := <getSort> x) ; isSubsortEq(|sort, sort2))	// if the sort is eq or lt the cell type, then match
+
+	isSubsortEq(|a, b) =
+		<?a> b <+ isSubsort2(|a, b)
+
+	isSubsort2(|a, b) =
+		where(<one(?(a, b))> <MemoMySbs>)
+
+	getMaxSort =
+		?sort ; repeat(getMaxSort2)
+	getMaxSort2:
+		a -> bb
+		where MemoMySbs ; one({b: ?(b, a) ; bb := b})
+		where not(!bb => "List{K}")
+

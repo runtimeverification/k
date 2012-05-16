@@ -1,0 +1,56 @@
+module disambFit
+
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libstratego-sglr
+
+	include/K3Disamb
+
+	disambSup
+	starter
+	disambCells
+
+strategies
+
+	chooseBestFitRec =
+		 bottomup(try(chooseBestFit))
+
+	chooseBestFit:
+		amb(x) -> rez2
+		where rez := <filterSize> x
+		where rez2 := <if <lt>(<length> rez, 2) then  !<last> rez else !amb(rez) end>
+
+	filterSize:
+		xs -> xs2
+		where mymax := <foldr(!-2147483600, max)> (<all(getFitness)> xs)		// calculate the size of the smallest term
+		where xs2 := <filter(findLargest(|mymax))> xs								// filter terms that are of a greater size
+
+	findLargest(|size) =
+		where(currSize := <getFitness> ;
+		<eq>(currSize, size))
+
+	getFitness:
+		x#(xs) -> score
+		where <one(?(x, sort, terms))>  <MemoMyCons>
+		where score := <foldr(!0, add)> (<zip(getFitnessUnit)> (terms, xs))
+
+	getFitnessUnit:
+		(a, b#(_)) -> score
+		where !b => "amb"
+		where score := 0
+
+	getFitnessUnit:
+		(a, b#(_)) -> score									// match on a pair made by ziping terms with the current terms
+		where not(!b => "amb")
+		where b' := <getSort> b
+		where score := 	<(	isSubsortEq(|a, b') ; !1 <+		// if the sort is a subsort then put 1
+							isSubsortEq(|"K", a) ; <?"K"> b' ; !0 <+ // if the sort is K then score it as 0, only if the expected sort is a subsort of K
+							!-1								// if none of the above, then put -1
+						)>
+
+
+
+
+ 

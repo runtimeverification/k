@@ -1,8 +1,0 @@
-load ../../../../examples/languages/classic/pcf/untyped/pcf-untyped-compiled.maude
-load ../../../../examples/languages/classic/pcf/untyped/pcf-untyped-syntax.maude
-
-mod KCP is including PCF-UNTYPED-SYNTAX .
-  op pgm : -> Exp . 
-  eq pgm = %s .
-  ops a b c d e f g h i j k l m n o p q r s t u v w x y z : -> Id .
-endm

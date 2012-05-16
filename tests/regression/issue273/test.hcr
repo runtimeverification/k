@@ -1,1 +1,0 @@
-%let qv(a) :: tv(t) = qv(c) %in (qv(b) (qv(a) qv(d)))

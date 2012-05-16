@@ -1,6 +1,0 @@
-K/Maude syntax highlighter for TextWrangler/BBEdit
-
-To install, copy (or link) "K-Maude.plist" file into 
-"Library/Application Support/TextWrangler/Language Modules"
-or, if using BBEdit, change "TextWrangler" to "BBEdit"
-if the "Language Modules" directory does not exist, create it.

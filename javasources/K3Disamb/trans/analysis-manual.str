@@ -1,0 +1,11 @@
+module analysis-manual
+
+imports
+  include/K3Disamb
+  lib/analysis-auto.generated
+  lib/index-library.generated
+  lib/analysis-library.generated
+
+rules // Adjust lookup
+
+  // Add primitive types to type lookup.

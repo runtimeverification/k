@@ -1,2 +1,0 @@
-let f = lambda x . x
-in f 1

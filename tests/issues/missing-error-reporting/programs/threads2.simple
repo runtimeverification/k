@@ -1,7 +1,0 @@
-function main() {
-	var x = 5;
-	spawn x=x+2;
-	spawn x=x*2;
-	spawn x=11;
-	spawn write(x);
-}

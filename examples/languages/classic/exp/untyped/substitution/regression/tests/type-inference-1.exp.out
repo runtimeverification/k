@@ -1,3 +1,0 @@
-<k>
-  lambda x . lambda f . lambda x . f 0 lambda y . if true then y else x
-</k>

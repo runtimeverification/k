@@ -1,2 +1,0 @@
-load mu-test-compiled
-

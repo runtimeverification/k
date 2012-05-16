@@ -1,0 +1,28 @@
+module programs
+
+imports
+  libstratego-lib
+  libstratego-sglr
+  include/K3Disamb
+  xmlify
+  config
+  disamb
+  disambSup
+
+rules
+
+	makeConsLists = topdown(try(makeConsList2))
+
+	makeConsList2:
+		x#([y]) -> <makeConsList3(|x, emptyl)> y
+		where <string-ends-with(|"ListSyn")> x
+		where emptyl := (<string-replace(|"ListSyn", "Empty")> x)#([])
+
+	makeConsList3(|a, emptyl):
+		[hd | tl] -> a#([hd, <makeConsList3(|a, emptyl)> tl])
+
+	makeConsList3(|a, emptyl):
+		[] -> emptyl
+
+
+

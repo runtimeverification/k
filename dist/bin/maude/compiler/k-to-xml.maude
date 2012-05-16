@@ -1,0 +1,1412 @@
+load all-tools
+
+mod DECL-META-XML-PRINT is
+  pr K-META-OPEN-CELLS .
+  pr META-K-RULES .
+  pr META-K-CONTEXTS .
+  pr META-LEVEL .
+  pr CONVERSION .
+  pr NAT-LIST-EXTRAS .
+  pr META-MODULE-EXTRAS .
+  pr PARSE-METADATA .
+  pr QID-EXTRAS .
+  pr META-K-LATEX .
+
+  var  St Pattern OpenPar ClosingPar : String .
+  vars Left R N OpenPars ClosingPars : Nat .
+  var Label : Qid .  var Contents : Term . var B : Multiplicity .
+
+  ---- finds a pattern out of balanced parentheses 
+  ---- findOut("S{P1, P2{P21, P22}, P3}", ",", "{", "}", 6) returns 18, not 12
+  op findOut : String String String String Nat -> FindResult .
+  op findOut : String String String String Nat Nat -> FindResult .
+
+  eq findOut(St, Pattern, OpenPar, ClosingPar, N)
+    = findOut(St, Pattern, OpenPar, ClosingPar, 0, N) .
+
+  eq findOut(St, Pattern, OpenPar, ClosingPar, OpenPars, N)
+    = if N >= length(St)
+      then notFound
+      else if OpenPars == 0 and-then substr(St, N, length(Pattern)) == Pattern
+           then N
+           else if substr(St, N, length(OpenPar)) == OpenPar
+                then findOut(St, Pattern, OpenPar, ClosingPar, 
+                       OpenPars + 1, N + 1)
+                else if substr(St, N, length(ClosingPar)) == ClosingPar
+                     then findOut(St, Pattern, OpenPar, ClosingPar, 
+                            sd(OpenPars, 1), N + 1)
+                     else findOut(St, Pattern, OpenPar, ClosingPar, 
+                            OpenPars, N + 1)
+                     fi
+                fi
+           fi
+      fi .
+
+  ---- finds the first closing unbalanced parenthesis 
+  ---- findOut("P1, P2{P21, P22}, P3}", "{", "}", 6) returns 21, not 16
+  op findClosing : String String String Nat -> FindResult .
+  op findClosing : String String String Nat Nat -> FindResult .
+
+  eq findClosing(St, OpenPar, ClosingPar, N)
+    = findClosing(St, OpenPar, ClosingPar, 0, N) .
+
+  eq findClosing(St, OpenPar, ClosingPar, OpenPars, N)
+    = if N >= length(St)
+      then notFound
+      else if OpenPars == 0 
+              and-then substr(St, N, length(ClosingPar)) == ClosingPar
+           then N
+           else if substr(St, N, length(OpenPar)) == OpenPar
+                then findClosing(St, OpenPar, ClosingPar, 
+                       OpenPars + 1, N + 1)
+                else if substr(St, N, length(ClosingPar)) == ClosingPar
+                     then findClosing(St, OpenPar, ClosingPar, 
+                            sd(OpenPars, 1), N + 1)
+                     else findClosing(St, OpenPar, ClosingPar, 
+                            OpenPars, N + 1)
+                     fi
+                fi
+           fi
+      fi .
+
+  ---- finds the last opening unbalanced parenthesis 
+  ---- findOpening("S{P1, P2{P21, P22}, P3}", "{", "}", 21) returns 1, not 8
+  op findOpening : String String String Nat -> FindResult .
+  op findOpening : String String String Nat Nat -> FindResult .
+
+  eq findOpening(St, OpenPar, ClosingPar, N)
+    = findOpening(St, OpenPar, ClosingPar, 0, N) .
+
+  eq findOpening(St, OpenPar, ClosingPar, ClosingPars, N)
+    = if N == 0
+      then notFound
+      else if ClosingPars == 0 
+              and-then substr(St, N, length(ClosingPar)) == OpenPar
+           then N
+           else if substr(St, N, length(OpenPar)) == ClosingPar
+                then findOpening(St, OpenPar, ClosingPar, 
+                       ClosingPars + 1, sd(N, 1))
+                else if substr(St, N, length(ClosingPar)) == OpenPar
+                     then findOpening(St, OpenPar, ClosingPar, 
+                            sd(ClosingPars, 1), sd(N, 1))
+                     else findOpening(St, OpenPar, ClosingPar, 
+                            ClosingPars, sd(N, 1))
+                     fi
+                fi
+           fi
+      fi .
+
+
+  op getSort : Kind -> Sort .
+  eq getSort(K:Kind) 
+    = if findOut(string(K:Kind), "`,", "{", "}", 0) == notFound
+      then qid(substr(string(K:Kind), 
+                      2, 
+                      sd(length(string(K:Kind)), 4)))
+      else qid(substr(string(K:Kind), 
+                      2, 
+                      sd(findOut(string(K:Kind), "`,", "{", "}", 0), 2)))
+      fi .
+
+
+
+  op attrSet2QidList : AttrSet -> QidList .
+  op hookList2QidList : HookList -> QidList .
+  op termList2QidList : TermList -> QidList .
+  op intList2QidList : IntList -> QidList .
+  op typeList2QidList : TypeList -> QidList .
+
+  eq attrSet2QidList(none) = nil .
+  eq attrSet2QidList((assoc AtS)) = ('\attr '`{ 'assoc '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((comm AtS))  = ('\attr '`{ 'comm '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((idem AtS))  = ('\attr '`{ 'idem '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((iter AtS))  = ('\attr '`{ 'iter '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((id(T) AtS)) 
+    = ('\idTerm '`{ termList2QidList(T) '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((right-id(T) AtS)) 
+    = ('right-id: termList2QidList(T) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((left-id(T) AtS))  
+    = ('left-id: termList2QidList(T) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((poly(NL) AtS))
+    = ('poly '`( intList2QidList(NL) '`) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((strat(NL) AtS))
+    = ('strat '`( intList2QidList(NL) '`) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((memo AtS))  = ('memo attrSet2QidList(AtS)) .
+  eq attrSet2QidList((prec(N) AtS))  
+    = (---('\prec '`{ intList2QidList(N) '`}---) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((gather(QIL) AtS)) 
+    = (---('gather QIL---) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((format(QIL) AtS)) 
+    = ('\format '`{ QIL '`} attrSet2QidList(AtS)) .
+  eq attrSet2QidList((ctor AtS))  = ('ctor attrSet2QidList(AtS)) .
+  eq attrSet2QidList((frozen(NL) AtS))
+    = ('frozen '`( intList2QidList(NL) '`) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((config AtS))  = ('config attrSet2QidList(AtS)) .
+  eq attrSet2QidList((object AtS))  = ('object attrSet2QidList(AtS)) .
+  eq attrSet2QidList((msg AtS))  = ('msg attrSet2QidList(AtS)) .
+  eq attrSet2QidList((special(HkL) AtS))
+    = ('special '`( hookList2QidList(HkL) '`) attrSet2QidList(AtS)) .
+  eq attrSet2QidList((none).AttrSet) = nil .
+
+  eq hookList2QidList((id-hook(QI, QIL) HkL))
+    = ('id-hook QI '`, '`( QIL '`) hookList2QidList(HkL)) .
+  eq hookList2QidList((op-hook(QI, QI', QIL, QI'') HkL))
+    = ('op-hook QI '`( QI' ': QIL '-> QI'' '`) hookList2QidList(HkL)) .
+  eq hookList2QidList((term-hook(QI, T) HkL))
+    = ('term-hook '`( QI '`, termList2QidList(T) '`) hookList2QidList(HkL)) .
+
+  sort Printable Printables .
+  subsort Printable < Printables .
+ 
+  op empty : -> Printables .
+  op __ : Printables Printables -> Printables [assoc id: empty] .  
+
+  var P P1 P2 : Printable . var Prints : Printables .  var N1 N2 : Nat . var I1 I2 : Nat .
+
+  op loc : Int Int Printable -> Printable .
+  eq loc(-1,I1, P) = P .
+  ceq loc(N1,I1,P1) loc(N2,I2,P2) = loc(N2,I2,P2) loc(N1,I1,P1) if N2 < N1 .
+  ceq loc(N,I1,P1) loc(N,I2,P2) = loc(N,I2,P2) loc(N,I1,P1) if I2 < I1 .
+
+  op op : OpDecl -> Printable .
+  op mb : MembAx -> Printable .
+  op eq : Equation -> Printable .
+  op rl : Rule -> Printable .
+  op ss : SubsortDecl -> Printable .
+
+---(
+  op subsorts : SubsortDeclSet -> Printables .
+  eq subsorts(SSD SSDS) = ss(SSD) subsorts(SSDS) .
+  eq subsorts(none) = empty .
+  var SSD : SubsortDecl .  
+---)
+var Eq : Equation .  var Eqs : EquationSet .
+  var Rl : Rule . var Rls : RuleSet .
+
+  op ops : OpDeclSet -> Printables .
+  eq ops(Op OPDS) = loc(getBeginningLocation(getLocation(Op)),getOffsetLocation(getLocation(Op)), op(Op)) ops(OPDS) .
+  eq ops(none) = empty .
+
+
+  op mbs : MembAxSet -> Printables .
+  eq mbs(Mb MAS) = loc(getBeginningLocation(getLocation(Mb)),0, mb(Mb)) mbs(MAS) .
+  eq mbs(none) = empty .
+
+  op eqs : EquationSet -> Printables .
+  eq eqs(Eq Eqs) = loc(getBeginningLocation(getLocation(Eq)), 0, eq(Eq)) eqs(Eqs) .
+  eq eqs(none) = empty .
+
+  op rls : RuleSet -> Printables .
+  eq rls(Rl Rls) = loc(getBeginningLocation(getLocation(Rl)), 0, rl(Rl)) rls(Rls) .
+  eq rls(none) = empty .
+
+
+  op eMetaXMLPrint : Sort -> QidList .
+---  op eMetaXMLPrint : SortSet -> QidList .
+  op eMetaXMLPrint : TypeList -> QidList .
+---  op eMetaXMLPrint : SubsortDeclSet -> QidList .
+---  op eMetaXMLPrint : Module OpDeclSet -> QidList .
+---  op eMetaXMLPrintVars : OpDeclSet -> QidList .
+---  op eMetaXMLPrint : Module MembAxSet -> QidList .
+---  op eMetaXMLPrint : Module EquationSet -> QidList .
+---  op eMetaXMLPrint : Module RuleSet -> QidList .
+  op eMetaXMLPrint : Module Condition Nat -> QidList .
+  op eMetaXMLPrint : Module Term -> QidList .
+  op eMetaXMLPrint : Module Printables -> QidList .
+
+  op niceSort : Module Term ~> Sort .
+  eq niceSort(M, T) = niceSort(M, T, leastSort(M, T)) .
+
+
+  op niceSort : Module Term Kind ~> Sort .
+  eq niceSort(U, T, Sort) = Sort .
+ ceq niceSort(U, T, Knd) = List if sameKind(U, List, Knd) .
+ ceq niceSort(U, T, Knd) = Bag if sameKind(U, Bag, Knd) .
+ ceq niceSort(U, T, Knd) = Set if sameKind(U, Set, Knd) .
+ ceq niceSort(U, T, Knd) = Map if sameKind(U, Map, Knd) .
+ ceq niceSort(U, T, Knd) = KLabel if sameKind(U, KLabel, Knd) .
+  eq niceSort(U, '_`,`,_[Tl], Knd) = KList . 
+  eq niceSort(U, '_~>_[Tl], Knd) = K . 
+  eq niceSort(U, T, Knd) = resultSort(relatedOps(U, getTopOp(U, T), getOps(flatten(U)))) [owise print "Finding Nice sort for " T " with kind " Knd] .
+
+  op resultSort : OpDeclSet ~> Sort .
+  eq resultSort((op Q : TyL -> Sort [AS] .) OPDS) = Sort .
+  eq resultSort(OPDS) = '??? [owise print "No result sort found in " OPDS] .
+
+  eq eMetaXMLPrint(U, T) =  printTerm(U,T, niceSort(U, T),  0) . 
+  eq eMetaXMLPrint(U, (empty).Printables) = nil . 
+
+  var NeTl : NeTermList .  var C : Constant . var Q : Qid . vars T1 T2 : Term .
+  var V : Variable .  var Tl Tl' : TermList .  
+  op printTerm : Module Term Type Nat -> QidList .
+  op printTermL : Module NeTermList Nat -> QidList .
+  eq printTermL(U,(T,NeTl), N) = printTerm(U,T, niceSort(U,T), N) printTermL(U,NeTl, N) .
+  eq printTermL(U,T,N) = printTerm(U,T,niceSort(U,T), N) .
+  ops \constant`{_`}`{_`} \variable`{_`}`{_`} : QidList QidList -> Term .
+---(  ops \kprefix`{_`}`{_`} \ksuffix`{_`}`{_`} \kmiddle`{_`}`{_`} : Constant Term -> Term .
+---)
+  op \configCell`{_`}`{_`}`{_`} : Constant Term AttrSet -> Term .
+  ops \kcell`{_`}`{_`}`{_`} : Term Term Ellipses -> Term .
+  ops \reduce`{_`}`{_`} \ereduce`{_`}`{_`} : Term Term -> Term .
+  op merge : QidList TermList -> Term .
+  op splitMixFix : String -> QidList .
+  op prefixOp : Qid Term -> Term .
+  op xmlOp : Qid Term -> Term .
+  op genCommas : Nat -> QidList .
+  eq genCommas(s(N)) = genQids(N, '`,) .
+  op mixfix : Qid -> Bool .
+  op xmlCmd : Qid -> Bool .
+  op \value{_} : Term -> Term .
+  op \myquote{_} : String -> QidList .
+
+
+  op formatEmpty : Sort Nat -> QidList .
+  eq formatEmpty(Q, N) 
+   = indent(N) '<empty qid("sort=\"" + string(Q) + "\"/>") ---('\n) .
+
+ ceq printTerm(U,C,Ty,N) 
+   = indent(N) '<var  
+        'sort= qid("\"" + xmlString(Ty) + "\"") 
+        '/> ---('\n) 
+  if getName(C) == '? . 
+ ceq printTerm(U,C,Ty,N)
+   = formatEmpty(List, N) 
+  if C = emptyCt(List) .
+ ceq printTerm(U,C,Ty,N)
+   = formatEmpty(Bag, N) 
+  if C = emptyCt(Bag) .
+ ceq printTerm(U,C,Ty,N)
+   = formatEmpty(Set, N) 
+  if C = emptyCt(Set) .
+ ceq printTerm(U,C,Ty,N)
+   = formatEmpty(Map, N) 
+  if C = emptyCt(Map) .
+ ceq printTerm(U,C,Ty,N)
+   = formatEmpty(KList, N) 
+  if C = emptyCt(KList) .
+ ceq printTerm(U,C,Ty,N)
+   = formatEmpty(K, N) 
+  if C = emptyCt(K) .
+ ceq printTerm(U,C,Ty,N)
+   = indent(N) '<emptylist 'ctor= qid("\"" + getListCtor(string(getName(C))) + "\"") 
+     '/> ---('\n)
+  if string(getType(C)) starts-with "SemList`{Bottom`,\"" .
+
+
+ op getListCtor : String -> String .
+ eq getListCtor(Str) = substr(Str,find(Str,"\"",0) + 1, _-_(rfind(Str,"\"",length(Str)), find(Str,"\"",0) + 1)) .
+
+ ceq printTerm(U,C,Ty,N) 
+   = printConst(C, Ty, N)
+  if isBuiltin(Ty) .
+
+  op printConst : Constant Type Nat -> QidList .
+  eq printConst(C, Ty, N)
+   = indent(N) '<const 
+        'sort= qid("\"" + xmlString(Ty) + "\">") 
+        tokenizeXML(xmlString(getName(C)))
+        '</const> ---('\n) .
+  eq printTerm(U, C, Ty, N)
+   =  indent(N) '<term  
+              'sort= qid("\"" + xmlString(Ty) + "\"") '> 
+             '<label> 
+               tokenizeXML(xmlString(getName(C)))
+              '</label> ---('\n)
+             '<args/> 
+             '</term>
+     [owise] .
+ ceq printTerm(U,V,Ty,N) 
+   = indent(N) '<var  
+        'sort= qid("\"" + xmlString(Ty) + "\"") '> 
+            '<declaredSort> tokenizeXML(xmlString(Ty)) '</declaredSort>
+        '</var> ---('\n) 
+  if getName(V) == '? . 
+  eq printTerm(U,V,Ty,N) 
+   = indent(N) '<var 
+        'sort= qid("\"" + xmlString(getType(V)) + "\"") 
+        '>
+            '<name> tokenizeXML(xmlString(getName(V))) '</name>
+            '<declaredSort> tokenizeXML(xmlString(getType(V))) '</declaredSort>
+        '</var> 
+ ---('\n) [owise] .
+
+  op getName : OpDeclSet Qid Type -> Qid .
+  eq getName( (op Q : nil -> Ty [AS metadata(Str) ] .) OPDS, Q, Ty)
+   = getName(Q, metadataParse(Str)) [owise] .
+ ceq getName(OPDS, Q, Ty) 
+   = getLabelName(OPDS, qid(substr(string(Q),1,length(string(Q))))) 
+  if substr(string(Q),0,1) = "'" .
+  eq getName(OPDS, Q, Ty) = Q [owise] .
+
+  op getLabelName : OpDeclSet Qid -> Qid .
+  eq getLabelName( (op Q : TyL -> Ty [AS metadata(Str) ] .) OPDS, Q)
+   = addParams(getName(Q, metadataParse(Str)),arity(TyL)) [owise] .
+  eq getLabelName( (op Q : TyL -> Ty [AS] .) OPDS, Q)
+   = addParams(getName(Q, none),arity(TyL)) [owise] .
+  eq getLabelName(OPDS, Q) = Q [owise] .
+   
+  op addParams : Qid Nat -> Qid .
+  eq addParams(Q, N) = if xmlCmd(Q) then qidList2Qid('\ensuremath '`{ qid(string(Q)+ "NoSpace") genQids(N, '`{ '\_ '`}) '`}) else qid(replaceAll(string(Q),"_" |-> "\\_")) fi .
+
+  var Q' : Qid . var  AS1 AS2 : AttrSet .
+  op getName : Qid AttrSet -> Qid .
+  eq getName(Q, AS pair("wrapper",Str)) = '_ .
+  eq getName(Q, AS1 klatex(AS2 krenameTo(Q') ) ) = Q' [print Q " renamed to " Q'].
+  eq getName(Q, AS) = latexify(Q) [owise] .
+
+---  eq printTerm(U,Q[NeTl]) 
+---   = Q '`( printTermL(U, NeTl) '`) .
+  ceq  printTerm(U,T,Ty,N)
+    =  printTerm(U,\kcell{Label}{Contents}{AS[ellipses]},Ty,N)
+    if {Label, Contents, AS} := splitKCell(T) .
+
+  var Ellipses : Ellipses .
+
+  op printSequence : Module TermList Type Nat Qid ~> QidList .
+  eq printSequence(U, empty, Ty, N, Q') = nil .
+  ceq printSequence(U,(Q[Tl],Tl'),Ty, N, Q')
+    = printSequence(U, (Tl,Tl'), Ty, N, Q')
+   if Q = Q' .
+  eq printSequence(U, (T,Tl), Ty, N, Q')
+   = printTerm(U, T, Ty, N) printSequence(U, Tl, Ty, N, Q') [owise] .
+
+
+  op formatSequence : Module TermList Type Nat Qid String ~> QidList .
+  eq formatSequence(U, Tl, Ty, N, Q, Str)
+   = indent(N) qid("<" + Str + ">") ---('\n)
+         printSequence(U, Tl, Ty, s(N), Q)
+       indent(N)  qid("</" + Str + ">") ---('\n) .
+ 
+  op formatElement : Module Term Type Nat String ~> QidList .
+  eq formatElement(U, T, Ty, N, Str)
+   = indent(N) qid("<" + Str + ">") ---('\n)
+         printTerm(U, T, Ty, s(N))
+     indent(N)  qid("</" + Str + ">") ---('\n) .
+
+  ceq printTerm(U,Q[T1,T2],Ty,N) = 
+     printTerm(U,\reduce{T1}{T2},Ty,N) 
+   if Q = replaceS .
+  ceq printTerm(U,Q[Tl],Ty, N)
+    = formatSequence(U, Tl, Ty, N, Q, "KSequence") 
+   if sameKind(U, Ty, K) /\ Q = kraS .
+  ceq printTerm(U,Q[Tl],Ty,N)
+    = formatSequence(U, Tl, Ty, N, Q, "Bag")
+   if sameKind(U, Ty, Bag) /\ Q = ctor(Bag) .
+  ceq printTerm(U,Q[Tl],Ty,N)
+    = formatSequence(U, Tl, Ty, N, Q, "Set")
+   if sameKind(U, Ty, Set) /\ Q = ctor(Set) .
+  ceq printTerm(U,Q[Tl],Ty,N)
+    = formatSequence(U, Tl, Ty, N, Q, "List")
+   if sameKind(U, Ty, List) /\ Q = ctor(List) .
+  ceq printTerm(U,Q[Tl],Ty,N)
+    = formatSequence(U, Tl, Ty, N, Q, "Map")
+   if sameKind(U, Ty, Map) /\ Q = ctor(Map) .
+  ceq printTerm(U,Q[Tl],Ty,N)
+    = formatSequence(U, Tl, Ty, N, Q, "ListOfK")
+   if sameKind(U, Ty, KList) /\ Q = kListS .
+  ceq printTerm(U,Q[T], Ty, N)
+    = formatElement(U, T, K, N, "SetItem")
+   if Q = itemCtor(Set) .
+  ceq printTerm(U,Q[T], Ty, N)
+    = formatElement(U, T, K, N, "ListItem")
+   if Q = itemCtor(List) .
+  ceq printTerm(U,Q[T], Ty, N)
+    = formatElement(U, T, K, N, "BagItem")
+   if Q = itemCtor(Bag) .
+  ceq printTerm(U,Q[T1,T2], Ty, N)
+    = indent(N) '<MapItem> ---('\n)
+       formatElement(U, T1, K, s(N), "key")
+       formatElement(U, T2, K, s(N), "value")
+      indent(N) '</MapItem> ---('\n)
+   if Q = itemCtor(Map) .
+  ceq printTerm(U, Q['0.#Zero],Ty,N) = printTerm(U, qid(string(N',10) + ".#Nat"),'#Int, N) 
+   if N' := getNat(string(Q)) .
+---(
+  ceq printTerm(U, '_`(_`)[Q,'_`,`,_[NeTl]], Ty, N) = printTerm(U,Q'[NeTl], Ty,N)
+   if substr(string(getName(Q)),0,1) = "'" 
+   /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) .
+  ceq printTerm(U, '_`(_`)[Ct,T], Ty, N) = printTerm(U,Ct, Ty, N)
+   if sortLeq(U,getType(Ct),KLabel) /\ T = nilKList .
+  ceq printTerm(U, '_`(_`)[V,T], Ty, N) = printTerm(U,V, Ty, N)
+   if sortLeq(U,getType(V),KLabel) /\ T = nilKList .
+---)
+  ceq printTerm(U, '_`(_`)[Q,T], Ty, N) = printTerm(U,Q'[T], Ty, N)
+   if substr(string(getName(Q)),0,1) = "'" 
+   /\ Q' := qid(substr(string(getName(Q)),1,length(string(Q)))) [owise] .
+
+  op getNat : String -> [Nat] .
+  var Str : String .
+  ceq getNat(Str) 
+    = rat(substr(Str, length("sNat_^"), length(Str)), 10) 
+   if substr(Str, 0, length("sNat_^")) =  "sNat_^" .
+  eq getNat("sNat_") = 1 .
+  
+  eq printTerm(U, T, Ty, N)
+    = printTerm1(U,T,Ty,N) [owise] . 
+
+  var TyL' : TypeList .  var Ty' : Type .
+  op getRenamedQid : Qid OpDeclSet -> [Qid] .
+  eq getRenamedQid(Q, (op Q : TyL -> Ty [AS metadata(Str) ] .) OPDS) = getName(Q,metadataParse(Str)) [owise print Q " -> " Str "?"] .
+  eq getRenamedQid(Q, OPDS) = latexify(Q) [owise] . --- print Op:[OpDecl]] .
+ 
+  op printTerm1 : Module Term Type Nat -> QidList .
+
+---( ceq printTerm1(U, Q[Ct],N) = tokenizeXML(getString(Ct)) if Q == latexS .
+ ceq printTerm1(U, '__[Tl1:TermList, Q[Ct], Tl2:TermList], Ty, N)
+   = printTerm(U,merge(genQids(s countTerms(Tl1:TermList), '\somespace), Tl1:TermList), Ty, N)
+     tokenizeXML(getString(Ct))
+     printTerm(U,merge(genQids(s countTerms(Tl2:TermList), '\somespace), Tl2:TermList), Ty, N)
+  if Q == latexS .
+---)
+---(
+ ceq printTerm1(U,Q[NeTl,T],N)
+   = printTerm(U,Q[Q[NeTl],T],N)
+  if mixfix(Q) /\ size(splitMixFix(string(Q))) = 3 /\ 1 < countTerms(NeTl) [owise print "normalizing"] .
+---)
+  eq printTerm1(U, F[NeTl],Ty,N) 
+   =  indent(N) '<term  
+              'sort= qid("\"" + xmlString(Ty) + "\"") '> 
+             '<label> 
+               tokenizeXML(xmlString(F))
+              '</label> ---('\n)
+             '<args>
+          printTermL(U, NeTl, s(N)) 
+             '</args> 
+             '</term>
+   [owise] .
+  eq printTerm(M, T:[Term],Ty,N) = 'error 
+     [owise print "error in Print Term for " T:[Term]] .
+ 
+  op eMetaXMLPrint : Module AttrSet Nat -> QidList .
+  op eMetaXMLPrint : IntList -> QidList .
+---  op eMetaXMLPrint : AttrDeclSet -> QidList .
+  op eMetaXMLPrint : Module HookList -> QidList .
+
+  vars QI QI' QI'' F L : Qid .
+  var  QIL : QidList .
+  var  M : Module .
+  var  U : Module .
+  vars SS : SortSet .
+  vars S S' : Sort .
+  var  TyL : TypeList .
+  var  Ty : Type .
+  var  SSDS : SubsortDeclSet .
+  var  OPDS : OpDeclSet .
+  var  AtS : AttrSet .
+  var  MAS : MembAxSet .
+  var  EqS : EquationSet .
+  var  RlS : RuleSet .
+  var  Hk : Hook .
+  var  HkL : HookList .
+  var  I : Int .
+  var  NL : IntList .
+  vars T T' T'' T3 : Term .
+  var  Cond : Condition .
+  var  Knd : Kind .
+
+---  ceq eMetaXMLPrint(VE) = viewExp2QidList(VE) if not VE :: TypeList .
+
+  --- eq eMetaXMLPrint(Ty) = Ty .
+
+  op \sort{_} : Sort -> QidList .
+  eq eMetaXMLPrint(S) = \sort{S} .
+---(
+    = if getPars(S) == empty
+      then S
+      else getName(S) '`{ parameterList2QidList(getPars(S)) '`}
+      fi .
+---)
+  eq eMetaXMLPrint(Knd) = '\kind '`{ eMetaXMLPrint(getSort(Knd)) '`} . 
+
+  eq eMetaXMLPrint((S ; SS)) 
+    = (eMetaXMLPrint(S) eMetaXMLPrint(SS))
+    [owise] .
+  eq eMetaXMLPrint((none).SortSet) = nil .
+
+  var NeTyL : NeTypeList .
+  eq eMetaXMLPrint(Ty NeTyL) 
+    = eMetaXMLPrint(Ty) '\times eMetaXMLPrint(NeTyL) 
+    [owise] .
+  eq eMetaXMLPrint((nil).TypeList) = nil .
+
+---  op \subsort{_}{_} : Sort Sort -> SubsortDecl [ctor] .
+  op \terminal{_} : Qid -> QidList [ctor] .
+  op \nterminal{_} : Type -> QidList [ctor] .
+  op syntax : QidList QidList AttrSet -> Printable .
+  op \cellLabel{_}{_} : Qid AttrSet -> OpDecl .
+  eq op(op F : nil -> 'CellLabel [AS] .) = empty .
+  eq op(op F : TyL -> Ty [ metadata("generated-label=()") AS] .) = empty .
+  eq op(op F : TyL -> Ty [ metadata(St) AS] .)
+   = op(op F : TyL -> Ty [ metadataParse(St) AS] .) [owise] .
+
+---  eq op(op F : TyL -> Ty [pair("generated","") AS] .) = empty .
+
+---  eq metadata("builtin wrapper") = none .
+
+  op subsort(_, _) : QidList QidList -> Printable .
+  var Sort Sort' : Sort .
+  eq ss(subsort Sort < Sort' .) = subsort(\nterminal{Sort}, \nterminal{Sort'}) .
+
+  op addKLabel : Qid AttrSet ~> AttrSet .
+  eq addKLabel(Q, pair("klabel",Str) AS) = pair("klabel",Str) AS .
+  eq addKLabel(Q, AS) = pair("klabel", qstring(Q)) AS [owise] .
+
+  eq op(op Q : nil -> Ty [AS] .)
+   = syntax(Ty, \terminal{Q}, #Types(0) addKLabel(Q,AS)) [owise] .
+  eq op(op Q : TyL -> Ty [AS] .)
+   = syntax(Ty,
+      mergeTypes(splitMixFix(string(Q)), TyL), #Types(arity(TyL)) addKLabel(Q, AS))
+ [owise] .
+  op #Types : Nat -> Attr .
+
+  op mergeTypes : QidList TypeList -> TypeList .
+  var Op : OpDecl .
+  op \algebraicOp{_}{_}{_}{_} : Qid TypeList  Type AttrSet -> OpDecl .
+
+  op eMetaXMLPrint1 : Module AttrSet Nat -> QidList .
+  eq eMetaXMLPrint1(M,label(Q) AtS, N) = eMetaXMLPrint1(M,AtS, N) .
+  eq eMetaXMLPrint1(M,klarge AtS, N) = eMetaXMLPrint1(M,AtS, N) .
+  eq eMetaXMLPrint1(M,(none).AttrSet, N) = nil .
+  eq eMetaXMLPrint1(M,AtS, N)
+   =  '`[ eMetaXMLPrint(M,AtS, N) '`] [owise] .
+
+  ops rule : String KRuleSplit -> Printable .
+  ops mequation : String Term Term AttrSet Condition -> Printable .
+  ops mrule : String Term Term -> Printable .
+  ops cmrule : String Term Term Condition -> Printable .
+ 
+  op config : Term -> Printable .
+  op xml : String -> Printable .
+  op context : String KContextSplit -> Printable . 
+  var AS : AttrSet .
+
+  op getLabel : AttrSet -> String .
+  eq getLabel( label(Q) AS) = string(Q) .
+  eq getLabel(AS) = "" [owise] .
+
+  var KRS : KRuleSplit .  var KCS : KContextSplit . 
+  var Mb : MembAx .  var MAS' : MembAxSet .
+  eq mb(mb 'configuration_[T] : 'KSentence [AS] .) = config(T) .
+  eq mb(mb 'xml_[T] : 'KSentence [AS] .) = xml(getString(T)) .
+ ceq mb(Mb) = rule(getLabel(getAttrs(Mb)),KRS)
+  if KRS := splitKRule(metadataParse(Mb)) .
+ ceq mb(Mb) = context(getLabel(getAttrs(Mb)),KCS) 
+  if KCS := splitKContext(metadataParse(Mb)) .
+
+---(
+
+  eq eMetaXMLPrint(M, mb(mb T : S [none] .) Prints)
+    = (---('\n) 'mb eMetaXMLPrint(M, T) 
+                   ': eMetaXMLPrint(S) '. 
+       eMetaXMLPrint(M, Prints)) [owise] .
+  eq eMetaXMLPrint(M, mb(mb T : S [AtS] .) Prints)
+    = (---('\n) 'mb eMetaXMLPrint(M, T) 
+                   ': eMetaXMLPrint(S) 
+               '`[ eMetaXMLPrint(M, AtS) '`] '. 
+       eMetaXMLPrint(M, Prints)) 
+    [owise] .
+  eq eMetaXMLPrint(M, mb(cmb T : S if Cond [none] .) Prints)
+    = (---('\n) 'cmb eMetaXMLPrint(M, T) 
+                   ': eMetaXMLPrint(S) 
+       ---('\n) 'if eMetaXMLPrint(M, Cond) '. 
+       eMetaXMLPrint(M, Prints)) [owise] .
+  eq eMetaXMLPrint(M, mb(cmb T : S if Cond [AtS] .) Prints)
+    = (---('\n) 'cmb eMetaXMLPrint(M, T) 
+                   ': eMetaXMLPrint(S) 
+       ---('\n) 'if eMetaXMLPrint(M, Cond) 
+           '`[ eMetaXMLPrint(M, AtS) '`] '. 
+       eMetaXMLPrint(M, Prints)) 
+    [owise] .
+---)
+
+  eq loc(I,N,empty) = empty .
+  eq eq(eq T = T' [metadata("simplify")] .) = empty .
+  eq eq(eq T = T' [metadata(Str) AtS] .) 
+   = eq(eq T = T' [metadataParse(Str) AtS] .) [owise] .
+  eq eq(eq T = T' [pair("parser","") AtS] .) = empty .
+  eq eq(eq T = T' [AtS] .) = mequation(getLabel(AtS),T,T', AtS, nil) [owise] .
+  eq eMetaXMLPrint(M, mequation(Str, T, T', AtS, Cond) Prints)
+    = (indent(2) 
+          '<equation 'displayLabel= qid("\"" + xmlString(Str) + "\"") '> ---('\n)
+            printTerm(M,T,niceSort(M,T),3)
+            printTerm(M,T',niceSort(M,T),3)
+            printCondition(M, Cond)
+            printAttributes(M, AtS)
+       indent(2)
+          '</equation> ---('\n)
+       eMetaXMLPrint(M, Prints)) 
+    [owise] .
+  eq eq(ceq T = T' if Cond [AtS] .) = mequation(getLabel(AtS), T, T', AtS, Cond) .
+
+  op printAttributes : Module AttrSet -> QidList .
+  eq printAttributes(M, none) = nil .
+  eq printAttributes(M, AS) = ( 
+         indent(5) '<attributes> ---('\n)
+           eMetaXMLPrint(M, AS, 6) 
+         indent(5) '</attributes> ---('\n)) [owise] . 
+ 
+ op printCondition : Module Condition -> QidList .
+  eq printCondition(M, nil) = nil .
+  eq printCondition(M, Cond) = (
+         indent(3) '<condition> ---('\n)
+            eMetaXMLPrint(M, Cond, 4)
+         indent(3) '</condition> ---('\n)
+       ) [owise] .
+
+
+  eq rl(rl T => T' [AtS] .) = mrule(getLabel(AtS), T, T') .
+  eq  eMetaXMLPrint(M, mrule(Str, T, T') Prints) 
+    = (---('\n) '\mrule '`{ qid(Str) '`} '`{ eMetaXMLPrint(M, T) 
+        '`} '`{ eMetaXMLPrint(M, T') '`} 
+       
+       eMetaXMLPrint(M, Prints)) .
+  eq rl(crl T => T' if Cond [AtS] .) =  cmrule(getLabel(AtS), T, T', Cond) .
+  eq  eMetaXMLPrint(M, cmrule(Str, T, T', Cond) Prints) 
+    = (---('\n) '\cmrule '`{ qid(Str) '`} '`{ eMetaXMLPrint(M, T) 
+        '`} '`{ eMetaXMLPrint(M, T') '`} 
+        '`{ eMetaXMLPrint(M, Cond, 3) '`} 
+       
+       eMetaXMLPrint(M, Prints)) .
+
+  var Ct : Constant .
+  eq eMetaXMLPrint(M, T = 'true.Bool /\ Cond, N) 
+   = printTerm(M, T, Bool, N) eMetaXMLPrint(M, Cond, N) .
+  eq eMetaXMLPrint(M, T = T' /\ Cond, N) 
+    = indent(N) '<equality> ---('\n) 
+        printTerm(M, T, niceSort(M,T), s(N)) 
+        printTerm(M, T', niceSort(M,T), s(N))
+      indent(N) '</equality> ---('\n) eMetaXMLPrint(M, Cond, N) [owise] .
+  eq eMetaXMLPrint(M, T : S /\ Cond, N) 
+    = (printTerm(M, T, niceSort(M,T), N) ': eMetaXMLPrint(S)) eMetaXMLPrint(M, Cond, N) .
+  eq eMetaXMLPrint(M, T := T' /\ Cond, N) 
+    = (printTerm(M, T, niceSort(M,T), N) ':= printTerm(M, T', niceSort(M,T), N)) eMetaXMLPrint(M, Cond, N) .
+  eq eMetaXMLPrint(M, T => T' /\ Cond, N) 
+    = (printTerm(M, T, niceSort(M,T), N) '=> printTerm(M, T', niceSort(M,T), N)) eMetaXMLPrint(M, Cond, N) .
+
+  eq eMetaXMLPrint(M, (nil).Condition, N) = nil .
+
+  var NAtS : NeAttrSet .
+  eq eMetaXMLPrint(M, (Attr:Attr NAtS), N)
+   = eMetaXMLPrint(M, Attr:Attr, N) eMetaXMLPrint(M, NAtS, N)  .
+  eq eMetaXMLPrint(M, klarge, N)  
+    = nil .
+  eq eMetaXMLPrint(M, assoc, N)  
+    = indent(N) '<tag 'key="assoc" '/> ---('\n) .
+  eq eMetaXMLPrint(M, comm, N)
+    = indent(N) '<tag 'key="comm" '/> ---('\n) .
+  eq eMetaXMLPrint(M, (memo ), N)   
+    = indent(N) '<tag 'key="memo" '/> ---('\n) .
+  eq eMetaXMLPrint(M, (idem ), N)   
+    = indent(N) '<tag 'key="idem" '/> ---('\n) .
+
+  eq eMetaXMLPrint(M, (id(T) ), N)
+    = indent(N) '<tag 'key="id" '> ---('\n) 
+        printTerm(M,T, niceSort(M,T),s(N))
+      indent(N) '</tag> ---('\n) . 
+
+  eq eMetaXMLPrint(M, (right-id(T) ), N)
+    = indent(N) '<tag 'key="right-id" '> ---('\n) 
+        printTerm(M,T, niceSort(M,T),s(N))
+      indent(N) '</tag> ---('\n) . 
+  eq eMetaXMLPrint(M, (left-id(T) ), N)
+    = indent(N) '<tag 'key="left-id" '> ---('\n) 
+        printTerm(M,T, niceSort(M,T),s(N))
+      indent(N) '</tag> ---('\n) . 
+  eq eMetaXMLPrint(M, (poly(NL) ), N)
+    = ('\kpoly '`{ eMetaXMLPrint(NL) '`} 
+       ) .
+
+  eq eMetaXMLPrint(M, (karity(N) ), N')
+    = indent(N) '<tag 'key="arity" 
+           'value= qid("\"" + string(N,10) + "\"") '/> ---('\n) .
+
+---  op \wrapping{_} : Qid -> QidList .
+  op \renameTo{_} : Qid -> QidList .
+
+  var N' : Nat .
+  op eMetaXMLPrint : Module Nat AttrSet Nat -> QidList .
+  eq eMetaXMLPrint(M, N, (krenameTo(Q) ), N')
+    = (\renameTo{getRenamedKOp(Q, N, getOps(M))} 
+       ) .
+  eq eMetaXMLPrint(M, N, AtS, N') = eMetaXMLPrint(M, testDitto(AtS), N') [owise] .
+
+
+  op testDitto : AttrSet -> AttrSet .
+  eq testDitto(kditto AS) = kditto .
+  eq testDitto(AS) = AS [owise] .
+
+  op getRenamedKOp : Qid Nat OpDeclSet -> Qid .
+  eq getRenamedKOp(Q, N, OPDS) 
+   = getRenamedKOp(Q, manyK(N), OPDS) .
+
+  op manyK : Nat -> TypeList .
+  eq manyK(0) = nil .
+  eq manyK(s(N)) = 'K manyK(N) .
+  
+  op getRenamedKOp : Qid TypeList OpDeclSet -> Qid .
+  eq getRenamedKOp(Q, TyL,  (op Q : TyL -> Ty [AS] .) OPDS)
+   = getRenamedKOp(Q, AS) .
+  eq getRenamedKOp(Q, TyL, OPDS) = Q [owise] .
+ 
+  op getRenamedKOp : Qid AttrSet -> Qid .
+  eq getRenamedKOp(Q, AS metadata(Str) ) 
+   = getName(Q, metadataParse(Str)) [owise] .
+
+  eq eMetaXMLPrint(M, (kaux), N)
+    = ('\kaux '`{ '`}) .
+  eq eMetaXMLPrint(M, (kditto), N)
+    = ('\kditto '`{ '`}) .
+
+
+  op printStrictCells : QidList Nat -> QidList .
+  eq printStrictCells('k, N) = nil .
+  eq printStrictCells(nil, N) = nil .
+  eq printStrictCells(QIL,N) 
+   = indent(N) '<strictCells> ---('\n) 
+       indent(s(N)) QIL ---('\n)
+     indent(N) '</strictCells> ---('\n) [owise] .
+
+  var NNL : NeNatList .
+  sort NeAttrSet .
+  subsort Attr < NeAttrSet < AttrSet .
+  op __ : NeAttrSet AttrSet -> NeAttrSet [ditto] .  
+
+  eq eMetaXMLPrint(M, (klocation(Str)), N) 
+   = (indent(N) '<location> tokenizeXML(xmlString(Str)) '</location>) .
+ 
+
+  eq eMetaXMLPrint(M, (kstrict(NL, QIL)), N)
+   = (indent(N) '<strict> ---('\n) 
+        printStrictPositions(NL, s(N))
+        printStrictCells(QIL, s(N))
+      indent(N) '</strict> ---('\n) ) .
+  op printStrictPositions : NatList Nat -> QidList .
+  eq printStrictPositions(nil,N) = nil .
+  eq printStrictPositions(NL,N) = 
+     (indent(N) '<positions> ---('\n)
+          indent(s(N)) eMetaXMLPrint(NL) ---('\n)
+      indent(N) '</positions> ---('\n)) .
+
+  eq eMetaXMLPrint(M, (seqkstrict(NL, QIL)), N)
+   = (indent(N) '<seqstrict> ---('\n) 
+        printStrictPositions(NL, s(N))
+        printStrictCells(QIL, s(N))
+      indent(N) '</seqstrict> ---('\n) ) .
+  eq eMetaXMLPrint(M, (pair("function",Str)), N)
+   = (indent(N) '<function> tokenizeXML(xmlString(Str)) '</function>) .
+  eq eMetaXMLPrint(M, (pair("hybrid","")), N) = (indent(N) '<hybrid/>) .
+  eq eMetaXMLPrint(M, (pair("structural","")), N) = (indent(N) '<structural/>) .
+  eq eMetaXMLPrint(M, (pair("transition","")), N) = (indent(N) '<transition/>) .
+  eq eMetaXMLPrint(M, (pair("superheat","")), N) = (indent(N) '<superheat/>) .
+  eq eMetaXMLPrint(M, (pair("supercool","")), N) = (indent(N) '<supercool/>) .
+  eq eMetaXMLPrint(M, (pair("anywhere","")), N) = (indent(N) '<anywhere/>) .
+  eq eMetaXMLPrint(M, (pair("latex",Str)), N)
+   = (indent(N) '<latex> tokenizeXML(xmlString(Str)) '</latex>) .
+  eq eMetaXMLPrint(M, (pair("hook",Str)), N)
+   = (indent(N) '<hook> tokenizeXML(xmlString(Str)) '</hook>) .
+  eq eMetaXMLPrint(M, (pair("binder",Str)), N)
+   = (indent(N) '<binder> tokenizeXML(xmlString(Str)) '</binder>) .
+  eq eMetaXMLPrint(M, (pair("klabel",Str)), N)
+   = (indent(N) '<klabel> tokenizeXML(xmlString(Str)) '</klabel>) .
+  eq eMetaXMLPrint(M, (pair(Str,"") ), N)   
+    = (indent(N) '<tag 
+          'key= qid("\"" + xmlString(Str) + "\"")
+          '/> ---('\n)) [owise] .
+  eq eMetaXMLPrint(M, (pair(Str,Str') ), N)   
+    = (indent(N) '<tag 
+          'key= qid("\"" + xmlString(Str) + "\"") '>
+          tokenizeXML(xmlString(Str'))
+       '</tag> ---('\n)) [owise] .
+  eq eMetaXMLPrint(M, (strat(NL) ), N)
+    = ('\kstrat '`{ eMetaXMLPrint(NL) '`} 
+       ) .
+  eq eMetaXMLPrint(M, (memo ), N)   
+    = ('\kmemo '`{ '`}) .
+  eq eMetaXMLPrint(M, (prec(I) ), N)
+   = (indent(N) '<tag 'key="prec" 
+                            'value= qid("\"" + string(I,10) + "\"") 
+                 '/> ---('\n)) .
+  eq eMetaXMLPrint(M, (klatex(AS) ), N)
+    = nil .
+  eq eMetaXMLPrint(M, (gather(QIL) ), N)
+    = nil .
+  eq eMetaXMLPrint(M, (format(QIL) ), N)
+    = nil .
+  eq eMetaXMLPrint(M, (ctor ), N)   
+    = ('\kctor '`{ '`}) .
+  eq eMetaXMLPrint(M, (frozen(NL) ), N) 
+    = ('\kfrozen '`{ eMetaXMLPrint(NL) '`} 
+       ) .
+  eq eMetaXMLPrint(M, (iter ), N)   
+    = ('\kiter '`{ '`}) .
+  eq eMetaXMLPrint(M, (special(HkL) ), N)
+    = nil .
+  eq eMetaXMLPrint(M, (config ), N)   
+    = ('\kconfig '`{ '`}) .
+  eq eMetaXMLPrint(M, (object ), N)   
+    = ('\kobject '`{ '`}) .
+  eq eMetaXMLPrint(M, (msg ), N)   
+    = ('\kmsg '`{ '`}) .
+
+  eq eMetaXMLPrint(M, (label(QI) ), N)
+    = nil . --- '\klabel '`{ QI '`}  .
+  eq eMetaXMLPrint(M, (metadata(St) ), N)
+    = ('\kmetadata '`{ qid(St) '`} 
+      ) .
+  eq eMetaXMLPrint(M, (nonexec ), N)
+    = ('\knonexec '`{ '`}) .
+  eq eMetaXMLPrint(M, (owise ), N)
+   = (indent(N) '<tag 'key="owise" '/> ---('\n)) .
+  eq eMetaXMLPrint(M, (print(QIL) ), N)
+    = ('\kprint '`{ QIL '`}) .
+
+  eq eMetaXMLPrint(M, (none).AttrSet, N) = nil .
+
+  ceq eMetaXMLPrint(M, (Hk HkL)) 
+    = (eMetaXMLPrint(M, Hk) eMetaXMLPrint(M, HkL)) 
+    if HkL =/= nil .
+  eq eMetaXMLPrint(M, id-hook(QI, nil)) = ('id-hook QI) .
+  eq eMetaXMLPrint(M, id-hook(QI, QIL))
+    = ('id-hook QI '`( QIL '`) ) 
+    [owise] .
+  eq eMetaXMLPrint(M, op-hook(QI, QI', nil, QI''))
+    = ('op-hook QI '`( QI' ': '~> QI'' '`) '\o) .
+  eq eMetaXMLPrint(M, op-hook(QI, QI', QIL, QI''))
+    = ('op-hook QI '`( QI' ': QIL '~> QI'' '`) '\o) 
+    [owise] .
+  eq eMetaXMLPrint(M, term-hook(QI, T))
+    = ('term-hook QI '`( eMetaXMLPrint(M, T) '`) '\o) .
+
+  eq eMetaXMLPrint((I NL)) = (qid(string(I, 10)) eMetaXMLPrint(NL)) .
+  eq eMetaXMLPrint((nil).NatList) = nil .
+
+
+  var Str' : String .
+
+endm
+
+*******************************************************************************
+
+***
+*** 8.2.2 Meta XML Printing of Modules
+***
+
+*** In the following module, the \texttt{meta-pretty-print} function is
+*** defined on sort \texttt{Module}.
+
+mod UNIT-META-XML-PRINT is
+  pr DECL-META-XML-PRINT .
+  pr MOD-NAME-TO-QID .
+
+  op eMetaXMLPrint : Module Module -> QidList .
+
+  op eMetaXMLPrint : Module Module -> QidList .
+  op eMetaXMLPrint : Header -> QidList .
+  op eMetaXMLPrint : ParameterDeclList -> QidList .
+  op eMetaXMLPrint : ImportList -> QidList .
+
+  var  M : Module .
+  vars QI F F' L L' : Qid .
+  var  QIL : QidList .
+  var  ME : ModuleExpression .
+  vars S S' : Sort .
+  var  Ty : Type .
+  var  TyL : TypeList .
+  var  SS : SortSet .
+  var  PD : ParameterDecl .
+  var  PDL : ParameterDeclList .
+  vars IL IL' : ImportList .
+  var  SSDS : SubsortDeclSet .
+  var  OPDS : OpDeclSet .
+  var  MAS : MembAxSet .
+  var  EqS : EquationSet .
+  var  RlS : RuleSet .
+  var  U : Module .
+  var  AtS : AttrSet .
+  var  MN : ModuleExpression .
+
+  ceq eMetaXMLPrint(ME) 
+    = if QI == '`) or QI == '`] or QI == '`} 
+      then QIL QI 
+      else QIL QI 
+      fi
+    if QIL QI := header2QidList(ME) .
+
+
+  var I : Import .
+  op removeKModules : ModuleExpression ImportList -> ImportList .
+  eq removeKModules(ME, (including 'PL-BUILTINS .) IL) = removeKModules(ME, IL) .
+  eq removeKModules(ME, (including 'K-RULES .) IL) = removeKModules(ME, IL) .
+  eq removeKModules(ME, (including 'BOOL .) IL) = removeKModules(ME, IL) .
+  ceq removeKModules(ME, (including Q .) IL) 
+    = removeKModules(ME, IL) 
+   if string(Q) == string(ME) + "-K-CONFIGURATION" .
+  eq removeKModules(ME, I IL) = I removeKModules(ME, IL) [owise] .
+  eq removeKModules(ME, nil) = nil .
+ 
+  eq eMetaXMLPrint(M, mod ME is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
+    = (---('\n)          
+       indent(1) '<module> '<name> tokenizeXML(xmlString(ME)) '</name> ---('\n)
+       indent(2) '<imports> ---('\n) 
+          eMetaXMLPrint(removeKModules(ME,IL)) 
+       indent(2) '</imports> ---('\n)
+          ---(if SS == none
+           then nil
+           else (---('\n) '\sorts '`{ eMetaXMLPrint(SS) '`} '\o)
+           fi)
+          eMetaXMLPrint(M, ---(subsorts(SSDS)---)
+                             ops(OPDS) mbs(MAS) eqs(EqS) rls(RlS))
+       indent(1) '</module> ---('\n)) .
+
+  eq eMetaXMLPrint((including ME .) IL)
+    = (eMetaXMLPrintME(ME) 
+       eMetaXMLPrint(IL)) .
+  eq eMetaXMLPrint((extending ME .) IL)
+    = (eMetaXMLPrintME(ME) 
+       eMetaXMLPrint(IL)) .
+  eq eMetaXMLPrint((protecting ME .) IL)
+    = (eMetaXMLPrintME(ME) 
+       eMetaXMLPrint(IL)) .
+  eq eMetaXMLPrint((nil).ImportList) = nil .
+
+---(
+  eq eMetaXMLPrint((QI :: ME, PDL))
+    = (QI '::  eMetaXMLPrintME(ME) '`, eMetaXMLPrint(PDL))
+    [owise] .
+  eq eMetaXMLPrint((QI :: ME)) = (QI '::  eMetaXMLPrintME(ME)) .
+  eq eMetaXMLPrint((nil).ParameterDeclList) = (nil).QidList .
+---)
+
+  op eMetaXMLPrintME : ModuleExpression -> QidList .
+  var ME' : ModuleExpression .
+  eq eMetaXMLPrintME(ME' + ME:ModuleExpression)
+    = eMetaXMLPrintME(ME')  eMetaXMLPrintME(ME:ModuleExpression) .
+---(
+  eq eMetaXMLPrintME(ME * (RnS:RenamingSet))
+    = eMetaXMLPrintME(ME) '* '`( renamingSet2QidList(RnS:RenamingSet) '`) .
+---)
+  var PL : ParameterList . var NePL : NeParameterList .
+---(
+  eq eMetaXMLPrintME(ME{PL})
+   = eMetaXMLPrintME(ME) '\ '`{ eMetaXMLPrintPL(PL) '\ '`} .
+  op eMetaXMLPrintPL : ParameterList -> QidList .
+  eq eMetaXMLPrintPL((QI,NePL)) = \moduleName{QI} '`, eMetaXMLPrintPL(NePL) .
+  eq eMetaXMLPrintPL(QI) = \moduleName{QI} .
+---)
+  var Q : Qid .
+  op \moduleName{_} : Qid -> Qid .
+  eq eMetaXMLPrintME(Q) 
+   =  indent(6) '<moduleImport> tokenizeXML(xmlString(Q)) '</moduleImport> ---('\n) .
+
+---(
+  op renamingSet2QidList : RenamingSet -> QidList .
+  eq renamingSet2QidList(((op F to F' [AtS]), RS:RenamingSet))
+    = if AtS == none 
+      then ('op F 'to F' '`, renamingSet2QidList(RS:RenamingSet))
+      else ('op F 'to F' '`[ attrSet2QidList(AtS) '`] '`, 
+            renamingSet2QidList(RS:RenamingSet))
+      fi
+    [owise] .
+  eq renamingSet2QidList((op F to F' [AtS]))
+    = if AtS == none 
+      then ('op F 'to F')  
+      else ('op F 'to F' '`[ attrSet2QidList(AtS) '`]) 
+      fi .
+  eq renamingSet2QidList(((op F : TyL -> Ty to F' [AtS]), RS:RenamingSet))
+    = if AtS == none 
+      then ('op F ': typeList2QidList(TyL) '-> Ty 'to F' '`, 
+            renamingSet2QidList(RS:RenamingSet))
+      else ('op F ': typeList2QidList(TyL) '-> Ty 'to F' 
+            '`[ attrSet2QidList(AtS) '`] '`, 
+            renamingSet2QidList(RS:RenamingSet))
+      fi 
+    [owise] .
+  eq renamingSet2QidList((op F : TyL -> Ty to F' [AtS]))
+    = if AtS == none 
+      then ('op F ': typeList2QidList(TyL) '-> Ty 'to F')
+      else ('op F ': typeList2QidList(TyL) '-> Ty 'to F' 
+            '`[ attrSet2QidList(AtS) '`]) 
+      fi .
+  eq renamingSet2QidList(((sort S to S'), RS:RenamingSet))
+    = ('sort S 'to S' '`, 
+       renamingSet2QidList(RS:RenamingSet))
+    [owise] .
+  eq renamingSet2QidList((sort S to S')) = ('sort S 'to S') .
+
+  eq renamingSet2QidList(((label L to L'), RS:RenamingSet))
+    = ('label L 'to L' '`, renamingSet2QidList(RS:RenamingSet))
+    [owise] .
+  eq renamingSet2QidList((label L to L')) = ('label L 'to L') .
+---)
+endm
+
+
+
+mod XML-PRINT-META is
+  including UNIT-META-XML-PRINT .
+  including COMPILE-ONESHOT .
+  sort ProductionType .
+  op \textsf{_} : Qid -> Qid [ctor] .
+
+  var Ty : Type . var Tyl : TypeList . var NTyl : NeTypeList .
+  eq printTerm(M, merge(Q Ql, NeTl), Ty, N)
+   = printEndTerminal(Q)
+     printTerm(M, mergeT(Ql,NeTl), Ty, N) .
+  eq printTerm(M, mergeT(Ql,(T, Tl)), Ty, N)
+   = '`{ printTerm(M, T, Ty, N) '`} printTerm(M, mergeQ(Ql, Tl), Ty, N) .
+  eq printTerm(M, mergeQ(Q, empty), Ty, N) 
+   = printEndTerminal(Q) .
+  eq printTerm(M, mergeQ(Q Ql,NeTl), Ty, N) 
+   = printTerminal(Q) printTerm(M, mergeT(Ql, NeTl), Ty, N) .
+
+  ops mergeT mergeQ : QidList TermList -> Term .
+
+  op printTerminal : Qid -> QidList .
+  eq printTerminal(Q) 
+   = indent(5) '<terminal> tokenizeXML(xmlString(Q)) '</terminal> ---('\n) 
+  [print "terminal " Q] .
+
+  op xmlTerminal : Qid -> Bool .
+  eq xmlTerminal(Q) = (substr(string(Q), _-_(length(string(Q)), 1), 1) == "{" and substr(string(Q), _-_(length(string(Q)), 2), 1) == "`")  or-else (substr(string(Q), 1, 1) == "}" and substr(string(Q), 0, 1) == "`") .
+
+  op printEndTerminal : Qid -> QidList .
+  eq printEndTerminal(Q) 
+   = if Q == '\enspace  then nil else printTerminal(Q) fi .
+
+  eq mergeTypes(Q, nil) = printTerminal(Q) .
+  eq mergeTypes(Q, NTyl) = printTerminal(Q) mergeTypes('`( genCommas(arity(NTyl)) '`), NTyl) .
+  eq mergeTypes(Q Ql, NTyl) 
+   = printEndTerminal(Q) mergeTypesT(Ql, NTyl) [owise] .
+
+  ops mergeTypesT mergeTypesQ : QidList TypeList -> QidList .
+  eq mergeTypesT(Ql,Ty Tyl) 
+   =  \nterminal{Ty} mergeTypesQ(Ql,Tyl) .
+
+  eq mergeTypesQ(Q Ql, NTyl) = printTerminal(Q) mergeTypesT(Ql, NTyl) .
+  eq mergeTypesQ(Q , nil) = printEndTerminal(Q) .
+ 
+  var T : Term . var Cond : Condition . var AS : AttrSet .
+  var T1 T2 : Term . var POS : PrintOptionSet . var Ct : Constant .
+  var Q Q' : Qid . var Ql : QidList .
+  
+  eq \constant{'?}{QIL} = \variable{'AnyVar}{QIL} .
+  eq \constant{'HOLE}{QIL} = \variable{'HOLE}{QIL}.
+  eq \variable{'HOLE}{QIL} = \variable{'\ensuremath`{\square`}}{QIL} .
+  eq \variable{'?}{QIL} = \variable{'AnyVar}{QIL} .
+  eq \variable{'AnyVar}{QIL} = '\AnyVar '`{ printSortQid(QIL) '`} .
+  
+
+  op isGreek : String -> Bool .
+  eq isGreek("Alpha") = true . 
+  eq isGreek("Beta") = true .
+  eq isGreek("Gamma") = true .
+  eq isGreek("Delta") = true .
+  eq isGreek("Epsilon") = true .
+  eq isGreek("VarEpsilon") = true .
+  eq isGreek("Chi") = true .
+  eq isGreek("Zeta") = true .
+  eq isGreek("Eta") = true .
+  eq isGreek("Theta") = true .
+  eq isGreek("VarTheta") = true .
+  eq isGreek("Iota") = true .
+  eq isGreek("Kappa") = true .
+  eq isGreek("Lambda") = true .
+  eq isGreek("Mu") = true .
+  eq isGreek("Nu") = true .
+  eq isGreek("Xi") = true .
+  eq isGreek("Pi") = true .
+  eq isGreek("VarPi") = true .
+  eq isGreek("Rho") = true .
+  eq isGreek("VarRho") = true .
+  eq isGreek("Sigma") = true .
+  eq isGreek("VarSigma") = true .
+  eq isGreek("Tau") = true .
+  eq isGreek("Upsilon") = true .
+  eq isGreek("Phi") = true .
+  eq isGreek("VarPhi") = true .
+  eq isGreek("Chi") = true .
+  eq isGreek("Psi") = true .
+  eq isGreek("Omega") = true .
+  eq isGreek(St) = false [owise] .
+
+  op \greek{_} : String -> String .
+  eq \greek{St} = "\\displayGreek{\\" + smallCaps(St) + "}" .
+
+ ceq printVariable(St) = printVariable(\greek{St}) if isGreek(St) .
+  eq printVariable("Sigma") = printVariable("\\ensuremath{\\sigma}") .
+---  eq \constant{'.empty} = '\kdot .
+---  eq \constant{'.K} = '\kdot .
+---  eq \constant{'.nil} = '\kdot .
+  op printOpQid : Qid -> Qid .
+  eq printOpQid(Q) = printQid(Q) .
+---  eq \wrapping{Q} = 'wrapping printQid(Q) .
+  eq \renameTo{'AnyVar} = 'renameTo .
+  eq \renameTo{Q} = 'renameTo printOpQid(Q) [owise] .
+  eq \variable{Q}{QIL} = '\variable '`{ printVariable(replaceAll(string(Q), ("$" |-> "\\$"))) '`} '`{ printSortQid(QIL) '`}  [owise] .
+  eq \constant{'.}{QIL} = '\dotCt '`{ printSortQid(QIL) '`} .
+  eq \constant{Q}{QIL} = '\constant '`{ printQid(Q) '`} '`{ printSortQid(QIL) '`} [owise] .
+  eq printTerm(M, prefixOp(Q, T), Ty, N)
+   = '\prefixOp '`{ printQid(Q)  '`} printTerm(M, T, Ty, N) .
+  eq printTerm(M, xmlOp(Q,T), Ty, N) = Q printTerm(M,T, Ty, N) .
+
+  vars St St' St'' : String .
+  op printVariable : String -> QidList .
+  ceq printVariable(St) 
+    =  if I:[Int] :: Nat 
+       then printIndexedVariable(substr(St, 0, _-_(length(St), 1)), St') 
+       else if St' == "'" then (printVariable(substr(St,0,_-_(length(St),1))) '') else string2qidList(St) fi fi
+   if St' := substr(St, _-_(length(St),1), 1)
+   /\ I:[Int] := rat(St',10) .
+
+  op printIndexedVariable : String String -> QidList .
+  ceq printIndexedVariable(St, St'')
+    =  if I:[Int] :: Nat 
+       then printIndexedVariable(substr(St, 0, _-_(length(St),1)), St'' + St') 
+       else '`{ printVariable(St) '`} '_ '`{ string2qidList(St'') '`} fi
+   if St' := substr(St, _-_(length(St), 1), 1)
+   /\ I:[Int] := rat(St',10) .
+
+  eq \moduleName{Q} = '\moduleName '`{ printQid(Q) '`} .
+
+  eq \textsf{'} = '\enspace .
+  eq \textsf{'\} = '\ensuremath`{\backslash`} .
+---  eq \textsf{'|->} = '\mapsto .
+---  eq \textsf{'<-} = '\leftarrow .
+---  eq \textsf{'&} = \textsf{'\&} .
+---  eq \textsf{'#} = ' .
+---  eq \textsf{'->} = '\kra .
+  eq \textsf{'==} = '= .
+  eq \textsf{Q} = Q [owise] .
+  eq \myquote{Str} 
+   = '\myquote '`{ printStr(latexString(substr(Str,1, _-_(length(Str), 2)))) '`} .
+  op printQid : Qid -> QidList .
+  eq printQid(Q) 
+   = if Q == ' then nil else 
+     if xmlCmd(Q) then '\ensuremath '`{ Q '`} 
+     else printStr(string(Q)) fi fi .
+ 
+  op printStr : String -> QidList .
+  eq printStr(Str) = string2qidList(Str ---replaceAll(Str,("#" |-> "\\#", "%" |-> "\\%", "$" |-> "\\$", "&'" |-> "\\&", "_" |-> "\\_", "'" |-> "", "`" |-> ""))
+) .
+ 
+  var Color : String . var Multiplicity : Multiplicity . var Ellipses : Ellipses .
+  eq printTerm(M, \kcell{Ct}{T}{Ellipses}, Ty, N) 
+   = indent(N) '<cell>
+        '<ellipses> tokenizeXML(xmlString(symbolES(Ellipses))) '</ellipses> ---('\n)
+         '<label> tokenizeXML(xmlString(string(getName(Ct)))) '</label>
+      printTerm(M, T, niceSort(M,T), s(N)) 
+    indent(N) '</cell> ---('\n) [print "printing cell " Ct] .
+
+  eq printTerm(M, \reduce{T1}{T2}, Ty, N) 
+   = indent(N) '<rewrite 'sort= qid("\"" + xmlString(Ty) + "\"") '> ---('\n)
+        indent(s(N)) '<left> ---('\n)
+           printTerm(M, T1, niceSort(M,T1), s(s(N))) 
+        indent(s(N)) '</left> ---('\n)
+        indent(s(N)) '<right> ---('\n)
+        printTerm(M, T2, niceSort(M,T2), s(s(N))) 
+        indent(s(N)) '</right> ---('\n)
+     indent(N) '</rewrite> ---('\n)  .
+  eq printTerm(M, \value{T}, Ty, N) = '\kvalue '`{ printTerm(M, T, Ty, N) '`} .
+
+  op getColor : Module Qid -> Qid .
+  eq getColor(M, Q) 
+   = getColor(getOps(M), Q, 'CellLabel) [print "getting color for " Q] .
+
+  op getColor : OpDeclSet Qid Qid -> Qid .
+  eq getColor((op Q : nil -> Q' [AS metadata(Str) ] .) OPDS, Q, Q')
+   = getXMLColor(metadataParse(Str)) [print "found metadata for the cellLabel " Q ": " Str] .
+  eq getColor(OPDS, Q, Q') = 'white [owise print "did not find metadata for cellLabel " Q " among " OPDS ] .
+
+  op getXMLColor : AttrSet -> Qid .
+  var  AS1 : AttrSet .
+  eq getXMLColor(AS1 klatex(kcolor(Q) AS) ) = Q [print "found color " Q] .
+  eq getXMLColor(AS) = 'white [owise print "color not found among " AS] .
+
+  op length : TermList -> Nat .
+  var Tl : TermList .
+  eq length(empty) = 0 .
+  eq length((T, Tl)) = s(length(Tl)) .
+
+
+  eq mixfix(Q) =  find(string(Q), "_", 0) :: Nat .
+  ceq xmlCmd(Q) = substr(Str,0,1) == "\\" and-then all-letters(substr(Str,1,length(Str))) 
+   if Str := string(Q) [print "testying for LaTeX " Str] .
+
+   var Str : String . var N : Nat . var Nz : NzNat . var NeTl : NeTermList .
+  var I : Int .
+  ceq splitMixFix(Str) 
+    = \textsf{qid(substr(Str, 0, N))} splitMixFix(substr(Str, N + 1, length(Str)))
+   if N := find(Str, "_", 0) .
+  eq splitMixFix(Str) = \textsf{qid(Str)} [owise] .
+
+  var M : Module .  var MAS : MembAxSet . var OPDS : OpDeclSet .
+  var QIL QIL' : QidList .
+  var P : Printable . var Prints : Printables .
+  eq eMetaXMLPrint(M, loc(N,I,P) Prints) = eMetaXMLPrint(M, P Prints) [print Prints] .
+  eq eMetaXMLPrint(M, syntax(Q, QIL', #Types(N) AS) Prints)
+   = (indent(2) '<syntax> ---('\n)  
+        indent(3) '<sort> tokenizeXML(xmlString(Q)) '</sort> ---('\n)
+        indent(3) '<priority> ---('\n)
+        indent(4) '<production 'loc= qid("\"" + getLocation(AS) + "\"") '> ---('\n)
+         QIL'
+
+         printAttributes(M, AS)
+       indent(4) '</production>  ---('\n)
+       indent(3) '</priority>  ---('\n)
+      indent(2) '</syntax> ---('\n)
+     eMetaXMLPrint(M, Prints)) [owise] .
+---  eq \subsort{QIL}{QIL'} = \syntax{QIL'}{QIL}{none} .
+
+
+  op eMetaXMLPrintQ : Module QidList Printables -> QidList .
+  eq eMetaXMLPrintQ(M, QIL, loc(N,I,P) Prints) = eMetaXMLPrintQ(M, QIL,  P Prints) .
+  eq eMetaXMLPrintQ(M, QIL, syntax(QIL, QIL', #Types(N) AS) Prints)
+   = (---('\n) '\syntaxCont '`{ QIL '`} '`{ 
+      QIL' '`} '`{ eMetaXMLPrint(M, N, AS, 0) '`} eMetaXMLPrintQ(M, QIL, Prints)) .
+  eq eMetaXMLPrintQ(M, QIL, Prints) = eMetaXMLPrint(M, Prints) [owise] . 
+
+  var F : Qid .  var TyL : TypeList . var AtS : AttrSet .
+
+---  op eMetaXMLPrint : ProductionType -> QidList .
+  eq (\nterminal{Ty}) 
+   = indent(5) '<sort> tokenizeXML(xmlString(Ty)) '</sort> ---('\n) .
+  eq (\terminal{Q}) 
+   = indent(5) '<terminal> tokenizeXML(xmlString(Q)) '</terminal> ---('\n) .
+  eq \sort{Q} = '\sort '`{ printSortQid(Q) '`} .
+
+  op printSortQid : Qid -> QidList .
+  eq printSortQid(Q) = printQid(qid(replaceAll(string(Q), ("`{" |-> "\\{", "`}" |-> "\\}", "#" |-> "\\#")))) .
+
+   var C : Constant .  var V : Variable . var SC : SplitCell .
+   op printConfig : Module Term Nat -> QidList .
+  ceq  printConfig(M,T, N)
+    =  printConfig(M,\configCell{getName(SC)}{getContents(SC)}{getAttributes(SC)}, N)
+    if SC := splitKCell(T)  .
+
+
+   eq printConfig(M, \configCell{Q}{T}{AS}, N)
+    =  indent(N) '<configCell
+            'color= qid("\"" + string(getColor(M,Q)) + "\"")  
+            'sort= qid("\"" + xmlString((niceSort(M,T))) + "\"") 
+           '> ---('\n) 
+            '<label> tokenizeXML(xmlString((Q))) '</label>  
+            '<multiplicity> tokenizeXML(xmlString(symbolS(AS[multiplicity]))) '</multiplicity> 
+            '<contents>
+       printConfig(M,T,s(N)) 
+       '</contents>
+       indent(N) '</configCell> ---('\n) [owise] .
+   eq printConfig(M, Q[Tl], N) 
+    = if Q == ctor(Bag) then printConfigL(M,Tl, N) else printTerm(M,Q[Tl], niceSort(M, Q[Tl]), N) fi [owise print "Escaping to terms if Q is not __. Q: " Q "[" Tl "]"] .
+   eq printConfig(M, C, N) 
+    = printTerm(M, C, getType(C), N) [owise] .
+   eq printConfig(M, V, N) = printTerm(M,V, getType(V), N) .
+
+
+  op printConfigL : Module TermList Nat -> QidList .
+  eq printConfigL(M, (T, NeTl), N) 
+   = printConfig(M, T, N) printConfigL(M, NeTl, N) .
+  eq printConfigL(M, T, N) = printConfig(M,T, N) [owise] .
+  var MAS' : MembAxSet .
+  eq eMetaXMLPrint(M, xml(Str) Prints) 
+   = (---('\n) ---('\n) '\begin '`{ 'xmlComment '`} ---('\n) tokenizeXML(stripSpaces(Str)) ---('\n) '\end '`{ 'xmlComment '`} ) eMetaXMLPrint(M, Prints) .
+  eq eMetaXMLPrint(M, config(T) Prints)
+    = ('\s '\s '\s '\s '<configuration> ---('\n)
+         printConfig(M, T, 3) 
+       '\s '\s '\s '\s '</configuration> ---('\n)
+       eMetaXMLPrint(M, Prints)) .
+
+  var Cnd : TermList .
+  eq eMetaXMLPrint(M, (rule(Str, R{T, Cnd, AS})) Prints)
+    = (indent(2) '<rule  
+            'displayLabel= qid("\"" + xmlString(Str) + "\"") 
+                     'sort= qid("\"" + xmlString(niceSort(M,T)) + "\"") 
+              '> ---('\n) 
+        indent(3) '<body> ---('\n)
+         printTerm0(M, T, AS)
+        indent(3) '</body> ---('\n) 
+         printKCondition(M, Cnd)
+         printAttributes(M, AS)
+       indent(2) '</rule> ---('\n)
+       eMetaXMLPrint(M, Prints)) [owise] .
+  op printKCondition : Module TermList -> QidList .
+  eq printKCondition(M, empty) = nil .
+  eq printKCondition(M, Cnd) = (
+         indent(3) '<condition> ---('\n)
+            printTerm(M, Cnd, K, 4)
+         indent(3) '</condition> ---('\n)
+       ) [owise] .
+
+  eq eMetaXMLPrint(M, (context(Str, C{T, Cnd, AS})) Prints)
+    = (indent(2) '<context
+            'displayLabel= qid("\"" + Str + "\"")  
+              '> ---('\n) 
+         printTerm0(M, T, AS) 
+         printKCondition(M, Cnd)
+         printAttributes(M, AS)
+       indent(2) '</context> ---('\n)
+       eMetaXMLPrint(M, Prints)) [owise] .
+
+  op printTerm0 : Module Term AttrSet -> QidList .
+---  eq printTerm0(M, T, AS klarge )
+---   = '\kLarge '`{ printTerm0(M,T) '`} .
+  eq printTerm0(M, T, AS )
+   = printTerm0(M,T, niceSort(M, T)) [owise] .
+  op printTerm0 : Module Term Type -> QidList .
+--- ceq printTerm0(M, Q[T1,T2]) 
+---   = if getName(M) == 'STRUCTURAL then '\reduceTopS else '\reduceTop fi '`{ printTerm(M, T1, 0) '`}  '`{ printTerm(M, T2, 0) '`}
+---  if Q == replaceS .
+  eq printTerm0(M,T, Ty) = printTerm(M,T, Ty, 4) [owise] .
+
+  op xmlPrint : Module Module -> QidList .
+  var FM : [Module] .
+---(
+  eq xmlPrint(M,
+(fmod 'SYNTAX-ERROR is nil sorts none . none (OPDS (op 'error : nil -> 'Error 
+      [metadata(Str)] .))
+      none none 
+endfm)) = tokenizeXML(Str) ---('\n) eMetaXMLPrint(setMbs(setRls(setEqs(M,none),none),none),OPDS) .
+---)
+  var StrL : List{String} .
+  op stringList2qidList : List{String} -> QidList .
+  eq stringList2qidList(St StrL) 
+   = string2qidList(St) ---('\n) stringList2qidList(StrL) .
+  eq stringList2qidList(nil) = nil .
+
+  eq xmlPrint(FM, M) = eMetaXMLPrint(setMbs(setRls(setEqs(FM,none),none), none), removeImports(M, (including 'K .) (including 'K-SHARED .) (including 'K-RESULT .) (including 'K-XML .) (including 'URIS .)))  [print "red xmlPrint((" FM "),(" M ")) ."] .
+
+  op xmlPrint : Qid -> QidList .
+  eq xmlPrint(Q) = $xmlPrint(Q,upModule(Q,false)) .
+
+  op xmlPrint : Qid Qid -> QidList .
+  eq xmlPrint(Q, Q') = $xmlPrint(Q,
+---upModule(Q,false)
+partialCompile(Q,Q', supercools(metadataParse("supercool=()")) transitions(metadataParse("transition=()")) superheats(metadataParse("superheat=()")))
+) .
+  op $xmlPrint : Qid [Module] -> QidList .
+  eq $xmlPrint(Q, FM) = if FM :: Module 
+     then xmlPrint(FM, FM) 
+     else (
+       indent(1) '<module 'name= qid("\"" + xmlString((Q)) + "\"") '> ---('\n)
+          indent(2) 'does 'not 'exist 
+                     'or 'is 'not 'valid. ---('\n)
+          '</module> ---('\n)) 
+     fi .
+endm
+
+mod XML-PRINT-LOOP is including LOOP-MODE + XML-PRINT-META .
+  op xml-print : -> System .
+  op idle : -> State .
+  var Q Q' : Qid . var QIL QIL' : QidList .
+  eq xml-print = [nil, idle, nil] .
+
+  op error : -> [Module] .
+
+  rl [Q QIL, idle, QIL'] 
+   => [nil, idle, handle(Q QIL)] .
+
+  op handle : QidList -> QidList .
+  eq handle('print Q '. QIL) = xmlPrint(Q) .
+  eq handle('print Q Q' QIL) = xmlPrint(Q, Q') [owise] .
+  eq handle(QIL) = QIL [owise] .
+endm
+

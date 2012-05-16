@@ -1,5 +1,0 @@
-How many elements (n <= 100)? n=
-Enter 4 elements, separated by whitespace
-The original sequence is 6 3 5 4
-Sorting the array using insertion sort ... Done!
-The sorted sequence is 3 4 5 6

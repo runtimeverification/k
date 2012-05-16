@@ -1,5 +1,0 @@
-maude-cmd:          search
-io:                 false
-do-search:          true
-output-mode:        pretty
-xsearch-pattern: =>! B:Bag such that < solution > L:List </ solution > := B:Bag 

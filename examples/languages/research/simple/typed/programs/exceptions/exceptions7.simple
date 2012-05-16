@@ -1,7 +1,0 @@
-function main():void {
-  var e:int;
-  try { var x:int = 2; print(x," "); throw ( ++x + x ); }
-  catch(e) { print(e,"\n"); }
-}
-
-// 2 6 or 2 5

@@ -1,0 +1,280 @@
+module lib/index-library.generated
+
+imports
+  libstratego-lib
+  lib/editor-common.generated
+  
+signature constructors
+  
+  // Index elements
+  DefData      : List(UriPart) * DefDataType * Term -> Summary
+    
+  // URI header
+  Namespace      : UriPart
+  Unresolved     : Namespace -> UriPart
+  INTERNAL_ERROR : UriPart
+  Timestamp      : UriPart
+ 
+  // Remainder of URI
+  String : UriPart
+  Anon   : Int -> UriPart
+  Anon   : UriPart
+  
+  FileEntries : Term * Term -> Term
+  
+rules // Index management
+   
+  index-setup(|language, project-paths) =
+    obsolete(!"index-setup(|language, project-paths); use index-setup(|language, project-paths, current-file)");
+    index-setup(|language, project-paths, ".")
+    
+  /**
+   * Sets up the index library for given language and project paths.
+   * Must be called once before doing anything with the library.
+   */
+  index-setup(|language, project-paths, current-file) =
+    prim("LANG_index_setup", language, project-paths, current-file)
+
+  /**
+   * Adds all given elements to the index with given file path and optionally subfile.
+   *
+   * Example:
+   *   <index-add-all(|"fullpath/file.ext")> [Def([Entity(), "Bar"]), ...]
+   *   <index-add-all(|("fullpath/file.ext", "subfile"))> [Def([Entity(), "Bar"]), ...]
+   */
+  index-add-all(|file) =
+    list-loop(with(prim("LANG_index_add", <id>, file)))
+    
+  /**
+   * Removes all given elements from the index that are contained in given file path and optionally subfile.
+   *
+   * Example:
+   *   <index-remove-all(|"fullpath/file.ext")> [Def([Entity(), "Bar"]), ...]
+   *   <index-remove-all(|("fullpath/file.ext", "subfile"))> [Def([Entity(), "Bar"]), ...]
+   */
+  index-remove-all(|files) =
+    list-loop(with(prim("LANG_index_remove", <id>, files)))
+    
+  /**
+   * Removes all elements from the index that are contained in given file path and optionally subfile.
+   *
+   * Example:
+   *   <index-clear-file> "fullpath/file.ext"
+   *   <index-clear-file> ("fullpath/file.ext", "subfile")
+   */
+  index-clear-file = 
+    prim("LANG_index_clear_file", <id>)
+    
+  /**
+   * Clears all elements from the index.
+   */
+  index-clear = 
+    prim("LANG_index_clear_all")
+   
+  /**
+   * Commits index to a file on disk.
+   */
+  index-commit = 
+    if not(index-timestamp-get-updates(|"LANG_index_commit") => []) then
+      prim("LANG_index_commit");
+      index-timestamp-set-updated(|"LANG_index_commit")
+    end
+  
+rules // Index API
+  
+  /**
+   * Gets the file that the analysis is currently in.
+   */
+  index-get-current-file =
+    prim("LANG_index_get_current_file")
+  
+  /**
+   * Gets a list of all files and subfile for current project.
+   *
+   * Example:
+   *   <index-get-all-files> => ["fullpath/file.ext", ...]
+   */   
+  index-get-all-files =
+    prim("LANG_index_all_files")
+  
+  /**
+   * Gets all index entries for the given file path and optionally subfile.
+   *
+   * Examples:
+   *   <index-get-all-in-file> "fullpath/file.ext" => [Def([Entity(), "Bar"]), ...]
+   *   <index-get-all-in-file> ("fullpath/file.ext", "subfile") => [Def([Entity(), "Bar"]), ...]
+   */  
+  index-get-all-in-file:
+    filepath -> entries
+    with
+      entries := <prim("LANG_index_get_all_in_file", filepath)>
+   
+  /**
+   * Gets all index entries for the given file path and optionally subfile.
+   *
+   * Example:
+   *   <index-get-all-in-file(|Import())> "fullpath/file.ext" => [Def([Import(), "Bar"]), ...]
+   */  
+  index-get-all-in-file(|namespace):
+    filepath -> entries
+    with
+      // TODO: Optimize -- add an argument to LANG_index_get_all_in_file to do this filtering
+      entries := <prim("LANG_index_get_all_in_file", filepath)>;
+      filter(where(index-uri => [namespace | _]))
+    
+  /**
+   * Gets the containing files and subfiles of index entry with given template.
+   *
+   * Example:
+   *   <index-get-files-of> Def([Entity(), "Bar"]) => [("fullpath/file.ext", "subfile"), ...]
+   */  
+  index-get-files-of:
+    template -> <prim("LANG_index_get_files_of", template)>
+    
+  /**
+   * Gets all index entries (of every file for current project).
+   *
+   * Example:
+   *   <indexlib-get-all-elements> => [Def([Entity(), "Bar"]), ...]
+   */
+  indexlib-get-all-elements =
+    // TODO: is there a use case for this? doing this is *expensive*
+    <mapconcat(index-get-all-in-file)> <index-get-all-files>
+    
+  /**
+   * Get all index entries that match the given template.
+   *
+   * Example:
+   *   <indexlib-get-all> Def([Entity(), "Bar"]) => [Def([Entity(), "Bar"]), ...]
+   */
+  indexlib-get-all:
+    template -> <prim("LANG_index_get", template)>
+    
+  /**
+   * Get all values of index entries that match the given template.
+   *
+   * @see index-value
+   *
+   * Example:
+   *   <indexlib-get-all-values> DefData([Property(), "s"], Type(), ()) => [TYPE("String"), ...]
+   */
+  indexlib-get-all-values:
+    template -> <map(index-value)> <indexlib-get-all> template
+ 
+  /**
+   * Get the first index entry that matches the given template, or fail.
+   *
+   * Example:
+   *   <indexlib-get> Def([Entity(), "Bar"]) => Def([Entity(), "Bar"])
+   */
+  indexlib-get:
+    template -> <?[<id>|_]> <indexlib-get-all> template
+   
+  /**
+   * Get the value of first index entry that matches the given template, or fail.
+   *
+   * @see index-value
+   *
+   * Example:
+   *   <indexlib-get-value> DefData([Entity(), "Bar"], Type(), ()) => TYPE("Bar")
+   */
+  indexlib-get-value:
+    template -> <index-value> <?[<id>|_]> <indexlib-get-all> template
+ 
+  /**
+   * Updates the "last updated" timestamp for the given service name.
+   *
+   * @see index-get-changes-since-timestamp(|service)
+   */
+  index-timestamp-set-updated(|service) =
+    file := $[/.internal/timestamps/[service]];
+    <index-clear-file> file;
+    prim("LANG_index_add", DefData([Timestamp(), "timestamps", ".internal"], Timestamp(), []), file)
+   
+  /**
+   * Gets all files with changes since the last time stamp update for the given service name.
+   */
+  index-timestamp-get-updates(|service):
+    _ -> files'
+    with
+      timestampName := $[/.internal/timestamps/[service]];
+      files := <prim("LANG_index_get_files_newer_than", timestampName)>;
+      files' := <remove-all(?(timestampName, _))> files
+
+  /**
+   * Queries if given index file is a 'fake' file for storing internal data.
+   */
+  index-is-fake-file = string-starts-with(|"/.internal")
+    
+  /**
+   * Gets the URI part for given term.
+   */ 
+  index-uri = index-uri-impl <+ index-uri-generic
+  
+  /**
+   * Checks if given URI's are equal. Discards anonymous scopes if necessary.
+   *
+   * Example:
+   *   <index-uri-eq> ([Entity(), Anon("a"), "Bar"], [Entity(), Anon("b"), "Bar"]) => 
+   *     ([Entity(), Anon("a"), "Bar"], [Entity(), Anon("b"), "Bar"])
+   *   <index-uri-eq> ([Entity(), "Foo"], [Entity(), "Bar"]) => fail
+   */
+  index-uri-eq:
+    (u1, u2) -> <id>
+    where
+      u1' := <index-uri-unwrap> u1;
+      u2' := <index-uri-unwrap> u2;
+      (<eq> (u1', u2') <+ <eq> (<remove-all(?Anon(_))> u1', <remove-all(?Anon(_))> u2'))
+
+  /**
+   * Checks if given keys (term{uri} elements) are equal. Discards unresolved URI's.
+   *
+   * Example:
+   *   <index-key-eq> ("Bar"{[Entity(), "Bar"]}, "Bar"{[Unresolved(Entity()), "Bar"]}) => 
+   *     ("Bar"{[Entity(), "Bar"]}, "Bar"{[Unresolved(Entity()), "Bar"]})
+   *   <index-key-eq> ("Foo"{[Entity(), "Foo"]}, "Bar"{[Entity(), "Bar"]}) => fail
+   */      
+  index-key-eq:
+    (k1, k2) -> <id>
+    where
+      <eq> (<index-key-unwrap> k1, <index-key-unwrap> k2)
+  
+  /**
+   * Gets the value part for given term.
+   */  
+  index-value = index-value-impl <+ index-value-generic
+  
+  /**
+   * Finds the first key (term{uri} element) for given term, or fail. 
+   */
+  index-find-key:
+    x -> key
+    where
+      key := <collect-one(?_{_})> x
+      
+/** @internal */
+rules // URI and value projections
+    
+  index-uri-impl:
+    DefData(uri, _, _) -> uri
+
+  index-uri-generic:
+    term -> <?_#(<?[<id>|_]>)> term
+  
+  index-value-impl:
+    DefData(_, _, value) -> value
+    
+  index-value-generic:
+    term -> <?_#(<?[_, <id>|_]> )> term
+     
+/** @internal */ 
+rules // Internal helpers
+  
+  index-namespace-unwrap =
+    \Unresolved(n) -> n\ <+ id
+    
+  index-uri-unwrap =
+    \[ns|xs] -> [<index-namespace-unwrap> ns|xs]\ <+ id
+    
+  index-key-unwrap = 
+    \key{uri} -> key{<index-uri-unwrap> uri}\ <+ id

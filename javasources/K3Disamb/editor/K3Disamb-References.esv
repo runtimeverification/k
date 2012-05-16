@@ -1,0 +1,12 @@
+module K3Disamb-References
+
+imports K3Disamb-References.generated
+
+references
+                                                                                                   
+  // This file can be used to specify reference resolving and hover help, and content completion.  
+  //                                                                                               
+  // See the imported file for a brief introduction and examples.                                  
+                                                                                                   
+
+references

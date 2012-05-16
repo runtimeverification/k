@@ -1,0 +1,2 @@
+  rule "seek#" +String A:String +String "#"
+                              +String B:String +String "#" 

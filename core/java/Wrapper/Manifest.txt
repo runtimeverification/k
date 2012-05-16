@@ -1,2 +1,0 @@
-Main-Class: runner.KRunner
-Class-Path: jopt-simple-3.3.jar

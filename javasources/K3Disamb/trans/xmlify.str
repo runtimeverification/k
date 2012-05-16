@@ -1,0 +1,358 @@
+module xmlify
+
+imports
+  libstratego-lib
+  libstratego-sglr
+  include/K3Disamb
+  config
+  disamb
+  disambSup
+  starter
+
+rules
+
+
+	to-xml =
+		to-xml1 <+ to-xml2 <+ to-xml3 <+ to-xml4 <+ (debug(!"Error XMLifying at: ") ; !"<error/>")
+
+	to-xml1:
+		KSentenceList(a') -> $[[<all(to-xml)>a']]
+
+	// print the K definition as an XML - parsing only the syntax
+	to-xml1:
+		Config(x1) -> $[<config loc="[loc]">
+			[<to-xml> x1]
+		</config>
+		<summary>
+			[sum]
+		</summary>
+		]
+		where mydebug(!"Config: ")
+ 		where sum := <collectCellSorts ; all(cels2Xml)> x1
+		where loc := <getLocAsString>
+
+	// generate xml for cells
+	to-xml1:
+		Bag1ClosedCell(a, b', c, d) -> $[<cell label="[a]" loc="[loc]"[prop]>
+											[<to-xml> c]
+		</cell>
+		]
+		where mydebug(!"Cell: ")
+		where prop := <all(to-xml)> b'
+		where loc := <getLocAsString>
+
+	to-xml1:
+		CellProperty(a, b) -> $[[<id>""] [a]=[<xmlStringEscapeFromString>b]]
+
+	to-xml1:
+		Context(x1) -> $[<context loc="[loc]">
+							<body>
+								[x1']
+							</body>
+		</context>
+		]
+		where mydebug(!"Context: ")
+		where x1' := <to-xml> x1
+		where loc := <getLocAsString>
+	to-xml1:
+		CondSentence(Context(x1), cond) -> $[<context loc="[loc]">
+												<body>
+													[x1']
+												</body>
+												<cond>
+													[cond']
+												</cond>
+		</context>
+		]
+		where mydebug(!"Context: ")
+		where x1' := <to-xml> x1
+		where cond' := <to-xml> cond
+		where loc := <getLocAsString>
+
+	to-xml1:
+		Tag(x) -> $[<tag key="[x]" loc="[loc]" />
+		]
+		where loc := <getLocAsString>
+	to-xml1:
+		NoTags() -> $[]
+	to-xml1:
+		TagList(x1, x2) -> $[[<to-xml> x1][<to-xml> x2]]
+
+	to-xml1:
+		TagParam(x, y) -> $[<tag key="[x]" value="[<xmlStringEscape> y]" loc="[loc]" />
+		]
+		where loc := <getLocAsString>
+
+	to-xml1:
+		NoLabel() -> $[]
+	to-xml1:
+		Label(x) -> $[label="[x]" ]
+
+	to-xml1:
+		CondSentence(a#(b), c) -> $[<rule sort="[sort]" [label] loc="[loc]">
+					<body>
+						[children]
+					</body>
+					<cond>
+						[<to-xml> c]
+					</cond>
+		</rule>
+		]
+		where <string-ends-with(|"Rule")> a
+		where mydebug(!"Rule: ")
+		where !b => [x, y]
+		where label := <to-xml> x
+		where children := <to-xml> y
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml1:
+		AttributedCondSentence(a#(b), c, d) -> $[<rule sort="[sort]" [label] loc="[loc]">
+					<body>
+						[children]
+					</body>
+					<cond>
+						[<to-xml> c]
+					</cond>
+					<attributes>
+						[<to-xml> d]
+					</attributes>
+		</rule>
+		]
+		where <string-ends-with(|"Rule")> a
+		where mydebug(!"Rule: ")
+		where !b => [x, y]
+		where label := <to-xml> x
+		where children := <to-xml> y
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml1:
+		AttributedSentence(a#(b), d) -> $[<rule sort="[sort]" [label] loc="[loc]">
+					<body>
+						[children]
+					</body>
+					<attributes>
+						[<to-xml> d]
+					</attributes>
+		</rule>
+		]
+		where <string-ends-with(|"Rule")> a
+		where mydebug(!"Rule: ")
+		where !b => [x, y]
+		where label := <to-xml> x
+		where children := <to-xml> y
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml1:
+		"K1Seq"#(b) -> $[<KSequence sort="K" loc="[loc]">
+							[children]
+		</KSequence>
+		]
+		where mydebug(!"KSequence: ")
+		where children := <all(to-xml)> b
+		where loc := <getLocAsString>
+
+	to-xml1:
+		K1App(a, b) -> $[<KApp sort="K" loc="[loc]">
+							<label loc="[<getLocAsString> a]">
+								[<to-xml> a]
+							</label>
+							[<to-xml> b]
+		</KApp>
+		]
+		where mydebug(!"KApp: ")
+		where loc := <getLocAsString>
+
+
+	to-xml2:
+		a#(b) -> $[<empty sort="[sort]" loc="[loc]"/>
+		]
+		where <string-ends-with(|"Empty")> a
+		where mydebug(!"Empty: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(b) -> $[<hole sort="[sort]" loc="[loc]"/>
+		]
+		where <string-ends-with(|"Hole")> a
+		where mydebug(!"Hole: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(b) -> $[<var name="[b]" sort="[sort]" loc="[loc]"/>
+		]
+		where <string-ends-with(|"Var")> a
+		where mydebug(!"Var: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#([b]) -> $[<const value="[<xmlStringEscape> b]" sort="[sort]" loc="[loc]"/>
+		]
+		where <string-ends-with(|"Const")> a
+		where mydebug(!"Const: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(b) -> $[<term sort="[sort]" cons="[a]" loc="[loc]">
+					[children]
+		</term>
+		]
+		where <string-ends-with(|"Syn")> a
+		where mydebug(!"SynTerm: ")
+		where children := <all(to-xml)> b
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(b) -> $[<builtinOp sort="[sort]" cons="[a]" loc="[loc]">
+					[children]
+		</builtinOp>
+		]
+		where <string-ends-with(|"Builtin")> a
+		where mydebug(!"BuiltinTerm: ")
+		where children := <all(to-xml)> b
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#([b, c]) -> $[<rewrite sort="[sort]" loc="[loc]">
+							<left>
+								[<to-xml> b]
+							</left>
+							<right>
+								[<to-xml> c]
+							</right>
+		</rewrite>
+		]
+		where <string-ends-with(|"Rewrite")> a
+		where mydebug(!"Rewrite: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(b) -> $[<rule sort="[sort]" [label] loc="[loc]">
+					<body>
+						[children]
+					</body>
+		</rule>
+		]
+		where <string-ends-with(|"Rule")> a
+		where mydebug(!"Rule: ")
+		where !b => [x, y]
+		where label := <to-xml> x
+		where children := <to-xml> y
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:	// sort wrappers
+		a#(b) -> $[<[sort] sort="[sort2]" loc="[loc]">
+						[children]
+		</[sort]>
+		]
+		where <string-ends-with(|"List")> a
+		where mydebug(!"1List: ")
+		where children := <all(to-xml)> b
+		where sort2 := <getSort> a
+		where sort  := <?"List{K}" < !"ListOfK" + id> sort2
+		where loc := <getLocAsString>
+
+	to-xml2:	// sort items
+		a#([b]) -> $[<[sort] sort="[sort]" loc="[loc]">
+						[<to-xml> b]
+		</[sort]>
+		]
+		where <string-ends-with(|"Item")> a
+		where mydebug(!"Wrap: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+	to-xml2:	// sort items
+		a#([b, c]) -> $[<[sort] sort="[sort]" loc="[loc]">
+							<key>
+								[<to-xml> b]
+							</key>
+							<value>
+								[<to-xml> c]
+							</value>
+		</[sort]>
+		]
+		where <string-ends-with(|"Item")> a
+		where mydebug(!"Wrap: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml3:
+		amb(b) -> $[<amb loc="[loc]">
+						[children]
+		</amb>
+		]
+		where mydebug(!"XmlifyingAmb: ")
+		where children := <all(to-xml)> b
+		where loc := <getLocAsString>
+
+	to-xml4:
+		a#(b) -> $[<term general="true" sort="[sort]" cons="[a]" loc="[loc]">
+					[children]
+		</term>
+		]
+		where mydebug(!"GTerm: ")
+		where sort := <getSort> a
+		where children := <all(to-xml)> b
+		where loc := <getLocAsString>
+
+	// -----------------------------------------------------
+	// - this second part is related to xmlifying programs -
+	// -----------------------------------------------------
+
+	to-xml-p:
+		a#(b) -> $[<term sort="[srt]" cons="[a]" loc="[loc]">
+					[children]
+		</term>
+		]
+		where <string-ends-with(|"Syn")> a
+		where mydebug(!"SynTerm: ")
+		where children := <all(to-xml-p)> b
+		where srt := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml-p:
+		a#(b) -> $[<builtinOp sort="[sort]" cons="[a]" loc="[loc]">
+					[children]
+		</builtinOp>
+		]
+		where <string-ends-with(|"Builtin")> a
+		where mydebug(!"BuiltinTerm: ")
+		where children := <all(to-xml-p)> b
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml-p:
+		a#(b) -> $[<empty sort="[srt]" loc="[loc]"/>
+		]
+		where <string-ends-with(|"Empty")> a
+		where mydebug(!"SynTerm: ")
+		where srt := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml-p:
+		a#(b) -> $[<const sort="[srt]" value="[<all(xmlStringEscape)> b]" loc="[loc]"/>
+		]
+		where <string-ends-with(|"Const")> a
+		where srt := <getSort> a
+		where mydebug(!"Const: ")
+		where loc := <getLocAsString>
+
+	to-xml-p:
+		amb(b) -> $[<amb loc="[loc]">
+						[children]
+		</amb>
+		]
+		where mydebug(!"XmlifyingAmb: ")
+		where children := <all(to-xml-p)> b
+		where loc := <getLocAsString>
+

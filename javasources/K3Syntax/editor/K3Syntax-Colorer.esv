@@ -1,0 +1,39 @@
+module K3Syntax-Colorer
+
+imports K3Syntax-Colorer.generated
+
+colorer
+                                                                      
+  // This file can be used for custom colorer rules.                  
+  //                                                                  
+  // See the imported file for a brief introduction and examples.     
+  
+  STRING: 64 0 192
+  SORTID: red
+  KEY: darkgreen
+  TAGCONTENT: black
+  layout: 108 108 108 italic
+
+/*
+  	KSentence.Syntax: magenta
+	BASICID: darkgreen
+	STRING: 64 0 192
+	number     : blue
+	_.ClosedCell: 0 128 0 bold
+	CellContents: _
+	K: _
+	ListOfK: _
+	Map: _
+	Bag: _
+	List: _
+	Set: _
+	VARID: red
+	layout: 128 128 128 italic
+	
+	_.K1Rule: blue
+	_.ListOfK1Rule: blue
+	_.List1Rule: blue
+	_.Bag1Rule: blue
+	_.Set1Rule: blue
+	_.Map1Rule: blue
+*/ 

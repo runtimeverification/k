@@ -1,0 +1,255 @@
+module xmlify
+
+imports
+  libstratego-lib
+  libstratego-sglr
+  include/K3Syntax
+
+rules
+
+	//test1 = !"KSyntax.tbl" ; file-exists
+	//test3 = dummy(|<import-term(KSyntax.tbl)>) ; !1
+	//dummy(|a) = debug(!"Rez here: ")
+
+	//test4 = <find-file(!"tbl")> ("KSyntax.tbl", ["."])
+	//test5 = <parse-file-pt(|<import-term(KSyntax.tbl)>)> "example.k"
+	//test6 = import-term(Simple.sbs) ; debug(!"Sorts: ")
+	//test7 = <parse-string(|<import-term(KSyntax.tbl)>)> "kmod A is\n rule a endkm" ; prim("SSL_EXT_origin_location", <id>)
+	//test8 = import-term(Simple.sbs) ; topdown(debug(!"Term: "))
+	//test9 = import-term(Simple.sbs) ; debug(!"Terms1") ; implode-asfix ; debug(!"Terms2") 
+	//test10 = parse-file-pt(|<import-term(KSyntax.tbl)>, None(), Stream(<prim("SSL_stdin_stream")> ()))
+	//test11 = <read-text-file> stdin() //"/Users/radu/Desktop/work2/workspacespoofax/KJava/src/example.k"
+	//test12 = parse-xtc-file(|<import-term(KSyntax.tbl)>, None(), "stdin")
+	//test13 = <memo-openre-parse-table> include/KSyntax.tbl
+
+
+
+	// the editor will call this:
+	callxml = callxml1 <+ callxml2 <+ to-xml
+
+	callxml1:
+		(selected, position, ast, path, project-path) -> (filename, result)
+	with
+		filename := <guarantee-extension(|"xml")> path;
+		result   := <callxml> selected
+	callxml2:
+		(ast, path, project-path) -> <to-xml> ast
+
+
+	prim-origin-offset = prim("SSL_EXT_origin_offset", <id>)
+
+	// command line will call this:
+	// compile like this: java -jar strategoxt.jar -i xmlify.str -o a.out -la stratego-sglr -I .. -m safecallcmd1
+	// this will generate a .java file called a.java - put this in a eclipse Java project and export a jar file
+	// run like this: java -jar ksyntax.jar d:\work\strategoxt\example.k
+	// generate a lib like this: java -jar strategoxt.jar -i xmlify.str -o K2Str -la stratego-sglr --lib -I .. -p k2parser.lib --clean
+	// this will generate a bunch of files in K2Str, copy these in a java package and call something like Context.init()
+
+	//callcmd1 = ?[a, b] ; <parse-file(|<import-term(include/KSyntax.tbl)>)> b ; to-xml
+	//callcmd2 = ?[a, b] ; <parse-file(|<import-term(include/KSyntax.tbl)>)> b ; debug ; clearamb ; debug ; to-xml
+
+	//safecallcmd1 = ?[a, b] ; <parse-file(my-open-error, my-parse-error|<import-term(include/KSyntax.tbl)>)> b ; to-xml
+
+	javaParseString = ?[a, b] ; <parse-string(my-parse-error|<import-term(include/K3Syntax.tbl)>)> b ; processParse
+
+	processParse =
+		(handleErrors <+ to-xml)
+
+	handleErrors =
+		(?error(_,_) ; (to-xml-error <+ debug(!"Error: This should not happen. Please report.")))
+
+
+	to-xml-error:
+		error(a, b*) -> $[<?xml version="1.0" encoding="UTF-8" ?>
+		<T>
+			<error value="[<xmlStringEscapeToString>a]">
+				[b']
+			</error>
+		</T>
+		]
+		where b' := <all(to-xml-error)> b*
+
+	to-xml-error:
+		localized(a, b) ->
+			$[<localized message="[<xmlStringEscape>a]" filename="[<xmlStringEscape>x]" loc="[loc]" />
+			]
+		where (!b => (x, area(y1, y2, y3, y4, y5, y6))) <+ (!b => area-in-file(x, area(y1, y2, y3, y4, y5, y6)))
+		where loc := <write-to-string> (y1, y2, y3, y4)
+
+	to-xml-error-open:
+		[a, b] -> $[<?xml version="1.0" encoding="UTF-8" ?>
+		<error value="Open error">
+			<file value="[<xmlStringEscape>b]" />
+		</error>
+		]
+
+
+
+	my-open-error = mydebug(!"OpenError: ")
+	my-parse-error = mydebug(!"ParseError: ")
+
+	mydebug = id//debug
+	mydebug(a) = id//debug(a)
+	// xmlify - starts from here
+	xmlStringEscape         = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\"", "&quot;")
+	xmlStringEscapeToString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
+	getLocAsString        = prim("SSL_EXT_origin_location", <id>) ; write-to-string
+	get-original-sentence = prim("SSL_EXT_origin_text", <id>) ; xmlStringEscape ; escape
+
+
+	// print the K definition as an XML - parsing only the syntax
+	to-xml:
+		KModuleList(i*, x*) -> $[<?xml version="1.0" encoding="UTF-8" ?>
+			<def loc="[loc]">
+				[i']
+				[x']
+			</def>
+			]
+		where mydebug(!"KModuleList: ")
+		where i' := <all(to-xml)> i*
+		where x' := <all(to-xml)> x*		// print to XML all the modules
+		where mydebug(!"KModuleList**: ")
+		where loc := <getLocAsString>		// get the location info
+
+	to-xml:
+		Require(x) -> $[<require value=[<xmlStringEscapeToString>x] />
+		]
+
+	to-xml:
+		KModule(x1, x2*, x3*) ->
+			$[<module value="[x1]" loc="[loc]" type="module">
+				[x2'*]
+				[x3'*]
+			</module>
+			]
+		where mydebug(!"KModule: ")
+		where x2'* := <all(to-xml)> x2*		// transform all of the sentences in a module
+		where x3'* := <all(to-xml)> x3*		// transform all of the sentences in a module
+		where loc := <getLocAsString>	// get all of the production rules
+
+	to-xml:
+		KInterface(x1, x2*, x3*) ->
+			$[<module value="[x1]" loc="[loc]" type="interface">
+				[x2'*]
+				[x3'*]
+			</module>
+			]
+		where mydebug(!"KModule: ")
+		where x2'* := <all(to-xml)> x2*		// transform all of the sentences in a module
+		where x3'* := <all(to-xml)> x3*		// transform all of the sentences in a module
+		where loc := <getLocAsString>	// get all of the production rules
+
+	to-xml:
+		Imports(x1) -> $[<import name="[x1]" loc="[locs]"/>
+		]
+		where locs := <getLocAsString> x1
+
+	to-xml:
+		Syntax(x1, x2*) -> $[<syntax loc="[loc]">
+								<sort value="[x1]" loc="[locs]" />
+								[x2'*]
+			</syntax>
+		]
+		where mydebug(!"Syntax: ")
+		where x2'* := <all(to-xml)> x2*	// get all of the production rules
+		where loc := <getLocAsString>
+		where locs := <getLocAsString> x1
+
+	to-xml:
+		OrList(a*) -> $[<priority loc="[loc]">
+							[<all(to-xml)> a*]
+			</priority>
+		]
+		where loc := <getLocAsString>
+
+	to-xml:
+		LeftOrList(a*) -> $[<priority loc="[loc]" assoc="left">
+								[<all(to-xml)> a*]
+			</priority>
+		]
+		where loc := <getLocAsString>
+
+	to-xml:
+		RightOrList(a*) -> $[<priority loc="[loc]" assoc="right">
+								[<all(to-xml)> a*]
+			</priority>
+		]
+		where loc := <getLocAsString>
+
+	to-xml:
+		NonAssocOrList(a*) -> $[<priority loc="[loc]" assoc="non-assoc">
+							[<all(to-xml)> a*]
+			</priority>
+		]
+		where loc := <getLocAsString>
+
+	to-xml:
+		Sort(x1)		-> $[<sort     value="[x1]" loc="[loc]" />
+		]
+		where loc := <getLocAsString>
+
+	to-xml:
+		List(x1, x2)		-> $[<userlist     value="[x1]" separator=[x2] loc="[loc]" />
+		]
+		where loc := <getLocAsString>
+
+	to-xml:	// print an annotated production rule
+		AnnoProd(a*, b*) -> $[<production loc="[loc]">
+								[a'*]
+								<attributes>
+									[b'*]
+								</attributes>
+						</production>
+						]
+		where mydebug(!"AnnoProd: ")
+		where a'* := <all(to-xml)> a*
+		where b'* := <all(to-xml)> b*
+		where loc := <getLocAsString>
+
+	to-xml:	// print a production rule
+		Prod(a*) -> $[<production loc="[loc]">
+						[a'*]
+					</production>
+					]
+		where mydebug(!"Prod: ")
+		where a'* := <all(to-xml)> a*
+		where loc := <getLocAsString>
+
+	to-xml:
+		Terminal(s) -> $[<terminal value=[s'] loc="[loc]" />
+		]
+		where s' := <xmlStringEscapeToString> s
+		where loc := <getLocAsString>
+
+	to-xml:
+		Config(x1) -> $[<config loc="[loc]" value="[x1']" />
+		]
+		where mydebug(!"Config: ")
+		where x1' := <get-original-sentence>
+		where loc := <getLocAsString>
+
+	to-xml:
+		Context(x1) -> $[<context loc="[loc]" value="[x1']" />
+		]
+		where mydebug(!"Context: ")
+		where x1' := <get-original-sentence>
+		where loc := <getLocAsString>
+
+	to-xml:
+		Rule(x1) -> $[<rule loc="[loc]" value="[x1']" />
+		]
+		where mydebug(!"Context: ")
+		where x1' := <get-original-sentence>
+		where loc := <getLocAsString>
+
+	to-xml:
+		Tag(x) -> $[<tag key="[x]" loc="[loc]" />
+		]
+		where loc := <getLocAsString>
+
+	to-xml:
+		TagParam(x, y) -> $[<tag key="[x]" value="[<xmlStringEscape> y]" loc="[loc]" />
+		]
+		where loc := <getLocAsString>
+
+

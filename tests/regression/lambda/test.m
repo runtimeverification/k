@@ -1,2 +1,0 @@
-load lambda-test-compiled
-

@@ -1,6 +1,0 @@
- var a,b,c;
-   c = 10;
-   a = lift c;
-   b = quote(quote(unquote(unquote(lift c))));
-   print(eval(b));
-

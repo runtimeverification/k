@@ -1,3 +1,0 @@
-let y = 0
-in letrec f x = if x == 0 then y else let y = 1 in f(x - 1)
-   in f 1

@@ -1,2 +1,0 @@
-load io-test-compiled
-

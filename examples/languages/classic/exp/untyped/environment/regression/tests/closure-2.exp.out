@@ -1,3 +1,0 @@
-<result>
-  closure-lambda( g |-> 0 , x , lambda y . g g )
-</result>

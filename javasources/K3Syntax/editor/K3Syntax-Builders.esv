@@ -1,0 +1,25 @@
+module K3Syntax-Builders
+
+imports K3Syntax-Builders.generated
+
+builders
+                                                                                   
+  // This file can be used for custom analysis, builder and refactoring rules.     
+  //                                                                               
+  // See the imported file for a brief introduction and examples.                  
+
+builders
+                                                                                                                          
+  provider : include/k3syntax.ctree                                                                                       
+  provider : include/k3syntax-java.jar                                                                                    
+                                                                                                                          
+  //observer : editor-analyze                                                                                               
+                                                                                                                          
+  builder  : "Show abstract syntax (for selection)"          = generate-aterm (openeditor) (realtime) (meta) (source)     
+  builder  : "Generate XML"        = callxml (openeditor) (realtime)                                                                                                                           
+
+refactorings
+
+  //pretty-print : pp-k3syntax-string
+
+  //on save : index-on-save

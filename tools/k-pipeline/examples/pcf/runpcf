@@ -1,3 +1,0 @@
-#!/bin/sh
-COMPILED=../../../../examples/languages/classic/pcf/untyped/pcf-untyped-compiled.maude
-kcp PCF-UNTYPED /dev/stdin | simplemaude '[[ %s ]]' $COMPILED | cellstoxml | xpath "//result/text()" 2> /dev/null | unlabel

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="allsig" name="K3 build signature files">
+
+	<!-- set the native directory depending on the os -->
+	<condition property="osNativesDir" value="linux">
+		<and>
+			<os family="unix" />
+			<not>
+				<os family="mac" />
+			</not>
+		</and>
+	</condition>
+	<condition property="osNativesDir" value="macosx">
+		<os family="mac" />
+	</condition>
+	<condition property="osNativesDir" value="cygwin">
+		<os family="windows" />
+	</condition>
+
+	<!-- compile and call the k.utils.AntPropertyHelper class to get some properties from artifacts.xml
+	representing version numbers from spoofax library -->
+
+	<!-- weird stuff to make it work:
+	- create the path for the AntPropertyHelper
+	- compile the AntPropertyHelper
+	-->
+	<property name="build.strategoxt.sdf" value="${basedir}/../../dist/bin/native/${osNativesDir}/" />
+
+	<!-- call both targets -->
+	<target name="allsig" depends="k3syntaxsig, k3sig" />
+
+	<target name="k3syntaxsig">
+		<!-- pack the definition into a single .def file -->
+		<mkdir dir="../K3Syntax/include" />
+		<java jar="./lib/strj.jar" fork="true" failonerror="true">
+			<arg value="org.strategoxt.tools.main-pack-sdf" />
+			<arg value="-i" />
+			<arg value="../K3Syntax/syntax/K3Syntax.sdf" />
+			<arg value="-o" />
+			<arg value="../K3Syntax/include/K3Syntax.def" />
+		</java>
+		<echo>Packed to .def</echo>
+		<!-- create the rtg file -->
+		<java jar="./lib/strj.jar" fork="true" failonerror="true">
+			<arg value="org.strategoxt.tools.main-sdf2rtg" />
+			<arg value="-i" />
+			<arg value="../K3Syntax/include/K3Syntax.def" />
+			<arg value="-o" />
+			<arg value="../K3Syntax/include/K3Syntax.rtg" />
+			<arg value="--ignore-missing-cons" />
+			<arg value="-Xnativepath" />
+			<arg value="${build.strategoxt.sdf}" />
+			<arg value="-m" />
+			<arg value="K3Syntax" />
+		</java>
+		<echo>Def -> Rtg</echo>
+		<!-- create the .str file representing the signature -->
+		<java jar="./lib/strj.jar" fork="true" failonerror="true">
+			<arg value="org.strategoxt.tools.main-rtg2sig" />
+			<arg value="-i" />
+			<arg value="../K3Syntax/include/K3Syntax.rtg" />
+			<arg value="-o" />
+			<arg value="../K3Syntax/include/K3Syntax.str" />
+			<arg value="--module" />
+			<arg value="K3Syntax" />
+		</java>
+
+		<!-- create the .tbl file of the definition -->
+		<echo message="Build TBL"/>
+		<exec executable="${build.strategoxt.sdf}sdf2table">
+			<arg value="-i" />
+			<arg value="../K3Syntax/include/K3Syntax.def" />
+			<arg value="-o" />
+			<arg value="../K3Syntax/include/K3Syntax.tbl" />
+			<arg value="-m" />
+			<arg value="K3Syntax" />
+		</exec>
+	</target>
+
+
+	<target name="k3sig">
+		<!-- pack the definition into a single .def file -->
+		<mkdir dir="../K3Disamb/include" />
+		<java jar="./lib/strj.jar" fork="true" failonerror="true">
+			<arg value="org.strategoxt.tools.main-pack-sdf" />
+			<arg value="-i" />
+			<arg value="../K3Disamb/syntax/K3Disamb.sdf" />
+			<arg value="-o" />
+			<arg value="../K3Disamb/include/K3Disamb.def" />
+		</java>
+		<echo>Packed to .def</echo>
+		<!-- create the rtg file -->
+		<java jar="./lib/strj.jar" fork="true" failonerror="true">
+			<arg value="org.strategoxt.tools.main-sdf2rtg" />
+			<arg value="-i" />
+			<arg value="../K3Disamb/include/K3Disamb.def" />
+			<arg value="-o" />
+			<arg value="../K3Disamb/include/K3Disamb.rtg" />
+			<arg value="--ignore-missing-cons" />
+			<arg value="-Xnativepath" />
+			<arg value="${build.strategoxt.sdf}" />
+			<arg value="-m" />
+			<arg value="K3Disamb" />
+		</java>
+		<echo>Def -> Rtg</echo>
+		<!-- create the .str file representing the signature -->
+		<java jar="./lib/strj.jar" fork="true" failonerror="true">
+			<arg value="org.strategoxt.tools.main-rtg2sig" />
+			<arg value="-i" />
+			<arg value="../K3Disamb/include/K3Disamb.rtg" />
+			<arg value="-o" />
+			<arg value="../K3Disamb/include/K3Disamb.str" />
+			<arg value="--module" />
+			<arg value="K3Disamb" />
+		</java>
+	</target>
+
+</project>

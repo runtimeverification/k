@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="all" name="K3 Build file">
+
+	<property location="javasources" name="javasources"/>
+
+	<target name="java">
+		<ant antfile="${javasources}/K3Java/buildjava.xml" dir="${javasources}/K3Java"/>
+		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun"/>
+	</target>
+
+	<target name="jar">
+		<ant antfile="${javasources}/K3Java/buildjar.xml" dir="${javasources}/K3Java"/>
+		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun"/>
+	</target>
+	
+	<target name="all">
+		<ant antfile="${javasources}/K3Java/build.xml" dir="${javasources}/K3Java"/>
+		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun"/>
+		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun"/>
+	</target>
+
+	<target name="clean">
+		<delete>
+			<fileset dir="${javasources}/K3Java/src/k2parser/lib">
+				<include name="*.java" />
+				<include name="K3Syntax.tbl" />
+			</fileset>
+		</delete>
+		<delete file="${javasources}/K3Syntax/trans/K2Str.rtree" />
+		<delete file="${javasources}/K3Syntax/trans/K2Str.dep" />
+		<delete dir="${javasources}/K3Syntax/trans/K2Str" />
+		<delete dir="${javasources}/K3Syntax/include" />
+
+		<delete>
+			<fileset dir="${javasources}/K3Java/src/k3parser/lib">
+				<include name="*.java" />
+				<exclude name="string_trim_last_one_0_0.java" />
+				<exclude name="string_unescape_sort_0_0.java" />
+			</fileset>
+		</delete>
+		<delete file="../K3Disamb/trans/K3Str.rtree" />
+		<delete file="../K3Disamb/trans/K3Str.dep" />
+		<delete dir="../K3Disamb/trans/K3Str" />
+		<delete dir="${javasources}/K3Disamb/include" />
+
+		<delete dir="${javasources}/K3Java/bin" />
+		<delete dir="${javasources}/KUtils/bin" />
+		<delete dir="${javasources}/KPreprocessor/bin" />
+		<delete dir="${javasources}/Kil2Maude/bin" />
+
+		<delete file="${javasources}/../dist/bin/java/k3.jar"/>
+		<delete file="k3.zip"/>
+	</target>
+
+	<target name="release">
+		<available file="./dist/bin/java/k3.jar" property="k3zip-exists" />
+		
+		<antcall target="r2"/>
+		<antcall target="r2false"/>
+	</target>
+	<target name="r2" if="k3zip-exists">
+		<delete file="k3.zip" />
+		<zip destfile="k3.zip" basedir="dist" />
+	</target>
+	<target name="r2false" unless="k3zip-exists">
+		<echo message="You must build the project before you can release it." />
+	</target>
+
+
+	<property location="dist/examples" name="examples"/>
+	<property location="dist/bin/kompile" name="kompile"/>
+	<property location="dist/bin/kast" name="kast"/>
+	<property location="dist/bin/krun" name="krun"/>
+
+	<target name="compile">
+	        <exec executable="${kompile}">
+		    <arg value="${examples}/imp/imp.k"/>
+		</exec>
+	        <exec executable="${krun}">
+		    <arg value="${examples}/imp/programs/sum.imp"/>
+		    <arg value="--parser"/>
+		    <arg value="${kast}"/>
+		    <arg value="--compiled-def"/>
+		    <arg value="${examples}/imp/imp-compiled.maude"/>
+		    <arg value="--syntax-module"/>
+		    <arg value="IMP-SYNTAX"/>
+		</exec>
+	        <exec executable="${krun}">
+		    <arg value="${examples}/imp/programs/collatz.imp"/>
+		    <arg value="--parser"/>
+		    <arg value="${kast}"/>
+		    <arg value="--compiled-def"/>
+		    <arg value="${examples}/imp/imp-compiled.maude"/>
+		    <arg value="--syntax-module"/>
+		    <arg value="IMP-SYNTAX"/>
+		</exec>
+	        <exec executable="${krun}">
+		    <arg value="${examples}/imp/programs/countPrimes.imp"/>
+		    <arg value="--parser"/>
+		    <arg value="${kast}"/>
+		    <arg value="--compiled-def"/>
+		    <arg value="${examples}/imp/imp-compiled.maude"/>
+		    <arg value="--syntax-module"/>
+		    <arg value="IMP-SYNTAX"/>
+		</exec>
+	</target>
+
+
+</project>
