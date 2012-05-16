@@ -279,7 +279,6 @@ public class Main {
 			if (!pgmFile.exists()) {
 				Error.report("\nProgram file does not exist: " + K.pgm);
 			}
-			String pgm = FileUtil.getFilename(K.pgm, ".", K.fileSeparator);
 			String lang = FileUtil.getExtension(K.pgm, ".");
 
 			// by default
