@@ -88,7 +88,7 @@ $ kompile imp.k --pdf
 To run programs, simply pass the program to \texttt{krun} in the
 directory where \texttt{imp.k} is:
 \begin{verbatim}
-$ krun programs/sumPgm.imp
+$ krun programs/sum.imp
 \end{verbatim}
 In general, the above commands work as shown for any language, say
 LANG, provided that you replace \texttt{IMP} by \texttt{LANG} and
@@ -355,7 +355,7 @@ which is labeled \textsf{T}. */
                   <state color="red"> .Map </state>
                 </T>
 // Replace the above <state/> cell with the following when you want to pass
-// an initial state through krun; see program programs/sumPgm-novars.imp.
+// an initial state through krun; see program programs/sum-novars.imp.
 //                  <state color="red"> $STATE:Map </state>
 // Make sure you rekompile the definition before calling krun.
 
@@ -378,7 +378,7 @@ initial state to \texttt{krun} in addition to the program, such as in
 the following command requesting \texttt{krun} to execute
 a program in a state binding $n$ to 0 and $s$ to 10:
 \begin{verbatim}
-krun programs/sumPgm-novars.imp --STATE="n|->0 s|->10"
+krun programs/sum-novars.imp --STATE="n|->0 s|->10"
 \end{verbatim}
 */
 
