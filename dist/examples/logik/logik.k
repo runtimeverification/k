@@ -1,4 +1,4 @@
-//require /modules/unification
+require "unification.k"
 
 module LOGIK-SYNTAX
   syntax Literal ::=  Id 
@@ -15,8 +15,8 @@ module LOGIK-SYNTAX
 
 /*@ Normalizing the definition. 
 Almost complete --- See additional rule in the semantics module. */
-  rule Lit:Literal. => Lit :-.  [anywhere,structural]
-  rule X:Id :- Lits:Literals. => X() :- Lits.  [anywhere,structural]
+  rule Lit:Literal. => Lit :- .Literals .  [anywhere,structural]
+  rule X:Id :- Lits:Literals. => X(.Literals) :- Lits.  [anywhere,structural]
 
   rule [.Literals | L:Literal ] => L  [anywhere,structural]
   rule [L:Literal,Lits:Literals] => [L | [Lits]]  [anywhere,structural]
@@ -51,15 +51,14 @@ module LOGIK-SEMANTICS
   [anywhere,structural]
 
 //@ Normalizing all ids which are not used for unification
-  rule X:Id,Lits:Literals => X(),Lits 
+  rule X:Id,Lits:Literals => X(.Literals),Lits 
   when 'isUnificationVar(X) =/=K true
   [anywhere]
 
 //@ Find a clause with the same name and generate a fresh version of it
-  rule <k> (.K => alpha(Clause)) 
-          ~> (_`(_`)(X:Id,Args:Literals),_:Literals) </k> 
-      <clauses>... BagItem(Clause) ...</clauses>
-  where Clause = _`(_`)(X,Params:Literals) :- Body:Literals.
+  rule <k> (.K => alpha(X(Params:Literals) :- Body:Literals.)) 
+          ~> (X:Id(Args:Literals),_:Literals) </k> 
+      <clauses>... BagItem(X(Params:Literals) :- Body:Literals.) ...</clauses>
   [transition]
 
 
