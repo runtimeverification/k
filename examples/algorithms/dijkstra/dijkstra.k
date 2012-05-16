@@ -1,3 +1,4 @@
+require nat-inf
 kmod DIJKSTRA is including NAT-INF 
   configuration <graph> .Set </graph> <shortest> .Map </shortest>
 

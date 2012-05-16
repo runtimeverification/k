@@ -15,6 +15,7 @@ mod DECL-META-XML-PRINT is
   var  St Pattern OpenPar ClosingPar : String .
   vars Left R N OpenPars ClosingPars : Nat .
   var Label : Qid .  var Contents : Term . var B : Multiplicity .
+  var CellLabelT : Term .
 
   ---- finds a pattern out of balanced parentheses 
   ---- findOut("S{P1, P2{P21, P22}, P3}", ",", "{", "}", 6) returns 18, not 12
@@ -247,7 +248,8 @@ var Eq : Equation .  var Eqs : EquationSet .
 ---)
   op \configCell`{_`}`{_`}`{_`} : Constant Term AttrSet -> Term .
   ops \kcell`{_`}`{_`}`{_`} : Term Term Ellipses -> Term .
-  ops \reduce`{_`}`{_`} \ereduce`{_`}`{_`} : Term Term -> Term .
+  ops \reduce`{_`}`{_`} \ereduce`{_`}`{_`} \kapp`{_`}`{_`} : Term Term -> Term .
+  op \hole : -> Term .
   op merge : QidList TermList -> Term .
   op splitMixFix : String -> QidList .
   op prefixOp : Qid Term -> Term .
@@ -260,73 +262,86 @@ var Eq : Equation .  var Eqs : EquationSet .
   op \myquote{_} : String -> QidList .
 
 
-  op formatEmpty : Sort Nat -> QidList .
-  eq formatEmpty(Q, N) 
-   = indent(N) '<empty qid("sort=\"" + string(Q) + "\"/>") ---('\n) .
+  op formatEmpty : Module Sort Nat -> QidList .
+  eq formatEmpty(U, Ty, N) 
+   = indent(N) '<empty> printAttributes(U, pair("sort", string(Ty))) '</empty> .
 
  ceq printTerm(U,C,Ty,N) 
-   = indent(N) '<var  
-        'sort= qid("\"" + xmlString(Ty) + "\"") 
-        '/> ---('\n) 
+   = indent(N) '<var>
+        printAttributes(U, pair("sort",string(Ty),true))
+        '</var> ---('\n) 
   if getName(C) == '? . 
  ceq printTerm(U,C,Ty,N)
-   = formatEmpty(List, N) 
+   = formatEmpty(U,List, N) 
   if C = emptyCt(List) .
  ceq printTerm(U,C,Ty,N)
-   = formatEmpty(Bag, N) 
+   = formatEmpty(U,Bag, N) 
   if C = emptyCt(Bag) .
  ceq printTerm(U,C,Ty,N)
-   = formatEmpty(Set, N) 
+   = formatEmpty(U,Set, N) 
   if C = emptyCt(Set) .
  ceq printTerm(U,C,Ty,N)
-   = formatEmpty(Map, N) 
+   = formatEmpty(U,Map, N) 
   if C = emptyCt(Map) .
  ceq printTerm(U,C,Ty,N)
-   = formatEmpty(KList, N) 
+   = formatEmpty(U,KList, N) 
   if C = emptyCt(KList) .
  ceq printTerm(U,C,Ty,N)
-   = formatEmpty(K, N) 
+   = formatEmpty(U,K, N) 
   if C = emptyCt(K) .
  ceq printTerm(U,C,Ty,N)
-   = indent(N) '<emptylist 'ctor= qid("\"" + getListCtor(string(getName(C))) + "\"") 
-     '/> ---('\n)
+   = indent(N) '<emptylist> '<symbol> tokenizeXML(xmlString(getListCtor(string(getName(C)))))  '</symbol> '</emptylist>
   if string(getType(C)) starts-with "SemList`{Bottom`,\"" .
-
 
  op getListCtor : String -> String .
  eq getListCtor(Str) = substr(Str,find(Str,"\"",0) + 1, _-_(rfind(Str,"\"",length(Str)), find(Str,"\"",0) + 1)) .
 
  ceq printTerm(U,C,Ty,N) 
-   = printConst(C, Ty, N)
+   = printConst(U,C, Ty, N)
   if isBuiltin(Ty) .
 
-  op printConst : Constant Type Nat -> QidList .
-  eq printConst(C, Ty, N)
-   = indent(N) '<const 
-        'sort= qid("\"" + xmlString(Ty) + "\">") 
-        tokenizeXML(xmlString(getName(C)))
+  eq pair("sort","#Zero",true) = pair("sort","#Int", true) .
+  eq pair("sort","#Nat", true) = pair("sort","#Int", true) .
+  eq pair("sort","#NzNat", true) = pair("sort","#Int", true) .
+  eq pair("sort","#NzInt", true) = pair("sort","#Int", true) .
+  eq pair("sort","#Zero", true) = pair("sort","#Int", true) .
+
+  eq pair("sort", "#FiniteFloat", true) = pair("sort","#Float", true) .
+  eq pair("sort", "#Char", true) = pair("sort", "#String", true) .
+
+  eq pair("sort","#Zero") = pair("sort","#Int") .
+  eq pair("sort","#Nat") = pair("sort","#Int") .
+  eq pair("sort","#NzNat") = pair("sort","#Int") .
+  eq pair("sort","#NzInt") = pair("sort","#Int") .
+  eq pair("sort","#Zero") = pair("sort","#Int") .
+
+  eq pair("sort", "#FiniteFloat") = pair("sort","#Float") .
+  eq pair("sort", "#Char") = pair("sort", "#String") .
+
+  op printConst : Module Constant Type Nat -> QidList .
+  eq printConst(U,C, Ty, N)
+   = indent(N) '<const> 
+        '<value> tokenizeXML(xmlString(getName(C))) '</value>
+          printAttributes(U, pair("sort",string(Ty),true))
         '</const> ---('\n) .
   eq printTerm(U, C, Ty, N)
-   =  indent(N) '<term  
-              'sort= qid("\"" + xmlString(Ty) + "\"") '> 
-             '<label> 
+   =  indent(N) '<term>  
+             '<symbol> 
                tokenizeXML(xmlString(getName(C)))
-              '</label> ---('\n)
+              '</symbol> ---('\n)
              '<args/> 
+            printAttributes(U, pair("sort",string(Ty),true))
              '</term>
      [owise] .
  ceq printTerm(U,V,Ty,N) 
-   = indent(N) '<var  
-        'sort= qid("\"" + xmlString(Ty) + "\"") '> 
-            '<declaredSort> tokenizeXML(xmlString(Ty)) '</declaredSort>
+   = indent(N) '<var>  
+        printAttributes(U,pair("sort", string(Ty), true))
         '</var> ---('\n) 
   if getName(V) == '? . 
   eq printTerm(U,V,Ty,N) 
-   = indent(N) '<var 
-        'sort= qid("\"" + xmlString(getType(V)) + "\"") 
-        '>
+   = indent(N) '<var> 
             '<name> tokenizeXML(xmlString(getName(V))) '</name>
-            '<declaredSort> tokenizeXML(xmlString(getType(V))) '</declaredSort>
+            printAttributes(U,pair("sort", string(Ty)))
         '</var> 
  ---('\n) [owise] .
 
@@ -357,8 +372,8 @@ var Eq : Equation .  var Eqs : EquationSet .
 ---  eq printTerm(U,Q[NeTl]) 
 ---   = Q '`( printTermL(U, NeTl) '`) .
   ceq  printTerm(U,T,Ty,N)
-    =  printTerm(U,\kcell{Label}{Contents}{AS[ellipses]},Ty,N)
-    if {Label, Contents, AS} := splitKCell(T) .
+    =  printTerm(U,\kcell{CellLabelT}{Contents}{AS[ellipses]},Ty,N)
+    if {CellLabelT, Contents, AS} := splitKCell(T) .
 
   var Ellipses : Ellipses .
 
@@ -383,9 +398,25 @@ var Eq : Equation .  var Eqs : EquationSet .
          printTerm(U, T, Ty, s(N))
      indent(N)  qid("</" + Str + ">") ---('\n) .
 
+  ceq printTerm(U, Ct, Ty, N) 
+    = printTerm(U, \hole, Ty, N) 
+   if Ct == hole .
+ 
   ceq printTerm(U,Q[T1,T2],Ty,N) = 
      printTerm(U,\reduce{T1}{T2},Ty,N) 
    if Q = replaceS .
+  ceq printTerm(U, Q[T1,T2], Ty, N)
+    = printTerm(U, \kapp{T1}{T2}, Ty, N)
+   if Q = kApplyS /\ getKind(U, leastSort(U,T1)) = getKind(U, KLabel) .
+
+  ceq printTerm(U, Ct, Ty, N)
+    = '<klabel> tokenizeXML(xmlString(getName(Ct))) '</klabel> 
+   if Ty == KLabel .
+
+  ceq printTerm(U, Ct, Ty, N)
+    = '<celllabel> tokenizeXML(xmlString(getName(Ct))) '</celllabel> 
+   if Ty == CellLabel .
+  
   ceq printTerm(U,Q[Tl],Ty, N)
     = formatSequence(U, Tl, Ty, N, Q, "KSequence") 
    if sameKind(U, Ty, K) /\ Q = kraS .
@@ -464,14 +495,14 @@ var Eq : Equation .  var Eqs : EquationSet .
   if mixfix(Q) /\ size(splitMixFix(string(Q))) = 3 /\ 1 < countTerms(NeTl) [owise print "normalizing"] .
 ---)
   eq printTerm1(U, F[NeTl],Ty,N) 
-   =  indent(N) '<term  
-              'sort= qid("\"" + xmlString(Ty) + "\"") '> 
-             '<label> 
+   =  indent(N) '<term>  
+             '<symbol> 
                tokenizeXML(xmlString(F))
-              '</label> ---('\n)
+              '</symbol> ---('\n)
              '<args>
           printTermL(U, NeTl, s(N)) 
              '</args> 
+              printAttributes(U,pair("sort", string(Ty), true))  
              '</term>
    [owise] .
   eq printTerm(M, T:[Term],Ty,N) = 'error 
@@ -575,7 +606,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   ops mrule : String Term Term -> Printable .
   ops cmrule : String Term Term Condition -> Printable .
  
-  op config : Term -> Printable .
+  op config : Term AttrSet -> Printable .
   op xml : String -> Printable .
   op context : String KContextSplit -> Printable . 
   var AS : AttrSet .
@@ -586,7 +617,7 @@ var Eq : Equation .  var Eqs : EquationSet .
 
   var KRS : KRuleSplit .  var KCS : KContextSplit . 
   var Mb : MembAx .  var MAS' : MembAxSet .
-  eq mb(mb 'configuration_[T] : 'KSentence [AS] .) = config(T) .
+  eq mb(mb 'configuration_[T] : 'KSentence [AS] .) = config(T,metadataParse(AS)) .
   eq mb(mb 'xml_[T] : 'KSentence [AS] .) = xml(getString(T)) .
  ceq mb(Mb) = rule(getLabel(getAttrs(Mb)),KRS)
   if KRS := splitKRule(metadataParse(Mb)) .
@@ -619,31 +650,21 @@ var Eq : Equation .  var Eqs : EquationSet .
     [owise] .
 ---)
 
+
   eq loc(I,N,empty) = empty .
   eq eq(eq T = T' [metadata("simplify")] .) = empty .
   eq eq(eq T = T' [metadata(Str) AtS] .) 
    = eq(eq T = T' [metadataParse(Str) AtS] .) [owise] .
   eq eq(eq T = T' [pair("parser","") AtS] .) = empty .
   eq eq(eq T = T' [AtS] .) = mequation(getLabel(AtS),T,T', AtS, nil) [owise] .
-  eq eMetaXMLPrint(M, mequation(Str, T, T', AtS, Cond) Prints)
-    = (indent(2) 
-          '<equation 'displayLabel= qid("\"" + xmlString(Str) + "\"") '> ---('\n)
-            printTerm(M,T,niceSort(M,T),3)
-            printTerm(M,T',niceSort(M,T),3)
-            printCondition(M, Cond)
-            printAttributes(M, AtS)
-       indent(2)
-          '</equation> ---('\n)
-       eMetaXMLPrint(M, Prints)) 
-    [owise] .
   eq eq(ceq T = T' if Cond [AtS] .) = mequation(getLabel(AtS), T, T', AtS, Cond) .
 
   op printAttributes : Module AttrSet -> QidList .
   eq printAttributes(M, none) = nil .
   eq printAttributes(M, AS) = ( 
-         indent(5) '<attributes> ---('\n)
+         indent(5) '<tags> ---('\n)
            eMetaXMLPrint(M, AS, 6) 
-         indent(5) '</attributes> ---('\n)) [owise] . 
+         indent(5) '</tags> ---('\n)) [owise] . 
  
  op printCondition : Module Condition -> QidList .
   eq printCondition(M, nil) = nil .
@@ -691,34 +712,34 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaXMLPrint(M, klarge, N)  
     = nil .
   eq eMetaXMLPrint(M, assoc, N)  
-    = indent(N) '<tag 'key="assoc" '/> ---('\n) .
+    = indent(N) '<tag><name>assoc</name></tag> ---('\n) .
   eq eMetaXMLPrint(M, comm, N)
-    = indent(N) '<tag 'key="comm" '/> ---('\n) .
+    = indent(N) '<tag><name>comm</name></tag> ---('\n) .
   eq eMetaXMLPrint(M, (memo ), N)   
-    = indent(N) '<tag 'key="memo" '/> ---('\n) .
+    = indent(N) '<tag><name>memo</name></tag> ---('\n) .
   eq eMetaXMLPrint(M, (idem ), N)   
-    = indent(N) '<tag 'key="idem" '/> ---('\n) .
+    = indent(N) '<tag><name>idem</name></tag> ---('\n) .
 
   eq eMetaXMLPrint(M, (id(T) ), N)
-    = indent(N) '<tag 'key="id" '> ---('\n) 
-        printTerm(M,T, niceSort(M,T),s(N))
+    = indent(N) '<tag><name>id</name>
+        '<content> printTerm(M,T, niceSort(M,T),s(N)) '</content>
       indent(N) '</tag> ---('\n) . 
 
   eq eMetaXMLPrint(M, (right-id(T) ), N)
-    = indent(N) '<tag 'key="right-id" '> ---('\n) 
-        printTerm(M,T, niceSort(M,T),s(N))
+    = indent(N) '<tag><name>right-id</name>
+        '<content> printTerm(M,T, niceSort(M,T),s(N)) '</content>
       indent(N) '</tag> ---('\n) . 
   eq eMetaXMLPrint(M, (left-id(T) ), N)
-    = indent(N) '<tag 'key="left-id" '> ---('\n) 
-        printTerm(M,T, niceSort(M,T),s(N))
+    = indent(N) '<tag><name>left-id</name>
+        '<content> printTerm(M,T, niceSort(M,T),s(N)) '</content>
       indent(N) '</tag> ---('\n) . 
   eq eMetaXMLPrint(M, (poly(NL) ), N)
     = ('\kpoly '`{ eMetaXMLPrint(NL) '`} 
        ) .
 
   eq eMetaXMLPrint(M, (karity(N) ), N')
-    = indent(N) '<tag 'key="arity" 
-           'value= qid("\"" + string(N,10) + "\"") '/> ---('\n) .
+    = indent(N) '<tag><name>arity</name>
+          '<content> tokenizeXML(xmlString(string(N,10))) '</content></tag> ---('\n) .
 
 ---  op \wrapping{_} : Qid -> QidList .
   op \renameTo{_} : Qid -> QidList .
@@ -776,10 +797,10 @@ var Eq : Equation .  var Eqs : EquationSet .
  
 
   eq eMetaXMLPrint(M, (kstrict(NL, QIL)), N)
-   = (indent(N) '<strict> ---('\n) 
+   = indent(N) '<strict>
         printStrictPositions(NL, s(N))
         printStrictCells(QIL, s(N))
-      indent(N) '</strict> ---('\n) ) .
+      indent(N) '</strict> .
   op printStrictPositions : NatList Nat -> QidList .
   eq printStrictPositions(nil,N) = nil .
   eq printStrictPositions(NL,N) = 
@@ -788,44 +809,55 @@ var Eq : Equation .  var Eqs : EquationSet .
       indent(N) '</positions> ---('\n)) .
 
   eq eMetaXMLPrint(M, (seqkstrict(NL, QIL)), N)
-   = (indent(N) '<seqstrict> ---('\n) 
+   = indent(N) '<seqstrict>
         printStrictPositions(NL, s(N))
         printStrictCells(QIL, s(N))
-      indent(N) '</seqstrict> ---('\n) ) .
-  eq eMetaXMLPrint(M, (pair("function",Str)), N)
-   = (indent(N) '<function> tokenizeXML(xmlString(Str)) '</function>) .
-  eq eMetaXMLPrint(M, (pair("hybrid","")), N) = (indent(N) '<hybrid/>) .
-  eq eMetaXMLPrint(M, (pair("structural","")), N) = (indent(N) '<structural/>) .
-  eq eMetaXMLPrint(M, (pair("transition","")), N) = (indent(N) '<transition/>) .
-  eq eMetaXMLPrint(M, (pair("superheat","")), N) = (indent(N) '<superheat/>) .
-  eq eMetaXMLPrint(M, (pair("supercool","")), N) = (indent(N) '<supercool/>) .
-  eq eMetaXMLPrint(M, (pair("anywhere","")), N) = (indent(N) '<anywhere/>) .
-  eq eMetaXMLPrint(M, (pair("latex",Str)), N)
-   = (indent(N) '<latex> tokenizeXML(xmlString(Str)) '</latex>) .
-  eq eMetaXMLPrint(M, (pair("hook",Str)), N)
-   = (indent(N) '<hook> tokenizeXML(xmlString(Str)) '</hook>) .
-  eq eMetaXMLPrint(M, (pair("binder",Str)), N)
-   = (indent(N) '<binder> tokenizeXML(xmlString(Str)) '</binder>) .
-  eq eMetaXMLPrint(M, (pair("klabel",Str)), N)
-   = (indent(N) '<klabel> tokenizeXML(xmlString(Str)) '</klabel>) .
-  eq eMetaXMLPrint(M, (pair(Str,"") ), N)   
-    = (indent(N) '<tag 
-          'key= qid("\"" + xmlString(Str) + "\"")
-          '/> ---('\n)) [owise] .
-  eq eMetaXMLPrint(M, (pair(Str,Str') ), N)   
-    = (indent(N) '<tag 
-          'key= qid("\"" + xmlString(Str) + "\"") '>
+      indent(N) '</seqstrict> .
+
+  op pair : String String Bool -> Attr .
+  eq pair(Str, Str', false) = pair(Str, Str) .
+
+
+  eq eMetaXMLPrint(M, pair("sort",Str, true), N)
+   = '<sort 'generated="true"> 
+          tokenizeXML(xmlString(Str))
+     '</sort> .
+
+  eq eMetaXMLPrint(M, (pair(Str,"", true) ), N)   
+    = (indent(N) '<tag 'generated="true"><name>
+          tokenizeXML(xmlString(Str))
+                    '</name></tag> ---('\n)) [owise] .
+  eq eMetaXMLPrint(M, (pair(Str,Str', true) ), N)   
+    = (indent(N) '<tag 'generated="true"><name> tokenizeXML(xmlString(Str)) 
+       '</name><content>
           tokenizeXML(xmlString(Str'))
-       '</tag> ---('\n)) [owise] .
+       '</content></tag> ---('\n)) [owise] .
+
+
+  ceq eMetaXMLPrint(M, pair(Str,Str'), N)
+    = qid("<" + Str + if Str' == "" then "/" else "" fi + ">")  
+      if Str' == "" then nil else 
+          tokenizeXML(xmlString(Str'))
+      qid("</" + Str + ">")  fi 
+   if Str == "color" or-else Str == "sort" or-else Str == "supercool" or-else Str == "transition" or-else Str == "function" or-else Str == "hook" or-else Str == "klabel" or-else Str == "hybrid" or-else Str == "structural" or-else Str == "binder" or-else Str == "multiplicity" or-else Str == "anywhere" or-else Str == "ellipses" .
+  eq eMetaXMLPrint(M, (pair(Str,"") ), N)   
+    = (indent(N) '<tag><name> 
+          tokenizeXML(xmlString(Str))
+          '</name></tag> ---('\n)) [owise] .
+  eq eMetaXMLPrint(M, (pair(Str,Str') ), N)   
+    = (indent(N) '<tag><name> 
+          tokenizeXML(xmlString(Str)) '</name><content>
+          tokenizeXML(xmlString(Str')) 
+       '</content></tag> ---('\n)) [owise] .
   eq eMetaXMLPrint(M, (strat(NL) ), N)
     = ('\kstrat '`{ eMetaXMLPrint(NL) '`} 
        ) .
   eq eMetaXMLPrint(M, (memo ), N)   
     = ('\kmemo '`{ '`}) .
   eq eMetaXMLPrint(M, (prec(I) ), N)
-   = (indent(N) '<tag 'key="prec" 
-                            'value= qid("\"" + string(I,10) + "\"") 
-                 '/> ---('\n)) .
+   = (indent(N) '<tag><name>prec</name><content> 
+                            tokenizeXML(xmlString(string(I,10)))
+                 '</content></tag> ---('\n)) .
   eq eMetaXMLPrint(M, (klatex(AS) ), N)
     = nil .
   eq eMetaXMLPrint(M, (gather(QIL) ), N)
@@ -856,7 +888,7 @@ var Eq : Equation .  var Eqs : EquationSet .
   eq eMetaXMLPrint(M, (nonexec ), N)
     = ('\knonexec '`{ '`}) .
   eq eMetaXMLPrint(M, (owise ), N)
-   = (indent(N) '<tag 'key="owise" '/> ---('\n)) .
+   = (indent(N) '<tag><name>owise</name></tag> ---('\n)) .
   eq eMetaXMLPrint(M, (print(QIL) ), N)
     = ('\kprint '`{ QIL '`}) .
 
@@ -1190,22 +1222,32 @@ mod XML-PRINT-META is
 ) .
  
   var Color : String . var Multiplicity : Multiplicity . var Ellipses : Ellipses .
-  eq printTerm(M, \kcell{Ct}{T}{Ellipses}, Ty, N) 
+  eq printTerm(M, \kcell{T1}{T2}{Ellipses}, Ty, N) 
    = indent(N) '<cell>
-        '<ellipses> tokenizeXML(xmlString(symbolES(Ellipses))) '</ellipses> ---('\n)
-         '<label> tokenizeXML(xmlString(string(getName(Ct)))) '</label>
-      printTerm(M, T, niceSort(M,T), s(N)) 
-    indent(N) '</cell> ---('\n) [print "printing cell " Ct] .
+         '<label> printTerm(M, T1, CellLabel, N + 1) '</label>
+        printAttributes(M, pair("ellipses",symbolES(Ellipses)))  
+      printTerm(M, T2, niceSort(M,T2), s(N)) 
+    indent(N) '</cell> ---('\n) [print "printing cell " T1] .
 
   eq printTerm(M, \reduce{T1}{T2}, Ty, N) 
-   = indent(N) '<rewrite 'sort= qid("\"" + xmlString(Ty) + "\"") '> ---('\n)
+   = indent(N) '<rewrite> ---('\n)
         indent(s(N)) '<left> ---('\n)
            printTerm(M, T1, niceSort(M,T1), s(s(N))) 
         indent(s(N)) '</left> ---('\n)
         indent(s(N)) '<right> ---('\n)
         printTerm(M, T2, niceSort(M,T2), s(s(N))) 
         indent(s(N)) '</right> ---('\n)
+        printAttributes(M, pair("sort",string(Ty), true))
      indent(N) '</rewrite> ---('\n)  .
+
+  eq printTerm(M, \kapp{T1}{T2}, Ty, N)
+   = indent(N) '<KApp> '<label> printTerm(M, T1, KLabel, s(s(N))) '</label>
+                       formatSequence(M, T2, KList, s(N), kListS, "args")
+     indent(N) '</KApp> .
+
+
+  eq printTerm(M, \hole, Ty, N) = '<hole/> .
+
   eq printTerm(M, \value{T}, Ty, N) = '\kvalue '`{ printTerm(M, T, Ty, N) '`} .
 
   op getColor : Module Qid -> Qid .
@@ -1245,9 +1287,9 @@ mod XML-PRINT-META is
   eq eMetaXMLPrint(M, loc(N,I,P) Prints) = eMetaXMLPrint(M, P Prints) [print Prints] .
   eq eMetaXMLPrint(M, syntax(Q, QIL', #Types(N) AS) Prints)
    = (indent(2) '<syntax> ---('\n)  
-        indent(3) '<sort> tokenizeXML(xmlString(Q)) '</sort> ---('\n)
+        indent(3) '<nonterminal> tokenizeXML(xmlString(Q)) '</nonterminal> ---('\n)
         indent(3) '<priority> ---('\n)
-        indent(4) '<production 'loc= qid("\"" + getLocation(AS) + "\"") '> ---('\n)
+        indent(4) '<production> ---('\n)
          QIL'
 
          printAttributes(M, AS)
@@ -1269,7 +1311,7 @@ mod XML-PRINT-META is
 
 ---  op eMetaXMLPrint : ProductionType -> QidList .
   eq (\nterminal{Ty}) 
-   = indent(5) '<sort> tokenizeXML(xmlString(Ty)) '</sort> ---('\n) .
+   = indent(5) '<nonterminal> tokenizeXML(xmlString(Ty)) '</nonterminal> ---('\n) .
   eq (\terminal{Q}) 
    = indent(5) '<terminal> tokenizeXML(xmlString(Q)) '</terminal> ---('\n) .
   eq \sort{Q} = '\sort '`{ printSortQid(Q) '`} .
@@ -1285,16 +1327,13 @@ mod XML-PRINT-META is
 
 
    eq printConfig(M, \configCell{Q}{T}{AS}, N)
-    =  indent(N) '<configCell
-            'color= qid("\"" + string(getColor(M,Q)) + "\"")  
-            'sort= qid("\"" + xmlString((niceSort(M,T))) + "\"") 
-           '> ---('\n) 
-            '<label> tokenizeXML(xmlString((Q))) '</label>  
-            '<multiplicity> tokenizeXML(xmlString(symbolS(AS[multiplicity]))) '</multiplicity> 
+    =  indent(N) '<cell>
+            '<label> printTerm(M, mkConstant(Q, CellLabel), CellLabel, N + 1) '</label>  
+        printAttributes(M, pair("color",string(getColor(M,Q))) pair("sort",string(niceSort(M,T)), true) pair("multiplicity",(symbolS(AS[multiplicity]))))
             '<contents>
        printConfig(M,T,s(N)) 
        '</contents>
-       indent(N) '</configCell> ---('\n) [owise] .
+       indent(N) '</cell> ---('\n) [owise] .
    eq printConfig(M, Q[Tl], N) 
     = if Q == ctor(Bag) then printConfigL(M,Tl, N) else printTerm(M,Q[Tl], niceSort(M, Q[Tl]), N) fi [owise print "Escaping to terms if Q is not __. Q: " Q "[" Tl "]"] .
    eq printConfig(M, C, N) 
@@ -1309,23 +1348,36 @@ mod XML-PRINT-META is
   var MAS' : MembAxSet .
   eq eMetaXMLPrint(M, xml(Str) Prints) 
    = (---('\n) ---('\n) '\begin '`{ 'xmlComment '`} ---('\n) tokenizeXML(stripSpaces(Str)) ---('\n) '\end '`{ 'xmlComment '`} ) eMetaXMLPrint(M, Prints) .
-  eq eMetaXMLPrint(M, config(T) Prints)
-    = ('\s '\s '\s '\s '<configuration> ---('\n)
-         printConfig(M, T, 3) 
-       '\s '\s '\s '\s '</configuration> ---('\n)
+  eq eMetaXMLPrint(M, config(T, AS) Prints)
+    = (indent(2) '<configuration> ---('\n)
+        indent(3) '<body>
+           printConfig(M, T, 4) 
+        indent(3) '</body>
+        printAttributes(M, AS)
+       indent(2) '</configuration> ---('\n)
        eMetaXMLPrint(M, Prints)) .
+
+
+  eq eMetaXMLPrint(M, (mequation(Str, T1, T2, AS, nil)) Prints)
+    = (indent(2) '<rule>
+        indent(3) '<body> ---('\n)
+         printTerm(M, \reduce{T1}{T2}, niceSort(M,T1), 4)
+        indent(3) '</body> ---('\n) 
+---         printKCondition(M, Cnd)
+         printAttributes(M, AS pair("macro","") pair("sort", string(niceSort(M,T1)),true))
+       indent(2) '</rule> ---('\n)
+       eMetaXMLPrint(M, Prints)) [owise] .
+
+---  eq mequation(Str, T1, T2, AS, nil) = rule(Str, R{replaceS[T1,T2],empty,AS}) .
 
   var Cnd : TermList .
   eq eMetaXMLPrint(M, (rule(Str, R{T, Cnd, AS})) Prints)
-    = (indent(2) '<rule  
-            'displayLabel= qid("\"" + xmlString(Str) + "\"") 
-                     'sort= qid("\"" + xmlString(niceSort(M,T)) + "\"") 
-              '> ---('\n) 
+    = (indent(2) '<rule>
         indent(3) '<body> ---('\n)
          printTerm0(M, T, AS)
         indent(3) '</body> ---('\n) 
          printKCondition(M, Cnd)
-         printAttributes(M, AS)
+         printAttributes(M, AS pair("sort", string(niceSort(M,T)),true))
        indent(2) '</rule> ---('\n)
        eMetaXMLPrint(M, Prints)) [owise] .
   op printKCondition : Module TermList -> QidList .
@@ -1337,10 +1389,10 @@ mod XML-PRINT-META is
        ) [owise] .
 
   eq eMetaXMLPrint(M, (context(Str, C{T, Cnd, AS})) Prints)
-    = (indent(2) '<context
-            'displayLabel= qid("\"" + Str + "\"")  
-              '> ---('\n) 
+    = (indent(2) '<context>
+        indent(3) '<body> ---('\n)
          printTerm0(M, T, AS) 
+        indent(3) '</body> ---('\n) 
          printKCondition(M, Cnd)
          printAttributes(M, AS)
        indent(2) '</context> ---('\n)
@@ -1375,7 +1427,7 @@ endfm)) = tokenizeXML(Str) ---('\n) eMetaXMLPrint(setMbs(setRls(setEqs(M,none),n
   eq xmlPrint(FM, M) = eMetaXMLPrint(setMbs(setRls(setEqs(FM,none),none), none), removeImports(M, (including 'K .) (including 'K-SHARED .) (including 'K-RESULT .) (including 'K-XML .) (including 'URIS .)))  [print "red xmlPrint((" FM "),(" M ")) ."] .
 
   op xmlPrint : Qid -> QidList .
-  eq xmlPrint(Q) = $xmlPrint(Q,upModule(Q,false)) .
+  eq xmlPrint(Q) = $xmlPrint(Q,addImports((including K .), upModule(Q,false))) .
 
   op xmlPrint : Qid Qid -> QidList .
   eq xmlPrint(Q, Q') = $xmlPrint(Q,
