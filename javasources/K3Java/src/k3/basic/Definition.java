@@ -2,6 +2,7 @@ package k3.basic;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -151,8 +152,10 @@ public class Definition implements Cloneable {
 		sdf += "exports\n\n";
 
 		List<Production> outsides = new ArrayList<Production>();
-		List<Production> constants = new ArrayList<Production>();
+		// List<Production> constants = new ArrayList<Production>();
+		Map<String, String> constants = new HashMap<String, String>();
 		Set<Sort> sorts = new HashSet<Sort>(); // list of declared sorts
+		Set<Terminal> terminalList = getTerminals(false);
 		// list of sorts declared as being list
 		Set<Sort> listSorts = new HashSet<Sort>();
 
@@ -173,12 +176,23 @@ public class Definition implements Cloneable {
 								if (it.getType() == ItemType.SORT)
 									sorts.add((Sort) it);
 
+							// if the user declares a klabel in the attributes list, declare it as a KLabel constant
+							if (prd.getAttributes().containsKey("klabel")) {
+								// TODO: don't add this for now, it creates ambiguities
+								//constants.put(prd.getAttributes().get("klabel"), "KLabel");
+								//terminalList.add(new Terminal(prd.getAttributes().get("klabel")));
+							}
+
 							if (prd.getAttributes().containsKey("bracket")) {
 								// do nothing for programs
 							} else if (prd.isSubsort()) {
 								outsides.add(prd);
-							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#")) {
-								constants.add(prd);
+							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1
+									&& (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
+								// constants.add(prd);
+								String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
+								String sort = prd.getProdSort().getSortName();
+								constants.put(terminal, sort);
 							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ItemType.TERMINAL) {
 								outsides.add(prd);
 							} else if (prd.getProdSort().isBaseSort()) {
@@ -270,11 +284,13 @@ public class Definition implements Cloneable {
 
 		sdf += "\n";
 		sdf += "lexical syntax\n";
-		for (Production p : constants) {
-			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "\n";
+		sdf += "	%% constants\n";
+		for (Map.Entry<String, String> p : constants.entrySet()) {
+			sdf += "	\"" + p.getKey() + "\" -> Dz" + StringUtil.escapeSortName(p.getValue()) + "\n";
 		}
 
-		for (Terminal t : getTerminals(false)) {
+		sdf += "\n	%% terminals reject\n";
+		for (Terminal t : terminalList) {
 			if (t.getTerminal().matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
 				sdf += "	\"" + t.getTerminal() + "\" -> VARID {reject}\n";
 			}
@@ -529,6 +545,7 @@ public class Definition implements Cloneable {
 		}
 
 		String sdf = "lexical restrictions\n";
+		sdf += "	%% follow restrictions\n";
 		for (Ttuple tt : mytuples) {
 			sdf += "	\"" + tt.value + "\" -/- ";
 			String ending = tt.key.substring(tt.value.length());

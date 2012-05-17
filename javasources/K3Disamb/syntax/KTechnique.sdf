@@ -11,12 +11,12 @@ context-free priorities
 	K "~>" K	-> K {left, cons("K1Seq")}
 	".List{K}"	-> ListDlKDr {cons("ListDlKDr12Empty")}
 	ListDlKDr   ",," ListDlKDr	-> ListDlKDr {left, cons("ListDlKDr1List")}
-	KLabel "(" ListDlKDr ")"	-> K {cons("K1App")}
 } > { non-assoc:
 	K "=>" K	-> K {non-assoc, cons("K1Rewrite")}
 	ListDlKDr  "=>" ListDlKDr	-> ListDlKDr {non-assoc, cons("ListDlKDr1Rewrite")}
 }
 context-free syntax
+	KLabel "(" ListDlKDr ")"	-> K {cons("K1App")}
 	K					-> ListDlKDr %%{cons("ListOfK3K")}
 	"HOLE"				-> K {cons("K1Hole")}
 	"HOLE" ":" "K"		-> K {cons("K12Hole")}

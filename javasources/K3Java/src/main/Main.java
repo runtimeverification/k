@@ -1,7 +1,13 @@
 package main;
 
-import java.io.*;
-import k.utils.*;
+import java.io.File;
+import java.io.IOException;
+
+import k.utils.FileUtil;
+import k.utils.GlobalSettings;
+import k.utils.Stopwatch;
+import k.utils.XmlLoader;
+
 import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -12,6 +18,7 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		Stopwatch sw = new Stopwatch();
 		OptionsParser op = new OptionsParser();
 
 		CommandLine cmd = op.parse(args);
@@ -135,5 +142,7 @@ public class Main {
 			// } else if (cmd.hasOption("latex") && cmd.hasOption("file")) {
 			// latex(cmd);
 		}
+		if (GlobalSettings.verbose)
+			sw.printTotal("Total           = ");
 	}
 }

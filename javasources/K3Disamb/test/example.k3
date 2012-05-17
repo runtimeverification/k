@@ -1,2 +1,4 @@
-  rule "seek#" +String A:String +String "#"
-                              +String B:String +String "#" 
+  rule unifyEqs(subst(Ks:List{K} => eqn(X,,K),,substitute(X,,K,,Ks)),,
+              (eqns(eqn(X,,K),,Eqns:List{K}) => substitute(X,, K,, eqns(Eqns))))
+    when 'isUnificationVar(X) andBool notBool(X subTerm K)
+   [structural, anywhere]

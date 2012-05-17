@@ -137,7 +137,6 @@ public class FrontEnd {
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Maudify         = ");
-				sw.printTotal("Total           = ");
 			}
 
 			return maudified;
@@ -151,9 +150,9 @@ public class FrontEnd {
 
 	public static void compile(File mainFile, String mainModule) {
 		try {
-			Stopwatch sw = new Stopwatch();
-
 			String maudified = maudify(mainFile, mainModule);
+
+			Stopwatch sw = new Stopwatch();
 
 			// for now just use this file as main argument
 			File f = mainFile.getCanonicalFile();

@@ -5,7 +5,7 @@ imports Common %% For Comments and whitespace
 exports
 context-free syntax
 	%% KLabel
-	KLABEL	-> KLabel {cons("KLabel1KLabelConst")}
+	DzKLabel	-> KLabel {cons("KLabel1Const")}
 	"(" KLabel ")"			-> KLabel {bracket}
 	KLabel "=>" KLabel		-> KLabel {cons("KLabel1Rewrite")}
 
@@ -34,7 +34,7 @@ lexical syntax
 	"\\"				-> BackSlashChar
 
 	%% KLabel definition + restrictions lower
-	"'" KLabelChar+			-> KLABEL
+	"'" KLabelChar+			-> DzKLabel
 	~[\`\(\)\ \t\n\r]		-> KLabelChar
 	"``"					-> KLabelChar
 	"`("					-> KLabelChar
@@ -49,7 +49,7 @@ lexical restrictions
 
 	%% BackQuote in KLabel cannot be folowed by ( ) `
 	BackQuote -/- [\(\)\`]
-	KLABEL -/-   ~[\`\(\)\ \t\n\r]
+	DzKLabel -/-   ~[\`\(\)\ \t\n\r]
 
 context-free restrictions
 	"-" -/- [0-9]
