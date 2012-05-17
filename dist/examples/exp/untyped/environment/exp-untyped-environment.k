@@ -20,9 +20,9 @@ $\lambda$-abstractions will evaluate to closures.  We desugar
 substitution-based definition. */
 
   syntax Exp ::= left: "if" Exp "then" Exp "else" Exp [strict(1)]
-               | "lambda" Id "." Exp       [latex "\lambda{#1}.{#2}"]
+               | "lambda" Id "." Exp       [latex("\lambda{#1}.{#2}")]
                | Exp Exp                    [strict]
-               | "mu" Id "." Exp           [latex "\mu{#1}.{#2}"]
+               | "mu" Id "." Exp           [latex("\mu{#1}.{#2}")]
                | "let" Id "=" Exp "in" Exp
                | "letrec" Id Id "=" Exp "in" Exp
 	       > left: Int | Bool | Id
@@ -92,7 +92,8 @@ The rules below are taken over, unchanged, from the semantics of IMP\@. */
        <env>... X |-> L:Nat ...</env>
        <store>... L |-> E ...</store>
   rule I1:Int + I2:Int => I1 +Int I2
-  rule _-_(I1:Int,I2:Int) => _-Int_(I1,I2)
+ // rule _-_(I1:Int,I2:Int) => _-Int_(I1,I2)
+  rule I1:Int - I2:Int => I1 -Int I2
   rule I1:Int * I2:Int => I1 *Int I2
   rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=Int 0
   rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=Int 0
@@ -137,17 +138,18 @@ operation is kept in the computation, so the computation will not grow
 when programs are in a tail recursive form. */
 
   syntax Val ::= "closure-lambda" "(" Map "," Id "," Exp ")"
-                   [latex "\textsf{closure}_\lambda({#1},{#2},{#3})"]
+                   [latex("\textsf{closure}_\lambda({#1},{#2},{#3})")]
   rule <k> lambda X:Id . E:Exp => closure-lambda(Rho:Map,X,E) ...</k>
        <env> Rho </env>
   rule <k> closure-lambda(Rho:Map,X:Id,E:Exp) V:Val => E ~> env(Rho') ...</k>
        <env> Rho':Map =>  Rho[L/X] </env>
-       <store_> . => L|->V <_/store>
+//       <store_> . => L|->V <_/store>
+       <store>... . => L|->V ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
   syntax K ::= "env" "(" Map ")"
-  rule <k> V:Val ~> (env(Rho:Map) => .) ...</k> <env> _ => Rho </env>  [:structural:]
-  rule (env(_) => .) ~> env(_)                                 [:structural:]
+  rule <k> V:Val ~> (env(Rho:Map) => .) ...</k> <env> _ => Rho </env>  [structural]
+  rule (env(_) => .) ~> env(_)                                 [structural]
 
 
 /*@ \subsection{Recursion abstraction}
@@ -170,7 +172,7 @@ Without a $\mu$-closure, the \texttt{letrec}-free \texttt{y} in the
 conditional. */
 
   syntax Exp ::= "closure-mu" "(" Map "," Exp ")"
-                   [latex "\textsf{closure}_\mu({#1},{#2})"]
+                   [latex("\textsf{closure}_\mu({#1},{#2})")]
   rule <k> mu X:Id . E:Exp => closure-mu(Rho:Map[L:Nat/X],E) ...</k>
        <env> Rho </env>
        <store>... . => L |-> closure-mu(Rho[L/X],E) ...</store>
@@ -188,4 +190,4 @@ conditional. */
        <nextLoc> L => L +Int 1 </nextLoc> 
 */
 
-end module
+endmodule
