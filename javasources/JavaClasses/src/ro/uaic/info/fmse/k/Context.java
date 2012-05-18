@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Context extends Sentence {
@@ -66,5 +67,9 @@ public class Context extends Sentence {
 		Element context = doc.createElement(Constants.CONTEXT);
 		context.setTextContent("notimplementedyet");
 		return context;
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

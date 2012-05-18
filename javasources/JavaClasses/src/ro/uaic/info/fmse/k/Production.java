@@ -13,6 +13,7 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -137,10 +138,14 @@ public class Production extends ASTNode {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
+	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.items.size(); i++) {
-			ProductionItem elem = (ProductionItem) visitor.visit(this.items.get(i));
+			ProductionItem elem = (ProductionItem) visitor.modify(this.items.get(i));
 			this.items.set(i, elem);
 		}
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

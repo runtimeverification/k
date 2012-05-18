@@ -9,11 +9,11 @@ import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class TermCons extends Term {
-	String sort;
 	String cons;
 	boolean builtin = false;
 	protected java.util.List<Term> contents;
@@ -111,10 +111,14 @@ public class TermCons extends Term {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
+	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.contents.size(); i++) {
-			Term elem = (Term) visitor.visit(this.contents.get(i));
+			Term elem = (Term) visitor.modify(this.contents.get(i));
 			this.contents.set(i, elem);
 		}
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

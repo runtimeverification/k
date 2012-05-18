@@ -6,10 +6,10 @@ import ro.uaic.info.fmse.k.ProductionItem;
 import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.parsing.ASTNode;
-import ro.uaic.info.fmse.parsing.Visitor;
+import ro.uaic.info.fmse.parsing.Modifier;
 
-public class LatexFilter extends Visitor {
-	public ASTNode visit(ASTNode astNode) {
+public class LatexFilter extends Modifier {
+	public ASTNode modify(ASTNode astNode) {
 		if (astNode instanceof Ambiguity) {
 			Ambiguity amb = (Ambiguity) astNode;
 			String msg = "Warning! Parsing ambiguity at: " + amb.getLocation() + " in file: " + amb.getFilename() + "\n";
@@ -33,7 +33,7 @@ public class LatexFilter extends Visitor {
 			astNode = amb.getContents().get(0);
 		}
 
-		astNode.all(this);
+		astNode.applyToAll(this);
 		return astNode;
 	}
 }

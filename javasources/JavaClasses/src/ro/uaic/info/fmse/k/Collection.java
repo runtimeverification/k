@@ -6,7 +6,7 @@ import java.util.List;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.parsing.Visitor;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public abstract class Collection extends Term {
@@ -57,9 +57,9 @@ public abstract class Collection extends Term {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
+	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.contents.size(); i++) {
-			Term elem = (Term) visitor.visit(this.contents.get(i));
+			Term elem = (Term) visitor.modify(this.contents.get(i));
 			this.contents.set(i, elem);
 		}
 	}

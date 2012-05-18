@@ -3,10 +3,10 @@ package ro.uaic.info.fmse.k;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 
 public class Constant extends Term {
-	String sort;
 	String value;
 
 	public Constant(String location, String filename) {
@@ -53,11 +53,15 @@ public class Constant extends Term {
 		this.value = value;
 	}
 
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
+	public void accept(Modifier visitor) {
+		visitor.modify(this);
 	}
 
 	@Override
-	public void all(Visitor visitor) {
+	public void applyToAll(Modifier visitor) {
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

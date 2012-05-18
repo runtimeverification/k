@@ -4,12 +4,12 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
-public class MapItem extends Term {
-	Term key;
-	Term value;
+public class MapItem extends CollectionItem {
+	private Term key;
 
 	public MapItem(Element element) {
 		super(element);
@@ -22,6 +22,14 @@ public class MapItem extends Term {
 		this.value = (Term) JavaClassesFactory.getTerm(elmBody);
 	}
 
+	public void setKey(Term key) {
+		this.key = key;
+	}
+
+	public Term getKey() {
+		return key;
+	}
+
 	public String toString() {
 		return this.key + " |->" + this.value;
 	}
@@ -32,8 +40,12 @@ public class MapItem extends Term {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
-		key = (Term) visitor.visit(key);
-		value = (Term) visitor.visit(value);
+	public void applyToAll(Modifier visitor) {
+		key = (Term) visitor.modify(key);
+		value = (Term) visitor.modify(value);
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

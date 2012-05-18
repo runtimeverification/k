@@ -4,12 +4,13 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Rewrite extends Term {
-	Term left;
-	Term right;
+	private Term left;
+	private Term right;
 
 	public Rewrite(Element element) {
 		super(element);
@@ -20,6 +21,22 @@ public class Rewrite extends Term {
 		temp = XML.getChildrenElementsByTagName(element, Constants.RIGHT).get(0);
 		temp = XML.getChildrenElements(temp).get(0);
 		right = (Term) JavaClassesFactory.getTerm(temp);
+	}
+
+	public void setLeft(Term left) {
+		this.left = left;
+	}
+
+	public Term getLeft() {
+		return left;
+	}
+
+	public void setRight(Term right) {
+		this.right = right;
+	}
+
+	public Term getRight() {
+		return right;
 	}
 
 	@Override
@@ -36,8 +53,12 @@ public class Rewrite extends Term {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
-		left = (Term) visitor.visit(left);
-		right = (Term) visitor.visit(right);
+	public void applyToAll(Modifier visitor) {
+		left = (Term) visitor.modify(left);
+		right = (Term) visitor.modify(right);
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

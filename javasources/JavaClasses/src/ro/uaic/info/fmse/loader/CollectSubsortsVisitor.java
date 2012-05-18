@@ -3,10 +3,10 @@ package ro.uaic.info.fmse.loader;
 import ro.uaic.info.fmse.k.*;
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.parsing.ASTNode;
-import ro.uaic.info.fmse.parsing.Visitor;
+import ro.uaic.info.fmse.parsing.Modifier;
 
-public class CollectSubsortsVisitor extends Visitor {
-	public ASTNode visit(ASTNode astNode) {
+public class CollectSubsortsVisitor extends Modifier {
+	public ASTNode modify(ASTNode astNode) {
 		if (astNode instanceof Syntax) {
 			Syntax syn = (Syntax) astNode;
 			for (PriorityBlock pb : syn.getPriorityBlocks()) {
@@ -24,7 +24,7 @@ public class CollectSubsortsVisitor extends Visitor {
 			}
 		}
 
-		astNode.all(this);
+		astNode.applyToAll(this);
 		return astNode;
 	}
 }

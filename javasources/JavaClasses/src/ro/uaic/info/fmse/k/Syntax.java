@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.utils.strings.StringUtil;
@@ -132,11 +133,15 @@ public class Syntax extends ModuleItem {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
-		sort = (Sort) visitor.visit(sort);
+	public void applyToAll(Modifier visitor) {
+		sort = (Sort) visitor.modify(sort);
 		for (int i = 0; i < this.priorityBlocks.size(); i++) {
-			PriorityBlock elem = (PriorityBlock) visitor.visit(this.priorityBlocks.get(i));
+			PriorityBlock elem = (PriorityBlock) visitor.modify(this.priorityBlocks.get(i));
 			this.priorityBlocks.set(i, elem);
 		}
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

@@ -127,9 +127,9 @@ public class FrontEnd {
 
 			ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
 
-			new AmbFilter().visit(javaDef);
-			new CollectSubsortsVisitor().visit(javaDef);
-			new EmptyListsVisitor().visit(javaDef);
+			new AmbFilter().modify(javaDef);
+			new CollectSubsortsVisitor().modify(javaDef);
+			new EmptyListsVisitor().modify(javaDef);
 
 			String maudified = javaDef.toMaude();
 

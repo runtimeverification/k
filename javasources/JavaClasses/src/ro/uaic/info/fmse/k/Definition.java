@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.transitions.maude.CellLabelsVisitor;
 import ro.uaic.info.fmse.transitions.maude.KLabelsVisitor;
@@ -111,10 +112,18 @@ public class Definition extends ASTNode {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
+	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.items.size(); i++) {
-			DefinitionItem di = (DefinitionItem) visitor.visit(this.items.get(i));
+			DefinitionItem di = (DefinitionItem) visitor.modify(this.items.get(i));
 			this.items.set(i, di);
 		}
+	}
+	
+	public List<DefinitionItem> getItems() {
+		return items;
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

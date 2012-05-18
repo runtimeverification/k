@@ -12,16 +12,16 @@ import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.parsing.ASTNode;
-import ro.uaic.info.fmse.parsing.Visitor;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.utils.errors.Error;
 
-public class EmptyListsVisitor extends Visitor {
+public class EmptyListsVisitor extends Modifier {
 
 	@Override
-	public ASTNode visit(ASTNode astNode) {
+	public ASTNode modify(ASTNode astNode) {
 
 		// traverse
-		astNode.all(this);
+		astNode.applyToAll(this);
 
 		if (astNode instanceof TermCons) {
 			TermCons tc = (TermCons) astNode;

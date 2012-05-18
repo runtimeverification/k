@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.parsing.Visitor;
+import ro.uaic.info.fmse.parsing.Modifier;
 
 public abstract class Sentence extends ModuleItem {
 	Term body;
@@ -76,9 +76,9 @@ public abstract class Sentence extends ModuleItem {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
-		this.body = (Term) visitor.visit(body);
+	public void applyToAll(Modifier visitor) {
+		this.body = (Term) visitor.modify(body);
 		if (this.condition != null)
-			this.condition = (Term) visitor.visit(condition);
+			this.condition = (Term) visitor.modify(condition);
 	}
 }

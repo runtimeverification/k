@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Rule extends Sentence {
@@ -88,5 +89,9 @@ public class Rule extends Sentence {
 		Element rule = doc.createElement(Constants.RULE);
 		rule.setTextContent("notImplementedYet");
 		return rule;
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

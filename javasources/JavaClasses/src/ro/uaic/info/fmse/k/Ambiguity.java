@@ -3,6 +3,8 @@ package ro.uaic.info.fmse.k;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.parsing.Visitor;
+
 public class Ambiguity extends Collection {
 
 	public Ambiguity(Element element) {
@@ -18,4 +20,9 @@ public class Ambiguity extends Collection {
 	public Element toXml(Document doc) {
 		return null;
 	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+	}
+
 }

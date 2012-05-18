@@ -6,7 +6,7 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.transitions.maude.IMaude;
 import ro.uaic.info.fmse.transitions.xml.IXML;
 
-public abstract class ASTNode implements IMaude, IXML, Visitable {
+public abstract class ASTNode implements IMaude, IXML, Modifiable, Visitable {
 	protected String location;
 	protected String filename;
 
@@ -29,7 +29,7 @@ public abstract class ASTNode implements IMaude, IXML, Visitable {
 		return location;
 	}
 
-	public abstract void all(Visitor visitor);
+	public abstract void applyToAll(Modifier visitor);
 
 	public String getLocation() {
 		return location;
@@ -46,4 +46,5 @@ public abstract class ASTNode implements IMaude, IXML, Visitable {
 	public void setFilename(String filename) {
 		this.filename = filename;
 	}
+	
 }

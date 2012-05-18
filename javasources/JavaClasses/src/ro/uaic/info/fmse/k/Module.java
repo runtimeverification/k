@@ -10,11 +10,12 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Module extends DefinitionItem {
-	String name;
+	private String name;
 	List<ModuleItem> items;
 	String type;
 	boolean predefined = false;
@@ -31,6 +32,18 @@ public class Module extends DefinitionItem {
 		for (Element e : elements) {
 			items.add((ModuleItem) JavaClassesFactory.getTerm(e));
 		}
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public List<ModuleItem> getItems() {
+		return items;
 	}
 
 	@Override
@@ -83,7 +96,7 @@ public class Module extends DefinitionItem {
 
 		return sorts;
 	}
-
+		
 	@Override
 	public Element toXml(Document doc) {
 		Element module = doc.createElement(Constants.MODULE);
@@ -99,10 +112,14 @@ public class Module extends DefinitionItem {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
+	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.items.size(); i++) {
-			ModuleItem elem = (ModuleItem) visitor.visit(this.items.get(i));
+			ModuleItem elem = (ModuleItem) visitor.modify(this.items.get(i));
 			this.items.set(i, elem);
 		}
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.k;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -56,8 +57,12 @@ public class KApp extends Term {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
-		this.label = (Term) visitor.visit(label);
-		this.child = (Term) visitor.visit(child);
+	public void applyToAll(Modifier visitor) {
+		this.label = (Term) visitor.modify(label);
+		this.child = (Term) visitor.modify(child);
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

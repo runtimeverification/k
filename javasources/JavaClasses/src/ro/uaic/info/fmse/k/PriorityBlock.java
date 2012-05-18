@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -73,10 +74,14 @@ public class PriorityBlock extends ASTNode {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
+	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.productions.size(); i++) {
-			Production elem = (Production) visitor.visit(this.productions.get(i));
+			Production elem = (Production) visitor.modify(this.productions.get(i));
 			this.productions.set(i, elem);
 		}
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }

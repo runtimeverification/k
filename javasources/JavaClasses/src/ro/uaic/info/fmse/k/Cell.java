@@ -9,13 +9,13 @@ import org.w3c.dom.NamedNodeMap;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Cell extends Term {
 	String label;
 	Term contents;
-	String sort;
 	String elipses;
 	Map<String, String> attributes;
 
@@ -121,7 +121,11 @@ public class Cell extends Term {
 	}
 
 	@Override
-	public void all(Visitor visitor) {
-		this.contents = (Term) visitor.visit(contents);
+	public void applyToAll(Modifier visitor) {
+		this.contents = (Term) visitor.modify(contents);
+	}
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 }
