@@ -9,7 +9,9 @@ import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -36,6 +38,13 @@ public class TermCons extends Term {
 		cons = listCons;
 		builtin = false;
 		contents = genContents;
+	}
+
+	public TermCons(TermCons node) {
+		super(node);
+		this.cons = node.cons;
+		this.builtin = node.builtin;
+		this.contents = node.contents;
 	}
 
 	public String toString() {
@@ -120,5 +129,9 @@ public class TermCons extends Term {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

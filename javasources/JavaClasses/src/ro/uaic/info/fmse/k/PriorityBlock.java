@@ -9,6 +9,7 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -42,6 +43,12 @@ public class PriorityBlock extends ASTNode {
 			this.productions.add((Production) JavaClassesFactory.getTerm(production));
 
 		assoc = element.getAttribute(Constants.ASSOC_assoc_ATTR);
+	}
+
+	public PriorityBlock(PriorityBlock node) {
+		super(node);
+		this.assoc = node.assoc;
+		this.productions = node.productions;
 	}
 
 	@Override
@@ -83,5 +90,9 @@ public class PriorityBlock extends ASTNode {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

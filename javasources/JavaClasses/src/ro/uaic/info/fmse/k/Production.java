@@ -14,6 +14,7 @@ import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -47,6 +48,12 @@ public class Production extends ASTNode {
 			DefinitionHelper.conses.put(attributes.get(Constants.CONS_cons_ATTR), this);
 		//if (items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST)
 			
+	}
+
+	public Production(Production node) {
+		super(node);
+		this.attributes = node.attributes;
+		this.items = node.items;
 	}
 
 	public String toString() {
@@ -147,5 +154,9 @@ public class Production extends ASTNode {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

@@ -6,6 +6,10 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.parsing.ASTNode;
 
 public abstract class DefinitionItem extends ASTNode {
+	
+	public DefinitionItem(DefinitionItem di) {
+		super(di);
+	}
 
 	public DefinitionItem(Element element) {
 		super(element);

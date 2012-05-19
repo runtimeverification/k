@@ -44,7 +44,7 @@ public interface Visitor {
 	public void visit(Map node);
 	public void visit(Set node);
 	//	</Collections>
-	void visit(CollectionItem node);
+	public void visit(CollectionItem node);
 	//	<CollectionItems>
 	public void visit(BagItem node);
 	public void visit(ListItem node);

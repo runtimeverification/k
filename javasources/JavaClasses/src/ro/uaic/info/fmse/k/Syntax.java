@@ -8,7 +8,9 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.utils.strings.StringUtil;
@@ -46,6 +48,12 @@ public class Syntax extends ModuleItem {
 		List<Element> priorities = XML.getChildrenElementsByTagName(element, Constants.PRIORITY);
 		for (Element priority : priorities)
 			priorityBlocks.add((PriorityBlock) JavaClassesFactory.getTerm(priority));
+	}
+
+	public Syntax(Syntax node) {
+		super(node);
+		this.sort = node.sort;
+		this.priorityBlocks = node.priorityBlocks;
 	}
 
 	@Override
@@ -143,5 +151,9 @@ public class Syntax extends ModuleItem {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

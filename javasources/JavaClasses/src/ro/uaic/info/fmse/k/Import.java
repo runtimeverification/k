@@ -4,7 +4,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
+import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 
 public class Import extends ModuleItem {
@@ -17,7 +19,7 @@ public class Import extends ModuleItem {
 	}
 
 	public Import(String importName) {
-		super(null);
+		super((Element)null);
 		name = importName;
 	}
 
@@ -44,5 +46,9 @@ public class Import extends ModuleItem {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

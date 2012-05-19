@@ -9,6 +9,11 @@ import ro.uaic.info.fmse.parsing.ASTNode;
 public abstract class Term extends ASTNode {
 	String sort;
 
+	public Term(Term t) {
+		super(t);
+		this.sort = t.sort;
+	}
+	
 	public Term(String location, String filename, String sort) {
 		super(location, filename);
 		setSort(sort);

@@ -10,6 +10,7 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.transitions.maude.CellLabelsVisitor;
 import ro.uaic.info.fmse.transitions.maude.KLabelsVisitor;
@@ -18,11 +19,19 @@ import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Definition extends ASTNode {
 
-	java.util.List<DefinitionItem> items;
-	String mainFile;
-	String mainModule;
-	String mainSyntaxModule;
+	private java.util.List<DefinitionItem> items;
+	private String mainFile;
+	private String mainModule;
+	private String mainSyntaxModule;
 
+	public Definition(Definition d) {
+		super(d);
+		this.mainFile = d.mainFile;
+		this.mainModule = d.mainModule;
+		this.mainSyntaxModule = d.mainSyntaxModule;
+		this.items = d.items;
+	}
+	
 	public Definition(Element element) {
 		super(element);
 
@@ -60,7 +69,7 @@ public class Definition extends ASTNode {
 		// klabels
 		String klabels = "";
 		KLabelsVisitor labelsVisitor = new KLabelsVisitor();
-		labelsVisitor.visit(this);
+		accept(labelsVisitor);
 		for (String kl : labelsVisitor.kLabels) {
 			klabels += kl + " ";
 		}
@@ -71,7 +80,7 @@ public class Definition extends ASTNode {
 		// cellLabels visitor
 		String cellLabels = "";
 		CellLabelsVisitor cellLabelsVisitor = new CellLabelsVisitor();
-		cellLabelsVisitor.visit(this);
+		accept(cellLabelsVisitor);
 		for (String cellLabel : cellLabelsVisitor.cellLabels) {
 			cellLabels += cellLabel + " ";
 		}
@@ -119,11 +128,43 @@ public class Definition extends ASTNode {
 		}
 	}
 	
+	public void setItems(java.util.List<DefinitionItem> items) {
+		this.items = items;
+	}
+
 	public List<DefinitionItem> getItems() {
 		return items;
 	}
+	public void setMainFile(String mainFile) {
+		this.mainFile = mainFile;
+	}
+
+	public String getMainFile() {
+		return mainFile;
+	}
+
+	public void setMainModule(String mainModule) {
+		this.mainModule = mainModule;
+	}
+
+	public String getMainModule() {
+		return mainModule;
+	}
+
+	public void setMainSyntaxModule(String mainSyntaxModule) {
+		this.mainSyntaxModule = mainSyntaxModule;
+	}
+
+	public String getMainSyntaxModule() {
+		return mainSyntaxModule;
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

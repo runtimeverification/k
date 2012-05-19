@@ -13,6 +13,10 @@ public abstract class ModuleItem extends ASTNode {
 		super(element);
 	}
 
+	public ModuleItem(ModuleItem s) {
+		super(s);
+	}
+
 	public java.util.List<String> getLabels() {
 		return null;
 	}

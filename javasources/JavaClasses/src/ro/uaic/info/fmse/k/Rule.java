@@ -8,6 +8,8 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -38,6 +40,10 @@ public class Rule extends Sentence {
 						e.getAttribute(Constants.VALUE_value_ATTR));
 			}
 		}
+	}
+
+	public Rule(Rule node) {
+		super(node);
 	}
 
 	public void setLabel(String label) {
@@ -93,5 +99,9 @@ public class Rule extends Sentence {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

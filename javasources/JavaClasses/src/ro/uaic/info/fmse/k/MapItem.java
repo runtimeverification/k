@@ -4,7 +4,9 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -20,6 +22,11 @@ public class MapItem extends CollectionItem {
 		elm = XML.getChildrenElementsByTagName(element, Constants.VALUE).get(0);
 		elmBody = XML.getChildrenElements(elm).get(0);
 		this.value = (Term) JavaClassesFactory.getTerm(elmBody);
+	}
+
+	public MapItem(MapItem node) {
+		super(node);
+		this.key = node.key;
 	}
 
 	public void setKey(Term key) {
@@ -47,5 +54,9 @@ public class MapItem extends CollectionItem {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

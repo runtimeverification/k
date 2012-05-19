@@ -6,9 +6,14 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.transitions.maude.IMaude;
 import ro.uaic.info.fmse.transitions.xml.IXML;
 
-public abstract class ASTNode implements IMaude, IXML, Modifiable, Visitable {
+public abstract class ASTNode implements IMaude, IXML, Modifiable, Visitable, Transformable {
 	protected String location;
 	protected String filename;
+	
+	public ASTNode(ASTNode di) {
+		this.location = di.location;
+		this.filename = di.filename;
+	}
 
 	public ASTNode(String location, String filename) {
 		this.location = location;

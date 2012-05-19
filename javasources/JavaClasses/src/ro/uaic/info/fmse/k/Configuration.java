@@ -7,6 +7,8 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -20,6 +22,10 @@ public class Configuration extends Sentence {
 		super(element);
 		this.body = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
 		this.attributes = new HashMap<String, String>();
+	}
+
+	public Configuration(Configuration node) {
+		super(node);
 	}
 
 	public String toString() {
@@ -43,5 +49,9 @@ public class Configuration extends Sentence {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

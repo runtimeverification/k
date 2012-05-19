@@ -4,7 +4,9 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -21,6 +23,12 @@ public class Rewrite extends Term {
 		temp = XML.getChildrenElementsByTagName(element, Constants.RIGHT).get(0);
 		temp = XML.getChildrenElements(temp).get(0);
 		right = (Term) JavaClassesFactory.getTerm(temp);
+	}
+
+	public Rewrite(Rewrite node) {
+		super(node);
+		this.left = node.left;
+		this.right = node.right;
 	}
 
 	public void setLeft(Term left) {
@@ -60,5 +68,9 @@ public class Rewrite extends Term {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

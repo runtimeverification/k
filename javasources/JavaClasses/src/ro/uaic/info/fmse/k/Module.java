@@ -10,15 +10,17 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Module extends DefinitionItem {
 	private String name;
-	List<ModuleItem> items;
-	String type;
-	boolean predefined = false;
+	private List<ModuleItem> items;
+	private String type;
+	private boolean predefined = false;
 
 	public Module(Element element) {
 		super(element);
@@ -34,6 +36,14 @@ public class Module extends DefinitionItem {
 		}
 	}
 	
+	public Module(Module m) {
+		super(m);
+		this.name = m.name;
+		this.type = m.type;
+		this.predefined = m.predefined;
+		this.items = m.items;
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -42,8 +52,20 @@ public class Module extends DefinitionItem {
 		return name;
 	}
 
+	public void setItems(List<ModuleItem> items) {
+		this.items = items;
+	}
+
 	public List<ModuleItem> getItems() {
 		return items;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getType() {
+		return type;
 	}
 
 	@Override
@@ -121,5 +143,17 @@ public class Module extends DefinitionItem {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
+	}
+
+	public void setPredefined(boolean predefined) {
+		this.predefined = predefined;
+	}
+
+	public boolean isPredefined() {
+		return predefined;
 	}
 }

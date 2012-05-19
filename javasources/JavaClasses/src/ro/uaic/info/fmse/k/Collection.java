@@ -12,6 +12,11 @@ import ro.uaic.info.fmse.utils.xml.XML;
 public abstract class Collection extends Term {
 
 	protected java.util.List<Term> contents;
+	
+	public Collection(Collection c) {
+		super(c);
+		this.contents = c.contents;
+	}
 
 	public Collection(String location, String filename) {
 		super(location, filename);

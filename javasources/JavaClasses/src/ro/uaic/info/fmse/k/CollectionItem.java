@@ -6,6 +6,11 @@ public abstract class CollectionItem extends Term {
 
 	protected Term value;
 
+	public CollectionItem(CollectionItem i) {
+		super(i);
+		this.value = i.value;
+	}
+	
 	public CollectionItem(String location, String filename, String sort) {
 		super(location, filename, sort);
 	}
@@ -18,6 +23,10 @@ public abstract class CollectionItem extends Term {
 		super(element);
 	}
 
+	public void setItem(Term value) {
+		this.value = value;
+	}
+	
 	public Term getItem() {
 		return value;
 	}

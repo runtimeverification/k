@@ -9,7 +9,9 @@ import org.w3c.dom.NamedNodeMap;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.Modifier;
+import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
 
@@ -39,6 +41,14 @@ public class Cell extends Term {
 				attributes.put(its.item(i).getNodeName(), its.item(i).getNodeValue());
 			}
 		}
+	}
+
+	public Cell(Cell node) {
+		super(node);
+		this.label = node.label;
+		this.attributes = node.attributes;
+		this.elipses = node.elipses;
+		this.contents = node.contents;
 	}
 
 	public String toString() {
@@ -127,5 +137,9 @@ public class Cell extends Term {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	@Override
+	public ASTNode accept(Transformer visitor) {
+		return visitor.transform(this);
 	}
 }

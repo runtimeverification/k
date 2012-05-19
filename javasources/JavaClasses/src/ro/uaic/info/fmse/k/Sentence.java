@@ -13,6 +13,14 @@ public abstract class Sentence extends ModuleItem {
 	Term condition = null;
 	Map<String, String> attributes;
 
+	
+	public Sentence(Sentence s) {
+		super(s);
+		this.body = s.body;
+		this.condition = s.condition;
+		this.attributes = s.attributes;
+	}
+	
 	public Sentence(String location, String filename) {
 		super(location, filename);
 	}
