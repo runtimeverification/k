@@ -80,8 +80,7 @@ public class KompileOptionsParser {
 		CommandLineParser parser = new PosixParser();
 		try {
 			CommandLine cl = parser.parse(options, cmd);
-			if (cl.getOptions().length > 0)
-				return cl;
+			return cl;
 		} catch (ParseException e) {
 			k.utils.Error.silentReport(e.getLocalizedMessage());
 			e.printStackTrace();

@@ -18,7 +18,7 @@ public class KastFrontEnd {
 
 	public static void kast(String[] args) {
 		Stopwatch sw = new Stopwatch();
-		KompileOptionsParser op = new KompileOptionsParser();
+		KastOptionsParser op = new KastOptionsParser();
 		CommandLine cmd = op.parse(args);
 		// set verbose
 		if (cmd.hasOption("verbose")) {
