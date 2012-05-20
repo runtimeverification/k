@@ -1,0 +1,9 @@
+module LatexComments-Outliner
+
+imports LatexComments-Outliner.generated
+
+outliner
+  
+  // This file can be used for custom outliner rules.
+  //
+  // See the imported file for a brief introduction and examples.

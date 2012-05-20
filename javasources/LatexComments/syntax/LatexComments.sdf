@@ -1,0 +1,48 @@
+%% Grammar for the LatexComments language
+%% By default, based on an example "entities" syntax
+module LatexComments
+
+exports
+context-free start-symbols
+    Start
+
+context-free syntax
+	Comment* -> Start {cons("Comments")}
+	COMMENT -> Comment {cons("Comment")}
+
+lexical syntax
+    "\"" StringChar* "\"" -> LAYOUT
+    ~[\"\n]               -> StringChar
+    "\\\""                -> StringChar
+    BackSlashChar         -> StringChar
+    "\\"                  -> BackSlashChar
+    "/"                   -> SlashChar
+    
+    ~[\/\"] -> LAYOUT
+    SlashChar -> LAYOUT
+    
+    [\*]                             -> CommentChar
+    "/*" (~[\*] | CommentChar)* "*/" -> COMMENT
+    "//" ~[\n\r]* ([\n\r] | EOF)     -> COMMENT
+
+    -> EOF
+  
+lexical restrictions
+    %% Ensure greedy matching for lexicals
+    CommentChar   -/- [\/]
+    SlashChar     -/- [\/]
+    SlashChar     -/- [\*]
+    
+    %% EOF may not be followed by any char
+    EOF           -/- ~[]
+
+    %% Backslash chars in strings may not be followed by " 
+    BackSlashChar -/- [\"]
+
+context-free restrictions
+    %% Ensure greedy matching for comments
+    LAYOUT? -/-  ~[\/]
+    LAYOUT? -/-  [\/].~[\/\*]
+
+
+

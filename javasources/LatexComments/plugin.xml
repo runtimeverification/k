@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?eclipse version="3.0"?>
+
+<plugin>
+       <extension point="org.eclipse.imp.runtime.languageDescription">
+          <language extensions="ktex" description="LatexComments" language="LatexComments" derivedFrom="DynamicRoot" validator="LatexComments.LatexCommentsValidator" validatorClass="LatexComments.LatexCommentsValidator"></language>
+       </extension>
+       <extension id="LatexComments.parser" name="LatexComments Parser" point="org.eclipse.imp.runtime.parser">
+          <parser class="LatexComments.LatexCommentsParseController" language="LatexComments">
+          </parser>
+       </extension>    
+    </plugin>

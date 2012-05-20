@@ -1,0 +1,16 @@
+module generate
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/LatexComments
+  lib/editor-common.generated
+  lib/compilation-library.generated
+
+rules // Incremental code generation of project using compilation library.
+      
+  index-compile-ast(|file, subfile, project-path):
+    ast -> None()
+rules // Transformation to java strings.
+

@@ -1,0 +1,16 @@
+module LatexComments.main
+
+imports LatexComments-Builders LatexComments-Colorer LatexComments-Completions LatexComments-Folding LatexComments-Outliner LatexComments-References LatexComments-Syntax
+
+language General properties
+                  
+  name          : LatexComments
+  id            : LatexComments
+  extends       : Root
+                  
+  description   : "Spoofax/IMP-generated editor for the LatexComments language"
+  url           : http://strategoxt.org
+                  
+  extensions    : ktex
+  table         : include/LatexComments.tbl
+  start symbols : Start

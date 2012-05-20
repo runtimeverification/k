@@ -1,0 +1,37 @@
+module check
+
+imports
+  libstratego-lib
+  include/LatexComments
+  lib/editor-common.generated
+  lib/index-library.generated
+  lib/analysis-library.generated
+
+rules // Resolving
+  
+  constraint-error:
+    x{[Unresolved(t) | _]} -> (x, $[Unable to resolve.])
+    
+rules // Duplicates
+    
+  is-unique-namespace = id
+  is-unique-namespace = id
+      
+  constraint-error:
+    definition -> (definition, $[Duplicate definition])
+    where
+      key{[ns|_]} := <nam-get-definition-key> definition;
+      <is-unique-namespace> ns;
+      definitions := <index-lookup-all> key;
+      <gt> (<length> definitions, 1)
+    
+rules // Other
+  
+  constraint-warning:
+    Entity(x, _) -> (x, $[Entity names must start with a capital])
+    where
+      not(<string-starts-with-capital> x)
+  
+  constraint-note:
+    Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language
+                                      (this note is defined in trans/check.str) ])

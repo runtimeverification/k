@@ -1,0 +1,24 @@
+module lib/analysis-auto.generated
+
+signature
+  constructors
+    
+
+
+imports
+  include/LatexComments
+
+
+rules
+
+  nam-get-scope-types :
+    Module(_, _) -> [Type()]
+
+  nam-get-scope-types :
+    Entity(_, _) -> [Property()]
+
+  nam-get-def(|n) =
+    fail
+
+  nam-annotate-use(|n) =
+    fail
