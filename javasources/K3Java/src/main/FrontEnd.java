@@ -22,7 +22,7 @@ import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.pp.Preprocessor;
-import ro.uaic.info.fmse.transitions.labelify.KAppFactory;
+import ro.uaic.info.fmse.transitions.labelify.KAppModifier;
 
 public class FrontEnd {
 
@@ -233,9 +233,8 @@ public class FrontEnd {
 			Document doc2 = ro.uaic.info.fmse.utils.xml.XML.getDocument(program);
 			out = JavaClassesFactory.getTerm((Element) doc2.getDocumentElement().getFirstChild().getNextSibling());
 
-			ASTNode kapp = KAppFactory.getTerm(out);
-			String kast = kapp.toMaude();
-
+			out = out.accept(new KAppModifier());
+			String kast = out.toMaude();
 			System.out.println(kast);
 
 			String ast;
