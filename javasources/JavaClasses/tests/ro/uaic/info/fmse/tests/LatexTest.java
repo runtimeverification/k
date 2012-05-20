@@ -20,6 +20,8 @@ public class LatexTest {
 		assertTrue(doc != null);
 		ASTNode out = JavaClassesFactory.getTerm(doc.getDocumentElement());
 
-		out = new LatexFilter().modify(out);
+		LatexFilter lf = new LatexFilter();
+		out.accept(lf);
+		System.out.println(lf.latexString);
 	}
 }

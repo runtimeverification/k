@@ -5,8 +5,7 @@ import java.util.*;
 import k.utils.Tag;
 import org.w3c.dom.*;
 
-public class Module extends Term implements java.io.Serializable, Cloneable {
-	private static final long serialVersionUID = 1L;
+public class Module extends Term implements Cloneable {
 	// K statements
 	private List<Sentence> sentences;
 	private String moduleName;

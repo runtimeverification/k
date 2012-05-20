@@ -2,7 +2,6 @@ package k3.basic;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +24,7 @@ import k.utils.XmlLoader;
 import k2parser.KParser;
 import k3.basic.Item.ItemType;
 import k3.basic.Sentence.SentenceType;
+import k3latex.K3LatexParser;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -88,6 +88,12 @@ public class Definition implements Cloneable {
 					XmlLoader.addFilename(doc.getFirstChild(), file.getAbsolutePath());
 					XmlLoader.reportErrors(doc);
 
+					// parse the string again to extract the comments
+					String parsedLatex = K3LatexParser.ParseKString(content);
+					Document docLatex = XmlLoader.getXMLDoc(parsedLatex);
+					XmlLoader.addFilename(docLatex.getFirstChild(), file.getAbsolutePath());
+					XmlLoader.reportErrors(docLatex);
+
 					if (firstTime) {
 						// add automatically the autoinclude.k file
 						if (GlobalSettings.verbose)
@@ -106,6 +112,8 @@ public class Definition implements Cloneable {
 					}
 
 					NodeList xmlModules = doc.getDocumentElement().getElementsByTagName(Tag.module);
+					NodeList xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.module);
+					// TODO: insert latex comments in the def.xml
 
 					for (int i = 0; i < xmlModules.getLength(); i++) {
 						Module km = new Module(xmlModules.item(i), cannonicalPath);
@@ -179,16 +187,15 @@ public class Definition implements Cloneable {
 							// if the user declares a klabel in the attributes list, declare it as a KLabel constant
 							if (prd.getAttributes().containsKey("klabel")) {
 								// TODO: don't add this for now, it creates ambiguities
-								//constants.put(prd.getAttributes().get("klabel"), "KLabel");
-								//terminalList.add(new Terminal(prd.getAttributes().get("klabel")));
+								// constants.put(prd.getAttributes().get("klabel"), "KLabel");
+								// terminalList.add(new Terminal(prd.getAttributes().get("klabel")));
 							}
 
 							if (prd.getAttributes().containsKey("bracket")) {
 								// do nothing for programs
 							} else if (prd.isSubsort()) {
 								outsides.add(prd);
-							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1
-									&& (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
+							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
 								// constants.add(prd);
 								String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
 								String sort = prd.getProdSort().getSortName();

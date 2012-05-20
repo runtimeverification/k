@@ -6,7 +6,7 @@
 	Don't forget to set up the propper execution rights for those programs.
 	-->
 
-	<target name="allstr" depends="k2syntax, k3" />
+	<target name="allstr" depends="k2syntax, k3latex, k3" />
 
 	<target name="k2syntax">
 		<java failonerror="true" dir="../K3Syntax/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
@@ -28,6 +28,26 @@
 		<delete dir="../K3Syntax/trans/K2Str" />
 	</target>
 
+	<target name="k3latex">
+		<java failonerror="true" dir="../LatexComments/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
+			<arg line="-i xmlify.str -o K3Latex -la stratego-sglr --lib -I .. -p k3latex.lib --clean" />
+		</java>
+		<delete>
+			<fileset dir="src/k3latex/lib">
+				<include name="*.java" />
+				<include name="LatexComments.tbl" />
+			</fileset>
+		</delete>
+		<copy todir="src/k3latex/lib/">
+			<fileset dir="../LatexComments/trans/K3Latex">
+				<include name="*" />
+			</fileset>
+		</copy>
+		<delete file="../LatexComments/trans/K3Latex.rtree" />
+		<delete file="../LatexComments/trans/K3Latex.dep" />
+		<delete dir="../LatexComments/trans/K3Latex" />
+	</target>
+	
 	<target name="k3">
 		<java failonerror="true" dir="../K3Disamb/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i starter.str -o K3Str -la stratego-sglr --lib -I .. -p k3parser.lib --clean" />
