@@ -18,6 +18,4 @@ public class KExceptionManager {
 			if (levels.contains(e.level))
 				System.out.println(e);
 	}
-	
-	
 }

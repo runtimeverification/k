@@ -1,0 +1,986 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{k}[2012/02/14 Package for typesetting K Framework definitions http://k-framework.org]
+
+\RequirePackage{kvoptions}
+\RequirePackage{ifthen}
+% \RequirePackage{etoolbox}
+% \RequirePackage{etextools} % for xifstrequal
+% \RequirePackage{stringstrings} % for \stringlength
+
+\SetupKeyvalOptions{ 
+ family=k, 
+ prefix=k@ 
+} 
+
+
+\DeclareStringOption[bubble]{style}  % the default style for cells & stuff
+\DeclareBoolOption{tight}  % whether (bubble) cells should be tight or not
+\DeclareBoolOption{poster}  % to generate a poster from the definition
+\ProcessKeyvalOptions*
+
+% Usage Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Next command uses the default style (bubble) with tight edges for cells. 
+% \usepackage[tight]{k}
+%
+% Next command changes the default style to mathematic cells.
+% \usepackage[style=math]{k}
+%
+% Next command enables poster mode with mathematic cells
+% \usepackage[style=math,poster]{k}  
+%
+%
+% Use next command to temporary change the default style inside a definition
+% \begin{k}[math]
+%  . . .
+% \end{k}
+% If the default was set to math, use bubble instead of math above.
+
+% Some exported commands (useful for manually writing K):
+% \kall, \kprefix, \ksuffix, and \kmiddle are used to specify cells which are 
+% either complete, open to the right, open to the left, and open both ways,
+% respectively .
+
+\ifthenelse{\equal{\k@style}{bubble}}{
+\newcommand{\kall}[3][white]{\ball{#1}{#2}{#3}}
+\newcommand{\kallLarge}[3][white]{\ballLarge{#1}{#2}{#3}}
+\newcommand{\kprefix}[3][white]{\bprefix{#1}{#2}{#3}}
+\newcommand{\ksuffix}[3][white]{\bsuffix{#1}{#2}{#3}}
+\newcommand{\kmiddle}[3][white]{\bmiddle{#1}{#2}{#3}}
+\newcommand{\kdot}{\bdot}
+\newcommand{\AnyVar}[1][]{\bAnyVar{#1}}
+}{% else, assume default style is math
+\newcommand{\kall}[3][white]{\mall{#1}{#2}{#3}}
+\newcommand{\kallLarge}[3][white]{\mallLarge{#1}{#2}{#3}}
+\newcommand{\kprefix}[3][white]{\mprefix{#1}{#2}{#3}}
+\newcommand{\ksuffix}[3][white]{\msuffix{#1}{#2}{#3}}
+\newcommand{\kmiddle}[3][white]{\mmiddle{#1}{#2}{#3}}
+\newcommand{\kdot}{\mdot}
+\newcommand{\AnyVar}[1][]{\mAnyVar{#1}}
+}
+
+
+
+\RequirePackage[pdftex]{hyperref}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{textcomp}
+
+
+\RequirePackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
+
+\ifk@poster
+%%% PDF functionality.
+\RequirePackage{pdfcomment}
+%%% Layout and design.
+
+% microtype is nice, but seems to create strange problems
+% \RequirePackage{microtype}
+
+\RequirePackage{times}
+\RequirePackage[scaled]{berasans}
+\RequirePackage[scaled]{beramono}
+
+\RequirePackage[small,compact]{titlesec}
+%\titleformat{command}[shape]{format}{label}{sep}{before}[after]
+% shape ::= hang | block | display | runin | leftmargin | rightmargin 
+%         | drop | wrap | frame
+% sep is mandatory to be a length.
+% more on http://www.ctex.org/documents/packages/layout/titlesec.pdf
+\titleformat{\subsubsection}[runin]{\bfseries}{}{0pt}{}[.\hspace*{1ex}]
+
+% PDF link colors
+% The color values and names come from the Tango Icon Scheme
+\definecolor{SkyBlue2}{rgb}{.204, .396, .643}
+\definecolor{ScarletRed3}{rgb}{.643, 0, 0}
+\definecolor{Chocolate3}{rgb}{.561, .349, .008}
+
+\hypersetup{%
+  % Color the text of links instead of framing them.
+  colorlinks=true,
+  linkcolor=SkyBlue2,
+  urlcolor=ScarletRed3,
+  filecolor=Chocolate3
+}
+\else
+\newcommand{\organization}{\date}
+\fi
+
+%%% Additional symbols and notation.
+
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{stmaryrd}
+
+%%% Graphics.
+
+\RequirePackage{tikz}
+\usetikzlibrary{shapes.misc}
+\usetikzlibrary{calc}
+
+%%% Auxiliary packages.
+
+\RequirePackage{calc}
+\RequirePackage{ifthen}
+\RequirePackage{ifdraft}
+\RequirePackage{ucs}
+\RequirePackage{xspace}
+
+\makeatletter
+
+% Page Setup %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% To output all definitions, rules, and comments onto a single, long page, we
+% take the following steps:
+%
+% - Wrap the whole document in a 'kdefinition' environment and tell the
+%   'preview' package to typeset it onto a single page.  This gives us a single
+%   page of output.  Setting a suitable border and the 'tightpage' option
+%   adjusts the page height to match the content.
+%
+% - Finding the correct page width requires two runs of TeX[1].  In the first
+%   run, we mark the width of every typeset block (rules, comments, etc.).
+%   This information is is written into an auxiliary file of name
+%   '\jobname.mrk'.  At the beginning of the second run, we read this file
+%   (if it exists), determine the maximum width, and use the maximum as
+%   the text width.  If no width information is available, we default to
+%   a text width of 16 inches.
+%
+% ---
+% [1] (At least) two runs are necessary anyway: cross-referencing and indexing
+%     require them, and so do PDF annotations.
+\ifk@poster
+\pagestyle{empty}
+
+%%% PDF default view
+
+% Most PDF viewers seem to default to the "fit whole page" view mode.  A single,
+% long page badly fits this behavior, so we request "fit page width" instead.
+\hypersetup{pdfstartview=FitH}
+
+%%% Use the 'preview' package to typeset everything onto a single page.
+
+\usepackage[active,tightpage,pdftex]{preview}
+\setlength\PreviewBorder{5pt}
+\fi
+
+% Everything within an environment that is marked as \PreviewEnvironment
+% is put onto its own page.  Thus, by defining a global environment that
+% wraps the whole document, we get all output on a single page.
+%
+% The 'kompile.pl' script takes care of the wrapping.
+\newenvironment{kdefinition}{}{}
+
+\ifk@poster
+\PreviewEnvironment{kdefinition}
+
+%%% Determine the text width from markers put at the lower right end of
+%   each content block.
+
+% The system layer of the 'PGF' package hides the gory details.
+% (See "Position Tracking Commands" in Part XIII of the PGF manual.)
+\usepackage{pgfsys}
+
+% Try to load the marker positions from the previous run.
+\newcounter{k@prevMarkerCount}%
+\InputIfFileExists{\jobname.mrk}{}{}%
+
+% Set the text width to the maximum of the X coordinates.
+\newlength{\k@maxX}%
+\newlength{\k@currentMarkerX}%
+
+\whiledo{\value{k@prevMarkerCount} > 0}{%
+  \addtocounter{k@prevMarkerCount}{-1}%
+  \pgfsys@getposition{k@marker@\the\c@k@prevMarkerCount}{\k@currentMarker}%
+  \pgfextractx{\k@currentMarkerX}{\k@currentMarker}%
+    \ifthenelse{\lengthtest{\k@currentMarkerX > \k@maxX}}{%
+      \setlength{\k@maxX}{\k@currentMarkerX}%
+    }{}%
+}%
+\ifthenelse{\lengthtest{\k@maxX > 0pt}}{%
+  \setlength{\textwidth}{\k@maxX}%
+}{%
+  \setlength{\textwidth}{16in}%
+}%
+
+
+% To mark the position, we use the PGF system layer macro \pgfsys@markposition.
+% However, this macro usually writes to the main auxiliary file '\jobname.aux'.
+% This will not work in our setting because the marker positions would then
+% only be available just before the document starts, which is too late to set
+% the text width.  Thus we use our own auxiliary file.
+
+% Open the marker file for writing.
+\newwrite\k@markerOut
+\immediate\openout\k@markerOut=\jobname.mrk
+
+\newcounter{k@marker}
+% The marker macro generates the marker names and briefly swaps the output
+% stream that \pgfsys@markposition uses before calling it.
+\newcommand{\k@markPosition}{%
+  \let\k@tmpAuxOut=\pgfutil@auxout%
+  \let\pgfutil@auxout=\k@markerOut%
+  \pgfsys@markposition{k@marker@\the\c@k@marker}%
+  \let\pgfutil@auxout=\k@tmpAuxOut%
+  \addtocounter{k@marker}{1}%
+}
+
+% Also store the number of set markers for the next run (for easier looping).
+\AtEndDocument{%
+  \immediate\write\k@markerOut{%
+    \string\setcounter{k@prevMarkerCount}{\the\c@k@marker}%
+  }{}%
+}
+
+% Title %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\@maketitle}{
+ \null
+ \vspace*{3ex}
+ {\Huge \@title}
+ \par\vspace*{2ex}
+ {\Large \@author}
+ \par\vspace*{1ex}
+ {\large \@organization}
+ \par\vspace*{3ex}
+}
+
+% Also add respective PDF meta information
+\hypersetup{
+  pdftitle={\@title},
+  pdfauthor={\@author}
+}
+
+\let\k@oldTitle=\title
+\renewcommand{\title}[1]{%
+  \k@oldTitle{#1}%
+  \hypersetup{pdftitle={#1}}%
+}
+\let\k@oldAuthor=\author
+\renewcommand{\author}[1]{%
+  \k@oldAuthor{#1}%
+  \hypersetup{pdfauthor={#1}}%
+}
+\let\@organization=\@empty
+\newcommand{\organization}[1]{%
+  \def\@organization{#1}%
+}
+
+% Source Comments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Turn off section numbering: all headings will look like they were starred.
+% However, they will still appear in the table of contents (and the bookmarks
+% that hyperref generates for the PDF).
+%
+% Note that hyperref seems to rely on the "secnumdepth" counter for bookmark
+% generation.  Thus, the "traditional" approach \setcounter{secnumdepth}{0}
+% leads to (rather) arbitrary bookmark nestings.
+%
+% Simply remove the labeling number from all titles.
+\titlelabel{}
+% Create TOC entries down to subsections.
+\setcounter{tocdepth}{4}
+% Show the TOC by default.
+\hypersetup{%
+  bookmarksopen=true,
+  bookmarksopenlevel=2
+}
+\else
+\newcommand{\k@markPosition}{}
+\fi
+
+\usepackage{fancyvrb}
+\usepackage{fancybox}
+
+\tikzset{comment/.style={
+    rectangle,
+    rounded corners,
+    draw,
+    fill=black!10,
+    inner sep=.75em
+  }
+}
+
+
+% Macros for use in the comments.
+\newcommand{\K}{\mbox{$\mathbb{K}$}\xspace}
+\newcommand{\KLabel}{\textit{KLabel}\xspace}
+\newcommand{\KResult}{\textit{KResult}\xspace}
+
+
+% Special Glyphs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\lp}{(}
+\newcommand{\rp}{)}
+\newcommand{\myquote}[1]{
+  \k@withTooltip{\text{\rmfamily ``\ttfamily #1\rmfamily ''}}{Constant Sort: String}%
+}
+\newcommand{\mysinglequote}[1]{\text{\rmfamily "}}
+\newcommand{\mybracket}[1]{(#1)}
+\newcommand{\sqbracket}[1]{[#1]}
+\newcommand{\crlbracket}[1]{\{#1\}}
+
+\newcommand{\nothing}{}
+\newcommand{\somespace}{\mathbin{}}
+\newcommand{\subscript}[1]{\ensuremath{\nothing_{#1}}}
+
+\newcommand{\kLarge}[1]{\left(\begin{array}{@{}c@{}}#1\end{array}\right)}
+\newcommand{\kBR}{\\}
+
+% Builtins %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\builtinEqBool}[2]{{#1}==_{\scriptstyle\it Bool}{#2}}
+\newcommand{\builtinNeqBool}[2]{{#1}!=_{\scriptstyle\it Bool}{#2}}
+
+\newcommand{\builtinAnd}[2]{{#1}\wedge_{\scriptstyle\it Bool}{#2}}
+\newcommand{\builtinOr}[2]{{#1}\vee_{\scriptstyle\it Bool}{#2}}
+\newcommand{\builtinXor}[2]{{#1}\oplus_{\scriptstyle\it Bool}{#2}}
+\newcommand{\builtinNot}[1]{\neg_{\scriptstyle\it Bool}{#1}}
+\newcommand{\builtinImplies}[2]{{#1}\Rightarrow_{\scriptstyle\it Bool}{#2}}
+
+\newcommand{\builtinIntPlus}[2]{{#1}\mathrel{+_{\scriptstyle\it Int}}{#2}}
+\newcommand{\builtinIntMinus}[2]{{#1}\mathrel{-_{\scriptstyle\it Int}}{#2}}
+\newcommand{\builtinIntTimes}[2]{{#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}}
+\newcommand{\builtinIntDiv}[2]{{#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}}
+\newcommand{\builtinIntMod}[2]{{#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}}
+
+
+% K Blocks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newlength{\kblock@indent}
+\newenvironment{kblock}[1][\k@style]{%
+\ifk@tight%
+\small%
+\fi%
+\newcommand{\kblock@arg}{#1}%
+\setlength{\kblock@indent}{\parindent}%
+\ifthenelse{\equal{#1}{bubble}}{%
+\renewcommand{\kall}{\ball}%
+\renewcommand{\kallLarge}{\ballLarge}%
+\renewcommand{\kprefix}{\bprefix}%
+\renewcommand{\ksuffix}{\bsuffix}%
+\renewcommand{\kmiddle}{\bmiddle}%
+\renewcommand{\kdot}{\bdot}%
+\renewcommand{\AnyVar}{\bAnyVar}%
+}{\ifthenelse{\equal{#1}{math}}{%
+\renewcommand{\kall}{\mall}%
+\renewcommand{\kallLarge}{\mallLarge}%
+\renewcommand{\kprefix}{\mprefix}%
+\renewcommand{\ksuffix}{\msuffix}%
+\renewcommand{\kmiddle}{\mmiddle}%
+\renewcommand{\kdot}{\mdot}%
+\renewcommand{\AnyVar}{\mAnyVar}%
+}%
+{\ifthenelse{\equal{#1}{text}}{%
+\ifk@poster%
+  \begin{Sbox}%
+    \begin{minipage}{50em}%
+      \addtolength{\parskip}{.5\baselineskip}%
+\else%
+\fi%
+}{%
+}}}%
+}{%
+\ifthenelse{\equal{\kblock@arg}{text}}{%
+\ifk@poster%
+    \ \end{minipage}%
+  \end{Sbox}%
+  \begin{tikzpicture}
+    \node[comment]{\TheSbox};
+  \end{tikzpicture}%
+  \k@markPosition%
+\fi%
+}{%
+}%
+\setlength{\parindent}{\kblock@indent}%
+\par\ \par%
+}
+
+% Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{module}[1]{%
+  \par\noindent%
+  \text{\scshape module #1}%
+  \setlength{\parindent}{1em}%
+  \par\ \par%
+}{%
+  \par\noindent\text{\scshape end module}%
+  \par\ \par%
+}
+
+\newenvironment{commentModule}{%
+  \setlength{\parindent}{1em}%
+  \par\ \par%
+}{%
+  \par\ \par%
+}
+
+\newcommand{\moduleName}[1]{#1}
+\newcommand{\including}[1]{\par\text{\scshape imports}\ #1\par\ \par}
+\newcommand{\modulePlus}{$+$}
+
+
+% Syntax %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sorts and kinds.
+\newcommand{\sorts}[1]{}
+\newcommand{\sort}[1]{\text{\itshape #1}}
+\newcommand{\kind}[1]{\text{\itshape #1}}
+
+% Syntax rules.
+\newlength{\syntaxlength}  % The amount of indention for continued rules.
+
+\newcommand{\syntax}[3]{\rulebox{%
+\mbox{\scshape syntax}\hspace{1em}$#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
+}\k@markPosition%
+}
+\newcommand{\syntaxCont}[3]{\par\indent\rulebox{%
+  $\setlength{\syntaxlength}{\widthof{$\mathrel{::=}$}}%
+  \setlength{\syntaxlength}{.5\syntaxlength}%
+  \addtolength{\syntaxlength}{\widthof{\mbox{\scshape syntax}\hspace{1em}$#1$}}%
+  \hspace{\syntaxlength}%
+  \;\;\!\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
+  }\k@markPosition%
+}
+\newcommand{\syntaxContL}[3]{{\small%\par\indent%
+$\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
+}}
+
+
+\newenvironment{syntaxBlock}{\par\indent\ }{\par\ \par}
+
+
+% Non-terminals.
+\newcommand{\nonTerminal}[1]{\text{\itshape #1}\/}
+
+% Terminals.
+\newcommand{\terminal}[1]{\ensuremath\mathrel{\text{\ttfamily #1}}}
+\newcommand{\terminalNoSpace}[1]{\ensuremath\mathord{\text{\ttfamily #1}}}
+
+% Tags.
+\newcommand{\kassoc}{assoc}
+\newcommand{\kcomm}{comm}
+\newcommand{\khybrid}{{\color{blue}hybrid}}
+%\newcommand{\klabel}[1]{}
+% \newcommand{\ignoreThisLabel}{} % this is used to figure out whether we should ignore an attribute (like the name)
+%\newcommand{\kattribute}[1]{\xifstrequal{#1}{\ignoreThisLabel}{}{{\color{blue}#1}}}
+\newcommand{\kattribute}[1]{{\color{blue}#1}}
+\newcommand{\kid}[1]{id: {#1}}
+\newcommand{\kditto}{ditto}
+\newcommand{\karity}[1]{{\color{blue}arity(#1)}}
+\newcommand{\kstrict}[2]{{%
+  \color{blue}strict%
+  \ifx&#1&%
+  \else%
+    (#1)%
+  \fi%
+  \ifx&#2&%
+  \else%
+    in (#2)%
+  \fi%
+}}
+\newcommand{\kseqstrict}[2]{{%
+  \color{blue}seqstrict%
+  \ifx&#1&%
+  \else%
+    (#1)%
+  \fi%
+  \ifx&#2&%
+  \else%
+    in (#2)%
+  \fi%
+}}
+
+
+% Configuration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\kconfig}[1]{\par%
+  {\sc configuration:}\par%
+    \ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}\k@markPosition%
+  \par\ \par%
+}
+
+\newcommand{\kconfigb}[1]{\begin{kblock}\kconfig{#1}\end{kblock}}
+
+% Cells %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifk@poster
+%%% Tooltips.
+
+% Following a how-to guide for Adobe InDesign, we create tooltips for items by
+% overlaying them with a transparent button.
+%
+% For documentation on the JavaScript objects, see the JavaScript for Acrobat
+% API Reference at http://www.adobe.com/devnet/acrobat/javascript.html
+%
+% For documentation on the PDF code, see the PDF reference manual at
+% http://www.adobe.com/devnet/pdf/pdf_reference.html
+
+% These definitions will hold the payload.  They have to be global because
+% hyperref definitions vanish when the document starts(?).
+\def\k@tooltipText{}%
+\edef\k@tooltipString{}%
+
+% The "user name" of fields is the user visible name of this entity.  For
+% (non-readonly) buttons, it shows up as tooltip when the mouse hovers over it.
+% Unfortunately, the hyperref package does not allow specifying the user name;
+% thus, by means of a small hack, we push in some raw PDF code when hyperref
+% creates a PushButton object.  The raw PDF code is appended to the "flags"
+% field \Fld@flags.  See the button creation macro "\PDFForm@Push" in the
+% hpdftex.def driver.
+%
+% For the definition of the user name property of fields, see section 12.7.3.1
+% in the PDF specification.
+\let\k@hyPushButtonFlags=\HyField@FlagsPushButton
+\gdef\HyField@FlagsPushButton{%
+  % Execute the original macro
+  \k@hyPushButtonFlags%
+  % Save the current flags and add the user visible name via /TU ("text user"?).
+  \let\k@currentFlags=\Fld@flags%
+  \pdfstringdef\k@tooltipString{\k@tooltipText}%
+  \edef\Fld@flags{/TU (\k@tooltipString)\k@currentFlags}%
+  \edef\Fld@bordercolor{\space}%
+}
+
+\newcounter{k@tooltipCounter}
+
+\newcommand{\k@withTooltip}[2]{%
+  % #1 is the target / box, #2 is the tooltip
+  \def\k@tooltipText{#2}
+  \hbox{\PushButton[name=tooltip\the\c@k@tooltipCounter,
+              borderwidth=0,
+              % The focus handler executes before the click happens, so the
+              % button is set to "not interact" just before it would change
+              % its visual appearance.
+              onfocus={ var t = this.getField("tooltip\the\c@k@tooltipCounter");
+                       t.highlight = highlight.n; }
+             ]{#1}}%
+  \addtocounter{k@tooltipCounter}{1}%
+}
+
+% Buttons are form elements and require a surrounding Form environment.
+% \AtBeginDocument{\begin{Form}}
+% \AtEndDocument{\end{Form}}
+\else
+\newcommand{\k@withTooltip}[2]{#1}
+\fi
+
+%%% Cell contents.
+
+\newcommand{\reduceTop}[2]{{#1}\Rightarrow{#2}}
+\newcommand{\reduceTopS}[2]{{#1}\rightharpoonup{#2}}
+\newcommand{\reduce}[2]{\hbox{%
+  \begin{tikzpicture}[baseline=(top.base),
+                      inner xsep=0pt,
+                      inner ysep=.3333ex,
+                      minimum width=2em]
+    \path node (top) {$#1$\strut}
+          (top.south)
+          node (bottom) [anchor=north, inner ysep=.5ex] {$#2$\strut};
+    %%% Draw the horizontal line:
+    % Line with chevron.
+    %\path[draw,thin,solid] let \p1 = (current bounding box.west),
+    %                           \p2 = (current bounding box.east),
+    %                           \p3 = (top.south)
+    %                       in (top.south) ++(0,-1.5pt) -- ++(-2pt,1.5pt) -- (\x1,\y3)
+    %                          (top.south) ++(0,-1.5pt) -- ++(2pt,1.5pt)  -- (\x2,\y3);
+    %%% Other options:
+    % Solid line.
+    \path[draw,thin,solid] let \p1 = (current bounding box.west),
+                               \p2 = (current bounding box.east),
+                               \p3 = (top.south)
+                           in (\x1,\y3) -- (\x2,\y3);
+    % Solid arrow (augmenting the solid line).
+    \path[fill] (top.south) ++(2pt,0) -- ++(-4pt,0) -- ++(2pt,-1.5pt) -- cycle;
+  \end{tikzpicture}%
+}}
+\newcommand{\reduceS}[2]{\hbox{%
+  \begin{tikzpicture}[baseline=(top.base),
+                      inner xsep=0pt,
+                      inner ysep=.3333ex,
+                      minimum width=2em]
+    \path node (top) {$#1$\strut}
+          (top.south)
+          node (bottom) [anchor=north] {$#2$\strut};
+    \path[draw,thin,densely dashed] let \p1 = (current bounding box.west),
+                                        \p2 = (current bounding box.east),
+                                        \p3 = (top.south)
+                                    in (\x1,\y3) -- (\x2,\y3);
+  \end{tikzpicture}%
+}}
+\newcommand{\kra}{\curvearrowright}
+\newcommand{\kvalue}[1]{{\color{red}#1}}
+\newcommand{\constant}[2][none]{%
+  \k@withTooltip{\text{\sffamily #2}}{Constant Sort: #1}%
+}
+\newcommand{\variable}[2][none]{%
+\k@withTooltip{\text{\ensuremath{\it #2}}\/}{Variable Sort: #1}%
+}
+
+\newcommand{\displayGreek}[1]{%
+  \text{\Large\ensuremath{\displaystyle #1}}%
+}
+
+\newcommand{\prefixOp}{\terminalNoSpace}
+\newcommand{\dotCt}[1]{%
+  \k@withTooltip{\raise.3ex\hbox{\ensuremath{\kdot}}}{Constant Sort: #1}%
+}
+
+%%% Mathematical notation.
+
+\newcommand{\mall}[3]{{\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\langle}{#3}{\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\rangle_{\sf #2}}}
+\newcommand{\mallLarge}[3]{{\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\left\langle{\color{black}\begin{array}{c}#3\end{array}}\right\rangle_{{\sf #2}}}}
+\newcommand{\ellipses}{\mathrel{\cdot\!\!\cdot\!\!\cdot}}
+\newcommand{\mprefix}[3]{\mall{#1}{#2}{{#3}\ {\color{#1!50!black}\ellipses}}}
+\newcommand{\msuffix}[3]{\mall{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}}}
+\newcommand{\mmiddle}[3]{\mall{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}\ {\color{#1!50!black}\ellipses}}}
+\newcommand{\mdot}{\cdot}
+\newcommand{\mAnyVar}[1]{\_}
+
+%%% Bubble notation.
+
+\newcommand{\ball}[3]{\kcell{#1}{#2}{$#3$}{convex}{convex}}
+\newcommand{\ballLarge}[3]{%
+  \kcell{#1}%
+        {#2}%
+        {\begin{array}[t]{@{}c@{}}%
+            #3%
+          \end{array}}%
+        {convex}%
+        {convex}%
+}
+\newcommand{\bprefix}[3]{\kcell{#1}{#2}{$#3$}{convex}{none}}
+\newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
+\newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
+\newcommand{\bdot}{{\scriptscriptstyle\bullet}}
+\newcommand{\bAnyVar}[1]{%
+  \k@withTooltip{\mbox{---}}{Variable Sort: #1}%
+}
+
+\tikzset{
+  cell/.style={
+    line width=1pt,
+    draw=#1!50!black,
+    shade,
+    shading=axis,
+    top color=#1!20,
+    bottom color=#1!20!white!90!black,
+  },
+  body/.style={
+    rounded rectangle,
+    rounded rectangle arc length=180,
+    minimum width=3em,
+    minimum height=4ex,
+    inner ysep=.3333em,
+    inner xsep=.3333em
+  },
+  label/.style={
+    rectangle,
+    inner xsep=.5ex,
+    inner ysep=.5ex,
+    text depth=.15em,
+%    font=\sffamily\footnotesize
+  },
+}
+
+
+%%% The main bubble drawing method \kcell.
+
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\newlength{\k@cellContentWidth}
+\newlength{\k@cellContentHeight}
+\newlength{\k@labelXShift}
+\newlength{\k@ruptureStepSize}
+
+% Cell drawing happens roughly as follows:
+% 1) The cell content is placed in the image.
+% 2) TikZ fits a 'rounded rectangle' node around the content.  This node, which
+%    we call 'body' here, remains invisible; its anchors serve as reference points.
+% 3) The label is placed on the top left of the cell body.
+% 4) The cell outline is drawn and filled on the background layer, that is,
+%    behind the already placed cell content.
+% 5) Some vertical space is added around the whole drawing.
+\newcommand{\kcell}[5]{\hbox{%
+  \begingroup
+  \def\cellColor{#1}%
+  \def\cellLabel{\textsf{\footnotesize\strut #2}}% The strut ensures even label height.
+  \def\cellContent{#3}%
+  % Parameters #4 and #5 determine whether the west and east arc are curved
+  % or straight ("whole" or "ruptured").
+
+  \begin{tikzpicture}[baseline=(cell content.base)]
+    \begin{scope}[inner sep=0pt,outer sep=0pt,anchor=base west]
+      % Beside the cell content, also draw an empty node a bit wider than
+      % the cell label.  That way, the cell body will always be wide enough
+      % for the label.
+      \path node (cell content) {\cellContent}
+            node                {\phantom{\cellLabel}\hbox to 2em {}};
+    \end{scope}
+    % Determine the size of the cell content.
+    \def\k@cellContentBBox{\pgfpointdiff{\pgfpointanchor{current bounding box}{south west}}
+                                        {\pgfpointanchor{current bounding box}{north east}}}
+    \pgfextractx{\k@cellContentWidth}{\k@cellContentBBox}%
+    \pgfextracty{\k@cellContentHeight}{\k@cellContentBBox}%
+    
+    \begin{pgfonlayer}{background}
+      \ifdraft{%
+        \path (cell content.center)
+              node (cell body) [body,
+                                rectangle,
+                                anchor=center,
+                                text width=\k@cellContentWidth,
+                                text height=\k@cellContentHeight] {};
+      }{%
+        % Let TikZ find the best rounded rectangle around the content.
+        \path (cell content.center)
+              node (cell body) [body,
+                                anchor=center,
+                                text width=\k@cellContentWidth,
+                                text height=\k@cellContentHeight,
+rectangle,rectangle
+%                                rounded rectangle west arc=#4,
+%                                rounded rectangle east arc=#5
+] {};
+      }
+    \end{pgfonlayer}
+
+    % Place the cell label relative to the rounded rectangle.  If the left side
+    % is straight, shift the label a little to the right to avoid an ugly
+    % long vertical left side.
+    \ifthenelse{\equal{#4}{convex}}{%
+      \setlength{\k@labelXShift}{0pt}%
+    }{
+      \setlength{\k@labelXShift}{1ex}
+    }%
+
+    \path (cell body.north west)
+          ++(\k@labelXShift,.6ex)
+          node (cell label) [label,anchor=base west] {\cellLabel};
+
+    % Finally, draw the background of the cell behind the content.
+    \begin{pgfonlayer}{background}
+      % Decide how to draw the cell's west and east side.
+      \ifthenelse{\equal{#4}{convex}}{%
+        \def\cellWestArc{ arc (90:270:\n4 and \n3) -- (cell body.south west) }%
+      }{%
+        \ifdraft{%
+          \def\cellWestArc{ |- (cell body.south west) }
+        }{%
+          % This yields a rounded zig zag pattern (starting outward).
+          \def\cellWestArc{ { [rounded corners=.25ex]
+                              \foreach \signPrefix in {-,0,-,0,-,0,-,0} {%
+                                -- ++(\signPrefix{}.75\k@ruptureStepSize,-\k@ruptureStepSize)}
+                            }
+                          }%
+        }%
+      }%
+      \ifthenelse{\equal{#5}{convex}}{%
+        \def\cellEastArc{ arc (-90:90:\n4 and \n3) }%
+      }{%
+        \ifdraft{%
+          \def\cellEastArc{ -- (cell body.north east) }
+        }{%
+          \def\cellEastArc{ { [rounded corners=.25ex]
+                              \foreach \signPrefix in {0,-,0,-,0,-,0,-} {%
+                                -- ++(\signPrefix{}.75\k@ruptureStepSize,\k@ruptureStepSize)}
+                            }
+                          }%
+        }%
+      }%
+
+      % Draw the cell outline
+      \path[cell=\cellColor]
+                    % Compute half of the body's height.  The value is the
+                    % radius for the arced sides; it also determines the size
+                    % of the zig zag pattern of ruptured sides.
+                    let \p1 = (cell body.north east),
+                        \p2 = (cell body.center),
+                        \n3 = {\y1 - \y2},
+                        \n4 = {\ifk@tight 1ex + \n3 / 5 \else \n3 \fi}
+                    in
+                    \pgfextra{%
+                      \setlength{\k@ruptureStepSize}{\n3}%
+                      \setlength{\k@ruptureStepSize}{.25\k@ruptureStepSize}%
+                     }%
+                     
+                    % Draw counter-clock-wise, starting from the
+                    % lower right corner.
+                    (cell body.south east)
+
+                    % Right
+                    \cellEastArc
+
+                    % Top
+                    { [rounded corners=.2em]
+                                  -| (cell label.north east)
+                                  -- (cell label.north west)
+                                  |- (cell body.north west)
+                    }
+                    % A little offset to the left for a more pleasant look
+                    -- ++(-.2em,0pt)
+
+                    % Left
+                    \cellWestArc
+
+                    % Bottom (just close the path)
+                    -- cycle;
+    \end{pgfonlayer}
+    
+    % Add extra space above and below the cell.
+    \path[use as bounding box] (current bounding box.south west) ++(0,-.3333em)
+                               rectangle (current bounding box.north east) ++(0,.3333em);
+  \end{tikzpicture}%
+  \endgroup
+}}
+
+
+% Rules and Equations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\when}[1]{%
+  \hspace{2em} when \ensuremath{#1}%
+  \k@markPosition%
+}
+
+%%% Context
+
+% Context.
+\newcommand{\kcontext}[4]{\wrapRules{%
+  \text{\scshape context:} $#2$%
+  \ifthenelse{\equal{#3}{}}{}{%
+    \when{#3}%
+  }%
+  \ifthenelse{\equal{#4}{}}{}{%  
+   [#4]% 
+  }%
+  \k@markPosition%
+  }%
+}
+
+\newcommand{\kcontextb}[4]{\begin{kblock}\kcontext{#1}{#2}{#3}{#4}\end{kblock}}
+
+%%% Equations and structural rules.
+
+\newcommand{\k@ruleLabel}[2]{%
+  \ifthenelse{\equal{#1}{}}{\mbox{\scshape #2}}{\k@withTooltip{\mbox{\scshape #2}}{Rule Label: #1}}%
+}
+
+\newcommand{\rulebox}[1]{\hbox{#1}}
+
+\newcommand{\mequation}[3]{%
+  \wrapRules{%
+  \rulebox{%
+    \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
+  }%
+  \k@markPosition%
+  }%
+}
+\newcommand{\cmequation}[4]{%
+  \wrapRules{%
+  \rulebox{%
+    \k@ruleLabel{#1}{macro}\hspace{1em}$#2 = #3$%
+    \when{#4}%
+  }%
+  \k@markPosition%
+  }%
+}
+
+\newcommand{\wrapRules}[1]{\par\indent#1\par\ \par}
+%%% Rules.
+\newcommand{\ruleAttributes}[1]{\hfill[#1]}
+\newcommand{\kdefine}[4]{%
+\wrapRules{%
+  \rulebox{%
+    \k@ruleLabel{#1}{define}\hspace{1em}$#2$%
+  }%
+  \ifthenelse{\equal{#3}{}}{}{%
+    \when{#3}%
+  }%
+  \k@markPosition%
+  \ifthenelse{\equal{#4}{}}{}{%  
+   \ruleAttributes{#4}%
+  }%
+  }%
+}
+
+\newcommand{\krule}[4]{%
+\wrapRules{%
+  \rulebox{%
+    \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
+  }%
+  \ifthenelse{\equal{#3}{}}{}{%
+    \when{#3}%
+  }%
+  \k@markPosition%
+  \ifthenelse{\equal{#4}{}}{}{%  
+   \ruleAttributes{#4}% 
+  }%
+}%
+}
+
+\newcommand{\kruleb}[4]{\begin{kblock}\krule{#1}{#2}{#3}{#4}\end{kblock}}
+
+
+\ifk@poster
+\newcommand{\myskip}{\bigskip}
+\else
+\renewcommand{\when}[1]{\par{}\hspace{2em} when \ensuremath{#1}}
+\renewcommand{\ruleAttributes}[1]{\par{}\hspace{2em} [#1]}
+\renewcommand{\rulebox}[1]{\parbox[b]{\columnwidth}{#1}}
+\renewcommand{\wrapRules}[1]{\par{\parbox[b]{\columnwidth}{#1}}\par\ \par}
+\renewcommand{\k@ruleLabel}[2]{%
+  \ifthenelse{\equal{#1}{\textbackslash !}}{\mbox{\scshape #2}}{\k@withTooltip{\mbox{\scshape #2 \kattribute{#1}}}{Rule Label: #1}}\\%
+% \global\def\ignoreThisLabel{#1}%
+}
+\newcommand{\myskip}{\smallskip}
+\fi
+
+
+\makeatother
+
+\usepackage{listings}
+
+
+\lstnewenvironment{asciik}{
+       \lstset{
+               language=k,
+               basicstyle=\small,
+               tabsize=2,
+               %frame=tb,
+               columns=flexible,
+               mathescape=false,
+			   upquote=true,
+% 				literate=
+% 	   			{"}{\textquotedbl}1
+       }
+}{}
+\lstdefinelanguage{k}{
+		upquote=true,
+       morekeywords={kompile, kast, krun, require, HOLE, configuration, module, end, imports, rule, macro, op, ops, syntax, sort, sorts, subsort, subsorts, context, HOLE, hybrid, strict, seqstrict, binder, color, latex, kvar, structural, transition, superheat, supercool, search, rewrite, prec, gather, stream, multiplicity, when},
+        emph={[3]Map, Set, Bag, List, K, KLabel, KResult, KProper, CellLabel, SetItem, BagItem, ListItem, MapItem, Int, Bool, String, Id},
+       emphstyle={[3]\textit},
+       literate=
+       {LT}{$<$}3
+       {LEQ}{$<=$}4 
+%       {.K}{$\kdot{\it K}$}2 
+%       {.List}{$\kdot{\it List}$}4 
+       {PROMPT}{\$}1
+       {...<}{${\ellipses}\langle$}2
+       {>}{$\rangle$}1 
+       {>...}{$\rangle{\ellipses}$}2
+       {+Int}{$+{\rm\scriptstyle Int}$}4 
+       {*Int}{$*{\rm\scriptstyle Int}$}4 
+       {/Int}{$/{\rm\scriptstyle Int}$}4 
+       {LeqInt}{${<}{=}{\rm\scriptstyle Int}$}9 
+       {!=Int}{${!}{=}{\rm\scriptstyle Int}$}5 
+       {==Bool}{${=}{=}{\rm\scriptstyle Bool}$}7 
+       {=/=Bool}{${=}{/}{=}{\rm\scriptstyle Bool}$}9 
+       {notBool}{${\tt not}{\rm\scriptstyle Bool}$}5 
+       {<}{$\langle$}1 
+       {_}{$\_$}1 {~}{$\_$}1 
+       {=>}{$\;=\!>$}5 
+       {->}{{$->$}}3 
+       {~>}{{$\sim\!\!>$}}3  
+       {|->}{$\;|-\!\!>$}5 
+}
+\newcommand{\ka}[1]{\mbox{\lstinline[language=k]{#1}}}
+

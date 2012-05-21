@@ -213,8 +213,21 @@ public class KompileFrontEnd {
 
 			LatexFilter lf = new LatexFilter();
 			javaDef.accept(lf);
-			String latexified = lf.getResult();
-
+			
+			String endl = System.getProperty("line.separator");
+			String fileSep = System.getProperty("file.separator");
+			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k";
+			
+			String latexified = "\\documentclass{article}" + endl
+			+ "\\usepackage[poster,style=bubble]{" + kLatexStyle + "}" + endl
+//			+ "\\setlength{\\parindent}{1em}" + endl
+			+ "\\title{" + mainModule + "}" + endl
+//			+ "\\author{Grigore Ro\\c{s}u (\\texttt{grosu@illinois.edu})}" + endl
+//			+ "\\organization{University of Illinois at Urbana-Champaign}" + endl
+			+ "\\begin{document}" + endl
+			+ lf.getResult()
+			+ "\\end{document}" + endl;
+			
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.tex", latexified);
 
 			if (GlobalSettings.verbose) {
