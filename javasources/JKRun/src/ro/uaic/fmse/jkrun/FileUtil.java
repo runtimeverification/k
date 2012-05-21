@@ -135,7 +135,6 @@ public class FileUtil {
 			}
 			in.close();
 			out.close();
-			System.out.println("File copied.");
 		} catch (FileNotFoundException ex) {
 			Error.report(ex.getMessage() + " in the specified directory.");
 		} catch (IOException e) {
@@ -163,7 +162,6 @@ public class FileUtil {
 			out.write(b);
 			in.close();
 			out.close();
-			// System.out.println("File copied.");
 		} catch (FileNotFoundException ex) {
 			Error.report(ex.getMessage() + " in the specified directory.");
 		} catch (IOException e) {
@@ -184,7 +182,6 @@ public class FileUtil {
 				if (line.endsWith("</ T >")) {
 					ok = false;
 					stringBuilder.append(line);
-					// System.out.println("endLine=" + endLine);
 				}
 				if (!ok) {
 					break;
@@ -196,7 +193,6 @@ public class FileUtil {
 				if (line.startsWith("< T >")) {
 					startLine = i;
 					stringBuilder.append(line);
-					// System.out.println("startLine=" + startLine);
 				}
 				i++;
 			}
@@ -211,7 +207,6 @@ public class FileUtil {
 			try {
 				reader.close();
 			} catch (IOException e) {
-				// ignore this one
 				e.printStackTrace();
 			}
 		}
@@ -241,12 +236,16 @@ public class FileUtil {
 	}
 
 	public static String getExtension(String fullPath, String extensionSeparator) {
-		int dot = fullPath.lastIndexOf(extensionSeparator);
-		return fullPath.substring(dot + 1);
+		int dot;
+		if (fullPath.indexOf(extensionSeparator) == -1) {
+			return "";
+		} else {
+			dot = fullPath.lastIndexOf(extensionSeparator);
+			return fullPath.substring(dot + 1);
+		}
 	}
 
 	public static String getFilename(String fullPath, String extensionSeparator, String pathSeparator) {
-		//System.out.println("fullPath="+fullPath);
 		int dot = fullPath.lastIndexOf(extensionSeparator);
 		int sep = fullPath.lastIndexOf(pathSeparator);
 		return fullPath.substring(sep + 1, dot);

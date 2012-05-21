@@ -1,6 +1,7 @@
 package ro.uaic.fmse.jkrun;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -12,11 +13,27 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 public class CommandlineOptions {
+	
+	static class OptionComparator implements Comparator {
+		public int compare(Object obj1, Object obj2) {
+			Option opt1 = (Option) obj1;
+			Option opt2 = (Option) obj2;
+			int index1 = new CommandlineOptions().getOptionList().indexOf(opt1);
+			int index2 = new CommandlineOptions().getOptionList().indexOf(opt2);
+
+			if (index1 > index2)
+				return 1;
+			else if (index1 < index2)
+				return -1;
+			else
+				return 0;
+		}
+	}
 
 	Options options;
 	HelpFormatter help;
 	private CommandLine cl;
-    public static ArrayList<Option> optionList = new ArrayList<Option>();
+    private ArrayList<Option> optionList = new ArrayList<Option>();
 	
 	public CommandlineOptions() {
 		options = new Options();
@@ -28,10 +45,10 @@ public class CommandlineOptions {
 		Option version = new Option("v", "version", false, "Display the version number and quit");
 		Option desk_file = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("desk-file").withDescription("Set Desk file path, instead of searching for it").create();
 		
-		options.addOption(help1); optionList.add(help1);
-		options.addOption(help2); optionList.add(help2);
-		options.addOption(version); optionList.add(version);
-		options.addOption(desk_file); optionList.add(desk_file);
+		options.addOption(help1); getOptionList().add(help1);
+		options.addOption(help2); getOptionList().add(help2);
+		options.addOption(version); getOptionList().add(version);
+		options.addOption(desk_file); getOptionList().add(desk_file);
 		
 		// Common K options
 		Option pgm = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("pgm").withDescription("Name of the program to execute").create();
@@ -48,19 +65,19 @@ public class CommandlineOptions {
 		Option parens = OptionBuilder.hasArg(false).withLongOpt("parens").withDescription("Show parentheses in output").create();
 		Option no_parens = OptionBuilder.hasArg(false).withLongOpt("no-parens").create();
 
-		options.addOption(pgm); optionList.add(pgm);
-		options.addOption(k_definition); optionList.add(k_definition);
-		options.addOption(main_module); optionList.add(main_module);
-		options.addOption(syntax_module); optionList.add(syntax_module);
-		options.addOption(parser); optionList.add(parser);
-		options.addOption(io); optionList.add(io);
-		options.addOption(no_io); optionList.add(no_io);
-		options.addOption(statistics); optionList.add(statistics);
-		options.addOption(no_statistics); optionList.add(no_statistics);
-		options.addOption(color); optionList.add(color);
-		options.addOption(no_color); optionList.add(no_color);
-		options.addOption(parens); optionList.add(parens);
-		options.addOption(no_parens); optionList.add(no_parens);
+		options.addOption(pgm); getOptionList().add(pgm);
+		options.addOption(k_definition); getOptionList().add(k_definition);
+		options.addOption(main_module); getOptionList().add(main_module);
+		options.addOption(syntax_module); getOptionList().add(syntax_module);
+		options.addOption(parser); getOptionList().add(parser);
+		options.addOption(io); getOptionList().add(io);
+		options.addOption(no_io); getOptionList().add(no_io);
+		options.addOption(statistics); getOptionList().add(statistics);
+		options.addOption(no_statistics); getOptionList().add(no_statistics);
+		options.addOption(color); getOptionList().add(color);
+		options.addOption(no_color); getOptionList().add(no_color);
+		options.addOption(parens); getOptionList().add(parens);
+		options.addOption(no_parens); getOptionList().add(no_parens);
 
 		// Advanced K options
 		Option compiled_def = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("compiled-def").withDescription("Path to the compiled K definition").create();
@@ -72,23 +89,23 @@ public class CommandlineOptions {
 		Option log_io = OptionBuilder.hasArg(false).withLongOpt("log-io").withDescription("Tell the IO server to create logs").create();
 		Option no_log_io = OptionBuilder.hasArg(false).withLongOpt("no-log-io").create();
 
-		options.addOption(compiled_def); optionList.add(compiled_def);
-		options.addOption(do_search); optionList.add(do_search);
-		options.addOption(no_do_search); optionList.add(no_do_search);
-		options.addOption(maude_cmd); optionList.add(maude_cmd);
-		options.addOption(xsearch_pattern); optionList.add(xsearch_pattern);
-		options.addOption(output_mode); optionList.add(output_mode);
-		options.addOption(log_io); optionList.add(log_io);
-		options.addOption(no_log_io); optionList.add(no_log_io);
+		options.addOption(compiled_def); getOptionList().add(compiled_def);
+		options.addOption(do_search); getOptionList().add(do_search);
+		options.addOption(no_do_search); getOptionList().add(no_do_search);
+		options.addOption(maude_cmd); getOptionList().add(maude_cmd);
+		options.addOption(xsearch_pattern); getOptionList().add(xsearch_pattern);
+		options.addOption(output_mode); getOptionList().add(output_mode);
+		options.addOption(log_io); getOptionList().add(log_io);
+		options.addOption(no_log_io); getOptionList().add(no_log_io);
 
 		// for debugger
 		Option debug = OptionBuilder.hasArg(false).withLongOpt("debug").withDescription("Run an execution in debug mode").create();
 		Option rule_labels = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("rule-labels").withDescription("A list of labels associated to rules for breakpoint execution").create();
 		Option trace = new Option("trace", false, "Set trace on.");
 
-		options.addOption(debug); optionList.add(debug);
-		options.addOption(rule_labels); optionList.add(rule_labels);
-		options.addOption(trace); optionList.add(trace);
+		options.addOption(debug); getOptionList().add(debug);
+		options.addOption(rule_labels); getOptionList().add(rule_labels);
+		options.addOption(trace); getOptionList().add(trace);
 
 	}
 
@@ -120,6 +137,12 @@ public class CommandlineOptions {
 		this.cl = cl;
 	}
 	
-	
+	public ArrayList<Option> getOptionList() {
+		return optionList;
+	}
+
+	public void setOptionList(ArrayList<Option> optionList) {
+		this.optionList = optionList;
+	}
 	
 }

@@ -17,8 +17,8 @@ public class Error {
 	}
 
 	public static void usageError(String message) {
-		System.out.println("jkrun: " + message);
-		System.out.println("Type 'jkrun --help' for more information.");
+		System.out.println("krun: " + message);
+		System.out.println("Type 'krun --help' for more information.");
 		System.exit(1);
 	}
 }

@@ -1,5 +1,7 @@
 package ro.uaic.fmse.jkrun;
 
+import org.fusesource.jansi.AnsiConsole;
+
 public class XmlUtil {
 
 	private static XmlFormatter formatter = new XmlFormatter(2, 80);
@@ -25,13 +27,15 @@ public class XmlUtil {
 		public synchronized String format(String s, int initialIndent, boolean color) {
 			int indent = initialIndent;
 			StringBuilder sb = new StringBuilder();
-			int lastIndex = 0;
-
+         
+			AnsiConsole.systemInstall();
+			
 			for (int i = 0; i < s.length(); i++) {
 				char currentChar = s.charAt(i);
 				if (currentChar == '<') {
 					if (color) {
 						sb.append(PrettyPrintOutput.ANSI_GREEN);
+						
 					}
 					char nextChar = s.charAt(i + 1);
 					if (nextChar == '/')
@@ -45,7 +49,7 @@ public class XmlUtil {
 				sb.append(currentChar);
 				if (currentChar == '>') {
 					if (color) {
-						sb.append(PrettyPrintOutput.ANSI_RESET);
+						sb.append(PrettyPrintOutput.ANSI_NORMAL);
 					}
 					if (s.charAt(i - 1) == '/') {
 						indent -= indentNumChars;
@@ -66,7 +70,7 @@ public class XmlUtil {
 									aux.append(tokens[i]);
 									aux.append(PrettyPrintOutput.ANSI_PURPLE);
 									aux.append("|->");
-									aux.append(PrettyPrintOutput.ANSI_RESET);
+									aux.append(PrettyPrintOutput.ANSI_NORMAL);
 								}
 								aux.append(tokens[tokens.length - 1]);
 								textBetweenElements = new String(aux);

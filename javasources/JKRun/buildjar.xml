@@ -14,6 +14,7 @@
             <zipfileset excludes="META-INF/*.SF" src="./lib/commons-io-2.1.jar"/>
         	<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="./lib/jopt-simple-3.3.jar"/>
+        	<zipfileset excludes="META-INF/*.SF" src="./lib/jansi-1.8.jar"/>
         </jar>
     </target>
 </project>

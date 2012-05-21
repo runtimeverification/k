@@ -14,6 +14,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import main.MainServer;
 import ro.uaic.fmse.tasks.MaudeTask;
+import ro.uaic.fmse.jkrun.KPaths;
 
 public class KRunner {
 	// private String _maudeCommand = "maude";
@@ -106,7 +107,8 @@ public class KRunner {
 		if (!_noServer) {
 			startServer();
 		}
-
+		_maudeFileName = KPaths.windowfyPath(_maudeFileName);
+		_maudeCommandFileName = KPaths.windowfyPath(_maudeCommandFileName);
 		String commandTemplate = "load {0}\n" + "mod KRUNNER is including {1} .\n" + "eq #TCPPORT = {2,number,#} .\n" + "endm\n" + "load {3}\n";
 		String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
 		MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName, _logger);

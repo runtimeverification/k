@@ -3,7 +3,6 @@ package ro.uaic.fmse.jkrun;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 // instantiate processes
 public class RunProcess {
@@ -86,9 +85,9 @@ public class RunProcess {
 
 			// if some errors occurred (if something was written on the stderr stream)
 			if (!s2.equals("")) {
-				System.out.println("RunProcess: Some errors occurred.." + s2);
+				System.out.println("RunProcess: kast reported errors or warnings:");
 				this.setErr(s2);
-				System.exit(1);
+				//System.exit(1);
 			}
 
 		} catch (IOException e) {

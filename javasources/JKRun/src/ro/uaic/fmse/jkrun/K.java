@@ -24,6 +24,7 @@ public class K {
 
 	public static String maude_io_cmd = "io-cmd.maude";
 	public static String maude_output = "maudeoutput.xml";
+	
 	// where to write the pretty-printed output of jkrun
 	public static String krun_output = "krun_output.txt";
 

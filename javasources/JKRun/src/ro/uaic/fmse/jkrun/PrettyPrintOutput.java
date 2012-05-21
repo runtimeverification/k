@@ -30,17 +30,18 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class PrettyPrintOutput {
-
-	public static final String ANSI_RESET = "\u001B[0m";
-	public static final String ANSI_BLACK = "\u001B[30m";
-	public static final String ANSI_RED = "\u001B[31m";
-	public static final String ANSI_GREEN = "\u001B[32m";
-	public static final String ANSI_YELLOW = "\u001B[33m";
-	public static final String ANSI_BLUE = "\u001B[34m";
-	public static final String ANSI_PURPLE = "\u001B[35m";
-	public static final String ANSI_CYAN = "\u001B[36m";
-	public static final String ANSI_WHITE = "\u001B[37m";
-
+	
+	public static final String ANSI_NORMAL = "\u001b[0m";
+	
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+	
 	// Function to read DOM Tree from File
 	public Document readXML(File f) {
 		/* System.out.println("File absolute path:" + f.getAbsolutePath().toString()); */
@@ -71,7 +72,7 @@ public class PrettyPrintOutput {
 		Node nod = list.item(0);
 
 		if (nod == null) {
-			Error.report("The node with result tag wasn't found");
+			Error.report("Pretty Print Output: The node with result tag wasn't found");
 		} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
 			Element elem = (Element) nod;
 			String attr = elem.getAttribute(attrName);
@@ -86,7 +87,7 @@ public class PrettyPrintOutput {
 		Node nod = list.item(0);
 
 		if (nod == null) {
-			Error.report("The node with search-result tag wasn't found");
+			Error.report("Pretty Print Output: The node with search-result tag wasn't found");
 		} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
 			Element elem = (Element) nod;
 			String attr = elem.getAttribute(attrName);
@@ -104,7 +105,7 @@ public class PrettyPrintOutput {
 			list = doc.getElementsByTagName("result");
 			nod = list.item(0);
 			if (nod == null) {
-				Error.report("The node with result tag wasn't found");
+				Error.report("Pretty Print Output: The node with result tag wasn't found");
 			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
 				Element elem = (Element) nod;
 				NodeList child = elem.getChildNodes();
@@ -118,7 +119,7 @@ public class PrettyPrintOutput {
 			list = doc.getElementsByTagName("search-result");
 			nod = list.item(0);
 			if (nod == null) {
-				Error.report("The node with search-result tag wasn't found");
+				Error.report("Pretty Print Output: The node with search-result tag wasn't found");
 			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
 				// using XPath for direct access to the desired node
 				XPathFactory factory2 = XPathFactory.newInstance();
