@@ -2,9 +2,9 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import k.utils.FileUtil;
-import k.utils.GlobalSettings;
 import k.utils.KPaths;
 import k.utils.MaudeRun;
 import k.utils.ResourceExtractor;
@@ -17,6 +17,8 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.errorsystem.KException.Level;
+import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.latex.LatexFilter;
 import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.AmbFilter;
@@ -100,6 +102,8 @@ public class KompileFrontEnd {
 		}
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
+		List<Level> levels = null;
+		GlobalSettings.kem.print(levels);
 	}
 
 	public static String latex(File mainFile, String mainModule) {

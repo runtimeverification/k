@@ -9,20 +9,20 @@ public class KException {
 	protected Label label;
 	protected String filename;
 	protected String location;
-	protected int level;
+	protected Level level;
 	protected String message;
 	
 	private Map<ExceptionType, String> types;
 	private Map<Label, String> labels;
 	
-	public KException(ExceptionType type, Label label, String message, String filename, String location) {
+	public KException(ExceptionType type, Label label, String message, String filename, String location, Level level) {
 		super();
 		this.type = type;
 		this.label = label;
 		this.message = message;
 		this.filename = filename;
 		this.location = location;
-		
+		this.level = level;
 		initialize();
 	}
 	
@@ -44,6 +44,7 @@ public class KException {
 
 	public enum Label { PARSER, COMPILER, LISTS, INTERNAL, CRITICAL};
 	public enum ExceptionType { ERROR, WARNING, STATUS };
+	public enum Level {LEVEL0, LEVEL1, LEVEL2};
 	
 	@Override
 	public String toString() {

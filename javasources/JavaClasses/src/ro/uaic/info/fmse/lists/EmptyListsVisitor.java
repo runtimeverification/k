@@ -1,8 +1,15 @@
 package ro.uaic.info.fmse.lists;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.Label;
+import ro.uaic.info.fmse.errorsystem.KException.Level;
+import ro.uaic.info.fmse.errorsystem.KMessages;
+import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.Empty;
 import ro.uaic.info.fmse.k.Production;
 import ro.uaic.info.fmse.k.Sort;
@@ -13,7 +20,6 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.parsing.BasicTransformer;
-import ro.uaic.info.fmse.utils.errors.Error;
 
 public class EmptyListsVisitor extends BasicTransformer {
 
@@ -70,15 +76,9 @@ public class EmptyListsVisitor extends BasicTransformer {
 						}
 
 						if (!avoid)
-							Error.silentReport("Cannot infer list terminator for term:"
-									+ tc
-									+ " at location "
-									+ tc.getLocation()
-									+ " in file: "
-									+ tc.getFilename()
-									+ "\n    Expected sort: "
-									+ psort
-									+ " found sort: " + tsort);
+						{
+							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, Label.LISTS, KMessages.WARNING1000, new File(tc.getFilename()).getName(), tc.getLocation(), Level.LEVEL0));
+						}
 					}
 				}
 				j++;

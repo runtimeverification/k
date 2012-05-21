@@ -2,14 +2,16 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
+
 import k.utils.FileUtil;
-import k.utils.GlobalSettings;
 import k.utils.Stopwatch;
 import k.utils.XmlLoader;
 
 import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.transitions.labelify.KAppModifier;

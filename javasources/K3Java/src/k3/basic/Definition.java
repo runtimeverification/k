@@ -16,7 +16,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import k.utils.Error;
 import k.utils.FileUtil;
-import k.utils.GlobalSettings;
 import k.utils.KPaths;
 import k.utils.StringUtil;
 import k.utils.Tag;
@@ -31,6 +30,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class Definition implements Cloneable {
 	private List<Module> modules;
