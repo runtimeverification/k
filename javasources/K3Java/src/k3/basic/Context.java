@@ -10,7 +10,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 public class Context extends Sentence {
-	private static final long serialVersionUID = 1L;
 	private String content;
 
 	public Context clone() {

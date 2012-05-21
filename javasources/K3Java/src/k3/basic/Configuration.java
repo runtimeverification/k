@@ -10,7 +10,6 @@ import k.utils.XmlLoader;
 import org.w3c.dom.*;
 
 public class Configuration extends Sentence {
-	private static final long serialVersionUID = 1L;
 	private String content;
 	private boolean parsed = false;
 	private Map<String, Cell> cellLabels;

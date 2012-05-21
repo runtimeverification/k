@@ -351,7 +351,7 @@ public class KompileFrontEnd {
 	public static void compile(File mainFile, String mainModule) {
 		try {
 			String maudified = maudify(mainFile, mainModule);
-
+			// init stopwatch
 			Stopwatch sw = new Stopwatch();
 
 			// for now just use this file as main argument
