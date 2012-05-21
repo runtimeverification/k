@@ -209,7 +209,7 @@ public class KompileFrontEnd {
 
 			LatexFilter lf = new LatexFilter();
 			javaDef.accept(lf);
-			String latexified = lf.latexString;
+			String latexified = lf.getResult();
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.tex", latexified);
 
