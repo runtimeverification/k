@@ -290,7 +290,8 @@ public class Main {
 
 			if (K.parser.equals("kast")) {
 				//rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
-				rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
+				//rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
+				rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, K.pgm });
 			} else {
 				System.out.println("The external parser to be used is:" + K.parser);
 				// code to execute the external parser
@@ -298,7 +299,8 @@ public class Main {
 				// System.exit(0);
 			}
 			if (rp.getErr() != null) {
-				Error.report("\nAttempted command:\n" + "kast --definition=" + K.k_definition + " --lang=" + K.main_module + " --syntax-module=" + K.syntax_module + K.pgm);
+				Error.report("kast error:" + rp.getErr());
+				Error.report("\nAttempted command:\n" + "kast --definition=" + K.k_definition + " " + K.pgm);
 		    }
 			if (rp.getStdout() != null) {
 				KAST = rp.getStdout();
