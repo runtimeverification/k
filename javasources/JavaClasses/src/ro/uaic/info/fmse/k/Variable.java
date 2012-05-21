@@ -9,12 +9,20 @@ import ro.uaic.info.fmse.parsing.Transformer;
 import ro.uaic.info.fmse.parsing.Visitor;
 
 public class Variable extends Term {
-	String name;
+	private String name;
 
 	public Variable(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.name = element.getAttribute(Constants.NAME_name_ATTR);
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public String toString() {

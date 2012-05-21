@@ -15,13 +15,21 @@ public class LatexTest {
 
 	@Test
 	public void testGetTerm() {
-		String file = "d:/work/k3/javasources/K3Syntax/test/imp/.k/def.xml";
+		String file = "/Users/tserban2/Documents/k/trunk/dist/examples/imp/.k/def.xml";
 		Document doc = XML.getDocument(FileUtil.readFileAsString(file));
 		assertTrue(doc != null);
 		ASTNode out = JavaClassesFactory.getTerm(doc.getDocumentElement());
-
-		LatexFilter lf = new LatexFilter();
-		out.accept(lf);
-		System.out.println(lf.latexString);
+		LatexFilter filter = new LatexFilter(); 
+		out.accept(filter);
+		String endl = System.getProperty("line.separator");
+		System.out.println("\\documentclass{article}" + endl 
+				+ "\\usepackage[poster,style=bubble]{/Users/tserban2/Documents/k/branches/k2/core/latex/k}" + endl
+				+ "\\setlength{\\parindent}{1em}" + endl
+				+ "\\title{IMP}" + endl
+				+ "\\author{Grigore Ro\\c{s}u (\\texttt{grosu@illinois.edu})}" + endl
+				+ "\\organization{University of Illinois at Urbana-Champaign}" + endl
+				+ "\\begin{document}" + endl
+				+ filter.getResult()
+				+ "\\end{document}" + endl);
 	}
 }

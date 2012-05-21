@@ -11,11 +11,19 @@ import ro.uaic.info.fmse.parsing.Visitor;
 
 public class Terminal extends ProductionItem {
 
-	String terminal;
+	private String terminal;
 
 	public Terminal(Element element) {
 		super(element);
 		terminal = element.getAttribute(Constants.VALUE_value_ATTR);
+	}
+
+	public void setTerminal(String terminal) {
+		this.terminal = terminal;
+	}
+
+	public String getTerminal() {
+		return terminal;
 	}
 
 	public ProductionType getType() {

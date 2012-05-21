@@ -87,7 +87,7 @@ public class Syntax extends ModuleItem {
 					if (item instanceof Sort) {
 						contents += "subsort " + p.items.get(0) + " < " + sort + " .\n";
 					}
-				} else if (p.items.size() == 1 && (p.items.get(0) instanceof Terminal) && MaudeHelper.constantSorts.contains(sort.sort)) {
+				} else if (p.items.size() == 1 && (p.items.get(0) instanceof Terminal) && MaudeHelper.constantSorts.contains(sort.getSort())) {
 					// ignore K constants declarations
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof UserList)) {
 					// user declared lists case

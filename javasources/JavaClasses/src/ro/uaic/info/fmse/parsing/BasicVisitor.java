@@ -76,6 +76,7 @@ public class BasicVisitor implements Visitor {
 
 	@Override
 	public void visit(Syntax node) {
+		node.getSort().accept(this);
 		for (PriorityBlock pb : node.getPriorityBlocks()) {
 			pb.accept(this);
 		}

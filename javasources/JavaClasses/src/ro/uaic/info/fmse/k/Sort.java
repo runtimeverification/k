@@ -11,12 +11,20 @@ import ro.uaic.info.fmse.parsing.Visitor;
 
 public class Sort extends ProductionItem {
 
-	String sort;
+	private String sort;
 
 	public Sort(Element element) {
 		super(element);
 
 		sort = element.getAttribute(Constants.VALUE_value_ATTR);
+	}
+
+	public void setSort(String sort) {
+		this.sort = sort;
+	}
+
+	public String getSort() {
+		return sort;
 	}
 
 	public ProductionType getType() {

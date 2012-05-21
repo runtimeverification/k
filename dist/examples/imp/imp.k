@@ -29,9 +29,9 @@ endmodule
 module IMP
   imports IMP-SYNTAX
 
-  configuration <T> 
-  					<k> $PGM : K </k>
-  					<env> .Map </env>
+  configuration <T color="yellow"> 
+  					<k color="green"> $PGM : K </k>
+  					<env color="red"> .Map </env>
   				</T>
 
 
