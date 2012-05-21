@@ -46,8 +46,8 @@ public class Production extends ASTNode {
 		}
 		if (attributes.containsKey(Constants.CONS_cons_ATTR))
 			DefinitionHelper.conses.put(attributes.get(Constants.CONS_cons_ATTR), this);
-		//if (items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST)
-			
+		// if (items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST)
+
 	}
 
 	public Production(Production node) {
@@ -151,10 +151,12 @@ public class Production extends ASTNode {
 			this.items.set(i, elem);
 		}
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

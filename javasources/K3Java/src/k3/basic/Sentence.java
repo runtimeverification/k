@@ -18,9 +18,7 @@ public abstract class Sentence extends Term {
 		super(node);
 	}
 
-	public SentenceType getType() {
-		return null;
-	}
+	public abstract SentenceType getType();
 
 	@Override
 	public Sentence clone() {

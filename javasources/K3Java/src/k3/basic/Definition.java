@@ -22,6 +22,7 @@ import k.utils.Tag;
 import k.utils.XmlLoader;
 import k2parser.KParser;
 import k3.basic.Item.ItemType;
+import k3.basic.ModuleItem.ModuleType;
 import k3.basic.Sentence.SentenceType;
 import k3latex.K3LatexParser;
 
@@ -34,7 +35,7 @@ import org.w3c.dom.NodeList;
 import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class Definition implements Cloneable {
-	private List<Module> modules;
+	private List<ModuleItem> modules;
 	private Map<String, Module> modulesMap;
 	private List<String> filePaths;
 	private File mainFile;
@@ -43,7 +44,7 @@ public class Definition implements Cloneable {
 
 	public Definition() {
 		modulesMap = new HashMap<String, Module>();
-		modules = new ArrayList<Module>();
+		modules = new ArrayList<ModuleItem>();
 		filePaths = new ArrayList<String>();
 	}
 
@@ -54,11 +55,14 @@ public class Definition implements Cloneable {
 			def2.mainFile = mainFile;
 			def2.languageModuleName = languageModuleName;
 
-			for (Module m : modules) {
-				Module m2 = m.clone();
-				def2.modules.add(m2);
-				def2.modulesMap.put(m2.getModuleName(), m2);
-			}
+			for (ModuleItem mi : modules)
+				if (mi.getType() == ModuleType.MODULE) {
+					Module m = (Module) mi;
+					Module m2 = m.clone();
+					def2.modules.add(m2);
+					def2.modulesMap.put(m2.getModuleName(), m2);
+				} else
+					def2.modules.add(mi.clone());
 			for (String f : filePaths)
 				def2.filePaths.add(f);
 
@@ -116,6 +120,8 @@ public class Definition implements Cloneable {
 					NodeList xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.comment);
 					// TODO: insert latex comments in the def.xml
 
+					java.util.List<Module> modulesTemp = new ArrayList<Module>();
+
 					for (int i = 0; i < xmlModules.getLength(); i++) {
 						Module km = new Module(xmlModules.item(i), cannonicalPath);
 						// set the module type as predefined if it is located in the /include directory
@@ -123,9 +129,13 @@ public class Definition implements Cloneable {
 						if (file.getAbsolutePath().startsWith(new File(KPaths.getKBase(false) + "/include/").getAbsolutePath()))
 							km.setPredefined(true);
 						km.addComments(xmlComments);
-						modules.add(km);
+
+						modulesTemp.add(km);
 						modulesMap.put(km.getModuleName(), km);
 					}
+
+					modules.addAll(Definition.mergeModuleAndComments(modulesTemp, xmlComments));
+
 					filePaths.add(cannonicalPath);
 				} else {
 					Error.externalReport("File: " + file.getCanonicalPath() + " is not .k");
@@ -134,6 +144,50 @@ public class Definition implements Cloneable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static List<ModuleItem> mergeModuleAndComments(List<Module> lm, NodeList lnl) {
+		List<ModuleItem> lmi = new ArrayList<ModuleItem>();
+		List<CommentDef> lcd = new ArrayList<CommentDef>();
+
+		// select only the comments that are outside modules
+		for (int i = 0; i < lnl.getLength(); i++) {
+			Element elm = (Element) lnl.item(i);
+			boolean intraModule = false;
+			CommentDef cd = new CommentDef(elm);
+			for (Module m : lm) {
+				if (cd.getStartLine() >= m.getStartLine() && cd.getEndLine() <= m.getEndLine()) {
+					intraModule = true;
+					break;
+				}
+			}
+			if (!intraModule)
+				lcd.add(cd);
+		}
+
+		int i = 0;
+		int j = 0;
+
+		while (i < lm.size() && j < lcd.size()) {
+			Module s = lm.get(i);
+			CommentDef com = lcd.get(j);
+			if (s.getStartLine() < com.getStartLine()) {
+				lmi.add(s);
+				i++;
+			} else {
+				lmi.add(com);
+				j++;
+			}
+		}
+		while (i < lm.size()) {
+			lmi.add(lm.get(i));
+			i++;
+		}
+		while (j < lcd.size()) {
+			lmi.add(lcd.get(j));
+			j++;
+		}
+		return lmi;
 	}
 
 	private File buildInclPath(File currFile, String inclFile) throws IOException {
@@ -169,81 +223,82 @@ public class Definition implements Cloneable {
 		// list of sorts declared as being list
 		Set<Sort> listSorts = new HashSet<Sort>();
 
-		for (Module m : modules) {
-			for (Sentence s : m.getSentences()) {
-				if (s.getType() == SentenceType.SYNTAX) {
-					Syntax syn = (Syntax) s;
-					sorts.add(syn.getSort());
-					List<Priority> prilist = new ArrayList<Priority>();
-					for (Priority prt : syn.getPriorities()) {
-						Priority p = new Priority();
-						p.setBlockAssoc(prt.getBlockAssoc());
-						// p.getProductions().add(e)
+		for (ModuleItem mi : modules)
+			if (mi.getType() == ModuleType.MODULE) {
+				Module m = (Module) mi;
+				for (Sentence s : m.getSentences()) {
+					if (s.getType() == SentenceType.SYNTAX) {
+						Syntax syn = (Syntax) s;
+						sorts.add(syn.getSort());
+						List<Priority> prilist = new ArrayList<Priority>();
+						for (Priority prt : syn.getPriorities()) {
+							Priority p = new Priority();
+							p.setBlockAssoc(prt.getBlockAssoc());
+							// p.getProductions().add(e)
 
-						// filter the productions according to their form
-						for (Production prd : prt.getProductions()) {
-							for (Item it : prd.getItems())
-								if (it.getType() == ItemType.SORT)
-									sorts.add((Sort) it);
+							// filter the productions according to their form
+							for (Production prd : prt.getProductions()) {
+								for (Item it : prd.getItems())
+									if (it.getType() == ItemType.SORT)
+										sorts.add((Sort) it);
 
-							// if the user declares a klabel in the attributes list, declare it as a KLabel constant
-							if (prd.getAttributes().containsKey("klabel")) {
-								// TODO: don't add this for now, it creates ambiguities
-								// constants.put(prd.getAttributes().get("klabel"), "KLabel");
-								// terminalList.add(new Terminal(prd.getAttributes().get("klabel")));
+								// if the user declares a klabel in the attributes list, declare it as a KLabel constant
+								if (prd.getAttributes().containsKey("klabel")) {
+									// TODO: don't add this for now, it creates ambiguities
+									// constants.put(prd.getAttributes().get("klabel"), "KLabel");
+									// terminalList.add(new Terminal(prd.getAttributes().get("klabel")));
+								}
+
+								if (prd.getAttributes().containsKey("bracket")) {
+									// do nothing for programs
+								} else if (prd.isSubsort()) {
+									outsides.add(prd);
+								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
+									// constants.add(prd);
+									String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
+									String sort = prd.getProdSort().getSortName();
+									constants.put(terminal, sort);
+								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ItemType.TERMINAL) {
+									outsides.add(prd);
+								} else if (prd.getProdSort().isBaseSort()) {
+									// TODO: pentru sorturile mari, care nu sunt K, adauga si prioritatile fata de =>
+									outsides.add(prd);
+								} else if (prd.getItems().get(0).getType() == ItemType.USERLIST) {
+									outsides.add(prd);
+									listSorts.add(prd.getProdSort());
+								} else {
+									p.getProductions().add(prd);
+								}
 							}
-
-							if (prd.getAttributes().containsKey("bracket")) {
-								// do nothing for programs
-							} else if (prd.isSubsort()) {
-								outsides.add(prd);
-							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1
-									&& (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
-								// constants.add(prd);
-								String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
-								String sort = prd.getProdSort().getSortName();
-								constants.put(terminal, sort);
-							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ItemType.TERMINAL) {
-								outsides.add(prd);
-							} else if (prd.getProdSort().isBaseSort()) {
-								// TODO: pentru sorturile mari, care nu sunt K, adauga si prioritatile fata de =>
-								outsides.add(prd);
-							} else if (prd.getItems().get(0).getType() == ItemType.USERLIST) {
-								outsides.add(prd);
-								listSorts.add(prd.getProdSort());
-							} else {
-								p.getProductions().add(prd);
-							}
+							if (p.getProductions().size() > 0)
+								prilist.add(p);
 						}
-						if (p.getProductions().size() > 0)
-							prilist.add(p);
-					}
 
-					if (prilist.size() > 0) {
-						sdf += "context-free priorities\n";
+						if (prilist.size() > 0) {
+							sdf += "context-free priorities\n";
 
-						for (Priority prt : prilist) {
-							if (prt.getBlockAssoc() == null)
-								sdf += "{\n";
-							else
-								sdf += "{ " + prt.getBlockAssoc() + ":\n";
-							for (Production p : prt.getProductions()) {
-								sdf += "	" + getSDFProdsInPriority(p.getItems(), listSorts) + "-> ";
-								if (p.getProdSort().isBaseSort())
-									sdf += p.getProdSort().getSortName();
+							for (Priority prt : prilist) {
+								if (prt.getBlockAssoc() == null)
+									sdf += "{\n";
 								else
-									sdf += "K";
-								sdf += getSDFAttributes(p.getAttributes()) + "\n";
+									sdf += "{ " + prt.getBlockAssoc() + ":\n";
+								for (Production p : prt.getProductions()) {
+									sdf += "	" + getSDFProdsInPriority(p.getItems(), listSorts) + "-> ";
+									if (p.getProdSort().isBaseSort())
+										sdf += p.getProdSort().getSortName();
+									else
+										sdf += "K";
+									sdf += getSDFAttributes(p.getAttributes()) + "\n";
+								}
+								sdf += "} > ";
 							}
-							sdf += "} > ";
+							sdf += "{\n";
+							sdf += "	K \"~>\" K -> K\n";
+							sdf += "}\n\n";
 						}
-						sdf += "{\n";
-						sdf += "	K \"~>\" K -> K\n";
-						sdf += "}\n\n";
 					}
 				}
 			}
-		}
 
 		sdf += "context-free syntax\n";
 		sdf += "	K -> InsertDzK\n";
@@ -509,26 +564,27 @@ public class Definition implements Cloneable {
 	public Set<Terminal> getTerminals(boolean syntax) {
 		Set<Terminal> termins = new HashSet<Terminal>();
 
-		for (Module m : modules) {
-			if (!m.getModuleName().endsWith("SYNTAX") && syntax)
-				continue; // skip modules that don't end in SYNTAX
-			for (Sentence s : m.getSentences()) {
-				if (s.getType() == SentenceType.SYNTAX) {
-					Syntax syn = (Syntax) s;
-					List<Production> prods = syn.getProductions();
+		for (ModuleItem mi : modules)
+			if (mi.getType() == ModuleType.MODULE) {
+				Module m = (Module) mi;
+				if (!m.getModuleName().endsWith("SYNTAX") && syntax)
+					continue; // skip modules that don't end in SYNTAX
+				for (Sentence s : m.getSentences()) {
+					if (s.getType() == SentenceType.SYNTAX) {
+						Syntax syn = (Syntax) s;
+						List<Production> prods = syn.getProductions();
 
-					for (Production p : prods) {
-						if (!(p.getProdSort().getSortName().equals("#Id") && p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.TERMINAL))
-							// reject those terminals that are not declared as #Id
-							for (Item i : p.getItems())
-								if (i.getType() == ItemType.TERMINAL) {
-									termins.add((Terminal) i);
-								}
+						for (Production p : prods) {
+							if (!(p.getProdSort().getSortName().equals("#Id") && p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.TERMINAL))
+								// reject those terminals that are not declared as #Id
+								for (Item i : p.getItems())
+									if (i.getType() == ItemType.TERMINAL) {
+										termins.add((Terminal) i);
+									}
+						}
 					}
 				}
 			}
-		}
-
 		return termins;
 	}
 
@@ -598,29 +654,31 @@ public class Definition implements Cloneable {
 
 	public Map<Production, List<Production>> getProductionDittos() {
 		Map<Production, List<Production>> prods2 = new HashMap<Production, List<Production>>();
-		for (Module m : modules) {
-			for (Sentence s : m.getSentences()) {
-				if (s.getType() == SentenceType.SYNTAX) {
-					Syntax syn = (Syntax) s;
-					List<Production> prods = syn.getProductions();
+		for (ModuleItem mi : modules)
+			if (mi.getType() == ModuleType.MODULE) {
+				Module m = (Module) mi;
+				for (Sentence s : m.getSentences()) {
+					if (s.getType() == SentenceType.SYNTAX) {
+						Syntax syn = (Syntax) s;
+						List<Production> prods = syn.getProductions();
 
-					for (Production p : prods) {
-						if (!p.isSubsort()) {
-							Production p2 = p.clone();// (Production) Cloner.copy(p);
-							p2.collapseSorts();
-							if (prods2.containsKey(p2)) {
-								List<Production> lprod = prods2.get(p2);
-								lprod.add(p);
-							} else {
-								List<Production> lprod = new ArrayList<Production>();
-								lprod.add(p);
-								prods2.put(p2, lprod);
+						for (Production p : prods) {
+							if (!p.isSubsort()) {
+								Production p2 = p.clone();// (Production) Cloner.copy(p);
+								p2.collapseSorts();
+								if (prods2.containsKey(p2)) {
+									List<Production> lprod = prods2.get(p2);
+									lprod.add(p);
+								} else {
+									List<Production> lprod = new ArrayList<Production>();
+									lprod.add(p);
+									prods2.put(p2, lprod);
+								}
 							}
 						}
 					}
 				}
 			}
-		}
 
 		return prods2;
 	}
@@ -628,22 +686,24 @@ public class Definition implements Cloneable {
 	public Set<Subsort> getSubsorts() {
 		// collect the existing subsorting, and add the default ones
 		Set<Subsort> sbs = Subsort.getDefaultSubsorts();
-		for (Module m : modules) {
-			for (Sentence s : m.getSentences()) {
-				if (s.getType() == SentenceType.SYNTAX) {
-					Syntax syn = (Syntax) s;
-					if (!syn.getSort().isBaseSort())
-						sbs.add(new Subsort(new Sort("K"), syn.getSort(), syn.getSort().getFilename(), syn.getSort().getLocation()));
-					for (Production p : syn.getProductions()) {
-						if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.SORT) {
-							// this is a subsort, add it to the list
-							Sort s2 = (Sort) p.getItems().get(0);
-							sbs.add(new Subsort(syn.getSort(), s2, s2.getFilename(), s2.getLocation()));
+		for (ModuleItem mi : modules)
+			if (mi.getType() == ModuleType.MODULE) {
+				Module m = (Module) mi;
+				for (Sentence s : m.getSentences()) {
+					if (s.getType() == SentenceType.SYNTAX) {
+						Syntax syn = (Syntax) s;
+						if (!syn.getSort().isBaseSort())
+							sbs.add(new Subsort(new Sort("K"), syn.getSort(), syn.getSort().getFilename(), syn.getSort().getLocation()));
+						for (Production p : syn.getProductions()) {
+							if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.SORT) {
+								// this is a subsort, add it to the list
+								Sort s2 = (Sort) p.getItems().get(0);
+								sbs.add(new Subsort(syn.getSort(), s2, s2.getFilename(), s2.getLocation()));
+							}
 						}
 					}
 				}
 			}
-		}
 
 		// closure for sorts
 		boolean finished = false;
@@ -679,31 +739,33 @@ public class Definition implements Cloneable {
 
 	public String getConsAsStrategoTerms() {
 		String str = "[  ";
-		for (Module m : modules) {
-			for (Sentence s : m.getSentences()) {
-				if (s.getType() == SentenceType.SYNTAX) {
-					Syntax syn = (Syntax) s;
-					for (Production p : syn.getProductions()) {
-						if (p.getItems().size() > 1 || p.getItems().get(0).getType() == ItemType.TERMINAL || p.isListDecl()) {
-							// if it contains at least one non-terminal - add it to the list
-							boolean hasNonTerminal = false;
-							String tempStr = "(\"" + p.getAttributes().get("cons") + "\",   \"" + syn.getSort() + "\", [";
+		for (ModuleItem mi : modules)
+			if (mi.getType() == ModuleType.MODULE) {
+				Module m = (Module) mi;
+				for (Sentence s : m.getSentences()) {
+					if (s.getType() == SentenceType.SYNTAX) {
+						Syntax syn = (Syntax) s;
+						for (Production p : syn.getProductions()) {
+							if (p.getItems().size() > 1 || p.getItems().get(0).getType() == ItemType.TERMINAL || p.isListDecl()) {
+								// if it contains at least one non-terminal - add it to the list
+								boolean hasNonTerminal = false;
+								String tempStr = "(\"" + p.getAttributes().get("cons") + "\",   \"" + syn.getSort() + "\", [";
 
-							for (Item i : p.getItems()) {
-								if (i.getType() == ItemType.SORT) {
-									hasNonTerminal = true;
-									tempStr += "\"" + i + "\", ";
+								for (Item i : p.getItems()) {
+									if (i.getType() == ItemType.SORT) {
+										hasNonTerminal = true;
+										tempStr += "\"" + i + "\", ";
+									}
 								}
+								if (hasNonTerminal) {
+									str += tempStr.substring(0, tempStr.length() - 2) + "])\n, ";
+								} else
+									str += tempStr + "])\n, ";
 							}
-							if (hasNonTerminal) {
-								str += tempStr.substring(0, tempStr.length() - 2) + "])\n, ";
-							} else
-								str += tempStr + "])\n, ";
 						}
 					}
 				}
 			}
-		}
 
 		return str.substring(0, str.length() - 2) + "]";
 	}
@@ -797,9 +859,11 @@ public class Definition implements Cloneable {
 
 	public List<Sentence> getAllSentences() {
 		List<Sentence> sts = new ArrayList<Sentence>();
-		for (Module m : modules) {
-			sts.addAll(m.getSentences());
-		}
+		for (ModuleItem mi : modules)
+			if (mi.getType() == ModuleType.MODULE) {
+				Module m = (Module) mi;
+				sts.addAll(m.getSentences());
+			}
 		return sts;
 	}
 
@@ -846,9 +910,8 @@ public class Definition implements Cloneable {
 			el.setAttribute("mainFile", this.mainFile.getCanonicalPath());
 			el.setAttribute("mainModule", this.mainModule);
 
-			for (Module m : modules) {
-				el.appendChild(doc.importNode(m.getXmlTerm(), true));
-			}
+			for (ModuleItem mi : modules)
+				el.appendChild(doc.importNode(mi.getXmlTerm(), true));
 
 			doc.appendChild(el);
 
@@ -865,117 +928,122 @@ public class Definition implements Cloneable {
 	}
 
 	public void makeConsLists() throws Exception {
-		for (Module m : modules) {
-			for (Sentence s : m.getSentences()) {
-				if (s.getType() == SentenceType.SYNTAX) {
-					Syntax syn = (Syntax) s;
-					for (Priority pry : syn.getPriorities()) {
-						List<Production> prods = pry.getProductions();
+		for (ModuleItem mi : modules)
+			if (mi.getType() == ModuleType.MODULE) {
+				Module m = (Module) mi;
+				for (Sentence s : m.getSentences()) {
+					if (s.getType() == SentenceType.SYNTAX) {
+						Syntax syn = (Syntax) s;
+						for (Priority pry : syn.getPriorities()) {
+							List<Production> prods = pry.getProductions();
 
-						for (Production p : prods) {
-							if (p.isListDecl()) {
-								// this is the list decl
-								UserList sl = (UserList) p.getItems().get(0);
+							for (Production p : prods) {
+								if (p.isListDecl()) {
+									// this is the list decl
+									UserList sl = (UserList) p.getItems().get(0);
 
-								p.getItems().clear(); // clear the production
-								p.getItems().add(p.getProdSort()); // and replace it with the cons list
-								p.getItems().add(new Terminal(sl.getTerminal()));
-								p.getItems().add(p.getProdSort());
-								p.getAttributes().put("right", "");
+									p.getItems().clear(); // clear the production
+									p.getItems().add(p.getProdSort()); // and replace it with the cons list
+									p.getItems().add(new Terminal(sl.getTerminal()));
+									p.getItems().add(p.getProdSort());
+									p.getAttributes().put("right", "");
 
-								Production sbs = new Production(); // also add the element subsorted to the list sort
-								sbs.setProdSort(p.getProdSort());
-								sbs.getItems().add(sl.getSort());
-								prods.add(sbs);
+									Production sbs = new Production(); // also add the element subsorted to the list sort
+									sbs.setProdSort(p.getProdSort());
+									sbs.getItems().add(sl.getSort());
+									prods.add(sbs);
 
-								Production idElem = new Production(); // also add the identity element
-								idElem.setProdSort(p.getProdSort());
-								idElem.getItems().add(new Terminal("." + p.getProdSort().getSortName()));
-								String cons = p.getAttributes().get("cons");
-								if (!cons.endsWith("ListSyn"))
-									throw new Exception("Why isn't this cons ending in ListSyn: " + cons);
-								cons = cons.substring(0, cons.length() - "ListSyn".length());
-								idElem.getAttributes().put("cons", cons + "Empty");
-								prods.add(idElem);
-								break;
+									Production idElem = new Production(); // also add the identity element
+									idElem.setProdSort(p.getProdSort());
+									idElem.getItems().add(new Terminal("." + p.getProdSort().getSortName()));
+									String cons = p.getAttributes().get("cons");
+									if (!cons.endsWith("ListSyn"))
+										throw new Exception("Why isn't this cons ending in ListSyn: " + cons);
+									cons = cons.substring(0, cons.length() - "ListSyn".length());
+									idElem.getAttributes().put("cons", cons + "Empty");
+									prods.add(idElem);
+									break;
+								}
 							}
 						}
 					}
 				}
 			}
-		}
 	}
 
 	public void addConsToProductions() {
 		// add cons to productions that don't have it already
-		for (Module m : modules) {
-			String termination;
-			if (m.getType().equals(Tag.interfaceTag))
-				termination = "Builtin";
-			else
-				termination = "Syn";
-			for (Sentence s : m.getSentences()) {
-				if (s.getType() == SentenceType.SYNTAX) {
-					Syntax syn = (Syntax) s;
-					for (Priority pry : syn.getPriorities()) {
-						List<Production> prods = pry.getProductions();
+		for (ModuleItem mi : modules)
+			if (mi.getType() == ModuleType.MODULE) {
+				Module m = (Module) mi;
+				String termination;
+				if (m.getModuleType().equals(Tag.interfaceTag))
+					termination = "Builtin";
+				else
+					termination = "Syn";
+				for (Sentence s : m.getSentences()) {
+					if (s.getType() == SentenceType.SYNTAX) {
+						Syntax syn = (Syntax) s;
+						for (Priority pry : syn.getPriorities()) {
+							List<Production> prods = pry.getProductions();
 
-						for (Production p : prods) {
-							if (p.getAttributes().containsKey("bracket")) {
-								// don't add cons to bracket production
-								String cons = p.getAttributes().get("cons");
-								if (cons != null)
-									Error.report("'bracket' productions are not allowed to have cons: '" + cons + "'");
-							} else if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.TERMINAL && p.getProdSort().getSortName().startsWith("#")) {
-								// don't add any cons, if it is a constant
-								// a constant is a single terminal for a builtin sort
-								String cons = p.getAttributes().get("cons");
-								if (cons != null)
-									Error.report("Constants are not allowed to have cons: '" + cons + "'");
-							} else if (p.isSubsort()) {
-								// cons are not allowed for subsortings
-								String cons = p.getAttributes().get("cons");
-								if (cons != null)
-									Error.report("Subsortings are not allowed to have cons: '" + cons + "'");
-							} else {
-								if (!p.getAttributes().containsKey("cons")) {
-									String cons;
-									if (p.isListDecl())
-										cons = StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1" + "List" + termination;
-									else
-										cons = StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1" + StringUtil.getUniqueId() + termination;
-									p.getAttributes().put("cons", cons);
-									Element el = p.xmlTerm.getOwnerDocument().createElement("tag");
-									el.setAttribute("key", "cons");
-									el.setAttribute("loc", "generated");
-									el.setAttribute("value", "\"" + cons + "\"");
-
-									Node attributes = p.xmlTerm.getLastChild().getPreviousSibling();
-
-									// if the production doesn't have an attributes tag, add it manually
-									if (!attributes.getNodeName().equals(Tag.attributes)) {
-										Element attributes2 = p.xmlTerm.getOwnerDocument().createElement(Tag.attributes);
-										p.xmlTerm.appendChild(attributes2);
-										attributes = attributes2;
-									}
-
-									attributes.appendChild(el);
-								} else {
-									// check if the provided cons is correct
+							for (Production p : prods) {
+								if (p.getAttributes().containsKey("bracket")) {
+									// don't add cons to bracket production
 									String cons = p.getAttributes().get("cons");
-									String escSort = StringUtil.escapeSortName(p.getProdSort().getSortName());
-									if (m.getType().equals(Tag.interfaceTag)) {
-										if (!cons.endsWith("Builtin"))
-											Error.report("The cons attribute must end with 'Builtin' and not with " + cons);
-										if (!cons.startsWith(escSort))
-											Error.report("The cons attribute must start with '" + escSort + "' and not with " + cons);
+									if (cons != null)
+										Error.report("'bracket' productions are not allowed to have cons: '" + cons + "'");
+								} else if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.TERMINAL && p.getProdSort().getSortName().startsWith("#")) {
+									// don't add any cons, if it is a constant
+									// a constant is a single terminal for a builtin sort
+									String cons = p.getAttributes().get("cons");
+									if (cons != null)
+										Error.report("Constants are not allowed to have cons: '" + cons + "'");
+								} else if (p.isSubsort()) {
+									// cons are not allowed for subsortings
+									String cons = p.getAttributes().get("cons");
+									if (cons != null)
+										Error.report("Subsortings are not allowed to have cons: '" + cons + "'");
+								} else {
+									if (!p.getAttributes().containsKey("cons")) {
+										String cons;
+										if (p.isListDecl())
+											cons = StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1" + "List" + termination;
+										else
+											cons = StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1" + StringUtil.getUniqueId() + termination;
+										p.getAttributes().put("cons", cons);
+										Element el = p.xmlTerm.getOwnerDocument().createElement("tag");
+										el.setAttribute("key", "cons");
+										el.setAttribute("loc", "generated");
+										el.setAttribute("value", "\"" + cons + "\"");
+
+										Node attributes = p.xmlTerm.getLastChild().getPreviousSibling();
+
+										// if the production doesn't have an attributes tag, add it manually
+										if (!attributes.getNodeName().equals(Tag.attributes)) {
+											Element attributes2 = p.xmlTerm.getOwnerDocument().createElement(Tag.attributes);
+											p.xmlTerm.appendChild(attributes2);
+											attributes = attributes2;
+										}
+
+										attributes.appendChild(el);
 									} else {
-										if (!cons.startsWith(escSort))
-											Error.report("The cons attribute must start with '" + escSort + "' and not with " + cons);
-										if (!cons.endsWith("Syn")) // a normal cons must end with 'Syn'
-											Error.report("The cons attribute must end with 'Syn' and not with " + cons);
-										if (p.isListDecl() && !cons.endsWith("ListSyn")) // if this is a list, it must end with 'ListSyn'
-											Error.report("The cons attribute must end with 'ListSyn' and not with " + cons);
+										// check if the provided cons is correct
+										String cons = p.getAttributes().get("cons");
+										String escSort = StringUtil.escapeSortName(p.getProdSort().getSortName());
+										if (m.getModuleType().equals(Tag.interfaceTag)) {
+											if (!cons.endsWith("Builtin"))
+												Error.report("The cons attribute must end with 'Builtin' and not with " + cons);
+											if (!cons.startsWith(escSort))
+												Error.report("The cons attribute must start with '" + escSort + "' and not with " + cons);
+										} else {
+											if (!cons.startsWith(escSort))
+												Error.report("The cons attribute must start with '" + escSort + "' and not with " + cons);
+											if (!cons.endsWith("Syn")) // a normal cons must end with 'Syn'
+												Error.report("The cons attribute must end with 'Syn' and not with " + cons);
+											if (p.isListDecl() && !cons.endsWith("ListSyn")) // if this is a list, it must end with 'ListSyn'
+												Error.report("The cons attribute must end with 'ListSyn' and not with " + cons);
+										}
 									}
 								}
 							}
@@ -983,35 +1051,36 @@ public class Definition implements Cloneable {
 					}
 				}
 			}
-		}
 	}
 
 	public void replaceDittoCons() {
 		Map<Production, List<Production>> prodSummary = getProductionDittos();
 
-		for (Module m : modules) {
-			for (Sentence s : m.getSentences()) {
-				if (s.getType() == SentenceType.SYNTAX) {
-					Syntax syn = (Syntax) s;
-					List<Production> prods = syn.getProductions();
+		for (ModuleItem mi : modules)
+			if (mi.getType() == ModuleType.MODULE) {
+				Module m = (Module) mi;
+				for (Sentence s : m.getSentences()) {
+					if (s.getType() == SentenceType.SYNTAX) {
+						Syntax syn = (Syntax) s;
+						List<Production> prods = syn.getProductions();
 
-					for (Production p : prods) {
-						if (!p.isSubsort()) {
-							Production p2 = p.clone();// (Production) Cloner.copy(p);
-							p2.collapseSorts();
+						for (Production p : prods) {
+							if (!p.isSubsort()) {
+								Production p2 = p.clone();// (Production) Cloner.copy(p);
+								p2.collapseSorts();
 
-							if (prodSummary.containsKey(p2)) {
-								List<Production> listForProds = prodSummary.get(p2);
+								if (prodSummary.containsKey(p2)) {
+									List<Production> listForProds = prodSummary.get(p2);
 
-								if (listForProds.size() > 1) {
-									p.getAttributes().put("cons", listForProds.get(0).getAttributes().get("cons"));
+									if (listForProds.size() > 1) {
+										p.getAttributes().put("cons", listForProds.get(0).getAttributes().get("cons"));
+									}
 								}
 							}
 						}
 					}
 				}
 			}
-		}
 	}
 
 	public String getDittosAsStrategoTerm() {

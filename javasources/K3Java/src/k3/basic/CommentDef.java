@@ -7,21 +7,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-public class Comment extends Sentence {
+public class CommentDef extends ModuleItem {
 	private String content;
 
-	public Comment clone() {
+	public CommentDef clone() {
 		return this;
 	}
 
-	public Comment() {
+	public CommentDef() {
 	}
 
-	public Comment(Node node) {
+	public CommentDef(Node node) {
 		super(node);
 
 		NamedNodeMap attr = node.getAttributes();
-		Element elm = node.getOwnerDocument().createElement("moduleComment");
+		Element elm = node.getOwnerDocument().createElement("defComment");
 		NamedNodeMap nmp = node.getAttributes();
 		for (int i = 0; i < nmp.getLength(); i++)
 			elm.setAttribute(nmp.item(i).getNodeName(), nmp.item(i).getNodeValue());
@@ -33,7 +33,6 @@ public class Comment extends Sentence {
 			content = content.substring(2, content.length() - 1); // remove // and \n from begining and end
 		else
 			content = content.substring(2, content.length() - 2); // remove /* and */ from begining and end
-
 		if (content.startsWith("@")) {
 			elm.setAttribute("special", "latex");
 			content = content.substring(1);
@@ -55,7 +54,7 @@ public class Comment extends Sentence {
 	}
 
 	@Override
-	public SentenceType getType() {
-		return SentenceType.COMMENT;
+	public ModuleType getType() {
+		return ModuleType.COMMENT;
 	}
 }

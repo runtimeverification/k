@@ -17,7 +17,9 @@ public class Production extends Term implements Cloneable {
 		p.copy(this);
 
 		p.prodSort = prodSort;
-		p.attributes.putAll(attributes);
+		for (Map.Entry<String, String> es : attributes.entrySet())
+			p.attributes.put(es.getKey(), es.getValue());
+
 		for (Item i : items)
 			p.items.add(i.clone());
 

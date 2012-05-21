@@ -70,9 +70,12 @@ public class JavaClassesFactory {
 			return new List(element);
 		if (Constants.DEFINITION.equals(element.getNodeName()))
 			return new Definition(element);
-		if (Constants.AMB.equals(element.getNodeName())) {
+		if (Constants.AMB.equals(element.getNodeName()))
 			return new Ambiguity(element);
-		}
+		if (Constants.MODULECOMMENT.equals(element.getNodeName()))
+			return new LiterateModuleComment(element);
+		if (Constants.DEFCOMMENT.equals(element.getNodeName()))
+			return new LiterateDefinitionComment(element);
 
 		System.out.println(">>> " + element.getNodeName() + " <<< - unimplemented yet: JavaClassesFactory");
 		return null;

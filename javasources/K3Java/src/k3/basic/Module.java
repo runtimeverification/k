@@ -7,7 +7,7 @@ import k.utils.XmlLoader;
 
 import org.w3c.dom.*;
 
-public class Module extends Term implements Cloneable {
+public class Module extends ModuleItem implements Cloneable {
 	// K statements
 	private List<Sentence> sentences;
 	private String moduleName;
@@ -127,7 +127,7 @@ public class Module extends Term implements Cloneable {
 			sentences.add(comms.get(j));
 			j++;
 		}
-		//TODO: fix the xmlNode
+		// fix the xmlNode
 		Element el = (Element) xmlTerm;
 		while (el.hasChildNodes())
 			el.removeChild(el.getLastChild());
@@ -151,7 +151,7 @@ public class Module extends Term implements Cloneable {
 		this.type = type;
 	}
 
-	public String getType() {
+	public String getModuleType() {
 		return type;
 	}
 
@@ -163,5 +163,10 @@ public class Module extends Term implements Cloneable {
 
 	public boolean isPredefined() {
 		return predefined;
+	}
+
+	@Override
+	public ModuleType getType() {
+		return ModuleType.MODULE;
 	}
 }
