@@ -13,8 +13,10 @@ public class KExceptionManager {
 	}
 
 	public void print(List<Level> levels) {
+		if (levels != null)
 		for(KException e : exceptions)
-			System.out.println(e);
+			if (levels.contains(e.level))
+				System.out.println(e);
 	}
 	
 	
