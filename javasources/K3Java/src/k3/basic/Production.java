@@ -29,12 +29,10 @@ public class Production extends Term implements Cloneable {
 		attributes = new HashMap<String, String>();
 	}
 
-	public Production(Node node, String filename, Sort pSort) {
-
+	public Production(Node node, Sort pSort) {
+		super(node);
 		items = new ArrayList<Item>();
 		attributes = new HashMap<String, String>();
-		this.filename = filename;
-		this.xmlTerm = node;
 		setProdSort(pSort);
 
 		NamedNodeMap attr = node.getAttributes();
@@ -44,11 +42,11 @@ public class Production extends Term implements Cloneable {
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			if (children.item(i).getNodeName().equals(Tag.sort)) {
-				items.add(new Sort(children.item(i), filename));
+				items.add(new Sort(children.item(i)));
 			} else if (children.item(i).getNodeName().equals(Tag.terminal)) {
-				items.add(new Terminal(children.item(i), filename));
+				items.add(new Terminal(children.item(i)));
 			} else if (children.item(i).getNodeName().equals(Tag.userlist)) {
-				items.add(new UserList(children.item(i), filename));
+				items.add(new UserList(children.item(i)));
 			} else if (children.item(i).getNodeName().equals(Tag.attributes)) {
 				NodeList ch = ((Element) children.item(i)).getElementsByTagName(Tag.tag);
 				for (int j = 0; j < ch.getLength(); j++) {

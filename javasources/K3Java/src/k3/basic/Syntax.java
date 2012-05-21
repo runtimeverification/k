@@ -1,31 +1,30 @@
 package k3.basic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import k.utils.Tag;
 
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class Syntax extends Sentence {
 	private Sort sort;
 	private List<Priority> priorities;
-	
+
 	public Syntax clone() {
 		super.clone();
-		
-		Syntax s = new Syntax();
-		s.copy(this);
-		s.sort = this.sort;
-		for (Priority p : priorities)
-			s.priorities.add(p.clone());
-		
+
+		Syntax s = new Syntax(this);
 		return s;
 	}
 
-	public Syntax() {
+	public Syntax(Syntax s) {
+		super(s);
 		priorities = new ArrayList<Priority>();
+		this.sort = s.sort;
+		for (Priority p : s.priorities)
+			this.priorities.add(p.clone());
 	}
 
 	public List<Priority> getPriorities() {
@@ -36,27 +35,17 @@ public class Syntax extends Sentence {
 		this.priorities = priorities;
 	}
 
-	public Syntax(Node node, String filename) {
-		// set file name
-		this.filename = filename;
-		this.xmlTerm = node;
+	public Syntax(Node node) {
+		super(node);
 		// set everything
 		priorities = new ArrayList<Priority>();
-
-		Node item = node.getAttributes().getNamedItem(Tag.location);
-		location = item.getNodeValue();
 
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			if (children.item(i).getNodeName().equals(Tag.sort)) {
-				NamedNodeMap attr = children.item(i).getAttributes();
-				item = attr.getNamedItem(Tag.value);
-				sort = new Sort(item.getNodeValue());
-
-				item = attr.getNamedItem(Tag.location);
-				this.location = item.getNodeValue();
+				sort = new Sort(children.item(i));
 			} else if (children.item(i).getNodeName().equals(Tag.priority)) {
-				priorities.add(new Priority(children.item(i), filename, sort));
+				priorities.add(new Priority(children.item(i), sort));
 			}
 		}
 	}

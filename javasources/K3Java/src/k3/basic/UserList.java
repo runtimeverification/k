@@ -22,18 +22,14 @@ public class UserList extends Term implements Item {
 		this.terminal = terminal;
 	}
 
-	public UserList(Node node, String fileName) {
+	public UserList(Node node) {
+		super(node);
 		NamedNodeMap attr = node.getAttributes();
 		Node item = attr.getNamedItem(Tag.value);
 		sort = new Sort(item.getNodeValue());
 
 		item = attr.getNamedItem(Tag.separator);
 		terminal = item.getNodeValue();
-
-		item = attr.getNamedItem(Tag.location);
-		location = item.getNodeValue();
-		xmlTerm = node;
-		filename = fileName;
 	}
 
 	@Override

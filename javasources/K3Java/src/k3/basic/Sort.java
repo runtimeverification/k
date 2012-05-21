@@ -7,7 +7,7 @@ import org.w3c.dom.Node;
 
 public class Sort extends Term implements Item {
 	private String sort;
-	
+
 	public Sort clone() {
 		Sort s = new Sort(sort);
 		s.copy(this);
@@ -20,19 +20,16 @@ public class Sort extends Term implements Item {
 		filename = "generated";
 	}
 
-	public Sort(Node node, String fileName) {
+	public Sort(Node node) {
+		super(node);
 		NamedNodeMap attr = node.getAttributes();
 		Node item = attr.getNamedItem(Tag.value);
 		sort = item.getNodeValue();
-		item = attr.getNamedItem(Tag.location);
-		location = item.getNodeValue();
-		filename = fileName;
-		xmlTerm = node;
 	}
 
 	public boolean isBaseSort() {
-		return sort.equals("VARID") || sort.equals("Map") || sort.equals("K") || sort.equals("List") || sort.equals("Bag") || sort.equals("Set") || sort.equals("MapItem")
-				|| sort.equals("ListItem") || sort.equals("BagItem") || sort.equals("SetItem") || sort.equals("List{K}") || sort.equals("KLabel");
+		return sort.equals("VARID") || sort.equals("Map") || sort.equals("K") || sort.equals("List") || sort.equals("Bag") || sort.equals("Set") || sort.equals("MapItem") || sort.equals("ListItem") || sort.equals("BagItem") || sort.equals("SetItem")
+				|| sort.equals("List{K}") || sort.equals("KLabel");
 	}
 
 	public String getSortName() {

@@ -113,7 +113,7 @@ public class Definition implements Cloneable {
 					}
 
 					NodeList xmlModules = doc.getDocumentElement().getElementsByTagName(Tag.module);
-					NodeList xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.module);
+					NodeList xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.comment);
 					// TODO: insert latex comments in the def.xml
 
 					for (int i = 0; i < xmlModules.getLength(); i++) {
@@ -122,6 +122,7 @@ public class Definition implements Cloneable {
 						// used later when including SHARED module
 						if (file.getAbsolutePath().startsWith(new File(KPaths.getKBase(false) + "/include/").getAbsolutePath()))
 							km.setPredefined(true);
+						km.addComments(xmlComments);
 						modules.add(km);
 						modulesMap.put(km.getModuleName(), km);
 					}
@@ -196,7 +197,8 @@ public class Definition implements Cloneable {
 								// do nothing for programs
 							} else if (prd.isSubsort()) {
 								outsides.add(prd);
-							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
+							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1
+									&& (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
 								// constants.add(prd);
 								String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
 								String sort = prd.getProdSort().getSortName();
@@ -845,7 +847,7 @@ public class Definition implements Cloneable {
 			el.setAttribute("mainModule", this.mainModule);
 
 			for (Module m : modules) {
-				el.appendChild(doc.importNode(m.xmlTerm, true));
+				el.appendChild(doc.importNode(m.getXmlTerm(), true));
 			}
 
 			doc.appendChild(el);

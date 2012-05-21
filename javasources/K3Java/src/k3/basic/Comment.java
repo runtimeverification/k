@@ -7,27 +7,25 @@ import k.utils.XmlLoader;
 
 import org.w3c.dom.*;
 
-public class Rule extends Sentence {
+public class Comment extends Sentence {
 	private String content;
 
-	public Rule clone() {
-		// super.clone();
-		//
-		// Rule r = new Rule();
-		// r.content = content;
-		// r.copy(this);
-
+	public Comment clone() {
 		return this;
 	}
 
-	public Rule() {
+	public Comment() {
 	}
 
-	public Rule(Node node) {
+	public Comment(Node node) {
 		super(node);
 
 		NamedNodeMap attr = node.getAttributes();
-		Node item = attr.getNamedItem(Tag.value);
+		Node item = attr.getNamedItem(Tag.location);
+		location = item.getNodeValue();
+		xmlTerm = node;
+
+		item = attr.getNamedItem(Tag.value);
 		content = StringUtil.unescape(item.getNodeValue());
 	}
 
@@ -60,6 +58,6 @@ public class Rule extends Sentence {
 
 	@Override
 	public SentenceType getType() {
-		return SentenceType.RULE;
+		return SentenceType.COMMENT;
 	}
 }

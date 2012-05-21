@@ -9,7 +9,7 @@ import org.w3c.dom.*;
 public class Priority extends Term {
 	private List<Production> productions = new ArrayList<Production>();
 	private String blockAssoc = null;
-	
+
 	public Priority clone() {
 		Priority p = new Priority();
 		p.copy(this);
@@ -30,11 +30,10 @@ public class Priority extends Term {
 	public Priority() {
 	}
 
-	public Priority(Node node, String filename, Sort pSort) {
+	public Priority(Node node, Sort pSort) {
+		super(node);
 
 		setProductions(new ArrayList<Production>());
-		this.filename = filename;
-		this.xmlTerm = node;
 
 		NamedNodeMap attr = node.getAttributes();
 		Node item = attr.getNamedItem(Tag.location);
@@ -47,7 +46,7 @@ public class Priority extends Term {
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			if (children.item(i).getNodeName().equals(Tag.production)) {
-				productions.add(new Production(children.item(i), filename, pSort));
+				productions.add(new Production(children.item(i), pSort));
 			}
 		}
 	}

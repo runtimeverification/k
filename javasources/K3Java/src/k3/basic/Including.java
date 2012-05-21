@@ -7,7 +7,7 @@ import org.w3c.dom.Node;
 
 public class Including extends Sentence {
 	String includedModuleName;
-	
+
 	public Including clone() {
 		return this;
 	}
@@ -21,6 +21,7 @@ public class Including extends Sentence {
 	}
 
 	public Including(Node node) {
+		super(node);
 		NamedNodeMap attr = node.getAttributes();
 		Node item = attr.getNamedItem(Tag.name);
 		includedModuleName = item.getNodeValue();

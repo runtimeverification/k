@@ -17,6 +17,7 @@ public class Tag {
 	public final static String userlist = "userlist";
 	public final static String nelist = "nelist";
 	public final static String syntax = "syntax";
+	public final static String comment = "comment";
 	public final static String location = "loc";
 	public final static String type = "type";
 	public final static String assoc = "assoc";
@@ -39,4 +40,5 @@ public class Tag {
 	public final static String label = "label";
 	public final static String listSeparator = "separator";
 	public final static String interfaceTag = "interface";
+	public final static String filename = "filename";
 }

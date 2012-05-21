@@ -15,19 +15,14 @@ public class Context extends Sentence {
 	public Context clone() {
 		return this;
 	}
-	
+
 	public Context() {
 	}
 
-	public Context(Node node, String filename) {
-		this.filename = filename;
-
+	public Context(Node node) {
+		super(node);
 		NamedNodeMap attr = node.getAttributes();
-		Node item = attr.getNamedItem(Tag.location);
-		location = item.getNodeValue();
-		xmlTerm = node;
-
-		item = attr.getNamedItem(Tag.value);
+		Node item = attr.getNamedItem(Tag.value);
 		setContent(StringUtil.unescape(item.getNodeValue()));
 	}
 

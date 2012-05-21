@@ -20,14 +20,11 @@ public class Terminal extends Term implements Item {
 		location = "(0,0,0,0)";
 	}
 
-	public Terminal(Node node, String fileName) {
+	public Terminal(Node node) {
+		super(node);
 		NamedNodeMap attr = node.getAttributes();
 		Node item = attr.getNamedItem(Tag.value);
 		terminal = item.getNodeValue();
-		item = attr.getNamedItem(Tag.location);
-		location = item.getNodeValue();
-		filename = fileName;
-		xmlTerm = node;
 	}
 
 	public String getTerminal() {

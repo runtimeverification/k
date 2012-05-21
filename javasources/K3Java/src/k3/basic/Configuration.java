@@ -33,15 +33,11 @@ public class Configuration extends Sentence {
 		cellLabels = new HashMap<String, Cell>();
 	}
 
-	public Configuration(Node node, String filename) {
-		this.filename = filename;
-		this.xmlTerm = node;
+	public Configuration(Node node) {
+		super(node);
 
 		NamedNodeMap attr = node.getAttributes();
-		Node item = attr.getNamedItem(Tag.location);
-		location = item.getNodeValue();
-
-		item = attr.getNamedItem(Tag.value);
+		Node item = attr.getNamedItem(Tag.value);
 		setContent(StringUtil.unescape(item.getNodeValue()));
 	}
 
