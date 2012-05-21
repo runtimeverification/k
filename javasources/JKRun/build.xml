@@ -18,7 +18,9 @@
         <pathelement location="lib/commons-cli-1.2.jar"/>
         <path refid="IOServer.classpath"/>
         <pathelement location="lib/commons-io-2.1.jar"/>
-        <pathelement location="lib/jopt-simple-3.3.jar"/>
+		<pathelement location="lib/jopt-simple-3.3.jar"/>
+		<pathelement location="lib/jansi-1.8.jar"/>
+        C
     </path>
     <target name="init">
         <mkdir dir="bin"/>

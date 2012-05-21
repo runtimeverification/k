@@ -6,6 +6,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/IOServer"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/jopt-simple-3.3.jar"/>
-	<classpathentry kind="lib" path="/Users/Emiliannec/Documents/k3/javasources/JKRun/lib/jansi-1.8.jar"/>
+	<classpathentry kind="lib" path="lib/jansi-1.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
