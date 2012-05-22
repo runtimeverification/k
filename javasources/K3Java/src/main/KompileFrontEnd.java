@@ -250,12 +250,14 @@ public class KompileFrontEnd {
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k";
 			
 			String latexified = "\\documentclass{article}" + endl
-			+ "\\usepackage[poster,style=bubble]{" + kLatexStyle + "}" + endl
-//			+ "\\setlength{\\parindent}{1em}" + endl
-			+ "\\title{" + mainModule + "}" + endl
-//			+ "\\author{Grigore Ro\\c{s}u (\\texttt{grosu@illinois.edu})}" + endl
-//			+ "\\organization{University of Illinois at Urbana-Champaign}" + endl
+			+ "\\usepackage[poster,style=bubble]{" + kLatexStyle + "}" + endl;
+			String preamble = lf.getPreamble();
+			if (!preamble.contains("\\title{")) {
+				preamble += "\\title{" + mainModule + "}" + endl;
+			}
+			latexified += preamble
 			+ "\\begin{document}" + endl
+			+ "\\maketitle" + endl
 			+ lf.getResult()
 			+ "\\end{document}" + endl;
 			

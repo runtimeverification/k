@@ -24,6 +24,14 @@ public class LatexFilter extends BasicVisitor {
 		this.result = result;
 	}
 
+	public void setPreamble(String preamble) {
+		this.preamble = preamble;
+	}
+
+	public String getPreamble() {
+		return preamble;
+	}
+
 	public String getResult() {
 		return result;
 	}
@@ -161,7 +169,7 @@ public class LatexFilter extends BasicVisitor {
 			result += "[" + DefinitionHelper.latexify(var.getSort()) + "]";
 		}
 		if (!var.getName().equals("_")) {
-			result += "{" + DefinitionHelper.latexify(makeIndices(makeGreek(var.getName()))) + "}";
+			result += "{" + makeIndices(makeGreek(DefinitionHelper.latexify(var.getName()))) + "}";
 		}
 	}
 	
