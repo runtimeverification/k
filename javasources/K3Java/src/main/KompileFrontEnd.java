@@ -1,7 +1,11 @@
 package main;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.List;
 
 import k.utils.FileUtil;
@@ -17,7 +21,11 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.Label;
 import ro.uaic.info.fmse.errorsystem.KException.Level;
+import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.latex.LatexFilter;
 import ro.uaic.info.fmse.lists.EmptyListsVisitor;
@@ -61,6 +69,9 @@ public class KompileFrontEnd {
 		}
 
 		File mainFile = new File(def);
+		GlobalSettings.mainFile = mainFile;
+		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "");
+		
 		if (!mainFile.exists())
 			k.utils.Error.report("Could not find file: " + def);
 
@@ -108,32 +119,33 @@ public class KompileFrontEnd {
 		GlobalSettings.kem.print(levels);
 	}
 
+	private static void pdfClean(String[] extensions)
+	{
+		for(int i = 0; i < extensions.length; i++)
+			new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
+	}
 	private static void pdf(File mainFile, String lang) {
 		latex(mainFile, lang);
 		
-//		try {
-//			// Run pdflatex.
-//			String pdfLatex = "pdflatex";
-//			String fileSep = System.getProperty("file.separator");
-//			File f = mainFile.getCanonicalFile();
-//			String argument = "";
-//			System.out.println(argument);
-//			
-//			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument);
-//			Process process;
-//
-//			process = pb.start();
-//			process.wait();
-//			if (process.exitValue() == 0)
-//				System.out.println("Ok.");
-//			else System.out.println("Not ok");
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		try {
+			// Run pdflatex.
+			String pdfLatex = "pdflatex";
+			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
+			
+			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument);
+			Process process = pb.start();
+
+			// Apparently I have to do this for now. I'll search for a better solution soon.
+			InputStream is = process.getInputStream();
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
+			while(br.readLine() != null){}
+
+		} catch (IOException e) {
+			KException exception = new KException(ExceptionType.ERROR, Label.CRITICAL, KMessages.ERR1001, "", "", Level.LEVEL0);
+			GlobalSettings.kem.register(exception);
+		} 
+		pdfClean(new String[] {".aux", ".log", ".mrk", ".out"});
 	}
 
 	public static String latex(File mainFile, String mainModule) {

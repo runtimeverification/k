@@ -1,5 +1,7 @@
 package ro.uaic.info.fmse.general;
 
+import java.io.File;
+
 import ro.uaic.info.fmse.errorsystem.KExceptionManager;
 
 public class GlobalSettings {
@@ -10,4 +12,6 @@ public class GlobalSettings {
 	public static boolean latex = false; 
 	public static String synModule = null;
 	public static KExceptionManager kem = new KExceptionManager();
+	public static File mainFile;
+	public static String mainFileWithNoExtension;
 }
