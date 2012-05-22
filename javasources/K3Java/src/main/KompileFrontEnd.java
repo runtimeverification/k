@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.List;
 
 import k.utils.FileUtil;
@@ -132,14 +131,15 @@ public class KompileFrontEnd {
 			String pdfLatex = "pdflatex";
 			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
 			
-			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument);
+			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
 			Process process = pb.start();
 
 			// Apparently I have to do this for now. I'll search for a better solution soon.
 			InputStream is = process.getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
-			while(br.readLine() != null){}
+			String line;
+			while((line = br.readLine()) != null){System.out.println(line);}
 
 		} catch (IOException e) {
 			KException exception = new KException(ExceptionType.ERROR, Label.CRITICAL, KMessages.ERR1001, "", "", Level.LEVEL0);
@@ -261,7 +261,7 @@ public class KompileFrontEnd {
 			String fileSep = System.getProperty("file.separator");
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k";
 			
-			String latexified = "\\documentclass{article}" + endl
+			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl
 			+ "\\usepackage[poster,style=bubble]{" + kLatexStyle + "}" + endl;
 			String preamble = lf.getPreamble();
 			if (!preamble.contains("\\title{")) {
