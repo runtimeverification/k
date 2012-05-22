@@ -2,8 +2,11 @@ package ro.uaic.info.fmse.latex;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import ro.uaic.info.fmse.k.*;
+import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
+import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.parsing.BasicVisitor;
 
@@ -12,6 +15,7 @@ public class LatexFilter extends BasicVisitor {
 	private String result="";
 	private boolean firstProduction = false;
 	private Map<String,String> colors = new HashMap<String,String>();
+	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 
 	public void setResult(String result) {
 		this.result = result;
@@ -23,8 +27,8 @@ public class LatexFilter extends BasicVisitor {
 	
 	@Override
 	public void visit(Definition def) {
-		result += "\\begin{kdefinition}" + endl
-		+ "\\maketitle" + endl;
+		def.accept(patternsVisitor);
+		result += "\\begin{kdefinition}" + endl;
 		super.visit(def);
 		result += "\\end{kdefinition}" + endl;
 	}
@@ -32,7 +36,7 @@ public class LatexFilter extends BasicVisitor {
 	@Override
 	public void visit(Module mod) {
 		if (DefinitionHelper.isModulePredefined(mod.getName())) return;
-		result += "\\begin{module}{\\moduleName{" + latexify(mod.getName()) + "}}" + endl;
+		result += "\\begin{module}{\\moduleName{" + DefinitionHelper.latexify(mod.getName()) + "}}" + endl;
 		super.visit(mod);
 		result += "\\end{module}" + endl;
 	}
@@ -47,7 +51,7 @@ public class LatexFilter extends BasicVisitor {
 	
 	@Override
 	public void visit(Sort sort) {
-		result += "{\\nonTerminal{\\sort{" + latexify(sort.getSort()) + "}}}";
+		result += "{\\nonTerminal{\\sort{" + DefinitionHelper.latexify(sort.getSort()) + "}}}";
 	}
 	
 	@Override
@@ -58,7 +62,22 @@ public class LatexFilter extends BasicVisitor {
 		} else {
 			result += "\\syntaxCont{";
 		}
-		super.visit(p);
+		if (p.getAttributes().containsKey(Constants.CONS_cons_ATTR) && 
+				patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
+			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
+			int n = 1;
+			LatexFilter termFilter = new LatexFilter();
+			for (ProductionItem pi : p.getItems()) {
+				if (pi.getType()!=ProductionType.TERMINAL) {
+					termFilter.setResult("");
+					pi.accept(termFilter);
+					pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
+				}
+			}
+			result += pattern;
+		} else {
+			super.visit(p);
+		}
 		result += "}{";
 		printSentenceAttributes(p.getAttributes());
 		result += "}";
@@ -68,7 +87,17 @@ public class LatexFilter extends BasicVisitor {
 	public void visit(Terminal pi) {
 		String terminal = pi.getTerminal();
 		if (terminal.isEmpty()) return;
-		result += "\\terminal{" + latexify(terminal) + "}";
+		if (DefinitionHelper.isSpecialTerminal(terminal)) {
+			result += DefinitionHelper.latexify(terminal);
+		} else {
+			result += "\\terminal{" + DefinitionHelper.latexify(terminal) + "}";
+		}
+	}
+	
+	@Override
+	public void visit(UserList ul) {
+		result += "List\\{" + DefinitionHelper.latexify(ul.getSort()) + 
+			", \\mbox{``}" + DefinitionHelper.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
 	}
 	
 	@Override
@@ -95,9 +124,26 @@ public class LatexFilter extends BasicVisitor {
 		if (colors.containsKey(c.getLabel())) {
 			result += "[" + colors.get(c.getLabel()) + "]";				
 		}
-		result += "{" + latexify(c.getLabel()) + "}{";
+		result += "{" + DefinitionHelper.latexify(c.getLabel()) + "}{";
 		super.visit(c);
 		result += "}" + endl;
+	}
+	
+	public void visit(Collection col) {
+		List<Term> contents = col.getContents();
+		printList(contents, "\\mathrel{}");
+	}
+
+	private void printList(List<Term> contents, String str) {
+		boolean first = true;
+		for (Term trm : contents) {
+			if (first) {
+				first = false;
+			} else {
+				result += str;
+			}
+			trm.accept(this);
+		}
 	}
 	
 	
@@ -109,24 +155,118 @@ public class LatexFilter extends BasicVisitor {
 			result += "\\variable";
 		}
 		if (var.getSort() != null) {
-			result += "[" + latexify(var.getSort()) + "]";
+			result += "[" + DefinitionHelper.latexify(var.getSort()) + "]";
 		}
 		if (!var.getName().equals("_")) {
-			result += "{" + latexify(var.getName()) + "}";
+			result += "{" + DefinitionHelper.latexify(makeIndices(makeGreek(var.getName()))) + "}";
 		}
 	}
 	
+	private String makeIndices(String str) {
+		return str;
+	}
+
+	private String makeGreek(String name) {
+		return name
+		.replace("Alpha", "{\\alpha}")
+		.replace("Beta", "{\\beta}")
+		.replace("Gamma", "{\\gamma}")
+		.replace("Delta", "{\\delta}")
+		.replace("VarEpsilon", "{\\varepsilon}")
+		.replace("Epsilon", "{\\epsilon}")
+		.replace("Zeta", "{\\zeta}")
+		.replace("Eta", "{\\eta}")
+		.replace("Theta", "{\\theta}")
+		.replace("Kappa", "{\\kappa}")
+		.replace("Lambda", "{\\lambda}")
+		.replace("Mu", "{\\mu}")
+		.replace("Nu", "{\\nu}")
+		.replace("Xi", "{\\xi}")
+		.replace("Pi", "{\\pi}")
+		.replace("VarRho", "{\\varrho}")
+		.replace("Rho", "{\\rho}")
+		.replace("VarSigma", "{\\varsigma}")
+		.replace("Sigma", "{\\sigma}")
+		.replace("GAMMA", "{\\Gamma}")
+		.replace("DELTA", "{\\Delta}")
+		.replace("THETA", "{\\Theta}")
+		.replace("LAMBDA", "{\\Lambda}")
+		.replace("XI", "{\\Xi}")
+		.replace("PI", "{\\Pi}")
+		.replace("SIGMA", "{\\Sigma}")
+		.replace("UPSILON", "{\\Upsilon}")
+		.replace("PHI", "{\\Phi}")
+		;
+	}
+
 	@Override 
 	public void visit(Empty e) {
 		result += "\\dotCt{" + e.getSort() + "}";
 	}
 	
+	@Override
+	public void visit(Rule rule) {
+		result += "\\krule";
+		if (!rule.getLabel().equals("")) {
+			result += "[" + rule.getLabel() + "]";
+		}
+		result += "{" + endl;
+		rule.getBody().accept(this);
+		result +=  "}{";
+		if (rule.getCondition() != null) {
+			rule.getCondition().accept(this);
+		}
+		result += "}{"; 
+		printSentenceAttributes(rule.getAttributes()); 
+		result += "}" + endl;
+	}	
 	
-	private String latexify(String name) {
-		return name.replace("{","\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace(
-				"$", "\\$").replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}");
+	@Override
+	public void visit(Rewrite rew) {
+		result += "\\reduce{";
+		rew.getLeft().accept(this);
+		result += "}{";
+		rew.getRight().accept(this);
+		result += "}";
 	}
-
+	
+	@Override 
+	public void visit(TermCons trm) {
+		String pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
+		if (pattern == null) {
+			Production pr = DefinitionHelper.conses.get("\"" + trm.getCons() + "\"");
+			pr.accept(patternsVisitor);
+			pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
+		}
+		int n = 1;
+		LatexFilter termFilter = new LatexFilter();
+		for (Term t : trm.getContents()) {
+			termFilter.setResult("");
+			t.accept(termFilter);
+			pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
+		}
+		result += pattern;
+	}
+	
+	@Override
+	public void visit(Constant c) {
+		result += "\\constant[" + DefinitionHelper.latexify(c.getSort()) + "]{" + DefinitionHelper.latexify(c.getValue()) + "}";
+	}
+	
+	@Override
+	public void visit(MapItem mi) {
+		mi.getKey().accept(this);
+		result += "\\mapsto";		
+		mi.getItem().accept(this);
+	}
+	
+	@Override
+	public void visit(KSequence k) {
+		printList(k.getContents(), "\\kra");
+		
+	}
+	
+	
 	private void printSentenceAttributes(Map<String, String> attributes) {
 		boolean first = true;
 		String value;

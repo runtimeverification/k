@@ -43,6 +43,16 @@ public class DefinitionHelper {
 		"prefixlabel",
 	};
 	
+	public static String specialTerminals[] = {
+		"(",
+		")",
+		",",
+		"[",
+		"]",
+		"{",
+		"}",
+	};
+	
 	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	// contains a mapping from listSort to list separator
@@ -87,4 +97,13 @@ public class DefinitionHelper {
 	public static boolean isTagGenerated(String key) {
 		return (Arrays.binarySearch(generatedTags, key) >= 0);
 	}
+
+	public static boolean isSpecialTerminal(String terminal) {
+		return (Arrays.binarySearch(specialTerminals, terminal) >= 0);
+	}
+	
+	public static String latexify(String name) {
+		return name.replace("{","\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace(
+				"$", "\\$").replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}");
+	}	
 }
