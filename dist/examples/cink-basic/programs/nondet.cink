@@ -1,0 +1,8 @@
+int r; 
+int f(int x) {
+  return (r = x);
+}
+int main() {
+  r = 5;
+  return f(1) + f(2), r;
+}

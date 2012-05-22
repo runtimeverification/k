@@ -1,0 +1,19 @@
+#include <iostream>
+
+int fact(int n) {
+  int result = 1;
+  while (n > 0) {
+    result = n * result;
+    n = n - 1;
+  }
+  return result;
+}
+int main() {
+  int n;
+//  cout << "n = ";
+//  cin >> n;
+  n = 3;
+  cout << fact(n + 1);
+  return 0;
+}
+
