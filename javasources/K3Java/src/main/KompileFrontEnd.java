@@ -138,8 +138,9 @@ public class KompileFrontEnd {
 			InputStream is = process.getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
-			String line;
-			while((line = br.readLine()) != null){System.out.println(line);}
+//			String line;
+			while(br.readLine()!=null){};
+///			while((line = br.readLine()) != null){System.out.println(line);}
 
 		} catch (IOException e) {
 			KException exception = new KException(ExceptionType.ERROR, Label.CRITICAL, KMessages.ERR1001, "", "", Level.LEVEL0);
