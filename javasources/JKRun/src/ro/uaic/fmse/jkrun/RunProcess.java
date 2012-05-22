@@ -32,8 +32,7 @@ public class RunProcess {
 		ThreadedStreamHandler inputStreamHandler, errorStreamHandler;
 		try {
 			if (commands.length <= 0) {
-				System.out.println("Need command options to run");
-				System.exit(-1);
+				Error.report("Need command options to run");
 			}
 
 			// create process
@@ -46,7 +45,6 @@ public class RunProcess {
 			/*Map<String, String> environment = pb.environment();
 			environment.put("PATH", System.getenv("PATH"));
 			environment.put("K_BASE", System.getenv("K_BASE"));*/
-			// environment.put("PERL", K.perl);
 
 			// start process
 			Process process = pb.start();
@@ -91,10 +89,8 @@ public class RunProcess {
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

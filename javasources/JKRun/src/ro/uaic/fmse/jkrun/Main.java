@@ -17,8 +17,7 @@ public class Main {
 
 	private static final String USAGE = "krun [options] <file>" + K.lineSeparator;
 	private static final String HEADER = "";
-	private static final String FOOTER = K.lineSeparator + "krun also has several predefined option groups such as --search," + K.lineSeparator
-			+ "--config, and --no-config. These predefined groups can be found in " + K.lineSeparator + "$K_BASE/tools/global-defaults.desk";
+	private static final String FOOTER = "";
 
 	public static void printUsage(Options options) {
 		HelpFormatter helpFormatter = new HelpFormatter();
@@ -42,15 +41,13 @@ public class Main {
 			String realTime = p.getSearchTagAttr(file, "real-time-ms");
 			String cpuTime = p.getSearchTagAttr(file, "cpu-time-ms");
 			String rewritesPerSecond = p.getSearchTagAttr(file, "rewrites-per-second");
-			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "states: " + totalStates + " rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond
-					+ " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL);
+			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "states: " + totalStates + " rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL);
 		} else {
 			String totalRewrites = p.getResultTagAttr(file, "total-rewrites");
 			String realTime = p.getResultTagAttr(file, "real-time-ms");
 			String cpuTime = p.getResultTagAttr(file, "cpu-time-ms");
 			String rewritesPerSecond = p.getResultTagAttr(file, "rewrites-per-second");
-			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)"
-					+ PrettyPrintOutput.ANSI_NORMAL);
+			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL);
 		}
 	}
 
@@ -61,7 +58,7 @@ public class Main {
 		String solutionNumber = p.getSearchTagAttr(file, "solution-number");
 		String stateNumber = p.getSearchTagAttr(file, "state-number");
 		System.out.println("Search results:\n");
-		AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "Solution: " + solutionNumber + ", state " + stateNumber + PrettyPrintOutput.ANSI_NORMAL);
+		AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "Solution " + solutionNumber + ", state " + stateNumber + ":" + PrettyPrintOutput.ANSI_NORMAL);
 	}
 
 	public static String initOptions(String path, String lang) {
@@ -88,7 +85,7 @@ public class Main {
 				Error.report("\nMultiple compiled definitions found.\nPlease use only one of: " + str.toString());
 			} else if (maudeFiles.size() == 1) {
 				if (lang.length() > 0) {
-					result = K.k_definition + "-compiled.maude";
+					/*result = K.k_definition + "-compiled.maude";*/
 				}
 			}
 		} catch (IOException e) {
@@ -97,12 +94,13 @@ public class Main {
 		return result;
 	}
 
-	public static void resolveOption(String optionName, String lang, CommandLine cmd) {
+	public static void resolveOption(String optionName, String lang,
+			CommandLine cmd) {
 		String s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
 		int sep = s.lastIndexOf(K.fileSeparator);
 		String str = s.substring(sep + 1).toUpperCase();
 		int index;
-		
+
 		if (optionName == "compiled-def") {
 			if (cmd.hasOption("k-definition")) {
 				K.compiled_def = s + "-compiled.maude";
@@ -127,7 +125,7 @@ public class Main {
 		CommandLine cmd = cmd_options.parse(cmds);
 		try {
 			// Parse the program arguments
-            
+
 			if (cmd.hasOption('h') || cmd.hasOption('?')) {
 				K.help = true;
 			}
@@ -140,7 +138,7 @@ public class Main {
 			}
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
-				//K.k_definition = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
+				// K.k_definition = FileUtil.dropKExtension(K.k_definition, ".",K.fileSeparator);
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");
@@ -212,8 +210,7 @@ public class Main {
 				K.debug = true;
 				Error.report("You have to provide some labels in order to start debugging.");
 			}
-			if (cmd.hasOption("trace"))
-			{
+			if (cmd.hasOption("trace")) {
 				K.trace = true;
 			}
 
@@ -255,9 +252,9 @@ public class Main {
 			if (!cmd.hasOption("k-definition")) {
 				K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
 			}
-			
+
 			initOptions(K.userdir, lang);
-   
+
 			if (!cmd.hasOption("compiled-def")) {
 				resolveOption("compiled-def", lang, cmd);
 			}
@@ -267,7 +264,7 @@ public class Main {
 			if (!cmd.hasOption("syntax-module")) {
 				resolveOption("syntax-module", lang, cmd);
 			}
-			
+
 			if (FileUtil.getExtension(K.k_definition, ".").length() == 0) {
 				K.k_definition = K.k_definition + ".k";
 			}
@@ -280,28 +277,36 @@ public class Main {
 				Error.report("\nCould not find compiled definition: " + K.compiled_def + "\nPlease compile the definition by using `kompile'.");
 			}
 
-			/*System.out.println("K.k_definition=" + K.k_definition);
-			System.out.println("K.syntax_module=" + K.syntax_module);
-			System.out.println("K.main_module=" + K.main_module);*/
+			/*
+			 * System.out.println("K.k_definition=" + K.k_definition);
+			 * System.out.println("K.syntax_module=" + K.syntax_module);
+			 * System.out.println("K.main_module=" + K.main_module);
+			 */
 
 			// in KAST variable we obtain the output from running kast process on a program defined in K
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
 
 			if (K.parser.equals("kast")) {
-				//rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
-				//rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
+				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
+				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
 				rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, K.pgm });
 			} else {
+				K.parser = new File(K.parser).getCanonicalPath();
 				System.out.println("The external parser to be used is:" + K.parser);
 				// code to execute the external parser
-				rp.execute(new String[] { K.parser, "--k-definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
-				// System.exit(0);
+				rp.execute(new String[] { K.parser, K.pgm });
 			}
 			if (rp.getErr() != null) {
+			  if (K.parser.equals("kast")) {
 				Error.report("kast error:" + rp.getErr());
 				Error.report("\nAttempted command:\n" + "kast --definition=" + K.k_definition + " " + K.pgm);
-		    }
+			  }
+			  else {
+				  Error.report("parser error:" + rp.getErr());
+				  Error.report("\nAttempted command:\n" + K.parser + " " + K.pgm);
+			  }
+			}
 			if (rp.getStdout() != null) {
 				KAST = rp.getStdout();
 			}
@@ -320,10 +325,10 @@ public class Main {
 			} else {
 				s = "set show command off ." + K.lineSeparator + "erew #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
 			}
-			
+
 			if (K.trace)
 				s = "set trace on ." + K.lineSeparator + s;
-			
+
 			FileUtil.createFile(K.maude_io_cmd, s);
 
 			// run IOServer
@@ -361,11 +366,11 @@ public class Main {
 			}
 
 			// save the pretty-printed output of jkrun in a file
-			//FileUtil.createFile(K.krun_output, prettyOutput);
+			// FileUtil.createFile(K.krun_output, prettyOutput);
 
 			// delete temporary files
-			 FileUtil.deleteFile(K.maude_io_cmd);
-			 FileUtil.deleteFile(K.maude_output);
+			FileUtil.deleteFile(K.maude_io_cmd);
+			FileUtil.deleteFile(K.maude_output);
 
 			System.exit(1);
 
@@ -382,9 +387,9 @@ public class Main {
 
 	}
 
-	public static void main(String[] args) {	
+	public static void main(String[] args) {
 		execute_Krun(args);
-		
+
 	}
 
 }
