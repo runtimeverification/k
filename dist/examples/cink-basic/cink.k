@@ -10,7 +10,7 @@ module CINK-SYNTAX
 
   /* \subsection{Expressions} */
 
-  syntax Exp ::= Id | Int | Bool | String
+  syntax Exp ::= Id | Int | Bool | String | Val
                | "(" Exp ")"  [bracket]
                | Id "(" Exps ")" [prec(0), strict(1)]
                | "&" Exp
@@ -31,14 +31,15 @@ module CINK-SYNTAX
                  Exp "&&" Exp [left, strict(1)]
                > 
                 Exp "||" Exp [left, strict(1)]
-               > 
-                 "cout" "<<" Exp [left, strict]
-               | "cin" ">>" Id [left]
+               > left:
+                 Exp "<<" Exp [left, strict]
+               | Exp ">>" Exp [left, strict(1)]
                >
                  Exp "=" Exp [right, strict(2)]
                
 
-  syntax #Id ::= "main"
+  syntax #Id ::= "main" 
+  syntax Val ::= "cout" | "cin"
 
   /* \subsection{Statements} */
 
@@ -81,9 +82,8 @@ module CINK
 
   /* \subsection{Auxiliary constructs.} */
 
-  // extends the expressions with the new values and other constructs
-  syntax Exp ::= Val 
-               | "lvalue" "(" K ")"
+  // extends the expressions with other constructs
+  syntax Exp ::=  "lvalue" "(" K ")"
                | "valFromLoc" "(" K ")" [strict]
 
   syntax K ::= "undefined" | "execute"
@@ -158,9 +158,19 @@ module CINK
 
    rule [var-decl] :
        <k> Decl:Decl => void  ...</k>      
-       <env>...  . => (getName(Decl) |-> L)  ...</env>
+       <env> Env:Map => Env[L/getName(Decl)] </env>
        <store>... . => (L |-> undefined) ...</store>
        <nextLoc> L:Int => (L +Int 1) </nextLoc>
+      [structural]
+
+   rule [alias-decl] :
+       <k> int & X:Id = Y:Id => void  ...</k>      
+       <env> Y |-> L:Int (Env:Map => Env[L/X]) </env>
+      [structural]
+
+   rule [alias-decl] :
+       <k> bool & X:Id = Y:Id => void  ...</k>      
+       <env> Y |-> L:Int (Env:Map => Env[L/X]) </env>
       [structural]
 
   rule [include] :
@@ -175,20 +185,15 @@ module CINK
   /* \subsection{Memmory operations.} */
 
 
-  rule <k> lvalue(X:Id) => lookup(X, ([Env] Stack)) ...</k>
-       <env> Env:Map </env>
-       <bstack> Stack:List </bstack>
-       [structural]
+  rule [mem-lookup-lvalue] :
+       <k> lvalue(X:Id) => loc(L) ...</k>
+       <env>... X |-> L:Int ...</env>
 
-  rule [mem-lookup] :
-       <k> X:Id => valFromLoc(lookup(X, ([Env] Stack))) ...</k>
-       <env> Env:Map </env>
-       <bstack> Stack:List </bstack>
 
-  rule [mem-lookup] :
-       <k> valFromLoc(loc(L:Int)) => V  ...</k>
-       <store>... (L |-> V:Val) ...</store>
-       [structural]
+  rule [mem-lookup-rvalue] :
+       <k> X:Id => V ...</k>
+       <env>... X |-> L:Int ...</env>
+       <store>... L |-> V:Val ...</store>
 
   context (HOLE => lvalue(HOLE)) = _
   rule [mem-update] :
@@ -222,11 +227,11 @@ module CINK
   /* \subsection{Input/Output Statements.} */
 
   rule [print-stream]:
-       <k> cout << V:Val => void  ...</k>  
-       <out>... . => (ListItem(V) ListItem(";")) </out>
+       <k> cout << V:Val => cout  ...</k>  
+       <out>... . => (ListItem(V) ListItem(" ")) </out>
 
   rule [read-stream]:
-       <k> cin >> X:Id => void  ...</k>
+       <k> cin >> X:Id => cin  ...</k>
        <env>...  X |-> L:Int  ...</env>
        <store>... L |-> (_ => I)  ...</store>
        <in> (ListItem(I:Int) => .)  ...</in>
@@ -265,26 +270,6 @@ module CINK
        [supercool]
 
   /* \subsection{Auxiliary Functions and Rules.} */
-
-  // \texttt{lookup} returns the location of a name \texttt{X}
-
-  syntax K ::= "lookup" "(" Id "," List ")"
-
-  rule lookup(X:Id, [(X:Id |-> L:Int) _:Map] _:List)
-       =>
-       loc(L) 
-       [function, anywhere]
-
-  rule lookup(X:Id, [(Y:Id |-> _:Int) Env:Map] Stack:List)
-       =>
-       lookup(X, [Env] Stack)
-       when X =/=K Y
-       [function, anywhere]
-
-  rule lookup(X:Id, [.Map] Stack:List)
-       =>
-       lookup(X, Stack) 
-       [function, anywhere]
 
 
   // \texttt{bindto} binds formal parameters to actual parameters 

@@ -1,0 +1,8 @@
+
+int main() {
+  int a = 5;
+  int &b = a;
+  b = 10;
+  cout << a << b;
+  return 0;
+}

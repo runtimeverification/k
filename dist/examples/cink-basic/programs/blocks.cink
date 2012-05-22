@@ -1,0 +1,21 @@
+int main() {
+  int x = 1;
+  int y = 2;
+  {
+    int x = 11;
+    cout << x << y << "\n";
+    {
+      int y = 112;
+      cout << x;
+      cout << y;
+      cout << "\n";
+    }
+    cout << x;
+    cout << y;
+    cout << "\n";
+  }
+  cout << x;
+  cout << y;
+  cout << "\n";
+  return 0;
+}

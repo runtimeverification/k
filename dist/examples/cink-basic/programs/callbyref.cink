@@ -12,8 +12,7 @@ int g(int &x, int &y) {
 int main () {
   int x;
   int y;
-  cin >> x;
-  cin >> y;
+  cin >> x >> y;
 //  f(x);
 //  cout << x;
   g(y, x);
