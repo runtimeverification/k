@@ -44,6 +44,7 @@ public class Rule extends Sentence {
 
 	public Rule(Rule node) {
 		super(node);
+		this.label = node.getLabel();
 	}
 
 	public void setLabel(String label) {
