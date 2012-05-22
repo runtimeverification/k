@@ -93,11 +93,15 @@ public class Definition implements Cloneable {
 					XmlLoader.addFilename(doc.getFirstChild(), file.getAbsolutePath());
 					XmlLoader.reportErrors(doc);
 
-					// parse the string again to extract the comments
-					String parsedLatex = K3LatexParser.ParseKString(content);
-					Document docLatex = XmlLoader.getXMLDoc(parsedLatex);
-					XmlLoader.addFilename(docLatex.getFirstChild(), file.getAbsolutePath());
-					XmlLoader.reportErrors(docLatex);
+					String parsedLatex = null;
+					Document docLatex = null;
+					if (GlobalSettings.latex) {
+						// parse the string again to extract the comments
+						parsedLatex = K3LatexParser.ParseKString(content);
+						docLatex = XmlLoader.getXMLDoc(parsedLatex);
+						XmlLoader.addFilename(docLatex.getFirstChild(), file.getAbsolutePath());
+						XmlLoader.reportErrors(docLatex);
+					}
 
 					if (firstTime) {
 						// add automatically the autoinclude.k file
@@ -117,7 +121,9 @@ public class Definition implements Cloneable {
 					}
 
 					NodeList xmlModules = doc.getDocumentElement().getElementsByTagName(Tag.module);
-					NodeList xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.comment);
+					NodeList xmlComments = null;
+					if (GlobalSettings.latex)
+						xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.comment);
 					// TODO: insert latex comments in the def.xml
 
 					java.util.List<Module> modulesTemp = new ArrayList<Module>();
@@ -128,13 +134,17 @@ public class Definition implements Cloneable {
 						// used later when including SHARED module
 						if (file.getAbsolutePath().startsWith(new File(KPaths.getKBase(false) + "/include/").getAbsolutePath()))
 							km.setPredefined(true);
-						km.addComments(xmlComments);
+						if (GlobalSettings.latex)
+							km.addComments(xmlComments);
 
 						modulesTemp.add(km);
 						modulesMap.put(km.getModuleName(), km);
 					}
 
-					modules.addAll(Definition.mergeModuleAndComments(modulesTemp, xmlComments));
+					if (GlobalSettings.latex)
+						modules.addAll(Definition.mergeModuleAndComments(modulesTemp, xmlComments));
+					else
+						modules.addAll(modulesTemp);
 
 					filePaths.add(cannonicalPath);
 				} else {
@@ -253,7 +263,8 @@ public class Definition implements Cloneable {
 									// do nothing for programs
 								} else if (prd.isSubsort()) {
 									outsides.add(prd);
-								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
+								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1
+										&& (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
 									// constants.add(prd);
 									String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
 									String sort = prd.getProdSort().getSortName();

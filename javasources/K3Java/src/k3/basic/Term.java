@@ -23,10 +23,10 @@ public abstract class Term implements Cloneable {
 	}
 
 	public Term(Node node) {
+		this.xmlTerm = node;
 		Element el = (Element) node;
 		this.location = el.getAttribute(Tag.location);
 		this.filename = el.getAttribute(Tag.filename);
-		this.xmlTerm = node;
 	}
 
 	public void copy(Term t) {

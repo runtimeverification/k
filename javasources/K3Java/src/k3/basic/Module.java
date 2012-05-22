@@ -4,6 +4,7 @@ import java.util.*;
 
 import k.utils.Tag;
 import k.utils.XmlLoader;
+import k3.basic.Sentence.SentenceType;
 
 import org.w3c.dom.*;
 
@@ -46,8 +47,7 @@ public class Module extends ModuleItem implements Cloneable {
 	}
 
 	public Module(Node module, String filename) {
-		this.filename = filename;
-		this.xmlTerm = module;
+		super(module);
 
 		// set module name
 		setModuleName(module);
@@ -133,7 +133,11 @@ public class Module extends ModuleItem implements Cloneable {
 			el.removeChild(el.getLastChild());
 		Document doc = el.getOwnerDocument();
 		for (Sentence s2 : sentences) {
-			Element elm = (Element) doc.importNode(s2.xmlTerm, true);
+			Element elm;
+			if (s2.getType() == SentenceType.COMMENT)
+				elm = (Element) doc.importNode(s2.xmlTerm, true);
+			else
+				elm = (Element) s2.xmlTerm;
 			s2.xmlTerm = elm;
 			el.appendChild(elm);
 		}

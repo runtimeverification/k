@@ -14,8 +14,8 @@ public class CommentDef extends ModuleItem {
 		return this;
 	}
 
-	public CommentDef() {
-	}
+//	public CommentDef() {
+//	}
 
 	public CommentDef(Node node) {
 		super(node);

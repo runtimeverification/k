@@ -7,6 +7,7 @@ public class GlobalSettings {
 	public static boolean noFilename = false;
 	public static String startFile = "";
 	public static String lib = ""; 
+	public static boolean latex = false; 
 	public static String synModule = null;
 	public static KExceptionManager kem = new KExceptionManager();
 }

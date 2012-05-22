@@ -36,10 +36,8 @@ public class Priority extends Term {
 		setProductions(new ArrayList<Production>());
 
 		NamedNodeMap attr = node.getAttributes();
-		Node item = attr.getNamedItem(Tag.location);
-		location = item.getNodeValue();
 
-		item = attr.getNamedItem(Tag.assoc);
+		Node item = attr.getNamedItem(Tag.assoc);
 		if (item != null)
 			blockAssoc = item.getNodeValue();
 

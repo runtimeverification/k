@@ -108,6 +108,7 @@ public class KompileFrontEnd {
 
 	public static String latex(File mainFile, String mainModule) {
 		try {
+			GlobalSettings.latex = true;
 			// compile a definition here
 			Stopwatch sw = new Stopwatch();
 
