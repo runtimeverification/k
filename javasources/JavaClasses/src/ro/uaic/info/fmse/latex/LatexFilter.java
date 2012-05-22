@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.List;
 
 import ro.uaic.info.fmse.k.*;
+import ro.uaic.info.fmse.k.LiterateComment.LiterateCommentType;
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
@@ -13,9 +14,11 @@ import ro.uaic.info.fmse.parsing.BasicVisitor;
 public class LatexFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
 	private String result="";
+	private String preamble="";
 	private boolean firstProduction = false;
 	private Map<String,String> colors = new HashMap<String,String>();
 	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
+	
 
 	public void setResult(String result) {
 		this.result = result;
@@ -266,12 +269,34 @@ public class LatexFilter extends BasicVisitor {
 		
 	}
 	
+	@Override
+	public void visit(LiterateDefinitionComment comment) {
+		if (comment.getType()==LiterateCommentType.LATEX) {
+			result += "\\begin{kblock}[text]" + endl;
+			result += comment.getValue();
+			result += "\\end{kblock}" + endl;		
+		} else if (comment.getType()==LiterateCommentType.PREAMBLE) {
+			preamble += comment.getValue();
+		}
+	}
+	
+	@Override
+	public void visit(LiterateModuleComment comment) {
+		if (comment.getType()==LiterateCommentType.LATEX) {
+			result += "\\begin{kblock}[text]" + endl;
+			result += comment.getValue();
+			result += "\\end{kblock}" + endl;		
+		} else if (comment.getType()==LiterateCommentType.PREAMBLE) {
+			preamble += comment.getValue();
+		}
+	}	
 	
 	private void printSentenceAttributes(Map<String, String> attributes) {
 		boolean first = true;
 		String value;
 		for (Map.Entry<String, String> entry : attributes.entrySet()) {
 			if (DefinitionHelper.isTagGenerated(entry.getKey())) continue;
+			if (entry.getKey().equals("latex")) continue;
 			if (first) {
 				first = false;
 			} else {
