@@ -428,11 +428,11 @@
 % Syntax rules.
 \newlength{\syntaxlength}  % The amount of indention for continued rules.
 
-\newcommand{\syntax}[3]{\rulebox{%
+\newcommand{\syntax}[3][\defSort]{\rulebox{%
 \mbox{\scshape syntax}\hspace{1em}$#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
 }\k@markPosition%
 }
-\newcommand{\syntaxCont}[3]{\par\indent\rulebox{%
+\newcommand{\syntaxCont}[3][\defSort]{\par\indent\rulebox{%
   $\setlength{\syntaxlength}{\widthof{$\mathrel{::=}$}}%
   \setlength{\syntaxlength}{.5\syntaxlength}%
   \addtolength{\syntaxlength}{\widthof{\mbox{\scshape syntax}\hspace{1em}$#1$}}%
@@ -445,7 +445,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 }}
 
 
-\newenvironment{syntaxBlock}{\par\indent\ }{\par\ \par}
+\newenvironment{syntaxBlock}[1]{\newcommand{\defSort}{#1}\par\indent\ }{\par\ \par}
 
 
 % Non-terminals.
@@ -902,7 +902,7 @@ rectangle,rectangle
   }%
 }
 
-\newcommand{\krule}[4]{%
+\newcommand{\krule}[4][]{%
 \wrapRules{%
   \rulebox{%
     \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
@@ -917,7 +917,7 @@ rectangle,rectangle
 }%
 }
 
-\newcommand{\kruleb}[4]{\begin{kblock}\krule{#1}{#2}{#3}{#4}\end{kblock}}
+\newcommand{\kruleb}[4]{\begin{kblock}\krule[#1]{#2}{#3}{#4}\end{kblock}}
 
 
 \ifk@poster
