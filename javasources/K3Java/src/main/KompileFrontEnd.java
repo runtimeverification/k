@@ -96,6 +96,8 @@ public class KompileFrontEnd {
 			maudify(mainFile, lang);
 		} else if (cmd.hasOption("latex")) {
 			latex(mainFile, lang);
+		} else if (cmd.hasOption("pdf")) {
+			pdf(mainFile, lang);
 		} else {
 			// default option: if (cmd.hasOption("compile"))
 			compile(mainFile, lang);
@@ -104,6 +106,34 @@ public class KompileFrontEnd {
 			sw.printTotal("Total           = ");
 		List<Level> levels = null;
 		GlobalSettings.kem.print(levels);
+	}
+
+	private static void pdf(File mainFile, String lang) {
+		latex(mainFile, lang);
+		
+//		try {
+//			// Run pdflatex.
+//			String pdfLatex = "pdflatex";
+//			String fileSep = System.getProperty("file.separator");
+//			File f = mainFile.getCanonicalFile();
+//			String argument = "";
+//			System.out.println(argument);
+//			
+//			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument);
+//			Process process;
+//
+//			process = pb.start();
+//			process.wait();
+//			if (process.exitValue() == 0)
+//				System.out.println("Ok.");
+//			else System.out.println("Not ok");
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	public static String latex(File mainFile, String mainModule) {
@@ -231,6 +261,8 @@ public class KompileFrontEnd {
 			
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.tex", latexified);
 
+			FileUtil.saveInFile(f.getAbsolutePath().replaceFirst("\\.k$", "") + ".tex", latexified);
+			
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Latexif         = ");
 			}
