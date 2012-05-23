@@ -45,10 +45,13 @@ public abstract class Command implements Runnable {
 		}
 		try {
 			_logger.info("Closing client socket for " + maudeId);
-			//if (output != null) {output.close();}
+//			socket.shutdownOutput();
+//			if (output != null) {output.close();}
+			Thread.sleep(100);   // There should exist a better solution for this problem
 			socket.close();
 		} catch (Exception e) {
 			_logger.info("failed to close socket for " + maudeId);
+			e.printStackTrace();
 		}
 	}
 }
