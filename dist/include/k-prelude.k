@@ -4,6 +4,12 @@ interface K-TECHNIQUE
 	// all in SDF directly
 endinterface
 
+interface K-LISTK-EXTRAS
+  imports K-TECHNIQUE
+  
+  syntax Bool ::= K "inList{K}" List{K}
+endinterface
+
 interface K-MAP-EXTRAS
 	imports K-TECHNIQUE
 	//imports BOOL
@@ -107,7 +113,7 @@ interface K
   //imports K-CONTEXTS  
   imports K-DESTRUCTORS           // defines getKLabel and getList{K} for K
   //imports K-EXTRAS                // defines a KLabel substitution 
-  //imports K-LISTK-EXTRAS  
+  imports K-LISTK-EXTRAS  
   imports K-LIST-EXTRAS  
   imports K-MAP-EXTRAS            // operations on Maps
   imports K-BAG-EXTRAS            // operations on Bags

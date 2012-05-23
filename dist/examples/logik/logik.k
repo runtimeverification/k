@@ -63,8 +63,8 @@ module LOGIK-SEMANTICS
 
 
 /*@ Unify the goal with the clause head and replace the goal with the clause body.  */
-  rule Lit:Literal :- Lits:Literals. ~> Lit':Literal,Lits':Literals
-    => unify(Lit,Lit') ~> Lits @ Lits'
+  rule (Lit:Literal :- Lits:Literals.) ~> (Lit':Literal,Lits':Literals)
+    => unify(Lit,Lit') ~> (Lits @ Lits')
 
 //@ if the unification succeeded, apply the mgu to the goals and the solution.
   rule <k> subst(Eqns:List{K}) ~> Lits:Literals 
@@ -91,9 +91,8 @@ module LOGIK
 //@ Initialization
 
 //@ Add clauses to the set of clauses
-  rule <k> Clause Pgm:K => Pgm </k>
-       <clauses>... . => BagItem(Clause) ...</clauses>
-  where Clause =  _`(_`)(X:Id,Params:Literals) :- Body:Literals.
+  rule <k>  X:Id(Params:Literals) :- Body:Literals. Pgm:K => Pgm </k>
+       <clauses>... . => BagItem(X:Id(Params:Literals) :- Body:Literals.) ...</clauses>
 
 /*@ To preserve the variables in the query we generate a substitution mapping 
 them to fresh variables, then we save this substitution as the current solution,
@@ -125,8 +124,8 @@ the solution.
 
 
   rule printLit(X:Id) => printStr(Id2String(X))
-  rule printLit(X:Id()) => printStr(Id2String(X)) 
-  rule printLit(_`(_`)(X:Id,(Lit:Literal,Lits:Literals))) 
+  rule printLit(X:Id(.Literals)) => printStr(Id2String(X)) 
+  rule printLit(X:Id(Lit:Literal,Lits:Literals)) 
     => printStr(Id2String(X)) ~> printStr("(") ~> printLits(Lit,Lits) ~> printStr(")") 
   rule printLits(Lit:Literal,Lit':Literal,Lits:Literals) 
     => printLit(Lit) ~> printStr(", ") ~> printLits(Lit',Lits)
@@ -135,11 +134,11 @@ the solution.
   rule <k> printStr(Str:String) => . ...</k>
       <solution>... . => ListItem(Str) </solution>
 
-  rule printLit([]) => printStr("[]")
+  rule printLit([.Literals]) => printStr("[]")
   rule printLit([Lit:Literal|Lit':Literal])
     => printStr("[") ~> printList([Lit:Literal|Lit':Literal]) ~> printStr("]")
 
-  rule printList([Lit:Literal|[]]) => printLit(Lit)
+  rule printList([Lit:Literal|[.Literals]]) => printLit(Lit)
   rule printList([Lit1:Literal|[Lit2:Literal|Lit':Literal]])
     => printLit(Lit1) ~> printStr(", ") ~> printList([Lit2|Lit'])
 

@@ -42,19 +42,19 @@ rule K1 subTerm K2 => K1 ==K K2 orElseBool K1 properSubTerm K2
    [structural, anywhere]
   syntax Bool ::= K "properSubTerm" K [function]
   rule K1 properSubTerm L:KLabel(.List{K}) => false   [structural, anywhere]
-  rule K1 properSubTerm L:KLabel(K2,,Ks:List{K}) 
-      => K1 subTerm K2 orElseBool K1 properSubTerm L(Ks)
+  rule K1:K properSubTerm L:KLabel(K2:K,,Ks:List{K}) 
+      => (K1 subTerm K2) orElseBool (K1 properSubTerm L:KLabel(Ks))
    [structural, anywhere]
 /*@ Generic first order substitution on K ASTs.  
 Note that ~> is not handled  and neither are binding operations.
 */
 
-  rule substitute(X,,K,,.List{K}) => .List{K}   [structural, anywhere]
-  rule substitute(X,,K,,K1,,K2,,Ks:List{K})
+  rule substitute(X:K,,K:K,,.List{K}) => .List{K}   [structural, anywhere]
+  rule substitute(X:K,,K:K,,K1:K,,K2:K,,Ks:List{K})
       => substitute(X,,K,,K1),,substitute(X,,K,,K2),,substitute(X,,K,,Ks)   [structural, anywhere]
-  rule substitute(X,,K,,X) => K   [structural, anywhere]
-  rule substitute(X,,K,,L(Ks:List{K})) => L(substitute(X,,K,,Ks))
-    when X =/=K L(Ks)
+  rule substitute(X:K,,K:K,,X) => K   [structural, anywhere]
+  rule substitute(X:K,,K:K,,L:KLabel(Ks:List{K})) => L:KLabel(substitute(X,,K,,Ks))
+    when X =/=K L:KLabel(Ks)
    [structural, anywhere]
 
   syntax K ::= "unify" "(" K "," K ")" [function]
@@ -70,8 +70,8 @@ constraint.
       => unifyEqs(subst(Ks),,eqns(applySubst(subst(Ks),eqn(K1,,K2))))
    [structural, anywhere]
   syntax K ::= "applySubst" "(" K "," K ")" [function]
-  rule applySubst(subst((eqn(K1,,K2) => .List{K}),,_), 
-                    (K => substitute(K1,, K2,, K)))   [structural, anywhere]
+  rule applySubst(subst((eqn(K1:K,,K2:K) => .List{K}),,_), 
+                    (K:K => substitute(K1,, K2,, K)))   [structural, anywhere]
   rule applySubst(subst(.List{K}),K) => K   [structural, anywhere]
   
   syntax KLabel ::= "unifyEqs" | "subst" | "vars" | "substitute" 

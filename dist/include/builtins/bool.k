@@ -11,8 +11,10 @@ module BOOL-HOOKS
 
   syntax Bool ::= "notBool" Bool			[function, left, latex("\neg_{\scriptstyle\it Bool}{#1}")]
 				> Bool "andBool" Bool		[function, left, latex("{#1}\wedge_{\scriptstyle\it Bool}{#2}")]
+                                | K "andThenBool" K              [function, left]
 				> Bool "xorBool" Bool		[function, left]
 				> Bool "orBool" Bool		[function, left, latex("{#1}\vee_{\scriptstyle\it Bool}{#2}")]
+                                | K "orElseBool" K              [function, left]
 				> Bool "impliesBool" Bool	[function, left]
 				> left:
 				  Bool "==Bool" Bool		[function, left, hook(#BOOL:_==Bool_)]
@@ -33,6 +35,11 @@ module BOOL-HOOKS
   rule true impliesBool B:Bool => B [function, anywhere]
   rule false impliesBool _:Bool => true [function, anywhere]
 
+  rule true orElseBool _ => true [anywhere]
+  rule false orElseBool K:K => K [anywhere]
+
+  rule false andThenBool _ => false [anywhere]
+  rule true andThenBool K:K => K [anywhere]
 
   //syntax KLabel ::= "'#andBool" // People should not be using this
 
