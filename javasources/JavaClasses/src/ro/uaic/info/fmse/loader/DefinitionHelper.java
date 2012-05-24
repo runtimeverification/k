@@ -103,7 +103,7 @@ public class DefinitionHelper {
 	}
 	
 	public static String latexify(String name) {
-		return name.replace("{","\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace(
+		return name.replace("_","\\_").replace("{","\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace(
 				"$", "\\$").replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}");
 	}	
 }
