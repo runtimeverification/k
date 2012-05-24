@@ -1,6 +1,7 @@
 require "unification.k"
 
 module LOGIK-SYNTAX
+  imports BUILTIN-SYNTAX-HOOKS
   syntax Literal ::=  Id 
                    | Id "(" Literals ")" [prec(0)]
                    > "[" Literals "]"
@@ -12,16 +13,6 @@ module LOGIK-SYNTAX
   syntax Query ::= "?-" Literals "." [prec(70)]
   syntax Pgm ::= Query
                > Clause Pgm [prec(90)]
-
-/*@ Normalizing the definition. 
-Almost complete --- See additional rule in the semantics module. */
-  rule Lit:Literal. => Lit :- .Literals .  [anywhere,structural]
-  rule X:Id :- Lits:Literals. => X(.Literals) :- Lits.  [anywhere,structural]
-
-  rule [.Literals | L:Literal ] => L  [anywhere,structural]
-  rule [L:Literal,Lits:Literals] => [L | [Lits]]  [anywhere,structural]
-  rule [L1:Literal,L2:Literal,Lits:Literals|L':Literal]
-      => [L1|[L2|[Lits|L']]]  [anywhere,structural]
 
 endmodule
 
@@ -50,7 +41,15 @@ module LOGIK-SEMANTICS
   when asciiString(substrString(Id2String(K),0,1)) <Int 96  
   [anywhere,structural]
 
-//@ Normalizing all ids which are not used for unification
+//@ Normalizing the definition. 
+  rule Lit:Literal. => Lit :- .Literals .  [anywhere,structural]
+  rule X:Id :- Lits:Literals. => X(.Literals) :- Lits.  [anywhere,structural]
+
+  rule [.Literals | L:Literal ] => L  [anywhere,structural]
+  rule [L:Literal,Lits:Literals] => [L | [Lits]]  [anywhere,structural]
+  rule [L1:Literal,L2:Literal,Lits:Literals|L':Literal]
+      => [L1|[L2|[Lits|L']]]  [anywhere,structural]
+
   rule X:Id,Lits:Literals => X(.Literals),Lits 
   when 'isUnificationVar(X) =/=K true
   [anywhere]

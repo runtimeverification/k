@@ -15,6 +15,6 @@ parents(X,X).
 parents(A,B):-
   ancestor(A,B).
 
-pr(l(X)) :- ancestor(_1,X), ancestor(X,_2).
+pr(l(X)) :- ancestor(Anon1,X), ancestor(X,Anon2).
 
 ?- pr(Y).
