@@ -1,14 +1,24 @@
 package ro.uaic.info.fmse.transitions.maude;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import ro.uaic.info.fmse.k.Definition;
 import ro.uaic.info.fmse.k.DefinitionItem;
+import ro.uaic.info.fmse.k.Import;
+import ro.uaic.info.fmse.k.Module;
+import ro.uaic.info.fmse.k.ModuleItem;
+import ro.uaic.info.fmse.k.PriorityBlock;
+import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.parsing.BasicVisitor;
 
 public class MaudeVisitor extends BasicVisitor {
 
-	private String maudified;
-	private String contents;
+	private String maudified = "";
+	private String contents = "";
+	private Set<String> declaredSorts = new HashSet<String>();
+	
 	
 	public void visit(Definition node) {
 		String uris = "";
@@ -16,8 +26,8 @@ public class MaudeVisitor extends BasicVisitor {
 			// if (di instanceof Module && ((Module)di).name.equals("URIS"))
 			// uris = di.toMaude();
 			// else
-			visit(di);
-//			content += di.toMaude() + " \n";
+			di.accept(this);
+			// content += di.toMaude() + " \n";
 		}
 
 		// klabels
@@ -44,7 +54,7 @@ public class MaudeVisitor extends BasicVisitor {
 
 		// sorts & automatic subsortation to K
 		String sorts = "";
-		for (String s : MaudeHelper.declaredSorts) {
+		for (String s : declaredSorts) {
 			if (!MaudeHelper.basicSorts.contains(s))
 				sorts += s + " ";
 		}
@@ -52,11 +62,39 @@ public class MaudeVisitor extends BasicVisitor {
 		if (!sorts.equals(""))
 			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
 
-		String shared = "mod " + Constants.SHARED + " is\n  including K .\n" + klabels + sorts + cellLabels + "\nendm";
+		String shared = "mod " + Constants.SHARED + " is\n  including K .\n"
+				+ klabels + sorts + cellLabels + "\nendm";
 
 		setMaudified(uris + "\n" + shared + "\n" + contents);
 	}
 
+	@Override
+	public void visit(Module node) {
+		if (!node.getType().equals("interface")) {
+
+			node.getItems().add(0, new Import(Constants.SHARED));
+			if (!node.isPredefined())
+				node.getItems().add(0, new Import("URIS"));
+
+			contents += "mod " + node.getName() + " is\n";
+			for (ModuleItem mi : node.getItems()) {
+				// content += mi.toMaude() + "\n";
+				mi.accept(this);
+			}
+
+			contents += "\nendm\n";
+		}
+	}
+
+	
+	@Override
+	public void visit(Syntax node) {
+		for (PriorityBlock pb : node.getPriorityBlocks()) {
+			pb.accept(this);
+		}
+	}
+	
+	
 	public String getMaudified() {
 		return maudified;
 	}
