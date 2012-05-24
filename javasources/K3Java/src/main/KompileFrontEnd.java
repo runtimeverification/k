@@ -20,8 +20,6 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.thoughtworks.xstream.XStream;
-
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.Label;
@@ -34,6 +32,8 @@ import ro.uaic.info.fmse.loader.AmbFilter;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.pp.Preprocessor;
 
+import com.thoughtworks.xstream.XStream;
+
 public class KompileFrontEnd {
 
 	public static void kompile(String[] args) {
@@ -42,11 +42,16 @@ public class KompileFrontEnd {
 
 		CommandLine cmd = op.parse(args);
 
+		// options: help
+		if (cmd.hasOption("help")) {
+			k.utils.Error.helpExit(op.getHelp(), op.getOptions());
+		} 
+
 		// set verbose
 		if (cmd.hasOption("verbose")) {
 			GlobalSettings.verbose = true;
 		}
-
+		
 		if (cmd.hasOption("nofilename")) {
 			GlobalSettings.noFilename = true;
 		}
@@ -58,6 +63,13 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("syntax-module"))
 			GlobalSettings.synModule = cmd.getOptionValue("syntax-module");
 
+		if (cmd.hasOption("fromxml")) {
+			File xmlFile = new File(cmd.getOptionValue("fromxml"));
+			if (cmd.hasOption("lang"))
+				fromxml(xmlFile, cmd.getOptionValue("lang"));
+			else fromxml(xmlFile, xmlFile.getName().replaceFirst("\\.[a-zA-Z]+$", "").toUpperCase());
+		}
+		
 		String def = null;
 		if (cmd.hasOption("def"))
 			def = cmd.getOptionValue("def");
@@ -69,10 +81,10 @@ public class KompileFrontEnd {
 				def = restArgs[0];
 		}
 
+
 		File mainFile = new File(def);
 		GlobalSettings.mainFile = mainFile;
 		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "");
-		
 		if (!mainFile.exists())
 			k.utils.Error.report("Could not find file: " + def);
 
@@ -80,31 +92,11 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("lang"))
 			lang = cmd.getOptionValue("lang");
 		else
-			lang = mainFile.getName().substring(0, mainFile.getName().length() - 2).toUpperCase();
+			lang = mainFile.getName().replaceFirst("\\.[a-zA-Z]+$", "").toUpperCase();
+		
 
-		String file = null;
-		if (cmd.hasOption("file"))
-			file = cmd.getOptionValue("file");
-		else {
-			String[] restArgs = cmd.getArgs();
-			if (restArgs.length < 1)
-				k.utils.Error.report("You have to provide a file in order to compile!.");
-			else
-				file = restArgs[0];
-		}
-
-		if (!mainFile.exists())
-			k.utils.Error.report("Could not find file: " + file);
-
-		if (cmd.hasOption("lang"))
-			lang = cmd.getOptionValue("lang");
-		else
-			lang = mainFile.getName().substring(0, mainFile.getName().length() - 2).toUpperCase();
-
-		// options: help
-		if (cmd.hasOption("help")) {
-			k.utils.Error.helpExit(op.getHelp(), op.getOptions());
-		} else if (cmd.hasOption("maudify")) {
+ 
+		if (cmd.hasOption("maudify")) {
 			maudify(mainFile, lang);
 		} else if (cmd.hasOption("latex")) {
 			latex(mainFile, lang);
@@ -112,9 +104,9 @@ public class KompileFrontEnd {
 			pdf(mainFile, lang);
 		} else if (cmd.hasOption("xml")) {
 			xml(mainFile, lang);
-		} else {
+		} else  {
 			// default option: if (cmd.hasOption("compile"))
-			compile(mainFile, lang);
+			compile(mainFile, lang, maudify(mainFile, lang));
 		}
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
@@ -122,11 +114,6 @@ public class KompileFrontEnd {
 		GlobalSettings.kem.print(levels);
 	}
 
-	private static void pdfClean(String[] extensions)
-	{
-		for(int i = 0; i < extensions.length; i++)
-			new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
-	}
 	private static void pdf(File mainFile, String lang) {
 		latex(mainFile, lang);
 		
@@ -151,6 +138,11 @@ public class KompileFrontEnd {
 			GlobalSettings.kem.register(exception);
 		} 
 		pdfClean(new String[] {".aux", ".log", ".mrk", ".out"});
+	}
+	private static void pdfClean(String[] extensions)
+	{
+		for(int i = 0; i < extensions.length; i++)
+			new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
 	}
 
 	public static String latex(File mainFile, String mainModule) {
@@ -237,6 +229,42 @@ public class KompileFrontEnd {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	private static void fromxml(File xmlFile, String lang) {
+		try {
+			// initial setup
+			File canoFile = xmlFile.getCanonicalFile();
+			File dotk = new File(canoFile.getParent() + "/.k");
+			dotk.mkdirs();
+
+			System.out.println("TODO: " + xmlFile.getName() + " lang:" + lang);
+			
+			// unmarshalling
+			XStream xStream = new XStream();
+			ro.uaic.info.fmse.k.Definition javaDef = (ro.uaic.info.fmse.k.Definition)xStream.fromXML(canoFile);
+
+//			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+//			javaDef.accept(new CollectSubsortsVisitor());
+//			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+
+			System.out.println(javaDef);
+			
+			Stopwatch sw = new Stopwatch();
+			
+			
+			// save it
+			String maudified = javaDef.toMaude();
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Maudify         = ");
+			}
+
+			compile(canoFile, lang, maudified);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private static ro.uaic.info.fmse.k.Definition parseDefinition(
@@ -460,9 +488,8 @@ public class KompileFrontEnd {
 		return null;
 	}
 
-	public static void compile(File mainFile, String mainModule) {
+	public static void compile(File mainFile, String mainModule, String maudified) {
 		try {
-			String maudified = maudify(mainFile, mainModule);
 			// init stopwatch
 			Stopwatch sw = new Stopwatch();
 

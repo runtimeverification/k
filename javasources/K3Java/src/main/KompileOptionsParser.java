@@ -49,10 +49,12 @@ public class KompileOptionsParser {
 		// xml
 		OptionGroup xml = new OptionGroup();
 		Option toXml = new Option("xml", false, "generate xml from definition");
+		Option fromXml = new Option("fromxml", true, "load definition from xml");
 		
 		xml.addOption(toXml);
-		
+		xml.addOption(fromXml);
 
+		
 		// language module name
 		OptionGroup langGroup = new OptionGroup();
 		Option lang = new Option("l", "lang", true, "start module");
