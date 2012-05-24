@@ -212,6 +212,8 @@ public class KompileFrontEnd {
 					mainModule, canonicalFile, dotk, sw);
 
 			XStream xstream = new XStream();
+			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+			
 			String xml = xstream.toXML(javaDef);
 			
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.xml", xml);
