@@ -33,7 +33,6 @@
     <path id="K3Java.classpath">
         <pathelement location="bin"/>
         <pathelement location="../../dist/bin/java/xstream.jar"/>
-        <pathelement location="../../dist/bin/java/kxml2-min.jar"/>
         <pathelement location="../../dist/bin/java/strategoxt.jar"/>
         <pathelement location="lib/commons-cli-1.2-javadoc.jar"/>
         <pathelement location="lib/commons-cli-1.2-sources.jar"/>

@@ -8,6 +8,8 @@
 				<attribute name="Class-Path" value=". strategoxt.jar"/>
 				<attribute name="Class-Path" value=". xstream.jar"/>
 				<attribute name="Class-Path" value=". kxml2-min.jar"/>
+				<attribute name="Class-Path" value=". xmlpull.jar"/>
+				<attribute name="Class-Path" value=". xpp3_min.jar"/>
 			</manifest>
 			<fileset dir="./bin"/>
 			<!--<zipfileset excludes="META-INF/*.SF" src="./lib/strategoxt.jar"/> -->

@@ -243,8 +243,10 @@ public class KompileFrontEnd {
 			System.out.println("TODO: " + xmlFile.getName() + " lang:" + lang);
 			
 			// unmarshalling
-			XStream xStream = new XStream();
-			ro.uaic.info.fmse.k.Definition javaDef = (ro.uaic.info.fmse.k.Definition)xStream.fromXML(canoFile);
+			XStream xstream = new XStream();
+			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+
+			ro.uaic.info.fmse.k.Definition javaDef = (ro.uaic.info.fmse.k.Definition)xstream.fromXML(canoFile);
 
 //			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
 //			javaDef.accept(new CollectSubsortsVisitor());
