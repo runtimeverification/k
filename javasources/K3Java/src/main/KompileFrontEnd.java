@@ -68,6 +68,7 @@ public class KompileFrontEnd {
 			if (cmd.hasOption("lang"))
 				fromxml(xmlFile, cmd.getOptionValue("lang"));
 			else fromxml(xmlFile, xmlFile.getName().replaceFirst("\\.[a-zA-Z]+$", "").toUpperCase());
+			System.exit(0);
 		}
 		
 		String def = null;
@@ -239,23 +240,20 @@ public class KompileFrontEnd {
 			File canoFile = xmlFile.getCanonicalFile();
 			File dotk = new File(canoFile.getParent() + "/.k");
 			dotk.mkdirs();
-
-			System.out.println("TODO: " + xmlFile.getName() + " lang:" + lang);
 			
 			// unmarshalling
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
 			ro.uaic.info.fmse.k.Definition javaDef = (ro.uaic.info.fmse.k.Definition)xstream.fromXML(canoFile);
-
+			// This is essential for generating maude
+			javaDef.preprocess();
+			
 //			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
 //			javaDef.accept(new CollectSubsortsVisitor());
 //			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
-
-			System.out.println(javaDef);
 			
 			Stopwatch sw = new Stopwatch();
-			
 			
 			// save it
 			String maudified = javaDef.toMaude();
@@ -521,7 +519,7 @@ public class KompileFrontEnd {
 			int enddd = compiled.indexOf("---K-MAUDE-GENERATED-OUTPUT-END-----");
 			compiled = compiled.substring(start, enddd);
 
-			String defFile = mainFile.getName().substring(0, mainFile.getName().length() - 2);
+			String defFile = mainFile.getName().replaceFirst("\\.[a-zA-Z]+$", "");
 			FileUtil.saveInFile(dotk.getParent() + "/" + defFile + "-compiled.maude", load + compiled);
 
 			if (GlobalSettings.verbose) {

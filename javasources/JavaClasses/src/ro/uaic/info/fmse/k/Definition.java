@@ -6,6 +6,8 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.loader.CollectConsesVisitor;
+import ro.uaic.info.fmse.loader.CollectListConsesVisitor;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.parsing.ASTNode;
@@ -166,5 +168,11 @@ public class Definition extends ASTNode {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	public void preprocess() {
+		// Collect conses
+		this.accept(new CollectConsesVisitor());
+		this.accept(new CollectListConsesVisitor());
 	}
 }
