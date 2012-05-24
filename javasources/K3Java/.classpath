@@ -10,5 +10,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/KPreprocessor"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JavaClasses"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/KUtils"/>
+        <classpathentry kind="lib" path="../../dist/bin/java/xstream.jar"/>
+        <classpathentry kind="lib" path="../../dist/bin/java/kxml2-min.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

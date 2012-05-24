@@ -20,6 +20,8 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.thoughtworks.xstream.XStream;
+
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.Label;
@@ -108,6 +110,8 @@ public class KompileFrontEnd {
 			latex(mainFile, lang);
 		} else if (cmd.hasOption("pdf")) {
 			pdf(mainFile, lang);
+		} else if (cmd.hasOption("xml")) {
+			xml(mainFile, lang);
 		} else {
 			// default option: if (cmd.hasOption("compile"))
 			compile(mainFile, lang);
@@ -151,109 +155,18 @@ public class KompileFrontEnd {
 
 	public static String latex(File mainFile, String mainModule) {
 		try {
+			// for now just use this file as main argument
+			File canonicalFile = mainFile.getCanonicalFile();
+
+			File dotk = new File(canonicalFile.getParent() + "/.k");
+			dotk.mkdirs();
+
 			GlobalSettings.latex = true;
 			// compile a definition here
 			Stopwatch sw = new Stopwatch();
 
-			// for now just use this file as main argument
-			File f = mainFile.getCanonicalFile();
-
-			File dotk = new File(f.getParent() + "/.k");
-			dotk.mkdirs();
-
-			// ------------------------------------- basic parsing
-			Definition def = new Definition();
-			def.slurp(f, true);
-			def.setMainModule(mainModule);
-			def.setMainFile(mainFile);
-			def.addConsToProductions();
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Basic Parsing   = ");
-
-			// ------------------------------------- generate files
-			ResourceExtractor.ExtractAllSDF(dotk);
-
-			ResourceExtractor.ExtractProgramSDF(dotk);
-
-			// ------------------------------------- generate parser TBL
-			// cache the TBL if the sdf file is the same
-			String oldSdf = "";
-			if (new File(dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
-				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", def.getSDFForPrograms());
-
-			String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Pgm    = ");
-
-			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/pgm"), "Program");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLPgm = ");
-
-			// generate a copy for the definition and modify it to generate the intermediate data
-			Definition def2 = def.clone();// (Definition) Cloner.copy(def);
-			def2.makeConsLists();
-
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.sbs", def2.getSubsortingAsStrategoTerms());
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cons", def2.getConsAsStrategoTerms());
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.ditto", def2.getDittosAsStrategoTerm());
-
-			def2.replaceDittoCons();
-
-			// ------------------------------------- generate parser TBL
-			// cache the TBL if the sdf file is the same
-			oldSdf = "";
-			if (new File(dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
-				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def2.getSDFForDefinition());
-			newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Def    = ");
-
-			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3Disamb");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLDef = ");
-
-			// ------------------------------------- import files in Stratego
-			k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
-			k3parser.KParser.ImportDitto(dotk.getAbsolutePath() + "/Integration.ditto");
-			k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
-			k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Importing Files = ");
-
-			// ------------------------------------- parse configs
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
-			k3parser.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Configs = ");
-
-			// ----------------------------------- parse rules
-			def.parseRules();
-
-			// ----------------------------------- preprocessiong steps
-			Preprocessor preprocessor = new Preprocessor();
-			Document preprocessedDef = preprocessor.run(def.getDefAsXML());
-
-			XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Rules   = ");
-
-			ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
-
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
-			javaDef.accept(new CollectSubsortsVisitor());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(
+					mainModule, canonicalFile, dotk, sw);
 
 			LatexFilter lf = new LatexFilter();
 			javaDef.accept(lf);
@@ -276,7 +189,7 @@ public class KompileFrontEnd {
 			
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.tex", latexified);
 
-			FileUtil.saveInFile(f.getAbsolutePath().replaceFirst("\\.k$", "") + ".tex", latexified);
+			FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".tex", latexified);
 			
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Latexif         = ");
@@ -289,6 +202,140 @@ public class KompileFrontEnd {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static String xml(File mainFile, String mainModule) {
+		try {
+			// for now just use this file as main argument
+			File canonicalFile = mainFile.getCanonicalFile();
+
+			File dotk = new File(canonicalFile.getParent() + "/.k");
+			dotk.mkdirs();
+
+			GlobalSettings.latex = true;
+			// compile a definition here
+			Stopwatch sw = new Stopwatch();
+
+			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(
+					mainModule, canonicalFile, dotk, sw);
+
+			XStream xstream = new XStream();
+			String xml = xstream.toXML(javaDef);
+			
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.xml", xml);
+
+			FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".xml", xml);
+			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Latexif         = ");
+			}
+
+			return xml;
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private static ro.uaic.info.fmse.k.Definition parseDefinition(
+			String mainModule, File canonicalFile, File dotk, Stopwatch sw)
+			throws IOException, Exception {
+		// ------------------------------------- basic parsing
+		Definition def = new Definition();
+		def.slurp(canonicalFile, true);
+		def.setMainModule(mainModule);
+		def.setMainFile(canonicalFile);
+		def.addConsToProductions();
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Basic Parsing   = ");
+
+		// ------------------------------------- generate files
+		ResourceExtractor.ExtractAllSDF(dotk);
+
+		ResourceExtractor.ExtractProgramSDF(dotk);
+
+		// ------------------------------------- generate parser TBL
+		// cache the TBL if the sdf file is the same
+		String oldSdf = "";
+		if (new File(dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
+			oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
+		FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", def.getSDFForPrograms());
+
+		String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("File Gen Pgm    = ");
+
+		if (!oldSdf.equals(newSdf))
+			Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/pgm"), "Program");
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Generate TBLPgm = ");
+
+		// generate a copy for the definition and modify it to generate the intermediate data
+		Definition def2 = def.clone();// (Definition) Cloner.copy(def);
+		def2.makeConsLists();
+
+		FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.sbs", def2.getSubsortingAsStrategoTerms());
+		FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cons", def2.getConsAsStrategoTerms());
+		FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.ditto", def2.getDittosAsStrategoTerm());
+
+		def2.replaceDittoCons();
+
+		// ------------------------------------- generate parser TBL
+		// cache the TBL if the sdf file is the same
+		oldSdf = "";
+		if (new File(dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
+			oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
+		FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def2.getSDFForDefinition());
+		newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("File Gen Def    = ");
+
+		if (!oldSdf.equals(newSdf))
+			Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3Disamb");
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Generate TBLDef = ");
+
+		// ------------------------------------- import files in Stratego
+		k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
+		k3parser.KParser.ImportDitto(dotk.getAbsolutePath() + "/Integration.ditto");
+		k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
+		k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Importing Files = ");
+
+		// ------------------------------------- parse configs
+		FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
+		k3parser.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Parsing Configs = ");
+
+		// ----------------------------------- parse rules
+		def.parseRules();
+
+		// ----------------------------------- preprocessiong steps
+		Preprocessor preprocessor = new Preprocessor();
+		Document preprocessedDef = preprocessor.run(def.getDefAsXML());
+
+		XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Parsing Rules   = ");
+
+		ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
+
+		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+		javaDef.accept(new CollectSubsortsVisitor());
+		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+		return javaDef;
 	}
 
 	public static String maudify(File mainFile, String mainModule) {

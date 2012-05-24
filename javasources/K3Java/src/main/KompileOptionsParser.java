@@ -45,6 +45,13 @@ public class KompileOptionsParser {
 		tex.addOption(pdf);
 		tex.addOption(compile);
 		tex.addOption(maudify);
+		
+		// xml
+		OptionGroup xml = new OptionGroup();
+		Option toXml = new Option("xml", false, "generate xml from definition");
+		
+		xml.addOption(toXml);
+		
 
 		// language module name
 		OptionGroup langGroup = new OptionGroup();
@@ -72,6 +79,7 @@ public class KompileOptionsParser {
 		options.addOptionGroup(langGroup);
 		options.addOptionGroup(langSynGroup);
 		options.addOptionGroup(tex);
+		options.addOptionGroup(xml);
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
 	}
