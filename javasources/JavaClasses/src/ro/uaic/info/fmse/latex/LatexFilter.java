@@ -233,6 +233,25 @@ public class LatexFilter extends BasicVisitor {
 	}	
 	
 	@Override
+	public void visit(Context cxt) {
+		result += "\\kcontext";
+		result += "{" + endl;
+		cxt.getBody().accept(this);
+		result +=  "}{";
+		if (cxt.getCondition() != null) {
+			cxt.getCondition().accept(this);
+		}
+		result += "}{"; 
+		printSentenceAttributes(cxt.getAttributes()); 
+		result += "}" + endl;
+	}	
+	
+	@Override
+	public void visit(Hole hole) {
+		result += "\\khole{}";
+	}
+	
+	@Override
 	public void visit(Rewrite rew) {
 		result += "\\reduce{";
 		rew.getLeft().accept(this);

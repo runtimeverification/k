@@ -844,19 +844,14 @@ rectangle,rectangle
 %%% Context
 
 % Context.
-\newcommand{\kcontext}[4]{\wrapRules{%
-  \text{\scshape context:} $#2$%
-  \ifthenelse{\equal{#3}{}}{}{%
-    \when{#3}%
-  }%
-  \ifthenelse{\equal{#4}{}}{}{%  
-   [#4]% 
-  }%
-  \k@markPosition%
-  }%
+\newcommand{\kcontext}[4][]{
+\ksentence{context}{#1}{#2}{#3}{#4}
 }
 
 \newcommand{\kcontextb}[4]{\begin{kblock}\kcontext{#1}{#2}{#3}{#4}\end{kblock}}
+
+
+\newcommand{\khole}{\Box}
 
 %%% Equations and structural rules.
 
@@ -887,34 +882,24 @@ rectangle,rectangle
 \newcommand{\wrapRules}[1]{\par\indent#1\par\ \par}
 %%% Rules.
 \newcommand{\ruleAttributes}[1]{\hfill[#1]}
-\newcommand{\kdefine}[4]{%
+
+\newcommand{\ksentence}[5]{%
 \wrapRules{%
   \rulebox{%
-    \k@ruleLabel{#1}{define}\hspace{1em}$#2$%
+    \k@ruleLabel{#2}{#1}\hspace{1em}$#3$%
   }%
-  \ifthenelse{\equal{#3}{}}{}{%
-    \when{#3}%
+  \ifthenelse{\equal{#4}{}}{}{%
+    \when{#4}%
   }%
   \k@markPosition%
-  \ifthenelse{\equal{#4}{}}{}{%  
-   \ruleAttributes{#4}%
+  \ifthenelse{\equal{#5}{}}{}{%  
+   \ruleAttributes{#5}% 
   }%
-  }%
+}%
 }
 
 \newcommand{\krule}[4][]{%
-\wrapRules{%
-  \rulebox{%
-    \k@ruleLabel{#1}{rule}\hspace{1em}$#2$%
-  }%
-  \ifthenelse{\equal{#3}{}}{}{%
-    \when{#3}%
-  }%
-  \k@markPosition%
-  \ifthenelse{\equal{#4}{}}{}{%  
-   \ruleAttributes{#4}% 
-  }%
-}%
+\ksentence{rule}{#1}{#2}{#3}{#4}
 }
 
 \newcommand{\kruleb}[4]{\begin{kblock}\krule[#1]{#2}{#3}{#4}\end{kblock}}
