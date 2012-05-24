@@ -297,6 +297,19 @@ public class LatexFilter extends BasicVisitor {
 	}
 	
 	@Override
+	public void visit(KApp app) {
+		app.getLabel().accept(this);
+		result += "(";
+		app.getChild().accept(this);
+		result += ")";
+	}
+	
+	@Override 
+	public void visit(ListOfK list) {
+		printList(list.getContents(), "\\kcomma");
+	}
+	
+	@Override
 	public void visit(LiterateDefinitionComment comment) {
 		if (comment.getType()==LiterateCommentType.LATEX) {
 			result += "\\begin{kblock}[text]" + endl;
