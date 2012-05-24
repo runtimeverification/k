@@ -45,13 +45,13 @@ public class KompileFrontEnd {
 		// options: help
 		if (cmd.hasOption("help")) {
 			k.utils.Error.helpExit(op.getHelp(), op.getOptions());
-		} 
+		}
 
 		// set verbose
 		if (cmd.hasOption("verbose")) {
 			GlobalSettings.verbose = true;
 		}
-		
+
 		if (cmd.hasOption("nofilename")) {
 			GlobalSettings.noFilename = true;
 		}
@@ -67,10 +67,11 @@ public class KompileFrontEnd {
 			File xmlFile = new File(cmd.getOptionValue("fromxml"));
 			if (cmd.hasOption("lang"))
 				fromxml(xmlFile, cmd.getOptionValue("lang"));
-			else fromxml(xmlFile, xmlFile.getName().replaceFirst("\\.[a-zA-Z]+$", "").toUpperCase());
+			else
+				fromxml(xmlFile, xmlFile.getName().replaceFirst("\\.[a-zA-Z]+$", "").toUpperCase());
 			System.exit(0);
 		}
-		
+
 		String def = null;
 		if (cmd.hasOption("def"))
 			def = cmd.getOptionValue("def");
@@ -82,21 +83,21 @@ public class KompileFrontEnd {
 				def = restArgs[0];
 		}
 
-
 		File mainFile = new File(def);
 		GlobalSettings.mainFile = mainFile;
 		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "");
-		if (!mainFile.exists())
-			k.utils.Error.report("Could not find file: " + def);
+		if (!mainFile.exists()) {
+			mainFile = new File(def + ".k");
+			if (!mainFile.exists())
+				k.utils.Error.report("Could not find file: " + def);
+		}
 
 		String lang = null;
 		if (cmd.hasOption("lang"))
 			lang = cmd.getOptionValue("lang");
 		else
 			lang = mainFile.getName().replaceFirst("\\.[a-zA-Z]+$", "").toUpperCase();
-		
 
- 
 		if (cmd.hasOption("maudify")) {
 			maudify(mainFile, lang);
 		} else if (cmd.hasOption("latex")) {
@@ -105,7 +106,7 @@ public class KompileFrontEnd {
 			pdf(mainFile, lang);
 		} else if (cmd.hasOption("xml")) {
 			xml(mainFile, lang);
-		} else  {
+		} else {
 			// default option: if (cmd.hasOption("compile"))
 			compile(mainFile, lang, maudify(mainFile, lang));
 		}
@@ -117,12 +118,12 @@ public class KompileFrontEnd {
 
 	private static void pdf(File mainFile, String lang) {
 		latex(mainFile, lang);
-		
+
 		try {
 			// Run pdflatex.
 			String pdfLatex = "pdflatex";
 			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
-			
+
 			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
 			Process process = pb.start();
 
@@ -130,19 +131,21 @@ public class KompileFrontEnd {
 			InputStream is = process.getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
-//			String line;
-			while(br.readLine()!=null){};
-///			while((line = br.readLine()) != null){System.out.println(line);}
+			// String line;
+			while (br.readLine() != null) {
+			}
+			;
+			// / while((line = br.readLine()) != null){System.out.println(line);}
 
 		} catch (IOException e) {
 			KException exception = new KException(ExceptionType.ERROR, Label.CRITICAL, KMessages.ERR1001, "", "", Level.LEVEL0);
 			GlobalSettings.kem.register(exception);
-		} 
-		pdfClean(new String[] {".aux", ".log", ".mrk", ".out"});
+		}
+		pdfClean(new String[] { ".aux", ".log", ".mrk", ".out" });
 	}
-	private static void pdfClean(String[] extensions)
-	{
-		for(int i = 0; i < extensions.length; i++)
+
+	private static void pdfClean(String[] extensions) {
+		for (int i = 0; i < extensions.length; i++)
 			new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
 	}
 
@@ -158,32 +161,26 @@ public class KompileFrontEnd {
 			// compile a definition here
 			Stopwatch sw = new Stopwatch();
 
-			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(
-					mainModule, canonicalFile, dotk, sw);
+			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk, sw);
 
 			LatexFilter lf = new LatexFilter();
 			javaDef.accept(lf);
-			
+
 			String endl = System.getProperty("line.separator");
 			String fileSep = System.getProperty("file.separator");
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k";
-			
-			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl
-			+ "\\usepackage[poster,style=bubble]{" + kLatexStyle + "}" + endl;
+
+			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[poster,style=bubble]{" + kLatexStyle + "}" + endl;
 			String preamble = lf.getPreamble();
 			if (!preamble.contains("\\title{")) {
 				preamble += "\\title{" + mainModule + "}" + endl;
 			}
-			latexified += preamble
-			+ "\\begin{document}" + endl
-			+ "\\maketitle" + endl
-			+ lf.getResult()
-			+ "\\end{document}" + endl;
-			
+			latexified += preamble + "\\begin{document}" + endl + "\\maketitle" + endl + lf.getResult() + "\\end{document}" + endl;
+
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.tex", latexified);
 
 			FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".tex", latexified);
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Latexif         = ");
 			}
@@ -209,18 +206,17 @@ public class KompileFrontEnd {
 			// compile a definition here
 			Stopwatch sw = new Stopwatch();
 
-			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(
-					mainModule, canonicalFile, dotk, sw);
+			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk, sw);
 
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
-			
+
 			String xml = xstream.toXML(javaDef);
-			
+
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.xml", xml);
 
 			FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".xml", xml);
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Latexif         = ");
 			}
@@ -233,28 +229,28 @@ public class KompileFrontEnd {
 		}
 		return null;
 	}
-	
+
 	private static void fromxml(File xmlFile, String lang) {
 		try {
 			// initial setup
 			File canoFile = xmlFile.getCanonicalFile();
 			File dotk = new File(canoFile.getParent() + "/.k");
 			dotk.mkdirs();
-			
+
 			// unmarshalling
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
-			ro.uaic.info.fmse.k.Definition javaDef = (ro.uaic.info.fmse.k.Definition)xstream.fromXML(canoFile);
+			ro.uaic.info.fmse.k.Definition javaDef = (ro.uaic.info.fmse.k.Definition) xstream.fromXML(canoFile);
 			// This is essential for generating maude
 			javaDef.preprocess();
-			
-//			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
-//			javaDef.accept(new CollectSubsortsVisitor());
-//			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
-			
+
+			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+			// javaDef.accept(new CollectSubsortsVisitor());
+			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+
 			Stopwatch sw = new Stopwatch();
-			
+
 			// save it
 			String maudified = javaDef.toMaude();
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
@@ -268,10 +264,8 @@ public class KompileFrontEnd {
 			e.printStackTrace();
 		}
 	}
-	
-	private static ro.uaic.info.fmse.k.Definition parseDefinition(
-			String mainModule, File canonicalFile, File dotk, Stopwatch sw)
-			throws IOException, Exception {
+
+	private static ro.uaic.info.fmse.k.Definition parseDefinition(String mainModule, File canonicalFile, File dotk, Stopwatch sw) throws IOException, Exception {
 		// ------------------------------------- basic parsing
 		Definition def = new Definition();
 		def.slurp(canonicalFile, true);
