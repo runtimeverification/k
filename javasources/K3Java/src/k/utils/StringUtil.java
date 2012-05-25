@@ -21,6 +21,32 @@ public class StringUtil {
 		return sb.toString();
 	}
 
+	public static String escape(String str) {
+		str = str.replaceAll("\n", "\\n");
+		str = str.replaceAll("\r", "\\r");
+		str = str.replaceAll("\t", "\\t");
+		str = str.replaceAll("\"", "\\\"");
+
+		return str;
+	}
+
+	/**
+	 * Use this function to print XML directly as string, and not when using DOM.
+	 * @param str
+	 * @return
+	 */
+	public static String escapeToXmlAttribute(String str) {
+		str = str.replaceAll("\\", "\\\\");
+		str = str.replaceAll("\n", "\\n");
+		str = str.replaceAll("\r", "\\r");
+		str = str.replaceAll("\t", "\\t");
+		str = str.replaceAll("&", "&amp;");
+		str = str.replaceAll("<", "&lt;");
+		str = str.replaceAll(">", "&gt;");
+		str = str.replaceAll("\"", "&quot;");
+		return str;
+	}
+
 	public static String escapeSortName(String str) {
 		str = str.replace("D", "Dd");
 		str = str.replace("#", "Dz");

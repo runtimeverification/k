@@ -94,12 +94,15 @@ rules
 	xmlStringEscape         = string-replace(|"&", "&amp;") ;
 	                          string-replace(|">", "&gt;") ;
 	                          string-replace(|"<", "&lt;") ; 
-	                          string-replace(|"\"", "&quot;") ;
 	                          string-replace(|"\\", "\\\\") ;
+	                          string-replace(|"\"", "&quot;") ;
 	                          string-replace(|"\n", "\\n") ;
 	                          string-replace(|"\r", "\\r")
 	                          
-	xmlStringEscapeToString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
+	xmlStringEscapeToString = string-replace(|"&", "&amp;") ;
+	                          string-replace(|">", "&gt;") ;
+	                          string-replace(|"<", "&lt;") ;
+	                          string-replace(|"\\\"", "&quot;")
 	getLocAsString        = prim("SSL_EXT_origin_location", <id>) ; write-to-string
 	get-original-sentence = prim("SSL_EXT_origin_text", <id>) ; xmlStringEscape ; escape
 

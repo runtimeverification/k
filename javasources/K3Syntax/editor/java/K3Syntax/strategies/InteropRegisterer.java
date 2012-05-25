@@ -9,6 +9,6 @@ import org.strategoxt.lang.Strategy;
 public class InteropRegisterer extends JavaInteropRegisterer {
 
   public InteropRegisterer() {
-    super(new Strategy[] { java_strategy_0_0.instance });
+    super(new Strategy[] { java_strategy_0_0.instance, xml_string_escape_from_string_0_0.instance });
   }
 }

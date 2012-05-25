@@ -62,7 +62,7 @@ rules
 	to-xml-error:
 		error(a, b*) -> $[<?xml version="1.0" encoding="UTF-8" ?>
 		<T>
-			<error value="[<xmlStringEscapeToString>a]">
+			<error value="[<xml-string-escape-from-string>a]">
 				[b']
 			</error>
 		</T>
@@ -91,10 +91,12 @@ rules
 	mydebug = id//debug
 	mydebug(a) = id//debug(a)
 	// xmlify - starts from here
-	xmlStringEscape         = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\"", "&quot;")
-	xmlStringEscapeToString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
+	xmlStringEscape           = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\", "\\\\") ; string-replace(|"\"", "&quot;")
+	//xmlStringEscapeFromString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
 	getLocAsString        = prim("SSL_EXT_origin_location", <id>) ; write-to-string
 	get-original-sentence = prim("SSL_EXT_origin_text", <id>) ; xmlStringEscape ; escape
+	
+	external xml-string-escape-from-string(|)
 
 
 	// print the K definition as an XML - parsing only the syntax
@@ -112,7 +114,7 @@ rules
 		where loc := <getLocAsString>		// get the location info
 
 	to-xml:
-		Require(x) -> $[<require value=[<xmlStringEscapeToString>x] />
+		Require(x) -> $[<require value="[<xml-string-escape-from-string>x]" />
 		]
 
 	to-xml:
@@ -216,9 +218,9 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml:
-		Terminal(s) -> $[<terminal value=[s'] loc="[loc]" />
+		Terminal(s) -> $[<terminal value="[s']" loc="[loc]" />
 		]
-		where s' := <xmlStringEscapeToString> s
+		where s' := <xml-string-escape-from-string> s
 		where loc := <getLocAsString>
 
 	to-xml:

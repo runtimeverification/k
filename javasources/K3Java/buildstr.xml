@@ -16,6 +16,7 @@
 			<fileset dir="src/k2parser/lib">
 				<include name="*.java" />
 				<include name="K3Syntax.tbl" />
+				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</fileset>
 		</delete>
 		<copy todir="src/k2parser/lib/">
@@ -47,7 +48,7 @@
 		<delete file="../LatexComments/trans/K3Latex.dep" />
 		<delete dir="../LatexComments/trans/K3Latex" />
 	</target>
-	
+
 	<target name="k3">
 		<java failonerror="true" dir="../K3Disamb/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i starter.str -o K3Str -la stratego-sglr --lib -I .. -p k3parser.lib --clean" />
