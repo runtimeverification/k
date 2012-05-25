@@ -39,9 +39,12 @@ public class LatexFilter extends BasicVisitor {
 	@Override
 	public void visit(Definition def) {
 		def.accept(patternsVisitor);
-		result += "\\begin{kdefinition}" + endl;
-		super.visit(def);
+		result += "\\begin{kdefinition}" + endl + "\\maketitle" + endl;
+		super.visit(def);		
 		result += "\\end{kdefinition}" + endl;
+		if (!preamble.contains("\\title{")) {
+			preamble += "\\title{" +  def.getMainModule() + "}" + endl;
+		}
 	}
 	
 	@Override

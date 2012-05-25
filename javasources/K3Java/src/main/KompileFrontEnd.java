@@ -125,16 +125,23 @@ public class KompileFrontEnd {
 			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
 
 			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
-			Process process = pb.start();
-
-			// Apparently I have to do this for now. I'll search for a better solution soon.
-			InputStream is = process.getInputStream();
-			InputStreamReader isr = new InputStreamReader(is);
-			BufferedReader br = new BufferedReader(isr);
-			// String line;
-			while (br.readLine() != null) {
+			try {
+				Process process = pb.start();
+				process.waitFor();
+				process = pb.start();
+				process.waitFor();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			;
+			
+//			// Apparently I have to do this for now. I'll search for a better solution soon.
+//			InputStream is = process.getInputStream();
+//			InputStreamReader isr = new InputStreamReader(is);
+//			BufferedReader br = new BufferedReader(isr);
+//			// String line;
+//			while (br.readLine() != null) {
+//			}
+//			;
 			// / while((line = br.readLine()) != null){System.out.println(line);}
 
 		} catch (IOException e) {
@@ -172,10 +179,7 @@ public class KompileFrontEnd {
 
 			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[poster,style=bubble]{" + kLatexStyle + "}" + endl;
 			String preamble = lf.getPreamble();
-			if (!preamble.contains("\\title{")) {
-				preamble += "\\title{" + mainModule + "}" + endl;
-			}
-			latexified += preamble + "\\begin{document}" + endl + "\\maketitle" + endl + lf.getResult() + "\\end{document}" + endl;
+			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.tex", latexified);
 

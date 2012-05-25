@@ -26,6 +26,7 @@ public class DefinitionHelper {
 		"K-DESTRUCTORS",
 		"K-EQUAL-HOOKS",
 		"K-LIST-EXTRAS",
+		"K-LISTK-EXTRAS",
 		"K-MAP-EXTRAS",
 		"K-RESULT",
 		"K-SET-EXTRAS",

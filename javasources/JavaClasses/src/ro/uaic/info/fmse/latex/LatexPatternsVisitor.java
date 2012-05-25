@@ -11,7 +11,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
 	private Map<String,String> patterns = new HashMap<String,String>();
 	String pattern = "";
 	int nonTerm;
-	boolean prevNonTerm = false;
+	boolean prevNonTerm;
 	
 	public void setPatterns(Map<String,String> patterns) {
 		this.patterns = patterns;
@@ -32,7 +32,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
 			pattern = p.getAttributes().get("latex");
 			pattern = pattern.substring(1, pattern.length()-1);
 		} else {
-			pattern = ""; nonTerm = 1;
+			pattern = ""; nonTerm = 1; prevNonTerm = false;
 			super.visit(p);
 		}
 		patterns.put(p.getAttributes().get("cons"), pattern);

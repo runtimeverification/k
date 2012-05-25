@@ -74,7 +74,7 @@ module CINK
   /* \subsection{ASTs which are results.} */
 
   syntax Val ::= Int | Bool | String | "void" 
-               | "lambda" "(" Decls "@" Stmts ")" [latex("")]
+               | "lambda" "(" Decls "@" Stmts ")" [latex("\lambda{#1}.{#2}")]
                | "loc" "(" Int ")"
 
   syntax Vals ::= List{Val,","}

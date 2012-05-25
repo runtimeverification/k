@@ -622,7 +622,8 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 
 \newcommand{\prefixOp}{\terminalNoSpace}
 \newcommand{\dotCt}[1]{%
-  \k@withTooltip{\raise.3ex\hbox{\ensuremath{\kdot}}}{Constant Sort: #1}%
+  \ensuremath{\raise.3ex\hbox{\ensuremath{\kdot}}}_{\color{black!60}\scriptstyle\it \!#1}}
+%  \k@withTooltip{\raise.3ex\hbox{\ensuremath{\kdot}}}{Constant Sort: #1}%
 }
 
 %%% Mathematical notation.
