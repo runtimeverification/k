@@ -5,12 +5,20 @@ Checkout this directory in your desired location and update your $PATH to
 /dist/bin.  Then build the .jar binaries by calling ant on $K_BASE.
 
 3. Work on Java code
-Open eclipse with the spoofax plug-in installed and set your workspace
-to /javasources.  Go to File->Import->General->Existing projects into
-workspace, and select all of the projects from /javasources.  You can
-run the K3Java project to test the main functionalities directly from
-eclipse (main project is K3Java), or you can (re)build the .jar binaries
-by calling ant on /javasources/K3Java/buld.xml
+Open eclipse and set your workspace to /javasources.  Go to 
+File->Import->General->Existing projects into workspace, and select all of 
+the projects from /javasources.  
+If you have the spoofax plugin installed in eclipse, you might be able to 
+work and compile directly within eclipse (the main project is K3Java and 
+can be used to test the main functionalities).
+
+If your do not have the spoofax plugin, you can still use eclipse as an editor
+and to test functionality not related to parsing.  
+
+If you only modified java files, you can speed up the rebuilding of the
+distributed jar:
+  ant java jar
+
 
 4. Work on Maude code
 Modify the Maude files found in /dist/bin/maude.
@@ -21,9 +29,5 @@ Call 'ant release' in the base directory.  Or you can just zip the
 
 6. Compiling definitions and running programs
 assuming  /dist/bin is in your path, you can compile definitions using
-the 'kompile' command.  Until jKrun is released, to execute a  program
-you can use the Haskell krun specifying it should use the kast from
-/dist/bin as a parser.  Assuming $K3_BASE points to the /dist directory,
-the following command should suffice:
-krun --parser="$K3_BASE/bin/kast" <program> 
- 
+the 'kompile' command.  To execute a  program
+you can use 'krun'.
