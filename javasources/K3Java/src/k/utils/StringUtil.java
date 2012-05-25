@@ -2,10 +2,23 @@ package k.utils;
 
 public class StringUtil {
 	public static String unescape(String str) {
-		str = str.replace("\\n", "\n");
-		str = str.replace("\\t", "\t");
-		str = str.replace("\\r", "\r");
-		return str;
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < str.length(); i++) {
+			if (str.charAt(i) == '\\') {
+				if (str.charAt(i + 1) == '\\')
+					sb.append('\\');
+				else if (str.charAt(i + 1) == 'n')
+					sb.append('\n');
+				else if (str.charAt(i + 1) == 'r')
+					sb.append('\r');
+				else if (str.charAt(i + 1) == 't')
+					sb.append('\t');
+				i++;
+			} else
+				sb.append(str.charAt(i));
+		}
+
+		return sb.toString();
 	}
 
 	public static String escapeSortName(String str) {
