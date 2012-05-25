@@ -263,8 +263,7 @@ public class Definition implements Cloneable {
 									// do nothing for programs
 								} else if (prd.isSubsort()) {
 									outsides.add(prd);
-								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1
-										&& (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
+								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
 									// constants.add(prd);
 									String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
 									String sort = prd.getProdSort().getSortName();
@@ -405,7 +404,11 @@ public class Definition implements Cloneable {
 		if (mainSyntax == null) {
 			Error.silentReport("Could not find a module for program syntax: " + mainSynModName);
 		} else {
-
+			Module bshm = modulesMap.get("BUILTIN-SYNTAX-HOOKS");
+			if (bshm != null)
+				synQue.add(bshm);
+			else
+				Error.silentReport("Could not find module BUILTIN-SYNTAX-HOOKS (automatically included in the main syntax module)!");
 			while (!synQue.isEmpty()) {
 				Module m = synQue.remove(0);
 				if (!synMods.contains(m)) {
