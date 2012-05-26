@@ -1,7 +1,7 @@
 load pl-builtins.maude
 load socket.maude
 load TCPSupport
-load k-model-checker.maude
+*** load k-model-checker.maude
 --- load pl-meta-level
 
 --- Level 0

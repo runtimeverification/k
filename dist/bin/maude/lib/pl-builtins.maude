@@ -976,6 +976,8 @@ mod BOTTOM is
   sort Bottom .
 endm
 
+ load k-model-checker
+
 mod PL-BUILTINS is
 including #BOOL-INTERFACE .
 including #EXT-BOOL-INTERFACE .
@@ -991,6 +993,8 @@ including #COUNTER-INTERFACE .
 including #BOOL-INTERFACE .
 including #ID-INTERFACE .
 including BOTTOM .
+including #LTL-INTERFACE .
+including #MODEL-CHECKER-INTERFACE .
 endm
 
 ---set include #BOOL on .

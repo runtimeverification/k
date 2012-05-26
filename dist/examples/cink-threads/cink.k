@@ -17,7 +17,7 @@ module CINK-SYNTAX
                > left:
                  Exp "*" Exp [left, strict]
                | Exp "/" Exp [left, strict]
-               | Exp "%" Exp [left, strict] 
+               | Exp "%" Exp [left, strict, latex("{#1}\%{#2}")] 
                >  left:
                  Exp "+" Exp [left, strict]
                | Exp "-" Exp [left, strict]
@@ -28,7 +28,7 @@ module CINK-SYNTAX
                >
                  "!" Exp [strict] 
                > 
-                 Exp "&&" Exp [left, strict(1)]
+                 Exp "&&" Exp [left, strict(1), latex("{#1}\&\&{#2}")]
                > 
                 Exp "||" Exp [left, strict(1)]
                > left:
@@ -49,8 +49,9 @@ module CINK-SYNTAX
                | "{" Stmts "}"
                | "while" "(" Exp ")" Stmt 
                | "return" Exps ";" // [strict]
-               | Decl "(" Decls ")" "{" Stmts "}"
-               | "#include" "<iostream>"
+               | Decl "(" Decls ")" "{" Stmts "}" 
+               | "spawn" Stmt             
+               | "#include" "<iostream>" [latex("\#\texttt{include <iostream>}")]
                | "if" "(" Exp ")" Stmt "else" Stmt [strict(1)]
                >
                  "if" "(" Exp ")" Stmt
@@ -68,13 +69,13 @@ module CINK-SYNTAX
 
 endmodule
 
-module CINK-SEMANTICS
+module CINK-SEMANTICS 
   imports CINK-SYNTAX
 
   /* \subsection{ASTs which are results.} */
 
   syntax Val ::= Int | Bool | String | "void" 
-               | "lambda" "(" Decls "@" Stmts ")" [latex("")]
+               | "lambda" "(" Decls "@" Stmts ")" [latex("\lambda{#1}.{#2}")]
                | "loc" "(" Int ")"
 
   syntax Vals ::= List{Val,","}
@@ -93,13 +94,18 @@ module CINK-SEMANTICS
 
  /* \subsection{Configuration.} */
   configuration <T color="yellow">
-                  <k color="green"> ($PGM:Pgm ~> execute) </k>
-                  <env color="LightSkyBlue"> .Map </env>
-                  <fstack color="orange"> .List </fstack>
-                  <bstack color="orange"> .List </bstack>
+                  <threads color="orange">
+                    <thread multiplicity="*" color="yellow">
+                      <k color="green"> ($PGM:Pgm ~> execute) </k>
+                      <env color="LightSkyBlue"> .Map </env>
+                      <fstack color="orange"> .List </fstack>
+                      <bstack color="orange"> .List </bstack>
+                    </thread>
+                  </threads>
                   <genv color="SkyBlue"> .Map </genv>
                   <store color="white"> .Map </store>
 //                  <br/>
+//                  <in color="magenta"> .List </in>  
                   <in color="magenta" stream="stdin"> $IN:List </in>
 //                  <out color="Orchid"> .List </out>
                   <out color="Orchid" stream="stdout"> .List </out>
@@ -107,13 +113,18 @@ module CINK-SEMANTICS
                 </T>
 
 // macros
+
   rule if(B:Exp) St:Stmt => if(B) St else {}  [anywhere]
+
   rule '_`(_`)(X:Id,,E:Exp) => '_`(_`)(X,,'_`,_(E,, .Exps))  [anywhere]
+
   rule void X:Id => int X  [anywhere]
+
   rule '_;('int_('_=_(X:Id,, A:Exp)))
        =>
        '__('_;(int X),, '_;('_=_(X,, A)))
        [anywhere]
+
   rule '_;('bool_('_=_(X:Id,, B:Exp)))
        =>
        '__('_;(int X),, '_;('_=_(X,, B)))
@@ -214,11 +225,32 @@ module CINK-SEMANTICS
        when K =/=K .K
 //       [transition]
 
+
   rule [block] : 
        <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
        <env> Env:Map </env>
-       <bstack> . => [Env] ...</bstack>
+       <bstack> . => [Env] </bstack>
        [structural]
+
+  rule [block] : 
+       <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
+       <env> Env:Map </env>
+       <bstack> (. => [Env]) [Env1:Map] ...</bstack>
+       when Env =/=Map Env1
+       [structural]
+
+  rule [block] : 
+       <k>{Sts:Stmts} => Sts  ...</k>
+       <env> Env:Map </env>
+       <bstack> (. => [Env]) [Env1:Map] ...</bstack>
+       when Env ==Map Env1
+       [structural]
+
+/*
+  rule [block] : 
+       <k>{Sts:Stmts} => Sts  ...</k>
+       [structural]
+*/
 
   rule [block-empty] : {} => .  [structural]
 
@@ -269,6 +301,17 @@ module CINK-SEMANTICS
        <fstack> ([Env:Map] Stack:List, K:K) => . ...</fstack>
        [supercool]
 
+   rule [spawn] :
+        <thread>...
+          <k> spawn St:Stmt => . ...</k>
+          <env> Env:Map </env>
+        ...</thread>
+        (. => <thread>... <k> St </k> <env> Env </env> ...</thread>)
+
+   rule [thread-end] :
+        (<thread>... <k>.K</k>  ...</thread> => .)
+ 
+
   /* \subsection{Auxiliary Functions and Rules.} */
 
 
@@ -301,13 +344,57 @@ module CINK-SEMANTICS
        <bstack> [Env:Map] => . ...</bstack>
        <env> _ => Env </env> 
 
+  // equality over maps
+
+  syntax Bool ::= Map "<=Map" Map    [function]
+  rule MapItem1:MapItem Map1:Map <=Map MapItem1 Map2:Map => Map1 <=Map Map2 [function, anywhere]
+  rule .Map <=Map _:Map => true [function, anywhere]
+  rule (D:K |-> _:K) Map1:Map <=Map Map2:Map => false
+       when notBool $hasMapping(Map2, D) [function, anywhere]
+
+  syntax Bool ::= Map "==Map" Map    [function]
+  rule Map1:Map ==Map Map2:Map => (Map1 <=Map Map2) andBool (Map2 <=Map Map1) [function, anywhere]
+
+  syntax Bool ::= Map "=/=Map" Map   [function]
+  rule Map1:Map =/=Map Map2:Map => notBool(Map1 ==Map Map2) [function, anywhere]
 
 endmodule
-
 
 module CINK
   imports CINK-SEMANTICS
   imports MODEL-CHECKER-HOOKS
 
+
+  syntax Val ::= "val" "(" Bag "," Id ")" [function]
+
+
+  rule val(<T>... 
+                 <genv>... X:Id |-> L:Int ...</genv> 
+                 <store>... L |-> V:Val ...</store> 
+           ...</T>, X)
+       =>
+       V
+       [anywhere]
+
+  syntax #Prop ::= "eqTo" "(" Id "," Val ")" [function]
+
+  rule KItem(B:Bag) LTL|= eqTo(X:Id, I:Int) => true when val(B, X) ==Int I [anywhere]
+
+  syntax #ModelCheckerState ::= "KItem" "(" Bag ")"
+
+
+  syntax #Id ::= "critical1" | "critical2"
+
+  syntax LTLFormula ::= "f1"
+
+//  rule f1 => LTL<> (eqTo(critical1, 1) LTL/\ eqTo(critical2, 1)) [anywhere]
+
+  syntax Bag ::= "initConfig"
+
+  syntax ModelCheckResult ::= "check"
+
+  rule check => modelCheck(KItem(initConfig), f1) [anywhere]
+
 endmodule
+
 
