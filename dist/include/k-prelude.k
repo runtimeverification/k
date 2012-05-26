@@ -23,6 +23,7 @@ interface K-MAP-EXTRAS
 	syntax List{K} ::= Map "(" List{K} ")" [prec(0)]
 
 	syntax Set ::= "keys" Map  
+	syntax #Bool ::= "$hasMapping" "(" Map "," K ")" [latex("latex=(renameTo \\$hasMapping\\mybracket{_,_})")]
 endinterface
 
 interface K-SET-EXTRAS
