@@ -93,7 +93,7 @@ public class Definition extends ASTNode {
 		// sorts & automatic subsortation to K
 		String sorts = "";
 		for (String s : MaudeHelper.declaredSorts) {
-			if (!MaudeHelper.basicSorts.contains(s))
+			if (!MaudeHelper.basicSorts.contains(s) && !s.startsWith("#"))
 				sorts += s + " ";
 		}
 		sorts = sorts.trim();

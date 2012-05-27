@@ -109,12 +109,13 @@ public class Syntax extends ModuleItem {
 					contents += "eq ." + sort + " = .List`{\"" + list.separator + "\"`} .\n";
 				} else {
 					String metadata = p.getMetadata();
-
+					String maudelabel = p.getLabel();
+					
 					if (!p.attributes.containsKey("bracket"))
 						if (metadata.equals(""))
-							contents += "op " + p.getLabel() + " : " + p.toMaude() + " -> " + sort + " .\n";
+							contents += "op " + maudelabel + " : " + p.toMaude() + " -> " + sort + " .\n";
 						else
-							contents += "op " + p.getLabel() + " : " + p.toMaude() + " -> " + sort + " [metadata \"" + metadata + "\"] .\n";
+							contents += "op " + maudelabel + " : " + p.toMaude() + " -> " + sort + " [metadata \"" + metadata + "\"] .\n";
 				}
 			}
 		}

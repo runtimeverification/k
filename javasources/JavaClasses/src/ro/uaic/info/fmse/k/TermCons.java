@@ -72,7 +72,11 @@ public class TermCons extends Term {
 	@Override
 	public String toMaude() {
 		Production pr = DefinitionHelper.conses.get("\"" + cons + "\"");
+		
 		String cons = pr.getLabel();
+
+		if (pr.attributes.containsKey("maudeop"))
+			cons = pr.attributes.get("maudeop").replaceAll("\"", "");
 
 		String contents = "";
 		for (Term term : this.contents)
