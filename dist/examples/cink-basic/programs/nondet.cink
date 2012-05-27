@@ -5,4 +5,5 @@ int f(int x) {
 int main() {
   r = 5;
   return f(1) + f(2), r;
+//  cout << f(1) + f(2) << r << "\n";
 }

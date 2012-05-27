@@ -4,7 +4,7 @@ module CINK-SYNTAX
 
   /* \subsection{Declarations} */
 
-  syntax Decl ::= "int"  Exp 
+  syntax Decl ::= "int"  Exp
                 | "void" Id 
                 | "bool" Exp
 
@@ -17,7 +17,7 @@ module CINK-SYNTAX
                > left:
                  Exp "*" Exp [left, strict]
                | Exp "/" Exp [left, strict]
-               | Exp "%" Exp [left, strict] 
+               | Exp "%" Exp [left, strict, latex("{#1}\%{#2}")] 
                >  left:
                  Exp "+" Exp [left, strict]
                | Exp "-" Exp [left, strict]
@@ -28,7 +28,7 @@ module CINK-SYNTAX
                >
                  "!" Exp [strict] 
                > 
-                 Exp "&&" Exp [left, strict(1)]
+                 Exp "&&" Exp [left, strict(1), latex("{#1}\&\&{#2}")]
                > 
                 Exp "||" Exp [left, strict(1)]
                > left:
@@ -50,7 +50,7 @@ module CINK-SYNTAX
                | "while" "(" Exp ")" Stmt 
                | "return" Exps ";" // [strict]
                | Decl "(" Decls ")" "{" Stmts "}"
-               | "#include" "<iostream>"
+               | "#include" "<iostream>" [latex("\texttt{\#include<iostream>}")]
                | "if" "(" Exp ")" Stmt "else" Stmt [strict(1)]
                >
                  "if" "(" Exp ")" Stmt
@@ -307,7 +307,7 @@ endmodule
 
 module CINK
   imports CINK-SEMANTICS
-  imports MODEL-CHECKER-HOOKS
+//  imports MODEL-CHECKER-HOOKS
 
 endmodule
 

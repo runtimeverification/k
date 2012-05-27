@@ -17,18 +17,18 @@ module CINK-SYNTAX
                > left:
                  Exp "*" Exp [left, strict]
                | Exp "/" Exp [left, strict]
-               | Exp "%" Exp [left, strict, latex("{#1}\%{#2}")] 
+               | Exp "%" Exp [left, strict, latex("{#1}\\%{#2}")] 
                >  left:
-                 Exp "+" Exp [left, strict]
+                 Exp "+" Exp [left, strict, superheat]
                | Exp "-" Exp [left, strict]
                > left:
                  Exp ">" Exp [left, strict]
-               | Exp "<=" Exp [left, strict, latex("{#1}\leq{#2}")] 
+               | Exp "<=" Exp [left, strict, latex("{#1}\\leq{#2}")] 
                | Exp "==" Exp [left, strict]
                >
                  "!" Exp [strict] 
                > 
-                 Exp "&&" Exp [left, strict(1), latex("{#1}\&\&{#2}")]
+                 Exp "&&" Exp [left, strict(1), latex("{#1}\\&\\&{#2}")]
                > 
                 Exp "||" Exp [left, strict(1)]
                > left:
@@ -43,15 +43,15 @@ module CINK-SYNTAX
 
   /* \subsection{Statements} */
 
-  syntax Stmt ::= Exp ";" [strict]
+  syntax Stmt ::= Exp ";" [strict, superheat]
                | Decl ";"
                | "{" "}"
                | "{" Stmts "}"
                | "while" "(" Exp ")" Stmt 
-               | "return" Exps ";" // [strict]
+               | "return" Exps ";"
                | Decl "(" Decls ")" "{" Stmts "}" 
                | "spawn" Stmt             
-               | "#include" "<iostream>" [latex("\#\texttt{include <iostream>}")]
+               | "#include" "<iostream>" [latex("\\#\\texttt{include <iostream>}")]
                | "if" "(" Exp ")" Stmt "else" Stmt [strict(1)]
                >
                  "if" "(" Exp ")" Stmt
@@ -75,7 +75,7 @@ module CINK-SEMANTICS
   /* \subsection{ASTs which are results.} */
 
   syntax Val ::= Int | Bool | String | "void" 
-               | "lambda" "(" Decls "@" Stmts ")" [latex("\lambda{#1}.{#2}")]
+               | "lambda" "(" Decls "@" Stmts ")" [latex("\\lambda{#1}.{#2}")]
                | "loc" "(" Int ")"
 
   syntax Vals ::= List{Val,","}
@@ -223,7 +223,7 @@ module CINK-SEMANTICS
   rule [instr-expr] : 
        <k> (V:Val; ~> K:K) => K </k> 
        when K =/=K .K
-//       [transition]
+       [transition]
 
 
   rule [block] : 
@@ -362,23 +362,23 @@ endmodule
 
 module CINK
   imports CINK-SEMANTICS
-  imports MODEL-CHECKER-HOOKS
+//  imports MODEL-CHECKER-HOOKS
 
 
-  syntax Val ::= "val" "(" Bag "," Id ")" [function]
+  syntax Int ::= "val" "(" Bag "," Id ")" [function]
 
 
   rule val(<T>... 
                  <genv>... X:Id |-> L:Int ...</genv> 
-                 <store>... L |-> V:Val ...</store> 
+                 <store>... L |-> I:Int ...</store> 
            ...</T>, X)
        =>
-       V
+       I
        [anywhere]
 
-  syntax #Prop ::= "eqTo" "(" Id "," Val ")" [function]
+  syntax #Prop ::= "eqTo" "(" Id "," Int ")" [function]
 
-  rule KItem(B:Bag) LTL|= eqTo(X:Id, I:Int) => true when val(B, X) ==Int I [anywhere]
+  rule KItem(B:Bag) LTL|= eqTo(X:Id, I:Int) => true when val(B, X) ==K I [anywhere]
 
   syntax #ModelCheckerState ::= "KItem" "(" Bag ")"
 
@@ -389,12 +389,15 @@ module CINK
 
 //  rule f1 => LTL<> (eqTo(critical1, 1) LTL/\ eqTo(critical2, 1)) [anywhere]
 
+//  rule f1 => LTL<> (eqTo(critical1, 1) LTL\/ eqTo(critical1, 0)) [anywhere]
+
+  rule f1 => LTLTrue [anywhere]
+
   syntax Bag ::= "initConfig"
 
   syntax ModelCheckResult ::= "check"
 
   rule check => modelCheck(KItem(initConfig), f1) [anywhere]
-
 endmodule
 
 

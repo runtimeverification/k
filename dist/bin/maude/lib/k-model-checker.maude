@@ -223,6 +223,9 @@ mod #MODEL-CHECKER-INTERFACE is
   protecting #BOOL .
   sorts #ModelCheckerState #Prop .
   sort #ModelCheckResult .
+
+  op _LTL|=_ : #ModelCheckerState #Prop -> #Bool [frozen] .
+
 endm
 
 mod #MODEL-CHECKER is
@@ -230,9 +233,6 @@ mod #MODEL-CHECKER is
   including #MODEL-CHECKER-INTERFACE .
   including #LTL .
   subsort #Prop < #LTLFormula .
-
-
-  op _LTL|=_ : #ModelCheckerState #Prop -> #Bool [frozen] .
 
   --- transitions and results
   sorts #RuleName #Transition #TransitionList .
