@@ -19,7 +19,7 @@ module CINK-SYNTAX
                | Exp "/" Exp [left, strict]
                | Exp "%" Exp [left, strict, latex("{#1}\%{#2}")] 
                >  left:
-                 Exp "+" Exp [left, strict]
+                 Exp "+" Exp [left, strict, superheating]
                | Exp "-" Exp [left, strict]
                > left:
                  Exp ">" Exp [left, strict]
