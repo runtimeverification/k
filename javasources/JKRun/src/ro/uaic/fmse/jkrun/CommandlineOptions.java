@@ -43,12 +43,10 @@ public class CommandlineOptions {
 		Option help1 = new Option("h", "help", false, "Display the detailed help message and quit");
 		Option help2 = new Option("?", false, "Display the detailed help message and quit");
 		Option version = new Option("v", "version", false, "Display the version number and quit");
-		Option desk_file = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("desk-file").withDescription("Set Desk file path, instead of searching for it").create();
 		
 		options.addOption(help1); getOptionList().add(help1);
 		options.addOption(help2); getOptionList().add(help2);
 		options.addOption(version); getOptionList().add(version);
-		options.addOption(desk_file); getOptionList().add(desk_file);
 		
 		// Common K options
 		Option pgm = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("pgm").withDescription("Name of the program to execute").create();
@@ -84,7 +82,8 @@ public class CommandlineOptions {
 		Option do_search = OptionBuilder.hasArg(false).withLongOpt("do-search").withDescription("Search for all possible results").create();
 		Option no_do_search = OptionBuilder.hasArg(false).withLongOpt("no-do-search").create();
 		Option maude_cmd = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("maude-cmd").withDescription("Maude command used to execute the definition").create();
-		Option xsearch_pattern = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("xsearch-pattern").withDescription("Search pattern").create();
+		//Option xsearch_pattern = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("xsearch-pattern").withDescription("Search pattern").create();
+		Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern").withDescription("Search pattern").hasArg().withArgName("STRING").create();                             
 		Option output_mode = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("output-mode").withDescription("How to display Maude results (none, raw, pretty)").create();
 		Option log_io = OptionBuilder.hasArg(false).withLongOpt("log-io").withDescription("Tell the IO server to create logs").create();
 		Option no_log_io = OptionBuilder.hasArg(false).withLongOpt("no-log-io").create();
@@ -97,6 +96,15 @@ public class CommandlineOptions {
 		options.addOption(output_mode); getOptionList().add(output_mode);
 		options.addOption(log_io); getOptionList().add(log_io);
 		options.addOption(no_log_io); getOptionList().add(no_log_io);
+		
+		//for group options
+		Option search = OptionBuilder.hasArg(false).withLongOpt("search").create();
+		Option config = OptionBuilder.hasArg(false).withLongOpt("config").create();
+		Option no_config = OptionBuilder.hasArg(false).withLongOpt("no-config").create();
+		
+		options.addOption(search); getOptionList().add(search);
+		options.addOption(config); getOptionList().add(config);
+		options.addOption(no_config); getOptionList().add(no_config);
 
 		// for debugger
 		Option debug = OptionBuilder.hasArg(false).withLongOpt("debug").withDescription("Run an execution in debug mode").create();

@@ -257,12 +257,13 @@ public class FileUtil {
 	}
 	
 	public static String dropKExtension(String fullPath, String extensionSeparator, String pathSeparator) {
-		if (getExtension(fullPath, ".").equals("k")) {
-			return dropExtension(fullPath, extensionSeparator, pathSeparator);
-		}
-		else {
-			return fullPath;
-		}
-	}
+        if (getExtension(fullPath, ".").equals("k")) {
+                return dropExtension(fullPath, extensionSeparator, pathSeparator);
+        }
+        else {
+                return fullPath;
+        }
+}
+
 
 }

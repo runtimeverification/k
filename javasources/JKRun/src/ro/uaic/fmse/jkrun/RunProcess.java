@@ -9,6 +9,7 @@ public class RunProcess {
 
 	private String stdout = null;
 	private String err = null;
+	private int exitCode;
 
 	public String getStdout() {
 		return stdout;
@@ -26,10 +27,19 @@ public class RunProcess {
 	public void setErr(String err) {
 		this.err = err;
 	}
+	
+	public void setExitCode(int exitCode) {
+		this.exitCode = exitCode;
+	}
+
+	public int getExitCode() {
+		return exitCode;
+	}
 
 	public void execute(String... commands) {
 
 		ThreadedStreamHandler inputStreamHandler, errorStreamHandler;
+		
 		try {
 			if (commands.length <= 0) {
 				Error.report("Need command options to run");
@@ -60,6 +70,7 @@ public class RunProcess {
 
 			// wait for process to finish
 			process.waitFor();
+			setExitCode(process.exitValue());
 
 			synchronized (inputStreamHandler) {
 				if (inputStreamHandler.isAlive())
@@ -75,15 +86,13 @@ public class RunProcess {
 
 			String s1 = inputStreamHandler.getContent().toString();
 			if (!s1.equals("")) {
-				// System.out.println("Output is:" + s1);
 				this.setStdout(s1);
 			}
 
 			String s2 = errorStreamHandler.getContent().toString();
-
 			// if some errors occurred (if something was written on the stderr stream)
 			if (!s2.equals("")) {
-				System.out.println("RunProcess: kast reported errors or warnings:");
+				//System.out.println("RunProcess: kast/parser reported errors or warnings:");
 				this.setErr(s2);
 				//System.exit(1);
 			}

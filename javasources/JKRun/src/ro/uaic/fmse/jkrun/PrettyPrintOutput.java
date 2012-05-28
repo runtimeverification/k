@@ -121,6 +121,11 @@ public class PrettyPrintOutput {
 			if (nod == null) {
 				Error.report("Pretty Print Output: The node with search-result tag wasn't found");
 			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
+				Element elem = (Element) nod;
+				if (elem.getAttribute("solution-number").equals("NONE")) {
+					String output = FileUtil.getFileContent(K.maude_out);
+					Error.report("Unable to parse Maude's search results:\n" + output);
+				}
 				// using XPath for direct access to the desired node
 				XPathFactory factory2 = XPathFactory.newInstance();
 				XPath xpath2 = factory2.newXPath();
@@ -128,9 +133,16 @@ public class PrettyPrintOutput {
 				Object result2;
 				try {
 					result2 = xpath2.evaluate(s2, nod, XPathConstants.NODESET);
-					NodeList nodes2 = (NodeList) result2;
-					nod = nodes2.item(0);
-					return processElement((Element) nod);
+					if (result2 != null) {
+						NodeList nodes2 = (NodeList) result2;
+						nod = nodes2.item(0);
+						return processElement((Element) nod);
+					}
+					else {
+						String output = FileUtil.getFileContent(K.maude_out);
+						Error.report("Unable to parse Maude's search results:\n" + output);
+					}
+					
 				} catch (XPathExpressionException e) {
 					Error.report("XPathExpressionException " + e.getMessage());
 				}

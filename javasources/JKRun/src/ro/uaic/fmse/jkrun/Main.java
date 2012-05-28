@@ -94,8 +94,7 @@ public class Main {
 		return result;
 	}
 
-	public static void resolveOption(String optionName, String lang,
-			CommandLine cmd) {
+	public static void resolveOption(String optionName, String lang, CommandLine cmd) {
 		String s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
 		int sep = s.lastIndexOf(K.fileSeparator);
 		String str = s.substring(sep + 1).toUpperCase();
@@ -126,15 +125,23 @@ public class Main {
 		try {
 			// Parse the program arguments
 
+			if (cmd.hasOption("search")) {
+				K.maude_cmd = "search";
+				K.io = false;
+				K.do_search = true;
+				K.output_mode = "pretty";
+			}
+			if (cmd.hasOption("config")) {
+				K.output_mode = "pretty";
+			}
+			if (cmd.hasOption("no-config")) {
+				K.output_mode = "none";
+			}
 			if (cmd.hasOption('h') || cmd.hasOption('?')) {
 				K.help = true;
 			}
 			if (cmd.hasOption('v')) {
 				K.version = true;
-			}
-			if (cmd.hasOption("desk-file")) {
-				K.desk_file = new File(cmd.getOptionValue("desk-file")).getCanonicalPath();
-				// System.out.println("desk-file=" + K.desk_file);
 			}
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
@@ -175,7 +182,6 @@ public class Main {
 			}
 			if (cmd.hasOption("compiled-def")) {
 				K.compiled_def = new File(cmd.getOptionValue("compiled-def")).getCanonicalPath();
-				// System.out.println("compiled-def=" + K.compiled_def);
 			}
 			if (cmd.hasOption("do-search")) {
 				K.do_search = true;
@@ -189,11 +195,11 @@ public class Main {
 			}
 			if (cmd.hasOption("xsearch-pattern")) {
 				K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern");
-				// System.out.println("xsearch-pattern=" + K.xsearch_pattern);
+				//System.out.println("xsearch-pattern:" + K.xsearch_pattern);
 			}
 			if (cmd.hasOption("output-mode")) {
 				K.output_mode = cmd.getOptionValue("output-mode");
-				// System.out.println("output-mode=" + K.output_mode);
+				//System.out.println("output-mode=" + K.output_mode);
 			}
 			if (cmd.hasOption("log-io")) {
 				K.log_io = true;
@@ -213,7 +219,6 @@ public class Main {
 			if (cmd.hasOption("trace")) {
 				K.trace = true;
 			}
-
 			if (cmd.hasOption("pgm")) {
 				K.pgm = new File(cmd.getOptionValue("pgm")).getCanonicalPath();
 			}
@@ -264,7 +269,7 @@ public class Main {
 			if (!cmd.hasOption("syntax-module")) {
 				resolveOption("syntax-module", lang, cmd);
 			}
-
+ 
 			if (FileUtil.getExtension(K.k_definition, ".").length() == 0) {
 				K.k_definition = K.k_definition + ".k";
 			}
@@ -297,16 +302,27 @@ public class Main {
 				// code to execute the external parser
 				rp.execute(new String[] { K.parser, K.pgm });
 			}
-			if (rp.getErr() != null) {
-			  if (K.parser.equals("kast")) {
-				Error.report("kast error:" + rp.getErr());
-				Error.report("\nAttempted command:\n" + "kast --definition=" + K.k_definition + " " + K.pgm);
+			
+		    if (K.parser.equals("kast")) {
+			  if (rp.getErr() != null) {
+				Error.externalReport("Warning: kast reported errors or warnings:\n" + rp.getErr());
 			  }
-			  else {
-				  Error.report("parser error:" + rp.getErr());
-				  Error.report("\nAttempted command:\n" + K.parser + " " + K.pgm);
+			  if (rp.getExitCode() != 0) {
+				 System.out.println("Kast reported:\n" + rp.getStdout());
+				 System.out.println("Fatal: kast returned a non-zero exit code: " + rp.getExitCode());
+				 Error.report("\nAttempted command:\n" + "kast --definition=" + K.k_definition + " " + K.pgm);
 			  }
-			}
+		    } else {
+		    	if (rp.getErr() != null) {
+		    		Error.externalReport("Warning: parser reported errors or warnings:\n" + rp.getErr());
+				}
+		    	if (rp.getExitCode() != 0) {
+					 System.out.println("Parser reported:\n" + rp.getStdout());
+					 System.out.println("Fatal: parser returned a non-zero exit code: " + rp.getExitCode());
+					 Error.report("\nAttempted command:\n" + K.parser + " " + K.pgm);
+				}
+		    }
+			
 			if (rp.getStdout() != null) {
 				KAST = rp.getStdout();
 			}
@@ -322,6 +338,7 @@ public class Main {
 				s = "set show command off ." + K.lineSeparator + K.maude_cmd + " #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
 			} else if (cmd.hasOption("xsearch-pattern")) {
 				s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + K.xsearch_pattern + " .";
+				//s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern + "\"" + " .";
 			} else {
 				s = "set show command off ." + K.lineSeparator + "erew #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
 			}
@@ -366,7 +383,7 @@ public class Main {
 			}
 
 			// save the pretty-printed output of jkrun in a file
-			// FileUtil.createFile(K.krun_output, prettyOutput);
+			FileUtil.createFile(K.krun_output, prettyOutput);
 
 			// delete temporary files
 			FileUtil.deleteFile(K.maude_io_cmd);

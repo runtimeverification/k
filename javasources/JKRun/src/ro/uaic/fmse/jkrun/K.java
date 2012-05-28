@@ -28,8 +28,7 @@ public class K {
 	// where to write the pretty-printed output of jkrun
 	public static String krun_output = "krun_output.txt";
 
-	// the default values for options from here correspond to the ones from the desk file
-	// arguments to jkrun commandline options
+	// the default values for jkrun commandline options
 	public static String desk_file;
 	public static String pgm;
 	public static String k_definition;
