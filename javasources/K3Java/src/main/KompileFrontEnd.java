@@ -1,11 +1,7 @@
 package main;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
 
 import k.utils.FileUtil;
 import k.utils.KPaths;
@@ -22,8 +18,7 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
-import ro.uaic.info.fmse.errorsystem.KException.Label;
-import ro.uaic.info.fmse.errorsystem.KException.Level;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.latex.LatexFilter;
@@ -112,8 +107,7 @@ public class KompileFrontEnd {
 		}
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
-		List<Level> levels = null;
-		GlobalSettings.kem.print(levels);
+		GlobalSettings.kem.print(GlobalSettings.level);
 	}
 
 	private static void pdf(File mainFile, String lang) {
@@ -133,19 +127,19 @@ public class KompileFrontEnd {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
-//			// Apparently I have to do this for now. I'll search for a better solution soon.
-//			InputStream is = process.getInputStream();
-//			InputStreamReader isr = new InputStreamReader(is);
-//			BufferedReader br = new BufferedReader(isr);
-//			// String line;
-//			while (br.readLine() != null) {
-//			}
-//			;
+
+			// // Apparently I have to do this for now. I'll search for a better solution soon.
+			// InputStream is = process.getInputStream();
+			// InputStreamReader isr = new InputStreamReader(is);
+			// BufferedReader br = new BufferedReader(isr);
+			// // String line;
+			// while (br.readLine() != null) {
+			// }
+			// ;
 			// / while((line = br.readLine()) != null){System.out.println(line);}
 
 		} catch (IOException e) {
-			KException exception = new KException(ExceptionType.ERROR, Label.CRITICAL, KMessages.ERR1001, "", "", Level.LEVEL0);
+			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", "", 0);
 			GlobalSettings.kem.register(exception);
 		}
 		pdfClean(new String[] { ".aux", ".log", ".mrk", ".out" });
@@ -273,8 +267,8 @@ public class KompileFrontEnd {
 		// ------------------------------------- basic parsing
 		Definition def = new Definition();
 		def.slurp(canonicalFile, true);
-		def.setMainModule(mainModule);
 		def.setMainFile(canonicalFile);
+		def.setMainModule(mainModule);
 		def.addConsToProductions();
 
 		if (GlobalSettings.verbose)
@@ -380,8 +374,8 @@ public class KompileFrontEnd {
 			// ------------------------------------- basic parsing
 			Definition def = new Definition();
 			def.slurp(f, true);
-			def.setMainModule(mainModule);
 			def.setMainFile(mainFile);
+			def.setMainModule(mainModule);
 			def.addConsToProductions();
 
 			if (GlobalSettings.verbose)
@@ -490,6 +484,9 @@ public class KompileFrontEnd {
 
 	public static void compile(File mainFile, String mainModule, String maudified) {
 		try {
+			// TODO: trateaza erorile de compilare
+			GlobalSettings.kem.print(GlobalSettings.level, KExceptionGroup.COMPILER);
+
 			// init stopwatch
 			Stopwatch sw = new Stopwatch();
 

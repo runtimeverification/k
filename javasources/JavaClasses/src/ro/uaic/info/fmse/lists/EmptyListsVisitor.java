@@ -6,8 +6,7 @@ import java.util.List;
 
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
-import ro.uaic.info.fmse.errorsystem.KException.Label;
-import ro.uaic.info.fmse.errorsystem.KException.Level;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.Empty;
@@ -67,7 +66,7 @@ public class EmptyListsVisitor extends BasicTransformer {
 						}
 
 						if (!avoid) {
-							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, Label.LISTS, KMessages.WARNING1000, new File(tc.getFilename()).getName(), tc.getLocation(), Level.LEVEL0));
+							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.LISTS, KMessages.WARNING1000, new File(tc.getFilename()).getName(), tc.getLocation(), 0));
 						}
 					}
 				}

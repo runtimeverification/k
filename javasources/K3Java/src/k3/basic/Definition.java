@@ -32,6 +32,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class Definition implements Cloneable {
@@ -263,7 +267,8 @@ public class Definition implements Cloneable {
 									// do nothing for programs
 								} else if (prd.isSubsort()) {
 									outsides.add(prd);
-								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
+								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1
+										&& (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
 									// constants.add(prd);
 									String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
 									String sort = prd.getProdSort().getSortName();
@@ -1117,6 +1122,8 @@ public class Definition implements Cloneable {
 
 	public void setMainModule(String mainModule) {
 		this.mainModule = mainModule;
+		if (!this.modulesMap.containsKey(this.mainModule))
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, KMessages.ERR1002 + mainModule + ". Use --lang <arg> to specify another.", this.mainFile.getName(), "definition", 0));
 	}
 
 	public String getMainModule() {

@@ -6,48 +6,50 @@ import java.util.Map;
 public class KException {
 
 	protected ExceptionType type;
-	protected Label label;
+	protected KExceptionGroup exceptionGroup;
 	protected String filename;
 	protected String location;
-	protected Level level;
+	protected int level;
 	protected String message;
-	
+
 	private Map<ExceptionType, String> types;
-	private Map<Label, String> labels;
-	
-	public KException(ExceptionType type, Label label, String message, String filename, String location, Level level) {
+	private Map<KExceptionGroup, String> labels;
+
+	public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location, int level) {
 		super();
 		this.type = type;
-		this.label = label;
+		this.exceptionGroup = label;
 		this.message = message;
 		this.filename = filename;
 		this.location = location;
 		this.level = level;
 		initialize();
 	}
-	
-	
+
 	private void initialize() {
 		types = new HashMap<KException.ExceptionType, String>();
 		types.put(ExceptionType.ERROR, "Error");
 		types.put(ExceptionType.WARNING, "Warning");
 		types.put(ExceptionType.STATUS, "Status");
-		
-		labels = new HashMap<KException.Label, String>();
-		labels.put(Label.COMPILER, "Compiler");
-		labels.put(Label.PARSER, "Parser");
-		labels.put(Label.LISTS, "Lists");
-		labels.put(Label.INTERNAL, "Internal");
-		labels.put(Label.CRITICAL, "Critical");
+
+		labels = new HashMap<KException.KExceptionGroup, String>();
+		labels.put(KExceptionGroup.COMPILER, "Compiler");
+		labels.put(KExceptionGroup.PARSER, "Parser");
+		labels.put(KExceptionGroup.LISTS, "Lists");
+		labels.put(KExceptionGroup.INTERNAL, "Internal");
+		labels.put(KExceptionGroup.CRITICAL, "Critical");
 	}
 
+	public enum KExceptionGroup {
+		PARSER, COMPILER, LISTS, INTERNAL, CRITICAL
+	};
 
-	public enum Label { PARSER, COMPILER, LISTS, INTERNAL, CRITICAL};
-	public enum ExceptionType { ERROR, WARNING, STATUS };
-	public enum Level {LEVEL0, LEVEL1, LEVEL2};
-	
+	public enum ExceptionType {
+		ERROR, WARNING, STATUS
+	};
+
 	@Override
 	public String toString() {
-		return "[" + types.get(type) + "] " + labels.get(label) + ":" + message + "\n\tFile: " + filename + "\n\tLocation: " + location;
+		return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message + "\n\tFile: " + filename + "\n\tLocation: " + location;
 	}
 }
