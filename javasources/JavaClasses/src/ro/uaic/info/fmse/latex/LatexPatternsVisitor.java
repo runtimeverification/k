@@ -49,9 +49,10 @@ public class LatexPatternsVisitor extends BasicVisitor {
 	
 	@Override
 	public void visit(UserList sort) {
-		if (prevNonTerm) pattern += "\\mathrel{}";
+		//Should be only nonterminal in a production, so prevNonTerm has no effect
 		pattern += "{#" + nonTerm++ + "}";
-		prevNonTerm = true;
+		pattern += "\\mathpunct{\\terminalNoSpace{" + DefinitionHelper.latexify(sort.getSeparator()) + "}}";
+		pattern += "{#" + nonTerm++ + "}";
 	}
 	
 	
