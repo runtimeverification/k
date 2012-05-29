@@ -169,7 +169,7 @@ public class KompileFrontEnd {
 
 			String endl = System.getProperty("line.separator");
 			String fileSep = System.getProperty("file.separator");
-			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k";
+			String kLatexStyle = (KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k").replace(fileSep, "/");
 
 			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[poster,style=bubble]{\"" + kLatexStyle + "\"}" + endl;
 			String preamble = lf.getPreamble();
