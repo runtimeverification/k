@@ -76,8 +76,9 @@ public class LatexFilter extends BasicVisitor {
 		} else {
 			result += "\\syntaxCont{";
 		}
-		if (p.getAttributes().containsKey(Constants.CONS_cons_ATTR) && 
-				patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
+		if (p.getItems().get(0).getType() != ProductionType.USERLIST 
+				&& p.getAttributes().containsKey(Constants.CONS_cons_ATTR) 
+				&& 	patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
 			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
 			int n = 1;
 			LatexFilter termFilter = new LatexFilter();

@@ -30,7 +30,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
 		}		
 		if (p.getAttributes().containsKey("latex")) {
 			pattern = p.getAttributes().get("latex");
-			pattern = pattern.substring(1, pattern.length()-1);
+			pattern = pattern.substring(1, pattern.length()-1).replace("\\\\", "\\");
 		} else {
 			pattern = ""; nonTerm = 1; prevNonTerm = false;
 			super.visit(p);
