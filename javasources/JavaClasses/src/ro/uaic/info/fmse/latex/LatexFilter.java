@@ -49,7 +49,7 @@ public class LatexFilter extends BasicVisitor {
 	
 	@Override
 	public void visit(Module mod) {
-		if (DefinitionHelper.isModulePredefined(mod.getName())) return;
+		if (mod.isPredefined()) return;
 		result += "\\begin{module}{\\moduleName{" + DefinitionHelper.latexify(mod.getName()) + "}}" + endl;
 		super.visit(mod);
 		result += "\\end{module}" + endl;

@@ -8,40 +8,6 @@ import java.util.Set;
 import ro.uaic.info.fmse.k.Production;
 
 public class DefinitionHelper {
-	public static String predefinedModules[] = { // they need to be in alphabetic order!
-		"AUTO-INCLUDED-MODULE",
-		"AUTO-INCLUDED-MODULE-SYNTAX",
-		"BOOL-HOOKS",
-		"BOOL-SYNTAX-HOOKS",
-		"BUILTIN-HOOKS",
-		"BUILTIN-SYNTAX-HOOKS",
-		"FLOAT-HOOKS",
-		"FLOAT-SYNTAX-HOOKS",
-		"ID-HOOKS",
-		"ID-SYNTAX-HOOKS",
-		"INT-HOOKS",
-		"INT-SYNTAX-HOOKS",
-		"K",
-		"K-BAG-EXTRAS",
-		"K-DESTRUCTORS",
-		"K-EQUAL-HOOKS",
-		"K-LIST-EXTRAS",
-		"K-LISTK-EXTRAS",
-		"K-MAP-EXTRAS",
-		"K-RESULT",
-		"K-SET-EXTRAS",
-		"K-TECHNIQUE",
-		"K-WRAPPERS-LABELS",
-		"LTL-HOOKS",
-		"LTL-SYNTAX-HOOKS",
-		"MODEL-CHECKER-HOOKS",
-		"MODEL-CHECKER-SYNTAX-HOOKS",
-		"STRING-HOOKS",
-		"STRING-SYNTAX-HOOKS",
-		"TCP-HOOKS",
-		"URIS",
-	};
-	
 	public static String generatedTags[] = {
 		"cons",
 		"kgeneratedlabel",
@@ -93,10 +59,6 @@ public class DefinitionHelper {
 
 	public static boolean isSubsorted(String bigSort, String smallSort) {
 		return subsorts.contains(new Subsort(bigSort, smallSort));
-	}
-
-	public static boolean isModulePredefined(String string) {
-		return (Arrays.binarySearch(predefinedModules, string) >= 0);
 	}
 
 	public static boolean isTagGenerated(String key) {
