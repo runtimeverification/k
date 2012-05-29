@@ -128,6 +128,9 @@
   ;; Comment entries
   (set-comment-highlighting)
 
+  ;; Set comment start characters
+  (setq comment-start "//")
+
   ;; Shortcuts and menu
   (setup-k3-mode-map)
   (use-local-map k3-mode-map)
