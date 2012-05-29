@@ -287,14 +287,17 @@
 \usepackage{fancyvrb}
 \usepackage{fancybox}
 
-\tikzset{comment/.style={
+\tikzset{basic comment/.style={
     rectangle,
     rounded corners,
     draw,
-    fill=black!10,
     inner sep=.75em
   }
 }
+
+
+
+\tikzset{comment/.style={basic comment, fill=black!5 } }
 
 
 % Macros for use in the comments.
@@ -399,6 +402,7 @@
 % Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newenvironment{module}[1]{%
+  \tikzset{comment/.style={basic comment,fill=black!10}}%
   \par\noindent%
   \text{\scshape module #1}%
   \setlength{\parindent}{1em}%
@@ -612,10 +616,10 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 \newcommand{\kcomma}{\mathpunct{\textbf{,}}}
 \newcommand{\kvalue}[1]{{\color{red}#1}}
 \newcommand{\constant}[2][none]{%
-  \k@withTooltip{\text{\sffamily #2}}{Constant Sort: #1}%
+  \k@withTooltip{\text{\sffamily #2}}{syntax #1 ::= "#2"}%
 }
 \newcommand{\variable}[2][none]{%
-\k@withTooltip{\text{\ensuremath{\it #2}}\/}{Variable Sort: #1}%
+\k@withTooltip{\text{\ensuremath{\it #2}}\/}{Variable #2:#1}%
 }
 
 \newcommand{\displayGreek}[1]{%
