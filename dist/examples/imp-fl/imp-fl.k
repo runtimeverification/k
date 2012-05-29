@@ -1,20 +1,3 @@
-module IMP-FL-SYNTAX
-
-  syntax KLabel ::= "div#ee"
-  	 	  | "div#He"
-  	 	  | "div#eH"
-  	 	  | "plus#ee"
-  	 	  | "plus#He"
-  	 	  | "plus#eH"
-
-		  | "le#ee"
-		  | "le#He"
-
-		  | "not#e"
-		  | "not#H"
-
-  syntax KResult ::= Int | Bool
-
   // syntax AExp ::= Int | Id
   // 				| AExp "/" AExp [left, strict]
   // 				> AExp "+" AExp [left, strict]
@@ -33,12 +16,48 @@ module IMP-FL-SYNTAX
   // 				> Stmt ";" Stmt   [left]
   // 				| "(" Stmt ")"    [bracket]
 
+
   // syntax Pgm ::= "var" Ids ";" Stmt
   // syntax Ids ::= List{Id, ","}
   // syntax Start ::= Pgm  
 
-endmodule
+module IMP-FL-SYNTAX
 
+  syntax KLabel ::= "div#ee"
+  	 	  | "div#He"
+  	 	  | "div#eH"
+  	 	  | "plus#ee"
+  	 	  | "plus#He"
+  	 	  | "plus#eH"
+
+		  | "le#ee"
+		  | "le#He"
+
+		  | "not#e"
+		  | "not#H"
+
+		  | "and#ee"
+		  | "and#He"
+
+		  | "assign#ee"
+		  | "assign#eH"
+
+		  | "ite#eee"
+		  | "ite#Hee"
+
+		  | "while#ee"
+
+		  | "seq#ee"
+
+		  | "pgm#ee"
+		  
+		  | "ids#"
+
+		  | "start#e"
+
+  syntax KResult ::= Int | Bool
+
+endmodule
 
 module IMP-FL
    imports IMP-FL-SYNTAX
@@ -81,10 +100,34 @@ module IMP-FL
 
 // NOT
 
-  rulen not#e(E1) => E1 ~> not#H(.List{K})
+  rule not#e(E1) => E1 ~> not#H(.List{K})
        when 'notBool('isKResult(E1))
 
   rule E1 ~> not#H(.List{K}) => not#e(E1) 
+       when 'isKResult(E1)
+
+// AND
+
+  rule and#ee(E1,,E2) => E1 ~> and#He(E2)
+       when 'notBool('isKResult(E1))
+
+  rule E1 ~> and#He(E2) => and#ee(E1,,E2) 
+       when 'isKResult(E1)
+
+// ASSIGN
+
+  rule assign#ee(E1,,E2) => E2 ~> assign#eH(E1)
+       when 'notBool('isKResult(E2))
+
+  rule E2 ~> assign#eH(E1) => assign#ee(E1,,E2) 
+       when 'isKResult(E2)
+
+// ITE
+
+  rule ite#eee(E1,,E2,,E3) => E1 ~> ite#Hee(E2,,E3)
+       when 'notBool('isKResult(E1))
+
+  rule E1 ~> ite#Hee(E2,,E3) => ite#eee(E1,,E2,,E3) 
        when 'isKResult(E1)
 
 
