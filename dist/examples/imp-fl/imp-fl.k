@@ -55,6 +55,17 @@ module IMP-FL-SYNTAX
 
 		  | "start#e"
 
+//   configuration <T color="yellow"> 
+//   					<k color="green"> $PGM : K </k>
+//   					<env color="red"> .Map </env>
+//   				</T>
+
+		  | "KCell#e"
+
+		  | "EnvCell#e"
+
+		  | "TCell#ee"
+
   syntax KResult ::= Int | Bool
 
 endmodule
@@ -64,86 +75,82 @@ module IMP-FL
 
 // DIVISION
 
-  rule div#ee(E1,,E2) => E1 ~> div#He(E2)
+  rule 'KCell#e(('div#ee(E1,,E2) => E1 ~> 'div#He(E2)) ~> _)
        when 'notBool('isKResult(E1))
 
-  rule div#ee(E1,,E2) => E2 ~> div#eH(E1)
+  rule 'KCell#e(('div#ee(E1,,E2) => E2 ~> 'div#eH(E1)) ~> _)
        when 'notBool('isKResult(E2))
 
-  rule E1 ~> div#He(E2) => div#ee(E1,,E2) 
+  rule 'KCell#e((E1 ~> 'div#He(E2) => 'div#ee(E1,,E2)) ~> _)
        when 'isKResult(E1)
 
-  rule E2 ~> div#eH(E1) => div#ee(E1,,E2) 
+  rule 'KCell#e((E2 ~> 'div#eH(E1) => 'div#ee(E1,,E2)) ~> _)
        when 'isKResult(E2)
 
 // PLUS
 
-  rule plus#ee(E1,,E2) => E1 ~> plus#He(E2)
+  rule 'KCell#e(('plus#ee(E1,,E2) => E1 ~> 'plus#He(E2)) ~> _)
        when 'notBool('isKResult(E1))
 
-  rule plus#ee(E1,,E2) => E2 ~> plus#eH(E1)
+  rule 'KCell#e(('plus#ee(E1,,E2) => E2 ~> 'plus#eH(E1)) ~> _)
        when 'notBool('isKResult(E2))
 
-  rule E1 ~> plus#He(E2) => plus#ee(E1,,E2) 
+  rule 'KCell#e((E1 ~> 'plus#He(E2) => 'plus#ee(E1,,E2)) ~> _)
        when 'isKResult(E1)
 
-  rule E2 ~> plus#eH(E1) => plus#ee(E1,,E2) 
+  rule 'KCell#e((E2 ~> 'plus#eH(E1) => 'plus#ee(E1,,E2)) ~> _)
        when 'isKResult(E2)
 
 // LE
 
-  rule le#ee(E1,,E2) => E1 ~> le#He(E2)
+  rule 'KCell#e(('le#ee(E1,,E2) => E1 ~> 'le#He(E2)) ~> _)
        when 'notBool('isKResult(E1))
 
-  rule E1 ~> le#He(E2) => le#ee(E1,,E2) 
+  rule 'KCell#e((E1 ~> 'le#He(E2) => 'le#ee(E1,,E2)) ~> _)
        when 'isKResult(E1)
 
 // NOT
 
-  rule not#e(E1) => E1 ~> not#H(.List{K})
-       when 'notBool('isKResult(E1))
+  rule 'KCell#e(('not#e(E1) => E1 ~> 'not#H(.List{K})) ~> _)
+       when ''notBool('isKResult(E1))
 
-  rule E1 ~> not#H(.List{K}) => not#e(E1) 
+  rule 'KCell#e((E1 ~> 'not#H(.List{K}) => 'not#e(E1)) ~> _)
        when 'isKResult(E1)
 
 // AND
 
-  rule and#ee(E1,,E2) => E1 ~> and#He(E2)
+  rule 'KCell#e(('and#ee(E1,,E2) => E1 ~> 'and#He(E2)) ~> _)
        when 'notBool('isKResult(E1))
 
-  rule E1 ~> and#He(E2) => and#ee(E1,,E2) 
+  rule 'KCell#e((E1 ~> 'and#He(E2) => 'and#ee(E1,,E2)) ~> _)
        when 'isKResult(E1)
 
 // ASSIGN
 
-  rule assign#ee(E1,,E2) => E2 ~> assign#eH(E1)
+  rule 'KCell#e(('assign#ee(E1,,E2) => E2 ~> 'assign#eH(E1)) ~> _)
        when 'notBool('isKResult(E2))
 
-  rule E2 ~> assign#eH(E1) => assign#ee(E1,,E2) 
+  rule 'KCell#e((E2 ~> 'assign#eH(E1) => 'assign#ee(E1,,E2)) ~> _)
        when 'isKResult(E2)
 
 // ITE
 
-  rule ite#eee(E1,,E2,,E3) => E1 ~> ite#Hee(E2,,E3)
+  rule 'KCell#e(('ite#eee(E1,,E2,,E3) => E1 ~> 'ite#Hee(E2,,E3)) ~> _)
        when 'notBool('isKResult(E1))
 
-  rule E1 ~> ite#Hee(E2,,E3) => ite#eee(E1,,E2,,E3) 
+  rule 'KCell#e((E1 ~> 'ite#Hee(E2,,E3) => 'ite#eee(E1,,E2,,E3)) ~> _)
        when 'isKResult(E1)
 
-
-//   configuration <T color="yellow"> 
-//   					<k color="green"> $PGM : K </k>
-//   					<env color="red"> .Map </env>
-//   				</T>
-
-
-//   syntax KResult ::= Int | Bool
+// ACTUAL RULES
 
 //   rule [lookup] :  	<k> X:Id => I:Int ...</k>
 //   					<env>... X |-> I ...</env> 
+//   rule 'TCell#ee('KCell#e((X => I) ~> _),,'EnvCell('-Bag('Bag(X,,I),,_)))
 
 //   rule [assignment]: <k> X:Id := I:Int => . ...</k>
 //   					<env>... X |-> (_ => I) ...</env>
+//   rule 'TCell#ee('KCell#e('assign#ee(X => I) ~> _),,'EnvCell('-Bag('Bag(X,,I),,_)))
+
 
 //   rule [addition] : I1:Int + I2:Int => I1 +Int I2 
 //   rule [div#ision] : I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
