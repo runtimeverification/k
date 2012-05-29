@@ -1,19 +1,19 @@
 module IMP-FL-SYNTAX
 
-  syntax KLabel ::= "divee"
-  	 	  | "divHe"
-  	 	  | "diveH"
-  	 	  | "plusee"
-  	 	  | "plusHe"
-  	 	  | "pluseH"
+  syntax KLabel ::= "div#ee"
+  	 	  | "div#He"
+  	 	  | "div#eH"
+  	 	  | "plus#ee"
+  	 	  | "plus#He"
+  	 	  | "plus#eH"
+
+		  | "le#ee"
+		  | "le#He"
+
+		  | "not#e"
+		  | "not#H"
 
   syntax KResult ::= Int | Bool
-
-  rule divee(E1,,E2) => E1 ~> divHe(E2)
-       when 'notBool('isKResult(E1))
-
-  rule E1 ~> divHe(E2) => divee(E1,,E2) 
-       when 'isKResult(E1)
 
   // syntax AExp ::= Int | Id
   // 				| AExp "/" AExp [left, strict]
@@ -43,6 +43,51 @@ endmodule
 module IMP-FL
    imports IMP-FL-SYNTAX
 
+// DIVISION
+
+  rule div#ee(E1,,E2) => E1 ~> div#He(E2)
+       when 'notBool('isKResult(E1))
+
+  rule div#ee(E1,,E2) => E2 ~> div#eH(E1)
+       when 'notBool('isKResult(E2))
+
+  rule E1 ~> div#He(E2) => div#ee(E1,,E2) 
+       when 'isKResult(E1)
+
+  rule E2 ~> div#eH(E1) => div#ee(E1,,E2) 
+       when 'isKResult(E2)
+
+// PLUS
+
+  rule plus#ee(E1,,E2) => E1 ~> plus#He(E2)
+       when 'notBool('isKResult(E1))
+
+  rule plus#ee(E1,,E2) => E2 ~> plus#eH(E1)
+       when 'notBool('isKResult(E2))
+
+  rule E1 ~> plus#He(E2) => plus#ee(E1,,E2) 
+       when 'isKResult(E1)
+
+  rule E2 ~> plus#eH(E1) => plus#ee(E1,,E2) 
+       when 'isKResult(E2)
+
+// LE
+
+  rule le#ee(E1,,E2) => E1 ~> le#He(E2)
+       when 'notBool('isKResult(E1))
+
+  rule E1 ~> le#He(E2) => le#ee(E1,,E2) 
+       when 'isKResult(E1)
+
+// NOT
+
+  rulen not#e(E1) => E1 ~> not#H(.List{K})
+       when 'notBool('isKResult(E1))
+
+  rule E1 ~> not#H(.List{K}) => not#e(E1) 
+       when 'isKResult(E1)
+
+
 //   configuration <T color="yellow"> 
 //   					<k color="green"> $PGM : K </k>
 //   					<env color="red"> .Map </env>
@@ -58,7 +103,7 @@ module IMP-FL
 //   					<env>... X |-> (_ => I) ...</env>
 
 //   rule [addition] : I1:Int + I2:Int => I1 +Int I2 
-//   rule [division] : I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
+//   rule [div#ision] : I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
 
 //   rule [leq] : I1:Int <= I2:Int => I1 <=Int I2
 //   rule [not] : not T:Bool => notBool T
