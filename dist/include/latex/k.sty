@@ -7,10 +7,7 @@
 % \RequirePackage{etextools} % for xifstrequal
 % \RequirePackage{stringstrings} % for \stringlength
 
-\SetupKeyvalOptions{ 
- family=k, 
- prefix=k@ 
-} 
+\SetupKeyvalOptions{family=k,prefix=k@} 
 
 
 \DeclareStringOption[bubble]{style}  % the default style for cells & stuff
@@ -622,7 +619,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 
 \newcommand{\prefixOp}{\terminalNoSpace}
 \newcommand{\dotCt}[1]{%
-  \ensuremath{\raise.3ex\hbox{\ensuremath{\kdot}}}_{\color{black!60}\scriptstyle\it \!#1}}
+\ensuremath{{\raise.3ex\hbox{\ensuremath{\kdot}}}_{\color{black!60}\scriptstyle\it \!#1}}
 %  \k@withTooltip{\raise.3ex\hbox{\ensuremath{\kdot}}}{Constant Sort: #1}%
 }
 

@@ -462,7 +462,7 @@ to modify the rules below to always match at the top of the \textsf{k}
 cell. */
 
   rule I1:Int + I2:Int => I1 +Int I2
-  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0 
+  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0 
 
 /*@ \subsection{Boolean expressions}
 The rules below are straightforward.  Note the short-circuited semantics
@@ -472,7 +472,7 @@ The particular name of a variable in a rule is sometimes irrelevant,
 as it happens in the second rule for \texttt{and} below.  \K allows us
 to use anonymous variables, written as underscores like in Prolog. */
 
-  rule I1 <= I2 => I1 <=Int I2
+  rule I1:Int <= I2:Int => I1 <=Int I2
   rule not(T:Bool) => notBool T
   rule true and B:BExp => B
   rule false and _ => false
@@ -511,7 +511,7 @@ and counting only the steps corresponding to computational rules as
 transitions (i.e., hiding the structural rules as unobservable, or
 internal steps). */
 
-  rule [sequential]: S1:K ; S2:K => S1 ~> S2  [structural]
+  rule [sequential]: S1 ; S2 => S1 ~> S2  [structural]
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
@@ -520,7 +520,7 @@ Recall that the conditional was annotated with the attribute
 \texttt{strict(1)} in the syntax module above, so only its first
 argument is allowed to be evaluated. */
 
-  rule [if-true]:  if true then S:K else _ => S
+  rule [if-true]:  if true then S else _ => S
   rule [if-false]: if false then _ else S => S
 
 /*@ \subsubsection{While loop}
@@ -557,7 +557,7 @@ stands for the second argument of this top-level program construct,
 not for the rest of the computation. */
 
   rule [program-still-vars]:
-       <k> var (X,Xs:Ids => Xs); _ </k>
+       <k> var (X:Id,Xs:Ids => Xs); _ </k>
        <state> Rho:Map (. => X |-> 0) </state>
     when notBool(X in keys(Rho))
   rule [program-no-vars]: <k> var .Ids; S => S </k>  [structural]

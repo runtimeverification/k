@@ -345,10 +345,10 @@ public class LatexFilter extends BasicVisitor {
 			} else {
 				result += ", ";
 			}
-			result += entry.getKey();
+			result += DefinitionHelper.latexify(entry.getKey());
 			value = entry.getValue();
 			if (!value.isEmpty()) {
-				result += "(" + value + ")"; 
+				result += "(" + DefinitionHelper.latexify(value) + ")"; 
 			}
 		}
 	}

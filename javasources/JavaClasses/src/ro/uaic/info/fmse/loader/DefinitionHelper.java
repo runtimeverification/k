@@ -8,7 +8,7 @@ import java.util.Set;
 import ro.uaic.info.fmse.k.Production;
 
 public class DefinitionHelper {
-	public static String predefinedModules[] = {
+	public static String predefinedModules[] = { // they need to be in alphabetic order!
 		"AUTO-INCLUDED-MODULE",
 		"AUTO-INCLUDED-MODULE-SYNTAX",
 		"BOOL-HOOKS",
@@ -32,6 +32,10 @@ public class DefinitionHelper {
 		"K-SET-EXTRAS",
 		"K-TECHNIQUE",
 		"K-WRAPPERS-LABELS",
+		"LTL-HOOKS",
+		"LTL-SYNTAX-HOOKS",
+		"MODEL-CHECKER-HOOKS",
+		"MODEL-CHECKER-SYNTAX-HOOKS",
 		"STRING-HOOKS",
 		"STRING-SYNTAX-HOOKS",
 		"TCP-HOOKS",
