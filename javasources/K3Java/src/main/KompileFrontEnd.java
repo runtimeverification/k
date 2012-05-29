@@ -1,7 +1,10 @@
 package main;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import k.utils.FileUtil;
 import k.utils.KPaths;
@@ -26,11 +29,12 @@ import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.AmbFilter;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.pp.Preprocessor;
+import java.io.OutputStream;
 
 import com.thoughtworks.xstream.XStream;
 
 public class KompileFrontEnd {
-
+	
 	public static void kompile(String[] args) {
 		Stopwatch sw = new Stopwatch();
 		KompileOptionsParser op = new KompileOptionsParser();
@@ -119,10 +123,19 @@ public class KompileFrontEnd {
 			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
 
 			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
+			pb.redirectErrorStream(true);
 			try {
 				Process process = pb.start();
+				 InputStream is = process.getInputStream();
+				 InputStreamReader isr = new InputStreamReader(is);
+				 BufferedReader br = new BufferedReader(isr);
+				 while (br.readLine() != null) {};
 				process.waitFor();
 				process = pb.start();
+				 is = process.getInputStream();
+				 isr = new InputStreamReader(is);
+				 br = new BufferedReader(isr);
+				 while (br.readLine() != null) {};
 				process.waitFor();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
