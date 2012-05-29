@@ -205,7 +205,9 @@ public class KompileFrontEnd {
 			Stopwatch sw = new Stopwatch();
 
 			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk, sw);
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
+			
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
@@ -356,7 +358,6 @@ public class KompileFrontEnd {
 
 		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
 		javaDef.accept(new CollectSubsortsVisitor());
-		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 		return javaDef;
 	}
 
