@@ -251,6 +251,11 @@ public class FileUtil {
 		return fullPath.substring(sep + 1, dot);
 	}
 	
+	public static String getExternalParserName(String fullPath, String pathSeparator) {
+		int sep = fullPath.lastIndexOf(pathSeparator);
+		return fullPath.substring(sep + 1);
+	}
+	
 	public static String dropExtension(String fullPath, String extensionSeparator, String pathSeparator) {
 		int dot = fullPath.lastIndexOf(extensionSeparator);
 		return fullPath.substring(0, dot);

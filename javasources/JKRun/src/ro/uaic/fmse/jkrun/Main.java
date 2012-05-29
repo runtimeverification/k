@@ -191,7 +191,7 @@ public class Main {
 			}
 			if (cmd.hasOption("maude-cmd")) {
 				K.maude_cmd = cmd.getOptionValue("maude-cmd");
-				// System.out.println("maude-cmd=" + K.maude_cmd);
+				//System.out.println("maude-cmd=" + K.maude_cmd);
 			}
 			if (cmd.hasOption("xsearch-pattern")) {
 				K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern");
@@ -199,7 +199,7 @@ public class Main {
 			}
 			if (cmd.hasOption("output-mode")) {
 				K.output_mode = cmd.getOptionValue("output-mode");
-				//System.out.println("output-mode=" + K.output_mode);
+				System.out.println("output-mode=" + K.output_mode);
 			}
 			if (cmd.hasOption("log-io")) {
 				K.log_io = true;
@@ -299,6 +299,10 @@ public class Main {
 			} else {
 				K.parser = new File(K.parser).getCanonicalPath();
 				System.out.println("The external parser to be used is:" + K.parser);
+				String parserName = FileUtil.getExternalParserName(K.parser, K.fileSeparator);
+				if (parserName.equals("kast") && (System.getProperty("os.name").toLowerCase().contains("win"))) {
+					K.parser += ".bat";
+				}
 				// code to execute the external parser
 				rp.execute(new String[] { K.parser, K.pgm });
 			}
@@ -359,7 +363,7 @@ public class Main {
 			} else {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
 			}
-			PrettyPrintOutput p = new PrettyPrintOutput();
+			PrettyPrintOutput p = new PrettyPrintOutput(cmd);
 			String input = K.userdir + K.fileSeparator + K.maude_output;
 			File file = new File(input);
 			String red = p.processDoc(file);

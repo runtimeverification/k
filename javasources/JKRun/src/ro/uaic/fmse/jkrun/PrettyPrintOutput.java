@@ -22,6 +22,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,6 +31,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class PrettyPrintOutput {
+	
+	private CommandLine cmd;
 	
 	public static final String ANSI_NORMAL = "\u001b[0m";
 	
@@ -41,6 +44,14 @@ public class PrettyPrintOutput {
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
+    
+    public PrettyPrintOutput() {
+    	this.cmd = null;
+    }
+    
+    public PrettyPrintOutput(CommandLine cmd_) {
+    	this.cmd = cmd_;
+    }
 	
 	// Function to read DOM Tree from File
 	public Document readXML(File f) {
@@ -101,7 +112,7 @@ public class PrettyPrintOutput {
 		NodeList list = null;
 		Node nod = null;
 
-		if (K.maude_cmd.equals("erewrite")) {
+		if (K.maude_cmd.equals("erewrite") && !(cmd.hasOption("xsearch-pattern"))) {
 			list = doc.getElementsByTagName("result");
 			nod = list.item(0);
 			if (nod == null) {
@@ -115,7 +126,7 @@ public class PrettyPrintOutput {
 					}
 				}
 			}
-		} else if (K.maude_cmd.equals("search")) {
+		} else if (K.maude_cmd.equals("search") || cmd.hasOption("xsearch-pattern")) {
 			list = doc.getElementsByTagName("search-result");
 			nod = list.item(0);
 			if (nod == null) {
@@ -334,6 +345,14 @@ public class PrettyPrintOutput {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public void setCmd(CommandLine cmd) {
+		this.cmd = cmd;
+	}
+
+	public CommandLine getCmd() {
+		return cmd;
 	}
 
 }
