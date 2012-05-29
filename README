@@ -1,10 +1,44 @@
 1. This is a readme file for the developers.
 
-2. Install
-Checkout this directory in your desired location and update your $PATH to
-/dist/bin.  Then build the .jar binaries by calling ant on $K_BASE.
+2. Prerequisites
 
-3. Work on Java code
+2.1 Java Develpment Kit (tested with JDK6 or higher)
+You can follow the instructions here: 
+http://docs.oracle.com/javase/7/docs/webnotes/install/index.html depending on 
+the type of your machine.
+
+To make sure that everything works you should be able to call 'java' and
+'javac' from a Terminal.
+
+2.2 Apache ANT
+Linux and Mac:
+    Most likely you will already have it.
+Windows:
+    Go to http://ant.apache.org/bindownload.cgi and download the zip with the 
+    binary distribution. Unzip it in your desired location and follow the 
+    instalation instructions from the 'INSTALL' file.
+
+You can test if it works by calling 'ant' in a Terminal.
+
+2.3 Maude
+Linux and Mac:
+   Download the binary distribution from http://maude.cs.uiuc.edu/download/, 
+   unzip it, and update your $PATH with '<extraction-dir>'. Rename 
+   'maude.linux' or 'maude.linux64' to 'maude' (depending on your machine) and
+   you should be good to go.
+Windows:
+    Go to http://moment.dsic.upv.es/ and download Maude for Windows. Follow
+    the instructions from the instalation wizard.
+
+To test if maude has been corectly installed, type 'maude' in a Terminal. You
+should not get any errors or warnings.
+
+3. Install
+Checkout this directory in your desired location and call 'ant' from the main
+directory to build the .jar binaries. For convenient usage, you can update
+your $PATH with <checkout-dir>/dist/bin (strongly recommended, but optional).
+
+4. Work on Java code
 Open eclipse and set your workspace to /javasources.  Go to 
 File->Import->General->Existing projects into workspace, and select all of 
 the projects from /javasources.  
@@ -12,22 +46,22 @@ If you have the spoofax plugin installed in eclipse, you might be able to
 work and compile directly within eclipse (the main project is K3Java and 
 can be used to test the main functionalities).
 
-If your do not have the spoofax plugin, you can still use eclipse as an editor
+If your do not have the Spoofax plugin, you can still use Eclipse as an editor
 and to test functionality not related to parsing.  
 
 If you only modified java files, you can speed up the rebuilding of the
 distributed jar:
-  ant java jar
+    ant java jar
 
 
-4. Work on Maude code
-Modify the Maude files found in /dist/bin/maude.
+5. Work on Maude code
+Modify the Maude files found in /dist/bin/maude. No need for recompilation.
 
-5. Build the final release zip
+6. Build the final release zip
 Call 'ant release' in the base directory.  Or you can just zip the
-/dist folder after you have built the /javasources.
+/dist folder after you have built the entire project.
 
-6. Compiling definitions and running programs
+7. Compiling definitions and running programs
 assuming  /dist/bin is in your path, you can compile definitions using
 the 'kompile' command.  To execute a  program
 you can use 'krun'.
