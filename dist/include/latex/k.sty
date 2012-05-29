@@ -342,6 +342,9 @@
 
 % K Blocks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newlength{\commentIndent}
+\setlength{\commentIndent}{1em}
+
 \newlength{\kblock@indent}
 \newenvironment{kblock}[1][\k@style]{%
 \ifk@tight%
@@ -368,6 +371,8 @@
 }%
 {\ifthenelse{\equal{#1}{text}}{%
 \ifk@poster%
+  \setlength{\parindent}{\commentIndent}%
+  \indent%
   \begin{Sbox}%
     \begin{minipage}{50em}%
       \addtolength{\parskip}{.5\baselineskip}%
