@@ -21,7 +21,9 @@ rules
 	// print the K definition as an XML - parsing only the syntax
 	to-xml1:
 		Config(x1) -> $[<config loc="[loc]">
-			[<to-xml> x1]
+			<body>
+				[<to-xml> x1]
+			</body>
 		</config>
 		<summary>
 			[sum]
@@ -114,7 +116,7 @@ rules
 					<cond>
 						[<to-xml> c]
 					</cond>
-					<attributes>
+					<attributes loc="[loc]">
 						[<to-xml> d]
 					</attributes>
 		</rule>
@@ -132,7 +134,7 @@ rules
 					<body>
 						[children]
 					</body>
-					<attributes>
+					<attributes loc="[loc]">
 						[<to-xml> d]
 					</attributes>
 		</rule>

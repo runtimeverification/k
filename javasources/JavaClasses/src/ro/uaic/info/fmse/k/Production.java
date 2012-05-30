@@ -1,9 +1,7 @@
 package ro.uaic.info.fmse.k;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map.Entry;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -20,7 +18,7 @@ import ro.uaic.info.fmse.utils.xml.XML;
 
 public class Production extends ASTNode {
 	protected java.util.List<ProductionItem> items;
-	protected java.util.Map<String, String> attributes;
+	protected Attributes attributes;
 
 	public Production(Element element) {
 		super(element);
@@ -35,19 +33,14 @@ public class Production extends ASTNode {
 		for (Element e : its)
 			items.add((ProductionItem) JavaClassesFactory.getTerm(e));
 
-		attributes = new HashMap<String, String>();
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
 		// assumption: <attributes> appears only once
 		if (its.size() > 0) {
-			its = XML.getChildrenElements(its.get(0));
-			for (Element e : its) {
-				attributes.put(e.getAttribute(Constants.KEY_key_ATTR), e.getAttribute(Constants.VALUE_value_ATTR));
-			}
-		}
+			attributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
+		} else
+			attributes = new Attributes("generated", "generated");
 		if (attributes.containsKey(Constants.CONS_cons_ATTR))
 			DefinitionHelper.conses.put(attributes.get(Constants.CONS_cons_ATTR), this);
-		// if (items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST)
-
 	}
 
 	public Production(Production node) {
@@ -61,17 +54,7 @@ public class Production extends ASTNode {
 		for (ProductionItem i : items)
 			content += i + " ";
 
-		String attributes = "";
-		for (Entry<String, String> entry : this.attributes.entrySet()) {
-			String value = entry.getValue();
-			if (!value.equals(""))
-				value = "(" + value + ")";
-
-			attributes += " " + entry.getKey() + value;
-		}
-		if (attributes.equals(""))
-			return content;
-		return content + "[" + attributes + "]";
+		return content + attributes.toString();
 	}
 
 	@Override
@@ -93,25 +76,6 @@ public class Production extends ASTNode {
 		if (attributes.containsKey("klabel"))
 			return attributes.get("klabel");
 		return attributes.get("kgeneratedlabel");
-	}
-
-	public String getMetadata() {
-		java.util.List<String> reject = new LinkedList<String>();
-		reject.add("cons");
-		reject.add("kgeneratedlabel");
-		reject.add("latex");
-		reject.add("prefixlabel");
-
-		String attributes = "";
-		for (Entry<String, String> entry : this.attributes.entrySet()) {
-			if (!reject.contains(entry.getKey()))
-				attributes += " " + entry.getKey() + "=(" + entry.getValue() + ")";
-		}
-
-		// append locations too
-		attributes += " location=" + getMaudeLocation();
-
-		return attributes.trim();
 	}
 
 	@Override
@@ -136,11 +100,11 @@ public class Production extends ASTNode {
 		this.items = items;
 	}
 
-	public java.util.Map<String, String> getAttributes() {
+	public Attributes getAttributes() {
 		return attributes;
 	}
 
-	public void setAttributes(java.util.Map<String, String> attributes) {
+	public void setAttributes(Attributes attributes) {
 		this.attributes = attributes;
 	}
 

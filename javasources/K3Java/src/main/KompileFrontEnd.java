@@ -29,7 +29,6 @@ import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.AmbFilter;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.pp.Preprocessor;
-import java.io.OutputStream;
 
 import com.thoughtworks.xstream.XStream;
 

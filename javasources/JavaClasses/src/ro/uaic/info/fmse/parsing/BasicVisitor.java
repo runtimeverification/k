@@ -61,17 +61,17 @@ public class BasicVisitor implements Visitor {
 
 	@Override
 	public void visit(Configuration node) {
-		visit((Sentence)node);
+		visit((Sentence) node);
 	}
 
 	@Override
 	public void visit(Context node) {
-		visit((Sentence)node);
+		visit((Sentence) node);
 	}
 
 	@Override
 	public void visit(Rule node) {
-		visit((Sentence)node);
+		visit((Sentence) node);
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public class BasicVisitor implements Visitor {
 		}
 		visit((Term) node);
 	}
-	
+
 	@Override
 	public void visit(Ambiguity node) {
 		visit((Collection) node);
@@ -189,6 +189,7 @@ public class BasicVisitor implements Visitor {
 		node.getItem().accept(this);
 		visit((CollectionItem) node);
 	}
+
 	@Override
 	public void visit(ListItem node) {
 		visit((CollectionItem) node);
@@ -203,8 +204,8 @@ public class BasicVisitor implements Visitor {
 	@Override
 	public void visit(SetItem node) {
 		visit((CollectionItem) node);
-	}	
-	
+	}
+
 	@Override
 	public void visit(Constant node) {
 		visit((Term) node);
@@ -252,4 +253,15 @@ public class BasicVisitor implements Visitor {
 		visit((Term) node);
 	}
 
+	public void visit(Attributes attributes) {
+		for (Attribute t : attributes.getContents()) {
+			t.accept(this);
+		}
+		visit((ASTNode) attributes);
+	}
+
+	@Override
+	public void visit(Attribute attribute) {
+		visit((ASTNode) attribute);
+	}
 }

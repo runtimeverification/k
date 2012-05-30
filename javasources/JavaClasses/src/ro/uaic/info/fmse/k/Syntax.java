@@ -92,7 +92,8 @@ public class Syntax extends ModuleItem {
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof UserList)) {
 					// user declared lists case
 					UserList list = (UserList) p.items.get(0);
-					String metadata = (p.getMetadata() + " hybrid=()").trim();
+					String metadata = (p.getAttributes().toMaude() + " hybrid=()").trim();
+					metadata += " location=" + p.getMaudeLocation();
 					if (!MaudeHelper.separators.contains(list.separator)) {
 						contents += "op _" + StringUtil.escape(list.separator) + "_ : K K -> K [prec 120 metadata \"" + metadata + "\"] .\n";
 						contents += "op .List`{\"" + list.separator + "\"`} : -> K .\n";
@@ -108,9 +109,11 @@ public class Syntax extends ModuleItem {
 					contents += "eq 'is" + sort + "(_" + StringUtil.escape(list.separator) + "_( X:" + list.sort + ", L:" + sort + " )) = true .\n";
 					contents += "eq ." + sort + " = .List`{\"" + list.separator + "\"`} .\n";
 				} else {
-					String metadata = p.getMetadata();
+					String metadata = p.getAttributes().toMaude();
+					metadata += " location=" + p.getMaudeLocation();
+
 					String maudelabel = p.getLabel();
-					
+
 					if (!p.attributes.containsKey("bracket"))
 						if (metadata.equals(""))
 							contents += "op " + maudelabel + " : " + p.toMaude() + " -> " + sort + " .\n";
@@ -149,10 +152,12 @@ public class Syntax extends ModuleItem {
 			this.priorityBlocks.set(i, elem);
 		}
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

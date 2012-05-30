@@ -76,6 +76,10 @@ public class JavaClassesFactory {
 			return new LiterateModuleComment(element);
 		if (Constants.DEFCOMMENT.equals(element.getNodeName()))
 			return new LiterateDefinitionComment(element);
+		if (Constants.TAG.equals(element.getNodeName()))
+			return new Attribute(element);
+		if (Constants.ATTRIBUTES.equals(element.getNodeName()))
+			return new Attributes(element);
 
 		System.out.println(">>> " + element.getNodeName() + " <<< - unimplemented yet: JavaClassesFactory");
 		return null;

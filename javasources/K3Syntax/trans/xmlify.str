@@ -198,7 +198,7 @@ rules
 	to-xml:	// print an annotated production rule
 		AnnoProd(a*, b*) -> $[<production loc="[loc]">
 								[a'*]
-								<attributes>
+								<attributes loc="[loc]">
 									[b'*]
 								</attributes>
 						</production>
