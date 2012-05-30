@@ -37,7 +37,7 @@ public class TestK {
 		// first, checkout K -> verify the existence of k-framework dir.
 		Integer ulimit = 120;
 		System.out.println("Checkout K ...");
-		String[] commands = new String[] { "svn", "checkout",
+		String[] commands = new String[] { "svn", "export",
 				"https://k-framework.googlecode.com/svn/trunk", kbase };
 		Executor executor = new Executor(commands, ".");
 		executor.start();
@@ -51,15 +51,15 @@ public class TestK {
 		// build K -> verify if the k3.jar file was created
 		commands = new String[] { "ant" };
 		System.out.println("Build ...");
-		Executor build = new Executor(commands, toolsDir + fileSep + kbase);
+		Executor build = new Executor(commands, toolsDir + fileSep + "Jenkins" + fileSep + kbase);
 		build.start();
 		build.join(ulimit * 1000);
 		Thread.yield();
-		k3Jar = toolsDir + fileSep + kbase + fileSep + "dist" + fileSep + "bin"
+		k3Jar = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep + "dist" + fileSep + "bin"
 				+ fileSep + "java" + fileSep + "k3.jar";
-		krun = toolsDir + fileSep + kbase + fileSep + "dist" + fileSep + "bin"
+		krun = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep + "dist" + fileSep + "bin"
 				+ fileSep + "krun";
-		kompile = toolsDir + fileSep + kbase + fileSep + "dist" + fileSep
+		kompile = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep + "dist" + fileSep
 				+ "bin" + fileSep + "kompile";
 		// / System.out.println(k3Jar);
 		assertTrue(new File(k3Jar).exists());

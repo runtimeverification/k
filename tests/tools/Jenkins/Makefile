@@ -1,6 +1,5 @@
 all:
 	javac src/*.java;
-	export CLASSPATH=lib/junit-4.10.jar:src:tests;
-	javac tests/*.java;
+	javac tests/*.java -cp lib/junit-4.10.jar:src
 	java org.junit.runner.JUnitCore TestK
 	
