@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <tests>
 	<example dir="/dist/examples/imppp" mainfile="imppp.k" mainmodule="IMPPP" compiledfile="imppp-compiled.maude">
 		<test file="/dist/examples/imppp/programs/locals.imppp" output="/dist/examples/imppp/programs/tests/locals.imppp.out"/>
