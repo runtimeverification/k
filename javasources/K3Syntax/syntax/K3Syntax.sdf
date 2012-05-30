@@ -51,6 +51,11 @@ lexical syntax
 lexical restrictions
 	TAGCONTENT	-/- ~[\(\)]
 	KEY			-/- [A-Za-z\-]
+	"syntax"	-/- ~[\n\r\ \t]
+	"rule"		-/- ~[\n\r\ \t]
+	"context"	-/- ~[\n\r\ \t]
+	"imports"	-/- ~[\n\r\ \t]
+	"configuration"	-/- ~[\n\r\ \t]
 
 
 lexical syntax
