@@ -14,8 +14,6 @@
     <path id="Jenkins.classpath">
         <pathelement location="bin"/>
         <pathelement location="lib/org.junit_4.8.2.v4_8_2_v20110321-1705/junit.jar"/>
-        <pathelement location="lib/org.hamcrest.core_1.1.0.v20090501071000.jar"/>
-        <pathelement location="lib/org.hamcrest.core.source_1.1.0.v20090501071000.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
