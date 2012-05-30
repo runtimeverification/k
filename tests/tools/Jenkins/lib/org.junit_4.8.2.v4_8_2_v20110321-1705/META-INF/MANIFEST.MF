@@ -1,0 +1,48 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: junit.jar
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.junit
+Eclipse-SourceReferences: scm:cvs:pserver:dev.eclipse.org:/cvsroot/too
+ ls:org.eclipse.orbit/org.junit;tag=v4_8_2_v20110321-1705
+Require-Bundle: org.hamcrest.core;bundle-version="1.1.0";visibility:=r
+ eexport
+Export-Package: junit.extensions;version="4.8.2",junit.framework;versi
+ on="4.8.2",junit.runner;version="4.8.2",junit.textui;version="4.8.2",
+ org.junit;version="4.8.2",org.junit.experimental;version="4.8.2",org.
+ junit.experimental.categories;version="4.8.2",org.junit.experimental.
+ max;version="4.8.2",org.junit.experimental.results;version="4.8.2",or
+ g.junit.experimental.runners;version="4.8.2",org.junit.experimental.t
+ heories;version="4.8.2",org.junit.experimental.theories.internal;vers
+ ion="4.8.2";x-internal:=true,org.junit.experimental.theories.supplier
+ s;version="4.8.2",org.junit.internal;version="4.8.2";x-internal:=true
+ ,org.junit.internal.builders;version="4.8.2";x-internal:=true,org.jun
+ it.internal.matchers;version="4.8.2";x-internal:=true,org.junit.inter
+ nal.requests;version="4.8.2";x-internal:=true,org.junit.internal.runn
+ ers;version="4.8.2";x-internal:=true,org.junit.internal.runners.model
+ ;version="4.8.2";x-internal:=true,org.junit.internal.runners.statemen
+ ts;version="4.8.2";x-internal:=true,org.junit.matchers;version="4.8.2
+ ",org.junit.rules;version="4.8.2",org.junit.runner;version="4.8.2",or
+ g.junit.runner.manipulation;version="4.8.2",org.junit.runner.notifica
+ tion;version="4.8.2",org.junit.runners;version="4.8.2",org.junit.runn
+ ers.model;version="4.8.2"
+Bundle-Version: 4.8.2.v4_8_2_v20110321-1705
+Bundle-ManifestVersion: 2
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: u+F8j/GAE8tzrDry9+wT3Cvg81Y=
+
+Name: junit.jar
+SHA1-Digest: YLuWDgYW5A3oGZMT0UDrWCxX7Js=
+
+Name: about_files/cpl-v10.html
+SHA1-Digest: REygXYi+T14Sj1v8XnnKycNjpN4=
+
+Name: about.html
+SHA1-Digest: Myp5wMdsICQoAejNJG1PhgJ3UXY=
+
+Name: plugin.properties
+SHA1-Digest: jmDQY7WzbFbRBx/fmZNGdzlfNyE=
+
