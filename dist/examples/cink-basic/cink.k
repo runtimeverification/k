@@ -1,25 +1,65 @@
+/*!
+\setlength{\parindent}{1em}
+\title{CinK -- an experiment on how to think in \K}
+\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro})}
+\organization{Alexandru Ioan Cuza University of Ia\c{s}i, Romania}
+\newcommand{\myparagraph}[1]{\textbf{#1}}
+*/
+
+/*@ \section{Introduction}
+
+CinK is C++ like language we used to experiment with \K. The language is used
+an example for teaching classes and is refered in several research paper.
+
+In this report we briefly present the \K definition of CinK. The most part of
+the text is automatically generated with the \K tool, therefore there are some
+differences btween the source code and the pdf version. For instance, the
+terminal syntax declarations are enclosed into quotes but in the pdf version
+these are not displayed. In pdf version, for ease reading reasons, there are 
+used different fonts in order to distinguish between different syntactic 
+categories.
+
+We refer the reader to~\cite{k-primer-2012-v25} for a brief presentation of 
+the \KTool.
+
+/*@ \section{Syntax}
+
+*/
+
 module CINK-SYNTAX 
 
   imports BUILTIN-SYNTAX-HOOKS
 
-  /* \subsection{Declarations} */
+  /*@ \subsection{Declarations} */
 
   syntax Decl ::= "int"  Exp
                 | "void" Id 
                 | "bool" Exp
 
-  /* \subsection{Expressions} */
+  /*@ \subsection{Expressions} */
 
-  syntax Exp ::= Id | Int | Bool | String | Val
+  /*@ The constants of the builtin types are primitive constructs and therefore
+      they should be values. We distinguish the subsort of "lvalues", which 
+      we assume that they are integers. 
+      The sort for values will be extended in the module describing the 
+      semantics. 
+      Obviously, any value is an expression.
+  */
+
+  syntax LVal ::=  Int
+  syntax Val ::= "cout" | "cin" | Bool | String
+
+  syntax Exp ::= Id | Val
                | "(" Exp ")"  [bracket]
                | Id "(" Exps ")" [prec(0), strict(1)]
                | "&" Exp
+               | "*" Exp [strict]
                > left:
                  Exp "*" Exp [left, strict]
                | Exp "/" Exp [left, strict]
                | Exp "%" Exp [left, strict, latex("{#1}\%{#2}")] 
                >  left:
-                 Exp "+" Exp [left, strict, superheating]
+                 Exp "+" Exp [left, strict, superheat]
                | Exp "-" Exp [left, strict]
                > left:
                  Exp ">" Exp [left, strict]
@@ -32,14 +72,13 @@ module CINK-SYNTAX
                > 
                 Exp "||" Exp [left, strict(1)]
                > left:
-                 Exp "<<" Exp [left, strict]
+                 Exp "<<" Exp [left, seqstrict]
                | Exp ">>" Exp [left, strict(1)]
                >
                  Exp "=" Exp [right, strict(2)]
                
 
   syntax #Id ::= "main" 
-  syntax Val ::= "cout" | "cin"
 
   /* \subsection{Statements} */
 
@@ -73,7 +112,7 @@ module CINK-SEMANTICS
 
   /* \subsection{ASTs which are results.} */
 
-  syntax Val ::= Int | Bool | String | "void" 
+  syntax Val ::= "void" 
                | "lambda" "(" Decls "@" Stmts ")" [latex("\lambda{#1}\mathrel{\bullet}{#2}")]
                | "loc" "(" Int ")"
 
@@ -123,7 +162,7 @@ module CINK-SEMANTICS
   /* \subsection{Expressions Evaluation.} */
   rule I1:Int + I2:Int => I1 +Int I2 [structural]
   rule I1:Int - I2:Int => I1 -Int I2 [structural]
-  rule I1:Int * I2:Int => I1 *Int I2 [structural]
+  rule '_*_(I1:Int,, I2:Int) => I1 *Int I2 [structural]
   rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=Int 0 [structural]
   rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=Int 0 [structural]
 
@@ -138,6 +177,9 @@ module CINK-SEMANTICS
   rule ! false  => true [structural]
   rule ! true => false [structural]
 
+  rule [indirection] :
+       <k> (* L:Int) => V ...</k>
+       <store>... L |-> V ...</store>
 
   syntax  Id ::= "getName" "(" Decl ")" [function]
 
@@ -188,6 +230,11 @@ module CINK-SEMANTICS
   rule [mem-lookup-lvalue] :
        <k> lvalue(X:Id) => loc(L) ...</k>
        <env>... X |-> L:Int ...</env>
+
+  rule [mem-lookup-lvalue-indirect] :
+       <k> lvalue(* X:Id) => loc(V) ...</k>
+       <env>... X |-> L:Int ...</env>
+       <store>... L |-> V:Val ...</store>
 
 
   rule [mem-lookup-rvalue] :
