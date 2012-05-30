@@ -61,7 +61,7 @@ public class Example extends Thread{
 	
 	@Override
 	public String toString() {
-		return "Testing " + mainFile;// + ":\nCompilation status: " + exitCode + "\nOutput: " + output + "\nError: " + error + "\n" + "Compile time: " + millis + " milliseconds.\n";
+		return "Testing " + dir + "/" + mainFile + " : " + (isCompiled() == true ? "success" : "failed");// + ":\nCompilation status: " + exitCode + "\nOutput: " + output + "\nError: " + error + "\n" + "Compile time: " + millis + " milliseconds.\n";
 	}
 
 

@@ -57,10 +57,12 @@ public class TestK {
 		Thread.yield();
 		k3Jar = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep + "dist" + fileSep + "bin"
 				+ fileSep + "java" + fileSep + "k3.jar";
-		krun = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep + "dist" + fileSep + "bin"
-				+ fileSep + "krun";
-		kompile = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep + "dist" + fileSep
-				+ "bin" + fileSep + "kompile";
+		// krun = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep +
+		// "dist" + fileSep + "bin"
+		// + fileSep + "krun";
+		// kompile = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep
+		// + "dist" + fileSep
+		// + "bin" + fileSep + "kompile";
 		// / System.out.println(k3Jar);
 		assertTrue(new File(k3Jar).exists());
 		System.out.println("Done.");
