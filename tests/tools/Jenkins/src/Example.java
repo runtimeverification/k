@@ -39,7 +39,7 @@ public class Example extends Thread{
 		long millis = System.currentTimeMillis();
 //		Executor compile = new Executor(new String[]{ "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kompile", mainFile, "-l", mainModule}, dir);
 		String kompile = new File(k3jar).getAbsolutePath().replaceFirst("/java.*?$", "") + System.getProperty("file.separator") + "kompile";
-		Executor compile = new Executor(new String[]{ kompile, mainFile, "-l", mainModule}, dir);
+		Executor compile = new Executor(new String[]{ "bash" ,kompile, mainFile, "-l", mainModule}, dir);
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 		tpe.execute(compile);
 		while(tpe.getCompletedTaskCount() != 1)
