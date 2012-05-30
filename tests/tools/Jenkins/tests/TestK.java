@@ -33,7 +33,7 @@ public class TestK {
 	public void buildK() throws InterruptedException, URISyntaxException {
 
 		file = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-		toolsDir = file.getAbsolutePath().replaceFirst("/bin.*?$", "");
+		toolsDir = file.getAbsolutePath().replaceFirst("/Jenkins.*?$", "");
 		
 
 		// first, checkout K -> verify the existence of k-framework dir. 
