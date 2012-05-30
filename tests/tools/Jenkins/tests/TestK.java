@@ -68,22 +68,22 @@ public class TestK {
 //		System.out.println(build.getError());
 		
 		System.out.println("Compiling examples...");
-//		String configuration = file.getAbsolutePath().replaceFirst("/Jenkins.*?$", "") + fileSep + "configuration.xml";
-//		List<Example> examples = getExamples(configuration, k3Jar);
-//		pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POOL_SIZE);
-//		for(Example example : examples)
-//			pool.execute(example);
-//		
-//		// wait until examples are running
-//		while (pool.getCompletedTaskCount() != examples.size())
-//		{
-//			Thread.sleep(1);
-//		}
-//		
-//		for(Example example : examples)
-//		{
-//			assertTrue(example.isCompiled());
-//		}
+		String configuration = file.getAbsolutePath().replaceFirst("/Jenkins.*?$", "") + fileSep + "configuration.xml";
+		List<Example> examples = getExamples(configuration, k3Jar);
+		pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+		for(Example example : examples)
+			pool.execute(example);
+		
+		// wait until examples are running
+		while (pool.getCompletedTaskCount() != examples.size())
+		{
+			Thread.sleep(1);
+		}
+		
+		for(Example example : examples)
+		{
+			assertTrue(example.isCompiled());
+		}
 	}
 
 	private List<Example> getExamples(String configuration, String k3jar) {
