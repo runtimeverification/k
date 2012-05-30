@@ -96,7 +96,7 @@ public class TestK {
 		NodeList exampless = document.getElementsByTagName("example");
 		for (int i = 0; i < exampless.getLength(); i++) {
 			Element example = (Element) exampless.item(i);
-			String dir = toolsDir + fileSep + kbase
+			String dir = toolsDir + fileSep + "Jenkins" + fileSep + kbase
 					+ example.getAttribute("dir");
 			String mainFile = example.getAttribute("mainfile");
 			String mainModule = example.getAttribute("mainmodule");
