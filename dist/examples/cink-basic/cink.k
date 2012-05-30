@@ -74,7 +74,7 @@ module CINK-SEMANTICS
   /* \subsection{ASTs which are results.} */
 
   syntax Val ::= Int | Bool | String | "void" 
-               | "lambda" "(" Decls "@" Stmts ")" [latex("")]
+               | "lambda" "(" Decls "@" Stmts ")" [latex("\lambda{#1}\mathrel{\bullet}{#2}")]
                | "loc" "(" Int ")"
 
   syntax Vals ::= List{Val,","}
@@ -236,23 +236,32 @@ module CINK-SEMANTICS
        <store>... L |-> (_ => I)  ...</store>
        <in> (ListItem(I:Int) => .)  ...</in>
 
+
+  context _`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE => evaluate(Xl, HOLE))
+
+  syntax Exps ::= "evaluate" "(" Decls "," Exps ")"
+
+  context evaluate( (int X:Id, _:Decls), (HOLE, _:Exps) )
+
+  context evaluate( (int & X:Id, _:Decls), ((HOLE => lvalue(HOLE)), _:Exps) )
+
+  rule evaluate( (Dec:Decl, Xl:Decls), (V:Val, El:Exps))
+    => V, evaluate(Xl, El)
+  rule evaluate(.Decls,.Exps) => .Vals
+
+
   /* \subsection{Function Call.} */
   rule [fun-call] : 
-       <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, El:Exps) ~> K:K)
+       <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Vals) ~> K:K)
            =>
-           (bindto(Xl; El) ~> setEnv(GEnv) ~> Sts ~> return void;)
+           (bindto(Xl; Vl) ~> Sts ~> return void;)
        </k> 
 //       <br/>
        <genv> GEnv:Map </genv>
-       <env> Env:Map </env>
+       <env> Env:Map => GEnv </env>
        <bstack> Stack:List </bstack>
        <fstack> . => ([Env] Stack, K) ...</fstack>
 //       [large]
-
-  syntax K ::= "setEnv" "(" Map ")"
-
-  rule <k> setEnv(Env:Map) => . ...</k>
-       <env> _ => Env </env>
 
   /* \subsection{Function Return.} */
 
@@ -274,23 +283,20 @@ module CINK-SEMANTICS
 
   // \texttt{bindto} binds formal parameters to actual parameters 
 
-  syntax K ::= "bindto" "(" Decls ";" Exps ")"
+  syntax K ::= "bindto" "(" Decls ";" Vals ")"
 
-  context bindto( (int X:Id, _:Decls); (HOLE, _:Exps) )
 
   rule <k> bindto(((int X:Id, Xl:Decls) => Xl); 
-                  ((V:Val, Es:Exps) => Es))
-           ~> setEnv(Env => Env[L/X]) 
+                  ((V:Val, Vs:Vals) => Vs))
        ...</k>
+       <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
-  context bindto( (int & X:Id, _:Decls); ((HOLE => lvalue(HOLE)), _:Exps) )
-
   rule <k> bindto(((int & X:Id, Xl:Decls) => Xl); 
-                  ((loc(L:Int), Es:Exps) => Es))
-           ~> setEnv(Env => Env[L/X]) 
+                  ((loc(L:Int), Vs:Vals) => Vs))
        ...</k>
+       <env> Env:Map => Env[L/X] </env> 
 
   rule <k> bindto(.Decls;.Vals) => . ...</k>  [ structural ]
 
