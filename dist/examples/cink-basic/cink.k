@@ -237,24 +237,24 @@ module CINK-SEMANTICS
        <in> (ListItem(I:Int) => .)  ...</in>
 
 
-  context _`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE => evaluate(Xl, HOLE))
+  context '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, (HOLE => evaluate HOLE following Xl;))
 
-  syntax Exps ::= "evaluate" "(" Decls "," Exps ")"
+  syntax Exps ::= "evaluate" Exps "following" Decls ";"
 
-  context evaluate( (int X:Id, _:Decls), (HOLE, _:Exps) )
+  context evaluate (HOLE, _:Exps) following (int X:Id, _:Decls);
 
-  context evaluate( (int & X:Id, _:Decls), ((HOLE => lvalue(HOLE)), _:Exps) )
+  context evaluate((HOLE => lvalue(HOLE)), _:Exps) following  (int & X:Id, _:Decls);
 
-  rule evaluate( (Dec:Decl, Xl:Decls), (V:Val, El:Exps))
-    => V, evaluate(Xl, El)
-  rule evaluate(.Decls,.Exps) => .Vals
+  rule evaluate(V:Val, El:Exps) following (Dec:Decl, Xl:Decls);
+    => V, evaluate El following Xl;
+  rule evaluate .Exps following .Decls; => .Vals
 
 
   /* \subsection{Function Call.} */
   rule [fun-call] : 
        <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Vals) ~> K:K)
            =>
-           (bindto(Xl; Vl) ~> Sts ~> return void;)
+           (bind Vl to Xl; ~> Sts ~> return void;)
        </k> 
 //       <br/>
        <genv> GEnv:Map </genv>
@@ -283,22 +283,22 @@ module CINK-SEMANTICS
 
   // \texttt{bindto} binds formal parameters to actual parameters 
 
-  syntax K ::= "bindto" "(" Decls ";" Vals ")"
+  syntax K ::= "bind" Vals "to" Decls ";"  
 
 
-  rule <k> bindto(((int X:Id, Xl:Decls) => Xl); 
-                  ((V:Val, Vs:Vals) => Vs))
+  rule <k> bind((V:Val, Vs:Vals) => Vs)
+           to((int X:Id, Xl:Decls) => Xl); 
        ...</k>
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
-  rule <k> bindto(((int & X:Id, Xl:Decls) => Xl); 
-                  ((loc(L:Int), Vs:Vals) => Vs))
+  rule <k> bind((loc(L:Int), Vs:Vals) => Vs)
+           to((int & X:Id, Xl:Decls) => Xl); 
        ...</k>
        <env> Env:Map => Env[L/X] </env> 
 
-  rule <k> bindto(.Decls;.Vals) => . ...</k>  [ structural ]
+  rule bind .Vals to .Decls; => . [ structural ]
 
   // \texttt{popb} pops out the stack of block environments
   syntax K ::= "popb"
