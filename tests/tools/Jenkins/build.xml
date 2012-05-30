@@ -6,7 +6,7 @@
               as the first entry and export the buildfile again. -->
 <project basedir="." default="build" name="Jenkins">
     <property environment="env"/>
-    <property name="ECLIPSE_HOME" value="../../../../../Desktop/eclipse-SDK/eclipse"/>
+    <property name="ECLIPSE_HOME" value="/home/andrei.arusoaie/Desktop/eclipse-SDK/eclipse"/>
     <property name="junit.output.dir" value="junit"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
