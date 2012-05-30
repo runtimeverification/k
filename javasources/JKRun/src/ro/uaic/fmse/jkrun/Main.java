@@ -31,11 +31,11 @@ public class Main {
 		System.out.println("JKrun 0.2.0\n" + "Copyright (C) 2012 Necula Emilian & Raluca");
 	}
 
-	public static void printStatistics() {
-		PrettyPrintOutput p = new PrettyPrintOutput();
+	public static void printStatistics(CommandLine cmd) {
+		PrettyPrintOutput p = new PrettyPrintOutput(cmd);
 		String input = K.userdir + K.fileSeparator + K.maude_output;
 		File file = new File(input);
-		if (K.maude_cmd.equals("search")) {
+		if (K.maude_cmd.equals("search") || p.getCmd().hasOption("xsearch-pattern")) {
 			String totalStates = p.getSearchTagAttr(file, "total-states");
 			String totalRewrites = p.getSearchTagAttr(file, "total-rewrites");
 			String realTime = p.getSearchTagAttr(file, "real-time-ms");
@@ -383,11 +383,11 @@ public class Main {
 			}
 
 			if (K.statistics) {
-				printStatistics();
+				printStatistics(cmd);
 			}
 
 			// save the pretty-printed output of jkrun in a file
-			FileUtil.createFile(K.krun_output, prettyOutput);
+			//FileUtil.createFile(K.krun_output, prettyOutput);
 
 			// delete temporary files
 			FileUtil.deleteFile(K.maude_io_cmd);
