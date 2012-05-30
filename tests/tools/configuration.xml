@@ -14,6 +14,6 @@
 	</example>
 	<example dir="/dist/examples/cink-basic" mainfile="cink.k" mainmodule="CINK" compiledfile="cink-compiled.maude">
 	</example>
-	<example dir="/dist/examples/cink-threads" mainfile="cink.k" mainmodule="CINK" compiledfile="cink-compiled.maude">
-	</example>
+<!--	<example dir="/dist/examples/cink-threads" mainfile="cink.k" mainmodule="CINK" compiledfile="cink-compiled.maude">
+	</example> -->
 </tests>
