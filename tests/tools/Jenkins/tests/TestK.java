@@ -36,7 +36,7 @@ public class TestK {
 
 		// first, checkout K -> verify the existence of k-framework dir.
 		Integer ulimit = 120;
-		System.out.println("Checkout K ...");
+		System.out.println("\nRetrieving K ...");
 		String[] commands = new String[] { "svn", "export",
 				"https://k-framework.googlecode.com/svn/trunk", kbase };
 		Executor executor = new Executor(commands, ".");
