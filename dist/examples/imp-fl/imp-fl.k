@@ -57,9 +57,8 @@ module IMP-FL-SYNTAX
 
 	    | "skip#"
 
-  syntax Val ::= Int | Bool
 
-  syntax KResult ::= Val
+  syntax KResult ::= Int | Bool
 
 endmodule
 
@@ -80,68 +79,106 @@ module IMP-FL
        <k>E1 ~> div#He(E2) ~> K </k>
      when 'notBool('isKResult(E1))
 
-  rule 'KCell#e(('div#ee(E1,,E2) => E2 ~> 'div#eH(E1)) ~> _)
-       when 'notBool('isKResult(E2))
+  rule <k> div#ee(E1,,E2) ~> K:K </k>
+       =>
+       <k>E2 ~> div#eH(E1) ~> K </k>
+     when 'notBool('isKResult(E2))
 
-  rule 'KCell#e((E1 ~> 'div#He(E2) => 'div#ee(E1,,E2)) ~> _)
-       when 'isKResult(E1)
+  rule <k> V:K ~> div#He(E) ~> K:K </k>
+       =>
+       <k> div#ee(V,, E) ~> K </k>
+     when 'isKResult(V)
 
-  rule 'KCell#e((E2 ~> 'div#eH(E1) => 'div#ee(E1,,E2)) ~> _)
-       when 'isKResult(E2)
+  rule <k> V:K ~> div#eH(E) ~> K:K </k>
+       =>
+       <k> div#ee(E,, V) ~> K </k>
+     when 'isKResult(V)
+
 
 // PLUS
 
-  rule 'KCell#e(('plus#ee(E1,,E2) => E1 ~> 'plus#He(E2)) ~> _)
-       when 'notBool('isKResult(E1))
+  rule <k> plus#ee(E1,,E2) ~> K:K </k>
+       =>
+       <k>E1 ~> plus#He(E2) ~> K </k>
+     when 'notBool('isKResult(E1))
 
-  rule 'KCell#e(('plus#ee(E1,,E2) => E2 ~> 'plus#eH(E1)) ~> _)
-       when 'notBool('isKResult(E2))
+  rule <k> plus#ee(E1,,E2) ~> K:K </k>
+       =>
+       <k>E2 ~> plus#eH(E1) ~> K </k>
+     when 'notBool('isKResult(E2))
 
-  rule 'KCell#e((E1 ~> 'plus#He(E2) => 'plus#ee(E1,,E2)) ~> _)
-       when 'isKResult(E1)
+  rule <k> V:K ~> plus#He(E) ~> K:K </k>
+       =>
+       <k> plus#ee(V,, E) ~> K </k>
+     when 'isKResult(V)
 
-  rule 'KCell#e((E2 ~> 'plus#eH(E1) => 'plus#ee(E1,,E2)) ~> _)
-       when 'isKResult(E2)
+  rule <k> V:K ~> plus#eH(E) ~> K:K </k>
+       =>
+       <k> plus#ee(E,, V) ~> K </k>
+     when 'isKResult(V)
 
 // LE
 
-  rule 'KCell#e(('le#ee(E1,,E2) => E1 ~> 'le#He(E2)) ~> _)
-       when 'notBool('isKResult(E1))
+  rule <k> le#ee(E1,,E2) ~> K:K </k>
+       =>
+       <k>E1 ~> le#He(E2) ~> K </k>
+     when 'notBool('isKResult(E1))
 
-  rule 'KCell#e((E1 ~> 'le#He(E2) => 'le#ee(E1,,E2)) ~> _)
-       when 'isKResult(E1)
+  rule <k> V:K ~> le#He(E) ~> K:K </k>
+       =>
+       <k> le#ee(V,, E) ~> K </k>
+     when 'isKResult(V)
+
 
 // NOT
 
-  rule 'KCell#e(('not#e(E1) => E1 ~> 'not#H(.List{K})) ~> _)
-       when ''notBool('isKResult(E1))
+  rule <k> not#e(E) ~> K:K </k>
+       =>
+       <k> E ~> not#H(.List{K}) ~> K </k>
+     when 'notBool('isKResult(E))
 
-  rule 'KCell#e((E1 ~> 'not#H(.List{K}) => 'not#e(E1)) ~> _)
-       when 'isKResult(E1)
+  rule <k> V:K ~> not#H(.List{K}) ~> K:K </k>
+       =>
+       <k> not#e(V) ~> K </k>
+     when 'isKResult(V)
 
 // AND
 
-  rule 'KCell#e(('and#ee(E1,,E2) => E1 ~> 'and#He(E2)) ~> _)
-       when 'notBool('isKResult(E1))
+  rule <k> and#ee(E1,,E2) ~> K:K </k>
+       =>
+       <k>E1 ~> and#He(E2) ~> K </k>
+     when 'notBool('isKResult(E1))
 
-  rule 'KCell#e((E1 ~> 'and#He(E2) => 'and#ee(E1,,E2)) ~> _)
-       when 'isKResult(E1)
+  rule <k> V:K ~> and#He(E) ~> K:K </k>
+       =>
+       <k> and#ee(V,, E) ~> K </k>
+     when 'isKResult(V)
 
 // ASSIGN
 
-  rule 'KCell#e(('assign#ee(E1,,E2) => E2 ~> 'assign#eH(E1)) ~> _)
-       when 'notBool('isKResult(E2))
+  rule <k> assign#ee(E1,,E2) ~> K:K </k>
+       =>
+       <k>E2 ~> assign#eH(E1) ~> K </k>
+     when 'notBool('isKResult(E2))
 
-  rule 'KCell#e((E2 ~> 'assign#eH(E1) => 'assign#ee(E1,,E2)) ~> _)
-       when 'isKResult(E2)
+  rule <k> V:K ~> assign#eH(E) ~> K:K </k>
+       =>
+       <k> assign#ee(E,, V) ~> K </k>
+     when 'isKResult(V)
+
 
 // ITE
 
-  rule 'KCell#e(('ite#eee(E1,,E2,,E3) => E1 ~> 'ite#Hee(E2,,E3)) ~> _)
-       when 'notBool('isKResult(E1))
+  rule <k> ite#eee(E,,S1,, S2) ~> K:K </k>
+       =>
+       <k>E ~> ite#Hee(S1,, S2) ~> K </k>
+     when 'notBool('isKResult(E))
 
-  rule 'KCell#e((E1 ~> 'ite#Hee(E2,,E3) => 'ite#eee(E1,,E2,,E3)) ~> _)
-       when 'isKResult(E1)
+  rule <k> V:K ~> ite#Hee(S1,, S2) ~> K:K </k>
+       =>
+       <k> ite#eee(V,, S1,, S2) ~> K </k>
+     when 'isKResult(V)
+
 
 // ACTUAL RULES
 
@@ -186,7 +223,7 @@ module IMP-FL
 
 //   rule [leq] : I1:Int <= I2:Int => I1 <=Int I2
 
-  rule <k> leq#ee(I1:Int,,I2:Int) ~> K:K </k>
+  rule <k> le#ee(I1:Int,,I2:Int) ~> K:K </k>
        =>
        <k> I1 <=Int I2 ~> K </k>
 
@@ -236,23 +273,26 @@ module IMP-FL
 
   rule <k> while#ee(E:K,,S:K) ~> K:K </k>
        =>
-       <k> ite#eee(E,,seq#ee(S,,while#ee(E:K,,S:K)),,skip#) ~> K </k>
+       <k> ite#eee(E,,seq#ee(S,,while#ee(E,,S)),,skip#(.List{K})) ~> K </k>
 
   // rule [program-still-vars]:
   // 	 	<k> var X:Id, Xs:Ids; S => var Xs; S ...</k>
   // 	    <env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
 
   rule <T>
-          <k> consIds(V:K,,Rest::K) ~> K:K </k>
+          <k> consIds#ee(V:K,,Rest:K) ~> K:K </k>
           <env> E:Map </env>
        </T>
        =>
        <T>
-          <k> K </k>
-          <env> X |-> 0 E </env> 
+          <k> Rest ~> K </k>
+          <env> V |-> 0 E </env> 
        </T>
-     when 'notBool(X in keys(E))
+     when 'notBool(V in keys(E))
 
 //   rule [program-no-vars]: <k> var .Ids ; S => S ...</k> [structural]
 
+  rule <k> emptyIds#(.List{K}) ~> K:K </k> => <k>  K:K </k>
+  
 endmodule
+
