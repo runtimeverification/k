@@ -51,32 +51,34 @@ module IMP-FL-SYNTAX
 
 		  | "pgm#ee"
 		  
-		  | "ids#"
+		  | "emptyIds#"
+		  
+		  | "consIds#ee"
 
-		  | "start#e"
+	    | "skip#"
 
-//   configuration <T color="yellow"> 
-//   					<k color="green"> $PGM : K </k>
-//   					<env color="red"> .Map </env>
-//   				</T>
+  syntax Val ::= Int | Bool
 
-		  | "KCell#e"
-
-		  | "EnvCell#e"
-
-		  | "TCell#ee"
-
-  syntax KResult ::= Int | Bool
+  syntax KResult ::= Val
 
 endmodule
 
 module IMP-FL
    imports IMP-FL-SYNTAX
 
+   configuration <T color="yellow"> 
+   					<k color="green"> $PGM : K </k>
+   					<env color="red"> .Map </env>
+   				</T>
+
 // DIVISION
 
-  rule 'KCell#e(('div#ee(E1,,E2) => E1 ~> 'div#He(E2)) ~> _)
-       when 'notBool('isKResult(E1))
+
+  
+  rule <k> div#ee(E1,,E2) ~> K:K </k>
+       =>
+       <k>E1 ~> div#He(E2) ~> K </k>
+     when 'notBool('isKResult(E1))
 
   rule 'KCell#e(('div#ee(E1,,E2) => E2 ~> 'div#eH(E1)) ~> _)
        when 'notBool('isKResult(E2))
@@ -145,33 +147,111 @@ module IMP-FL
 
 //   rule [lookup] :  	<k> X:Id => I:Int ...</k>
 //   					<env>... X |-> I ...</env> 
-//   rule 'TCell#ee('KCell#e((X => I) ~> _),,'EnvCell('-Bag('Bag(X,,I),,_)))
+
+  rule <T>
+          <k> X:Id ~> K:K </k>
+          <env> EL:Map X |-> I ER:Map </env>
+       </T>
+       =>
+       <T>
+          <k> I ~> K </k>
+          <env> EL X |-> I ER </env> 
+       </T>
 
 //   rule [assignment]: <k> X:Id := I:Int => . ...</k>
 //   					<env>... X |-> (_ => I) ...</env>
-//   rule 'TCell#ee('KCell#e('assign#ee(X => I) ~> _),,'EnvCell('-Bag('Bag(X,,I),,_)))
 
+  rule <T>
+          <k> assign#ee(X:Id,,I:Int) ~> K:K </k>
+          <env> EL:Map X |-> _ ER:Map </env>
+       </T>
+       =>
+       <T>
+          <k> K </k>
+          <env> EL X |-> I ER </env> 
+       </T>
 
 //   rule [addition] : I1:Int + I2:Int => I1 +Int I2 
+
+  rule <k> plus#ee(I1:Int,,I2:Int) ~> K:K </k>
+       =>
+       <k> I1 +Int I2 ~> K </k>
+
 //   rule [div#ision] : I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
 
+  rule <k> div#ee(I1:Int,,I2:Int) ~> K:K </k>
+       =>
+       <k> I1 /Int I2 ~> K </k>
+     when I2 =/=K 0
+
 //   rule [leq] : I1:Int <= I2:Int => I1 <=Int I2
+
+  rule <k> leq#ee(I1:Int,,I2:Int) ~> K:K </k>
+       =>
+       <k> I1 <=Int I2 ~> K </k>
+
 //   rule [not] : not T:Bool => notBool T
+
+  rule <k> not#e(B:Bool) ~> K:K </k>
+       =>
+       <k> notBool B ~> K </k>
+
 //   rule [and-true] : true and B:BExp => B
+
+  rule <k> and#ee(true,,B:Bool) ~> K:K </k>
+       =>
+       <k> B ~> K </k>
+
 //   rule [and-false]: false and B:BExp => false
+
+  rule <k> and#ee(false,,_:K) ~> K:K </k>
+       =>
+       <k> false ~> K </k>
 
 //   rule [skip] : skip => .
 
+  rule <k> skip#(.List{K}) ~> K:K </k>
+       =>
+       <k> K </k>
+
 //   rule [sequential] : S1;S2 => S1 ~> S2 [structural]
 
+  rule <k> seq#ee(E1:K,,E2:K) ~> K:K </k>
+       =>
+       <k> E1 ~> E2 ~> K </k>
+
 //   rule [if-true] : if true  then S else _ => S
+
+  rule <k> ite#eee(true,,E1:K,,E2:K) ~> K:K </k>
+       =>
+       <k> E1 ~> K </k>
+
 //   rule [if-false]: if false then _ else S => S
 
+  rule <k> ite#eee(false,,E1:K,,E2:K) ~> K:K </k>
+       =>
+       <k> E2 ~> K </k>
+
 //   rule [while] : <k> while B do S => if B then S ; while B do S else skip ...</k> [structural]
+
+  rule <k> while#ee(E:K,,S:K) ~> K:K </k>
+       =>
+       <k> ite#eee(E,,seq#ee(S,,while#ee(E:K,,S:K)),,skip#) ~> K </k>
 
   // rule [program-still-vars]:
   // 	 	<k> var X:Id, Xs:Ids; S => var Xs; S ...</k>
   // 	    <env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
+
+  rule <T>
+          <k> consIds(V:K,,Rest::K) ~> K:K </k>
+          <env> E:Map </env>
+       </T>
+       =>
+       <T>
+          <k> K </k>
+          <env> X |-> 0 E </env> 
+       </T>
+     when 'notBool(X in keys(E))
 
 //   rule [program-no-vars]: <k> var .Ids ; S => S ...</k> [structural]
 
