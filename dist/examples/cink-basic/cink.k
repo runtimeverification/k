@@ -23,7 +23,9 @@ We refer the reader to~\cite{k-primer-2012-v25} for a brief presentation of
 the \KTool.
 
 /*@ \section{Syntax}
-
+The syntax of Cink is written using the last version at the moment of the 
+\K Tool, namely K3. The syntax of a language is given using a BNF-like 
+notation enriched with annotations and priority specifications. 
 */
 
 module CINK-SYNTAX 
@@ -55,16 +57,16 @@ module CINK-SYNTAX
                | "&" Exp
                | "*" Exp [strict]
                > left:
-                 Exp "*" Exp [left, strict]
-               | Exp "/" Exp [left, strict]
-               | Exp "%" Exp [left, strict, latex("{#1}\%{#2}")] 
+                 Exp "*" Exp [strict]
+               | Exp "/" Exp [strict]
+               | Exp "%" Exp [strict, latex("{#1}\%{#2}")] 
                >  left:
-                 Exp "+" Exp [left, strict, superheat]
-               | Exp "-" Exp [left, strict]
+                 Exp "+" Exp [strict, superheat]
+               | Exp "-" Exp [strict]
                > left:
-                 Exp ">" Exp [left, strict]
-               | Exp "<=" Exp [left, strict, latex("{#1}\leq{#2}")] 
-               | Exp "==" Exp [left, strict]
+                 Exp ">" Exp [strict]
+               | Exp "<=" Exp [strict, latex("{#1}\leq{#2}")] 
+               | Exp "==" Exp [strict]
                >
                  "!" Exp [strict] 
                > 
@@ -72,15 +74,15 @@ module CINK-SYNTAX
                > 
                 Exp "||" Exp [left, strict(1)]
                > left:
-                 Exp "<<" Exp [left, seqstrict]
-               | Exp ">>" Exp [left, strict(1)]
+                 Exp "<<" Exp [seqstrict]
+               | Exp ">>" Exp [strict(1)]
                >
                  Exp "=" Exp [right, strict(2)]
                
 
   syntax #Id ::= "main" 
 
-  /* \subsection{Statements} */
+  /*@ \subsection{Statements} */
 
   syntax Stmt ::= Exp ";" [strict]
                | Decl ";"
@@ -163,6 +165,7 @@ module CINK-SEMANTICS
   rule I1:Int + I2:Int => I1 +Int I2 [structural]
   rule I1:Int - I2:Int => I1 -Int I2 [structural]
   rule '_*_(I1:Int,, I2:Int) => I1 *Int I2 [structural]
+//  rule I1:Int * I2:Int => I1 *Int I2 [structural]
   rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=Int 0 [structural]
   rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=Int 0 [structural]
 
@@ -353,7 +356,6 @@ module CINK-SEMANTICS
   rule <k> popb => . ...</k>
        <bstack> [Env:Map] => . ...</bstack>
        <env> _ => Env </env> 
-
 
 endmodule
 
