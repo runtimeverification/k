@@ -112,7 +112,7 @@ public class Syntax extends ModuleItem {
 					String metadata = p.getAttributes().toMaude();
 					metadata += " location=" + p.getMaudeLocation();
 
-					String maudelabel = p.getLabel();
+					String maudelabel = p.getLabel().replaceAll("` ", "`");
 
 					if (!p.attributes.containsKey("bracket"))
 						if (metadata.equals(""))
