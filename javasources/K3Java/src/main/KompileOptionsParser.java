@@ -40,11 +40,13 @@ public class KompileOptionsParser {
 		Option latex = new Option("latex", false, "generate latex from definition");
 		Option maudify = new Option("m", "maudify", false, "maudify the definition");
 		Option compile = new Option("c", "compile", false, "compile the definition");
+		Option warnings = new Option("w", "warnings", false, "display warnings");
 
 		tex.addOption(latex);
 		tex.addOption(pdf);
 		tex.addOption(compile);
 		tex.addOption(maudify);
+		tex.addOption(warnings);
 		
 		// xml
 		OptionGroup xml = new OptionGroup();

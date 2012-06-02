@@ -53,6 +53,9 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("nofilename")) {
 			GlobalSettings.noFilename = true;
 		}
+		
+		if(cmd.hasOption("warnings"))
+			GlobalSettings.warnings = true;
 
 		// set lib if any
 		if (cmd.hasOption("lib")) {
