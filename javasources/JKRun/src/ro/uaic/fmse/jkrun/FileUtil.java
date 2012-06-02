@@ -3,14 +3,10 @@ package ro.uaic.fmse.jkrun;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -18,25 +14,6 @@ import java.util.Iterator;
 import org.apache.commons.io.FileUtils;
 
 public class FileUtil {
-
-	// save content in file
-	public static void saveInFile(String file, String content) {
-		try {
-			File file1 = new File(file);
-			File f2 = new File(file1.getParent());
-			f2.mkdirs();
-			// file1.createNewFile();
-
-			BufferedWriter out = new BufferedWriter(new FileWriter(file1));
-			if (content != null) {
-				out.write(content);
-				out.flush();
-				out.close();
-			}
-		} catch (IOException e) {
-			Error.report("Internal error: Cannot save file content.");
-		}
-	}
 
 	public static void createFile(String file, String content) {
 		try {
@@ -90,7 +67,7 @@ public class FileUtil {
 
 		File f = new File(fileName);
 
-		// Make sure the file or directory exists and isn't write protected
+		// Make sure the file or directory exists 
 		if (!f.exists())
 			throw new IllegalArgumentException("Delete: no such file or directory:" + fileName);
 
@@ -99,75 +76,6 @@ public class FileUtil {
 
 		if (!success)
 			throw new IllegalArgumentException("Delete: deletion failed");
-	}
-
-	public static boolean deleteDirectory(File path) {
-		if (path.exists()) {
-			File[] files = path.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (files[i].isDirectory()) {
-					deleteDirectory(files[i]);
-				} else {
-					files[i].delete();
-				}
-			}
-		}
-		return (path.delete());
-	}
-
-	// appends the content from the srFile to dtFile
-	public static void copyfile(String srFile, String dtFile) {
-
-		try {
-			File f1 = new File(srFile);
-			File f2 = new File(dtFile);
-			InputStream in = new FileInputStream(f1);
-
-			// For Append the file.
-			OutputStream out = new FileOutputStream(f2, true);
-
-			// For Overwrite the file.
-			// OutputStream out = new FileOutputStream(f2);
-			byte[] buf = new byte[1024];
-			int len;
-			while ((len = in.read(buf)) > 0) {
-				out.write(buf, 0, len);
-			}
-			in.close();
-			out.close();
-		} catch (FileNotFoundException ex) {
-			Error.report(ex.getMessage() + " in the specified directory.");
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	// creates a new file named fileName in which copies the content from
-	// srcFile and at the end appends the string s
-	public static void copyFile(String fileName, String srcFile, String s) {
-
-		try {
-			File destFile = new File(fileName);
-			File inFile = new File(srcFile);
-
-			InputStream in = new FileInputStream(inFile);
-			OutputStream out = new FileOutputStream(destFile);
-
-			byte[] buf = new byte[1024];
-			int len;
-			while ((len = in.read(buf)) > 0) {
-				out.write(buf, 0, len);
-			}
-			byte[] b = s.getBytes();
-			out.write(b);
-			in.close();
-			out.close();
-		} catch (FileNotFoundException ex) {
-			Error.report(ex.getMessage() + " in the specified directory.");
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-
 	}
 
 	public static String parseOutputMaude(String file) {
@@ -235,13 +143,17 @@ public class FileUtil {
 		return result;
 	}
 
-	public static String getExtension(String fullPath, String extensionSeparator) {
-		int dot;
-		if (fullPath.indexOf(extensionSeparator) == -1) {
+	public static String getExtension(String fullPath, String extensionSeparator, String pathSeparator) {
+		int dot, pos;
+		String aux;
+		
+		pos = fullPath.lastIndexOf(pathSeparator);
+		aux = fullPath.substring(pos + 1);
+		if (aux.indexOf(extensionSeparator) == -1) {
 			return "";
 		} else {
-			dot = fullPath.lastIndexOf(extensionSeparator);
-			return fullPath.substring(dot + 1);
+			dot = aux.lastIndexOf(extensionSeparator);
+			return aux.substring(dot + 1);
 		}
 	}
 
@@ -261,14 +173,13 @@ public class FileUtil {
 		return fullPath.substring(0, dot);
 	}
 	
-	public static String dropKExtension(String fullPath, String extensionSeparator, String pathSeparator) {
-        if (getExtension(fullPath, ".").equals("k")) {
-                return dropExtension(fullPath, extensionSeparator, pathSeparator);
-        }
-        else {
-                return fullPath;
-        }
-}
+	public static String dropKExtension(String fullPath,String extensionSeparator, String pathSeparator) {
+		if (getExtension(fullPath, ".", pathSeparator).equals("k")) {
+			return dropExtension(fullPath, extensionSeparator, pathSeparator);
+		} else {
+			return fullPath;
+		}
+	}
 
 
 }

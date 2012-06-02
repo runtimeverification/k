@@ -30,7 +30,7 @@ public class ThreadedStreamHandler extends Thread {
 			try {
 				bufferedReader.close();
 			} catch (IOException e) {
-				// ignore this one
+				e.printStackTrace();
 			}
 		}
 	}

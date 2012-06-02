@@ -191,7 +191,6 @@ public class Main {
 			}
 			if (cmd.hasOption("maude-cmd")) {
 				K.maude_cmd = cmd.getOptionValue("maude-cmd");
-				//System.out.println("maude-cmd=" + K.maude_cmd);
 			}
 			if (cmd.hasOption("xsearch-pattern")) {
 				K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern");
@@ -199,7 +198,7 @@ public class Main {
 			}
 			if (cmd.hasOption("output-mode")) {
 				K.output_mode = cmd.getOptionValue("output-mode");
-				System.out.println("output-mode=" + K.output_mode);
+				//System.out.println("output-mode=" + K.output_mode);
 			}
 			if (cmd.hasOption("log-io")) {
 				K.log_io = true;
@@ -251,7 +250,7 @@ public class Main {
 			if (!pgmFile.exists()) {
 				Error.report("\nProgram file does not exist: " + K.pgm);
 			}
-			String lang = FileUtil.getExtension(K.pgm, ".");
+			String lang = FileUtil.getExtension(K.pgm, ".", K.fileSeparator);
 
 			// by default
 			if (!cmd.hasOption("k-definition")) {
@@ -270,7 +269,7 @@ public class Main {
 				resolveOption("syntax-module", lang, cmd);
 			}
  
-			if (FileUtil.getExtension(K.k_definition, ".").length() == 0) {
+			if (! K.k_definition.endsWith(".k")) {
 				K.k_definition = K.k_definition + ".k";
 			}
 

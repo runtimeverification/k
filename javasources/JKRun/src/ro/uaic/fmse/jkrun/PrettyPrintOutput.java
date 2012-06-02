@@ -55,7 +55,6 @@ public class PrettyPrintOutput {
 	
 	// Function to read DOM Tree from File
 	public Document readXML(File f) {
-		/* System.out.println("File absolute path:" + f.getAbsolutePath().toString()); */
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = null;

@@ -92,9 +92,7 @@ public class RunProcess {
 			String s2 = errorStreamHandler.getContent().toString();
 			// if some errors occurred (if something was written on the stderr stream)
 			if (!s2.equals("")) {
-				//System.out.println("RunProcess: kast/parser reported errors or warnings:");
 				this.setErr(s2);
-				//System.exit(1);
 			}
 
 		} catch (IOException e) {
