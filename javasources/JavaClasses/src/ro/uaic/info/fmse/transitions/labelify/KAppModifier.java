@@ -1,5 +1,6 @@
 package ro.uaic.info.fmse.transitions.labelify;
 
+import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Constant;
 import ro.uaic.info.fmse.k.Empty;
 import ro.uaic.info.fmse.k.KApp;
@@ -7,9 +8,8 @@ import ro.uaic.info.fmse.k.ListOfK;
 import ro.uaic.info.fmse.k.Production;
 import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
-import ro.uaic.info.fmse.parsing.ASTNode;
-import ro.uaic.info.fmse.parsing.BasicTransformer;
 import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
+import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class KAppModifier extends BasicTransformer {
 	public ASTNode transform(TermCons tc) {

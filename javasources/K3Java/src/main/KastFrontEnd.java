@@ -12,8 +12,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.general.GlobalSettings;
+import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.transitions.labelify.KAppModifier;
 
 public class KastFrontEnd {

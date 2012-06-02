@@ -2,9 +2,8 @@ package ro.uaic.info.fmse.k;
 
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.parsing.ASTNode;
-import ro.uaic.info.fmse.parsing.Transformer;
-import ro.uaic.info.fmse.parsing.Visitor;
+import ro.uaic.info.fmse.visitors.Transformer;
+import ro.uaic.info.fmse.visitors.Visitor;
 
 public class Bag extends Collection {
 	public Bag(String location, String filename) {

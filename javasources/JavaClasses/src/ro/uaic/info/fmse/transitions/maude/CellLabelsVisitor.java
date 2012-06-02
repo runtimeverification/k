@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ro.uaic.info.fmse.k.Cell;
-import ro.uaic.info.fmse.parsing.BasicVisitor;
+import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class CellLabelsVisitor extends BasicVisitor {
 

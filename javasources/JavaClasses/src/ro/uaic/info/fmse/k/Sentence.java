@@ -4,8 +4,8 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.parsing.Modifier;
 import ro.uaic.info.fmse.utils.xml.XML;
+import ro.uaic.info.fmse.visitors.Modifier;
 
 public abstract class Sentence extends ModuleItem {
 	Term body;

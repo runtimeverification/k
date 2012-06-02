@@ -6,4 +6,9 @@ public class StringUtil {
 		return tag.replaceAll("([\\(\\)\\[\\]\\{\\},\\s`])", "`$1");
 	}
 
+	public static String latexify(String name) {
+		return name.replace("_","\\_").replace("{","\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace(
+				"$", "\\$").replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}");
+	}
+
 }

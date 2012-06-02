@@ -11,7 +11,7 @@ import ro.uaic.info.fmse.k.ModuleItem;
 import ro.uaic.info.fmse.k.PriorityBlock;
 import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.loader.Constants;
-import ro.uaic.info.fmse.parsing.BasicVisitor;
+import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class MaudeVisitor extends BasicVisitor {
 

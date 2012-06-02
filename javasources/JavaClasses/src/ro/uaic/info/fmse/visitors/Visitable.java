@@ -1,4 +1,4 @@
-package ro.uaic.info.fmse.parsing;
+package ro.uaic.info.fmse.visitors;
 
 public interface Visitable {
 	public void accept(Visitor visitor);

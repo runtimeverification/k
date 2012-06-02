@@ -7,7 +7,7 @@ import ro.uaic.info.fmse.k.Production;
 import ro.uaic.info.fmse.k.ProductionItem;
 import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.k.UserList;
-import ro.uaic.info.fmse.parsing.BasicVisitor;
+import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class CollectListConsesVisitor extends BasicVisitor {
 

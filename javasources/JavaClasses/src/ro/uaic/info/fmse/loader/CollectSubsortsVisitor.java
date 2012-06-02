@@ -2,7 +2,7 @@ package ro.uaic.info.fmse.loader;
 
 import ro.uaic.info.fmse.k.*;
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
-import ro.uaic.info.fmse.parsing.BasicVisitor;
+import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class CollectSubsortsVisitor extends BasicVisitor {
 	public void visit(Syntax syn) {

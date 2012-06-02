@@ -121,10 +121,14 @@ public class KompileFrontEnd {
 
 		try {
 			// Run pdflatex.
+			File canonicalFile = mainFile.getCanonicalFile();
+			File dotk = new File(canonicalFile.getParent() + "/.k");
+			
 			String pdfLatex = "pdflatex";
 			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
 
 			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
+			
 			pb.redirectErrorStream(true);
 			try {
 				Process process = pb.start();
@@ -133,12 +137,17 @@ public class KompileFrontEnd {
 				 BufferedReader br = new BufferedReader(isr);
 				 while (br.readLine() != null) {};
 				process.waitFor();
+				if (process.exitValue() != 0) {
+					KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", "", 0);
+					GlobalSettings.kem.register(exception);
+				}
 				process = pb.start();
 				 is = process.getInputStream();
 				 isr = new InputStreamReader(is);
 				 br = new BufferedReader(isr);
 				 while (br.readLine() != null) {};
 				process.waitFor();
+				pdfClean(new String[] { ".tex", ".aux", ".log", ".mrk", ".out" });
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

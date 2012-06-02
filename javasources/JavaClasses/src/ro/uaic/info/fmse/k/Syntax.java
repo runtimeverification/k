@@ -8,13 +8,12 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.parsing.ASTNode;
-import ro.uaic.info.fmse.parsing.Modifier;
-import ro.uaic.info.fmse.parsing.Transformer;
-import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.utils.strings.StringUtil;
 import ro.uaic.info.fmse.utils.xml.XML;
+import ro.uaic.info.fmse.visitors.Modifier;
+import ro.uaic.info.fmse.visitors.Transformer;
+import ro.uaic.info.fmse.visitors.Visitor;
 
 public class Syntax extends ModuleItem {
 	Sort sort;

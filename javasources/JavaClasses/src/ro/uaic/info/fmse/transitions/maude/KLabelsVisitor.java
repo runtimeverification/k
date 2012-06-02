@@ -5,7 +5,7 @@ import java.util.Set;
 
 import ro.uaic.info.fmse.k.Constant;
 import ro.uaic.info.fmse.loader.Constants;
-import ro.uaic.info.fmse.parsing.BasicVisitor;
+import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class KLabelsVisitor extends BasicVisitor {
 

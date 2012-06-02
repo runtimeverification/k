@@ -1,4 +1,4 @@
-package ro.uaic.info.fmse.parsing;
+package ro.uaic.info.fmse.visitors;
 
 import java.util.ArrayList;
 import ro.uaic.info.fmse.k.*;

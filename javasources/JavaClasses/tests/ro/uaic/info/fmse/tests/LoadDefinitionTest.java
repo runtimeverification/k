@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.utils.file.FileUtil;
 import ro.uaic.info.fmse.utils.xml.XML;
 

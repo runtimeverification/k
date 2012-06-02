@@ -3,7 +3,6 @@ package ro.uaic.info.fmse.loader;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.k.*;
-import ro.uaic.info.fmse.parsing.ASTNode;
 
 public class JavaClassesFactory {
 

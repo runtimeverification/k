@@ -5,7 +5,8 @@ import java.util.Map;
 
 import ro.uaic.info.fmse.k.*;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
-import ro.uaic.info.fmse.parsing.BasicVisitor;
+import ro.uaic.info.fmse.utils.strings.StringUtil;
+import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class LatexPatternsVisitor extends BasicVisitor {
 	private Map<String,String> patterns = new HashMap<String,String>();
@@ -51,7 +52,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
 	public void visit(UserList sort) {
 		//Should be only nonterminal in a production, so prevNonTerm has no effect
 		pattern += "{#" + nonTerm++ + "}";
-		pattern += "\\mathpunct{\\terminalNoSpace{" + DefinitionHelper.latexify(sort.getSeparator()) + "}}";
+		pattern += "\\mathpunct{\\terminalNoSpace{" + StringUtil.latexify(sort.getSeparator()) + "}}";
 		pattern += "{#" + nonTerm++ + "}";
 	}
 	
@@ -61,9 +62,9 @@ public class LatexPatternsVisitor extends BasicVisitor {
 		String terminal = pi.getTerminal();
 		if (terminal.isEmpty()) return;
 		if (DefinitionHelper.isSpecialTerminal(terminal)) {
-			pattern += DefinitionHelper.latexify(terminal);
+			pattern += StringUtil.latexify(terminal);
 		} else {
-			pattern += "\\terminal{" + DefinitionHelper.latexify(terminal) + "}";
+			pattern += "\\terminal{" + StringUtil.latexify(terminal) + "}";
 		}
 		prevNonTerm = false;
 	}

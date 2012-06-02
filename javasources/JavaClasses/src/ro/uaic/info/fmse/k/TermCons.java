@@ -9,11 +9,10 @@ import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.parsing.ASTNode;
-import ro.uaic.info.fmse.parsing.Modifier;
-import ro.uaic.info.fmse.parsing.Transformer;
-import ro.uaic.info.fmse.parsing.Visitor;
 import ro.uaic.info.fmse.utils.xml.XML;
+import ro.uaic.info.fmse.visitors.Modifier;
+import ro.uaic.info.fmse.visitors.Transformer;
+import ro.uaic.info.fmse.visitors.Visitor;
 
 public class TermCons extends Term {
 	String cons;

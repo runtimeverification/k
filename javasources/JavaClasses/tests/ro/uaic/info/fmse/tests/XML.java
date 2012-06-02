@@ -9,8 +9,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.parsing.ASTNode;
 import ro.uaic.info.fmse.utils.file.FileUtil;
 
 public class XML {

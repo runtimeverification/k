@@ -1,7 +1,7 @@
 package ro.uaic.info.fmse.loader;
 
 import ro.uaic.info.fmse.k.Production;
-import ro.uaic.info.fmse.parsing.BasicVisitor;
+import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class CollectConsesVisitor extends BasicVisitor {
 

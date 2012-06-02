@@ -9,7 +9,8 @@ import ro.uaic.info.fmse.k.LiterateComment.LiterateCommentType;
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
-import ro.uaic.info.fmse.parsing.BasicVisitor;
+import ro.uaic.info.fmse.utils.strings.StringUtil;
+import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class LatexFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
@@ -51,7 +52,7 @@ public class LatexFilter extends BasicVisitor {
 	public void visit(Module mod) {
 		if (mod.isPredefined())
 			return;
-		result += "\\begin{module}{\\moduleName{" + DefinitionHelper.latexify(mod.getName()) + "}}" + endl;
+		result += "\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl;
 		super.visit(mod);
 		result += "\\end{module}" + endl;
 	}
@@ -66,7 +67,7 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Sort sort) {
-		result += "{\\nonTerminal{\\sort{" + DefinitionHelper.latexify(sort.getSort()) + "}}}";
+		result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getSort()) + "}}}";
 	}
 
 	@Override
@@ -103,15 +104,15 @@ public class LatexFilter extends BasicVisitor {
 		if (terminal.isEmpty())
 			return;
 		if (DefinitionHelper.isSpecialTerminal(terminal)) {
-			result += DefinitionHelper.latexify(terminal);
+			result += StringUtil.latexify(terminal);
 		} else {
-			result += "\\terminal{" + DefinitionHelper.latexify(terminal) + "}";
+			result += "\\terminal{" + StringUtil.latexify(terminal) + "}";
 		}
 	}
 
 	@Override
 	public void visit(UserList ul) {
-		result += "List\\{" + DefinitionHelper.latexify(ul.getSort()) + ", \\mbox{``}" + DefinitionHelper.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
+		result += "List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
 	}
 
 	@Override
@@ -138,7 +139,7 @@ public class LatexFilter extends BasicVisitor {
 		if (colors.containsKey(c.getLabel())) {
 			result += "[" + colors.get(c.getLabel()) + "]";
 		}
-		result += "{" + DefinitionHelper.latexify(c.getLabel()) + "}{";
+		result += "{" + StringUtil.latexify(c.getLabel()) + "}{";
 		super.visit(c);
 		result += "}" + endl;
 	}
@@ -168,10 +169,10 @@ public class LatexFilter extends BasicVisitor {
 			result += "\\variable";
 		}
 		if (var.getSort() != null) {
-			result += "[" + DefinitionHelper.latexify(var.getSort()) + "]";
+			result += "[" + StringUtil.latexify(var.getSort()) + "]";
 		}
 		if (!var.getName().equals("_")) {
-			result += "{" + makeIndices(makeGreek(DefinitionHelper.latexify(var.getName()))) + "}";
+			result += "{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}";
 		}
 	}
 
@@ -256,7 +257,7 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Constant c) {
-		result += "\\constant[" + DefinitionHelper.latexify(c.getSort()) + "]{" + DefinitionHelper.latexify(c.getValue()) + "}";
+		result += "\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}";
 	}
 
 	@Override
@@ -313,10 +314,10 @@ public class LatexFilter extends BasicVisitor {
 			return;
 		if (entry.getKey().equals("latex"))
 			return;
-		result += DefinitionHelper.latexify(entry.getKey());
+		result += StringUtil.latexify(entry.getKey());
 		String value = entry.getValue();
 		if (!value.isEmpty()) {
-			result += "(" + DefinitionHelper.latexify(value) + ")";
+			result += "(" + StringUtil.latexify(value) + ")";
 		}
 		if (firstAttribute) {
 			firstAttribute = false;

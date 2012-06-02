@@ -9,6 +9,7 @@ import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
+import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Empty;
 import ro.uaic.info.fmse.k.Production;
 import ro.uaic.info.fmse.k.Sort;
@@ -17,8 +18,7 @@ import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
-import ro.uaic.info.fmse.parsing.ASTNode;
-import ro.uaic.info.fmse.parsing.BasicTransformer;
+import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class EmptyListsVisitor extends BasicTransformer {
 

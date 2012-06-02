@@ -1,11 +1,11 @@
 package ro.uaic.info.fmse.loader;
 
+import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Ambiguity;
 import ro.uaic.info.fmse.k.Production;
 import ro.uaic.info.fmse.k.ProductionItem;
 import ro.uaic.info.fmse.k.TermCons;
-import ro.uaic.info.fmse.parsing.ASTNode;
-import ro.uaic.info.fmse.parsing.BasicTransformer;
+import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class AmbFilter extends BasicTransformer {
 	public ASTNode transform(Ambiguity amb) {

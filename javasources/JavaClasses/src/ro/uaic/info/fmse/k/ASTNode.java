@@ -1,14 +1,19 @@
-package ro.uaic.info.fmse.parsing;
+package ro.uaic.info.fmse.k;
 
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.transitions.maude.IMaude;
 import ro.uaic.info.fmse.transitions.xml.IXML;
+import ro.uaic.info.fmse.visitors.Modifiable;
+import ro.uaic.info.fmse.visitors.Modifier;
+import ro.uaic.info.fmse.visitors.Transformable;
+import ro.uaic.info.fmse.visitors.Visitable;
 
 public abstract class ASTNode implements IMaude, IXML, Modifiable, Visitable, Transformable {
 	protected String location;
 	protected String filename;
+	protected Attributes attributes = null;
 	
 	public ASTNode(ASTNode di) {
 		this.location = di.location;

@@ -67,10 +67,5 @@ public class DefinitionHelper {
 
 	public static boolean isSpecialTerminal(String terminal) {
 		return (Arrays.binarySearch(specialTerminals, terminal) >= 0);
-	}
-	
-	public static String latexify(String name) {
-		return name.replace("_","\\_").replace("{","\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace(
-				"$", "\\$").replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}");
 	}	
 }
