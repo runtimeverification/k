@@ -33,7 +33,7 @@ import ro.uaic.info.fmse.pp.Preprocessor;
 import com.thoughtworks.xstream.XStream;
 
 public class KompileFrontEnd {
-	
+
 	public static void kompile(String[] args) {
 		Stopwatch sw = new Stopwatch();
 		KompileOptionsParser op = new KompileOptionsParser();
@@ -53,8 +53,8 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("nofilename")) {
 			GlobalSettings.noFilename = true;
 		}
-		
-		if(cmd.hasOption("warnings"))
+
+		if (cmd.hasOption("warnings"))
 			GlobalSettings.warnings = true;
 
 		// set lib if any
@@ -101,6 +101,8 @@ public class KompileFrontEnd {
 
 		if (cmd.hasOption("maudify")) {
 			maudify(mainFile, lang);
+		} else if (cmd.hasOption("tempc")) {
+			tempc(mainFile, lang);
 		} else if (cmd.hasOption("latex")) {
 			latex(mainFile, lang);
 		} else if (cmd.hasOption("pdf")) {
@@ -123,29 +125,33 @@ public class KompileFrontEnd {
 			// Run pdflatex.
 			File canonicalFile = mainFile.getCanonicalFile();
 			File dotk = new File(canonicalFile.getParent() + "/.k");
-			
+
 			String pdfLatex = "pdflatex";
 			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
 
 			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
-			
+
 			pb.redirectErrorStream(true);
 			try {
 				Process process = pb.start();
-				 InputStream is = process.getInputStream();
-				 InputStreamReader isr = new InputStreamReader(is);
-				 BufferedReader br = new BufferedReader(isr);
-				 while (br.readLine() != null) {};
+				InputStream is = process.getInputStream();
+				InputStreamReader isr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(isr);
+				while (br.readLine() != null) {
+				}
+				;
 				process.waitFor();
 				if (process.exitValue() != 0) {
 					KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", "", 0);
 					GlobalSettings.kem.register(exception);
 				}
 				process = pb.start();
-				 is = process.getInputStream();
-				 isr = new InputStreamReader(is);
-				 br = new BufferedReader(isr);
-				 while (br.readLine() != null) {};
+				is = process.getInputStream();
+				isr = new InputStreamReader(is);
+				br = new BufferedReader(isr);
+				while (br.readLine() != null) {
+				}
+				;
 				process.waitFor();
 				pdfClean(new String[] { ".tex", ".aux", ".log", ".mrk", ".out" });
 			} catch (InterruptedException e) {
@@ -231,7 +237,6 @@ public class KompileFrontEnd {
 			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk, sw);
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
-			
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
@@ -386,6 +391,141 @@ public class KompileFrontEnd {
 	}
 
 	public static String maudify(File mainFile, String mainModule) {
+		try {
+			// compile a definition here
+			Stopwatch sw = new Stopwatch();
+
+			// for now just use this file as main argument
+			File f = mainFile.getCanonicalFile();
+
+			File dotk = new File(f.getParent() + "/.k");
+			dotk.mkdirs();
+
+			// ------------------------------------- basic parsing
+			Definition def = new Definition();
+			def.slurp(f, true);
+			def.setMainFile(mainFile);
+			def.setMainModule(mainModule);
+			def.addConsToProductions();
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Basic Parsing   = ");
+
+			// ------------------------------------- generate files
+			ResourceExtractor.ExtractAllSDF(dotk);
+
+			ResourceExtractor.ExtractProgramSDF(dotk);
+
+			// ------------------------------------- generate parser TBL
+			// cache the TBL if the sdf file is the same
+			String oldSdf = "";
+			if (new File(dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
+				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", def.getSDFForPrograms());
+
+			String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("File Gen Pgm    = ");
+
+			if (!oldSdf.equals(newSdf))
+				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/pgm"), "Program");
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Generate TBLPgm = ");
+
+			// generate a copy for the definition and modify it to generate the intermediate data
+			Definition def2 = def.clone();// (Definition) Cloner.copy(def);
+			def2.makeConsLists();
+
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.sbs", def2.getSubsortingAsStrategoTerms());
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cons", def2.getConsAsStrategoTerms());
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.ditto", def2.getDittosAsStrategoTerm());
+
+			def2.replaceDittoCons();
+
+			// ------------------------------------- generate parser TBL
+			// cache the TBL if the sdf file is the same
+			oldSdf = "";
+			if (new File(dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
+				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def2.getSDFForDefinition());
+			newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("File Gen Def    = ");
+
+			if (!oldSdf.equals(newSdf))
+				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3Disamb");
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Generate TBLDef = ");
+
+			// ------------------------------------- import files in Stratego
+			k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
+			k3parser.KParser.ImportDitto(dotk.getAbsolutePath() + "/Integration.ditto");
+			k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
+			k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Importing Files = ");
+
+			// ------------------------------------- parse configs
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
+			k3parser.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Parsing Configs = ");
+
+			// ----------------------------------- parse rules
+			def.parseRules();
+
+			// ----------------------------------- preprocessiong steps
+			Preprocessor preprocessor = new Preprocessor();
+			Document preprocessedDef = preprocessor.run(def.getDefAsXML());
+
+			XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Parsing Rules   = ");
+
+			ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
+
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+			javaDef.accept(new CollectSubsortsVisitor());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+
+			String maudified = javaDef.toMaude();
+
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Maudify         = ");
+			}
+
+			return maudified;
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * TODO: make this the new basic parsing step.
+	 * 1. slurp
+	 * 2. gen files
+	 * 3. gen TBLs
+	 * 4. import files in stratego
+	 * 5. parse configs
+	 * 6. parse rules
+	 * 7. ???
+	 * @param mainFile
+	 * @param mainModule
+	 * @return
+	 */
+	public static String tempc(File mainFile, String mainModule) {
 		try {
 			// compile a definition here
 			Stopwatch sw = new Stopwatch();

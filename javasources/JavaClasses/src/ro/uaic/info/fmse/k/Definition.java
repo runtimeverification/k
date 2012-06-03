@@ -32,7 +32,7 @@ public class Definition extends ASTNode {
 		this.mainSyntaxModule = d.mainSyntaxModule;
 		this.items = d.items;
 	}
-	
+
 	public Definition(Element element) {
 		super(element);
 
@@ -128,7 +128,7 @@ public class Definition extends ASTNode {
 			this.items.set(i, di);
 		}
 	}
-	
+
 	public void setItems(java.util.List<DefinitionItem> items) {
 		this.items = items;
 	}
@@ -136,6 +136,7 @@ public class Definition extends ASTNode {
 	public List<DefinitionItem> getItems() {
 		return items;
 	}
+
 	public void setMainFile(String mainFile) {
 		this.mainFile = mainFile;
 	}
@@ -164,6 +165,7 @@ public class Definition extends ASTNode {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
