@@ -31,10 +31,11 @@ public class Module extends DefinitionItem {
 
 		List<Element> elements = XML.getChildrenElements(element);
 		for (Element e : elements) {
-			items.add((ModuleItem) JavaClassesFactory.getTerm(e));
+			ASTNode astn = JavaClassesFactory.getTerm(e);
+			items.add((ModuleItem) astn);
 		}
 	}
-	
+
 	public Module(Module m) {
 		super(m);
 		this.name = m.name;
@@ -117,7 +118,7 @@ public class Module extends DefinitionItem {
 
 		return sorts;
 	}
-		
+
 	@Override
 	public Element toXml(Document doc) {
 		Element module = doc.createElement(Constants.MODULE);
@@ -139,10 +140,12 @@ public class Module extends DefinitionItem {
 			this.items.set(i, elem);
 		}
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

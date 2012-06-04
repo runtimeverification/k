@@ -21,6 +21,10 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KMessages;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class XmlLoader {
@@ -98,7 +102,28 @@ public class XmlLoader {
 				}
 			}
 		}
+	}
 
+	public static void reportErrors2(Document doc) {
+		// report any error that xml parser returns
+		NodeList nl = doc.getElementsByTagName("error");
+
+		if (nl.getLength() > 0) {
+			Node nodeElem = nl.item(0);
+			String attr = nodeElem.getAttributes().getNamedItem(Tag.value).getNodeValue();
+			NodeList ch = nodeElem.getChildNodes();
+			for (int i = 0; i < ch.getLength(); i++) {
+				if (ch.item(i).getNodeType() == Node.ELEMENT_NODE) {
+					Element node = (Element) ch.item(i);
+					if (node.getNodeName().equals(Tag.localized)) {
+						String msg = node.getAttribute("message");
+						String file = node.getAttribute("filename");
+						String location = node.getAttribute("loc");
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1005 + attr + ": " + msg, file, location, 0));
+					}
+				}
+			}
+		}
 	}
 
 	public static Node updateLocation(Node node, int startLine, int startCol) {

@@ -6,6 +6,8 @@ module NOT-FL-SYNTAX
 
 
   syntax KResult ::= Int | Bool
+  
+  configuration asf
 
 
 endmodule

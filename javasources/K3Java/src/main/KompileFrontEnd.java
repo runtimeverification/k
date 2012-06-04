@@ -14,6 +14,7 @@ import k.utils.Sdf2Table;
 import k.utils.Stopwatch;
 import k.utils.XmlLoader;
 import k3.basic.Definition;
+import k3.loader.BasicParser;
 
 import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
@@ -513,14 +514,8 @@ public class KompileFrontEnd {
 	}
 
 	/**
-	 * TODO: make this the new basic parsing step.
-	 * 1. slurp
-	 * 2. gen files
-	 * 3. gen TBLs
-	 * 4. import files in stratego
-	 * 5. parse configs
-	 * 6. parse rules
-	 * 7. ???
+	 * TODO: make this the new basic parsing step. 1. slurp 2. gen files 3. gen TBLs 4. import files in stratego 5. parse configs 6. parse rules 7. ???
+	 * 
 	 * @param mainFile
 	 * @param mainModule
 	 * @return
@@ -537,11 +532,15 @@ public class KompileFrontEnd {
 			dotk.mkdirs();
 
 			// ------------------------------------- basic parsing
-			Definition def = new Definition();
-			def.slurp(f, true);
-			def.setMainFile(mainFile);
-			def.setMainModule(mainModule);
-			def.addConsToProductions();
+
+			BasicParser bparser = new BasicParser();
+			bparser.parseFile(f);
+
+			// Definition def = new Definition();
+			// def.slurp(f, true);
+			// def.setMainFile(mainFile);
+			// def.setMainModule(mainModule);
+			// def.addConsToProductions();
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Basic Parsing   = ");
@@ -556,7 +555,7 @@ public class KompileFrontEnd {
 			String oldSdf = "";
 			if (new File(dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
 				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", def.getSDFForPrograms());
+			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", def.getSDFForPrograms());
 
 			String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
@@ -570,21 +569,21 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Generate TBLPgm = ");
 
 			// generate a copy for the definition and modify it to generate the intermediate data
-			Definition def2 = def.clone();// (Definition) Cloner.copy(def);
-			def2.makeConsLists();
-
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.sbs", def2.getSubsortingAsStrategoTerms());
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cons", def2.getConsAsStrategoTerms());
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.ditto", def2.getDittosAsStrategoTerm());
-
-			def2.replaceDittoCons();
+			// Definition def2 = def.clone();// (Definition) Cloner.copy(def);
+			// def2.makeConsLists();
+			//
+			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.sbs", def2.getSubsortingAsStrategoTerms());
+			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cons", def2.getConsAsStrategoTerms());
+			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.ditto", def2.getDittosAsStrategoTerm());
+			//
+			// def2.replaceDittoCons();
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
 			oldSdf = "";
 			if (new File(dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
 				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def2.getSDFForDefinition());
+			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def2.getSDFForDefinition());
 			newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
@@ -597,48 +596,49 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Generate TBLDef = ");
 
 			// ------------------------------------- import files in Stratego
-			k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
-			k3parser.KParser.ImportDitto(dotk.getAbsolutePath() + "/Integration.ditto");
-			k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
-			k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
+			// k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
+			// k3parser.KParser.ImportDitto(dotk.getAbsolutePath() + "/Integration.ditto");
+			// k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
+			// k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Importing Files = ");
 
 			// ------------------------------------- parse configs
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
-			k3parser.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
+			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
+			// k3parser.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Configs = ");
 
 			// ----------------------------------- parse rules
-			def.parseRules();
+			// def.parseRules();
 
 			// ----------------------------------- preprocessiong steps
-			Preprocessor preprocessor = new Preprocessor();
-			Document preprocessedDef = preprocessor.run(def.getDefAsXML());
-
-			XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
+			// Preprocessor preprocessor = new Preprocessor();
+			// Document preprocessedDef = preprocessor.run(def.getDefAsXML());
+			//
+			// XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Rules   = ");
 
-			ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
-
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
-			javaDef.accept(new CollectSubsortsVisitor());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
-
-			String maudified = javaDef.toMaude();
-
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
+			// ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
+			//
+			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+			// javaDef.accept(new CollectSubsortsVisitor());
+			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+			//
+			// String maudified = javaDef.toMaude();
+			//
+			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Maudify         = ");
 			}
 
-			return maudified;
+			// return maudified;
+			return "";
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (Exception e) {

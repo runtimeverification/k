@@ -7,14 +7,16 @@ import ro.uaic.info.fmse.k.*;
 public class JavaClassesFactory {
 
 	public static ASTNode getTerm(Element element) {
-		// TODO: used for a new feature - loading java classes at first first step (Basic Parsing)
+		// TODO: used for a new feature - loading java classes at first step (Basic Parsing)
 		if (Constants.RULE.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
-			return new Module(element);
+			return new StringSentence(element);
 		if (Constants.CONFIG.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
-			return new Module(element);
+			return new StringSentence(element);
 		if (Constants.CONTEXT.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
-			return new Module(element);
+			return new StringSentence(element);
 
+		if (Constants.REQUIRE.equals(element.getNodeName()))
+			return new Require(element);
 		if (Constants.MODULE.equals(element.getNodeName()))
 			return new Module(element);
 		if (Constants.IMPORT.equals(element.getNodeName()))

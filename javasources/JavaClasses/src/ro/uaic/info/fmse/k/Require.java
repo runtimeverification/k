@@ -1,6 +1,5 @@
 package ro.uaic.info.fmse.k;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
@@ -8,35 +7,17 @@ import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformer;
 import ro.uaic.info.fmse.visitors.Visitor;
 
-public class Import extends ModuleItem {
+public class Require extends DefinitionItem {
+	private String value;
 
-	String name;
-
-	public Import(Element element) {
+	public Require(Element element) {
 		super(element);
-		name = element.getAttribute(Constants.NAME_name_ATTR);
-	}
-
-	public Import(String importName) {
-		super((Element) null);
-		name = importName;
-	}
-
-	@Override
-	public String toString() {
-		return "  imports " + name;
+		value = element.getAttribute(Constants.VALUE_value_ATTR);
 	}
 
 	@Override
 	public String toMaude() {
-		return "including " + name + " .";
-	}
-
-	@Override
-	public Element toXml(Document doc) {
-		Element import_ = doc.createElement(Constants.IMPORT);
-		import_.setTextContent(name);
-		return import_;
+		return "";
 	}
 
 	@Override
@@ -51,5 +32,13 @@ public class Import extends ModuleItem {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
+	public String getValue() {
+		return value;
 	}
 }

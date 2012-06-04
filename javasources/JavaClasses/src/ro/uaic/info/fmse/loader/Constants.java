@@ -1,16 +1,12 @@
-/**
- * 
- */
 package ro.uaic.info.fmse.loader;
-
 
 /**
  * @author andrei.arusoaie
- *
+ * 
  */
 public class Constants {
-	
-	//Tags constants
+
+	// Tags constants
 	public static final String MODULE = "module";
 	public static final String IMPORT = "import";
 	public static final String SYNTAX = "syntax";
@@ -59,8 +55,9 @@ public class Constants {
 	public static final String MAINSYNTAXMODULE = "mainSyntaxModule";
 	public static final String NAME = "name";
 	public static final String PREDICATE = "predicate";
+	public static final String REQUIRE = "require";
 
-	//Attributes constants
+	// Attributes constants
 	public static final String VALUE_value_ATTR = "value";
 	public static final String LOC_loc_ATTR = "loc";
 	public static final String TYPE_type_ATTR = "type";

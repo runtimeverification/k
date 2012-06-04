@@ -44,7 +44,6 @@ public class Definition implements Cloneable {
 	private List<String> filePaths;
 	private File mainFile;
 	private String mainModule;
-	private String languageModuleName;
 
 	public Definition() {
 		modulesMap = new HashMap<String, Module>();
@@ -57,7 +56,6 @@ public class Definition implements Cloneable {
 			super.clone();
 			Definition def2 = new Definition();
 			def2.mainFile = mainFile;
-			def2.languageModuleName = languageModuleName;
 
 			for (ModuleItem mi : modules)
 				if (mi.getType() == ModuleType.MODULE) {
@@ -267,8 +265,7 @@ public class Definition implements Cloneable {
 									// do nothing for programs
 								} else if (prd.isSubsort()) {
 									outsides.add(prd);
-								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1
-										&& (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
+								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
 									// constants.add(prd);
 									String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
 									String sort = prd.getProdSort().getSortName();
@@ -866,14 +863,6 @@ public class Definition implements Cloneable {
 
 	public void setMainFile(File mainFile) {
 		this.mainFile = mainFile;
-	}
-
-	public String getLanguageModuleName() {
-		return languageModuleName;
-	}
-
-	public void setLanguageModuleName(String languageModuleName) {
-		this.languageModuleName = languageModuleName;
 	}
 
 	public List<Sentence> getAllSentences() {

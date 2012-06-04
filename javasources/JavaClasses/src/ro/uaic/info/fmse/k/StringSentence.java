@@ -4,6 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
+import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformer;
 import ro.uaic.info.fmse.visitors.Visitor;
 
@@ -13,7 +14,7 @@ import ro.uaic.info.fmse.visitors.Visitor;
  * @author Radu
  * 
  */
-public class StringSentence extends Sentence {
+public class StringSentence extends ModuleItem {
 	private String content;
 
 	public StringSentence(Element element) {
@@ -27,14 +28,7 @@ public class StringSentence extends Sentence {
 	}
 
 	public String toString() {
-		String content = "  rule ";
-
-		if (this.content != null && !this.content.equals(""))
-			content += "[" + this.content + "]: ";
-
-		content += this.body + " ";
-
-		return content + attributes;
+		return "String sentence.";
 	}
 
 	@Override
@@ -66,5 +60,9 @@ public class StringSentence extends Sentence {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	@Override
+	public void applyToAll(Modifier visitor) {
 	}
 }
