@@ -42,7 +42,7 @@ public class Main {
 			String cpuTime = p.getSearchTagAttr(file, "cpu-time-ms");
 			String rewritesPerSecond = p.getSearchTagAttr(file, "rewrites-per-second");
 			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "states: " + totalStates + " rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL);
-		} else {
+		} else if (K.maude_cmd.equals("erewrite")){
 			String totalRewrites = p.getResultTagAttr(file, "total-rewrites");
 			String realTime = p.getResultTagAttr(file, "real-time-ms");
 			String cpuTime = p.getResultTagAttr(file, "cpu-time-ms");
@@ -105,8 +105,10 @@ public class Main {
 				K.compiled_def = s + "-compiled.maude";
 			} else {
 				K.compiled_def = initOptions(K.userdir, lang);
-				index = K.compiled_def.indexOf("-compiled.maude");
-				K.k_definition = K.compiled_def.substring(0, index);
+				if (K.compiled_def != null) {
+					index = K.compiled_def.indexOf("-compiled.maude");
+					K.k_definition = K.compiled_def.substring(0, index);
+				}
 			}
 		} else if (optionName == "main-module") {
 			K.main_module = str;
