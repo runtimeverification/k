@@ -22,6 +22,7 @@ public class MaudeHelper {
 		basic.add("Set");
 		basic.add("Map");
 		basic.add("BagItem");
+		basic.add("CellLabel");
 //		basic.add("KItem");
 		basic.add("ListItem");
 		basic.add("SetItem");
