@@ -1,4 +1,4 @@
-require "unification.k"
+require "modules/unification.k"
 
 module LOGIK-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
