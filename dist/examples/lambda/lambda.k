@@ -18,9 +18,9 @@ We do so by including them in the KResult category.
 
 module LAMBDA-SYNTAX 
 
-  syntax Exp ::= Val
-               | "(" Exp ")"        [bracket]
+  syntax Exp ::= "(" Exp ")"        [bracket]
                | Exp Exp            [seqstrict, left]
+               > Val
 
   syntax Val ::= Id
                > "lambda" Id "." Exp [binder, latex("\lambda{#1}.{#2}")]
