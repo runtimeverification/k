@@ -1,8 +1,9 @@
 require "k-visitor.k"
 
 module BINDER
-  syntax KLabel ::= isBinder
-                  | isBinder or Id
+  imports BUILTIN-HOOKS
+  syntax KLabel ::= "isBinder"
+                  | "isBinder" "or" Id
 
   rule isBinder or X(X:Id) => true [function, anywhere]
   rule isBinder or X(K:K) => true when isBinder(K) [function, anywhere]
@@ -13,20 +14,21 @@ module SUBSTITUTION
   imports BINDER
 
   //beta-substitution definition using the K AST visitor pattern
-  syntax K ::= K "[" K "/" Id "]" [prec(0)]
-             | "beta" K "[" K "/" Id "]" [prec 0 latex "{#1}\sqbracket{\framebox{${#2}$}/{#3}}"]
-             | "eval" K "," "then" "apply" "[" K "/" Id "]" [prec(0), strict(1), latex("eval({#1})\sqbracket{\framebox{${#2}$}/{#3}}")]
+  syntax K ::= K "[" K "/" Id "]"
+             | "beta" K "[" K "/" Id "]" [latex( "{#1}\sqbracket{\framebox{${#2}$}/{#3}}")]
+             | "eval" K "," "then" "apply" "[" K "/" Id "]" [strict(1), latex("eval({#1})\sqbracket{\framebox{${#2}$}/{#3}}")]
                
-  syntax KLabel ::= "beta" "[" K "/" Id "]" [prec(0) latex("\sqbracket{\framebox{${#1}$}/{#2}}")]
+  syntax KLabel ::= "beta" "[" K "/" Id "]" 
+            [latex("\sqbracket{\framebox{${#1}$}/{#2}}")]
                
   syntax Id ::= "id" Int  [function]   // to generate fresh names
   rule id N:Nat => String2Id("_id" +String Int2String(N)) [function, anywhere]
 
-  syntax CellLabel ::= "nextId"
-
   rule <k> K'[K/Y] => endVisit(beta K'[K/Y]) ...</k> [structural]
 
   rule beta[K/Y](Y) => visitedK(K) [structural]  //this does the actual substitution
+
+  syntax CellLabel ::= "nextId"
 
   rule <k> beta[K/Y](L:KLabel(X:Id,,K')) => 
            visitedL(L)(visitedK(id(N)) 
@@ -36,8 +38,8 @@ module SUBSTITUTION
   rule eval visitedK(K'), then apply [ K / Y ] => beta K'[K/Y] [structural]
 
   // This was a macro 
-  rule beta K':K [K:K/Y:Id] 
-      = visit K' applying beta[K/Y] 
-                       when isBinder or Y
 
+  rule beta K':K [K:K/Y:Id]
+    => visit K' applying beta[K/Y] if isBinder or Y
+    [structural]
 endmodule
