@@ -12,10 +12,10 @@ Matching on any KAST label, the
   rule eqns((.List{K} => eqn(K1,,K2)),, 
             eqn(L:KLabel((K1:K => .List{K}),,Ks:List{K}),,
                 L((K2:K => .List{K}),,Ks':List{K})),,_)
-    when 'isUnificationVar(L(K1,,Ks)) =/=K true  
-         andBool 'isUnificationVar(L(K2,,Ks')) =/=K true
+    when ('isUnificationVar(L(K1,,Ks)) =/=K true)
+         andBool ('isUnificationVar(L(K2,,Ks')) =/=K true)
     [structural, anywhere]
-  rule eqns((eqn(K,,X:K) => eqn(X,,K)),,_) when 'isUnificationVar(X) andBool 'isUnificationVar(K) =/=K true   [structural, anywhere]
+  rule eqns((eqn(K,,X:K) => eqn(X,,K)),,_) when 'isUnificationVar(X) andBool ('isUnificationVar(K) =/=K true)   [structural, anywhere]
 
 /*@ When an equation contains a variable, it can be added as a binding
 to the mgu.  While we know that the variables in the domain of the mgu
@@ -38,7 +38,7 @@ once all constraints were incorporated.
    [structural, anywhere]
 /*@ the subTerm relation is used to determine cyclic uunification */
   syntax Bool ::= K "subTerm" K [function]
-rule K1 subTerm K2 => K1 ==K K2 orElseBool K1 properSubTerm K2
+rule K1 subTerm K2 => (K1 ==K K2) orElseBool (K1 properSubTerm K2)
    [structural, anywhere]
   syntax Bool ::= K "properSubTerm" K [function]
   rule K1 properSubTerm L:KLabel(.List{K}) => false   [structural, anywhere]

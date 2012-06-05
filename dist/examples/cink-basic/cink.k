@@ -49,7 +49,7 @@ module CINK-SYNTAX
   */
 
   syntax LVal ::=  Int
-  syntax Val ::= "cout" | "cin" | Bool | String
+  syntax Val ::= "cout" | "cin" | Bool | String | LVal
 
   syntax Exp ::= Id | Val
                | "(" Exp ")"  [bracket]

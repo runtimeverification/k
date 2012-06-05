@@ -90,7 +90,7 @@ module LOGIK
 //@ Initialization
 
 //@ Add clauses to the set of clauses
-  rule <k>  X:Id(Params:Literals) :- Body:Literals. Pgm:K => Pgm </k>
+  rule <k>  (((X:Id(Params:Literals)) :- Body:Literals.) Pgm:K) => Pgm </k>
        <clauses>... . => BagItem(X:Id(Params:Literals) :- Body:Literals.) ...</clauses>
 
 /*@ To preserve the variables in the query we generate a substitution mapping 
