@@ -73,7 +73,7 @@ module SIMPLE-UNTYPED
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:Id = E1 to E2 do S) => {var X=E1; while X <= E2 do {S X = (X + 1);}}
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
-  rule var X = E; => var X; X = E;
+  rule var X:Id = E:Exp; => var X; X = E;
 
   syntax #Id ::= "main"
 
@@ -100,8 +100,8 @@ module SIMPLE-UNTYPED
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
-                  <in color="magenta" > .List </in>
-                  <out color="brown" > .List </out>
+                  <in color="magenta" stream="stdin"> .List </in>
+                  <out color="brown" stream="stdout"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
@@ -121,7 +121,7 @@ module SIMPLE-UNTYPED
        <nextLoc> L => (L:Int +Int 1) +Int N </nextLoc>
 
 
-  context var X:Id[HOLE];
+  context var X:Id[HOLE],.Exps;
 
   syntax #Id ::= "$1" | "$2"
   rule var X:Id[N1:Int,N2:Int,Vs:Vals]; =>
@@ -205,7 +205,7 @@ module SIMPLE-UNTYPED
        <nextLoc> L => L:Int +Int 1 </nextLoc>
   rule <k> bindto(.Ids,.Vals) => . ...</k>  [structural]
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in>  [transition]
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [transition]
 
 
   context (HOLE => lvalue(HOLE)) = _
