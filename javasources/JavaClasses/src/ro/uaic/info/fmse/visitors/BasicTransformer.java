@@ -282,7 +282,7 @@ public class BasicTransformer implements Transformer {
 			terms.add((Term) t.accept(this));
 		}
 		TermCons result = new TermCons(node);
-		node.setContents(terms);
+		result.setContents(terms);
 		return transform((Term) result);
 	}
 
