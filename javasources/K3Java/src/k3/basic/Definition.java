@@ -376,6 +376,11 @@ public class Definition implements Cloneable {
 
 		sdf += getFollowRestrictionsForTerminals(false);
 
+		sdf += "lexical restrictions\n";
+		sdf += "	%% some restrictions to ensure greedy matching for user defined constants\n";
+		sdf += "	DzDzId  -/- [a-zA-Z0-9]\n";
+		sdf += "	DzDzInt -/- [0-9]\n\n";
+
 		return sdf + "\n";
 	}
 

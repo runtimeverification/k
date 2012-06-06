@@ -277,7 +277,7 @@ module KOOL-UNTYPED
   rule <k> acquire V:Val; => . ...</k>
        <holds>...V |-> (N:Int => N +Int 1)...</holds>
 
-  rule <k> release V; => . ...</k> <holds>...V|->(N => _-Int_(N,1))...</holds>
+  rule <k> release V; => . ...</k> <holds>...V|->(N => N -Int 1)...</holds>
     when N >Int 0
 
   rule <k> release V:Val; => . ...</k>
