@@ -1,9 +1,13 @@
 1. Module inclusion syntax:
 
+require "filename.k"
+
 module SIMPLE-UNTYPED-SYNTAX
   including K
+  
+endmodule // in one word
 
-2. Comparators instead of precedence:
+2. Priorities instead of precedence:
 
                | "++" Exp
                > Exp "[" Exps "]"
@@ -18,19 +22,11 @@ module SIMPLE-UNTYPED-SYNTAX
                	 Exp "<" Exp
 
 
-4. brackets:
+4. brackets (no semantic meaning, used just for grouping and to override priorities):
 
                | "(" Exp ")"            [bracket]
 
-5. Ability to use cons attributes:
-
-               	 Exp "<" Exp         	[strict, non-assoc, cons("Exp1LTSyn")]
-
-6. Empty lists should be specified explicitly:
-
-  rule var (E1:Exp, E2:Exp, Es:Exps); => var (E1, .Exps); var (E2, Es);
-
-7. The scope of a variable in k3 is restricted to rule. In k2 it was the module.
+5. The scope of a variable in k3 is restricted to rule. In k2 it was the module.
 As a result, the type of each variable should be specified in each rule in which it is used.
 
-8. +Nat and the entire Nat sort is transformed into Int
+6. +Nat and the entire Nat sort should be transformed into Int
