@@ -41,14 +41,16 @@ public class KompileOptionsParser {
 		Option maudify = new Option("m", "maudify", false, "maudify the definition");
 		Option compile = new Option("c", "compile", false, "compile the definition");
 		Option tempcompile = new Option("tempc", "tempce", false, "test new implementation");
-		Option warnings = new Option("w", "warnings", false, "display warnings");
 
 		tex.addOption(latex);
 		tex.addOption(pdf);
 		tex.addOption(compile);
 		tex.addOption(tempcompile);
 		tex.addOption(maudify);
-		tex.addOption(warnings);
+
+		OptionGroup warn = new OptionGroup();
+		Option warnings = new Option("w", "warnings", false, "display warnings");
+		warn.addOption(warnings);
 
 		// xml
 		OptionGroup xml = new OptionGroup();
@@ -84,6 +86,7 @@ public class KompileOptionsParser {
 		options.addOptionGroup(langGroup);
 		options.addOptionGroup(langSynGroup);
 		options.addOptionGroup(tex);
+		options.addOptionGroup(warn);
 		options.addOptionGroup(xml);
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
