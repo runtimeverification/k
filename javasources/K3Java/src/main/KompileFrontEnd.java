@@ -89,9 +89,10 @@ public class KompileFrontEnd {
 		GlobalSettings.mainFile = mainFile;
 		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "");
 		if (!mainFile.exists()) {
+			File errorFile = mainFile;
 			mainFile = new File(def + ".k");
 			if (!mainFile.exists())
-				k.utils.Error.report("Could not find file: " + def);
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system.", 0));
 		}
 
 		String lang = null;

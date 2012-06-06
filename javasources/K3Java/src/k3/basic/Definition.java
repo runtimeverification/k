@@ -82,76 +82,77 @@ public class Definition implements Cloneable {
 	 */
 	public void slurp(File file, boolean firstTime) {
 		if (!file.exists()) {
-			Error.externalReport("Could not find file: " + file.getAbsolutePath());
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + file.getName() + " not found.", file.getAbsolutePath(), "File system.", 0));
 		}
 		try {
 			String cannonicalPath = file.getCanonicalPath();
 			if (!filePaths.contains(cannonicalPath)) {
-				if (file.getAbsolutePath().endsWith(".k")) {
-					String content = FileUtil.getFileContent(file.getAbsolutePath());
+				if (file.isDirectory())
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, file.getName() + " is a directory, not a file.", file.getAbsolutePath(), "File system.", 0));
+				if (!file.getAbsolutePath().endsWith(".k"))
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, file.getName() + " is not a K file.", file.getAbsolutePath(), "File system.", 0));
 
-					String parsed = KParser.ParseKString(content);
-					Document doc = XmlLoader.getXMLDoc(parsed);
-					XmlLoader.addFilename(doc.getFirstChild(), file.getAbsolutePath());
-					XmlLoader.reportErrors(doc);
+				String content = FileUtil.getFileContent(file.getAbsolutePath());
 
-					String parsedLatex = null;
-					Document docLatex = null;
-					if (GlobalSettings.latex) {
-						// parse the string again to extract the comments
-						parsedLatex = K3LatexParser.ParseKString(content);
-						docLatex = XmlLoader.getXMLDoc(parsedLatex);
-						XmlLoader.addFilename(docLatex.getFirstChild(), file.getAbsolutePath());
-						XmlLoader.reportErrors(docLatex);
-					}
+				String parsed = KParser.ParseKString(content);
+				Document doc = XmlLoader.getXMLDoc(parsed);
+				XmlLoader.addFilename(doc.getFirstChild(), file.getAbsolutePath());
+				XmlLoader.reportErrors(doc);
 
-					if (firstTime) {
-						// add automatically the autoinclude.k file
-						if (GlobalSettings.verbose)
-							System.out.println("Including file: " + "autoinclude.k");
-						File newFilePath = buildInclPath(file, "autoinclude.k");
-						slurp(newFilePath, false);
-					}
-
-					NodeList xmlIncludes = doc.getDocumentElement().getElementsByTagName(Tag.require);
-					for (int i = 0; i < xmlIncludes.getLength(); i++) {
-						String inclFile = xmlIncludes.item(i).getAttributes().getNamedItem("value").getNodeValue();
-						if (GlobalSettings.verbose)
-							System.out.println("Including file: " + inclFile);
-						File newFilePath = buildInclPath(file, inclFile);
-						slurp(newFilePath, false);
-					}
-
-					NodeList xmlModules = doc.getDocumentElement().getElementsByTagName(Tag.module);
-					NodeList xmlComments = null;
-					if (GlobalSettings.latex)
-						xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.comment);
-					// TODO: insert latex comments in the def.xml
-
-					java.util.List<Module> modulesTemp = new ArrayList<Module>();
-
-					for (int i = 0; i < xmlModules.getLength(); i++) {
-						Module km = new Module(xmlModules.item(i), cannonicalPath);
-						// set the module type as predefined if it is located in the /include directory
-						// used later when including SHARED module
-						if (file.getAbsolutePath().startsWith(new File(KPaths.getKBase(false) + "/include/").getAbsolutePath()))
-							km.setPredefined(true);
-						if (GlobalSettings.latex)
-							km.addComments(xmlComments);
-
-						modulesTemp.add(km);
-						modulesMap.put(km.getModuleName(), km);
-					}
-
-					if (GlobalSettings.latex)
-						modules.addAll(Definition.mergeModuleAndComments(modulesTemp, xmlComments));
-					else
-						modules.addAll(modulesTemp);
-
-					filePaths.add(cannonicalPath);
-				} else {
-					Error.externalReport("File: " + file.getCanonicalPath() + " is not .k");
+				String parsedLatex = null;
+				Document docLatex = null;
+				if (GlobalSettings.latex) {
+					// parse the string again to extract the comments
+					parsedLatex = K3LatexParser.ParseKString(content);
+					docLatex = XmlLoader.getXMLDoc(parsedLatex);
+					XmlLoader.addFilename(docLatex.getFirstChild(), file.getAbsolutePath());
+					XmlLoader.reportErrors(docLatex);
 				}
+
+				if (firstTime) {
+					// add automatically the autoinclude.k file
+					if (GlobalSettings.verbose)
+						System.out.println("Including file: " + "autoinclude.k");
+					File newFilePath = buildInclPath(file, "autoinclude.k");
+					slurp(newFilePath, false);
+				}
+
+				NodeList xmlIncludes = doc.getDocumentElement().getElementsByTagName(Tag.require);
+				for (int i = 0; i < xmlIncludes.getLength(); i++) {
+					String inclFile = xmlIncludes.item(i).getAttributes().getNamedItem("value").getNodeValue();
+					if (GlobalSettings.verbose)
+						System.out.println("Including file: " + inclFile);
+					File newFilePath = buildInclPath(file, inclFile);
+					slurp(newFilePath, false);
+				}
+
+				NodeList xmlModules = doc.getDocumentElement().getElementsByTagName(Tag.module);
+				NodeList xmlComments = null;
+				if (GlobalSettings.latex)
+					xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.comment);
+				// TODO: insert latex comments in the def.xml
+
+				java.util.List<Module> modulesTemp = new ArrayList<Module>();
+
+				for (int i = 0; i < xmlModules.getLength(); i++) {
+					Module km = new Module(xmlModules.item(i), cannonicalPath);
+					// set the module type as predefined if it is located in the /include directory
+					// used later when including SHARED module
+					if (file.getAbsolutePath().startsWith(new File(KPaths.getKBase(false) + "/include/").getAbsolutePath()))
+						km.setPredefined(true);
+					if (GlobalSettings.latex)
+						km.addComments(xmlComments);
+
+					modulesTemp.add(km);
+					modulesMap.put(km.getModuleName(), km);
+				}
+
+				if (GlobalSettings.latex)
+					modules.addAll(Definition.mergeModuleAndComments(modulesTemp, xmlComments));
+				else
+					modules.addAll(modulesTemp);
+
+				filePaths.add(cannonicalPath);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -215,7 +216,7 @@ public class Definition implements Cloneable {
 			}
 
 			file = new File(filepath);
-			Error.externalReport("Could not find file: " + inclFile + " imported from " + currFile);
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + file.getName() + " not found.", file.getAbsolutePath(), "File system.", 0));
 		}
 		return new File(file.getCanonicalPath());
 	}
@@ -1000,18 +1001,18 @@ public class Definition implements Cloneable {
 									// don't add cons to bracket production
 									String cons = p.getAttributes().get("cons");
 									if (cons != null)
-										Error.report("'bracket' productions are not allowed to have cons: '" + cons + "'");
+										GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "'bracket' productions are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation(), 0));
 								} else if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.TERMINAL && p.getProdSort().getSortName().startsWith("#")) {
 									// don't add any cons, if it is a constant
 									// a constant is a single terminal for a builtin sort
 									String cons = p.getAttributes().get("cons");
 									if (cons != null)
-										Error.report("Constants are not allowed to have cons: '" + cons + "'");
+										GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Constants are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation(), 0));
 								} else if (p.isSubsort()) {
 									// cons are not allowed for subsortings
 									String cons = p.getAttributes().get("cons");
 									if (cons != null)
-										Error.report("Subsortings are not allowed to have cons: '" + cons + "'");
+										GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Subsortings are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation(), 0));
 								} else {
 									if (!p.getAttributes().containsKey("cons")) {
 										String cons;
@@ -1041,16 +1042,16 @@ public class Definition implements Cloneable {
 										String escSort = StringUtil.escapeSortName(p.getProdSort().getSortName());
 										if (m.getModuleType().equals(Tag.interfaceTag)) {
 											if (!cons.endsWith("Builtin"))
-												Error.report("The cons attribute must end with 'Builtin' and not with " + cons);
+												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'Builtin' and not with " + cons, p.getFilename(), p.getLocation(), 0));
 											if (!cons.startsWith(escSort))
-												Error.report("The cons attribute must start with '" + escSort + "' and not with " + cons);
+												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must start with '" + escSort + "' and not with " + cons, p.getFilename(), p.getLocation(), 0));
 										} else {
 											if (!cons.startsWith(escSort))
-												Error.report("The cons attribute must start with '" + escSort + "' and not with " + cons);
+												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must start with '" + escSort + "' and not with " + cons, p.getFilename(), p.getLocation(), 0));
 											if (!cons.endsWith("Syn")) // a normal cons must end with 'Syn'
-												Error.report("The cons attribute must end with 'Syn' and not with " + cons);
+												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'Syn' and not with " + cons, p.getFilename(), p.getLocation(), 0));
 											if (p.isListDecl() && !cons.endsWith("ListSyn")) // if this is a list, it must end with 'ListSyn'
-												Error.report("The cons attribute must end with 'ListSyn' and not with " + cons);
+												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'ListSyn' and not with " + cons, p.getFilename(), p.getLocation(), 0));
 										}
 									}
 								}
