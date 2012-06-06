@@ -178,7 +178,8 @@ module SIMPLE-UNTYPED
 
 
   rule V[N1:Int,N2:Int,Vs:Vals] => V[N1][N2,Vs]  [structural]
-  rule arrayRef(L,_:Int)[N] => lookup(L:Int +Int N:Int)  [structural]
+  rule arrayRef(L,_:Int)[N] => lookup(L:Int +Int N:Int)  
+    [structural, anywhere]
   syntax K ::= "lookup" "(" Int ")" [cons("K1LookupSyn")]
   rule <k> lookup(L:Int) => V:Val ...</k> <store>...L|->V...</store>  [transition]
 
