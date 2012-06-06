@@ -1,3 +1,20 @@
+/*!
+\setlength{\parindent}{1em}
+\title{EXP --- Untyped --- Environment-Based}
+\author{Grigore Ro\c{s}u and
+        Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
+	(\texttt{\{grosu,tserban2\}@illinois.edu})}
+\organization{University of Illinois at Urbana-Champaign}
+*/
+
+/*@
+\section{Abstract}
+This is the environment-based \K semantics of Milner's EXP
+language.  See the substitution-based definition for bibliographic
+notes and for comments on the meaning of EXP's constructs.  We here
+only focus on the environment-specific aspects.
+*/
+
 
 module EXP-UNTYPED-ENVIRONMENT-SYNTAX
 
@@ -19,10 +36,12 @@ $\lambda$-abstractions will evaluate to closures.  We desugar
 \texttt{let} and \texttt{letrec} the same way as in the
 substitution-based definition. */
 
-  syntax Exp ::= left: "if" Exp "then" Exp "else" Exp [strict(1)]
+  syntax Exp ::= "(" Exp ")"               [bracket]
+               > left: 
+                 "if" Exp "then" Exp "else" Exp [strict(1)]
+               | Exp Exp                    [left,strict]
+               > left: "mu" Id "." Exp           [latex("\mu{#1}.{#2}")]
                | "lambda" Id "." Exp       [latex("\lambda{#1}.{#2}")]
-               | Exp Exp                    [strict]
-               | "mu" Id "." Exp           [latex("\mu{#1}.{#2}")]
                | "let" Id "=" Exp "in" Exp
                | "letrec" Id Id "=" Exp "in" Exp
 	       > left: Int | Bool | Id
@@ -43,11 +62,10 @@ substitution-based definition. */
                | "not" Exp                  [strict]
 
 
-/*
-  macro let X:Id = E:Exp in E':Exp = (lambda X . E') E
-  macro (letrec F:Id X = E in E') = (let F = mu F . (lambda X . E) in E')
- */
-
+  rule let X:Id = E:Exp in E':Exp => (lambda X . E') E  [macro, anywhere]
+  rule (letrec F:Id X = E in E') 
+    => (let F = mu F . (lambda X . E) in E')
+   [macro, anywhere]
 endmodule
 
 
