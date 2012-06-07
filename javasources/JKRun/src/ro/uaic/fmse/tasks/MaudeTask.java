@@ -77,7 +77,7 @@ public class MaudeTask extends Thread {
 
 		String line;
 		while ((line = maudeOutput.readLine()) != null) {
-			 System.out.println(line);
+//			 System.out.println(line);
 			outputFile.write(line + "\n");
 		}
 		outputFile.close();
@@ -90,7 +90,7 @@ public class MaudeTask extends Thread {
 
 		String line;
 		while ((line = maudeOutput.readLine()) != null) {
-			 System.out.println(line);
+//			 System.out.println(line);
 			outputFile.write(line + "\n");
 		}
 		outputFile.close();
