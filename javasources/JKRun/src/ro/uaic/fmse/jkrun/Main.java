@@ -360,7 +360,7 @@ public class Main {
 			String[] cmmds = new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" };
 			System.out.println("Calling IOS: ");
 				for(int k = 0; k < cmmds.length; k++)
-					   System.out.println(cmmds[i]);
+					   System.out.println(cmmds[k]);
 				System.exit(4);
 				
 			if (K.log_io) {
