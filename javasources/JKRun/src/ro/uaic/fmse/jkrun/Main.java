@@ -296,7 +296,7 @@ public class Main {
 			if (K.parser.equals("kast")) {
 				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
-				rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, K.pgm });
+				rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", new File(K.kast).getParent() + System.getProperty("file.separator") + "java" + System.getProperty("file.separator") + "k3.jar", "-kast", "--definition=" + K.k_definition, K.pgm });
 			} else {
 				K.parser = new File(K.parser).getCanonicalPath();
 				System.out.println("The external parser to be used is:" + K.parser);
