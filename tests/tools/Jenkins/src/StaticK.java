@@ -1,4 +1,6 @@
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,9 +45,9 @@ public class StaticK {
 			for(int j = 0; j < tests.getLength(); j++)
 			{
 				Element test = (Element) tests.item(j);
-				String file = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep + test.getAttribute("file");
-				String input = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep + test.getAttribute("input");
-				String output = toolsDir + fileSep + "Jenkins" + fileSep + kbase + fileSep + test.getAttribute("output");
+				String file = toolsDir + fileSep + "Jenkins" + fileSep + kbase + test.getAttribute("file");
+				String input = toolsDir + fileSep + "Jenkins" + fileSep + kbase + test.getAttribute("input");
+				String output = toolsDir + fileSep + "Jenkins" + fileSep + kbase + test.getAttribute("output");
 				
 				programs.add(new Program(file, input, output, "", mainFile, dir));
 			}
@@ -76,4 +78,21 @@ public class StaticK {
 		return null;
 	}
 
+	public static String readFileAsString(String filePath) {
+        byte[] buffer = new byte[(int) new File(filePath).length()];
+        BufferedInputStream f = null;
+        try {
+                f = new BufferedInputStream(new FileInputStream(filePath));
+                f.read(buffer);
+        } catch (Exception e) {
+                System.out.println(e.getLocalizedMessage());
+        } finally {
+                if (f != null)
+                        try {
+                                f.close();
+                        } catch (IOException ignored) {
+                        }
+        }
+        return new String(buffer);
+}
 }

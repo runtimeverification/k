@@ -1,10 +1,12 @@
+import java.io.File;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-
-
-public class Program extends Thread{
+public class Program extends Thread {
 	public String filename, inputFile, outputFile, krun, kdefinition, dir;
+
+	private String output = "", error = "";
+	private int exit;
 
 	public Program(String filename, String inputFile, String outputFile,
 			String krun, String kdefinition, String dir) {
@@ -16,13 +18,19 @@ public class Program extends Thread{
 		this.kdefinition = kdefinition;
 		this.dir = dir;
 	}
-	
+
 	@Override
 	public void run() {
 		super.run();
-		
-		Executor compile = new Executor(new String[] { "java", "-jar" , krun, filename,
-				"--k-definition", kdefinition }, dir);
+
+		Executor compile;
+//		if (new File(inputFile).exists())
+//			compile = new Executor(new String[] { "cat", inputFile, "|",
+//					"java", "-jar", krun, filename, "--k-definition",
+//					kdefinition }, dir);
+//		else
+			compile = new Executor(new String[] { "java", "-jar", krun,
+					filename, "--k-definition", kdefinition }, dir);
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
 		tpe.execute(compile);
@@ -35,13 +43,26 @@ public class Program extends Thread{
 			}
 		}
 
-		String output = compile.getOutput();
-		String error = compile.getError();
-		int exitCode = compile.getExitValue();
-		System.out.println(filename + "\nOut: " + output + "\nError: " + error + "\nExit: " + exitCode);
+		output = compile.getOutput();
+		error = compile.getError();
+		exit = compile.getExitValue();
+		System.out.println(filename + "\nOut: " + output + "\nError: " + error
+				+ "\nExit: " + exit);
 	}
-	
-	
+
+	public boolean isCorrect() {
+		if (!new File(outputFile).exists()) {
+			if (error.equals("") && exit == 0)
+				return true;
+		} else {
+			String out = StaticK.readFileAsString(new File(outputFile)
+					.getAbsolutePath());
+			if (out.trim().equals(output.trim()) && exit == 0)
+				return true;
+		}
+		return false;
+	}
+
 	@Override
 	public String toString() {
 		return "Testing " + filename + " ... ";
