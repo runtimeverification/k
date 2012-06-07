@@ -358,8 +358,8 @@ public class Main {
 			File outFile = FileUtil.createMaudeFile(K.maude_out);
 			File errFile = FileUtil.createMaudeFile(K.maude_err);
 				System.exit(4);
-			String cmds = new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" };
-			System.out.println("Calling IOS: " + cmds);
+			String[] cmmds = new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" };
+			System.out.println("Calling IOS: " + cmmds);
 				
 			if (K.log_io) {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" });
