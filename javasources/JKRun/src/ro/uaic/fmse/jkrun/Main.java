@@ -394,10 +394,11 @@ public class Main {
 			FileUtil.deleteFile(K.maude_io_cmd);
 			FileUtil.deleteFile(K.maude_output);
 
-			System.exit(1);
+			System.exit(0);
 
 		} catch (ParseException exp) {
 			System.out.println("Unexpected exception:" + exp.getMessage());
+			System.exit(1);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
