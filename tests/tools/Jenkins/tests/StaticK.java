@@ -38,8 +38,20 @@ public class StaticK {
 			String mainModule = example.getAttribute("mainmodule");
 			String compiledFile = example.getAttribute("compiledfile");
 
+			List<Program> programs = new LinkedList<Program>();
+			NodeList tests = example.getElementsByTagName("test");
+			for(int j = 0; j < tests.getLength(); j++)
+			{
+				Element test = (Element) tests.item(j);
+				String file = test.getAttribute("file");
+				String input = test.getAttribute("input");
+				String output = test.getAttribute("output");
+				
+				programs.add(new Program(file, input, output, "", ""));
+			}
+			
 			Example e = new Example(dir, mainFile, mainModule, new String[] {},
-					k3jar, compiledFile, null);
+					k3jar, compiledFile, programs);
 			examples.add(e);
 		}
 
