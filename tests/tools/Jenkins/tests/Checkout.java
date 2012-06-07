@@ -23,7 +23,7 @@ public class Checkout {
 
 		// first, checkout K -> verify the existence of k-framework dir.
 		System.out.print("\nRetrieving K ...");
-		String[] commands = new String[] { "svn", "export",
+		String[] commands = new String[] { "svn", "checkout",
 				"https://k-framework.googlecode.com/svn/trunk", StaticK.kbase };
 		Executor executor = new Executor(commands, ".");
 		executor.start();
