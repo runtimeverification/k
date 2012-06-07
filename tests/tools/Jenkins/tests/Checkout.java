@@ -8,12 +8,18 @@ import org.junit.Test;
 public class Checkout {
 
 	@Test
-	public void checkout() throws InterruptedException, URISyntaxException {
-
+	public void allTests() throws URISyntaxException
+	{
 		StaticK.file = new File(getClass().getProtectionDomain()
 				.getCodeSource().getLocation().toURI().getPath());
 		StaticK.toolsDir = StaticK.file.getAbsolutePath().replaceFirst(
 				"/Jenkins.*?$", "");
+
+		assertTrue(new File(StaticK.toolsDir).exists());
+	}
+
+	@Test
+	public void checkout() throws InterruptedException, URISyntaxException {
 
 		// first, checkout K -> verify the existence of k-framework dir.
 		System.out.print("\nRetrieving K ...");
@@ -24,6 +30,6 @@ public class Checkout {
 		executor.join(StaticK.ulimit * 1000);
 		Thread.yield();
 		assertTrue(new File(StaticK.kbase).exists());
-		System.out.println("Done.");
+		System.out.println("\tDone.");
 	}
 }

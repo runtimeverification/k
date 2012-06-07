@@ -1,5 +1,4 @@
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -12,12 +11,8 @@ import org.junit.Test;
 public class Kompile {
 
 	@Test
-	public void test() {
-		fail("Not yet implemented");
-	}
-	@Test
 	public void kompile() throws InterruptedException, URISyntaxException {
-		System.out.println("Compiling examples...");
+		System.out.println("\nCompiling examples...");
 		String configuration = StaticK.file.getAbsolutePath().replaceFirst(
 				"/Jenkins.*?$", "")
 				+ StaticK.fileSep + "configuration.xml";
@@ -35,6 +30,8 @@ public class Kompile {
 		for (Example example : examples) {
 			assertTrue(example.isCompiled());
 		}
+		
+		System.out.println("\nDone.");
 	}
 
 }
