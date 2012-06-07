@@ -57,8 +57,8 @@ public class Example extends Thread {
 			System.out.println(this);
 		} else {
 
-			String krun = new File(k3jar).getParentFile().getParent() + StaticK.fileSep
-					+ "krun";
+			String krun = new File(k3jar).getParent() + StaticK.fileSep
+					+ "JKrun.jar";
 			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 					.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
 			for (Program program : programs) {
@@ -86,17 +86,7 @@ public class Example extends Thread {
 	@Override
 	public String toString() {
 		return "Testing " + dir + "/" + mainFile + " : "
-				+ (isCompiled() == true ? "success" : "failed");// +
-																// ":\nCompilation status: "
-																// + exitCode +
-																// "\nOutput: "
-																// + output +
-																// "\nError: " +
-																// error + "\n"
-																// +
-																// "Compile time: "
-																// + millis +
-																// " milliseconds.\n";
+				+ (isCompiled() == true ? "success" : "failed");
 	}
 
 	public boolean isCompiled() {

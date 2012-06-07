@@ -21,7 +21,7 @@ public class Program extends Thread{
 	public void run() {
 		super.run();
 		
-		Executor compile = new Executor(new String[] { krun, filename,
+		Executor compile = new Executor(new String[] { "java", "-jar" , krun, filename,
 				"--k-definition", kdefinition }, dir);
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);

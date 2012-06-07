@@ -19,7 +19,7 @@ public class StaticK {
 	public static File file;
 	public static String toolsDir;
 	public static String fileSep = System.getProperty("file.separator");
-	public static String k3Jar, krun, kompile;
+	public static String k3Jar, JKrun;
 	public static ThreadPoolExecutor pool;
 	public static int THREAD_POOL_SIZE = 24;
 	public static int ulimit = 120;
