@@ -120,7 +120,7 @@ public class KRunner {
 		maude.join();
 		int returnValue = maude.returnValue;
 
-		System.exit("MAUDE EXITVALUE: " + returnValue);
+		System.out.println("MAUDE EXITVALUE: " + returnValue);
 
 	}
 
