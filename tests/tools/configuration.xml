@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- all the paths must be relative to k-framework dir-->
 <tests>
 	<example dir="/dist/examples/imppp" mainfile="imppp.k" mainmodule="IMPPP" compiledfile="imppp-compiled.maude">
 		<test file="/dist/examples/imppp/programs/locals.imppp" output="/dist/examples/imppp/programs/tests/locals.imppp.out"/>
 		<test file="/dist/examples/imppp/programs/sum-0.imppp" output="/dist/examples/imppp/programs/tests/sum-0.imppp.out"/>
 		<test file="/dist/examples/imppp/programs/sum-1.imppp" output="/dist/examples/imppp/programs/tests/sum-1.imppp.out"/>		
-		<test file="/dist/examples/imppp/programs/locals.imppp" output="/dist/examples/imppp/programs/tests/sum-3.imppp.out" input="/dist/examples/imppp/programs/tests/sum-3.imppp.in"/>
+		<test file="/dist/examples/imppp/programs/sum-3.imppp" output="/dist/examples/imppp/programs/tests/sum-3.imppp.out" input="/dist/examples/imppp/programs/tests/sum-3.imppp.in"/>
 	</example>
 	<example dir="/dist/examples/imp" mainfile="imp.k" mainmodule="IMP" compiledfile="imp-compiled.maude">
 	</example>

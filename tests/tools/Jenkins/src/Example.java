@@ -57,7 +57,7 @@ public class Example extends Thread {
 			System.out.println(this);
 		} else {
 
-			String krun = new File(k3jar).getParent() + StaticK.fileSep
+			String krun = new File(k3jar).getParentFile().getParent() + StaticK.fileSep
 					+ "krun";
 			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 					.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
@@ -75,9 +75,11 @@ public class Example extends Thread {
 				}
 			}
 
+			String pgms = "";
 			for (Program program : programs)
-				System.out.println(program);
+				pgms += program.toString() + "\n";
 
+			System.out.println(pgms);
 		}
 	}
 

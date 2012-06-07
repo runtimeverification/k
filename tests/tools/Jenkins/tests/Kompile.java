@@ -7,7 +7,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import org.junit.Test;
 
-
 public class Kompile {
 
 	@Test
