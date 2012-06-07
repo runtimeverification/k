@@ -14,7 +14,7 @@ public class Build {
 		System.out.print("\nBuild ...");
 		Executor build = new Executor(commands, StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase);
 		build.start();
-		build.join(StaticK.ulimit * 1000);
+		build.join(0);
 		Thread.yield();
 		StaticK.k3Jar = StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase + StaticK.fileSep + "dist" + StaticK.fileSep + "bin"
 				+ StaticK.fileSep + "java" + StaticK.fileSep + "k3.jar";
