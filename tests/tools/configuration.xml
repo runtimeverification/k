@@ -16,6 +16,13 @@
 	</example>
 	<example dir="/dist/examples/cink-basic" mainfile="cink.k" mainmodule="CINK" compiledfile="cink-compiled.maude">
 	</example>
+	<example dir="/dist/examples/lambda" mainfile="lambda.k" mainmodule="LAMBDA" compiledfile="lambda-compiled.maude">
+	</example>
+	<example dir="/dist/examples/lambdapp" mainfile="lambdapp.k" mainmodule="LAMBDAPP" compiledfile="lambdapp-compiled.maude">
+	</example>
+	<example dir="/dist/examples/kool-untyped" mainfile="kool-untyped.k" mainmodule="KOOL-UNTYPED" compiledfile="kool-untyped-compiled.maude">
+	</example>
+
 <!--	<example dir="/dist/examples/cink-threads" mainfile="cink.k" mainmodule="CINK" compiledfile="cink-compiled.maude">
 	</example> -->
 </tests>
