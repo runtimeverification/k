@@ -147,7 +147,6 @@ public class Main {
 			}
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
-				// K.k_definition = FileUtil.dropKExtension(K.k_definition, ".",K.fileSeparator);
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");
@@ -200,7 +199,6 @@ public class Main {
 			}
 			if (cmd.hasOption("output-mode")) {
 				K.output_mode = cmd.getOptionValue("output-mode");
-				//System.out.println("output-mode=" + K.output_mode);
 			}
 			if (cmd.hasOption("log-io")) {
 				K.log_io = true;
@@ -293,21 +291,22 @@ public class Main {
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
 
+			String k3jar = new File(K.kast).getParent() + K.fileSeparator + "java" + K.fileSeparator + "k3.jar";
 			if (K.parser.equals("kast")) {
 				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
-				String k3jar = new File(K.kast).getParent() + System.getProperty("file.separator") + "java" + System.getProperty("file.separator") + "k3.jar";
 				System.out.println("K3: " + k3jar);
 				rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition=" + K.k_definition, K.pgm });
 			} else {
 				K.parser = new File(K.parser).getCanonicalPath();
 				System.out.println("The external parser to be used is:" + K.parser);
 				String parserName = FileUtil.getExternalParserName(K.parser, K.fileSeparator);
-				if (parserName.equals("kast") && (System.getProperty("os.name").toLowerCase().contains("win"))) {
-					K.parser += ".bat";
+				if (parserName.equals("kast")) {
+					rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", K.pgm });
 				}
-				// code to execute the external parser
-				rp.execute(new String[] { K.parser, K.pgm });
+				else {
+					rp.execute(new String[] { K.parser, K.pgm });
+				}
 			}
 			
 		    if (K.parser.equals("kast")) {
