@@ -30,7 +30,7 @@ public class Program extends Thread {
 //					kdefinition }, dir);
 //		else
 			compile = new Executor(new String[] { "java", "-jar", krun,
-					filename, "--k-definition", kdefinition }, dir);
+					filename, "--k-definition", kdefinition , "--output-mode", "none"}, dir);
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
 		tpe.execute(compile);
@@ -46,8 +46,8 @@ public class Program extends Thread {
 		output = compile.getOutput();
 		error = compile.getError();
 		exit = compile.getExitValue();
-		System.out.println(filename + "\nOut: " + output + "\nError: " + error
-				+ "\nExit: " + exit);
+//		System.out.println(filename + "\nOut: " + output + "\nError: " + error
+//				+ "\nExit: " + exit);
 	}
 
 	public boolean isCorrect() {
