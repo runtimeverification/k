@@ -18,7 +18,12 @@ public class Build {
 		Thread.yield();
 		StaticK.k3Jar = StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase + StaticK.fileSep + "dist" + StaticK.fileSep + "bin"
 				+ StaticK.fileSep + "java" + StaticK.fileSep + "k3.jar";
+		StaticK.JKrun = StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase + StaticK.fileSep + "dist" + StaticK.fileSep + "bin"
+				+ StaticK.fileSep + "java" + StaticK.fileSep + "JKrun.jar";
+		
 		assertTrue(new File(StaticK.k3Jar).exists());
+		assertTrue(new File(StaticK.JKrun).exists());
+		
 		System.out.println("\tDone.");
 	}
 }
