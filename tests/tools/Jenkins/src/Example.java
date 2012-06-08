@@ -10,7 +10,7 @@ public class Example extends Thread {
 	String mainModule;
 	String[] krunOptions;
 	String k3jar;
-	List<Program> programs;
+	public List<Program> programs;
 	String output = "", error = "";
 	int exitCode;
 	long millis;
@@ -74,13 +74,6 @@ public class Example extends Thread {
 					e.printStackTrace();
 				}
 			}
-
-			String pgms = "";
-			for (Program program : programs)
-				pgms += program.toString() + "\n";
-
-			
-			System.out.println(pgms);
 		}
 	}
 

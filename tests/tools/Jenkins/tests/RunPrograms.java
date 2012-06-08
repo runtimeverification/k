@@ -1,3 +1,5 @@
+import static org.junit.Assert.assertTrue;
+
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -28,6 +30,12 @@ public class RunPrograms {
 //		for (Example example : examples) {
 //			assertTrue(example.isCompiled());
 //		}
+		
+		for(Example example : examples)
+		{
+			for(Program program : example.programs)
+				assertTrue(program.isCorrect());
+		}
 //		
 		System.out.println("\nDone.");
 	}
