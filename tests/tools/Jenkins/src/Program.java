@@ -52,8 +52,8 @@ public class Program extends Thread {
 
 	public boolean isCorrect() {
 		
-		System.out.println(filename + "\nOut: " + output + "\nError: " + error
-				+ "\nExit: " + exit);
+//		System.out.println(filename + "\nOut: " + output + "\nError: " + error
+//				+ "\nExit: " + exit);
 		if (!new File(outputFile).exists()) {
 			if (error.equals("") && exit == 0)
 				return true;
