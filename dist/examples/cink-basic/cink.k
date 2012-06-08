@@ -42,19 +42,14 @@ module CINK-SYNTAX
   /*@ \subsection{Expressions} */
 
   /*@ The constants of the builtin types are primitive constructs and therefore
-      they should be values. We distinguish the subsort of "lvalues", which 
-      we assume that they are integers. 
+      they should be values.  
       The sort for values will be extended in the module describing the 
-      semantics. The sort \texttt{LVal} is for \textit{lvalues}, i.e., those
-      that designates locations. We use non-negative integers for locations,
-      therefore the only constructor for \texttt{Lval} is the subsort 
-      \texttt{Int}.
+      semantics. 
       We prefer to declare \texttt{cin} and \texttt{cout} as values rather 
-      than identifier; the reason for this decisin will be explained later.
+      than identifier; the reason for this decision will be explained later.
    */
 
-  syntax LVal ::=  Int
-  syntax Val ::= "cout" | "cin" | Bool | String | LVal 
+  syntax Val ::= "cout" | "cin" | Bool | String | Int
 
   /*@
     We included in CinK a small subset of C++ language, the missing operators
@@ -64,7 +59,13 @@ module CINK-SYNTAX
     operands. For instance, the arithmetic binary 
     operators are strict in both arguments, hence the behavior of some 
     programs could be undefined or non-determinsitic because the evaluation
-    of the arguments could have side-effects. The assignment operator is strict
+    of the arguments could have side-effects. Initially, their strictness was
+    declared directly in the syntax, uing the attribute strict. When we gave 
+    semantics to the prefix increment operator, we realized that this is not
+    a good choice. Since some operators, like the prefix increment, return
+    l-values, in Cink the l-values and r-values can mixtly occur in the 
+    evaluation of an expression. We will discuss in detail this apect when
+    we give semantics to the operators.  The assignment operator is strict
     only in the second argument because the first argument must be evaluated 
     to an l-value. These features are common to many languages. In contrast
     to the other examples, the function call expression is strict only in the
@@ -80,16 +81,16 @@ module CINK-SYNTAX
                | "*" Exp [strict]
                | "++" Exp
                > left:
-                 Exp "*" Exp [strict]
-               | Exp "/" Exp [strict]
-               | Exp "%" Exp [strict, latex("{#1}\%{#2}")] 
+                 Exp "*" Exp 
+               | Exp "/" Exp 
+               | Exp "%" Exp [latex("{#1}\%{#2}")] 
                >  left:
-                 Exp "+" Exp [strict]
-               | Exp "-" Exp [strict]
+                 Exp "+" Exp 
+               | Exp "-" Exp 
                > left:
-                 Exp ">" Exp [strict]
-               | Exp "<=" Exp [strict, latex("{#1}\leq{#2}")] 
-               | Exp "==" Exp [strict]
+                 Exp ">" Exp 
+               | Exp "<=" Exp [latex("{#1}\leq{#2}")]
+               | Exp "==" Exp 
                >
                  "!" Exp [strict] 
                > 
@@ -100,7 +101,7 @@ module CINK-SYNTAX
                  Exp "<<" Exp [seqstrict]
                | Exp ">>" Exp [strict(1)]
                >
-                 Exp "=" Exp [right, strict(2)]
+                 Exp "=" Exp [right]
                >
                  "endl"
   /*@
@@ -160,10 +161,12 @@ module CINK-SEMANTICS
     As usual, all values must be subsorted to the \texttt{KResult} sort.
    */
 
-  syntax Val ::= "void" 
+
+  syntax LVal ::= "loc" "(" Int ")"
+
+  syntax Val ::= "void" | LVal
                | "lambda" "(" Decls "@" Stmts ")" 
                  [latex("\lambda{#1}\mathrel{\bullet}{#2}")]
-               | "loc" "(" Int ")"
 
   syntax Vals ::= List{Val,","}
   syntax KResult ::= Val
@@ -174,7 +177,7 @@ module CINK-SEMANTICS
     In some contexts, some expressions are evaluated to l-values.
     We wrap these expressions with the \texttt{lvalue} tag.
   */
-  syntax Exp ::=  "lvalue" "(" K ")"
+  syntax Exp ::=  "lvalue" "(" K ")" | "rvalue" "(" K ")" [strict]
 
   syntax K ::= "undefined" | "execute"
 
@@ -215,15 +218,41 @@ module CINK-SEMANTICS
 
   
   /* \subsection{Expressions Evaluation.} */
+
+  /*
+   The following expressions are strict
+  */
+  context (HOLE => rvalue(HOLE)) + _
+  context _ + (HOLE => rvalue(HOLE))
   rule I1:Int + I2:Int => I1 +Int I2 [structural]
+
+  context (HOLE => rvalue(HOLE)) - _
+  context _ - (HOLE => rvalue(HOLE))
   rule I1:Int - I2:Int => I1 -Int I2 [structural]
+
+  context (HOLE => rvalue(HOLE)) * _
+  context _ * (HOLE => rvalue(HOLE))
   rule '_*_(I1:Int,, I2:Int) => I1 *Int I2 [structural]
 //  rule I1:Int * I2:Int => I1 *Int I2 [structural]
+
+  context (HOLE => rvalue(HOLE)) / _
+  context _ / (HOLE => rvalue(HOLE))
   rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=Int 0 [structural]
+ 
+  context (HOLE => rvalue(HOLE)) % _
+  context _ % (HOLE => rvalue(HOLE))
   rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=Int 0 [structural]
 
+  context (HOLE => rvalue(HOLE)) > _
+  context _ > (HOLE => rvalue(HOLE))
   rule I1:Int > I2:Int => (I1 >Int I2) [structural]
+
+  context (HOLE => rvalue(HOLE)) <= _
+  context _ <= (HOLE => rvalue(HOLE))
   rule I1:Int <= I2:Int => (I1 <=Int I2) [structural]
+
+  context (HOLE => rvalue(HOLE)) == _
+  context _ == (HOLE => rvalue(HOLE))
   rule I1:Int == I2:Int => (I1 ==Int I2) [structural]
  
   rule true && B:Exp => B [structural]
@@ -267,7 +296,6 @@ module CINK-SEMANTICS
     Here we try to identify the contexts under which an l-value is 
     transformed into an r-value.
   */ 
-  syntax K ::= "rvalue" "(" K ")"
 
   syntax Bool ::= "hasRValueArgs" "(" KLabel ")"
 
@@ -284,7 +312,15 @@ module CINK-SEMANTICS
     orElseBool OP ==KLabel '_>>_  
     [anywhere]
 
+  //@ Strictness attribute for expression operators
 
+
+  rule <k> rvalue(loc(L:Int)) => V ...</k>
+       <store>... L |-> V:Val ...</store>
+
+  rule rvalue(V:Val) => V when 'isLVal(V) =/=K true
+
+/*
   rule [Lval2Rval1stArg] :
        <k> OP:KLabel((loc(L:Int) => V),,_:List{K}) ...</k>
        <store>... L |-> V:Val ...</store>
@@ -298,7 +334,7 @@ module CINK-SEMANTICS
   rule [Lval2RvalAssg] :
        <k> loc(L1:Int) = (loc(L2:Int) => V) ...</k>
        <store>... L2 |-> V:Val ...</store>
-
+*/
 
 /*
   rule <k> loc(L:Int) + V:Val => rvalue(loc(L:Int)) + V:Val ...</k>
@@ -367,7 +403,7 @@ module CINK-SEMANTICS
 
   /* \subsection{Memmory operations.} */
 
-  context lvalue(HOLE) when 'isId(HOLE) =/=K true
+  context lvalue(HOLE) when 'isId(HOLE) =/=K true  
 
   rule lvalue(L:Int) => loc(L) [structural]
 
@@ -382,12 +418,14 @@ module CINK-SEMANTICS
        <env>... X |-> L:Int ...</env>
        <store>... L |-> V:Val ...</store>
 
+
   rule [mem-lookup-rvalue] :
        <k> X:Id => V ...</k>
        <env>... X |-> L:Int ...</env>
        <store>... L |-> V:Val ...</store>
 
   context (HOLE => lvalue(HOLE)) = _
+  context _=(HOLE => rvalue(HOLE))
   rule [mem-update] :
        <k> loc(L:Int) = V:Val => V  ...</k>
        <env>...  X |-> L  ...</env>
