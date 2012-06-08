@@ -34,7 +34,9 @@ public class RunPrograms {
 		for(Example example : examples)
 		{
 			for(Program program : example.programs)
+			{
 				assertTrue(program.isCorrect());
+			}
 		}
 //		
 		System.out.println("\nDone.");

@@ -74,6 +74,11 @@ public class Example extends Thread {
 					e.printStackTrace();
 				}
 			}
+			
+			String programss = "Testing " + mainFile + " programs:";
+			for(Program program : programs)
+				programss += "Testing " + program.filename + " ... " + (program.isCorrect() == true ? "success" : "fail");
+			System.out.println(programss);
 		}
 	}
 
