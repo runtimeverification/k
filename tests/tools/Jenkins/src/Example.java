@@ -77,7 +77,7 @@ public class Example extends Thread {
 			
 			String programss = "Testing " + mainFile + " programs:\n";
 			for(Program program : programs)
-				programss += "Testing " + program.filename + " ... " + (program.isCorrect() == true ? "success" : "fail");
+				programss += "Testing " + program.filename + " ... " + (program.isCorrect() == true ? "success" : "fail") + "\n";
 			System.out.println(programss);
 		}
 	}
