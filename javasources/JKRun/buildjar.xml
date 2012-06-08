@@ -6,7 +6,7 @@
     	<delete file="../../dist/bin/java/JKrun.jar" failonerror="false" />
         <jar destfile="../../dist/bin/java/JKrun.jar" filesetmanifest="mergewithoutmain">
             <manifest>
-                <attribute name="Main-Class" value="ro.uaic.fmse.jkrun.Main"/>
+                <attribute name="Main-Class" value="ro.uaic.info.fmse.jkrun.Main"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <fileset dir="./bin"/>

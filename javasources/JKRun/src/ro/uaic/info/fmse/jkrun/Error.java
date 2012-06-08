@@ -1,4 +1,4 @@
-package ro.uaic.fmse.jkrun;
+package ro.uaic.info.fmse.jkrun;
 
 public class Error {
 

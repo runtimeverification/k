@@ -1,5 +1,5 @@
 // make && java -jar wrapperAndServer.jar --maudefile blah
-package ro.uaic.fmse.runner;
+package ro.uaic.info.fmse.runner;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +13,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import main.MainServer;
-import ro.uaic.fmse.tasks.MaudeTask;
-import ro.uaic.fmse.jkrun.KPaths;
+import ro.uaic.info.fmse.jkrun.KPaths;
+import ro.uaic.info.fmse.tasks.MaudeTask;
 
 public class KRunner {
 	// private String _maudeCommand = "maude";
@@ -110,8 +110,8 @@ public class KRunner {
 		_maudeFileName = KPaths.windowfyPath(_maudeFileName);
 		_maudeCommandFileName = KPaths.windowfyPath(_maudeCommandFileName);
 		String commandTemplate = "load {0}\n" + "mod KRUNNER is including {1} .\n" + "eq #TCPPORT = {2,number,#} .\n" + "endm\n" + "load {3}\n";
-		_maudeFileName = _maudeFileName.replaceAll("(\\s)", "\\\1");
-		_maudeCommandFileName = _maudeCommandFileName.replaceAll("(\\s)", "\\ ");
+		/*_maudeFileName = _maudeFileName.replaceAll("(\\s)", "\\\1");
+		_maudeCommandFileName = _maudeCommandFileName.replaceAll("(\\s)", "\\ ");*/
 		
 		String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
 		MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName, _logger);

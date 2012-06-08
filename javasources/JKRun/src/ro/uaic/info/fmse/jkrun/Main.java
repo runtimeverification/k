@@ -1,4 +1,4 @@
-package ro.uaic.fmse.jkrun;
+package ro.uaic.info.fmse.jkrun;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import ro.uaic.fmse.runner.KRunner;
+import ro.uaic.info.fmse.runner.KRunner;
 
 import org.fusesource.jansi.AnsiConsole;
 
@@ -301,7 +301,7 @@ public class Main {
 				System.out.println("The external parser to be used is:" + K.parser);
 				String parserName = FileUtil.getExternalParserName(K.parser, K.fileSeparator);
 				if (parserName.equals("kast")) {
-					rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", K.k_definition, K.pgm });
+					rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", K.pgm });
 				}
 				else {
 					rp.execute(new String[] { K.parser, K.pgm });
@@ -351,7 +351,7 @@ public class Main {
 			if (K.trace)
 				s = "set trace on ." + K.lineSeparator + s;
 
-			FileUtil.createFile(K.maude_io_cmd, s);
+			FileUtil.createMaudeFile(K.maude_io_cmd, s);
 
 			// run IOServer
 			File outFile = FileUtil.createMaudeFile(K.maude_out);
@@ -392,8 +392,8 @@ public class Main {
 			//FileUtil.createFile(K.krun_output, prettyOutput);
 
 			// delete temporary files
-			FileUtil.deleteFile(K.maude_io_cmd);
-			FileUtil.deleteFile(K.maude_output);
+			//FileUtil.deleteFile(K.maude_io_cmd);
+			//FileUtil.deleteFile(K.maude_output);
 
 			System.exit(0);
 

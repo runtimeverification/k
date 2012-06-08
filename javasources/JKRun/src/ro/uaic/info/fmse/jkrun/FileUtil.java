@@ -1,4 +1,4 @@
-package ro.uaic.fmse.jkrun;
+package ro.uaic.info.fmse.jkrun;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 import org.apache.commons.io.FileUtils;
 
@@ -40,6 +42,37 @@ public class FileUtil {
 			Error.report("Error while creating maude file " + file);
 		}
 		return null;
+	}
+	
+	public static void createMaudeFile(String file, String content) {
+		try {
+			File file1 = new File(file);
+			File f2 = new File(file1.getParent());
+			f2.mkdirs();
+			BufferedWriter out = new BufferedWriter(new FileWriter(file1));
+			if (content != null) {
+				out.write(content);
+				out.flush();
+				out.close();
+			}
+		} catch (Exception e) {
+			Error.report("Error while creating maude file " + file);
+		}
+	}
+	
+	public static String generateUniqueName(String fileName) {
+		 String result = new String();
+		 String name = new String();
+		 String extension = new String();
+		 
+		 SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy_hhmmss"); 
+		 Date curDate = new Date(); 
+		 String strDate = sdf.format(curDate); 
+		 int dot = fileName.lastIndexOf(".");
+		 name = fileName.substring(0, dot);
+		 extension = fileName.substring(dot + 1, fileName.length());
+		 result = name + "_" + strDate + "." + extension; 
+		 return result;
 	}
 
 	public static String getFileContent(String file) {

@@ -1,4 +1,4 @@
-package ro.uaic.fmse.tasks;
+package ro.uaic.info.fmse.tasks;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,6 +9,8 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import ro.uaic.info.fmse.jkrun.K;
 
 public class MaudeTask extends Thread {
 	// private static final String LOG_FILE = "maude.log";
@@ -57,7 +59,7 @@ public class MaudeTask extends Thread {
 		//}
 		commands.add("-no-wrap");
 		commands.add("-no-banner");
-		commands.add("-xml-log=maudeoutput.xml");
+		commands.add("-xml-log="+ K.maude_output);
 		maude.command(commands);
 
 		Process maudeProcess = maude.start();
@@ -77,7 +79,6 @@ public class MaudeTask extends Thread {
 
 		String line;
 		while ((line = maudeOutput.readLine()) != null) {
-//			 System.out.println(line);
 			outputFile.write(line + "\n");
 		}
 		outputFile.close();
@@ -90,7 +91,6 @@ public class MaudeTask extends Thread {
 
 		String line;
 		while ((line = maudeOutput.readLine()) != null) {
-//			 System.out.println(line);
 			outputFile.write(line + "\n");
 		}
 		outputFile.close();

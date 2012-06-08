@@ -1,4 +1,4 @@
-package ro.uaic.fmse.jkrun;
+package ro.uaic.info.fmse.jkrun;
 
 import java.util.ArrayList;
 import java.util.Comparator;
