@@ -60,10 +60,10 @@ public class Program extends Thread {
 		} else {
 			String out = StaticK.readFileAsString(new File(outputFile)
 					.getAbsolutePath());
-			System.out.println("Comparing: ");
-			System.out.println("1|" + out + "|1");
-			System.out.println("2|" + output + "|3");
-			System.out.println("END");
+//			System.out.println("Comparing: ");
+//			System.out.println("1|" + out + "|1");
+//			System.out.println("2|" + output + "|3");
+//			System.out.println("END");
 			if (out.trim().equals(output.trim()) && exit == 0)
 				return true;
 		}
