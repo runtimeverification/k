@@ -51,12 +51,19 @@ public class Program extends Thread {
 	}
 
 	public boolean isCorrect() {
+		
+		System.out.println(filename + "\nOut: " + output + "\nError: " + error
+				+ "\nExit: " + exit);
 		if (!new File(outputFile).exists()) {
 			if (error.equals("") && exit == 0)
 				return true;
 		} else {
 			String out = StaticK.readFileAsString(new File(outputFile)
 					.getAbsolutePath());
+			System.out.println("Comparing: ");
+			System.out.println("1|" + out + "|1");
+			System.out.println("2|" + output + "|3");
+			System.out.println("END");
 			if (out.trim().equals(output.trim()) && exit == 0)
 				return true;
 		}

@@ -22,7 +22,7 @@ public class Checkout {
 	public void checkout() throws InterruptedException, URISyntaxException {
 
 		// first, checkout K -> verify the existence of k-framework dir.
-		System.out.print("\nRetrieving K ...");
+		System.out.print("\nCheckout K ...");
 		String[] commands = new String[] { "svn", "checkout",
 				"https://k-framework.googlecode.com/svn/trunk", StaticK.kbase };
 		Executor executor = new Executor(commands, ".");
