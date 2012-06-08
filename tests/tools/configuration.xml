@@ -5,7 +5,7 @@
 		<test file="/dist/examples/imppp/programs/locals.imppp" output="/dist/examples/imppp/programs/tests/locals.imppp.out"/>
 		<test file="/dist/examples/imppp/programs/sum-0.imppp" output=""/>
 		<test file="/dist/examples/imppp/programs/sum-1.imppp" output="/dist/examples/imppp/programs/tests/sum-1.imppp.out"/>		
-		<test file="/dist/examples/imppp/programs/div-nondet.imppp" output="/dist/examples/imppp/programs/tests/sum-1.imppp.out"/>
+		<test file="/dist/examples/imppp/programs/div-nondet.imppp" output="/dist/examples/imppp/programs/tests/div-nondet.imppp.out"/>
 		<test file="/dist/examples/imppp/programs/spawn.imppp" output="/dist/examples/imppp/programs/tests/spawn.imppp.out"/>		
 	</example>
 	<example dir="/dist/examples/imp" mainfile="imp.k" mainmodule="IMP" compiledfile="imp-compiled.maude">
