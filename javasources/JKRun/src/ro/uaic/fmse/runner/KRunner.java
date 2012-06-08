@@ -114,7 +114,6 @@ public class KRunner {
 		_maudeCommandFileName = _maudeCommandFileName.replaceAll("(\\s)", "\\ ");
 		
 		String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
-System.out.println("CMD: " + command);
 		MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName, _logger);
 
 		maude.start();
@@ -123,8 +122,6 @@ System.out.println("CMD: " + command);
 
 		maude.join();
 		int returnValue = maude.returnValue;
-
-//		System.out.println("MAUDE EXITVALUE: " + returnValue);
 
 	}
 

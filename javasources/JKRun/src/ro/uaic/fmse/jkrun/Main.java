@@ -292,7 +292,6 @@ public class Main {
 			RunProcess rp = new RunProcess();
 
 			String k3jar = new File(K.kast).getParent() + K.fileSeparator + "java" + K.fileSeparator + "k3.jar";
-			System.out.println("K3: " + k3jar);
 			if (K.parser.equals("kast")) {
 				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
