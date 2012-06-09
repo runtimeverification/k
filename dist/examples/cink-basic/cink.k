@@ -627,9 +627,12 @@ module CINK
 
   // the semantics of the "eqTo" proposition
 
+  rule KItem(B:Bag) LTL|= #eqTo(X:Id, I:Int) => true when val(B, X) ==K I [anywhere]
+
+/*
   rule '_LTL|=_(KItem(B:Bag),, #eqTo(X:Id, I:Int)) => true 
     when val(B, X) ==K I [anywhere]
-
+*/
 endmodule
 /*
 module CINK
