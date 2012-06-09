@@ -406,15 +406,15 @@ public class Main {
 
 		} catch (ParseException exp) {
 			System.out.println("Unexpected exception:" + exp.getMessage());
-			//System.exit(1);
+			System.exit(1);
 		} catch (IOException e) {
 			e.printStackTrace();
-			//System.exit(1);
+			System.exit(1);
 		} catch (Exception e) {
 			System.out.println("You provided bad program arguments!");
 			e.printStackTrace();
 			printUsage(cmd_options.options);
-			//System.exit(1);
+			System.exit(1);
 		}
 
 	}
