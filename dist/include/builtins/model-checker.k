@@ -1,16 +1,20 @@
-require "builtins/bool.k"
+require "bool.k"
 
 module LTL-SYNTAX-HOOKS
-  imports #LTL-INTERFACE
-  syntax LTLFormula ::= #LTLFormula 
+  syntax LTLFormula ::= #LTLFormula
 endmodule
 
 module LTL-HOOKS
   imports LTL-SYNTAX-HOOKS
+  imports #LTL-INTERFACE
 
 //  syntax LTLFormula ::= "LTLTrue" [hook(#LTL:LTLTrue)]
 
 //  syntax LTLFormula ::= "LTLFalse" [hook(#LTL:LTLFalse)]
+
+//  syntax LTL ::= "justforK2"
+
+  syntax LTLFormula ::= "(" LTLFormula ")" [bracket]
 
   syntax LTLFormula ::= "LTL~" LTLFormula  [function, prec(53), hook(#LTL:LTL~_)]
 
@@ -57,18 +61,21 @@ module LTL-HOOKS
 endmodule
 
 module MODEL-CHECKER-SYNTAX-HOOKS
-  imports #MODEL-CHECKER-INTERFACE
+  imports LTL-SYNTAX-HOOKS
   syntax ModelCheckerState ::= #ModelCheckerState 
   syntax Prop ::= #Prop
   syntax ModelCheckResult ::= #ModelCheckResult
+  syntax LTLFormula ::= Prop
 endmodule
 
+
 module MODEL-CHECKER-HOOKS
+  imports #MODEL-CHECKER-INTERFACE
   imports MODEL-CHECKER-SYNTAX-HOOKS
-  imports LTL-SYNTAX-HOOKS
   imports BOOL-HOOKS
 
   syntax ModelCheckResult ::= "modelCheck" "(" ModelCheckerState "," LTLFormula ")" 
          [function, hook(#MODEL-CHECKER:modelCheck)]
+
 
 endmodule

@@ -4,6 +4,7 @@ require "float.k"
 require "string.k"
 require "tcp.k"
 require "k-equal.k"
+require "random.k"
 require "model-checker.k"
 
 module BUILTIN-SYNTAX-HOOKS
@@ -23,6 +24,8 @@ module BUILTIN-HOOKS
   imports STRING-HOOKS
   imports TCP-HOOKS
   imports K-EQUAL-HOOKS
+  imports RANDOM-HOOKS
   imports LTL-HOOKS
   imports MODEL-CHECKER-HOOKS
 endmodule
+

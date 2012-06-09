@@ -29,7 +29,7 @@ The syntax of Cink is written using the last version at the moment of the
 notation enriched with annotations and priority specifications. 
 */
 
-module CINK-SYNTAX 
+module CINK-LANG-SYNTAX 
 
   imports BUILTIN-SYNTAX-HOOKS
 
@@ -130,6 +130,7 @@ module CINK-SYNTAX
                | "if" "(" Exp ")" Stmt "else" Stmt [strict(1)]
                >
                  "if" "(" Exp ")" Stmt
+               | "std::thread" Id "(" Exps ")" ";"
   /*@
     A program is a sequence of statements.
   */
@@ -145,16 +146,16 @@ module CINK-SYNTAX
 
 endmodule
 
-module CINK-SEMANTICS
-  imports CINK-SYNTAX
+module CINK-LANG-SEMANTICS
+  imports CINK-LANG-SYNTAX
 
   /*@ \subsection{Values.} 
     The values are a very important syntactic category in the definition
-    of any languages; with them, we are able to know when the evaluation
+    of any language; with them, we are able to know when the evaluation
     of an expression is finished. This piece of information is crucial, e.g.,
     for the heating and cooling rules. "Paradoxally", the value \texttt{void}
     means in fact "no value". The lambda abstractions are used for storing the
-    functions. Similar to other \K examples (IMP. IMPPP, SIMPLE), the 
+    functions. Similar to other \K examples (IMP, IMPPP, SIMPLE), the 
     functions are stored similar to variables and therefore their definitions
     are seen as values. The values of the form \texttt{loc($L$:Int)} designate
     locations and they are used as result for the evaluation of the l-values.
@@ -174,22 +175,46 @@ module CINK-SEMANTICS
   /* \subsection{Auxiliary constructs.} */
 
   /*@
-    In some contexts, some expressions are evaluated to l-values.
-    We wrap these expressions with the \texttt{lvalue} tag.
+    In Cink, the expressions can be evaluated to l-values or to r-values,
+    depending on the context they are used.
+    Historically, the names of these two categories are coming from the fact 
+    that an lvalue expression can be used in the left hand side of an 
+    assignment and an rvalue expression can be used in the right hand side of 
+    an assignment.
+    Semantically, an l-value expression is evaluated to a location and an 
+    r-value expression is evaluated to a value that can be stored into a
+    location.
+    As we mentioned earlier, we use the sort \texttt{LVal} for l-values.
+    We also use two auxiliary semantics constructs that help to specify
+    the places where an l-value (resp. r-value) is expected. 
   */
-  syntax Exp ::=  "lvalue" "(" K ")" | "rvalue" "(" K ")" [strict]
+  syntax Exp ::=  "lvalue" "(" Exp ")" | "rvalue" "(" Exp ")" [strict]
 
-  syntax K ::= "undefined" | "execute"
+  /*@
+    We also a special symbol,  \texttt{undefined}, in order to initialize 
+    the content of a new memory location. The construct \texttt{execute} is
+    used to start the computation of a program.
+  */
+  syntax K ::= "undefined" | "execute" | "noname"
 
+ /*@
+   The next two constructors are used for storing tv
+ */
   syntax ListItem ::= "(" List "," K ")"
                     | "[" Map "]"
 
  /* \subsection{Configuration.} */
+
   configuration <T color="yellow">
-                  <k color="green"> ($PGM:Pgm ~> execute) </k>
-                  <env color="LightSkyBlue"> .Map </env>
-                  <fstack color="orange"> .List </fstack>
-                  <bstack color="orange"> .List </bstack>
+                  <threads color="pink">
+                    <thread multiplicity="*" color="purple"> 
+                      <name color="yellow"> noname </name>
+                      <k color="green"> ($PGM:Pgm ~> execute) </k>
+                      <env color="LightSkyBlue"> .Map </env>
+                      <bstack color="orange"> .List </bstack>
+                      <fstack color="orange"> .List </fstack>
+                    </thread>
+                  </threads>
                   <genv color="SkyBlue"> .Map </genv>
                   <store color="white"> .Map </store>
 //                  <br/>
@@ -216,10 +241,52 @@ module CINK-SEMANTICS
        '__('_;(int X),, '_;('_=_(X,, B)))
        [anywhere]
 
-  
-  /* \subsection{Expressions Evaluation.} */
+ /* \subsection{Declarations.} */
+  rule [fun-decl] :
+       <k> '_`(_`)`{_`}(Decl:Decl,, Xl:Decls,, Sts:Stmts) => .  ...</k> 
+       <env>... . =>  (getName(Decl) |-> L) ...</env>
+       <store>... . => (L |-> lambda(Xl @ Sts)) ...</store>
+       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+       [structural]
 
-  /*
+  /*@
+    The rules vor variable declarations must be in this order.
+  */
+
+  context int & X = (HOLE => lvalue(HOLE))
+  rule [alias-decl] :
+       <k> int & X:Id = loc(L:Int) => void  ...</k>      
+       <env> Env:Map => Env[L/X] </env>
+       [structural]
+
+  rule [alias-decl] :
+       <k> bool & X:Id = Y:Id => void  ...</k>      
+       <env> Y |-> L:Int (Env:Map => Env[L/X]) </env>
+       [structural]
+
+  rule [var-decl] :
+       <k> Decl:Decl => void  ...</k>      
+       <env> Env:Map => Env[L/getName(Decl)] </env>
+       <store>... . => (L |-> undefined) ...</store>
+       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+       [structural]
+
+  rule [include] :
+       <k> #include <iostream> => .  ...</k>
+       [structural]
+
+  rule [include] :
+       <k> using namespace std;=> .  ...</k>
+       [structural]
+
+  rule <k> execute => '_;('_`(_`)(main,, .Vals)) </k>
+       <env> Env:Map </env>
+       <genv> . => Env:Map </genv>
+       [structural]
+  
+  /*@ \subsection{Expressions Evaluation.} */
+
+  /*@
    The following expressions are strict
   */
   context (HOLE => rvalue(HOLE)) + _
@@ -255,6 +322,8 @@ module CINK-SEMANTICS
   context _ == (HOLE => rvalue(HOLE))
   rule I1:Int == I2:Int => (I1 ==Int I2) [structural]
  
+  //@ The expressions having the strict attribute declared in the syntax
+
   rule true && B:Exp => B [structural]
   rule false && B:Exp => false [structural]
   rule true || B:Exp => true [structural]
@@ -297,55 +366,12 @@ module CINK-SEMANTICS
     transformed into an r-value.
   */ 
 
-  syntax Bool ::= "hasRValueArgs" "(" KLabel ")"
-
-  rule hasRValueArgs(OP:KLabel) => true
-    when       OP ==KLabel '_+_ 
-    orElseBool OP ==KLabel '_-_ 
-    orElseBool OP ==KLabel '_*_ 
-    orElseBool OP ==KLabel '_/_ 
-    orElseBool OP ==KLabel '_%_ 
-    orElseBool OP ==KLabel '_<_ 
-    orElseBool OP ==KLabel '_<=_
-    orElseBool OP ==KLabel '_||_
-    orElseBool OP ==KLabel '_<<_ 
-    orElseBool OP ==KLabel '_>>_  
-    [anywhere]
-
-  //@ Strictness attribute for expression operators
-
 
   rule <k> rvalue(loc(L:Int)) => V ...</k>
        <store>... L |-> V:Val ...</store>
 
   rule rvalue(V:Val) => V when 'isLVal(V) =/=K true
 
-/*
-  rule [Lval2Rval1stArg] :
-       <k> OP:KLabel((loc(L:Int) => V),,_:List{K}) ...</k>
-       <store>... L |-> V:Val ...</store>
-    when hasRValueArgs(OP) ==K true
-
-  rule [Lval2Rval2ndArg] :
-       <k> OP:KLabel(_:List{K},, (loc(L:Int) => V)) ...</k>
-       <store>... L |-> V:Val ...</store>
-    when hasRValueArgs(OP) ==K true
-
-  rule [Lval2RvalAssg] :
-       <k> loc(L1:Int) = (loc(L2:Int) => V) ...</k>
-       <store>... L2 |-> V:Val ...</store>
-*/
-
-/*
-  rule <k> loc(L:Int) + V:Val => rvalue(loc(L:Int)) + V:Val ...</k>
-       <store>... L |-> V:Val ...</store>
-
-  rule <k> cout << loc(L:Int) => cout << rvalue(loc(L:Int)) ...</k>
-       <store>... L |-> V:Val ...</store>
-
-  rule <k> rvalue(loc(L:Int)) => V ...</k>
-       <store>... L |-> V:Val ...</store>
-*/
 
   syntax  Id ::= "getName" "(" Decl ")" [function]
 
@@ -356,50 +382,6 @@ module CINK-SEMANTICS
   rule getName(int  * X:Id) => X   [anywhere]
   rule getName(bool * X:Id) => X   [anywhere]
   rule getName('void_(X:Id)) => X  [anywhere]
-
-
-  /* \subsection{Declarations.} */
-  rule [fun-decl] :
-       <k> '_`(_`)`{_`}(Decl:Decl,, Xl:Decls,, Sts:Stmts) => .  ...</k> 
-       <env>... . =>  (getName(Decl) |-> L) ...</env>
-       <store>... . => (L |-> lambda(Xl @ Sts)) ...</store>
-       <nextLoc> L:Int => (L +Int 1) </nextLoc>
-       [structural]
-
-  /*@
-    The rules vor variable declarations must be in this order.
-  */
-
-  context int & X = (HOLE => lvalue(HOLE))
-  rule [alias-decl] :
-       <k> int & X:Id = loc(L:Int) => void  ...</k>      
-       <env> Env:Map => Env[L/X] </env>
-       [structural]
-
-  rule [alias-decl] :
-       <k> bool & X:Id = Y:Id => void  ...</k>      
-       <env> Y |-> L:Int (Env:Map => Env[L/X]) </env>
-       [structural]
-
-  rule [var-decl] :
-       <k> Decl:Decl => void  ...</k>      
-       <env> Env:Map => Env[L/getName(Decl)] </env>
-       <store>... . => (L |-> undefined) ...</store>
-       <nextLoc> L:Int => (L +Int 1) </nextLoc>
-       [structural]
-
-  rule [include] :
-       <k> #include <iostream> => .  ...</k>
-       [structural]
-
-  rule [include] :
-       <k> using namespace std;=> .  ...</k>
-       [structural]
-
-  rule <k> execute => '_;('_`(_`)(main,, .Vals)) </k>
-       <env> Env:Map </env>
-       <genv> . => Env:Map </genv>
-       [structural]
 
   /* \subsection{Memmory operations.} */
 
@@ -412,17 +394,20 @@ module CINK-SEMANTICS
   rule [mem-lookup-lvalue] :
        <k> lvalue(X:Id) => loc(L) ...</k>
        <env>... X |-> L:Int ...</env>
+       [transition]
 
   rule [mem-lookup-lvalue-indirect] :
        <k> lvalue(* X:Id) => loc(V) ...</k>
        <env>... X |-> L:Int ...</env>
        <store>... L |-> V:Val ...</store>
+       [transition]
 
 
   rule [mem-lookup-rvalue] :
        <k> X:Id => V ...</k>
        <env>... X |-> L:Int ...</env>
        <store>... L |-> V:Val ...</store>
+       [transition]
 
   context (HOLE => lvalue(HOLE)) = _
   context _=(HOLE => rvalue(HOLE))
@@ -430,6 +415,7 @@ module CINK-SEMANTICS
        <k> loc(L:Int) = V:Val => V  ...</k>
        <env>...  X |-> L  ...</env>
        <store>... L |-> (_ => V) ...</store>
+       [transition]
 
   /* \subsection{Control Statements.} */
   rule [while] :
@@ -444,10 +430,33 @@ module CINK-SEMANTICS
        when K =/=K .K
 //       [transition]
 
+/*
   rule [block] : 
        <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
        <env> Env:Map </env>
        <bstack> . => [Env] ...</bstack>
+       [structural]
+*/
+
+
+  rule [block] : 
+       <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
+       <env> Env:Map </env>
+       <bstack> . => [Env] </bstack>
+       [structural]
+
+  rule [block] : 
+       <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
+       <env> Env:Map </env>
+       <bstack> (. => [Env]) [Env1:Map] ...</bstack>
+       when Env =/=Map Env1
+       [structural]
+
+  rule [block] : 
+       <k>{Sts:Stmts} => Sts  ...</k>
+       <env> Env:Map </env>
+       <bstack> [Env1:Map] ...</bstack>
+       when Env ==Map Env1
        [structural]
 
   rule [block-empty] : {} => .  [structural]
@@ -512,6 +521,23 @@ module CINK-SEMANTICS
        <fstack> ([Env:Map] Stack:List, K:K) => . ...</fstack>
        [transition]
 
+  rule [thread]:
+       <thread>...
+         <k> 'std::thread_`(_`);(T:Id,, '_`,_(F:Id,, El:Exps)) => . ...</k>
+         <env> Env </env>
+       ...</thread>
+       (. => 
+        <thread>... 
+        <name> T </name>  
+        <k> '_;('_`(_`)(F,, El)) </k> <env> Env </env> 
+        ...</thread>
+       )
+  
+
+  rule [thread-end] :
+       (<thread>... <k>.K</k>  ...</thread> => .)
+
+
   /* \subsection{Auxiliary Functions and Rules.} */
 
 
@@ -541,13 +567,74 @@ module CINK-SEMANTICS
        <bstack> [Env:Map] => . ...</bstack>
        <env> _ => Env </env> 
 
+  // equality over maps
+
+  syntax Bool ::= Map "<=Map" Map    [function]
+  rule (MapItem1:MapItem Map1:Map) <=Map (MapItem1 Map2:Map) => (Map1 <=Map Map2) [function, anywhere]
+  rule .Map <=Map _:Map => true [function, anywhere]
+  rule ((D:K |-> _:K) Map1:Map) <=Map Map2:Map => false
+       when notBool $hasMapping(Map2, D) [function, anywhere]
+
+  syntax Bool ::= Map "==Map" Map    [function]
+  rule Map1:Map ==Map Map2:Map => (Map1 <=Map Map2) andBool (Map2 <=Map Map1) [function, anywhere]
+
+  syntax Bool ::= Map "=/=Map" Map   [function]
+  rule Map1:Map =/=Map Map2:Map => notBool(Map1 ==Map Map2) [function, anywhere]
+
+  // bug
+
+  rule '_`,_(X:Id,, .Exps) => X [structural]
+
 endmodule
 
+module CINK-SYNTAX
+  imports CINK-LANG-SYNTAX
+  imports LTL-HOOKS
+
+  syntax Prop ::= "eqTo" "(" Id "," Val ")" // [function]
+
+endmodule
 
 module CINK
-  imports CINK-SEMANTICS
-//  imports MODEL-CHECKER-HOOKS
+  imports MODEL-CHECKER-HOOKS
+  imports CINK-SYNTAX
+  imports CINK-LANG-SEMANTICS
+
+  //define the state of the transition system
+
+  syntax #ModelCheckerState ::= "KItem" "(" Bag ")"
+
+/*
+   the following constructions should be automatically generated
+*/
+  syntax #Prop ::= "#eqTo" "(" Id "," Val ")" [function]
+  
+  // the following should be a rule
+  rule eqTo(X:Id, V:Val) => #eqTo(X, V) [anywhere]
+
+/* ... */
+
+  // an auxiliary operation
+  syntax Int ::= "val" "(" Bag "," Id ")" [function]
+
+  rule val(<T>... 
+                 <genv>... X:Id |-> L:Int ...</genv> 
+                 <store>... L |-> I:Int ...</store> 
+           ...</T>, X)
+       =>
+       I
+       [anywhere]
+
+  // the semantics of the "eqTo" proposition
+
+  rule '_LTL|=_(KItem(B:Bag),, #eqTo(X:Id, I:Int)) => true 
+    when val(B, X) ==K I [anywhere]
 
 endmodule
+/*
+module CINK
+  imports CINK-PROP-SEMANTICS
 
+endmodule
+*/
 

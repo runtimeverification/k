@@ -1,0 +1,2 @@
+LTL[] (eqTo(critical1, 1) LTL-> eqTo(critical2, 0))
+

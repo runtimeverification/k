@@ -976,7 +976,7 @@ mod BOTTOM is
   sort Bottom .
 endm
 
- load k-model-checker
+load k-model-checker
 
 mod PL-BUILTINS is
 including #BOOL-INTERFACE .

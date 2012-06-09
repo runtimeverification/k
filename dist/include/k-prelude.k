@@ -121,3 +121,14 @@ interface K
   imports K-SET-EXTRAS            // operations on Sets
   //imports K-LATEX  
 endinterface
+
+interface  MODEL-CHECKER-INTERFACE
+  imports #MODEL-CHECKER-INTERFACE
+//  sorts #ModelCheckerState #Prop .
+//  sort #ModelCheckResult .
+
+//  op _LTL|=_ : #ModelCheckerState #Prop -> #Bool [frozen] .
+
+  syntax #Bool ::= #ModelCheckerState "LTL|=" #Prop
+
+endinterface
