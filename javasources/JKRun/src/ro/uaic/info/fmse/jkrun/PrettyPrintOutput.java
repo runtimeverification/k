@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.jkrun;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -12,8 +13,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -33,6 +37,8 @@ import org.xml.sax.SAXException;
 public class PrettyPrintOutput {
 	
 	private CommandLine cmd;
+	
+	private static boolean changed = true;
 	
 	public static final String ANSI_NORMAL = "\u001b[0m";
 	
@@ -104,6 +110,96 @@ public class PrettyPrintOutput {
 			return attr;
 		}
 		return null;
+	}
+	
+	public void preprocessDoc(File file, String processedFile) {
+		Document doc = readXML(file);
+		NodeList list = null;
+
+		list = doc.getElementsByTagName("term");
+		if (list == null) {
+			Error.report("Preprocess Document: Nodes with term tag weren't found");
+		} else {
+			//while (changed) {
+				//setChanged(false);
+				for (int i = 0; i < list.getLength(); i++) {
+					if (list.item(i).getNodeType() == Node.ELEMENT_NODE) {
+						System.out.println("Curent node " + i + " =\n" + convertNodeToString(list.item(i)) + "\n");
+						preprocessElement((Element) list.item(i));
+					}
+				}
+				/*serializeXML(doc, processedFile);
+			    doc = readXML(new File(processedFile));
+				list = doc.getElementsByTagName("term");
+				if (list == null) {
+					Error.report("Preprocess Document: Nodes with term tag weren't found");
+				}*/
+			}
+		//}
+
+		serializeXML(doc, processedFile);
+
+	}
+	
+	private static void preprocessElement(Element node) {
+		String op = node.getAttribute("op");
+		String sort = node.getAttribute("sort");
+		
+		//rule 1
+		if (sort.equals("KItem") && op.equals("_`(_`)")) {
+			Node parent = node.getParentNode();
+			/*if (parent.getNodeValue() == null) {
+				Error.report("Parent doesn't exist");
+			}*/
+			
+			NodeList ch = node.getChildNodes();
+			// used for counting the child nodes that are of Element type
+			int count = 0;
+			Element firstChild = null;
+			Element secondChild = null;
+			for (int j = 0; j < ch.getLength(); j++) {
+				if (ch.item(j).getNodeType() == Node.ELEMENT_NODE) {
+					Element elem = (Element) ch.item(j);
+					if (count == 0) {
+						firstChild = elem;
+					}
+					if (count == 1) {
+						secondChild = elem;
+					}
+					count++;
+					if (count > 1) {
+						break;
+					}
+				}
+			}
+			String sort_ = firstChild.getAttribute("sort");
+			if (sort_.equals("KLabel")) {
+				firstChild.appendChild(secondChild);
+				parent.appendChild(firstChild);
+				parent.removeChild(node);
+				System.out.println("Rule 1: parent node=" + convertNodeToString(parent) + "\n");
+				//setChanged(true);
+			}
+		}
+		
+		//rule 2
+		if (sort.equals("NeList`{K`}") && op.equals("_`,`,_")) {
+			Node parent = node.getParentNode();
+			/*if (parent.getNodeValue() == null) {
+				Error.report("Parent doesn't exist");
+			}*/
+			
+			ArrayList<Element> list = getChildElements(node);
+			if (list.size() >= 2) {
+				for (Element elem: list) {
+					parent.appendChild(elem);
+				}
+				parent.removeChild(node);
+				System.out.println("Rule 2: parent node=" + convertNodeToString(parent) + "\n");
+				//setChanged(true);
+			}
+		}
+		
 	}
 
 	public String processDoc(File file) {
@@ -332,6 +428,20 @@ public class PrettyPrintOutput {
 
 		return result;
 	}
+	
+	public static ArrayList<Element> getChildElements(Node node) {
+		ArrayList l = new ArrayList();
+		for (Node childNode = node.getFirstChild(); childNode != null;) {
+			if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element elem = (Element) childNode;
+				l.add(elem);
+			}
+			Node nextChild = childNode.getNextSibling();
+			childNode = nextChild;
+		}
+
+		return l;
+	}
 
 	public static String convertNodeToString(Node node) {
 		try {
@@ -345,6 +455,40 @@ public class PrettyPrintOutput {
 		}
 		return null;
 	}
+	
+	public static void serializeXML(Document doc, String fileName) {
+		// write the XML document to disk
+		try {
+
+			// create DOMSource for source XML document
+			Source xmlSource = new DOMSource(doc);
+
+			// create StreamResult for transformation result
+			Result result = new StreamResult(new FileOutputStream(fileName));
+
+			// create TransformerFactory
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+
+			// create Transformer for transformation
+			Transformer transformer = transformerFactory.newTransformer();
+			//transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "1");
+
+			// transform and deliver content to client
+			transformer.transform(xmlSource, result);
+		}
+		// handle exception creating TransformerFactory
+		catch (TransformerFactoryConfigurationError factoryError) {
+			System.err.println("Error creating " + "TransformerFactory");
+			factoryError.printStackTrace();
+		} catch (TransformerException transformerError) {
+			System.err.println("Error transforming document");
+			transformerError.printStackTrace();
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
+	}
 
 	public void setCmd(CommandLine cmd) {
 		this.cmd = cmd;
@@ -352,6 +496,14 @@ public class PrettyPrintOutput {
 
 	public CommandLine getCmd() {
 		return cmd;
+	}
+	
+	private static boolean isChanged() {
+		return changed;
+	}
+
+	private static void setChanged(boolean changed) {
+		changed = changed;
 	}
 
 }

@@ -11,18 +11,19 @@ public class K {
 	public static String k_base = KPaths.getKBase(false);
 
 	public static String kdir = userdir + fileSeparator + ".k";
-	public static String maude_in = kdir + fileSeparator + FileUtil.generateUniqueName("maude_in.txt");
-	public static String maude_out = kdir + fileSeparator + FileUtil.generateUniqueName("maude_out.txt");
-	public static String maude_err = kdir + fileSeparator + FileUtil.generateUniqueName("maude_err.txt");
+	public static String krunDir = kdir + fileSeparator + "krun";
+	public static String maude_in = krunDir + fileSeparator + FileUtil.generateUniqueName("maude_in.txt");
+	public static String maude_out = krunDir + fileSeparator + FileUtil.generateUniqueName("maude_out.txt");
+	public static String maude_err = krunDir + fileSeparator + FileUtil.generateUniqueName("maude_err.txt");
 
 	// kast
 	public static String kast = k_base + K.fileSeparator + "bin" + K.fileSeparator + getKastOnOs();
 
-	public static String maude_io_cmd = kdir + fileSeparator + FileUtil.generateUniqueName("io-cmd.maude");
-	public static String maude_output = FileUtil.generateUniqueName("maudeoutput.xml");
+	public static String maude_io_cmd = krunDir + fileSeparator + FileUtil.generateUniqueName("io-cmd.maude");
+	public static String maude_output = krunDir + fileSeparator + FileUtil.generateUniqueName("maudeoutput.xml");
 	
 	// where to write the pretty-printed output of jkrun
-	public static String krun_output = FileUtil.generateUniqueName("krun_output.txt");
+	public static String krun_output = krunDir + fileSeparator + FileUtil.generateUniqueName("krun_output.txt");
 
 	// the default values for jkrun commandline options
 	public static String desk_file;

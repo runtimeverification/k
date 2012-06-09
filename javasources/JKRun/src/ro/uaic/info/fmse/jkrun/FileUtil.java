@@ -17,22 +17,7 @@ import org.apache.commons.io.FileUtils;
 
 public class FileUtil {
 
-	public static void createFile(String file, String content) {
-		try {
-			File file1 = new File(file);
-			file1.setExecutable(true);
-			BufferedWriter out = new BufferedWriter(new FileWriter(file1));
-			if (content != null) {
-				out.write(content);
-				out.flush();
-				out.close();
-			}
-		} catch (IOException e) {
-			Error.report("Internal error: Cannot save file content.");
-		}
-	}
-
-	public static File createMaudeFile(String file) {
+	public static File createFile(String file) {
 		try {
 			File file1 = new File(file);
 			File f2 = new File(file1.getParent());
@@ -44,7 +29,7 @@ public class FileUtil {
 		return null;
 	}
 	
-	public static void createMaudeFile(String file, String content) {
+	public static File createFile(String file, String content) {
 		try {
 			File file1 = new File(file);
 			File f2 = new File(file1.getParent());
@@ -55,9 +40,11 @@ public class FileUtil {
 				out.flush();
 				out.close();
 			}
+			return file1;
 		} catch (Exception e) {
 			Error.report("Error while creating maude file " + file);
 		}
+		return null;
 	}
 	
 	public static String generateUniqueName(String fileName) {
@@ -109,6 +96,20 @@ public class FileUtil {
 
 		if (!success)
 			throw new IllegalArgumentException("Delete: deletion failed");
+	}
+	
+	public static boolean deleteDirectory(File path) {
+		if (path.exists()) {
+			File[] files = path.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				if (files[i].isDirectory()) {
+					deleteDirectory(files[i]);
+				} else {
+					files[i].delete();
+				}
+			}
+		}
+		return (path.delete());
 	}
 
 	public static String parseOutputMaude(String file) {

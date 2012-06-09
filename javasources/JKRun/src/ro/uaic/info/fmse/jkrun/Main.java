@@ -122,6 +122,9 @@ public class Main {
 	 *            represents the arguments/options given to jkrun command..
 	 */
 	public static void execute_Krun(String cmds[]) {
+		//delete temporary krun directory
+		FileUtil.deleteDirectory(new File(K.krunDir));
+		
 		CommandlineOptions cmd_options = new CommandlineOptions();
 		CommandLine cmd = cmd_options.parse(cmds);
 		try {
@@ -351,11 +354,11 @@ public class Main {
 			if (K.trace)
 				s = "set trace on ." + K.lineSeparator + s;
 
-			FileUtil.createMaudeFile(K.maude_io_cmd, s);
+			FileUtil.createFile(K.maude_io_cmd, s);
 
 			// run IOServer
-			File outFile = FileUtil.createMaudeFile(K.maude_out);
-			File errFile = FileUtil.createMaudeFile(K.maude_err);
+			File outFile = FileUtil.createFile(K.maude_out);
+			File errFile = FileUtil.createFile(K.maude_err);
 				
 			if (K.log_io) {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" });
@@ -366,8 +369,12 @@ public class Main {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
 			}
 			PrettyPrintOutput p = new PrettyPrintOutput(cmd);
-			String input = K.userdir + K.fileSeparator + K.maude_output;
+			String input = K.maude_output;
+			//String input_ = K.userdir + K.fileSeparator + "maudeoutput_cut.xml";
+			//String processedInput = K.userdir + K.fileSeparator + "maudeoutput_simplified.xml";
 			File file = new File(input);
+			//File file_ = new File(input_);
+		    //p.preprocessDoc(file_, processedInput);
 			String red = p.processDoc(file);
 			String prettyOutput = XmlUtil.formatXml(red, K.color);
 			if (K.maude_cmd.equals("search") && K.do_search) {
@@ -399,12 +406,15 @@ public class Main {
 
 		} catch (ParseException exp) {
 			System.out.println("Unexpected exception:" + exp.getMessage());
+			//System.exit(1);
 		} catch (IOException e) {
 			e.printStackTrace();
+			//System.exit(1);
 		} catch (Exception e) {
 			System.out.println("You provided bad program arguments!");
 			e.printStackTrace();
 			printUsage(cmd_options.options);
+			//System.exit(1);
 		}
 
 	}

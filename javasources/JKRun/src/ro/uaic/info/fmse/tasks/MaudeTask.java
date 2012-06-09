@@ -2,14 +2,17 @@ package ro.uaic.info.fmse.tasks;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import ro.uaic.info.fmse.jkrun.FileUtil;
 import ro.uaic.info.fmse.jkrun.K;
 
 public class MaudeTask extends Thread {
@@ -49,6 +52,7 @@ public class MaudeTask extends Thread {
 
 	private void runMaude() throws IOException {
 		ProcessBuilder maude = new ProcessBuilder();
+		File f = FileUtil.createFile(K.maude_output);
 		/*Map<String, String> environment = maude.environment();
 		environment.put("MAUDE_LIB", System.getenv("MAUDE_LIB"));*/
 		List<String> commands = new ArrayList<String>();
@@ -59,7 +63,7 @@ public class MaudeTask extends Thread {
 		//}
 		commands.add("-no-wrap");
 		commands.add("-no-banner");
-		commands.add("-xml-log="+ K.maude_output);
+		commands.add("-xml-log=" + f.getCanonicalPath());
 		maude.command(commands);
 
 		Process maudeProcess = maude.start();

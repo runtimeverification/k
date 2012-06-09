@@ -82,7 +82,6 @@ public class CommandlineOptions {
 		Option do_search = OptionBuilder.hasArg(false).withLongOpt("do-search").withDescription("Search for all possible results").create();
 		Option no_do_search = OptionBuilder.hasArg(false).withLongOpt("no-do-search").create();
 		Option maude_cmd = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("maude-cmd").withDescription("Maude command used to execute the definition").create();
-		//Option xsearch_pattern = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("xsearch-pattern").withDescription("Search pattern").create();
 		Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern").withDescription("Search pattern").hasArg().withArgName("STRING").create();                             
 		Option output_mode = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("output-mode").withDescription("How to display Maude results (none, raw, pretty)").create();
 		Option log_io = OptionBuilder.hasArg(false).withLongOpt("log-io").withDescription("Tell the IO server to create logs").create();
