@@ -57,7 +57,7 @@ public class Program extends Thread {
 		if (!new File(outputFile).exists()) {
 			if (error.equals("") && exit == 0)
 				return true;
-		} else {
+		} else if (new File(outputFile).isFile()){
 			String out = StaticK.readFileAsString(new File(outputFile)
 					.getAbsolutePath());
 //			System.out.println("Comparing: ");
