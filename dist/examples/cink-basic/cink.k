@@ -113,7 +113,8 @@ module CINK-LANG-SYNTAX
   /*@ \subsection{Statements}
     For now, we include in CinK only (a subset) of the imperative statements:
     expresion statement, bloc, sequential composition, while, and conditionals.
-    
+    We also added a minimal support for threads, similar to IMPPP, but using a
+    C++ syntax and semantics.
    */
 
   syntax Stmt ::= Exp ";" [strict]
@@ -191,19 +192,34 @@ module CINK-LANG-SEMANTICS
   syntax Exp ::=  "lvalue" "(" Exp ")" | "rvalue" "(" Exp ")" [strict]
 
   /*@
-    We also a special symbol,  \texttt{undefined}, in order to initialize 
-    the content of a new memory location. The construct \texttt{execute} is
-    used to start the computation of a program.
+    We also some  other special symbols:  \texttt{undefined}, in order to 
+    initialize the content of a new memory location;
+    \texttt{execute} is used to start the computation of a program; and
+    \texttt{noname} for the initial name of a thread.
   */
   syntax K ::= "undefined" | "execute" | "noname"
 
  /*@
-   The next two constructors are used for storing tv
+   The next two constructors are used for storing the enavironment and the
+   rest of the computation in the call stack (\texttt{fstack}) and in the block 
+   stack (\texttt{bstack}). 
  */
   syntax ListItem ::= "(" List "," K ")"
                     | "[" Map "]"
 
- /* \subsection{Configuration.} */
+ /*@ \subsection{Configuration.} 
+   The configuration is standard for such languages (compare it to that of IMPP
+   and SIMPLE).
+   The threads are included in a cell named \texttt{threads}, where each cell
+   \texttt{thread}, representing the current of a thread, includes a cell 
+   \texttt{k} for the local computations, a cell \texttt{env} for the local
+   environment, a cell \texttt{bstack} for managing the environments
+   when the execution enters or exits a block, and a cell \texttt{fstack} for
+   the managing the local configurations when a function call expression 
+   or a return statement is executed.
+   The cell \texttt{bstack} is specific to this definition, it does not appear
+   in the definition of the other similar languages.
+  */
 
   configuration <T color="yellow">
                   <threads color="pink">
@@ -224,7 +240,12 @@ module CINK-LANG-SEMANTICS
                   <nextLoc> 0 </nextLoc>
                 </T>
 
-// macros
+  /*@
+    In order to have a minimal set of rules, some syntactic constructs
+    are desugared. The desugaring can be done using the structural rules.
+    In order to avoid some tw
+   */
+
   rule if(B:Exp) St:Stmt => if(B) St else {}  [anywhere]
   rule '_`(_`)(X:Id,,E:Exp) => '_`(_`)(X,,'_`,_(E,, .Exps))  [anywhere]
   rule void X:Id => int X  [anywhere]
@@ -372,16 +393,6 @@ module CINK-LANG-SEMANTICS
 
   rule rvalue(V:Val) => V when 'isLVal(V) =/=K true
 
-
-  syntax  Id ::= "getName" "(" Decl ")" [function]
-
-  rule getName(int  X:Id) => X     [anywhere]
-  rule getName(bool X:Id) => X     [anywhere]
-  rule getName(int  & X:Id) => X   [anywhere]
-  rule getName(bool & X:Id) => X   [anywhere]
-  rule getName(int  * X:Id) => X   [anywhere]
-  rule getName(bool * X:Id) => X   [anywhere]
-  rule getName('void_(X:Id)) => X  [anywhere]
 
   /* \subsection{Memmory operations.} */
 
@@ -540,8 +551,25 @@ module CINK-LANG-SEMANTICS
 
   /* \subsection{Auxiliary Functions and Rules.} */
 
+  syntax Bool ::= "isTypeLabel" "(" KLabel ")" [function]
 
-  // \texttt{bindto} binds formal parameters to actual parameters 
+  rule isTypeLabel(KL:KLabel) => true
+  when   KL ==KLabel 'int_
+  orElseBool KL ==KLabel 'bool_
+
+
+  syntax  Id ::= "getName" "(" Decl ")" [function]
+
+  rule getName(int  X:Id) => X     [anywhere]
+  rule getName(bool X:Id) => X     [anywhere]
+  rule getName(int  & X:Id) => X   [anywhere]
+  rule getName(bool & X:Id) => X   [anywhere]
+  rule getName(int  * X:Id) => X   [anywhere]
+  rule getName(bool * X:Id) => X   [anywhere]
+  rule getName('void_(X:Id)) => X  [anywhere]
+
+
+  // \texttt{bindto} binds formal parameters to actual parametersgg 
 
   syntax K ::= "bind" Vals "to" Decls ";"  
 
