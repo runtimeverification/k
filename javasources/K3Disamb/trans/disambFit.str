@@ -25,7 +25,7 @@ strategies
 	filterSize:
 		xs -> xs2
 		where mymax := <foldr(!-2147483600, max)> (<all(getFitness)> xs)		// calculate the size of the smallest term
-		where xs2 := <filter(findLargest(|mymax))> xs								// filter terms that are of a greater size
+		where xs2 := <filter(findLargest(|mymax))> xs							// filter terms that are of a greater size
 
 	findLargest(|size) =
 		where(currSize := <getFitness> ;

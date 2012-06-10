@@ -36,6 +36,14 @@ public class MapItem extends CollectionItem {
 		return key;
 	}
 
+	public Term getValue() {
+		return value;
+	}
+
+	public void setValue(Term t) {
+		value = t;
+	}
+
 	public String toString() {
 		return this.key + " |->" + this.value;
 	}
@@ -50,10 +58,12 @@ public class MapItem extends CollectionItem {
 		key = (Term) visitor.modify(key);
 		value = (Term) visitor.modify(value);
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

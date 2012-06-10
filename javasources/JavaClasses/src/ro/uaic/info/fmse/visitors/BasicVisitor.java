@@ -149,11 +149,6 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(K node) {
-		visit((Collection) node);
-	}
-
-	@Override
 	public void visit(KSequence node) {
 		visit((Collection) node);
 	}

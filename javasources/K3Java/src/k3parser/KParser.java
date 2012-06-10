@@ -4,6 +4,8 @@ import org.spoofax.interpreter.terms.*;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 
+import ro.uaic.info.fmse.general.GlobalSettings;
+
 import k3parser.lib.*;
 
 public class KParser {
@@ -287,7 +289,10 @@ public class KParser {
 		IStrategoTerm result = null;
 		try {
 			try {
-				result = context.invokeStrategyCLI(java$Parse$String$Rules_0_0.instance, "a.exe", kDefinition);
+				if (GlobalSettings.tempDisamb)
+					result = context.invokeStrategyCLI(java$Parse$String$Rules_0_0.instance, "a.exe", kDefinition, "half");
+				else
+					result = context.invokeStrategyCLI(java$Parse$String$Rules_0_0.instance, "a.exe", kDefinition, "full");
 			} finally {
 				context.getIOAgent().closeAllFiles();
 			}

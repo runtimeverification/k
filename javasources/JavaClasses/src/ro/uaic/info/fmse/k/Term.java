@@ -37,7 +37,7 @@ public abstract class Term extends ASTNode {
 		return sort;
 	}
 
-	private void setSort(String sort) {
+	public void setSort(String sort) {
 		this.sort = sort;
 	}
 }

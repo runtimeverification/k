@@ -1,7 +1,51 @@
 package ro.uaic.info.fmse.visitors;
 
 import java.util.ArrayList;
-import ro.uaic.info.fmse.k.*;
+
+import ro.uaic.info.fmse.k.ASTNode;
+import ro.uaic.info.fmse.k.Ambiguity;
+import ro.uaic.info.fmse.k.Attribute;
+import ro.uaic.info.fmse.k.Attributes;
+import ro.uaic.info.fmse.k.Bag;
+import ro.uaic.info.fmse.k.BagItem;
+import ro.uaic.info.fmse.k.Cell;
+import ro.uaic.info.fmse.k.Collection;
+import ro.uaic.info.fmse.k.CollectionItem;
+import ro.uaic.info.fmse.k.Configuration;
+import ro.uaic.info.fmse.k.Constant;
+import ro.uaic.info.fmse.k.Context;
+import ro.uaic.info.fmse.k.Definition;
+import ro.uaic.info.fmse.k.DefinitionItem;
+import ro.uaic.info.fmse.k.Empty;
+import ro.uaic.info.fmse.k.Hole;
+import ro.uaic.info.fmse.k.Import;
+import ro.uaic.info.fmse.k.KApp;
+import ro.uaic.info.fmse.k.KLabel;
+import ro.uaic.info.fmse.k.KSequence;
+import ro.uaic.info.fmse.k.List;
+import ro.uaic.info.fmse.k.ListItem;
+import ro.uaic.info.fmse.k.ListOfK;
+import ro.uaic.info.fmse.k.LiterateDefinitionComment;
+import ro.uaic.info.fmse.k.LiterateModuleComment;
+import ro.uaic.info.fmse.k.Map;
+import ro.uaic.info.fmse.k.MapItem;
+import ro.uaic.info.fmse.k.Module;
+import ro.uaic.info.fmse.k.ModuleItem;
+import ro.uaic.info.fmse.k.PriorityBlock;
+import ro.uaic.info.fmse.k.Production;
+import ro.uaic.info.fmse.k.ProductionItem;
+import ro.uaic.info.fmse.k.Rewrite;
+import ro.uaic.info.fmse.k.Rule;
+import ro.uaic.info.fmse.k.Sentence;
+import ro.uaic.info.fmse.k.Set;
+import ro.uaic.info.fmse.k.SetItem;
+import ro.uaic.info.fmse.k.Sort;
+import ro.uaic.info.fmse.k.Syntax;
+import ro.uaic.info.fmse.k.Term;
+import ro.uaic.info.fmse.k.TermCons;
+import ro.uaic.info.fmse.k.Terminal;
+import ro.uaic.info.fmse.k.UserList;
+import ro.uaic.info.fmse.k.Variable;
 
 public class BasicTransformer implements Transformer {
 
@@ -14,7 +58,7 @@ public class BasicTransformer implements Transformer {
 	public ASTNode transform(Definition node) {
 		ArrayList<DefinitionItem> items = new ArrayList<DefinitionItem>();
 		for (DefinitionItem di : node.getItems()) {
-			items.add((DefinitionItem)di.accept(this));
+			items.add((DefinitionItem) di.accept(this));
 		}
 		Definition result = new Definition(node);
 		result.setItems(items);
@@ -71,26 +115,26 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(Configuration node) {
 		Configuration c = new Configuration(node);
-		return transform((Sentence)c);
+		return transform((Sentence) c);
 	}
 
 	@Override
 	public ASTNode transform(Context node) {
 		Context c = new Context(node);
-		return transform((Sentence)c);
+		return transform((Sentence) c);
 	}
 
 	@Override
 	public ASTNode transform(Rule node) {
 		Rule r = new Rule(node);
-		return transform((Sentence)r);
+		return transform((Sentence) r);
 	}
 
 	@Override
 	public ASTNode transform(Syntax node) {
 		ArrayList<PriorityBlock> pbs = new ArrayList<PriorityBlock>();
 		for (PriorityBlock pb : node.getPriorityBlocks()) {
-			pbs.add((PriorityBlock)pb.accept(this));
+			pbs.add((PriorityBlock) pb.accept(this));
 		}
 		Syntax result = new Syntax(node);
 		result.setPriorityBlocks(pbs);
@@ -112,7 +156,7 @@ public class BasicTransformer implements Transformer {
 	public ASTNode transform(Production node) {
 		ArrayList<ProductionItem> pis = new ArrayList<ProductionItem>();
 		for (ProductionItem pi : node.getItems()) {
-			pis.add((ProductionItem)pi.accept(this));
+			pis.add((ProductionItem) pi.accept(this));
 		}
 		Production result = new Production(node);
 		result.setItems(pis);
@@ -155,12 +199,12 @@ public class BasicTransformer implements Transformer {
 	public ASTNode transform(Collection node) {
 		ArrayList<Term> terms = new ArrayList<Term>();
 		for (Term t : node.getContents()) {
-			terms.add((Term)t.accept(this));
+			terms.add((Term) t.accept(this));
 		}
 		node.setContents(terms);
 		return transform((Term) node);
 	}
-	
+
 	@Override
 	public ASTNode transform(Ambiguity node) {
 		Ambiguity result = new Ambiguity(node);
@@ -170,12 +214,6 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(Bag node) {
 		Bag result = new Bag(node);
-		return transform((Collection) result);
-	}
-
-	@Override
-	public ASTNode transform(K node) {
-		K result = new K(node);
 		return transform((Collection) result);
 	}
 
@@ -220,6 +258,7 @@ public class BasicTransformer implements Transformer {
 		BagItem result = new BagItem(node);
 		return transform((CollectionItem) result);
 	}
+
 	@Override
 	public ASTNode transform(ListItem node) {
 		ListItem result = new ListItem(node);
@@ -230,6 +269,7 @@ public class BasicTransformer implements Transformer {
 	public ASTNode transform(MapItem node) {
 		MapItem result = new MapItem(node);
 		result.setKey((Term) node.getKey().accept(this));
+		result.setValue((Term) node.getValue().accept(this));
 		return transform((CollectionItem) result);
 	}
 
@@ -237,8 +277,8 @@ public class BasicTransformer implements Transformer {
 	public ASTNode transform(SetItem node) {
 		SetItem result = new SetItem(node);
 		return transform((CollectionItem) result);
-	}	
-	
+	}
+
 	@Override
 	public ASTNode transform(Constant node) {
 		return transform((Term) node);
@@ -291,4 +331,17 @@ public class BasicTransformer implements Transformer {
 		return transform((Term) node);
 	}
 
+	@Override
+	public ASTNode transform(Attributes node) {
+		java.util.List<Attribute> contents = new ArrayList<Attribute>();
+		for (Attribute at : node.getContents())
+			contents.add((Attribute) at.accept(this));
+		node.setContents(contents);
+		return node;
+	}
+
+	@Override
+	public ASTNode transform(Attribute node) {
+		return transform((Attribute) node);
+	}
 }

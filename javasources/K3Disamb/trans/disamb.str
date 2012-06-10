@@ -17,23 +17,49 @@ imports
 
 strategies
 
-	mydisambiguate =
+	mydisambiguate(|c) =
+		if where(!c => "full") then
+			//where(ts := <term-size> ; debug(!"InitialSize____________________________: ")) ;
+			correctDitto ;
+			flatten-amb-top ;
+			flatten-amb-2 ;
+			//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
+			disambigCellTypes ;
+			emphasizeVars ; 
+			type-inferenceTypeSystem ;
+			chooseBestFitRec ;
+			type-inferenceSupremum ;
+			var-type-inference2 ; // new type inference where I correct the first type inference
+			topdown(try(correctRewrite)) ;
+			flattenKLists
+			 /**///;
+			//where(ts2 := <term-size> ; !(ts2, <div> (<mul>(ts2, 100.0) ,ts1), <div> (<mul>(ts2, 100.0) ,ts)) ; debug(!"FinalSize(,%,%): "))
+		else
+			correctDitto ;
+			flatten-amb-top ;
+			flatten-amb-2 ;
+			//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
+			disambigCellTypes ;
+			emphasizeVars 
+		end		
+
+
+	mydisambiguate2 =
 		//where(ts := <term-size> ; debug(!"InitialSize____________________________: ")) ;
 		correctDitto ;
 		flatten-amb-top ;
 		flatten-amb-2 ;
 		//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
 		disambigCellTypes ;
-		emphasizeVars ;
-		type-inferenceTypeSystem ;
-		chooseBestFitRec ;
-		type-inferenceSupremum ;
-		var-type-inference2 ; // new type inference where I correct the first type inference
-		topdown(try(correctRewrite)) ;
-		flattenKLists
+		emphasizeVars //;
+		//type-inferenceTypeSystem //;
+		//chooseBestFitRec //;
+		//type-inferenceSupremum //;
+		//var-type-inference2 //; // new type inference where I correct the first type inference
+		//topdown(try(correctRewrite)) //;
+		//flattenKLists
 		 /**///;
 		//where(ts2 := <term-size> ; !(ts2, <div> (<mul>(ts2, 100.0) ,ts1), <div> (<mul>(ts2, 100.0) ,ts)) ; debug(!"FinalSize(,%,%): "))
-
 
 	mydisambiguateConfig =
 		correctDitto ;
@@ -45,7 +71,7 @@ strategies
 		flattenKLists
 
 
-	mydisambiguate2 = all(mydisambiguate)
+	mydisambiguate2 = all(mydisambiguate(|"full"))
 
 	flattenKLists = bottomup(try(fks2)) ; bottomup(try(flists2))
 	fks2:

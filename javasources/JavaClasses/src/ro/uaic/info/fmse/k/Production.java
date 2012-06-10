@@ -18,6 +18,7 @@ import ro.uaic.info.fmse.visitors.Visitor;
 public class Production extends ASTNode {
 	protected java.util.List<ProductionItem> items;
 	protected Attributes attributes;
+	protected String sort;
 
 	public Production(Element element) {
 		super(element);
@@ -123,5 +124,13 @@ public class Production extends ASTNode {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	public String getSort() {
+		return sort;
+	}
+
+	public void setSort(String sort) {
+		this.sort = sort;
 	}
 }

@@ -1,33 +1,38 @@
-module NOT-FL-SYNTAX
+require "autoinclude.k"
 
+module EXAMPLE-SYNTAX
 
-  syntax KLabel ::= "not#e"
-		  | "not#H"
-
-
-  syntax KResult ::= Int | Bool
+  syntax Bool ::= K "==K" K [cons("Bool1EqSyn")]
+  syntax Bool ::= Bool "andBool" Bool [cons("Bool1AndSyn")]
   
-  configuration asf
+  syntax Bool ::= #Bool
+  
+  syntax BExp ::= Bool
+  
+  syntax Stmt ::= "if" BExp "then" Stmt "else" Stmt
+
+
+  configuration <T> 
+                  <k> .K </k>
+                  <env> .Map </env>
+                  <out> .List </out>
+                </T>
+
+endmodule
+
+
+
+
+module EXAMPLE
+   imports EXAMPLE-SYNTAX
+
+
+  rule if true then S else _ => S
+  //rule A:K andBool B:K ==K true
+  //rule <env>... X |-> (_ => I) ...</env>
+  //rule 1 ~> 2 ,, 3 ~> 4 ~> 5 ,, 6
+  //rule <out> A B C D </out>
 
 
 endmodule
 
-
-
-
-module NOT-FL
-   imports NOT-FL-SYNTAX
-
-
-// NOT
-
-
-  rule not#e(E1) => E1 ~> not#H(.List{K})
-       when 'notBool('isKResult(E1))
-
-
-  rulen E1 ~> not#H(.List{K}) => not#e(E1) 
-       when 'isKResult(E1)
-
-
-endmodule

@@ -25,6 +25,8 @@ public interface Transformer {
 	public ASTNode transform(PriorityBlock node);
 	public ASTNode transform(Production node);
 	public ASTNode transform(ProductionItem node);
+	public ASTNode transform(Attributes node);
+	public ASTNode transform(Attribute node);
 	//<ProductionItems>
 	public ASTNode transform(Sort node);
 	public ASTNode transform(Terminal node);
@@ -37,7 +39,6 @@ public interface Transformer {
 	//	<Collections>
 	public ASTNode transform(Ambiguity node);
 	public ASTNode transform(Bag node);
-	public ASTNode transform(K node);
 	public ASTNode transform(KSequence node);
 	public ASTNode transform(List node);
 	public ASTNode transform(ListOfK node);

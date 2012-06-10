@@ -56,11 +56,11 @@ rules
 	importTblPgm = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTblPgm : _ -> trm)
 
 	javaParseStringConfig = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>)> b ; (handleErrors <+ justFineConfig)
-	javaParseStringRules  = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>)> b ; (handleErrors <+ justFineRule)
+	javaParseStringRules  = ?[a, b, c] ; <parse-string(my-parse-error|<MemoMyTbl>)> b ; (handleErrors <+ justFineRule(|c))
 	javaParseStringPgm    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblPgm>)> b ; (handleErrors <+ justFinePgms)
 
-	justFineRule =
-		mydisambiguate ; justFine2
+	justFineRule(|c) =
+		mydisambiguate(|c) ; justFine2
 	justFineConfig =
 		mydisambiguateConfig ; justFine2
 	justFinePgms = bottomup(try(removeDuplicateAmb)) ; makeConsLists ; justFinePgms2
@@ -147,5 +147,5 @@ rules
 		(ast, path, project-path) -> <testMe5> ast
 
 	testDisambig =
-		(?Config(_) ; mydisambiguateConfig) <+ mydisambiguate
+		(?Config(_) ; mydisambiguateConfig) <+ mydisambiguate(|"full")
 

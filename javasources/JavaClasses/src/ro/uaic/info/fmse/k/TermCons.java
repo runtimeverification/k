@@ -46,6 +46,10 @@ public class TermCons extends Term {
 		this.contents = node.contents;
 	}
 
+	public Production getProduction() {
+		return DefinitionHelper.conses.get("\"" + getCons() + "\"");
+	}
+
 	public String toString() {
 		String str = "";
 		Production pr = DefinitionHelper.conses.get("\"" + cons + "\"");
@@ -71,7 +75,7 @@ public class TermCons extends Term {
 	@Override
 	public String toMaude() {
 		Production pr = DefinitionHelper.conses.get("\"" + cons + "\"");
-		
+
 		String cons = pr.getLabel();
 
 		if (pr.attributes.containsKey("maudeop"))
@@ -129,10 +133,12 @@ public class TermCons extends Term {
 			this.contents.set(i, elem);
 		}
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

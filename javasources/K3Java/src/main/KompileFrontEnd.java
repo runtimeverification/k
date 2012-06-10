@@ -20,6 +20,13 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.disambiguate.AmbFilter;
+import ro.uaic.info.fmse.disambiguate.BestFitFilter;
+import ro.uaic.info.fmse.disambiguate.CorrectRewriteFilter;
+import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
+import ro.uaic.info.fmse.disambiguate.TypeInferenceSupremumFilter;
+import ro.uaic.info.fmse.disambiguate.TypeSystemFilter;
+import ro.uaic.info.fmse.disambiguate.VariableTypeInferenceFilter;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
@@ -27,7 +34,7 @@ import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.latex.LatexFilter;
 import ro.uaic.info.fmse.lists.EmptyListsVisitor;
-import ro.uaic.info.fmse.loader.AmbFilter;
+import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.pp.Preprocessor;
 
@@ -54,6 +61,10 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("nofilename")) {
 			GlobalSettings.noFilename = true;
 		}
+
+		// TODO: temporary to test the java disambituator
+		if (cmd.hasOption("tempDisamb"))
+			GlobalSettings.tempDisamb = true;
 
 		if (cmd.hasOption("warnings"))
 			GlobalSettings.warnings = true;
@@ -125,9 +136,6 @@ public class KompileFrontEnd {
 
 		try {
 			// Run pdflatex.
-			File canonicalFile = mainFile.getCanonicalFile();
-			File dotk = new File(canonicalFile.getParent() + "/.k");
-
 			String pdfLatex = "pdflatex";
 			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
 
@@ -141,7 +149,6 @@ public class KompileFrontEnd {
 				BufferedReader br = new BufferedReader(isr);
 				while (br.readLine() != null) {
 				}
-				;
 				process.waitFor();
 				if (process.exitValue() != 0) {
 					KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", "", 0);
@@ -153,7 +160,6 @@ public class KompileFrontEnd {
 				br = new BufferedReader(isr);
 				while (br.readLine() != null) {
 				}
-				;
 				process.waitFor();
 				pdfClean(new String[] { ".tex", ".aux", ".log", ".mrk", ".out" });
 			} catch (InterruptedException e) {
@@ -192,10 +198,10 @@ public class KompileFrontEnd {
 
 			GlobalSettings.latex = true;
 			// compile a definition here
+
+			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk);
+
 			Stopwatch sw = new Stopwatch();
-
-			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk, sw);
-
 			LatexFilter lf = new LatexFilter();
 			javaDef.accept(lf);
 
@@ -234,9 +240,10 @@ public class KompileFrontEnd {
 
 			GlobalSettings.latex = true;
 			// compile a definition here
-			Stopwatch sw = new Stopwatch();
 
-			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk, sw);
+			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk);
+
+			Stopwatch sw = new Stopwatch();
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
 			XStream xstream = new XStream();
@@ -291,12 +298,12 @@ public class KompileFrontEnd {
 
 			compile(canoFile, lang, maudified);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	private static ro.uaic.info.fmse.k.Definition parseDefinition(String mainModule, File canonicalFile, File dotk, Stopwatch sw) throws IOException, Exception {
+	private static ro.uaic.info.fmse.k.Definition parseDefinition(String mainModule, File canonicalFile, File dotk) throws IOException, Exception {
+		Stopwatch sw = new Stopwatch();
 		// ------------------------------------- basic parsing
 		Definition def = new Definition();
 		def.slurp(canonicalFile, true);
@@ -387,8 +394,12 @@ public class KompileFrontEnd {
 
 		ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
 
-		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+		javaDef.accept(new CollectConsesVisitor());
 		javaDef.accept(new CollectSubsortsVisitor());
+		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+
+		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
+
 		return javaDef;
 	}
 
@@ -493,8 +504,22 @@ public class KompileFrontEnd {
 
 			ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
 
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+			javaDef.accept(new CollectConsesVisitor());
 			javaDef.accept(new CollectSubsortsVisitor());
+
+			// disambiguation steps
+
+			if (GlobalSettings.tempDisamb) {
+				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());
+				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter());
+				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
+				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
+				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
+				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
+			}
+			// last resort disambiguation
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
 			String maudified = javaDef.toMaude();

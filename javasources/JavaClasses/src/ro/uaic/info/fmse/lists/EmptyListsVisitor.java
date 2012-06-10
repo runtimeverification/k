@@ -28,7 +28,7 @@ public class EmptyListsVisitor extends BasicTransformer {
 		// traverse
 		TermCons tc = (TermCons) super.transform(node);
 
-		Production production = DefinitionHelper.conses.get("\"" + tc.getCons() + "\"");
+		Production production = tc.getProduction();
 		// System.out.println("TermCons: " + tc);
 		// System.out.println("Production: " + production);
 

@@ -29,6 +29,8 @@ public class KompileOptionsParser {
 		verb.addOption(help);
 		verb.addOption(verbose);
 
+		Option tempDisamb = new Option("tempDisamb", "tempDisamb", false, "temporary to test the java disambiguator");
+
 		// verbose and help
 		OptionGroup nofile = new OptionGroup();
 		Option nofileopt = new Option("nofile", "nofilename", false, "don't include the long filenames in the XML.");
@@ -90,6 +92,7 @@ public class KompileOptionsParser {
 		options.addOptionGroup(xml);
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
+		options.addOption(tempDisamb);
 	}
 
 	public CommandLine parse(String[] cmd) {

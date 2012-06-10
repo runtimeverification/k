@@ -18,12 +18,8 @@ strategies
 
 	chooseAmb:
 		amb(x) -> rez2
-		where poset := <MemoMySbs>
 		where rez := <isectSorts> x
 		where rez2 := <if <lt>(<length> rez, 2) then  !<last> rez else !amb(rez) end>
-
-	match1var = ?c#(xs) ;
-				where(<string-ends-with(|"1Var")> c)  			// match on a term that ends with "1Var"
 
 	isectSorts: // filter every element - if it has a smaller sort as sibling => no match
 		z -> z'
@@ -61,6 +57,9 @@ strategies
 		where b   := <take(|<add>(len, -2))> a
 		where y   := <concat-strings> b
 */
+
+	match1var = ?c#(xs) ;
+				where(<string-ends-with(|"1Var")> c)  			// match on a term that ends with "1Var"
 
 	getTerma:	// get the sort from a node name
 		x -> y
