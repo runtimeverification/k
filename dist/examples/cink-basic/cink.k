@@ -36,7 +36,7 @@ module CINK-LANG-SYNTAX
   /*@ \subsection{Declarations} */
 
   syntax Decl ::= "int"  Exp
-                | "void" Id 
+                | "void" Exp
                 | "bool" Exp
 
   /*@ \subsection{Expressions} */
@@ -166,7 +166,7 @@ module CINK-LANG-SEMANTICS
 
   syntax LVal ::= "loc" "(" Int ")"
 
-  syntax Val ::= "void" | LVal
+  syntax Val ::= "void" | "undefined" | LVal
                | "lambda" "(" Decls "@" Stmts ")" 
                  [latex("\lambda{#1}\mathrel{\bullet}{#2}")]
 
@@ -197,7 +197,7 @@ module CINK-LANG-SEMANTICS
     \texttt{execute} is used to start the computation of a program; and
     \texttt{noname} for the initial name of a thread.
   */
-  syntax K ::= "undefined" | "execute" | "noname"
+  syntax K ::= "execute" | "noname"
 
  /*@
    The next two constructors are used for storing the enavironment and the
@@ -246,23 +246,33 @@ module CINK-LANG-SEMANTICS
     In order to avoid some tw
    */
 
+  //@ Desugaring rule for the if-then statement: 
   rule if(B:Exp) St:Stmt => if(B) St else {}  [anywhere]
+
+  //@ Desugaring rule for the function call expression without arguments
   rule '_`(_`)(X:Id,,E:Exp) => '_`(_`)(X,,'_`,_(E,, .Exps))  [anywhere]
-  rule void X:Id => int X  [anywhere]
-  rule '_;('int_('_=_(X:Id,, A:Exp)))
+
+
+  /*@
+    Desugaring rules for variablee declarations with initialization:
+     e.g., \texttt{int *y = \&x;} is desugared into 
+    \texttt{ int *y; y = \&x;}.
+   */
+  rule '_;(KL:KLabel('_=_(E1:Exp,, E2:Exp)))
        =>
-       '__('_;(int X),, '_;('_=_(X,, A)))
-       [anywhere]
-  rule '_;('int_('_=_(*X:Id,, A:Exp)))
-       =>
-       '__('_;(int X),, '_;('_=_(X,, A)))
-       [anywhere]
-  rule '_;('bool_('_=_(X:Id,, B:Exp)))
-       =>
-       '__('_;(int X),, '_;('_=_(X,, B)))
+       '__('_;(KL(E1)),, '_;('_=_(getName(E1),, E2)))
+       when isDeclLabel(KL) ==K true
+       andBool isAlias('_=_(E1,, E2)) =/=K true
        [anywhere]
 
- /* \subsection{Declarations.} */
+
+  /*@ \subsection{Declarations.} */
+
+  /*@
+    Function declaration: a function is a stored similar to a variable,
+    wher the value stored in the associated location is the lambda
+    abstraction of the function. 
+   */
   rule [fun-decl] :
        <k> '_`(_`)`{_`}(Decl:Decl,, Xl:Decls,, Sts:Stmts) => .  ...</k> 
        <env>... . =>  (getName(Decl) |-> L) ...</env>
@@ -274,29 +284,32 @@ module CINK-LANG-SEMANTICS
     The rules vor variable declarations must be in this order.
   */
 
-  context int & X = (HOLE => lvalue(HOLE))
+  context KL:KLabel(_ = (HOLE => lvalue(HOLE)))
+       when isDeclLabel(KL) ==Bool true
+
+  //@ Declaration of an alias:
   rule [alias-decl] :
-       <k> int & X:Id = loc(L:Int) => void  ...</k>      
+       <k> KL:KLabel(& X:Id = loc(L:Int)) => void  ...</k>      
        <env> Env:Map => Env[L/X] </env>
+       when isDeclLabel(KL) ==Bool true
        [structural]
 
-  rule [alias-decl] :
-       <k> bool & X:Id = Y:Id => void  ...</k>      
-       <env> Y |-> L:Int (Env:Map => Env[L/X]) </env>
-       [structural]
-
+  //@ Declaration of a variable:
   rule [var-decl] :
-       <k> Decl:Decl => void  ...</k>      
-       <env> Env:Map => Env[L/getName(Decl)] </env>
+       <k> KL:KLabel(E:Exp) => void  ...</k>      
+       <env> Env:Map => Env[L/getName(E)] </env>
        <store>... . => (L |-> undefined) ...</store>
        <nextLoc> L:Int => (L +Int 1) </nextLoc>
+       when isDeclLabel(KL) ==Bool true
        [structural]
 
+  //@ The \texttt{\#include} directive has no semantics yet.
   rule [include] :
        <k> #include <iostream> => .  ...</k>
        [structural]
 
-  rule [include] :
+  //@ The \texttt{using} statement has no semantics yet.
+  rule [using] :
        <k> using namespace std;=> .  ...</k>
        [structural]
 
@@ -308,7 +321,9 @@ module CINK-LANG-SEMANTICS
   /*@ \subsection{Expressions Evaluation.} */
 
   /*@
-   The following expressions are strict
+   The following expressions are strict, but their strictness is declared using
+   contextual declarations in order to be able to specify whether an argument
+   is an l-value or an r-value. 
   */
   context (HOLE => rvalue(HOLE)) + _
   context _ + (HOLE => rvalue(HOLE))
@@ -343,7 +358,10 @@ module CINK-LANG-SEMANTICS
   context _ == (HOLE => rvalue(HOLE))
   rule I1:Int == I2:Int => (I1 ==Int I2) [structural]
  
-  //@ The expressions having the strict attribute declared in the syntax
+  /*@
+   Here are the rules for the expressions having the strict attribute 
+   declared in the syntax.
+  */
 
   rule true && B:Exp => B [structural]
   rule false && B:Exp => false [structural]
@@ -375,7 +393,9 @@ module CINK-LANG-SEMANTICS
     expression \texttt{y + (++x)}; since the addition operator is strict in 
     both arguments, it will be reduced something like $\it I + loc(L)$ and 
     in that case $\it loc(L)$ should be evaluate at the value stored into
-    the location $L$.
+    the location $L$. This is one reason for that we make a clear distinction
+    between r-value and l-value expression and use the contexts declarations
+    in order to specify how to valuate subexpressions.
   */
 
   context ++ (HOLE => lvalue(HOLE))
@@ -383,24 +403,37 @@ module CINK-LANG-SEMANTICS
        <store>... L |-> (V:Int => V +Int 1) ...</store>
 
   /*@
-    Here we try to identify the contexts under which an l-value is 
-    transformed into an r-value.
-  */ 
-
-
-  rule <k> rvalue(loc(L:Int)) => V ...</k>
-       <store>... L |-> V:Val ...</store>
-
-  rule rvalue(V:Val) => V when 'isLVal(V) =/=K true
-
-
-  /* \subsection{Memmory operations.} */
-
-  context lvalue(HOLE) when 'isId(HOLE) =/=K true  
+    The \texttt{lvalue()} operator: if the argument is not already an l-value,
+    then it is firstly evaluated. The result of the argument evaluation is an
+    Int or an l-value (when the argument was evaluated as an l-value).
+   */
+  context lvalue(HOLE) 
+          when isLValue(HOLE) =/=K true  
 
   rule lvalue(L:Int) => loc(L) [structural]
 
   rule lvalue(loc(L:Int)) => loc(L) [structural]
+
+
+  /*@
+    The \texttt{rvalue()} operator.\\
+    The case we have got an l-value where an r-value is expected: 
+  */ 
+  rule <k> rvalue(loc(L:Int)) => V ...</k>
+       <store>... L |-> V:Val ...</store>
+
+  /*@
+    The case when we got an r-value and an r-value is expected:
+  */
+  rule rvalue(V:Val) => V when 'isLVal(V) =/=K true
+
+
+  /*@ \subsection{Memmory operations.} */
+
+  /*@
+    The evaluation of a variable name as an l-value. We distinguish two cases:
+    
+  */
 
   rule [mem-lookup-lvalue] :
        <k> lvalue(X:Id) => loc(L) ...</k>
@@ -413,49 +446,66 @@ module CINK-LANG-SEMANTICS
        <store>... L |-> V:Val ...</store>
        [transition]
 
-
+  /*@
+    The evaluation of a variable name as an r-value:
+  */
   rule [mem-lookup-rvalue] :
        <k> X:Id => V ...</k>
        <env>... X |-> L:Int ...</env>
        <store>... L |-> V:Val ...</store>
        [transition]
 
+  /*@
+    The memory update is given by the assignment operator. The left-hand side
+    must be evaluated to an l-value and the right-hand side to an r-value.
+   */
   context (HOLE => lvalue(HOLE)) = _
   context _=(HOLE => rvalue(HOLE))
   rule [mem-update] :
        <k> loc(L:Int) = V:Val => V  ...</k>
-       <env>...  X |-> L  ...</env>
        <store>... L |-> (_ => V) ...</store>
        [transition]
 
   /* \subsection{Control Statements.} */
+
+  /*@
+    As usual, the \texttt{while} statement is desugared using the 
+    \texttt{if-then-else} statement.
+  */
   rule [while] :
        while(B:Exp) St:Stmt => if (B) {St while(B) St} else {}
        [structural]
 
+  /*@
+    Since \texttt{if} is strict in the first argument, which is a boolean
+    expression, proceed by case-analysis on the result values:
+  */
   rule [if-false] : if(false) _ else St:Stmt => St
   rule [if-true] : if(true) St:Stmt else _ => St
 
+
+  //@ The expression statement:
   rule [instr-expr] : 
        <k> (V:Val; ~> K:K) => K </k> 
        when K =/=K .K
-//       [transition]
-
-/*
-  rule [block] : 
-       <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
-       <env> Env:Map </env>
-       <bstack> . => [Env] ...</bstack>
-       [structural]
-*/
-
-
+  /*@
+    Since in \Cink we may have variable declarations inside of blocks, 
+    each time the execution enters a block, the environment is saved in 
+    the cell \texttt{bstack}.
+    We define the semantics of the block statement such that the environment
+    is saved only if it differs from the one stored in the top of the cell.\\
+    The case cell \texttt{bstack} is empty:
+  */
   rule [block] : 
        <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
        <env> Env:Map </env>
        <bstack> . => [Env] </bstack>
        [structural]
 
+  /*@
+    The case cell \texttt{bstack} is not empty and the current evirinment
+    is different from that on the top:
+  */
   rule [block] : 
        <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
        <env> Env:Map </env>
@@ -463,6 +513,10 @@ module CINK-LANG-SEMANTICS
        when Env =/=Map Env1
        [structural]
 
+  /*@
+    The case cell \texttt{bstack} is not empty and the current evirinment
+    is equal to tha on the top:
+  */
   rule [block] : 
        <k>{Sts:Stmts} => Sts  ...</k>
        <env> Env:Map </env>
@@ -470,41 +524,41 @@ module CINK-LANG-SEMANTICS
        when Env ==Map Env1
        [structural]
 
+  //@ The block is empty:
   rule [block-empty] : {} => .  [structural]
 
   rule [seq-comp] : 
        (Sts:Stmts Sts':Stmts) => (Sts ~> Sts')
        [structural] 
 
-  /* \subsection{Input/Output Statements.} */
+  /*@ \subsection{Input/Output Statements.} */
 
+  //@ Writting in the the standard stream \texttt{cout}:
   rule [print-stream]:
        <k> cout << V:Val => cout  ...</k>  
        <out>... . => (ListItem(V) ListItem(" ")) </out>
 
+  //@ Reading from the standard stream \texttt{cin}:
   rule [read-stream]:
        <k> cin >> X:Id => cin  ...</k>
        <env>...  X |-> L:Int  ...</env>
        <store>... L |-> (_ => I)  ...</store>
        <in> (ListItem(I:Int) => .)  ...</in>
 
+  /*@
+    \subsection{The function call expression}
+    The function name is evaluated to its value, which is a lambda 
+    abstraction: $\it Xl$ is the list of parameters, $\it Sts$ is body of
+    the function. The {\sc function-call} rule pushes the calling context,
+    i.e., the remainder of the computation $K$ and environment stack 
+    (including the current environment) on top of the function stack, 
+    while the {\sc return} rule uses the information there to restore 
+    the environment and computation of the caller.
+   */
 
   context '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, 
                  (HOLE => evaluate HOLE following Xl;))
 
-  syntax Exps ::= "evaluate" Exps "following" Decls ";"
-
-  context evaluate (HOLE, _:Exps) following (int X:Id, _:Decls);
-
-  context evaluate((HOLE => lvalue(HOLE)), _:Exps)
-          following  (int & X:Id, _:Decls);
-
-  rule evaluate(V:Val, El:Exps) following (Dec:Decl, Xl:Decls);
-    => V, evaluate El following Xl;
-  rule evaluate .Exps following .Decls; => .Vals
-
-
-  /* \subsection{Function Call.} */
   rule [fun-call] : 
        <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Vals) ~> K:K)
            =>
@@ -516,6 +570,17 @@ module CINK-LANG-SEMANTICS
        <bstack> Stack:List </bstack>
        <fstack> . => ([Env] Stack, K) ...</fstack>
 //       [large]
+
+  syntax Exps ::= "evaluate" Exps "following" Decls ";"
+
+  context evaluate (HOLE, _:Exps) following (int X:Id, _:Decls);
+
+  context evaluate((HOLE => lvalue(HOLE)), _:Exps)
+          following  (int & X:Id, _:Decls);
+
+  rule evaluate(V:Val, El:Exps) following (Dec:Decl, Xl:Decls);
+    => V, evaluate El following Xl;
+  rule evaluate .Exps following .Decls; => .Vals
 
   /* \subsection{Function Return.} */
 
@@ -549,24 +614,41 @@ module CINK-LANG-SEMANTICS
        (<thread>... <k>.K</k>  ...</thread> => .)
 
 
-  /* \subsection{Auxiliary Functions and Rules.} */
+  /*@ \subsection{Auxiliary Functions and Rules.} */
 
-  syntax Bool ::= "isTypeLabel" "(" KLabel ")" [function]
+  //@
+  syntax Bool ::= "isDeclLabel" "(" KLabel ")" [function]
 
-  rule isTypeLabel(KL:KLabel) => true
-  when   KL ==KLabel 'int_
-  orElseBool KL ==KLabel 'bool_
+  rule isDeclLabel(KL:KLabel) => true
+       when       KL ==KLabel 'int_
+       orElseBool KL ==KLabel 'bool_ 
+       orElseBool KL ==KLabel 'void_
+       [anywhere]
 
+  //@
+  syntax Bool ::= "isAlias" "(" Exp ")" [function]
 
-  syntax  Id ::= "getName" "(" Decl ")" [function]
+  rule isAlias(& X:Id = E:Exp) => true [anywhere]
 
-  rule getName(int  X:Id) => X     [anywhere]
-  rule getName(bool X:Id) => X     [anywhere]
-  rule getName(int  & X:Id) => X   [anywhere]
-  rule getName(bool & X:Id) => X   [anywhere]
-  rule getName(int  * X:Id) => X   [anywhere]
-  rule getName(bool * X:Id) => X   [anywhere]
-  rule getName('void_(X:Id)) => X  [anywhere]
+  //@
+  syntax Bool ::= "isLValue" "(" Exp ")" [function]
+
+  rule isLValue(lvalue(E:Exp)) => true [anywhere]
+
+  rule isLValue(loc(L:Int)) => true [anywhere]
+
+  rule isLValue(X:Id) => true [anywhere]
+
+  //@
+  syntax  Id ::= "getName" "(" Exp ")" [function]
+
+  rule getName(X:Id) => X       [anywhere]
+  rule getName(& X:Id) => X     [anywhere]
+  rule getName(* X:Id) => X     [anywhere]
+  rule getName(KL:KLabel(E:Exp)) => getName(E)
+       when isDeclLabel(KL) ==Bool true
+       [anywhere]
+  rule getName(E1:Exp = E2:Exp) => getName(E1) [anywhere]
 
 
   // \texttt{bindto} binds formal parameters to actual parametersgg 
@@ -598,16 +680,27 @@ module CINK-LANG-SEMANTICS
   // equality over maps
 
   syntax Bool ::= Map "<=Map" Map    [function]
-  rule (MapItem1:MapItem Map1:Map) <=Map (MapItem1 Map2:Map) => (Map1 <=Map Map2) [function, anywhere]
+
+  rule (MapItem1:MapItem Map1:Map) <=Map (MapItem1 Map2:Map)
+        =>
+       (Map1 <=Map Map2)
+       [function, anywhere]
+
   rule .Map <=Map _:Map => true [function, anywhere]
+
   rule ((D:K |-> _:K) Map1:Map) <=Map Map2:Map => false
-       when notBool $hasMapping(Map2, D) [function, anywhere]
+       when notBool $hasMapping(Map2, D)
+       [function, anywhere]
 
   syntax Bool ::= Map "==Map" Map    [function]
-  rule Map1:Map ==Map Map2:Map => (Map1 <=Map Map2) andBool (Map2 <=Map Map1) [function, anywhere]
+
+  rule Map1:Map ==Map Map2:Map
+       =>
+      (Map1 <=Map Map2) andBool (Map2 <=Map Map1)
+      [function, anywhere]
 
   syntax Bool ::= Map "=/=Map" Map   [function]
-  rule Map1:Map =/=Map Map2:Map => notBool(Map1 ==Map Map2) [function, anywhere]
+  rule Map1:Map =/=Map Map2:Map => notBool(Map1 ==Map Map2) [anywhere]
 
   // bug
 
