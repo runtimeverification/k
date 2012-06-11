@@ -57,7 +57,6 @@ public class StaticK {
 					Element option = (Element)options.item(k);
 					String name = option.getAttribute("name");
 					String value = option.getAttribute("value");
-					System.out.println("NAME: " + name + " VALUE: " + value);
 					if (!name.equals(""))
 						krunOptions.add(name);
 					if (!value.equals(""))
