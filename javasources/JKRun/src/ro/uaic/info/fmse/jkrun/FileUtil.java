@@ -48,18 +48,17 @@ public class FileUtil {
 	}
 	
 	public static String generateUniqueName(String fileName) {
-		 String result = new String();
-		 String name = new String();
-		 String extension = new String();
+		
+		int dot = fileName.lastIndexOf(".");
+		 String name = fileName.substring(0, dot);
+		 String extension = fileName.substring(dot + 1, fileName.length());
 		 
-		 SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy_hhmmss"); 
-		 Date curDate = new Date(); 
-		 String strDate = sdf.format(curDate); 
-		 int dot = fileName.lastIndexOf(".");
-		 name = fileName.substring(0, dot);
-		 extension = fileName.substring(dot + 1, fileName.length());
-		 result = name + "_" + strDate + "." + extension; 
-		 return result;
+		try {
+			return File.createTempFile(name, extension).getName();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public static String getFileContent(String file) {
