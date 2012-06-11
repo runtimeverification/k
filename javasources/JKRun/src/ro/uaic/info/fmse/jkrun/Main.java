@@ -369,13 +369,13 @@ public class Main {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
 			}
 			PrettyPrintOutput p = new PrettyPrintOutput(cmd);
-			String input = K.maude_output;
-			//String input_ = K.userdir + K.fileSeparator + "maudeoutput_cut.xml";
-			//String processedInput = K.userdir + K.fileSeparator + "maudeoutput_simplified.xml";
-			File file = new File(input);
+			//String input_ = K.userdir + K.fileSeparator + "maudeoutput_sum-0_break_imppp.xml";
+			//String input_ = K.userdir + K.fileSeparator + "maudeoutput_cut_1.xml";
+			File file = new File(K.maude_output);
 			//File file_ = new File(input_);
-		    //p.preprocessDoc(file_, processedInput);
-			String red = p.processDoc(file);
+			File processedFile = new File(K.processed_maude_output);
+		    p.preprocessDoc(file, K.processed_maude_output);
+			String red = p.processDoc(processedFile);
 			String prettyOutput = XmlUtil.formatXml(red, K.color);
 			if (K.maude_cmd.equals("search") && K.do_search) {
 				printSearchResults();

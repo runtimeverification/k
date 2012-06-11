@@ -51,11 +51,6 @@ public class RunProcess {
 			// set execution directory to current user dir
 			pb.directory(new File(K.userdir));
 
-			// set environment variables for this process
-			/*Map<String, String> environment = pb.environment();
-			environment.put("PATH", System.getenv("PATH"));
-			environment.put("K_BASE", System.getenv("K_BASE"));*/
-
 			// start process
 			Process process = pb.start();
 
@@ -80,9 +75,6 @@ public class RunProcess {
 				if (errorStreamHandler.isAlive())
 					errorStreamHandler.wait();
 			}
-
-			/*
-			 * inputStreamHandler.interrupt(); errorStreamHandler.interrupt(); inputStreamHandler.join(); errorStreamHandler.join(); */
 
 			String s1 = inputStreamHandler.getContent().toString();
 			if (!s1.equals("")) {

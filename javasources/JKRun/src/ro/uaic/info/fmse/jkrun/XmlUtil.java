@@ -1,6 +1,24 @@
 package ro.uaic.info.fmse.jkrun;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.fusesource.jansi.AnsiConsole;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 public class XmlUtil {
 
@@ -32,10 +50,15 @@ public class XmlUtil {
 			
 			for (int i = 0; i < s.length(); i++) {
 				char currentChar = s.charAt(i);
+				char nextChar_ = currentChar;
+				if (i != s.length() - 1) {
+					nextChar_ = s.charAt(i + 1);
+				}
 				if (currentChar == '<') {
 					if (color) {
-						sb.append(PrettyPrintOutput.ANSI_GREEN);
-						
+						if (Character.isLetter(nextChar_) || nextChar_ == '/') {
+							sb.append(PrettyPrintOutput.ANSI_GREEN);
+						}	
 					}
 					char nextChar = s.charAt(i + 1);
 					if (nextChar == '/')
@@ -58,21 +81,21 @@ public class XmlUtil {
 						boolean newline = false;
 						String[] temp = new String[1];
 						int nextStartElementPos = s.indexOf('<', i);
+						char ch = s.charAt(nextStartElementPos + 1);
+						//System.out.println("ch=" + ch);
+						/*while ((!Character.isLetter(ch) && (ch != '/'))) {
+							nextStartElementPos = s.indexOf('<', nextStartElementPos);
+							ch = s.charAt(nextStartElementPos + 1);
+						}*/
+						//if (!Character.isLetter(ch))
 						if (nextStartElementPos > i + 1) {
 							String textBetweenElements = s.substring(i + 1, nextStartElementPos);
-
+                            //System.out.println("textBetweenElements=\n" + textBetweenElements);
 							if (color) {
 								StringBuilder aux = new StringBuilder();
-								String delims = "\\|->";
-								String[] tokens;
-								tokens = textBetweenElements.split(delims);
-								for (i = 0; i < tokens.length - 1; i++) {
-									aux.append(tokens[i]);
-									aux.append(PrettyPrintOutput.ANSI_PURPLE);
-									aux.append("|->");
-									aux.append(PrettyPrintOutput.ANSI_NORMAL);
-								}
-								aux.append(tokens[tokens.length - 1]);
+								aux = colorSymbol(textBetweenElements, "|->", PrettyPrintOutput.ANSI_PURPLE);
+								textBetweenElements = new String(aux);
+								aux = colorSymbol(textBetweenElements, "~>", PrettyPrintOutput.ANSI_BLUE);
 								textBetweenElements = new String(aux);
 							}
 
@@ -108,6 +131,20 @@ public class XmlUtil {
 			return sb.toString();
 		}
 	}
+	
+	private static StringBuilder colorSymbol(String text, String symbol, String color) {
+		StringBuilder aux = new StringBuilder();
+		String[] tokens;
+		tokens = text.split("\\" + symbol);
+		for (int i = 0; i < tokens.length - 1; i++) {
+			aux.append(tokens[i]);
+			aux.append(color);
+			aux.append(symbol);
+			aux.append(PrettyPrintOutput.ANSI_NORMAL);
+		}
+		aux.append(tokens[tokens.length - 1]);
+		return aux;
+	}
 
 	private static String buildWhitespace(int numChars) {
 		StringBuilder sb = new StringBuilder();
@@ -132,6 +169,7 @@ public class XmlUtil {
 		int lineStartPos = 0;
 		int lineEndPos;
 		boolean firstLine = true;
+		
 		while (lineStartPos < s.length()) {
 			if (!firstLine)
 				sb.append("\n");
@@ -153,5 +191,68 @@ public class XmlUtil {
 		}
 		return sb.toString();
 	}
+	
+	public static ArrayList<Element> getChildElements(Node node) {
+		ArrayList l = new ArrayList();
+		for (Node childNode = node.getFirstChild(); childNode != null;) {
+			if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element elem = (Element) childNode;
+				l.add(elem);
+			}
+			Node nextChild = childNode.getNextSibling();
+			childNode = nextChild;
+		}
+
+		return l;
+	}
+	
+	public static Element getNextSiblingElement(Node node) {
+		Node nextSibling = node.getNextSibling();
+		while (nextSibling != null) {
+			if (nextSibling.getNodeType() == Node.ELEMENT_NODE) {
+				return (Element) nextSibling;
+			}
+			nextSibling = nextSibling.getNextSibling();
+		}
+
+		return null;
+	}
+
+	public static String convertNodeToString(Node node) {
+		try {
+			Transformer t = TransformerFactory.newInstance().newTransformer();
+			t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			StringWriter sw = new StringWriter();
+			t.transform(new DOMSource(node), new StreamResult(sw));
+			return sw.toString();
+		} catch (TransformerException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	// write the XML document to disk
+	public static void serializeXML(Document doc, String fileName) {
+		try {
+			Source xmlSource = new DOMSource(doc);
+			Result result = new StreamResult(new FileOutputStream(fileName));
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			//transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "1");
+			transformer.transform(xmlSource, result);
+		}
+		catch (TransformerFactoryConfigurationError factoryError) {
+			System.err.println("Error creating " + "TransformerFactory");
+			factoryError.printStackTrace();
+		} catch (TransformerException transformerError) {
+			System.err.println("Error transforming document");
+			transformerError.printStackTrace();
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
+	}
+
 
 }

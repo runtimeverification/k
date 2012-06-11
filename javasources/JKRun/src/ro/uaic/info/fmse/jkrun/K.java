@@ -21,6 +21,7 @@ public class K {
 
 	public static String maude_io_cmd = krunDir + fileSeparator + FileUtil.generateUniqueName("io-cmd.maude");
 	public static String maude_output = krunDir + fileSeparator + FileUtil.generateUniqueName("maudeoutput.xml");
+	public static String processed_maude_output = krunDir + fileSeparator + FileUtil.generateUniqueName("maudeoutput_simplified.xml");
 	
 	// where to write the pretty-printed output of jkrun
 	public static String krun_output = krunDir + fileSeparator + FileUtil.generateUniqueName("krun_output.txt");
@@ -55,7 +56,5 @@ public class K {
 			return "kast.bat";
 		return "kast";
 	}
-	
-	
 	
 }

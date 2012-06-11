@@ -38,8 +38,6 @@ public class PrettyPrintOutput {
 	
 	private CommandLine cmd;
 	
-	private static boolean changed = true;
-	
 	public static final String ANSI_NORMAL = "\u001b[0m";
 	
     public static final String ANSI_BLACK = "\u001B[30m";
@@ -114,89 +112,61 @@ public class PrettyPrintOutput {
 	
 	public void preprocessDoc(File file, String processedFile) {
 		Document doc = readXML(file);
-		NodeList list = null;
-
-		list = doc.getElementsByTagName("term");
-		if (list == null) {
-			Error.report("Preprocess Document: Nodes with term tag weren't found");
-		} else {
-			//while (changed) {
-				//setChanged(false);
-				for (int i = 0; i < list.getLength(); i++) {
-					if (list.item(i).getNodeType() == Node.ELEMENT_NODE) {
-						System.out.println("Curent node " + i + " =\n" + convertNodeToString(list.item(i)) + "\n");
-						preprocessElement((Element) list.item(i));
-					}
-				}
-				/*serializeXML(doc, processedFile);
-			    doc = readXML(new File(processedFile));
-				list = doc.getElementsByTagName("term");
-				if (list == null) {
-					Error.report("Preprocess Document: Nodes with term tag weren't found");
-				}*/
-			}
-		//}
-
-		serializeXML(doc, processedFile);
-
+		
+		Node root = doc.getDocumentElement();
+		preprocessElement((Element)root);
+		
+		XmlUtil.serializeXML(doc, processedFile);
 	}
 	
-	private static void preprocessElement(Element node) {
+	public void preprocessElement(Element node) {
+		NodeList list = null;
+
+		list = node.getChildNodes();
+		if (list != null && list.getLength() > 0) {
+			for (int i = 0; i < list.getLength(); i++) {
+				if (list.item(i).getNodeType() == Node.ELEMENT_NODE) {
+					preprocessElement((Element) list.item(i));
+				}
+			}
+			if (node.hasAttribute("op") && node.hasAttribute("sort")) {
+				applyRules(node);
+			}
+		}
+	}
+	
+	private static void applyRules(Element node) {
 		String op = node.getAttribute("op");
 		String sort = node.getAttribute("sort");
 		
 		//rule 1
 		if (sort.equals("KItem") && op.equals("_`(_`)")) {
 			Node parent = node.getParentNode();
-			/*if (parent.getNodeValue() == null) {
-				Error.report("Parent doesn't exist");
-			}*/
+			Node nextSibling = XmlUtil.getNextSiblingElement(node);
 			
-			NodeList ch = node.getChildNodes();
-			// used for counting the child nodes that are of Element type
-			int count = 0;
-			Element firstChild = null;
-			Element secondChild = null;
-			for (int j = 0; j < ch.getLength(); j++) {
-				if (ch.item(j).getNodeType() == Node.ELEMENT_NODE) {
-					Element elem = (Element) ch.item(j);
-					if (count == 0) {
-						firstChild = elem;
-					}
-					if (count == 1) {
-						secondChild = elem;
-					}
-					count++;
-					if (count > 1) {
-						break;
-					}
-				}
-			}
+			ArrayList<Element> list = XmlUtil.getChildElements(node);
+			Element firstChild = list.get(0);
 			String sort_ = firstChild.getAttribute("sort");
 			if (sort_.equals("KLabel")) {
-				firstChild.appendChild(secondChild);
-				parent.appendChild(firstChild);
+				for (int i = 1; i < list.size(); i++) {
+					firstChild.appendChild(list.get(i));
+				}
+				parent.insertBefore(firstChild, nextSibling);
 				parent.removeChild(node);
-				System.out.println("Rule 1: parent node=" + convertNodeToString(parent) + "\n");
-				//setChanged(true);
 			}
 		}
 		
 		//rule 2
 		if (sort.equals("NeList`{K`}") && op.equals("_`,`,_")) {
 			Node parent = node.getParentNode();
-			/*if (parent.getNodeValue() == null) {
-				Error.report("Parent doesn't exist");
-			}*/
+			Node nextSibling = XmlUtil.getNextSiblingElement(node);
 			
-			ArrayList<Element> list = getChildElements(node);
+			ArrayList<Element> list = XmlUtil.getChildElements(node);
 			if (list.size() >= 2) {
 				for (Element elem: list) {
-					parent.appendChild(elem);
+					parent.insertBefore(elem, nextSibling);
 				}
 				parent.removeChild(node);
-				System.out.println("Rule 2: parent node=" + convertNodeToString(parent) + "\n");
-				//setChanged(true);
 			}
 		}
 		
@@ -270,26 +240,36 @@ public class PrettyPrintOutput {
 			result = op;
 			if (op.indexOf("_") != -1) {
 				List<String> elements = new ArrayList<String>();
+				StringBuilder aux = new StringBuilder();
 				NodeList ch = node.getChildNodes();
 				for (int j = 0; j < ch.getLength(); j++) {
 					if (ch.item(j).getNodeType() == Node.ELEMENT_NODE) {
 						elements.add(processElement((Element) ch.item(j)));
 					}
 				}
+				op = op.replaceAll("_", " ");
 				for (int i = 0; i < elements.size(); i++) {
 					String s = elements.get(i);
-					op = op.replaceFirst("_", s);
+					if (i == elements.size() - 1) {
+						aux.append(s);
+					} else {
+						aux.append(s);
+						aux.append(op);
+					}
 				}
-				result = op;
-
+                result = aux.toString();
 			}
 			return result;
 		}
-		if (op.equals("#istream`(_`)") || op.equals("#ostream`(_`)") || op.equals("ListItem")) { // the istream and ostream cells are ignored
+		/*if (op.equals("#istream`(_`)") || op.equals("#ostream`(_`)") || op.equals("ListItem")) { // the istream and ostream cells are ignored
+			result = "";
+			return result;
+		}*/
+		if (op.equals("#istream`(_`)") || op.equals("#ostream`(_`)")) { // the istream and ostream cells are ignored
 			result = "";
 			return result;
 		}
-		// BagItem or MapItem or NeList sort
+		// BagItem or MapItem sort
 		if (sort.equals("BagItem") || sort.equals("MapItem")) {
 			List<String> elements = new ArrayList<String>();
 			NodeList ch = node.getChildNodes();
@@ -308,12 +288,27 @@ public class PrettyPrintOutput {
 				}
 				if (sort.equals("MapItem") && initOp.equals("_|->_")) { // for pretty-printing
 					if (i == 1) {
-						s = " " + s;
+						//s = " " + s;
 					}
 				}
 				op = op.replaceFirst("_", s);
 			}
 			result = op;
+		}
+		if (sort.equals("NeList") || sort.equals("NeBag")) {
+			List<String> elements = new ArrayList<String>();
+			StringBuilder sb = new StringBuilder();
+			NodeList ch = node.getChildNodes();
+			for (int j = 0; j < ch.getLength(); j++) {
+				if (ch.item(j).getNodeType() == Node.ELEMENT_NODE) {
+					elements.add(processElement((Element) ch.item(j)));
+				}
+			}
+			for (String s : elements) {
+				sb.append(s + "\n");
+			}
+			result = sb.toString();
+			
 		}
 		if (sort.equals("List")) {
 			List<String> elements = new ArrayList<String>();
@@ -338,7 +333,7 @@ public class PrettyPrintOutput {
 			}
 		}
 		// NeBag or NeMap sort
-		if (sort.equals("NeBag") || sort.equals("NeMap") || sort.equals("NeList")) {
+		if (sort.equals("NeBag") || sort.equals("NeMap")) {
 			List<String> elements = new ArrayList<String>();
 			StringBuilder sb = new StringBuilder();
 			NodeList ch = node.getChildNodes();
@@ -354,37 +349,39 @@ public class PrettyPrintOutput {
 			}
 			result = sb.toString();
 		}
-		if (sort.equals("KItem") && op.equals("_`(_`)")) {
+		if (sort.equals("KLabel")) {
 			NodeList ch = node.getChildNodes();
-			// used for counting the child nodes that are of Element type
-			int count = 0;
-			Element firstChild = null;
-			Element secondChild = null;
+			List<String> elements = new ArrayList<String>();
 			for (int j = 0; j < ch.getLength(); j++) {
 				if (ch.item(j).getNodeType() == Node.ELEMENT_NODE) {
-					Element elem = (Element) ch.item(j);
-					if (count == 0) {
-						firstChild = elem;
+					Element child = (Element) ch.item(j);
+					String op_ = child.getAttribute("op");
+					String sort_ = child.getAttribute("sort");
+					if (!(op_.equals(".List`{K`}") && sort_.equals("List`{K`}"))) {
+						elements.add(processElement(child));
 					}
-					if (count == 1) {
-						secondChild = elem;
-					}
-					count++;
 				}
 			}
-			if (secondChild.getAttribute("sort").equals("List`{K`}")) {
-				result = processElement(firstChild);
-				// System.out.println("result="+result);
-			} else {
-				List<String> elements = new ArrayList<String>();
-				elements.add(processElement(firstChild));
-				elements.add(processElement(secondChild));
-				for (String s : elements)
-					op = op.replaceFirst("_", s);
-				result = op;
+			char firstCh = op.charAt(0);
+			if ((firstCh == '#') || (firstCh == '\'')) {
+				op = op.substring(1);
 			}
+			if (elements.size() > 1) {
+				op = op.replaceFirst("_", " _ ");
+			}
+			if (elements.size() == 1) {
+				op = op.replaceFirst("_", " _");
+			}
+			for (int i = 0; i < elements.size(); i++) {
+				String s = elements.get(i);
+				op = op.replaceFirst("_", s);
+			}
+			if (op.equals(".List`{\"\"`}")) {
+				op = ".";
+			}
+			result = op;
 		}
-		if ((sort.equals("KLabel") && op.equals("#_")) || (sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("-Int_"))) {
+		if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_")) || (sort.equals("ListItem") && op.equals("ListItem"))) {
 			NodeList ch = node.getChildNodes();
 			// used for counting the child nodes that are of Element type
 			int count = 0;
@@ -399,15 +396,16 @@ public class PrettyPrintOutput {
 
 				}
 			}
-			if (sort.equals("#NzInt") && op.equals("-Int_")) {
+			if (sort.equals("#NzInt") && op.equals("--Int_")) {
 				result = "-" + processElement(firstChild);
 			} else {
 				result = processElement(firstChild);
 			}
+			
 		}
-		/* if (sort.equals("KLabel") && !op.equals("#_")) { result = op; } */
-		if (sort.equals("#Zero") && op.equals("0")) {
-			result = "0";
+		// TODO: what other sorts that may appear should be added here? 
+		if (sort.equals("#Zero") || sort.equals("#Bool")) {
+			result = op;
 		}
 		if (sort.equals("#NzNat") && op.equals("sNat_")) {
 			result = node.getAttribute("number");
@@ -429,67 +427,6 @@ public class PrettyPrintOutput {
 		return result;
 	}
 	
-	public static ArrayList<Element> getChildElements(Node node) {
-		ArrayList l = new ArrayList();
-		for (Node childNode = node.getFirstChild(); childNode != null;) {
-			if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-				Element elem = (Element) childNode;
-				l.add(elem);
-			}
-			Node nextChild = childNode.getNextSibling();
-			childNode = nextChild;
-		}
-
-		return l;
-	}
-
-	public static String convertNodeToString(Node node) {
-		try {
-			Transformer t = TransformerFactory.newInstance().newTransformer();
-			t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			StringWriter sw = new StringWriter();
-			t.transform(new DOMSource(node), new StreamResult(sw));
-			return sw.toString();
-		} catch (TransformerException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public static void serializeXML(Document doc, String fileName) {
-		// write the XML document to disk
-		try {
-
-			// create DOMSource for source XML document
-			Source xmlSource = new DOMSource(doc);
-
-			// create StreamResult for transformation result
-			Result result = new StreamResult(new FileOutputStream(fileName));
-
-			// create TransformerFactory
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-
-			// create Transformer for transformation
-			Transformer transformer = transformerFactory.newTransformer();
-			//transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "1");
-
-			// transform and deliver content to client
-			transformer.transform(xmlSource, result);
-		}
-		// handle exception creating TransformerFactory
-		catch (TransformerFactoryConfigurationError factoryError) {
-			System.err.println("Error creating " + "TransformerFactory");
-			factoryError.printStackTrace();
-		} catch (TransformerException transformerError) {
-			System.err.println("Error transforming document");
-			transformerError.printStackTrace();
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
-		}
-	}
-
 	public void setCmd(CommandLine cmd) {
 		this.cmd = cmd;
 	}
@@ -498,12 +435,5 @@ public class PrettyPrintOutput {
 		return cmd;
 	}
 	
-	private static boolean isChanged() {
-		return changed;
-	}
-
-	private static void setChanged(boolean changed) {
-		changed = changed;
-	}
 
 }
