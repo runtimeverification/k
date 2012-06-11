@@ -81,12 +81,23 @@ public class BestFitFilter extends BasicTransformer {
 	 *            - the sort found in the term.
 	 * @return
 	 */
+	// private int getFitnessUnit2(String declSort, String termSort) {
+	// if (declSort.equals("K") || declSort.equals("List{K}") || termSort.equals("K") || termSort.equals("List{K}"))
+	// return 0; // do nothing when you have a K
+	// else if (declSort.equals(termSort))
+	// return 2;
+	// else if (DefinitionHelper.isSubsorted(declSort, termSort)) {
+	// return 1;
+	// } else
+	// return -1;
+	// }
+	// TODO: this is so wrong, but it works :-??
 	private int getFitnessUnit2(String declSort, String termSort) {
-		if (declSort.equals("K") || declSort.equals("List{K}") || termSort.equals("K") || termSort.equals("List{K}"))
-			return 0; // do nothing when you have a K
-		else if (declSort.equals(termSort) || DefinitionHelper.isSubsorted(declSort, termSort)) {
+		if (declSort.equals(termSort) || DefinitionHelper.isSubsorted(declSort, termSort))
 			return 1;
-		} else
+		else if ((DefinitionHelper.isSubsorted("K", termSort) || termSort.equals("K")) && (DefinitionHelper.isSubsorted("K", declSort) || declSort.equals("K")))
+			return 0; // do nothing when you have a K
+		else
 			return -1;
 	}
 }
