@@ -1,0 +1,10 @@
+// Testing field initialization and access.
+
+class main {
+  var a=3;
+  method main() {
+    print("a = ", a, "\n");
+  }
+}
+
+// a = 3

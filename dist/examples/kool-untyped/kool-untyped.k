@@ -96,7 +96,7 @@ module KOOL-UNTYPED
                         <xstack color="purple"> .List </xstack>
 // KOOL addition
                         //<br/>
-                        <crntObj color="Fuchsia"> 
+                        <crntObj color="Fuchsia">
                            <crntClass> object </crntClass>
                            <envStack> .List </envStack>
                            <location multiplicity="?"> .K </location>
@@ -151,9 +151,9 @@ module KOOL-UNTYPED
        var X[N1];
        {
          var $1 = X;
-         for $2 = 0 to (N1 - 1) do 
+         for $2 = 0 to (N1 - 1) do
          {
-           var X[N2,Vs]; 
+           var X[N2,Vs];
            $1[$2] = X;
          }
        }
@@ -233,7 +233,7 @@ module KOOL-UNTYPED
 
   rule (env(_) => .) ~> env(_)  [structural]
 
-  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [structural]
+  rule Ss1:K Ss2:K => Ss1 ~> Ss2  [structural]
 
   rule V:Val; => .
 
@@ -339,7 +339,7 @@ module KOOL-UNTYPED
        <store>... . => L |-> methodClosure(Class,OL,Xs,S) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
-  rule <k> new Class:Id(Vs:Vals) ~> K 
+  rule <k> new Class:Id(Vs:Vals) ~> K
         => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
        <env> Env:Map => . </env>
        <control> C:Bag
@@ -358,7 +358,7 @@ module KOOL-UNTYPED
 
   rule <k> create(Class:Id)
            =>
-           create(Class1) ~> setCrntClass(Class) ~> Ss ~> addEnvLayer 
+           create(Class1) ~> setCrntClass(Class) ~> Ss ~> addEnvLayer
        ...</k>
        <className> Class </className>
        <extends> Class1:Id </extends>
@@ -368,7 +368,7 @@ module KOOL-UNTYPED
   rule <k> create(object) => . ...</k>    [structural]
 
 
-  syntax K ::= "setCrntClass" "(" Id ")" 
+  syntax K ::= "setCrntClass" "(" Id ")"
 
   rule <k> setCrntClass(Class:Id) => . ...</k>
        <crntClass> _ => Class </crntClass>
@@ -380,7 +380,7 @@ module KOOL-UNTYPED
   rule <k> addEnvLayer => . ...</k>
        <env> Env:Map => . </env>
        <crntClass> Class:Id </crntClass>
-       <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack> 
+       <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack>
        [structural]
 
   syntax K ::= "storeObj"
@@ -389,7 +389,7 @@ module KOOL-UNTYPED
        <crntObj> Obj:Bag (<location> L:Int </location> => .) </crntObj>
        <store>... . => L |-> objectClosure(Obj) ...</store>
 
-  rule <k> this => objectClosure(Obj) ...</k>  
+  rule <k> this => objectClosure(Obj) ...</k>
        <crntObj> Obj:Bag </crntObj>
 
   rule <k> X:Id => '_._(this,, X) ...</k> <env> Env </env>
@@ -421,15 +421,15 @@ module KOOL-UNTYPED
    [structural]
 
 
-  context '_`(_`)('_._(HOLE,,_),,_) when HOLE =/=K super 
+  context '_`(_`)('_._(HOLE,,_),,_) when HOLE =/=K super
 
-  rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X) 
+  rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X)
                     =>
-                    lookupMember(<envStack> EStack </envStack>, X)),, _) 
+                    lookupMember(<envStack> EStack </envStack>, X)),, _)
        ...</k>
        [structural]
 
-  rule <k> '_`(_`)(('_._(super,,X:Id) 
+  rule <k> '_`(_`)(('_._(super,,X:Id)
                      =>
                     lookupMember(<envStack> EStack </envStack>, X)),, _)
        ...</k>
@@ -449,7 +449,7 @@ module KOOL-UNTYPED
 
   rule <k> methodClosure(Class:Id, OL:Int, Xs:Ids, S:Stmt)(Vs:Vals) ~> K:K
            =>
-           bindto(Xs,Vs) ~> S ~> return; 
+           bindto(Xs,Vs) ~> S ~> return;
        </k>
        <control>
           C:Bag
@@ -458,7 +458,7 @@ module KOOL-UNTYPED
         </control>
        <env> Env:Map => . </env>
        <store>...
-           OL |-> objectClosure(<crntClass>_:Id</crntClass>Obj:Bag) 
+           OL |-> objectClosure(<crntClass>_:Id</crntClass>Obj:Bag)
        ...</store>
 
 
@@ -474,7 +474,7 @@ module KOOL-UNTYPED
   rule objectClosure(_ <envStack> .List </envStack>) instanceOf Class:Id
        =>
        false
- 
+
 
   rule <k> cast objectClosure(<crntClass> _:K </crntClass> Obj:Bag) to Class:Id
             =>
@@ -488,14 +488,14 @@ module KOOL-UNTYPED
 
   context lvalue('_._(HOLE,, _:Id))
 
-  rule <k> lvalue('_._(objectClosure(<crntClass> Class:Id </crntClass> 
+  rule <k> lvalue('_._(objectClosure(<crntClass> Class:Id </crntClass>
                           <envStack>...
                              ListItem(Class :: EnvC:BagItem) EStack:List
                           </envStack>),, X)
            =>
            lookupMember(<envStack>
                            ListItem(Class :: EnvC) EStack
-                        </envStack>, X)) 
+                        </envStack>, X))
        ...</k>  [structural]
 
 
@@ -516,7 +516,7 @@ module KOOL-UNTYPED
   rule lookupMember(<envStack> ListItem(_:Id :: <env> Env:Map </env>)
                                 => .
                     ...</envStack>, X)
-       when notBool(X in keys(Env))     
+       when notBool(X in keys(Env))
        [structural, anywhere]
 
 endmodule
