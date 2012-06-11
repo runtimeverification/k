@@ -26,10 +26,8 @@ public class Executor extends Thread {
 			pb.directory(new File(dir));
 			Process p = pb.start();
 			
-			System.out.println("INPUT: " + input);
 			if (input != null && !input.equals(""))
 			{
-				System.out.println("Entering here for " + input);
 				OutputStream stream = p.getOutputStream();
 				stream.write(input.getBytes());
 				stream.flush();
