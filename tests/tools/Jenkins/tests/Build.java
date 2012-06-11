@@ -12,7 +12,7 @@ public class Build {
 	// build K -> verify if the k3.jar file was created
 		String[] commands = new String[] { "ant" }; // , "all", "java", "jar" };
 		System.out.print("\nBuild ...");
-		Executor build = new Executor(commands, StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase);
+		Executor build = new Executor(commands, StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase, null);
 		build.start();
 		build.join(0);
 		Thread.yield();

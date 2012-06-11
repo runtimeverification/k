@@ -7,6 +7,7 @@
 		<test file="/dist/examples/imppp/programs/sum-0.imppp" output=""/>
 		<test file="/dist/examples/imppp/programs/sum-1.imppp" output="/dist/examples/imppp/programs/tests/sum-1.imppp.out"/>		
 		<test file="/dist/examples/imppp/programs/div-nondet.imppp" output="/dist/examples/imppp/programs/tests/div-nondet.imppp.out"/>
+		<test file="/dist/examples/imppp/programs/spawn-det.imppp" output="/dist/examples/imppp/programs/tests/spawn-det.imppp.out" input="/dist/examples/imppp/programs/tests/spawn-det.imppp.in"/>
 	</example>
 	<example dir="/dist/examples/imp" mainfile="imp.k" mainmodule="IMP" compiledfile="imp-compiled.maude">
 		<test file="/dist/examples/imp/programs/sum.imp" output=""/>

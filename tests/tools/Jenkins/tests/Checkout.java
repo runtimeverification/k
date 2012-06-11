@@ -25,7 +25,7 @@ public class Checkout {
 		System.out.print("\nCheckout K ...");
 		String[] commands = new String[] { "svn", "checkout",
 				"https://k-framework.googlecode.com/svn/trunk", StaticK.kbase };
-		Executor executor = new Executor(commands, ".");
+		Executor executor = new Executor(commands, ".", null);
 		executor.start();
 		executor.join(StaticK.ulimit * 1000);
 		Thread.yield();

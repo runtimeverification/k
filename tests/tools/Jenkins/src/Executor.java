@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 public class Executor extends Thread {
 
@@ -9,11 +10,13 @@ public class Executor extends Thread {
 	private String dir;
 	private String output = "", error = "";
 	private int exitValue;
+	private String input;
 	
-	public Executor(String[] commands, String dir) {
+	public Executor(String[] commands, String dir, String input) {
 		super();
 		this.commands = commands;
 		this.dir = dir;
+		this.input = input;
 	}
 
 	@Override
@@ -22,6 +25,16 @@ public class Executor extends Thread {
 			ProcessBuilder pb = new ProcessBuilder(commands);
 			pb.directory(new File(dir));
 			Process p = pb.start();
+			
+			System.out.println("INPUT: " + input);
+			if (input != null && !input.equals(""))
+			{
+				System.out.println("Entering here for " + input);
+				OutputStream stream = p.getOutputStream();
+				stream.write(input.getBytes());
+				stream.flush();
+				stream.close();
+			}
 			
 			exitValue = p.waitFor();
 			BufferedReader br = new BufferedReader(new InputStreamReader(

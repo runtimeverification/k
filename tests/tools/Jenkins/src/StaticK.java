@@ -80,6 +80,9 @@ public class StaticK {
 	}
 
 	public static String readFileAsString(String filePath) {
+		if (new File(filePath).isDirectory())
+			return "";
+		
 		byte[] buffer = new byte[(int) new File(filePath).length()];
 		BufferedInputStream f = null;
 		try {

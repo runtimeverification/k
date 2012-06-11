@@ -24,13 +24,8 @@ public class Program extends Thread {
 	public void run() {
 		super.run();
 
-//		if (new File(inputFile).exists())
-//			compile = new Executor(new String[] { "cat", inputFile, "|",
-//					"java", "-jar", krun, filename, "--k-definition",
-//					kdefinition }, dir);
-//		else
-			compile = new Executor(new String[] { "java", "-jar", krun,
-					filename, "--k-definition", kdefinition , "--output-mode", "none"}, dir);
+		compile = new Executor(new String[] { "java", "-jar", krun,
+					filename, "--k-definition", kdefinition , "--output-mode", "none"}, dir, StaticK.readFileAsString(inputFile));
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
 		tpe.execute(compile);
@@ -73,6 +68,6 @@ public class Program extends Thread {
 	public String toString() {
 		if (isCorrect())
 			return filename + "... success.";
-		else return filename + " ... failed:\n\n------------ STATS ------------\nRun:\n" + compile + "\nKrun exit code: " + exit + "\nError: " + error + "\nOutput: " + output + "\n--------------------------------\n";
+		else return filename + " ... failed:\n\n------------ STATS ------------\nRun:\n" + compile + "\nKrun exit code: " + exit + "\nError: " + error + "\nOutput: " + output + "\n-------------------------------\n";
 	}
 }
