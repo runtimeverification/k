@@ -16,7 +16,7 @@ public class Example extends Thread {
 	long millis;
 	private int THREAD_POOL_SIZE = 24;
 	public boolean runPrograms;
-
+	
 	public Example(String dir, String mainFile, String mainModule,
 			String[] krunOptions, String k3jar, String compiledFile,
 			List<Program> programs) {
@@ -77,7 +77,7 @@ public class Example extends Thread {
 			
 			String programss = "Testing " + mainFile + " programs:\n";
 			for(Program program : programs)
-				programss += "Testing " + program.filename + " ... " + (program.isCorrect() == true ? "success" : "fail") + "\n";
+				programss += "Testing " + program + "\n";
 			System.out.println(programss);
 		}
 	}

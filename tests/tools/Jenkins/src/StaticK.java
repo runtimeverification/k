@@ -15,7 +15,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-
 public class StaticK {
 	public static String kbase = "k-framework";
 	public static File file;
@@ -25,7 +24,7 @@ public class StaticK {
 	public static ThreadPoolExecutor pool;
 	public static int THREAD_POOL_SIZE = 24;
 	public static int ulimit = 120;
-	
+
 	public static List<Example> getExamples(String configuration, String k3jar) {
 		Document document = getDocument(configuration);
 
@@ -42,16 +41,18 @@ public class StaticK {
 
 			List<Program> programs = new LinkedList<Program>();
 			NodeList tests = example.getElementsByTagName("test");
-			for(int j = 0; j < tests.getLength(); j++)
-			{
+			for (int j = 0; j < tests.getLength(); j++) {
 				Element test = (Element) tests.item(j);
-				String file = toolsDir + fileSep + "Jenkins" + fileSep + kbase + test.getAttribute("file");
-				String input = toolsDir + fileSep + "Jenkins" + fileSep + kbase + test.getAttribute("input");
-				String output = toolsDir + fileSep + "Jenkins" + fileSep + kbase + test.getAttribute("output");
-				
+				String file = toolsDir + fileSep + "Jenkins" + fileSep + kbase
+						+ test.getAttribute("file");
+				String input = toolsDir + fileSep + "Jenkins" + fileSep + kbase
+						+ test.getAttribute("input");
+				String output = toolsDir + fileSep + "Jenkins" + fileSep
+						+ kbase + test.getAttribute("output");
+
 				programs.add(new Program(file, input, output, "", mainFile, dir));
 			}
-			
+
 			Example e = new Example(dir, mainFile, mainModule, new String[] {},
 					k3jar, compiledFile, programs);
 			examples.add(e);
@@ -79,20 +80,20 @@ public class StaticK {
 	}
 
 	public static String readFileAsString(String filePath) {
-        byte[] buffer = new byte[(int) new File(filePath).length()];
-        BufferedInputStream f = null;
-        try {
-                f = new BufferedInputStream(new FileInputStream(filePath));
-                f.read(buffer);
-        } catch (Exception e) {
-                System.out.println(e.getLocalizedMessage());
-        } finally {
-                if (f != null)
-                        try {
-                                f.close();
-                        } catch (IOException ignored) {
-                        }
-        }
-        return new String(buffer);
-}
+		byte[] buffer = new byte[(int) new File(filePath).length()];
+		BufferedInputStream f = null;
+		try {
+			f = new BufferedInputStream(new FileInputStream(filePath));
+			f.read(buffer);
+		} catch (Exception e) {
+			System.out.println(e.getLocalizedMessage());
+		} finally {
+			if (f != null)
+				try {
+					f.close();
+				} catch (IOException ignored) {
+				}
+		}
+		return new String(buffer);
+	}
 }
