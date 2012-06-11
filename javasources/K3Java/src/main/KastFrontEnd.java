@@ -115,40 +115,38 @@ public class KastFrontEnd {
 				XmlLoader.addFilename(doc.getFirstChild(), mainFile.getAbsolutePath());
 				XmlLoader.reportErrors(doc);
 				XmlLoader.writeXmlFile(doc, dotk.getAbsolutePath() + "/pgm.xml");
+
+				if (GlobalSettings.verbose) {
+					sw.printIntermediate("Parsing Program = ");
+				}
+
+				String definition = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def.xml");
+
+				Document defDoc = ro.uaic.info.fmse.utils.xml.XML.getDocument(definition);
+				ASTNode out = JavaClassesFactory.getTerm(defDoc.getDocumentElement());
+
+				out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+
+				out = out.accept(new KAppModifier());
+				String kast = out.toMaude();
+
+				System.out.println(kast);
+
+				String ast;
+				ast = "load ../" + defFile.getName().substring(0, defFile.getName().length() - 2) + "-compiled.maude\n";
+				ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.List{K})) , (\n\n";
+				ast += kast;
+				ast += "\n\n))),(.).Map))  .\n quit\n";
+
+				FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.maude", ast);
+
+				if (GlobalSettings.verbose) {
+					sw.printIntermediate("Maudify Program = ");
+					sw.printTotal("Total           = ");
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				k.utils.Error.report("Cannot parse program: " + e.getLocalizedMessage());
-			}
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Parsing Program = ");
-			}
-
-			String definition = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def.xml");
-			String program = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm.xml");
-
-			Document doc = ro.uaic.info.fmse.utils.xml.XML.getDocument(definition);
-			ASTNode out = JavaClassesFactory.getTerm(doc.getDocumentElement());
-
-			Document doc2 = ro.uaic.info.fmse.utils.xml.XML.getDocument(program);
-			out = JavaClassesFactory.getTerm((Element) doc2.getDocumentElement().getFirstChild().getNextSibling());
-
-			out = out.accept(new KAppModifier());
-			String kast = out.toMaude();
-
-			System.out.println(kast);
-
-			String ast;
-			ast = "load ../" + defFile.getName().substring(0, defFile.getName().length() - 2) + "-compiled.maude\n";
-			ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.List{K})) , (\n\n";
-			ast += kast;
-			ast += "\n\n))),(.).Map))  .\n quit\n";
-
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.maude", ast);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Maudify Program = ");
-				sw.printTotal("Total           = ");
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
