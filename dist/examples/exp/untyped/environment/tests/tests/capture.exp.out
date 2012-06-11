@@ -1,3 +1,4 @@
 <result>
-  closure-lambda( x |-> 1 , y , x y )
+  closure-lambda`( Map2KLabel  x |-> 1 `, y`,  x  y`)
 </result>
+  
