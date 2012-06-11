@@ -1,16 +1,19 @@
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class Program extends Thread {
 	public String filename, inputFile, outputFile, krun, kdefinition, dir;
+	public List<String> krunOptions;
 
 	private String output = "", error = "";
 	private int exit;
 	private Executor compile;
-	
+
 	public Program(String filename, String inputFile, String outputFile,
-			String krun, String kdefinition, String dir) {
+			String krun, String kdefinition, String dir,
+			List<String> krunOptions) {
 		super();
 		this.filename = filename;
 		this.inputFile = inputFile;
@@ -18,14 +21,29 @@ public class Program extends Thread {
 		this.krun = krun;
 		this.kdefinition = kdefinition;
 		this.dir = dir;
+		this.krunOptions = krunOptions;
 	}
 
 	@Override
 	public void run() {
 		super.run();
 
-		compile = new Executor(new String[] { "java", "-jar", krun,
-					filename, "--k-definition", kdefinition , "--output-mode", "none"}, dir, StaticK.readFileAsString(inputFile));
+		/* Compute the krun arguments */
+		String[] basic = new String[] { "java", "-jar", krun, filename,
+				"--k-definition", kdefinition };
+		int length = basic.length + krunOptions.size();
+		String[] run = new String[length];
+		for (int i = 0; i < length; i++)
+			if (i < basic.length)
+				run[i] = basic[i];
+		int i = 0;
+		for (String opt : krunOptions) {
+			run[i + basic.length] = opt;
+			i++;
+		}
+		/* END */
+
+		compile = new Executor(run, dir, StaticK.readFileAsString(inputFile));
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
 		tpe.execute(compile);
@@ -48,17 +66,17 @@ public class Program extends Thread {
 		if (outputFile.equals("") || new File(outputFile).isDirectory())
 			if (exit == 0)
 				return true;
-			else return false;
+			else
+				return false;
 
-		if (new File(outputFile).exists())
-		{
+		if (new File(outputFile).exists()) {
 			String out = StaticK.readFileAsString(new File(outputFile)
-			.getAbsolutePath());
+					.getAbsolutePath());
 			if (out.trim().equals(output.trim()) && exit == 0)
 				return true;
-		}
-		else {
-			System.out.println("\t\tINTERNAL ERROR: output file (" + outputFile + ") for program (" +  filename + ") does not exist.");
+		} else {
+			System.out.println("\t\tINTERNAL ERROR: output file (" + outputFile
+					+ ") for program (" + filename + ") does not exist.");
 			System.exit(2);
 		}
 		return false;
@@ -68,6 +86,11 @@ public class Program extends Thread {
 	public String toString() {
 		if (isCorrect())
 			return filename + "... success.";
-		else return filename + " ... failed:\n\n------------ STATS ------------\nRun:\n" + compile + "\nKrun exit code: " + exit + "\nError: " + error + "\nOutput: " + output + "\n-------------------------------\n";
+		else
+			return filename
+					+ " ... failed:\n\n------------ STATS ------------\nRun:\n"
+					+ compile + "\nKrun exit code: " + exit + "\nError: "
+					+ error + "\nOutput: " + output
+					+ "\n-------------------------------\n";
 	}
 }

@@ -50,7 +50,21 @@ public class StaticK {
 				String output = toolsDir + fileSep + "Jenkins" + fileSep
 						+ kbase + test.getAttribute("output");
 
-				programs.add(new Program(file, input, output, "", mainFile, dir));
+				NodeList options = test.getElementsByTagName("option");
+				List<String> krunOptions = new LinkedList<String>();
+				for(int k = 0; k < options.getLength(); k++)
+				{
+					Element option = (Element)options.item(k);
+					String name = option.getAttribute("name");
+					String value = option.getAttribute("value");
+					System.out.println("NAME: " + name + " VALUE: " + value);
+					if (!name.equals(""))
+						krunOptions.add(name);
+					if (!value.equals(""))
+						krunOptions.add(value);
+				}
+				
+				programs.add(new Program(file, input, output, "", mainFile, dir, krunOptions));
 			}
 
 			Example e = new Example(dir, mainFile, mainModule, new String[] {},
