@@ -1,0 +1,10 @@
+#include <iostream>
+using namespace std;
+
+int main(){
+        int z = 0;
+        int x = 0;
+        z = ++(++x);
+        cout << z << endl;
+        return 0;
+}
