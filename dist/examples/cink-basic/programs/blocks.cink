@@ -6,6 +6,7 @@ int main() {
     cout << x << y << "\n";
     {
       int y = 112;
+z=1;
       cout << x;
       cout << y;
       cout << "\n";

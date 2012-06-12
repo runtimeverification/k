@@ -510,8 +510,8 @@ module CINK-LANG-SEMANTICS
        [structural]
 
   /*@
-    The case cell \texttt{bstack} is not empty and the current evirinment
-    is different from that on the top:
+    The case when the cell \texttt{bstack} is not empty and the current 
+    environment is different from that on the top:
   */
   rule [block] : 
        <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
@@ -521,8 +521,8 @@ module CINK-LANG-SEMANTICS
        [structural]
 
   /*@
-    The case cell \texttt{bstack} is not empty and the current evirinment
-    is equal to tha on the top:
+    The case when the cell \texttt{bstack} is not empty and the current 
+    environment is equal to that on the top:
   */
   rule [block] : 
        <k>{Sts:Stmts} => Sts  ...</k>
@@ -788,8 +788,6 @@ module CINK-LANG-SEMANTICS
   rule getName(E1:Exp = E2:Exp) => getName(E1) [anywhere]
 
 
- 
-
   /*@
     The semantic of \texttt{popb} is to pop out the stack of the
     block environments:
@@ -806,28 +804,6 @@ module CINK-LANG-SEMANTICS
     the file \texttt{k-equal.k}.
   */ 
 
-  syntax Bool ::= Map "<=Map" Map    [function]
-
-  rule (MapItem1:MapItem Map1:Map) <=Map (MapItem1 Map2:Map)
-        =>
-       (Map1 <=Map Map2)
-       [function, anywhere]
-
-  rule .Map <=Map _:Map => true [function, anywhere]
-
-  rule ((D:K |-> _:K) Map1:Map) <=Map Map2:Map => false
-       when notBool $hasMapping(Map2, D)
-       [function, anywhere]
-
-  syntax Bool ::= Map "==Map" Map    [function]
-
-  rule Map1:Map ==Map Map2:Map
-       =>
-      (Map1 <=Map Map2) andBool (Map2 <=Map Map1)
-      [function, anywhere]
-
-  syntax Bool ::= Map "=/=Map" Map   [function]
-  rule Map1:Map =/=Map Map2:Map => notBool(Map1 ==Map Map2) [anywhere]
 
 endmodule
 
