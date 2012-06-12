@@ -270,7 +270,7 @@ public class PrettyPrintOutput {
 			return result;
 		}
 		// BagItem or MapItem sort
-		if (sort.equals("BagItem") || sort.equals("MapItem")) {
+		if (sort.equals("BagItem") || sort.equals("MapItem") || sort.equals("ListItem")) {
 			List<String> elements = new ArrayList<String>();
 			NodeList ch = node.getChildNodes();
 			for (int j = 0; j < ch.getLength(); j++) {
@@ -278,6 +278,7 @@ public class PrettyPrintOutput {
 					elements.add(processElement((Element) ch.item(j)));
 				}
 			}
+			op = op.replaceAll("`", "");
 			String initOp = op;
 			for (int i = 0; i < elements.size(); i++) {
 				String s = elements.get(i);
@@ -349,19 +350,20 @@ public class PrettyPrintOutput {
 			}
 			result = sb.toString();
 		}
-		if (sort.equals("KLabel")) {
+		if (sort.equals("KLabel") && !op.equals("'.List`{\",\"`}")) {
 			NodeList ch = node.getChildNodes();
 			List<String> elements = new ArrayList<String>();
 			for (int j = 0; j < ch.getLength(); j++) {
 				if (ch.item(j).getNodeType() == Node.ELEMENT_NODE) {
 					Element child = (Element) ch.item(j);
-					String op_ = child.getAttribute("op");
-					String sort_ = child.getAttribute("sort");
-					if (!(op_.equals(".List`{K`}") && sort_.equals("List`{K`}"))) {
+					//String op_ = child.getAttribute("op");
+					//String sort_ = child.getAttribute("sort");
+					//if (!(op_.equals(".List`{K`}") && sort_.equals("List`{K`}"))) {
 						elements.add(processElement(child));
-					}
+					//}
 				}
 			}
+			op = op.replaceAll("`", "");
 			char firstCh = op.charAt(0);
 			if ((firstCh == '#') || (firstCh == '\'')) {
 				op = op.substring(1);
@@ -381,7 +383,18 @@ public class PrettyPrintOutput {
 			}
 			result = op;
 		}
+		if (sort.equals("KLabel") && op.equals("'.List`{\",\"`}")) {
+			Element previous = XmlUtil.getPreviousSiblingElement(node);
+			// if the node has siblings
+			if (previous != null) {
+				result = "";
+			}
+			else {
+				result = ".";
+			}
+		}
 		if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_")) || (sort.equals("ListItem") && op.equals("ListItem"))) {
+		//if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_"))) {
 			NodeList ch = node.getChildNodes();
 			// used for counting the child nodes that are of Element type
 			int count = 0;

@@ -217,6 +217,18 @@ public class XmlUtil {
 
 		return null;
 	}
+	
+	public static Element getPreviousSiblingElement(Node node) {
+		Node previousSibling = node.getPreviousSibling();
+		while (previousSibling != null) {
+			if (previousSibling.getNodeType() == Node.ELEMENT_NODE) {
+				return (Element) previousSibling;
+			}
+			previousSibling = previousSibling.getPreviousSibling();
+		}
+
+		return null;
+	}
 
 	public static String convertNodeToString(Node node) {
 		try {
