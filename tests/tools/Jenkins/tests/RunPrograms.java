@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import junit.framework.AssertionFailedError;
+
 import org.junit.Test;
 
 public class RunPrograms {
