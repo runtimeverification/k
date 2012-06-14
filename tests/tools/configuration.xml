@@ -3,7 +3,7 @@
 
 <tests>
 	<example dir="/dist/examples/imppp" mainfile="imppp.k" mainmodule="IMPPP" compiledfile="imppp-compiled.maude">
-		<test file="/dist/examples/imppp/programs/locals.imppp" output="/dist/examples/imppp/programs/tests/locals.imppp.out">
+		<test file="/dist/examples/imppp/programs/locals.imppp" output="/tests/examples/imppp/locals.imppp.out">
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
@@ -11,23 +11,23 @@
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
-		<test file="/dist/examples/imppp/programs/sum-1.imppp" output="/dist/examples/imppp/programs/tests/sum-1.imppp.out">		
+		<test file="/dist/examples/imppp/programs/sum-1.imppp" output="/tests/examples/imppp/sum-1.imppp.out">		
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
-		<test file="/dist/examples/imppp/programs/sum-2.imppp" output="/dist/examples/imppp/programs/tests/sum-2.imppp.out" input="/dist/examples/imppp/programs/tests/sum-2.imppp.in">
+		<test file="/dist/examples/imppp/programs/sum-2.imppp" output="/tests/examples/imppp/sum-2.imppp.out" input="/tests/examples/imppp/sum-2.imppp.in">
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
-		<test file="/dist/examples/imppp/programs/sum-3.imppp" output="/dist/examples/imppp/programs/tests/sum-3.imppp.out" input="/dist/examples/imppp/programs/tests/sum-3.imppp.in">
+		<test file="/dist/examples/imppp/programs/sum-3.imppp" output="/tests/examples/imppp/sum-3.imppp.out" input="/tests/examples/imppp/sum-3.imppp.in">
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
-		<test file="/dist/examples/imppp/programs/div-nondet.imppp" output="/dist/examples/imppp/programs/tests/div-nondet.imppp.out">
+		<test file="/dist/examples/imppp/programs/div-nondet.imppp" output="/tests/examples/imppp/div-nondet.imppp.out">
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
-		<test file="/dist/examples/imppp/programs/spawn-det.imppp" output="/dist/examples/imppp/programs/tests/spawn-det.imppp.out" input="/dist/examples/imppp/programs/tests/spawn-det.imppp.in">
+		<test file="/dist/examples/imppp/programs/spawn-det.imppp" output="/tests/examples/imppp/spawn-det.imppp.out" input="/tests/examples/imppp/spawn-det.imppp.in">
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
