@@ -55,7 +55,7 @@
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
-		<test file="/dist/examples/cink-basic/programs/prim.cink" output="tests/examples/cink-basic/programs/tests/prim.cink.out" input="/tests/examples/cink-basic/programs/tests/prim.cink.in">
+		<test file="/dist/examples/cink-basic/programs/prim.cink" output="tests/examples/cink-basic/prim.cink.out" input="/tests/examples/cink-basic/prim.cink.in">
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
