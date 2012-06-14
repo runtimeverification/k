@@ -80,6 +80,17 @@
 		</test>
 	</example>
 	<example dir="/dist/examples/lambdapp" mainfile="lambdapp.k" mainmodule="LAMBDAPP" compiledfile="lambdapp-compiled.maude">
+		<test file="/dist/examples/lambdapp/programs/print.lambdapp" output="/tests/examples/lambdapp/print.lambdapp.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/lambdapp/programs/fact.lambdapp" output="/tests/examples/lambdapp/fact.lambdapp.out" input="/tests/examples/lambdapp/fact.lambdapp.in">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/lambdapp/programs/simple.lambdapp" output="/tests/examples/lambdapp/simple.lambdapp.out">
+			<option name="--no-color" value=""/>
+		</test>
 	</example>
 	<example dir="/dist/examples/kool-untyped" mainfile="kool-untyped.k" mainmodule="KOOL-UNTYPED" compiledfile="kool-untyped-compiled.maude">
 	</example>
