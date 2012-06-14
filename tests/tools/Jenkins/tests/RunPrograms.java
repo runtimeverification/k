@@ -35,12 +35,12 @@ public class RunPrograms {
 		{
 			for(Program program : example.programs)
 			{
-				StaticK.report.report(program, "Run");
+				StaticK.reportPgm.report(program, "Run");
 				assertTrue(program.isCorrect());
 			}
 		}
 //		
-		StaticK.report.save();
+		StaticK.reportDef.save();
 		System.out.println("\nDone.");
 	}
 

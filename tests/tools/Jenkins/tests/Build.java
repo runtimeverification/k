@@ -24,7 +24,7 @@ public class Build {
 		assertTrue(new File(StaticK.k3Jar).exists());
 		assertTrue(new File(StaticK.JKrun).exists());
 
-		StaticK.report.save();
+		StaticK.reportDef.save();
 		System.out.println("\tDone.");
 	}
 }
