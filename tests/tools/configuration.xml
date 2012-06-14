@@ -51,6 +51,14 @@
 	<example dir="/dist/examples/logik" mainfile="logik.k" mainmodule="LOGIK" compiledfile="logik-compiled.maude">
 	</example>
 	<example dir="/dist/examples/cink-basic" mainfile="cink.k" mainmodule="CINK" compiledfile="cink-compiled.maude">
+		<test file="/dist/examples/cink-basic/programs/sum.cink" output="">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/cink-basic/programs/prim.cink" output="/dist/examples/cink-basic/programs/tests/prim.cink.out" input="/dist/examples/cink-basic/programs/tests/prim.cink.in">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
 	</example>
 	<example dir="/dist/examples/lambda" mainfile="lambda.k" mainmodule="LAMBDA" compiledfile="lambda-compiled.maude">
 	</example>
