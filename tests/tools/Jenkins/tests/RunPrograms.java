@@ -39,6 +39,7 @@ public class RunPrograms {
 			}
 		}
 //		
+		StaticK.report.save();
 		System.out.println("\nDone.");
 	}
 

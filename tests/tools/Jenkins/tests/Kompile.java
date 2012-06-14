@@ -31,6 +31,7 @@ public class Kompile {
 			assertTrue(example.isCompiled());
 		}
 		
+		StaticK.report.save();
 		System.out.println("\nDone.");
 	}
 

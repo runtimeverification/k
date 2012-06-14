@@ -30,6 +30,7 @@ public class Checkout {
 		executor.join(StaticK.ulimit * 1000);
 		Thread.yield();
 		assertTrue(new File(StaticK.kbase).exists());
+		StaticK.report.save();
 		System.out.println("\tDone.");
 	}
 }
