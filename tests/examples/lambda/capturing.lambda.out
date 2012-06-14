@@ -1,6 +1,8 @@
+
 <k>
-  lambda _id0 . lambda x . lambda y . x y _id0
+  lambda  id0  . lambda  x  .lambda  y  .  x   y   id0 
 </k>
 <nextId>
-  1
+   1 
 </nextId>
+
