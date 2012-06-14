@@ -14,6 +14,7 @@ import k.utils.Sdf2Table;
 import k.utils.Stopwatch;
 import k.utils.XmlLoader;
 import k3.basic.Definition;
+import k3.loader.AddConsesVisitor;
 import k3.loader.BasicParser;
 
 import org.apache.commons.cli.CommandLine;
@@ -560,13 +561,18 @@ public class KompileFrontEnd {
 			// ------------------------------------- basic parsing
 
 			BasicParser bparser = new BasicParser();
-			bparser.parseFile(f);
+			bparser.slurp(mainFile.getPath());
 
-			// Definition def = new Definition();
-			// def.slurp(f, true);
-			// def.setMainFile(mainFile);
-			// def.setMainModule(mainModule);
-			// def.addConsToProductions();
+			// transfer information from the BasicParser object, to the Definition object
+			ro.uaic.info.fmse.k.Definition def = new ro.uaic.info.fmse.k.Definition();
+			def.setMainFile(mainFile.getCanonicalPath());
+			def.setMainModule(mainModule);
+			def.setModulesMap(bparser.getModulesMap());
+			def.setItems(bparser.getModuleItems());
+
+			def.accept(new CollectConsesVisitor());
+			def.accept(new CollectSubsortsVisitor());
+			def.accept(new AddConsesVisitor());
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Basic Parsing   = ");

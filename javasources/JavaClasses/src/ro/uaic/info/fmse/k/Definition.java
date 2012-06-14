@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.k;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,7 +24,12 @@ public class Definition extends ASTNode {
 	private java.util.List<DefinitionItem> items;
 	private String mainFile;
 	private String mainModule;
+	private Map<String, Module> modulesMap;
 	private String mainSyntaxModule;
+
+	public Definition() {
+		super("File System", "generated");
+	}
 
 	public Definition(Definition d) {
 		super(d);
@@ -175,5 +181,13 @@ public class Definition extends ASTNode {
 		// Collect conses
 		this.accept(new CollectConsesVisitor());
 		this.accept(new CollectListConsesVisitor());
+	}
+
+	public Map<String, Module> getModulesMap() {
+		return modulesMap;
+	}
+
+	public void setModulesMap(Map<String, Module> modulesMap) {
+		this.modulesMap = modulesMap;
 	}
 }

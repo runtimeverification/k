@@ -52,4 +52,12 @@ public class Import extends ModuleItem {
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

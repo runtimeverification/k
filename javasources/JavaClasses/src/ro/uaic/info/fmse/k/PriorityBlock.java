@@ -33,6 +33,10 @@ public class PriorityBlock extends ASTNode {
 		this.assoc = assoc;
 	}
 
+	public PriorityBlock() {
+		super("generated", "generated");
+	}
+
 	public PriorityBlock(Element element) {
 		super(element);
 
@@ -86,10 +90,12 @@ public class PriorityBlock extends ASTNode {
 			this.productions.set(i, elem);
 		}
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

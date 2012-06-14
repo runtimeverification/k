@@ -20,6 +20,18 @@ public class Production extends ASTNode {
 	protected Attributes attributes;
 	protected String sort;
 
+	public boolean isListDecl() {
+		return items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST;
+	}
+
+	public boolean isSubsort() {
+		return items.size() == 1 && items.get(0).getType() == ProductionType.SORT;
+	}
+
+	public boolean isConstant() {
+		return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals("KLabel"));
+	}
+
 	public Production(Element element) {
 		super(element);
 

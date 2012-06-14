@@ -28,23 +28,22 @@ import ro.uaic.info.fmse.k.Require;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 
 public class BasicParser {
-	private List<DefinitionItem> modules;
+	private List<DefinitionItem> moduleItems;
 	private Map<String, Module> modulesMap;
 	private List<String> filePaths;
 	private File mainFile;
 	private String mainModule;
 
 	public BasicParser() {
-
 	}
 
 	/**
-	 * Given a file, this method parses it and creates a list of modules of all the included files.
+	 * Given a file, this method parses it and creates a list of modules from all of the included files.
 	 * 
 	 * @param filepath
 	 */
 	public void slurp(String fileName) {
-		modules = new ArrayList<DefinitionItem>();
+		moduleItems = new ArrayList<DefinitionItem>();
 		modulesMap = new HashMap<String, Module>();
 		filePaths = new ArrayList<String>();
 
@@ -54,8 +53,8 @@ public class BasicParser {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, "", 0));
 			slurp2(file, new File("."));
 			setMainFile(file);
-			file = buildCanonicalPath(fileName, new File("."));
-			if (file == null)
+			file = new File(fileName);
+			if (!file.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " given at console.", "", "", 0));
 			slurp2(file, new File("."));
 		} catch (IOException e) {
@@ -100,7 +99,7 @@ public class BasicParser {
 			for (DefinitionItem di : defItemList) {
 				if (di instanceof Module) {
 					Module m = (Module) di;
-					this.modules.add(m);
+					this.moduleItems.add(m);
 					this.modulesMap.put(m.getName(), m);
 				}
 			}
@@ -142,5 +141,21 @@ public class BasicParser {
 
 	public String getMainModule() {
 		return mainModule;
+	}
+
+	public List<DefinitionItem> getModuleItems() {
+		return moduleItems;
+	}
+
+	public void setModuleItems(List<DefinitionItem> moduleItems) {
+		this.moduleItems = moduleItems;
+	}
+
+	public Map<String, Module> getModulesMap() {
+		return modulesMap;
+	}
+
+	public void setModulesMap(Map<String, Module> modulesMap) {
+		this.modulesMap = modulesMap;
 	}
 }

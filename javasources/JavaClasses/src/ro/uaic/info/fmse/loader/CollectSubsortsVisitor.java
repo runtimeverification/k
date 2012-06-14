@@ -1,7 +1,6 @@
 package ro.uaic.info.fmse.loader;
 
 import ro.uaic.info.fmse.k.Production;
-import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.k.Sort;
 import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.visitors.BasicVisitor;
@@ -9,11 +8,11 @@ import ro.uaic.info.fmse.visitors.BasicVisitor;
 public class CollectSubsortsVisitor extends BasicVisitor {
 
 	public void visit(Production prd) {
-		if (prd.getItems().size() == 1 && prd.getItems().get(0).getType() == ProductionType.SORT) {
+		if (prd.isSubsort()) {
 			Sort srt = (Sort) prd.getItems().get(0);
 			DefinitionHelper.addSubsort(prd.getSort(), srt.toString());
 		}
-		if (prd.getItems().size() == 1 && prd.getItems().get(0).getType() == ProductionType.USERLIST) {
+		if (prd.isListDecl()) {
 			UserList srt = (UserList) prd.getItems().get(0);
 			DefinitionHelper.addSubsort(prd.getSort(), srt.getSort());
 			DefinitionHelper.listConses.put(prd.getSort(), prd);

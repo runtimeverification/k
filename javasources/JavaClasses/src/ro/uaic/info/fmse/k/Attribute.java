@@ -15,6 +15,12 @@ public class Attribute extends ASTNode {
 	private String key;
 	private String value;
 
+	public Attribute(String key, String value) {
+		super("generated", "generated");
+		this.key = key;
+		this.value = value;
+	}
+
 	public Attribute(Element elm) {
 		super(elm);
 
