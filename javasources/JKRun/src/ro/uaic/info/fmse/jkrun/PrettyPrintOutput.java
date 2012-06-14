@@ -307,7 +307,7 @@ public class PrettyPrintOutput {
 			}
 			for (String s : elements) {
 				sb.append(s);
-				if (sort.equals("NeMap"))
+				if (sort.equals("NeMap") || sort.equals("NeList"))
 					sb.append("\n");
 			}
 			result = sb.toString();	
