@@ -99,6 +99,6 @@ public class Example extends Thread {
 	
 	public String getFile()
 	{
-		return mainFile;
+		return new File(mainFile).getName();
 	}
 }
