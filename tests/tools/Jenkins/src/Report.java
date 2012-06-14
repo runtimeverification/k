@@ -121,6 +121,17 @@ public class Report {
 		error.setTextContent(program.getError());
 		testcase.appendChild(error);
 
+		// if failed, the test case includes a failure tag
+		if (!program.isCorrect())
+		{
+			Element failure = doc.createElement("failure");
+			failure.setAttribute("message", program.getError());
+			failure.setAttribute("type", "critical");
+			
+			testcase.appendChild(failure);
+		}
+		
+		
 		// append testcase to suite
 		testsuite.appendChild(testcase);
 	}
