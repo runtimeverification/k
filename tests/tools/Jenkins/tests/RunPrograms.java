@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import junit.framework.AssertionFailedError;
-
 import org.junit.Test;
 
 public class RunPrograms {
@@ -35,14 +33,15 @@ public class RunPrograms {
 		
 		for(Example example : examples)
 		{
+			Report report = new Report(example.getFile() + ".xml");
 			for(Program program : example.programs)
 			{
-				StaticK.reportPgm.report(program, "Run");
+				report.report(program, "Run");
 				assertTrue(program.isCorrect());
 			}
+			report.save();
 		}
 //		
-		StaticK.reportPgm.save();
 		System.out.println("\nDone.");
 	}
 
