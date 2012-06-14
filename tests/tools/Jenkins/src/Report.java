@@ -127,7 +127,6 @@ public class Report {
 	}
 
 	public void save() {
-		System.out.println("Saving.");
 		try {
 			FileWriter fstream = new FileWriter(file);
 			BufferedWriter out = new BufferedWriter(fstream);
