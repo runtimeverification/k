@@ -37,11 +37,18 @@ public class RunPrograms {
 			for(Program program : example.programs)
 			{
 				StaticK.report.report(program, example.getFile().replaceAll("\\..*?$", "") + " programs");
-				assertTrue(program.isCorrect());
 			}
 			StaticK.report.save();
 		}
-//		
+
+		for(Example example : examples)
+		{
+			for(Program program : example.programs)
+			{
+				assertTrue(program.isCorrect());
+			}
+		}
+
 		System.out.println("\nDone.");
 	}
 
