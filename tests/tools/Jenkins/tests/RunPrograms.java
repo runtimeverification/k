@@ -33,13 +33,13 @@ public class RunPrograms {
 		
 		for(Example example : examples)
 		{
-			Report report = new Report(example.getFile() + ".xml");
+//			Report report = new Report(example.getFile() + ".xml");
 			for(Program program : example.programs)
 			{
-				report.report(program, "Run");
+				StaticK.report.report(program, example.getFile() + " programs");
 				assertTrue(program.isCorrect());
 			}
-			report.save();
+			StaticK.report.save();
 		}
 //		
 		System.out.println("\nDone.");

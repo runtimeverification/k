@@ -27,11 +27,11 @@ public class Kompile {
 		}
 		
 		for (Example example : examples) {
-			StaticK.reportDef.report(example, "kompile");
+			StaticK.report.report(example, "kompile");
 			assertTrue(example.isCompiled());
 		}
 		
-		StaticK.reportDef.save();
+		StaticK.report.save();
 		System.out.println("\nDone.");
 	}
 
