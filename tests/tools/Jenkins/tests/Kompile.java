@@ -25,8 +25,9 @@ public class Kompile {
 		while (StaticK.pool.getCompletedTaskCount() != examples.size()) {
 			Thread.sleep(1);
 		}
-
+		
 		for (Example example : examples) {
+			StaticK.report.report(example, "compile");
 			assertTrue(example.isCompiled());
 		}
 		

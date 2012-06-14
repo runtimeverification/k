@@ -13,9 +13,9 @@ public class Example extends Thread {
 	public List<Program> programs;
 	String output = "", error = "";
 	int exitCode;
-	long millis;
 	private int THREAD_POOL_SIZE = 24;
 	public boolean runPrograms;
+	private long time = 0;
 	
 	public Example(String dir, String mainFile, String mainModule,
 			String[] krunOptions, String k3jar, String compiledFile,
@@ -53,7 +53,7 @@ public class Example extends Thread {
 			output = compile.getOutput();
 			error = compile.getError();
 			exitCode = compile.getExitValue();
-			this.millis = System.currentTimeMillis() - millis;
+			time = System.currentTimeMillis() - millis;
 			System.out.println(this);
 		} else {
 
@@ -91,5 +91,14 @@ public class Example extends Thread {
 	public boolean isCompiled() {
 		return new File(dir + System.getProperty("file.separator")
 				+ compiledFile).exists();
+	}
+
+	public long getTime() {
+		return time;
+	}
+	
+	public String getFile()
+	{
+		return mainFile;
 	}
 }

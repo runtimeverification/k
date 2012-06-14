@@ -24,7 +24,8 @@ public class StaticK {
 	public static ThreadPoolExecutor pool;
 	public static int THREAD_POOL_SIZE = 24;
 	public static int ulimit = 120;
-
+	public static Report report = new Report("junit-report.xml");
+	
 	public static List<Example> getExamples(String configuration, String k3jar) {
 		Document document = getDocument(configuration);
 
