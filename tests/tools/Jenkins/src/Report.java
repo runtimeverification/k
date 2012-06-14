@@ -71,7 +71,7 @@ public class Report {
 				: "fail");
 
 		// set time
-		testcase.setAttribute("time", Long.toString(example.getTime()) + " ms");
+		testcase.setAttribute("time", Long.toString(example.getTime() / 1000));
 
 		// append testcase to suite
 		testsuite.appendChild(testcase);
