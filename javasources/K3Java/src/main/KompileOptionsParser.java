@@ -81,6 +81,9 @@ public class KompileOptionsParser {
 		OptionGroup libGroup = new OptionGroup();
 		Option lib = new Option("lib", true, "Specify extra-libraries for compile/runtime.");
 		libGroup.addOption(lib);
+		
+		Option toHTML = new Option("html", false, "generate html from definition");
+
 
 		// add options
 		options.addOptionGroup(verb);
@@ -93,6 +96,7 @@ public class KompileOptionsParser {
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
 		options.addOption(tempDisamb);
+		options.addOption(toHTML);
 	}
 
 	public CommandLine parse(String[] cmd) {

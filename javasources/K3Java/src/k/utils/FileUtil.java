@@ -29,6 +29,18 @@ public class FileUtil {
 		}
 	}
 
+	public static String getExtension(String file) {
+		int idx = file.lastIndexOf(".");
+		if (idx<0) return null;
+		return file.substring(idx);
+	}	
+	
+	public static String stripExtension(String file) {
+		int idx = file.lastIndexOf(".");
+		if (idx<0) return file;
+		return file.substring(0,idx);
+	}
+	
 	public static String getFileContent(String file) {
 		BufferedReader reader;
 		try {
@@ -56,4 +68,5 @@ public class FileUtil {
 	{
 		new File(file).delete();
 	}
+
 }

@@ -33,6 +33,7 @@ import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
+import ro.uaic.info.fmse.html.HTMLFilter;
 import ro.uaic.info.fmse.latex.LatexFilter;
 import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
@@ -123,6 +124,8 @@ public class KompileFrontEnd {
 			pdf(mainFile, lang);
 		} else if (cmd.hasOption("xml")) {
 			xml(mainFile, lang);
+		} else if (cmd.hasOption("html")) {
+			html(mainFile, lang);
 		} else {
 			// default option: if (cmd.hasOption("compile"))
 			compile(mainFile, lang, maudify(mainFile, lang));
@@ -200,7 +203,7 @@ public class KompileFrontEnd {
 			GlobalSettings.latex = true;
 			// compile a definition here
 
-			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk);
+			ro.uaic.info.fmse.k.Definition javaDef = loadDefinition(mainFile,mainModule);
 
 			Stopwatch sw = new Stopwatch();
 			LatexFilter lf = new LatexFilter();
@@ -216,7 +219,7 @@ public class KompileFrontEnd {
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.tex", latexified);
 
-			FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".tex", latexified);
+			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".tex", latexified);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Latexif         = ");
@@ -231,6 +234,61 @@ public class KompileFrontEnd {
 		return null;
 	}
 
+	private static String html(File mainFile, String lang) {
+		ro.uaic.info.fmse.k.Definition javaDef;
+		try {
+			javaDef = loadDefinition(mainFile, lang);
+			// for now just use this file as main argument
+			File canonicalFile = mainFile.getCanonicalFile();
+
+			File dotk = new File(canonicalFile.getParent() + "/.k");
+			dotk.mkdirs();
+
+			Stopwatch sw = new Stopwatch();
+			HTMLFilter htmlFilter = new HTMLFilter();
+			javaDef.accept(htmlFilter);
+
+			String html = htmlFilter.getResult();
+			
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.html", html);
+
+			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".html", html);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Latexif         = ");
+			}
+
+			return html;			
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private static ro.uaic.info.fmse.k.Definition loadDefinition(File mainFile, String lang)
+			throws IOException, Exception {
+		ro.uaic.info.fmse.k.Definition javaDef;
+		File canoFile = mainFile.getCanonicalFile();
+
+		
+		if (FileUtil.getExtension(mainFile.getAbsolutePath()).equals(".xml")) {
+			// unmarshalling
+			XStream xstream = new XStream();
+			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+
+			javaDef = (ro.uaic.info.fmse.k.Definition) xstream.fromXML(canoFile);
+			javaDef.preprocess();
+			
+		} else {
+			File dotk = new File(canoFile.getParent() + "/.k");
+			dotk.mkdirs();
+			javaDef = parseDefinition(lang, canoFile, dotk);
+		}
+		return javaDef;
+	}
+	
 	public static String xml(File mainFile, String mainModule) {
 		try {
 			// for now just use this file as main argument
@@ -239,7 +297,6 @@ public class KompileFrontEnd {
 			File dotk = new File(canonicalFile.getParent() + "/.k");
 			dotk.mkdirs();
 
-			GlobalSettings.latex = true;
 			// compile a definition here
 
 			ro.uaic.info.fmse.k.Definition javaDef = parseDefinition(mainModule, canonicalFile, dotk);

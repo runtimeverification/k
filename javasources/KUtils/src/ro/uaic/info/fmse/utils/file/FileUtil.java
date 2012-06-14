@@ -25,6 +25,12 @@ public class FileUtil {
 		}
 		return new String(buffer);
 	}
+	
+	public static String getExtension(String file) {
+		int idx = file.lastIndexOf(".");
+		if (idx<0) return null;
+		return file.substring(idx);
+	}
 
 	public static void saveInFile(String file, String content) {
 		try {
