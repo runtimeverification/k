@@ -73,6 +73,16 @@ public class Report {
 		// set time
 		testcase.setAttribute("time", Long.toString(example.getTime() / 1000));
 
+		// set output
+		Element output = doc.createElement("system-out");
+		output.setTextContent(example.output);
+		testcase.appendChild(output);
+		
+		// set error
+		Element error = doc.createElement("system-err");
+		error.setTextContent(example.error);
+		testcase.appendChild(error);
+
 		// append testcase to suite
 		testsuite.appendChild(testcase);
 	}

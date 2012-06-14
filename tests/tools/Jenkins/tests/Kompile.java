@@ -27,7 +27,7 @@ public class Kompile {
 		}
 		
 		for (Example example : examples) {
-			StaticK.report.report(example, "compile");
+			StaticK.report.report(example, "kompile");
 			assertTrue(example.isCompiled());
 		}
 		
