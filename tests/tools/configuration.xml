@@ -15,6 +15,10 @@
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
 		</test>
+		<test file="/dist/examples/imppp/programs/sum-2.imppp" output="/dist/examples/imppp/programs/tests/sum-2.imppp.out" input="/dist/examples/imppp/programs/tests/sum-2.imppp.in">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
 		<test file="/dist/examples/imppp/programs/div-nondet.imppp" output="/dist/examples/imppp/programs/tests/div-nondet.imppp.out">
 			<option name="--no-color" value=""/>
 			<option name="--output-mode" value="none"/>
