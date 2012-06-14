@@ -10,7 +10,8 @@ public class Program extends Thread {
 	private String output = "", error = "";
 	private int exit;
 	private Executor compile;
-
+	private long time = 0;
+	
 	public Program(String filename, String inputFile, String outputFile,
 			String krun, String kdefinition, String dir,
 			List<String> krunOptions) {
@@ -28,6 +29,8 @@ public class Program extends Thread {
 	public void run() {
 		super.run();
 
+		long millis = System.currentTimeMillis();
+		
 		/* Compute the krun arguments */
 		String[] basic = new String[] { "java", "-jar", krun, filename,
 				"--k-definition", kdefinition };
@@ -60,6 +63,8 @@ public class Program extends Thread {
 		output = compile.getOutput();
 		error = compile.getError();
 		exit = compile.getExitValue();
+		
+		time = System.currentTimeMillis() - millis;
 	}
 
 	public boolean isCorrect() {
@@ -92,5 +97,19 @@ public class Program extends Thread {
 					+ compile + "\nKrun exit code: " + exit + "\nError: "
 					+ error + "\nOutput: " + output
 					+ "\n-------------------------------\n";
+	}
+
+	public long getTime() {
+		return time;
+	}
+	
+	public String getOutput()
+	{
+		return output;
+	}
+	
+	public String getError()
+	{
+		return error;
 	}
 }

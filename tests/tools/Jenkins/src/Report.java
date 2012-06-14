@@ -87,6 +87,44 @@ public class Report {
 		testsuite.appendChild(testcase);
 	}
 
+	
+	public void report(Program program, String suite) {
+		Element testsuite = tests.get(suite);
+		if (testsuite == null) {
+			testsuite = doc.createElement("testsuite");
+			testsuite.setAttribute("name", suite);
+			tests.put(suite, testsuite);
+			testsuites.appendChild(testsuite);
+		}
+
+		// create test case
+		Element testcase = doc.createElement("testcase");
+
+		// set test case name
+		testcase.setAttribute("name", program.filename);
+
+		// set status
+		testcase.setAttribute("status", program.isCorrect() ? "success"
+				: "fail");
+
+		// set time
+		testcase.setAttribute("time", Long.toString(program.getTime() / 1000));
+
+		// set output
+		Element output = doc.createElement("system-out");
+		output.setTextContent(program.getOutput());
+		testcase.appendChild(output);
+		
+		// set error
+		Element error = doc.createElement("system-err");
+		error.setTextContent(program.getError());
+		testcase.appendChild(error);
+
+		// append testcase to suite
+		testsuite.appendChild(testcase);
+	}
+
+	
 	/**
 	 * Given an XML file as input it return the DOM Document
 	 * 
