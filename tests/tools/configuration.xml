@@ -69,6 +69,15 @@
 		</test>
 	</example>
 	<example dir="/dist/examples/lambda" mainfile="lambda.k" mainmodule="LAMBDA" compiledfile="lambda-compiled.maude">
+		<test file="/dist/examples/lambda/programs/capturing.lambda" output="/tests/examples/lambda/capturing.lambda.out">
+			<option name="--no-color" value=""/>
+		</test>
+		<test file="/dist/examples/lambda/programs/identity.lambda" output="/tests/examples/lambda/identity.lambda.out">
+			<option name="--no-color" value=""/>
+		</test>
+		<test file="/dist/examples/lambda/programs/free-vars-and-var-capturing.lambda" output="/tests/examples/lambda/free-vars-and-var-capturing.lambda.out">
+			<option name="--no-color" value=""/>
+		</test>
 	</example>
 	<example dir="/dist/examples/lambdapp" mainfile="lambdapp.k" mainmodule="LAMBDAPP" compiledfile="lambdapp-compiled.maude">
 	</example>
