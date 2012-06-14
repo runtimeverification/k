@@ -33,6 +33,9 @@ public class Example extends Thread {
 	@Override
 	public void run() {
 		if (!runPrograms) {
+			new File(dir + System.getProperty("file.separator")
+					+ compiledFile).delete();
+			
 			// compile the definition: java -ss8m -Xms64m -Xmx1G -jar
 			long millis = System.currentTimeMillis();
 			Executor compile = new Executor(new String[] { "java", "-ss8m",
