@@ -1,4 +1,5 @@
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -101,7 +102,7 @@ public class Report {
 		Element testcase = doc.createElement("testcase");
 
 		// set test case name
-		testcase.setAttribute("name", program.filename);
+		testcase.setAttribute("name", new File(program.filename).getName());
 
 		// set status
 		testcase.setAttribute("status", program.isCorrect() ? "success"

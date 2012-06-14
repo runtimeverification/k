@@ -36,7 +36,7 @@ public class RunPrograms {
 //			Report report = new Report(example.getFile() + ".xml");
 			for(Program program : example.programs)
 			{
-				StaticK.report.report(program, example.getFile() + " programs");
+				StaticK.report.report(program, example.getFile().replaceAll("\\..*?$", "") + " programs");
 				assertTrue(program.isCorrect());
 			}
 			StaticK.report.save();
