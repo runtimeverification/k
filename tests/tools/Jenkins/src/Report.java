@@ -84,6 +84,17 @@ public class Report {
 		error.setTextContent(example.error);
 		testcase.appendChild(error);
 
+		
+		// if failed, the test case includes a failure tag
+		if (!example.isCompiled())
+		{
+			Element failure = doc.createElement("failure");
+			failure.setAttribute("message", example.error);
+			failure.setAttribute("type", "not compiling");
+			
+			testcase.appendChild(failure);
+		}
+
 		// append testcase to suite
 		testsuite.appendChild(testcase);
 	}
@@ -126,7 +137,7 @@ public class Report {
 		{
 			Element failure = doc.createElement("failure");
 			failure.setAttribute("message", program.getError());
-			failure.setAttribute("type", "critical");
+			failure.setAttribute("type", "output not expected");
 			
 			testcase.appendChild(failure);
 		}
