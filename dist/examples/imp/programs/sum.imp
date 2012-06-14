@@ -1,5 +1,5 @@
 var n, sum;
-n := 10;
+n := 100;;
 sum:=0;
 while not n <= 0 do (
   sum := sum + n;
