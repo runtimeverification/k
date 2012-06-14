@@ -40,7 +40,7 @@ public class RunPrograms {
 			}
 		}
 //		
-		StaticK.reportDef.save();
+		StaticK.reportPgm.save();
 		System.out.println("\nDone.");
 	}
 
