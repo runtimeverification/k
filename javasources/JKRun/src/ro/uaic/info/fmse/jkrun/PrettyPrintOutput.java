@@ -250,6 +250,7 @@ public class PrettyPrintOutput {
 				op = op.replaceAll("_", " ");
 				for (int i = 0; i < elements.size(); i++) {
 					String s = elements.get(i);
+					s = s.trim();
 					if (i == elements.size() - 1) {
 						aux.append(s);
 					} else {
@@ -261,15 +262,10 @@ public class PrettyPrintOutput {
 			}
 			return result;
 		}
-		/*if (op.equals("#istream`(_`)") || op.equals("#ostream`(_`)") || op.equals("ListItem")) { // the istream and ostream cells are ignored
-			result = "";
-			return result;
-		}*/
 		if (op.equals("#istream`(_`)") || op.equals("#ostream`(_`)")) { // the istream and ostream cells are ignored
 			result = "";
 			return result;
 		}
-		// BagItem or MapItem sort
 		if (sort.equals("BagItem") || sort.equals("MapItem") || sort.equals("ListItem")) {
 			List<String> elements = new ArrayList<String>();
 			NodeList ch = node.getChildNodes();
@@ -282,6 +278,7 @@ public class PrettyPrintOutput {
 			String initOp = op;
 			for (int i = 0; i < elements.size(); i++) {
 				String s = elements.get(i);
+				s = s.trim();
 				if (sort.equals("MapItem") && initOp.equals("_|->_")) { // for pretty-printing
 					if (i == 0) {
 						s = s + " ";
@@ -289,14 +286,17 @@ public class PrettyPrintOutput {
 				}
 				if (sort.equals("MapItem") && initOp.equals("_|->_")) { // for pretty-printing
 					if (i == 1) {
-						//s = " " + s;
+						s = " " + s;
 					}
 				}
-				op = op.replaceFirst("_", s);
+			    op = op.replaceFirst("_", s);	
+			    if (op.equals(initOp)) {
+			    	op = s;
+			    }
 			}
 			result = op;
 		}
-		if (sort.equals("NeList") || sort.equals("NeBag")) {
+		if (sort.equals("NeBag") || sort.equals("NeMap") || sort.equals("NeList")) {
 			List<String> elements = new ArrayList<String>();
 			StringBuilder sb = new StringBuilder();
 			NodeList ch = node.getChildNodes();
@@ -306,10 +306,11 @@ public class PrettyPrintOutput {
 				}
 			}
 			for (String s : elements) {
-				sb.append(s + "\n");
+				sb.append(s);
+				if (sort.equals("NeMap"))
+					sb.append("\n");
 			}
-			result = sb.toString();
-			
+			result = sb.toString();	
 		}
 		if (sort.equals("List")) {
 			List<String> elements = new ArrayList<String>();
@@ -333,8 +334,7 @@ public class PrettyPrintOutput {
 				result = op;
 			}
 		}
-		// NeBag or NeMap sort
-		if (sort.equals("NeBag") || sort.equals("NeMap")) {
+		/*if (sort.equals("NeBag") || sort.equals("NeMap")) {
 			List<String> elements = new ArrayList<String>();
 			StringBuilder sb = new StringBuilder();
 			NodeList ch = node.getChildNodes();
@@ -349,18 +349,14 @@ public class PrettyPrintOutput {
 					sb.append("\n");
 			}
 			result = sb.toString();
-		}
+		}*/
 		if (sort.equals("KLabel") && !op.equals("'.List`{\",\"`}")) {
 			NodeList ch = node.getChildNodes();
 			List<String> elements = new ArrayList<String>();
 			for (int j = 0; j < ch.getLength(); j++) {
 				if (ch.item(j).getNodeType() == Node.ELEMENT_NODE) {
 					Element child = (Element) ch.item(j);
-					//String op_ = child.getAttribute("op");
-					//String sort_ = child.getAttribute("sort");
-					//if (!(op_.equals(".List`{K`}") && sort_.equals("List`{K`}"))) {
-						elements.add(processElement(child));
-					//}
+				    elements.add(processElement(child));
 				}
 			}
 			op = op.replaceAll("`", "");
@@ -368,19 +364,32 @@ public class PrettyPrintOutput {
 			if ((firstCh == '#') || (firstCh == '\'')) {
 				op = op.substring(1);
 			}
-			if (elements.size() > 1) {
-				op = op.replaceFirst("_", " _ ");
+			//System.out.print("Before: Op=" + op);
+			StringBuilder sb = new StringBuilder(op);
+			int index = 0;
+			while (index != -1) {
+				index = sb.indexOf("_", index);
+				if (index != -1) {
+					if (index == 0) {
+						sb.insert(index + 1, " ");
+						index += "-".length();
+					} else if (index == sb.length() - 1) {
+						sb.insert(index, " ");
+						index += 2;
+					} else {
+						sb = sb.insert(index + 1, " ");
+						sb = sb.insert(index, " ");
+						index += 2;
+					}
+				}
 			}
-			if (elements.size() == 1) {
-				op = op.replaceFirst("_", " _");
-			}
+			op = sb.toString();
 			for (int i = 0; i < elements.size(); i++) {
 				String s = elements.get(i);
-				op = op.replaceFirst("_", s);
+				s = s.trim();
+			    op = op.replaceFirst("_", s);
 			}
-			if (op.equals(".List`{\"\"`}")) {
-				op = ".";
-			}
+			//System.out.println(" After: Op=" + op);
 			result = op;
 		}
 		if (sort.equals("KLabel") && op.equals("'.List`{\",\"`}")) {
@@ -393,7 +402,8 @@ public class PrettyPrintOutput {
 				result = ".";
 			}
 		}
-		if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_")) || (sort.equals("ListItem") && op.equals("ListItem"))) {
+		if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_"))) {
+		//if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_")) || (sort.equals("ListItem") && op.equals("ListItem"))) {
 		//if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_"))) {
 			NodeList ch = node.getChildNodes();
 			// used for counting the child nodes that are of Element type
@@ -430,6 +440,7 @@ public class PrettyPrintOutput {
 			if (result.startsWith("#")) {
 				result = "\"" + result + "\"";
 			}
+			result = " " + result;
 		}
 		if (op.equals(".")) {
 			result = ".";

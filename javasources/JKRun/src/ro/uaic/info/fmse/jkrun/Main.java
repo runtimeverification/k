@@ -33,8 +33,7 @@ public class Main {
 
 	public static void printStatistics(CommandLine cmd) {
 		PrettyPrintOutput p = new PrettyPrintOutput(cmd);
-		String input = K.userdir + K.fileSeparator + K.maude_output;
-		File file = new File(input);
+		File file = new File(K.maude_output);
 		if (K.maude_cmd.equals("search") || p.getCmd().hasOption("xsearch-pattern")) {
 			String totalStates = p.getSearchTagAttr(file, "total-states");
 			String totalRewrites = p.getSearchTagAttr(file, "total-rewrites");
@@ -53,8 +52,7 @@ public class Main {
 
 	public static void printSearchResults() {
 		PrettyPrintOutput p = new PrettyPrintOutput();
-		String input = K.userdir + K.fileSeparator + K.maude_output;
-		File file = new File(input);
+		File file = new File(K.maude_output);
 		String solutionNumber = p.getSearchTagAttr(file, "solution-number");
 		String stateNumber = p.getSearchTagAttr(file, "state-number");
 		System.out.println("Search results:\n");

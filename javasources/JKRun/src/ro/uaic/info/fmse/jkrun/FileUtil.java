@@ -74,8 +74,7 @@ public class FileUtil {
 			return stringBuilder.toString();
 
 		} catch (FileNotFoundException e) {
-			Error.report("Cannot retrieve file content. Make sure that file "
-					+ file + " exists.");
+			Error.report("Cannot retrieve file content. Make sure that file " + file + " exists.");
 		} catch (IOException e) {
 			Error.silentReport("Cannot retrieve file content. An IO error occured.");
 		}
@@ -89,8 +88,7 @@ public class FileUtil {
 
 		// Make sure the file or directory exists
 		if (!f.exists())
-			throw new IllegalArgumentException(
-					"Delete: no such file or directory:" + fileName);
+			throw new IllegalArgumentException("Delete: no such file or directory:" + fileName);
 
 		// Attempt to delete it
 		boolean success = f.delete();
@@ -143,8 +141,7 @@ public class FileUtil {
 			return stringBuilder.toString();
 
 		} catch (FileNotFoundException e) {
-			Error.report("Cannot retrieve file content. Make sure that file "
-					+ file + " exists.");
+			Error.report("Cannot retrieve file content. Make sure that file " + file + " exists.");
 		} catch (IOException e) {
 			Error.silentReport("Cannot retrieve file content. An IO error occured.");
 		} finally {
@@ -157,22 +154,17 @@ public class FileUtil {
 		return null;
 	}
 
-	public static ArrayList<File> searchFiles(String path, String extension,
-			boolean recursive) {
+	public static ArrayList<File> searchFiles(String path, String extension, boolean recursive) {
 		ArrayList<File> result = new ArrayList<File>();
 		File dir = new File(path);
 
 		if (dir.isFile()) {
-			Error.report("The path given as argument (" + path
-					+ ") is a file and not a directory.");
+			Error.report("The path given as argument (" + path + ") is a file and not a directory.");
 		} else if (dir.isDirectory()) {
 			try {
 				String[] extensions = { extension };
-				Collection<?> files = FileUtils.listFiles(dir, extensions,
-						recursive);
-
-				for (Iterator<?> iterator = files.iterator(); iterator
-						.hasNext();) {
+				Collection<?> files = FileUtils.listFiles(dir, extensions, recursive);
+				for (Iterator<?> iterator = files.iterator(); iterator.hasNext();) {
 					File file = (File) iterator.next();
 					result.add(file);
 				}
@@ -183,8 +175,7 @@ public class FileUtil {
 		return result;
 	}
 
-	public static String getExtension(String fullPath,
-			String extensionSeparator, String pathSeparator) {
+	public static String getExtension(String fullPath, String extensionSeparator, String pathSeparator) {
 		int dot, pos;
 		String aux;
 
@@ -198,27 +189,23 @@ public class FileUtil {
 		}
 	}
 
-	public static String getFilename(String fullPath,
-			String extensionSeparator, String pathSeparator) {
+	public static String getFilename(String fullPath, String extensionSeparator, String pathSeparator) {
 		int dot = fullPath.lastIndexOf(extensionSeparator);
 		int sep = fullPath.lastIndexOf(pathSeparator);
 		return fullPath.substring(sep + 1, dot);
 	}
 
-	public static String getExternalParserName(String fullPath,
-			String pathSeparator) {
+	public static String getExternalParserName(String fullPath, String pathSeparator) {
 		int sep = fullPath.lastIndexOf(pathSeparator);
 		return fullPath.substring(sep + 1);
 	}
 
-	public static String dropExtension(String fullPath,
-			String extensionSeparator, String pathSeparator) {
+	public static String dropExtension(String fullPath, String extensionSeparator, String pathSeparator) {
 		int dot = fullPath.lastIndexOf(extensionSeparator);
 		return fullPath.substring(0, dot);
 	}
 
-	public static String dropKExtension(String fullPath,
-			String extensionSeparator, String pathSeparator) {
+	public static String dropKExtension(String fullPath, String extensionSeparator, String pathSeparator) {
 		if (getExtension(fullPath, ".", pathSeparator).equals("k")) {
 			return dropExtension(fullPath, extensionSeparator, pathSeparator);
 		} else {
