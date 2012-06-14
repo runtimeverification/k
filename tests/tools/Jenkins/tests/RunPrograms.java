@@ -35,8 +35,8 @@ public class RunPrograms {
 		{
 			for(Program program : example.programs)
 			{
-				assertTrue(program.isCorrect());
 				StaticK.report.report(program, "Run");
+				assertTrue(program.isCorrect());
 			}
 		}
 //		
