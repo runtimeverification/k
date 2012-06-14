@@ -1,6 +1,6 @@
 
 module IMP-SYNTAX
-  imports BUILTIN-SYNTAX-HOOK 
+  imports BUILTIN-SYNTAX-HOOKS 
   
   syntax AExp ::= Int | Id
   				| AExp "/" AExp [left, strict]
