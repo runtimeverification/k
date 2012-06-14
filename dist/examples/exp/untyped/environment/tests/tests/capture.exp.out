@@ -1,4 +1,5 @@
-<result>
-  closure-lambda( Map2KLabel  x |-> 1 , y,  x  y)
-</result>
-  
+
+[32m<result>[0m
+  closure-lambda( Map2KLabel  x  [35m|->[0m 1   , y ,  x   y )
+[32m</result>[0m
+
