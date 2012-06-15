@@ -8,7 +8,6 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.loader.Constants;
-import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.utils.xml.XML;
 import ro.uaic.info.fmse.visitors.Modifier;
@@ -51,8 +50,6 @@ public class Production extends ASTNode {
 			attributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
 		} else
 			attributes = new Attributes("generated", "generated");
-		if (attributes.containsKey(Constants.CONS_cons_ATTR))
-			DefinitionHelper.conses.put(attributes.get(Constants.CONS_cons_ATTR), this);
 	}
 
 	public Production(Production node) {

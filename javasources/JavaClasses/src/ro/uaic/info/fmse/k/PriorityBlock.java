@@ -1,6 +1,6 @@
 package ro.uaic.info.fmse.k;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,7 +14,7 @@ import ro.uaic.info.fmse.visitors.Visitor;
 
 public class PriorityBlock extends ASTNode {
 
-	java.util.List<Production> productions;
+	java.util.List<Production> productions = new ArrayList<Production>();
 	String assoc;
 
 	public java.util.List<Production> getProductions() {
@@ -40,7 +40,6 @@ public class PriorityBlock extends ASTNode {
 	public PriorityBlock(Element element) {
 		super(element);
 
-		this.productions = new LinkedList<Production>();
 		java.util.List<Element> productions = XML.getChildrenElementsByTagName(element, Constants.PRODUCTION);
 		for (Element production : productions)
 			this.productions.add((Production) JavaClassesFactory.getTerm(production));
@@ -51,7 +50,7 @@ public class PriorityBlock extends ASTNode {
 	public PriorityBlock(PriorityBlock node) {
 		super(node);
 		this.assoc = node.assoc;
-		this.productions = node.productions;
+		this.productions.addAll(node.productions);
 	}
 
 	@Override

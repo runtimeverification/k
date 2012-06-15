@@ -8,58 +8,47 @@ import java.util.Set;
 
 import k.utils.Error;
 import k.utils.StringUtil;
-import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.Definition;
 import ro.uaic.info.fmse.k.DefinitionItem;
 import ro.uaic.info.fmse.k.Import;
 import ro.uaic.info.fmse.k.Module;
 import ro.uaic.info.fmse.k.Production;
 import ro.uaic.info.fmse.k.ProductionItem;
+import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.k.Sort;
 import ro.uaic.info.fmse.k.Terminal;
 import ro.uaic.info.fmse.k.UserList;
-import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 
 public class ProgramSDF {
 
 	public static String getSdfForPrograms(Definition def) {
 
-		String mainSynModName;
-		if (GlobalSettings.synModule == null)
-			mainSynModName = def.getMainSyntaxModule() + "-SYNTAX";
-		else
-			mainSynModName = GlobalSettings.synModule;
-		Module mainSyntax = def.getModulesMap().get(mainSynModName);
 		Set<Module> synMods = new HashSet<Module>();
 		List<Module> synQue = new LinkedList<Module>();
+		synQue.add(def.getModulesMap().get(def.getMainSyntaxModule()));
 
-		// make a set of all the syntax modules
-		synQue.add(mainSyntax);
-		if (mainSyntax == null) {
-			Error.silentReport("Could not find a module for program syntax: " + mainSynModName);
-		} else {
-			Module bshm = def.getModulesMap().get("BUILTIN-SYNTAX-HOOKS");
-			if (bshm != null)
-				synQue.add(bshm);
-			else
-				Error.silentReport("Could not find module BUILTIN-SYNTAX-HOOKS (automatically included in the main syntax module)!");
-			while (!synQue.isEmpty()) {
-				Module m = synQue.remove(0);
-				if (!synMods.contains(m)) {
-					synMods.add(m);
-					CollectIncludesVisitor civ = new CollectIncludesVisitor();
-					m.accept(civ);
-					List<Import> ss = civ.getImportList();
-					for (Import s : ss) {
-						String mname = s.getName();
-						Module mm = def.getModulesMap().get(mname);
-						// if the module starts with # it means it is predefined in maude
-						if (!mname.startsWith("#"))
-							if (mm != null)
-								synQue.add(mm);
-							else
-								Error.silentReport("Could not find module: " + mname + " imported from: " + m.getName());
-					}
+		Module bshm = def.getModulesMap().get("BUILTIN-SYNTAX-HOOKS");
+		if (bshm != null)
+			synQue.add(bshm);
+		else
+			Error.silentReport("Could not find module BUILTIN-SYNTAX-HOOKS (automatically included in the main syntax module)!");
+
+		while (!synQue.isEmpty()) {
+			Module m = synQue.remove(0);
+			if (!synMods.contains(m)) {
+				synMods.add(m);
+				CollectIncludesVisitor civ = new CollectIncludesVisitor();
+				m.accept(civ);
+				List<Import> ss = civ.getImportList();
+				for (Import s : ss) {
+					String mname = s.getName();
+					Module mm = def.getModulesMap().get(mname);
+					// if the module starts with # it means it is predefined in maude
+					if (!mname.startsWith("#"))
+						if (mm != null)
+							synQue.add(mm);
+						else
+							Error.silentReport("Could not find module: " + mname + " imported from: " + m.getName());
 				}
 			}
 		}
@@ -103,7 +92,7 @@ public class ProgramSDF {
 				sdf += SDFHelper.getSDFAttributes(p.getAttributes()) + "\n";
 			}
 		}
-		
+
 		for (String ss : psdfv.sorts)
 			sdf += "	" + StringUtil.escapeSortName(ss) + " -> InsertDz" + StringUtil.escapeSortName(ss) + "\n";
 
@@ -137,14 +126,14 @@ public class ProgramSDF {
 		sdf += "\n\n";
 
 		// TODO: uncomment and fix
-//		for (Terminal t : getTerminals(true)) {
-//			if (t.getTerminal().matches("[a-zA-Z][a-zA-Z0-9]*")) {
-//				sdf += "	\"" + t.getTerminal() + "\" -> DzDzID {reject}\n";
-//			}
-//		}
-//
-//		sdf += "\n";
-//		sdf += getFollowRestrictionsForTerminals(true);
+		// for (Terminal t : getTerminals(true)) {
+		// if (t.getTerminal().matches("[a-zA-Z][a-zA-Z0-9]*")) {
+		// sdf += "	\"" + t.getTerminal() + "\" -> DzDzID {reject}\n";
+		// }
+		// }
+		//
+		// sdf += "\n";
+		// sdf += getFollowRestrictionsForTerminals(true);
 
 		sdf += "\n";
 

@@ -16,6 +16,7 @@ import k.utils.XmlLoader;
 import k3.basic.Definition;
 import k3.loader.AddConsesVisitor;
 import k3.loader.BasicParser;
+import k3.loader.ProgramSDF;
 
 import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
@@ -38,6 +39,7 @@ import ro.uaic.info.fmse.latex.LatexFilter;
 import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
+import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.pp.Preprocessor;
 
 import com.thoughtworks.xstream.XStream;
@@ -64,7 +66,7 @@ public class KompileFrontEnd {
 			GlobalSettings.noFilename = true;
 		}
 
-		// TODO: temporary to test the java disambituator
+		// TODO: temporary to test the java disambiguator
 		if (cmd.hasOption("tempDisamb"))
 			GlobalSettings.tempDisamb = true;
 
@@ -203,7 +205,7 @@ public class KompileFrontEnd {
 			GlobalSettings.latex = true;
 			// compile a definition here
 
-			ro.uaic.info.fmse.k.Definition javaDef = loadDefinition(mainFile,mainModule);
+			ro.uaic.info.fmse.k.Definition javaDef = loadDefinition(mainFile, mainModule);
 
 			Stopwatch sw = new Stopwatch();
 			LatexFilter lf = new LatexFilter();
@@ -249,7 +251,7 @@ public class KompileFrontEnd {
 			javaDef.accept(htmlFilter);
 
 			String html = htmlFilter.getResult();
-			
+
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.html", html);
 
 			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".html", html);
@@ -258,7 +260,7 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Latexif         = ");
 			}
 
-			return html;			
+			return html;
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (Exception e) {
@@ -267,12 +269,10 @@ public class KompileFrontEnd {
 		return null;
 	}
 
-	private static ro.uaic.info.fmse.k.Definition loadDefinition(File mainFile, String lang)
-			throws IOException, Exception {
+	private static ro.uaic.info.fmse.k.Definition loadDefinition(File mainFile, String lang) throws IOException, Exception {
 		ro.uaic.info.fmse.k.Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
-		
 		if (FileUtil.getExtension(mainFile.getAbsolutePath()).equals(".xml")) {
 			// unmarshalling
 			XStream xstream = new XStream();
@@ -280,7 +280,7 @@ public class KompileFrontEnd {
 
 			javaDef = (ro.uaic.info.fmse.k.Definition) xstream.fromXML(canoFile);
 			javaDef.preprocess();
-			
+
 		} else {
 			File dotk = new File(canoFile.getParent() + "/.k");
 			dotk.mkdirs();
@@ -288,7 +288,7 @@ public class KompileFrontEnd {
 		}
 		return javaDef;
 	}
-	
+
 	public static String xml(File mainFile, String mainModule) {
 		try {
 			// for now just use this file as main argument
@@ -452,6 +452,7 @@ public class KompileFrontEnd {
 
 		ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
 
+		javaDef.accept(new UpdateReferencesVisitor());
 		javaDef.accept(new CollectConsesVisitor());
 		javaDef.accept(new CollectSubsortsVisitor());
 		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
@@ -562,6 +563,7 @@ public class KompileFrontEnd {
 
 			ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
 
+			javaDef.accept(new UpdateReferencesVisitor());
 			javaDef.accept(new CollectConsesVisitor());
 			javaDef.accept(new CollectSubsortsVisitor());
 
@@ -627,6 +629,12 @@ public class KompileFrontEnd {
 			def.setModulesMap(bparser.getModulesMap());
 			def.setItems(bparser.getModuleItems());
 
+			if (GlobalSettings.synModule == null)
+				def.setMainSyntaxModule(mainModule + "-SYNTAX");
+			else
+				def.setMainSyntaxModule(GlobalSettings.synModule);
+
+			def.accept(new UpdateReferencesVisitor());
 			def.accept(new CollectConsesVisitor());
 			def.accept(new CollectSubsortsVisitor());
 			def.accept(new AddConsesVisitor());
@@ -644,7 +652,13 @@ public class KompileFrontEnd {
 			String oldSdf = "";
 			if (new File(dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
 				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
-			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", def.getSDFForPrograms());
+
+			// make a set of all the syntax modules
+			if (def.getModulesMap().get(def.getMainSyntaxModule()) == null) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, "Could not find main syntax module used to generate a parser for programs: " + def.getMainSyntaxModule(), def.getMainFile(), "File system.", 0));
+			} else {
+				FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", ProgramSDF.getSdfForPrograms(def));
+			}
 
 			String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
