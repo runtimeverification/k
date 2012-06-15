@@ -13,7 +13,9 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
+import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.transitions.labelify.KAppModifier;
 
 public class KastFrontEnd {
@@ -123,9 +125,11 @@ public class KastFrontEnd {
 				String definition = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def.xml");
 
 				Document defDoc = ro.uaic.info.fmse.utils.xml.XML.getDocument(definition);
-				ASTNode out = JavaClassesFactory.getTerm(defDoc.getDocumentElement());
+				ASTNode outDef = JavaClassesFactory.getTerm(defDoc.getDocumentElement());
+				outDef.accept(new UpdateReferencesVisitor());
+				outDef.accept(new CollectConsesVisitor());
 
-				out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+				ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
 				out = out.accept(new KAppModifier());
 				String kast = out.toMaude();
