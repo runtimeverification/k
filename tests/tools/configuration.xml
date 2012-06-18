@@ -71,25 +71,27 @@
 	<example dir="/dist/examples/lambda" mainfile="lambda.k" mainmodule="LAMBDA" compiledfile="lambda-compiled.maude">
 		<test file="/dist/examples/lambda/programs/capturing.lambda" output="/tests/examples/lambda/capturing.lambda.out">
 			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
 		</test>
 		<test file="/dist/examples/lambda/programs/identity.lambda" output="/tests/examples/lambda/identity.lambda.out">
 			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
 		</test>
 		<test file="/dist/examples/lambda/programs/free-vars-and-var-capturing.lambda" output="/tests/examples/lambda/free-vars-and-var-capturing.lambda.out">
+			<option name="--output-mode" value="none"/>
 			<option name="--no-color" value=""/>
 		</test>
 	</example>
 	<example dir="/dist/examples/lambdapp" mainfile="lambdapp.k" mainmodule="LAMBDAPP" compiledfile="lambdapp-compiled.maude">
 		<test file="/dist/examples/lambdapp/programs/print.lambdapp" output="/tests/examples/lambdapp/print.lambdapp.out">
 			<option name="--no-color" value=""/>
-			<option name="--output-mode" value="none"/>
 		</test>
 		<test file="/dist/examples/lambdapp/programs/fact.lambdapp" output="/tests/examples/lambdapp/fact.lambdapp.out" input="/tests/examples/lambdapp/fact.lambdapp.in">
 			<option name="--no-color" value=""/>
-			<option name="--output-mode" value="none"/>
 		</test>
 		<test file="/dist/examples/lambdapp/programs/simple.lambdapp" output="/tests/examples/lambdapp/simple.lambdapp.out">
 			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
 		</test>
 	</example>
 	<example dir="/dist/examples/kool-untyped" mainfile="kool-untyped.k" mainmodule="KOOL-UNTYPED" compiledfile="kool-untyped-compiled.maude">
@@ -97,6 +99,7 @@
 	<example dir="/dist/examples/exp/untyped/environment" mainfile="exp-untyped-environment.k" mainmodule="EXP-UNTYPED-ENVIRONMENT" compiledfile="exp-untyped-environment-compiled.maude">
 		<test file="/dist/examples/exp/untyped/environment/tests/capture.exp" output="/dist/examples/exp/untyped/environment/tests/tests/capture.exp.out">
 			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
 		</test>
 	</example>
 
