@@ -1,8 +1,6 @@
-
-<k>
-  lambda  x  . x 
-</k>
-<nextId>
-   0 
-</nextId>
-
+[32m<k>[0m
+  lambda x . x
+[32m</k>[0m
+[32m<nextId>[0m
+  0
+[32m</nextId>[0m
