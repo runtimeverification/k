@@ -316,6 +316,7 @@ public class PrettyPrintOutput {
 			List<String> elements = new ArrayList<String>();
 			StringBuilder sb = new StringBuilder();
 			NodeList ch = node.getChildNodes();
+			op = op.replaceAll("`", "");
 			for (int j = 0; j < ch.getLength(); j++) {
 				if (ch.item(j).getNodeType() == Node.ELEMENT_NODE) {
 					elements.add(processElement((Element) ch.item(j)));

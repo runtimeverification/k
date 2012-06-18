@@ -379,7 +379,7 @@ public class Main {
 				printSearchResults();
 			}
 			if (K.output_mode.equals("pretty")) {
-				AnsiConsole.out.println(K.lineSeparator + prettyOutput);
+				AnsiConsole.out.print(prettyOutput);
 			} else if (K.output_mode.equals("raw")) {
 				String output = FileUtil.parseOutputMaude(K.maude_out);
 				System.out.println(output);
