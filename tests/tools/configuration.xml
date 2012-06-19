@@ -101,7 +101,6 @@
 	<example dir="/dist/examples/exp/untyped/environment" mainfile="exp-untyped-environment.k" mainmodule="EXP-UNTYPED-ENVIRONMENT" compiledfile="exp-untyped-environment-compiled.maude">
 		<test file="/dist/examples/exp/untyped/environment/tests/capture.exp" output="/dist/examples/exp/untyped/environment/tests/tests/capture.exp.out">
 			<option name="--no-color" value=""/>
-			<option name="--output-mode" value="none"/>
 		</test>
 	</example>
 
