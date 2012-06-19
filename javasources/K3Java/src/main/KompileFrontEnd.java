@@ -167,7 +167,7 @@ public class KompileFrontEnd {
 				while (br.readLine() != null) {
 				}
 				process.waitFor();
-				pdfClean(new String[] { ".tex", ".aux", ".log", ".mrk", ".out" });
+				pdfClean(new String[] { ".tex", ".aux", ".log", ".mrk", ".out", ".sty" });
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -199,7 +199,8 @@ public class KompileFrontEnd {
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();
 
-			File dotk = new File(canonicalFile.getParent() + "/.k");
+			String fileSep = System.getProperty("file.separator");
+			File dotk = new File(canonicalFile.getParent() + fileSep + ".k");
 			dotk.mkdirs();
 
 			GlobalSettings.latex = true;
@@ -212,10 +213,11 @@ public class KompileFrontEnd {
 			javaDef.accept(lf);
 
 			String endl = System.getProperty("line.separator");
-			String fileSep = System.getProperty("file.separator");
-			String kLatexStyle = (KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k").replace(fileSep, "/");
+			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
+			FileUtil.saveInFile(canonicalFile.getParent() + fileSep + "k.sty", 
+					FileUtil.getFileContent(kLatexStyle));
 
-			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[poster,style=bubble]{\"" + kLatexStyle + "\"}" + endl;
+			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[poster,style=bubble]{k}" + endl;
 			String preamble = lf.getPreamble();
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
