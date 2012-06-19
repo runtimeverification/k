@@ -567,8 +567,9 @@ public class PrettyPrintOutput {
 		    }
 			for (String s : elements) {
 				sb_.append(s);
-				//if (sort.equals("NeMap") || sort.equals("NeList"))
+				if (sort.equals("NeMap") || sort.equals("NeList"))
 					//sb_.append("\n");
+					sb_.append(" ");
 			}
 			sb.append(sb_);	
 		}
@@ -658,12 +659,13 @@ public class PrettyPrintOutput {
 			sb = new StringBuilder();
 			Element previous = XmlUtil.getPreviousSiblingElement(node);
 			// if the node has siblings
-			if (previous != null) {
+			/*if (previous != null) {
 				sb.append("");
 			}
 			else {
 				sb.append(".");
-			}
+			}*/
+			sb.append(".");
 		}
 		if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_"))) {
 			sb = new StringBuilder();
