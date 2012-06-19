@@ -1,5 +1,8 @@
 package ro.uaic.info.fmse.jkrun;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class K {
 
 	public static boolean verbose = false;
@@ -55,6 +58,11 @@ public class K {
 		if (System.getProperty("os.name").toLowerCase().contains("win"))
 			return "kast.bat";
 		return "kast";
+	}
+	
+	public static void main(String args[]) {
+		
+
 	}
 	
 }

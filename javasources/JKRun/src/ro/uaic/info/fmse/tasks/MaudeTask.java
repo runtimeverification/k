@@ -53,14 +53,14 @@ public class MaudeTask extends Thread {
 	private void runMaude() throws IOException {
 		ProcessBuilder maude = new ProcessBuilder();
 		File f = FileUtil.createFile(K.maude_output);
-		/*Map<String, String> environment = maude.environment();
-		environment.put("MAUDE_LIB", System.getenv("MAUDE_LIB"));*/
+		Map<String, String> environment = maude.environment();
+		environment.put("MAUDE_LIB", System.getenv("MAUDE_LIB"));
 		List<String> commands = new ArrayList<String>();
-		/*if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+		if (System.getProperty("os.name").toLowerCase().contains("mac")) {
 			commands.add(System.getenv("MAUDE_LIB") + K.fileSeparator + "maude");
-		} else {*/
+		} else {
 			commands.add("maude");
-		//}
+		}
 		commands.add("-no-wrap");
 		commands.add("-no-banner");
 		commands.add("-xml-log=" + f.getCanonicalPath());

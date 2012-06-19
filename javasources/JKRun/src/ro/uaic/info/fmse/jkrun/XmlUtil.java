@@ -90,7 +90,7 @@ public class XmlUtil {
                                                 //if (!Character.isLetter(ch))
                                                 if (nextStartElementPos > i + 1) {
                                                         String textBetweenElements = s.substring(i + 1, nextStartElementPos);
-                            //System.out.println("textBetweenElements=\n" + textBetweenElements);
+                                                       //System.out.println("textBetweenElements=\n" + textBetweenElements);
                                                         if (color) {
                                                                 StringBuilder aux = new StringBuilder();
                                                                 aux = colorSymbol(textBetweenElements, "|->", PrettyPrintOutput.ANSI_PURPLE);
@@ -132,7 +132,7 @@ public class XmlUtil {
                 }
         }
         
-        private static StringBuilder colorSymbol(String text, String symbol, String color) {
+        public static StringBuilder colorSymbol(String text, String symbol, String color) {
                 StringBuilder aux = new StringBuilder();
                 String[] tokens;
                 tokens = text.split("\\" + symbol);
@@ -146,7 +146,7 @@ public class XmlUtil {
                 return aux;
         }
 
-        private static String buildWhitespace(int numChars) {
+        public static String buildWhitespace(int numChars) {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < numChars; i++)
                         sb.append(" ");

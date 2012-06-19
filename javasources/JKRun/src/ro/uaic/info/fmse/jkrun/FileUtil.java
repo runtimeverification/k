@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
@@ -110,35 +109,80 @@ public class FileUtil {
 		}
 		return (path.delete());
 	}
-
-	public static String parseOutputMaude(String file) {
+	
+	public static String parseResultOutputMaude(String file) {
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(file));
 			String line = null;
-			int startLine = 0, i = 0;
-			boolean ok = true;
-			StringBuilder stringBuilder = new StringBuilder("\n");
+			boolean found = false;
+			StringBuilder stringBuilder = new StringBuilder();
+			
 			while ((line = reader.readLine()) != null) {
-				if (line.endsWith("</ T >")) {
-					ok = false;
-					stringBuilder.append(line);
-				}
-				if (!ok) {
+				if (line.startsWith("Maude> Bye.")) {
 					break;
 				}
-				if (startLine != 0) {
-					stringBuilder.append(line);
-					stringBuilder.append(K.lineSeparator);
+				if (found) {
+					line = reader.readLine(); 
+                    found = false;
 				}
-				if (line.startsWith("< T >")) {
-					startLine = i;
+				if (line.startsWith("Maude> rewrites:")) {
+					found = true;
+				}
+				else {
 					stringBuilder.append(line);
 				}
-				i++;
 			}
 
 			return stringBuilder.toString();
+
+		} catch (FileNotFoundException e) {
+			Error.report("Cannot retrieve file content. Make sure that file " + file + " exists.");
+		} catch (IOException e) {
+			Error.silentReport("Cannot retrieve file content. An IO error occured.");
+		} finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	public static List<String> parseSearchOutputMaude(String file) {
+		BufferedReader reader = null;
+		List<String> l = new ArrayList<String>();
+		try {
+			reader = new BufferedReader(new FileReader(file));
+			String line = null;
+			boolean found = false;
+			StringBuilder stringBuilder = new StringBuilder();
+			
+			while ((line = reader.readLine()) != null) {
+				if (line.length() == 0) {
+					l.add(stringBuilder.toString());
+					stringBuilder = new StringBuilder();
+				}
+				if (line.startsWith("No more solutions.")) {
+					break;
+				}
+				if (found) {
+					//jump two lines
+					for (int j = 0; j < 2; j++) {
+					    line = reader.readLine(); 
+					}
+                    found = false;
+				}
+				//it will match a string like: "Solution 1248465 (state 45)"
+				if (line.matches("Solution\\s\\d+\\s\\(state\\s\\d+\\)")) {
+					found = true;
+				}
+				else if (! line.startsWith("Maude>")) {
+					stringBuilder.append(line);
+				}
+			}
+			return l;
 
 		} catch (FileNotFoundException e) {
 			Error.report("Cannot retrieve file content. Make sure that file " + file + " exists.");
@@ -206,7 +250,7 @@ public class FileUtil {
 	}
 
 	public static String dropKExtension(String fullPath, String extensionSeparator, String pathSeparator) {
-		if (getExtension(fullPath, ".", pathSeparator).equals("k")) {
+		if ("k".equals(getExtension(fullPath, ".", pathSeparator))) {
 			return dropExtension(fullPath, extensionSeparator, pathSeparator);
 		} else {
 			return fullPath;

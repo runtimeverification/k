@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.jkrun;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -34,14 +35,14 @@ public class Main {
 	public static void printStatistics(CommandLine cmd) {
 		PrettyPrintOutput p = new PrettyPrintOutput(cmd);
 		File file = new File(K.maude_output);
-		if (K.maude_cmd.equals("search") || p.getCmd().hasOption("xsearch-pattern")) {
+		if ("search".equals(K.maude_cmd) || p.getCmd().hasOption("xsearch-pattern")) {
 			String totalStates = p.getSearchTagAttr(file, "total-states");
 			String totalRewrites = p.getSearchTagAttr(file, "total-rewrites");
 			String realTime = p.getSearchTagAttr(file, "real-time-ms");
 			String cpuTime = p.getSearchTagAttr(file, "cpu-time-ms");
 			String rewritesPerSecond = p.getSearchTagAttr(file, "rewrites-per-second");
 			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "states: " + totalStates + " rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL);
-		} else if (K.maude_cmd.equals("erewrite")){
+		} else if ("erewrite".equals(K.maude_cmd)){
 			String totalRewrites = p.getResultTagAttr(file, "total-rewrites");
 			String realTime = p.getResultTagAttr(file, "real-time-ms");
 			String cpuTime = p.getResultTagAttr(file, "cpu-time-ms");
@@ -293,7 +294,7 @@ public class Main {
 			RunProcess rp = new RunProcess();
 
 			String k3jar = new File(K.kast).getParent() + K.fileSeparator + "java" + K.fileSeparator + "k3.jar";
-			if (K.parser.equals("kast")) {
+			if ("kast".equals(K.parser)) {
 				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
 				rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", K.k_definition, K.pgm });
@@ -301,7 +302,7 @@ public class Main {
 				K.parser = new File(K.parser).getCanonicalPath();
 				System.out.println("The external parser to be used is:" + K.parser);
 				String parserName = FileUtil.getExternalParserName(K.parser, K.fileSeparator);
-				if (parserName.equals("kast")) {
+				if ("kast".equals(parserName)) {
 					rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", K.pgm });
 				}
 				else {
@@ -335,7 +336,7 @@ public class Main {
 
 			String s = new String();
 			if (K.do_search) {
-				if (K.maude_cmd.equals("search")) {
+				if ("search".equals(K.maude_cmd)) {
 					s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) =>! B:Bag .";
 				} else {
 					Error.report("For the do-search option you need to specify that --maude-cmd=search");
@@ -366,24 +367,34 @@ public class Main {
 			} else {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
 			}
-			PrettyPrintOutput p = new PrettyPrintOutput(cmd);
-			//String input_ = K.userdir + K.fileSeparator + "maudeoutput_sum-0_break_imppp.xml";
-			//String input_ = K.userdir + K.fileSeparator + "maudeoutput_cut_1.xml";
-			File file = new File(K.maude_output);
-			//File file_ = new File(input_);
-			File processedFile = new File(K.processed_maude_output);
-		    p.preprocessDoc(file, K.processed_maude_output);
-			String red = p.processDoc(processedFile);
-			String prettyOutput = XmlUtil.formatXml(red, K.color);
-			if (K.maude_cmd.equals("search") && K.do_search) {
+			if ("search".equals(K.maude_cmd) && K.do_search) {
 				printSearchResults();
 			}
-			if (K.output_mode.equals("pretty")) {
-				AnsiConsole.out.print(prettyOutput);
-			} else if (K.output_mode.equals("raw")) {
-				String output = FileUtil.parseOutputMaude(K.maude_out);
+			if ("pretty".equals(K.output_mode)) {
+				PrettyPrintOutput p = new PrettyPrintOutput(cmd);
+				//String input_ = K.userdir + K.fileSeparator + "maudeoutput_sum-0_break_imppp.xml";
+				//String input_ = K.userdir + K.fileSeparator + "maudeoutput_cut_1.xml";
+				File file = new File(K.maude_output);
+				//File file_ = new File(input_);
+				File processedFile = new File(K.processed_maude_output);
+			    p.preprocessDoc(file, K.processed_maude_output);
+				String red = p.processDoc(processedFile);
+				/*String prettyOutput = XmlUtil.formatXml(red, K.color);
+				AnsiConsole.out.print(prettyOutput);*/
+				//AnsiConsole.out.print(red);
+				System.out.println(red);
+			} else if ("raw".equals(K.output_mode)) {
+				//String output = FileUtil.parseOutputMaude(K.maude_out);
+				String output = new String();
+				if ("search".equals(K.maude_cmd)) {
+					List<String> l = FileUtil.parseSearchOutputMaude(K.maude_out);
+					output = l.get(0);
+				}
+				else if ("erewrite".equals(K.maude_cmd)){
+					output = FileUtil.parseResultOutputMaude(K.maude_out);
+				}
 				System.out.println(output);
-			} else if (K.output_mode.equals("none")) {
+			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
 			} else {
 				Error.report(K.output_mode + " is not a valid value for output-mode option");
