@@ -121,12 +121,12 @@ module CINK-LANG-SYNTAX
                >
                  "!" Exp [strict] 
                > 
-                 Exp "&&" Exp [left, strict(1), latex("{#1}\&\&{#2}")]
+                 Exp "&&" Exp [left, strict(1), latex("{#1}\mathrel{\&\&}{#2}")]
                > 
                 Exp "||" Exp [left, strict(1)]
                > left:
-                 Exp "<<" Exp [seqstrict]
-               | Exp ">>" Exp [strict(1)]
+                 Exp "<<" Exp [seqstrict, latex("{#1}\mathrel{\tt <<}{#2}")]
+               | Exp ">>" Exp [strict(1), latex("{#1}\mathrel{\tt >>}{#2}")]
                >
                  Exp "=" Exp [right]
                >
@@ -148,7 +148,7 @@ module CINK-LANG-SYNTAX
                | "#include" "<iostream>" 
                  [latex("\texttt{\#include<iostream>}")]
                | "using" "namespace" "std" ";" 
-                 [latex("using namespace std;")]
+                 [latex("\texttt{using namespace std;}")]
                | Decl ";"
                | "{" "}"
                | "{" Stmts "}"
@@ -195,7 +195,7 @@ module CINK-LANG-SEMANTICS
 
   syntax Val ::= "void" | "undefined" | LVal
                | "lambda" "(" Decls "@" Stmts ")" 
-                 [latex("\lambda{#1}\mathrel{\bullet}{#2}")]
+                 [latex("\lambda\,{#1}\mathrel{\bullet}{#2}")]
 
   syntax Vals ::= List{Val,","}
   syntax KResult ::= Val
@@ -270,18 +270,19 @@ module CINK-LANG-SEMANTICS
   /*@
     In order to have a minimal set of rules, some syntactic constructs
     are desugared. The desugaring can be done using the structural rules.
-    In order to avoid some tw
+    In order to avoid some ambiguous parsings, some terms are written using
+    the \K AST notation.
    */
 
   /*@ The desugaring rule for the if-then statement: */
   rule if(B:Exp) St:Stmt => if(B) St else {}  [anywhere]
-
-  /*@ The desugaring rule for the function call expression without arguments:
-   */
-  rule '_`(_`)(X:Id,,E:Exp) => '_`(_`)(X,,'_`,_(E,, .Exps))  [anywhere]
   
   /*@
-    The desugaring rule for variable declarations with multiple variables:
+    The desugaring rule for statements declaring multiple variables. Here
+    the use of the \K AST notation allows to write a single rule for all
+    declaration types. The function \texttt{isDeclLabel}$(KL)$ returns 
+    true only if $KL$ is a label of a declaration; it is defined later,
+    in the subsection devoted to the auxiliary functions.
    */
   rule '_;(KL:KLabel('_`,_(E:Exp,, Es:Exps)))
        =>
@@ -294,7 +295,9 @@ module CINK-LANG-SEMANTICS
   /*@
     Desugaring rule for variable declarations with initialization:
      e.g., \texttt{int *y = \&x;} is desugared into 
-    \texttt{ int *y; y = \&x;}.
+    \texttt{ int *y; y = \&x;}. The previous desugaring rule allows us
+    to consider here only simple variable declarations, which are not 
+    aliases. 
    */
   rule '_;(KL:KLabel('_`,_('_=_(E1:Exp,, E2:Exp),, .Exps)))
        =>
@@ -328,7 +331,7 @@ module CINK-LANG-SEMANTICS
   context KL:KLabel('_`,_(&_ = (HOLE => lvalue(HOLE)),, .Exps))
        when isDeclLabel(KL)
 
-  /*@ */
+  /* */
   rule [alias-decl] :
        <k> KL:KLabel('_`,_(& X:Id = loc(L:Int),, .Exps)) => void  ...</k>      
        <env> Env:Map => Env[L/X] </env>
@@ -424,7 +427,7 @@ module CINK-LANG-SEMANTICS
 
 
   /*@ \subsubsection{The prefix increment operator.}
-    From the standard:
+    From the manual of C++2011:
     "The operand of prefix ++ is modified by adding 1, or set to true 
     if it is bool (this use is deprecated). The operand shall be a 
     modifiable lvalue. The type of the operand shall be an arithmetic 
@@ -436,7 +439,7 @@ module CINK-LANG-SEMANTICS
     both arguments, it will be reduced something like $\it I + loc(L)$ and 
     in that case $\it loc(L)$ should be evaluate at the value stored into
     the location $L$. This is one reason for that we make a clear distinction
-    between r-value and l-value expression and use the contexts declarations
+    between r-value and l-value expressions and use the contexts declarations
     in order to specify how to valuate subexpressions.
   */
 
@@ -458,14 +461,14 @@ module CINK-LANG-SEMANTICS
 
 
   /*@
-    The \texttt{rvalue()} operator.\\
-    The case we have got an l-value where an r-value is expected: 
+    The \texttt{rvalue()} operator:\\
+    -- the case we have got an l-value where an r-value is expected: 
   */ 
   rule <k> rvalue(loc(L:Int)) => V ...</k>
        <store>... L |-> V:Val ...</store>
 
   /*@
-    The case when we got an r-value and an r-value is expected:
+    -- the case when we got an expected r-value:
   */
   rule rvalue(V:Val) => V when 'isLVal(V) =/=K true
 
@@ -919,7 +922,7 @@ module CINK
        I
        [anywhere]
   /*@
-    We are ready now to give the semantics for \texttt{eqTo}$(X,I): it is 
+    We are ready now to give the semantics for \texttt{eqTo}$(X,I)$: it is 
     satisfied by a configuration (state) $B$ iff the value of $X$ in $B$ is
     equal to $I$: 
    */
