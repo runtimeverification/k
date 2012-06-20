@@ -8,10 +8,9 @@
           return true;
         }
     int main() {
-         int n;
-         int p = 2;
+         int n, p = 2;
+         cout << "n = ";
          cin >> n;
-      //   n = 50;
          while (n > 0) {
            if (isPrim(p)) n = n - 1;
            p = p + 1;

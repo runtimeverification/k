@@ -10,9 +10,8 @@ int fact(int n) {
 }
 int main() {
   int n;
-//  cout << "n = ";
-//  cin >> n;
-  n = 3;
+  cout << "n = ";
+  cin >> n;
   cout << fact(n + 1);
   return 0;
 }

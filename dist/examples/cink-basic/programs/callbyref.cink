@@ -1,12 +1,12 @@
-int f(int &x) {
-  x = 5;
+int f(int x, int &y) {
+  x = 1;
+  y = 2;
   return x;
 }
 
-int g(int &x, int &y) {
+void g(int &x, int &y) {
   x = 3;
-  y = 2;
-  return x + y;
+  y = 4;
 }
 
 int main () {
@@ -14,9 +14,8 @@ int main () {
   int y;
   cout << "x, y: ";
   cin >> x >> y;
-//  f(x);
-//  cout << x;
+//  f(x, y);
+  cout << f(x, y) << x << y << "\n";
   g(y, x);
-  cout << x;
-  cout << y;
+  cout << x << y << "\n";
 }

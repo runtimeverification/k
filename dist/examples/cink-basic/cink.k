@@ -12,7 +12,8 @@
 
 /*@ \section{Introduction}
 
-CinK is \Cpp like language we used to experiment with \K. The language is used
+CinK is a kernel of the \Cpp language we used to experiment with \K.
+The language is used
 an example for teaching classes and is refered in several research paper.
 
 In this report we briefly present the \K definition of CinK. The most part of
@@ -23,14 +24,31 @@ these are not displayed. In pdf version, for ease reading reasons, there are
 used different fonts in order to distinguish between different syntactic 
 categories.
 
+The report is not intended to be an introduction to \K. 
+We assume the reader is already familiar with the \K Framework and the 
+\KTool and we try to share our experiece in defining a languages with some
+specific features, as \Cpp is. Such features includes a clear distinction
+between l-values and r-values, declaration of aliases, and 
+various parameters passing mechanisms.
+We also extend the definition with a small property language, including LTL
+formulas, and we show how the \KTool is used together with Maude system 
+for analazing \Cink programs.
+
+The \K definition of \Cink is continuously evolving, so this report presents
+the status of this definition at the publication date. 
+
 %We refer the reader to~\cite{k-primer-2012-v25} for a brief presentation of 
 %the \KTool.
 */
 
 /*@ \section{Syntax}
-The syntax of Cink is written using the last version at the moment of the 
-\K Tool, namely K3. The syntax of a language is given using a BNF-like 
-notation enriched with annotations and priority specifications. 
+The syntax of \Cink is written using the last version at the moment of the 
+\KTool. Since the language is relatively small, we use the facilties the 
+\KTool offers for deffining the syntax.This is given using a BNF-like 
+notation enriched with annotations and priority specifications.
+In this way, the rules giving semantics are written using the \Cink 
+syntax. However, in order to avoid some ambiguous parsings, some rules are
+written using the corresponding \K abstract syntax trees. 
 */
 
 module CINK-LANG-SYNTAX 
@@ -38,13 +56,15 @@ module CINK-LANG-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
 
   /*@ \subsection{Declarations}
+    The declarations are used for declaring variables and function names
+    together with their return types.
     We consider only integer and boolean variables. A return type of a function
     could be an integer, a boolean, or \texttt{void}.
   */
 
-  syntax Decl ::= "int"  Exp
-                | "void" Exp
-                | "bool" Exp
+  syntax Decl ::= "int"  Exps
+                | "void" Exps
+                | "bool" Exps
 
   /*@ \subsection{Expressions} */
 
@@ -253,23 +273,34 @@ module CINK-LANG-SEMANTICS
     In order to avoid some tw
    */
 
-  /*@ Desugaring rule for the if-then statement: */
+  /*@ The desugaring rule for the if-then statement: */
   rule if(B:Exp) St:Stmt => if(B) St else {}  [anywhere]
 
-  /*@ Desugaring rule for the function call expression without arguments */
+  /*@ The desugaring rule for the function call expression without arguments:
+   */
   rule '_`(_`)(X:Id,,E:Exp) => '_`(_`)(X,,'_`,_(E,, .Exps))  [anywhere]
+  
+  /*@
+    The desugaring rule for variable declarations with multiple variables:
+   */
+  rule '_;(KL:KLabel('_`,_(E:Exp,, Es:Exps)))
+       =>
+       '__('_;(KL('_`,_(E,, .Exps))),, '_;(KL(Es)))
+       when isDeclLabel(KL)
+       andBool (Es =/=K .Exps)
+       [anywhere]
 
 
   /*@
-    Desugaring rules for variablee declarations with initialization:
+    Desugaring rule for variable declarations with initialization:
      e.g., \texttt{int *y = \&x;} is desugared into 
     \texttt{ int *y; y = \&x;}.
    */
-  rule '_;(KL:KLabel('_=_(E1:Exp,, E2:Exp)))
+  rule '_;(KL:KLabel('_`,_('_=_(E1:Exp,, E2:Exp),, .Exps)))
        =>
-       '__('_;(KL(E1)),, '_;('_=_(getName(E1),, E2)))
-       when isDeclLabel(KL) ==K true
-       andBool isAlias('_=_(E1,, E2)) =/=K true
+       '__('_;(KL('_`,_(E1,, .Exps))),, '_;('_=_(getName(E1),, E2)))
+       when isDeclLabel(KL) 
+       andBool (isAlias('_=_(E1,, E2)) =/=K true)
        [anywhere]
 
 
@@ -288,26 +319,30 @@ module CINK-LANG-SEMANTICS
        [structural]
 
   /*@
-    The rules vor variable declarations must be in this order.
+    The rules for variable declarations. 
+    Declaration of an alias: 
   */
 
-  context KL:KLabel(_ = (HOLE => lvalue(HOLE)))
-       when isDeclLabel(KL) ==Bool true
+//('int_).KLabel(('_`,_).KLabel(('_=_).KLabel(('&_).KLabel(# #id "b"(.List{K})),,# #id "a"(.List{K})),,('.List`{","`}).KLabel(.List{K}))) 
 
-  /*@ Declaration of an alias: */
+  context KL:KLabel('_`,_(&_ = (HOLE => lvalue(HOLE)),, .Exps))
+       when isDeclLabel(KL)
+
+  /*@ */
   rule [alias-decl] :
-       <k> KL:KLabel(& X:Id = loc(L:Int)) => void  ...</k>      
+       <k> KL:KLabel('_`,_(& X:Id = loc(L:Int),, .Exps)) => void  ...</k>      
        <env> Env:Map => Env[L/X] </env>
-       when isDeclLabel(KL) ==Bool true
+       when isDeclLabel(KL)
        [structural]
 
   /*@ Declaration of a variable: */
   rule [var-decl] :
-       <k> KL:KLabel(E:Exp) => void  ...</k>      
+       <k> KL:KLabel('_`,_(E:Exp,, .Exps)) => void  ...</k>      
        <env> Env:Map => Env[L/getName(E)] </env>
        <store>... . => (L |-> undefined) ...</store>
        <nextLoc> L:Int => (L +Int 1) </nextLoc>
-       when isDeclLabel(KL) ==Bool true
+       when isDeclLabel(KL)
+       andBool (isAlias(E) =/=K true)
        [structural]
 
   /*@ The \texttt{\#include} directive has no semantics yet. */
@@ -757,7 +792,7 @@ module CINK-LANG-SEMANTICS
    The function \texttt{isDeclLabel} tests whether an initialization expression
    is in fact an alias.
   */
-  syntax Bool ::= "isAlias" "(" Exp ")" [function]
+  syntax K ::= "isAlias" "(" Exp ")" [function]
 
   rule isAlias(& X:Id = E:Exp) => true [anywhere]
 
@@ -773,6 +808,8 @@ module CINK-LANG-SEMANTICS
 
   rule isLValue(X:Id) => true [anywhere]
 
+  rule isLValue(* X:Id) => true [anywhere]
+
   /*@
     The next oprator returns the variable name from an expression occurring
     in a declaration:
@@ -786,6 +823,9 @@ module CINK-LANG-SEMANTICS
        when isDeclLabel(KL) ==Bool true
        [anywhere]
   rule getName(E1:Exp = E2:Exp) => getName(E1) [anywhere]
+  rule getName(KL:KLabel('_`,_(E:Exp,, .Exps))) => getName(E)
+       when isDeclLabel(KL) ==Bool true
+       [anywhere]
 
 
   /*@
@@ -885,6 +925,7 @@ module CINK
    */
 
   rule KItem(B:Bag) LTL|= #eqTo(X:Id, I:Int) => true when val(B, X) ==K I [anywhere]
+
 
 endmodule
 
