@@ -15,7 +15,7 @@
            if (isPrim(p)) n = n - 1;
            p = p + 1;
          }
-         cout << p;
+         cout << p - 1;
          return 0;
     }
 
