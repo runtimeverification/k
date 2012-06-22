@@ -199,7 +199,10 @@ public class Initialize {
 			/******************* CHANGING DEFAULTS ACCORDING TO CONFIG FILE  ******************/
 			if(config != null)
 			{
-				Element krunopts = (Element)config.getElementsByTagName("krun-options").item(0);
+				NodeList kopts = config.getElementsByTagName("krun-options");
+				if(kopts.getLength() > 0)
+				{
+				Element krunopts = (Element)kopts.item(0);
 				boolean set = false;
 				
 				NodeList pgms = krunopts.getElementsByTagName("program");
@@ -241,6 +244,7 @@ public class Initialize {
 							krunoptions.put(opt.getAttribute("name"), opt.getAttribute("value"));
 						}
 					}
+				}
 				}
 			}
 			/*************************************/
