@@ -26,12 +26,12 @@ public class StaticK {
 	public static int ulimit = 120;
 	public static Report report = new Report("junit-report.xml");
 	
-	public static List<Example> getExamples(String configuration, String k3jar) {
+	public static List<Example> getExamples(String configuration, String k3jar, String tagName) {
 		Document document = getDocument(configuration);
 
 		List<Example> examples = new LinkedList<Example>();
 
-		NodeList exampless = document.getElementsByTagName("example");
+		NodeList exampless = document.getElementsByTagName(tagName);
 		for (int i = 0; i < exampless.getLength(); i++) {
 			Element example = (Element) exampless.item(i);
 			String dir = toolsDir + fileSep + "Jenkins" + fileSep + kbase
@@ -64,11 +64,11 @@ public class StaticK {
 						krunOptions.add(value);
 				}
 				
-				programs.add(new Program(file, input, output, "", mainFile, dir, krunOptions));
+				programs.add(new Program(file, input, output, "", mainFile, dir, krunOptions, tagName));
 			}
 
 			Example e = new Example(dir, mainFile, mainModule, new String[] {},
-					k3jar, compiledFile, programs);
+					k3jar, compiledFile, programs, tagName);
 			examples.add(e);
 		}
 

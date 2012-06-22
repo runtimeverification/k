@@ -11,10 +11,11 @@ public class Program extends Thread {
 	private int exit;
 	private Executor compile;
 	private long time = 0;
+	public String type = "";
 	
 	public Program(String filename, String inputFile, String outputFile,
 			String krun, String kdefinition, String dir,
-			List<String> krunOptions) {
+			List<String> krunOptions, String type) {
 		super();
 		this.filename = filename;
 		this.inputFile = inputFile;
@@ -23,6 +24,7 @@ public class Program extends Thread {
 		this.kdefinition = kdefinition;
 		this.dir = dir;
 		this.krunOptions = krunOptions;
+		this.type = type;
 	}
 
 	@Override

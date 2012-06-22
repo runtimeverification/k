@@ -16,10 +16,11 @@ public class Example extends Thread {
 	private int THREAD_POOL_SIZE = 24;
 	public boolean runPrograms;
 	private long time = 0;
+	public String tagName;
 	
 	public Example(String dir, String mainFile, String mainModule,
 			String[] krunOptions, String k3jar, String compiledFile,
-			List<Program> programs) {
+			List<Program> programs, String tagName) {
 		super();
 		this.dir = dir;
 		this.mainFile = mainFile;
@@ -28,6 +29,7 @@ public class Example extends Thread {
 		this.k3jar = k3jar;
 		this.programs = programs;
 		this.compiledFile = compiledFile;
+		this.tagName = tagName;
 	}
 
 	@Override

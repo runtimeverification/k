@@ -61,6 +61,17 @@ public class Report {
 			testsuites.appendChild(testsuite);
 		}
 
+		if (example.tagName.equals("regression"))
+		{
+			testsuite = tests.get("regression");
+			if (testsuite == null) {
+				testsuite = doc.createElement("testsuite");
+				testsuite.setAttribute("name", suite);
+				tests.put(suite, testsuite);
+				testsuites.appendChild(testsuite);
+			}
+		}
+		
 		// create test case
 		Element testcase = doc.createElement("testcase");
 
@@ -98,7 +109,6 @@ public class Report {
 		// append testcase to suite
 		testsuite.appendChild(testcase);
 	}
-
 	
 	public void report(Program program, String suite) {
 		Element testsuite = tests.get(suite);
@@ -109,6 +119,17 @@ public class Report {
 			testsuites.appendChild(testsuite);
 		}
 
+		if (program.type.equals("regression"))
+		{
+			testsuite = tests.get("regression");
+			if (testsuite == null) {
+				testsuite = doc.createElement("testsuite");
+				testsuite.setAttribute("name", suite);
+				tests.put(suite, testsuite);
+				testsuites.appendChild(testsuite);
+			}
+		}
+		
 		// create test case
 		Element testcase = doc.createElement("testcase");
 
@@ -146,7 +167,6 @@ public class Report {
 		// append testcase to suite
 		testsuite.appendChild(testcase);
 	}
-
 	
 	/**
 	 * Given an XML file as input it return the DOM Document
