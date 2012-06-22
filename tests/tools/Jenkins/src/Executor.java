@@ -51,16 +51,12 @@ public class Executor extends Thread {
 			    		output = "";
 			    		while ((line = br.readLine()) != null) {
 			    			output += line + "\n";
-			    			if (line.matches("directory"))
-			    				System.out.println(this);
 			    		}
 
 			    		br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 			    		line = ""; error = "";
 			    		while ((line = br.readLine()) != null) {
 			    			error += line + "\n";
-			    			if (line.matches("directory"))
-			    				System.out.println(this);
 			    		}
 
 			    		return p.waitFor();
