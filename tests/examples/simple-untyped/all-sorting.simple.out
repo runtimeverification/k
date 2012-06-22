@@ -1,0 +1,17 @@
+Size of the array to sort = Type 5 numbers: Finished reading the 5 numbers
+The original unsorted array is:
+71 23 43 23 91 
+Reversing the array ... Done!
+The reversed array is:
+91 23 43 23 71 
+Sorting the array using insertion sort ... Done!
+The resulting array is:
+23 23 43 71 91 
+Reversing the array ... Done!
+Sorting the array using bubble sort ... Done!
+The resulting array is:
+23 23 43 71 91 
+Reversing the array ... Done!
+Sorting the array using heap sort ... Done!
+The resulting array is:
+23 23 43 71 91 

@@ -1,0 +1,3 @@
+<config>
+	<test def="/dist/examples/simple-untyped/simple-untyped.k" program-extension="simple" compiled-file-name="simple-untyped-compiled.maude"/>
+</config>
