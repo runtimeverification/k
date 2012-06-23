@@ -403,6 +403,15 @@ public class Main {
 			// save the pretty-printed output of jkrun in a file
 			//FileUtil.createFile(K.krun_output, prettyOutput);
 
+			//test if the krun directory is empty and if is not empty delete its content
+			File f = new File(K.krunDir);
+			boolean empty = true;
+			if (f.exists()) {
+				empty = FileUtil.isEmptyDir(K.krunDir);
+			}
+			if (!empty) {
+				FileUtil.deleteDirectoryContent(f);
+			}
 			//rename krun temp directory into "krun" 
 			boolean success = FileUtil.renameDirectory(K.krunTempDir, K.krunDir);
 			if (!success) {

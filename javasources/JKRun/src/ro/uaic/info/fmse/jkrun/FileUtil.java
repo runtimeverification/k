@@ -117,11 +117,36 @@ public class FileUtil {
 		return (path.delete());
 	}
 	
+	public static void deleteDirectoryContent(File path) {
+		if (path.exists()) {
+			File[] files = path.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				if (files[i].isDirectory()) {
+					deleteDirectory(files[i]);
+				} else {
+					files[i].delete();
+				}
+			}
+		}
+	}
+	
 	public synchronized static boolean renameDirectory(String oldDirName, String newDirName) {
 		File oldDir = new File(oldDirName);
 		File newDir = new File(newDirName);
 		boolean rename = oldDir.renameTo(newDir);
 		return rename;
+	}
+	
+	public static boolean isEmptyDir(String dirName) {
+		boolean result = true;
+		File file = new File(dirName);
+        if (file.isDirectory()) {
+	        String[] files = file.list();
+	        if (files.length > 0) {
+	        	result = false;
+	        }
+        }
+        return result;
 	}
 	
 	public static String parseResultOutputMaude(String file) {
