@@ -23,14 +23,14 @@ public class ThreadedStreamHandler extends Thread {
 				content.append(line + K.lineSeparator);
 			}
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			Error.report("Error while running thread:" + ioe.getMessage());
 		} catch (Throwable t) {
-			t.printStackTrace();
+			Error.report("Error while running thread:" + t.getMessage());
 		} finally {
 			try {
 				bufferedReader.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Error.report("Error while running thread:" + e.getMessage());
 			}
 		}
 	}

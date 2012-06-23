@@ -13,8 +13,13 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 public class CommandlineOptions {
-	
-	static class OptionComparator implements Comparator {
+
+	private Options options;
+	private HelpFormatter help;
+	private CommandLine cl;
+    private ArrayList<Option> optionList = new ArrayList<Option>();
+    
+    static class OptionComparator implements Comparator {
 		public int compare(Object obj1, Object obj2) {
 			Option opt1 = (Option) obj1;
 			Option opt2 = (Option) obj2;
@@ -29,11 +34,6 @@ public class CommandlineOptions {
 				return 0;
 		}
 	}
-
-	Options options;
-	HelpFormatter help;
-	private CommandLine cl;
-    private ArrayList<Option> optionList = new ArrayList<Option>();
 	
 	public CommandlineOptions() {
 		options = new Options();
@@ -122,7 +122,7 @@ public class CommandlineOptions {
 			setCommandLine(parser.parse(options, cmd));
 			return getCommandLine();
 		} catch (ParseException e) {
-			e.printStackTrace();
+			Error.report("Error while parsing commandline:" + e.getMessage());
 		}
 
 		return null;

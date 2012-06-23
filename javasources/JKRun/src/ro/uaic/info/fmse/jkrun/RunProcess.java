@@ -11,31 +11,6 @@ public class RunProcess {
 	private String err = null;
 	private int exitCode;
 
-	public String getStdout() {
-		return stdout;
-	}
-
-	public void setStdout(String stdout) {
-		this.stdout = stdout;
-	}
-
-	// catch error
-	public String getErr() {
-		return err;
-	}
-
-	public void setErr(String err) {
-		this.err = err;
-	}
-	
-	public void setExitCode(int exitCode) {
-		this.exitCode = exitCode;
-	}
-
-	public int getExitCode() {
-		return exitCode;
-	}
-
 	public void execute(String... commands) {
 
 		ThreadedStreamHandler inputStreamHandler, errorStreamHandler;
@@ -88,11 +63,37 @@ public class RunProcess {
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			Error.report("Error while running process:" + e.getMessage());
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			Error.report("Error while running process:" + e.getMessage());
 		}
 
+	}
+	
+	public String getStdout() {
+		return stdout;
+	}
+
+	public void setStdout(String stdout) {
+		this.stdout = stdout;
+	}
+
+	public String getErr() {
+		return err;
+	}
+
+	public void setErr(String err) {
+		this.err = err;
+	}
+	
+	public void setExitCode(int exitCode) {
+		this.exitCode = exitCode;
+	}
+
+	public int getExitCode() {
+		return exitCode;
 	}
 
 }

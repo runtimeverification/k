@@ -226,7 +226,7 @@ public class Main {
 
 			// printing the output according to the given options
 			if (K.help) {
-				printUsage(cmd_options.options);
+				printUsage(cmd_options.getOptions());
 				System.exit(0);
 			}
 			if (K.version) {
@@ -372,19 +372,15 @@ public class Main {
 			}
 			if ("pretty".equals(K.output_mode)) {
 				PrettyPrintOutput p = new PrettyPrintOutput(cmd);
-				//String input_ = K.userdir + K.fileSeparator + "maudeoutput_sum-0_break_imppp.xml";
-				//String input_ = K.userdir + K.fileSeparator + "maudeoutput_cut_1.xml";
 				File file = new File(K.maude_output);
-				//File file_ = new File(input_);
 				File processedFile = new File(K.processed_maude_output);
 			    p.preprocessDoc(file, K.processed_maude_output);
 				String red = p.processDoc(processedFile);
 				/*String prettyOutput = XmlUtil.formatXml(red, K.color);
 				AnsiConsole.out.print(prettyOutput);*/
-				//AnsiConsole.out.print(red);
+				//AnsiConsole.out.println(red);
 				System.out.println(red);
 			} else if ("raw".equals(K.output_mode)) {
-				//String output = FileUtil.parseOutputMaude(K.maude_out);
 				String output = new String();
 				if ("search".equals(K.maude_cmd)) {
 					List<String> l = FileUtil.parseSearchOutputMaude(K.maude_out);
@@ -407,22 +403,24 @@ public class Main {
 			// save the pretty-printed output of jkrun in a file
 			//FileUtil.createFile(K.krun_output, prettyOutput);
 
-			// delete temporary files
-			//FileUtil.deleteFile(K.maude_io_cmd);
-			//FileUtil.deleteFile(K.maude_output);
-
+			//rename krun temp directory into "krun" 
+			boolean success = FileUtil.renameDirectory(K.krunTempDir, K.krunDir);
+			if (!success) {
+				Error.externalReport("Directory does not rename successfully.");
+			}
+			
 			System.exit(0);
 
 		} catch (ParseException exp) {
-			System.out.println("Unexpected exception:" + exp.getMessage());
-			System.exit(1);
+			Error.externalReport("Unexpected exception:" + exp.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
+			//e.printStackTrace();
+			Error.externalReport(e.getMessage());
 		} catch (Exception e) {
 			System.out.println("You provided bad program arguments!");
 			e.printStackTrace();
-			printUsage(cmd_options.options);
+			//Error.report(e.getMessage());
+			printUsage(cmd_options.getOptions());
 			System.exit(1);
 		}
 

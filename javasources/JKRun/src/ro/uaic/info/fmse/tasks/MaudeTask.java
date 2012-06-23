@@ -52,7 +52,6 @@ public class MaudeTask extends Thread {
 
 	private void runMaude() throws IOException {
 		ProcessBuilder maude = new ProcessBuilder();
-		File f = FileUtil.createFile(K.maude_output);
 		/*Map<String, String> environment = maude.environment();
 		environment.put("MAUDE_LIB", System.getenv("MAUDE_LIB"));*/
 		List<String> commands = new ArrayList<String>();
@@ -63,7 +62,7 @@ public class MaudeTask extends Thread {
 		//}
 		commands.add("-no-wrap");
 		commands.add("-no-banner");
-		commands.add("-xml-log=" + f.getCanonicalPath());
+		commands.add("-xml-log=" + K.maude_output);
 		maude.command(commands);
 
 		Process maudeProcess = maude.start();
@@ -89,7 +88,7 @@ public class MaudeTask extends Thread {
 	}
 
 	private void writeError() throws IOException {
-		// redirect out in log file
+		// redirect error in log file
 		BufferedReader maudeOutput = new BufferedReader(new InputStreamReader(_maudeProcess.getErrorStream()));
 		BufferedWriter outputFile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_errorFile)));
 

@@ -1,33 +1,31 @@
 package ro.uaic.info.fmse.jkrun;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class K {
 
 	public static boolean verbose = false;
 
 	// os specific
-	public static String userdir = System.getProperty("user.dir");
-	public static String fileSeparator = System.getProperty("file.separator");
-	public static String lineSeparator = System.getProperty("line.separator");
-	public static String k_base = KPaths.getKBase(false);
+	public static final String userdir = System.getProperty("user.dir");
+	public static final String fileSeparator = System.getProperty("file.separator");
+	public static final String lineSeparator = System.getProperty("line.separator");
+	public static final String k_base = KPaths.getKBase(false);
 
-	public static String kdir = userdir + fileSeparator + ".k";
-	public static String krunDir = kdir + fileSeparator + "krun";
-	public static String maude_in = krunDir + fileSeparator + FileUtil.generateUniqueName("maude_in.txt");
-	public static String maude_out = krunDir + fileSeparator + FileUtil.generateUniqueName("maude_out.txt");
-	public static String maude_err = krunDir + fileSeparator + FileUtil.generateUniqueName("maude_err.txt");
+	public static final String kdir = userdir + fileSeparator + ".k";
+	public static final String krunDir = kdir + fileSeparator + "krun";
+	public static final String krunTempDir = kdir + fileSeparator + FileUtil.generateUniqueFolderName("krun");
+	public static final String maude_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_in.txt");
+	public static final String maude_out = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_out.txt");
+	public static final String maude_err = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_err.txt");
 
 	// kast
-	public static String kast = k_base + K.fileSeparator + "bin" + K.fileSeparator + getKastOnOs();
+	public static final String kast = k_base + K.fileSeparator + "bin" + K.fileSeparator + getKastOnOs();
 
-	public static String maude_io_cmd = krunDir + fileSeparator + FileUtil.generateUniqueName("io-cmd.maude");
-	public static String maude_output = krunDir + fileSeparator + FileUtil.generateUniqueName("maudeoutput.xml");
-	public static String processed_maude_output = krunDir + fileSeparator + FileUtil.generateUniqueName("maudeoutput_simplified.xml");
+	public static final String maude_io_cmd = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("io-cmd.maude");
+	public static final String maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput.xml");
+	public static final String processed_maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput_simplified.xml");
 	
 	// where to write the pretty-printed output of jkrun
-	public static String krun_output = krunDir + fileSeparator + FileUtil.generateUniqueName("krun_output.txt");
+	public static final String krun_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("krun_output.txt");
 
 	// the default values for jkrun commandline options
 	public static String desk_file;
@@ -58,11 +56,6 @@ public class K {
 		if (System.getProperty("os.name").toLowerCase().contains("win"))
 			return "kast.bat";
 		return "kast";
-	}
-	
-	public static void main(String args[]) {
-		
-
 	}
 	
 }

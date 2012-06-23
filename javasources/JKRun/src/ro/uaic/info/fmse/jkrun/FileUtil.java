@@ -46,7 +46,7 @@ public class FileUtil {
 		return null;
 	}
 
-	public static String generateUniqueName(String fileName) {
+	public static String generateUniqueFileName(String fileName) {
 
 		int dot = fileName.lastIndexOf(".");
 		String name = fileName.substring(0, dot);
@@ -55,7 +55,16 @@ public class FileUtil {
 		try {
 			return File.createTempFile(name, extension).getName();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Error.report("Error while generating unique file name:" + e.getMessage());
+		}
+		return null;
+	}
+	
+	public static String generateUniqueFolderName(String dirName) {
+		try {
+			return File.createTempFile(dirName, "").getName();
+		} catch (IOException e) {
+			Error.report("Error while generating unique directory name:" + e.getMessage());
 		}
 		return null;
 	}
@@ -71,13 +80,11 @@ public class FileUtil {
 				stringBuilder.append(K.lineSeparator);
 			}
 			return stringBuilder.toString();
-
 		} catch (FileNotFoundException e) {
 			Error.report("Cannot retrieve file content. Make sure that file " + file + " exists.");
 		} catch (IOException e) {
 			Error.silentReport("Cannot retrieve file content. An IO error occured.");
 		}
-
 		return "";
 	}
 
@@ -108,6 +115,13 @@ public class FileUtil {
 			}
 		}
 		return (path.delete());
+	}
+	
+	public static boolean renameDirectory(String oldDirName, String newDirName) {
+		File oldDir = new File(oldDirName);
+		File newDir = new File(newDirName);
+		boolean rename = oldDir.renameTo(newDir);
+		return rename;
 	}
 	
 	public static String parseResultOutputMaude(String file) {
@@ -144,7 +158,8 @@ public class FileUtil {
 			try {
 				reader.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
+				Error.report("Error while parsing result output maude:" + e.getMessage());
 			}
 		}
 		return null;
@@ -192,7 +207,7 @@ public class FileUtil {
 			try {
 				reader.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Error.report("Error while parsing search output maude:" + e.getMessage());
 			}
 		}
 		return null;
@@ -213,7 +228,7 @@ public class FileUtil {
 					result.add(file);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				Error.report("Error while searching files:" + e.getMessage());
 			}
 		}
 		return result;

@@ -38,7 +38,8 @@ public class KPaths {
 			else
 				return parent.getAbsolutePath();
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			Error.report("Error while get kbase:" + e.getMessage());
 		}
 		return null;
 	}
