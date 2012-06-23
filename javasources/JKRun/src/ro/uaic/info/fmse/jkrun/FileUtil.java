@@ -117,7 +117,7 @@ public class FileUtil {
 		return (path.delete());
 	}
 	
-	public static boolean renameDirectory(String oldDirName, String newDirName) {
+	public synchronized static boolean renameDirectory(String oldDirName, String newDirName) {
 		File oldDir = new File(oldDirName);
 		File newDir = new File(newDirName);
 		boolean rename = oldDir.renameTo(newDir);
