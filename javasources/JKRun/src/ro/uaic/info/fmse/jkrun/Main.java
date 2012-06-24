@@ -402,35 +402,28 @@ public class Main {
 
 			// save the pretty-printed output of jkrun in a file
 			//FileUtil.createFile(K.krun_output, prettyOutput);
-
-			//test if the krun directory is empty and if is not empty delete its content
-			File f = new File(K.krunDir);
-			boolean empty = true;
-			if (f.exists()) {
-				empty = FileUtil.isEmptyDir(K.krunDir);
-			}
-			if (!empty) {
-				FileUtil.deleteDirectoryContent(f);
-			}
-			//rename krun temp directory into "krun" 
-			boolean success = FileUtil.renameDirectory(K.krunTempDir, K.krunDir);
-			if (!success) {
-				Error.externalReport("Directory does not rename successfully.");
-			}
 			
-			System.exit(0);
+			ProcessBean bean = new ProcessBean();
+			bean.setExitCode(0);
+			System.exit(bean.getExitCode());
 
 		} catch (ParseException exp) {
-			Error.externalReport("Unexpected exception:" + exp.getMessage());
+			System.out.println("Unexpected exception:" + exp.getMessage());
+			ProcessBean bean = new ProcessBean();
+			bean.setExitCode(1);
+			System.exit(bean.getExitCode());
 		} catch (IOException e) {
-			//e.printStackTrace();
-			Error.externalReport(e.getMessage());
+			System.out.println(e.getMessage());
+			ProcessBean bean = new ProcessBean();
+			bean.setExitCode(1);
+			System.exit(bean.getExitCode());
 		} catch (Exception e) {
 			System.out.println("You provided bad program arguments!");
 			e.printStackTrace();
-			//Error.report(e.getMessage());
+			ProcessBean bean = new ProcessBean();
+			bean.setExitCode(1);
 			printUsage(cmd_options.getOptions());
-			System.exit(1);
+			System.exit(bean.getExitCode());
 		}
 
 	}

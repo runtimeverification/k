@@ -739,7 +739,9 @@ public class PrettyPrintOutput {
 		AnsiConsole.systemInstall();
 		//newline
 		if (lineskip) {
-			output.append(K.lineSeparator);
+			if (text.indexOf(K.lineSeparator) != 0) {
+				output.append(K.lineSeparator);
+			}
 		}
 		if (whitespace > 0) {
 			String space = XmlUtil.buildWhitespace(whitespace);
