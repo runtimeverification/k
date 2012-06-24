@@ -15,76 +15,80 @@ import ro.uaic.info.fmse.visitors.BasicVisitor;
 public class HTMLFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
 	private String result = "";
-	private String preamble = "";
+	private String css = "";
+	private String title = "";
 	private boolean firstProduction = false;
 	private Map<String, String> colors = new HashMap<String, String>();
 //	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
 
-	public void setResult(String result) {
+	/*public void setResult(String result) {
 		this.result = result;
-	}
+	}*/
 
-	public void setPreamble(String preamble) {
+	/*public void setPreamble(String preamble) {
 		this.preamble = preamble;
 	}
 
 	public String getPreamble() {
 		return preamble;
-	}
+	}*/
 
 	public String getResult() {
-		String endl = System.getProperty("line.separator");
-		String kLatexStyle = "k";
+		
 		String html = 
-			"\\nonstopmode" + endl + 
-			"\\documentclass{article}" + endl + 
-			"\\usepackage[poster,style=bubble]{\"" + kLatexStyle + "\"}" + endl;
+			"<!DOCTYPE html>" + endl + 
+			"<html lang=\"en\">" + endl + 
+			"<head>" + endl + 
+			"	<title>" + title + "</title>" + endl + 
+			"	<style>" + endl + 
+			css + 
+			"	</style>" + endl + 
+			"	<meta charset=\"utf-8\" />" + endl + 
+			"</head>" + endl + 
+			"<body>" + endl;
 		html += 
-			preamble + 
-			"\\begin{document}" + endl + 
 			result + 
-			"\\end{document}" + endl;
+			"</body>" + endl +
+			"</html>" + endl;
 
 		return html;
 	}
 
 	@Override
 	public void visit(Definition def) {
-//		def.accept(patternsVisitor);
-		result += "\\begin{kdefinition}" + endl + "\\maketitle" + endl;
+		result += "<div>" + "Definition" + endl;
 		super.visit(def);
-		result += "\\end{kdefinition}" + endl;
-		if (!preamble.contains("\\title{")) {
-			preamble += "\\title{" + def.getMainModule() + "}" + endl;
-		}
+		result += "Definition - END" + "</div>" + endl;
+		title  = def.getMainModule();
 	}
 
 	@Override
 	public void visit(Module mod) {
 		if (mod.isPredefined())
 			return;
-		result += "\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl;
+		result += "<div>" + "Module " + mod.getName() + endl;
+		//result += "\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl;
 		super.visit(mod);
-		result += "\\end{module}" + endl;
+		result += "Module " + mod.getName() + "- END " + "</div>" + endl;
 	}
 
 	@Override
 	public void visit(Syntax syn) {
-		result += endl + "\\begin{syntaxBlock}";
+		/*result += endl + "\\begin{syntaxBlock}";
 		firstProduction = true;
 		super.visit(syn);
-		result += endl + "\\end{syntaxBlock}" + endl;
+		result += endl + "\\end{syntaxBlock}" + endl;*/
 	}
 
 	@Override
 	public void visit(Sort sort) {
-		result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getSort()) + "}}}";
+		/*result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getSort()) + "}}}";*/
 	}
 
 	@Override
 	public void visit(Production p) {
-		if (firstProduction) {
+		/*if (firstProduction) {
 			result += "\\syntax{";
 			firstProduction = false;
 		} else {
@@ -107,36 +111,36 @@ public class HTMLFilter extends BasicVisitor {
 //		}
 		result += "}{";
 		p.getAttributes().accept(this);
-		result += "}";
+		result += "}";*/
 	}
 
 	@Override
 	public void visit(Terminal pi) {
-		String terminal = pi.getTerminal();
+		/*String terminal = pi.getTerminal();
 		if (terminal.isEmpty())
 			return;
 		if (DefinitionHelper.isSpecialTerminal(terminal)) {
 			result += StringUtil.latexify(terminal);
 		} else {
 			result += "\\terminal{" + StringUtil.latexify(terminal) + "}";
-		}
+		}*/
 	}
 
 	@Override
 	public void visit(UserList ul) {
-		result += "List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
+		//result += "List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
 	}
 
 	@Override
 	public void visit(Configuration conf) {
-		result += "\\kconfig{";
+		/*result += "\\kconfig{";
 		super.visit(conf);
-		result += "}" + endl;
+		result += "}" + endl;*/
 	}
 
 	@Override
 	public void visit(Cell c) {
-		if (c.getElipses().equals("left")) {
+		/*if (c.getElipses().equals("left")) {
 			result += "\\ksuffix";
 		} else if (c.getElipses().equals("right")) {
 			result += "\\kprefix";
@@ -153,16 +157,16 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		result += "{" + StringUtil.latexify(c.getLabel()) + "}{";
 		super.visit(c);
-		result += "}" + endl;
+		result += "}" + endl;*/
 	}
 
 	public void visit(Collection col) {
-		List<Term> contents = col.getContents();
-		printList(contents, "\\mathrel{}");
+		/*List<Term> contents = col.getContents();
+		printList(contents, "\\mathrel{}");*/
 	}
 
 	private void printList(List<Term> contents, String str) {
-		boolean first = true;
+		/*boolean first = true;
 		for (Term trm : contents) {
 			if (first) {
 				first = false;
@@ -170,12 +174,12 @@ public class HTMLFilter extends BasicVisitor {
 				result += str;
 			}
 			trm.accept(this);
-		}
+		}*/
 	}
 
 	@Override
 	public void visit(Variable var) {
-		if (var.getName().equals("_")) {
+		/*if (var.getName().equals("_")) {
 			result += "\\AnyVar";
 		} else {
 			result += "\\variable";
@@ -185,7 +189,7 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		if (!var.getName().equals("_")) {
 			result += "{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}";
-		}
+		}*/
 	}
 
 	private String makeIndices(String str) {
@@ -201,12 +205,12 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Empty e) {
-		result += "\\dotCt{" + e.getSort() + "}";
+		//result += "\\dotCt{" + e.getSort() + "}";
 	}
 
 	@Override
 	public void visit(Rule rule) {
-		result += "\\krule";
+		/*result += "\\krule";
 		if (!rule.getLabel().equals("")) {
 			result += "[" + rule.getLabel() + "]";
 		}
@@ -218,12 +222,12 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		result += "}{";
 		rule.getAttributes().accept(this);
-		result += "}" + endl;
+		result += "}" + endl;*/
 	}
 
 	@Override
 	public void visit(Context cxt) {
-		result += "\\kcontext";
+		/*result += "\\kcontext";
 		result += "{" + endl;
 		cxt.getBody().accept(this);
 		result += "}{";
@@ -232,21 +236,21 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		result += "}{";
 		cxt.getAttributes().accept(this);
-		result += "}" + endl;
+		result += "}" + endl;*/
 	}
 
 	@Override
 	public void visit(Hole hole) {
-		result += "\\khole{}";
+		//result += "\\khole{}";
 	}
 
 	@Override
 	public void visit(Rewrite rew) {
-		result += "\\reduce{";
+		/*result += "\\reduce{";
 		rew.getLeft().accept(this);
 		result += "}{";
 		rew.getRight().accept(this);
-		result += "}";
+		result += "}";*/
 	}
 
 	@Override
@@ -265,65 +269,65 @@ public class HTMLFilter extends BasicVisitor {
 //			pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
 //		}
 //		result += pattern;
-		result += "\\mbox{" + StringUtil.latexify(trm.toString()) + "}";
+		//result += "\\mbox{" + StringUtil.latexify(trm.toString()) + "}";
 	}
 
 	@Override
 	public void visit(Constant c) {
-		result += "\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}";
+		//result += "\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}";
 	}
 
 	@Override
 	public void visit(MapItem mi) {
-		mi.getKey().accept(this);
-		result += "\\mapsto";
-		mi.getItem().accept(this);
+		//mi.getKey().accept(this);
+		//result += "\\mapsto";
+		//mi.getItem().accept(this);
 	}
 
 	@Override
 	public void visit(KSequence k) {
-		printList(k.getContents(), "\\kra");
+		//printList(k.getContents(), "\\kra");
 
 	}
 
 	@Override
 	public void visit(KApp app) {
-		app.getLabel().accept(this);
+		/*app.getLabel().accept(this);
 		result += "(";
 		app.getChild().accept(this);
-		result += ")";
+		result += ")";*/
 	}
 
 	@Override
 	public void visit(ListOfK list) {
-		printList(list.getContents(), "\\kcomma");
+		//printList(list.getContents(), "\\kcomma");
 	}
 
 	@Override
 	public void visit(LiterateDefinitionComment comment) {
-		if (comment.getType() == LiterateCommentType.LATEX) {
+		/*if (comment.getType() == LiterateCommentType.LATEX) {
 			result += "\\begin{kblock}[text]" + endl;
 			result += comment.getValue();
 			result += "\\end{kblock}" + endl;
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
 			preamble += comment.getValue();
-		}
+		}*/
 	}
 
 	@Override
 	public void visit(LiterateModuleComment comment) {
-		if (comment.getType() == LiterateCommentType.LATEX) {
+		/*if (comment.getType() == LiterateCommentType.LATEX) {
 			result += "\\begin{kblock}[text]" + endl;
 			result += comment.getValue();
 			result += "\\end{kblock}" + endl;
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
 			preamble += comment.getValue();
-		}
+		}*/
 	}
 
 	@Override
 	public void visit(Attribute entry) {
-		if (DefinitionHelper.isTagGenerated(entry.getKey()))
+		/*if (DefinitionHelper.isTagGenerated(entry.getKey()))
 			return;
 		if (entry.getKey().equals("latex"))
 			return;
@@ -336,14 +340,14 @@ public class HTMLFilter extends BasicVisitor {
 			firstAttribute = false;
 		} else {
 			result += ", ";
-		}
+		}*/
 	}
 
 	@Override
 	public void visit(Attributes attributes) {
-		firstAttribute = true;
+		/*firstAttribute = true;
 		for (Attribute entry : attributes.getContents()) {
 			entry.accept(this);
-		}
+		}*/
 	}
 }
