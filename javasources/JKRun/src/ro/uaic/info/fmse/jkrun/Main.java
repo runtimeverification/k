@@ -127,6 +127,7 @@ public class Main {
 		CommandlineOptions cmd_options = new CommandlineOptions();
 		CommandLine cmd = cmd_options.parse(cmds);
 		try {
+		
 			// Parse the program arguments
 
 			if (cmd.hasOption("search")) {
