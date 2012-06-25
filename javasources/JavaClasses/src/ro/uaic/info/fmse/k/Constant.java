@@ -36,7 +36,7 @@ public class Constant extends Term {
 		if (sort.equals("#Id"))
 			return "#id \"" + value + "\"";
 
-		return StringUtil.unescape(value);
+		return value;
 	}
 
 	public String getSort() {

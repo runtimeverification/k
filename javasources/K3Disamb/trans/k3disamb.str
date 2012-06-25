@@ -22,7 +22,7 @@ rules // Main editor interface (defined by editor/K3Disamb-Builders and -Referen
     (ast, path, project-path) -> (ast', errors, warnings, notes)
     with
       editor-init;
-      ast'     := <analyze-top>;
+      ast'     := <id>;
       errors   := <collect-all(constraint-error, conc)> ast';
       warnings := <collect-all(constraint-warning, conc)> ast';
       notes    := <collect-all(constraint-note, conc)> ast'
@@ -41,13 +41,13 @@ rules // Main editor interface (defined by editor/K3Disamb-Builders and -Referen
     with
       editor-init;
       filename := <guarantee-extension(|"analyzed.aterm")> path;
-      result   := <analyze-top> (selected, path, project-path)
+      result   := <id> (selected, path, project-path)
   
   // Resolves a reference when the user control-clicks or presses F3 in the editor.
   editor-resolve:
     (node, position, ast, path, project-path) -> target
     where
-      language  := <index-origin-language> ast;
+      language  := <id> ast;
       index-setup(|language, [project-path], $[[project-path]/[path]]);
       target    := <index-lookup> node
 
@@ -62,7 +62,7 @@ rules // Main editor interface (defined by editor/K3Disamb-Builders and -Referen
     (node, position, ast, path, project-path) -> proposals'
     where
       editor-init;
-      ast'              := <analyze-top> (ast, path, project-path);
+      ast'              := <id> (ast, path, project-path);
       x                 := <collect-one(?COMPLETION(_))> ast';
       COMPLETION(name)  := x;
       (
