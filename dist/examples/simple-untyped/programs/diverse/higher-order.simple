@@ -45,20 +45,20 @@ function app2(f,x) {
 }
 
 function map(f,x) {
-  for i=0 to sizeOf(x)-1 do
+  for i=0 to sizeOf(x) - 1 do
     x[i] = app2(f,x[i]);
 }
 
 function printall() {
   print("x = ",x, ";  a[] = ");
-  for i=0 to sizeOf(a)-1
+  for i=0 to sizeOf(a) - 1
     do print(a[i], " ");
   print("\n");
 }
 
 function main() {
   x = 0;
-  for i=0 to sizeOf(a)-1 do
+  for i=0 to sizeOf(a) - 1 do
     a[i]=i;
   printall();
   hoincx()();
