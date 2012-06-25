@@ -57,6 +57,8 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Definition def) {
+		initializeCss();
+		
 		result += "<div>" + "Definition" + endl;
 		super.visit(def);
 		result += "Definition - END" + "</div>" + endl;
@@ -70,29 +72,30 @@ public class HTMLFilter extends BasicVisitor {
 		result += "<div>" + "Module " + mod.getName() + endl;
 		//result += "\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl;
 		super.visit(mod);
-		result += "Module " + mod.getName() + "- END " + "</div>" + endl;
+		result += "Module " + mod.getName() + "- END " + "<br />" + "<br />" + "</div>" + endl;
 	}
 
 	@Override
 	public void visit(Syntax syn) {
-		/*result += endl + "\\begin{syntaxBlock}";
+		result += "<div>" + "SYNTAX" + endl;
 		firstProduction = true;
 		super.visit(syn);
-		result += endl + "\\end{syntaxBlock}" + endl;*/
+		result += "</div>" + endl;
 	}
 
 	@Override
 	public void visit(Sort sort) {
+		result += "<span class =\"italic\">" + sort.getSort() + "</span>";
 		/*result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getSort()) + "}}}";*/
 	}
 
 	@Override
 	public void visit(Production p) {
-		/*if (firstProduction) {
-			result += "\\syntax{";
+		if (firstProduction) {
+			result += " ::= ";
 			firstProduction = false;
 		} else {
-			result += "\\syntaxCont{";
+			result += "" + " | ";
 		}
 //		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.getAttributes().containsKey(Constants.CONS_cons_ATTR) && patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
 //			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
@@ -107,15 +110,16 @@ public class HTMLFilter extends BasicVisitor {
 //			}
 //			result += pattern;
 //		} else {
-			super.visit(p);
+		//result += "<div>" + "Production" + endl;
+		super.visit(p);
 //		}
-		result += "}{";
 		p.getAttributes().accept(this);
-		result += "}";*/
+		//result += "Production - END " + "</div>" + endl;
 	}
 
 	@Override
 	public void visit(Terminal pi) {
+		result += "<span>" + "\"" + pi.getTerminal() + "\"" + "</span>"  + endl;
 		/*String terminal = pi.getTerminal();
 		if (terminal.isEmpty())
 			return;
@@ -128,6 +132,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(UserList ul) {
+		result += "<span class =\"italic\">" + "List(#" + ul.getSort() + ",\"" + ul.getSeparator() + "\") </span>"  + endl;
 		//result += "List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
 	}
 
@@ -154,19 +159,19 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		if (colors.containsKey(c.getLabel())) {
 			result += "[" + colors.get(c.getLabel()) + "]";
-		}
+		}*/
 		result += "{" + StringUtil.latexify(c.getLabel()) + "}{";
 		super.visit(c);
-		result += "}" + endl;*/
+		result += "}" + endl;
 	}
 
 	public void visit(Collection col) {
-		/*List<Term> contents = col.getContents();
-		printList(contents, "\\mathrel{}");*/
+		List<Term> contents = col.getContents();
+		printList(contents, " ^-^ ");
 	}
-
+	
 	private void printList(List<Term> contents, String str) {
-		/*boolean first = true;
+		boolean first = true;
 		for (Term trm : contents) {
 			if (first) {
 				first = false;
@@ -174,22 +179,22 @@ public class HTMLFilter extends BasicVisitor {
 				result += str;
 			}
 			trm.accept(this);
-		}*/
+		}
 	}
 
 	@Override
 	public void visit(Variable var) {
-		/*if (var.getName().equals("_")) {
-			result += "\\AnyVar";
+		if (var.getName().equals("_")) {
+			result += "_";
 		} else {
-			result += "\\variable";
+			result += "var";
 		}
 		if (var.getSort() != null) {
-			result += "[" + StringUtil.latexify(var.getSort()) + "]";
+			result += "[" + var.getSort() + "]";
 		}
 		if (!var.getName().equals("_")) {
-			result += "{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}";
-		}*/
+			result += " " + var.getName()+ " ";
+		}
 	}
 
 	private String makeIndices(String str) {
@@ -205,29 +210,35 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Empty e) {
-		//result += "\\dotCt{" + e.getSort() + "}";
+		result += " " + e.getSort() + " ";
 	}
 
 	@Override
 	public void visit(Rule rule) {
-		/*result += "\\krule";
+		result += "<div> RULE";
 		if (!rule.getLabel().equals("")) {
-			result += "[" + rule.getLabel() + "]";
+			result += "  [" + rule.getLabel() + "] ";
 		}
-		result += "{" + endl;
 		rule.getBody().accept(this);
-		result += "}{";
 		if (rule.getCondition() != null) {
 			rule.getCondition().accept(this);
 		}
-		result += "}{";
+		rule.getAttributes().accept(this);
+		result += "</div>" + endl;
+		//result += "\\krule";
+		
+		/*result += "{" + endl;
+		rule.getBody().accept(this);
+		result += "}{";*/
+		
+		/*result += "}{";
 		rule.getAttributes().accept(this);
 		result += "}" + endl;*/
 	}
 
 	@Override
 	public void visit(Context cxt) {
-		/*result += "\\kcontext";
+		result += "\\kcontext";
 		result += "{" + endl;
 		cxt.getBody().accept(this);
 		result += "}{";
@@ -236,21 +247,22 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		result += "}{";
 		cxt.getAttributes().accept(this);
-		result += "}" + endl;*/
+		result += "}" + endl;
 	}
 
 	@Override
 	public void visit(Hole hole) {
-		//result += "\\khole{}";
+		result += "HOLE";
 	}
 
 	@Override
 	public void visit(Rewrite rew) {
-		/*result += "\\reduce{";
+		
+		result += " ";
 		rew.getLeft().accept(this);
-		result += "}{";
+		result += " => ";
 		rew.getRight().accept(this);
-		result += "}";*/
+		result += " ";
 	}
 
 	@Override
@@ -270,37 +282,41 @@ public class HTMLFilter extends BasicVisitor {
 //		}
 //		result += pattern;
 		//result += "\\mbox{" + StringUtil.latexify(trm.toString()) + "}";
+		result += trm.toString();
+		if(trm.toString().isEmpty())
+			result += ".";
 	}
 
 	@Override
 	public void visit(Constant c) {
+		result += c.getSort() + " " + c.getValue();
 		//result += "\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}";
 	}
 
 	@Override
 	public void visit(MapItem mi) {
-		//mi.getKey().accept(this);
+		mi.getKey().accept(this);
 		//result += "\\mapsto";
-		//mi.getItem().accept(this);
+		mi.getItem().accept(this);
 	}
 
 	@Override
 	public void visit(KSequence k) {
-		//printList(k.getContents(), "\\kra");
+		printList(k.getContents(), "ksequence ");
 
 	}
 
 	@Override
 	public void visit(KApp app) {
-		/*app.getLabel().accept(this);
+		app.getLabel().accept(this);
 		result += "(";
 		app.getChild().accept(this);
-		result += ")";*/
+		result += ")";
 	}
 
 	@Override
 	public void visit(ListOfK list) {
-		//printList(list.getContents(), "\\kcomma");
+		printList(list.getContents(), "listofK");
 	}
 
 	@Override
@@ -327,27 +343,48 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Attribute entry) {
-		/*if (DefinitionHelper.isTagGenerated(entry.getKey()))
+		if (DefinitionHelper.isTagGenerated(entry.getKey()))
 			return;
 		if (entry.getKey().equals("latex"))
 			return;
-		result += StringUtil.latexify(entry.getKey());
-		String value = entry.getValue();
-		if (!value.isEmpty()) {
-			result += "(" + StringUtil.latexify(value) + ")";
-		}
+		
 		if (firstAttribute) {
 			firstAttribute = false;
 		} else {
 			result += ", ";
-		}*/
+		}
+		result += entry.getKey();
+		String value = entry.getValue();
+		
+		if (!value.isEmpty()) {
+			result += "(" + value + ")";
+		}
+		
+
+		
 	}
 
 	@Override
 	public void visit(Attributes attributes) {
-		/*firstAttribute = true;
-		for (Attribute entry : attributes.getContents()) {
-			entry.accept(this);
-		}*/
+		if(!attributes.getContents().isEmpty()){
+			result += " [ <span class =\"attribute\">";
+			firstAttribute = true;
+			for (Attribute entry : attributes.getContents()) {
+				entry.accept(this);
+			}
+			result += "</span> ]";
+		}
+	}
+	
+	private void initializeCss(){
+		css += ".italic" + endl
+				+ "{" + endl
+				+ "font-style: italic;"+endl
+				+ "}" + endl;
+		css += ".attribute" + endl
+				+ "{" + endl
+				+ "color: blue;"+endl
+				+ "}" + endl;
+				
 	}
 }
