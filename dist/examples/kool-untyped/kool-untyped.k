@@ -1,69 +1,69 @@
 module KOOL-UNTYPED-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
 
-  syntax Ids ::= List{Id,","} [strict, cons("Ids1ListSyn"), hybrid]
-  syntax Exps ::=  List{Exp,","} [cons("Exps1ListSyn")]
+  syntax Ids ::= List{Id,","} [strict, hybrid]
+  syntax Exps ::=  List{Exp,","} 
 
-  syntax Decl ::= "var" Exps ";" [cons("Ddecl1varDeclSyn")]
-                | "method" Id "(" Ids ")" Stmt          [cons("Ddecl1methodDeclSyn")]
-                | "class" Id "{" Stmts "}"              [cons("Ddecl1classBasicDeclSyn")]
-                | "class" Id "extends" Id "{" Stmts "}" [cons("Ddecl1classDerivDeclSyn")]
+  syntax Decl ::= "var" Exps ";" 
+                | "method" Id "(" Ids ")" Stmt          
+                | "class" Id "{" Stmts "}"
+                | "class" Id "extends" Id "{" Stmts "}"
 
   syntax Exp ::= Int | Bool | String | Id
                | "this"
                | "super"
                | "(" Exp ")"            [bracket]
-               | "++" Exp			    [cons("Exp1PrefixIncSyn")]
-               | Exp "instanceOf" Id    [strict(1), cons("Exp1instOfSyn")]
-               | "cast" Exp "to" Id     [strict(1), cons("Exp1castToSyn")]
-               | "new" Id "(" Exps ")"  [strict(2), cons("Exp1newSyn")]
-               | Exp "." Id             [cons("Exp1dotSepSyn")]
-               > Exp "[" Exps "]"	    [strict, cons("Exp1ArraySyn")]
-               > Exp "(" Exps ")"	    [strict, cons("Exp1FuncCallSyn")]
-               | "-" Exp             	[strict, cons("Exp1UMinusSyn")]
-               | "sizeOf" "(" Exp ")"   [strict, cons("Exp1SizeSyn")]
-               | "read" "(" ")"			[cons("Exp1Exp1ReadSyn")]
+               | "++" Exp                
+               | Exp "instanceOf" Id    [strict(1)]
+               | "cast" Exp "to" Id     [strict(1)]
+               | "new" Id "(" Exps ")"  [strict(2)]
+               | Exp "." Id      
+               > Exp "[" Exps "]"       [strict]
+               > Exp "(" Exps ")"       [strict]
+               | "-" Exp                [strict]
+               | "sizeOf" "(" Exp ")"   [strict]
+               | "read" "(" ")"    
                > left:
-               	 Exp "*" Exp         	[strict, left, cons("Exp1MulSyn")]
-               | Exp "/" Exp         	[strict, left, cons("Exp1DivSyn")]
-               | Exp "%" Exp         	[strict, left, cons("Exp1ModSyn")]
+                    Exp "*" Exp          [strict, left]
+               | Exp "/" Exp             [strict, left]
+               | Exp "%" Exp             [strict, left]
                > left:
-               	 Exp "+" Exp         	[strict, left, cons("Exp1PlusSyn")]
-               | Exp "-" Exp         	[strict, left, cons("Exp1MinusSyn")]
+                    Exp "+" Exp          [strict, left]
+               | Exp "-" Exp             [strict, left]
                > non-assoc:
-               	 Exp "<" Exp         	[strict, non-assoc, cons("Exp1LTSyn")]
-               | Exp "<=" Exp        	[strict, non-assoc, cons("Exp1LTESyn")]
-               | Exp ">" Exp         	[strict, non-assoc, cons("Exp1GTSyn")]
-               | Exp ">=" Exp        	[strict, non-assoc, cons("Exp1GTESyn")]
-               | Exp "==" Exp        	[strict, non-assoc, cons("Exp1EQSyn")]
-               | Exp "!=" Exp        	[strict, non-assoc, cons("Exp1NEQSyn")]
-               > "not" Exp           	[strict, cons("Exp1NotSyn")]
+                    Exp "<" Exp          [strict, non-assoc]
+               | Exp "<=" Exp            [strict, non-assoc]
+               | Exp ">" Exp             [strict, non-assoc]
+               | Exp ">=" Exp            [strict, non-assoc]
+               | Exp "==" Exp            [strict, non-assoc]
+               | Exp "!=" Exp            [strict, non-assoc]
+               > "not" Exp               [strict]
                > left:
-               	 Exp "and" Exp       	[strict, left, cons("Exp1AndSyn")]
-               | Exp "or" Exp        	[strict, left, cons("Exp1OrSyn")]
-               > Exp "=" Exp         	[strict(2), right, cons("Exp1AssignSyn")]
+                    Exp "and" Exp        [strict, left]
+               | Exp "or" Exp            [strict, left]
+               > Exp "=" Exp             [strict(2), right]
 
-  syntax Stmt ::= "{" "}"				[cons("Stmt1BlockEmptySyn")]
-                | "{" Stmts "}"			[cons("Stmt1BlockSyn")]
-                | Exp ";"			  	[strict, cons("Stmt1Stmt2ExpSyn")]
-                | "if" Exp "then" Stmt "else" Stmt		[avoid, strict(1), cons("Stmt1IfThnElsSyn")]
-                | "if" Exp "then" Stmt					[cons("Stmt1IfThnSyn")]
-                | "while" Exp "do" Stmt					[cons("Stmt1WhileSyn")]
-                | "for" Id "=" Exp "to" Exp "do" Stmt	[cons("Stmt1ForSyn")]
-                | "return" Exp ";"						[strict, cons("Stmt1ReturnSyn")]
-                | "return" ";"			    			    [cons("Stmt1Return2Syn")]
-                | "write" "(" Exp ")" ";"				[strict, cons("Stmt1WriteSyn")]
-                | "try" Stmt "catch" "(" Id ")" Stmt	    [cons("Stmt1TrySyn")]
-                | "throw" Exp ";"						[strict, cons("Stmt1ThrowSyn")]
-                | "spawn" Stmt							[cons("Stmt1SpawnSyn")]
-                | "acquire" Exp ";"                  	[strict, cons("Stmt1AcquireSyn")]
-                | "release" Exp ";"                  	[strict, cons("Stmt1ReleaseSyn")]
-                | "rendezvous" Exp ";"               	[strict, cons("Stmt1RendezvousSyn")]
-                | "print" "(" Exps ")" ";"              [strict, cons("Stmt1PrintSyn")]
+  syntax Stmt ::= "{" "}"
+                | "{" Stmts "}"
+                | Exp ";"                           [strict]
+                | "if" Exp "then" Stmt "else" Stmt  [avoid, strict(1)]
+                | "if" Exp "then" Stmt    
+                | "while" Exp "do" Stmt    
+                | "for" Id "=" Exp "to" Exp "do" Stmt
+                | "return" Exp ";"                  [strict]
+                | "return" ";"
+                | "write" "(" Exp ")" ";"           [strict]
+                | "try" Stmt "catch" "(" Id ")" Stmt
+                | "throw" Exp ";"                   [strict]
+                | "spawn" Stmt    
+                | "acquire" Exp ";"                 [strict]
+                | "release" Exp ";"                 [strict]
+                | "rendezvous" Exp ";"              [strict]
+                | "print" "(" Exps ")" ";"          [strict]
 
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts                      [right, cons("Stmts1LstStmtsSyn")]
+                 | Stmts Stmts             [right]
 
   // coming from macros
   rule if E:Exp then S:Stmt => if E then S else {}
@@ -123,8 +123,8 @@ module KOOL-UNTYPED
 
 
   syntax Val ::= Int | Bool | String
-               | "arrayRef" "(" Int "," Int ")" [cons("Val1arrayRefSyn")]
-  syntax Vals ::= List{Val,","} [cons("Vals1ListSyn")]
+               | "arrayRef" "(" Int "," Int ")" 
+  syntax Vals ::= List{Val,","}
 
   syntax Exp ::= Val
 
@@ -328,7 +328,7 @@ module KOOL-UNTYPED
                         </class>)
        ...</classes>  [structural]
 
-  syntax K ::= "execute" [ cons("K1executeSyn")]
+  syntax K ::= "execute" 
 
   rule <k> execute => new main(.Exps); </k> <env> . </env>  [structural]
 
@@ -502,7 +502,7 @@ module KOOL-UNTYPED
   syntax K ::= Id "::" Bag
   // Id is the class name, BagItem is its corresponding environment
 
-  syntax K ::= "lookupMember" "(" BagItem "," Id ")"   [function, klabel(lookupMember)]
+  syntax K ::= "lookupMember" "(" BagItem "," Id ")"   [function]
   // BagItem is the envStack cell, Id is the member name
 
 // First look for the member in the top environment; if found then done.
@@ -519,4 +519,10 @@ module KOOL-UNTYPED
        when notBool(X in keys(Env))
        [structural, anywhere]
 
+
+
+//
+
+
+  rule .Vals; => . [structural]
 endmodule
