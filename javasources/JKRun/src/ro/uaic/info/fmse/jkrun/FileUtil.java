@@ -117,38 +117,30 @@ public class FileUtil {
 		return (path.delete());
 	}
 	
-	public static void deleteDirectoryContent(File path) {
-		if (path.exists()) {
-			File[] files = path.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (files[i].isDirectory()) {
-					deleteDirectory(files[i]);
-				} else {
-					files[i].delete();
+	public static void renameFolder(String oldName, String newName)throws IOException {
+		File srcFile = new File(oldName);
+		boolean bSucceeded = false;
+		try {
+			File destFile = new File(newName);
+			//test if the krun directory is empty and if is not empty delete it
+			if (destFile.exists()) {
+				if (!FileUtil.deleteDirectory(destFile)) {
+					throw new IOException(oldName + " was not successfully deleted " + newName);
 				}
+			}
+			//rename krun temp directory into "krun" 
+			if (!srcFile.renameTo(destFile)) {
+				throw new IOException(oldName + " was not successfully renamed to " + newName);
+			} else {
+				bSucceeded = true;
+			}
+		} finally {
+			if (bSucceeded) {
+				srcFile.delete();
 			}
 		}
 	}
-	
-	public synchronized static boolean renameDirectory(String oldDirName, String newDirName) {
-		File oldDir = new File(oldDirName);
-		File newDir = new File(newDirName);
-		boolean rename = oldDir.renameTo(newDir);
-		return rename;
-	}
-	
-	public static boolean isEmptyDir(String dirName) {
-		boolean result = true;
-		File file = new File(dirName);
-        if (file.isDirectory()) {
-	        String[] files = file.list();
-	        if (files.length > 0) {
-	        	result = false;
-	        }
-        }
-        return result;
-	}
-	
+
 	public static String parseResultOutputMaude(String file) {
 		BufferedReader reader = null;
 		try {
