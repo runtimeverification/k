@@ -373,10 +373,8 @@ public class Main {
 			}
 			if ("pretty".equals(K.output_mode)) {
 				PrettyPrintOutput p = new PrettyPrintOutput(cmd);
-				File file = new File(K.maude_output);
-				File processedFile = new File(K.processed_maude_output);
-			    p.preprocessDoc(file, K.processed_maude_output);
-				String red = p.processDoc(processedFile);
+			    p.preprocessDoc(K.maude_output, K.processed_maude_output);
+				String red = p.processDoc(K.processed_maude_output);
 				/*String prettyOutput = XmlUtil.formatXml(red, K.color);
 				AnsiConsole.out.print(prettyOutput);*/
 				//AnsiConsole.out.println(red);
@@ -426,7 +424,6 @@ public class Main {
 			printUsage(cmd_options.getOptions());
 			System.exit(bean.getExitCode());
 		}
-
 	}
 
 	public static void main(String[] args) {

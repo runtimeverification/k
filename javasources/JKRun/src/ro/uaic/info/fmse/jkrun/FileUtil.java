@@ -117,7 +117,7 @@ public class FileUtil {
 		return (path.delete());
 	}
 	
-	public static void renameFolder(String oldName, String newName)throws IOException {
+	public static void renameFolder(String oldName, String newName) throws IOException {
 		File srcFile = new File(oldName);
 		boolean bSucceeded = false;
 		try {
@@ -125,7 +125,7 @@ public class FileUtil {
 			//test if the krun directory is empty and if is not empty delete it
 			if (destFile.exists()) {
 				if (!FileUtil.deleteDirectory(destFile)) {
-					throw new IOException(oldName + " was not successfully deleted " + newName);
+					throw new IOException(oldName + " was not successfully deleted");
 				}
 			}
 			//rename krun temp directory into "krun" 
@@ -288,5 +288,22 @@ public class FileUtil {
 			return fullPath;
 		}
 	}
-
+	
+	/*
+	 * count the number of underscores from the String op
+	 */
+	public static int countUnderscores(String op) {
+		int count = 0;
+	    int index = 0;
+	    StringBuilder sb = new StringBuilder(op);
+		while (index != -1) {
+			index = sb.indexOf("_", index);
+			if (index != -1) {
+				count++;
+				index++;
+			}
+		}
+		return count;
+	}
+	
 }

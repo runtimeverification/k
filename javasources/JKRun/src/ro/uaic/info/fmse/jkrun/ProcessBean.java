@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class ProcessBean implements PropertyChangeListener, Serializable {
 
 	private static final long serialVersionUID = 1L;
-	public static final int defaultValue = Integer.MAX_VALUE;
+	private static final int defaultValue = Integer.MAX_VALUE;
 	private int exitCode;
 
 	private PropertyChangeSupport pcs = new PropertyChangeSupport(this);

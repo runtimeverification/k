@@ -20,7 +20,7 @@ public class PrettyPrintOutput {
 	
 	private CommandLine cmd;
 	
-	public static final int indent = 2;
+	public static final int indent = 1;
 	
 	public static final String ANSI_NORMAL = "\u001b[0m";
 	
@@ -57,6 +57,7 @@ public class PrettyPrintOutput {
 		return null;
 	}
 
+	/* return the value for the attribute attrName of search-result tag */
 	public String getSearchTagAttr(File file, String attrName) {
 		Document doc = XmlUtil.readXML(file);
 		NodeList list = doc.getElementsByTagName("search-result");
@@ -72,8 +73,9 @@ public class PrettyPrintOutput {
 		return null;
 	}
 	
-	public void preprocessDoc(File file, String processedFile) {
-		Document doc = XmlUtil.readXML(file);
+	public void preprocessDoc(String fileName, String processedFile) {
+		File input = new File(fileName);
+		Document doc = XmlUtil.readXML(input);
 		
 		Node root = doc.getDocumentElement();
 		preprocessElement((Element)root);
@@ -134,8 +136,9 @@ public class PrettyPrintOutput {
 		
 	}
 
-	public String processDoc(File file) {
-		Document doc = XmlUtil.readXML(file);
+	public String processDoc(String fileName) {
+		File input = new File(fileName);
+		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
 		Node nod = null;
 
@@ -203,7 +206,7 @@ public class PrettyPrintOutput {
 		   	sb.append(prettyPrint(">", false, 0, ANSI_GREEN));
 		   	for (int i = 1; i < list.size() - 1; i++) {
 		   		Element child = list.get(i);
-		   		sb.append(prettyPrint(print(child, false, 0, ANSI_NORMAL), true, whitespace + indent, ANSI_NORMAL));
+		   		sb.append(prettyPrint(print(child, false, whitespace + indent, ANSI_NORMAL), true, whitespace + indent, ANSI_NORMAL));
 		   	}
 		   	sb.append(prettyPrint("</", true, whitespace, ANSI_GREEN));
 		   	sb.append(prettyPrint(print(list.get(list.size() - 1), false, 0, ANSI_GREEN), false, 0, ANSI_GREEN));
@@ -214,16 +217,8 @@ public class PrettyPrintOutput {
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
-			int m = 0;
-		    StringBuilder sb1 = new StringBuilder(op);
-		    int index = 0;
-			while (index != -1) {
-				index = sb1.indexOf("_", index);
-				if (index != -1) {
-					m++;
-					index++;
-				}
-			}
+			int m = FileUtil.countUnderscores(op);
+			
 			//HOLE case
 			if (m == 0 && n == 0) {
 				sb.append(op);
@@ -258,9 +253,9 @@ public class PrettyPrintOutput {
 		   		    Element child = list.get(i);
 		   		    elements.add(prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL));
 			    }
-				index = 0;
+				int index = 0;
 				int count = 0;
-			    sb1 = new StringBuilder(op);
+			    StringBuilder sb1 = new StringBuilder(op);
 			    //replace all "_"
 				while (index != -1) {
 					index = sb1.indexOf("_", index);
@@ -296,16 +291,10 @@ public class PrettyPrintOutput {
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
-			int m = 0;
-		    StringBuilder sb1 = new StringBuilder(op);
-		    int index = 0;
-			while (index != -1) {
-				index = sb1.indexOf("_", index);
-				if (index != -1) {
-					m++;
-					index++;
-				}
-			}
+            int m = FileUtil.countUnderscores(op);
+			
+			//postprocess
+			op = postProcessElement(node, op, sort);
 			//HOLE case
 			if (m == 0 && n == 0) {
 				sb.append(op);
@@ -327,47 +316,15 @@ public class PrettyPrintOutput {
 				for (int i = 0; i < elements.size(); i++) {
 					sb.append(elements.get(i));
 					if (i != elements.size() - 1) {
-                        sb.append(", ");
+	                    sb.append(", ");
 					}
 				}
 				if (elements.size() > 0) {
 					sb.append(")");
 				}
 			}
+			//like in the case of an associative operator (<term op="_~>_" sort="K">)
 			else if (m < n && n > 0 && m > 0) {
-				List<String> elements = new ArrayList<String>();
-				for (int i = 0; i < list.size(); i++) {
-		   		    Element child = list.get(i);
-		   		    elements.add(prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL));
-			    }
-				index = 0;
-				int count = 0;
-			    sb1 = new StringBuilder(op);
-				while (index != -1) {
-					index = sb1.indexOf("_", index);
-					if (index != -1) {
-						String s = (String)elements.get(count);
-						sb1.insert(index, s);
-						index += s.length();
-						sb1 = sb1.deleteCharAt(index);
-						count++;
-					}
-				}
-				sb.append(sb1);
-				if (!(n - m == 1 && elements.get(m).length() == 0)) {
-					sb.append("(");
-				}
-				for (int i = m; i < n; i++) {
-					sb.append(elements.get(i));
-					if (i != elements.size() - 1) {
-                        sb.append(", ");
-					}
-				}
-				if (!(n - m == 1 && elements.get(m).length() == 0)) {
-					sb.append(")");
-				}
-			}
-			else {
 				List<String> elements = new ArrayList<String>();
 				StringBuilder aux = new StringBuilder();
 				for (int i = 0; i < list.size(); i++) {
@@ -387,7 +344,56 @@ public class PrettyPrintOutput {
 				}
 				sb.append(aux);
 			}
-		}
+			//like in the case of <term op="var`{K`}`(_`)" sort="K">
+			else if (m == n) {
+				List<String> elements = new ArrayList<String>();
+				for (int i = 0; i < list.size(); i++) {
+					Element child = list.get(i);
+					elements.add(print(child, false, 0, ANSI_NORMAL));
+				}
+				StringBuilder sb_ = new StringBuilder(op);
+				int index = 0;
+				//insert around each "_" additional space depending on "_" position  
+				while (index != -1) {
+					index = sb_.indexOf("_", index);
+					if (index != -1) {
+						if (index == 0) {
+							sb_.insert(index + 1, " ");
+							index += "-".length();
+						} else if (index == sb_.length() - 1) {
+							sb_.insert(index, " ");
+							index += 2;
+						} else {
+							sb_ = sb_.insert(index + 1, " ");
+							sb_ = sb_.insert(index, " ");
+							index += 2;
+						}
+					}
+				}
+				op = sb_.toString();
+				index = 0;
+				int count = 0;
+				StringBuilder sb1 = new StringBuilder(op);
+				//replace each "_" with its children representation
+				while (index != -1) {
+					index = sb1.indexOf("_", index);
+					if (index != -1) {
+						if (count >= elements.size()) {
+							break;
+						}
+						String s = (String) elements.get(count);
+						s = s.trim();
+						sb1.insert(index, s);
+						index += s.length();
+						sb1 = sb1.deleteCharAt(index);
+						count++;
+						op = sb1.toString();
+					}
+				}
+				sb.append(op);
+			}
+	}
+		
 		if (op.equals("#istream`(_`)") || op.equals("#ostream`(_`)")) { // the istream and ostream cells are ignored
 			sb = new StringBuilder();
 			sb.append("");
@@ -397,16 +403,11 @@ public class PrettyPrintOutput {
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
-			int m = 0;
-		    StringBuilder sb1 = new StringBuilder(op);
-		    int index = 0;
-			while (index != -1) {
-				index = sb1.indexOf("_", index);
-				if (index != -1) {
-					m++;
-					index++;
-				}
-			}
+			int m = FileUtil.countUnderscores(op);
+			
+			//postprocess
+			op = postProcessElement(node, op, sort);
+			
 			//HOLE case
 			if (m == 0 && n == 0) {
 				sb.append(op);
@@ -439,11 +440,11 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < list.size(); i++) {
 		   		    Element child = list.get(i);
-		   		    elements.add(prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL));
+		   		    elements.add(prettyPrint(print(child, lineskip, whitespace, ANSI_NORMAL), lineskip, whitespace, ANSI_NORMAL));
 			    }
-				index = 0;
+				int index = 0;
 				int count = 0;
-			    sb1 = new StringBuilder(op);
+			    StringBuilder sb1 = new StringBuilder(op);
 				while (index != -1) {
 					index = sb1.indexOf("_", index);
 					if (index != -1) {
@@ -474,9 +475,8 @@ public class PrettyPrintOutput {
 					Element child = list.get(i);
 					elements.add(print(child, lineskip, whitespace, ANSI_NORMAL));
 				}
-				op = op.replaceAll("`", "");
 				String initOp = op;
-				index = 0;
+				int index = 0;
 				int count = 0;
 				StringBuilder sb_ = new StringBuilder(op);
 				while (index != -1) {
@@ -527,7 +527,9 @@ public class PrettyPrintOutput {
 			sb = new StringBuilder();
 			List<String> elements = new ArrayList<String>();
 			StringBuilder sb_ = new StringBuilder();
-			op = op.replaceAll("`", "");
+			//postprocess
+			op = postProcessElement(node, op, sort);
+			
 			for (int i = 0; i < list.size(); i++) {
 	   		    Element child = list.get(i);
 	   		    elements.add(print(child, false, whitespace + indent, ANSI_NORMAL));   
@@ -555,21 +557,16 @@ public class PrettyPrintOutput {
 				sb.append(op);
 			}
 		}
-		if (sort.equals("KLabel") && !op.equals("'.List`{\",\"`}")) {
+		if ((sort.equals("KLabel") && !op.equals("'.List`{\",\"`}") )) {
 			sb = new StringBuilder();
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
-			int m = 0;
-		    StringBuilder sb1 = new StringBuilder(op);
-		    int index = 0;
-			while (index != -1) {
-				index = sb1.indexOf("_", index);
-				if (index != -1) {
-					m++;
-					index++;
-				}
-			}
+			int m = FileUtil.countUnderscores(op);
+			
+			//postprocess
+			op = postProcessElement(node, op, sort);
+			
 			//HOLE case
 			if (m == 0 && n == 0) {
 				sb.append(op);
@@ -604,9 +601,9 @@ public class PrettyPrintOutput {
 		   		    Element child = list.get(i);
 		   		    elements.add(prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL));
 			    }
-				index = 0;
+				int index = 0;
 				int count = 0;
-			    sb1 = new StringBuilder(op);
+			    StringBuilder sb1 = new StringBuilder(op);
 				while (index != -1) {
 					index = sb1.indexOf("_", index);
 					if (index != -1) {
@@ -637,14 +634,9 @@ public class PrettyPrintOutput {
 					Element child = list.get(i);
 					elements.add(print(child, false, 0, ANSI_NORMAL));
 				}
-				op = op.replaceAll("`", "");
-				char firstCh = op.charAt(0);
-				if ((firstCh == '#') || (firstCh == '\'')) {
-					op = op.substring(1);
-				}
-				// System.out.print("Before: Op=" + op);
 				StringBuilder sb_ = new StringBuilder(op);
-				index = 0;
+				int index = 0;
+				//insert around each "_" additional space depending on "_" position  
 				while (index != -1) {
 					index = sb_.indexOf("_", index);
 					if (index != -1) {
@@ -664,7 +656,8 @@ public class PrettyPrintOutput {
 				op = sb_.toString();
 				index = 0;
 				int count = 0;
-				sb1 = new StringBuilder(op);
+				StringBuilder sb1 = new StringBuilder(op);
+				//replace each "_" with its child representation
 				while (index != -1) {
 					index = sb1.indexOf("_", index);
 					if (index != -1) {
@@ -681,7 +674,6 @@ public class PrettyPrintOutput {
 					}
 				}
 				sb.append(op);
-				// System.out.println(" After: Op=" + op);
 			}
 		}
 		if (sort.equals("KLabel") && op.equals("'.List`{\",\"`}")) {
@@ -703,27 +695,21 @@ public class PrettyPrintOutput {
 				sb = new StringBuilder();
 				sb.append("-" + print(firstChild, false, 0, ANSI_NORMAL)); 
 			} else {
-				sb.append(print(firstChild, false, 0, ANSI_NORMAL));
+				String s = print(firstChild, false, 0, ANSI_NORMAL);
+				//eliminate the apostrophes
+				String parts[];
+				parts = s.split("\"");
+				sb.append(parts[1]);
 			}
 		}
-		// TODO: what other sorts that may appear should be added here? 
-		if (sort.equals("#Zero") || sort.equals("#Bool")) {
+		// TODO: what other sorts(builtins) that may appear should be added here? 
+		if (sort.equals("#Zero") || sort.equals("#Bool") || sort.equals("#Char") || sort.equals("#String") || sort.equals("#Int") || sort.equals("#Float")) {
 			sb = new StringBuilder();
 			sb.append(op);
 		}
 		if (sort.equals("#NzNat") && op.equals("sNat_")) {
 			sb = new StringBuilder();
 			sb.append(node.getAttribute("number"));
-		}
-		if (sort.equals("#Char") || sort.equals("#String")) {
-			sb = new StringBuilder();
-			String parts[];
-			parts = op.split("\"");
-			sb.append(parts[1]);
-			if (sb.toString().startsWith("#")) {
-				sb.append("\"" + sb + "\"");
-			}
-			//sb.append(" ");
 		}
 		if (op.equals(".")) {
 			sb = new StringBuilder();
@@ -775,6 +761,28 @@ public class PrettyPrintOutput {
 		return output.toString();
 	}
 	
+	public static String postProcessElement(Element node, String op, String sort) {
+		String result = new String();
+		
+		if ((sort.equals("KLabel") && !op.equals("'.List`{\",\"`}") || sort.equals("K"))) {
+			char firstCh = op.charAt(0);
+			if ((firstCh == '#') || (firstCh == '\'')) {
+				op = op.substring(1);
+			}
+			if (op.indexOf("`") != -1) {
+				op = op.replaceAll("`", "");
+			}
+		}
+		if (sort.equals("MapItem") || sort.equals("ListItem") || sort.equals("SetItem") || sort.equals("List")) {
+			if (op.indexOf("`") != -1) {
+				op = op.replaceAll("`", "");
+			}
+		}
+		result = op;
+		
+		return result;
+	}
+	
 	public void setCmd(CommandLine cmd) {
 		this.cmd = cmd;
 	}
@@ -782,6 +790,5 @@ public class PrettyPrintOutput {
 	public CommandLine getCmd() {
 		return cmd;
 	}
-	
 
 }

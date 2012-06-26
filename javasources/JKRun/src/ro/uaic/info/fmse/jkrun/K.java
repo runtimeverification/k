@@ -18,7 +18,7 @@ public class K {
 	public static final String maude_err = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_err.txt");
 
 	// kast
-	public static final String kast = k_base + K.fileSeparator + "bin" + K.fileSeparator + getKastOnOs();
+	public static final String kast = k_base + fileSeparator + "bin" + fileSeparator + getKastOnOs();
 
 	public static final String maude_io_cmd = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("io-cmd.maude");
 	public static final String maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput.xml");
