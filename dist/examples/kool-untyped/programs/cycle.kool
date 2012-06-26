@@ -13,7 +13,7 @@ class C2 extends C1 {
 class main {
   method main() {
 // Should work if you comment next line
-    new C1();
+//    new C1();
     print("No cycle detected\n");
   }
 }

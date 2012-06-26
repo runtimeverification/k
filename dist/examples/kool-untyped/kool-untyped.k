@@ -24,14 +24,14 @@ module KOOL-UNTYPED-SYNTAX
                | "sizeOf" "(" Exp ")"   [strict]
                | "read" "(" ")"    
                > left:
-                    Exp "*" Exp          [strict, left]
+                 Exp "*" Exp             [strict, left]
                | Exp "/" Exp             [strict, left]
                | Exp "%" Exp             [strict, left]
                > left:
-                    Exp "+" Exp          [strict, left]
+                 Exp "+" Exp             [strict, left]
                | Exp "-" Exp             [strict, left]
                > non-assoc:
-                    Exp "<" Exp          [strict, non-assoc]
+                 Exp "<" Exp             [strict, non-assoc]
                | Exp "<=" Exp            [strict, non-assoc]
                | Exp ">" Exp             [strict, non-assoc]
                | Exp ">=" Exp            [strict, non-assoc]
@@ -39,7 +39,7 @@ module KOOL-UNTYPED-SYNTAX
                | Exp "!=" Exp            [strict, non-assoc]
                > "not" Exp               [strict]
                > left:
-                    Exp "and" Exp        [strict, left]
+                 Exp "and" Exp           [strict, left]
                | Exp "or" Exp            [strict, left]
                > Exp "=" Exp             [strict(2), right]
 
@@ -181,14 +181,14 @@ module KOOL-UNTYPED
   rule I1:Int > I2:Int => I1 >Int I2
   rule I1:Int >= I2:Int => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==K V2
-  rule V1 != V2 => V1 =/=K V2
+  rule V1:Val != V2:Val => V1 =/=K V2
   rule B1:Bool and B2:Bool => B1 andBool B2
   rule B1:Bool or B2:Bool => B1 orBool B2
   rule not(B:Bool) => notBool(B)
 
-  rule V[N1:Int,N2:Int,Vs:Vals] => V[N1][N2,Vs]           [structural, anywhere]
+  rule V:Val[N1:Int,N2:Int,Vs:Vals] => V[N1][N2,Vs]           [structural, anywhere]
 
-  rule arrayRef(L:Int,_:Nat)[N] => lookup(L +Int N)       [structural, anywhere]
+  rule arrayRef(L:Int,_:Nat)[N:Int] => lookup(L +Int N)       [structural, anywhere]
 
   syntax K ::= "lookup" "(" Int ")"  [cons("K1lookupSyn")]
 
@@ -235,7 +235,8 @@ module KOOL-UNTYPED
 
   rule Ss1:K Ss2:K => Ss1 ~> Ss2  [structural]
 
-  rule V:Val; => .
+  rule V:Val; => . [structural]
+  rule (Vs:Vals); => . [structural]
 
   rule if  true then S else _ => S
   rule if false then _ else S => S
@@ -262,7 +263,10 @@ module KOOL-UNTYPED
        <xstack> _:ListItem => . ...</xstack>
 
   rule <k> throw V:Val; ~> _ => {var X=V; S2} ~> K </k>
-       <control> <xstack> (X:Id, S2:Stmt, K:K, Env:Map, C:Bag) => . ...</xstack> (_ => C) </control>
+       <control>
+          <xstack> (X:Id, S2:Stmt, K:K, Env:Map, C:Bag) => . ...</xstack> 
+          (_ => C)
+       </control>
        <env> _ => Env </env>
 
   rule (<thread>... <k>.K</k> <holds> H:Map </holds> ...</thread> => .)
@@ -524,5 +528,4 @@ module KOOL-UNTYPED
 //
 
 
-  rule .Vals; => . [structural]
 endmodule
