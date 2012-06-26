@@ -18,7 +18,6 @@ public class Executor extends Thread {
 	private String output = "", error = "";
 	private int exitValue;
 	private String input;
-	private int ulimit = 60;
 	
 	public Executor(String[] commands, String dir, String input) {
 		super();
@@ -62,7 +61,7 @@ public class Executor extends Thread {
 			    		}
 
 			    		return p.waitFor();
-			        }}, ulimit, TimeUnit.SECONDS);
+			        }}, StaticK.ulimit, TimeUnit.SECONDS);
 			} catch (TimeoutException e) {
 			    output = "Timed out";
 			    error = "Timed out.";
