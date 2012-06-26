@@ -138,9 +138,9 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Configuration conf) {
-		/*result += "\\kconfig{";
+		result += "Configuration{";
 		super.visit(conf);
-		result += "}" + endl;*/
+		result += "}" + endl;
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	public void visit(Collection col) {
 		List<Term> contents = col.getContents();
-		printList(contents, " ^-^ ");
+		printList(contents, " -> ");
 	}
 	
 	private void printList(List<Term> contents, String str) {
@@ -193,24 +193,24 @@ public class HTMLFilter extends BasicVisitor {
 			result += "[" + var.getSort() + "]";
 		}
 		if (!var.getName().equals("_")) {
-			result += " " + var.getName()+ " ";
+			result += " " + makeGreek(var.getName())+ " ";
 		}
 	}
 
-	private String makeIndices(String str) {
+	/*private String makeIndices(String str) {
 		return str;
-	}
+	}*/
 
 	private String makeGreek(String name) {
-		return name.replace("Alpha", "{\\alpha}").replace("Beta", "{\\beta}").replace("Gamma", "{\\gamma}").replace("Delta", "{\\delta}").replace("VarEpsilon", "{\\varepsilon}").replace("Epsilon", "{\\epsilon}").replace("Zeta", "{\\zeta}").replace("Eta", "{\\eta}")
-				.replace("Theta", "{\\theta}").replace("Kappa", "{\\kappa}").replace("Lambda", "{\\lambda}").replace("Mu", "{\\mu}").replace("Nu", "{\\nu}").replace("Xi", "{\\xi}").replace("Pi", "{\\pi}").replace("VarRho", "{\\varrho}").replace("Rho", "{\\rho}")
-				.replace("VarSigma", "{\\varsigma}").replace("Sigma", "{\\sigma}").replace("GAMMA", "{\\Gamma}").replace("DELTA", "{\\Delta}").replace("THETA", "{\\Theta}").replace("LAMBDA", "{\\Lambda}").replace("XI", "{\\Xi}").replace("PI", "{\\Pi}")
-				.replace("SIGMA", "{\\Sigma}").replace("UPSILON", "{\\Upsilon}").replace("PHI", "{\\Phi}");
+		return name.replace("Alpha", "&alpha;").replace("Beta", "&beta;").replace("Gamma", "&gamma;").replace("Delta", "&delta;").replace("VarEpsilon", "&vepsilon;").replace("Epsilon", "&epsilon;").replace("Zeta", "&zeta;").replace("Eta", "&eta;")
+				.replace("Theta", "&theta;").replace("Kappa", "&kappa;").replace("Lambda", "&lambda;").replace("Mu", "&mu;").replace("Nu", "&nu;").replace("Xi", "&xi;").replace("Pi", "&pi;").replace("VarRho", "&varrho;").replace("Rho", "&rho;")
+				.replace("VarSigma", "&vsigma;").replace("Sigma", "&sigma;").replace("GAMMA", "&Gamma;").replace("DELTA", "&Delta;").replace("THETA", "&Theta;").replace("LAMBDA", "&Lambda;").replace("XI", "&Xi;").replace("PI", "&Pi;")
+				.replace("SIGMA", "&Sigma;").replace("UPSILON", "&Upsilon;").replace("PHI", "&Phi;");
 	}
 
 	@Override
 	public void visit(Empty e) {
-		result += " " + e.getSort() + " ";
+		result += " <span class = \"bold\">&middot;</span> " + e.getSort() + " ";
 	}
 
 	@Override
@@ -221,6 +221,7 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		rule.getBody().accept(this);
 		if (rule.getCondition() != null) {
+			result += " when ";
 			rule.getCondition().accept(this);
 		}
 		rule.getAttributes().accept(this);
@@ -367,7 +368,7 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Attributes attributes) {
 		if(!attributes.getContents().isEmpty()){
-			result += " [ <span class =\"attribute\">";
+			result += " [ <span class =\"attribute\"> ";
 			firstAttribute = true;
 			for (Attribute entry : attributes.getContents()) {
 				entry.accept(this);
@@ -377,6 +378,10 @@ public class HTMLFilter extends BasicVisitor {
 	}
 	
 	private void initializeCss(){
+		css += ".bold" + endl
+				+ "{" + endl
+				+ "font-weight: bold;"+endl
+				+ "}" + endl;
 		css += ".italic" + endl
 				+ "{" + endl
 				+ "font-style: italic;"+endl
