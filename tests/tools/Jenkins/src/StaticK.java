@@ -22,8 +22,8 @@ public class StaticK {
 	public static String fileSep = System.getProperty("file.separator");
 	public static String k3Jar, JKrun;
 	public static ThreadPoolExecutor pool;
-	public static int THREAD_POOL_SIZE = 24;
-	public static int ulimit = 60;
+	public static int THREAD_POOL_SIZE = 18;
+	public static int ulimit = 120;
 	public static Report report = new Report("junit-report.xml");
 	
 	public static List<Example> getExamples(String configuration, String k3jar, String tagName) {
