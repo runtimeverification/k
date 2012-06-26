@@ -1,0 +1,1 @@
+(\c.((\b.print(eval(b))) (quote(quote(unquote(unquote(lift c))))))) 10

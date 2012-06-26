@@ -1,0 +1,57 @@
+
+
+require exp
+require if
+require lambda
+require mu
+require callcc
+require halt
+require seq
+require io
+require ref
+require while
+require threads
+require agents
+require quote-unquote
+
+module AGENT
+  imports EXP 
+  imports LAMBDA
+  imports MU
+  imports CALLCC
+  imports HALT 
+  imports IO 
+  imports REF 
+  imports WHILE 
+  imports THREADS 
+  imports AGENTS 
+  imports QUOTE-UNQUOTE 
+
+ configuration
+    <T>
+      <agent multiplicity="*"> 
+          <control>
+              <thread multiplicity="*">
+                  <k color="green">$PGM:K</k>
+                  <holds>.Map</holds>
+              </thread>
+          </control>
+          <busy>.Set</busy> 
+          @latex("\\kBR")
+          <mem> .Map </mem> <nextLoc> 0 </nextLoc>
+          <me>0</me>
+          <parent>-1</parent>
+      </agent>
+      @latex("\\kBR")
+      <nextAgent>1</nextAgent>
+      <world>SetItem(0)</world>
+      <barrier>true</barrier> <waiting>.Set</waiting>
+      @latex("\\kBR")
+      <messages> <message multiplicity="*">
+          <from>.K</from> <to>.Set</to> <body>.K</body>
+      </message> </messages>
+      <IO> <in stream="stdin">.List</in> <out stream="stdout">.List</out> </IO>
+    </T>
+
+  syntax KResult ::= Id
+endmodule
