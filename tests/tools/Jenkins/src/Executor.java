@@ -29,9 +29,10 @@ public class Executor extends Thread {
 	@Override
 	public void run() {
 			try {
+				output = ""; error = "";
 				ProcessBuilder pb = new ProcessBuilder(commands);
 				pb.directory(new File(dir));
-			    exitValue = timedCall(new MyCallable<Integer>(pb.start()) {
+				MyCallable<Integer> callable = new MyCallable<Integer>(pb.start(), input) {
 			        public Integer call() throws Exception
 			        {
 			    		
@@ -61,7 +62,10 @@ public class Executor extends Thread {
 			    		}
 
 			    		return p.waitFor();
-			        }}, StaticK.ulimit, TimeUnit.SECONDS);
+			        }};
+			    exitValue = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
+			    output = callable.output;
+			    error = callable.error;
 			} catch (TimeoutException e) {
 			    output = "Timed out";
 			    error = "Timed out.";
@@ -118,10 +122,14 @@ public class Executor extends Thread {
 class MyCallable<T> implements Callable<T>
 {
 	Process p;
+	String output = "";
+	String error = "";
+	String input = "";
 	
-	public MyCallable(Process p1)
+	public MyCallable(Process p1, String input)
 	{
 		this.p = p1;
+		this.input = input;
 	}
 	
 	@SuppressWarnings("unchecked")

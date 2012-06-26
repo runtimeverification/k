@@ -96,7 +96,7 @@ public class Program extends Thread {
 			return filename + "... success.";
 		else
 			return filename
-					+ " ... failed:\n\n------------ STATS ------------\nRun:\n"
+					+ "... failed:\n\n------------ STATS ------------\nRun:\n"
 					+ compile + "\nKrun exit code: " + exit + "\nError: "
 					+ error + "\nOutput: " + output
 					+ "\n-------------------------------\n";
