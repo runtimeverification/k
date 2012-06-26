@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="Jenkins">
+    
+	<target name="build">
+	    <javac srcdir="src" includeantruntime="false"/>
+		<javac srcdir="tests" classpath="lib/junit-4.10.jar:src" includeantruntime="false"/>
+		<java classname="org.junit.runner.JUnitCore" classpath="lib/junit-4.10.jar:src:tests">
+		    <arg value="AllTests"/>
+		</java>
+	</target>
+	
+</project>
