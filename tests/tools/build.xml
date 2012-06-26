@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="all" name="K3 Build file">
+    
+	<target name="all">
+	    <ant antfile="build.xml" dir="Jenkins"/>	
+	</target>
+	
+	<target name="build">
+	    <ant antfile="build.xml" dir="Jenkins"/>
+	</target>
+</project>
