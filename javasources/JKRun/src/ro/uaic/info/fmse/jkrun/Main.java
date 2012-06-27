@@ -64,6 +64,7 @@ public class Main {
 		String result = null;
 		String path_ = null;
 		String fileName = null;
+		String compiledDef = null; 
 		StringBuilder str = new StringBuilder();
 		int count = 0;
 
@@ -72,6 +73,7 @@ public class Main {
 			for (File maudeFile : maudeFiles) {
 				String fullPath = maudeFile.getCanonicalPath();
 				path_ = FileUtil.dropExtension(fullPath, ".", K.fileSeparator);
+				compiledDef = maudeFile.getName();
 				int sep = path_.lastIndexOf(K.fileSeparator);
 				fileName = path_.substring(sep + 1);
 				if (fileName.startsWith(lang) && lang.length() > 0) {
@@ -79,13 +81,14 @@ public class Main {
 					str.append("\"./" + fileName + "\" ");
 					count++;
 				}
+			    if (lang.length() == 0 && fileName.endsWith("-compiled")) {
+			    	count++;
+			    }
 			}
 			if (count > 1) {
 				Error.report("\nMultiple compiled definitions found.\nPlease use only one of: " + str.toString());
 			} else if (maudeFiles.size() == 1) {
-				if (lang.length() > 0) {
-					/*result = K.k_definition + "-compiled.maude";*/
-				}
+				result = compiledDef; 
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -302,7 +305,7 @@ public class Main {
 			} else {
 				K.parser = new File(K.parser).getCanonicalPath();
 				System.out.println("The external parser to be used is:" + K.parser);
-				String parserName = FileUtil.getExternalParserName(K.parser, K.fileSeparator);
+				String parserName = new File(K.parser).getName();
 				if ("kast".equals(parserName)) {
 					rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", K.pgm });
 				}
