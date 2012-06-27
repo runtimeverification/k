@@ -1,20 +1,33 @@
+require "exp.k"
+require "if.k"
+require "lambda.k"
+require "mu.k"
+require "callcc.k"
+require "halt.k"
+require "seq.k"
+require "io.k"
+require "ref.k"
+require "while.k"
+require "threads.k"
+require "agents.k"
+require "quote-unquote.k"
 
-
-require exp
-require if
-require lambda
-require mu
-require callcc
-require halt
-require seq
-require io
-require ref
-require while
-require threads
-require agents
-require quote-unquote
+module AGENT-SYNTAX
+  imports EXP-SYNTAX
+  imports LAMBDA-SYNTAX
+  imports MU-SYNTAX
+  imports CALLCC-SYNTAX
+  imports HALT-SYNTAX
+  imports IO-SYNTAX
+  imports REF-SYNTAX
+  imports WHILE-SYNTAX
+  imports THREADS-SYNTAX
+  imports AGENTS-SYNTAX
+  imports QUOTE-UNQUOTE-SYNTAX
+endmodule
 
 module AGENT
+  imports AGENT-SYNTAX
   imports EXP 
   imports LAMBDA
   imports MU
@@ -37,16 +50,16 @@ module AGENT
               </thread>
           </control>
           <busy>.Set</busy> 
-          @latex("\\kBR")
+//          @latex("\\kBR")
           <mem> .Map </mem> <nextLoc> 0 </nextLoc>
           <me>0</me>
           <parent>-1</parent>
       </agent>
-      @latex("\\kBR")
+//      @latex("\\kBR")
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting>
-      @latex("\\kBR")
+//      @latex("\\kBR")
       <messages> <message multiplicity="*">
           <from>.K</from> <to>.Set</to> <body>.K</body>
       </message> </messages>

@@ -1,8 +1,13 @@
-require lambda
+require "lambda.k"
 
-module MU imports LAMBDA
-  syntax K ::= "mu" Id "." K [binder prec 100 latex "\mu{#1}.{#2}" ]
+module MU-SYNTAX imports LAMBDA-SYNTAX
+  syntax K ::= "mu" Id "." K [binder, latex("\mu{#1}.{#2}")]
+endmodule
 
----Fix point operator (through beta-substitution)
-  rule <k> (mu X:Id . E:K) => E[(mu X.E) / X] ...</k>
-end module
+module MU 
+  imports MU-SYNTAX 
+  imports LAMBDA
+
+//Fix point operator (through beta-substitution)
+  rule (mu X:Id . E:K) => E[(mu X . E) / X] 
+endmodule

@@ -1,22 +1,26 @@
-require /modules/k-visitor
+require "/modules/k-visitor.k"
 
-module QUOTE-UNQUOTE imports K-VISITOR
+module QUOTE-UNQUOTE-SYNTAX
   syntax K ::= "quote" K
              | "unquote" K
              | "lift" K    [strict]
              | "eval" K    [strict]
+endmodule
 
-  syntax K ::= "isQuote" "(" K ")"  [function klabel(isQuote)]
-  define isQuote(quote K) => true
-  define isQuote(unquote K) => true
+module QUOTE-UNQUOTE 
+  imports QUOTE-UNQUOTE-SYNTAX
+  imports K-VISITOR
+  syntax K ::= "isQuote" "(" K ")"  [klabel(isQuote)]
+  rule isQuote(quote K) => true [anywhere]
+  rule isQuote(unquote K) => true [anywhere]
 
-  syntax K ::= "mQuote" "(" K "," Nat ")" [function klabel(mQuote) latex "{\it quote}({#1},{#2})"]
-  define mQuote(K,N) 
+  syntax K ::= "mQuote" "(" K "," Nat ")" [klabel(mQuote), latex("{\it quote}({#1},{#2})")]
+  rule mQuote(K,N) 
     => visit K applying quoteit[N] if 'isQuote
-    [structural]
+    [structural, anywhere]
 
---- Code generation (via reflection)
-  syntax KLabel ::= "quoteit" "[" Nat "]" [latex "{\it quote}_{\mbox{\scriptsize\ensuremath{#1}}}"]
+// Code generation (via reflection)
+  syntax KLabel ::= "quoteit" "[" Nat "]" [latex("{\it quote}_{\mbox{\scriptsize\ensuremath{#1}}}")]
 
   rule <k>quote K:K => mQuote(K,0) ...</k>
   rule quoteit[N](quote(K)) => visitedL('quote_)(mQuote(K,N +Int 1)) 
@@ -26,4 +30,4 @@ module QUOTE-UNQUOTE imports K-VISITOR
 
   rule lift V:KResult => visitedK(V) 
   rule eval visitedK(K) => K 
-end module
+endmodule

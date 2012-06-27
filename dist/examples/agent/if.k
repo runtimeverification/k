@@ -1,9 +1,14 @@
 
 
-module IF 
-  syntax K ::= if K then K else K   [strict(1)]
-  syntax KResult ::= Bool
+module IF-SYNTAX
+  syntax K ::= Bool
+             | "if" K "then" K "else" K   [strict(1)]
+endmodule
 
-  rule if true then E else _ => E:K
+module IF 
+  imports IF-SYNTAX
+
+  syntax KResult ::= Bool
+  rule if true then E else _ => E
   rule if false then _ else E => E
-end module
+endmodule

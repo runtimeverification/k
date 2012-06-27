@@ -1,4 +1,8 @@
+module HALT-SYNTAX
+  syntax K ::= "halt" K [strict]
+endmodule
+
 module HALT
-  syntax K ::= halt K [strict]
-  rule <k>halt(V:KResult)~>_ => V</k> 
-end module
+  imports HALT-SYNTAX
+  rule <k>(halt V:KResult)~>_ => V</k> 
+endmodule
