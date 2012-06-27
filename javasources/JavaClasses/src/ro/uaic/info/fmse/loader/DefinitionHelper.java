@@ -76,7 +76,6 @@ public class DefinitionHelper {
 	}
 
 	public static boolean isParsingTag(String key) {
-		// TODO Auto-generated method stub
-		return false;
+		return Arrays.binarySearch(parsingTags, key) >= 0;
 	}	
 }

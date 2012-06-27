@@ -102,7 +102,7 @@ public class KompileFrontEnd {
 
 		File mainFile = new File(def);
 		GlobalSettings.mainFile = mainFile;
-		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "");
+		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
 		if (!mainFile.exists()) {
 			File errorFile = mainFile;
 			mainFile = new File(def + ".k");
@@ -144,6 +144,7 @@ public class KompileFrontEnd {
 			// Run pdflatex.
 			String pdfLatex = "pdflatex";
 			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
+			System.out.println(argument);
 
 			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
 
