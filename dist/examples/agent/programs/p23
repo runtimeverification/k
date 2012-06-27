@@ -3,7 +3,7 @@
     (newAgent (
       (print me);
       barrier)) ;
-    (*x := *x + 1)
+    (*x := (*x + 1))
   )) ; 
   barrier;
   (print me))) (ref 1)
