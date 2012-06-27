@@ -26,6 +26,10 @@ public class StringUtil {
 	}
 
 	public static String latexify(String name) {
-		return name.replace("_", "\\_").replace("{", "\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace("$", "\\$").replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}");
+		return name.replace("\\", "\\textbackslash ")
+		.replace("_", "\\_").replace("{", "\\{").replace("}", "\\}")
+		.replace("#", "\\#").replace("%", "\\%").replace("$", "\\$")
+		.replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}")
+		.replace("`", "\\`{}");
 	}
 }

@@ -312,17 +312,19 @@ public class LatexFilter extends BasicVisitor {
 	public void visit(Attribute entry) {
 		if (DefinitionHelper.isTagGenerated(entry.getKey()))
 			return;
+		if (DefinitionHelper.isParsingTag(entry.getKey()))
+			return;
 		if (entry.getKey().equals("latex"))
 			return;
-		result += StringUtil.latexify(entry.getKey());
-		String value = entry.getValue();
-		if (!value.isEmpty()) {
-			result += "(" + StringUtil.latexify(value) + ")";
-		}
 		if (firstAttribute) {
 			firstAttribute = false;
 		} else {
 			result += ", ";
+		}
+		result += StringUtil.latexify(entry.getKey());
+		String value = entry.getValue();
+		if (!value.isEmpty()) {
+			result += "(" + StringUtil.latexify(value) + ")";
 		}
 	}
 

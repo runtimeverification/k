@@ -14,6 +14,12 @@ public class DefinitionHelper {
 		"prefixlabel",
 	};
 	
+	public static String parsingTags[] = {
+		"bracket",
+		"left",
+		"right"
+	};
+	
 	public static String specialTerminals[] = {
 		"(",
 		")",
@@ -67,5 +73,10 @@ public class DefinitionHelper {
 
 	public static boolean isSpecialTerminal(String terminal) {
 		return (Arrays.binarySearch(specialTerminals, terminal) >= 0);
+	}
+
+	public static boolean isParsingTag(String key) {
+		// TODO Auto-generated method stub
+		return false;
 	}	
 }
