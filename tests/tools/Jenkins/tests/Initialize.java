@@ -130,6 +130,9 @@ public class Initialize {
 		String name = file.getName();
 		String dirParent = file.getAbsoluteFile().getParent();
 		
+		if (new File(dirParent).getName().equals(name.replaceAll("\\.\\S+$", "")))
+			return Integer.MAX_VALUE;
+		
 		int score = 0;
 		String[] split = name.split("-");
 		for(int i = 0; i < split.length; i++)
