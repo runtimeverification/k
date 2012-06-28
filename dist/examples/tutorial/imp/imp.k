@@ -159,7 +159,7 @@ displayed as $\leq$ everywhere in the generated PDF.  Currently, the
   syntax BExp ::= Bool
                 | AExp "<=" AExp   [seqstrict, latex("{#1}\leq{#2}")]
                 | "not" BExp       [strict]
-                > BExp "and" BExp  [strict(1)]
+                > BExp "and" BExp  [left, strict(1)]
                 | "(" BExp ")"     [bracket]
   syntax Stmt ::= "skip"
                 | Id ":=" AExp     [strict(2)]
@@ -168,7 +168,7 @@ displayed as $\leq$ everywhere in the generated PDF.  Currently, the
                   "else" Stmt      [strict(1)]
                 | "while" BExp
                   "do" Stmt
-                > Stmt ";" Stmt    
+                > Stmt ";" Stmt    [left]
                 | "(" Stmt ")"     [bracket]
 
 /*@ An IMP program declares a set of variables and then executes a
