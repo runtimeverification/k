@@ -177,7 +177,8 @@ module SIMPLE-UNTYPED
   rule not(B:Bool) => notBool(B)
 
 
-  rule V[N1:Int,N2:Int,Vs:Vals] => V[N1][N2,Vs]  [structural]
+  rule V:Val[N1:Int,N2:Int,Vs:Vals] 
+    => V[N1,.Exps][N2,Vs]  [structural, anywhere]
   rule arrayRef(L,_:Int)[N] => lookup(L:Int +Int N:Int)  
     [structural, anywhere]
   syntax K ::= "lookup" "(" Int ")" [cons("K1LookupSyn")]
