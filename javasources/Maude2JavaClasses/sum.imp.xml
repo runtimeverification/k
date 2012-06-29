@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<maudeml>
+ <result cpu-time-ms="33" real-time-ms="34" rewrites-per-second="486952" total-rewrites="16328">
+  <term op="&lt;_&gt;_&lt;/_&gt;" sort="BagItem">
+   <term op="T" sort="CellLabel"/>
+   <term op="__" sort="NeBag">
+    <term op="&lt;_&gt;_&lt;/_&gt;" sort="BagItem">
+     <term op="k" sort="CellLabel"/>
+     <term op="." sort="K"/>
+     <term op="k" sort="CellLabel"/>
+    </term>
+    <term op="&lt;_&gt;_&lt;/_&gt;" sort="BagItem">
+     <term op="env" sort="CellLabel"/>
+     <term op="__" sort="NeMap">
+      <term op="_|-&gt;_" sort="MapItem">
+       
+       <term op="#_" sort="KLabel">
+         <term op="#id_" sort="#Id">
+          <term op="&quot;n&quot;" sort="#Char"/>
+         </term>
+        <term op=".List`{K`}" sort="List`{K`}"/>
+       </term>
+      <term op="#_" sort="KLabel">
+         <term op="0" sort="#Zero"/>
+        <term op=".List`{K`}" sort="List`{K`}"/>
+       </term>
+      </term>
+      <term op="_|-&gt;_" sort="MapItem">
+       
+       <term op="#_" sort="KLabel">
+         <term op="#id_" sort="#Id">
+          <term op="&quot;sum&quot;" sort="#String"/>
+         </term>
+        <term op=".List`{K`}" sort="List`{K`}"/>
+       </term>
+      <term op="#_" sort="KLabel">
+         <term number="5050" op="sNat_" sort="#NzNat">
+          <term op="0" sort="#Zero"/>
+         </term>
+        <term op=".List`{K`}" sort="List`{K`}"/>
+       </term>
+      </term>
+     </term>
+     <term op="env" sort="CellLabel"/>
+    </term>
+   </term>
+   <term op="T" sort="CellLabel"/>
+  </term>
+ </result>
+</maudeml>
