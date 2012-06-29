@@ -5,12 +5,14 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.visitors.Transformer;
 import ro.uaic.info.fmse.visitors.Visitor;
 
-
 public class Map extends Collection {
 
 	public Map(Element element) {
 		super(element);
-		// TODO Auto-generated constructor stub
+	}
+
+	public Map(String location, String filename) {
+		super(location, filename);
 	}
 
 	public Map(Map node) {
@@ -21,6 +23,7 @@ public class Map extends Collection {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

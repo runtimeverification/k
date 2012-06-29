@@ -1,6 +1,6 @@
 package ro.uaic.info.fmse.k;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -20,12 +20,13 @@ public abstract class Collection extends Term {
 
 	public Collection(String location, String filename) {
 		super(location, filename);
+		contents = new ArrayList<Term>();
 	}
 
 	public Collection(Element element) {
 		super(element);
 
-		contents = new LinkedList<Term>();
+		contents = new ArrayList<Term>();
 		List<Element> children = XML.getChildrenElements(element);
 		for (Element e : children)
 			contents.add((Term) JavaClassesFactory.getTerm(e));

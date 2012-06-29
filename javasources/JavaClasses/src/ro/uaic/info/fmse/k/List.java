@@ -15,6 +15,10 @@ public class List extends Collection {
 		super(node);
 	}
 
+	public List(String location, String filename) {
+		super(location, filename);
+	}
+
 	@Override
 	public String toString() {
 		return super.toString();
@@ -24,6 +28,7 @@ public class List extends Collection {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

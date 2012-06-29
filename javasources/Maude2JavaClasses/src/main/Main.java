@@ -1,5 +1,6 @@
 package main;
 
+import transformer.JavaClassesFactory;
 import basic.Term;
 
 public class Main {
@@ -12,7 +13,8 @@ public class Main {
 		
 		System.out.println(t);
 		
-		
+		ro.uaic.info.fmse.k.Term t2 = JavaClassesFactory.getTerm(t);
+		System.out.println(t2);
 	}
 
 }

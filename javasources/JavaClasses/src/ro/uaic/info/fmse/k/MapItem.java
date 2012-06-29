@@ -23,6 +23,10 @@ public class MapItem extends CollectionItem {
 		this.value = (Term) JavaClassesFactory.getTerm(elmBody);
 	}
 
+	public MapItem(String location, String filename) {
+		super(location, filename);
+	}
+	
 	public MapItem(MapItem node) {
 		super(node);
 		this.key = node.key;

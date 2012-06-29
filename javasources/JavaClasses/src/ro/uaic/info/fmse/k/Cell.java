@@ -22,6 +22,7 @@ public class Cell extends Term {
 
 	public Cell(String location, String filename) {
 		super(location, filename);
+		attributes = new HashMap<String, String>();
 	}
 
 	public Cell(Element element) {
@@ -50,6 +51,7 @@ public class Cell extends Term {
 		this.contents = node.contents;
 	}
 
+	@Override
 	public String toString() {
 		String attributes = "";
 		for (Entry<String, String> entry : this.attributes.entrySet())
@@ -64,8 +66,10 @@ public class Cell extends Term {
 				content += " " + this.contents + " ...";
 			} else if (elipses.equals("both")) {
 				content += "... " + this.contents + " ...";
-			} else
-				content += " " + this.contents;
+			}
+				
+		} else {
+			content += " " + this.contents;
 		}
 		return content + "</" + this.label + "> ";
 	}
