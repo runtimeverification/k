@@ -25,10 +25,12 @@ public class Hole extends Term {
 	@Override
 	public void applyToAll(Modifier visitor) {
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

@@ -3,7 +3,6 @@ package ro.uaic.info.fmse.k;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.loader.Constants;
-import ro.uaic.info.fmse.utils.strings.StringUtil;
 import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformer;
 import ro.uaic.info.fmse.visitors.Visitor;
