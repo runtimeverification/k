@@ -61,7 +61,7 @@ public class HTMLFilter extends BasicVisitor {
 		
 		result += "<div>" + "Definition" + endl;
 		super.visit(def);
-		result += "Definition - END" + "</div>" + endl;
+		result += "</div>" + endl;
 		title  = def.getMainModule();
 	}
 
@@ -69,10 +69,10 @@ public class HTMLFilter extends BasicVisitor {
 	public void visit(Module mod) {
 		if (mod.isPredefined())
 			return;
-		result += "<div>" + "Module " + mod.getName() + endl;
+		result += "<div>" + "Module " + mod.getName() + "<br/>" + endl;
 		//result += "\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl;
 		super.visit(mod);
-		result += "Module " + mod.getName() + "- END " + "<br />" + "<br />" + "</div>" + endl;
+		result += "<br />" + "<br />" + "</div>" + endl;
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Sort sort) {
-		result += "<span class =\"italic\">" + sort.getSort() + "</span>";
+		result += "<span class =\"italic\"> " + sort.getSort() + " </span>";
 		/*result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getSort()) + "}}}";*/
 	}
 
@@ -139,18 +139,18 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Configuration conf) {
-		result += "Configuration{";
+		result += "Configuration : <br />";
 		super.visit(conf);
-		result += "}" + endl;
 	}
 
 	@Override
 	public void visit(Cell c) {
-		/*if (c.getElipses().equals("left")) {
-			result += "\\ksuffix";
+		String blockClasses = "block";
+		if (c.getElipses().equals("left")) {
+			blockClasses += " left";
 		} else if (c.getElipses().equals("right")) {
-			result += "\\kprefix";
-		} else if (c.getElipses().equals("both")) {
+			blockClasses += " right";
+		} /*else if (c.getElipses().equals("both")) {
 			result += "\\kmiddle";
 		} else {
 			result += "\\kall";
@@ -161,14 +161,17 @@ public class HTMLFilter extends BasicVisitor {
 		if (colors.containsKey(c.getLabel())) {
 			result += "[" + colors.get(c.getLabel()) + "]";
 		}*/
-		result += "{" + StringUtil.latexify(c.getLabel()) + "}{";
+		result += "<div class=\"cell\"> <div class=\"tab\">";
+		result += "<span class = \"bold\">" + makeGreek(htmlify(c.getLabel())) + "</span> </div>";
+		result += "<br />";
+		result += "<div class=\"" + blockClasses + "\">";
 		super.visit(c);
-		result += "}" + endl;
+		result += "</div> </div>" + endl;
 	}
 
 	public void visit(Collection col) {
 		List<Term> contents = col.getContents();
-		printList(contents, " -> ");
+		printList(contents, "");
 	}
 	
 	private void printList(List<Term> contents, String str) {
@@ -211,7 +214,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Empty e) {
-		result += " <span class = \"bold\">&middot;</span> " + e.getSort() + " ";
+		result += " <span title=\""+ e.getSort()+"\" class = \"bold\"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> ";
 	}
 
 	@Override
@@ -220,13 +223,15 @@ public class HTMLFilter extends BasicVisitor {
 		if (!rule.getLabel().equals("")) {
 			result += "  [" + rule.getLabel() + "] ";
 		}
+		result+="<div class=\"cell\"> ";
 		rule.getBody().accept(this);
+		result+="</div> ";
 		if (rule.getCondition() != null) {
 			result += " when ";
 			rule.getCondition().accept(this);
 		}
 		rule.getAttributes().accept(this);
-		result += "</div>" + endl;
+		result += "</div> <br />" + endl;
 		//result += "\\krule";
 		
 		/*result += "{" + endl;
@@ -260,11 +265,11 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Rewrite rew) {
 		
-		result += " ";
+		result += "<div class=\"textCentered\"> <em>";
 		rew.getLeft().accept(this);
-		result += " => ";
+		result += "</em> <hr class=\"reduce\"/> <em>";
 		rew.getRight().accept(this);
-		result += " ";
+		result += "</em> </div>";
 	}
 
 	@Override
@@ -284,9 +289,9 @@ public class HTMLFilter extends BasicVisitor {
 //		}
 //		result += pattern;
 		//result += "\\mbox{" + StringUtil.latexify(trm.toString()) + "}";
-		result += trm.toString();
+		result += makeGreek(htmlify(trm.toString()));
 		if(trm.toString().isEmpty())
-			result += ".";
+			result += "&nbsp; &nbsp; &nbsp; .&nbsp; &nbsp; &nbsp; ";
 	}
 
 	@Override
@@ -387,6 +392,10 @@ public class HTMLFilter extends BasicVisitor {
 				+ "{" + endl
 				+ "font-style: italic;"+endl
 				+ "}" + endl;
+		css += "em" + endl
+				+ "{" + endl
+				+ "font-style: italic;"+endl
+				+ "}" + endl;
 		css += ".attribute" + endl
 				+ "{" + endl
 				+ "color: blue;"+endl
@@ -395,6 +404,71 @@ public class HTMLFilter extends BasicVisitor {
 				+ "{" + endl
 				+ "text-align: center;"+endl
 				+ "}" + endl;
-				
+		css += ".cell" + endl
+				+ "{" + endl
+				+ "display: inline-block;"+endl
+				+ "vertical-align: top;"+endl
+				+ "}" + endl;
+		css += "hr.reduce" + endl
+				+ "{" + endl
+				+ "color: black;"+endl
+				+ "background-color: black;"+endl
+				+ "height: 3px;"+endl
+				+ "}" + endl;
+		css += "hr.reduce:after" + endl
+				+ "{" + endl
+				+ "width: 0;"+endl
+				+ "height: 0;"+endl
+				+ "border-left : 6px solid transparent;"+endl
+				+ "border-right : 6px solid transparent;"+endl
+				+ "border-top : 6px solid black;"+endl
+				+ "position: absolute;"+endl
+				+ "content: \"\";"+endl
+				+ "}" + endl;
+		css += ".tab" + endl
+				+ "{" + endl
+				+ "display: inline-block;"+endl
+				+ "padding : 2px;"+endl
+				+ "margin-left : 0;"+endl
+				+ "border-top : 3px solid;"+endl
+				+ "border-left : 3px solid;"+endl
+				+ "border-right : 3px solid;"+endl
+				+ "position: relative;"+endl
+				+ "left: 30px;"+endl
+				+ "top : 3px;"+endl
+				+ "border-color :#008000;"+endl
+				+ "background-color: #BEEEBE;"+endl
+				+ "}" + endl;
+		
+		css += ".block" + endl
+				+ "{" + endl
+				+ "color : black;"+endl
+				+ "border: 3px #008000;"+endl
+				+ "background-color: #BEEEBE;"+endl
+				+ "display: inline-block; "+endl
+				+ "padding: 10px;"+endl
+				+ "padding-left: 20px;"+endl
+				+ "padding-right: 20px;"+endl
+				+ "border-radius: 30px;"+endl
+				+ "border-style: solid;"+endl
+				+ "}" + endl;
+		
+		css += ".block.right" + endl
+				+ "{" + endl
+				+ "border-top-right-radius: 0px;"+endl
+				+ "border-bottom-right-radius: 0px;"+endl
+				+ "border-right-style: dotted;"+endl
+				+ "}" + endl;
+		
+		css += ".block.left" + endl
+				+ "{" + endl
+				+ "border-top-left-radius: 0px;"+endl
+				+ "border-bottom-left-radius: 0px;"+endl
+				+ "border-left-style: dotted;"+endl
+				+ "}" + endl;		
+	}
+	
+	private String htmlify(String name) {
+		return name.replace("<", "&lt;");
 	}
 }
