@@ -48,7 +48,7 @@ public class HTMLFilter extends BasicVisitor {
 			"</head>" + endl + 
 			"<body>" + endl;
 		html += 
-			result + 
+			result +
 			"</body>" + endl +
 			"</html>" + endl;
 
@@ -77,10 +77,10 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Syntax syn) {
-		result += "<div>" + "SYNTAX" + endl;
+		result += "<table> <tr> <td> SYNTAX" + endl;
 		firstProduction = true;
 		super.visit(syn);
-		result += "</div>" + endl;
+		result += "</table>" + endl;
 	}
 
 	@Override
@@ -92,10 +92,10 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Production p) {
 		if (firstProduction) {
-			result += " ::= ";
+			result += "</td><td> ::= </td> <td>";
 			firstProduction = false;
 		} else {
-			result += "" + " | ";
+			result += "<tr> <td> </td> <td class = \"textCentered\"> |  </td> <td>";
 		}
 //		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.getAttributes().containsKey(Constants.CONS_cons_ATTR) && patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
 //			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
@@ -115,6 +115,7 @@ public class HTMLFilter extends BasicVisitor {
 //		}
 		p.getAttributes().accept(this);
 		//result += "Production - END " + "</div>" + endl;
+		result += "</td> </tr>";
 	}
 
 	@Override
@@ -350,6 +351,7 @@ public class HTMLFilter extends BasicVisitor {
 			return;
 		
 		if (firstAttribute) {
+			result += " [ <span class =\"attribute\"> ";
 			firstAttribute = false;
 		} else {
 			result += ", ";
@@ -367,14 +369,13 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Attributes attributes) {
-		if(!attributes.getContents().isEmpty()){
-			result += " [ <span class =\"attribute\"> ";
-			firstAttribute = true;
-			for (Attribute entry : attributes.getContents()) {
-				entry.accept(this);
-			}
-			result += "</span> ]";
+		firstAttribute = true;
+		for (Attribute entry : attributes.getContents()) {
+			entry.accept(this);
 		}
+		if(!firstAttribute)
+			result += "</span> ]";
+	
 	}
 	
 	private void initializeCss(){
@@ -389,6 +390,10 @@ public class HTMLFilter extends BasicVisitor {
 		css += ".attribute" + endl
 				+ "{" + endl
 				+ "color: blue;"+endl
+				+ "}" + endl;
+		css += ".textCentered" + endl
+				+ "{" + endl
+				+ "text-align: center;"+endl
 				+ "}" + endl;
 				
 	}
