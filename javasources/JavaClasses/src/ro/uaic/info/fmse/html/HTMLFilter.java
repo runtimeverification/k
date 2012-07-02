@@ -3,6 +3,8 @@ package ro.uaic.info.fmse.html;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.Random;
+import java.util.Vector;
 
 import ro.uaic.info.fmse.k.*;
 import ro.uaic.info.fmse.k.LiterateComment.LiterateCommentType;
@@ -18,7 +20,7 @@ public class HTMLFilter extends BasicVisitor {
 	private String css = "";
 	private String title = "";
 	private boolean firstProduction = false;
-	private Map<String, String> colors = new HashMap<String, String>();
+	private Map<String, String> colors = new HashMap<String,String>();
 //	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
 
@@ -33,6 +35,79 @@ public class HTMLFilter extends BasicVisitor {
 	public String getPreamble() {
 		return preamble;
 	}*/
+	
+	public HTMLFilter() {
+		initializeCss();
+		createColors();
+	}
+	
+	public void createColors(){
+		colors.clear();
+		colors.put("yellow" , ".yellow" + endl
+				+ "{" + endl
+				+ "border-color: #96915c;"+endl
+				+ "background-color: #f7f7c5;"+endl
+				+ "}" + endl);
+		colors.put("brown" , ".brown" + endl
+				+ "{" + endl
+				+ "border-color: #804000;"+endl
+				+ "background-color: #f6dec5;"+endl
+				+ "}" + endl);
+		colors.put("red" , ".red" + endl
+				+ "{" + endl
+				+ "border-color: #892d29;"+endl
+				+ "background-color: #f5c4c4;"+endl
+				+ "}" + endl);
+		colors.put("green" , ".green" + endl
+				+ "{" + endl
+				+ "border-color: #008000;"+endl
+				+ "background-color: #BEEEBE;"+endl
+				+ "}" + endl);
+		colors.put("blue" , ".blue" + endl
+				+ "{" + endl
+				+ "border-color: #44677d;"+endl
+				+ "background-color: #d8e6ee;"+endl
+				+ "}" + endl);
+		colors.put("pink" , ".pink" + endl
+				+ "{" + endl
+				+ "border-color: #ad7a9b;"+endl
+				+ "background-color: #edbeed;"+endl
+				+ "}" + endl);
+		colors.put("purple" , ".purple" + endl
+				+ "{" + endl
+				+ "border-color: #957294;"+endl
+				+ "background-color: #e8d4e8;"+endl
+				+ "}" + endl);
+		colors.put("lightGrey" , ".lightGrey" + endl
+				+ "{" + endl
+				+ "border-color: #808080;"+endl
+				+ "background-color: #f0f0f0;"+endl
+				+ "}" + endl);
+		colors.put("darkGrey" , ".darkGrey" + endl
+				+ "{" + endl
+				+ "border-color: #7c7c7c;"+endl
+				+ "background-color: #d7d7d7;"+endl
+				+ "}" + endl);
+		
+	}
+	
+	private String getRandomColor(){
+		Random generator = new Random();
+		Object[] keys = colors.keySet().toArray();
+		return (String) keys[generator.nextInt(keys.length)];
+	}
+	
+	private String getCellColor(String cellName){
+		if(cellName.toLowerCase().equals("k"))
+			return "green";
+		else if(cellName.toLowerCase().equals("env"))
+			return "red";
+		else if(cellName.toLowerCase().equals("t"))
+			return "yellow";
+		else
+			return getRandomColor();
+			
+	}
 
 	public String getResult() {
 		
@@ -57,8 +132,6 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Definition def) {
-		initializeCss();
-		
 		result += "<div>" + "Definition" + endl;
 		super.visit(def);
 		result += "</div>" + endl;
@@ -161,10 +234,14 @@ public class HTMLFilter extends BasicVisitor {
 		if (colors.containsKey(c.getLabel())) {
 			result += "[" + colors.get(c.getLabel()) + "]";
 		}*/
-		result += "<div class=\"cell\"> <div class=\"tab\">";
+		String color = getCellColor(makeGreek(htmlify(c.getLabel())));
+		
+		css+= colors.get(color);
+		
+		result += "<div class=\"cell\"> <div class=\"tab " + color + "\">";
 		result += "<span class = \"bold\">" + makeGreek(htmlify(c.getLabel())) + "</span> </div>";
 		result += "<br />";
-		result += "<div class=\"" + blockClasses + "\">";
+		result += "<div class=\"" + blockClasses + " " + color + "\">";
 		super.visit(c);
 		result += "</div> </div>" + endl;
 	}
@@ -425,6 +502,7 @@ public class HTMLFilter extends BasicVisitor {
 				+ "position: absolute;"+endl
 				+ "content: \"\";"+endl
 				+ "}" + endl;
+		
 		css += ".tab" + endl
 				+ "{" + endl
 				+ "display: inline-block;"+endl
@@ -436,15 +514,12 @@ public class HTMLFilter extends BasicVisitor {
 				+ "position: relative;"+endl
 				+ "left: 30px;"+endl
 				+ "top : 3px;"+endl
-				+ "border-color :#008000;"+endl
-				+ "background-color: #BEEEBE;"+endl
 				+ "}" + endl;
 		
 		css += ".block" + endl
 				+ "{" + endl
 				+ "color : black;"+endl
-				+ "border: 3px #008000;"+endl
-				+ "background-color: #BEEEBE;"+endl
+				+ "border-width: 3px;"+endl
 				+ "display: inline-block; "+endl
 				+ "padding: 10px;"+endl
 				+ "padding-left: 20px;"+endl
