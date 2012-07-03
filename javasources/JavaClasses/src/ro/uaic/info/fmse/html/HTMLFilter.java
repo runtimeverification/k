@@ -1,6 +1,7 @@
 package ro.uaic.info.fmse.html;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.List;
 import java.util.Random;
@@ -21,6 +22,7 @@ public class HTMLFilter extends BasicVisitor {
 	private String title = "";
 	private boolean firstProduction = false;
 	private Map<String, String> colors = new HashMap<String,String>();
+	private HashSet usedColors = new HashSet();
 //	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
 
@@ -132,17 +134,18 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Definition def) {
-		result += "<div>" + "Definition" + endl;
-		super.visit(def);
-		result += "</div>" + endl;
 		title  = def.getMainModule();
+		result += "<span class=\"xlarge\">" + title + " </span> " + endl;
+		result += "<div> <br /> </div>" + endl;
+		super.visit(def);
+
 	}
 
 	@Override
 	public void visit(Module mod) {
 		if (mod.isPredefined())
 			return;
-		result += "<div>" + "Module " + mod.getName() + "<br/>" + endl;
+		result += "<div>" + "Module <span class=\"large\">" + mod.getName() + "</span> <br/>" + endl;
 		//result += "\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl;
 		super.visit(mod);
 		result += "<br />" + "<br />" + "</div>" + endl;
@@ -150,7 +153,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Syntax syn) {
-		result += "<table> <tr> <td> SYNTAX" + endl;
+		result += "<table> <tr> <td> SYNTAX ";
 		firstProduction = true;
 		super.visit(syn);
 		result += "</table>" + endl;
@@ -188,12 +191,12 @@ public class HTMLFilter extends BasicVisitor {
 //		}
 		p.getAttributes().accept(this);
 		//result += "Production - END " + "</div>" + endl;
-		result += "</td> </tr>";
+		result += "</td> </tr>" + endl;
 	}
 
 	@Override
 	public void visit(Terminal pi) {
-		result += "<span>" + "\"" + pi.getTerminal() + "\"" + "</span>"  + endl;
+		result += htmlify(pi.getTerminal());
 		/*String terminal = pi.getTerminal();
 		if (terminal.isEmpty())
 			return;
@@ -236,7 +239,8 @@ public class HTMLFilter extends BasicVisitor {
 		}*/
 		String color = getCellColor(makeGreek(htmlify(c.getLabel())));
 		
-		css+= colors.get(color);
+		if(usedColors.add(color))
+			css+= colors.get(color);
 		
 		result += "<div class=\"cell\"> <div class=\"tab " + color + "\">";
 		result += "<span class = \"bold\">" + makeGreek(htmlify(c.getLabel())) + "</span> </div>";
@@ -296,13 +300,14 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Rule rule) {
-		result += "<div> RULE";
+		result += "<div> <span ";
 		if (!rule.getLabel().equals("")) {
-			result += "  [" + rule.getLabel() + "] ";
+			result += "title =\"Rule Label: " + rule.getLabel() + "\"";
 		}
-		result+="<div class=\"cell\"> ";
+		result += "> RULE </span>";
+		result += "<div class=\"cell\"> ";
 		rule.getBody().accept(this);
-		result+="</div> ";
+		result += "</div> ";
 		if (rule.getCondition() != null) {
 			result += " when ";
 			rule.getCondition().accept(this);
@@ -342,9 +347,9 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Rewrite rew) {
 		
-		result += "<div class=\"textCentered\"> <em>";
+		result += "<div class=\"textCentered\"> <em> ";
 		rew.getLeft().accept(this);
-		result += "</em> <hr class=\"reduce\"/> <em>";
+		result += "</em> <hr class=\"reduce\"/> <em> ";
 		rew.getRight().accept(this);
 		result += "</em> </div>";
 	}
@@ -368,7 +373,9 @@ public class HTMLFilter extends BasicVisitor {
 		//result += "\\mbox{" + StringUtil.latexify(trm.toString()) + "}";
 		result += makeGreek(htmlify(trm.toString()));
 		if(trm.toString().isEmpty())
-			result += "&nbsp; &nbsp; &nbsp; .&nbsp; &nbsp; &nbsp; ";
+			result += "&nbsp; &nbsp; &nbsp; &middot; &nbsp; &nbsp; &nbsp; ";
+		/*Production p = trm.getProduction();
+		super.visit(p);*/
 	}
 
 	@Override
@@ -472,6 +479,14 @@ public class HTMLFilter extends BasicVisitor {
 		css += "em" + endl
 				+ "{" + endl
 				+ "font-style: italic;"+endl
+				+ "}" + endl;
+		css += ".large" + endl
+				+ "{" + endl
+				+ "font-size: large;"+endl
+				+ "}" + endl;
+		css += ".xlarge" + endl
+				+ "{" + endl
+				+ "font-size: x-large;"+endl
 				+ "}" + endl;
 		css += ".attribute" + endl
 				+ "{" + endl
