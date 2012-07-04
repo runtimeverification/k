@@ -19,9 +19,7 @@ import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.latex.LatexFilter;
-import ro.uaic.info.fmse.latex.LatexFilter;
-
+import ro.uaic.info.fmse.hkcd.HaskellDumpFilter;
 
 /// Haskell K Compiler dump tool frontend
 ///
@@ -95,11 +93,10 @@ public class HKCDFrontEnd {
 
 			Stopwatch sw = new Stopwatch();
 
-			//HaskellDumpFilter lf = new HaskellDumpFilter();
-			//javaDef.accept(hdf);
+			HaskellDumpFilter hdf = new HaskellDumpFilter();
+			javaDef.accept(hdf);
 
-			//String dumped = hdf.getResult();
-			String dumped = "";
+			String dumped = hdf.getResult();
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.hkcd", dumped);
 
