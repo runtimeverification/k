@@ -393,9 +393,6 @@ public class KompileFrontEnd {
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.sbs", def2.getSubsortingAsStrategoTerms());
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cons", def2.getConsAsStrategoTerms());
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.ditto", def2.getDittosAsStrategoTerm());
-
-			def2.replaceDittoCons();
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
@@ -416,7 +413,6 @@ public class KompileFrontEnd {
 
 			// ------------------------------------- import files in Stratego
 			k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
-			k3parser.KParser.ImportDitto(dotk.getAbsolutePath() + "/Integration.ditto");
 			k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
 			k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
 
@@ -558,9 +554,7 @@ public class KompileFrontEnd {
 			//
 			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.sbs", def2.getSubsortingAsStrategoTerms());
 			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cons", def2.getConsAsStrategoTerms());
-			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.ditto", def2.getDittosAsStrategoTerm());
 			//
-			// def2.replaceDittoCons();
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
@@ -581,7 +575,6 @@ public class KompileFrontEnd {
 
 			// ------------------------------------- import files in Stratego
 			// k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
-			// k3parser.KParser.ImportDitto(dotk.getAbsolutePath() + "/Integration.ditto");
 			// k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
 			// k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
 

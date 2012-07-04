@@ -52,7 +52,6 @@ rules
 	importSbs    = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMySbs    : _ -> trm)
 	importCons   = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyCons   : _ -> trm)
 	importCells  = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyCells  : _ -> trm)
-	importDitto  = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyDitto  : _ -> trm)
 	importTblPgm = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTblPgm : _ -> trm)
 
 	javaParseStringConfig = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>)> b ; (handleErrors <+ justFineConfig)
@@ -131,18 +130,18 @@ rules
 		<importSbs>  ["a.exe", "../K3Syntax/test/.k/Integration.sbs"] ;
 		<importCons> ["a.exe", "../K3Syntax/test/.k/Integration.cons"] ;
 		<importTbl>  ["a.exe", "../K3Syntax/test/.k/def/K3Dist.tbl"] ;
-		<importCells>["a.exe", "../K3Syntax/test/.k/Integration.cells"] ;
-		<importDitto>["a.exe", "../K3Syntax/test/.k/Integration.ditto"])
+		<importCells>["a.exe", "../K3Syntax/test/.k/Integration.cells"])
 
 	testMe5 =
 		where(
 		<importSbs>  ["a.exe", "../K3Syntax/test/.k/Integration.sbs"] ;
 		<importCons> ["a.exe", "../K3Syntax/test/.k/Integration.cons"] ;
-		<importCells>["a.exe", "../K3Syntax/test/.k/Integration.cells"] ;
-		<importDitto>["a.exe", "../K3Syntax/test/.k/Integration.ditto"]) ;
+		<importCells>["a.exe", "../K3Syntax/test/.k/Integration.cells"]) ;
 		all(all(testDisambig))
 
-	disambig0 = disambig2 <+ testMe5
+	external clear-console(|)
+
+	disambig0 = clear-console ; (disambig2 <+ testMe5)
 	disambig2:
 		(ast, path, project-path) -> <testMe5> ast
 

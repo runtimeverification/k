@@ -8,10 +8,10 @@ imports Integration
 
 exports
 context-free start-symbols
-	Start
+	StartDz
 
 context-free syntax
-	KSentence+	-> Start {cons("KSentenceList")}
+	KSentence+	-> StartDz {cons("KSentenceList")}
 	%% K Sentences
 	%%"macro" Bag "=" Bag			-> KSimpleSentence {cons("Macro")}
 	"configuration" Bag			-> KSentence {cons("Config")}
@@ -74,7 +74,8 @@ lexical restrictions
 
 lexical syntax
 	[A-Z][a-zA-Z0-9]* -> BASICID
-	[A-Za-z] ~[\<\>\_\ \n\r\t]*	-> CellLabel
+	[A-Za-z] ~[\<\>\_\ \n\r\t]*	-> DzCellLabel
+	DzCellLabel				-> CellLabel
 	[A-Z\-]+				-> ModName
 	~[\[\]\_\ \n\r\t]+		-> LABEL
 

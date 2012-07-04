@@ -16,15 +16,16 @@ rules
 	matchCell2:		// create a tuple with the (cellLabel, maxSort, minSort)
 		Bag1ClosedCell(x1, x2, x3#(_), x4) -> (x1, maxSort, minSort)
 		where minSort := <getSort> x3
-		where maxSort := <getSort ; getMaxSort> x3
+		where maxSort := <getSort ; getMaxSort-2> x3
 
 	cels2Xml:
 		(cellName, maxS, minS) -> $[<cellSummary value="[cellName]" maxSort="[maxS]" minSort="[minS]"/>
 		]
 
-	getMaxSort =
-		?sort ; repeat(getMaxSort2(|sort))
-	getMaxSort2(|sort):
-		a -> b
-		where MemoMySbs ; one(?(b, a))
+	getMaxSort-2 =
+		?sort ; getMaxSort3(|sort) ; ((?"List{K}" ; !"K") <+ id)
+
+	getMaxSort3(|sort) =
+		(MemoMySbs ; one(?(bigger, sort)) ; getMaxSort3(|bigger)) <+ !sort
+
 

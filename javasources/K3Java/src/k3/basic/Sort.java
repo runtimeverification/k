@@ -29,7 +29,11 @@ public class Sort extends Term implements Item {
 
 	public boolean isBaseSort() {
 		return sort.equals("VARID") || sort.equals("Map") || sort.equals("K") || sort.equals("List") || sort.equals("Bag") || sort.equals("Set") || sort.equals("MapItem") || sort.equals("ListItem") || sort.equals("BagItem") || sort.equals("SetItem")
-				|| sort.equals("List{K}") || sort.equals("KLabel");
+				|| sort.equals("List{K}") || sort.equals("KLabel") || sort.equals("CellLabel");
+	}
+	
+	public boolean isConstantSort() {
+		return sort.startsWith("#") || sort.equals("KLabel") || sort.equals("CellLabel");
 	}
 
 	public String getSortName() {
