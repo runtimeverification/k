@@ -8,10 +8,10 @@ imports Integration
 
 exports
 context-free start-symbols
-	Start
+	StartDz
 
 context-free syntax
-	KSentence+	-> Start {cons("KSentenceList")}
+	KSentence+	-> StartDz {cons("KSentenceList")}
 	%% K Sentences
 	%%"macro" Bag "=" Bag			-> KSimpleSentence {cons("Macro")}
 	"configuration" Bag			-> KSentence {cons("Config")}

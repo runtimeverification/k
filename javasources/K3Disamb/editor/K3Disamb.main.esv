@@ -13,5 +13,5 @@ language General properties
                   
   extensions    : k3
   table         : include/K3Disamb.tbl
-  start symbols : Start
+  start symbols : StartDz
   disambiguator : disambig0

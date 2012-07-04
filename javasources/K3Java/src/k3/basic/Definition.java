@@ -227,54 +227,40 @@ public class Definition implements Cloneable {
 		sdf += "imports KTechnique\n";
 		sdf += "imports KBuiltinsBasic\n\n";
 		sdf += "exports\n\n";
+		sdf += "context-free syntax\n";
 
 		List<Production> outsides = new ArrayList<Production>();
-		// List<Production> constants = new ArrayList<Production>();
-		Map<String, String> constants = new HashMap<String, String>();
-		Set<Sort> sorts = new HashSet<Sort>(); // list of declared sorts
-		Set<Terminal> terminalList = getTerminals(false);
-		// list of sorts declared as being list
-		Set<Sort> listSorts = new HashSet<Sort>();
+		List<Production> constants = new ArrayList<Production>();
+		Set<Sort> sorts = new HashSet<Sort>(); // list of inserted sorts that need to avoid the priority filter
+		Set<Sort> startSorts = new HashSet<Sort>(); // list of sorts that are start symbols
+		Set<Production> subsorts = new HashSet<Production>(); // list of sorts that are start symbols
+		Set<Sort> listSorts = new HashSet<Sort>(); // list of sorts declared as being list
+		Set<Sort> userSorts = new HashSet<Sort>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
 
-		for (ModuleItem mi : modules)
+		for (ModuleItem mi : modules) {
 			if (mi.getType() == ModuleType.MODULE) {
 				Module m = (Module) mi;
 				for (Sentence s : m.getSentences()) {
 					if (s.getType() == SentenceType.SYNTAX) {
 						Syntax syn = (Syntax) s;
-						sorts.add(syn.getSort());
+						userSorts.add(syn.getSort());
 						List<Priority> prilist = new ArrayList<Priority>();
 						for (Priority prt : syn.getPriorities()) {
 							Priority p = new Priority();
 							p.setBlockAssoc(prt.getBlockAssoc());
-							// p.getProductions().add(e)
 
 							// filter the productions according to their form
 							for (Production prd : prt.getProductions()) {
-								for (Item it : prd.getItems())
-									if (it.getType() == ItemType.SORT)
-										sorts.add((Sort) it);
-
-								// if the user declares a klabel in the attributes list, declare it as a KLabel constant
-								if (prd.getAttributes().containsKey("klabel")) {
-									// TODO: don't add this for now, it creates ambiguities
-									// constants.put(prd.getAttributes().get("klabel"), "KLabel");
-									// terminalList.add(new Terminal(prd.getAttributes().get("klabel")));
-								}
-
-								if (prd.getAttributes().containsKey("bracket")) {
-									// do nothing for programs
-								} else if (prd.isSubsort()) {
+								if (prd.isSubsort()) {
 									outsides.add(prd);
-								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && (prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#") || prd.getProdSort().getSortName().equals("KLabel"))) {
-									// constants.add(prd);
-									String terminal = ((Terminal) prd.getItems().get(0)).getTerminal();
-									String sort = prd.getProdSort().getSortName();
-									constants.put(terminal, sort);
+									subsorts.add(prd);
+									if (prd.getProdSort().equals(new Sort("Start")))
+										startSorts.add((Sort) prd.getItems().get(0));
+									// add the small sort to the user sorts to add it to the variable declarations
+									userSorts.add((Sort) prd.getItems().get(0));
+								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#")) {
+									constants.add(prd);
 								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ItemType.TERMINAL) {
-									outsides.add(prd);
-								} else if (prd.getProdSort().isBaseSort()) {
-									// TODO: pentru sorturile mari, care nu sunt K, adauga si prioritatile fata de =>
 									outsides.add(prd);
 								} else if (prd.getItems().get(0).getType() == ItemType.USERLIST) {
 									outsides.add(prd);
@@ -286,70 +272,150 @@ public class Definition implements Cloneable {
 							if (p.getProductions().size() > 0)
 								prilist.add(p);
 						}
-
 						if (prilist.size() > 0) {
-							sdf += "context-free priorities\n";
+							if (prilist.size() <= 1 && syn.getPriorities().get(0).getBlockAssoc() == null) {
+								// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
+								// you need to have at least 2 productions or a block association
+								Priority prt = prilist.get(0);
+								for (Production p : prt.getProductions())
+									outsides.add(p);
+							} else {
+								sdf += "context-free priorities\n";
 
-							for (Priority prt : prilist) {
-								if (prt.getBlockAssoc() == null)
-									sdf += "{\n";
-								else
-									sdf += "{ " + prt.getBlockAssoc() + ":\n";
-								for (Production p : prt.getProductions()) {
-									sdf += "	" + getSDFProdsInPriority(p.getItems(), listSorts) + "-> ";
-									if (p.getProdSort().isBaseSort())
-										sdf += p.getProdSort().getSortName();
+								for (Priority prt : prilist) {
+									if (prt.getBlockAssoc() == null)
+										sdf += "{\n";
 									else
-										sdf += "K";
-									sdf += getSDFAttributes(p.getAttributes()) + "\n";
+										sdf += "{ " + prt.getBlockAssoc() + ":\n";
+									for (Production p : prt.getProductions()) {
+										sdf += "	";
+										List<Item> items = p.getItems();
+										for (int i = 0; i < items.size(); i++) {
+											Item itm = items.get(i);
+											if (itm.getType() == ItemType.TERMINAL) {
+												Terminal t = (Terminal) itm;
+												sdf += "\"" + t.getTerminal() + "\" ";
+											} else if (itm.getType() == ItemType.SORT) {
+												Sort srt = (Sort) itm;
+												// if we are on the first or last place and this sort is not a list, just print the sort
+												if (i == 0 || i == items.size() - 1) {
+													sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
+												} else {
+													// if this sort should be inserted to avoid the priority filter, then add it to the list
+													sorts.add(srt);
+													sdf += "InsertDz" + StringUtil.escapeSortName(srt.getSortName()) + " ";
+												}
+											}
+										}
+										sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+										sdf += getSDFAttributes(p.getAttributes()) + "\n";
+									}
+									sdf += "} > ";
 								}
-								sdf += "} > ";
+								sdf = sdf.substring(0, sdf.length() - 3) + "\n\n";
 							}
-							sdf += "{\n";
-							sdf += "	K \"~>\" K -> K\n";
-							sdf += "}\n\n";
 						}
 					}
 				}
 			}
+		}
 
-		sdf += "context-free syntax\n";
-		sdf += "	K -> InsertDzK\n";
-		for (Production p : outsides) {
-			if (p.isListDecl()) {
-				System.out.println("This should not happend, Syntactic lists should be cons list when parsing K3 definitions. Check me.");
-				System.exit(0);
-			} else if (!p.isSubsort()) {
-				sdf += "	" + getSDFProds(p.getItems()) + "-> ";
-				if (p.getProdSort().isBaseSort()) {
-					sdf += StringUtil.escapeSortName(p.getProdSort().getSortName());
-				} else
-					sdf += "K";
-				sdf += getSDFAttributes(p.getAttributes()) + "\n";
+		sdf += "%% subsorts 1\n";
+		sdf += "context-free priorities\n{\n";
+		// 1
+		// print Sort -> K > K -> Sort
+		for (Sort s : userSorts) {
+			if (!s.isBaseSort()) {
+				sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + " -> K";
+				// sdf += " {cons(\"K12" + StringUtil.escapeSortName(s.getSortName()) + "\")}";
+				sdf += "\n";
+			}
+		}
+		sdf += "} > {\n";
+		for (Production p : subsorts) {
+			Sort s1 = (Sort) p.getItems().get(0);
+			Sort s2 = p.getProdSort();
+			if (!s1.isBaseSort() && !s2.isBaseSort()) {
+				sdf += "	" + StringUtil.escapeSortName(s1.getSortName()) + " -> " + StringUtil.escapeSortName(s2.getSortName());
+				// sdf += " {cons(\"" + StringUtil.escapeSortName(s2.getSortName()) + "12" + StringUtil.escapeSortName(s1.getSortName()) + "\")}";
+				sdf += "\n";
+			}
+		}
+		sdf += "} > {\n";
+		for (Sort s : userSorts) {
+			if (!s.isBaseSort()) {
+				sdf += "	K -> " + StringUtil.escapeSortName(s.getSortName());
+				// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12K\")}";
+				sdf += "\n";
+			}
+		}
+		sdf += "}\n\n";
+
+		Set<Subsort> sbs = getSubsorts();
+		// 2
+		sdf += "%% subsorts 2\n";
+		// print Sort -> K > K -> Sort
+		for (Sort s : userSorts) {
+			if (!s.isBaseSort()) {
+				sdf += "context-free priorities\n{\n";
+				sdf += "	K -> " + StringUtil.escapeSortName(s.getSortName());
+				// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12K\")}";
+				sdf += "\n";
+				sdf += "} .> {\n";
+				for (Sort ss : userSorts) {
+					if (!ss.isBaseSort() && (ss.equals(s) || sbs.contains(new Subsort(s, ss)))) {
+						sdf += "	" + StringUtil.escapeSortName(ss.getSortName()) + " -> K";
+						// sdf += " {cons(\"K12" + StringUtil.escapeSortName(ss.getSortName()) + "\")}";
+						sdf += "\n";
+					}
+				}
+				sdf += "}\n\n";
 			}
 		}
 
+		sdf += "context-free syntax\n";
+
+		for (Production p : outsides) {
+			if (p.isListDecl()) {
+				UserList si = (UserList) p.getItems().get(0);
+				sdf += "	{" + StringUtil.escapeSortName(si.getSort().getSortName()) + " \"" + si.getTerminal() + "\"}* -> " + StringUtil.escapeSortName(p.getProdSort().getSortName()) + " {cons(\"" + p.getAttributes().get("cons") + "\")}\n";
+			} else if (p.getAttributes().containsKey("bracket")) {
+				// don't add bracket attributes added by the user
+			} else {
+				sdf += "	";
+				List<Item> items = p.getItems();
+				for (int i = 0; i < items.size(); i++) {
+					Item itm = items.get(i);
+					if (itm.getType() == ItemType.TERMINAL) {
+						Terminal t = (Terminal) itm;
+						sdf += "\"" + t.getTerminal() + "\" ";
+					} else if (itm.getType() == ItemType.SORT) {
+						Sort srt = (Sort) itm;
+						sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
+					}
+				}
+				sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+				sdf += getSDFAttributes(p.getAttributes()) + "\n";
+			}
+		}
+		for (Sort ss : sorts)
+			sdf += "	" + StringUtil.escapeSortName(ss.getSortName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getSortName()) + "\n";
+
 		sdf += "\n\n";
 		// print variables, HOLEs
-		for (Sort s : sorts) {
+		for (Sort s : userSorts) {
 			if (!s.isBaseSort()) {
 				sdf += "	VARID  \":\" \"" + s.getSortName() + "\"        -> K            {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12Var\")}\n";
 			}
 		}
 		sdf += "\n";
-		for (Sort s : sorts) {
+		for (Sort s : userSorts) {
 			if (!s.isBaseSort()) {
 				sdf += "	\"HOLE\" \":\" \"" + s.getSortName() + "\"      -> K            {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12Hole\")}\n";
 			}
 		}
 
 		sdf += "\n\n";
-		sdf += "	DzInt		-> K\n";
-		sdf += "	DzBool		-> K\n";
-		sdf += "	DzId		-> K\n";
-		sdf += "	DzString	-> K\n";
-
-		sdf += "\n";
 		sdf += "	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n";
 		sdf += "	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n";
 		sdf += "	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n";
@@ -357,29 +423,28 @@ public class Definition implements Cloneable {
 
 		sdf += "\n";
 		sdf += "	DzDzINT		-> DzDzInt\n";
+		// sdf += "	DzDzID		-> DzDzId\n";
 		sdf += "	DzDzBOOL	-> DzDzBool\n";
 		sdf += "	DzDzSTRING	-> DzDzString\n";
 
 		sdf += "\n";
+
 		sdf += "lexical syntax\n";
-		sdf += "	%% constants\n";
-		for (Map.Entry<String, String> p : constants.entrySet()) {
-			sdf += "	\"" + p.getKey() + "\" -> Dz" + StringUtil.escapeSortName(p.getValue()) + "\n";
+		for (Production p : constants) {
+			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "\n";
 		}
 
-		sdf += "\n	%% terminals reject\n";
-		for (Terminal t : terminalList) {
+		sdf += "\n\n";
+
+		sdf += "\n      %% terminals reject\n";
+		for (Terminal t : getTerminals(false)) {
 			if (t.getTerminal().matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
-				sdf += "	\"" + t.getTerminal() + "\" -> VARID {reject}\n";
+				sdf += "        \"" + t.getTerminal() + "\" -> VARID {reject}\n";
 			}
 		}
 
+		sdf += "\n";
 		sdf += getFollowRestrictionsForTerminals(false);
-
-		sdf += "lexical restrictions\n";
-		sdf += "	%% some restrictions to ensure greedy matching for user defined constants\n";
-		sdf += "	DzDzId  -/- [a-zA-Z0-9]\n";
-		sdf += "	DzDzInt -/- [0-9]\n\n";
 
 		return sdf + "\n";
 	}
@@ -818,51 +883,6 @@ public class Definition implements Cloneable {
 			return str + "}";
 	}
 
-	private String getSDFProdsInPriority(List<Item> items, Set<Sort> listSorts) {
-		String str = "";
-		for (int i = 0; i < items.size(); i++) {
-			Item itm = items.get(i);
-			if (itm.getType() == ItemType.TERMINAL) {
-				Terminal t = (Terminal) itm;
-				str += "\"" + t.getTerminal() + "\" ";
-			} else if (itm.getType() == ItemType.SORT) {
-				Sort s = (Sort) itm;
-				if (s.isBaseSort()) {
-					str += StringUtil.escapeSortName(s.getSortName()) + " ";
-				} else if (listSorts.contains(s)) { // this is a list
-					str += StringUtil.escapeSortName(s.getSortName()) + " ";
-				} else if (i == 0 || i == items.size() - 1) {
-					// apply the priority filter only to the outermost locations
-					str += "K ";
-				} else {
-					// if inside the production create special sort
-					str += "InsertDzK ";
-				}
-			}
-		}
-
-		return str;
-	}
-
-	private String getSDFProds(List<Item> items) {
-		String str = "";
-		for (Item i : items) {
-			if (i.getType() == ItemType.TERMINAL) {
-				Terminal t = (Terminal) i;
-				str += "\"" + t.getTerminal() + "\" ";
-			} else if (i.getType() == ItemType.SORT) {
-				Sort s = (Sort) i;
-				if (s.isBaseSort()) {
-					str += StringUtil.escapeSortName(s.getSortName()) + " ";
-				} else {
-					str += "K ";
-				}
-			}
-		}
-
-		return str;
-	}
-
 	public File getMainFile() {
 		return mainFile;
 	}
@@ -1065,54 +1085,6 @@ public class Definition implements Cloneable {
 					}
 				}
 			}
-	}
-
-	public void replaceDittoCons() {
-		Map<Production, List<Production>> prodSummary = getProductionDittos();
-
-		for (ModuleItem mi : modules)
-			if (mi.getType() == ModuleType.MODULE) {
-				Module m = (Module) mi;
-				for (Sentence s : m.getSentences()) {
-					if (s.getType() == SentenceType.SYNTAX) {
-						Syntax syn = (Syntax) s;
-						List<Production> prods = syn.getProductions();
-
-						for (Production p : prods) {
-							if (!p.isSubsort()) {
-								Production p2 = p.clone();// (Production) Cloner.copy(p);
-								p2.collapseSorts();
-
-								if (prodSummary.containsKey(p2)) {
-									List<Production> listForProds = prodSummary.get(p2);
-
-									if (listForProds.size() > 1) {
-										p.getAttributes().put("cons", listForProds.get(0).getAttributes().get("cons"));
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-	}
-
-	public String getDittosAsStrategoTerm() {
-		Map<Production, List<Production>> prodSummary = getProductionDittos();
-		String term = "[  ";
-		for (Map.Entry<Production, List<Production>> ss : prodSummary.entrySet()) {
-			List<Production> listForProds = ss.getValue();
-
-			if (listForProds.size() > 1) {
-				term += "(\"" + listForProds.get(0).getAttributes().get("cons") + "\", [";
-				for (Production p : listForProds) {
-					term += "\"" + p.getAttributes().get("cons") + "\", ";
-				}
-				term = term.substring(0, term.length() - 2) + "])\n, ";
-			}
-		}
-
-		return term.substring(0, term.length() - 2) + "]";
 	}
 
 	public void setMainModule(String mainModule) {

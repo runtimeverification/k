@@ -1,2 +1,1 @@
-  rule [if-true] : if true  then S else _ => S
-  //rule [if-false]: if false then _ else S => S
+  rule <k>    A </k>

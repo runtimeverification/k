@@ -20,8 +20,7 @@ strategies
 
 	removeCellAmb:	// replace the old cell with a new cell with les problems
 		Bag1ClosedCell(x1, x2, x3, x4) -> Bag1ClosedCell(x1, x2, new3, x4)
-		where
-			new3 := <removeCellAmb2(|x1)> x3
+		where new3 := <removeCellAmb2(|x1)> x3
 
 	normalizeCell =
 		normalizeCellMiddle <+ normalizeCellPrefix <+ normalizeCellSufix <+ id

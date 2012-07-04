@@ -217,38 +217,6 @@ public class KParser {
 		return rez;
 	}
 
-	public static String ImportDitto(String filePath) {
-		init();
-		String rez = "";
-		context.setStandAlone(true);
-		IStrategoTerm result = null;
-		try {
-			try {
-				result = context.invokeStrategyCLI(import$Ditto_0_0.instance, "a.exe", filePath);
-			} finally {
-				context.getIOAgent().closeAllFiles();
-			}
-			if (result == null) {
-				System.err.println("rewriting failed, trace:");
-				context.printStackTrace();
-				context.setStandAlone(false);
-				System.exit(1);
-			} else {
-				context.setStandAlone(false);
-			}
-		} catch (StrategoExit exit) {
-			context.setStandAlone(false);
-			System.exit(exit.getValue());
-		}
-
-		if (result.getTermType() == IStrategoTerm.STRING) {
-			rez = (((IStrategoString) result).stringValue());
-		} else {
-			rez = result.toString();
-		}
-		return rez;
-	}
-
 	public static String ParseKConfigString(String kDefinition) {
 		init();
 		String rez = "";
