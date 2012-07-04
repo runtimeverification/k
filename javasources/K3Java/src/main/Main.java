@@ -17,6 +17,8 @@ public class Main {
 			KompileFrontEnd.kompile(args2);
 		} else if (args[0].equals("-kast")) {
 			KastFrontEnd.kast(args2);
+		} else if (args[0].equals("-hkcd")) {
+			HKCDFrontEnd.hkcd(args2);
 		} else if (args[0].equals("-krun")) {
 			Error.report("krun not yet fully integrated in K3.");
 		} else
