@@ -29,8 +29,8 @@ strategies
 			//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
 			topdown(try(annolocationremove)) ;
 			disambigCellTypes ;
-			emphasizeVars ; 
 			topdown(try(correctRewrite)) ;
+			emphasizeVars ; 
 			type-inferenceTypeSystem ;
 			chooseBestFitRec ;
 			type-inferenceSupremum ;
@@ -53,19 +53,20 @@ strategies
 		topdown(try(merge-amb ; flatten-amb-top )) ;
 		//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
 		topdown(try(annolocationremove)) ;
+		topdown(try(correctRewrite)) ;
 		disambigCellTypes ;
 		emphasizeVars ; 
 		type-inferenceTypeSystem ;
 		chooseBestFitRec ;
 		type-inferenceSupremum ;
 		var-type-inference2 ; // new type inference where I correct the first type inference
-		topdown(try(correctRewrite)) ;
 		flattenKLists
 
 	mydisambiguateConfig =
 		topdown(try(annolocation)) ;
 		flatten-amb-top ;
 		topdown(try(merge-amb ; flatten-amb-top )) ;
+		topdown(try(annolocationremove)) ;
 		type-inferenceTypeSystem ;
 		type-inferenceSupremum ;
 		chooseBestFitRec ;
