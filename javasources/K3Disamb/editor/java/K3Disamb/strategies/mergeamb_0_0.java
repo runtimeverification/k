@@ -6,7 +6,9 @@ import java.util.ArrayList;
 
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
+import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.Strategy;
@@ -104,8 +106,19 @@ public class mergeamb_0_0 extends Strategy {
 	 * @return - true if the terms are similar, false otherwise.
 	 */
 	private boolean isSimilar(IStrategoTerm t1, IStrategoTerm t2, Context context) {
-		if (!((IStrategoAppl) t1).getName().equals(((IStrategoAppl) t2).getName()))
+		if (t1.getTermType() != t2.getTermType())
 			return false;
+
+		if (t1.getTermType() == IStrategoTerm.APPL)
+			if (!((IStrategoAppl) t1).getName().equals(((IStrategoAppl) t2).getName()))
+				return false;
+		if (t1.getTermType() == IStrategoTerm.STRING)
+			if (!((IStrategoString) t1).stringValue().equals(((IStrategoString) t2).stringValue()))
+				return false;
+		if (t1.getTermType() == IStrategoTerm.INT)
+			if (((IStrategoInt) t1).intValue() != ((IStrategoInt) t2).intValue())
+				return false;
+		
 		for (int i = 0; i < t1.getSubtermCount(); i++) {
 			IStrategoTerm ch1 = t1.getSubterm(i);
 			IStrategoTerm ch2 = t2.getSubterm(i);

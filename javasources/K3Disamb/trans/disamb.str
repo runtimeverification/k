@@ -35,8 +35,9 @@ strategies
 			chooseBestFitRec ;
 			type-inferenceSupremum ;
 			var-type-inference2 ; // new type inference where I correct the first type inference
-			flattenKLists
+			flattenKLists ;
 			 /**///;
+			 id
 			//where(ts2 := <term-size> ; !(ts2, <div> (<mul>(ts2, 100.0) ,ts1), <div> (<mul>(ts2, 100.0) ,ts)) ; debug(!"FinalSize(,%,%): "))
 		else
 			flatten-amb-top ;

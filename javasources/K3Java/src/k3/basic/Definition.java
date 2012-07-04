@@ -258,7 +258,7 @@ public class Definition implements Cloneable {
 										startSorts.add((Sort) prd.getItems().get(0));
 									// add the small sort to the user sorts to add it to the variable declarations
 									userSorts.add((Sort) prd.getItems().get(0));
-								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#")) {
+								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && prd.getProdSort().isConstantSort()) {
 									constants.add(prd);
 								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ItemType.TERMINAL) {
 									outsides.add(prd);
@@ -445,6 +445,11 @@ public class Definition implements Cloneable {
 
 		sdf += "\n";
 		sdf += getFollowRestrictionsForTerminals(false);
+		
+		sdf += "lexical restrictions\n";                                                                                                                                                              
+		sdf += "%% some restrictions to ensure greedy matching for user defined constants\n";                                                                                                     
+		sdf += "	DzDzId  -/- [a-zA-Z0-9]\n";                                                                                                                                                       
+		sdf += "	DzDzInt -/- [0-9]\n";  
 
 		return sdf + "\n";
 	}
