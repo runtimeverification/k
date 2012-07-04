@@ -8,8 +8,8 @@ public class HaskellDumpFilter extends BasicVisitor {
 	private String result = "";
 
 	@Override
-	public void visit(Rule rule) {
-		result += rule.getLabel() + endl;
+	public void visit(Rewrite r) {
+		result += r.toString() + endl;
 	}
 
 	public String getResult() {
