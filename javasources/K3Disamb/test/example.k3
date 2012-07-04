@@ -1,1 +1,1 @@
-  rule <k>    A </k>
+  rule <k> bindto((X:Id,Xs => Xs),(V,Vs:Vals => Vs)) ...</k>

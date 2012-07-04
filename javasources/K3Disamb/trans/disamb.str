@@ -30,11 +30,11 @@ strategies
 			topdown(try(annolocationremove)) ;
 			disambigCellTypes ;
 			emphasizeVars ; 
+			topdown(try(correctRewrite)) ;
 			type-inferenceTypeSystem ;
 			chooseBestFitRec ;
 			type-inferenceSupremum ;
 			var-type-inference2 ; // new type inference where I correct the first type inference
-			topdown(try(correctRewrite)) ;
 			flattenKLists
 			 /**///;
 			//where(ts2 := <term-size> ; !(ts2, <div> (<mul>(ts2, 100.0) ,ts1), <div> (<mul>(ts2, 100.0) ,ts)) ; debug(!"FinalSize(,%,%): "))
@@ -82,14 +82,14 @@ strategies
 
 	flattenKLists = bottomup(try(fks2)) ; bottomup(try(flists2))
 	fks2:
-		K1Seq(a, b){anno} -> "K1Seq"#(<flatten-list> [a', b']){anno}
+		K1Seq(a, b) -> "K1Seq"#(<flatten-list> [a', b'])
 		where a' := <try(fks3)> a
 		where b' := <try(fks3)> b
 	fks3:
 		"K1Seq"#(a) -> a
 
 	flists2:
-		a#([b, c]){anno} -> a#(<flatten-list> [b', c']){anno}
+		a#([b, c]) -> a#(<flatten-list> [b', c'])
 		where <string-ends-with(|"1List")> a
 		where b' := <try(flists3(|a))> b
 		where c' := <try(flists3(|a))> c
