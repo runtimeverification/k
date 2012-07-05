@@ -429,7 +429,6 @@ public class Main {
 				sb.append(K.lineSeparator);
 				sb.append(") .");
 				s = sb.toString();
-				//System.exit(0);
 			}
 
 			FileUtil.createFile(K.maude_in, s);

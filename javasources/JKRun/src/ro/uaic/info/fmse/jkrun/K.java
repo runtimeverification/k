@@ -59,12 +59,4 @@ public class K {
 		return "kast";
 	}
 	
-	public static void main (String args[]) {
-		String text = "rewrites: 164241 in 773ms cpu (773ms real) (212423 rewrites/second)   ";
-		String pattern =".*rewrites:\\s\\d+\\sin\\s.*";
-		if (text.matches(pattern)) {
-			System.out.println("matched");
-		}
-	}
-	
 }
