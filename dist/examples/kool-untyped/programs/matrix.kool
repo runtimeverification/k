@@ -11,17 +11,17 @@ class Matrix {
   }
 
   method readMatrix() {
-    for i = 0 to lines-(1) do {
+    for i = 0 to lines- 1 do {
       print("Line ", i+1, " (", columns, " elements): ");
-      for j = 0 to columns-(1) do
+      for j = 0 to columns - 1 do
         matrix[i][j] = read();
     }
   }
 
   method printMatrix() {
-    for i = 0 to lines-(1) do {
+    for i = 0 to lines- 1 do {
       print("Line ",i+1," (",columns," elements):");
-      for j = 0 to columns-(1) do
+      for j = 0 to columns - 1 do
         print(" ",matrix[i,j]);
     print("\n");
     }
@@ -29,16 +29,16 @@ class Matrix {
 
   method copy() {
     var a = new Matrix(lines,columns);
-    for i = 0 to lines-(1) do
-      for j = 0 to columns-(1) do
+    for i = 0 to lines - 1 do
+      for j = 0 to columns- 1 do
         a.matrix[i,j] = matrix[i,j];
     return a;
   }
 
   method transpose() {
     var a[columns,lines];
-    for i = 0 to lines-(1) do
-      for j = 0 to columns-(1) do
+    for i = 0 to lines- 1 do
+      for j = 0 to columns - 1 do
         a[j,i] = matrix[i,j];
     var temp = lines;
     lines = columns;
@@ -52,10 +52,10 @@ class Matrix {
       return;
     }
     var b[lines,a.columns];
-    for i = 0 to lines-(1) do
-      for j = 0 to a.columns-(1) do {
+    for i = 0 to lines- 1 do
+      for j = 0 to a.columns - 1 do {
         b[i,j] = 0;
-        for k = 0 to columns-(1) do
+        for k = 0 to columns - 1 do
           b[i,j] = b[i,j] + matrix[i,k] * a.matrix[k,j];
       }
     columns = a.columns;

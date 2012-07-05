@@ -31,7 +31,7 @@ class Sorting {
   }
 
   method insertionSort() {
-    for i = 1 to size-1 do {
+    for i = 1 to size - 1 do {
       var v = array[i], j = i - 1;
       while (j > 0 and array[j] > v) do {  // doing the loop only up to 1
         array[j + 1] = array[j];
@@ -47,9 +47,9 @@ class Sorting {
   method bubbleSort() {
     for i = 0 to size - 1 do
       for j = 0 to size - 2 do
-        if array[j] > array[j+1] then {
-          var t = array[j+1];
-          array[j+1] = array[j];
+        if array[j] > array[j + 1] then {
+          var t = array[j + 1];
+          array[j + 1] = array[j];
           array[j] = t;
         }
   }
