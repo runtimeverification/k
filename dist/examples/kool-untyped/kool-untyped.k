@@ -43,7 +43,7 @@ for the KOOL object-oriented constructs. */
                | "new" Id "(" Exps ")"  [strict(2)]
                | Exp "." Id      
                > Exp "[" Exps "]"       [strict]
-               > Exp "(" Exps ")"       [strict]
+               > Exp "(" Exps ")"       [strict(2)]
                | "-" Exp                [strict]
                | "sizeOf" "(" Exp ")"   [strict]
                | "read" "(" ")"    
@@ -672,11 +672,11 @@ method call or the array access.  */
 
   context '_`(_`)('_._(HOLE,,_),,_) when HOLE =/=K super
 
-//  rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X)
-//                    =>
-//                    lookupMember(<envStack> EStack </envStack>, X)),, _)
-//       ...</k>
-//       [structural]
+  rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X)
+                    =>
+                    lookupMember(<envStack> EStack </envStack>, X)),, _)
+       ...</k>
+       [structural]
 
   rule <k> '_`(_`)(('_._(super,,X:Id)
                      =>
