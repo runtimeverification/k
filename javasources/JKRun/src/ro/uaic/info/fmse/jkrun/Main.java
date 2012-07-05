@@ -227,6 +227,9 @@ public class Main {
 			if (cmd.hasOption("pgm")) {
 				K.pgm = new File(cmd.getOptionValue("pgm")).getCanonicalPath();
 			}
+			if (cmd.hasOption("ltlmc")) {
+				K.model_checking = new File(cmd.getOptionValue("ltlmc")).getCanonicalPath();
+			}
 
 			// printing the output according to the given options
 			if (K.help) {
@@ -354,22 +357,94 @@ public class Main {
 				s = "set show command off ." + K.lineSeparator + "erew #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
 			}
 
-			if (K.trace)
+			if (K.trace) {
 				s = "set trace on ." + K.lineSeparator + s;
+			}
+			
+			StringBuilder sb = new StringBuilder();
+			if (K.model_checking.length() > 0) {
+				//run kast for the formula to be verified
+				File formulaFile = new File(K.model_checking);
+				if (!formulaFile.exists()) {
+					Error.report("\nProgram file that describes the LTL formula does not exist: " + K.model_checking);
+				}
+				if ("kast".equals(K.parser)) {
+					// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
+					// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
+					rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", K.k_definition, K.model_checking });
+				} else {
+					K.parser = new File(K.parser).getCanonicalPath();
+					String parserName = new File(K.parser).getName();
+					if ("kast".equals(parserName)) {
+						rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", K.model_checking });
+					}
+					else {
+						rp.execute(new String[] { K.parser, K.model_checking });
+					}
+				}
+				
+			    if (K.parser.equals("kast")) {
+				  if (rp.getErr() != null) {
+					Error.externalReport("Warning: kast reported errors or warnings:\n" + rp.getErr());
+				  }
+				  if (rp.getExitCode() != 0) {
+					 System.out.println("Kast reported:\n" + rp.getStdout());
+					 System.out.println("Fatal: kast returned a non-zero exit code: " + rp.getExitCode());
+					 Error.report("\nAttempted command:\n" + "kast --definition=" + K.k_definition + " " + K.model_checking);
+				  }
+			    } else {
+			    	if (rp.getErr() != null) {
+			    		Error.externalReport("Warning: parser reported errors or warnings:\n" + rp.getErr());
+					}
+			    	if (rp.getExitCode() != 0) {
+						 System.out.println("Parser reported:\n" + rp.getStdout());
+						 System.out.println("Fatal: parser returned a non-zero exit code: " + rp.getExitCode());
+						 Error.report("\nAttempted command:\n" + K.parser + " " + K.model_checking);
+					}
+			    }
+			    String KAST1 = new String();
+				if (rp.getStdout() != null) {
+					KAST1 = rp.getStdout();
+				}
+				
+				sb.append("load " + K.compiled_def);
+				sb.append(K.lineSeparator + K.lineSeparator);
+				sb.append("mod MCK is");
+				sb.append(" including " + K.main_module + " .");
+				sb.append(K.lineSeparator + K.lineSeparator);
+				sb.append(" op #initConfig : -> Bag .");
+				sb.append(K.lineSeparator + K.lineSeparator);
+				sb.append(" eq #initConfig =");
+				sb.append(K.lineSeparator);
+				sb.append("  #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .");
+				sb.append(K.lineSeparator);
+				sb.append("endm");
+				sb.append(K.lineSeparator + K.lineSeparator);
+				sb.append("red");
+				sb.append(K.lineSeparator);
+				sb.append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(#_(KItem`(_`)(#initConfig)),.List`{K`}),");
+				sb.append(K.lineSeparator);
+				sb.append(KAST1);
+				sb.append(")");
+				sb.append(K.lineSeparator);
+				sb.append(") .");
+				s = sb.toString();
+				//System.exit(0);
+			}
 
-			FileUtil.createFile(K.maude_io_cmd, s);
+			FileUtil.createFile(K.maude_in, s);
 
 			// run IOServer
 			File outFile = FileUtil.createFile(K.maude_out);
 			File errFile = FileUtil.createFile(K.maude_err);
 				
 			if (K.log_io) {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" });
+				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" });
 			}
 			if (!K.io) {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--noServer" });
+				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--noServer" });
 			} else {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_io_cmd, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
+				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
 			}
 			if ("search".equals(K.maude_cmd) && K.do_search) {
 				printSearchResults();
@@ -384,14 +459,19 @@ public class Main {
 				System.out.println(red);
 			} else if ("raw".equals(K.output_mode)) {
 				String output = new String();
-				if ("search".equals(K.maude_cmd)) {
-					List<String> l = FileUtil.parseSearchOutputMaude(K.maude_out);
-					output = l.get(0);
-				}
-				else if ("erewrite".equals(K.maude_cmd)){
-					output = FileUtil.parseResultOutputMaude(K.maude_out);
+				if (K.model_checking.length() > 0) {
+					output = FileUtil.parseModelCheckingOutputMaude(K.maude_out);
+				} 
+				else {
+					if ("search".equals(K.maude_cmd)) {
+						List<String> l = FileUtil.parseSearchOutputMaude(K.maude_out);
+						output = l.get(0);
+					} else if ("erewrite".equals(K.maude_cmd)) {
+						output = FileUtil.parseResultOutputMaude(K.maude_out);
+					}
 				}
 				System.out.println(output);
+
 			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
 			} else {

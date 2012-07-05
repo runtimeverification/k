@@ -141,7 +141,7 @@ public class PrettyPrintOutput {
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
 		Node nod = null;
-
+		
 		if (K.maude_cmd.equals("erewrite") && !(cmd.hasOption("xsearch-pattern"))) {
 			list = doc.getElementsByTagName("result");
 			nod = list.item(0);
@@ -557,7 +557,9 @@ public class PrettyPrintOutput {
 				sb.append(op);
 			}
 		}
-		if ((sort.equals("KLabel") && !op.equals("'.List`{\",\"`}") )) {
+		if ((sort.equals("KLabel") && !op.equals("'.List`{\",\"`}") )
+			|| sort.equals("#ModelCheckResult") || sort.equals("#TransitionList") || sort.equals("#Transition") || sort.equals("#ModelCheckerState")
+			) {
 			sb = new StringBuilder();
 			//n = nr of child nodes
 			int n = list.size();

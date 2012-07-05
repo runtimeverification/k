@@ -154,11 +154,59 @@ public class FileUtil {
 					break;
 				}
 				if (found) {
+					//jump one line
 					line = reader.readLine(); 
                     found = false;
 				}
 				if (line.startsWith("Maude> rewrites:")) {
 					found = true;
+				}
+				else {
+					stringBuilder.append(line);
+				}
+			}
+
+			return stringBuilder.toString();
+
+		} catch (FileNotFoundException e) {
+			Error.report("Cannot retrieve file content. Make sure that file " + file + " exists.");
+		} catch (IOException e) {
+			Error.silentReport("Cannot retrieve file content. An IO error occured.");
+		} finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				//e.printStackTrace();
+				Error.report("Error while parsing result output maude:" + e.getMessage());
+			}
+		}
+		return null;
+	}
+	
+	public static String parseModelCheckingOutputMaude(String file) {
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader(file));
+			String line = null;
+			boolean before = true;
+			StringBuilder stringBuilder = new StringBuilder();
+			
+			while ((line = reader.readLine()) != null) {
+				if (line.startsWith("Maude> Bye.")) {
+					break;
+				}
+				if (before) {
+					//jump three lines
+					for (int j = 0; j < 3; j++) {
+						line = reader.readLine();
+					}
+					before = false;
+				}
+				if (line.startsWith("result KItem: ")) {
+					String pattern = new String("result KItem: ");
+					int index = line.indexOf(pattern);
+					String s = line.substring(index + pattern.length());
+					stringBuilder.append(s);
 				}
 				else {
 					stringBuilder.append(line);

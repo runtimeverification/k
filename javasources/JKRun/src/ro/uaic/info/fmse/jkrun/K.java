@@ -13,14 +13,14 @@ public class K {
 	public static final String kdir = userdir + fileSeparator + ".k";
 	public static final String krunDir = kdir + fileSeparator + "krun";
 	public static final String krunTempDir = kdir + fileSeparator + FileUtil.generateUniqueFolderName("krun");
-	public static final String maude_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_in.txt");
+	public static final String maude_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_in.maude");
 	public static final String maude_out = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_out.txt");
 	public static final String maude_err = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_err.txt");
 
 	// kast
 	public static final String kast = k_base + fileSeparator + "bin" + fileSeparator + getKastOnOs();
 
-	public static final String maude_io_cmd = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("io-cmd.maude");
+	//public static final String maude_io_cmd = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("io-cmd.maude");
 	public static final String maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput.xml");
 	public static final String processed_maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput_simplified.xml");
 	
@@ -39,6 +39,7 @@ public class K {
 	public static String output_mode = "pretty";
 	public static String xsearch_pattern = "=>! B:Bag";
 	public static String rule_labels = "";
+	public static String model_checking = "";
 
 	// variables to store if that specific option was set; also set default values for options
 	public static boolean help = false;
@@ -56,6 +57,14 @@ public class K {
 		if (System.getProperty("os.name").toLowerCase().contains("win"))
 			return "kast.bat";
 		return "kast";
+	}
+	
+	public static void main (String args[]) {
+		String text = "rewrites: 164241 in 773ms cpu (773ms real) (212423 rewrites/second)   ";
+		String pattern =".*rewrites:\\s\\d+\\sin\\s.*";
+		if (text.matches(pattern)) {
+			System.out.println("matched");
+		}
 	}
 	
 }
