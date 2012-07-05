@@ -6,7 +6,6 @@ imports
   lib/editor-common.generated
   lib/analysis-auto.generated
   lib/index-library.generated
-  lib/analysis-library.generated
 
 rules // Resolving
   
@@ -18,8 +17,8 @@ rules // Duplicates
   constraint-error:
     definition -> (definition, $[Duplicate definition])
     where
-      key{[ns|_]} := <nam-get-definition-key> definition;
-      definitions := <index-lookup-all> key;
+      key{[ns|_]} := <id> definition;
+      definitions := <id> key;
       <gt> (<length> definitions, 1)
     
 rules // Other

@@ -8,8 +8,6 @@ imports
   lib/editor-common.generated
   lib/analysis-auto.generated
   lib/index-library.generated
-  lib/analysis-library.generated
-  lib/compilation-library.generated
   analysis-manual
   check
   starter
@@ -49,7 +47,7 @@ rules // Main editor interface (defined by editor/K3Disamb-Builders and -Referen
     where
       language  := <id> ast;
       index-setup(|language, [project-path], $[[project-path]/[path]]);
-      target    := <index-lookup> node
+      target    := <id> node
 
   // Returns "hover help" information for a particular node in the editor.
   // For references, this rule is invoked using the resolved term.
@@ -66,11 +64,9 @@ rules // Main editor interface (defined by editor/K3Disamb-Builders and -Referen
       x                 := <collect-one(?COMPLETION(_))> ast';
       COMPLETION(name)  := x;
       (
-        proposals       := <index-lookup-all-levels(|name)> x
+        proposals       := <id> x
       <+ 
         proposals       := []
       );
-      proposals'        := <map(def-to-name)> proposals
+      proposals'        := <map(id)> proposals
 
-  def-to-name:
-    Def([namespace, name | _]) -> name

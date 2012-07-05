@@ -45,8 +45,8 @@ strategies
 		(a, b#(_)) -> score									// match on a pair made by ziping terms with the current terms
 		where not(!b => "amb")
 		where b' := <getSort> b
-		where score := 	<(	isSubsortEq(|a, b') ; !1 <+		// if the sort is a subsort then put 1
-							isSubsortEq(|"K", a) ; <?"K"> b' ; !0 <+ // if the sort is K then score it as 0, only if the expected sort is a subsort of K
+		where score := 	<(	isSubsortEq(|"K", a) ; (<?"K"> b' <+ <?"K"> a); !0 <+ // if the sort is K then score it as 0, only if the expected sort is a subsort of K
+							isSubsortEq(|a, b') ; !1 <+		// if the sort is a subsort then put 1
 							!-1								// if none of the above, then put -1
 						)>
 
