@@ -97,6 +97,16 @@
 		</test>
 	</example>
 	<example dir="/dist/examples/kool-untyped" mainfile="kool-untyped.k" mainmodule="KOOL-UNTYPED" compiledfile="kool-untyped-compiled.maude">
+                <test file="/dist/examples/kool-untyped/programs/cast.kool" output="/tests/examples/kool-untyped/cast.kool.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/lambdapp/programs/simple.lambdapp" output="/tests/examples/lambdapp/simple.lambdapp.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+	</example>
+	<example dir="/dist/examples/kool-untyped" mainfile="kool-untyped.k" mainmodule="KOOL-UNTYPED" compiledfile="kool-untyped-compiled.maude">
 	</example>
 	<example dir="/dist/examples/exp/untyped/environment" mainfile="exp-untyped-environment.k" mainmodule="EXP-UNTYPED-ENVIRONMENT" compiledfile="exp-untyped-environment-compiled.maude">
 		<test file="/dist/examples/exp/untyped/environment/tests/capture.exp" output="/dist/examples/exp/untyped/environment/tests/tests/capture.exp.out">
