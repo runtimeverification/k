@@ -405,15 +405,18 @@ public class Definition implements Cloneable {
 		// print variables, HOLEs
 		for (Sort s : userSorts) {
 			if (!s.isBaseSort()) {
-				sdf += "	VARID  \":\" \"" + s.getSortName() + "\"        -> K            {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12Var\")}\n";
+				sdf += "	VARID  \":\" \"" + s.getSortName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12Var\")}\n";
 			}
 		}
 		sdf += "\n";
 		for (Sort s : userSorts) {
 			if (!s.isBaseSort()) {
-				sdf += "	\"HOLE\" \":\" \"" + s.getSortName() + "\"      -> K            {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12Hole\")}\n";
+				sdf += "	\"HOLE\" \":\" \"" + s.getSortName() + "\"      -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12Hole\")}\n";
 			}
 		}
+	
+		sdf += "\n";
+		sdf += "	VariableDz -> K\n";
 
 		sdf += "\n\n";
 		sdf += "	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n";
@@ -428,6 +431,9 @@ public class Definition implements Cloneable {
 		sdf += "	DzDzSTRING	-> DzDzString\n";
 
 		sdf += "\n";
+		
+		sdf += "context-free restrictions\n";
+		sdf += "	VariableDz -/- ~[\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]\n\n";
 
 		sdf += "lexical syntax\n";
 		for (Production p : constants) {
