@@ -23,6 +23,8 @@ public class HTMLFilter extends BasicVisitor {
 	private boolean firstProduction = false;
 	private Map<String, String> colors = new HashMap<String,String>();
 	private HashSet usedColors = new HashSet();
+	private Map<String, String> cellColors = new HashMap<String,String>();
+
 //	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
 
@@ -50,7 +52,7 @@ public class HTMLFilter extends BasicVisitor {
 				+ "border-color: #96915c;"+endl
 				+ "background-color: #f7f7c5;"+endl
 				+ "}" + endl);
-		colors.put("brown" , ".brown" + endl
+		colors.put("orange" , ".orange" + endl
 				+ "{" + endl
 				+ "border-color: #804000;"+endl
 				+ "background-color: #f6dec5;"+endl
@@ -65,30 +67,40 @@ public class HTMLFilter extends BasicVisitor {
 				+ "border-color: #008000;"+endl
 				+ "background-color: #BEEEBE;"+endl
 				+ "}" + endl);
-		colors.put("blue" , ".blue" + endl
+		colors.put("LightSkyBlue" , ".LightSkyBlue" + endl
 				+ "{" + endl
 				+ "border-color: #44677d;"+endl
 				+ "background-color: #d8e6ee;"+endl
 				+ "}" + endl);
-		colors.put("pink" , ".pink" + endl
+		colors.put("magenta" , ".magenta" + endl
 				+ "{" + endl
 				+ "border-color: #ad7a9b;"+endl
 				+ "background-color: #edbeed;"+endl
 				+ "}" + endl);
-		colors.put("purple" , ".purple" + endl
+		colors.put("Orchid" , ".Orchid" + endl
 				+ "{" + endl
 				+ "border-color: #957294;"+endl
 				+ "background-color: #e8d4e8;"+endl
 				+ "}" + endl);
-		colors.put("lightGrey" , ".lightGrey" + endl
+		colors.put("white" , ".white" + endl
 				+ "{" + endl
 				+ "border-color: #808080;"+endl
 				+ "background-color: #f0f0f0;"+endl
 				+ "}" + endl);
-		colors.put("darkGrey" , ".darkGrey" + endl
+		colors.put("gray" , ".gray" + endl
 				+ "{" + endl
 				+ "border-color: #7c7c7c;"+endl
 				+ "background-color: #d7d7d7;"+endl
+				+ "}" + endl);
+		colors.put("grey" , ".grey" + endl
+				+ "{" + endl
+				+ "border-color: #7c7c7c;"+endl
+				+ "background-color: #d7d7d7;"+endl
+				+ "}" + endl);
+		colors.put("default" , "default" + endl
+				+ "{" + endl
+				+ "border-color: black;"+endl
+				+ "background-color: white;"+endl
 				+ "}" + endl);
 		
 	}
@@ -100,14 +112,10 @@ public class HTMLFilter extends BasicVisitor {
 	}
 	
 	private String getCellColor(String cellName){
-		if(cellName.toLowerCase().equals("k"))
-			return "green";
-		else if(cellName.toLowerCase().equals("env"))
-			return "red";
-		else if(cellName.toLowerCase().equals("t"))
-			return "yellow";
+		if(cellColors.get(cellName) != null)
+			return cellColors.get(cellName);
 		else
-			return getRandomColor();
+			return "default";
 			
 	}
 
@@ -145,10 +153,9 @@ public class HTMLFilter extends BasicVisitor {
 	public void visit(Module mod) {
 		if (mod.isPredefined())
 			return;
-		result += "<div>" + "Module <span class=\"large\">" + mod.getName() + "</span> <br/>" + endl;
-		//result += "\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl;
+		result += "<div>" + "MODULE <span class=\"large\">" + mod.getName() + "</span> <br /> <br />" + endl;
 		super.visit(mod);
-		result += "<br />" + "<br />" + "</div>" + endl;
+		result += "END MODULE </div>" + endl + "<br />" + endl;
 	}
 
 	@Override
@@ -156,7 +163,7 @@ public class HTMLFilter extends BasicVisitor {
 		result += "<table> <tr> <td> SYNTAX ";
 		firstProduction = true;
 		super.visit(syn);
-		result += "</table>" + endl;
+		result += "</table>" + endl + "<br />" + endl;
 	}
 
 	@Override
@@ -196,7 +203,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Terminal pi) {
-		result += htmlify(pi.getTerminal());
+		result += htmlify(pi.getTerminal()) +" ";
 		/*String terminal = pi.getTerminal();
 		if (terminal.isEmpty())
 			return;
@@ -209,13 +216,13 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(UserList ul) {
-		result += "<span class =\"italic\">" + "List(#" + ul.getSort() + ",\"" + ul.getSeparator() + "\") </span>"  + endl;
+		result += "<span class =\"italic\">" + "List{#" + ul.getSort() + ",\"" + ul.getSeparator() + "\"} </span>"  + endl;
 		//result += "List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
 	}
 
 	@Override
 	public void visit(Configuration conf) {
-		result += "Configuration : <br />";
+		result += "CONFIGURATION : <br />";
 		super.visit(conf);
 	}
 
@@ -226,17 +233,15 @@ public class HTMLFilter extends BasicVisitor {
 			blockClasses += " left";
 		} else if (c.getElipses().equals("right")) {
 			blockClasses += " right";
-		} /*else if (c.getElipses().equals("both")) {
-			result += "\\kmiddle";
-		} else {
+		} else if (c.getElipses().equals("both")) {
+			blockClasses += " left right";
+		} /*else {
 			result += "\\kall";
-		}
-		if (c.getAttributes().containsKey("color")) {
-			colors.put(c.getLabel(), c.getAttributes().get("color"));
-		}
-		if (colors.containsKey(c.getLabel())) {
-			result += "[" + colors.get(c.getLabel()) + "]";
 		}*/
+		if (c.getAttributes().containsKey("color")) {
+			cellColors.put(c.getLabel(), c.getAttributes().get("color"));
+		}
+
 		String color = getCellColor(makeGreek(htmlify(c.getLabel())));
 		
 		if(usedColors.add(color))
@@ -269,17 +274,18 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Variable var) {
-		if (var.getName().equals("_")) {
+		result +="<span ";
+		if (var.getSort() != null) {
+			result += "title =\"" + var.getSort() + "\"";
+		}
+		result+=">" + makeGreek(var.getName());
+		
+		/*if (var.getName().equals("_")) {
 			result += "_";
 		} else {
-			result += "var";
-		}
-		if (var.getSort() != null) {
-			result += "[" + var.getSort() + "]";
-		}
-		if (!var.getName().equals("_")) {
-			result += " " + makeGreek(var.getName())+ " ";
-		}
+			result += "var " + makeGreek(var.getName())+ " ";
+		}*/
+		result+=" </span> ";
 	}
 
 	/*private String makeIndices(String str) {
@@ -295,7 +301,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Empty e) {
-		result += " <span title=\""+ e.getSort()+"\" class = \"bold\"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> ";
+		result += " <span title=\""+ e.getSort()+"\" class = \"bold\"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> ";
 	}
 
 	@Override
@@ -371,29 +377,54 @@ public class HTMLFilter extends BasicVisitor {
 //		}
 //		result += pattern;
 		//result += "\\mbox{" + StringUtil.latexify(trm.toString()) + "}";
-		result += makeGreek(htmlify(trm.toString()));
+		
+		/*result += makeGreek(htmlify(trm.toString()));
 		if(trm.toString().isEmpty())
-			result += "&nbsp; &nbsp; &nbsp; &middot; &nbsp; &nbsp; &nbsp; ";
-		/*Production p = trm.getProduction();
-		super.visit(p);*/
+			result += "&nbsp; &nbsp; &nbsp; &middot; &nbsp; &nbsp; &nbsp; ";*/
+		boolean empty = true;
+		Production pr = trm.getProduction();
+
+		if (pr.getItems().size() > 0) {
+			if (pr.getItems().get(0).getType() == ProductionType.USERLIST) {
+				String separator = ((UserList) pr.getItems().get(0)).getSeparator();
+				trm.getContents().get(0).accept(this);
+				result += " " + separator + " ";
+				trm.getContents().get(1).accept(this);
+				result += " ";
+				empty = false;
+			} else
+				for (int i = 0, j = 0; i < pr.getItems().size(); i++) {
+					ProductionItem pi = pr.getItems().get(i);
+					if (pi.getType() == ProductionType.TERMINAL) {
+						pi.accept(this);
+						empty = false;
+					} else if (pi.getType() == ProductionType.SORT) {
+						Term t = trm.getContents().get(j++);
+						t.accept(this);	
+						empty = false;
+					}
+				}
+		}
+		if(empty)
+			result += "&nbsp; &nbsp; &middot; &nbsp; &nbsp;";
 	}
 
 	@Override
 	public void visit(Constant c) {
-		result += c.getSort() + " " + c.getValue();
+		result += "<span title =\"" + c.getSort() + "\"> " + c.getValue() + " </span> ";
 		//result += "\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}";
 	}
 
 	@Override
 	public void visit(MapItem mi) {
 		mi.getKey().accept(this);
-		//result += "\\mapsto";
+		result += "<span text-size=\"large\"> &#x21a6; </span>";
 		mi.getItem().accept(this);
 	}
 
 	@Override
 	public void visit(KSequence k) {
-		printList(k.getContents(), "ksequence ");
+		printList(k.getContents(), "&#x21b7; ");
 
 	}
 
@@ -495,6 +526,8 @@ public class HTMLFilter extends BasicVisitor {
 		css += ".textCentered" + endl
 				+ "{" + endl
 				+ "text-align: center;"+endl
+				+ "display: inline-block;"+endl
+				+ "vertical-align: top;"+endl
 				+ "}" + endl;
 		css += ".cell" + endl
 				+ "{" + endl
