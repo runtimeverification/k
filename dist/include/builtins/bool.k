@@ -10,11 +10,11 @@ module BOOL-HOOKS
   rule B1:Bool =/=Bool B2:Bool => notBool(B1 ==Bool B2)
 
   syntax Bool ::= "notBool" Bool			[function, left, latex("\neg_{\scriptstyle\it Bool}{#1}")]
-				> Bool "andBool" Bool		[function, left, latex("{#1}\wedge_{\scriptstyle\it Bool}{#2}")]
-                                | K "andThenBool" K              [function, left]
+				> Bool "andBool" Bool		[function, left, latex("{#1}\wedge_{\scriptstyle\it Bool}{#2}"), cons("Bool1AndBoolSyn")]
+				| K "andThenBool" K              [function, left]
 				> Bool "xorBool" Bool		[function, left]
 				> Bool "orBool" Bool		[function, left, latex("{#1}\vee_{\scriptstyle\it Bool}{#2}")]
-                                | K "orElseBool" K              [function, left]
+				| K "orElseBool" K              [function, left]
 				> Bool "impliesBool" Bool	[function, left]
 				> left:
 				  Bool "==Bool" Bool		[function, left, hook(#BOOL:_==Bool_)]

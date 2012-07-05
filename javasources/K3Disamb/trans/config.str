@@ -26,6 +26,6 @@ rules
 		?sort ; getMaxSort3(|sort) ; ((?"List{K}" ; !"K") <+ id)
 
 	getMaxSort3(|sort) =
-		(MemoMySbs ; one(?(bigger, sort)) ; getMaxSort3(|bigger)) <+ !sort
+		(MemoMySbs ; one({big: ?(big, sort) ; bigger := big}) ; getMaxSort3(|bigger)) <+ !sort
 
 

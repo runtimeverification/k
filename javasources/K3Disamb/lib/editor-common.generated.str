@@ -32,8 +32,6 @@ strategies
     ast2abox(|[<import-term(include/K3Disamb.generated.pp.af)>,
                <import-term(include/K3Disamb.pp.af)>]);
     box2text-string(|100)
-    
-  language = !"K3Disamb"
 
 strategies
   
@@ -228,9 +226,6 @@ signature constructors
   Entity   : ID * List(Property) -> Entity
   Property : ID * Type           -> Property
   Type     : ID                  -> Type
-  
-  Type     : Namespace
-  Property : Namespace
 
 strategies
   

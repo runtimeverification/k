@@ -6,8 +6,8 @@ module K-VISITOR
     [latex("\mbox{apply }{#2}\mbox{ in }{#1}\mbox{ if }{#3}")]
   // "boxed" versions of the K constructors (all of them are strict)
   syntax K ::= K "visitedL(~>)" K [latex("{#1}\framebox{$\kra$}{#2}"), strict]
-             | K "visitedL(,,)" K [latex("{#1}\framebox{$,\!\!,$}{#2}"), strict]
-  syntax KResult ::= "visitedK" List{K}  [latex("\framebox{${#1}$}")]
+             > K "visitedL(,,)" K [latex("{#1}\framebox{$,\!\!,$}{#2}"), strict]
+  syntax KResult ::= "visitedK" "(" List{K} ")" [latex("\framebox{${#1}$}")]
 
   rule visit Kl:List{K} applying A:KLabel if Pred:KLabel
     => #if Pred:KLabel(Kl:List{K}) ==K true 

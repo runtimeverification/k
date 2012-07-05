@@ -1,1 +1,2 @@
-configuration <test> 0 </test>
+  //rule <k> print I:Int => lambda dummy . dummy </k>
+configuration <k> $PGM:Exp </k>
