@@ -28,8 +28,6 @@ public class Report {
 	Document doc;
 	
 	Element testsuites;
-	Element regression;
-	Element examples;
 	
 	Map<String, Element> exampleToTestsuite;
 
@@ -54,14 +52,6 @@ public class Report {
 		testsuites = doc.createElement("testsuites");
 		doc.appendChild(testsuites);
 		testsuites.setAttribute("name", "k-framework");
-		
-//		examples = doc.createElement("testsuite");
-//		examples.setAttribute("name", "examples");
-//		testsuites.appendChild(examples);
-//	
-//		regression = doc.createElement("testsuite");
-//		regression.setAttribute("name", "regression tests");
-//		testsuites.appendChild(regression);
 	}
 
 	public void report(Example example) {
@@ -71,6 +61,7 @@ public class Report {
 		if (testcases == null) {
 			testcases = doc.createElement("testsuite");
 			testcases.setAttribute("name", testcasesname);
+			testcases.setAttribute("package", "examples");
 			exampleToTestsuite.put(testcasesname, testcases);
 			
 			testsuites.appendChild(testcases);
