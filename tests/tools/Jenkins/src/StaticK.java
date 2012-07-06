@@ -25,8 +25,10 @@ public class StaticK {
 	public static int THREAD_POOL_SIZE = 18;
 	public static int ulimit = 120;
 	public static Report report = new Report("junit-report.xml");
+	public static String kbasedir;
+	public static String configuration;
 	
-	public static List<Example> getExamples(String configuration, String k3jar, String tagName) {
+	public static List<Example> getExamples(String configuration, String k3jar, String tagName, String kbasedir) {
 		Document document = getDocument(configuration);
 
 		List<Example> examples = new LinkedList<Example>();
@@ -34,7 +36,7 @@ public class StaticK {
 		NodeList exampless = document.getElementsByTagName(tagName);
 		for (int i = 0; i < exampless.getLength(); i++) {
 			Element example = (Element) exampless.item(i);
-			String dir = toolsDir + fileSep + "Jenkins" + fileSep + kbase
+			String dir = kbasedir
 					+ example.getAttribute("dir");
 			String mainFile = example.getAttribute("mainfile");
 			String mainModule = example.getAttribute("mainmodule");
@@ -44,12 +46,11 @@ public class StaticK {
 			NodeList tests = example.getElementsByTagName("test");
 			for (int j = 0; j < tests.getLength(); j++) {
 				Element test = (Element) tests.item(j);
-				String file = toolsDir + fileSep + "Jenkins" + fileSep + kbase
+				String file = kbasedir
 						+ test.getAttribute("file");
-				String input = toolsDir + fileSep + "Jenkins" + fileSep + kbase
+				String input = kbasedir
 						+ test.getAttribute("input");
-				String output = toolsDir + fileSep + "Jenkins" + fileSep
-						+ kbase + test.getAttribute("output");
+				String output = kbasedir + test.getAttribute("output");
 
 				NodeList options = test.getElementsByTagName("option");
 				List<String> krunOptions = new LinkedList<String>();
