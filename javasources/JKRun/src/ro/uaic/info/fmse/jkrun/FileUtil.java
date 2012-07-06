@@ -349,4 +349,23 @@ public class FileUtil {
 		return count;
 	}
 	
+	//replace all "_" from String op with its children representation from elements list
+	public static StringBuilder replaceAllUnderscores(String op, List<String> elements) {
+		int index = 0;
+		int count = 0;
+	    StringBuilder sb1 = new StringBuilder(op);
+	    
+		while (index != -1) {
+			index = sb1.indexOf("_", index);
+			if (index != -1) {
+				String s = (String)elements.get(count);
+				sb1.insert(index, s);
+				index += s.length();
+				sb1 = sb1.deleteCharAt(index);
+				count++;
+			}
+		}
+		return sb1;
+	}
+	
 }

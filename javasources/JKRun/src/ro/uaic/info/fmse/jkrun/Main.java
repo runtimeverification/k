@@ -301,45 +301,7 @@ public class Main {
 			RunProcess rp = new RunProcess();
 
 			String k3jar = new File(K.kast).getParent() + K.fileSeparator + "java" + K.fileSeparator + "k3.jar";
-			if ("kast".equals(K.parser)) {
-				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
-				// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
-				rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", K.k_definition, K.pgm });
-			} else {
-				K.parser = new File(K.parser).getCanonicalPath();
-				System.out.println("The external parser to be used is:" + K.parser);
-				String parserName = new File(K.parser).getName();
-				if ("kast".equals(parserName)) {
-					rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", K.pgm });
-				}
-				else {
-					rp.execute(new String[] { K.parser, K.pgm });
-				}
-			}
-			
-		    if (K.parser.equals("kast")) {
-			  if (rp.getErr() != null) {
-				Error.externalReport("Warning: kast reported errors or warnings:\n" + rp.getErr());
-			  }
-			  if (rp.getExitCode() != 0) {
-				 System.out.println("Kast reported:\n" + rp.getStdout());
-				 System.out.println("Fatal: kast returned a non-zero exit code: " + rp.getExitCode());
-				 Error.report("\nAttempted command:\n" + "kast --definition=" + K.k_definition + " " + K.pgm);
-			  }
-		    } else {
-		    	if (rp.getErr() != null) {
-		    		Error.externalReport("Warning: parser reported errors or warnings:\n" + rp.getErr());
-				}
-		    	if (rp.getExitCode() != 0) {
-					 System.out.println("Parser reported:\n" + rp.getStdout());
-					 System.out.println("Fatal: parser returned a non-zero exit code: " + rp.getExitCode());
-					 Error.report("\nAttempted command:\n" + K.parser + " " + K.pgm);
-				}
-		    }
-			
-			if (rp.getStdout() != null) {
-				KAST = rp.getStdout();
-			}
+			KAST = rp.runParser(k3jar, K.parser, K.k_definition, K.pgm);
 
 			String s = new String();
 			if (K.do_search) {
@@ -368,44 +330,8 @@ public class Main {
 				if (!formulaFile.exists()) {
 					Error.report("\nProgram file that describes the LTL formula does not exist: " + K.model_checking);
 				}
-				if ("kast".equals(K.parser)) {
-					// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
-					// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
-					rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", K.k_definition, K.model_checking });
-				} else {
-					K.parser = new File(K.parser).getCanonicalPath();
-					String parserName = new File(K.parser).getName();
-					if ("kast".equals(parserName)) {
-						rp.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", K.model_checking });
-					}
-					else {
-						rp.execute(new String[] { K.parser, K.model_checking });
-					}
-				}
-				
-			    if (K.parser.equals("kast")) {
-				  if (rp.getErr() != null) {
-					Error.externalReport("Warning: kast reported errors or warnings:\n" + rp.getErr());
-				  }
-				  if (rp.getExitCode() != 0) {
-					 System.out.println("Kast reported:\n" + rp.getStdout());
-					 System.out.println("Fatal: kast returned a non-zero exit code: " + rp.getExitCode());
-					 Error.report("\nAttempted command:\n" + "kast --definition=" + K.k_definition + " " + K.model_checking);
-				  }
-			    } else {
-			    	if (rp.getErr() != null) {
-			    		Error.externalReport("Warning: parser reported errors or warnings:\n" + rp.getErr());
-					}
-			    	if (rp.getExitCode() != 0) {
-						 System.out.println("Parser reported:\n" + rp.getStdout());
-						 System.out.println("Fatal: parser returned a non-zero exit code: " + rp.getExitCode());
-						 Error.report("\nAttempted command:\n" + K.parser + " " + K.model_checking);
-					}
-			    }
-			    String KAST1 = new String();
-				if (rp.getStdout() != null) {
-					KAST1 = rp.getStdout();
-				}
+				String KAST1 = new String();
+				KAST1 = rp.runParser(k3jar, K.parser, K.k_definition, K.model_checking);
 				
 				sb.append("load " + K.compiled_def);
 				sb.append(K.lineSeparator + K.lineSeparator);

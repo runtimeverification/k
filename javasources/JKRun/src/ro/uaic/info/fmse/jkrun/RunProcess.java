@@ -71,6 +71,59 @@ public class RunProcess {
 		}
 
 	}
+	/*
+	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) 
+	 * and return the AST obtained by parser
+	 */
+	public String runParser(String k3jar, String parser, String definition, String pgm) {
+		String KAST = new String();
+		
+		if ("kast".equals(parser)) {
+			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
+			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
+			this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", definition, pgm });
+		} else {
+			try {
+				parser = new File(parser).getCanonicalPath();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("The external parser to be used is:" + parser);
+			String parserName = new File(parser).getName();
+			if ("kast".equals(parserName)) {
+				this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
+			}
+			else {
+				this.execute(new String[] { parser, pgm });
+			}
+		}
+		
+	    if (parser.equals("kast")) {
+		  if (this.getErr() != null) {
+			Error.externalReport("Warning: kast reported errors or warnings:\n" + this.getErr());
+		  }
+		  if (this.getExitCode() != 0) {
+			 System.out.println("Kast reported:\n" + this.getStdout());
+			 System.out.println("Fatal: kast returned a non-zero exit code: " + this.getExitCode());
+			 Error.report("\nAttempted command:\n" + "kast --definition=" + definition + " " + pgm);
+		  }
+	    } else {
+	    	if (this.getErr() != null) {
+	    		Error.externalReport("Warning: parser reported errors or warnings:\n" + this.getErr());
+			}
+	    	if (this.getExitCode() != 0) {
+				 System.out.println("Parser reported:\n" + this.getStdout());
+				 System.out.println("Fatal: parser returned a non-zero exit code: " + this.getExitCode());
+				 Error.report("\nAttempted command:\n" + parser + " " + pgm);
+			}
+	    }
+		
+		if (this.getStdout() != null) {
+			KAST = this.getStdout();
+		}
+		return KAST;
+	}
 	
 	public String getStdout() {
 		return stdout;

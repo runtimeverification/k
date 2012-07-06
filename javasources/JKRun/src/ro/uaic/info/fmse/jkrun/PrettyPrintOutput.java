@@ -202,14 +202,14 @@ public class PrettyPrintOutput {
 		if (sort.equals("BagItem") && op.equals("<_>_</_>")) {
 			sb = new StringBuilder();
 		   	sb.append(prettyPrint("<", true, whitespace, ANSI_GREEN));
-		   	sb.append(prettyPrint(print(list.get(0), false, 0, ANSI_GREEN), false, 0, ANSI_GREEN));
+		   	sb.append(prettyPrint(print(list.get(0), false, whitespace, ANSI_GREEN), false, whitespace, ANSI_GREEN));
 		   	sb.append(prettyPrint(">", false, 0, ANSI_GREEN));
 		   	for (int i = 1; i < list.size() - 1; i++) {
 		   		Element child = list.get(i);
-		   		sb.append(prettyPrint(print(child, false, whitespace + indent, ANSI_NORMAL), true, whitespace + indent, ANSI_NORMAL));
+		   		sb.append(prettyPrint(print(child, true, whitespace + indent, ANSI_NORMAL), true, whitespace + indent, ANSI_NORMAL));
 		   	}
 		   	sb.append(prettyPrint("</", true, whitespace, ANSI_GREEN));
-		   	sb.append(prettyPrint(print(list.get(list.size() - 1), false, 0, ANSI_GREEN), false, 0, ANSI_GREEN));
+		   	sb.append(prettyPrint(print(list.get(list.size() - 1), false, whitespace, ANSI_GREEN), false, whitespace, ANSI_GREEN));
 		   	sb.append(prettyPrint(">", false, 0, ANSI_GREEN));
 		}
 		if (sort.equals("BagItem") && !op.equals("<_>_</_>")) {
@@ -228,7 +228,7 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < n; i++) {
 					Element child = list.get(i);
-					String prettyStr = prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL);
+					String prettyStr = prettyPrint(print(child, true, whitespace + indent, ANSI_NORMAL), true, whitespace + indent, ANSI_NORMAL);
 					if (prettyStr.length() > 0) {
 						elements.add(prettyStr);
 					}
@@ -251,22 +251,9 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < list.size(); i++) {
 		   		    Element child = list.get(i);
-		   		    elements.add(prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL));
+		   		    elements.add(prettyPrint(print(child, true, whitespace + indent, ANSI_NORMAL), true, whitespace + indent, ANSI_NORMAL));
 			    }
-				int index = 0;
-				int count = 0;
-			    StringBuilder sb1 = new StringBuilder(op);
-			    //replace all "_"
-				while (index != -1) {
-					index = sb1.indexOf("_", index);
-					if (index != -1) {
-						String s = (String)elements.get(count);
-						sb1.insert(index, s);
-						index += s.length();
-						sb1 = sb1.deleteCharAt(index);
-						count++;
-					}
-				}
+				StringBuilder sb1 = FileUtil.replaceAllUnderscores(op, elements);
 				sb.append(sb1);
 				if (!(n - m == 1 && elements.get(m).length() == 0)) {
 					sb.append("(");
@@ -304,7 +291,7 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < n; i++) {
 					Element child = list.get(i);
-					String prettyStr = prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL);
+					String prettyStr = prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL);
 					if (prettyStr.length() > 0) {
 						elements.add(prettyStr);
 					}
@@ -329,7 +316,7 @@ public class PrettyPrintOutput {
 				StringBuilder aux = new StringBuilder();
 				for (int i = 0; i < list.size(); i++) {
 					Element child = list.get(i);
-					elements.add(print(child, false, 0, ANSI_NORMAL));
+					elements.add(prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL));
 				}
 				op = op.replaceAll("_", " ");
 				for (int i = 0; i < elements.size(); i++) {
@@ -349,7 +336,8 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < list.size(); i++) {
 					Element child = list.get(i);
-					elements.add(print(child, false, 0, ANSI_NORMAL));
+					String elem = prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL);
+					elements.add(elem.trim());
 				}
 				StringBuilder sb_ = new StringBuilder(op);
 				int index = 0;
@@ -371,25 +359,10 @@ public class PrettyPrintOutput {
 					}
 				}
 				op = sb_.toString();
-				index = 0;
-				int count = 0;
 				StringBuilder sb1 = new StringBuilder(op);
 				//replace each "_" with its children representation
-				while (index != -1) {
-					index = sb1.indexOf("_", index);
-					if (index != -1) {
-						if (count >= elements.size()) {
-							break;
-						}
-						String s = (String) elements.get(count);
-						s = s.trim();
-						sb1.insert(index, s);
-						index += s.length();
-						sb1 = sb1.deleteCharAt(index);
-						count++;
-						op = sb1.toString();
-					}
-				}
+			    sb1 = FileUtil.replaceAllUnderscores(op, elements);
+			    op = sb1.toString();
 				sb.append(op);
 			}
 	}
@@ -417,7 +390,9 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < n; i++) {
 					Element child = list.get(i);
-					String prettyStr = prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL);
+					String prettyStr = new String();
+				    prettyStr = prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL);
+					
 					if (prettyStr.length() > 0) {
 						elements.add(prettyStr);
 					}
@@ -440,21 +415,9 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < list.size(); i++) {
 		   		    Element child = list.get(i);
-		   		    elements.add(prettyPrint(print(child, lineskip, whitespace, ANSI_NORMAL), lineskip, whitespace, ANSI_NORMAL));
+		   		    elements.add(prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL));
 			    }
-				int index = 0;
-				int count = 0;
-			    StringBuilder sb1 = new StringBuilder(op);
-				while (index != -1) {
-					index = sb1.indexOf("_", index);
-					if (index != -1) {
-						String s = (String)elements.get(count);
-						sb1.insert(index, s);
-						index += s.length();
-						sb1 = sb1.deleteCharAt(index);
-						count++;
-					}
-				}
+				StringBuilder sb1 = FileUtil.replaceAllUnderscores(op, elements);
 				sb.append(sb1);
 				if (!(n - m == 1 && elements.get(m).length() == 0)) {
 					sb.append("(");
@@ -473,7 +436,7 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < list.size(); i++) {
 					Element child = list.get(i);
-					elements.add(print(child, lineskip, whitespace, ANSI_NORMAL));
+					elements.add(prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL));
 				}
 				String initOp = op;
 				int index = 0;
@@ -513,13 +476,15 @@ public class PrettyPrintOutput {
 			StringBuilder sb_ = new StringBuilder();
 			for (int i = 0; i < list.size(); i++) {
 	   		    Element child = list.get(i);
-	   		    elements.add(print(child, true, whitespace + indent, ANSI_NORMAL));   
+	   		    if (sort.equals("NeMap")) {
+	   		    	elements.add(prettyPrint(print(child, true, whitespace + indent, ANSI_NORMAL), true, whitespace + indent, ANSI_NORMAL));
+	   		    }
+	   		    else {
+	   		    	elements.add(prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL));
+	   		    }
 		    }
 			for (String s : elements) {
 				sb_.append(s);
-				if (sort.equals("NeMap") || sort.equals("NeList"))
-					//sb_.append("\n");
-					sb_.append(" ");
 			}
 			sb.append(sb_);	
 		}
@@ -532,7 +497,7 @@ public class PrettyPrintOutput {
 			
 			for (int i = 0; i < list.size(); i++) {
 	   		    Element child = list.get(i);
-	   		    elements.add(print(child, false, whitespace + indent, ANSI_NORMAL));   
+	   		    elements.add(prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL));   
 		    }
 			if (K.io) {
 				for (String s : elements) {
@@ -540,20 +505,8 @@ public class PrettyPrintOutput {
 				}
 				sb.append(sb_);
 			} else {
-				int index = 0;
-			    int count = 0;
-			    StringBuilder sb1 = new StringBuilder(op);
-				while (index != -1) {
-					index = sb1.indexOf("_", index);
-					if (index != -1) {
-						String s = (String)elements.get(count);
-						sb1.insert(index, s);
-						index += s.length();
-						sb1 = sb1.deleteCharAt(index);
-						count++;
-						op = sb1.toString();
-					}
-				}
+				StringBuilder sb1 = FileUtil.replaceAllUnderscores(op, elements);
+				op = sb1.toString();
 				sb.append(op);
 			}
 		}
@@ -578,7 +531,7 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < n; i++) {
 					Element child = list.get(i);
-					String prettyStr = prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL);
+					String prettyStr = prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL);
 					if (prettyStr.length() > 0) {
 						elements.add(prettyStr);
 					}
@@ -601,21 +554,9 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < list.size(); i++) {
 		   		    Element child = list.get(i);
-		   		    elements.add(prettyPrint(print(child, false, 0, ANSI_NORMAL), false, 0, ANSI_NORMAL));
+		   		    elements.add(prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL));
 			    }
-				int index = 0;
-				int count = 0;
-			    StringBuilder sb1 = new StringBuilder(op);
-				while (index != -1) {
-					index = sb1.indexOf("_", index);
-					if (index != -1) {
-						String s = (String)elements.get(count);
-						sb1.insert(index, s);
-						index += s.length();
-						sb1 = sb1.deleteCharAt(index);
-						count++;
-					}
-				}
+				StringBuilder sb1 = FileUtil.replaceAllUnderscores(op, elements);
 				sb.append(sb1);
 				if (!(n - m == 1 && elements.get(m).length() == 0)) {
 					sb.append("(");
@@ -634,7 +575,7 @@ public class PrettyPrintOutput {
 				List<String> elements = new ArrayList<String>();
 				for (int i = 0; i < list.size(); i++) {
 					Element child = list.get(i);
-					elements.add(print(child, false, 0, ANSI_NORMAL));
+					elements.add(prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL));
 				}
 				StringBuilder sb_ = new StringBuilder(op);
 				int index = 0;
@@ -693,11 +634,11 @@ public class PrettyPrintOutput {
 		if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_"))) {
 			sb = new StringBuilder();
 			Element firstChild = list.get(0);
+			String s = prettyPrint(print(firstChild, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL);
 			if (sort.equals("#NzInt") && op.equals("--Int_")) {
 				sb = new StringBuilder();
-				sb.append("-" + print(firstChild, false, 0, ANSI_NORMAL)); 
+				sb.append("-" + s); 
 			} else {
-				String s = print(firstChild, false, 0, ANSI_NORMAL);
 				//eliminate the apostrophes
 				String parts[];
 				parts = s.split("\"");
@@ -731,7 +672,7 @@ public class PrettyPrintOutput {
 				output.append(K.lineSeparator);
 			}
 		}
-		if (whitespace > 0) {
+		if (whitespace > 0 && lineskip) {
 			String space = XmlUtil.buildWhitespace(whitespace);
 			output.append(space);
 		}
