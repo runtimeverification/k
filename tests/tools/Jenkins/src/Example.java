@@ -91,7 +91,8 @@ public class Example extends Thread {
 
 	@Override
 	public String toString() {
-		return "Testing " + dir + StaticK.fileSep + mainFile + " : "
+		String newfile = dir + StaticK.fileSep + mainFile;
+		return "Testing " + newfile.substring(StaticK.kbasedir.length()) + " : "
 				+ (isCompiled() == true ? "success" : "failed");
 	}
 

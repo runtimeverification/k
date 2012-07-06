@@ -74,10 +74,6 @@ public class Report {
 			exampleToTestsuite.put(testcasesname, testcases);
 			
 			testsuites.appendChild(testcases);
-			
-//			if (example.tagName.equals("regression"))
-//				regression.appendChild(testcases);
-//			else examples.appendChild(testcases);
 		}
 		
 		// create test case

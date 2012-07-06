@@ -47,11 +47,11 @@ public class RunPrograms {
 			}
 			StaticK.report.save();
 		}
-		for(Example example : regression)
+		for(Example r : regression)
 		{
-			for(Program program : example.programs)
+			for(Program program : r.programs)
 			{
-				StaticK.report.report(program, example);
+				StaticK.report.report(program, r);
 			}
 			StaticK.report.save();
 		}
@@ -63,9 +63,9 @@ public class RunPrograms {
 				assertTrue(program.isCorrect());
 			}
 		}
-		for(Example example : regression)
+		for(Example r : regression)
 		{
-			for(Program program : example.programs)
+			for(Program program : r.programs)
 			{
 				assertTrue(program.isCorrect());
 			}

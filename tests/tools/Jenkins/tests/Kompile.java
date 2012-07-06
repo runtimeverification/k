@@ -25,8 +25,8 @@ public class Kompile {
 
 		for (Example example : examples)
 			StaticK.pool.execute(example);
-		for (Example example : regression)
-			StaticK.pool.execute(example);
+		for (Example r : regression)
+			StaticK.pool.execute(r);
 
 		
 		// wait until examples are running
@@ -39,9 +39,9 @@ public class Kompile {
 			assertTrue(example.isCompiled());
 		}
 
-		for (Example example : regression) {
-			StaticK.report.report(example);
-			assertTrue(example.isCompiled());
+		for (Example r : regression) {
+			StaticK.report.report(r);
+			assertTrue(r.isCompiled());
 		}
 		
 		StaticK.report.save();

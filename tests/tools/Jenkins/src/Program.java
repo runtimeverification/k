@@ -93,9 +93,9 @@ public class Program extends Thread {
 	@Override
 	public String toString() {
 		if (isCorrect())
-			return filename + "... success.";
+			return filename.substring(StaticK.kbasedir.length()) + "... success.";
 		else
-			return filename
+			return filename.substring(StaticK.kbasedir.length())
 					+ "... failed:\n\n------------ STATS ------------\nRun:\n"
 					+ compile + "\nKrun exit code: " + exit + "\nError: "
 					+ error + "\nOutput: " + output
