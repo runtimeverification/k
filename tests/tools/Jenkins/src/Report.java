@@ -63,7 +63,7 @@ public class Report {
 
 		if (example.tagName.equals("regression"))
 		{
-			testsuite = tests.get("regression");
+			testsuite = tests.get("/regression");
 			if (testsuite == null) {
 				testsuite = doc.createElement("testsuite");
 				testsuite.setAttribute("name", suite);
