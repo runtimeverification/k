@@ -55,13 +55,13 @@ public class Report {
 		doc.appendChild(testsuites);
 		testsuites.setAttribute("name", "k-framework");
 		
-		examples = doc.createElement("testsuite");
-		examples.setAttribute("name", "examples");
-		testsuites.appendChild(examples);
-	
-		regression = doc.createElement("testsuite");
-		regression.setAttribute("name", "regression tests");
-		testsuites.appendChild(regression);
+//		examples = doc.createElement("testsuite");
+//		examples.setAttribute("name", "examples");
+//		testsuites.appendChild(examples);
+//	
+//		regression = doc.createElement("testsuite");
+//		regression.setAttribute("name", "regression tests");
+//		testsuites.appendChild(regression);
 	}
 
 	public void report(Example example) {
@@ -69,13 +69,15 @@ public class Report {
 		String testcasesname = example.getJenkinsSuiteName();
 		Element testcases = exampleToTestsuite.get(testcasesname);
 		if (testcases == null) {
-			testcases = doc.createElement("testcase");
+			testcases = doc.createElement("testsuite");
 			testcases.setAttribute("name", testcasesname);
 			exampleToTestsuite.put(testcasesname, testcases);
 			
-			if (example.tagName.equals("regression"))
-				regression.appendChild(testcases);
-			else examples.appendChild(testcases);
+			testsuites.appendChild(testcases);
+			
+//			if (example.tagName.equals("regression"))
+//				regression.appendChild(testcases);
+//			else examples.appendChild(testcases);
 		}
 		
 		// create test case
