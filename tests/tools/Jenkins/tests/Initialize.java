@@ -50,8 +50,7 @@ public class Initialize {
 	
 	public void testExamples() {
 
-		String kframework = StaticK.toolsDir + StaticK.fileSep + "Jenkins"
-				+ StaticK.fileSep + StaticK.kbase;
+		String kframework = StaticK.kbasedir;
 
 		String examplesDefDir = kframework + StaticK.fileSep + "dist"
 				+ StaticK.fileSep + "examples";
@@ -74,8 +73,7 @@ public class Initialize {
 
 	public void testRegression()
 	{
-		String kframework = StaticK.toolsDir + StaticK.fileSep + "Jenkins"
-				+ StaticK.fileSep + StaticK.kbase;
+		String kframework = StaticK.kbasedir;
 
 		String regressionTests = kframework + StaticK.fileSep + "tests" + StaticK.fileSep + "regression";
 		
@@ -325,7 +323,8 @@ public class Initialize {
 	}
 	
 	public void save() {
-		String file = "configuration.xml";
+		StaticK.configuration = StaticK.kbasedir + "configuration.xml";
+		String file = StaticK.configuration;
 		try {
 			FileWriter fstream = new FileWriter(file);
 			BufferedWriter out = new BufferedWriter(fstream);

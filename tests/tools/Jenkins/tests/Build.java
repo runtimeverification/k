@@ -12,13 +12,13 @@ public class Build {
 	// build K -> verify if the k3.jar file was created
 		String[] commands = new String[] { "ant" }; // , "all", "java", "jar" };
 		System.out.print("\nBuild ...");
-		Executor build = new Executor(commands, StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase, null);
+		Executor build = new Executor(commands, StaticK.kbasedir, null);
 		build.start();
 		build.join(0);
 		Thread.yield();
-		StaticK.k3Jar = StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase + StaticK.fileSep + "dist" + StaticK.fileSep + "bin"
+		StaticK.k3Jar = StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin"
 				+ StaticK.fileSep + "java" + StaticK.fileSep + "k3.jar";
-		StaticK.JKrun = StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase + StaticK.fileSep + "dist" + StaticK.fileSep + "bin"
+		StaticK.JKrun = StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin"
 				+ StaticK.fileSep + "java" + StaticK.fileSep + "JKrun.jar";
 		
 		assertTrue(new File(StaticK.k3Jar).exists());

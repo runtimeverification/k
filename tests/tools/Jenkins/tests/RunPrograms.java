@@ -14,8 +14,8 @@ public class RunPrograms {
 		String configuration = StaticK.file.getAbsolutePath().replaceFirst(
 				"/Jenkins.*?$", "")
 				+ StaticK.fileSep + "Jenkins" + StaticK.fileSep + "configuration.xml";
-		List<Example> examples = StaticK.getExamples(configuration, StaticK.k3Jar, "example");
-		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression");
+		List<Example> examples = StaticK.getExamples(configuration, StaticK.k3Jar, "example", StaticK.kbasedir);
+		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression", StaticK.kbasedir);
 		
 		
 		StaticK.pool = (ThreadPoolExecutor) Executors

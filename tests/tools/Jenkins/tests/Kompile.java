@@ -1,5 +1,6 @@
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -12,11 +13,13 @@ public class Kompile {
 	@Test
 	public void kompile() throws InterruptedException, URISyntaxException {
 		System.out.println("\nCompiling examples...");
-		String configuration = StaticK.file.getAbsolutePath().replaceFirst(
-				"/Jenkins.*?$", "")
-				+ StaticK.fileSep + "Jenkins" + StaticK.fileSep + "configuration.xml";
-		List<Example> examples = StaticK.getExamples(configuration, StaticK.k3Jar, "example");
-		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression");
+		
+		String configuration = StaticK.configuration;
+		assertTrue(new File(configuration).exists());
+
+		
+		List<Example> examples = StaticK.getExamples(configuration, StaticK.k3Jar, "example", StaticK.kbasedir);
+		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression", StaticK.kbasedir);
 		StaticK.pool = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
 

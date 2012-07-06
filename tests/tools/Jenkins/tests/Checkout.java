@@ -14,6 +14,7 @@ public class Checkout {
 				.getCodeSource().getLocation().toURI().getPath());
 		StaticK.toolsDir = StaticK.file.getAbsolutePath().replaceFirst(
 				"/Jenkins.*?$", "");
+		StaticK.kbasedir = StaticK.toolsDir + StaticK.fileSep + "Jenkins" + StaticK.fileSep + StaticK.kbase;
 
 		assertTrue(new File(StaticK.toolsDir).exists());
 	}
@@ -30,6 +31,7 @@ public class Checkout {
 		executor.join(StaticK.ulimit * 1000);
 		Thread.yield();
 		assertTrue(new File(StaticK.kbase).exists());
+		assertTrue(new File(StaticK.kbasedir).exists());
 		StaticK.report.save();
 		System.out.println("\tDone.");
 	}
