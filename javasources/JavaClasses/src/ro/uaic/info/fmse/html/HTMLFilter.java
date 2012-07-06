@@ -22,7 +22,7 @@ public class HTMLFilter extends BasicVisitor {
 	private String title = "";
 	private boolean firstProduction = false;
 	private Map<String, String> colors = new HashMap<String,String>();
-	private HashSet usedColors = new HashSet();
+	private HashSet<String> usedColors = new HashSet();
 	private Map<String, String> cellColors = new HashMap<String,String>();
 
 //	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
@@ -243,14 +243,21 @@ public class HTMLFilter extends BasicVisitor {
 		}
 
 		String color = getCellColor(makeGreek(htmlify(c.getLabel())));
+		String cellName = makeGreek(htmlify(c.getLabel()));
 		
 		if(usedColors.add(color))
 			css+= colors.get(color);
 		
 		result += "<div class=\"cell\"> <div class=\"tab " + color + "\">";
-		result += "<span class = \"bold\">" + makeGreek(htmlify(c.getLabel())) + "</span> </div>";
+		result += "<span class = \"bold\">" + cellName + "</span> </div>";
 		result += "<br />";
-		result += "<div class=\"" + blockClasses + " " + color + "\">";
+		result += "<div class=\"" + blockClasses + " " + color + "\" ";
+		if(cellName.length() > 5) {
+			double mw = Math.floor(cellName.length() * 0.7 *10 +0.5 )/10.0;
+			result += "style=\"min-width:"+mw+"em\"";
+		}
+			
+		result += ">";
 		super.visit(c);
 		result += "</div> </div>" + endl;
 	}
@@ -528,11 +535,13 @@ public class HTMLFilter extends BasicVisitor {
 				+ "text-align: center;"+endl
 				+ "display: inline-block;"+endl
 				+ "vertical-align: top;"+endl
+				+ "min-width: 20px;"+endl
 				+ "}" + endl;
 		css += ".cell" + endl
 				+ "{" + endl
 				+ "display: inline-block;"+endl
 				+ "vertical-align: top;"+endl
+				+ "text-align:left;" +endl
 				+ "}" + endl;
 		css += "hr.reduce" + endl
 				+ "{" + endl
@@ -574,6 +583,7 @@ public class HTMLFilter extends BasicVisitor {
 				+ "padding-right: 20px;"+endl
 				+ "border-radius: 30px;"+endl
 				+ "border-style: solid;"+endl
+				+ "min-width: 60px;"+endl
 				+ "}" + endl;
 		
 		css += ".block.right" + endl
@@ -588,7 +598,7 @@ public class HTMLFilter extends BasicVisitor {
 				+ "border-top-left-radius: 0px;"+endl
 				+ "border-bottom-left-radius: 0px;"+endl
 				+ "border-left-style: dotted;"+endl
-				+ "}" + endl;		
+				+ "}" + endl;	
 	}
 	
 	private String htmlify(String name) {
