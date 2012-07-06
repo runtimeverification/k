@@ -121,7 +121,7 @@ public class Report {
 
 		if (program.type.equals("regression"))
 		{
-			testsuite = tests.get("regression");
+			testsuite = tests.get("/regression");
 			if (testsuite == null) {
 				testsuite = doc.createElement("testsuite");
 				testsuite.setAttribute("name", suite);
