@@ -211,6 +211,7 @@ public class PrettyPrintOutput {
 		   	sb.append(prettyPrint("</", true, whitespace, ANSI_GREEN));
 		   	sb.append(prettyPrint(print(list.get(list.size() - 1), false, whitespace, ANSI_GREEN), false, whitespace, ANSI_GREEN));
 		   	sb.append(prettyPrint(">", false, 0, ANSI_GREEN));
+		   	return sb.toString();
 		}
 		if (sort.equals("BagItem") && !op.equals("<_>_</_>")) {
 			sb = new StringBuilder();
@@ -268,10 +269,12 @@ public class PrettyPrintOutput {
 					sb.append(")");
 				}
 			}
+			return sb.toString();
 			
 		}
 		if (sort.equals("CellLabel")) {
 			sb.append(op);
+			return sb.toString();
 		}
 		if (sort.equals("K")) {
 			sb = new StringBuilder();
@@ -365,12 +368,9 @@ public class PrettyPrintOutput {
 			    op = sb1.toString();
 				sb.append(op);
 			}
+			return sb.toString();
 	}
 		
-		if (op.equals("#istream`(_`)") || op.equals("#ostream`(_`)")) { // the istream and ostream cells are ignored
-			sb = new StringBuilder();
-			sb.append("");
-		}
 		if (sort.equals("MapItem") || sort.equals("ListItem") || sort.equals("SetItem")) {
 			sb = new StringBuilder();
 			//n = nr of child nodes
@@ -469,6 +469,7 @@ public class PrettyPrintOutput {
 				}
 				sb.append(op);
 			}
+			return sb.toString();
 		}
 		if (sort.equals("NeBag") || sort.equals("NeMap") || sort.equals("NeList")) {
 			sb = new StringBuilder();
@@ -476,7 +477,7 @@ public class PrettyPrintOutput {
 			StringBuilder sb_ = new StringBuilder();
 			for (int i = 0; i < list.size(); i++) {
 	   		    Element child = list.get(i);
-	   		    if (sort.equals("NeMap")) {
+	   		    if (sort.equals("NeMap") || sort.equals("NeList")) {
 	   		    	elements.add(prettyPrint(print(child, true, whitespace + indent, ANSI_NORMAL), true, whitespace + indent, ANSI_NORMAL));
 	   		    }
 	   		    else {
@@ -487,6 +488,7 @@ public class PrettyPrintOutput {
 				sb_.append(s);
 			}
 			sb.append(sb_);	
+			return sb.toString();
 		}
 		if (sort.equals("List")) {
 			sb = new StringBuilder();
@@ -499,16 +501,32 @@ public class PrettyPrintOutput {
 	   		    Element child = list.get(i);
 	   		    elements.add(prettyPrint(print(child, false, whitespace, ANSI_NORMAL), false, whitespace, ANSI_NORMAL));   
 		    }
-			if (K.io) {
-				for (String s : elements) {
-					sb_.append(s);
+		    sb_ = new StringBuilder(op);
+			int index = 0;
+			//insert around each "_" additional space depending on "_" position  
+			while (index != -1) {
+				index = sb_.indexOf("_", index);
+				if (index != -1) {
+					if (index == 0) {
+						sb_.insert(index + 1, " ");
+						index += "-".length();
+					} else if (index == sb_.length() - 1) {
+						sb_.insert(index, " ");
+						index += 2;
+					} else {
+						sb_ = sb_.insert(index + 1, " ");
+						sb_ = sb_.insert(index, " ");
+						index += 2;
+					}
 				}
-				sb.append(sb_);
-			} else {
-				StringBuilder sb1 = FileUtil.replaceAllUnderscores(op, elements);
-				op = sb1.toString();
-				sb.append(op);
 			}
+			op = sb_.toString();
+			StringBuilder sb1 = new StringBuilder(op);
+			//replace each "_" with its children representation
+		    sb1 = FileUtil.replaceAllUnderscores(op, elements);
+		    op = sb1.toString();
+			sb.append(op);
+			return sb.toString();
 		}
 		if ((sort.equals("KLabel") && !op.equals("'.List`{\",\"`}") )
 			|| sort.equals("#ModelCheckResult") || sort.equals("#TransitionList") || sort.equals("#Transition") || sort.equals("#ModelCheckerState")
@@ -618,6 +636,7 @@ public class PrettyPrintOutput {
 				}
 				sb.append(op);
 			}
+			return sb.toString();
 		}
 		if (sort.equals("KLabel") && op.equals("'.List`{\",\"`}")) {
 			sb = new StringBuilder();
@@ -630,6 +649,7 @@ public class PrettyPrintOutput {
 				sb.append(".");
 			}*/
 			sb.append(".");
+			return sb.toString();
 		}
 		if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_"))) {
 			sb = new StringBuilder();
@@ -644,19 +664,23 @@ public class PrettyPrintOutput {
 				parts = s.split("\"");
 				sb.append(parts[1]);
 			}
+			return sb.toString();
 		}
 		// TODO: what other sorts(builtins) that may appear should be added here? 
 		if (sort.equals("#Zero") || sort.equals("#Bool") || sort.equals("#Char") || sort.equals("#String") || sort.equals("#Int") || sort.equals("#Float")) {
 			sb = new StringBuilder();
 			sb.append(op);
+			return sb.toString();
 		}
 		if (sort.equals("#NzNat") && op.equals("sNat_")) {
 			sb = new StringBuilder();
 			sb.append(node.getAttribute("number"));
+			return sb.toString();
 		}
 		if (op.equals(".")) {
 			sb = new StringBuilder();
 			sb.append(".");
+			return sb.toString();
 		}
 		
 		return sb.toString();
