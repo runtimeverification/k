@@ -41,19 +41,24 @@ public class RunPrograms {
 		
 		for(Example example : examples)
 		{
+			Report report = StaticK.reports.get(example.getJenkinsSuiteName());
 			for(Program program : example.programs)
 			{
-				StaticK.report.report(program, example);
+				report.report(program);
 			}
-			StaticK.report.save();
+			report.save();
+			StaticK.reports.put(example.getJenkinsSuiteName(), report);
 		}
+		
 		for(Example r : regression)
 		{
+			Report report = StaticK.reports.get(r.getJenkinsSuiteName());
 			for(Program program : r.programs)
 			{
-				StaticK.report.report(program, r);
+				report.report(program);
 			}
-			StaticK.report.save();
+			report.save();
+			StaticK.reports.put(r.getJenkinsSuiteName(), report);
 		}
 
 		for(Example example : examples)

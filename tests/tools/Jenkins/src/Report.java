@@ -3,8 +3,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,13 +25,14 @@ public class Report {
 	String file;
 	Document doc;
 	
-	Element testsuites;
+	Element testsuites, kompile, programs;
+	String mainTestSuites;
 	
-	Map<String, Element> exampleToTestsuite;
 
-	public Report(String file) {
+	public Report(String file, String mainTestSuites) {
 		try {
 			this.file = file;
+			this.mainTestSuites = mainTestSuites;
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db;
 			db = dbf.newDocumentBuilder();
@@ -43,7 +42,6 @@ public class Report {
 			System.exit(1);
 		}
 		
-		exampleToTestsuite = new HashMap<String, Element>();
 		init();
 	}
 
@@ -51,21 +49,21 @@ public class Report {
 		// root of the document
 		testsuites = doc.createElement("testsuites");
 		doc.appendChild(testsuites);
-		testsuites.setAttribute("name", "k-framework");
+		testsuites.setAttribute("name", mainTestSuites);
+		
+		// create test suite
+		kompile = doc.createElement("testsuite");
+		kompile.setAttribute("name", "kompile");
+		testsuites.appendChild(kompile);
+		
+
+		// create test suite
+		programs = doc.createElement("testsuite");
+		programs.setAttribute("name", "programs");
+		testsuites.appendChild(programs);
 	}
 
 	public void report(Example example) {
-		
-		String testcasesname = example.getJenkinsSuiteName();
-		Element testcases = exampleToTestsuite.get(testcasesname);
-		if (testcases == null) {
-			testcases = doc.createElement("testsuite");
-			testcases.setAttribute("name", testcasesname);
-			testcases.setAttribute("package", "examples");
-			exampleToTestsuite.put(testcasesname, testcases);
-			
-			testsuites.appendChild(testcases);
-		}
 		
 		// create test case
 		Element testcase = doc.createElement("testcase");
@@ -102,17 +100,11 @@ public class Report {
 		}
 
 		// append testcase to suite
-		testcases.appendChild(testcase);
+		kompile.appendChild(testcase);
 	}
 	
-	public void report(Program program, Example example) {
+	public void report(Program program) {
 
-		String testcasesname = example.getJenkinsSuiteName();
-		Element testcases = exampleToTestsuite.get(testcasesname);
-		
-		if (testcases == null)
-			return;
-		
 		// create test case
 		Element testcase = doc.createElement("testcase");
 
@@ -147,7 +139,7 @@ public class Report {
 		}
 		
 		// append testcase to suite
-		testcases.appendChild(testcase);
+		programs.appendChild(testcase);
 	}
 	
 	/**

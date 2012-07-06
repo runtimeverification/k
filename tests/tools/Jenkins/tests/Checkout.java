@@ -34,7 +34,6 @@ public class Checkout {
 		Thread.yield();
 		assertTrue(new File(StaticK.kbase).exists());
 		assertTrue(new File(StaticK.kbasedir).exists());
-		StaticK.report.save();
 		System.out.println("\tDone.");
 	}
 }

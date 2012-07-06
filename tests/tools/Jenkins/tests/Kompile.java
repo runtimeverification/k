@@ -36,14 +36,20 @@ public class Kompile {
 		
 		// report first
 		for (Example example : examples) {
-			StaticK.report.report(example);
+			String file = StaticK.kbasedir + StaticK.fileSep + "junit-reports" + StaticK.fileSep + example.getJenkinsSuiteName().replaceAll("[\\/:]+", "-") + ".xml";
+			Report report = new Report(file, "examples");
+			report.save();
+			StaticK.reports.put(example.getJenkinsSuiteName(), report);
 		}
-		StaticK.report.save();
 
 		for (Example r : regression) {
-			StaticK.report.report(r);
+			String file = StaticK.kbasedir + StaticK.fileSep + "junit-reports" + StaticK.fileSep + r.getJenkinsSuiteName().replaceAll("[\\/:]+", "-") + ".xml";
+			Report report = new Report(file, "examples");
+			report.save();
+			StaticK.reports.put(r.getJenkinsSuiteName(), report);
 		}
-		StaticK.report.save();
+
+		
 		
 		// assert now...
 		for (Example example : examples) {
@@ -54,7 +60,6 @@ public class Kompile {
 			assertTrue(r.isCompiled());
 		}
 
-		StaticK.report.save();
 		System.out.println("\nDone.");
 	}
 

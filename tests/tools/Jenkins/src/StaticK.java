@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -24,9 +25,10 @@ public class StaticK {
 	public static ThreadPoolExecutor pool;
 	public static int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() > 2 ? Runtime.getRuntime().availableProcessors() / 2 : Runtime.getRuntime().availableProcessors();
 	public static int ulimit = 120;
-	public static Report report = new Report("junit-report.xml");
 	public static String kbasedir;
 	public static String configuration;
+	public static String reportsDir;
+	public static Map<String, Report> reports;
 	
 	public static List<Example> getExamples(String configuration, String k3jar, String tagName, String kbasedir) {
 		Document document = getDocument(configuration);
