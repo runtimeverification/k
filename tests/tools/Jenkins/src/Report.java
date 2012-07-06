@@ -43,6 +43,8 @@ public class Report {
 		}
 		
 		init();
+		
+		System.out.println("REPORT: " + file + " SUITE: " + mainTestSuites);
 	}
 
 	public void init() {
