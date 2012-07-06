@@ -111,6 +111,7 @@ public class Example extends Thread {
 	
 	public String getJenkinsSuiteName()
 	{
-		return new File(dir + StaticK.fileSep + mainFile).toURI().relativize(new File(StaticK.kbasedir).toURI()).getPath();
+		String newfile = dir + StaticK.fileSep + mainFile;
+		return newfile.substring(StaticK.kbasedir.length());
 	}
 }
