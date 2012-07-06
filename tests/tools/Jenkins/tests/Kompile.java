@@ -34,7 +34,6 @@ public class Kompile {
 			Thread.sleep(1);
 		}
 		
-		System.out.println("Example SIZE: " + examples.size());
 		// report first
 		for (Example example : examples) {
 			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
@@ -43,25 +42,24 @@ public class Kompile {
 				{new File(jdir).mkdir();}
 			
 			String file = jdir + StaticK.fileSep + example.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
-			System.out.println("EXAMPLE: " + example.getJenkinsSuiteName() + " SHOULD create report");
 			Report report = new Report(file, "examples");
 			report.report(example);
-			System.out.println("EXAMPLE: " + example.getJenkinsSuiteName() + " AFTER report.");
 			report.save();
 			StaticK.reports.put(example.getJenkinsSuiteName(), report);
 		}
 
-//		for (Example r : regression) {
-//			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
-//			
-//			if (!new File(jdir).exists())
-//				new File(jdir).mkdir();
-//			
-//			String file = jdir + StaticK.fileSep + r.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
-//			Report report = new Report(file, "regression");
-//			report.save();
-//			StaticK.reports.put(r.getJenkinsSuiteName(), report);
-//		}
+		for (Example r : regression) {
+			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
+			
+			if (!new File(jdir).exists())
+				new File(jdir).mkdir();
+			
+			String file = jdir + StaticK.fileSep + r.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
+			Report report = new Report(file, "regression");
+			report.report(r);
+			report.save();
+			StaticK.reports.put(r.getJenkinsSuiteName(), report);
+		}
 
 		
 		
