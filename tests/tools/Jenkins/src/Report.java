@@ -49,7 +49,7 @@ public class Report {
 		// root of the document
 		testsuites = doc.createElement("testsuites");
 		doc.appendChild(testsuites);
-		testsuites.setAttribute("name", "k-framework");
+		testsuites.setAttribute("name", "/k-framework");
 	}
 
 	public void report(Example example, String suite) {

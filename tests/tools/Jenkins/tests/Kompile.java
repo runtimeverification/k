@@ -35,11 +35,11 @@ public class Kompile {
 		}
 		
 		for (Example example : examples) {
-			StaticK.report.report(example, "kompile");
+			StaticK.report.report(example, "/kompile");
 			assertTrue(example.isCompiled());
 		}
 		for (Example example : regression) {
-			StaticK.report.report(example, "regression");
+			StaticK.report.report(example, "/regression");
 			assertTrue(example.isCompiled());
 		}
 		
