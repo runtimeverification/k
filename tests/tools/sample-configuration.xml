@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- all the paths must be relative to k-framework dir-->
+
+<tests>
+	<example dir="/dist/examples/imppp" mainfile="imppp.k" mainmodule="IMPPP" compiledfile="imppp-compiled.maude">
+		<test file="/dist/examples/imppp/programs/locals.imppp" output="/tests/examples/imppp/locals.imppp.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/imppp/programs/sum-0.imppp" output="">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/imppp/programs/sum-1.imppp" output="/tests/examples/imppp/sum-1.imppp.out">		
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/imppp/programs/sum-2.imppp" output="/tests/examples/imppp/sum-2.imppp.out" input="/tests/examples/imppp/sum-2.imppp.in">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/imppp/programs/sum-3.imppp" output="/tests/examples/imppp/sum-3.imppp.out" input="/tests/examples/imppp/sum-3.imppp.in">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/imppp/programs/div-nondet.imppp" output="/tests/examples/imppp/div-nondet.imppp.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/imppp/programs/spawn-det.imppp" output="/tests/examples/imppp/spawn-det.imppp.out" input="/tests/examples/imppp/spawn-det.imppp.in">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+	</example>
+	<example dir="/dist/examples/imp" mainfile="imp.k" mainmodule="IMP" compiledfile="imp-compiled.maude">
+		<test file="/dist/examples/imp/programs/sum.imp" output="">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/imp/programs/collatz.imp" output="">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/imp/programs/countPrimes.imp" output="">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+	</example>
+	<example dir="/dist/examples/simple-untyped" mainfile="simple-untyped.k" mainmodule="SIMPLE-UNTYPED" compiledfile="simple-untyped-compiled.maude">
+	</example>
+	<example dir="/dist/examples/logik" mainfile="logik.k" mainmodule="LOGIK" compiledfile="logik-compiled.maude">
+	</example>
+	<example dir="/dist/examples/cink-basic" mainfile="cink.k" mainmodule="CINK" compiledfile="cink-compiled.maude">
+		<test file="/dist/examples/cink-basic/programs/sum.cink" output="">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/cink-basic/programs/prim.cink" output="/tests/examples/cink-basic/prim.cink.out" input="/tests/examples/cink-basic/prim.cink.in">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/cink-basic/programs/fact.cink" output="/tests/examples/cink-basic/fact.cink.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/cink-basic/programs/print.cink" output="/tests/examples/cink-basic/print.cink.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+	</example>
+	<example dir="/dist/examples/lambda" mainfile="lambda.k" mainmodule="LAMBDA" compiledfile="lambda-compiled.maude">
+		<test file="/dist/examples/lambda/programs/capturing.lambda" output="/tests/examples/lambda/capturing.lambda.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/lambda/programs/identity.lambda" output="/tests/examples/lambda/identity.lambda.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/lambda/programs/free-vars-and-var-capturing.lambda" output="/tests/examples/lambda/free-vars-and-var-capturing.lambda.out">
+			<option name="--output-mode" value="none"/>
+			<option name="--no-color" value=""/>
+		</test>
+	</example>
+	<example dir="/dist/examples/lambdapp" mainfile="lambdapp.k" mainmodule="LAMBDAPP" compiledfile="lambdapp-compiled.maude">
+		<test file="/dist/examples/lambdapp/programs/print.lambdapp" output="/tests/examples/lambdapp/print.lambdapp.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/lambdapp/programs/fact.lambdapp" output="/tests/examples/lambdapp/fact.lambdapp.out" input="/tests/examples/lambdapp/fact.lambdapp.in">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+		<test file="/dist/examples/lambdapp/programs/simple.lambdapp" output="/tests/examples/lambdapp/simple.lambdapp.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+	</example>
+	<example dir="/dist/examples/kool-untyped" mainfile="kool-untyped.k" mainmodule="KOOL-UNTYPED" compiledfile="kool-untyped-compiled.maude">
+                <test file="/dist/examples/kool-untyped/programs/cast.kool" output="/tests/examples/kool-untyped/cast.kool.out">
+			<option name="--no-color" value=""/>
+			<option name="--output-mode" value="none"/>
+		</test>
+	</example>
+	<example dir="/dist/examples/kool-untyped" mainfile="kool-untyped.k" mainmodule="KOOL-UNTYPED" compiledfile="kool-untyped-compiled.maude">
+	</example>
+	<example dir="/dist/examples/exp/untyped/environment" mainfile="exp-untyped-environment.k" mainmodule="EXP-UNTYPED-ENVIRONMENT" compiledfile="exp-untyped-environment-compiled.maude">
+		<test file="/dist/examples/exp/untyped/environment/tests/capture.exp" output="/dist/examples/exp/untyped/environment/tests/tests/capture.exp.out">
+			<option name="--no-color" value=""/>
+		</test>
+	</example>
+
+</tests>
