@@ -112,6 +112,6 @@ public class Example extends Thread {
 	public String getJenkinsSuiteName()
 	{
 		String newfile = dir + StaticK.fileSep + mainFile;
-		return newfile.substring(StaticK.kbasedir.length());
+		return newfile.substring(StaticK.kbasedir.length()).replaceAll("\\.\\S+$", "");
 	}
 }
