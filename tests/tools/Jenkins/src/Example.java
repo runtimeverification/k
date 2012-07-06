@@ -108,4 +108,9 @@ public class Example extends Thread {
 	{
 		return new File(mainFile).getName();
 	}
+	
+	public String getJenkinsSuiteName()
+	{
+		return new File(dir + StaticK.fileSep + mainFile).toURI().relativize(new File(StaticK.kbasedir).toURI()).getPath();
+	}
 }
