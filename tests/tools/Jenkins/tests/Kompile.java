@@ -37,7 +37,10 @@ public class Kompile {
 		// report first
 		for (Example example : examples) {
 			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
-			new File(jdir).mkdir();
+			
+			if (!new File(jdir).exists())
+				new File(jdir).mkdir();
+			
 			String file = jdir + StaticK.fileSep + example.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
 			Report report = new Report(file, "examples");
 			report.save();
@@ -46,9 +49,12 @@ public class Kompile {
 
 		for (Example r : regression) {
 			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
-			new File(jdir).mkdir();
+			
+			if (!new File(jdir).exists())
+				new File(jdir).mkdir();
+			
 			String file = jdir + StaticK.fileSep + r.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
-			Report report = new Report(file, "examples");
+			Report report = new Report(file, "regression");
 			report.save();
 			StaticK.reports.put(r.getJenkinsSuiteName(), report);
 		}
