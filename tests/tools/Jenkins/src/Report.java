@@ -26,13 +26,14 @@ public class Report {
 	Document doc;
 	
 	Element testsuites, kompile, programs;
-	String mainTestSuites;
+	String mainTestSuites, programsSuite;
 	
 
-	public Report(String file, String mainTestSuites) {
+	public Report(String file, String mainTestSuites, String programsSuite) {
 		try {
 			this.file = file;
 			this.mainTestSuites = mainTestSuites;
+			this.programsSuite = programsSuite;
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db;
 			db = dbf.newDocumentBuilder();
@@ -61,7 +62,7 @@ public class Report {
 
 		// create test suite
 		programs = doc.createElement("testsuite");
-		programs.setAttribute("name", "programs");
+		programs.setAttribute("name", programsSuite + "programs");
 		testsuites.appendChild(programs);
 	}
 

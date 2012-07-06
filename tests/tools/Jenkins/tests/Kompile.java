@@ -42,7 +42,7 @@ public class Kompile {
 				{new File(jdir).mkdir();}
 			
 			String file = jdir + StaticK.fileSep + example.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
-			Report report = new Report(file, "examples");
+			Report report = new Report(file, "examples", example.getJenkinsSuiteName());
 			report.report(example);
 			report.save();
 			StaticK.reports.put(example.getJenkinsSuiteName(), report);
@@ -55,7 +55,7 @@ public class Kompile {
 				new File(jdir).mkdir();
 			
 			String file = jdir + StaticK.fileSep + r.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
-			Report report = new Report(file, "regression");
+			Report report = new Report(file, "regression", r.getJenkinsSuiteName());
 			report.report(r);
 			report.save();
 			StaticK.reports.put(r.getJenkinsSuiteName(), report);
