@@ -7,12 +7,13 @@ fmod MAKE-K-RULES is
   including META-K-CONDITION-SEARCH .
   including PARSE-METADATA .
   including COMPILATION-ATTRS .
+  including META-ANONYMOUS-VARIABLE .
   var M Flat : Module .  var T T1 T2 Trm : Term .  var Cond : TermList .
   var Cnd : Condition .
   var Cxt : String .
   var AS AS' AS'' : AttrSet .  var A : Attr .
   var C : Term . var S : Sort .  var Ss : SortSet . var Subst : Substitution .
-  var Ct : Constant . var V : Variable .
+  var Ct : Constant . var V  : Variable .
   var O O' Q : Qid . var N : Nat . var Tl : TermList .
   var KRuleType : KRuleKind .  var Split : KRuleSplit .
   var Mas : MembAxSet . var Max : MembAx .
@@ -76,17 +77,27 @@ fmod MAKE-K-RULES is
   eq addReplace(Flat, M, R{T,Cond,AS}, Subst, AS')
    = $addReplace(M, addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,1))), handleTagSuperCooling(addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,2))), Subst, AS, AS'), makeCondition(Cond), AS, AS') .
 
+  op formatVariable : Variable -> Variable .
+  eq formatVariable(V) 
+   = if isAnyVar(V) then mkVariable('_, getType(V)) else V fi .
+
+  op prettyPrintVar : Variable -> String .
+  eq prettyPrintVar(V) = if isAnyVar(V) then "anonymous variable" else "variable " + string(V) fi .
+  
   op $addReplace : Module Term Term Condition AttrSet AttrSet ~> Module .
+ ceq $addReplace(M, T1, T2, Cnd, AS, AS')
+   = errorM(AS, "Unbound " + prettyPrintVar(V) + " in the replacement part of the K rule", formatVariable(V), "", M) 
+  if V := first(removeTerms(noDuplicates(getVars(T2)),noDuplicates(getVars(T1)))) .
   eq $addReplace(M, T1, T2, Cnd, AS pair("predicate",Str), AS')
-   = addStructural(M, T1, T2, Cnd, AS pair("predicate",Str), AS') .
+   = addStructural(M, T1, T2, Cnd, AS pair("predicate",Str), AS') [owise] .
   eq $addReplace(M, T1, T2, Cnd, AS pair("function",Str), AS')
-   = addStructural(M, T1, T2, Cnd, AS pair("function",Str), AS') .
+   = addStructural(M, T1, T2, Cnd, AS pair("function",Str), AS') [owise] .
   eq $addReplace(M, T1, T2, Cnd, AS A, transitions(A AS'') AS')
-   = addTransition(M, T1, T2, Cnd, AS A, AS') .
+   = addTransition(M, T1, T2, Cnd, AS A, AS') [owise] .
   eq $addReplace(M, T1, T2, Cnd, AS pair(Str,Str':String), transitions(pair(Str, Str'':String) AS'') AS')
-   = addTransition(M, T1, T2, Cnd, AS pair(Str, Str':String), AS') .
+   = addTransition(M, T1, T2, Cnd, AS pair(Str, Str':String), AS') [owise] .
   eq $addReplace(M, T1, T2, Cnd, AS, transitions(pair("default","") AS'') AS')
-   = addTransition(M, T1, T2, Cnd, AS pair("default",""), AS') .
+   = addTransition(M, T1, T2, Cnd, AS pair("default",""), AS') [owise] .
   eq $addReplace(M, T1, T2, Cnd, AS, AS')
    = addStructural(M, T1, T2, Cnd, AS pair("default",""), AS') [owise] .
   eq $addReplace(M, errorT(Err:[Term],Cxt:String,Msg:String), T2:[Term], Cnd:[Condition], AS, AS')

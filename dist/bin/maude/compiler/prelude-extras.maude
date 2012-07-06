@@ -369,6 +369,18 @@ fmod META-TERM-EXTRAS is
   eq noDuplicates((Trl,Tr,Trl',Tr,Trl'')) = noDuplicates((Trl,Tr,Trl',Trl'')) .
   eq noDuplicates(Trl) = Trl [owise] .
 
+  op removeTerms : TermList TermList -> TermList .
+  eq removeTerms(empty, Trl') = empty .
+  eq removeTerms((Tr, Trl), Trl')
+   = if Tr in Trl' then removeTerms(Trl, Trl') 
+     else Tr, removeTerms(Trl, Trl') fi .
+  
+  op _in_ : Term TermList -> Bool .
+  eq Tr in (Trl, Tr, Trl') = true .
+  eq Tr in Trl = false [owise] .
+
+  op first_ : TermList -> [Term] .
+  eq first(Tr,Trl) = Tr .
 
   --- retrieves the nth var in a term. uses getVars
   op getVar : TermList NzNat ~> Term .
