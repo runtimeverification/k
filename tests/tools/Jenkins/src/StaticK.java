@@ -2,6 +2,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class StaticK {
 	public static String kbasedir;
 	public static String configuration;
 	public static String reportsDir;
-	public static Map<String, Report> reports;
+	public static Map<String, Report> reports = new HashMap<String, Report>();
 	
 	public static List<Example> getExamples(String configuration, String k3jar, String tagName, String kbasedir) {
 		Document document = getDocument(configuration);

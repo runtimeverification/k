@@ -40,7 +40,7 @@ public class Kompile {
 			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
 			
 			if (!new File(jdir).exists())
-				new File(jdir).mkdir();
+				{new File(jdir).mkdir();}
 			
 			String file = jdir + StaticK.fileSep + example.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
 			System.out.println("EXAMPLE: " + example.getJenkinsSuiteName() + " SHOULD create report");
