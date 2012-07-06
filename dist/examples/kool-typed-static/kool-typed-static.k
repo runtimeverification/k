@@ -38,6 +38,8 @@ the \K strictness attributes and the desugaring macros. */
                | "cast" Exp "to" Id     [strict(1)]
                | "new" Id "(" Exps ")"  [strict(2)]
                | Exp "." Id             [strict(1)]
+//               | Exp ":" Type            // allowed only for declarations
+               | Exp "of" Type           // allowed only for declarations
                > Exp "[" Exps "]"       [strict]
                > Exp "(" Exps ")"       [strict]
                | "-" Exp                [strict]
@@ -62,8 +64,6 @@ the \K strictness attributes and the desugaring macros. */
                  Exp "and" Exp           [strict, left]
                | Exp "or" Exp            [strict, left]
                > Exp "=" Exp             [strict(2), right]
-               | Exp ":" Type            
-                                       // allowed only for declarations
 
 
   syntax Exps ::= List{Exp,","}
@@ -90,12 +90,15 @@ the \K strictness attributes and the desugaring macros. */
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts            [seqstrict, right]
 
+  rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
+  rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
+
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:Id = E1:Exp to E2:Exp do S)
        =>
        {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
-  rule var X:Id : T:Type = E:Exp, .Exps; => var X : T, .Exps; X = E;
+  rule var '_:_(X:Id,, T:Type) = E:Exp, .Exps; => var '_:_(X,, T), .Exps; X = E;
 
 /*@ \subsection{KOOL Additional Syntax}
 Note the strictness attributes, telling which arguments need to be
@@ -197,8 +200,9 @@ typed SIMPLE, so we do not discuss them much here. */
   syntax Type ::= "stmt"
 
   rule var .Types; => stmt   [ structural]
-  context var _[HOLE] : _,.Exps;
-  rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;  [structural]
+  context var '_:_(_[HOLE],, _),.Exps;
+  rule var '_:_(X[Ts:Types],, T), .Exps; => checkDepth(Ts,T) ~> var '_:_(X,, T);
+       [structural]
 
   syntax K ::= "checkDepth" "(" Types "," Type ")"
   rule checkDepth((int,Ts => Ts), (arrayOf T => T))   [structural]
@@ -209,8 +213,8 @@ semantics, the \texttt{types(...)} operation stays the same. */
 
   syntax Types ::= "types" "(" Exps ")"   [function, klabel(types)]
   rule types(.Exps) => void, .Types       [anywhere]             
-  rule types(X:Id : T:Type, .Exps) => T, .Types   [anywhere]         
-  rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E,Es) [anywhere]
+  rule types('_:_(X:Id,, T:Type), .Exps) => T, .Types   [anywhere]         
+  rule types('_:_(X:Id,, T:Type), E:Exp, Es:Exps) => T, types(E,Es) [anywhere]
 
   rule <k> I:Int => int ...</k>
   rule <k> B:Bool => bool ...</k>
@@ -228,7 +232,7 @@ semantics, the \texttt{types(...)} operation stays the same. */
   rule ++ int => int
   rule int + int => int
   rule string + string => string
-  rule _-_(int,int) => int
+  rule '_-_(int,, int) => int
   rule int * int => int
   rule int / int => int
   rule int % int => int
@@ -270,7 +274,7 @@ although the function tasks are now called method tasks. */
   rule spawn stmt => stmt
   rule acquire T:Type; => stmt
   rule release T:Type; => stmt
-  rule rendezvous_;(T:TYpe) => stmt
+  rule rendezvous_;(T:Type) => stmt
 
   rule stmt stmt => stmt
 
@@ -286,7 +290,7 @@ The operation \texttt{checkType}, defined at the end of this module,
 checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
-  rule <k> var X:Id : T:Type; => checkType(T) ~> stmt ...</k>
+  rule <k> var '_:_(X:Id,, T:Type); => checkType(T) ~> stmt ...</k>
        <tenv> Rho:Map => Rho[T / X] </tenv>
 
 /*@ \subsubsection{Class member declaration}
@@ -307,11 +311,11 @@ with it; this \texttt{stuck} operation is displayed as a frame in this
 PDF document because of its latex attribute (see the ASCII .k file,
 at the end of this module). */
 
-  rule <k> var X:Id : T:Type ; => checkType(T) ~> stmt ...</k>
+  rule <k> var '_:_(X:Id,, T:Type); => checkType(T) ~> stmt ...</k>
        <ctenvT> Rho:Map (. => X |-> T) </ctenvT>
     when notBool(X in keys(Rho))
 
-  rule <k> var X:Id : T:Type; => stuck(var X : T;) ...</k>
+  rule <k> var '_:_(X:Id,, T:Type); => stuck(var '_:_(X,, T);) ...</k>
        <ctenvT>... X |-> _ ...</ctenvT>
        <inClass> C </inClass>
        <out>... . => ListItem("Member \"" +String Id2String(X)
@@ -429,7 +433,7 @@ for example, inside other methods). */
 
   rule <k> method M:Id(XTs:Exps) : T:Type S:Stmt
         => checkMethod(M, function from types(XTs) to T, C')
-           ~> var M : function from types(XTs) to T; ...</k>
+           ~> var '_:_(M,, function from types(XTs) to T); ...</k>
        <inClass> C:Id </inClass>
        <ctenvT> _:Map </ctenvT> // to ensure we are in a class pass
        <className> C </className>
@@ -476,7 +480,7 @@ succeeds, meaning that it types to \texttt{stmt}, then we discard the
 the new object.  The auxiliary \texttt{discard} operation is defined
 also at the end of this module. */
 
-  rule new C:Id(Ts:Types) => _`(_`)(_._((class C), C), Ts) ~> discard ~> class C
+  rule new C:Id(Ts:Types) => '_`(_`)('_._((class C),, C),, Ts) ~> discard ~> class C
 
 
 /*@ \subsection{Self reference}
@@ -518,22 +522,22 @@ yet available, in which case these rules have to wait.  Finally, the
 fifth rule below reports an error when the \texttt{object} class is
 reached. */ 
 
-  rule <k> X:Id => _._(this,X) ...</k>
+  rule <k> X:Id => '_._(this,, X) ...</k>
        <tenv> Rho:Map </tenv>
        when notBool(X in keys(Rho))
 
-  rule ltype(_._(E:Exp, X:Id)) => _._(E,X)  [structural]
+  rule ltype('_._(E:Exp,, X:Id)) => '_._(E,, X)  [structural]
 
-  rule <k> _._(class C:Id, X:Id) => T ...</k>
+  rule <k> '_._(class C:Id,, X:Id) => T ...</k>
        <className> C </className> <ctenv>... X |-> T:Type ...</ctenv>
 
-  rule <k> _._(class (C1:Id => C2), X:Id) ...</k>
+  rule <k> '_._(class (C1:Id => C2),, X:Id) ...</k>
        <className> C1 </className>
        <extends> C2:Id </extends>
        <ctenv> Rho:Map </ctenv>
     when notBool(X in keys(Rho))  [structural]
 
-  rule <k> _._(class object, X:Id) => stuck(_._(class object, X)) ...</k>
+  rule <k> '_._(class object,, X:Id) => stuck('_._(class object,, X)) ...</k>
        <inClass> C:Id </inClass>
        <out>... . => ListItem("Member \"" +String Id2String(X)
                               +String "\" not declared! (see class \""
@@ -546,9 +550,9 @@ Methods can be applied on values of more concrete types than their
 arguments.  The second rule below ensures that the empty list of
 arguments is treated as a value of type \texttt{void}. */
 
-  rule <k> _`(_`)(function from Ts:Types to T:Type, (T':Type,Ts':Types))
+  rule <k> '_`(_`)(function from Ts:Types to T:Type,, (T':Type,Ts':Types))
         => checkSubtype((T',Ts'),Ts) ~> T ...</k>
-  rule _`(_`)(function from void to T:Type, .Types) => T
+  rule '_`(_`)(function from void to T:Type,, .Types) => T
 
 
 /*@ \subsection{Instance of and casting}
@@ -568,7 +572,7 @@ we cannot test the full type safety of exceptions.  Instead, we
 only check that the \texttt{try} and the \texttt{catch} statements
 type correctly. */
 
-  rule try stmt catch(X:Id : class C:Id) S:Stmt => {var X : class C; S}
+  rule try stmt catch('_:_(X:Id,, class C:Id)) S:Stmt => {var '_:_(X,, class C); S}
     [structural]
   rule throw class _:Id ; => stmt
 
@@ -591,7 +595,7 @@ the \textsf{tasks} cell has been removed. */
 // discard main task when done, issuing a "new main();" command to
 // make sure that the class main and the method main() are declared.
 
-  rule <task> <k> stmt => new main(); </k>
+  rule <task> <k> stmt => new main(.Exps); </k>
               (. => <tenv> . </tenv>
                     <return> void </return>
                     <inClass> main </inClass>)
