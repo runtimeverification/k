@@ -1,0 +1,3 @@
+<config>
+	<test def="/dist/examples/kool-typed-dynamic/kool-typed-dynamic.k" program-extension="kool" compiled-file-name="kool-typed-dynamic-compiled.maude"/>
+</config>
