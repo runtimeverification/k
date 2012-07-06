@@ -628,7 +628,10 @@ invocations see the entire object, as needed for dynamic method dispatch. */
                               </envStack>),,
                 X:Id)
            =>
-           lookupMember(<envStack> ListItem(Class :: EnvC) EStack </envStack>, X)
+           lookupMember(<envStack> 
+                          ListItem(Class :: EnvC)
+                          EStack
+                        </envStack>, X)
        ...</k>
        [structural]
 
@@ -672,9 +675,12 @@ method call or the array access.  */
 
   context '_`(_`)('_._(HOLE,,_),,_) when HOLE =/=K super
 
-  rule <k> '_`(_`)(('_._(objectClosure(Obj <envStack> EStack </envStack>),,X)
+  rule <k> '_`(_`)(('_._(objectClosure(Obj:Bag 
+                                       <envStack> 
+                                         EStack:List
+                                       </envStack>),,X)
                     =>
-                    lookupMember(<envStack> EStack </envStack>, X)),, _)
+                    lookupMember(<envStack> EStack </envStack>, X:Id)),, _)
        ...</k>
        [structural]
 
@@ -715,7 +721,7 @@ borrowed (see above).  */
         </control>
        <env> Env:Map => . </env>
        <store>...
-           OL |-> objectClosure(<crntClass>_:Id</crntClass>Obj:Bag)
+           OL |-> objectClosure(<crntClass> _:Id </crntClass> Obj:Bag)
        ...</store>
 
 /*@ \subsection{Instance Of}
@@ -726,12 +732,13 @@ otherwise it returns \texttt{false}; it never gets stuck.  */
   rule objectClosure(_ <envStack> ListItem(Class::_) ...</envStack>)
         instanceOf Class:Id => true
 
-  rule objectClosure(_ <envStack> ListItem(Class1::_)
+  rule objectClosure(_ <envStack> ListItem(Class1:Id ::_)
                                   =>
                                   .
-                       ...</envStack>) instanceOf Class2:Id
-    when Class1 =/=K Class2
-    [structural]
+                       ...</envStack>)
+       instanceOf Class2:Id
+       when Class1 =/=K Class2
+       [structural]
 
   rule objectClosure(_ <envStack> .List </envStack>) instanceOf Class:Id
        =>
@@ -746,7 +753,8 @@ available.  Moreover, the execution may complete successfully even
 in the presence of invalid casts, provided that each accessed member
 during the current execution is, or happens to be, available.  */
 
-  rule <k> cast objectClosure(<crntClass> _:K </crntClass> Obj:Bag) to Class:Id
+  rule <k> cast objectClosure(<crntClass> _:K </crntClass> Obj:Bag)
+                to Class:Id
             =>
            objectClosure(<crntClass> Class </crntClass> Obj)
        ...</k>
@@ -789,8 +797,10 @@ with the most concrete class and going up in the hierarchy. */
   syntax K ::= "lookupMember" "(" BagItem "," Id ")"   [function]
   // BagItem is the envStack cell, Id is the member name
 
-// First look for the member in the top environment; if found then done.
-  rule lookupMember(<envStack> ListItem(_:Id :: <env>...X:Id |-> L:Int ...</env>)
+  // First look for the member in the top environment; if found then done.
+  rule lookupMember(<envStack> ListItem(_:Id :: <env>...
+                                                  X:Id |-> L:Int
+                                                ...</env>)
                     ...</envStack>, X)
        =>
        lookup(L)
