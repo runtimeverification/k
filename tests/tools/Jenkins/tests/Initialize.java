@@ -61,9 +61,9 @@ public class Initialize {
 		List<String> defs = getKFilesFromDir(examplesDefDir);
 		for (String def : defs)
 		{
-			String defRelPath = def.replaceAll(kframework, "");
-			String programsRelDir = new File(def).getParent().replaceAll(kframework, "");
-			String testsRelDir = (examplesTestDir + new File(def).getParentFile().getAbsolutePath().replaceAll(examplesDefDir, "")).replaceAll(kframework, "");
+			String defRelPath = def.substring(kframework.length());
+			String programsRelDir = new File(def).getParent().substring(kframework.length());
+			String testsRelDir = (examplesTestDir + new File(def).getParentFile().getAbsolutePath().substring(examplesDefDir.length())).substring(kframework.length());
 			
 			root.appendChild(createTest(kframework, defRelPath, programsRelDir, testsRelDir, doc, "example"));
 		}
@@ -81,8 +81,8 @@ public class Initialize {
 		
 		for(String t : regTests)
 		{
-			String defRelPath = t.replaceAll(kframework, "");
-			String programsRelDir = new File(t).getParent().replaceAll(kframework, "");
+			String defRelPath = t.substring(kframework.length());
+			String programsRelDir = new File(t).getParent().substring(kframework.length());
 			String testsRelDir = programsRelDir + StaticK.fileSep + "tests";
 			root.appendChild(createTest(kframework, defRelPath, programsRelDir, testsRelDir, doc, "regression"));
 		}
@@ -176,7 +176,7 @@ public class Initialize {
 		
 		// create example tag
 		Element example = root.createElement(mainTagName);
-		example.setAttribute("dir", defDir.replaceAll(rootPath, ""));
+		example.setAttribute("dir", defDir.substring(rootPath.length()));
 		example.setAttribute("mainfile", defName);
 		example.setAttribute("mainmodule", moduleName);
 		example.setAttribute("compiledfile", compiledDef);
