@@ -323,7 +323,7 @@ public class Initialize {
 	}
 	
 	public void save() {
-		StaticK.configuration = StaticK.kbasedir + "configuration.xml";
+		StaticK.configuration = StaticK.kbasedir + StaticK.fileSep + "configuration.xml";
 		String file = StaticK.configuration;
 		try {
 			FileWriter fstream = new FileWriter(file);
