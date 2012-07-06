@@ -5,6 +5,8 @@ public class InitLocal {
 
 	@Test
 	public void test() {
+		System.out.println("Using " + StaticK.THREAD_POOL_SIZE + " processors.");
+		
 		String userDir = System.getProperty("user.dir");
 		
 		StaticK.kbasedir = userDir;

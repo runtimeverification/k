@@ -10,6 +10,8 @@ public class Checkout {
 	@Test
 	public void allTests() throws URISyntaxException
 	{
+		System.out.println("Using " + StaticK.THREAD_POOL_SIZE + " processors.");
+		
 		StaticK.file = new File(getClass().getProtectionDomain()
 				.getCodeSource().getLocation().toURI().getPath());
 		StaticK.toolsDir = StaticK.file.getAbsolutePath().replaceFirst(
