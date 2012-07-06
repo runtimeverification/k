@@ -72,9 +72,12 @@
 	</target>
 
 
-	<property location="tests/tools/Jenkins" name="tools"/>
 	<target name="test">
-		<ant antfile="${tools}/build.xml" dir="${tools}"/>
+		<javac srcdir="./tests/tools/Jenkins/src" includeantruntime="false"/>
+		<javac srcdir="./tests/tools/Jenkins/tests"  classpath="tests/tools/Jenkins/lib/junit-4.10.jar:tests/tools/Jenkins/src" includeantruntime="false"/>
+		<java classname="org.junit.runner.JUnitCore" classpath="tests/tools/Jenkins/lib/junit-4.10.jar:tests/tools/Jenkins/src:tests/tools/Jenkins/tests">
+			<arg value="LocalTests"/>
+		</java>
 	</target>
 
 
