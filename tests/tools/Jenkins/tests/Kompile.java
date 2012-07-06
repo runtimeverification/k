@@ -34,16 +34,26 @@ public class Kompile {
 			Thread.sleep(1);
 		}
 		
+		// report first
 		for (Example example : examples) {
 			StaticK.report.report(example);
+		}
+		StaticK.report.save();
+
+		for (Example r : regression) {
+			StaticK.report.report(r);
+		}
+		StaticK.report.save();
+		
+		// assert now...
+		for (Example example : examples) {
 			assertTrue(example.isCompiled());
 		}
 
 		for (Example r : regression) {
-			StaticK.report.report(r);
 			assertTrue(r.isCompiled());
 		}
-		
+
 		StaticK.report.save();
 		System.out.println("\nDone.");
 	}
