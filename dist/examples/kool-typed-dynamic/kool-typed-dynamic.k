@@ -38,7 +38,8 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
                | "cast" Exp "to" Id     [strict(1)]
                | "new" Id "(" Exps ")"  [strict(2)]
                | Exp "." Id      
-               | Exp ":" Type           // allowed only for declarations
+//               | Exp ":" Type           // allowed only for declarations
+               | Exp "of" Type           // allowed only for declarations
                > Exp "[" Exps "]"       [strict]
                > Exp "(" Exps ")"       [strict(2)]
                | "-" Exp                [strict]
@@ -65,7 +66,6 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
                > Exp "=" Exp             [strict(2), right]
 
 
-
   syntax Exps ::= List{Exp,","}
 
   syntax Stmt ::= "{" "}"
@@ -87,12 +87,18 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts            [right]
 
+  rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
+  rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
+
+
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:Id = E1:Exp to E2:Exp do S:Stmt)
         =>
-       { var X:int = E1; while X <= E2 do { S X = X+1; } }
-  rule var E1:Exp, E2:Exp, Es:Exps; = var E1; var E2, Es;
-  rule var X:Id : T:Type = E:Exp; => var X : T; X = E;
+       { var '_:_(X,, int) = E1; while X <= E2 do { S X = X+1; } }
+
+  rule var E1:Exp, E2:Exp, Es:Exps; => var (E1, .Exps); var E2, Es;
+
+  rule var '_:_(X:Id,, T:Type) = E:Exp; => var ('_:_(X,, T), .Exps); X = E;
 
 
 /*@ \subsection{KOOL Additional Syntax}
@@ -121,7 +127,7 @@ form \textit{Id:Type}. */
   syntax Decl ::= "class" Id "{" Stmts "}"
                 | "class" Id "extends" Id "{" Stmts "}"
 
-  rule class C:Id {Ss:Stmts} => class C extends object {Ss}
+  rule class C:Id { Ss:Stmts } => class C extends object { Ss }
 
   syntax Stmt ::= "try" Stmt "catch" "(" Exp ")" Stmt 
 endmodule
@@ -201,25 +207,25 @@ KOOL).  */
 
   syntax K ::= "undefined" "(" Type ")" [latex("\bot_{#1}")]
 
-  rule <k> var X:Id : T:Type; => . ...</k>
+  rule <k> var ('_:_(X:Id,, T:Type), .Exps); => . ...</k>
        <env> Env:Map => Env[L:Nat/X] </env>
        <store>... . => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
-  rule <k> var X:Id[N:Int] : arrayOf T:Type; => . ...</k> 
+  rule <k> var '_:_(X:Id[N:Int],, arrayOf T:Type); => . ...</k> 
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> arrayRef(arrayOf T, L +Int 1, N)
                        L +Int 1 .. L +Int N |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
 
-  context var X:Id[HOLE] : T:Type, .Exps ;
+  context var '_:_(X:Id[HOLE],, T:Type), .Exps ;
 
   syntax Id ::= "$1" | "$2"
-  rule var X:Id[N1:Int, N2:Int, Vs:Vals] : arrayOf arrayOf T:Type;
+  rule var '_:_(X:Id[N1:Int, N2:Int, Vs:Vals],, arrayOf arrayOf T:Type);
        =>
        'var_;('_:_(X[N1],, arrayOf arrayOf T));
        {
-         var $1 : arrayOf arrayOf T = X;
+         var '_:_($1,, arrayOf arrayOf T) = X;
          for $2 = 0 to N1 - 1 do
          {
            'var_;('_:_(X[N2,Vs],, arrayOf T));
@@ -234,7 +240,7 @@ KOOL).  */
        [transition]
 
   context ++(HOLE => lvalue(HOLE))
-  rule <k> ++loc(L:int) => I:Int +Int 1 ...</k>
+  rule <k> ++loc(L:Int) => I:Int +Int 1 ...</k>
        <store>... L |-> (I => I +Int 1) ...</store>
        [transition]
 
@@ -300,7 +306,7 @@ KOOL).  */
 
   rule <k> acquire V:Val; => . ...</k>
        <holds>... . => V |-> 0 ...</holds>
-       <busy> Busy (. => SetItem(V)) </busy>
+       <busy> Busy:Set (. => SetItem(V)) </busy>
        when notBool(V in Busy)
        [transition]
 
@@ -359,8 +365,8 @@ KOOL).  */
   syntax Types ::= "types" "(" Exps ")"   [function, klabel(types)]
 
   rule types(.Exps) => void,.Types     [anywhere]
-  rule types(X:Id : T:Type, .Exps) => T,.Types  [anywhere]
-  rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E,Es)  [anywhere]
+  rule types('_:_(X:Id,, T:Type), .Exps) => T,.Types  [anywhere]
+  rule types('_:_(X:Id,, T:Type), (E:Exp, Es:Exps)) => T, types(E,Es)  [anywhere]
 
   syntax List{K} ::= Int ".." Int
 
@@ -407,9 +413,9 @@ encountered. */
 
   syntax ListItem ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
-  rule <k> (try S1:Stmt catch(X:Id : T:Type) S2:Stmt => S1 ~> popx) ~> K:K </k>
+  rule <k> (try S1:Stmt catch('_:_(X:Id,, T:Type)) S2:Stmt => S1 ~> popx) ~> K:K </k>
        <control>
-         <xstack> . => (X : T, S2, K, Env, C) ...</xstack>
+         <xstack> . => ('_:_(X,, T), S2, K, Env, C) ...</xstack>
          C:Bag
        </control>
        <env> Env </env>
@@ -420,12 +426,12 @@ encountered. */
   rule <k> throw V:Val; ~> _
             =>
            if subtype(typeOf(V), T)
-           then {var X : T=V; S2}
+           then {var '_:_(X,, T) = V; S2}
            else throw V; ~> K
        </k>
        <control>
          <xstack>
-            (X:Id : T:Type, S2:Stmt, K:K, Env:Map, C:Bag) => .
+            ('_:_(X:Id,, T:Type), S2:Stmt, K:K, Env:Map, C:Bag) => .
          ...</xstack>
          (_ => C)
        </control>
@@ -437,7 +443,7 @@ parameters */
 
   syntax K ::= "bindto" "(" Exps "," Vals ")"
   rule <k> 
-         (. => X = V;) ~> bindto((X:Id : T:Type, XTs:Exps => XTs),
+         (. => X = V;) ~> bindto(('_:_(X:Id,, T:Type), XTs:Exps => XTs),
                                  (V:Val, Vs:Vals => Vs)) 
        ...</k>
        <env> Env:Map => Env[L/X] </env>
@@ -488,7 +494,7 @@ the only difference is the addition of the types.  */
          .  => L |-> methodClosure(Class, OL, XTs, S, 
                                    function from types(XTs) to T)
        ...</store>
-       <nextLoc> L:int => L +Int 1 </nextLoc>
+       <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 
 /*@ \subsection{New}
@@ -500,16 +506,16 @@ order to be recovered after the creation of the new object.  Only the
 first rule below needs to be changed; the others are identical to
 those in untyped KOOL. */
 
-  rule <k> new Class:Id(Vs:Vals) ~> K:K 
+  rule <k> 'new_`(_`)(Class:Id,, Vs:Vals) ~> K:K
            =>
-           create(Class) ~> storeObj ~> '_`(_`)(Class,, Vs); return this;
+           create(Class) ~> (storeObj ~> ('_`(_`)(Class,, Vs); return this;))
        </k>
        <env> Env:Map => . </env>
        <control> C:Bag
          <crntObj> Obj:Bag
                 => <crntClass> object </crntClass>
                    <envStack> ListItem(object::<env>.Map</env>) </envStack>
-                   <location> L </location>
+                   <location> L:Int </location>
          </crntObj>
          <return> T:Type => class Class </return>
          <fstack> . => ListItem((Env, K, C <return> T </return> 
@@ -559,18 +565,18 @@ Like in untyped KOOL. */
 /*@ \subsection{Object member access}
 Like in untyped KOOL. */
 
-  rule <k> X:Id => _._(this, X) ...</k>
+  rule <k> X:Id => '_._(this,, X) ...</k>
        <env> Env:Map </env>
        when notBool(X in keys(Env))
        [structural]
 
   context ('_._(HOLE,,_)) when (HOLE =/=K super)
 
-  rule <k> _._(objectClosure(<crntClass> Class:Id </crntClass>
+  rule <k> '_._(objectClosure(<crntClass> Class:Id </crntClass>
                              <envStack>...
                                ListItem(Class:Id :: EnvC:BagItem)
                                EStack:List
-                             </envStack>), X:Id) 
+                             </envStack>),, X:Id) 
            =>
            lookupMember(<envStack>
                           ListItem(Class :: EnvC)
@@ -579,7 +585,7 @@ Like in untyped KOOL. */
        ...</k>
        [structural]
 
-  rule <k> _._(super, X:Id)
+  rule <k> '_._(super,, X:Id)
            =>
            lookupMember(<envStack> EStack </envStack>, X)
        ...</k>
@@ -599,7 +605,7 @@ rules below are identical to those in untyped KOOL. */
        <env>... X |-> L:Int ...</env>
        <store>... L |-> V:Val ...</store>
 
-  rule <k> '_`(_`)((X:Id => _._(this,X)),,_) ...</k>
+  rule <k> '_`(_`)((X:Id => '_._(this,, X)),,_) ...</k>
        <env> Env:Map </env>
     when notBool(X in keys(Env))  [structural]
 
@@ -637,7 +643,7 @@ be checked against the return type of the method.  To do this correctly,
 we also need to stack the current status of the \textsf{return} cell
 and then pop it when the method returns. */
 
-  rule <k> '_`(_`)(methodClosure(Class:Id, OL:Int, XTs:Eps, S:Stmt,
+  rule <k> '_`(_`)(methodClosure(Class:Id, OL:Int, XTs:Exps, S:Stmt,
                                 function from _ to T:Type),,
                   Vs:Vals) ~> K:K
            => 
@@ -702,7 +708,7 @@ can indeed be cast to the claimed type. */
 /*@ \subsection{Objects as lvalues}
 Like in untyped KOOL. */
 
-  rule <k> lvalue(X:Id => _._(this, X)) ...</k>
+  rule <k> lvalue(X:Id => '_._(this,, X)) ...</k>
        <env> Env:Map </env>
        when notBool(X in keys(Env))
        [structural]
