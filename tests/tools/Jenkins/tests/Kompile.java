@@ -34,6 +34,7 @@ public class Kompile {
 			Thread.sleep(1);
 		}
 		
+		System.out.println("Example SIZE: " + examples.size());
 		// report first
 		for (Example example : examples) {
 			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
@@ -44,6 +45,7 @@ public class Kompile {
 			String file = jdir + StaticK.fileSep + example.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
 			System.out.println("EXAMPLE: " + example.getJenkinsSuiteName() + " SHOULD create report");
 			Report report = new Report(file, "examples");
+			report.report(example);
 			System.out.println("EXAMPLE: " + example.getJenkinsSuiteName() + " AFTER report.");
 			report.save();
 			StaticK.reports.put(example.getJenkinsSuiteName(), report);
