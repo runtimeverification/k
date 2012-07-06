@@ -36,14 +36,18 @@ public class Kompile {
 		
 		// report first
 		for (Example example : examples) {
-			String file = StaticK.kbasedir + StaticK.fileSep + "junit-reports" + StaticK.fileSep + example.getJenkinsSuiteName().replaceAll("[\\/:]+", "-") + ".xml";
+			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
+			new File(jdir).mkdir();
+			String file = jdir + StaticK.fileSep + example.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
 			Report report = new Report(file, "examples");
 			report.save();
 			StaticK.reports.put(example.getJenkinsSuiteName(), report);
 		}
 
 		for (Example r : regression) {
-			String file = StaticK.kbasedir + StaticK.fileSep + "junit-reports" + StaticK.fileSep + r.getJenkinsSuiteName().replaceAll("[\\/:]+", "-") + ".xml";
+			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
+			new File(jdir).mkdir();
+			String file = jdir + StaticK.fileSep + r.getJenkinsSuiteName().replaceAll("[\\/:]+", "") + ".xml";
 			Report report = new Report(file, "examples");
 			report.save();
 			StaticK.reports.put(r.getJenkinsSuiteName(), report);
