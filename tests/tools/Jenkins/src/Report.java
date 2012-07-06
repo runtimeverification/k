@@ -56,13 +56,13 @@ public class Report {
 		
 		// create test suite
 		kompile = doc.createElement("testsuite");
-		kompile.setAttribute("name", "kompile");
+		kompile.setAttribute("name", mainTestSuites);
 		testsuites.appendChild(kompile);
 		
 
 		// create test suite
 		programs = doc.createElement("testsuite");
-		programs.setAttribute("name", programsSuite + "programs");
+		programs.setAttribute("name", programsSuite + " programs");
 		testsuites.appendChild(programs);
 	}
 
