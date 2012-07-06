@@ -43,7 +43,7 @@ public class RunPrograms {
 		{
 			for(Program program : example.programs)
 			{
-				StaticK.report.report(program, example.getJenkinsSuiteName() + " programs");
+				StaticK.report.report(program, example);
 			}
 			StaticK.report.save();
 		}
@@ -51,7 +51,7 @@ public class RunPrograms {
 		{
 			for(Program program : example.programs)
 			{
-				StaticK.report.report(program, example.getJenkinsSuiteName() + " programs");
+				StaticK.report.report(program, example);
 			}
 			StaticK.report.save();
 		}

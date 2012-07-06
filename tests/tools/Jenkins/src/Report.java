@@ -26,8 +26,12 @@ public class Report {
 
 	String file;
 	Document doc;
+	
 	Element testsuites;
-	Map<String, Element> tests;
+	Element regression;
+	Element examples;
+	
+	Map<String, Element> exampleToTestsuite;
 
 	public Report(String file) {
 		try {
@@ -41,7 +45,7 @@ public class Report {
 			System.exit(1);
 		}
 		
-		tests = new HashMap<String, Element>();
+		exampleToTestsuite = new HashMap<String, Element>();
 		init();
 	}
 
@@ -49,27 +53,29 @@ public class Report {
 		// root of the document
 		testsuites = doc.createElement("testsuites");
 		doc.appendChild(testsuites);
-		testsuites.setAttribute("name", "/k-framework");
+		testsuites.setAttribute("name", "k-framework");
+		
+		examples = doc.createElement("testsuite");
+		examples.setAttribute("name", "examples");
+		testsuites.appendChild(examples);
+	
+		regression = doc.createElement("testsuite");
+		regression.setAttribute("name", "regression tests");
+		testsuites.appendChild(regression);
 	}
 
-	public void report(Example example, String suite) {
-		Element testsuite = tests.get(suite);
-		if (testsuite == null) {
-			testsuite = doc.createElement("testsuite");
-			testsuite.setAttribute("name", suite);
-			tests.put(suite, testsuite);
-			testsuites.appendChild(testsuite);
-		}
-
-		if (example.tagName.equals("regression"))
-		{
-			testsuite = tests.get("/regression");
-			if (testsuite == null) {
-				testsuite = doc.createElement("testsuite");
-				testsuite.setAttribute("name", suite);
-				tests.put(suite, testsuite);
-				testsuites.appendChild(testsuite);
-			}
+	public void report(Example example) {
+		
+		String testcasesname = example.getJenkinsSuiteName();
+		Element testcases = exampleToTestsuite.get(testcasesname);
+		if (testcases == null) {
+			testcases = doc.createElement("testcases");
+			testcases.setAttribute("name", testcasesname);
+			exampleToTestsuite.put(testcasesname, testcases);
+			
+			if (example.tagName.equals("regression"))
+				regression.appendChild(testcases);
+			else examples.appendChild(testcases);
 		}
 		
 		// create test case
@@ -107,28 +113,16 @@ public class Report {
 		}
 
 		// append testcase to suite
-		testsuite.appendChild(testcase);
+		testcases.appendChild(testcase);
 	}
 	
-	public void report(Program program, String suite) {
-		Element testsuite = tests.get(suite);
-		if (testsuite == null) {
-			testsuite = doc.createElement("testsuite");
-			testsuite.setAttribute("name", suite);
-			tests.put(suite, testsuite);
-			testsuites.appendChild(testsuite);
-		}
+	public void report(Program program, Example example) {
 
-		if (program.type.equals("regression"))
-		{
-			testsuite = tests.get("/regression");
-			if (testsuite == null) {
-				testsuite = doc.createElement("testsuite");
-				testsuite.setAttribute("name", suite);
-				tests.put(suite, testsuite);
-				testsuites.appendChild(testsuite);
-			}
-		}
+		String testcasesname = example.getJenkinsSuiteName();
+		Element testcases = exampleToTestsuite.get(testcasesname);
+		
+		if (testcases == null)
+			return;
 		
 		// create test case
 		Element testcase = doc.createElement("testcase");
@@ -163,9 +157,8 @@ public class Report {
 			testcase.appendChild(failure);
 		}
 		
-		
 		// append testcase to suite
-		testsuite.appendChild(testcase);
+		testcases.appendChild(testcase);
 	}
 	
 	/**
