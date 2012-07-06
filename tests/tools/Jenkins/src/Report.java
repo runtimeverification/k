@@ -69,7 +69,7 @@ public class Report {
 		String testcasesname = example.getJenkinsSuiteName();
 		Element testcases = exampleToTestsuite.get(testcasesname);
 		if (testcases == null) {
-			testcases = doc.createElement("testcases");
+			testcases = doc.createElement("testcase");
 			testcases.setAttribute("name", testcasesname);
 			exampleToTestsuite.put(testcasesname, testcases);
 			
