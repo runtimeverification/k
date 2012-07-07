@@ -22,6 +22,7 @@
     </path>
     <path id="JavaClasses.classpath">
         <pathelement location="bin"/>
+	<pathelement location="../../dist/bin/java/xstream.jar" />
         <path refid="KUtils.classpath"/>
     </path>
     <target name="init">
