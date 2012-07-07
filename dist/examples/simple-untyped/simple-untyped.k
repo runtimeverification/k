@@ -47,7 +47,7 @@ argument (for the same reason as the increment). */
                | "read" "(" ")"    
                > left:
                     Exp "*" Exp          [strict, left]
-               | Exp "/" Exp             [strict, left
+               | Exp "/" Exp             [strict, left]
                | Exp "%" Exp             [strict, left]
                > left:
                     Exp "+" Exp          [strict, left]
@@ -85,7 +85,7 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
   syntax Stmt ::= "{" "}"        
                 | "{" Stmts "}"        
                 | Exp ";"                             [strict]
-                | "if" Exp "then" Stmt "else" Stmt    [avoid, strict(1)
+                | "if" Exp "then" Stmt "else" Stmt    [avoid, strict(1)]
                 | "if" Exp "then" Stmt               
                 | "while" Exp "do" Stmt               
                 | "for" Id "=" Exp "to" Exp "do" Stmt  
@@ -120,8 +120,6 @@ declared alone and is initialized. */
   syntax #Id ::= "main"
 
 endmodule
-
-
 
 
 
