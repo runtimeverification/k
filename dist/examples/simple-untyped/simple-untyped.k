@@ -113,7 +113,9 @@ that there are only \texttt{while} loops, and that each variable is
 declared alone and is initialized. */
 
   rule if E:Exp then S:Stmt => if E then S else {}
-  rule (for X:Id = E1 to E2 do S) => {var X=E1; while X <= E2 do {S X = (X + 1);}}
+  rule (for X:Id = E1 to E2 do S)
+        =>
+       {var X=E1; while X <= E2 do {S X = (X + 1);}}
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
   rule var X:Id = E:Exp; => var X; X = E;
 

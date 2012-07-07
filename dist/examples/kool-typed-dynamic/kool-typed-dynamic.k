@@ -87,6 +87,7 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts            [right]
 
+// temporary solution for the ":" operator
   rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
   rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
 
