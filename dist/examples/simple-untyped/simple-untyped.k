@@ -1,6 +1,22 @@
 module SIMPLE-UNTYPED-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
 
+/*@ \section{Syntax}
+We start by defining the SIMPLE syntax.  The language constructs discussed
+above have the expected syntax and evaluation strategies.  Recall that in \K
+we annotate the syntax with appropriate strictness attributes, thus giving
+each language construct the desired evaluation strategy. */
+
+/*@ \subsection{Identifiers}
+The special identifier for the function ``main'' belongs to all programs.
+Each program may use additional identifiers, which need to be declared either
+automatically (when one uses an external parser) or manually
+(when one writes the program). */
+
+/*@ \subsection{Declarations}
+There are two types of declarations: for variables (including arrays) and
+for functions. */
+
   syntax Start ::= Stmts
   syntax Ids ::= List{Id,","} [strict, cons("Ids1ListSyn"), hybrid]
   syntax Exps ::=  List{Exp,","} [cons("Exps1ListSyn")]
@@ -9,54 +25,99 @@ module SIMPLE-UNTYPED-SYNTAX
   syntax Decl ::= "var" Exps ";" [cons("Ddecl1VarDeclSyn")]
                 | "function" Id "(" Ids ")" Stmt [cons("Ddecl1FuncDeclSyn")]
 
+/*@ \subsection{Expressions}
+The expression constructs below are standard.  Increment (\texttt{++}) takes
+an expression rather than a variable because it can also increment an array
+element.  Arrays can be multidimensional and can hold other arrays, so their
+lookup operation takes a list of expressions as argument and applies to an
+expression (which can in particular be another array lookup), respectively.
+The construct \texttt{sizeof} gives the size of an array in number of elements
+of its first dimension.  Note that almost all constructs are strict.
+Exceptions are the increment (since its first argument gets updated, so it
+cannot be evaluated) and the assignment which is only strict in its second
+argument (for the same reason as the increment). */
+
   syntax Exp ::= Int | Bool | Id | String
                | "(" Exp ")"            [bracket]
-               | "++" Exp				[cons("Exp1PrefixPPSyn")]
-               > Exp "[" Exps "]"	    [strict, cons("Exp1ArraySyn")]
-               > Exp "(" Exps ")"	    [strict, cons("Exp1FuncCallSyn")]
-               | "-" Exp             	[strict, cons("Exp1UMinusSyn")]
-               | "sizeOf" "(" Exp ")"   [strict, cons("Exp1SizeSyn")]
-               | "read" "(" ")"			[cons("Exp1Exp1ReadSyn")]
+               | "++" Exp        
+               > Exp "[" Exps "]"        [strict]
+               > Exp "(" Exps ")"        [strict]
+               | "-" Exp                 [strict]
+               | "sizeOf" "(" Exp ")"    [strict]
+               | "read" "(" ")"    
                > left:
-               	 Exp "*" Exp         	[strict, left, cons("Exp1MulSyn")]
-               | Exp "/" Exp         	[strict, left, cons("Exp1DivSyn")]
-               | Exp "%" Exp         	[strict, left, cons("Exp1ModSyn")]
+                    Exp "*" Exp          [strict, left]
+               | Exp "/" Exp             [strict, left
+               | Exp "%" Exp             [strict, left]
                > left:
-               	 Exp "+" Exp         	[strict, left, cons("Exp1PlusSyn")]
-               | Exp "-" Exp         	[strict, left, cons("Exp1MinusSyn")]
+                    Exp "+" Exp          [strict, left]
+               | Exp "-" Exp             [strict, left]
                > non-assoc:
-               	 Exp "<" Exp         	[strict, non-assoc, cons("Exp1LTSyn")]
-               | Exp "<=" Exp        	[strict, non-assoc, cons("Exp1LTESyn")]
-               | Exp ">" Exp         	[strict, non-assoc, cons("Exp1GTSyn")]
-               | Exp ">=" Exp        	[strict, non-assoc, cons("Exp1GTESyn")]
-               | Exp "==" Exp        	[strict, non-assoc, cons("Exp1EQSyn")]
-               | Exp "!=" Exp        	[strict, non-assoc, cons("Exp1NEQSyn")]
-               > "not" Exp           	[strict, cons("Exp1NotSyn")]
+                    Exp "<" Exp          [strict, non-assoc]
+               | Exp "<=" Exp            [strict, non-assoc]
+               | Exp ">" Exp             [strict, non-assoc]
+               | Exp ">=" Exp            [strict, non-assoc]
+               | Exp "==" Exp            [strict, non-assoc]
+               | Exp "!=" Exp            [strict, non-assoc]
+               > "not" Exp               [strict]
                > left:
-               	 Exp "and" Exp       	[strict, left, cons("Exp1AndSyn")]
-               | Exp "or" Exp        	[strict, left, cons("Exp1OrSyn")]
-               > Exp "=" Exp         	[strict(2), right, cons("Exp1AssignSyn")]
+                    Exp "and" Exp        [strict, left]
+               | Exp "or" Exp            [strict, left]
+               > Exp "=" Exp             [strict(2), right]
 
-  syntax Stmt ::= "{" "}"				[cons("Stmt1BlockEmptySyn")]
-                | "{" Stmts "}"			[cons("Stmt1BlockSyn")]
-                | Exp ";"			  	[strict, cons("Stmt1Stmt2ExpSyn")]
-                | "if" Exp "then" Stmt "else" Stmt		[avoid, strict(1), cons("Stmt1IfThnElsSyn")]
-                | "if" Exp "then" Stmt					[cons("Stmt1IfThnSyn")]
-                | "while" Exp "do" Stmt					[cons("Stmt1WhileSyn")]
-                | "for" Id "=" Exp "to" Exp "do" Stmt	[cons("Stmt1ForSyn")]
-                | "return" Exp ";"						[strict, cons("Stmt1ReturnSyn")]
-                | "return" ";"			    			[cons("Stmt1Return2Syn")]
-                | "write" "(" Exp ")" ";"				[strict, cons("Stmt1WriteSyn")]
-                | "try" Stmt "catch" "(" Id ")" Stmt	[cons("Stmt1TrySyn")]
-                | "throw" Exp ";"						[strict, cons("Stmt1ThrowSyn")]
-                | "spawn" Stmt							[cons("Stmt1SpawnSyn")]
-                | "acquire" Exp ";"                  	[strict, cons("Stmt1AcquireSyn")]
-                | "release" Exp ";"                  	[strict, cons("Stmt1ReleaseSyn")]
-                | "rendezvous" Exp ";"               	[strict, cons("Stmt1RendezvousSyn")]
-                | "print" "(" Exps ")" ";"              [strict, cons("Stmt1PrintSyn")]
+/*@ \subsection{Statements}
+Most of the statement constructs are standard for imperative languages.
+We syntactically distinguish between empty and non-empty blocks, because we
+chose \textit{Stmts} not to be a (``\texttt{;}''-separated) list of
+\textit{Stmt}.  Variables can be declared anywhere inside a block, their scope
+ending with the block.  Expressions are allowed to be used for their side
+effects only (followed by a semicolon ``\texttt{;}'').  Functions are allowed
+to abruptly return.  The exceptions are parametric, i.e., one can throw a value
+which is bound to the variable declared by \texttt{catch}.  Threads can be
+dynamically created and terminated, and can synchronize with \texttt{acquire},
+\texttt{release} and \texttt{rendezvous}.  Note that the strictness attributes
+obey the intended evaluation strategy of the various constructs.  In
+particular, the if-then-else construct is strict only in its first argument
+(the if-then construct will be desugared into if-then-else), while the loops
+constructs are not strict in any arguments.  The \texttt{print} statement
+constructs is variadic, that is, it takes an arbitrary number of arguments. */
+
+  syntax Stmt ::= "{" "}"        
+                | "{" Stmts "}"        
+                | Exp ";"                             [strict]
+                | "if" Exp "then" Stmt "else" Stmt    [avoid, strict(1)
+                | "if" Exp "then" Stmt               
+                | "while" Exp "do" Stmt               
+                | "for" Id "=" Exp "to" Exp "do" Stmt  
+                | "return" Exp ";"                    [strict]
+                | "return" ";"                      
+                | "write" "(" Exp ")" ";"             [strict]
+                | "try" Stmt "catch" "(" Id ")" Stmt 
+                | "throw" Exp ";"                     [strict]
+                | "spawn" Stmt                     
+                | "acquire" Exp ";"                   [strict]
+                | "release" Exp ";"                   [strict]
+                | "rendezvous" Exp ";"                [strict]
+                | "print" "(" Exps ")" ";"            [strict]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts							[right, cons("Stmts1LstStmtsSyn")]
+                 | Stmts Stmts                        [right]
+
+/*@ \section{Desugared Syntax}
+This part desugars some of SIMPLE's language constructs into core ones.
+We only want to give semantics to core constructs, so we get rid of the
+derived ones before we start the semantics.  All desugaring macros below are
+straightforward.  For the semantics, we can therefore assume that all
+functions take a list of arguments, that each conditional has both branches,
+that there are only \texttt{while} loops, and that each variable is
+declared alone and is initialized. */
+
+  rule if E:Exp then S:Stmt => if E then S else {}
+  rule (for X:Id = E1 to E2 do S) => {var X=E1; while X <= E2 do {S X = (X + 1);}}
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
+  rule var X:Id = E:Exp; => var X; X = E;
+
+  syntax #Id ::= "main"
 
 endmodule
 
@@ -68,14 +129,6 @@ endmodule
 module SIMPLE-UNTYPED
   imports SIMPLE-UNTYPED-SYNTAX
   imports BUILTIN-HOOKS
-
-  // coming from macros
-  rule if E:Exp then S:Stmt => if E then S else {}
-  rule (for X:Id = E1 to E2 do S) => {var X=E1; while X <= E2 do {S X = (X + 1);}}
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
-  rule var X:Id = E:Exp; => var X; X = E;
-
-  syntax #Id ::= "main"
 
   syntax Val ::= Int | Bool | String
                | "arrayRef" "(" Int "," Int ")" [cons("Val1ArrayRefSyn")]

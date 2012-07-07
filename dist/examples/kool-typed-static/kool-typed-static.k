@@ -97,7 +97,9 @@ the \K strictness attributes and the desugaring macros. */
   rule (for X:Id = E1:Exp to E2:Exp do S)
        =>
        {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
+
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
+
   rule var '_:_(X:Id,, T:Type) = E:Exp, .Exps; => var '_:_(X,, T), .Exps; X = E;
 
 /*@ \subsection{KOOL Additional Syntax}
@@ -116,7 +118,7 @@ typed before the actual construct can be typed. */
   syntax Decl ::= "class" Id "{" Stmts "}"
                 | "class" Id "extends" Id "{" Stmts "}"
 
-  rule class C:Id { Ss:Stmts } => class C extends object { Ss }
+  rule 'class_`{_`}(C:Id,, Ss:Stmts ) => class C extends object { Ss }
 
 endmodule 
 
@@ -290,7 +292,10 @@ The operation \texttt{checkType}, defined at the end of this module,
 checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
-  rule <k> var '_:_(X:Id,, T:Type); => checkType(T) ~> stmt ...</k>
+  rule <k> 'var_;('_`,_('_:_(X:Id,, T:Type),, .Exps))
+            =>
+            checkType(T) ~> stmt 
+       ...</k>
        <tenv> Rho:Map => Rho[T / X] </tenv>
 
 /*@ \subsubsection{Class member declaration}
@@ -371,6 +376,7 @@ instance of this rule). */
        (. => <task>
                 <k> checkType(class C') ~> Ss:Stmts </k>
                 <inClass> C </inClass>
+                <tenv> . </tenv>
                 <ctenvT> . </ctenvT>
              </task>)  [structural]
 
@@ -529,7 +535,8 @@ reached. */
   rule ltype('_._(E:Exp,, X:Id)) => '_._(E,, X)  [structural]
 
   rule <k> '_._(class C:Id,, X:Id) => T ...</k>
-       <className> C </className> <ctenv>... X |-> T:Type ...</ctenv>
+       <className> C </className>
+       <ctenv>... X |-> T:Type ...</ctenv>
 
   rule <k> '_._(class (C1:Id => C2),, X:Id) ...</k>
        <className> C1 </className>
@@ -551,7 +558,9 @@ arguments.  The second rule below ensures that the empty list of
 arguments is treated as a value of type \texttt{void}. */
 
   rule <k> '_`(_`)(function from Ts:Types to T:Type,, (T':Type,Ts':Types))
-        => checkSubtype((T',Ts'),Ts) ~> T ...</k>
+           => checkSubtype((T',Ts'),Ts) ~> T 
+       ...</k>
+
   rule '_`(_`)(function from void to T:Type,, .Types) => T
 
 
