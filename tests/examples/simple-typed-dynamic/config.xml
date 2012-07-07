@@ -1,0 +1,3 @@
+<config>
+	<test def="/dist/examples/simple-typed-dynamic/simple-typed-dynamic.k" program-extension="simple" compiled-file-name="simple-typed-dynamic-compiled.maude"/>
+</config>
