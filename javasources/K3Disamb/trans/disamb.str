@@ -28,6 +28,7 @@ strategies
 			topdown(try(merge-amb ; flatten-amb-top )) ;
 			//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
 			topdown(try(annolocationremove)) ;
+			topdown(try(removeDouaPuncte)) ;
 			disambigCellTypes ;
 			topdown(try(correctRewrite)) ;
 			emphasizeVars ; 
@@ -81,6 +82,13 @@ strategies
 
 
 	mydisambiguate2 = all(mydisambiguate(|"full"))
+	
+	
+	removeDouaPuncte:
+		a#(b) -> a#(b')
+		where <string-ends-with(|"Syn")> a
+		where <one(?DouaPuncte())> b
+		where b' := <filter(not(?DouaPuncte()))> b
 
 	flattenKLists = bottomup(try(fks2)) ; bottomup(try(flists2))
 	fks2:

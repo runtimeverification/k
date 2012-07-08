@@ -294,7 +294,10 @@ public class Definition implements Cloneable {
 											Item itm = items.get(i);
 											if (itm.getType() == ItemType.TERMINAL) {
 												Terminal t = (Terminal) itm;
-												sdf += "\"" + t.getTerminal() + "\" ";
+												if (t.getTerminal().equals(":"))
+													sdf += "DouaPuncteDz ";
+												else
+													sdf += "\"" + t.getTerminal() + "\" ";
 											} else if (itm.getType() == ItemType.SORT) {
 												Sort srt = (Sort) itm;
 												// if we are on the first or last place and this sort is not a list, just print the sort
@@ -388,7 +391,10 @@ public class Definition implements Cloneable {
 					Item itm = items.get(i);
 					if (itm.getType() == ItemType.TERMINAL) {
 						Terminal t = (Terminal) itm;
-						sdf += "\"" + t.getTerminal() + "\" ";
+						if (t.getTerminal().equals(":"))
+							sdf += "DouaPuncteDz ";
+						else
+							sdf += "\"" + t.getTerminal() + "\" ";
 					} else if (itm.getType() == ItemType.SORT) {
 						Sort srt = (Sort) itm;
 						sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
@@ -429,11 +435,13 @@ public class Definition implements Cloneable {
 		// sdf += "	DzDzID		-> DzDzId\n";
 		sdf += "	DzDzBOOL	-> DzDzBool\n";
 		sdf += "	DzDzSTRING	-> DzDzString\n";
+		sdf += "	\":\" -> DouaPuncteDz {cons(\"DouaPuncte\")}\n";
 
 		sdf += "\n";
 		
 		sdf += "context-free restrictions\n";
-		sdf += "	VariableDz -/- ~[\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]\n\n";
+		sdf += "	VariableDz -/- ~[\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]\n";
+		sdf += "	DouaPuncteDz -/- [A-Z]\n\n";
 
 		sdf += "lexical syntax\n";
 		for (Production p : constants) {
@@ -442,10 +450,10 @@ public class Definition implements Cloneable {
 
 		sdf += "\n\n";
 
-		sdf += "\n      %% terminals reject\n";
+		sdf += "\n%% terminals reject\n";
 		for (Terminal t : getTerminals(false)) {
 			if (t.getTerminal().matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
-				sdf += "        \"" + t.getTerminal() + "\" -> VARID {reject}\n";
+				sdf += "	\"" + t.getTerminal() + "\" -> VARID {reject}\n";
 			}
 		}
 
