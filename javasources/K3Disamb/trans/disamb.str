@@ -87,8 +87,8 @@ strategies
 	removeDouaPuncte:
 		a#(b) -> a#(b')
 		where <string-ends-with(|"Syn")> a
-		where <one(?DouaPuncte())> b
-		where b' := <filter(not(?DouaPuncte()))> b
+		where <one(?"DouaPuncte"#(_))> b
+		where b' := <filter(not(?"DouaPuncte"#(_)))> b
 
 	flattenKLists = bottomup(try(fks2)) ; bottomup(try(flists2))
 	fks2:
