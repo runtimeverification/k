@@ -28,22 +28,22 @@ module WRL
       <in stream="stdin"> $IN:List </in>
       <out stream="stdout"> .List </out>
     </streams>
-    <mode> 0 </mode>              // 0 = init, 1 = execute
-    <progmap> .Map </progmap>     // maps address to program instruction
-    <size> 0 </size>              // size of program
-    <ip> 0 </ip>                  // instruction pointer
+    <settings>
+      <mode> 0 </mode>              // 0 = init, 1 = eval, 2 = exec instruction
+      <progmap> .Map </progmap>     // maps address to program instruction
+      <size> 0 </size>              // size of program
+      <ip> 0 </ip>                  // instruction pointer
 
-    <memmap> .Map </memmap>       // memory map
-    <mp> 0 </mp>                  // memory pointer
+      <memmap> .Map </memmap>       // memory map
+      <mp> 0 </mp>                  // memory pointer
 
-    <opsring> 0 </opsring>        // operations ring current instruction
-    <opval> 0 </opval>            // operations ring value
-    <opdir> 0 </opval>            // operations ring direction (0 = cw)
-    <mathring> 0 </mathring>      // math ring current instruction
-    <mathval> 0 </mathval>        // math ring value
-    <mathdir> 0 </mathdir>        // math ring direction
+      <ring> 0 </ring>           // ops ring = 0; math ring = 1
+      <turn> 0 |-> 0 1 |-> 0 </turn>  // current instruction
+      <val> 0 |-> 0 1 |-> 0  </val>   // value
+      <dir> 0 |-> 1 1 |-> 1 </val>    // direction (ccw = 0; cw = 1)
 
-    <parity> false </parity>      // true iff last operation was a regular 0
+      <parity> false </parity>      // true iff last operation was a regular 0
+    </settings>
     
 
  //   syntax KResult ::= Program
@@ -51,21 +51,52 @@ module WRL
     rule X:Bit Y:Program => X ~> Y [seqstrict, structural]
 
   
+   // initializes by writing entire program to progmap
    rule [Init]:
       <k> X:Bit => . ...</k>
-      <out>... . => ListItem(X) </out>
+//      <out>... . => ListItem(X) </out>
       <mode> 0 </mode>
       <progmap>... . => P |-> X . ...</progmap>
       <ip> P:Int => P +Int 1 </ip> [transition]
 
+   // switches to execute mode
    rule [ProgStart]:
       <k> end </k>
       <mode> 0 => 1 </mode>
       <size> _ => S </size>
-      <parity> _ => false </parity>
       <ip> S:Int => 0 </ip>
 
-//   rule [Execute]:
-//    <k> end </k>
+   rule [ChangeDirection]:
+      <mode> 1 </mode>
+      <progmap>... P |-> 0 ...</progmap>
+      <parity> false => true </parity>
+      <ip> P:Int => P +Int 1 </ip>
+      <ring> R:Int </ring>
+      <dir>... R |-> (D:Int => 1 -Int D) ...</dir>
+
+   rule [Rotate]:
+      <mode> 1 </mode>
+      <progmap>... P |-> 1 ...</progmap>
+      <parity> _ => false </parity>
+      <ip> P:Int => P +Int 1 </ip>
+      <ring> R:Int </ring>
+      <dir>... R |-> D:Int ...</dir>
+      <turn>... R |-> (T:Int => T +Int (2 *Int D) -Int 1) ...</turn>
+
+   rule [Execute]:
+      <mode> 1 => 2 </mode>
+      <progmap>... P |-> 0 ...</progmap>
+      <parity> true => false </parity>
+      <ip> P:Int => P +Int 1 </ip>
+      <ring> R:Int </ring> 
+      <dir>... R |-> (D:Int => 1 -Int D) ...</dir>
+ 
+
+    // TODO: Implement individual instructions   
+
+
+   rule [ResumeExecute]:
+      <mode> 3 => 1 </mode>
+      <ring> R:Int => 1 -Int R </ring>
 
 endmodule
