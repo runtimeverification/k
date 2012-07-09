@@ -229,15 +229,19 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Cell c) {
 		String blockClasses = "block";
+		String tabClasses = "tab";
 		if (c.getElipses().equals("left")) {
 			blockClasses += " left";
+			tabClasses += " straightEdge";
 		} else if (c.getElipses().equals("right")) {
 			blockClasses += " right";
+			tabClasses += " curvedEdge";
 		} else if (c.getElipses().equals("both")) {
 			blockClasses += " left right";
-		} /*else {
-			result += "\\kall";
-		}*/
+			tabClasses += " straightEdge";
+		} else {
+			tabClasses += " curvedEdge";
+		}
 		if (c.getAttributes().containsKey("color")) {
 			cellColors.put(c.getLabel(), c.getAttributes().get("color"));
 		}
@@ -248,7 +252,7 @@ public class HTMLFilter extends BasicVisitor {
 		if(usedColors.add(color))
 			css+= colors.get(color);
 		
-		result += "<div class=\"cell\"> <div class=\"tab " + color + "\">";
+		result += "<div class=\"cell\"> <div class=\"" + tabClasses + " " + color + "\">";
 		result += "<span class = \"bold\">" + cellName + "</span> </div>";
 		result += "<br />";
 		result += "<div class=\"" + blockClasses + " " + color + "\" ";
@@ -257,9 +261,9 @@ public class HTMLFilter extends BasicVisitor {
 			result += "style=\"min-width:"+mw+"em\"";
 		}
 			
-		result += ">";
+		result += "> <div class=\"center\">";
 		super.visit(c);
-		result += "</div> </div>" + endl;
+		result += "</div> </div> </div>" + endl;
 	}
 
 	public void visit(Collection col) {
@@ -530,6 +534,10 @@ public class HTMLFilter extends BasicVisitor {
 				+ "{" + endl
 				+ "color: blue;"+endl
 				+ "}" + endl;
+		css += ".center" + endl
+				+ "{" + endl
+				+ "text-align: center;"+endl
+				+ "}" + endl;
 		css += ".textCentered" + endl
 				+ "{" + endl
 				+ "text-align: center;"+endl
@@ -568,8 +576,20 @@ public class HTMLFilter extends BasicVisitor {
 				+ "border-top : 3px solid;"+endl
 				+ "border-left : 3px solid;"+endl
 				+ "border-right : 3px solid;"+endl
+				+ "text-align: left;"+endl
+				+ "}" + endl;
+		
+		css += ".tab.curvedEdge" + endl
+				+ "{" + endl
 				+ "position: relative;"+endl
 				+ "left: 30px;"+endl
+				+ "top : 3px;"+endl
+				+ "}" + endl;
+		
+		css += ".tab.straightEdge" + endl
+				+ "{" + endl
+				+ "position: relative;"+endl
+				+ "left: 8px;"+endl
 				+ "top : 3px;"+endl
 				+ "}" + endl;
 		
@@ -584,6 +604,7 @@ public class HTMLFilter extends BasicVisitor {
 				+ "border-radius: 30px;"+endl
 				+ "border-style: solid;"+endl
 				+ "min-width: 60px;"+endl
+				+ "text-align: left;"+endl
 				+ "}" + endl;
 		
 		css += ".block.right" + endl
