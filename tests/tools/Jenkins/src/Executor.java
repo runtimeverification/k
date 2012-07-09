@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -72,6 +71,15 @@ public class Executor extends Thread {
 				// TODO Auto-generated catch block
 			    timedout = true;
 			    error = "IOException";
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				timedout = true;
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+				timedout = true;
+			} catch (TimeoutException e) {
+				e.printStackTrace();
+				timedout=true;
 			}
 
 	}
@@ -109,30 +117,12 @@ public class Executor extends Thread {
 	private static final ExecutorService THREAD_POOL 
     = Executors.newCachedThreadPool();
 
-	private static <T> T timedCall(Callable<T> c, long timeout, TimeUnit timeUnit)
+	private static <T> T timedCall(Callable<T> c, long timeout, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException
 	    {
 			FutureTask<T> task = new FutureTask<T>(c);
 		    THREAD_POOL.execute(task);
-		    try{
-		    	T result = task.get(timeout, timeUnit);
-		    	if (THREAD_POOL.isTerminated())
-		    		return result;
-		    	else {
-		    		task.cancel(true);
-		    		return null;
-		    	}
-		    }
-		    catch (TimeoutException e) {
-			    return null;
-			} catch (InterruptedException e) {
-			    return null;
-			} catch (ExecutionException ee) {
-				return null;
-			} catch (CancellationException ce){
-				return null;
-			}
-	}
-
+		    return task.get(timeout, timeUnit);
+	    }
 }
 
 class MyCallable<T> implements Callable<T>
