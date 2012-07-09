@@ -214,8 +214,11 @@ public class Initialize {
 					String name = pgm.getAttribute("name");
 					String ignoreAttr = pgm.getAttribute("ignore");
 					if (ignoreAttr.equals("yes"))
-						ignore = true;
-					
+					{
+						if (name.equals(new File(program).getName()))
+							ignore = true;
+					}
+
 					if (name.equals(new File(program).getName()))
 					{
 						set = true;
