@@ -115,7 +115,7 @@ public class CommandlineOptions {
 		options.addOption(trace); getOptionList().add(trace);*/
 		
 		//for LTL model-checking
-		Option model_checking = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("ltlmc").withDescription("Specify the formula for model checking through a file or at commandline").create();
+		Option model_checking = OptionBuilder.hasArg(true).withArgName("FILE/STRING").withLongOpt("ltlmc").withDescription("Specify the formula for model checking through a file or at commandline").create();
 		options.addOption(model_checking); getOptionList().add(model_checking);
 
 	}

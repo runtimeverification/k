@@ -78,7 +78,7 @@ public class RunProcess {
 	public String runParser(String k3jar, String parser, String definition, String pgm, boolean isPgm) {
 		String KAST = new String();
 		
-		//the argument is a formula and we should write in a file before passing it to kast
+		//the argument is a formula and we should write it in a file before passing it to kast
 		if (!isPgm) {
 			FileUtil.createFile(K.kast_in, pgm);
 			pgm = K.kast_in;

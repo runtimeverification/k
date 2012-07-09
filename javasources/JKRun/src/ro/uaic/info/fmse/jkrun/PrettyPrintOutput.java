@@ -256,7 +256,7 @@ public class PrettyPrintOutput {
 				sb = freezerCase(list, op, n, false, whitespace, ANSI_NORMAL);
 			}
 			else if (m < n && n > 0 && m > 0) {
-				//like in the case of an associative operator (<term op="_~>_" sort="K">) "_~>_" is an associative operator
+				//like in the case of an associative operator (<term op="_~>_" sort="K">); "_~>_" is an associative operator
 				if (op.equals("_~>_")) {
 					sb = lessUnderscoresAssocCase(list, op, false, whitespace, ANSI_NORMAL);
 				}
