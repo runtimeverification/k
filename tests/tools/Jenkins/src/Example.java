@@ -8,6 +8,8 @@ public class Example extends Thread {
 	String mainFile;
 	String compiledFile;
 	String mainModule;
+	private boolean timedout;
+
 	String[] krunOptions;
 	String k3jar;
 	public List<Program> programs;
@@ -60,6 +62,7 @@ public class Example extends Thread {
 			output = compile.getOutput();
 			error = compile.getError();
 			exitCode = compile.getExitValue();
+			timedout = compile.getTimedOut();
 			time = System.currentTimeMillis() - millis;
 			System.out.println(this);
 		} else {
@@ -97,6 +100,9 @@ public class Example extends Thread {
 	}
 
 	public boolean isCompiled() {
+		if (timedout)
+			return false;
+		
 		return new File(dir + System.getProperty("file.separator")
 				+ compiledFile).exists();
 	}

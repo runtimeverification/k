@@ -18,6 +18,7 @@ public class Executor extends Thread {
 	private String output = "", error = "";
 	private int exitValue;
 	private String input;
+	private boolean timedout = false;
 	
 	public Executor(String[] commands, String dir, String input) {
 		super();
@@ -67,8 +68,9 @@ public class Executor extends Thread {
 			    output = callable.output;
 			    error = callable.error;
 			} catch (TimeoutException e) {
-			    output = "Timed out";
+			    output = "Timed out.";
 			    error = "Timed out.";
+			    timedout = true;
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -96,6 +98,11 @@ public class Executor extends Thread {
 
 	public int getExitValue() {
 		return exitValue;
+	}
+	
+	public boolean getTimedOut()
+	{
+		return timedout;
 	}
 	
 	@Override

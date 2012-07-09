@@ -12,6 +12,7 @@ public class Program extends Thread {
 	private Executor compile;
 	private long time = 0;
 	public String type = "";
+	private boolean timedout = false;
 	
 	public Program(String filename, String inputFile, String outputFile,
 			String krun, String kdefinition, String dir,
@@ -66,11 +67,14 @@ public class Program extends Thread {
 		output = compile.getOutput();
 		error = compile.getError();
 		exit = compile.getExitValue();
-		
+		timedout = compile.getTimedOut();
 		time = System.currentTimeMillis() - millis;
 	}
 
 	public boolean isCorrect() {
+		if (timedout)
+			return false;
+		
 		if (outputFile.equals("") || new File(outputFile).isDirectory())
 			if (exit == 0)
 				return true;
