@@ -1,0 +1,6 @@
+<config>
+    <test def="/dist/examples/cink-basic/cink.k" program-extension="cink" compiled-file-name="cink-compiled.maude"/>
+    <krun-options>
+        <program name="dekker.cink" ignore="yes"/>                              
+    </krun-options>
+</config>
