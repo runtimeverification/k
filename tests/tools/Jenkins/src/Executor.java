@@ -63,28 +63,10 @@ public class Executor extends Thread {
 
 			    		return p.waitFor();
 			        }};
-			    Integer tcall = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
-			    exitValue = tcall;
+		        exitValue = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
 			    output = callable.output;
 			    error = callable.error;
 			    timedout = callable.timedout;
-			    if (tcall == null) {
-			    	timedout = true;
-			    }
-			    
-			} catch (TimeoutException e) {
-			    output = "Timed out.";
-			    error = "Timed out.";
-			    timedout = true;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			    timedout = true;
-			    error = "Interrupted.";
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-			    timedout = true;
-			    error = "Execution exception.";
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 			    timedout = true;
@@ -127,13 +109,19 @@ public class Executor extends Thread {
     = Executors.newCachedThreadPool();
 
 	private static <T> T timedCall(Callable<T> c, long timeout, TimeUnit timeUnit)
-	    throws InterruptedException, ExecutionException, TimeoutException {
+	    {
 			FutureTask<T> task = new FutureTask<T>(c);
 		    THREAD_POOL.execute(task);
-		    T result = task.get(timeout, timeUnit);
-		    if (task.isCancelled())
-		    	return null;
-		    return result;
+		    try{
+		    	return task.get(timeout, timeUnit);
+		    }
+		    catch (TimeoutException e) {
+			    return null;
+			} catch (InterruptedException e) {
+			    return null;
+			} catch (ExecutionException e) {
+				return null;
+			}
 	}
 
 }
