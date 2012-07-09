@@ -1,34 +1,34 @@
-var x:int, a[10]:arrayOf int;
+var x : int, a[10] : arrayOf int;
 
-function incx():void {
+function incx() : void {
   ++x;
 }
 
-function zero():int {
+function zero() : int {
   return 0;
 }
 
-function id(x:int):int {
+function id(x : int) : int {
   return x;
 }
 
-function double(x:int):int {
+function double(x : int) : int {
   return 2*x;
 }
 
-function hoincx(): function from void to void {
+function hoincx() : function from void to void {
   return incx;
 }
 
-function hozero(): function from void to int {
+function hozero() : function from void to int {
   return zero;
 }
 
-function hoid(): function from int to int {
+function hoid() : function from int to int {
   return id;
 }
 
-function hodouble(): function from int to int {
+function hodouble() : function from int to int {
   return double;
 }
 
@@ -57,20 +57,20 @@ function app2(f : function from int to int, x : int) : int {
 }
 
 function map(f : function from int to int, x : arrayOf int) : void {
-  for i=0 to sizeOf(x)-1 do
+  for i=0 to sizeOf(x) - 1 do
     x[i] = app2(f,x[i]);
 }
 
-function printall():void {
+function printall() : void {
   print("x = ",x, ";  a[] = ");
-  for i=0 to sizeOf(a)-1
+  for i=0 to sizeOf(a) - 1
     do print(a[i], " ");
   print("\n");
 }
 
 function main():void {
   x = 0;
-  for i=0 to sizeOf(a)-1 do
+  for i=0 to sizeOf(a) - 1 do
     a[i]=i;
   printall();
   hoincx()();
