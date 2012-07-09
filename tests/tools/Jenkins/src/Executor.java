@@ -100,7 +100,6 @@ public class Executor extends Thread {
 	
 	public boolean getTimedOut()
 	{
-		System.out.println("TIMEOUT: " + timedout);
 		return timedout;
 	}
 	
