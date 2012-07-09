@@ -72,14 +72,14 @@ public class Executor extends Thread {
 			    timedout = true;
 			    error = "IOException";
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 				timedout = true;
+				System.out.println("EXCEPTION: " + e.getMessage());
 			} catch (ExecutionException e) {
-				e.printStackTrace();
 				timedout = true;
+				System.out.println("EXCEPTION: " + e.getMessage());
 			} catch (TimeoutException e) {
 				timedout=true;
-				e.printStackTrace();
+				System.out.println("EXCEPTION: " + e.getMessage());
 			}
 
 	}
