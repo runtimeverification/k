@@ -80,6 +80,7 @@ public class Executor extends Thread {
 				System.out.println("EXCEPTION: " + e.getMessage());
 			} catch (TimeoutException e) {
 				timedout = true;
+				System.out.println("Setting timedout to " + timedout);
 				System.out.println("EXCEPTION: " + e.toString());
 			}
 
