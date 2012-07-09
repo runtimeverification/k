@@ -37,9 +37,7 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
                | Exp "instanceOf" Id    [strict(1)]
                | "cast" Exp "to" Id     [strict(1)]
                | "new" Id "(" Exps ")"  [strict(2)]
-               | Exp "." Id      
-//               | Exp ":" Type           // allowed only for declarations
-               | Exp "of" Type           // allowed only for declarations
+               | Exp "." Id    
                > Exp "[" Exps "]"       [strict]
                > Exp "(" Exps ")"       [strict(2)]
                | "-" Exp                [strict]
@@ -63,7 +61,9 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
                > left:
                  Exp "and" Exp           [strict, left]
                | Exp "or" Exp            [strict, left]
-               > Exp "=" Exp             [strict(2), right]
+               > Exp "=" Exp             [strict(2), right]  
+               | Exp ":" Type           // allowed only for declarations
+//               | Exp "of" Type           // allowed only for declarations
 
 
   syntax Exps ::= List{Exp,","}
@@ -88,8 +88,8 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
                  | Stmts Stmts            [right]
 
 // temporary solution for the ":" operator
-  rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
-  rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
+//  rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
+//  rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
 
 
   rule if E:Exp then S:Stmt => if E then S else {}
@@ -213,7 +213,7 @@ KOOL).  */
        <store>... . => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
-  rule <k> var '_:_(X:Id[N:Int],, arrayOf T:Type); => . ...</k> 
+  rule <k> var '_:_(X:Id[N:Int, .Vals],, arrayOf T:Type), .Exps; => . ...</k> 
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> arrayRef(arrayOf T, L +Int 1, N)
                        L +Int 1 .. L +Int N |-> undefined(T) ...</store>
@@ -222,14 +222,14 @@ KOOL).  */
   context var '_:_(X:Id[HOLE],, T:Type), .Exps ;
 
   syntax Id ::= "$1" | "$2"
-  rule var '_:_(X:Id[N1:Int, N2:Int, Vs:Vals],, arrayOf arrayOf T:Type);
+  rule var '_:_(X:Id[N1:Int, N2:Int, Vs:Vals],, arrayOf arrayOf T:Type), .Exps;
        =>
-       'var_;('_:_(X[N1],, arrayOf arrayOf T));
+       var X[N1] : arrayOf arrayOf T;
        {
-         var '_:_($1,, arrayOf arrayOf T) = X;
+         var $1 : (arrayOf arrayOf T) = X;
          for $2 = 0 to N1 - 1 do
          {
-           'var_;('_:_(X[N2,Vs],, arrayOf T));
+           var X[N2,Vs] : arrayOf T;
            $1[$2] = X;
          }
        }
@@ -262,7 +262,7 @@ KOOL).  */
   rule B1:Bool or B2:Bool => B1 orBool B2
   rule not(B:Bool) => notBool(B)
 
-  rule V[N1:Int, N2:Int, Vs:Vals] => V[N1][N2,Vs] [anywhere]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2,Vs] [anywhere]
   rule arrayRef(_, L:Int, M:Int)[N:Int] => lookup(L +Int N)
        when N >=Int 0 andBool N <Int M
        [anywhere]
@@ -272,7 +272,9 @@ KOOL).  */
   syntax Val ::= "nothing"
   rule return; => return nothing;   [structural]
 
-  rule <k> read() => I ...</k> <in> ListItem(I) => . ...</in> [transition]
+  rule <k> read() => I ...</k>
+       <in> ListItem(I:Int) => . ...</in>
+       [transition]
 
   context (HOLE => lvalue(HOLE)) = _
 
@@ -282,7 +284,8 @@ KOOL).  */
        <env> Env:Map </env>
        [structural]
 
-  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [structural]
+  rule Ss1:K Ss2:K => Ss1 ~> Ss2  [structural]
+
   rule V:Val; => .
   rule if  true then S:Stmt else _ => S
   rule if false then _ else S:Stmt => S

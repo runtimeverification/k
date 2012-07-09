@@ -1,0 +1,3 @@
+<config>
+	<test def="/dist/examples/kool-untyped/kool-untyped.k" program-extension="kool" compiled-file-name="kool-untyped-compiled.maude"/>
+</config>
