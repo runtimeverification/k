@@ -64,7 +64,6 @@ public class Executor extends Thread {
 			    		return p.waitFor();
 			        }};
 		        exitValue = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
-		        
 			    output = callable.output;
 			    error = callable.error;
 			} catch (IOException e) {
@@ -78,11 +77,10 @@ public class Executor extends Thread {
 				timedout = true;
 				System.out.println("EXCEPTION: " + e.getMessage());
 			} catch (TimeoutException e) {
-				timedout=true;
+				timedout = true;
 				System.out.println("Setting timeout to " + timedout);
-				System.out.println("EXCEPTION: " + e.getMessage());
+				System.out.println("EXCEPTION: " + e.toString());
 			}
-
 	}
 
 	public String[] getCommands() {
