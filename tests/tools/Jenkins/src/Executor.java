@@ -36,7 +36,6 @@ public class Executor extends Thread {
 				MyCallable<Integer> callable = new MyCallable<Integer>(pb.start(), input) {
 			        public Integer call() throws Exception
 			        {
-			    		
 			    		if (input != null && !input.equals(""))
 			    		{
 			    			OutputStream stream = p.getOutputStream();
@@ -64,9 +63,15 @@ public class Executor extends Thread {
 
 			    		return p.waitFor();
 			        }};
-			    exitValue = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
+			    Integer tcall = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
+			    exitValue = tcall;
 			    output = callable.output;
 			    error = callable.error;
+			    timedout = callable.timedout;
+			    if (tcall == null) {
+			    	timedout = true;
+			    }
+			    
 			} catch (TimeoutException e) {
 			    output = "Timed out.";
 			    error = "Timed out.";
@@ -125,13 +130,17 @@ public class Executor extends Thread {
 	    throws InterruptedException, ExecutionException, TimeoutException {
 			FutureTask<T> task = new FutureTask<T>(c);
 		    THREAD_POOL.execute(task);
-		    return task.get(timeout, timeUnit);
+		    T result = task.get(timeout, timeUnit);
+		    if (task.isCancelled())
+		    	return null;
+		    return result;
 	}
 
 }
 
 class MyCallable<T> implements Callable<T>
 {
+	public boolean timedout = false;
 	Process p;
 	String output = "";
 	String error = "";
