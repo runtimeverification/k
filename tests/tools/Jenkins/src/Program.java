@@ -51,11 +51,11 @@ public class Program extends Thread {
 
 		compile = new Executor(run, dir, StaticK.readFileAsString(inputFile));
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
+				.newCachedThreadPool();
 		tpe.execute(compile);
 		compile.start();
-		long stamp = System.currentTimeMillis();
-		while (tpe.getCompletedTaskCount() != 1 && (System.currentTimeMillis() - stamp - StaticK.ulimit * 1000) < 0) {
+
+		while (tpe.getCompletedTaskCount() != 1 ) {
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
