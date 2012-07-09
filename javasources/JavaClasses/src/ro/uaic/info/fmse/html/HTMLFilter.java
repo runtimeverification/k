@@ -97,10 +97,10 @@ public class HTMLFilter extends BasicVisitor {
 				+ "border-color: #7c7c7c;"+endl
 				+ "background-color: #d7d7d7;"+endl
 				+ "}" + endl);
-		colors.put("default" , "default" + endl
+		colors.put("defaultColor" , ".defaultColor" + endl
 				+ "{" + endl
-				+ "border-color: black;"+endl
-				+ "background-color: white;"+endl
+				+ "border-color: #000000;"+endl
+				+ "background-color: #FFFFFF;"+endl
 				+ "}" + endl);
 		
 	}
@@ -115,7 +115,7 @@ public class HTMLFilter extends BasicVisitor {
 		if(cellColors.get(cellName) != null)
 			return cellColors.get(cellName);
 		else
-			return "default";
+			return "defaultColor";
 			
 	}
 
@@ -242,7 +242,7 @@ public class HTMLFilter extends BasicVisitor {
 		} else {
 			tabClasses += " curvedEdge";
 		}
-		if (c.getAttributes().containsKey("color")) {
+		if (c.getAttributes().containsKey("color") && colors.containsKey(c.getAttributes().get("color"))) {
 			cellColors.put(c.getLabel(), c.getAttributes().get("color"));
 		}
 
@@ -344,21 +344,18 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Context cxt) {
-		result += "\\kcontext";
-		result += "{" + endl;
+		result += "CONTEXT ";
 		cxt.getBody().accept(this);
-		result += "}{";
 		if (cxt.getCondition() != null) {
+			result += " when ";
 			cxt.getCondition().accept(this);
 		}
-		result += "}{";
 		cxt.getAttributes().accept(this);
-		result += "}" + endl;
 	}
 
 	@Override
 	public void visit(Hole hole) {
-		result += "HOLE";
+		result += "&#9633;";
 	}
 
 	@Override
@@ -435,7 +432,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KSequence k) {
-		printList(k.getContents(), "&#x21b7; ");
+		printList(k.getContents(), "&#x219d; ");
 
 	}
 
@@ -477,6 +474,8 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Attribute entry) {
 		if (DefinitionHelper.isTagGenerated(entry.getKey()))
+			return;
+		if (DefinitionHelper.isParsingTag(entry.getKey()))
 			return;
 		if (entry.getKey().equals("latex"))
 			return;
