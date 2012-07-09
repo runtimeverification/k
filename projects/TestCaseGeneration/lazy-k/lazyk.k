@@ -12,6 +12,7 @@
 
 
 
+
 module LAZYK-SYNTAX
    syntax Program  ::= Write CCExpr
 
@@ -25,20 +26,23 @@ module LAZYK-SYNTAX
 //   syntax IotaExpr ::= "!"
 //                     | ExprPrime
 
-   syntax ExprPrime  ::= "k"
-                       | "s"
-                       | "j"
+   syntax ExprPrime  ::= UnlambdaExpr
                        | NonemptyJotExpr
-                       | ">" Expr Expr
 //                       | "*" IotaExpr IotaExpr
                        | "[" CCExpr "]"
                        | "[" "]"
 
+   syntax UnlambdaExpr ::= "s"
+                         | "k"
+                         | "j"
+                         | ">" Expr Expr
 
-   syntax NonemptyJotExpr ::= NonemptyJotExpr Zero
-                            | NonemptyJotExpr One
-                            | Zero
-                            | One
+   syntax NonemptyJotExpr ::= NonemptyJotExpr JotDigit [right]
+                            | TerminalJot
+
+   syntax TerminalJot ::= JotDigit
+
+   syntax JotDigit ::= Zero | One
 
    syntax Zero ::= "z"  
    syntax One ::= "o"
@@ -59,23 +63,49 @@ module LAZYK
     syntax KResult ::= Program
 
 
-
-
-  rule > i X:Fun => X [anywhere]
-
-  rule > > k X:Fun Y:Fun => X [anywhere]
-
-  rule > > > s X:Fun Y:Fun Z:Fun => > > X Z > Y Z [anywhere]
-
-
-
   
- //rule  read => s  [anywhere]
+  // CC expressions
+  rule [ ] => j [anywhere]
+  rule X:CCExpr Y:Expr => > X Y [anywhere]
+  rule [ X:UnlambdaExpr ] => X [anywhere]
 
 
- // [anywhere] tag does not match, if <k> ... </k> is used
- rule <k> read => I ...</k> 
-       <in> ListItem(I) => . ...</in> [anywhere]
+  // TODO: doesn't work right
+  // Jot expressions
+//  rule X:TerminalJot => > j X [anywhere]
+//  rule X:UnlambdaExpr z => > > X s k [anywhere]
+//  rule X:UnlambdaExpr o => 
+//       > > s > k > s > k X > > s > > s > k s > > s > k k j > k j [anywhere]
+
+
+  rule ! => j [anywhere]
+  rule > j X:Expr => X [anywhere]
+
+  rule > > k X:Expr Y:Expr => X [anywhere]
+
+  rule > > > s X:Expr Y:Expr Z:Expr => > > X Z > Y Z [anywhere]
+
+
+
+
+
+  // TODO: Output
+
+
+ 
+
+
+
+
+ // "read" is i (disabled input)
+ rule read => j [anywhere]
+
+ // TODO: Input
+
+  //rule  read => s  [anywhere]
+ 
+ //rule <k>... read => C ...</k> 
+//       <in> ListItem(C:Char) => . ...</in>
 
 
 //  rule [Input]:
@@ -93,15 +123,15 @@ module LAZYK
 //      str(substrString(S:String, 0, 1))(.List{K})
 //      [structural]
 
-  //rule [charToAscii]: 
+//  rule [charToAscii]: 
 //    charToAscii(str(C:Char)(.List{K})) => int(asciiString(C:Char))(.List{K})
 //      [structural]
 
-/*  rule [butFirstChar]: 
-    butFirstChar(str(S:String)(.List{K})) => 
-      str(substrString(S:String, 1, lengthString(S:String)))(.List{K})
-      [structural]
-*/
+//  rule [butFirstChar]: 
+//  butFirstChar(str(S:String)(.List{K})) => 
+//    str(substrString(S:String, 1, lengthString(S:String)))(.List{K})
+//    [structural]
+
 
 
 endmodule

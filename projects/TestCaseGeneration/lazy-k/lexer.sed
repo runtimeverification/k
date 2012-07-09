@@ -2,7 +2,7 @@
 
 # Lexer for Lazy K
 
-# Usage:  $ cat program.lazy | sed -f lexer.sed > program.lexed.unl
+# Usage:  $ cat program.lazy | sed -f lexer.sed > program.k.lazy
 
 
 # Written for GNU sed.
@@ -20,6 +20,7 @@
 # * Introduces spaces between adjacent tokens.
 # * Adds "write" token at beginning (requires at least one line in input).
 # * Adds "read" token at end.
+# * Wraps program within "> [ <program> ]", to be applied to input function.
 
 
 
@@ -60,11 +61,11 @@ y/01/zo/
 y/()/[]/
 
 
-# "write" at beginning
-1iwrite
+# "write" at beginning, plus apply program function
+1iwrite > [ 
 
 # "read" at end
-$aread
+$a] read 
 
 # Delete empty lines
 /^$/d
