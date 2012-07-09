@@ -1,0 +1,33 @@
+// The following program gets stuck, because "and" is not
+// shortcircuited in SIMPLE (though it types)
+
+var x[100] : arrayOf int;
+
+function init(n:int):void {
+  for i = 0 to n - 1 do
+    x[i] = (n - i) + 100;
+}
+
+function printAll(n:int):void {
+  for i = 0 to n - 1 do
+  print(" ",x[i]);
+}
+
+function main():void {
+  var n:int=30;
+  init(n);
+  print("The original sequence is");
+  printAll(n);
+  print("\nSorting the array using insertion sort ... ");
+  for i = 1 to n - 1 do {
+    var j:int = i - 1, v:int = x[i];
+    while (j >= 0 and x[j] > v) do {  // gets stuck on the while condition
+      x[j + 1] = x[j];
+      j = j - 1;
+    }
+    x[j+1] = v;
+  }
+  print("Done!\nThe sorted sequence is");
+  printAll(n);
+  print("\n");
+}

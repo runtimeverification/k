@@ -1,0 +1,86 @@
+var x:int, a[10]:arrayOf int;
+
+function incx():void {
+  ++x;
+}
+
+function zero():int {
+  return 0;
+}
+
+function id(x:int):int {
+  return x;
+}
+
+function double(x:int):int {
+  return 2*x;
+}
+
+function hoincx(): function from void to void {
+  return incx;
+}
+
+function hozero(): function from void to int {
+  return zero;
+}
+
+function hoid(): function from int to int {
+  return id;
+}
+
+function hodouble(): function from int to int {
+  return double;
+}
+
+function hoid0(f : function from void to void) : function from void to void {
+  return f;
+}
+
+function hoid1(f : function from void to int) : function from void to int {
+  return f;
+}
+
+function hoid2(f : function from int to int) : function from int to int {
+  return f;
+}
+
+function app0(f : function from void to void) : void {
+  f();
+}
+
+function app1(f : function from void to int) : int {
+  return f();
+}
+
+function app2(f : function from int to int, x : int) : int {
+  return f(x);
+}
+
+function map(f : function from int to int, x : arrayOf int) : void {
+  for i=0 to sizeOf(x)-1 do
+    x[i] = app2(f,x[i]);
+}
+
+function printall():void {
+  print("x = ",x, ";  a[] = ");
+  for i=0 to sizeOf(a)-1
+    do print(a[i], " ");
+  print("\n");
+}
+
+function main():void {
+  x = 0;
+  for i=0 to sizeOf(a)-1 do
+    a[i]=i;
+  printall();
+  hoincx()();
+  print(x," ", hozero()()," ", hoid()(7)," ", hodouble()(7),"\n");
+  hoid0(hoincx())();
+  print(x," ", hoid1(hozero())()," ", 
+        hoid2(hoid())(7)," ", hoid2(hodouble())(7),"\n");
+  app0(hoid0(hoincx()));
+  print(x," ", app1(hoid1(hozero()))," ", 
+        app2(hoid2(hoid()),7)," ", app2(hoid2(hodouble()),7),"\n");
+  map(double,a);
+  printall();
+}

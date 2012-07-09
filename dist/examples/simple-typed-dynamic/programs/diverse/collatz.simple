@@ -8,8 +8,8 @@
 // do not want to enforce any particular such value, which is why the
 // latter gets stuck.
 
-function collatz(n of int) : void {
-  var s of int = 0;
+function collatz(n:int):void {
+  var s:int=0;
   print("Testing Collatz' conjecture for n = ",n," ... ");
   while n > 1 do {
     s = s+1;
@@ -22,7 +22,7 @@ function collatz(n of int) : void {
 
 function main():void {
   print("Testing Collatz' conjecture up to what number? ");
-  var m of int = read();
+  var m:int = read();
   for i = 1 to m do
     collatz(i);
   print("Done.  It appears to hold.\n");

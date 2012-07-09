@@ -31,8 +31,6 @@ the desired evaluation strategies of the various language constructs .  */
   syntax Exp ::= Int | Bool | String | Id
                | "(" Exp ")"            [bracket]
                | "++" Exp     
-//               | Exp ":" Type           // allowed only for declarations
-               | Exp "of" Type           // allowed only for declarations
                > Exp "[" Exps "]"       [strict]
                > Exp "(" Exps ")"       [strict]
                | "-" Exp                [strict]
@@ -57,6 +55,8 @@ the desired evaluation strategies of the various language constructs .  */
                  Exp "and" Exp           [strict, left]
                | Exp "or" Exp            [strict, left]
                > Exp "=" Exp             [strict(2), right]
+               | Exp ":" Type           // allowed only for declarations
+//               | Exp "of" Type           // allowed only for declarations
 
   syntax Exps ::= List{Exp,","}
 
@@ -84,19 +84,20 @@ the desired evaluation strategies of the various language constructs .  */
 
 
 // temporary solution for the ":" operator
-  rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
-  rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
+//  rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
+//  rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
 
 
 //@ We use the same desugaring macros like in typed SIMPLE
 
   rule if E:Exp then S:Stmt => if E then S else {}
-  rule (for X:Id = E1 to E2 do S)
+  rule (for X:Id = E1:Exp to E2:Exp do S:Stmt)
         =>
-       {var '_:_(X,, int) = E1; while X <= E2 do {S X = (X + 1);}}
+       {var X : int = E1; while X <= E2 do {S X = (X + 1);}}
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
-  rule var '_:_(X:Id,, T:Type) = E:Exp; => var '_:_(X,, T), .Exps; X = E;
-
+  rule var (X:Id : T:Type) = E:Exp;
+       =>
+       var X : T; X = E;
 endmodule
 
 
@@ -189,7 +190,7 @@ similar to that in untyped SIMPLE, but we have to enforce that the
 type of an array declaration be of the form \texttt{arrayOf $T$}
 and assign the right type ($T$) to the allocated array locations. */
 
-  rule <k> var '_:_(X[N:Int],, arrayOf T); => . ...</k> 
+  rule <k> var '_:_(X[N:Int, .Vals],, arrayOf T), .Exps; => . ...</k> 
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> arrayRef(arrayOf T, L +Int 1, N)
                        L +Int 1 .. L +Int N |-> undefined(T) ...</store>
@@ -203,16 +204,17 @@ make sure that all the declared temporary variables have the right
 types. */
 
   syntax Id ::= "$1" | "$2"
-  rule var '_:_(X[N1:Int, N2:Int, Vs:Vals],, arrayOf arrayOf T); =>
-       var '_:_(X[N1],, arrayOf arrayOf T);
+  rule var X[N1:Int, N2:Int, Vs:Vals] : arrayOf arrayOf T; =>
+       var X[N1] : arrayOf (arrayOf T);
        {
-         var '_:_($1,, arrayOf arrayOf T) = X;
+         var ($1 : arrayOf (arrayOf T)) = X;
          for $2 = 0 to N1 - 1 do
          {
-           (var '_:_(X[N2,Vs],, arrayOf T);)
+           var X[N2,Vs] : arrayOf T;
            $1[$2] = X;
          }
-       }  [structural]
+       }
+       [structural]
 
 /*@ Store all function parameters, as well as the return type, as part
 of the lambda abstraction.  In the spirit of dynamic typing, we will
@@ -267,7 +269,7 @@ When done with the first pass, call \texttt{main()}. */
 
 //@ Check array bounds, as part of the dynamic typing policy.
 
-  rule V[N1:Int, N2:Int, Vs:Vals] => V[N1][N2,Vs] [anywhere]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2,Vs] [anywhere]
 
   rule arrayRef(_, L:Int, M:Int)[N:Int] => lookup(L +Int N)
        when N >=Int 0 andBool N <Int M
