@@ -29,6 +29,8 @@ public class Executor extends Thread {
 
 	@Override
 	public void run() {
+		
+		boolean timedout = false;
 			try {
 				output = ""; error = "";
 				ProcessBuilder pb = new ProcessBuilder(commands);
@@ -78,9 +80,12 @@ public class Executor extends Thread {
 				System.out.println("EXCEPTION: " + e.getMessage());
 			} catch (TimeoutException e) {
 				timedout = true;
-				System.out.println("Setting timeout to " + timedout);
 				System.out.println("EXCEPTION: " + e.toString());
 			}
+
+			System.out.println("TIMEDOUT " + timedout);
+			if (timedout)
+				this.timedout = timedout;
 	}
 
 	public String[] getCommands() {
