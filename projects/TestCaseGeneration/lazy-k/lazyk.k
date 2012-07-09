@@ -29,7 +29,7 @@ module LAZYK-SYNTAX
                        | "s"
                        | "j"
                        | NonemptyJotExpr
-                       | "=" Expr Expr
+                       | ">" Expr Expr
 //                       | "*" IotaExpr IotaExpr
                        | "[" CCExpr "]"
                        | "[" "]"
@@ -57,6 +57,17 @@ module LAZYK
       <out stream="stdout"> .List </out>
     </streams>
     syntax KResult ::= Program
+
+
+
+
+  rule > i X:Fun => X [anywhere]
+
+  rule > > k X:Fun Y:Fun => X [anywhere]
+
+  rule > > > s X:Fun Y:Fun Z:Fun => > > X Z > Y Z [anywhere]
+
+
 
   
  //rule  read => s  [anywhere]

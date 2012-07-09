@@ -11,7 +11,7 @@
 # This lexer converts a Lazy-K program into a K-readable equivalent.
 # * Comments and extra whitespace are removed.
 # * Undefined characters are indicated as an "UNDEF" token.
-# * The combinator application token "`" is replaced by "=".
+# * The combinator application token "`" is replaced by ">".
 # * "I" -> "!".
 # * "i" -> "j".
 # * "K" and "S" to lowercase.
