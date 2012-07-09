@@ -64,9 +64,9 @@ public class Executor extends Thread {
 			    		return p.waitFor();
 			        }};
 		        exitValue = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
+		        
 			    output = callable.output;
 			    error = callable.error;
-			    timedout = callable.timedout;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 			    timedout = true;
@@ -127,7 +127,6 @@ public class Executor extends Thread {
 
 class MyCallable<T> implements Callable<T>
 {
-	public boolean timedout = false;
 	Process p;
 	String output = "";
 	String error = "";
