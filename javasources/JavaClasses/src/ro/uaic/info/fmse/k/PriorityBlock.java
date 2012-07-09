@@ -99,4 +99,37 @@ public class PriorityBlock extends ASTNode {
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (this == obj)
+			return true;
+		if (!(obj instanceof PriorityBlock))
+			return false;
+		PriorityBlock pb = (PriorityBlock) obj;
+
+		if (!pb.getAssoc().equals(this.assoc))
+			return false;
+
+		if (pb.productions.size() != productions.size())
+			return false;
+
+		for (int i = 0; i < pb.productions.size(); i++) {
+			if (!pb.productions.get(i).equals(productions.get(i)))
+				return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = assoc.hashCode();
+
+		for (Production prd : productions)
+			hash += prd.hashCode();
+		return hash;
+	}
 }

@@ -161,4 +161,37 @@ public class Syntax extends ModuleItem {
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Syntax))
+			return false;
+		Syntax syn = (Syntax) obj;
+
+		if (!syn.getSort().equals(this.sort))
+			return false;
+
+		if (syn.priorityBlocks.size() != priorityBlocks.size())
+			return false;
+
+		for (int i = 0; i < syn.priorityBlocks.size(); i++) {
+			if (!syn.priorityBlocks.get(i).equals(priorityBlocks.get(i)))
+				return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = sort.hashCode();
+
+		for (PriorityBlock pb : priorityBlocks)
+			hash += pb.hashCode();
+		return hash;
+	}
 }

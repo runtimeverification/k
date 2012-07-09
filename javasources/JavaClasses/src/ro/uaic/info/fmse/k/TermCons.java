@@ -143,4 +143,39 @@ public class TermCons extends Term {
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (this == obj)
+			return true;
+		if (!(obj instanceof TermCons))
+			return false;
+		TermCons tc = (TermCons) obj;
+
+		if (!tc.getSort().equals(this.sort))
+			return false;
+		if (!tc.cons.equals(cons))
+			return false;
+
+		if (tc.contents.size() != contents.size())
+			return false;
+
+		for (int i = 0; i < tc.contents.size(); i++) {
+			if (!tc.contents.get(i).equals(contents.get(i)))
+				return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = sort.hashCode() + cons.hashCode();
+
+		for (Term t : contents)
+			hash += t.hashCode();
+		return hash;
+	}
 }

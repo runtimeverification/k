@@ -56,12 +56,35 @@ public class Sort extends ProductionItem {
 	@Override
 	public void applyToAll(Modifier visitor) {
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (obj == this)
+			return true;
+		if (!(obj instanceof Sort))
+			return false;
+
+		Sort srt = (Sort) obj;
+
+		if (!sort.equals(srt.getSort()))
+			return false;
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return this.sort.hashCode();
 	}
 }

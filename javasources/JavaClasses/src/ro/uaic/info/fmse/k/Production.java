@@ -20,15 +20,19 @@ public class Production extends ASTNode {
 	protected String sort;
 
 	public boolean isListDecl() {
-		return items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST;
+		return items.size() == 1
+				&& items.get(0).getType() == ProductionType.USERLIST;
 	}
 
 	public boolean isSubsort() {
-		return items.size() == 1 && items.get(0).getType() == ProductionType.SORT;
+		return items.size() == 1
+				&& items.get(0).getType() == ProductionType.SORT;
 	}
 
 	public boolean isConstant() {
-		return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals("KLabel"));
+		return items.size() == 1
+				&& items.get(0).getType() == ProductionType.TERMINAL
+				&& (sort.startsWith("#") || sort.equals("KLabel"));
 	}
 
 	public Production(Element element) {
@@ -38,7 +42,8 @@ public class Production extends ASTNode {
 		strings.add(Constants.SORT);
 		strings.add(Constants.TERMINAL);
 		strings.add(Constants.USERLIST);
-		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, strings);
+		java.util.List<Element> its = XML.getChildrenElementsByTagName(element,
+				strings);
 
 		items = new ArrayList<ProductionItem>();
 		for (Element e : its)
@@ -120,7 +125,8 @@ public class Production extends ASTNode {
 	@Override
 	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.items.size(); i++) {
-			ProductionItem elem = (ProductionItem) visitor.modify(this.items.get(i));
+			ProductionItem elem = (ProductionItem) visitor.modify(this.items
+					.get(i));
 			this.items.set(i, elem);
 		}
 	}
@@ -141,5 +147,42 @@ public class Production extends ASTNode {
 
 	public void setSort(String sort) {
 		this.sort = sort;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (obj == this)
+			return true;
+		if (!(obj instanceof Production))
+			return false;
+		Production prd = (Production) obj;
+
+		if (this.sort != null && prd.getSort() != null)
+			if (!this.sort.equals(prd.getSort()))
+				return false;
+		if (this.sort == null && prd.getSort() != null)
+			return false;
+
+		if (prd.getItems().size() != this.items.size())
+			return false;
+
+		for (int i = 0; i < this.items.size(); i++) {
+			if (!prd.getItems().get(i).equals(items.get(i)))
+				return false;
+		}
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 0;
+		if (sort != null)
+			hash += sort.hashCode();
+
+		for (ProductionItem pi : this.items)
+			hash += pi.hashCode();
+		return hash;
 	}
 }

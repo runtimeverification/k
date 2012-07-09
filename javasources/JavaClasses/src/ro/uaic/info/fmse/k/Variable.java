@@ -42,12 +42,32 @@ public class Variable extends Term {
 	@Override
 	public void applyToAll(Modifier visitor) {
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Variable))
+			return false;
+		Variable var = (Variable) obj;
+
+		return this.sort.equals(var.getSort()) && this.name.equals(var.getName());
+	}
+
+	@Override
+	public int hashCode() {
+		return sort.hashCode() + name.hashCode();
 	}
 }
