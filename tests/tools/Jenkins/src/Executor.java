@@ -29,64 +29,57 @@ public class Executor extends Thread {
 
 	@Override
 	public void run() {
-		
-		boolean timedout = false;
-			try {
-				output = ""; error = "";
-				ProcessBuilder pb = new ProcessBuilder(commands);
-				pb.directory(new File(dir));
-				MyCallable<Integer> callable = new MyCallable<Integer>(pb.start(), input) {
-			        public Integer call() throws Exception
-			        {
-			    		if (input != null && !input.equals(""))
-			    		{
-			    			OutputStream stream = p.getOutputStream();
-			    			stream.write(input.getBytes());
-			    			stream.flush();
-			    			stream.close();
-			    		}
-			    		
-			    		exitValue = p.waitFor();
-			    		BufferedReader br = new BufferedReader(new InputStreamReader(
-			    				p.getInputStream()));
-			    		String line;
-			    		output = "";
-			    		while ((line = br.readLine()) != null) {
-			    			output += line + "\n";
-			    			line = "";
-			    		}
+		try {
+			output = ""; error = "";
+			ProcessBuilder pb = new ProcessBuilder(commands);
+			pb.directory(new File(dir));
+			MyCallable<Integer> callable = new MyCallable<Integer>(pb.start(), input) {
+		        public Integer call() throws Exception
+		        {
+		    		if (input != null && !input.equals(""))
+		    		{
+		    			OutputStream stream = p.getOutputStream();
+		    			stream.write(input.getBytes());
+		    			stream.flush();
+		    			stream.close();
+		    		}
+		    		
+		    		exitValue = p.waitFor();
+		    		BufferedReader br = new BufferedReader(new InputStreamReader(
+		    				p.getInputStream()));
+		    		String line;
+		    		output = "";
+		    		while ((line = br.readLine()) != null) {
+		    			output += line + "\n";
+		    			line = "";
+		    		}
 
-			    		br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-			    		line = ""; error = "";
-			    		while ((line = br.readLine()) != null) {
-			    			error += line + "\n";
-			    			line = "";
-			    		}
+		    		br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+		    		line = ""; error = "";
+		    		while ((line = br.readLine()) != null) {
+		    			error += line + "\n";
+		    			line = "";
+		    		}
 
-			    		return p.waitFor();
-			        }};
-		        exitValue = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
-			    output = callable.output;
-			    error = callable.error;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-			    timedout = true;
-			    error = "IOException";
-			} catch (InterruptedException e) {
-				timedout = true;
-				System.out.println("EXCEPTION: " + e.getMessage());
-			} catch (ExecutionException e) {
-				timedout = true;
-				System.out.println("EXCEPTION: " + e.getMessage());
-			} catch (TimeoutException e) {
-				timedout = true;
-				System.out.println("Setting timedout to " + timedout);
-				System.out.println("EXCEPTION: " + e.toString());
-			}
-
-			System.out.println("TIMEDOUT " + timedout);
-			if (timedout)
-				this.timedout = timedout;
+		    		return p.waitFor();
+		        }};
+	        exitValue = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
+		    output = callable.output;
+		    error = callable.error;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+		    timedout = true;
+		    error = "IOException";
+		} catch (InterruptedException e) {
+			timedout = true;
+			error = "InteruptedException";
+		} catch (ExecutionException e) {
+			timedout = true;
+			error = "ExecutionException";
+		} catch (TimeoutException e) {
+			timedout = true;
+			error = "TimeoutException";
+		}
 	}
 
 	public String[] getCommands() {
@@ -107,6 +100,7 @@ public class Executor extends Thread {
 	
 	public boolean getTimedOut()
 	{
+		System.out.println("TIMEOUT: " + timedout);
 		return timedout;
 	}
 	
