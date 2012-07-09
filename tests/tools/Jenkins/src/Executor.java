@@ -78,8 +78,8 @@ public class Executor extends Thread {
 				e.printStackTrace();
 				timedout = true;
 			} catch (TimeoutException e) {
-				e.printStackTrace();
 				timedout=true;
+				e.printStackTrace();
 			}
 
 	}
