@@ -96,6 +96,7 @@ public class Program extends Thread {
 
 	@Override
 	public String toString() {
+		System.out.println(filename.substring(StaticK.kbasedir.length()) + " time out: " + timedout);
 		if (isCorrect())
 			return filename.substring(StaticK.kbasedir.length()) + "... success.";
 		else
