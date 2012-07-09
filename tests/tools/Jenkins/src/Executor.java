@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -113,13 +114,21 @@ public class Executor extends Thread {
 			FutureTask<T> task = new FutureTask<T>(c);
 		    THREAD_POOL.execute(task);
 		    try{
-		    	return task.get(timeout, timeUnit);
+		    	T result = task.get(timeout, timeUnit);
+		    	if (THREAD_POOL.isTerminated())
+		    		return result;
+		    	else {
+		    		task.cancel(true);
+		    		return null;
+		    	}
 		    }
 		    catch (TimeoutException e) {
 			    return null;
 			} catch (InterruptedException e) {
 			    return null;
-			} catch (ExecutionException e) {
+			} catch (ExecutionException ee) {
+				return null;
+			} catch (CancellationException ce){
 				return null;
 			}
 	}
