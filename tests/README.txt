@@ -49,7 +49,7 @@ d) The name of the input and output files for some programs are different:
 e) Some programs need special options to run
 
 
-we create in directory /tests/examples/exp-untyped/ a configuration file:
+we create in directory /tests/examples/simple-untyped/ a configuration file:
 called "config.xml".
 For instance, a "config.xml" for simple-unyped may contain:
 
