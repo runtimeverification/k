@@ -49,8 +49,7 @@ public class Example extends Thread {
 					.newFixedThreadPool(THREAD_POOL_SIZE);
 			tpe.execute(compile);
 			
-			long stamp = System.currentTimeMillis();
-			while (tpe.getCompletedTaskCount() != 1 && (System.currentTimeMillis() - stamp - StaticK.ulimit * 1000) < 0) {
+			while (tpe.getCompletedTaskCount() != 1) {
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
