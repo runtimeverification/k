@@ -151,7 +151,7 @@ public class Initialize {
 		String compiledDef = defNameNoExtension + "-compiled.maude";
 		String programsExtension = defNameNoExtension;
 		String programsDir = rootPath + programsRelDir;
-
+		
 		/**** CHANGE DEFAULTS if config.xml is present in testsDir ****/
 		String xmlConfigFile = rootPath + testsRelDir + StaticK.fileSep + "config.xml";
 		Element config = null;
@@ -196,6 +196,7 @@ public class Initialize {
 			Map<String, String> krunoptions = new HashMap<String, String>();
 			krunoptions.put("--no-color", "");
 			krunoptions.put("--output-mode", "none");
+			boolean ignore = false;
 			
 			/******************* CHANGING DEFAULTS ACCORDING TO CONFIG FILE  ******************/
 			if(config != null)
@@ -211,6 +212,9 @@ public class Initialize {
 				{
 					Element pgm = (Element) pgms.item(i);
 					String name = pgm.getAttribute("name");
+					String ignoreAttr = pgm.getAttribute("ignore");
+					if (ignoreAttr.equals("yes"))
+						ignore = true;
 					if (name.equals(new File(program).getName()))
 					{
 						set = true;
@@ -265,7 +269,8 @@ public class Initialize {
 				}
 			}
 			
-			example.appendChild(test);
+			if (!ignore)
+				example.appendChild(test);
 		}
 
 		return example;
