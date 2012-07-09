@@ -8,7 +8,7 @@ public class Example extends Thread {
 	String mainFile;
 	String compiledFile;
 	String mainModule;
-	private boolean timedout;
+	private boolean timedout = false;
 
 	String[] krunOptions;
 	String k3jar;
