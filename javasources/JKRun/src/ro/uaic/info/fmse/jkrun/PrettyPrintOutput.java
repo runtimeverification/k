@@ -255,9 +255,8 @@ public class PrettyPrintOutput {
 			else if (m == 0 && n > 0) {
 				sb = freezerCase(list, op, n, false, whitespace, ANSI_NORMAL);
 			}
-			//like in the case of an associative operator (<term op="_~>_" sort="K">)
 			else if (m < n && n > 0 && m > 0) {
-				//"_~>_" is an associative operator
+				//like in the case of an associative operator (<term op="_~>_" sort="K">) "_~>_" is an associative operator
 				if (op.equals("_~>_")) {
 					sb = lessUnderscoresAssocCase(list, op, false, whitespace, ANSI_NORMAL);
 				}
@@ -401,7 +400,8 @@ public class PrettyPrintOutput {
 				return sb.toString();
 			}
 			//like the case of #Zero, #Bool, #Char and #String sorts
-			else if ((m == 0) && (n == 0)) {
+			else if ((m == 0) && (n == 0) ||
+					(sort.equals("#Zero") || sort.equals("#Bool") || sort.equals("#Char") || sort.equals("#String"))) {
 				sb = new StringBuilder();
 				sb.append(op);
 				return sb.toString();
@@ -528,7 +528,7 @@ public class PrettyPrintOutput {
 		for (int i = 0; i < list.size(); i++) {
    		    Element child = list.get(i);
    		    String elem = prettyPrint(print(child, lineskip, whitespace, color), lineskip, whitespace, color);
-			elements.add(elem.trim());
+			elements.add(elem);
 	    }
 		StringBuilder sb_ = new StringBuilder(op);
 		sb_ = FileUtil.insertSpaceNearUnderscores(op);
@@ -560,7 +560,7 @@ public class PrettyPrintOutput {
 		for (int i = 0; i < list.size(); i++) {
 			Element child = list.get(i);
 			String elem = prettyPrint(print(child, lineskip, whitespace, color), lineskip, whitespace, color);
-			elements.add(elem.trim());
+			elements.add(elem);
 		}
 		aux = FileUtil.replaceAllUnderscoresAssoc(op, elements);
 		sb.append(aux);

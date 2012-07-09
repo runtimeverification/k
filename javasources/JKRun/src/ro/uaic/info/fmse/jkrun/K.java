@@ -19,6 +19,7 @@ public class K {
 
 	// kast
 	public static final String kast = k_base + fileSeparator + "bin" + fileSeparator + getKastOnOs();
+	public static final String kast_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("kast_in.txt");
 
 	public static final String maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput.xml");
 	public static final String processed_maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput_simplified.xml");

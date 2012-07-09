@@ -61,7 +61,7 @@ public class MaudeTask extends Thread {
 		commands.add("-no-wrap");
 		commands.add("-no-banner");
 		commands.add("-xml-log=" + K.maude_output);
-		maude.command(commands);
+		maude.command(commands); 
 
 		Process maudeProcess = maude.start();
 		_maudeProcess = maudeProcess;

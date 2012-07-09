@@ -228,7 +228,7 @@ public class Main {
 				K.pgm = new File(cmd.getOptionValue("pgm")).getCanonicalPath();
 			}
 			if (cmd.hasOption("ltlmc")) {
-				K.model_checking = new File(cmd.getOptionValue("ltlmc")).getCanonicalPath();
+				K.model_checking = cmd.getOptionValue("ltlmc");
 			}
 
 			// printing the output according to the given options
@@ -301,7 +301,7 @@ public class Main {
 			RunProcess rp = new RunProcess();
 
 			String k3jar = new File(K.kast).getParent() + K.fileSeparator + "java" + K.fileSeparator + "k3.jar";
-			KAST = rp.runParser(k3jar, K.parser, K.k_definition, K.pgm);
+			KAST = rp.runParser(k3jar, K.parser, K.k_definition, K.pgm, true);
 
 			String s = new String();
 			if (K.do_search) {
@@ -327,11 +327,16 @@ public class Main {
 			if (K.model_checking.length() > 0) {
 				//run kast for the formula to be verified
 				File formulaFile = new File(K.model_checking);
-				if (!formulaFile.exists()) {
-					Error.report("\nProgram file that describes the LTL formula does not exist: " + K.model_checking);
-				}
 				String KAST1 = new String();
-				KAST1 = rp.runParser(k3jar, K.parser, K.k_definition, K.model_checking);
+				if (!formulaFile.exists()) {
+					//Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
+					//assume that the specified argument is not a file and maybe represents a formula
+					KAST1 = rp.runParser(k3jar, K.parser, K.k_definition, K.model_checking, false);
+				}
+				else {
+					//the specified argument represents a file
+					KAST1 = rp.runParser(k3jar, K.parser, K.k_definition, K.model_checking, true);
+				}
 				
 				sb.append("load " + K.compiled_def);
 				sb.append(K.lineSeparator + K.lineSeparator);

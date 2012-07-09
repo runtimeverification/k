@@ -75,9 +75,14 @@ public class RunProcess {
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) 
 	 * and return the AST obtained by parser
 	 */
-	public String runParser(String k3jar, String parser, String definition, String pgm) {
+	public String runParser(String k3jar, String parser, String definition, String pgm, boolean isPgm) {
 		String KAST = new String();
 		
+		//the argument is a formula and we should write in a file before passing it to kast
+		if (!isPgm) {
+			FileUtil.createFile(K.kast_in, pgm);
+			pgm = K.kast_in;
+		}
 		if ("kast".equals(parser)) {
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
