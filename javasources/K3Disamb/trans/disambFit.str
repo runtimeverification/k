@@ -50,6 +50,59 @@ strategies
 							!-1								// if none of the above, then put -1
 						)>
 
+	// ------------- new type filter that goes deeper
+	getFitness2(|expect):
+		a#(_) -> 0
+		where <string-ends-with(|"Var") <+
+		       string-ends-with(|"Const") <+
+		       string-ends-with(|"Empty") <+
+		       string-ends-with(|"Hole")> a
+
+	getFitness2(|expect):
+		[] -> 0
+
+	getFitness2(|expect):
+		a#([x, y]) -> <add> (score1, score2)
+		where <string-ends-with(|"Rewrite") <+
+		       string-ends-with(|"List") <+
+		       string-ends-with(|"K1Seq")> a
+		where score1 := <getFitness2(|<getSort> a)> x
+		where score2 := <getFitness2(|<getSort> a)> y
+
+	getFitness2(|expect):
+		a#([x]) -> score
+		where <string-ends-with(|"Item")> a
+		where score := <getFitness2(|"K")> x
+
+	getFitness2(|expect):
+		MapItem1LKLKItem(x, y) -> <add> (score1, score2)
+		where score1 := <getFitness2(|"List{K}")> x
+		where score2 := <getFitness2(|"List{K}")> y
+
+	getFitness2(|expect):
+		Bag1ClosedCell(x1, x2, x3, x4) -> score
+		where MemoMyCells ; one(?(x1, expected2))
+		where score := <getFitness2(|expected2)> x3
+
+	getFitness2(|expect):
+		K1App(a, b) -> <add> (score1, score2)
+		where score1 := <getFitness2(|"KLabel")> a
+		where score2 := <getFitness2(|"List{K}")> b
+
+
+	getFitnessUnit2:
+		(expect, place) -> score
+		where score :=  <(	isSubsortEq(|expect, place) ; !0 <+		// if the sort is a subsort then put 1
+							isSubsortEq(|"K", expect) ; (<?"K"> place <+ <?"K"> expect); !0 <+ // if the sort is K then score it as 0, only if the expected sort is a subsort of K
+							!-1								// if none of the above, then put -1
+						)>
+
+
+
+
+
+
+
 
 
 

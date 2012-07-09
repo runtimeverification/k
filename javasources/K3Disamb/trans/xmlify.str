@@ -212,17 +212,6 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:
-		a#(b) -> $[<builtinOp sort="[sort]" cons="[a]" loc="[loc]">
-					[children]
-		</builtinOp>
-		]
-		where <string-ends-with(|"Builtin")> a
-		where mydebug(!"BuiltinTerm: ")
-		where children := <all(to-xml)> b
-		where sort := <getSort> a
-		where loc := <getLocAsString>
-
-	to-xml2:
 		a#([b, c]) -> $[<rewrite sort="[sort]" loc="[loc]">
 							<left>
 								[<to-xml> b]
