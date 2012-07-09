@@ -5,5 +5,5 @@ all: clean
 
 clean:
 #	rm -rf k-framework
-	rm -rf *.xml
+	rm -rf k-framework/dist/bin/java/k3jar k-framework/dist/bin/java/JKrun.jar
 	
