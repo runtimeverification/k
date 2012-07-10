@@ -24,70 +24,63 @@ strategies
 
 	filterSize:
 		xs -> xs2
-		where mymax := <foldr(!-2147483600, max)> (<all(getFitness)> xs)		// calculate the size of the smallest term
+		where mymax := <foldr(!-2147483600, max)> (<all(getFitness2)> xs)		// calculate the size of the smallest term
 		where xs2 := <filter(findLargest(|mymax))> xs							// filter terms that are of a greater size
 
 	findLargest(|size) =
-		where(currSize := <getFitness> ;
+		where(currSize := <getFitness2> ;
 		<eq>(currSize, size))
 
-	getFitness:
-		x#(xs) -> score
-		where <one(?(x, sort, terms))>  <MemoMyCons>
-		where score := <foldr(!0, add)> (<zip(getFitnessUnit)> (terms, xs))
-
-	getFitnessUnit:
-		(a, b#(_)) -> score
-		where !b => "amb"
-		where score := 0
-
-	getFitnessUnit:
-		(a, b#(_)) -> score									// match on a pair made by ziping terms with the current terms
-		where not(!b => "amb")
-		where b' := <getSort> b
-		where score := 	<(	isSubsortEq(|"K", a) ; (<?"K"> b' <+ <?"K"> a); !0 <+ // if the sort is K then score it as 0, only if the expected sort is a subsort of K
-							isSubsortEq(|a, b') ; !1 <+		// if the sort is a subsort then put 1
-							!-1								// if none of the above, then put -1
-						)>
-
 	// ------------- new type filter that goes deeper
-	getFitness2(|expect):
+	getFitness2:
 		a#(_) -> 0
 		where <string-ends-with(|"Var") <+
 		       string-ends-with(|"Const") <+
 		       string-ends-with(|"Empty") <+
 		       string-ends-with(|"Hole")> a
-
-	getFitness2(|expect):
+		       
+	getFitness2:
 		[] -> 0
+		
+	getFitness2:
+		a#(b) -> <add> (score1, score2)
+		where <string-ends-with(|"Syn") <+ string-ends-with(|"Builtin")> a
+		where score1 := <all(getFitness2) ; foldr(!0,add)> b
+		where MemoMyCons ; one(?(a, _, terms))
+		where score2 := <zip ; all(getFitnessUnit2) ; foldr(!0,add)> (terms, <all(getSortFromTerm)> b)
 
-	getFitness2(|expect):
-		a#([x, y]) -> <add> (score1, score2)
+	getFitness2:
+		a#([x, y]) -> <foldr(!0,add)> [score1, score2, scorea, scoreb]
 		where <string-ends-with(|"Rewrite") <+
 		       string-ends-with(|"List") <+
 		       string-ends-with(|"K1Seq")> a
-		where score1 := <getFitness2(|<getSort> a)> x
-		where score2 := <getFitness2(|<getSort> a)> y
+		where score1 := <getFitness2> x // calculate subtree score
+		where score2 := <getFitness2> y
+		where scorea := <getFitnessUnit2> (<getSort> a, <getSortFromTerm> x) // calculate local score
+		where scoreb := <getFitnessUnit2> (<getSort> a, <getSortFromTerm> y)
 
-	getFitness2(|expect):
-		a#([x]) -> score
+	getFitness2:
+		a#(x) -> score
 		where <string-ends-with(|"Item")> a
-		where score := <getFitness2(|"K")> x
+		// don't calculate the local score as it requires only K
+		where score := <all(getFitness2) ; foldr(!0,add)> x
 
-	getFitness2(|expect):
-		MapItem1LKLKItem(x, y) -> <add> (score1, score2)
-		where score1 := <getFitness2(|"List{K}")> x
-		where score2 := <getFitness2(|"List{K}")> y
+	getFitness2:
+		amb(x) -> <add> (score, -1)
+		where score := <all(getFitness2) ; foldr(!0,add)> x
 
-	getFitness2(|expect):
-		Bag1ClosedCell(x1, x2, x3, x4) -> score
+	getFitness2:
+		Bag1ClosedCell(x1, x2, x3, x4) -> <add> (score1, score2)
+		where score1 := <getFitness2> x3
 		where MemoMyCells ; one(?(x1, expected2))
-		where score := <getFitness2(|expected2)> x3
+		where score2 := <getFitnessUnit2> (expected2, <getSortFromTerm> x3)
 
-	getFitness2(|expect):
-		K1App(a, b) -> <add> (score1, score2)
-		where score1 := <getFitness2(|"KLabel")> a
-		where score2 := <getFitness2(|"List{K}")> b
+	getFitness2:
+		K1App(a, b) -> <foldr(!0,add)> [score1, score2, scorea, scoreb]
+		where score1 := <getFitnessUnit2> ("KLabel", <getSortFromTerm> a)
+		where score2 := <getFitnessUnit2> ("List{K}", <getSortFromTerm> b)
+		where scorea := <getFitness2> a // calculate subtree score
+		where scoreb := <getFitness2> b
 
 
 	getFitnessUnit2:
@@ -97,6 +90,14 @@ strategies
 							!-1								// if none of the above, then put -1
 						)>
 
+	getFitnessUnit2:
+		(expect, []) -> -1
+
+	getSortFromTerm:
+		amb(_) -> []
+	getSortFromTerm:
+		x#(_) -> y
+		where y := <string-trim-last-one ; string-unescape-sort> x
 
 
 
