@@ -71,7 +71,8 @@ For instance, a "config.xml" for simple-unyped may contain:
 </config>
 
 
-
+As you can see in the XML above, some programs (e.g. which 
+do not finish) can be ignored by setting ignore attribute to "yes".
 
 
 *************************
