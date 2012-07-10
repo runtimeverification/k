@@ -111,7 +111,6 @@ strategies
 	correctRewrite:	// K1Rewrite must bind as low as possible, this why choose it to be as high as possible in the AST
 		amb(x) -> ListDlKDr1Rewrite(a, b)
 		where <one(?ListDlKDr1Rewrite(a, b))> x
-		where not(<one(?K1Rewrite(_, _))> x)
 
 	correctRewrite:
 		amb(x) -> Map1Rewrite(a, b)
