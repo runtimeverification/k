@@ -66,7 +66,7 @@ strategies
 		where score := <all(getFitness2) ; foldr(!0,add)> x
 
 	getFitness2:
-		amb(x) -> <add> (score, -1)
+		amb(x) -> <add> (score, 0)
 		where score := <all(getFitness2) ; foldr(!0,add)> x
 
 	getFitness2:
@@ -82,6 +82,8 @@ strategies
 		where scorea := <getFitness2> a // calculate subtree score
 		where scoreb := <getFitness2> b
 
+	getFitnessUnit2:
+		(expect, []) -> 0
 
 	getFitnessUnit2:
 		(expect, place) -> score
@@ -90,8 +92,6 @@ strategies
 							!-1								// if none of the above, then put -1
 						)>
 
-	getFitnessUnit2:
-		(expect, []) -> -1
 
 	getSortFromTerm:
 		amb(_) -> []
