@@ -222,8 +222,9 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Configuration conf) {
-		result += "CONFIGURATION : <br />";
+		result += "<div> CONFIGURATION : <br />";
 		super.visit(conf);
+		result += "</div> <br />" ;
 	}
 
 	@Override
@@ -344,13 +345,14 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Context cxt) {
-		result += "CONTEXT ";
+		result += "<div> CONTEXT ";
 		cxt.getBody().accept(this);
 		if (cxt.getCondition() != null) {
 			result += " when ";
 			cxt.getCondition().accept(this);
 		}
 		cxt.getAttributes().accept(this);
+		result += "</div> <br />" + endl;
 	}
 
 	@Override
@@ -446,7 +448,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(ListOfK list) {
-		printList(list.getContents(), "listofK");
+		printList(list.getContents(), "<span class=\"bold\">, </span>");
 	}
 
 	@Override
@@ -513,30 +515,37 @@ public class HTMLFilter extends BasicVisitor {
 				+ "{" + endl
 				+ "font-weight: bold;"+endl
 				+ "}" + endl;
+		
 		css += ".italic" + endl
 				+ "{" + endl
 				+ "font-style: italic;"+endl
 				+ "}" + endl;
+		
 		css += "em" + endl
 				+ "{" + endl
 				+ "font-style: italic;"+endl
 				+ "}" + endl;
+		
 		css += ".large" + endl
 				+ "{" + endl
 				+ "font-size: large;"+endl
 				+ "}" + endl;
+		
 		css += ".xlarge" + endl
 				+ "{" + endl
 				+ "font-size: x-large;"+endl
 				+ "}" + endl;
+		
 		css += ".attribute" + endl
 				+ "{" + endl
 				+ "color: blue;"+endl
 				+ "}" + endl;
+		
 		css += ".center" + endl
 				+ "{" + endl
 				+ "text-align: center;"+endl
 				+ "}" + endl;
+		
 		css += ".textCentered" + endl
 				+ "{" + endl
 				+ "text-align: center;"+endl
@@ -544,18 +553,21 @@ public class HTMLFilter extends BasicVisitor {
 				+ "vertical-align: top;"+endl
 				+ "min-width: 20px;"+endl
 				+ "}" + endl;
+		
 		css += ".cell" + endl
 				+ "{" + endl
 				+ "display: inline-block;"+endl
 				+ "vertical-align: top;"+endl
 				+ "text-align:left;" +endl
 				+ "}" + endl;
+		
 		css += "hr.reduce" + endl
 				+ "{" + endl
 				+ "color: black;"+endl
 				+ "background-color: black;"+endl
 				+ "height: 3px;"+endl
 				+ "}" + endl;
+		
 		css += "hr.reduce:after" + endl
 				+ "{" + endl
 				+ "width: 0;"+endl
