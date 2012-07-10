@@ -31,6 +31,7 @@ strategies
 			topdown(try(removeDouaPuncte)) ;
 			disambigCellTypes ;
 			topdown(try(correctRewrite)) ;
+			topdown(try(correctKseq)) ;
 			emphasizeVars ; 
 			type-inferenceTypeSystem ;
 			chooseBestFitRec ;
@@ -97,6 +98,11 @@ strategies
 		
 
 	// manual corrections
+	correctKseq:
+		amb(x) -> K1Seq(a, b)
+		where <one(?K1Seq(a, b))> x
+		
+	
 	correctRewrite:	// K1Rewrite must bind as low as possible, this why choose it to be as high as possible in the AST
 		amb(x) -> K1Rewrite(a, b)
 		where <one(?K1Rewrite(a, b))> x
