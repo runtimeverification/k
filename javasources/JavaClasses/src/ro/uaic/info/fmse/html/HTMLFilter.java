@@ -168,7 +168,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Sort sort) {
-		result += "<span class =\"italic\"> " + sort.getSort() + " </span>";
+		result += "<span class =\"italic\"> " + makeGreek(sort.getSort()) + " </span>";
 		/*result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getSort()) + "}}}";*/
 	}
 
@@ -203,7 +203,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Terminal pi) {
-		result += htmlify(pi.getTerminal()) +" ";
+		result += makeGreek(htmlify(pi.getTerminal())) +" ";
 		/*String terminal = pi.getTerminal();
 		if (terminal.isEmpty())
 			return;
@@ -216,7 +216,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(UserList ul) {
-		result += "<span class =\"italic\">" + "List{#" + ul.getSort() + ",\"" + ul.getSeparator() + "\"} </span>"  + endl;
+		result += "<span class =\"italic\">" + "List</span>{#<span class =\"italic\">" + ul.getSort() + "</span>,\"" + ul.getSeparator() + "\"} </span>"  + endl;
 		//result += "List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
 	}
 
@@ -421,7 +421,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Constant c) {
-		result += "<span title =\"" + c.getSort() + "\"> " + c.getValue() + " </span> ";
+		result += "<span title =\"" + c.getSort() + "\"> " + makeGreek(c.getValue()) + " </span> ";
 		//result += "\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}";
 	}
 
@@ -488,8 +488,8 @@ public class HTMLFilter extends BasicVisitor {
 		} else {
 			result += ", ";
 		}
-		result += entry.getKey();
-		String value = entry.getValue();
+		result += makeGreek(entry.getKey());
+		String value = makeGreek(entry.getValue());
 		
 		if (!value.isEmpty()) {
 			result += "(" + value + ")";
