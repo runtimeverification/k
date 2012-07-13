@@ -36,6 +36,7 @@ module WRL
 
       <memmap> 0 |-> 0 .  </memmap>       // memory map
       <mp> 0 </mp>                  // memory pointer
+      <memtemp> 0 </memtemp>        // temporary memory value
 
       <ring> 0 </ring>           // ops ring = 0; math ring = 1
       <turn> 0 |-> 0 1 |-> 0 </turn>  // current instruction
@@ -81,7 +82,8 @@ module WRL
       <ip> P:Int => P +Int 1 </ip>
       <ring> R:Int </ring>
       <dir>... R |-> D:Int ...</dir>
-      <turn>... R |-> (T:Int => (T +Int (2 *Int D) -Int 1) %Int 12) ...</turn>
+      <turn>... R |-> (T:Int => (T +Int (D *Int 2) +Int 11) %Int 12) ...</turn>
+  //    <out>... . => ListItem(T) </out>
 
    rule [Execute]:
       <mode> 1 => 2 </mode>
@@ -90,6 +92,8 @@ module WRL
       <ip> P:Int => P +Int 1 </ip>
       <ring> R:Int </ring> 
       <dir>... R |-> (D:Int => 1 -Int D) ...</dir>
+      <turn>... R |-> T:Int ...</turn>
+//      <out>... . => ListItem(R) ListItem(":") ListItem(T) ListItem(" ") </out>
  
 
 
@@ -140,48 +144,257 @@ module WRL
       <val>... 0 |-> V:Int ...</val>
       <mp> M:Int => (M +Int V) </mp>
       
-   rule [LogicZeroM]: // ops ring 8
+   rule [LogicZeroM]: // ops ring 8, memval = 0
       <mode> 2 => 3 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 8 ...</turn>
       <val>... 0 |-> (_ => 0) ...</val>
-      <memmap>... M |-> 0 ...</memmap>
       <mp> M:Int </mp>
+      <memmap>... M |-> 0 ...</memmap>
 
-   rule [LogicZeroV]: // ops ring 8
+   rule [LogicZeroV]: // ops ring 8, value = 0
       <mode> 2 => 3 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 8 ...</turn>
       <val>... 0 |-> 0 ...</val>
  
-   rule [LogicNonzero]: // ops ring 8
+   rule [LogicNonzero]: // ops ring 8, memval != 0 and value != 0
       <mode> 2 => 3 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 8 ...</turn>
       <val>... 0 |-> (V:Int => 1) ...</val>
-      <memmap>... M |-> I:Int ...</memmap>
       <mp> M:Int </mp>
-      when (I =/=Int 0) andBool (V =/=Int 0)
+      <memmap>... M |-> I:Int ...</memmap>
+    when (I =/=Int 0) andBool (V =/=Int 0)
+
+   rule [IfZero]: // ops ring 9, memval = 0
+      <mode> 2 => 3 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 9 ...</turn>
+      <val>... 0 |-> V:Int ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> 0 ...</memmap>
+
+   rule [IfNonzero]: // ops ring 9, memval != 0
+      <mode> 2 => 3 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 9 ...</turn>
+      <val>... 0 |-> V:Int ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+      <ip> P:Int => (P +Int V) </ip>
+    when (I =/=Int 0)
 
 
-       // TODO: Implement more individual instructions  
+      // TODO: fix IO
+
+
+
+   rule [IntIOZero]: // ops ring 10, value = 0 (input)
+      <mode> 2 => 3 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 10 ...</turn>
+      <val>... 0 |-> 0 ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> (_ => I) ...</memmap>
+      <in> ListItem(I:Int) => . ...</in>
+
+
+/*
+   rule [FakeIntIOZero]: // for testing
+      <mode> 2 => 3 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 10 ...</turn>
+      <val>... 0 |-> 0 ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> (_ => 4) ...</memmap>
+*/
+
+   rule [IntIONonzero]: // ops ring 10, value != 0 (output)
+      <mode> 2 => 3 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 10 ...</turn>
+      <val>... 0 |-> V:Int ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+      <out>... . => ListItem(I) </out>
+    when (V =/=Int 0)
+
+
+/*
+   rule [AscIOZero]: // ops ring 11, value = 0 (input)
+      <mode> 2 => 3 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 11 ...</turn>
+      <val>... 0 |-> 0 ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> (_ => C) ...</memmap>
+      <in> ListItem(C:Char) => . ...</in>
+*/
+
+
+   rule [FakeAscIOZero]: // for testing
+      <mode> 2 => 3 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 11 ...</turn>
+      <val>... 0 |-> 0 ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> (_ => 32) ...</memmap>
+
+   rule [AscIONonzero]: // ops ring 10, value != 0 (output)
+      <mode> 2 => 3 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 11 ...</turn>
+      <val>... 0 |-> V:Int ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> C:Int ...</memmap>
+      <out>... . => ListItem(C) ListItem(" ") </out>
+    when (V =/=Int 0)
+
+   
+
+   rule [LoadMath]: // math ring 1
+      <mode> 2 => 11 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 1 ...</turn>
+
+   rule [StoreMath]: // math ring 2
+      <mode> 2 => 12 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 2 ...</turn>
+
+   rule [Add]: // math ring 3
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 3 ...</turn>
+      <val>... 1 |-> (V:Int => (V +Int I)) ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+
+   rule [Mult]: // math ring 4
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 4 ...</turn>
+      <val>... 1 |-> (V:Int => (V *Int I)) ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+
+   rule [Div]: // math ring 5
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 5 ...</turn>
+      <val>... 1 |-> (V:Int => (V /Int I)) ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+    when (I =/=Int 0)
+  
+   rule [DivByZero]: // math ring 5, division by zero
+      <k> _ => 1 </k>
+      <mode> 2 => -1 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 5 ...</turn>
+      <mp> M:Int </mp>
+      <memmap>... M |-> 0 ...</memmap>
+
+   rule [ZeroMath]: // math ring 6
+      <mode> 2 => 10 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 6 ...</turn>
+
+   rule [LessThanTrue]: // math ring 7
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 7 ...</turn>
+      <val>... 1 |-> (V:Int => 1) ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+    when (V <Int I)
+
+   rule [LessThanFalse]: // math ring 7
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 7 ...</turn>
+      <val>... 1 |-> (V:Int => 0) ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+    when (V >=Int I)
+
+   rule [GreaterThanTrue]: // math ring 8
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 8 ...</turn>
+      <val>... 1 |-> (V:Int => 1) ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+    when (V >Int I)
+
+   rule [GreaterThanFalse]: // math ring 8
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 8 ...</turn>
+      <val>... 1 |-> (V:Int => 0) ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+    when (V <=Int I)
+
+   rule [EqualsTrue]: // math ring 9
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 9 ...</turn>
+      <val>... 1 |-> (V:Int => 1) ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+    when (V ==Int I)
+
+   rule [EqualsFalse]: // math ring 9
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 9 ...</turn>
+      <val>... 1 |-> (V:Int => 0) ...</val>
+      <mp> M:Int </mp>
+      <memmap>... M |-> I:Int ...</memmap>
+    when (V =/=Int I)
+
+   rule [NotNonzero]: // math ring 10, value != 0
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 10 ...</turn>
+      <val>... 1 |-> (V:Int => 0) ...</val>
+    when (V =/=Int 0)
+
+   rule [NotZero]: // math ring 10, value = 0
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 10 ...</turn>
+      <val>... 1 |-> (0 => 1) ...</val>
+ 
+   rule [Neg]: // math ring 11
+      <mode> 2 => 3 </mode>
+      <ring> 1 </ring>
+      <turn>... 1 |-> 11 ...</turn>
+      <val>... 1 |-> (V:Int => (V *Int -1)) ...</val>
+      
+   
+
+
+       
+      
+
 
 
 
    // Memory initialization to 0 upon execution of MAdd
-
-  // TODO: does this always work?
-  //       how to prevent [MemoryInit] from running if [MemoryCheck] matches?
-
-   rule [MemoryCheck]: // keep existing value in new memory position
+ 
+   rule [MemoryCheck]: // keep existing value
       <mode> 8 => 3 </mode>
       <mp> M:Int </mp>
-      <memmap>... M |-> _ ...</memmap>
+      <memmap>... M |-> V:Int ...</memmap>
  
    rule [MemoryInit]: // add default value of 0 to new memory position
-      <mode> 8 </mode>
+      <mode> 8 => 3 </mode>
       <mp> M:Int </mp>
-      <memmap>... . => (M |-> 0) . </memmap>
+      <memmap> R:Map (. => M |-> 0) </memmap>
+    when notBool(M in keys(R))
 
    
   
