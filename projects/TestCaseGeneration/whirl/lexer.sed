@@ -13,9 +13,10 @@ s/[^01]//g
 # Put spaces after '0' and '1'
 s/./& /g
 
-# Delete blank lines
-/^$/d
 
 
 # Append "end" to end
 $aend 
+
+# Delete blank lines
+/^$/d
