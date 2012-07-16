@@ -95,7 +95,7 @@ public class Report {
 		// if failed, the test case includes a failure tag
 		if (!example.isCompiled())
 		{
-			Element failure = doc.createElement("failure");
+			Element failure = doc.createElement("error");
 			failure.setAttribute("message", example.error);
 			failure.setAttribute("type", "not compiling");
 			
@@ -105,7 +105,7 @@ public class Report {
 		
 		if (example.isCompiled() && !example.output.trim().equals(""))
 		{
-			Element err = doc.createElement("error");
+			Element err = doc.createElement("failure");
 			err.setAttribute("message", example.output);
 			err.setAttribute("type", "warnings");
 			
