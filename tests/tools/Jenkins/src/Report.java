@@ -102,6 +102,16 @@ public class Report {
 			testcase.appendChild(failure);
 		}
 
+		
+		if (example.isCompiled() && !example.output.trim().equals(""))
+		{
+			Element err = doc.createElement("error");
+			err.setAttribute("message", example.output);
+			err.setAttribute("type", "warnings");
+			
+			testcase.appendChild(err);
+		}
+		
 		// append testcase to suite
 		kompile.appendChild(testcase);
 	}
