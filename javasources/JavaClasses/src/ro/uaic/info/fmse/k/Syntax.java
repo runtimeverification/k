@@ -91,12 +91,12 @@ public class Syntax extends ModuleItem {
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof UserList)) {
 					// user declared lists case
 					UserList list = (UserList) p.items.get(0);
-//					String metadata = (p.getAttributes().toMaude() + " hybrid=()").trim();
-//					metadata += " location=" + p.getMaudeLocation();
+					String metadata = (p.getAttributes().toMaude() + " hybrid=()").trim();
+					metadata += " location=" + p.getMaudeLocation();
 					if (!MaudeHelper.separators.contains(list.separator)) {
-//						contents += "op _" + StringUtil.escape(list.separator) + "_ : K K -> K [prec 120 metadata \"" + metadata + "\"] .\n";
-//						contents += "op .List`{\"" + list.separator + "\"`} : -> K .\n";
-//						contents += "eq 'isKResult(.List`{\"" + list.separator + "\"`}) = true .\nop 'isKResult : -> KLabel [metadata \"generated-label=()\"] .\n";
+						contents += "op _" + StringUtil.escape(list.separator) + "_ : K K -> K [prec 120 metadata \"" + metadata + "\"] .\n";
+						contents += "op .List`{\"" + list.separator + "\"`} : -> K .\n";
+						contents += "eq 'isKResult(.List`{\"" + list.separator + "\"`}) = true .\nop 'isKResult : -> KLabel [metadata \"generated-label=()\"] .\n";
 						MaudeHelper.separators.add(list.separator);
 					}
 

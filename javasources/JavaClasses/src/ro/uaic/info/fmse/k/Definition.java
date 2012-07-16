@@ -106,6 +106,7 @@ public class Definition extends ASTNode {
 		if (!sorts.equals(""))
 			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
 
+		@SuppressWarnings("unused")
 		String theLists = "";
 		for(String separator : MaudeHelper.separators)
 		{
@@ -114,7 +115,7 @@ public class Definition extends ASTNode {
 			theLists += "eq 'isKResult(.List`{\"" + separator + "\"`}) = true .\nop 'isKResult : -> KLabel [metadata \"generated-label=()\"] .\n\n";
 		}
 		
-		String shared = "mod " + Constants.SHARED + " is\n  including K .\n" + klabels + sorts + cellLabels + "\n\n" + theLists + "\nendm";
+		String shared = "mod " + Constants.SHARED + " is\n  including K .\n" + klabels + sorts + cellLabels  + "\nendm";
 
 		return uris + "\n" + shared + "\n" + content;
 	}
