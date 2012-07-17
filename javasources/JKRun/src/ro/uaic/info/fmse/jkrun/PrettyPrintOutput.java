@@ -463,7 +463,6 @@ public class PrettyPrintOutput {
 		else {
 			output.append(text);
 		}
-		//output.append(text);
 		
 		return output.toString();
 	}

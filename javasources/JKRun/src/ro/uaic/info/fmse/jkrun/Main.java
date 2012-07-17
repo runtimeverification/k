@@ -397,10 +397,7 @@ public class Main {
 				PrettyPrintOutput p = new PrettyPrintOutput(cmd);
 			    p.preprocessDoc(K.maude_output, K.processed_maude_output);
 				String red = p.processDoc(K.processed_maude_output);
-				/*String prettyOutput = XmlUtil.formatXml(red, K.color);
-				AnsiConsole.out.print(prettyOutput);*/
 				AnsiConsole.out.println(red);
-				//System.out.println(red);
 			} else if ("raw".equals(K.output_mode)) {
 				String output = new String();
 				if (K.model_checking.length() > 0) {
