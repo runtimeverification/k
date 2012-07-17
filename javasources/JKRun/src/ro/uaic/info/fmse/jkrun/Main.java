@@ -56,8 +56,13 @@ public class Main {
 		File file = new File(K.maude_output);
 		String solutionNumber = p.getSearchTagAttr(file, "solution-number");
 		String stateNumber = p.getSearchTagAttr(file, "state-number");
-		System.out.println("Search results:\n");
-		AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "Solution " + solutionNumber + ", state " + stateNumber + ":" + PrettyPrintOutput.ANSI_NORMAL);
+		if (!solutionNumber.equals("NONE")) {
+			System.out.println("Search results:\n");
+			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "Solution " + solutionNumber + ", state " + stateNumber + ":" + PrettyPrintOutput.ANSI_NORMAL);
+		}
+		else {
+			System.out.println("Found no solution");
+		}
 	}
 
 	public static String initOptions(String path, String lang) {
@@ -376,6 +381,15 @@ public class Main {
 			} else {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
 			}
+			
+			// check whether Maude produced errors
+			if (errFile.exists()) {
+				String content = FileUtil.getFileContent(K.maude_err);
+				if (content.length() > 0) {
+					Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+				}
+			}
+			
 			if ("search".equals(K.maude_cmd) && K.do_search) {
 				printSearchResults();
 			}
@@ -385,8 +399,8 @@ public class Main {
 				String red = p.processDoc(K.processed_maude_output);
 				/*String prettyOutput = XmlUtil.formatXml(red, K.color);
 				AnsiConsole.out.print(prettyOutput);*/
-				//AnsiConsole.out.println(red);
-				System.out.println(red);
+				AnsiConsole.out.println(red);
+				//System.out.println(red);
 			} else if ("raw".equals(K.output_mode)) {
 				String output = new String();
 				if (K.model_checking.length() > 0) {
@@ -395,7 +409,12 @@ public class Main {
 				else {
 					if ("search".equals(K.maude_cmd)) {
 						List<String> l = FileUtil.parseSearchOutputMaude(K.maude_out);
-						output = l.get(0);
+						if (l.size() > 0) {
+							output = l.get(0);
+						}
+						else {
+							output = "";
+						}
 					} else if ("erewrite".equals(K.maude_cmd)) {
 						output = FileUtil.parseResultOutputMaude(K.maude_out);
 					}

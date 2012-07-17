@@ -77,8 +77,9 @@ public class RunProcess {
 	 */
 	public String runParser(String k3jar, String parser, String definition, String pgm, boolean isPgm) {
 		String KAST = new String();
+		String parserPath = new String(); 
 		
-		//the argument is a formula and we should write it in a file before passing it to kast
+		//the argument is a formula and we should write it in a file before passing it to the parser
 		if (!isPgm) {
 			FileUtil.createFile(K.kast_in, pgm);
 			pgm = K.kast_in;
@@ -89,18 +90,19 @@ public class RunProcess {
 			this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", definition, pgm });
 		} else {
 			try {
-				parser = new File(parser).getCanonicalPath();
+				parserPath = new File(parser).getCanonicalPath();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			System.out.println("The external parser to be used is:" + parser);
-			String parserName = new File(parser).getName();
+			String parserName = new File(parserPath).getName();
+			System.out.println("The external parser to be used is:" + parserName);
 			if ("kast".equals(parserName)) {
 				this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
 			}
 			else {
-				this.execute(new String[] { parser, pgm });
+				String cmd = parser + " " + pgm;
+				String[] tokens = cmd.split(" ");
+				this.execute(tokens);
 			}
 		}
 		
@@ -153,5 +155,5 @@ public class RunProcess {
 	public int getExitCode() {
 		return exitCode;
 	}
-
+	
 }

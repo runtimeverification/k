@@ -429,10 +429,11 @@ public class PrettyPrintOutput {
 	private static String prettyPrint(String text, boolean lineskip, int whitespace, String color) {
 		StringBuilder output = new StringBuilder();
 		StringBuilder aux;
-		AnsiConsole.systemInstall();
+		
 		//newline
 		if (lineskip) {
-			if (text.indexOf(K.lineSeparator) != 0) {
+			// if the text doesn't start with a line separator for writing on a new line, add one
+			if (! text.startsWith(K.lineSeparator)) {
 				output.append(K.lineSeparator);
 			}
 		}
@@ -440,20 +441,20 @@ public class PrettyPrintOutput {
 			String space = XmlUtil.buildWhitespace(whitespace);
 			output.append(space);
 		}
-		/*if (K.color) {
-			if (!color.equals("ANSI_NORMAL")) {
+		if (K.color) {
+			if (!color.equals(ANSI_NORMAL)) {
 				output.append(color);
 			    output.append(text);
-			    output.append("ANSI_NORMAL");
+			    output.append(ANSI_NORMAL);
 			}
 			else if (text.indexOf("|->") != -1) {
 				aux = new StringBuilder();
-                aux = XmlUtil.colorSymbol(text, "|->", PrettyPrintOutput.ANSI_PURPLE);
+                aux = XmlUtil.colorSymbol(text, "|->", ANSI_PURPLE);
                 output.append(aux);
 			}
-			else if (text.indexOf("|->") != -1) {
+			else if (text.indexOf("~>") != -1) {
 				aux = new StringBuilder();
-				aux = XmlUtil.colorSymbol(text, "~>", PrettyPrintOutput.ANSI_BLUE);
+				aux = XmlUtil.colorSymbol(text, "~>", ANSI_BLUE);
 				output.append(aux);
 			}
 			else {
@@ -462,8 +463,8 @@ public class PrettyPrintOutput {
 		}
 		else {
 			output.append(text);
-		}*/
-		output.append(text);
+		}
+		//output.append(text);
 		
 		return output.toString();
 	}

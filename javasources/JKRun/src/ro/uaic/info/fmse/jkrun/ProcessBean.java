@@ -28,7 +28,6 @@ public class ProcessBean implements PropertyChangeListener, Serializable {
 				try {
 					FileUtil.renameFolder(K.krunTempDir, K.krunDir);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 	    	}
