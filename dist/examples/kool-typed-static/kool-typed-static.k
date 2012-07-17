@@ -272,7 +272,7 @@ although the function tasks are now called method tasks. */
   rule while bool do stmt  => stmt
   rule return; => stmt
   rule print(T:Type, Ts:Types => Ts);  when T ==K int orBool T ==K string
-  rule print((.Types); => stmt
+  rule print((.Types)); => stmt
   rule spawn stmt => stmt
   rule acquire T:Type; => stmt
   rule release T:Type; => stmt
