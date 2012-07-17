@@ -27,6 +27,7 @@ import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.disambiguate.BestFitFilter;
 import ro.uaic.info.fmse.disambiguate.CorrectRewriteFilter;
 import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
+import ro.uaic.info.fmse.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import ro.uaic.info.fmse.disambiguate.TypeInferenceSupremumFilter;
 import ro.uaic.info.fmse.disambiguate.TypeSystemFilter;
 import ro.uaic.info.fmse.disambiguate.VariableTypeInferenceFilter;
@@ -215,8 +216,7 @@ public class KompileFrontEnd {
 
 			String endl = System.getProperty("line.separator");
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
-			FileUtil.saveInFile(canonicalFile.getParent() + fileSep + "k.sty", 
-					FileUtil.getFileContent(kLatexStyle));
+			FileUtil.saveInFile(canonicalFile.getParent() + fileSep + "k.sty", FileUtil.getFileContent(kLatexStyle));
 
 			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[poster,style=bubble]{k}" + endl;
 			String preamble = lf.getPreamble();
@@ -448,7 +448,7 @@ public class KompileFrontEnd {
 
 			if (GlobalSettings.tempDisamb) {
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter());
+				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());

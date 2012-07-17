@@ -42,10 +42,15 @@ strategies
 			 id
 			//where(ts2 := <term-size> ; !(ts2, <div> (<mul>(ts2, 100.0) ,ts1), <div> (<mul>(ts2, 100.0) ,ts)) ; debug(!"FinalSize(,%,%): "))
 		else
+			topdown(try(annolocation)) ;
 			flatten-amb-top ;
-			flatten-amb-2 ;
+			topdown(try(merge-amb ; flatten-amb-top )) ;
 			//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
+			topdown(try(annolocationremove)) ;
+			topdown(try(removeDouaPuncte)) ;
 			disambigCellTypes ;
+			topdown(try(correctRewrite)) ;
+			topdown(try(correctKseq)) ;
 			emphasizeVars 
 		end		
 
