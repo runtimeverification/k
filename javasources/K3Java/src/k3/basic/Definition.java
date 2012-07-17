@@ -326,7 +326,7 @@ public class Definition implements Cloneable {
 		sdf += "%% subsorts 1\n";
 		sdf += "context-free priorities\n{\n";
 		// 1
-		// print Sort -> K > K -> Sort
+		// print Sort -> K > A -> B > K -> Sort
 		for (Sort s : userSorts) {
 			if (!s.isBaseSort()) {
 				sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + " -> K";
@@ -354,27 +354,26 @@ public class Definition implements Cloneable {
 		}
 		sdf += "}\n\n";
 
-		Set<Subsort> sbs = getSubsorts();
 		// 2
 		sdf += "%% subsorts 2\n";
-		// print Sort -> K > K -> Sort
+		// print K -> Sort > Sort -> K
+		sdf += "context-free priorities\n{\n";
 		for (Sort s : userSorts) {
 			if (!s.isBaseSort()) {
-				sdf += "context-free priorities\n{\n";
 				sdf += "	K -> " + StringUtil.escapeSortName(s.getSortName());
 				// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12K\")}";
 				sdf += "\n";
-				sdf += "} .> {\n";
-				for (Sort ss : userSorts) {
-					if (!ss.isBaseSort() && (ss.equals(s) || sbs.contains(new Subsort(s, ss)))) {
-						sdf += "	" + StringUtil.escapeSortName(ss.getSortName()) + " -> K";
-						// sdf += " {cons(\"K12" + StringUtil.escapeSortName(ss.getSortName()) + "\")}";
-						sdf += "\n";
-					}
-				}
-				sdf += "}\n\n";
 			}
 		}
+		sdf += "} .> {\n";
+		for (Sort s : userSorts) {
+			if (!s.isBaseSort()) {
+				sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + " -> K";
+				// sdf += " {cons(\"K12" + StringUtil.escapeSortName(s.getSortName()) + "\")}";
+				sdf += "\n";
+			}
+		}
+		sdf += "}\n";
 
 		sdf += "context-free syntax\n";
 

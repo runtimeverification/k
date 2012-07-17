@@ -201,7 +201,7 @@ typed SIMPLE, so we do not discuss them much here. */
   
   syntax Type ::= "stmt"
 
-  rule var .Types; => stmt   [ structural]
+  rule var (.Types); => stmt   [ structural]
   context var '_:_(_[HOLE],, _),.Exps;
   rule var '_:_(X[Ts:Types],, T), .Exps; => checkDepth(Ts,T) ~> var '_:_(X,, T);
        [structural]
@@ -249,7 +249,7 @@ semantics, the \texttt{types(...)} operation stays the same. */
   rule bool or bool => bool
   rule not(bool) => bool
   rule (arrayOf T:Type)[int,Ts:Types] => T[Ts]
-  rule T:Type[.Types] => T
+  rule T:Type[(.Types)] => T
   rule sizeOf(arrayOf T:Type) => int
   rule read() => int
   context (HOLE => ltype(HOLE)) = _
@@ -272,7 +272,7 @@ although the function tasks are now called method tasks. */
   rule while bool do stmt  => stmt
   rule return; => stmt
   rule print(T:Type, Ts:Types => Ts);  when T ==K int orBool T ==K string
-  rule print(.Types); => stmt
+  rule print((.Types); => stmt
   rule spawn stmt => stmt
   rule acquire T:Type; => stmt
   rule release T:Type; => stmt

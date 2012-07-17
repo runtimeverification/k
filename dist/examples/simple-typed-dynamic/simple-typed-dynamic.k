@@ -123,7 +123,7 @@ semantics.  In other words, the \K syntax is the ``syntax of the
 semantics''.  */
 
   syntax Val ::= Int | Bool | String
-               | "arrayRef" "(" Type "," Nat "," Nat ")"
+               | "arrayRef" "(" Type "," Int "," Int ")"
                | "lambda" "(" Exps "," Stmt "," Type ")"
                      [latex("(\lambda{#1}\,.\,{#2}):{#3}")]
   syntax Vals ::= List{Val,","}
@@ -190,7 +190,7 @@ similar to that in untyped SIMPLE, but we have to enforce that the
 type of an array declaration be of the form \texttt{arrayOf $T$}
 and assign the right type ($T$) to the allocated array locations. */
 
-  rule <k> var '_:_(X[N:Int, .Vals],, arrayOf T), .Exps; => . ...</k> 
+  rule <k> var '_:_(X[N:Int, (.Vals)],, arrayOf T), .Exps; => . ...</k> 
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> arrayRef(arrayOf T, L +Int 1, N)
                        L +Int 1 .. L +Int N |-> undefined(T) ...</store>
@@ -345,7 +345,7 @@ When done with the first pass, call \texttt{main()}. */
        when typeOf(V) ==K int orBool typeOf(V) ==K string
       [transition]
 
-  rule print(.Vals); => .  [structural]
+  rule print((.Vals)); => .  [structural]
 
   syntax K ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
 

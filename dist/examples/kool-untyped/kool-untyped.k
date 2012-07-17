@@ -290,7 +290,7 @@ of Java.  In fact, the latter can be implemented in terms of
        <store>... . => L |-> V ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
-  rule <k> bindto(.Ids,.Exps) => . ...</k>  [structural]
+  rule <k> bindto(.Ids,.Vals) => . ...</k>  [structural]
 
   rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>    [transition]
 
@@ -326,7 +326,7 @@ of Java.  In fact, the latter can be implemented in terms of
        <out>... . => ListItem(V) </out>
        [transition]
 
-  rule print(.Vals); => .   [structural]
+  rule print((.Vals)); => .   [structural]
 
   syntax ListItem ::= "(" Id "," Stmt "," K "," Map "," Bag ")"
   syntax K ::= "popx"
@@ -372,7 +372,7 @@ constructs keep their semantics from SIMPLE. */
        [transition]
 
   syntax Exp ::= "lvalue" "(" K ")"
-  syntax Val ::= "loc" "(" Nat ")"
+  syntax Val ::= "loc" "(" Int ")"
 
   rule <k> lvalue(X:Id) => loc(L) ...</k>
        <env>... X |-> L:Int ...</env>
@@ -383,7 +383,7 @@ constructs keep their semantics from SIMPLE. */
 
   rule <k> lvalue(lookup(L)) => loc(L) ...</k>  [structural]
 
-  syntax List{K} ::= Nat ".." Nat
+  syntax List{K} ::= Int ".." Int
 
   rule N1:Int..N2:Int => .List{K}
        when N1  >Int N2

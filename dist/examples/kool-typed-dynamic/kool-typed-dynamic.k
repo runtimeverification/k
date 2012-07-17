@@ -213,7 +213,7 @@ KOOL).  */
        <store>... . => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
-  rule <k> var '_:_(X:Id[N:Int, .Vals],, arrayOf T:Type), .Exps; => . ...</k> 
+  rule <k> var '_:_(X:Id[N:Int, (.Vals)],, arrayOf T:Type), .Exps; => . ...</k> 
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> arrayRef(arrayOf T, L +Int 1, N)
                        L +Int 1 .. L +Int N |-> undefined(T) ...</store>
@@ -300,7 +300,7 @@ KOOL).  */
        when typeOf(V) ==K int orBool typeOf(V) ==K string
        [transition]
 
-  rule print(.Vals); => . [structural]
+  rule print((.Vals)); => . [structural]
 
   rule (<thread>...
            <k> .K </k>
@@ -343,7 +343,7 @@ KOOL).  */
 
   rule lvalue(lookup(L:Int)) => loc(L) [structural]
 
-  syntax K ::= "lookup" "(" Nat ")"
+  syntax K ::= "lookup" "(" Int ")"
 
   rule <k> lookup(L:Int) => V:Val ...</k>
        <store>... L |-> V ...</store>
@@ -462,7 +462,7 @@ The only change to untyped KOOL's values is that closures are now typed
 (their last argument holds their type). */
 
  syntax Val ::= "objectClosure" "(" Bag ")"
-              | "methodClosure" "(" Id "," Nat "," Exps "," Stmt "," Type ")"
+              | "methodClosure" "(" Id "," Int "," Exps "," Stmt "," Type ")"
 
 /*@ \subsection{Class declaration}       
 Like in untyped KOOL. */
