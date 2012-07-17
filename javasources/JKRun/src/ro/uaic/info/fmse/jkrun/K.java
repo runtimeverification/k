@@ -1,7 +1,5 @@
 package ro.uaic.info.fmse.jkrun;
 
-import org.fusesource.jansi.AnsiConsole;
-
 public class K {
 
 	public static boolean verbose = false;
