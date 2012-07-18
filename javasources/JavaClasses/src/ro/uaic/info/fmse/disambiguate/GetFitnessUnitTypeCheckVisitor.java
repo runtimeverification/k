@@ -26,6 +26,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 					Term child = (Term) tc.getContents().get(j);
 					score += getFitnessUnit2(sort.getSort(), child.getSort());
 					j++;
+					DefinitionHelper.subsorts.isEmpty();
 				}
 			}
 		}
@@ -52,15 +53,17 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 	// }
 	// TODO: this is so wrong, but it works :-??
 	private int getFitnessUnit2(String declSort, String termSort) {
+		if (termSort.equals(""))
+			return 0; // if it is amb it won't have a sort
 		int score;
-		if (declSort.equals(termSort) || DefinitionHelper.isSubsorted(declSort, termSort))
+		if (DefinitionHelper.isSubsortedEq(declSort, termSort))
 			score = 0;
 		// isSubsortEq(|"K", expect) ; (<?"K"> place <+ <?"K"> expect); !0
-		else if (DefinitionHelper.isSubsorted("K", termSort) && (declSort.equals("K") || declSort.equals("K")))
+		else if (DefinitionHelper.isSubsortedEq("K", termSort) && (declSort.equals("K") || termSort.equals("K")))
 			score = 0; // do nothing when you have a K
 		else {
 			score = -1;
-			//System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
+			System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
 		}
 		return score;
 	}

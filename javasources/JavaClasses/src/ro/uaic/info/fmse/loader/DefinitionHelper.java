@@ -8,28 +8,12 @@ import java.util.Set;
 import ro.uaic.info.fmse.k.Production;
 
 public class DefinitionHelper {
-	public static String generatedTags[] = {
-		"cons",
-		"kgeneratedlabel",
-		"prefixlabel",
-	};
-	
-	public static String parsingTags[] = {
-		"bracket",
-		"left",
-		"right"
-	};
-	
-	public static String specialTerminals[] = {
-		"(",
-		")",
-		",",
-		"[",
-		"]",
-		"{",
-		"}",
-	};
-	
+	public static String generatedTags[] = { "cons", "kgeneratedlabel", "prefixlabel", };
+
+	public static String parsingTags[] = { "bracket", "left", "right" };
+
+	public static String specialTerminals[] = { "(", ")", ",", "[", "]", "{", "}", };
+
 	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	// contains a mapping from listSort to list separator
@@ -67,6 +51,12 @@ public class DefinitionHelper {
 		return subsorts.contains(new Subsort(bigSort, smallSort));
 	}
 
+	public static boolean isSubsortedEq(String bigSort, String smallSort) {
+		if (bigSort.equals(smallSort))
+			return true;
+		return subsorts.contains(new Subsort(bigSort, smallSort));
+	}
+
 	public static boolean isTagGenerated(String key) {
 		return (Arrays.binarySearch(generatedTags, key) >= 0);
 	}
@@ -77,5 +67,5 @@ public class DefinitionHelper {
 
 	public static boolean isParsingTag(String key) {
 		return Arrays.binarySearch(parsingTags, key) >= 0;
-	}	
+	}
 }

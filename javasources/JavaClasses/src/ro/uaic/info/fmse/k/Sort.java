@@ -18,6 +18,15 @@ public class Sort extends ProductionItem {
 		sort = element.getAttribute(Constants.VALUE_value_ATTR);
 	}
 
+	public static boolean isBasesort(String sort) {
+		return sort.equals("VARID") || sort.equals("Map") || sort.equals("K") || sort.equals("List") || sort.equals("Bag") || sort.equals("Set") || sort.equals("MapItem") || sort.equals("ListItem") || sort.equals("BagItem") || sort.equals("SetItem")
+				|| sort.equals("List{K}") || sort.equals("KLabel") || sort.equals("CellLabel");
+	}
+	
+	public boolean isBaseSort() {
+		return Sort.isBasesort(sort);
+	}
+
 	public void setSort(String sort) {
 		this.sort = sort;
 	}

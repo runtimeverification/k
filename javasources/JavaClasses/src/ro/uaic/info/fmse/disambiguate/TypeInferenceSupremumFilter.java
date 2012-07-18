@@ -12,7 +12,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 
 	public ASTNode transform(Ambiguity amb) {
 
-		// choose the maximums from the list of ambiguities
+		// choose the maximum from the list of ambiguities
 		java.util.List<Term> terms = new ArrayList<Term>();
 		for (Term trm1 : amb.getContents()) {
 			boolean topSort = true;
