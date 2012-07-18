@@ -123,10 +123,10 @@ module CINK-LANG-SYNTAX
                > 
                  Exp "&&" Exp [left, strict(1), latex("{#1}\mathrel{\&\&}{#2}")]
                > 
-                Exp "||" Exp [left, strict(1)]
+                 Exp "||" Exp [left, strict(1)]
                > left:
-                 Exp "<<" Exp [seqstrict, latex("{#1}\mathrel{\tt <<}{#2}")]
-               | Exp ">>" Exp [latex("{#1}\mathrel{\tt >>}{#2}")]
+                 Exp "<<" Exp [left, seqstrict, latex("{#1}\mathrel{\tt <<}{#2}")]
+               | Exp ">>" Exp [left, latex("{#1}\mathrel{\tt >>}{#2}")]
                >
                  Exp "=" Exp [right]
                >
