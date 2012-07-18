@@ -7,7 +7,7 @@ import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 
-public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
+public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
 	@Override
 	public void visit(TermCons tc) {
@@ -47,18 +47,18 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 		int score;
 		if (DefinitionHelper.isSubsortedEq(declSort, termSort))
 			score = 0;
-		// isSubsortEq(|"K", expect) ; (<?"K"> place <+ <?"K"> expect); !0
-		else if (DefinitionHelper.isSubsortedEq("K", termSort) && (declSort.equals("K") || termSort.equals("K")))
-			score = 0; // do nothing when you have a K
+		// isSubsortEq(|"K", expect) ; <?"K"> place ; !-1
+		else if (DefinitionHelper.isSubsortedEq("K", declSort) && termSort.equals("K"))
+			score = -1; // if I insert a K where I would expect a more specific kind of sort, put -1
 		else {
 			score = -1;
-			// System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
+			System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
 		}
 		return score;
 	}
 
 	@Override
 	public GetFitnessUnitBasicVisitor getInstance() {
-		return new GetFitnessUnitTypeCheckVisitor();
+		return new GetFitnessUnitKCheckVisitor();
 	}
 }

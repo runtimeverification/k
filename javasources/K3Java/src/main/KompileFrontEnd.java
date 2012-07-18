@@ -25,6 +25,7 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.disambiguate.BestFitFilter;
 import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
+import ro.uaic.info.fmse.disambiguate.GetFitnessUnitKCheckVisitor;
 import ro.uaic.info.fmse.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import ro.uaic.info.fmse.disambiguate.TypeInferenceSupremumFilter;
 import ro.uaic.info.fmse.disambiguate.TypeSystemFilter;
@@ -444,10 +445,11 @@ public class KompileFrontEnd {
 
 			// disambiguation steps
 
-			if (GlobalSettings.tempDisamb) {
+			if (!GlobalSettings.tempDisamb) {
 				//javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());

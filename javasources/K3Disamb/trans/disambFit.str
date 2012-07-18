@@ -16,7 +16,7 @@ strategies
 
 	chooseBestFitRec =
 		bottomup(try(chooseBestFit(getFitnessUnit2|)))
-		//; bottomup(try(chooseBestFit(getFitnessUnit3|)))
+		; bottomup(try(chooseBestFit(getFitnessUnit3|)))
 
 	chooseBestFit(getFitnessUnit|):
 		amb(x) -> rez2
@@ -88,7 +88,7 @@ strategies
 
 	getFitnessUnit2:
 		(expect, place) -> score
-		where score :=  <(	isSubsortEq(|expect, place) ; !0 <+		// if the sort is a subsort then put 1
+		where score :=  <(	isSubsortEq(|expect, place) ; !0 <+		// if the sort is a subsort then put 0
 							isSubsortEq(|"K", expect) ; (<?"K"> place <+ <?"K"> expect); !0 <+ // if the sort is K then score it as 0, only if the expected sort is a subsort of K
 							!-1								// if none of the above, then put -1
 						)>
@@ -100,7 +100,7 @@ strategies
 	getFitnessUnit3:
 		(expect, place) -> score
 		where score :=  <(	isSubsortEq(|expect, place) ; !0 <+		// if the sort is a subsort then put 1
-							<?"K"> expect ; !-1 <+ // if the sort is K then score it as 0, only if the expected sort is a subsort of K
+							isSubsortEq(|"K", expect) ; <?"K"> place ; !-1 <+ // if the sort is K then score it as 0, only if the expected sort is a subsort of K
 							!-1								// if none of the above, then put -1
 						)>
 
