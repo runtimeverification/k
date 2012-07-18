@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import k.utils.DefinitionLoader;
 import k.utils.FileUtil;
 import k.utils.KPaths;
 import k.utils.MaudeRun;

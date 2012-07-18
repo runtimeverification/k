@@ -7,10 +7,63 @@ import java.io.OutputStream;
 
 public class MaudeRun {
 
+	static String maudeExe = initializeMaudeExecutable();
+	
+	/**
+	 * This function computes the path to a K-included version of maude.
+	 * It assumes that /dist/bin/maude directory contains all maude executables.
+	 * It searches for the os type and the architecture and it returns
+	 * the right maude executable.
+	 */
+	public static String initializeMaudeExecutable()
+	{	
+		// get system properties: file separator, os name, os architecture
+		String fileSeparator = System.getProperty("file.separator");
+		String osname = System.getProperty("os.name");
+		String arch = System.getProperty("os.arch");
+		
+		// set different maude executables
+		String maude_mac = "maude.intelDarwin";
+		String maude_linux_32 = "maude.linux";
+		String maude_linux_64 = "maude.linux64";
+		
+//		System.out.println("OS: |" + osname + "|" + arch + "|");
+//		System.out.println(KPaths.getKBase(true));
+		
+		String maudeDir = KPaths.getKBase(true) +  fileSeparator + "bin" + fileSeparator + "maude" + fileSeparator + "binaries";
+		@SuppressWarnings("unused")
+		String maudeExe = "maude";
+		
+		if (osname.toLowerCase().contains("win"))
+		{
+			// silently ignore this case
+			// the user should install itself maude
+			// we assume that he can execute maude from command line
+			maudeExe = "maude";
+		}
+		else if (osname.toLowerCase().contains("mac"))
+		{
+			// I hope this condition is strong enough
+				maudeExe = maudeDir + fileSeparator + maude_mac;
+		}
+		else if (osname.toLowerCase().contains("linux")){
+			// in this case we assume linux
+			if (arch.toLowerCase().contains("64"))
+			{
+				maudeExe = maudeDir + fileSeparator + maude_linux_64;
+			}
+			else maudeExe = maudeDir + fileSeparator + maude_linux_32;			
+		}
+		
+//		System.out.println("MAUDE: " + maudeExe);
+//		return maudeExe;
+		return "maude";
+	}
+	
 	public static String run_maude(File startDir, String mainFile) {
 		try {
 			// create process
-			java.lang.ProcessBuilder pb = new java.lang.ProcessBuilder("maude");
+			java.lang.ProcessBuilder pb = new java.lang.ProcessBuilder(maudeExe);
 
 			// set execution directory to current user dir
 			pb.directory(startDir);

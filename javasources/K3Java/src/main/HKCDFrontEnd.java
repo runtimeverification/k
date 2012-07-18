@@ -1,17 +1,10 @@
 package main;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
-import k.utils.DefinitionLoader;
 import k.utils.FileUtil;
-import k.utils.KPaths;
 import k.utils.Stopwatch;
-import k.utils.XmlLoader;
-import k3.basic.Definition;
 
 import org.apache.commons.cli.CommandLine;
 

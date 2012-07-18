@@ -3,8 +3,6 @@ package k.utils;
 import java.io.File;
 import java.io.IOException;
 
-import k3.basic.Definition;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -13,8 +11,6 @@ import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.transitions.labelify.KAppModifier;
-
-import com.thoughtworks.xstream.XStream;
 
 public class ProgramLoader {
 	public static void parsePgm(File mainFile, File defFile, Boolean verbose) {
