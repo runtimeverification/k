@@ -7,6 +7,11 @@ import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 
+/**
+ * Check to see which branch of an ambiguity has less K insertions
+ * @author RaduFmse
+ *
+ */
 public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
 	@Override

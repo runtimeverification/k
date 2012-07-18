@@ -7,6 +7,12 @@ import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 
+
+/**
+ * Check to see which branch of an ambiguity has less type errors
+ * @author RaduFmse
+ *
+ */
 public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
 	@Override

@@ -10,7 +10,7 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class AmbFilter extends BasicTransformer {
 	public ASTNode transform(Ambiguity amb) {
-		String msg = "Warning! Parsing ambiguity at: " + amb.getLocation() + " in file: " + amb.getFilename() + "\n";
+		String msg = "Parsing ambiguity at: " + amb.getLocation() + " in file: " + amb.getFilename() + "\n";
 		msg += "    Ambiguity between: ";
 
 		for (ASTNode variant : amb.getContents()) {
