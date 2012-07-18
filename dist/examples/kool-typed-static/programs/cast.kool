@@ -2,29 +2,29 @@
 // This program should execute but should not type check
 
 class A {
-  var x of int;
+  var x:int;
   method A() {
     x=10;
   }
-  method getA() : int {
+  method getA():int {
     return x;
   }
 }
 
 class B extends A {
-  var x of int;
+  var x:int;
   method B() {
     super.A();
     x=20;
   }
-  method getB() : int {
+  method getB():int {
     return x;
   }
 }
 
 class main {
   method main() {
-    var b of class B = new B(), a of class A = cast b to A;
+    var b : class B = new B(), a : class A = cast b to A;
     print("b.x = ", b.x, "\n");
     print("a.x = ", a.x, "\n");
     print("a.getB() = ", a.getB(), "\n");  // this should not type check

@@ -103,6 +103,10 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts                        [right]
 
+//  syntax Stmts ::= Decl | StmtList
+//  syntax StmtList ::= List{Stmt,""}
+  
+
 /*@ \section{Desugared Syntax}
 This part desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the

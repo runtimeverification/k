@@ -38,8 +38,6 @@ the \K strictness attributes and the desugaring macros. */
                | "cast" Exp "to" Id     [strict(1)]
                | "new" Id "(" Exps ")"  [strict(2)]
                | Exp "." Id             [strict(1)]
-//               | Exp ":" Type            // allowed only for declarations
-               | Exp "of" Type           // allowed only for declarations
                > Exp "[" Exps "]"       [strict]
                > Exp "(" Exps ")"       [strict]
                | "-" Exp                [strict]
@@ -64,6 +62,7 @@ the \K strictness attributes and the desugaring macros. */
                  Exp "and" Exp           [strict, left]
                | Exp "or" Exp            [strict, left]
                > Exp "=" Exp             [strict(2), right]
+               | Exp ":" Type            // allowed only for declarations
 
 
   syntax Exps ::= List{Exp,","}
@@ -90,17 +89,14 @@ the \K strictness attributes and the desugaring macros. */
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts            [seqstrict, right]
 
-  rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
-  rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
-
   rule if E:Exp then S:Stmt => if E then S else {}
-  rule (for X:Id = E1:Exp to E2:Exp do S)
+  rule (for X:Id = E1:Exp to E2:Exp do S:Stmt)
        =>
-       {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
+       {var X = E1, .Exps; while X <= E2 do {S X = (X + 1);}}
 
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
 
-  rule var '_:_(X:Id,, T:Type) = E:Exp, .Exps; => var '_:_(X,, T), .Exps; X = E;
+  rule var (X:Id : T:Type) = E:Exp; => var X : T; X = E;
 
 /*@ \subsection{KOOL Additional Syntax}
 Note the strictness attributes, telling which arguments need to be

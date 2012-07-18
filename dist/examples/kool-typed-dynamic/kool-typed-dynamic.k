@@ -99,7 +99,9 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
 
   rule var E1:Exp, E2:Exp, Es:Exps; => var (E1, .Exps); var E2, Es;
 
-  rule var '_:_(X:Id,, T:Type) = E:Exp; => var ('_:_(X,, T), .Exps); X = E;
+//  rule var '_:_(X:Id,, T:Type) = E:Exp; => var ('_:_(X,, T), .Exps); X = E;
+
+  rule var X:Id : T:Type = E:Exp; => var X : T; X = E;
 
 
 /*@ \subsection{KOOL Additional Syntax}
@@ -284,7 +286,7 @@ KOOL).  */
        <env> Env:Map </env>
        [structural]
 
-  rule Ss1:K Ss2:K => Ss1 ~> Ss2  [structural]
+  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [structural]
 
   rule V:Val; => .
   rule if  true then S:Stmt else _ => S
