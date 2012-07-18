@@ -17,7 +17,8 @@ public class DefinitionHelper {
 	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	// contains a mapping from listSort to list separator
-	public static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
+	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
+	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
 
 	public static boolean isListSort(String sort) {
 		return DefinitionHelper.listConses.containsKey(sort);
@@ -45,6 +46,36 @@ public class DefinitionHelper {
 			}
 			subsorts.addAll(ssTemp);
 		}
+	}
+
+	public static void addFileRequirement(String required, String local) {
+		// add the new subsorting
+		fileRequirements.add(new Subsort(required, local));
+
+		// closure for sorts
+		boolean finished = false;
+		while (!finished) {
+			finished = true;
+			Set<Subsort> ssTemp = new HashSet<Subsort>();
+			for (Subsort s1 : fileRequirements) {
+				for (Subsort s2 : fileRequirements) {
+					if (s1.getBigSort().equals(s2.getSmallSort())) {
+						Subsort sTemp = new Subsort(s2.getBigSort(), s1.getSmallSort());
+						if (!fileRequirements.contains(sTemp)) {
+							ssTemp.add(sTemp);
+							finished = false;
+						}
+					}
+				}
+			}
+			fileRequirements.addAll(ssTemp);
+		}
+	}
+
+	public static boolean isRequiredEq(String required, String local) {
+		if (required.equals(local))
+			return true;
+		return fileRequirements.contains(new Subsort(required, local));
 	}
 
 	public static boolean isSubsorted(String bigSort, String smallSort) {

@@ -37,6 +37,7 @@ import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
+import ro.uaic.info.fmse.loader.DefinitionHelper;
 
 public class Definition implements Cloneable {
 	private List<ModuleItem> modules;
@@ -117,6 +118,9 @@ public class Definition implements Cloneable {
 					slurp(newFilePath, false);
 				}
 
+				if (!file.getAbsolutePath().startsWith(new File(KPaths.getKBase(false) + "/include/").getAbsolutePath()))
+					DefinitionHelper.addFileRequirement(buildInclPath(file, "autoinclude.k").getCanonicalPath(), file.getCanonicalPath());
+
 				NodeList xmlIncludes = doc.getDocumentElement().getElementsByTagName(Tag.require);
 				for (int i = 0; i < xmlIncludes.getLength(); i++) {
 					String inclFile = xmlIncludes.item(i).getAttributes().getNamedItem("value").getNodeValue();
@@ -124,6 +128,7 @@ public class Definition implements Cloneable {
 						System.out.println("Including file: " + inclFile);
 					File newFilePath = buildInclPath(file, inclFile);
 					slurp(newFilePath, false);
+					DefinitionHelper.addFileRequirement(newFilePath.getCanonicalPath(), file.getCanonicalPath());
 				}
 
 				NodeList xmlModules = doc.getDocumentElement().getElementsByTagName(Tag.module);
@@ -137,7 +142,7 @@ public class Definition implements Cloneable {
 				for (int i = 0; i < xmlModules.getLength(); i++) {
 					Module km = new Module(xmlModules.item(i), cannonicalPath);
 					// set the module type as predefined if it is located in the /include directory
-					// used later when including SHARED module
+					// used later for latex and when including SHARED module
 					if (file.getAbsolutePath().startsWith(new File(KPaths.getKBase(false) + "/include/").getAbsolutePath()))
 						km.setPredefined(true);
 					if (GlobalSettings.latex)
@@ -354,7 +359,7 @@ public class Definition implements Cloneable {
 		}
 		sdf += "}\n\n";
 
-		// TODO: add type warnings option in command line 
+		// TODO: add type warnings option in command line
 		if (GlobalSettings.typeWarnings) {
 			Set<Subsort> sbs = getSubsorts();
 			// 2

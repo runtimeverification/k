@@ -7,11 +7,11 @@ import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 
-
 /**
  * Check to see which branch of an ambiguity has less type errors
+ * 
  * @author RaduFmse
- *
+ * 
  */
 public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
@@ -32,7 +32,6 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 					Term child = (Term) tc.getContents().get(j);
 					score += getFitnessUnit2(sort.getSort(), child.getSort());
 					j++;
-					DefinitionHelper.subsorts.isEmpty();
 				}
 			}
 		}

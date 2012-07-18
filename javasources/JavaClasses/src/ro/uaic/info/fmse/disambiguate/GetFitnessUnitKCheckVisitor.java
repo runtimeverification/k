@@ -9,8 +9,9 @@ import ro.uaic.info.fmse.loader.DefinitionHelper;
 
 /**
  * Check to see which branch of an ambiguity has less K insertions
+ * 
  * @author RaduFmse
- *
+ * 
  */
 public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
@@ -31,7 +32,6 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 					Term child = (Term) tc.getContents().get(j);
 					score += getFitnessUnit2(sort.getSort(), child.getSort());
 					j++;
-					DefinitionHelper.subsorts.isEmpty();
 				}
 			}
 		}
