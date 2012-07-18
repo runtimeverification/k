@@ -8,6 +8,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class FileUtil {
 
@@ -16,7 +20,7 @@ public class FileUtil {
 			File file1 = new File(file);
 			File f2 = new File(file1.getParent());
 			f2.mkdirs();
-			//file1.createNewFile();
+			// file1.createNewFile();
 
 			BufferedWriter out = new BufferedWriter(new FileWriter(file1));
 			if (content != null) {
@@ -25,22 +29,24 @@ public class FileUtil {
 				out.close();
 			}
 		} catch (IOException e) {
-			Error.report("Internal error: Cannot save file content.");
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot save file content: " + file, "internal", "FileUtil.java", 0));
 		}
 	}
 
 	public static String getExtension(String file) {
 		int idx = file.lastIndexOf(".");
-		if (idx<0) return null;
+		if (idx < 0)
+			return null;
 		return file.substring(idx);
-	}	
-	
+	}
+
 	public static String stripExtension(String file) {
 		int idx = file.lastIndexOf(".");
-		if (idx<0) return file;
-		return file.substring(0,idx);
+		if (idx < 0)
+			return file;
+		return file.substring(0, idx);
 	}
-	
+
 	public static String getFileContent(String file) {
 		BufferedReader reader;
 		try {
@@ -55,18 +61,15 @@ public class FileUtil {
 			return stringBuilder.toString();
 
 		} catch (FileNotFoundException e) {
-			Error.report("Cannot retrieve file content. Make sure that file "
-					+ file + " exists.");
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. Make sure that file: " + file + " exists.", "internal", "FileUtil.java", 0));
 		} catch (IOException e) {
-			Error.silentReport("Cannot retrieve file content. An IO error occured.");
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. An IO error occured: " + file, "internal", "FileUtil.java", 0));
 		}
 
 		return "";
 	}
-	
-	public static void delete(String file)
-	{
+
+	public static void delete(String file) {
 		new File(file).delete();
 	}
-
 }

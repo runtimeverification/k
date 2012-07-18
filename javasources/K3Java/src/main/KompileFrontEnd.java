@@ -72,7 +72,7 @@ public class KompileFrontEnd {
 			GlobalSettings.tempDisamb = true;
 
 		if (cmd.hasOption("warnings"))
-			GlobalSettings.warnings = 0;
+			GlobalSettings.warnings = true;
 
 		// set lib if any
 		if (cmd.hasOption("lib")) {
@@ -96,7 +96,7 @@ public class KompileFrontEnd {
 		else {
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 1)
-				k.utils.Error.report("You have to provide a file in order to compile!.");
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to compile!.", "command line", "System file.", 0));
 			else
 				def = restArgs[0];
 		}

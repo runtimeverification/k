@@ -11,6 +11,8 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
 
@@ -38,20 +40,20 @@ public class KastFrontEnd {
 		else {
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 1)
-				k.utils.Error.report("You have to provide a file in order to kast a program!.");
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to kast a program!.", "command line", "System file.", 0));
 			else
 				pgm = restArgs[0];
 		}
 
 		File mainFile = new File(pgm);
 		if (!mainFile.exists())
-			k.utils.Error.report("Could not find file: " + pgm);
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file.", 0));
 
 		File def = null;
 		if (cmd.hasOption("def")) {
 			def = new File(cmd.getOptionValue("def"));
 			if (!def.exists())
-				k.utils.Error.report("Could not find file: " + def);
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file.", 0));
 		} else {
 			// search for the definition
 			try {
@@ -66,7 +68,7 @@ public class KastFrontEnd {
 					if (dotk.exists()) {
 						File defXml = new File(dotk.getCanonicalPath() + "/def.xml");
 						if (!defXml.exists()) {
-							k.utils.Error.report("Could not find the compiled definition in: " + dotk);
+							GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition in: " + dotk, "command line", pgm, 0));
 						}
 
 						Document doc = XmlLoader.getXMLDoc(FileUtil.getFileContent(defXml.getAbsolutePath()));
@@ -77,7 +79,7 @@ public class KastFrontEnd {
 				}
 
 				if (def == null)
-					k.utils.Error.report("Could not find a compiled definition, please provide one using the -def option");
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find a compiled definition, please provide one using the -def option", "command line", pgm, 0));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -85,6 +87,6 @@ public class KastFrontEnd {
 		k.utils.ProgramLoader.parsePgm(mainFile, def);
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
-		GlobalSettings.kem.print(0);
+		GlobalSettings.kem.print(GlobalSettings.level);
 	}
 }

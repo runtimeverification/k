@@ -22,47 +22,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ro.uaic.info.fmse.errorsystem.KException;
-import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class XmlLoader {
-
-	public static Document createModules(String toParse, String filename) {
-
-		try {
-			// parse the xml returned by the parser.
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			InputStream is = new ByteArrayInputStream(toParse.getBytes("UTF-8"));
-			Document doc = db.parse(is);
-
-			// report any error that xml parser returns
-			if (doc.getDocumentElement().getNodeName().equals(Tag.error)) {
-				String attr = doc.getDocumentElement().getAttribute(Tag.value);
-				NodeList ch = doc.getDocumentElement().getChildNodes();
-				for (int i = 0; i < ch.getLength(); i++) {
-					if (ch.item(i).getNodeType() == Node.ELEMENT_NODE) {
-						Element node = (Element) ch.item(i);
-						if (node.getNodeName().equals(Tag.localized)) {
-							String msg = node.getAttribute("message");
-							String file = node.getAttribute("file");
-							String location = node.getAttribute("area");
-							Error.externalReport(attr + ":" + msg + " at " + file + " location=" + location);
-						}
-					}
-				}
-			}
-
-			return doc;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
 
 	public static Document getXMLDoc(String toParse) {
 
@@ -97,29 +61,7 @@ public class XmlLoader {
 						String msg = node.getAttribute("message");
 						String file = node.getAttribute("filename");
 						String location = node.getAttribute("loc");
-						Error.externalReport(attr + ": " + msg + "\n\t at: " + location + " in file: " + file);
-					}
-				}
-			}
-		}
-	}
-
-	public static void reportErrors2(Document doc) {
-		// report any error that xml parser returns
-		NodeList nl = doc.getElementsByTagName("error");
-
-		if (nl.getLength() > 0) {
-			Node nodeElem = nl.item(0);
-			String attr = nodeElem.getAttributes().getNamedItem(Tag.value).getNodeValue();
-			NodeList ch = nodeElem.getChildNodes();
-			for (int i = 0; i < ch.getLength(); i++) {
-				if (ch.item(i).getNodeType() == Node.ELEMENT_NODE) {
-					Element node = (Element) ch.item(i);
-					if (node.getNodeName().equals(Tag.localized)) {
-						String msg = node.getAttribute("message");
-						String file = node.getAttribute("filename");
-						String location = node.getAttribute("loc");
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1005 + attr + ": " + msg, file, location, 0));
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location, 0));
 					}
 				}
 			}

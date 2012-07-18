@@ -62,7 +62,7 @@ rules
 	to-xml-error:
 		error(a, b*) -> $[<?xml version="1.0" encoding="UTF-8" ?>
 		<T>
-			<error value="[<xml-string-escape-from-string>a]">
+			<error value="[<xmlStringEscape>a]">
 				[b']
 			</error>
 		</T>

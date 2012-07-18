@@ -1,6 +1,5 @@
 package k3.basic;
 
-import k.utils.Error;
 import k.utils.StringUtil;
 import k.utils.Tag;
 import k.utils.XmlLoader;
@@ -8,6 +7,11 @@ import k.utils.XmlLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class Context extends Sentence {
 	private String content;
@@ -41,7 +45,7 @@ public class Context extends Sentence {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			Error.report("Cannot parse context: " + e.getLocalizedMessage() + " at: " + this.location + " in file: " + this.filename);
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse context: " + e.getLocalizedMessage(), this.filename, location, 0));
 		}
 	}
 

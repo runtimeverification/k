@@ -7,6 +7,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.disambiguate.AmbFilter;
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
@@ -76,7 +79,7 @@ public class ProgramLoader {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				k.utils.Error.report("Cannot parse program: " + e.getLocalizedMessage());
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), mainFile.getAbsolutePath(), "File system.", 0));
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();

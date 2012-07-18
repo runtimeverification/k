@@ -1,13 +1,22 @@
 package k3.basic;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import k.utils.Error;
 import k.utils.StringUtil;
 import k.utils.Tag;
 import k.utils.XmlLoader;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class Configuration extends Sentence {
 	private String content;
@@ -84,7 +93,7 @@ public class Configuration extends Sentence {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			Error.report("Cannot parse configuration: " + e.getLocalizedMessage() + " at: " + this.location + " in file: " + this.filename);
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse configuration: " + e.getLocalizedMessage(), this.filename, location, 0));
 		}
 
 		parsed = true;
