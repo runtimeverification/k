@@ -92,6 +92,7 @@ strategies
 							isSubsortEq(|"K", expect) ; (<?"K"> place <+ <?"K"> expect); !0 <+ // if the sort is K then score it as 0, only if the expected sort is a subsort of K
 							!-1								// if none of the above, then put -1
 						)>
+		//where <lt> (score, 0) ; <debug(!"Score: ")> (expect, place, score) <+ id
 
 	getFitnessUnit3:
 		(expect, []) -> 0

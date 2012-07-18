@@ -11,6 +11,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
 	@Override
 	public void visit(TermCons tc) {
+		super.visit(tc);
 
 		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {
 			UserList ulist = (UserList) tc.getProduction().getItems().get(0);
@@ -28,7 +29,6 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 				}
 			}
 		}
-		super.visit(tc);
 	}
 
 	/**
@@ -52,12 +52,17 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 	// }
 	// TODO: this is so wrong, but it works :-??
 	private int getFitnessUnit2(String declSort, String termSort) {
+		int score;
 		if (declSort.equals(termSort) || DefinitionHelper.isSubsorted(declSort, termSort))
-			return 0;
-		else if ((DefinitionHelper.isSubsorted("K", termSort) || termSort.equals("K")) && (DefinitionHelper.isSubsorted("K", declSort) || declSort.equals("K")))
-			return 0; // do nothing when you have a K
-		else
-			return -1;
+			score = 0;
+		// isSubsortEq(|"K", expect) ; (<?"K"> place <+ <?"K"> expect); !0
+		else if (DefinitionHelper.isSubsorted("K", termSort) && (declSort.equals("K") || declSort.equals("K")))
+			score = 0; // do nothing when you have a K
+		else {
+			score = -1;
+			//System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
+		}
+		return score;
 	}
 
 	@Override

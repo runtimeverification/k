@@ -18,13 +18,37 @@ public class Ambiguity extends Collection {
 
 	@Override
 	public String toMaude() {
-		return this.contents.get(0).toMaude();
+		String content = "";
+
+		for (Term term : contents)
+			if (term != null)
+				content += term.toMaude() + ",";
+
+		if (content.length() > 1)
+			content = content.substring(0, content.length() - 1);
+
+		return "amb(" + content + ")";
 	}
 
 	@Override
 	public Element toXml(Document doc) {
 		return null;
 	}
+
+	@Override
+	public String toString() {
+		String content = "";
+
+		for (Term term : contents)
+			if (term != null)
+				content += term + ",";
+
+		if (content.length() > 1)
+			content = content.substring(0, content.length() - 1);
+
+		return "amb(" + content + ")";
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);

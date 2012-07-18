@@ -17,4 +17,5 @@ public class GlobalSettings {
 	public static int level = 2;
 	public static boolean warnings = false;
 	public static boolean tempDisamb = false;
+	public static boolean typeWarnings = false;
 }

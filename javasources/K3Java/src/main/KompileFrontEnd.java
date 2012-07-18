@@ -22,9 +22,7 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.disambiguate.BestFitFilter;
-import ro.uaic.info.fmse.disambiguate.CorrectRewriteFilter;
 import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
 import ro.uaic.info.fmse.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import ro.uaic.info.fmse.disambiguate.TypeInferenceSupremumFilter;
@@ -446,17 +444,17 @@ public class KompileFrontEnd {
 			// disambiguation steps
 
 			if (GlobalSettings.tempDisamb) {
+				//javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
 			}
 			// last resort disambiguation
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+			//javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
 
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+			//javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
 			String maudified = javaDef.toMaude();
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Ambiguity;
+import ro.uaic.info.fmse.k.Production;
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.k.Rewrite;
 import ro.uaic.info.fmse.k.Sort;
@@ -25,13 +26,13 @@ public class TypeSystemFilter extends BasicTransformer {
 
 		} else {
 			int j = 0;
-			for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
-				if (tc.getProduction().getItems().get(i).getType() != ProductionType.SORT)
-					i++;
-				else {
-					Sort sort = (Sort) tc.getProduction().getItems().get(i);
+			Production prd = tc.getProduction();
+			for (int i = 0; i < prd.getItems().size(); i++) {
+				if (prd.getItems().get(i).getType() == ProductionType.SORT) {
+					Sort sort = (Sort) prd.getItems().get(i);
 					Term child = (Term) tc.getContents().get(j);
 					tc.getContents().set(j, applyTypeFilter(child, sort.getSort()));
+					j++;
 				}
 			}
 		}

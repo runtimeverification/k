@@ -17,6 +17,7 @@ public class BestFitFilter extends BasicTransformer {
 
 	public ASTNode transform(Ambiguity amb) {
 
+		// TODO: make this bottom up
 		int maximum = getFitnessUnit(amb.getContents().get(0));
 
 		// choose the maximums from the list of ambiguities

@@ -86,7 +86,6 @@ strategies
 
 	applyFilter2:
 		(sort, amb(x)) -> rez2
-		where poset := <MemoMySbs>
 		where rez := <filter(isSubsort(|sort))> x
 		where rez2 := <if <lt>(<length> rez, 1) then
 							!amb(x)

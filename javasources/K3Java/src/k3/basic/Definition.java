@@ -354,26 +354,51 @@ public class Definition implements Cloneable {
 		}
 		sdf += "}\n\n";
 
-		// 2
-		sdf += "%% subsorts 2\n";
-		// print K -> Sort > Sort -> K
-		sdf += "context-free priorities\n{\n";
-		for (Sort s : userSorts) {
-			if (!s.isBaseSort()) {
-				sdf += "	K -> " + StringUtil.escapeSortName(s.getSortName());
-				// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12K\")}";
-				sdf += "\n";
+		// TODO: add type warnings option in command line 
+		if (GlobalSettings.typeWarnings) {
+			Set<Subsort> sbs = getSubsorts();
+			// 2
+			sdf += "%% subsorts 2\n";
+			// print Sort -> K > K -> Sort
+			for (Sort s : userSorts) {
+				if (!s.isBaseSort()) {
+					sdf += "context-free priorities\n{\n";
+					sdf += "        K -> " + StringUtil.escapeSortName(s.getSortName());
+					// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12K\")}";
+					sdf += "\n";
+					sdf += "} .> {\n";
+					for (Sort ss : userSorts) {
+						if (!ss.isBaseSort() && (ss.equals(s) || sbs.contains(new Subsort(s, ss)))) {
+							sdf += "        " + StringUtil.escapeSortName(ss.getSortName()) + " -> K";
+							// sdf += " {cons(\"K12" + StringUtil.escapeSortName(ss.getSortName()) + "\")}";
+							sdf += "\n";
+						}
+					}
+					sdf += "}\n\n";
+				}
 			}
-		}
-		sdf += "} .> {\n";
-		for (Sort s : userSorts) {
-			if (!s.isBaseSort()) {
-				sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + " -> K";
-				// sdf += " {cons(\"K12" + StringUtil.escapeSortName(s.getSortName()) + "\")}";
-				sdf += "\n";
+		} else {
+			// 2
+			sdf += "%% subsorts 2\n";
+			// print K -> Sort > Sort -> K
+			sdf += "context-free priorities\n{\n";
+			for (Sort s : userSorts) {
+				if (!s.isBaseSort()) {
+					sdf += "	K -> " + StringUtil.escapeSortName(s.getSortName());
+					// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12K\")}";
+					sdf += "\n";
+				}
 			}
+			sdf += "} .> {\n";
+			for (Sort s : userSorts) {
+				if (!s.isBaseSort()) {
+					sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + " -> K";
+					// sdf += " {cons(\"K12" + StringUtil.escapeSortName(s.getSortName()) + "\")}";
+					sdf += "\n";
+				}
+			}
+			sdf += "}\n";
 		}
-		sdf += "}\n";
 
 		sdf += "context-free syntax\n";
 
@@ -419,7 +444,7 @@ public class Definition implements Cloneable {
 				sdf += "	\"HOLE\" \":\" \"" + s.getSortName() + "\"      -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12Hole\")}\n";
 			}
 		}
-	
+
 		sdf += "\n";
 		sdf += "	VariableDz -> K\n";
 
@@ -437,7 +462,7 @@ public class Definition implements Cloneable {
 		sdf += "	\":\" -> DouaPuncteDz {cons(\"DouaPuncte\")}\n";
 
 		sdf += "\n";
-		
+
 		sdf += "context-free restrictions\n";
 		sdf += "	VariableDz -/- ~[\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]\n";
 		sdf += "	DouaPuncteDz -/- [A-Z]\n\n";
@@ -458,11 +483,11 @@ public class Definition implements Cloneable {
 
 		sdf += "\n";
 		sdf += getFollowRestrictionsForTerminals(false);
-		
-		sdf += "lexical restrictions\n";                                                                                                                                                              
-		sdf += "%% some restrictions to ensure greedy matching for user defined constants\n";                                                                                                     
-		sdf += "	DzDzId  -/- [a-zA-Z0-9]\n";                                                                                                                                                       
-		sdf += "	DzDzInt -/- [0-9]\n";  
+
+		sdf += "lexical restrictions\n";
+		sdf += "%% some restrictions to ensure greedy matching for user defined constants\n";
+		sdf += "	DzDzId  -/- [a-zA-Z0-9]\n";
+		sdf += "	DzDzInt -/- [0-9]\n";
 
 		return sdf + "\n";
 	}
@@ -1028,11 +1053,6 @@ public class Definition implements Cloneable {
 		for (ModuleItem mi : modules)
 			if (mi.getType() == ModuleType.MODULE) {
 				Module m = (Module) mi;
-				String termination;
-				if (m.getModuleType().equals(Tag.interfaceTag))
-					termination = "Builtin";
-				else
-					termination = "Syn";
 				for (Sentence s : m.getSentences()) {
 					if (s.getType() == SentenceType.SYNTAX) {
 						Syntax syn = (Syntax) s;
@@ -1060,9 +1080,9 @@ public class Definition implements Cloneable {
 									if (!p.getAttributes().containsKey("cons")) {
 										String cons;
 										if (p.isListDecl())
-											cons = StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1" + "List" + termination;
+											cons = StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1" + "ListSyn";
 										else
-											cons = StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1" + StringUtil.getUniqueId() + termination;
+											cons = StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1" + StringUtil.getUniqueId() + "Syn";
 										p.getAttributes().put("cons", cons);
 										Element el = p.xmlTerm.getOwnerDocument().createElement("tag");
 										el.setAttribute("key", "cons");
@@ -1083,19 +1103,13 @@ public class Definition implements Cloneable {
 										// check if the provided cons is correct
 										String cons = p.getAttributes().get("cons");
 										String escSort = StringUtil.escapeSortName(p.getProdSort().getSortName());
-										if (m.getModuleType().equals(Tag.interfaceTag)) {
-											if (!cons.endsWith("Builtin"))
-												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'Builtin' and not with " + cons, p.getFilename(), p.getLocation(), 0));
-											if (!cons.startsWith(escSort))
-												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must start with '" + escSort + "' and not with " + cons, p.getFilename(), p.getLocation(), 0));
-										} else {
-											if (!cons.startsWith(escSort))
-												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must start with '" + escSort + "' and not with " + cons, p.getFilename(), p.getLocation(), 0));
-											if (!cons.endsWith("Syn")) // a normal cons must end with 'Syn'
-												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'Syn' and not with " + cons, p.getFilename(), p.getLocation(), 0));
-											if (p.isListDecl() && !cons.endsWith("ListSyn")) // if this is a list, it must end with 'ListSyn'
-												GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'ListSyn' and not with " + cons, p.getFilename(), p.getLocation(), 0));
-										}
+
+										if (!cons.startsWith(escSort))
+											GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must start with '" + escSort + "' and not with " + cons, p.getFilename(), p.getLocation(), 0));
+										if (!cons.endsWith("Syn")) // a normal cons must end with 'Syn'
+											GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'Syn' and not with " + cons, p.getFilename(), p.getLocation(), 0));
+										if (p.isListDecl() && !cons.endsWith("ListSyn")) // if this is a list, it must end with 'ListSyn'
+											GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'ListSyn' and not with " + cons, p.getFilename(), p.getLocation(), 0));
 									}
 								}
 							}
