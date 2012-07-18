@@ -22,6 +22,7 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.disambiguate.BestFitFilter;
 import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
 import ro.uaic.info.fmse.disambiguate.GetFitnessUnitTypeCheckVisitor;
@@ -452,9 +453,9 @@ public class KompileFrontEnd {
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
 			}
 			// last resort disambiguation
-			//javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
 
-			//javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
 			String maudified = javaDef.toMaude();
 
