@@ -11,6 +11,7 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class KastFrontEnd {
@@ -81,8 +82,9 @@ public class KastFrontEnd {
 				e.printStackTrace();
 			}
 		}
-		k.utils.ProgramLoader.parsePgm(mainFile, def, GlobalSettings.verbose);
+		k.utils.ProgramLoader.parsePgm(mainFile, def);
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
+		GlobalSettings.kem.print(0);
 	}
 }

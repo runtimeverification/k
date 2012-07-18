@@ -72,7 +72,7 @@ public class KompileFrontEnd {
 			GlobalSettings.tempDisamb = true;
 
 		if (cmd.hasOption("warnings"))
-			GlobalSettings.warnings = true;
+			GlobalSettings.warnings = 0;
 
 		// set lib if any
 		if (cmd.hasOption("lib")) {

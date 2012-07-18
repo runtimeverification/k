@@ -15,7 +15,7 @@ public class GlobalSettings {
 	public static File mainFile;
 	public static String mainFileWithNoExtension;
 	public static int level = 2;
-	public static boolean warnings = false;
+	public static int warnings = 1;
 	public static boolean tempDisamb = false;
 	public static boolean typeWarnings = false;
 }

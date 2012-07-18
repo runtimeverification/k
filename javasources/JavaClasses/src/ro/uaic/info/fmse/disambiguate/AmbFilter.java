@@ -1,5 +1,9 @@
 package ro.uaic.info.fmse.disambiguate;
 
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Ambiguity;
 import ro.uaic.info.fmse.k.Production;
@@ -10,8 +14,7 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class AmbFilter extends BasicTransformer {
 	public ASTNode transform(Ambiguity amb) {
-		String msg = "Parsing ambiguity at: " + amb.getLocation() + " in file: " + amb.getFilename() + "\n";
-		msg += "    Ambiguity between: ";
+		String msg = "";
 
 		for (ASTNode variant : amb.getContents()) {
 			if (variant instanceof TermCons) {
@@ -26,7 +29,7 @@ public class AmbFilter extends BasicTransformer {
 		}
 		msg = msg.substring(0, msg.length() - 2);
 		msg += "    Arbitrarily choosing the first.";
-		ro.uaic.info.fmse.utils.errors.Error.silentReport(msg);
+		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Parsing ambiguity between: " + msg, amb.getFilename(), amb.getLocation(), 0));
 
 		ASTNode astNode = amb.getContents().get(0);
 

@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.disambiguate.AmbFilter;
+import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
@@ -13,7 +15,7 @@ import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.transitions.labelify.KAppModifier;
 
 public class ProgramLoader {
-	public static void parsePgm(File mainFile, File defFile, Boolean verbose) {
+	public static void parsePgm(File mainFile, File defFile) {
 		try {
 			// compile a definition here
 			Stopwatch sw = new Stopwatch();
@@ -27,7 +29,7 @@ public class ProgramLoader {
 
 			// ------------------------------------- import files in Stratego
 			k3parser.KParser.ImportTblPgm(tbl.getAbsolutePath());
-			if (verbose)
+			if (GlobalSettings.verbose)
 				sw.printIntermediate("Importing Files = ");
 
 			try {
@@ -40,7 +42,7 @@ public class ProgramLoader {
 				XmlLoader.reportErrors(doc);
 				XmlLoader.writeXmlFile(doc, dotk.getAbsolutePath() + "/pgm.xml");
 
-				if (verbose) {
+				if (GlobalSettings.verbose) {
 					sw.printIntermediate("Parsing Program = ");
 				}
 
@@ -52,6 +54,8 @@ public class ProgramLoader {
 				outDef.accept(new CollectConsesVisitor());
 
 				ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+
+				out = out.accept(new AmbFilter());
 
 				out = out.accept(new KAppModifier());
 				String kast = out.toMaude();
@@ -66,7 +70,7 @@ public class ProgramLoader {
 
 				FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.maude", ast);
 
-				if (verbose) {
+				if (GlobalSettings.verbose) {
 					sw.printIntermediate("Maudify Program = ");
 					sw.printTotal("Total           = ");
 				}
