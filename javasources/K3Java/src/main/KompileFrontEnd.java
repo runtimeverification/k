@@ -456,7 +456,7 @@ public class KompileFrontEnd {
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
 				if (GlobalSettings.verbose)
-					sw.printIntermediate("Parsing Rules   = ");
+					sw.printIntermediate("Disambiguate    = ");
 			}
 			// last resort disambiguation
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
