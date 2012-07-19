@@ -1,6 +1,3 @@
 <config>
-    <test def="/dist/examples/simple-typed-static/simple-typed-static.k" program-extension="simple" compiled-file-name="simple-typed-static-compiled.maude"/>
-    <krun-options>
-        <program name="dekker.simple" ignore="yes"/>                              
-    </krun-options>
+	<test def="/dist/examples/simple-typed-static/simple-typed-static.k" program-extension="simple" compiled-file-name="simple-typed-static-compiled.maude"/>
 </config>
