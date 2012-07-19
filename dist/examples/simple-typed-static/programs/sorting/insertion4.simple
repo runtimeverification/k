@@ -1,0 +1,35 @@
+// This version of insertion sorting declares the vector in the init function
+// and returns it (actually its reference) to the main function
+
+function init(n:int) : arrayOf int {
+  var x[100]:arrayOf int;
+  for i = 0 to n - 1 do
+    x[i] = (n-i) + 100;
+  return x;
+}
+
+function printAll(x:arrayOf int, n:int):void {
+  for i = 0 to n - 1 do
+  print(" ",x[i]);
+}
+
+function main():void {
+  var n:int = 30, x:arrayOf int = init(n);
+  print("The original sequence is");
+  printAll(x,n);
+  print("\nSorting the array using insertion sort ... ");
+  for i = 1 to n - 1 do {
+    var j:int = i - 1, v:int = x[i];
+    while (j > 0 and x[j] > v) do {  // doing the loop only up to 1
+      x[j + 1] = x[j];
+      j = j - 1;
+    }
+    if (x[0] > v) then { 
+      x[1] = x[0];
+      x[0] = v;
+    } else x[j+1] = v;
+  }
+  print("Done!\nThe sorted sequence is");
+  printAll(x,n);
+  print("\n");
+}
