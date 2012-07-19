@@ -18,7 +18,7 @@ public class K {
 	public static final String maude_err = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_err.txt");
 
 	// kast
-	public static final String kast = k_base + fileSeparator + "bin" + fileSeparator + getKastOnOs();
+	public static final String kast = k_base + fileSeparator + "bin" + fileSeparator + Utils.getKastOnOs();
 	public static final String kast_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("kast_in.txt");
 
 	public static final String maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput.xml");
@@ -52,11 +52,5 @@ public class K {
 	public static boolean log_io = false;
 	public static boolean debug = false;
 	public static boolean trace = false;
-
-	private static String getKastOnOs() {
-		if (System.getProperty("os.name").toLowerCase().contains("win"))
-			return "kast.bat";
-		return "kast";
-	}
 
 }

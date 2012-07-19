@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="lib/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/jopt-simple-3.3.jar"/>
 	<classpathentry kind="lib" path="lib/jansi-1.8.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/K3Java"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

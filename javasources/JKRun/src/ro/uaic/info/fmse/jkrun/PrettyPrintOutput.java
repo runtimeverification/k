@@ -217,7 +217,7 @@ public class PrettyPrintOutput {
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
-			int m = FileUtil.countUnderscores(op);
+			int m = Utils.countUnderscores(op);
 			
 			//HOLE case
 			if (m == 0 && n == 0) {
@@ -241,7 +241,7 @@ public class PrettyPrintOutput {
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
-            int m = FileUtil.countUnderscores(op);
+            int m = Utils.countUnderscores(op);
 			
 			//postprocess
 			op = postProcessElement(node, op, sort);
@@ -274,7 +274,7 @@ public class PrettyPrintOutput {
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
-			int m = FileUtil.countUnderscores(op);
+			int m = Utils.countUnderscores(op);
 			
 			//postprocess
 			op = postProcessElement(node, op, sort);
@@ -336,7 +336,7 @@ public class PrettyPrintOutput {
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
-			int m = FileUtil.countUnderscores(op);
+			int m = Utils.countUnderscores(op);
 			
 			//postprocess
 			op = postProcessElement(node, op, sort);
@@ -375,7 +375,7 @@ public class PrettyPrintOutput {
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
-			int m = FileUtil.countUnderscores(op);
+			int m = Utils.countUnderscores(op);
 			
 			//#Id is treated separately
 			if ((sort.equals("#Id") && op.equals("#id_")) || (sort.equals("#NzInt") && op.equals("--Int_"))) {
@@ -530,9 +530,9 @@ public class PrettyPrintOutput {
 			elements.add(elem);
 	    }
 		StringBuilder sb_ = new StringBuilder(op);
-		sb_ = FileUtil.insertSpaceNearUnderscores(op);
+		sb_ = Utils.insertSpaceNearUnderscores(op);
 		op = sb_.toString();
-		StringBuilder sb1 = FileUtil.replaceAllUnderscores(op, elements);
+		StringBuilder sb1 = Utils.replaceAllUnderscores(op, elements);
 		sb.append(sb1);
 		if (!(n - m == 1 && elements.get(m).length() == 0)) {
 			sb.append("(");
@@ -561,7 +561,7 @@ public class PrettyPrintOutput {
 			String elem = prettyPrint(print(child, lineskip, whitespace, color), lineskip, whitespace, color);
 			elements.add(elem);
 		}
-		aux = FileUtil.replaceAllUnderscoresAssoc(op, elements);
+		aux = Utils.replaceAllUnderscoresAssoc(op, elements);
 		sb.append(aux);
 		
 		return sb;
@@ -577,7 +577,6 @@ public class PrettyPrintOutput {
 			String elem = prettyPrint(print(child, lineskip, whitespace, color), lineskip, whitespace, color);
 			elements.add(elem.trim());
 		}
-		
 		if (op.indexOf("`") != -1) {
 			op = op.replaceAll("`", "");
 		}
@@ -586,11 +585,11 @@ public class PrettyPrintOutput {
 			op = op.substring(1);
 		}
 		StringBuilder sb_ = new StringBuilder(op);
-		sb_ = FileUtil.insertSpaceNearUnderscores(op);
+		sb_ = Utils.insertSpaceNearUnderscores(op);
 		op = sb_.toString();
 		StringBuilder sb1 = new StringBuilder(op);
 		//replace each "_" with its children representation
-	    sb1 = FileUtil.replaceAllUnderscores(op, elements);
+	    sb1 = Utils.replaceAllUnderscores(op, elements);
 	    op = sb1.toString();
 		sb.append(op);
 		return sb;

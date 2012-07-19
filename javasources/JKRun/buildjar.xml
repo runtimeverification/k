@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="create_run_jar" name="Create Runnable Jar for Project JKRun">
-    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
-    <!--ANT 1.7 is required                                        -->
-    <target name="create_run_jar">
-    	<delete file="../../dist/bin/java/JKrun.jar" failonerror="false" />
-        <jar destfile="../../dist/bin/java/JKrun.jar" filesetmanifest="mergewithoutmain">
-            <manifest>
-                <attribute name="Main-Class" value="ro.uaic.info.fmse.jkrun.Main"/>
-                <attribute name="Class-Path" value="."/>
-            </manifest>
-            <fileset dir="./bin"/>
-            <fileset dir="../IOServer/bin"/>
-            <zipfileset excludes="META-INF/*.SF" src="./lib/commons-io-2.1.jar"/>
-        	<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="./lib/jopt-simple-3.3.jar"/>
-        	<zipfileset excludes="META-INF/*.SF" src="./lib/jansi-1.8.jar"/>
-        </jar>
-    </target>
+	<!--this file was created by Eclipse Runnable JAR Export Wizard-->
+	<!--ANT 1.7 is required                                        -->
+	<target name="create_run_jar">
+		<delete file="../../dist/bin/java/JKrun.jar" failonerror="false" />
+		<jar destfile="../../dist/bin/java/JKrun.jar" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="ro.uaic.info.fmse.jkrun.Main"/>
+				<attribute name="Class-Path" value="."/>
+			</manifest>
+			<fileset dir="./bin"/>
+			<fileset dir="../IOServer/bin"/>
+			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-io-2.1.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="./lib/jopt-simple-3.3.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="./lib/jansi-1.8.jar"/>
+			<fileset dir="../K3Java/bin"/>
+			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2.jar"/>
+			<fileset dir="../KPreprocessor/bin"/>
+			<fileset dir="../KUtils/bin"/>
+			<fileset dir="../JavaClasses/bin"/>
+		</jar>
+	</target>
 </project>

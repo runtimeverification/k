@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import ro.uaic.info.fmse.jkrun.K;
+import k.utils.MaudeRun;
 
 public class MaudeTask extends Thread {
 	// private static final String LOG_FILE = "maude.log";
@@ -22,6 +23,8 @@ public class MaudeTask extends Thread {
 	private String _errorFile;
 	private Process _maudeProcess;
 	public int returnValue;
+	
+	public static String maudeExe = MaudeRun.initializeMaudeExecutable();
 
 	public MaudeTask(String command, String outputFile, String errorFile, Logger parentLogger) {
 		_command = command;
@@ -56,7 +59,8 @@ public class MaudeTask extends Thread {
 		/*if (System.getProperty("os.name").toLowerCase().contains("mac")) {
 			commands.add(System.getenv("MAUDE_LIB") + K.fileSeparator + "maude");
 		} else {*/
-			commands.add("maude");
+			//commands.add("maude");
+			commands.add(maudeExe);
 		//}
 		commands.add("-no-wrap");
 		commands.add("-no-banner");
