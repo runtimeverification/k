@@ -14,6 +14,7 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.utils.strings.StringUtil;
 import ro.uaic.info.fmse.visitors.BasicVisitor;
+import ro.uaic.info.fmse.html.Color;
 
 public class HTMLFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
@@ -121,6 +122,8 @@ public class HTMLFilter extends BasicVisitor {
 
 	public String getResult() {
 		
+		result += "Color test " + Color.convertHSLtoRGB(Color.convertRGBtoHSL(new Color.RGB(255,0,0)));
+		
 		String html = 
 			"<!DOCTYPE html>" + endl + 
 			"<html lang=\"en\">" + endl + 
@@ -136,6 +139,9 @@ public class HTMLFilter extends BasicVisitor {
 			result +
 			"</body>" + endl +
 			"</html>" + endl;
+		
+		
+		
 
 		return html;
 	}
