@@ -87,13 +87,13 @@ public class MaudeTask extends Thread {
 
 	private void writeError() throws IOException {
 		// redirect error in log file
-		BufferedReader maudeOutput = new BufferedReader(new InputStreamReader(_maudeProcess.getErrorStream()));
-		BufferedWriter outputFile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_errorFile)));
+		BufferedReader maudeError = new BufferedReader(new InputStreamReader(_maudeProcess.getErrorStream()));
+		BufferedWriter errorFile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_errorFile)));
 
 		String line;
-		while ((line = maudeOutput.readLine()) != null) {
-			outputFile.write(line + "\n");
+		while ((line = maudeError.readLine()) != null) {
+			errorFile.write(line + "\n");
 		}
-		outputFile.close();
+		errorFile.close();
 	}
 }

@@ -577,6 +577,7 @@ public class PrettyPrintOutput {
 			String elem = prettyPrint(print(child, lineskip, whitespace, color), lineskip, whitespace, color);
 			elements.add(elem.trim());
 		}
+		
 		if (op.indexOf("`") != -1) {
 			op = op.replaceAll("`", "");
 		}

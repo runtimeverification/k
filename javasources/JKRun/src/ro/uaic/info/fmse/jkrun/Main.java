@@ -217,14 +217,8 @@ public class Main {
 			if (cmd.hasOption("no-log-io")) {
 				K.log_io = false;
 			}
-			if (cmd.hasOption("debug") && cmd.hasOption("rule-labels")) {
+			if (cmd.hasOption("debug")) {
 				K.debug = true;
-				K.rule_labels = cmd.getOptionValue("rule-labels");
-				// System.out.println("rule-labels=" + K.rule_labels);
-			}
-			if (cmd.hasOption("debug") && !cmd.hasOption("rule-labels")) {
-				K.debug = true;
-				Error.report("You have to provide some labels in order to start debugging.");
 			}
 			if (cmd.hasOption("trace")) {
 				K.trace = true;

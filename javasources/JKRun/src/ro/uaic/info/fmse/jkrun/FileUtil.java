@@ -106,11 +106,13 @@ public class FileUtil {
 	public static boolean deleteDirectory(File path) {
 		if (path.exists()) {
 			File[] files = path.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (files[i].isDirectory()) {
-					deleteDirectory(files[i]);
-				} else {
-					files[i].delete();
+			if (files != null && files.length > 0) {
+				for (int i = 0; i < files.length; i++) {
+					if (files[i].isDirectory()) {
+						deleteDirectory(files[i]);
+					} else {
+						files[i].delete();
+					}
 				}
 			}
 		}
@@ -359,6 +361,12 @@ public class FileUtil {
 		while (index != -1) {
 			index = sb.indexOf("_", index);
 			if (index != -1) {
+				//when the number of underscores is greater than the number of children (such in the case of family.logik)
+				if (count >= elements.size()) {		
+					sb.insert(index, "");
+					sb = sb.deleteCharAt(index);
+					break;		
+				}
 				String s = (String)elements.get(count);
 				sb.insert(index, s);
 				index += s.length();
