@@ -32,6 +32,8 @@ strategies
     ast2abox(|[<import-term(include/K3Syntax.generated.pp.af)>,
                <import-term(include/K3Syntax.pp.af)>]);
     box2text-string(|100)
+    
+  language = !"K3Syntax"
 
 strategies
   
@@ -226,6 +228,9 @@ signature constructors
   Entity   : ID * List(Property) -> Entity
   Property : ID * Type           -> Property
   Type     : ID                  -> Type
+  
+  Type     : Namespace
+  Property : Namespace
 
 strategies
   

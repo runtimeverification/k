@@ -14,8 +14,7 @@ public class GlobalSettings {
 	public static KExceptionManager kem = new KExceptionManager();
 	public static File mainFile;
 	public static String mainFileWithNoExtension;
-	public static int level = 2;
-	public static boolean warnings = false;
+	public static int warningslevel = 2;
 	public static boolean tempDisamb = false;
 	public static boolean typeWarnings = false;
 }

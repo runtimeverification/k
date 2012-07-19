@@ -51,7 +51,7 @@ public class KompileOptionsParser {
 		tex.addOption(maudify);
 
 		OptionGroup warn = new OptionGroup();
-		Option warnings = new Option("w", "warnings", false, "display warnings");
+		Option warnings = new Option("w", "warnings", true, "display warnings - default level = 2");
 		warn.addOption(warnings);
 
 		// xml

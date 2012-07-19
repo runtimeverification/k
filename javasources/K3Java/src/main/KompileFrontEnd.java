@@ -72,7 +72,7 @@ public class KompileFrontEnd {
 			GlobalSettings.tempDisamb = true;
 
 		if (cmd.hasOption("warnings"))
-			GlobalSettings.warnings = true;
+			GlobalSettings.warningslevel = Integer.parseInt(cmd.getOptionValue("warnings"));
 
 		// set lib if any
 		if (cmd.hasOption("lib")) {
@@ -135,7 +135,7 @@ public class KompileFrontEnd {
 		}
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
-		GlobalSettings.kem.print(GlobalSettings.level);
+		GlobalSettings.kem.print();
 	}
 
 	private static void pdf(File mainFile, String lang) {
@@ -631,7 +631,7 @@ public class KompileFrontEnd {
 	public static void compile(File mainFile, String mainModule, String maudified) {
 		try {
 			// TODO: trateaza erorile de compilare
-			GlobalSettings.kem.print(GlobalSettings.level, KExceptionGroup.COMPILER);
+			GlobalSettings.kem.print(KExceptionGroup.COMPILER);
 
 			// init stopwatch
 			Stopwatch sw = new Stopwatch();

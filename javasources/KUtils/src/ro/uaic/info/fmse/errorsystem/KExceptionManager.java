@@ -13,37 +13,31 @@ public class KExceptionManager {
 	public void register(KException exception) {
 		exceptions.add(exception);
 		if (exception.exceptionGroup.equals(KExceptionGroup.CRITICAL)) {
-			print(GlobalSettings.level);
+			print();
 		}
 	}
 
-	public void print(int level) {
+	public void print() {
 		boolean errors = false;
-		for (KException e : exceptions)
-			if (e.level <= level) {
-				if (e.type == ExceptionType.WARNING && (GlobalSettings.warnings || e.level <= level)) {
-					System.err.println(e);
-				} else
-					System.err.println(e);
-				if (e.type == ExceptionType.ERROR)
-					errors = true;
-			}
+		for (KException e : exceptions) {
+			if (e.type == ExceptionType.WARNING && e.level <= GlobalSettings.warningslevel)
+				System.err.println(e);
+			if (e.type == ExceptionType.ERROR)
+				errors = true;
+		}
 		if (errors)
 			System.exit(1);
 	}
 
-	public void print(int level, KExceptionGroup keg) {
+	public void print(KExceptionGroup keg) {
 		boolean errors = false;
 		for (KException e : exceptions)
-			if (e.level <= level)
-				if (e.exceptionGroup == keg) {
-					if (e.type == ExceptionType.WARNING && (GlobalSettings.warnings || e.level <= level)) {
-						System.err.println(e);
-					} else
-						System.err.println(e);
-					if (e.type == ExceptionType.ERROR)
-						errors = true;
-				}
+			if (e.exceptionGroup == keg) {
+				if (e.type == ExceptionType.WARNING && e.level <= GlobalSettings.warningslevel)
+					System.err.println(e);
+				if (e.type == ExceptionType.ERROR)
+					errors = true;
+			}
 		if (errors)
 			System.exit(1);
 	}

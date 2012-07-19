@@ -87,6 +87,6 @@ public class KastFrontEnd {
 		k.utils.ProgramLoader.parsePgm(mainFile, def);
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
-		GlobalSettings.kem.print(GlobalSettings.level);
+		GlobalSettings.kem.print();
 	}
 }

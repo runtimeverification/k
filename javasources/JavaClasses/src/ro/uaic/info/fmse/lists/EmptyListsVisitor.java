@@ -66,7 +66,7 @@ public class EmptyListsVisitor extends BasicTransformer {
 						}
 
 						if (!avoid) {
-							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.LISTS, KMessages.WARNING1000, new File(tc.getFilename()).getName(), tc.getLocation(), 0));
+							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.LISTS, KMessages.WARNING1000, new File(tc.getFilename()).getName(), tc.getLocation(), 3));
 						}
 					}
 				}
