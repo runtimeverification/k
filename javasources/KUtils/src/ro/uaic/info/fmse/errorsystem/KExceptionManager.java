@@ -22,8 +22,10 @@ public class KExceptionManager {
 		for (KException e : exceptions) {
 			if (e.type == ExceptionType.WARNING && e.level <= GlobalSettings.warningslevel)
 				System.err.println(e);
-			if (e.type == ExceptionType.ERROR)
+			if (e.type == ExceptionType.ERROR) {
+				System.err.println(e);
 				errors = true;
+			}
 		}
 		if (errors)
 			System.exit(1);
@@ -35,8 +37,10 @@ public class KExceptionManager {
 			if (e.exceptionGroup == keg) {
 				if (e.type == ExceptionType.WARNING && e.level <= GlobalSettings.warningslevel)
 					System.err.println(e);
-				if (e.type == ExceptionType.ERROR)
+				if (e.type == ExceptionType.ERROR) {
+					System.err.println(e);
 					errors = true;
+				}
 			}
 		if (errors)
 			System.exit(1);

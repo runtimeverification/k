@@ -119,7 +119,7 @@ course, including the types of the involved variables. */
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
 
 //  rule var X:Id : T:Type = E:Exp; => var X : T; X = E;
-  rule 'var_;('_`,_('_=_('_:_(X:Id,, T:Type),, E:Exp),, .Exps))
+  rule var X:Id : T:Type = E:Exp;
        =>
        var X : T; X = E;
     
@@ -235,13 +235,13 @@ references). */
   rule var .Exps; => stmt   [structural]
 
   rule <task>
-         <k> var X:Id : T:Type, .Exps; => stmt ...</k>
+         <k> var X:Id : T:Type; => stmt ...</k>
        </task>
        <gtenv> Rho:Map (. => X |-> T) </gtenv>
     when notBool(X in keys(Rho))
 
   rule <task>
-         <k> var X:Id : T:Type, .Exps;
+         <k> var X:Id : T:Type;
                => stuck(var X : T;) 
          ...</k>
        </task>
@@ -385,7 +385,7 @@ integer in order to be allowed to be incremented, as seen in the rule
   rule ++ int => int
   rule int + int => int
   rule string + string => string
-  rule '_-_(int,, int) => int
+  rule int - int => int
   rule int * int => int
   rule int / int => int
   rule int % int => int
@@ -400,7 +400,7 @@ integer in order to be allowed to be incremented, as seen in the rule
   rule bool or bool => bool
   rule not(bool) => bool
   rule (arrayOf T:Type)[int, Ts:Types] => '_`[_`](T,, Ts)
-  rule '_`[_`](T:Type,, .Types) => T
+  rule T:Type [.Types] => T
   rule sizeOf(arrayOf T:Type) => int
   rule '_`(_`)(function from Ts:Types to T:Type,, Ts) => T
        when Ts =/=K .Types
@@ -451,7 +451,7 @@ exceptions can only have integer type. */
   rule print(T:Type, Ts:Types => Ts);
        when T ==K int orBool T ==K string
 
-  rule 'print`(_`)(.Types) => stmt
+  rule print(.Types); => stmt
 
   rule try stmt catch(X:Id) S:Stmt => {var X:int; S}  [structural]
 
@@ -463,7 +463,7 @@ exceptions can only have integer type. */
 
   rule release T:Type; => stmt
 
-  rule rendezvous_;(T:Type) => stmt
+  rule rendezvous T:Type; => stmt
 
   rule stmt stmt => stmt
 

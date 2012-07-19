@@ -57,7 +57,7 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 			score = -1; // if I insert a K where I would expect a more specific kind of sort, put -1
 		else {
 			score = -1;
-			System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
+			//System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
 		}
 		return score;
 	}

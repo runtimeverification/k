@@ -360,7 +360,7 @@ public class Definition implements Cloneable {
 		sdf += "}\n\n";
 
 		// TODO: add type warnings option in command line
-		if (GlobalSettings.typeWarnings) {
+		if (!GlobalSettings.typeWarnings) {
 			Set<Subsort> sbs = getSubsorts();
 			// 2
 			sdf += "%% subsorts 2\n";
