@@ -64,6 +64,7 @@ module SYMBOLIC-CALCULUS
   rule isBoolSymExp(I1:Int <=Int I2:Int) => true
        when isIntSymExp(I1) ==K true
        [anywhere]
+
   rule isBoolSymExp(I1:Int <=Int I2:Int) => true
        when isIntSymExp(I2) ==K true
        [anywhere]
@@ -157,6 +158,7 @@ module SYMBOLIC-CALCULUS
        => 
        (I +Int 1) *Int (I +Int 1)
        [anywhere]
+
 endmodule
 
 //@ \section{Semantics}
@@ -179,9 +181,21 @@ module IMP
                         <env color="red"> .Map </env>
                       </config>
                       <formula> true </formula>
-                      <guard> .Map </guard>
                     </task>
                   </tasks>
+                  <hypos>
+                    <hypo multiplicity="*">
+                      <patt1>
+                        <k1 color="green"> .K  </k1>
+                        <env1 color="red"> .Map </env1>
+                      </patt1>
+                      <patt2>
+                        <k2 color="green"> .K  </k2>
+                        <env2 color="red"> .Map </env2>
+                      </patt2>
+                      <formula> true </formula>
+                    </hypo>
+                  </hypos>
                 </T>
 
 /*@
@@ -193,7 +207,15 @@ module IMP
 
   syntax KResult ::= Int | Bool
 
-// **********************
+/*@
+  We use a new syntactic construct that help us to store hypotheses. The basic
+  idea is to add the hypotheses in a controlled way. For instance, we may add
+  hypothesis only when in the k cell we have a main statement like while, if, 
+  or assignment. 
+*/
+
+  syntax K ::= "storeHypo" "(" K ")"
+
 
 /*@
   The semantics of the expressions remains unchanged.
@@ -239,21 +261,19 @@ module IMP
 /*@ 
     The rule for while is annotated as transition for technical reasons: since
   our formula uses while as the main statement, it forces to apply the rules
-  for hypotheses before firing the semantic rule (if any).
-  From the same reasons, the execution of while changes the guard  such that
-  the hypothesis added by the goal can be fired after that.
-  We convetionally named our goal "sqsum".
+  for hypotheses before firing the semantic rule (if any).\\
+  Moreover, the semantics of while is changed such each time in the cell k 
+  we have an while , we store the hypotheses provided that the corresponding
+  formula is included in the observational equivalence.
 */
-
-  syntax K ::= "sqsum"
 
   rule [while] :
        <k>
-          while B:BExp do S:Stmt
+          while B:BExp do S:Stmt ~> K:K
           => 
-          if B then S ; while B do S else skip
-       ...</k>
-       <guard>... sqsum |-> ( _ => true ) ...</guard> 
+          storeHypo(while B do S ~> K) ~>
+          if B then S ; while B do S else skip ~> K
+       </k> 
        [transition]
 
 
@@ -324,65 +344,105 @@ module IMP
   rule success success => success 
 
 /*@
-  The next rule implements the basic entailment relation. Two configurations
-  are observational equivalent iff the values for the program variables \texttt{n},
-  \texttt{s}, aand \texttt{i} are the same.
+  The next rule implements the basic entailment relation.
 */
 
   rule [equality] :
        <task>
          <config>
            <k> K:K </k>
-           <env> n |-> N:Int s |-> S:Int i |-> I:Int Env:Map </env>
+           <env> Env:Map </env>
          </config>
          <config>
            <k> K </k>
-           <env> n |-> N s |-> S i |-> I Env':Map </env>
+           <env> Env':Map </env>
          </config>
          C:Bag
        </task>
        =>
        success
+       when eqObs(<env> Env </env> <env> Env' </env>) ==K true
 
 /*@
   The next rule applies the hypothesis added by the initial processing
   of the goal:
 */
 
-  rule [circularity-sqsum] :
-            ( <task>
-                <config>
-                  <k> 
-		    while (i <= n) do (
-		      s := s + i * i;
-		        i := i + 1
-		    )
-                  </k>
-                  <env>
-                       i |-> I1:Int
-                       s |-> S1:Int 
-                  ...</env>
-                </config>
-                <config>
-                  <k>
-	 	    while (i <= n) do (
-		      s := s + k;
-		        (k := k + i + i + 1;
-		           i := i + 1)
-	            )
-                  </k>
-                  <env>  i |-> I2:Int
-                         s |-> S2:Int 
-                         k |-> K2:Int
-                  ...</env>
-                </config>
-                <guard> sqsum |-> true </guard>
-              ...</task>)
-              =>
-              success
-  when (I1 ==Int I2)
-       andBool (S1 ==Int S2)
-       andBool (K2 ==Int I2 *Int I2)
+/*@
+  The observationa equivalence relation:
+*/
+
+  syntax Bool ::= "eqObs" "(" Bag ")"
+
+  rule eqObs( <env>... s |-> V1:K ...</env>
+              <env>... s |-> V2:K ...</env> )
+       =>
+       true
+       when V1 ==K V2
+       [anywhere]
+
+/*@
+  The next rule gives semantics to the new construct \texttt{storeHyp}, which 
+  consists of storing the hypothesis given by the arguments.
+*/
+
+  rule [store-hypo] :
+       <task>
+         <config> 
+           <k> storeHypo(K1:K) => . ...</k>
+           <env> Env1:Map </env>
+         </config> 
+         <config> 
+           <k> storeHypo(K2:K) => . ...</k>
+           <env> Env2:Map </env>
+         </config>
+         <formula> F:Bool </formula>
+       </task>
+       <hypos>... 
+         .
+         =>
+         <hypo>
+           <patt1> 
+             <k1> K1 </k1>
+             <env1> Env1 </env1>
+           </patt1> 
+           <patt2> 
+             <k2> K2 </k2>
+             <env2> Env2 </env2>
+           </patt2>
+           <formula> F </formula>
+         </hypo>
+       ...</hypos>
+       when eqObs(<env> Env1 </env> <env> Env2 </env>) ==K true
+
+  rule [circularity] :
+       (<task>
+         <config> 
+           <k> K1:K </k>
+           <env> Env1:Map </env>
+         </config> 
+         <config> 
+           <k> K2:K </k>
+           <env> Env2:Map </env>
+         </config>
+         <formula> F:Bool </formula>
+       </task>
+       =>
+       success)
+       <hypos>... 
+         <hypo>
+           <patt1> 
+             <k1> K1 </k1>
+             <env1> Env1':Map </env1>
+           </patt1> 
+           <patt2> 
+             <k2> K2 </k2>
+             <env2> Env2':Map </env2>
+           </patt2>
+           <formula> F </formula>
+         </hypo>
+       ...</hypos>
+     when eqObs(<env> Env1 </env> <env> Env2 </env>) //ihm, o fi bine?
 
 /*@
   The initial configuration:
@@ -393,9 +453,12 @@ module IMP
          <tasks>
            .
          </tasks>
+         <hypos> 
+           .
+         </hypos>
        </T>
-        =>
-        <T> 
+       =>
+       <T> 
          <tasks>
             <task>
                <config>
@@ -418,9 +481,11 @@ module IMP
                  <env> n |-> n0 s |-> s0 i |-> i0 k |-> i0 *Int i0  </env>
               </config>
               <formula> true </formula>
-              <guard> sqsum |-> false </guard>
            </task>
-         </tasks>
-       </T>
+        </tasks>
+        <hypos>
+          .
+        </hypos>
+      </T>
 
 endmodule
