@@ -1,58 +1,36 @@
+//@ \section{Symbolic Calculus}
 
-//@ \section{Syntax}
-
-module IMP-SYNTAX
-  imports BUILTIN-SYNTAX-HOOKS 
-
-/*@
-  This is the syntax of IMP, where we added the multiplication operator.
-*/
-  
-  syntax AExp ::= Int | Id
-  				| AExp "/" AExp [left, strict]
-  				| AExp "*" AExp [left, strict]
-  				> AExp "+" AExp [left, strict]
-  				| "(" AExp ")"  [bracket]
-
-  syntax BExp ::= Bool
-  				| AExp "<=" AExp  [seqstrict]
-  				| "not" BExp      [strict]
-  				> BExp "and" BExp [left, strict(1)]
-  				| "(" BExp ")"    [bracket]
-
-  syntax Stmt ::= "skip"
-  				| Id ":=" AExp   [strict(2)]
-  				| "if" BExp "then" Stmt "else" Stmt [strict(1)]
-  				| "while" BExp "do" Stmt
-  				> Stmt ";" Stmt   [left]
-  				| "(" Stmt ")"    [bracket]
-
-  syntax Pgm ::= "var" Ids ";" Stmt
-  syntax Ids ::= List{Id, ","}
-  syntax Start ::= Pgm  
-
-endmodule
-
-//@  \section{Symbolic calculus}
-
-module SYMBOLIC-CALCULUS
-
-/*@
-  This module is designed for our example. 
-*/
-
-//@ The variable used in the programs:
-
-  syntax #Id ::= "i" | "n" | "s" | "k" 
+module SYMBOLIC-CALCULUS-SYNTAX
 
 /*@ 
   The symbolic values needed to define the initial configuration.
   They are corresponding to the vriables in equivalence formula.
 */
 
-  syntax IntSymVar ::= "n0" | "s0" | "i0"
+
+  syntax IntSymVar ::= "symInt" "(" Id ")" 
+
+  syntax Id ::= "fresh" "(" Int ")" [function] 
+  rule fresh(I:Int) => String2Id("symVar" +String Int2String(I)) [anywhere]
 
   syntax Int ::= IntSymVar
+
+// The variable used in the programs:
+
+  syntax #Id ::= "i" | "n" | "s" | "k" 
+
+endmodule
+
+module SYMBOLIC-CALCULUS
+  imports SYMBOLIC-CALCULUS-SYNTAX
+
+
+
+/*@
+  This module is designed with a minimal support. 
+*/
+
+
 
 /*@
   The predicate defining the symbolic boolean expressions.
@@ -161,6 +139,50 @@ module SYMBOLIC-CALCULUS
 
 endmodule
 
+
+//@ \section{Syntax}
+
+module IMP-SYNTAX
+  imports BUILTIN-SYNTAX-HOOKS
+  imports SYMBOLIC-CALCULUS-SYNTAX
+
+/*@
+  This is the syntax of IMP, where we added the multiplication operator.
+*/
+  
+  syntax AExp ::= Int | Id
+  				| AExp "/" AExp [left, strict]
+  				| AExp "*" AExp [left, strict]
+  				> AExp "+" AExp [left, strict]
+  				| "(" AExp ")"  [bracket]
+
+  syntax BExp ::= Bool
+  				| AExp "<=" AExp  [seqstrict]
+  				| "not" BExp      [strict]
+  				> BExp "and" BExp [left, strict(1)]
+  				| "(" BExp ")"    [bracket]
+
+  syntax Stmt ::= "skip"
+  				| Id ":=" AExp   [strict(2)]
+  				| "if" BExp "then" Stmt "else" Stmt [strict(1)]
+  				| "while" BExp "do" Stmt
+  				> Stmt ";" Stmt   [left]
+  				| "(" Stmt ")"    [bracket]
+
+  syntax Pgm ::= "var" Ids ";" Stmt
+  syntax Ids ::= List{Id, ","}
+
+  syntax EqvPgm ::= "program1:" Pgm "program2:" Pgm "observers:" Ids ";"
+
+  syntax Start ::= EqvPgm  
+
+
+endmodule
+
+//@  \section{Symbolic calculus}
+
+
+
 //@ \section{Semantics}
 
 module IMP
@@ -177,7 +199,7 @@ module IMP
                   <tasks> 
                     <task multiplicity="*">
                       <config multiplicity="*">
-                        <k color="green"> .K  </k>
+                        <k color="green"> $PGM:EqvPgm  </k>
                         <env color="red"> .Map </env>
                       </config>
                       <formula> true </formula>
@@ -196,6 +218,8 @@ module IMP
                       <formula> true </formula>
                     </hypo>
                   </hypos>
+                  <observers> .List </observers> 
+                  <nextSymvar> 0 </nextSymVar>
                 </T>
 
 /*@
@@ -348,7 +372,7 @@ module IMP
 */
 
   rule [equality] :
-       <task>
+       (<task>
          <config>
            <k> K:K </k>
            <env> Env:Map </env>
@@ -360,8 +384,10 @@ module IMP
          C:Bag
        </task>
        =>
-       success
-       when eqObs(<env> Env </env> <env> Env' </env>) ==K true
+       success)
+       <observers> Obs:List </observers>
+       when eqObs(<env> Env </env> <env> Env' </env> <observers> Obs </observers>)
+            ==K true
 
 /*@
   The next rule applies the hypothesis added by the initial processing
@@ -369,22 +395,46 @@ module IMP
 */
 
 /*@
-  The observationa equivalence relation:
+  The observational equivalence relation:
 */
 
-  syntax Bool ::= "eqObs" "(" Bag ")"
+  syntax Bool ::= "eqObs" "(" Bag ")" [function]
 
+/*
   rule eqObs( <env>... s |-> V1:K ...</env>
               <env>... s |-> V2:K ...</env> )
        =>
        true
        when V1 ==K V2
        [anywhere]
+*/
 
+  rule eqObs(<env> _ </env>
+             <env> _ </env>
+             <observers> .List </observers>)
+       =>
+       true
+       [anywhere]
+
+  rule eqObs( <env>... X:Id |-> V1:K ...</env>
+              <env>... X |-> V2:K ...</env>
+              <observers> ListItem(X) => . ...</observers> )
+       when V1 ==K V2
+       [anywhere]
+
+  rule eqObs( <env>... X:Id |-> V1:K ...</env>
+              <env>... X |-> V2:K ...</env>
+              <observers> ListItem(X) ...</observers> )
+       =>
+       false
+       when V1 =/=K V2
+       [anywhere]
+ 
 /*@
   The next rule gives semantics to the new construct \texttt{storeHyp}, which 
   consists of storing the hypothesis given by the arguments.
 */
+
 
   rule [store-hypo] :
        <task>
@@ -413,7 +463,9 @@ module IMP
            <formula> F </formula>
          </hypo>
        ...</hypos>
-       when eqObs(<env> Env1 </env> <env> Env2 </env>) ==K true
+         <observers> Obs:List </observers>
+       when eqObs(<env> Env1 </env> <env> Env2 </env> <observers> Obs </observers>)
+            ==K true
 
   rule [circularity] :
        (<task>
@@ -442,12 +494,16 @@ module IMP
            <formula> F </formula>
          </hypo>
        ...</hypos>
-     when eqObs(<env> Env1 </env> <env> Env2 </env>) //ihm, o fi bine?
+       <observers> Obs </observers>
+     when eqObs(<env> Env1 </env> <env> Env2 </env> <observers> Obs </observers>)
+ //ihm, o fi bine?
+
 
 /*@
   The initial configuration:
 */
 
+/*
   rule [initial] :
        <T> 
          <tasks>
@@ -487,5 +543,46 @@ module IMP
           .
         </hypos>
       </T>
+*/
+
+  rule [initial] :
+       <config>
+         <k> 
+           program1: P1:Pgm program2: P2:Pgm observers: Obs:Ids ;
+           =>
+           initVal(Obs) ~> P1
+         </k>
+         <env> _ </env>
+       </config>
+      (. =>
+       <config>
+         <k> 
+           initVal(Obs) ~> P2
+         </k>
+         <env> . </env>
+       </config>)
+       <observers> . => Ids2List(Obs) </observers>
+
+  syntax List ::= "Ids2List" "(" Ids ")" [function]
+  rule Ids2List(.Ids) => .List [anywhere]
+  rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
+       [anywhere]
+
+  syntax K ::= "initVal" "(" Ids ")"
+
+  rule <k> initVal(.Ids) => . ...</k>
+       <k> initVal(.Ids) => . ...</k>
+       [structural]
+
+  rule <config>
+         <k> initVal((X:Id, Xs:Ids) => Xs) ...</k>
+         <env>... . => X |-> symInt(fresh(I)) ...</env>
+       </config> 
+       <config> 
+         <k> initVal((X:Id, Xs:Ids) => Xs) ...</k>
+         <env>... . => X |-> symInt(fresh(I)) ...</env>
+       </config> 
+       <nextSymvar> I:Int => I +Int 1 </nextSymVar>
+       [structural]
 
 endmodule
