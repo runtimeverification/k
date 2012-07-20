@@ -69,7 +69,7 @@ public class KompileFrontEnd {
 
 		// TODO: temporary to test the java disambiguator
 		if (cmd.hasOption("tempDisamb"))
-			GlobalSettings.tempDisamb = true;
+			GlobalSettings.tempDisamb = false;
 
 		if (cmd.hasOption("warnings"))
 			GlobalSettings.warningslevel = Integer.parseInt(cmd.getOptionValue("warnings"));
@@ -446,7 +446,7 @@ public class KompileFrontEnd {
 
 			// disambiguation steps
 
-			if (!GlobalSettings.tempDisamb) {
+			if (GlobalSettings.tempDisamb) {
 				// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
 				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());

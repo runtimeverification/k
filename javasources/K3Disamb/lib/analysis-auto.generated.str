@@ -6,7 +6,6 @@ signature
 
 
 imports
-  lib/editor-common.generated
   include/K3Disamb
 
 
