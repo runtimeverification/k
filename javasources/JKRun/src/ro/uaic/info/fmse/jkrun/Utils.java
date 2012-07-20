@@ -4,9 +4,7 @@ import java.util.List;
 
 public class Utils {
    
-	/*
-	 * count the number of underscores from the String op
-	 */
+	// count the number of underscores from the String op
 	public static int countUnderscores(String op) {
 		int count = 0;
 	    int index = 0;
@@ -89,6 +87,7 @@ public class Utils {
 		return sb;
 	}
 	
+	//get kast script according to the OS
 	public static String getKastOnOs() {
 		if (System.getProperty("os.name").toLowerCase().contains("win"))
 			return "kast.bat";

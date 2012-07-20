@@ -35,7 +35,7 @@ public class Main {
 	public static void printStatistics(CommandLine cmd) {
 		PrettyPrintOutput p = new PrettyPrintOutput(cmd);
 		File file = new File(K.maude_output);
-		if ("search".equals(K.maude_cmd) || p.getCmd().hasOption("xsearch-pattern")) {
+		if ("search".equals(K.maude_cmd)) {
 			String totalStates = p.getSearchTagAttr(file, "total-states");
 			String totalRewrites = p.getSearchTagAttr(file, "total-rewrites");
 			String realTime = p.getSearchTagAttr(file, "real-time-ms");
@@ -205,6 +205,8 @@ public class Main {
 				K.maude_cmd = cmd.getOptionValue("maude-cmd");
 			}
 			if (cmd.hasOption("xsearch-pattern")) {
+				K.maude_cmd = "search";
+				K.do_search = true;
 				K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern");
 				//System.out.println("xsearch-pattern:" + K.xsearch_pattern);
 			}
@@ -337,27 +339,17 @@ public class Main {
 					KAST1 = rp.runParser(k3jar, K.parser, K.k_definition, K.model_checking, true);
 				}
 				
-				sb.append("load " + K.compiled_def);
-				sb.append(K.lineSeparator + K.lineSeparator);
-				sb.append("mod MCK is");
-				sb.append(" including " + K.main_module + " .");
-				sb.append(K.lineSeparator + K.lineSeparator);
-				sb.append(" op #initConfig : -> Bag .");
-				sb.append(K.lineSeparator + K.lineSeparator);
-				sb.append(" eq #initConfig =");
-				sb.append(K.lineSeparator);
-				sb.append("  #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .");
-				sb.append(K.lineSeparator);
-				sb.append("endm");
-				sb.append(K.lineSeparator + K.lineSeparator);
-				sb.append("red");
-				sb.append(K.lineSeparator);
+				sb.append("load " + K.compiled_def + K.lineSeparator + K.lineSeparator);
+				sb.append("mod MCK is" + K.lineSeparator); 
+				sb.append(" including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator);
+				sb.append(" op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator);
+				sb.append(" eq #initConfig =" + K.lineSeparator);
+				sb.append("  #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) ." + K.lineSeparator);
+				sb.append("endm" + K.lineSeparator + K.lineSeparator);
+				sb.append("red" + K.lineSeparator);
 				sb.append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(#_(KItem`(_`)(#initConfig)),.List`{K`}),");
 				sb.append(K.lineSeparator);
-				sb.append(KAST1);
-				sb.append(")");
-				sb.append(K.lineSeparator);
-				sb.append(") .");
+				sb.append(KAST1 + ")" + K.lineSeparator + ") .");
 				s = sb.toString();
 			}
 
@@ -380,7 +372,9 @@ public class Main {
 			if (errFile.exists()) {
 				String content = FileUtil.getFileContent(K.maude_err);
 				if (content.length() > 0) {
-					Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+					//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+					String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+					Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
 				}
 			}
 			

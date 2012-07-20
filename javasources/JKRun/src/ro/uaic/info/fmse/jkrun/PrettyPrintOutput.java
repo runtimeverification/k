@@ -141,7 +141,7 @@ public class PrettyPrintOutput {
 		NodeList list = null;
 		Node nod = null;
 		
-		if (K.maude_cmd.equals("erewrite") && !(cmd.hasOption("xsearch-pattern"))) {
+		if (K.maude_cmd.equals("erewrite")) {
 			list = doc.getElementsByTagName("result");
 			nod = list.item(0);
 			if (nod == null) {
@@ -155,7 +155,7 @@ public class PrettyPrintOutput {
 					}
 				}
 			}
-		} else if (K.maude_cmd.equals("search") || cmd.hasOption("xsearch-pattern")) {
+		} else if (K.maude_cmd.equals("search")) {
 			list = doc.getElementsByTagName("search-result");
 			nod = list.item(0);
 			if (nod == null) {
