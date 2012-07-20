@@ -1,3 +1,11 @@
+
+/*!
+\setlength{\parindent}{1em}
+\title{IMP++}
+\author{Dorel Lucanu (\texttt{grosu@illinois.edu}) and Vlad Rusu (Vlad.Rusu@inria.fr)}
+\organization{"Alexandru Ioan Cuza" University of Iasi, INRIA Lille}
+*/
+
 //@ \section{Symbolic Calculus}
 
 module SYMBOLIC-CALCULUS-SYNTAX
@@ -10,14 +18,17 @@ module SYMBOLIC-CALCULUS-SYNTAX
 
   syntax IntSymVar ::= "symInt" "(" Id ")" 
 
+/*@ 
+  The following function is used to generate fresh names for symbolic values.
+*/
   syntax Id ::= "fresh" "(" Int ")" [function] 
   rule fresh(I:Int) => String2Id("symVar" +String Int2String(I)) [anywhere]
 
+/*@
+  Any symbolic variable is of sort Int:
+*/
+
   syntax Int ::= IntSymVar
-
-// The variable used in the programs:
-
-  syntax #Id ::= "i" | "n" | "s" | "k" 
 
 endmodule
 
@@ -172,14 +183,19 @@ module IMP-SYNTAX
   syntax Pgm ::= "var" Ids ";" Stmt
   syntax Ids ::= List{Id, ","}
 
+/*@
+  The following syntax is specific to the program equivalence.
+  The "observers' are the program variables used to define the observational
+  equivalence. Two configurations are observational equivalence iff each
+  variable observers has the same value in both configurations.
+*/
+
   syntax EqvPgm ::= "program1:" Pgm "program2:" Pgm "observers:" Ids ";"
 
   syntax Start ::= EqvPgm  
 
 
 endmodule
-
-//@  \section{Symbolic calculus}
 
 
 
@@ -193,6 +209,12 @@ module IMP
   A configuration is a multiset of tasks. Each task consists of an
   equivalence formula. The patterns are stored into a \texttt{config}
   cell and the condition in the \texttt{formula} cell.
+  The cell \texttt{hypos} is for storing the hypotheses met during
+  the proving process. It has a structure similar to that of tasks, but
+  where the names of cells are changed in order to forbid the rules firing
+  for hypotheses, in this way the hypotheses are kept unchanged. 
+  The cell \texttt{observers} stores the list of the observer variables.
+  The cell \texttt{nextSymVar} is used for generating fresh symbolic names.
 */
 
   configuration <T color="yellow"> 
@@ -224,7 +246,7 @@ module IMP
 
 /*@
   The values are defined as for the original IMP, but note that now Int includes
-  the symbolic integer expressions. Remeber that the predicate \texttt{isBool} 
+  the symbolic integer expressions. Remember that the predicate \texttt{isBool} 
   is not extended to symbolic boolean expressions. So, the only boolean values 
   remain \texttt{true} and \texttt{false}.
 */
@@ -263,7 +285,7 @@ module IMP
 
 /*@
   The semantics for memory lookup, skip, assignment, sequential composition,
-  and if remain unchanged, too. The rule for assignment is annotated
+  and if remain unchanged, too. The rules for assignment and if are annotated
   as transition for tracing reasons.
 */
 
@@ -279,8 +301,10 @@ module IMP
   rule [sequential] : S1;S2 => S1 ~> S2 [structural]
 
   rule [if-true] : if true  then S:Stmt else _ => S
+       [transition]
 
   rule [if-false]: if false then _ else S:Stmt => S
+       [transition]
 
 /*@ 
     The rule for while is annotated as transition for technical reasons: since
@@ -304,13 +328,15 @@ module IMP
 
 /*@
   \subsection{Additional Rules}
-  The first two additional rules implement our trick for handling the symbolic
+  The first two additional rules implement our approach for handling the symbolic
   boolean expressions. An elementary symbolic boolean expression (remember that 
   the boolean operators are strict in at leat one argument) is seen as a 
   variable and consequently its value is stored in the \texttt{env} cell.
   Each time a new elementary symbolic boolean expression is met, the current task 
   is split in two task: one for the \texttt{true} value, and the other one for
-  the \texttt{false} value.
+  the \texttt{false} value.\\
+  In fact, we guess that this is the only rule that uses unification for computing
+  the derivatives. More details will be added later.
 */
 
   rule <task>
@@ -368,7 +394,10 @@ module IMP
   rule success success => success 
 
 /*@
-  The next rule implements the basic entailment relation.
+  The next rule implements the basic entailment relation. The current version
+  is incomplete because the formula is ignored (we tested only examples where
+  the formula is true. We have to elaborate the implementation of the basic
+  entailment.
 */
 
   rule [equality] :
@@ -386,28 +415,19 @@ module IMP
        =>
        success)
        <observers> Obs:List </observers>
-       when eqObs(<env> Env </env> <env> Env' </env> <observers> Obs </observers>)
+       when eqObs(<env> Env </env> 
+                  <env> Env' </env>
+                  <observers> Obs </observers>)
             ==K true
 
-/*@
-  The next rule applies the hypothesis added by the initial processing
-  of the goal:
-*/
 
 /*@
-  The observational equivalence relation:
+  The observational equivalence relation is defined by checking the equality of
+  the observer variables in the two configurations (see how \texttt{eqObs} is 
+  called.
 */
 
   syntax Bool ::= "eqObs" "(" Bag ")" [function]
-
-/*
-  rule eqObs( <env>... s |-> V1:K ...</env>
-              <env>... s |-> V2:K ...</env> )
-       =>
-       true
-       when V1 ==K V2
-       [anywhere]
-*/
 
   rule eqObs(<env> _ </env>
              <env> _ </env>
@@ -432,7 +452,8 @@ module IMP
  
 /*@
   The next rule gives semantics to the new construct \texttt{storeHyp}, which 
-  consists of storing the hypothesis given by the arguments.
+  consists of storing the hypothesis given by the arguments. Its semantics
+  is similar to that of threads synchronization.
 */
 
 
@@ -464,8 +485,15 @@ module IMP
          </hypo>
        ...</hypos>
          <observers> Obs:List </observers>
-       when eqObs(<env> Env1 </env> <env> Env2 </env> <observers> Obs </observers>)
+       when eqObs(<env> Env1 </env> 
+                  <env> Env2 </env> 
+                  <observers> Obs </observers>)
             ==K true
+/*@
+  The next rule is intended to implement the entailment between the collected
+  hypotheses and goals. Obviously, this is a partial implementation. Again,
+  the formulas are ignored for now, because they are considered equal.
+*/
 
   rule [circularity] :
        (<task>
@@ -495,54 +523,14 @@ module IMP
          </hypo>
        ...</hypos>
        <observers> Obs </observers>
-     when eqObs(<env> Env1 </env> <env> Env2 </env> <observers> Obs </observers>)
- //ihm, o fi bine?
+     when eqObs(<env> Env1 </env> 
+                <env> Env2 </env>
+                <observers> Obs </observers> )
 
 
 /*@
-  The initial configuration:
-*/
-
-/*
-  rule [initial] :
-       <T> 
-         <tasks>
-           .
-         </tasks>
-         <hypos> 
-           .
-         </hypos>
-       </T>
-       =>
-       <T> 
-         <tasks>
-            <task>
-               <config>
-                 <k> 
-		    while (i <= n) do (
-		      s := s + i * i;
-		        i := i + 1
-		    )
-                  </k>
-                 <env> n |-> n0 s |-> s0 i |-> i0  </env>
-               </config>
-               <config>
-                 <k>
-		    while (i <= n) do (
-		      s := s + k;
-		        (k := k + i + i + 1;
-		           i := i + 1)
-	            )
-                 </k>
-                 <env> n |-> n0 s |-> s0 i |-> i0 k |-> i0 *Int i0  </env>
-              </config>
-              <formula> true </formula>
-           </task>
-        </tasks>
-        <hypos>
-          .
-        </hypos>
-      </T>
+  The following rule creates the initial configuration from the equivalence
+  specification given as input.
 */
 
   rule [initial] :
@@ -563,10 +551,11 @@ module IMP
        </config>)
        <observers> . => Ids2List(Obs) </observers>
 
-  syntax List ::= "Ids2List" "(" Ids ")" [function]
-  rule Ids2List(.Ids) => .List [anywhere]
-  rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
-       [anywhere]
+/*@
+  The auxiliary construct \texttt{initVal()} is used for initializing the 
+  observer variables with the same values in the two initial program
+  configurations. 
+*/
 
   syntax K ::= "initVal" "(" Ids ")"
 
@@ -584,5 +573,15 @@ module IMP
        </config> 
        <nextSymvar> I:Int => I +Int 1 </nextSymVar>
        [structural]
+/*@
+  The following is a helper function that transform a list of
+  identifiers into a builtin list, used for storing the observer
+  variables into the cell \texttt{observers}.
+*/ 
+  syntax List ::= "Ids2List" "(" Ids ")" [function]
+  rule Ids2List(.Ids) => .List [anywhere]
+  rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
+       [anywhere]
+
 
 endmodule
