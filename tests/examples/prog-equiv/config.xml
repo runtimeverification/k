@@ -1,0 +1,6 @@
+<config>
+    <test def="/dist/examples/prog-equiv/imp.k" program-extension="imp" compiled-file-name="imp-compiled.maude"/>
+    <krun-options>
+        <program name="sqsum.imp" ignore="yes"/>                              
+    </krun-options>
+</config>
