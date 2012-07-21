@@ -1,5 +1,9 @@
 package ro.uaic.info.fmse.jkrun;
 
+import java.util.Scanner;
+
+import org.apache.commons.cli.CommandLine;
+
 public class K {
 
 	public static boolean verbose = false;

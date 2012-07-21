@@ -13,6 +13,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import main.MainServer;
+import ro.uaic.info.fmse.jkrun.K;
 import ro.uaic.info.fmse.jkrun.KPaths;
 import ro.uaic.info.fmse.tasks.MaudeTask;
 
@@ -62,7 +63,7 @@ public class KRunner {
 			_createLogs = options.has(createLogs);
 			_noServer = options.has(noServer);
 		} catch (OptionException e) {
-			System.out.println(e.getMessage() + "\n");
+			System.out.println(e.getMessage() + K.lineSeparator);
 			usageError();
 		}
 
@@ -109,7 +110,7 @@ public class KRunner {
 		}
 		_maudeFileName = KPaths.windowfyPath(_maudeFileName);
 		_maudeCommandFileName = KPaths.windowfyPath(_maudeCommandFileName);
-		String commandTemplate = "load {0}\n" + "mod KRUNNER is including {1} .\n" + "eq #TCPPORT = {2,number,#} .\n" + "endm\n" + "load {3}\n";
+		String commandTemplate = "load {0}" + K.lineSeparator + "mod KRUNNER is including {1} ." + K.lineSeparator + "eq #TCPPORT = {2,number,#} ." + K.lineSeparator + "endm" + K.lineSeparator + "load {3}" + K.lineSeparator;
 		/*_maudeFileName = _maudeFileName.replaceAll("(\\s)", "\\\1");
 		_maudeCommandFileName = _maudeCommandFileName.replaceAll("(\\s)", "\\ ");*/
 		
@@ -118,7 +119,7 @@ public class KRunner {
 
 		maude.start();
 		_logger.info("Maude started");
-		_logger.info("Maude command:\n" + command);
+		_logger.info("Maude command:" + K.lineSeparator + command);
 
 		maude.join();
 		int returnValue = maude.returnValue;

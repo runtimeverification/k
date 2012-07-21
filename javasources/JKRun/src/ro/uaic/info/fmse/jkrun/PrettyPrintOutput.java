@@ -437,7 +437,7 @@ public class PrettyPrintOutput {
 			}
 		}
 		if (whitespace > 0 && lineskip) {
-			String space = XmlUtil.buildWhitespace(whitespace);
+			String space = Utils.buildWhitespace(whitespace);
 			output.append(space);
 		}
 		if (K.color) {
@@ -448,12 +448,12 @@ public class PrettyPrintOutput {
 			}
 			else if (text.indexOf("|->") != -1) {
 				aux = new StringBuilder();
-                aux = XmlUtil.colorSymbol(text, "|->", ANSI_PURPLE);
+                aux = Utils.colorSymbol(text, "|->", ANSI_PURPLE);
                 output.append(aux);
 			}
 			else if (text.indexOf("~>") != -1) {
 				aux = new StringBuilder();
-				aux = XmlUtil.colorSymbol(text, "~>", ANSI_BLUE);
+				aux = Utils.colorSymbol(text, "~>", ANSI_BLUE);
 				output.append(aux);
 			}
 			else {

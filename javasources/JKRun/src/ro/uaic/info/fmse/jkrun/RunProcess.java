@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import ro.uaic.info.fmse.tasks.MaudeTask;
+
 // instantiate processes
 public class RunProcess {
 
@@ -130,6 +132,18 @@ public class RunProcess {
 			KAST = this.getStdout();
 		}
 		return KAST;
+	}
+	
+	// run the Maude process by specifying the command to execute, the output file and the error file
+	public int runMaude (String command, String outputFileName, String errorFileName) {
+		MaudeTask maude = new MaudeTask(command, outputFileName, errorFileName);
+		maude.start();
+		try {
+			maude.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return  maude.returnValue;
 	}
 	
 	public String getStdout() {

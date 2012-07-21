@@ -20,7 +20,7 @@ public class Utils {
 		return count;
 	}
 	
-	//replace all "_" from String op with its children representation from elements list
+	//replace all "_" from op attribute of the current node with its children representation from elements list
 	public static StringBuilder replaceAllUnderscores(String op, List<String> elements) {
 		int index = 0;
 		int count = 0;
@@ -45,7 +45,7 @@ public class Utils {
 		return sb;
 	}
 	
-	//replace all "_" from String op with its children representation from elements list when the operator is associative
+	//replace all "_" from op attribute of the current node with its children representation from elements list when the operator is associative
 	public static StringBuilder replaceAllUnderscoresAssoc(String op, List<String> elements) {
 		StringBuilder aux = new StringBuilder();
 		
@@ -85,6 +85,27 @@ public class Utils {
 			}
 		}
 		return sb;
+	}
+	
+	public static StringBuilder colorSymbol(String text, String symbol, String color) {
+		StringBuilder aux = new StringBuilder();
+		String[] tokens;
+		tokens = text.split("\\" + symbol);
+		for (int i = 0; i < tokens.length - 1; i++) {
+			aux.append(tokens[i]);
+			aux.append(color);
+			aux.append(symbol);
+			aux.append(PrettyPrintOutput.ANSI_NORMAL);
+		}
+		aux.append(tokens[tokens.length - 1]);
+		return aux;
+	}
+
+	public static String buildWhitespace(int numChars) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < numChars; i++)
+			sb.append(" ");
+		return sb.toString();
 	}
 	
 	//get kast script according to the OS

@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,32 +25,11 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XmlUtil {
-
-
-	public static StringBuilder colorSymbol(String text, String symbol, String color) {
-		StringBuilder aux = new StringBuilder();
-		String[] tokens;
-		tokens = text.split("\\" + symbol);
-		for (int i = 0; i < tokens.length - 1; i++) {
-			aux.append(tokens[i]);
-			aux.append(color);
-			aux.append(symbol);
-			aux.append(PrettyPrintOutput.ANSI_NORMAL);
-		}
-		aux.append(tokens[tokens.length - 1]);
-		return aux;
-	}
-
-	public static String buildWhitespace(int numChars) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < numChars; i++)
-			sb.append(" ");
-		return sb.toString();
-	}
 
 	// Function to read DOM Tree from File
 	public static Document readXML(File f) {
@@ -161,6 +141,75 @@ public class XmlUtil {
 				}
 			}
 		}
+	}
+	
+	//convert the xml obtained from Maude with the -xml-log option into Maude representation
+	public static String xmlToMaude (String fileName) {
+		File input = new File(fileName);
+		Document doc = XmlUtil.readXML(input);
+		NodeList list = null;
+		Node nod = null;
+		
+		if (K.maude_cmd.equals("erewrite")) {
+			list = doc.getElementsByTagName("result");
+			nod = list.item(0);
+			if (nod == null) {
+				Error.report("XmltoMaude: The node with result tag wasn't found");
+			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
+				Element elem = (Element) nod;
+				NodeList child = elem.getChildNodes();
+				for (int i = 0; i < child.getLength(); i++) {
+					if (child.item(i).getNodeType() == Node.ELEMENT_NODE) {
+						return process((Element) child.item(i));
+					}
+				}
+			}
+		}
+		return "";
+		
+	}
+	
+	public static String process(Element node) {
+		StringBuilder sb = new StringBuilder();
+		String op = node.getAttribute("op");
+		String sort = node.getAttribute("sort");
+		ArrayList<Element> list = XmlUtil.getChildElements(node);
+		
+		if (sort.equals("#NzNat") && op.equals("sNat_")) {
+			sb = new StringBuilder();
+			sb.append(node.getAttribute("number"));
+			return sb.toString();
+		}
+		else {
+			//n = nr of child nodes
+			int n = list.size();
+			if (n == 0) {
+				sb = new StringBuilder();
+				sb.append(op);
+				return sb.toString();
+			}
+			//the node has more than 1 child
+			else {
+				List<String> elements = new ArrayList<String>();
+				for (int i = 0; i < list.size(); i++) {
+		   		    Element child = list.get(i);
+		   		    String elem = process(child);
+					elements.add(elem);
+			    }
+				sb = new StringBuilder(op);
+				sb.append("(");
+				for (int i = 0; i < elements.size(); i++) {
+					sb.append(elements.get(i));
+					if (i != elements.size() - 1) {
+		                sb.append(", ");
+					}
+				}
+				sb.append(")");
+				return sb.toString();
+			}
+			
+		}
+		
 	}
 
 }

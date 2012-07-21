@@ -25,12 +25,16 @@ public class MaudeTask extends Thread {
 	public int returnValue;
 	
 	public static String maudeExe = MaudeRun.initializeMaudeExecutable();
-
-	public MaudeTask(String command, String outputFile, String errorFile, Logger parentLogger) {
+	
+	public MaudeTask(String command, String outputFile, String errorFile) {
 		_command = command;
 		_outputFile = outputFile;
-		_logger = parentLogger;
 		_errorFile = errorFile;
+	}
+
+	public MaudeTask(String command, String outputFile, String errorFile, Logger parentLogger) {
+		this(command, outputFile, errorFile);
+		_logger = parentLogger;
 	}
 
 	@Override
@@ -73,7 +77,7 @@ public class MaudeTask extends Thread {
 
 	private void runCommand() throws IOException {
 		BufferedWriter maudeInput = new BufferedWriter(new OutputStreamWriter(_maudeProcess.getOutputStream()));
-		maudeInput.write(_command + "\n");
+		maudeInput.write(_command + K.lineSeparator);
 		maudeInput.close();
 	}
 
@@ -84,7 +88,7 @@ public class MaudeTask extends Thread {
 
 		String line;
 		while ((line = maudeOutput.readLine()) != null) {
-			outputFile.write(line + "\n");
+			outputFile.write(line + K.lineSeparator);
 		}
 		outputFile.close();
 	}
@@ -96,7 +100,7 @@ public class MaudeTask extends Thread {
 
 		String line;
 		while ((line = maudeError.readLine()) != null) {
-			errorFile.write(line + "\n");
+			errorFile.write(line + K.lineSeparator);
 		}
 		errorFile.close();
 	}

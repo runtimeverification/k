@@ -34,11 +34,20 @@ public class CommandlineOptions {
 				return 0;
 		}
 	}
-	
-	public CommandlineOptions() {
-		options = new Options();
+    
+    public CommandlineOptions() {
+    	options = new Options();
 		help = new HelpFormatter();
-
+		
+		if (K.debug) {
+			initializeDebugOptions();
+		}
+		else {
+			initializeKRunOptions();
+		}
+    }
+	
+	public void initializeKRunOptions() {
 		// General options
 		Option help1 = new Option("h", "help", false, "Display the detailed help message and quit");
 		Option help2 = new Option("?", false, "Display the detailed help message and quit");
@@ -118,6 +127,18 @@ public class CommandlineOptions {
 		Option model_checking = OptionBuilder.hasArg(true).withArgName("FILE/STRING").withLongOpt("ltlmc").withDescription("Specify the formula for model checking through a file or at commandline").create();
 		options.addOption(model_checking); getOptionList().add(model_checking);
 
+	}
+	
+	public void initializeDebugOptions() {
+		//stepper options
+		Option step = OptionBuilder.hasArg(false).withLongOpt("step").withDescription("Execute one step").create();
+		Option resume = OptionBuilder.hasArg(false).withLongOpt("resume").withDescription("Resume the execution and exit from the debug mode").create();
+		Option abort = OptionBuilder.hasArg(false).withLongOpt("abort").withDescription("Abort the execution and exit from the debug mode").create();
+		Option help = OptionBuilder.hasArg(false).withLongOpt("help").withDescription("Display the available commands").create();
+		options.addOption(step); getOptionList().add(step);
+		options.addOption(resume); getOptionList().add(resume);
+		options.addOption(abort); getOptionList().add(abort);
+		options.addOption(help); getOptionList().add(help);
 	}
 
 	public CommandLine parse(String[] cmd) {

@@ -122,23 +122,26 @@ public class FileUtil {
 	public static void renameFolder(String oldName, String newName) throws IOException {
 		File srcFile = new File(oldName);
 		boolean bSucceeded = false;
-		try {
-			File destFile = new File(newName);
-			//test if the krun directory is empty and if is not empty delete it
-			if (destFile.exists()) {
-				if (!FileUtil.deleteDirectory(destFile)) {
-					throw new IOException(oldName + " was not successfully deleted");
+		
+		if (srcFile.exists()) {
+			try {
+				File destFile = new File(newName);
+				//test if the krun directory is empty and if is not empty delete it
+				if (destFile.exists()) {
+					if (!FileUtil.deleteDirectory(destFile)) {
+						throw new IOException(oldName + " was not successfully deleted");
+					}
 				}
-			}
-			//rename krun temp directory into "krun" 
-			if (!srcFile.renameTo(destFile)) {
-				throw new IOException(oldName + " was not successfully renamed to " + newName);
-			} else {
-				bSucceeded = true;
-			}
-		} finally {
-			if (bSucceeded) {
-				srcFile.delete();
+				//rename krun temp directory into "krun" 
+				if (!srcFile.renameTo(destFile)) {
+					throw new IOException(oldName + " was not successfully renamed to " + newName);
+				} else {
+					bSucceeded = true;
+				}
+			} finally {
+				if (bSucceeded) {
+					srcFile.delete();
+				}
 			}
 		}
 	}
