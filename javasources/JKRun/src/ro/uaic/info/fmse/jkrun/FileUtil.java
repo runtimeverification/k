@@ -70,7 +70,7 @@ public class FileUtil {
 	}
 
 	public static String getFileContent(String file) {
-		BufferedReader reader;
+		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(file));
 			String line = null;
@@ -84,6 +84,15 @@ public class FileUtil {
 			Error.report("Cannot retrieve file content. Make sure that file " + file + " exists.");
 		} catch (IOException e) {
 			Error.silentReport("Cannot retrieve file content. An IO error occured.");
+		}
+		finally{
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return "";
 	}
