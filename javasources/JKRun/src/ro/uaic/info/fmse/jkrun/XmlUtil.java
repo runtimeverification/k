@@ -185,7 +185,10 @@ public class XmlUtil {
 			int n = list.size();
 			if (n == 0) {
 				sb = new StringBuilder();
+				sb.append("(");
 				sb.append(op);
+				sb.append(")." + sort);
+				
 				return sb.toString();
 			}
 			//the node has more than 1 child

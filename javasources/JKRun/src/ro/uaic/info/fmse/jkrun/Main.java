@@ -340,6 +340,7 @@ public class Main {
 	            if (cmd.hasOption("step")) {
 	            	//get the maudified version of the current configuration based on the xml obtained from -xml-log option
 					String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
+					//System.out.println("config=" + maudeConfig);
 					maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[1] " + maudeConfig + " .";
 					rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 					// check whether Maude produced errors
