@@ -227,7 +227,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".tex", latexified);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Latexif         = ");
+				sw.printIntermediate("Latexify        = ");
 			}
 
 			return latexified;

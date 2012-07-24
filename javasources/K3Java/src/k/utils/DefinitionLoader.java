@@ -15,7 +15,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.disambiguate.AmbFilter;
+import ro.uaic.info.fmse.disambiguate.BestFitFilter;
 import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
+import ro.uaic.info.fmse.disambiguate.GetFitnessUnitFileCheckVisitor;
+import ro.uaic.info.fmse.disambiguate.GetFitnessUnitKCheckVisitor;
+import ro.uaic.info.fmse.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import ro.uaic.info.fmse.disambiguate.TypeInferenceSupremumFilter;
+import ro.uaic.info.fmse.disambiguate.TypeSystemFilter;
+import ro.uaic.info.fmse.disambiguate.VariableTypeInferenceFilter;
+import ro.uaic.info.fmse.general.GlobalSettings;
+import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
@@ -136,9 +145,24 @@ public class DefinitionLoader {
 		javaDef.accept(new UpdateReferencesVisitor());
 		javaDef.accept(new CollectConsesVisitor());
 		javaDef.accept(new CollectSubsortsVisitor());
+		// disambiguation steps
+
+		if (GlobalSettings.tempDisamb) {
+			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Disambiguate    = ");
+		}
+		// last resort disambiguation
 		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
 
-		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
+		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
 		return javaDef;
 	}
