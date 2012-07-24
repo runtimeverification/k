@@ -301,7 +301,8 @@ public class Main {
 				System.out.print(K.lineSeparator + "Commmand>");
 				Scanner sc = new Scanner(System.in);
 				String input = sc.nextLine();
-				String[] cmds = new String[] { "--" + input };
+				//apply trim to remove possible blank spaces from the inserted command
+				String[] cmds = new String[] { "--" + input.trim() };
 				CommandlineOptions cmd_options = new CommandlineOptions();
 				CommandLine cmd = cmd_options.parse(cmds);
 				if (cmd.hasOption("help")) {
