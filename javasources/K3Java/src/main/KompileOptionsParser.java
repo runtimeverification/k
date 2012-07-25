@@ -106,7 +106,7 @@ public class KompileOptionsParser {
 			return cl;
 		} catch (ParseException e) {
 			k.utils.Error.silentReport(e.getLocalizedMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		k.utils.Error.helpExit(help, options);

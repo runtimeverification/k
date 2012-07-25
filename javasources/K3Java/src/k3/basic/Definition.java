@@ -513,186 +513,190 @@ public class Definition implements Cloneable {
 
 		// gather modules for syntax
 		String mainSynModName;
-		if (GlobalSettings.synModule == null)
+		if (GlobalSettings.synModule == null) {
 			mainSynModName = mainModule + "-SYNTAX";
-		else
+			if (!this.modulesMap.containsKey(mainSynModName)) {
+				mainSynModName = mainModule;
+				GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Could not find a specilized module for syntax. Using main module instead.", this.mainFile.getAbsolutePath(), this.mainModule, 3));
+			}
+		} else
 			mainSynModName = GlobalSettings.synModule;
 		Module mainSyntax = modulesMap.get(mainSynModName);
 		Set<Module> synMods = new HashSet<Module>();
 		List<Module> synQue = new LinkedList<Module>();
 
 		synQue.add(mainSyntax);
-		if (mainSyntax == null) {
-			Error.silentReport("Could not find a module for program syntax: " + mainSynModName);
-		} else {
-			Module bshm = modulesMap.get("BUILTIN-SYNTAX-HOOKS");
-			if (bshm != null)
-				synQue.add(bshm);
-			else
-				Error.silentReport("Could not find module BUILTIN-SYNTAX-HOOKS (automatically included in the main syntax module)!");
-			while (!synQue.isEmpty()) {
-				Module m = synQue.remove(0);
-				if (!synMods.contains(m)) {
-					synMods.add(m);
-					List<Sentence> ss = m.getSentences();
-					for (Sentence s : ss)
-						if (s.getType() == SentenceType.INCLUDING) {
-							String mname = ((Including) s).getIncludedModuleName();
-							Module mm = modulesMap.get(mname);
-							// if the module starts with # it means it is predefined in maude
-							if (!mname.startsWith("#"))
-								if (mm != null)
-									synQue.add(mm);
-								else
-									Error.silentReport("Could not find module: " + mname + " imported from: " + m.getModuleName());
-						}
-				}
+		// if (mainSyntax == null) {
+		// Error.silentReport("Could not find a module for program syntax: " + mainSynModName);
+		// } else {
+
+		Module bshm = modulesMap.get("BUILTIN-SYNTAX-HOOKS");
+		if (bshm != null)
+			synQue.add(bshm);
+		else
+			Error.silentReport("Could not find module BUILTIN-SYNTAX-HOOKS (automatically included in the main syntax module)!");
+		while (!synQue.isEmpty()) {
+			Module m = synQue.remove(0);
+			if (!synMods.contains(m)) {
+				synMods.add(m);
+				List<Sentence> ss = m.getSentences();
+				for (Sentence s : ss)
+					if (s.getType() == SentenceType.INCLUDING) {
+						String mname = ((Including) s).getIncludedModuleName();
+						Module mm = modulesMap.get(mname);
+						// if the module starts with # it means it is predefined in maude
+						if (!mname.startsWith("#"))
+							if (mm != null)
+								synQue.add(mm);
+							else
+								Error.silentReport("Could not find module: " + mname + " imported from: " + m.getModuleName());
+					}
 			}
+		}
 
-			for (Module m : synMods) {
-				for (Sentence s : m.getSentences()) {
-					if (s.getType() == SentenceType.SYNTAX) {
-						Syntax syn = (Syntax) s;
-						userSort.add(syn.getSort());
-						List<Priority> prilist = new ArrayList<Priority>();
-						for (Priority prt : syn.getPriorities()) {
-							Priority p = new Priority();
-							p.setBlockAssoc(prt.getBlockAssoc());
+		for (Module m : synMods) {
+			for (Sentence s : m.getSentences()) {
+				if (s.getType() == SentenceType.SYNTAX) {
+					Syntax syn = (Syntax) s;
+					userSort.add(syn.getSort());
+					List<Priority> prilist = new ArrayList<Priority>();
+					for (Priority prt : syn.getPriorities()) {
+						Priority p = new Priority();
+						p.setBlockAssoc(prt.getBlockAssoc());
 
-							// filter the productions according to their form
-							for (Production prd : prt.getProductions()) {
-								if (prd.isSubsort()) {
-									outsides.add(prd);
-									if (prd.getProdSort().equals(new Sort("Start")))
-										startSorts.add((Sort) prd.getItems().get(0));
-								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#")) {
-									constants.add(prd);
-								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ItemType.TERMINAL) {
-									outsides.add(prd);
-								} else if (prd.getItems().get(0).getType() == ItemType.USERLIST) {
-									outsides.add(prd);
-									listSorts.add(prd.getProdSort());
-								} else {
-									p.getProductions().add(prd);
-								}
-							}
-							if (p.getProductions().size() > 0)
-								prilist.add(p);
-						}
-						if (prilist.size() > 0) {
-							if (prilist.size() <= 1 && syn.getPriorities().get(0).getBlockAssoc() == null) {
-								// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
-								// you need to have at least 2 productions or a block association
-								Priority prt = prilist.get(0);
-								for (Production p : prt.getProductions())
-									outsides.add(p);
+						// filter the productions according to their form
+						for (Production prd : prt.getProductions()) {
+							if (prd.isSubsort()) {
+								outsides.add(prd);
+								if (prd.getProdSort().equals(new Sort("Start")))
+									startSorts.add((Sort) prd.getItems().get(0));
+							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().size() == 1 && prd.getProdSort().getSortName().startsWith("#")) {
+								constants.add(prd);
+							} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ItemType.TERMINAL) {
+								outsides.add(prd);
+							} else if (prd.getItems().get(0).getType() == ItemType.USERLIST) {
+								outsides.add(prd);
+								listSorts.add(prd.getProdSort());
 							} else {
-								sdf += "context-free priorities\n";
+								p.getProductions().add(prd);
+							}
+						}
+						if (p.getProductions().size() > 0)
+							prilist.add(p);
+					}
+					if (prilist.size() > 0) {
+						if (prilist.size() <= 1 && syn.getPriorities().get(0).getBlockAssoc() == null) {
+							// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
+							// you need to have at least 2 productions or a block association
+							Priority prt = prilist.get(0);
+							for (Production p : prt.getProductions())
+								outsides.add(p);
+						} else {
+							sdf += "context-free priorities\n";
 
-								for (Priority prt : prilist) {
-									if (prt.getBlockAssoc() == null)
-										sdf += "{\n";
-									else
-										sdf += "{ " + prt.getBlockAssoc() + ":\n";
-									for (Production p : prt.getProductions()) {
-										sdf += "	";
-										List<Item> items = p.getItems();
-										for (int i = 0; i < items.size(); i++) {
-											Item itm = items.get(i);
-											if (itm.getType() == ItemType.TERMINAL) {
-												Terminal t = (Terminal) itm;
-												sdf += "\"" + t.getTerminal() + "\" ";
-											} else if (itm.getType() == ItemType.SORT) {
-												Sort srt = (Sort) itm;
-												// if we are on the first or last place and this sort is not a list, just print the sort
-												if (i == 0 || i == items.size() - 1) {
-													sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
-												} else {
-													// if this sort should be inserted to avoid the priority filter, then add it to the list
-													sorts.add(srt);
-													sdf += "InsertDz" + StringUtil.escapeSortName(srt.getSortName()) + " ";
-												}
+							for (Priority prt : prilist) {
+								if (prt.getBlockAssoc() == null)
+									sdf += "{\n";
+								else
+									sdf += "{ " + prt.getBlockAssoc() + ":\n";
+								for (Production p : prt.getProductions()) {
+									sdf += "	";
+									List<Item> items = p.getItems();
+									for (int i = 0; i < items.size(); i++) {
+										Item itm = items.get(i);
+										if (itm.getType() == ItemType.TERMINAL) {
+											Terminal t = (Terminal) itm;
+											sdf += "\"" + t.getTerminal() + "\" ";
+										} else if (itm.getType() == ItemType.SORT) {
+											Sort srt = (Sort) itm;
+											// if we are on the first or last place and this sort is not a list, just print the sort
+											if (i == 0 || i == items.size() - 1) {
+												sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
+											} else {
+												// if this sort should be inserted to avoid the priority filter, then add it to the list
+												sorts.add(srt);
+												sdf += "InsertDz" + StringUtil.escapeSortName(srt.getSortName()) + " ";
 											}
 										}
-										sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
-										sdf += getSDFAttributes(p.getAttributes()) + "\n";
 									}
-									sdf += "} > ";
+									sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+									sdf += getSDFAttributes(p.getAttributes()) + "\n";
 								}
-								sdf = sdf.substring(0, sdf.length() - 3) + "\n\n";
+								sdf += "} > ";
 							}
+							sdf = sdf.substring(0, sdf.length() - 3) + "\n\n";
 						}
 					}
 				}
 			}
-
-			sdf += "context-free start-symbols\n";
-			sdf += "	Start\n";
-			sdf += "context-free syntax\n";
-
-			for (Production p : outsides) {
-				if (p.isListDecl()) {
-					UserList si = (UserList) p.getItems().get(0);
-					sdf += "	{" + StringUtil.escapeSortName(si.getSort().getSortName()) + " \"" + si.getTerminal() + "\"}* -> " + StringUtil.escapeSortName(p.getProdSort().getSortName()) + " {cons(\"" + p.getAttributes().get("cons") + "\")}\n";
-				} else {
-					sdf += "	";
-					List<Item> items = p.getItems();
-					for (int i = 0; i < items.size(); i++) {
-						Item itm = items.get(i);
-						if (itm.getType() == ItemType.TERMINAL) {
-							Terminal t = (Terminal) itm;
-							sdf += "\"" + t.getTerminal() + "\" ";
-						} else if (itm.getType() == ItemType.SORT) {
-							Sort srt = (Sort) itm;
-							sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
-						}
-					}
-					sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
-					sdf += getSDFAttributes(p.getAttributes()) + "\n";
-				}
-			}
-			for (Sort ss : sorts)
-				sdf += "	" + StringUtil.escapeSortName(ss.getSortName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getSortName()) + "\n";
-
-			sdf += "\n%% start symbols\n";
-			if (startSorts.size() == 0) {
-				for (Sort s : userSort) {
-					if (!s.getSortName().equals("Start"))
-						sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + "		-> Start\n";
-				}
-			}
-
-			sdf += "\n\n";
-			sdf += "	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n";
-			sdf += "	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n";
-			sdf += "	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n";
-			sdf += "	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n";
-
-			sdf += "\n";
-			sdf += "	DzDzINT		-> DzDzInt\n";
-			sdf += "	DzDzID		-> DzDzId\n";
-			sdf += "	DzDzBOOL	-> DzDzBool\n";
-			sdf += "	DzDzSTRING	-> DzDzString\n";
-
-			sdf += "\n";
-
-			sdf += "lexical syntax\n";
-			for (Production p : constants) {
-				sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "\n";
-			}
-
-			sdf += "\n\n";
-
-			for (Terminal t : getTerminals(true)) {
-				if (t.getTerminal().matches("[a-zA-Z][a-zA-Z0-9]*")) {
-					sdf += "	\"" + t.getTerminal() + "\" -> DzDzID {reject}\n";
-				}
-			}
-
-			sdf += "\n";
-			sdf += getFollowRestrictionsForTerminals(true);
-
 		}
+
+		sdf += "context-free start-symbols\n";
+		sdf += "	Start\n";
+		sdf += "context-free syntax\n";
+
+		for (Production p : outsides) {
+			if (p.isListDecl()) {
+				UserList si = (UserList) p.getItems().get(0);
+				sdf += "	{" + StringUtil.escapeSortName(si.getSort().getSortName()) + " \"" + si.getTerminal() + "\"}* -> " + StringUtil.escapeSortName(p.getProdSort().getSortName()) + " {cons(\"" + p.getAttributes().get("cons") + "\")}\n";
+			} else {
+				sdf += "	";
+				List<Item> items = p.getItems();
+				for (int i = 0; i < items.size(); i++) {
+					Item itm = items.get(i);
+					if (itm.getType() == ItemType.TERMINAL) {
+						Terminal t = (Terminal) itm;
+						sdf += "\"" + t.getTerminal() + "\" ";
+					} else if (itm.getType() == ItemType.SORT) {
+						Sort srt = (Sort) itm;
+						sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
+					}
+				}
+				sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+				sdf += getSDFAttributes(p.getAttributes()) + "\n";
+			}
+		}
+		for (Sort ss : sorts)
+			sdf += "	" + StringUtil.escapeSortName(ss.getSortName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getSortName()) + "\n";
+
+		sdf += "\n%% start symbols\n";
+		if (startSorts.size() == 0) {
+			for (Sort s : userSort) {
+				if (!s.getSortName().equals("Start"))
+					sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + "		-> Start\n";
+			}
+		}
+
+		sdf += "\n\n";
+		sdf += "	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n";
+		sdf += "	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n";
+		sdf += "	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n";
+		sdf += "	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n";
+
+		sdf += "\n";
+		sdf += "	DzDzINT		-> DzDzInt\n";
+		sdf += "	DzDzID		-> DzDzId\n";
+		sdf += "	DzDzBOOL	-> DzDzBool\n";
+		sdf += "	DzDzSTRING	-> DzDzString\n";
+
+		sdf += "\n";
+
+		sdf += "lexical syntax\n";
+		for (Production p : constants) {
+			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "\n";
+		}
+
+		sdf += "\n\n";
+
+		for (Terminal t : getTerminals(true)) {
+			if (t.getTerminal().matches("[a-zA-Z][a-zA-Z0-9]*")) {
+				sdf += "	\"" + t.getTerminal() + "\" -> DzDzID {reject}\n";
+			}
+		}
+
+		sdf += "\n";
+		sdf += getFollowRestrictionsForTerminals(true);
+
 		return sdf + "\n";
 	}
 
