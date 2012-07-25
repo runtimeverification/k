@@ -321,7 +321,8 @@ public class LatexFilter extends BasicVisitor {
 		} else {
 			result += ", ";
 		}
-		result += StringUtil.latexify(entry.getKey());
+		result += "\\kattribute{" +
+				StringUtil.latexify(entry.getKey()) +"}";
 		String value = entry.getValue();
 		if (!value.isEmpty()) {
 			result += "(" + StringUtil.latexify(value) + ")";
