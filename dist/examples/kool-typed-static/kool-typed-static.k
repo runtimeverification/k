@@ -14,7 +14,7 @@ borrowed unchanged from SIMPLE and then add the KOOL new constructs. */
 The syntax below is taken over unchanged from SIMPLE, including all
 the \K strictness attributes and the desugaring macros. */
 
-  syntax Id ::= "main"
+  syntax #Id ::= "main"
 
   syntax Type ::= "int"
                 | "bool"
@@ -92,11 +92,11 @@ the \K strictness attributes and the desugaring macros. */
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:Id = E1:Exp to E2:Exp do S:Stmt)
        =>
-       {var X = E1, .Exps; while X <= E2 do {S X = (X + 1);}}
+       {var X = E1; while X <= E2 do {S X = (X + 1);}}
 
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
 
-  rule var (X:Id : T:Type) = E:Exp; => var X : T; X = E;
+  rule var (X:Id : T:Type) = E:Exp; => var X : T, .Exps; X = E;
 
 /*@ \subsection{KOOL Additional Syntax}
 Note the strictness attributes, telling which arguments need to be
@@ -198,21 +198,21 @@ typed SIMPLE, so we do not discuss them much here. */
   syntax Type ::= "stmt"
 
   rule var (.Types); => stmt   [ structural]
-  context var '_:_(_[HOLE],, _),.Exps;
-  rule var '_:_(X[Ts:Types],, T), .Exps; => checkDepth(Ts,T) ~> var '_:_(X,, T);
+  context var _[HOLE] : _,.Exps;
+  rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;
        [structural]
 
   syntax K ::= "checkDepth" "(" Types "," Type ")"
-  rule checkDepth((int,Ts => Ts), (arrayOf T => T))   [structural]
-  rule checkDepth(.Types,_) => .K                     [structural]
+  rule checkDepth((int, Ts => Ts), (arrayOf T => T))   [structural]
+  rule checkDepth(.Types, _) => .K                     [structural]
 
 /*@ Although functions turn into methods and get a slightly different
 semantics, the \texttt{types(...)} operation stays the same. */
 
   syntax Types ::= "types" "(" Exps ")"   [function, klabel(types)]
   rule types(.Exps) => void, .Types       [anywhere]             
-  rule types('_:_(X:Id,, T:Type), .Exps) => T, .Types   [anywhere]         
-  rule types('_:_(X:Id,, T:Type), E:Exp, Es:Exps) => T, types(E,Es) [anywhere]
+  rule types(X:Id : T:Type, .Exps) => T, .Types   [anywhere]         
+  rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E,Es) [anywhere]
 
   rule <k> I:Int => int ...</k>
   rule <k> B:Bool => bool ...</k>
@@ -288,7 +288,7 @@ The operation \texttt{checkType}, defined at the end of this module,
 checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
-  rule <k> 'var_;('_`,_('_:_(X:Id,, T:Type),, .Exps))
+  rule <k> var X:Id : T:Type, .Exps;
             =>
             checkType(T) ~> stmt 
        ...</k>
@@ -312,13 +312,13 @@ with it; this \texttt{stuck} operation is displayed as a frame in this
 PDF document because of its latex attribute (see the ASCII .k file,
 at the end of this module). */
 
-  rule <k> var '_:_(X:Id,, T:Type); => checkType(T) ~> stmt ...</k>
+  rule <k> var X:Id : T:Type, .Exps; => checkType(T) ~> stmt ...</k>
        <ctenvT> Rho:Map (. => X |-> T) </ctenvT>
     when notBool(X in keys(Rho))
 
-  rule <k> var '_:_(X:Id,, T:Type); => stuck(var '_:_(X,, T);) ...</k>
+  rule <k> var X:Id : T:Type, .Exps; => stuck(var X : T;) ...</k>
        <ctenvT>... X |-> _ ...</ctenvT>
-       <inClass> C </inClass>
+       <inClass> C:Id </inClass>
        <out>... . => ListItem("Member \"" +String Id2String(X)
                               +String "\" declared twice in class \""
                               +String Id2String(C) +String "\"!\n") </out>
@@ -359,6 +359,9 @@ instance of this rule). */
 // There seems to be some error with the configuration concretization,
 // as the rule below does not work when rewriting . to both the task
 // and the class cells; I had to include two separate . rewrites
+
+syntax K ::= "blabla"
+
   rule <task>
           <k> class C:Id extends C':Id { Ss:Stmts }
               =>
@@ -404,7 +407,7 @@ checks for cycles. */
          <extendsAll> SetItem(C:Id) Classes:Set (. => SetItem(C')) </extendsAll>
        ...</class>
        <class>...
-         <className> C </className> <extends> C':Id </extends>
+         <className> C:Id </className> <extends> C':Id </extends>
        ...</class>
     when notBool(C' in (SetItem(C) Classes))  [structural]
 
@@ -435,7 +438,7 @@ for example, inside other methods). */
 
   rule <k> method M:Id(XTs:Exps) : T:Type S:Stmt
         => checkMethod(M, function from types(XTs) to T, C')
-           ~> var '_:_(M,, function from types(XTs) to T); ...</k>
+           ~> var M : function from types(XTs) to T; ...</k>
        <inClass> C:Id </inClass>
        <ctenvT> _:Map </ctenvT> // to ensure we are in a class pass
        <className> C </className>
@@ -482,7 +485,7 @@ succeeds, meaning that it types to \texttt{stmt}, then we discard the
 the new object.  The auxiliary \texttt{discard} operation is defined
 also at the end of this module. */
 
-  rule new C:Id(Ts:Types) => '_`(_`)('_._((class C),, C),, Ts) ~> discard ~> class C
+  rule new C:Id(Ts:Types) => '_`(_`)('_._((class C), C), Ts) ~> discard ~> class C
 
 
 /*@ \subsection{Self reference}
@@ -501,7 +504,7 @@ Note that for typing concerns, super can be considered as an object
    rule <k> super => class C' ...</k>
         <inClass> C:Id </inClass>
         <className> C':Id </className>
-        <extends> C':Id </extends>
+        <extends> C' </extends>
 
 
 /*@ \subsection{Object member access}
@@ -528,7 +531,7 @@ reached. */
        <tenv> Rho:Map </tenv>
        when notBool(X in keys(Rho))
 
-  rule ltype('_._(E:Exp,, X:Id)) => '_._(E,, X)  [structural]
+  rule ltype(E:Exp . X:Id) => '_._(E,, X)  [structural]
 
   rule <k> '_._(class C:Id,, X:Id) => T ...</k>
        <className> C </className>
@@ -577,7 +580,7 @@ we cannot test the full type safety of exceptions.  Instead, we
 only check that the \texttt{try} and the \texttt{catch} statements
 type correctly. */
 
-  rule try stmt catch('_:_(X:Id,, class C:Id)) S:Stmt => {var '_:_(X,, class C); S}
+  rule try stmt catch(X:Id : class C:Id) S:Stmt => {var X : class C; S}
     [structural]
   rule throw class _:Id ; => stmt
 
