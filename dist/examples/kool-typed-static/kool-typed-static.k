@@ -92,7 +92,7 @@ the \K strictness attributes and the desugaring macros. */
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:Id = E1:Exp to E2:Exp do S:Stmt)
        =>
-       {var X = E1; while X <= E2 do {S X = (X + 1);}}
+       {var (X : int) = E1; while X <= E2 do {S X = (X + 1);}}
 
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
 
@@ -197,7 +197,7 @@ typed SIMPLE, so we do not discuss them much here. */
   
   syntax Type ::= "stmt"
 
-  rule var (.); => stmt   [ structural]
+  rule var .Exps ; => stmt   [ structural]
   context var _[HOLE] : _,.Exps;
   rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;
        [structural]
@@ -244,7 +244,8 @@ semantics, the \texttt{types(...)} operation stays the same. */
   rule bool and bool => bool
   rule bool or bool => bool
   rule not(bool) => bool
-  rule (arrayOf T:Type)[int,Ts:Types] => T[Ts]
+  rule (arrayOf T:Type)[int,Ts:Types] => T[Ts]  [structural]
+ //bug: [Ts] parsed as attribute
   rule T:Type[(.Types)] => T
   rule sizeOf(arrayOf T:Type) => int
   rule read() => int
@@ -340,7 +341,7 @@ methods. */
            =>
            checkSubtype(T,T') ~> stmt
        ...</k>
-       <return> T' </return>
+       <return> T':Type </return>
 
 
 //@ We now move to the specific KOOL constructs.
@@ -375,7 +376,6 @@ syntax K ::= "blabla"
        (. => <task>
                 <k> checkType(class C') ~> Ss:Stmts </k>
                 <inClass> C </inClass>
-                <tenv> . </tenv>
                 <ctenvT> . </ctenvT>
              </task>)  [structural]
 
@@ -485,7 +485,7 @@ succeeds, meaning that it types to \texttt{stmt}, then we discard the
 the new object.  The auxiliary \texttt{discard} operation is defined
 also at the end of this module. */
 
-  rule new C:Id(Ts:Types) => '_`(_`)('_._((class C), C), Ts) ~> discard ~> class C
+  rule new C:Id(Ts:Types) => '_`(_`)('_._((class C),, C),, Ts) ~> discard ~> class C
 
 
 /*@ \subsection{Self reference}
@@ -503,8 +503,8 @@ Note that for typing concerns, super can be considered as an object
 
    rule <k> super => class C' ...</k>
         <inClass> C:Id </inClass>
-        <className> C':Id </className>
-        <extends> C' </extends>
+        <className> C </className>
+        <extends> C':Id </extends>
 
 
 /*@ \subsection{Object member access}
