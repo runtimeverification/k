@@ -35,8 +35,8 @@ conditional, while loop and sequential composition constructs for statements.
 Since IMP is so simple, we will use its semantics as an opportunity to
 explain some of the main features of the \K  prototype tool.  Other
 features will be explained in other \K definitions coming as part of
-this distribution.  For a quick introduction to the \K prototype, you
-are referred to the README file at the root of this
+this distribution's tutorial.  For a quick introduction to the \K
+prototype, you are referred to the README file at the root of this
 distribution.  If you are interested in reading more about \K, please
 check the following paper:
 \begin{quote}
@@ -118,15 +118,17 @@ module IMP-SYNTAX
 This module defines the syntax of IMP\@.
 Syntax in \K is defined using the familiar BNF notation, with
 terminals enclosed in quotes and nonterminals starting with capital
-letters, except for the builtin nonterminals which start with
-``\textit{\#}''.  To ease reading, the quotes around the terminals are
-not displayed in the generated PDFs.  Productions can have attributes,
-which can define the evaluation strategy of the corresponding
-constructs (the \texttt{strict} and \texttt{seqstrict} attributes), or
-help the parser with operator precedences and grouping (the
-\texttt{prec} and \texttt{gather} attributes), or instruct the PDF
-generator how to display the various constructs (the \texttt{latex}
-attribute), etc.
+letters.  Currently, \K uses \href{http://releases.strategoxt.org/strategoxt-manual/unstable/manual/chunk-chapter/tutorial-sdf.html}{SDF}
+as parsing frontend.  Specifically,
+it extends BNF with several attributes and notations inspired from SDF,
+plus a few \K-specific attributes which will be described in this tutorial.
+To ease reading, the parsing- or typesetting-specific syntactic notations
+and attributes that appear in the ASCII semantics, such as the quotes around
+the terminals and operator precedences and grouping, are not displayed in
+the generated PDFs.  We only display the \K-specific attributes in the
+generated PDF, such as those defining the evaluation strategy of the
+corresponding constructs (the \texttt{strict} and \texttt{seqstrict}
+attributes), because those have a semantic nature.
 
 The following constructs are given the expected strictness attributes,
 except for \texttt{<=} and \textsf{and}, for demonstration purposes.
@@ -136,21 +138,11 @@ evaluates its arguments in order, from left to right.  The
 interleaved) orders.  The latter is only strict in its first argument,
 because we will give it a short-circuited semantics (its second
 argument will only be evaluated when the first evaluates to true).
-The parsing attributes, which are not displayed in the generated PDFs
-(also to ease reading), are taken over from Maude; please consult
-Maude's manual for their meaning.  For example, \texttt{prec(...)}
-defines a precedence for the corresponding syntactic construct, which
-is taken into account when parsing programs and rules (the lower the
-precedence the tighter the binding).  Also, \texttt{gather(...)} is
-used for grouping reasons; for example, \texttt{gather(E e)} means
-left-associative and \texttt{gather(e E)} means right-associative.
 The \K tool also allows us to associate \LaTeX\ attributes to
 constructs, telling the PDF generator how to display them.  For
 example, \texttt{<=} has the attribute
 \texttt{latex("\{\#1\}\textbackslash{leq}\{\#2\}")}, which makes it be
-displayed as $\leq$ everywhere in the generated PDF.  Currently, the
-\K tool allows parentheses to be used for grouping (e.g.,
-``\texttt{while (x>=0) (x:=x/2; y:=x)}''). */
+displayed as $\leq$ everywhere in the generated PDF. */
 
   syntax AExp ::= Int | Id
                 | AExp "/" AExp    [left, strict]
@@ -222,16 +214,16 @@ or the {\em \K rules}, are of two types: {\em structural} and
 {\em computational}.  Intuitively, structural rules rearrange the
 configuration so that computational rules can apply.  Structural rules
 therefore do not count as computational steps.  A \K semantics can be
-thought of as a generator of transition systems or Kripke structures,
-one for each program.  It is only the computational rules that create
-steps, or transitions, in the corresponding transition systems or
-Kripke structures, the structural rules being unobservable at this
-level.  By default, rules are assumed computational.  If you want to
-explicitly make a rule structural, then you should include the
-tag/attribute \texttt{structural} in square brackets right after the
-rule.  These attributes may be taken into account by different \K
-tools, so it is highly recommended to spend a moment after each rule
-and think whether you want it to be structural or computational.  */
+thought of as a generator of transition systems, one for each program.
+It is only the computational rules that create steps, or transitions,
+in the corresponding transition systems or Kripke structures, the
+structural rules being unobservable at this level.  By default, rules
+are assumed computational.  If you want to explicitly make a rule
+structural, then you should include the tag/attribute \texttt{structural}
+in square brackets right after the rule.  These attributes may be taken
+into account by different \K tools, so it is highly recommended to spend
+a moment after each rule and think whether you want it to be structural
+or computational.  */
 
 /*@ \subsection{Values and results}
 IMP only has two types of values, or results of computations: integers
@@ -239,7 +231,7 @@ and Booleans.  We here use the \K builtin variants for both of them,
 noting that you are free to define your own values if these are not
 suitable for your language (e.g., the builtin integers and operations
 on them are arbitrary precision, etc.).
-The file \texttt{k-framework/core/maude/lib/pl-builtins.maude}
+The file \texttt{k-framework/bin/maude/lib/pl-builtins.maude}
 contains the (Maude) definitions of all the current builtins offered
 by the \K tool.  Although unnecessary here, it is insightful and useful
 to understand the relationship between your language's values and other
@@ -436,30 +428,32 @@ applied after the arguments of the  arithmetic constructs are fully
 evaluated to \K results; this will happen thanks to their strictness
 attributes declared as annotations in the syntax module above.  For
 demonstration purposes, we do not label the trivial rules below for
-arithmetic and Boolean constructs. 
+arithmetic and Boolean constructs.
 
-For the rest of this \K definition, recall that \K is a
-context-insensitive rewriting framework, that is, rewrite rules can
-apply wherever they match.  If you want a particular rewrite step to
-not take place unless it is in the right place, then you have to add
-more context to the rule so that it will not match.  For example, the
-first rule below will rewrite \texttt{3+7} to \texttt{10} no matter
-where it is located in the program.  If you want such reductions
-to only take place when they reach a position which can be evaluated
-according to the declared (through strictness attributes or evaluation
-contexts) evaluation strategies of the various language constructs,
-then you should modify the rules below to also match the beginning of
-the \textsf{k} cell (e.g., ``\texttt{<k> I1 + I2 => I1 +Int I2 ...</k>}'',
-etc.).  Note that this is in sharp contrast to structural operational
-semantics (SOS), where one needs to explicitly give permission
-(through conditional rules) to reductions inside language constructs'
-arguments.  In general, we prefer to not inhibit the application of
+Recall that \K is a context-insensitive rewriting framework, that is,
+rewrite rules can apply wherever they match.  If you want a particular
+rewrite step to not take place unless it is in the right place, then you
+have to add more context to the rule so that it will not match.
+For example, without any precautions, the first rule below would rewrite
+\texttt{3+7} to \texttt{10} no matter where it is located in the program.
+If you want such reductions to only take place when they reach a position
+which can be evaluated according to the declared (through strictness
+attributes or evaluation contexts) evaluation strategies of the various
+language constructs, then you should normally modify the rules below to
+also match the beginning of the \textsf{k} cell (e.g.,
+``\texttt{<k> I1 + I2 => I1 +Int I2 ...</k>}'', etc.).
+While in general we prefer to not inhibit the application of
 rewrite steps when unnecessary, because that also inhibits \K's
-potential for concurrent rewriting, but some language designers may
-get confused (or not like it) even when safe rewrites are applied in
-places of the program where they were not supposed to.  Those are free
-to modify the rules below to always match at the top of the \textsf{k}
-cell. */
+potential for concurrent rewriting, it turned out that many \K users
+got confused (or did not like it) when rewrites of syntactic terms
+(of sort $K$) were applied in places of the program where they were
+not expected to.  Consequently, as a special-case notational convention,
+the current implementation of the \K tool automatically modifies rules
+between $K$ terms by adding the \texttt{<k>...</k>} cell context, as shown
+above.  If you do not want that to happen, then you should tag the rule with
+the attribute \texttt{anywhere}, which tells the tool to not complete the
+rule and thus allows it to apply anywhere.
+*/
 
   rule I1:Int + I2:Int => I1 +Int I2
   rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0 
