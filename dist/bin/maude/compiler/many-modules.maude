@@ -17,7 +17,10 @@ fmod MANY-MODULES is
    = checkModule(removeImports(setImports(setName(manyModules(emptySModule, getModules(Ms), 'noConfig), O), getImports(Ms)), (including 'K-LATEX .))) .
 
   op manyModules : Module ModuleSet  Term ~> Module .
-  eq manyModules(M, M' MS, T) = $manyModules(if getName(M') == 'SUBSTITUTION then setName(M,'SUBSTITUTION) else M fi, M', MS, T) .
+  eq manyModules(M, M' MS, T) = manyModules(M,getName(M'), M', MS, T) .
+
+  op manyModules : Module Qid Module ModuleSet  Term ~> Module .
+  eq manyModules(M, O, M', MS, T) = $manyModules(if O == 'SUBSTITUTION then setName(M,'SUBSTITUTION) else M fi, M', MS, T) [print "importing " O "'"].
 
   op $manyModules : Module Module ModuleSet  Term ~> Module .
   eq $manyModules(M, M', MS, T)
@@ -40,6 +43,6 @@ fmod MANY-MODULES is
    = if T :: Term 
         then setConfTerm(M, T) 
         else M 
-     fi .
+     fi [print "Done.  Final Term: " T] .
 endfm
 

@@ -30,7 +30,6 @@ module LAMBDA
  imports LAMBDA-SYNTAX 
  imports SUBSTITUTION
  
- configuration <k> $PGM:Exp </k>
  syntax KResult ::= Val  
 
 //@ $\beta$-substitution

@@ -458,7 +458,7 @@ fmod K-META-CONFIG is
   op setConfTerm : MembAxSet Term -> MembAxSet .
   eq setConfTerm((mb 'configuration_[T1] : 'KSentence [AS] .) MAS, T2) 
    = (mb 'configuration_[T2] : 'KSentence [AS] .) MAS .
-  eq setConfTerm(MAS, T) = MAS [owise] .
+  eq setConfTerm(MAS, T) = (mb 'configuration_[T] : 'KSentence [metadata(pair("generated",""))] .) MAS [owise] .
   
   sort KConfigSplit .
   op Cfg{_,_} : Term AttrSet -> KConfigSplit .
