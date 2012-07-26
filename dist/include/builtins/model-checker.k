@@ -16,47 +16,47 @@ module LTL-HOOKS
 
   syntax LTLFormula ::= "(" LTLFormula ")" [bracket]
 
-  syntax LTLFormula ::= "LTL~" LTLFormula  [function, prec(53), hook(#LTL:LTL~_)]
+  syntax LTLFormula ::= "LTL~" LTLFormula  [function, hook(#LTL:LTL~_)]
 
 
   syntax LTLFormula ::= LTLFormula "LTL/\\" LTLFormula 
-      [function, prec(55), gather(E e),  hook(#LTL:_LTL&&_)]
+      [function,  hook(#LTL:_LTL&&_)]
 
   syntax LTLFormula ::= LTLFormula "LTL\\/" LTLFormula 
-      [function, prec(59), gather(E e), hook(#LTL:_LTL||_)]
+      [function, hook(#LTL:_LTL||_)]
 
   syntax LTLFormula ::= "LTLO" LTLFormula 
-      [function, prec(53), hook(#LTL:LTLO_)]
+      [function, hook(#LTL:LTLO_)]
 
   syntax LTLFormula ::= LTLFormula "LTLU" LTLFormula 
-      [function, prec(63), hook(#LTL:_LTLU_)]
+      [function, hook(#LTL:_LTLU_)]
 
   syntax LTLFormula ::= LTLFormula "LTLR" LTLFormula 
-      [function, prec(63), hook(#LTL:_LTLR_)]
+      [function, hook(#LTL:_LTLR_)]
 
   syntax LTLFormula ::= LTLFormula "LTL->" LTLFormula 
-      [function, prec(65), gather(e E), hook(#LTL:_LTL->_)]
+      [function, gather(e E), hook(#LTL:_LTL->_)]
 
   syntax LTLFormula ::= LTLFormula "LTL<->" LTLFormula 
-      [function, prec(65), hook(#LTL:_LTL<->_)]
+      [function, hook(#LTL:_LTL<->_)]
 
   syntax LTLFormula ::= "LTL<>" LTLFormula 
-      [function, prec(53), hook(#LTL:LTL<>_)]
+      [function, hook(#LTL:LTL<>_)]
 
   syntax LTLFormula ::= "LTL[]" LTLFormula 
-      [function, prec(53), hook(#LTL:LTL@_)]
+      [function, hook(#LTL:LTL@_)]
  
   syntax LTLFormula ::= LTLFormula "LTLW" LTLFormula 
-      [function, prec(63), hook(#LTL:_LTLW_)]
+      [function, hook(#LTL:_LTLW_)]
 
   syntax LTLFormula ::= LTLFormula "LTL|->" LTLFormula   // leads-to
-      [function, prec(63), hook(#LTL:_LTL|->_)]
+      [function, hook(#LTL:_LTL|->_)]
 
   syntax LTLFormula ::= LTLFormula "LTL=>" LTLFormula 
-      [function, prec(65), gather (e E), hook(#LTL:_LTL=>_)]
+      [function, hook(#LTL:_LTL=>_)]
 
   syntax LTLFormula ::= LTLFormula "LTL<=>" LTLFormula 
-      [function, prec(65), hook(#LTL:_LTL<=>_)]
+      [function, hook(#LTL:_LTL<=>_)]
 
 endmodule
 

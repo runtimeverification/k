@@ -14,7 +14,7 @@ module STRING-HOOKS
   imports ID-HOOKS
 
 
-  syntax String ::= String "+String" String	[function, left, prec(33), gather(E e), latex("{#1}+_{\scriptstyle\it String}{#2}"), hook(#STRING:_+String_)]
+  syntax String ::= String "+String" String	[function, left, latex("{#1}+_{\scriptstyle\it String}{#2}"), hook(#STRING:_+String_)]
 
   syntax Bool ::= String "==String" String [function, left, hook(#STRING:_==String_)]
 

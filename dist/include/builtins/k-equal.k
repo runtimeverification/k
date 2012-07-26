@@ -3,7 +3,7 @@ module K-EQUAL-HOOKS
   imports BOOL-HOOKS
 
   syntax Bool ::= left:
-  				  K "==K" K           [function, hook(#K-EQUAL:_==K_), cons("Bool1EqEqKSyn")]
+  				  K "==K" K           [function, hook(#K-EQUAL:_==K_)]
 				| K "=/=K" K          [function]
   rule K1:K =/=K K2:K => notBool(K1 ==K K2) [function, anywhere]
 
