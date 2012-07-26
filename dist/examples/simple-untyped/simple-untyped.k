@@ -18,12 +18,12 @@ There are two types of declarations: for variables (including arrays) and
 for functions. */
 
   syntax Start ::= Stmts
-  syntax Ids ::= List{Id,","} [strict, cons("Ids1ListSyn"), hybrid]
-  syntax Exps ::=  List{Exp,","} [cons("Exps1ListSyn")]
+  syntax Ids ::= List{Id,","} [strict, hybrid]
+  syntax Exps ::=  List{Exp,","}
 
 
-  syntax Decl ::= "var" Exps ";" [cons("Ddecl1VarDeclSyn")]
-                | "function" Id "(" Ids ")" Stmt [cons("Ddecl1FuncDeclSyn")]
+  syntax Decl ::= "var" Exps ";" 
+                | "function" Id "(" Ids ")" Stmt 
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -161,9 +161,9 @@ function definitions cannot be nested).  Like in IMP and other
 languages, we finally tell the tool that values are \K results. */
 
   syntax Val ::= Int | Bool | String
-               | "arrayRef" "(" Int "," Int ")" [cons("Val1ArrayRefSyn")]
-               | "lambda" "(" Ids "," Stmt ")"  [cons("Val1LambdaSyn")]
-  syntax Vals ::= List{Val,","} [cons("Vals1ListSyn")]
+               | "arrayRef" "(" Int "," Int ")" 
+               | "lambda" "(" Ids "," Stmt ")"  
+  syntax Vals ::= List{Val,","} 
   syntax Exp ::= Val
   syntax KResult ::= Val
 
@@ -268,7 +268,7 @@ structure.
 fresh locations is rather low level and hopefully temporary; we intend to
 soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
-  syntax K ::= "undefined"  [cons("K1UndefinedSyn")]
+  syntax K ::= "undefined"  
 
 
   rule <k> var X:Id; => . ...</k>
@@ -380,7 +380,7 @@ bound in the global environment and, as seen below, they are executed in that
 same global environment; all these mean, in particular, that the functions
 ``see'' each other, allowing for mutual recursion, etc. */
 
-  syntax K ::= "execute" [cons("K1ExecuteSyn")]
+  syntax K ::= "execute" 
   rule <k> execute => (main(.Exps);) </k>
        <env> Env:Map </env>
        <genv> . => Env </genv>
@@ -458,7 +458,7 @@ The semantics of the \texttt{lookup} operation is straightforward. */
   rule arrayRef(L:Int,_:Int)[N:Int] => lookup(L +Int N)  
        [structural, anywhere]
 
-  syntax K ::= "lookup" "(" Int ")" [cons("K1LookupSyn")]
+  syntax K ::= "lookup" "(" Int ")" 
 
   rule <k> lookup(L:Int) => V ...</k>
        <store>... L |-> V:Val ...</store>
@@ -501,7 +501,7 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax ListItem ::=  "(" Map "," K "," Bag ")" [cons("ListItem1MKBSyn")]
+  syntax ListItem ::=  "(" Map "," K "," Bag ")" 
 
   rule <k>
           lambda(Xs:Ids,S)(Vs:Vals) ~> K:K
@@ -727,7 +727,7 @@ exception stack.  The three rules below modularly do precisely the above. */
 
   syntax ListItem ::= "(" Id "," Stmt "," K "," Map "," Bag ")"
 
-  syntax K ::= "popx" [cons("K1PopxSyn")]
+  syntax K ::= "popx" 
 
   rule <k> (try S1:Stmt catch(X:Id) S2:Stmt => S1 ~> popx) ~> K </k>
        <control>
