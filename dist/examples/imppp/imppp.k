@@ -5,36 +5,36 @@ module IMPPP-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
 
   syntax AExp ::= Id | Int
-                | AExp "/" AExp   		 [prec(31), left, superheat, strict]
-                > AExp "+" AExp   		 [prec(33), left, superheat, strict]
+                | AExp "/" AExp   		 [left, superheat, strict]
+                > AExp "+" AExp   		 [left, superheat, strict]
                 | "(" AExp ")"			 [bracket]
                 
   syntax BExp ::= Bool
-                | AExp "<=" AExp  		 [prec(37), seqstrict, latex("{#1}\leq{#2}")]
-                > "not" BExp      		 [prec(53), strict]
-                > BExp "and" BExp 		 [prec(55), strict(1)]
+                | AExp "<=" AExp  		 [seqstrict, latex("{#1}\leq{#2}")]
+                > "not" BExp      		 [strict]
+                > BExp "and" BExp 		 [strict(1)]
                 | "(" BExp ")"			 [bracket]
 
   syntax Stmt ::= "skip"
-  				| "var" Ids              [prec(70)]
+  				| "var" Ids              
                 | "print" "(" AExps ")"  [strict]  
                 | "halt"
-                > Id ":=" AExp    		 [prec(80), strict(2)]
+                > Id ":=" AExp    		 [strict(2)]
                 > "if" BExp
                   "then" Stmt
-                  "else" Stmt     		 [prec(85), strict(1)]
+                  "else" Stmt     		 [strict(1)]
                 | "while" BExp
-                  "do" Stmt       		 [prec(85)]
-                > "spawn" Stmt           [prec(90)]
-                > Stmt ";" Stmt   		 [prec(100), left]
+                  "do" Stmt       		 
+                > "spawn" Stmt           
+                > Stmt ";" Stmt   		 [left]
                 | "(" Stmt ")"    		 [bracket]
                 | "{" "}"
-                | "{" Stmt "}"           [gather(&)]
+                | "{" Stmt "}"           
                   
   syntax Ids ::= List{Id,","}     		 [strict]
 
   syntax AExp ::= String
-                | "++" Id         		 [prec(0)]
+                | "++" Id         		 
                 | "read" "(" ")"
 
   syntax AExps ::= List{AExp,","}
