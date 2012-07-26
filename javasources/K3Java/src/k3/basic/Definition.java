@@ -515,8 +515,10 @@ public class Definition implements Cloneable {
 		String mainSynModName;
 		if (GlobalSettings.synModule == null) {
 			mainSynModName = mainModule + "-SYNTAX";
+			GlobalSettings.synModule = mainModule + "-SYNTAX";
 			if (!this.modulesMap.containsKey(mainSynModName)) {
 				mainSynModName = mainModule;
+				GlobalSettings.synModule = mainModule;
 				GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Could not find a specilized module for syntax. Using main module instead.", this.mainFile.getAbsolutePath(), this.mainModule, 3));
 			}
 		} else
@@ -702,25 +704,50 @@ public class Definition implements Cloneable {
 
 	public Set<Terminal> getTerminals(boolean syntax) {
 		Set<Terminal> termins = new HashSet<Terminal>();
+		Set<Module> synMods = new HashSet<Module>();
 
-		for (ModuleItem mi : modules)
-			if (mi.getType() == ModuleType.MODULE) {
-				Module m = (Module) mi;
-				if (!m.getModuleName().endsWith("SYNTAX") && syntax)
-					continue; // skip modules that don't end in SYNTAX
-				for (Sentence s : m.getSentences()) {
-					if (s.getType() == SentenceType.SYNTAX) {
-						Syntax syn = (Syntax) s;
-						List<Production> prods = syn.getProductions();
+		if (syntax) {
+			List<Module> synQue = new LinkedList<Module>();
 
-						for (Production p : prods) {
-							if (!(p.getProdSort().getSortName().equals("#Id") && p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.TERMINAL))
-								// reject those terminals that are not declared as #Id
-								for (Item i : p.getItems())
-									if (i.getType() == ItemType.TERMINAL) {
-										termins.add((Terminal) i);
-									}
+			synQue.add(this.modulesMap.get(GlobalSettings.synModule));
+
+			while (!synQue.isEmpty()) {
+				Module m = synQue.remove(0);
+				if (!synMods.contains(m)) {
+					synMods.add(m);
+					List<Sentence> ss = m.getSentences();
+					for (Sentence s : ss)
+						if (s.getType() == SentenceType.INCLUDING) {
+							String mname = ((Including) s).getIncludedModuleName();
+							Module mm = modulesMap.get(mname);
+							// if the module starts with # it means it is predefined in maude
+							if (!mname.startsWith("#"))
+								if (mm != null)
+									synQue.add(mm);
+								else
+									Error.silentReport("Could not find module: " + mname + " imported from: " + m.getModuleName());
 						}
+				}
+			}
+		} else {
+			for (ModuleItem mi : this.modules)
+				if (mi.getType() == ModuleType.MODULE)
+					synMods.add((Module) mi);
+		}
+
+		for (Module m : synMods)
+			for (Sentence s : m.getSentences()) {
+				if (s.getType() == SentenceType.SYNTAX) {
+					Syntax syn = (Syntax) s;
+					List<Production> prods = syn.getProductions();
+
+					for (Production p : prods) {
+						if (!(p.getProdSort().getSortName().equals("#Id") && p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.TERMINAL))
+							// reject those terminals that are not declared as #Id
+							for (Item i : p.getItems())
+								if (i.getType() == ItemType.TERMINAL) {
+									termins.add((Terminal) i);
+								}
 					}
 				}
 			}
