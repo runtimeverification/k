@@ -91,6 +91,10 @@ rules
 		Label(x) -> $[label="[x]" ]
 
 	to-xml1:
+		BagItem1Break() -> $[<br sort="BagItem"/>
+		]
+
+	to-xml1:
 		CondSentence(a#(b), c) -> $[<rule sort="[sort]" [label] loc="[loc]">
 					<body>
 						[children]

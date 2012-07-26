@@ -4,7 +4,7 @@ imports
   libstratego-lib
   libstratego-parallel
   lib/editor-common.generated
-  lib/analysis-library-internal.generated
+  //lib/analysis-library-internal.generated
   lib/index-library.generated
  
 signature constructors

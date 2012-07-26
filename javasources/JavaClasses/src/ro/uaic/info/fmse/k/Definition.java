@@ -106,7 +106,6 @@ public class Definition extends ASTNode {
 		if (!sorts.equals(""))
 			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
 
-		@SuppressWarnings("unused")
 		String theLists = "";
 		for(String separator : MaudeHelper.separators)
 		{

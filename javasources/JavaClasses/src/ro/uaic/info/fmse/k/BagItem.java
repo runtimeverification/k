@@ -43,10 +43,12 @@ public class BagItem extends CollectionItem {
 	public void applyToAll(Modifier visitor) {
 		value = (Term) visitor.modify(value);
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);

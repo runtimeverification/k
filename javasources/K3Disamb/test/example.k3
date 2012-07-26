@@ -1,2 +1,5 @@
-  //rule <k> print I:Int => lambda dummy . dummy </k>
-configuration <k> $PGM:Exp </k>
+  configuration <T color="yellow"> 
+  					<k color="green"> $PGM : K </k>
+  					<br />
+  					<env color="red"> .Map </env>
+  				</T>

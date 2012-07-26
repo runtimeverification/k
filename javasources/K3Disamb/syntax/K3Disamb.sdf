@@ -31,11 +31,13 @@ context-free syntax
 	KSimpleSentence							-> KSentence {avoid}
 	
 
-	"<" CellLabel CellProperty* ">" A "</" CellLabel ">"	-> BagItem {cons("Bag1ClosedCell")}
-	"..." B 	-> A {cons("LeftCell")}
-	B -> A {avoid}
-	CellContents "..." -> B {cons("RightCell")}
-	CellContents -> B {avoid}
+	"<" CellLabel CellProperty* ">" ADz "</" CellLabel ">"	-> BagItem {cons("Bag1ClosedCell")}
+	"..." BDz			-> ADz {cons("LeftCell")}
+	BDz					-> ADz {avoid}
+	CellContents "..."	-> BDz {cons("RightCell")}
+	CellContents		-> BDz {avoid}
+	
+	"<br" "/>"			-> BagItem {cons("BagItem1Break")}
 
 
 	K		-> CellContents %%{cons("K")}
