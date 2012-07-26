@@ -9,10 +9,10 @@ import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.fusesource.jansi.AnsiConsole;
+import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.runner.KRunner;
-
-import org.fusesource.jansi.AnsiConsole;
 
 public class Main {
 	
@@ -57,20 +57,6 @@ public class Main {
 			String cpuTime = p.getResultTagAttr(file, "cpu-time-ms");
 			String rewritesPerSecond = p.getResultTagAttr(file, "rewrites-per-second");
 			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL);
-		}
-	}
-
-	public static void printSearchResults() {
-		PrettyPrintOutput p = new PrettyPrintOutput();
-		File file = new File(K.maude_output);
-		String solutionNumber = p.getSearchTagAttr(file, "solution-number");
-		String stateNumber = p.getSearchTagAttr(file, "state-number");
-		if (!solutionNumber.equals("NONE")) {
-			System.out.println("Search results:\n");
-			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "Solution " + solutionNumber + ", state " + stateNumber + ":" + PrettyPrintOutput.ANSI_NORMAL);
-		}
-		else {
-			System.out.println("Found no solution");
 		}
 	}
 
@@ -136,7 +122,6 @@ public class Main {
 	//execute krun in normal mode (i.e. not in debug mode)
 	public static void normalExecution(String KAST, CommandLine cmd, RunProcess rp, String k3jar, CommandlineOptions cmd_options) {
 		try {
-			System.out.println(cmd.getOptionValue("xsearch-pattern"));
 			String s = new String();
 			if (K.do_search) {
 				if ("search".equals(K.maude_cmd)) {
@@ -214,13 +199,17 @@ public class Main {
 			}
 			
 			if ("search".equals(K.maude_cmd) && K.do_search) {
-				printSearchResults();
+				System.out.println("Search results:");
 			}
+			
+
 			if ("pretty".equals(K.output_mode)) {
 				PrettyPrintOutput p = new PrettyPrintOutput();
 			    p.preprocessDoc(K.maude_output, K.processed_maude_output);
-				String red = p.processDoc(K.processed_maude_output);
-				AnsiConsole.out.println(red);
+				List<String> red = p.processDoc(K.processed_maude_output);
+				for (String result: red) {
+					AnsiConsole.out.println(result);
+				}
 			} else if ("raw".equals(K.output_mode)) {
 				String output = new String();
 				if (K.model_checking.length() > 0) {
@@ -298,8 +287,10 @@ public class Main {
 			//pretty-print the obtained configuration
 			PrettyPrintOutput p = new PrettyPrintOutput();
 		    p.preprocessDoc(K.maude_output, K.processed_maude_output);
-			String red = p.processDoc(K.processed_maude_output);
-			AnsiConsole.out.println(red);
+			List<String> red = p.processDoc(K.processed_maude_output);
+			for (String result: red) {
+				AnsiConsole.out.println(result);
+			}
 			
 			while (true) {
 				System.out.print(K.lineSeparator + "Commmand>");

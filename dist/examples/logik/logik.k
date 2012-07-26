@@ -26,11 +26,13 @@ module LOGIK-SEMANTICS
     <clauses>
           .Bag
     </clauses>
+    <br/>
     <k>
       $PGM:K
     </k>
     <nextVar> 0 </nextVar>
    </T>
+   <br/>
    <solution stream="stdout"> .List </solution>
 
   syntax Id ::= UnificationVar

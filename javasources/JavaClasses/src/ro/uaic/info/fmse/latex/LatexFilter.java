@@ -150,6 +150,7 @@ public class LatexFilter extends BasicVisitor {
 	}
 
 	private void printList(List<Term> contents, String str) {
+		result += "\\begin{array}{l}";
 		boolean first = true;
 		for (Term trm : contents) {
 			if (first) {
@@ -159,6 +160,12 @@ public class LatexFilter extends BasicVisitor {
 			}
 			trm.accept(this);
 		}
+		result += "\\end{array}";
+	}
+	
+	public void visit(TermComment tc) {
+		result += "\\\\";
+		super.visit(tc);
 	}
 
 	@Override

@@ -125,6 +125,11 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(TermComment node) {
+		visit((ASTNode) node);
+	}
+
+	@Override
 	public void visit(Cell node) {
 		node.getContents().accept(this);
 		visit((Term) node);

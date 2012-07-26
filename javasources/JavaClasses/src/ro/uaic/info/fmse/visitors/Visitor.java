@@ -40,6 +40,7 @@ import ro.uaic.info.fmse.k.SetItem;
 import ro.uaic.info.fmse.k.Sort;
 import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.k.Term;
+import ro.uaic.info.fmse.k.TermComment;
 import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.Terminal;
 import ro.uaic.info.fmse.k.UserList;
@@ -104,4 +105,5 @@ public interface Visitor {
 	// </Terms>
 	public void visit(Attributes attributes);
 	public void visit(Attribute attribute);
+	public void visit(TermComment node);
 }
