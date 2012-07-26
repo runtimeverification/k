@@ -14,7 +14,7 @@ public class TermComment extends Term {
 
 	@Override
 	public String toMaude() {
-		return "";
+		return " (.).Bag ";
 	}
 
 	@Override

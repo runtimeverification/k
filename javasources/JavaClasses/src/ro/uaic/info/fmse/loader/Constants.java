@@ -75,4 +75,5 @@ public class Constants {
 	public static final String SHARED = "SHARED";
 	public static final String KLABEL = "KLabel";
 	public static final String PREDEFINED = "predefined";
+	public static final String BREAK = "br";
 }

@@ -59,6 +59,8 @@ public class JavaClassesFactory {
 			return new Configuration(element);
 		if (Constants.CELL.equals(element.getNodeName()))
 			return new Cell(element);
+		if (Constants.BREAK.equals(element.getNodeName()))
+			return new TermComment(element);
 		if (Constants.BAG.equals(element.getNodeName()))
 			return new Bag(element);
 		if (Constants.BAGITEM.equals(element.getNodeName()))
