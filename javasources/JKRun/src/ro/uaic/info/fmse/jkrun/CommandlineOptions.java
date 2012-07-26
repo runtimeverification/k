@@ -69,8 +69,8 @@ public class CommandlineOptions {
 		Option no_statistics = OptionBuilder.hasArg(false).withLongOpt("no-statistics").create();
 		Option color = OptionBuilder.hasArg(false).withLongOpt("color").withDescription("Use colors in output").create();
 		Option no_color = OptionBuilder.hasArg(false).withLongOpt("no-color").create();
-		/*Option parens = OptionBuilder.hasArg(false).withLongOpt("parens").withDescription("Show parentheses in output").create();
-		Option no_parens = OptionBuilder.hasArg(false).withLongOpt("no-parens").create();*/
+		Option parens = OptionBuilder.hasArg(false).withLongOpt("parens").withDescription("Show parentheses in output").create();
+		Option no_parens = OptionBuilder.hasArg(false).withLongOpt("no-parens").create();
 
 		options.addOption(pgm); getOptionList().add(pgm);
 		options.addOption(k_definition); getOptionList().add(k_definition);
@@ -83,8 +83,8 @@ public class CommandlineOptions {
 		options.addOption(no_statistics); getOptionList().add(no_statistics);
 		options.addOption(color); getOptionList().add(color);
 		options.addOption(no_color); getOptionList().add(no_color);
-		/*options.addOption(parens); getOptionList().add(parens);
-		options.addOption(no_parens); getOptionList().add(no_parens);*/
+		options.addOption(parens); getOptionList().add(parens);
+		options.addOption(no_parens); getOptionList().add(no_parens);
 
 		// Advanced K options
 		Option compiled_def = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("compiled-def").withDescription("Path to the compiled K definition").create();

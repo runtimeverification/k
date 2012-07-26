@@ -198,7 +198,8 @@ public class PrettyPrintOutput {
 		String sort = node.getAttribute("sort");
 		ArrayList<Element> list = XmlUtil.getChildElements(node);
 		
-		if (sort.equals("BagItem") && op.equals("<_>_</_>")) {
+		if (sort.equals("BagItem") && op.equals("<_>_</_>")
+			|| sort.equals("[Bag]") && op.equals("<_>_</_>")) {
 			sb = new StringBuilder();
 		   	sb.append(prettyPrint("<", true, whitespace, ANSI_GREEN));
 		   	sb.append(prettyPrint(print(list.get(0), false, whitespace, ANSI_GREEN), false, whitespace, ANSI_GREEN));
@@ -212,7 +213,8 @@ public class PrettyPrintOutput {
 		   	sb.append(prettyPrint(">", false, 0, ANSI_GREEN));
 		   	return sb.toString();
 		}
-		if (sort.equals("BagItem") && !op.equals("<_>_</_>")) {
+		if (sort.equals("BagItem") && !op.equals("<_>_</_>")
+			|| sort.equals("[Bag]") && !op.equals("<_>_</_>")) {
 			sb = new StringBuilder();
 			//n = nr of child nodes
 			int n = list.size();
@@ -317,27 +319,46 @@ public class PrettyPrintOutput {
 			sb.append(sb_);	
 			return sb.toString();
 		}
-		if (sort.equals("List") || sort.equals("Set") || sort.equals("Bag") || sort.equals("Map")) {
+		if (sort.equals("List") || sort.equals("Set") || sort.equals("Bag") || sort.equals("Map")
+		    //we may find this sorts in intermediate configurations of the stepper
+			|| sort.equals("[List]") || sort.equals("[Set]") || sort.equals("[Map]") ) {
 			sb = new StringBuilder();
 			//postprocess
 			op = postProcessElement(node, op, sort);
-			//"__" is an associative operator
-			if (op.equals("__")) {
-				sb = lessUnderscoresAssocCase(list, op, false, whitespace, ANSI_NORMAL);
-			}
-			else {
-				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL);
-			}
-		
-			return sb.toString();
-		}
-		if ((sort.equals("KLabel") && !op.equals("'.List`{\",\"`}") )) {
-			sb = new StringBuilder();
+			
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
 			int m = Utils.countUnderscores(op);
 			
+			//"__" is an associative operator
+			if (op.equals("__")) {
+				sb = lessUnderscoresAssocCase(list, op, false, whitespace, ANSI_NORMAL);
+			}
+			//HOLE case
+			if (m == 0 && n == 0) {
+				sb.append(op);
+			}
+			//freezer case
+			else if (m == 0 && n > 0) {
+				sb = freezerCase(list, op, n, false, whitespace + indent, ANSI_NORMAL);
+			}
+			else if (m < n && n > 0 && m > 0) {
+				sb = lessUnderscoresCase(list, op, n, m, false, whitespace + indent, ANSI_NORMAL);
+			}
+			else {
+				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL);
+			}
+			return sb.toString();
+		}
+		if ((sort.equals("KLabel") && !op.equals("'.List`{\",\"`}") )
+			|| sort.equals("[KLabel]") && !op.equals("'.List`{\",\"`}")) {
+			sb = new StringBuilder();
+			//n = nr of child nodes
+			int n = list.size();
+			// m = nr of "_" characters from op atrribute
+			int m = Utils.countUnderscores(op);
+		
 			//postprocess
 			op = postProcessElement(node, op, sort);
 			
@@ -357,7 +378,8 @@ public class PrettyPrintOutput {
 			}
 			return sb.toString();
 		}
-		if (sort.equals("KLabel") && op.equals("'.List`{\",\"`}")) {
+		if (sort.equals("KLabel") && op.equals("'.List`{\",\"`}")
+			|| sort.equals("[KLabel]") && op.equals("'.List`{\",\"`}")) {
 			sb = new StringBuilder();
 			Element previous = XmlUtil.getPreviousSiblingElement(node);
 			// if the node has siblings
@@ -371,7 +393,7 @@ public class PrettyPrintOutput {
 			return sb.toString();
 		}
 		//this is the case of builtins
-		if (sort.startsWith("#")) {
+		if (sort.startsWith("#") || sort.startsWith("[#")) {
 			//n = nr of child nodes
 			int n = list.size();
 			// m = nr of "_" characters from op atrribute
@@ -414,14 +436,48 @@ public class PrettyPrintOutput {
 			}
             else {
             	sb = generalCase(list, op, false, whitespace, ANSI_NORMAL);
-			}	
+			}
+			return sb.toString();
 		}
 		if (op.equals(".")) {
 			sb = new StringBuilder();
 			sb.append(".");
 			return sb.toString();
 		}
-		
+		if (sort.equals("List`{K`}") && op.equals(".List`{K`}") 
+			|| sort.equals("[List`{K`}]") && op.equals("[.List`{K`}]")) {
+			return "";
+		}
+		if (sort.equals("List`{K`}") && !op.equals(".List`{K`}") 
+			|| sort.equals("[List`{K`}]") && !op.equals("[.List`{K`}]")) {
+			sb = new StringBuilder();
+			//n = nr of child nodes
+			int n = list.size();
+			// m = nr of "_" characters from op atrribute
+			int m = Utils.countUnderscores(op);
+			
+			//postprocess
+			op = postProcessElement(node, op, sort);
+			
+			//HOLE case
+			if (m == 0 && n == 0) {
+				sb.append(op);
+			}
+			//freezer case
+			else if (m == 0 && n > 0) {
+				sb = freezerCase(list, op, n, false, whitespace + indent, ANSI_NORMAL);
+			}
+			else if (m < n && n > 0 && m > 0) {
+				sb = lessUnderscoresCase(list, op, n, m, false, whitespace + indent, ANSI_NORMAL);
+			}
+            else {
+            	sb = generalCase(list, op, false, whitespace + indent, ANSI_NORMAL);
+			}
+			return sb.toString();
+		}
+		/*else {
+			return "rule no implemented yet: op=" + op + " sort=" + sort;
+		}*/
 		return sb.toString();
 	}
 	
