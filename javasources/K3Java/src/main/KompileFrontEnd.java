@@ -145,7 +145,7 @@ public class KompileFrontEnd {
 			// Run pdflatex.
 			String pdfLatex = "pdflatex";
 			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
-			System.out.println(argument);
+			// System.out.println(argument);
 
 			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
 
