@@ -287,7 +287,7 @@ public class PrettyPrintOutput {
 			}
 			//like in the case of <term op="var`{K`}`(_`)" sort="K"> (equal number of underscores and children)
 			else if (m == n) {
-				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL);
+				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL, true);
 			}
 			return sb.toString();
 		}
@@ -313,7 +313,7 @@ public class PrettyPrintOutput {
 				sb = lessUnderscoresCase(list, op, n, m, false, whitespace, ANSI_NORMAL);
 			}
 			else {
-				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL);
+				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL, true);
 			}
 			return sb.toString();
 		}
@@ -367,7 +367,7 @@ public class PrettyPrintOutput {
 				sb = lessUnderscoresCase(list, op, n, m, false, whitespace + indent, ANSI_NORMAL);
 			}
 			else {
-				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL);
+				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL, true);
 			}
 			return sb.toString();
 		}
@@ -394,7 +394,7 @@ public class PrettyPrintOutput {
 				sb = lessUnderscoresCase(list, op, n, m, false, whitespace + indent, ANSI_NORMAL);
 			}
 			else {
-				sb = generalCase(list, op, false, whitespace + indent, ANSI_NORMAL);
+				sb = generalCase(list, op, false, whitespace + indent, ANSI_NORMAL, true);
 			}
 			return sb.toString();
 		}
@@ -455,7 +455,7 @@ public class PrettyPrintOutput {
 				sb = lessUnderscoresCase(list, op, n, m, false, whitespace, ANSI_NORMAL);
 			}
 			else {
-				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL);
+				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL, true);
 			}
 			return sb.toString();
 		}
@@ -491,7 +491,7 @@ public class PrettyPrintOutput {
 				sb = lessUnderscoresCase(list, op, n, m, false, whitespace + indent, ANSI_NORMAL);
 			}
 			else {
-				sb = generalCase(list, op, false, whitespace + indent, ANSI_NORMAL);
+				sb = generalCase(list, op, false, whitespace + indent, ANSI_NORMAL, true);
 			}
 			return sb.toString();
 		}
@@ -644,7 +644,7 @@ public class PrettyPrintOutput {
 	}
 
 	//when the number of underscores is equal with the number of children
-	public static StringBuilder generalCase(List<Element> list, String op, boolean lineskip, int whitespace, String color) {
+	public static StringBuilder generalCase(List<Element> list, String op, boolean lineskip, int whitespace, String color, boolean addParens) {
 		StringBuilder sb = new StringBuilder();
 		List<String> elements = new ArrayList<String>();
 
@@ -661,8 +661,15 @@ public class PrettyPrintOutput {
 			op = op.substring(1);
 		}
 		StringBuilder sb_ = new StringBuilder(op);
-		sb_ = Utils.insertSpaceNearUnderscores(op);
+		if (K.parens) {
+			sb_ = Utils.insertParenthesisNearUnderscores(op);
+		}
 		op = sb_.toString();
+		if (! K.parens) {
+			sb_ = Utils.insertSpaceNearUnderscores(op);
+		}
+		op = sb_.toString();
+		
 		StringBuilder sb1 = new StringBuilder(op);
 		//replace each "_" with its children representation
 		sb1 = Utils.replaceAllUnderscores(op, elements);

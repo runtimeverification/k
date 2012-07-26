@@ -85,6 +85,22 @@ public class Utils {
 			}
 		}
 		return sb;
+	 }
+	
+	// insert parenthesis before and after each "_" when we have the option --parens
+	public static StringBuilder insertParenthesisNearUnderscores(String op) {
+		StringBuilder sb = new StringBuilder(op);
+		int index = 0;
+
+		while (index != -1) {
+			index = sb.indexOf("_", index);
+			if (index != -1) {
+				sb = sb.insert(index + 1, ")");
+				sb = sb.insert(index, "(");
+				index += 2;
+			}
+		}
+		return sb;
 	}
 	
 	public static StringBuilder colorSymbol(String text, String symbol, String color) {
