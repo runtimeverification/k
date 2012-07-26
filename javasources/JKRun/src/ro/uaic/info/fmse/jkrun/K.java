@@ -53,11 +53,5 @@ public class K {
 	public static boolean debug = false;
 	public static boolean trace = false;
 	
-	/*public static void main (String args[]) {
-		String op = "_~>_";
-		StringBuilder str = Utils.insertParenthesisNearUnderscores(op);
-		System.out.println("str=" + str);
-		
-	}*/
 
 }
