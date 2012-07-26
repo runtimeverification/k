@@ -17,7 +17,7 @@ lexical syntax
 	"false"				-> DzDzID {reject}
 
 	[a-zA-Z][a-zA-Z0-9]*	-> DzDzID
-	[\+\-]? [0-9]+			-> DzDzINT
+	[\-]? [0-9]+			-> DzDzINT
 
 	FloatDigits ExponentPart? [fFdD]? -> DzDzFLOAT
 	[0-9]* "." [0-9]*	-> FloatDigits
