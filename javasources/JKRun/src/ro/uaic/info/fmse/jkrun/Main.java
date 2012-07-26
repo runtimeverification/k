@@ -136,19 +136,23 @@ public class Main {
 	//execute krun in normal mode (i.e. not in debug mode)
 	public static void normalExecution(String KAST, CommandLine cmd, RunProcess rp, String k3jar, CommandlineOptions cmd_options) {
 		try {
+			System.out.println(cmd.getOptionValue("xsearch-pattern"));
 			String s = new String();
 			if (K.do_search) {
 				if ("search".equals(K.maude_cmd)) {
-					s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) =>! B:Bag .";
+					s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
+							",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
+							",(.).Map)) ";
+					if (cmd.hasOption("xsearch-pattern")) {
+						s += K.xsearch_pattern + " .";
+						//s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern + "\"" + " .";
+					} else s += " =>! B:Bag .";		
 				} else {
 					Error.report("For the do-search option you need to specify that --maude-cmd=search");
 				}
 			} else if (cmd.hasOption("maude-cmd")) {
 				s = "set show command off ." + K.lineSeparator + K.maude_cmd + " #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
-			} else if (cmd.hasOption("xsearch-pattern")) {
-				s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + K.xsearch_pattern + " .";
-				//s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern + "\"" + " .";
-			} else {
+			}  else {
 				s = "set show command off ." + K.lineSeparator + "erew #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
 			}
 	
@@ -453,7 +457,7 @@ public class Main {
 				K.maude_cmd = "search";
 				K.do_search = true;
 				K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern");
-				//System.out.println("xsearch-pattern:" + K.xsearch_pattern);
+//				System.out.println("xsearch-pattern:" + K.xsearch_pattern);
 			}
 			if (cmd.hasOption("output-mode")) {
 				K.output_mode = cmd.getOptionValue("output-mode");
