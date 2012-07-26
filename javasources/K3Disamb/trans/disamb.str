@@ -51,8 +51,15 @@ strategies
 			disambigCellTypes ;
 			topdown(try(correctRewrite)) ;
 			topdown(try(correctKseq)) ;
-			emphasizeVars 
-		end		
+			emphasizeVars ; 
+			type-inferenceTypeSystem ;
+			chooseBestFitRec ;
+			type-inferenceSupremum ;
+			var-type-inference2 ; // new type inference where I correct the first type inference
+			flattenKLists ;
+			 /**///;
+			 id
+       end		
 
 
 	mydisambiguateConfig =
