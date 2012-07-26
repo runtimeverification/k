@@ -170,6 +170,7 @@ public class KompileFrontEnd {
 				}
 				process.waitFor();
 				pdfClean(new String[] { ".tex", ".aux", ".log", ".mrk", ".out", ".sty" });
+			        new File("k.sty").delete();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
