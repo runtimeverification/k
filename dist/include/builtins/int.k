@@ -21,8 +21,8 @@ module INT-HOOKS
 				| Int "<Int" Int	[function, left, latex("{#1}\mathrel{<_{\scriptstyle\it Int}}{#2}"), hook(#INT:_<Int_)]
 				| Int ">=Int" Int	[function, left, latex("{#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}"), hook(#INT:_>=Int_)]
 				| Int ">Int" Int	[function, left, latex("{#1}\mathrel{>_{\scriptstyle\it Int}}{#2}"), hook(#INT:_>Int_)]
-				| Int "==Int" Int	[function, left, hook(#INT:_==Int_)]
-				| Int "=/=Int" Int	[function, left]
+				| Int "==Int" Int	[function, left,latex("{#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}"), hook(#INT:_==Int_)]
+				| Int "=/=Int" Int	[function, left,latex("{#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}")]
 
   rule I1:Int =/=Int I2:Int => notBool(I1 ==Int I2) [function, anywhere]
 
