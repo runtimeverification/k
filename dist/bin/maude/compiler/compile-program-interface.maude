@@ -1,0 +1,52 @@
+---load sanity-checks
+load compile-program
+
+mod COMPILE-PROGRAM-META is
+  including COMPILE-PROGRAM .
+  including META-LEVEL-EXTRAS .
+  var NoCompiledPgm Pgm : String . 
+  var QNoCompiledPgm QPgm : Qid . 
+  op compileProgram : String String ~> Term .
+  eq compileProgram(NoCompiledPgm, Pgm) = compileProgram(qid(NoCompiledPgm), qid(Pgm)) .
+  op compileProgram : Qid Qid ~> Term .
+  eq compileProgram(QNoCompiledPgm, QPgm) = $compileProgram(upModule(QNoCompiledPgm, true), compileProgram2Term(upModule(QNoCompiledPgm, true), QPgm)) .
+  var Trm : Term . var T : Type .  var Q : Qid .  var M M' : Module .
+  op $compileProgram : Module Term ~> Term .
+  eq $compileProgram(M, Trm) = Trm .
+  op termError : QidList -> [Term] .
+  eq $compileProgram(M, errorTrm(Trm, T))
+   = termError('\r 'Error: '\o 'The 'sanity 'checks 'phase 'of 'compilation 'failed. '\n '\s '\s 'Term '\n '\t '\r metaPrettyPrint(M, Trm) '\o '\n '\s '\s 'does 'not 'parse 'to 'a 'sort 'but 'rather 'to 'kind '\n '\t '\r T '\o '. '\n '\s '\s 'Please 'resolve 'that 'before 'continuing.) .
+endm
+
+mod COMPILE-PROGRAM-LOOP is 
+  including LOOP-MODE + META-LEVEL-EXTRAS + META-K-BUILTINS .
+  op compile-program : -> System .
+  op idle : -> State .
+  var Q NoCompiledPgm Pgm : Qid . var QIL QIL' : QidList . var FM : [Term] .
+  var Syntax : Module .
+  eq compile-program = [nil, idle, 
+ 'Usage: 'compileProgram '<ProgramModule> '<programName> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Term] .
+  op printTrm : Module [Term] -> QidList .
+  var T : Term .
+  eq printTrm(Syntax, T) 
+   = ('\n '---K-MAUDE-GENERATED-OUTPUT-BEGIN--- '\n  
+     metaPrettyPrint(addOps(getBuiltinOps(Syntax) 
+    (op '#_ : 'Universal -> 'KLabel [poly(1)] .)
+    (op '<Qids> : nil -> 'KLabel 
+        [special(id-hook('QuotedIdentifierSymbol, nil))] .)
+     , upModule('K, true)), T)
+     '\n '---K-MAUDE-GENERATED-OUTPUT-END----- '\n) .
+  eq printTrm(Syntax, termError(QIL)) = QIL .
+ 
+  crl ['compileProgram NoCompiledPgm Pgm QIL, idle, QIL'] 
+   => [QIL, idle, printTrm(upModule(NoCompiledPgm, true), FM)] 
+   if FM := downTerm(getTerm(
+             metaReduce(wrapper('COMPILE-PROGRAM-META),
+                        'compileProgram[upTerm(string(NoCompiledPgm)),upTerm(string(Pgm))])),error) .
+endm

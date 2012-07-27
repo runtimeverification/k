@@ -1,0 +1,227 @@
+mod SYNTAX-PREDICATES is
+  including META-MODULE-EXTRAS .
+  including META-K-RULES .
+  including META-LEVEL-EXTRAS .
+  including PARSE-METADATA .
+  including METADATA-EXTRAS .
+  including META-K-MODULE .
+  including K-META-OPS .
+  including META-K-PREDICATES .
+  including META-K-CONTEXTS .
+  including META-ANONYMOUS-VARIABLE .
+  including COMPILATION-ATTRS .
+ 
+  op syntaxPreds : Module AttrSet -> Module .
+  eq syntaxPreds(M, AS)
+   = syntaxPreds(M, flatten(M), AS) .
+
+  op syntaxPreds : Module Module AttrSet -> Module .
+  eq syntaxPreds(M, Flat, AS)
+   = syntaxPreds(M, Flat, removeSorts(lesserSorts(Flat, K), KItem ; K), makeSubsorts(Flat,getSorts(Flat),getSorts(Flat)), getOps(Flat), AS) .
+
+  op syntaxPreds : Module Module SortSet SubsortDeclSet OpDeclSet AttrSet -> Module .
+  eq syntaxPreds(M, Flat, SS, SSDS, OPDS, AS) = syntaxPreds(M, Flat, SS \ builtinSorts(M,SS), builtinSorts(M, SS), SSDS, OPDS, AS) .
+
+  op syntaxPreds : Module Module SortSet SortSet SubsortDeclSet OpDeclSet AttrSet -> Module .
+  eq syntaxPreds(M, Flat, SS, BSS, SSDS, OPDS, AS)
+   = removeImports(removeSorts(removeSyntaxSubsorts(setMbs(setOps( 
+                  setEqs(M,syntaxPredsEqs(SS, getEqs(M)))
+                  ,
+                  syntaxPreds(SS ; BSS) syntaxOps(M, Flat, SS ; BSS, getOps(M))
+                  ),
+            syntaxPredsMbs(SS, syntaxPreds(getSubsorts(SSDS, SS)) 
+              syntaxPreds(getOps(OPDS, SS), AS) 
+              getMbs(M))
+              builtinSyntaxPreds(BSS)
+            ), SS), SS), (including 'K-RESULT .)) .
+
+
+
+  op removeSyntaxSubsorts : SubsortDeclSet SortSet -> SubsortDeclSet .
+  eq removeSyntaxSubsorts(SSDS (subsort S < S' .), S ; SS)
+   = removeSyntaxSubsorts(SSDS, S ; SS) .
+  eq removeSyntaxSubsorts(SSDS (subsort S < S' .), S' ; SS)
+   = if isBuiltin(S) then (subsort S < K .) removeSyntaxSubsorts(SSDS, S' ; SS) else removeSyntaxSubsorts(SSDS, S' ; SS) fi .
+  eq removeSyntaxSubsorts(SSDS, SS) = SSDS [owise] .
+
+  op removeSyntaxSubsorts : Module SortSet -> Module .
+  eq removeSyntaxSubsorts(M, SS) 
+   = setSubsorts(M, removeSyntaxSubsorts(getSubsorts(M),SS)) .
+
+
+
+ op syntaxPredsMbs : SortSet MembAxSet ~> MembAxSet .
+ eq syntaxPredsMbs(SS, Mbs Mb)
+  =  syntaxPredsMbs(SS, Mbs) syntaxPredsMb(SS, Mb) .
+ eq syntaxPredsMbs(SS, none) = none .
+
+ op syntaxPredsMb : SortSet MembAx ~> MembAx .
+ceq syntaxPredsMb(SS,Mb)
+  = syntaxPredsKRl(SS, KRS, syntaxPredsT(SS, getContents(KRS)), syntaxCondition(syntaxVars(SS, noDuplicates(getVars(getContents(KRS))))))
+ if KRS := splitKRule(Mb) [print "syntaxPredsMb splitKRule " KRS].
+ceq syntaxPredsMb(SS,Mb)
+  = syntaxPredsKCxt(SS, KCS, syntaxPredsT(SS, getContents(KCS)), syntaxCondition(syntaxVars(SS, noDuplicates(getVars(getContents(KCS))))))
+ if KCS := splitKContext(Mb) .
+ceq syntaxPredsMb(SS,Mb)
+  = plugKConfig(setContents(KCfgS,syntaxPredsT(SS, getContents(KCfgS))))
+ if KCfgS := splitKConfig(Mb) .
+---(
+ eq syntaxPredsMb(SS,Mb)
+  = plugMb(syntaxPredsT(SS,getTerm(Mb)), getType(Mb), getAttrs(Mb), mkBaseCondition(syntaxCondition(syntaxVars(SS, noDuplicates(getVars(getTerm(Mb)))))) /\ syntaxPredsCond(SS, getCond(Mb))) [owise] .
+---)
+
+
+ op syntaxPredsKCxt : SortSet KContextSplit Term TermList ~> MembAx .
+ eq syntaxPredsKCxt(SS, KCS, Trm, Trms) = plugKContext(setCondition(setContents(KCS, Trm), andBool(flattenSyntaxT(SS, getCondition(KCS)),Trms))) .
+
+ op syntaxPredsKRl : SortSet KRuleSplit Term TermList ~> MembAx .
+ eq syntaxPredsKRl(SS, KRS, Trm, Trms) = plugKRule(setCondition(setContents(KRS, Trm), andBool(flattenSyntaxT(SS, getCondition(KRS)),Trms))) .
+
+
+ op syntaxPredsT : SortSet Term ~> Term .
+ eq syntaxPredsT(SS, Trm) = flattenSyntaxT(SS, Trm) .
+
+  op flattenSyntaxT : SortSet TermList ~> TermList .
+  eq flattenSyntaxT(SS, (Q[Trms],Trms')) = Q[flattenSyntaxT(SS, Trms)],flattenSyntaxT(SS, Trms') .
+  eq flattenSyntaxT(SS, empty) = empty .
+  eq flattenSyntaxT(SS, (CV, Trms'))  
+   = if getType(CV) in SS 
+     then if CV :: Variable and-then isAnyAnyVar(CV) then setType(CV,K) else setType(CV, KItem) fi
+     else if getType(CV) == ResultList 
+          then setType(CV, KList)
+          else CV 
+          fi
+     fi, flattenSyntaxT(SS, Trms') .
+
+  op syntaxVars : SortSet TermList ~> TermList .
+  eq syntaxVars(SS, empty) = empty .
+  eq syntaxVars(SS, (V,Trms))
+   = if isAnyAnyVar(V) == false and-then 
+        (getType(V) in SS or-else getType(V) == ResultList)
+     then V,syntaxVars(SS, Trms) else syntaxVars(SS, Trms) fi .
+
+  op isAnyAnyVar : Variable -> Bool .
+  eq isAnyAnyVar(V)
+   = substr(string(getName(V)),0,3 * length(string(anyVarS))) 
+     == string(anyVarS) + string(anyVarS) + string(anyVarS) .
+
+  op syntaxCondition_ : TermList ~> TermList .
+  eq syntaxCondition(empty) = empty .
+  eq syntaxCondition(NTrms) = andBool($syntaxCondition(NTrms)) .
+
+  op $syntaxCondition_ : TermList ~> TermList .
+  eq $syntaxCondition(empty) = empty .
+  eq $syntaxCondition(V, Trms) 
+   = if getType(V) == ResultList 
+     then kApply(predicateLabel(KResult), setType(V,KList))
+     else kApply(predicateLabel(getType(V)),setType(V,KItem)) 
+     fi,syntaxCondition(Trms) .
+
+ op syntaxPredsEqs : SortSet EquationSet ~> EquationSet .
+ eq syntaxPredsEqs(SS, Eqs Eq)
+  =  syntaxPredsEqs(SS, Eqs) plugEq(syntaxPredsT(SS, getLhs(Eq)), syntaxPredsT(SS, getRhs(Eq)), getAttrs(Eq), mkBaseCondition(syntaxCondition(syntaxVars(SS, noDuplicates(getVars(getLhs(Eq)))))) /\ syntaxPredsCond(SS, getCond(Eq))) .
+ eq syntaxPredsEqs(SS, none) = none .
+
+ op mkBaseCondition : TermList ~> Condition .
+ eq mkBaseCondition(empty) = nil .
+ eq mkBaseCondition(Trm) = (Trm = trueCt) .
+ 
+ op syntaxPredsCond : SortSet Condition ~> Condition .
+ eq syntaxPredsCond(SS, Trm1 = Trm2 /\ Cond)
+  = syntaxPredsT(SS, Trm1) = syntaxPredsT(SS, Trm2)
+    /\ syntaxPredsCond(SS, Cond) .
+ eq syntaxPredsCond(SS, Trm1 := Trm2 /\ Cond)
+  = syntaxPredsT(SS, Trm1) := syntaxPredsT(SS, Trm2)
+    /\ syntaxPredsCond(SS, Cond) .
+ eq syntaxPredsCond(SS, Trm1 => Trm2 /\ Cond)
+  = syntaxPredsT(SS, Trm1) => syntaxPredsT(SS, Trm2)
+    /\ syntaxPredsCond(SS, Cond) .
+ eq syntaxPredsCond(SS, Trm : Ty /\ Cond)
+  = syntaxPredsT(SS, Trm) : Ty
+    /\ syntaxPredsCond(SS, Cond) .
+ eq syntaxPredsCond(SS, nil) = nil .
+
+ op syntaxPreds : OpDeclSet AttrSet ~> MembAxSet .
+ eq syntaxPreds(Op OPDS, AS)
+  = syntaxPred(Op, AS)  syntaxPreds(OPDS, AS) .
+ eq syntaxPreds((none).OpDeclSet, AS) = none .
+
+ op syntaxPred : OpDecl AttrSet ~> MembAxSet .
+ eq syntaxPred((op Q : Tyl -> Ty [AS metadata(Str)] .), AS')
+  = syntaxPred((op Q : Tyl -> Ty [AS metadataParse(Str)] .), AS') .
+ eq syntaxPred((op Q : Tyl -> Ty [A AS] .), defineds(A AS') AS'')
+  = none .
+ eq syntaxPred((op Q : Tyl -> Ty [pair(Str, Str') AS] .), defineds(pair(Str, Str'') AS') AS'')
+  = none .
+ eq syntaxPred((op '<Floats> : nil -> Ty [AS] .), AS')
+  = none .
+ eq syntaxPred((op Q : nil -> Ty [AS] .), AS')
+   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),mkConstant(Q,Ty)),trueCt],empty, removeOpAttrs(AS) metadata(pair("structural","") pair("predicate",metadataString((Ty))))}) [owise] .
+ eq syntaxPred((op Q : NeTyl -> Ty [AS] .), AS')
+   = plugKRule(R{replaceS[kApply(predicateLabel(Ty),Q[genVars(Universal2K(NeTyl), "Is", 1)]),trueCt],empty, removeOpAttrs(AS) metadata(pair("predicate",metadataString((Ty))))}) [owise] .
+
+  op syntaxOps : Module Module SortSet OpDeclSet ~> OpDeclSet .
+  eq syntaxOps(M, Flat, SS, Op OPDS)
+   = syntaxOp(M, Flat, SS, Op)
+     syntaxOps(M, Flat, SS, OPDS) .
+  eq syntaxOps(M, Flat, SS, none) = none .
+
+  op syntaxOp : Module Module SortSet OpDecl ~> OpDecl .
+  eq syntaxOp(M, Flat, SS, (op Q : Tyl -> Ty [AS] .))
+   = (op Q : syntaxTyl(M, Flat, SS, Tyl) -> syntaxRTy(M, Flat, SS, Ty) [AS ---(metadata(removeHybrid(metadataParse(AS))))] .) . 
+
+  op syntaxTyl : Module Module SortSet TypeList ~> TypeList .
+  eq syntaxTyl(M, Flat, SS, Ty Tyl) 
+   = syntaxRTy(M, Flat, SS, Ty) 
+     syntaxTyl(M, Flat, SS, Tyl)  .
+  eq syntaxTyl(M, Flat, SS, nil) = nil .
+     
+  op syntaxTy : Module Module SortSet Type ~> Type .
+  eq syntaxTy(M, Flat, SS, Ty) 
+   = if Ty in SS then K else if Ty == ResultList then KList else Ty fi fi .
+
+  op syntaxRTy : Module Module SortSet Type ~> Type .
+  eq syntaxRTy(M, Flat, SS, Ty) 
+   = if isBuiltin(Ty) then Ty else syntaxTy(M, Flat, SS, Ty) fi .
+
+---(
+  op removeHybrid : AttrSet -> AttrSet .
+  eq removeHybrid(AS pair("hybrid","")) = AS .
+  eq removeHybrid(AS) = AS [owise] .
+---)
+
+ op syntaxPreds : SubsortDeclSet ~> MembAxSet .
+ eq syntaxPreds((subsort S < S' .) SSDS)
+  = plugKRule(R{replaceS[kApply(predicateLabel(S'),mkVariable(S,S)),trueCt],empty, metadata(pair("predicate",metadataString((S'))))}) 
+    syntaxPreds(SSDS) .
+ eq syntaxPreds((none).SubsortDeclSet) = none .
+
+ op builtinSyntaxPreds : SortSet ~> MembAxSet .
+ eq builtinSyntaxPreds(S ; SS) 
+  = plugKRule(R{replaceS[kApply(predicateLabel(S),mkVariable(S,S)),trueCt],empty, metadata(pair("predicate",metadataString((S))))})  
+    builtinSyntaxPreds(SS) .
+ eq builtinSyntaxPreds(none) = none .
+
+  op syntaxPreds : SortSet ~> OpDeclSet .
+  eq syntaxPreds(S ; SS) 
+   = (op predicateLabelS(S) : nil -> KLabel [metadata(pair("predicate", metadataString((S))))] .) 
+     syntaxPreds(SS) .
+  eq syntaxPreds((none).SortSet) = none .
+
+
+  op metadataString : Qid -> String .
+  eq metadataString(Q) = replaceAll(string(Q), ("\"" |-> "'", "`" |-> "")) .
+  
+  var Q : Qid .  var Ct : Constant .  var Str Str' Str'' : String .
+  var Ty : Type . var NeTyl : NeTypeList .  var Tyl : TypeList .
+
+  var OPDS : OpDeclSet . var Op : OpDecl .  
+  var AS AS' AS'' : AttrSet . var A : Attr .
+  var SSDS : SubsortDeclSet .  var SS BSS : SortSet . var S S' : Sort .
+  var M Flat : Module .
+  var Mbs : MembAxSet .  var Mb : MembAx . 
+  var Eqs : EquationSet .  var Eq : Equation . 
+  var Trm Trm1 Trm2 : Term .   var CV : Term . var V : Variable .
+  var Trms Trms' : TermList .  var NTrms : NeTermList .  var Cond : Condition .
+  var KRS : KRuleSplit . var KCS : KContextSplit .  var KCfgS : KConfigSplit .
+endm

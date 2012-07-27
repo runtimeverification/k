@@ -1,0 +1,271 @@
+***(
+
+    This file is part of the Maude 2 interpreter.
+	
+	Modified for the K-Framework.
+
+    Copyright 1997-2006 SRI International, Menlo Park, CA 94025, USA.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+***)
+
+---
+---	Maude LTL satisfiability solver and model checker.
+---	Version 2.3.
+---
+
+mod #LTL-INTERFACE is
+  sort #LTLFormula .
+  ops LTLTrue LTLFalse : -> #LTLFormula [ctor format (g o)] .
+endm
+
+mod #LTL is
+  protecting #BOOL .
+  protecting #LTL-INTERFACE .
+
+  --- primitive LTL operators
+  op LTL~_ : #LTLFormula -> #LTLFormula [ctor prec 53 format (r o d)] .
+  op _LTL&&_ : #LTLFormula #LTLFormula -> #LTLFormula [comm ctor gather (E e) prec 55 format (d r o d)] .
+  op _LTL||_ : #LTLFormula #LTLFormula -> #LTLFormula [comm ctor gather (E e) prec 59 format (d r o d)] .
+  op LTLO_ : #LTLFormula -> #LTLFormula [ctor prec 53 format (r o d)] .
+  op _LTLU_ : #LTLFormula #LTLFormula -> #LTLFormula [ctor prec 63 format (d r o d)] .
+  op _LTLR_ : #LTLFormula #LTLFormula -> #LTLFormula [ctor prec 63 format (d r o d)] .
+
+  --- defined LTL operators
+  op _LTL->_ : #LTLFormula #LTLFormula -> #LTLFormula [gather (e E) prec 65 format (d r o d)] .
+  op _LTL<->_ : #LTLFormula #LTLFormula -> #LTLFormula [prec 65 format (d r o d)] .
+  op LTL<>_ : #LTLFormula -> #LTLFormula [prec 53 format (r o d)] .
+  op LTL@_ : #LTLFormula -> #LTLFormula [prec 53 format (r  o d)] .
+  op _LTLW_ : #LTLFormula #LTLFormula -> #LTLFormula [prec 63 format (d r o d)] .
+  op _LTL|->_ : #LTLFormula #LTLFormula -> #LTLFormula [prec 63 format (d r o d)] . --- leads-to
+  op _LTL=>_ : #LTLFormula #LTLFormula -> #LTLFormula [gather (e E) prec 65 format (d r o d)] .
+  op _LTL<=>_ : #LTLFormula #LTLFormula -> #LTLFormula [prec 65 format (d r o d)] .
+
+  vars f g : #LTLFormula .
+
+  eq f LTL-> g = LTL~ f LTL|| g .
+  eq f LTL<-> g = (f LTL-> g) LTL&& (g LTL-> f) .
+  eq LTL<> f = LTLTrue LTLU f .
+  eq LTL@ f = LTLFalse LTLR f .
+  eq f LTLW g = (f LTLU g) LTL|| LTL@ f .
+  eq f LTL|-> g = LTL@(f LTL-> (LTL<> g)) .
+  eq f LTL=> g = LTL@ (f LTL-> g) .
+  eq f LTL<=> g = LTL@ (f LTL<-> g) .
+
+  --- negative normal form
+  eq LTL~ LTLTrue = LTLFalse .
+  eq LTL~ LTLFalse = LTLTrue .
+  eq LTL~ LTL~ f = f .
+  eq LTL~ (f LTL|| g) = LTL~ f LTL&& LTL~ g .
+  eq LTL~ (f LTL&& g) = LTL~ f LTL|| LTL~ g .
+  eq LTL~ LTLO f = LTLO LTL~ f .
+  eq LTL~(f LTLU g) = (LTL~ f) LTLR (LTL~ g) .
+  eq LTL~(f LTLR g) = (LTL~ f) LTLU (LTL~ g) .
+endm
+
+mod #LTL-SIMPLIFIER is
+  including #LTL .
+
+  --- The simplifier is based on:
+  ---   Kousha Etessami and Gerard J. Holzman,
+  ---   "Optimizing Buchi Automata", p153-167, CONCUR 2000, LNCS 1877.
+  --- We use the Maude sort system to do much of the work.
+
+  sorts $TrueLTLFormula $FalseLTLFormula $PureLTLFormula $PE-LTLFormula $PU-LTLFormula .
+  subsort $TrueLTLFormula $FalseLTLFormula < $PureLTLFormula <
+	  $PE-LTLFormula $PU-LTLFormula < #LTLFormula .
+	  
+  op LTLTrue : -> $TrueLTLFormula [ctor ditto] .
+  op LTLFalse : -> $FalseLTLFormula [ctor ditto] .
+  op _LTL&&_ : $PE-LTLFormula $PE-LTLFormula -> $PE-LTLFormula [ctor ditto] .
+  op _LTL&&_ : $PU-LTLFormula $PU-LTLFormula -> $PU-LTLFormula [ctor ditto] .
+  op _LTL&&_ : $PureLTLFormula $PureLTLFormula -> $PureLTLFormula [ctor ditto] .
+  op _LTL||_ : $PE-LTLFormula $PE-LTLFormula -> $PE-LTLFormula [ctor ditto] .
+  op _LTL||_ : $PU-LTLFormula $PU-LTLFormula -> $PU-LTLFormula [ctor ditto] .
+  op _LTL||_ : $PureLTLFormula $PureLTLFormula -> $PureLTLFormula [ctor ditto] .
+  op LTLO_ : $PE-LTLFormula -> $PE-LTLFormula [ctor ditto] .
+  op LTLO_ : $PU-LTLFormula -> $PU-LTLFormula [ctor ditto] .
+  op LTLO_ : $PureLTLFormula -> $PureLTLFormula [ctor ditto] .
+  op _LTLU_ : $PE-LTLFormula $PE-LTLFormula -> $PE-LTLFormula [ctor ditto] .
+  op _LTLU_ : $PU-LTLFormula $PU-LTLFormula -> $PU-LTLFormula [ctor ditto] .
+  op _LTLU_ : $PureLTLFormula $PureLTLFormula -> $PureLTLFormula [ctor ditto] .
+  op _LTLU_ : $TrueLTLFormula #LTLFormula -> $PE-LTLFormula [ctor ditto] .
+  op _LTLU_ : $TrueLTLFormula $PU-LTLFormula -> $PureLTLFormula [ctor ditto] .
+  op _LTLR_ : $PE-LTLFormula $PE-LTLFormula -> $PE-LTLFormula [ctor ditto] .
+  op _LTLR_ : $PU-LTLFormula $PU-LTLFormula -> $PU-LTLFormula [ctor ditto] .
+  op _LTLR_ : $PureLTLFormula $PureLTLFormula -> $PureLTLFormula [ctor ditto] .
+  op _LTLR_ : $FalseLTLFormula #LTLFormula -> $PU-LTLFormula [ctor ditto] .
+  op _LTLR_ : $FalseLTLFormula $PE-LTLFormula -> $PureLTLFormula [ctor ditto] .
+
+  vars p q r s : #LTLFormula .
+  var pe : $PE-LTLFormula .
+  var pu : $PU-LTLFormula .
+  var pr : $PureLTLFormula .
+
+  --- Rules 1, 2 and 3; each with its dual.
+  eq (p LTLU r) LTL&& (q LTLU r) = (p LTL&& q) LTLU r .
+  eq (p LTLR r) LTL|| (q LTLR r) = (p LTL|| q) LTLR r .
+  eq (p LTLU q) LTL|| (p LTLU r) = p LTLU (q LTL|| r) .
+  eq (p LTLR q) LTL&& (p LTLR r) = p LTLR (q LTL&& r) .
+  eq LTLTrue LTLU (p LTLU q) = LTLTrue LTLU q .
+  eq LTLFalse LTLR (p LTLR q) = LTLFalse LTLR q .
+
+  --- Rules 4 and 5 do most of the work.
+  eq p LTLU pe = pe .
+  eq p LTLR pu = pu .
+
+  --- An extra rule in the same style.
+  eq LTLO pr = pr .
+
+  --- We also use the rules from:
+  ---   Fabio Somenzi and Roderick Bloem,
+  ---	"Efficient Buchi Automata from LTL LTLFormulae",
+  ---   p247-263, CAV 2000, LNCS 1633.
+  --- that are not subsumed by the previous system.
+
+  --- Four pairs of duals.
+  eq LTLO p LTL&& LTLO q = LTLO (p LTL&& q) .
+  eq LTLO p LTL|| LTLO q = LTLO (p LTL|| q) .
+  eq LTLO p LTLU LTLO q = LTLO (p LTLU q) .
+  eq LTLO p LTLR LTLO q = LTLO (p LTLR q) .
+  eq LTLTrue LTLU LTLO p = LTLO (LTLTrue LTLU p) .
+  eq LTLFalse LTLR LTLO p = LTLO (LTLFalse LTLR p) .
+  eq (LTLFalse LTLR (LTLTrue LTLU p)) LTL|| (LTLFalse LTLR (LTLTrue LTLU q)) = LTLFalse LTLR (LTLTrue LTLU (p LTL|| q)) .
+  eq (LTLTrue LTLU (LTLFalse LTLR p)) LTL&& (LTLTrue LTLU (LTLFalse LTLR q)) = LTLTrue LTLU (LTLFalse LTLR (p LTL&& q)) .
+
+  --- <= relation on formula
+  op _<=_ : #LTLFormula #LTLFormula -> #Bool [prec 75] .
+
+  eq p <= p = true .
+  eq LTLFalse <= p  = true .
+  eq p <= LTLTrue = true .
+
+  ceq p <= (q LTL&& r) = true if (p <= q) /\ (p <= r) .
+  ceq p <= (q LTL|| r) = true if p <= q .
+  ceq (p LTL&& q) <= r = true if p <= r .
+  ceq (p LTL|| q) <= r = true if (p <= r) /\ (q <= r) .
+
+  ceq p <= (q LTLU r) = true if p <= r .
+  ceq (p LTLR q) <= r = true if q <= r .
+  ceq (p LTLU q) <= r = true if (p <= r) /\ (q <= r) .
+  ceq p <= (q LTLR r) = true if (p <= q) /\ (p <= r) .
+  ceq (p LTLU q) <= (r LTLU s) = true if (p <= r) /\ (q <= s) .
+  ceq (p LTLR q) <= (r LTLR s) = true if (p <= r) /\ (q <= s) .
+
+  --- condition rules depending on <= relation
+  ceq p LTL&& q = p if p <= q .
+  ceq p LTL|| q = q if p <= q .
+  ceq p LTL&& q = LTLFalse if p <= LTL~ q .
+  ceq p LTL|| q = LTLTrue if LTL~ p <= q .
+  ceq p LTLU q = q if p <= q .
+  ceq p LTLR q = q if q <= p .
+  ceq p LTLU q = LTLTrue LTLU q if p =/=Universal LTLTrue /\ LTL~ q <= p .
+  ceq p LTLR q = LTLFalse LTLR q if p =/=Universal LTLFalse /\ q <= LTL~ p .
+  ceq p LTLU (q LTLU r) = q LTLU r if p <= q .
+  ceq p LTLR (q LTLR r) = q LTLR r if q <= p .
+endm
+
+mod #SAT-SOLVER is
+  protecting #LTL .
+
+  --- formula lists and results
+  sorts #LTLFormulaList #SatSolveResult #TautCheckResult .
+  subsort #LTLFormula < #LTLFormulaList .
+  subsort #Bool < #SatSolveResult #TautCheckResult .
+  op LTLnil : -> #LTLFormulaList [ctor] .
+  op _LTL;_ : #LTLFormulaList #LTLFormulaList -> #LTLFormulaList [ctor assoc id: LTLnil] .
+  op LTLmodel : #LTLFormulaList #LTLFormulaList -> #SatSolveResult [ctor] .
+
+  op LTLsatSolve : #LTLFormula ~> #SatSolveResult
+	[special (
+	   id-hook SatSolverSymbol
+	   op-hook trueSymbol           (LTLTrue : ~> #LTLFormula)
+	   op-hook falseSymbol		(LTLFalse : ~> #LTLFormula)
+	   op-hook notSymbol		(LTL~_ : #LTLFormula ~> #LTLFormula)
+	   op-hook nextSymbol		(LTLO_ : #LTLFormula ~> #LTLFormula)
+	   op-hook andSymbol		(_LTL&&_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook orSymbol		(_LTL||_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook untilSymbol		(_LTLU_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook releaseSymbol	(_LTLR_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook formulaListSymbol
+		   (_LTL;_ : #LTLFormulaList #LTLFormulaList ~> #LTLFormulaList)
+	   op-hook nilFormulaListSymbol	(LTLnil : ~> #LTLFormulaList)
+	   op-hook modelSymbol
+		   (LTLmodel : #LTLFormulaList #LTLFormulaList ~> #SatSolveResult)
+	   term-hook falseTerm		(false)
+	 )] .
+
+  op LTLcounterexample : #LTLFormulaList #LTLFormulaList -> #TautCheckResult [ctor] .
+  op LTLtautCheck : #LTLFormula ~> #TautCheckResult .
+  op LTL$invert : #SatSolveResult -> #TautCheckResult .
+
+  var F : #LTLFormula .
+  vars L C : #LTLFormulaList .
+  eq LTLtautCheck(F) = LTL$invert(LTLsatSolve(LTL~ F)) .
+  eq LTL$invert(false) = true .
+  eq LTL$invert(LTLmodel(L, C)) = LTLcounterexample(L, C) .
+endm
+
+mod #MODEL-CHECKER-INTERFACE is
+  protecting #BOOL .
+  sorts #ModelCheckerState #Prop .
+  sort #ModelCheckResult .
+
+  op _LTL|=_ : #ModelCheckerState #Prop -> #Bool [frozen] .
+
+endm
+
+mod #MODEL-CHECKER is
+  protecting #QID .
+  including #MODEL-CHECKER-INTERFACE .
+  including #LTL .
+  subsort #Prop < #LTLFormula .
+
+  --- transitions and results
+  sorts #RuleName #Transition #TransitionList .
+  subsort #Qid < #RuleName .
+  subsort #Transition < #TransitionList .
+  subsort #Bool < #ModelCheckResult .
+  ops LTLunlabeled LTLdeadlock : -> #RuleName .
+  op LTL{_,_} : #ModelCheckerState #RuleName -> #Transition [ctor] .
+  op LTLnil : -> #TransitionList [ctor] .
+  op _LTL_ : #TransitionList #TransitionList -> #TransitionList [ctor assoc id: LTLnil] .
+  op LTLcounterexample : #TransitionList #TransitionList -> #ModelCheckResult [ctor] .
+
+  op modelCheck : #ModelCheckerState #LTLFormula ~> #ModelCheckResult
+	[special (
+	   id-hook ModelCheckerSymbol
+	   op-hook trueSymbol           (LTLTrue : ~> #LTLFormula)
+	   op-hook falseSymbol		(LTLFalse : ~> #LTLFormula)
+	   op-hook notSymbol		(LTL~_ : #LTLFormula ~> #LTLFormula)
+	   op-hook nextSymbol		(LTLO_ : #LTLFormula ~> #LTLFormula)
+	   op-hook andSymbol		(_LTL&&_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook orSymbol		(_LTL||_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook untilSymbol		(_LTLU_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+	   op-hook releaseSymbol	(_LTLR_ : #LTLFormula #LTLFormula ~> #LTLFormula)
+           op-hook satisfiesSymbol      (_LTL|=_ : #ModelCheckerState #LTLFormula ~> #Bool)
+	   op-hook qidSymbol		(<Qids> : ~> #Qid)
+	   op-hook unlabeledSymbol	(LTLunlabeled : ~> #RuleName)
+	   op-hook deadlockSymbol	(LTLdeadlock : ~> #RuleName)
+	   op-hook transitionSymbol	(LTL{_,_} : #ModelCheckerState #RuleName ~> #Transition)
+	   op-hook transitionListSymbol
+		   (_LTL_ : #TransitionList #TransitionList ~> #TransitionList)
+	   op-hook nilTransitionListSymbol	(LTLnil : ~> #TransitionList)
+	   op-hook counterexampleSymbol
+		   (LTLcounterexample : #TransitionList #TransitionList ~> #ModelCheckResult)
+	   term-hook trueTerm		(true)
+	 )] .
+endm

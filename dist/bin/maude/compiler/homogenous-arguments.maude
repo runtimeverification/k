@@ -1,0 +1,227 @@
+fmod HOMOGENOUS-ARGUMENTS is
+ including META-TERM-EXTRAS .
+ including META-MODULE-EXTRAS .
+ including META-LEVEL-EXTRAS .
+ including META-K-MODULE .
+ including META-K-WRAPPERS .
+ including META-K-LEAST-SORTS .
+ including PARSE-METADATA .
+
+ var Q Q' : Qid . var T T' T'' : Type . var Tl Tl' : TypeList . 
+ var N : Nat . var Nl : NatList .
+ var MS : ModuleSet .  var M Flat : Module .
+ vars Mbs : MembAxSet . var Mb : MembAx .
+ var Eqs : EquationSet . var Eq : Equation .
+ var Rls : RuleSet . var Rl : Rule .
+ var Trms : TermList . vars T1 T2 Trm : Term .  var Cond : Condition .
+ var C : Constant . var V : Variable .
+ vars OPDS Wrappers Homogenous : OpDeclSet . var Op Op' : OpDecl .
+ var AS AS' : AttrSet .
+ var OPDM : OpDeclWrapListMap .  var WrapList : WrapList .
+
+ op homogenousArgsImports : ModuleSet ~> ImportList .
+ eq homogenousArgsImports(M MS) = homogenousArgsImports(MS, getName(M), pseudoKOps(getOps(M))) .
+
+ op homogenousArgsImports : ModuleSet Qid OpDeclSet ~> ImportList .
+ eq homogenousArgsImports(MS, Q, OPDS) 
+  = if OPDS == getWrappers(OPDS)
+    then homogenousArgsImports(MS)
+    else homogenousArgsImports(MS) (including Q .) 
+    fi [print Q "(" OPDS ")" ] .
+ eq homogenousArgsImports(empty) = nil .
+
+ op makeHomogenousArgs : Qid Module Module ModuleSet ~> Module .
+ eq makeHomogenousArgs(Q, M, Flat, MS)
+  = makeHomogenousArgs(setName(addImports((including 'K-WRAPPERS .), suffixImports(Q,M,homogenousArgsImports(MS))), qid(string(getName(M)) + string(Q))), Flat, pseudoKOps(getOps(Flat))) .
+
+ op makeHomogenousArgs : Module Module OpDeclSet ~> Module .
+ eq makeHomogenousArgs(M, Flat, OPDS) 
+  = makeHomogenousArgs(M, Flat, OPDS, getWrappers(OPDS)) .
+
+ op makeHomogenousArgs : Module Module OpDeclSet OpDeclSet ~> Module .
+ eq makeHomogenousArgs(M, Flat, OPDS, Wrappers) 
+  = makeHomogenousArgs(M, Flat, processOps(Flat, removeOps(OPDS, Wrappers), builtin-wrappers Wrappers)) .
+
+ op makeHomogenousArgs : Module Module OpDeclWrapListMap ~> Module .
+ eq makeHomogenousArgs(M, Flat, homogenous(Homogenous) OPDM) 
+  = applyHomogenousArgs(addOps(localOps(Homogenous,getOps(M)), removeOps(M, getKeys(OPDM))), Flat, OPDM) .
+
+
+ op localOps : OpDeclSet OpDeclSet ~> OpDeclSet .
+ceq localOps((op Q : Tl -> T [AS] .) Homogenous, (op Q : Tl' -> T [AS'] .) OPDS)
+  = (op Q : Tl -> T [AS] .) localOps(Homogenous, OPDS) 
+ if arity(Tl) = arity(Tl') .
+ eq localOps(Homogenous, OPDS) = none [owise] .
+
+ op applyHomogenousArgs : Module  Module OpDeclWrapListMap ~> Module .
+ eq applyHomogenousArgs(M, Flat, OPDM)
+  = 
+   setRls(
+   setEqs(
+   setMbs(
+       M 
+    , homogenousMbs(Flat, getOps(Flat), OPDM, getMbs(M)))
+    , homogenousEqs(Flat, getOps(Flat), OPDM, getEqs(M)))
+    , homogenousRls(Flat, getOps(Flat), OPDM, getRls(M)))
+  [print OPDM] .
+
+ op homogenousMbs : Module OpDeclSet OpDeclWrapListMap MembAxSet ~> MembAxSet .
+ eq homogenousMbs(M, OPDS, OPDM, Mbs Mb)
+  =  homogenousMbs(M, OPDS, OPDM, Mbs) homogenousMb(Mb, M, OPDS, OPDM) .
+ eq homogenousMbs(M, OPDS, OPDM, none) = none .
+
+ op homogenousMb : MembAx Module OpDeclSet OpDeclWrapListMap ~> MembAx .
+ eq homogenousMb((mb T1 : T [AS] .), M, OPDS, OPDM)
+  = (mb homogenousT(T1, getKind(M,T), M, OPDS, OPDM) : T [AS] .) .
+ eq homogenousMb((cmb T1 : T if Cond [AS] .), M, OPDS, OPDM)
+  = (cmb homogenousT(T1, getKind(M,T), M, OPDS, OPDM) : T if Cond [AS] .) .
+
+
+ op homogenousEqs : Module OpDeclSet OpDeclWrapListMap EquationSet ~> EquationSet .
+ eq homogenousEqs(M, OPDS, OPDM, Eqs Eq)
+  =  homogenousEqs(M, OPDS, OPDM, Eqs) homogenousEq(Eq, M, OPDS, OPDM) .
+ eq homogenousEqs(M, OPDS, OPDM, none) = none .
+
+ op homogenousEq : Equation Module OpDeclSet OpDeclWrapListMap ~> Equation .
+ eq homogenousEq((eq T1 = T2 [AS] .), M, OPDS, OPDM)
+  = (eq homogenousT(T1, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) 
+      = homogenousT(T2, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) [AS] .) .
+ eq homogenousEq((ceq T1 = T2 if Cond [AS] .), M, OPDS, OPDM)
+  = (ceq homogenousT(T1, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) 
+       = homogenousT(T2, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) 
+      if homogenousCond(Cond, M, OPDS, OPDM) [AS] .) .
+
+ op homogenousRls : Module OpDeclSet OpDeclWrapListMap RuleSet ~> RuleSet .
+ eq homogenousRls(M, OPDS, OPDM, Rls Rl)
+  =  homogenousRls(M, OPDS, OPDM, Rls) homogenousRl(Rl, M, OPDS, OPDM) .
+ eq homogenousRls(M, OPDS, OPDM, none) = none .
+
+ op homogenousRl : Rule Module OpDeclSet OpDeclWrapListMap ~> Rule .
+ eq homogenousRl((rl T1 => T2 [AS] .), M, OPDS, OPDM)
+  = (rl homogenousT(T1, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) 
+     => homogenousT(T2, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) [AS] .) .
+ eq homogenousRl((crl T1 => T2 if Cond [AS] .), M, OPDS, OPDM)
+  = (crl homogenousT(T1, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) 
+      => homogenousT(T2, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) 
+      if homogenousCond(Cond, M, OPDS, OPDM) [AS] .) .
+      
+ op homogenousCond : Condition Module OpDeclSet OpDeclWrapListMap ~> Condition .
+ eq homogenousCond(T1 = T2 /\ Cond, M, OPDS, OPDM)
+  = homogenousT(T1, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) = homogenousT(T2, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM)
+    /\ homogenousCond(Cond, M, OPDS, OPDM) .
+ eq homogenousCond(T1 := T2 /\ Cond, M, OPDS, OPDM)
+  = homogenousT(T1, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) := homogenousT(T2, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM)
+    /\ homogenousCond(Cond, M, OPDS, OPDM) .
+ eq homogenousCond(T1 => T2 /\ Cond, M, OPDS, OPDM)
+  = homogenousT(T1, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM) => homogenousT(T2, getKind(M,leastSortsT(M,T1)), M, OPDS, OPDM)
+    /\ homogenousCond(Cond, M, OPDS, OPDM) .
+ eq homogenousCond(Trm : T /\ Cond, M, OPDS, OPDM)
+  = homogenousT(Trm, getKind(M,T), M, OPDS, OPDM) : T
+    /\ homogenousCond(Cond, M, OPDS, OPDM) .
+ eq homogenousCond(nil, M, OPDS, OPDM) = nil .
+ 
+
+ op homogenousTs : TermList TypeList Module OpDeclSet OpDeclWrapListMap ~> TermList  .
+ eq homogenousTs((Trm,Trms), T Tl, M, OPDS, OPDM)
+  = homogenousT(Trm,T,M,OPDS,OPDM), homogenousTs(Trms,Tl, M,OPDS,OPDM) .
+ eq homogenousTs(empty,nil,M,OPDS,OPDM) = empty .
+
+ op homogenousTs : TermList TypeList Module OpDeclSet OpDeclWrapListMap WrapList Nat 
+    ~> TermList .
+ eq homogenousTs(Trms, Tl, M, OPDS, OPDM, nil, N) 
+  = homogenousTs(Trms, Tl, M, OPDS, OPDM) .
+---(
+ceq homogenousTs((Q[T1,T2],Trms),T Tl, M, OPDS, OPDM, ([N : Q'], WrapList), N)
+  = Q[Q'[homogenousT(T1,T,M, OPDS,OPDM)],Q'[homogenousT(T2,T,M, OPDS,OPDM)]],
+    homogenousTs(Trms, Tl, M, OPDS, OPDM, WrapList, s N)
+ if Q = replaceS .
+---)
+ eq homogenousTs((Trm,Trms),T Tl, M, OPDS, OPDM, ([N : Q], WrapList), N)
+  = Q[homogenousT(Trm,T,M, OPDS,OPDM)], 
+    homogenousTs(Trms, Tl, M, OPDS, OPDM, WrapList, s N) .
+--- if topOpSymbol(Trm) =/= replaceS .
+ eq homogenousTs((Trm,Trms),T Tl, M, OPDS, OPDM, WrapList, N)
+  = homogenousT(Trm,T,M, OPDS,OPDM), 
+    homogenousTs(Trms, Tl, M, OPDS, OPDM, WrapList, s N) [owise] .
+
+ op homogenousT : Term Type Module OpDeclSet OpDeclWrapListMap ~> Term .
+ eq homogenousT(C, T, M, OPDS, OPDM ) = C .
+ eq homogenousT(V, T, M, OPDS, OPDM) = V .
+ceq homogenousT(Q[T1, T2], T, M, OPDS, OPDM)
+  = Q[homogenousT(T1,leastSortsT(M,T1),M, OPDS, OPDM),homogenousT(T2,leastSortsT(M,T2),M, OPDS, OPDM)]
+  if Q = replaceS .
+ eq homogenousT('if_then_else_fi[Trms],T,M,OPDS,OPDM)
+  = 'if_then_else_fi[homogenousTs(Trms, Bool T T, M, OPDS,OPDM)] .
+--- eq homogenousT('_==Bool_[T1,T2],T,M,OPDS,OPDM)
+---  = '_==Bool_[homogenousTs((T1,T2), leastSort(M,T1) leastSort(M, T2), M, OPDS,OPDM)] .
+ eq homogenousT(Q[Trms], T, M, OPDS, OPDM)
+  = homogenousT(Q[Trms], T, M, OPDS, OPDM, findOp(M, OPDS,Q, leastSortsTs(M, Trms), T)) [owise] .
+
+
+ op homogenousT : Term Type Module OpDeclSet OpDeclWrapListMap OpDecl ~> Term .
+--- subsorted terms becoming klabels
+ eq homogenousT(Q[Trms], T, M, OPDS, OPDM, Op)
+  = Q[homogenousTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, OPDM, OPDM[Op], 1)] .
+
+
+ sort WrapList .
+ op [_:_] : Nat Qid -> WrapList .
+ op _,_ : WrapList WrapList -> WrapList [assoc id: nil] .
+ op nil : -> WrapList .
+
+ sort OpDeclWrapListMap .
+ op _|->_ : OpDecl WrapList -> OpDeclWrapListMap .
+ op __ : OpDeclWrapListMap OpDeclWrapListMap -> OpDeclWrapListMap [assoc comm id: empty] .
+ op homogenous_ : OpDeclSet -> OpDeclWrapListMap .
+ op empty : -> OpDeclWrapListMap .
+
+ op _[_] : OpDeclWrapListMap OpDecl -> WrapList .
+ eq ((Op |-> WrapList) OPDM)[Op] = WrapList .
+ eq OPDM[Op] = nil [owise] .
+
+ op getKeys : OpDeclWrapListMap ~> OpDeclSet .
+ eq getKeys((Op |-> WrapList) OPDM) = Op getKeys(OPDM) .
+ eq getKeys(empty) = none .
+
+ op processOps : Module OpDeclSet OpDeclSet ~> OpDeclWrapListMap .
+ eq processOps(M, OPDS, Wrappers) 
+  = processOps(M, OPDS, Wrappers, none) .
+ 
+ op processOps : Module OpDeclSet OpDeclSet OpDeclSet ~> OpDeclWrapListMap . 
+ eq processOps(M, Op OPDS, Wrappers, Homogenous)
+  = processOps(M, OPDS, Op, Wrappers, Homogenous, notKSorts(Op)) .
+ eq processOps(M, none, Wrappers, Homogenous) = homogenous(Homogenous) .
+
+ op notKSorts : OpDecl ~> NatList .
+ eq notKSorts(op Q : Tl -> T [AS] .) = notMatchingSortsList(Tl,K ; KResult ; KItem) .
+ 
+ op processOps : Module OpDeclSet OpDecl OpDeclSet OpDeclSet NatList ~> OpDeclWrapListMap . 
+ eq processOps(M, OPDS, Op, Wrappers, Homogenous, nil)
+  = processOps(M, OPDS, Wrappers, Homogenous) .
+ eq processOps(M, OPDS, Op, Wrappers, Homogenous, Nl)
+  = processOps(M, OPDS, Op, Wrappers, Homogenous, processOp(M,Op,Wrappers,Nl)) .
+
+ op processOps : Module OpDeclSet OpDecl OpDeclSet OpDeclSet OpDeclWrapListMap ~> OpDeclWrapListMap . 
+ eq processOps(M, OPDS, Op, Wrappers, Homogenous, Op' |-> WrapList)
+  = processOps(M, OPDS, Wrappers, Homogenous Op') Op |-> WrapList .
+ 
+ op processOp : Module OpDecl OpDeclSet NatList ~> OpDeclWrapListMap .
+ eq processOp(M,(op Q : Tl -> T [AS] .), Wrappers, Nl)
+  = (op Q : dup(K,arity(Tl)) -> T [AS] .) |-> assignWrappers(M,Tl,Nl,Wrappers) .
+
+ op assignWrappers : Module TypeList NatList OpDeclSet ~> WrapList .
+ eq assignWrappers(M,Tl,Nl,Wrappers) = assignWrappers(M,Tl,Nl,Wrappers,1) .
+
+ op assignWrappers : Module TypeList NatList OpDeclSet Nat ~> WrapList .
+ eq assignWrappers(M,Tl,nil,Wrappers,N) = nil .
+ eq assignWrappers(M,T Tl,N Nl,Wrappers,N) 
+  =  [N : getWrapper(M, T, Wrappers)], assignWrappers(M,Tl,Nl,Wrappers,s N) .
+ eq assignWrappers(M,T Tl,Nl,Wrappers,N)
+  = assignWrappers(M,Tl,Nl,Wrappers,s N) [owise] .
+ 
+ op getWrapper : Module Type OpDeclSet ~> Qid .
+ceq getWrapper(M,T,(op Q : T' -> T'' [AS] .) Wrappers) = Q
+ if sortLeq(M,T,T') .
+endfm
+
+

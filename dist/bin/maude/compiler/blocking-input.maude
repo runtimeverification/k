@@ -1,0 +1,86 @@
+fmod BLOCKING-INPUT is
+  including META-MODULE-EXTRAS .
+  including K-META-CONFIG .
+  including META-ANONYMOUS-VARIABLE . 
+  including K-META-OPEN-CELLS .
+  including INT .
+  including META-K-STREAMS .
+  including PARSE-METADATA .
+  var M : Module .  var T T' T1 T2 : Term . var O Q : Qid .  var Ct : Constant . 
+  var Tl Tl' : TermList .  var N : Nat .  var Ty : Type .
+  var Ss : SortSet .  var V : Variable .  var B B' : Bool .
+  var Mbs : MembAxSet .  var Mb : MembAx . var SC : SplitCell .  var SC' : [SplitCell] .
+  var Rls : RuleSet . var Rl : Rule .
+  var Eqs : EquationSet . var Eq : Equation .  var AS : AttrSet .
+  var Cond : Condition  .
+  var KRS : [KRuleSplit] .
+  
+  op blockingInput : Qid Module Qid ~> Module .
+  var IL : ImportList . var SSDS : SubsortDeclSet . 
+  eq blockingInput(Q, M, O) = setName(setMbs(M, blockingInputMbs(getMbs(M),O)),Q) [print "Generating blocking input. Input cell: " O] . 
+  eq blockingInput(Q,M,O:[Qid]) = M [owise] .
+
+  var Trm Cxt : Term . var Str : String .
+
+  op getInputCell : TermList ~> Qid .
+  eq getInputCell((T,Tl)) = getInputCell((T,Tl),splitKCell(T)) .
+  op getInputCell : TermList SplitCell ~> Term .
+  eq getInputCell((T,Tl),SC')
+   = if SC' :: SplitCell then if getConnection(SC') == "stdin" then getName(SC') else getInputCell((Tl,getContents(SC'))) fi  else $getInputCell((T,Tl)) fi [print SC'] .
+
+  op $getInputCell : TermList ~> Term .
+  eq $getInputCell((O[Tl'],Tl)) = getInputCell((Tl,Tl')) .
+  eq $getInputCell((V,Tl)) = getInputCell(Tl) .
+  eq $getInputCell((Ct,Tl)) = getInputCell(Tl) .
+
+  op blockingInputMbs : MembAxSet Qid ~> MembAxSet .
+  eq blockingInputMbs(Mb Mbs, Q)
+   = blockingInputMbs(Mbs, Q)  blockingInputMb(Mb, Q, splitKRule(Mb)) .
+  eq blockingInputMbs(none, Q) = none .
+
+  op blockingInputMb : MembAx Qid KRuleSplit ~> MembAxSet .
+  eq blockingInputMb(Mb, Q, KRS)
+   = Mb if KRS :: KRuleSplit then blockingInputKR(KRS, findCell(getContents(KRS),Q)) else none fi [print "mb: " Mb] .
+
+  op blockingInputKR : KRuleSplit Term ~> MembAxSet .
+  eq blockingInputKR(KRS,T) = blockingInputKR(KRS,splitKCell(T)) .
+  eq blockingInputKR(KRS,T:[Term]) = none [owise print "Could not find input cell in " KRS ". Obtained " T:[Term]] .
+
+  
+  op blockingInputKR : KRuleSplit SplitCell ~> MembAxSet .
+  eq blockingInputKR(KRS, SC) 
+   = blockingInputKR(KRS, getName(SC), getEllipses(SC), getContents(SC)) .
+
+  op blockingInputKR : KRuleSplit Qid Ellipses Term ~> MembAxSet .
+ ceq blockingInputKR(KRS, Q, right, T) 
+   = plugKRule(setContents(KRS, blockingInputTerm(getContents(KRS), Q, getType(V)))) 
+  if '_=>_['ListItem[V],'..List] := T .
+---  if '_=>_['ListItem['_`(_`)['#_[V],'.List`{K`}.List`{K`}]],'..List] := T .
+  eq  blockingInputKR(KRS, Q, E:Ellipses, T) = none [owise print T " or " E:Ellipses " did not match "] . 
+
+  op blockingInputTerm : Term Qid Type ~> Term .
+  eq blockingInputTerm(T,Q,Ty) = blockingInputTerm(T,Q,Ty,splitKCell(T)) .
+  
+  op blockingInputTerm : Term Qid Type SplitCell ~> Term .
+  eq blockingInputTerm(T,Q,Ty,SC') = if SC' :: SplitCell then if getName(SC') == Q then plugCell(setContents(SC',blockingInput(Ty))) else plugCell(setContents(SC',blockingInputTerm(getContents(SC'), Q, Ty))) fi else $blockingInputTerm(T,Q,Ty) fi .
+
+  op $blockingInputTerm : Term Qid Type ~> Term .
+  eq $blockingInputTerm(Ct,Q,Ty) = Ct .
+  eq $blockingInputTerm(V,Q,Ty) = V .
+ ceq $blockingInputTerm(O[T1,T2],Q,Ty) = T1 
+  if O = replaceS .
+  eq $blockingInputTerm(O[Tl],Q,Ty) = O[$blockingInputTermL(Tl,Q,Ty)] [owise] .
+
+  op $blockingInputTermL : TermList Qid Type ~> TermList .
+  eq $blockingInputTermL((T,Tl),Q,Ty) = blockingInputTerm(T,Q,Ty), $blockingInputTermL(Tl,Q,Ty) .
+  eq $blockingInputTermL(empty,Q,Ty) = empty .
+
+  op blockingInput : Type -> Term .
+  eq blockingInput(Ty) = ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))] .
+
+  op parseTerm : String Term -> Term .
+  eq parseTerm(Str:String,T)
+   = '#parse`(_`,_`)[stringCt(Str:String),nilK] .
+
+
+endfm

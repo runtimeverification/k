@@ -1,19 +1,18 @@
 // Calculates in s the total number of prime numbers up to upTo.
 
-
  var upTo, s, n, i, q, t, x, y, z, r;
  upTo := 100;
  s := 0;
  n := 2;
- while n <= upTo do (
+ while (n <= upTo) do (
    i := 2;
    q := n / i;
    t := 1;
-   while i<=q and 1<=t do (
+   while (i<=q and 1<=t) do (
      x := i;
      y := q;
      z := 0;
-     while not x <= 0 do (
+     while not(x <= 0) do (
        q := x / 2;
        r := q + q + 1;
        if r<=x then z := z+y else skip;
@@ -28,6 +27,5 @@
    if 1<=t then s := s + 1 else skip;
    n := n + 1
  )
-
 
 // s should be 25 when upTo in initialized to 100

@@ -1,7 +1,11 @@
+// This program calculates in sum the sum of numbers from 1 to n.
+
 var n, sum;
 n := 100;
 sum:=0;
-while not n <= 0 do (
+while not(n <= 0) do (
   sum := sum + n;
   n := n + -1
 )
+
+// sum should be 5050 when n is 100

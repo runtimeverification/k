@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+java -jar -Xmx1024m "$(dirname $0)/java/JKrun.jar" "$@"

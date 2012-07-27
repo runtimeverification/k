@@ -1,0 +1,68 @@
+fmod ANONYMOUS-VARIABLES is
+  including META-MODULE-EXTRAS .
+  including META-TERM-EXTRAS .
+  including META-ANONYMOUS-VARIABLE .
+  var M : Module . var Q : Qid .
+  var Mbs : MembAxSet . var Mb : MembAx .  
+  var Eqs : EquationSet . var Eq : Equation .
+  var Rls : RuleSet . var Rl : Rule .
+  var Trm Trm' T : Term . vars Tl Tl' : TermList .  var Type : Type .
+  var V : Variable . var Ct : Constant . var Cond : Condition .
+  var N : Nat .  var AS : AttrSet .  var TN : TermsNat .
+  op resolveAnonymousVars : Qid Module ~> Module .
+  eq resolveAnonymousVars(Q,M) = setName(setRls(setEqs(setMbs(M,resolveVarsMbs(M,getMbs(M))),resolveVarsEqs(M,getEqs(M))),resolveVarsRls(M,getRls(M))), Q) .
+
+  op resolveVarsMbs : Module MembAxSet ~> MembAxSet .
+  eq resolveVarsMbs(M, none) = none .
+  eq resolveVarsMbs(M, Mbs Mb) = resolveVarsMbs(M, Mbs) resolveVarsMb(M, Mb) .
+
+
+  op resolveVarsEqs : Module EquationSet ~> EquationSet .
+  eq resolveVarsEqs(M, none) = none .
+  eq resolveVarsEqs(M, Eqs Eq) = resolveVarsEqs(M, Eqs) resolveVarsEq(M, Eq) .
+
+  op resolveVarsRls : Module RuleSet ~> RuleSet .
+  eq resolveVarsRls(M, none) = none .
+  eq resolveVarsRls(M, Rls Rl) = resolveVarsRls(M, Rls) resolveVarsRl(M, Rl) .
+
+  op resolveVarsMb : Module MembAx ~> MembAx .
+  eq resolveVarsMb(M, (mb Trm : Type [AS] .))
+   = (mb resolveVarsT(M,Trm) : Type [AS] .) .
+  eq resolveVarsMb(M, (cmb Trm : Type if Cond [AS] .))
+   = (cmb resolveVarsT(M,Trm) : Type if Cond [AS] .) .
+  op resolveVarsEq : Module Equation ~> Equation .
+  eq resolveVarsEq(M, (eq Trm = Trm' [AS] .))
+   = (eq resolveVarsT(M,Trm) = Trm' [AS] .) .
+  eq resolveVarsEq(M, (ceq Trm = Trm' if Cond [AS] .))
+   = (ceq resolveVarsT(M,Trm) = Trm' if Cond [AS] .) .
+  op resolveVarsRl : Module Rule ~> Rule .
+  eq resolveVarsRl(M, (rl Trm => Trm' [AS] .))
+   = (rl resolveVarsT(M,Trm) => Trm' [AS] .) .
+  eq resolveVarsRl(M, (crl Trm => Trm' if Cond [AS] .))
+   = (crl resolveVarsT(M,Trm) => Trm' if Cond [AS] .) .
+
+  op resolveVarsT : Module Term ~> Term .
+  eq resolveVarsT(M, T) 
+   = getTerm(resolveVarsT(M,T,1 + countTerms(getVars(T)))) .
+
+  sort TermsNat . 
+  op {_,_} : TermList Nat -> TermsNat .
+  op getTerm : TermsNat ~> Term .
+  eq getTerm({T,N}) = T .
+
+  op resolveVarsTl : Module TermList TermsNat ~> TermsNat .
+  eq resolveVarsTl(M, empty, TN) = TN .
+  eq resolveVarsTl(M, (T,Tl), {Tl',N}) = resolveVarsTl(M, Tl, resolveVarsT(M,T,N), Tl') .
+
+  op resolveVarsTl : Module TermList TermsNat TermList ~> TermsNat .
+  eq resolveVarsTl(M, Tl, {T,N}, Tl') = resolveVarsTl(M,Tl,{(Tl',T),N}) .
+
+  op resolveVarsT : Module Term Nat ~> TermsNat .
+  eq resolveVarsT(M, Q[Tl], N)
+   = resolveVarsT(M, Q, resolveVarsTl(M,Tl,{empty,N})) .
+  eq resolveVarsT(M, V, N) = if isAnyVar(V) then {anyVar(getName(V),N,getType(V)), N + 1} else {V,N} fi .
+  eq resolveVarsT(M, Ct, N) = {Ct,N}  .
+
+  op resolveVarsT : Module Qid TermsNat ~> TermsNat .
+  eq resolveVarsT(M, Q, {Tl,N}) = {Q[Tl],N} .
+endfm

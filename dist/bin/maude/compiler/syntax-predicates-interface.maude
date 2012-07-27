@@ -1,0 +1,39 @@
+load syntax-predicates
+
+mod SYNTAX-PREDICATES-META is
+  including SYNTAX-PREDICATES .
+  including META-LEVEL-EXTRAS .
+  including COMPILATION-ATTRS .
+  var Syntax : String .  var M : Module .  var Q QSyntax : Qid . 
+  op syntaxPredicates : String ~> Module .
+  eq syntaxPredicates(Syntax) = syntaxPredicates(qid(Syntax)) .
+  op syntaxPredicates : Qid ~> Module .
+  eq syntaxPredicates(QSyntax) = syntaxPreds(upModule(QSyntax, false),none) .
+  
+  op compileSYNTAX-PREDICATES : Module AttrSet ~> Module .
+  eq compileSYNTAX-PREDICATES(M, AS:AttrSet) = syntaxPreds(M,AS:AttrSet) .
+endm
+
+mod SYNTAX-PREDICATES-LOOP is 
+  including LOOP-MODE + META-LEVEL .
+  including MODULE-META-PRETTY-PRINT .
+  op syntax-predicates : -> System .
+  op idle : -> State .
+  var Q Syntax : Qid . var QIL QIL' : QidList . var FM : Module .
+  eq syntax-predicates = [nil, idle, 
+ 'Usage: 'syntaxPredicates '<Name> '.] .
+
+
+  op wrapper : Qid -> Module .
+  eq wrapper(Q) = (mod 'MKKR is including Q . 
+                    sorts none . none none none none none endm) .
+  op error : -> [Module] .
+  op print : [Module] -> QidList .
+  var Str : String . var M FM' : Module . 
+  eq print(moduleError(QIL)) = QIL '\n .
+  eq print(FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) .
+  rl ['syntaxPredicates Syntax QIL, idle, QIL'] 
+   => [QIL, idle, print(downTerm(getTerm(
+             metaReduce(wrapper('SYNTAX-PREDICATES-META),
+                        'syntaxPredicates[upTerm(string(Syntax))])), error))] .
+endm

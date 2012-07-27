@@ -1,0 +1,33 @@
+fmod RESOLVE-BINDER is
+ including METADATA-EXTRAS .
+ including META-K-MODULE .
+ including META-K-BINDER .
+ including STRING-EXTRAS .
+  including PARSE-METADATA .
+
+
+  var Q : Qid . var M : Module . var N : Nat . var Op : OpDecl . var Ops OPDS : OpDeclSet .
+  var Tl : TypeList .  var T : Type . var AS : AttrSet . var Str Str' : String .
+
+ op resolveBinder : Qid Module ~> Module .
+ eq resolveBinder(Q, M) 
+  = setName(addEqs(resolveBinderOps(getOps(M)), M), Q) .
+
+ op resolveBinderOps : OpDeclSet ~> EquationSet .
+ eq resolveBinderOps(Ops Op)
+  =  resolveBinderOps(Ops) resolveBinderOp(metadataParse(Op)) .
+ eq resolveBinderOps(none)  = none .
+
+ op resolveBinderOp : OpDecl ~> EquationSet .
+ eq resolveBinderOp(op Q : Tl -> T [AS pair("binder","")] .) 
+  = (eq binder(op2term(op Q : Tl -> T [AS pair("binder","")] .))
+      = trueCt [metadata(removeOpAttrs(AS) pair("binder",""))] .) .
+ eq resolveBinderOp(Op) = none [owise] .
+ eq resolveBinderOp(errorOp(Str, AS)) 
+  =  errorEq('`[`]:K,"",Str,AS) .
+
+ op resolveBinderMeta : Qid String OpDeclSet ~> String .
+ eq resolveBinderMeta(Q,Str, (op Q : Tl -> T [AS] .) OPDS)
+  = resolveBinderMeta(Q, Str + " " + replace(metadataString(AS),"binder", ""), OPDS) .
+ eq resolveBinderMeta(Q, Str, OPDS) = Str [owise] .
+endfm
