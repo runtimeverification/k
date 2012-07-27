@@ -336,7 +336,7 @@ public class PrettyPrintOutput {
 				sb = lessUnderscoresCase(list, op, n, m, false, whitespace, ANSI_NORMAL);
 			}
 			else {
-				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL, true);
+				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL, false);
 			}
 			return sb.toString();
 		}
@@ -684,11 +684,11 @@ public class PrettyPrintOutput {
 			op = op.substring(1);
 		}
 		StringBuilder sb_ = new StringBuilder(op);
-		if (K.parens) {
-			sb_ = Utils.insertParenthesisNearUnderscores(op);
+		if (K.parens && addParens) {
+			sb_ = Utils.insertParenthesisNearUnderscores(list, op);
 		}
 		op = sb_.toString();
-		if (! K.parens) {
+		if (! K.parens || ! addParens) {
 			sb_ = Utils.insertSpaceNearUnderscores(op);
 		}
 		op = sb_.toString();

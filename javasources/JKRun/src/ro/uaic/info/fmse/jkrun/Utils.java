@@ -2,6 +2,8 @@ package ro.uaic.info.fmse.jkrun;
 
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 public class Utils {
    
 	// count the number of underscores from the String op
@@ -88,16 +90,26 @@ public class Utils {
 	 }
 	
 	// insert parenthesis before and after each "_" when we have the option --parens
-	public static StringBuilder insertParenthesisNearUnderscores(String op) {
+	public static StringBuilder insertParenthesisNearUnderscores(List<Element> list, String op) {
 		StringBuilder sb = new StringBuilder(op);
 		int index = 0;
-
+		int count = 0;
 		while (index != -1) {
 			index = sb.indexOf("_", index);
 			if (index != -1) {
-				sb = sb.insert(index + 1, ")");
-				sb = sb.insert(index, "(");
-				index += 2;
+				Element child = list.get(count);
+				//do not insert any parenthesis in this case
+				if (child.getAttribute("op").equals("#_") && child.getAttribute("sort").equals("KLabel"))  {
+					sb = sb.insert(index + 1, " ");
+					sb = sb.insert(index, " ");
+					index += 2;
+				}
+				else {
+					sb = sb.insert(index + 1, ") ");
+					sb = sb.insert(index, " (");
+					index += 3;
+				}
+				count++;
 			}
 		}
 		return sb;
