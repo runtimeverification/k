@@ -19,8 +19,8 @@ module IMPPP-SYNTAX
   				| "var" Ids              
                 | "print" "(" AExps ")"  [strict]  
                 | "halt"
-                > Id ":=" AExp    		 [strict(2)]
-                > "if" BExp
+                | Id ":=" AExp    		 [strict(2)]
+                | "if" BExp
                   "then" Stmt
                   "else" Stmt     		 [strict(1)]
                 | "while" BExp
@@ -29,15 +29,15 @@ module IMPPP-SYNTAX
                 > Stmt ";" Stmt   		 [left]
                 | "(" Stmt ")"    		 [bracket]
                 | "{" "}"
-                | "{" Stmt "}"           
+                | "{" Stmt "}"
                   
-  syntax Ids ::= List{Id,","}     		 [strict]
+  syntax Ids ::= List{Id,","} [strict]
 
   syntax AExp ::= String
                 | "++" Id         		 
                 | "read" "(" ")"
 
-  syntax AExps ::= List{AExp,","}
+  syntax AExps ::= List{AExp,","} [strict]
 
 endmodule
 
