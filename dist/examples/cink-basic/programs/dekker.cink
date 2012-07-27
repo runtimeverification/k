@@ -1,5 +1,14 @@
-// This is Dekker's algorithm for mutual exclusion.
-// This program is not meant to be executed, it is meant to be model checked.
+/* This is Dekker's algorithm for mutual exclusion.
+   This program is not meant to be executed, it is meant to be model checked.
+   The model-checker can be called using the "krun" command:
+
+   krun programs/dekker.cink --ltlmc "LTL[] (eqTo(critical1, 1) LTL-> eqTo(critical2, 0))"
+
+   If the formula is stored into a file, say form.cink, then the following 
+   command can be used:
+
+   krun programs/dekker.cink --ltlmc programs/form.cink 
+*/
 
 int flag1 = 0;
 int flag2 = 0;
