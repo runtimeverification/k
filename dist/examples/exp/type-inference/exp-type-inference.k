@@ -1,3 +1,4 @@
+require "modules/unification.k"
 
 module EXP-TYPE-INFERENCE-SYNTAX
 
@@ -63,6 +64,7 @@ endmodule
 
 module TYPES
   imports EXP-TYPE-INFERENCE-SYNTAX
+  imports UNIFICATION
 // This module should eventually be builtin and provided by the K
 // framework tool.  Most type checkers/inferencers are expected to
 // need it.  For now, we give it to the \K tool manually.
@@ -73,26 +75,22 @@ module TYPES
 
   syntax KResult ::= Type
 
-  syntax Type ::= "tv" Nat             // type variables
+  syntax TypeVar ::= UnificationVar
+
+  syntax Type ::= TypeVar             // type variables
+                | BasicType
                 | Type "->" Type        // function type
   syntax Types ::= List{Type,","}
-
-  syntax Bool ::= "basicType" "(" Type ")"
-                 | "typeVar" "(" Type ")"
-  rule typeVar(T) => getKLabel(T) ==KLabel 'tv_  [structural,anywhere]
 
   syntax TypeSchema ::= Type
                       | "(" "forall" Types ")" Type
                           [latex("(\forall{#1}){#2}")]
   syntax TypeSchemas ::= List{TypeSchema,","}
 
-  syntax Type ::= Type "+Type" Nat [latex("{#1}+_{\it Type}{#2}")]
-  rule tv(N:Nat) +Type M:Nat => tv(N +Int M)  [structural,anywhere]
-
 // Free type variables.  These should be generic and builtin, for all binders.
   syntax Types ::= "ftv" "(" TypeSchemas ")"
-  rule ftv(BT:Type) => .Types when basicType(BT) [anywhere]
-  rule ftv(Tv:Type) => Tv,.Types when typeVar(Tv) [anywhere]
+  rule ftv(BT:BasicType) => .Types [anywhere]
+  rule ftv(Tv:TypeVar) => Tv,.Types [anywhere]
   rule ftv(T1:Type -> T2:Type) => union(ftv(T1),ftv(T2)) [anywhere]
   rule ftv((forall Tvs:Types) T:Type) => diff(ftv(T),Tvs) [anywhere]
   rule ftv(.TypeSchemas) => .Types [anywhere]
@@ -118,16 +116,16 @@ module TYPES
   rule |.Types| => 0 [anywhere]
 
 // This should be generalized and builtin: fresh name generator
-  syntax Types ::= Nat "from" Type
-  rule 0 from tv(_:Nat) => .Types [anywhere]
-  rule N:Nat from tv(M:Nat) => tv(M),((N -Int 1) from tv(M +Int 1)) 
+  syntax Types ::= "freshVars" "(" Int "," Int ")"
+  rule freshVars(_:Int,0) => .Types [anywhere]
+  rule freshVars(M:Int, N:Int) => freshVar(M),freshVars(M +Int 1, N -Int 1) 
     when N >Int 0
     [anywhere]
 
 // This could also be generic: subterm relation?
   syntax Bool ::= Type "inType" Type [latex("{#1}\in_{\it Type}{#2}")]
-  rule Tv:Type inType BT:Type  => false when typeVar(Tv) andBool basicType(BT) [anywhere]
-  rule Tv:Type inType Tv':Type => Tv ==K Tv' when typeVar(Tv) andBool typeVar(Tv') [anywhere]
+  rule Tv:TypeVar inType BT:BasicType  => false [anywhere]
+  rule Tv:TypeVar inType Tv':TypeVar => Tv ==K Tv' [anywhere]
   rule Tv:Type inType (T1:Type -> T2:Type) => (Tv inType T1) orBool (Tv inType T2) [anywhere]
 
 // Type substitution: T[Ts / Tvs]* substitutes list of types Ts for
@@ -138,9 +136,9 @@ module TYPES
                 | Type "[" Type  "/"  Type  "]"   // auxiliary
   rule T:Type[.Types / .Types]* => T [anywhere]
   rule T:Type[T1,Ts:Types / Tv,Tvs]* => T[T1 / Tv][Ts / Tvs]* [anywhere]
-  rule BT:Type[T:Type / Tv:Type] => BT when basicType(BT) andBool typeVar(Tv) [anywhere]
-  rule Tv':Type[T:Type / Tv:Type] => #if Tv' ==K Tv #then T #else Tv' #fi
-    when typeVar(Tv') [anywhere]
+  rule BT:BasicType[T:Type / Tv:TypeVar] => BT [anywhere]
+  rule Tv':TypeVar[T:Type / Tv:Type] => #if Tv' ==K Tv #then T #else Tv' #fi
+   [anywhere]
   rule (T1:Type -> T2:Type)[T:Type / Tv:Type] => (T1:Type[T:Type / Tv:Type]) -> (T2:Type[T:Type / Tv:Type]) [anywhere]
 
 // Map application.  Should be generic and builtin.
@@ -185,9 +183,7 @@ We do need, however, to declare our basic types.  The operation
 \texttt{basicType} used below is provided by the \texttt{TYPES} module. */
 
   syntax Exp ::= Type
-  syntax Type ::= "int" | "bool"        // basic types
-  rule basicType(int) => true   [structural,anywhere]
-  rule basicType(bool) => true  [structural,anywhere]
+  syntax BasicType ::= "int" | "bool"        // basic types
 
 /*@ \subsection{Configuration}
 Besides the \textsf{k} and \textsf{tenv} cells that are also present
@@ -206,7 +202,7 @@ holds the current most-general unifier. */
                     </eqns>
                     <mgu color="blue"> .Map </mgu>
                   </unification>
-                  <nextType> tv(0) </nextType>
+                  <nextVar> 0 </nextVar>
                 </T>
 				<resultType multiplicity="?"> .K </resultType>
 				
@@ -247,10 +243,10 @@ type the lambda-body, and then we construct the corresponding function
 type.  At the same time, we recover the type environment. */
 
   syntax K ::= Type "->" "[]"
-  rule <k> lambda X:Id . E:Exp => E ~> (Tv -> []) ~> tenv(TEnv) ...</k>
-          <tenv> TEnv:Map => TEnv[Tv/X] </tenv>
-          <nextType> Tv:Type => Tv +Type 1 </nextType>
-  rule T:Type ~> (Tv:Type -> []) => Tv -> T [anywhere]
+  rule <k> lambda X:Id . E:Exp => E ~> (freshVar(N) -> []) ~> tenv(TEnv) ...</k>
+          <tenv> TEnv:Map => TEnv[freshVar(N)/X] </tenv>
+          <nextVar> N:Int => N +Int 1 </nextVar>
+  rule T:Type ~> (Tv:TypeVar -> []) => Tv -> T [anywhere]
 
 // usual environment recovery
   syntax K ::= "tenv" "(" Map ")"
@@ -268,8 +264,8 @@ cases, we instead add a fresh type variable for the result type and
 the type constraint that the first argument is a function type of the
 right type, and finally we return the result type. */
 
-  rule <k> T1:Type T2:Type => (T1 = (T2 -> Tv)) ~> Tv ...</k>
-       <nextType> Tv:Type => Tv +Type 1 </nextType>
+  rule <k> T1:Type T2:Type => (T1 = (T2 -> freshVar(N))) ~> freshVar(N) ...</k>
+       <nextVar> N:Int => N +Int 1 </nextVar>
 
 /*@ \subsection{Mu}
 We add a fresh type variable for the mu-bound variable and then we
@@ -277,9 +273,9 @@ enforce the my-body and the result type to be both equal to the type
 of the mu-bound variable. */
 
   syntax K ::= Type "=" "[]"
-  rule <k> mu X:Id . E:Exp => E ~> (Tv:Type = []) ~> Tv ~> tenv(TEnv) ...</k>
-          <tenv> TEnv:Map => TEnv[Tv / X] </tenv>
-          <nextType> (Tv => Tv +Type 1) </nextType>
+  rule <k> mu X:Id . E:Exp => E ~> (freshVar(N) = []) ~> freshVar(N) ~> tenv(TEnv) ...</k>
+          <tenv> TEnv:Map => TEnv[freshVar(N) / X] </tenv>
+          <nextVar> N:Int => N:Int +Int 1 </nextVar>
   rule T:Type ~> (Tv:Type = []) => Tv = T [anywhere]
 
 /*@ \subsection{Let}
@@ -319,9 +315,9 @@ module. */
                  Theta[T]) / X]
        </tenv>
 
-  rule <k> X => T[|Tvs| from Tv / Tvs]* ...</k>
+  rule <k> X => T[freshVars(N, |Tvs|) / Tvs]* ...</k>
        <tenv>... X:Id |-> (forall Tvs:Types) T:Type ...</tenv>
-       <nextType> Tv:Type => Tv +Type | Tvs | </nextType>
+       <nextVar> N:Int => N +Int | Tvs | </nextVar>
 
 /*@ \subsection{Final type}
 When there is only one type left in the computation cell and all the
@@ -364,8 +360,8 @@ appear in the equations. */
   rule <eqn> (T1:Type -> T2:Type) = (T1':Type -> T2':Type) </eqn>
     => <eqn> T1 = T1' </eqn> <eqn> T2 = T2' </eqn>
 
-  rule <eqn> (T:Type = Tv:Type) => (Tv = T) </eqn>
-    when typeVar(Tv) andBool notBool(typeVar(T))
+  rule <eqn> (T:Type = Tv:TypeVar) => (Tv = T) </eqn>
+    when 'isTypeVar(T) =/=K true
 
 /*@ When an equation contains a variable, it can be added as a binding
 to the mgu.  While we know that the variables in the domain of the mgu
