@@ -1,0 +1,116 @@
+module Program
+
+imports Common
+imports KBuiltinsBasic
+exports
+
+context-free syntax
+context-free priorities
+{
+	AExp "/" AExp -> AExp {left, cons("AExp1284Syn")}
+} > {
+	AExp "+" AExp -> AExp {left, cons("AExp1285Syn")}
+}
+
+context-free priorities
+{
+	AExp "<=" AExp -> BExp {cons("BExp1286Syn")}
+} > {
+	"not" BExp -> BExp {cons("BExp1287Syn")}
+} > {
+	BExp "and" BExp -> BExp {cons("BExp1288Syn")}
+}
+
+context-free priorities
+{
+	"var" Ids -> Stmt {cons("Stmt1290Syn")}
+} > {
+	Id ":=" AExp -> Stmt {cons("Stmt1294Syn")}
+} > {
+	"if" InsertDzBExp "then" InsertDzStmt "else" Stmt -> Stmt {cons("Stmt1295Syn")}
+	"while" InsertDzBExp "do" Stmt -> Stmt {cons("Stmt1296Syn")}
+} > {
+	"spawn" Stmt -> Stmt {cons("Stmt1297Syn")}
+} > {
+	Stmt ";" Stmt -> Stmt {left, cons("Stmt1298Syn")}
+}
+
+context-free start-symbols
+	Start
+context-free syntax
+	DzId -> Id
+	DzBool -> Bool
+	DzModelCheckerState -> ModelCheckerState
+	DzProp -> Prop
+	DzModelCheckResult -> ModelCheckResult
+	Prop -> LTLFormula
+	DzString -> String
+	DzLTLFormula -> LTLFormula
+	DzInt -> Int
+	Id -> AExp
+	Int -> AExp
+	"(" AExp ")" -> AExp {bracket}
+	Bool -> BExp
+	"(" BExp ")" -> BExp {bracket}
+	"skip" -> Stmt {cons("Stmt1289Syn")}
+	"print" "(" AExps ")" -> Stmt {cons("Stmt1292Syn")}
+	"halt" -> Stmt {cons("Stmt1293Syn")}
+	"(" Stmt ")" -> Stmt {bracket}
+	"{" "}" -> Stmt {cons("Stmt1299Syn")}
+	"{" Stmt "}" -> Stmt {cons("Stmt1300Syn")}
+	{Id ","}* -> Ids {cons("Ids1ListSyn")}
+	String -> AExp
+	"read" "(" ")" -> AExp {cons("AExp1303Syn")}
+	"++" Id -> AExp {cons("AExp1302Syn")}
+	{AExp ","}* -> AExps {cons("AExps1ListSyn")}
+	DzFloat -> Float
+	BExp -> InsertDzBExp
+	Stmt -> InsertDzStmt
+
+%% start symbols
+	Float		-> Start
+	Bool		-> Start
+	AExps		-> Start
+	ModelCheckResult		-> Start
+	LTLFormula		-> Start
+	AExp		-> Start
+	BExp		-> Start
+	Prop		-> Start
+	String		-> Start
+	Stmt		-> Start
+	Id		-> Start
+	Int		-> Start
+	Ids		-> Start
+	ModelCheckerState		-> Start
+
+
+	DzDzInt		-> DzInt	{cons("DzInt1Const")}
+	DzDzBool	-> DzBool	{cons("DzBool1Const")}
+	DzDzId		-> DzId		{cons("DzId1Const")}
+	DzDzString	-> DzString	{cons("DzString1Const")}
+
+	DzDzINT		-> DzDzInt
+	DzDzID		-> DzDzId
+	DzDzBOOL	-> DzDzBool
+	DzDzSTRING	-> DzDzString
+
+lexical syntax
+
+
+	"else" -> DzDzID {reject}
+	"var" -> DzDzID {reject}
+	"skip" -> DzDzID {reject}
+	"print" -> DzDzID {reject}
+	"while" -> DzDzID {reject}
+	"and" -> DzDzID {reject}
+	"not" -> DzDzID {reject}
+	"spawn" -> DzDzID {reject}
+	"if" -> DzDzID {reject}
+	"then" -> DzDzID {reject}
+	"read" -> DzDzID {reject}
+	"do" -> DzDzID {reject}
+	"halt" -> DzDzID {reject}
+
+lexical restrictions
+	%% follow restrictions
+

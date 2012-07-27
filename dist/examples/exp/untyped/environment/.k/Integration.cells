@@ -1,0 +1,7 @@
+[  ("T", "Bag")
+, ("result", "K")
+, ("store", "Map")
+, ("env", "Map")
+, ("k", "K")
+, ("nextLoc", "K")
+]

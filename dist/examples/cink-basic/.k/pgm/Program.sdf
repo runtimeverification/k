@@ -1,0 +1,159 @@
+module Program
+
+imports Common
+imports KBuiltinsBasic
+exports
+
+context-free syntax
+context-free priorities
+{
+	Id "(" InsertDzExps ")" -> Exp {cons("Exp1289Syn")}
+	"&" Exp -> Exp {cons("Exp1290Syn")}
+	"*" Exp -> Exp {cons("Exp1292Syn")}
+	"++" Exp -> Exp {cons("Exp1293Syn")}
+} > { left:
+	Exp "*" Exp -> Exp {cons("Exp1294Syn")}
+	Exp "/" Exp -> Exp {cons("Exp1295Syn")}
+	Exp "%" Exp -> Exp {cons("Exp1296Syn")}
+} > { left:
+	Exp "+" Exp -> Exp {cons("Exp1297Syn")}
+	Exp "-" Exp -> Exp {cons("Exp1298Syn")}
+} > { left:
+	Exp ">" Exp -> Exp {cons("Exp1299Syn")}
+	Exp "<=" Exp -> Exp {cons("Exp1300Syn")}
+	Exp "==" Exp -> Exp {cons("Exp1302Syn")}
+} > {
+	"!" Exp -> Exp {cons("Exp1303Syn")}
+} > {
+	Exp "&&" Exp -> Exp {left, cons("Exp1304Syn")}
+} > {
+	Exp "||" Exp -> Exp {left, cons("Exp1305Syn")}
+} > { left:
+	Exp "<<" Exp -> Exp {cons("Exp1306Syn")}
+	Exp ">>" Exp -> Exp {cons("Exp1307Syn")}
+} > {
+	Exp "=" Exp -> Exp {right, cons("Exp1308Syn")}
+}
+
+context-free priorities
+{
+	Exp ";" -> Stmt {cons("Stmt1320Syn")}
+	Ddecl ";" -> Stmt {cons("Stmt1324Syn")}
+	"while" "(" InsertDzExp ")" Stmt -> Stmt {cons("Stmt1327Syn")}
+	Ddecl "(" InsertDzDdecls ")" "{" InsertDzStmts "}" -> Stmt {cons("Stmt1329Syn")}
+	"if" "(" InsertDzExp ")" InsertDzStmt "else" Stmt -> Stmt {cons("Stmt1330Syn")}
+} > {
+	"if" "(" InsertDzExp ")" Stmt -> Stmt {cons("Stmt1332Syn")}
+}
+
+context-free start-symbols
+	Start
+context-free syntax
+	"int" Exps -> Ddecl {cons("Ddecl1284Syn")}
+	"void" Exps -> Ddecl {cons("Ddecl1285Syn")}
+	"bool" Exps -> Ddecl {cons("Ddecl1286Syn")}
+	"cout" -> Val {cons("Val1287Syn")}
+	"cin" -> Val {cons("Val1288Syn")}
+	Bool -> Val
+	String -> Val
+	Int -> Val
+	Id -> Exp
+	Val -> Exp
+	"(" Exp ")" -> Exp {bracket}
+	"endl" -> Exp {cons("Exp1309Syn")}
+	"#include" "<iostream>" -> Stmt {cons("Stmt1322Syn")}
+	"using" "namespace" "std" ";" -> Stmt {cons("Stmt1323Syn")}
+	"{" "}" -> Stmt {cons("Stmt1325Syn")}
+	"{" Stmts "}" -> Stmt {cons("Stmt1326Syn")}
+	"return" Exps ";" -> Stmt {cons("Stmt1328Syn")}
+	"std::thread" Id "(" Exps ")" ";" -> Stmt {cons("Stmt1333Syn")}
+	Stmts -> Pgm
+	Stmt -> Stmts
+	Stmts Stmts -> Stmts {left, cons("Stmts1334Syn")}
+	{Exp ","}* -> Exps {cons("Exps1ListSyn")}
+	{Ddecl ","}* -> Ddecls {cons("Ddecls1ListSyn")}
+	DzBool -> Bool
+	DzString -> String
+	DzId -> Id
+	DzFloat -> Float
+	"eqTo" "(" Id "," Val ")" -> Prop {cons("Prop1354Syn")}
+	DzInt -> Int
+	DzModelCheckerState -> ModelCheckerState
+	DzProp -> Prop
+	DzModelCheckResult -> ModelCheckResult
+	Prop -> LTLFormula
+	DzLTLFormula -> LTLFormula
+	"(" LTLFormula ")" -> LTLFormula {bracket}
+	"LTL~" LTLFormula -> LTLFormula {cons("LTLFormula189Syn")}
+	LTLFormula "LTL/\\" LTLFormula -> LTLFormula {cons("LTLFormula190Syn")}
+	LTLFormula "LTL\\/" LTLFormula -> LTLFormula {cons("LTLFormula192Syn")}
+	"LTLO" LTLFormula -> LTLFormula {cons("LTLFormula193Syn")}
+	LTLFormula "LTLU" LTLFormula -> LTLFormula {cons("LTLFormula194Syn")}
+	LTLFormula "LTLR" LTLFormula -> LTLFormula {cons("LTLFormula195Syn")}
+	LTLFormula "LTL->" LTLFormula -> LTLFormula {cons("LTLFormula196Syn")}
+	LTLFormula "LTL<->" LTLFormula -> LTLFormula {cons("LTLFormula197Syn")}
+	"LTL<>" LTLFormula -> LTLFormula {cons("LTLFormula198Syn")}
+	"LTL[]" LTLFormula -> LTLFormula {cons("LTLFormula199Syn")}
+	LTLFormula "LTLW" LTLFormula -> LTLFormula {cons("LTLFormula1200Syn")}
+	LTLFormula "LTL|->" LTLFormula -> LTLFormula {cons("LTLFormula1202Syn")}
+	LTLFormula "LTL=>" LTLFormula -> LTLFormula {cons("LTLFormula1203Syn")}
+	LTLFormula "LTL<=>" LTLFormula -> LTLFormula {cons("LTLFormula1204Syn")}
+	Ddecls -> InsertDzDdecls
+	Exp -> InsertDzExp
+	Stmt -> InsertDzStmt
+	Stmts -> InsertDzStmts
+	Exps -> InsertDzExps
+
+%% start symbols
+	Float		-> Start
+	Ddecls		-> Start
+	Bool		-> Start
+	Pgm		-> Start
+	Ddecl		-> Start
+	DzId		-> Start
+	Stmts		-> Start
+	ModelCheckResult		-> Start
+	Exp		-> Start
+	LTLFormula		-> Start
+	Prop		-> Start
+	String		-> Start
+	Stmt		-> Start
+	Val		-> Start
+	Id		-> Start
+	Int		-> Start
+	Exps		-> Start
+	ModelCheckerState		-> Start
+
+
+	DzDzInt		-> DzInt	{cons("DzInt1Const")}
+	DzDzBool	-> DzBool	{cons("DzBool1Const")}
+	DzDzId		-> DzId		{cons("DzId1Const")}
+	DzDzString	-> DzString	{cons("DzString1Const")}
+
+	DzDzINT		-> DzDzInt
+	DzDzID		-> DzDzId
+	DzDzBOOL	-> DzDzBool
+	DzDzSTRING	-> DzDzString
+
+lexical syntax
+	"main" -> DzDzId
+
+
+	"using" -> DzDzID {reject}
+	"while" -> DzDzID {reject}
+	"namespace" -> DzDzID {reject}
+	"if" -> DzDzID {reject}
+	"cin" -> DzDzID {reject}
+	"else" -> DzDzID {reject}
+	"int" -> DzDzID {reject}
+	"std" -> DzDzID {reject}
+	"return" -> DzDzID {reject}
+	"cout" -> DzDzID {reject}
+	"void" -> DzDzID {reject}
+	"eqTo" -> DzDzID {reject}
+	"endl" -> DzDzID {reject}
+	"bool" -> DzDzID {reject}
+
+lexical restrictions
+	%% follow restrictions
+

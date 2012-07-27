@@ -1,0 +1,56 @@
+%% Grammar for the K language
+module KBuiltinsBasic
+imports Common %% For Comments and whitespace
+
+exports
+context-free syntax
+	%% KLabel
+	DzKLabel	-> KLabel {cons("KLabel1Const")}
+	"(" KLabel ")"			-> KLabel {bracket}
+	KLabel "=>" KLabel		-> KLabel {cons("KLabel1Rewrite")}
+
+lexical syntax
+	"true"				-> DzDzBOOL
+	"false"				-> DzDzBOOL
+
+	"true"				-> DzDzID {reject}
+	"false"				-> DzDzID {reject}
+
+	[a-zA-Z][a-zA-Z0-9]*	-> DzDzID
+	[\+\-]? [0-9]+			-> DzDzINT
+
+	FloatDigits ExponentPart? [fFdD]? -> DzDzFLOAT
+	[0-9]* "." [0-9]*	-> FloatDigits
+	[0-9]+				-> FloatDigits
+	[eE] DzDzINT		-> ExponentPart
+	[0-9]+				-> FloatDigits {reject}
+	"."					-> FloatDigits {reject}
+
+	%% String declaration
+	"\"" StringChar* "\"" -> DzDzSTRING
+	~[\"\n]				-> StringChar
+	"\\\""				-> StringChar
+	BackSlashChar		-> StringChar
+	"\\"				-> BackSlashChar
+
+	%% KLabel definition + restrictions lower
+	"'" KLabelChar+			-> DzKLabel
+	~[\`\(\)\ \t\n\r]		-> KLabelChar
+	"``"					-> KLabelChar
+	"`("					-> KLabelChar
+	"`)"					-> KLabelChar
+	"`"						-> BackQuote
+	BackQuote				-> KLabelChar
+
+lexical restrictions
+	DzDzID  -/- [a-zA-Z0-9]
+	DzDzINT -/- [0-9]
+	BackSlashChar  -/- [\"]
+
+	%% BackQuote in KLabel cannot be folowed by ( ) `
+	BackQuote -/- [\(\)\`]
+	DzKLabel -/-   ~[\`\(\)\ \t\n\r]
+
+context-free restrictions
+	"-" -/- [0-9]
+

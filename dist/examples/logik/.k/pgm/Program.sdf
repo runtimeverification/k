@@ -1,0 +1,71 @@
+module Program
+
+imports Common
+imports KBuiltinsBasic
+exports
+
+context-free syntax
+context-free priorities
+{
+	Literal ":-" InsertDzLiterals "." -> Clause {cons("Clause1306Syn")}
+} > {
+	Literal "." -> Clause {cons("Clause1307Syn")}
+}
+
+context-free start-symbols
+	Start
+context-free syntax
+	Id -> Literal
+	"[" Literals "]" -> Literal {cons("Literal1304Syn")}
+	"[" Literals "|" Literal "]" -> Literal {cons("Literal1305Syn")}
+	Id "(" Literals ")" -> Literal {cons("Literal1303Syn")}
+	{Literal ","}* -> Literals {cons("Literals1ListSyn")}
+	"?-" Literals "." -> Query {cons("Query1308Syn")}
+	Query -> Pgm
+	Clause Pgm -> Pgm {cons("Pgm1309Syn")}
+	DzModelCheckerState -> ModelCheckerState
+	DzProp -> Prop
+	DzModelCheckResult -> ModelCheckResult
+	Prop -> LTLFormula
+	DzString -> String
+	DzBool -> Bool
+	DzInt -> Int
+	DzLTLFormula -> LTLFormula
+	DzId -> Id
+	DzFloat -> Float
+	Literals -> InsertDzLiterals
+
+%% start symbols
+	Float		-> Start
+	Bool		-> Start
+	Literal		-> Start
+	Pgm		-> Start
+	Query		-> Start
+	Clause		-> Start
+	ModelCheckResult		-> Start
+	LTLFormula		-> Start
+	Prop		-> Start
+	String		-> Start
+	Id		-> Start
+	Int		-> Start
+	Literals		-> Start
+	ModelCheckerState		-> Start
+
+
+	DzDzInt		-> DzInt	{cons("DzInt1Const")}
+	DzDzBool	-> DzBool	{cons("DzBool1Const")}
+	DzDzId		-> DzId		{cons("DzId1Const")}
+	DzDzString	-> DzString	{cons("DzString1Const")}
+
+	DzDzINT		-> DzDzInt
+	DzDzID		-> DzDzId
+	DzDzBOOL	-> DzDzBool
+	DzDzSTRING	-> DzDzString
+
+lexical syntax
+
+
+
+lexical restrictions
+	%% follow restrictions
+

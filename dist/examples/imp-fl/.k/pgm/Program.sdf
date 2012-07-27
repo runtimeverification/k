@@ -1,0 +1,76 @@
+module Program
+
+imports Common
+imports KBuiltinsBasic
+exports
+
+context-free syntax
+context-free start-symbols
+	Start
+context-free syntax
+	DzId -> Id
+	"div#ee" -> KLabel {cons("KLabel1284Syn")}
+	"div#He" -> KLabel {cons("KLabel1285Syn")}
+	"div#eH" -> KLabel {cons("KLabel1286Syn")}
+	"plus#ee" -> KLabel {cons("KLabel1287Syn")}
+	"plus#He" -> KLabel {cons("KLabel1288Syn")}
+	"plus#eH" -> KLabel {cons("KLabel1289Syn")}
+	"le#ee" -> KLabel {cons("KLabel1290Syn")}
+	"le#He" -> KLabel {cons("KLabel1292Syn")}
+	"not#e" -> KLabel {cons("KLabel1293Syn")}
+	"not#H" -> KLabel {cons("KLabel1294Syn")}
+	"and#ee" -> KLabel {cons("KLabel1295Syn")}
+	"and#He" -> KLabel {cons("KLabel1296Syn")}
+	"assign#ee" -> KLabel {cons("KLabel1297Syn")}
+	"assign#eH" -> KLabel {cons("KLabel1298Syn")}
+	"ite#eee" -> KLabel {cons("KLabel1299Syn")}
+	"ite#Hee" -> KLabel {cons("KLabel1300Syn")}
+	"while#ee" -> KLabel {cons("KLabel1302Syn")}
+	"seq#ee" -> KLabel {cons("KLabel1303Syn")}
+	"pgm#ee" -> KLabel {cons("KLabel1304Syn")}
+	"emptyIds#" -> KLabel {cons("KLabel1305Syn")}
+	"consIds#ee" -> KLabel {cons("KLabel1306Syn")}
+	"skip#" -> KLabel {cons("KLabel1307Syn")}
+	Int -> KResult
+	Bool -> KResult
+	DzString -> String
+	DzFloat -> Float
+	DzInt -> Int
+	DzBool -> Bool
+	DzModelCheckerState -> ModelCheckerState
+	DzProp -> Prop
+	DzModelCheckResult -> ModelCheckResult
+	Prop -> LTLFormula
+	DzLTLFormula -> LTLFormula
+
+%% start symbols
+	Float		-> Start
+	LTLFormula		-> Start
+	Bool		-> Start
+	Prop		-> Start
+	String		-> Start
+	KLabel		-> Start
+	ModelCheckResult		-> Start
+	Id		-> Start
+	Int		-> Start
+	KResult		-> Start
+	ModelCheckerState		-> Start
+
+
+	DzDzInt		-> DzInt	{cons("DzInt1Const")}
+	DzDzBool	-> DzBool	{cons("DzBool1Const")}
+	DzDzId		-> DzId		{cons("DzId1Const")}
+	DzDzString	-> DzString	{cons("DzString1Const")}
+
+	DzDzINT		-> DzDzInt
+	DzDzID		-> DzDzId
+	DzDzBOOL	-> DzDzBool
+	DzDzSTRING	-> DzDzString
+
+lexical syntax
+
+
+
+lexical restrictions
+	%% follow restrictions
+

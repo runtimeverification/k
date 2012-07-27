@@ -1,0 +1,178 @@
+module Program
+
+imports Common
+imports KBuiltinsBasic
+exports
+
+context-free syntax
+context-free priorities
+{
+	"++" Exp -> Exp {cons("Exp1295Syn")}
+	Exp "instanceOf" Id -> Exp {cons("Exp1296Syn")}
+	"cast" InsertDzExp "to" Id -> Exp {cons("Exp1297Syn")}
+	Exp "." Id -> Exp {cons("Exp1299Syn")}
+} > {
+	Exp "[" InsertDzExps "]" -> Exp {cons("Exp1300Syn")}
+} > {
+	Exp "(" InsertDzExps ")" -> Exp {cons("Exp1302Syn")}
+	"-" Exp -> Exp {cons("Exp1303Syn")}
+} > { left:
+	Exp "*" Exp -> Exp {left, cons("Exp1306Syn")}
+	Exp "/" Exp -> Exp {left, cons("Exp1307Syn")}
+	Exp "%" Exp -> Exp {left, cons("Exp1308Syn")}
+} > { left:
+	Exp "+" Exp -> Exp {left, cons("Exp1309Syn")}
+	Exp "-" Exp -> Exp {left, cons("Exp1320Syn")}
+} > { non-assoc:
+	Exp "<" Exp -> Exp {non-assoc, cons("Exp1322Syn")}
+	Exp "<=" Exp -> Exp {non-assoc, cons("Exp1323Syn")}
+	Exp ">" Exp -> Exp {non-assoc, cons("Exp1324Syn")}
+	Exp ">=" Exp -> Exp {non-assoc, cons("Exp1325Syn")}
+	Exp "==" Exp -> Exp {non-assoc, cons("Exp1326Syn")}
+	Exp "!=" Exp -> Exp {non-assoc, cons("Exp1327Syn")}
+} > {
+	"not" Exp -> Exp {cons("Exp1328Syn")}
+} > { left:
+	Exp "and" Exp -> Exp {left, cons("Exp1329Syn")}
+	Exp "or" Exp -> Exp {left, cons("Exp1330Syn")}
+} > {
+	Exp "=" Exp -> Exp {right, cons("Exp1332Syn")}
+	Exp ":" Type -> Exp {cons("Exp1333Syn")}
+}
+
+context-free start-symbols
+	Start
+context-free syntax
+	DzId -> Id
+	DzBool -> Bool
+	DzModelCheckerState -> ModelCheckerState
+	DzProp -> Prop
+	DzModelCheckResult -> ModelCheckResult
+	Prop -> LTLFormula
+	DzString -> String
+	DzLTLFormula -> LTLFormula
+	DzInt -> Int
+	"main" -> Id {cons("Id1284Syn")}
+	"int" -> Type {cons("Type1285Syn")}
+	"bool" -> Type {cons("Type1286Syn")}
+	"string" -> Type {cons("Type1287Syn")}
+	"void" -> Type {cons("Type1288Syn")}
+	"arrayOf" Type -> Type {cons("Type1289Syn")}
+	"function" "from" Types "to" Type -> Type {cons("Type1290Syn")}
+	{Type ","}* -> Types {cons("Types1ListSyn")}
+	"var" Exps ";" -> Ddecl {cons("Ddecl1292Syn")}
+	Int -> Exp
+	Bool -> Exp
+	String -> Exp
+	Id -> Exp
+	"this" -> Exp {cons("Exp1293Syn")}
+	"super" -> Exp {cons("Exp1294Syn")}
+	"(" Exp ")" -> Exp {bracket}
+	"new" Id "(" Exps ")" -> Exp {cons("Exp1298Syn")}
+	"sizeOf" "(" Exp ")" -> Exp {cons("Exp1304Syn")}
+	"read" "(" ")" -> Exp {cons("Exp1305Syn")}
+	{Exp ","}* -> Exps {cons("Exps1ListSyn")}
+	"{" "}" -> Stmt {cons("Stmt1334Syn")}
+	"{" Stmts "}" -> Stmt {cons("Stmt1335Syn")}
+	"return" Exp ";" -> Stmt {cons("Stmt1342Syn")}
+	"return" ";" -> Stmt {cons("Stmt1343Syn")}
+	"print" "(" Exps ")" ";" -> Stmt {cons("Stmt1344Syn")}
+	"throw" Exp ";" -> Stmt {cons("Stmt1345Syn")}
+	"acquire" Exp ";" -> Stmt {cons("Stmt1347Syn")}
+	"release" Exp ";" -> Stmt {cons("Stmt1348Syn")}
+	"rendezvous" Exp ";" -> Stmt {cons("Stmt1349Syn")}
+	Exp ";" -> Stmt {cons("Stmt1336Syn")}
+	"if" Exp "then" Stmt "else" Stmt -> Stmt {avoid, cons("Stmt1337Syn")}
+	"if" Exp "then" Stmt -> Stmt {cons("Stmt1338Syn")}
+	"while" Exp "do" Stmt -> Stmt {cons("Stmt1339Syn")}
+	"for" Id "=" Exp "to" Exp "do" Stmt -> Stmt {cons("Stmt1340Syn")}
+	"spawn" Stmt -> Stmt {cons("Stmt1346Syn")}
+	Ddecl -> Stmts
+	Stmt -> Stmts
+	Stmts Stmts -> Stmts {right, cons("Stmts1350Syn")}
+	"object" -> Id {cons("Id1352Syn")}
+	"class" Id -> Type {cons("Type1353Syn")}
+	"method" Id "(" Exps ")" ":" Type Stmt -> Ddecl {cons("Ddecl1354Syn")}
+	"method" Id "(" Exps ")" Stmt -> Ddecl {cons("Ddecl1355Syn")}
+	"class" Id "{" Stmts "}" -> Ddecl {cons("Ddecl1356Syn")}
+	"class" Id "extends" Id "{" Stmts "}" -> Ddecl {cons("Ddecl1357Syn")}
+	"try" Stmt "catch" "(" Exp ")" Stmt -> Stmt {cons("Stmt1358Syn")}
+	DzFloat -> Float
+	Exp -> InsertDzExp
+	Exps -> InsertDzExps
+
+%% start symbols
+	Float		-> Start
+	Types		-> Start
+	Bool		-> Start
+	Type		-> Start
+	Ddecl		-> Start
+	Stmts		-> Start
+	ModelCheckResult		-> Start
+	Exp		-> Start
+	LTLFormula		-> Start
+	Prop		-> Start
+	String		-> Start
+	Stmt		-> Start
+	Id		-> Start
+	Int		-> Start
+	Exps		-> Start
+	ModelCheckerState		-> Start
+
+
+	DzDzInt		-> DzInt	{cons("DzInt1Const")}
+	DzDzBool	-> DzBool	{cons("DzBool1Const")}
+	DzDzId		-> DzId		{cons("DzId1Const")}
+	DzDzString	-> DzString	{cons("DzString1Const")}
+
+	DzDzINT		-> DzDzInt
+	DzDzID		-> DzDzId
+	DzDzBOOL	-> DzDzBool
+	DzDzSTRING	-> DzDzString
+
+lexical syntax
+
+
+	"to" -> DzDzID {reject}
+	"arrayOf" -> DzDzID {reject}
+	"for" -> DzDzID {reject}
+	"function" -> DzDzID {reject}
+	"spawn" -> DzDzID {reject}
+	"else" -> DzDzID {reject}
+	"extends" -> DzDzID {reject}
+	"int" -> DzDzID {reject}
+	"or" -> DzDzID {reject}
+	"class" -> DzDzID {reject}
+	"instanceOf" -> DzDzID {reject}
+	"and" -> DzDzID {reject}
+	"not" -> DzDzID {reject}
+	"cast" -> DzDzID {reject}
+	"then" -> DzDzID {reject}
+	"release" -> DzDzID {reject}
+	"this" -> DzDzID {reject}
+	"try" -> DzDzID {reject}
+	"var" -> DzDzID {reject}
+	"catch" -> DzDzID {reject}
+	"object" -> DzDzID {reject}
+	"from" -> DzDzID {reject}
+	"while" -> DzDzID {reject}
+	"super" -> DzDzID {reject}
+	"throw" -> DzDzID {reject}
+	"if" -> DzDzID {reject}
+	"read" -> DzDzID {reject}
+	"do" -> DzDzID {reject}
+	"rendezvous" -> DzDzID {reject}
+	"acquire" -> DzDzID {reject}
+	"return" -> DzDzID {reject}
+	"void" -> DzDzID {reject}
+	"sizeOf" -> DzDzID {reject}
+	"print" -> DzDzID {reject}
+	"main" -> DzDzID {reject}
+	"new" -> DzDzID {reject}
+	"string" -> DzDzID {reject}
+	"method" -> DzDzID {reject}
+	"bool" -> DzDzID {reject}
+
+lexical restrictions
+	%% follow restrictions
+

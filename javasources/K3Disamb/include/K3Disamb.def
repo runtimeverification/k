@@ -1,0 +1,333 @@
+definition
+module Integration
+
+imports Common
+imports KTechnique
+imports KBuiltinsBasic
+
+exports
+
+context-free syntax
+
+
+module KBuiltinsBasic
+imports Common %% For Comments and whitespace
+
+exports
+context-free syntax
+	%% KLabel
+	DzKLabel	-> KLabel {cons("KLabel1Const")}
+	"(" KLabel ")"			-> KLabel {bracket}
+	KLabel "=>" KLabel		-> KLabel {cons("KLabel1Rewrite")}
+
+lexical syntax
+	"true"				-> DzDzBOOL
+	"false"				-> DzDzBOOL
+
+	"true"				-> DzDzID {reject}
+	"false"				-> DzDzID {reject}
+
+	[a-zA-Z][a-zA-Z0-9]*	-> DzDzID
+	[\+\-]? [0-9]+			-> DzDzINT
+
+	FloatDigits ExponentPart? [fFdD]? -> DzDzFLOAT
+	[0-9]* "." [0-9]*	-> FloatDigits
+	[0-9]+				-> FloatDigits
+	[eE] DzDzINT		-> ExponentPart
+	[0-9]+				-> FloatDigits {reject}
+	"."					-> FloatDigits {reject}
+
+	%% String declaration
+	"\"" StringChar* "\"" -> DzDzSTRING
+	~[\"\n]				-> StringChar
+	"\\\""				-> StringChar
+	BackSlashChar		-> StringChar
+	"\\"				-> BackSlashChar
+
+	%% KLabel definition + restrictions lower
+	"'" KLabelChar+			-> DzKLabel
+	~[\`\(\)\ \t\n\r]		-> KLabelChar
+	"``"					-> KLabelChar
+	"`("					-> KLabelChar
+	"`)"					-> KLabelChar
+	"`"						-> BackQuote
+	BackQuote				-> KLabelChar
+
+lexical restrictions
+	DzDzID  -/- [a-zA-Z0-9]
+	DzDzINT -/- [0-9]
+	BackSlashChar  -/- [\"]
+
+	%% BackQuote in KLabel cannot be folowed by ( ) `
+	BackQuote -/- [\(\)\`]
+	DzKLabel -/-   ~[\`\(\)\ \t\n\r]
+
+context-free restrictions
+	"-" -/- [0-9]
+
+module KTechnique
+imports Common %% For Comments and whitespace
+imports KBuiltinsBasic
+
+exports
+context-free priorities
+{
+	".K"		-> K {cons("K12Empty"), prefer}
+	"."			-> K {cons("K1Empty")}
+	K "~>" K	-> K {left, cons("K1Seq")}
+	".List{K}"	-> ListDlKDr {cons("ListDlKDr12Empty")}
+	ListDlKDr   ",," ListDlKDr	-> ListDlKDr {left, cons("ListDlKDr1List")}
+} > { non-assoc:
+	K "=>" K	-> K {non-assoc, cons("K1Rewrite")}
+	ListDlKDr  "=>" ListDlKDr	-> ListDlKDr {non-assoc, cons("ListDlKDr1Rewrite")}
+}
+context-free syntax
+	KLabel "(" ListDlKDr ")"	-> K {cons("K1App")}
+	K					-> ListDlKDr %%{cons("ListOfK3K")}
+	"HOLE"				-> K {cons("K1Hole")}
+	"HOLE" ":" "K"		-> K {cons("K12Hole")}
+	"(" ListDlKDr ")"	-> ListDlKDr {bracket}
+	"(" K ")"			-> K {bracket}
+	KLabel "=>" KLabel	-> KLabel {cons("KLabel1Rewrite")}
+
+context-free priorities
+{
+	".List"					-> List {cons("List12Empty"), prefer}
+	"."						-> List {cons("List1Empty")}
+	"ListItem" "(" K ")"	-> ListItem {cons("ListItem1LIKItem")}
+	ListItem				-> List
+	List List				-> List {left, cons("List1List")}
+} > {
+	List "=>" List			-> List {non-assoc, cons("List1Rewrite")}
+}
+context-free syntax
+	"(" List ")"			-> List {bracket}
+
+context-free priorities
+{
+	".Bag"				-> Bag {cons("Bag12Empty"), prefer}
+	"."					-> Bag {cons("Bag1Empty")}
+	BagItem				-> Bag
+	"BagItem" "(" K ")" -> BagItem {cons("BagItem1BIKItem")}
+	%%BagItem+			-> Bag {cons("BagList")}
+	Bag Bag				-> Bag {left, cons("Bag1List")}
+} > {
+	Bag "=>" Bag		-> Bag {non-assoc, cons("Bag1Rewrite")}
+}
+context-free syntax
+	%%"(" BagItem ")"	-> BagItem {bracket}
+	"(" Bag ")"			-> Bag {bracket}
+
+context-free priorities
+{
+	".Set"				-> Set {cons("Set12Empty"), prefer}
+	"."					-> Set {cons("Set1Empty")}
+	"SetItem" "(" K ")" -> SetItem {cons("SetItem1SIKItem")}
+	%%SetItem+			-> Set {cons("SetList")}
+	SetItem				-> Set %%{cons("Set3SetItem")}
+	Set Set				-> Set {left, cons("Set1List")}
+} > {
+	Set "=>" Set		-> Set {non-assoc, cons("Set1Rewrite")}
+}
+context-free syntax
+	%%"(" SetItem ")"		-> SetItem {bracket}
+	"(" Set ")"				-> Set {bracket}
+
+context-free priorities
+{
+	".Map"			-> Map {cons("Map12Empty"), prefer}
+	"."				-> Map {cons("Map1Empty")}
+	MapItem			-> Map %%{cons("Map3MapItem")}  %% Does SDF supports subsorting closure? I believe it generates ambiguities
+	"MapItem" "(" K "," K ")"	-> MapItem {cons("MapItem1KKItem")}
+	ListDlKDr "|->" ListDlKDr	-> MapItem {cons("MapItem1LKLKItem")}
+	%%K "|->" K					-> MapItem {cons("MapItem1MapsTo")}
+	Map   Map				-> Map {left, cons("Map1List")}
+	%%Map "[" K "/" K "]"		-> Map {cons("Map1MapReplaceK")}
+} > {
+	Map "=>" Map			-> Map {non-assoc, cons("Map1Rewrite")}
+}
+context-free syntax
+	%%"(" MapItem ")"		-> MapItem {bracket}
+	"(" Map ")"				-> Map {bracket}
+
+context-free syntax
+	%% TODO: Variables Dunno what to do with the variables
+	%% VarId ":" Type		-> Variable {cons("TypedVar")}
+	VARID ":" "List"		-> List {cons("List12Var")}
+	VARID					-> List {cons("List1Var")}
+	VARID ":" "ListItem"	-> List {cons("ListItem12Var")}
+	VARID					-> List {cons("ListItem1Var")}
+	VARID ":" "Set"			-> Set {cons("Set12Var")}
+	VARID					-> Set {cons("Set1Var")}
+	VARID ":" "SetItem"		-> Set {cons("SetItem12Var")}
+	VARID					-> Set {cons("SetItem1Var")}
+	VARID ":" "Bag"			-> Bag {cons("Bag12Var")}
+	VARID					-> Bag {cons("Bag1Var")}
+	VARID ":" "BagItem"		-> Bag {cons("BagItem12Var")}
+	VARID					-> Bag {cons("BagItem1Var")}
+	VARID ":" "Map"			-> Map {cons("Map12Var")}
+	VARID					-> Map {cons("Map1Var")}
+	VARID ":" "MapItem"		-> Map {cons("MapItem12Var")}
+	VARID					-> Map {cons("MapItem1Var")}
+	VARID ":" "K"			-> K {cons("K12Var")}
+	VARID					-> K {cons("K1Var")}
+	VARID ":" "List{K}"		-> ListDlKDr {cons("ListDlKDr12Var")}
+	VARID					-> ListDlKDr {cons("ListDlKDr1Var")}
+	VARID ":" "KLabel"		-> KLabel {cons("KLabel12Var")}
+	VARID					-> KLabel {cons("KLabel1Var")}
+
+lexical syntax
+	%% rejects
+	%%"K"			-> ID {reject}
+	%%"List"		-> ID {reject}
+	"ListItem"		-> VARID {reject}
+	%%"Bag"			-> ID {reject}
+	"BagItem"		-> VARID {reject}
+	%%"Set"			-> ID {reject}
+	"SetItem"		-> VARID {reject}
+	%%"Map"			-> ID {reject}
+	"MapItem"		-> VARID {reject}
+	%%"keys"			-> ID {reject}
+	%%"hasMapping"	-> ID {reject}
+
+lexical restrictions
+	".List"		-/- [a-zA-Z0-9\{\}]
+	".ListItem"	-/- [a-zA-Z0-9]
+	".Map"		-/- [a-zA-Z0-9]
+	".MapItem"	-/- [a-zA-Z0-9]
+	".Set"		-/- [a-zA-Z0-9]
+	".SetItem"	-/- [a-zA-Z0-9]
+	".Bag"		-/- [a-zA-Z0-9]
+	".BagItem"	-/- [a-zA-Z0-9]
+	".K"		-/- [a-zA-Z0-9]
+	".List{K}"	-/- [a-zA-Z0-9]
+
+	"List"		-/- [a-zA-Z0-9]
+	"ListItem"	-/- [a-zA-Z0-9]
+	"Map"		-/- [a-zA-Z0-9]
+	"MapItem"	-/- [a-zA-Z0-9]
+	"Set"		-/- [a-zA-Z0-9]
+	"SetItem"	-/- [a-zA-Z0-9]
+	"Bag"		-/- [a-zA-Z0-9]
+	"BagItem"	-/- [a-zA-Z0-9]
+	"K"			-/- [a-zA-Z0-9]
+	"List{K}"	-/- [a-zA-Z0-9]
+	"."			-/- [a-zA-Z0-9\.]
+
+module Common
+
+exports
+lexical syntax
+	[\ \t\n\r] -> LAYOUT
+
+	[\*]                             -> CommentChar
+	"/*" (~[\*] | CommentChar)* "*/" -> LAYOUT
+	"//" ~[\n\r]* ([\n\r] | EOF)     -> LAYOUT
+
+	-> EOF
+
+	%% Variables and the Anonymous Variable
+	"$"?[A-Z] ~[\:\;\(\)\<\>\~\n\r\t\,\ \[\]\=\+\-\*\/\|\{\}\.]*  -> VARID
+	"_" -> VARID
+	"HOLE" -> VARID {reject}
+
+lexical restrictions
+	%% Ensure greedy matching for lexicals
+	CommentChar   -/- [\/]
+
+	%% EOF may not be followed by any char
+	EOF           -/- ~[]
+
+	VARID -/- ~[\:\;\(\)\<\>\~\n\r\t\,\ \[\]\=\+\-\*\/\|\{\}\.]
+
+context-free restrictions
+	%% Ensure greedy matching for comments
+	LAYOUT? -/- [\ \t\n\r]
+	LAYOUT? -/- [\/].[\/]
+	LAYOUT? -/- [\/].[\*]
+
+module K3Disamb
+imports Common %% For Comments and whitespace
+imports KTechnique
+imports KBuiltinsBasic
+imports Integration
+
+
+exports
+context-free start-symbols
+	StartDz
+
+context-free syntax
+	KSentence+	-> StartDz {cons("KSentenceList")}
+	%% K Sentences
+	%%"macro" Bag "=" Bag			-> KSimpleSentence {cons("Macro")}
+	"configuration" Bag			-> KSentence {cons("Config")}
+	%%"rule" Label K				-> KSimpleSentence {cons("K1Rule")}
+	"rule" Label List			-> KSimpleSentence {cons("List1Rule")}
+	"rule" Label Bag			-> KSimpleSentence {cons("Bag1Rule")}
+	"rule" Label ListDlKDr		-> KSimpleSentence {cons("ListDlKDr1Rule")}
+	"rule" Label Set			-> KSimpleSentence {cons("Set1Rule")}
+	"rule" Label Map			-> KSimpleSentence {cons("Map1Rule")}
+	"context" K					-> KSimpleSentence {cons("Context")}
+	%%"predicate" K				-> KSimpleSentence {cons("Predicate")}
+
+
+	KSimpleSentence "when" K "[" TagList "]"-> KSentence {cons("AttributedCondSentence"), prefer}
+	KSimpleSentence "when" K				-> KSentence {cons("CondSentence")}
+	KSimpleSentence "[" TagList "]"			-> KSentence {cons("AttributedSentence")}
+	KSimpleSentence							-> KSentence {avoid}
+	
+
+	"<" CellLabel CellProperty* ">" A "</" CellLabel ">"	-> BagItem {cons("Bag1ClosedCell")}
+	"..." B 	-> A {cons("LeftCell")}
+	B -> A {avoid}
+	CellContents "..." -> B {cons("RightCell")}
+	CellContents -> B {avoid}
+
+
+	K		-> CellContents %%{cons("K")}
+	Map		-> CellContents %%{cons("Map")}
+	Bag		-> CellContents %%{cons("Bag")}
+	Set		-> CellContents %%{cons("Set")}
+	List	-> CellContents %%{cons("List")}
+
+	DzDzID "=" DzDzSTRING -> CellProperty {cons("CellProperty")}
+	%%CellProperty* -> CellProperties %%{cons("CellProperties")}
+
+	CellLabel "=>" CellLabel	-> CellLabel {non-assoc, cons("CellLabelRewrite")}
+
+						-> Label {cons("NoLabel")}
+	"[" LABEL "]" ":"	-> Label {cons("Label")}
+
+
+						-> TagList {cons("NoTags")}
+	Tag					-> TagList
+	TagList "," TagList -> TagList {left, cons("TagList")}
+	
+
+	KEY							-> Tag {cons("Tag")}
+	KEY "(" TAGCONTENT ")"		-> Tag {cons("TagParam")}
+	KEY "(" DzDzSTRING ")"		-> Tag {cons("TagParam")}
+lexical syntax
+	[A-Za-z\-]				-> TAG
+	TAG+					-> KEY
+	TC*						-> TAGCONTENT
+	~[\n\r\(\)\"]			-> TC
+	"(" TAGCONTENT ")"		-> TC
+
+lexical restrictions
+	TAGCONTENT	-/- ~[\(\)]
+	KEY			-/- [A-Za-z\-]
+
+lexical syntax
+	[A-Z][a-zA-Z0-9]* -> BASICID
+	[A-Za-z] ~[\<\>\_\ \n\r\t]*	-> DzCellLabel
+	DzCellLabel				-> CellLabel
+	[A-Z\-]+				-> ModName
+	~[\[\]\_\ \n\r\t]+		-> LABEL
+
+lexical restrictions
+	BASICID 	-/- [a-zA-Z0-9\{\}]
+	CellLabel	-/- ~[\<\>\_\ \t\n\r]
+	LABEL		-/- ~[\[\]\_\ \n\r\t]
+	ModName		-/- [A-Z\-]

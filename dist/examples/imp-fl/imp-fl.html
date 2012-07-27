@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>IMP-FL</title>
+	<style>
+.bold
+{
+font-weight: bold;
+}
+.italic
+{
+font-style: italic;
+}
+em
+{
+font-style: italic;
+}
+.large
+{
+font-size: large;
+}
+.xlarge
+{
+font-size: x-large;
+}
+.attribute
+{
+color: blue;
+}
+.center
+{
+text-align: center;
+}
+.textCentered
+{
+text-align: center;
+display: inline-block;
+vertical-align: top;
+min-width: 20px;
+}
+.cell
+{
+display: inline-block;
+vertical-align: top;
+text-align:left;
+}
+hr.reduce
+{
+color: black;
+background-color: black;
+height: 3px;
+}
+hr.reduce:after
+{
+width: 0;
+height: 0;
+border-left : 6px solid transparent;
+border-right : 6px solid transparent;
+border-top : 6px solid black;
+position: absolute;
+content: "";
+}
+.tab
+{
+display: inline-block;
+padding : 2px;
+margin-left : 0;
+border-top : 3px solid;
+border-left : 3px solid;
+border-right : 3px solid;
+text-align: left;
+}
+.tab.curvedEdge
+{
+position: relative;
+left: 30px;
+top : 3px;
+}
+.tab.straightEdge
+{
+position: relative;
+left: 8px;
+top : 3px;
+}
+.block
+{
+color : black;
+border-width: 3px;
+display: inline-block; 
+padding: 10px;
+padding-left: 20px;
+padding-right: 20px;
+border-radius: 30px;
+border-style: solid;
+min-width: 60px;
+text-align: left;
+}
+.block.right
+{
+border-top-right-radius: 0px;
+border-bottom-right-radius: 0px;
+border-right-style: dotted;
+}
+.block.left
+{
+border-top-left-radius: 0px;
+border-bottom-left-radius: 0px;
+border-left-style: dotted;
+}
+.yellow
+{
+border-color: #96915c;
+background-color: #f7f7c5;
+}
+.green
+{
+border-color: #008000;
+background-color: #BEEEBE;
+}
+.red
+{
+border-color: #892d29;
+background-color: #f5c4c4;
+}
+	</style>
+	<meta charset="utf-8" />
+</head>
+<body>
+<span class="xlarge">IMP-FL </span> 
+<div> <br /> </div>
+<div>MODULE <span class="large">IMP-FL-SYNTAX</span> <br /> <br />
+<table> <tr> <td> SYNTAX <span class ="italic"> KLabel </span></td><td> ::= </td> <td>div#ee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>div#He </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>div#eH </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>plus#ee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>plus#He </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>plus#eH </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>le#ee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>le#He </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>not#e </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>not#H </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>and#ee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>and#He </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>assign#ee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>assign#eH </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>ite#eee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>ite#Hee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>while#ee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>seq#ee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>pgm#ee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>emptyIds# </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>consIds#ee </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>skip# </td> </tr>
+</table>
+<br />
+<table> <tr> <td> SYNTAX <span class ="italic"> KResult </span></td><td> ::= </td> <td><span class ="italic"> Int </span></td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td><span class ="italic"> Bool </span></td> </tr>
+</table>
+<br />
+END MODULE </div>
+<br />
+<div>MODULE <span class="large">IMP-FL</span> <br /> <br />
+<div> CONFIGURATION : <br /><div class="cell"> <div class="tab curvedEdge yellow"><span class = "bold">T</span> </div><br /><div class="block yellow" > <div class="center"><div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">$PGM </span> </div> </div> </div>
+<div class="cell"> <div class="tab curvedEdge red"><span class = "bold">env</span> </div><br /><div class="block red" > <div class="center"> <span title="Map" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> </div> </div> </div>
+</div> </div> </div>
+</div> <br /><div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> div#ee </span> (<span title ="K">E1 </span> <span class="bold">, </span><span title ="List{K}">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E1 </span> &#x219d; <span title ="KLabel"> div#He </span> (<span title ="List{K}">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="KLabel"> 'isKResult </span> (<span title ="K">E1 </span> ))</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> div#ee </span> (<span title ="List{K}">E1 </span> <span class="bold">, </span><span title ="K">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E2 </span> &#x219d; <span title ="KLabel"> div#eH </span> (<span title ="List{K}">E1 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="KLabel"> 'isKResult </span> (<span title ="K">E2 </span> ))</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">V </span> &#x219d; <span title ="KLabel"> div#He </span> (<span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> div#ee </span> (<span title ="K">V </span> <span class="bold">, </span><span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'isKResult </span> (<span title ="K">V </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">V </span> &#x219d; <span title ="KLabel"> div#eH </span> (<span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> div#ee </span> (<span title ="List{K}">E </span> <span class="bold">, </span><span title ="K">V </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'isKResult </span> (<span title ="K">V </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> plus#ee </span> (<span title ="K">E1 </span> <span class="bold">, </span><span title ="List{K}">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E1 </span> &#x219d; <span title ="KLabel"> plus#He </span> (<span title ="List{K}">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="KLabel"> 'isKResult </span> (<span title ="K">E1 </span> ))</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> plus#ee </span> (<span title ="List{K}">E1 </span> <span class="bold">, </span><span title ="K">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E2 </span> &#x219d; <span title ="KLabel"> plus#eH </span> (<span title ="List{K}">E1 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="KLabel"> 'isKResult </span> (<span title ="K">E2 </span> ))</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">V </span> &#x219d; <span title ="KLabel"> plus#He </span> (<span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> plus#ee </span> (<span title ="K">V </span> <span class="bold">, </span><span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'isKResult </span> (<span title ="K">V </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">V </span> &#x219d; <span title ="KLabel"> plus#eH </span> (<span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> plus#ee </span> (<span title ="List{K}">E </span> <span class="bold">, </span><span title ="K">V </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'isKResult </span> (<span title ="K">V </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> le#ee </span> (<span title ="K">E1 </span> <span class="bold">, </span><span title ="List{K}">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E1 </span> &#x219d; <span title ="KLabel"> le#He </span> (<span title ="List{K}">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="KLabel"> 'isKResult </span> (<span title ="K">E1 </span> ))</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">V </span> &#x219d; <span title ="KLabel"> le#He </span> (<span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> le#ee </span> (<span title ="K">V </span> <span class="bold">, </span><span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'isKResult </span> (<span title ="K">V </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> not#e </span> (<span title ="K">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E </span> &#x219d; <span title ="KLabel"> not#H </span> ( <span title="List{K}" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="KLabel"> 'isKResult </span> (<span title ="K">E </span> ))</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">V </span> &#x219d; <span title ="KLabel"> not#H </span> ( <span title="List{K}" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> not#e </span> (<span title ="K">V </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'isKResult </span> (<span title ="K">V </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> and#ee </span> (<span title ="K">E1 </span> <span class="bold">, </span><span title ="List{K}">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E1 </span> &#x219d; <span title ="KLabel"> and#He </span> (<span title ="List{K}">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="KLabel"> 'isKResult </span> (<span title ="K">E1 </span> ))</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">V </span> &#x219d; <span title ="KLabel"> and#He </span> (<span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> and#ee </span> (<span title ="K">V </span> <span class="bold">, </span><span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'isKResult </span> (<span title ="K">V </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> assign#ee </span> (<span title ="List{K}">E1 </span> <span class="bold">, </span><span title ="K">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E2 </span> &#x219d; <span title ="KLabel"> assign#eH </span> (<span title ="List{K}">E1 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="KLabel"> 'isKResult </span> (<span title ="K">E2 </span> ))</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">V </span> &#x219d; <span title ="KLabel"> assign#eH </span> (<span title ="List{K}">E </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> assign#ee </span> (<span title ="List{K}">E </span> <span class="bold">, </span><span title ="K">V </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'isKResult </span> (<span title ="K">V </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> ite#eee </span> (<span title ="K">E </span> <span class="bold">, </span><span title ="List{K}">S1 </span> <span class="bold">, </span><span title ="List{K}">S2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E </span> &#x219d; <span title ="KLabel"> ite#Hee </span> (<span title ="List{K}">S1 </span> <span class="bold">, </span><span title ="List{K}">S2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="KLabel"> 'isKResult </span> (<span title ="K">E </span> ))</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">V </span> &#x219d; <span title ="KLabel"> ite#Hee </span> (<span title ="List{K}">S1 </span> <span class="bold">, </span><span title ="List{K}">S2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> ite#eee </span> (<span title ="K">V </span> <span class="bold">, </span><span title ="List{K}">S1 </span> <span class="bold">, </span><span title ="List{K}">S2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'isKResult </span> (<span title ="K">V </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge yellow"><span class = "bold">T</span> </div><br /><div class="block yellow" > <div class="center"><div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="Id">X </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+<div class="cell"> <div class="tab curvedEdge red"><span class = "bold">env</span> </div><br /><div class="block red" > <div class="center"><span title ="Map">EL </span> <span title ="Id">X </span> <span text-size="large"> &#x21a6; </span><span title ="K">I </span> <span title ="Map">ER </span> </div> </div> </div>
+</div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge yellow"><span class = "bold">T</span> </div><br /><div class="block yellow" > <div class="center"><div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">I </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+<div class="cell"> <div class="tab curvedEdge red"><span class = "bold">env</span> </div><br /><div class="block red" > <div class="center"><span title ="Map">EL </span> <span title ="Id">X </span> <span text-size="large"> &#x21a6; </span><span title ="K">I </span> <span title ="Map">ER </span> </div> </div> </div>
+</div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge yellow"><span class = "bold">T</span> </div><br /><div class="block yellow" > <div class="center"><div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> assign#ee </span> (<span title ="Id">X </span> <span class="bold">, </span><span title ="Int">I </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+<div class="cell"> <div class="tab curvedEdge red"><span class = "bold">env</span> </div><br /><div class="block red" > <div class="center"><span title ="Map">EL </span> <span title ="Id">X </span> <span text-size="large"> &#x21a6; </span><span title ="List{K}">_ </span> <span title ="Map">ER </span> </div> </div> </div>
+</div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge yellow"><span class = "bold">T</span> </div><br /><div class="block yellow" > <div class="center"><div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">K </span> </div> </div> </div>
+<div class="cell"> <div class="tab curvedEdge red"><span class = "bold">env</span> </div><br /><div class="block red" > <div class="center"><span title ="Map">EL </span> <span title ="Id">X </span> <span text-size="large"> &#x21a6; </span><span title ="Int">I </span> <span title ="Map">ER </span> </div> </div> </div>
+</div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> plus#ee </span> (<span title ="Int">I1 </span> <span class="bold">, </span><span title ="Int">I2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="Int">I1 </span> +Int <span title ="Int">I2 </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> div#ee </span> (<span title ="Int">I1 </span> <span class="bold">, </span><span title ="Int">I2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="Int">I1 </span> /Int <span title ="Int">I2 </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div>  when <span title ="Int">I2 </span> =/=K <span title ="#Int"> 0 </span> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> le#ee </span> (<span title ="Int">I1 </span> <span class="bold">, </span><span title ="Int">I2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="Int">I1 </span> &lt;=Int <span title ="Int">I2 </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> not#e </span> (<span title ="Bool">B </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center">notBool <span title ="Bool">B </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> and#ee </span> (<span title ="#Bool"> true </span> <span class="bold">, </span><span title ="Bool">B </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="Bool">B </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> and#ee </span> (<span title ="#Bool"> false </span> <span class="bold">, </span><span title ="K">_ </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="#Bool"> false </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> skip# </span> ( <span title="List{K}" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> seq#ee </span> (<span title ="K">E1 </span> <span class="bold">, </span><span title ="K">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E1 </span> &#x219d; <span title ="K">E2 </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> ite#eee </span> (<span title ="#Bool"> true </span> <span class="bold">, </span><span title ="K">E1 </span> <span class="bold">, </span><span title ="K">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E1 </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> ite#eee </span> (<span title ="#Bool"> false </span> <span class="bold">, </span><span title ="K">E1 </span> <span class="bold">, </span><span title ="K">E2 </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">E2 </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> while#ee </span> (<span title ="K">E </span> <span class="bold">, </span><span title ="K">S </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> ite#eee </span> (<span title ="K">E </span> <span class="bold">, </span><span title ="KLabel"> seq#ee </span> (<span title ="K">S </span> <span class="bold">, </span><span title ="KLabel"> while#ee </span> (<span title ="K">E </span> <span class="bold">, </span><span title ="K">S </span> ))<span class="bold">, </span><span title ="KLabel"> skip# </span> ( <span title="List{K}" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> ))&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge yellow"><span class = "bold">T</span> </div><br /><div class="block yellow" > <div class="center"><div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> consIds#ee </span> (<span title ="K">V </span> <span class="bold">, </span><span title ="K">Rest </span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+<div class="cell"> <div class="tab curvedEdge red"><span class = "bold">env</span> </div><br /><div class="block red" > <div class="center"><span title ="Map">E </span> </div> </div> </div>
+</div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge yellow"><span class = "bold">T</span> </div><br /><div class="block yellow" > <div class="center"><div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">Rest </span> &#x219d; <span title ="K">K </span> </div> </div> </div>
+<div class="cell"> <div class="tab curvedEdge red"><span class = "bold">env</span> </div><br /><div class="block red" > <div class="center"><span title ="K">V </span> <span text-size="large"> &#x21a6; </span><span title ="#Int"> 0 </span> <span title ="Map">E </span> </div> </div> </div>
+</div> </div> </div>
+</em> </div></div>  when <span title ="KLabel"> 'notBool </span> (<span title ="K">V </span> in keys <span title ="Map">E </span> )</div> <br />
+<div> <span > RULE </span><div class="cell"> <div class="textCentered"> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="KLabel"> emptyIds# </span> ( <span title="List{K}" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> )&#x219d; <span title ="K">K </span> </div> </div> </div>
+</em> <hr class="reduce"/> <em> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">K </span> </div> </div> </div>
+</em> </div></div> </div> <br />
+END MODULE </div>
+<br />
+</body>
+</html>

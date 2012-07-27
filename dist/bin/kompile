@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-
-java -ss8m -Xms64m -Xmx1G  -jar "$(dirname $0)/java/k3.jar" -kompile "$@"

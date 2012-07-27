@@ -1,0 +1,7 @@
+[  ("T", "Bag")
+, ("nextVar", "K")
+, ("substitution", "K")
+, ("clauses", "Bag")
+, ("solution", "List")
+, ("k", "K")
+]

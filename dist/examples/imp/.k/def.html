@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>IMP</title>
+	<style>
+.bold
+{
+font-weight: bold;
+}
+.italic
+{
+font-style: italic;
+}
+em
+{
+font-style: italic;
+}
+.large
+{
+font-size: large;
+}
+.xlarge
+{
+font-size: x-large;
+}
+.attribute
+{
+color: blue;
+}
+.center
+{
+text-align: center;
+}
+.textCentered
+{
+text-align: center;
+display: inline-block;
+vertical-align: top;
+min-width: 20px;
+}
+.cell
+{
+display: inline-block;
+vertical-align: top;
+text-align:left;
+}
+hr.reduce
+{
+color: black;
+background-color: black;
+height: 3px;
+}
+hr.reduce:after
+{
+width: 0;
+height: 0;
+border-left : 6px solid transparent;
+border-right : 6px solid transparent;
+border-top : 6px solid black;
+position: absolute;
+content: "";
+}
+.tab
+{
+display: inline-block;
+padding : 2px;
+margin-left : 0;
+border-top : 3px solid;
+border-left : 3px solid;
+border-right : 3px solid;
+text-align: left;
+}
+.tab.curvedEdge
+{
+position: relative;
+left: 30px;
+top : 3px;
+}
+.tab.straightEdge
+{
+position: relative;
+left: 8px;
+top : 3px;
+}
+.block
+{
+color : black;
+border-width: 3px;
+display: inline-block; 
+padding: 10px;
+padding-left: 20px;
+padding-right: 20px;
+border-radius: 30px;
+border-style: solid;
+min-width: 60px;
+text-align: left;
+}
+.block.right
+{
+border-top-right-radius: 0px;
+border-bottom-right-radius: 0px;
+border-right-style: dotted;
+}
+.block.left
+{
+border-top-left-radius: 0px;
+border-bottom-left-radius: 0px;
+border-left-style: dotted;
+}
+.defaultColor
+{
+border-color: #000000;
+background-color: #FFFFFF;
+}
+.yellow
+{
+border-color: #7c7c00;
+background-color: #ffff00;
+}
+.green
+{
+border-color: #003e00;
+background-color: #00b600;
+}
+.red
+{
+border-color: #7c0000;
+background-color: #ff0000;
+}
+	</style>
+	<meta charset="utf-8" />
+</head>
+<body>
+<span class="xlarge">IMP </span> 
+<div> <br /> </div>
+<div>MODULE <span class="large">IMP-SYNTAX</span> <br /> <br />
+<table> <tr> <td> SYNTAX <span class ="italic"> AExp </span></td><td> ::= </td> <td><span class ="italic"> Int </span></td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td><span class ="italic"> Id </span></td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td><span class ="italic"> AExp </span>/ <span class ="italic"> AExp </span> [ <span class ="attribute"> strict</span> ]</td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td><span class ="italic"> AExp </span>+ <span class ="italic"> AExp </span> [ <span class ="attribute"> strict</span> ]</td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>( <span class ="italic"> AExp </span>) </td> </tr>
+</table>
+<br />
+<table> <tr> <td> SYNTAX <span class ="italic"> BExp </span></td><td> ::= </td> <td><span class ="italic"> Bool </span></td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td><span class ="italic"> AExp </span>&lt;= <span class ="italic"> AExp </span> [ <span class ="attribute"> seqstrict</span> ]</td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>not <span class ="italic"> BExp </span> [ <span class ="attribute"> strict</span> ]</td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td><span class ="italic"> BExp </span>and <span class ="italic"> BExp </span> [ <span class ="attribute"> strict(1)</span> ]</td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>( <span class ="italic"> BExp </span>) </td> </tr>
+</table>
+<br />
+<table> <tr> <td> SYNTAX <span class ="italic"> Stmt </span></td><td> ::= </td> <td>skip </td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td><span class ="italic"> Id </span>:= <span class ="italic"> AExp </span> [ <span class ="attribute"> strict(2)</span> ]</td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>if <span class ="italic"> BExp </span>then <span class ="italic"> Stmt </span>else <span class ="italic"> Stmt </span> [ <span class ="attribute"> strict(1)</span> ]</td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>while <span class ="italic"> BExp </span>do <span class ="italic"> Stmt </span></td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td><span class ="italic"> Stmt </span>; <span class ="italic"> Stmt </span></td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td>( <span class ="italic"> Stmt </span>) </td> </tr>
+</table>
+<br />
+<table> <tr> <td> SYNTAX <span class ="italic"> Pgm </span></td><td> ::= </td> <td>var <span class ="italic"> Ids </span>; <span class ="italic"> Stmt </span></td> </tr>
+</table>
+<br />
+<table> <tr> <td> SYNTAX <span class ="italic"> Ids </span></td><td> ::= </td> <td><span class ="italic">List</span>{#<span class ="italic">Id</span>,","} </span>
+</td> </tr>
+</table>
+<br />
+<table> <tr> <td> SYNTAX <span class ="italic"> Start </span></td><td> ::= </td> <td><span class ="italic"> Pgm </span></td> </tr>
+</table>
+<br />
+END MODULE </div>
+<br />
+<div>MODULE <span class="large">IMP</span> <br /> <br />
+<div> CONFIGURATION : <br /><div class="cell"> <div class="tab curvedEdge yellow"><span class = "bold">T</span> </div><br /><div class="block yellow" > <div class="center"><div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block green" > <div class="center"><span title ="K">$PGM </span> </div> </div> </div>
+<div class="cell"> <div class="tab curvedEdge red"><span class = "bold">env</span> </div><br /><div class="block red" > <div class="center"> <span title="Map" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> </div> </div> </div>
+</div> </div> </div>
+</div> <br /><table> <tr> <td> SYNTAX <span class ="italic"> KResult </span></td><td> ::= </td> <td><span class ="italic"> Int </span></td> </tr>
+<tr> <td> </td> <td class = "textCentered"> |  </td> <td><span class ="italic"> Bool </span></td> </tr>
+</table>
+<br />
+<div> <span title ="Rule Label: lookup"> RULE </span><div class="cell"> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block right green" > <div class="center"><div class="textCentered"> <em> <span title ="Id">X </span> </em> <hr class="reduce"/> <em> <span title ="Int">I </span> </em> </div></div> </div> </div>
+<div class="cell"> <div class="tab straightEdge red"><span class = "bold">env</span> </div><br /><div class="block left right red" > <div class="center"><span title ="Id">X </span> <span text-size="large"> &#x21a6; </span><span title ="Int">I </span> </div> </div> </div>
+</div> </div> <br />
+<div> <span title ="Rule Label: assignment"> RULE </span><div class="cell"> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block right green" > <div class="center"><div class="textCentered"> <em> <span title ="Id">X </span> := <span title ="Int">I </span> </em> <hr class="reduce"/> <em>  <span title="K" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> </em> </div></div> </div> </div>
+<div class="cell"> <div class="tab straightEdge red"><span class = "bold">env</span> </div><br /><div class="block left right red" > <div class="center"><span title ="Id">X </span> <span text-size="large"> &#x21a6; </span><div class="textCentered"> <em> <span title ="List{K}">_ </span> </em> <hr class="reduce"/> <em> <span title ="Int">I </span> </em> </div></div> </div> </div>
+</div> </div> <br />
+<div> <span title ="Rule Label: addition"> RULE </span><div class="cell"> <div class="textCentered"> <em> <span title ="Int">I1 </span> + <span title ="Int">I2 </span> </em> <hr class="reduce"/> <em> <span title ="Int">I1 </span> +Int <span title ="Int">I2 </span> </em> </div></div> </div> <br />
+<div> <span title ="Rule Label: division"> RULE </span><div class="cell"> <div class="textCentered"> <em> <span title ="Int">I1 </span> / <span title ="Int">I2 </span> </em> <hr class="reduce"/> <em> <span title ="Int">I1 </span> /Int <span title ="Int">I2 </span> </em> </div></div>  when <span title ="Int">I2 </span> =/=K <span title ="#Int"> 0 </span> </div> <br />
+<div> <span title ="Rule Label: leq"> RULE </span><div class="cell"> <div class="textCentered"> <em> <span title ="Int">I1 </span> &lt;= <span title ="Int">I2 </span> </em> <hr class="reduce"/> <em> <span title ="Int">I1 </span> &lt;=Int <span title ="Int">I2 </span> </em> </div></div> </div> <br />
+<div> <span title ="Rule Label: not"> RULE </span><div class="cell"> <div class="textCentered"> <em> not <span title ="Bool">T </span> </em> <hr class="reduce"/> <em> notBool <span title ="Bool">T </span> </em> </div></div> </div> <br />
+<div> <span title ="Rule Label: and-true"> RULE </span><div class="cell"> <div class="textCentered"> <em> <span title ="#Bool"> true </span> and <span title ="BExp">B </span> </em> <hr class="reduce"/> <em> <span title ="BExp">B </span> </em> </div></div> </div> <br />
+<div> <span title ="Rule Label: and-false"> RULE </span><div class="cell"> <div class="textCentered"> <em> <span title ="#Bool"> false </span> and <span title ="BExp">B </span> </em> <hr class="reduce"/> <em> <span title ="#Bool"> false </span> </em> </div></div> </div> <br />
+<div> <span title ="Rule Label: skip"> RULE </span><div class="cell"> <div class="textCentered"> <em> skip </em> <hr class="reduce"/> <em>  <span title="K" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> </em> </div></div> </div> <br />
+<div> <span title ="Rule Label: sequential"> RULE </span><div class="cell"> <div class="textCentered"> <em> <span title ="K">S1 </span> ; <span title ="K">S2 </span> </em> <hr class="reduce"/> <em> <span title ="K">S1 </span> &#x219d; <span title ="K">S2 </span> </em> </div></div>  [ <span class ="attribute"> structural</span> ]</div> <br />
+<div> <span title ="Rule Label: if-true"> RULE </span><div class="cell"> <div class="textCentered"> <em> if <span title ="#Bool"> true </span> then <span title ="K">S </span> else <span title ="K">_ </span> </em> <hr class="reduce"/> <em> <span title ="K">S </span> </em> </div></div> </div> <br />
+<div> <span title ="Rule Label: if-false"> RULE </span><div class="cell"> <div class="textCentered"> <em> if <span title ="#Bool"> false </span> then <span title ="K">_ </span> else <span title ="K">S </span> </em> <hr class="reduce"/> <em> <span title ="K">S </span> </em> </div></div> </div> <br />
+<div> <span title ="Rule Label: while"> RULE </span><div class="cell"> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block right green" > <div class="center"><div class="textCentered"> <em> while <span title ="K">B </span> do <span title ="K">S </span> </em> <hr class="reduce"/> <em> if <span title ="K">B </span> then <span title ="K">S </span> ; while <span title ="K">B </span> do <span title ="K">S </span> else skip </em> </div></div> </div> </div>
+</div>  [ <span class ="attribute"> structural</span> ]</div> <br />
+<div> <span title ="Rule Label: program-still-vars"> RULE </span><div class="cell"> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block right green" > <div class="center"><div class="textCentered"> <em> var <span title ="Id">X </span>  , <span title ="Ids">Xs </span>  ; <span title ="K">S </span> </em> <hr class="reduce"/> <em> var <span title ="Ids">Xs </span> ; <span title ="K">S </span> </em> </div></div> </div> </div>
+<div class="cell"> <div class="tab curvedEdge red"><span class = "bold">env</span> </div><br /><div class="block red" > <div class="center"><span title ="Map">&rho; </span> <div class="textCentered"> <em>  <span title="Map" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> </em> <hr class="reduce"/> <em> <span title ="Id">X </span> <span text-size="large"> &#x21a6; </span><span title ="#Int"> 0 </span> </em> </div></div> </div> </div>
+</div>  when notBool <span title ="Id">X </span> in keys <span title ="Map">&rho; </span> </div> <br />
+<div> <span title ="Rule Label: program-no-vars"> RULE </span><div class="cell"> <div class="cell"> <div class="tab curvedEdge green"><span class = "bold">k</span> </div><br /><div class="block right green" > <div class="center"><div class="textCentered"> <em> var  <span title="Ids" class = "bold"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> ; <span title ="K">S </span> </em> <hr class="reduce"/> <em> <span title ="K">S </span> </em> </div></div> </div> </div>
+</div>  [ <span class ="attribute"> structural</span> ]</div> <br />
+END MODULE </div>
+<br />
+</body>
+</html>
