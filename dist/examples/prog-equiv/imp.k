@@ -1,3 +1,5 @@
+require "modules/substitution.k"
+
 
 /*!
 \setlength{\parindent}{1em}
@@ -8,7 +10,9 @@
 
 //@ \section{Symbolic Calculus}
 
-module SYMBOLIC-CALCULUS-SYNTAX
+//module SYMBOLIC-CALCULUS-SYNTAX
+
+module SYMBOLIC-CALCULUS
 
 /*@ 
   The symbolic values needed to define the initial configuration.
@@ -30,10 +34,11 @@ module SYMBOLIC-CALCULUS-SYNTAX
 
   syntax Int ::= IntSymVar
 
-endmodule
 
-module SYMBOLIC-CALCULUS
-  imports SYMBOLIC-CALCULUS-SYNTAX
+//endmodule
+
+//module SYMBOLIC-CALCULUS
+//  imports SYMBOLIC-CALCULUS-SYNTAX
 
 
 
@@ -135,9 +140,10 @@ module SYMBOLIC-CALCULUS
        when isIntSymExp(K) ==K true
        [anywhere]
 
-  rule 'isInt(I1:Int +Int I2:Int) => true [anywhere]
-  rule 'isInt(I1:Int *Int I2:Int) => true [anywhere] 
-  rule 'isInt(I1:Int /Int I2:Int) => true [anywhere]
+  rule 'isInt(_:Int +Int _:Int) => true [anywhere]
+  rule 'isInt(_:Int *Int _:Int) => true [anywhere] 
+  rule 'isInt(_:Int /Int _:Int) => true [anywhere]
+
 
 //@ Some simplification rules.
 
@@ -148,6 +154,27 @@ module SYMBOLIC-CALCULUS
        (I +Int 1) *Int (I +Int 1)
        [anywhere]
 
+
+  rule B1:K andBool B2:K impliesBool V1:K ==K V2:K =>
+       B1 impliesBool V1 ==K V2 orBool
+       B2 impliesBool V1 ==K V2
+       [anywhere]
+
+  rule B:K impliesBool true => true  [anywhere]
+
+  rule B:K andBool true => B  [anywhere]
+
+  rule true andBool B:K => B  [anywhere]
+
+  rule B:K orBool true => true  [anywhere]
+
+  rule true orBool B:K => true  [anywhere]
+
+
+  rule V1:K ==K V2:K impliesBool V1 ==K V2 => true [anywhere]
+  
+     
+
 endmodule
 
 
@@ -155,7 +182,8 @@ endmodule
 
 module IMP-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
-  imports SYMBOLIC-CALCULUS-SYNTAX
+  imports SYMBOLIC-CALCULUS
+//  imports SYMBOLIC-CALCULUS-SYNTAX
 
 /*@
   This is the syntax of IMP, where we added the multiplication operator.
@@ -190,10 +218,15 @@ module IMP-SYNTAX
   variable observers has the same value in both configurations.
 */
 
-  syntax EqvPgm ::= "program1:" Pgm "program2:" Pgm "observers:" Ids ";"
+  syntax EqvPgm ::= "program1:" Pgm 
+                    "program2:" Pgm 
+                    "condition:" BExp
+                    "observers:" Ids ";"
 
   syntax Start ::= EqvPgm  
 
+
+  syntax BExp ::= AExp "==" AExp  [strict]
 
 endmodule
 
@@ -203,7 +236,8 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports SYMBOLIC-CALCULUS
+//  imports SYMBOLIC-CALCULUS
+  imports SUBSTITUTION
 
 /*@
   A configuration is a multiset of tasks. Each task consists of an
@@ -282,6 +316,12 @@ module IMP
   rule [program-still-vars]:
            <k> var X:Id, Xs:Ids; S:Stmt => var Xs; S ...</k>
           <env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
+
+/*@ 
+  Equality of ints:
+*/
+
+  rule [eq] : I1:Int == I2:Int => I1 ==Int I2
 
 /*@
   The semantics for memory lookup, skip, assignment, sequential composition,
@@ -385,6 +425,17 @@ module IMP
        <env>... B |-> V:Bool ...</env>
        when isBoolSymExp(B)
 
+
+/*@
+
+*/
+
+  rule <task>...
+         <env>... B |-> true B |-> false ...</env>
+       ...</task>
+       =>
+       .
+
 /*@
   The special bag \texttt{success} is used for removing tasks (goals).
 */
@@ -410,14 +461,14 @@ module IMP
            <k> K </k>
            <env> Env':Map </env>
          </config>
-         C:Bag
+         <formula> F:K </formula>
        </task>
        =>
        success)
        <observers> Obs:List </observers>
        when eqObs(<env> Env </env> 
                   <env> Env' </env>
-                  <observers> Obs </observers>)
+                  <observers> Obs </observers>, F)
             ==K true
 
 
@@ -427,33 +478,35 @@ module IMP
   called.
 */
 
-  syntax Bool ::= "eqObs" "(" Bag ")" [function]
+  syntax Bool ::= "eqObs" "(" Bag "," K ")" [function]
 
   rule eqObs(<env> _ </env>
              <env> _ </env>
-             <observers> .List </observers>)
+             <observers> .List </observers>, F:K)
        =>
        true
        [anywhere]
 
   rule eqObs( <env>... X:Id |-> V1:K ...</env>
               <env>... X |-> V2:K ...</env>
-              <observers> ListItem(X) => . ...</observers> )
-       when V1 ==K V2
+              <observers> ListItem(X) => . ...</observers>, F:K )
+       when F impliesBool V1 ==K V2
        [anywhere]
 
   rule eqObs( <env>... X:Id |-> V1:K ...</env>
               <env>... X |-> V2:K ...</env>
-              <observers> ListItem(X) ...</observers> )
+              <observers> ListItem(X) ...</observers> , F:K)
        =>
        false
-       when V1 =/=K V2
+       when  F impliesBool V1 =/=K V2
        [anywhere]
  
 /*@
   The next rule gives semantics to the new construct \texttt{storeHyp}, which 
   consists of storing the hypothesis given by the arguments. Its semantics
-  is similar to that of threads synchronization.
+  is similar to that of threads synchronization.\\
+  TBD: replace the values of the program variables with fresh symbolic
+  values and add to formula the corresponding contraints.
 */
 
 
@@ -467,7 +520,7 @@ module IMP
            <k> storeHypo(K2:K) => . ...</k>
            <env> Env2:Map </env>
          </config>
-         <formula> F:Bool </formula>
+         <formula> F:K </formula>
        </task>
        <hypos>... 
          .
@@ -487,8 +540,45 @@ module IMP
          <observers> Obs:List </observers>
        when eqObs(<env> Env1 </env> 
                   <env> Env2 </env> 
-                  <observers> Obs </observers>)
-            ==K true
+                  <observers> Obs </observers>, F)
+
+/*@
+  Compute the substitution given by a pair of configurations
+  cfg1 ->* cfg2 (here the configurations are environments). 
+*/
+
+  syntax Map ::= "substitution" "(" Bag ")" [function]
+
+  rule substitution( <env> X:Id |-> V:IntSymVar Env:Map </env>
+                     <env> X |-> E:Int Env':Map </env>)
+       =>
+       V |-> E 
+       substitution( <env> Env:Map </env>
+                     <env> Env':Map </env>)
+       [anywhere]
+
+  rule substitution( <env> X:Id |-> V:IntSymVar Env:Map </env>
+                     <env> Env':Map </env>)
+       =>
+       substitution( <env> Env:Map </env>
+                     <env> Env':Map </env>)
+       when notBool(X in keys(Env'))
+       [anywhere]
+
+/*@
+  The following function applies a substitution to a formula.
+*/
+
+  syntax Bool ::= "apply" "(" Map "," Bool ")" [function]
+
+  rule apply(.Map, F:Bool) => F [anywhere]
+
+  rule apply(X:Id |-> V:Int M:Map, F:Bool)
+       =>
+       apply(M,  F[V/X])
+       [anywhere] 
+
+ 
 /*@
   The next rule is intended to implement the entailment between the collected
   hypotheses and goals. Obviously, this is a partial implementation. Again,
@@ -505,7 +595,7 @@ module IMP
            <k> K2:K </k>
            <env> Env2:Map </env>
          </config>
-         <formula> F:Bool </formula>
+         <formula> F:K </formula>
        </task>
        =>
        success)
@@ -519,13 +609,14 @@ module IMP
              <k2> K2 </k2>
              <env2> Env2':Map </env2>
            </patt2>
-           <formula> F </formula>
+           <formula> F':K </formula>
          </hypo>
        ...</hypos>
        <observers> Obs </observers>
-     when eqObs(<env> Env1 </env> 
-                <env> Env2 </env>
-                <observers> Obs </observers> )
+//     when F' impliesBool
+//          apply(substitution(<env> Env1 </env> <env> Env1' </env>)
+//           substitution(<env> Env2 </env> <env> Env2' </env>), F)
+          
 
 
 /*@
@@ -536,12 +627,13 @@ module IMP
   rule [initial] :
        <config>
          <k> 
-           program1: P1:Pgm program2: P2:Pgm observers: Obs:Ids ;
+           program1: P1:Pgm program2: P2:Pgm condition: F:BExp
+           observers: Obs:Ids ;
            =>
            initVal(Obs) ~> P1
          </k>
-         <env> _ </env>
-       </config>
+       ...</config>
+       <formula> _ => injectForm(F) </formula>
       (. =>
        <config>
          <k> 
@@ -573,6 +665,43 @@ module IMP
        </config> 
        <nextSymvar> I:Int => I +Int 1 </nextSymVar>
        [structural]
+
+/*@ 
+  The next function translates the initial formula into internal
+  form.\\
+  TBD: refactor it!!!!
+*/
+
+
+  syntax Bool ::= "injectForm" "(" BExp ")" [function]
+
+  rule injectForm(A1:AExp == A2:AExp)
+       =>
+       injectAExp(A1)  ==Int injectAExp(A2)
+       [anywhere]
+
+  rule injectForm(B1:BExp and B2:BExp)
+       =>
+       injectForm(B1) andBool injectForm(B2)
+       [anywhere]
+
+  syntax Int ::= "injectAExp" "(" AExp ")" [function]
+  rule injectAExp(I:Int) => I [anywhere]
+  rule injectAExp(A1:AExp + A2:AExp)
+       =>
+       injectAExp(A1)  +Int injectAExp(A2)
+       [anywhere]
+
+  rule injectAExp(A1:AExp * A2:AExp)
+       =>
+       injectAExp(A1)  *Int injectAExp(A2)
+       [anywhere]
+
+  rule injectAExp(A1:AExp / A2:AExp)
+       =>
+       injectAExp(A1)  /Int injectAExp(A2)
+       [anywhere]
+
 /*@
   The following is a helper function that transform a list of
   identifiers into a builtin list, used for storing the observer

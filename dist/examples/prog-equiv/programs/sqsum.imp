@@ -1,7 +1,7 @@
 program1:
 
 var i;
-i := symInt(i0);
+i := symInt(i01);
 while (i <= n) do (
   s := s + i * i;
   i := i + 1
@@ -10,13 +10,19 @@ while (i <= n) do (
 program2:
 
 var i, k;
-i := symInt(i0);
-k := symInt(i0) * symInt(i0);
+i := symInt(i02);
+k := symInt(k0);
 while (i <= n) do (
   s := s + k;
   k := k + i + i + 1;
   i := i + 1
 )
+
+condition:
+
+  symInt(k0) == symInt(i02) * symInt(i02)
+  and
+  symInt(i01) == symInt(i02)
 
 observers: n, s;
 
