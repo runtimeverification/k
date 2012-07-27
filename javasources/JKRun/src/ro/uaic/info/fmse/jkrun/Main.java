@@ -44,25 +44,6 @@ public class Main {
 		System.out.println("JKrun 0.2.0\n" + "Copyright (C) 2012 Necula Emilian & Raluca");
 	}
 
-	public static void printStatistics() {
-		PrettyPrintOutput p = new PrettyPrintOutput();
-		File file = new File(K.maude_output);
-		if ("search".equals(K.maude_cmd)) {
-			String totalStates = p.getSearchTagAttr(file, "total-states");
-			String totalRewrites = p.getSearchTagAttr(file, "total-rewrites");
-			String realTime = p.getSearchTagAttr(file, "real-time-ms");
-			String cpuTime = p.getSearchTagAttr(file, "cpu-time-ms");
-			String rewritesPerSecond = p.getSearchTagAttr(file, "rewrites-per-second");
-			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "states: " + totalStates + " rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL);
-		} else if ("erewrite".equals(K.maude_cmd)){
-			String totalRewrites = p.getResultTagAttr(file, "total-rewrites");
-			String realTime = p.getResultTagAttr(file, "real-time-ms");
-			String cpuTime = p.getResultTagAttr(file, "cpu-time-ms");
-			String rewritesPerSecond = p.getResultTagAttr(file, "rewrites-per-second");
-			AnsiConsole.out.println(PrettyPrintOutput.ANSI_BLUE + "rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL);
-		}
-	}
-
 	public static String initOptions(String path, String lang) {
 		String result = null;
 		String path_ = null;
@@ -225,8 +206,6 @@ public class Main {
 			if ("search".equals(K.maude_cmd) && K.do_search) {
 				System.out.println("Search results:");
 			}
-			
-
 			if ("pretty".equals(K.output_mode)) {
 				PrettyPrintOutput p = new PrettyPrintOutput();
 			    p.preprocessDoc(K.maude_output, K.processed_maude_output);
@@ -258,10 +237,6 @@ public class Main {
 				System.out.print("");
 			} else {
 				Error.report(K.output_mode + " is not a valid value for output-mode option");
-			}
-	
-			if (K.statistics) {
-				printStatistics();
 			}
 	
 			// save the pretty-printed output of jkrun in a file

@@ -11,6 +11,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.cli.CommandLine;
+import org.fusesource.jansi.AnsiConsole;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -138,12 +139,29 @@ public class PrettyPrintOutput {
 	
 	public static String printSearchResults(Element elem) {
 		String result = "";
-//		PrettyPrintOutput p = new PrettyPrintOutput();
-//		File file = new File(K.maude_output);
 		String solutionNumber = elem.getAttribute("solution-number");
 		String stateNumber = elem.getAttribute("state-number");
 		if (!solutionNumber.equals("NONE")) {
 			result += K.lineSeparator + (PrettyPrintOutput.ANSI_BLUE + "Solution " + solutionNumber + ", state " + stateNumber + ":" + PrettyPrintOutput.ANSI_NORMAL);
+		}
+		return result;
+	}
+	
+	public static String printStatistics(Element elem) {
+		String result = "";
+		if ("search".equals(K.maude_cmd)) {
+			String totalStates = elem.getAttribute("total-states");
+			String totalRewrites = elem.getAttribute("total-rewrites");
+			String realTime = elem.getAttribute("real-time-ms");
+			String cpuTime = elem.getAttribute("cpu-time-ms");
+			String rewritesPerSecond = elem.getAttribute("rewrites-per-second");
+			result += PrettyPrintOutput.ANSI_BLUE + "states: " + totalStates + " rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL;
+		} else if ("erewrite".equals(K.maude_cmd)){
+			String totalRewrites = elem.getAttribute("total-rewrites");
+			String realTime = elem.getAttribute("real-time-ms");
+			String cpuTime = elem.getAttribute("cpu-time-ms");
+			String rewritesPerSecond = elem.getAttribute("rewrites-per-second");
+			result += PrettyPrintOutput.ANSI_BLUE + "rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL;
 		}
 		return result;
 	}
@@ -169,11 +187,13 @@ public class PrettyPrintOutput {
 						result.add(print((Element) child.item(i), false, 0, ANSI_NORMAL));
 					}
 				}
+				if (K.statistics) {
+					result.add(printStatistics(elem));
+				}
 			}
 		} else if (K.maude_cmd.equals("search")) {
 			list = doc.getElementsByTagName("search-result");
-//			System.out.println("Length="+list.getLength());
-			for (int i=0; i < list.getLength(); i++) {
+			for (int i = 0; i < list.getLength(); i++) {
 				nod = list.item(i);
 				if (nod == null) {
 					Error.report("Pretty Print Output: The node with search-result tag wasn't found");
@@ -196,6 +216,9 @@ public class PrettyPrintOutput {
 							NodeList nodes2 = (NodeList) result2;
 							nod = nodes2.item(0);
 							result.add(printSearchResults(elem) + K.lineSeparator + print((Element) nod, false, 0, ANSI_NORMAL));
+							if (K.statistics) {
+								result.add(printStatistics(elem));
+							}
 						}
 						else {
 							String output = FileUtil.getFileContent(K.maude_out);
