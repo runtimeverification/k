@@ -14,7 +14,7 @@ import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.utils.strings.StringUtil;
 import ro.uaic.info.fmse.visitors.BasicVisitor;
-import ro.uaic.info.fmse.html.Color;
+import java.awt.Color;
 
 public class HTMLFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
@@ -22,9 +22,10 @@ public class HTMLFilter extends BasicVisitor {
 	private String css = "";
 	private String title = "";
 	private boolean firstProduction = false;
-	private Map<String, String> colors = new HashMap<String,String>();
-	private HashSet<String> usedColors = new HashSet();
+	//private Map<String, String> colors = new HashMap<String,String>();
+	private HashSet<String> usedColors = new HashSet<String>();
 	private Map<String, String> cellColors = new HashMap<String,String>();
+	private Map<String,Color> HTMLColors = new HashMap<String,Color>();
 
 //	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
@@ -43,10 +44,10 @@ public class HTMLFilter extends BasicVisitor {
 	
 	public HTMLFilter() {
 		initializeCss();
-		createColors();
+		createHTMLColors();
 	}
 	
-	public void createColors(){
+	/*public void createColors(){
 		colors.clear();
 		colors.put("yellow" , ".yellow" + endl
 				+ "{" + endl
@@ -104,26 +105,31 @@ public class HTMLFilter extends BasicVisitor {
 				+ "background-color: #FFFFFF;"+endl
 				+ "}" + endl);
 		
-	}
+	}*/
 	
-	private String getRandomColor(){
+	/*private String getRandomColor(){
 		Random generator = new Random();
 		Object[] keys = colors.keySet().toArray();
 		return (String) keys[generator.nextInt(keys.length)];
+	}*/
+	
+	private void addToCss(String color)
+	{
+		css += "." + color + endl
+				+ "{" + endl
+				+ "border-color: " + HTMLColorToString( HTMLColors.get(color).darker().darker() ) + ";" + endl
+				+ "background-color: " + HTMLColorToString( HTMLColors.get(color).brighter() ) + ";" + endl
+				+ "}" + endl;
 	}
 	
 	private String getCellColor(String cellName){
 		if(cellColors.get(cellName) != null)
 			return cellColors.get(cellName);
 		else
-			return "defaultColor";
-			
+			return "defaultColor";		
 	}
 
 	public String getResult() {
-		
-		result += "Color test " + Color.convertHSLtoRGB(Color.convertRGBtoHSL(new Color.RGB(255,0,0)));
-		
 		String html = 
 			"<!DOCTYPE html>" + endl + 
 			"<html lang=\"en\">" + endl + 
@@ -249,15 +255,15 @@ public class HTMLFilter extends BasicVisitor {
 		} else {
 			tabClasses += " curvedEdge";
 		}
-		if (c.getAttributes().containsKey("color") && colors.containsKey(c.getAttributes().get("color"))) {
-			cellColors.put(c.getLabel(), c.getAttributes().get("color"));
+		if (c.getAttributes().containsKey("color") && HTMLColors.containsKey(c.getAttributes().get("color").toLowerCase())) {
+			cellColors.put(c.getLabel(), c.getAttributes().get("color").toLowerCase());
 		}
 
 		String color = getCellColor(makeGreek(htmlify(c.getLabel())));
 		String cellName = makeGreek(htmlify(c.getLabel()));
 		
 		if(usedColors.add(color))
-			css+= colors.get(color);
+			addToCss(color);
 		
 		result += "<div class=\"cell\"> <div class=\"" + tabClasses + " " + color + "\">";
 		result += "<span class = \"bold\">" + cellName + "</span> </div>";
@@ -637,9 +643,186 @@ public class HTMLFilter extends BasicVisitor {
 				+ "border-bottom-left-radius: 0px;"+endl
 				+ "border-left-style: dotted;"+endl
 				+ "}" + endl;	
+		
+		css += ".defaultColor" + endl
+				+ "{" + endl
+				+ "border-color: #000000;"+endl
+				+ "background-color: #FFFFFF;"+endl
+				+ "}" + endl;
 	}
 	
 	private String htmlify(String name) {
 		return name.replace("<", "&lt;");
+	}
+	
+	private String HTMLColorToString(Color a){
+		return "#" + toHex(a.getRed()) + toHex(a.getGreen()) + toHex(a.getBlue());
+	}
+	
+	private String toHex(int c){
+		if(0 <= c && c <= 15)
+			return "0" + Integer.toHexString(c);
+		else if(16 <= c && c <= 255)
+			return Integer.toHexString(c);
+		else
+			return "ERROR in String toHex(int c)";
+	}
+	
+	/*private Color alterColor(Color a )
+	{
+		
+	}*/
+	
+	private void createHTMLColors(){
+		
+		HTMLColors.put("aliceblue" , new Color(240, 248, 255));
+		HTMLColors.put("antiquewhite" , new Color(250, 235, 215));
+		HTMLColors.put("aqua" , new Color(0, 255, 255));
+		HTMLColors.put("aquamarine" , new Color(127, 255, 212));
+		HTMLColors.put("azure" , new Color(240, 255, 255));
+		HTMLColors.put("beige" , new Color(245, 245, 220));
+		HTMLColors.put("bisque" , new Color(255, 228, 196));
+		HTMLColors.put("black" , new Color(0, 0, 0));
+		HTMLColors.put("blanchedalmond" , new Color(255, 235, 205));
+		HTMLColors.put("blue" , new Color(0, 0, 255));
+		HTMLColors.put("blueviolet" , new Color(138, 43, 226));
+		HTMLColors.put("brown" , new Color(165, 42, 42));
+		HTMLColors.put("burlywood" , new Color(222, 184, 135));
+		HTMLColors.put("cadetblue" , new Color(95, 158, 160));
+		HTMLColors.put("chartreuse" , new Color(127, 255, 0));
+		HTMLColors.put("chocolate" , new Color(210, 105, 30));
+		HTMLColors.put("coral" , new Color(255, 127, 80));
+		HTMLColors.put("cornflowerblue" , new Color(100, 149, 237));
+		HTMLColors.put("cornsilk" , new Color(255, 248, 220));
+		HTMLColors.put("crimson" , new Color(220, 20, 60));
+		HTMLColors.put("cyan" , new Color(0, 255, 255));
+		HTMLColors.put("darkblue" , new Color(0, 0, 139));
+		HTMLColors.put("darkcyan" , new Color(0, 139, 139));
+		HTMLColors.put("darkgoldenrod" , new Color(184, 134, 11));
+		HTMLColors.put("darkgray" , new Color(169, 169, 169));
+		HTMLColors.put("darkgreen" , new Color(0, 100, 0));
+		HTMLColors.put("darkgrey" , new Color(169, 169, 169));
+		HTMLColors.put("darkkhaki" , new Color(189, 183, 107));
+		HTMLColors.put("darkmagenta" , new Color(139, 0, 139));
+		HTMLColors.put("darkolivegreen" , new Color(85, 107, 47));
+		HTMLColors.put("darkorchid" , new Color(153, 50, 204));
+		HTMLColors.put("darkred" , new Color(139, 0, 0));
+		HTMLColors.put("darksalmon" , new Color(233, 150, 122));
+		HTMLColors.put("darkseagreen" , new Color(143, 188, 143));
+		HTMLColors.put("darkslateblue" , new Color(72, 61, 139));
+		HTMLColors.put("darkslategray" , new Color(47, 79, 79));
+		HTMLColors.put("darkslategrey" , new Color(47, 79, 79));
+		HTMLColors.put("darkturquoise" , new Color(0, 206, 209));
+		HTMLColors.put("darkviolet" , new Color(148, 0, 211));
+		HTMLColors.put("darkorange" , new Color(255, 140, 0));
+		HTMLColors.put("deeppink" , new Color(255, 20, 147));
+		HTMLColors.put("deepskyblue" , new Color(0, 191, 255));
+		HTMLColors.put("dimgray" , new Color(105, 105, 105));
+		HTMLColors.put("dimgrey" , new Color(105, 105, 105));
+		HTMLColors.put("dodgerblue" , new Color(30, 144, 255));
+		HTMLColors.put("firebrick" , new Color(178, 34, 34));
+		HTMLColors.put("floralwhite" , new Color(255, 250, 240));
+		HTMLColors.put("forestgreen" , new Color(34, 139, 34));
+		HTMLColors.put("fuchsia" , new Color(255, 0, 255));
+		HTMLColors.put("gainsboro" , new Color(220, 220, 220));
+		HTMLColors.put("ghostwhite" , new Color(248, 248, 255));
+		HTMLColors.put("gold" , new Color(255, 215, 0));
+		HTMLColors.put("goldenrod" , new Color(218, 165, 32));
+		HTMLColors.put("gray" , new Color(128, 128, 128));
+		HTMLColors.put("green" , new Color(0, 128, 0));
+		HTMLColors.put("greenyellow" , new Color(173, 255, 47));
+		HTMLColors.put("grey" , new Color(128, 128, 128));
+		HTMLColors.put("honeydew" , new Color(240, 255, 240));
+		HTMLColors.put("hotpink" , new Color(255, 105, 180));
+		HTMLColors.put("indianred" , new Color(205, 92, 92));
+		HTMLColors.put("indigo" , new Color(75, 0, 130));
+		HTMLColors.put("ivory" , new Color(255, 255, 240));
+		HTMLColors.put("khaki" , new Color(240, 230, 140));
+		HTMLColors.put("lavender" , new Color(230, 230, 250));
+		HTMLColors.put("lavenderblush" , new Color(255, 240, 245));
+		HTMLColors.put("lawngreen" , new Color(124, 252, 0));
+		HTMLColors.put("lemonchiffon" , new Color(255, 250, 205));
+		HTMLColors.put("lightblue" , new Color(173, 216, 230));
+		HTMLColors.put("lightcoral" , new Color(240, 128, 128));
+		HTMLColors.put("lightcyan" , new Color(224, 255, 255));
+		HTMLColors.put("lightgoldenrodyellow" , new Color(250, 250, 210));
+		HTMLColors.put("lightgray" , new Color(211, 211, 211));
+		HTMLColors.put("lightgreen" , new Color(144, 238, 144));
+		HTMLColors.put("lightgrey" , new Color(211, 211, 211));
+		HTMLColors.put("lightpink" , new Color(255, 182, 193));
+		HTMLColors.put("lightsalmon" , new Color(255, 160, 122));
+		HTMLColors.put("lightseagreen" , new Color(32, 178, 170));
+		HTMLColors.put("lightskyblue" , new Color(135, 206, 250));
+		HTMLColors.put("lightslategray" , new Color(119, 136, 153));
+		HTMLColors.put("lightslategrey" , new Color(119, 136, 153));
+		HTMLColors.put("lightsteelblue" , new Color(176, 196, 222));
+		HTMLColors.put("lightyellow" , new Color(255, 255, 224));
+		HTMLColors.put("lime" , new Color(0, 255, 0));
+		HTMLColors.put("limegreen" , new Color(50, 205, 50));
+		HTMLColors.put("linen" , new Color(250, 240, 230));
+		HTMLColors.put("magenta" , new Color(255, 0, 255));
+		HTMLColors.put("maroon" , new Color(128, 0, 0));
+		HTMLColors.put("mediumaquamarine" , new Color(102, 205, 170));
+		HTMLColors.put("mediumblue" , new Color(0, 0, 205));
+		HTMLColors.put("mediumorchid" , new Color(186, 85, 211));
+		HTMLColors.put("mediumpurple" , new Color(147, 112, 216));
+		HTMLColors.put("mediumseagreen" , new Color(60, 179, 113));
+		HTMLColors.put("mediumslateblue" , new Color(123, 104, 238));
+		HTMLColors.put("mediumspringgreen" , new Color(0, 250, 154));
+		HTMLColors.put("mediumturquoise" , new Color(72, 209, 204));
+		HTMLColors.put("mediumvioletred" , new Color(199, 21, 133));
+		HTMLColors.put("midnightblue" , new Color(25, 25, 112));
+		HTMLColors.put("mintcream" , new Color(245, 255, 250));
+		HTMLColors.put("mistyrose" , new Color(255, 228, 225));
+		HTMLColors.put("moccasin" , new Color(255, 228, 181));
+		HTMLColors.put("navajowhite" , new Color(255, 222, 173));
+		HTMLColors.put("navy" , new Color(0, 0, 128));
+		HTMLColors.put("oldlace" , new Color(253, 245, 230));
+		HTMLColors.put("olive" , new Color(128, 128, 0));
+		HTMLColors.put("olivedrab" , new Color(107, 142, 35));
+		HTMLColors.put("orange" , new Color(255, 165, 0));
+		HTMLColors.put("orangered" , new Color(255, 69, 0));
+		HTMLColors.put("orchid" , new Color(218, 112, 214));
+		HTMLColors.put("palegoldenrod" , new Color(238, 232, 170));
+		HTMLColors.put("palegreen" , new Color(152, 251, 152));
+		HTMLColors.put("paleturquoise" , new Color(175, 238, 238));
+		HTMLColors.put("palevioletred" , new Color(216, 112, 147));
+		HTMLColors.put("papayawhip" , new Color(255, 239, 213));
+		HTMLColors.put("peachpuff" , new Color(255, 218, 185));
+		HTMLColors.put("peru" , new Color(205, 133, 63));
+		HTMLColors.put("pink" , new Color(255, 192, 203));
+		HTMLColors.put("plum" , new Color(221, 160, 221));
+		HTMLColors.put("powderblue" , new Color(176, 224, 230));
+		HTMLColors.put("purple" , new Color(128, 0, 128));
+		HTMLColors.put("red" , new Color(255, 0, 0));
+		HTMLColors.put("rosybrown" , new Color(188, 143, 143));
+		HTMLColors.put("royalblue" , new Color(65, 105, 225));
+		HTMLColors.put("saddlebrown" , new Color(139, 69, 19));
+		HTMLColors.put("salmon" , new Color(250, 128, 114));
+		HTMLColors.put("sandybrown" , new Color(244, 164, 96));
+		HTMLColors.put("seagreen" , new Color(46, 139, 87));
+		HTMLColors.put("seashell" , new Color(255, 245, 238));
+		HTMLColors.put("sienna" , new Color(160, 82, 45));
+		HTMLColors.put("silver" , new Color(192, 192, 192));
+		HTMLColors.put("skyblue" , new Color(135, 206, 235));
+		HTMLColors.put("slateblue" , new Color(106, 90, 205));
+		HTMLColors.put("slategray" , new Color(112, 128, 144));
+		HTMLColors.put("slategrey" , new Color(112, 128, 144));
+		HTMLColors.put("snow" , new Color(255, 250, 250));
+		HTMLColors.put("springgreen" , new Color(0, 255, 127));
+		HTMLColors.put("steelblue" , new Color(70, 130, 180));
+		HTMLColors.put("tan" , new Color(210, 180, 140));
+		HTMLColors.put("teal" , new Color(0, 128, 128));
+		HTMLColors.put("thistle" , new Color(216, 191, 216));
+		HTMLColors.put("tomato" , new Color(255, 99, 71));
+		HTMLColors.put("turquoise" , new Color(64, 224, 208));
+		HTMLColors.put("violet" , new Color(238, 130, 238));
+		HTMLColors.put("wheat" , new Color(245, 222, 179));
+		HTMLColors.put("white" , new Color(255, 255, 255));
+		HTMLColors.put("whitesmoke" , new Color(245, 245, 245));
+		HTMLColors.put("yellow" , new Color(255, 255, 0));
+		HTMLColors.put("yellowgreen" , new Color(154, 205, 50));
+
+
 	}
 }
