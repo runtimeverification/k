@@ -193,18 +193,18 @@ arithmetic constructs. */
   rule <k> B:Bool => bool ...</k>
   rule <k> X:Id => T:Type ...</k> <tenv>... X |-> T ...</tenv>
 
-  rule <k> L:KLabel(T1:Type,,T2:Type) => (T1,T2,.Types = int,int,.Types) ~> int ...</k>
+  rule <k> L:KLabel(T1:Type,,T2:Type) => T1 = int ~> T2 = int  ~> int ...</k>
     when L ==KLabel '_+_ orBool L ==KLabel '_-_ orBool
        L ==KLabel '_*_ orBool L ==KLabel '_/_ orBool L ==KLabel '_%_
   rule <k> - T:Type => (T = int) ~> int ...</k>
-  rule <k> L(T1:Type,,T2:Type) => (T1,T2,.Types = int,int,.Types) ~> bool ...</k>
+  rule <k> L(T1:Type,,T2:Type) => T1 = int ~> T2 = int  ~> bool ...</k>
     when L ==KLabel '_<_ orBool L ==KLabel '_<=_ orBool L ==KLabel '_>_ orBool
        L ==KLabel '_>=_ orBool L ==KLabel '_==_ orBool L ==KLabel '_!=_
-  rule <k> L(T1:Type,,T2:Type) => (T1,T2,.Types = bool,bool,.Types) ~> bool ...</k>
+  rule <k> L(T1:Type,,T2:Type) => T1 = bool ~> T2 = bool ~> bool ...</k>
     when L ==KLabel '_and_ orBool L ==KLabel '_or_
 
   rule <k> not T:Type => (T = bool) ~> bool ...</k>
-  rule <k> if T:Type then T1:Type else T2:Type => (T,T1,.Types = bool,T2,.Types) ~> T1 ...</k>
+  rule <k> if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1 ...</k>
 
 /*@ \subsection{Lambda}
 We add a fresh type variable for the lambda-bound variable, then we
@@ -241,11 +241,9 @@ We add a fresh type variable for the mu-bound variable and then we
 enforce the my-body and the result type to be both equal to the type
 of the mu-bound variable. */
 
-  syntax K ::= Type "=" "[]"
-  rule <k> mu X:Id . E:Exp => E ~> (freshVar(N) = []) ~> freshVar(N) ~> tenv(TEnv) ...</k>
+  rule <k> mu X:Id . E:Exp => (freshVar(N) = E) ~> freshVar(N) ~> tenv(TEnv) ...</k>
           <tenv> TEnv:Map => TEnv[freshVar(N) / X] </tenv>
           <nextVar> N:Int => N:Int +Int 1 </nextVar>
-  rule T:Type ~> (Tv:Type = []) => Tv = T [anywhere]
 
 /*@ \subsection{Let}
 The trickiest part of Milner's W procedure is how to type the
@@ -298,8 +296,8 @@ and that is the final result of the typing procedure. */
 /*@ Type constraints are used to update the mgu as soon as they
 are matched on the top of the computation. */
 
-  syntax K ::= Types "=" Types  [strict]
-  rule <k> Ts:Types = Ts':Types => . ...</k>
-       <mgu> subst(Theta:List{K}) => updateMgu(subst(Theta), Ts, Ts') </mgu>
+  syntax K ::= Exp "=" Exp  [strict]
+  rule <k> T:Type = T':Type => . ...</k>
+       <mgu> subst(Theta:List{K}) => updateMgu(subst(Theta), T, T') </mgu>
 
 endmodule
