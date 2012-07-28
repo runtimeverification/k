@@ -189,32 +189,22 @@ We do need, however, to declare our basic types.  The operation
 Besides the \textsf{k} and \textsf{tenv} cells that are also present
 in IMP's type checker, we now add two more top-level cells, one for
 the unification procedure and one to hold the counter for fresh type
-variables.  The cell \textsf{unification} holds a cell \textsf{eqns}
-with equations that need to be solved, and a cell \textsf{mgu} which
+variables.  The top cell holds a cell \textsf{mgu} which
 holds the current most-general unifier. */
 
   configuration <T color="yellow" multiplicity="?">
                   <k color="green"> $PGM:Exp </k>
                   <tenv color="LightSkyBlue"> .Map </tenv>
-                  <unification color="black">
-                    <eqns color="orange">
-                      <eqn multiplicity="*" color="red"> .K </eqn>
-                    </eqns>
-                    <mgu color="blue"> .Map </mgu>
-                  </unification>
+                  <mgu color="blue"> subst(.List{K}) </mgu>
                   <nextVar> 0 </nextVar>
                 </T>
-				<resultType multiplicity="?"> .K </resultType>
+                <resultType multiplicity="?"> .K </resultType>
 				
-  // termination rule; useful for making sure program finished.  
-  // Can be removed when we have better krun tools for displaying final config
-  rule <T>... <k> T:Type </k> ...</T> => <resultType> T </resultType>
-
 /*@ \subsection{Arithmetic expressions}
 Primitive values rewrite to their types.  Arithmetic constructs, which
 were all declared strict, generate type constraints for the types of
 their arguments and return on the computation structure their result
-type.  As seen in the unification section below, type equalities
+type.  Type equalities
 posted on the computation structure are eventually collected and
 solved by the unification procedure.  To save space and time, in the
 rules below we match the \K labels corresponding to some of the
@@ -298,7 +288,7 @@ place where the let-bound variable is used.
 
 There are two additional important observations regarding the first
 rule below: first, we enforce that all type constraints are solved (by
-requiring the \textsf{eqns} cell to be empty; then we apply the
+requiring the mgu contains only a substitutio; then we apply the
 resulting most-general unifier to the let-bound type; then we bind the
 let variable to the type schema obtained by parametrizing the solved
 let-bound type with all its context-free type variables, that is, by
@@ -309,10 +299,10 @@ application operations, are defined in the imported \texttt{TYPES}
 module. */
 
   rule <k> let X:Id = T:Type in E:Exp => E ~> tenv(TEnv) ...</k>
-       <eqns> .Bag </eqns> <mgu> Theta:Map </mgu>
+       <mgu> subst(Theta:List{K}) </mgu>
        <tenv> TEnv:Map
-        => TEnv[((forall diff(ftv(Theta[T]),ftv(Theta[types(TEnv)]*)))
-                 Theta[T]) / X]
+        => TEnv[((forall diff(ftv(applySubst(subst(Theta), T),.Types),ftv(applySubst(subst(Theta), types(TEnv)))))
+                 applySubst(subst(Theta), T)) / X]
        </tenv>
 
   rule <k> X => T[freshVars(N, |Tvs|) / Tvs]* ...</k>
@@ -322,70 +312,15 @@ module. */
 /*@ \subsection{Final type}
 When there is only one type left in the computation cell and all the
 type constraints are solved, we apply the resulting mgu to that type
-and that is the final result of the typing procedure.  We also remove
-the unnecessary \textsf{eqns} cell, but prefer to keep the
-\textsf{mgu} cell, as it may be insightful to see its contents in the
-final configuration. */
+and that is the final result of the typing procedure. */
 
-// You can remove the <mgu\> cell, too, from the final configuration
-  rule <k> T:Type => Theta[T] </k> (<eqns> .Bag </eqns> => .) <mgu> Theta:Map </mgu>
+  rule <T>... <k> T:Type </k> <mgu> subst(Theta:List{K}) </mgu> ...</T> => <resultType> applySubst(subst(Theta), T) </resultType>
 
-
-/*@ \section{Unification}
-Unification can be defined quite elegantly in \K (and in AC rewriting,
-in general): decompose and apply the equations until each of them has
-the form $x = t$ where $x$ is a variable and $t$ is a term, thus
-giving us the desired most general unifier; if $t$ contains $x$ in any
-of the solved equations, then unification has failed.  For
-optimization reasons, we prefer to separate the already calculated
-most general unifier from the equations. */
+/*@ Type constraints are used to update the mgu as soon as they
+are matched on the top of the computation. */
 
   syntax K ::= Types "=" Types  [strict]
-
-/*@ Type constraints are added to the set of equations as soon as they
-are matched on the top of the computation.  Since the mgu is held
-separately, we also apply it to the type equations.  This way, we are
-guaranteed that the variables in the domain of the mgu will never
-appear in the equations. */
   rule <k> Ts:Types = Ts':Types => . ...</k>
-       (. => <eqn> Theta[Ts]* = Theta[Ts']* </eqn>)
-       <mgu> Theta:Map </mgu>
-
-//@ Cleanup, decomposition and orientation of equations.
-  rule <eqn> Ts:Types = Ts:Types </eqn> => .
-
-  rule <eqn> (T1:Type,T2:Type,Ts:Types) = (T1':Type,T2':Type,Ts':Types) </eqn>
-    => <eqn> T1 = T1' </eqn> <eqn> (T2,Ts) = (T2',Ts') </eqn>
-
-  rule <eqn> (T1:Type -> T2:Type) = (T1':Type -> T2':Type) </eqn>
-    => <eqn> T1 = T1' </eqn> <eqn> T2 = T2' </eqn>
-
-  rule <eqn> (T:Type = Tv:TypeVar) => (Tv = T) </eqn>
-    when 'isTypeVar(T) =/=K true
-
-/*@ When an equation contains a variable, it can be added as a binding
-to the mgu.  While we know that the variables in the domain of the mgu
-do not appear anywhere in the equations, it can be and usually is the
-case that variables appearing in the equations also appear in the
-codomain of the mgu.  Thus, we have to refine the mgu by applying the
-new binding to all its terms.  Moreover, to maintain the equations
-canonical in terms of the current mgu, we also have to refine the
-remaining equations by applying the new mgu binding to them. */
-
-  rule <eqns> Eqns:Bag <eqn> Tv:Type = T:Type </eqn> => refine(Eqns,Tv,T) </eqns>
-       <mgu> Theta => Tv |-> T refine(Theta,Tv,T) </mgu>
-    when notBool(Tv inType T)
-
-  syntax Map ::= "refine" "(" Map "," Type "," Type ")"
-  rule refine(.Map,_,_) => .Map [anywhere]
-  rule refine(Tv':Type|->T':Type Theta:Map, Tv:Type, T:Type)
-    => Tv'|->T'[T/Tv] refine(Theta,Tv,T)
-    [anywhere]
-
-  syntax Bag ::= "refine" "(" Bag "," Type "," Type ")"
-  rule refine(.Bag,Tv:Type,T:Type) => .Bag [anywhere]
-  rule refine(<eqn> T1:Type = T2:Type </eqn> Eqns:Bag, Tv:Type, T:Type)
-    => <eqn> T1[T/Tv] = T2[T/Tv] </eqn> refine(Eqns,Tv,T)
-    [anywhere]
+       <mgu> subst(Theta:List{K}) => updateMgu(subst(Theta), Ts, Ts') </mgu>
 
 endmodule
