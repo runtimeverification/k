@@ -299,59 +299,65 @@ public class Main {
 				String[] cmds = new String[] { "--" + input.trim() };
 				CommandlineOptions cmd_options = new CommandlineOptions();
 				CommandLine cmd = cmd_options.parse(cmds);
-				if (cmd.hasOption("help")) {
-					printDebugUsage(cmd_options.getOptions());
+				//when an error occurred during parsing the commandline
+				if (cmd == null) {
+					continue;
 				}
-				if (cmd.hasOption("abort")) {
-					ProcessBean bean = new ProcessBean();
-					bean.setExitCode(0);
-					System.exit(bean.getExitCode());
-				}
-				if (cmd.hasOption("resume")) {
-					//get the maudified version of the current configuration based on the xml obtained from -xml-log option
-					String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
-					maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew " + maudeConfig + " .";
-					rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
-					// check whether Maude produced errors
-					if (errFile.exists()) {
-						String content = FileUtil.getFileContent(K.maude_err);
-						if (content.length() > 0) {
-							//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-							String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-							Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
-						}
+				else {
+					if (cmd.hasOption("help")) {
+						printDebugUsage(cmd_options.getOptions());
 					}
-					//pretty-print the obtained configuration
-					p = new PrettyPrintOutput();
-				    p.preprocessDoc(K.maude_output, K.processed_maude_output);
-					red = p.processDoc(K.processed_maude_output);
-					AnsiConsole.out.println(red);
-					
-					ProcessBean bean = new ProcessBean();
-					bean.setExitCode(0);
-					System.exit(bean.getExitCode());
-				}
-				//one step execution
-	            if (cmd.hasOption("step")) {
-	            	//get the maudified version of the current configuration based on the xml obtained from -xml-log option
-					String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
-					//System.out.println("config=" + maudeConfig);
-					maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[1] " + maudeConfig + " .";
-					rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
-					// check whether Maude produced errors
-					if (errFile.exists()) {
-						String content = FileUtil.getFileContent(K.maude_err);
-						if (content.length() > 0) {
-							//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-							String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-							Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
-						}
+					if (cmd.hasOption("abort")) {
+						ProcessBean bean = new ProcessBean();
+						bean.setExitCode(0);
+						System.exit(bean.getExitCode());
 					}
-					//pretty-print the obtained configuration
-					p = new PrettyPrintOutput();
-				    p.preprocessDoc(K.maude_output, K.processed_maude_output);
-					red = p.processDoc(K.processed_maude_output);
-					AnsiConsole.out.println(red);
+					if (cmd.hasOption("resume")) {
+						//get the maudified version of the current configuration based on the xml obtained from -xml-log option
+						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
+						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew " + maudeConfig + " .";
+						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
+						// check whether Maude produced errors
+						if (errFile.exists()) {
+							String content = FileUtil.getFileContent(K.maude_err);
+							if (content.length() > 0) {
+								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+								String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
+							}
+						}
+						//pretty-print the obtained configuration
+						p = new PrettyPrintOutput();
+					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
+						red = p.processDoc(K.processed_maude_output);
+						AnsiConsole.out.println(red);
+						
+						ProcessBean bean = new ProcessBean();
+						bean.setExitCode(0);
+						System.exit(bean.getExitCode());
+					}
+					//one step execution
+		            if (cmd.hasOption("step")) {
+		            	//get the maudified version of the current configuration based on the xml obtained from -xml-log option
+						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
+						//System.out.println("config=" + maudeConfig);
+						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[1] " + maudeConfig + " .";
+						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
+						// check whether Maude produced errors
+						if (errFile.exists()) {
+							String content = FileUtil.getFileContent(K.maude_err);
+							if (content.length() > 0) {
+								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+								String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
+							}
+						}
+						//pretty-print the obtained configuration
+						p = new PrettyPrintOutput();
+					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
+						red = p.processDoc(K.processed_maude_output);
+						AnsiConsole.out.println(red);
+					}
 				}
 			}
 		} catch (IOException e) {

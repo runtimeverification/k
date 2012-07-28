@@ -147,7 +147,7 @@ public class CommandlineOptions {
 			setCommandLine(parser.parse(options, cmd));
 			return getCommandLine();
 		} catch (ParseException e) {
-			Error.report("Error while parsing commandline:" + e.getMessage());
+			System.out.println("Error while parsing commandline:" + e.getMessage());
 		}
 
 		return null;
