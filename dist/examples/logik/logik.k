@@ -3,16 +3,16 @@ require "modules/unification.k"
 module LOGIK-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
   syntax Literal ::=  Id 
-                   | Id "(" Literals ")" [prec(0)]
+                   | Id "(" Literals ")"
                    > "[" Literals "]"
                    | "[" Literals "|" Literal "]"
-  syntax Literals ::= List{Literal,","} [prec(60)]
+  syntax Literals ::= List{Literal,","}
 
-  syntax Clause ::= Literal ":-" Literals "." [prec(70)]
-                  > Literal "."  [prec(80)]
-  syntax Query ::= "?-" Literals "." [prec(70)]
+  syntax Clause ::= Literal ":-" Literals "."
+                  > Literal "." 
+  syntax Query ::= "?-" Literals "."
   syntax Pgm ::= Query
-               > Clause Pgm [prec(90)]
+               > Clause Pgm
 
 endmodule
 
@@ -26,13 +26,13 @@ module LOGIK-SEMANTICS
     <clauses>
           .Bag
     </clauses>
-    <br/>
+//    <br/>
     <k>
       $PGM:K
     </k>
     <nextVar> 0 </nextVar>
    </T>
-   <br/>
+ //  <br/>
    <solution stream="stdout"> .List </solution>
 
   syntax Id ::= UnificationVar

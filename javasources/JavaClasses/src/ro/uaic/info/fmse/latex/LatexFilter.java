@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.latex;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import ro.uaic.info.fmse.k.*;
 import ro.uaic.info.fmse.k.LiterateComment.LiterateCommentType;
@@ -20,6 +21,7 @@ public class LatexFilter extends BasicVisitor {
 	private Map<String, String> colors = new HashMap<String, String>();
 	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
+	private boolean parentParens = false;
 
 	public void setResult(String result) {
 		this.result = result;
@@ -35,6 +37,14 @@ public class LatexFilter extends BasicVisitor {
 
 	public String getResult() {
 		return result;
+	}
+
+	private boolean isParentParens() {
+		return parentParens;
+	}
+
+	private void setParentParens(boolean parentParens) {
+		this.parentParens = parentParens;
 	}
 
 	@Override
@@ -139,7 +149,7 @@ public class LatexFilter extends BasicVisitor {
 		if (colors.containsKey(c.getLabel())) {
 			result += "[" + colors.get(c.getLabel()) + "]";
 		}
-		result += "{" + StringUtil.latexify(c.getLabel()) + "}{";
+		result += "{" + StringUtil.latexify(c.getLabel() + StringUtil.emptyIfNull(c.getAttributes().get("multiplicity"))) + "}{";
 		super.visit(c);
 		result += "}" + endl;
 	}
@@ -150,7 +160,7 @@ public class LatexFilter extends BasicVisitor {
 	}
 
 	private void printList(List<Term> contents, String str) {
-		result += "\\begin{array}{l}";
+//		result += "\\begin{array}{l}";
 		boolean first = true;
 		for (Term trm : contents) {
 			if (first) {
@@ -160,7 +170,7 @@ public class LatexFilter extends BasicVisitor {
 			}
 			trm.accept(this);
 		}
-		result += "\\end{array}";
+//		result += "\\end{array}";
 	}
 	
 	public void visit(TermComment tc) {
@@ -252,10 +262,21 @@ public class LatexFilter extends BasicVisitor {
 			pr.accept(patternsVisitor);
 			pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
 		}
+		String regex = "\\{#\\d+\\}$";
+		Pattern p = Pattern.compile(regex);
+		if (parentParens && (pattern.indexOf("{#") == 0 
+				|| p.matcher(pattern).matches())) {
+			pattern = "(" + pattern + ")";
+		}		
 		int n = 1;
 		LatexFilter termFilter = new LatexFilter();
 		for (Term t : trm.getContents()) {
 			termFilter.setResult("");
+			regex = "\\{#\\d+\\}\\{#" + n + "\\}";
+			p = Pattern.compile(regex);
+			if (pattern.contains("{#" + n + "}{#") || p.matcher(pattern).matches()) {
+				termFilter.setParentParens(true);				
+			}
 			t.accept(termFilter);
 			pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
 		}

@@ -1,5 +1,27 @@
 require "modules/unification.k"
 
+/*!
+\setlength{\parindent}{1em}
+\title{EXP --- Static Semantics --- W Type Inferencer}
+\author{Grigore Ro\c{s}u and
+        Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
+	(\texttt{\{grosu,tserban2\}@illinois.edu})}
+\organization{University of Illinois at Urbana-Champaign}
+*/
+
+/*@
+\section{Abstract}
+This is the \K definition of the classic W type inference procedure
+for the EXP language.  The EXP language and W were originally proposed
+by Robin Milner in his seminal paper on type inference below:
+\begin{quote}
+Robin Milner. A theory of type polymorphism in programming.
+{\em Journal of Computer and System Sciences}, 17(3):348-375, 1978.
+\end{quote}
+See the \K definition of untyped EXP for the semantics of the various
+EXP language constructs.
+*/
+
 module EXP-TYPE-INFERENCE-SYNTAX
 
 /*@ \section{Syntax}
@@ -189,22 +211,22 @@ solved by the unification procedure.  To save space and time, in the
 rules below we match the \K labels corresponding to some of the
 arithmetic constructs. */
 
-  rule <k> I:Int => int ...</k>
-  rule <k> B:Bool => bool ...</k>
+  rule I:Int => int
+  rule B:Bool => bool
   rule <k> X:Id => T:Type ...</k> <tenv>... X |-> T ...</tenv>
 
-  rule <k> L:KLabel(T1:Type,,T2:Type) => T1 = int ~> T2 = int  ~> int ...</k>
+  rule L:KLabel(T1:Type,,T2:Type) => T1 = int ~> T2 = int  ~> int
     when L ==KLabel '_+_ orBool L ==KLabel '_-_ orBool
        L ==KLabel '_*_ orBool L ==KLabel '_/_ orBool L ==KLabel '_%_
-  rule <k> - T:Type => (T = int) ~> int ...</k>
-  rule <k> L(T1:Type,,T2:Type) => T1 = int ~> T2 = int  ~> bool ...</k>
+  rule - T:Type => (T = int) ~> int
+  rule L:KLabel(T1:Type,,T2:Type) => T1 = int ~> T2 = int  ~> bool
     when L ==KLabel '_<_ orBool L ==KLabel '_<=_ orBool L ==KLabel '_>_ orBool
        L ==KLabel '_>=_ orBool L ==KLabel '_==_ orBool L ==KLabel '_!=_
-  rule <k> L(T1:Type,,T2:Type) => T1 = bool ~> T2 = bool ~> bool ...</k>
+  rule L:KLabel(T1:Type,,T2:Type) => T1 = bool ~> T2 = bool ~> bool
     when L ==KLabel '_and_ orBool L ==KLabel '_or_
 
-  rule <k> not T:Type => (T = bool) ~> bool ...</k>
-  rule <k> if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1 ...</k>
+  rule not T:Type => (T = bool) ~> bool
+  rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
 
 /*@ \subsection{Lambda}
 We add a fresh type variable for the lambda-bound variable, then we

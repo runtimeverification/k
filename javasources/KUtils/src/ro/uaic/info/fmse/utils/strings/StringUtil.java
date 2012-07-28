@@ -32,4 +32,9 @@ public class StringUtil {
 		.replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}")
 		.replace("`", "\\`{}");
 	}
+
+	public static String emptyIfNull(String string) {
+		if (string == null) return "";
+		return string;
+	}
 }
