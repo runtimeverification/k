@@ -274,6 +274,7 @@ public class PrettyPrintOutput {
 			}
 			else if (m < n && n > 0 && m > 0) {
 				sb = lessUnderscoresCase(list, op, n, m, false, whitespace + indent, ANSI_NORMAL);
+				//System.out.println("the content of the bag is:" + sb);
 			}
 			return sb.toString();
 		}

@@ -62,7 +62,7 @@ public class MaudeTask extends Thread {
 		List<String> commands = new ArrayList<String>();
 		/*if (System.getProperty("os.name").toLowerCase().contains("mac")) {
 			commands.add(System.getenv("MAUDE_LIB") + K.fileSeparator + "maude");
-		} else { */
+		} else {*/
 			//commands.add("maude");
 			commands.add(maudeExe);
 		//}
