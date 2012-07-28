@@ -79,7 +79,7 @@ module TYPES
 
   syntax Type ::= TypeVar             // type variables
                 | BasicType
-                | Type "->" Type        // function type
+                | Type "->" Type  [strict]      // function type
   syntax Types ::= List{Type,","}
 
   syntax TypeSchema ::= Type
@@ -211,11 +211,9 @@ We add a fresh type variable for the lambda-bound variable, then we
 type the lambda-body, and then we construct the corresponding function
 type.  At the same time, we recover the type environment. */
 
-  syntax K ::= Type "->" "[]"
-  rule <k> lambda X:Id . E:Exp => E ~> (freshVar(N) -> []) ~> tenv(TEnv) ...</k>
+  rule <k> lambda X:Id . E:Exp => freshVar(N) -> E ~> tenv(TEnv) ...</k>
           <tenv> TEnv:Map => TEnv[freshVar(N)/X] </tenv>
           <nextVar> N:Int => N +Int 1 </nextVar>
-  rule T:Type ~> (Tv:TypeVar -> []) => Tv -> T [anywhere]
 
 // usual environment recovery
   syntax K ::= "tenv" "(" Map ")"
