@@ -122,33 +122,12 @@ module TYPES
     when N >Int 0
     [anywhere]
 
-// This could also be generic: subterm relation?
-  syntax Bool ::= Type "inType" Type [latex("{#1}\in_{\it Type}{#2}")]
-  rule Tv:TypeVar inType BT:BasicType  => false [anywhere]
-  rule Tv:TypeVar inType Tv':TypeVar => Tv ==K Tv' [anywhere]
-  rule Tv:Type inType (T1:Type -> T2:Type) => (Tv inType T1) orBool (Tv inType T2) [anywhere]
-
 // Type substitution: T[Ts / Tvs]* substitutes list of types Ts for
-// list of type variables Tvs.  T[T' / Tv] substitutes type T' for type
-// variable Tv in T.  These should also be generic and builtin.
-  syntax Type  ::= Map "[" Type  "]"   
-                > Type "[" Types "/" Types "]*"  
-                | Type "[" Type  "/"  Type  "]"   // auxiliary
+// list of type variables Tvs.  
+  syntax Type  ::= Type "[" Types "/" Types "]*"  
   rule T:Type[.Types / .Types]* => T [anywhere]
-  rule T:Type[T1,Ts:Types / Tv,Tvs]* => T[T1 / Tv][Ts / Tvs]* [anywhere]
-  rule BT:BasicType[T:Type / Tv:TypeVar] => BT [anywhere]
-  rule Tv':TypeVar[T:Type / Tv:Type] => #if Tv' ==K Tv #then T #else Tv' #fi
-   [anywhere]
-  rule (T1:Type -> T2:Type)[T:Type / Tv:Type] => (T1:Type[T:Type / Tv:Type]) -> (T2:Type[T:Type / Tv:Type]) [anywhere]
+  rule T:Type[T1:Type,Ts:Types / Tv:Type,Tvs:Types]* => applySubst(subst(eqn(Tv,,T1)),T)[Ts / Tvs]* [anywhere]
 
-// Map application.  Should be generic and builtin.
-  syntax Types ::= Map "[" Types "]*"  [prec(1)]
-
-  rule .[T:Type] => T [anywhere]
-  rule (Tv:Type |-> T':Type Theta:Map)[T:Type] => Theta[T[T'/Tv]] [anywhere]
-
-  rule Theta:Map[.Types]* => .Types [anywhere]
-  rule Theta:Map[T:Type,Ts:Types]* => Theta[T],Theta[Ts]* [anywhere]
 
 // Next should probably be generic in some way, for all maps ...
 // although note that it does something specific for type schemas.
