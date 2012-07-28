@@ -118,7 +118,7 @@ public class HTMLFilter extends BasicVisitor {
 		css += "." + color + endl
 				+ "{" + endl
 				+ "border-color: " + HTMLColorToString( HTMLColors.get(color).darker().darker() ) + ";" + endl
-				+ "background-color: " + HTMLColorToString( HTMLColors.get(color).brighter() ) + ";" + endl
+				+ "background-color: " + HTMLColorToString( alter(HTMLColors.get(color)) ) + ";" + endl
 				+ "}" + endl;
 	}
 	
@@ -668,10 +668,13 @@ public class HTMLFilter extends BasicVisitor {
 			return "ERROR in String toHex(int c)";
 	}
 	
-	/*private Color alterColor(Color a )
+	private Color alter(Color a )
 	{
-		
-	}*/
+		float hsb[] = Color.RGBtoHSB(a.getRed(), a.getGreen(), a.getBlue(), null);
+		hsb[1] /= 4;
+		hsb[2] = (float) (240.0/255.0);
+		return new Color( Color.HSBtoRGB( hsb[0], hsb[1], hsb[2] ) );
+	}
 	
 	private void createHTMLColors(){
 		
