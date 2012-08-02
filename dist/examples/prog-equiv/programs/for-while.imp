@@ -1,0 +1,19 @@
+program1:
+
+	for i from symInt(a1) to symInt(a2) do symStmt(s)
+
+program2:
+
+	i := symInt(a1);
+	while (i <= symInt(a2)) do (
+	  symStmt(s);
+	  i := i + 1
+	)
+
+condition:
+
+	i isNotModifiedBy symStmt(s) == true
+
+
+observers: i;
+

@@ -10,9 +10,7 @@ require "modules/substitution.k"
 
 //@ \section{Symbolic Calculus}
 
-//module SYMBOLIC-CALCULUS-SYNTAX
-
-module SYMBOLIC-CALCULUS
+module SYMBOLIC-CALCULUS-SYNTAX
 
 /*@ 
   The symbolic values needed to define the initial configuration.
@@ -34,11 +32,10 @@ module SYMBOLIC-CALCULUS
 
   syntax Int ::= IntSymVar
 
+endmodule
 
-//endmodule
-
-//module SYMBOLIC-CALCULUS
-//  imports SYMBOLIC-CALCULUS-SYNTAX
+module SYMBOLIC-CALCULUS
+  imports SYMBOLIC-CALCULUS-SYNTAX
 
 
 
@@ -155,10 +152,13 @@ module SYMBOLIC-CALCULUS
        [anywhere]
 
 
-  rule B1:K andBool B2:K impliesBool V1:K ==K V2:K =>
-       B1 impliesBool V1 ==K V2 orBool
-       B2 impliesBool V1 ==K V2
+//@ The following is specific to the example wit sum of squares
+
+  rule ((I1:Int ==Int I2:Int *Int I2) andBool (I3:Int ==Int I2)) impliesBool ((I:Int +Int I1) ==Int (I +Int I3 *Int I3))
+       =>
+       true
        [anywhere]
+
 
   rule B:K impliesBool true => true  [anywhere]
 
@@ -173,7 +173,6 @@ module SYMBOLIC-CALCULUS
 
   rule V1:K ==K V2:K impliesBool V1 ==K V2 => true [anywhere]
   
-     
 
 endmodule
 
@@ -205,6 +204,7 @@ module IMP-SYNTAX
   				| Id ":=" AExp   [strict(2)]
   				| "if" BExp "then" Stmt "else" Stmt [strict(1)]
   				| "while" BExp "do" Stmt
+                                | "for" Id "from" AExp "to" AExp "do" Stmt [strict(2, 3)] 
   				> Stmt ";" Stmt   [left]
   				| "(" Stmt ")"    [bracket]
 
@@ -227,6 +227,18 @@ module IMP-SYNTAX
 
 
   syntax BExp ::= AExp "==" AExp  [strict]
+
+//get if no effect
+syntax Bool ::= Id "isNotModifiedBy" Stmt 
+
+  /*@
+    Extending the statements with symbolic values:
+   */
+
+  syntax StmtSymVar ::= "symStmt" "(" Id ")"
+  
+  syntax Stmt ::= StmtSymVar
+
 
 endmodule
 
@@ -276,6 +288,7 @@ module IMP
                   </hypos>
                   <observers> .List </observers> 
                   <nextSymvar> 0 </nextSymVar>
+<debug> .K </debug>
                 </T>
 
 /*@
@@ -329,8 +342,8 @@ module IMP
   as transition for tracing reasons.
 */
 
-  rule [lookup] :      <k> X:Id => I:Int ...</k>
-                      <env>... X |-> I ...</env> 
+  rule [lookup] :      <k> X:Id => I ...</k>
+                      <env>... X |-> I:Int ...</env> 
   rule [skip] : skip => .
 
   rule [assignment]:
@@ -364,6 +377,13 @@ module IMP
        </k> 
        [transition]
 
+//for 
+rule [for] :  
+        <k> 
+          (for I:Id from A1:Int to A2:Int  do S:Stmt) => 
+          I := A1; if (I <= A2) then (S; for I from A1 + 1 to A2  do S) else skip
+        ...</k> 
+ [transition] 
 
 
 /*@
@@ -388,34 +408,39 @@ module IMP
            <k> K2:K </k>
            <env> Rho2:Map </env>
          </config>
+         <formula> F:K </formula>
          C:Bag
        </task>
        =>
        <task>
          <config>
-           <k> true ~> K1 </k>
+           <k> storeSyns(F, B, true) ~> true ~> K1 </k>
            <env> Rho1:Map (B |-> true) </env>
          </config>
          <config>
            <k> K2 </k>
            <env> Rho2:Map (B |-> true) </env>
          </config>
+         <formula> F </formula>
          C
        </task>
        <task>
          <config>
-           <k> false ~> K1 </k>
+           <k> storeSyns(F, B, false) ~> false ~> K1 </k>
            <env> Rho1:Map (B |-> false) </env>
          </config>
          <config>
            <k> K2 </k>
            <env> Rho2:Map (B |-> false) </env>
          </config>
+         <formula> F </formula>
          C
        </task>
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho1))
             andBool notBool(B in keys(Rho2))
+
+
 /*@
   When an existing elementary symbolic boolean expression has to be evaluated, its
   value is read the cell \texttt{env}.
@@ -435,6 +460,71 @@ module IMP
        ...</task>
        =>
        .
+//@ The folowing is specific to the example
+
+  rule <task>...
+         <config>...
+           <k> B:K => V ...</k>
+         ...</config>
+         <config>...
+           <env>... B |-> V:Bool ...</env>
+         </config>
+       ...</task>
+
+  /*@
+    Store the elementary symbolic boolean expressions obtained as
+    "synonims" of the already stored ones due to the path formula 
+  */
+  syntax K ::= "storeSyns" "(" K "," K "," Bool ")"
+
+  rule storeSyns(F1:K andBool F2:K, B:K, V:Bool) 
+       =>
+       storeSyns(F1, B, V) ~> storeSyns(F2, B, V)
+
+  rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
+       <env>... . => (B[I1/I2] |-> V) ...</env>
+       when B[I1/I2] =/=K B
+
+  rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
+       <env>... . => (B[I2/I1] |-> V) ...</env>
+       when B[I2/I1] =/=K B
+
+  rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
+       when (B[I1/I2] ==K B) andBool (B[I2/I1] ==K B)
+
+  rule (F1:K andBool F2:K) [ V:K / X:K ]
+        =>
+        F1 [ V:K / X:K ] andBool F2[ V:K / X:K ]
+        [anywhere]
+
+  rule (I1:Int <=Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) <=Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule (I1:Int ==Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) ==Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule (I1:Int +Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) +Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule (I1:Int *Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) *Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule I:Int [ E1:K / E2:K ] => E1 
+       when I ==K E2
+       [anywhere]
+ 
+  rule I:Int [ E1:K / E2:K ] => I
+       when I =/=K E2
+       [anywhere]
+
 
 /*@
   The special bag \texttt{success} is used for removing tasks (goals).
@@ -490,7 +580,7 @@ module IMP
   rule eqObs( <env>... X:Id |-> V1:K ...</env>
               <env>... X |-> V2:K ...</env>
               <observers> ListItem(X) => . ...</observers>, F:K )
-       when F impliesBool V1 ==K V2
+       when F impliesBool (V1 ==Int V2)
        [anywhere]
 
   rule eqObs( <env>... X:Id |-> V1:K ...</env>
@@ -498,9 +588,10 @@ module IMP
               <observers> ListItem(X) ...</observers> , F:K)
        =>
        false
-       when  F impliesBool V1 =/=K V2
+       when  F impliesBool V1 =/=Int V2
        [anywhere]
- 
+
+
 /*@
   The next rule gives semantics to the new construct \texttt{storeHyp}, which 
   consists of storing the hypothesis given by the arguments. Its semantics
@@ -542,6 +633,45 @@ module IMP
                   <env> Env2 </env> 
                   <observers> Obs </observers>, F)
 
+
+  rule [store-hypo] :
+       <task>
+         <config> 
+           <k> storeHypo(K1:K) => 
+eqObs(<env> Env1 </env> 
+                  <env> Env2 </env> 
+                  <observers> Obs </observers>, F) ...</k>
+           <env> Env1:Map </env>
+         </config> 
+         <config> 
+           <k> storeHypo(K2:K) => . ...</k>
+           <env> Env2:Map </env>
+         </config>
+         <formula> F:K </formula>
+       </task>
+       <hypos>... 
+         .
+         =>
+         <hypo>
+           <patt1> 
+             <k1> K1 </k1>
+             <env1> Env1 </env1>
+           </patt1> 
+           <patt2> 
+             <k2> K2 </k2>
+             <env2> Env2 </env2>
+           </patt2>
+           <formula> F </formula>
+         </hypo>
+       ...</hypos>
+         <observers> Obs:List </observers>
+       when eqObs(<env> Env1 </env> 
+                  <env> Env2 </env> 
+                  <observers> Obs </observers>, F) =/=K true
+
+
+
+
 /*@
   Compute the substitution given by a pair of configurations
   cfg1 ->* cfg2 (here the configurations are environments). 
@@ -565,18 +695,24 @@ module IMP
        when notBool(X in keys(Env'))
        [anywhere]
 
+  rule substitution( <env> .Map </env>
+                     <env> Env':Map </env>)
+       =>
+       .Map
+
 /*@
   The following function applies a substitution to a formula.
 */
 
-  syntax Bool ::= "apply" "(" Map "," Bool ")" [function]
+  syntax K ::= "apply" "(" Map "," K ")" [function]
 
-  rule apply(.Map, F:Bool) => F [anywhere]
+  rule apply(.Map, F:K) => F [anywhere]
 
-  rule apply(X:Id |-> V:Int M:Map, F:Bool)
+  rule apply(X:Id |-> V:K M:Map, F:K)
        =>
        apply(M,  F[V/X])
        [anywhere] 
+
 
  
 /*@
@@ -613,6 +749,9 @@ module IMP
          </hypo>
        ...</hypos>
        <observers> Obs </observers>
+       <debug> _ => apply(substitution(<env> Env1 </env> <env> Env1' </env>)
+           substitution(<env> Env2 </env> <env> Env2' </env>), F) 
+       </debug>
 //     when F' impliesBool
 //          apply(substitution(<env> Env1 </env> <env> Env1' </env>)
 //           substitution(<env> Env2 </env> <env> Env2' </env>), F)
@@ -711,6 +850,25 @@ module IMP
   rule Ids2List(.Ids) => .List [anywhere]
   rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
        [anywhere]
+
+
+/*@
+  Semantics of the symbolic statements:
+*/
+
+syntax Map ::= "apply" "(" Stmt "," Map ")" 
+
+// symbolic statement 
+rule [symbolic-stmt] : 
+    <k> SS:StmtSymVar => .  ...</k>
+    <env> M:Map => apply(SS,M) </env>
+    [transition] 
+
+  rule [lookup] :  <k> X:Id => I ...</k>
+                   <env> apply(SS:StmtSymVar, (_ X |-> I:Int _)) </env> 
+//  rule get(I:Id, apply(SS:SymbolicStmt, M:Map)) => get(I,M)
+   when I isNotModifiedBy SS
+   [structural,anywhere]
 
 
 endmodule
