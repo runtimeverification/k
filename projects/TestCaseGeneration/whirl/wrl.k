@@ -63,7 +63,7 @@ module WRL
    // switches to execute mode
    rule [ProgStart]:
       <k> end </k>
-      <mode> 0 => 1 </mode>
+      <mode> 99 => 1 </mode>
       <size> _ => S </size>
       <ip> S:Int => 0 </ip>
 
@@ -189,7 +189,6 @@ module WRL
       // TODO: fix IO
 
 
-
    rule [IntIOZero]: // ops ring 10, value = 0 (input)
       <mode> 2 => 3 </mode>
       <ring> 0 </ring>
@@ -248,7 +247,7 @@ module WRL
       <val>... 0 |-> V:Int ...</val>
       <mp> M:Int </mp>
       <memmap>... M |-> C:Int ...</memmap>
-      <out>... . => ListItem(C) ListItem(" ") </out>
+      <out>... . => ListItem(charString(C)) </out>
     when (V =/=Int 0)
 
    
