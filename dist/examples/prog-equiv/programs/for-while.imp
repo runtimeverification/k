@@ -1,9 +1,11 @@
 program1:
 
+	var ;	
 	for i from symInt(a1) to symInt(a2) do symStmt(s)
 
 program2:
 
+	var ;
 	i := symInt(a1);
 	while (i <= symInt(a2)) do (
 	  symStmt(s);
@@ -12,7 +14,7 @@ program2:
 
 condition:
 
-	i isNotModifiedBy symStmt(s) == true
+	i isNotModifiedBy symStmt(s)
 
 
 observers: i;

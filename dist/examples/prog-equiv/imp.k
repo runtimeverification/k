@@ -36,8 +36,7 @@ endmodule
 
 module SYMBOLIC-CALCULUS
   imports SYMBOLIC-CALCULUS-SYNTAX
-
-
+  imports SUBSTITUTION
 
 /*@
   This module is designed with a minimal support. 
@@ -141,6 +140,43 @@ module SYMBOLIC-CALCULUS
   rule 'isInt(_:Int *Int _:Int) => true [anywhere] 
   rule 'isInt(_:Int /Int _:Int) => true [anywhere]
 
+/*@
+  The following rules extends the substitution to the symbolic values and
+  symbolic expressions.
+*/
+
+  rule (F1:K andBool F2:K) [ V:K / X:K ]
+        =>
+        F1 [ V:K / X:K ] andBool F2[ V:K / X:K ]
+        [anywhere]
+
+  rule (I1:Int <=Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) <=Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule (I1:Int ==Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) ==Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule (I1:Int +Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) +Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule (I1:Int *Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) *Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule I:Int [ E1:K / E2:K ] => E1 
+       when I ==K E2
+       [anywhere]
+ 
+  rule I:Int [ E1:K / E2:K ] => I
+       when I =/=K E2
+       [anywhere]
 
 //@ Some simplification rules.
 
@@ -151,16 +187,18 @@ module SYMBOLIC-CALCULUS
        (I +Int 1) *Int (I +Int 1)
        [anywhere]
 
-
 //@ The following is specific to the example wit sum of squares
 
-  rule ((I1:Int ==Int I2:Int *Int I2) andBool (I3:Int ==Int I2)) impliesBool ((I:Int +Int I1) ==Int (I +Int I3 *Int I3))
+  rule ((I1:Int ==Int I2:Int *Int I2) andBool (I3:Int ==Int I2))
+       impliesBool
+       ((I:Int +Int I1) ==Int (I +Int I3 *Int I3))
        =>
        true
        [anywhere]
 
-
   rule B:K impliesBool true => true  [anywhere]
+
+  rule (B:K andBool B':K) impliesBool B => true  [anywhere]
 
   rule B:K andBool true => B  [anywhere]
 
@@ -170,9 +208,7 @@ module SYMBOLIC-CALCULUS
 
   rule true orBool B:K => true  [anywhere]
 
-
   rule V1:K ==K V2:K impliesBool V1 ==K V2 => true [anywhere]
-  
 
 endmodule
 
@@ -204,7 +240,8 @@ module IMP-SYNTAX
   				| Id ":=" AExp   [strict(2)]
   				| "if" BExp "then" Stmt "else" Stmt [strict(1)]
   				| "while" BExp "do" Stmt
-                                | "for" Id "from" AExp "to" AExp "do" Stmt [strict(2, 3)] 
+                                | "for" Id "from" AExp "to" AExp "do" Stmt
+                                  [strict(2 3)] 
   				> Stmt ";" Stmt   [left]
   				| "(" Stmt ")"    [bracket]
 
@@ -228,8 +265,8 @@ module IMP-SYNTAX
 
   syntax BExp ::= AExp "==" AExp  [strict]
 
-//get if no effect
-syntax Bool ::= Id "isNotModifiedBy" Stmt 
+//@ get if no effect
+  syntax Bool ::= Id "isNotModifiedBy" Stmt 
 
   /*@
     Extending the statements with symbolic values:
@@ -242,14 +279,11 @@ syntax Bool ::= Id "isNotModifiedBy" Stmt
 
 endmodule
 
-
-
 //@ \section{Semantics}
 
 module IMP
   imports IMP-SYNTAX
 //  imports SYMBOLIC-CALCULUS
-  imports SUBSTITUTION
 
 /*@
   A configuration is a multiset of tasks. Each task consists of an
@@ -288,7 +322,6 @@ module IMP
                   </hypos>
                   <observers> .List </observers> 
                   <nextSymvar> 0 </nextSymVar>
-<debug> .K </debug>
                 </T>
 
 /*@
@@ -337,19 +370,12 @@ module IMP
   rule [eq] : I1:Int == I2:Int => I1 ==Int I2
 
 /*@
-  The semantics for memory lookup, skip, assignment, sequential composition,
+  The semantics for skip, sequential composition,
   and if remain unchanged, too. The rules for assignment and if are annotated
   as transition for tracing reasons.
 */
 
-  rule [lookup] :      <k> X:Id => I ...</k>
-                      <env>... X |-> I:Int ...</env> 
   rule [skip] : skip => .
-
-  rule [assignment]:
-       <k> X:Id := I:Int => . ...</k>
-       <env>... X |-> (_ => I) ...</env>
-       [transition]
 
   rule [sequential] : S1;S2 => S1 ~> S2 [structural]
 
@@ -377,13 +403,83 @@ module IMP
        </k> 
        [transition]
 
-//for 
+/*@
+  The statement \texttt{for} is added just for proving its equivalence 
+  with its simulation with while. The semantics of \texttt{for} is given
+  in a similar way to that of while.
+*/
 rule [for] :  
         <k> 
-          (for I:Id from A1:Int to A2:Int  do S:Stmt) => 
-          I := A1; if (I <= A2) then (S; for I from A1 + 1 to A2  do S) else skip
-        ...</k> 
+          (for I:Id from A1:Int to A2:Int do S:Stmt) ~> K:K => 
+          storeHypo(for I:Id from A1:Int to A2:Int do S:Stmt) ~>
+          I := A1; if (I <= A2) then (S; for I from (A1 + 1) to A2  do S) else skip
+          ~> K
+        </k> 
  [transition] 
+
+/*@ 
+  \textbf{Remark.} It will be nice to invent a way to specify the "shape"
+  of the hypotheses added for circularity reasoning. This should increase
+  the efficiency of the proof system.
+*/
+
+/*@
+  Semantics of the symbolic statements:
+*/
+
+  syntax Map ::= "execute" "(" Stmt "," Map ")" 
+
+  rule [symbolic-stmt] : 
+       <k> SS:StmtSymVar => .  ...</k>
+       <env> M:Map => execute(SS,M) </env>
+       [transition] 
+
+/*@
+  The memory lookup rule is changed because now the memory can be a 
+  symbolic one obtained after a the execution of a symbolic statement.
+*/
+
+  syntax K ::= "lookup" "(" Id "," Map ")" [function]
+
+  rule [lookup] : 
+       <k> X:Id =>  lookup(X, Rho) ...</k>
+       <env> Rho:Map </env> 
+
+  rule [lookup] :  lookup(X:Id, (_ X |-> I:Int _)) => I
+
+  rule [lookup] :
+       <k> lookup(X:Id, execute(SS:StmtSymVar, Rho:Map)) 
+           => 
+           lookup(X, Rho)
+       ...</k>
+       <formula> F:K </formula>
+       when F impliesBool (X isNotModifiedBy SS)
+
+/*@
+  The semantics of the assignment is modified because it participate 
+  at storing hypotheses.
+*/
+
+  syntax K ::= "update" "(" Id "," K ")"
+
+  rule [assignment]:
+       <k>
+          (X:Id := I:Int ~> K:K)
+          =>
+          (storeHypo(X:Id := I:Int ~> K) ~> update(X,I) ~> K) 
+       </k>
+       [transition]
+
+  rule [assignment]:
+       <k> update(X:Id, V:K) => . ...</k>
+       <env>... X |-> (_ => V) ...</env>
+       [transition]
+
+  rule [assignment]:
+       <k> update(X:Id, V:K) => . ...</k>
+       <env> (Rho:Map) (. => X |-> V) </env>
+       when notBool(X in keys(Rho))
+       [transition]
 
 
 /*@
@@ -393,10 +489,41 @@ rule [for] :
   the boolean operators are strict in at leat one argument) is seen as a 
   variable and consequently its value is stored in the \texttt{env} cell.
   Each time a new elementary symbolic boolean expression is met, the current task 
-  is split in two task: one for the \texttt{true} value, and the other one for
+  is split in two tasks: one for the \texttt{true} value, and the other one for
   the \texttt{false} value.\\
   In fact, we guess that this is the only rule that uses unification for computing
-  the derivatives. More details will be added later.
+  the derivatives. 
+  We assume that we have the formula:
+  \begin{verbatim}
+      <config>                            <config>
+        <k> I1 <= I2 ~> K1 </k>     ~       <k> K2 </k>          if F
+        <env> Rho1  </env>                  <env> Rho2 </env>
+      </config>                           </config>
+  \end{verbatim}
+  The semantic rule evaluating \texttt{I1 <= I2}  is equivalent with the 
+  following two rules:
+  \begin{verbatim}
+    rule I1 <= I2 => true when I1 <=Int I2
+    rule I1 <= I2 => false when notBool(I1 <=Int I2)
+  \end{verbatim} 
+  Then the derivatives of the above goal are:
+  \begin{verbatim}
+      <config>                            <config>
+        <k> true ~> K1 </k>       ~         <k> K2 </k>          if F andBool B
+        <env> Rho1  </env>                  <env> Rho2 </env>
+      </config>                           </config>
+      <config>                            <config>
+        <k> false ~> K1 </k>      ~         <k> K2 </k>          if F andBool 
+        <env> Rho1  </env>                  <env> Rho2 </env>       notBool B
+      </config>                           </config>
+  \end{verbatim}
+  Therefore the below rule can be interepreted as being the implementation of the
+  [derive] rule from the proof system; it is a special case (and the only one)
+  when the current goal has two derivatives.\\
+  The values of the elementary symbolic boolean expressions are stored in the 
+  cell \texttt{env} for efficiency reasons. Note that each such expression could
+  have "synonims": e.g., if $B$ is $I_1\le I_2$ and $F$ implies $I_1=I'_1$, then
+  $I'_1\le I_2$ is a synonim of $B$ and both of them have the same value.
 */
 
   rule <task>
@@ -421,7 +548,7 @@ rule [for] :
            <k> K2 </k>
            <env> Rho2:Map (B |-> true) </env>
          </config>
-         <formula> F </formula>
+         <formula> F andBool B  </formula>
          C
        </task>
        <task>
@@ -433,13 +560,12 @@ rule [for] :
            <k> K2 </k>
            <env> Rho2:Map (B |-> false) </env>
          </config>
-         <formula> F </formula>
+         <formula> F andBool notBool (B) </formula>
          C
        </task>
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho1))
             andBool notBool(B in keys(Rho2))
-
 
 /*@
   When an existing elementary symbolic boolean expression has to be evaluated, its
@@ -452,7 +578,9 @@ rule [for] :
 
 
 /*@
-
+  The following rules remove an inconsistent formula, where the
+  condition is false. Note that the stored symbolic boolean expressions
+  are parts of the condition.
 */
 
   rule <task>...
@@ -460,16 +588,34 @@ rule [for] :
        ...</task>
        =>
        .
-//@ The folowing is specific to the example
+       when isBoolSymExp(B)
+
+  rule <task>...
+         <env>... B |-> true ...</env>
+         <env>... B |-> false ...</env>
+       ...</task>
+       =>
+       .
+       when isBoolSymExp(B)
+
+/*@
+  The folowing rule "borrows" the value of a elementary boolean expression
+  from the pairing configuration. Since these expressions includes symbolic
+  values whose scopes are the entire formula, this rule is sound.
+  Note also that only sysnonims are usually stored only in one environment.
+*/
 
   rule <task>...
          <config>...
            <k> B:K => V ...</k>
+           <env> Rho:Map </env>
          ...</config>
          <config>...
            <env>... B |-> V:Bool ...</env>
          </config>
        ...</task>
+       when isBoolSymExp(B)
+            andBool notBool (B in keys(Rho))
 
   /*@
     Store the elementary symbolic boolean expressions obtained as
@@ -492,39 +638,9 @@ rule [for] :
   rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
        when (B[I1/I2] ==K B) andBool (B[I2/I1] ==K B)
 
-  rule (F1:K andBool F2:K) [ V:K / X:K ]
-        =>
-        F1 [ V:K / X:K ] andBool F2[ V:K / X:K ]
-        [anywhere]
+  rule storeSyns(X:Id isNotModifiedBy S:Stmt, B:K, V:Bool) => .
 
-  rule (I1:Int <=Int I2:Int) [ E1:K / E2:K ]
-       =>
-       (I1 [ E1 /E2 ]) <=Int (I2 [ E1 / E2 ])
-       [anywhere]
-
-  rule (I1:Int ==Int I2:Int) [ E1:K / E2:K ]
-       =>
-       (I1 [ E1 /E2 ]) ==Int (I2 [ E1 / E2 ])
-       [anywhere]
-
-  rule (I1:Int +Int I2:Int) [ E1:K / E2:K ]
-       =>
-       (I1 [ E1 /E2 ]) +Int (I2 [ E1 / E2 ])
-       [anywhere]
-
-  rule (I1:Int *Int I2:Int) [ E1:K / E2:K ]
-       =>
-       (I1 [ E1 /E2 ]) *Int (I2 [ E1 / E2 ])
-       [anywhere]
-
-  rule I:Int [ E1:K / E2:K ] => E1 
-       when I ==K E2
-       [anywhere]
- 
-  rule I:Int [ E1:K / E2:K ] => I
-       when I =/=K E2
-       [anywhere]
-
+  rule <k> storeSyns(I1:Int <=Int I2:Int, B:K, V:Bool) => . ...</k>
 
 /*@
   The special bag \texttt{success} is used for removing tasks (goals).
@@ -632,15 +748,13 @@ rule [for] :
        when eqObs(<env> Env1 </env> 
                   <env> Env2 </env> 
                   <observers> Obs </observers>, F)
+       [transition]
 
 
   rule [store-hypo] :
        <task>
          <config> 
-           <k> storeHypo(K1:K) => 
-eqObs(<env> Env1 </env> 
-                  <env> Env2 </env> 
-                  <observers> Obs </observers>, F) ...</k>
+           <k> storeHypo(K1:K) => . ...</k>
            <env> Env1:Map </env>
          </config> 
          <config> 
@@ -668,52 +782,118 @@ eqObs(<env> Env1 </env>
        when eqObs(<env> Env1 </env> 
                   <env> Env2 </env> 
                   <observers> Obs </observers>, F) =/=K true
-
-
-
+       [transition]
 
 /*@
-  Compute the substitution given by a pair of configurations
-  cfg1 ->* cfg2 (here the configurations are environments). 
+  The followings defines (special) cases when a current goal is a 
+  consequence of the circular hypotheses.\\
+  This relation must be more elaborated.
 */
 
-  syntax Map ::= "substitution" "(" Bag ")" [function]
+  syntax Bool ::= "KItem" "(" Bag ")" "|-subst" "KItem" "(" Bag ")" [function]
 
-  rule substitution( <env> X:Id |-> V:IntSymVar Env:Map </env>
-                     <env> X |-> E:Int Env':Map </env>)
-       =>
-       V |-> E 
-       substitution( <env> Env:Map </env>
-                     <env> Env':Map </env>)
-       [anywhere]
-
-  rule substitution( <env> X:Id |-> V:IntSymVar Env:Map </env>
-                     <env> Env':Map </env>)
-       =>
-       substitution( <env> Env:Map </env>
-                     <env> Env':Map </env>)
-       when notBool(X in keys(Env'))
-       [anywhere]
-
-  rule substitution( <env> .Map </env>
-                     <env> Env':Map </env>)
-       =>
-       .Map
-
-/*@
-  The following function applies a substitution to a formula.
-*/
-
-  syntax K ::= "apply" "(" Map "," K ")" [function]
-
-  rule apply(.Map, F:K) => F [anywhere]
-
-  rule apply(X:Id |-> V:K M:Map, F:K)
-       =>
-       apply(M,  F[V/X])
-       [anywhere] 
+//rule KItem(<hypo> B1:Bag </hypo>) |-subst KItem(<task> B2:Bag </task>) => true [anywhere]
 
 
+rule KItem(<hypo>      
+       <formula>
+         F:K
+       </formula> 
+       <patt1>        
+         <k1>
+          for I:Id from (A1:Int) to (A2:Int) do (S:Stmt) 
+         </k1> 
+         <env1>
+          Rho1:Map
+         </env1> 
+       </patt1> 
+       <patt2>        
+         <k2>
+           (I := A1) ~> 
+           (while (I <= A2) do (S ; (I := (I + 1)))) 
+         </k2> 
+         <env2>
+          Rho2:Map
+         </env2> 
+       </patt2> 
+     </hypo>) 
+
+    |-subst
+
+     KItem(<task>      
+       <formula>
+         F':K
+       </formula> 
+       <config>        
+         <k>
+          for I from (A1 +Int 1) to A2 do S 
+         </k> 
+         <env>
+          Rho1':Map
+         </env> 
+       </config> 
+       <config>        
+         <k>
+           (I := (A1 +Int 1)) ~> 
+           (while (I <= A2) do (S ; (I := (I + 1)))) 
+         </k>
+         <env>
+          Rho2':Map
+         </env>
+       </config>
+     </task>)
+     => 
+     true
+     [anywhere]
+
+rule KItem( <hypo>      
+       <formula> F:K </formula> 
+       <patt1>        
+         <k1>
+          while (I:Id <= N:Id) do ((S:Id := (S + (I * I))) ; (I := (I + 1))) 
+         </k1> 
+         <env1>          
+           Rho1:Map
+         </env1> 
+       </patt1> 
+       <patt2>        
+         <k2>
+           while (I <= N) do (((S := (S + K:Id)) ;
+                              (K := (((K + I) + I) + 1))) ; 
+                              (I := (I + 1))) 
+         </k2> 
+         <env2>          
+           Rho2:Map
+         </env2> 
+       </patt2> 
+     </hypo>)
+
+     |-subst
+
+     KItem(<task>      
+       <formula> F':K </formula> 
+       <config>        
+         <k>
+          while (I <= N) do ((S := (S + (I * I))) ; (I := (I + 1))) 
+         </k> 
+         <env>          
+           Rho1':Map
+         </env> 
+       </config> 
+       <config>        
+         <k>
+           while (I <= N) do (((S := (S + K:Id)) ;
+                              (K := (((K + I) + I) + 1))) ; 
+                              (I := (I + 1))) 
+         </k> 
+         <env>          
+           Rho2':Map
+         </env> 
+       </config> 
+     </task>)
+     =>
+     true
+     [anywhere]
  
 /*@
   The next rule is intended to implement the entailment between the collected
@@ -724,11 +904,11 @@ eqObs(<env> Env1 </env>
   rule [circularity] :
        (<task>
          <config> 
-           <k> K1:K </k>
+           <k> storeHypo(K1:K) ...</k>
            <env> Env1:Map </env>
          </config> 
          <config> 
-           <k> K2:K </k>
+           <k> storeHypo(K2:K) ...</k>
            <env> Env2:Map </env>
          </config>
          <formula> F:K </formula>
@@ -738,25 +918,46 @@ eqObs(<env> Env1 </env>
        <hypos>... 
          <hypo>
            <patt1> 
-             <k1> K1 </k1>
+             <k1> K1':K </k1>
              <env1> Env1':Map </env1>
            </patt1> 
            <patt2> 
-             <k2> K2 </k2>
+             <k2> K2':K </k2>
              <env2> Env2':Map </env2>
            </patt2>
            <formula> F':K </formula>
          </hypo>
        ...</hypos>
-       <observers> Obs </observers>
-       <debug> _ => apply(substitution(<env> Env1 </env> <env> Env1' </env>)
-           substitution(<env> Env2 </env> <env> Env2' </env>), F) 
-       </debug>
-//     when F' impliesBool
-//          apply(substitution(<env> Env1 </env> <env> Env1' </env>)
-//           substitution(<env> Env2 </env> <env> Env2' </env>), F)
-          
+//       <observers> Obs </observers>
 
+      when
+
+        KItem(<hypo>
+           <patt1> 
+             <k1> K1' </k1>
+             <env1> Env1' </env1>
+           </patt1> 
+           <patt2> 
+             <k2> K2' </k2>
+             <env2> Env2' </env2>
+           </patt2>
+           <formula> F' </formula>
+        </hypo>)
+
+       |-subst 
+ 
+       KItem(<task>
+         <config> 
+           <k> K1 </k>
+           <env> Env1 </env>
+         </config> 
+         <config> 
+           <k> K2 </k>
+           <env> Env2 </env>
+         </config>
+         <formula> F </formula>
+       </task>)
+      [transition]
 
 /*@
   The following rule creates the initial configuration from the equivalence
@@ -841,6 +1042,11 @@ eqObs(<env> Env1 </env>
        injectAExp(A1)  /Int injectAExp(A2)
        [anywhere]
 
+  rule injectForm(X:Id isNotModifiedBy S:Stmt ) 
+       =>
+       X:Id isNotModifiedBy S:Stmt 
+       [anywhere]
+
 /*@
   The following is a helper function that transform a list of
   identifiers into a builtin list, used for storing the observer
@@ -850,25 +1056,5 @@ eqObs(<env> Env1 </env>
   rule Ids2List(.Ids) => .List [anywhere]
   rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
        [anywhere]
-
-
-/*@
-  Semantics of the symbolic statements:
-*/
-
-syntax Map ::= "apply" "(" Stmt "," Map ")" 
-
-// symbolic statement 
-rule [symbolic-stmt] : 
-    <k> SS:StmtSymVar => .  ...</k>
-    <env> M:Map => apply(SS,M) </env>
-    [transition] 
-
-  rule [lookup] :  <k> X:Id => I ...</k>
-                   <env> apply(SS:StmtSymVar, (_ X |-> I:Int _)) </env> 
-//  rule get(I:Id, apply(SS:SymbolicStmt, M:Map)) => get(I,M)
-   when I isNotModifiedBy SS
-   [structural,anywhere]
-
 
 endmodule

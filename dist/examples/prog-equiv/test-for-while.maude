@@ -1,0 +1,4 @@
+search [1,1000] #eval(__((_|->_((# "$PGM"(.List{K})) ,('program1:_program2:_condition:_observers:_;(_`,`,_('var_;_(_`,`,_('.Ids(.List{K}) ,'for_from_to_do_(_`,`,_(#_(#id "i") (.List{K}) ,'symInt`(_`)(#_(#id "a1") (.List{K}) ) ,'symInt`(_`)(#_(#id "a2") (.List{K}) ) ,'symStmt`(_`)(#_(#id "s") (.List{K}) ) )) )) ,'var_;_(_`,`,_('.Ids(.List{K}) ,'_;_(_`,`,_('_:=_(_`,`,_(#_(#id "i") (.List{K}) ,'symInt`(_`)(#_(#id "a1") (.List{K}) ) )) ,'while_do_(_`,`,_('_<=_(_`,`,_(#_(#id "i") (.List{K}) ,'symInt`(_`)(#_(#id "a2") (.List{K}) ) )) ,'_;_(_`,`,_('symStmt`(_`)(#_(#id "s") (.List{K}) ) ,'_:=_(_`,`,_(#_(#id "i") (.List{K}) ,'_+_(_`,`,_(#_(#id "i") (.List{K}) ,#_(1) (.List{K}) )) )) )) )) )) )) ,'_isNotModifiedBy_(_`,`,_(#_(#id "i") (.List{K}) ,'symStmt`(_`)(#_(#id "s") (.List{K}) ) )) ,'_`,_(_`,`,_(#_(#id "i") (.List{K}) ,'.Ids(.List{K}) )) )) 
+))),(.).Map)) =>* < T > < tasks > success </ tasks > B:Bag </ T > B'':Bag .
+
+
