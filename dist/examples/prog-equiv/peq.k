@@ -261,10 +261,16 @@ module IMP-SYNTAX
 
 //  syntax Strings ::= List{String, ","}
 
-  syntax EqvPgm ::= "program1:" Pgm 
-                    "program2:" Pgm 
-                    "condition:" BExp
-                    "observers:" Ids ";"
+  syntax InitVal ::= Id "->" Int
+  syntax InitVals ::= List{InitVal,","}
+
+  syntax EqvPgm ::= "<k>" Stmt "</k>"
+                    "<env>" InitVals "</env>"
+                    "~" 
+                    "<k>" Stmt "</k>"
+                    "<env>" InitVals "</env>"
+                    "if" BExp
+                    "using" "observers:" Ids ";"
 //                    "syncs:" Strings ";"
 
   syntax Start ::= EqvPgm  
@@ -1006,19 +1012,23 @@ rule KItem(<hypo>
   rule [initial] :
        <config>
          <k> 
-           program1: P1:Pgm program2: P2:Pgm
-           condition: F:BExp
-           observers: Obs:Ids; 
+           <k> P1:Stmt </k>
+           <env> Inits1:InitVals </env>
+           ~
+           <k> P2:Stmt </k>
+           <env> Inits2:InitVals </env>
+           if F:BExp
+           using observers: Obs:Ids; 
 //           syncs: Syncs:Strings;
            =>
-           initVal(Obs) ~> P1
+           setInitValObs(Obs) ~> setInitVal(Inits1) ~> P1
          </k>
        ...</config>
        <formula> _ => injectForm(F) </formula>
       (. =>
        <config>
          <k> 
-           initVal(Obs) ~> P2
+           setInitValObs(Obs) ~> setInitVal(Inits2) ~> P2
          </k>
          <env> . </env>
        </config>)
@@ -1031,18 +1041,28 @@ rule KItem(<hypo>
   configurations. 
 */
 
-  syntax K ::= "initVal" "(" Ids ")"
 
-  rule <k> initVal(.Ids) => . ...</k>
-       <k> initVal(.Ids) => . ...</k>
+  syntax K ::= "setInitVal" "(" InitVals ")"
+
+  rule setInitVal(.InitVals) => .
+       [structural]
+
+  rule <k> setInitVal((X:Id -> V:Int, XVs:InitVals) => XVs) ...</k>
+       <env>... . => X |-> V ...</env>
+       [structural]
+
+  syntax K ::= "setInitValObs" "(" Ids ")"
+
+  rule <k> setInitValObs(.Ids) => . ...</k>
+       <k> setInitValObs(.Ids) => . ...</k>
        [structural]
 
   rule <config>
-         <k> initVal((X:Id, Xs:Ids) => Xs) ...</k>
+         <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
          <env>... . => X |-> symInt(fresh(I)) ...</env>
        </config> 
        <config> 
-         <k> initVal((X:Id, Xs:Ids) => Xs) ...</k>
+         <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
          <env>... . => X |-> symInt(fresh(I)) ...</env>
        </config> 
        <nextSymvar> I:Int => I +Int 1 </nextSymVar>

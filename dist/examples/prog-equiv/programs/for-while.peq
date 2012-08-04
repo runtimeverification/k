@@ -1,33 +1,25 @@
-program1:
-
-	var i;	
-L:	for i from symInt(a1) to symInt(a2) do symStmt(s)
-
-program2:
-
-	var i;
-	i := symInt(a1);
-L:	while (i <= symInt(a2)) do (
-	  symStmt(s);
-	  i := i + 1
-	)
-
-condition:
-
-	i isNotModifiedBy symStmt(s)
-
-
-observers: ;
-
-/*
-<k>  L : for i from symInt(a1) to symInt(a2) do symStmt(s) </k>
-<env> i |-> _ </env>
+<k>
+  L : for i from symInt(a1) to symInt(a2) do symStmt(s)
+</k>
+<env>
+  i -> symInt(i0)
+</env>
 ~
-<k> 
-L : while (i <= symInt(a2)) do (
+<k>
+ L :	while (i <= symInt(a2)) do (
 	  symStmt(s);
 	  i := i + 1
 	)
- </k>
-<env> i |-> symInt(a1) </env>
-*/
+</k>
+<env>
+  i -> symInt(a1)
+</env>
+
+if
+
+i isNotModifiedBy symStmt(s)
+
+
+using observers: ;
+
+
