@@ -1,0 +1,50 @@
+program1:
+
+var i;
+i := symInt(i01);
+L: while (i <= n) do (
+  s := s + i * i;
+  i := i + 1
+)
+
+program2:
+
+var i, k;
+i := symInt(i02);
+k := symInt(k0);
+L: while (i <= n) do (
+  s := s + k;
+  k := k + i + i + 1;
+  i := i + 1
+)
+
+condition:
+
+  symInt(k0) == symInt(i02) * symInt(i02)
+  and
+  symInt(i01) == symInt(i02)
+
+observers: n, s;
+
+/*
+
+<k>
+i := symInt(i01);
+L: while (i <= n) do (
+  s := s + i * i;
+  i := i + 1
+)
+</k>
+<env>... x |-> _ s |-> s0 n |-> n0 ...</env>
+~
+<k> 
+i := symInt(i02);
+k := symInt(k0);
+L: while (i <= n) do (
+  s := s + k;
+  k := k + i + i + 1;
+  i := i + 1
+)
+</k>
+<env>... x |-> _ s |-> s0 n |-> n0 ...</env>
+*/

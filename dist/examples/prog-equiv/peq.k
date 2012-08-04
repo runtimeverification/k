@@ -242,6 +242,10 @@ module IMP-SYNTAX
   				| "while" BExp "do" Stmt
                                 | "for" Id "from" AExp "to" AExp "do" Stmt
                                   [strict(2 3)] 
+  				| Id ":" "while" BExp "do" Stmt
+                                | Id ":" "for" Id "from" AExp "to" AExp "do" Stmt
+                                  [strict(3 4)] 
+//                                | Id ":" Stmt
   				> Stmt ";" Stmt   [left]
   				| "(" Stmt ")"    [bracket]
 
@@ -255,10 +259,13 @@ module IMP-SYNTAX
   variable observers has the same value in both configurations.
 */
 
+//  syntax Strings ::= List{String, ","}
+
   syntax EqvPgm ::= "program1:" Pgm 
                     "program2:" Pgm 
                     "condition:" BExp
                     "observers:" Ids ";"
+//                    "syncs:" Strings ";"
 
   syntax Start ::= EqvPgm  
 
@@ -281,7 +288,7 @@ endmodule
 
 //@ \section{Semantics}
 
-module IMP
+module PEQ
   imports IMP-SYNTAX
 //  imports SYMBOLIC-CALCULUS
 
@@ -321,6 +328,7 @@ module IMP
                     </hypo>
                   </hypos>
                   <observers> .List </observers> 
+//                  <syncs> .Set </syncs>
                   <nextSymvar> 0 </nextSymVar>
                 </T>
 
@@ -341,7 +349,6 @@ module IMP
 */
 
   syntax K ::= "storeHypo" "(" K ")"
-
 
 /*@
   The semantics of the expressions remains unchanged.
@@ -394,28 +401,61 @@ module IMP
   formula is included in the observational equivalence.
 */
 
-  rule [while] :
+/*
+  rule [sync]:
        <k>
-          while B:BExp do S:Stmt ~> K:K
+          L:Id : S:Stmt ~> K:K
           => 
-          storeHypo(while B do S ~> K) ~>
-          if B then S ; while B do S else skip ~> K
+          storeHypo(S ~> K) ~> S ~> K
        </k> 
        [transition]
+*/
+
+// it must be a transition
+
+  rule [while] :
+          while B:BExp do S:Stmt 
+          => 
+          if B then S ; while B do S else skip
+       [transition]
+
+
+  rule [while] :
+       <k>
+          L:Id : while B:BExp do S:Stmt ~> K:K
+          => 
+          storeHypo(while B do S ~> K) ~>
+          if B then S ; L : while B do S else skip
+          ~> K
+       </k> 
+       [transition]
+
 
 /*@
   The statement \texttt{for} is added just for proving its equivalence 
   with its simulation with while. The semantics of \texttt{for} is given
   in a similar way to that of while.
 */
-rule [for] :  
+
+  rule [for]:  
         <k> 
-          (for I:Id from A1:Int to A2:Int do S:Stmt) ~> K:K => 
-          storeHypo(for I:Id from A1:Int to A2:Int do S:Stmt) ~>
-          I := A1; if (I <= A2) then (S; for I from (A1 + 1) to A2  do S) else skip
+          L:Id : for I:Id from A1:Int to A2:Int do S:Stmt ~> K:K
+           => 
+          storeHypo(for I from A1 to A2 do S ~> K) ~>
+          I := A1;
+          if (I <= A2) then (S; L : for I from (A1 + 1) to A2  do S)
+                       else skip
           ~> K
         </k> 
- [transition] 
+       [transition] 
+
+  rule [for]:  
+       for I:Id from A1:Int to A2:Int do S:Stmt
+       => 
+       I := A1;
+       if (I <= A2) then (S; for I from (A1 + 1) to A2  do S)
+                    else skip
+       [transition] 
 
 /*@ 
   \textbf{Remark.} It will be nice to invent a way to specify the "shape"
@@ -462,20 +502,29 @@ rule [for] :
 
   syntax K ::= "update" "(" Id "," K ")"
 
+/*
   rule [assignment]:
        <k>
-          (X:Id := I:Int ~> K:K)
+          L:Id : X:Id := I:Int ~> K:K
           =>
-          (storeHypo(X:Id := I:Int ~> K) ~> update(X,I) ~> K) 
+          storeHypo(X:Id := I:Int ~> K) ~> 
+          update(X,I)
+          ~> K 
        </k>
        [transition]
-
+*/
   rule [assignment]:
+       X:Id := I:Int
+       => 
+       update(X,I)
+       [transition]
+
+  rule [update]:
        <k> update(X:Id, V:K) => . ...</k>
        <env>... X |-> (_ => V) ...</env>
        [transition]
 
-  rule [assignment]:
+  rule [update]:
        <k> update(X:Id, V:K) => . ...</k>
        <env> (Rho:Map) (. => X |-> V) </env>
        when notBool(X in keys(Rho))
@@ -714,7 +763,7 @@ rule [for] :
   is similar to that of threads synchronization.\\
   TBD: replace the values of the program variables with fresh symbolic
   values and add to formula the corresponding contraints.
-*/
+/n-*/
 
 
   rule [store-hypo] :
@@ -729,9 +778,10 @@ rule [for] :
          </config>
          <formula> F:K </formula>
        </task>
-       <hypos>... 
-         .
+       <hypos>
+         Hypos:Bag
          =>
+         Hypos
          <hypo>
            <patt1> 
              <k1> K1 </k1>
@@ -743,15 +793,30 @@ rule [for] :
            </patt2>
            <formula> F </formula>
          </hypo>
-       ...</hypos>
-         <observers> Obs:List </observers>
-       when eqObs(<env> Env1 </env> 
+       </hypos>
+       <observers> Obs:List </observers>
+       when (eqObs(<env> Env1 </env> 
                   <env> Env2 </env> 
-                  <observers> Obs </observers>, F)
+                  <observers> Obs </observers>, F) ==K true)
+            andBool
+            ((KItem(Hypos)
+            |-subst
+            KItem(<task>
+               <config> 
+                 <k> K1 </k>
+                 <env> Env1 </env>
+               </config> 
+               <config> 
+                 <k> K2 </k>
+                 <env> Env2 </env>
+               </config>
+               <formula> F </formula>
+             </task>))
+             =/=K true)
        [transition]
 
 
-  rule [store-hypo] :
+  rule [store-hypo]:
        <task>
          <config> 
            <k> storeHypo(K1:K) => . ...</k>
@@ -763,25 +828,14 @@ rule [for] :
          </config>
          <formula> F:K </formula>
        </task>
-       <hypos>... 
-         .
-         =>
-         <hypo>
-           <patt1> 
-             <k1> K1 </k1>
-             <env1> Env1 </env1>
-           </patt1> 
-           <patt2> 
-             <k2> K2 </k2>
-             <env2> Env2 </env2>
-           </patt2>
-           <formula> F </formula>
-         </hypo>
-       ...</hypos>
-         <observers> Obs:List </observers>
-       when eqObs(<env> Env1 </env> 
-                  <env> Env2 </env> 
-                  <observers> Obs </observers>, F) =/=K true
+       <hypos>
+         Hypos:Bag
+       </hypos>
+       <observers> Obs:List </observers>
+       when
+       eqObs(<env> Env1 </env> 
+             <env> Env2 </env> 
+             <observers> Obs </observers>, F) =/=K true
        [transition]
 
 /*@
@@ -790,10 +844,22 @@ rule [for] :
   This relation must be more elaborated.
 */
 
-  syntax Bool ::= "KItem" "(" Bag ")" "|-subst" "KItem" "(" Bag ")" [function]
+  syntax K ::= "KItem" "(" Bag ")"
+  syntax Bool ::= K "|-subst" K [function]
 
 //rule KItem(<hypo> B1:Bag </hypo>) |-subst KItem(<task> B2:Bag </task>) => true [anywhere]
 
+
+  rule KItem (H1:Bag H2:Bag) |-subst KItem(G:Bag)
+       =>
+       KItem (H1) |-subst KItem(G)
+       orBool
+       KItem (H2) |-subst KItem(G)
+       when (KItem(H1) =/=K KItem(.Bag)) andBool (KItem(H2) =/=K KItem(.Bag))
+       [anywhere]
+
+
+  rule KItem(.Bag) |-subst KItem(G:Bag) => false [anywhere]
 
 rule KItem(<hypo>      
        <formula>
@@ -808,11 +874,11 @@ rule KItem(<hypo>
          </env1> 
        </patt1> 
        <patt2>        
-         <k2>
-           (I := A1) ~> 
+         <k2> 
            (while (I <= A2) do (S ; (I := (I + 1)))) 
          </k2> 
          <env2>
+          I |-> A1
           Rho2:Map
          </env2> 
        </patt2> 
@@ -826,18 +892,18 @@ rule KItem(<hypo>
        </formula> 
        <config>        
          <k>
-          for I from (A1 +Int 1) to A2 do S 
+          for I from A1':Int to A2 do S 
          </k> 
          <env>
           Rho1':Map
          </env> 
        </config> 
        <config>        
-         <k>
-           (I := (A1 +Int 1)) ~> 
+         <k> 
            (while (I <= A2) do (S ; (I := (I + 1)))) 
          </k>
          <env>
+          I |-> A1'
           Rho2':Map
          </env>
        </config>
@@ -846,7 +912,7 @@ rule KItem(<hypo>
      true
      [anywhere]
 
-rule KItem( <hypo>      
+rule KItem(<hypo>      
        <formula> F:K </formula> 
        <patt1>        
          <k1>
@@ -894,7 +960,7 @@ rule KItem( <hypo>
      =>
      true
      [anywhere]
- 
+
 /*@
   The next rule is intended to implement the entailment between the collected
   hypotheses and goals. Obviously, this is a partial implementation. Again,
@@ -915,37 +981,10 @@ rule KItem( <hypo>
        </task>
        =>
        success)
-       <hypos>... 
-         <hypo>
-           <patt1> 
-             <k1> K1':K </k1>
-             <env1> Env1':Map </env1>
-           </patt1> 
-           <patt2> 
-             <k2> K2':K </k2>
-             <env2> Env2':Map </env2>
-           </patt2>
-           <formula> F':K </formula>
-         </hypo>
-       ...</hypos>
-//       <observers> Obs </observers>
-
-      when
-
-        KItem(<hypo>
-           <patt1> 
-             <k1> K1' </k1>
-             <env1> Env1' </env1>
-           </patt1> 
-           <patt2> 
-             <k2> K2' </k2>
-             <env2> Env2' </env2>
-           </patt2>
-           <formula> F' </formula>
-        </hypo>)
-
+       <hypos> Hypos:Bag </hypos>
+       when
+       KItem(Hypos)
        |-subst 
- 
        KItem(<task>
          <config> 
            <k> K1 </k>
@@ -967,8 +1006,10 @@ rule KItem( <hypo>
   rule [initial] :
        <config>
          <k> 
-           program1: P1:Pgm program2: P2:Pgm condition: F:BExp
-           observers: Obs:Ids ;
+           program1: P1:Pgm program2: P2:Pgm
+           condition: F:BExp
+           observers: Obs:Ids; 
+//           syncs: Syncs:Strings;
            =>
            initVal(Obs) ~> P1
          </k>
@@ -982,6 +1023,7 @@ rule KItem( <hypo>
          <env> . </env>
        </config>)
        <observers> . => Ids2List(Obs) </observers>
+//       <syncs> . => Strings2Set(Syncs) </syncs> 
 
 /*@
   The auxiliary construct \texttt{initVal()} is used for initializing the 
@@ -1049,7 +1091,7 @@ rule KItem( <hypo>
 
 /*@
   The following is a helper function that transform a list of
-  identifiers into a builtin list, used for storing the observer
+  identifiers into a builtin list; it is used for storing the observer
   variables into the cell \texttt{observers}.
 */ 
   syntax List ::= "Ids2List" "(" Ids ")" [function]

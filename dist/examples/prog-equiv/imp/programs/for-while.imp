@@ -1,0 +1,11 @@
+	var i, a1, a2, s1, s2;
+        a1 := 1; a2 := 5; s1 := 0;	
+	for i from a1 to a2 do s1 := s1 + i;
+        a1 := 1; a2 := 5; s2 := 0;	
+	i := a1;
+	while (i <= a2) do (
+	  s2 := s2 + i;
+	  i := i + 1
+	)
+
+
