@@ -221,7 +221,11 @@ module IMP-SYNTAX
 //  imports SYMBOLIC-CALCULUS-SYNTAX
 
 /*@
-  This is the syntax of IMP, where we added the multiplication operator.
+  This is the syntax of IMP, where we added the multiplication operator, the
+  "for" statement,  and the  labeled statements.
+  The statement \texttt{for} is added just for proving its equivalence 
+  with its simulation with while. The semantics of \texttt{for} is given
+  in a similar way to that of while.
 */
   
   syntax AExp ::= Int | Id
@@ -242,10 +246,10 @@ module IMP-SYNTAX
   				| "while" BExp "do" Stmt
                                 | "for" Id "from" AExp "to" AExp "do" Stmt
                                   [strict(2 3)] 
-  				| Id ":" "while" BExp "do" Stmt
-                                | Id ":" "for" Id "from" AExp "to" AExp "do" Stmt
-                                  [strict(3 4)] 
-//                                | Id ":" Stmt
+//                                | Id ":" "while" BExp "do" Stmt
+//                                | Id ":" "for" Id "from" AExp "to" AExp "do" Stmt
+//                                  [strict(3 4)] 
+                                | Id ":" Stmt
   				> Stmt ";" Stmt   [left]
   				| "(" Stmt ")"    [bracket]
 
@@ -259,7 +263,6 @@ module IMP-SYNTAX
   variable observers has the same value in both configurations.
 */
 
-//  syntax Strings ::= List{String, ","}
 
   syntax InitVal ::= Id "->" Int
   syntax InitVals ::= List{InitVal,","}
@@ -271,10 +274,14 @@ module IMP-SYNTAX
                     "<env>" InitVals "</env>"
                     "if" BExp
                     "using" "observers:" Ids ";"
-//                    "syncs:" Strings ";"
 
   syntax Start ::= EqvPgm  
 
+/*@
+  The following expression is used in conditions.
+  If it is included in the definition of the language, then its declaration
+  here is no longer necessary.
+*/
 
   syntax BExp ::= AExp "==" AExp  [strict]
 
@@ -334,7 +341,6 @@ module PEQ
                     </hypo>
                   </hypos>
                   <observers> .List </observers> 
-//                  <syncs> .Set </syncs>
                   <nextSymvar> 0 </nextSymVar>
                 </T>
 
@@ -350,14 +356,15 @@ module PEQ
 /*@
   We use a new syntactic construct that help us to store hypotheses. The basic
   idea is to add the hypotheses in a controlled way. For instance, we may add
-  hypothesis only when in the k cell we have a main statement like while, if, 
-  or assignment. 
+  hypothesis only when on the top in the two k cells we have  statement with
+  the same label (the label is a kind of "rendevous" synchronisarion). 
 */
 
-  syntax K ::= "storeHypo" "(" K ")"
+  syntax K ::= "storeHypo" "(" Id "," K ")"
 
 /*@
-  The semantics of the expressions remains unchanged.
+  The semantics of the expressions remains unchanged, excepting the memory 
+  lookup and the memory update; these will be explained later.
 */
 
   rule [addition] : I1:Int + I2:Int => I1 +Int I2 
@@ -377,18 +384,18 @@ module PEQ
           <env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
 
 /*@ 
-  Equality of ints:
+  Equality of ints we additionally added:
 */
 
   rule [eq] : I1:Int == I2:Int => I1 ==Int I2
 
 /*@
-  The semantics for skip, sequential composition,
-  and if remain unchanged, too. The rules for assignment and if are annotated
-  as transition for tracing reasons.
+  The semantics for the initial statements remain unchanged, too. 
+  However, most of the rules are annotated as transitions for tracing reasons.
 */
 
   rule [skip] : skip => .
+       [structural]
 
   rule [sequential] : S1;S2 => S1 ~> S2 [structural]
 
@@ -398,62 +405,11 @@ module PEQ
   rule [if-false]: if false then _ else S:Stmt => S
        [transition]
 
-/*@ 
-    The rule for while is annotated as transition for technical reasons: since
-  our formula uses while as the main statement, it forces to apply the rules
-  for hypotheses before firing the semantic rule (if any).\\
-  Moreover, the semantics of while is changed such each time in the cell k 
-  we have an while , we store the hypotheses provided that the corresponding
-  formula is included in the observational equivalence.
-*/
-
-/*
-  rule [sync]:
-       <k>
-          L:Id : S:Stmt ~> K:K
-          => 
-          storeHypo(S ~> K) ~> S ~> K
-       </k> 
-       [transition]
-*/
-
-// it must be a transition
-
   rule [while] :
           while B:BExp do S:Stmt 
           => 
           if B then S ; while B do S else skip
        [transition]
-
-
-  rule [while] :
-       <k>
-          L:Id : while B:BExp do S:Stmt ~> K:K
-          => 
-          storeHypo(while B do S ~> K) ~>
-          if B then S ; L : while B do S else skip
-          ~> K
-       </k> 
-       [transition]
-
-
-/*@
-  The statement \texttt{for} is added just for proving its equivalence 
-  with its simulation with while. The semantics of \texttt{for} is given
-  in a similar way to that of while.
-*/
-
-  rule [for]:  
-        <k> 
-          L:Id : for I:Id from A1:Int to A2:Int do S:Stmt ~> K:K
-           => 
-          storeHypo(for I from A1 to A2 do S ~> K) ~>
-          I := A1;
-          if (I <= A2) then (S; L : for I from (A1 + 1) to A2  do S)
-                       else skip
-          ~> K
-        </k> 
-       [transition] 
 
   rule [for]:  
        for I:Id from A1:Int to A2:Int do S:Stmt
@@ -463,11 +419,68 @@ module PEQ
                     else skip
        [transition] 
 
-/*@ 
-  \textbf{Remark.} It will be nice to invent a way to specify the "shape"
-  of the hypotheses added for circularity reasoning. This should increase
-  the efficiency of the proof system.
+
+/*@ \subsection{Labelled statements}
+  We first extend the contextual declarations (derived from the strictness
+  attribute) to the labelled transitions.
 */
+
+  context _ : for _ from HOLE to _ do _
+  context _ : for _ from_ to HOLE do _
+  context _ : if HOLE then _ else _
+
+/*@
+  The labelled recursive statements have a special semantics because
+  the label must be propagated. Therefore we need a boolean function
+  that discriminate between recursive and non-recursive statements.
+*/
+
+  syntax Boolean ::= "isRecursive" "(" Stmt ")" [function]
+  rule isRecursive(while B:BExp do S:Stmt) => true [anywhere]
+  rule isRecursive(for I:Id from A1:AExp to A2:AExp do S:Stmt) => true
+       [anywhere]
+
+/*@
+  For the non-recursive statements, the labels are translated into 
+  synchronyzing construct. Naturally, for these cases only the label
+  is required for the synchronization. We prefer to save the whole
+  content of the cell \texttt{k} as argument of the synchronyzing
+*/
+
+  rule <k>
+          L:Id : S:Stmt ~> K:K
+          =>
+          storeHypo(L, S ~> K) ~> S
+       </k>
+       when isRecursive (S) =/=K true
+
+/*@
+  The two labeled recursive statements have a special semantics due to the
+  label  propagation.
+*/
+
+  rule [while] :
+       <k>
+          L:Id : while B:BExp do S:Stmt ~> K:K
+          => 
+          storeHypo(L, while B do S ~> K) ~>
+          if B then S ; L : while B do S else skip
+          ~> K
+       </k> 
+       [transition]
+
+  rule [for]:  
+        <k> 
+          L:Id : for I:Id from A1:Int to A2:Int do S:Stmt ~> K:K
+           => 
+          storeHypo(L, for I from A1 to A2 do S ~> K) ~>
+          I := A1;
+          if (I <= A2) then (S; L : for I from (A1 + 1) to A2  do S)
+                       else skip
+          ~> K
+        </k> 
+       [transition] 
+
 
 /*@
   Semantics of the symbolic statements:
@@ -477,7 +490,7 @@ module PEQ
 
   rule [symbolic-stmt] : 
        <k> SS:StmtSymVar => .  ...</k>
-       <env> M:Map => execute(SS,M) </env>
+       <env> M:Map => execute(SS, M) </env>
        [transition] 
 
 /*@
@@ -502,23 +515,12 @@ module PEQ
        when F impliesBool (X isNotModifiedBy SS)
 
 /*@
-  The semantics of the assignment is modified because it participate 
-  at storing hypotheses.
+  The semantics of the assignment is modified because of the symbolic  
+  statements.
 */
 
   syntax K ::= "update" "(" Id "," K ")"
 
-/*
-  rule [assignment]:
-       <k>
-          L:Id : X:Id := I:Int ~> K:K
-          =>
-          storeHypo(X:Id := I:Int ~> K) ~> 
-          update(X,I)
-          ~> K 
-       </k>
-       [transition]
-*/
   rule [assignment]:
        X:Id := I:Int
        => 
@@ -535,7 +537,6 @@ module PEQ
        <env> (Rho:Map) (. => X |-> V) </env>
        when notBool(X in keys(Rho))
        [transition]
-
 
 /*@
   \subsection{Additional Rules}
@@ -775,11 +776,11 @@ module PEQ
   rule [store-hypo] :
        <task>
          <config> 
-           <k> storeHypo(K1:K) => . ...</k>
+           <k> storeHypo(L:Id, K1:K) => . ...</k>
            <env> Env1:Map </env>
          </config> 
          <config> 
-           <k> storeHypo(K2:K) => . ...</k>
+           <k> storeHypo(L, K2:K) => . ...</k>
            <env> Env2:Map </env>
          </config>
          <formula> F:K </formula>
@@ -825,11 +826,11 @@ module PEQ
   rule [store-hypo]:
        <task>
          <config> 
-           <k> storeHypo(K1:K) => . ...</k>
+           <k> storeHypo(L:Id, K1:K) => . ...</k>
            <env> Env1:Map </env>
          </config> 
          <config> 
-           <k> storeHypo(K2:K) => . ...</k>
+           <k> storeHypo(L, K2:K) => . ...</k>
            <env> Env2:Map </env>
          </config>
          <formula> F:K </formula>
@@ -976,11 +977,11 @@ rule KItem(<hypo>
   rule [circularity] :
        (<task>
          <config> 
-           <k> storeHypo(K1:K) ...</k>
+           <k> storeHypo(L:Id, K1:K) ...</k>
            <env> Env1:Map </env>
          </config> 
          <config> 
-           <k> storeHypo(K2:K) ...</k>
+           <k> storeHypo(L, K2:K) ...</k>
            <env> Env2:Map </env>
          </config>
          <formula> F:K </formula>
@@ -1019,7 +1020,6 @@ rule KItem(<hypo>
            <env> Inits2:InitVals </env>
            if F:BExp
            using observers: Obs:Ids; 
-//           syncs: Syncs:Strings;
            =>
            setInitValObs(Obs) ~> setInitVal(Inits1) ~> P1
          </k>
