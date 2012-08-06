@@ -28,6 +28,9 @@ context-free syntax
 	"non-assoc:" {Prod2 "|"}+ -> Prod1 {cons("NonAssocOrList")}
 	{Prod2 "|"}+ -> Prod1 {cons("OrList")}
 
+	ID "(" {BASICID ","}+ ")"	-> Prod2 {cons("ShortProd")}
+	ID "(" {BASICID ","}+ ")"	"[" {Tag ","}+ "]" -> Prod2 {cons("ShortAnnoProd")}
+
 	SyntaxElement+	-> Prod2 {cons("Prod")}
 	SyntaxElement+	"[" {Tag ","}+ "]" -> Prod2 {cons("AnnoProd")}
 	STRING		-> SyntaxElement {cons("Terminal")}
@@ -79,6 +82,7 @@ lexical syntax
 	BackSlashChar		-> StringChar
 	"\\"				-> BackSlashChar
 
+	[a-zA-Z][a-zA-Z0-9]*  -> ID
 	"#"?[A-Z][a-zA-Z0-9]* -> BASICID
 	[A-Z][a-zA-Z0-9]* "{" "#"?[A-Z][a-zA-Z0-9]* "}" -> COMPOSEDID
 
@@ -90,6 +94,7 @@ lexical restrictions
 	MODNAME			-/- [A-Z\-]
 	BackSlashChar	-/- [\"]
 	BASICID 		-/- [a-zA-Z0-9\{\}]
+	ID 				-/- [a-zA-Z0-9\{\}]
 	%%COMPOSEDID		-/- [a-zA-Z0-9\{\}]
 	NAT				-/- [0-9]
 

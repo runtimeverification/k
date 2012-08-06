@@ -1,0 +1,64 @@
+module generate
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/K3Syntax
+  lib/editor-common.generated
+  lib/compilation-library.generated
+
+rules // Incremental code generation of project using compilation library.
+      
+  index-compile-ast(|file, subfile):
+    ast -> None()
+    with
+      java := <to-java> ast;
+      full-path := <dirname> file;
+      filename := <guarantee-extension(|"java")> <base-filename> file;
+      writePath := $[[full-path]/];
+      writeFile :=  $[[writePath][filename]];
+      try(<mkdir> writePath);
+      <fclose> <fputs> (java, <fopen> (writeFile, "w"))
+
+rules // Transformation to java strings.
+
+  to-java:
+    [_] -> <concat-strings> <map(to-java)>
+
+  to-java:
+    Module(x, d*) ->
+    $[ package [x];
+       
+       [d'*]
+     ]
+    with
+      d'* := <to-java> d*
+  
+  to-java:
+    Entity(x, p*) ->
+    $[ class [x] {
+           [p'*]
+       }
+     ]
+    with
+      p'* := <to-java> p*
+
+  to-java:
+    Property(x, Type(t)) -> $[
+      private [t] [x];
+      
+      public [t] get_[x] {
+          return [x];
+      }
+      
+      public void set_[x] ([t] [x]) {
+          this.[x] = [x];    
+      }
+  ]
+  
+  to-java:
+    Type(t) -> t
+
+  to-java:
+    t* -> <map(to-java)> t*

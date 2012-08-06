@@ -94,7 +94,7 @@ rules
 	xmlStringEscape         = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\"", "&quot;")
 	//xmlStringEscape           = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\", "\\\\") ; string-replace(|"\"", "&quot;")
 	//xmlStringEscapeFromString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
-	getLocAsString        = prim("SSL_EXT_origin_location", <id>) ; write-to-string
+	getLocAsString        = prim("SSL_EXT_origin_location", <id>) ; write-to-string <+ !"(0,0,0,0)"
 	get-original-sentence = prim("SSL_EXT_origin_text", <id>) ; xmlStringEscape ; escape
 	
 	external xml-string-escape-from-string(|)
@@ -209,6 +209,20 @@ rules
 		where b'* := <all(to-xml)> b*
 		where loc := <getLocAsString>
 
+	to-xml:	// print an annotated production rule
+		ShortAnnoProd(x, a*, b*) -> $[<production loc="[loc]">
+								[a'*]
+								<attributes loc="[loc]">
+									[b'*]
+								</attributes>
+						</production>
+						]
+		where mydebug(!"AnnoProd: ")
+		where aa  := <all({z: \z -> Sort(z)\}) ; add-commas ; flatten-list> a*
+		where a'* := <flatten-list ; all(to-xml)> [Terminal(<concat-strings> ["\"", x, "\""]), Terminal("\"(\""), aa, Terminal("\")\"")]
+		where b'* := <all(to-xml)> b*
+		where loc := <getLocAsString>
+
 	to-xml:	// print a production rule
 		Prod(a*) -> $[<production loc="[loc]">
 						[a'*]
@@ -217,6 +231,22 @@ rules
 		where mydebug(!"Prod: ")
 		where a'* := <all(to-xml)> a*
 		where loc := <getLocAsString>
+
+	to-xml:	// print a production rule
+		ShortProd(x, a*) -> $[<production loc="[loc]">
+						[a'*]
+					</production>
+					]
+		where mydebug(!"Prod: ")
+		where aa  := <all({z: \z -> Sort(z)\}) ; add-commas ; flatten-list> a*
+		where a'* := <flatten-list ; all(to-xml)> [Terminal(<concat-strings> ["\"", x, "\""]), Terminal("\"(\""), aa, Terminal("\")\"")]
+		where loc := <getLocAsString>
+
+	add-commas:
+		[a] -> [a]
+	add-commas:
+		[hd | tl] -> [hd, Terminal("\",\"") | <add-commas> tl]
+		
 
 	to-xml:
 		Terminal(s) -> $[<terminal value="[s']" loc="[loc]" />

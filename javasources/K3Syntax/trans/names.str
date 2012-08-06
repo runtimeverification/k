@@ -1,0 +1,116 @@
+module names
+
+imports
+  lib/analysis-library.generated
+  lib/analysis-library-internal.generated
+  lib/index-library.generated
+  
+
+imports
+  include/K3Syntax
+
+
+signature
+  constructors
+    Type        : DefDataKind
+    Import      : DefDataKind
+    Transitive  : ImportAnno
+    CurrentFile : ImportAnno
+
+  constructors
+    Module   : Namespace
+    Entity   : Namespace
+    Property : Namespace
+
+
+rules
+
+  nam-get-scope-types :
+    Module(x, _) -> [Entity()]
+
+  nam-get-definition-keys :
+    Module(x, _) -> [x]
+
+  nam-get-definitions :
+    Module(x, _) -> [(Module(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Module(x, _) -> <Module(nam-annotate-def(|path__), id)>
+
+  nam-unique :
+    Module(x, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    Entity(x, _) -> [Property()]
+
+  nam-get-definition-keys :
+    Entity(x, _) -> [x]
+
+  nam-get-definitions :
+    Entity(x, _) -> [(Entity(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Entity(x, _) -> <Entity(nam-annotate-def(|path__), id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Entity(x, _) -> <store__> DefData(
+                                [namespace__|path__]
+                              , Type()
+                              , Type(x)
+                              )
+
+  type-of :
+    Entity(x, _) -> Type(x)
+
+  nam-unique :
+    Entity(x, _) -> <id>
+
+
+rules
+
+  nam-get-definition-keys :
+    Property(x, t) -> [x]
+
+  nam-get-definitions :
+    Property(x, t) -> [(Property(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Property(x, t) -> <Property(nam-annotate-def(|path__), id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Property(x, t) -> <store__> DefData(
+                                  [namespace__|path__]
+                                , Type()
+                                , t
+                                )
+
+  type-of :
+    Property(x, t) -> t
+
+  nam-unique :
+    Property(x, t) -> <id>
+
+
+rules
+
+  nam-get-uses-keys :
+    Type(x) -> [x, "String", "Int"]
+
+  nam-get-uses :
+    Type(x) -> [ (Entity(), [x])
+               , (Entity(), ["String"])
+               , (Entity(), ["Int"])
+               ]
+
+  nam-annotate-names(|paths__, path__):
+    Type(x) -> <Type(nam-annotate-use(|paths__, Entity()))>
+
+  adjust-index-lookup(target__|namespace__, path__, prefix__):
+    Type(x) -> <concat> [ [[Entity()|path__]]
+                        , [Def([Entity(), "String"])]
+                        , [Def([Entity(), "Int"])]
+                        ]
+    where <target__> x

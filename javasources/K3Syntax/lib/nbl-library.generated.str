@@ -1,0 +1,144 @@
+module lib/nbl-library.generated
+
+imports
+  libstratego-lib
+  lib/editor-common.generated
+  lib/index-library.generated
+  lib/analysis-library.generated
+  lib/analysis-library-internal.generated
+  
+signature constructors
+  
+  Type        : DefDataKind
+  Import      : DefDataKind
+  Transitive  : ImportAnno
+  CurrentFile : ImportAnno
+  
+rules // Import adjust rule
+     
+  import-transitive =
+    collect-one(?Transitive())
+  import-standard =
+    not(import-transitive)
+    
+  import-values(|namespace, path) =
+    <index-get-all-values> DefData([namespace| path], Import(), ())
+    
+  import-currentfile-values(|namespace) =
+    <index-get-all-values> DefData([namespace|[<index-file-to-string> <index-get-current-file>]], Import(), ())  
+    
+  adjust-index-import(|namespace, path):
+    _ -> <concat> [[[namespace | path]], currentFileImportDefs, importDefs]
+    with
+      uri := [namespace | path]
+    where
+      allImports := <import-values(|namespace, path)> ;
+      importDefs := <mapconcat(import-defs(|namespace, [uri]))> allImports
+    where
+      currentfileImports := <import-currentfile-values(|namespace)> ;
+      currentFileImportDefs := <mapconcat(import-defs(|namespace, [uri]))> currentfileImports
+    
+  import-defs(|namespace, seen):
+    (key, <import-standard>) -> [uri]
+    with
+      uri := [namespace | <index-uri-path> key]
+      
+  import-defs(|namespace, seen):
+    (key, <import-transitive>) -> <conc> ([uri], transitiveUris)
+    with
+      path := <index-uri-path> key ;
+      uri := [namespace | path] ;
+      
+      if not(<elem> (uri, seen)) then
+        allImports := <import-values(|namespace, path)> ;
+        transitiveUris := <mapconcat(import-defs(|namespace, [uri|seen]))> allImports
+      else
+        transitiveUris := []
+      end
+
+rules // Adjust difference comparison
+    
+  // Add Type to the constructors to check for differences.
+  index-diff-constructors = ?DefData(_, Type(), _)
+  
+  // Type definitions are equal if their URI is equal and if their values are equal.
+  index-diff-compare:
+    (DefData(u1, Type(), v1), DefData(u2, Type(), v2)) -> <id>
+    where
+       <index-uri-eq> (u1, u2);
+       <index-key-eq> (v1, v2)
+
+rules // Error checks
+  
+  constraint-error:
+    x{[Unresolved(t) | _]} -> (x, $[Unable to resolve.])
+    
+  constraint-error:
+    definition -> (key, $[Duplicate definition])
+    where
+      <nam-unique> definition;
+      key := <nam-get-definition-key> definition;
+      defs := <index-lookup-all-scoped-noimports> key;
+      <gt> (<length> defs, 1)
+      
+rules // Type dependant lookup
+	
+	/**
+   * Given an annotated AST node and a type, resolves it and checks if type equals given type, returning its definition.
+   * Uses precise matching for names.
+   *
+   * @param type	Only definitions with this type are returned.
+   * @type "name"{uri} -> ?Def(uri')
+   */
+  index-lookup-typed(|type):
+    x{[namespace|path]} -> <index-lookup-internal(index-compare-nametype-equal(|name, type)|ns, path, name)> x
+    where
+      ns := <index-namespace-unwrap> namespace;
+      name := <strip-annos> x
+
+  /**
+   * Given an annotated AST node, a prefix and a type, looks for all definitions with given prefix and type starting at the scope of 
+   * the given node.
+   * Uses substring matching for names.
+   *
+   * @param prefix    Only definitions with a name that starts with this string are returned.
+   * @param type			Only definitions with this type are returned.
+   * @type "name"{uri} -> List(Def(uri'))
+   */
+  index-lookup-all-typed(|prefix, type):
+    x{[namespace|path]} -> <index-lookup-all-internal(index-compare-nametype-substring(|prefix, type)|ns, path, prefix)> x
+    where
+      ns := <index-namespace-unwrap> namespace
+
+  /**
+   * Compares given element (with an URI) to given name using string equality comparison and given type using equality.
+   * 
+   * @internal 
+   */     
+  index-compare-nametype-equal(|name, type):
+    element -> <id>
+    where
+      uri := <index-uri> element;
+      <SRTS-EXT-eq-ignore-annos(|name)> <index-uri-name> uri;
+      <nbl-type-eq(|type)> <nbl-get-type> uri
+      
+  /**
+   * Compares given element (with an URI) to given prefix using substring comparison and given type using equality.
+   * 
+   * @internal 
+   */     
+  index-compare-nametype-substring(|prefix, type):
+    element -> <id>
+    where
+      uri := <index-uri> element;
+      <is-substring(!prefix)> <index-uri-name> uri;
+      <nbl-type-eq(|type)> <nbl-get-type> uri
+  
+  /** @internal */
+  nbl-get-type:
+  	uri -> <index-get-data(|Type())> Def(uri)
+  
+  // TODO: Allow user defined type equality.
+  /** @internal */	
+  nbl-type-eq(|type) = 
+  	<eq> (<id>, type)

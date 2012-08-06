@@ -1,13 +1,10 @@
 
 module EXAMPLE-SYNTAX
 
-
-
-  syntax Bool ::= #Bool
-  syntax Int ::= #Int
-  syntax Id ::= #Id
-  syntax String ::= #String
-
+  syntax A ::= a(X) [a]
+  syntax B ::= "a" "(" X ")" [a]
+  
+  
   syntax Start ::= Stmts
   syntax Ids ::= List{Id,","} [strict, cons("Ids1ListSyn"), hybrid]
   syntax Exps ::=  List{Exp,","} [cons("Exps1ListSyn")]

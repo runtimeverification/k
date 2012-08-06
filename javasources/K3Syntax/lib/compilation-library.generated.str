@@ -5,7 +5,7 @@ imports
   lib/editor-common.generated
   lib/index-library.generated
   lib/analysis-library.generated
-  //lib/analysis-library-internal.generated
+  lib/analysis-library-internal.generated
   
 rules // Extension points
   
@@ -42,6 +42,16 @@ rules // Extension points
    * @type ast -> None()
    */
   index-compile-ast(|file, subfile) = fail
+
+  /**
+   * Extension point. 
+   */
+  index-is-partial-ast = fail
+
+  /**
+   * Extension point. 
+   */
+  index-combine-asts = fail
   
 rules // Compilation
   
@@ -67,21 +77,48 @@ rules // Compilation
       diffs         := <analyze-get-compilediffs>;
       files         := <map(index-compilation-restore-read-file)> diffs;
       filteredFiles := <make-set> <remove-all(index-compilation-filter-file)> files;
+      (completeFiles, partialFiles) := <index-split-partial-files> filteredFiles;
       
       // Clean compile time reads
-      <filter(index-compilation-clean-reads)> filteredFiles;
+      <filter(index-compilation-clean-reads)> completeFiles;
+      <filter(index-compilation-clean-reads)> partialFiles;
       
       // Set total work units to number of files to compile for visual indication
-      <set-total-work-units> <length> filteredFiles;
+      <set-total-work-units> <add> (<length> completeFiles, <length> partialFiles);
       
       // Compile the files
-      <filter(index-compilation-file(|language, project-path); complete-work-unit)> filteredFiles
+      <filter(index-compilation-file; complete-work-unit)> completeFiles;
+      <filter(index-compilation-partial-file; complete-work-unit)> partialFiles
+      
+  /** @internal */    
+  index-split-partial-files:
+    files -> (completeFiles, <make-set> splitFiles)
+    with
+      (completeFiles, splitFiles) := <partition(not(index-file-is-partial), index-file-is-partial)> files
 
   /** @internal */
-  index-compilation-file(|language, project-path):
+  index-compilation-file:
     (path, subfile) -> None()
     with
-      ast := <index-get-global(|<conc> (<index-file-to-uri> (path, subfile), ["ast"]))>;
+    	asts := <index-get-all-values> AST(subfile, ());
+      <map(index-compilation-ast(|path, subfile))> asts
+      
+  /** @internal */    
+  index-compilation-partial-file:
+    (path, subfile) -> None()
+    with
+      asts := <index-get-all-values> AST(subfile, ());
+      if 1 := <length> asts then
+      	ast := <?[<id>|_]> asts
+    	else
+    		ast := <try(index-combine-asts)> asts
+  		end;
+      <index-compilation-ast(|path, subfile)> ast
+      
+  /** @internal */
+  index-compilation-ast(|path, subfile):
+    ast -> None()
+    with
       {| Index-ReadSet:
         readSet := <new-iset>;
         rules(Index-ReadSet: _ -> readSet);
@@ -92,7 +129,7 @@ rules // Compilation
         // Store compile-time reads.
         reads := <iset-elements> readSet;
         <index-add-all(|<index-compilation-file-tuple> (path, subfile))> reads
-      |}
+      |} 
 
   /** @internal */
   index-compilation-filter-file:
@@ -168,12 +205,22 @@ rules // Compile time reads
   index-compilation-restore-read-file:
     (file, subfile) -> (file', subfile)
     where
-      file' := <string-replace(|<index-compilation-read-path>, "")> file
+      if removedPath := <string-replace(|<index-compilation-read-path>, "")> file then
+        file' := removedPath
+      else
+        file' := file
+      end
+
   /** @internal */
   index-compilation-restore-read-file:
-    (file, subfile) -> (file, subfile)
+    file -> file'
     where
-      not(<string-replace(|<index-compilation-read-path>, "")> file)
+      not(<is-tuple> file);
+      if removedPath := <string-replace(|<index-compilation-read-path>, "")> file then
+        file' := removedPath
+      else
+        file' := file
+      end
       
   /** @internal */
   index-compilation-clean-reads = 
@@ -186,3 +233,12 @@ rules // Compile time reads
   /** @internal */
   index-compilation-read-path =
     !"/.internal/reads/compile"
+    
+/** @internal */
+rules // Utility
+
+  /** @internal */
+  index-file-is-partial:
+  	file -> file
+  	where 
+      Snd; index-uri; index-is-partial-ast

@@ -1,9 +1,0 @@
-module analysis-manual
-
-imports
-  include/K3Syntax
-  lib/analysis-auto.generated
-  lib/index-library.generated
-  lib/analysis-library.generated
-
-rules // Adjust lookup

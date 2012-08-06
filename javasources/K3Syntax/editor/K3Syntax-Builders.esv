@@ -9,17 +9,31 @@ builders
   // See the imported file for a brief introduction and examples.                  
 
 builders
-                                                                                                                          
-  provider : include/k3syntax.ctree                                                                                       
-  provider : include/k3syntax-java.jar                                                                                    
-                                                                                                                          
-  //observer : editor-analyze                                                                                               
-                                                                                                                          
-  builder  : "Show abstract syntax (for selection)"          = generate-aterm (openeditor) (realtime) (meta) (source)     
-  builder  : "Generate XML"        = callxml (openeditor) (realtime)                                                                                                                           
+                                                                                                                            
+  provider : include/k3syntax.ctree                                                                                         
+  provider : include/k3syntax-java.jar                                                                                      
+                                                                                                                            
+  observer : editor-analyze                        (multifile)                                                              
+                                                                                                                            
+  builder  : "Show abstract syntax"                = debug-generate-aterm (openeditor) (realtime) (meta) (source)
+  builder  : "Generate XML"                        = callxml (openeditor) (realtime)           
+  //builder  : "Show deffed syntax"                  = debug-generate-deffed (openeditor) (realtime) (meta) (source)          
+  //builder  : "Show analyzed syntax"                = debug-generate-analyzed (openeditor) (realtime) (meta) (source)        
+  //builder  : "Show index entries for current file" = debug-index-show-current-file (openeditor) (realtime) (meta) (source)  
+  //builder  : "Show index entries for all files"    = debug-index-show-all-files (openeditor) (realtime) (meta) (source)     
+  //builder  : "Clear index for current file"        = debug-index-clear-current (meta) (source)                              
+  //builder  : "Clear index"                         = debug-index-clear (meta) (source)                                      
+  //builder  : "Reload index"                        = debug-index-reload (meta) (source)                                     
+                                                                                                                            
 
 refactorings
 
   //pretty-print : pp-k3syntax-string
 
-  //on save : index-on-save
+  /*refactoring ID : "Rename Entity" = rename-entity (source) (cursor)
+    shortcut : "org.eclipse.jdt.ui.edit.text.java.rename.element"
+    input
+      identifier : "new name" = ""
+
+  on save : editor-save
+*/
