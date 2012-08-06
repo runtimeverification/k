@@ -1,0 +1,6 @@
+// call exit command
+
+1 0 0
+
+00010101011010101010101010101010100001 // junk, should not get here
+

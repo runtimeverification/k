@@ -1,0 +1,27 @@
+// print "42" using integer I/O
+
+00       ops: noop
+11111100 math: zero (zero)
+00       ops: noop
+111100   math: not (one)
+00       ops: noop
+111100	 math: store [one]
+00       ops: noop
+100	 math: mult (two)
+00       ops: noop
+00	 math: add (three)
+00       ops: noop
+0100	 math: store [three]
+00       ops: noop
+0100	 math: add (six)
+00       ops: noop
+0100	 math: store [six]
+00       ops: noop
+01100	 math: mult (thirty-six)
+00       ops: noop
+0100	 math: add (forty-two)
+00       ops: noop
+100	 math: store [forty-two]
+1100	 ops: one
+1100	 math: noop
+0111100	 ops: intIO > "42"

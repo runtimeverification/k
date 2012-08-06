@@ -63,7 +63,7 @@ module WRL
    // switches to execute mode
    rule [ProgStart]:
       <k> end </k>
-      <mode> 99 => 1 </mode>
+      <mode> 0 => 1 </mode>
       <size> _ => S </size>
       <ip> S:Int => 0 </ip>
 
