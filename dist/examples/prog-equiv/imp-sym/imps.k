@@ -1,0 +1,522 @@
+/*!
+\setlength{\parindent}{1em}
+\title{IMP  with Symbolic Values}
+\author{Dorel Lucanu (\texttt{grosu@illinois.edu}) and Vlad Rusu (Vlad.Rusu@inria.fr)}
+\organization{"Alexandru Ioan Cuza" University of Iasi, INRIA Lille}
+*/
+
+//@ \section{Symbolic Calculus}
+
+module SYMBOLIC-CALCULUS-SYNTAX
+
+/*@ 
+  The symbolic values needed to define the initial configuration.
+  They are corresponding to the vriables in equivalence formula.
+*/
+
+  syntax IntSymVar ::= "symInt" "(" Id ")" 
+
+/*@ 
+  The following function is used to generate fresh names for symbolic values.
+*/
+  syntax Id ::= "fresh" "(" Int ")" [function] 
+  rule fresh(I:Int) => String2Id("symVar" +String Int2String(I)) [anywhere]
+
+/*@
+  Any symbolic variable is of sort Int:
+*/
+
+  syntax Int ::= IntSymVar
+
+endmodule
+
+module SYMBOLIC-CALCULUS
+  imports SYMBOLIC-CALCULUS-SYNTAX
+
+/*@
+  This module is designed with a minimal support. 
+*/
+
+/*@
+  The predicate defining the symbolic boolean expressions.
+*/
+
+  syntax Bool ::=  "isBoolSymExp" "(" K ")"
+
+
+  rule isBoolSymExp(I1:Int <=Int I2:Int) => true
+       when isIntSymExp(I1) ==K true
+       [anywhere]
+
+  rule isBoolSymExp(I1:Int <=Int I2:Int) => true
+       when isIntSymExp(I2) ==K true
+       [anywhere]
+
+  rule isBoolSymExp(I1:Int ==Int I2:Int) => true
+       when isIntSymExp(I1) ==K true
+       [anywhere]
+
+  rule isBoolSymExp(I1:Int ==Int I2:Int) => true
+       when isIntSymExp(I2) ==K true
+       [anywhere]
+
+  rule isBoolSymExp(B1:Bool andBool I2:Bool) => true
+       when isBoolSymExp(B1) ==K true
+       [anywhere]
+
+  rule isBoolSymExp(B1:Bool orBool I2:Bool) => true
+       when isBoolSymExp(B1) ==K true
+       [anywhere]
+/*@ 
+  \textbf{Remark.~~}
+  The symbolic boolean expressions are not sobsorted to Bool.
+  This is a trick that help us to handle easier this expressions.
+*/
+
+/*
+  rule 'isBool(K:K) => true
+       when isBoolSymExp(K) ==K true
+       [anywhere]
+*/
+
+/*@
+  The predicate defining the symbolic integer expressions.
+*/
+  syntax Bool ::= "isIntSymExp" "(" K ")" 
+ 
+  rule isIntSymExp(I1:Int +Int I2:Int) => true
+       when isIntSymExp(I1) ==K true
+       [anywhere]
+
+  rule isIntSymExp(I1:Int +Int I2:Int) => true
+       when isIntSymExp(I2) ==K true
+       [anywhere]
+
+ 
+  rule isIntSymExp(I1:Int -Int I2:Int) => true
+       when isIntSymExp(I1) ==K true
+       [anywhere]
+
+  rule isIntSymExp(I1:Int -Int I2:Int) => true
+       when isIntSymExp(I2) ==K true
+       [anywhere]
+
+  rule isIntSymExp(I1:Int *Int I2:Int) => true
+       when isIntSymExp(I1) ==K true
+       [anywhere]
+
+  rule isIntSymExp(I1:Int *Int I2:Int) => true
+       when isIntSymExp(I2) ==K true
+       [anywhere]
+
+  rule isIntSymExp(I1:Int /Int I2:Int) => true
+       when isIntSymExp(I1) ==K true
+       [anywhere]
+
+  rule isIntSymExp(I1:Int /Int I2:Int) => true
+       when isIntSymExp(I2) ==K true
+       [anywhere]
+
+
+  rule isIntSymExp(K:K) => true
+       when 'isIntSymVar(K) ==K true
+       [anywhere]
+
+/*@
+  Extending Int with symbolic expressions:
+*/
+  rule 'isInt(K:K) => true
+       when isIntSymExp(K) ==K true
+       [anywhere]
+
+  rule 'isInt(_:Int +Int _:Int) => true [anywhere]
+  rule 'isInt(_:Int *Int _:Int) => true [anywhere] 
+  rule 'isInt(_:Int /Int _:Int) => true [anywhere]
+
+/*@
+  The following defines the substitution of the symbolic values with
+  symbolic expressions.
+*/
+
+  syntax K ::= K "[" K "/" K "]"
+
+  rule (F1:K andBool F2:K) [ V:K / X:K ]
+        =>
+        F1 [ V:K / X:K ] andBool F2[ V:K / X:K ]
+        [anywhere]
+
+  rule (I1:Int <=Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) <=Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule (I1:Int ==Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) ==Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule (I1:Int +Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) +Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule (I1:Int *Int I2:Int) [ E1:K / E2:K ]
+       =>
+       (I1 [ E1 /E2 ]) *Int (I2 [ E1 / E2 ])
+       [anywhere]
+
+  rule I:Int [ E1:K / E2:K ] => E1 
+       when I ==K E2
+       [anywhere]
+ 
+  rule I:Int [ E1:K / E2:K ] => I
+       when I =/=K E2
+       [anywhere]
+
+//@ Some simplification rules.
+
+  rule (I:Int ==Int I:Int) => true [anywhere]
+
+  rule (I:Int *Int I +Int I +Int I +Int 1)
+       => 
+       (I +Int 1) *Int (I +Int 1)
+       [anywhere]
+
+  rule I:Int <=Int I:Int => true [anywhere] 
+
+/*
+  rule I1:Int <=Int (I2:Int +Int I:Int) => true
+       when I >=Int 0
+       [anywhere]
+
+  rule I1:Int <=Int (I2:Int +Int I:Int) => false
+       when I <Int 0
+       [anywhere]
+*/
+  rule (I1:Int ==Int I2:Int) andBool F:K impliesBool B:K
+       =>
+       F impliesBool B [ I2 / I1 ]
+       [anywhere]
+
+  rule (I1:Int ==Int I2:Int) impliesBool B:K
+       =>
+       B [ I2 / I1 ]
+       [anywhere]
+
+
+//@ The following is specific to the example wit sum of squares
+
+  rule ((I1:Int ==Int I2:Int *Int I2) andBool (I3:Int ==Int I2))
+       impliesBool
+       ((I:Int +Int I1) ==Int (I +Int I3 *Int I3))
+       =>
+       true
+       [anywhere]
+
+  rule B:K impliesBool true => true  [anywhere]
+
+  rule (B:K andBool B':K) impliesBool B => true  [anywhere]
+
+  rule B:K andBool true => B  [anywhere]
+
+  rule true andBool B:K => B  [anywhere]
+
+  rule B:K orBool true => true  [anywhere]
+
+  rule true orBool B:K => true  [anywhere]
+
+  rule V1:K ==K V2:K impliesBool V1 ==K V2 => true [anywhere]
+
+endmodule
+
+
+//@ \section{Syntax}
+
+module IMPS-SYNTAX
+  imports BUILTIN-SYNTAX-HOOKS
+  imports SYMBOLIC-CALCULUS
+
+/*@
+  This is the syntax of IMP, where we added the multiplication operator, the
+  "for" statement,  and the  labeled statements.
+  The statement \texttt{for} is added just for proving its equivalence 
+  with its simulation with while. The semantics of \texttt{for} is given
+  in a similar way to that of while.
+*/
+  
+  syntax AExp ::= Int | Id
+  				| AExp "/" AExp [left, strict]
+  				| AExp "*" AExp [left, strict]
+  				> AExp "+" AExp [left, strict]
+  				| "(" AExp ")"  [bracket]
+
+  syntax BExp ::= Bool
+  				| AExp "<=" AExp  [seqstrict]
+  				| "not" BExp      [strict]
+  				> BExp "and" BExp [left, strict(1)]
+  				| "(" BExp ")"    [bracket]
+
+  syntax Stmt ::= "skip"
+  				| Id ":=" AExp   [strict(2)]
+  				| "if" BExp "then" Stmt "else" Stmt [prefer, strict(1)]
+  				| "while" BExp "do" Stmt
+                                | "for" Id "from" AExp "to" AExp "do" Stmt
+                                  [strict(2 3)] 
+  				> Stmt ";" Stmt   [left]
+  				| "(" Stmt ")"    [bracket]
+
+  /*@
+    Extending the statements with symbolic values:
+   */
+
+  syntax StmtSymVar ::= "symStmt" "(" Id ")"
+  
+  syntax Stmt ::= StmtSymVar
+
+/*@
+  The following expressions are used in conditions.
+  If it is included in the definition of the language, then its declaration
+  here is no longer necessary.
+*/
+
+  syntax BExp ::= AExp "==" AExp  [strict]
+
+  //@ get if no effect
+  syntax Bool ::= Id "isNotModifiedBy" Stmt 
+
+/*@
+  The symbolic programs are programs extended with conditions.
+*/
+
+  syntax Pgm ::= "var" Ids ";" Stmt
+
+  syntax SPgm ::= Pgm "if" BExp
+
+  syntax Ids ::= List{Id, ","}
+
+  syntax Start ::= SPgm  
+
+endmodule
+
+//@ \section{Semantics}
+
+module IMPS
+  imports IMPS-SYNTAX
+
+/*@
+  A configuration is a multiset of tasks. Each task consists of an
+  equivalence formula. The patterns are stored into a \texttt{config}
+  cell and the condition in the \texttt{formula} cell.
+  The cell \texttt{hypos} is for storing the hypotheses met during
+  the proving process. It has a structure similar to that of tasks, but
+  where the names of cells are changed in order to forbid the rules firing
+  for hypotheses, in this way the hypotheses are kept unchanged. 
+  The cell \texttt{observers} stores the list of the observer variables.
+  The cell \texttt{nextSymVar} is used for generating fresh symbolic names.
+*/
+
+  configuration <T color="yellow"> 
+                  <config>
+                    <k color="green"> $PGM:SPgm  </k>
+                    <env color="red"> .Map </env>
+                  </config>
+                  <formula> true </formula>
+                  <nextSymvar> 0 </nextSymVar>
+                </T>
+
+/*@
+  The values are defined as for the original IMP, but note that now Int includes
+  the symbolic integer expressions. Remember that the predicate \texttt{isBool} 
+  is not extended to symbolic boolean expressions. So, the only boolean values 
+  remain \texttt{true} and \texttt{false}.
+*/
+
+  syntax KResult ::= Int | Bool
+
+
+/*@
+  The semantics of the expressions remains unchanged, excepting the memory 
+  lookup and the memory update; these will be explained later.
+*/
+
+  rule [addition] : I1:Int + I2:Int => I1 +Int I2 
+  rule [multiplication] : I1:Int * I2:Int => I1 *Int I2 
+  rule [division] : I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
+
+  rule [leq] : I1:Int <= I2:Int => I1 <=Int I2
+  rule [not] : not T:Bool => notBool T
+  rule [and-true] : true and B:BExp => B
+  rule [and-false]: false and B:BExp => false
+
+/*@ 
+  Equality of ints we additionally added:
+*/
+
+  rule [eq] : I1:Int == I2:Int => I1 ==Int I2
+
+
+  rule [program-no-vars]: <k> var .Ids ; S:Stmt => S ...</k> [structural]
+
+
+  rule [program-still-vars]:
+           <k> var X:Id, Xs:Ids; S:Stmt => var Xs; S ...</k>
+          <env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
+
+/*@
+  The semantics for the initial statements remain unchanged, too. 
+  However, most of the rules are annotated as transitions for tracing reasons.
+*/
+
+  rule [skip] : skip => .
+       [structural]
+
+  rule [sequential] : S1;S2 => S1 ~> S2 [structural]
+
+  rule [if-true] : (if true  then S:Stmt else _) => S
+       [transition]
+
+  rule [if-false]: (if false then _ else S:Stmt) => S
+       [transition]
+
+  rule [while] :
+          while B:BExp do S:Stmt 
+          => 
+          if B then S ; while B do S else skip
+       [transition]
+
+  rule [for]:  
+       for I:Id from A1:Int to A2:Int do S:Stmt
+       => 
+       I := A1;
+       if (I <= A2) then (S; for I from (A1 + 1) to A2  do S)
+                    else skip
+       [transition] 
+
+/*@
+  Semantics of the symbolic statements:
+*/
+
+  syntax Map ::= "execute" "(" Stmt "," Map ")" 
+
+  rule [symbolic-stmt] : 
+       <k> SS:StmtSymVar => .  ...</k>
+       <env> M:Map => execute(SS, M) </env>
+       [transition] 
+
+/*@
+  The memory lookup rule is changed because now the memory can be a 
+  symbolic one obtained after a the execution of a symbolic statement.
+*/
+
+  syntax K ::= "lookup" "(" Id "," Map ")" [function]
+
+  rule [lookup] : 
+       <k> X:Id =>  lookup(X, Rho) ...</k>
+       <env> Rho:Map </env> 
+
+  rule [lookup] :  lookup(X:Id, (_ X |-> I:Int _)) => I
+
+  rule [lookup] :
+       <k> lookup(X:Id, execute(SS:StmtSymVar, Rho:Map)) 
+           => 
+           lookup(X, Rho)
+       ...</k>
+       <formula> F:K </formula>
+       when F impliesBool (X isNotModifiedBy SS)
+
+/*@
+  The semantics of the assignment is modified because of the symbolic  
+  statements.
+*/
+
+  syntax K ::= "update" "(" Id "," K ")"
+
+  rule [assignment]:
+       X:Id := I:Int
+       => 
+       update(X,I)
+       [transition]
+
+  rule [update]:
+       <k> update(X:Id, V:K) => . ...</k>
+       <env>... X |-> (_ => V) ...</env>
+       [transition]
+
+  rule [update]:
+       <k> update(X:Id, V:K) => . ...</k>
+       <env> (Rho:Map) (. => X |-> V) </env>
+       when notBool(X in keys(Rho))
+       [transition]
+
+/*@
+  additional rules that conservatively extend the definition
+*/
+
+  
+  rule <k> B:K => true ...</k>
+       <formula> F:K </formula>
+       when isBoolSymExp(B)
+            andBool  F impliesBool B
+
+  rule <k> B:K => false ...</k>
+       <formula> F:K </formula>
+       when isBoolSymExp(B)
+            andBool F impliesBool notBool(B)
+
+/*@
+  The following rule creates the initial configuration from the equivalence
+  specification given as input.
+*/
+
+  rule [initial] :
+       <config>
+         <k> 
+           P:Pgm if F:BExp
+           =>
+           P
+         </k>
+       ...</config>
+       <formula> _ => injectForm(F) </formula>
+
+/*@ 
+  The next function translates the initial formula into internal
+  form.\\
+  TBD: refactor it!!!!
+*/
+
+
+  syntax Bool ::= "injectForm" "(" BExp ")" [function]
+
+  rule injectForm(A1:AExp == A2:AExp)
+       =>
+       injectAExp(A1)  ==Int injectAExp(A2)
+       [anywhere]
+
+  rule injectForm(B1:BExp and B2:BExp)
+       =>
+       injectForm(B1) andBool injectForm(B2)
+       [anywhere]
+
+  syntax Int ::= "injectAExp" "(" AExp ")" [function]
+  rule injectAExp(I:Int) => I [anywhere]
+  rule injectAExp(A1:AExp + A2:AExp)
+       =>
+       injectAExp(A1)  +Int injectAExp(A2)
+       [anywhere]
+
+  rule injectAExp(A1:AExp * A2:AExp)
+       =>
+       injectAExp(A1)  *Int injectAExp(A2)
+       [anywhere]
+
+  rule injectAExp(A1:AExp / A2:AExp)
+       =>
+       injectAExp(A1)  /Int injectAExp(A2)
+       [anywhere]
+
+  rule injectForm(X:Id isNotModifiedBy S:Stmt ) 
+       =>
+       X:Id isNotModifiedBy S:Stmt 
+       [anywhere]
+
+endmodule

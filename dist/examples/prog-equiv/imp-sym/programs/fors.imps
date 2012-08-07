@@ -1,0 +1,7 @@
+var i;
+for i from 0 to symInt(n) do symStmt(s)
+
+if
+
+symInt(n) ==  1
+

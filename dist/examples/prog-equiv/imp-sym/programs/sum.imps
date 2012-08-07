@@ -1,0 +1,9 @@
+var i, s, n;
+n := symInt(n0);
+s := 0;
+for i from symInt(i0) to n do (
+  s := s + i
+)
+if
+symInt(n0) == symInt(i0)
+   

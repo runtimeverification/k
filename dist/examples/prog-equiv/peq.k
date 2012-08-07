@@ -1,9 +1,8 @@
-require "modules/substitution.k"
 
 
 /*!
 \setlength{\parindent}{1em}
-\title{IMP++}
+\title{PEQ (Program Equivalence)}
 \author{Dorel Lucanu (\texttt{grosu@illinois.edu}) and Vlad Rusu (Vlad.Rusu@inria.fr)}
 \organization{"Alexandru Ioan Cuza" University of Iasi, INRIA Lille}
 */
@@ -16,7 +15,6 @@ module SYMBOLIC-CALCULUS-SYNTAX
   The symbolic values needed to define the initial configuration.
   They are corresponding to the vriables in equivalence formula.
 */
-
 
   syntax IntSymVar ::= "symInt" "(" Id ")" 
 
@@ -36,12 +34,10 @@ endmodule
 
 module SYMBOLIC-CALCULUS
   imports SYMBOLIC-CALCULUS-SYNTAX
-  imports SUBSTITUTION
 
 /*@
   This module is designed with a minimal support. 
 */
-
 
 
 /*@
@@ -141,9 +137,11 @@ module SYMBOLIC-CALCULUS
   rule 'isInt(_:Int /Int _:Int) => true [anywhere]
 
 /*@
-  The following rules extends the substitution to the symbolic values and
+  The following defines the substitution of the symbolic values with
   symbolic expressions.
 */
+
+  syntax K ::= K "[" K "/" K "]"
 
   rule (F1:K andBool F2:K) [ V:K / X:K ]
         =>
@@ -278,14 +276,14 @@ module IMP-SYNTAX
   syntax Start ::= EqvPgm  
 
 /*@
-  The following expression is used in conditions.
+  The following expressions are used in conditions.
   If it is included in the definition of the language, then its declaration
   here is no longer necessary.
 */
 
   syntax BExp ::= AExp "==" AExp  [strict]
 
-//@ get if no effect
+  //@ get if no effect
   syntax Bool ::= Id "isNotModifiedBy" Stmt 
 
   /*@
@@ -303,7 +301,6 @@ endmodule
 
 module PEQ
   imports IMP-SYNTAX
-//  imports SYMBOLIC-CALCULUS
 
 /*@
   A configuration is a multiset of tasks. Each task consists of an
@@ -559,8 +556,12 @@ module PEQ
   The semantic rule evaluating \texttt{I1 <= I2}  is equivalent with the 
   following two rules:
   \begin{verbatim}
-    rule I1 <= I2 => true when I1 <=Int I2
-    rule I1 <= I2 => false when notBool(I1 <=Int I2)
+    rule <k> I1 <= I2 => true ...</k>
+         <formula> F:K </formula>
+         when F impliesBool I1 <=Int I2
+    rule <k> I1 <= I2 => false ...</k>
+         <formula> F:K </formula>
+         when F impliesBool notBool(I1 <=Int I2)
   \end{verbatim} 
   Then the derivatives of the above goal are:
   \begin{verbatim}
