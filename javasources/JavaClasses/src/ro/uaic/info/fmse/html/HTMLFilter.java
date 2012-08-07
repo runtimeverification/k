@@ -6,10 +6,13 @@ import java.util.Map;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import ro.uaic.info.fmse.k.*;
 import ro.uaic.info.fmse.k.LiterateComment.LiterateCommentType;
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
+import ro.uaic.info.fmse.latex.LatexFilter;
+import ro.uaic.info.fmse.latex.LatexPatternsVisitor;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.utils.strings.StringUtil;
@@ -22,13 +25,12 @@ public class HTMLFilter extends BasicVisitor {
 	private String css = "";
 	private String title = "";
 	private boolean firstProduction = false;
-	//private Map<String, String> colors = new HashMap<String,String>();
 	private HashSet<String> usedColors = new HashSet<String>();
 	private Map<String, String> cellColors = new HashMap<String,String>();
 	private Map<String,Color> HTMLColors = new HashMap<String,Color>();
-
-//	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
+	private HTMLPatternsVisitor patternsVisitor = new HTMLPatternsVisitor();
 	private boolean firstAttribute;
+	private boolean parentParens = false;
 
 	/*public void setResult(String result) {
 		this.result = result;
@@ -41,6 +43,14 @@ public class HTMLFilter extends BasicVisitor {
 	public String getPreamble() {
 		return preamble;
 	}*/
+	
+	private boolean isParentParens() {
+		return parentParens;
+	}
+
+	private void setParentParens(boolean parentParens) {
+		this.parentParens = parentParens;
+	}
 	
 	public HTMLFilter() {
 		initializeCss();
@@ -129,7 +139,7 @@ public class HTMLFilter extends BasicVisitor {
 			return "defaultColor";		
 	}
 
-	public String getResult() {
+	public String getHTML() {
 		String html = 
 			"<!DOCTYPE html>" + endl + 
 			"<html lang=\"en\">" + endl + 
@@ -139,21 +149,25 @@ public class HTMLFilter extends BasicVisitor {
 			css + 
 			"	</style>" + endl + 
 			"	<meta charset=\"utf-8\" />" + endl + 
+			"<script type=\"text/javascript\" " + endl +
+			"src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\">" + endl +
+			"</script>" + endl +
 			"</head>" + endl + 
 			"<body>" + endl;
 		html += 
 			result +
 			"</body>" + endl +
 			"</html>" + endl;
-		
-		
-		
-
 		return html;
+	}
+	
+	public String getResult() {
+		return result;
 	}
 
 	@Override
 	public void visit(Definition def) {
+		def.accept(patternsVisitor);
 		title  = def.getMainModule();
 		result += "<span class=\"xlarge\">" + title + " </span> " + endl;
 		result += "<div> <br /> </div>" + endl;
@@ -181,7 +195,6 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Sort sort) {
 		result += "<span class =\"italic\"> " + makeGreek(sort.getSort()) + " </span>";
-		/*result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getSort()) + "}}}";*/
 	}
 
 	@Override
@@ -192,21 +205,25 @@ public class HTMLFilter extends BasicVisitor {
 		} else {
 			result += "<tr> <td> </td> <td class = \"textCentered\"> |  </td> <td>";
 		}
-//		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.getAttributes().containsKey(Constants.CONS_cons_ATTR) && patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
-//			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
-//			int n = 1;
-//			HTMLFilter termFilter = new HTMLFilter();
-//			for (ProductionItem pi : p.getItems()) {
-//				if (pi.getType() != ProductionType.TERMINAL) {
-//					termFilter.setResult("");
-//					pi.accept(termFilter);
-//					pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
-//				}
-//			}
-//			result += pattern;
-//		} else {
-		//result += "<div>" + "Production" + endl;
+		
+		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.getAttributes().containsKey(Constants.CONS_cons_ATTR) 
+				&& patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))
+				&& patternsVisitor.isLatex(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
+			
+			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
+			int n = 1;
+			HTMLFilter termFilter = new HTMLFilter();
+			for (ProductionItem pi : p.getItems()) {
+				if (pi.getType() != ProductionType.TERMINAL) {
+					termFilter.result = "";
+					pi.accept(termFilter);
+					pattern = pattern.replace("{#" + n++ + "}", "\\)" + termFilter.getResult() + "\\(");
+				}
+			}
+			result += "\\(" + pattern + "\\)";
+		} else {
 		super.visit(p);
+		}
 //		}
 		p.getAttributes().accept(this);
 		//result += "Production - END " + "</div>" + endl;
@@ -295,6 +312,11 @@ public class HTMLFilter extends BasicVisitor {
 			trm.accept(this);
 		}
 	}
+	
+	public void visit(TermComment tc) {
+		result += "<br />";
+		super.visit(tc);
+	}
 
 	@Override
 	public void visit(Variable var) {
@@ -344,15 +366,6 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		rule.getAttributes().accept(this);
 		result += "</div> <br />" + endl;
-		//result += "\\krule";
-		
-		/*result += "{" + endl;
-		rule.getBody().accept(this);
-		result += "}{";*/
-		
-		/*result += "}{";
-		rule.getAttributes().accept(this);
-		result += "}" + endl;*/
 	}
 
 	@Override
@@ -384,51 +397,89 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(TermCons trm) {
-//		String pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
-//		if (pattern == null) {
-//			Production pr = DefinitionHelper.conses.get("\"" + trm.getCons() + "\"");
-//			pr.accept(patternsVisitor);
-//			pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
-//		}
-//		int n = 1;
-//		HTMLFilter termFilter = new HTMLFilter();
-//		for (Term t : trm.getContents()) {
-//			termFilter.setResult("");
-//			t.accept(termFilter);
-//			pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
-//		}
-//		result += pattern;
-		//result += "\\mbox{" + StringUtil.latexify(trm.toString()) + "}";
 		
-		/*result += makeGreek(htmlify(trm.toString()));
-		if(trm.toString().isEmpty())
-			result += "&nbsp; &nbsp; &nbsp; &middot; &nbsp; &nbsp; &nbsp; ";*/
-		boolean empty = true;
-		Production pr = trm.getProduction();
-
-		if (pr.getItems().size() > 0) {
-			if (pr.getItems().get(0).getType() == ProductionType.USERLIST) {
-				String separator = ((UserList) pr.getItems().get(0)).getSeparator();
-				trm.getContents().get(0).accept(this);
-				result += " " + separator + " ";
-				trm.getContents().get(1).accept(this);
-				result += " ";
-				empty = false;
-			} else
-				for (int i = 0, j = 0; i < pr.getItems().size(); i++) {
-					ProductionItem pi = pr.getItems().get(i);
-					if (pi.getType() == ProductionType.TERMINAL) {
-						pi.accept(this);
-						empty = false;
-					} else if (pi.getType() == ProductionType.SORT) {
-						Term t = trm.getContents().get(j++);
-						t.accept(this);	
-						empty = false;
-					}
-				}
+		/*String pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
+		if (pattern == null) {
+			Production pr = DefinitionHelper.conses.get("\"" + trm.getCons() + "\"");
+			pr.accept(patternsVisitor);
+			pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
 		}
-		if(empty)
-			result += "&nbsp; &nbsp; &middot; &nbsp; &nbsp;";
+		String regex = "\\{#\\d+\\}$";
+		Pattern p = Pattern.compile(regex);
+		if (parentParens && (pattern.indexOf("{#") == 0 
+				|| p.matcher(pattern).matches())) {
+			pattern = "(" + pattern + ")";
+		}		
+		int n = 1;
+		LatexFilter termFilter = new LatexFilter();
+		for (Term t : trm.getContents()) {
+			termFilter.setResult("");
+			regex = "\\{#\\d+\\}\\{#" + n + "\\}";
+			p = Pattern.compile(regex);
+			if (pattern.contains("{#" + n + "}{#") || p.matcher(pattern).matches()) {
+				termFilter.setParentParens(true);				
+			}
+			t.accept(termFilter);
+			pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
+		}
+		result += pattern;*/
+		Boolean hasLatexAttribute = patternsVisitor.isLatex("\"" + trm.getCons() + "\"");
+		if(hasLatexAttribute == null)
+		{
+			Production pr = DefinitionHelper.conses.get("\"" + trm.getCons() + "\"");
+			pr.accept(patternsVisitor);
+			hasLatexAttribute = patternsVisitor.isLatex("\"" + trm.getCons() + "\"");
+		}
+		
+		if(hasLatexAttribute.booleanValue()){
+			String pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
+			String regex = "\\{#\\d+\\}$";
+			Pattern p = Pattern.compile(regex);
+			if (parentParens && (pattern.indexOf("{#") == 0 
+					|| p.matcher(pattern).matches())) {
+				pattern = "(" + pattern + ")";
+			}		
+			int n = 1;
+			HTMLFilter termFilter = new HTMLFilter();
+			for (Term t : trm.getContents()) {
+				termFilter.result = "";
+				regex = "\\{#\\d+\\}\\{#" + n + "\\}";
+				p = Pattern.compile(regex);
+				if (pattern.contains("{#" + n + "}{#") || p.matcher(pattern).matches()) {
+					termFilter.setParentParens(true);				
+				}
+				t.accept(termFilter);
+				pattern = pattern.replace("{#" + n++ + "}", "\\) " + termFilter.getResult() + "\\(");
+			}
+			result += "\\(" + pattern + "\\)";
+		}else {
+			boolean empty = true;
+			Production pr = trm.getProduction();
+	
+			if (pr.getItems().size() > 0) {
+				if (pr.getItems().get(0).getType() == ProductionType.USERLIST) {
+					String separator = ((UserList) pr.getItems().get(0)).getSeparator();
+					trm.getContents().get(0).accept(this);
+					result += " " + separator + " ";
+					trm.getContents().get(1).accept(this);
+					result += " ";
+					empty = false;
+				} else
+					for (int i = 0, j = 0; i < pr.getItems().size(); i++) {
+						ProductionItem pi = pr.getItems().get(i);
+						if (pi.getType() == ProductionType.TERMINAL) {
+							pi.accept(this);
+							empty = false;
+						} else if (pi.getType() == ProductionType.SORT) {
+							Term t = trm.getContents().get(j++);
+							t.accept(this);	
+							empty = false;
+						}
+					}
+			}
+			if(empty)
+				result += "&nbsp; &nbsp; &middot; &nbsp; &nbsp;";
+		}
 	}
 
 	@Override
@@ -668,8 +719,7 @@ public class HTMLFilter extends BasicVisitor {
 			return "ERROR in String toHex(int c)";
 	}
 	
-	private Color alter(Color a )
-	{
+	private Color alter(Color a ) {
 		float hsb[] = Color.RGBtoHSB(a.getRed(), a.getGreen(), a.getBlue(), null);
 		hsb[1] /= 4;
 		hsb[2] = (float) (240.0/255.0);
@@ -677,6 +727,7 @@ public class HTMLFilter extends BasicVisitor {
 	}
 	
 	private void createHTMLColors(){
+		usedColors.add("defaultColor");
 		
 		HTMLColors.put("aliceblue" , new Color(240, 248, 255));
 		HTMLColors.put("antiquewhite" , new Color(250, 235, 215));
