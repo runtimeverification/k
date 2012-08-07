@@ -23,6 +23,7 @@ public class MaudeRun {
 		String arch = System.getProperty("os.arch");
 		
 		// set different maude executables
+		String maude_win = "maude.exe";
 		String maude_mac = "maude.intelDarwin";
 		String maude_linux_32 = "maude.linux";
 		String maude_linux_64 = "maude.linux64";
@@ -38,7 +39,7 @@ public class MaudeRun {
 			// silently ignore this case
 			// the user should install itself maude
 			// we assume that he can execute maude from command line
-			maudeExe = "maude";
+			maudeExe = maudeDir + fileSeparator + maude_win;
 		}
 		else if (osname.toLowerCase().contains("mac"))
 		{
@@ -55,8 +56,8 @@ public class MaudeRun {
 		}
 		
 	   
-	        if (!new File(maudeExe).exists())
-	        {
+	    if (!new File(maudeExe).exists())
+	    {
 		   // if the maude binaries are not found then consider default `maude`
 		   return "maude";
 		}
