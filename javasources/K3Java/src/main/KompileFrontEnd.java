@@ -254,7 +254,7 @@ public class KompileFrontEnd {
 			HTMLFilter htmlFilter = new HTMLFilter();
 			javaDef.accept(htmlFilter);
 
-			String html = htmlFilter.getResult();
+			String html = htmlFilter.getHTML();
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.html", html);
 
