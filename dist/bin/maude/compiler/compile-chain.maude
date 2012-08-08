@@ -104,6 +104,10 @@ mod COMPILE-ONESHOT is
   
   op partialCompile : Qid Qid AttrSet ~> Module .
   eq partialCompile(Q, Q', AS) = partialCompile(upModule(Q, false), Q', AS) .
+  
+  op partialCompile : Qid Qid ~> Module .
+  eq partialCompile(Q, Q')
+   = partialCompile(Q, Q', transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool","")) anywheres(pair("function","")pair("predicate","")pair("anywhere","")) defineds(pair("function","")pair("predicate","")pair("defined",""))) .
 
   var M : Module . var Q Q' : Qid . var QIL : QidList .  var AS : AttrSet .
 endm

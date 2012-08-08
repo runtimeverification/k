@@ -776,6 +776,9 @@ fmod META-MODULE-EXTRAS is
   eq addSubsorts(SSDS, U) = setSubsorts(U, (SSDS getSubsorts(U))) .
   eq addOps(OPDS, U) = setOps(U, (OPDS getOps(U))) .
   eq addMbs(MAS, U) = setMbs(U, (MAS getMbs(U))) .
+
+  eq addEqs(EqS1:[EquationSet], errorM(AS, Str, Trm, Cxt, U)) 
+   = errorM(AS, Str, Trm, Cxt, U) . 
   eq addEqs(EqS, U) = setEqs(U, (EqS getEqs(U))) .
   eq addEqs(EqS1:[EquationSet] 
        errorEq(T:[Term], Cxt:String, Str:String, AS), U)
