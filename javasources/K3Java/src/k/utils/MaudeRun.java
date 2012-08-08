@@ -55,16 +55,13 @@ public class MaudeRun {
 			else maudeExe = maudeDir + fileSeparator + maude_linux_32;			
 		}
 		
-		   System.out.println("MAUDE: " + maudeExe);
-	   
+   
 	    if (!new File(maudeExe).exists())
 	    {
-	 	   System.out.println("MAUDE-OUT: " + maudeExe);
 		   // if the maude binaries are not found then consider default `maude`
 		   return "maude";
 		}
 	   
-	   System.out.println("MAUDE: " + maudeExe);
 		return maudeExe;
 	}
 	
