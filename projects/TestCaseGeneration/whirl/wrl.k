@@ -34,7 +34,7 @@ module WRL
       <size> 0 </size>              // size of program
       <ip> 0 </ip>                  // instruction pointer
 
-      <memmap> 0 |-> 0 .  </memmap>       // memory map
+      <memmap> 0 |-> 0 </memmap>       // memory map
       <mp> 0 </mp>                  // memory pointer
       <memtemp> 0 </memtemp>        // temporary memory value
 
@@ -44,12 +44,14 @@ module WRL
       <dir> 0 |-> 1 1 |-> 1 </val>    // direction (ccw = 0; cw = 1)
 
       <parity> false </parity>      // true iff last operation was a regular 0
+
+      <buff> "" </buff>
     </settings>
     
 
  //   syntax KResult ::= Program
 
-    rule X:Bit Y:Program => X ~> Y [seqstrict, structural]
+   rule X:Bit Y:Program => X ~> Y [seqstrict, structural]
 
   
    // initializes by writing entire program to progmap
@@ -186,10 +188,9 @@ module WRL
     when (I =/=Int 0)
 
 
-      // TODO: fix IO
 
-
-   rule [IntIOZero]: // ops ring 10, value = 0 (input)
+   // TODO: parse integer directly rather than reading list item
+   rule [IntInput]: // for testing
       <mode> 2 => 3 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 10 ...</turn>
@@ -199,17 +200,7 @@ module WRL
       <in> ListItem(I:Int) => . ...</in>
 
 
-/*
-   rule [FakeIntIOZero]: // for testing
-      <mode> 2 => 3 </mode>
-      <ring> 0 </ring>
-      <turn>... 0 |-> 10 ...</turn>
-      <val>... 0 |-> 0 ...</val>
-      <mp> M:Int </mp>
-      <memmap>... M |-> (_ => 4) ...</memmap>
-*/
-
-   rule [IntIONonzero]: // ops ring 10, value != 0 (output)
+   rule [IntOutput]: // ops ring 10, value != 0 (output)
       <mode> 2 => 3 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 10 ...</turn>
@@ -220,27 +211,20 @@ module WRL
     when (V =/=Int 0)
 
 
-/*
-   rule [AscIOZero]: // ops ring 11, value = 0 (input)
-      <mode> 2 => 3 </mode>
+   rule [AscInput]: // for testing
+      <mode> 2 => 20 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 11 ...</turn>
       <val>... 0 |-> 0 ...</val>
+      <buff> _ => charString(#fReadByte(0)) </buff>
+
+   rule [AscInputBuffer]: 
+      <mode> 20 => 3 </mode>
       <mp> M:Int </mp>
-      <memmap>... M |-> (_ => C) ...</memmap>
-      <in> ListItem(C:Char) => . ...</in>
-*/
+      <memmap>... M |-> (_ => asciiString(S)) ...</memmap>
+      <buff> S:String => . </buff>
 
-
-   rule [FakeAscIOZero]: // for testing
-      <mode> 2 => 3 </mode>
-      <ring> 0 </ring>
-      <turn>... 0 |-> 11 ...</turn>
-      <val>... 0 |-> 0 ...</val>
-      <mp> M:Int </mp>
-      <memmap>... M |-> (_ => 32) ...</memmap>
-
-   rule [AscIONonzero]: // ops ring 10, value != 0 (output)
+   rule [AscOutput]: // ops ring 10, value != 0 (output)
       <mode> 2 => 3 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 11 ...</turn>

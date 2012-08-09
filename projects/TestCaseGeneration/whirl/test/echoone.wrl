@@ -1,0 +1,7 @@
+// echo one character
+
+0100    ops: ascIO (zero)
+00      math: noop
+011100  ops: one (one)
+00      math: noop
+011100  ops: ascIO (one)
