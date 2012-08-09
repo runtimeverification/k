@@ -222,7 +222,7 @@ public class HTMLFilter extends BasicVisitor {
 			}
 			result += "\\(" + pattern + "\\)";
 		} else {
-		super.visit(p);
+			super.visit(p);
 		}
 //		}
 		p.getAttributes().accept(this);
@@ -233,20 +233,11 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Terminal pi) {
 		result += makeGreek(htmlify(pi.getTerminal())) +" ";
-		/*String terminal = pi.getTerminal();
-		if (terminal.isEmpty())
-			return;
-		if (DefinitionHelper.isSpecialTerminal(terminal)) {
-			result += StringUtil.latexify(terminal);
-		} else {
-			result += "\\terminal{" + StringUtil.latexify(terminal) + "}";
-		}*/
 	}
 
 	@Override
 	public void visit(UserList ul) {
 		result += "<span class =\"italic\">" + "List</span>{#<span class =\"italic\">" + ul.getSort() + "</span>,\"" + ul.getSeparator() + "\"} </span>"  + endl;
-		//result += "List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
 	}
 
 	@Override
@@ -325,18 +316,8 @@ public class HTMLFilter extends BasicVisitor {
 			result += "title =\"" + var.getSort() + "\"";
 		}
 		result+=">" + makeGreek(var.getName());
-		
-		/*if (var.getName().equals("_")) {
-			result += "_";
-		} else {
-			result += "var " + makeGreek(var.getName())+ " ";
-		}*/
 		result+=" </span> ";
 	}
-
-	/*private String makeIndices(String str) {
-		return str;
-	}*/
 
 	private String makeGreek(String name) {
 		return name.replace("Alpha", "&alpha;").replace("Beta", "&beta;").replace("Gamma", "&gamma;").replace("Delta", "&delta;").replace("VarEpsilon", "&vepsilon;").replace("Epsilon", "&epsilon;").replace("Zeta", "&zeta;").replace("Eta", "&eta;")
@@ -397,32 +378,6 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(TermCons trm) {
-		
-		/*String pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
-		if (pattern == null) {
-			Production pr = DefinitionHelper.conses.get("\"" + trm.getCons() + "\"");
-			pr.accept(patternsVisitor);
-			pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
-		}
-		String regex = "\\{#\\d+\\}$";
-		Pattern p = Pattern.compile(regex);
-		if (parentParens && (pattern.indexOf("{#") == 0 
-				|| p.matcher(pattern).matches())) {
-			pattern = "(" + pattern + ")";
-		}		
-		int n = 1;
-		LatexFilter termFilter = new LatexFilter();
-		for (Term t : trm.getContents()) {
-			termFilter.setResult("");
-			regex = "\\{#\\d+\\}\\{#" + n + "\\}";
-			p = Pattern.compile(regex);
-			if (pattern.contains("{#" + n + "}{#") || p.matcher(pattern).matches()) {
-				termFilter.setParentParens(true);				
-			}
-			t.accept(termFilter);
-			pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
-		}
-		result += pattern;*/
 		Boolean hasLatexAttribute = patternsVisitor.isLatex("\"" + trm.getCons() + "\"");
 		if(hasLatexAttribute == null)
 		{
@@ -485,7 +440,6 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Constant c) {
 		result += "<span title =\"" + c.getSort() + "\"> " + makeGreek(c.getValue()) + " </span> ";
-		//result += "\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}";
 	}
 
 	@Override
@@ -498,7 +452,6 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(KSequence k) {
 		printList(k.getContents(), "&#x219d; ");
-
 	}
 
 	@Override
@@ -516,24 +469,26 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(LiterateDefinitionComment comment) {
-		/*if (comment.getType() == LiterateCommentType.LATEX) {
-			result += "\\begin{kblock}[text]" + endl;
-			result += comment.getValue();
-			result += "\\end{kblock}" + endl;
+		result += endl + "COMMENT" + endl;
+		if (comment.getType() == LiterateCommentType.LATEX) {
+			result += "<div class=\"commentBlock definitionComment\">" + endl;
+			result += "" + comment.getValue() + "";
+			result += "</div>" + endl;
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
-			preamble += comment.getValue();
-		}*/
+			//preamble += comment.getValue();
+		}
 	}
 
 	@Override
 	public void visit(LiterateModuleComment comment) {
-		/*if (comment.getType() == LiterateCommentType.LATEX) {
-			result += "\\begin{kblock}[text]" + endl;
-			result += comment.getValue();
-			result += "\\end{kblock}" + endl;
+		result += endl + "COMMENT" + endl;
+		if (comment.getType() == LiterateCommentType.LATEX) {
+			result += "<div class=\"commentBlock moduleComment\">" + endl;
+			result += "" + comment.getValue() + "";
+			result += "</div>" + endl;
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
-			preamble += comment.getValue();
-		}*/
+			//preamble += comment.getValue();
+		}
 	}
 
 	@Override
@@ -681,6 +636,19 @@ public class HTMLFilter extends BasicVisitor {
 				+ "text-align: left;"+endl
 				+ "}" + endl;
 		
+		css += ".commentBlock" + endl
+				+ "{" + endl
+				+ "color : black;"+endl
+				+ "border-width: 1px;"+endl
+				+ "display: inline-block; "+endl
+				+ "padding: 10px;"+endl
+				+ "padding-left: 20px;"+endl
+				+ "padding-right: 20px;"+endl
+				+ "border-radius: 30px;"+endl
+				+ "border-style: solid;"+endl
+				+ "text-align: left;"+endl
+				+ "}" + endl;
+		
 		css += ".block.right" + endl
 				+ "{" + endl
 				+ "border-top-right-radius: 0px;"+endl
@@ -699,6 +667,18 @@ public class HTMLFilter extends BasicVisitor {
 				+ "{" + endl
 				+ "border-color: #000000;"+endl
 				+ "background-color: #FFFFFF;"+endl
+				+ "}" + endl;
+		
+		css += ".definitionComment" + endl
+				+ "{" + endl
+				+ "border-color: #000000;"+endl
+				+ "background-color: #f2f2f2;"+endl
+				+ "}" + endl;
+		
+		css += ".moduleComment" + endl
+				+ "{" + endl
+				+ "border-color: #000000;"+endl
+				+ "background-color: #e5e5e5;"+endl
 				+ "}" + endl;
 	}
 	
