@@ -24,6 +24,8 @@ public class HTMLFilter extends BasicVisitor {
 	private String result = "";
 	private String css = "";
 	private String title = "";
+	private String author = "";
+	private String organization = "";
 	private boolean firstProduction = false;
 	private HashSet<String> usedColors = new HashSet<String>();
 	private Map<String, String> cellColors = new HashMap<String,String>();
@@ -31,6 +33,9 @@ public class HTMLFilter extends BasicVisitor {
 	private HTMLPatternsVisitor patternsVisitor = new HTMLPatternsVisitor();
 	private boolean firstAttribute;
 	private boolean parentParens = false;
+	private String preamble = "";
+	
+	
 
 	/*public void setResult(String result) {
 		this.result = result;
@@ -140,6 +145,7 @@ public class HTMLFilter extends BasicVisitor {
 	}
 
 	public String getHTML() {
+		parsePreamble();
 		String html = 
 			"<!DOCTYPE html>" + endl + 
 			"<html lang=\"en\">" + endl + 
@@ -164,13 +170,49 @@ public class HTMLFilter extends BasicVisitor {
 	public String getResult() {
 		return result;
 	}
+	
+	private void parsePreamble() {
+		
+		if(preamble.contains("\\title{"))
+			title = extract(preamble,"\\title{");
+		organization = extract(preamble,"\\organization{");
+		author = extract(preamble,"\\author{");
+		
+		if(organization != null) {
+			result = "<div> <br /> </div>" + endl + result;
+			result = "<span>" + organization + " </span> " + endl + result;
+		}
+		if(author != null) {
+			result = "<div> <br /> </div>" + endl + result;
+			result = "<span>" + author + "</span> " + endl + result;
+		}
+		
+		result = "<div> <br /> </div>" + endl + result;
+		result = "<span class=\"xlarge\">" + title + " </span> " + endl + result;
+		
+	}
+	
+	private String extract(String from, String instruction)
+	{
+		int a = from.indexOf(instruction);
+		if(a != -1) {
+			a += instruction.length();
+			int i = a;
+			for(int b = 1; b > 0 && i < from.length(); i++) {
+				if(from.charAt(i) == '{')
+					b++;
+				else if (from.charAt(i) == '}')
+					b--;
+			}
+			return from.substring(a,i-1);
+		}
+		return null;
+	}
 
 	@Override
 	public void visit(Definition def) {
 		def.accept(patternsVisitor);
-		title  = def.getMainModule();
-		result += "<span class=\"xlarge\">" + title + " </span> " + endl;
-		result += "<div> <br /> </div>" + endl;
+		title = def.getMainModule();
 		super.visit(def);
 
 	}
@@ -469,25 +511,23 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(LiterateDefinitionComment comment) {
-		result += endl + "COMMENT" + endl;
 		if (comment.getType() == LiterateCommentType.LATEX) {
 			result += "<div class=\"commentBlock definitionComment\">" + endl;
-			result += "" + comment.getValue() + "";
+			result += comment.getValue();
 			result += "</div>" + endl;
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
-			//preamble += comment.getValue();
+			preamble += comment.getValue();
 		}
 	}
 
 	@Override
 	public void visit(LiterateModuleComment comment) {
-		result += endl + "COMMENT" + endl;
 		if (comment.getType() == LiterateCommentType.LATEX) {
 			result += "<div class=\"commentBlock moduleComment\">" + endl;
-			result += "" + comment.getValue() + "";
+			result += comment.getValue();
 			result += "</div>" + endl;
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
-			//preamble += comment.getValue();
+			preamble += comment.getValue();
 		}
 	}
 
