@@ -1,3 +1,4 @@
+require "bool-sym.k"
 
 //@ \subsection{Symbolic Integers}
 
