@@ -102,7 +102,7 @@ public class Definition implements Cloneable {
 
 				String parsedLatex = null;
 				Document docLatex = null;
-				if (GlobalSettings.latex) {
+				if (GlobalSettings.literate) {
 					// parse the string again to extract the comments
 					parsedLatex = K3LatexParser.ParseKString(content);
 					docLatex = XmlLoader.getXMLDoc(parsedLatex);
@@ -133,7 +133,7 @@ public class Definition implements Cloneable {
 
 				NodeList xmlModules = doc.getDocumentElement().getElementsByTagName(Tag.module);
 				NodeList xmlComments = null;
-				if (GlobalSettings.latex)
+				if (GlobalSettings.literate)
 					xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.comment);
 				// TODO: insert latex comments in the def.xml
 
@@ -145,14 +145,14 @@ public class Definition implements Cloneable {
 					// used later for latex and when including SHARED module
 					if (file.getAbsolutePath().startsWith(new File(KPaths.getKBase(false) + "/include/").getAbsolutePath()))
 						km.setPredefined(true);
-					if (GlobalSettings.latex)
+					if (GlobalSettings.literate)
 						km.addComments(xmlComments);
 
 					modulesTemp.add(km);
 					modulesMap.put(km.getModuleName(), km);
 				}
 
-				if (GlobalSettings.latex)
+				if (GlobalSettings.literate)
 					modules.addAll(Definition.mergeModuleAndComments(modulesTemp, xmlComments));
 				else
 					modules.addAll(modulesTemp);

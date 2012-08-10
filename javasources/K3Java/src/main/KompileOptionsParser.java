@@ -83,6 +83,8 @@ public class KompileOptionsParser {
 		libGroup.addOption(lib);
 		
 		Option toHTML = new Option("html", false, "generate html from definition");
+		
+		Option literate = new Option("literate", false, "preserve literate comments");
 
 
 		// add options
@@ -97,6 +99,8 @@ public class KompileOptionsParser {
 		options.addOptionGroup(nofile);
 		options.addOption(tempDisamb);
 		options.addOption(toHTML);
+		options.addOption(literate);
+		
 	}
 
 	public CommandLine parse(String[] cmd) {

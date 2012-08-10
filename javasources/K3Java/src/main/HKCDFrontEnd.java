@@ -80,7 +80,7 @@ public class HKCDFrontEnd {
 			File dotk = new File(canonicalFile.getParent() + fileSep + ".k");
 			dotk.mkdirs();
 
-			GlobalSettings.latex = true;
+			GlobalSettings.literate = true;
 
 			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, mainModule, GlobalSettings.verbose);
 

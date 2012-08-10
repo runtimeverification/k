@@ -62,6 +62,11 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("verbose")) {
 			GlobalSettings.verbose = true;
 		}
+		
+		// set literate
+		if (cmd.hasOption("literate")) {
+			GlobalSettings.literate = true;
+		}
 
 		if (cmd.hasOption("nofilename")) {
 			GlobalSettings.noFilename = true;
@@ -206,7 +211,7 @@ public class KompileFrontEnd {
 			File dotk = new File(canonicalFile.getParent() + fileSep + ".k");
 			dotk.mkdirs();
 
-			GlobalSettings.latex = true;
+			GlobalSettings.literate = true;
 			// compile a definition here
 
 			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, mainModule, GlobalSettings.verbose);
@@ -243,6 +248,8 @@ public class KompileFrontEnd {
 	private static String html(File mainFile, String lang) {
 		ro.uaic.info.fmse.k.Definition javaDef;
 		try {
+			GlobalSettings.literate = true;
+
 			javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, lang, GlobalSettings.verbose);
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();
@@ -298,7 +305,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".xml", xml);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Latexif         = ");
+				sw.printIntermediate("Xmlify         = ");
 			}
 
 			return xml;
