@@ -84,7 +84,7 @@ public class KastFrontEnd {
 				e.printStackTrace();
 			}
 		}
-		k.utils.ProgramLoader.parsePgm(mainFile, def);
+		k.utils.ProgramLoader.processPgm(mainFile, def);
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
 		GlobalSettings.kem.print();
