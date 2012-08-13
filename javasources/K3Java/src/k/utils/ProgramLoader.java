@@ -79,7 +79,7 @@ public class ProgramLoader {
 
 				System.out.println(kast);
 
-				String language = defFile.getName().substring(0, defFile.getName().length() - 2);
+				String language = FileUtil.stripExtension(defFile.getName());
 				writeMaudifiedPgm(kast, language, dotk);
 
 				if (GlobalSettings.verbose) {
