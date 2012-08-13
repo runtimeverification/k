@@ -91,7 +91,7 @@ public class KompileFrontEnd {
 			if (cmd.hasOption("lang"))
 				fromxml(xmlFile, cmd.getOptionValue("lang"));
 			else
-				fromxml(xmlFile, xmlFile.getName().replaceFirst("\\.[a-zA-Z]+$", "").toUpperCase());
+				fromxml(xmlFile, FileUtil.getMainModule(xmlFile.getName()));
 			System.exit(0);
 		}
 
@@ -120,7 +120,7 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("lang"))
 			lang = cmd.getOptionValue("lang");
 		else
-			lang = mainFile.getName().replaceFirst("\\.[a-zA-Z]+$", "").toUpperCase();
+			lang = FileUtil.getMainModule(mainFile.getName());
 
 		if (cmd.hasOption("maudify")) {
 			maudify(mainFile, lang);

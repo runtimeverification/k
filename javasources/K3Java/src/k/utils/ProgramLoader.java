@@ -18,9 +18,11 @@ import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.transitions.labelify.KAppModifier;
 
 public class ProgramLoader {
-	/// Load program file to ASTNode.
-	///
-	/// Write pgm.xml cache in given dotk folder.
+	/**
+	 * Load program file to ASTNode.
+	 *
+	 * Write pgm.xml cache in given dotk folder.
+	 */
 	public static ASTNode loadPgmAst(File pgmFile, File dotk) throws IOException {
 		File tbl = new File(dotk.getCanonicalPath() + "/pgm/Program.tbl");
 
@@ -54,9 +56,11 @@ public class ProgramLoader {
 	}
 
 
-	/// Print maudified program to standard output.
-	///
-        /// Save it in dotk cache under pgm.maude.
+	/**
+	 * Print maudified program to standard output.
+	 *
+         * Save it in dotk cache under pgm.maude.
+         */
 	public static void processPgm(File pgmFile, File defFile) {
 		try {
 			// compile a definition here
@@ -95,9 +99,11 @@ public class ProgramLoader {
 		}
 	}
 
-	/// Store maudified AST of K program under `pgm.maude` in dotk
-	/// directory. `pgm.maude` will also load language definition
-	/// from `LANGUAGE-compiled.maude` in parent directory.
+	/**
+	 *  Store maudified AST of K program under `pgm.maude` in dotk
+	 *  directory. `pgm.maude` will also load language definition
+	 *  from `LANGUAGE-compiled.maude` in parent directory.
+	 */
 	private static void writeMaudifiedPgm(String kast, String language, File dotk) {
 		String ast;
 		ast = "load ../" + language + "-compiled.maude\n";

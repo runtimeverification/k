@@ -47,6 +47,14 @@ public class FileUtil {
 		return file.substring(0, idx);
 	}
 
+	/**
+	 * Get language name in uppercase (main module name) given the
+	 * filename of definition.
+	 */
+	public static String getMainModule(String filename) {
+		return stripExtension(filename).toUpperCase();
+	}
+
 	public static String getFileContent(String file) {
 		BufferedReader reader;
 		try {
