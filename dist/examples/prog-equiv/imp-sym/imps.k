@@ -236,28 +236,30 @@ module IMPS
        <condition> F:K => F andBool B  </condition>
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho))
+            andBool notBool ((F impliesBool B) ==K true)
        [transition]
 
   rule <config>
          <k> B:K => storeSyns(F, B, false) ~> false ...</k>
-         <env> Rho:Map (. => B |-> true) </env>
+         <env> Rho:Map (. => B |-> false) </env>
        </config>
        <condition> F:K => F andBool notBool B  </condition>
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho))
+            andBool notBool ((F impliesBool notBool B) ==K true)
        [transition]
   
   rule <k> B:K => true ...</k>
        <condition> F:K </condition>
        when isBoolSymExp(B)
             andBool  F impliesBool B
-       [transition]
+//       [transition]
 
   rule <k> B:K => false ...</k>
        <condition> F:K </condition>
        when isBoolSymExp(B)
             andBool F impliesBool notBool(B)
-       [transition]
+//       [transition]
 
   syntax K ::= "storeSyns" "(" K "," K "," Bool ")"
 

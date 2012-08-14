@@ -1,0 +1,7 @@
+<config>
+    <test def="/dist/examples/prog-equiv/imp-sym/imps.k" program-extension="imps" compiled-file-name="imps-compiled.maude"/>
+    <krun-options>
+        <program name="fors.peq" ignore="yes"/>
+        <program name="sum.peq" ignore="yes"/>                              
+    </krun-options>
+</config>

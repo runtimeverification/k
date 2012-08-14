@@ -336,23 +336,17 @@ module PEQ
 */
 
 
-  rule <config>
-         <k> B:K => storeSyns(F, B, true) ~> true ...</k>
-         <env> Rho:Map (. => B |-> true) </env>
-       </config>
-       <condition> F:K => F andBool B  </condition>
+  rule <k> B:K => true ...</k>
+       <condition> F:K </condition>
        when isBoolSymExp(B)
-            andBool notBool(B in keys(Rho))
-       [transition]
+            andBool  F impliesBool B
+//       [transition]
 
-  rule <config>
-         <k> B:K => storeSyns(F, B, false) ~> false ...</k>
-         <env> Rho:Map (. => B |-> true) </env>
-       </config>
-       <condition> F:K => F andBool notBool B  </condition>
+  rule <k> B:K => false ...</k>
+       <condition> F:K </condition>
        when isBoolSymExp(B)
-            andBool notBool(B in keys(Rho))
-       [transition]
+            andBool F impliesBool notBool(B)
+//       [transition]
 
 /*@
   \subsection{Additional Rules}
@@ -382,15 +376,17 @@ module PEQ
        <condition> F:K => F andBool B  </condition>
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho))
+            andBool notBool (F impliesBool B)
        [transition]
 
   rule <config>
          <k> B:K => false ...</k>
-         <env> Rho:Map (. => B |-> true) </env>
+         <env> Rho:Map (. => B |-> false) </env>
        </config>
        <condition> F:K => F andBool notBool B  </condition>
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho))
+            andBool notBool (F impliesBool notBool B)
   \end{verbatim} 
   Then the derivatives of the above goal are:
   \begin{verbatim}
@@ -440,6 +436,8 @@ module PEQ
        </goal>
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho1))
+            andBool notBool ((F impliesBool B) ==K true)
+            andBool notBool ((F impliesBool notBool B) ==K true)
 
 /*@
   When an existing elementary symbolic boolean expression has to be evaluated, its
