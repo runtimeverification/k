@@ -12,6 +12,7 @@ import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
+import ro.uaic.info.fmse.hkcd.HaskellDefFilter;
 import ro.uaic.info.fmse.hkcd.HaskellPgmFilter;
 
 import ro.uaic.info.fmse.k.ASTNode;
@@ -112,13 +113,14 @@ public class HKCDFrontEnd {
 	 * Dump language definition and program tree to hkc-readable
 	 * form
 	 */
-	public static String hkcd(File defFile, File pgmFile, String mainModule) {
+	public static void hkcd(File defFile, File pgmFile, String mainModule) {
 		try {
-			// for now just use this file as main argument
-			File canonicalFile = defFile.getCanonicalFile();
-
+			Stopwatch sw = new Stopwatch();
 			String fileSep = System.getProperty("file.separator");
-			File dotk = new File(canonicalFile.getParent() + fileSep + ".k");
+
+			File defCanonical = defFile.getCanonicalFile();
+			File pgmCanonical = pgmFile.getCanonicalFile();
+			File dotk = new File(defCanonical.getParent() + fileSep + ".k");
 			dotk.mkdirs();
 
 			GlobalSettings.literate = true;
@@ -129,34 +131,38 @@ public class HKCDFrontEnd {
 					mainModule,
 					GlobalSettings.verbose);
 
-			Stopwatch sw = new Stopwatch();
+			ASTNode pgmAst = 
+				k.utils.ProgramLoader.loadPgmAst(
+					pgmFile, dotk, false);
 
-			HaskellPgmFilter hdf = new HaskellPgmFilter();
+			HaskellPgmFilter hpf = new HaskellPgmFilter();
+			pgmAst.accept(hpf);
+			String pgmDump = hpf.getResult();
 
-			ASTNode pgmAst = k.utils.ProgramLoader.loadPgmAst(pgmFile, dotk, false);
+			HaskellDefFilter hdf = new HaskellDefFilter();
+			langDef.accept(hdf);
+			String defDump = hdf.getResult();
 
-			pgmAst.accept(hdf);
-			String dump = hdf.getResult();
+			System.out.println("Definition:");
+			System.out.println(defDump);
 
-			System.out.println(dump);
+			System.out.println("Program:");
+			System.out.println(pgmDump);
 
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.hkcd", dump);
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.hkcd", pgmDump);
 
 			FileUtil.saveInFile(
-				FileUtil.stripExtension(canonicalFile.getAbsolutePath()) +
+				FileUtil.stripExtension(defCanonical.getAbsolutePath()) +
 				".hkcd",
-				dump);
+				pgmDump);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("HKCD         = ");
 			}
-
-			return dump;
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
 	}
 }

@@ -11,10 +11,7 @@ import ro.uaic.info.fmse.visitors.BasicVisitor;
  *
  * @see ProgramLoader.loadPgmAst
  */
-public class HaskellPgmFilter extends BasicVisitor {
-	String endl = System.getProperty("line.separator");
-	private String result = "";
-
+public class HaskellPgmFilter extends HaskellFilter {
 	/**
 	 * Update transformer state wrt type of current AST node.
 	 *
@@ -24,7 +21,7 @@ public class HaskellPgmFilter extends BasicVisitor {
 		String klabel =
 			DefinitionHelper.conses.get("\"" + tc.getCons() + "\"")
 			.getKLabel();
-		result += "KApp (KLabel \"" + klabel + "\") [";
+		this.result += "KApp (KLabel \"" + klabel + "\") [";
 
 		int s = tc.getContents().size();
 
@@ -38,35 +35,5 @@ public class HaskellPgmFilter extends BasicVisitor {
 			}
 
 		result += "]";
-	}
-
-	public void visit(Constant cst) {
-		String s = cst.getSort();
-		String v = cst.getValue();
-
-		if (s.equals("#Int")) {
-			result += "KInt " + v;
-			return;
-		}
-
-		if (s.equals("#String")) {
-			result += "KString " + v;
-			return;
-		}
-
-		if (s.equals("#Id")) {
-			result += "KId \"" + v + "\"";
-			return;
-		}
-
-
-		if (s.equals("#Bool")) {
-			result += "KBool " + HaskellUtil.capitalizeFirst(v);
-			return;
-		}
-	}
-
-	public String getResult() {
-		return result;
 	}
 }
