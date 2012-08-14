@@ -12,29 +12,33 @@ import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.hkcd.HaskellDumpFilter;
+import ro.uaic.info.fmse.hkcd.HaskellPgmFilter;
 
-/// Haskell K Compiler dump tool frontend
-///
-/// @todo .def loading routine is the same as in kompile — refactor it
-/// as well
+import ro.uaic.info.fmse.k.ASTNode;
+
+/**
+ * Haskell K Compiler dump tool frontend
+ *
+ * @todo .def and .pgm loading routines is the same as in
+ * kast/kompile — refactor it as well
+ */
 public class HKCDFrontEnd {
 
 	public static void hkcd(String[] args) {
 		Stopwatch sw = new Stopwatch();
-		KompileOptionsParser op = new KompileOptionsParser();
+		HKCDOptionsParser op = new HKCDOptionsParser();
 
 		CommandLine cmd = op.parse(args);
 
-		// options: help
-		if (cmd.hasOption("help")) {
-			k.utils.Error.helpExit(op.getHelp(), op.getOptions());
+		// set verbose
+		if (cmd.hasOption("verbose")) {
+			GlobalSettings.verbose = true;
 		}
 
-		// // set verbose
-		// if (cmd.hasOption("verbose")) {
-		//	GlobalSettings.verbose = true;
-		// }
+		// options: help
+		if (cmd.hasOption("help")) {
+			k.utils.Error.helpExit(op.getHelp(), "hkcd DEF PGM", op.getOptions());
+		}
 
 		String def = null;
 		if (cmd.hasOption("def"))
@@ -42,28 +46,61 @@ public class HKCDFrontEnd {
 		else {
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 1)
-				k.utils.Error.report("You have to provide a file in order to compile!.");
+				GlobalSettings.kem.register(
+					new KException(ExceptionType.ERROR,
+						       KExceptionGroup.CRITICAL,
+						       "You have to provide a language definition in order to compile!",
+						       "command line",
+						       "System file.", 0));
 			else
 				def = restArgs[0];
 		}
 
-		File mainFile = new File(def);
-		GlobalSettings.mainFile = mainFile;
-		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
-		if (!mainFile.exists()) {
-			File errorFile = mainFile;
-			mainFile = new File(def + ".k");
-			if (!mainFile.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system.", 0));
+		// Load .def
+		File defFile = new File(def);
+		GlobalSettings.mainFile = defFile;
+		GlobalSettings.mainFileWithNoExtension =
+			defFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
+		if (!defFile.exists()) {
+			File errorFile = defFile;
+			defFile = new File(def + ".k");
+			if (!defFile.exists())
+				GlobalSettings.kem.register(
+					new KException(ExceptionType.ERROR,
+						       KExceptionGroup.CRITICAL,
+						       "File: " + errorFile.getName() + "(.k) not found.",
+						       errorFile.getAbsolutePath(), "File system.", 0));
 		}
+
+		// Load .pgm
+		String pgm = null;
+		if (cmd.hasOption("pgm"))
+			pgm = cmd.getOptionValue("pgm");
+		else {
+			String[] restArgs = cmd.getArgs();
+			if (restArgs.length < 2)
+				GlobalSettings.kem.register(
+					new KException(ExceptionType.ERROR,
+						       KExceptionGroup.CRITICAL,
+						       "You have to provide a program source!",
+						       "command line",
+						       "System file.", 0));
+			else
+				pgm = restArgs[1];
+		}
+
+		File pgmFile = new File(pgm);
+		if (!pgmFile.exists())
+			k.utils.Error.report("Could not find file: " + pgm);
 
 		String lang = null;
 		if (cmd.hasOption("lang"))
 			lang = cmd.getOptionValue("lang");
 		else
-			lang = mainFile.getName().replaceFirst("\\.[a-zA-Z]+$", "").toUpperCase();
+			lang = FileUtil.getMainModule(defFile.getName());
 
-		hkcd(mainFile, lang);
+		/// Do the actual processing
+		hkcd(defFile, pgmFile, lang);
 
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
@@ -71,10 +108,14 @@ public class HKCDFrontEnd {
 	}
 
 
-	public static String hkcd(File mainFile, String mainModule) {
+	/**
+	 * Dump language definition and program tree to hkc-readable
+	 * form
+	 */
+	public static String hkcd(File defFile, File pgmFile, String mainModule) {
 		try {
 			// for now just use this file as main argument
-			File canonicalFile = mainFile.getCanonicalFile();
+			File canonicalFile = defFile.getCanonicalFile();
 
 			String fileSep = System.getProperty("file.separator");
 			File dotk = new File(canonicalFile.getParent() + fileSep + ".k");
@@ -82,24 +123,35 @@ public class HKCDFrontEnd {
 
 			GlobalSettings.literate = true;
 
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, mainModule, GlobalSettings.verbose);
+			ro.uaic.info.fmse.k.Definition langDef =
+				k.utils.DefinitionLoader.loadDefinition(
+					defFile,
+					mainModule,
+					GlobalSettings.verbose);
 
 			Stopwatch sw = new Stopwatch();
 
-			HaskellDumpFilter hdf = new HaskellDumpFilter();
-			javaDef.accept(hdf);
+			HaskellPgmFilter hdf = new HaskellPgmFilter();
 
-			String dumped = hdf.getResult();
+			ASTNode pgmAst = k.utils.ProgramLoader.loadPgmAst(pgmFile, dotk, false);
 
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.hkcd", dumped);
+			pgmAst.accept(hdf);
+			String dump = hdf.getResult();
 
-			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".hkcd", dumped);
+			System.out.println(dump);
+
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.hkcd", dump);
+
+			FileUtil.saveInFile(
+				FileUtil.stripExtension(canonicalFile.getAbsolutePath()) +
+				".hkcd",
+				dump);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("HKCD         = ");
 			}
 
-			return dumped;
+			return dump;
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (Exception e) {
