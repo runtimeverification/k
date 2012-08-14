@@ -22,8 +22,10 @@ public class ProgramLoader {
 	 * Load program file to ASTNode.
 	 *
 	 * Write pgm.xml cache in given dotk folder.
+	 *
+	 * @param kappize If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(File pgmFile, File dotk) throws IOException {
+	public static ASTNode loadPgmAst(File pgmFile, File dotk, Boolean kappize) throws IOException {
 		File tbl = new File(dotk.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
@@ -50,9 +52,15 @@ public class ProgramLoader {
 
 		out = out.accept(new AmbFilter());
 
-		out = out.accept(new KAppModifier());
+		if (kappize)
+			out = out.accept(new KAppModifier());
 
 		return out;
+	}
+
+
+	public static ASTNode loadPgmAst(File pgmFile, File dotk) throws IOException {
+		return loadPgmAst(pgmFile, dotk, true);
 	}
 
 
