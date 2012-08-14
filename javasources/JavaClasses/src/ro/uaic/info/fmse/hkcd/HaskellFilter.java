@@ -13,7 +13,7 @@ public class HaskellFilter extends BasicVisitor {
 		String v = cst.getValue();
 
 		if (s.equals("#Int")) {
-			result += "KInt " + v;
+			result += "KInt (" + v + ")";
 			return;
 		}
 
