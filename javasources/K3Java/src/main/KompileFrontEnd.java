@@ -79,6 +79,13 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("warnings"))
 			GlobalSettings.warningslevel = Integer.parseInt(cmd.getOptionValue("warnings"));
 
+		if (cmd.hasOption("transition"))
+			GlobalSettings.transition = cmd.getOptionValue("transition");
+		if (cmd.hasOption("supercool"))
+			GlobalSettings.supercool = cmd.getOptionValue("supercool");
+		if (cmd.hasOption("superheat"))
+			GlobalSettings.superheat = cmd.getOptionValue("superheat");
+		
 		// set lib if any
 		if (cmd.hasOption("lib")) {
 			GlobalSettings.lib = cmd.getOptionValue("lib");
@@ -179,16 +186,6 @@ public class KompileFrontEnd {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
-			// // Apparently I have to do this for now. I'll search for a better solution soon.
-			// InputStream is = process.getInputStream();
-			// InputStreamReader isr = new InputStreamReader(is);
-			// BufferedReader br = new BufferedReader(isr);
-			// // String line;
-			// while (br.readLine() != null) {
-			// }
-			// ;
-			// / while((line = br.readLine()) != null){System.out.println(line);}
 
 		} catch (IOException e) {
 			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", "", 0);
@@ -656,8 +653,19 @@ public class KompileFrontEnd {
 			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
 			load += maudeLib;
 
+			String transition = "\"transition=()\"";
+			String superheat = "\"superheat=()\"";
+			String supercool = "\"supercool=()\"";
+			
+			if (!GlobalSettings.transition.equals(""))
+				transition = "\"" + metadataParse(GlobalSettings.transition) + "\"";
+			if (!GlobalSettings.superheat.equals(""))
+				superheat = "\"" + metadataParse(GlobalSettings.superheat) + "\"";
+			if (!GlobalSettings.supercool.equals(""))
+				supercool = "\"" + metadataParse(GlobalSettings.supercool) + "\"";
+				
 			String compile = load + maudified + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + mainModule
-					+ " transitions \"transition=()\" superheats \"superheat=()\" supercools \"supercool=()\" anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
+					+ " transitions " + transition + " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 
@@ -677,5 +685,23 @@ public class KompileFrontEnd {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static String metadataParse(String tags)
+	{
+		String[] alltags = tags.split("\\s+");
+		String result = "";
+		String tag;
+		for(int i = 0; i < alltags.length; i++)
+		{
+			tag = alltags[i];
+			if (tag.matches("\\("))
+				tag.replaceFirst("\\(", "=(");
+			else tag += "=()";
+			
+			result += tag + " ";
+		}
+		
+		return result;
 	}
 }

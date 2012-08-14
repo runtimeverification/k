@@ -17,4 +17,7 @@ public class GlobalSettings {
 	public static int warningslevel = 2;
 	public static boolean tempDisamb = true;
 	public static boolean typeWarnings = false;
+	public static String transition = "";
+	public static String superheat = "";
+	public static String supercool = "";
 }

@@ -86,6 +86,19 @@ public class KompileOptionsParser {
 		
 		Option literate = new Option("literate", false, "preserve literate comments");
 
+		
+		// options for non-determinism
+		OptionGroup nondet = new OptionGroup();
+		
+		// transition
+		Option transition = new Option("transition", true, "<arg> tags to become rewrite rules");
+		Option supercool = new Option("supercool", true, "syntax <arg> tags triggering super heating nondetermistic choice for strictness");
+		Option superheat = new Option("superheat", true, "rule <arg> tags triggering super cooling tags are space-separated and can include the tag default");
+		
+		nondet.addOption(transition);
+		nondet.addOption(supercool);
+		nondet.addOption(superheat);
+		
 
 		// add options
 		options.addOptionGroup(verb);
@@ -100,7 +113,7 @@ public class KompileOptionsParser {
 		options.addOption(tempDisamb);
 		options.addOption(toHTML);
 		options.addOption(literate);
-		
+		options.addOptionGroup(nondet);
 	}
 
 	public CommandLine parse(String[] cmd) {
