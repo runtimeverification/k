@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ro.uaic.info.fmse.html.HTMLPatternsVisitor.HTMLPatternType;
 import ro.uaic.info.fmse.k.*;
 import ro.uaic.info.fmse.k.LiterateComment.LiterateCommentType;
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
@@ -174,9 +176,9 @@ public class HTMLFilter extends BasicVisitor {
 	private void parsePreamble() {
 		
 		if(preamble.contains("\\title{"))
-			title = extract(preamble,"\\title{");
-		organization = extract(preamble,"\\organization{");
-		author = extract(preamble,"\\author{");
+			title = latexExtract(preamble,"\\title{");
+		organization = latexExtract(preamble,"\\organization{");
+		author = latexExtract(preamble,"\\author{");
 		
 		if(organization != null) {
 			result = "<div> <br /> </div>" + endl + result;
@@ -192,7 +194,7 @@ public class HTMLFilter extends BasicVisitor {
 		
 	}
 	
-	private String extract(String from, String instruction)
+	private String latexExtract(String from, String instruction)
 	{
 		int a = from.indexOf(instruction);
 		if(a != -1) {
@@ -207,6 +209,27 @@ public class HTMLFilter extends BasicVisitor {
 			return from.substring(a,i-1);
 		}
 		return null;
+	}
+	
+	private Vector<String> multipleLatexExtracts(String from, String regex)
+	{
+		Vector<String> results = new Vector<String>();
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(from);
+		while(m.find()) {
+			//System.out.println(m.group());
+			int a = m.end();
+			int i = a;
+			for(int b = 1; b > 0 && i < from.length(); i++) {
+				if(from.charAt(i) == '{')
+					b++;
+				else if (from.charAt(i) == '}')
+					b--;
+			}
+			results.add(from.substring(a,i-1));
+			//System.out.println(results.get(results.size()-1));
+		}
+		return results;
 	}
 
 	@Override
@@ -250,19 +273,20 @@ public class HTMLFilter extends BasicVisitor {
 		
 		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.getAttributes().containsKey(Constants.CONS_cons_ATTR) 
 				&& patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))
-				&& patternsVisitor.isLatex(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
+				&& patternsVisitor.getPatternType(p.getAttributes().get(Constants.CONS_cons_ATTR)) != HTMLPatternType.DEFAULT) {
 			
 			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
+			boolean isLatex = patternsVisitor.getPatternType(p.getAttributes().get(Constants.CONS_cons_ATTR)) == HTMLPatternType.LATEX;
 			int n = 1;
 			HTMLFilter termFilter = new HTMLFilter();
 			for (ProductionItem pi : p.getItems()) {
 				if (pi.getType() != ProductionType.TERMINAL) {
 					termFilter.result = "";
 					pi.accept(termFilter);
-					pattern = pattern.replace("{#" + n++ + "}", "\\)" + termFilter.getResult() + "\\(");
+					pattern = pattern.replace("{#" + n++ + "}", isLatex ? "\\)" + termFilter.getResult() + "\\(" : termFilter.getResult());
 				}
 			}
-			result += "\\(" + pattern + "\\)";
+			result += isLatex ? "\\(" + pattern + "\\)" : pattern;
 		} else {
 			super.visit(p);
 		}
@@ -420,15 +444,15 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(TermCons trm) {
-		Boolean hasLatexAttribute = patternsVisitor.isLatex("\"" + trm.getCons() + "\"");
-		if(hasLatexAttribute == null)
+		HTMLPatternType type = patternsVisitor.getPatternType("\"" + trm.getCons() + "\"");
+		if(type == null)
 		{
 			Production pr = DefinitionHelper.conses.get("\"" + trm.getCons() + "\"");
 			pr.accept(patternsVisitor);
-			hasLatexAttribute = patternsVisitor.isLatex("\"" + trm.getCons() + "\"");
+			type = patternsVisitor.getPatternType("\"" + trm.getCons() + "\"");
 		}
 		
-		if(hasLatexAttribute.booleanValue()){
+		if(type != HTMLPatternType.DEFAULT){
 			String pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
 			String regex = "\\{#\\d+\\}$";
 			Pattern p = Pattern.compile(regex);
@@ -448,7 +472,13 @@ public class HTMLFilter extends BasicVisitor {
 				t.accept(termFilter);
 				pattern = pattern.replace("{#" + n++ + "}", "\\) " + termFilter.getResult() + "\\(");
 			}
-			result += "\\(" + pattern + "\\)";
+			if(type == HTMLPatternType.LATEX)
+				result += "\\(";
+			
+			result += pattern;
+			
+			if(type == HTMLPatternType.LATEX)
+				result += "\\)";
 		}else {
 			boolean empty = true;
 			Production pr = trm.getProduction();
@@ -512,9 +542,9 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(LiterateDefinitionComment comment) {
 		if (comment.getType() == LiterateCommentType.LATEX) {
-			result += "<div class=\"commentBlock definitionComment\">" + endl;
-			result += comment.getValue();
-			result += "</div>" + endl;
+			result += "<div class=\"commentBlock definitionComment tex2jax_ignore\">" + endl;
+			result += parseComment(comment.getValue());
+			result += "</div><div><br /></div>" + endl;
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
 			preamble += comment.getValue();
 		}
@@ -523,13 +553,41 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(LiterateModuleComment comment) {
 		if (comment.getType() == LiterateCommentType.LATEX) {
-			result += "<div class=\"commentBlock moduleComment\">" + endl;
-			result += comment.getValue();
-			result += "</div>" + endl;
+			result += "<div class=\"commentBlock moduleComment tex2jax_ignore\">" + endl;
+			result += parseComment(comment.getValue());
+			result += "</div><div><br /></div>" + endl;
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
 			preamble += comment.getValue();
 		}
 	}
+	
+	private String parseComment(String comment) {
+		Vector<String> sectionContents = multipleLatexExtracts(comment,"\\\\section\\{");
+		for(String a : sectionContents) {
+			comment = comment.replace("\\section{"+a+"}", "<br/><span class=\"large bold\">"+a+"</span><br/><br/>");
+		}
+		
+		Vector<String> subsectionContents = multipleLatexExtracts(comment,"\\\\subsection\\{");
+		for(String a : subsectionContents) {
+			comment = comment.replace("\\subsection{"+a+"}", "<span class=\"large\">"+a+"</span><br/>");
+		}
+		
+		Vector<String> subsubsectionContents = multipleLatexExtracts(comment,"\\\\subsubsection\\{");
+		for(String a : subsubsectionContents) {
+			comment = comment.replace("\\subsubsection{"+a+"}", "<span class=\"italic\">"+a+"</span><br/>");
+		}
+		
+		Vector<String> textttContents = multipleLatexExtracts(comment,"\\\\texttt\\{");
+		for(String a : textttContents) {
+			comment = comment.replace("\\texttt{"+a+"}", "<span class=\"courier\">"+a+"</span>");
+		}
+		
+		comment = comment.replace("\\K", "K").replace("{\\textbackslash}", "\\")
+						.replace("\\{","{").replace("\\}","}").replace("\\texttildelow", "~");
+		
+		return comment;
+	}
+	
 
 	@Override
 	public void visit(Attribute entry) {
@@ -539,6 +597,10 @@ public class HTMLFilter extends BasicVisitor {
 			return;
 		if (entry.getKey().equals("latex"))
 			return;
+		if (entry.getKey().equals("html")) {
+			return;
+		}
+			
 		
 		if (firstAttribute) {
 			result += " [ <span class =\"attribute\"> ";
@@ -592,6 +654,11 @@ public class HTMLFilter extends BasicVisitor {
 		css += ".xlarge" + endl
 				+ "{" + endl
 				+ "font-size: x-large;"+endl
+				+ "}" + endl;
+		
+		css += ".courier" + endl
+				+ "{" + endl
+				+ "font-family: courier;"+endl
 				+ "}" + endl;
 		
 		css += ".attribute" + endl

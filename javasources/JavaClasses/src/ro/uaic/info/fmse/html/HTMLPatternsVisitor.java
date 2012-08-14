@@ -9,8 +9,13 @@ import ro.uaic.info.fmse.utils.strings.StringUtil;
 import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class HTMLPatternsVisitor extends BasicVisitor {
+	public enum HTMLPatternType {
+		LATEX, HTML, DEFAULT
+	};
+	
 	private Map<String,String> patterns = new HashMap<String,String>();
-	private Map<String,Boolean> hasLatexAttribute = new HashMap<String,Boolean>();
+	private Map<String,HTMLPatternType> type = new HashMap<String,HTMLPatternType>();
+	
 	String pattern = "";
 	int nonTerm;
 	boolean prevNonTerm;
@@ -24,9 +29,9 @@ public class HTMLPatternsVisitor extends BasicVisitor {
 		return patterns;
 	}
 
-	public Boolean isLatex(String cons){
-		if(hasLatexAttribute.containsKey(cons))
-			return hasLatexAttribute.get(cons);
+	public HTMLPatternType getPatternType(String cons){
+		if(type.containsKey(cons))
+			return type.get(cons);
 		else
 			return null;
 	}
@@ -35,14 +40,26 @@ public class HTMLPatternsVisitor extends BasicVisitor {
 	public void visit(Production p) {
 		if (!p.getAttributes().containsKey("cons")) {
 			return;
-		}		
-		if (p.getAttributes().containsKey("latex")) {
-			pattern = p.getAttributes().get("latex");
-			pattern = pattern.substring(1, pattern.length()-1).replace("\\\\", "\\");
-			patterns.put(p.getAttributes().get("cons"), pattern);
-			hasLatexAttribute.put(p.getAttributes().get("cons"), true);
+		}
+		if(p.getAttributes().containsKey("latex") || p.getAttributes().containsKey("html")) {
+			if (p.getAttributes().containsKey("latex")) {
+				
+				pattern = p.getAttributes().get("latex");
+				pattern = pattern.substring(1, pattern.length()-1).replace("\\\\", "\\");
+				patterns.put(p.getAttributes().get("cons"), pattern);
+				type.put(p.getAttributes().get("cons"), HTMLPatternType.LATEX);
+				
+			}
+			if (p.getAttributes().containsKey("html")) {
+				
+				pattern = p.getAttributes().get("html");
+				pattern = pattern.substring(1, pattern.length()-1).replace("\\\\", "\\");
+				patterns.put(p.getAttributes().get("cons"), pattern);
+				type.put(p.getAttributes().get("cons"), HTMLPatternType.HTML);
+				
+			} 
 		} else {
-			hasLatexAttribute.put(p.getAttributes().get("cons"), false);
+			type.put(p.getAttributes().get("cons"), HTMLPatternType.DEFAULT);
 			//super.visit(p);
 		}
 		
