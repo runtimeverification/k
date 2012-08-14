@@ -97,7 +97,7 @@ module IMPS
                     <k color="green"> $PGM:SPgm  </k>
                     <env color="red"> .Map </env>
                   </config>
-                  <formula> true </formula>
+                  <condition> true </condition>
                   <nextSymvar> 0 </nextSymVar>
                 </T>
 
@@ -108,7 +108,7 @@ module IMPS
   remain \texttt{true} and \texttt{false}.
 */
 
-  syntax KResult ::= Int | Bool
+  syntax KResult ::= Int | #Bool
 
 
 /*@
@@ -198,7 +198,7 @@ module IMPS
            => 
            lookup(X, Rho)
        ...</k>
-       <formula> F:K </formula>
+       <condition> F:K </condition>
        when F impliesBool (X isNotModifiedBy SS)
 
 /*@
@@ -229,16 +229,59 @@ module IMPS
   additional rules that conservatively extend the definition
 */
 
+  rule <config>
+         <k> B:K => storeSyns(F, B, true) ~> true ...</k>
+         <env> Rho:Map (. => B |-> true) </env>
+       </config>
+       <condition> F:K => F andBool B  </condition>
+       when isBoolSymExp(B)
+            andBool notBool(B in keys(Rho))
+       [transition]
+
+  rule <config>
+         <k> B:K => storeSyns(F, B, false) ~> false ...</k>
+         <env> Rho:Map (. => B |-> true) </env>
+       </config>
+       <condition> F:K => F andBool notBool B  </condition>
+       when isBoolSymExp(B)
+            andBool notBool(B in keys(Rho))
+       [transition]
   
   rule <k> B:K => true ...</k>
-       <formula> F:K </formula>
+       <condition> F:K </condition>
        when isBoolSymExp(B)
             andBool  F impliesBool B
+       [transition]
 
   rule <k> B:K => false ...</k>
-       <formula> F:K </formula>
+       <condition> F:K </condition>
        when isBoolSymExp(B)
             andBool F impliesBool notBool(B)
+       [transition]
+
+  syntax K ::= "storeSyns" "(" K "," K "," Bool ")"
+
+  rule storeSyns(F1:K andBool F2:K, B:K, V:Bool) 
+       =>
+       storeSyns(F1, B, V) ~> storeSyns(F2, B, V)
+
+  rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
+       <env>... . => (B[I1/I2] |-> V) ...</env>
+       when B[I1/I2] =/=K B
+
+  rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
+       <env>... . => (B[I2/I1] |-> V) ...</env>
+       when B[I2/I1] =/=K B
+
+  rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
+       when (B[I1/I2] ==K B) andBool (B[I2/I1] ==K B)
+
+  rule storeSyns(X:Id isNotModifiedBy S:Stmt, B:K, V:Bool) => .
+
+  rule <k> storeSyns(I1:Int <=Int I2:Int, B:K, V:Bool) => . ...</k>
+
+  rule <k> storeSyns(true, B:K, V:Bool) => . ...</k>
+
 
 /*@
   The following rule creates the initial configuration from the equivalence
@@ -253,7 +296,7 @@ module IMPS
            P
          </k>
        ...</config>
-       <formula> _ => injectForm(F) </formula>
+       <condition> _ => injectForm(F) </condition>
 
 /*@ 
   The next function translates the initial formula into internal

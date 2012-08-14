@@ -34,11 +34,11 @@ module BOOL-SYM
   This is a trick that help us to handle easier this expressions.
 */
 
-/*
+
   rule 'isBool(K:K) => true
        when isBoolSymExp(K) ==K true
        [anywhere]
-*/
+
 
 //@ Some simplification rules.
 
