@@ -151,8 +151,15 @@ public class HKCDFrontEnd {
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.hkcd", pgmDump);
 
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.hkcd", defDump);
+
 			FileUtil.saveInFile(
 				FileUtil.stripExtension(defCanonical.getAbsolutePath()) +
+				".hkcd",
+				defDump);
+
+			FileUtil.saveInFile(
+				FileUtil.stripExtension(pgmCanonical.getAbsolutePath()) +
 				".hkcd",
 				pgmDump);
 
