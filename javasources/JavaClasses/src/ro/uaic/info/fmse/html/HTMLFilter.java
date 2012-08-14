@@ -190,7 +190,7 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		
 		result = "<div> <br /> </div>" + endl + result;
-		result = "<span class=\"xlarge\">" + title + " </span> " + endl + result;
+		result = "<h1>" + title + " </h1> " + endl + result;
 		
 	}
 	
@@ -564,17 +564,17 @@ public class HTMLFilter extends BasicVisitor {
 	private String parseComment(String comment) {
 		Vector<String> sectionContents = multipleLatexExtracts(comment,"\\\\section\\{");
 		for(String a : sectionContents) {
-			comment = comment.replace("\\section{"+a+"}", "<br/><span class=\"large bold\">"+a+"</span><br/><br/>");
+			comment = comment.replace("\\section{"+a+"}", "<h2>"+a+"</h2><br/>");
 		}
 		
 		Vector<String> subsectionContents = multipleLatexExtracts(comment,"\\\\subsection\\{");
 		for(String a : subsectionContents) {
-			comment = comment.replace("\\subsection{"+a+"}", "<span class=\"large\">"+a+"</span><br/>");
+			comment = comment.replace("\\subsection{"+a+"}", "<h3>"+a+"</h3><br/>");
 		}
 		
 		Vector<String> subsubsectionContents = multipleLatexExtracts(comment,"\\\\subsubsection\\{");
 		for(String a : subsubsectionContents) {
-			comment = comment.replace("\\subsubsection{"+a+"}", "<span class=\"italic\">"+a+"</span><br/>");
+			comment = comment.replace("\\subsubsection{"+a+"}", "<h4>"+a+"</h4><br/>");
 		}
 		
 		Vector<String> textttContents = multipleLatexExtracts(comment,"\\\\texttt\\{");
