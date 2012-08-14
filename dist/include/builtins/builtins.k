@@ -1,5 +1,7 @@
 require "bool.k"
+require "bool-symbolic.k"
 require "int.k"
+require "int-symbolic.k"
 require "float.k"
 require "string.k"
 require "tcp.k"
