@@ -241,9 +241,10 @@ module PEQ
 */
 
   rule <k>
-          L:Id : S:Stmt ~> K:K
-          =>
-          storeHypo(L, S ~> K) ~> S
+          ( L:Id : S:Stmt
+            =>
+            storeHypo(L, S ~> K) ~> S
+          ) ~> K:K 
        </k>
        when isRecursive (S) =/=K true
 
@@ -377,6 +378,7 @@ module PEQ
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho))
             andBool notBool (F impliesBool B)
+            andBool notBool ((F impliesBool notBool B) ==K true)
        [transition]
 
   rule <config>
@@ -386,6 +388,7 @@ module PEQ
        <condition> F:K => F andBool notBool B  </condition>
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho))
+            andBool notBool (F impliesBool B)
             andBool notBool (F impliesBool notBool B)
   \end{verbatim} 
   Then the derivatives of the above goal are:
@@ -394,6 +397,7 @@ module PEQ
         <k> true ~> K1 </k>       ~         <k> K2 </k>          if F andBool B
         <env> Rho1  </env>                  <env> Rho2 </env>
       </config>                           </config>
+
       <config>                            <config>
         <k> false ~> K1 </k>      ~         <k> K2 </k>          if F andBool 
         <env> Rho1  </env>                  <env> Rho2 </env>       notBool B
@@ -408,7 +412,7 @@ module PEQ
   $I'_1\le I_2$ is a synonim of $B$ and both of them have the same value.
 */
 
-  rule [case-analysis]:
+  rule [derive-with-case-analysis]:
        <goal>
          <config>
            <k> B:K ~> K1:K </k>
@@ -493,6 +497,7 @@ module PEQ
     Store the elementary symbolic boolean expressions obtained as
     "synonims" of the already stored ones due to the path formula 
   */
+
   syntax K ::= "storeSyns" "(" K "," K "," Bool ")"
 
   rule storeSyns(F1:K andBool F2:K, B:K, V:Bool) 

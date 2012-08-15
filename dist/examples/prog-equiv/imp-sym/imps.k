@@ -237,6 +237,7 @@ module IMPS
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho))
             andBool notBool ((F impliesBool B) ==K true)
+            andBool notBool ((F impliesBool notBool B) ==K true)
        [transition]
 
   rule <config>
@@ -246,6 +247,7 @@ module IMPS
        <condition> F:K => F andBool notBool B  </condition>
        when isBoolSymExp(B)
             andBool notBool(B in keys(Rho))
+            andBool notBool ((F impliesBool B) ==K true)
             andBool notBool ((F impliesBool notBool B) ==K true)
        [transition]
   
@@ -260,6 +262,20 @@ module IMPS
        when isBoolSymExp(B)
             andBool F impliesBool notBool(B)
 //       [transition]
+
+/*@
+  When an existing elementary symbolic boolean expression has to be evaluated, its
+  value is read the cell \texttt{env}.
+*/
+
+  rule <k> B:K => V ...</k>
+       <env>... B |-> V:Bool ...</env>
+       when isBoolSymExp(B)
+
+  /*@
+    Store the elementary symbolic boolean expressions obtained as
+    "synonims" of the already stored ones due to the path formula 
+  */
 
   syntax K ::= "storeSyns" "(" K "," K "," Bool ")"
 

@@ -29,9 +29,7 @@ module BOOL-SYM
        when isBoolSymExp(B1) ==K true
        [anywhere]
 /*@ 
-  \textbf{Remark.~~}
-  The symbolic boolean expressions are not sobsorted to Bool.
-  This is a trick that help us to handle easier this expressions.
+  Any symbolic boolean expressions is of sort Bool:
 */
 
 
