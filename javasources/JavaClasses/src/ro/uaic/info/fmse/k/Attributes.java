@@ -43,7 +43,7 @@ public class Attributes extends ASTNode {
 		String content = "[";
 		for (Attribute t : contents)
 			content += t + ", ";
-		return content.substring(0, contents.size() - 2) + "]";
+		return content.substring(0, content.length() - 2) + "]";
 	}
 
 	@Override
