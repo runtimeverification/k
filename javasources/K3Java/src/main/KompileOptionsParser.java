@@ -26,8 +26,10 @@ public class KompileOptionsParser {
 		OptionGroup verb = new OptionGroup();
 		Option help = new Option("h", "help", false, "prints this message and exits");
 		Option verbose = new Option("v", "verbose", false, "verbose mode");
+		Option lint = new Option("lint", "lint", false, "Checks your definition for possible logical errors");
 		verb.addOption(help);
 		verb.addOption(verbose);
+		verb.addOption(lint);
 
 		Option tempDisamb = new Option("tempDisamb", "tempDisamb", false, "temporary to test the java disambiguator");
 
@@ -86,7 +88,7 @@ public class KompileOptionsParser {
 		
 		Option literate = new Option("literate", false, "preserve literate comments");
 
-		
+
 		// options for non-determinism
 		OptionGroup nondet = new OptionGroup();
 		
@@ -98,7 +100,7 @@ public class KompileOptionsParser {
 		nondet.addOption(transition);
 		nondet.addOption(supercool);
 		nondet.addOption(superheat);
-		
+
 
 		// add options
 		options.addOptionGroup(verb);

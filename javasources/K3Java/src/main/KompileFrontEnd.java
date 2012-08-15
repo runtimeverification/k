@@ -18,6 +18,12 @@ import k3.loader.AddConsesVisitor;
 import k3.loader.BasicParser;
 import k3.loader.ProgramSDF;
 
+import klint.KlintRule;
+import klint.InfiniteRewrite;
+import klint.UnusedName;
+import klint.UnusedSyntax;
+
+
 import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -62,7 +68,7 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("verbose")) {
 			GlobalSettings.verbose = true;
 		}
-		
+
 		// set literate
 		if (cmd.hasOption("literate")) {
 			GlobalSettings.literate = true;
@@ -129,6 +135,10 @@ public class KompileFrontEnd {
 		else
 			lang = FileUtil.getMainModule(mainFile.getName());
 
+		if (cmd.hasOption("lint")) {
+			lint(mainFile, lang);
+		}
+
 		if (cmd.hasOption("maudify")) {
 			maudify(mainFile, lang);
 		} else if (cmd.hasOption("tempc")) {
@@ -149,6 +159,29 @@ public class KompileFrontEnd {
 			sw.printTotal("Total           = ");
 		GlobalSettings.kem.print();
 	}
+
+	private static void lint(File mainFile, String mainModule) {
+		try{
+			File canonicalFile = mainFile.getCanonicalFile();
+			File dotk = new File(canonicalFile.getParent() + "/.k");
+			dotk.mkdirs();
+			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk, GlobalSettings.verbose);
+
+			KlintRule lintRule = new UnusedName(javaDef);
+			lintRule.run();
+
+			lintRule = new UnusedSyntax(javaDef);
+			lintRule.run();
+
+			lintRule = new InfiniteRewrite(javaDef);
+			lintRule.run();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+	}
+
 
 	private static void pdf(File mainFile, String lang) {
 		latex(mainFile, lang);

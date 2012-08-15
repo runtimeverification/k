@@ -50,6 +50,9 @@ private static HashMap parameters = new HashMap();
 				lintRule = new UnusedSyntax(javaDef);
 				lintRule.run();
 				
+				lintRule = new InfiniteRewrite(javaDef);
+				lintRule.run();
+				
 				//System.out.println(javaDef);
 	
 			
