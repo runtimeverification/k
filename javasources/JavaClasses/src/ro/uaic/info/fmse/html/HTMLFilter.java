@@ -1,9 +1,11 @@
 package ro.uaic.info.fmse.html;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -20,6 +22,8 @@ import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.utils.strings.StringUtil;
 import ro.uaic.info.fmse.visitors.BasicVisitor;
 import java.awt.Color;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class HTMLFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
@@ -36,6 +40,10 @@ public class HTMLFilter extends BasicVisitor {
 	private boolean firstAttribute;
 	private boolean parentParens = false;
 	private String preamble = "";
+	
+	private Properties Latex2HTMLzero = new Properties();
+	private Properties Latex2HTMLone = new Properties();
+	private Properties Latex2HTMLtwo = new Properties();
 	
 	
 
@@ -62,6 +70,27 @@ public class HTMLFilter extends BasicVisitor {
 	public HTMLFilter() {
 		initializeCss();
 		createHTMLColors();
+		loadProperties();
+	}
+	
+	private void loadProperties() {
+		try {
+		    Latex2HTMLzero.load(new FileInputStream("Latex2HTMLzero.properties"));
+		} catch (IOException e) {
+			System.out.println("error loading Latex2HTMLzero.properties");
+		}
+		
+		try {
+		    Latex2HTMLone.load(new FileInputStream("Latex2HTMLone.properties"));
+		} catch (IOException e) {
+			System.out.println("error loading Latex2HTMLone.properties");
+		}
+		
+		try {
+		    Latex2HTMLtwo.load(new FileInputStream("Latex2HTMLtwo.properties"));
+		} catch (IOException e) {
+			System.out.println("error loading Latex2HTMLtwo.properties");
+		}
 	}
 	
 	/*public void createColors(){
@@ -211,23 +240,52 @@ public class HTMLFilter extends BasicVisitor {
 		return null;
 	}
 	
-	private Vector<String> multipleLatexExtracts(String from, String regex)
+	private Vector<String> multipleLatexExtracts(String from, String regex, int startIndex)
 	{
+		// start index is the index of the # in the string, it's supposed to be after the first {
 		Vector<String> results = new Vector<String>();
 		Pattern p = Pattern.compile(regex);
 		Matcher m = p.matcher(from);
 		while(m.find()) {
-			//System.out.println(m.group());
-			int a = m.end();
-			int i = a;
-			for(int b = 1; b > 0 && i < from.length(); i++) {
-				if(from.charAt(i) == '{')
-					b++;
-				else if (from.charAt(i) == '}')
-					b--;
+			if(!m.group().isEmpty()) {
+				if(regex.contains("em"))
+					System.out.println(m.group());
+				int a = m.start()+startIndex;
+				int i = a;
+				for(int braceCount = 1; braceCount > 0 && i < from.length(); i++) {
+					if(from.charAt(i) == '{')
+							braceCount++;
+					else if (from.charAt(i) == '}')
+						braceCount--;
+				}
+				results.add(from.substring(a,i-1));
+				//System.out.println(results.get(results.size()-1));
 			}
-			results.add(from.substring(a,i-1));
-			//System.out.println(results.get(results.size()-1));
+		}
+		return results;
+	}
+	
+	private Vector<String> multipleDoubleLatexExtracts(String from, String regex, int startIndex1, int satrtIndex2)
+	{
+		// start index 1 is the index of the 1st # in the string, it's supposed to be after the first {
+		Vector<String> results = new Vector<String>();
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(from);
+		while(m.find()) {
+			if(!m.group().isEmpty()) {
+				if(regex.contains("paragraph"))
+					System.out.println(m.group());
+				int a = m.start()+startIndex1;
+				int i = a;
+				for(int braceCount = 1; braceCount > 0 && i < from.length(); i++) {
+					if(from.charAt(i) == '{')
+							braceCount++;
+					else if (from.charAt(i) == '}')
+						braceCount--;
+				}
+				results.add(from.substring(a,i-1));
+				//System.out.println(results.get(results.size()-1));
+			}
 		}
 		return results;
 	}
@@ -562,32 +620,43 @@ public class HTMLFilter extends BasicVisitor {
 	}
 	
 	private String parseComment(String comment) {
-		Vector<String> sectionContents = multipleLatexExtracts(comment,"\\\\section\\{");
-		for(String a : sectionContents) {
-			comment = comment.replace("\\section{"+a+"}", "<h2>"+a+"</h2><br/>");
-		}
 		
-		Vector<String> subsectionContents = multipleLatexExtracts(comment,"\\\\subsection\\{");
-		for(String a : subsectionContents) {
-			comment = comment.replace("\\subsection{"+a+"}", "<h3>"+a+"</h3><br/>");
-		}
 		
-		Vector<String> subsubsectionContents = multipleLatexExtracts(comment,"\\\\subsubsection\\{");
-		for(String a : subsubsectionContents) {
-			comment = comment.replace("\\subsubsection{"+a+"}", "<h4>"+a+"</h4><br/>");
-		}
+		for (Enumeration e = Latex2HTMLone.keys() ; e.hasMoreElements() ;) {
+			String key = (String) e.nextElement();
+			if(key != null) {
+				Vector<String> contents = multipleLatexExtracts(comment,regexify(key.replace("#1", ".*?")),key.indexOf("#"));
+				for(String c : contents)
+				{
+					comment = comment.replace(key.replace("#1",c),
+											Latex2HTMLone.getProperty(key).replace("#1", c));
+					//System.out.println("replacing "+key.replace("#1",c)+" by "+Latex2HTMLzero.getProperty(key));
+				}
+			}
+				
+	     }
 		
-		Vector<String> textttContents = multipleLatexExtracts(comment,"\\\\texttt\\{");
-		for(String a : textttContents) {
-			comment = comment.replace("\\texttt{"+a+"}", "<span class=\"courier\">"+a+"</span>");
-		}
+		for (Enumeration e = Latex2HTMLzero.keys() ; e.hasMoreElements() ;) {
+			String key = (String) e.nextElement();
+			
+			if(key != null)
+			{
+				comment = comment.replace(key,Latex2HTMLzero.getProperty(key));
+				//System.out.println("replacing "+key+" by "+Latex2HTMLzero.getProperty(key));
+			}
+				
+	     }
 		
-		comment = comment.replace("\\K", "K").replace("{\\textbackslash}", "\\")
-						.replace("\\{","{").replace("\\}","}").replace("\\texttildelow", "~");
+		/*comment = comment.replace("\\K", "K").replace("{\\textbackslash}", "\\")
+						.replace("\\{","{").replace("\\}","}").replace("\\texttildelow", "~");*/
 		
 		return comment;
 	}
 	
+
+	private String regexify(String regex) {
+		return regex.replace("\\", "\\\\").replace("{","\\{").replace("}", "\\}");
+	}
 
 	@Override
 	public void visit(Attribute entry) {
@@ -630,7 +699,7 @@ public class HTMLFilter extends BasicVisitor {
 	
 	}
 	
-	private void initializeCss(){
+	private void initializeCss() {
 		css += ".bold" + endl
 				+ "{" + endl
 				+ "font-weight: bold;"+endl
@@ -793,11 +862,11 @@ public class HTMLFilter extends BasicVisitor {
 		return name.replace("<", "&lt;");
 	}
 	
-	private String HTMLColorToString(Color a){
+	private String HTMLColorToString(Color a) {
 		return "#" + toHex(a.getRed()) + toHex(a.getGreen()) + toHex(a.getBlue());
 	}
 	
-	private String toHex(int c){
+	private String toHex(int c) {
 		if(0 <= c && c <= 15)
 			return "0" + Integer.toHexString(c);
 		else if(16 <= c && c <= 255)
@@ -813,7 +882,7 @@ public class HTMLFilter extends BasicVisitor {
 		return new Color( Color.HSBtoRGB( hsb[0], hsb[1], hsb[2] ) );
 	}
 	
-	private void createHTMLColors(){
+	private void createHTMLColors() {
 		usedColors.add("defaultColor");
 		
 		HTMLColors.put("aliceblue" , new Color(240, 248, 255));
@@ -963,7 +1032,5 @@ public class HTMLFilter extends BasicVisitor {
 		HTMLColors.put("whitesmoke" , new Color(245, 245, 245));
 		HTMLColors.put("yellow" , new Color(255, 255, 0));
 		HTMLColors.put("yellowgreen" , new Color(154, 205, 50));
-
-
 	}
 }
