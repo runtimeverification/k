@@ -70,13 +70,13 @@ interface K-WRAPPERS-LABELS
 	imports K-TECHNIQUE
 	imports STRING
 
-	syntax KLabel ::= "wklabel" KLabel
-					| "wcelllabel" CellLabel
+	syntax KLabel ::= "KLabel2KLabel" KLabel
+					| "CellLabel2KLabel" CellLabel
 					| "kList" String
-					| "wbag" Bag
-					| "wset" Set
-					| "wlist" List
-					| "wmap" Map
+					| "Bag2KLabel" Bag
+					| "Set2KLabel" Set
+					| "List2KLabel" List
+					| "Map2KLabel" Map
 					| "wrap-with"
 
 endinterface
@@ -86,8 +86,6 @@ interface K-DESTRUCTORS
 
 endinterface
 
-
-/*
 interface K-WRAPPERS
 	imports K-TECHNIQUE
 
@@ -99,7 +97,6 @@ interface K-WRAPPERS
 			   | "wlist" List
 			   | "wmap" Map
 endinterface
-*/
 
 interface K
   imports K-TECHNIQUE
