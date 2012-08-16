@@ -344,6 +344,8 @@ public class LatexFilter extends BasicVisitor {
 			return;
 		if (entry.getKey().equals("latex"))
 			return;
+		if (entry.getKey().equals("html"))
+			return;
 		if (firstAttribute) {
 			firstAttribute = false;
 		} else {
