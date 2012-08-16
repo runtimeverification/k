@@ -85,12 +85,6 @@ public class HTMLFilter extends BasicVisitor {
 		} catch (IOException e) {
 			System.out.println("error loading Latex2HTMLone.properties");
 		}
-		
-		try {
-		    Latex2HTMLtwo.load(new FileInputStream("Latex2HTMLtwo.properties"));
-		} catch (IOException e) {
-			System.out.println("error loading Latex2HTMLtwo.properties");
-		}
 	}
 	
 	/*public void createColors(){
@@ -205,17 +199,17 @@ public class HTMLFilter extends BasicVisitor {
 	private void parsePreamble() {
 		
 		if(preamble.contains("\\title{"))
-			title = latexExtract(preamble,"\\title{");
+			title = parseComment(latexExtract(preamble,"\\title{"));
 		organization = latexExtract(preamble,"\\organization{");
 		author = latexExtract(preamble,"\\author{");
 		
 		if(organization != null) {
 			result = "<div> <br /> </div>" + endl + result;
-			result = "<span>" + organization + " </span> " + endl + result;
+			result = "<span>" + parseComment(organization) + " </span> " + endl + result;
 		}
 		if(author != null) {
 			result = "<div> <br /> </div>" + endl + result;
-			result = "<span>" + author + "</span> " + endl + result;
+			result = "<span>" + parseComment(author) + "</span> " + endl + result;
 		}
 		
 		result = "<div> <br /> </div>" + endl + result;
@@ -240,11 +234,11 @@ public class HTMLFilter extends BasicVisitor {
 		return null;
 	}
 	
-	private Vector<String> multipleLatexExtracts(String from, String regex, int startIndex)
+	/*private Vector<String> multipleLatexExtracts(String from, String regex, int startIndex)
 	{
 		// start index is the index of the # in the string, it's supposed to be after the first {
 		Vector<String> results = new Vector<String>();
-		Pattern p = Pattern.compile(regex);
+		Pattern p = Pattern.compile(regex,Pattern.DOTALL);
 		Matcher m = p.matcher(from);
 		while(m.find()) {
 			if(!m.group().isEmpty()) {
@@ -263,28 +257,54 @@ public class HTMLFilter extends BasicVisitor {
 			}
 		}
 		return results;
+	}*/
+	
+	private Vector<Integer> findStartIndexs(String from) {
+		Vector<Integer> result = new Vector<Integer>();
+		for(int i = 1; from.contains("#"+i); i++) {
+				result.add(from.indexOf("#"+i));
+		}
+		return result;
 	}
 	
-	private Vector<String> multipleDoubleLatexExtracts(String from, String regex, int startIndex1, int satrtIndex2)
+	private Vector<Vector<String>> multipleLatexExtracts(String from, String regex, Vector<Integer> startIndexs)
 	{
-		// start index 1 is the index of the 1st # in the string, it's supposed to be after the first {
-		Vector<String> results = new Vector<String>();
-		Pattern p = Pattern.compile(regex);
+		
+		if(regex.contains("href"))
+			System.out.println(regex + " " + startIndexs.size());
+		// outside Vector = each extract
+		// inside Vector = the different strings of an extract
+		Vector<Vector<String>> results = new Vector<Vector<String>>();
+		Pattern p = Pattern.compile(regex,Pattern.DOTALL);
 		Matcher m = p.matcher(from);
 		while(m.find()) {
+			int offset = 0;
 			if(!m.group().isEmpty()) {
-				if(regex.contains("paragraph"))
+				if(regex.contains("href"))
 					System.out.println(m.group());
-				int a = m.start()+startIndex1;
-				int i = a;
-				for(int braceCount = 1; braceCount > 0 && i < from.length(); i++) {
-					if(from.charAt(i) == '{')
-							braceCount++;
-					else if (from.charAt(i) == '}')
-						braceCount--;
+				Vector<String> contents = new Vector<String>();
+				for(int start : startIndexs) {
+					
+					int a = m.start()+start+offset;
+					int i = a;
+					for(int braceCount = 1; braceCount > 0 && i < from.length(); i++) {
+						if(from.charAt(i) == '{')
+								braceCount++;
+						else if (from.charAt(i) == '}')
+							braceCount--;
+					}
+					contents.add(from.substring(a,i-1));
+					offset += from.substring(a,i-1).length() - 2;
 				}
-				results.add(from.substring(a,i-1));
-				//System.out.println(results.get(results.size()-1));
+				results.add(contents);
+
+			}
+		}
+		if(regex.contains("href")) {
+			for(Vector<String> a: results) {
+				for(String b : a)
+					System.out.print(b+" ");
+				System.out.print("\n");
 			}
 		}
 		return results;
@@ -528,7 +548,10 @@ public class HTMLFilter extends BasicVisitor {
 					termFilter.setParentParens(true);				
 				}
 				t.accept(termFilter);
-				pattern = pattern.replace("{#" + n++ + "}", "\\) " + termFilter.getResult() + "\\(");
+				if(type == HTMLPatternType.LATEX)
+					pattern = pattern.replace("{#" + n++ + "}", "\\) " + termFilter.getResult() + "\\(");
+				else
+					pattern = pattern.replace("{#" + n++ + "}", termFilter.getResult());
 			}
 			if(type == HTMLPatternType.LATEX)
 				result += "\\(";
@@ -622,7 +645,7 @@ public class HTMLFilter extends BasicVisitor {
 	private String parseComment(String comment) {
 		
 		
-		for (Enumeration e = Latex2HTMLone.keys() ; e.hasMoreElements() ;) {
+		/*for (Enumeration e = Latex2HTMLone.keys() ; e.hasMoreElements() ;) {
 			String key = (String) e.nextElement();
 			if(key != null) {
 				Vector<String> contents = multipleLatexExtracts(comment,regexify(key.replace("#1", ".*?")),key.indexOf("#"));
@@ -631,6 +654,28 @@ public class HTMLFilter extends BasicVisitor {
 					comment = comment.replace(key.replace("#1",c),
 											Latex2HTMLone.getProperty(key).replace("#1", c));
 					//System.out.println("replacing "+key.replace("#1",c)+" by "+Latex2HTMLzero.getProperty(key));
+				}
+			}
+				
+	     }*/
+		
+		for (Enumeration e = Latex2HTMLone.keys() ; e.hasMoreElements() ;) {
+			String key = (String) e.nextElement();
+			if(key != null) {
+				
+				Vector<Integer> startIndexs = findStartIndexs(key);
+				int numberOfIndexs = startIndexs.size();
+				Vector<Vector<String>> contents = multipleLatexExtracts(comment,regexify(key),startIndexs);
+				for(Vector<String> c : contents) {
+					String copyKey = key;
+					String property = Latex2HTMLone.getProperty(key);
+					for(int i = 1; i < numberOfIndexs+1; i++) {
+						copyKey = copyKey.replace("#"+i, c.get(i-1));
+						property = property.replace("#"+i,c.get(i-1));
+					}
+					comment = comment.replace(copyKey,property);
+					if(key.contains("href"))
+					System.out.println("replacing "+copyKey+" by "+property);
 				}
 			}
 				
@@ -655,7 +700,11 @@ public class HTMLFilter extends BasicVisitor {
 	
 
 	private String regexify(String regex) {
-		return regex.replace("\\", "\\\\").replace("{","\\{").replace("}", "\\}");
+		String a = regex;
+		for(int i = 1; a.contains("#" + i); i++)
+			a = a.replace("#"+i, ".*?");
+		
+		return a.replace("\\", "\\\\").replace("{","\\{").replace("}", "\\}");
 	}
 
 	@Override
