@@ -32,6 +32,9 @@ Windows:
 
 To test if maude has been corectly installed, type 'maude' in a Terminal. You
 should not get any errors or warnings.
+If you get the following warning: 'cannot find prelude.maude', you may need to
+set an environment variable 'MAUDE_LIB' with the directory containing the
+required file.
 
 3. Install
 Checkout this directory in your desired location and call 'ant' from the main
