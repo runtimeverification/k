@@ -7,10 +7,38 @@ import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 
 /**
  * Translate AST into Haskell data constructors.
+ *
+ * AST of program must be not yet processed by KAppModifier since this
+ * filter performs TermCons expansion of its own.
  */
 public class HaskellFilter extends BasicVisitor {
-	String endl = System.getProperty("line.separator");
+	protected String endl = System.getProperty("line.separator");
 	protected String result = "";
+
+	/**
+	 * Update transformer state wrt type of current AST node.
+	 *
+	 * Parents handle parens.
+	 */
+	public void visit(TermCons tc) {
+		String klabel =
+			DefinitionHelper.conses.get("\"" + tc.getCons() + "\"")
+			.getKLabel();
+		this.result += "KApp (KLabel \"" + klabel + "\") [";
+
+		int s = tc.getContents().size();
+
+		if (s != 0)
+			for (int i = 0; i < s; i++) {
+				result += "(";
+				tc.getContents().get(i).accept(this);
+				result += ")";
+				if (i < (s - 1))
+					result += ", ";
+			}
+
+		result += "]";
+	}
 
 	public void visit(Constant cst) {
 		String s = cst.getSort();

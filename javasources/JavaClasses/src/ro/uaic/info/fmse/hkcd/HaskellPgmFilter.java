@@ -12,28 +12,4 @@ import ro.uaic.info.fmse.visitors.BasicVisitor;
  * @see ProgramLoader.loadPgmAst
  */
 public class HaskellPgmFilter extends HaskellFilter {
-	/**
-	 * Update transformer state wrt type of current AST node.
-	 *
-	 * Parents handle parens.
-	 */
-	public void visit(TermCons tc) {
-		String klabel =
-			DefinitionHelper.conses.get("\"" + tc.getCons() + "\"")
-			.getKLabel();
-		this.result += "KApp (KLabel \"" + klabel + "\") [";
-
-		int s = tc.getContents().size();
-
-		if (s != 0)
-			for (int i = 0; i < s; i++) {
-				result += "(";
-				tc.getContents().get(i).accept(this);
-				result += ")";
-				if (i < (s - 1))
-					result += ", ";
-			}
-
-		result += "]";
-	}
 }
