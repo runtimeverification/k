@@ -44,6 +44,7 @@ public class HTMLFilter extends BasicVisitor {
 	private Properties Latex2HTMLzero = new Properties();
 	private Properties Latex2HTMLone = new Properties();
 	private Properties Latex2HTMLtwo = new Properties();
+	private String includePath;
 	
 	
 
@@ -67,7 +68,8 @@ public class HTMLFilter extends BasicVisitor {
 		this.parentParens = parentParens;
 	}
 	
-	public HTMLFilter() {
+	public HTMLFilter(String includePath) {
+		this.includePath = includePath;
 		initializeCss();
 		createHTMLColors();
 		loadProperties();
@@ -75,13 +77,13 @@ public class HTMLFilter extends BasicVisitor {
 	
 	private void loadProperties() {
 		try {
-		    Latex2HTMLzero.load(new FileInputStream("Latex2HTMLzero.properties"));
+		    Latex2HTMLzero.load(new FileInputStream(includePath + "Latex2HTMLzero.properties"));
 		} catch (IOException e) {
-			System.out.println("error loading Latex2HTMLzero.properties");
+			System.out.println("error loading " + includePath + "Latex2HTMLzero.properties");
 		}
 		
 		try {
-		    Latex2HTMLone.load(new FileInputStream("Latex2HTMLone.properties"));
+		    Latex2HTMLone.load(new FileInputStream(includePath + "Latex2HTMLone.properties"));
 		} catch (IOException e) {
 			System.out.println("error loading Latex2HTMLone.properties");
 		}
@@ -356,7 +358,7 @@ public class HTMLFilter extends BasicVisitor {
 			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
 			boolean isLatex = patternsVisitor.getPatternType(p.getAttributes().get(Constants.CONS_cons_ATTR)) == HTMLPatternType.LATEX;
 			int n = 1;
-			HTMLFilter termFilter = new HTMLFilter();
+			HTMLFilter termFilter = new HTMLFilter(includePath);
 			for (ProductionItem pi : p.getItems()) {
 				if (pi.getType() != ProductionType.TERMINAL) {
 					termFilter.result = "";
@@ -539,7 +541,7 @@ public class HTMLFilter extends BasicVisitor {
 				pattern = "(" + pattern + ")";
 			}		
 			int n = 1;
-			HTMLFilter termFilter = new HTMLFilter();
+			HTMLFilter termFilter = new HTMLFilter(includePath);
 			for (Term t : trm.getContents()) {
 				termFilter.result = "";
 				regex = "\\{#\\d+\\}\\{#" + n + "\\}";
@@ -1082,4 +1084,5 @@ public class HTMLFilter extends BasicVisitor {
 		HTMLColors.put("yellow" , new Color(255, 255, 0));
 		HTMLColors.put("yellowgreen" , new Color(154, 205, 50));
 	}
+
 }

@@ -279,6 +279,10 @@ public class KompileFrontEnd {
 		ro.uaic.info.fmse.k.Definition javaDef;
 		try {
 			GlobalSettings.literate = true;
+			
+			String fileSep = System.getProperty("file.separator");
+			String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
+
 
 			javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, lang, GlobalSettings.verbose);
 			// for now just use this file as main argument
@@ -288,7 +292,7 @@ public class KompileFrontEnd {
 			dotk.mkdirs();
 
 			Stopwatch sw = new Stopwatch();
-			HTMLFilter htmlFilter = new HTMLFilter();
+			HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath);
 			javaDef.accept(htmlFilter);
 
 			String html = htmlFilter.getHTML();
