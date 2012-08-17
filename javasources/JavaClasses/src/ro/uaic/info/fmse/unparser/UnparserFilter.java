@@ -1,5 +1,6 @@
 package ro.uaic.info.fmse.unparser;
 
+import java.util.LinkedList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,17 +25,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class UnparserFilter extends BasicVisitor {
-    String endl = System.getProperty("line.separator");
-    private String result = "";
+    private Indenter result = new Indenter();
     private boolean firstPriorityBlock = false;
     private boolean firstProduction = false;
     private boolean inConfiguration = false;
+    private static int TAB = 4;
     
     public UnparserFilter() {
     }
     
     public String getResult() {
-	return result;
+	return result.toString();
     }
     
     @Override
@@ -46,27 +47,35 @@ public class UnparserFilter extends BasicVisitor {
     public void visit(Module mod) {
 	if (mod.isPredefined())
 	    return;
-	result += "module " + mod.getName() + endl + endl;
+	result.write("module " + mod.getName());
+	result.endLine();
+	result.endLine();
+	result.indent(TAB);
 	super.visit(mod);
-	result += "endmodule" + endl + endl;
+	result.unindent();
+	result.write("endmodule");
+	result.endLine();
+	result.endLine();
     }
     
     @Override
     public void visit(Syntax syn) {
 	firstPriorityBlock = true;
-	result += "syntax " + syn.getSort().getSort();
+	result.write("syntax " + syn.getSort().getSort());
+	result.indentToCurrent();
 	for (PriorityBlock pb : syn.getPriorityBlocks()) {
 	    pb.accept(this);
 	}
-	result += endl;
+	result.unindent();
+	result.endLine();
     }
 
     @Override
     public void visit(PriorityBlock priorityBlock) {
 	if (firstPriorityBlock) {
-	    result += " ::=";
+	    result.write(" ::=");
 	} else {
-	    result += " >";
+	    result.write("  >");
 	}
 	firstPriorityBlock = false;
 	firstProduction = true;
@@ -76,68 +85,84 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(Production prod) {
 	if (firstProduction) {
-	    result += " ";
+	    result.write(" ");
 	} else {
-	    result += " | ";
+	    result.write("  | ");
 	}
 	firstProduction = false;
 	for (int i = 0; i < prod.getItems().size(); ++i) {
 	    ProductionItem pi = prod.getItems().get(i);
 	    pi.accept(this);
 	    if (i != prod.getItems().size() - 1) {
-		result += " ";
+		result.write(" ");
 	    }
 	}
 	prod.getAttributes().accept(this);
-	result += endl;
+	result.endLine();
     }
 
     @Override
     public void visit(Sort sort) {
-	result += sort.getSort();
+	result.write(sort.getSort());
     }
 
     @Override
     public void visit(Terminal terminal) {
-	result += "\"" + terminal.getTerminal() + "\"";
+	result.write("\"" + terminal.getTerminal() + "\"");
     }
 
     @Override
     public void visit(UserList userList) {
-	result += "List{" + userList.getSort() + ",\"" + userList.getSeparator() + "\"}";
+	result.write("List{" + userList.getSort() + ",\"" + userList.getSeparator() + "\"}");
     }
 
     @Override
     public void visit(Attributes attributes) {
-	if (!attributes.isEmpty()) {
-	    result += " ";
-	    result += "[";
-	    List<Attribute> attributeList = attributes.getContents();
+	java.util.List<String> reject = new LinkedList<String>();
+	reject.add("cons");
+	reject.add("kgeneratedlabel");
+	reject.add("prefixlabel");
+
+	List<Attribute> attributeList = new LinkedList<Attribute>();
+	List<Attribute> oldAttributeList = attributes.getContents();
+	for (int i = 0; i < oldAttributeList.size(); ++i) {
+	    if (!reject.contains(oldAttributeList.get(i).getKey())) {
+		attributeList.add(oldAttributeList.get(i));
+	    }
+	}
+
+	if (!attributeList.isEmpty()) {
+	    result.write(" ");
+	    result.write("[");
 	    for (int i = 0; i < attributeList.size(); ++i) {
 		attributeList.get(i).accept(this);
 		if (i != attributeList.size() - 1) {
-		    result += ", ";
+		    result.write(", ");
 		}
 	    }
-	    result += "]";
+	    result.write("]");
 	}
     }
 
     @Override
     public void visit(Attribute attribute) {
-	result += attribute.getKey();
+	result.write(attribute.getKey());
 	if (!attribute.getValue().equals("")) {
-	    result += "(" + attribute.getValue() + ")";
+	    result.write("(" + attribute.getValue() + ")");
 	}
     }
 
     @Override
     public void visit(Configuration configuration) {
-	result += "configuration" + endl;
+	result.write("configuration");
+	result.endLine();
+	result.indent(TAB);
 	inConfiguration = true;
 	configuration.getBody().accept(this);
 	inConfiguration = false;
-	result += endl + endl;
+	result.unindent();
+	result.endLine();
+	result.endLine();
     }
 
     @Override
@@ -148,55 +173,61 @@ public class UnparserFilter extends BasicVisitor {
 		attributes += " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
 	    }
 	}
-	result += "<" + cell.getLabel() + attributes + "> ";
+	result.write("<" + cell.getLabel() + attributes + ">");
 	if (inConfiguration) {
-	    result += endl;
+	    result.endLine();
+	    result.indent(TAB);
+	} else {
+	    result.write(" ");
 	}
 	if (cell.hasLeftEllipsis()) {
-	    result += "... ";
+	    result.write("... ");
 	}
 	cell.getContents().accept(this);
 	if (cell.hasRightEllipsis()) {
-	    result += " ...";
+	    result.write(" ...");
 	}
 	if (inConfiguration) {
-	    result += endl;
+	    result.endLine();
+	    result.unindent();
+	} else {
+	    result.write(" ");
 	}
-	result += "</" + cell.getLabel() + ">";
+	result.write("</" + cell.getLabel() + ">");
     }
 
     @Override
     public void visit(Variable variable) {
-	result += variable.getName() + ":" + variable.getSort();
+	result.write(variable.getName() + ":" + variable.getSort());
     }
 
     @Override
     public void visit(Empty empty) {
-	result += "." + empty.getSort();
+	result.write("." + empty.getSort());
     }
 
     @Override
     public void visit(Rule rule) {
-	result += "rule ";
+	result.write("rule ");
 	if (!rule.getLabel().equals("")) {
-	    result += "[" + rule.getLabel() + "]: ";
+	    result.write("[" + rule.getLabel() + "]: ");
 	}
 	rule.getBody().accept(this);
 	if (rule.getCondition() != null) {
-	    result += "when ";
+	    result.write(" when ");
 	    rule.getCondition().accept(this);
 	}
 	rule.getAttributes().accept(this);
-	result += endl;
-	result += endl;
+	result.endLine();
+	result.endLine();
     }
 
     @Override
     public void visit(KApp kapp) {
 	kapp.getLabel().accept(this);
-	result += "(";
+	result.write("(");
 	kapp.getChild().accept(this);
-	result += ")";
+	result.write(")");
     }
 
     @Override
@@ -205,7 +236,7 @@ public class UnparserFilter extends BasicVisitor {
 	for (int i = 0; i < contents.size(); i++) {
 	    contents.get(i).accept(this);
 	    if (i != contents.size() - 1) {
-		result += " ~> ";
+		result.write(" ~> ");
 	    }
 	}
     }
@@ -219,28 +250,30 @@ public class UnparserFilter extends BasicVisitor {
 	    if (productionItem.getType() != ProductionType.TERMINAL) {
 		termCons.getContents().get(where++).accept(this);
 	    } else {
-		result += ((Terminal)productionItem).getTerminal();
+		result.write(((Terminal)productionItem).getTerminal());
 	    }
-	    result += " ";
+	    if (i != production.getItems().size() - 1) {
+		result.write(" ");
+	    }
 	}
     }
 
     @Override
     public void visit(Rewrite rewrite) {
 	rewrite.getLeft().accept(this);
-	result += " => ";
+	result.write(" => ");
 	rewrite.getRight().accept(this);
     }
 
     @Override
     public void visit(Constant constant) {
-	result += constant.getValue();
+	result.write(constant.getValue());
     }
 
     @Override
     public void visit(MapItem mapItem) {
 	mapItem.getKey().accept(this);
-	result += " |-> ";
+	result.write(" |-> ");
 	mapItem.getValue().accept(this);
     }
 
@@ -249,8 +282,12 @@ public class UnparserFilter extends BasicVisitor {
 	java.util.List<Term> contents = collection.getContents();
 	for (int i = 0; i < contents.size(); ++i) {
 	    contents.get(i).accept(this);
-	    if (i != contents.size()) {
-		result += " ";
+	    if (i != contents.size() - 1) {
+		if (inConfiguration) {
+		    result.endLine();
+		} else {
+		    result.write(" ");
+		}
 	    }
 	}
     }
