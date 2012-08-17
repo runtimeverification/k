@@ -11,7 +11,7 @@ context-free syntax
 	"require" STRING	-> Require {cons("Require")}
 
 	%% K Module syntax
-	"module" MODNAME KModHeaderItem* KSentence* "endmodule" -> KModule {cons("KModule")}
+	"module" MODNAME KModHeaderItem* KSentence* "end" "module" -> KModule {cons("KModule")}
 	"interface" MODNAME KModHeaderItem* KSentence* "endinterface" -> KModule {cons("KInterface")}
 	"imports" MODNAME	-> KModHeaderItem {cons("Imports")}
 
@@ -71,7 +71,7 @@ lexical syntax
 	"syntax"		-> HIDDEN {reject}
 	"context"		-> HIDDEN {reject}
 	"configuration"	-> HIDDEN {reject}
-	"endmodule"		-> HIDDEN {reject}
+	"end" "module"		-> HIDDEN {reject}
 	"endinterface"	-> HIDDEN {reject}
 	"#"?[A-Z\-]+	-> MODNAME
 

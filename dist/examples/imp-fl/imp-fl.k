@@ -57,23 +57,20 @@ module IMP-FL-SYNTAX
 
 	    | "skip#"
 
-
   syntax KResult ::= Int | Bool
 
 endmodule
 
 module IMP-FL
-   imports IMP-FL-SYNTAX
+  imports IMP-FL-SYNTAX
 
-   configuration <T color="yellow"> 
+  configuration <T color="yellow"> 
    					<k color="green"> $PGM : K </k>
    					<env color="red"> .Map </env>
-   				</T>
+		</T>
 
 // DIVISION
 
-
-  
   rule <k> div#ee(E1,,E2) ~> K:K </k>
        =>
        <k>E1 ~> div#He(E2) ~> K </k>
@@ -295,4 +292,3 @@ module IMP-FL
   rule <k> emptyIds#(.List{K}) ~> K:K </k> => <k>  K:K </k>
   
 endmodule
-

@@ -43,6 +43,7 @@ import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.html.HTMLFilter;
+import ro.uaic.info.fmse.unparser.UnparserFilter;
 import ro.uaic.info.fmse.latex.LatexFilter;
 import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
@@ -151,6 +152,8 @@ public class KompileFrontEnd {
 			xml(mainFile, lang);
 		} else if (cmd.hasOption("html")) {
 			html(mainFile, lang);
+		} else if (cmd.hasOption("unparse")) {
+			unparse(mainFile, lang);
 		} else {
 			// default option: if (cmd.hasOption("compile"))
 			compile(mainFile, lang, maudify(mainFile, lang));
@@ -306,6 +309,41 @@ public class KompileFrontEnd {
 			}
 
 			return html;
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private static String unparse(File mainFile, String lang) {
+		ro.uaic.info.fmse.k.Definition javaDef;
+		try {
+			GlobalSettings.literate = true;
+
+			javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, lang, GlobalSettings.verbose);
+			// for now just use this file as main argument
+			File canonicalFile = mainFile.getCanonicalFile();
+
+			File dotk = new File(canonicalFile.getParent() + "/.k");
+			dotk.mkdirs();
+
+			Stopwatch sw = new Stopwatch();
+			UnparserFilter unparserFilter = new UnparserFilter();
+			javaDef.accept(unparserFilter);
+
+			String unparsedText = unparserFilter.getResult();
+
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.k", unparsedText);
+
+			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".unparsed.k", unparsedText);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Unparsing       = ");
+			}
+
+			return unparsedText;
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (Exception e) {

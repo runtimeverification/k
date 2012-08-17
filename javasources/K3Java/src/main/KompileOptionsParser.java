@@ -86,6 +86,8 @@ public class KompileOptionsParser {
 		
 		Option toHTML = new Option("html", false, "generate html from definition");
 		
+		Option unparse = new Option("unparse", false, "unparse a definition");
+		
 		Option literate = new Option("literate", false, "preserve literate comments");
 
 
@@ -114,6 +116,7 @@ public class KompileOptionsParser {
 		options.addOptionGroup(nofile);
 		options.addOption(tempDisamb);
 		options.addOption(toHTML);
+		options.addOption(unparse);
 		options.addOption(literate);
 		options.addOptionGroup(nondet);
 	}

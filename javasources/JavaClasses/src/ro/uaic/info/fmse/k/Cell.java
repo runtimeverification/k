@@ -51,6 +51,16 @@ public class Cell extends Term {
 		this.contents = node.contents;
 	}
 
+        public boolean hasRightEllipsis() {
+	        return elipses != null &&
+		    (elipses.equals("right") || elipses.equals("both"));
+        }
+
+        public boolean hasLeftEllipsis() {
+	        return elipses != null &&
+		    (elipses.equals("left") || elipses.equals("both"));
+        }
+
 	@Override
 	public String toString() {
 		String attributes = "";
