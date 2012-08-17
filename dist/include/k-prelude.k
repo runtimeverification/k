@@ -89,13 +89,13 @@ endinterface
 interface K-WRAPPERS
 	imports K-TECHNIQUE
 
-	syntax K ::= "wklabel" KLabel
-			   | "wcelllabel" CellLabel
-			   | "wklist" ListOfK
-			   | "wset" Set
-			   | "wbag" Bag
-			   | "wlist" List
-			   | "wmap" Map
+	syntax K ::= "KLabel2K" KLabel
+			   | "Celllabel2K" CellLabel
+			   | "List{K}2K" ListOfK
+			   | "Set2K" Set
+			   | "Bag2K" Bag
+			   | "List2K" List
+			   | "Map2K" Map
 endinterface
 
 interface K
