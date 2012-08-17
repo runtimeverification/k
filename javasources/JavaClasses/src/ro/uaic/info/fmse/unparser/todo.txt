@@ -1,0 +1,4 @@
+- only declare variable types once
+- set maximal width
+- add paranthesis when priorities require so
+
