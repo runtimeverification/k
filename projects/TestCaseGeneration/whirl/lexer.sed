@@ -16,7 +16,8 @@ s/./& /g
 
 
 # Append "end" to end
-$aend 
+$a\
+end 
 
 # Delete blank lines
 /^$/d

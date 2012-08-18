@@ -62,10 +62,12 @@ y/()/[]/
 
 
 # "write" at beginning, plus apply program function
-1iwrite > [ 
+1i\
+write > [ 
 
 # "read" at end
-$a] read 
+$a\
+] read 
 
 # Delete empty lines
 /^$/d
