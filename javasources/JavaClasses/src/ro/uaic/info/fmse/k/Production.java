@@ -116,6 +116,10 @@ public class Production extends ASTNode {
 		return attributes.get("prefixlabel");
 	}
 
+	public String getCons() {
+		return attributes.get("cons");
+	}
+
 	public String getKLabel() {
 		if (attributes.containsKey("klabel"))
 			return attributes.get("klabel");

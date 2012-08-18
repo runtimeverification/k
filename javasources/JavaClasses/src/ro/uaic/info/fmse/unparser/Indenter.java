@@ -28,6 +28,8 @@ public class Indenter {
     protected java.util.Stack<Integer> indents;
     protected java.lang.StringBuilder stringBuilder;
     protected boolean atBOL = true;
+    private static int width = 78;
+    private static int auxIndent = 2;
 
     public Indenter() {
 	indents = new java.util.Stack<Integer>();
@@ -45,6 +47,14 @@ public class Indenter {
     public void write(String string) {
 	if (atBOL) {
 	    for (int i = 0; i < indentSize(); ++i) {
+		stringBuilder.append(" ");
+	    }
+	}
+	int indexEndLine = stringBuilder.lastIndexOf(endl);
+	int indexEndString = stringBuilder.length();
+	if (indexEndString - indexEndLine + string.length() > width) {
+	    stringBuilder.append(endl);
+	    for (int i = 0; i < indentSize() + auxIndent; ++i) {
 		stringBuilder.append(" ");
 	    }
 	}

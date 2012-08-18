@@ -43,6 +43,11 @@ public class Attribute extends ASTNode {
 	}
 
 	@Override
+	public String toString() {
+	    return " " + this.getKey() + "=(" + this.getValue() + ")";
+	}
+
+	@Override
 	public Element toXml(Document doc) {
 		// TODO Auto-generated method stub
 		return null;
