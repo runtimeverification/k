@@ -97,6 +97,14 @@ module WRL
       <turn>... R |-> T:Int ...</turn>
 //      <out>... . => ListItem(R) ListItem(":") ListItem(T) ListItem(" ") </out>
  
+   rule [AutoTerminate]: // regular program termination without explicit "exit"
+      <k> _ => 0 </k>
+      <mode> 2 => -2 </mode>
+      <ip> P:Int </ip>
+      <size> S:Int </size>
+    when P >Int S
+
+
 
 
    // Individual instructions
@@ -190,7 +198,7 @@ module WRL
 
 
    // TODO: parse integer directly rather than reading list item
-   rule [IntInput]: // for testing
+   rule [IntInput]: // ops ring 10, value == 0 (input)
       <mode> 2 => 3 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 10 ...</turn>
@@ -211,18 +219,25 @@ module WRL
     when (V =/=Int 0)
 
 
-   rule [AscInput]: // for testing
-      <mode> 2 => 20 </mode>
+   rule [AscInput]: // ops ring 11, value == 0 (input); append char to buffer
+      <mode> 2 => 2 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 11 ...</turn>
       <val>... 0 |-> 0 ...</val>
-      <buff> _ => charString(#fReadByte(0)) </buff>
+//      <out>... . => ListItem("INPUT") </out>
+      <buff> "" => charString(#fReadByte(0)) </buff>
 
-   rule [AscInputBuffer]: 
-      <mode> 20 => 3 </mode>
+   rule [AscInputBuffer]: // use buffered character if exists
+      <mode> 2 => 3 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 11 ...</turn>
+      <val>... 0 |-> 0 ...</val>
       <mp> M:Int </mp>
       <memmap>... M |-> (_ => asciiString(S)) ...</memmap>
-      <buff> S:String => . </buff>
+   //  <out>... . => ListItem(" INPUT2") </out>
+      <buff> S:String => "" </buff>
+   when lengthString(S:String) >Int 0
+
 
    rule [AscOutput]: // ops ring 10, value != 0 (output)
       <mode> 2 => 3 </mode>

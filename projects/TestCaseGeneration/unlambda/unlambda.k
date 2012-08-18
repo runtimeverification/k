@@ -39,4 +39,5 @@ module UNLAMBDA
   rule > > > s X:Fun Y:Fun Z:Fun => > > X Z > Y Z [anywhere]
 
   rule > v X:Fun => v [anywhere]
+
 endmodule
