@@ -1,4 +1,4 @@
-// Implementation of Whirl of K
+// Implementation of Whirl in K
 // Language specification: http://bigzaphod.org/whirl/
 
 
@@ -41,23 +41,21 @@ module WRL
       <ring> 0 </ring>           // ops ring = 0; math ring = 1
       <turn> 0 |-> 0 1 |-> 0 </turn>  // current instruction
       <val> 0 |-> 0 1 |-> 0  </val>   // value
-      <dir> 0 |-> 1 1 |-> 1 </val>    // direction (ccw = 0; cw = 1)
+      <dir> 0 |-> 1 1 |-> 1 </dir>    // direction (ccw = 0; cw = 1)
 
       <parity> false </parity>      // true iff last operation was a regular 0
 
-      <buff> "" </buff>
+      <isign> 1 </isign> // sign of input integer
+      <ibuff> 0 </ibuff>  // buffer for integer input
+      <buff> "" </buff> // buffer for character input
     </settings>
     
-
- //   syntax KResult ::= Program
-
    rule X:Bit Y:Program => X ~> Y [seqstrict, structural]
 
   
    // initializes by writing entire program to progmap
    rule [Init]:
       <k> X:Bit => . ...</k>
-//      <out>... . => ListItem(X) </out>
       <mode> 0 </mode>
       <progmap>... . => P |-> X . ...</progmap>
       <ip> P:Int => P +Int 1 </ip> [transition]
@@ -85,7 +83,6 @@ module WRL
       <ring> R:Int </ring>
       <dir>... R |-> D:Int ...</dir>
       <turn>... R |-> (T:Int => (T +Int (D *Int 2) +Int 11) %Int 12) ...</turn>
-  //    <out>... . => ListItem(T) </out>
 
    rule [Execute]:
       <mode> 1 => 2 </mode>
@@ -95,14 +92,13 @@ module WRL
       <ring> R:Int </ring> 
       <dir>... R |-> (D:Int => 1 -Int D) ...</dir>
       <turn>... R |-> T:Int ...</turn>
-//      <out>... . => ListItem(R) ListItem(":") ListItem(T) ListItem(" ") </out>
  
    rule [AutoTerminate]: // regular program termination without explicit "exit"
       <k> _ => 0 </k>
-      <mode> 2 => -2 </mode>
+      <mode> 1 => -2 </mode>
       <ip> P:Int </ip>
       <size> S:Int </size>
-    when P >Int S
+    when (P >=Int S) orBool (P <Int 0)
 
 
 
@@ -118,6 +114,7 @@ module WRL
       <mode> 2 => -1 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 1 ...</turn>
+      <buff> _ => . </buff>
 
    rule [One]: // ops ring 2
       <mode> 2 => 3 </mode>
@@ -197,16 +194,67 @@ module WRL
 
 
 
-   // TODO: parse integer directly rather than reading list item
    rule [IntInput]: // ops ring 10, value == 0 (input)
-      <mode> 2 => 3 </mode>
+      <mode> 2 => 20 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 10 ...</turn>
       <val>... 0 |-> 0 ...</val>
-      <mp> M:Int </mp>
-      <memmap>... M |-> (_ => I) ...</memmap>
-      <in> ListItem(I:Int) => . ...</in>
+      <buff> "" => charString(#fReadByte(0)) </buff>
+      <isign> _ => 1 </isign>
 
+   rule [IntInputBuffer]: // use buffered character
+      <mode> 2 => 20 </mode>
+      <ring> 0 </ring>
+      <turn>... 0 |-> 10 ...</turn>
+      <val>... 0 |-> 0 ...</val>
+      <buff> S:String </buff>
+      <isign> _ => 1 </isign>
+    when lengthString(S) >Int 0
+
+   rule [IntInputIgnoreWhitespace]: // ignore intervening whitespace
+      <mode> 20 </mode>
+      <buff> S:String => charString(#fReadByte(0)) </buff>
+    when (S ==String " ") orBool (S ==String "\n") orBool
+         (S ==String "\t") orBool (S ==String "\r")
+
+   rule [IntInputNegative]: // negative integer 
+      <mode> 20 => 21 </mode>
+      <buff> S:String => charString(#fReadByte(0)) </buff>
+      <isign> _ => -1 </isign>
+    when (S ==String "-")
+
+   rule [IntInputFirstDigit]: // first digit of integer
+      <mode> M:Int => 22 </mode>
+      <buff> S:String => charString(#fReadByte(0)) </buff>
+      <ibuff> _ => asciiString(S) -Int 48 </ibuff>
+    when ((M ==Int 20) orBool (M ==Int 21)) andBool
+         (asciiString(S) >=Int 48) andBool (asciiString(S) <=Int 57)
+  
+   rule [IntInputMoreDigits]: // more digits of integer
+      <mode> 22 </mode>
+      <buff> S:String => charString(#fReadByte(0)) </buff>
+      <ibuff> I:Int => (I *Int 10) +Int (asciiString(S) -Int 48) </ibuff>
+    when (asciiString(S) >=Int 48) andBool (asciiString(S) <=Int 57)
+ 
+   rule [IntInputEnd]: // end of integer
+      <mode> 22 => 3 </mode>
+      <buff> S:String </buff>
+      <ibuff> I:Int => 0 </ibuff>
+      <isign> P:Int </isign>
+      <mp> M:Int </mp>
+      <memmap>... M |-> (_ => I *Int P) ...</memmap>
+    when (asciiString(S) <Int 48) orBool (asciiString(S) >Int 57)
+
+   rule [IntInputEOF]: // end of integer, EOF
+      <mode> 22 => 3 </mode>
+      <buff> charString(#EOF) </buff>
+      <ibuff> I:Int => 0 </ibuff>
+      <isign> P:Int </isign>
+      <mp> M:Int </mp>
+      <memmap>... M |-> (_ => I *Int P) ...</memmap>
+    
+  
+   
 
    rule [IntOutput]: // ops ring 10, value != 0 (output)
       <mode> 2 => 3 </mode>
@@ -220,11 +268,10 @@ module WRL
 
 
    rule [AscInput]: // ops ring 11, value == 0 (input); append char to buffer
-      <mode> 2 => 2 </mode>
+      <mode> 2 </mode>
       <ring> 0 </ring>
       <turn>... 0 |-> 11 ...</turn>
       <val>... 0 |-> 0 ...</val>
-//      <out>... . => ListItem("INPUT") </out>
       <buff> "" => charString(#fReadByte(0)) </buff>
 
    rule [AscInputBuffer]: // use buffered character if exists
@@ -234,7 +281,6 @@ module WRL
       <val>... 0 |-> 0 ...</val>
       <mp> M:Int </mp>
       <memmap>... M |-> (_ => asciiString(S)) ...</memmap>
-   //  <out>... . => ListItem(" INPUT2") </out>
       <buff> S:String => "" </buff>
    when lengthString(S:String) >Int 0
 
