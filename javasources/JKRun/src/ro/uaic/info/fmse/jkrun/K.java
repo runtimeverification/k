@@ -1,5 +1,10 @@
 package ro.uaic.info.fmse.jkrun;
 
+import java.io.File;
+import java.util.Scanner;
+
+import org.apache.commons.cli.CommandLine;
+
 public class K {
 
 	public static boolean verbose = false;
@@ -54,5 +59,28 @@ public class K {
 	public static boolean debug = false;
 	public static boolean trace = false;
 	
-
+ 
+	public static void main(String args[]) {
+		System.out.print(K.lineSeparator + "Commmand>");
+		Scanner sc = new Scanner(System.in);
+		String input = sc.nextLine();
+		String arg = new String();
+		
+		K.debug = true;
+		CommandlineOptions cmd_options = new CommandlineOptions();
+		CommandLine cmd = cmd_options.parse( args );
+		
+		if (cmd.hasOption("step")) {
+			System.out.println("step command inserted");
+		}
+			String[] remainingArguments = null;
+		
+			remainingArguments = cmd.getArgs();
+			if (remainingArguments.length > 0) {
+				arg = remainingArguments[0];
+				System.out.println("Inserted argument is: " + arg);
+			}
+		
+		
+	}
 }

@@ -295,6 +295,22 @@ public class Main {
 				System.out.print(K.lineSeparator + "Commmand>");
 				Scanner sc = new Scanner(System.in);
 				String input = sc.nextLine();
+				
+				//construct the right command line input when we specify the "step" option with an argument (i.e. step=3) 
+				if (input.startsWith("step") && input.length() >= 6) {
+					String[] tokens = input.split(" ");
+					StringBuilder aux = new StringBuilder();
+					for (int i = 0; i < tokens.length; i++) {
+						if (!tokens[i].equals(" ")) {
+							if (i == tokens.length - 1) {
+								aux.append("=");
+							}
+							aux.append(tokens[i]);
+						}
+					}
+					input = aux.toString();
+				}
+				
 				//apply trim to remove possible blank spaces from the inserted command
 				String[] cmds = new String[] { "--" + input.trim() };
 				CommandlineOptions cmd_options = new CommandlineOptions();
@@ -330,7 +346,7 @@ public class Main {
 						p = new PrettyPrintOutput();
 					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
 						red = p.processDoc(K.processed_maude_output);
-						AnsiConsole.out.println(red);
+						AnsiConsole.out.println(red.get(0));
 						
 						ProcessBean bean = new ProcessBean();
 						bean.setExitCode(0);
@@ -338,10 +354,17 @@ public class Main {
 					}
 					//one step execution
 		            if (cmd.hasOption("step")) {
+		            	//by default execute only one step at a time
+		            	String arg = new String("1");
+		            	String[] remainingArguments = null;
+		    			remainingArguments = cmd.getArgs();
+		    			if (remainingArguments.length > 0) {
+		    				arg = remainingArguments[0];
+		    			}
 		            	//get the maudified version of the current configuration based on the xml obtained from -xml-log option
 						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
 						//System.out.println("config=" + maudeConfig);
-						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[1] " + maudeConfig + " .";
+						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[" + arg + "] " + maudeConfig + " .";
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
 						if (errFile.exists()) {
@@ -356,7 +379,7 @@ public class Main {
 						p = new PrettyPrintOutput();
 					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
 						red = p.processDoc(K.processed_maude_output);
-						AnsiConsole.out.println(red);
+						AnsiConsole.out.println(red.get(0));
 					}
 				}
 			}
