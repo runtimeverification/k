@@ -1,0 +1,11 @@
+// read in two integers, output their sum
+
+01100   ops: intIO (zero) [A]
+100	math: load (A)
+00      ops: intIO (zero) [B]
+1100    math: add (A+B)
+01100   ops: noop
+0100    math: store [A+B]
+1100    ops: one (one)
+1100    math: noop
+0111100 ops: intIO (one)
