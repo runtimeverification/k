@@ -43,10 +43,6 @@ public class HTMLFilter extends BasicVisitor {
 	
 	private Properties Latex2HTMLzero = new Properties();
 	private Properties Latex2HTMLone = new Properties();
-	private Properties Latex2HTMLtwo = new Properties();
-	private String includePath;
-	
-	
 
 	/*public void setResult(String result) {
 		this.result = result;
