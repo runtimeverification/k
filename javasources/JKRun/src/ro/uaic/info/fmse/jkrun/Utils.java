@@ -97,6 +97,11 @@ public class Utils {
 		while (index != -1) {
 			index = sb.indexOf("_", index);
 			if (index != -1) {
+				//when the number of underscores is greater than the number of children (such in the case of family.logik)
+				if (count >= list.size()) {		
+					sb.insert(index, "");
+					break;		
+				}
 				Element child = list.get(count);
 				//do not insert any parenthesis in this case
 				if (child.getAttribute("op").equals("#_") && child.getAttribute("sort").equals("KLabel"))  {
