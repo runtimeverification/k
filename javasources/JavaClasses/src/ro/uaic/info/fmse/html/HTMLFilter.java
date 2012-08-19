@@ -549,8 +549,6 @@ public class HTMLFilter extends BasicVisitor {
 						property = property.replace("#"+i,c.get(i-1));
 					}
 					comment = comment.replace(copyKey,property);
-					if(key.contains("href"))
-					System.out.println("replacing "+copyKey+" by "+property);
 				}
 			}
 				
