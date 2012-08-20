@@ -143,6 +143,9 @@ public class IOServer {
 		    c.setPool(pool);
 		    return c;
 		}
+		if (command.equals("smt")){
+			return new CommandSmt(args, socket, logger);
+		}
 
 		return new CommandUnknown(args, socket, logger); //, (long) 0);
 	}

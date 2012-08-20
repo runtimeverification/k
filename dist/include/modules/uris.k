@@ -2,6 +2,7 @@ require "builtins/builtins.k"
 
 module URIS 
   imports BUILTIN-HOOKS
+  
 // B, N, and P are really supposed to be Nat
   syntax K ::= String | Int | Float
              | "#open" "(" String ")"
@@ -13,7 +14,7 @@ module URIS
              | "#fPeekByte" "(" Int ")"
              | "String2Bool" "(" String ")"
              | "#ioError" "(" String ")"
-
+ 
   syntax K ::= "#fPutByte" "(" Int "," Int ")"   [function, klabel(#fPutByte)]
              | "#flush" "(" Int ")"              [function, klabel(#flush)]
              | "#fReadByte" "(" Int ")"          [function, klabel(#fReadByte)]

@@ -1,10 +1,10 @@
 package commands;
 
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.logging.Logger;
+
 import main.IOServer;
 
 public abstract class Command implements Runnable {
