@@ -160,7 +160,6 @@ public class UnparserFilter extends BasicVisitor {
 		result.write(",, ");
 	    }
 	}
-	super.visit(listOfK);
 	postpare();
     }
 
@@ -379,9 +378,6 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(CollectionItem collectionItem) {
 	prepare(collectionItem);
-	result.endLine();
-	result.write("Don't know how to pretty print CollectionItem");
-	result.endLine();
 	super.visit(collectionItem);
 	postpare();
     }
@@ -399,10 +395,9 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(ListItem listItem) {
 	prepare(listItem);
-	result.endLine();
-	result.write("Don't know how to pretty print ListItem");
-	result.endLine();
+	result.write("ListItem(");
 	super.visit(listItem);
+	result.write(")");
 	postpare();
     }
 
@@ -428,10 +423,7 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(Hole hole) {
 	prepare(hole);
-	result.endLine();
-	result.write("Don't know how to pretty print Hole");
-	result.endLine();
-	super.visit(hole);
+	result.write("HOLE");
 	postpare();
     }
 
@@ -467,9 +459,6 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(ro.uaic.info.fmse.k.List list) {
 	prepare(list);
-	result.endLine();
-	result.write("Don't know how to pretty print List");
-	result.endLine();
 	super.visit(list);
 	postpare();
     }
@@ -523,10 +512,16 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(ro.uaic.info.fmse.k.Context context) {
 	prepare(context);
+	result.write("context ");
+	variableList.clear();
+	context.getBody().accept(this);
+	if (context.getCondition() != null) {
+	    result.write(" when ");
+	    context.getCondition().accept(this);
+	}
+	context.getAttributes().accept(this);
 	result.endLine();
-	result.write("Don't know how to pretty print Ambiguity");
 	result.endLine();
-	super.visit(context);
 	postpare();
     }
 
