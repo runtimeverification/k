@@ -1,0 +1,4 @@
+# delay test
+#  output should be ABC, not BAC; .B is delayed until after .A is applied
+
+`.C````kdi`.Bi`.Ai

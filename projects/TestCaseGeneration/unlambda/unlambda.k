@@ -10,7 +10,9 @@
 module UNLAMBDA-SYNTAX
 
    syntax Fun ::= Atom         // atomic function
-              |   Apply Fun Fun  // apply function to function
+              |   Composite
+
+   syntax Composite ::= Apply Fun Fun  // apply function to function
 
    syntax Apply ::= ">"       // apply token (`)
 
@@ -47,8 +49,8 @@ module UNLAMBDA-SYNTAX
    // Continuation and Promise are not in strict Unlambda syntax, and the
    // lexer should mark these as undefined
 
-   syntax Continuation ::= "$"
-   syntax Promise ::= "p"
+   syntax Continuation ::= "$" Int
+   syntax Promise ::= "p" Int
       
 endmodule
 
@@ -68,7 +70,15 @@ module UNLAMBDA
 //      <eval> .Map </eval> // evaluations at nonterminals
 
 
+      <pmap> .Map </pmap>  // promise map
+      <cmap> .Map </cmap>  // continuation map
        
+      <pcount> 0 </pcount> // promise counter
+      <ccount> 0 </ccount> // continuation counter
+
+      <promise> 0 </promise> // promise number
+      <continuation> 0 </continuation> // continuation number
+
       <leftdepth> 0 </leftdepth>
                     // depth of current node following left branches only
                     // i.e., number of right c-commanding nodes
@@ -155,15 +165,40 @@ module UNLAMBDA
 //    <chain> . => ListItem(L) ...</chain>
    when (N ==Int -1 *Int L) //andBool (M =/=Int C)
 
-  rule [TraverseRightChild]: // only if not delay
-    <mode> 4 => 3 </mode>
-    <loc> L:Int => C </loc>
-    <tree>... L |-> Z:Apply ...</tree>
-    <child>... L |-> C:Int ...</child>
+  rule [CheckDelayFound]:
+    <mode> 4 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int ...</child>
+    <tree>... C |-> Z:Delay ...</tree>
     <status>... L |-> (0 => 1) ...</status>
+   when (N ==Int -1 *Int L)
+
+  rule [CheckDelayNormal]:
+    <mode> 4 => 10 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int ...</child>
+    <tree>... C |-> Z:Normal ...</tree>
+    <status>... L |-> (0 => 1) ...</status>
+   when (N ==Int -1 *Int L)
+
+  rule [CheckDelayComposite]:
+    <mode> 4 => 10 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int ...</child>
+    <tree>... C |-> Z:Apply ...</tree>
+    <status>... L |-> (0 => 1) ...</status>
+   when (N ==Int -1 *Int L)
+
+
+  rule [TraverseRightChild]: // only if not delay
+    <mode> 10 => 3 </mode>
+    <loc> L:Int => C </loc>
+    <child>... L |-> C:Int ...</child>
  //   <leftdepth> _ => 0 </leftdepth>
 //    <chain> _ => . </chain>
 
+  
+  
     
   rule [ProcessNonterminal]:
     <mode> 4 => 11 </mode>
@@ -184,7 +219,6 @@ module UNLAMBDA
   // degree checks
   rule [CheckFirstDegreeContinue]:
     <mode> 11 => 12 </mode>
-    //<loc> L:Int </loc>
     <check> C:Int => G </check>
     <child>... N |-> G:Int ...</child>
     <tree>... C |-> Z:Apply ...</tree>
@@ -192,13 +226,11 @@ module UNLAMBDA
 
   rule [CheckFirstDegreeMatch]:
     <mode> 11 => 21 </mode>
-    //<loc> L:Int </loc>
     <check> C:Int </check>
     <tree>... C |-> Z:First ...</tree>
 
   rule [CheckFirstDegreeMatchDelay]:
     <mode> 11 => 21 </mode>
-    //<loc> L:Int </loc>
     <check> C:Int </check>
     <tree>... C |-> Z:Delay ...</tree>
 
@@ -216,7 +248,6 @@ module UNLAMBDA
 
   rule [CheckSecondDegreeMatch]:
     <mode> 12 => 22 </mode>
-    //<loc> L:Int </loc>
     <check> C:Int </check>
     <tree>... C |-> Z:Second ...</tree>
 
@@ -275,6 +306,24 @@ module UNLAMBDA
 
   rule [EvaluateConstantGenerator]: // k
     <mode> 22 => 41 </mode> // mode 22 iff k, unique second-degree function
+
+
+
+
+  rule [EvaluateDelay]: // d
+    <mode> 21 => 71 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int ...</child>
+    <tree>... C |-> d ...</tree>
+   when (N ==Int -1 *Int L)
+
+  rule [EvaluatePromise]: // $ Int
+    <mode> 21 => 76 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int ...</child>
+    <tree>... C |-> ($ P:Int) ...</tree>
+    <promise> _ => P </promise>
+   when (N ==Int -1 *Int L)
   
 
   // tree transformations
@@ -371,7 +420,41 @@ module UNLAMBDA
 
 
 
+   rule [DelayTransform1]: // erase left child
+    <mode> 71 => 72 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int => . ...</child>
+    <parent>... C |-> L => . ...</parent>
+    <tree>... C |-> _ => . ...</tree>
+    <status>... C |-> _ => . ...</status>
+   when (N ==Int -1 *Int L)
 
+   rule [DelayTransform2]: // create promise
+    <mode> 72 => 73 </mode>
+    <loc> L:Int </loc>
+    <child>... L |-> C:Int => . ...</child>
+    <tree>... L |-> (_ => ($ P)) ...</tree>
+    <parent>... C |-> (L => -1) ...</parent>
+    <pmap>... . => P |-> C </pmap>
+    <pcount> P:Int => P +Int 1 </pcount>
+
+   rule [DelayTransform3]: // return
+    <mode> 73 => 4 </mode>
+    <loc> L:Int => P </loc>
+    <parent>... L |-> P ...</parent>
+    <status>... L |-> (_ => 3) ...</status>
+
+   rule [PromiseTransform]: // reconnect promise tree
+    <mode> 76 => 100 </mode>
+    <next> _ => 4 </next>
+    <start> _ => C </start>
+    <loc> L:Int => T </loc>
+    <child>... N |-> (C:Int => T) ...</child>
+    <parent>... T |-> (-1 => L) ...</parent>
+    <status>... L |-> (_ => 0) ...</status>
+    <tree>... C |-> ($ P:Int) ...</tree>
+    <pmap>... P |-> T:Int ...</pmap>
+   when (N ==Int -1 *Int L)
 
 
 
