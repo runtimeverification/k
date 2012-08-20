@@ -1158,7 +1158,7 @@ public class Definition implements Cloneable {
 	public void setMainModule(String mainModule) {
 		this.mainModule = mainModule;
 		if (!this.modulesMap.containsKey(this.mainModule))
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, KMessages.ERR1002 + mainModule + ". Use --lang <arg> to specify another.", this.mainFile.getName(), "definition", 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1002 + mainModule + ". Use --lang <arg> to specify another.", this.mainFile.getName(), "definition", 0));
 	}
 
 	public String getMainModule() {

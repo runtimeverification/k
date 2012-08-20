@@ -11,21 +11,3 @@ completions
 
 completions
                                              
-  // Syntax completion:                      
-                                             
-  completion template Start :
-    "module " <m> (blank)  
-                                             
-  completion template Definition :
-    "entity " <e> " {" (cursor) "}" (blank)  
-                                             
-  completion template Property : "property : Type" =
-    <x> " : " <T> (blank)  
-                                             
-
-completions
-  // Semantic (identifier) completion:   
-                                         
-  completion proposer                  : editor-complete
-                                         
-  completion trigger                   : ":"

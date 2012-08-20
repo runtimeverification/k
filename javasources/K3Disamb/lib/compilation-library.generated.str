@@ -1,0 +1,188 @@
+module lib/compilation-library.generated
+
+imports
+  libstratego-lib
+  lib/editor-common.generated
+  lib/index-library.generated
+  lib/analysis-library.generated
+  lib/analysis-library-internal.generated
+  
+rules // Extension points
+  
+  /**
+   * Extension point. Override this rule to define a desugaring that is applied to AST before analyzing and compiling.
+   *
+   * Extension example:
+   *   index-desugar-ast:
+   *     ast -> <desugar> ast
+   *
+   * @type ast -> ast'
+   */
+  index-desugar-ast = fail
+    
+  /**
+   * Extension point. Override this rule to define a compilation or transformation to some other target language. The
+   * index manages which files have to be compiled and calls this rule for each AST that has changed since the last
+   * compilation.
+   *
+   * Extensions example:
+   *   index-compile-ast(|file, subfile):
+   *     ast -> None()
+   *     with
+   *       java := <to-java> ast;
+   *       full-path := <dirname> file;
+   *       filename := <guarantee-extension(|"java")> <base-filename> file;
+   *       writePath := $[[full-path]/java/];
+   *       writeFile :=  $[[writePath][filename]];
+   *       try(<mkdir> writePath);
+   *       <fclose> <fputs> (java, <fopen> (writeFile, "w"))
+   *
+   * @param file    The file that must be compiled.
+   * @param subfile The subfile that must be compiled ("" if there is no subfile).
+   * @type ast -> None()
+   */
+  index-compile-ast(|file, subfile) = fail
+  
+rules // Compilation
+  
+  /**
+   * Schedules compilation in the background of all files that have changed since the last compilation.
+   *
+   * @type x -> x
+   */
+  index-schedule-compilation:
+    _ -> None()
+    with
+      queue-strategy(|"index-compilation", "Compiling files")
+  
+  /** @internal */
+  index-compilation:
+    language -> None()
+    with
+      // Init
+      project-path := <project-path>;
+      index-setup(|language, [project-path], ".")
+    with
+      // Determine the files to compile by looking at changed files
+      diffs         := <analyze-get-compilediffs>;
+      files         := <map(index-compilation-restore-read-file)> diffs;
+      filteredFiles := <make-set> <remove-all(index-compilation-filter-file)> files;
+      
+      // Clean compile time reads
+      <filter(index-compilation-clean-reads)> filteredFiles;
+      
+      // Set total work units to number of files to compile for visual indication
+      <set-total-work-units> <length> filteredFiles;
+      
+      // Compile the files
+      <filter(index-compilation-file(|language, project-path); complete-work-unit)> filteredFiles
+
+  /** @internal */
+  index-compilation-file(|language, project-path):
+    (path, subfile) -> None()
+    with
+      ast := <index-get-global(|<conc> (<index-file-to-uri> (path, subfile), ["ast"]))>;
+      {| Index-ReadSet:
+        readSet := <new-iset>;
+        rules(Index-ReadSet: _ -> readSet);
+        
+        // Compile file
+        <try(index-compile-ast(|path, subfile))> ast;
+        
+        // Store compile-time reads.
+        reads := <iset-elements> readSet;
+        <index-add-all(|<index-compilation-file-tuple> (path, subfile))> reads
+      |}
+
+  /** @internal */
+  index-compilation-filter-file:
+    (file, subfile) -> (file, subfile)
+    where
+      <is-test-file <+ index-is-fake-file <+ not(file-exists)> file
+    
+rules // On save handling
+  
+  /**
+   * Commits the index to disk and schedules compilation. Use trigger-commit-and-compile instead of this strategy.
+   *
+   * @see trigger-commit-and-compile
+   *
+   * @internal
+   */
+  commit-and-compile:
+    language -> None()
+    with
+      index-commit
+    with
+      index-schedule-compilation
+
+  /**
+   * Triggers commit and compilation, requires target language as current term.
+   * Compilation can be delayed by using disable-commit-and-compile. Compilation will be triggered when 
+   * enable-commit-and-compile is called.
+   *
+   * @type language -> language
+   *
+   * @see enable-commit-and-compile
+   * @see disable-commit-and-compile
+   */
+  trigger-commit-and-compile:
+    language -> <id>
+    with
+      if not(index-is-global-enabled(|"delay-compile")) then
+        commit-and-compile
+      else
+        index-enable-global(|"trigger-compile")
+      end
+  
+  /**
+   * Delays commit and compilation until enable-commit-and-compile is called.
+   *
+   * @type x -> x
+   *
+   * @see enable-commit-and-compile
+   */
+  disable-commit-and-compile = 
+    index-enable-global(|"delay-compile")
+  
+  /**
+   * Cancels the commit and compilation delay, requires target language as current term. 
+   * If commit and compilation was triggered during the delay, it is triggered now.
+   *
+   * @type language -> language
+   *
+   * @see disable-commit-and-compile
+   */
+  enable-commit-and-compile:
+    language -> <id>
+    with
+      if index-is-global-enabled(|"trigger-compile") then
+        commit-and-compile
+      end;
+      index-disable-global(|"delay-compile")
+      
+/** @internal */
+rules // Compile time reads
+
+  /** @internal */
+  index-compilation-restore-read-file:
+    (file, subfile) -> (file', subfile)
+    where
+      file' := <string-replace(|<index-compilation-read-path>, "")> file
+  /** @internal */
+  index-compilation-restore-read-file:
+    (file, subfile) -> (file, subfile)
+    where
+      not(<string-replace(|<index-compilation-read-path>, "")> file)
+      
+  /** @internal */
+  index-compilation-clean-reads = 
+    ?(file, subfile); index-compilation-file-tuple; index-clear-file
+      
+  /** @internal */
+  index-compilation-file-tuple:
+    (file, subfile) -> ($[[<index-compilation-read-path>]/[file]], subfile)
+    
+  /** @internal */
+  index-compilation-read-path =
+    !"/.internal/reads/compile"
