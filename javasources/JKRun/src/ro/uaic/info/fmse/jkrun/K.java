@@ -1,10 +1,5 @@
 package ro.uaic.info.fmse.jkrun;
 
-import java.io.File;
-import java.util.Scanner;
-
-import org.apache.commons.cli.CommandLine;
-
 public class K {
 
 	public static boolean verbose = false;
@@ -43,6 +38,8 @@ public class K {
 	public static String maude_cmd = "erewrite";
 	public static String output_mode = "pretty";
 	public static String xsearch_pattern = "=>! B:Bag";
+	public static String bound;
+	public static String depth;
 	public static String rule_labels = "";
 	public static String model_checking = "";
 

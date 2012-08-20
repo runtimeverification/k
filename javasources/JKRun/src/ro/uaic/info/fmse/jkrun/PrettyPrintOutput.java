@@ -208,7 +208,7 @@ public class PrettyPrintOutput {
 					// using XPath for direct access to the desired node
 					XPathFactory factory2 = XPathFactory.newInstance();
 					XPath xpath2 = factory2.newXPath();
-					String s2 = "substitution/assignment/term[2]";
+					String s2 = "substitution/assignment[last()]/term[2]";
 					Object result2;
 					try {
 						result2 = xpath2.evaluate(s2, nod, XPathConstants.NODESET);

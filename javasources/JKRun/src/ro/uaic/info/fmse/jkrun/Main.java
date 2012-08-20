@@ -129,13 +129,27 @@ public class Main {
 			    			}
 			    		}
 			        }
-					s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
+			        if (cmd.hasOption("bound") && (cmd.hasOption("depth"))) {
+			        	s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "," + K.depth + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
+								",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
+								",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
+								",(.).Map)) ";
+			        }
+			        else if (cmd.hasOption("bound")) {
+			        	s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
+								",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
+								",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
+								",(.).Map)) ";
+			        }
+			        else {
+			        	s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
 							",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
 							",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
 							",(.).Map)) ";
+			        }
+					//s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern + "\"" + " .";
 					if (cmd.hasOption("xsearch-pattern")) {
 						s += K.xsearch_pattern + " .";
-						//s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern + "\"" + " .";
 					} else s += " =>! B:Bag .";		
 				} else {
 					Error.report("For the do-search option you need to specify that --maude-cmd=search");
@@ -477,6 +491,12 @@ public class Main {
 				K.do_search = true;
 				K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern");
 //				System.out.println("xsearch-pattern:" + K.xsearch_pattern);
+			}
+			if (cmd.hasOption("bound")) {
+				K.bound = cmd.getOptionValue("bound");
+			}
+			if (cmd.hasOption("depth")) {
+				K.depth = cmd.getOptionValue("depth");
 			}
 			if (cmd.hasOption("output-mode")) {
 				K.output_mode = cmd.getOptionValue("output-mode");

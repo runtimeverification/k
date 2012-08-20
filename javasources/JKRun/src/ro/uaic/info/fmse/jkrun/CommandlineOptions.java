@@ -91,7 +91,15 @@ public class CommandlineOptions {
 		Option do_search = OptionBuilder.hasArg(false).withLongOpt("do-search").withDescription("Search for all possible results").create();
 		Option no_do_search = OptionBuilder.hasArg(false).withLongOpt("no-do-search").create();
 		Option maude_cmd = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("maude-cmd").withDescription("Maude command used to execute the definition").create();
-		Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern").withDescription("Search pattern").hasArg().withArgName("STRING").create();                             
+		Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern")
+				.withDescription("Search pattern. In conjunction with it you can specify 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search)")
+				.hasArg().withArgName("STRING").create();                             
+		/*Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern")
+			    	.withDescription("The first argument is the search pattern which is compulsory. The other 2 arguments are optional: bound is the number of desired solutions and depth gives the maximum depth of the search")
+				    .withValueSeparator( '=' ).withArgName("STRING bound=value depth=value").hasArgs(6).create();
+		xsearch_pattern.setOptionalArg(false);*/
+		Option bound = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("bound").withDescription("The number of desired solutions for search").create();
+		Option depth = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("depth").withDescription("The maximum depth of the search").create();
 		Option output_mode = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("output-mode").withDescription("How to display Maude results (none, raw, pretty)").create();
 		Option log_io = OptionBuilder.hasArg(false).withLongOpt("log-io").withDescription("Tell the IO server to create logs").create();
 		Option no_log_io = OptionBuilder.hasArg(false).withLongOpt("no-log-io").create();
@@ -101,12 +109,14 @@ public class CommandlineOptions {
 		options.addOption(no_do_search); getOptionList().add(no_do_search);
 		options.addOption(maude_cmd); getOptionList().add(maude_cmd);
 		options.addOption(xsearch_pattern); getOptionList().add(xsearch_pattern);
+		options.addOption(bound); getOptionList().add(bound);
+		options.addOption(depth); getOptionList().add(depth);
 		options.addOption(output_mode); getOptionList().add(output_mode);
 		options.addOption(log_io); getOptionList().add(log_io);
 		options.addOption(no_log_io); getOptionList().add(no_log_io);
 		
 		//for group options
-		Option search = OptionBuilder.hasArg(false).withLongOpt("search").create();
+		Option search = OptionBuilder.hasArg(false).withLongOpt("search").withDescription("In conjunction with it you can specify 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search)").create();
 		Option config = OptionBuilder.hasArg(false).withLongOpt("config").create();
 		Option no_config = OptionBuilder.hasArg(false).withLongOpt("no-config").create();
 		
