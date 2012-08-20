@@ -17,6 +17,7 @@
 			<zipfileset excludes="META-INF/*.SF" src="./lib/jansi-1.8.jar"/>
 			<fileset dir="../K3Java/bin"/>
 			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="./lib/jline-1.0.jar"/>
 			<fileset dir="../KPreprocessor/bin"/>
 			<fileset dir="../KUtils/bin"/>
 			<fileset dir="../JavaClasses/bin"/>

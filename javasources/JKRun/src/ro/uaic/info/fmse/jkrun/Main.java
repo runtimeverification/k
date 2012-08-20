@@ -6,14 +6,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
+
+import jline.ArgumentCompletor;
+import jline.ConsoleReader;
+import jline.FileNameCompletor;
+import jline.MultiCompletor;
+import jline.SimpleCompletor;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
-import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.runner.KRunner;
 
@@ -147,9 +152,9 @@ public class Main {
 							",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
 							",(.).Map)) ";
 			        }
-					//s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern + "\"" + " .";
 					if (cmd.hasOption("xsearch-pattern")) {
 						s += K.xsearch_pattern + " .";
+						//s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern + "\"" + " .";
 					} else s += " =>! B:Bag .";		
 				} else {
 					Error.report("For the do-search option you need to specify that --maude-cmd=search");
@@ -279,6 +284,17 @@ public class Main {
 	//execute krun in debug mode (i.e. step by step execution)
 	public static void debugExecution(String kast) {
 		try {
+			//adding autocompletion and history feature to the stepper internal commandline by using the JLine library
+			ConsoleReader reader = new ConsoleReader();
+		    reader.setBellEnabled(false);
+		    
+		    List argCompletor = new LinkedList();
+		    argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step"}));
+		    argCompletor.add(new FileNameCompletor());
+		    List completors = new LinkedList();
+		    completors.add(new ArgumentCompletor(argCompletor));
+		    reader.addCompletor(new MultiCompletor(completors));
+			
 			//first execute one step then prompt from the user an input
 			System.out.println("After running one step of execution the result is:");
 			String compiledFile = new String();
@@ -304,11 +320,10 @@ public class Main {
 			for (String result: red) {
 				AnsiConsole.out.println(result);
 			}
+			System.out.println();
 			
 			while (true) {
-				System.out.print(K.lineSeparator + "Commmand>");
-				Scanner sc = new Scanner(System.in);
-				String input = sc.nextLine();
+				String input = reader.readLine("Command > ");
 				
 				//construct the right command line input when we specify the "step" option with an argument (i.e. step=3) 
 				if (input.startsWith("step") && input.length() >= 6) {
@@ -395,6 +410,7 @@ public class Main {
 						red = p.processDoc(K.processed_maude_output);
 						AnsiConsole.out.println(red.get(0));
 					}
+		            System.out.println();
 				}
 			}
 		} catch (IOException e) {
