@@ -1,0 +1,3 @@
+<config>
+    <test def="/dist/examples/exp/untyped/environment/exp-untyped-environment.k" program-extension="exp" compiled-file-name="exp-untyped-environment-compiled.maude"/>
+</config>

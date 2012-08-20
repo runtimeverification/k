@@ -1,0 +1,3 @@
+<result>
+  closure-lambda( . , x , lambda f . f lambda y . if true then x 7 else x y )
+</result>
