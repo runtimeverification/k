@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import ro.uaic.info.fmse.k.*;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 
+/**
+ *  This class is a lint rule that checks for unused syntaxes on the productions
+ */
 public class UnusedSyntax extends KlintRule {
 
 	private static boolean debug = false;
@@ -21,8 +24,6 @@ public class UnusedSyntax extends KlintRule {
 			if(!hasRewrite(production, rewrites))
 				warning("Unused syntax: ", (ASTNode)production);
 		}
-
-
 	}
 
 	/**

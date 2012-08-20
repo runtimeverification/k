@@ -1,17 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package klint;
 
 import java.util.ArrayList;
 import ro.uaic.info.fmse.k.*;
 
 /**
- * @author fotanus
- *
- * This classes looks for names declared on the left side of a rule that aren't
- * used on the right side.
+ * This classes is a lint rule that looks for names declared on the left side
+ * of a rule that aren't used on the right side
  */
 public class UnusedName extends KlintRule{
 
@@ -52,10 +46,11 @@ public class UnusedName extends KlintRule{
 
 
 	/**
-	 * This function checkes in a giving rewrite rule for unused variables. If this
-	 * rewrite has other recursive rewrites, it checks on these as well.
+	 * This function checks if all variables are used, and if any variable is missing.
 	 *
-	 * @param rewrite the rewrite rule that will be checked
+	 * @param rule the rule that is being checked
+	 * @param leftVars Variables on the left of this rule
+	 * @param rightVars Variables on the right of this rule
 	 */
 	private void containsAllVariables(Term rule, ArrayList<Variable> leftVars, ArrayList<Variable> rightVars){
 

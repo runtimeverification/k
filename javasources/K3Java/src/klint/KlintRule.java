@@ -1,4 +1,3 @@
-
 package klint;
 
 import java.util.ArrayList;
@@ -7,6 +6,10 @@ import ro.uaic.info.fmse.k.*;
 /**
  * A Klint rule is an algorithm that giving the AST of a K file will detect a
  * type of mistake.
+ *
+ * To Create a new rule, extend this class and create the algorithm to this rule.
+ * Afterwards, import this class on KompileFrontEnd and add a check on lint method
+ * the same way the other rules are called.
  */
 public abstract class KlintRule {
 
