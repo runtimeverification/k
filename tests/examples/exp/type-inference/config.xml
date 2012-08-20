@@ -1,0 +1,3 @@
+<config>
+    <test def="/dist/examples/exp/type-inference/exp-type-inference.k" program-extension="exp" compiled-file-name="exp-type-inference-compiled.maude"/>
+</config>
