@@ -240,13 +240,45 @@ module UNLAMBDA
     <tree>... C |-> i ...</tree>
    when (N ==Int -1 *Int L)
 
+  rule [EvaluatePrint]: // .x
+    <mode> 21 => 31 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int ...</child>
+    <tree>... C |-> (. A:Int) ...</tree>
+    <out>... . => ListItem(charString(A)) </out>
+   when (N ==Int -1 *Int L)
+
+  rule [EvaluateCarriageReturn]: // r
+    <mode> 21 => 31 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int ...</child>
+    <tree>... C |-> r ...</tree>
+    <out>... . => ListItem("\n") </out>
+   when (N ==Int -1 *Int L)
+
+
+  rule [EvaluateVoid]: // v
+    <mode> 21 => 61 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int ...</child>
+    <tree>... C |-> v ...</tree>
+   when (N ==Int -1 *Int L)
+
+  rule [EvaluateExit]: // e
+    <mode> 21 => -1 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int ...</child>
+    <tree>... C |-> e ...</tree>
+   when (N ==Int -1 *Int L)
+
+
   
 
+  // tree transformations
 
   rule [IdentityTransform1]: // erase left child
     <mode> 31 => 32 </mode>
     <loc> L:Int </loc>
-    <new> _ => C </new>
     <child>... N |-> C:Int => . ...</child>
     <parent>... C |-> L => . ...</parent>
     <tree>... C |-> _ => . ...</tree>
@@ -275,6 +307,39 @@ module UNLAMBDA
     <parent>... C:Int |-> (L => P) ...</parent>
    when P >=Int 0
 
+
+  rule [VoidTransform1]: // erase right child
+    <mode> 61 => 62 </mode>
+    <loc> L:Int </loc>
+    <child>... L |-> R:Int => . ...</child>
+    <parent>... R |-> L => . ...</parent>
+    <tree>... R |-> _ => . ...</tree>
+    <status>... R |-> _ => . ...</status>
+
+  rule [VoidTransform2]: // erase L
+    <mode> 62 => 33 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int => . ...</child>
+    <parent>... L |-> P:Int => . ...</parent>
+    <tree>... L |-> _ => . ...</tree>
+    <status>... L |-> _ => . ...</status>
+   when (N ==Int -1 *Int L)  
+
+/*
+  rule [VoidTransform3Left]: // remap
+    <mode> 63 => 4 </mode>
+    <loc> L:Int => 0 -Int Q </loc>
+    <child>... Q:Int |-> (L => C) ...</child>
+    <parent>... C:Int |-> (L => 0 -Int Q) ...</parent>
+   when Q <Int 0
+  
+  rule [VoidTransform3Right]: // remap
+    <mode> 63 => 4 </mode>
+    <loc> L:Int => P </loc>
+    <child>... P:Int |-> (L => C) ...</child>
+    <parent>... C:Int |-> (L => P) ...</parent>
+   when P >=Int 0
+*/
 
 
 //    <parent>... L |-> P:Int ...</parent>
