@@ -11,43 +11,39 @@ import ro.uaic.info.fmse.visitors.BasicVisitor;
  * @see ProgramLoader.loadPgmAst
  */
 public class HaskellDefFilter extends HaskellFilter {
-	/**
-	 * When true, the filter is processing LHS of a rewrite.
-	 */
-	private boolean lhs = false;
+	public void visit(Rule rl) {
+		result += "KRule [";
+		Term b = rl.getBody();
 
-	/**
-	 * For rules we need to produce a pattern to match the
-	 * constructor for the LHS, and use names of patterns in RHS.
-	 */
-	public void visit(Rewrite r) {
-		lhs = true;
-		r.getLeft().accept(this);
-		result += " => ";
-		lhs = false;
-		r.getRight().accept(this);
+		// Rule has no bag or cell, just a single rewrite of
+		// List{K} sort
+		if (b instanceof Rewrite) {
+			result += "(KRuleCell \"PGM\" ";
+			b.accept(this);
+			result += ")";
+		}
+		result += "]";
 		result += endl;
 	}
 
 	/**
+	 * A rewrite is entered from cell, thus we yield two
+	 * KRuleSide's.
+	 */
+	public void visit(Rewrite rw) {
+		result += "(KRewriteSide (";
+		rw.getLeft().accept(this);
+		result += ")) (KRewriteSide (";
+		rw.getRight().accept(this);
+		result += "))";
+	}
+
+	/**
 	 * When on LHS, produce a pattern to match constructor for
-	 * sort of variable. Name of variable will be used as name of
-	 * pattern.
+	 * sort of variable. Lower-cased name of variable will be used
+	 * as name of pattern.
 	 */
 	public void visit(Variable var) {
-		if (lhs) {
-			String l = var.getLocation();
-			String f = var.getFilename();
-			Constant cst = new Constant(l, f);
-			
-			cst.setSort("#" + var.getSort());
-			cst.setValue("_");
-			
-			result += var.getName() + "@(";
-			cst.accept(this);
-			result += ")";
-		} else {
-			result += var.getName();
-		}
+		result += "KVar \"" + var.getName() + "\" \"" + var.getSort() + "\"";
 	}
 }

@@ -24,7 +24,7 @@ public class HaskellFilter extends BasicVisitor {
 		String klabel =
 			DefinitionHelper.conses.get("\"" + tc.getCons() + "\"")
 			.getKLabel();
-		this.result += "KApp (KLabel \"" + klabel + "\") [";
+		this.result += "KApp (KLabel [Syntax \"" + klabel + "\"]) [";
 
 		int s = tc.getContents().size();
 
@@ -65,15 +65,17 @@ public class HaskellFilter extends BasicVisitor {
 		}
 
 		// We take a shortcut here instead of processing a new
-		// Empty of sort "List{K}".
+		// empty of sort "List{K}".
 		result += ") []";
 	}
 
+	// Empty terms of non basic sorts expand to
+	// `KApp (KLabel [Syntax "SORT"]) []`
 	public void visit(Empty e) {
 		String s = e.getSort();
 		
 		if (!MaudeHelper.basicSorts.contains(s)) {
-			result += "KApp (KLabel \"'." + s + "\") []";
+			result += "KApp (KLabel [Syntax \"" + s + "\"]) []";
 		}
 		else
 			result += "[]";
