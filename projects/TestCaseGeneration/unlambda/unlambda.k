@@ -7,6 +7,9 @@
 
 
 
+// All features are implemented except continuations and input.
+
+
 module UNLAMBDA-SYNTAX
 
    syntax Fun ::= Atom         // atomic function
@@ -91,9 +94,16 @@ module UNLAMBDA
 
       <new> 0 </new>
       <start> 0 </start>
+      <sup> 0 </sup>
+      <subroot> 0 </subroot>
+      <pivot> 0 </pivot>
+      <subpivot> 0 </subpivot>
+      <switch> 0 </switch>
+
       <next> 0 </next>
       <check> 0 </check>
 
+      <copy> .List </copy>
       <queue> .List </queue>
       <prog> K:K </prog>
       <counter> 0 </counter>
@@ -160,6 +170,7 @@ module UNLAMBDA
     <loc> L:Int => C </loc>
     <tree>... L |-> Z:Apply ...</tree>
     <child>... N:Int |-> C:Int ...</child>
+    <status>... C |-> (_ => 0) ...</status>
 //    <parent>... M:Int |-> L ...</parent>
  //   <leftdepth> D:Int => D +Int 1 </leftdepth>
 //    <chain> . => ListItem(L) ...</chain>
@@ -194,6 +205,7 @@ module UNLAMBDA
     <mode> 10 => 3 </mode>
     <loc> L:Int => C </loc>
     <child>... L |-> C:Int ...</child>
+    <status>... C |-> (_ => 0) ...</status>
  //   <leftdepth> _ => 0 </leftdepth>
 //    <chain> _ => . </chain>
 
@@ -304,10 +316,11 @@ module UNLAMBDA
    when (N ==Int -1 *Int L)
 
 
-  rule [EvaluateConstantGenerator]: // k
+  rule [EvaluateConstant]: // k
     <mode> 22 => 41 </mode> // mode 22 iff k, unique second-degree function
 
-
+  rule [EvaluateSubstitution]: // s
+    <mode> 23 => 51 </mode> // mode 23 iff s, unique third-degree function
 
 
   rule [EvaluateDelay]: // d
@@ -400,6 +413,83 @@ module UNLAMBDA
 
   
 
+  rule [SubstitutionTransform1]: // set sup to root parent P, subroot to L
+    <mode> 51 => 52 </mode>      // set pivot to middle node C
+    <loc> L:Int </loc>           // set parent of L to C
+    <sup> _ => P </sup>
+    <subroot> _ => L </subroot>
+    <pivot> _ => C </pivot>
+    <child>... N |-> C:Int ...</child>
+    <parent>... L |-> (P:Int => C) ...</parent>
+   when (N ==Int -1 *Int L)
+
+  rule [SubstitutionTransform2]: // set parent of C to P
+    <mode> 52 => 53 </mode>      // set child of P to C
+    <sup> P:Int </sup>
+    <subroot> L:Int </subroot>
+    <pivot> C:Int </pivot>
+    <parent>... C |-> (L => P) ...</parent>
+    <child>... Q |-> (L => C) ...</child>
+   when (Q ==Int P) orBool (Q ==Int -1 *Int P)
+
+  rule [SubstitutionTransform3]: // set right child of C to L
+    <mode> 53 => 54 </mode>
+    <sup> P:Int </sup>           // set switch to Y, right child of C
+    <subroot> L:Int </subroot>   // set parent of Y to L
+    <pivot> C:Int </pivot>
+    <switch> _ => Y </switch>
+    <parent>... Y |-> (C => L) ...</parent>
+    <child>... C |-> (Y:Int => L) ...</child>
+
+  rule [SubstitutionTransform4]: // set left child of L to Y
+    <mode> 54 => 55 </mode>
+    <subroot> L:Int </subroot>
+    <pivot> C:Int </pivot>
+    <switch> Y:Int </switch>
+    <child>... N |-> (C => Y) ...</child>
+   when (N ==Int -1 *Int L)
+
+  rule [SubstitutionTransform5]: // set subpivot to G, left child of C
+    <mode> 55 => 56 </mode>
+    <pivot> C:Int </pivot>
+    <subpivot> _ => G </subpivot>
+    <child>... N |-> G:Int ...</child>
+   when (N ==Int -1 *Int C)
+
+  rule [SubstitutionTransform6]: // delete 's'
+    <mode> 56 => 57 </mode>
+    <subpivot> G:Int </subpivot>
+    <child>... N |-> S:Int => . ...</child>
+    <parent>... S |-> G => . ...</parent>
+    <tree>... S |-> _ => . ...</tree>
+    <status>... S |-> _ => . ...</status>
+   when (N ==Int -1 *Int G)
+
+  rule [SubstitutionTransform7]: // move X to left child of G
+    <mode> 57 => 58 </mode>
+    <subpivot> G:Int </subpivot>
+    <child>... (G => -1 *Int G) |-> X:Int ...</child>
+  
+  rule [SubstitutionTransform8]: // go copy Z, right child of L
+    <mode> 58 => 200 </mode>
+    <start> _ => Z </start>
+    <next> _ => 59 </next>
+    <subroot> L:Int </subroot>
+    <child>... L |-> Z:Int ...</child>
+
+  rule [SubstitutionTransform9]: // connect copy of Z to G
+    <mode> 59 => 3 </mode>
+    <new> N:Int </new>
+    <loc> _ => C </loc>
+    <pivot> C:Int </pivot>
+    <subpivot> G:Int </subpivot>
+    <child>... . => G |-> N </child>
+    <parent>... . => N |-> G </parent>
+    <status>... C |-> (_ => 0) ...</status>
+
+  
+
+
 
 
   rule [VoidTransform1]: // erase right child
@@ -491,6 +581,73 @@ module UNLAMBDA
     <mode> 101 => R </mode>
     <next> R:Int </next>
     <queue> . </queue>  
+
+
+
+  // copying a subtree
+
+  rule [CopySubtree]: // copy subtree rooted at L
+    <mode> 200 => 201 </mode>
+    <start> L:Int </start>
+    <counter> C:Int </counter>
+    <new> _ => C </new>
+//    <tree>... L |-> Z:K ...</tree>
+    <queue> . => ListItem(0) ListItem(0) ListItem(L) </queue>
+
+  rule [CopySubtreeTerminal]:
+    <mode> 201 </mode>
+    <queue> ListItem(P:Int) ListItem(R:Int) ListItem(L:Int) => . ...</queue>
+    <counter> C:Int => C +Int 1 </counter>
+    <copy> . => ListItem(C) ListItem(Z) </copy>
+    <tree>... L |-> Z:Atom ...</tree>
+    <parent>... . => C |-> P </parent>
+    <child>... . => (P *Int R) |-> C </child>
+    <status>... . => C |-> 0 </status>
+
+  rule [CopySubtreeTerminal2]:
+    <mode> 201 </mode>
+    <copy> ListItem(C:Int) ListItem(Z:Atom) => . </copy>
+    <tree>... . => C |-> Z </tree>
+
+  rule [CopySubtreeNonterminalRight]:
+    <mode> 201 => 202 </mode>
+    <queue> ListItem(P:Int) ListItem(R:Int) ListItem(L:Int) =>
+            ListItem(P) ListItem(R) ListItem(L)
+            ListItem(C) ListItem(1) ListItem(Y) ...</queue>
+    <counter> C:Int </counter>
+    <copy> . => ListItem(C) ListItem(Z) ListItem(P) ListItem(R) </copy>
+    <tree>... L |-> Z:Apply ...</tree>
+    <child>... L |-> Y:Int ...</child>
+    <parent>... . => C |-> P </parent>
+    <status>... . => C |-> 0 </status>
+
+  rule [CopySubtreeNonterminalRight2]:
+    <mode> 202 </mode>
+    <copy> ListItem(C:Int) ListItem(Z:Apply) ListItem(P:Int) ListItem(R:Int)
+           => . </copy>
+    <tree>... . => C |-> Z </tree>
+    <child>... . => (P *Int R) |-> C </child>
+
+  rule [CopySubtreeNonterminalLeft]:
+    <mode> 202 => 201 </mode>
+    <queue> ListItem(P:Int) ListItem(R:Int) ListItem(L:Int) =>
+            ListItem(C) ListItem(-1) ListItem(X) ...</queue>
+    <counter> C:Int => C +Int 1 </counter>
+//    <copy> . => Z P R </copy>
+    <child>... N |-> X:Int ...</child>
+   when N ==Int -1 *Int L
+
+
+  rule [CopyComplete]:
+    <mode> 201 => R </mode>
+    <new> N:Int </new>
+    <next> R:Int </next>
+    <queue> . </queue> 
+    <child>... 0 |-> N => . ...</child>
+    <parent>... N |-> 0 => . ...</parent>
+
+
+ // TODO: continuations, input
 
 
 /*
