@@ -521,12 +521,19 @@ public class UnparserFilter extends BasicVisitor {
 	postpare();
     }
 
+    @Override
+    public void visit(LiterateDefinitionComment literateDefinitionComment) {
+	prepare(literateDefinitionComment);
+	//result.write(literateDefinitionComment.getValue());
+	//result.endLine();
+	postpare();
+    }
+
+    @Override
     public void visit(ro.uaic.info.fmse.k.Require require) {
 	prepare(require);
+	result.write("require \"" + require.getValue() + "\"");
 	result.endLine();
-	result.write("Don't know how to pretty print Require");
-	result.endLine();
-	super.visit(require);
 	postpare();
     }
 

@@ -36,6 +36,11 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+        public void visit(Require require) {
+		visit((DefinitionItem) require);
+	}
+
+	@Override
 	public void visit(ModuleItem node) {
 		visit((ASTNode) node);
 	}

@@ -45,6 +45,7 @@ import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.Terminal;
 import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.k.Variable;
+import ro.uaic.info.fmse.k.Require;
 
 public interface Visitor {
 	public void visit(ASTNode node);
@@ -53,6 +54,7 @@ public interface Visitor {
 	// <DefinitionItems>
 	public void visit(LiterateDefinitionComment node);
 	public void visit(Module node);
+	public void visit(Require require);
 	// </DefinitionItems>
 	public void visit(ModuleItem node);
 	// <ModuleItems>
