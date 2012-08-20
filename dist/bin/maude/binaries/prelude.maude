@@ -1,0 +1,2463 @@
+***(
+
+    This file is part of the Maude 2 interpreter.
+
+    Copyright 1997-2009 SRI International, Menlo Park, CA 94025, USA.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+)
+
+***
+***	Maude interpreter standard prelude.
+***	Version 2.5.
+***
+***	Some of the overall structure is taken from the OBJ3
+***	interpreter standard prelude.
+***
+
+set include BOOL off .
+
+fmod TRUTH-VALUE is
+  sort Bool .
+  op true : -> Bool [ctor special (id-hook SystemTrue)] .
+  op false : -> Bool [ctor special (id-hook SystemFalse)] .
+endfm
+
+fmod BOOL-OPS is
+  protecting TRUTH-VALUE .
+  op _and_ : Bool Bool -> Bool [assoc comm prec 55] .
+  op _or_ : Bool Bool -> Bool [assoc comm prec 59] .
+  op _xor_ : Bool Bool -> Bool [assoc comm prec 57] .
+  op not_ : Bool -> Bool [prec 53] .
+  op _implies_ : Bool Bool -> Bool [gather (e E) prec 61] .
+  vars A B C : Bool .
+  eq true and A = A .
+  eq false and A = false .
+  eq A and A = A .
+  eq false xor A = A .
+  eq A xor A = false .
+  eq A and (B xor C) = A and B xor A and C .
+  eq not A = A xor true .
+  eq A or B = A and B xor A xor B .
+  eq A implies B = not(A xor A and B) .
+endfm
+
+fmod TRUTH is
+  protecting TRUTH-VALUE .
+  op if_then_else_fi : Bool Universal Universal -> Universal 
+        [poly (2 3 0)
+         special (id-hook BranchSymbol
+                  term-hook 1 (true)
+                  term-hook 2 (false))] .
+
+  op _==_ : Universal Universal -> Bool 
+        [prec 51 poly (1 2)
+         special (id-hook EqualitySymbol
+                  term-hook equalTerm (true)
+                  term-hook notEqualTerm (false))] .
+
+  op _=/=_ : Universal Universal -> Bool 
+        [prec 51 poly (1 2)
+         special (id-hook EqualitySymbol
+                  term-hook equalTerm (false)
+                  term-hook notEqualTerm (true))] .
+endfm
+
+fmod BOOL is
+  protecting BOOL-OPS .
+  protecting TRUTH .
+endfm
+
+fmod EXT-BOOL is
+  protecting BOOL .
+  op _and-then_ : Bool Bool -> Bool [strat (1 0) gather (e E) prec 55] .
+  op _or-else_ : Bool Bool -> Bool [strat (1 0) gather (e E) prec 59] .
+  var B : [Bool] .
+  eq true and-then B = B .
+  eq false and-then B = false .
+  eq true or-else B = true .
+  eq false or-else B = B .
+endfm
+
+***
+***	Builtin data types.
+***
+
+fmod NAT is
+  protecting BOOL .
+  sorts Zero NzNat Nat .
+  subsort Zero NzNat < Nat .
+  op 0 : -> Zero [ctor] .
+
+  op s_ : Nat -> NzNat
+        [ctor iter
+         special (id-hook SuccSymbol
+                  term-hook zeroTerm (0))] .
+
+  op _+_ : NzNat Nat -> NzNat
+        [assoc comm prec 33
+         special (id-hook ACU_NumberOpSymbol (+)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+  op _+_ : Nat Nat -> Nat [ditto] .
+
+  op sd : Nat Nat -> Nat
+        [comm
+         special (id-hook CUI_NumberOpSymbol (sd)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op _*_ : NzNat NzNat -> NzNat
+        [assoc comm prec 31
+         special (id-hook ACU_NumberOpSymbol (*)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+  op _*_ : Nat Nat -> Nat [ditto] .
+
+  op _quo_ : Nat NzNat -> Nat
+        [prec 31 gather (E e)
+         special (id-hook NumberOpSymbol (quo)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op _rem_ : Nat NzNat -> Nat
+        [prec 31 gather (E e)
+         special (id-hook NumberOpSymbol (rem)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op _^_ : Nat Nat -> Nat
+        [prec 29  gather (E e)
+         special (id-hook NumberOpSymbol (^)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+  op _^_ : NzNat Nat -> NzNat [ditto] .
+
+  op modExp : Nat Nat NzNat ~> Nat
+        [special (id-hook NumberOpSymbol (modExp)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+ 
+  op gcd : NzNat Nat -> NzNat
+        [assoc comm
+         special (id-hook ACU_NumberOpSymbol (gcd)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+  op gcd : Nat Nat -> Nat [ditto] .
+
+  op lcm : NzNat NzNat -> NzNat
+        [assoc comm
+         special (id-hook ACU_NumberOpSymbol (lcm)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+  op lcm : Nat Nat -> Nat [ditto] .
+
+  op min : NzNat NzNat -> NzNat
+        [assoc comm
+         special (id-hook ACU_NumberOpSymbol (min)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+  op min : Nat Nat -> Nat [ditto] .
+
+  op max : NzNat Nat -> NzNat
+        [assoc comm
+         special (id-hook ACU_NumberOpSymbol (max)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+  op max : Nat Nat -> Nat [ditto] .
+
+  op _xor_ : Nat Nat -> Nat
+        [assoc comm prec 55
+         special (id-hook ACU_NumberOpSymbol (xor)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op _&_ : Nat Nat -> Nat
+        [assoc comm prec 53
+         special (id-hook ACU_NumberOpSymbol (&)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op _|_ : NzNat Nat -> NzNat
+        [assoc comm prec 57
+         special (id-hook ACU_NumberOpSymbol (|)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+  op _|_ : Nat Nat -> Nat [ditto] .
+
+  op _>>_ : Nat Nat -> Nat
+        [prec 35 gather (E e)
+         special (id-hook NumberOpSymbol (>>)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op _<<_ : Nat Nat -> Nat
+        [prec 35 gather (E e)
+         special (id-hook NumberOpSymbol (<<)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op _<_ : Nat Nat -> Bool
+        [prec 37
+         special (id-hook NumberOpSymbol (<)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _<=_ : Nat Nat -> Bool
+        [prec 37
+         special (id-hook NumberOpSymbol (<=)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _>_ : Nat Nat -> Bool
+        [prec 37
+         special (id-hook NumberOpSymbol (>)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _>=_ : Nat Nat -> Bool
+        [prec 37
+         special (id-hook NumberOpSymbol (>=)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _divides_ : NzNat Nat -> Bool
+        [prec 51
+         special (id-hook NumberOpSymbol (divides)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+endfm
+
+fmod INT is
+  protecting NAT .
+  sorts NzInt Int .
+  subsorts NzNat < NzInt Nat < Int .
+
+  op -_ : NzNat -> NzInt
+        [ctor
+         special (id-hook MinusSymbol
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op -_ : NzInt -> NzInt [ditto] .
+  op -_ : Int -> Int [ditto] .
+
+  op _+_ : Int Int -> Int
+        [assoc comm prec 33
+         special (id-hook ACU_NumberOpSymbol (+)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+
+  op _-_ : Int Int -> Int
+        [prec 33 gather (E e)
+         special (id-hook NumberOpSymbol (-)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+
+  op _*_ : NzInt NzInt -> NzInt
+        [assoc comm prec 31
+         special (id-hook ACU_NumberOpSymbol (*)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op _*_ : Int Int -> Int [ditto] .
+
+  op _quo_ : Int NzInt -> Int
+        [prec 31 gather (E e)
+         special (id-hook NumberOpSymbol (quo)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+
+  op _rem_ : Int NzInt -> Int
+        [prec 31 gather (E e)
+         special (id-hook NumberOpSymbol (rem)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+
+  op _^_ : Int Nat -> Int
+        [prec 29 gather (E e)
+         special (id-hook NumberOpSymbol (^)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op _^_ : NzInt Nat -> NzInt [ditto] .
+
+  op abs : NzInt -> NzNat
+        [special (id-hook NumberOpSymbol (abs)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op abs : Int -> Nat [ditto] .
+
+  op gcd : NzInt Int -> NzNat
+        [assoc comm
+         special (id-hook ACU_NumberOpSymbol (gcd)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op gcd : Int Int -> Nat [ditto] .
+
+  op lcm : NzInt NzInt -> NzNat
+        [assoc comm
+         special (id-hook ACU_NumberOpSymbol (lcm)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op lcm : Int Int -> Nat [ditto] .
+
+  op min : NzInt NzInt -> NzInt
+        [assoc comm
+         special (id-hook ACU_NumberOpSymbol (min)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op min : Int Int -> Int [ditto] .
+
+  op max : NzInt NzInt -> NzInt
+        [assoc comm
+         special (id-hook ACU_NumberOpSymbol (max)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op max : Int Int -> Int [ditto] .
+  op max : NzNat Int -> NzNat [ditto] .
+  op max : Nat Int -> Nat [ditto] .
+
+  op ~_ : Int -> Int
+        [special (id-hook NumberOpSymbol (~)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+
+  op _xor_ : Int Int -> Int
+        [assoc comm prec 55
+         special (id-hook ACU_NumberOpSymbol (xor)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+
+  op _&_ : Nat Int -> Nat
+        [assoc comm prec 53
+         special (id-hook ACU_NumberOpSymbol (&)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op _&_ : Int Int -> Int [ditto] .
+
+  op _|_ : NzInt Int -> NzInt
+        [assoc comm prec 57
+         special (id-hook ACU_NumberOpSymbol (|)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+  op _|_ : Int Int -> Int [ditto] .
+
+  op _>>_ : Int Nat -> Int
+        [prec 35 gather (E e)
+         special (id-hook NumberOpSymbol (>>)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+
+  op _<<_ : Int Nat -> Int
+        [prec 35 gather (E e)
+         special (id-hook NumberOpSymbol (<<)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+
+  op _<_ : Int Int -> Bool
+        [prec 37
+         special (id-hook NumberOpSymbol (<)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _<=_ : Int Int -> Bool
+        [prec 37
+         special (id-hook NumberOpSymbol (<=)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _>_ : Int Int -> Bool
+        [prec 37
+         special (id-hook NumberOpSymbol (>)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _>=_ : Int Int -> Bool
+        [prec 37
+         special (id-hook NumberOpSymbol (>=)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _divides_ : NzInt Int -> Bool
+        [prec 51
+         special (id-hook NumberOpSymbol (divides)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+endfm
+
+fmod RAT is
+  protecting INT .
+  sorts PosRat NzRat Rat .
+  subsorts NzInt < NzRat Int < Rat .
+  subsorts NzNat < PosRat < NzRat .
+
+  op _/_ : NzInt NzNat -> NzRat
+        [ctor prec 31 gather (E e)
+         special (id-hook DivisionSymbol
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int))] .
+
+  var I J : NzInt .
+  var N M : NzNat .
+  var K : Int .
+  var Z : Nat .
+  var Q : NzRat .
+  var R : Rat .
+
+  op _/_ : NzNat NzNat -> PosRat [ctor ditto] .
+  op _/_ : PosRat PosRat -> PosRat [ditto] .
+  op _/_ : NzRat NzRat -> NzRat [ditto] .
+  op _/_ : Rat NzRat -> Rat [ditto] .
+  eq 0 / Q = 0 .
+  eq I / - N = - I / N .
+  eq (I / N) / (J / M) = (I * M) / (J * N) .
+  eq (I / N) / J = I / (J * N) .
+  eq I / (J / M) = (I * M) / J .
+
+  op -_ : NzRat -> NzRat [ditto] .
+  op -_ : Rat -> Rat [ditto] .
+  eq - (I / N) = - I / N .
+
+  op _+_ : PosRat PosRat -> PosRat [ditto] .
+  op _+_ : PosRat Nat -> PosRat [ditto] .
+  op _+_ : Rat Rat -> Rat [ditto] .
+  eq I / N + J / M = (I * M + J * N) / (N * M) .
+  eq I / N + K = (I + K * N) / N .
+
+  op _-_ : Rat Rat -> Rat [ditto] .
+  eq I / N - J / M = (I * M - J * N) / (N * M) .
+  eq I / N - K = (I - K * N) / N .
+  eq K - J / M = (K * M - J ) / M .
+
+  op _*_ : PosRat PosRat -> PosRat [ditto] .
+  op _*_ : NzRat NzRat -> NzRat [ditto] .
+  op _*_ : Rat Rat -> Rat [ditto] .
+  eq Q * 0 = 0 .
+  eq (I / N) * (J / M) = (I * J) / (N * M).
+  eq (I / N) * K = (I * K) / N .
+
+  op _quo_ : PosRat PosRat -> Nat [ditto] .
+  op _quo_ : Rat NzRat -> Int [ditto] .
+  eq (I / N) quo Q = I quo (N * Q) .
+  eq K quo (J / M) = (K * M) quo J .
+
+  op _rem_ : Rat NzRat -> Rat [ditto] .
+  eq (I / N) rem (J / M) = ((I * M) rem (J * N)) / (N * M) .
+  eq K rem (J / M) = ((K * M) rem J) / M .
+  eq (I / N) rem J = (I rem (J * N)) / N .
+
+  op _^_ : PosRat Nat -> PosRat [ditto] .
+  op _^_ : NzRat Nat -> NzRat [ditto] .
+  op _^_ : Rat Nat -> Rat [ditto] .
+  eq (I / N) ^ Z = (I ^ Z) / (N ^ Z) .
+
+  op abs : NzRat -> PosRat [ditto] .
+  op abs : Rat -> Rat [ditto] .
+  eq abs(I / N) = abs(I) / N .
+
+  op gcd : NzRat Rat -> PosRat [ditto] .
+  op gcd : Rat Rat -> Rat [ditto] .
+  eq gcd(I / N, R) = gcd(I, N * R) / N .
+
+  op lcm : NzRat NzRat -> PosRat [ditto] .
+  op lcm : Rat Rat -> Rat [ditto] .
+  eq lcm(I / N, R) = lcm(I, N * R) / N .
+
+  op min : PosRat PosRat -> PosRat [ditto] .
+  op min : NzRat NzRat -> NzRat [ditto] .
+  op min : Rat Rat -> Rat [ditto] .
+  eq min(I / N, R) = min(I, N * R) / N .
+
+  op max : PosRat Rat -> PosRat [ditto] .
+  op max : NzRat NzRat -> NzRat [ditto] .
+  op max : Rat Rat -> Rat [ditto] .
+  eq max(I / N, R) = max(I, N * R) / N .
+
+  op _<_ : Rat Rat -> Bool [ditto] .
+  eq (I / N) < (J / M) = (I * M) < (J * N) .
+  eq (I / N) < K = I < (K * N) .
+  eq K < (J / M) = (K * M) < J .
+
+  op _<=_ : Rat Rat -> Bool [ditto] .
+  eq (I / N) <= (J / M) = (I * M) <= (J * N) .
+  eq (I / N) <= K = I <= (K * N) .
+  eq K <= (J / M) = (K * M) <= J .
+
+  op _>_ : Rat Rat -> Bool [ditto] .
+  eq (I / N) > (J / M) = (I * M) > (J * N) .
+  eq (I / N) > K = I > (K * N) .
+  eq K > (J / M) = (K * M) > J .
+
+  op _>=_ : Rat Rat -> Bool [ditto] .
+  eq (I / N) >= (J / M) = (I * M) >= (J * N) .
+  eq (I / N) >= K = I >= (K * N) .
+  eq K >= (J / M) = (K * M) >= J .
+
+  op _divides_ : NzRat Rat -> Bool [ditto] .
+  eq (I / N) divides K = I divides N * K .
+  eq Q divides (J / M) = Q * M divides J .
+
+  op trunc : PosRat -> Nat .
+  op trunc : Rat -> Int .
+  eq trunc(K) = K .
+  eq trunc(I / N) = I quo N .
+  
+  op frac : Rat -> Rat .
+  eq frac(K) = 0 .
+  eq frac(I / N) = (I rem N) / N .
+
+  op floor : PosRat -> Nat .
+  op floor : Rat -> Int .
+  op ceiling : PosRat -> NzNat .
+  op ceiling : Rat -> Int .
+  eq floor(K) = K .
+  eq ceiling(K) = K .
+  eq floor(N / M) = N quo M .
+  eq ceiling(N / M) = ((N + M) - 1) quo M .
+  eq floor(- N / M) = - ceiling(N / M) .
+  eq ceiling(- N / M) = - floor(N / M) .
+endfm
+
+fmod FLOAT is
+  protecting BOOL .
+  sorts FiniteFloat Float .
+  subsort FiniteFloat < Float .
+
+*** pseudo constructor for the set of double precision floats
+  op <Floats> : -> FiniteFloat [special (id-hook FloatSymbol)] .
+  op <Floats> : -> Float [ditto] .
+
+  op -_ : Float -> Float
+        [prec 15
+         special (id-hook FloatOpSymbol (-)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op -_ : FiniteFloat -> FiniteFloat [ditto] .
+
+  op _+_ : Float Float -> Float
+        [prec 33 gather (E e)
+         special (id-hook FloatOpSymbol (+)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op _-_ : Float Float -> Float
+        [prec 33 gather (E e)
+         special (id-hook FloatOpSymbol (-)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op _*_ : Float Float -> Float
+        [prec 31 gather (E e)
+         special (id-hook FloatOpSymbol (*)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op _/_ : Float Float ~> Float
+        [prec 31 gather (E e)
+         special (id-hook FloatOpSymbol (/)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op _rem_ : Float Float ~> Float
+        [prec 31 gather (E e)
+         special (id-hook FloatOpSymbol (rem)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op _^_ : Float Float ~> Float
+        [prec 29  gather (E e)
+         special (id-hook FloatOpSymbol (^)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op abs : Float -> Float
+        [special (id-hook FloatOpSymbol (abs)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op abs : FiniteFloat -> FiniteFloat [ditto] .
+
+  op floor : Float -> Float
+        [special (id-hook FloatOpSymbol (floor)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op ceiling : Float -> Float
+        [special (id-hook FloatOpSymbol (ceiling)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op min : Float Float -> Float
+        [special (id-hook FloatOpSymbol (min)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op max : Float Float -> Float
+        [special (id-hook FloatOpSymbol (max)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op sqrt : Float ~> Float
+        [special (id-hook FloatOpSymbol (sqrt)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op exp : Float -> Float
+        [special (id-hook FloatOpSymbol (exp)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op log : Float ~> Float
+        [special (id-hook FloatOpSymbol (log)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op sin : Float -> Float
+        [special (id-hook FloatOpSymbol (sin)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op cos : Float -> Float
+        [special (id-hook FloatOpSymbol (cos)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op tan : Float -> Float
+        [special (id-hook FloatOpSymbol (tan)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op asin : Float ~> Float
+        [special (id-hook FloatOpSymbol (asin)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op acos : Float ~> Float
+        [special (id-hook FloatOpSymbol (acos)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op atan : Float -> Float
+        [special (id-hook FloatOpSymbol (atan)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op atan : Float Float -> Float
+        [special (id-hook FloatOpSymbol (atan)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op _<_ : Float Float -> Bool
+        [prec 51
+         special (id-hook FloatOpSymbol (<)
+                  op-hook floatSymbol (<Floats> : ~> Float)
+                   term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _<=_ : Float Float -> Bool
+        [prec 51
+         special (id-hook FloatOpSymbol (<=)
+                  op-hook floatSymbol (<Floats> : ~> Float)
+                    term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _>_ : Float Float -> Bool
+        [prec 51
+         special (id-hook FloatOpSymbol (>)
+                  op-hook floatSymbol (<Floats> : ~> Float)
+                    term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _>=_ : Float Float -> Bool
+        [prec 51
+         special (id-hook FloatOpSymbol (>=)
+                  op-hook floatSymbol (<Floats> : ~> Float)
+                    term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op pi : -> FiniteFloat .
+  eq pi = 3.1415926535897931 .
+
+  op _=[_]_ : Float FiniteFloat Float -> Bool [prec 51 format (d d d d d s d)] .
+  var X Y : Float .
+  var Z : FiniteFloat .
+  eq X =[Z] Y = abs(X - Y) < Z .
+endfm
+
+fmod STRING is
+  protecting NAT .
+  sorts String Char FindResult .
+  subsort Char < String .
+  subsort Nat < FindResult .
+
+*** pseudo constructor for the infinite set of strings
+  op <Strings> : -> Char [special (id-hook StringSymbol)] .
+  op <Strings> : -> String [ditto] .
+
+  op notFound : -> FindResult [ctor] .
+
+  op ascii : Char -> Nat
+        [special (id-hook StringOpSymbol (ascii)
+                  op-hook stringSymbol (<Strings> : ~> Char)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op char : Nat ~> Char
+        [special (id-hook StringOpSymbol (char)
+                  op-hook stringSymbol (<Strings> : ~> Char)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op _+_ : String String -> String
+        [prec 33 gather (E e)
+         special (id-hook StringOpSymbol (+)
+                  op-hook stringSymbol (<Strings> : ~> String))] .
+
+  op length : String -> Nat
+        [special (id-hook StringOpSymbol (length)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op substr : String Nat Nat -> String
+        [special (id-hook StringOpSymbol (substr)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+
+  op find : String String Nat -> FindResult
+        [special (id-hook StringOpSymbol (find)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  term-hook notFoundTerm (notFound))] .
+
+  op rfind : String String Nat -> FindResult
+        [special (id-hook StringOpSymbol (rfind)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  term-hook notFoundTerm (notFound))] .
+
+  op _<_ : String String -> Bool 
+        [prec 37
+         special (id-hook StringOpSymbol (<)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _<=_ : String String -> Bool 
+        [prec 37
+         special (id-hook StringOpSymbol (<=)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _>_ : String String -> Bool 
+        [prec 37
+         special (id-hook StringOpSymbol (>)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+
+  op _>=_ : String String -> Bool 
+        [prec 37
+         special (id-hook StringOpSymbol (>=)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  term-hook trueTerm (true)
+                  term-hook falseTerm (false))] .
+endfm
+
+fmod CONVERSION is
+  protecting RAT .
+  protecting FLOAT .
+  protecting STRING .
+  sort DecFloat .
+  op <_,_,_> : Int String Int -> DecFloat [ctor] .
+
+  op float : Rat -> Float
+        [special (id-hook FloatOpSymbol (float)
+                  op-hook floatSymbol (<Floats> : ~> Float)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  op-hook divisionSymbol (_/_ : NzInt NzNat ~> NzRat))] .
+
+  op rat : FiniteFloat -> Rat
+        [special (id-hook FloatOpSymbol (rat)
+                  op-hook floatSymbol (<Floats> : ~> Float)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  op-hook divisionSymbol (_/_ : NzInt NzNat ~> NzRat))] .
+
+  op string : Rat NzNat ~> String
+        [special (id-hook StringOpSymbol (string)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  op-hook divisionSymbol (_/_ : NzInt NzNat ~> NzRat))] .
+
+  op rat : String NzNat ~> Rat
+        [special (id-hook StringOpSymbol (rat)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  op-hook divisionSymbol (_/_ : NzInt NzNat ~> NzRat))] .
+
+  op string : Float -> String
+        [special (id-hook StringOpSymbol (string)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op float : String ~> Float
+        [special (id-hook StringOpSymbol (float)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  op-hook floatSymbol (<Floats> : ~> Float))] .
+
+  op decFloat : Float Nat -> DecFloat
+        [special (id-hook StringOpSymbol (decFloat)
+                  op-hook stringSymbol (<Strings> : ~> String)
+                  op-hook floatSymbol (<Floats> : ~> Float)
+                  op-hook succSymbol (s_ : Nat ~> NzNat)
+                  op-hook minusSymbol (-_ : NzNat ~> Int)
+                  op-hook decFloatSymbol 
+                          (<_,_,_> : Int String Int ~> DecFloat))] .
+endfm
+
+fmod RANDOM is
+  protecting NAT .
+  op random : Nat -> Nat
+        [special (id-hook RandomOpSymbol
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+endfm
+
+fmod QID is
+  protecting STRING .
+  sort Qid .
+
+*** pseudo constructor for the infinite set of quoted identifiers
+  op <Qids> : -> Qid [special (id-hook QuotedIdentifierSymbol)] .
+
+  op string : Qid -> String 
+        [special (id-hook QuotedIdentifierOpSymbol (string)
+                  op-hook quotedIdentifierSymbol (<Qids> : ~> Qid)
+                  op-hook stringSymbol (<Strings> : ~> String))] .
+
+  op qid : String ~> Qid 
+        [special (id-hook QuotedIdentifierOpSymbol (qid)
+                  op-hook quotedIdentifierSymbol (<Qids> : ~> Qid)
+                  op-hook stringSymbol (<Strings> : ~> String))] .
+endfm
+
+***
+***	Standard theories and views.
+***
+
+fth TRIV is
+  sort Elt .
+endfth
+
+view TRIV from TRIV to TRIV is endv
+
+view Bool from TRIV to BOOL is
+  sort Elt to Bool .
+endv
+
+view Nat from TRIV to NAT is
+  sort Elt to Nat .
+endv
+
+view Int from TRIV to INT is
+  sort Elt to Int .
+endv
+
+view Rat from TRIV to RAT is
+  sort Elt to Rat .
+endv
+
+view Float from TRIV to FLOAT is
+  sort Elt to Float .
+endv
+
+view String from TRIV to STRING is
+  sort Elt to String .
+endv
+
+view Qid from TRIV to QID is
+  sort Elt to Qid .
+endv
+
+fth STRICT-WEAK-ORDER is
+  protecting BOOL .
+  including TRIV .
+  op _<_ : Elt Elt -> Bool .
+  vars X Y Z : Elt .
+  ceq X < Z = true if X < Y /\ Y < Z [nonexec label transitive] .
+  eq X < X = false [nonexec label irreflexive] .
+  ceq X < Y or Y < X or Y < Z or Z < Y = true if X < Z or Z < X
+    [nonexec label incomparability-transitive] .
+endfth
+
+view STRICT-WEAK-ORDER from TRIV to STRICT-WEAK-ORDER is endv
+
+fth STRICT-TOTAL-ORDER is
+  inc STRICT-WEAK-ORDER .
+  vars X Y : Elt .
+  ceq X = Y if X < Y = false /\ Y < X = false [nonexec label total] .
+endfth
+
+view STRICT-TOTAL-ORDER from STRICT-WEAK-ORDER to STRICT-TOTAL-ORDER is endv
+
+view Nat< from STRICT-TOTAL-ORDER to NAT is
+  sort Elt to Nat .
+endv
+
+view Int< from STRICT-TOTAL-ORDER to INT is
+  sort Elt to Int .
+endv
+
+view Rat< from STRICT-TOTAL-ORDER to RAT is
+  sort Elt to Rat .
+endv
+
+view Float< from STRICT-TOTAL-ORDER to FLOAT is
+  sort Elt to Float .
+endv
+
+view String< from STRICT-TOTAL-ORDER to STRING is
+  sort Elt to String .
+endv
+
+fth TOTAL-PREORDER is
+  protecting BOOL .
+  including TRIV .
+  op _<=_ : Elt Elt -> Bool .
+  vars X Y Z : Elt .
+  eq X <= X = true [nonexec label reflexive] .
+  ceq X <= Z = true if X <= Y /\ Y <= Z [nonexec label transitive] .
+  eq X <= Y or Y <= X = true [nonexec label total] .
+endfth
+
+view TOTAL-PREORDER from TRIV to TOTAL-PREORDER is endv
+
+fth TOTAL-ORDER is
+  inc TOTAL-PREORDER .
+  vars X Y : Elt .
+  ceq X = Y if X <= Y /\ Y <= X  [nonexec label antisymmetric] .
+endfth
+
+view TOTAL-ORDER from TOTAL-PREORDER to TOTAL-ORDER is endv
+
+view Nat<= from TOTAL-ORDER to NAT is
+  sort Elt to Nat .
+endv
+
+view Int<= from TOTAL-ORDER to INT is
+  sort Elt to Int .
+endv
+
+view Rat<= from TOTAL-ORDER to RAT is
+  sort Elt to Rat .
+endv
+
+view Float<= from TOTAL-ORDER to FLOAT is
+  sort Elt to Float .
+endv
+
+view String<= from TOTAL-ORDER to STRING is
+  sort Elt to String .
+endv
+
+fth DEFAULT is
+  including TRIV .
+  op 0 : -> Elt .
+endfth
+
+view DEFAULT from TRIV to DEFAULT is endv
+
+view Nat0 from DEFAULT to NAT is
+  sort Elt to Nat .
+endv
+
+view Int0 from DEFAULT to INT is
+  sort Elt to Int .
+endv
+
+view Rat0 from DEFAULT to RAT is
+  sort Elt to Rat .
+endv
+
+view Float0 from DEFAULT to FLOAT is
+  sort Elt to Float .
+  op 0 to term 0.0 .
+endv
+
+view String0 from DEFAULT to STRING is
+  sort Elt to String .
+  op 0 to term "" .
+endv
+
+view Qid0 from DEFAULT to QID is
+  sort Elt to Qid .
+  op 0 to term ' .
+endv
+
+***
+***	Container data types defined in Maude.
+***
+
+fmod LIST{X :: TRIV} is
+  protecting NAT .
+  sorts NeList{X} List{X} .
+  subsort X$Elt < NeList{X} < List{X} .
+
+  op nil : -> List{X} [ctor] .
+  op __ : List{X} List{X} -> List{X} [ctor assoc id: nil prec 25] .
+  op __ : NeList{X} List{X} -> NeList{X} [ctor ditto] .
+  op __ : List{X} NeList{X} -> NeList{X} [ctor ditto] .
+
+  var E E' : X$Elt .
+  vars A L : List{X} .
+  var C : Nat .
+
+  op append : List{X} List{X} -> List{X} .
+  op append : NeList{X} List{X} -> NeList{X} .
+  op append : List{X} NeList{X} -> NeList{X} .
+  eq append(A, L) = A L .
+
+  op head : NeList{X} -> X$Elt .
+  eq head(E L) = E .
+
+  op tail : NeList{X} -> List{X} .
+  eq tail(E L) = L .
+
+  op last : NeList{X} -> X$Elt .
+  eq last(L E) = E .
+
+  op front : NeList{X} -> List{X} .
+  eq front(L E) = L .
+
+  op occurs : X$Elt List{X} -> Bool .
+  eq occurs(E, nil) = false .
+  eq occurs(E, E' L) = if E == E' then true else occurs(E, L) fi .
+
+  op reverse : List{X} -> List{X} .
+  op reverse : NeList{X} -> NeList{X} .
+  eq reverse(L) = $reverse(L, nil) .
+
+  op $reverse : List{X} List{X} -> List{X} .
+  eq $reverse(nil, A) = A .
+  eq $reverse(E L, A) = $reverse(L, E A).
+
+  op size : List{X} -> Nat .
+  op size : NeList{X} -> NzNat .
+  eq size(L) = $size(L, 0) .
+
+  op $size : List{X} Nat -> Nat .
+  eq $size(nil, C) = C .
+  eq $size(E L, C) = $size(L, C + 1) .
+endfm
+
+fmod WEAKLY-SORTABLE-LIST{X :: STRICT-WEAK-ORDER} is
+  protecting LIST{STRICT-WEAK-ORDER}{X} *
+              (sort NeList{STRICT-WEAK-ORDER}{X} to NeList{X},
+               sort List{STRICT-WEAK-ORDER}{X} to List{X}) .
+  sort $Split{X} .
+
+  vars E E' : X$Elt .
+  vars A A' L L' : List{X} .
+  var N : NeList{X} .
+
+  op sort : List{X} -> List{X} .
+  op sort : NeList{X} -> NeList{X} .
+  eq sort(nil) = nil .
+  eq sort(E) = E .
+  eq sort(E N) = $sort($split(E N, nil, nil)) .
+
+  op $sort : $Split{X} -> List{X} .
+  eq $sort($split(nil, L, L')) = $merge(sort(L), sort(L'), nil) .
+
+  op $split : List{X} List{X} List{X} -> $Split{X} [ctor] .
+  eq $split(E, A, A') = $split(nil, A E, A') .
+  eq $split(E L E', A, A') = $split(L, A E, E' A') .
+
+  op merge : List{X} List{X} -> List{X} .
+  op merge : NeList{X} List{X} -> NeList{X} .
+  op merge : List{X} NeList{X} -> NeList{X} .
+  eq merge(L, L') = $merge(L, L', nil) .
+
+  op $merge : List{X} List{X} List{X} -> List{X} .
+  eq $merge(L, nil, A) = A L .
+  eq $merge(nil, L, A) = A L .
+  eq $merge(E L, E' L', A) =
+      if E' < E then $merge(E L, L', A E')
+      else $merge(L, E' L', A E)
+      fi .
+endfm
+
+fmod SORTABLE-LIST{X :: STRICT-TOTAL-ORDER} is
+  protecting WEAKLY-SORTABLE-LIST{STRICT-TOTAL-ORDER}{X} *
+              (sort NeList{STRICT-TOTAL-ORDER}{X} to NeList{X},
+               sort List{STRICT-TOTAL-ORDER}{X} to List{X}) .
+endfm
+
+fmod WEAKLY-SORTABLE-LIST'{X :: TOTAL-PREORDER} is
+  protecting LIST{TOTAL-PREORDER}{X} *
+              (sort NeList{TOTAL-PREORDER}{X} to NeList{X},
+               sort List{TOTAL-PREORDER}{X} to List{X}) .
+  sort $Split{X} .
+
+  vars E E' : X$Elt .
+  vars A A' L L' : List{X} .
+  var N : NeList{X} .
+
+  op sort : List{X} -> List{X} .
+  op sort : NeList{X} -> NeList{X} .
+  eq sort(nil) = nil .
+  eq sort(E) = E .
+  eq sort(E N) = $sort($split(E N, nil, nil)) .
+
+  op $sort : $Split{X} -> List{X} .
+  eq $sort($split(nil, L, L')) = $merge(sort(L), sort(L'), nil) .
+
+  op $split : List{X} List{X} List{X} -> $Split{X} [ctor] .
+  eq $split(E, A, A') = $split(nil, A E, A') .
+  eq $split(E L E', A, A') = $split(L, A E, E' A') .
+
+  op merge : List{X} List{X} -> List{X} .
+  op merge : NeList{X} List{X} -> NeList{X} .
+  op merge : List{X} NeList{X} -> NeList{X} .
+  eq merge(L, L') = $merge(L, L', nil) .
+
+  op $merge : List{X} List{X} List{X} -> List{X} .
+  eq $merge(L, nil, A) = A L .
+  eq $merge(nil, L, A) = A L .
+  eq $merge(E L, E' L', A) =
+      if E <= E' then $merge(L, E' L', A E)
+      else $merge(E L, L', A E')
+      fi .
+endfm
+
+fmod SORTABLE-LIST'{X :: TOTAL-ORDER} is
+  protecting WEAKLY-SORTABLE-LIST'{TOTAL-ORDER}{X} *
+              (sort NeList{TOTAL-ORDER}{X} to NeList{X},
+               sort List{TOTAL-ORDER}{X} to List{X}) .
+endfm
+
+fmod SET{X :: TRIV} is
+  protecting EXT-BOOL .
+  protecting NAT .
+  sorts NeSet{X} Set{X} .
+  subsort X$Elt < NeSet{X} < Set{X} .
+
+  op empty : -> Set{X} [ctor] .
+  op _,_ : Set{X} Set{X} -> Set{X} [ctor assoc comm id: empty prec 121 format (d r os d)] .
+  op _,_ : NeSet{X} Set{X} -> NeSet{X} [ctor ditto] .
+
+  var E : X$Elt .
+  var N : NeSet{X} .
+  vars A S S' : Set{X} .
+  var C : Nat .
+
+  eq N, N = N .
+  
+  op insert : X$Elt Set{X} -> Set{X} .
+  eq insert(E, S) = E, S .
+
+  op delete : X$Elt Set{X} -> Set{X} .
+  eq delete(E, (E, S)) = delete(E, S) .
+  eq delete(E, S) = S [owise] .
+
+  op _in_ : X$Elt Set{X} -> Bool .
+  eq E in (E, S) = true .
+  eq E in S = false [owise] .
+
+  op |_| : Set{X} -> Nat .
+  op |_| : NeSet{X} -> NzNat .
+  eq | S | = $card(S, 0) .
+
+  op $card : Set{X} Nat -> Nat .
+  eq $card(empty, C) = C .
+  eq $card((N, N, S), C) = $card((N, S), C) .
+  eq $card((E, S), C) = $card(S, C + 1) [owise] .
+
+  op union : Set{X} Set{X} -> Set{X} .
+  op union : NeSet{X} Set{X} -> NeSet{X} .
+  op union : Set{X} NeSet{X} -> NeSet{X} .
+  eq union(S, S') = S, S' .
+
+  op intersection : Set{X} Set{X} -> Set{X} .
+  eq intersection(S, empty) = empty .
+  eq intersection(S, N) = $intersect(S, N, empty) .
+
+  op $intersect : Set{X} Set{X} Set{X} -> Set{X} .
+  eq $intersect(empty, S', A) = A .
+  eq $intersect((E, S), S', A) = $intersect(S, S', if E in S' then E, A else A fi) .
+
+  op _\_ : Set{X} Set{X} -> Set{X}  [gather (E e)].
+  eq S \ empty = S .
+  eq S \ N = $diff(S, N, empty) .
+
+  op $diff : Set{X} Set{X} Set{X} -> Set{X} .
+  eq $diff(empty, S', A) = A .
+  eq $diff((E, S), S', A) = $diff(S, S', if E in S' then A else E, A fi) .
+
+  op _subset_ : Set{X} Set{X} -> Bool .
+  eq empty subset S' = true .
+  eq (E, S) subset S' = E in S' and-then S subset S' .
+
+  op _psubset_ : Set{X} Set{X} -> Bool .
+  eq S psubset S' = S =/= S' and-then S subset S' .
+endfm
+
+fmod LIST-AND-SET{X :: TRIV} is
+  protecting LIST{X} .
+  protecting SET{X} .
+
+  var E : X$Elt .
+  vars A L : List{X} .
+  var S : Set{X} .
+
+  op makeSet : List{X} -> Set{X} .
+  op makeSet : NeList{X} -> NeSet{X} .
+  eq makeSet(L) = $makeSet(L, empty) .
+
+  op $makeSet : List{X} Set{X} -> Set{X} .
+  op $makeSet : NeList{X} Set{X} -> NeSet{X} .
+  op $makeSet : List{X} NeSet{X} -> NeSet{X} .
+  eq $makeSet(nil, S) = S .
+  eq $makeSet(E L, S) = $makeSet(L, (E, S)) .
+
+  op filter : List{X} Set{X} -> List{X} .
+  eq filter(L, S) = $filter(L, S, nil) .
+
+  op $filter : List{X} Set{X} List{X} -> List{X} .
+  eq $filter(nil, S, A) = A .
+  eq $filter(E L, S, A) = $filter(L, S, if E in S then A E else A fi) .
+
+  op filterOut : List{X} Set{X} -> List{X} .
+  eq filterOut(L, S) = $filterOut(L, S, nil) .
+
+  op $filterOut : List{X} Set{X} List{X} -> List{X} .
+  eq $filterOut(nil, S, A) = A .
+  eq $filterOut(E L, S, A) = $filterOut(L, S, if E in S then A else A E fi) .
+endfm
+
+fmod SORTABLE-LIST-AND-SET{X :: STRICT-TOTAL-ORDER} is
+  protecting SORTABLE-LIST{X} .
+***
+***	This double renaming is needed for correct sharing of a renamed
+***	copy of LIST since Core Maude does not evaluate the composition
+***	of renamings but applies them sequentially.
+***
+  protecting LIST-AND-SET{STRICT-WEAK-ORDER}{STRICT-TOTAL-ORDER}{X} *
+              (sort NeList{STRICT-WEAK-ORDER}{STRICT-TOTAL-ORDER}{X} to NeList{STRICT-TOTAL-ORDER}{X},
+               sort List{STRICT-WEAK-ORDER}{STRICT-TOTAL-ORDER}{X} to List{STRICT-TOTAL-ORDER}{X}) *
+              (sort NeList{STRICT-TOTAL-ORDER}{X} to NeList{X},
+               sort List{STRICT-TOTAL-ORDER}{X} to List{X},
+	       sort NeSet{STRICT-WEAK-ORDER}{STRICT-TOTAL-ORDER}{X} to NeSet{X},
+               sort Set{STRICT-WEAK-ORDER}{STRICT-TOTAL-ORDER}{X} to Set{X}) .
+  
+  var E : X$Elt .
+  var L : List{X} .
+  var S : Set{X} .
+
+  op makeList : Set{X} -> List{X} .
+  op makeList : NeSet{X} -> NeList{X} .
+  eq makeList(S) = $makeList(S, nil) .
+
+  op $makeList : Set{X} List{X} -> List{X} .
+  op $makeList : NeSet{X} List{X} -> NeList{X} .
+  op $makeList : Set{X} NeList{X} -> NeList{X} .
+  eq $makeList(empty, L) = sort(L) .
+  eq $makeList((E, E, S), L) = $makeList((E, S), L) .
+  eq $makeList((E, S), L) = $makeList(S, E L) [owise] .
+endfm
+
+fmod SORTABLE-LIST-AND-SET'{X :: TOTAL-ORDER} is
+  protecting SORTABLE-LIST'{X} .
+***
+***	This double renaming is needed for the same reasons as above.
+***
+  protecting LIST-AND-SET{TOTAL-PREORDER}{TOTAL-ORDER}{X} *
+              (sort NeList{TOTAL-PREORDER}{TOTAL-ORDER}{X} to NeList{TOTAL-ORDER}{X},
+               sort List{TOTAL-PREORDER}{TOTAL-ORDER}{X} to List{TOTAL-ORDER}{X}) *
+              (sort NeList{TOTAL-ORDER}{X} to NeList{X},
+               sort List{TOTAL-ORDER}{X} to List{X},
+	       sort NeSet{TOTAL-PREORDER}{TOTAL-ORDER}{X} to NeSet{X},
+               sort Set{TOTAL-PREORDER}{TOTAL-ORDER}{X} to Set{X}) .
+  
+  var E : X$Elt .
+  var L : List{X} .
+  var S : Set{X} .
+
+  op makeList : Set{X} -> List{X} .
+  op makeList : NeSet{X} -> NeList{X} .
+  eq makeList(S) = $makeList(S, nil) .
+
+  op $makeList : Set{X} List{X} -> List{X} .
+  op $makeList : NeSet{X} List{X} -> NeList{X} .
+  op $makeList : Set{X} NeList{X} -> NeList{X} .
+  eq $makeList(empty, L) = sort(L) .
+  eq $makeList((E, E, S), L) = $makeList((E, S), L) .
+  eq $makeList((E, S), L) = $makeList(S, E L) [owise] .
+endfm
+
+fmod LIST*{X :: TRIV} is
+  protecting NAT .
+  sorts Item{X} PreList{X} NeList{X} List{X} .
+  subsort X$Elt List{X} < Item{X} < PreList{X} .
+  subsort NeList{X} < List{X} .
+
+  op __ : PreList{X} PreList{X} -> PreList{X} [ctor assoc prec 25] .
+  op [_] : PreList{X} -> NeList{X} [ctor] .
+  op [] : -> List{X} [ctor] .
+
+  vars A P : PreList{X} .
+  var L : List{X} .
+  var E E' : Item{X} .
+  var C : Nat .
+
+  op append : List{X} List{X} -> List{X} .
+  op append : NeList{X} List{X} -> NeList{X} .
+  op append : List{X} NeList{X} -> NeList{X} .
+  eq append([], L) = L .
+  eq append(L, []) = L .
+  eq append([P], [A]) = [P A] .
+
+  op head : NeList{X} -> Item{X} .
+  eq head([E]) = E .
+  eq head([E P]) = E .
+
+  op tail : NeList{X} -> List{X} .
+  eq tail([E]) = [] .
+  eq tail([E P]) = [P] .
+
+  op last : NeList{X} -> Item{X} .
+  eq last([E]) = E .
+  eq last([P E]) = E .
+
+  op front : NeList{X} -> List{X} .
+  eq front([E]) = [] .
+  eq front([P E]) = [P] .
+
+  op occurs : Item{X} List{X} -> Bool .
+  eq occurs(E, []) = false .
+  eq occurs(E, [E']) = (E == E') .
+  eq occurs(E, [E' P]) = if E == E' then true else occurs(E, [P]) fi .
+
+  op reverse : List{X} -> List{X} .
+  op reverse : NeList{X} -> NeList{X} .
+  eq reverse([]) = [] .
+  eq reverse([E]) = [E] .
+  eq reverse([E P]) = [$reverse(P, E)] .
+
+  op $reverse : PreList{X} PreList{X} -> PreList{X} .
+  eq $reverse(E, A) = E A .
+  eq $reverse(E P, A) = $reverse(P, E A).
+
+  op size : List{X} -> Nat .
+  op size : NeList{X} -> NzNat .
+  eq size([]) = 0 .
+  eq size([P]) = $size(P, 0) .
+
+  op $size : PreList{X} Nat -> NzNat .
+  eq $size(E, C) = C + 1 .
+  eq $size(E P, C) = $size(P, C + 1) .
+endfm
+
+fmod SET*{X :: TRIV} is
+  protecting EXT-BOOL .
+  protecting NAT .
+  sorts Element{X} PreSet{X} NeSet{X} Set{X} .
+  subsort X$Elt Set{X} < Element{X} < PreSet{X} .
+  subsort NeSet{X} < Set{X} .
+
+  op _,_ : PreSet{X} PreSet{X} -> PreSet{X} [ctor assoc comm prec 121 format (d r os d)] .
+  op {_} : PreSet{X} -> NeSet{X} [ctor] .
+  op {} : -> Set{X} [ctor] .
+
+  vars P Q : PreSet{X} .
+  vars A S : Set{X} .
+  var E : Element{X} .
+  var N : NeSet{X} .
+  var C : Nat .
+
+  eq {P, P} = {P} .
+  eq {P, P, Q} = {P, Q} .
+
+  op insert : Element{X} Set{X} -> Set{X} .
+  eq insert(E, {}) = {E} .
+  eq insert(E, {P}) = {E, P} .
+
+  op delete : Element{X} Set{X} -> Set{X} .
+  eq delete(E, {E}) = {} .
+  eq delete(E, {E, P}) = delete(E, {P}) .
+  eq delete(E, S) = S [owise] .
+
+  op _in_ : Element{X} Set{X} -> Bool .
+  eq E in {E} = true .
+  eq E in {E, P} = true .
+  eq E in S = false [owise] .
+
+  op |_| : Set{X} -> Nat .
+  op |_| : NeSet{X} -> NzNat .
+  eq | {} | = 0 .
+  eq | {P} | = $card(P, 0) .
+
+  op $card : PreSet{X} Nat -> Nat .
+  eq $card(E, C) = C + 1 .
+  eq $card((N, N, P), C) = $card((N, P), C) .
+  eq $card((E, P), C) = $card(P, C + 1) [owise] .
+
+  op union : Set{X} Set{X} -> Set{X} .
+  op union : NeSet{X} Set{X} -> NeSet{X} .
+  op union : Set{X} NeSet{X} -> NeSet{X} .
+  eq union({}, S) = S .
+  eq union(S, {}) = S .
+  eq union({P}, {Q}) = {P, Q} .
+
+  op intersection : Set{X} Set{X} -> Set{X} .
+  eq intersection({}, S) = {} .
+  eq intersection(S, {}) = {} .
+  eq intersection({P}, N) = $intersect(P, N, {}) .
+
+  op $intersect : PreSet{X} Set{X} Set{X} -> Set{X} .
+  eq $intersect(E, S, A) = if E in S then insert(E, A) else A fi .
+  eq $intersect((E, P), S, A) = $intersect(P, S, $intersect(E, S, A)) .
+
+  op _\_ : Set{X} Set{X} -> Set{X} [gather (E e)] .
+  eq {} \ S = {} .
+  eq S \ {} = S .
+  eq {P} \ N = $diff(P, N, {}) .
+
+  op $diff : PreSet{X} Set{X} Set{X} -> Set{X} .
+  eq $diff(E, S, A) = if E in S then A else insert(E, A) fi .
+  eq $diff((E, P), S, A) = $diff(P, S, $diff(E, S, A)) .
+
+  op 2^_ : Set{X} -> Set{X} .
+  eq 2^{} = {{}} .
+  eq 2^{E} = {{}, {E}} .
+  eq 2^{E, P} = union(2^{P}, $augment(2^{P}, E, {})) .
+
+  op $augment : NeSet{X} Element{X} Set{X} -> Set{X} .
+  eq $augment({S}, E, A) = insert(insert(E, S), A) .
+  eq $augment({S, P}, E, A) = $augment({P}, E, $augment({S}, E, A)) .
+
+  op _subset_ : Set{X} Set{X} -> Bool .
+  eq {} subset S = true .
+  eq {E} subset S = E in S .
+  eq {E, P} subset S = E in S and-then {P} subset S .
+
+  op _psubset_ : Set{X} Set{X} -> Bool .
+  eq A psubset S = A =/= S and-then A subset S .
+endfm
+
+fmod MAP{X :: TRIV, Y :: TRIV} is
+  protecting BOOL .
+  sorts Entry{X,Y} Map{X,Y} .
+  subsort Entry{X,Y} < Map{X,Y} .
+
+  op _|->_ : X$Elt Y$Elt -> Entry{X,Y} [ctor] .
+  op empty : -> Map{X,Y} [ctor] .
+  op _,_ : Map{X,Y} Map{X,Y} -> Map{X,Y} [ctor assoc comm id: empty prec 121 format (d r os d)] .
+  op undefined : -> [Y$Elt] [ctor] .
+
+  var D : X$Elt .
+  vars R R' : Y$Elt .
+  var M : Map{X,Y} .
+
+  op insert : X$Elt Y$Elt Map{X,Y} -> Map{X,Y} .
+  eq insert(D, R, (M, D |-> R')) =
+     if $hasMapping(M, D) then insert(D, R, M)
+     else (M, D |-> R)
+     fi .
+  eq insert(D, R, M) = (M, D |-> R) [owise] .
+
+  op _[_] : Map{X,Y} X$Elt -> [Y$Elt] [prec 23] .
+  eq (M, D |-> R)[D] =
+     if $hasMapping(M, D) then undefined
+     else R
+     fi .
+  eq M[D] = undefined [owise] .
+
+  op $hasMapping : Map{X,Y} X$Elt -> Bool .
+  eq $hasMapping((M, D |-> R), D) = true .
+  eq $hasMapping(M, D) = false [owise] .
+endfm
+
+fmod ARRAY{X :: TRIV, Y :: DEFAULT} is
+  protecting BOOL .
+  sorts Entry{X,Y} Array{X,Y} .
+  subsort Entry{X,Y} < Array{X,Y} .
+
+  op _|->_ : X$Elt Y$Elt -> Entry{X,Y} [ctor] .
+  op empty : -> Array{X,Y} [ctor] .
+  op _;_ : Array{X,Y} Array{X,Y} -> Array{X,Y} [ctor assoc comm id: empty prec 71 format (d r os d)] .
+
+  var D : X$Elt .
+  vars R R' : Y$Elt .
+  var A : Array{X,Y} .
+
+  op insert : X$Elt Y$Elt Array{X,Y} -> Array{X,Y} .
+  eq insert(D, R, (A ; D |-> R')) =
+     if $hasMapping(A, D) then insert(D, R, A)
+     else if R == 0 then A else (A ; D |-> R) fi
+     fi .
+
+  eq insert(D, R, A) = if R == 0 then A else (A ; D |-> R) fi [owise] .
+
+  op _[_] : Array{X,Y} X$Elt -> Y$Elt [prec 23] .
+  eq (A ; D |-> R)[D] =
+     if $hasMapping(A, D) then 0
+     else R
+     fi .
+  eq A[D] = 0 [owise] .
+
+  op $hasMapping : Array{X,Y} X$Elt -> Bool .
+  eq $hasMapping((A ; D |-> R), D) = true .
+  eq $hasMapping(A, D) = false [owise] .
+endfm
+
+***
+***	Container instantiations on builtin data types needed by the metalevel.
+***
+
+fmod NAT-LIST is
+  protecting LIST{Nat} * (sort NeList{Nat} to NeNatList, sort List{Nat} to NatList) .
+endfm
+
+fmod QID-LIST is
+  protecting LIST{Qid} * (sort NeList{Qid} to NeQidList, sort List{Qid} to QidList) .
+endfm
+
+fmod QID-SET is
+  protecting SET{Qid} * (sort NeSet{Qid} to NeQidSet, sort Set{Qid} to QidSet) .
+endfm
+
+***
+***	The metalevel.
+***
+
+fmod META-TERM is
+  protecting QID .
+
+*** types
+  sorts Sort Kind Type .
+  subsorts Sort Kind < Type < Qid .
+  op <Qids> : -> Sort [special (id-hook QuotedIdentifierSymbol (sortQid))] .
+  op <Qids> : -> Kind [special (id-hook QuotedIdentifierSymbol (kindQid))] .
+
+*** terms
+  sorts Constant Variable TermQid GroundTerm Term NeGroundTermList GroundTermList NeTermList TermList .
+  subsorts Constant Variable < TermQid < Qid Term .
+  subsorts Constant < GroundTerm < Term NeGroundTermList < NeTermList .
+  subsorts NeGroundTermList < NeTermList GroundTermList < TermList .
+  op <Qids> : -> Constant [special (id-hook QuotedIdentifierSymbol (constantQid))] .
+  op <Qids> : -> Variable [special (id-hook QuotedIdentifierSymbol (variableQid))] .
+  op empty : -> GroundTermList [ctor] .
+  op _,_ : NeGroundTermList GroundTermList -> NeGroundTermList [ctor assoc id: empty gather (e E) prec 121] .
+  op _,_ : GroundTermList NeGroundTermList -> NeGroundTermList [ctor ditto] .
+  op _,_ : GroundTermList GroundTermList -> GroundTermList [ctor ditto] .
+  op _,_ : NeTermList TermList -> NeTermList [ctor ditto] .
+  op _,_ : TermList NeTermList -> NeTermList [ctor ditto] .
+  op _,_ : TermList TermList -> TermList [ctor ditto] .
+  op _[_] : Qid NeGroundTermList -> GroundTerm [ctor] .
+  op _[_] : Qid NeTermList -> Term [ctor] .
+
+*** extraction of names and types
+  op getName : Constant -> Qid .
+  op getType : Constant -> Type .
+  var C : Constant .
+  eq getName(C) = qid(substr(string(C),
+                             0,
+                             rfind(string(C), ".", length(string(C))))) .
+  eq getType(C) = qid(substr(string(C),
+                             rfind(string(C), ".", length(string(C))) + 1,
+                             length(string(C)))) .
+
+  op getName : Variable -> Qid .
+  op getType : Variable -> Type .
+  var V : Variable .
+  eq getName(V) = qid(substr(string(V),
+                             0,
+                             rfind(string(V), ":", length(string(V))))) .
+  eq getType(V) = qid(substr(string(V),
+                             rfind(string(V), ":", length(string(V))) + 1,
+                             length(string(V)))) .
+
+*** substitutions
+  sorts Assignment Substitution .
+  subsort Assignment < Substitution .
+  op _<-_ : Variable Term -> Assignment [ctor prec 63 format (nt d d d)] .
+  op none : -> Substitution [ctor] .
+  op _;_ : Substitution Substitution -> Substitution
+    [ctor assoc comm id: none prec 65] .
+  eq A:Assignment ; A:Assignment = A:Assignment .
+
+*** contexts (terms with a single hole)
+  sorts Context NeCTermList GTermList .
+  subsort Context < NeCTermList < GTermList .
+  subsorts TermList < GTermList .
+
+  op [] : -> Context [ctor] .
+  op _,_ : TermList NeCTermList -> NeCTermList [ctor ditto] .
+  op _,_ : NeCTermList TermList -> NeCTermList [ctor ditto] .
+  op _,_ : GTermList GTermList -> GTermList [ctor ditto] .
+  op _[_] : Qid NeCTermList -> Context [ctor] .
+endfm
+
+fmod META-MODULE is
+  protecting META-TERM .
+  protecting NAT-LIST .
+  protecting QID-LIST .
+  protecting QID-SET * (op empty to none, op _,_ to _;_ [prec 43]) .
+
+*** subsort declarations
+  sorts SubsortDecl SubsortDeclSet .
+  subsort SubsortDecl < SubsortDeclSet .
+  op subsort_<_. : Sort Sort -> SubsortDecl [ctor] .
+  op none : -> SubsortDeclSet [ctor] .
+  op __ : SubsortDeclSet SubsortDeclSet -> SubsortDeclSet
+    [ctor assoc comm id: none format (d ni d)] .
+  eq S:SubsortDecl S:SubsortDecl = S:SubsortDecl .
+
+*** sort, kind and type sets
+  sorts EmptyTypeSet NeSortSet NeKindSet NeTypeSet SortSet KindSet TypeSet .
+  subsort EmptyTypeSet < SortSet KindSet < TypeSet < QidSet .
+  subsort Sort < NeSortSet < SortSet .
+  subsort Kind < NeKindSet < KindSet .
+  subsort Type NeSortSet NeKindSet < NeTypeSet < TypeSet NeQidSet .
+  op none : -> EmptyTypeSet [ctor] .
+  op _;_ : TypeSet TypeSet -> TypeSet [ctor ditto] .
+  op _;_ : NeTypeSet TypeSet -> NeTypeSet [ctor ditto] .
+  op _;_ : SortSet SortSet -> SortSet [ctor ditto] .
+  op _;_ : NeSortSet SortSet -> NeSortSet [ctor ditto] .
+  op _;_ : KindSet KindSet -> KindSet [ctor ditto] .
+  op _;_ : NeKindSet KindSet -> NeKindSet [ctor ditto] .
+  op _;_ : EmptyTypeSet EmptyTypeSet -> EmptyTypeSet [ctor ditto] .
+
+*** type lists
+  sort NeTypeList TypeList .
+  subsorts Type < NeTypeList < TypeList < QidList .
+  subsorts NeTypeList < NeQidList .
+  op nil : -> TypeList [ctor] .
+  op __ : TypeList TypeList -> TypeList [ctor ditto] .
+  op __ : NeTypeList TypeList -> NeTypeList [ctor ditto] .
+  op __ : TypeList NeTypeList -> NeTypeList [ctor ditto] .
+  eq T:TypeList ; T:TypeList = T:TypeList .
+
+*** sets of type lists
+  sort TypeListSet .
+  subsort TypeList TypeSet < TypeListSet .
+  op _;_ : TypeListSet TypeListSet -> TypeListSet [ctor ditto] .
+
+*** attribute sets
+  sorts Attr AttrSet .
+  subsort Attr < AttrSet .
+  op none : -> AttrSet [ctor] .
+  op __ : AttrSet AttrSet -> AttrSet [ctor assoc comm id: none] .
+  eq A:Attr A:Attr = A:Attr .
+
+*** renamings
+  sorts Renaming RenamingSet .
+  subsort Renaming < RenamingSet .
+  op sort_to_ : Qid Qid -> Renaming [ctor] .
+  op op_to_[_] : Qid Qid AttrSet -> Renaming
+    [ctor format (d d d d s d d d)] .
+  op op_:_->_to_[_] : Qid TypeList Type Qid AttrSet -> Renaming
+    [ctor format (d d d d d d d d s d d d)] .
+  op label_to_ : Qid Qid -> Renaming [ctor] .
+  op _,_ : RenamingSet RenamingSet -> RenamingSet
+    [ctor assoc comm prec 43 format (d d ni d)] .
+
+*** parameter lists
+  sort EmptyCommaList NeParameterList ParameterList .
+  subsorts Sort < NeParameterList < ParameterList .
+  subsort EmptyCommaList < GroundTermList ParameterList .
+  op empty : -> EmptyCommaList [ctor] .
+  op _,_ : ParameterList ParameterList -> ParameterList [ctor ditto] .
+  op _,_ : NeParameterList ParameterList -> NeParameterList [ctor ditto] .
+  op _,_ : ParameterList NeParameterList -> NeParameterList [ctor ditto] .
+  op _,_ : EmptyCommaList EmptyCommaList -> EmptyCommaList [ctor ditto] .
+
+*** module expressions
+  sort ModuleExpression .
+  subsort Qid < ModuleExpression .
+  op _+_ : ModuleExpression ModuleExpression -> ModuleExpression
+    [ctor assoc comm] .
+  op _*(_) : ModuleExpression RenamingSet -> ModuleExpression
+    [ctor prec 39 format (d d s n++i n--i d)] .
+  op _{_} : ModuleExpression ParameterList -> ModuleExpression [ctor prec 37].
+
+*** parameter declarations
+  sorts ParameterDecl NeParameterDeclList ParameterDeclList .
+  subsorts ParameterDecl < NeParameterDeclList < ParameterDeclList .
+  op _::_ : Sort ModuleExpression -> ParameterDecl .
+  op nil : -> ParameterDeclList [ctor] .
+  op _,_ : ParameterDeclList ParameterDeclList -> ParameterDeclList [ctor assoc id: nil prec 121] .
+  op _,_ : NeParameterDeclList ParameterDeclList -> NeParameterDeclList [ctor ditto] .
+  op _,_ : ParameterDeclList NeParameterDeclList -> NeParameterDeclList [ctor ditto] .
+
+*** importations
+  sorts Import ImportList .
+  subsort Import < ImportList .
+  op protecting_. : ModuleExpression -> Import [ctor] .
+  op extending_. : ModuleExpression -> Import [ctor] .
+  op including_. : ModuleExpression -> Import [ctor] .
+  op nil : -> ImportList [ctor] .
+  op __ : ImportList ImportList -> ImportList
+    [ctor assoc id: nil format (d ni d)] .
+
+*** hooks
+  sorts Hook NeHookList HookList .
+  subsort Hook < NeHookList < HookList .
+  op id-hook : Qid QidList -> Hook [ctor format (nssss d)] .
+  op op-hook : Qid Qid QidList Qid -> Hook [ctor format (nssss d)] .
+  op term-hook : Qid Term -> Hook [ctor format (nssss d)] .
+  op nil : -> HookList [ctor] .
+  op __ : HookList HookList -> HookList [ctor assoc id: nil] .
+  op __ : NeHookList HookList -> NeHookList [ctor ditto] .
+  op __ : HookList NeHookList -> NeHookList [ctor ditto] .
+
+*** operator attributes
+  op assoc : -> Attr [ctor] .
+  op comm : -> Attr [ctor] .
+  op idem : -> Attr [ctor] .
+  op iter : -> Attr [ctor] .
+  op id : Term -> Attr [ctor] .
+  op left-id : Term -> Attr [ctor] .
+  op right-id : Term -> Attr [ctor] .
+  op strat : NeNatList -> Attr [ctor] .
+  op memo : -> Attr [ctor] .
+  op prec : Nat -> Attr [ctor] .
+  op gather : QidList -> Attr [ctor] .
+  op format : QidList -> Attr [ctor] .
+  op ctor : -> Attr [ctor] .
+  op config : -> Attr [ctor] .
+  op object : -> Attr [ctor] .
+  op msg : -> Attr [ctor] .
+  op frozen : NeNatList -> Attr [ctor] .
+  op poly : NeNatList -> Attr [ctor] .
+  op special : NeHookList -> Attr [ctor] .
+
+*** statement attributes
+  op label : Qid -> Attr [ctor] .
+  op metadata : String -> Attr [ctor] .
+  op owise : -> Attr [ctor] .
+  op nonexec : -> Attr [ctor] .
+  op print : QidList -> Attr [ctor] .
+
+*** operator declarations
+  sorts OpDecl OpDeclSet .
+  subsort OpDecl < OpDeclSet .
+  op (op_:_->_[_].) : Qid TypeList Type AttrSet -> OpDecl
+    [ctor format (d d d d d d s d d s d)] .
+  op none : -> OpDeclSet [ctor] .
+  op __ : OpDeclSet OpDeclSet -> OpDeclSet
+    [ctor assoc comm id: none format (d ni d)] .
+  eq O:OpDecl O:OpDecl = O:OpDecl .
+
+*** conditions
+  sorts EqCondition Condition .
+  subsort EqCondition < Condition .
+  op nil : -> EqCondition [ctor] .
+  op _=_ : Term Term -> EqCondition [ctor prec 71] .
+  op _:_ : Term Sort -> EqCondition [ctor prec 71] .
+  op _:=_ : Term Term -> EqCondition [ctor prec 71] .
+  op _=>_ : Term Term -> Condition [ctor prec 71] .
+  op _/\_ : EqCondition EqCondition -> EqCondition [ctor assoc id: nil prec 73] .
+  op _/\_ : Condition Condition -> Condition [ctor assoc id: nil prec 73] .
+
+*** membership axioms
+  sorts MembAx MembAxSet .
+  subsort MembAx < MembAxSet .
+  op mb_:_[_]. : Term Sort AttrSet -> MembAx
+    [ctor format (d d d d s d d s d)] .
+  op cmb_:_if_[_]. : Term Sort EqCondition AttrSet -> MembAx
+    [ctor format (d d d d d d s d d s d)] .
+  op none : -> MembAxSet [ctor] .
+  op __ : MembAxSet MembAxSet -> MembAxSet
+    [ctor assoc comm id: none format (d ni d)] .
+  eq M:MembAx M:MembAx = M:MembAx .
+
+*** equations
+  sorts Equation EquationSet .
+  subsort Equation < EquationSet .
+  op eq_=_[_]. : Term Term AttrSet -> Equation
+    [ctor format (d d d d s d d s d)] .
+  op ceq_=_if_[_]. : Term Term EqCondition AttrSet -> Equation
+    [ctor format (d d d d d d s d d s d)] .
+  op none : -> EquationSet [ctor] .
+  op __ : EquationSet EquationSet -> EquationSet
+    [ctor assoc comm id: none format (d ni d)] .
+  eq E:Equation E:Equation = E:Equation .
+
+*** rules
+  sorts Rule RuleSet .
+  subsort Rule < RuleSet .
+  op rl_=>_[_]. : Term Term AttrSet -> Rule
+    [ctor format (d d d d s d d s d)] .
+  op crl_=>_if_[_]. : Term Term Condition AttrSet -> Rule
+    [ctor format (d d d d d d s d d s d)] .
+  op none : -> RuleSet [ctor] .
+  op __ : RuleSet RuleSet -> RuleSet
+    [ctor assoc comm id: none format (d ni d)] .
+  eq R:Rule R:Rule = R:Rule .
+
+*** modules
+  sorts FModule SModule FTheory STheory Module .
+  subsorts FModule < SModule < Module .
+  subsorts FTheory < STheory < Module .
+  sort Header .
+  subsort Qid < Header .
+  op _{_}  : Qid ParameterDeclList -> Header [ctor] .
+  op fmod_is_sorts_.____endfm : Header ImportList SortSet SubsortDeclSet
+    OpDeclSet MembAxSet EquationSet -> FModule [ctor gather (& & & & & & &)
+     format (d d s n++i ni d d ni ni ni ni n--i d)] .
+  op mod_is_sorts_._____endm : Header ImportList SortSet SubsortDeclSet
+    OpDeclSet MembAxSet EquationSet RuleSet -> SModule
+    [ctor gather (& & & & & & & &)
+     format (d d s n++i ni d d ni ni ni ni ni n--i d)] .
+  op fth_is_sorts_.____endfth : Qid ImportList SortSet SubsortDeclSet
+    OpDeclSet MembAxSet EquationSet -> FTheory [ctor gather (& & & & & & &)
+     format (d d d n++i ni d d ni ni ni ni n--i d)] .
+  op th_is_sorts_._____endth : Qid ImportList SortSet SubsortDeclSet
+    OpDeclSet MembAxSet EquationSet RuleSet -> STheory
+    [ctor gather (& & & & & & & &)
+     format (d d d n++i ni d d ni ni ni ni ni n--i d)] .
+  op [_] : Qid -> Module .
+  eq [Q:Qid] = (th Q:Qid is including Q:Qid .
+                sorts none . none none none none none endth) .
+
+*** projection functions
+  var Q : Qid .
+  var PDL : ParameterDeclList .
+  var H : Header .
+  var M : Module .
+  var IL : ImportList .
+  var SS : SortSet .
+  var SSDS : SubsortDeclSet .
+  var OPDS : OpDeclSet .
+  var MAS : MembAxSet .
+  var EQS : EquationSet .
+  var RLS : RuleSet .
+
+  op getName : Module -> Qid .
+  eq getName(fmod Q is IL sorts SS . SSDS OPDS MAS EQS endfm) = Q .
+  eq getName(mod Q is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = Q .
+  eq getName(fmod Q{PDL} is IL sorts SS . SSDS OPDS MAS EQS endfm) = Q .
+  eq getName(mod Q{PDL} is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = Q .
+  eq getName(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = Q .
+  eq getName(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = Q .
+
+  op getImports : Module -> ImportList .
+  eq getImports(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = IL .
+  eq getImports(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = IL .
+  eq getImports(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = IL .
+  eq getImports(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = IL .
+
+  op getSorts : Module -> SortSet .
+  eq getSorts(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = SS .
+  eq getSorts(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = SS .
+  eq getSorts(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = SS .
+  eq getSorts(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = SS .
+
+  op getSubsorts : Module -> SubsortDeclSet .
+  eq getSubsorts(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = SSDS .
+  eq getSubsorts(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = SSDS .
+  eq getSubsorts(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = SSDS .
+  eq getSubsorts(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = SSDS .
+
+  op getOps : Module -> OpDeclSet .
+  eq getOps(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = OPDS .
+  eq getOps(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = OPDS .
+  eq getOps(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = OPDS .
+  eq getOps(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = OPDS .
+
+  op getMbs : Module -> MembAxSet .
+  eq getMbs(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = MAS .
+  eq getMbs(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = MAS .
+  eq getMbs(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = MAS .
+  eq getMbs(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = MAS .
+
+  op getEqs : Module -> EquationSet .
+  eq getEqs(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = EQS .
+  eq getEqs(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = EQS .
+  eq getEqs(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = EQS .
+  eq getEqs(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = EQS .
+
+  op getRls : Module -> RuleSet .
+  eq getRls(fmod H is IL sorts SS . SSDS OPDS MAS EQS endfm) = none .
+  eq getRls(mod H is IL sorts SS . SSDS OPDS MAS EQS RLS endm) = RLS .
+  eq getRls(fth Q is IL sorts SS . SSDS OPDS MAS EQS endfth) = none .
+  eq getRls(th Q is IL sorts SS . SSDS OPDS MAS EQS RLS endth) = RLS .
+endfm
+
+fmod META-VIEW is
+  protecting META-MODULE .
+
+*** sort mappings
+  sorts SortMapping SortMappingSet .
+  subsort SortMapping < SortMappingSet .
+  op sort_to_. : Sort Sort -> SortMapping [ctor] .
+  op none : -> SortMappingSet [ctor] .
+  op __ : SortMappingSet SortMappingSet -> SortMappingSet
+    [ctor assoc comm id: none format (d ni d)] .
+  eq S:SortMapping S:SortMapping = S:SortMapping .
+
+*** operator mappings
+  sorts OpMapping OpMappingSet .
+  subsort OpMapping < OpMappingSet .
+
+  op (op_to_.) : Qid Qid -> OpMapping [ctor] .
+  op (op_:_->_to_.) : Qid TypeList Type Qid -> OpMapping [ctor] .
+  op (op_to term_.) : Term Term -> OpMapping [ctor] .
+
+  op none : -> OpMappingSet [ctor] .
+  op __ : OpMappingSet OpMappingSet -> OpMappingSet
+    [ctor assoc comm id: none format (d ni d)] .
+  eq O:OpMapping O:OpMapping = O:OpMapping .
+
+  sort View .
+  op view_from_to_is__endv : Header ModuleExpression ModuleExpression
+    SortMappingSet OpMappingSet -> View [ctor gather (& & & & &)
+     format (d d d d d d d n++i ni n--i d)] .
+
+*** projection functions
+  var Q : Qid .
+  vars ME ME' : ModuleExpression .
+  var SMS : SortMappingSet .
+  var OMS : OpMappingSet .
+
+  op getName : View -> Qid .
+  eq getName(view Q from ME to ME' is SMS OMS endv) = Q .
+
+  op getFrom : View -> ModuleExpression .
+  eq getFrom(view Q from ME to ME' is SMS OMS endv) = ME .
+
+  op getTo : View -> ModuleExpression .
+  eq getTo(view Q from ME to ME' is SMS OMS endv) = ME' .
+
+  op getSortMappings : View -> SortMappingSet .
+  eq getSortMappings(view Q from ME to ME' is SMS OMS endv) = SMS .
+
+  op getOpMappings : View -> OpMappingSet .
+  eq getOpMappings(view Q from ME to ME' is SMS OMS endv) = OMS .
+endfm
+
+fmod META-LEVEL is
+  protecting META-VIEW .
+
+*** bounds
+  sort Bound .
+  subsort Nat < Bound .
+  op unbounded : -> Bound [ctor] .
+
+*** argument values
+  sort Type? .
+  subsort Type < Type? .
+  op anyType : -> Type? [ctor] .
+
+*** options for metaPrettyPrint()
+  sorts PrintOption PrintOptionSet .
+  subsort PrintOption < PrintOptionSet .
+  ops mixfix with-parens flat format number rat : -> PrintOption [ctor] .
+  op none : -> PrintOptionSet [ctor] .
+  op __ : PrintOptionSet PrintOptionSet -> PrintOptionSet [ctor assoc comm id: none] .
+
+*** unification problems
+  sorts UnificandPair UnificationProblem .
+  subsort UnificandPair < UnificationProblem .
+  op _=?_ : Term Term -> UnificandPair [ctor prec 71] .
+  op _/\_ : UnificationProblem UnificationProblem -> UnificationProblem [ctor assoc comm prec 73] .
+
+*** success results
+  sorts ResultPair ResultTriple Result4Tuple MatchPair TraceStep Trace
+    UnificationPair UnificationTriple .
+  subsort TraceStep < Trace .
+  op {_,_} : Term Type -> ResultPair [ctor] .
+  op {_,_,_} : Term Type Substitution -> ResultTriple [ctor] .
+  op {_,_,_,_} : Term Type Substitution Context -> Result4Tuple [ctor] .
+  op {_,_} : Substitution Context -> MatchPair [ctor] .
+  op {_,_} : Substitution Nat -> UnificationPair [ctor] .
+  op {_,_,_} : Substitution Substitution Nat -> UnificationTriple [ctor] .
+  op {_,_,_} : Term Type Rule -> TraceStep [ctor] .
+  op nil : -> Trace [ctor] .
+  op __ : Trace Trace -> Trace [ctor assoc id: nil format (d n d)] .
+
+*** failure results
+  sorts ResultPair? ResultTriple? Result4Tuple? MatchPair? Substitution? Trace?
+    UnificationPair? UnificationTriple? .
+  subsort ResultPair < ResultPair? .
+  subsort ResultTriple < ResultTriple? .
+  subsort Result4Tuple < Result4Tuple? .
+  subsort MatchPair < MatchPair? .
+  subsort UnificationPair < UnificationPair? .
+  subsort UnificationTriple < UnificationTriple? .
+  subsort Substitution < Substitution? .
+  subsort Trace < Trace? .
+  op noParse : Nat -> ResultPair? [ctor] .
+  op ambiguity : ResultPair ResultPair -> ResultPair? [ctor] .
+  op failure : -> ResultPair? [ctor] .
+
+  op failure : -> ResultTriple? [ctor] .
+  op failure : -> Result4Tuple? [ctor] .
+  op noUnifier : -> UnificationPair? [ctor] .
+  op noUnifier : -> UnificationTriple? [ctor] .
+  op noMatch : -> Substitution? [ctor] .
+  op noMatch : -> MatchPair? [ctor] .
+  op failure : -> Trace? [ctor] .
+
+*** projection functions
+  op getTerm : ResultPair -> Term .
+  eq getTerm({T:Term, T:Type}) = T:Term .
+  op getType : ResultPair -> Type .
+  eq getType({T:Term, T:Type}) = T:Type .
+
+  op getTerm : ResultTriple -> Term .
+  eq getTerm({T:Term, T:Type, S:Substitution}) = T:Term .
+  op getType : ResultTriple -> Type .
+  eq getType({T:Term, T:Type, S:Substitution}) = T:Type .
+  op getSubstitution : ResultTriple -> Substitution .
+  eq getSubstitution({T:Term, T:Type, S:Substitution}) = S:Substitution .
+
+  op getTerm : Result4Tuple -> Term .
+  eq getTerm({T:Term, T:Type, S:Substitution, C:Context}) = T:Term .
+  op getType : Result4Tuple -> Type .
+  eq getType({T:Term, T:Type, S:Substitution, C:Context}) = T:Type .
+  op getSubstitution : Result4Tuple -> Substitution .
+  eq getSubstitution({T:Term, T:Type, S:Substitution, C:Context}) = S:Substitution .
+  op getContext : Result4Tuple -> Context .
+  eq getContext({T:Term, T:Type, S:Substitution, C:Context}) = C:Context .
+
+  op getSubstitution : MatchPair -> Substitution .
+  eq getSubstitution({S:Substitution, C:Context}) = S:Substitution .
+  op getContext : MatchPair -> Context .
+  eq getContext({S:Substitution, C:Context}) = C:Context .
+
+*** descent functions
+  op metaReduce : Module Term ~> ResultPair
+     [special (
+        id-hook MetaLevelOpSymbol	(metaReduce)
+
+        op-hook qidSymbol		(<Qids> : ~> Qid)
+        op-hook metaTermSymbol		(_[_] : Qid NeTermList ~> Term)
+        op-hook metaArgSymbol		(_,_ : NeTermList NeTermList ~> NeTermList)
+
+        op-hook assignmentSymbol	(_<-_ : Qid Term ~> Assignment)
+        op-hook substitutionSymbol
+                (_;_ : Substitution Substitution ~> Substitution)
+        op-hook emptySubstitutionSymbol	(none : ~> Substitution)
+        op-hook holeSymbol		([] : ~> Context)
+
+        op-hook headerSymbol		(_{_} : Qid ParameterDeclList ~> Header)
+        op-hook parameterDeclSymbol	(_::_ : Sort ModuleExpression ~> ParameterDecl)
+        op-hook parameterDeclListSymbol	(_,_ : ParameterDeclList ParameterDeclList ~> ParameterDeclList)
+
+        op-hook emptyAttrSetSymbol	(none : ~> AttrSet)
+        op-hook attrSetSymbol		(__ : AttrSet AttrSet ~> AttrSet)
+
+        op-hook sortRenamingSymbol	(sort_to_ : Qid Qid ~> Renaming)
+        op-hook opRenamingSymbol	(op_to_[_] : Qid Qid AttrSet ~> Renaming)
+        op-hook opRenamingSymbol2
+                (op_:_->_to_[_] : Qid TypeList Type Qid AttrSet ~> Renaming)
+        op-hook labelRenamingSymbol	(label_to_ : Qid Qid ~> Renaming)
+        op-hook renamingSetSymbol	(_,_ : RenamingSet RenamingSet ~> RenamingSet)
+
+        op-hook sumSymbol
+                (_+_ : ModuleExpression ModuleExpression ~> ModuleExpression)
+        op-hook renamingSymbol
+                (_*(_) : ModuleExpression RenamingSet ~> ModuleExpression)
+        op-hook instantiationSymbol
+                (_{_} : ModuleExpression ParameterList ~> ModuleExpression)
+
+        op-hook protectingSymbol	(protecting_. : ModuleExpression ~> Import)
+        op-hook extendingSymbol		(extending_. : ModuleExpression ~> Import)
+        op-hook includingSymbol		(including_. : ModuleExpression ~> Import)
+        op-hook nilImportListSymbol	(nil : ~> ImportList)
+        op-hook importListSymbol	(__ : ImportList ImportList ~> ImportList)
+
+        op-hook emptySortSetSymbol	(none : ~> SortSet)
+        op-hook sortSetSymbol		(_;_ : SortSet SortSet ~> SortSet)
+
+        op-hook subsortSymbol		(subsort_<_. : Sort Sort ~> SubsortDecl)
+        op-hook emptySubsortDeclSetSymbol	(none : ~> SubsortDeclSet)
+        op-hook subsortDeclSetSymbol
+                (__ : SubsortDeclSet SubsortDeclSet ~> SubsortDeclSet)
+
+        op-hook nilQidListSymbol	(nil : ~> QidList)
+        op-hook qidListSymbol		(__ : QidList QidList ~> QidList)
+
+        op-hook succSymbol		(s_ : Nat ~> NzNat)
+        op-hook natListSymbol		(__ : NeNatList NeNatList ~> NeNatList)
+        op-hook unboundedSymbol		(unbounded : ~> Bound)
+
+        op-hook stringSymbol		(<Strings> : ~> String)
+        op-hook idHookSymbol		(id-hook : Qid QidList ~> Hook)
+        op-hook opHookSymbol		(op-hook : Qid Qid QidList Qid ~> Hook)
+        op-hook termHookSymbol		(term-hook : Qid Term ~> Hook)
+        op-hook hookListSymbol		(__ : HookList HookList ~> HookList)
+
+        op-hook assocSymbol		(assoc : ~> Attr)
+        op-hook commSymbol		(comm : ~> Attr)
+        op-hook idemSymbol		(idem : ~> Attr)
+        op-hook iterSymbol		(iter : ~> Attr)
+        op-hook idSymbol		(id : Term ~> Attr)
+        op-hook leftIdSymbol		(left-id : Term ~> Attr)
+        op-hook rightIdSymbol		(right-id : Term ~> Attr)
+        op-hook stratSymbol		(strat : NeNatList ~> Attr)
+        op-hook memoSymbol		(memo : ~> Attr)
+        op-hook precSymbol		(prec : Nat ~> Attr)
+        op-hook gatherSymbol		(gather : QidList ~> Attr)
+        op-hook formatSymbol		(format : QidList ~> Attr)
+        op-hook ctorSymbol		(ctor : ~> Attr)
+        op-hook frozenSymbol		(frozen : NeNatList ~> Attr)
+        op-hook polySymbol		(poly : NeNatList ~> Attr)
+        op-hook configSymbol		(config : ~> Attr)
+        op-hook objectSymbol		(object : ~> Attr)
+        op-hook msgSymbol		(msg : ~> Attr)
+        op-hook specialSymbol		(special : NeHookList ~> Attr)
+
+        op-hook labelSymbol		(label : Qid ~> Attr)
+        op-hook metadataSymbol		(metadata : String ~> Attr)
+        op-hook owiseSymbol		(owise : ~> Attr)
+        op-hook nonexecSymbol		(nonexec : ~> Attr)
+        op-hook printSymbol		(print : QidList ~> Attr)
+
+        op-hook opDeclSymbol
+                (op_:_->_[_]. : Qid TypeList Type AttrSet ~> OpDecl)
+        op-hook emptyOpDeclSetSymbol	(none : ~> OpDeclSet)
+        op-hook opDeclSetSymbol		(__ : OpDeclSet OpDeclSet ~> OpDeclSet)
+
+        op-hook noConditionSymbol	(nil : ~> EqCondition)
+        op-hook equalityConditionSymbol	(_=_ : Term Term ~> EqCondition)
+        op-hook sortTestConditionSymbol	(_:_ : Term Sort ~> EqCondition)
+        op-hook matchConditionSymbol	(_:=_ : Term Term ~> EqCondition)
+        op-hook rewriteConditionSymbol	(_=>_ : Term Term ~> Condition)
+        op-hook conjunctionSymbol	(_/\_ : Condition Condition ~> Condition)
+
+        op-hook mbSymbol		(mb_:_[_]. : Term Sort AttrSet ~> MembAx)
+        op-hook cmbSymbol
+                (cmb_:_if_[_]. : Term Sort EqCondition AttrSet ~> MembAx)
+        op-hook emptyMembAxSetSymbol	(none : ~> MembAxSet)
+        op-hook membAxSetSymbol		(__ : MembAxSet MembAxSet ~> MembAxSet)
+
+        op-hook eqSymbol		(eq_=_[_]. : Term Term AttrSet ~> Equation)
+        op-hook ceqSymbol
+                (ceq_=_if_[_]. : Term Term EqCondition AttrSet ~> Equation)
+        op-hook emptyEquationSetSymbol	(none : ~> EquationSet)
+        op-hook equationSetSymbol
+                (__ : EquationSet EquationSet ~> EquationSet)
+
+        op-hook rlSymbol		(rl_=>_[_]. : Term Term AttrSet ~> Rule)
+        op-hook crlSymbol
+                (crl_=>_if_[_]. : Term Term Condition AttrSet ~> Rule)
+        op-hook emptyRuleSetSymbol	(none : ~> RuleSet)
+        op-hook ruleSetSymbol		(__ : RuleSet RuleSet ~> RuleSet)
+
+        op-hook fmodSymbol
+                (fmod_is_sorts_.____endfm :
+                        Qid ImportList SortSet SubsortDeclSet OpDeclSet 
+                        MembAxSet EquationSet ~> FModule)
+        op-hook fthSymbol
+                (fth_is_sorts_.____endfth :
+                        Qid ImportList SortSet SubsortDeclSet OpDeclSet 
+                        MembAxSet EquationSet ~> FModule)
+        op-hook modSymbol
+                (mod_is_sorts_._____endm :
+                        Qid ImportList SortSet SubsortDeclSet OpDeclSet 
+                        MembAxSet EquationSet RuleSet ~> Module)
+        op-hook thSymbol
+                (th_is_sorts_._____endth :
+                        Qid ImportList SortSet SubsortDeclSet OpDeclSet 
+                        MembAxSet EquationSet RuleSet ~> Module)
+
+        op-hook sortMappingSymbol	(sort_to_. : Sort Sort ~> SortMapping [ctor] .)
+	op-hook emptySortMappingSetSymbol	(none : ~> SortMappingSet)
+        op-hook sortMappingSetSymbol
+                (__ : SortMappingSet SortMappingSet ~> SortMappingSet)
+
+        op-hook opMappingSymbol		(op_to_. : Qid Qid ~> OpMapping)
+        op-hook opSpecificMappingSymbol	(op_:_->_to_. : Qid TypeList Type Qid ~> OpMapping)
+        op-hook opTermMappingSymbol	(op_to`term_. : Term Term ~> OpMapping)
+
+	op-hook emptyOpMappingSetSymbol	(none : ~> OpMappingSet)
+        op-hook opMappingSetSymbol
+                (__ : OpMappingSet OpMappingSet ~> OpMappingSet)
+
+        op-hook viewSymbol
+                (view_from_to_is__endv : Header ModuleExpression ModuleExpression
+                 SortMappingSet OpMappingSet ~> View)
+
+        op-hook anyTypeSymbol		(anyType : ~> Type?)
+
+	op-hook unificandPairSymbol	(_=?_ : Term Term ~> UnificandPair)
+        op-hook unificationConjunctionSymbol
+                (_/\_ : UnificationProblem UnificationProblem ~> UnificationProblem)
+
+        op-hook resultPairSymbol	({_,_} : Term Type ~> ResultPair)
+        op-hook resultTripleSymbol
+                ({_,_,_} : Term Type Substitution ~> ResultTriple)
+        op-hook result4TupleSymbol
+                ({_,_,_,_} : Term Type Substitution Context ~> Result4Tuple)
+        op-hook matchPairSymbol		({_,_} : Substitution Context ~> MatchPair)
+        op-hook unificationPairSymbol	({_,_} : Substitution Nat ~> UnificationPair)
+        op-hook unificationTripleSymbol	({_,_,_} : Substitution Substitution Nat ~> UnificationTriple)
+
+        op-hook traceStepSymbol		({_,_,_} : Term Type Rule ~> TraceStep)
+        op-hook nilTraceSymbol		(nil : ~> Trace)
+        op-hook traceSymbol		(__ : Trace Trace ~> Trace)
+
+        op-hook noParseSymbol		(noParse : Nat ~> ResultPair?)
+        op-hook ambiguitySymbol		(ambiguity : ResultPair ResultPair ~> ResultPair?)
+        op-hook failure2Symbol		(failure : ~> ResultPair?)
+        op-hook failure3Symbol		(failure : ~> ResultTriple?)
+        op-hook failure4Symbol		(failure : ~> Result4Tuple?)
+        op-hook noUnifierPairSymbol	(noUnifier : ~> UnificationPair?)
+        op-hook noUnifierTripleSymbol	(noUnifier : ~> UnificationTriple?)
+        op-hook noMatchSubstSymbol	(noMatch : ~> Substitution?)
+        op-hook noMatchPairSymbol	(noMatch : ~> MatchPair?)
+        op-hook failureTraceSymbol	(failure : ~> Trace?)
+
+        op-hook mixfixSymbol		(mixfix : ~> PrintOption)
+        op-hook withParensSymbol	(with-parens : ~> PrintOption)
+        op-hook flatSymbol		(flat : ~> PrintOption)
+        op-hook formatPrintOptionSymbol	(format : ~> PrintOption)
+        op-hook numberSymbol		(number : ~> PrintOption)
+        op-hook ratSymbol		(rat : ~> PrintOption)
+        op-hook emptyPrintOptionSetSymbol	(none : ~> PrintOptionSet)
+        op-hook printOptionSetSymbol	(__ : PrintOptionSet PrintOptionSet ~> PrintOptionSet)
+
+        term-hook trueTerm		(true)
+        term-hook falseTerm		(false))] .
+
+  op metaNormalize : Module Term ~> ResultPair
+        [special (
+           id-hook MetaLevelOpSymbol	(metaNormalize)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaRewrite : Module Term Bound ~> ResultPair
+        [special (
+           id-hook MetaLevelOpSymbol	(metaRewrite)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaFrewrite : Module Term Bound Nat ~> ResultPair
+        [special (
+           id-hook MetaLevelOpSymbol	(metaFrewrite)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaApply : Module Term Qid Substitution Nat ~> ResultTriple?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaApply)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaXapply : Module Term Qid Substitution Nat Bound Nat ~> Result4Tuple?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaXapply)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaMatch : Module Term Term Condition Nat ~> Substitution?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaMatch)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaXmatch : Module Term Term Condition Nat Bound Nat ~> MatchPair?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaXmatch)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaUnify : Module UnificationProblem Nat Nat ~> UnificationPair?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUnify)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaDisjointUnify : Module UnificationProblem Nat Nat ~> UnificationTriple?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaDisjointUnify)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaSearch : Module Term Term Condition Qid Bound Nat ~> ResultTriple?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaSearch)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaSearchPath : Module Term Term Condition Qid Bound Nat ~> Trace?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaSearchPath)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaNarrow : Module Term Term Qid Bound Nat ~> ResultTriple?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaNarrow)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaNarrow : Module Term Qid Bound Bool Nat ~> ResultPair?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaNarrow2)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op sortLeq : Module Type Type ~> Bool
+        [special (
+           id-hook MetaLevelOpSymbol	(metaSortLeq)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op sameKind : Module Type Type ~> Bool
+        [special (
+           id-hook MetaLevelOpSymbol	(metaSameKind)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op lesserSorts : Module Type ~> SortSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaLesserSorts)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op glbSorts : Module Type Type ~> TypeSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaGlbSorts)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op leastSort : Module Term ~> Type
+        [special (
+           id-hook MetaLevelOpSymbol	(metaLeastSort)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op completeName : Module Type ~> Type
+        [special (
+           id-hook MetaLevelOpSymbol	(metaCompleteName)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaParse : Module QidList Type? ~> ResultPair?
+        [special (
+           id-hook MetaLevelOpSymbol	(metaParse)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op metaPrettyPrint : Module Term PrintOptionSet ~> QidList
+        [special (
+           id-hook MetaLevelOpSymbol	(metaPrettyPrint)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op wellFormed : Module -> Bool
+        [special (
+           id-hook MetaLevelOpSymbol	(metaWellFormedModule)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op wellFormed : Module Term ~> Bool
+        [special (
+           id-hook MetaLevelOpSymbol	(metaWellFormedTerm)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op wellFormed : Module Substitution ~> Bool
+        [special (
+           id-hook MetaLevelOpSymbol	(metaWellFormedSubstitution)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op getKind : Module Type ~> Kind
+        [special (
+           id-hook MetaLevelOpSymbol	(metaGetKind)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op getKinds : Module ~> KindSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaGetKinds)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op maximalSorts : Module Kind ~> SortSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaMaximalSorts)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op minimalSorts : Module Kind ~> SortSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaMinimalSorts)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op maximalAritySet : Module Qid TypeList Sort ~> TypeListSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaMaximalAritySet)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upModule : Qid Bool ~> Module
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUpModule)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upImports : Qid ~> ImportList
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUpImports)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upSorts : Qid Bool ~> SortSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUpSorts)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upSubsortDecls : Qid Bool ~> SubsortDeclSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUpSubsortDecls)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upOpDecls : Qid Bool ~> OpDeclSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUpOpDecls)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upMbs : Qid Bool ~> MembAxSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUpMbs)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upEqs : Qid Bool ~> EquationSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUpEqs)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upRls : Qid Bool ~> RuleSet
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUpRls)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upView : Qid ~> View
+        [special (
+           id-hook MetaLevelOpSymbol	(metaUpView)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op upTerm : Universal -> Term
+        [poly (1)
+         special (
+           id-hook MetaLevelOpSymbol	(metaUpTerm)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+  op downTerm : Term Universal -> Universal
+        [poly (2 0)
+         special (
+           id-hook MetaLevelOpSymbol	(metaDownTerm)
+           op-hook shareWith		(metaReduce : Module Term ~> ResultPair))] .
+
+*** backward compatibility
+  op metaPrettyPrint : Module Term ~> QidList .
+  eq metaPrettyPrint(M:Module, T:Term) = metaPrettyPrint(M:Module, T:Term, mixfix flat format number rat) .
+endfm
+
+***
+***	System modules.
+***
+
+mod COUNTER is
+  protecting NAT .
+  op counter : -> [Nat]
+        [special (id-hook CounterSymbol
+                  op-hook succSymbol (s_ : Nat ~> NzNat))] .
+endm
+
+mod LOOP-MODE is
+  protecting QID-LIST .
+  sorts State System .
+  op [_,_,_] : QidList State QidList -> System 
+        [ctor special (
+           id-hook LoopSymbol
+           op-hook qidSymbol		(<Qids> : ~> Qid)
+           op-hook nilQidListSymbol	(nil : ~> QidList)
+           op-hook qidListSymbol	(__ : QidList QidList ~> QidList))] .
+endm
+
+mod CONFIGURATION is
+  sorts Attribute AttributeSet .
+  subsort Attribute < AttributeSet .
+  op none : -> AttributeSet  [ctor] .
+  op _,_ : AttributeSet AttributeSet -> AttributeSet [ctor assoc comm id: none] .
+
+  sorts Oid Cid Object Msg Portal Configuration .
+  subsort Object Msg Portal < Configuration .
+  op <_:_|_> : Oid Cid AttributeSet -> Object [ctor object] .
+  op none : -> Configuration [ctor] .
+  op __ : Configuration Configuration -> Configuration [ctor config assoc comm id: none] .
+  op <> : -> Portal [ctor] .
+endm
+
+set include BOOL on .
+set omod include CONFIGURATION on .
+
+select CONVERSION .

@@ -1,0 +1,70 @@
+***(
+
+    This file is part of the Maude 2 interpreter.
+
+    Copyright 2004-2006 SRI International, Menlo Park, CA 94025, USA.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+)
+
+***
+***	Maude internet socket external objects.
+***	Version 2.3.
+***
+
+mod SOCKET is
+  protecting STRING .
+  including CONFIGURATION .
+
+  op socket : Nat -> Oid [ctor] .
+
+  op createClientTcpSocket : Oid Oid String Nat -> Msg [ctor msg format (b o)] .
+  op createServerTcpSocket : Oid Oid Nat Nat -> Msg [ctor msg format (b o)] .
+  op createdSocket : Oid Oid Oid -> Msg [ctor msg format (m o)] .
+
+  op acceptClient : Oid Oid -> Msg [ctor msg format (b o)] .
+  op acceptedClient : Oid Oid String Oid -> Msg [ctor msg format (m o)] .
+
+  op send : Oid Oid String -> Msg [ctor msg format (b o)] .
+  op sent : Oid Oid -> Msg [ctor msg format (m o)] .
+
+  op receive : Oid Oid -> Msg [ctor msg format (b o)] .
+  op received : Oid Oid String -> Msg [ctor msg format (m o)] .
+
+  op closeSocket : Oid Oid -> Msg [ctor msg format (b o)] .
+  op closedSocket : Oid Oid String -> Msg [ctor msg format (m o)] .
+
+  op socketError : Oid Oid String -> Msg [ctor msg format (r o)] .
+
+  op socketManager : -> Oid
+        [special (
+           id-hook SocketManagerSymbol
+	   op-hook succSymbol			(s_ : Nat ~> NzNat)
+	   op-hook stringSymbol			(<Strings> : ~> String)
+	   op-hook socketOidSymbol		(socket : Nat ~> Oid)
+	   op-hook createClientTcpSocketMsg	(createClientTcpSocket : Oid Oid String Nat ~> Msg)
+	   op-hook createServerTcpSocketMsg	(createServerTcpSocket : Oid Oid Nat Nat ~> Msg)
+	   op-hook createdSocketMsg		(createdSocket : Oid Oid Oid ~> Msg)
+	   op-hook acceptClientMsg		(acceptClient : Oid Oid ~> Msg)
+	   op-hook acceptedClientMsg		(acceptedClient : Oid Oid String Oid ~> Msg)
+	   op-hook sendMsg			(send : Oid Oid String ~> Msg)
+	   op-hook sentMsg			(sent : Oid Oid ~> Msg)
+	   op-hook receiveMsg			(receive : Oid Oid ~> Msg)
+	   op-hook receivedMsg			(received : Oid Oid String ~> Msg)
+	   op-hook closeSocketMsg		(closeSocket : Oid Oid ~> Msg)
+	   op-hook closedSocketMsg		(closedSocket : Oid Oid String ~> Msg)
+	   op-hook socketErrorMsg		(socketError : Oid Oid String ~> Msg))] .
+endm
