@@ -404,10 +404,9 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(SetItem setItem) {
 	prepare(setItem);
-	result.endLine();
-	result.write("Don't know how to pretty print ListItem");
-	result.endLine();
+	result.write("SetItem(");
 	super.visit(setItem);
+	result.write(")");
 	postpare();
     }
 
@@ -492,9 +491,6 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(ro.uaic.info.fmse.k.Set set) {
 	prepare(set);
-	result.endLine();
-	result.write("Don't know how to pretty print Set");
-	result.endLine();
 	super.visit(set);
 	postpare();
     }
