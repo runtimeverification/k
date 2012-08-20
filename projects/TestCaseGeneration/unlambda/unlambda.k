@@ -80,6 +80,7 @@ module UNLAMBDA
       <loc> 0 </loc>   // location of current eval
 
       <new> 0 </new>
+      <start> 0 </start>
       <next> 0 </next>
       <check> 0 </check>
 
@@ -272,6 +273,8 @@ module UNLAMBDA
    when (N ==Int -1 *Int L)
 
 
+  rule [EvaluateConstantGenerator]: // k
+    <mode> 22 => 41 </mode> // mode 22 iff k, unique second-degree function
   
 
   // tree transformations
@@ -308,13 +311,54 @@ module UNLAMBDA
    when P >=Int 0
 
 
-  rule [VoidTransform1]: // erase right child
-    <mode> 61 => 62 </mode>
+
+  rule [ConstantTransform1]: // ``kXY; erase Y
+    <mode> 41 => 100 </mode>
+    <next> _ => 42 </next>
+    <start> _ => R </start>
     <loc> L:Int </loc>
     <child>... L |-> R:Int => . ...</child>
-    <parent>... R |-> L => . ...</parent>
-    <tree>... R |-> _ => . ...</tree>
-    <status>... R |-> _ => . ...</status>
+
+  rule [ConstantTransform2]: // move to middle
+    <mode> 42 => 43 </mode>
+    <loc> L:Int => C </loc>
+    <child>... N |-> C:Int ...</child>
+   when (N ==Int -1 *Int L)
+
+  rule [ConstantTransform3]: // erase "k"
+    <mode> 43 => 44 </mode>
+    <loc> L:Int </loc>
+    <child>... N |-> C:Int => . ...</child>
+    <parent>... C |-> L => . ...</parent>
+    <tree>... C |-> _ => . ...</tree>
+    <status>... C |-> _ => . ...</status>
+   when (N ==Int -1 *Int L)
+
+  rule [ConstantTransform4]: // erase L
+    <mode> 44 => 45 </mode>
+    <loc> L:Int </loc>
+    <child>... L |-> R:Int => . ...</child>
+    <parent>... L |-> P:Int => . ...</parent>
+    <tree>... L |-> _ => . ...</tree>
+    <status>... L |-> _ => . ...</status>  
+
+  rule [ConstantTransform5]: // remap lower
+    <mode> 45 => 62 </mode>
+    <loc> L:Int => 0 -Int Q </loc>
+    <child>... Q:Int |-> (L => C) ...</child>
+    <parent>... C:Int |-> (L => 0 -Int Q) ...</parent>
+   when Q <Int 0
+
+  
+
+
+
+  rule [VoidTransform1]: // erase right child
+    <mode> 61 => 100 </mode>
+    <next> _ => 62 </next>
+    <start> _ => R </start>
+    <loc> L:Int </loc>
+    <child>... L |-> R:Int => . ...</child>
 
   rule [VoidTransform2]: // erase L
     <mode> 62 => 33 </mode>
@@ -324,6 +368,47 @@ module UNLAMBDA
     <tree>... L |-> _ => . ...</tree>
     <status>... L |-> _ => . ...</status>
    when (N ==Int -1 *Int L)  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // garbage collection
+
+  rule [EraseSubtree]: // erase subtree rooted at L
+    <mode> 100 => 101 </mode>
+    <start> L:Int </start>
+    <queue> _ => ListItem(L) </queue>
+
+  rule [EraseSubtreeTerminal]:
+    <mode> 101 </mode>
+    <queue> ListItem(L:Int) => . ...</queue>
+    <child> M:Map </child>
+    <tree>... L |-> _ => . ...</tree>
+    <parent>... L |-> _ => . ...</parent>
+    <status>... L |-> _ => . ...</status>  
+   when notBool(L in keys(M))
+
+  rule [EraseSubtreeNonterminal]:
+    <mode> 101 </mode>
+    <queue> ListItem(L:Int) => ListItem(L) ListItem(C) ...</queue>
+    <child>... N |-> C:Int => . ...</child>
+   when (N ==Int -1 *Int L) orBool N ==Int L
+
+  rule [EraseComplete]:
+    <mode> 101 => R </mode>
+    <next> R:Int </next>
+    <queue> . </queue>  
+
 
 /*
   rule [VoidTransform3Left]: // remap
@@ -351,7 +436,7 @@ module UNLAMBDA
 
 
   
-
+  
 
 
 
