@@ -896,7 +896,7 @@ fmod META-K-PREDICATES is
   including META-K-MODULE .
   var S : Sort .
   op predicateLabelS : Sort -> Qid .
-  eq predicateLabelS(S) = qid("'is" + string(S)) .
+  eq predicateLabelS(S) = qid("is" + string(S)) .
 
   op predicateLabel : Sort -> Constant .
   eq predicateLabel(S) = mkConstant(predicateLabelS(S), KLabel) .

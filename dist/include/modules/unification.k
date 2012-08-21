@@ -13,10 +13,10 @@ Matching on any KAST label, the
   rule eqns((.List{K} => eqn(K1,,K2)),, 
             eqn(L:KLabel((K1:K => .List{K}),,Ks:List{K}),,
                 L((K2:K => .List{K}),,Ks':List{K})),,_)
-    when ('isUnificationVar(L(K1,,Ks)) =/=K true)
-         andBool ('isUnificationVar(L(K2,,Ks')) =/=K true)
+    when (isUnificationVar(L(K1,,Ks)) =/=K true)
+         andBool (isUnificationVar(L(K2,,Ks')) =/=K true)
     [structural, anywhere]
-  rule eqns((eqn(K,,X:K) => eqn(X,,K)),,_) when 'isUnificationVar(X) andBool ('isUnificationVar(K) =/=K true)   [structural, anywhere]
+  rule eqns((eqn(K,,X:K) => eqn(X,,K)),,_) when isUnificationVar(X) andBool (isUnificationVar(K) =/=K true)   [structural, anywhere]
 
 /*@ When an equation contains a variable, it can be added as a binding
 to the mgu.  While we know that the variables in the domain of the mgu
@@ -30,7 +30,7 @@ remaining equations by applying the new mgu binding to them. */
 
   rule unifyEqs(subst(Ks:List{K} => eqn(X,,K),,substitute(X,,K,,Ks)),,
               (eqns(eqn(X,,K),,Eqns:List{K}) => substitute(X,, K,, eqns(Eqns))))
-    when 'isUnificationVar(X) andBool notBool(X subTerm K)
+    when isUnificationVar(X) andBool notBool(X subTerm K)
    [structural, anywhere]
 /*@ Final rule of the unification algorithm, retrieving the substitution 
 once all constraints were incorporated.
@@ -86,10 +86,10 @@ constraint.
         #then accumulateVars(vars(Xs),,Ks)
         #else accumulateVars(vars(Xs,,X),,Ks)
         #fi
-     when 'isUnificationVar(X)
+     when isUnificationVar(X)
    [structural, anywhere]
    rule accumulateVars(_:K,,(L:KLabel(Ks:List{K}) => Ks),,_)
-     when 'isUnificationVar(L(Ks)) =/=K true
+     when isUnificationVar(L(Ks)) =/=K true
    [structural, anywhere]
    rule accumulateVars(vars(Xs:List{K})) => vars(Xs)   [structural, anywhere]
 

@@ -83,11 +83,6 @@ the desired evaluation strategies of the various language constructs .  */
                  | Stmts Stmts                      [right]
 
 
-// temporary solution for the ":" operator
-//  rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
-//  rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
-
-
 //@ We use the same desugaring macros like in typed SIMPLE
 
   rule if E:Exp then S:Stmt => if E then S else {}

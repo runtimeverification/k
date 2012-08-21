@@ -37,13 +37,7 @@ $\lambda$-abstractions will evaluate to closures.  We desugar
 substitution-based definition. */
 
   syntax Exp ::= "(" Exp ")"               [bracket]
-               > left: 
-                 "if" Exp "then" Exp "else" Exp [strict(1)]
                | Exp Exp                    [left,strict]
-               > left: "mu" Id "." Exp           [latex("\mu{#1}.{#2}")]
-               | "lambda" Id "." Exp       [latex("\lambda{#1}.{#2}")]
-               | "let" Id "=" Exp "in" Exp
-               | "letrec" Id Id "=" Exp "in" Exp
 	       > left: Int | Bool | Id
                | Exp "+" Exp		    [strict]
                | Exp "-" Exp                [strict]
@@ -60,7 +54,12 @@ substitution-based definition. */
                > right: Exp "and" Exp       [strict]
                | Exp "or" Exp               [strict]
                | "not" Exp                  [strict]
-
+               > left: 
+                 "if" Exp "then" Exp "else" Exp [strict(1)]
+               > left: "let" Id "=" Exp "in" Exp
+               | "letrec" Id Id "=" Exp "in" Exp
+               > left: "mu" Id "." Exp           [latex("\mu{#1}.{#2}")]
+               | "lambda" Id "." Exp       [latex("\lambda{#1}.{#2}")]
 
   rule let X:Id = E:Exp in E':Exp => (lambda X . E') E  [macro, anywhere]
   rule (letrec F:Id X = E in E') 

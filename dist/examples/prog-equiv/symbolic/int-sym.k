@@ -61,19 +61,19 @@ module INT-SYM
 
 
   rule isIntSymExp(K:K) => true
-       when 'isIntSymVar(K) ==K true
+       when isIntSymVar(K) ==K true
        [anywhere]
 
 /*@
   Extending Int with symbolic expressions:
 */
-  rule 'isInt(K:K) => true
+  rule isInt(K:K) => true
        when isIntSymExp(K) ==K true
        [anywhere]
 
-  rule 'isInt(_:Int +Int _:Int) => true [anywhere]
-  rule 'isInt(_:Int *Int _:Int) => true [anywhere] 
-  rule 'isInt(_:Int /Int _:Int) => true [anywhere]
+  rule isInt(_:Int +Int _:Int) => true [anywhere]
+  rule isInt(_:Int *Int _:Int) => true [anywhere] 
+  rule isInt(_:Int /Int _:Int) => true [anywhere]
 
 /*@
   Symbolic integer expressions extend the symbolic boolean

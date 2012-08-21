@@ -74,22 +74,22 @@ module IMP-FL
   rule <k> div#ee(E1,,E2) ~> K:K </k>
        =>
        <k>E1 ~> div#He(E2) ~> K </k>
-     when 'notBool('isKResult(E1))
+     when 'notBool(isKResult(E1))
 
   rule <k> div#ee(E1,,E2) ~> K:K </k>
        =>
        <k>E2 ~> div#eH(E1) ~> K </k>
-     when 'notBool('isKResult(E2))
+     when 'notBool(isKResult(E2))
 
   rule <k> V:K ~> div#He(E) ~> K:K </k>
        =>
        <k> div#ee(V,, E) ~> K </k>
-     when 'isKResult(V)
+     when isKResult(V)
 
   rule <k> V:K ~> div#eH(E) ~> K:K </k>
        =>
        <k> div#ee(E,, V) ~> K </k>
-     when 'isKResult(V)
+     when isKResult(V)
 
 
 // PLUS
@@ -97,34 +97,34 @@ module IMP-FL
   rule <k> plus#ee(E1,,E2) ~> K:K </k>
        =>
        <k>E1 ~> plus#He(E2) ~> K </k>
-     when 'notBool('isKResult(E1))
+     when 'notBool(isKResult(E1))
 
   rule <k> plus#ee(E1,,E2) ~> K:K </k>
        =>
        <k>E2 ~> plus#eH(E1) ~> K </k>
-     when 'notBool('isKResult(E2))
+     when 'notBool(isKResult(E2))
 
   rule <k> V:K ~> plus#He(E) ~> K:K </k>
        =>
        <k> plus#ee(V,, E) ~> K </k>
-     when 'isKResult(V)
+     when isKResult(V)
 
   rule <k> V:K ~> plus#eH(E) ~> K:K </k>
        =>
        <k> plus#ee(E,, V) ~> K </k>
-     when 'isKResult(V)
+     when isKResult(V)
 
 // LE
 
   rule <k> le#ee(E1,,E2) ~> K:K </k>
        =>
        <k>E1 ~> le#He(E2) ~> K </k>
-     when 'notBool('isKResult(E1))
+     when 'notBool(isKResult(E1))
 
   rule <k> V:K ~> le#He(E) ~> K:K </k>
        =>
        <k> le#ee(V,, E) ~> K </k>
-     when 'isKResult(V)
+     when isKResult(V)
 
 
 // NOT
@@ -132,36 +132,36 @@ module IMP-FL
   rule <k> not#e(E) ~> K:K </k>
        =>
        <k> E ~> not#H(.List{K}) ~> K </k>
-     when 'notBool('isKResult(E))
+     when 'notBool(isKResult(E))
 
   rule <k> V:K ~> not#H(.List{K}) ~> K:K </k>
        =>
        <k> not#e(V) ~> K </k>
-     when 'isKResult(V)
+     when isKResult(V)
 
 // AND
 
   rule <k> and#ee(E1,,E2) ~> K:K </k>
        =>
        <k>E1 ~> and#He(E2) ~> K </k>
-     when 'notBool('isKResult(E1))
+     when 'notBool(isKResult(E1))
 
   rule <k> V:K ~> and#He(E) ~> K:K </k>
        =>
        <k> and#ee(V,, E) ~> K </k>
-     when 'isKResult(V)
+     when isKResult(V)
 
 // ASSIGN
 
   rule <k> assign#ee(E1,,E2) ~> K:K </k>
        =>
        <k>E2 ~> assign#eH(E1) ~> K </k>
-     when 'notBool('isKResult(E2))
+     when 'notBool(isKResult(E2))
 
   rule <k> V:K ~> assign#eH(E) ~> K:K </k>
        =>
        <k> assign#ee(E,, V) ~> K </k>
-     when 'isKResult(V)
+     when isKResult(V)
 
 
 // ITE
@@ -169,12 +169,12 @@ module IMP-FL
   rule <k> ite#eee(E,,S1,, S2) ~> K:K </k>
        =>
        <k>E ~> ite#Hee(S1,, S2) ~> K </k>
-     when 'notBool('isKResult(E))
+     when 'notBool(isKResult(E))
 
   rule <k> V:K ~> ite#Hee(S1,, S2) ~> K:K </k>
        =>
        <k> ite#eee(V,, S1,, S2) ~> K </k>
-     when 'isKResult(V)
+     when isKResult(V)
 
 
 // ACTUAL RULES

@@ -485,7 +485,7 @@ module CINK-LANG-SEMANTICS
   /*@
     -- the case when we got an expected r-value:
   */
-  rule rvalue(V:Val) => V when 'isLVal(V) =/=K true
+  rule rvalue(V:Val) => V when isLVal(V) =/=K true
 
 
   /*@ \subsection{Memmory operations.} */

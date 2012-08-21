@@ -16,7 +16,7 @@ module QUOTE-UNQUOTE
 
   syntax K ::= "mQuote" "(" K "," Int ")" [klabel(mQuote), latex("{\it quote}({#1},{#2})")]
   rule mQuote(K,N) 
-    => visit K applying quoteit[N] if 'isQuote
+    => visit K applying quoteit[N] if isQuote
     [structural, anywhere]
 
 // Code generation (via reflection)

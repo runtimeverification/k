@@ -33,7 +33,7 @@ module BOOL-SYM
 */
 
 
-  rule 'isBool(K:K) => true
+  rule isBool(K:K) => true
        when isBoolSymExp(K) ==K true
        [anywhere]
 

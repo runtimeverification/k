@@ -25,7 +25,7 @@ module SMTLIB
   rule Smtlib(notBool B:Bool) => "(not " +String Smtlib(B) +String ")" [anywhere]
 
   // Smtlib: integers
-  rule Smtlib(I:Int) => Int2String(I) when notBool('isSymbolicInt(I)) [anywhere]
+  rule Smtlib(I:Int) => Int2String(I) when notBool(isIntSymbolic(I)) [anywhere]
   rule Smtlib(symInt(I:Int)) => "var" +String Int2String(I) [anywhere]
 
   rule Smtlib(I1:Int <Int I2:Int) => "(< " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]

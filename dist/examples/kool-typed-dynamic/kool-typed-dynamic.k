@@ -87,10 +87,6 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts            [right]
 
-// temporary solution for the ":" operator
-//  rule E:Exp of T:Type => '_:_(E,, T) [anywhere]
-//  rule 'isExp('_:_(E:Exp,, T:Type)) => true [anywhere]
-
 
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:Id = E1:Exp to E2:Exp do S:Stmt)
@@ -98,8 +94,6 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
        { var '_:_(X,, int) = E1; while X <= E2 do { S X = X+1; } }
 
   rule var E1:Exp, E2:Exp, Es:Exps; => var (E1, .Exps); var E2, Es;
-
-//  rule var '_:_(X:Id,, T:Type) = E:Exp; => var ('_:_(X,, T), .Exps); X = E;
 
   rule var X:Id : T:Type = E:Exp; => var X : T; X = E;
 
