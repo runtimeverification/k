@@ -258,7 +258,9 @@ public class Definition implements Cloneable {
 
 							// filter the productions according to their form
 							for (Production prd : prt.getProductions()) {
-								if (prd.isSubsort()) {
+								if (prd.getAttributes().containsKey("onlyLabel")) {
+									// if a production has this attribute, don't add it to the list
+								} else if (prd.isSubsort()) {
 									outsides.add(prd);
 									subsorts.add(prd);
 									if (prd.getProdSort().equals(new Sort("Start")))
