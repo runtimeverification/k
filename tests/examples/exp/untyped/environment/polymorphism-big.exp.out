@@ -1,8 +1,2 @@
-<result>
-  closure-lambda( f00 |-> 0
-  f01 |-> 1
-  f02 |-> 2
-  f03 |-> 3
-  f04 |-> 4
-  f05 |-> 5 , x , f05 f05 x )
-</result>
+Error: 
+Program file does not exist: /Users/tserban2/Documents/k/trunk/dist/examples/exp/untyped/environment/regression/polymorphism-big.exp

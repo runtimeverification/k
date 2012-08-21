@@ -1,3 +1,2 @@
-<result>
-  closure-lambda( Map2KLabel x |-> 1 , y , x  y )
-</result>
+Error: 
+Program file does not exist: /Users/tserban2/Documents/k/trunk/dist/examples/exp/untyped/environment/regression/capture.exp

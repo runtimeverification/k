@@ -1,3 +1,2 @@
-<result>
-  closure-lambda( f |-> 0 , y , f y )
-</result>
+Error: 
+Program file does not exist: /Users/tserban2/Documents/k/trunk/dist/examples/exp/untyped/environment/regression/identity-3.exp

@@ -1,3 +1,2 @@
-<result>
-  closure-lambda( . , x , lambda f . f lambda y . if true then x 7 else x y )
-</result>
+Error: 
+Program file does not exist: /Users/tserban2/Documents/k/trunk/dist/examples/exp/untyped/environment/regression/type-inference-2.exp

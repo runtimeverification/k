@@ -1,3 +1,2 @@
-<result>
-  closure-lambda( . , x , lambda f . lambda d . x f x + 1 lambda x . x )
-</result>
+Error: 
+Program file does not exist: /Users/tserban2/Documents/k/trunk/dist/examples/exp/untyped/environment/regression/type-inference-3.exp
