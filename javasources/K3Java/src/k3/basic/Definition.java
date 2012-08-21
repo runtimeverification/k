@@ -137,7 +137,7 @@ public class Definition implements Cloneable {
 					xmlComments = docLatex.getDocumentElement().getElementsByTagName(Tag.comment);
 				// TODO: insert latex comments in the def.xml
 
-				java.util.List<Module> modulesTemp = new ArrayList<Module>();
+				java.util.List<ModuleItem> modulesTemp = new ArrayList<ModuleItem>();
 
 				for (int i = 0; i < xmlModules.getLength(); i++) {
 					Module km = new Module(xmlModules.item(i), cannonicalPath);
@@ -148,6 +148,8 @@ public class Definition implements Cloneable {
 					if (GlobalSettings.literate)
 						km.addComments(xmlComments);
 
+					for (int j = 0; j < xmlIncludes.getLength(); j++)
+						modulesTemp.add(new Require(xmlIncludes.item(j)));
 					modulesTemp.add(km);
 					modulesMap.put(km.getModuleName(), km);
 				}
@@ -164,7 +166,7 @@ public class Definition implements Cloneable {
 		}
 	}
 
-	private static List<ModuleItem> mergeModuleAndComments(List<Module> lm, NodeList lnl) {
+	private static List<ModuleItem> mergeModuleAndComments(List<ModuleItem> lm, NodeList lnl) {
 		List<ModuleItem> lmi = new ArrayList<ModuleItem>();
 		List<CommentDef> lcd = new ArrayList<CommentDef>();
 
@@ -173,7 +175,7 @@ public class Definition implements Cloneable {
 			Element elm = (Element) lnl.item(i);
 			boolean intraModule = false;
 			CommentDef cd = new CommentDef(elm);
-			for (Module m : lm) {
+			for (ModuleItem m : lm) {
 				if (cd.getStartLine() >= m.getStartLine() && cd.getEndLine() <= m.getEndLine()) {
 					intraModule = true;
 					break;
@@ -187,7 +189,7 @@ public class Definition implements Cloneable {
 		int j = 0;
 
 		while (i < lm.size() && j < lcd.size()) {
-			Module s = lm.get(i);
+			ModuleItem s = lm.get(i);
 			CommentDef com = lcd.get(j);
 			if (s.getStartLine() < com.getStartLine()) {
 				lmi.add(s);

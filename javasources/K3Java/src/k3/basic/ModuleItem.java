@@ -4,7 +4,7 @@ import org.w3c.dom.Node;
 
 public abstract class ModuleItem extends Term {
 	public enum ModuleType {
-		MODULE, COMMENT;
+		MODULE, COMMENT, REQUIRE;
 	}
 
 	public ModuleItem() {
