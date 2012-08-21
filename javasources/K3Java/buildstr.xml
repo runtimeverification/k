@@ -9,6 +9,20 @@
 	<target name="allstr" depends="k2syntax, k3latex, k3" />
 
 	<target name="k2syntax">
+		<dependset>
+			<srcfileset file="../K3Syntax/trans/*.str" />
+			<srcfileset file="../K3Syntax/include/K3Syntax.str" />
+			<srcfileset file="../K3Syntax/include/K3Syntax.tbl" />
+			<targetfileset dir="src/k2parser/lib">
+				<include name="*.java" />
+				<include name="K3Syntax.tbl" />
+				<exclude name="xml_string_escape_from_string_0_0.java" />
+			</targetfileset>
+		</dependset>
+		<available file="src/k2parser/lib/K2Str.java" property="k2syntax.available" />
+		<antcall target="k2syntax.helper" />
+	</target>
+	<target name="k2syntax.helper" unless="k2syntax.available">
 		<java failonerror="true" dir="../K3Syntax/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i xmlify.str -o K2Str -la stratego-sglr --lib -I .. -p k2parser.lib --clean" />
 		</java>
@@ -30,6 +44,19 @@
 	</target>
 
 	<target name="k3latex">
+		<dependset>
+			<srcfileset file="../LatexComments/trans/*.str" />
+			<srcfileset file="../LatexComments/include/LatexComments.str" />
+			<srcfileset file="../LatexComments/include/LatexComments.tbl" />
+			<targetfileset dir="src/k3latex/lib">
+				<include name="*.java" />
+				<include name="LatexComments.tbl" />
+			</targetfileset>
+		</dependset>
+		<available file="src/k3latex/lib/K3Latex.java" property="k3latex.available" />
+		<antcall target="k3latex.helper" />
+	</target>
+	<target name="k3latex.helper" unless="k3latex.available">
 		<java failonerror="true" dir="../LatexComments/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i xmlify.str -o K3Latex -la stratego-sglr --lib -I .. -p k3latex.lib --clean" />
 		</java>
@@ -50,6 +77,23 @@
 	</target>
 
 	<target name="k3">
+		<dependset>
+			<srcfileset file="../K3Disamb/trans/*.str" />
+			<srcfileset file="../K3Disamb/include/K3Disamb.str" />
+			<targetfileset dir="src/k3parser/lib">
+				<include name="*.java" />
+				<exclude name="string_trim_last_one_0_0.java" />
+				<exclude name="string_unescape_sort_0_0.java" />
+				<exclude name="annolocation_0_0.java" />
+				<exclude name="annolocationremove_0_0.java" />
+				<exclude name="clear_console_0_0.java" />
+				<exclude name="mergeamb_0_0.java" />
+			</targetfileset>
+		</dependset>
+		<available file="src/k3parser/lib/K3Str.java" property="k3.available" />
+		<antcall target="k3.helper" />
+	</target>
+	<target name="k3.helper" unless="k3.available">
 		<java failonerror="true" dir="../K3Disamb/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i starter.str -o K3Str -la stratego-sglr --lib -I .. -p k3parser.lib --clean" />
 		</java>

@@ -54,6 +54,7 @@
 		<delete dir="${javasources}/Kil2Maude/bin" />
 
 		<delete file="${javasources}/../dist/bin/java/k3.jar"/>
+		<delete file="${javasources}/../dist/bin/java/JKrun.jar"/>
 		<delete file="k3.zip"/>
 	</target>
 

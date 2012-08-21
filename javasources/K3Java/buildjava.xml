@@ -81,22 +81,4 @@
 		</javac>
 	</target>
 	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects" />
-	<target name="Main - Def Imp">
-		<java classname="main.Main" dir="${workspace_loc:K3Syntax/test}" failonerror="true" fork="yes">
-			<arg line="-m -v imp/imp.k" />
-			<classpath refid="K3Java.classpath" />
-		</java>
-	</target>
-	<target name="Main - Def Simple-untyped">
-		<java classname="main.Main" dir="${workspace_loc:K3Syntax/test}" failonerror="true" fork="yes">
-			<arg line="-m -v simple-untyped/simple-untyped.k" />
-			<classpath refid="K3Java.classpath" />
-		</java>
-	</target>
-	<target name="Main - Pgm">
-		<java classname="main.Main" dir="${workspace_loc:K3Syntax/test}" failonerror="true" fork="yes">
-			<arg line="-kast -v simple-untyped/programs/collatz.simple" />
-			<classpath refid="K3Java.classpath" />
-		</java>
-	</target>
 </project>

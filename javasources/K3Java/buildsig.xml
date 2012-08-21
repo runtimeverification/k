@@ -30,6 +30,15 @@
 	<target name="allsig" depends="k3syntaxsig, k3latexsig, k3sig" />
 
 	<target name="k3syntaxsig">
+		<dependset>
+			<srcfileset file="../K3Syntax/syntax/*.sdf" />
+			<targetfileset file="../K3Syntax/include/*.tbl" />
+			<targetfileset file="../K3Syntax/include/*.str" />
+		</dependset>
+		<available file="../K3Syntax/include/K3Syntax.tbl" property="k3syntaxsig.available" />
+		<antcall target="k3syntaxsig.helper" />
+	</target>
+	<target name="k3syntaxsig.helper" unless="k3syntaxsig.available">
 		<!-- pack the definition into a single .def file -->
 		<mkdir dir="../K3Syntax/include" />
 		<java jar="./lib/strj.jar" fork="true" failonerror="true">
@@ -66,7 +75,7 @@
 		</java>
 
 		<!-- create the .tbl file of the definition -->
-		<echo message="Build TBL"/>
+		<echo message="Build TBL" />
 		<exec executable="${build.strategoxt.sdf}sdf2table">
 			<arg value="-i" />
 			<arg value="../K3Syntax/include/K3Syntax.def" />
@@ -78,6 +87,15 @@
 	</target>
 
 	<target name="k3latexsig">
+		<dependset>
+			<srcfileset file="../LatexComments/syntax/*.sdf" />
+			<targetfileset file="../LatexComments/include/*.tbl" />
+			<targetfileset file="../LatexComments/include/*.str" />
+		</dependset>
+		<available file="../LatexComments/include/LatexComments.tbl" property="k3latexsig.available" />
+		<antcall target="k3latexsig.helper" />
+	</target>
+	<target name="k3latexsig.helper" unless="k3latexsig.available">
 		<!-- pack the definition into a single .def file -->
 		<mkdir dir="../LatexComments/include" />
 		<java jar="./lib/strj.jar" fork="true" failonerror="true">
@@ -114,7 +132,7 @@
 		</java>
 
 		<!-- create the .tbl file of the definition -->
-		<echo message="Build TBL"/>
+		<echo message="Build TBL" />
 		<exec executable="${build.strategoxt.sdf}sdf2table">
 			<arg value="-i" />
 			<arg value="../LatexComments/include/LatexComments.def" />
@@ -124,9 +142,17 @@
 			<arg value="LatexComments" />
 		</exec>
 	</target>
-	
-	
+
+
 	<target name="k3sig">
+		<dependset>
+			<srcfileset file="../K3Disamb/syntax/*.sdf" />
+			<targetfileset file="../K3Disamb/include/*.str" />
+		</dependset>
+		<available file="../K3Disamb/include/K3Disamb.str" property="k3sig.available" />
+		<antcall target="k3sig.helper" />
+	</target>
+	<target name="k3sig.helper" unless="k3sig.available">
 		<!-- pack the definition into a single .def file -->
 		<mkdir dir="../K3Disamb/include" />
 		<java jar="./lib/strj.jar" fork="true" failonerror="true">
