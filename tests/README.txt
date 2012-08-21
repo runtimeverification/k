@@ -67,6 +67,10 @@ For instance, a "config.xml" for simple-unyped may contain:
 			<option name="--no-color"/>
 		</program>
 		<program name="dekker.simple" ignore="yes"/>
+		<general>
+            <option name="--output-mode" value="pretty"/>
+		    <option name="--no-color" value=""/>
+		</general>
 	</krun-options>
 </config>
 
