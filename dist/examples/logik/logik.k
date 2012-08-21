@@ -39,7 +39,7 @@ module LOGIK-SEMANTICS
 
 
 //@ Defining as unification variables all Ids starting with a small letter
-  rule 'isUnificationVar(K:K) => true 
+  rule isUnificationVar(K:K) => true 
   when asciiString(substrString(Id2String(K),0,1)) <Int 96  
   [anywhere,structural]
 
@@ -53,7 +53,7 @@ module LOGIK-SEMANTICS
       => [L1|[L2|[Lits|L']]]  [anywhere,structural]
 
   rule X:Id,Lits:Literals => X(.Literals),Lits 
-  when 'isUnificationVar(X) =/=K true
+  when isUnificationVar(X) =/=K true
   [anywhere]
 
 //@ Find a clause with the same name and generate a fresh version of it

@@ -74,7 +74,7 @@ module LAMBDAPP
  its branches might lead to non-termination in the presence of $\mu$.
  We also exclude print as it is side-effecting.
 */
-  rule 'isVal(X:Id V:Val) => true 
+  rule isVal(X:Id V:Val) => true 
    when X =/=K print andBool X =/=K ite
    [anywhere]
 endmodule

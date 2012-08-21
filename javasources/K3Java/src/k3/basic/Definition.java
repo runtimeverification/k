@@ -481,6 +481,12 @@ public class Definition implements Cloneable {
 			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "\n";
 		}
 
+		sdf += "\n\n%% sort predicates\n";
+		// print is<Sort> predicates (actually KLabel)
+		for (Sort s : userSorts) {
+				sdf += "	\"is" + s.getSortName() + "\"      -> DzKLabel\n";
+		}
+
 		sdf += "\n\n";
 
 		sdf += "\n%% terminals reject\n";
@@ -497,6 +503,7 @@ public class Definition implements Cloneable {
 		sdf += "%% some restrictions to ensure greedy matching for user defined constants\n";
 		sdf += "	DzDzId  -/- [a-zA-Z0-9]\n";
 		sdf += "	DzDzInt -/- [0-9]\n";
+		sdf += "	\"is\" -/- [\\#A-Z]\n";
 
 		return sdf + "\n";
 	}
