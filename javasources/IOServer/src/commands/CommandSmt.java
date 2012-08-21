@@ -34,7 +34,7 @@ public class CommandSmt extends Command {
 			String result = z3(filename);
 //			System.out.println("Created:" + toExecute + "\nExecution: " + result + "\n\n");
 			// delete filename
-			new File(filename).delete();
+       			new File(filename).delete();
 			
 			succeed(new String[] { result });
 		} catch (IOException e) {
@@ -82,11 +82,11 @@ public class CommandSmt extends Command {
 			String line = "";
 			while((line = output.readLine())!=null)
 			{
-				out += line + "\n";
+				out += line;
 			}
 			while((line = error.readLine())!=null)
 			{
-				out += line + "\n";
+				out += line;
 			}
 			
 			p.destroy();
