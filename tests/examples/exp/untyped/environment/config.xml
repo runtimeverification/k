@@ -1,3 +1,9 @@
 <config>
     <test def="/dist/examples/exp/untyped/environment/exp-untyped-environment.k" program-extension="exp" compiled-file-name="exp-untyped-environment-compiled.maude"/>
+	<krun-options>
+	  <general>
+	    <option name="--output-mode" value="pretty"/>
+		<option name="--no-color" value=""/>
+	  </general>
+	</krun-options>
 </config>
