@@ -1,2 +1,4 @@
-Error: 
-Program file does not exist: /Users/tserban2/Documents/k/trunk/dist/examples/exp/untyped/environment/regression/type-inference-1.exp
+
+<result>
+ closure-lambda( (Map2KLabel .) , x , ((lambda f . (lambda x . (f  0)))  (lambda y . (if true then y else x))) )
+</result>

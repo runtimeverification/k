@@ -1,2 +1,4 @@
-Error: 
-Program file does not exist: /Users/tserban2/Documents/k/trunk/dist/examples/exp/untyped/environment/regression/closure-2.exp
+
+<result>
+ closure-lambda( (Map2KLabel g |-> 0) , x , (lambda y . (g  g)) )
+</result>

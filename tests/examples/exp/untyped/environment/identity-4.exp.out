@@ -1,2 +1,4 @@
-Error: 
-Program file does not exist: /Users/tserban2/Documents/k/trunk/dist/examples/exp/untyped/environment/regression/identity-4.exp
+
+<result>
+ closure-lambda( (Map2KLabel .) , x , x )
+</result>
