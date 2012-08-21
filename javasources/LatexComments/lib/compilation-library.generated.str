@@ -5,139 +5,240 @@ imports
   lib/editor-common.generated
   lib/index-library.generated
   lib/analysis-library.generated
+  lib/analysis-library-internal.generated
   
 rules // Extension points
+  
+  /**
+   * Extension point. Override this rule to define a desugaring that is applied to AST before analyzing and compiling.
+   *
+   * Extension example:
+   *   index-desugar-ast:
+   *     ast -> <desugar> ast
+   *
+   * @type ast -> ast'
+   */
+  index-desugar-ast = fail
     
-  // Should compile given analysed ast.
-  index-compile-ast(|file, subfile, project-path) = fail
+  /**
+   * Extension point. Override this rule to define a compilation or transformation to some other target language. The
+   * index manages which files have to be compiled and calls this rule for each AST that has changed since the last
+   * compilation.
+   *
+   * Extensions example:
+   *   index-compile-ast(|file, subfile):
+   *     ast -> None()
+   *     with
+   *       java := <to-java> ast;
+   *       full-path := <dirname> file;
+   *       filename := <guarantee-extension(|"java")> <base-filename> file;
+   *       writePath := $[[full-path]/java/];
+   *       writeFile :=  $[[writePath][filename]];
+   *       try(<mkdir> writePath);
+   *       <fclose> <fputs> (java, <fopen> (writeFile, "w"))
+   *
+   * @param file    The file that must be compiled.
+   * @param subfile The subfile that must be compiled ("" if there is no subfile).
+   * @type ast -> None()
+   */
+  index-compile-ast(|file, subfile) = fail
+
+  /**
+   * Extension point. 
+   */
+  index-is-partial-ast = fail
+
+  /**
+   * Extension point. 
+   */
+  index-combine-asts = fail
   
 rules // Compilation
   
+  /**
+   * Schedules compilation in the background of all files that have changed since the last compilation.
+   *
+   * @type x -> x
+   */
   index-schedule-compilation:
-    <with(?(_, _, _) | "(ast, path, project-path) tuple expected")> -> None()
+    _ -> None()
     with
-      queue-strategy(|"index-compilation", "Compiling!")
-    
-  index-compilation:
-    (ast, path, project-path) -> <index-compilation(|path, project-path)> ast
+      queue-strategy(|"index-compilation", "Compiling files")
   
-  index-compilation(|path, project-path):
-    ast -> None()
+  /** @internal */
+  index-compilation:
+    language -> None()
     with
       // Init
-      full-path := $[[project-path]/[path]];
-      language  := <index-origin-language> ast;
-      index-setup(|language, [project-path], full-path)
+      project-path := <project-path>;
+      index-setup(|language, [project-path], ".")
     with
-      // Determine the files to compile by looking at changed files.
-      diffs         := <analyze-get-diffs>;
+      // Determine the files to compile by looking at changed files
+      diffs         := <analyze-get-compilediffs>;
       files         := <map(index-compilation-restore-read-file)> diffs;
       filteredFiles := <make-set> <remove-all(index-compilation-filter-file)> files;
+      (completeFiles, partialFiles) := <index-split-partial-files> filteredFiles;
       
-      // Clean compile time reads.
-      <filter(index-compilation-clean-reads)> filteredFiles;
+      // Clean compile time reads
+      <filter(index-compilation-clean-reads)> completeFiles;
+      <filter(index-compilation-clean-reads)> partialFiles;
       
-      <set-total-work-units> <length> filteredFiles;
+      // Set total work units to number of files to compile for visual indication
+      <set-total-work-units> <add> (<length> completeFiles, <length> partialFiles);
       
       // Compile the files
-      <filter(index-compilation-file(|language, project-path); complete-work-unit)> filteredFiles;
+      <filter(index-compilation-file; complete-work-unit)> completeFiles;
+      <filter(index-compilation-partial-file; complete-work-unit)> partialFiles
       
-      // Clean diffs
-      analyze-clean-diff
-
-  index-compilation-file(|language, project-path):
-    (file, subfile) -> None()
+  /** @internal */    
+  index-split-partial-files:
+    files -> (completeFiles, <make-set> splitFiles)
     with
-      // Parse and analyze ast.
-      ast                                 := <parse-file> file;
-      AnalysedResult(ast', _, _, _, _, _) := <analyze-top-internal(|Compile(), language, file)> (ast, file, project-path)
+      (completeFiles, splitFiles) := <partition(not(index-file-is-partial), index-file-is-partial)> files
+
+  /** @internal */
+  index-compilation-file:
+    (path, subfile) -> None()
+    with
+    	asts := <index-get-all-values> AST(subfile, ());
+      <map(index-compilation-ast(|path, subfile))> asts
+      
+  /** @internal */    
+  index-compilation-partial-file:
+    (path, subfile) -> None()
+    with
+      asts := <index-get-all-values> AST(subfile, ());
+      if 1 := <length> asts then
+      	ast := <?[<id>|_]> asts
+    	else
+    		ast := <try(index-combine-asts)> asts
+  		end;
+      <index-compilation-ast(|path, subfile)> ast
+      
+  /** @internal */
+  index-compilation-ast(|path, subfile):
+    ast -> None()
     with
       {| Index-ReadSet:
         readSet := <new-iset>;
         rules(Index-ReadSet: _ -> readSet);
         
         // Compile file
-        <index-compile-ast(|file, subfile, project-path)> ast';
+        <try(index-compile-ast(|path, subfile))> ast;
         
         // Store compile-time reads.
         reads := <iset-elements> readSet;
-        <index-add-all(|<index-compilation-file-tuple> (file, subfile))> reads
-      |}
+        <index-add-all(|<index-compilation-file-tuple> (path, subfile))> reads
+      |} 
 
-  index-compilation-filter-file = 
-    ?(<id>, _); (is-test-file <+ index-is-fake-file <+ not(file-exists))
-
-rules // Compile time reads
-
-  index-compilation-restore-read-file:
-    (file, subfile) -> (file', subfile)
-    with
-      file' := <string-replace(|<index-compilation-read-path>, "")> file
-      
-  index-compilation-clean-reads = 
-    ?(file, subfile); index-compilation-file-tuple; index-clear-file
-      
-  index-compilation-file-tuple:
-    (file, subfile) -> ($[[<index-compilation-read-path>]/[file]], subfile)
-    
-  index-compilation-read-path =
-    !"/.internal/reads/compile"
-    
-signature constructors // On save handling
-
-  CommitAndCompile : List(UriPart) -> Summary
-  CommitAndCompile : Namespace
+  /** @internal */
+  index-compilation-filter-file:
+    (file, subfile) -> (file, subfile)
+    where
+      <is-test-file <+ index-is-fake-file <+ not(file-exists)> file
     
 rules // On save handling
   
+  /**
+   * Commits the index to disk and schedules compilation. Use trigger-commit-and-compile instead of this strategy.
+   *
+   * @see trigger-commit-and-compile
+   *
+   * @internal
+   */
   commit-and-compile:
-    (_, path, project-path) -> <id>
+    language -> None()
     with
       index-commit
     with
       index-schedule-compilation
-  
-  index-on-save:
-    (ast, _, _, path, project-path) -> None()
+
+  /**
+   * Triggers commit and compilation, requires target language as current term.
+   * Compilation can be delayed by using disable-commit-and-compile. Compilation will be triggered when 
+   * enable-commit-and-compile is called.
+   *
+   * @type language -> language
+   *
+   * @see enable-commit-and-compile
+   * @see disable-commit-and-compile
+   */
+  trigger-commit-and-compile:
+    language -> <id>
     with
-      if 0 := <analysis-count> then
-        disable-commit-and-compile;
-        <commit-and-compile> (ast, path, project-path)
-      else
-        enable-commit-and-compile
-      end
-      
-  post-analyze-top(|phase, language, full-path):
-    _ -> <id>
-    with
-      if Editor() := phase then 
-          scheduledAnalyses := <analysis-count>
-      else
-        scheduledAnalyses := -1
-      end
-    with
-      if 0 := scheduledAnalyses; check-commit-and-compile then
-        disable-commit-and-compile;
+      if not(index-is-global-enabled(|"delay-compile")) then
         commit-and-compile
+      else
+        index-enable-global(|"trigger-compile")
+      end
+  
+  /**
+   * Delays commit and compilation until enable-commit-and-compile is called.
+   *
+   * @type x -> x
+   *
+   * @see enable-commit-and-compile
+   */
+  disable-commit-and-compile = 
+    index-enable-global(|"delay-compile")
+  
+  /**
+   * Cancels the commit and compilation delay, requires target language as current term. 
+   * If commit and compilation was triggered during the delay, it is triggered now.
+   *
+   * @type language -> language
+   *
+   * @see disable-commit-and-compile
+   */
+  enable-commit-and-compile:
+    language -> <id>
+    with
+      if index-is-global-enabled(|"trigger-compile") then
+        commit-and-compile
+      end;
+      index-disable-global(|"delay-compile")
+      
+/** @internal */
+rules // Compile time reads
+
+  /** @internal */
+  index-compilation-restore-read-file:
+    (file, subfile) -> (file', subfile)
+    where
+      if removedPath := <string-replace(|<index-compilation-read-path>, "")> file then
+        file' := removedPath
+      else
+        file' := file
+      end
+
+  /** @internal */
+  index-compilation-restore-read-file:
+    file -> file'
+    where
+      not(<is-tuple> file);
+      if removedPath := <string-replace(|<index-compilation-read-path>, "")> file then
+        file' := removedPath
+      else
+        file' := file
       end
       
-  analysis-count = 
-    prim("SSL_EXT_queue_analysis_count")
+  /** @internal */
+  index-compilation-clean-reads = 
+    ?(file, subfile); index-compilation-file-tuple; index-clear-file
       
-  enable-commit-and-compile:
-    _ -> <id>
-    with
-      <index-add-all(|<index-commit-and-compile-path>)> [CommitAndCompile([CommitAndCompile(), ".internal"])]
-      
-  disable-commit-and-compile:
-    _ -> <id>
-    with
-      <index-clear-file> <index-commit-and-compile-path>
-      
-  check-commit-and-compile:
-    _ -> <id>
-    where
-        <index-get> CommitAndCompile([CommitAndCompile(), ".internal"])
-      
-  index-commit-and-compile-path =
-    !"/.internal/commit-and-compile"
+  /** @internal */
+  index-compilation-file-tuple:
+    (file, subfile) -> ($[[<index-compilation-read-path>]/[file]], subfile)
+    
+  /** @internal */
+  index-compilation-read-path =
+    !"/.internal/reads/compile"
+    
+/** @internal */
+rules // Utility
+
+  /** @internal */
+  index-file-is-partial:
+  	file -> file
+  	where 
+      Snd; index-uri; index-is-partial-ast

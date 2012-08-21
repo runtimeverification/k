@@ -145,6 +145,14 @@ rules // Index management
    */
   index-clear = 
     prim("LANG_index_clear_all")
+    
+  /**
+   * Clears all elements from the index and re-analyzes all files in the project.
+   *
+   * @type x -> x
+   */
+  index-reload = 
+    prim("LANG_index_reload")
    
   /**
    * Commits index to a file on disk.
@@ -524,6 +532,19 @@ rules // Index utility
    */ 
   index-uri-name =
     ?[_|[<id>|_]]
+    
+  /**
+   * Gets the parent of given URI or fail if the URI doesn't have a parent.
+   *
+   * Example:
+   *   <index-uri-parent> [Entity(), "Bar", "Baz"] => [Entity(), "Baz"]
+   *   <index-uri-parent> [Entity(), "Baz"] => [Entity()]
+   *   <index-uri-parent> [Entity()] => fail
+   *
+   * @type uri@[namespace|[name|restPath]] -> ?name
+   */     
+  index-uri-parent =
+    ?[ns|[_|<id>]]; ![ns|<id>]
   
   /**
    * Gets the value part for given term. Can be extended by defining a index-value-impl rule. If no index-value-impl 
@@ -575,6 +596,19 @@ rules // Index utility
     x -> key
     where
       key := <collect-one(?_{_})> x
+
+  /**
+   * Converts a path from an URI to a string.
+   *
+   * Example:
+   *   <index-path-to-string> ["Bar", "Baz"] => "Bar.Baz"
+   *
+   * @type path -> str
+   */
+  index-path-to-string:
+    path -> str
+    with
+      str := <take-until(?Anon(_)); reverse; separate-by(|"."); concat-strings> path
       
   /**
    * Converts a URI to a string.
@@ -587,7 +621,7 @@ rules // Index utility
   index-uri-to-string:
     [ns|path] -> <concat-strings> [nsStr, "://", pathStr]
     with
-      pathStr := <take-until(?Anon(_)); reverse; separate-by(|"."); concat-strings> path;
+      pathStr := <index-path-to-string> path;
       nsStr := <?<id>#(_)> ns
   
   /**
@@ -666,6 +700,10 @@ rules // Index utility
       
 /** @internal */
 rules // URI and value projections
+
+  /** @internal */
+  index-uri-impl:
+    [_|_] -> <id>
   
   /** @internal */
   index-uri-impl:

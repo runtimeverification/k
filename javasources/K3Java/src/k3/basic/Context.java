@@ -39,7 +39,7 @@ public class Context extends Sentence {
 			xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
 			XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(location, 0), XmlLoader.getLocNumber(location, 1));
 			XmlLoader.addFilename(xmlTerm, filename);
-			XmlLoader.reportErrors(doc);
+			XmlLoader.reportErrors(doc, "context");
 
 			old.getParentNode().replaceChild(old.getOwnerDocument().importNode(xmlTerm, true), old);
 

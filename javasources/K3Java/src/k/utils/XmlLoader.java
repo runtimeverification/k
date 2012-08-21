@@ -68,6 +68,30 @@ public class XmlLoader {
 		}
 	}
 
+	public static void reportErrors(Document doc, String fromWhere) {
+		// report any error that xml parser returns
+		NodeList nl = doc.getElementsByTagName("error");
+
+		if (nl.getLength() > 0) {
+			Node nodeElem = nl.item(0);
+			String attr = nodeElem.getAttributes().getNamedItem(Tag.value).getNodeValue();
+			NodeList ch = nodeElem.getChildNodes();
+			for (int i = 0; i < ch.getLength(); i++) {
+				if (ch.item(i).getNodeType() == Node.ELEMENT_NODE) {
+					Element node = (Element) ch.item(i);
+					if (node.getNodeName().equals(Tag.localized)) {
+						String msg = node.getAttribute("message");
+						if (msg.equals("Unexpected end of file"))
+							msg = "Unexpected end of " + fromWhere;
+						String file = node.getAttribute("filename");
+						String location = node.getAttribute("loc");
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location, 0));
+					}
+				}
+			}
+		}
+	}
+
 	public static Node updateLocation(Node node, int startLine, int startCol) {
 		if (Node.ELEMENT_NODE == node.getNodeType()) {
 			NamedNodeMap attr = node.getAttributes();
