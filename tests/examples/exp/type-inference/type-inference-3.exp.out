@@ -1,3 +1,4 @@
+
 <resultType>
-  int -> int
+  (int) -> (int) 
 </resultType>

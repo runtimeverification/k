@@ -1,3 +1,4 @@
+
 <resultType>
-  tv 11 -> tv 10 -> tv 9 -> tv 9
+  (freshVar( 11 )) -> ((freshVar( 10 )) -> ((freshVar( 9 )) -> (freshVar( 9 )))) 
 </resultType>

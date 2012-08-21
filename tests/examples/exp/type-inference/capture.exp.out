@@ -1,3 +1,15 @@
-<resultType>
-  tv 5
-</resultType>
+
+<T> 
+  <k>
+    (((freshVar( 3 )) -> (freshVar( 4 ))) = (((freshVar( 0 )) -> ((freshVar( 1 )) -> (freshVar( 2 )))) -> (freshVar( 5 )))) ~> (freshVar( 5 )) 
+  </k> 
+  <mgu>
+   unifyEqs(subst(eqn(freshVar( 0 ), (freshVar( 1 )) -> (freshVar( 2 )))), eqns(eqn(freshVar( 3 ), (freshVar( 3 )) -> (freshVar( 4 )))))
+  </mgu> 
+  <nextVar>
+   6 
+  </nextVar> 
+  <tenv>
+   .
+  </tenv> 
+</T>

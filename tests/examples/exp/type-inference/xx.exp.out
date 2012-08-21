@@ -1,3 +1,15 @@
-<resultType>
-  tv 0 -> tv 1
-</resultType>
+
+<T> 
+  <k>
+    (freshVar( 0 )) -> (freshVar( 1 )) 
+  </k> 
+  <mgu>
+   unifyEqs(subst, eqns(eqn(freshVar( 0 ), (freshVar( 0 )) -> (freshVar( 1 )))))
+  </mgu> 
+  <nextVar>
+   2 
+  </nextVar> 
+  <tenv>
+   .
+  </tenv> 
+</T>

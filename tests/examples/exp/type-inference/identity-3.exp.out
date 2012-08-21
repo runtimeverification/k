@@ -1,3 +1,4 @@
+
 <resultType>
-  tv 4 -> tv 4
+  (freshVar( 4 )) -> (freshVar( 4 )) 
 </resultType>

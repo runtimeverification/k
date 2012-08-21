@@ -1,3 +1,4 @@
+
 <resultType>
-  tv 52 -> tv 68 -> tv 67 -> tv 66 -> tv 65 -> tv 64 -> tv 63 -> tv 62 -> tv 61 -> tv 60 -> tv 59 -> tv 58 -> tv 57 -> tv 56 -> tv 55 -> tv 54 -> tv 53 -> tv 52
+  (freshVar( 52 )) -> ((freshVar( 68 )) -> ((freshVar( 67 )) -> ((freshVar( 66 )) -> ((freshVar( 65 )) -> ((freshVar( 64 )) -> ((freshVar( 63 )) -> ((freshVar( 62 )) -> ((freshVar( 61 )) -> ((freshVar( 60 )) -> ((freshVar( 59 )) -> ((freshVar( 58 )) -> ((freshVar( 57 )) -> ((freshVar( 56 )) -> ((freshVar( 55 )) -> ((freshVar( 54 )) -> ((freshVar( 53 )) -> (freshVar( 52 )))))))))))))))))) 
 </resultType>

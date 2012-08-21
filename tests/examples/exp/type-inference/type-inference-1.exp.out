@@ -1,3 +1,4 @@
+
 <resultType>
-  int -> tv 2 -> int
+  (int) -> ((freshVar( 2 )) -> (int)) 
 </resultType>
