@@ -96,16 +96,16 @@ public class Syntax extends ModuleItem {
 					if (!MaudeHelper.separators.contains(list.separator)) {
 						contents += "op _" + StringUtil.escape(list.separator) + "_ : K K -> K [prec 120 metadata \"" + metadata + "\"] .\n";
 						contents += "op .List`{\"" + list.separator + "\"`} : -> K .\n";
-						contents += "eq 'isKResult(.List`{\"" + list.separator + "\"`}) = true .\nop 'isKResult : -> KLabel [metadata \"generated-label=()\"] .\n";
+						contents += "eq isKResult(.List`{\"" + list.separator + "\"`}) = true .\n";
 						MaudeHelper.separators.add(list.separator);
 					}
 
 					contents += "op ." + sort + " : -> " + sort + " .\n";
 					contents += "subsort " + list.sort + " < K .\n";
-					contents += "op 'is" + list.sort + " : -> KLabel .\n";
-					contents += "op 'is" + sort + " : -> KLabel .\n";
-					contents += "eq 'is" + sort + "(.List`{\"" + list.separator + "\"`}) = true .\n";
-					contents += "eq 'is" + sort + "(_" + StringUtil.escape(list.separator) + "_( X:" + list.sort + ", L:" + sort + " )) = true .\n";
+					contents += "op is" + list.sort + " : -> KLabel .\n";
+					contents += "op is" + sort + " : -> KLabel .\n";
+					contents += "eq is" + sort + "(.List`{\"" + list.separator + "\"`}) = true .\n";
+					contents += "eq is" + sort + "(_" + StringUtil.escape(list.separator) + "_( X:" + list.sort + ", L:" + sort + " )) = true .\n";
 					contents += "eq ." + sort + " = .List`{\"" + list.separator + "\"`} .\n";
 				} else {
 					String metadata = p.getAttributes().toMaude();

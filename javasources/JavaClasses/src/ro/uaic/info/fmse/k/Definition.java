@@ -111,7 +111,7 @@ public class Definition extends ASTNode {
 		{
 			theLists += "op _" + StringUtil.escape(separator) + "_ : K K -> K [prec 120 metadata \"hybrid=()\"] .\n";
 			theLists += "op .List`{\"" + separator + "\"`} : -> K .\n";
-			theLists += "eq 'isKResult(.List`{\"" + separator + "\"`}) = true .\nop 'isKResult : -> KLabel [metadata \"generated-label=()\"] .\n\n";
+			theLists += "eq isKResult(.List`{\"" + separator + "\"`}) = true .\n";
 		}
 		
 		String shared = "mod " + Constants.SHARED + " is\n  including K .\n" + klabels + sorts + cellLabels  + "\nendm";
