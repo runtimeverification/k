@@ -34,6 +34,24 @@ public class Checkout {
 		Thread.yield();
 		assertTrue(new File(StaticK.kbase).exists());
 		assertTrue(new File(StaticK.kbasedir).exists());
+		
+		// delete maude binaries
+		deleteFolder(new File(StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin" + StaticK.fileSep + "maude" + StaticK.fileSep + "binaries"));
+		
 		System.out.println("\tDone.");
+	}
+	
+	private void deleteFolder(File folder) {
+	    File[] files = folder.listFiles();
+	    if(files!=null) { //some JVMs return null for empty dirs
+	        for(File f: files) {
+	            if(f.isDirectory()) {
+	                deleteFolder(f);
+	            } else {
+	                f.delete();
+	            }
+	        }
+	    }
+	    folder.delete();
 	}
 }
