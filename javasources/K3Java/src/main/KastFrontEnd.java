@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import k.utils.FileUtil;
+import k.utils.KPaths;
 import k.utils.Stopwatch;
 import k.utils.XmlLoader;
 
@@ -22,6 +23,13 @@ public class KastFrontEnd {
 		Stopwatch sw = new Stopwatch();
 		KastOptionsParser op = new KastOptionsParser();
 		CommandLine cmd = op.parse(args);
+
+		if (cmd.hasOption("version")) {
+			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + "/bin/version.txt");
+			System.out.println(msg);
+			System.exit(0);
+		}
+
 		// set verbose
 		if (cmd.hasOption("verbose")) {
 			GlobalSettings.verbose = true;

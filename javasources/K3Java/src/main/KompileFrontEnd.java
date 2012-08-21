@@ -23,7 +23,6 @@ import klint.InfiniteRewrite;
 import klint.UnusedName;
 import klint.UnusedSyntax;
 
-
 import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -65,6 +64,12 @@ public class KompileFrontEnd {
 			k.utils.Error.helpExit(op.getHelp(), op.getOptions());
 		}
 
+		if (cmd.hasOption("version")) {
+			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + "/bin/version.txt");
+			System.out.println(msg);
+			System.exit(0);
+		}
+
 		// set verbose
 		if (cmd.hasOption("verbose")) {
 			GlobalSettings.verbose = true;
@@ -92,7 +97,7 @@ public class KompileFrontEnd {
 			GlobalSettings.supercool = cmd.getOptionValue("supercool");
 		if (cmd.hasOption("superheat"))
 			GlobalSettings.superheat = cmd.getOptionValue("superheat");
-		
+
 		// set lib if any
 		if (cmd.hasOption("lib")) {
 			GlobalSettings.lib = cmd.getOptionValue("lib");
@@ -164,7 +169,7 @@ public class KompileFrontEnd {
 	}
 
 	private static void lint(File mainFile, String mainModule) {
-		try{
+		try {
 			File canonicalFile = mainFile.getCanonicalFile();
 			File dotk = new File(canonicalFile.getParent() + "/.k");
 			dotk.mkdirs();
@@ -184,7 +189,6 @@ public class KompileFrontEnd {
 			e1.printStackTrace();
 		}
 	}
-
 
 	private static void pdf(File mainFile, String lang) {
 		latex(mainFile, lang);
@@ -218,7 +222,7 @@ public class KompileFrontEnd {
 				}
 				process.waitFor();
 				pdfClean(new String[] { ".tex", ".aux", ".log", ".mrk", ".out", ".sty" });
-			        new File("k.sty").delete();
+				new File("k.sty").delete();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -282,10 +286,9 @@ public class KompileFrontEnd {
 		ro.uaic.info.fmse.k.Definition javaDef;
 		try {
 			GlobalSettings.literate = true;
-			
+
 			String fileSep = System.getProperty("file.separator");
 			String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
-
 
 			javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, lang, GlobalSettings.verbose);
 			// for now just use this file as main argument
@@ -731,16 +734,16 @@ public class KompileFrontEnd {
 			String transition = "\"transition=()\"";
 			String superheat = "\"superheat=()\"";
 			String supercool = "\"supercool=()\"";
-			
+
 			if (!GlobalSettings.transition.equals(""))
 				transition = "\"" + metadataParse(GlobalSettings.transition) + "\"";
 			if (!GlobalSettings.superheat.equals(""))
 				superheat = "\"" + metadataParse(GlobalSettings.superheat) + "\"";
 			if (!GlobalSettings.supercool.equals(""))
 				supercool = "\"" + metadataParse(GlobalSettings.supercool) + "\"";
-				
-			String compile = load + maudified + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + mainModule
-					+ " transitions " + transition + " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
+
+			String compile = load + maudified + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + mainModule + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
+					+ " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 
@@ -761,22 +764,21 @@ public class KompileFrontEnd {
 			e.printStackTrace();
 		}
 	}
-	
-	private static String metadataParse(String tags)
-	{
+
+	private static String metadataParse(String tags) {
 		String[] alltags = tags.split("\\s+");
 		String result = "";
 		String tag;
-		for(int i = 0; i < alltags.length; i++)
-		{
+		for (int i = 0; i < alltags.length; i++) {
 			tag = alltags[i];
 			if (tag.matches("\\("))
 				tag.replaceFirst("\\(", "=(");
-			else tag += "=()";
-			
+			else
+				tag += "=()";
+
 			result += tag + " ";
 		}
-		
+
 		return result;
 	}
 }

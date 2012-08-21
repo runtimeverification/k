@@ -25,13 +25,15 @@ public class KompileOptionsParser {
 		// verbose and help
 		OptionGroup verb = new OptionGroup();
 		Option help = new Option("h", "help", false, "prints this message and exits");
+		Option version = new Option("version", false, "prints version number");
 		Option verbose = new Option("v", "verbose", false, "verbose mode");
 		Option lint = new Option("lint", "lint", false, "Checks your definition for possible logical errors");
 		verb.addOption(help);
+		verb.addOption(version);
 		verb.addOption(verbose);
 		verb.addOption(lint);
 
-		Option tempDisamb = new Option("tempDisamb", "tempDisamb", false, "temporary to test the java disambiguator");
+		//Option tempDisamb = new Option("tempDisamb", "tempDisamb", false, "temporary to test the java disambiguator");
 
 		// verbose and help
 		OptionGroup nofile = new OptionGroup();
@@ -44,12 +46,12 @@ public class KompileOptionsParser {
 		Option latex = new Option("latex", false, "generate latex from definition");
 		Option maudify = new Option("m", "maudify", false, "maudify the definition");
 		Option compile = new Option("c", "compile", false, "compile the definition");
-		Option tempcompile = new Option("tempc", "tempce", false, "test new implementation");
+		//Option tempcompile = new Option("tempc", "tempce", false, "test new implementation");
 
 		tex.addOption(latex);
 		tex.addOption(pdf);
 		tex.addOption(compile);
-		tex.addOption(tempcompile);
+		//tex.addOption(tempcompile);
 		tex.addOption(maudify);
 
 		OptionGroup warn = new OptionGroup();
@@ -83,26 +85,24 @@ public class KompileOptionsParser {
 		OptionGroup libGroup = new OptionGroup();
 		Option lib = new Option("lib", true, "Specify extra-libraries for compile/runtime.");
 		libGroup.addOption(lib);
-		
-		Option toHTML = new Option("html", false, "generate html from definition");
-		
-		Option unparse = new Option("unparse", false, "unparse a definition");
-		
-		Option literate = new Option("literate", false, "preserve literate comments");
 
+		Option toHTML = new Option("html", false, "generate html from definition");
+
+		Option unparse = new Option("unparse", false, "unparse a definition");
+
+		Option literate = new Option("literate", false, "preserve literate comments");
 
 		// options for non-determinism
 		OptionGroup nondet = new OptionGroup();
-		
+
 		// transition
 		Option transition = new Option("transition", true, "<arg> tags to become rewrite rules");
 		Option supercool = new Option("supercool", true, "syntax <arg> tags triggering super heating nondetermistic choice for strictness");
 		Option superheat = new Option("superheat", true, "rule <arg> tags triggering super cooling tags are space-separated and can include the tag default");
-		
+
 		nondet.addOption(transition);
 		nondet.addOption(supercool);
 		nondet.addOption(superheat);
-
 
 		// add options
 		options.addOptionGroup(verb);
@@ -114,7 +114,7 @@ public class KompileOptionsParser {
 		options.addOptionGroup(xml);
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
-		options.addOption(tempDisamb);
+		//options.addOption(tempDisamb);
 		options.addOption(toHTML);
 		options.addOption(unparse);
 		options.addOption(literate);
@@ -128,7 +128,7 @@ public class KompileOptionsParser {
 			return cl;
 		} catch (ParseException e) {
 			k.utils.Error.silentReport(e.getLocalizedMessage());
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 
 		k.utils.Error.helpExit(help, options);
