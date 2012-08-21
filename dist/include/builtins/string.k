@@ -37,7 +37,6 @@ module STRING-HOOKS
 
   syntax Char ::= "dummyChar"
 
-  syntax Bool ::= "isChar" "(" String ")"        [function, klabel(isChar)]
   rule isChar(S:String) => lengthString(S) ==Int 1 [function, anywhere]
 
   syntax Bool ::= "#isWhiteSpace" "(" Char ")"   [function, klabel(#isWhiteSpace)]

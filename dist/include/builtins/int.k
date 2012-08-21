@@ -28,7 +28,6 @@ module INT-HOOKS
 
   //sort Nat  // ::= {I:Int | I >=Int 0}
   syntax Nat ::= "dummyNat"
-  syntax Bool ::= "isNat" "(" Int ")"     [function, klabel(isNat)]
   rule isNat(I:Int) => I >=Int 0 [function, anywhere]
 
   syntax Bool ::= Int "dividesInt" Int    [function]
