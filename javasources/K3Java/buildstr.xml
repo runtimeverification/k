@@ -23,6 +23,9 @@
 		<antcall target="k2syntax.helper" />
 	</target>
 	<target name="k2syntax.helper" unless="k2syntax.available">
+		<delete file="../K3Syntax/trans/K2Str.rtree" />
+		<delete file="../K3Syntax/trans/K2Str.dep" />
+		<delete dir="../K3Syntax/trans/K2Str" />
 		<java failonerror="true" dir="../K3Syntax/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i xmlify.str -o K2Str -la stratego-sglr --lib -I .. -p k2parser.lib --clean" />
 		</java>
@@ -57,6 +60,9 @@
 		<antcall target="k3latex.helper" />
 	</target>
 	<target name="k3latex.helper" unless="k3latex.available">
+		<delete file="../LatexComments/trans/K3Latex.rtree" />
+		<delete file="../LatexComments/trans/K3Latex.dep" />
+		<delete dir="../LatexComments/trans/K3Latex" />
 		<java failonerror="true" dir="../LatexComments/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i xmlify.str -o K3Latex -la stratego-sglr --lib -I .. -p k3latex.lib --clean" />
 		</java>
@@ -94,6 +100,9 @@
 		<antcall target="k3.helper" />
 	</target>
 	<target name="k3.helper" unless="k3.available">
+		<delete file="../K3Disamb/trans/K3Str.rtree" />
+		<delete file="../K3Disamb/trans/K3Str.dep" />
+		<delete dir="../K3Disamb/trans/K3Str" />
 		<java failonerror="true" dir="../K3Disamb/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
 			<arg line="-i starter.str -o K3Str -la stratego-sglr --lib -I .. -p k3parser.lib --clean" />
 		</java>
