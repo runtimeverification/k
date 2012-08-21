@@ -52,6 +52,7 @@
         <pathelement location="lib/commons-io-2.1.jar"/>
         <pathelement location="lib/jopt-simple-3.3.jar"/>
         <pathelement location="lib/jansi-1.8.jar"/>
+		<pathelement location="lib/jline-1.0.jar"/>
         <path refid="K3Java.classpath"/>
     </path>
     <target name="init">
