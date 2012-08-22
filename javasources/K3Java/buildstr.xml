@@ -98,6 +98,10 @@
 			</targetfileset>
 		</dependset>
 		<available file="src/k3parser/lib/K3Str.java" property="k3.available" />
+		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/Common.sdf" />
+		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/K3Disamb.sdf" />
+		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/KBuiltinsBasic.sdf" />
+		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/KTechnique.sdf" />
 		<antcall target="k3.helper" />
 	</target>
 	<target name="k3.helper" unless="k3.available">
@@ -125,10 +129,6 @@
 			</fileset>
 		</copy>
 
-		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/Common.sdf" />
-		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/K3Disamb.sdf" />
-		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/KBuiltinsBasic.sdf" />
-		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/KTechnique.sdf" />
 
 		<delete file="../K3Disamb/trans/K3Str.rtree" />
 		<delete file="../K3Disamb/trans/K3Str.dep" />
