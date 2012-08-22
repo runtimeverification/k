@@ -141,7 +141,7 @@ argument will only be evaluated when the first evaluates to true).
 The \K tool also allows us to associate \LaTeX\ attributes to
 constructs, telling the PDF generator how to display them.  For
 example, \texttt{<=} has the attribute
-\texttt{latex("\{\#1\}\textbackslash{leq}\{\#2\}")}, which makes it be
+\texttt{latex(\{\#1\}\textbackslash{leq}\{\#2\})}, which makes it be
 displayed as $\leq$ everywhere in the generated PDF. */
 
   syntax AExp ::= Int | Id
@@ -149,7 +149,7 @@ displayed as $\leq$ everywhere in the generated PDF. */
                 > AExp "+" AExp    [left, strict]
                 | "(" AExp ")"     [bracket]
   syntax BExp ::= Bool
-                | AExp "<=" AExp   [seqstrict, latex("{#1}\leq{#2}")]
+                | AExp "<=" AExp   [seqstrict, latex({#1}\leq{#2})]
                 | "not" BExp       [strict]
                 > BExp "and" BExp  [left, strict(1)]
                 | "(" BExp ")"     [bracket]

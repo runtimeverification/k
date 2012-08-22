@@ -14,9 +14,9 @@ the desired evaluation strategies of the various language constructs .  */
                 | "string"
                 | "void"
                 | "arrayOf" Type
-                    [latex("{#1}\texttt{\char91\char93}")]
+                    [latex({#1}\texttt{\char91\char93})]
                 | "function" "from" Types "to" Type
-                    [latex("({#1}\ \texttt{->}\ {#2})")]
+                    [latex(({#1}\ \texttt{->}\ {#2}))]
 
   syntax Types ::= List{Type,","}  [strict]
 
@@ -120,7 +120,7 @@ semantics''.  */
   syntax Val ::= Int | Bool | String
                | "arrayRef" "(" Type "," Int "," Int ")"
                | "lambda" "(" Exps "," Stmt "," Type ")"
-                     [latex("(\lambda{#1}\,.\,{#2}):{#3}")]
+                     [latex((\lambda{#1}\,.\,{#2}):{#3})]
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val
@@ -173,7 +173,7 @@ location and then never allow that type to change.  The typed
 undefined values effectively assign both a type and an undefined value
 to a location. */
 
-  syntax K ::= "undefined" "(" Type ")" [latex("\bot_{#1}")]
+  syntax K ::= "undefined" "(" Type ")" [latex(\bot_{#1})]
 
   rule <k> var '_:_(X:Id,, T:Type), .Exps; => . ...</k>
        <env> Env:Map => Env[L/X] </env>

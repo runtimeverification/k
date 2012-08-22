@@ -6,7 +6,7 @@ module LAMBDAPP-SYNTAX
   syntax Exp ::= "let" Id "=" Exp "in" Exp  
                | "letrec" Id "=" Exp "in" Exp  
                | "if" Exp "then" Exp "else" Exp
-               > "mu" Id "." Exp       [binder, latex("\mu{#1}.{#2}")] 
+               > "mu" Id "." Exp       [binder, latex(\mu{#1}.{#2})] 
   syntax Val ::= Int | Bool
 
   syntax Id ::= "+" | "*" | "/" | "<=" | "ite" | "callcc"

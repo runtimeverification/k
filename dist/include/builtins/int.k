@@ -9,20 +9,20 @@ module INT-HOOKS
   imports BOOL-HOOKS
 
   syntax Int ::= left:
-  				 Int "*Int" Int [function, left, latex("{#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}"), hook(#INT:_*Int_)]
-			   | Int "/Int" Int [function, left, latex("{#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}"), hook(#INT:_/Int_)]
-			   | Int "%Int" Int [function, left, latex("{#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}"), hook(#INT:_%Int_)]
+  				 Int "*Int" Int [function, left, latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(#INT:_*Int_)]
+			   | Int "/Int" Int [function, left, latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(#INT:_/Int_)]
+			   | Int "%Int" Int [function, left, latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(#INT:_%Int_)]
 			   > left:
-			   	 Int "+Int" Int [function, left, latex("{#1}\mathrel{+_{\scriptstyle\it Int}}{#2}"), hook(#INT:_+Int_)]
-			   | Int "-Int" Int [function, left, latex("{#1}\mathrel{-_{\scriptstyle\it Int}}{#2}"), hook(#INT:_-Int_)]
+			   	 Int "+Int" Int [function, left, latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(#INT:_+Int_)]
+			   | Int "-Int" Int [function, left, latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(#INT:_-Int_)]
 
 
-  syntax Bool ::= Int "<=Int" Int	[function, left, latex("{#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}"), hook(#INT:_<=Int_)]
-				| Int "<Int" Int	[function, left, latex("{#1}\mathrel{<_{\scriptstyle\it Int}}{#2}"), hook(#INT:_<Int_)]
-				| Int ">=Int" Int	[function, left, latex("{#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}"), hook(#INT:_>=Int_)]
-				| Int ">Int" Int	[function, left, latex("{#1}\mathrel{>_{\scriptstyle\it Int}}{#2}"), hook(#INT:_>Int_)]
-				| Int "==Int" Int	[function, left,latex("{#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}"), hook(#INT:_==Int_)]
-				| Int "=/=Int" Int	[function, left,latex("{#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}")]
+  syntax Bool ::= Int "<=Int" Int	[function, left, latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(#INT:_<=Int_)]
+				| Int "<Int" Int	[function, left, latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(#INT:_<Int_)]
+				| Int ">=Int" Int	[function, left, latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(#INT:_>=Int_)]
+				| Int ">Int" Int	[function, left, latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(#INT:_>Int_)]
+				| Int "==Int" Int	[function, left,latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(#INT:_==Int_)]
+				| Int "=/=Int" Int	[function, left,latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2})]
 
   rule I1:Int =/=Int I2:Int => notBool(I1 ==Int I2) [function, anywhere]
 

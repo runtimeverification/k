@@ -28,10 +28,12 @@ lexical syntax
 
 	%% String declaration
 	"\"" StringChar* "\"" -> DzDzSTRING
-	~[\"\n]				-> StringChar
+	~[\"\\\n]			-> StringChar
 	"\\\""				-> StringChar
-	BackSlashChar		-> StringChar
-	"\\"				-> BackSlashChar
+	"\\n"				-> StringChar
+	"\\r"				-> StringChar
+	"\\t"				-> StringChar
+	"\\\\"				-> StringChar
 
 	%% KLabel definition + restrictions lower
 	"'" KLabelChar+			-> DzKLabel
@@ -45,7 +47,6 @@ lexical syntax
 lexical restrictions
 	DzDzID  -/- [a-zA-Z0-9]
 	DzDzINT -/- [0-9]
-	BackSlashChar  -/- [\"]
 
 	%% BackQuote in KLabel cannot be folowed by ( ) `
 	BackQuote -/- [\(\)\`]

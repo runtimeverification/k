@@ -10,7 +10,7 @@ module IMPPP-SYNTAX
                 | "(" AExp ")"			 [bracket]
                 
   syntax BExp ::= Bool
-                | AExp "<=" AExp  		 [seqstrict, latex("{#1}\leq{#2}")]
+                | AExp "<=" AExp  		 [seqstrict, latex({#1}\leq{#2})]
                 > "not" BExp      		 [strict]
                 > BExp "and" BExp 		 [strict(1)]
                 | "(" BExp ")"			 [bracket]

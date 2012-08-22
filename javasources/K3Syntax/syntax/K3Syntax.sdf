@@ -41,7 +41,7 @@ context-free syntax
 
 	KEY							-> Tag {cons("Tag")}
 	KEY "(" TAGCONTENT ")"		-> Tag {cons("TagParam")}
-	KEY "(" STRING ")"			-> Tag {cons("TagParam")}
+	KEY "(" STRING ")"			-> Tag {cons("TagString")}
 
 
 lexical syntax
@@ -77,10 +77,12 @@ lexical syntax
 
 	%% String declaration
 	"\"" StringChar* "\"" -> STRING
-	~[\"\n]				-> StringChar
+	~[\"\\\n]			-> StringChar
 	"\\\""				-> StringChar
-	BackSlashChar		-> StringChar
-	"\\"				-> BackSlashChar
+	"\\n"				-> StringChar
+	"\\r"				-> StringChar
+	"\\t"				-> StringChar
+	"\\\\"				-> StringChar
 
 	[a-zA-Z][a-zA-Z0-9]*  -> ID
 	"#"?[A-Z][a-zA-Z0-9]* -> BASICID
@@ -92,7 +94,6 @@ lexical syntax
 lexical restrictions
 	HIDDEN			-/- ~[\t\n\r\ ]
 	MODNAME			-/- [A-Z\-]
-	BackSlashChar	-/- [\"]
 	BASICID 		-/- [a-zA-Z0-9\{\}]
 	ID 				-/- [a-zA-Z0-9\{\}]
 	%%COMPOSEDID		-/- [a-zA-Z0-9\{\}]

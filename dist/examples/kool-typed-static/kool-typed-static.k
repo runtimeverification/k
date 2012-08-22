@@ -21,9 +21,9 @@ the \K strictness attributes and the desugaring macros. */
                 | "string"
                 | "void"
                 | "arrayOf" Type
-                    [latex("{#1}\texttt{\char91\char93}")]
+                    [latex({#1}\texttt{\char91\char93})]
                 | "function" "from" Types "to" Type
-                    [latex("({#1}~\texttt{->}~{#2})")]
+                    [latex(({#1}~\texttt{->}~{#2}))]
 
   syntax Types ::= List{Type,","}  [strict]
 
@@ -675,7 +675,7 @@ that the types used in the program actually exists */
 
 
 //@ These should be generic, belonging to the K framework
-  syntax K ::= "stuck" "(" K ")"  [latex("\framebox{${#1}$}")]
+  syntax K ::= "stuck" "(" K ")"  [latex(\framebox{${#1}$})]
   syntax K ::= "discard"
   rule _:KResult ~> discard => .  [structural]
 

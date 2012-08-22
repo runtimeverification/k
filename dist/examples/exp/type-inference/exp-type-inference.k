@@ -69,8 +69,8 @@ strategy now. */
                  "if" Exp "then" Exp "else" Exp [strict]
                > left: "let" Id "=" Exp "in" Exp [strict(2)]
                | "letrec" Id Id "=" Exp "in" Exp
-               > left: "mu" Id "." Exp           [latex("\mu{#1}.{#2}")]
-               | "lambda" Id "." Exp       [latex("\lambda{#1}.{#2}")]
+               > left: "mu" Id "." Exp           [latex(\mu{#1}.{#2})]
+               | "lambda" Id "." Exp       [latex(\lambda{#1}.{#2})]
                
 
 /*@ \subsection{Desugaring macros}
@@ -106,7 +106,7 @@ module TYPES
 
   syntax TypeSchema ::= Type
                       | "(" "forall" Types ")" Type
-                          [latex("(\forall{#1}){#2}")]
+                          [latex((\forall{#1}){#2})]
   syntax TypeSchemas ::= List{TypeSchema,","}
 
 // Free type variables.  These should be generic and builtin, for all binders.
@@ -122,7 +122,7 @@ module TYPES
 // The operations below should be generic and builtin, for all lists
   syntax Types ::= "union" "(" Types "," Types ")"
                  | "diff" "(" Types "," Types ")"
-                     [latex("{#1}-_{\it Types}{#2}")]
+                     [latex({#1}-_{\it Types}{#2})]
                  | "insert" "(" Type "," Types ")"
                  | "delete" "(" Type "," Types ")"
   syntax Nat ::= "|" Types "|"

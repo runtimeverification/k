@@ -47,12 +47,12 @@ public class TermCons extends Term {
 	}
 
 	public Production getProduction() {
-		return DefinitionHelper.conses.get("\"" + getCons() + "\"");
+		return DefinitionHelper.conses.get(getCons());
 	}
 
 	public String toString() {
 		String str = "";
-		Production pr = DefinitionHelper.conses.get("\"" + cons + "\"");
+		Production pr = DefinitionHelper.conses.get(cons);
 
 		if (pr.items.size() > 0) {
 			if (pr.items.get(0).getType() == ProductionType.USERLIST) {
@@ -74,8 +74,7 @@ public class TermCons extends Term {
 
 	@Override
 	public String toMaude() {
-		Production pr = DefinitionHelper.conses.get("\"" + cons + "\"");
-
+		Production pr = DefinitionHelper.conses.get(cons);
 		String cons = pr.getLabel();
 
 		if (pr.attributes.containsKey("maudeop"))

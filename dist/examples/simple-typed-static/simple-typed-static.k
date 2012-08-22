@@ -14,9 +14,9 @@ The lists of types are useful for function arguments. */
                 | "string"
                 | "void"
                 | "arrayOf" Type
-                    [latex("{#1}\texttt{\char91\char93}")]
+                    [latex({#1}\texttt{\char91\char93})]
                 | "function" "from" Types "to" Type
-                    [latex("({#1}\ \texttt{->}\ {#2})")]
+                    [latex(({#1}\ \texttt{->}\ {#2}))]
   syntax Types ::= List{Type,","} [strict]
 
 /*@ \subsection{Declarations}
@@ -472,6 +472,6 @@ the generated PDF, used to stuck computations with whatever
 computation we want as argument.  This should be generic, part of the
 \K framework. */
 
-  syntax K ::= "stuck" "(" K ")"  [latex("\framebox{${#1}$}")]
+  syntax K ::= "stuck" "(" K ")"  [latex(\framebox{${#1}$})]
 
 endmodule

@@ -4,7 +4,7 @@ module LAMBDA
   imports SUBSTITUTION
 
   syntax Val ::= Id
-               | "lambda" Id "." Exp  [binder, latex("\lambda{#1}.{#2}")]
+               | "lambda" Id "." Exp  [binder, latex(\lambda{#1}.{#2})]
   syntax Exp ::= Val
                | Exp Exp              [strict, left]
                | "(" Exp ")"          [bracket]
@@ -25,7 +25,7 @@ module LAMBDA
   syntax Exp ::= "let" Id "=" Exp "in" Exp
   rule (let X = E in E':Exp) => (lambda X . E') E     [structural]
 
-  syntax Exp ::= "mu" Id "." Exp       [binder, latex("\mu{#1}.{#2}")]
+  syntax Exp ::= "mu" Id "." Exp       [binder, latex(\mu{#1}.{#2})]
                | "letrec" Id Id "=" Exp "in" Exp
   rule mu X . E => E[(mu X . E) / X]
   rule letrec F:Id X = E in E'

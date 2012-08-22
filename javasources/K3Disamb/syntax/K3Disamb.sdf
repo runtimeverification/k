@@ -62,7 +62,7 @@ context-free syntax
 
 	KEY							-> Tag {cons("Tag")}
 	KEY "(" TAGCONTENT ")"		-> Tag {cons("TagParam")}
-	KEY "(" DzDzSTRING ")"		-> Tag {cons("TagParam")}
+	KEY "(" DzDzSTRING ")"		-> Tag {cons("TagString")}
 lexical syntax
 	[A-Za-z\-]				-> TAG
 	TAG+					-> KEY

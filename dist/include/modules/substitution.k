@@ -15,11 +15,11 @@ module SUBSTITUTION
 
   //beta-substitution definition using the K AST visitor pattern
   syntax K ::= K "[" K "/" Id "]"
-             | "beta" K "[" K "/" Id "]" [latex( "{#1}\sqbracket{\framebox{${#2}$}/{#3}}")]
-             | "eval" K "," "then" "apply" "[" K "/" Id "]" [strict(1), latex("eval({#1})\sqbracket{\framebox{${#2}$}/{#3}}")]
+             | "beta" K "[" K "/" Id "]" [latex({#1}\sqbracket{\framebox{${#2}$}/{#3}})]
+             | "eval" K "," "then" "apply" "[" K "/" Id "]" [strict(1), latex(eval({#1})\sqbracket{\framebox{${#2}$}/{#3}})]
                
   syntax KLabel ::= "beta" "[" K "/" Id "]" 
-            [latex("\sqbracket{\framebox{${#1}$}/{#2}}")]
+            [latex(\sqbracket{\framebox{${#1}$}/{#2}})]
                
   syntax Id ::= "id" Int  [function]   // to generate fresh names
   rule id N:Nat => String2Id("_id" +String Int2String(N)) [function, anywhere]

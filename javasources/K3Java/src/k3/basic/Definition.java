@@ -1134,7 +1134,7 @@ public class Definition implements Cloneable {
 										Element el = p.xmlTerm.getOwnerDocument().createElement("tag");
 										el.setAttribute("key", "cons");
 										el.setAttribute("loc", "generated");
-										el.setAttribute("value", "\"" + cons + "\"");
+										el.setAttribute("value", cons);
 
 										Node attributes = p.xmlTerm.getLastChild().getPreviousSibling();
 

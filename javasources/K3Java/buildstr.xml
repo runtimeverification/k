@@ -94,6 +94,7 @@
 				<exclude name="annolocationremove_0_0.java" />
 				<exclude name="clear_console_0_0.java" />
 				<exclude name="mergeamb_0_0.java" />
+				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</targetfileset>
 		</dependset>
 		<available file="src/k3parser/lib/K3Str.java" property="k3.available" />
@@ -115,6 +116,7 @@
 				<exclude name="annolocationremove_0_0.java" />
 				<exclude name="clear_console_0_0.java" />
 				<exclude name="mergeamb_0_0.java" />
+				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</fileset>
 		</delete>
 		<copy todir="src/k3parser/lib/">

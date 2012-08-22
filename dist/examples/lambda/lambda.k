@@ -23,7 +23,7 @@ module LAMBDA-SYNTAX
                > Val
 
   syntax Val ::= Id
-               > "lambda" Id "." Exp [binder, latex("\lambda{#1}.{#2}")]
+               > "lambda" Id "." Exp [binder, latex(\lambda{#1}.{#2})]
 endmodule
 
 module LAMBDA 

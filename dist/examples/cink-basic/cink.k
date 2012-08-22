@@ -110,23 +110,23 @@ module CINK-LANG-SYNTAX
                > left:
                  Exp "*" Exp 
                | Exp "/" Exp 
-               | Exp "%" Exp [latex("{#1}\%{#2}")] 
+               | Exp "%" Exp [latex({#1}\%{#2})] 
                >  left:
                  Exp "+" Exp 
                | Exp "-" Exp 
                > left:
                  Exp ">" Exp 
-               | Exp "<=" Exp [latex("{#1}\leq{#2}")]
+               | Exp "<=" Exp [latex({#1}\leq{#2})]
                | Exp "==" Exp 
                >
                  "!" Exp [strict] 
                > 
-                 Exp "&&" Exp [left, strict(1), latex("{#1}\mathrel{\&\&}{#2}")]
+                 Exp "&&" Exp [left, strict(1), latex({#1}\mathrel{\&\&}{#2})]
                > 
                  Exp "||" Exp [left, strict(1)]
                > left:
-                 Exp "<<" Exp [left, seqstrict, latex("{#1}\mathrel{\tt <<}{#2}")]
-               | Exp ">>" Exp [left, latex("{#1}\mathrel{\tt >>}{#2}")]
+                 Exp "<<" Exp [left, seqstrict, latex({#1}\mathrel{\tt <<}{#2})]
+               | Exp ">>" Exp [left, latex({#1}\mathrel{\tt >>}{#2})]
                >
                  Exp "=" Exp [right]
                >
@@ -146,9 +146,9 @@ module CINK-LANG-SYNTAX
 
   syntax Stmt ::= Exp ";" [strict]
                | "#include" "<iostream>" 
-                 [latex("\texttt{\#include<iostream>}")]
+                 [latex(\texttt{\#include<iostream>})]
                | "using" "namespace" "std" ";" 
-                 [latex("\texttt{using namespace std;}")]
+                 [latex(\texttt{using namespace std;})]
                | Decl ";"
                | "{" "}"
                | "{" Stmts "}"
@@ -203,7 +203,7 @@ module CINK-LANG-SEMANTICS
 
   syntax Val ::= "void" | "undefined" | LVal
                | "lambda" "(" Decls "@" Stmts ")" 
-                 [latex("\lambda\,{#1}\mathrel{\bullet}{#2}")]
+                 [latex(\lambda\,{#1}\mathrel{\bullet}{#2})]
 
   syntax Vals ::= List{Val,","}
   syntax KResult ::= Val

@@ -41,6 +41,7 @@
 				<exclude name="annolocationremove_0_0.java" />
 				<exclude name="clear_console_0_0.java" />
 				<exclude name="mergeamb_0_0.java" />
+				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</fileset>
 		</delete>
 		<delete file="../K3Disamb/trans/K3Str.rtree" />

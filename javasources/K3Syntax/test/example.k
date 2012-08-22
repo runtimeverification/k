@@ -6,52 +6,52 @@ module EXAMPLE-SYNTAX
   
   
   syntax Start ::= Stmts
-  syntax Ids ::= List{Id,","} [strict, cons("Ids1ListSyn"), hybrid]
-  syntax Exps ::=  List{Exp,","} [cons("Exps1ListSyn")]
+  syntax Ids ::= List{Id,","} [strict, cons(Ids1ListSyn), hybrid]
+  syntax Exps ::=  List{Exp,","} [cons(Exps1ListSyn)]
 
 
-  syntax Decl ::= "var" Exps ";" [cons("Ddecl1VarDeclSyn")]
-                | "function" Id "(" Ids ")" Stmt [cons("Ddecl1FuncDeclSyn")]
+  syntax Decl ::= "var" Exps ";" [cons(Ddecl1VarDeclSyn)]
+                | "function" Id "(" Ids ")" Stmt [cons(Ddecl1FuncDeclSyn)]
 
   syntax Exp ::= Int | Bool | Id | String
                | "(" Exp ")"            [bracket]
-               | "++" Exp				[cons("Exp1PrefixPPSyn")]
-               > Exp "[" Exps "]"	    [strict, cons("Exp1ArraySyn")]
-               > Exp "(" Exps ")"	    [strict, cons("Exp1FuncCallSyn")]
-               | "-" Exp             	[strict, cons("Exp1UMinusSyn")]
-               | "sizeOf" "(" Exp ")"   [strict, cons("Exp1SizeSyn")]
-               | "read" "(" ")"			[cons("Exp1Exp1ReadSyn")]
+               | "++" Exp				[cons(Exp1PrefixPPSyn)]
+               > Exp "[" Exps "]"	    [strict, cons(Exp1ArraySyn)]
+               > Exp "(" Exps ")"	    [strict, cons(Exp1FuncCallSyn)]
+               | "-" Exp             	[strict, cons(Exp1UMinusSyn)]
+               | "sizeOf" "(" Exp ")"   [strict, cons(Exp1SizeSyn)]
+               | "read" "(" ")"			[cons(Exp1Exp1ReadSyn)]
                > left:
-               	 Exp "*" Exp         	[strict, left, cons("Exp1MulSyn")]
-               | Exp "/" Exp         	[strict, left, cons("Exp1DivSyn")]
-               | Exp "%" Exp         	[strict, left, cons("Exp1ModSyn")]
+               	 Exp "*" Exp         	[strict, left, cons(Exp1MulSyn)]
+               | Exp "/" Exp         	[strict, left, cons(Exp1DivSyn)]
+               | Exp "%" Exp         	[strict, left, cons(Exp1ModSyn)]
                > left:
-               	 Exp "+" Exp         	[strict, left, cons("Exp1PlusSyn")]
-               | Exp "-" Exp         	[strict, left, cons("Exp1MinusSyn")]
+               	 Exp "+" Exp         	[strict, left, cons(Exp1PlusSyn)]
+               | Exp "-" Exp         	[strict, left, cons(Exp1MinusSyn)]
                > non-assoc:
-               	 Exp "<" Exp         	[strict, non-assoc, cons("Exp1LTSyn")]
-               | Exp "<=" Exp        	[strict, non-assoc, cons("Exp1LTESyn")]
-               | Exp ">" Exp         	[strict, non-assoc, cons("Exp1GTSyn")]
-               | Exp ">=" Exp        	[strict, non-assoc, cons("Exp1GTESyn")]
-               | Exp "==" Exp        	[strict, non-assoc, cons("Exp1EQSyn")]
-               | Exp "!=" Exp        	[strict, non-assoc, cons("Exp1NEQSyn")]
-               > "not" Exp           	[strict, cons("Exp1NotSyn")]
+               	 Exp "<" Exp         	[strict, non-assoc, cons(Exp1LTSyn)]
+               | Exp "<=" Exp        	[strict, non-assoc, cons(Exp1LTESyn)]
+               | Exp ">" Exp         	[strict, non-assoc, cons(Exp1GTSyn)]
+               | Exp ">=" Exp        	[strict, non-assoc, cons(Exp1GTESyn)]
+               | Exp "==" Exp        	[strict, non-assoc, cons(Exp1EQSyn)]
+               | Exp "!=" Exp        	[strict, non-assoc, cons(Exp1NEQSyn)]
+               > "not" Exp           	[strict, cons(Exp1NotSyn)]
                > left:
-               	 Exp "and" Exp       	[strict, left, cons("Exp1AndSyn")]
-               | Exp "or" Exp        	[strict, left, cons("Exp1OrSyn")]
-               > Exp "=" Exp         	[strict(2), right, cons("Exp1AssignSyn")]
+               	 Exp "and" Exp       	[strict, left, cons(Exp1AndSyn)]
+               | Exp "or" Exp        	[strict, left, cons(Exp1OrSyn)]
+               > Exp "=" Exp         	[strict(2), right, cons(Exp1AssignSyn)]
 
-  syntax Stmt ::= "{" "}"				[cons("Stmt1BlockEmptySyn")]
-                | "{" Stmts "}"			[cons("Stmt1BlockSyn")]
-                | Exp ";"			  	[strict, cons("Stmt1Stmt2ExpSyn")]
-                | "if" Exp "then" Stmt "else" Stmt		[avoid, strict(1), cons("Stmt1IfThnElsSyn")]
-                | "if" Exp "then" Stmt					[cons("Stmt1IfThnSyn")]
-                | "while" Exp "do" Stmt					[cons("Stmt1WhileSyn")]
-                | "for" Id "=" Exp "to" Exp "do" Stmt	[cons("Stmt1ForSyn")]
-                | "write" "(" Exp ")" ";"				[strict, cons("Stmt1WriteSyn")]
+  syntax Stmt ::= "{" "}"				[cons(Stmt1BlockEmptySyn)]
+                | "{" Stmts "}"			[cons(Stmt1BlockSyn)]
+                | Exp ";"			  	[strict, cons(Stmt1Stmt2ExpSyn)]
+                | "if" Exp "then" Stmt "else" Stmt		[avoid, strict(1), cons(Stmt1IfThnElsSyn)]
+                | "if" Exp "then" Stmt					[cons(Stmt1IfThnSyn)]
+                | "while" Exp "do" Stmt					[cons(Stmt1WhileSyn)]
+                | "for" Id "=" Exp "to" Exp "do" Stmt	[cons(Stmt1ForSyn)]
+                | "write" "(" Exp ")" ";"				[strict, cons(Stmt1WriteSyn)]
 
   syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts							[right, cons("Stmts1LstStmtsSyn")]
+                 | Stmts Stmts							[right, cons(Stmts1LstStmtsSyn)]
 
 endmodule
 
@@ -83,14 +83,14 @@ module EXAMPLE
                 </T>
 
   syntax Val ::= Int | Bool | String
-               | "arrayRef" "(" Int "," Int ")" [cons("Val1ArrayRefSyn")]
-               | "lambda" "(" Ids "," Stmt ")"  [cons("Val1LambdaSyn")]
-  syntax Vals ::= List{Val,","} [cons("Vals1ListSyn")]
+               | "arrayRef" "(" Int "," Int ")" [cons(Val1ArrayRefSyn)]
+               | "lambda" "(" Ids "," Stmt ")"  [cons(Val1LambdaSyn)]
+  syntax Vals ::= List{Val,","} [cons(Vals1ListSyn)]
   syntax Exp ::= Val
   syntax KResult ::= Val
-  syntax K ::= "undefined"  [cons("K1UndefinedSyn")]
-  syntax List{K} ::= Int ".." Int [cons("ListDlKDr1DotDotSyn")]
-  syntax K ::= "bindto" "(" Ids "," Vals ")" [cons("K1BindToSyn")]
+  syntax K ::= "undefined"  [cons(K1UndefinedSyn)]
+  syntax List{K} ::= Int ".." Int [cons(ListDlKDr1DotDotSyn)]
+  syntax K ::= "bindto" "(" Ids "," Vals ")" [cons(K1BindToSyn)]
 
 
   rule {S X = (X + 1);} //74

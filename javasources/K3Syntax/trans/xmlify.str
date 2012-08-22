@@ -289,4 +289,9 @@ rules
 		]
 		where loc := <getLocAsString>
 
+	to-xml:
+		TagString(x, y) -> $[<tag key="[x]" value="[<xml-string-escape-from-string> y]" loc="[loc]" />
+		]
+		where loc := <getLocAsString>
+
 

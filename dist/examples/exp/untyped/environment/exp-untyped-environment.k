@@ -58,8 +58,8 @@ substitution-based definition. */
                  "if" Exp "then" Exp "else" Exp [strict(1)]
                > left: "let" Id "=" Exp "in" Exp
                | "letrec" Id Id "=" Exp "in" Exp
-               > left: "mu" Id "." Exp           [latex("\mu{#1}.{#2}")]
-               | "lambda" Id "." Exp       [latex("\lambda{#1}.{#2}")]
+               > left: "mu" Id "." Exp           [latex(\mu{#1}.{#2})]
+               | "lambda" Id "." Exp       [latex(\lambda{#1}.{#2})]
 
   rule let X:Id = E:Exp in E':Exp => (lambda X . E') E  [macro, anywhere]
   rule (letrec F:Id X = E in E') 
@@ -155,7 +155,7 @@ operation is kept in the computation, so the computation will not grow
 when programs are in a tail recursive form. */
 
   syntax Val ::= "closure-lambda" "(" Map "," Id "," Exp ")"
-                   [latex("\textsf{closure}_\lambda({#1},{#2},{#3})")]
+                   [latex(\textsf{closure}_\lambda({#1},{#2},{#3}))]
   rule <k> lambda X:Id . E:Exp => closure-lambda(Rho:Map,X,E) ...</k>
        <env> Rho </env>
   rule <k> closure-lambda(Rho:Map,X:Id,E:Exp) V:Val => E ~> env(Rho') ...</k>
@@ -189,7 +189,7 @@ Without a $\mu$-closure, the \texttt{letrec}-free \texttt{y} in the
 conditional. */
 
   syntax Exp ::= "closure-mu" "(" Map "," Exp ")"
-                   [latex("\textsf{closure}_\mu({#1},{#2})")]
+                   [latex(\textsf{closure}_\mu({#1},{#2}))]
   rule <k> mu X:Id . E:Exp => closure-mu(Rho:Map[L:Nat/X],E) ...</k>
        <env> Rho </env>
        <store>... . => L |-> closure-mu(Rho[L/X],E) ...</store>

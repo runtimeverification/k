@@ -50,16 +50,16 @@ module AGENT
               </thread>
           </control>
           <busy>.Set</busy> 
-//          @latex("\\kBR")
+//          @latex(\\kBR)
           <mem> .Map </mem> <nextLoc> 0 </nextLoc>
           <me>0</me>
           <parent>-1</parent>
       </agent>
-//      @latex("\\kBR")
+//      @latex(\\kBR)
       <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting>
-//      @latex("\\kBR")
+//      @latex(\\kBR)
       <messages> <message multiplicity="*">
           <from>.K</from> <to>.Set</to> <body>.K</body>
       </message> </messages>

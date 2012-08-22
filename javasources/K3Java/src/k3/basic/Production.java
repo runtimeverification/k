@@ -63,8 +63,6 @@ public class Production extends Term implements Cloneable {
 						item = attrs.getNamedItem(Tag.value);
 						tagvalue = item.getNodeValue();
 					}
-					if (tagname.equals("cons")) // unquote the cons attribute
-						tagvalue = tagvalue.substring(0, tagvalue.length() - 1).substring(1);
 					attributes.put(tagname, tagvalue);
 				}
 			}

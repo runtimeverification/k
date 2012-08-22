@@ -81,8 +81,7 @@ public class EmptyListsVisitor extends BasicTransformer {
 
 	private String getListCons(String psort) {
 		Production p = DefinitionHelper.listConses.get(psort);
-		String cons = p.getAttributes().get(Constants.CONS_cons_ATTR);
-		return cons.substring(1, cons.length() - 1);
+		return p.getAttributes().get(Constants.CONS_cons_ATTR);
 	}
 
 	private boolean subsort(String tsort, String psort) {

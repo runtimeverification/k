@@ -8,7 +8,7 @@ module EXP-SYNTAX
              > left:
                K "+" K   [left, strict]       // addition
              > non-assoc:
-               K "<=" K  [latex("{#1}\leq{#2}"), seqstrict]
+               K "<=" K  [latex({#1}\leq{#2}), seqstrict]
              | K "==" K  [strict]                   // equality test
 
              > "not" K   [strict]                   // boolean negation

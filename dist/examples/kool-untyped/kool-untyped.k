@@ -204,7 +204,7 @@ of Java.  In fact, the latter can be implemented in terms of
 
   syntax KResult ::= Val //| Vals
 
-  syntax K ::= "undefined"  [latex("\bot")]
+  syntax K ::= "undefined"  [latex(\bot)]
 
   rule <k> var X:Id; => . ...</k>
        <env> Env:Map => Env[L:Int/X] </env>

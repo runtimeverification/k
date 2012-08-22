@@ -21,9 +21,9 @@ from that of SIMPLE, because we want to have typed exceptions in KOOL. */
                 | "string"
                 | "void"
                 | "arrayOf" Type
-                    [latex("{#1}\texttt{\char91\char93}")]
+                    [latex({#1}\texttt{\char91\char93})]
                 | "function" "from" Types "to" Type
-                    [latex("({#1}\ \texttt{->}\ {#2})")]
+                    [latex(({#1}\ \texttt{->}\ {#2}))]
 
   syntax Types ::= List{Type,","}      [strict]
 
@@ -202,7 +202,7 @@ KOOL).  */
   syntax Exp ::= Val
   syntax KResult ::= Val
 
-  syntax K ::= "undefined" "(" Type ")" [latex("\bot_{#1}")]
+  syntax K ::= "undefined" "(" Type ")" [latex(\bot_{#1})]
 
   rule <k> var ('_:_(X:Id,, T:Type), .Exps); => . ...</k>
        <env> Env:Map => Env[L:Nat/X] </env>
