@@ -256,11 +256,11 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(TermCons trm) {
-		String pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
+		String pattern = patternsVisitor.getPatterns().get(trm.getCons());
 		if (pattern == null) {
-			Production pr = DefinitionHelper.conses.get("\"" + trm.getCons() + "\"");
+			Production pr = DefinitionHelper.conses.get(trm.getCons());
 			pr.accept(patternsVisitor);
-			pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
+			pattern = patternsVisitor.getPatterns().get(trm.getCons());
 		}
 		String regex = "\\{#\\d+\\}$";
 		Pattern p = Pattern.compile(regex);
