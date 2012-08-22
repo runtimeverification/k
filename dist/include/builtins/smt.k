@@ -25,7 +25,7 @@ module SMTLIB
   rule Smtlib(notBool B:Bool) => "(not " +String Smtlib(B) +String ")" [anywhere]
 
   // Smtlib: integers
-  rule Smtlib(I:Int) => Int2String(I) when notBool(isIntSymbolic(I)) [anywhere]
+  rule Smtlib(I:#Int) => Int2String(I) [anywhere]
   rule Smtlib(symInt(I:Int)) => "var" +String Int2String(I) [anywhere]
 
   rule Smtlib(I1:Int <Int I2:Int) => "(< " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]
@@ -54,6 +54,8 @@ module SMTLIB
   // ConstSmtlib: integers
   rule ConstSmtlib(symInt(I:Int)) => "(declare-const " +String "var" +String Int2String(I) +String " Int)" [anywhere]
  
+  rule ConstSmtlib(I:#Int) => "" [anywhere]
+
   rule ConstSmtlib(I1:Int <Int I2:Int)   => ConstSmtlib(I1) +String  " " +String ConstSmtlib(I2) [anywhere]
   rule ConstSmtlib(I1:Int <=Int I2:Int)  => ConstSmtlib(I1) +String  " " +String ConstSmtlib(I2) [anywhere]
   rule ConstSmtlib(I1:Int >Int I2:Int)   => ConstSmtlib(I1) +String  " " +String ConstSmtlib(I2) [anywhere]

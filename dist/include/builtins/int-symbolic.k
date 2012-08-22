@@ -3,6 +3,7 @@ require "k-equal.k"
 module INT-SYMBOLIC-SYNTAX
   imports INT-SYNTAX-HOOKS
   syntax IntSymbolic ::= "symInt" "(" Int ")"
+  syntax IntSymbolic ::= "symInt" "(" Id ")"
   syntax Int ::= IntSymbolic
 endmodule  
 

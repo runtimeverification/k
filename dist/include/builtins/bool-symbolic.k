@@ -3,6 +3,7 @@ require "k-equal.k"
 module BOOL-SYMBOLIC-SYNTAX
   imports BOOL-SYNTAX-HOOKS
   syntax BoolSymbolic ::= "symBool" "(" Int ")"
+  syntax BoolSymbolic ::= "symBool" "(" Id ")"
   syntax Bool ::= BoolSymbolic
 endmodule
 
