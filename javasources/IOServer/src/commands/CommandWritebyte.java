@@ -3,7 +3,7 @@ package commands;
 import java.net.Socket;
 
 import java.util.logging.Logger;
-import resources.Resource;
+import resources.FileResource;
 import resources.ResourceSystem;
 
 public class CommandWritebyte extends Command {
@@ -28,7 +28,7 @@ public class CommandWritebyte extends Command {
 	public void run() {
 		
 		// get resource
-		Resource resource = ResourceSystem.getResource(ID);
+		FileResource resource = (FileResource)ResourceSystem.getResource(ID);
 		
 		try {
 			resource.writebyte(ascii);

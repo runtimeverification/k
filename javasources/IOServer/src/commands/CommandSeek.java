@@ -2,7 +2,7 @@ package commands;
 
 import java.net.Socket;
 import java.util.logging.Logger;
-import resources.Resource;
+import resources.FileResource;
 import resources.ResourceSystem;
 
 public class CommandSeek extends Command {
@@ -24,7 +24,7 @@ public class CommandSeek extends Command {
 
 	public void run() {
 		// retrieve file struct
-		Resource resource = ResourceSystem.getResource(ID);
+		FileResource resource = (FileResource)ResourceSystem.getResource(ID);
 		
 		try {
 			resource.seek(position);

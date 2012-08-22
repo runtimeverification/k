@@ -12,6 +12,5 @@ interface AUTO-INCLUDED-MODULE
   imports BUILTIN-SYNTAX
   imports K
   imports URIS
-  imports SMT
 
 endinterface

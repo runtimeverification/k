@@ -2,7 +2,7 @@ package commands;
 
 import java.net.Socket;
 import java.util.logging.Logger;
-import resources.Resource;
+import resources.FileResource;
 import resources.ResourceSystem;
 
 public class CommandEof extends Command {
@@ -21,7 +21,7 @@ public class CommandEof extends Command {
 
 	public void run() {
 		try{
-			Resource resource = ResourceSystem.getResource(ID);
+			FileResource resource = (FileResource)ResourceSystem.getResource(ID);
 			Byte bite = resource.eof();
 			succeed(new String[] { bite.toString() });
 		}

@@ -9,7 +9,7 @@ import java.net.URI;
  * @author andrei.arusoaie
  *
  */
-public class ResourceRandFile extends Resource {
+public class ResourceRandFile extends FileResource {
 
 	private URI uri;
 	private RandomAccessFile raf;
@@ -64,5 +64,17 @@ public class ResourceRandFile extends Resource {
 	@Override
 	public Byte eof() throws Exception {
 		return raf.getFilePointer() == raf.length() ? (byte) 1 : 0;
+	}
+
+	@Override
+	public void sendToInput(String s) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getFromOutput() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

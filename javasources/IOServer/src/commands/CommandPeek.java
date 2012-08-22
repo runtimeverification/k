@@ -3,7 +3,7 @@ package commands;
 import java.io.EOFException;
 import java.net.Socket;
 import java.util.logging.Logger;
-import resources.Resource;
+import resources.FileResource;
 import resources.ResourceSystem;
 
 public class CommandPeek extends Command {
@@ -26,7 +26,7 @@ public class CommandPeek extends Command {
 	public void run() {
 
 		// retrieve file struct
-		Resource resource = ResourceSystem.getResource(ID);
+		FileResource resource = (FileResource)ResourceSystem.getResource(ID);
 		
 		try {
 			Byte peek = resource.peek();

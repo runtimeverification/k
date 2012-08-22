@@ -1,7 +1,7 @@
 package resources;
 
 
-public class ResourceInFile extends Resource {
+public class ResourceInFile extends FileResource {
 
 	static BufferedReader in = new BufferedReader(System.in);
 	String uri;
@@ -45,6 +45,16 @@ public class ResourceInFile extends Resource {
 	@Override
 	public Byte eof() throws Exception {
 		return in.eof();
+	}
+
+	@Override
+	public void sendToInput(String s) throws Exception {
+		throw new Exception("Not applicable for streams.");
+	}
+
+	@Override
+	public String getFromOutput() throws Exception {
+		throw new Exception("Not applicable for streams.");
 	}
 
 }

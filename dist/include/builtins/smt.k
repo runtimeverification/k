@@ -2,15 +2,15 @@ require "builtins/builtins.k"
 require "builtins/int-symbolic.k"
 require "builtins/bool-symbolic.k"
 
-module SMTLIB
+module SMTLIB-CONVERSION
   imports BUILTIN-HOOKS
   imports INT-SYMBOLIC
   imports BOOL-SYMBOLIC  
 
+
+  // convert Bool to smtlib
   syntax String ::= "Smtlib" "(" Bool ")"
 		  | "Smtlib" "(" Int ")"
-		  | "ConstSmtlib" "(" Bool ")"
-		  | "ConstSmtlib" "(" Int ")"
 
   // Smtlib: booleans  
   rule Smtlib(false) => "false" [anywhere]
@@ -28,6 +28,12 @@ module SMTLIB
   rule Smtlib(I:#Int) => Int2String(I) [anywhere]
   rule Smtlib(symInt(I:Int)) => "var" +String Int2String(I) [anywhere]
 
+  rule Smtlib(I1:Int +Int I2:Int) => "(+ " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]
+  rule Smtlib(I1:Int *Int I2:Int) => "(* " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]
+  rule Smtlib(I1:Int /Int I2:Int) => "(/ " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]
+  rule Smtlib(I1:Int -Int I2:Int) => "(- " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]
+  rule Smtlib(I1:Int %Int I2:Int) => "(% " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]
+  
   rule Smtlib(I1:Int <Int I2:Int) => "(< " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]
   rule Smtlib(I1:Int <=Int I2:Int) => "(<= " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]
   rule Smtlib(I1:Int >Int I2:Int) => "(> " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")" [anywhere]
@@ -36,44 +42,72 @@ module SMTLIB
   rule Smtlib(I1:Int =/=Int I2:Int) => "(not (= " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String "))" [anywhere]
 
 
-
-
   //@ Collecting constants declarations
+  
+  syntax Set ::= "collectConstants" "(" Bool ")"
 
   // ConstSmtlib: booleans
-  rule ConstSmtlib(true) => "" [anywhere]
-  rule ConstSmtlib(false) => "" [anywhere]
-  rule ConstSmtlib(symBool(I:Int)) => "(declare-const " +String "var" +String Int2String(I) +String " Bool)" [anywhere]
+  rule collectConstants(true) => .Set [anywhere]
+  rule collectConstants(false) => .Set [anywhere]
+  rule collectConstants(symBool(I:Int)) => SetItem(symBool(I)) [anywhere]
   
-  rule ConstSmtlib(B1:Bool ==Bool B2:Bool)  => ConstSmtlib(B1) +String " " +String ConstSmtlib(B2) [anywhere]
-  rule ConstSmtlib(B1:Bool =/=Bool B2:Bool) => ConstSmtlib(B1) +String " " +String ConstSmtlib(B2) [anywhere]
-  rule ConstSmtlib(B1:Bool andBool B2:Bool) => ConstSmtlib(B1) +String " " +String ConstSmtlib(B2) [anywhere]
-  rule ConstSmtlib(B1:Bool orBool B2:Bool)  => ConstSmtlib(B1) +String " " +String ConstSmtlib(B2) [anywhere]
-  rule ConstSmtlib(B1:Bool xorBool B2:Bool) => ConstSmtlib(B1) +String " " +String ConstSmtlib(B2) [anywhere]
+  rule collectConstants(B1:Bool ==Bool B2:Bool)  => collectConstants(B1) collectConstants(B2) [anywhere]
+  rule collectConstants(B1:Bool =/=Bool B2:Bool) => collectConstants(B1) collectConstants(B2) [anywhere]
+  rule collectConstants(B1:Bool andBool B2:Bool) => collectConstants(B1) collectConstants(B2) [anywhere]
+  rule collectConstants(B1:Bool orBool B2:Bool)  => collectConstants(B1) collectConstants(B2) [anywhere]
+  rule collectConstants(B1:Bool xorBool B2:Bool) => collectConstants(B1) collectConstants(B2) [anywhere]
 
-  // ConstSmtlib: integers
-  rule ConstSmtlib(symInt(I:Int)) => "(declare-const " +String "var" +String Int2String(I) +String " Int)" [anywhere]
+  // collectConstants: integers
+  rule collectConstants(symInt(I:Int)) => SetItem(symInt(I)) [anywhere]
+  rule collectConstants(I:#Int) => .Set [anywhere]
  
-  rule ConstSmtlib(I:#Int) => "" [anywhere]
+  rule collectConstants(I1:Int <Int I2:Int)   => collectConstants(I1) collectConstants(I2) [anywhere]
+  rule collectConstants(I1:Int <=Int I2:Int)  => collectConstants(I1) collectConstants(I2) [anywhere]
+  rule collectConstants(I1:Int >Int I2:Int)   => collectConstants(I1) collectConstants(I2) [anywhere]
+  rule collectConstants(I1:Int >=Int I2:Int)  => collectConstants(I1) collectConstants(I2) [anywhere]
+  rule collectConstants(I1:Int ==Int I2:Int)  => collectConstants(I1) collectConstants(I2) [anywhere]
+  rule collectConstants(I1:Int =/=Int I2:Int) => collectConstants(I1) collectConstants(I2) [anywhere]
 
-  rule ConstSmtlib(I1:Int <Int I2:Int)   => ConstSmtlib(I1) +String  " " +String ConstSmtlib(I2) [anywhere]
-  rule ConstSmtlib(I1:Int <=Int I2:Int)  => ConstSmtlib(I1) +String  " " +String ConstSmtlib(I2) [anywhere]
-  rule ConstSmtlib(I1:Int >Int I2:Int)   => ConstSmtlib(I1) +String  " " +String ConstSmtlib(I2) [anywhere]
-  rule ConstSmtlib(I1:Int >=Int I2:Int)  => ConstSmtlib(I1) +String  " " +String ConstSmtlib(I2) [anywhere]
-  rule ConstSmtlib(I1:Int ==Int I2:Int)  => ConstSmtlib(I1) +String  " " +String ConstSmtlib(I2) [anywhere]
-  rule ConstSmtlib(I1:Int =/=Int I2:Int) => ConstSmtlib(I1) +String  " " +String ConstSmtlib(I2) [anywhere]
+  rule collectConstants(I1:Int +Int I2:Int)   => collectConstants(I1) collectConstants(I2) [anywhere]
+  rule collectConstants(I1:Int -Int I2:Int)   => collectConstants(I1) collectConstants(I2) [anywhere]
+  rule collectConstants(I1:Int *Int I2:Int)  => collectConstants(I1) collectConstants(I2) [anywhere]
+  rule collectConstants(I1:Int /Int I2:Int)   => collectConstants(I1) collectConstants(I2) [anywhere]
+  rule collectConstants(I1:Int %Int I2:Int)  => collectConstants(I1) collectConstants(I2) [anywhere]
+  
+endmodule
+
+module SMT-IO
+  imports URIS
+
+  syntax K ::= "#openSmtSession" 
+			 | "#closeSmtSession" "(" Int ")"
+  syntax String ::= "#sendSmtCommand" "(" Int "," String ")"
+
+  rule #openSmtSession => String2Int((#tcpRequest("open#" +String "smt" +String "#"))) [function, anywhere]
+  rule #closeSmtSession(I:Int) => #close(I) [function, anywhere]
+  rule #sendSmtCommand(I:Int, S:String) => #tcpRequest("smt#" +String Int2String(I) +String "#" +String S +String "#") [function, anywhere]
 
 endmodule
 
 module SMT
-  imports SMTLIB
+  imports SMT-IO
+  imports SMTLIB-CONVERSION
 
-  syntax K ::= "#checksat" "(" Bool ")"
-
-  rule #checksat(B:Bool) => #tcpRequest("smt#" +String ConstSmtlib(B) +String " (assert " +String Smtlib(B) +String ") (check-sat)#") [function]
-
+  syntax K ::= "checkSat" "(" Bool ")" [function]
+  
+  syntax K ::= "#checkSat" "(" Int "," String ")"
+			 | "#smt" "(" Int "," Set "," String ")"
+  
+  rule checkSat(B:Bool) => #smt(#openSmtSession, collectConstants(B), Smtlib(B) ) [anywhere]
+  
+  rule #smt(I:Int, .Set, S:String) => #checkSat(I, #sendSmtCommand(I, "(assert " +String S +String ")")) [anywhere]
+  rule #checkSat(I:Int, "success") => #sendSmtCommand(I, "(check-sat)") [anywhere]
+  rule #smt(I:Int, SetItem(symInt(V:Int) =>  #sendSmtCommand(I,"(declare-const var" +String Int2String(V) +String " Int)")) _:Set, _:String) [anywhere]
+  rule #smt(I:Int, SetItem(symBool(V:Int) =>  #sendSmtCommand(I,"(declare-const var" +String Int2String(V) +String " Bool)")) _:Set, _:String) [anywhere]
+  rule #smt(I:Int, (SetItem("success") => .Set) _:Set, _:String) [anywhere]
+  
   syntax Bool ::= "toSmtlib" "(" List ")" [function]
   rule toSmtlib(ListItem(B:Bool) Rest:List) => B andBool toSmtlib(Rest) [anywhere]
   rule toSmtlib(.List) => true [anywhere]
-
+  
 endmodule

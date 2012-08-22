@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 import javax.imageio.IIOException;
 
-public class BufferedReader extends Resource{
+public class BufferedReader extends FileResource{
 
 	private InputStream is;
 	private int integer;
@@ -67,6 +67,16 @@ public class BufferedReader extends Resource{
 	@Override
 	public void writebyte(byte ascii) throws Exception {
 		throw new IIOException("Writebyte not implemented for input streams");
+	}
+
+	@Override
+	public void sendToInput(String s) throws Exception {
+		throw new Exception("Not applicable for streams.");
+	}
+
+	@Override
+	public String getFromOutput() throws Exception {
+		throw new Exception("Not applicable for streams.");
 	}
 
 }

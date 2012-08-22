@@ -9,7 +9,7 @@ import java.net.URI;
 
 import javax.imageio.IIOException;
 
-public class ResourceOutFile extends Resource {
+public class ResourceOutFile extends FileResource {
 
 	
 	private OutputStream of;
@@ -67,6 +67,18 @@ public class ResourceOutFile extends Resource {
 	@Override
 	public Byte eof() throws Exception {
 		throw new IIOException("Eof not implemented.");
+	}
+
+
+	@Override
+	public void sendToInput(String s) throws Exception {
+		throw new Exception("Not applicable for streams.");
+	}
+
+
+	@Override
+	public String getFromOutput() throws Exception {
+		throw new Exception("Not applicable for streams.");
 	}
 
 }

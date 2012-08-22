@@ -87,7 +87,9 @@ public class ResourceSystem {
 	}
 
 	private static Resource createResource(URI uri, String[] args) throws ResourceException {
-		if (uri.getScheme().equals("file")) {
+		if (uri.toString().equals("smt")){
+			return new ResourceSmt("z3"); }
+		else if (uri.getScheme().equals("file")) {
 			return createNormalFile(uri, args);
 		} else if (uri.getScheme().equals("stdin")) {
 			return new ResourceInFile();
@@ -95,12 +97,12 @@ public class ResourceSystem {
 			return new ResourceOutFile(System.out);
 		} else if (uri.getScheme().equals("stderr")) {
 			return new ResourceOutFile(System.err);
-		}
-
+		} 
+		
 		return null;
 	}
 	
-	private static Resource createNormalFile(URI uri, String[] args) throws ResourceException {
+	private static FileResource createNormalFile(URI uri, String[] args) throws ResourceException {
 		if (uri.getPath() == null) { // relative path
 			String requestPath = uri.getSchemeSpecificPart();
 			try {
