@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ro.uaic.info.fmse.k.*;
-import ro.uaic.info.fmse.loader.DefinitionHelper;
-import ro.uaic.info.fmse.utils.strings.StringUtil;
 import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class HTMLPatternsVisitor extends BasicVisitor {
@@ -45,7 +43,7 @@ public class HTMLPatternsVisitor extends BasicVisitor {
 			if (p.getAttributes().containsKey("latex")) {
 				
 				pattern = p.getAttributes().get("latex");
-				pattern = pattern.substring(1, pattern.length()-1).replace("\\\\", "\\");
+				pattern = pattern.replace("\\\\", "\\");
 				patterns.put(p.getAttributes().get("cons"), pattern);
 				type.put(p.getAttributes().get("cons"), HTMLPatternType.LATEX);
 				

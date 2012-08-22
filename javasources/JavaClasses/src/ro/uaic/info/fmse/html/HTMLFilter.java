@@ -327,19 +327,19 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(TermCons trm) {
-		HTMLPatternType type = patternsVisitor.getPatternType("\"" + trm.getCons() + "\"");
+		HTMLPatternType type = patternsVisitor.getPatternType(trm.getCons());
 		if(type == null)
 		{
-			Production pr = DefinitionHelper.conses.get("\"" + trm.getCons() + "\"");
+			Production pr = DefinitionHelper.conses.get(trm.getCons());
 			pr.accept(patternsVisitor);
-			type = patternsVisitor.getPatternType("\"" + trm.getCons() + "\"");
+			type = patternsVisitor.getPatternType(trm.getCons());
 		}
 		/* This condition pretty much is : "Does this term have a Latex or HTML attribute?" */
 		if(type != HTMLPatternType.DEFAULT) {
 			
 		/* If yes, use the attribute to print it. 
 		 * The information about the attribute is in HTMLPatternVisitor. */
-			String pattern = patternsVisitor.getPatterns().get("\"" + trm.getCons() + "\"");
+			String pattern = patternsVisitor.getPatterns().get(trm.getCons());
 			String regex = "\\{#\\d+\\}$";
 			Pattern p = Pattern.compile(regex);
 			if (parentParens && (pattern.indexOf("{#") == 0 
