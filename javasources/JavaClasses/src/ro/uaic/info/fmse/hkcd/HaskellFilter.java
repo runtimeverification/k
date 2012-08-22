@@ -22,7 +22,7 @@ public class HaskellFilter extends BasicVisitor {
 	 */
 	public void visit(TermCons tc) {
 		String klabel =
-			DefinitionHelper.conses.get("\"" + tc.getCons() + "\"")
+			DefinitionHelper.conses.get(tc.getCons())
 			.getKLabel();
 		this.result += "KApp (KLabel [Syntax \"" + klabel + "\"]) [";
 

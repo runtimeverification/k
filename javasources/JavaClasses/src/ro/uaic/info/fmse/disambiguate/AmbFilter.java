@@ -19,7 +19,7 @@ public class AmbFilter extends BasicTransformer {
 		for (ASTNode variant : amb.getContents()) {
 			if (variant instanceof TermCons) {
 				TermCons tc = (TermCons) variant;
-				Production prod = DefinitionHelper.conses.get("\"" + tc.getCons() + "\"");
+				Production prod = DefinitionHelper.conses.get(tc.getCons());
 				for (ProductionItem i : prod.getItems())
 					msg += i + " ";
 				msg += "(" + tc.getCons() + "), ";

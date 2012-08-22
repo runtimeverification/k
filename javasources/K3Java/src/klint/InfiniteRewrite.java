@@ -44,8 +44,8 @@ public class InfiniteRewrite extends KlintRule{
 	}
 
 	private void checkProductions(TermCons leftTermCons, TermCons rightTermCons, Rewrite rewrite) {
-		Production leftTermProd = DefinitionHelper.conses.get("\"" + leftTermCons.getCons() + "\"");
-		Production rightTermProd = DefinitionHelper.conses.get("\"" + rightTermCons.getCons() + "\"");
+		Production leftTermProd = DefinitionHelper.conses.get(leftTermCons.getCons());
+		Production rightTermProd = DefinitionHelper.conses.get(rightTermCons.getCons());
 
 		if(leftTermProd.equals(rightTermProd)){
 			warning("Possible infinite rewrite: ", rewrite);
