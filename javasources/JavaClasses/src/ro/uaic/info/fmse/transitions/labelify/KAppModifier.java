@@ -15,7 +15,7 @@ public class KAppModifier extends BasicTransformer {
 	public ASTNode transform(TermCons tc) {
 		String l = tc.getLocation();
 		String f = tc.getFilename();
-		Production ppp = DefinitionHelper.conses.get("\"" + tc.getCons() + "\"");
+		Production ppp = DefinitionHelper.conses.get(tc.getCons());
 		String klabel = ppp.getKLabel();
 		KApp kapp = new KApp(l, f);
 		kapp.setLabel(new Constant(l, f, "KLabel", klabel));
