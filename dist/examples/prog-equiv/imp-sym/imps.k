@@ -1,9 +1,10 @@
-require "../symbolic/symbolic-calculus.k"
+//require "../symbolic/symbolic-calculus.k"
+require "builtins/symbolic-calculus.k"
 
 /*!
 \setlength{\parindent}{1em}
 \title{IMP  with Symbolic Values}
-\author{Dorel Lucanu (\texttt{grosu@illinois.edu}) and Vlad Rusu (Vlad.Rusu@inria.fr)}
+\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro) and Vlad Rusu (Vlad.Rusu@inria.fr)}
 \organization{"Alexandru Ioan Cuza" University of Iasi, INRIA Lille}
 */
 
@@ -12,6 +13,8 @@ require "../symbolic/symbolic-calculus.k"
 module IMPS-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
   imports SYMBOLIC-CALCULUS
+//  imports BOOL-SYMBOLIC
+//  imports INT-SYMBOLIC
 
 /*@
   This is the syntax of IMP, where we added the multiplication operator, the
@@ -66,12 +69,16 @@ module IMPS-SYNTAX
 */
 
   syntax Pgm ::= "var" Ids ";" Stmt
-
-  syntax SPgm ::= Pgm "if" BExp
-
   syntax Ids ::= List{Id, ","}
 
-  syntax Start ::= SPgm  
+  syntax InitVal ::= Id "->" Int
+  syntax InitVals ::= List{InitVal,","}
+
+  syntax CfgSym ::= "<k>" Pgm "</k>"
+                    "<env>" InitVals "</env>"
+                     "<condition>"  BExp "</condition>"
+
+  syntax Start ::= CfgSym  
 
 endmodule
 
@@ -80,21 +87,10 @@ endmodule
 module IMPS
   imports IMPS-SYNTAX
 
-/*@
-  A configuration is a multiset of tasks. Each task consists of an
-  equivalence formula. The patterns are stored into a \texttt{config}
-  cell and the condition in the \texttt{formula} cell.
-  The cell \texttt{hypos} is for storing the hypotheses met during
-  the proving process. It has a structure similar to that of tasks, but
-  where the names of cells are changed in order to forbid the rules firing
-  for hypotheses, in this way the hypotheses are kept unchanged. 
-  The cell \texttt{observers} stores the list of the observer variables.
-  The cell \texttt{nextSymVar} is used for generating fresh symbolic names.
-*/
 
   configuration <T color="yellow"> 
                   <config>
-                    <k color="green"> $PGM:SPgm  </k>
+                    <k color="green"> $PGM:CfgSym  </k>
                     <env color="red"> .Map </env>
                   </config>
                   <condition> true </condition>
@@ -103,9 +99,7 @@ module IMPS
 
 /*@
   The values are defined as for the original IMP, but note that now Int includes
-  the symbolic integer expressions. Remember that the predicate \texttt{isBool} 
-  is not extended to symbolic boolean expressions. So, the only boolean values 
-  remain \texttt{true} and \texttt{false}.
+  the symbolic integer expressions.
 */
 
   syntax KResult ::= Int | #Bool
@@ -228,13 +222,13 @@ module IMPS
 /*@
   additional rules that conservatively extend the definition
 */
-
+/*
   rule <config>
          <k> B:K => storeSyns(F, B, true) ~> true ...</k>
          <env> Rho:Map (. => B |-> true) </env>
        </config>
        <condition> F:K => F andBool B  </condition>
-       when isBoolSymExp(B)
+       when isBoolSymbolic(B)
             andBool notBool(B in keys(Rho))
             andBool notBool ((F impliesBool B) ==K true)
             andBool notBool ((F impliesBool notBool B) ==K true)
@@ -245,22 +239,22 @@ module IMPS
          <env> Rho:Map (. => B |-> false) </env>
        </config>
        <condition> F:K => F andBool notBool B  </condition>
-       when isBoolSymExp(B)
+       when isBoolSymbolic(B)
             andBool notBool(B in keys(Rho))
             andBool notBool ((F impliesBool B) ==K true)
             andBool notBool ((F impliesBool notBool B) ==K true)
-       [transition]
-  
-  rule <k> B:K => true ...</k>
-       <condition> F:K </condition>
-       when isBoolSymExp(B)
-            andBool  F impliesBool B
+       [transition]  
+*/
+  rule <k> B:K => checkSat(F andBool notBool B) ...</k> // true ...</k>
+       <condition> F:BoolSymbolic </condition>
+       when isBoolSymbolic(B)
+//            andBool  checkSat(F andBool notBool B) ==K "unsat"
 //       [transition]
 
   rule <k> B:K => false ...</k>
-       <condition> F:K </condition>
-       when isBoolSymExp(B)
-            andBool F impliesBool notBool(B)
+       <condition> F:BoolSymbolic </condition>
+       when isBoolSymbolic(B)
+            andBool checkSat(F andBool B) ==K "unsat"
 //       [transition]
 
 /*@
@@ -270,7 +264,7 @@ module IMPS
 
   rule <k> B:K => V ...</k>
        <env>... B |-> V:Bool ...</env>
-       when isBoolSymExp(B)
+       when isBoolSymbolic(B)
 
   /*@
     Store the elementary symbolic boolean expressions obtained as
@@ -309,12 +303,31 @@ module IMPS
   rule [initial] :
        <config>
          <k> 
-           P:Pgm if F:BExp
+           <k> P:Pgm </k>
+           <env> Inits1:InitVals </env>
+           <condition> F:BExp </condition>
            =>
-           P
+           setInitVal(Inits1) ~> P
          </k>
        ...</config>
        <condition> _ => injectForm(F) </condition>
+
+/*@
+  The auxiliary construct \texttt{initVal()} is used for initializing the 
+  observer variables with the same values in the two initial program
+  configurations. 
+*/
+
+
+  syntax K ::= "setInitVal" "(" InitVals ")"
+
+  rule setInitVal(.InitVals) => .
+       [structural]
+
+  rule <k> setInitVal((X:Id -> V:Int, XVs:InitVals) => XVs) ...</k>
+       <env>... . => X |-> V ...</env>
+       [structural]
+
 
 /*@ 
   The next function translates the initial formula into internal
@@ -328,6 +341,11 @@ module IMPS
   rule injectForm(A1:AExp == A2:AExp)
        =>
        injectAExp(A1)  ==Int injectAExp(A2)
+       [anywhere]
+
+  rule injectForm(A1:AExp <= A2:AExp)
+       =>
+       injectAExp(A1)  <=Int injectAExp(A2)
        [anywhere]
 
   rule injectForm(B1:BExp and B2:BExp)
