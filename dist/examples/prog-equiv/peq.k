@@ -3,7 +3,7 @@ require "symbolic/symbolic-calculus.k"
 /*!
 \setlength{\parindent}{1em}
 \title{PEQ (Program Equivalence)}
-\author{Dorel Lucanu (\texttt{grosu@illinois.edu}) and Vlad Rusu (Vlad.Rusu@inria.fr)}
+\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro}) and Vlad Rusu (Vlad.Rusu@inria.fr)}
 \organization{"Alexandru Ioan Cuza" University of Iasi, INRIA Lille}
 */
 
