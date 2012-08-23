@@ -71,7 +71,7 @@ module SYMBOLIC-CALCULUS
   syntax #Bool ::= Bool "SMT|=" Bool  [function]
 
   rule B1:Bool SMT|= B2:Bool => true
-       when #checksat(B1 andBool (notBool B2)) ==K "unsat"
+       when checkSat(B1 andBool (notBool B2)) ==K "unsat"
        [anywhere]
 
 
