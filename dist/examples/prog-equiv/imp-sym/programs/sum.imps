@@ -1,9 +1,15 @@
-var i, s, n;
-n := symInt(n0);
-s := 0;
-for i from symInt(i0) to n do (
-  s := s + i
-)
-if
-symInt(n0) == symInt(i0)
-   
+<k>
+  var i, s;
+  s := 0;
+  i := 1;
+  while (i <= n) do (
+    s := s + i;
+    i := i + 1
+  )
+</k>
+<env>
+  n -> symInt(n)
+</env>
+<condition>
+  0 <= symInt(n) and symInt(n) <= 100
+</condition> 

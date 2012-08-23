@@ -1,0 +1,14 @@
+<k>
+  var i;
+  i := 0;
+  while (i <= n) do (
+    symStmt(s);
+    i := i + 1
+  )
+</k>
+<env>
+  n -> symInt(n)
+</env>
+<condition>
+  symInt(n) ==  1
+</condition>

@@ -49,9 +49,9 @@ module IMPS-SYNTAX
     Extending the statements with symbolic values:
    */
 
-  syntax StmtSymVar ::= "symStmt" "(" Id ")"
+  syntax StmtSymbolic ::= "symStmt" "(" Id ")"
   
-  syntax Stmt ::= StmtSymVar
+  syntax Stmt ::= StmtSymbolic
 
 /*@
   The following expressions are used in conditions.
@@ -170,7 +170,7 @@ module IMPS
   syntax Map ::= "execute" "(" Stmt "," Map ")" 
 
   rule [symbolic-stmt] : 
-       <k> SS:StmtSymVar => .  ...</k>
+       <k> SS:StmtSymbolic => .  ...</k>
        <env> M:Map => execute(SS, M) </env>
        [transition] 
 
@@ -188,7 +188,7 @@ module IMPS
   rule [lookup] :  lookup(X:Id, (_ X |-> I:Int _)) => I
 
   rule [lookup] :
-       <k> lookup(X:Id, execute(SS:StmtSymVar, Rho:Map)) 
+       <k> lookup(X:Id, execute(SS:StmtSymbolic, Rho:Map)) 
            => 
            lookup(X, Rho)
        ...</k>
@@ -224,42 +224,76 @@ module IMPS
 */
 /*
   rule <config>
-         <k> B:K => storeSyns(F, B, true) ~> true ...</k>
+         <k> B:K => 
+checkSat(F andBool B) ~> "sat" ~>
+checkSat(F andBool notBool B) ~> "sat" ~>
+storeSyns(F, B, true) ~> true ...</k>
          <env> Rho:Map (. => B |-> true) </env>
        </config>
        <condition> F:K => F andBool B  </condition>
        when isBoolSymbolic(B)
             andBool notBool(B in keys(Rho))
-            andBool notBool ((F impliesBool B) ==K true)
-            andBool notBool ((F impliesBool notBool B) ==K true)
+//            andBool (checkSat(F andBool B) ==K "sat")
+//            andBool (checkSat(F andBool notBool B) ==K "sat")
+//            andBool notBool ((F impliesBool B) ==K true)
+//            andBool notBool ((F impliesBool notBool B) ==K true)
        [transition]
 
   rule <config>
-         <k> B:K => storeSyns(F, B, false) ~> false ...</k>
+         <k> B:K => 
+checkSat(F andBool B) ~> "sat" ~>
+checkSat(F andBool notBool B) ~> "sat" ~>
+storeSyns(F, B, false) ~> false ...</k>
          <env> Rho:Map (. => B |-> false) </env>
        </config>
        <condition> F:K => F andBool notBool B  </condition>
        when isBoolSymbolic(B)
             andBool notBool(B in keys(Rho))
-            andBool notBool ((F impliesBool B) ==K true)
-            andBool notBool ((F impliesBool notBool B) ==K true)
+//            andBool (checkSat(F andBool B) ==K "sat")
+//            andBool (checkSat(F andBool notBool B) ==K "sat")
+//            andBool notBool ((F impliesBool B) ==K true)
+//            andBool notBool ((F impliesBool notBool B) ==K true)
        [transition]  
-*/
-  rule <k> B:K => checkSat(F andBool notBool B) ...</k> // true ...</k>
+
+  rule <k> B:K => checkSat(F andBool notBool B) ~> "unsat" ~> true ...</k>
        <condition> F:BoolSymbolic </condition>
        when isBoolSymbolic(B)
 //            andBool  checkSat(F andBool notBool B) ==K "unsat"
-//       [transition]
+       [transition]
 
-  rule <k> B:K => false ...</k>
+  rule <k> B:K => checkSat(F andBool B) ~> "unsat" ~> false ...</k>
        <condition> F:BoolSymbolic </condition>
        when isBoolSymbolic(B)
-            andBool checkSat(F andBool B) ==K "unsat"
-//       [transition]
+//            andBool checkSat(F andBool B) ==K "unsat"
+       [transition]
+
+    rule "sat" ~> "sat" => .
+    rule "unsat" ~> "unsat" => .
+*/
+
+  rule <k>
+          B:BoolSymbolic
+          =>
+          checkSat(F andBool B) ~> checkSat(F andBool notBool B) ~> B
+       ...</k>
+       <condition> F:BoolSymbolic </condition>
+//       when isBoolSymbolic(B)
+
+
+  rule <k> "sat" ~> "sat" ~> B:BoolSymbolic => false ...</k>
+       <condition> F:K => F andBool notBool B  </condition>
+
+  rule <k> "sat" ~> "sat" ~> B:BoolSymbolic => true ...</k>
+       <condition> F:K => F andBool B  </condition>
+
+   rule "sat" ~> "unsat" ~> B:BoolSymbolic => true
+
+   rule "unsat" ~> "sat" ~> B:BoolSymbolic => false
+   
 
 /*@
-  When an existing elementary symbolic boolean expression has to be evaluated, its
-  value is read the cell \texttt{env}.
+  When an existing elementary symbolic boolean expression has to be evaluated,
+  its value is read the cell \texttt{env}.
 */
 
   rule <k> B:K => V ...</k>
