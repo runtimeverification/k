@@ -39,5 +39,23 @@ module BOOL-SYMBOLIC
   rule isBoolSymbolic(B1:Bool =/=Bool B2:BoolSymbolic) => true [anywhere]
   
 //  rule isBool(B:BoolSymbolic) => true [anywhere]
+
+//@ Some simplification rules.
+
+  rule B:Bool impliesBool true => true  [anywhere]
+
+  rule (B:Bool andBool B':Bool) impliesBool B => true  [anywhere]
+  rule (B':Bool andBool B:Bool) impliesBool B => true  [anywhere]
+
+  rule B:Bool andBool true => B  [anywhere]
+
+  rule true andBool B:Bool => B  [anywhere]
+
+  rule B:Bool orBool true => true  [anywhere]
+
+  rule true orBool B:Bool => true  [anywhere]
+
+  rule B:Bool impliesBool B => true [anywhere]
+
   
 endmodule

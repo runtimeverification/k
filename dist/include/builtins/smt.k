@@ -102,8 +102,8 @@ module SMT
              | "getModel" "(" Bool ")" [function]
 
   // check-sat for boolean formula
-  syntax K ::= "#checkSat" "(" Int "," String ")"
-             | "#smt" "(" Int "," Set "," String ")"
+  syntax K ::= "#checkSat" "(" Int "," String ")" [function]
+             | "#smt" "(" Int "," Set "," String ")" [function]
   
   rule checkSat(B:Bool) => #smt(#openSmtSession, collectConstants(B), Smtlib(B) ) [anywhere]
   
