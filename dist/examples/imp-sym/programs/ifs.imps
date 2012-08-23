@@ -1,0 +1,12 @@
+<k>
+  var s;
+  if n <= 0 then s := 1
+            else s := 2
+</k>
+<env>
+  n -> symInt(n)
+</env>
+<condition>
+  symInt(n) <= 0
+</condition>
+
