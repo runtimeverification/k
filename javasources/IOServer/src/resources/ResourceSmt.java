@@ -56,7 +56,6 @@ public class ResourceSmt extends Resource{
 		
 		while((line = br.readLine()) != null)
 		{
-			System.out.println("OUT: " + line);
 			output += line;
 			if (line.startsWith(")"))
 				break;

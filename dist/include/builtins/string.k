@@ -23,6 +23,7 @@ module STRING-HOOKS
   syntax Int ::= "asciiString" "(" String ")"  [function, klabel(asciiString), hook(#STRING:asciiString)]
 
   syntax String ::= "substrString" "(" String "," Int "," Int ")" [function, klabel(substrString), hook(#STRING:substrString)]
+  syntax Int ::= "findString" "(" String "," String "," Int ")" [function, klabel(findString), hook(#STRING:findString)]
 
   syntax String ::= "Float2String" "(" Float ")" [function, klabel(Float2String), hook(#CONVERSION:float2String)]
   syntax Float ::= "String2Float" "(" String ")" [function, klabel(String2Float), hook(#CONVERSION:string2Float)]

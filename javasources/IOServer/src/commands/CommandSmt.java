@@ -3,6 +3,9 @@ package commands;
 import java.net.Socket;
 import java.util.logging.Logger;
 
+import jfkbits.LispParser;
+import jfkbits.LispParser.Expr;
+import jfkbits.LispTokenizer;
 import resources.ResourceSmt;
 import resources.ResourceSystem;
 
@@ -32,8 +35,20 @@ public class CommandSmt extends Command {
 			resource.sendToInput(smtlib);
 			String output = resource.getFromOutput();
 
-			// probably the output should be parsed
-//			System.out.println("GOT: " + output);
+			// parsing
+			LispTokenizer lt = new LispTokenizer(output);
+			LispParser lp = new LispParser(lt);
+			try{
+				Expr parsed = lp.parseExpr();
+				String out = parsed.getKIF().trim();
+				if (out.trim().equals("")){
+					//System.out.println("EMPTY: >>" + out + "<<");
+				} else output = out;
+			}
+			catch(Exception e){
+				fail("unknown");
+			}
+			
 			// success
 			succeed(new String[] { output.toString() });
 

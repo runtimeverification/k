@@ -99,7 +99,7 @@ module SMT
   imports SMTLIB-CONVERSION
 
   syntax K ::= "checkSat" "(" Bool ")" [function]
-             | "getModel" "(" Bool ")" [function]
+  syntax Map ::= "getModel" "(" Bool ")" [function]
 
   // check-sat for boolean formula
   syntax K ::= "#checkSat" "(" Int "," String ")" [function]
@@ -117,19 +117,34 @@ module SMT
 
 
   // get-model for boolean formula
-//  rule getModel(B:Bool) => #model(#openSmtSession, collectConstants(B), Smtlib(B)) [anywhere]
-
-//  rule #model(I:Int, .Set, S:String) => #get(I, #checkSat(I, #sendSmtCommand(I, "(assert " +String S +String ")"))) [anywhere]
-//  rule #get(I:Int, "sat") => #sendSmtCommand(I, "(get-model)") [anywhere]
-
-  // TODO: user-interface for advanced uses of the smt
-  syntax Int ::= "openSmtSession"
-//  syntax Map ::= "getModel" "(" Int ")"
-  syntax K ::= "sendToSmt" "(" Int "," Bool ")"
-             | "checkSat" "(" Int ")"
+  syntax Map ::= "#model" "(" Int "," Set "," String ")"
+  syntax Map ::= "#get" "(" Int "," String ")"
   
-/*  syntax Bool ::= "toSmtlib" "(" List ")" [function]
-  rule toSmtlib(ListItem(B:Bool) Rest:List) => B andBool toSmtlib(Rest) [anywhere]
-  rule toSmtlib(.List) => true [anywhere]
-  */
+  rule getModel(B:Bool) => #model(#openSmtSession, collectConstants(B), Smtlib(B)) [anywhere]
+
+  rule #model(I:Int, .Set, S:String) => #get(I, #checkSat(I, #sendSmtCommand(I, "(assert " +String S +String ")"))) [anywhere]
+  rule #get(I:Int, "sat") => toMap(#sendSmtCommand(I, "(get-model)")) [anywhere]
+  rule #model(I:Int, SetItem(symInt(V:Int) =>  #sendSmtCommand(I,"(declare-const var" +String Int2String(V) +String " Int)")) _:Set, _:String) [anywhere]
+  rule #model(I:Int, SetItem(symBool(V:Int) =>  #sendSmtCommand(I,"(declare-const var" +String Int2String(V) +String " Bool)")) _:Set, _:String) [anywhere]
+  rule #model(I:Int, SetItem(symInt(Var:Id) =>  #sendSmtCommand(I,"(declare-const " +String Id2String(Var) +String " Int)")) _:Set, _:String) [anywhere]
+  rule #model(I:Int, SetItem(symBool(Var:Id) =>  #sendSmtCommand(I,"(declare-const " +String Id2String(Var) +String " Bool)")) _:Set, _:String) [anywhere]
+  rule #model(I:Int, (SetItem("success") => .Set) _:Set, _:String) [anywhere]
+
+  syntax Map ::= "toMap" "(" String ")"
+  syntax MapItem ::= "processToMap" "(" String ")"
+
+  rule toMap(S:String) => processToMap( substrString(S, 1, findString(S , "$", 0) -Int 1) )
+                          toMap(substrString(S, findString(S, "$", 0) +Int 1, lengthString(S)))
+                          when S =/=String "" [anywhere]
+  rule toMap("") => . [anywhere]
+
+  syntax MapItem ::= "castKey" "(" String "," String ")"
+                    | "castToMapItem" "(" String "," String "," String ")"
+                    
+  rule processToMap(S:String) => castKey(substrString(S, 0, findString(S, "#", 0) ), substrString(S, findString(S, "#", 0) +Int 1, lengthString(S))) [anywhere]
+  rule castKey(Key:String, S:String) => castToMapItem(Key, substrString(S, 0, findString(S, "#", 0)), substrString(S, findString(S, "#", 0) +Int 1, lengthString(S))) [anywhere]
+
+  rule castToMapItem(Key:String, "Int", Value:String) => String2Id(Key) |-> String2Int(Value) [anywhere]
+  rule castToMapItem(Key:String, "Bool", Value:String) => String2Id(Key) |-> String2Bool(Value) [anywhere]
+
 endmodule
