@@ -4,28 +4,42 @@ imports
   libstratego-lib
   include/LatexComments
   lib/editor-common.generated
-  lib/index-library.generated
-  lib/analysis-library.generated
 
-rules // Resolving
-  
-  constraint-error:
-    x{[Unresolved(t) | _]} -> (x, $[Unable to resolve.])
+rules
+
+  // Analysis: does a topdown traversal of the tree,
+  // and tries to apply the record-entity rule.
+  analyze:
+    t -> t
+    with
+      <topdown(try(record-entity))> t
+
+  // Records the definition of an entity in a dynamic rule GetEntity.
+  record-entity:
+    Entity(x, body) -> Entity(x, body)
+    with
+      // For a name 'x', GetEntity will return the original 'x' tree node
+      rules(
+        GetEntity :+ x -> x
+      )
+rules
     
-rules // Duplicates
-    
-  is-unique-namespace = id
-  is-unique-namespace = id
-      
+  // Reports an error if a property type is undefined.
+  // This error is reported on the type name 'type'.
   constraint-error:
-    definition -> (definition, $[Duplicate definition])
+    Property(x, Type(type)) -> (type, $[Type [type] is not defined])
     where
-      key{[ns|_]} := <nam-get-definition-key> definition;
-      <is-unique-namespace> ns;
-      definitions := <index-lookup-all> key;
-      <gt> (<length> definitions, 1)
-    
-rules // Other
+      not(!type => "String"); // String and Int are built-in types
+      not(!type => "Int");
+      not(<GetEntity> type) // no entity for this type
+  
+  // Reports an error if an entity is defined more than once.
+  // This constraint is implemented by testing if the "bag" of
+  // all entities x is not a singleton list.
+  constraint-error:
+    Entity(x, _) -> (x, $[Duplicate entity name])
+    where
+      not(<bagof-GetEntity> x => [_])
   
   constraint-warning:
     Entity(x, _) -> (x, $[Entity names must start with a capital])

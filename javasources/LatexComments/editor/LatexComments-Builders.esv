@@ -9,14 +9,13 @@ builders
   // See the imported file for a brief introduction and examples.                  
 
 builders
-                                                                                                                          
-  provider : include/latexcomments.ctree                                                                                  
-  provider : include/latexcomments-java.jar                                                                               
-                                                                                                                          
-  observer : editor-analyze                                                                                               
-                                                                                                                          
-  builder  : "Generate XML code (for selection)"            = callxml (openeditor) (realtime)                      
-  builder  : "Show abstract syntax (for selection)"          = generate-aterm (openeditor) (realtime) (meta) (source)     
-                                                                                                                          
+                                                                                                              
+  provider : include/latexcomments.ctree                                                                      
+  provider : include/latexcomments-java.jar                                                                   
+                                                                                                              
+  observer : editor-analyze                                                                                   
+                                                                                                              
+  builder  : "Generate XML (for selection)"   = callxml (openeditor) (realtime)                   
+  builder  : "Show abstract syntax (for selection)" = generate-aterm (openeditor) (realtime) (meta) (source)  
+                                                                                                              
 
-refactorings
