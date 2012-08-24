@@ -143,7 +143,7 @@ public class RunProcess {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return  maude.returnValue;
+		return maude.returnValue;
 	}
 	
 	public String getStdout() {

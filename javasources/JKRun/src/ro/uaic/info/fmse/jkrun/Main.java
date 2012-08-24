@@ -25,7 +25,8 @@ import ro.uaic.info.fmse.runner.KRunner;
 public class Main {
 	
 	private static final String USAGE_KRUN = "krun [options] <file>" + K.lineSeparator;
-	private static final String USAGE_DEBUG = "enter one of the following commands without \"--\" in front" + K.lineSeparator;
+	private static final String USAGE_DEBUG = "Enter one of the following commands without \"--\" in front. " 
+			                   + "For autocompletion press TAB key and for accessing the command history use up and down arrows." + K.lineSeparator;
 	private static final String HEADER = "";
 	private static final String FOOTER = "";
 
@@ -65,7 +66,7 @@ public class Main {
 				compiledDef = maudeFile.getName();
 				int sep = path_.lastIndexOf(K.fileSeparator);
 				fileName = path_.substring(sep + 1);
-				if (fileName.startsWith(lang) && lang.length() > 0) {
+				if (fileName.startsWith(lang) && fileName.endsWith("-compiled") && lang.length() > 0) {
 					result = fullPath;
 					str.append("\"./" + fileName + "\" ");
 					count++;
@@ -76,8 +77,8 @@ public class Main {
 			}
 			if (count > 1) {
 				Error.report("\nMultiple compiled definitions found.\nPlease use only one of: " + str.toString());
-			} else if (maudeFiles.size() == 1) {
-				result = compiledDef; 
+			} else if (count == 1) {
+				return result; 
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -583,7 +584,7 @@ public class Main {
 				resolveOption("syntax-module", lang, cmd);
 			}
  
-			if (! K.k_definition.endsWith(".k")) {
+			if (!K.k_definition.endsWith(".k")) {
 				K.k_definition = K.k_definition + ".k";
 			}
 

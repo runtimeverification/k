@@ -94,10 +94,6 @@ public class CommandlineOptions {
 		Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern")
 				.withDescription("Search pattern. In conjunction with it you can specify 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search)")
 				.hasArg().withArgName("STRING").create();                             
-		/*Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern")
-			    	.withDescription("The first argument is the search pattern which is compulsory. The other 2 arguments are optional: bound is the number of desired solutions and depth gives the maximum depth of the search")
-				    .withValueSeparator( '=' ).withArgName("STRING bound=value depth=value").hasArgs(6).create();
-		xsearch_pattern.setOptionalArg(false);*/
 		Option bound = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("bound").withDescription("The number of desired solutions for search").create();
 		Option depth = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("depth").withDescription("The maximum depth of the search").create();
 		Option output_mode = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("output-mode").withDescription("How to display Maude results (none, raw, pretty)").create();

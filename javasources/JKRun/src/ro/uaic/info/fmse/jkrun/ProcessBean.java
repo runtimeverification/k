@@ -31,8 +31,7 @@ public class ProcessBean implements PropertyChangeListener, Serializable {
 					e.printStackTrace();
 				}
 	    	}
-	    }
-	    
+	    } 
 	}
 
 	public int getExitCode() {
