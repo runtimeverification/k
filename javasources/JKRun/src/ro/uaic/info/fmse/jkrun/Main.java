@@ -50,11 +50,10 @@ public class Main {
 		System.out.println("JKrun 0.2.0\n" + "Copyright (C) 2012 Necula Emilian & Raluca");
 	}
 
-	public static String initOptions(String path, String lang) {
+	public static String initOptions(String path) {
 		String result = null;
 		String path_ = null;
-		String fileName = null;
-		String compiledDef = null; 
+		String fileName = null; 
 		StringBuilder str = new StringBuilder();
 		int count = 0;
 
@@ -63,17 +62,13 @@ public class Main {
 			for (File maudeFile : maudeFiles) {
 				String fullPath = maudeFile.getCanonicalPath();
 				path_ = FileUtil.dropExtension(fullPath, ".", K.fileSeparator);
-				compiledDef = maudeFile.getName();
 				int sep = path_.lastIndexOf(K.fileSeparator);
 				fileName = path_.substring(sep + 1);
-				if (fileName.startsWith(lang) && fileName.endsWith("-compiled") && lang.length() > 0) {
+				if (fileName.endsWith("-compiled")) {
 					result = fullPath;
 					str.append("\"./" + fileName + "\" ");
 					count++;
 				}
-			    if (lang.length() == 0 && fileName.endsWith("-compiled")) {
-			    	count++;
-			    }
 			}
 			if (count > 1) {
 				Error.report("\nMultiple compiled definitions found.\nPlease use only one of: " + str.toString());
@@ -86,7 +81,7 @@ public class Main {
 		return result;
 	}
 
-	public static void resolveOption(String optionName, String lang, CommandLine cmd) {
+	public static void resolveOption(String optionName, CommandLine cmd) {
 		String s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
 		int sep = s.lastIndexOf(K.fileSeparator);
 		String str = s.substring(sep + 1).toUpperCase();
@@ -96,16 +91,27 @@ public class Main {
 			if (cmd.hasOption("k-definition")) {
 				K.compiled_def = s + "-compiled.maude";
 			} else {
-				K.compiled_def = initOptions(K.userdir, lang);
+				K.compiled_def = initOptions(K.userdir);
 				if (K.compiled_def != null) {
 					index = K.compiled_def.indexOf("-compiled.maude");
 					K.k_definition = K.compiled_def.substring(0, index);
 				}
 			}
 		} else if (optionName == "main-module") {
-			K.main_module = str;
+			if (cmd.hasOption("syntax-module")) {
+			   int pos = K.syntax_module.indexOf("-SYNTAX");
+			   K.main_module = K.syntax_module.substring(0, pos);
+			}
+			else {
+				K.main_module = str;
+			}
 		} else if (optionName == "syntax-module") {
-			K.syntax_module = str + "-SYNTAX";
+			if (cmd.hasOption("main-module")) {
+				   K.syntax_module = K.main_module + "-SYNTAX"; 
+			}
+			else {
+				K.syntax_module = str + "-SYNTAX";
+			}
 		}
 	}
 	
@@ -218,8 +224,18 @@ public class Main {
 				String content = FileUtil.getFileContent(K.maude_err);
 				if (content.length() > 0) {
 					//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-					String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-					Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
+					/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+					Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
+					
+					//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
+					String fileName = new File(K.maude_err).getName();
+					ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
+					for (File file : files) {
+						if (file.getName().equals(fileName)) {
+							String fullPath = file.getCanonicalPath();
+							Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+						}
+					}
 				}
 			}
 			
@@ -310,8 +326,18 @@ public class Main {
 				String content = FileUtil.getFileContent(K.maude_err);
 				if (content.length() > 0) {
 					//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-					String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-					Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
+					/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+					Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
+					
+					//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
+					String fileName = new File(K.maude_err).getName();
+					ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
+					for (File file : files) {
+						if (file.getName().equals(fileName)) {
+							String fullPath = file.getCanonicalPath();
+							Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+						}
+					}
 				}
 			}
 			//pretty-print the obtained configuration
@@ -368,8 +394,18 @@ public class Main {
 							String content = FileUtil.getFileContent(K.maude_err);
 							if (content.length() > 0) {
 								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-								String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
+								/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
+								
+								//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
+								String fileName = new File(K.maude_err).getName();
+								ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
+								for (File file : files) {
+									if (file.getName().equals(fileName)) {
+										String fullPath = file.getCanonicalPath();
+										Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+									}
+								}
 							}
 						}
 						//pretty-print the obtained configuration
@@ -401,8 +437,18 @@ public class Main {
 							String content = FileUtil.getFileContent(K.maude_err);
 							if (content.length() > 0) {
 								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-								String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
+								/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
+								
+								//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
+								String fileName = new File(K.maude_err).getName();
+								ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
+								for (File file : files) {
+									if (file.getName().equals(fileName)) {
+										String fullPath = file.getCanonicalPath();
+										Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+									}
+								}
 							}
 						}
 						//pretty-print the obtained configuration
@@ -572,16 +618,16 @@ public class Main {
 				K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
 			}
 
-			initOptions(K.userdir, lang);
+			initOptions(K.userdir);
 
 			if (!cmd.hasOption("compiled-def")) {
-				resolveOption("compiled-def", lang, cmd);
+				resolveOption("compiled-def", cmd);
 			}
 			if (!cmd.hasOption("main-module")) {
-				resolveOption("main-module", lang, cmd);
+				resolveOption("main-module", cmd);
 			}
 			if (!cmd.hasOption("syntax-module")) {
-				resolveOption("syntax-module", lang, cmd);
+				resolveOption("syntax-module", cmd);
 			}
  
 			if (!K.k_definition.endsWith(".k")) {
@@ -596,11 +642,11 @@ public class Main {
 				Error.report("\nCould not find compiled definition: " + K.compiled_def + "\nPlease compile the definition by using `kompile'.");
 			}
 
-			/*
-			 * System.out.println("K.k_definition=" + K.k_definition);
-			 * System.out.println("K.syntax_module=" + K.syntax_module);
-			 * System.out.println("K.main_module=" + K.main_module);
-			 */
+			
+			/*System.out.println("K.k_definition=" + K.k_definition);
+			System.out.println("K.syntax_module=" + K.syntax_module);
+		    System.out.println("K.main_module=" + K.main_module);*/
+			 
 
 			// in KAST variable we obtain the output from running kast process on a program defined in K
 			String KAST = new String();

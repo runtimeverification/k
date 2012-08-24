@@ -1,5 +1,9 @@
 package ro.uaic.info.fmse.jkrun;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+
 public class K {
 
 	public static boolean verbose = false;
@@ -56,4 +60,26 @@ public class K {
 	public static boolean debug = false;
 	public static boolean trace = false;
 	
+	
+	public static void main(String args[]) {
+		File errFile = FileUtil.createFile(K.maude_err, "bla bla");
+		try {
+			FileUtil.renameFolder(K.krunTempDir, K.krunDir);
+			File errFile_ = new File(K.maude_err);
+			String path = errFile.getAbsolutePath();
+			String path_ = errFile_.getAbsolutePath();
+			System.out.println("File path is:" + path);
+			System.out.println("File path_ is:" + path_);
+			ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
+			for (File file : files) {
+				if (file.getName().startsWith("maude_err")) {
+					String fullPath = file.getCanonicalPath();
+					System.out.println("full path:" + fullPath);
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

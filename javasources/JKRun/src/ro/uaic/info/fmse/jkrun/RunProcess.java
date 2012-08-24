@@ -110,7 +110,7 @@ public class RunProcess {
 		
 	    if (parser.equals("kast")) {
 		  if (this.getErr() != null) {
-			Error.externalReport("Warning: kast reported errors or warnings:\n" + this.getErr());
+			 System.out.println("Warning: kast reported errors or warnings:\n" + this.getErr());
 		  }
 		  if (this.getExitCode() != 0) {
 			 System.out.println("Kast reported:\n" + this.getStdout());
@@ -119,7 +119,7 @@ public class RunProcess {
 		  }
 	    } else {
 	    	if (this.getErr() != null) {
-	    		Error.externalReport("Warning: parser reported errors or warnings:\n" + this.getErr());
+	    		System.out.println("Warning: parser reported errors or warnings:\n" + this.getErr());
 			}
 	    	if (this.getExitCode() != 0) {
 				 System.out.println("Parser reported:\n" + this.getStdout());
