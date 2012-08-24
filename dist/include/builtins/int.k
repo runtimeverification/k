@@ -15,7 +15,15 @@ module INT-HOOKS
 			   > left:
 			   	 Int "+Int" Int [function, left, latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(#INT:_+Int_)]
 			   | Int "-Int" Int [function, left, latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(#INT:_-Int_)]
-
+			   > left:
+				 Int ">>Int" Int [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(#INT:_>>Int_)]
+			   | Int "<<Int" Int [function, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(#INT:_<<Int_)]
+			   > left:
+				 Int "&Int" Int [function, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(#INT:_&Int_)]
+			   > left:
+				 Int "xorInt" Int [function, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(#INT:_xorInt_)]
+			   > left:
+				 Int "|Int" Int [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(#INT:_|Int_)]
 
   syntax Bool ::= Int "<=Int" Int	[function, left, latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(#INT:_<=Int_)]
 				| Int "<Int" Int	[function, left, latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(#INT:_<Int_)]

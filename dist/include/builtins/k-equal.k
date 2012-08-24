@@ -66,4 +66,8 @@ module K-EQUAL-HOOKS
   syntax Bool ::= KLabel "==KLabel" KLabel   [function]
   rule '_==KLabel_(K1:K,,K2:K) => K1 ==K K2 [function, anywhere]
 
+  // disequality over KLabel
+  syntax Bool ::= KLabel "=/=KLabel" KLabel  [function]
+  rule Lbl1:KLabel =/=KLabel Lbl2:KLabel => notBool(Lbl1 ==KLabel Lbl2) [function, anywhere]
+
 endmodule
