@@ -1,0 +1,22 @@
+K Tutorial --- LAMBDA --- Strictness
+by Grigore Rosu
+
+You can use the attribute "strict" to tell K that the corresponding construct
+has a strict evaluation strategy, that is, that its arguments need to be
+evaluated before the semantics of the construct applies.
+
+However, in order for the above to work we need to tell which expressions
+are meant to be results of computations, so that K will not attempt to
+evaluate them anymore.  One way to do it is to make "Val" a syntactic
+subcategory of the builtin KResult syntactic category.  See lambda.k.
+
+Compile again and then run some programs.  They should all work as expected.
+
+Now that we have a first complete language definition, we can go ahead and
+also generate documentation for it:
+
+  kompile lambda --pdf   (this generates PDF documentation)
+  kompile lambda --html  (this generates HTML documentation)
+
+To enhance readability, we may want to replace the keyword "lambda" by the
+mathematical lambda symbol in generated documentation.  See the next lesson.

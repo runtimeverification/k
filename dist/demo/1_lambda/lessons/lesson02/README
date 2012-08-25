@@ -31,7 +31,7 @@ Compile the definition and then run some programs.
 First, you will notice that a new cell has been added to the configuration.
 For example,
 
-  krun ../../programs/p3.lambda 
+  krun variable_capture.lambda
 
 yields the output
 
@@ -47,8 +47,12 @@ to keep track of the fresh variables that it needs to generate in order to
 avoid variable capture.  In our example above, it has already used a fresh
 identifier, _id0, and thus the counter has been incremented (from 0 to 1).
 
-Second, you will notice that only certain programs reduce, while others do not.
-This is because the K rewrite rules between syntactic terms do not apply
-anywhere they match.  They only apply where they have been given permission to
-apply, which is done using strictness attributes, evaluation contexts,
-heating/cooling rules, etc., as discussed in the next lessons.
+Second, you will notice that only certain programs reduce (some even yield
+non-termination, such as omega.lambda), while others do not.  This is because
+the K rewrite rules between syntactic terms do not apply anywhere they match.
+They only apply where they have been given permission to apply by means of
+appropriate evaluation strategies of language constructs, which is done using
+strictness attributes, evaluation contexts, heating/cooling rules, etc., as
+discussed in the next lessons.
+
+The next lesson will show how to add LAMBDA the desired evaluation strategies.

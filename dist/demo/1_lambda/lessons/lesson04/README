@@ -1,0 +1,20 @@
+K Tutorial --- LAMBDA --- Latex Attributes
+by Grigore Rosu
+
+Here we learn how to associate Latex attributes to language constructs, to
+control the way we display them in the generated documentation.
+
+This is actually quite easy.  All we have to do is to associate a "latex"
+attribute to the production defining the construct in questions, following
+the Latex syntax for defining new commands (or macros).
+
+In our case, we associate the atrribute "latex(\lambda{#1}.{#2})" to the
+production declaring the lambda abstraction (in Latex, where #n refers to the
+n-th argument of the defined new command).
+
+Now we have a simple programming language, with a nice documentation.  However,
+it is not easy to write interesting programs in this language.  Almost all
+programming languages built upon existing data-types and libraries.  The K
+tool provides a few of these (and the user can add more).  We next show how we
+can add builtin integers and booleans to LAMBDA, so we can start to evaluate
+meaningful expressions.

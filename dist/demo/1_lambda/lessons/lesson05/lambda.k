@@ -21,5 +21,4 @@ module LAMBDA
   rule I1:Int / I2:Int => I1 /Int I2
   rule I1:Int + I2:Int => I1 +Int I2
   rule I1:Int <= I2:Int => I1 <=Int I2
-
 endmodule

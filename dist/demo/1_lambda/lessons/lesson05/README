@@ -1,0 +1,45 @@
+K Tutorial --- LAMBDA --- Adding Builtins
+by Grigore Rosu
+
+The K tool provides several builtins, such as integers and booleans.  These
+can be used in the languages that we define, typically by including them in the
+desired syntactic categories.
+
+For example, to add integers and booleans as values to our LAMBDA, we have to
+add the productions
+
+  syntax Val ::= Int | Bool
+
+Int and Bool are the nonterminals that correspond to these builtins.
+
+To make use of these builtins, we have to add some arithmetic operation
+constructs to our language.  We prefer to use the conventional infix notation
+for these, and the usual precedences (i.e., multiplication and division bind
+tighter than addition, which binds tighter than relational operators).
+Inspired from SDF, we use ">" instead of "|" to state that all the previous
+constructs bind tighter than all the subsequent ones.  See lambda.k.
+
+The only thing left is to link the LAMBDA arithmetic operations to the
+corresponding builtin operations, when their arguments are evaluated.
+This can be easily done using trivial rewrite rules, as shown in lambda.k.
+In general, the K tool attempts to uniformly add the corresponding builtin name
+as a suffix to all the operations over builtins.  For example, the addition
+over integers is an infix operation named "+Int".
+
+Compile the new lambda.k definition and evaluate some simple arithmetic
+expressions.  For example, if arithmetic.lambda is "(1+2*3)/4 <= 1", then
+
+  krun arithmetic.lambda
+
+yields, as expected,
+
+ <k>
+  true
+ </k>
+ <nextId>
+  0
+ </nextId>
+
+This is nice, but writing programs with just lambda and arithmetic constructs
+is still a pain.  In the next lesson we will add let-binder and conditional
+constructs, which will allow us to write nicer programs.
