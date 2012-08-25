@@ -14,7 +14,6 @@ following:
 * How to define semantic rules.
 * How the predefined generic substitution works.
 * How to generate PDF and HTML documentation from ASCII definitions.
-* How to define evaluation strategies using context declarations.
 * How to include builtins (integers and Booleans) into your language.
 * How to define derived language constructs using structural rules.
 * How to use configuration cells and cell comprehension in your rules.

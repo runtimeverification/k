@@ -1,0 +1,54 @@
+K Tutorial --- LAMBDA --- Substitution
+by Grigore Rosu
+
+We here learn how to include a predefined module, SUBSTITUTION, and how to
+use it to define the characteristic semantic rule of lambda calculus.
+
+The "requires" keyword takes a .k file containing language features that are
+needed for the current definitions.  The predefined features are referred to
+using their relative path from the k/include folder.  Thus, the command
+
+  require "modules/substitution.k"
+
+says that the subsequent definition of LAMBDA needs the generic substitution,
+which is predefined in file modules/substitution.k under the folder k/include.
+
+Import in LAMBDA (using the "imports" keyword) the module SUBSTITUTION, which
+is defined in the required substitution.k file.
+
+Now we have all the substitution machinery available for our definition.
+However, since our substitution is generic, it cannot know which language
+constructs bind variables; this information is critical in order to correctly
+solve the variable capture problem.  Thus, you have to tell the substitution
+that your lambda construct is meant to be a binder.  This is simply done
+using the attribute "binder".
+
+Now we are ready to give the beta-reduction rule of lambda calculus, making
+use of substitution in its right-hand side, as shown in lambda.k.
+
+Compile the definition and then run some programs.
+
+First, you will notice that a new cell has been added to the configuration.
+For example,
+
+  krun ../../programs/p3.lambda 
+
+yields the output
+
+ <k>
+  lambda _id0 . ((lambda x . (lambda y . (x  y)))  _id0) 
+ </k> 
+ <nextId>
+  1 
+ </nextId> 
+
+The new cell <nextId> ... </nextId> has been added by the substitution,
+to keep track of the fresh variables that it needs to generate in order to
+avoid variable capture.  In our example above, it has already used a fresh
+identifier, _id0, and thus the counter has been incremented (from 0 to 1).
+
+Second, you will notice that only certain programs reduce, while others do not.
+This is because the K rewrite rules between syntactic terms do not apply
+anywhere they match.  They only apply where they have been given permission to
+apply, which is done using strictness attributes, evaluation contexts,
+heating/cooling rules, etc., as discussed in the next lessons.
