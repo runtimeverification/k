@@ -205,27 +205,54 @@ public class PrettyPrintOutput {
 //						Error.report("Unable to parse Maude's search results:\n" + output);
 					}
 					// using XPath for direct access to the desired node
-					XPathFactory factory2 = XPathFactory.newInstance();
-					XPath xpath2 = factory2.newXPath();
-					String s2 = "substitution/assignment[last()]/term[2]";
-					Object result2;
-					try {
-						result2 = xpath2.evaluate(s2, nod, XPathConstants.NODESET);
-						if (result2 != null) {
-							NodeList nodes2 = (NodeList) result2;
-							nod = nodes2.item(0);
-							result.add(printSearchResults(elem) + K.lineSeparator + print((Element) nod, false, 0, ANSI_NORMAL));
-							if (K.statistics) {
-								result.add(printStatistics(elem));
+					XPathFactory factory = XPathFactory.newInstance();
+					XPath xpath = factory.newXPath();
+					String s = null;
+					Object result1;
+					
+					//the default case when no assignments have to be printed
+					if (K.pattern.equals("=>! B:Bag")) {
+						s = "substitution/assignment/term[2]";
+						try {
+							result1 = xpath.evaluate(s, nod, XPathConstants.NODESET);
+							if (result1 != null) {
+								NodeList nodes = (NodeList) result1;
+								nod = nodes.item(0);
+								result.add(printSearchResults(elem) + K.lineSeparator + print((Element) nod, false, 0, ANSI_NORMAL));
+								if (K.statistics) {
+									result.add(printStatistics(elem));
+								}
+							}
+							else {
+								String output = FileUtil.getFileContent(K.maude_out);
+								Error.report("Unable to parse Maude's search results:\n" + output);
+							}
+	
+						} catch (XPathExpressionException e) {
+							Error.report("XPathExpressionException " + e.getMessage());
+						}
+					}
+					//when an explicit pattern is provided
+					else {
+						list = doc.getElementsByTagName("assignment");
+						result.add(printSearchResults(elem));
+						//iterate over each assignment node
+						for (i = 0; i < list.getLength(); i++) {
+							nod = list.item(i);
+							if (nod == null) {
+								Error.report("Pretty Print Output: The node with assignment tag wasn't found");
+							}
+							else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
+								Element elem1 = (Element) nod;
+								ArrayList<Element> list1 = XmlUtil.getChildElements(elem1);
+								Element child1 = list1.get(0);
+								Element child2 = list1.get(1);
+								result.add(child1.getAttribute("op") + " --> " + print(child2, false, 0, ANSI_NORMAL));
+								if (K.statistics) {
+									result.add(printStatistics(elem));
+								}
 							}
 						}
-						else {
-							String output = FileUtil.getFileContent(K.maude_out);
-							Error.report("Unable to parse Maude's search results:\n" + output);
-						}
-
-					} catch (XPathExpressionException e) {
-						Error.report("XPathExpressionException " + e.getMessage());
 					}
 
 				}
@@ -381,6 +408,7 @@ public class PrettyPrintOutput {
 			//HOLE case
 			if (m == 0 && n == 0) {
 				sb.append(op);
+				sb.append(sort);
 			}
 			//freezer case
 			else if (m == 0 && n > 0) {

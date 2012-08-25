@@ -309,6 +309,8 @@ public class Main {
 	//execute krun in debug mode (i.e. step by step execution)
 	public static void debugExecution(String kast) {
 		try {
+            //by default debug mode implies erewrite maude cmd
+			K.maude_cmd = "erewrite";
 			//adding autocompletion and history feature to the stepper internal commandline by using the JLine library
 			ConsoleReader reader = new ConsoleReader();
 		    reader.setBellEnabled(false);

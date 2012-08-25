@@ -117,7 +117,7 @@ public class CommandlineOptions {
 		options.addOption(no_log_io); getOptionList().add(no_log_io);
 		
 		//for group options
-		Option search = OptionBuilder.hasArg(false).withLongOpt("search").withDescription("In conjunction with it you can specify 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search)").create();
+		Option search = OptionBuilder.hasArg(false).withLongOpt("search").withDescription("In conjunction with it you can specify 3 options that are optional: pattern (the pattern used for search), bound (the number of desired solutions) and depth (the maximum depth of the search)").create();
 		Option config = OptionBuilder.hasArg(false).withLongOpt("config").create();
 		Option no_config = OptionBuilder.hasArg(false).withLongOpt("no-config").create();
 		
