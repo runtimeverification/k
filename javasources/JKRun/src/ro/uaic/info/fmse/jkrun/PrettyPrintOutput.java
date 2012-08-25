@@ -408,7 +408,10 @@ public class PrettyPrintOutput {
 			//HOLE case
 			if (m == 0 && n == 0) {
 				sb.append(op);
-				sb.append(sort);
+				//when search command is used assignments have to be printed print also the sort 
+				if (!K.pattern.equals("=>! B:Bag") && "search".equals(K.maude_cmd)) {
+				  sb.append(sort);
+				}
 			}
 			//freezer case
 			else if (m == 0 && n > 0) {
