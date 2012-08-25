@@ -65,13 +65,13 @@ public class KastFrontEnd {
 		} else {
 			// search for the definition
 			try {
-				File pgmFolder = mainFile.getCanonicalFile();
+				File pgmFolder = new File(".").getCanonicalFile();
 				boolean found = false;
 				while (!found) {
 					// check to see if I got to / or drive folder
 					if (pgmFolder.getAbsoluteFile().getParentFile() == null)
 						break;
-					File dotk = new File(pgmFolder.getParent() + "/.k");
+					File dotk = new File(pgmFolder.getCanonicalPath() + "/.k");
 					pgmFolder = pgmFolder.getParentFile();
 					if (dotk.exists()) {
 						File defXml = new File(dotk.getCanonicalPath() + "/def.xml");
