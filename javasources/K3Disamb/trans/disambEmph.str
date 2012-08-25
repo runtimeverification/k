@@ -38,7 +38,7 @@ rules	// emphasize vars - disambiguate declared variables
 
 	removeDuplicateAmb:
 		amb(x) -> a
-		where <?[a | b]> x
-		where <all(?a)> x
+		where rez := <nub> x
+		where a := <if <lt>(<length> rez, 2) then !<last> rez else !amb(rez) end>
 
 

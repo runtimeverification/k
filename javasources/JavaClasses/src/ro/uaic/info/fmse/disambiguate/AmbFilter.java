@@ -24,7 +24,7 @@ public class AmbFilter extends BasicTransformer {
 					msg += i + " ";
 				msg += "(" + tc.getCons() + "), ";
 			} else {
-				msg += variant.getClass().toString() + ", ";
+				msg += variant.toString() + ", ";
 			}
 		}
 		msg = msg.substring(0, msg.length() - 2);
