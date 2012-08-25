@@ -42,7 +42,7 @@ public class PrettyPrintOutput {
 	}
 
 	/* return the value for the attribute attrName of result tag */
-	public String getResultTagAttr(File file, String attrName) {
+/*	public String getResultTagAttr(File file, String attrName) {
 		Document doc = XmlUtil.readXML(file);
 		NodeList list = doc.getElementsByTagName("result");
 		Node nod = list.item(0);
@@ -55,10 +55,10 @@ public class PrettyPrintOutput {
 			return attr;
 		}
 		return null;
-	}
+	}*/
 
 	/* return the value for the attribute attrName of search-result tag */
-	public String getSearchTagAttr(File file, String attrName) {
+	/*public String getSearchTagAttr(File file, String attrName) {
 		Document doc = XmlUtil.readXML(file);
 		NodeList list = doc.getElementsByTagName("search-result");
 		Node nod = list.item(0);
@@ -71,7 +71,7 @@ public class PrettyPrintOutput {
 			return attr;
 		}
 		return null;
-	}
+	}*/
 
 	public void preprocessDoc(String fileName, String processedFile) {
 		File input = new File(fileName);
@@ -424,7 +424,7 @@ public class PrettyPrintOutput {
 		if (sort.equals("KLabel") && op.equals("'.List`{\",\"`}")
 				|| sort.equals("[KLabel]") && op.equals("'.List`{\",\"`}")) {
 			sb = new StringBuilder();
-			Element previous = XmlUtil.getPreviousSiblingElement(node);
+			//Element previous = XmlUtil.getPreviousSiblingElement(node);
 			// if the node has siblings
 			/*if (previous != null) {
 				sb.append("");

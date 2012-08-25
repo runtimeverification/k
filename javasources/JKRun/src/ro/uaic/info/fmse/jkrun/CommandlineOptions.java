@@ -48,6 +48,8 @@ public class CommandlineOptions {
     }
 	
 	public void initializeKRunOptions() {
+		//krun options
+		
 		// General options
 		Option help1 = new Option("h", "help", false, "Display the detailed help message and quit");
 		Option help2 = new Option("?", false, "Display the detailed help message and quit");
@@ -62,7 +64,7 @@ public class CommandlineOptions {
 		Option k_definition = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("k-definition").withDescription("Path to the K definition").create();
 		Option main_module = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("main-module").withDescription("Module the program should execute in").create();
 		Option syntax_module = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("syntax-module").withDescription("Name of the syntax module").create();
-		Option parser = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("parser").withDescription("Command used to parse programs (default: kast)").create();
+		Option parser = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("parser").withDescription("Command used to parse programs (default: kast). You need to specify the path where you parser is located on the disk").create();
 		Option io = OptionBuilder.hasArg(false).withLongOpt("io").withDescription("Use real IO when running the definition").create();
 		Option no_io = OptionBuilder.hasArg(false).withLongOpt("no-io").create();
 		Option statistics = OptionBuilder.hasArg(false).withLongOpt("statistics").withDescription("Print Maude's rewrite statistics").create();
@@ -91,9 +93,11 @@ public class CommandlineOptions {
 		Option do_search = OptionBuilder.hasArg(false).withLongOpt("do-search").withDescription("Search for all possible results").create();
 		Option no_do_search = OptionBuilder.hasArg(false).withLongOpt("no-do-search").create();
 		Option maude_cmd = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("maude-cmd").withDescription("Maude command used to execute the definition").create();
-		Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern")
+		/*Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern")
 				.withDescription("Search pattern. In conjunction with it you can specify 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search)")
-				.hasArg().withArgName("STRING").create();                             
+				.hasArg().withArgName("STRING").create();*/   
+		Option pattern = OptionBuilder.withLongOpt("pattern").withDescription("The pattern used for search. In conjunction with it you can specify other 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search)")
+				.hasArg().withArgName("STRING").create();
 		Option bound = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("bound").withDescription("The number of desired solutions for search").create();
 		Option depth = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("depth").withDescription("The maximum depth of the search").create();
 		Option output_mode = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("output-mode").withDescription("How to display Maude results (none, raw, pretty)").create();
@@ -104,7 +108,8 @@ public class CommandlineOptions {
 		options.addOption(do_search); getOptionList().add(do_search);
 		options.addOption(no_do_search); getOptionList().add(no_do_search);
 		options.addOption(maude_cmd); getOptionList().add(maude_cmd);
-		options.addOption(xsearch_pattern); getOptionList().add(xsearch_pattern);
+		//options.addOption(xsearch_pattern); getOptionList().add(xsearch_pattern);
+		options.addOption(pattern); getOptionList().add(pattern);
 		options.addOption(bound); getOptionList().add(bound);
 		options.addOption(depth); getOptionList().add(depth);
 		options.addOption(output_mode); getOptionList().add(output_mode);

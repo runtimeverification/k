@@ -1,9 +1,5 @@
 package ro.uaic.info.fmse.jkrun;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-
 public class K {
 
 	public static boolean verbose = false;
@@ -41,7 +37,8 @@ public class K {
 	public static String compiled_def;
 	public static String maude_cmd = "erewrite";
 	public static String output_mode = "pretty";
-	public static String xsearch_pattern = "=>! B:Bag";
+	//public static String xsearch_pattern = "=>! B:Bag";
+	public static String pattern = "=>! B:Bag";
 	public static String bound;
 	public static String depth;
 	public static String rule_labels = "";

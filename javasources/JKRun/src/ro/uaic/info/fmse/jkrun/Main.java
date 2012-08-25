@@ -141,7 +141,7 @@ public class Main {
 			    			}
 			    		}
 			        }
-			        if (cmd.hasOption("bound") && (cmd.hasOption("depth"))) {
+			        if (cmd.hasOption("bound") && cmd.hasOption("depth")) {
 			        	s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "," + K.depth + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
 								",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
 								",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
@@ -153,16 +153,24 @@ public class Main {
 								",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
 								",(.).Map)) ";
 			        }
+			        else if (cmd.hasOption("depth")) {
+			        	s = "set show command off ." + K.lineSeparator + "search [," + K.depth + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
+								",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
+								",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
+								",(.).Map)) ";
+			        }
 			        else {
 			        	s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
 							",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
 							",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
 							",(.).Map)) ";
 			        }
-					if (cmd.hasOption("xsearch-pattern")) {
+			        s += K.pattern + " .";
+					/*if (cmd.hasOption("xsearch-pattern")) {
 						s += K.xsearch_pattern + " .";
 						//s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern + "\"" + " .";
-					} else s += " =>! B:Bag .";		
+					} else s += " =>! B:Bag .";	*/	
+			        
 				} else {
 					Error.report("For the do-search option you need to specify that --maude-cmd=search");
 				}
@@ -549,11 +557,14 @@ public class Main {
 			if (cmd.hasOption("maude-cmd")) {
 				K.maude_cmd = cmd.getOptionValue("maude-cmd");
 			}
-			if (cmd.hasOption("xsearch-pattern")) {
+			/*if (cmd.hasOption("xsearch-pattern")) {
 				K.maude_cmd = "search";
 				K.do_search = true;
 				K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern");
 //				System.out.println("xsearch-pattern:" + K.xsearch_pattern);
+			}*/
+			if (cmd.hasOption("pattern")) {
+				K.pattern = cmd.getOptionValue("pattern");
 			}
 			if (cmd.hasOption("bound")) {
 				K.bound = cmd.getOptionValue("bound");
@@ -641,12 +652,10 @@ public class Main {
 			if (!compiledFile.exists()) {
 				Error.report("\nCould not find compiled definition: " + K.compiled_def + "\nPlease compile the definition by using `kompile'.");
 			}
-
 			
 			/*System.out.println("K.k_definition=" + K.k_definition);
 			System.out.println("K.syntax_module=" + K.syntax_module);
 		    System.out.println("K.main_module=" + K.main_module);*/
-			 
 
 			// in KAST variable we obtain the output from running kast process on a program defined in K
 			String KAST = new String();
