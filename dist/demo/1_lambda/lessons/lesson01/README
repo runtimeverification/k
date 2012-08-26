@@ -21,13 +21,13 @@ parenthesis production in the abstract syntax trees associated to programs.
 In other words, we want to allow parentheses to be used for grouping, but we
 do not want to bother to give them their obvious (ignore) semantics.
 
-We here define a variant of lambda calculus where identifiers and lambda
+In our variant of lambda calculus defined here, identifiers and lambda
 abstractions are meant to be irreducible, that is, are meant to be values.
 However, so far "Val" is just another non-terminal, just like "Exp",
 without any semantic meaning.  It will get a semantic meaning later.
 
-After you are done with typing your definition in the file lambda.k, kompile it
-in the current folder with the command:
+After you are done with typing your definition in the file lambda.k (up in the
+folder "work"), kompile it in the current folder ("work") with the command:
 
   kompile lambda.k
 
@@ -51,7 +51,7 @@ The krun command should then produce the output:
 If you see such an output it means that your program has been parsed (and then
 pretty printed) correctly.  If you want to see the internal abstract syntax
 tree (AST) representation of the parsed program, which we call the K AST, then
-type the kast command instead of krun:
+type "kast" in the command instead of "krun":
 
   kast closed_variable_capture.lambda
 

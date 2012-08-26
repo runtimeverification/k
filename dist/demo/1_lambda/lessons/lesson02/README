@@ -18,18 +18,18 @@ is defined in the required substitution.k file.
 
 Now we have all the substitution machinery available for our definition.
 However, since our substitution is generic, it cannot know which language
-constructs bind variables; this information is critical in order to correctly
-solve the variable capture problem.  Thus, you have to tell the substitution
-that your lambda construct is meant to be a binder.  This is simply done
-using the attribute "binder".
+constructs bind variables; however, this information is critical in order to
+correctly solve the variable capture problem.  Thus, you have to tell the
+substitution that your lambda construct is meant to be a binder.  This is
+simply done using the attribute "binder".
 
-Now we are ready to give the beta-reduction rule of lambda calculus, making
-use of substitution in its right-hand side, as shown in lambda.k.
+Now we are ready to define the beta-reduction rule of lambda calculus,
+making use of substitution in its right-hand side, as shown in lambda.k.
 
 Compile the definition and then run some programs.
 
-First, you will notice that a new cell has been added to the configuration.
-For example,
+First, you will notice that a new cell has been automatically added to the
+default configuration.  For example,
 
   krun variable_capture.lambda
 
