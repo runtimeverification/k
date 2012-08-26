@@ -58,7 +58,7 @@ public class MaudeTask extends Thread {
 	private void runMaude() throws IOException {
 		ProcessBuilder maude = new ProcessBuilder();
 		/*Map<String, String> environment = maude.environment();
-		environment.put("MAUDE_LIB", System.getenv("MAUDE_LIB"))*/;
+		environment.put("MAUDE_LIB", System.getenv("MAUDE_LIB")); */
 		List<String> commands = new ArrayList<String>();
 		/*if (System.getProperty("os.name").toLowerCase().contains("mac")) {
 			commands.add(System.getenv("MAUDE_LIB") + K.fileSeparator + "maude");

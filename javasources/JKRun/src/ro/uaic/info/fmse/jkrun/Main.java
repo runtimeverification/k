@@ -673,6 +673,12 @@ public class Main {
 			if (cmd.hasOption("ltlmc")) {
 				K.model_checking = cmd.getOptionValue("ltlmc");
 			}
+			if (cmd.hasOption("deleteTempDir")) {
+				K.deleteTempDir = true;
+			}
+			if (cmd.hasOption("no-deleteTempDir")) {
+				K.deleteTempDir = false;
+			}
 
 			// printing the output according to the given options
 			if (K.help) {
@@ -682,6 +688,14 @@ public class Main {
 			if (K.version) {
 				printVersion();
 				System.exit(0);
+			}
+			if (K.deleteTempDir) {
+				File[] folders = FileUtil.searchSubFolders(K.kdir, "krun\\d+");
+				if (folders != null && folders.length > 0) {
+					for (int i = 0; i < folders.length; i++) {
+						FileUtil.deleteDirectory(folders[i]);
+					}
+				}
 			}
 
 			String[] remainingArguments = null;

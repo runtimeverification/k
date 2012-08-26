@@ -124,7 +124,11 @@ public class CommandlineOptions {
 		options.addOption(search); getOptionList().add(search);
 		options.addOption(config); getOptionList().add(config);
 		options.addOption(no_config); getOptionList().add(no_config);
-
+		
+		//for deleting temporary folders created by krun at previous executions that couldn't be renamed into "krun" because some errors occurred
+		Option deleteTempDir = OptionBuilder.hasArg(false).withLongOpt("deleteTempDir").withDescription("Delete temporary folders created by krun at previous executions").create();
+		Option no_deleteTempDir = OptionBuilder.hasArg(false).withLongOpt("no-deleteTempDir").withDescription("Do not delete temporary folders created by krun at previous executions").create();
+		
 		// for debugger
 	    Option debug = OptionBuilder.hasArg(false).withLongOpt("debug").withDescription("Run an execution in debug mode").create();
 		/*Option rule_labels = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("rule-labels").withDescription("A list of labels associated to rules for breakpoint execution").create();

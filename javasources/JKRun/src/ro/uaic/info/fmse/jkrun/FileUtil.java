@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.jkrun;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -311,6 +312,18 @@ public class FileUtil {
 			}
 		}
 		return result;
+	}
+	
+	public static File[] searchSubFolders (String path, final String pattern) {
+		// This filter only returns directories with a name that matches the pattern
+		FileFilter fileFilter = new FileFilter() {
+		    public boolean accept(File file) {
+		        return (file.isDirectory() && file.getName().matches(pattern));
+		    }
+		};
+		File dir = new File(path);
+		File[] files = dir.listFiles(fileFilter);
+		return files;
 	}
 
 	public static String getExtension(String fullPath, String extensionSeparator, String pathSeparator) {
