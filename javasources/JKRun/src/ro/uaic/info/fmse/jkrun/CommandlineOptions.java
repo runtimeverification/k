@@ -128,6 +128,8 @@ public class CommandlineOptions {
 		//for deleting temporary folders created by krun at previous executions that couldn't be renamed into "krun" because some errors occurred
 		Option deleteTempDir = OptionBuilder.hasArg(false).withLongOpt("deleteTempDir").withDescription("Delete temporary folders created by krun at previous executions").create();
 		Option no_deleteTempDir = OptionBuilder.hasArg(false).withLongOpt("no-deleteTempDir").withDescription("Do not delete temporary folders created by krun at previous executions").create();
+		options.addOption(deleteTempDir); getOptionList().add(deleteTempDir);
+		options.addOption(no_deleteTempDir); getOptionList().add(no_deleteTempDir);
 		
 		// for debugger
 	    Option debug = OptionBuilder.hasArg(false).withLongOpt("debug").withDescription("Run an execution in debug mode").create();
