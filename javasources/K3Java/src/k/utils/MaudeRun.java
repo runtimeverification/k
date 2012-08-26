@@ -1,9 +1,17 @@
 package k.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class MaudeRun {
 
@@ -17,6 +25,11 @@ public class MaudeRun {
 	 */
 	public static String initializeMaudeExecutable()
 	{	
+		if (checkLocalMaudeInstallation())
+		{
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INTERNAL, "Maude is already installed on this machine. Please remove directory k-install-dir/bin/maude/binaries to use your local maude installation. ", "", "", 3));
+		}
+		
 		// get system properties: file separator, os name, os architecture
 		String fileSeparator = System.getProperty("file.separator");
 		String osname = System.getProperty("os.name");
@@ -63,6 +76,54 @@ public class MaudeRun {
 		}
 	   
 		return maudeExe;
+	}
+	
+	
+	private static boolean checkLocalMaudeInstallation()
+	{
+		String localMaude = "maude";
+		
+		try{
+			java.lang.ProcessBuilder pb = new java.lang.ProcessBuilder(localMaude);
+			pb.redirectErrorStream(true);
+			
+			Process p = pb.start();
+			
+			OutputStream os = p.getOutputStream();
+			os.write("q\n".getBytes());
+			os.flush();
+			os.close();
+			
+			InputStream is = p.getInputStream();
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			String line = "";
+			String output = "";
+			while((line = br.readLine())!=null)
+			{
+				output += line + "\n";
+			}
+			
+			p.waitFor();
+			if (output.matches("GLIBC"))
+			{
+				return false;
+			}
+			
+			if (output.matches("[Ww]arning"))
+			{
+				return false;
+			}
+			
+			if (output.matches("[Ee]rror"))
+			{
+				return false;
+			}
+		}
+		catch (Exception e) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	public static String run_maude(File startDir, String mainFile) {
