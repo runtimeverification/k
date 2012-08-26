@@ -105,7 +105,7 @@ public class Syntax extends ModuleItem {
 					contents += "op is" + list.sort + " : -> KLabel .\n";
 					contents += "op is" + sort + " : -> KLabel .\n";
 					contents += "eq is" + sort + "(.List`{\"" + list.separator + "\"`}) = true .\n";
-					contents += "eq is" + sort + "(_" + StringUtil.escape(list.separator) + "_( X:" + list.sort + ", L:" + sort + " )) = true .\n";
+					contents += "eq is" + sort + "(_" + StringUtil.equationSpaceElimination(list.separator) + "_( X:" + list.sort + ", L:" + sort + " )) = true .\n";
 					contents += "eq ." + sort + " = .List`{\"" + list.separator + "\"`} .\n";
 				} else {
 					String metadata = p.getAttributes().toMaude();

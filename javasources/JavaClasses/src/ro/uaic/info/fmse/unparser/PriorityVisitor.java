@@ -1,12 +1,12 @@
 package ro.uaic.info.fmse.unparser;
 
-import java.util.HashMap;
+import java.util.Map.Entry;
+
 import ro.uaic.info.fmse.k.Definition;
+import ro.uaic.info.fmse.k.PriorityBlock;
 import ro.uaic.info.fmse.k.Production;
 import ro.uaic.info.fmse.k.Syntax;
-import ro.uaic.info.fmse.k.PriorityBlock;
 import ro.uaic.info.fmse.visitors.BasicVisitor;
-import java.util.Map.Entry;
 
 public class PriorityVisitor extends BasicVisitor {
     public java.util.List<java.util.Map<Production, Integer>> priorities =

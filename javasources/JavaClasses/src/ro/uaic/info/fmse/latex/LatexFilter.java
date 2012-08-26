@@ -39,7 +39,7 @@ public class LatexFilter extends BasicVisitor {
 		return result;
 	}
 
-	private boolean isParentParens() {
+	public boolean isParentParens() {
 		return parentParens;
 	}
 

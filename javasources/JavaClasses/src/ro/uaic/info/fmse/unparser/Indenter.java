@@ -1,27 +1,5 @@
 package ro.uaic.info.fmse.unparser;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.List;
-import java.util.Properties;
-import java.util.Random;
-import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.Map.Entry;
-
-import ro.uaic.info.fmse.k.*;
-import ro.uaic.info.fmse.k.LiterateComment.LiterateCommentType;
-import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
-import ro.uaic.info.fmse.loader.Constants;
-import ro.uaic.info.fmse.loader.DefinitionHelper;
-import ro.uaic.info.fmse.utils.strings.StringUtil;
-import ro.uaic.info.fmse.visitors.BasicVisitor;
-import java.awt.Color;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 public class Indenter {
     String endl = System.getProperty("line.separator");

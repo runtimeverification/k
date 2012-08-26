@@ -14,7 +14,6 @@ import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.transitions.maude.CellLabelsVisitor;
 import ro.uaic.info.fmse.transitions.maude.KLabelsVisitor;
 import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
-import ro.uaic.info.fmse.utils.strings.StringUtil;
 import ro.uaic.info.fmse.utils.xml.XML;
 import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformer;
@@ -106,13 +105,13 @@ public class Definition extends ASTNode {
 		if (!sorts.equals(""))
 			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
 
-		String theLists = "";
-		for(String separator : MaudeHelper.separators)
-		{
-			theLists += "op _" + StringUtil.escape(separator) + "_ : K K -> K [prec 120 metadata \"hybrid=()\"] .\n";
-			theLists += "op .List`{\"" + separator + "\"`} : -> K .\n";
-			theLists += "eq isKResult(.List`{\"" + separator + "\"`}) = true .\n";
-		}
+//		String theLists = "";
+//		for(String separator : MaudeHelper.separators)
+//		{
+//			theLists += "op _" + StringUtil.escape(separator) + "_ : K K -> K [prec 120 metadata \"hybrid=()\"] .\n";
+//			theLists += "op .List`{\"" + separator + "\"`} : -> K .\n";
+//			theLists += "eq isKResult(.List`{\"" + separator + "\"`}) = true .\n";
+//		}
 		
 		String shared = "mod " + Constants.SHARED + " is\n  including K .\n" + klabels + sorts + cellLabels  + "\nendm";
 

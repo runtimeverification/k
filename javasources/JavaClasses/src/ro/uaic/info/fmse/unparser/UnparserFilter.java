@@ -1,29 +1,48 @@
 package ro.uaic.info.fmse.unparser;
 
 import java.util.LinkedList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.List;
-import java.util.Properties;
-import java.util.Random;
-import java.util.Vector;
-import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.Map.Entry;
 
-import ro.uaic.info.fmse.k.*;
-import ro.uaic.info.fmse.k.LiterateComment.LiterateCommentType;
+import ro.uaic.info.fmse.k.ASTNode;
+import ro.uaic.info.fmse.k.Attribute;
+import ro.uaic.info.fmse.k.Attributes;
+import ro.uaic.info.fmse.k.Bag;
+import ro.uaic.info.fmse.k.BagItem;
+import ro.uaic.info.fmse.k.Cell;
+import ro.uaic.info.fmse.k.Collection;
+import ro.uaic.info.fmse.k.CollectionItem;
+import ro.uaic.info.fmse.k.Configuration;
+import ro.uaic.info.fmse.k.Constant;
+import ro.uaic.info.fmse.k.Definition;
+import ro.uaic.info.fmse.k.Empty;
+import ro.uaic.info.fmse.k.Hole;
+import ro.uaic.info.fmse.k.Import;
+import ro.uaic.info.fmse.k.KApp;
+import ro.uaic.info.fmse.k.KInjectedLabel;
+import ro.uaic.info.fmse.k.KLabel;
+import ro.uaic.info.fmse.k.KSequence;
+import ro.uaic.info.fmse.k.ListItem;
+import ro.uaic.info.fmse.k.ListOfK;
+import ro.uaic.info.fmse.k.LiterateDefinitionComment;
+import ro.uaic.info.fmse.k.MapItem;
+import ro.uaic.info.fmse.k.Module;
+import ro.uaic.info.fmse.k.PriorityBlock;
+import ro.uaic.info.fmse.k.Production;
+import ro.uaic.info.fmse.k.ProductionItem;
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
-import ro.uaic.info.fmse.loader.Constants;
-import ro.uaic.info.fmse.loader.DefinitionHelper;
-import ro.uaic.info.fmse.utils.strings.StringUtil;
+import ro.uaic.info.fmse.k.Rewrite;
+import ro.uaic.info.fmse.k.Rule;
+import ro.uaic.info.fmse.k.SetItem;
+import ro.uaic.info.fmse.k.Sort;
+import ro.uaic.info.fmse.k.Syntax;
+import ro.uaic.info.fmse.k.Term;
+import ro.uaic.info.fmse.k.TermComment;
+import ro.uaic.info.fmse.k.TermCons;
+import ro.uaic.info.fmse.k.Terminal;
+import ro.uaic.info.fmse.k.UserList;
+import ro.uaic.info.fmse.k.Variable;
 import ro.uaic.info.fmse.visitors.BasicVisitor;
-import java.awt.Color;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 public class UnparserFilter extends BasicVisitor {
     PriorityVisitor priorityVisitor = new PriorityVisitor();
@@ -571,4 +590,12 @@ public class UnparserFilter extends BasicVisitor {
 	    return false;
 	}
     }
+
+	public java.util.Map<Production, Integer> getPriorities() {
+		return priorities;
+	}
+
+	public void setPriorities(java.util.Map<Production, Integer> priorities) {
+		this.priorities = priorities;
+	}
 }
