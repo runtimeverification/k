@@ -41,5 +41,5 @@ yields, as expected,
  </nextId>
 
 This is nice, but writing programs with just lambda and arithmetic constructs
-is still a pain.  In the next lesson we will add let-binding and conditional
-constructs, which will allow us to write nicer programs.
+is still a pain.  In the next two lessons we will add let-binding and
+conditional constructs, which will allow us to write nicer programs.
