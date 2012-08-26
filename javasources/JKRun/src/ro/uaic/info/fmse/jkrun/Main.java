@@ -309,14 +309,12 @@ public class Main {
 	//execute krun in debug mode (i.e. step by step execution)
 	public static void debugExecution(String kast) {
 		try {
-            //by default debug mode implies erewrite maude cmd
-			K.maude_cmd = "erewrite";
 			//adding autocompletion and history feature to the stepper internal commandline by using the JLine library
 			ConsoleReader reader = new ConsoleReader();
 		    reader.setBellEnabled(false);
 		    
 		    List argCompletor = new LinkedList();
-		    argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step"}));
+		    argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "show path labels"}));
 		    argCompletor.add(new FileNameCompletor());
 		    List completors = new LinkedList();
 		    completors.add(new ArgumentCompletor(argCompletor));
@@ -357,28 +355,40 @@ public class Main {
 			for (String result: red) {
 				AnsiConsole.out.println(result);
 			}
-			System.out.println();
 			
 			while (true) {
+				System.out.println();
 				String input = reader.readLine("Command > ");
-				
+				 
 				//construct the right command line input when we specify the "step" option with an argument (i.e. step=3) 
-				if (input.startsWith("step") && input.length() >= 6) {
-					String[] tokens = input.split(" ");
-					StringBuilder aux = new StringBuilder();
-					for (int i = 0; i < tokens.length; i++) {
-						if (!tokens[i].equals(" ")) {
-							if (i == tokens.length - 1) {
-								aux.append("=");
-							}
-							aux.append(tokens[i]);
+				input = input.trim();
+				String[] tokens = input.split(" ");
+				//store the tokens that are not a blank space 
+			    List<String> items = new ArrayList<String>();
+				for (int i = 0; i < tokens.length; i++) {
+					if ((!(tokens[i].equals(" ")) && (!tokens[i].equals("")))) {
+						items.add(tokens[i]);
+					}
+				}
+				StringBuilder aux = new StringBuilder();
+				//excepting the case of a command like: help
+				if (items.size() > 1) {
+					for (int i = 0; i < items.size(); i++) {
+						if (i == items.size() - 1) {
+							aux.append("=");
+							aux.append(items.get(i));
+						}
+						else if (i == items.size() - 2){
+							aux.append(items.get(i));
+						}
+						else {
+							aux.append(items.get(i) + " ");
 						}
 					}
 					input = aux.toString();
 				}
-				
 				//apply trim to remove possible blank spaces from the inserted command
-				String[] cmds = new String[] { "--" + input.trim() };
+				String[] cmds = new String[] { "--" + input };
 				CommandlineOptions cmd_options = new CommandlineOptions();
 				CommandLine cmd = cmd_options.parse(cmds);
 				//when an error occurred during parsing the commandline
@@ -389,7 +399,7 @@ public class Main {
 					if (cmd.hasOption("help")) {
 						printDebugUsage(cmd_options.getOptions());
 					}
-					if (cmd.hasOption("abort")) {
+				    if (cmd.hasOption("abort")) {
 						ProcessBean bean = new ProcessBean();
 						bean.setExitCode(0);
 						System.exit(bean.getExitCode());
@@ -419,6 +429,7 @@ public class Main {
 							}
 						}
 						//pretty-print the obtained configuration
+						K.maude_cmd = "erewrite";
 						p = new PrettyPrintOutput();
 					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
 						red = p.processDoc(K.processed_maude_output);
@@ -428,8 +439,8 @@ public class Main {
 						bean.setExitCode(0);
 						System.exit(bean.getExitCode());
 					}
-					//one step execution
-		            if (cmd.hasOption("step")) {
+					//one step execution (by default) or more if you specify an argument
+					if (cmd.hasOption("step")) {
 		            	//by default execute only one step at a time
 		            	String arg = new String("1");
 		            	String[] remainingArguments = null;
@@ -462,12 +473,79 @@ public class Main {
 							}
 						}
 						//pretty-print the obtained configuration
+						K.maude_cmd = "erewrite";
 						p = new PrettyPrintOutput();
 					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
 						red = p.processDoc(K.processed_maude_output);
 						AnsiConsole.out.println(red.get(0));
 					}
-		            System.out.println();
+		            if (cmd.hasOption("step-all")) {
+		            	//by default compute all successors in one transition
+		            	String arg = new String("1");
+		            	String[] remainingArguments = null;
+		    			remainingArguments = cmd.getArgs();
+		    			if (remainingArguments.length > 0) {
+		    				arg = remainingArguments[0];
+		    			}
+		            	//get the maudified version of the current configuration based on the xml obtained from -xml-log option
+						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
+						//System.out.println("config=" + maudeConfig);
+						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "search[," + arg + "] " + maudeConfig + "=>+ B:Bag .";
+						//System.out.println("maude cmd=" + maudeCmd);
+						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
+						// check whether Maude produced errors
+						if (errFile.exists()) {
+							String content = FileUtil.getFileContent(K.maude_err);
+							if (content.length() > 0) {
+								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+								/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
+								
+								//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
+								String fileName = new File(K.maude_err).getName();
+								ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
+								for (File file : files) {
+									if (file.getName().equals(fileName)) {
+										String fullPath = file.getCanonicalPath();
+										Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+									}
+								}
+							}
+						}
+						//pretty-print the obtained search results
+						K.maude_cmd = "search";
+						p = new PrettyPrintOutput();
+					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
+						red = p.processDoc(K.processed_maude_output);
+						for (String result: red) {
+							AnsiConsole.out.println(result);
+						}
+		            }
+		            if (cmd.hasOption("show path labels")) {
+		            	String arg = cmd.getOptionValue("show path labels");
+		            	maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "show path labels " + arg + " .";
+		            	//System.out.println("maude cmd=" + maudeCmd);
+		            	rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
+						// check whether Maude produced errors
+						if (errFile.exists()) {
+							String content = FileUtil.getFileContent(K.maude_err);
+							if (content.length() > 0) {
+								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+								/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
+								
+								//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
+								String fileName = new File(K.maude_err).getName();
+								ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
+								for (File file : files) {
+									if (file.getName().equals(fileName)) {
+										String fullPath = file.getCanonicalPath();
+										Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+									}
+								}
+							}
+						}
+		            }
 				}
 			}
 		} catch (IOException e) {
