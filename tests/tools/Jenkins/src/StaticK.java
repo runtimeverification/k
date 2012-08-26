@@ -57,6 +57,7 @@ public class StaticK {
 
 				NodeList options = test.getElementsByTagName("option");
 				List<String> krunOptions = new LinkedList<String>();
+				krunOptions.add("--no-deleteTempDir");
 				for(int k = 0; k < options.getLength(); k++)
 				{
 					Element option = (Element)options.item(k);
