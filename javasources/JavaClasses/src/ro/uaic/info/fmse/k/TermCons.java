@@ -89,7 +89,8 @@ public class TermCons extends Term {
 
 		if (contents.length() >= 1)
 			contents = "(" + contents.substring(0, contents.length() - 1) + ")";
-
+			
+		cons = cons.replaceAll(" ", "`");
 		return cons + contents;
 	}
 
