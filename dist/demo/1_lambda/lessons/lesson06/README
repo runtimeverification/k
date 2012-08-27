@@ -1,0 +1,29 @@
+K Tutorial --- LAMBDA --- Derived Constructs
+by Grigore Rosu
+
+When defining a language, we often want certain language constructs to be
+defined in terms of other constructs.  For example, a let-binding construct
+of the form
+
+  let x = e in e'
+
+is nothing but syntactic sugar for
+
+  (lambda x . e') e
+
+This can be easily achieved with a rule, as shown in lambda.k.
+
+As a side point, which is not very relevant here, we may want the "desugaring"
+of let to not even count as a computational step, but as a mere "structural
+rearangement" of the program so that other semantics rules (beta reduction,
+in our case) can match and apply.
+
+The K tool allows us to tag rules with the attribute "structural", with
+precisely the intuition above.  You can think of structural rules as a kind
+of light rules, almost like macros, or like ones which apply "under the hood",
+instanteneously.  There are several other uses for structural rules in K.
+
+Compile lambda.k and write some programs using let binders.
+
+In the next lecture we will define the conditional construct, which together
+with the let binder will allow us to write interesting programs.
