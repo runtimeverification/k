@@ -23,9 +23,9 @@ module LAMBDA
   rule I1:Int <= I2:Int => I1 <=Int I2
 
   syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule (let X = E in E':Exp) => (lambda X . E') E     [structural]
+  rule (let X = E in E':Exp) => (lambda X . E') E  [structural]
 
-  syntax Exp ::= "if" Exp "then" Exp "else" Exp   [strict(1)]
+  syntax Exp ::= "if" Exp "then" Exp "else" Exp    [strict(1)]
   rule if true  then E else _ => E
   rule if false then _ else E => E
 endmodule

@@ -1,8 +1,9 @@
-K Tutorial --- LAMBDA --- Substitution
+K Tutorial --- LAMBDA --- Module Importing, Rules, Variables
 by Grigore Rosu
 
-We here learn how to include a predefined module, SUBSTITUTION, and how to
-use it to define the characteristic semantic rule of lambda calculus.
+We here learn how to include a predefined module (SUBSTITUTION), how to
+use it to define a K rule (the characteristic rule of lambda calculus),
+and how to make proper use of variables in rules.
 
 The "requires" keyword takes a .k file containing language features that are
 needed for the current definitions.  The predefined features are referred to
@@ -25,6 +26,21 @@ simply done using the attribute "binder".
 
 Now we are ready to define the beta-reduction rule of lambda calculus,
 making use of substitution in its right-hand side, as shown in lambda.k.
+By convention, variables that appear in rules start with a capital letter
+(the current implementation of the K tool may even enforce that).
+
+Variables may be tagged by users with their syntactic category (also called
+"sort"), or not.  If tagged, the matching term will be checked at runtime for
+membership to the claimed sort.  It not tagged, then no check will be made.
+The former is safer, but involves the generation of a side condition to the
+rule, so it may be slightly slower overall.
+
+In our rule in lambda.k we tagged all variables with their sorts, so we chose
+the safest path.  Only the V variable really needs to be tagged there,
+because we can prove (using other means, not the K tool, as the K tool is not
+concerned with proving) that the first two variables will always have the
+claimed sorts whenever we execute any expression that parses within our
+original grammar.
 
 Compile the definition and then run some programs.
 
