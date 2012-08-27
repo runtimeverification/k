@@ -32,7 +32,9 @@ public class PrettyPrintOutput {
 	public static final String ANSI_PURPLE = "\u001B[35m";
 	public static final String ANSI_CYAN = "\u001B[36m";
 	public static final String ANSI_WHITE = "\u001B[37m";
-
+	//addnewLine is used to prevent adding an additional new line at the first BagItem located in the top of XML file
+    public static boolean addNewLine = false;
+	
 	public PrettyPrintOutput() {
 		this.cmd = null;
 	}
@@ -270,7 +272,13 @@ public class PrettyPrintOutput {
 		if (sort.equals("BagItem") && op.equals("<_>_</_>")
 				|| sort.equals("[Bag]") && op.equals("<_>_</_>")) {
 			sb = new StringBuilder();
-			sb.append(prettyPrint("<", true, whitespace, ANSI_GREEN));
+			if (addNewLine) {
+				sb.append(prettyPrint("<", true, whitespace, ANSI_GREEN));
+			}
+			else {
+				sb.append(prettyPrint("<", false, whitespace, ANSI_GREEN));
+			}
+			addNewLine = true;
 			sb.append(prettyPrint(print(list.get(0), false, whitespace, ANSI_GREEN), false, whitespace, ANSI_GREEN));
 			sb.append(prettyPrint(">", false, 0, ANSI_GREEN));
 			for (int i = 1; i < list.size() - 1; i++) {
@@ -300,7 +308,6 @@ public class PrettyPrintOutput {
 			}
 			else if (m < n && n > 0 && m > 0) {
 				sb = lessUnderscoresCase(list, op, n, m, false, whitespace + indent, ANSI_NORMAL);
-				//System.out.println("the content of the bag is:" + sb);
 			}
 			return sb.toString();
 		}
@@ -566,7 +573,7 @@ public class PrettyPrintOutput {
 				output.append(K.lineSeparator);
 			}
 		}
-		if (whitespace > 0 && lineskip) {
+		if ((whitespace > 0 && lineskip) || (whitespace > 0 && !addNewLine)) {
 			String space = Utils.buildWhitespace(whitespace);
 			output.append(space);
 		}

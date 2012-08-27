@@ -123,7 +123,6 @@ public class KRunner {
 
 		maude.join();
 		int returnValue = maude.returnValue;
-
 	}
 
 	public static void main(String[] args) throws IOException, Exception {
