@@ -62,8 +62,8 @@ that we would like to make regarding the definition of letrec.
 
 First, note that we have already inlined the definition of "fix" above, to
 save one application of the beta reduction rule (and the involved substitution
-steps).  We could have inlined the definition of "let", too, but we think that
-the current definition is easier to read.
+steps).  We could have inlined the definition of remaining "let", too, but we
+feel that the current definition is easier to read.
 
 Second, note that we extended the predefined "Id" syntactic category with two
 new constants, "$x$" and "$y$".  The predefined identifiers cannot start with
@@ -80,7 +80,5 @@ be written in a functional language:
 letrec f x = if x <= 1 then 1 else (x * (f (x + -1)))
 in (f 10)
 
-We have defined our first programming language in K, which allows us to
-write interesting functional programs.  Write a few more recursive programs,
-for example ones for calculating the Ackerman function, for calculating the
-number of moves to solve the Hanoi tower problem, etc.
+In the next lesson we will discuss an alternative definition of letrec, based
+on another binder, "mu", specifically designed to define fixed points.

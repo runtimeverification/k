@@ -13,10 +13,10 @@ module LAMBDA
   rule (lambda X:Id . E:Exp) V:Val => E[V / X]
   
   syntax Val ::= Int | Bool
-  syntax Exp ::= Exp "*" Exp           [strict, left]
-               | Exp "/" Exp           [strict]
-               > Exp "+" Exp           [strict, left]
-               > Exp "<=" Exp          [strict]
+  syntax Exp ::= Exp "*" Exp          [strict, left]
+               | Exp "/" Exp          [strict]
+               > Exp "+" Exp          [strict, left]
+               > Exp "<=" Exp         [strict]
   rule I1:Int * I2:Int => I1 *Int I2
   rule I1:Int / I2:Int => I1 /Int I2
   rule I1:Int + I2:Int => I1 +Int I2
@@ -27,16 +27,12 @@ module LAMBDA
   rule if false then _ else E => E
 
   syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E  [structural]
+  rule let X = E in E':Exp => (lambda X . E') E
+    [structural]
 
   syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-  syntax Id ::= "fix" | "f" | "x" | "y"
-  rule letrec F:Id X:Id = E in E'
-    => let fix = lambda f . (
-                   (lambda x . (f (lambda y . (x x y))))
-                   (lambda x . (f (lambda y . (x x y))))
-                 )
-       in let F = fix (lambda F . lambda X . E)
-          in E'  [structural]
-
+               | "mu" Id "." Exp      [binder, latex(\mu{#1}.{#2})]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
+    [structural]
+  rule mu X . E => E[(mu X . E) / X]
 endmodule
