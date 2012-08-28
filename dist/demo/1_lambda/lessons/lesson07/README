@@ -1,4 +1,4 @@
-K Tutorial --- LAMBDA --- Derived Constructs
+K Tutorial --- LAMBDA --- Derived Constructs, Extending Predefined Syntax
 by Grigore Rosu
 
 When defining a language, we often want certain language constructs to be
@@ -13,10 +13,10 @@ is nothing but syntactic sugar for
 
 This can be easily achieved with a rule, as shown in lambda.k.
 
-As a side point, which is not very relevant here, we may want the "desugaring"
-of let to not even count as a computational step, but as a mere "structural
-rearangement" of the program so that other semantics rules (beta reduction,
-in our case) can match and apply.
+As a side point, which is not very relevant here but good to know, we may
+want the "desugaring" of let to not even count as a computational step, but
+as a mere "structural rearangement" of the program so that other semantics
+rules (beta reduction, in our case) can match and apply.
 
 The K tool allows us to tag rules with the attribute "structural", with
 precisely the intuition above.  You can think of structural rules as a kind
@@ -24,17 +24,8 @@ of light rules, almost like macros, or like ones which apply "under the hood",
 instanteneously.  There are several other uses for structural rules in K,
 which we will discuss later in this tutorial.
 
-Compile lambda.k and write some programs using let binders.
-
-In the next lecture we will define the conditional construct, which together
-with the let binder will allow us to write interesting programs.
-
-
------------------ from lambda06 ----------------
-
-
-  As an example, here
-is a program calculating the factorial of 100:
+Compile lambda.k and write some programs using let binders.  As an example,
+here is a program calculating the factorial of 100:
 
 let f = lambda x . (
           (lambda t . lambda x . (t t x))
@@ -62,6 +53,34 @@ in let f = fix (lambda f . lambda x . if x <= 1 then 1 else (x * (f (x + -1))))
 
 While the above techniques are interesting and powerful (untyped lambda
 calculus is in fact Turing complete), programmers will likely not like to
-write programs this way.  In the next lesson we will introduce a new language
-construct, called letrec and conventionally found in functional programming
-languages, whose semantics will capture the fixed-point idea above.
+write programs this way.
+
+We can easily define a more complex derived construct, called letrec and
+conventionally found in functional programming languages, whose semantics
+captures the fixed-point idea above.  See lambda.k.  There are two observations
+that we would like to make regarding the definition of letrec.
+
+First, note that we have already inlined the definition of "fix" above, to
+save one application of the beta reduction rule (and the involved substitution
+steps).  We could have inlined the definition of "let", too, but we think that
+the current definition is easier to read.
+
+Second, note that we extended the predefined "Id" syntactic category with two
+new constants, "$x$" and "$y$".  The predefined identifiers cannot start with
+"$", so programs that will be executed with this semantics cannot possibly
+contain the identifiers $x and $y.  In other words, by adding them to Id they
+become indirectly reserved for the semantics.  This is indeed desirable,
+because any possible uses of $x in the body of the function defined
+using "letrec" would be captured by the "lambda $x" declaration in the
+definition of "letrec".
+
+Using letrec, we can now write the factorial program as elegantly as it can
+be written in a functional language:
+
+letrec f x = if x <= 1 then 1 else (x * (f (x + -1)))
+in (f 10)
+
+We have defined our first programming language in K, which allows us to
+write interesting functional programs.  Write a few more recursive programs,
+for example ones for calculating the Ackerman function, for calculating the
+number of moves to solve the Hanoi tower problem, etc.
