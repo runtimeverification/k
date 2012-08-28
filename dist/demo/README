@@ -2,11 +2,11 @@ K Tutorial
 by Grigore Rosu
 
 Here you will learn how to use the K tool by means of a few simple languages
-defined using K.  The objective here is to earn K, not the defined languages
+defined using K.  The objective here is to learn K, not the defined languages
 nor their underlying paradigms.  If you are interested in the latter, then you
 should check the various language definitions under the "examples" folder.
 
 It is recommended to study the languages defined in this folder in the order
 indicated by their name, because K features already discussed in a previous
-language definitionswill likely not be rediscussed in latter definitions.
+language definition will likely not be rediscussed in latter definitions.
 
