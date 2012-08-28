@@ -116,7 +116,7 @@ public class Main {
 	}
 	
 	//execute krun in normal mode (i.e. not in debug mode)
-	public static void normalExecution(String KAST, CommandLine cmd, RunProcess rp, String k3jar, CommandlineOptions cmd_options) {
+	public static void normalExecution(String KAST, String lang, CommandLine cmd, RunProcess rp, String k3jar, CommandlineOptions cmd_options) {
 		try {
 			String s = new String();
 			if (K.do_search) {
@@ -228,24 +228,7 @@ public class Main {
 			}
 			
 			// check whether Maude produced errors
-			if (errFile.exists()) {
-				String content = FileUtil.getFileContent(K.maude_err);
-				if (content.length() > 0) {
-					//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-					/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-					Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
-					
-					//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
-					String fileName = new File(K.maude_err).getName();
-					ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
-					for (File file : files) {
-						if (file.getName().equals(fileName)) {
-							String fullPath = file.getCanonicalPath();
-							Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
-						}
-					}
-				}
-			}
+			rp.checkMaudeForErrors(errFile, lang);
 			
 			if ("search".equals(K.maude_cmd) && K.do_search) {
 				System.out.println("Search results:");
@@ -307,7 +290,7 @@ public class Main {
 	}
 	
 	//execute krun in debug mode (i.e. step by step execution)
-	public static void debugExecution(String kast) {
+	public static void debugExecution(String kast, String lang) {
 		try {
 			//adding autocompletion and history feature to the stepper internal commandline by using the JLine library
 			ConsoleReader reader = new ConsoleReader();
@@ -330,24 +313,8 @@ public class Main {
 			RunProcess rp = new RunProcess();
 			rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 			// check whether Maude produced errors
-			if (errFile.exists()) {
-				String content = FileUtil.getFileContent(K.maude_err);
-				if (content.length() > 0) {
-					//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-					/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-					Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
-					
-					//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
-					String fileName = new File(K.maude_err).getName();
-					ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
-					for (File file : files) {
-						if (file.getName().equals(fileName)) {
-							String fullPath = file.getCanonicalPath();
-							Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
-						}
-					}
-				}
-			}
+			rp.checkMaudeForErrors(errFile, lang);
+			
 			//pretty-print the obtained configuration
 			PrettyPrintOutput p = new PrettyPrintOutput();
 		    p.preprocessDoc(K.maude_output, K.processed_maude_output);
@@ -410,24 +377,8 @@ public class Main {
 						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew " + maudeConfig + " .";
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
-						if (errFile.exists()) {
-							String content = FileUtil.getFileContent(K.maude_err);
-							if (content.length() > 0) {
-								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-								/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
-								
-								//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
-								String fileName = new File(K.maude_err).getName();
-								ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
-								for (File file : files) {
-									if (file.getName().equals(fileName)) {
-										String fullPath = file.getCanonicalPath();
-										Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
-									}
-								}
-							}
-						}
+						rp.checkMaudeForErrors(errFile, lang);
+						
 						//pretty-print the obtained configuration
 						K.maude_cmd = "erewrite";
 						p = new PrettyPrintOutput();
@@ -454,24 +405,8 @@ public class Main {
 						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[" + arg + "] " + maudeConfig + " .";
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
-						if (errFile.exists()) {
-							String content = FileUtil.getFileContent(K.maude_err);
-							if (content.length() > 0) {
-								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-								/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
-								
-								//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
-								String fileName = new File(K.maude_err).getName();
-								ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
-								for (File file : files) {
-									if (file.getName().equals(fileName)) {
-										String fullPath = file.getCanonicalPath();
-										Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
-									}
-								}
-							}
-						}
+						rp.checkMaudeForErrors(errFile, lang);
+						
 						//pretty-print the obtained configuration
 						K.maude_cmd = "erewrite";
 						p = new PrettyPrintOutput();
@@ -494,24 +429,8 @@ public class Main {
 						//System.out.println("maude cmd=" + maudeCmd);
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
-						if (errFile.exists()) {
-							String content = FileUtil.getFileContent(K.maude_err);
-							if (content.length() > 0) {
-								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-								/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
-								
-								//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
-								String fileName = new File(K.maude_err).getName();
-								ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
-								for (File file : files) {
-									if (file.getName().equals(fileName)) {
-										String fullPath = file.getCanonicalPath();
-										Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
-									}
-								}
-							}
-						}
+						rp.checkMaudeForErrors(errFile, lang);
+						
 						//pretty-print the obtained search results
 						K.maude_cmd = "search";
 						p = new PrettyPrintOutput();
@@ -527,24 +446,7 @@ public class Main {
 		            	//System.out.println("maude cmd=" + maudeCmd);
 		            	rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
-						if (errFile.exists()) {
-							String content = FileUtil.getFileContent(K.maude_err);
-							if (content.length() > 0) {
-								//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-								/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
-								Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
-								
-								//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
-								String fileName = new File(K.maude_err).getName();
-								ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
-								for (File file : files) {
-									if (file.getName().equals(fileName)) {
-										String fullPath = file.getCanonicalPath();
-										Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
-									}
-								}
-							}
-						}
+						rp.checkMaudeForErrors(errFile, lang);
 		            }
 				}
 			}
@@ -749,8 +651,9 @@ public class Main {
 			
 			/*System.out.println("K.k_definition=" + K.k_definition);
 			System.out.println("K.syntax_module=" + K.syntax_module);
-		    System.out.println("K.main_module=" + K.main_module);*/
-
+		    System.out.println("K.main_module=" + K.main_module);
+		    System.out.println("K.compiled_def=" + K.compiled_def);*/
+		    
 			// in KAST variable we obtain the output from running kast process on a program defined in K
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
@@ -759,10 +662,10 @@ public class Main {
 			KAST = rp.runParser(k3jar, K.parser, K.k_definition, K.pgm, true);
 			
 			if (!K.debug) {
-				normalExecution(KAST, cmd, rp, k3jar, cmd_options);
+				normalExecution(KAST, lang, cmd, rp, k3jar, cmd_options);
 			}
 			else {
-				debugExecution(KAST);
+				debugExecution(KAST, lang);
 			}
 		} catch (IOException e) {
 			System.out.println(e.getMessage());

@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.jkrun;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import ro.uaic.info.fmse.tasks.MaudeTask;
 
@@ -135,7 +136,7 @@ public class RunProcess {
 	}
 	
 	// run the Maude process by specifying the command to execute, the output file and the error file
-	public int runMaude (String command, String outputFileName, String errorFileName) {
+	public int runMaude(String command, String outputFileName, String errorFileName) {
 		MaudeTask maude = new MaudeTask(command, outputFileName, errorFileName);
 		maude.start();
 		try {
@@ -144,6 +145,43 @@ public class RunProcess {
 			e.printStackTrace();
 		}
 		return maude.returnValue;
+	}
+	
+	public void checkMaudeForErrors(File errFile, String lang) {
+		try {
+			if (errFile.exists()) {
+				String content = FileUtil.getFileContent(K.maude_err);
+				if (content.length() > 0) {
+					System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + 
+					"k_definition=" + K.k_definition + K.lineSeparator + "syntax_module=" + K.syntax_module + K.lineSeparator + 
+					"main_module=" + K.main_module + K.lineSeparator + "compiled_def=" + K.compiled_def+ K.lineSeparator);
+					 String compiledDefName = FileUtil.getFilename(K.compiled_def, ".", K.fileSeparator);
+					 int index = compiledDefName.indexOf("-compiled");
+					 compiledDefName = compiledDefName.substring(0, index);
+					 if (!lang.equals(compiledDefName)) {
+						 Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. " +
+						 		"Maybe you should use --syntax-module or --main-module options of krun");
+					 }
+					
+					//Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+					/*String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName();
+					Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");*/
+					
+					//get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
+					String fileName = new File(K.maude_err).getName();
+					ArrayList<File> files = FileUtil.searchFiles(K.kdir, "txt", true);
+					for (File file : files) {
+						if (file.getName().equals(fileName)) {
+							String fullPath = file.getCanonicalPath();
+							Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+						}
+					}
+				}
+			}
+		}
+		catch (IOException e) {
+			Error.report("Error in checkMaudeForErrors method:" + e.getMessage());
+		}
 	}
 	
 	public String getStdout() {
