@@ -1,0 +1,31 @@
+K Tutorial --- LAMBDA --- Lessons
+by Grigore Rosu
+
+This folder contains several lessons, each adding new features to LAMBDA.
+We recommend that you actually incrementally (re)type all the versions in
+the "work" directory, following the discussion flow in the README files.
+
+
+lambda1.k
+p1
+kast p1.lambda
+p2
+p3
+lambda2.k (requires, imports, binder, beta)
+p3 (works)
+p2 (doesn't work)
+lambda3.k (strict, KResult)
+p2,p3
+lambda.pdf
+
+lambda4.k
+lambda.pdf
+lambda5.k (looks like a red sem def, but all is syn sugar)
+lambda6.k (continues lambda4)
+p4
+lambda7.k
+p5
+lambda8.k
+p6
+lambda9
+p7

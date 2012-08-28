@@ -1,0 +1,26 @@
+K Tutorial --- LAMBDA --- Multiple Binding Constructs
+by Grigore Rosu
+
+Here we show how multiple language constructs that bind variables
+can coexsit.  Substitution knows how to deal with multiple such constructs,
+provided that they are explicitly declared to be binders (using the attribute
+binder).  Specifically, we define the famous "mu" construct, which can be
+used to define various kinds of fixed-points:
+
+  mu x . e
+
+is e with each occurrence of x bound to mu x . e, that is,
+
+  e[(mu x . e) / x]
+
+This can be easily defined with a rule, as shown in lambda.k.
+
+Then letrec is immediate, as shown in lambda.k.
+
+Compile lambda.k and execute some recursive programs.  They should be now
+several times faster.
+
+We have defined our first programming language in K, which allows us to
+write interesting functional programs.  Write a few more recursive programs,
+for example ones for calculating the Ackerman function, for calculating the
+number of moves needed to solve the Hanoi tower problem, etc.
