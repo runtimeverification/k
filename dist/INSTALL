@@ -2,29 +2,13 @@
 
 2. Prerequisites
 
-2.1 Java Runtime Edition (tested with JRE6 or higher)
+Java Runtime Edition (tested with JRE6 or higher)
 You can follow the instructions here: 
 http://java.com/en/download/index.jsp depending on 
 the type of your machine.
 
 To make sure that everything works you should be able to call 'java' from
 a Terminal.
-
-2.2 Maude
-Linux and Mac:
-   Download the binary distribution from http://maude.cs.uiuc.edu/download/, 
-   unzip it, and update your $PATH with '<extraction-dir>'. Rename 
-   'maude.linux' or 'maude.linux64' to 'maude' (depending on your machine) and
-   you should be good to go.
-Windows:
-    Go to http://moment.dsic.upv.es/ and download Maude for Windows. Follow
-    the instructions from the instalation wizard.
-
-To test if maude has been corectly installed, type 'maude' in a Terminal. You
-should not get any errors or warnings.
-
-Note: maude on windows is 4 to 6 times slower than on linux or mac, so you
-may experience considerable delays when compiling and running examples.
 
 3. Install
 Unzip this directory in your preferred location. For convenient usage, you can
