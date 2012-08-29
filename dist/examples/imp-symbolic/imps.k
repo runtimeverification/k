@@ -12,7 +12,7 @@ require "builtins/symbolic-calculus.k"
 
 module IMPS-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
-  imports SYMBOLIC-CALCULUS
+  imports SYMBOLIC-CALCULUS-SYNTAX
 //  imports BOOL-SYMBOLIC
 //  imports INT-SYMBOLIC
 
@@ -86,6 +86,7 @@ endmodule
 
 module IMPS
   imports IMPS-SYNTAX
+  imports SYMBOLIC-CALCULUS
 
 
   configuration <T color="yellow"> 
