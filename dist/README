@@ -17,3 +17,42 @@ What is new (from v2.7)
 * The front-end is now implemented completely in Java (previously it was
 implemented in a combination of Perl and Maude), making use of SDF (as
 distributed with the Spoofax system).
+
+Because we changed the parser, the syntax is a bit different.
+
+1. Modules and files:
+
+require "filename.k" // require the contents of another file found in the
+                     // current directory, or the 'include' directory.
+
+module MODULE-NAME
+  imports INCLUDED-MODULE
+
+endmodule // in one word
+
+2. Use priorities instead of precedence:
+               | Exp "*" Exp
+               > Exp "+" Exp
+
+3. Binary mixfix operators can be disambiguated with associativity attributes:
+  syntax Exp ::= Exp "*" Exp [left]
+               > left:
+               	 Exp "+" Exp [left]
+               | Exp "-" Exp [left]
+               > non-assoc:
+               	 Exp "=" Exp [right]
+
+4. You can use bracket productions to override priorities:
+               | "(" Exp ")"            [bracket]
+
+5. The scope of a variable in k3 is restricted to each rule. In k2 it was the
+module. As a result, the type of each variable should be specified in each
+rule in which it is used.
+
+6. The only accepted comments are // ... for one line comments and /* ... */
+for multiline ones. Latex comments remain the same:
+               //@ ...
+               /*@ ... */
+               //! ...
+               /*! ... */
+
