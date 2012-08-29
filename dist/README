@@ -1,8 +1,15 @@
 K tool, version 3.0
 
-Note: This file contains information regarding the stable release of the
-K tool indicated above, regardless of whether it came with the release itself
-or with subsequent nightly/latest builts.
+K is a framework for programming language design and executable semantics.
+This distribution contains a tool prototype which implements many of K's
+freatures.  For more on the K framework and how to use the current tool,
+go to k/tutorial (start with the README file there).
+
+Note: This README file contains information regarding the stable release of
+the K tool indicated in the title above, regardless of whether it came with
+the release itself or with subsequent nightly/latest builts.  This file is
+updated only when new stable versions are officially released.
+
 
 What is new (from v2.7)
 -----------------------
