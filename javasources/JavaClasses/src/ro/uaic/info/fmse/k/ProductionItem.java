@@ -9,6 +9,10 @@ public abstract class ProductionItem extends ASTNode {
 		// TODO Auto-generated constructor stub
 	}
 
+	public ProductionItem(){
+		super("generated", "generated");
+	}
+	
 	public enum ProductionType { TERMINAL, SORT, USERLIST } ;
 	
 	public ProductionType getType() {

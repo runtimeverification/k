@@ -36,6 +36,11 @@ public class Attributes extends ASTNode {
 			contents.add((Attribute) JavaClassesFactory.getTerm(e));
 	}
 
+	public Attributes() {
+		super("generated", "generated");
+		contents = new LinkedList<Attribute>();
+	}
+
 	@Override
 	public String toString() {
 		if (isEmpty())

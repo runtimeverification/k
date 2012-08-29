@@ -24,7 +24,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 				if (pi.getType() == ProductionType.SORT) {
 					Sort s = (Sort) pi;
 					if (!s.isBaseSort())
-						DefinitionHelper.addSubsort("K", s.getSort());
+						DefinitionHelper.addSubsort("K", s.getName());
 				}
 			}
 		}

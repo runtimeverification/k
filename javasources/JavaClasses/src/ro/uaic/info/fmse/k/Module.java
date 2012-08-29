@@ -26,7 +26,8 @@ public class Module extends DefinitionItem {
 
 		name = element.getAttribute(Constants.VALUE_value_ATTR);
 		type = element.getAttribute(Constants.TYPE_type_ATTR);
-		predefined = element.getAttribute(Constants.PREDEFINED).equals("true") ? true : false;
+		predefined = element.getAttribute(Constants.PREDEFINED).equals("true") ? true
+				: false;
 		items = new ArrayList<ModuleItem>();
 
 		List<Element> elements = XML.getChildrenElements(element);
@@ -42,6 +43,19 @@ public class Module extends DefinitionItem {
 		this.type = m.type;
 		this.predefined = m.predefined;
 		this.items = m.items;
+	}
+
+	public Module(String name, String type, boolean predefined) {
+		super();
+		this.name = name;
+		this.type = type;
+		this.predefined = predefined;
+	}
+
+	public void appendModuleItem(ModuleItem item) {
+		if (items == null)
+			items = new LinkedList<ModuleItem>();
+		this.items.add(item);
 	}
 
 	public void setName(String name) {
@@ -83,10 +97,6 @@ public class Module extends DefinitionItem {
 			return "";
 
 		String content = "";
-
-		items.add(0, new Import(Constants.SHARED));
-		if (!predefined)
-			items.add(0, new Import("URIS"));
 
 		for (ModuleItem mi : items) {
 			content += mi.toMaude() + "\n";

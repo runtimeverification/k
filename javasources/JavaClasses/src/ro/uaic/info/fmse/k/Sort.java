@@ -10,29 +10,37 @@ import ro.uaic.info.fmse.visitors.Visitor;
 
 public class Sort extends ProductionItem {
 
-	private String sort;
+	private String name;
 
 	public Sort(Element element) {
 		super(element);
-
-		sort = element.getAttribute(Constants.VALUE_value_ATTR);
+		name = element.getAttribute(Constants.VALUE_value_ATTR);
 	}
 
+	public Sort(String name)
+	{
+		super(null);
+		this.filename = "generated-sort";
+		this.location = "internal-generated-sort";
+		this.attributes = null;
+		this.name = name;
+	}
+	
 	public static boolean isBasesort(String sort) {
 		return sort.equals("VARID") || sort.equals("Map") || sort.equals("K") || sort.equals("List") || sort.equals("Bag") || sort.equals("Set") || sort.equals("MapItem") || sort.equals("ListItem") || sort.equals("BagItem") || sort.equals("SetItem")
 				|| sort.equals("List{K}") || sort.equals("KLabel") || sort.equals("CellLabel");
 	}
 	
 	public boolean isBaseSort() {
-		return Sort.isBasesort(sort);
+		return Sort.isBasesort(name);
 	}
 
-	public void setSort(String sort) {
-		this.sort = sort;
+	public void setName(String sort) {
+		this.name = sort;
 	}
 
-	public String getSort() {
-		return sort;
+	public String getName() {
+		return name;
 	}
 
 	public ProductionType getType() {
@@ -41,19 +49,19 @@ public class Sort extends ProductionItem {
 
 	@Override
 	public String toString() {
-		return sort;
+		return name;
 	}
 
 	@Override
 	public String toMaude() {
-		return sort;
+		return name;
 	}
 
 	@Override
 	public Element toXml(Document doc) {
 		// TODO Auto-generated method stub
 		Element sort = doc.createElement(Constants.SORT);
-		sort.setTextContent(this.sort);
+		sort.setTextContent(this.name);
 
 		return sort;
 	}
@@ -87,13 +95,13 @@ public class Sort extends ProductionItem {
 
 		Sort srt = (Sort) obj;
 
-		if (!sort.equals(srt.getSort()))
+		if (!name.equals(srt.getName()))
 			return false;
 		return true;
 	}
 
 	@Override
 	public int hashCode() {
-		return this.sort.hashCode();
+		return this.name.hashCode();
 	}
 }

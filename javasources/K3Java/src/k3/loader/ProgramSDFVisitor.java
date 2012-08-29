@@ -30,7 +30,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
 	public void visit(Syntax syn) {
 
-		userSort.add(syn.getSort().getSort());
+		userSort.add(syn.getSort().getName());
 		List<PriorityBlock> prilist = new ArrayList<PriorityBlock>();
 		for (PriorityBlock prt : syn.getPriorityBlocks()) {
 			PriorityBlock p = new PriorityBlock();
@@ -41,7 +41,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 				if (prd.isSubsort()) {
 					outsides.add(prd);
 					if (prd.getSort().equals("Start"))
-						startSorts.add(((Sort) prd.getItems().get(0)).getSort());
+						startSorts.add(((Sort) prd.getItems().get(0)).getName());
 				} else if (prd.isConstant()) {
 					constants.add(prd);
 				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {
@@ -83,11 +83,11 @@ public class ProgramSDFVisitor extends BasicVisitor {
 								Sort srt = (Sort) itm;
 								// if we are on the first or last place and this sort is not a list, just print the sort
 								if (i == 0 || i == items.size() - 1) {
-									sdf += StringUtil.escapeSortName(srt.getSort()) + " ";
+									sdf += StringUtil.escapeSortName(srt.getName()) + " ";
 								} else {
 									// if this sort should be inserted to avoid the priority filter, then add it to the list
-									sorts.add(srt.getSort());
-									sdf += "InsertDz" + StringUtil.escapeSortName(srt.getSort()) + " ";
+									sorts.add(srt.getName());
+									sdf += "InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ";
 								}
 							}
 						}

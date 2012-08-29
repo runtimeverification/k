@@ -17,6 +17,11 @@ public class Terminal extends ProductionItem {
 		terminal = element.getAttribute(Constants.VALUE_value_ATTR);
 	}
 
+	public Terminal(String terminal) {
+		super();
+		this.terminal = terminal;
+	}
+
 	public void setTerminal(String terminal) {
 		this.terminal = terminal;
 	}

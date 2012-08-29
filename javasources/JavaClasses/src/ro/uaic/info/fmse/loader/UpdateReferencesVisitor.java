@@ -12,7 +12,7 @@ public class UpdateReferencesVisitor extends BasicVisitor {
 	 */
 	@Override
 	public void visit(Syntax syn) {
-		prodSort = syn.getSort().getSort();
+		prodSort = syn.getSort().getName();
 		super.visit(syn);
 	}
 

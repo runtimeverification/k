@@ -19,6 +19,12 @@ public class Syntax extends ModuleItem {
 	Sort sort;
 	java.util.List<PriorityBlock> priorityBlocks;
 
+	public Syntax(Sort sort, java.util.List<PriorityBlock> priorities) {
+		super();
+		this.sort = sort;
+		this.priorityBlocks = priorities;
+	}
+	
 	public Sort getSort() {
 		return sort;
 	}
@@ -75,18 +81,26 @@ public class Syntax extends ModuleItem {
 		for (PriorityBlock pb : priorityBlocks) {
 			for (Production p : pb.productions) {
 
-				if (!MaudeHelper.declaredSorts.contains(sort.toString())) {
-					// contents += "sort " + sort.toString() + " . ";
-					MaudeHelper.declaredSorts.add(sort.toString());
-				}
+//				if (!MaudeHelper.declaredSorts.contains(sort.toString())) {
+//					MaudeHelper.declaredSorts.add(sort.toString());
+//				}
 
 				// subsort case
 				if (p.items.size() == 1 && (p.items.get(0) instanceof Sort)) {
 					ProductionItem item = p.items.get(0);
 					if (item instanceof Sort) {
+						if (!MaudeHelper.declaredSorts.contains(p.items.get(0).toString()) &&
+								!MaudeHelper.basicSorts.contains(p.items.get(0).toString()))
+							{
+								contents += "sort " + p.items.get(0) + " .\n";
+								MaudeHelper.declaredSorts.add(p.items.get(0).toString());
+							}
 						contents += "subsort " + p.items.get(0) + " < " + sort + " .\n";
 					}
-				} else if (p.items.size() == 1 && (p.items.get(0) instanceof Terminal) && MaudeHelper.constantSorts.contains(sort.getSort())) {
+				} else if (p.items.size() == 1 && (p.items.get(0) instanceof Terminal) && MaudeHelper.constantSorts.contains(sort.getName())) {
+					if (sort.toString().equals("KLabel") || sort.toString().equals("CellLabel"))
+						contents += "op " + p.toString().replaceAll("\"", "") + ": -> " + sort + " .\n";
+					
 					// ignore K constants declarations
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof UserList)) {
 					// user declared lists case

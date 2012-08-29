@@ -58,6 +58,13 @@ public class Production extends ASTNode {
 		this.items = node.items;
 	}
 
+	public Production(Sort sort, java.util.List<ProductionItem> items) {
+		super("generated", "generated");
+		this.items = items;
+		this.sort = sort.getName();
+		this.attributes = new Attributes();
+	}
+
 	public String toString() {
 		String content = "";
 		for (ProductionItem i : items)
@@ -82,7 +89,7 @@ public class Production extends ASTNode {
 					return false;
 
 				else if ((p1Term instanceof Sort) && (p2Term instanceof Sort))
-					if (!((Sort) p1Term).getSort().equals(((Sort) p2Term).getSort()))
+					if (!((Sort) p1Term).getName().equals(((Sort) p2Term).getName()))
 						return false;
 					else {
 						if (!(p1Term instanceof Sort) && !(p1Term instanceof Terminal))

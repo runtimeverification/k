@@ -10,11 +10,13 @@ import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformable;
 import ro.uaic.info.fmse.visitors.Visitable;
 
-public abstract class ASTNode implements IMaude, IXML, Modifiable, Visitable, Transformable {
+public abstract class ASTNode implements IMaude, IXML, Modifiable, Visitable,
+		Transformable {
 	protected String location;
 	protected String filename;
 	protected Attributes attributes = null;
-	
+
+
 	public ASTNode(ASTNode di) {
 		this.location = di.location;
 		this.filename = di.filename;
@@ -27,7 +29,8 @@ public abstract class ASTNode implements IMaude, IXML, Modifiable, Visitable, Tr
 
 	public ASTNode(Element element) {
 		if (element != null) {
-			this.filename = element.getAttribute(Constants.FILENAME_filename_ATTR);
+			this.filename = element
+					.getAttribute(Constants.FILENAME_filename_ATTR);
 			this.location = element.getAttribute(Constants.LOC_loc_ATTR);
 		}
 	}
@@ -56,5 +59,5 @@ public abstract class ASTNode implements IMaude, IXML, Modifiable, Visitable, Tr
 	public void setFilename(String filename) {
 		this.filename = filename;
 	}
-	
+
 }

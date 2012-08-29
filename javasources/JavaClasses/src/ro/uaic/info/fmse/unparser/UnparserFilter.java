@@ -100,7 +100,7 @@ public class UnparserFilter extends BasicVisitor {
     public void visit(Syntax syn) {
 	prepare(syn);
 	firstPriorityBlock = true;
-	result.write("syntax " + syn.getSort().getSort());
+	result.write("syntax " + syn.getSort().getName());
 	result.indentToCurrent();
 	for (PriorityBlock pb : syn.getPriorityBlocks()) {
 	    pb.accept(this);
@@ -148,7 +148,7 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(Sort sort) {
 	prepare(sort);
-	result.write(sort.getSort());
+	result.write(sort.getName());
 	super.visit(sort);
 	postpare();
     }

@@ -13,6 +13,11 @@ public abstract class DefinitionItem extends ASTNode {
 	public DefinitionItem(Element element) {
 		super(element);
 	}
+	
+	public DefinitionItem()
+	{
+		super("generated", "generated");
+	}
 
 	@Override
 	public Element toXml(Document doc) {

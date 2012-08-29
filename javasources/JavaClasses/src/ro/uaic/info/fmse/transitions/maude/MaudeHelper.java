@@ -13,6 +13,7 @@ public class MaudeHelper {
 	public static Set<String> kLabels = new HashSet<String>();
 	public static Set<String> constantSorts = getConstantSorts();
 	
+	
 	private static Set<String> getBasicSorts() {
 		Set<String> basic = new HashSet<String>();
 		
@@ -35,7 +36,12 @@ public class MaudeHelper {
 		basic.add("#Float");
 		basic.add("#Rat");
 		basic.add("#Int");
-		
+		basic.add("#Bool");
+		basic.add("#ModelCheckerState");
+		basic.add("#ModelCheckResult");
+		basic.add("#LTLFormula");
+		basic.add("#Prop");
+
 		return basic;
 	}
 
@@ -47,7 +53,9 @@ public class MaudeHelper {
 		basic.add("#Float");
 		basic.add("#Rat");
 		basic.add("#Int");
+		basic.add("#Bool");
 		basic.add("KLabel");
+		basic.add("CellLabel");
 		
 		return basic;
 	}

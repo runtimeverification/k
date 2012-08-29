@@ -164,7 +164,7 @@ public class HTMLFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Sort sort) {
-		result += "<span class =\"italic\"> " + makeGreek(sort.getSort()) + " </span>";
+		result += "<span class =\"italic\"> " + makeGreek(sort.getName()) + " </span>";
 	}
 
 	@Override

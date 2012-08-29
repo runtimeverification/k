@@ -31,7 +31,7 @@ public class TypeSystemFilter extends BasicTransformer {
 				if (prd.getItems().get(i).getType() == ProductionType.SORT) {
 					Sort sort = (Sort) prd.getItems().get(i);
 					Term child = (Term) tc.getContents().get(j);
-					tc.getContents().set(j, applyTypeFilter(child, sort.getSort()));
+					tc.getContents().set(j, applyTypeFilter(child, sort.getName()));
 					j++;
 				}
 			}

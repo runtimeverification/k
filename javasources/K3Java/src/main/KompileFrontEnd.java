@@ -42,6 +42,7 @@ import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.html.HTMLFilter;
+import ro.uaic.info.fmse.sharing.AutomaticModuleImportsTransformer;
 import ro.uaic.info.fmse.unparser.UnparserFilter;
 import ro.uaic.info.fmse.latex.LatexFilter;
 import ro.uaic.info.fmse.lists.EmptyListsVisitor;
@@ -544,8 +545,13 @@ public class KompileFrontEnd {
 			// last resort disambiguation
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
 
+			// this is more or less part of the compilation
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
-
+			
+			// import SHARED module in all other modules
+			AutomaticModuleImportsTransformer amit =  new AutomaticModuleImportsTransformer();
+			javaDef = (ro.uaic.info.fmse.k.Definition)javaDef.accept(amit);
+			
 			String maudified = javaDef.toMaude();
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);

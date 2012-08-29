@@ -11,9 +11,6 @@ import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectListConsesVisitor;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.transitions.maude.CellLabelsVisitor;
-import ro.uaic.info.fmse.transitions.maude.KLabelsVisitor;
-import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.utils.xml.XML;
 import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformer;
@@ -52,6 +49,14 @@ public class Definition extends ASTNode {
 			items.add((DefinitionItem) JavaClassesFactory.getTerm(e));
 	}
 
+	public void appendDefinitionItem(DefinitionItem di) {
+		items.add(di);
+	}
+
+	public void appendBeforeDefinitionItem(DefinitionItem di) {
+		items.add(0, di);
+	}
+
 	@Override
 	public String toString() {
 		String content = "";
@@ -65,57 +70,11 @@ public class Definition extends ASTNode {
 	public String toMaude() {
 		String content = "";
 
-		String uris = "";
 		for (DefinitionItem di : items) {
-			// if (di instanceof Module && ((Module)di).name.equals("URIS"))
-			// uris = di.toMaude();
-			// else
 			content += di.toMaude() + " \n";
 		}
 
-		// klabels
-		String klabels = "";
-		KLabelsVisitor labelsVisitor = new KLabelsVisitor();
-		accept(labelsVisitor);
-		for (String kl : labelsVisitor.kLabels) {
-			klabels += kl + " ";
-		}
-		klabels = klabels.trim();
-		if (!klabels.equals(""))
-			klabels = "  ops " + klabels + " : -> KLabel .\n";
-
-		// cellLabels visitor
-		String cellLabels = "";
-		CellLabelsVisitor cellLabelsVisitor = new CellLabelsVisitor();
-		accept(cellLabelsVisitor);
-		for (String cellLabel : cellLabelsVisitor.cellLabels) {
-			cellLabels += cellLabel + " ";
-		}
-		cellLabels = cellLabels.trim();
-		if (!cellLabels.equals(""))
-			cellLabels = "  ops " + cellLabels + " : -> CellLabel .\n";
-
-		// sorts & automatic subsortation to K
-		String sorts = "";
-		for (String s : MaudeHelper.declaredSorts) {
-			if (!MaudeHelper.basicSorts.contains(s) && !s.startsWith("#"))
-				sorts += s + " ";
-		}
-		sorts = sorts.trim();
-		if (!sorts.equals(""))
-			sorts = "  sorts " + sorts + " .\n  subsorts " + sorts + " < K .\n";
-
-//		String theLists = "";
-//		for(String separator : MaudeHelper.separators)
-//		{
-//			theLists += "op _" + StringUtil.escape(separator) + "_ : K K -> K [prec 120 metadata \"hybrid=()\"] .\n";
-//			theLists += "op .List`{\"" + separator + "\"`} : -> K .\n";
-//			theLists += "eq isKResult(.List`{\"" + separator + "\"`}) = true .\n";
-//		}
-		
-		String shared = "mod " + Constants.SHARED + " is\n  including K .\n" + klabels + sorts + cellLabels  + "\nendm";
-
-		return uris + "\n" + shared + "\n" + content;
+		return content;
 	}
 
 	@Override
@@ -138,7 +97,8 @@ public class Definition extends ASTNode {
 	@Override
 	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.items.size(); i++) {
-			DefinitionItem di = (DefinitionItem) visitor.modify(this.items.get(i));
+			DefinitionItem di = (DefinitionItem) visitor.modify(this.items
+					.get(i));
 			this.items.set(i, di);
 		}
 	}

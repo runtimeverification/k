@@ -85,7 +85,7 @@ public class ProgramSDF {
 						sdf += "\"" + t.getTerminal() + "\" ";
 					} else if (itm.getType() == ProductionType.SORT) {
 						Sort srt = (Sort) itm;
-						sdf += StringUtil.escapeSortName(srt.getSort()) + " ";
+						sdf += StringUtil.escapeSortName(srt.getName()) + " ";
 					}
 				}
 				sdf += "-> " + StringUtil.escapeSortName(p.getSort());

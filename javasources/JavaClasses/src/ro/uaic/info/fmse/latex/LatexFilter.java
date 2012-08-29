@@ -77,7 +77,7 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Sort sort) {
-		result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getSort()) + "}}}";
+		result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getName()) + "}}}";
 	}
 
 	@Override

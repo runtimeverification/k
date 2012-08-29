@@ -35,6 +35,7 @@ public class PriorityBlock extends ASTNode {
 
 	public PriorityBlock() {
 		super("generated", "generated");
+		this.assoc = "";
 	}
 
 	public PriorityBlock(Element element) {
