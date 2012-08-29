@@ -1,1 +1,15 @@
-I have no idea what to write here.
+The K Tool is licensed under under the GPL license:
+http://www.gnu.org/copyleft/gpl.html
+
+All K definitions shipped with the K tool are licensed under the BSD license:
+http://opensource.org/licenses/BSD-3-Clause
+
+Other binaries shipped with the distribution:
+---------------------------------------
+Maude (http://maude.cs.uiuc.edu) is licensed under the GPL license.
+Stratego (http://strategoxt.org) is licensed under the LGPL license.
+Xstream (http://xstream.codehaus.org/) is licensed under the BSD license.
+XML Pull (http://www.xmlpull.org) API is free.
+Xpp3 (http://www.extreme.indiana.edu/xgws/xsoap/xpp) is licensed under Indiana University Extreme! Lab Software License.
+KXML2 (http://kxml.sourceforge.net/kxml2/) is licensed under the BSD license.
+
