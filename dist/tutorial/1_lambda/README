@@ -16,3 +16,8 @@ following:
 * How to generate PDF and HTML documentation from ASCII definitions.
 * How to include builtins (integers and Booleans) into your language.
 * How to define derived language constructs.
+
+This folder contains several lessons, each adding new features to LAMBDA.
+We recommend that you actually incrementally (re)type all the versions in
+the "work_here" directory, in the suggested order and following the
+discussion flow in the README files.
