@@ -10,7 +10,7 @@ import ro.uaic.info.fmse.k.Production;
 public class DefinitionHelper {
 	public static String generatedTags[] = { "cons", "kgeneratedlabel", "prefixlabel", };
 
-	public static String parsingTags[] = { "bracket", "left", "right" };
+	public static String parsingTags[] = { "left", "right" };
 
 	public static String specialTerminals[] = { "(", ")", ",", "[", "]", "{", "}", };
 
