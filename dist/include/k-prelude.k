@@ -8,6 +8,8 @@ interface K-LISTK-EXTRAS
   imports K-TECHNIQUE
   
   syntax Bool ::= K "inList{K}" List{K}
+//  rule K inList{K} (_,,K:K,,_) => true [structural]
+//owise  rule K inList{K} Ks => false [owise] .
 endinterface
 
 interface K-MAP-EXTRAS
@@ -15,13 +17,25 @@ interface K-MAP-EXTRAS
 	//imports BOOL
 
 	syntax K ::= Map "(" K ")" [prec(0)]
+//        rule (_ K1:K |-> K2:K)(K1) => K2 [structural]
 
 	syntax Map ::= Map "[" Map "]"     [prec(0)]
 				 | Map "[" List{K} "/" List{K} "]" [prec(0)]
 				 | Map "[" "undef" "/" List{K} "]"
-
+/*
+  rule (Map:Map K1:K |-> K2:K)[K2':K / K1] => Map K1 |-> K2' [structural]
+  rule Map:Map[K2:K / K1:K] => Map K1 |-> K2 
+    when not(K1 in keys(Map))
+  
+  rule Map:Map[Map':Map K1 |-> K2] => Map[K2/K1][Map'] [structural]
+  rule Map:Map[.Map] => Map [structural]
+ */
 	syntax List{K} ::= Map "(" List{K} ")" [prec(0)]
-
+/*
+  rule Map:K((K1:K,,K2:K,,Ks:List{K})) 
+    => Map(K1),,Map(K2),,Map(K2) [structural]
+  rule Map:Map(.List{K}) => .List{K} [structural]
+*/
 	syntax Set ::= "keys" Map  
 	syntax #Bool ::= "$hasMapping" "(" Map "," K ")" [latex(latex=(renameTo \\$hasMapping\\mybracket{_,_})), maudeop("$hasMapping")]
 endinterface
