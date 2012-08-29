@@ -98,17 +98,24 @@ interface K-WRAPPERS
 			   | "Map2K" Map
 endinterface
 
+interface K-EVAL
+  imports K-TECHNIQUE
+  syntax Bag ::= "#eval" Map
+endinterface
+
+
+
 interface K
   imports K-TECHNIQUE
-  //imports K-WRAPPERS
+  imports K-WRAPPERS
   //imports K-BUILTINS
-  //imports K-RESULT             // to express results syntactically
-  //imports K-RULES              // to write k rules with in-place rewriting
-  //imports K-CONFIG             // to specify the global configuration term
-  //imports K-EVAL
-  //imports K-POLYMORPHIC-VARIABLES // defines the ? polmorfic constant
-  //imports K-OPEN-CELLS            // defines open cells like <_>..._...</_> 
-  //imports K-CONTEXTS  
+  imports K-RESULT             // to express results syntactically
+  imports K-RULES              // to write k rules with in-place rewriting
+  imports K-CONFIG             // to specify the global configuration term
+  imports K-EVAL
+  imports K-POLYMORPHIC-VARIABLES // defines the ? polmorfic constant
+  imports K-OPEN-CELLS            // defines open cells like <_>..._...</_> 
+  imports K-CONTEXTS  
   imports K-DESTRUCTORS           // defines getKLabel and getList{K} for K
   //imports K-EXTRAS                // defines a KLabel substitution 
   imports K-LISTK-EXTRAS  

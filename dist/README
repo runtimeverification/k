@@ -56,16 +56,15 @@ Please see the INSTALL file for detailed installation instructions.
 The languages defined so far using the K framework can be found in the 'examples'
 directory. For example, the directory
 
-TODO: change this to meet new 'examples' structure
-  examples/languages/research/simple 
+  examples/simple-untyped
 
+contains the definition of the
+untyped version of the SIMPLE language, while 
 
-contains 2 directories, namely "untyped" containing the definition of the
-untyped version of the language, and "typed" which in turn contains three
-directories with definitions: "static", for the static semantics, i.e., the type
-checker; "dynamic", for the dynamically typed version of simple; and
-"dynamic-typed-locations" which is a variant of dynamic, in which the type
-information is maintained in the environment.
+  examples/simple-typed-static
+
+containd the static semantics, i.e., the type
+checker.
 
 
 We encourage you to contribute with examples to our distribution.  Please see
@@ -117,7 +116,7 @@ variety of programs.
 In the examples provided with the tool, programs are generally kept in a
 `programs` directory in the directory containing the syntax definition.  Their
 extension is usually an indicator of the definition they belong to. For
-example, the /examples/languages/research/simple/untyped/programs directory 
+example, the /examples/simple-untyped/programs directory 
 contains programs for the simple-untyped definition.
 
 
@@ -151,11 +150,11 @@ This way, from an internal representation point of view, a language syntax is
 nothing but a finite set of KLabel constants.  The `kast` program can be used to
 parse a program and see its KAST form.  By running
 
-
+  $ kompile simple-untyped.k
   $ kast programs/diverse/factorial.simple
 
 
-from the /examples/languages/research/simple directory, one obtains the internal
+from the examples/simple-untyped directory, one obtains the internal
 representation of the factorial program:
 
 

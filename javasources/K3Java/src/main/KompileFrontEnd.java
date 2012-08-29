@@ -27,6 +27,7 @@ import org.apache.commons.cli.CommandLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.compile.FlattenModules;
 import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.disambiguate.BestFitFilter;
 import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
@@ -106,12 +107,17 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("syntax-module"))
 			GlobalSettings.synModule = cmd.getOptionValue("syntax-module");
 
+		String step = "RESOLVE-HOOKS";
+		if (cmd.hasOption("step")) {
+			step = cmd.getOptionValue("step");
+		}
+
 		if (cmd.hasOption("fromxml")) {
 			File xmlFile = new File(cmd.getOptionValue("fromxml"));
 			if (cmd.hasOption("lang"))
-				fromxml(xmlFile, cmd.getOptionValue("lang"));
+				fromxml(xmlFile, cmd.getOptionValue("lang"), step);
 			else
-				fromxml(xmlFile, FileUtil.getMainModule(xmlFile.getName()));
+				fromxml(xmlFile, FileUtil.getMainModule(xmlFile.getName()), step);
 			System.exit(0);
 		}
 
@@ -125,7 +131,7 @@ public class KompileFrontEnd {
 			else
 				def = restArgs[0];
 		}
-
+		
 		File mainFile = new File(def);
 		GlobalSettings.mainFile = mainFile;
 		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
@@ -162,7 +168,7 @@ public class KompileFrontEnd {
 			unparse(mainFile, lang);
 		} else {
 			// default option: if (cmd.hasOption("compile"))
-			compile(mainFile, lang, maudify(mainFile, lang));
+			compile(mainFile, lang, step);
 		}
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
@@ -393,7 +399,7 @@ public class KompileFrontEnd {
 		return null;
 	}
 
-	private static void fromxml(File xmlFile, String lang) {
+	private static void fromxml(File xmlFile, String lang, String step) {
 		try {
 			// initial setup
 			File canoFile = xmlFile.getCanonicalFile();
@@ -412,16 +418,8 @@ public class KompileFrontEnd {
 			// javaDef.accept(new CollectSubsortsVisitor());
 			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
-			Stopwatch sw = new Stopwatch();
-
-			// save it
-			String maudified = javaDef.toMaude();
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Maudify         = ");
-			}
-
-			compile(canoFile, lang, maudified);
+			compile(javaDef, step);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -438,120 +436,8 @@ public class KompileFrontEnd {
 			File dotk = new File(f.getParent() + "/.k");
 			dotk.mkdirs();
 
-			// ------------------------------------- basic parsing
-			Definition def = new Definition();
-			def.slurp(f, true);
-			def.setMainFile(mainFile);
-			def.setMainModule(mainModule);
-			def.addConsToProductions();
+			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk, GlobalSettings.verbose);
 
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Basic Parsing   = ");
-
-			// ------------------------------------- generate files
-			ResourceExtractor.ExtractAllSDF(dotk);
-
-			ResourceExtractor.ExtractProgramSDF(dotk);
-
-			// ------------------------------------- generate parser TBL
-			// cache the TBL if the sdf file is the same
-			String oldSdf = "";
-			if (new File(dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
-				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", def.getSDFForPrograms());
-
-			String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Pgm    = ");
-
-			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/pgm"), "Program");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLPgm = ");
-
-			// generate a copy for the definition and modify it to generate the intermediate data
-			Definition def2 = def.clone();// (Definition) Cloner.copy(def);
-			def2.makeConsLists();
-
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.sbs", def2.getSubsortingAsStrategoTerms());
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cons", def2.getConsAsStrategoTerms());
-
-			// ------------------------------------- generate parser TBL
-			// cache the TBL if the sdf file is the same
-			oldSdf = "";
-			if (new File(dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
-				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def2.getSDFForDefinition());
-			newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Def    = ");
-
-			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3Disamb");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLDef = ");
-
-			// ------------------------------------- import files in Stratego
-			k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
-			k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
-			k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Importing Files = ");
-
-			// ------------------------------------- parse configs
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
-			k3parser.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Configs = ");
-
-			// ----------------------------------- parse rules
-			def.parseRules();
-
-			// ----------------------------------- preprocessiong steps
-			Preprocessor preprocessor = new Preprocessor();
-			Document preprocessedDef = preprocessor.run(def.getDefAsXML());
-
-			XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Rules   = ");
-
-			ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
-
-			javaDef.accept(new UpdateReferencesVisitor());
-			javaDef.accept(new CollectConsesVisitor());
-			javaDef.accept(new CollectSubsortsVisitor());
-
-			// disambiguation steps
-
-			if (GlobalSettings.tempDisamb) {
-				// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
-				if (GlobalSettings.verbose)
-					sw.printIntermediate("Disambiguate    = ");
-			}
-			// last resort disambiguation
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
-
-			// this is more or less part of the compilation
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
-			
-			// import SHARED module in all other modules
-			AutomaticModuleImportsTransformer amit =  new AutomaticModuleImportsTransformer();
-			javaDef = (ro.uaic.info.fmse.k.Definition)javaDef.accept(amit);
-			
 			String maudified = javaDef.toMaude();
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
@@ -717,7 +603,8 @@ public class KompileFrontEnd {
 		return null;
 	}
 
-	public static void compile(File mainFile, String mainModule, String maudified) {
+	
+	public static void compile(File mainFile, String mainModule, String step) {
 		try {
 			// TODO: trateaza erorile de compilare
 			GlobalSettings.kem.print(KExceptionGroup.COMPILER);
@@ -729,14 +616,37 @@ public class KompileFrontEnd {
 			File f = mainFile.getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");
+			dotk.mkdirs();
+			
+			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk, GlobalSettings.verbose);
+			
+			compile(javaDef, step);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+			
 
+	public static void compile(ro.uaic.info.fmse.k.Definition javaDef, String step) {
+		try{
+			
+			FlattenModules fm = new FlattenModules();
+			javaDef.accept(fm);
+			javaDef = fm.getResult();
+			
+			
+			File f = new File(javaDef.getMainFile()).getCanonicalFile();
+	
+			File dotk = new File(f.getParent() + "/.k");
+			dotk.mkdirs();
+					
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";
 
 			// load libraries if any
 			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
 			load += maudeLib;
-
+			
 			String transition = "\"transition=()\"";
 			String superheat = "\"superheat=()\"";
 			String supercool = "\"supercool=()\"";
@@ -748,7 +658,8 @@ public class KompileFrontEnd {
 			if (!GlobalSettings.supercool.equals(""))
 				supercool = "\"" + metadataParse(GlobalSettings.supercool) + "\"";
 
-			String compile = load + maudified + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + mainModule + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
+			String compile = load + javaDef.toMaude() + " load \"" 
+					+ KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
 					+ " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
@@ -760,12 +671,12 @@ public class KompileFrontEnd {
 			int enddd = compiled.indexOf("---K-MAUDE-GENERATED-OUTPUT-END-----");
 			compiled = compiled.substring(start, enddd);
 
-			String defFile = mainFile.getName().replaceFirst("\\.[a-zA-Z]+$", "");
-			FileUtil.saveInFile(dotk.getParent() + "/" + defFile + "-compiled.maude", load + compiled);
+			String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
+			FileUtil.saveInFile(defFile + "-compiled.maude", load + compiled);
 
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("RunMaude        = ");
-			}
+//			if (GlobalSettings.verbose) {
+//				sw.printIntermediate("RunMaude        = ");
+//			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

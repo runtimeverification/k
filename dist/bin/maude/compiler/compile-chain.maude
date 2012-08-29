@@ -78,10 +78,10 @@ mod COMPILE-ONESHOT is
 --- 'SANITY-CHECKS 
 'REMOVE-PARSER 
 'SYNTAX-PREDICATES
-'SUBSORTS-TO-WRAPPERS   
-'HOMOGENOUS-ARGUMENTS  
+'SUBSORTS-TO-WRAPPERS     
+'HOMOGENOUS-ARGUMENTS     
 
-'MAKE-ALL-LABELS 
+'MAKE-ALL-LABELS         
 'STRICTOPS2CXT 
 --- 'ID-TO-STRING 
 ---'RESULT-PREDICATES
@@ -90,7 +90,7 @@ mod COMPILE-ONESHOT is
 'DEFAULT-TERMS 
 'CONTEXT-TRANSFORMERS 
 'OPEN-CELLS 
-'APPLY-MAPEQS
+'APPLY-MAPEQS    
 'MAKE-K-RULES 
 'STRICTCXT2EQS 
 'RESOLVE-HOOKS 
@@ -281,8 +281,8 @@ mod COMPILE-LOOP is
   eq print(moduleError(QIL)) = QIL .
 ---  eq purePrint(moduleError(QIL)) = QIL .
 ---  eq xmlPrint(moduleError(QIL)) = QIL .
-  rl ['compile Q 'transitions QStr 'superheats QComp 'supercools QSuper 'anywheres QFun 'defineds QDef QIL, idle, QIL'] 
-   => [QIL, idle, print(compile(Q, transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) anywheres(metadataQParse(QFun)) defineds(metadataQParse(QDef))))] [print QStr QComp QSuper QFun QDef] .
+  rl ['compile Q Q' 'transitions QStr 'superheats QComp 'supercools QSuper 'anywheres QFun 'defineds QDef QIL, idle, QIL'] 
+   => [QIL, idle, print(pcompile(Q, Q', transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) anywheres(metadataQParse(QFun)) defineds(metadataQParse(QDef))))] [print QStr QComp QSuper QFun QDef] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
    => [QIL, idle, print(pcompile(Q,Q', transitions(none) superheats(none) supercools(none) anywheres(none) defineds(none)))] .
 

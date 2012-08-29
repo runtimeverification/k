@@ -77,6 +77,7 @@ public class Definition extends ASTNode {
 		return content;
 	}
 
+
 	@Override
 	public Element toXml(Document doc) {
 
@@ -103,7 +104,7 @@ public class Definition extends ASTNode {
 		}
 	}
 
-	public void setItems(java.util.List<DefinitionItem> items) {
+	public void setItems(List<DefinitionItem> items) {
 		this.items = items;
 	}
 

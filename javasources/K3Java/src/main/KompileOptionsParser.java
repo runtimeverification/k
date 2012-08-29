@@ -20,6 +20,8 @@ public class KompileOptionsParser {
 		// main options
 		OptionGroup main = new OptionGroup();
 		Option def = new Option("def", "definition", true, "main file to kompile");
+		Option step = new Option("step", "step", true, "name of the compilation phase after which compilation should stop.");
+		main.addOption(step);
 		main.addOption(def);
 
 		// verbose and help

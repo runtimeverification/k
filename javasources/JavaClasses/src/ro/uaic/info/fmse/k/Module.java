@@ -45,6 +45,9 @@ public class Module extends DefinitionItem {
 		this.items = m.items;
 	}
 
+	public Module() {
+	}
+
 	public Module(String name, String type, boolean predefined) {
 		super();
 		this.name = name;
