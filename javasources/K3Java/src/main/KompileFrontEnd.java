@@ -12,45 +12,30 @@ import k.utils.MaudeRun;
 import k.utils.ResourceExtractor;
 import k.utils.Sdf2Table;
 import k.utils.Stopwatch;
-import k.utils.XmlLoader;
-import k3.basic.Definition;
 import k3.loader.AddConsesVisitor;
 import k3.loader.BasicParser;
 import k3.loader.ProgramSDF;
-
-import klint.KlintRule;
 import klint.InfiniteRewrite;
+import klint.KlintRule;
 import klint.UnusedName;
 import klint.UnusedSyntax;
 
 import org.apache.commons.cli.CommandLine;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.compile.FlattenModules;
-import ro.uaic.info.fmse.disambiguate.AmbFilter;
-import ro.uaic.info.fmse.disambiguate.BestFitFilter;
-import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
-import ro.uaic.info.fmse.disambiguate.GetFitnessUnitFileCheckVisitor;
-import ro.uaic.info.fmse.disambiguate.GetFitnessUnitKCheckVisitor;
-import ro.uaic.info.fmse.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import ro.uaic.info.fmse.disambiguate.TypeInferenceSupremumFilter;
-import ro.uaic.info.fmse.disambiguate.TypeSystemFilter;
-import ro.uaic.info.fmse.disambiguate.VariableTypeInferenceFilter;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.html.HTMLFilter;
-import ro.uaic.info.fmse.sharing.AutomaticModuleImportsTransformer;
-import ro.uaic.info.fmse.unparser.UnparserFilter;
 import ro.uaic.info.fmse.latex.LatexFilter;
 import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
-import ro.uaic.info.fmse.pp.Preprocessor;
+import ro.uaic.info.fmse.sharing.AutomaticModuleImportsTransformer;
+import ro.uaic.info.fmse.unparser.UnparserFilter;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -610,7 +595,7 @@ public class KompileFrontEnd {
 			GlobalSettings.kem.print(KExceptionGroup.COMPILER);
 
 			// init stopwatch
-			Stopwatch sw = new Stopwatch();
+			// Stopwatch sw = new Stopwatch();
 
 			// for now just use this file as main argument
 			File f = mainFile.getCanonicalFile();
@@ -629,6 +614,9 @@ public class KompileFrontEnd {
 
 	public static void compile(ro.uaic.info.fmse.k.Definition javaDef, String step) {
 		try{
+			
+			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
+			javaDef = (ro.uaic.info.fmse.k.Definition)javaDef.accept(amit);
 			
 			FlattenModules fm = new FlattenModules();
 			javaDef.accept(fm);
