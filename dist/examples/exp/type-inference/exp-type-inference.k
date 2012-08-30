@@ -125,7 +125,7 @@ module TYPES
                      [latex({#1}-_{\it Types}{#2})]
                  | "insert" "(" Type "," Types ")"
                  | "delete" "(" Type "," Types ")"
-  syntax Nat ::= "|" Types "|"
+  syntax Int ::= "|" Types "|"
   rule union(.Types,Ts':Types) => Ts' [anywhere]
   rule union((T:Type,Ts:Types),Ts':Types) => union(Ts,insert(T,Ts')) [anywhere]
   rule diff(Ts:Types,.Types) => Ts [anywhere]
