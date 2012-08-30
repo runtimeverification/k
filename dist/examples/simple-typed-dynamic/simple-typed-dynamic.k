@@ -188,7 +188,7 @@ and assign the right type ($T$) to the allocated array locations. */
   rule <k> var '_:_(X[N:Int, (.Vals)],, arrayOf T), .Exps; => . ...</k> 
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> arrayRef(arrayOf T, L +Int 1, N)
-                       L +Int 1 .. L +Int N |-> undefined(T) ...</store>
+                       Map(L +Int 1 .. L +Int N |-> undefined(T)) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
 
   context var '_:_(_[HOLE],, _),.Exps ;

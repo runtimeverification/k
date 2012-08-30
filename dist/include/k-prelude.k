@@ -22,6 +22,7 @@ interface K-MAP-EXTRAS
 	syntax Map ::= Map "[" Map "]"     [prec(0)]
 				 | Map "[" List{K} "/" List{K} "]" [prec(0)]
 				 | Map "[" "undef" "/" List{K} "]"
+                       | "Map" "(" List{K} "|->" List{K} ")" 
 /*
   rule (Map:Map K1:K |-> K2:K)[K2':K / K1] => Map K1 |-> K2' [structural]
   rule Map:Map[K2:K / K1:K] => Map K1 |-> K2 

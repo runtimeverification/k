@@ -214,7 +214,7 @@ of Java.  In fact, the latter can be implemented in terms of
   rule <k> var X:Id[N:Int]; => . ...</k>
        <env> Env:Map => Env[L:Int/X] </env>
        <store>... . => L |-> arrayRef(L +Int 1, N)
-                       L +Int 1 .. L +Int N |-> undefined
+                       Map(L +Int 1 .. L +Int N |-> undefined)
        ...</store>
        <nextLoc> L => L +Int 1 +Int N </nextLoc>
 

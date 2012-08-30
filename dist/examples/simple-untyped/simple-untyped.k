@@ -293,7 +293,7 @@ array declarations. */
   rule <k> var X[N:Int]; => . ...</k>
        <env> Env:Map => Env[L/X:Id] </env>
        <store>... . => L |-> arrayRef(L +Int 1, N)
-                       (L +Int 1) .. (L +Int N) |-> undefined
+                       Map((L +Int 1) .. (L +Int N) |-> undefined)
        ...</store>
        <nextLoc> L:Int => (L +Int 1) +Int N </nextLoc>
 
