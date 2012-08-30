@@ -240,8 +240,8 @@ public class Definition implements Cloneable {
 		List<Production> constants = new ArrayList<Production>();
 		Set<Sort> sorts = new HashSet<Sort>(); // list of inserted sorts that need to avoid the priority filter
 		Set<Sort> startSorts = new HashSet<Sort>(); // list of sorts that are start symbols
-		Set<Production> subsorts = new HashSet<Production>(); // list of sorts that are start symbols
-		Set<Sort> listSorts = new HashSet<Sort>(); // list of sorts declared as being list
+		Set<Subsort> subsorts = new HashSet<Subsort>(); // list of sorts that are start symbols
+		Set<Production> listProds = new HashSet<Production>(); // list of sorts declared as being list
 		Set<Sort> userSorts = new HashSet<Sort>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
 
 		for (ModuleItem mi : modules) {
@@ -262,7 +262,7 @@ public class Definition implements Cloneable {
 									// if a production has this attribute, don't add it to the list
 								} else if (prd.isSubsort()) {
 									outsides.add(prd);
-									subsorts.add(prd);
+									subsorts.add(new Subsort(prd.getProdSort(), (Sort) prd.getItems().get(0)));
 									if (prd.getProdSort().equals(new Sort("Start")))
 										startSorts.add((Sort) prd.getItems().get(0));
 									// add the small sort to the user sorts to add it to the variable declarations
@@ -271,9 +271,10 @@ public class Definition implements Cloneable {
 									constants.add(prd);
 								} else if (prd.getItems().get(0).getType() == ItemType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ItemType.TERMINAL) {
 									outsides.add(prd);
-								} else if (prd.getItems().get(0).getType() == ItemType.USERLIST) {
+								} else if (prd.isListDecl()) {
 									outsides.add(prd);
-									listSorts.add(prd.getProdSort());
+									listProds.add(prd);
+									subsorts.add(new Subsort(prd.getProdSort(), ((UserList) prd.getItems().get(0)).getSort()));
 								} else {
 									p.getProductions().add(prd);
 								}
@@ -332,6 +333,16 @@ public class Definition implements Cloneable {
 			}
 		}
 
+		Set<Subsort> sbs = getSubsorts();
+		for (Production p1 : listProds)
+			for (Production p2 : listProds)
+				if (p1 != p2) {
+					Sort srt1 = ((UserList) p1.getItems().get(0)).getSort();
+					Sort srt2 = ((UserList) p2.getItems().get(0)).getSort();
+					if (sbs.contains(new Subsort(srt1, srt2)))
+						subsorts.add(new Subsort(p1.getProdSort(), p2.getProdSort()));
+				}
+
 		sdf += "%% subsorts 1\n";
 		sdf += "context-free priorities\n{\n";
 		// 1
@@ -344,9 +355,9 @@ public class Definition implements Cloneable {
 			}
 		}
 		sdf += "} > {\n";
-		for (Production p : subsorts) {
-			Sort s1 = (Sort) p.getItems().get(0);
-			Sort s2 = p.getProdSort();
+		for (Subsort subs : subsorts) {
+			Sort s1 = (Sort) subs.getSmallSort();
+			Sort s2 = subs.getBigSort();
 			if (!s1.isBaseSort() && !s2.isBaseSort()) {
 				sdf += "	" + StringUtil.escapeSortName(s1.getSortName()) + " -> " + StringUtil.escapeSortName(s2.getSortName());
 				// sdf += " {cons(\"" + StringUtil.escapeSortName(s2.getSortName()) + "12" + StringUtil.escapeSortName(s1.getSortName()) + "\")}";
@@ -364,8 +375,7 @@ public class Definition implements Cloneable {
 		sdf += "}\n\n";
 
 		// TODO: add type warnings option in command line
-		if (!GlobalSettings.typeWarnings) {
-			Set<Subsort> sbs = getSubsorts();
+		if (GlobalSettings.typeWarnings) {
 			// 2
 			sdf += "%% subsorts 2\n";
 			// print Sort -> K > K -> Sort
@@ -414,7 +424,10 @@ public class Definition implements Cloneable {
 		for (Production p : outsides) {
 			if (p.isListDecl()) {
 				UserList si = (UserList) p.getItems().get(0);
-				sdf += "	{" + StringUtil.escapeSortName(si.getSort().getSortName()) + " \"" + si.getTerminal() + "\"}* -> " + StringUtil.escapeSortName(p.getProdSort().getSortName()) + " {cons(\"" + p.getAttributes().get("cons") + "\")}\n";
+				sdf += "	" + StringUtil.escapeSortName(si.getSort().getSortName()) + " \"" + si.getTerminal() + "\" " + StringUtil.escapeSortName(p.getProdSort().getSortName()) + " -> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+				sdf += " {cons(\"" + p.getAttributes().get("cons") + "\")}\n";
+				sdf += "	\"." + p.getProdSort().getSortName() + "\" -> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+				sdf += " {cons(\"" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1Empty\")}\n";
 			} else if (p.getAttributes().containsKey("bracket")) {
 				// don't add bracket attributes added by the user
 			} else {
@@ -484,7 +497,7 @@ public class Definition implements Cloneable {
 		sdf += "\n\n%% sort predicates\n";
 		// print is<Sort> predicates (actually KLabel)
 		for (Sort s : userSorts) {
-				sdf += "	\"is" + s.getSortName() + "\"      -> DzKLabel\n";
+			sdf += "	\"is" + s.getSortName() + "\"      -> DzKLabel\n";
 		}
 
 		sdf += "\n\n";
@@ -872,10 +885,13 @@ public class Definition implements Cloneable {
 						if (!syn.getSort().isBaseSort())
 							sbs.add(new Subsort(new Sort("K"), syn.getSort(), syn.getSort().getFilename(), syn.getSort().getLocation()));
 						for (Production p : syn.getProductions()) {
-							if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.SORT) {
+							if (p.isSubsort()) {
 								// this is a subsort, add it to the list
 								Sort s2 = (Sort) p.getItems().get(0);
 								sbs.add(new Subsort(syn.getSort(), s2, s2.getFilename(), s2.getLocation()));
+							} else if (p.isListDecl()) {
+								UserList ul = (UserList) p.getItems().get(0);
+								sbs.add(new Subsort(ul.getSort(), p.getProdSort(), ul.getFilename(), ul.getLocation()));
 							}
 						}
 					}

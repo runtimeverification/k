@@ -101,7 +101,7 @@ public class DefinitionLoader {
 		oldSdf = "";
 		if (new File(dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
 			oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
-		FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def2.getSDFForDefinition());
+		FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def.getSDFForDefinition());
 		newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 		if (verbose)

@@ -47,6 +47,7 @@ module SMTLIB-CONVERSION
   //@ Collecting constants declarations
   
   syntax Set ::= "collectConstants" "(" Bool ")"
+               | "collectConstants" "(" Int ")"
 
   // ConstSmtlib: booleans
   rule collectConstants(true) => .Set [anywhere]
