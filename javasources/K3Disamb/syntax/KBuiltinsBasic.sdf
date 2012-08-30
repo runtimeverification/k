@@ -37,20 +37,22 @@ lexical syntax
 
 	%% KLabel definition + restrictions lower
 	"'" KLabelChar+			-> DzKLabel
-	~[\`\(\)\ \t\n\r]		-> KLabelChar
+	~[\`\[\]\{\}\(\)\ \t\n\r\,]		-> KLabelChar
 	"``"					-> KLabelChar
 	"`("					-> KLabelChar
 	"`)"					-> KLabelChar
-	"`"						-> BackQuote
-	BackQuote				-> KLabelChar
+	"`,"					-> KLabelChar
+	"`["					-> KLabelChar
+	"`]"					-> KLabelChar
+	"`{"					-> KLabelChar
+	"`}"					-> KLabelChar
 
 lexical restrictions
 	DzDzID  -/- [a-zA-Z0-9]
 	DzDzINT -/- [0-9]
 
 	%% BackQuote in KLabel cannot be folowed by ( ) `
-	BackQuote -/- [\(\)\`]
-	DzKLabel -/-   ~[\`\(\)\ \t\n\r]
+	DzKLabel -/-   ~[\`\[\]\{\}\(\)\ \t\n\r\,]
 
 context-free restrictions
 	"-" -/- [0-9]

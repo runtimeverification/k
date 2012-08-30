@@ -22,7 +22,6 @@ import klint.UnusedSyntax;
 
 import org.apache.commons.cli.CommandLine;
 
-import ro.uaic.info.fmse.compile.FlattenModules;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
@@ -116,7 +115,7 @@ public class KompileFrontEnd {
 			else
 				def = restArgs[0];
 		}
-		
+
 		File mainFile = new File(def);
 		GlobalSettings.mainFile = mainFile;
 		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
@@ -404,7 +403,7 @@ public class KompileFrontEnd {
 			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
 			compile(javaDef, step);
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -413,8 +412,6 @@ public class KompileFrontEnd {
 	public static String maudify(File mainFile, String mainModule) {
 		try {
 			// compile a definition here
-			Stopwatch sw = new Stopwatch();
-
 			// for now just use this file as main argument
 			File f = mainFile.getCanonicalFile();
 
@@ -422,6 +419,8 @@ public class KompileFrontEnd {
 			dotk.mkdirs();
 
 			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk, GlobalSettings.verbose);
+
+			Stopwatch sw = new Stopwatch();
 
 			String maudified = javaDef.toMaude();
 
@@ -588,7 +587,6 @@ public class KompileFrontEnd {
 		return null;
 	}
 
-	
 	public static void compile(File mainFile, String mainModule, String step) {
 		try {
 			// TODO: trateaza erorile de compilare
@@ -602,39 +600,37 @@ public class KompileFrontEnd {
 
 			File dotk = new File(f.getParent() + "/.k");
 			dotk.mkdirs();
-			
+
 			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk, GlobalSettings.verbose);
-			
+
 			compile(javaDef, step);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-			
 
 	public static void compile(ro.uaic.info.fmse.k.Definition javaDef, String step) {
-		try{
-			
+		try {
+
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
-			javaDef = (ro.uaic.info.fmse.k.Definition)javaDef.accept(amit);
-			
-//			FlattenModules fm = new FlattenModules();
-//			javaDef.accept(fm);
-//			javaDef = fm.getResult();
-			
-			
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(amit);
+
+			// FlattenModules fm = new FlattenModules();
+			// javaDef.accept(fm);
+			// javaDef = fm.getResult();
+
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
-	
+
 			File dotk = new File(f.getParent() + "/.k");
 			dotk.mkdirs();
-					
+
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";
 
 			// load libraries if any
 			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
 			load += maudeLib;
-			
+
 			String transition = "\"transition=()\"";
 			String superheat = "\"superheat=()\"";
 			String supercool = "\"supercool=()\"";
@@ -646,9 +642,8 @@ public class KompileFrontEnd {
 			if (!GlobalSettings.supercool.equals(""))
 				supercool = "\"" + metadataParse(GlobalSettings.supercool) + "\"";
 
-			String compile = load + javaDef.toMaude() + " load \"" 
-					+ KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
-					+ " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
+			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats "
+					+ superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 
@@ -662,9 +657,9 @@ public class KompileFrontEnd {
 			String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
 			FileUtil.saveInFile(defFile + "-compiled.maude", load + compiled);
 
-//			if (GlobalSettings.verbose) {
-//				sw.printIntermediate("RunMaude        = ");
-//			}
+			// if (GlobalSettings.verbose) {
+			// sw.printIntermediate("RunMaude        = ");
+			// }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
