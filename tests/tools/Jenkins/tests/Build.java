@@ -10,7 +10,7 @@ public class Build {
 	@Test
 	public void build() throws InterruptedException, URISyntaxException {
 	// build K -> verify if the k3.jar file was created
-		String[] commands = new String[] { "ant", "clean", ";" , "ant" }; // , "all", "java", "jar" };
+		String[] commands = new String[] { "ant" };
 		System.out.print("\nBuild ...");
 		Executor build = new Executor(commands, StaticK.kbasedir, null);
 		build.start();
