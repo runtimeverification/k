@@ -38,6 +38,7 @@ public class Checkout {
 		// delete maude binaries
 		deleteFolder(new File(StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin" + StaticK.fileSep + "maude" + StaticK.fileSep + "binaries"));
 		
+		System.out.println(executor.getOutput() + "\n" + executor.getError());
 		System.out.println("\tDone.");
 	}
 	
