@@ -90,19 +90,19 @@ context-free syntax
 	VARID ":" "List"		-> List {cons("List12Var")}
 	VARID					-> List {cons("List1Var")}
 	VARID ":" "ListItem"	-> ListItem {cons("ListItem12Var")}
-	VARID					-> List {cons("ListItem1Var")}
+	VARID					-> ListItem {cons("ListItem1Var")}
 	VARID ":" "Set"			-> Set {cons("Set12Var")}
 	VARID					-> Set {cons("Set1Var")}
 	VARID ":" "SetItem"		-> SetItem {cons("SetItem12Var")}
-	VARID					-> Set {cons("SetItem1Var")}
+	VARID					-> SetItem {cons("SetItem1Var")}
 	VARID ":" "Bag"			-> Bag {cons("Bag12Var")}
 	VARID					-> Bag {cons("Bag1Var")}
 	VARID ":" "BagItem"		-> BagItem {cons("BagItem12Var")}
-	VARID					-> Bag {cons("BagItem1Var")}
+	VARID					-> BagItem {cons("BagItem1Var")}
 	VARID ":" "Map"			-> Map {cons("Map12Var")}
 	VARID					-> Map {cons("Map1Var")}
 	VARID ":" "MapItem"		-> MapItem {cons("MapItem12Var")}
-	VARID					-> Map {cons("MapItem1Var")}
+	VARID					-> MapItem {cons("MapItem1Var")}
 	VARID ":" "K"			-> K {cons("K12Var")}
 	VARID					-> K {cons("K1Var")}
 	VARID ":" "List{K}"		-> ListDlKDr {cons("ListDlKDr12Var")}
