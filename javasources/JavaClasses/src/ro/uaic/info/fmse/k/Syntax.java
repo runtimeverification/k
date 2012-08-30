@@ -98,9 +98,12 @@ public class Syntax extends ModuleItem {
 						contents += "subsort " + p.items.get(0) + " < " + sort + " .\n";
 					}
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof Terminal) && MaudeHelper.constantSorts.contains(sort.getName())) {
-					if (sort.toString().equals("KLabel") || sort.toString().equals("CellLabel"))
-						contents += "op " + p.toString().replaceAll("\"", "") + ": -> " + sort + " .\n";
 					
+					String metadata = p.getAttributes().toMaude();
+					if (sort.toString().equals("KLabel") || sort.toString().equals("CellLabel"))
+						if (!metadata.trim().equals(""))
+						contents += "op " + p.toString().replaceAll("\"", "") + ": -> " + sort + " [metadata \"" + metadata + "\"] .\n";
+						else contents += "op " + p.toString().replaceAll("\"", "") + ": -> " + sort + " .\n";
 					// ignore K constants declarations
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof UserList)) {
 					// user declared lists case

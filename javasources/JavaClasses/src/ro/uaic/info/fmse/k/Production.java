@@ -70,7 +70,7 @@ public class Production extends ASTNode {
 		for (ProductionItem i : items)
 			content += i + " ";
 
-		return content + attributes.toString();
+		return content;// + attributes.toString();
 	}
 
 	public boolean equals(Production other) {
