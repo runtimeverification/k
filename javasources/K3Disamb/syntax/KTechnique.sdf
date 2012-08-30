@@ -73,8 +73,8 @@ context-free priorities
 	"."				-> Map {cons("Map1Empty")}
 	MapItem			-> Map %%{cons("Map3MapItem")}  %% Does SDF supports subsorting closure? I believe it generates ambiguities
 	"MapItem" "(" K "," K ")"	-> MapItem {cons("MapItem1KKItem")}
-	ListDlKDr "|->" ListDlKDr	-> MapItem {cons("MapItem1LKLKItem")}
-	%%K "|->" K					-> MapItem {cons("MapItem1MapsTo")}
+	%%ListDlKDr "|->" ListDlKDr	-> MapItem {cons("MapItem1LKLKItem")}
+	K "|->" K					-> MapItem {cons("MapItem1LKLKItem")}
 	Map   Map				-> Map {left, cons("Map1List")}
 	%%Map "[" K "/" K "]"		-> Map {cons("Map1MapReplaceK")}
 } > {
