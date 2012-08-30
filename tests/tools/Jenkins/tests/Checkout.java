@@ -27,7 +27,7 @@ public class Checkout {
 		// first, checkout K -> verify the existence of k-framework dir.
 		System.out.print("\nCheckout K ...");
 		String[] commands = new String[] { "svn", "checkout",
-				"https://k-framework.googlecode.com/svn/trunk", ";" , "ant" , "clean", StaticK.kbase };
+				"https://k-framework.googlecode.com/svn/trunk", StaticK.kbase };
 		Executor executor = new Executor(commands, ".", null);
 		executor.start();
 		executor.join(StaticK.ulimit * 1000);
