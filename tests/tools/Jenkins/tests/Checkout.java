@@ -27,11 +27,16 @@ public class Checkout {
 		// first, checkout K -> verify the existence of k-framework dir.
 		
 		System.out.print("\nCheckout K ...");
-		String[] commands = new String[] { "svn", "checkout",
-				"https://k-framework.googlecode.com/svn/trunk", StaticK.kbase };
-		Executor executor = new Executor(commands, ".", null, StaticK.biggerlimit);
-		executor.start();
-		executor.join(StaticK.ulimit * 1000);
+		String[] removeCommands = new String[] { "rm", "-rf", StaticK.kbase };
+		Executor rmexecutor = new Executor(removeCommands, ".", null, StaticK.biggerlimit);
+		rmexecutor.start();
+		rmexecutor.join(StaticK.ulimit * 1000);
+		Thread.yield();
+	
+		String[] copyCommands = new String[] { "cp", "-r", "/var/lib/jenkins/workspace/k-framework" , StaticK.kbase };
+		Executor cpexecutor = new Executor(copyCommands, ".", null, StaticK.biggerlimit);
+		cpexecutor.start();
+		cpexecutor.join(StaticK.ulimit * 1000);
 		Thread.yield();
 		assertTrue(new File(StaticK.kbase).exists());
 		assertTrue(new File(StaticK.kbasedir).exists());
@@ -39,8 +44,6 @@ public class Checkout {
 		// delete maude binaries
 		deleteFolder(new File(StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin" + StaticK.fileSep + "maude" + StaticK.fileSep + "binaries"));
 		
-		System.out.println((executor.getOutput() + "\n" + executor.getError()).trim());
-		System.out.println("Checked out with code: "+ executor.getExitValue());
 		System.out.println("\tDone.");
 	}
 	
