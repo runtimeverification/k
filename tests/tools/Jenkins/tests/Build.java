@@ -29,8 +29,8 @@ public class Build {
 		if (!new File(StaticK.JKrun).exists())
 			System.exit(1);
 			
-		System.out.println("Output build: " + build.getOutput());
+		System.out.println("\n\n" + build.getOutput());
 		
-		System.out.println("\tDone.");
+		System.out.println("\n\nDone.");
 	}
 }
