@@ -112,10 +112,15 @@ strategies
 		where <one(?K1Seq(a, b))> x
 
 	correctRewrite:
-		amb(x) -> rez
-		where <one(?<string-ends-with(|"Rewrite")>#(_))> x
-		where rez := <filter(string-ends-with(|"Rewrite"))> x
-		where a := <if <lt>(<length> rez, 2) then !<last> rez else !amb(rez) end>
+		amb(x) -> rez2
+		where <one(isRewrite)> x
+		where rez := <filter(isRewrite)> x
+		where rez2 := <if <lt>(<length> rez, 2) then !<last> rez else !amb(rez) end>
+		
+	isRewrite:
+		a#(_) -> <id>
+		where <string-ends-with(|"Rewrite")> a
+			
 
 strategies  // restructure the ambs - thanks Lennart Kats
 	flatten-amb-top =
