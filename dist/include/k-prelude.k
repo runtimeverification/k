@@ -27,6 +27,14 @@ module K-MAP-EXTRAS
 				 | Map "[" List{K} "/" List{K} "]" [prec(0)]
 				 | Map "[" "undef" "/" List{K} "]"
                        | "Map" "(" List{K} "|->" List{K} ")" 
+
+  rule Map((K1:K => .List{K}),,_ |-> (K2:K => .List{K}),,_) (. => K1 |-> K2)
+  rule Map((K1:K => .List{K}),,_ |-> K2:K) (. => K1 |-> K2)
+  rule Map(.List{K} |-> _) => .
+
+  rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .List{K}),,_ 
+                        /  (K1:K,,K1':K => .List{K}),,_]
+
   rule (M:Map K1:K |-> K2:K)[K2':K / K1] => M K1 |-> K2' 
     [structural, anywhere]
   rule M:Map[K2:K / K1:K] => M K1 |-> K2 
