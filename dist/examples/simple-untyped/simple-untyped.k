@@ -803,7 +803,7 @@ the side condition of the first rule).\\
 counter for the lock (the locks are re-entrant).  These two cases are captured
 by the two rules below: */
 
-   rule <k> acquire V; => . ...</k>
+   rule <k> acquire V:Val; => . ...</k>
         <holds>... . => V |-> 0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
         when (notBool(V in Busy:Set))

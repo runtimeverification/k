@@ -35,6 +35,7 @@ import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.sharing.AutomaticModuleImportsTransformer;
+import ro.uaic.info.fmse.sharing.DittoFilter;
 import ro.uaic.info.fmse.unparser.UnparserFilter;
 
 import com.thoughtworks.xstream.XStream;
@@ -616,6 +617,9 @@ public class KompileFrontEnd {
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(amit);
 
+			DittoFilter df = new DittoFilter();
+			javaDef.accept(df);
+			
 			FlattenModules fm = new FlattenModules();
 			javaDef.accept(fm);
 			javaDef = fm.getResult();
