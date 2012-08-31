@@ -146,5 +146,5 @@ lexical restrictions
 	"BagItem"	-/- [a-zA-Z0-9]
 	"K"			-/- [a-zA-Z0-9]
 	"List{K}"	-/- [a-zA-Z0-9]
-	"."			-/- [a-zA-Z0-9\.]
+	"."			-/- [a-zA-Z\.]
 

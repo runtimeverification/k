@@ -20,11 +20,8 @@ lexical syntax
 	[\-]? [0-9]+			-> DzDzINT
 
 	FloatDigits ExponentPart? [fFdD]? -> DzDzFLOAT
-	[0-9]* "." [0-9]*	-> FloatDigits
-	[0-9]+				-> FloatDigits
+	[0-9]+ "." [0-9]+	-> FloatDigits
 	[eE] DzDzINT		-> ExponentPart
-	[0-9]+				-> FloatDigits {reject}
-	"."					-> FloatDigits {reject}
 
 	%% String declaration
 	"\"" StringChar* "\"" -> DzDzSTRING

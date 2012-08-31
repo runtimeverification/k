@@ -475,12 +475,14 @@ public class Definition implements Cloneable {
 		sdf += "	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n";
 		sdf += "	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n";
 		sdf += "	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n";
+		sdf += "	DzDzFloat	-> DzFloat	{cons(\"DzFloat1Const\")}\n";
 
 		sdf += "\n";
 		sdf += "	DzDzINT		-> DzDzInt\n";
 		// sdf += "	DzDzID		-> DzDzId\n";
 		sdf += "	DzDzBOOL	-> DzDzBool\n";
 		sdf += "	DzDzSTRING	-> DzDzString\n";
+		sdf += "	DzDzFLOAT	-> DzDzFloat\n";
 		sdf += "	\":\" -> DouaPuncteDz {cons(\"DouaPuncte\")}\n";
 
 		sdf += "\n";
@@ -698,12 +700,14 @@ public class Definition implements Cloneable {
 		sdf += "	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n";
 		sdf += "	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n";
 		sdf += "	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n";
+		sdf += "	DzDzFloat	-> DzFloat	{cons(\"DzFloat1Const\")}\n";
 
 		sdf += "\n";
 		sdf += "	DzDzINT		-> DzDzInt\n";
 		sdf += "	DzDzID		-> DzDzId\n";
 		sdf += "	DzDzBOOL	-> DzDzBool\n";
 		sdf += "	DzDzSTRING	-> DzDzString\n";
+		sdf += "	DzDzFLOAT	-> DzDzFloat\n";
 
 		sdf += "\n";
 

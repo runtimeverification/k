@@ -133,7 +133,7 @@ interface K-WRAPPERS
 
 	syntax K ::= "KLabel2K" KLabel
 			   | "Celllabel2K" CellLabel
-			   | "List{K}2K" ListOfK
+			   | "List{K}2K" List{K}
 			   | "Set2K" Set
 			   | "Bag2K" Bag
 			   | "List2K" List
