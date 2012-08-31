@@ -1,1 +1,1 @@
-rule A:K [x("a\\a\"z")]
+rule A => B

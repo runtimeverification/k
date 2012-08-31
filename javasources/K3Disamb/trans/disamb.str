@@ -80,11 +80,8 @@ strategies
 		where rez := <mergeamb> a*
 		where x := <if <lt>(<length> rez, 2) then !<last> rez else !amb(rez){anno} end>
 
-
-
 	mydisambiguate2 = all(mydisambiguate(|"full"))
-	
-	
+
 	removeDouaPuncte:
 		a#(b) -> a#(b')
 		where <string-ends-with(|"Syn")> a
@@ -113,33 +110,12 @@ strategies
 	correctKseq:
 		amb(x) -> K1Seq(a, b)
 		where <one(?K1Seq(a, b))> x
-		
-	
-	correctRewrite:	// K1Rewrite must bind as low as possible, this why choose it to be as high as possible in the AST
-		amb(x) -> K1Rewrite(a, b)
-		where <one(?K1Rewrite(a, b))> x
-		where not(<one(?ListDlKDr1Rewrite(_, _))> x)
-
-	correctRewrite:	// K1Rewrite must bind as low as possible, this why choose it to be as high as possible in the AST
-		amb(x) -> ListDlKDr1Rewrite(a, b)
-		where <one(?ListDlKDr1Rewrite(a, b))> x
 
 	correctRewrite:
-		amb(x) -> Map1Rewrite(a, b)
-		where <one(?Map1Rewrite(a, b))> x
-
-	correctRewrite:
-		amb(x) -> List1Rewrite(a, b)
-		where <one(?List1Rewrite(a, b))> x
-
-	correctRewrite:
-		amb(x) -> Set1Rewrite(a, b)
-		where <one(?Set1Rewrite(a, b))> x
-
-	correctRewrite:
-		amb(x) -> Bag1Rewrite(a, b)
-		where <one(?Bag1Rewrite(a, b))> x
-
+		amb(x) -> rez
+		where <one(?<string-ends-with(|"Rewrite")>#(_))> x
+		where rez := <filter(string-ends-with(|"Rewrite"))> x
+		where a := <if <lt>(<length> rez, 2) then !<last> rez else !amb(rez) end>
 
 strategies  // restructure the ambs - thanks Lennart Kats
 	flatten-amb-top =

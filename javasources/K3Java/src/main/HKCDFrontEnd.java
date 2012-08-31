@@ -128,8 +128,7 @@ public class HKCDFrontEnd {
 			ro.uaic.info.fmse.k.Definition langDef =
 				k.utils.DefinitionLoader.loadDefinition(
 					defFile,
-					mainModule,
-					GlobalSettings.verbose);
+					mainModule);
 
 			ASTNode pgmAst = 
 				k.utils.ProgramLoader.loadPgmAst(

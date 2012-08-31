@@ -99,7 +99,7 @@ rules
 		]
 
 	to-xml1:
-		CondSentence(a#(b), c) -> $[<rule sort="[sort]" [label] loc="[loc]">
+		CondSentence(Rule(x, y), c) -> $[<rule [label] loc="[loc]">
 					<body>
 						[children]
 					</body>
@@ -108,16 +108,13 @@ rules
 					</cond>
 		</rule>
 		]
-		where <string-ends-with(|"Rule")> a
 		where mydebug(!"Rule: ")
-		where !b => [x, y]
 		where label := <to-xml> x
 		where children := <to-xml> y
-		where sort := <getSort> a
 		where loc := <getLocAsString>
 
 	to-xml1:
-		AttributedCondSentence(a#(b), c, d) -> $[<rule sort="[sort]" [label] loc="[loc]">
+		AttributedCondSentence(Rule(x, y), c, d) -> $[<rule [label] loc="[loc]">
 					<body>
 						[children]
 					</body>
@@ -129,16 +126,13 @@ rules
 					</attributes>
 		</rule>
 		]
-		where <string-ends-with(|"Rule")> a
 		where mydebug(!"Rule: ")
-		where !b => [x, y]
 		where label := <to-xml> x
 		where children := <to-xml> y
-		where sort := <getSort> a
 		where loc := <getLocAsString>
 
 	to-xml1:
-		AttributedSentence(a#(b), d) -> $[<rule sort="[sort]" [label] loc="[loc]">
+		AttributedSentence(Rule(x, y), d) -> $[<rule [label] loc="[loc]">
 					<body>
 						[children]
 					</body>
@@ -147,12 +141,9 @@ rules
 					</attributes>
 		</rule>
 		]
-		where <string-ends-with(|"Rule")> a
 		where mydebug(!"Rule: ")
-		where !b => [x, y]
 		where label := <to-xml> x
 		where children := <to-xml> y
-		where sort := <getSort> a
 		where loc := <getLocAsString>
 
 	to-xml1:
@@ -235,18 +226,15 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:
-		a#(b) -> $[<rule sort="[sort]" [label] loc="[loc]">
+		Rule(x, y) -> $[<rule [label] loc="[loc]">
 					<body>
 						[children]
 					</body>
 		</rule>
 		]
-		where <string-ends-with(|"Rule")> a
 		where mydebug(!"Rule: ")
-		where !b => [x, y]
 		where label := <to-xml> x
 		where children := <to-xml> y
-		where sort := <getSort> a
 		where loc := <getLocAsString>
 
 	to-xml2:	// sort wrappers

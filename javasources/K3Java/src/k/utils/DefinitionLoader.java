@@ -33,7 +33,7 @@ import ro.uaic.info.fmse.pp.Preprocessor;
 import com.thoughtworks.xstream.XStream;
 
 public class DefinitionLoader {
-	public static ro.uaic.info.fmse.k.Definition loadDefinition(File mainFile, String lang, Boolean verbose) throws IOException, Exception {
+	public static ro.uaic.info.fmse.k.Definition loadDefinition(File mainFile, String lang) throws IOException, Exception {
 		ro.uaic.info.fmse.k.Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
@@ -48,13 +48,13 @@ public class DefinitionLoader {
 		} else {
 			File dotk = new File(canoFile.getParent() + "/.k");
 			dotk.mkdirs();
-			javaDef = parseDefinition(lang, canoFile, dotk, verbose);
+			javaDef = parseDefinition(lang, canoFile, dotk);
 		}
 		return javaDef;
 	}
 
 
-	public static ro.uaic.info.fmse.k.Definition parseDefinition(String mainModule, File canonicalFile, File dotk, Boolean verbose) throws IOException, Exception {
+	public static ro.uaic.info.fmse.k.Definition parseDefinition(String mainModule, File canonicalFile, File dotk) throws IOException, Exception {
 		Stopwatch sw = new Stopwatch();
 		// ------------------------------------- basic parsing
 		Definition def = new Definition();
@@ -63,7 +63,7 @@ public class DefinitionLoader {
 		def.setMainModule(mainModule);
 		def.addConsToProductions();
 
-		if (verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("Basic Parsing   = ");
 
 		// ------------------------------------- generate files
@@ -80,13 +80,13 @@ public class DefinitionLoader {
 
 		String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
-		if (verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("File Gen Pgm    = ");
 
 		if (!oldSdf.equals(newSdf))
 			Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/pgm"), "Program");
 
-		if (verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generate TBLPgm = ");
 
 		// generate a copy for the definition and modify it to generate the intermediate data
@@ -104,13 +104,13 @@ public class DefinitionLoader {
 		FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def.getSDFForDefinition());
 		newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
 
-		if (verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("File Gen Def    = ");
 
 		if (!oldSdf.equals(newSdf))
 			Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3Disamb");
 
-		if (verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generate TBLDef = ");
 
 		// ------------------------------------- import files in Stratego
@@ -118,14 +118,14 @@ public class DefinitionLoader {
 		k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
 		k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
 
-		if (verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("Importing Files = ");
 
 		// ------------------------------------- parse configs
 		FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
 		k3parser.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
 
-		if (verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("Parsing Configs = ");
 
 		// ----------------------------------- parse rules
@@ -137,7 +137,7 @@ public class DefinitionLoader {
 
 		XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
 
-		if (verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("Parsing Rules   = ");
 
 		ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());

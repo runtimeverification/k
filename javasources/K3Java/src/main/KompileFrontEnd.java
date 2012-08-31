@@ -165,7 +165,7 @@ public class KompileFrontEnd {
 			File canonicalFile = mainFile.getCanonicalFile();
 			File dotk = new File(canonicalFile.getParent() + "/.k");
 			dotk.mkdirs();
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk, GlobalSettings.verbose);
+			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
 
 			KlintRule lintRule = new UnusedName(javaDef);
 			lintRule.run();
@@ -243,7 +243,7 @@ public class KompileFrontEnd {
 			GlobalSettings.literate = true;
 			// compile a definition here
 
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, mainModule, GlobalSettings.verbose);
+			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, mainModule);
 
 			Stopwatch sw = new Stopwatch();
 			LatexFilter lf = new LatexFilter();
@@ -282,7 +282,7 @@ public class KompileFrontEnd {
 			String fileSep = System.getProperty("file.separator");
 			String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
 
-			javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, lang, GlobalSettings.verbose);
+			javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, lang);
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();
 
@@ -317,7 +317,7 @@ public class KompileFrontEnd {
 		try {
 			GlobalSettings.literate = true;
 
-			javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, lang, GlobalSettings.verbose);
+			javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, lang);
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();
 
@@ -357,7 +357,7 @@ public class KompileFrontEnd {
 
 			// compile a definition here
 
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk, GlobalSettings.verbose);
+			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
 
 			Stopwatch sw = new Stopwatch();
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
@@ -419,7 +419,7 @@ public class KompileFrontEnd {
 			File dotk = new File(f.getParent() + "/.k");
 			dotk.mkdirs();
 
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk, GlobalSettings.verbose);
+			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
 
 			Stopwatch sw = new Stopwatch();
 
@@ -602,7 +602,7 @@ public class KompileFrontEnd {
 			File dotk = new File(f.getParent() + "/.k");
 			dotk.mkdirs();
 
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk, GlobalSettings.verbose);
+			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
 
 			compile(javaDef, step);
 		} catch (Exception e) {
