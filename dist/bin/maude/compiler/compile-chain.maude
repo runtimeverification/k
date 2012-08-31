@@ -68,7 +68,7 @@ mod COMPILE-ONESHOT is
 
   op allSteps : -> QidList .
   eq allSteps = 
-'MANY-MODULES 
+--- 'MANY-MODULES 
 'ADD-EVAL 
 'RESOLVE-DITTO 
 'RESOLVE-BINDER    
@@ -198,7 +198,7 @@ fmod COMPILE-META is
 
   op allSteps : -> QidList .
   eq allSteps = 
-'MANY-MODULES 
+--- 'MANY-MODULES 
 'ADD-EVAL 
 'RESOLVE-DITTO 
 'RESOLVE-BINDER 

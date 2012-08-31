@@ -18,6 +18,10 @@ public class Bag extends Collection {
 		super(node);
 	}
 
+	public Bag() {
+		super();
+	}
+
 	@Override
 	public String toString() {
 		return super.toString();

@@ -10,6 +10,10 @@ import ro.uaic.info.fmse.visitors.Visitor;
 public class Constant extends Term {
 	String value;
 
+	public Constant() {
+		super("File System", "generated");
+	}
+	
 	public Constant(String location, String filename) {
 		super(location, filename);
 	}

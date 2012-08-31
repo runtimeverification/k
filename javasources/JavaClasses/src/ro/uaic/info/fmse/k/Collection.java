@@ -13,6 +13,11 @@ public abstract class Collection extends Term {
 
 	protected java.util.List<Term> contents;
 	
+	public Collection() {
+		super("File System", "generated");
+		contents = new ArrayList<Term>();
+	}
+
 	public Collection(Collection c) {
 		super(c);
 		this.contents = c.contents;

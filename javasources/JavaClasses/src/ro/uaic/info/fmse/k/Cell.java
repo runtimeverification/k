@@ -51,15 +51,20 @@ public class Cell extends Term {
 		this.contents = node.contents;
 	}
 
-        public boolean hasRightEllipsis() {
-	        return elipses != null &&
-		    (elipses.equals("right") || elipses.equals("both"));
-        }
+	public Cell() {
+		super("File System", "generated");
+		attributes = new HashMap<String, String>();
+	}
 
-        public boolean hasLeftEllipsis() {
-	        return elipses != null &&
-		    (elipses.equals("left") || elipses.equals("both"));
-        }
+	public boolean hasRightEllipsis() {
+		return elipses != null &&
+				(elipses.equals("right") || elipses.equals("both"));
+	}
+
+	public boolean hasLeftEllipsis() {
+		return elipses != null &&
+				(elipses.equals("left") || elipses.equals("both"));
+	}
 
 	@Override
 	public String toString() {
@@ -67,21 +72,21 @@ public class Cell extends Term {
 		for (Entry<String, String> entry : this.attributes.entrySet())
 			attributes += " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
 
-		String content = "<" + this.label + attributes + ">";
+				String content = "<" + this.label + attributes + ">";
 
-		if (elipses != null && !elipses.equals("none")) {
-			if (elipses.equals("left")) {
-				content += "... " + this.contents + " ";
-			} else if (elipses.equals("right")) {
-				content += " " + this.contents + " ...";
-			} else if (elipses.equals("both")) {
-				content += "... " + this.contents + " ...";
-			}
-				
-		} else {
-			content += " " + this.contents;
-		}
-		return content + "</" + this.label + "> ";
+				if (elipses != null && !elipses.equals("none")) {
+					if (elipses.equals("left")) {
+						content += "... " + this.contents + " ";
+					} else if (elipses.equals("right")) {
+						content += " " + this.contents + " ...";
+					} else if (elipses.equals("both")) {
+						content += "... " + this.contents + " ...";
+					}
+
+				} else {
+					content += " " + this.contents;
+				}
+				return content + "</" + this.label + "> ";
 	}
 
 	@Override
@@ -89,6 +94,7 @@ public class Cell extends Term {
 		String labell = "<_>_</_>";
 
 		String head = "", start = "", end = "";
+//		System.out.println(attributes.entrySet());
 		for (Entry<String, String> entry : attributes.entrySet())
 			if (!entry.getValue().equals("")) {
 				start += "__(";
@@ -98,8 +104,10 @@ public class Cell extends Term {
 		head = start + label + end;
 
 		// TODO: CHECK THIS AGAIN -> THE CONTENTS SHOULD NOT BE NULL
-		if (contents != null)
+		if (contents != null) {
+//			System.out.println(labell + "(" + head + ", " + contents.toMaude() + ", " + label + ")");
 			return labell + "(" + head + ", " + contents.toMaude() + ", " + label + ")";
+		}
 		return labell + "(" + head + ", " + null + ", " + label + ")";
 	}
 

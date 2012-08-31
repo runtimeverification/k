@@ -4,16 +4,20 @@ interface K-TECHNIQUE
 	// all in SDF directly
 endinterface
 
-interface K-LISTK-EXTRAS
+module K-LISTK-EXTRAS
   imports K-TECHNIQUE
   
   syntax Bool ::= K "inList{K}" List{K}
-//  rule K inList{K} (_,,K:K,,_) => true [structural]
-//owise  rule K inList{K} Ks => false [owise] .
-endinterface
+  syntax Bool ::= K "#inList{K}" List{K}
+  rule K inList{K} L:List{K} => K #inList{K} L ==K true 
+    [structural, anywhere]
+  rule K #inList{K} (_,,K:K,,_) => true 
+    [structural, anywhere]
+endmodule
 
-interface K-MAP-EXTRAS
+module K-MAP-EXTRAS
 	imports K-TECHNIQUE
+        imports K-SET-EXTRAS
 	//imports BOOL
 
 	syntax K ::= Map "(" K ")" [prec(0)]
@@ -23,35 +27,45 @@ interface K-MAP-EXTRAS
 				 | Map "[" List{K} "/" List{K} "]" [prec(0)]
 				 | Map "[" "undef" "/" List{K} "]"
                        | "Map" "(" List{K} "|->" List{K} ")" 
-/*
-  rule (Map:Map K1:K |-> K2:K)[K2':K / K1] => Map K1 |-> K2' [structural]
-  rule Map:Map[K2:K / K1:K] => Map K1 |-> K2 
-    when not(K1 in keys(Map))
+  rule (M:Map K1:K |-> K2:K)[K2':K / K1] => M K1 |-> K2' 
+    [structural, anywhere]
+  rule M:Map[K2:K / K1:K] => M K1 |-> K2 
+    when notBool(K1 in keys(M)) [structural, anywhere]
   
+/*
   rule Map:Map[Map':Map K1 |-> K2] => Map[K2/K1][Map'] [structural]
   rule Map:Map[.Map] => Map [structural]
  */
 	syntax List{K} ::= Map "(" List{K} ")" [prec(0)]
 /*
-  rule Map:K((K1:K,,K2:K,,Ks:List{K})) 
+  rule Map:Map((K1:K,,K2:K,,Ks:List{K})) 
     => Map(K1),,Map(K2),,Map(K2) [structural]
   rule Map:Map(.List{K}) => .List{K} [structural]
 */
 	syntax Set ::= "keys" Map  
-	syntax #Bool ::= "$hasMapping" "(" Map "," K ")" [latex(latex=(renameTo \\$hasMapping\\mybracket{_,_})), maudeop("$hasMapping")]
-endinterface
 
-interface K-SET-EXTRAS
+  rule keys . => .
+  rule (keys ((K:K |->_  => .) _)) (. => SetItem(K))
+
+	syntax #Bool ::= "$hasMapping" "(" Map "," K ")" [latex(latex=(renameTo \\$hasMapping\\mybracket{_,_})), maudeop("$hasMapping")]
+endmodule
+
+module K-SET-EXTRAS
 	imports K-TECHNIQUE
-	//imports IF-THEN-ELSE
 
 	syntax Set ::= "Set" List{K}
 				 | Set "-Set" Set
 
 	syntax Bool ::= K "in" Set
 			      | SetItem "in" Set	
+			      | K "#in" Set	
+   rule SetItem(K:K) in S:Set => K in S [structural, anywhere]
+   rule K:K in S:Set => K #in S ==K true
+     [structural, anywhere]
+   rule K #in SetItem(K) S:Set => true
+     [structural, anywhere]
 
-endinterface
+endmodule
 
 interface K-BAG-EXTRAS
 	imports K-TECHNIQUE

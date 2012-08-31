@@ -16,6 +16,13 @@ public class Variable extends Term {
 		this.name = element.getAttribute(Constants.NAME_name_ATTR);
 	}
 
+	public Variable(String name, String sort) {
+		super("File System", "generated");
+		this.sort = sort;
+		this.name = name;
+		// TODO Auto-generated constructor stub
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}

@@ -946,12 +946,13 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
 --- replace the line above with the one below to get unrestricted strictness
 ---  eq kWrap(T) = T .
 
-  ops heatedLabel heatLabel redexLabel coolLabel : -> Constant .
+  ops heatedLabel heatLabel redexLabel coolLabel inListKLabel : -> Constant .
   eq heatLabel = mkConstant('heat,KLabel) .
   eq heatedLabel = mkConstant('heated,KLabel) .
   eq redexLabel = mkConstant('redex,KLabel) .
   eq coolLabel = mkConstant('cool,KLabel) .
 
+  eq inListKLabel = mkConstant(''_inList`{K`}_, KLabel) .
 
   op getTopLabel : Term ~> Term .
   eq getTopLabel('_`(_`)[T,T']) = T . 

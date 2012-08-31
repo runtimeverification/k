@@ -39,6 +39,8 @@ public abstract class ASTNode implements IMaude, IXML, Modifiable, Visitable,
 		String location = this.location;
 		location = location.replaceAll(",", ":");
 		location = location.replaceFirst("\\(", "(" + this.filename + ":");
+		if (!location.startsWith("(")) location = "(" + location + ")";
+
 		return location;
 	}
 

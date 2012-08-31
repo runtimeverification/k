@@ -9,6 +9,10 @@ import ro.uaic.info.fmse.visitors.Visitor;
 
 public class Configuration extends Sentence {
 
+	public Configuration() {
+		super("File System", "generated");
+	}
+	
 	public Configuration(String location, String filename) {
 		super(location, filename);
 	}

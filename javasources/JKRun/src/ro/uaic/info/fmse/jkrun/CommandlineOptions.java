@@ -133,8 +133,9 @@ public class CommandlineOptions {
 		
 		// for debugger
 	    Option debug = OptionBuilder.hasArg(false).withLongOpt("debug").withDescription("Run an execution in debug mode").create();
-		/*Option rule_labels = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("rule-labels").withDescription("A list of labels associated to rules for breakpoint execution").create();
-		Option trace = new Option("trace", false, "Set trace on.");*/
+		//Option rule_labels = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("rule-labels").withDescription("A list of labels associated to rules for breakpoint execution").create();
+		Option trace = new Option("trace", false, "Set trace on.");
+		options.addOption(trace); getOptionList().add(trace);
 
 		options.addOption(debug); getOptionList().add(debug);
 		/*options.addOption(rule_labels); getOptionList().add(rule_labels);

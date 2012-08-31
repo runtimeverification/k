@@ -21,6 +21,7 @@ public abstract class Sentence extends ModuleItem {
 
 	public Sentence(String location, String filename) {
 		super(location, filename);
+		attributes = new Attributes();
 	}
 
 	public Sentence(Element element) {

@@ -144,7 +144,7 @@ mod STRICTCXT2EQS is
   eq superHeat(Q, T1, T2, Cnd, AS A, AS' superheats(A AS''), Str) =
      (ceq kWrap(Q, kApply(heatLabel, (kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList))), mkVariable('AnyHeat2,KList))))
         = kWrap(Q, kApply(heatLabel, (kApply(redexLabel,(kra(T1,mkVariable('RestHeat,K)),mkVariable('LHeat,KList),kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))))), mkVariable('AnyHeat2,KList)))) 
-       if  Cnd /\ '_inList`{K`}_[kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))), mkVariable('LHeat,KList)] = falseCt
+       if  Cnd /\ kApply(inListKLabel, (kApply(redexLabel,kra(T2,mkVariable('RestHeat,K))), kApply(mkListLabel('List`{K`}2K_),mkVariable('LHeat,KList)))) = kApply(labelWrapper('Bool)[falseCt], empty)
      [metadata(AS pair("superheat", Str))] .) .
   eq superHeat(Q, T1, T2, Cnd, AS, AS', Str) 
    = (ceq kWrap(Q, kApply(heatLabel, (kApply(redexLabel, kra(T1,mkVariable('RestHeat,K))), mkVariable('AnyHeat2,KList))))

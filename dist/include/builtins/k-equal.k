@@ -1,6 +1,8 @@
 require "bool.k"
 module K-EQUAL-HOOKS
+  imports #K-EQUAL-INTERFACE
   imports BOOL-HOOKS
+  
 
   syntax Bool ::= left:
   				  K "==K" K           [function, hook(#K-EQUAL:_==K_)]
