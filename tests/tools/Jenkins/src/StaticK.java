@@ -25,7 +25,7 @@ public class StaticK {
 	public static String k3Jar, JKrun;
 	public static ThreadPoolExecutor pool;
 	public static int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() > 2 ? Runtime.getRuntime().availableProcessors() / 2 : Runtime.getRuntime().availableProcessors();
-	public static int ulimit = 120;
+	public static int ulimit = 1000;
 	public static String kbasedir;
 	public static String configuration;
 	public static String reportsDir;
