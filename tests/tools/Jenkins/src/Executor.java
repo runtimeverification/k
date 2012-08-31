@@ -19,12 +19,14 @@ public class Executor extends Thread {
 	private int exitValue;
 	private String input;
 	private boolean timedout = false;
+	private int ulimit;
 	
-	public Executor(String[] commands, String dir, String input) {
+	public Executor(String[] commands, String dir, String input, int ulimit) {
 		super();
 		this.commands = commands;
 		this.dir = dir;
 		this.input = input;
+		this.ulimit = ulimit;
 	}
 
 	@Override
@@ -63,7 +65,7 @@ public class Executor extends Thread {
 
 		    		return p.waitFor();
 		        }};
-	        exitValue = timedCall(callable, StaticK.ulimit, TimeUnit.SECONDS);
+	        exitValue = timedCall(callable, ulimit, TimeUnit.SECONDS);
 		    output = callable.output;
 		    error = callable.error;
 		} catch (IOException e) {

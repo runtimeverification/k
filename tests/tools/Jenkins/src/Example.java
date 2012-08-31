@@ -44,7 +44,7 @@ public class Example extends Thread {
 			long millis = System.currentTimeMillis();
 			Executor compile = new Executor(new String[] { "java", "-ss8m",
 					"-Xms64m", "-Xmx1G", "-jar", k3jar, "-kompile", mainFile,
-					"-l", mainModule }, dir, null);
+					"-l", mainModule }, dir, null, StaticK.ulimit);
 			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 					.newFixedThreadPool(THREAD_POOL_SIZE);
 			tpe.execute(compile);
