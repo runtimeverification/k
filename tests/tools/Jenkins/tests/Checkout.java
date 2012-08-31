@@ -40,6 +40,7 @@ public class Checkout {
 		deleteFolder(new File(StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin" + StaticK.fileSep + "maude" + StaticK.fileSep + "binaries"));
 		
 		System.out.println((executor.getOutput() + "\n" + executor.getError()).trim());
+		System.out.println("Checked out with code: "+ executor.getExitValue());
 		System.out.println("\tDone.");
 	}
 	

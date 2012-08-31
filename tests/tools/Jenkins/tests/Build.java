@@ -24,6 +24,11 @@ public class Build {
 		assertTrue(new File(StaticK.k3Jar).exists());
 		assertTrue(new File(StaticK.JKrun).exists());
 
+		if (!new File(StaticK.k3Jar).exists())
+			System.exit(1);
+		if (!new File(StaticK.JKrun).exists())
+			System.exit(1);
+			
 		System.out.println("\tDone.");
 	}
 }
