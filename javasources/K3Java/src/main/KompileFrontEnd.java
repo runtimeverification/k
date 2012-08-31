@@ -22,6 +22,7 @@ import klint.UnusedSyntax;
 
 import org.apache.commons.cli.CommandLine;
 
+import ro.uaic.info.fmse.compile.FlattenModules;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
@@ -615,9 +616,9 @@ public class KompileFrontEnd {
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(amit);
 
-			// FlattenModules fm = new FlattenModules();
-			// javaDef.accept(fm);
-			// javaDef = fm.getResult();
+			FlattenModules fm = new FlattenModules();
+			javaDef.accept(fm);
+			javaDef = fm.getResult();
 
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
