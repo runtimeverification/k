@@ -809,7 +809,7 @@ with the most concrete class and going up in the hierarchy. */
 // Otherwise, recurse through the object environment stack
   rule lookupMember(<envStack> ListItem(_:Id :: <env> Env:Map </env>)
                                 => .
-                    ...</envStack>, X)
+                    ...</envStack>, X:Id)
        when notBool(X in keys(Env))
        [anywhere]
 

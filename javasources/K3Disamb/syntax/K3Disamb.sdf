@@ -24,6 +24,7 @@ context-free syntax
 	Bag			-> RuleContentDz
 	Set			-> RuleContentDz
 	List		-> RuleContentDz
+	KLabel		-> RuleContentDz
 
 
 	KSimpleSentence "when" K "[" TagListDz "]"-> KSentence {cons("AttributedCondSentence"), prefer}

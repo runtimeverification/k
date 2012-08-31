@@ -118,10 +118,11 @@ interface K-WRAPPERS-LABELS
 
 endinterface
 
-interface K-DESTRUCTORS
+module K-DESTRUCTORS
 	syntax KLabel ::= "getKLabel" K
+  rule getKLabel(L:KLabel(_:List{K})) => L [structural, anywhere]
 
-endinterface
+endmodule
 
 interface K-WRAPPERS
 	imports K-TECHNIQUE
