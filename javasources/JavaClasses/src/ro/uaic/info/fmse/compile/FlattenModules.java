@@ -50,18 +50,20 @@ public class FlattenModules extends BasicVisitor {
 			if (null == mod.getItems()) continue;
 			for(ModuleItem i : mod.getItems()) {
 				if (i instanceof Import) {
-					String imp = ((Import)i).getName();
-					if (MetaK.isNextIdModule(imp)) 
+					String name = ((Import)i).getName();
+					if (MetaK.isNextIdModule(name)) 
 						nextId = true;
-					if (included.contains(imp)) continue;
-					if (!MetaK.isKModule(imp) && !MetaK.isBuiltinModule(imp)) {
-						if (modules.containsKey(imp)) {
-							mods.add(modules.remove(imp));
-							included.add(imp);
+					if (included.contains(name)) continue;
+					if (!MetaK.isKModule(name) && !MetaK.isBuiltinModule(name)) {
+						if (modules.containsKey(name)) {
+							mods.add(modules.get(name));
+							included.add(name);
 //							System.out.println("push " + imp);
-							continue;
-						}					
-					} else included.add(imp);
+						} else {
+							System.out.println("Warning: Module " + name + " undefined " + i.getMaudeLocation() + ".");
+						}
+						continue;
+					} else included.add(name);
 				}
 				if (i instanceof Configuration) {
 					if (null == cfg) 
