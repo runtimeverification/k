@@ -1,6 +1,12 @@
-package ro.uaic.info.fmse.compile;
+package ro.uaic.info.fmse.compile.utils;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import ro.uaic.info.fmse.k.Variable;
+import ro.uaic.info.fmse.visitors.BasicVisitor;
+import ro.uaic.info.fmse.visitors.Visitable;
 
 public class MetaK {
 	public static String nextIdModules[] = {
@@ -38,5 +44,16 @@ public class MetaK {
 		return key.startsWith("#");
 	}
 	
-	
+	public static Set<Variable> getVariables(Visitable node) {
+		final Set<Variable> result = new HashSet<Variable>();
+		node.accept(new BasicVisitor() {
+			@Override
+			public void visit(Variable node) {
+				result.add(node);
+				super.visit(node);
+			}
+		});
+		return result;
+	}
+
 }

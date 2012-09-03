@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.k.Bag;
 import ro.uaic.info.fmse.k.Cell;
 import ro.uaic.info.fmse.k.Configuration;
@@ -72,16 +73,16 @@ public class FlattenModules extends BasicVisitor {
 				rmod.getItems().add(i);
 			}
 		}
+		if (null == cfg) {
+			cfg = new Configuration();
+			Cell k = new Cell();
+			k.setLabel("k");
+			k.setElipses("none");
+			k.setSort("K");
+			k.setContents(new Variable("$PGM","K"));
+			cfg.setBody(k);
+		}
 		if (nextId) {
-			if (null == cfg) {
-				cfg = new Configuration();
-				Cell k = new Cell();
-				k.setLabel("k");
-				k.setElipses("none");
-				k.setSort("K");
-				k.setContents(new Variable("$PGM","K"));
-				cfg.setBody(k);
-			}
 			Bag bag;
 			if (cfg.getBody() instanceof Bag) {
 				bag = (Bag) cfg.getBody();
@@ -103,7 +104,6 @@ public class FlattenModules extends BasicVisitor {
 		if (null != cfg)
 			rmod.getItems().add(cfg);
 	}
-
 	
 	@Override
 	public void visit(Module m) {

@@ -18,21 +18,13 @@ fmod ADD-EVAL is
   op addEval : Module Term TermList ~> Module .
   eq addEval(M, T, Tl) 
    = addSubsorts((subsort String < K .),
-       addEqs(defaultEvalEqs(Tl) mainEvalEq(evalCleanConf(T), evalMap(Tl)),
-            M)) .
+       addEqs(defaultEvalEqs(Tl,stdInVariable,noIOVarible)
+              mainEvalEq(evalCleanConf(T), evalMap(Tl)),
+              M)) .
 
 
   op defaultEvalEqs_ : TermList -> EquationSet .
-  eq defaultEvalEqs(empty) 
-   = (ceq evalS[mkVariable('M,Map)]
-       = evalS[ctor(Map)[itemCtor(Map)[stringCt(string(getName(stdinVariable))),wrap2K(emptyCt(getType(stdinVariable)))],mkVariable('M,Map)]]
-       if '_in_[stringCt(string(getName(stdinVariable))), 'keys_[mkVariable('M,Map)]] = falseCt 
-       [none] .)
-     (ceq evalS[mkVariable('M,Map)]
-       = evalS[ctor(Map)[itemCtor(Map)[stringCt(string(getName(noIOVariable))),wrap2K(emptyCt(getType(noIOVariable)))],mkVariable('M,Map)]]
-       if '_in_[stringCt(string(getName(noIOVariable))), 'keys_[mkVariable('M,Map)]] = falseCt 
-       [none] .)
-   . 
+  eq defaultEvalEqs(empty) = none . 
   eq defaultEvalEqs(V,Tl)
    = (ceq evalS[mkVariable('M,Map)]
        = evalS[ctor(Map)[itemCtor(Map)[stringCt(string(getName(V))),wrap2K(emptyCt(getType(V)))],mkVariable('M,Map)]]
