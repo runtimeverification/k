@@ -20,18 +20,17 @@ module K-MAP-EXTRAS
         imports K-SET-EXTRAS
 	//imports BOOL
 
-	syntax K ::= Map "(" K ")" [prec(0)]
-//        rule (_ K1:K |-> K2:K)(K1) => K2 [structural]
+  syntax K ::= Map "(" K ")"
+  rule (_ K1:K |-> K2:K)(K1) => K2 [structural, anywhere]
 
-	syntax Map ::= Map "[" Map "]"     [prec(0)]
-				 | Map "[" List{K} "/" List{K} "]" [prec(0)]
-				 | Map "[" "undef" "/" List{K} "]"
-                       | "Map" "(" List{K} "|->" List{K} ")" 
+	syntax Map ::= Map "[" "undef" "/" List{K} "]"
 
+  syntax Map ::= "Map" "(" List{K} "|->" List{K} ")" 
   rule Map((K1:K => .List{K}),,_ |-> (K2:K => .List{K}),,_) (. => K1 |-> K2)
   rule Map((K1:K => .List{K}),,_ |-> K2:K) (. => K1 |-> K2)
   rule Map(.List{K} |-> _) => .
 
+  syntax Map ::= Map "[" List{K} "/" List{K} "]"
   rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .List{K}),,_ 
                         /  (K1:K,,K1':K => .List{K}),,_]
 
@@ -40,16 +39,15 @@ module K-MAP-EXTRAS
   rule M:Map[K2:K / K1:K] => M K1 |-> K2 
     when notBool(K1 in keys(M)) [structural, anywhere]
   
-/*
-  rule Map:Map[Map':Map K1 |-> K2] => Map[K2/K1][Map'] [structural]
-  rule Map:Map[.Map] => Map [structural]
- */
-	syntax List{K} ::= Map "(" List{K} ")" [prec(0)]
-/*
-  rule Map:Map((K1:K,,K2:K,,Ks:List{K})) 
-    => Map(K1),,Map(K2),,Map(K2) [structural]
-  rule Map:Map(.List{K}) => .List{K} [structural]
-*/
+  syntax Map ::= Map "[" Map "]"   [cons(Map1UpdateMapWithMapSyn)]
+  rule M:Map[M':Map K1 |-> K2] => M[K2/K1][M'] [structural]
+  rule M:Map[.Map] => M [structural]
+
+//  syntax List{K} ::= Map "(" List{K} ")"
+//  rule Map:Map((K1:K,,K2:K,,Ks:List{K})) 
+//    => Map(K1),,Map(K2),,Map(Ks) [structural]
+//  rule Map:Map(.List{K}) => .List{K} [structural]
+
 	syntax Set ::= "keys" Map  
 
   rule keys . => .
@@ -142,7 +140,8 @@ endinterface
 
 interface K-EVAL
   imports K-TECHNIQUE
-  syntax Bag ::= "#eval" Map
+  syntax Bag ::= "#eval" Map          [cons(Bag1EvalSyn)]
+  syntax Bag ::= "#evalHelper" Map    [cons(Bag1EvalHelperSyn)]
 endinterface
 
 

@@ -179,7 +179,8 @@ module URIS
   // I fthe buffer becomes empty, read from the input stream
   rule #parse(_:String,_) (.List => ListItem(#fReadChar(N:Int))) #buffer(.K) #istream(N)
 
-  syntax List ::= "#istream" "(" Int ")" | "#ostream" "(" Int ")" 
+  syntax List ::= "#istream" "(" Int ")"        [cons(List1InputStreamSyn)]
+                | "#ostream" "(" Int ")"        [cons(List1OutputStreamSyn)]
   syntax List ::= "#noIO"
   rule #noIO #istream(_:Int) => .List
   rule #ostream(_:Int) #noIO => .List
