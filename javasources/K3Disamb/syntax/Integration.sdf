@@ -7,3 +7,56 @@ imports KBuiltinsBasic
 exports
 
 context-free syntax
+%% subsorts 1
+context-free priorities
+{
+} > {
+} > {
+}
+
+%% subsorts 2
+context-free priorities
+{
+} .> {
+}
+context-free syntax
+
+
+
+
+	VariableDz -> K
+
+
+	DzDzInt		-> DzInt	{cons("DzInt1Const")}
+	DzDzBool	-> DzBool	{cons("DzBool1Const")}
+	DzDzId		-> DzId		{cons("DzId1Const")}
+	DzDzString	-> DzString	{cons("DzString1Const")}
+	DzDzFloat	-> DzFloat	{cons("DzFloat1Const")}
+
+	DzDzINT		-> DzDzInt
+	DzDzBOOL	-> DzDzBool
+	DzDzSTRING	-> DzDzString
+	DzDzFLOAT	-> DzDzFloat
+	":" -> DouaPuncteDz {cons("DouaPuncte")}
+
+context-free restrictions
+	VariableDz -/- ~[\:\;\(\)\<\>\~\n\r\t\,\ \[\]\=\+\-\*\/\|\{\}\.]
+	DouaPuncteDz -/- [A-Z]
+
+lexical syntax
+
+
+%% sort predicates
+
+
+
+%% terminals reject
+
+lexical restrictions
+	%% follow restrictions
+lexical restrictions
+%% some restrictions to ensure greedy matching for user defined constants
+	DzDzId  -/- [a-zA-Z0-9]
+	DzDzInt -/- [0-9]
+	"is" -/- [\#A-Z]
+

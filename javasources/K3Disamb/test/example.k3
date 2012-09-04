@@ -1,1 +1,2 @@
-rule A => B
+rule <k> A:K </k>
+     <env> A:Bag </env>

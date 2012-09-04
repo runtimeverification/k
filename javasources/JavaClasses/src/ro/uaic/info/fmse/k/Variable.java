@@ -9,18 +9,19 @@ import ro.uaic.info.fmse.visitors.Visitor;
 
 public class Variable extends Term {
 	private String name;
+	private boolean userTyped = false;
 
 	public Variable(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.name = element.getAttribute(Constants.NAME_name_ATTR);
+		this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
 	}
 
 	public Variable(String name, String sort) {
 		super("File System", "generated");
 		this.sort = sort;
 		this.name = name;
-		// TODO Auto-generated constructor stub
 	}
 
 	public void setName(String name) {
@@ -76,5 +77,13 @@ public class Variable extends Term {
 	@Override
 	public int hashCode() {
 		return sort.hashCode() + name.hashCode();
+	}
+
+	public void setUserTyped(boolean userTyped) {
+		this.userTyped = userTyped;
+	}
+
+	public boolean isUserTyped() {
+		return userTyped;
 	}
 }

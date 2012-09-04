@@ -116,7 +116,9 @@ rules
 	// xmlify - starts from here
 	xmlStringEscape         = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\"", "&quot;")
 	xmlStringEscapeFromString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
-	getLocAsString        = (prim("SSL_EXT_origin_location", <id>) ; write-to-string) <+ !"(0,0,0,0)"
+	getLocAsString:
+		_{loc} -> <write-to-string> loc
+	//getLocAsString        = (prim("SSL_EXT_origin_location", <id>) ; write-to-string) <+ !"(0,0,0,0)"
 	get-original-sentence = prim("SSL_EXT_origin_text", <id>) ; xmlStringEscape ; escape
 	external xml-string-escape-from-string(|)
 

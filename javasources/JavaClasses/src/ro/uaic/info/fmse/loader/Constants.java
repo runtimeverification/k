@@ -61,6 +61,7 @@ public class Constants {
 	public static final String VALUE_value_ATTR = "value";
 	public static final String LOC_loc_ATTR = "loc";
 	public static final String TYPE_type_ATTR = "type";
+	public static final String TYPE_userTyped_ATTR = "userTyped";
 	public static final String FILENAME_filename_ATTR = "filename";
 	public static final String NAME_name_ATTR = "name";
 	public static final String SORT_sort_ATTR = "sort";

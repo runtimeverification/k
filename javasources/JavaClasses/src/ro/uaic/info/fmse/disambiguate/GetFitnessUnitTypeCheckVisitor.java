@@ -57,8 +57,8 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 			score = 0; // do nothing when you have a K
 		else {
 			score = -1;
-			// System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
 		}
+		// System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
 		return score;
 	}
 

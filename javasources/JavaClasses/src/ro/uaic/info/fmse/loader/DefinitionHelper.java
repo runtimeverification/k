@@ -78,10 +78,24 @@ public class DefinitionHelper {
 		return fileRequirements.contains(new Subsort(required, local));
 	}
 
+	/**
+	 * Check to see if smallSort is subsorted to bigSort (strict)
+	 * 
+	 * @param bigSort
+	 * @param smallSort
+	 * @return
+	 */
 	public static boolean isSubsorted(String bigSort, String smallSort) {
 		return subsorts.contains(new Subsort(bigSort, smallSort));
 	}
 
+	/**
+	 * Check to see if smallSort is subsorted or equal to bigSort
+	 * 
+	 * @param bigSort
+	 * @param smallSort
+	 * @return
+	 */
 	public static boolean isSubsortedEq(String bigSort, String smallSort) {
 		if (bigSort.equals(smallSort))
 			return true;
