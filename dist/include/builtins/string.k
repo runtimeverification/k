@@ -32,6 +32,15 @@ module STRING-HOOKS
   syntax String ::= "Id2String" "(" Id ")"		 [function, klabel(Id2String), hook(#CONVERSION:id2String)]
   syntax Id ::= "String2Id" "(" String ")"		 [function, klabel(String2Id), hook(#CONVERSION:string2Id)]
 
+  syntax String ::= "replaceAll" "(" String "," String "," String ")" [function]
+  syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function]
+  syntax String ::= "replaceFirst" "(" String "," String "," String ")" [function]
+  syntax Int ::= "countAllOccurences" "(" String "," String ")" [function]
+  
+  syntax String ::=  "trim" "(" String ")" [function]
+  syntax String ::= "ltrim" "(" String ")" [function]
+  syntax String ::= "rtrim" "(" String ")" [function]
+  
   syntax Bool ::= String "=/=String" String      [function, left]
   rule S1:String =/=String S2:String => notBool(S1 ==String S2) [function, anywhere]
 
@@ -49,7 +58,29 @@ module STRING-HOOKS
   rule #isDigit(C:Char) 
       => (asciiString(C) >=Int asciiString("0")) 
            andBool (asciiString(C) <=Int asciiString("9")) [function, anywhere]
+
+  rule countAllOccurences(Source:String, ToCount:String) => 0 
+			when findString(Source, ToCount, 0) <Int 0 [function, anywhere]
+  rule countAllOccurences(Source:String, ToCount:String) => 1 +Int countAllOccurences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount) 
+			when findString(Source, ToCount, 0) >=Int 0 [function, anywhere]
+			
+  rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => substrString(Source, 0, findString(Source, ToReplace, 0))
+				+String Replacement +String substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)) 
+				when findString(Source, ToReplace, 0) >=Int 0 [function, anywhere]
+  rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => Source 
+		when findString(Source, ToReplace, 0) <Int 0 [function, anywhere]
+  
+  
+  rule replace(Source:String, ToReplace:String, Replacement:String, Count:Int) => replace(replaceFirst(Source, ToReplace, Replacement), ToReplace, Replacement, Count -Int 1) 
+		when Count >Int 0 [function, anywhere]
+  rule replace(Source, ToReplace, Replacement, 0) => Source [function, anywhere]
+  rule replaceAll(Source, ToReplace, Replacement) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace)) [function, anywhere] 
+
+  rule ltrim(S:String) => replaceFirst(S, " ", "") when findString(S, " ", 0) ==Int 0 [function, anywhere]
+  rule ltrim(S:String) => S when findString(S, " ", 0) =/=Int 0 [function, anywhere]
+
+  rule rtrim(S:String) => rtrim(substrString(S,0, lengthString(S) -Int 1)) when substrString(S, lengthString(S) -Int 1, lengthString(S)) ==String " " [function, anywhere]
+  rule rtrim(S:String) => S when substrString(S, lengthString(S) -Int 1, lengthString(S)) =/=String " " [function, anywhere]
+  
+  rule trim(S) => ltrim(rtrim(S)) [function, anywhere]
 endmodule
-
-
-

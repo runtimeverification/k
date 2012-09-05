@@ -7,6 +7,6 @@
   n -> symInt(n)
 </env>
 <condition>
-  symInt(n) <= 0
+  symInt(n) <= 2
 </condition>
 

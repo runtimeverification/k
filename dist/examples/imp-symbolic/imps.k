@@ -229,50 +229,7 @@ module IMPS
 /*@
   additional rules that conservatively extend the definition
 */
-/*
-  rule <config>
-         <k> B:K => 
-checkSat(F andBool B) ~> "sat" ~>
-checkSat(F andBool notBool B) ~> "sat" ~>
-storeSyns(F, B, true) ~> true ...</k>
-         <env> Rho:Map (. => B |-> true) </env>
-       </config>
-       <condition> F:K => F andBool B  </condition>
-       when isBoolSymbolic(B)
-            andBool notBool(B in keys(Rho))
-//            andBool (checkSat(F andBool B) ==K "sat")  // F impliesBool notBool B
-//            andBool (checkSat(F andBool notBool B) ==K "sat") // F impliesBool B
-       [transition]
 
-  rule <config>
-         <k> B:K => 
-checkSat(F andBool B) ~> "sat" ~>
-checkSat(F andBool notBool B) ~> "sat" ~>
-storeSyns(F, B, false) ~> false ...</k>
-         <env> Rho:Map (. => B |-> false) </env>
-       </config>
-       <condition> F:K => F andBool notBool B  </condition>
-       when isBoolSymbolic(B)
-            andBool notBool(B in keys(Rho))
-//            andBool (checkSat(F andBool B) ==K "sat")  // F impliesBool notBool B
-//            andBool (checkSat(F andBool notBool B) ==K "sat") // F impliesBool B
-       [transition]  
-
-  rule <k> B:K => checkSat(F andBool notBool B) ~> "unsat" ~> true ...</k>
-       <condition> F:BoolSymbolic </condition>
-       when isBoolSymbolic(B)
-//            andBool  checkSat(F andBool notBool B) ==K "unsat" // F impliesBool notBool B
-       [transition]
-
-  rule <k> B:K => checkSat(F andBool B) ~> "unsat" ~> false ...</k>
-       <condition> F:BoolSymbolic </condition>
-       when isBoolSymbolic(B)
-//            andBool checkSat(F andBool B) ==K "unsat"  // F impliesBool B
-       [transition]
-
-    rule "sat" ~> "sat" => .
-    rule "unsat" ~> "unsat" => .
-*/
 
   rule <k>
           B:BoolSymbolic
@@ -284,17 +241,17 @@ storeSyns(F, B, false) ~> false ...</k>
 
 
   // (F impliesBool B) andBool (F impliesBool notBool B)
-  rule <k> "sat" ~> "sat" ~> B:BoolSymbolic => false ...</k>
-       <condition> F:K => F andBool notBool B  </condition>
+  rule <k> sat ~> sat ~> B:BoolSymbolic => false ...</k>
+       <condition> F:K => F andBool notBool B  </condition> [transition]
 
-  rule <k> "sat" ~> "sat" ~> B:BoolSymbolic => true ...</k> 
-       <condition> F:K => F andBool B  </condition>
+  rule <k> sat ~> sat ~> B:BoolSymbolic => true ...</k> 
+       <condition> F:K => F andBool B  </condition> [transition]
 
   // the other two cases
 
-   rule "sat" ~> "unsat" ~> B:BoolSymbolic => true  // F impliesBool B
+   rule sat ~> unsat ~> B:BoolSymbolic => true  // F impliesBool B
 
-   rule "unsat" ~> "sat" ~> B:BoolSymbolic => false // F impliesBool notBool B
+   rule unsat ~> sat ~> B:BoolSymbolic => false // F impliesBool notBool B
    
 
 /*@

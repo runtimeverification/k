@@ -146,6 +146,9 @@ public class IOServer {
 		if (command.equals("smt")){
 			return new CommandSmt(args, socket, logger);
 		}
+		if (command.equals("smtlib")){
+			return new CommandSmtlib(args, socket, logger);
+		}
 
 		return new CommandUnknown(args, socket, logger); //, (long) 0);
 	}

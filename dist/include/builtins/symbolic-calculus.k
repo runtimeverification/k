@@ -11,7 +11,7 @@ module SYMBOLIC-CALCULUS
   imports SYMBOLIC-CALCULUS-SYNTAX
   imports BOOL-SYMBOLIC
   imports INT-SYMBOLIC
-  imports SMT
+  imports SMT-HOOKS
 
 /*@ 
   The following function is used to generate fresh names for symbolic values.

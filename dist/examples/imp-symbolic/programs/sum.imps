@@ -11,5 +11,5 @@
   n -> symInt(n)
 </env>
 <condition>
-  0 <= symInt(n) and symInt(n) <= 5
+  0 <= symInt(n) and symInt(n) <= 3
 </condition> 
