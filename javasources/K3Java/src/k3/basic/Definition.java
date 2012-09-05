@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
@@ -576,7 +577,7 @@ public class Definition implements Cloneable {
 						if (!mname.startsWith("#"))
 							if (mm != null)
 								synQue.add(mm);
-							else
+							else if (!MetaK.isKModule(mname))
 								Error.silentReport("Could not find module: " + mname + " imported from: " + m.getModuleName());
 					}
 			}
@@ -752,7 +753,7 @@ public class Definition implements Cloneable {
 							if (!mname.startsWith("#"))
 								if (mm != null)
 									synQue.add(mm);
-								else
+								else if (!MetaK.isKModule(mname))
 									Error.silentReport("Could not find module: " + mname + " imported from: " + m.getModuleName());
 						}
 				}

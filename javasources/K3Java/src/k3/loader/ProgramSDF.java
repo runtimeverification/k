@@ -8,6 +8,7 @@ import java.util.Set;
 
 import k.utils.Error;
 import k.utils.StringUtil;
+import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.k.Definition;
 import ro.uaic.info.fmse.k.DefinitionItem;
 import ro.uaic.info.fmse.k.Import;
@@ -47,7 +48,7 @@ public class ProgramSDF {
 					if (!mname.startsWith("#"))
 						if (mm != null)
 							synQue.add(mm);
-						else
+						else if (!MetaK.isKModule(mname))
 							Error.silentReport("Could not find module: " + mname + " imported from: " + m.getName());
 				}
 			}
