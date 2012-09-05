@@ -1,8 +1,16 @@
-K Tutorial --- LAMBDA --- Latex Attributes
+K Tutorial --- LAMBDA --- Generating Documentattion; Latex Attributes
 by Grigore Rosu
 
-Here we learn how to associate Latex attributes to language constructs, to
-control the way we display them in the generated documentation.
+Now that we have a first complete language definition, we can go ahead and
+also generate documentation for it:
+
+  kompile lambda --pdf   (this generates PDF documentation)
+  kompile lambda --html  (this generates HTML documentation)
+
+To enhance readability, we may want to replace the keyword "lambda" by the
+mathematical lambda symbol in generated documentation.  We can control
+the way we display language constructs in the generated documentation
+by associating them Latex attributes.
 
 This is actually quite easy.  All we have to do is to associate a "latex"
 attribute to the production defining the construct in question, following
