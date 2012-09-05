@@ -234,7 +234,7 @@ module IMPS
   rule <k>
           B:BoolSymbolic
           =>
-          checkSat(F andBool B) ~> checkSat(F andBool notBool B) ~> B
+          getModel(F andBool B) ~> checkSat(F andBool notBool B) ~> B
        ...</k>
        <condition> F:BoolSymbolic </condition>
 //       when isBoolSymbolic(B)
