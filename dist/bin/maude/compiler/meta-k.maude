@@ -942,7 +942,7 @@ fmod K-STRICTNESS-OPS is including META-LEVEL .
   eq kWrap(T) = kWrap(klabel,T) .
 
    op kWrap : Qid Term -> Term .
-   eq kWrap(Q, T) = mkCell(Q, kra(T,'Rest:K)) .
+   eq kWrap(Q, T) = mkCell(Q, kra(T,'GENERATEDKWRAPRest:K)) .
 --- replace the line above with the one below to get unrestricted strictness
 ---  eq kWrap(T) = T .
 
