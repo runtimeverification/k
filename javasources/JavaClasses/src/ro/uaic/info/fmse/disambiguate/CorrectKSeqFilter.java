@@ -5,16 +5,16 @@ import java.util.List;
 
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Ambiguity;
-import ro.uaic.info.fmse.k.Rewrite;
+import ro.uaic.info.fmse.k.KSequence;
 import ro.uaic.info.fmse.k.Term;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
 
-public class CorrectRewriteFilter extends BasicTransformer {
+public class CorrectKSeqFilter extends BasicTransformer {
 
 	public ASTNode transform(Ambiguity amb) {
 		List<Term> children = new ArrayList<Term>();
 		for (Term t : amb.getContents()) {
-			if (t instanceof Rewrite) {
+			if (t instanceof KSequence) {
 				children.add(t);
 			}
 		}

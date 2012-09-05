@@ -3,12 +3,6 @@ package k.utils;
 import java.io.File;
 import java.io.IOException;
 
-import k.utils.FileUtil;
-import k.utils.Stopwatch;
-import k.utils.ResourceExtractor;
-import k.utils.Sdf2Table;
-import k.utils.XmlLoader;
-
 import k3.basic.Definition;
 
 import org.w3c.dom.Document;
@@ -16,6 +10,8 @@ import org.w3c.dom.Element;
 
 import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.disambiguate.BestFitFilter;
+import ro.uaic.info.fmse.disambiguate.CorrectKSeqFilter;
+import ro.uaic.info.fmse.disambiguate.CorrectRewriteFilter;
 import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
 import ro.uaic.info.fmse.disambiguate.GetFitnessUnitFileCheckVisitor;
 import ro.uaic.info.fmse.disambiguate.GetFitnessUnitKCheckVisitor;
@@ -52,7 +48,6 @@ public class DefinitionLoader {
 		}
 		return javaDef;
 	}
-
 
 	public static ro.uaic.info.fmse.k.Definition parseDefinition(String mainModule, File canonicalFile, File dotk) throws IOException, Exception {
 		Stopwatch sw = new Stopwatch();
@@ -148,7 +143,8 @@ public class DefinitionLoader {
 		// disambiguation steps
 
 		if (GlobalSettings.tempDisamb) {
-			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectKSeqFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());

@@ -27,7 +27,7 @@ strategies
 			topdown(try(merge-amb ; flatten-amb-top )) ;
 			//where(ts1 := <term-size> ; !(ts1, <div> (<mul>(ts1, 100.0) ,ts)) ; debug(!"FlattenedSize(,%): ")) ;
 			//topdown(try(annolocationremove)) ;
-			//topdown(try(removeDouaPuncte)) ;
+			topdown(try(removeDouaPuncte)) ;
 			/*disambigCellTypes ;
 			topdown(try(correctRewrite)) ;
 			topdown(try(correctKseq)) ;
