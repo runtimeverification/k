@@ -15,6 +15,7 @@ public class DefinitionHelper {
 	public static String specialTerminals[] = { "(", ")", ",", "[", "]", "{", "}", };
 
 	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
+	public static java.util.Map<String, String> cells = new HashMap<String, String>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	// contains a mapping from listSort to list separator
 	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();

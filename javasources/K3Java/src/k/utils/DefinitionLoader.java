@@ -8,8 +8,10 @@ import k3.basic.Definition;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.disambiguate.AmbDuplicateFilter;
 import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.disambiguate.BestFitFilter;
+import ro.uaic.info.fmse.disambiguate.CellTypesFilter;
 import ro.uaic.info.fmse.disambiguate.CorrectKSeqFilter;
 import ro.uaic.info.fmse.disambiguate.CorrectRewriteFilter;
 import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
@@ -143,10 +145,12 @@ public class DefinitionLoader {
 		// disambiguation steps
 
 		if (GlobalSettings.tempDisamb) {
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CellTypesFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectKSeqFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbDuplicateFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));

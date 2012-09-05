@@ -82,6 +82,7 @@ public class mergeamb_0_0 extends Strategy {
 				IStrategoConstructor newtermConstr = ((IStrategoAppl)head).getConstructor();
 				IStrategoList newtermList = context.getFactory().makeList(termList);
 				IStrategoAppl newtermAppl = context.getFactory().makeAppl(newtermConstr, newtermList.getAllSubterms(), null);
+				newtermAppl = (IStrategoAppl)context.getFactory().annotateTerm(newtermAppl, head.getAnnotations());
 				newchildren.add(newtermAppl);
 			}
 			else {

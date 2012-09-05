@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.disambiguate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -39,7 +40,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 			}
 
 			// get declarations (if any)
-			java.util.List<Variable> varDecl = new ArrayList<Variable>();
+			java.util.Set<Variable> varDecl = new HashSet<Variable>();
 			for (Variable var : varEntry.getValue()) {
 				if (var.isUserTyped())
 					varDecl.add(var);
@@ -58,7 +59,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 
 			// check to see if the declared type fits everywhere
 			if (varDecl.size() == 1) {
-				Variable declVar1 = varDecl.get(0); // the declared var
+				Variable declVar1 = varDecl.iterator().next(); // the declared var
 				for (Entry<String, java.util.List<Variable>> entryVars : varLoc.entrySet()) { // for each location of the variable
 					boolean isSubsorted = false;
 					for (Variable inPlaceVar : entryVars.getValue())
@@ -75,7 +76,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 				correctVariableSorts(varList, declVar1.getSort());
 			} else {
 				// when there aren't any variable declarations
-				java.util.List<Variable> isect = new ArrayList<Variable>();
+				java.util.Set<Variable> isect = new HashSet<Variable>();
 				// find the intersection of varLoc
 				for (Variable var1 : varLoc.entrySet().iterator().next().getValue()) {
 					// iterate over the first variable location
@@ -123,10 +124,10 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					if (maxSorts.size() == 1)
 						inferredVar = maxSorts.get(0);
 				} else if (isect.size() == 1)
-					inferredVar = isect.get(0);
+					inferredVar = isect.iterator().next();
 
 				if (inferredVar != null) {
-					correctVariableSorts(varList, isect.get(0).getSort());
+					correctVariableSorts(varList, isect.iterator().next().getSort());
 					String msg = "Variable '" + inferredVar.getName() + "' was not declared. Assuming sort " + inferredVar.getSort();
 					GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, varr.getFilename(), varr.getLocation(), 3));
 				}

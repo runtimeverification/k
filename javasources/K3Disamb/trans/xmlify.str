@@ -35,6 +35,33 @@ rules
 
 	// generate xml for cells
 	to-xml1:
+		Bag1ClosedCell(a, b', LeftCell(RightCell(c)), d) -> $[<cell label="[a]" loc="[loc]"[prop] ellipses="both">
+											[<to-xml> c]
+		</cell>
+		]
+		where mydebug(!"Cell: ")
+		where prop := <all(to-xml)> b'
+		where loc := <getLocAsString>
+
+	to-xml1:
+		Bag1ClosedCell(a, b', RightCell(c), d) -> $[<cell label="[a]" loc="[loc]"[prop] ellipses="right">
+											[<to-xml> c]
+		</cell>
+		]
+		where mydebug(!"Cell: ")
+		where prop := <all(to-xml)> b'
+		where loc := <getLocAsString>
+
+	to-xml1:
+		Bag1ClosedCell(a, b', LeftCell(c), d) -> $[<cell label="[a]" loc="[loc]"[prop] ellipses="left">
+											[<to-xml> c]
+		</cell>
+		]
+		where mydebug(!"Cell: ")
+		where prop := <all(to-xml)> b'
+		where loc := <getLocAsString>
+
+	to-xml1:
 		Bag1ClosedCell(a, b', c, d) -> $[<cell label="[a]" loc="[loc]"[prop]>
 											[<to-xml> c]
 		</cell>
@@ -313,7 +340,7 @@ rules
 		where mydebug(!"SynTerm: ")
 		where children := <all(to-xml-p)> b
 		where srt := <getSort> a
-		where loc := <getLocAsString>
+		where loc := <getLocAsString2>
 
 	to-xml-p:
 		a#(b) -> $[<empty sort="[srt]" loc="[loc]"/>
@@ -321,7 +348,7 @@ rules
 		where <string-ends-with(|"Empty")> a
 		where mydebug(!"SynTerm: ")
 		where srt := <getSort> a
-		where loc := <getLocAsString>
+		where loc := <getLocAsString2>
 
 	to-xml-p:
 		a#(b) -> $[<const sort="[srt]" value="[<all(xmlStringEscape)> b]" loc="[loc]"/>
@@ -329,7 +356,7 @@ rules
 		where <string-ends-with(|"Const")> a
 		where srt := <getSort> a
 		where mydebug(!"Const: ")
-		where loc := <getLocAsString>
+		where loc := <getLocAsString2>
 
 	to-xml-p:
 		amb(b) -> $[<amb loc="[loc]">
@@ -338,5 +365,5 @@ rules
 		]
 		where mydebug(!"XmlifyingAmb: ")
 		where children := <all(to-xml-p)> b
-		where loc := <getLocAsString>
+		where loc := <getLocAsString2>
 

@@ -1025,6 +1025,7 @@ public class Definition implements Cloneable {
 		String term = "[  ";
 		for (Map.Entry<String, Cell> c : cells.entrySet()) {
 			term += "(\"" + c.getKey() + "\", \"" + c.getValue().getSort() + "\")\n, ";
+			DefinitionHelper.cells.put(c.getKey(), c.getValue().getSort());
 		}
 
 		return term.substring(0, term.length() - 2) + "]";
