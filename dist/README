@@ -18,7 +18,7 @@ What is new (from v2.7)
 implemented in a combination of Perl and Maude), making use of SDF (as
 distributed with the Spoofax system).
 
-Because we changed the parser, the syntax is a bit different.
+Because the parser has changed, the syntax of K definitions has changed, too:
 
 1. Modules and files:
 
@@ -45,9 +45,9 @@ endmodule // in one word
 4. You can use bracket productions to override priorities:
                | "(" Exp ")"            [bracket]
 
-5. The scope of a variable in k3 is restricted to each rule. In k2 it was the
-module. As a result, the type of each variable should be specified in each
-rule in which it is used.
+5. The scope of a variable in k3 is restricted to each rule.  In k2 it was the
+module.  As a result, the sort of each variable should be specified in each
+rule in which it is used.  If not specified, it is automatically assumed K.
 
 6. The only accepted comments are // ... for one line comments and /* ... */
 for multiline ones. Latex comments remain the same:
@@ -55,4 +55,3 @@ for multiline ones. Latex comments remain the same:
                /*@ ... */
                //! ...
                /*! ... */
-

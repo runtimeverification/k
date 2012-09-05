@@ -1,21 +1,13 @@
-1. This is a readme file to help users to install the K-tool prototype.
-
-2. Prerequisites
-
+1. Prerequisites
 Java Runtime Edition (tested with JRE6 or higher)
-You can follow the instructions at
   http://java.com/en/download/index.jsp
-depending on the type of your machine.
+To make sure java is installed properly, call "java" in a terminal.
 
-To make sure that everything works you should be able to call 'java' from
-a Terminal.
+2. Install
+Unzip this directory in your preferred location.  For convenient usage,
+update pour $PATH with <preferred-location>/k/bin.
 
-3. Install
-Unzip this directory in your preferred location. For convenient usage, you
-can update pour $PATH with <preferred-location>/k/bin (strongly recommended,
-but optional).
-
-4. Test
-Go to one of the examples (let's say k/examples/imp). Assuming /bin is in
+3. Test
+Go to one of the examples (let's say k/examples/imp).  Assuming k/bin is in
 your $PATH, you can compile definitions using the 'kompile imp.k' command.
 To execute a program you can use 'krun programs/sum.imp'.
