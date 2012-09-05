@@ -18,11 +18,8 @@ KResult syntactic category.  See lambda.k.
 
 Compile again and then run some programs.  They should all work as expected.
 
-Now that we have a first complete language definition, we can go ahead and
-also generate documentation for it:
-
-  kompile lambda --pdf   (this generates PDF documentation)
-  kompile lambda --html  (this generates HTML documentation)
-
-To enhance readability, we may want to replace the keyword "lambda" by the
-mathematical lambda symbol in generated documentation.  See the next lesson.
+We now got a complete and working semantic definition of call-by-value
+lambda-calculus.  While theoretically correct, our definition is not
+easy to use and disseminate.  In the next lessons we will learn how to
+generate formatted documentation for LAMBDA and how to extend LAMBDA
+in order to write human readable and interesting programs.
