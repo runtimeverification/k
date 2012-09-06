@@ -19,6 +19,12 @@ public class UserList extends ProductionItem {
 		separator = element.getAttribute(Constants.SEPARATOR_separator_ATTR);
 	}
 
+	public UserList(UserList userList) {
+		super(userList);
+		sort = userList.sort;
+		separator = userList.separator;
+	}
+
 	public ProductionType getType() {
 		return ProductionType.USERLIST;
 	}
@@ -94,5 +100,10 @@ public class UserList extends ProductionItem {
 	@Override
 	public int hashCode() {
 		return this.separator.hashCode() + this.sort.hashCode();
+	}
+
+	@Override
+	public UserList shallowCopy() {
+		return new UserList(this);
 	}
 }

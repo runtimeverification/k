@@ -22,6 +22,9 @@ import klint.UnusedSyntax;
 
 import org.apache.commons.cli.CommandLine;
 
+import ro.uaic.info.fmse.compile.AddEval;
+import ro.uaic.info.fmse.compile.AddKCell;
+import ro.uaic.info.fmse.compile.AddTopCell;
 import ro.uaic.info.fmse.compile.FlattenModules;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
@@ -85,6 +88,10 @@ public class KompileFrontEnd {
 			GlobalSettings.supercool = cmd.getOptionValue("supercool");
 		if (cmd.hasOption("superheat"))
 			GlobalSettings.superheat = cmd.getOptionValue("superheat");
+		
+		if (cmd.hasOption("addTopCell")) {
+			GlobalSettings.addTopCell = true;
+		}
 
 		// set lib if any
 		if (cmd.hasOption("lib")) {
@@ -620,10 +627,16 @@ public class KompileFrontEnd {
 			DittoFilter df = new DittoFilter();
 			javaDef.accept(df);
 			
-			FlattenModules fm = new FlattenModules();
-			javaDef.accept(fm);
-			javaDef = fm.getResult();
-
+			javaDef = new FlattenModules().compile(javaDef);
+			
+			javaDef = new AddKCell().compile(javaDef);
+			
+			if (GlobalSettings.addTopCell) {
+				javaDef = new AddTopCell().compile(javaDef);
+			}
+			
+//			javaDef = new AddEval().compile(javaDef);
+			
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");

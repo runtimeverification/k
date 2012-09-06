@@ -19,13 +19,15 @@ public class Sort extends ProductionItem {
 
 	public Sort(String name)
 	{
-		super(null);
-		this.filename = "generated-sort";
-		this.location = "internal-generated-sort";
-		this.attributes = null;
+		super();
 		this.name = name;
 	}
 	
+	public Sort(Sort sort) {
+		super(sort);
+		this.name = sort.name;
+	}
+
 	public static boolean isBasesort(String sort) {
 		return sort.equals("VARID") || sort.equals("Map") || sort.equals("K") || sort.equals("List") || sort.equals("Bag") || sort.equals("Set") || sort.equals("MapItem") || sort.equals("ListItem") || sort.equals("BagItem") || sort.equals("SetItem")
 				|| sort.equals("List{K}") || sort.equals("KLabel") || sort.equals("CellLabel");
@@ -103,5 +105,10 @@ public class Sort extends ProductionItem {
 	@Override
 	public int hashCode() {
 		return this.name.hashCode();
+	}
+
+	@Override
+	public Sort shallowCopy() {
+		return new Sort(this);
 	}
 }

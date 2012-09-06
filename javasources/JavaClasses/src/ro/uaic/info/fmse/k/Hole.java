@@ -13,6 +13,10 @@ public class Hole extends Term {
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 	}
 
+	public Hole(Hole hole) {
+		super(hole);
+	}
+
 	public String toString() {
 		return "[]:" + sort + " ";
 	}
@@ -34,5 +38,10 @@ public class Hole extends Term {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	@Override
+	public Hole shallowCopy() {
+		return new Hole(this);
 	}
 }

@@ -111,7 +111,7 @@ module CINK-LANG-SYNTAX
                | "(" Exp ")"  [bracket]
                | Id "(" Exps ")" [strict(1)]
                | "&" Exp
-               | "*" Exp [strict]
+               | "*" Exp 
                | "++" Exp
                > left:
                  Exp "*" Exp 
@@ -131,7 +131,7 @@ module CINK-LANG-SYNTAX
                > 
                  Exp "||" Exp [left, strict(1)]
                > left:
-                 Exp "<<" Exp [left, seqstrict, latex({#1}\mathrel{\tt <<}{#2})]
+                 Exp "<<" Exp [left, latex({#1}\mathrel{\tt <<}{#2})]
                | Exp ">>" Exp [left, latex({#1}\mathrel{\tt >>}{#2})]
                >
                  Exp "=" Exp [right]
@@ -306,15 +306,6 @@ module CINK-LANG-SEMANTICS
        andBool (Es =/=K .Exps)
        [anywhere]
 
-  /*
-  rule (KL:KLabel(E:Exp, Es:Exps));
-       =>
-       (KL(E:Exp)); (KL(Es)); 
-       when isDeclLabel(KL)
-       andBool (Es =/=K .Exps)
-       [anywhere]
-  */
-
   /*@
     Desugaring rule for variable declarations with initialization:
      e.g., \texttt{int *y = \&x;} is desugared into 
@@ -322,22 +313,13 @@ module CINK-LANG-SEMANTICS
     to consider here only simple variable declarations, which are not 
     aliases. 
    */
+
   rule '_;(KL:KLabel('_`,_('_=_(E1:Exp,, E2:Exp),, .Exps)))
        =>
        '__('_;(KL('_`,_(E1,, .Exps))),, '_;('_=_(getName(E1),, E2)))
        when isDeclLabel(KL) 
        andBool (isAlias('_=_(E1,, E2)) =/=K true)
        [anywhere]
-
-  /*
-  rule (KL:KLabel((E1:Exp = E2:Exp), .Exps));
-       =>
-       (KL(E1), .Exps); (getName(E1) = E2);
-       when isDeclLabel(KL) 
-       andBool (isAlias(E1 = E2) =/=K true)
-       [anywhere]
-  */
-
 
   /*@ \subsection{Declarations.} */
 
@@ -454,6 +436,7 @@ module CINK-LANG-SEMANTICS
 
   rule endl => "\n" [structural]
 
+  context * (HOLE => rvalue(HOLE))
   rule [indirection] :
        <k> (* L:Int) => V ...</k>
        <store>... L |-> V ...</store>
@@ -627,6 +610,9 @@ module CINK-LANG-SEMANTICS
        [structural] 
 
   /*@ \subsection{Input/Output Statements.} */
+
+  context HOLE << _
+  context _:Val << (HOLE => rvalue(HOLE))
 
   /*@ Writting in the the standard stream \texttt{cout}: */
   rule [print-stream]:

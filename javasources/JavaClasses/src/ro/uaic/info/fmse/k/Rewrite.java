@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.k;
 
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.utils.xml.XML;
@@ -28,6 +29,12 @@ public class Rewrite extends Term {
 		super(node);
 		this.left = node.left;
 		this.right = node.right;
+	}
+
+	public Rewrite(Term eval1Left, Term eval1Right) {
+		super(eval1Left.getSort());
+		left = eval1Left;
+		right = eval1Right;
 	}
 
 	public void setLeft(Term left) {
@@ -71,5 +78,19 @@ public class Rewrite extends Term {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+	
+	@Override
+	public String getSort() {
+		String lsort = left.getSort();
+		String rsort = right.getSort();
+		if (MetaK.isDefaulable(rsort) || "List{K}".equals(rsort)) lsort = rsort;
+		if (!MetaK.isKSort(lsort)) lsort = "K";
+		return lsort;
+	}
+
+	@Override
+	public Rewrite shallowCopy() {
+		return new Rewrite(this);
 	}
 }

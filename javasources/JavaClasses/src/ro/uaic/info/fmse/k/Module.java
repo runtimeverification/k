@@ -171,4 +171,17 @@ public class Module extends DefinitionItem {
 	public boolean isPredefined() {
 		return predefined;
 	}
+
+	public Module addModuleItems(List<ModuleItem> rules) {
+		Module result = new Module(this);
+		List<ModuleItem> items = new ArrayList<ModuleItem>(this.items);
+		items.addAll(rules);
+		result.setItems(items);
+		return result;
+	}
+	
+	@Override
+	public Module shallowCopy() {
+		return new Module(this);
+	}
 }

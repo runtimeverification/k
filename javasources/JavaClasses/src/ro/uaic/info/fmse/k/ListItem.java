@@ -39,4 +39,9 @@ public class ListItem extends CollectionItem {
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
 	}
+
+	@Override
+	public ListItem shallowCopy() {
+		return new ListItem(this);
+	}
 }

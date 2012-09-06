@@ -93,6 +93,9 @@ public class KompileOptionsParser {
 		Option unparse = new Option("unparse", false, "unparse a definition");
 
 		Option literate = new Option("literate", false, "preserve literate comments");
+		
+		
+		Option addTopCell = new Option("addTopCell", false, "add a top cell to configuration and all rules");
 
 		// options for non-determinism
 		OptionGroup nondet = new OptionGroup();
@@ -120,6 +123,7 @@ public class KompileOptionsParser {
 		options.addOption(toHTML);
 		options.addOption(unparse);
 		options.addOption(literate);
+		options.addOption(addTopCell);
 		options.addOptionGroup(nondet);
 	}
 

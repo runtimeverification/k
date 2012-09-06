@@ -34,7 +34,7 @@ public class PriorityBlock extends ASTNode {
 	}
 
 	public PriorityBlock() {
-		super("generated", "generated");
+		super();
 		this.assoc = "";
 	}
 
@@ -132,5 +132,10 @@ public class PriorityBlock extends ASTNode {
 		for (Production prd : productions)
 			hash += prd.hashCode();
 		return hash;
+	}
+	
+	@Override
+	public PriorityBlock shallowCopy() {
+		return new PriorityBlock(this);
 	}
 }

@@ -7,6 +7,10 @@ import java.util.Map.Entry;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.utils.xml.XML;
@@ -15,21 +19,28 @@ import ro.uaic.info.fmse.visitors.Transformer;
 import ro.uaic.info.fmse.visitors.Visitor;
 
 public class Cell extends Term {
+	public enum Multiplicity {
+		ONE,
+		MAYBE,
+		ANY,
+		SOME,
+	}
+	
 	String label;
 	Term contents;
-	String elipses;
+	String ellipses;
 	Map<String, String> attributes;
 
 	public Cell(String location, String filename) {
-		super(location, filename);
+		super(location, filename, "BagItem");
 		attributes = new HashMap<String, String>();
 	}
 
 	public Cell(Element element) {
 		super(element);
-		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+		this.sort = "BagItem";
 		this.label = element.getAttribute(Constants.LABEL_label_ATTR);
-		this.elipses = element.getAttribute(Constants.ELLIPSES_ellipses_ATTR);
+		this.ellipses = element.getAttribute(Constants.ELLIPSES_ellipses_ATTR);
 		this.contents = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
 
 		NamedNodeMap its = element.getAttributes();
@@ -47,23 +58,23 @@ public class Cell extends Term {
 		super(node);
 		this.label = node.label;
 		this.attributes = node.attributes;
-		this.elipses = node.elipses;
+		this.ellipses = node.ellipses;
 		this.contents = node.contents;
 	}
 
 	public Cell() {
-		super("File System", "generated");
+		super("BagItem");
 		attributes = new HashMap<String, String>();
 	}
 
 	public boolean hasRightEllipsis() {
-		return elipses != null &&
-				(elipses.equals("right") || elipses.equals("both"));
+		return ellipses != null &&
+				(ellipses.equals("right") || ellipses.equals("both"));
 	}
 
 	public boolean hasLeftEllipsis() {
-		return elipses != null &&
-				(elipses.equals("left") || elipses.equals("both"));
+		return ellipses != null &&
+				(ellipses.equals("left") || ellipses.equals("both"));
 	}
 
 	@Override
@@ -74,12 +85,12 @@ public class Cell extends Term {
 
 				String content = "<" + this.label + attributes + ">";
 
-				if (elipses != null && !elipses.equals("none")) {
-					if (elipses.equals("left")) {
+				if (ellipses != null && !ellipses.equals("none")) {
+					if (ellipses.equals("left")) {
 						content += "... " + this.contents + " ";
-					} else if (elipses.equals("right")) {
+					} else if (ellipses.equals("right")) {
 						content += " " + this.contents + " ...";
-					} else if (elipses.equals("both")) {
+					} else if (ellipses.equals("both")) {
 						content += "... " + this.contents + " ...";
 					}
 
@@ -130,13 +141,29 @@ public class Cell extends Term {
 	public void setSort(String sort) {
 		this.sort = sort;
 	}
-
+	
+	public Multiplicity getMultiplicity() {
+		if (attributes.containsKey("multiplicity")) {	
+			String attr = attributes.get("multiplicity");
+			if ("?".equals(attr)) return Multiplicity.MAYBE;
+			if ("*".equals(attr)) return Multiplicity.ANY;
+			if ("+".equals(attr)) return Multiplicity.SOME;
+			if ("1".equals(attr)) return Multiplicity.ONE;
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
+					KExceptionGroup.COMPILER, 
+					"Unknown multiplicity in configuration for cell " + this.getLabel() + ".", 
+					this.getFilename(), this.getLocation(), 0));
+		}
+		return Multiplicity.ONE;
+	}
+	
 	public String getElipses() {
-		return elipses;
+		return ellipses;
 	}
 
-	public void setElipses(String elipses) {
-		this.elipses = elipses;
+	public void setElipses(String ellipses) {
+		this.ellipses = ellipses;
+		attributes.put("ellipses", ellipses);
 	}
 
 	public Map<String, String> getAttributes() {
@@ -162,5 +189,14 @@ public class Cell extends Term {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	public void setDefaultAttributes() {
+		attributes = new HashMap<String, String>();
+	}
+	
+	@Override
+	public Cell shallowCopy() {
+		return new Cell(this);
 	}
 }

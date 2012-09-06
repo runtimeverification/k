@@ -18,13 +18,14 @@ public abstract class Term extends ASTNode {
 		setSort(sort);
 	}
 
-	public Term(String location, String filename) {
-		super(location, filename);
-	}
-
 	public Term(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+	}
+
+	public Term(String sort) {
+		super();
+		this.sort = sort;
 	}
 
 	@Override
@@ -40,4 +41,7 @@ public abstract class Term extends ASTNode {
 	public void setSort(String sort) {
 		this.sort = sort;
 	}
+	
+	@Override
+	public abstract Term shallowCopy();
 }

@@ -20,6 +20,10 @@ public class Rule extends Sentence {
 		this.label = node.getLabel();
 	}
 
+	public Rule() {
+		super();
+	}
+
 	public void setLabel(String label) {
 		this.label = label;
 	}
@@ -66,5 +70,10 @@ public class Rule extends Sentence {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+	
+	@Override
+	public Rule shallowCopy() {
+		return new Rule(this);
 	}
 }

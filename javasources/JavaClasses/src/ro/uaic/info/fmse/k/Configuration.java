@@ -53,4 +53,9 @@ public class Configuration extends Sentence {
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
 	}
+	
+	@Override
+	public Configuration shallowCopy() {
+		return new Configuration(this);
+	}
 }

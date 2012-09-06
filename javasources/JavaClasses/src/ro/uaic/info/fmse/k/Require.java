@@ -15,6 +15,11 @@ public class Require extends DefinitionItem {
 		value = element.getAttribute(Constants.VALUE_value_ATTR);
 	}
 
+	public Require(Require require) {
+		super(require);
+		value = require.value;
+	}
+
 	@Override
 	public String toMaude() {
 		return "";
@@ -40,5 +45,10 @@ public class Require extends DefinitionItem {
 
 	public String getValue() {
 		return value;
+	}
+
+	@Override
+	public Require shallowCopy() {
+		return new Require(this);
 	}
 }

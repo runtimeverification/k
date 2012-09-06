@@ -26,6 +26,12 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 			this.lcType = LiterateCommentType.COMMON;
 	}
 
+	public LiterateModuleComment(LiterateModuleComment literateModuleComment) {
+		super(literateModuleComment);
+		value = literateModuleComment.value;
+		lcType = literateModuleComment.lcType;
+	}
+
 	@Override
 	public String toMaude() {
 		return "";
@@ -62,5 +68,10 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 
 	public String getValue() {
 		return value;
+	}
+
+	@Override
+	public LiterateModuleComment shallowCopy() {
+		return new LiterateModuleComment(this);
 	}
 }

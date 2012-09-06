@@ -15,12 +15,12 @@ public abstract class CollectionItem extends Term {
 		super(location, filename, sort);
 	}
 
-	public CollectionItem(String location, String filename) {
-		super(location, filename);
-	}
-
 	public CollectionItem(Element element) {
 		super(element);
+	}
+
+	public CollectionItem(String sort) {
+		super(sort);
 	}
 
 	public void setItem(Term value) {
@@ -30,5 +30,8 @@ public abstract class CollectionItem extends Term {
 	public Term getItem() {
 		return value;
 	}
+	
+	@Override
+	public abstract CollectionItem shallowCopy();
 
 }

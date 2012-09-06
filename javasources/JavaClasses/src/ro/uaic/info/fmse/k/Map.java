@@ -12,11 +12,15 @@ public class Map extends Collection {
 	}
 
 	public Map(String location, String filename) {
-		super(location, filename);
+		super(location, filename, "Map");
 	}
 
 	public Map(Map node) {
 		super(node);
+	}
+
+	public Map() {
+		super("Map");
 	}
 
 	@Override
@@ -27,5 +31,10 @@ public class Map extends Collection {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+	
+	@Override
+	public Map shallowCopy() {
+		return new Map(this);
 	}
 }

@@ -45,4 +45,9 @@ public class Context extends Sentence {
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
 	}
+	
+	@Override
+	public Context shallowCopy() {
+		return new Context(this);
+	}
 }

@@ -149,6 +149,7 @@ endinterface
 interface K
   imports K-TECHNIQUE
   imports K-WRAPPERS
+  imports K-WRAPPERS-LABELS
   //imports K-BUILTINS
   imports K-RESULT             // to express results syntactically
   imports K-RULES              // to write k rules with in-place rewriting

@@ -211,4 +211,9 @@ public class Syntax extends ModuleItem {
 			hash += pb.hashCode();
 		return hash;
 	}
+	
+	@Override
+	public Syntax shallowCopy() {
+		return new Syntax(this);
+	}
 }

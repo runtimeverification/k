@@ -5,6 +5,11 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.compile.utils.MetaK;
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.utils.xml.XML;
 import ro.uaic.info.fmse.visitors.Modifier;
@@ -13,8 +18,8 @@ public abstract class Collection extends Term {
 
 	protected java.util.List<Term> contents;
 	
-	public Collection() {
-		super("File System", "generated");
+	public Collection(String sort) {
+		super(sort);
 		contents = new ArrayList<Term>();
 	}
 
@@ -23,8 +28,8 @@ public abstract class Collection extends Term {
 		this.contents = c.contents;
 	}
 
-	public Collection(String location, String filename) {
-		super(location, filename);
+	public Collection(String location, String filename, String sort) {
+		super(location, filename, sort);
 		contents = new ArrayList<Term>();
 	}
 
@@ -48,15 +53,29 @@ public abstract class Collection extends Term {
 	@Override
 	public String toMaude() {
 		String content = "";
+		
+		if (contents.size()==0) {
+			return new Empty(sort).toMaude();
+		}
+		
+		if (contents.size()==1) {
+			return contents.get(0).toMaude();
+		}
 
-		for (Term term : contents)
-			if (term != null)
-				content += term.toMaude() + ",";
+		for (Term term : contents) {
+			if (term == null) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+						KExceptionGroup.INTERNAL, 
+						"NULL Term encountered when printing collection " + contents + ".", 
+						getFilename(), getLocation(), 0));				
+			}
+			content += term.toMaude() + ",";
+		}
 
 		if (content.length() > 1)
 			content = content.substring(0, content.length() - 1);
-
-		return "__(" + content + ")";
+        String constructor = MetaK.getMaudeConstructor(sort);
+		return constructor + "(" + content + ")";
 	}
 
 	public java.util.List<Term> getContents() {
@@ -74,4 +93,7 @@ public abstract class Collection extends Term {
 			this.contents.set(i, elem);
 		}
 	}
+	
+	@Override
+	public abstract Collection shallowCopy();
 }

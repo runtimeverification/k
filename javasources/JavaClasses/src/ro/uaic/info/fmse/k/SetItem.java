@@ -40,4 +40,9 @@ public class SetItem extends CollectionItem {
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
 	}
+
+	@Override
+	public SetItem shallowCopy() {
+		return new SetItem(this);
+	}
 }

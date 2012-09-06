@@ -86,7 +86,7 @@ module IMPPP
   rule if  true then S1:K else _  => S1
   rule if false then _  else S2:K => S2
 
-  rule <k> while B do S:K => if B then S ; while B do S else {} ...</k>
+  rule while B do S:K => if B then S ; while B do S else {}
   syntax KResult ::= String
   rule Str1:String + Str2:String => Str1 +String Str2
 

@@ -11,18 +11,21 @@ import ro.uaic.info.fmse.visitors.Visitor;
 
 public class Empty extends Term {
 
-	public Empty(String location, String filename) {
-		super(location, filename);
+	public Empty(String sort) {
+		super(sort);
 	}
 
 	public Empty(String location, String filename, String sort) {
-		super(location, filename);
-		this.sort = sort;
+		super(location, filename, sort);
 	}
 
 	public Empty(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+	}
+
+	public Empty(Empty empty) {
+		super(empty);
 	}
 
 	public String toString() {
@@ -61,5 +64,10 @@ public class Empty extends Term {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	@Override
+	public Empty shallowCopy() {
+		return new Empty(this);
 	}
 }

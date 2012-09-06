@@ -49,7 +49,7 @@ public class Production extends ASTNode {
 		if (its.size() > 0) {
 			attributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
 		} else
-			attributes = new Attributes("generated", "generated");
+			attributes = new Attributes();
 	}
 
 	public Production(Production node) {
@@ -59,7 +59,7 @@ public class Production extends ASTNode {
 	}
 
 	public Production(Sort sort, java.util.List<ProductionItem> items) {
-		super("generated", "generated");
+		super();
 		this.items = items;
 		this.sort = sort.getName();
 		this.attributes = new Attributes();
@@ -219,5 +219,10 @@ public class Production extends ASTNode {
 		for (ProductionItem pi : this.items)
 			hash += pi.hashCode();
 		return hash;
+	}
+	
+	@Override
+	public Production shallowCopy() {
+		return new Production(this);
 	}
 }

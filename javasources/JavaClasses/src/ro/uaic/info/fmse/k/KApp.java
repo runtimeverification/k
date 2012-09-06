@@ -13,15 +13,21 @@ public class KApp extends Term {
 	Term child;
 
 	public KApp(String location, String filename) {
-		super(location, filename);
+		super(location, filename, "K");
 	}
 
 	public KApp(String location, String filename, Term label, Term child) {
-		super(location, filename);
+		super(location, filename, "K");
 		this.label = label;
 		this.child = child;
 	}
 
+	public KApp(Term label, Term child) {
+		super("K");
+		this.label = label;
+		this.child = child;
+	}
+	
 	public KApp(Element element) {
 		super(element);
 		Element elm = XML.getChildrenElements(element).get(0);
@@ -44,7 +50,7 @@ public class KApp extends Term {
 
 	@Override
 	public String toMaude() {
-		return label.toMaude() + "(" + child.toMaude() + ") ";
+		return "_`(_`)(" + label.toMaude() + ", " + child.toMaude() + ") ";
 	}
 
 	public Term getLabel() {
@@ -75,5 +81,10 @@ public class KApp extends Term {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	@Override
+	public KApp shallowCopy() {
+		return new KApp(this);
 	}
 }

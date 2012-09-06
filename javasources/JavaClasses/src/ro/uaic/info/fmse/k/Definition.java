@@ -1,12 +1,17 @@
 package ro.uaic.info.fmse.k;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.errorsystem.KException;
+import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
+import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectListConsesVisitor;
 import ro.uaic.info.fmse.loader.Constants;
@@ -158,5 +163,47 @@ public class Definition extends ASTNode {
 
 	public void setModulesMap(Map<String, Module> modulesMap) {
 		this.modulesMap = modulesMap;
+	}
+	
+	
+	public Module getSingletonModule() {
+		List<Module> modules = new LinkedList<Module>();
+		for (DefinitionItem i : this.getItems()) {
+			if (i instanceof Module) modules.add((Module)i);
+		}
+		if (modules.size() != 1) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+					KExceptionGroup.INTERNAL, 
+					"Should have been only one module when calling this method.", 
+					this.getFilename(), this.getLocation(), 0));			
+		}
+		return modules.get(0);
+	}
+
+	public Definition updateSingletonModule(Module mod) {
+		int moduleCount = 0;
+		List<DefinitionItem> newDefinitionItems = new ArrayList<DefinitionItem>();
+		for (DefinitionItem i : this.getItems()) {
+			if (i instanceof Module) {
+				moduleCount++;
+				newDefinitionItems.add(mod);
+			} else {
+				newDefinitionItems.add(i);
+			}
+		}
+		if (moduleCount != 1) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+					KExceptionGroup.INTERNAL, 
+					"Should have been only one module when calling this method.", 
+					this.getFilename(), this.getLocation(), 0));			
+		}
+		Definition result = new Definition(this);
+		result.setItems(newDefinitionItems);
+		return result;
+	}
+	
+	@Override
+	public Definition shallowCopy() {
+		return new Definition(this);
 	}
 }

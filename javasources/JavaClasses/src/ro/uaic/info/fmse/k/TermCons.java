@@ -1,5 +1,6 @@
 package ro.uaic.info.fmse.k;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,12 +17,10 @@ import ro.uaic.info.fmse.visitors.Visitor;
 
 public class TermCons extends Term {
 	String cons;
-	boolean builtin = false;
 	protected java.util.List<Term> contents;
 
-	public TermCons(Element element, boolean builtin) {
+	public TermCons(Element element) {
 		super(element);
-		this.builtin = builtin;
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.cons = element.getAttribute(Constants.CONS_cons_ATTR);
 
@@ -31,18 +30,21 @@ public class TermCons extends Term {
 			contents.add((Term) JavaClassesFactory.getTerm(e));
 	}
 
-	public TermCons(String location, String filename, String psort, String listCons, List<Term> genContents) {
-		super(location, filename);
-		sort = psort;
+	public TermCons(String sort, String cons) {
+		super(sort);
+		this.cons = cons;
+		contents = new ArrayList<Term>();
+	}
+	
+	public TermCons(String location, String filename, String sort, String listCons, List<Term> genContents) {
+		super(location, filename, sort);
 		cons = listCons;
-		builtin = false;
 		contents = genContents;
 	}
 
 	public TermCons(TermCons node) {
 		super(node);
 		this.cons = node.cons;
-		this.builtin = node.builtin;
 		this.contents = node.contents;
 	}
 
@@ -110,14 +112,6 @@ public class TermCons extends Term {
 		this.cons = cons;
 	}
 
-	public boolean isBuiltin() {
-		return builtin;
-	}
-
-	public void setBuiltin(boolean builtin) {
-		this.builtin = builtin;
-	}
-
 	public java.util.List<Term> getContents() {
 		return contents;
 	}
@@ -177,5 +171,10 @@ public class TermCons extends Term {
 		for (Term t : contents)
 			hash += t.hashCode();
 		return hash;
+	}
+
+	@Override
+	public TermCons shallowCopy() {
+		return new TermCons(this);
 	}
 }

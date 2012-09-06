@@ -24,12 +24,16 @@ public class MapItem extends CollectionItem {
 	}
 
 	public MapItem(String location, String filename) {
-		super(location, filename);
+		super(location, filename, "MapItem");
 	}
 	
 	public MapItem(MapItem node) {
 		super(node);
 		this.key = node.key;
+	}
+
+	public MapItem() {
+		super("MapItem");
 	}
 
 	public void setKey(Term key) {
@@ -71,5 +75,10 @@ public class MapItem extends CollectionItem {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	@Override
+	public MapItem shallowCopy() {
+		return new MapItem(this);
 	}
 }

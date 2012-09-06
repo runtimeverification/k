@@ -19,6 +19,11 @@ public abstract class Sentence extends ModuleItem {
 		this.attributes = s.attributes;
 	}
 
+	public Sentence() {
+		super();
+		attributes = new Attributes();
+	}
+
 	public Sentence(String location, String filename) {
 		super(location, filename);
 		attributes = new Attributes();
@@ -83,4 +88,7 @@ public abstract class Sentence extends ModuleItem {
 	public void setAttributes(Attributes attributes) {
 		this.attributes = attributes;
 	}
+	
+	@Override
+	public abstract Sentence shallowCopy();
 }

@@ -37,7 +37,7 @@ public class Attributes extends ASTNode {
 	}
 
 	public Attributes() {
-		super("generated", "generated");
+		super();
 		contents = new LinkedList<Attribute>();
 	}
 
@@ -77,6 +77,16 @@ public class Attributes extends ASTNode {
 		return null;
 	}
 
+	public void set(String key, String value) {
+		for (Attribute attr : contents) {
+			if (attr.getKey().equals(key)) {
+				attr.setValue(value);
+				return;
+			}
+		}
+		contents.add(new Attribute(key, value));
+	}
+
 	public boolean isEmpty() {
 		return this.contents.isEmpty();
 	}
@@ -111,5 +121,10 @@ public class Attributes extends ASTNode {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+	
+	@Override
+	public Attributes shallowCopy() {
+		return new Attributes(this);
 	}
 }

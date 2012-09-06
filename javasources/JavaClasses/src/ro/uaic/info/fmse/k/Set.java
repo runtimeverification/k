@@ -17,7 +17,7 @@ public class Set extends Collection {
 	}
 
 	public Set(String location, String filename) {
-		super(location, filename);
+		super(location, filename, "Set");
 	}
 
 	@Override
@@ -28,5 +28,10 @@ public class Set extends Collection {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	@Override
+	public Set shallowCopy() {
+		return new Set(this);
 	}
 }

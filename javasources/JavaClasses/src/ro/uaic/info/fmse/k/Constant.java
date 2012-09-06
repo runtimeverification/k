@@ -10,17 +10,13 @@ import ro.uaic.info.fmse.visitors.Visitor;
 public class Constant extends Term {
 	String value;
 
-	public Constant() {
-		super("File System", "generated");
+	public Constant(String sort, String value) {
+		super(sort);
+		this.value = value;
 	}
 	
-	public Constant(String location, String filename) {
-		super(location, filename);
-	}
-
 	public Constant(String location, String filename, String sort, String value) {
-		super(location, filename);
-		this.sort = sort;
+		super(location, filename, sort);
 		this.value = value;
 	}
 
@@ -28,6 +24,11 @@ public class Constant extends Term {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.value = element.getAttribute(Constants.VALUE_value_ATTR);
+	}
+
+	public Constant(Constant constant) {
+		super(constant);
+		this.value = value;
 	}
 
 	public String toString() {
@@ -70,5 +71,10 @@ public class Constant extends Term {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+	
+	@Override
+	public Constant shallowCopy() {
+		return new Constant(this);
 	}
 }

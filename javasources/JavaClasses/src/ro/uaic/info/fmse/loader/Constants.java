@@ -76,4 +76,10 @@ public class Constants {
 	public static final String KLABEL = "KLabel";
 	public static final String PREDEFINED = "predefined";
 	public static final String BREAK = "br";
+	
+	
+	// Generated stuff
+	public static final String GENERATED_FILENAME = "File System";
+	public static final String GENERATED_LOCATION = "generated";
+	
 }

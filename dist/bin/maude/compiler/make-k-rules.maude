@@ -75,7 +75,12 @@ fmod MAKE-K-RULES is
 
   op addReplace : Module Module KRuleSplit Substitution AttrSet ~> Module .
   eq addReplace(Flat, M, R{T,Cond,AS}, Subst, AS')
-   = $addReplace(M, addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,1))), handleTagSuperCooling(addK(Flat, AS, AS', normalize(Flat,splitReplace(Flat, T,2))), Subst, AS, AS'), makeCondition(Cond), AS, AS') .
+   = $addReplace(M, ---addK (Flat, AS, AS', 
+       normalize(Flat,splitReplace(Flat, T,1)) --- )
+      , handleTagSuperCooling( ---addK (Flat, AS, AS', 
+       normalize(Flat,splitReplace(Flat, T,2))
+         --- )
+      , Subst, AS, AS'), makeCondition(Cond), AS, AS') .
 
   op formatVariable : Variable -> Variable .
   eq formatVariable(V) 

@@ -17,10 +17,13 @@ public class Variable extends Term {
 	}
 
 	public Variable(String name, String sort) {
-		super("File System", "generated");
-		this.sort = sort;
+		super(sort);
 		this.name = name;
-		// TODO Auto-generated constructor stub
+	}
+
+	public Variable(Variable variable) {
+		super(variable);
+		name = variable.name;
 	}
 
 	public void setName(String name) {
@@ -76,5 +79,10 @@ public class Variable extends Term {
 	@Override
 	public int hashCode() {
 		return sort.hashCode() + name.hashCode();
+	}
+
+	@Override
+	public Variable shallowCopy() {
+		return new Variable(this);
 	}
 }

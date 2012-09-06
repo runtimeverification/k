@@ -22,6 +22,11 @@ public class Import extends ModuleItem {
 		name = importName;
 	}
 
+	public Import(Import import1) {
+		super(import1);
+		this.name = import1.name; 
+	}
+
 	@Override
 	public String toString() {
 		return "  imports " + name;
@@ -59,5 +64,10 @@ public class Import extends ModuleItem {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public Import shallowCopy() {
+		return new Import(this);
 	}
 }

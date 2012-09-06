@@ -7,7 +7,7 @@ import ro.uaic.info.fmse.visitors.Visitor;
 
 public class Bag extends Collection {
 	public Bag(String location, String filename) {
-		super(location, filename);
+		super(location, filename, "Bag");
 	}
 
 	public Bag(Element element) {
@@ -19,7 +19,7 @@ public class Bag extends Collection {
 	}
 
 	public Bag() {
-		super();
+		super("Bag");
 	}
 
 	@Override
@@ -33,5 +33,10 @@ public class Bag extends Collection {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+	
+	@Override
+	public Bag shallowCopy() {
+		return new Bag(this);
 	}
 }

@@ -16,7 +16,7 @@ public class List extends Collection {
 	}
 
 	public List(String location, String filename) {
-		super(location, filename);
+		super(location, filename, "List");
 	}
 
 	@Override
@@ -32,5 +32,10 @@ public class List extends Collection {
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	@Override
+	public List shallowCopy() {
+		return new List(this);
 	}
 }

@@ -58,4 +58,9 @@ public class Ambiguity extends Collection {
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
 	}
+	
+	@Override
+	public Ambiguity shallowCopy() {
+		return new Ambiguity(this);
+	}
 }

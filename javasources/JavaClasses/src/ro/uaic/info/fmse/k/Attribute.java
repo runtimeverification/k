@@ -16,7 +16,7 @@ public class Attribute extends ASTNode {
 	private String value;
 
 	public Attribute(String key, String value) {
-		super("generated", "generated");
+		super();
 		this.key = key;
 		this.value = value;
 	}
@@ -26,6 +26,12 @@ public class Attribute extends ASTNode {
 
 		key = elm.getAttribute(Constants.KEY_key_ATTR);
 		value = elm.getAttribute(Constants.VALUE_value_ATTR);
+	}
+
+	public Attribute(Attribute attribute) {
+		super(attribute);
+		key = attribute.key;
+		value = attribute.value;
 	}
 
 	@Override
@@ -82,5 +88,10 @@ public class Attribute extends ASTNode {
 
 	public String getKey() {
 		return key;
+	}
+	
+	@Override
+	public Attribute shallowCopy() {
+		return new Attribute(this);
 	}
 }

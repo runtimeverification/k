@@ -12,6 +12,10 @@ public class TermComment extends Term {
 		super(element);
 	}
 
+	public TermComment(TermComment termComment) {
+		super(termComment);
+	}
+
 	@Override
 	public String toMaude() {
 		return " (.).Bag ";
@@ -34,5 +38,10 @@ public class TermComment extends Term {
 
 	@Override
 	public void applyToAll(Modifier visitor) {
+	}
+
+	@Override
+	public Term shallowCopy() {
+		return new TermComment(this);
 	}
 }

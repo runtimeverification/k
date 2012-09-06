@@ -32,7 +32,6 @@ fmod ADD-EVAL is
        [none] .)
       defaultEvalEqs(Tl) .
 
-
   op evalMap_ : TermList -> TermList .
   eq evalMap(empty) = itemCtor(Map)[stringCt(string(getName(stdinVariable))), wrap2K(stdinVariable)],
                       itemCtor(Map)[stringCt(string(getName(noIOVariable))), wrap2K(noIOVariable)],

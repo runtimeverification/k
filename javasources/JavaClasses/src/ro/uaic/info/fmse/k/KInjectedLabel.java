@@ -1,5 +1,6 @@
 package ro.uaic.info.fmse.k;
 
+import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformer;
 import ro.uaic.info.fmse.visitors.Visitor;
@@ -10,6 +11,16 @@ public class KInjectedLabel extends Term {
 
 	public KInjectedLabel(String location, String filename) {
 		super(location, filename, "KLabel");
+	}
+
+	public KInjectedLabel(KInjectedLabel l) {
+		super(l);
+		term = l.term;
+	}
+	
+	public KInjectedLabel(Term t) {
+		super("KLabel");
+		term = t;
 	}
 
 	public Term getTerm() {
@@ -26,7 +37,10 @@ public class KInjectedLabel extends Term {
 
 	@Override
 	public String toMaude() {
-		return "#_(" + term + ")";
+		if (MetaK.isKSort(term.getSort())) {
+			return term.getSort() + "2KLabel_(" + term.toMaude() + ")";
+		}
+		return "#_(" + term.toMaude() + ")";
 	}
 
 	@Override
@@ -41,5 +55,10 @@ public class KInjectedLabel extends Term {
 
 	@Override
 	public void applyToAll(Modifier visitor) {
+	}
+
+	@Override
+	public KInjectedLabel shallowCopy() {
+		return new KInjectedLabel(this);
 	}
 }

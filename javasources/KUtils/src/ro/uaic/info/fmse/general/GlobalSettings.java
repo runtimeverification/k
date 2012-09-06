@@ -20,4 +20,5 @@ public class GlobalSettings {
 	public static String transition = "";
 	public static String superheat = "";
 	public static String supercool = "";
+	public static boolean addTopCell = false;
 }

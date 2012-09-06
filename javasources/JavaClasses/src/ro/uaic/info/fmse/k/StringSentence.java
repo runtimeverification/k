@@ -65,4 +65,9 @@ public class StringSentence extends ModuleItem {
 	@Override
 	public void applyToAll(Modifier visitor) {
 	}
+
+	@Override
+	public StringSentence shallowCopy() {
+		return new StringSentence(this);
+	}
 }

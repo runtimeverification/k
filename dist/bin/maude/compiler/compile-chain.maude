@@ -36,6 +36,7 @@ mod COMPILE-ONESHOT is
   op compile1 : Module Qid AttrSet ~> Module .
   eq compile1(M, 'MANY-MODULES, AS) = compileMANY-MODULES(M, AS) .
   eq compile1(M, 'REMOVE-PARSER, AS) = compileREMOVE-PARSER(M, AS) .
+  eq compile1(M, 'DUMMY, AS) = M .
   eq compile1(M, 'ADD-EVAL, AS) = compileADD-EVAL(M, AS) .
   eq compile1(M, 'RESOLVE-DITTO, AS) = compileRESOLVE-DITTO(M, AS) .
   eq compile1(M, 'RESOLVE-BINDER, AS) = compileRESOLVE-BINDER(M, AS) .
@@ -69,6 +70,7 @@ mod COMPILE-ONESHOT is
   op allSteps : -> QidList .
   eq allSteps = 
 --- 'MANY-MODULES 
+'DUMMY
 'ADD-EVAL 
 'RESOLVE-DITTO 
 'RESOLVE-BINDER    
@@ -135,7 +137,9 @@ fmod COMPILE-META is
   eq pcompile(Q, Q', AS) = partialCompile(upModule(Q, false), Q', AS) .
 
   op getPhaseName : Qid ~> QidList .
-  eq getPhaseName('MANY-MODULES) 
+  eq getPhaseName('DUMMY) 
+   = 'doing 'nothing .
+   eq getPhaseName('MANY-MODULES) 
    = 'flattening 'entire 'definition 'in 'a 'single 'module .
   eq getPhaseName('REMOVE-PARSER) 
    = tokenize("removing extra parser stuff") .
@@ -199,6 +203,7 @@ fmod COMPILE-META is
   op allSteps : -> QidList .
   eq allSteps = 
 --- 'MANY-MODULES 
+'DUMMY
 'ADD-EVAL 
 'RESOLVE-DITTO 
 'RESOLVE-BINDER 
@@ -236,11 +241,12 @@ fmod COMPILE-META is
   
   op compile : Module QidList AttrSet ~> Module .
   eq compile(M,nil, AS) = M [print "Final module: " M] .
+  eq compile(M, 'DUMMY QIL, AS) = compile(M, QIL, AS) [print "dummy phasE"] .
   eq compile(M, Q QIL, AS) =  $compile(M, Q, 
     downTerm(getTerm(
              metaRewrite(wrapper(qid(string(Q) + "-META")),
                         qid("compile" + string(Q))[upTerm(M),upTerm(AS)], unbounded)), error)
-     , QIL, AS) [print "applying transformation " Q " on module " M] .
+     , QIL, AS) [owise print "applying transformation " Q " on module " M ] .
   
   op $compile : Module Qid Module QidList AttrSet ~> Module .
   eq $compile(M, Q, moduleError(QIL), QIL', AS) = moduleError(QIL) .

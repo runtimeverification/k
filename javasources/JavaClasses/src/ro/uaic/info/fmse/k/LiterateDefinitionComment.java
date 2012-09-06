@@ -24,6 +24,13 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
 			this.lcType = LiterateCommentType.COMMON;
 	}
 
+	public LiterateDefinitionComment(
+			LiterateDefinitionComment literateDefinitionComment) {
+		super(literateDefinitionComment);
+		value = literateDefinitionComment.value;
+		lcType = literateDefinitionComment.lcType; 
+	}
+
 	@Override
 	public String toMaude() {
 		return "";
@@ -54,5 +61,10 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
 	@Override
 	public LiterateCommentType getType() {
 		return lcType;
+	}
+
+	@Override
+	public LiterateDefinitionComment shallowCopy() {
+		return new LiterateDefinitionComment(this);
 	}
 }

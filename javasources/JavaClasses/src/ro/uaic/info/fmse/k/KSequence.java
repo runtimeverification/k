@@ -27,24 +27,16 @@ public class KSequence extends Collection {
 	}
 	
 	@Override
-	public String toMaude() {
-		String content = "";
-
-		for (Term term : contents)
-			if (term != null)
-				content += term.toMaude() + ",";
-
-		if (content.length() > 1)
-			content = content.substring(0, content.length() - 1);
-		
-		return "_~>_(" + content + ")";
-	}
-	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+
+	@Override
+	public KSequence shallowCopy() {
+		return new KSequence(this);
 	}
 }

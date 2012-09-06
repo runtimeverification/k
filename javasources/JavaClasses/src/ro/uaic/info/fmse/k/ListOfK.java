@@ -6,8 +6,12 @@ import ro.uaic.info.fmse.visitors.Transformer;
 import ro.uaic.info.fmse.visitors.Visitor;
 
 public class ListOfK extends Collection {
+	public ListOfK() {
+		super("List{K}");
+	}
+	
 	public ListOfK(String location, String filename) {
-		super(location, filename);
+		super(location, filename, "List{K}");
 	}
 
 	public ListOfK(Element element) {
@@ -31,24 +35,16 @@ public class ListOfK extends Collection {
 	}
 
 	@Override
-	public String toMaude() {
-		String content = "";
-
-		for (Term term : contents)
-			if (term != null)
-				content += term.toMaude() + ",";
-
-		if (content.length() > 1)
-			content = content.substring(0, content.length() - 1);
-
-		return "_`,`,_(" + content + ")";
-	}
-	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
 	@Override
 	public ASTNode accept(Transformer visitor) {
 		return visitor.transform(this);
+	}
+	
+	@Override
+	public ListOfK shallowCopy() {
+		return new ListOfK(this);
 	}
 }

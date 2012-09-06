@@ -4,6 +4,7 @@ import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Constant;
 import ro.uaic.info.fmse.k.Empty;
 import ro.uaic.info.fmse.k.KApp;
+import ro.uaic.info.fmse.k.KInjectedLabel;
 import ro.uaic.info.fmse.k.ListOfK;
 import ro.uaic.info.fmse.k.Production;
 import ro.uaic.info.fmse.k.TermCons;
@@ -36,7 +37,7 @@ public class KAppModifier extends BasicTransformer {
 		String f = cst.getFilename();
 
 		if (!cst.getSort().equals("KLabel"))
-			return new KApp(l, f, new KApp(l, f, new Constant(l, f, "KLabel", "#_"), cst), new Empty(l, f, "List{K}"));
+			return new KApp(l, f, new KInjectedLabel(cst), new Empty(l, f, "List{K}"));
 
 		return cst;
 	}
