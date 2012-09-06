@@ -1,8 +1,17 @@
 /*!
+\usepackage{ucs} % for unicode characters (just for \Rosu and \Serbanuta)
+
+\newcommand{\sh}{\unichar{0537}}
+\newcommand{\Sh}{\unichar{0536}}
+\newcommand{\tz}{\unichar{0539}}
+\newcommand{\Tz}{\unichar{0538}}
+\newcommand{\Serbanuta}{{\Sh}erb{\u a}nu{\tz}{\u a}}
+
 \setlength{\parindent}{1em}
 \title{CinK -- an experiment on how to think in \K}
-\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro}) and 
-        Traian Florin \c{S}erb\u{a}nu\c{t}\u{a} (\texttt{tserban2@illinois.edu})}
+\author{Dorel Lucanu and 
+        Traian Florin \Serbanuta{} \\
+     \texttt{\{dlucanu,traian.serbanuta\}@info.uaic.ro}}
 \organization{Alexandru Ioan Cuza University of Ia\c{s}i, Romania}
 \newcommand{\myparagraph}[1]{\textbf{#1}}
 \newcommand{\KTool}{\K tool\xspace}
@@ -256,19 +265,21 @@ module CINK-LANG-SEMANTICS
                   <threads color="pink">
                     <thread multiplicity="*" color="purple"> 
                       <name color="yellow"> noname </name>
+                      <br/>
                       <k color="green"> ($PGM:Pgm ~> execute) </k>
                       <env color="LightSkyBlue"> .Map </env>
+                      <br/>
                       <bstack color="orange"> .List </bstack>
                       <fstack color="orange"> .List </fstack>
                     </thread>
-                  </threads>
+                  </threads> <br/>
                   <genv color="SkyBlue"> .Map </genv>
                   <store color="white"> .Map </store>
-//                  <br/>
+                  <nextLoc> 0 </nextLoc>
+                  <br/>
                   <in color="magenta" stream="stdin"> $IN:List </in>
 //                  <out color="Orchid"> .List </out>
                   <out color="Orchid" stream="stdout"> .List </out>
-                  <nextLoc> 0 </nextLoc>
                 </T>
 
   /*@
@@ -580,7 +591,7 @@ module CINK-LANG-SEMANTICS
     -- the case cell \texttt{bstack} is empty:
   */
   rule [block] : 
-       <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
+       <k>{Sts:Stmts} => (Sts ~> restoreb ~> popb)  ...</k>
        <env> Env:Map </env>
        <bstack> . => [Env] </bstack>
        [structural]
@@ -590,7 +601,7 @@ module CINK-LANG-SEMANTICS
     environment is different from that on the top:
   */
   rule [block] : 
-       <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
+       <k>{Sts:Stmts} => (Sts ~> restoreb ~> popb)  ...</k>
        <env> Env:Map </env>
        <bstack> (. => [Env]) [Env1:Map] ...</bstack>
        when Env =/=Map Env1
@@ -601,7 +612,7 @@ module CINK-LANG-SEMANTICS
     environment is equal to that on the top:
   */
   rule [block] : 
-       <k>{Sts:Stmts} => Sts  ...</k>
+       <k>{Sts:Stmts} => Sts ~> restoreb ...</k>
        <env> Env:Map </env>
        <bstack> [Env1:Map] ...</bstack>
        when Env ==Map Env1
@@ -874,13 +885,17 @@ module CINK-LANG-SEMANTICS
 
 
   /*@
-    The semantics of \texttt{popb} is to pop out the stack of the
-    block environments:
+    The semantics of \texttt{popb} and \texttt{restoreb} is that the first 
+    pops out the stack of the block environments, while the second restores
+    the environment from the top of the stack (without popping it).  
   */
-  syntax K ::= "popb"
+  syntax K ::= "popb" | "restoreb"
 
   rule <k> popb => . ...</k>
        <bstack> [Env:Map] => . ...</bstack>
+
+  rule <k> restoreb => . ...</k>
+       <bstack> [Env:Map] ...</bstack>
        <env> _ => Env </env> 
 
 endmodule
