@@ -31,27 +31,27 @@ module THREADS
                                      => V|->0 ...</holds> 
        <busy>Busy (.
                    => SetItem(V))</busy>
-    when notBool(V in Busy:Set) [transition]
+    when notBool(V:KResult in Busy:Set) [transition]
   rule [reentrant-acquire] : 
-       <k>acquire V 
+       <k>acquire V:KResult 
           => skip ...</k> <holds>... V|->(N:Nat 
                                           => N +Int 1) ...</holds>
 
   rule [reentrant-release] : 
-       <k>release V 
+       <k>release V:KResult 
           => skip ...</k> <holds>... V|->(N 
                                           => N -Int 1) ...</holds>
     when N >Int 0
 
   rule [release] : 
-       <k>release V 
+       <k>release V:KResult 
           => skip ...</k> <holds>... (V|->0 
                                       => .) ...</holds> 
        <busy>... (SetItem(V)
             => .) ...</busy>
 
   rule [rendezvous] : 
-       <k>rendezvous V 
+       <k>rendezvous V:KResult 
           => skip ...</k> <k>rendezvous V 
                              => skip ...</k>  [transition]
 endmodule

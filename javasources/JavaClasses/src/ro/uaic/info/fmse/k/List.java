@@ -19,6 +19,10 @@ public class List extends Collection {
 		super(location, filename, "List");
 	}
 
+	public List() {
+		super("List");
+	}
+
 	@Override
 	public String toString() {
 		return super.toString();

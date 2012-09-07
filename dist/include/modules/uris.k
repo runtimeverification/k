@@ -167,7 +167,7 @@ module URIS
     when #isDigit(C:String)
   */
 
-  syntax List ::= "#buffer" "(" K ")"
+  syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
 
   // Initial input string is assumed wrapped in an #buffer wrapper an one character is retreved from it at a time
   rule #parse(_:String,_) (.List => ListItem(substrString(S:String,0,1))) 

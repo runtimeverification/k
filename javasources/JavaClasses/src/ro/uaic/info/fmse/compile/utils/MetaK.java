@@ -173,6 +173,21 @@ public class MetaK {
 			public void visit(Configuration node) {
 				result.add(node);
 			}
+
+			@Override
+			public void visit(Context node) {
+				return;
+			}
+
+			@Override
+			public void visit(Rule node) {
+				return;
+			}
+
+			@Override
+			public void visit(Syntax node) {
+				return;
+			}
 		});
 		if (result.size() == 0) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
@@ -183,7 +198,7 @@ public class MetaK {
 		return result.get(0);
 	}
 	
-	public static Term defaultTerm(Variable v) {
+	public static Term defaultTerm(Term v) {
 		String sort = v.getSort();
 		if (!isKSort(sort)) sort = "K";
 		if (!"K".equals(sort)) {
@@ -192,7 +207,7 @@ public class MetaK {
 		if (isDefaulable(sort)) return new Empty(sort);
 		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 				KExceptionGroup.COMPILER, 
-				"Don't know the default value for variable " + v.getName() + " in configuration. Assuming .K", 
+				"Don't know the default value for term " + v.toString() + ". Assuming .K", 
 				v.getFilename(), v.getLocation(), 0));
 		return new Empty("K");
 	}

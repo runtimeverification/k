@@ -28,6 +28,7 @@ import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.Variable;
 import ro.uaic.info.fmse.k.Cell.Multiplicity;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
+import ro.uaic.info.fmse.visitors.CopyOnWriteTransformer;
 
 public class AddEval implements CompilerStep {
 
@@ -102,27 +103,7 @@ public class AddEval implements CompilerStep {
 	}	
 	
 	
-	class ConfigurationCleaner extends BasicTransformer {
-		@Override
-		public ASTNode transform(Bag node) {
-			ArrayList<Term> terms = new ArrayList<Term>();
-			for (Term t : node.getContents()) {
-				ASTNode result =  t.accept(this);
-				if (result != null) {
-					if (!(result instanceof Term)) {
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-								KExceptionGroup.INTERNAL, 
-								"Expecting Term, but got " + result.getClass() + " in Configuration Cleaner.", 
-								t.getFilename(), t.getLocation(), 0));
-					}
-					Term r = (Term) result;
-					terms.add(r);
-				}
-			}
-			Bag bagResult = new Bag(node);
-			bagResult.setContents(terms);
-			return bagResult;			
-		}
+	class ConfigurationCleaner extends CopyOnWriteTransformer {
 		
 		@Override
 		public ASTNode transform(Cell node) {
@@ -132,44 +113,22 @@ public class AddEval implements CompilerStep {
 				}
 			}
 
-			ASTNode result = node.getContents().accept(this);
-			Cell finalResult = new Cell(node);
-			if (result != null) {
-				if (!(result instanceof Term)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-							KExceptionGroup.INTERNAL, 
-							"Expecting Term, but got " + result.getClass() + " in Configuration Cleaner.", 
-							result.getFilename(), result.getLocation(), 0));
-				}
-				Term r = (Term) result;
-				finalResult.setContents(r);
-			} else {
-				finalResult.setContents(new Empty("Bag"));
+			ASTNode result = super.transform(node);
+			if (result == null) return null;
+			if (!(result instanceof Cell)) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+						KExceptionGroup.INTERNAL, 
+						"Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.", 
+						node.getFilename(), node.getLocation(), 0));
 			}
-			
-			finalResult.setDefaultAttributes();
-			finalResult.setElipses("none");
-			return finalResult;
+			if (result == node) {
+				node = node.shallowCopy();
+			} else node = (Cell) result;
+			node.setDefaultAttributes();
+			node.setElipses("none");
+			return node;
 		}
 
-		@Override
-		public ASTNode transform(Configuration node) {
-			ASTNode result = node.getBody().accept(this);
-			Configuration finalResult = new Configuration(node);
-			if (result != null) {
-				if (!(result instanceof Term)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-							KExceptionGroup.INTERNAL, 
-							"Expecting Term, but got " + result.getClass() + " in Configuration Cleaner.", 
-							result.getFilename(), result.getLocation(), 0));
-				}
-				Term r = (Term) result;
-				finalResult.setBody(r);
-			} else {
-				finalResult.setBody(new Empty("Bag"));
-			}
-			return finalResult;
-		}
 	}
 
 

@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.visitors;
 
 import java.util.ArrayList;
 
+import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
@@ -239,7 +240,9 @@ public class CopyOnWriteTransformer implements Transformer {
 	public ASTNode transform(Cell node) {
 		Term term = node.getContents();
 		ASTNode result = term.accept(this);
-		if (result == null) return null;
+		if (result == null) {
+			result = MetaK.defaultTerm(term);
+		}
 		if (!(result instanceof Term)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
