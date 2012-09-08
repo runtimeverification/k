@@ -11,14 +11,14 @@ import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
-import ro.uaic.info.fmse.k.Rule;
+import ro.uaic.info.fmse.k.Sentence;
 import ro.uaic.info.fmse.k.Variable;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class VariableTypeInferenceFilter extends BasicTransformer {
 
-	public ASTNode transform(Rule r) {
+	public ASTNode transform(Sentence r) {
 
 		CollectVariablesVisitor vars = new CollectVariablesVisitor();
 		r.accept(vars);

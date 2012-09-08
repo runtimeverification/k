@@ -1,8 +1,17 @@
 /*!
+\usepackage{ucs} % for unicode characters (just for \Rosu and \Serbanuta)
+
+\newcommand{\sh}{\unichar{0537}}
+\newcommand{\Sh}{\unichar{0536}}
+\newcommand{\tz}{\unichar{0539}}
+\newcommand{\Tz}{\unichar{0538}}
+\newcommand{\Serbanuta}{{\Sh}erb{\u a}nu{\tz}{\u a}}
+
 \setlength{\parindent}{1em}
 \title{CinK -- an experiment on how to think in \K}
-\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro}) and 
-        Traian Florin \c{S}erb\u{a}nu\c{t}\u{a} (\texttt{tserban2@illinois.edu})}
+\author{Dorel Lucanu and 
+        Traian Florin \Serbanuta{} \\
+     \texttt{\{dlucanu,traian.serbanuta\}@info.uaic.ro}}
 \organization{Alexandru Ioan Cuza University of Ia\c{s}i, Romania}
 \newcommand{\myparagraph}[1]{\textbf{#1}}
 \newcommand{\KTool}{\K tool\xspace}
@@ -14,25 +23,25 @@
 
 CinK is a kernel of the \Cpp language we used to experiment with \K.
 The language is used
-an example for teaching classes and is refered in several research paper.
+an example for teaching classes and is referred in several research papers.
 
 In this report we briefly present the \K definition of CinK. The most part of
 the text is automatically generated with the \K tool, therefore there are some
-differences btween the source code and the pdf version. For instance, the
+differences between the source code and the pdf version. For instance, the
 terminal syntax declarations are enclosed into quotes but in the pdf version
-these are not displayed. In pdf version, for ease reading reasons, there are 
-used different fonts in order to distinguish between different syntactic 
+these are not displayed. In the pdf version (for ease of reading) 
+different fonts are used to distinguish between different syntactic 
 categories.
 
 The report is not intended to be an introduction to \K. 
 We assume the reader is already familiar with the \K Framework and the 
-\KTool and here we try to share our experiece in defining a languages with some
-specific features, as \Cpp is. Such features includes a clear distinction
+\KTool and here we try to share our experience in defining a language with some
+specific features, as \Cpp is. Such features include a clear distinction
 between l-values and r-values, declaration of aliases, and 
-various parameters passing mechanisms.
+various parameter-passing mechanisms.
 We also extend the definition with a small property language, including LTL
-formulas, and we show how the \KTool is used together with Maude system 
-for analazing \Cink programs.
+formulas, and we show how the \KTool can be used (together with Maude system) 
+for analyzing \Cink programs.
 
 The \K definition of \Cink is continuously evolving, so this report presents
 the status of this definition at the publication date. 
@@ -43,12 +52,12 @@ the status of this definition at the publication date.
 
 /*@ \section{Syntax}
 The syntax of \Cink is written using the last version at the moment of the 
-\KTool. Since the language is relatively small, we use the facilties the 
-\KTool offers for deffining the syntax.This is given using a BNF-like 
+\KTool. Since the language is relatively small, we use the facilities offered 
+by the \KTool for defining the syntax. This is given using a BNF-like 
 notation enriched with annotations and priority specifications.
 In this way, the rules giving semantics are written using the \Cink 
-syntax. However, in order to avoid some ambiguous parsings, some rules are
-written using the corresponding \K abstract syntax trees. 
+syntax. However, to avoid some ambiguous parsings, some rules are
+written using the \K abstract syntax trees instead of the concrete syntax. 
 */
 
 module CINK-LANG-SYNTAX 
@@ -68,44 +77,41 @@ module CINK-LANG-SYNTAX
 
   /*@ \subsection{Expressions} */
 
-  /*@ The constants of the builtin types are primitive constructs and therefore
-      they should be values.  
-      The sort for values will be extended in the module describing the 
-      semantics. 
+  /*@ Constants of builtin types are primitive values.
       We prefer to declare \texttt{cin} and \texttt{cout} as values rather 
       than identifiers; the reason for this decision will be explained later.
+      The values sort will be further extended in the module describing the 
+      semantics. 
    */
 
   syntax Val ::= "cout" | "cin" | Bool | String | Int
 
   /*@
-    We included in CinK a small subset of \Cpp language, the missing operators
-    can be easily added in a similar way. Recall that the most important (from
-    the semantic point of view) thing we have to mention for operators is the
-    attribute \texttt{strict}, that specifies the evaluation order of the 
+    We included in CinK a small subset of \Cpp language.
+    The attribute \texttt{strict} specifies the evaluation order of the 
     operands. For instance, the arithmetic binary 
     operators are strict in both arguments, hence the behavior of some 
-    programs could be undefined or non-determinsitic because the evaluation
+    programs could be undefined or non-deterministic because the evaluation
     of the arguments could have side-effects. Initially, their strictness was
-    declared directly in the syntax, uing the attribute strict. When we gave 
+    declared directly in the syntax, using the attribute strict. When we gave 
     semantics to the prefix increment operator, we realized that this is not
-    a good choice. Since some operators, like the prefix increment, return
-    l-values, in Cink the l-values and r-values can mixtly occur in the 
-    evaluation of an expression. We will discuss in detail this apect when
+    a good choice (???). Since some operators, like the prefix increment, return
+    l-values, in Cink the l-values and r-values can occur mixed in the 
+    evaluation of an expression. We will discuss in detail this aspect when
     we give semantics to the operators.  The assignment operator is strict
     only in the second argument because the first argument must be evaluated 
     to an l-value. These features are common to many languages. In contrast
     to the other examples, the function call expression is strict only in the
     first argument (the function name) because the evaluation of the arguments
-    it is depending on the bindding mechanism of the corresponding argument: 
-    this can be call-by-value or call-by-reference. These two mechansims will
+    is depending on the binding mechanism of the corresponding argument: 
+    this can be call-by-value or call-by-reference. These two mechanisms will
     be explained later. 
    */
   syntax Exp ::= Id | Val
                | "(" Exp ")"  [bracket]
                | Id "(" Exps ")" [strict(1)]
                | "&" Exp
-               | "*" Exp [strict]
+               | "*" Exp 
                | "++" Exp
                > left:
                  Exp "*" Exp 
@@ -125,7 +131,7 @@ module CINK-LANG-SYNTAX
                > 
                  Exp "||" Exp [left, strict(1)]
                > left:
-                 Exp "<<" Exp [left, seqstrict, latex({#1}\mathrel{\tt <<}{#2})]
+                 Exp "<<" Exp [left, latex({#1}\mathrel{\tt <<}{#2})]
                | Exp ">>" Exp [left, latex({#1}\mathrel{\tt >>}{#2})]
                >
                  Exp "=" Exp [right]
@@ -138,10 +144,11 @@ module CINK-LANG-SYNTAX
   syntax #Id ::= "main" 
 
   /*@ \subsection{Statements}
-    For now, we include in CinK only (a subset) of the imperative statements:
-    expresion statement, bloc, sequential composition, while, and conditionals.
-    We also added a minimal support for threads, similar to IMPPP, but using a
-    \Cpp syntax and semantics.
+    For now, we only include in CinK a subset of the imperative statements:
+    the expression statement, block, sequential composition, while, 
+    and conditionals.
+    We also added minimal support for threads, similar to IMPPP, but using a
+    syntax and semantics closer to that of \Cpp.
    */
 
   syntax Stmt ::= Exp ";" [strict]
@@ -187,9 +194,9 @@ module CINK-LANG-SEMANTICS
     of an expression is finished. This piece of information is crucial, e.g.,
     for the heating and cooling rules. 
     We already defined the subset of values that is part of the syntax, 
-    namely the values given by the primitive types. Here we estend the set
-    o values with intermediate constructs needed to execute programs. 
-    Such a value is\texttt{void}, which "paradoxally" denotes in fact 
+    namely the values given by primitive types. Here we extend the set
+    of values with intermediate constructs needed to execute programs. 
+    Such a value is \texttt{void}, which "paradoxically" denotes in fact 
     "no value". The lambda abstractions are used for storing the
     functions. Similar to other \K examples (IMP, IMPPP, SIMPLE), the 
     functions are stored similar to variables and therefore their definitions
@@ -214,8 +221,8 @@ module CINK-LANG-SEMANTICS
     In Cink, the expressions can be evaluated to l-values or to r-values,
     depending on the context they are used.
     Historically, the names of these two categories are coming from the fact 
-    that an lvalue expression can be used in the left hand side of an 
-    assignment and an rvalue expression can be used in the right hand side of 
+    that an l-value expression can be used in the left hand side of an 
+    assignment and an r-value expression can be used in the right hand side of 
     an assignment.
     Semantically, an l-value expression is evaluated to a location and an 
     r-value expression is evaluated to a value that can be stored into a
@@ -234,7 +241,7 @@ module CINK-LANG-SEMANTICS
   syntax K ::= "execute" | "noname"
 
  /*@
-   The next two constructors are used for storing the enavironment and the
+   The next two constructors are used for storing the environment and the
    rest of the computation in the call stack (\texttt{fstack}) and in the block 
    stack (\texttt{bstack}). 
  */
@@ -247,35 +254,36 @@ module CINK-LANG-SEMANTICS
    The threads are included in a cell named \texttt{threads}, where each cell
    \texttt{thread}, representing the current of a thread, includes a cell 
    \texttt{k} for the local computations, a cell \texttt{env} for the local
-   environment, a cell \texttt{bstack} for managing the environments
-   when the execution enters or exits a block, and a cell \texttt{fstack} for
+   environment, and a cell \texttt{fstack} for
    the managing the local configurations when a function call expression 
    or a return statement is executed.
-   The cell \texttt{bstack} is specific to this definition, it does not appear
-   in the definition of the other similar languages.
+   The cell \texttt{bstack}, used for managing the environments when the
+   execution enters or exits a block, is specific to this definition.
   */
 
   configuration <T color="yellow">
                   <threads color="pink">
                     <thread multiplicity="*" color="purple"> 
                       <name color="yellow"> noname </name>
+                      <br/>
                       <k color="green"> ($PGM:Pgm ~> execute) </k>
                       <env color="LightSkyBlue"> .Map </env>
+                      <br/>
                       <bstack color="orange"> .List </bstack>
                       <fstack color="orange"> .List </fstack>
                     </thread>
-                  </threads>
+                  </threads> <br/>
                   <genv color="SkyBlue"> .Map </genv>
                   <store color="white"> .Map </store>
-//                  <br/>
+                  <nextLoc> 0 </nextLoc>
+                  <br/>
                   <in color="magenta" stream="stdin"> $IN:List </in>
 //                  <out color="Orchid"> .List </out>
                   <out color="Orchid" stream="stdout"> .List </out>
-                  <nextLoc> 0 </nextLoc>
                 </T>
 
   /*@
-    In order to have a minimal set of rules, some syntactic constructs
+    To have a minimal set of rules, some syntactic constructs
     are desugared. The desugaring can be done using the structural rules.
     In order to avoid some ambiguous parsings, some terms are written using
     the \K AST notation.
@@ -298,7 +306,6 @@ module CINK-LANG-SEMANTICS
        andBool (Es =/=K .Exps)
        [anywhere]
 
-
   /*@
     Desugaring rule for variable declarations with initialization:
      e.g., \texttt{int *y = \&x;} is desugared into 
@@ -306,13 +313,13 @@ module CINK-LANG-SEMANTICS
     to consider here only simple variable declarations, which are not 
     aliases. 
    */
+
   rule '_;(KL:KLabel('_`,_('_=_(E1:Exp,, E2:Exp),, .Exps)))
        =>
        '__('_;(KL('_`,_(E1,, .Exps))),, '_;('_=_(getName(E1),, E2)))
        when isDeclLabel(KL) 
        andBool (isAlias('_=_(E1,, E2)) =/=K true)
        [anywhere]
-
 
   /*@ \subsection{Declarations.} */
 
@@ -333,19 +340,19 @@ module CINK-LANG-SEMANTICS
     -- declaration of an alias: 
   */
 
-  context KL:KLabel('_`,_(&_ = (HOLE => lvalue(HOLE)),, .Exps))
+  context KL:KLabel((&_ = (HOLE => lvalue(HOLE)), .Exps))
        when isDeclLabel(KL)
 
   /* */
   rule [alias-decl] :
-       <k> KL:KLabel('_`,_(& X:Id = loc(L:Int),, .Exps)) => void  ...</k>      
+       <k> KL:KLabel(& X:Id = loc(L:Int), .Exps) => void  ...</k>      
        <env> Env:Map => Env[L/X] </env>
        when isDeclLabel(KL)
        [structural]
 
   /*@ -- declaration of a variable: */
   rule [var-decl] :
-       <k> KL:KLabel('_`,_(E:Exp,, .Exps)) => void  ...</k>      
+       <k> KL:KLabel(E:Exp, .Exps) => void  ...</k>      
        <env> Env:Map => Env[L/getName(E)] </env>
        <store>... . => (L |-> undefined) ...</store>
        <nextLoc> L:Int => (L +Int 1) </nextLoc>
@@ -353,9 +360,9 @@ module CINK-LANG-SEMANTICS
        andBool (isAlias(E) =/=K true)
        [structural]
 
-  /*@ The following two constructs have no semantics yet; they are used now only 
-      for having a full compatibility with \Cpp, e.g., the \Cink programs can be 
-      compiled with a \Cpp compiler. */
+  /*@ The following two constructs have no semantics yet; 
+      they are used only for having a full compatibility with \Cpp, 
+       e.g., to allow \Cink programs to be compiled with a \Cpp compiler. */
   rule [include] :
        <k> #include <iostream> => .  ...</k>
        [structural]
@@ -429,6 +436,7 @@ module CINK-LANG-SEMANTICS
 
   rule endl => "\n" [structural]
 
+  context * (HOLE => rvalue(HOLE))
   rule [indirection] :
        <k> (* L:Int) => V ...</k>
        <store>... L |-> V ...</store>
@@ -439,17 +447,19 @@ module CINK-LANG-SEMANTICS
 
 
   /*@ \subsubsection{The prefix increment operator}
-    Here is the description of this operator from the manual of \Cpp 2011:
-    "The operand of prefix ++ is modified by adding 1, or set to true 
+    Here is the description of this operator from the \Cpp 2011 standard:
+    \begin{quote}
+    ``The operand of prefix ++ is modified by adding 1, or set to true 
     if it is bool (this use is deprecated). The operand shall be a 
     modifiable lvalue. The type of the operand shall be an arithmetic 
     type or a pointer to a completely-defined object type. 
     The result is the updated operand; it is an lvalue, and it is a 
-    bit-field if the operand is a bit-field."\\
+    bit-field if the operand is a bit-field.''
+    \end{quote}
     This definition raises some problems.
     We suppose that we want to evaluate the
     expression \texttt{y + (++x)}; since the addition operator is strict in 
-    both arguments, it will be reduced something like $\it I + loc(L)$ and 
+    both arguments, it will be reduced to something like $\it I + loc(L)$ and 
     in that case $\it loc(L)$ should be evaluate at the value stored into
     the location $L$. On the other hands, the evaluation of the expression
     \texttt{++ (++x)} uses the l-value returned by the operator.
@@ -464,7 +474,7 @@ module CINK-LANG-SEMANTICS
 
   /*@
     The \texttt{lvalue()} operator: if the argument is not already an l-value,
-    then it is firstly evaluated. The result of the argument evaluation is an
+    then it is first evaluated. The result of the argument evaluation is an
     \texttt{Int} or an l-value (when the argument was evaluated as an l-value).
    */
   context lvalue(HOLE) 
@@ -492,7 +502,7 @@ module CINK-LANG-SEMANTICS
 
   /*@
     The evaluation of a variable name as an l-value. We distinguish two cases:\\
-    -- the location is directly disignated by the variable name
+    -- the location is directly designated by the variable name
   */
 
   rule [mem-lookup-lvalue] :
@@ -564,7 +574,7 @@ module CINK-LANG-SEMANTICS
     -- the case cell \texttt{bstack} is empty:
   */
   rule [block] : 
-       <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
+       <k>{Sts:Stmts} => (Sts ~> restoreb ~> popb)  ...</k>
        <env> Env:Map </env>
        <bstack> . => [Env] </bstack>
        [structural]
@@ -574,7 +584,7 @@ module CINK-LANG-SEMANTICS
     environment is different from that on the top:
   */
   rule [block] : 
-       <k>{Sts:Stmts} => (Sts ~> popb)  ...</k>
+       <k>{Sts:Stmts} => (Sts ~> restoreb ~> popb)  ...</k>
        <env> Env:Map </env>
        <bstack> (. => [Env]) [Env1:Map] ...</bstack>
        when Env =/=Map Env1
@@ -585,7 +595,7 @@ module CINK-LANG-SEMANTICS
     environment is equal to that on the top:
   */
   rule [block] : 
-       <k>{Sts:Stmts} => Sts  ...</k>
+       <k>{Sts:Stmts} => Sts ~> restoreb ...</k>
        <env> Env:Map </env>
        <bstack> [Env1:Map] ...</bstack>
        when Env ==Map Env1
@@ -600,6 +610,9 @@ module CINK-LANG-SEMANTICS
        [structural] 
 
   /*@ \subsection{Input/Output Statements.} */
+
+  context HOLE << _
+  context _:Val << (HOLE => rvalue(HOLE))
 
   /*@ Writting in the the standard stream \texttt{cout}: */
   rule [print-stream]:
@@ -689,9 +702,8 @@ module CINK-LANG-SEMANTICS
     above for $\terminalNoSpace{evaluate}$, by requesting that the expression
     on position $\khole{}$ be evaluated as an lvalue.
     \par
-    The following two rules, together with the strict evaluation strategy for
-    lists of expressions complete the semantics of $\terminalNoSpace{evaluate}$
-    by recursing into the lists:
+    The following two rules,  complete the semantics of 
+    $\terminalNoSpace{evaluate}$ by recursing into the lists:
   */
 
   rule evaluate(V:Val, El:Exps) following (Dec:Decl, Xl:Decls);
@@ -746,15 +758,15 @@ module CINK-LANG-SEMANTICS
     Similar to the comma operator, the evaluation of the return argument
     is given from left to right. Since the expression lists are strict,
     if we declare the return statement strict then the evaluation is given
-    from right to left (in the oposite order). Therefore we use a context
+    from right to left (in the opposite order). Therefore we use a context
     declaration to have the right evaluation order:
   */
   context return HOLE, Es:Exps ;
 
   /*@
     We may write now the rules for the case when the first element of the
-    list is evaluated. The first rules treats the case when theare are 
-    elements to be evaluated, and the second one the case whne the evaluation
+    list is evaluated. The first rules treats the case when there are 
+    elements to be evaluated, and the second one the case when the evaluation
     is finished.
   */
   rule [return] : return V:Val, Es:Exps ; => return Es ; 
@@ -777,7 +789,7 @@ module CINK-LANG-SEMANTICS
     The rule giving semantics to this statement, creates a new cell 
     \texttt{thread}, where the computation from the cell \texttt{k} of the new
     thread is the function call expression given as arguments, and the
-    environment of the new thread is current environment of the current
+    environment of the new thread is the environment of the current
     thread.
   */
   rule [thread]:
@@ -802,8 +814,8 @@ module CINK-LANG-SEMANTICS
 
   /*@
     \subsection{Auxiliary Functions and Rules.}
-    Here we winclude the semantics for the auxiliary constructs, used to give
-    semnatics for \Cink.
+    Here we include the semantics for the auxiliary constructs, used to give
+    semantics for \Cink.
   */
 
   /*@
@@ -859,13 +871,17 @@ module CINK-LANG-SEMANTICS
 
 
   /*@
-    The semantics of \texttt{popb} is to pop out the stack of the
-    block environments:
+    The semantics of \texttt{popb} and \texttt{restoreb} is that the first 
+    pops out the stack of the block environments, while the second restores
+    the environment from the top of the stack (without popping it).  
   */
-  syntax K ::= "popb"
+  syntax K ::= "popb" | "restoreb"
 
   rule <k> popb => . ...</k>
        <bstack> [Env:Map] => . ...</bstack>
+
+  rule <k> restoreb => . ...</k>
+       <bstack> [Env:Map] ...</bstack>
        <env> _ => Env </env> 
 
 endmodule
@@ -889,7 +905,7 @@ module CINK-SYNTAX
     This module combines the syntax of the \Cink language with that of 
     the LTL formulas.
     The module \texttt{LTL-HOOKS} is a \K interface to the Maude module 
-    definign the LTL syntax. In addition to this interface, we have to
+    defining the LTL syntax. In addition to this interface, we have to
     define the atomic propositions. Here is an example of such proposition,
     whose intended semantics is to test whether the value of a variable in the
     configuration is equal to a given value. The semantics for this proposition
