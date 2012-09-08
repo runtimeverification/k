@@ -10,11 +10,22 @@ import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Ambiguity;
 import ro.uaic.info.fmse.k.Cell;
+import ro.uaic.info.fmse.k.Configuration;
+import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.k.Term;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class CellTypesFilter extends BasicTransformer {
+
+	// don't do anything for configuration and syntax
+	public ASTNode transform(Configuration cell) {
+		return cell;
+	}
+
+	public ASTNode transform(Syntax cell) {
+		return cell;
+	}
 
 	public ASTNode transform(Cell cell) {
 		String sort = DefinitionHelper.cells.get(cell.getLabel());
