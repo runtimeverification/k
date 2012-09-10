@@ -1,4 +1,4 @@
-K Tutorial --- LAMBDA --- Syntax
+K Tutorial --- LAMBDA --- Syntax Modules and Basic K Commands
 by Grigore Rosu
 
 Here we define our first K module, which contains the initial syntax of LAMBDA,
@@ -8,6 +8,8 @@ I have just created an empty working folder, and open a terminal window
 (to the left) and an editor window (to the right).  We will edit our K
 definition in the right window in a file called lambda.k, and will call
 the K tool commands in the left window.
+
+Let us start by defining a K module, containing the syntax of LAMBDA.
 
 K modules are introduced with the kewords "module" ... "endmodule".
 
@@ -42,7 +44,7 @@ it with the command:
 If we get no errors then a parser has been generated.  This parser will be
 called from now on by default by the krun tool.  To see whether and how the
 parser works, we are going to write some LAMBDA programs and store them in
-files with the extension .lambda.  For example:
+files with the extension .lambda.
 
 Let us create a file "identity.lambda", which contains the identity lambda
 abstraction:
