@@ -13,7 +13,8 @@ import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.disambiguate.BestFitFilter;
 import ro.uaic.info.fmse.disambiguate.CellTypesFilter;
 import ro.uaic.info.fmse.disambiguate.CorrectKSeqFilter;
-import ro.uaic.info.fmse.disambiguate.CorrectRewriteFilter;
+import ro.uaic.info.fmse.disambiguate.CorrectRewritePriorityFilter;
+import ro.uaic.info.fmse.disambiguate.CorrectRewriteSortFilter;
 import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
 import ro.uaic.info.fmse.disambiguate.GetFitnessUnitFileCheckVisitor;
 import ro.uaic.info.fmse.disambiguate.GetFitnessUnitKCheckVisitor;
@@ -146,10 +147,9 @@ public class DefinitionLoader {
 
 		if (GlobalSettings.tempDisamb) {
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CellTypesFilter());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewritePriorityFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectKSeqFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
-			//System.out.println(javaDef.toMaude());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbDuplicateFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());
@@ -157,6 +157,7 @@ public class DefinitionLoader {
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
 			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
+			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteSortFilter());
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Disambiguate    = ");
 		}

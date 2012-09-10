@@ -82,8 +82,7 @@ public class Rewrite extends Term {
 		return visitor.transform(this);
 	}
 
-//	@Override
-//	public String getSort() {
+//	public String getComputedSort() {
 //		if (sort.equals("List{K}")) {
 //			String lsort = left.getSort();
 //			String rsort = right.getSort();

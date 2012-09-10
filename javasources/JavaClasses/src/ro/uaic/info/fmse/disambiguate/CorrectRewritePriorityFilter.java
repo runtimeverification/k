@@ -10,7 +10,7 @@ import ro.uaic.info.fmse.k.Rewrite;
 import ro.uaic.info.fmse.k.Term;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
 
-public class CorrectRewriteFilter extends BasicTransformer {
+public class CorrectRewritePriorityFilter extends BasicTransformer {
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
 		List<Term> children = new ArrayList<Term>();
