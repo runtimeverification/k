@@ -1,5 +1,6 @@
 package ro.uaic.info.fmse.transitions.labelify;
 
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Constant;
 import ro.uaic.info.fmse.k.Empty;
@@ -13,7 +14,7 @@ import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class KAppModifier extends BasicTransformer {
-	public ASTNode transform(TermCons tc) {
+	public ASTNode transform(TermCons tc) throws TransformerException {
 		String l = tc.getLocation();
 		String f = tc.getFilename();
 		Production ppp = DefinitionHelper.conses.get(tc.getCons());

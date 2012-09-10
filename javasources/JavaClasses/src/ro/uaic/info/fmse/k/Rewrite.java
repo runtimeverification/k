@@ -2,7 +2,7 @@ package ro.uaic.info.fmse.k;
 
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.compile.utils.MetaK;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.utils.xml.XML;
@@ -71,23 +71,28 @@ public class Rewrite extends Term {
 		left = (Term) visitor.modify(left);
 		right = (Term) visitor.modify(right);
 	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
-	public ASTNode accept(Transformer visitor) {
+	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
 	}
-	
-	@Override
-	public String getSort() {
-		String lsort = left.getSort();
-		String rsort = right.getSort();
-		if (MetaK.isDefaulable(rsort) || "List{K}".equals(rsort)) lsort = rsort;
-		if (!MetaK.isKSort(lsort)) lsort = "K";
-		return lsort;
-	}
+
+//	@Override
+//	public String getSort() {
+//		if (sort.equals("List{K}")) {
+//			String lsort = left.getSort();
+//			String rsort = right.getSort();
+//
+//			if (!lsort.equals("List{K}") && !rsort.equals("List{K}"))
+//				sort = "K";
+//		}
+//		return sort;
+//	}
 
 	@Override
 	public Rewrite shallowCopy() {

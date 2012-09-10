@@ -1,36 +1,37 @@
 package ro.uaic.info.fmse.compile;
 
 import java.util.ArrayList;
-import java.util.Set;
 
-import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Cell;
-import ro.uaic.info.fmse.k.Configuration;
 import ro.uaic.info.fmse.k.Constant;
 import ro.uaic.info.fmse.k.Context;
 import ro.uaic.info.fmse.k.Definition;
 import ro.uaic.info.fmse.k.Empty;
-import ro.uaic.info.fmse.k.KApp;
-import ro.uaic.info.fmse.k.KInjectedLabel;
 import ro.uaic.info.fmse.k.List;
 import ro.uaic.info.fmse.k.Rule;
 import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.k.Term;
 import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.Variable;
-import ro.uaic.info.fmse.visitors.BasicTransformer;
 import ro.uaic.info.fmse.visitors.CopyOnWriteTransformer;
 
 public class DesugarStreams extends CopyOnWriteTransformer implements CompilerStep {
 
 	@Override
 	public Definition compile(Definition def) {
-		ASTNode result = def.accept(this);
+		ASTNode result = null;
+		try {
+			result = def.accept(this);
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (result == def) return def;
 		if (!(result instanceof Definition)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
@@ -47,7 +48,7 @@ public class DesugarStreams extends CopyOnWriteTransformer implements CompilerSt
 	}
 	
 	@Override
-	public ASTNode transform(Cell node) {
+	public ASTNode transform(Cell node) throws TransformerException {
 		ASTNode result = super.transform(node);
 		if (!(result instanceof Cell)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 

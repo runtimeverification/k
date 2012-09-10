@@ -1,6 +1,7 @@
 package ro.uaic.info.fmse.k;
 
 import ro.uaic.info.fmse.compile.utils.MetaK;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformer;
 import ro.uaic.info.fmse.visitors.Visitor;
@@ -49,7 +50,7 @@ public class KInjectedLabel extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) {
+	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
 	}
 

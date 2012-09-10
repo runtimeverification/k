@@ -31,6 +31,7 @@ import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.html.HTMLFilter;
 import ro.uaic.info.fmse.latex.LatexFilter;
@@ -623,7 +624,12 @@ public class KompileFrontEnd {
 		try {
 
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(amit);
+			try {
+				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(amit);
+			} catch (TransformerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 			DittoFilter df = new DittoFilter();
 			javaDef.accept(df);

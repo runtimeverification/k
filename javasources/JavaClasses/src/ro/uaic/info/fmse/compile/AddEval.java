@@ -9,14 +9,14 @@ import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
-import ro.uaic.info.fmse.k.Bag;
 import ro.uaic.info.fmse.k.Cell;
+import ro.uaic.info.fmse.k.Cell.Multiplicity;
 import ro.uaic.info.fmse.k.Configuration;
 import ro.uaic.info.fmse.k.Constant;
 import ro.uaic.info.fmse.k.Definition;
-import ro.uaic.info.fmse.k.Empty;
 import ro.uaic.info.fmse.k.Map;
 import ro.uaic.info.fmse.k.MapItem;
 import ro.uaic.info.fmse.k.Module;
@@ -26,8 +26,6 @@ import ro.uaic.info.fmse.k.Rule;
 import ro.uaic.info.fmse.k.Term;
 import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.Variable;
-import ro.uaic.info.fmse.k.Cell.Multiplicity;
-import ro.uaic.info.fmse.visitors.BasicTransformer;
 import ro.uaic.info.fmse.visitors.CopyOnWriteTransformer;
 
 public class AddEval implements CompilerStep {
@@ -37,7 +35,13 @@ public class AddEval implements CompilerStep {
 		Configuration cfg = MetaK.getConfiguration(def);
 		Set<Variable> vars = MetaK.getVariables(cfg);
 		
-		ASTNode cfgCleanedNode = new ConfigurationCleaner().transform(cfg);
+		ASTNode cfgCleanedNode = null;
+		try {
+			cfgCleanedNode = new ConfigurationCleaner().transform(cfg);
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (!(cfgCleanedNode instanceof Configuration)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
@@ -106,7 +110,7 @@ public class AddEval implements CompilerStep {
 	class ConfigurationCleaner extends CopyOnWriteTransformer {
 		
 		@Override
-		public ASTNode transform(Cell node) {
+		public ASTNode transform(Cell node) throws TransformerException {
 			if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
 				if (MetaK.getVariables(node).isEmpty()) {
 					return null;

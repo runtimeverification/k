@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.sharing;
 import java.util.LinkedList;
 import java.util.List;
 
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Definition;
 import ro.uaic.info.fmse.k.Import;
@@ -18,7 +19,7 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 public class AutomaticModuleImportsTransformer extends BasicTransformer {
 
 	@Override
-	public ASTNode transform(Module node) {
+	public ASTNode transform(Module node) throws TransformerException {
 		if (!node.getName().equals("SHARED"))
 			node.appendModuleItem(new Import("SHARED"));
 		else node.appendModuleItem(new Import("K"));
@@ -28,7 +29,7 @@ public class AutomaticModuleImportsTransformer extends BasicTransformer {
 	}
 	
 	@Override
-	public ASTNode transform(Definition node) {
+	public ASTNode transform(Definition node) throws TransformerException {
 		
 		SharedDataCollector sdc = new SharedDataCollector();
 		node.accept(sdc);

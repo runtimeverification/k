@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.k;
 
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformer;
@@ -28,7 +29,7 @@ public class Constant extends Term {
 
 	public Constant(Constant constant) {
 		super(constant);
-		this.value = value;
+		this.value = constant.value;
 	}
 
 	public String toString() {
@@ -69,7 +70,7 @@ public class Constant extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) {
+	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
 	}
 	

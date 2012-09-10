@@ -35,7 +35,34 @@ rules
 
 	// generate xml for cells
 	to-xml1:
-		Bag1ClosedCell(a, b', c, d) -> $[<cell label="[a]" loc="[loc]"[prop]>
+		Bag1ClosedCell(a, b', LeftCell(RightCell(c)), d) -> $[<cell label="[a]" loc="[loc]"[prop] ellipses="both" sort="BagItem">
+											[<to-xml> c]
+		</cell>
+		]
+		where mydebug(!"Cell: ")
+		where prop := <all(to-xml)> b'
+		where loc := <getLocAsString>
+
+	to-xml1:
+		Bag1ClosedCell(a, b', RightCell(c), d) -> $[<cell label="[a]" loc="[loc]"[prop] ellipses="right" sort="BagItem">
+											[<to-xml> c]
+		</cell>
+		]
+		where mydebug(!"Cell: ")
+		where prop := <all(to-xml)> b'
+		where loc := <getLocAsString>
+
+	to-xml1:
+		Bag1ClosedCell(a, b', LeftCell(c), d) -> $[<cell label="[a]" loc="[loc]"[prop] ellipses="left" sort="BagItem">
+											[<to-xml> c]
+		</cell>
+		]
+		where mydebug(!"Cell: ")
+		where prop := <all(to-xml)> b'
+		where loc := <getLocAsString>
+
+	to-xml1:
+		Bag1ClosedCell(a, b', c, d) -> $[<cell label="[a]" loc="[loc]"[prop] sort="BagItem">
 											[<to-xml> c]
 		</cell>
 		]
@@ -100,12 +127,12 @@ rules
 
 	to-xml1:
 		CondSentence(Rule(x, y), c) -> $[<rule [label] loc="[loc]">
-					<body>
-						[children]
-					</body>
-					<cond>
-						[<to-xml> c]
-					</cond>
+											<body>
+												[children]
+											</body>
+											<cond>
+												[<to-xml> c]
+											</cond>
 		</rule>
 		]
 		where mydebug(!"Rule: ")
@@ -115,15 +142,15 @@ rules
 
 	to-xml1:
 		AttributedCondSentence(Rule(x, y), c, d) -> $[<rule [label] loc="[loc]">
-					<body>
-						[children]
-					</body>
-					<cond>
-						[<to-xml> c]
-					</cond>
-					<attributes loc="[loc]">
-						[<to-xml> d]
-					</attributes>
+														<body>
+															[children]
+														</body>
+														<cond>
+															[<to-xml> c]
+														</cond>
+														<attributes loc="[loc]">
+															[<to-xml> d]
+														</attributes>
 		</rule>
 		]
 		where mydebug(!"Rule: ")
@@ -176,7 +203,7 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:
-		a#(b) -> $[<hole sort="[sort]" loc="[loc]"/>
+		a#(b) -> $[<hole sort="[sort]" loc="[loc]" />
 		]
 		where <string-ends-with(|"Hole")> a
 		where mydebug(!"Hole: ")
@@ -184,15 +211,23 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:
-		a#(b) -> $[<var name="[b]" sort="[sort]" loc="[loc]"/>
+		a#(b) -> $[<var name="[b]" sort="[sort]" loc="[loc]" userTyped="true" />
 		]
-		where <string-ends-with(|"Var")> a
+		where <string-ends-with(|"12Var")> a
 		where mydebug(!"Var: ")
 		where sort := <getSort> a
 		where loc := <getLocAsString>
 
 	to-xml2:
-		a#([b]) -> $[<const value="[<xmlStringEscape> b]" sort="[sort]" loc="[loc]"/>
+		a#(b) -> $[<var name="[b]" sort="[sort]" loc="[loc]" userTyped="false" />
+		]
+		where <string-ends-with(|"1Var")> a
+		where mydebug(!"Var: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#([b]) -> $[<const value="[<xmlStringEscape> b]" sort="[sort]" loc="[loc]" />
 		]
 		where <string-ends-with(|"Const")> a
 		where mydebug(!"Const: ")
@@ -227,9 +262,9 @@ rules
 
 	to-xml2:
 		Rule(x, y) -> $[<rule [label] loc="[loc]">
-					<body>
-						[children]
-					</body>
+							<body>
+								[children]
+							</body>
 		</rule>
 		]
 		where mydebug(!"Rule: ")
@@ -287,7 +322,7 @@ rules
 					[children]
 		</term>
 		]
-		where mydebug(!"GTerm: ")
+		where debug(!"GTerm: ")
 		where sort := <getSort> a
 		where children := <all(to-xml)> b
 		where loc := <getLocAsString>
@@ -305,7 +340,7 @@ rules
 		where mydebug(!"SynTerm: ")
 		where children := <all(to-xml-p)> b
 		where srt := <getSort> a
-		where loc := <getLocAsString>
+		where loc := <getLocAsString2>
 
 	to-xml-p:
 		a#(b) -> $[<empty sort="[srt]" loc="[loc]"/>
@@ -313,7 +348,7 @@ rules
 		where <string-ends-with(|"Empty")> a
 		where mydebug(!"SynTerm: ")
 		where srt := <getSort> a
-		where loc := <getLocAsString>
+		where loc := <getLocAsString2>
 
 	to-xml-p:
 		a#(b) -> $[<const sort="[srt]" value="[<all(xmlStringEscape)> b]" loc="[loc]"/>
@@ -321,7 +356,7 @@ rules
 		where <string-ends-with(|"Const")> a
 		where srt := <getSort> a
 		where mydebug(!"Const: ")
-		where loc := <getLocAsString>
+		where loc := <getLocAsString2>
 
 	to-xml-p:
 		amb(b) -> $[<amb loc="[loc]">
@@ -330,5 +365,5 @@ rules
 		]
 		where mydebug(!"XmlifyingAmb: ")
 		where children := <all(to-xml-p)> b
-		where loc := <getLocAsString>
+		where loc := <getLocAsString2>
 

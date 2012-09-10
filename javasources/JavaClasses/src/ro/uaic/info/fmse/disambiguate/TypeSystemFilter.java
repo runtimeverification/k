@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.disambiguate;
 
 import java.util.ArrayList;
 
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Ambiguity;
 import ro.uaic.info.fmse.k.Production;
@@ -16,7 +17,7 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class TypeSystemFilter extends BasicTransformer {
 
-	public ASTNode transform(TermCons tc) {
+	public ASTNode transform(TermCons tc) throws TransformerException {
 
 		// choose only the allowed subsorts for a TermCons
 		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {

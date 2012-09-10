@@ -205,7 +205,7 @@ KOOL).  */
   syntax K ::= "undefined" "(" Type ")" [latex(\bot_{#1})]
 
   rule <k> var ('_:_(X:Id,, T:Type), .Exps); => . ...</k>
-       <env> Env:Map => Env[L:Nat/X] </env>
+       <env> Env:Map => Env[L:Int/X] </env>
        <store>... . => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 

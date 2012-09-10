@@ -15,6 +15,7 @@ public class DefinitionHelper {
 	public static String specialTerminals[] = { "(", ")", ",", "[", "]", "{", "}", };
 
 	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
+	public static java.util.Map<String, String> cells = new HashMap<String, String>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	// contains a mapping from listSort to list separator
 	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
@@ -78,10 +79,24 @@ public class DefinitionHelper {
 		return fileRequirements.contains(new Subsort(required, local));
 	}
 
+	/**
+	 * Check to see if smallSort is subsorted to bigSort (strict)
+	 * 
+	 * @param bigSort
+	 * @param smallSort
+	 * @return
+	 */
 	public static boolean isSubsorted(String bigSort, String smallSort) {
 		return subsorts.contains(new Subsort(bigSort, smallSort));
 	}
 
+	/**
+	 * Check to see if smallSort is subsorted or equal to bigSort
+	 * 
+	 * @param bigSort
+	 * @param smallSort
+	 * @return
+	 */
 	public static boolean isSubsortedEq(String bigSort, String smallSort) {
 		if (bigSort.equals(smallSort))
 			return true;

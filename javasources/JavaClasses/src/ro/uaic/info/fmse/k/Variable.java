@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.k;
 
 import org.w3c.dom.Element;
 
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.loader.Constants;
 import ro.uaic.info.fmse.visitors.Modifier;
 import ro.uaic.info.fmse.visitors.Transformer;
@@ -9,11 +10,13 @@ import ro.uaic.info.fmse.visitors.Visitor;
 
 public class Variable extends Term {
 	private String name;
+	private boolean userTyped = false;
 
 	public Variable(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.name = element.getAttribute(Constants.NAME_name_ATTR);
+		this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
 	}
 
 	public Variable(String name, String sort) {
@@ -59,7 +62,7 @@ public class Variable extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) {
+	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
 	}
 
@@ -79,6 +82,14 @@ public class Variable extends Term {
 	@Override
 	public int hashCode() {
 		return sort.hashCode() + name.hashCode();
+	}
+
+	public void setUserTyped(boolean userTyped) {
+		this.userTyped = userTyped;
+	}
+
+	public boolean isUserTyped() {
+		return userTyped;
 	}
 
 	@Override

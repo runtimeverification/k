@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectListConsesVisitor;
@@ -147,7 +148,7 @@ public class Definition extends ASTNode {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) {
+	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
 	}
 

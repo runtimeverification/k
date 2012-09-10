@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.disambiguate;
 
 import java.util.ArrayList;
 
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Ambiguity;
 import ro.uaic.info.fmse.k.Term;
@@ -10,7 +11,7 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class TypeInferenceSupremumFilter extends BasicTransformer {
 
-	public ASTNode transform(Ambiguity amb) {
+	public ASTNode transform(Ambiguity amb) throws TransformerException {
 
 		// choose the maximum from the list of ambiguities
 		java.util.List<Term> terms = new ArrayList<Term>();

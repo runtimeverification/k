@@ -1,5 +1,6 @@
 package ro.uaic.info.fmse.disambiguate;
 
+import ro.uaic.info.fmse.k.Collection;
 import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.k.Sort;
 import ro.uaic.info.fmse.k.Term;
@@ -37,6 +38,15 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 		}
 	}
 
+	@Override
+	public void visit(Collection node) {
+		super.visit(node);
+		for (Term t : node.getContents()) {
+			if (!DefinitionHelper.isSubsortedEq(node.getSort(), t.getSort()))
+				score += -1;
+		}
+	}
+
 	/**
 	 * Get the score for two sorts
 	 * 
@@ -57,8 +67,8 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 			score = 0; // do nothing when you have a K
 		else {
 			score = -1;
-			// System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
 		}
+		// System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
 		return score;
 	}
 

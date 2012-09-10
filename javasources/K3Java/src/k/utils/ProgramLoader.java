@@ -10,6 +10,7 @@ import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
@@ -50,10 +51,20 @@ public class ProgramLoader {
 
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
-		out = out.accept(new AmbFilter());
+		try {
+			out = out.accept(new AmbFilter());
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		if (kappize)
-			out = out.accept(new KAppModifier());
+			try {
+				out = out.accept(new KAppModifier());
+			} catch (TransformerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		return out;
 	}

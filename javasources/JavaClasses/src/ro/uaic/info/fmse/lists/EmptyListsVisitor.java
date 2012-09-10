@@ -8,6 +8,7 @@ import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Empty;
@@ -23,7 +24,7 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 public class EmptyListsVisitor extends BasicTransformer {
 
 	@Override
-	public ASTNode transform(TermCons node) {
+	public ASTNode transform(TermCons node) throws TransformerException {
 
 		// traverse
 		TermCons tc = (TermCons) super.transform(node);

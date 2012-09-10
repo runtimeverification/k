@@ -6,18 +6,19 @@ import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.*;
 
 public class CopyOnWriteTransformer implements Transformer {
 
 	@Override
-	public ASTNode transform(ASTNode node) {
+	public ASTNode transform(ASTNode node) throws TransformerException {
 		return node;
 	}
 
 	@Override
-	public ASTNode transform(Definition node) {
+	public ASTNode transform(Definition node) throws TransformerException {
 		boolean change = false;
 		ArrayList<DefinitionItem> items = new ArrayList<DefinitionItem>();
 		for (DefinitionItem di : node.getItems()) {
@@ -41,17 +42,17 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(DefinitionItem node) {
+	public ASTNode transform(DefinitionItem node) throws TransformerException {
 		return transform((ASTNode) node);
 	}
 
 	@Override
-	public ASTNode transform(LiterateDefinitionComment node) {
+	public ASTNode transform(LiterateDefinitionComment node) throws TransformerException {
 		return transform((DefinitionItem) node);
 	}
 
 	@Override
-	public ASTNode transform(Module node) {
+	public ASTNode transform(Module node) throws TransformerException {
 		boolean change = false;
 		ArrayList<ModuleItem> items = new ArrayList<ModuleItem>();
 		for (ModuleItem mi : node.getItems()) {
@@ -75,22 +76,22 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(ModuleItem node) {
+	public ASTNode transform(ModuleItem node) throws TransformerException {
 		return transform((ASTNode) node);
 	}
 
 	@Override
-	public ASTNode transform(Import node) {
+	public ASTNode transform(Import node) throws TransformerException {
 		return transform((ModuleItem) node);
 	}
 
 	@Override
-	public ASTNode transform(LiterateModuleComment node) {
+	public ASTNode transform(LiterateModuleComment node) throws TransformerException {
 		return transform((ModuleItem) node);
 	}
 
 	@Override
-	public ASTNode transform(Sentence node) {
+	public ASTNode transform(Sentence node) throws TransformerException {
 		boolean change = false;
 		Term body = node.getBody();
 		ASTNode bodyAST = body.accept(this);
@@ -125,22 +126,22 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Configuration node) {
+	public ASTNode transform(Configuration node) throws TransformerException {
 		return transform((Sentence) node);
 	}
 
 	@Override
-	public ASTNode transform(Context node) {
+	public ASTNode transform(Context node) throws TransformerException {
 		return transform((Sentence) node);
 	}
 
 	@Override
-	public ASTNode transform(Rule node) {
+	public ASTNode transform(Rule node) throws TransformerException {
 		return transform((Sentence) node);
 	}
 
 	@Override
-	public ASTNode transform(Syntax node) {
+	public ASTNode transform(Syntax node) throws TransformerException {
 		boolean change = false;
 		ArrayList<PriorityBlock> pbs = new ArrayList<PriorityBlock>();
 		for (PriorityBlock pb : node.getPriorityBlocks()) {
@@ -164,7 +165,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(PriorityBlock node) {
+	public ASTNode transform(PriorityBlock node) throws TransformerException {
 		boolean change = false;
 		ArrayList<Production> prods = new ArrayList<Production>();
 		for (Production p : node.getProductions()) {
@@ -188,7 +189,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Production node) {
+	public ASTNode transform(Production node) throws TransformerException {
 		boolean change = false;
 		ArrayList<ProductionItem> pis = new ArrayList<ProductionItem>();
 		for (ProductionItem pi : node.getItems()) {
@@ -212,32 +213,32 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(ProductionItem node) {
+	public ASTNode transform(ProductionItem node) throws TransformerException {
 		return transform((ASTNode) node);
 	}
 
 	@Override
-	public ASTNode transform(Sort node) {
+	public ASTNode transform(Sort node) throws TransformerException {
 		return transform((ProductionItem) node);
 	}
 
 	@Override
-	public ASTNode transform(Terminal node) {
+	public ASTNode transform(Terminal node) throws TransformerException {
 		return transform((ProductionItem) node);
 	}
 
 	@Override
-	public ASTNode transform(UserList node) {
+	public ASTNode transform(UserList node) throws TransformerException {
 		return transform((ProductionItem) node);
 	}
 
 	@Override
-	public ASTNode transform(Term node) {
+	public ASTNode transform(Term node) throws TransformerException {
 		return transform((ASTNode) node);
 	}
 
 	@Override
-	public ASTNode transform(Cell node) {
+	public ASTNode transform(Cell node) throws TransformerException {
 		Term term = node.getContents();
 		ASTNode result = term.accept(this);
 		if (result == null) {
@@ -257,7 +258,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Collection node) {
+	public ASTNode transform(Collection node) throws TransformerException {
 		boolean change = false;
 		ArrayList<Term> terms = new ArrayList<Term>();
 		for (Term t : node.getContents()) {
@@ -281,42 +282,42 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Ambiguity node) {
+	public ASTNode transform(Ambiguity node) throws TransformerException {
 		return transform((Collection) node);
 	}
 
 	@Override
-	public ASTNode transform(Bag node) {
+	public ASTNode transform(Bag node) throws TransformerException {
 		return transform((Collection) node);
 	}
 
 	@Override
-	public ASTNode transform(KSequence node) {
+	public ASTNode transform(KSequence node) throws TransformerException {
 		return transform((Collection) node);
 	}
 
 	@Override
-	public ASTNode transform(List node) {
+	public ASTNode transform(List node) throws TransformerException {
 		return transform((Collection) node);
 	}
 
 	@Override
-	public ASTNode transform(ListOfK node) {
+	public ASTNode transform(ListOfK node) throws TransformerException {
 		return transform((Collection) node);
 	}
 
 	@Override
-	public ASTNode transform(Map node) {
+	public ASTNode transform(Map node) throws TransformerException {
 		return transform((Collection) node);
 	}
 
 	@Override
-	public ASTNode transform(Set node) {
+	public ASTNode transform(Set node) throws TransformerException {
 		return transform((Collection) node);
 	}
 
 	@Override
-	public ASTNode transform(CollectionItem node) {
+	public ASTNode transform(CollectionItem node) throws TransformerException {
 		Term term = node.getItem();
 		ASTNode result = term.accept(this);
 		if (result == null) return null;
@@ -334,17 +335,17 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(BagItem node) {
+	public ASTNode transform(BagItem node) throws TransformerException {
 		return transform((CollectionItem) node);
 	}
 
 	@Override
-	public ASTNode transform(ListItem node) {
+	public ASTNode transform(ListItem node) throws TransformerException {
 		return transform((CollectionItem) node);
 	}
 
 	@Override
-	public ASTNode transform(MapItem node) {
+	public ASTNode transform(MapItem node) throws TransformerException {
 		boolean change = false;
 		Term term = node.getKey();
 		ASTNode key = term.accept(this);
@@ -379,27 +380,27 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(SetItem node) {
+	public ASTNode transform(SetItem node) throws TransformerException {
 		return transform((CollectionItem) node);
 	}
 
 	@Override
-	public ASTNode transform(Constant node) {
+	public ASTNode transform(Constant node) throws TransformerException {
 		return transform((Term) node);
 	}
 
 	@Override
-	public ASTNode transform(Empty node) {
+	public ASTNode transform(Empty node) throws TransformerException {
 		return transform((Term) node);
 	}
 
 	@Override
-	public ASTNode transform(Hole node) {
+	public ASTNode transform(Hole node) throws TransformerException {
 		return transform((Term) node);
 	}
 
 	@Override
-	public ASTNode transform(KApp node) {
+	public ASTNode transform(KApp node) throws TransformerException {
 		boolean change = false;
 		Term term = node.getLabel();
 		ASTNode label = term.accept(this);
@@ -434,12 +435,12 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(KLabel node) {
+	public ASTNode transform(KLabel node) throws TransformerException {
 		return transform((Term) node);
 	}
 
 	@Override
-	public ASTNode transform(Rewrite node) {
+	public ASTNode transform(Rewrite node) throws TransformerException {
 		boolean change = false;
 		Term term = node.getLeft();
 		ASTNode left = term.accept(this);
@@ -474,7 +475,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(TermCons node) {
+	public ASTNode transform(TermCons node) throws TransformerException {
 		boolean change = false;
 		ArrayList<Term> terms = new ArrayList<Term>();
 		for (Term t : node.getContents()) {
@@ -498,12 +499,12 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Variable node) {
+	public ASTNode transform(Variable node) throws TransformerException {
 		return transform((Term) node);
 	}
 
 	@Override
-	public ASTNode transform(Attributes node) {
+	public ASTNode transform(Attributes node) throws TransformerException {
 		boolean change = false;
 		java.util.List<Attribute> contents = new ArrayList<Attribute>();
 		for (Attribute at : node.getContents()) {
@@ -527,7 +528,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Attribute node) {
+	public ASTNode transform(Attribute node) throws TransformerException {
 		return transform((ASTNode) node);
 	}
 }

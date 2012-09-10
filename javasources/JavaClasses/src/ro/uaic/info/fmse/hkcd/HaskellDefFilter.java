@@ -1,8 +1,6 @@
 package ro.uaic.info.fmse.hkcd;
 
 import ro.uaic.info.fmse.k.*;
-import ro.uaic.info.fmse.loader.DefinitionHelper;
-import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 /**
  * Transform AST of language definition into set of Haskell

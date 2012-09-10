@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.disambiguate;
 
 import java.util.ArrayList;
 
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Collection;
 import ro.uaic.info.fmse.k.Term;
@@ -9,7 +10,7 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class FlattenListsFilter extends BasicTransformer {
 
-	public ASTNode transform(Collection c) {
+	public ASTNode transform(Collection c) throws TransformerException {
 		boolean found;
 		do {
 			found = false;

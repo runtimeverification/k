@@ -7,6 +7,7 @@ import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Configuration;
@@ -26,7 +27,13 @@ public class AddTopCell extends CopyOnWriteTransformer implements CompilerStep {
 
 	@Override
 	public Definition compile(Definition def) {
-		ASTNode result =  def.accept(this);
+		ASTNode result = null;
+		try {
+			result = def.accept(this);
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (result == null) { 
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.COMPILER, 
@@ -50,7 +57,7 @@ public class AddTopCell extends CopyOnWriteTransformer implements CompilerStep {
 	
 	
 	@Override
-	public ASTNode transform(Module node) {
+	public ASTNode transform(Module node) throws TransformerException {
 		ASTNode result = super.transform(node);
 		if (result == node) return node;
 		if (result == null) { 

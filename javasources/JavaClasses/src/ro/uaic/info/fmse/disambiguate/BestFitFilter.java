@@ -2,6 +2,7 @@ package ro.uaic.info.fmse.disambiguate;
 
 import java.util.ArrayList;
 
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Ambiguity;
 import ro.uaic.info.fmse.k.Term;
@@ -15,7 +16,7 @@ public class BestFitFilter extends BasicTransformer {
 
 	private GetFitnessUnitBasicVisitor getFitnessUnit;
 
-	public ASTNode transform(Ambiguity amb) {
+	public ASTNode transform(Ambiguity amb) throws TransformerException {
 
 		// TODO: make this bottom up
 		int maximum = getFitnessUnit(amb.getContents().get(0));

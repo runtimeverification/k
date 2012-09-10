@@ -3,6 +3,7 @@ package ro.uaic.info.fmse.disambiguate;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Ambiguity;
@@ -13,7 +14,7 @@ import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class AmbFilter extends BasicTransformer {
-	public ASTNode transform(Ambiguity amb) {
+	public ASTNode transform(Ambiguity amb) throws TransformerException {
 		String msg = "";
 
 		for (ASTNode variant : amb.getContents()) {
