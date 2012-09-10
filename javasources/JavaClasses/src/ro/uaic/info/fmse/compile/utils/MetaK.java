@@ -37,9 +37,6 @@ import ro.uaic.info.fmse.visitors.Visitable;
 import ro.uaic.info.fmse.visitors.Visitor;
 
 public class MetaK {
-	public class DoneException extends Exception {
-
-	}
 
 	public static String nextIdModules[] = {
 		"SUBSTITUTION",

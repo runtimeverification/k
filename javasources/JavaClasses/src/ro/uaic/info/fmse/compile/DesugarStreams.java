@@ -29,7 +29,6 @@ public class DesugarStreams extends CopyOnWriteTransformer implements CompilerSt
 		try {
 			result = def.accept(this);
 		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (result == def) return def;

@@ -64,7 +64,12 @@ module K-SET-EXTRAS
 	imports K-TECHNIQUE
 
 //	syntax Set ::= "Set" List{K}
-//				 | Set "-Set" Set
+        syntax Set ::= Set "-Set" Set  [function]
+  rule S1:Set -Set (SI1:SetItem SI2:SetItem S2:Set)
+    => ((S1 -Set SI1) -Set SI2) -Set S2
+  rule S1:Set -Set . => S1 
+  rule (SI:SetItem S:Set) -Set SI => S
+  rule S:Set -Set SI:SetItem => S when SI in S ==Bool false //  [owise]
 
 	syntax Bool ::= K "in" Set   [function]
 			      | SetItem "in" Set   [function]	
