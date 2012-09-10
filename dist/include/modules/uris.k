@@ -47,9 +47,9 @@ module URIS
       => String2DotK((#tcpRequest("reopen#" +String Int2String(N) +String "#"
                               +String S +String "#"))) [function, anywhere]
 
-  syntax Int ::= "#stdin" 
-                | "#stdout" 
-                | "#stderr"
+  syntax Int ::= "#stdin"   [function] 
+                | "#stdout" [function]
+                | "#stderr" [function] 
   rule #stdin => 0
   rule #stdout => 1
   rule #stderr => 2

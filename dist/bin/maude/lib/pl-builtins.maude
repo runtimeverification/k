@@ -248,13 +248,13 @@ mod #INT is
  op _*Int_ : #NzNat #NzNat -> #NzNat [ditto] .
   op _*Int_ : #Nat #Nat -> #Nat [ditto] .
 
-  op _/Int_ : #Int #Int -> #Int
+  op _/Int_ : #Int #NzInt -> #Int
         [prec 31 gather (E e)   metadata "latex=(renameTo _\\ensuremath{{}\\div}\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (quo)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
                   op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
 
-  op _%Int_ : #Int #Int -> #Int
+  op _%Int_ : #Int #NzInt -> #Int
         [prec 31 gather (E e)  metadata "latex=(renameTo _\\%\\subscript{{\\scriptstyle\\it{}Int}}_)"
          special (id-hook NumberOpSymbol (rem)
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)

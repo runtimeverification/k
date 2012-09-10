@@ -7,8 +7,8 @@ endinterface
 module K-LISTK-EXTRAS
   imports K-TECHNIQUE
   
-  syntax Bool ::= K "inList{K}" List{K}
-  syntax Bool ::= K "#inList{K}" List{K}
+  syntax Bool ::= K "inList{K}" List{K} [function]
+  syntax Bool ::= K "#inList{K}" List{K} [function] 
   rule K inList{K} L:List{K} => K #inList{K} L ==K true 
     [structural, anywhere]
   rule K #inList{K} (_,,K:K,,_) => true 
@@ -20,17 +20,17 @@ module K-MAP-EXTRAS
         imports K-SET-EXTRAS
 	//imports BOOL
 
-  syntax K ::= Map "(" K ")"
+  syntax K ::= Map "(" K ")"  [function]
   rule (_ K1:K |-> K2:K)(K1) => K2 [structural, anywhere]
 
-	syntax Map ::= Map "[" "undef" "/" List{K} "]"
+  syntax Map ::= Map "[" "undef" "/" List{K} "]"  [function]
 
-  syntax Map ::= "Map" "(" List{K} "|->" List{K} ")" 
+  syntax Map ::= "Map" "(" List{K} "|->" List{K} ")"   [function]
   rule Map((K1:K => .List{K}),,_ |-> (K2:K => .List{K}),,_) (. => K1 |-> K2)
   rule Map((K1:K => .List{K}),,_ |-> K2:K) (. => K1 |-> K2)
   rule Map(.List{K} |-> _) => .
 
-  syntax Map ::= Map "[" List{K} "/" List{K} "]"
+  syntax Map ::= Map "[" List{K} "/" List{K} "]"  [function]
   rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .List{K}),,_ 
                         /  (K1:K,,K1':K => .List{K}),,_]
 
@@ -39,7 +39,7 @@ module K-MAP-EXTRAS
   rule M:Map[K2:K / K1:K] => M K1 |-> K2 
     when notBool(K1 in keys(M)) [structural, anywhere]
   
-  syntax Map ::= Map "[" Map "]"   [cons(Map1UpdateMapWithMapSyn)]
+  syntax Map ::= Map "[" Map "]"   [function, cons(Map1UpdateMapWithMapSyn)]
   rule M:Map[M':Map K1 |-> K2] => M[K2/K1][M'] [structural]
   rule M:Map[.Map] => M [structural]
 
@@ -48,13 +48,13 @@ module K-MAP-EXTRAS
 //    => Map(K1),,Map(K2),,Map(Ks) [structural]
 //  rule Map:Map(.List{K}) => .List{K} [structural]
 
-	syntax Set ::= "keys" Map  
+	syntax Set ::= "keys" Map  [function]
 
   rule keys . => .
   rule (keys ((K:K |->_  => .) _)) (. => SetItem(K))
 
-  syntax Bool ::= "$hasMapping" "(" Map "," K ")" [latex(latex=(renameTo \\$hasMapping\\mybracket{_,_})), maudeop("$hasMapping")]
-  syntax Bool ::= "#hasMapping" "(" Map "," K ")" [latex(latex=(renameTo \\$hasMapping\\mybracket{_,_})), maudeop("#hasMapping")]
+  syntax Bool ::= "$hasMapping" "(" Map "," K ")" [function, latex(latex=(renameTo \\$hasMapping\\mybracket{_,_})), maudeop("$hasMapping")]
+  syntax Bool ::= "#hasMapping" "(" Map "," K ")" [function, latex(latex=(renameTo \\$hasMapping\\mybracket{_,_})), maudeop("#hasMapping")]
   rule $hasMapping(M:Map,K:K) => #hasMapping(M,K) ==K true [structural, anywhere]
 
   rule #hasMapping(M:Map K:K |-> _,K) => true [structural, anywhere]
@@ -63,12 +63,12 @@ endmodule
 module K-SET-EXTRAS
 	imports K-TECHNIQUE
 
-	syntax Set ::= "Set" List{K}
-				 | Set "-Set" Set
+//	syntax Set ::= "Set" List{K}
+//				 | Set "-Set" Set
 
-	syntax Bool ::= K "in" Set
-			      | SetItem "in" Set	
-			      | K "#in" Set	
+	syntax Bool ::= K "in" Set   [function]
+			      | SetItem "in" Set   [function]	
+			      | K "#in" Set   [function]	
    rule SetItem(K:K) in S:Set => K in S [structural, anywhere]
    rule K:K in S:Set => K #in S ==K true
      [structural, anywhere]
@@ -81,19 +81,19 @@ interface K-BAG-EXTRAS
 	imports K-TECHNIQUE
 	//imports IF-THEN-ELSE
 
-	syntax Bag ::= "Bag" List{K}
-				 | Bag "-Bag" Bag
-	syntax Bool ::= K "in" Bag
-				  | BagItem "in" Bag
+//	syntax Bag ::= "Bag" List{K}
+//				 | Bag "-Bag" Bag
+//	syntax Bool ::= K "in" Bag
+//				  | BagItem "in" Bag
 endinterface
 
 interface K-LIST-EXTRAS
 	imports K-TECHNIQUE
 	//imports BOOL
 
-	syntax List ::= "List" List{K}
+//	syntax List ::= "List" List{K}
 
-	syntax Int ::= "lengthList" List
+//	syntax Int ::= "lengthList" List [function]
 endinterface
 
 interface K-RESULT
@@ -107,7 +107,6 @@ endinterface
 
 interface K-WRAPPERS-LABELS
 	imports K-TECHNIQUE
-	imports STRING
 
 	syntax KLabel ::= "KLabel2KLabel" KLabel
 					| "CellLabel2KLabel" CellLabel
