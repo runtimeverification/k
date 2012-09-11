@@ -4,7 +4,7 @@ require "builtins/symbolic-calculus.k"
 /*!
 \setlength{\parindent}{1em}
 \title{IMP  with Symbolic Values}
-\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro) and Vlad Rusu (Vlad.Rusu@inria.fr)}
+\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro} and Vlad Rusu (Vlad.Rusu@inria.fr)}
 \organization{"Alexandru Ioan Cuza" University of Iasi, INRIA Lille}
 */
 
@@ -69,6 +69,7 @@ module IMPS-SYNTAX
 */
 
   syntax Pgm ::= "var" Ids ";" Stmt
+  syntax Stmt ::= "assert" "(" BExp ")" [strict]
   syntax Ids ::= List{Id, ","}
 
   syntax InitVal ::= Id "->" Int
@@ -236,7 +237,7 @@ module IMPS
           =>
           checkSat(F andBool B) ~> checkSat(F andBool notBool B) ~> B
        ...</k>
-       <condition> F:BoolSymbolic </condition>
+       <condition> F:Bool </condition>
 //       when isBoolSymbolic(B)
 
 
@@ -253,6 +254,9 @@ module IMPS
 
    rule unsat ~> sat ~> B:BoolSymbolic => false // F impliesBool notBool B
    
+   rule assert(true) => .
+//   rule <k> (assert(false) ~> K)  => . </k>
+   
 
 /*@
   When an existing elementary symbolic boolean expression has to be evaluated,
@@ -262,34 +266,6 @@ module IMPS
   rule <k> B:K => V ...</k>
        <env>... B |-> V:Bool ...</env>
        when isBoolSymbolic(B)
-
-  /*@
-    Store the elementary symbolic boolean expressions obtained as
-    "synonims" of the already stored ones due to the path formula 
-  */
-
-  syntax K ::= "storeSyns" "(" K "," K "," Bool ")"
-
-  rule storeSyns(F1:K andBool F2:K, B:K, V:Bool) 
-       =>
-       storeSyns(F1, B, V) ~> storeSyns(F2, B, V)
-
-  rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
-       <env>... . => (B[I1/I2] |-> V) ...</env>
-       when B[I1/I2] =/=K B
-
-  rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
-       <env>... . => (B[I2/I1] |-> V) ...</env>
-       when B[I2/I1] =/=K B
-
-  rule <k> storeSyns(I1:Int ==Int I2:Int, B:K, V:Bool) => . ...</k>
-       when (B[I1/I2] ==K B) andBool (B[I2/I1] ==K B)
-
-  rule storeSyns(X:Id isNotModifiedBy S:Stmt, B:K, V:Bool) => .
-
-  rule <k> storeSyns(I1:Int <=Int I2:Int, B:K, V:Bool) => . ...</k>
-
-  rule <k> storeSyns(true, B:K, V:Bool) => . ...</k>
 
 
 /*@
@@ -371,6 +347,9 @@ module IMPS
        =>
        X:Id isNotModifiedBy S:Stmt 
        [anywhere]
+
+  rule injectForm(true) => true [anywhere]
+  rule injectForm(false) => false [anywhere]
 
 //@ rules that translate the locally defined predicates to SMTLIB
 

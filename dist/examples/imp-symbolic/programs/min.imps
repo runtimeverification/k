@@ -1,0 +1,15 @@
+<k>
+var min;
+if ( a <= b )
+  then if (a <= c)
+         then min := a
+		 else min := b
+//       else min := c
+  else if (b <= c)
+         then min := b
+		 else min := c;
+
+assert(min <= a and min <= b and min <= c) 
+</k>
+<env> a -> symInt(a) , b -> symInt(b) , c -> symInt(c) </env>
+<condition> true </condition>

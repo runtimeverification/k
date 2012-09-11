@@ -170,7 +170,20 @@ module SMT-HOOKS
   // hook to #smtCall
   syntax String ::= "smtCall" "(" String ")" [function, hook(#SMT:#smtCall_)]
   
-  rule checkSat(B:Bool) =>  parseSmtResponse( parseToKSExpString( replaceAll(smtCall ( "(set-logic AUFNIRA) " +String
+  rule checkSat(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) " +String
+                            createSmtCommand(collectConstants(B), Smtlib(B)) 
+							+String " (check-sat)")) [function, anywhere]
+
+  rule getModel(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) " +String
+                            createSmtCommand(collectConstants(B), Smtlib(B)) 
+							+String " (check-sat) (get-model)")) [function, anywhere]
+  
+  rule parseSmtResponse(S:String) => sat when trim(S) ==String "sat\n" [function, anywhere]
+  rule parseSmtResponse(S:String) => unsat when trim(S) ==String "unsat\n" [function, anywhere]
+  rule parseSmtResponse(S:String) => unknown when trim(S) ==String "unknown\n" orBool trim(S) ==String "unsupported\n" [function, anywhere]
+
+
+/*  rule checkSat(B:Bool) =>  parseSmtResponse( parseToKSExpString( replaceAll(smtCall ( "(set-logic AUFNIRA) " +String
                             createSmtCommand(collectConstants(B), Smtlib(B)) 
 							+String " (check-sat)"), "\n", " ")))
 							[function, anywhere] 
@@ -179,7 +192,7 @@ module SMT-HOOKS
                             createSmtCommand(collectConstants(B), Smtlib(B)) 
 							+String " (check-sat) (get-model)"), "\n", " ")))
 							[function, anywhere]
- 
+*/ 
 
   syntax SmtResponse ::= "parseSmtResponse" "(" String ")" [function]
 
@@ -187,12 +200,9 @@ module SMT-HOOKS
   
   rule parseToKSExpString(S:String) => #tcpRequest("smtlib#" +String Int2String(-1) +String "#" +String S +String "#") [function, anywhere]
 
-  rule parseSmtResponse(S:String) => sat when trim(S) ==String "sat" [function, anywhere]
-  rule parseSmtResponse(S:String) => unsat when trim(S) ==String "unsat" [function, anywhere]
-  rule parseSmtResponse(S:String) => unknown when trim(S) ==String "unknown" orBool trim(S) ==String "unsupported" [function, anywhere]
 
-  rule parseSmtResponse(S:String) => model ( toMap(replaceAll(S, "()", " "))) 
-	   when trim(S) =/=String "sat" andBool trim(S) =/=String "unsat" andBool trim(S) =/=String "unknown" [function, anywhere]
+//  rule parseSmtResponse(S:String) => model ( toMap(replaceAll(S, "()", " "))) 
+//	   when trim(S) =/=String "sat" andBool trim(S) =/=String "unsat" andBool trim(S) =/=String "unknown" [function, anywhere]
   
   syntax Map ::= "toMap" "(" String ")"
   syntax MapItem ::= "processToMap" "(" String ")"
