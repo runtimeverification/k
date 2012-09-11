@@ -1,6 +1,10 @@
 K Tutorial --- LAMBDA --- Derived Constructs, Extending Predefined Syntax
 by Grigore Rosu
 
+In this lesson we will learn how to define derived language constructs, that is,
+ones whose semantics is defined completely in terms of other language constructs.
+We will also learn how to add new constructs to predefined syntactic categories.
+
 When defining a language, we often want certain language constructs to be
 defined in terms of other constructs.  For example, a let-binding construct
 of the form
