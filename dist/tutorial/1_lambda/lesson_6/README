@@ -1,11 +1,11 @@
-K Tutorial --- LAMBDA --- Selective Strictness, Anonymous Variables
+K Tutorial --- LAMBDA --- Selective Strictness; Anonymous Variables
 by Grigore Rosu
 
-We here show how to define selective strictness to language constructs,
+We here show how to define selective strictness of language constructs,
 that is, how to state that certain language constructs are strict only
 in some arguments.  We also show how to use anonymous variables.
 
-We do this by means of a conditional construct, which takes three arguments,
+We next define a conditional "if" construct, which takes three arguments,
 evaluates only the first one, and then reduces to either the second or the
 third, depending on whether the first one evaluated to true or to false.
 
