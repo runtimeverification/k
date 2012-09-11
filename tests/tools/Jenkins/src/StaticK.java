@@ -24,13 +24,24 @@ public class StaticK {
 	public static String fileSep = System.getProperty("file.separator");
 	public static String k3Jar, JKrun;
 	public static ThreadPoolExecutor pool;
-	public static int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() > 2 ? Runtime.getRuntime().availableProcessors() / 2 : Runtime.getRuntime().availableProcessors();
+	public static int THREAD_POOL_SIZE = initPoolSize();
 	public static int ulimit = 120;
 	public static int biggerlimit = 3000;
 	public static String kbasedir;
 	public static String configuration;
 	public static String reportsDir;
 	public static Map<String, Report> reports = new HashMap<String, Report>();
+	
+	public static int initPoolSize()
+	{
+		int poolSize = 1;
+		
+		int pS = Runtime.getRuntime().availableProcessors() / 3;
+		if (pS > poolSize)
+			return pS;
+		
+		return poolSize;
+	}
 	
 	public static List<Example> getExamples(String configuration, String k3jar, String tagName, String kbasedir) {
 		Document document = getDocument(configuration);
