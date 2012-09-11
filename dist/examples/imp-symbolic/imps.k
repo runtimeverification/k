@@ -283,7 +283,7 @@ module IMPS
            setInitVal(Inits1) ~> P
          </k>
        ...</config>
-       <condition> _ => injectForm(F) </condition>
+  <condition> _ => injectForm(F) </condition>
 
 /*@
   The auxiliary construct \texttt{initVal()} is used for initializing the 
@@ -310,7 +310,7 @@ module IMPS
 
 
   syntax Bool ::= "injectForm" "(" BExp ")" [function]
-
+  
   rule injectForm(A1:AExp == A2:AExp)
        =>
        injectAExp(A1)  ==Int injectAExp(A2)
