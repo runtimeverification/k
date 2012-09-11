@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project basedir="." default="all" name="K3 Build file">
 
-	<property location="javasources" name="javasources"/>
+	<property location="javasources" name="javasources" />
 
 	<target name="java">
-		<ant antfile="${javasources}/K3Java/buildjava.xml" dir="${javasources}/K3Java"/>
-		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun"/>
+		<ant antfile="${javasources}/K3Java/buildjava.xml" dir="${javasources}/K3Java" />
+		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun" />
 	</target>
 
 	<target name="jar">
-		<ant antfile="${javasources}/K3Java/buildjar.xml" dir="${javasources}/K3Java"/>
-		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun"/>
+		<ant antfile="${javasources}/K3Java/buildjar.xml" dir="${javasources}/K3Java" />
+		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun" />
 	</target>
-	
+
 	<target name="all">
-		<ant antfile="${javasources}/K3Java/build.xml" dir="${javasources}/K3Java"/>
-		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun"/>
-		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun"/>
+		<ant antfile="${javasources}/K3Java/build.xml" dir="${javasources}/K3Java" />
+		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun" />
+		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun" />
 	</target>
 
 	<target name="clean">
@@ -44,41 +44,79 @@
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</fileset>
 		</delete>
-		<delete file="../K3Disamb/trans/K3Str.rtree" />
-		<delete file="../K3Disamb/trans/K3Str.dep" />
-		<delete dir="../K3Disamb/trans/K3Str" />
+		<delete file="${javasources}/K3Disamb/trans/K3Str.rtree" />
+		<delete file="${javasources}/K3Disamb/trans/K3Str.dep" />
+		<delete dir="${javasources}/K3Disamb/trans/K3Str" />
 		<delete dir="${javasources}/K3Disamb/include" />
 
+		<delete file="${javasources}/LatexComments/trans/K3Str.rtree" />
+		<delete file="${javasources}/LatexComments/trans/K3Str.dep" />
+		<delete dir="${javasources}/LatexComments/trans/K3Str" />
+		<delete dir="${javasources}/LatexComments/include" />
+
+
 		<delete dir="${javasources}/K3Java/bin" />
+		<delete dir="${javasources}/JKRun/bin" />
 		<delete dir="${javasources}/KUtils/bin" />
 		<delete dir="${javasources}/KPreprocessor/bin" />
 		<delete dir="${javasources}/Kil2Maude/bin" />
 
-		<delete file="${javasources}/../dist/bin/java/k3.jar"/>
-		<delete file="${javasources}/../dist/bin/java/JKrun.jar"/>
-		<delete file="k3.zip"/>
+		<delete file="${javasources}/../dist/bin/java/k3.jar" />
+		<delete file="${javasources}/../dist/bin/java/JKrun.jar" />
+		<delete file="k3.zip" />
+		<delete dir="./k/" />
 	</target>
 
 	<target name="release">
-		<available file="./dist/bin/java/k3.jar" property="k3zip-exists" />
-		
-		<antcall target="r2"/>
-		<antcall target="r2false"/>
+		<antcall target="all" />
+		<delete dir="./k/" />
+		<exec command="svn export dist k" failonerror="true" />
+		<copy file="./dist/bin/java/k3.jar" todir="./k/bin/java/" />
+		<copy file="./dist/bin/java/JKrun.jar" todir="./k/bin/java/" />
+
+		<property name="version.file" value="./k/bin/version.txt" />
+
+		<exec executable="svn" output="${version.file}">
+			<arg value="info" />
+			<arg value="--xml" />
+		</exec>
+
+		<xmlproperty file="${version.file}" />
+
+		<tstamp>
+			<format property="date" pattern="EEE MMM d HH:mm:ss z yyyy" />
+		</tstamp>
+
+		<property name="version" value="latest" />
+		<condition property="k-version" value="nigthly build">
+			<equals arg1="${version}" arg2="latest" />
+		</condition>
+		<condition property="k-version" value="version ${version}">
+			<not>
+				<equals arg1="${version}" arg2="latest" />
+			</not>
+		</condition>
+		<echo message="K-framework ${k-version}.${line.separator}" file="${version.file}" />
+		<echo message="SVN Revision: ${info.entry(revision)}${line.separator}" file="${version.file}" append="true" />
+		<echo message="Build date: ${date}${line.separator}" file="${version.file}" append="true" />
+
+		<delete file="k-${version}.zip" />
+		<delete file="k-${version}.tgz" />
+		<zip destfile="k-${version}.zip" basedir="k" />
+		<tar destfile="k-${version}.tgz" basedir="k" compression="gzip" />
 	</target>
-	<target name="r2" if="k3zip-exists">
-		<delete file="k3.zip" />
-		<zip destfile="k3.zip" basedir="dist" />
-	</target>
-	<target name="r2false" unless="k3zip-exists">
-		<echo message="You must build the project before you can release it." />
+
+	<target name="options">
+		<property name="version" value="latest" />
+		<echo message="${version}" />
 	</target>
 
 
 	<target name="test">
-		<javac srcdir="./tests/tools/Jenkins/src" includeantruntime="false"/>
-		<javac srcdir="./tests/tools/Jenkins/tests"  classpath="tests/tools/Jenkins/lib/junit-4.10.jar:tests/tools/Jenkins/src" includeantruntime="false"/>
+		<javac srcdir="./tests/tools/Jenkins/src" includeantruntime="false" />
+		<javac srcdir="./tests/tools/Jenkins/tests" classpath="tests/tools/Jenkins/lib/junit-4.10.jar:tests/tools/Jenkins/src" includeantruntime="false" />
 		<java classname="org.junit.runner.JUnitCore" classpath="tests/tools/Jenkins/lib/junit-4.10.jar:tests/tools/Jenkins/src:tests/tools/Jenkins/tests">
-			<arg value="LocalTests"/>
+			<arg value="LocalTests" />
 		</java>
 	</target>
 
