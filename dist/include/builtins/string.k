@@ -32,6 +32,10 @@ module STRING-HOOKS
   syntax String ::= "Id2String" "(" Id ")"		 [function, klabel(Id2String), hook(#CONVERSION:id2String)]
   syntax Id ::= "String2Id" "(" String ")"		 [function, klabel(String2Id), hook(#CONVERSION:string2Id)]
 
+
+  syntax String ::= "KLabel2String" "(" KLabel ")"  [function, klabel(KLabel2String)]
+  syntax KLabel ::= "String2KLabel" "(" String ")" [function]
+
   syntax String ::= "replaceAll" "(" String "," String "," String ")" [function]
   syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function]
   syntax String ::= "replaceFirst" "(" String "," String "," String ")" [function]
@@ -83,4 +87,16 @@ module STRING-HOOKS
   rule rtrim(S:String) => S when substrString(S, lengthString(S) -Int 1, lengthString(S)) =/=String " " [function, anywhere]
   
   rule trim(S) => ltrim(rtrim(S)) [function, anywhere]
+
+
+  syntax K ::= "#parseToken" "(" String "," String ")"  [function]
+  rule #parseToken("Int",S:String) => (String2Int(S +String "0") /Int 10) [anywhere]
+  rule #parseToken("Float",S:String) => (String2Float(S))  [anywhere]
+  rule #parseToken("String",S:String) => (S)  [anywhere]
+  rule #parseToken("Id",S:String) => (String2Id(S))  [anywhere]
+
+  rule String2Int("00") => 0  [anywhere]
+
+   
+
 endmodule

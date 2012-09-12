@@ -61,9 +61,17 @@ fmod MAKE-ALL-LABELS is
    setMbs(
        M 
     , hybridOps(OPDM) hybridLabels(getOps(Flat,KLabel)) labelsMbs(Flat, getOps(Flat), OPDM, getMbs(M)))
-    , labelsEqs(Flat, getOps(Flat), OPDM, getEqs(M)))
+    , stringKLabelEqs(getOps(M,KLabel)) labelsEqs(Flat, getOps(Flat), OPDM, getEqs(M)))
     , labelsRls(Flat, getOps(Flat), OPDM, getRls(M)))
-  .
+  [print "(applyLabels (Module " M ") (Map " OPDM "))"] .
+
+ op stringKLabelEqs : OpDeclSet -> EquationSet .
+ eq stringKLabelEqs((op Q : nil -> 'KLabel [AS] .) OPDS)
+  = (eq kApply(mkConstant(''KLabel2String, KLabel), kApply(labelWrapper(KLabel)[mkConstant(Q,KLabel)],empty)) = kApply(labelWrapper(String)[stringCt(string(Q))], empty) [metadata(pair("generated",""))] .)
+    (eq 'String2KLabel`(_`)[kApply(labelWrapper(String)[stringCt(string(Q))], empty)] = mkConstant(Q,KLabel) [metadata(pair("generated",""))] .)
+    stringKLabelEqs(OPDS) [print "Processing " Q] .
+
+  eq stringKLabelEqs(OPDS) = none [owise print "Did not process " OPDS] .
 
  op hybridOps : OpDeclOpDeclSetMap -> MembAxSet .
  eq hybridOps((Op |-> OPDS) OPDM)

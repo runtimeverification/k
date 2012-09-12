@@ -155,11 +155,7 @@ module URIS
   rule (#parse(SType:String,S:String) => #convertToken(SType, S)) ListItem(#EOF)
   
   syntax List ::= "#convertToken" "(" String "," String ")"
-  rule #convertToken("Int",S:String) => ListItem(String2Int(S +String "0") /Int 10)
-  rule #convertToken("Float",S:String) => ListItem(String2Float(S))
-  rule #convertToken("String",S:String) => ListItem(S)
-
-  rule String2Int("00") => 0  [anywhere]
+  rule #convertToken(Type:String,S:String) => ListItem(#parseToken(Type, S))
 
   
  /*   C++ -like parsing for ints. 
