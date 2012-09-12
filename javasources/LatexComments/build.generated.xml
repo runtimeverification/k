@@ -629,9 +629,12 @@
             </apply>
         </target>
         
-        <target name="clean" description="clean up">
+        <target name="clean" description="Selective clean up">
             <delete dir="${build}"/>
             <delete file="${include}/${sdfmodule}.def"/>
+            <delete file="${include}/${strmodule}.rtree"/>
+            <delete file="${include}/${strmodule}.ctree"/>
+            <delete file="${include}/${strmodule}.jar"/>
             <delete dir="${src-gen}/trans"/>
         </target>
     </project>
