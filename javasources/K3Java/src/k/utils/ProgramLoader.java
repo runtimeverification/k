@@ -20,12 +20,36 @@ import ro.uaic.info.fmse.transitions.labelify.KAppModifier;
 import ro.uaic.info.fmse.utils.file.FileUtil;
 
 public class ProgramLoader {
+
+	public static ASTNode loadPgmAst2(File pgmFile, File dotk) throws IOException {
+		File tbl = new File(dotk.getCanonicalPath() + "/pgm/Program.tbl");
+
+		// ------------------------------------- import files in Stratego
+		k3parser.KParser.ImportTblPgm(tbl.getAbsolutePath());
+
+		File f = pgmFile.getCanonicalFile();
+
+		String content = FileUtil.getFileContent(f.getAbsolutePath());
+
+		String parsed = k3parser.KParser.ParseProgramString(content);
+		Document doc = XmlLoader.getXMLDoc(parsed);
+
+		XmlLoader.addFilename(doc.getFirstChild(), pgmFile.getAbsolutePath());
+		XmlLoader.reportErrors(doc);
+		XmlLoader.writeXmlFile(doc, dotk.getAbsolutePath() + "/pgm.xml");
+
+		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+
+		return out;
+	}
+
 	/**
 	 * Load program file to ASTNode.
-	 *
+	 * 
 	 * Write pgm.xml cache in given dotk folder.
-	 *
-	 * @param kappize If true, then apply KAppModifier to AST.
+	 * 
+	 * @param kappize
+	 *            If true, then apply KAppModifier to AST.
 	 */
 	public static ASTNode loadPgmAst(File pgmFile, File dotk, Boolean kappize) throws IOException {
 		File tbl = new File(dotk.getCanonicalPath() + "/pgm/Program.tbl");
@@ -70,17 +94,15 @@ public class ProgramLoader {
 		return out;
 	}
 
-
 	public static ASTNode loadPgmAst(File pgmFile, File dotk) throws IOException {
 		return loadPgmAst(pgmFile, dotk, true);
 	}
 
-
 	/**
 	 * Print maudified program to standard output.
-	 *
-         * Save it in dotk cache under pgm.maude.
-         */
+	 * 
+	 * Save it in dotk cache under pgm.maude.
+	 */
 	public static void processPgm(File pgmFile, File defFile) {
 		try {
 			// compile a definition here
@@ -120,9 +142,7 @@ public class ProgramLoader {
 	}
 
 	/**
-	 *  Store maudified AST of K program under `pgm.maude` in dotk
-	 *  directory. `pgm.maude` will also load language definition
-	 *  from `LANGUAGE-compiled.maude` in parent directory.
+	 * Store maudified AST of K program under `pgm.maude` in dotk directory. `pgm.maude` will also load language definition from `LANGUAGE-compiled.maude` in parent directory.
 	 */
 	private static void writeMaudifiedPgm(String kast, String language, File dotk) {
 		String ast;

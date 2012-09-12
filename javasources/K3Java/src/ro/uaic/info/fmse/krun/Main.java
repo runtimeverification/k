@@ -23,10 +23,9 @@ import org.fusesource.jansi.AnsiConsole;
 import ro.uaic.info.fmse.krun.runner.KRunner;
 
 public class Main {
-	
+
 	private static final String USAGE_KRUN = "krun [options] <file>" + K.lineSeparator;
-	private static final String USAGE_DEBUG = "Enter one of the following commands without \"--\" in front. " 
-			                   + "For autocompletion press TAB key and for accessing the command history use up and down arrows." + K.lineSeparator;
+	private static final String USAGE_DEBUG = "Enter one of the following commands without \"--\" in front. " + "For autocompletion press TAB key and for accessing the command history use up and down arrows." + K.lineSeparator;
 	private static final String HEADER = "";
 	private static final String FOOTER = "";
 
@@ -37,7 +36,7 @@ public class Main {
 		helpFormatter.printHelp(USAGE_KRUN, HEADER, options, FOOTER);
 		System.out.println();
 	}
-	
+
 	public static void printDebugUsage(Options options) {
 		HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.setOptionComparator(new CommandlineOptions.OptionComparator());
@@ -53,7 +52,7 @@ public class Main {
 	public static String initOptions(String path) {
 		String result = null;
 		String path_ = null;
-		String fileName = null; 
+		String fileName = null;
 		StringBuilder str = new StringBuilder();
 		int count = 0;
 
@@ -73,7 +72,7 @@ public class Main {
 			if (count > 1) {
 				Error.report("\nMultiple compiled definitions found.\nPlease use only one of: " + str.toString());
 			} else if (count == 1) {
-				return result; 
+				return result;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -99,23 +98,21 @@ public class Main {
 			}
 		} else if (optionName == "main-module") {
 			if (cmd.hasOption("syntax-module")) {
-			   int pos = K.syntax_module.indexOf("-SYNTAX");
-			   K.main_module = K.syntax_module.substring(0, pos);
-			}
-			else {
+				int pos = K.syntax_module.indexOf("-SYNTAX");
+				K.main_module = K.syntax_module.substring(0, pos);
+			} else {
 				K.main_module = str;
 			}
 		} else if (optionName == "syntax-module") {
 			if (cmd.hasOption("main-module")) {
-				   K.syntax_module = K.main_module + "-SYNTAX"; 
-			}
-			else {
+				K.syntax_module = K.main_module + "-SYNTAX";
+			} else {
 				K.syntax_module = str + "-SYNTAX";
 			}
 		}
 	}
-	
-	//execute krun in normal mode (i.e. not in debug mode)
+
+	// execute krun in normal mode (i.e. not in debug mode)
 	public static void normalExecution(String KAST, String lang, CommandLine cmd, RunProcess rp, String k3jar, CommandlineOptions cmd_options) {
 		try {
 			String s = new String();
@@ -123,83 +120,70 @@ public class Main {
 				if ("search".equals(K.maude_cmd)) {
 					BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 					String buffer = null;
-					//detect if the input comes from console or redirected from a pipeline
+					// detect if the input comes from console or redirected from a pipeline
 					Console c = System.console();
-			        if (c == null) {
-			        	try {
-			        		buffer = br.readLine();
-			            } catch (IOException ioe) {
-			                ioe.getMessage();
-			            }
-			        	finally {
-			    			if (br != null) {
-			    				try {
-			    					br.close();
-			    				} catch (IOException e) {
-			    					e.printStackTrace();
-			    				}
-			    			}
-			    		}
-			        }
-			        if (cmd.hasOption("bound") && cmd.hasOption("depth")) {
-			        	s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "," + K.depth + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
-								",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
-								",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
-								",(.).Map)) ";
-			        }
-			        else if (cmd.hasOption("bound")) {
-			        	s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
-								",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
-								",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
-								",(.).Map)) ";
-			        }
-			        else if (cmd.hasOption("depth")) {
-			        	s = "set show command off ." + K.lineSeparator + "search [," + K.depth + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
-								",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
-								",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
-								",(.).Map)) ";
-			        }
-			        else {
-			        	s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" +
-							",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))" +
-							",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" +
-							",(.).Map)) ";
-			        }
-			        s += K.pattern + " .";
-					/*if (cmd.hasOption("xsearch-pattern")) {
-						s += K.xsearch_pattern + " .";
-						//s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern + "\"" + " .";
-					} else s += " =>! B:Bag .";	*/	
-			        
+					if (c == null) {
+						try {
+							buffer = br.readLine();
+						} catch (IOException ioe) {
+							ioe.getMessage();
+						} finally {
+							if (br != null) {
+								try {
+									br.close();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+							}
+						}
+					}
+					if (cmd.hasOption("bound") && cmd.hasOption("depth")) {
+						s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "," + K.depth + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
+								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
+					} else if (cmd.hasOption("bound")) {
+						s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
+								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
+					} else if (cmd.hasOption("depth")) {
+						s = "set show command off ." + K.lineSeparator + "search [," + K.depth + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
+								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
+					} else {
+						s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
+								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
+					}
+					s += K.pattern + " .";
+					/*
+					 * if (cmd.hasOption("xsearch-pattern")) { s += K.xsearch_pattern + " ."; //s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern +
+					 * "\"" + " ."; } else s += " =>! B:Bag .";
+					 */
+
 				} else {
 					Error.report("For the do-search option you need to specify that --maude-cmd=search");
 				}
 			} else if (cmd.hasOption("maude-cmd")) {
 				s = "set show command off ." + K.lineSeparator + K.maude_cmd + " #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
-			}  else {
+			} else {
 				s = "set show command off ." + K.lineSeparator + "erew #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
 			}
-	
+
 			if (K.trace) {
 				s = "set trace on ." + K.lineSeparator + s;
 			}
-			
+
 			StringBuilder sb = new StringBuilder();
 			if (K.model_checking.length() > 0) {
-				//run kast for the formula to be verified
+				// run kast for the formula to be verified
 				File formulaFile = new File(K.model_checking);
 				String KAST1 = new String();
 				if (!formulaFile.exists()) {
-					//Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
-					//assume that the specified argument is not a file and maybe represents a formula
+					// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
+					// assume that the specified argument is not a file and maybe represents a formula
 					KAST1 = rp.runParser(k3jar, K.parser, K.k_definition, K.model_checking, false);
-				}
-				else {
-					//the specified argument represents a file
+				} else {
+					// the specified argument represents a file
 					KAST1 = rp.runParser(k3jar, K.parser, K.k_definition, K.model_checking, true);
 				}
-				
-				sb.append("mod MCK is" + K.lineSeparator); 
+
+				sb.append("mod MCK is" + K.lineSeparator);
 				sb.append(" including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator);
 				sb.append(" op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator);
 				sb.append(" eq #initConfig =" + K.lineSeparator);
@@ -211,13 +195,13 @@ public class Main {
 				sb.append(KAST1 + ")" + K.lineSeparator + ") .");
 				s = sb.toString();
 			}
-	
+
 			FileUtil.createFile(K.maude_in, s);
-	
+
 			// run IOServer
 			File outFile = FileUtil.createFile(K.maude_out);
 			File errFile = FileUtil.createFile(K.maude_err);
-				
+
 			if (K.log_io) {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" });
 			}
@@ -226,32 +210,30 @@ public class Main {
 			} else {
 				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
 			}
-			
+
 			// check whether Maude produced errors
 			rp.checkMaudeForErrors(errFile, lang);
-			
+
 			if ("search".equals(K.maude_cmd) && K.do_search) {
 				System.out.println("Search results:");
 			}
 			if ("pretty".equals(K.output_mode)) {
 				PrettyPrintOutput p = new PrettyPrintOutput();
-			    p.preprocessDoc(K.maude_output, K.processed_maude_output);
+				p.preprocessDoc(K.maude_output, K.processed_maude_output);
 				List<String> red = p.processDoc(K.processed_maude_output);
-				for (String result: red) {
+				for (String result : red) {
 					AnsiConsole.out.println(result);
 				}
 			} else if ("raw".equals(K.output_mode)) {
 				String output = new String();
 				if (K.model_checking.length() > 0) {
 					output = FileUtil.parseModelCheckingOutputMaude(K.maude_out);
-				} 
-				else {
+				} else {
 					if ("search".equals(K.maude_cmd)) {
 						List<String> l = FileUtil.parseSearchOutputMaude(K.maude_out);
 						if (l.size() > 0) {
 							output = l.get(0);
-						}
-						else {
+						} else {
 							output = "";
 						}
 					} else if ("erewrite".equals(K.maude_cmd)) {
@@ -259,21 +241,20 @@ public class Main {
 					}
 				}
 				System.out.println(output);
-	
+
 			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
 			} else {
 				Error.report(K.output_mode + " is not a valid value for output-mode option");
 			}
-	
+
 			// save the pretty-printed output of jkrun in a file
-			//FileUtil.createFile(K.krun_output, prettyOutput);
-			
+			// FileUtil.createFile(K.krun_output, prettyOutput);
+
 			ProcessBean bean = new ProcessBean();
 			bean.setExitCode(0);
 			System.exit(bean.getExitCode());
-		}
-		 catch (IOException e) {
+		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			ProcessBean bean = new ProcessBean();
 			bean.setExitCode(1);
@@ -286,27 +267,27 @@ public class Main {
 			printKRunUsage(cmd_options.getOptions());
 			System.exit(bean.getExitCode());
 		}
-		
+
 	}
-	
-	//execute krun in debug mode (i.e. step by step execution)
+
+	// execute krun in debug mode (i.e. step by step execution)
 	public static void debugExecution(String kast, String lang) {
 		try {
-			//adding autocompletion and history feature to the stepper internal commandline by using the JLine library
+			// adding autocompletion and history feature to the stepper internal commandline by using the JLine library
 			ConsoleReader reader = new ConsoleReader();
-		    reader.setBellEnabled(false);
-		    
-		    List argCompletor = new LinkedList();
-		    argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "show path labels"}));
-		    argCompletor.add(new FileNameCompletor());
-		    List completors = new LinkedList();
-		    completors.add(new ArgumentCompletor(argCompletor));
-		    reader.addCompletor(new MultiCompletor(completors));
-			
-			//first execute one step then prompt from the user an input
+			reader.setBellEnabled(false);
+
+			List argCompletor = new LinkedList();
+			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "show path labels" }));
+			argCompletor.add(new FileNameCompletor());
+			List completors = new LinkedList();
+			completors.add(new ArgumentCompletor(argCompletor));
+			reader.addCompletor(new MultiCompletor(completors));
+
+			// first execute one step then prompt from the user an input
 			System.out.println("After running one step of execution the result is:");
 			String compiledFile = new String();
-		    compiledFile = new File(K.compiled_def).getCanonicalPath();
+			compiledFile = new File(K.compiled_def).getCanonicalPath();
 			String maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + kast + "))),(.).Map)) .";
 			File outFile = FileUtil.createFile(K.maude_out);
 			File errFile = FileUtil.createFile(K.maude_err);
@@ -314,140 +295,137 @@ public class Main {
 			rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 			// check whether Maude produced errors
 			rp.checkMaudeForErrors(errFile, lang);
-			
-			//pretty-print the obtained configuration
+
+			// pretty-print the obtained configuration
 			PrettyPrintOutput p = new PrettyPrintOutput();
-		    p.preprocessDoc(K.maude_output, K.processed_maude_output);
+			p.preprocessDoc(K.maude_output, K.processed_maude_output);
 			List<String> red = p.processDoc(K.processed_maude_output);
-			for (String result: red) {
+			for (String result : red) {
 				AnsiConsole.out.println(result);
 			}
-			
+
 			while (true) {
 				System.out.println();
 				String input = reader.readLine("Command > ");
-				 
-				//construct the right command line input when we specify the "step" option with an argument (i.e. step=3) 
+
+				// construct the right command line input when we specify the "step" option with an argument (i.e. step=3)
 				input = input.trim();
 				String[] tokens = input.split(" ");
-				//store the tokens that are not a blank space 
-			    List<String> items = new ArrayList<String>();
+				// store the tokens that are not a blank space
+				List<String> items = new ArrayList<String>();
 				for (int i = 0; i < tokens.length; i++) {
 					if ((!(tokens[i].equals(" ")) && (!tokens[i].equals("")))) {
 						items.add(tokens[i]);
 					}
 				}
 				StringBuilder aux = new StringBuilder();
-				//excepting the case of a command like: help
+				// excepting the case of a command like: help
 				if (items.size() > 1) {
 					for (int i = 0; i < items.size(); i++) {
 						if (i == items.size() - 1) {
 							aux.append("=");
 							aux.append(items.get(i));
-						}
-						else if (i == items.size() - 2){
+						} else if (i == items.size() - 2) {
 							aux.append(items.get(i));
-						}
-						else {
+						} else {
 							aux.append(items.get(i) + " ");
 						}
 					}
 					input = aux.toString();
 				}
-				//apply trim to remove possible blank spaces from the inserted command
+				// apply trim to remove possible blank spaces from the inserted command
 				String[] cmds = new String[] { "--" + input };
 				CommandlineOptions cmd_options = new CommandlineOptions();
 				CommandLine cmd = cmd_options.parse(cmds);
-				//when an error occurred during parsing the commandline
+				// when an error occurred during parsing the commandline
 				if (cmd == null) {
 					continue;
-				}
-				else {
+				} else {
 					if (cmd.hasOption("help")) {
 						printDebugUsage(cmd_options.getOptions());
 					}
-				    if (cmd.hasOption("abort")) {
+					if (cmd.hasOption("abort")) {
 						ProcessBean bean = new ProcessBean();
 						bean.setExitCode(0);
 						System.exit(bean.getExitCode());
 					}
 					if (cmd.hasOption("resume")) {
-						//get the maudified version of the current configuration based on the xml obtained from -xml-log option
+						// get the maudified version of the current configuration based on the xml obtained from -xml-log option
 						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
 						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew " + maudeConfig + " .";
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
 						rp.checkMaudeForErrors(errFile, lang);
-						
-						//pretty-print the obtained configuration
+
+						// pretty-print the obtained configuration
 						K.maude_cmd = "erewrite";
 						p = new PrettyPrintOutput();
-					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
+						p.preprocessDoc(K.maude_output, K.processed_maude_output);
 						red = p.processDoc(K.processed_maude_output);
 						AnsiConsole.out.println(red.get(0));
-						
+
 						ProcessBean bean = new ProcessBean();
 						bean.setExitCode(0);
 						System.exit(bean.getExitCode());
 					}
-					//one step execution (by default) or more if you specify an argument
+					// one step execution (by default) or more if you specify an argument
 					if (cmd.hasOption("step")) {
-		            	//by default execute only one step at a time
-		            	String arg = new String("1");
-		            	String[] remainingArguments = null;
-		    			remainingArguments = cmd.getArgs();
-		    			if (remainingArguments.length > 0) {
-		    				arg = remainingArguments[0];
-		    			}
-		            	//get the maudified version of the current configuration based on the xml obtained from -xml-log option
+						// by default execute only one step at a time
+						String arg = new String("1");
+						String[] remainingArguments = null;
+						remainingArguments = cmd.getArgs();
+						if (remainingArguments.length > 0) {
+							arg = remainingArguments[0];
+						}
+						// get the maudified version of the current configuration based on the xml obtained from -xml-log option
 						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
-						//System.out.println("config=" + maudeConfig);
+						// System.out.println("config=" + maudeConfig);
 						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[" + arg + "] " + maudeConfig + " .";
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
 						rp.checkMaudeForErrors(errFile, lang);
-						
-						//pretty-print the obtained configuration
+
+						// pretty-print the obtained configuration
 						K.maude_cmd = "erewrite";
 						p = new PrettyPrintOutput();
-					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
+						p.preprocessDoc(K.maude_output, K.processed_maude_output);
 						red = p.processDoc(K.processed_maude_output);
 						AnsiConsole.out.println(red.get(0));
 					}
-		            if (cmd.hasOption("step-all")) {
-		            	//by default compute all successors in one transition
-		            	String arg = new String("1");
-		            	String[] remainingArguments = null;
-		    			remainingArguments = cmd.getArgs();
-		    			if (remainingArguments.length > 0) {
-		    				arg = remainingArguments[0];
-		    			}
-		            	//get the maudified version of the current configuration based on the xml obtained from -xml-log option
+					if (cmd.hasOption("step-all")) {
+						// by default compute all successors in one transition
+						String arg = new String("1");
+						String[] remainingArguments = null;
+						remainingArguments = cmd.getArgs();
+						if (remainingArguments.length > 0) {
+							arg = remainingArguments[0];
+						}
+						// get the maudified version of the current configuration based on the xml obtained from -xml-log option
 						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
-						//System.out.println("config=" + maudeConfig);
+						// System.out.println("config=" + maudeConfig);
 						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "search[," + arg + "] " + maudeConfig + "=>+ B:Bag .";
-						//System.out.println("maude cmd=" + maudeCmd);
+						// System.out.println("maude cmd=" + maudeCmd);
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
 						rp.checkMaudeForErrors(errFile, lang);
-						
-						//pretty-print the obtained search results
+
+						// pretty-print the obtained search results
 						K.maude_cmd = "search";
 						p = new PrettyPrintOutput();
-					    p.preprocessDoc(K.maude_output, K.processed_maude_output);
+						p.preprocessDoc(K.maude_output, K.processed_maude_output);
 						red = p.processDoc(K.processed_maude_output);
-						for (String result: red) {
+						for (String result : red) {
 							AnsiConsole.out.println(result);
 						}
-		            }
-		            if (cmd.hasOption("show path labels")) {
-		            	String arg = cmd.getOptionValue("show path labels");
-		            	maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "show path labels " + arg + " .";
-		            	//System.out.println("maude cmd=" + maudeCmd);
-		            	rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
+					}
+					if (cmd.hasOption("show path labels")) {
+						String arg = cmd.getOptionValue("show path labels");
+						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "show path labels " + arg + " .";
+						// System.out.println("maude cmd=" + maudeCmd);
+						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
 						rp.checkMaudeForErrors(errFile, lang);
-		            }
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -455,7 +433,7 @@ public class Main {
 			ProcessBean bean = new ProcessBean();
 			bean.setExitCode(1);
 			System.exit(bean.getExitCode());
-		}	
+		}
 
 	}
 
@@ -464,13 +442,13 @@ public class Main {
 	 *            represents the arguments/options given to jkrun command..
 	 */
 	public static void execute_Krun(String cmds[]) {
-		//delete temporary krun directory
+		// delete temporary krun directory
 		FileUtil.deleteDirectory(new File(K.krunDir));
-		
+
 		CommandlineOptions cmd_options = new CommandlineOptions();
 		CommandLine cmd = cmd_options.parse(cmds);
 		try {
-		
+
 			// Parse the program arguments
 
 			if (cmd.hasOption("search")) {
@@ -539,12 +517,9 @@ public class Main {
 			if (cmd.hasOption("maude-cmd")) {
 				K.maude_cmd = cmd.getOptionValue("maude-cmd");
 			}
-			/*if (cmd.hasOption("xsearch-pattern")) {
-				K.maude_cmd = "search";
-				K.do_search = true;
-				K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern");
-//				System.out.println("xsearch-pattern:" + K.xsearch_pattern);
-			}*/
+			/*
+			 * if (cmd.hasOption("xsearch-pattern")) { K.maude_cmd = "search"; K.do_search = true; K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern"); // System.out.println("xsearch-pattern:" + K.xsearch_pattern); }
+			 */
 			if (cmd.hasOption("pattern")) {
 				K.pattern = cmd.getOptionValue("pattern");
 			}
@@ -636,7 +611,7 @@ public class Main {
 			if (!cmd.hasOption("syntax-module")) {
 				resolveOption("syntax-module", cmd);
 			}
- 
+
 			if (!K.k_definition.endsWith(".k")) {
 				K.k_definition = K.k_definition + ".k";
 			}
@@ -648,23 +623,21 @@ public class Main {
 			if (!compiledFile.exists()) {
 				Error.report("\nCould not find compiled definition: " + K.compiled_def + "\nPlease compile the definition by using `kompile'.");
 			}
-			
-			/*System.out.println("K.k_definition=" + K.k_definition);
-			System.out.println("K.syntax_module=" + K.syntax_module);
-		    System.out.println("K.main_module=" + K.main_module);
-		    System.out.println("K.compiled_def=" + K.compiled_def);*/
-		    
+
+			/*
+			 * System.out.println("K.k_definition=" + K.k_definition); System.out.println("K.syntax_module=" + K.syntax_module); System.out.println("K.main_module=" + K.main_module); System.out.println("K.compiled_def=" + K.compiled_def);
+			 */
+
 			// in KAST variable we obtain the output from running kast process on a program defined in K
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
 
 			String k3jar = new File(K.kast).getParent() + K.fileSeparator + "java" + K.fileSeparator + "k3.jar";
 			KAST = rp.runParser(k3jar, K.parser, K.k_definition, K.pgm, true);
-			
+
 			if (!K.debug) {
 				normalExecution(KAST, lang, cmd, rp, k3jar, cmd_options);
-			}
-			else {
+			} else {
 				debugExecution(KAST, lang);
 			}
 		} catch (IOException e) {

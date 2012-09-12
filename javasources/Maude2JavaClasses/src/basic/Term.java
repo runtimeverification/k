@@ -22,7 +22,7 @@ public class Term {
 	private List<Term> children;
 
 	public static Term loadTermFromFile(String file) {
-		String fileContent = FileUtil.readFileAsString(file);
+		String fileContent = FileUtil.getFileContent(file);
 
 		try {
 			// parse the xml returned by the parser.
