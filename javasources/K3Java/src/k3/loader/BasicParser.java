@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import k.utils.FileUtil;
-import k.utils.KPaths;
 import k.utils.XmlLoader;
 import k2parser.KParser;
 
@@ -26,6 +24,8 @@ import ro.uaic.info.fmse.k.DefinitionItem;
 import ro.uaic.info.fmse.k.Module;
 import ro.uaic.info.fmse.k.Require;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
+import ro.uaic.info.fmse.utils.file.FileUtil;
+import ro.uaic.info.fmse.utils.file.KPaths;
 
 public class BasicParser {
 	private List<DefinitionItem> moduleItems;

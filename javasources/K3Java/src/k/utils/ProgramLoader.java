@@ -17,6 +17,7 @@ import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.transitions.labelify.KAppModifier;
+import ro.uaic.info.fmse.utils.file.FileUtil;
 
 public class ProgramLoader {
 	/**

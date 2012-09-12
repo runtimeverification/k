@@ -1,4 +1,4 @@
-package k.utils;
+package ro.uaic.info.fmse.utils.file;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;

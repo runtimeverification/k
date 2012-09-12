@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import ro.uaic.info.fmse.utils.file.KPaths;
+
 public class Sdf2Table {
 
 	public static void run_sdf2table(File startDir, String mainFile) {

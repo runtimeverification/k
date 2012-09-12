@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import ro.uaic.info.fmse.jkrun.K;
-import k.utils.MaudeRun;
+import ro.uaic.info.fmse.maude.MaudeRun;
 
 public class MaudeTask extends Thread {
 	// private static final String LOG_FILE = "maude.log";

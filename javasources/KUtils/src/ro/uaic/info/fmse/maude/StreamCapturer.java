@@ -1,9 +1,11 @@
-package k.utils;
+package ro.uaic.info.fmse.maude;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import ro.uaic.info.fmse.utils.file.FileUtil;
 
 public class StreamCapturer extends Thread {
 	InputStream is;

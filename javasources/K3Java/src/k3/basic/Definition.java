@@ -15,8 +15,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import k.utils.Error;
-import k.utils.FileUtil;
-import k.utils.KPaths;
 import k.utils.StringUtil;
 import k.utils.Tag;
 import k.utils.XmlLoader;
@@ -39,6 +37,8 @@ import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
+import ro.uaic.info.fmse.utils.file.FileUtil;
+import ro.uaic.info.fmse.utils.file.KPaths;
 
 public class Definition implements Cloneable {
 	private List<ModuleItem> modules;

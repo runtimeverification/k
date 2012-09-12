@@ -1,4 +1,4 @@
-package k.utils;
+package ro.uaic.info.fmse.maude;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,120 +12,104 @@ import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
+import ro.uaic.info.fmse.utils.file.FileUtil;
+import ro.uaic.info.fmse.utils.file.KPaths;
 
 public class MaudeRun {
 
 	static String maudeExe = initializeMaudeExecutable();
-	
+
 	/**
-	 * This function computes the path to a K-included version of maude.
-	 * It assumes that /dist/bin/maude directory contains all maude executables.
-	 * It searches for the os type and the architecture and it returns
-	 * the right maude executable.
+	 * This function computes the path to a K-included version of maude. It assumes that /dist/bin/maude directory contains all maude executables. It searches for the os type and the architecture and it returns the right maude executable.
 	 */
-	public static String initializeMaudeExecutable()
-	{	
-		if (checkLocalMaudeInstallation())
-		{
-			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INTERNAL, "Maude is already installed on this machine. Please remove directory k-install-dir/bin/maude/binaries to use your local maude installation. ", "", "", 3));
+	public static String initializeMaudeExecutable() {
+		if (checkLocalMaudeInstallation()) {
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INTERNAL, "Maude is already installed on this machine. Please remove directory k-install-dir/bin/maude/binaries to use your local maude installation. ",
+					"", "", 3));
 		}
-		
+
 		// get system properties: file separator, os name, os architecture
 		String fileSeparator = System.getProperty("file.separator");
 		String osname = System.getProperty("os.name");
 		String arch = System.getProperty("os.arch");
-		
+
 		// set different maude executables
 		String maude_win = "maude.exe";
 		String maude_mac = "maude.intelDarwin";
 		String maude_linux_32 = "maude.linux";
 		String maude_linux_64 = "maude.linux64";
-		
-//		System.out.println("OS: |" + osname + "|" + arch + "|");
-//		System.out.println(KPaths.getKBase(true));
-		
-		String maudeDir = KPaths.getKBase(false) +  fileSeparator + "bin" + fileSeparator + "maude" + fileSeparator + "binaries";
+
+		// System.out.println("OS: |" + osname + "|" + arch + "|");
+		// System.out.println(KPaths.getKBase(true));
+
+		String maudeDir = KPaths.getKBase(false) + fileSeparator + "bin" + fileSeparator + "maude" + fileSeparator + "binaries";
 		String maudeExe = "maude";
-		
-		if (osname.toLowerCase().contains("win"))
-		{
+
+		if (osname.toLowerCase().contains("win")) {
 			// silently ignore this case
 			// the user should install itself maude
 			// we assume that he can execute maude from command line
 			maudeExe = maudeDir + fileSeparator + maude_win;
-		}
-		else if (osname.toLowerCase().contains("mac"))
-		{
+		} else if (osname.toLowerCase().contains("mac")) {
 			// I hope this condition is strong enough
-				maudeExe = maudeDir + fileSeparator + maude_mac;
-		}
-		else if (osname.toLowerCase().contains("linux")){
+			maudeExe = maudeDir + fileSeparator + maude_mac;
+		} else if (osname.toLowerCase().contains("linux")) {
 			// in this case we assume linux
-			if (arch.toLowerCase().contains("64"))
-			{
+			if (arch.toLowerCase().contains("64")) {
 				maudeExe = maudeDir + fileSeparator + maude_linux_64;
-			}
-			else maudeExe = maudeDir + fileSeparator + maude_linux_32;			
+			} else
+				maudeExe = maudeDir + fileSeparator + maude_linux_32;
 		}
-		
-   
-	    if (!new File(maudeExe).exists())
-	    {
-		   // if the maude binaries are not found then consider default `maude`
-		   return "maude";
+
+		if (!new File(maudeExe).exists()) {
+			// if the maude binaries are not found then consider default `maude`
+			return "maude";
 		}
-	   
+
 		return maudeExe;
 	}
-	
-	
-	private static boolean checkLocalMaudeInstallation()
-	{
+
+	private static boolean checkLocalMaudeInstallation() {
 		String localMaude = "maude";
-		
-		try{
+
+		try {
 			java.lang.ProcessBuilder pb = new java.lang.ProcessBuilder(localMaude);
 			pb.redirectErrorStream(true);
-			
+
 			Process p = pb.start();
-			
+
 			OutputStream os = p.getOutputStream();
 			os.write("q\n".getBytes());
 			os.flush();
 			os.close();
-			
+
 			InputStream is = p.getInputStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			String line = "";
 			String output = "";
-			while((line = br.readLine())!=null)
-			{
+			while ((line = br.readLine()) != null) {
 				output += line + "\n";
 			}
-			
+
 			p.waitFor();
-			if (output.matches("GLIBC"))
-			{
+			if (output.matches("GLIBC")) {
 				return false;
 			}
-			
-			if (output.matches("[Ww]arning"))
-			{
+
+			if (output.matches("[Ww]arning")) {
 				return false;
 			}
-			
-			if (output.matches("[Ee]rror"))
-			{
+
+			if (output.matches("[Ee]rror")) {
 				return false;
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	public static String run_maude(File startDir, String mainFile) {
 		try {
 			// create process
@@ -187,7 +171,7 @@ public class MaudeRun {
 			if (!error.equals("")) {
 				if (error.length() > 500) {
 					FileUtil.saveInFile(kompile_err, error);
-					Error.report(error.substring(0, 500) + "...\nCheck " + kompile_err + " to see the complete error.");
+					ro.uaic.info.fmse.utils.errors.Error.report(error.substring(0, 500) + "...\nCheck " + kompile_err + " to see the complete error.");
 				} else {
 					FileUtil.saveInFile(kompile_err, error);
 					System.out.println("Error: " + error);

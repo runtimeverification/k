@@ -28,6 +28,7 @@ import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.pp.Preprocessor;
+import ro.uaic.info.fmse.utils.file.FileUtil;
 
 import com.thoughtworks.xstream.XStream;
 

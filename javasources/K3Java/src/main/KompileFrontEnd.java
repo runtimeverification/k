@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import k.utils.FileUtil;
-import k.utils.KPaths;
-import k.utils.MaudeRun;
 import k.utils.ResourceExtractor;
 import k.utils.Sdf2Table;
 import k.utils.Stopwatch;
@@ -39,9 +36,12 @@ import ro.uaic.info.fmse.lists.EmptyListsVisitor;
 import ro.uaic.info.fmse.loader.CollectConsesVisitor;
 import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
 import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
+import ro.uaic.info.fmse.maude.MaudeRun;
 import ro.uaic.info.fmse.sharing.AutomaticModuleImportsTransformer;
 import ro.uaic.info.fmse.sharing.DittoFilter;
 import ro.uaic.info.fmse.unparser.UnparserFilter;
+import ro.uaic.info.fmse.utils.file.FileUtil;
+import ro.uaic.info.fmse.utils.file.KPaths;
 
 import com.thoughtworks.xstream.XStream;
 

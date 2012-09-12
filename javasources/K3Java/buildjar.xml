@@ -5,16 +5,14 @@
 		<jar destfile="../../dist/bin/java/k3.jar" filesetmanifest="mergewithoutmain">
 			<manifest>
 				<attribute name="Main-Class" value="main.Main"/>
-				<attribute name="Class-Path" value=". strategoxt.jar xstream.jar kxml2-min.jar xmlpull.jar xpp3_min.jar"/>
+				<attribute name="Class-Path" value=". strategoxt.jar xstream.jar kxml2-min.jar xmlpull.jar xpp3_min.jar commons-cli-1.2.jar commons-io-2.1.jar jansi-1.8.jar jline-1.0.jar jopt-simple-3.3.jar"/>
 			</manifest>
 			<fileset dir="./bin"/>
-			<!--<zipfileset excludes="META-INF/*.SF" src="./lib/strategoxt.jar"/> -->
-			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2-javadoc.jar"/>
-			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2-sources.jar"/>
-			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-cli-1.2.jar"/>
 			<fileset dir="../JavaClasses/bin"/>
 			<fileset dir="../KUtils/bin"/>
 			<fileset dir="../KPreprocessor/bin"/>
+			<fileset dir="../JKRun/bin"/>
+			<fileset dir="../IOServer/bin"/>
 		</jar>
 	</target>
 </project>

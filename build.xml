@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="all" name="K3 Build file">
+<project basedir="." default="build" name="K3 Build file">
 
 	<property location="javasources" name="javasources" />
 
@@ -10,13 +10,10 @@
 
 	<target name="jar">
 		<ant antfile="${javasources}/K3Java/buildjar.xml" dir="${javasources}/K3Java" />
-		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun" />
 	</target>
 
-	<target name="all">
+	<target name="build">
 		<ant antfile="${javasources}/K3Java/build.xml" dir="${javasources}/K3Java" />
-		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun" />
-		<ant antfile="${javasources}/JKRun/buildjar.xml" dir="${javasources}/JKRun" />
 	</target>
 
 	<target name="clean">
@@ -59,20 +56,18 @@
 		<delete dir="${javasources}/JKRun/bin" />
 		<delete dir="${javasources}/KUtils/bin" />
 		<delete dir="${javasources}/KPreprocessor/bin" />
-		<delete dir="${javasources}/Kil2Maude/bin" />
+		<delete dir="${javasources}/IOServer/bin" />
+		<delete dir="${javasources}/JavaClasses/bin" />
 
 		<delete file="${javasources}/../dist/bin/java/k3.jar" />
-		<delete file="${javasources}/../dist/bin/java/JKrun.jar" />
-		<delete file="k3.zip" />
 		<delete dir="./k/" />
 	</target>
 
 	<target name="release">
-		<antcall target="all" />
+		<antcall target="build" />
 		<delete dir="./k/" />
 		<exec command="svn export dist k" failonerror="true" />
 		<copy file="./dist/bin/java/k3.jar" todir="./k/bin/java/" />
-		<copy file="./dist/bin/java/JKrun.jar" todir="./k/bin/java/" />
 
 		<property name="version.file" value="./k/bin/version.txt" />
 

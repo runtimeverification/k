@@ -3,7 +3,6 @@ package main;
 import java.io.File;
 import java.io.IOException;
 
-import k.utils.FileUtil;
 import k.utils.Stopwatch;
 
 import org.apache.commons.cli.CommandLine;
@@ -16,6 +15,7 @@ import ro.uaic.info.fmse.hkcd.HaskellDefFilter;
 import ro.uaic.info.fmse.hkcd.HaskellPgmFilter;
 
 import ro.uaic.info.fmse.k.ASTNode;
+import ro.uaic.info.fmse.utils.file.FileUtil;
 
 /**
  * Haskell K Compiler dump tool frontend
