@@ -18,15 +18,10 @@ public class Build {
 		Thread.yield();
 		StaticK.k3Jar = StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin"
 				+ StaticK.fileSep + "java" + StaticK.fileSep + "k3.jar";
-		StaticK.JKrun = StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin"
-				+ StaticK.fileSep + "java" + StaticK.fileSep + "JKrun.jar";
 		
 		assertTrue(new File(StaticK.k3Jar).exists());
-		assertTrue(new File(StaticK.JKrun).exists());
 
 		if (!new File(StaticK.k3Jar).exists())
-			System.exit(1);
-		if (!new File(StaticK.JKrun).exists())
 			System.exit(1);
 			
 		System.out.println("\n\n" + build.getOutput());

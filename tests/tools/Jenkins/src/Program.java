@@ -35,9 +35,7 @@ public class Program extends Thread {
 		long millis = System.currentTimeMillis();
 		
 		/* Compute the krun arguments */
-		String[] basic = new String[] { 
-				// "java", "-jar", 
-				krun, filename,
+		String[] basic = new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", krun, "-krun", filename,
 				"--k-definition", kdefinition };
 		int length = basic.length + krunOptions.size();
 		String[] run = new String[length];
@@ -105,8 +103,8 @@ public class Program extends Thread {
 			return filename.substring(StaticK.kbasedir.length())
 					+ "... failed:\n\n------------ STATS ------------\nRun:\n"
 					+ compile + "\nKrun exit code: " + exit + "\nError: "
-					+ error + "\nOutput: " + output
-					+ "\n-------------------------------\n";
+					+ error + "\nOutput: |" + output
+					+ "|\n-------------------------------\n";
 	}
 
 	public long getTime() {

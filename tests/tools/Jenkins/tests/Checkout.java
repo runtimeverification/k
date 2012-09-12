@@ -27,7 +27,7 @@ public class Checkout {
 
 		// first, checkout K -> verify the existence of k-framework dir.
 		
-		System.out.print("\nRemoving old build artifacts K ...");
+		System.out.print("\nRemoving old K artifacts ...");
 		String[] removeCommands = new String[] { "rm", "-rf", StaticK.kbase };
 		Executor rmexecutor = new Executor(removeCommands, ".", null, StaticK.biggerlimit);
 		rmexecutor.start();
@@ -36,7 +36,7 @@ public class Checkout {
 		assertFalse(new File(StaticK.kbase).exists());
 		System.out.println("Removed.");
 		
-		System.out.println("\nCopying K from k-framework project ...");
+		System.out.print("\nCopying K from k-framework project ...");
 		String[] copyCommands = new String[] { "cp", "-r", "/var/lib/jenkins/workspace/k-framework" , StaticK.kbase };
 		Executor cpexecutor = new Executor(copyCommands, ".", null, StaticK.biggerlimit);
 		cpexecutor.start();
@@ -47,7 +47,7 @@ public class Checkout {
 		System.out.println("Copied.");
 		
 		// delete maude binaries
-		System.out.println("\nRemoving maude binaries ...");
+		System.out.print("\nRemoving maude binaries ...");
 		deleteFolder(new File(StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin" + StaticK.fileSep + "maude" + StaticK.fileSep + "binaries"));
 		assertFalse(new File(StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin" + StaticK.fileSep + "maude" + StaticK.fileSep + "binaries").exists());
 		System.out.println("Removed.");
