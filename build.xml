@@ -2,6 +2,7 @@
 <project basedir="." default="build" name="K3 Build file">
 
 	<property location="javasources" name="javasources" />
+	<property name="version" value="latest" />
 
 	<target name="java">
 		<ant antfile="${javasources}/K3Java/buildjava.xml" dir="${javasources}/K3Java" />
@@ -14,6 +15,7 @@
 
 	<target name="build">
 		<ant antfile="${javasources}/K3Java/build.xml" dir="${javasources}/K3Java" />
+		<antcall target="makeversion" />
 	</target>
 
 	<target name="clean">
@@ -51,7 +53,6 @@
 		<delete dir="${javasources}/LatexComments/trans/K3Str" />
 		<delete dir="${javasources}/LatexComments/include" />
 
-
 		<delete dir="${javasources}/K3Java/bin" />
 		<delete dir="${javasources}/KUtils/bin" />
 		<delete dir="${javasources}/KPreprocessor/bin" />
@@ -62,13 +63,8 @@
 		<delete dir="./k/" />
 	</target>
 
-	<target name="release">
-		<antcall target="build" />
-		<delete dir="./k/" />
-		<exec command="svn export dist k" failonerror="true" />
-		<copy file="./dist/bin/java/k3.jar" todir="./k/bin/java/" />
-
-		<property name="version.file" value="./k/bin/version.txt" />
+	<target name="makeversion">
+		<property name="version.file" value="./dist/bin/version.txt" />
 
 		<exec executable="svn" output="${version.file}">
 			<arg value="info" />
@@ -81,7 +77,6 @@
 			<format property="date" pattern="EEE MMM d HH:mm:ss z yyyy" />
 		</tstamp>
 
-		<property name="version" value="latest" />
 		<condition property="k-version" value="nigthly build">
 			<equals arg1="${version}" arg2="latest" />
 		</condition>
@@ -93,18 +88,20 @@
 		<echo message="K-framework ${k-version}.${line.separator}" file="${version.file}" />
 		<echo message="SVN Revision: ${info.entry(revision)}${line.separator}" file="${version.file}" append="true" />
 		<echo message="Build date: ${date}${line.separator}" file="${version.file}" append="true" />
+	</target>
+
+	<target name="release">
+		<antcall target="build" />
+		<delete dir="./k/" />
+
+		<exec command="svn export dist k" failonerror="true" />
+		<copy file="./dist/bin/java/k3.jar" todir="./k/bin/java/" />
 
 		<delete file="k-${version}.zip" />
 		<delete file="k-${version}.tgz" />
 		<zip destfile="k-${version}.zip" basedir="k" />
 		<tar destfile="k-${version}.tgz" basedir="k" compression="gzip" />
 	</target>
-
-	<target name="options">
-		<property name="version" value="latest" />
-		<echo message="${version}" />
-	</target>
-
 
 	<target name="test">
 		<javac srcdir="./tests/tools/Jenkins/src" includeantruntime="false" />
@@ -113,6 +110,5 @@
 			<arg value="LocalTests" />
 		</java>
 	</target>
-
 
 </project>
