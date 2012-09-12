@@ -96,6 +96,7 @@
 
 		<exec command="svn export dist k" failonerror="true" />
 		<copy file="./dist/bin/java/k3.jar" todir="./k/bin/java/" />
+		<copy file="./dist/bin/version.txt" todir="./k/bin/" />
 
 		<delete file="k-${version}.zip" />
 		<delete file="k-${version}.tgz" />
