@@ -35,7 +35,9 @@ public class Program extends Thread {
 		long millis = System.currentTimeMillis();
 		
 		/* Compute the krun arguments */
-		String[] basic = new String[] { "java", "-jar", krun, filename,
+		String[] basic = new String[] { 
+				// "java", "-jar", 
+				krun, filename,
 				"--k-definition", kdefinition };
 		int length = basic.length + krunOptions.size();
 		String[] run = new String[length];
