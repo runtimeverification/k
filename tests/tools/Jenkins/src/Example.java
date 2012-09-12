@@ -66,8 +66,8 @@ public class Example extends Thread {
 			System.out.println(this);
 		} else {
 
-			String krun = new File(k3jar).getParent() + StaticK.fileSep
-					+ "JKrun.jar";
+			String krun = new File(k3jar).getAbsolutePath();// .getParent() + StaticK.fileSep
+					// + "JKrun.jar";
 			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 					.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
 			for (Program program : programs) {
