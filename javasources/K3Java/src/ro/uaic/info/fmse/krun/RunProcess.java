@@ -1,11 +1,11 @@
-package ro.uaic.info.fmse.jkrun;
+package ro.uaic.info.fmse.krun;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import ro.uaic.info.fmse.tasks.MaudeTask;
+import ro.uaic.info.fmse.krun.tasks.MaudeTask;
 
 // instantiate processes
 public class RunProcess {

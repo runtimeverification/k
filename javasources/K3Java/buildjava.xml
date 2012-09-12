@@ -7,12 +7,10 @@
 <project basedir="." default="build" name="K3Java">
     <property environment="env"/>
     <property name="ECLIPSE_HOME" value="../../../eclisespoofax"/>
-    <property name="workspace_loc:K3Syntax/test" value="../K3Syntax/test"/>
     <property name="IOServer.location" value="../IOServer"/>
     <property name="KUtils.location" value="../KUtils"/>
     <property name="KPreprocessor.location" value="../KPreprocessor"/>
     <property name="JavaClasses.location" value="../JavaClasses"/>
-    <property name="JKRun.location" value="../JKRun"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
@@ -35,28 +33,22 @@
     <path id="IOServer.classpath">
         <pathelement location="${IOServer.location}/bin"/>
     </path>
-    <path id="JKRun.classpath">
-        <pathelement location="${JKRun.location}/bin"/>
-        <pathelement location="${JKRun.location}/../../dist/bin/java/commons-cli-1.2.jar"/>
-        <path refid="IOServer.classpath"/>
-        <pathelement location="${JKRun.location}/../../dist/bin/java/commons-io-2.1.jar"/>
-        <pathelement location="${JKRun.location}/../../dist/bin/java/jopt-simple-3.3.jar"/>
-        <pathelement location="${JKRun.location}/../../dist/bin/java/jansi-1.8.jar"/>
-        <pathelement location="${JKRun.location}/../../dist/bin/java/jline-1.0.jar"/>
-        <path refid="KUtils.classpath"/>
-    </path>
     <path id="K3Java.classpath">
         <pathelement location="bin"/>
         <pathelement location="../../dist/bin/java/strategoxt.jar"/>
         <pathelement location="../../dist/bin/java/commons-cli-1.2-javadoc.jar"/>
         <pathelement location="../../dist/bin/java/commons-cli-1.2-sources.jar"/>
         <pathelement location="../../dist/bin/java/commons-cli-1.2.jar"/>
+        <pathelement location="../../dist/bin/java/commons-io-2.1.jar"/>
+        <pathelement location="../../dist/bin/java/jopt-simple-3.3.jar"/>
+        <pathelement location="../../dist/bin/java/jansi-1.8.jar"/>
+        <pathelement location="../../dist/bin/java/jline-1.0.jar"/>
         <path refid="KPreprocessor.classpath"/>
         <path refid="JavaClasses.classpath"/>
         <path refid="KUtils.classpath"/>
+        <path refid="IOServer.classpath"/>
         <pathelement location="../../dist/bin/java/xstream.jar"/>
         <pathelement location="../../dist/bin/java/kxml2-min.jar"/>
-        <path refid="JKRun.classpath"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -81,7 +73,6 @@
         <ant antfile="build.xml" dir="${KUtils.location}" inheritAll="false" target="clean"/>
         <ant antfile="build.xml" dir="${KPreprocessor.location}" inheritAll="false" target="clean"/>
         <ant antfile="build.xml" dir="${JavaClasses.location}" inheritAll="false" target="clean"/>
-        <ant antfile="build.xml" dir="${JKRun.location}" inheritAll="false" target="clean"/>
     </target>
     <target depends="build-subprojects,build-project" name="build"/>
     <target name="build-subprojects">
@@ -101,11 +92,6 @@
             </propertyset>
         </ant>
         <ant antfile="build.xml" dir="${JavaClasses.location}" inheritAll="false" target="build-project">
-            <propertyset>
-                <propertyref name="build.compiler"/>
-            </propertyset>
-        </ant>
-        <ant antfile="build.xml" dir="${JKRun.location}" inheritAll="false" target="build-project">
             <propertyset>
                 <propertyref name="build.compiler"/>
             </propertyset>
@@ -132,5 +118,8 @@
             <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
         </unzip>
     </target>
-
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
 </project>

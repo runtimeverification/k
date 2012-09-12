@@ -6,7 +6,7 @@
               as the first entry and export the buildfile again. -->
 <project basedir="." default="build" name="IOServer">
     <property environment="env"/>
-    <property name="JKRun.location" value="../JKRun"/>
+    <property name="K3Java.location" value="../K3Java"/>
     <property name="ECLIPSE_HOME" value="../../../eclisespoofax"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.5"/>
@@ -37,8 +37,8 @@
         </javac>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
-        <ant antfile="build.xml" dir="${JKRun.location}" inheritAll="false" target="clean"/>
-        <ant antfile="build.xml" dir="${JKRun.location}" inheritAll="false" target="build">
+        <ant antfile="build.xml" dir="${K3Java.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${K3Java.location}" inheritAll="false" target="build">
             <propertyset>
                 <propertyref name="build.compiler"/>
             </propertyset>

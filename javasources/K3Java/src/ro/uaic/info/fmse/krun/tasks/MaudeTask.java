@@ -1,4 +1,4 @@
-package ro.uaic.info.fmse.tasks;
+package ro.uaic.info.fmse.krun.tasks;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import ro.uaic.info.fmse.jkrun.K;
+import ro.uaic.info.fmse.krun.K;
 import ro.uaic.info.fmse.maude.MaudeRun;
 
 public class MaudeTask extends Thread {

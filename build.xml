@@ -53,7 +53,6 @@
 
 
 		<delete dir="${javasources}/K3Java/bin" />
-		<delete dir="${javasources}/JKRun/bin" />
 		<delete dir="${javasources}/KUtils/bin" />
 		<delete dir="${javasources}/KPreprocessor/bin" />
 		<delete dir="${javasources}/IOServer/bin" />

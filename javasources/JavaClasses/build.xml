@@ -8,6 +8,7 @@
     <property environment="env"/>
     <property name="ECLIPSE_HOME" value="../../../eclisespoofax"/>
     <property name="K3Java.location" value="../K3Java"/>
+    <property name="Maude2JavaClasses.location" value="../Maude2JavaClasses"/>
     <property name="KUtils.location" value="../KUtils"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
@@ -57,6 +58,12 @@
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
         <ant antfile="build.xml" dir="${K3Java.location}" inheritAll="false" target="clean"/>
         <ant antfile="build.xml" dir="${K3Java.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${Maude2JavaClasses.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${Maude2JavaClasses.location}" inheritAll="false" target="build">
             <propertyset>
                 <propertyref name="build.compiler"/>
             </propertyset>

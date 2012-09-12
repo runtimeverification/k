@@ -1,4 +1,4 @@
-package ro.uaic.info.fmse.jkrun;
+package ro.uaic.info.fmse.krun;
 
 import java.io.BufferedReader;
 import java.io.Console;
@@ -20,7 +20,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 
-import ro.uaic.info.fmse.runner.KRunner;
+import ro.uaic.info.fmse.krun.runner.KRunner;
 
 public class Main {
 	

@@ -11,7 +11,6 @@
 			<fileset dir="../JavaClasses/bin"/>
 			<fileset dir="../KUtils/bin"/>
 			<fileset dir="../KPreprocessor/bin"/>
-			<fileset dir="../JKRun/bin"/>
 			<fileset dir="../IOServer/bin"/>
 		</jar>
 	</target>

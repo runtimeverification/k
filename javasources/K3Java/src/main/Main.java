@@ -20,7 +20,7 @@ public class Main {
 		} else if (args[0].equals("-hkcd")) {
 			HKCDFrontEnd.hkcd(args2);
 		} else if (args[0].equals("-krun")) {
-			ro.uaic.info.fmse.jkrun.Main.execute_Krun(args2);
+			ro.uaic.info.fmse.krun.Main.execute_Krun(args2);
 		} else
 			Error.report("The first arguemnt of K3 must be one of the following: -kompile|-kast|-krun");
 	}

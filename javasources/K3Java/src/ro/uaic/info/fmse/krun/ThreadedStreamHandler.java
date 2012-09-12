@@ -1,4 +1,4 @@
-package ro.uaic.info.fmse.jkrun;
+package ro.uaic.info.fmse.krun;
 
 import java.io.BufferedReader;
 import java.io.IOException;
