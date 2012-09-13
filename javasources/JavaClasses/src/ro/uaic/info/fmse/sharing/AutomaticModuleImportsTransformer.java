@@ -18,6 +18,10 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class AutomaticModuleImportsTransformer extends BasicTransformer {
 
+	public AutomaticModuleImportsTransformer() {
+		super("Automatic module importation");
+	}
+
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
 		if (!node.getName().equals("SHARED"))

@@ -12,6 +12,11 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class CorrectKSeqFilter extends BasicTransformer {
 
+	public CorrectKSeqFilter() {
+		super("Correct K sequences");
+		// TODO Auto-generated constructor stub
+	}
+
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
 		List<Term> children = new ArrayList<Term>();
 		for (Term t : amb.getContents()) {

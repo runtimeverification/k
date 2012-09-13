@@ -109,6 +109,11 @@ public class AddEval implements CompilerStep {
 	
 	class ConfigurationCleaner extends CopyOnWriteTransformer {
 		
+		public ConfigurationCleaner() {
+			super("Configuration Cleaner");
+			// TODO Auto-generated constructor stub
+		}
+
 		@Override
 		public ASTNode transform(Cell node) throws TransformerException {
 			if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {

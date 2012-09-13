@@ -10,6 +10,10 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class FlattenListsFilter extends BasicTransformer {
 
+	public FlattenListsFilter() {
+		super("Flatten lists");
+	}
+
 	public ASTNode transform(Collection c) throws TransformerException {
 		boolean found;
 		do {

@@ -49,6 +49,10 @@ import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.k.Variable;
 
 public class BasicTransformer implements Transformer {
+	
+	private String name;
+
+	public BasicTransformer(String name) {this.name = name;}
 
 	@Override
 	public ASTNode transform(ASTNode node) throws TransformerException {
@@ -360,5 +364,10 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(Attribute node) throws TransformerException {
 		return transform((Attribute) node);
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 }

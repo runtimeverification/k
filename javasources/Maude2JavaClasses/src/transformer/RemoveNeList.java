@@ -1,7 +1,5 @@
 package transformer;
 
-import basic.Term;
-
 public class RemoveNeList {
  
 	/*public Term remove(Term t) {

@@ -20,9 +20,8 @@ import klint.UnusedSyntax;
 import org.apache.commons.cli.CommandLine;
 
 import ro.uaic.info.fmse.compile.AddEval;
-import ro.uaic.info.fmse.compile.AddKCell;
-import ro.uaic.info.fmse.compile.AddTopCell;
-import ro.uaic.info.fmse.compile.DesugarStreams;
+import ro.uaic.info.fmse.compile.transformers.*;
+import ro.uaic.info.fmse.compile.CompilerTransformerStep;
 import ro.uaic.info.fmse.compile.FlattenModules;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
@@ -637,15 +636,19 @@ public class KompileFrontEnd {
 			javaDef = new FlattenModules().compile(javaDef);
 			
 			
-			javaDef = new DesugarStreams().compile(javaDef);
+			javaDef = new CompilerTransformerStep(new DesugarStreams()).compile(javaDef);
 			
-			javaDef = new AddKCell().compile(javaDef);
+			javaDef = new CompilerTransformerStep(new AddKCell()).compile(javaDef);
 			
 			if (GlobalSettings.addTopCell) {
-				javaDef = new AddTopCell().compile(javaDef);
+				javaDef = new CompilerTransformerStep(new AddTopCell()).compile(javaDef);
 			}
 			
 			javaDef = new AddEval().compile(javaDef);
+			
+			javaDef = new CompilerTransformerStep(new ResolveBinder()).compile(javaDef);
+			
+			javaDef = new CompilerTransformerStep(new ResolveAnonymousVariables()).compile(javaDef);
 			
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 

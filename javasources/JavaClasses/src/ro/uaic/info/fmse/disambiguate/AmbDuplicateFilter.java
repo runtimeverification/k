@@ -9,6 +9,11 @@ import ro.uaic.info.fmse.k.Term;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class AmbDuplicateFilter extends BasicTransformer {
+	public AmbDuplicateFilter() {
+		super("Remove ambiguity duplicates");
+		// TODO Auto-generated constructor stub
+	}
+
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
 
 		// remove duplicate ambiguities

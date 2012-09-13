@@ -24,8 +24,12 @@ import ro.uaic.info.fmse.k.ListItem;
 import ro.uaic.info.fmse.k.ListOfK;
 import ro.uaic.info.fmse.k.Map;
 import ro.uaic.info.fmse.k.MapItem;
+import ro.uaic.info.fmse.k.Production;
+import ro.uaic.info.fmse.k.ProductionItem;
+import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
 import ro.uaic.info.fmse.k.Rule;
 import ro.uaic.info.fmse.k.SetItem;
+import ro.uaic.info.fmse.k.Sort;
 import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.k.Term;
 import ro.uaic.info.fmse.k.TermCons;
@@ -37,6 +41,9 @@ import ro.uaic.info.fmse.visitors.Visitable;
 import ro.uaic.info.fmse.visitors.Visitor;
 
 public class MetaK {
+	static int nextVarId = 0;
+
+	static String anyVarSymbol = "_";
 
 	public static String nextIdModules[] = {
 		"SUBSTITUTION",
@@ -298,4 +305,25 @@ public class MetaK {
 	public static String getMaudeConstructor(String sort) {
 		return maudeCollectionConstructors.get(sort);
 	}
+	
+	public static Variable getFreshVar(String sort) {
+		return new Variable("GeneratedFreshVar" + nextVarId++, sort);
+	}
+
+	public static Term getTerm(Production prod) {
+		TermCons t = new TermCons(prod.getSort(), prod.getCons());
+		for (ProductionItem item : prod.getItems()) {
+			if (item.getType() == ProductionType.SORT) {
+				t.getContents().add(getFreshVar(((Sort)item).getName()));
+			}
+		}
+		return t;
+	}
+
+	public static boolean isAnonVar(Variable node) {
+		return node.getName().startsWith(anyVarSymbol);
+	}
+	
+	
+	
 }

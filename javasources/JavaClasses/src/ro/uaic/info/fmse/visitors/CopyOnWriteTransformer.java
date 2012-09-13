@@ -11,6 +11,9 @@ import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.*;
 
 public class CopyOnWriteTransformer implements Transformer {
+	String name;
+	
+	public CopyOnWriteTransformer(String name) { this.name = name;}
 
 	@Override
 	public ASTNode transform(ASTNode node) throws TransformerException {
@@ -530,5 +533,10 @@ public class CopyOnWriteTransformer implements Transformer {
 	@Override
 	public ASTNode transform(Attribute node) throws TransformerException {
 		return transform((ASTNode) node);
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 }

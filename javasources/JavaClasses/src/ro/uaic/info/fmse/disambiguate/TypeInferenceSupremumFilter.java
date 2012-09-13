@@ -11,6 +11,11 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class TypeInferenceSupremumFilter extends BasicTransformer {
 
+	public TypeInferenceSupremumFilter() {
+		super("Type inference supremum");
+		// TODO Auto-generated constructor stub
+	}
+
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
 
 		// choose the maximum from the list of ambiguities

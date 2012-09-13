@@ -23,6 +23,10 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class EmptyListsVisitor extends BasicTransformer {
 
+	public EmptyListsVisitor() {
+		super("Add empty lists");
+	}
+
 	@Override
 	public ASTNode transform(TermCons node) throws TransformerException {
 

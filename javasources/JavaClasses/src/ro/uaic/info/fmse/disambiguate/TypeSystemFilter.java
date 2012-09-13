@@ -17,6 +17,11 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class TypeSystemFilter extends BasicTransformer {
 
+	public TypeSystemFilter() {
+		super("Type system");
+		// TODO Auto-generated constructor stub
+	}
+
 	public ASTNode transform(TermCons tc) throws TransformerException {
 
 		// choose only the allowed subsorts for a TermCons

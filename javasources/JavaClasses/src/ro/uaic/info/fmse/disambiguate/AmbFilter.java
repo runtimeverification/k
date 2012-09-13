@@ -14,6 +14,10 @@ import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class AmbFilter extends BasicTransformer {
+	public AmbFilter() {
+		super("Ambiguity filter");
+	}
+
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
 		String msg = "";
 

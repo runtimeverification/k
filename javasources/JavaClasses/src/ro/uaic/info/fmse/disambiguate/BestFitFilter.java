@@ -11,6 +11,7 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 public class BestFitFilter extends BasicTransformer {
 
 	public BestFitFilter(GetFitnessUnitBasicVisitor gfubv) {
+		super("Best fit filter");
 		getFitnessUnit = gfubv;
 	}
 

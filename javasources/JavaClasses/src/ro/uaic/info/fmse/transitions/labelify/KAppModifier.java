@@ -14,6 +14,10 @@ import ro.uaic.info.fmse.transitions.maude.MaudeHelper;
 import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class KAppModifier extends BasicTransformer {
+	public KAppModifier() {
+		super("Syntax K to Abstract K");
+	}
+
 	public ASTNode transform(TermCons tc) throws TransformerException {
 		String l = tc.getLocation();
 		String f = tc.getFilename();

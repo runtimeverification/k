@@ -1,4 +1,4 @@
-package ro.uaic.info.fmse.compile;
+package ro.uaic.info.fmse.compile.transformers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,6 @@ import ro.uaic.info.fmse.general.GlobalSettings;
 import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Configuration;
 import ro.uaic.info.fmse.k.Context;
-import ro.uaic.info.fmse.k.Definition;
 import ro.uaic.info.fmse.k.Module;
 import ro.uaic.info.fmse.k.PriorityBlock;
 import ro.uaic.info.fmse.k.Production;
@@ -23,38 +22,12 @@ import ro.uaic.info.fmse.k.Syntax;
 import ro.uaic.info.fmse.k.Terminal;
 import ro.uaic.info.fmse.visitors.CopyOnWriteTransformer;
 
-public class AddTopCell extends CopyOnWriteTransformer implements CompilerStep {
+public class AddTopCell extends CopyOnWriteTransformer {
 
-	@Override
-	public Definition compile(Definition def) {
-		ASTNode result = null;
-		try {
-			result = def.accept(this);
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (result == null) { 
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-					KExceptionGroup.COMPILER, 
-					"Expecting definition, but got null while transforming. Returning the untransformed ", 
-					def.getFilename(), def.getLocation(), 0));					
-			return def;
-		}
-		if (!(result instanceof Definition)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-					KExceptionGroup.INTERNAL, 
-					"Expecting Term, but got " + result.getClass() + " while transforming.", 
-					def.getFilename(), def.getLocation(), 0));					
-		}
-		return (Definition) result;
+	public AddTopCell() {
+		super("Add top cell");
+		// TODO Auto-generated constructor stub
 	}
-
-	@Override
-	public String getName() {
-		return "Add Top cell";
-	}
-	
 	
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {

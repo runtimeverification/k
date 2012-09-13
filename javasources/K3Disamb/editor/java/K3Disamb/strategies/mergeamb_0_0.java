@@ -1,7 +1,5 @@
 package K3Disamb.strategies;
 
-import static org.strategoxt.lang.Term.NO_STRATEGIES;
-
 import java.util.ArrayList;
 
 import org.spoofax.interpreter.terms.IStrategoAppl;

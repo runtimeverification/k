@@ -12,6 +12,10 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class CorrectRewritePriorityFilter extends BasicTransformer {
 
+	public CorrectRewritePriorityFilter() {
+		super("Correct Rewrite priority");
+	}
+
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
 		List<Term> children = new ArrayList<Term>();
 		for (Term t : amb.getContents()) {

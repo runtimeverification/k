@@ -47,7 +47,6 @@ import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.k.Variable;
 
 public interface Transformer {
-
 	public ASTNode transform(ASTNode node) throws TransformerException;
 	public ASTNode transform(Definition node) throws TransformerException;
 	public ASTNode transform(DefinitionItem node) throws TransformerException;
@@ -106,4 +105,5 @@ public interface Transformer {
 	public ASTNode transform(TermCons node) throws TransformerException;
 	public ASTNode transform(Variable node) throws TransformerException;
 	//</Terms>
+	public String getName();
 }

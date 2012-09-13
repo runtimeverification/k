@@ -7,6 +7,10 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class CorrectRewriteSortFilter extends BasicTransformer {
 
+	public CorrectRewriteSortFilter() {
+		super("Correct rewrite sort");
+	}
+
 	public ASTNode transform(Rewrite rw) throws TransformerException {
 
 		if (rw.getSort().equals("List{K}")) {

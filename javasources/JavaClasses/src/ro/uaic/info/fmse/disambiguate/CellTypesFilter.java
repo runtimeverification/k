@@ -19,6 +19,11 @@ import ro.uaic.info.fmse.visitors.BasicTransformer;
 
 public class CellTypesFilter extends BasicTransformer {
 
+	public CellTypesFilter() {
+		super("Cell types");
+		// TODO Auto-generated constructor stub
+	}
+
 	// don't do anything for configuration and syntax
 	public ASTNode transform(Configuration cell) {
 		return cell;

@@ -17,6 +17,7 @@ public class VariableTypeFilter extends BasicTransformer {
 	private Map<String, String> variableTypes = null;
 
 	public VariableTypeFilter(Map<String, String> types) {
+		super("Variable type filter");
 		this.variableTypes = types;
 	}
 

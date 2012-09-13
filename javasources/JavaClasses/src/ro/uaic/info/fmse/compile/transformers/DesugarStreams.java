@@ -1,4 +1,4 @@
-package ro.uaic.info.fmse.compile;
+package ro.uaic.info.fmse.compile.transformers;
 
 import java.util.ArrayList;
 
@@ -11,7 +11,6 @@ import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Cell;
 import ro.uaic.info.fmse.k.Constant;
 import ro.uaic.info.fmse.k.Context;
-import ro.uaic.info.fmse.k.Definition;
 import ro.uaic.info.fmse.k.Empty;
 import ro.uaic.info.fmse.k.List;
 import ro.uaic.info.fmse.k.Rule;
@@ -21,29 +20,10 @@ import ro.uaic.info.fmse.k.TermCons;
 import ro.uaic.info.fmse.k.Variable;
 import ro.uaic.info.fmse.visitors.CopyOnWriteTransformer;
 
-public class DesugarStreams extends CopyOnWriteTransformer implements CompilerStep {
+public class DesugarStreams extends CopyOnWriteTransformer {
 
-	@Override
-	public Definition compile(Definition def) {
-		ASTNode result = null;
-		try {
-			result = def.accept(this);
-		} catch (TransformerException e) {
-			e.printStackTrace();
-		}
-		if (result == def) return def;
-		if (!(result instanceof Definition)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-					KExceptionGroup.INTERNAL, 
-					"Configuration Cleaner failed.", 
-					def.getFilename(), def.getLocation(), 0));
-		}
-		return (Definition) result;
-	}
-
-	@Override
-	public String getName() {
-		return "Streams Desugarer";
+	public DesugarStreams() {
+		super("Desugar streams");
 	}
 	
 	@Override
