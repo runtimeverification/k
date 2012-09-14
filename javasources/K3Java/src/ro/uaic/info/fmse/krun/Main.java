@@ -126,7 +126,7 @@ public class Main {
 						try {
 							buffer = br.readLine();
 						} catch (IOException ioe) {
-							ioe.getMessage();
+							ioe.printStackTrace();
 						} finally {
 							if (br != null) {
 								try {
@@ -255,7 +255,7 @@ public class Main {
 			bean.setExitCode(0);
 			System.exit(bean.getExitCode());
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 			ProcessBean bean = new ProcessBean();
 			bean.setExitCode(1);
 			System.exit(bean.getExitCode());
@@ -429,7 +429,7 @@ public class Main {
 				}
 			}
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 			ProcessBean bean = new ProcessBean();
 			bean.setExitCode(1);
 			System.exit(bean.getExitCode());
@@ -641,7 +641,7 @@ public class Main {
 				debugExecution(KAST, lang);
 			}
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 			ProcessBean bean = new ProcessBean();
 			bean.setExitCode(1);
 			System.exit(bean.getExitCode());
