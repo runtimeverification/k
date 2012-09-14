@@ -114,8 +114,8 @@ public class Program extends Thread {
 					+ "... failed:\n\n------------ STATS ------------\nRun:\n"
 					+ compile + "\nKrun exit code: " + exit + "\nError: "
 					+ error + "\nOutput: |" + output
-					+ "\nExpecting: |" + expected + "|"
-					+ "\nInput: |" + input + "|"
+					+ "|\nExpecting: |" + expected
+					+ "|\nInput: |" + input
 					+ "|\n-------------------------------\n";
 	}
 
