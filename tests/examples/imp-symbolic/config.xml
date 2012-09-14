@@ -8,17 +8,5 @@
 	  <program name="whiles.imps" input="" output="whiles.imps.out">
 	    <option name="--no-color"/>
 	  </program>
-<!--	  <program name="ifs" input="" output="ifs.imps.out">
-	    <option name="--no-color"/>
-		<option nam="--search"/>
-	  </program>
-	  <program name="sum.imps" input="" output="sum.imps.out">
-	    <option name="--no-color"/>
-		<option name="--search"/>
-	  </program>
-	  <program name="min.imps" input="" output="min.imps.out">
-	    <option name="--no-color"/>
-		<option name="--search"/>
-	  </program>  -->
 	</krun-options>
 </config>
