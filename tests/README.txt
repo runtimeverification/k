@@ -62,8 +62,8 @@ For instance, a "config.xml" for simple-unyped may contain:
 
 	<krun-options>
 		<program name="collatz.simple" input="collatz.simple.in" 
-					       output="collatz.simple.out"/>
-			<option name="output-mode" value="none"/>
+					       output="collatz.simple.out">
+			<option name="--output-mode" value="none"/>
 			<option name="--no-color"/>
 		</program>
 		<program name="dekker.simple" ignore="yes"/>
