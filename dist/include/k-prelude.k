@@ -26,7 +26,7 @@ module K-MAP-EXTRAS
   syntax Map ::= Map "[" "undef" "/" List{K} "]"  [function]
 
   syntax Map ::= "Map" "(" List{K} "|->" List{K} ")"   [function]
-  rule Map((K1:K => .List{K}),,_ |-> (K2:K => .List{K}),,_) (. => K1 |-> K2)
+  rule Map((K1:K => .List{K}),,_ |-> (K2:K => .List{K}),,_:K,,_) (. => K1 |-> K2)
   rule Map((K1:K => .List{K}),,_ |-> K2:K) (. => K1 |-> K2)
   rule Map(.List{K} |-> _) => .
 
