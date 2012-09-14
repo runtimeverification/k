@@ -116,6 +116,8 @@ public class Program extends Thread {
 					+ error + "\nOutput: |" + output
 					+ "|\nExpecting: |" + expected
 					+ "|\nInput: |" + input
+					+ "\nInput file: " + inputFile 
+					+ "\nOutput file: " + outputFile
 					+ "|\n-------------------------------\n";
 	}
 
