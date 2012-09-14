@@ -116,7 +116,7 @@ public class Executor extends Thread {
 	}
 	
 	private static final ExecutorService THREAD_POOL 
-    = Executors.newCachedThreadPool();
+    = Executors.newSingleThreadExecutor();
 
 	private static <T> T timedCall(Callable<T> c, long timeout, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException
 	    {
