@@ -44,7 +44,7 @@ public class Executor extends Thread {
 		    			stream.write(input.getBytes());
 		    			stream.flush();
 		    			stream.close();
-		    			sent = input.getBytes().length + "";
+		    			sent = input + "\nSize:" + input.getBytes().length + "";
 		    		}
 		    		
 		    		exitValue = p.waitFor();
