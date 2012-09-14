@@ -36,7 +36,7 @@ public class Program extends Thread {
 		
 		/* Compute the krun arguments */
 		String[] basic = new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", krun, "-krun", filename,
-				"--k-definition", kdefinition };
+				"--k-definition", kdefinition, " --no-deleteTempDir" };
 		int length = basic.length + krunOptions.size();
 		String[] run = new String[length];
 		for (int i = 0; i < length; i++)

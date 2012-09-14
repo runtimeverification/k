@@ -71,16 +71,16 @@ public class Executor extends Thread {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 		    timedout = true;
-		    error = "IOException";
+		    error = e.getMessage();
 		} catch (InterruptedException e) {
 			timedout = true;
-			error = "InteruptedException";
+		    error = e.getMessage();
 		} catch (ExecutionException e) {
 			timedout = true;
-			error = "ExecutionException";
+		    error = e.getMessage();
 		} catch (TimeoutException e) {
 			timedout = true;
-			error = "TimeoutException";
+		    error = e.getMessage();
 		}
 	}
 
