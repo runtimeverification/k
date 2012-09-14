@@ -634,18 +634,19 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 
 %%% Mathematical notation.
 
-\newcommand{\mall}[3]{{\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\langle}{#3}{\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\rangle_{\sf #2}}}
-\newcommand{\mallLarge}[3]{{\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\left\langle{\color{black}\begin{array}{c}#3\end{array}}\right\rangle_{{\sf #2}}}}
+\newcommand{\mcell}[3]{{\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\left\langle{#3}\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\right\rangle_{\sf #2}}}
 \newcommand{\ellipses}{\mathrel{\cdot\!\!\cdot\!\!\cdot}}
-\newcommand{\mprefix}[3]{\mall{#1}{#2}{{#3}\ {\color{#1!50!black}\ellipses}}}
-\newcommand{\msuffix}[3]{\mall{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}}}
-\newcommand{\mmiddle}[3]{\mall{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}\ {\color{#1!50!black}\ellipses}}}
+\newcommand{\mallLarge}{\mall}
+\newcommand{\mall}[3]{\mcell{#1}{#2}{{\begin{array}{@{}c@{}}#3\end{array}}}}
+\newcommand{\mprefix}[3]{\mcell{#1}{#2}{{\begin{array}{@{}c@{}}#3\end{array}}\ {\color{#1!50!black}\ellipses}}}
+\newcommand{\msuffix}[3]{\mcell{#1}{#2}{{\color{#1!50!black}\ellipses}\ {\begin{array}{@{}c@{}}#3\end{array}}}}
+\newcommand{\mmiddle}[3]{\mcell{#1}{#2}{{\color{#1!50!black}\ellipses}\ {\begin{array}{@{}c@{}}#3\end{array}}\ {\color{#1!50!black}\ellipses}}}
 \newcommand{\mdot}{\cdot}
 \newcommand{\mAnyVar}[1]{\_}
 
 %%% Bubble notation.
 
-\newcommand{\ball}[3]{\kcell{#1}{#2}{$#3$}{convex}{convex}}
+\newcommand{\ball}[3]{\kcell{#1}{#2}{#3}{convex}{convex}}
 \newcommand{\ballLarge}[3]{%
   \kcell{#1}%
         {#2}%
@@ -655,9 +656,9 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
         {convex}%
         {convex}%
 }
-\newcommand{\bprefix}[3]{\kcell{#1}{#2}{$#3$}{convex}{none}}
-\newcommand{\bsuffix}[3]{\kcell{#1}{#2}{$#3$}{none}{convex}}
-\newcommand{\bmiddle}[3]{\kcell{#1}{#2}{$#3$}{none}{none}}
+\newcommand{\bprefix}[3]{\kcell{#1}{#2}{#3}{convex}{none}}
+\newcommand{\bsuffix}[3]{\kcell{#1}{#2}{#3}{none}{convex}}
+\newcommand{\bmiddle}[3]{\kcell{#1}{#2}{#3}{none}{none}}
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
 \newcommand{\bAnyVar}[1]{%
   \k@withTooltip{\mbox{---}}{Variable \_:#1}%
@@ -712,7 +713,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
   \begingroup
   \def\cellColor{#1}%
   \def\cellLabel{\textsf{\footnotesize\strut #2}}% The strut ensures even label height.
-  \def\cellContent{#3}%
+  \def\cellContent{$\begin{array}[t]{@{}c@{}}#3\end{array}$}%
   % Parameters #4 and #5 determine whether the west and east arc are curved
   % or straight ("whole" or "ruptured").
 
