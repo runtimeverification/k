@@ -15,7 +15,7 @@ public class Executor extends Thread {
 
 	private String[] commands;
 	private String dir;
-	private String output = "", error = "";
+	private String output = "", error = ""; public String sent = "";
 	private int exitValue;
 	private String input;
 	private boolean timedout = false;
@@ -44,6 +44,7 @@ public class Executor extends Thread {
 		    			stream.write(input.getBytes());
 		    			stream.flush();
 		    			stream.close();
+		    			sent = input.getBytes().length + "";
 		    		}
 		    		
 		    		exitValue = p.waitFor();
