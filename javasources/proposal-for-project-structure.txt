@@ -1,0 +1,105 @@
+------------------------------------------
+CURRENT ORGANISATION OF THE K SOURCE CODE.
+
+ConfigurationAbstraction
+  - old temporary project by Andrei to prototype configuration
+abstraction (to be removed soon)
+
+IOServer
+  - java process to interact with Maude (should be integrated in KRun)
+
+JavaClasses
+  - data structure to store K definitions
+  - visitors and transformers over K definitions for compiling to
+Maude, outputing LaTeX, etc
+
+K3Disamb
+  - Stratego project for parsing the concrete syntax within K rules, K
+contexts and programs. This parser is parameterized by the syntax of the
+language being defined.
+  - Stratego code gets compiled to the (human unreadable) Java code in 
+K3Java/k3parser.lib
+  - Should be renamed. We propose "ConcreteParser" or "CompleteParser".
+
+K3Java
+  - "Main" project. Contains the following packages:
+  1) k.utils - various utils (stopwatch, etc). Should be unified with
+the other "utils" packages.
+  2) k2parser - interface for calling the basic parser. Should be
+renamed to "basicparser" or "parser.basic".
+  3) k2parser.lib - implementation for basic parser; automatically
+generated from stratego code in project "K3Syntax".
+  4) k3.basic - old (duplicate of) JavaClasses; is currently used
+during parsing; Radu is working on removing it
+  5) k3.loader - integration of all parsing phases. Will include
+whatever "k3.basic" does now. Should be renamed to "loader"
+  6) k3latex - interface for calling the parser for latex comments.
+Should be renamed to "latexparser" or "parser.latex".
+  7) k3latex.lib - implementation for the parser for latex comments.
+Automatically generated from the Stratego project "LatexComments".
+Should be renamed to "parser.latex.lib" or similar.
+  8) k3parser - interface for parsing the concrete syntax in rules.
+Should be renamed to "completeparser" or "parser.complete" or similar.
+  9) k3parser.lib - implementation for the complete parser.
+Automatically generated from the Stratego project "K3Disamb"
+  10) klint - implementation of the lint-like tool for K
+  11) main - entry point of the jar file
+  12) ro.uaic.info.fmse.krun - implementation of KRun
+  13) ro.uaic.info.fmse.krun.runner - utility for running and
+interacting with Maude/IOServer.
+  14) ro.uaic.info.fmse.krun.tasks - starts Maude process
+  
+K3Syntax
+  - basic parser (written in SDF + Stratego)
+  - when compiled, generated Java code with the k3basic.lib package.
+
+KPreprocessor
+  - adds labels such as '_+_ to the productions
+  - will be removed and integrated in the compiler as a visitor for
+the JavaClasses
+
+KUtils
+  - various utilities for files, strings, etc. Should be integrated
+with the other utils.
+
+LatexComments
+  - Stratego project for parsing the LaTeX comments in a K definition.
+Compiled to Java code in the package k3latex.lib
+
+Maude2JavaClasses
+  - parser for Maude's XML output; generates instances of JavaClasses.
+
+
+------------------------------------------
+HOW WE PROPOSE TO ORGANIZE THE CODE
+
+1) kframework.org expires on the 24th of September. We propose to buy
+it and place all code under the org.kframework namespace.
+
+2) the following projects will get removed "soon":
+- ConfigurationAbstraction (was a prototype by Andrei; is not and
+cannot be used in the kompiler)
+
+3) we propose to have four top-level projects:
+- K - all java source code with the following packages
+    - main (entry point, doesn't change)
+    - parser.basic[.lib] (contains the old k2parser[.lib])
+    - parser.concrete[.lib] (contains the old k3parser[.lib])
+    - parser.latex[.lib] (contains the old k3latex[.lib])
+    - util (integrates KUtils and k.utils)
+    - kil (contains the current JavaClasses)
+    - kompile (visitors for JavaClasses for all steps in the compilation)
+    - kompile.lint
+    - backend.maude (toMaude() from the JavaClasses)
+    - backend.haskell (current HKCD)
+    - backend.html
+    - backend.latex
+    - krun (integrates the current krun + krun.runner + krun.tasks +
+Maude2JavaClasses)
+    - ioserver (old project IOServer)
+- BasicParser (SDF + stratego for basic parsing)
+- ConcreteParser (SDF + stratego for concrete parsing (programs,
+rules, etc))
+- LatexCommentsParser (SDF + stratego for parsing latex comments)
+
+ 
