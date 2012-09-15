@@ -35,8 +35,8 @@ public class StaticK {
 	public static int initPoolSize()
 	{
 		int poolSize = 1;
-		
-		int pS = Runtime.getRuntime().availableProcessors() / 2;
+		int cores = Runtime.getRuntime().availableProcessors();
+		int pS = cores - cores / 4;
 		if (pS > poolSize)
 			return pS;
 		
