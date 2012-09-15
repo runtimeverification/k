@@ -25,7 +25,7 @@ public class Checkout {
 	@Test
 	public void checkout() throws InterruptedException, URISyntaxException {
 
-		// first, checkout K -> verify the existence of k-framework dir.
+		// first, copy K -> verify the existence of k-framework dir.
 		
 		System.out.print("\nRemoving old K artifacts ...");
 		String[] removeCommands = new String[] { "rm", "-rf", StaticK.kbase };

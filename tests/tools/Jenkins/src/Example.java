@@ -66,22 +66,40 @@ public class Example extends Thread {
 			System.out.println(this);
 		} else {
 
-			String krun = new File(k3jar).getAbsolutePath();// .getParent() + StaticK.fileSep
-					// + "JKrun.jar";
-			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
-					.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
-			for (Program program : programs) {
+			String krun = new File(k3jar).getAbsolutePath();
+
+//			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
+//					.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
+//			for (Program program : programs) {
+//				program.krun = krun;
+//				tpe.execute(program);
+//			}
+//			// wait until examples are running
+//			while (tpe.getCompletedTaskCount() != programs.size()) {
+//				try {
+//					Thread.sleep(1);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+			
+			ThreadPoolExecutor tpe;
+			for (Program program: programs){
 				program.krun = krun;
+				tpe  = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 				tpe.execute(program);
-			}
-			// wait until examples are running
-			while (tpe.getCompletedTaskCount() != programs.size()) {
-				try {
-					Thread.sleep(1);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				
+				// wait until the program finishes execution
+				while (tpe.getCompletedTaskCount() != 1) {
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
+				tpe.shutdown();
 			}
 			
 			String programss = "Testing " + mainFile + " programs:\n";
