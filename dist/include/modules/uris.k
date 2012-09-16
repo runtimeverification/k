@@ -122,7 +122,7 @@ module URIS
  
   syntax List ::= "#removeCharUponAck"
   
-  syntax List ::= "#parse" "(" String "," K ")"
+  syntax List ::= "#parse" "(" String "," K ")"   [cons(List1ParseSyn)]
 
 /*
   // base values for each type

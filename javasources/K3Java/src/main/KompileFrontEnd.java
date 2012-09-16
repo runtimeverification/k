@@ -650,6 +650,8 @@ public class KompileFrontEnd {
 			
 			javaDef = new CompilerTransformerStep(new ResolveAnonymousVariables()).compile(javaDef);
 			
+			javaDef = new CompilerTransformerStep(new ResolveBlockingInput()).compile(javaDef);
+			
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");

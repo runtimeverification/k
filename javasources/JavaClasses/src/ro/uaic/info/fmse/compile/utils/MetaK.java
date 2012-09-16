@@ -90,6 +90,14 @@ public class MetaK {
 		"SetItem",
 	};
 	
+	public static String builtinSorts[] = {
+		"Bool",
+		"Float",
+		"Id",
+		"Int",
+		"String",
+	};
+	
 	public static java.util.Map<String,String> mainSort = new HashMap<String, String>();
 	static {
 		mainSort.put("Bag", "Bag");
@@ -322,6 +330,10 @@ public class MetaK {
 
 	public static boolean isAnonVar(Variable node) {
 		return node.getName().startsWith(anyVarSymbol);
+	}
+
+	public static boolean isBuiltinSort(String sort) {
+		return (Arrays.binarySearch(builtinSorts, sort) >= 0);		
 	}
 	
 	

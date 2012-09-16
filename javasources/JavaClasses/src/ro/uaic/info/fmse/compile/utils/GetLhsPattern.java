@@ -10,6 +10,10 @@ public class GetLhsPattern extends CopyOnWriteTransformer {
 		super("Get Left-hand-side pattern");
 	}
 	
+	public GetLhsPattern(String s) {
+		super(s);
+	}
+	
 	@Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		return node.getLeft();
