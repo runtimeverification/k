@@ -73,15 +73,19 @@ public class Executor extends Thread {
 			// TODO Auto-generated catch block
 		    timedout = true;
 		    error = e.getMessage();
+		    e.printStackTrace();
 		} catch (InterruptedException e) {
 			timedout = true;
 		    error = e.getMessage();
+		    e.printStackTrace();
 		} catch (ExecutionException e) {
 			timedout = true;
 		    error = e.getMessage();
+		    e.printStackTrace();
 		} catch (TimeoutException e) {
 			timedout = true;
 		    error = e.getMessage();
+		    e.printStackTrace();
 		}
 	}
 
