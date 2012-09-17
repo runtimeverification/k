@@ -14,7 +14,7 @@ function printAll(n) {
 }
 
 function main() {
-  var n=30;
+  var n=10;
   init(n);
   print("The original sequence is");
   printAll(n);
