@@ -151,7 +151,7 @@ public class CommandlineOptions {
 		//stepper options
 		Option step = OptionBuilder.hasArg(false).withLongOpt("step").withDescription("Execute one step or multiple steps at one time if you specify a positive integer argument").create();
 		Option stepAll = OptionBuilder.hasArg(false).withLongOpt("step-all").withDescription("Computes all successors in one or more transitions (if you specify a positive integer argument) of the current configuration").create();
-		Option showPathLabels = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("show path labels").withDescription("Displays the labels of applied rules to reach a given state, identified by the number given as argument. For this option you should have labeled rules in your definition").create();
+		Option showPathLabels = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("show path labels").withDescription("Displays the labels of applied rules to" + K.lineSeparator + "reach a given state, identified by the" + K.lineSeparator + "number given as argument. For this option" + K.lineSeparator + "you should have labeled rules in your" + K.lineSeparator + "definition").create();
 		Option resume = OptionBuilder.hasArg(false).withLongOpt("resume").withDescription("Resume the execution and exit from the debug mode").create();
 		Option abort = OptionBuilder.hasArg(false).withLongOpt("abort").withDescription("Abort the execution and exit from the debug mode").create();
 		Option help = OptionBuilder.hasArg(false).withLongOpt("help").withDescription("Display the available commands").create();

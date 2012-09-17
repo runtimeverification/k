@@ -25,7 +25,7 @@ import ro.uaic.info.fmse.krun.runner.KRunner;
 public class Main {
 
 	private static final String USAGE_KRUN = "krun [options] <file>" + K.lineSeparator;
-	private static final String USAGE_DEBUG = "Enter one of the following commands without \"--\" in front. " + "For autocompletion press TAB key and for accessing the command history use up and down arrows." + K.lineSeparator;
+	private static final String USAGE_DEBUG = "Enter one of the following commands without \"--\" in front. " + K.lineSeparator + "For autocompletion press TAB key and for accessing the command" + K.lineSeparator + "history use up and down arrows." + K.lineSeparator;
 	private static final String HEADER = "";
 	private static final String FOOTER = "";
 
@@ -40,7 +40,7 @@ public class Main {
 	public static void printDebugUsage(Options options) {
 		HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.setOptionComparator(new CommandlineOptions.OptionComparator());
-		helpFormatter.setWidth(100);
+		helpFormatter.setWidth(79);
 		helpFormatter.printHelp(USAGE_DEBUG, HEADER, options, FOOTER);
 		System.out.println();
 	}
