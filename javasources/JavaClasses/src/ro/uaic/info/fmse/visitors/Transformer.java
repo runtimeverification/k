@@ -65,7 +65,7 @@ public interface Transformer {
 	public ASTNode transform(Rule node) throws TransformerException;
 	//	</Sentences>
 	public ASTNode transform(Syntax node) throws TransformerException;
-	//<ModuleItems>	
+	//</ModuleItems>	
 	public ASTNode transform(PriorityBlock node) throws TransformerException;
 	public ASTNode transform(Production node) throws TransformerException;
 	public ASTNode transform(ProductionItem node) throws TransformerException;
