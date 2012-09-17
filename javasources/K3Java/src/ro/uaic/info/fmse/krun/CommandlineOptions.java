@@ -103,6 +103,7 @@ public class CommandlineOptions {
 		Option output_mode = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("output-mode").withDescription("How to display Maude results (none, raw," + K.lineSeparator + "pretty)").create();
 		Option log_io = OptionBuilder.hasArg(false).withLongOpt("log-io").withDescription("Tell the IO server to create logs").create();
 		Option no_log_io = OptionBuilder.hasArg(false).withLongOpt("no-log-io").create();
+		Option output = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("output").withDescription("Save the output of krun in the file given as argument").create();
 
 		options.addOption(compiled_def); getOptionList().add(compiled_def);
 		options.addOption(do_search); getOptionList().add(do_search);
@@ -115,6 +116,7 @@ public class CommandlineOptions {
 		options.addOption(output_mode); getOptionList().add(output_mode);
 		options.addOption(log_io); getOptionList().add(log_io);
 		options.addOption(no_log_io); getOptionList().add(no_log_io);
+		options.addOption(output); getOptionList().add(output);
 		
 		//for group options
 		Option search = OptionBuilder.hasArg(false).withLongOpt("search").withDescription("In conjunction with it you can specify 3" + K.lineSeparator + "options that are optional: pattern (the pattern" + K.lineSeparator + "used for search), bound (the number of desired" + K.lineSeparator + "solutions) and depth (the maximum depth of the" + K.lineSeparator + "search)").create();

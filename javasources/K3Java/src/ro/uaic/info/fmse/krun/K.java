@@ -43,6 +43,7 @@ public class K {
 	public static String depth;
 	public static String rule_labels = "";
 	public static String model_checking = "";
+	public static String output = "";
 
 	// variables to store if that specific option was set; also set default values for options
 	public static boolean help = false;

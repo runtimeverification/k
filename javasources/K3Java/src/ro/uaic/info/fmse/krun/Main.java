@@ -116,6 +116,9 @@ public class Main {
 	public static void normalExecution(String KAST, String lang, CommandLine cmd, RunProcess rp, String k3jar, CommandlineOptions cmd_options) {
 		try {
 			String s = new String();
+			List<String> red = new ArrayList<String>();
+			StringBuilder aux1 = new StringBuilder();
+			
 			if (K.do_search) {
 				if ("search".equals(K.maude_cmd)) {
 					BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -214,15 +217,18 @@ public class Main {
 			// check whether Maude produced errors
 			rp.checkMaudeForErrors(errFile, lang);
 
-			if ("search".equals(K.maude_cmd) && K.do_search) {
+			if ("search".equals(K.maude_cmd) && K.do_search && !cmd.hasOption("output")) {
 				System.out.println("Search results:");
 			}
 			if ("pretty".equals(K.output_mode)) {
 				PrettyPrintOutput p = new PrettyPrintOutput();
 				p.preprocessDoc(K.maude_output, K.processed_maude_output);
-				List<String> red = p.processDoc(K.processed_maude_output);
+				red = p.processDoc(K.processed_maude_output);
 				for (String result : red) {
-					AnsiConsole.out.println(result);
+					aux1.append(result);
+					if (!cmd.hasOption("output")) {
+						AnsiConsole.out.println(result);
+					}
 				}
 			} else if ("raw".equals(K.output_mode)) {
 				String output = new String();
@@ -240,7 +246,9 @@ public class Main {
 						output = FileUtil.parseResultOutputMaude(K.maude_out);
 					}
 				}
-				System.out.println(output);
+				if (!cmd.hasOption("output")) {
+					System.out.println(output);
+				}
 
 			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
@@ -249,7 +257,9 @@ public class Main {
 			}
 
 			// save the pretty-printed output of jkrun in a file
-			// FileUtil.createFile(K.krun_output, prettyOutput);
+			if (cmd.hasOption("output")) {
+				FileUtil.createFile(K.output, aux1.toString());
+			}
 
 			ProcessBean bean = new ProcessBean();
 			bean.setExitCode(0);
@@ -555,6 +565,9 @@ public class Main {
 			}
 			if (cmd.hasOption("no-deleteTempDir")) {
 				K.deleteTempDir = false;
+			}
+			if (cmd.hasOption("output")) {
+				K.output = new File(cmd.getOptionValue("output")).getCanonicalPath();
 			}
 
 			// printing the output according to the given options
