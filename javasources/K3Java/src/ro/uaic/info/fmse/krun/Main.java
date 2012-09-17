@@ -32,7 +32,7 @@ public class Main {
 	public static void printKRunUsage(Options options) {
 		HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.setOptionComparator(new CommandlineOptions.OptionComparator());
-		helpFormatter.setWidth(100);
+		helpFormatter.setWidth(79);
 		helpFormatter.printHelp(USAGE_KRUN, HEADER, options, FOOTER);
 		System.out.println();
 	}

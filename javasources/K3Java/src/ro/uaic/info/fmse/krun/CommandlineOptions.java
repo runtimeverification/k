@@ -64,7 +64,7 @@ public class CommandlineOptions {
 		Option k_definition = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("k-definition").withDescription("Path to the K definition").create();
 		Option main_module = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("main-module").withDescription("Module the program should execute in").create();
 		Option syntax_module = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("syntax-module").withDescription("Name of the syntax module").create();
-		Option parser = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("parser").withDescription("Command used to parse programs (default: kast). You need to specify the path where you parser is located on the disk").create();
+		Option parser = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("parser").withDescription("Command used to parse programs (default: kast)." + K.lineSeparator + "You need to specify the path where you parser" + K.lineSeparator + "is located on the disk").create();
 		Option io = OptionBuilder.hasArg(false).withLongOpt("io").withDescription("Use real IO when running the definition").create();
 		Option no_io = OptionBuilder.hasArg(false).withLongOpt("no-io").create();
 		Option statistics = OptionBuilder.hasArg(false).withLongOpt("statistics").withDescription("Print Maude's rewrite statistics").create();
@@ -96,11 +96,11 @@ public class CommandlineOptions {
 		/*Option xsearch_pattern = OptionBuilder.withLongOpt("xsearch-pattern")
 				.withDescription("Search pattern. In conjunction with it you can specify 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search)")
 				.hasArg().withArgName("STRING").create();*/   
-		Option pattern = OptionBuilder.withLongOpt("pattern").withDescription("The pattern used for search. In conjunction with it you can specify other 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search)")
+		Option pattern = OptionBuilder.withLongOpt("pattern").withDescription("The pattern used for search. In conjunction" + K.lineSeparator + "with it you can specify other 2 options that" + K.lineSeparator + "are optional: bound (the number of desired" + K.lineSeparator + "solutions) and depth (the maximum depth of the" + K.lineSeparator + "search)")
 				.hasArg().withArgName("STRING").create();
 		Option bound = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("bound").withDescription("The number of desired solutions for search").create();
 		Option depth = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("depth").withDescription("The maximum depth of the search").create();
-		Option output_mode = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("output-mode").withDescription("How to display Maude results (none, raw, pretty)").create();
+		Option output_mode = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("output-mode").withDescription("How to display Maude results (none, raw," + K.lineSeparator + "pretty)").create();
 		Option log_io = OptionBuilder.hasArg(false).withLongOpt("log-io").withDescription("Tell the IO server to create logs").create();
 		Option no_log_io = OptionBuilder.hasArg(false).withLongOpt("no-log-io").create();
 
@@ -117,7 +117,7 @@ public class CommandlineOptions {
 		options.addOption(no_log_io); getOptionList().add(no_log_io);
 		
 		//for group options
-		Option search = OptionBuilder.hasArg(false).withLongOpt("search").withDescription("In conjunction with it you can specify 3 options that are optional: pattern (the pattern used for search), bound (the number of desired solutions) and depth (the maximum depth of the search)").create();
+		Option search = OptionBuilder.hasArg(false).withLongOpt("search").withDescription("In conjunction with it you can specify 3" + K.lineSeparator + "options that are optional: pattern (the pattern" + K.lineSeparator + "used for search), bound (the number of desired" + K.lineSeparator + "solutions) and depth (the maximum depth of the" + K.lineSeparator + "search)").create();
 		Option config = OptionBuilder.hasArg(false).withLongOpt("config").create();
 		Option no_config = OptionBuilder.hasArg(false).withLongOpt("no-config").create();
 		
@@ -126,7 +126,7 @@ public class CommandlineOptions {
 		options.addOption(no_config); getOptionList().add(no_config);
 		
 		//for deleting temporary folders created by krun at previous executions that couldn't be renamed into "krun" because some errors occurred
-		Option deleteTempDir = OptionBuilder.hasArg(false).withLongOpt("deleteTempDir").withDescription("Delete temporary folders created by krun at previous executions").create();
+		Option deleteTempDir = OptionBuilder.hasArg(false).withLongOpt("deleteTempDir").withDescription("Delete temporary folders created by krun at" + K.lineSeparator + "previous executions").create();
 		Option no_deleteTempDir = OptionBuilder.hasArg(false).withLongOpt("no-deleteTempDir").withDescription("Do not delete temporary folders created by krun at previous executions").create();
 		options.addOption(deleteTempDir); getOptionList().add(deleteTempDir);
 		options.addOption(no_deleteTempDir); getOptionList().add(no_deleteTempDir);
@@ -142,7 +142,7 @@ public class CommandlineOptions {
 		options.addOption(trace); getOptionList().add(trace);*/
 		
 		//for LTL model-checking
-		Option model_checking = OptionBuilder.hasArg(true).withArgName("FILE/STRING").withLongOpt("ltlmc").withDescription("Specify the formula for model checking through a file or at commandline").create();
+		Option model_checking = OptionBuilder.hasArg(true).withArgName("FILE/STRING").withLongOpt("ltlmc").withDescription("Specify the formula for model checking through" + K.lineSeparator + "a file or at commandline").create();
 		options.addOption(model_checking); getOptionList().add(model_checking);
 
 	}
