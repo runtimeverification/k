@@ -119,13 +119,14 @@ public class StaticK {
 		try {
 			f = new BufferedInputStream(new FileInputStream(filePath));
 			f.read(buffer);
-		} catch (Exception e) {
-			System.out.println(e.getLocalizedMessage());
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			if (f != null)
 				try {
 					f.close();
 				} catch (IOException ignored) {
+					ignored.printStackTrace();
 				}
 		}
 		return new String(buffer);
