@@ -2,19 +2,19 @@ package org.kframework.compile.transformers;
 
 import java.util.ArrayList;
 
-import org.kframework.exceptions.TransformerException;
-import org.kframework.k.ASTNode;
-import org.kframework.k.Cell;
-import org.kframework.k.Constant;
-import org.kframework.k.Context;
-import org.kframework.k.Empty;
-import org.kframework.k.List;
-import org.kframework.k.Rule;
-import org.kframework.k.Syntax;
-import org.kframework.k.Term;
-import org.kframework.k.TermCons;
-import org.kframework.k.Variable;
-import org.kframework.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Context;
+import org.kframework.kil.Empty;
+import org.kframework.kil.List;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.Variable;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;

@@ -1,9 +1,9 @@
 package k3.loader;
 
-import org.kframework.k.Attribute;
-import org.kframework.k.Production;
-import org.kframework.k.ProductionItem.ProductionType;
-import org.kframework.visitors.BasicVisitor;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.visitors.BasicVisitor;
 
 import k.utils.StringUtil;
 import ro.uaic.info.fmse.errorsystem.KException;

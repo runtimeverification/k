@@ -7,38 +7,38 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.kframework.exceptions.TransformerException;
-import org.kframework.k.ASTNode;
-import org.kframework.k.Attribute;
-import org.kframework.k.Attributes;
-import org.kframework.k.Cell;
-import org.kframework.k.Configuration;
-import org.kframework.k.Context;
-import org.kframework.k.Definition;
-import org.kframework.k.Empty;
-import org.kframework.k.KApp;
-import org.kframework.k.KInjectedLabel;
-import org.kframework.k.KSequence;
-import org.kframework.k.ListItem;
-import org.kframework.k.ListOfK;
-import org.kframework.k.Map;
-import org.kframework.k.MapItem;
-import org.kframework.k.Production;
-import org.kframework.k.ProductionItem;
-import org.kframework.k.Rule;
-import org.kframework.k.SetItem;
-import org.kframework.k.Sort;
-import org.kframework.k.Syntax;
-import org.kframework.k.Term;
-import org.kframework.k.TermCons;
-import org.kframework.k.UserList;
-import org.kframework.k.Variable;
-import org.kframework.k.ProductionItem.ProductionType;
-import org.kframework.loader.DefinitionHelper;
-import org.kframework.visitors.BasicVisitor;
-import org.kframework.visitors.CopyOnWriteTransformer;
-import org.kframework.visitors.Visitable;
-import org.kframework.visitors.Visitor;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Context;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Empty;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.ListItem;
+import org.kframework.kil.ListOfK;
+import org.kframework.kil.Map;
+import org.kframework.kil.MapItem;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
+import org.kframework.kil.Rule;
+import org.kframework.kil.SetItem;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.UserList;
+import org.kframework.kil.Variable;
+import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.Visitable;
+import org.kframework.kil.visitors.Visitor;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
@@ -282,7 +282,7 @@ public class MetaK {
 			}
 			
 			@Override
-			public void visit(org.kframework.k.List node) {
+			public void visit(org.kframework.kil.List node) {
 				return;
 			}
 			
@@ -297,7 +297,7 @@ public class MetaK {
 			}
 			
 			@Override
-			public void visit(org.kframework.k.Set node) {
+			public void visit(org.kframework.kil.Set node) {
 				return;
 			}
 			

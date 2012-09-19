@@ -1,9 +1,9 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.k.ASTNode;
-import org.kframework.k.Rule;
-import org.kframework.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Rule;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 public class AddKCell extends CopyOnWriteTransformer {
 

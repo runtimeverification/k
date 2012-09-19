@@ -1,6 +1,6 @@
 package k3.loader;
 
-import org.kframework.k.Attributes;
+import org.kframework.kil.Attributes;
 
 public class SDFHelper {
 	public static String getSDFAttributes(Attributes attrs) {

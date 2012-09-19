@@ -25,7 +25,7 @@ import k3.basic.Sentence.SentenceType;
 import k3latex.K3LatexParser;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.loader.DefinitionHelper;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

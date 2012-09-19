@@ -2,8 +2,8 @@ package k3.loader;
 
 import java.util.ArrayList;
 
-import org.kframework.k.Import;
-import org.kframework.visitors.BasicVisitor;
+import org.kframework.kil.Import;
+import org.kframework.kil.visitors.BasicVisitor;
 
 
 public class CollectIncludesVisitor extends BasicVisitor {

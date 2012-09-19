@@ -1,10 +1,10 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.exceptions.TransformerException;
-import org.kframework.k.ASTNode;
-import org.kframework.k.Variable;
-import org.kframework.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Variable;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class ResolveAnonymousVariables extends CopyOnWriteTransformer {
 

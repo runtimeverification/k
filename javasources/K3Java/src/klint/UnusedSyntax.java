@@ -2,8 +2,8 @@ package klint;
 
 import java.util.ArrayList;
 
-import org.kframework.k.*;
-import org.kframework.loader.DefinitionHelper;
+import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 
 /**
  *  This class is a lint rule that checks for unused syntaxes on the productions

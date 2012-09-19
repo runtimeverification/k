@@ -3,10 +3,10 @@ package org.kframework.compile.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kframework.k.ASTNode;
-import org.kframework.k.Configuration;
-import org.kframework.k.Production;
-import org.kframework.visitors.BasicVisitor;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Production;
+import org.kframework.kil.visitors.BasicVisitor;
 
 
 public class GetSyntaxByTag extends BasicVisitor {
@@ -17,10 +17,10 @@ public class GetSyntaxByTag extends BasicVisitor {
 	public void visit(Configuration node) {return;}
 	
 	@Override
-	public void visit(org.kframework.k.Context node) {return;};
+	public void visit(org.kframework.kil.Context node) {return;};
 	
 	@Override
-	public void visit(org.kframework.k.Rule node) {return;};
+	public void visit(org.kframework.kil.Rule node) {return;};
 	
 	@Override
 	public void visit(Production node) {

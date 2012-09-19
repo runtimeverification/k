@@ -7,16 +7,16 @@ import java.util.List;
 import java.util.Set;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.k.Definition;
-import org.kframework.k.DefinitionItem;
-import org.kframework.k.Import;
-import org.kframework.k.Module;
-import org.kframework.k.Production;
-import org.kframework.k.ProductionItem;
-import org.kframework.k.Sort;
-import org.kframework.k.Terminal;
-import org.kframework.k.UserList;
-import org.kframework.k.ProductionItem.ProductionType;
+import org.kframework.kil.Definition;
+import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.Import;
+import org.kframework.kil.Module;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.ProductionItem.ProductionType;
 
 import k.utils.Error;
 import k.utils.StringUtil;

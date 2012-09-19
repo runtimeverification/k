@@ -1,6 +1,6 @@
 package k3.basic;
 
-import org.kframework.loader.Constants;
+import org.kframework.kil.loader.Constants;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 

@@ -4,12 +4,12 @@ import java.io.File;
 
 import k.utils.XmlLoader;
 
-import org.kframework.exceptions.TransformerException;
-import org.kframework.k.ASTNode;
-import org.kframework.loader.CollectConsesVisitor;
-import org.kframework.loader.JavaClassesFactory;
-import org.kframework.loader.UpdateReferencesVisitor;
-import org.kframework.transitions.labelify.KAppModifier;
+import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.UpdateReferencesVisitor;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -56,7 +56,7 @@ public class KastParser {
 
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 		try {
-			out = out.accept(new KAppModifier());
+			out = out.accept(new FlattenSyntax());
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}

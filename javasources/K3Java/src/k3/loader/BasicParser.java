@@ -10,10 +10,10 @@ import java.util.Map;
 import k.utils.XmlLoader;
 import k2parser.KParser;
 
-import org.kframework.k.DefinitionItem;
-import org.kframework.k.Module;
-import org.kframework.k.Require;
-import org.kframework.loader.JavaClassesFactory;
+import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.Module;
+import org.kframework.kil.Require;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

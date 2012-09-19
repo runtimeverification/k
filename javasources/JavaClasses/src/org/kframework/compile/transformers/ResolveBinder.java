@@ -5,17 +5,17 @@ import java.util.List;
 
 import org.kframework.compile.utils.GetSyntaxByTag;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.exceptions.TransformerException;
-import org.kframework.k.ASTNode;
-import org.kframework.k.Attribute;
-import org.kframework.k.Constant;
-import org.kframework.k.KApp;
-import org.kframework.k.Module;
-import org.kframework.k.ModuleItem;
-import org.kframework.k.Production;
-import org.kframework.k.Rewrite;
-import org.kframework.k.Rule;
-import org.kframework.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Constant;
+import org.kframework.kil.KApp;
+import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Production;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 
 
 public class ResolveBinder extends CopyOnWriteTransformer {

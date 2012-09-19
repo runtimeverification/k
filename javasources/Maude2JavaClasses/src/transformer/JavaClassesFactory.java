@@ -1,27 +1,27 @@
 package transformer;
 
-import org.kframework.k.Bag;
-import org.kframework.k.Cell;
-import org.kframework.k.Constant;
-import org.kframework.k.Empty;
-import org.kframework.k.KApp;
-import org.kframework.k.KInjectedLabel;
-import org.kframework.k.List;
-import org.kframework.k.Map;
-import org.kframework.k.MapItem;
-import org.kframework.k.Set;
+import org.kframework.kil.Bag;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Empty;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.List;
+import org.kframework.kil.Map;
+import org.kframework.kil.MapItem;
+import org.kframework.kil.Set;
 
 import basic.Term;
 
 public class JavaClassesFactory {
-	public static org.kframework.k.Term getTerm(Term t) {
+	public static org.kframework.kil.Term getTerm(Term t) {
 		if (t.getOp().equals("<_>_</_>") && t.getSort().equals("BagItem")) {
 			Cell cl = new Cell("maude", "maude");
 			Term cellLabel = t.getChildren().get(0);
 			assert (cellLabel.getSort().equals("CellLabel"));
 			cl.setLabel(cellLabel.getOp());
 
-			cl.setContents((org.kframework.k.Term) JavaClassesFactory.getTerm(t.getChildren().get(1)));
+			cl.setContents((org.kframework.kil.Term) JavaClassesFactory.getTerm(t.getChildren().get(1)));
 			cl.setElipses("none");
 
 			return cl;

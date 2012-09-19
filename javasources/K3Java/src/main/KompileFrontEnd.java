@@ -18,20 +18,19 @@ import klint.UnusedName;
 import klint.UnusedSyntax;
 
 import org.apache.commons.cli.CommandLine;
+import org.kframework.backend.html.HTMLFilter;
+import org.kframework.backend.latex.LatexFilter;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.AddEval;
-import org.kframework.compile.CompilerTransformerStep;
 import org.kframework.compile.FlattenModules;
+import org.kframework.compile.sharing.AutomaticModuleImportsTransformer;
+import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.transformers.*;
-import org.kframework.exceptions.TransformerException;
-import org.kframework.html.HTMLFilter;
-import org.kframework.latex.LatexFilter;
-import org.kframework.lists.EmptyListsVisitor;
-import org.kframework.loader.CollectConsesVisitor;
-import org.kframework.loader.CollectSubsortsVisitor;
-import org.kframework.loader.UpdateReferencesVisitor;
-import org.kframework.sharing.AutomaticModuleImportsTransformer;
-import org.kframework.sharing.DittoFilter;
-import org.kframework.unparser.UnparserFilter;
+import org.kframework.compile.utils.CompilerTransformerStep;
+import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.CollectSubsortsVisitor;
+import org.kframework.kil.loader.UpdateReferencesVisitor;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
@@ -174,7 +173,7 @@ public class KompileFrontEnd {
 			File canonicalFile = mainFile.getCanonicalFile();
 			File dotk = new File(canonicalFile.getParent() + "/.k");
 			dotk.mkdirs();
-			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
+			org.kframework.kil.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
 
 			KlintRule lintRule = new UnusedName(javaDef);
 			lintRule.run();
@@ -252,7 +251,7 @@ public class KompileFrontEnd {
 			GlobalSettings.literate = true;
 			// compile a definition here
 
-			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, mainModule);
+			org.kframework.kil.Definition javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, mainModule);
 
 			Stopwatch sw = new Stopwatch();
 			LatexFilter lf = new LatexFilter();
@@ -284,7 +283,7 @@ public class KompileFrontEnd {
 	}
 
 	private static String html(File mainFile, String lang) {
-		org.kframework.k.Definition javaDef;
+		org.kframework.kil.Definition javaDef;
 		try {
 			GlobalSettings.literate = true;
 
@@ -322,7 +321,7 @@ public class KompileFrontEnd {
 	}
 
 	private static String unparse(File mainFile, String lang) {
-		org.kframework.k.Definition javaDef;
+		org.kframework.kil.Definition javaDef;
 		try {
 			GlobalSettings.literate = true;
 
@@ -366,10 +365,10 @@ public class KompileFrontEnd {
 
 			// compile a definition here
 
-			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
+			org.kframework.kil.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
 
 			Stopwatch sw = new Stopwatch();
-			javaDef = (org.kframework.k.Definition) javaDef.accept(new EmptyListsVisitor());
+			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
 
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
@@ -404,7 +403,7 @@ public class KompileFrontEnd {
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
-			org.kframework.k.Definition javaDef = (org.kframework.k.Definition) xstream.fromXML(canoFile);
+			org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(canoFile);
 			// This is essential for generating maude
 			javaDef.preprocess();
 
@@ -428,7 +427,7 @@ public class KompileFrontEnd {
 			File dotk = new File(f.getParent() + "/.k");
 			dotk.mkdirs();
 
-			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
+			org.kframework.kil.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
 
 			Stopwatch sw = new Stopwatch();
 
@@ -473,7 +472,7 @@ public class KompileFrontEnd {
 			bparser.slurp(mainFile.getPath());
 
 			// transfer information from the BasicParser object, to the Definition object
-			org.kframework.k.Definition def = new org.kframework.k.Definition();
+			org.kframework.kil.Definition def = new org.kframework.kil.Definition();
 			def.setMainFile(mainFile.getCanonicalPath());
 			def.setMainModule(mainModule);
 			def.setModulesMap(bparser.getModulesMap());
@@ -611,7 +610,7 @@ public class KompileFrontEnd {
 			File dotk = new File(f.getParent() + "/.k");
 			dotk.mkdirs();
 
-			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
+			org.kframework.kil.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
 
 			compile(javaDef, step);
 		} catch (Exception e) {
@@ -619,12 +618,12 @@ public class KompileFrontEnd {
 		}
 	}
 
-	public static void compile(org.kframework.k.Definition javaDef, String step) {
+	public static void compile(org.kframework.kil.Definition javaDef, String step) {
 		try {
 
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
 			try {
-				javaDef = (org.kframework.k.Definition) javaDef.accept(amit);
+				javaDef = (org.kframework.kil.Definition) javaDef.accept(amit);
 			} catch (TransformerException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

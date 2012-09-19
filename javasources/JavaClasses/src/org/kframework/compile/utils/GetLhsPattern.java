@@ -1,9 +1,9 @@
 package org.kframework.compile.utils;
 
-import org.kframework.exceptions.TransformerException;
-import org.kframework.k.ASTNode;
-import org.kframework.k.Rewrite;
-import org.kframework.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class GetLhsPattern extends CopyOnWriteTransformer {
 	public GetLhsPattern() {

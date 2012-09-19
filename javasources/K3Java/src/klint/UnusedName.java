@@ -2,7 +2,7 @@ package klint;
 
 import java.util.ArrayList;
 
-import org.kframework.k.*;
+import org.kframework.kil.*;
 
 /**
  * This classes is a lint rule that looks for names declared on the left side
