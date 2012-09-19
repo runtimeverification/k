@@ -112,7 +112,7 @@ module TYPES
 // Free type variables.  These should be generic and builtin, for all binders.
   syntax Types ::= "ftv" "(" TypeSchemas ")"
   rule ftv(BT:BasicType) => .Types [anywhere]
-  rule ftv(Tv:TypeVar) => Tv,.Types [anywhere]
+  rule ftv(Tv:UnificationVar) => Tv,.Types [anywhere]
   rule ftv(T1:Type -> T2:Type) => union(ftv(T1),ftv(T2)) [anywhere]
   rule ftv((forall Tvs:Types) T:Type) => diff(ftv(T),Tvs) [anywhere]
   rule ftv(.TypeSchemas) => .Types [anywhere]
@@ -137,18 +137,13 @@ module TYPES
   rule |T:Type,Ts:Types| => 1 +Int |Ts| [anywhere]
   rule |.Types| => 0 [anywhere]
 
-// This should be generalized and builtin: fresh name generator
-  syntax Types ::= "freshVars" "(" Int "," Int ")"
-  rule freshVars(_:Int,0) => .Types [anywhere]
-  rule freshVars(M:Int, N:Int) => freshVar(M),freshVars(M +Int 1, N -Int 1) 
-    when N >Int 0
-    [anywhere]
-
-// Type substitution: T[Ts / Tvs]* substitutes list of types Ts for
-// list of type variables Tvs.  
-  syntax Type  ::= Type "[" Types "/" Types "]*"  
-  rule T:Type[.Types / .Types]* => T [anywhere]
-  rule T:Type[T1:Type,Ts:Types / Tv:Type,Tvs:Types]* => applySubst(subst(eqn(Tv,,T1)),T)[Ts / Tvs]* [anywhere]
+// Type substitution: T[fresh / Tvs]* substitutes fresh types for
+// the list of type variables Tvs.  
+  syntax Type  ::= Type "[" "fresh" "/" Types "]*"  
+  rule T:Type[fresh / .Types]* => T 
+  rule T:Type[fresh / Tv:Type,Tvs:Types]* 
+    => applySubst(subst(eqn(Tv,,F)),T)[fresh / Tvs]* 
+    when fresh(F:UnificationVar)
 
 
 // Next should probably be generic in some way, for all maps ...
@@ -197,7 +192,6 @@ holds the current most-general unifier. */
                   <k color="green"> $PGM:Exp </k>
                   <tenv color="LightSkyBlue"> .Map </tenv>
                   <mgu color="blue"> subst(.List{K}) </mgu>
-                  <nextVar> 0 </nextVar>
                 </T>
                 <resultType multiplicity="?"> .K </resultType>
 				
@@ -233,9 +227,9 @@ We add a fresh type variable for the lambda-bound variable, then we
 type the lambda-body, and then we construct the corresponding function
 type.  At the same time, we recover the type environment. */
 
-  rule <k> lambda X:Id . E:Exp => freshVar(N) -> E ~> tenv(TEnv) ...</k>
-          <tenv> TEnv:Map => TEnv[freshVar(N)/X] </tenv>
-          <nextVar> N:Int => N +Int 1 </nextVar>
+  rule <k> lambda X:Id . E:Exp => F -> E ~> tenv(TEnv) ...</k>
+          <tenv> TEnv:Map => TEnv[F/X] </tenv>
+       when fresh(F:UnificationVar)
 
 // usual environment recovery
   syntax K ::= "tenv" "(" Map ")"
@@ -253,17 +247,17 @@ cases, we instead add a fresh type variable for the result type and
 the type constraint that the first argument is a function type of the
 right type, and finally we return the result type. */
 
-  rule <k> T1:Type T2:Type => (T1 = (T2 -> freshVar(N))) ~> freshVar(N) ...</k>
-       <nextVar> N:Int => N +Int 1 </nextVar>
+  rule T1:Type T2:Type => (T1 = (T2 -> F)) ~> F 
+       when fresh(F:UnificationVar)
 
 /*@ \subsection{Mu}
 We add a fresh type variable for the mu-bound variable and then we
 enforce the my-body and the result type to be both equal to the type
 of the mu-bound variable. */
 
-  rule <k> mu X:Id . E:Exp => (freshVar(N) = E) ~> freshVar(N) ~> tenv(TEnv) ...</k>
-          <tenv> TEnv:Map => TEnv[freshVar(N) / X] </tenv>
-          <nextVar> N:Int => N:Int +Int 1 </nextVar>
+  rule <k> mu X:Id . E:Exp => (F = E) ~> F ~> tenv(TEnv) ...</k>
+          <tenv> TEnv:Map => TEnv[F / X] </tenv>
+     when fresh(F:UnificationVar)
 
 /*@ \subsection{Let}
 The trickiest part of Milner's W procedure is how to type the
@@ -302,9 +296,8 @@ module. */
                  applySubst(subst(Theta), T)) / X]
        </tenv>
 
-  rule <k> X => T[freshVars(N, |Tvs|) / Tvs]* ...</k>
+  rule <k> X => T[fresh / Tvs]* ...</k>
        <tenv>... X:Id |-> (forall Tvs:Types) T:Type ...</tenv>
-       <nextVar> N:Int => N +Int | Tvs | </nextVar>
 
 /*@ \subsection{Final type}
 When there is only one type left in the computation cell and all the
