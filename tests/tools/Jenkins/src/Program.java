@@ -1,7 +1,5 @@
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -99,15 +97,9 @@ public class Program extends Thread {
 
 	@Override
 	public String toString() {
-		String expected;
-		String input;
-		try {
-			expected = readFile(outputFile);
-			 input = readFile(inputFile);
-		} catch (IOException e) {
-			expected = e.getMessage();
-			input = e.getMessage();
-		}
+		String expected = StaticK.readFileAsString(outputFile);
+		String input = StaticK.readFileAsString(inputFile);
+
 		if (isCorrect())
 			return filename.substring(StaticK.kbasedir.length()) + "... success.";
 		else
@@ -135,22 +127,5 @@ public class Program extends Thread {
 	public String getError()
 	{
 		return error;
-	}
-	
-	private String readFile(String pathname) throws IOException {
-
-	    File file = new File(pathname);
-	    StringBuilder fileContents = new StringBuilder((int)file.length());
-	    Scanner scanner = new Scanner(file);
-	    String lineSeparator = System.getProperty("line.separator");
-
-	    try {
-	        while(scanner.hasNextLine()) {        
-	            fileContents.append(scanner.nextLine() + lineSeparator);
-	        }
-	        return fileContents.toString();
-	    } finally {
-	        scanner.close();
-	    }
 	}
 }
