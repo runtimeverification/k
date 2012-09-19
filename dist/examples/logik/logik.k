@@ -30,7 +30,6 @@ module LOGIK-SEMANTICS
     <k>
       $PGM:K
     </k>
-    <nextVar> 0 </nextVar>
    </T>
  //  <br/>
    <solution stream="stdout"> .List </solution>
@@ -149,6 +148,6 @@ the solution.
 
   
 
-  rule Id2String(freshVar(N:Int)) => "_" +String Int2String(N)
+  rule Id2String('symUnificationVar`(_`)(N:Int)) => "_" +String Int2String(N)
   [structural, anywhere]
 endmodule

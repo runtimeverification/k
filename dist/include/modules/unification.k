@@ -1,7 +1,7 @@
 module UNIFICATION 
   imports BUILTIN-HOOKS
 
-  syntax UnificationVar ::= "freshVar" "(" Int ")"
+  syntax UnificationVar ::= "dummy"
 
 //@ Cleanup, decomposition and orientation of equations.
 
@@ -102,7 +102,7 @@ constraint.
 
   syntax KLabel ::= "freshSubst" 
 
-  rule <k> freshSubst(subst(_,,(.List{K} => eqn(X:K,,freshVar(N)))),,vars((X => .List{K}),,_)) ...</k> <nextVar> N:Int => N +Int 1 </nextVar>
+  rule freshSubst(subst(_,,(.List{K} => eqn(X:K,,F))),,vars((X => .List{K}),,_)) when fresh(F:UnificationVar)
 
   rule freshSubst(subst(Eqns:List{K}),,vars(.List{K})) => subst(Eqns)
 endmodule
