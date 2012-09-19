@@ -120,6 +120,7 @@ public class StaticK {
 			f = new BufferedInputStream(new FileInputStream(filePath));
 			f.read(buffer);
 		} catch (IOException e) {
+			System.out.println("INTERNAL ERROR: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
 			if (f != null)
