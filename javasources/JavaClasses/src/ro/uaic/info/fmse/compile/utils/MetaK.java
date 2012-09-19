@@ -9,7 +9,9 @@ import java.util.Set;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
+import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
+import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.k.Attribute;
 import ro.uaic.info.fmse.k.Attributes;
 import ro.uaic.info.fmse.k.Cell;
@@ -37,6 +39,7 @@ import ro.uaic.info.fmse.k.UserList;
 import ro.uaic.info.fmse.k.Variable;
 import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.visitors.BasicVisitor;
+import ro.uaic.info.fmse.visitors.CopyOnWriteTransformer;
 import ro.uaic.info.fmse.visitors.Visitable;
 import ro.uaic.info.fmse.visitors.Visitor;
 
@@ -45,9 +48,9 @@ public class MetaK {
 
 	static String anyVarSymbol = "_";
 
-	public static String nextIdModules[] = {
-		"SUBSTITUTION",
-	};
+//	public static String nextIdModules[] = {
+//		"SUBSTITUTION",
+//	};
 
 	public static String kModules[] = {
 		"K-CONDITION-SEARCH", 
@@ -131,9 +134,9 @@ public class MetaK {
 		return (Arrays.binarySearch(kModules, key) >= 0);		
 	}
 
-	public static boolean isNextIdModule(String key) {
-		return (Arrays.binarySearch(nextIdModules, key) >= 0);		
-	}
+//	public static boolean isNextIdModule(String key) {
+//		return (Arrays.binarySearch(nextIdModules, key) >= 0);		
+//	}
 
 	public static boolean isBuiltinModule(String key) {
 		return key.startsWith("#");
@@ -148,6 +151,35 @@ public class MetaK {
 			}
 		});
 		return result;
+	}
+	
+	public static Definition setConfiguration(Definition node, final Configuration conf) {
+		try {
+			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter") {
+				@Override
+				public ASTNode transform(Configuration node) {
+					return conf;
+				}
+
+				@Override
+				public ASTNode transform(Context node) {
+					return node;
+				}
+
+				@Override
+				public ASTNode transform(Rule node) {
+					return node;
+				}
+
+				@Override
+				public ASTNode transform(Syntax node) {
+					return node;
+				}
+			});
+		} catch (TransformerException e) {
+			e.printStackTrace();
+		}
+		return node;
 	}
 	
 	public static Configuration getConfiguration(Definition node) {

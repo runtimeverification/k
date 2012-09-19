@@ -50,7 +50,6 @@ public class AddTopCell extends CopyOnWriteTransformer {
 		node = (Module) result;
 		List<PriorityBlock> topCellBlocks = new ArrayList<PriorityBlock>();
 		PriorityBlock topPriorityBlock = new PriorityBlock();
-		
 		List<ProductionItem> topTerminals = new ArrayList<ProductionItem>();
 		topTerminals.add(new Terminal("generatedTop"));
 		Production topProduction = new Production(new Sort("CellLabel"), topTerminals );

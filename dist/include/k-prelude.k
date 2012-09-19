@@ -149,6 +149,12 @@ interface K-EVAL
 endinterface
 
 
+interface K-FRESH
+  imports K-TECHNIQUE
+  syntax Bool ::= "fresh" "(" K ")"  [cons(Bool1FreshSyn)]
+endinterface
+
+
 
 interface K
   imports K-TECHNIQUE

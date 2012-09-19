@@ -56,7 +56,6 @@ module IMPPP
      </threads>
 //     <br/>
      <store color="white"> .Map </store>
-     <nextLoc color="gray"> 0 </nextLoc>
      <in color="magenta" stream="stdin">  .List </in>
      <out color="Orchid" stream="stdout"> .List </out>
     </T>
@@ -115,7 +114,7 @@ module IMPPP
   rule <k> var (X,Xl => Xl:Ids) ...</k>
        <env> Rho => Rho[N/X] </env>
        <store>... . => N |-> 0 ...</store>
-       <nextLoc> N => N +Int 1 </nextLoc>
+    when fresh(N:Int)
   rule var .Ids => .  [structural]
 
   syntax K ::= "env" "(" Map ")"

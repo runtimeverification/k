@@ -40,7 +40,7 @@ public class FlattenModules  implements CompilerStep {
 		public void visit(Definition d) {
 			Set<String> included = new HashSet<String>();
 			Configuration cfg = null;
-			boolean nextId = false;
+//			boolean nextId = false;
 			super.visit(d);
 			result.setFilename(d.getFilename());
 			result.setLocation(d.getLocation());
@@ -63,8 +63,8 @@ public class FlattenModules  implements CompilerStep {
 				for(ModuleItem i : mod.getItems()) {
 					if (i instanceof Import) {
 						String name = ((Import)i).getName();
-						if (MetaK.isNextIdModule(name)) 
-							nextId = true;
+//						if (MetaK.isNextIdModule(name)) 
+//							nextId = true;
 						if (included.contains(name)) continue;
 						if (!MetaK.isKModule(name) && !MetaK.isBuiltinModule(name)) {
 							if (modules.containsKey(name)) {
@@ -99,22 +99,22 @@ public class FlattenModules  implements CompilerStep {
 				k.setContents(new Variable("$PGM","K"));
 				cfg.setBody(k);
 			}
-			if (nextId) {
-				Bag bag;
-				if (cfg.getBody() instanceof Bag) {
-					bag = (Bag) cfg.getBody();
-				} else {
-					bag = new Bag();
-					bag.getContents().add(cfg.getBody());
-					cfg.setBody(bag);
-				}
-				Cell nId = new Cell();
-				nId.setLabel("nextId");
-				nId.setElipses("none");
-				Constant zero = new Constant("Int", "0");
-				nId.setContents(zero);
-				bag.getContents().add(nId);
-			}
+//			if (nextId) {
+//				Bag bag;
+//				if (cfg.getBody() instanceof Bag) {
+//					bag = (Bag) cfg.getBody();
+//				} else {
+//					bag = new Bag();
+//					bag.getContents().add(cfg.getBody());
+//					cfg.setBody(bag);
+//				}
+//				Cell nId = new Cell();
+//				nId.setLabel("nextId");
+//				nId.setElipses("none");
+//				Constant zero = new Constant("Int", "0");
+//				nId.setContents(zero);
+//				bag.getContents().add(nId);
+//			}
 			if (null != cfg)
 				rmod.getItems().add(cfg);
 		}

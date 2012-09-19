@@ -640,6 +640,8 @@ public class KompileFrontEnd {
 			
 			javaDef = new CompilerTransformerStep(new AddKCell()).compile(javaDef);
 			
+			javaDef = new CompilerTransformerStep(new ResolveFresh()).compile(javaDef);
+			
 			if (GlobalSettings.addTopCell) {
 				javaDef = new CompilerTransformerStep(new AddTopCell()).compile(javaDef);
 			}
