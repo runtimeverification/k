@@ -14,18 +14,18 @@ import org.kframework.kil.Require;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.parser.basic.KParser;
 import org.kframework.utils.XmlLoader;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KMessages;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.utils.file.FileUtil;
+import org.kframework.utils.utils.file.KPaths;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import ro.uaic.info.fmse.errorsystem.KException;
-import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
-import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
-import ro.uaic.info.fmse.errorsystem.KMessages;
-import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.utils.file.FileUtil;
-import ro.uaic.info.fmse.utils.file.KPaths;
 
 public class BasicParser {
 	private List<DefinitionItem> moduleItems;

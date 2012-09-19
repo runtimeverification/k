@@ -24,7 +24,7 @@ public class KastParser {
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
 
 		String definition = FileUtil.getFileContent(K.kdir + "/def.xml");
-		Document defDoc = ro.uaic.info.fmse.utils.xml.XML.getDocument(definition);
+		Document defDoc = org.kframework.utils.utils.xml.XML.getDocument(definition);
 		ASTNode outDef = JavaClassesFactory.getTerm(defDoc.getDocumentElement());
 		outDef.accept(new UpdateReferencesVisitor());
 		outDef.accept(new CollectConsesVisitor());

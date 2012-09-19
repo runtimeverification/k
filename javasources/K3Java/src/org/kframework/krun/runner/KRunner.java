@@ -10,13 +10,13 @@ import java.util.logging.SimpleFormatter;
 
 import org.kframework.krun.K;
 import org.kframework.krun.KPaths;
+import org.kframework.krun.ioserver.main.MainServer;
 import org.kframework.krun.tasks.MaudeTask;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import main.MainServer;
 
 public class KRunner {
 	// private String _maudeCommand = "maude";

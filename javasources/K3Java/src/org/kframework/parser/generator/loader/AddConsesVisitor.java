@@ -5,11 +5,11 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
-import ro.uaic.info.fmse.errorsystem.KException;
-import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
-import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
-import ro.uaic.info.fmse.general.GlobalSettings;
 
 public class AddConsesVisitor extends BasicVisitor {
 

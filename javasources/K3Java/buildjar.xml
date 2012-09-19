@@ -8,10 +8,6 @@
 				<attribute name="Class-Path" value=". strategoxt.jar xstream.jar kxml2-min.jar xmlpull.jar xpp3_min.jar commons-cli-1.2.jar commons-io-2.1.jar jansi-1.8.jar jline-1.0.jar jopt-simple-3.3.jar"/>
 			</manifest>
 			<fileset dir="./bin"/>
-			<fileset dir="../JavaClasses/bin"/>
-			<fileset dir="../KUtils/bin"/>
-			<fileset dir="../KPreprocessor/bin"/>
-			<fileset dir="../IOServer/bin"/>
 		</jar>
 	</target>
 </project>

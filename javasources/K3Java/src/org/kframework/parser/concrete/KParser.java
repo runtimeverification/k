@@ -1,11 +1,11 @@
 package org.kframework.parser.concrete;
 
 import org.kframework.parser.concrete.lib.*;
+import org.kframework.utils.general.GlobalSettings;
 import org.spoofax.interpreter.terms.*;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 
-import ro.uaic.info.fmse.general.GlobalSettings;
 
 
 public class KParser {

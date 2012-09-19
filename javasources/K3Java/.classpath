@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="src" path="lib/resources"/>
-
 	<classpathentry kind="lib" path="../../dist/bin/java/strategoxt.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/commons-cli-1.2-javadoc.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/commons-cli-1.2-sources.jar"/>
@@ -12,14 +11,7 @@
 	<classpathentry kind="lib" path="../../dist/bin/java/jopt-simple-3.3.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/jansi-1.8.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/jline-1.0.jar"/>
-
-	<classpathentry combineaccessrules="false" kind="src" path="/KPreprocessor"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/JavaClasses"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/KUtils"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/IOServer"/>
-
 	<classpathentry kind="lib" path="../../dist/bin/java/xstream.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/kxml2-min.jar"/>
-
 	<classpathentry kind="output" path="bin"/>
 </classpath>

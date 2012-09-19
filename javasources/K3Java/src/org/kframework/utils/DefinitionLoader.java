@@ -23,12 +23,12 @@ import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.generator.basic.Definition;
+import org.kframework.parser.generator.preprocessor.Preprocessor;
+import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.pp.Preprocessor;
-import ro.uaic.info.fmse.utils.file.FileUtil;
 
 import com.thoughtworks.xstream.XStream;
 

@@ -6,7 +6,6 @@
 
 	<target name="java">
 		<ant antfile="${javasources}/K3Java/buildjava.xml" dir="${javasources}/K3Java" />
-		<ant antfile="${javasources}/JKRun/build.xml" dir="${javasources}/JKRun" />
 	</target>
 
 	<target name="jar">
@@ -54,10 +53,6 @@
 		<delete dir="${javasources}/LatexComments/include" />
 
 		<delete dir="${javasources}/K3Java/bin" />
-		<delete dir="${javasources}/KUtils/bin" />
-		<delete dir="${javasources}/KPreprocessor/bin" />
-		<delete dir="${javasources}/IOServer/bin" />
-		<delete dir="${javasources}/JavaClasses/bin" />
 
 		<delete file="${javasources}/../dist/bin/java/k3.jar" />
 		<delete dir="./k/" />

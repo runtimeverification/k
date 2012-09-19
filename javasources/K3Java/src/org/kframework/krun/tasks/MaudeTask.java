@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.kframework.krun.K;
+import org.kframework.utils.maude.MaudeRun;
 
-import ro.uaic.info.fmse.maude.MaudeRun;
 
 public class MaudeTask extends Thread {
 	// private static final String LOG_FILE = "maude.log";

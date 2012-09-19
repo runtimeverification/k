@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import ro.uaic.info.fmse.utils.file.KPaths;
+import org.kframework.utils.utils.file.KPaths;
+
 
 public class Sdf2Table {
 

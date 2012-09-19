@@ -10,14 +10,14 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.errorsystem.KException;
-import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
-import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
-import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.utils.file.FileUtil;
 
 public class ProgramLoader {
 
@@ -69,7 +69,7 @@ public class ProgramLoader {
 		XmlLoader.writeXmlFile(doc, dotk.getAbsolutePath() + "/pgm.xml");
 
 		String definition = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def.xml");
-		Document defDoc = ro.uaic.info.fmse.utils.xml.XML.getDocument(definition);
+		Document defDoc = org.kframework.utils.utils.xml.XML.getDocument(definition);
 		ASTNode outDef = JavaClassesFactory.getTerm(defDoc.getDocumentElement());
 		outDef.accept(new UpdateReferencesVisitor());
 		outDef.accept(new CollectConsesVisitor());
