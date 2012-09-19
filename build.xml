@@ -96,7 +96,23 @@
 		<delete file="k-${version}.zip" />
 		<delete file="k-${version}.tgz" />
 		<zip destfile="k-${version}.zip" basedir="k" />
-		<tar destfile="k-${version}.tgz" basedir="k" compression="gzip" />
+		<tar destfile="k-${version}.tgz" compression="gzip">
+			<tarfileset filemode="755" dir="./k">
+				<include name="bin/kast" />
+				<include name="bin/kompile" />
+				<include name="bin/krun" />
+				<include name="bin/ksettest" />
+				<include name="bin/hkcd" />
+			</tarfileset>
+			<tarfileset dir="./k">
+				<include name="**" />
+				<exclude name="bin/kast" />
+				<exclude name="bin/kompile" />
+				<exclude name="bin/krun" />
+				<exclude name="bin/ksettest" />
+				<exclude name="bin/hkcd" />
+			</tarfileset>
+		</tar>
 	</target>
 
 	<target name="test">
@@ -106,5 +122,4 @@
 			<arg value="LocalTests" />
 		</java>
 	</target>
-
 </project>
