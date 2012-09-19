@@ -4,13 +4,13 @@
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="K3Java">
+<project basedir="." default="build" name="KTool">
     <property environment="env"/>
     <property name="ECLIPSE_HOME" value="../../../eclisespoofax"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
-    <path id="K3Java.classpath">
+    <path id="KTool.classpath">
         <pathelement location="bin"/>
         <pathelement location="../../dist/bin/java/strategoxt.jar"/>
         <pathelement location="../../dist/bin/java/commons-cli-1.2-javadoc.jar"/>
@@ -48,11 +48,11 @@
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
             <src path="src"/>
-            <classpath refid="K3Java.classpath"/>
+            <classpath refid="KTool.classpath"/>
         </javac>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
             <src path="lib/resources"/>
-            <classpath refid="K3Java.classpath"/>
+            <classpath refid="KTool.classpath"/>
         </javac>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>

@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="build" name="K3 Build file">
+<project basedir="." default="build" name="KTool Build file">
 
 	<property location="javasources" name="javasources" />
 	<property name="version" value="latest" />
 
 	<target name="java">
-		<ant antfile="${javasources}/K3Java/buildjava.xml" dir="${javasources}/K3Java" />
+		<ant antfile="${javasources}/KTool/buildjava.xml" dir="${javasources}/KTool" />
 	</target>
 
 	<target name="jar">
-		<ant antfile="${javasources}/K3Java/buildjar.xml" dir="${javasources}/K3Java" />
+		<ant antfile="${javasources}/KTool/buildjar.xml" dir="${javasources}/KTool" />
 	</target>
 
 	<target name="build">
-		<ant antfile="${javasources}/K3Java/build.xml" dir="${javasources}/K3Java" />
+		<ant antfile="${javasources}/KTool/build.xml" dir="${javasources}/KTool" />
 		<antcall target="makeversion" />
 	</target>
 
 	<target name="clean">
 		<delete>
-			<fileset dir="${javasources}/K3Java/src/org/kframework/parser/basic/lib">
+			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic/lib">
 				<include name="*.java" />
 				<include name="K3Syntax.tbl" />
 				<exclude name="xml_string_escape_from_string_0_0.java" />
@@ -31,7 +31,7 @@
 		<delete dir="${javasources}/K3Syntax/include" />
 
 		<delete>
-			<fileset dir="${javasources}/K3Java/src/org/kframework/parser/concrete/lib">
+			<fileset dir="${javasources}/KTool/src/org/kframework/parser/concrete/lib">
 				<include name="*.java" />
 				<exclude name="string_trim_last_one_0_0.java" />
 				<exclude name="string_unescape_sort_0_0.java" />
@@ -52,7 +52,7 @@
 		<delete dir="${javasources}/LatexComments/trans/K3Str" />
 		<delete dir="${javasources}/LatexComments/include" />
 
-		<delete dir="${javasources}/K3Java/bin" />
+		<delete dir="${javasources}/KTool/bin" />
 
 		<delete file="${javasources}/../dist/bin/java/k3.jar" />
 		<delete dir="./k/" />

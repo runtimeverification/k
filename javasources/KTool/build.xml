@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="alllocal" name="K3Java all">
+<project basedir="." default="alllocal" name="KTool all">
 
 	<import file="buildsig.xml" />
 	<import file="buildstr.xml" />
