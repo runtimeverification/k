@@ -20,7 +20,7 @@
 
 	<target name="clean">
 		<delete>
-			<fileset dir="${javasources}/K3Java/src/k2parser/lib">
+			<fileset dir="${javasources}/K3Java/src/org/kframework/parser/basic/lib">
 				<include name="*.java" />
 				<include name="K3Syntax.tbl" />
 				<exclude name="xml_string_escape_from_string_0_0.java" />
@@ -32,7 +32,7 @@
 		<delete dir="${javasources}/K3Syntax/include" />
 
 		<delete>
-			<fileset dir="${javasources}/K3Java/src/k3parser/lib">
+			<fileset dir="${javasources}/K3Java/src/org/kframework/parser/concrete/lib">
 				<include name="*.java" />
 				<exclude name="string_trim_last_one_0_0.java" />
 				<exclude name="string_unescape_sort_0_0.java" />

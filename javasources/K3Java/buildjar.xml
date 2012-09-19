@@ -4,7 +4,7 @@
 		<delete file="../../dist/bin/java/k3.jar" failonerror="false" />
 		<jar destfile="../../dist/bin/java/k3.jar" filesetmanifest="mergewithoutmain">
 			<manifest>
-				<attribute name="Main-Class" value="main.Main"/>
+				<attribute name="Main-Class" value="org.kframework.main.Main"/>
 				<attribute name="Class-Path" value=". strategoxt.jar xstream.jar kxml2-min.jar xmlpull.jar xpp3_min.jar commons-cli-1.2.jar commons-io-2.1.jar jansi-1.8.jar jline-1.0.jar jopt-simple-3.3.jar"/>
 			</manifest>
 			<fileset dir="./bin"/>

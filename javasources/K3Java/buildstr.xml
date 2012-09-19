@@ -19,7 +19,7 @@
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</targetfileset>
 		</dependset>
-		<available file="src/k2parser/lib/K2Str.java" property="k2syntax.available" />
+		<available file="src/org/kframework/parser/basic/lib/K2Str.java" property="k2syntax.available" />
 		<antcall target="k2syntax.helper" />
 	</target>
 	<target name="k2syntax.helper" unless="k2syntax.available">
@@ -27,16 +27,16 @@
 		<delete file="../K3Syntax/trans/K2Str.dep" />
 		<delete dir="../K3Syntax/trans/K2Str" />
 		<java failonerror="true" dir="../K3Syntax/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
-			<arg line="-i xmlify.str -o K2Str -la stratego-sglr --lib -I .. -p k2parser.lib --clean" />
+			<arg line="-i xmlify.str -o K2Str -la stratego-sglr --lib -I .. -p org.kframework.parser.basic.lib --clean" />
 		</java>
 		<delete>
-			<fileset dir="src/k2parser/lib">
+			<fileset dir="src/org/kframework/parser/basic/lib">
 				<include name="*.java" />
 				<include name="K3Syntax.tbl" />
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</fileset>
 		</delete>
-		<copy todir="src/k2parser/lib/">
+		<copy todir="src/org/kframework/parser/basic/lib/">
 			<fileset dir="../K3Syntax/trans/K2Str">
 				<include name="*" />
 			</fileset>
@@ -51,12 +51,12 @@
 			<srcfileset file="../LatexComments/trans/*.str" />
 			<srcfileset file="../LatexComments/include/LatexComments.str" />
 			<srcfileset file="../LatexComments/include/LatexComments.tbl" />
-			<targetfileset dir="src/k3latex/lib">
+			<targetfileset dir="src/org/kframework/parser/latex/lib">
 				<include name="*.java" />
 				<include name="LatexComments.tbl" />
 			</targetfileset>
 		</dependset>
-		<available file="src/k3latex/lib/K3Latex.java" property="k3latex.available" />
+		<available file="src/org/kframework/parser/latex/lib/K3Latex.java" property="k3latex.available" />
 		<antcall target="k3latex.helper" />
 	</target>
 	<target name="k3latex.helper" unless="k3latex.available">
@@ -64,15 +64,15 @@
 		<delete file="../LatexComments/trans/K3Latex.dep" />
 		<delete dir="../LatexComments/trans/K3Latex" />
 		<java failonerror="true" dir="../LatexComments/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
-			<arg line="-i xmlify.str -o K3Latex -la stratego-sglr --lib -I .. -p k3latex.lib --clean" />
+			<arg line="-i xmlify.str -o K3Latex -la stratego-sglr --lib -I .. -p org.kframework.parser.latex.lib --clean" />
 		</java>
 		<delete>
-			<fileset dir="src/k3latex/lib">
+			<fileset dir="src/org/kframework/parser/latex/lib">
 				<include name="*.java" />
 				<include name="LatexComments.tbl" />
 			</fileset>
 		</delete>
-		<copy todir="src/k3latex/lib/">
+		<copy todir="src/org/kframework/parser/latex/lib/">
 			<fileset dir="../LatexComments/trans/K3Latex">
 				<include name="*" />
 			</fileset>
@@ -86,7 +86,7 @@
 		<dependset>
 			<srcfileset file="../K3Disamb/trans/*.str" />
 			<srcfileset file="../K3Disamb/include/K3Disamb.str" />
-			<targetfileset dir="src/k3parser/lib">
+			<targetfileset dir="src/org/kframework/parser/concrete/lib">
 				<include name="*.java" />
 				<exclude name="string_trim_last_one_0_0.java" />
 				<exclude name="string_unescape_sort_0_0.java" />
@@ -97,7 +97,7 @@
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</targetfileset>
 		</dependset>
-		<available file="src/k3parser/lib/K3Str.java" property="k3.available" />
+		<available file="src/org/kframework/parser/concrete/lib/K3Str.java" property="k3.available" />
 		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/Common.sdf" />
 		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/K3Disamb.sdf" />
 		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/KBuiltinsBasic.sdf" />
@@ -109,10 +109,10 @@
 		<delete file="../K3Disamb/trans/K3Str.dep" />
 		<delete dir="../K3Disamb/trans/K3Str" />
 		<java failonerror="true" dir="../K3Disamb/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
-			<arg line="-i starter.str -o K3Str -la stratego-sglr --lib -I .. -p k3parser.lib --clean" />
+			<arg line="-i starter.str -o K3Str -la stratego-sglr --lib -I .. -p org.kframework.parser.concrete.lib --clean" />
 		</java>
 		<delete>
-			<fileset dir="src/k3parser/lib">
+			<fileset dir="src/org/kframework/parser/concrete/lib">
 				<include name="*.java" />
 				<exclude name="string_trim_last_one_0_0.java" />
 				<exclude name="string_unescape_sort_0_0.java" />
@@ -123,16 +123,14 @@
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</fileset>
 		</delete>
-		<copy todir="src/k3parser/lib/">
+		<copy todir="src/org/kframework/parser/concrete/lib/">
 			<fileset dir="../K3Disamb/trans/K3Str">
 				<include name="*" />
 			</fileset>
 		</copy>
 
-
 		<delete file="../K3Disamb/trans/K3Str.rtree" />
 		<delete file="../K3Disamb/trans/K3Str.dep" />
 		<delete dir="../K3Disamb/trans/K3Str" />
 	</target>
-
 </project>
