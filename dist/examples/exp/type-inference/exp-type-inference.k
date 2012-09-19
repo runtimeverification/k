@@ -139,7 +139,7 @@ module TYPES
 
 // Type substitution: T[fresh / Tvs]* substitutes fresh types for
 // the list of type variables Tvs.  
-  syntax Type  ::= Type "[" "fresh" "/" Types "]*"  
+  syntax Type  ::= Type "[" "fresh" "/" Types "]*"  [function]
   rule T:Type[fresh / .Types]* => T 
   rule T:Type[fresh / Tv:Type,Tvs:Types]* 
     => applySubst(subst(eqn(Tv,,F)),T)[fresh / Tvs]* 

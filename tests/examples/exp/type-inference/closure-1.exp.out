@@ -1,4 +1,6 @@
-
-<resultType>
-  (freshVar( 2 )) -> (int) 
-</resultType>
+ <freshCounter>
+  3 
+ </freshCounter> 
+ <resultType>
+   (symUnificationVar( 2 )) -> (int) 
+ </resultType> 

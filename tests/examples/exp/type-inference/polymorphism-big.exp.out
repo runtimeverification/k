@@ -1,4 +1,6 @@
-
-<resultType>
-  (freshVar( 52 )) -> ((freshVar( 68 )) -> ((freshVar( 67 )) -> ((freshVar( 66 )) -> ((freshVar( 65 )) -> ((freshVar( 64 )) -> ((freshVar( 63 )) -> ((freshVar( 62 )) -> ((freshVar( 61 )) -> ((freshVar( 60 )) -> ((freshVar( 59 )) -> ((freshVar( 58 )) -> ((freshVar( 57 )) -> ((freshVar( 56 )) -> ((freshVar( 55 )) -> ((freshVar( 54 )) -> ((freshVar( 53 )) -> (freshVar( 52 )))))))))))))))))) 
-</resultType>
+ <freshCounter>
+  69 
+ </freshCounter> 
+ <resultType>
+   (symUnificationVar( 52 )) -> ((symUnificationVar( 68 )) -> ((symUnificationVar( 67 )) -> ((symUnificationVar( 66 )) -> ((symUnificationVar( 65 )) -> ((symUnificationVar( 64 )) -> ((symUnificationVar( 63 )) -> ((symUnificationVar( 62 )) -> ((symUnificationVar( 61 )) -> ((symUnificationVar( 60 )) -> ((symUnificationVar( 59 )) -> ((symUnificationVar( 58 )) -> ((symUnificationVar( 57 )) -> ((symUnificationVar( 56 )) -> ((symUnificationVar( 55 )) -> ((symUnificationVar( 54 )) -> ((symUnificationVar( 53 )) -> (symUnificationVar( 52 )))))))))))))))))) 
+ </resultType> 

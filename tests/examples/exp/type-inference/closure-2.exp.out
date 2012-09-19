@@ -1,4 +1,6 @@
-
-<resultType>
-  (freshVar( 11 )) -> ((freshVar( 10 )) -> ((freshVar( 9 )) -> (freshVar( 9 )))) 
-</resultType>
+ <freshCounter>
+  12 
+ </freshCounter> 
+ <resultType>
+   (symUnificationVar( 11 )) -> ((symUnificationVar( 10 )) -> ((symUnificationVar( 9 )) -> (symUnificationVar( 9 )))) 
+ </resultType> 

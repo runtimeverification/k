@@ -1,15 +1,14 @@
-
-<T> 
-  <k>
-    (freshVar( 0 )) -> (freshVar( 1 )) 
-  </k> 
-  <mgu>
-   unifyEqs(subst, eqns(eqn(freshVar( 0 ), (freshVar( 0 )) -> (freshVar( 1 )))))
-  </mgu> 
-  <nextVar>
-   2 
-  </nextVar> 
-  <tenv>
-   .
-  </tenv> 
-</T>
+ <freshCounter>
+  2 
+ </freshCounter> 
+ <T>  
+   <k>
+     (symUnificationVar( 0 )) -> (symUnificationVar( 1 )) 
+   </k> 
+   <mgu>
+    unifyEqs(subst, eqns(eqn(symUnificationVar( 0 ), (symUnificationVar( 0 )) -> (symUnificationVar( 1 )))))
+   </mgu> 
+   <tenv>
+    .
+   </tenv> 
+ </T> 

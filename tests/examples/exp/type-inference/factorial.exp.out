@@ -1,4 +1,6 @@
-
-<resultType>
- int
-</resultType>
+ <freshCounter>
+  5 
+ </freshCounter> 
+ <resultType>
+  int
+ </resultType> 
