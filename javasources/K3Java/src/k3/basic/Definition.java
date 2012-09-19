@@ -24,19 +24,19 @@ import k3.basic.ModuleItem.ModuleType;
 import k3.basic.Sentence.SentenceType;
 import k3latex.K3LatexParser;
 
+import org.kframework.compile.utils.MetaK;
+import org.kframework.loader.DefinitionHelper;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import ro.uaic.info.fmse.compile.utils.MetaK;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.loader.DefinitionHelper;
 import ro.uaic.info.fmse.utils.file.FileUtil;
 import ro.uaic.info.fmse.utils.file.KPaths;
 

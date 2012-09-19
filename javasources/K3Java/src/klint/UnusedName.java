@@ -1,7 +1,8 @@
 package klint;
 
 import java.util.ArrayList;
-import ro.uaic.info.fmse.k.*;
+
+import org.kframework.k.*;
 
 /**
  * This classes is a lint rule that looks for names declared on the left side

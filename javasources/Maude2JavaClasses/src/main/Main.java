@@ -13,7 +13,7 @@ public class Main {
 		
 		System.out.println(t);
 		
-		ro.uaic.info.fmse.k.Term t2 = JavaClassesFactory.getTerm(t);
+		org.kframework.k.Term t2 = JavaClassesFactory.getTerm(t);
 		System.out.println(t2);
 	}
 

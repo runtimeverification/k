@@ -1,7 +1,7 @@
 package klint;
 
-import ro.uaic.info.fmse.k.*;
-import ro.uaic.info.fmse.loader.DefinitionHelper;
+import org.kframework.k.*;
+import org.kframework.loader.DefinitionHelper;
 
 /**
  * Inifite rewrite rule is a lint rule that looks for rules that can lead to infinite rewrite.

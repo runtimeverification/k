@@ -10,6 +10,10 @@ import java.util.Map;
 import k.utils.XmlLoader;
 import k2parser.KParser;
 
+import org.kframework.k.DefinitionItem;
+import org.kframework.k.Module;
+import org.kframework.k.Require;
+import org.kframework.loader.JavaClassesFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -20,10 +24,6 @@ import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
 import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.k.DefinitionItem;
-import ro.uaic.info.fmse.k.Module;
-import ro.uaic.info.fmse.k.Require;
-import ro.uaic.info.fmse.loader.JavaClassesFactory;
 import ro.uaic.info.fmse.utils.file.FileUtil;
 import ro.uaic.info.fmse.utils.file.KPaths;
 

@@ -2,8 +2,9 @@ package k3.loader;
 
 import java.util.ArrayList;
 
-import ro.uaic.info.fmse.k.Import;
-import ro.uaic.info.fmse.visitors.BasicVisitor;
+import org.kframework.k.Import;
+import org.kframework.visitors.BasicVisitor;
+
 
 public class CollectIncludesVisitor extends BasicVisitor {
 	private java.util.List<Import> importList = new ArrayList<Import>();

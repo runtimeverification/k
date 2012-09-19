@@ -18,27 +18,27 @@ import klint.UnusedName;
 import klint.UnusedSyntax;
 
 import org.apache.commons.cli.CommandLine;
+import org.kframework.compile.AddEval;
+import org.kframework.compile.CompilerTransformerStep;
+import org.kframework.compile.FlattenModules;
+import org.kframework.compile.transformers.*;
+import org.kframework.exceptions.TransformerException;
+import org.kframework.html.HTMLFilter;
+import org.kframework.latex.LatexFilter;
+import org.kframework.lists.EmptyListsVisitor;
+import org.kframework.loader.CollectConsesVisitor;
+import org.kframework.loader.CollectSubsortsVisitor;
+import org.kframework.loader.UpdateReferencesVisitor;
+import org.kframework.sharing.AutomaticModuleImportsTransformer;
+import org.kframework.sharing.DittoFilter;
+import org.kframework.unparser.UnparserFilter;
 
-import ro.uaic.info.fmse.compile.AddEval;
-import ro.uaic.info.fmse.compile.transformers.*;
-import ro.uaic.info.fmse.compile.CompilerTransformerStep;
-import ro.uaic.info.fmse.compile.FlattenModules;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.errorsystem.KMessages;
-import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.html.HTMLFilter;
-import ro.uaic.info.fmse.latex.LatexFilter;
-import ro.uaic.info.fmse.lists.EmptyListsVisitor;
-import ro.uaic.info.fmse.loader.CollectConsesVisitor;
-import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
-import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.maude.MaudeRun;
-import ro.uaic.info.fmse.sharing.AutomaticModuleImportsTransformer;
-import ro.uaic.info.fmse.sharing.DittoFilter;
-import ro.uaic.info.fmse.unparser.UnparserFilter;
 import ro.uaic.info.fmse.utils.file.FileUtil;
 import ro.uaic.info.fmse.utils.file.KPaths;
 
@@ -174,7 +174,7 @@ public class KompileFrontEnd {
 			File canonicalFile = mainFile.getCanonicalFile();
 			File dotk = new File(canonicalFile.getParent() + "/.k");
 			dotk.mkdirs();
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
+			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
 
 			KlintRule lintRule = new UnusedName(javaDef);
 			lintRule.run();
@@ -252,7 +252,7 @@ public class KompileFrontEnd {
 			GlobalSettings.literate = true;
 			// compile a definition here
 
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, mainModule);
+			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.loadDefinition(mainFile, mainModule);
 
 			Stopwatch sw = new Stopwatch();
 			LatexFilter lf = new LatexFilter();
@@ -284,7 +284,7 @@ public class KompileFrontEnd {
 	}
 
 	private static String html(File mainFile, String lang) {
-		ro.uaic.info.fmse.k.Definition javaDef;
+		org.kframework.k.Definition javaDef;
 		try {
 			GlobalSettings.literate = true;
 
@@ -322,7 +322,7 @@ public class KompileFrontEnd {
 	}
 
 	private static String unparse(File mainFile, String lang) {
-		ro.uaic.info.fmse.k.Definition javaDef;
+		org.kframework.k.Definition javaDef;
 		try {
 			GlobalSettings.literate = true;
 
@@ -366,10 +366,10 @@ public class KompileFrontEnd {
 
 			// compile a definition here
 
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
+			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
 
 			Stopwatch sw = new Stopwatch();
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
@@ -404,7 +404,7 @@ public class KompileFrontEnd {
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
-			ro.uaic.info.fmse.k.Definition javaDef = (ro.uaic.info.fmse.k.Definition) xstream.fromXML(canoFile);
+			org.kframework.k.Definition javaDef = (org.kframework.k.Definition) xstream.fromXML(canoFile);
 			// This is essential for generating maude
 			javaDef.preprocess();
 
@@ -428,7 +428,7 @@ public class KompileFrontEnd {
 			File dotk = new File(f.getParent() + "/.k");
 			dotk.mkdirs();
 
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
+			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
 
 			Stopwatch sw = new Stopwatch();
 
@@ -473,7 +473,7 @@ public class KompileFrontEnd {
 			bparser.slurp(mainFile.getPath());
 
 			// transfer information from the BasicParser object, to the Definition object
-			ro.uaic.info.fmse.k.Definition def = new ro.uaic.info.fmse.k.Definition();
+			org.kframework.k.Definition def = new org.kframework.k.Definition();
 			def.setMainFile(mainFile.getCanonicalPath());
 			def.setMainModule(mainModule);
 			def.setModulesMap(bparser.getModulesMap());
@@ -611,7 +611,7 @@ public class KompileFrontEnd {
 			File dotk = new File(f.getParent() + "/.k");
 			dotk.mkdirs();
 
-			ro.uaic.info.fmse.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
+			org.kframework.k.Definition javaDef = k.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
 
 			compile(javaDef, step);
 		} catch (Exception e) {
@@ -619,12 +619,12 @@ public class KompileFrontEnd {
 		}
 	}
 
-	public static void compile(ro.uaic.info.fmse.k.Definition javaDef, String step) {
+	public static void compile(org.kframework.k.Definition javaDef, String step) {
 		try {
 
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
 			try {
-				javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(amit);
+				javaDef = (org.kframework.k.Definition) javaDef.accept(amit);
 			} catch (TransformerException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -1,14 +1,15 @@
 package k3.loader;
 
+import org.kframework.k.Attribute;
+import org.kframework.k.Production;
+import org.kframework.k.ProductionItem.ProductionType;
+import org.kframework.visitors.BasicVisitor;
+
 import k.utils.StringUtil;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.k.Attribute;
-import ro.uaic.info.fmse.k.Production;
-import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
-import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class AddConsesVisitor extends BasicVisitor {
 

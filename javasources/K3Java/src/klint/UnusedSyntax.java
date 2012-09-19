@@ -1,8 +1,9 @@
 package klint;
 
 import java.util.ArrayList;
-import ro.uaic.info.fmse.k.*;
-import ro.uaic.info.fmse.loader.DefinitionHelper;
+
+import org.kframework.k.*;
+import org.kframework.loader.DefinitionHelper;
 
 /**
  *  This class is a lint rule that checks for unused syntaxes on the productions

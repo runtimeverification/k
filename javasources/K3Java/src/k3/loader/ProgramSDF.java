@@ -6,19 +6,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.kframework.compile.utils.MetaK;
+import org.kframework.k.Definition;
+import org.kframework.k.DefinitionItem;
+import org.kframework.k.Import;
+import org.kframework.k.Module;
+import org.kframework.k.Production;
+import org.kframework.k.ProductionItem;
+import org.kframework.k.Sort;
+import org.kframework.k.Terminal;
+import org.kframework.k.UserList;
+import org.kframework.k.ProductionItem.ProductionType;
+
 import k.utils.Error;
 import k.utils.StringUtil;
-import ro.uaic.info.fmse.compile.utils.MetaK;
-import ro.uaic.info.fmse.k.Definition;
-import ro.uaic.info.fmse.k.DefinitionItem;
-import ro.uaic.info.fmse.k.Import;
-import ro.uaic.info.fmse.k.Module;
-import ro.uaic.info.fmse.k.Production;
-import ro.uaic.info.fmse.k.ProductionItem;
-import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
-import ro.uaic.info.fmse.k.Sort;
-import ro.uaic.info.fmse.k.Terminal;
-import ro.uaic.info.fmse.k.UserList;
 
 public class ProgramSDF {
 

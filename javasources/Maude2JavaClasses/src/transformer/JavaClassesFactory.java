@@ -1,26 +1,27 @@
 package transformer;
 
-import ro.uaic.info.fmse.k.Bag;
-import ro.uaic.info.fmse.k.Cell;
-import ro.uaic.info.fmse.k.Constant;
-import ro.uaic.info.fmse.k.Empty;
-import ro.uaic.info.fmse.k.KApp;
-import ro.uaic.info.fmse.k.KInjectedLabel;
-import ro.uaic.info.fmse.k.List;
-import ro.uaic.info.fmse.k.Map;
-import ro.uaic.info.fmse.k.MapItem;
-import ro.uaic.info.fmse.k.Set;
+import org.kframework.k.Bag;
+import org.kframework.k.Cell;
+import org.kframework.k.Constant;
+import org.kframework.k.Empty;
+import org.kframework.k.KApp;
+import org.kframework.k.KInjectedLabel;
+import org.kframework.k.List;
+import org.kframework.k.Map;
+import org.kframework.k.MapItem;
+import org.kframework.k.Set;
+
 import basic.Term;
 
 public class JavaClassesFactory {
-	public static ro.uaic.info.fmse.k.Term getTerm(Term t) {
+	public static org.kframework.k.Term getTerm(Term t) {
 		if (t.getOp().equals("<_>_</_>") && t.getSort().equals("BagItem")) {
 			Cell cl = new Cell("maude", "maude");
 			Term cellLabel = t.getChildren().get(0);
 			assert (cellLabel.getSort().equals("CellLabel"));
 			cl.setLabel(cellLabel.getOp());
 
-			cl.setContents((ro.uaic.info.fmse.k.Term) JavaClassesFactory.getTerm(t.getChildren().get(1)));
+			cl.setContents((org.kframework.k.Term) JavaClassesFactory.getTerm(t.getChildren().get(1)));
 			cl.setElipses("none");
 
 			return cl;

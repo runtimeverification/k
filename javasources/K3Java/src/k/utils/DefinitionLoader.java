@@ -5,36 +5,36 @@ import java.io.IOException;
 
 import k3.basic.Definition;
 
+import org.kframework.disambiguate.AmbDuplicateFilter;
+import org.kframework.disambiguate.AmbFilter;
+import org.kframework.disambiguate.BestFitFilter;
+import org.kframework.disambiguate.CellTypesFilter;
+import org.kframework.disambiguate.CorrectKSeqFilter;
+import org.kframework.disambiguate.CorrectRewritePriorityFilter;
+import org.kframework.disambiguate.CorrectRewriteSortFilter;
+import org.kframework.disambiguate.FlattenListsFilter;
+import org.kframework.disambiguate.GetFitnessUnitFileCheckVisitor;
+import org.kframework.disambiguate.GetFitnessUnitKCheckVisitor;
+import org.kframework.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.disambiguate.TypeInferenceSupremumFilter;
+import org.kframework.disambiguate.TypeSystemFilter;
+import org.kframework.disambiguate.VariableTypeInferenceFilter;
+import org.kframework.lists.EmptyListsVisitor;
+import org.kframework.loader.CollectConsesVisitor;
+import org.kframework.loader.CollectSubsortsVisitor;
+import org.kframework.loader.UpdateReferencesVisitor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.disambiguate.AmbDuplicateFilter;
-import ro.uaic.info.fmse.disambiguate.AmbFilter;
-import ro.uaic.info.fmse.disambiguate.BestFitFilter;
-import ro.uaic.info.fmse.disambiguate.CellTypesFilter;
-import ro.uaic.info.fmse.disambiguate.CorrectKSeqFilter;
-import ro.uaic.info.fmse.disambiguate.CorrectRewritePriorityFilter;
-import ro.uaic.info.fmse.disambiguate.CorrectRewriteSortFilter;
-import ro.uaic.info.fmse.disambiguate.FlattenListsFilter;
-import ro.uaic.info.fmse.disambiguate.GetFitnessUnitFileCheckVisitor;
-import ro.uaic.info.fmse.disambiguate.GetFitnessUnitKCheckVisitor;
-import ro.uaic.info.fmse.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import ro.uaic.info.fmse.disambiguate.TypeInferenceSupremumFilter;
-import ro.uaic.info.fmse.disambiguate.TypeSystemFilter;
-import ro.uaic.info.fmse.disambiguate.VariableTypeInferenceFilter;
 import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.lists.EmptyListsVisitor;
-import ro.uaic.info.fmse.loader.CollectConsesVisitor;
-import ro.uaic.info.fmse.loader.CollectSubsortsVisitor;
-import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
 import ro.uaic.info.fmse.pp.Preprocessor;
 import ro.uaic.info.fmse.utils.file.FileUtil;
 
 import com.thoughtworks.xstream.XStream;
 
 public class DefinitionLoader {
-	public static ro.uaic.info.fmse.k.Definition loadDefinition(File mainFile, String lang) throws IOException, Exception {
-		ro.uaic.info.fmse.k.Definition javaDef;
+	public static org.kframework.k.Definition loadDefinition(File mainFile, String lang) throws IOException, Exception {
+		org.kframework.k.Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
 		if (FileUtil.getExtension(mainFile.getAbsolutePath()).equals(".xml")) {
@@ -42,7 +42,7 @@ public class DefinitionLoader {
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
-			javaDef = (ro.uaic.info.fmse.k.Definition) xstream.fromXML(canoFile);
+			javaDef = (org.kframework.k.Definition) xstream.fromXML(canoFile);
 			javaDef.preprocess();
 
 		} else {
@@ -53,7 +53,7 @@ public class DefinitionLoader {
 		return javaDef;
 	}
 
-	public static ro.uaic.info.fmse.k.Definition parseDefinition(String mainModule, File canonicalFile, File dotk) throws IOException, Exception {
+	public static org.kframework.k.Definition parseDefinition(String mainModule, File canonicalFile, File dotk) throws IOException, Exception {
 		Stopwatch sw = new Stopwatch();
 		// ------------------------------------- basic parsing
 		Definition def = new Definition();
@@ -139,7 +139,7 @@ public class DefinitionLoader {
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Parsing Rules   = ");
 
-		ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
+		org.kframework.k.Definition javaDef = new org.kframework.k.Definition((Element) preprocessedDef.getFirstChild());
 
 		javaDef.accept(new UpdateReferencesVisitor());
 		javaDef.accept(new CollectConsesVisitor());
@@ -147,25 +147,25 @@ public class DefinitionLoader {
 		// disambiguation steps
 
 		if (GlobalSettings.tempDisamb) {
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CellTypesFilter());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewritePriorityFilter());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectKSeqFilter());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbDuplicateFilter());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeSystemFilter());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new FlattenListsFilter());
-			javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new CorrectRewriteSortFilter());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new CellTypesFilter());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new CorrectRewritePriorityFilter());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new CorrectKSeqFilter());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new VariableTypeInferenceFilter());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new AmbDuplicateFilter());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new TypeSystemFilter());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new FlattenListsFilter());
+			javaDef = (org.kframework.k.Definition) javaDef.accept(new CorrectRewriteSortFilter());
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Disambiguate    = ");
 		}
 		// last resort disambiguation
-		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
+		javaDef = (org.kframework.k.Definition) javaDef.accept(new AmbFilter());
 
-		javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
+		javaDef = (org.kframework.k.Definition) javaDef.accept(new EmptyListsVisitor());
 
 		return javaDef;
 	}

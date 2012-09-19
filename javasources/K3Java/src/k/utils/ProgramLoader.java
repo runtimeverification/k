@@ -3,20 +3,20 @@ package k.utils;
 import java.io.File;
 import java.io.IOException;
 
+import org.kframework.disambiguate.AmbFilter;
+import org.kframework.exceptions.TransformerException;
+import org.kframework.k.ASTNode;
+import org.kframework.loader.CollectConsesVisitor;
+import org.kframework.loader.JavaClassesFactory;
+import org.kframework.loader.UpdateReferencesVisitor;
+import org.kframework.transitions.labelify.KAppModifier;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import ro.uaic.info.fmse.disambiguate.AmbFilter;
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
-import ro.uaic.info.fmse.exceptions.TransformerException;
 import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.k.ASTNode;
-import ro.uaic.info.fmse.loader.CollectConsesVisitor;
-import ro.uaic.info.fmse.loader.JavaClassesFactory;
-import ro.uaic.info.fmse.loader.UpdateReferencesVisitor;
-import ro.uaic.info.fmse.transitions.labelify.KAppModifier;
 import ro.uaic.info.fmse.utils.file.FileUtil;
 
 public class ProgramLoader {

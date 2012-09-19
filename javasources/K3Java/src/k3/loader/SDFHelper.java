@@ -1,6 +1,6 @@
 package k3.loader;
 
-import ro.uaic.info.fmse.k.Attributes;
+import org.kframework.k.Attributes;
 
 public class SDFHelper {
 	public static String getSDFAttributes(Attributes attrs) {

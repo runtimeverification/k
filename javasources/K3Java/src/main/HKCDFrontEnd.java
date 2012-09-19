@@ -6,15 +6,15 @@ import java.io.IOException;
 import k.utils.Stopwatch;
 
 import org.apache.commons.cli.CommandLine;
+import org.kframework.hkcd.HaskellDefFilter;
+import org.kframework.hkcd.HaskellPgmFilter;
+import org.kframework.k.ASTNode;
 
 import ro.uaic.info.fmse.errorsystem.KException;
 import ro.uaic.info.fmse.errorsystem.KException.ExceptionType;
 import ro.uaic.info.fmse.errorsystem.KException.KExceptionGroup;
 import ro.uaic.info.fmse.general.GlobalSettings;
-import ro.uaic.info.fmse.hkcd.HaskellDefFilter;
-import ro.uaic.info.fmse.hkcd.HaskellPgmFilter;
 
-import ro.uaic.info.fmse.k.ASTNode;
 import ro.uaic.info.fmse.utils.file.FileUtil;
 
 /**
@@ -125,7 +125,7 @@ public class HKCDFrontEnd {
 
 			GlobalSettings.literate = true;
 
-			ro.uaic.info.fmse.k.Definition langDef =
+			org.kframework.k.Definition langDef =
 				k.utils.DefinitionLoader.loadDefinition(
 					defFile,
 					mainModule);

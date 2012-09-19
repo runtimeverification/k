@@ -1,9 +1,9 @@
 package k3.basic;
 
+import org.kframework.loader.Constants;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import ro.uaic.info.fmse.loader.Constants;
 
 public class Require extends ModuleItem implements Cloneable {
 	private String value;

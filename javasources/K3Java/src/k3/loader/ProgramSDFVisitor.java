@@ -5,15 +5,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.kframework.k.PriorityBlock;
+import org.kframework.k.Production;
+import org.kframework.k.ProductionItem;
+import org.kframework.k.Sort;
+import org.kframework.k.Syntax;
+import org.kframework.k.Terminal;
+import org.kframework.k.ProductionItem.ProductionType;
+import org.kframework.visitors.BasicVisitor;
+
 import k.utils.StringUtil;
-import ro.uaic.info.fmse.k.PriorityBlock;
-import ro.uaic.info.fmse.k.Production;
-import ro.uaic.info.fmse.k.ProductionItem;
-import ro.uaic.info.fmse.k.ProductionItem.ProductionType;
-import ro.uaic.info.fmse.k.Sort;
-import ro.uaic.info.fmse.k.Syntax;
-import ro.uaic.info.fmse.k.Terminal;
-import ro.uaic.info.fmse.visitors.BasicVisitor;
 
 public class ProgramSDFVisitor extends BasicVisitor {
 
