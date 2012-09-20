@@ -79,7 +79,7 @@ public class RunProcess {
 	/*
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
 	 */
-	public String runParser(String k3jar, String parser, String definition, String pgm, boolean isPgm) {
+	public String runParser(String parser, String pgm, boolean isPgm) {
 		String KAST = new String();
 		String parserPath = new String();
 

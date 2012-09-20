@@ -89,7 +89,7 @@ public class Utils {
 		return sb;
 	 }
 	
-	// insert parenthesis before and after each "_" when we have the option --parens
+	//insert parenthesis before and after each "_" when we have the option --parens
 	public static StringBuilder insertParenthesisNearUnderscores(List<Element> list, String op) {
 		StringBuilder sb = new StringBuilder(op);
 		int index = 0;
@@ -120,6 +120,7 @@ public class Utils {
 		return sb;
 	}
 	
+	//color the symbol found in text with the specified color
 	public static StringBuilder colorSymbol(String text, String symbol, String color) {
 		StringBuilder aux = new StringBuilder();
 		String[] tokens;
@@ -134,18 +135,12 @@ public class Utils {
 		return aux;
 	}
 
+	//returns a string composed of numChars whitespace characters
 	public static String buildWhitespace(int numChars) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < numChars; i++)
 			sb.append(" ");
 		return sb.toString();
-	}
-	
-	//get kast script according to the OS
-	public static String getKastOnOs() {
-		if (System.getProperty("os.name").toLowerCase().contains("win"))
-			return "kast.bat";
-		return "kast";
 	}
 	
 }

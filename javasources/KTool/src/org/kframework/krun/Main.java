@@ -49,6 +49,7 @@ public class Main {
 		System.out.println("JKrun 0.2.0\n" + "Copyright (C) 2012 Necula Emilian & Raluca");
 	}
 
+	//find the maude compiled definitions on the disk
 	public static String initOptions(String path) {
 		String result = null;
 		String path_ = null;
@@ -80,6 +81,7 @@ public class Main {
 		return result;
 	}
 
+	//set the main-module, syntax-module and k-definition according to their correlation with compiled-def
 	public static void resolveOption(String optionName, CommandLine cmd) {
 		String s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
 		int sep = s.lastIndexOf(K.fileSeparator);
@@ -113,11 +115,12 @@ public class Main {
 	}
 
 	// execute krun in normal mode (i.e. not in debug mode)
-	public static void normalExecution(String KAST, String lang, CommandLine cmd, RunProcess rp, String k3jar, CommandlineOptions cmd_options) {
+	public static void normalExecution(String KAST, String lang, RunProcess rp, CommandlineOptions cmd_options) {
 		try {
 			String s = new String();
 			List<String> red = new ArrayList<String>();
 			StringBuilder aux1 = new StringBuilder();
+			CommandLine cmd = cmd_options.getCommandLine();
 			
 			if (K.do_search) {
 				if ("search".equals(K.maude_cmd)) {
@@ -180,10 +183,10 @@ public class Main {
 				if (!formulaFile.exists()) {
 					// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
 					// assume that the specified argument is not a file and maybe represents a formula
-					KAST1 = rp.runParser(k3jar, K.parser, K.k_definition, K.model_checking, false);
+					KAST1 = rp.runParser(K.parser, K.model_checking, false);
 				} else {
 					// the specified argument represents a file
-					KAST1 = rp.runParser(k3jar, K.parser, K.k_definition, K.model_checking, true);
+					KAST1 = rp.runParser(K.parser, K.model_checking, true);
 				}
 
 				sb.append("mod MCK is" + K.lineSeparator);
@@ -481,7 +484,7 @@ public class Main {
 			}
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
-				K.kdir = new File(K.k_definition).getParent() + K.fileSeparator + ".k";;
+				K.kdir = new File(K.k_definition).getParent() + K.fileSeparator + ".k";
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");
@@ -646,11 +649,10 @@ public class Main {
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
 
-			String k3jar = new File(K.kast).getParent() + K.fileSeparator + "java" + K.fileSeparator + "k3.jar";
-			KAST = rp.runParser(k3jar, K.parser, K.k_definition, K.pgm, true);
+			KAST = rp.runParser(K.parser, K.pgm, true);
 
 			if (!K.debug) {
-				normalExecution(KAST, lang, cmd, rp, k3jar, cmd_options);
+				normalExecution(KAST, lang, rp, cmd_options);
 			} else {
 				debugExecution(KAST, lang);
 			}
