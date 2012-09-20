@@ -21,14 +21,37 @@ several lines, are ignored, too.  */
 /*@ \section{Abstract}
 This file defines a simple functional language in \K, called LAMBDA,
 using a substitution style.  The explicit objective here is to teach some 
-\K concepts and how they work in the K tool, and not to teach $\lambda$-calculus
-or to argue for one definitional style against another (e.g., some may prefer
-environment/closure-based definitions of such languages).
+\K concepts and how they work in the K tool, and not to teach
+$\lambda$-calculus or to argue for one definitional style against another
+(e.g., some may prefer environment/closure-based definitions of such
+languages).
 
 Note that the subsequent definition is so simple, that it hardly shows any
 of the strengths of \K.  Perhaps the most interesting \K aspect it shows is
 that substitution can be defined fully generically, and then used to give
-semantics to various constructs in various languages. */
+semantics to various constructs in various languages.
+
+\paragraph{Note:}{
+\K follows the
+\href{https://en.wikipedia.org/wiki/Literate_programming}{literate
+programming} approach.  The various semantic features defined in a \K
+module can be reordered at will and can be commented using normal
+comments like in C/C++/Java.  If those comments start with
+`\texttt{@}' preceded by no space (e.g.,
+`\texttt{//{@} {\textbackslash}section\{Variable declarations\}}'
+or
+`\texttt{/*{@} {\textbackslash}section\{Variable declarations\} {*}/}')
+then they are interpreted as formal \LaTeX\ documentation by the
+\texttt{kompile} tool when used with the option \texttt{-\,\!-pdf}
+(or \texttt{-\,\!-latex}).
+While comments are useful in general, they can annoy the expert user
+of \K.  To turn them off, you can do one of the following (unless you
+want to remove them manually): (1) Use an editor which can hide or
+color conventional C-like comments; or (2) Run the \K pre-processor
+(kpp) on the ASCII .k file, which outputs (to stdout) a variant of the
+\K definition with no comments.
+}
+*/
 
 /*@ \section{Substitution}
 We need the predefined substitution module, so we require it with the command
@@ -47,6 +70,26 @@ that we declare the lambda abstraction construct to be a binder, the
 lambda application to be strict, and the parentheses used for grouping as
 a bracket. */
 
+/*@ \paragraph{Note:}{
+Syntax in \K is defined using the familiar BNF notation, with
+terminals enclosed in quotes and nonterminals starting with capital
+letters.  Currently, \K uses
+\href{http://releases.strategoxt.org/strategoxt-manual/unstable/manual/chunk-chapter/tutorial-sdf.html}{SDF}
+as parsing frontend.  Specifically, it extends BNF with several attributes and
+notations inspired from SDF, plus a few \K-specific attributes which will be
+described in this tutorial.  To ease reading, the parsing- or
+typesetting-specific syntactic notations and attributes that appear in the
+ASCII semantics, such as the quotes around the terminals and operator
+precedences and grouping, are not displayed in the generated documentation.
+We only display the \K-specific attributes in the generated documentation,
+such as \texttt{strict}, \texttt{binder} and \texttt{bracket}, because those
+have a semantic nature.
+} */
+
+/*@ \paragraph{Note:}{
+The \texttt{strict} constructs can evaluate their arguments in any (fully
+interleaved) orders.
+} */
 
 //@ The initial syntax of our $\lambda$-calculus:
 
@@ -61,7 +104,17 @@ a bracket. */
 
   rule (lambda X:Id . E:Exp) V:Val => E[V / X]
 
-//@ \section{Integer and Boolean Builtins}
+/*@ \section{Integer and Boolean Builtins}
+The LAMBDA arithmetic and Boolean expression constructs are simply rewritten
+to their builtin counterparts once their arguments are evaluated.
+The operations with subscripts in the right-hand sides of the rules below are
+builtin and come with the corresponding builtin sort; they are actually
+written like \texttt{+Int} in ASCII, but they have \LaTeX\ attributes to be
+displayed like $+_{\it Int}$ in the generated document.  Note that the
+variables appearing in these rules have integer sort.  That means that these
+rules will only be applied after the arguments of the arithmetic constructs
+are fully evaluated to \K results; this will happen thanks to their strictness
+attributes declared as annotations to their syntax declarations (below).  */
 
   syntax Val ::= Int | Bool
   syntax Exp ::= Exp "*" Exp          [strict, left]
@@ -73,7 +126,8 @@ a bracket. */
   rule I1:Int + I2:Int => I1 +Int I2
   rule I1:Int <= I2:Int => I1 <=Int I2
 
-//@ \section{Conditional}
+/*@ \section{Conditional}
+Note that the \texttt{if} construct is strict only in its first argument. */
 
   syntax Exp ::= "if" Exp "then" Exp "else" Exp    [strict(1)]
   rule if true  then E else _ => E

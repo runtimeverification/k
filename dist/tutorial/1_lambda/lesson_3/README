@@ -23,7 +23,9 @@ In order for the above strictness declaration to work effectively and
 efficiently, we need to tell the K tool which expressions are meant to be
 results of computations, so that it will not attempt to evaluate them anymore.
 One way to do it is to make "Val" a syntactic subcategory of the builtin
-KResult syntactic category.  See lambda.k.
+KResult syntactic category.  Since we use the same K parser to also parse
+the semantics, we use the same "syntax" keyword to define additional syntax
+needed exclusively for the semantics (like KResults).  See lambda.k.
 
 Compile again and then run some programs.  They should all work as expected.
 In particular, free-variable-capture.lambda now evaluates to "a y".
