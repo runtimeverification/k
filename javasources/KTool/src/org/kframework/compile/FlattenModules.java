@@ -9,10 +9,8 @@ import java.util.Set;
 
 import org.kframework.compile.utils.CompilerStep;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Import;

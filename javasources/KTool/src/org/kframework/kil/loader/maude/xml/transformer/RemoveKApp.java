@@ -15,7 +15,6 @@ public class RemoveKApp {
 
 		if (t.getOp().equals("_`(_`)") && t.getSort().equals("KItem")) {
 			Term klabel = t.getChildren().get(0);
-			Term emptyListK = t.getChildren().get(1);
 			if (klabel.getSort().equals("KLabel"))
 				toReturn = klabel;
 		}

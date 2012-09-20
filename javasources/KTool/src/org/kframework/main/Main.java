@@ -24,7 +24,7 @@ public class Main {
 			} else {
 				Error.report("The first argument of K3 not recognized. Try -kompile or -kast or -krun.");
 			}
-		}
-		Error.report("There must be a first argument to K3: try -kompile or -kast or -krun.");
+		} else
+			Error.report("There must be a first argument to K3: try -kompile or -kast or -krun.");
 	}
 }
