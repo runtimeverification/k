@@ -1,0 +1,15 @@
+Although unnecessary here, it is insightful and useful
+to understand the relationship between your language's values and other
+syntactic categories.  It is often the case that values form a
+subset of the existing language syntax, like here, but sometimes that
+is not immediately obvious and sometimes even not true by default (for
+example, when defining functional languages we may add closures as
+values, even though closures were not expressions in the original
+language).  When that happens, in order for the semantics to be
+given smoothly and uniformly you may need to extend your language's
+original syntactic categories with the new values.  This is not needed
+for our IMP semantics here, since its values are trivial and already
+part of the original syntax.  Nevertheless, we still have to tell the
+\K tool that it should interpret our intended values as results of
+computations (note that this is not automatic, since sometimes other
+syntactic categories are results; e.g., types when defining a type system).
