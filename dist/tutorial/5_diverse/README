@@ -1,0 +1,53 @@
+Here we will learn several other features of K, such as:
+
+- how to properly use syntactic lists
+- how to define arbitrary evaluation contexts
+- how to define heating/cooling rules manually
+- how to make use of freezers in your rules
+- more details about how configuration abstraction really works
+- how to define arbitrary partial orders over syntactic constructs
+etc.
+
+
+
+
+
+Similar heating/cooling rules are also automatically
+associated to \K (evaluation) context declarations in more complex
+languages.  
+
+
+  Sometimes we want to customize the initial
+configuration before executing a program.  Then we can use
+custom configuration variables, whose name starts with {\em \$} like
+that of {\em \$PGM}.  For example, we can replace the
+$\kdot$ contents of the \textsf{state} cell with configuration
+map variable {\em \$STATE}.  This allows you to pass your desired
+initial state to \texttt{krun} in addition to the program, such as in
+the following command requesting \texttt{krun} to execute
+a program in a state binding $n$ to 0 and $s$ to 10:
+\begin{verbatim}
+krun programs/sum-novars.imp --STATE="n|->0 s|->10"
+\end{verbatim}
+
+
+You can manually edit the generated .tex and remove the poster option
+from \documentclass
+If you do that, it tries to format your definition for printing.  you
+can also use the thight option there to generate tighter bubbles.
+
+if you hover over the rule keyword, it displays a
+tooltip with the label.
+
+Configuration variables:
+// Moreover, since the purpose of the tutorial is to teach you K, the
+// language definition below may not be configured optimally as is.
+// For example, the initial configuration has no configuration variables.
+// Thus, some example programs may not run well with the provided
+// configuration.  You will be required to configure the K definition
+// appropriately and then rekompile it in order to run those programs.
+...
+// Replace the above <state/> cell with the following when you want to pass
+// an initial state through krun; see program programs/sum-novars.imp.
+//                  <state color="red"> $STATE:Map </state>
+// Make sure you rekompile the definition before calling krun.
