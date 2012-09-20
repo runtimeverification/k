@@ -17,6 +17,7 @@ import org.apache.commons.io.FileUtils;
 
 public class FileUtil {
 
+	//create a file with the specified name and place it under a subfolder
 	public static File createFile(String file) {
 		try {
 			File file1 = new File(file);
@@ -29,6 +30,7 @@ public class FileUtil {
 		return null;
 	}
 
+	//create a file with the specified name and content and place it under a subfolder
 	public static File createFile(String file, String content) {
 		try {
 			File file1 = new File(file);
@@ -47,6 +49,7 @@ public class FileUtil {
 		return null;
 	}
 
+	//generate an unique name for a file with the name fileName
 	public static String generateUniqueFileName(String fileName) {
 
 		int dot = fileName.lastIndexOf(".");
@@ -61,6 +64,7 @@ public class FileUtil {
 		return null;
 	}
 	
+	//generate an unique name for a folder with the name dirName
 	public static String generateUniqueFolderName(String dirName) {
 		try {
 			return File.createTempFile(dirName, "").getName();
@@ -70,6 +74,7 @@ public class FileUtil {
 		return null;
 	}
 
+	//return the content of a file 
 	public static String getFileContent(String file) {
 		BufferedReader reader = null;
 		try {
@@ -156,6 +161,7 @@ public class FileUtil {
 		}
 	}
 
+	// parse the output of Maude when --output-mode=raw
 	public static String parseResultOutputMaude(String file) {
 		BufferedReader reader = null;
 		try {
@@ -198,6 +204,7 @@ public class FileUtil {
 		return null;
 	}
 	
+	// parse the output of Maude when --output-mode=raw and --ltlmc options are provided
 	public static String parseModelCheckingOutputMaude(String file) {
 		BufferedReader reader = null;
 		try {
@@ -245,6 +252,7 @@ public class FileUtil {
 		return null;
 	}
 	
+	//parse the output of Maude when --output-mode=raw and search command is used 
 	public static List<String> parseSearchOutputMaude(String file) {
 		BufferedReader reader = null;
 		List<String> l = new ArrayList<String>();
@@ -293,6 +301,7 @@ public class FileUtil {
 		return null;
 	}
 
+	//search for files in the given path, with the specified extension and recursively if recursive=true 
 	public static ArrayList<File> searchFiles(String path, String extension, boolean recursive) {
 		ArrayList<File> result = new ArrayList<File>();
 		File dir = new File(path);
@@ -314,6 +323,7 @@ public class FileUtil {
 		return result;
 	}
 	
+	//search for subfolders in the given path and having a name that matches the pattern
 	public static File[] searchSubFolders (String path, final String pattern) {
 		// This filter only returns directories with a name that matches the pattern
 		FileFilter fileFilter = new FileFilter() {
@@ -326,6 +336,7 @@ public class FileUtil {
 		return files;
 	}
 
+	//get the extension of a file specified by the fullPath with the specified extension and path separator
 	public static String getExtension(String fullPath, String extensionSeparator, String pathSeparator) {
 		int dot, pos;
 		String aux;
@@ -339,18 +350,21 @@ public class FileUtil {
 			return aux.substring(dot + 1);
 		}
 	}
-
+    
+	// for folder/subfolder/fileName.extension it will return fileName ("." - extensionSeparator and "/" - pathSeparator)
 	public static String getFilename(String fullPath, String extensionSeparator, String pathSeparator) {
 		int dot = fullPath.lastIndexOf(extensionSeparator);
 		int sep = fullPath.lastIndexOf(pathSeparator);
 		return fullPath.substring(sep + 1, dot);
 	}
 
+	// for folder/subfolder/fileName.extension it will return folder/subfolder/fileName
 	public static String dropExtension(String fullPath, String extensionSeparator, String pathSeparator) {
 		int dot = fullPath.lastIndexOf(extensionSeparator);
 		return fullPath.substring(0, dot);
 	}
 
+	//drop the .k extension from the name of a file
 	public static String dropKExtension(String fullPath, String extensionSeparator, String pathSeparator) {
 		if ("k".equals(getExtension(fullPath, ".", pathSeparator))) {
 			return dropExtension(fullPath, extensionSeparator, pathSeparator);

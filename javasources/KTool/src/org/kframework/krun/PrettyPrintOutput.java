@@ -167,7 +167,7 @@ public class PrettyPrintOutput {
 		return result;
 	}
 
-
+    //process the xml document (obtained from Maude) given by the fileName
 	public List<String> processDoc(String fileName) {
 		File input = new File(fileName);
 		Document doc = XmlUtil.readXML(input);
@@ -562,6 +562,7 @@ public class PrettyPrintOutput {
 		return sb.toString();
 	}
 
+	//pretty print a text according to specified lineskip, whitespace and color
 	private static String prettyPrint(String text, boolean lineskip, int whitespace, String color) {
 		StringBuilder output = new StringBuilder();
 		StringBuilder aux;
@@ -604,6 +605,7 @@ public class PrettyPrintOutput {
 		return output.toString();
 	}
 
+	//some pretty-printing process of an xml node according to its op and sort attributes 
 	public static String postProcessElement(Element node, String op, String sort) {
 		String result = new String();
 

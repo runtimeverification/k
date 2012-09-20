@@ -481,6 +481,7 @@ public class Main {
 			}
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
+				K.kdir = new File(K.k_definition).getParent() + K.fileSeparator + ".k";;
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");

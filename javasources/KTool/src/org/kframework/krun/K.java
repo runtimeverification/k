@@ -10,7 +10,7 @@ public class K {
 	public static final String lineSeparator = System.getProperty("line.separator");
 	public static final String k_base = KPaths.getKBase(false);
 
-	public static final String kdir = userdir + fileSeparator + ".k";
+	public static String kdir = userdir + fileSeparator + ".k";
 	public static final String krunDir = kdir + fileSeparator + "krun";
 	public static final String krunTempDir = kdir + fileSeparator + FileUtil.generateUniqueFolderName("krun");
 	public static final String maude_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_in.maude");
@@ -57,6 +57,8 @@ public class K {
 	public static boolean log_io = false;
 	public static boolean debug = false;
 	public static boolean trace = false;
+	//delete temp folders created by krun by default
 	public static boolean deleteTempDir = true;
 
+	
 }

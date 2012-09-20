@@ -6,6 +6,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.Serializable;
 
+// a Java bean class needed to perform folder renaming when the value of the "exitCode" property changes (i.e. program is about to exit)
 public class ProcessBean implements PropertyChangeListener, Serializable {
 
 	private static final long serialVersionUID = 1L;
