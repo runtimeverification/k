@@ -70,21 +70,24 @@ public class Executor extends Thread {
 		    output = callable.output;
 		    error = callable.error;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 		    timedout = true;
 		    error = e.getMessage();
+		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 		    e.printStackTrace();
 		} catch (InterruptedException e) {
 			timedout = true;
 		    error = e.getMessage();
+		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 		    e.printStackTrace();
 		} catch (ExecutionException e) {
 			timedout = true;
 		    error = e.getMessage();
+		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 		    e.printStackTrace();
 		} catch (TimeoutException e) {
 			timedout = true;
 		    error = e.getMessage();
+		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 		    e.printStackTrace();
 		}
 	}

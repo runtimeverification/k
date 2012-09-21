@@ -53,7 +53,7 @@ public class Example extends Thread {
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					System.out.println("Jenkins: " + e.getLocalizedMessage());
 					e.printStackTrace();
 				}
 			}
@@ -67,23 +67,6 @@ public class Example extends Thread {
 		} else {
 
 			String krun = new File(k3jar).getAbsolutePath();
-
-//			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
-//					.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
-//			for (Program program : programs) {
-//				program.krun = krun;
-//				tpe.execute(program);
-//			}
-//			// wait until examples are running
-//			while (tpe.getCompletedTaskCount() != programs.size()) {
-//				try {
-//					Thread.sleep(1);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-			
 			ThreadPoolExecutor tpe;
 			for (Program program: programs){
 				program.krun = krun;
@@ -95,7 +78,7 @@ public class Example extends Thread {
 					try {
 						Thread.sleep(1);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+						System.out.println("Jenkins: " + e.getLocalizedMessage());
 						e.printStackTrace();
 					}
 				}

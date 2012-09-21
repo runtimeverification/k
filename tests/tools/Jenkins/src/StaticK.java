@@ -100,10 +100,13 @@ public class StaticK {
 			Document doc = db.parse(xmlFileName);
 			return doc;
 		} catch (ParserConfigurationException e) {
+		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 			e.printStackTrace();
 		} catch (SAXException e) {
+		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
+		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 
@@ -120,13 +123,14 @@ public class StaticK {
 			f = new BufferedInputStream(new FileInputStream(filePath));
 			f.read(buffer);
 		} catch (IOException e) {
-			System.out.println("INTERNAL ERROR: " + e.getMessage());
+		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 			e.printStackTrace();
 		} finally {
 			if (f != null)
 				try {
 					f.close();
 				} catch (IOException ignored) {
+				    System.out.println("Jenkins: " + ignored.getLocalizedMessage());
 					ignored.printStackTrace();
 				}
 		}
