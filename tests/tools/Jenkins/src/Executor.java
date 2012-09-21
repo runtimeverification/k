@@ -73,6 +73,7 @@ public class Executor extends Thread {
 		    timedout = true;
 		    error = e.getMessage();
 		    System.out.println("Jenkins: " + e.getLocalizedMessage());
+		    System.out.println("Command: " + commands);
 		    e.printStackTrace();
 		} catch (InterruptedException e) {
 			timedout = true;
