@@ -47,6 +47,7 @@ public class Executor extends Thread {
     		String line = "";
     		output = "";
     		while ((line = br.readLine()) != null) {
+    			System.out.println("LINE OUT LOOP: " + line);
     			output += line + "\n";
     			line = "";
     		}
@@ -55,6 +56,7 @@ public class Executor extends Thread {
     		br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
     		line = ""; error = "";
     		while ((line = br.readLine()) != null) {
+    			System.out.println("LINE ERR LOOP: " + line);
     			error += line + "\n";
     			line = "";
     		}
