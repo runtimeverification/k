@@ -5,7 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.html.HTMLFilter;
@@ -15,8 +16,19 @@ import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.sharing.AutomaticModuleImportsTransformer;
 import org.kframework.compile.sharing.DittoFilter;
-import org.kframework.compile.transformers.*;
+import org.kframework.compile.tags.AddDefaultComputational;
+import org.kframework.compile.tags.AddOptionalTags;
+import org.kframework.compile.tags.AddStrictStar;
+import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.transformers.AddKCell;
+import org.kframework.compile.transformers.AddTopCell;
+import org.kframework.compile.transformers.DesugarStreams;
+import org.kframework.compile.transformers.ResolveAnonymousVariables;
+import org.kframework.compile.transformers.ResolveBinder;
+import org.kframework.compile.transformers.ResolveBlockingInput;
+import org.kframework.compile.transformers.ResolveFresh;
 import org.kframework.compile.utils.CompilerTransformerStep;
+import org.kframework.kil.Definition;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
@@ -32,14 +44,13 @@ import org.kframework.utils.ResourceExtractor;
 import org.kframework.utils.Sdf2Table;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KMessages;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KMessages;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.maude.MaudeRun;
 import org.kframework.utils.utils.file.FileUtil;
 import org.kframework.utils.utils.file.KPaths;
-
 
 import com.thoughtworks.xstream.XStream;
 
@@ -83,11 +94,11 @@ public class KompileFrontEnd {
 			GlobalSettings.warningslevel = Integer.parseInt(cmd.getOptionValue("warnings"));
 
 		if (cmd.hasOption("transition"))
-			GlobalSettings.transition = cmd.getOptionValue("transition");
+			GlobalSettings.transition = metadataParse(cmd.getOptionValue("transition"));
 		if (cmd.hasOption("supercool"))
-			GlobalSettings.supercool = cmd.getOptionValue("supercool");
+			GlobalSettings.supercool = metadataParse(cmd.getOptionValue("supercool"));
 		if (cmd.hasOption("superheat"))
-			GlobalSettings.superheat = cmd.getOptionValue("superheat");
+			GlobalSettings.superheat = metadataParse(cmd.getOptionValue("superheat"));
 		
 		if (cmd.hasOption("addTopCell")) {
 			GlobalSettings.addTopCell = true;
@@ -665,17 +676,14 @@ public class KompileFrontEnd {
 			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
 			load += maudeLib;
 
-			String transition = "\"transition=()\"";
-			String superheat = "\"superheat=()\"";
-			String supercool = "\"supercool=()\"";
+			String transition = "\"structural=() computational=() transition=()\"";
+			String superheat = "\"strict*=() superheat=()\"";
+			String supercool = "\"structural=() computational=() supercool=()\"";
 
-			if (!GlobalSettings.transition.equals(""))
-				transition = "\"" + metadataParse(GlobalSettings.transition) + "\"";
-			if (!GlobalSettings.superheat.equals(""))
-				superheat = "\"" + metadataParse(GlobalSettings.superheat) + "\"";
-			if (!GlobalSettings.supercool.equals(""))
-				supercool = "\"" + metadataParse(GlobalSettings.supercool) + "\"";
-
+			javaDef = (Definition) javaDef.accept(new AddStrictStar());
+			javaDef = (Definition) javaDef.accept(new AddDefaultComputational());
+			javaDef = (Definition) javaDef.accept(new AddOptionalTags());
+			
 			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats "
 					+ superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
@@ -696,23 +704,17 @@ public class KompileFrontEnd {
 			// }
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
-	private static String metadataParse(String tags) {
+	private static List<String> metadataParse(String tags) {
 		String[] alltags = tags.split("\\s+");
-		String result = "";
-		String tag;
-		for (int i = 0; i < alltags.length; i++) {
-			tag = alltags[i];
-			if (tag.matches("\\("))
-				tag.replaceFirst("\\(", "=(");
-			else
-				tag += "=()";
-
-			result += tag + " ";
-		}
-
+		List<String> result = new ArrayList<String>();
+		for(int i = 0; i < alltags.length; i++)
+			result.add(alltags[i]);
 		return result;
 	}
 }

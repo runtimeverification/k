@@ -1,6 +1,8 @@
 package org.kframework.utils.general;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -18,8 +20,8 @@ public class GlobalSettings {
 	public static int warningslevel = 2;
 	public static boolean tempDisamb = true;
 	public static boolean typeWarnings = false;
-	public static String transition = "";
-	public static String superheat = "";
-	public static String supercool = "";
+	public static List<String> transition = new ArrayList<String>();
+	public static List<String> superheat = new ArrayList<String>();
+	public static List<String> supercool = new ArrayList<String>();
 	public static boolean addTopCell = false;
 }
