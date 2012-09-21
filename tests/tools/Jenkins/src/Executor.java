@@ -50,6 +50,7 @@ public class Executor extends Thread {
     			output += line + "\n";
     			line = "";
     		}
+    		br.close();
 
     		br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
     		line = ""; error = "";
@@ -57,6 +58,7 @@ public class Executor extends Thread {
     			error += line + "\n";
     			line = "";
     		}
+    		br.close();
 		}
 		catch (IOException e){
 			e.printStackTrace();
@@ -65,6 +67,7 @@ public class Executor extends Thread {
 		}
 		this.output = output;
 		this.error = error;
+		System.out.println(this);
 	}
 
 	public String[] getCommands() {
@@ -94,7 +97,7 @@ public class Executor extends Thread {
 		for(String cmd : this.commands)
 			commands += cmd + " ";
 		
-		return "`" + commands.trim() + "` in directory: " + dir;
+		return "`" + commands.trim() + "` in directory: " + dir + "\nOUT: " + output + "\nERR: " + error;
 	}
 	
 }
