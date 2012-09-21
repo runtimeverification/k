@@ -142,10 +142,9 @@ public class Syntax extends ModuleItem {
 
 					if (maudelabel.equals(""))
 					{
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot declare empty terminal.", p.filename, p.location, 0));
+						GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Empty production. Please use `prefixlabel` attribute.", p.filename, p.location, 0));
 						continue;
 					}
-
 					
 					if (!p.attributes.containsKey("bracket"))
 						if (metadata.equals(""))
