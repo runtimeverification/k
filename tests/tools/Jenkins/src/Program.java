@@ -7,7 +7,7 @@ public class Program extends Thread {
 	public String filename, inputFile, outputFile, krun, kdefinition, dir;
 	public List<String> krunOptions;
 
-	private String output = "", error = "", sent = "";
+	private String output = "", error = "";
 	private int exit;
 	private Executor compile;
 	private long time = 0;
@@ -69,7 +69,6 @@ public class Program extends Thread {
 		exit = compile.getExitValue();
 		timedout = compile.getTimedOut();
 		time = System.currentTimeMillis() - millis;
-		sent = compile.sent;
 	}
 
 	public boolean isCorrect() {
@@ -111,7 +110,6 @@ public class Program extends Thread {
 					+ "|\nInput: |" + input
 					+ "|\nInput file: " + inputFile 
 					+ "\nOutput file: " + outputFile
-					+ "\nSent: " + sent
 					+ "\n-------------------------------\n";
 	}
 
