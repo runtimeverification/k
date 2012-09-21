@@ -35,7 +35,7 @@ public class KompileOptionsParser {
 		verb.addOption(verbose);
 		verb.addOption(lint);
 
-		//Option tempDisamb = new Option("tempDisamb", "tempDisamb", false, "temporary to test the java disambiguator");
+		// Option tempDisamb = new Option("tempDisamb", "tempDisamb", false, "temporary to test the java disambiguator");
 
 		// verbose and help
 		OptionGroup nofile = new OptionGroup();
@@ -48,12 +48,12 @@ public class KompileOptionsParser {
 		Option latex = new Option("latex", false, "generate latex from definition");
 		Option maudify = new Option("m", "maudify", false, "maudify the definition");
 		Option compile = new Option("c", "compile", false, "compile the definition");
-		//Option tempcompile = new Option("tempc", "tempce", false, "test new implementation");
+		// Option tempcompile = new Option("tempc", "tempce", false, "test new implementation");
 
 		tex.addOption(latex);
 		tex.addOption(pdf);
 		tex.addOption(compile);
-		//tex.addOption(tempcompile);
+		// tex.addOption(tempcompile);
 		tex.addOption(maudify);
 
 		OptionGroup warn = new OptionGroup();
@@ -93,21 +93,13 @@ public class KompileOptionsParser {
 		Option unparse = new Option("unparse", false, "unparse a definition");
 
 		Option literate = new Option("literate", false, "preserve literate comments");
-		
-		
-		Option addTopCell = new Option("addTopCell", false, "add a top cell to configuration and all rules");
 
-		// options for non-determinism
-		OptionGroup nondet = new OptionGroup();
+		Option addTopCell = new Option("addTopCell", false, "add a top cell to configuration and all rules");
 
 		// transition
 		Option transition = new Option("transition", true, "<arg> tags to become rewrite rules");
-		Option supercool = new Option("supercool", true, "syntax <arg> tags triggering super heating nondetermistic choice for strictness");
-		Option superheat = new Option("superheat", true, "rule <arg> tags triggering super cooling tags are space-separated and can include the tag default");
-
-		nondet.addOption(transition);
-		nondet.addOption(supercool);
-		nondet.addOption(superheat);
+		Option superheat = new Option("superheat", true, "syntax <arg> tags triggering super heating nondetermistic choice for strictness");
+		Option supercool = new Option("supercool", true, "rule <arg> tags triggering super cooling tags are space-separated and can include the tag default");
 
 		// add options
 		options.addOptionGroup(verb);
@@ -119,12 +111,14 @@ public class KompileOptionsParser {
 		options.addOptionGroup(xml);
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
-		//options.addOption(tempDisamb);
+		// options.addOption(tempDisamb);
 		options.addOption(toHTML);
 		options.addOption(unparse);
 		options.addOption(literate);
 		options.addOption(addTopCell);
-		options.addOptionGroup(nondet);
+		options.addOption(transition);
+		options.addOption(supercool);
+		options.addOption(superheat);
 	}
 
 	public CommandLine parse(String[] cmd) {
