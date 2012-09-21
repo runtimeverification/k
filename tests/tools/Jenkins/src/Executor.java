@@ -20,6 +20,8 @@ public class Executor extends Thread {
 	private String input;
 	private boolean timedout = false;
 	private int ulimit;
+	public boolean exceptions = false;
+	
 	
 	public Executor(String[] commands, String dir, String input, int ulimit) {
 		super();
@@ -35,7 +37,7 @@ public class Executor extends Thread {
 			output = ""; error = "";
 			ProcessBuilder pb = new ProcessBuilder(commands);
 			pb.directory(new File(dir));
-			MyCallable<Integer> callable = new MyCallable<Integer>(pb.start(), input) {
+			MyCallable<Integer> callable = new MyCallable<Integer>(pb.start(), input, ulimit) {
 		        public Integer call() throws Exception
 		        {
 		    		if (input != null && !input.equals(""))
@@ -44,7 +46,6 @@ public class Executor extends Thread {
 		    			stream.write(input.getBytes());
 		    			stream.flush();
 		    			stream.close();
-		    			sent = input + "\nSize:" + input.getBytes().length + "";
 		    		}
 		    		
 		    		exitValue = p.waitFor();
@@ -70,25 +71,10 @@ public class Executor extends Thread {
 		    output = callable.output;
 		    error = callable.error;
 		} catch (IOException e) {
-		    timedout = true;
+		    exceptions = true;
 		    error = e.getMessage();
 		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 		    System.out.println("Command: " + commands);
-		    e.printStackTrace();
-		} catch (InterruptedException e) {
-			timedout = true;
-		    error = e.getMessage();
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
-		    e.printStackTrace();
-		} catch (ExecutionException e) {
-			timedout = true;
-		    error = e.getMessage();
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
-		    e.printStackTrace();
-		} catch (TimeoutException e) {
-			timedout = true;
-		    error = e.getMessage();
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 		    e.printStackTrace();
 		}
 	}
@@ -126,11 +112,24 @@ public class Executor extends Thread {
 	private static final ExecutorService THREAD_POOL 
     = Executors.newSingleThreadExecutor();
 
-	private static <T> T timedCall(Callable<T> c, long timeout, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException
+	private static <T> T timedCall(Callable<T> c, long timeout, TimeUnit timeUnit)
 	    {
-			FutureTask<T> task = new FutureTask<T>(c);
-		    THREAD_POOL.execute(task);
-		    return task.get(timeout, timeUnit);
+		    try {
+				FutureTask<T> task = new FutureTask<T>(c);
+			    THREAD_POOL.execute(task);
+				return task.get(timeout, timeUnit);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TimeoutException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    
+		    return null;
 	    }
 }
 
@@ -140,16 +139,19 @@ class MyCallable<T> implements Callable<T>
 	String output = "";
 	String error = "";
 	String input = "";
+	int timeout = 12000;
 	
-	public MyCallable(Process p1, String input)
+	public MyCallable(Process p1, String input, int timeout)
 	{
 		this.p = p1;
 		this.input = input;
+		this.timeout = timeout;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public T call() throws Exception {
-        return (T) (Integer)p.waitFor();	
+		p.wait(timeout);
+        return (T) (Integer)p.waitFor();
 	}
 }
