@@ -97,7 +97,7 @@ public class Executor extends Thread {
 		for(String cmd : this.commands)
 			commands += cmd + " ";
 		
-		return "`" + commands.trim() + "` in directory: " + dir + "\nOUT: " + output + "\nERR: " + error;
+		return "CMD: `" + commands.trim() + "` in directory: " + dir + "\nOUT: " + output + "\nERR: " + error + "\n";
 	}
 	
 }
