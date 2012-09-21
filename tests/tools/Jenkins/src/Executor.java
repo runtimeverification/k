@@ -65,6 +65,7 @@ public class Executor extends Thread {
 		    			line = "";
 		    		}
 
+		    		p.wait(timeout);
 		    		return p.waitFor();
 		        }};
 	        exitValue = timedCall(callable, ulimit, TimeUnit.SECONDS);
