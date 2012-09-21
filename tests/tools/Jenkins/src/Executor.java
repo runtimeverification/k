@@ -12,7 +12,6 @@ public class Executor extends Thread {
 	private int exitValue;
 	private String input;
 	private boolean timedout = false;
-//	private int ulimit;
 	public boolean exceptions = false;
 	
 	
@@ -21,7 +20,6 @@ public class Executor extends Thread {
 		this.commands = commands;
 		this.dir = dir;
 		this.input = input;
-//		this.ulimit = ulimit;
 	}
 
 	@Override

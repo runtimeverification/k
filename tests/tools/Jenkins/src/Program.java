@@ -9,7 +9,6 @@ public class Program extends Thread {
 
 	private String output = "", error = "";
 	private int exit;
-	private Executor compile;
 	private long time = 0;
 	public String type = "";
 	private boolean timedout = false;
@@ -49,7 +48,7 @@ public class Program extends Thread {
 		}
 		/* END */
 
-		compile = new Executor(run, dir, StaticK.readFileAsString(inputFile), StaticK.ulimit);
+		Executor compile = new Executor(run, dir, StaticK.readFileAsString(inputFile), StaticK.ulimit);
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 				.newCachedThreadPool();
 		tpe.execute(compile);
@@ -103,8 +102,8 @@ public class Program extends Thread {
 			return filename.substring(StaticK.kbasedir.length()) + "... success.";
 		else
 			return filename.substring(StaticK.kbasedir.length())
-					+ "... failed:\n\n------------ STATS ------------\nRun:\n"
-					+ compile + "\nKrun exit code: " + exit + "\nError: "
+					+ "... failed:\n\n------------ STATS ------------\n" +
+					"Krun exit code: " + exit + "\nError: "
 					+ error + "\nOutput: |" + output
 					+ "|\nExpecting: |" + expected
 					+ "|\nInput: |" + input
