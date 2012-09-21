@@ -12,7 +12,7 @@ public class Executor extends Thread {
 	private int exitValue;
 	private String input;
 	private boolean timedout = false;
-	private int ulimit;
+//	private int ulimit;
 	public boolean exceptions = false;
 	
 	
@@ -21,7 +21,7 @@ public class Executor extends Thread {
 		this.commands = commands;
 		this.dir = dir;
 		this.input = input;
-		this.ulimit = ulimit;
+//		this.ulimit = ulimit;
 	}
 
 	@Override
@@ -41,7 +41,6 @@ public class Executor extends Thread {
     			stream.close();
     		}
     		
-			p.wait(ulimit * 100);
     		exitValue = p.waitFor();
 
     		BufferedReader br = new BufferedReader(new InputStreamReader(
