@@ -10,6 +10,10 @@ import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.utils.strings.StringUtil;
 import org.kframework.utils.utils.xml.XML;
 import org.w3c.dom.Element;
@@ -98,11 +102,18 @@ public class Syntax extends ModuleItem {
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof Terminal) && MaudeHelper.constantSorts.contains(sort.getName())) {
 
 					String metadata = p.getAttributes().toMaude();
+					String operation = p.toString().replaceAll("\"", "");
+					
+					if (operation.equals(""))
+					{
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot declare empty terminal.", p.filename, p.location, 0));
+						continue;
+					}
 					if (sort.toString().equals("KLabel") || sort.toString().equals("CellLabel"))
 						if (!metadata.trim().equals(""))
-							contents += "op " + p.toString().replaceAll("\"", "") + ": -> " + sort + " [metadata \"" + metadata + "\"] .\n";
+							contents += "op " + operation + ": -> " + sort + " [metadata \"" + metadata + "\"] .\n";
 						else
-							contents += "op " + p.toString().replaceAll("\"", "") + ": -> " + sort + " .\n";
+							contents += "op " + operation + ": -> " + sort + " .\n";
 					// ignore K constants declarations
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof UserList)) {
 					// user declared lists case
@@ -129,6 +140,13 @@ public class Syntax extends ModuleItem {
 
 					String maudelabel = p.getLabel().replaceAll("` ", "`");
 
+					if (maudelabel.equals(""))
+					{
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot declare empty terminal.", p.filename, p.location, 0));
+						continue;
+					}
+
+					
 					if (!p.attributes.containsKey("bracket"))
 						if (metadata.equals(""))
 							contents += "op " + maudelabel + " : " + p.toMaude() + " -> " + sort + " .\n";
