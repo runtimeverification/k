@@ -24,8 +24,9 @@ public class Executor extends Thread {
 
 	@Override
 	public void run() {
+		String output = "";
+		String error = "";
 		try {
-			output = ""; error = "";
 			ProcessBuilder pb = new ProcessBuilder(commands);
 			pb.directory(new File(dir));
 
@@ -43,7 +44,7 @@ public class Executor extends Thread {
 
     		BufferedReader br = new BufferedReader(new InputStreamReader(
     				p.getInputStream()));
-    		String line;
+    		String line = "";
     		output = "";
     		while ((line = br.readLine()) != null) {
     			output += line + "\n";
@@ -62,6 +63,8 @@ public class Executor extends Thread {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		this.output = output;
+		this.error = error;
 	}
 
 	public String[] getCommands() {
