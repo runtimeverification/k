@@ -36,7 +36,7 @@ public class Initialize {
 			// StaticK.toolsDir = "/home/andrei.arusoaie/work/trunk/tests/tools";
 			
 		} catch (ParserConfigurationException e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
+			System.out.println(e.getMessage());
 			System.exit(1);
 		}
 	}
@@ -340,7 +340,6 @@ public class Initialize {
 			out.write(Report.format(doc));
 			out.close();
 		} catch (IOException e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 	}

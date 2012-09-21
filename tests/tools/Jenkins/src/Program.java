@@ -7,8 +7,9 @@ public class Program extends Thread {
 	public String filename, inputFile, outputFile, krun, kdefinition, dir;
 	public List<String> krunOptions;
 
-	private String output = "", error = "";
+	private String output = "", error = "", sent = "";
 	private int exit;
+	private Executor compile;
 	private long time = 0;
 	public String type = "";
 	private boolean timedout = false;
@@ -48,7 +49,7 @@ public class Program extends Thread {
 		}
 		/* END */
 
-		Executor compile = new Executor(run, dir, StaticK.readFileAsString(inputFile), StaticK.ulimit);
+		compile = new Executor(run, dir, StaticK.readFileAsString(inputFile), StaticK.ulimit);
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 				.newCachedThreadPool();
 		tpe.execute(compile);
@@ -58,7 +59,7 @@ public class Program extends Thread {
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
-			    System.out.println("Jenkins: " + e.getLocalizedMessage());
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -68,6 +69,7 @@ public class Program extends Thread {
 		exit = compile.getExitValue();
 		timedout = compile.getTimedOut();
 		time = System.currentTimeMillis() - millis;
+		sent = compile.sent;
 	}
 
 	public boolean isCorrect() {
@@ -102,13 +104,14 @@ public class Program extends Thread {
 			return filename.substring(StaticK.kbasedir.length()) + "... success.";
 		else
 			return filename.substring(StaticK.kbasedir.length())
-					+ "... failed:\n\n------------ STATS ------------\n" +
-					"Krun exit code: " + exit + "\nError: "
+					+ "... failed:\n\n------------ STATS ------------\nRun:\n"
+					+ compile + "\nKrun exit code: " + exit + "\nError: "
 					+ error + "\nOutput: |" + output
 					+ "|\nExpecting: |" + expected
 					+ "|\nInput: |" + input
 					+ "|\nInput file: " + inputFile 
 					+ "\nOutput file: " + outputFile
+					+ "\nSent: " + sent
 					+ "\n-------------------------------\n";
 	}
 

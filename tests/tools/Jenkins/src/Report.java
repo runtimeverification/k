@@ -39,9 +39,8 @@ public class Report {
 			db = dbf.newDocumentBuilder();
 			this.doc = db.newDocument();
 		} catch (ParserConfigurationException e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
-		    e.printStackTrace();
-		    System.exit(1);
+			System.out.println(e.getMessage());
+			System.exit(1);
 		}
 		
 		init();
@@ -170,13 +169,10 @@ public class Report {
 			Document doc = db.parse(file);
 			return doc;
 		} catch (ParserConfigurationException e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 			e.printStackTrace();
 		} catch (SAXException e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 
@@ -196,13 +192,13 @@ public class Report {
 			return result.getWriter().toString();
 
 		} catch (TransformerConfigurationException e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TransformerFactoryConfigurationError e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TransformerException e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -215,7 +211,6 @@ public class Report {
 			out.write(format(doc));
 			out.close();
 		} catch (IOException e) {
-		    System.out.println("Jenkins: " + e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 	}
