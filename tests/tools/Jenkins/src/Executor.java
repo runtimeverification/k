@@ -126,6 +126,12 @@ public class Executor extends Thread {
 	    {
 			FutureTask<T> task = new FutureTask<T>(c);
 		    THREAD_POOL.execute(task);
+		    
+		    while (!THREAD_POOL.isTerminated())
+		    {
+		    	Thread.sleep(1);
+		    }
+		    
 		    return task.get(timeout, timeUnit);
 	    }
 }
