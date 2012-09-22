@@ -1,9 +1,9 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,12 +33,14 @@ public class Executor extends Thread {
 	public void run() {
 		try {
 			output = ""; error = "";
-			ProcessBuilder pb = new ProcessBuilder(commands);
-			pb.directory(new File(dir));
-			MyCallable<Integer> callable = new MyCallable<Integer>(pb.start(), input) {
+			MyCallable<Integer> callable = new MyCallable<Integer>(null, input) {
 		        public Integer call() throws Exception
 		        {
-		    		if (input != null && !input.equals(""))
+					ProcessBuilder pb = new ProcessBuilder(commands);
+					pb.directory(new File(dir));
+					p = pb.start();
+
+					if (input != null && !input.equals(""))
 		    		{
 		    			OutputStream stream = p.getOutputStream();
 		    			stream.write(input.getBytes());
@@ -69,11 +71,6 @@ public class Executor extends Thread {
 	        exitValue = timedCall(callable, ulimit, TimeUnit.SECONDS);
 		    output = callable.output;
 		    error = callable.error;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-		    timedout = true;
-		    error = e.getMessage();
-		    e.printStackTrace();
 		} catch (InterruptedException e) {
 			timedout = true;
 		    error = e.getMessage();
@@ -122,16 +119,10 @@ public class Executor extends Thread {
 	private static final ExecutorService THREAD_POOL 
     = Executors.newSingleThreadExecutor();
 
-	private static <T> T timedCall(Callable<T> c, long timeout, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException
+	private static <T> T timedCall(Callable<T> c, long timeout, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException, CancellationException
 	    {
 			FutureTask<T> task = new FutureTask<T>(c);
 		    THREAD_POOL.execute(task);
-		    
-		    while (!task.isDone())
-		    {
-		    	Thread.sleep(1);
-		    }
-		    
 		    return task.get(timeout, timeUnit);
 	    }
 }
