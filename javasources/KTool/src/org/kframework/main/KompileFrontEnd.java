@@ -99,7 +99,7 @@ public class KompileFrontEnd {
 			GlobalSettings.supercool = metadataParse(cmd.getOptionValue("supercool"));
 		if (cmd.hasOption("superheat"))
 			GlobalSettings.superheat = metadataParse(cmd.getOptionValue("superheat"));
-		
+
 		if (cmd.hasOption("addTopCell")) {
 			GlobalSettings.addTopCell = true;
 		}
@@ -612,9 +612,6 @@ public class KompileFrontEnd {
 			// TODO: trateaza erorile de compilare
 			GlobalSettings.kem.print(KExceptionGroup.COMPILER);
 
-			// init stopwatch
-			// Stopwatch sw = new Stopwatch();
-
 			// for now just use this file as main argument
 			File f = mainFile.getCanonicalFile();
 
@@ -630,6 +627,9 @@ public class KompileFrontEnd {
 	}
 
 	public static void compile(org.kframework.kil.Definition javaDef, String step) {
+		// init stopwatch
+		Stopwatch sw = new Stopwatch();
+
 		try {
 
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
@@ -642,28 +642,27 @@ public class KompileFrontEnd {
 
 			DittoFilter df = new DittoFilter();
 			javaDef.accept(df);
-			
+
 			javaDef = new FlattenModules().compile(javaDef);
-			
-			
+
 			javaDef = new CompilerTransformerStep(new DesugarStreams()).compile(javaDef);
-			
+
 			javaDef = new CompilerTransformerStep(new AddKCell()).compile(javaDef);
-			
+
 			javaDef = new CompilerTransformerStep(new ResolveFresh()).compile(javaDef);
-			
+
 			if (GlobalSettings.addTopCell) {
 				javaDef = new CompilerTransformerStep(new AddTopCell()).compile(javaDef);
 			}
-			
+
 			javaDef = new AddEval().compile(javaDef);
-			
+
 			javaDef = new CompilerTransformerStep(new ResolveBinder()).compile(javaDef);
-			
+
 			javaDef = new CompilerTransformerStep(new ResolveAnonymousVariables()).compile(javaDef);
-			
+
 			javaDef = new CompilerTransformerStep(new ResolveBlockingInput()).compile(javaDef);
-			
+
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");
@@ -683,11 +682,14 @@ public class KompileFrontEnd {
 			javaDef = (Definition) javaDef.accept(new AddStrictStar());
 			javaDef = (Definition) javaDef.accept(new AddDefaultComputational());
 			javaDef = (Definition) javaDef.accept(new AddOptionalTags());
-			
-			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats "
-					+ superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
+
+			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools "
+					+ supercool + " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Java Compiler   = ");
 
 			// call maude to kompile the definition
 			String compiled = MaudeRun.run_maude(dotk.getAbsoluteFile(), compile);
@@ -699,9 +701,8 @@ public class KompileFrontEnd {
 			String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
 			FileUtil.saveInFile(defFile + "-compiled.maude", load + compiled);
 
-			// if (GlobalSettings.verbose) {
-			// sw.printIntermediate("RunMaude        = ");
-			// }
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("RunMaude        = ");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (TransformerException e) {
@@ -713,7 +714,7 @@ public class KompileFrontEnd {
 	private static List<String> metadataParse(String tags) {
 		String[] alltags = tags.split("\\s+");
 		List<String> result = new ArrayList<String>();
-		for(int i = 0; i < alltags.length; i++)
+		for (int i = 0; i < alltags.length; i++)
 			result.add(alltags[i]);
 		return result;
 	}
