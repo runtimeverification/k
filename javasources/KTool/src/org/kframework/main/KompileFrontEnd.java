@@ -675,9 +675,9 @@ public class KompileFrontEnd {
 			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
 			load += maudeLib;
 
-			String transition = "\"structural=() computational=() transition=()\"";
-			String superheat = "\"strict*=() superheat=()\"";
-			String supercool = "\"structural=() computational=() supercool=()\"";
+			String transition = metadataTags(GlobalSettings.transition); 
+			String superheat = metadataTags(GlobalSettings.superheat);
+			String supercool = metadataTags(GlobalSettings.supercool);
 
 			javaDef = (Definition) javaDef.accept(new AddStrictStar());
 			javaDef = (Definition) javaDef.accept(new AddDefaultComputational());
@@ -717,5 +717,13 @@ public class KompileFrontEnd {
 		for (int i = 0; i < alltags.length; i++)
 			result.add(alltags[i]);
 		return result;
+	}
+	
+	private static String metadataTags(List<String> tags) {
+		String result = "";
+		for (String s : tags) {
+			result += s + "=()";
+		}
+		return "\"" + result + "\"";
 	}
 }

@@ -23,5 +23,10 @@ public class GlobalSettings {
 	public static List<String> transition = new ArrayList<String>();
 	public static List<String> superheat = new ArrayList<String>();
 	public static List<String> supercool = new ArrayList<String>();
+	static {
+		transition.add("transition");
+		superheat.add("superheat");
+		supercool.add("supercool");
+	}
 	public static boolean addTopCell = false;
 }
