@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,8 +22,6 @@ public class StaticK {
 	public static String toolsDir;
 	public static String fileSep = System.getProperty("file.separator");
 	public static String k3Jar;
-	public static ThreadPoolExecutor pool;
-//	public static int THREAD_POOL_SIZE = initPoolSize();
 	public static int ulimit = 1000;
 	public static int biggerlimit = 3000;
 	public static String kbasedir;

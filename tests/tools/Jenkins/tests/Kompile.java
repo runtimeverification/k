@@ -20,19 +20,21 @@ public class Kompile {
 		
 		List<Example> examples = StaticK.getExamples(configuration, StaticK.k3Jar, "example", StaticK.kbasedir);
 		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression", StaticK.kbasedir);
-		StaticK.pool = (ThreadPoolExecutor) Executors
+		ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(StaticK.initPoolSize());
 
 		for (Example example : examples)
-			StaticK.pool.execute(example);
+			pool.execute(example);
 		for (Example r : regression)
-			StaticK.pool.execute(r);
+			pool.execute(r);
 
 		
 		// wait until examples are running
-		while (StaticK.pool.getCompletedTaskCount() != (examples.size() + regression.size())) {
+		while (pool.getCompletedTaskCount() != (examples.size() + regression.size())) {
 			Thread.sleep(1);
 		}
+		
+		pool.shutdown();
 		
 		// report first
 		for (Example example : examples) {

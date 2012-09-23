@@ -20,24 +20,25 @@ public class RunPrograms {
 		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression", StaticK.kbasedir);
 		
 		
-		StaticK.pool = (ThreadPoolExecutor) Executors
+		ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(StaticK.initPoolSize());
 		for (Example example : examples)
 		{
 			example.runPrograms = true;
-			StaticK.pool.execute(example);
+			pool.execute(example);
 		}
 		for (Example example : regression)
 		{
 			example.runPrograms = true;
-			StaticK.pool.execute(example);
+			pool.execute(example);
 		}
 
 		// wait until examples are running
-		while (StaticK.pool.getCompletedTaskCount() != examples.size() + regression.size()) {
+		while (pool.getCompletedTaskCount() != examples.size() + regression.size()) {
 			Thread.sleep(1);
 		}
 
+		pool.shutdown();
 		
 		for(Example example : examples)
 		{
