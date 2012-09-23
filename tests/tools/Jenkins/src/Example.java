@@ -44,7 +44,7 @@ public class Example extends Thread {
 			Executor compile = new Executor(new String[] { "java", "-ss8m",
 					"-Xms64m", "-Xmx1G", "-jar", k3jar, "-kompile", mainFile,
 					"-l", mainModule }, dir, null, StaticK.ulimit);
-			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newSingleThreadExecutor();
+			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 			tpe.execute(compile);
 			
 			while (tpe.getCompletedTaskCount() != 1) {
