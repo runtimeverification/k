@@ -24,6 +24,12 @@ public class Kompile {
 		for (Example r : regression)
 			r.start();
 		
+		// wait for pool to finish
+		while(!StaticK.pool.isTerminated())
+		{
+			Thread.sleep(1);
+		}
+		
 		// report first
 		for (Example example : examples) {
 			String jdir = StaticK.kbasedir + StaticK.fileSep + "junit-reports";
