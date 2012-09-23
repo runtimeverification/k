@@ -28,11 +28,14 @@ public class Kompile {
 		for (Example r : regression)
 			pool.execute(r);
 
-		
+		System.out.println("Pool size: " + pool.getPoolSize());
+		System.out.println("Active: " + pool.getActiveCount());
+		System.out.println("Completed: " + pool.getCompletedTaskCount());
 		// wait until examples are running
 		while (pool.getCompletedTaskCount() != (examples.size() + regression.size())) {
 			Thread.sleep(1);
 		}
+		System.out.println("Completed: " + pool.getCompletedTaskCount());
 		
 		pool.shutdown();
 		
