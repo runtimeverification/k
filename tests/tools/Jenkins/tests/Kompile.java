@@ -3,8 +3,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.junit.Test;
 
@@ -20,24 +18,24 @@ public class Kompile {
 		
 		List<Example> examples = StaticK.getExamples(configuration, StaticK.k3Jar, "example", StaticK.kbasedir);
 		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression", StaticK.kbasedir);
-		ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(StaticK.initPoolSize());
+//		ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors
+//				.newFixedThreadPool(StaticK.initPoolSize());
 
 		for (Example example : examples)
-			pool.execute(example);
+			StaticK.pool.execute(example);
 		for (Example r : regression)
-			pool.execute(r);
+			StaticK.pool.execute(r);
 
-		System.out.println("Pool size: " + pool.getPoolSize());
-		System.out.println("Active: " + pool.getActiveCount());
-		System.out.println("Completed: " + pool.getCompletedTaskCount());
+		System.out.println("StaticK.pool size: " + StaticK.pool.getPoolSize());
+		System.out.println("Active: " + StaticK.pool.getActiveCount());
+		System.out.println("Completed: " + StaticK.pool.getCompletedTaskCount());
 		// wait until examples are running
-		while (pool.getCompletedTaskCount() != (examples.size() + regression.size())) {
+		while (StaticK.pool.getCompletedTaskCount() != (examples.size() + regression.size())) {
 			Thread.sleep(1);
 		}
-		System.out.println("Completed: " + pool.getCompletedTaskCount());
+		System.out.println("Completed: " + StaticK.pool.getCompletedTaskCount());
 		
-		pool.shutdown();
+//		StaticK.pool.shutdown();
 		
 		// report first
 		for (Example example : examples) {
