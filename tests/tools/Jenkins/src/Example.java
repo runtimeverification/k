@@ -71,11 +71,11 @@ public class Example extends Thread {
 			ThreadPoolExecutor tpe;
 			for (Program program: programs){
 				program.krun = krun;
-				tpe  = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+				tpe  = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 				tpe.execute(program);
 				
 				// wait until the program finishes execution
-				while (tpe.getCompletedTaskCount() != 10) {
+				while (tpe.getCompletedTaskCount() != 1) {
 					try {
 						Thread.sleep(1);
 					} catch (InterruptedException e) {
