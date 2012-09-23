@@ -72,11 +72,9 @@ public class Executor extends Thread {
 		    output = callable.output;
 		    error = callable.error;
 		} catch (InterruptedException e) {
-			timedout = true;
 		    error = e.getMessage();
 		    e.printStackTrace();
 		} catch (ExecutionException e) {
-			timedout = true;
 		    error = e.getMessage();
 		    e.printStackTrace();
 		} catch (TimeoutException e) {
