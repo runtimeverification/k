@@ -57,7 +57,8 @@ public class Example extends Thread {
 			}
 			tpe.shutdown();
 			
-			output = "Execute: " + compile + "\n\n" + compile.getOutput();
+			output = compile.getOutput();
+//			output = "Execute: " + compile + "\n\n" + compile.getOutput();
 			error = compile.getError();
 			exitCode = compile.getExitValue();
 			timedout = compile.getTimedOut();
