@@ -21,7 +21,7 @@ public class Kompile {
 		List<Example> examples = StaticK.getExamples(configuration, StaticK.k3Jar, "example", StaticK.kbasedir);
 		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression", StaticK.kbasedir);
 		StaticK.pool = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
+				.newFixedThreadPool(StaticK.initPoolSize());
 
 		for (Example example : examples)
 			StaticK.pool.execute(example);

@@ -5,7 +5,7 @@ public class InitLocal {
 
 	@Test
 	public void test() {
-		System.out.println("Using " + StaticK.THREAD_POOL_SIZE + " core(s).");
+		System.out.println("Using " + StaticK.initPoolSize() + " core(s).");
 		
 		String userDir = System.getProperty("user.dir");
 		

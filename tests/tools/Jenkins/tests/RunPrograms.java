@@ -21,7 +21,7 @@ public class RunPrograms {
 		
 		
 		StaticK.pool = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
+				.newFixedThreadPool(StaticK.initPoolSize());
 		for (Example example : examples)
 		{
 			example.runPrograms = true;

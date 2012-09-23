@@ -11,7 +11,7 @@ public class Checkout {
 	@Test
 	public void allTests() throws URISyntaxException
 	{
-		System.out.println("Using " + StaticK.THREAD_POOL_SIZE + " cores.");
+		System.out.println("Using " + StaticK.initPoolSize() + " core(s).");
 		
 		StaticK.file = new File(getClass().getProtectionDomain()
 				.getCodeSource().getLocation().toURI().getPath());
