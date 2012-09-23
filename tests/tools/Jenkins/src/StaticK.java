@@ -25,7 +25,7 @@ public class StaticK {
 	public static String k3Jar;
 	public static ThreadPoolExecutor pool;
 	public static int THREAD_POOL_SIZE = initPoolSize();
-	public static int ulimit = 500;
+	public static int ulimit = 1000;
 	public static int biggerlimit = 3000;
 	public static String kbasedir;
 	public static String configuration;
