@@ -56,31 +56,15 @@ public class Example extends Thread {
 				}
 			}
 
-			output = compile.getOutput();
+			output = "Execute: " + compile + "\n\n" + compile.getOutput();
 			error = compile.getError();
 			exitCode = compile.getExitValue();
 			timedout = compile.getTimedOut();
 			time = System.currentTimeMillis() - millis;
-			System.out.println(compile + "\n" + this + "\nTook: " + time + " ms.");
+			System.out.println(this + ". Took: " + time + " ms.");
 		} else {
 
 			String krun = new File(k3jar).getAbsolutePath();
-
-//			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
-//					.newFixedThreadPool(StaticK.THREAD_POOL_SIZE);
-//			for (Program program : programs) {
-//				program.krun = krun;
-//				tpe.execute(program);
-//			}
-//			// wait until examples are running
-//			while (tpe.getCompletedTaskCount() != programs.size()) {
-//				try {
-//					Thread.sleep(1);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
 			
 			ThreadPoolExecutor tpe;
 			for (Program program: programs){
