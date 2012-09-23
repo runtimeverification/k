@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
-public class Checkout {
+public class Setup {
 
 	@Test
 	public void allTests() throws URISyntaxException
@@ -29,7 +29,7 @@ public class Checkout {
 		
 		System.out.print("\nRemoving old K artifacts ...");
 		String[] removeCommands = new String[] { "rm", "-rf", StaticK.kbase };
-		Executor rmexecutor = new Executor(removeCommands, ".", null, StaticK.biggerlimit);
+		Executor rmexecutor = new Executor(removeCommands, ".", null);
 		rmexecutor.start();
 		rmexecutor.join(StaticK.ulimit * 1000);
 		Thread.yield();
@@ -38,7 +38,7 @@ public class Checkout {
 		
 		System.out.print("Copying K from k-framework project ...");
 		String[] copyCommands = new String[] { "cp", "-r", "/var/lib/jenkins/workspace/k-framework" , StaticK.kbase };
-		Executor cpexecutor = new Executor(copyCommands, ".", null, StaticK.biggerlimit);
+		Executor cpexecutor = new Executor(copyCommands, ".", null);
 		cpexecutor.start();
 		cpexecutor.join(StaticK.ulimit * 1000);
 		Thread.yield();
