@@ -44,7 +44,7 @@ public class Example extends Thread {
 			Executor compile = new Executor(new String[] { "java", "-ss8m",
 					"-Xms64m", "-Xmx1G", "-jar", k3jar, "-kompile", mainFile,
 					"-l", mainModule }, dir, null, StaticK.ulimit);
-			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(StaticK.initPoolSize());
 			tpe.execute(compile);
 			
 			while (tpe.getCompletedTaskCount() != 1) {
@@ -63,7 +63,7 @@ public class Example extends Thread {
 			exitCode = compile.getExitValue();
 			timedout = compile.getTimedOut();
 			time = System.currentTimeMillis() - millis;
-			System.out.println(this + " (" + time + ") ms.");
+			System.out.println(this + " (" + time + " ms).");
 		} else {
 
 			String krun = new File(k3jar).getAbsolutePath();
