@@ -1,7 +1,5 @@
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class Program extends Thread {
 	public String filename, inputFile, outputFile, krun, kdefinition, dir;
@@ -50,18 +48,12 @@ public class Program extends Thread {
 		/* END */
 
 		compile = new Executor(run, dir, StaticK.readFileAsString(inputFile));
-		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
-				.newCachedThreadPool();
-		tpe.execute(compile);
 		compile.start();
 
-		while (tpe.getCompletedTaskCount() != 1 ) {
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			compile.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 
 		output = compile.getOutput();

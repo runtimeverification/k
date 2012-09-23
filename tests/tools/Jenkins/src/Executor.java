@@ -23,7 +23,7 @@ public class Executor extends Thread {
 	@Override
 	public void run() {
 		try {
-			output = ""; error = "";
+			error = "";
 			ProcessBuilder pb = new ProcessBuilder(commands);
 			pb.directory(new File(dir));
 			Process p = pb.start();
@@ -59,6 +59,7 @@ public class Executor extends Thread {
 		    e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			error = e.getMessage();
 			e.printStackTrace();
 		}
 	}
