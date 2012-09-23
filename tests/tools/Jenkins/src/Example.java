@@ -1,7 +1,5 @@
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class Example extends Thread {
 	String dir;
@@ -43,17 +41,13 @@ public class Example extends Thread {
 			long millis = System.currentTimeMillis();
 			Executor compile = new Executor(new String[] { "java", "-ss8m",
 					"-Xms64m", "-Xmx1G", "-jar", k3jar, "-kompile", mainFile,
-					"-l", mainModule }, dir, null, StaticK.ulimit);
+					"-l", mainModule }, dir, null);
 
-			StaticK.pool.execute(compile);
-
-			while (compile.isAlive()) {
-				try {
-					Thread.sleep(1);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			compile.start();
+			try {
+				compile.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 			
 			output = compile.getOutput();
@@ -66,22 +60,17 @@ public class Example extends Thread {
 
 			String krun = new File(k3jar).getAbsolutePath();
 			
-			ThreadPoolExecutor tpe;
+			// execute sequentially the programs
 			for (Program program: programs){
 				program.krun = krun;
-				tpe  = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-				tpe.execute(program);
+				program.start();
 				
-				// wait until the program finishes execution
-				while (tpe.getCompletedTaskCount() != 1) {
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+				// wait
+				try {
+					program.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-				tpe.shutdown();
 			}
 			
 			String programss = "Testing " + mainFile + " programs:\n";

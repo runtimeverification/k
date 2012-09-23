@@ -49,7 +49,7 @@ public class Program extends Thread {
 		}
 		/* END */
 
-		compile = new Executor(run, dir, StaticK.readFileAsString(inputFile), StaticK.ulimit);
+		compile = new Executor(run, dir, StaticK.readFileAsString(inputFile));
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
 				.newCachedThreadPool();
 		tpe.execute(compile);

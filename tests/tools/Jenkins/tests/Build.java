@@ -12,7 +12,7 @@ public class Build {
 	// build K -> verify if the k3.jar file was created
 		String[] commands = new String[] { "ant" };
 		System.out.print("\nBuild ...");
-		Executor build = new Executor(commands, StaticK.kbasedir, null, StaticK.ulimit);
+		Executor build = new Executor(commands, StaticK.kbasedir, null);
 		build.start();
 		build.join(0);
 		Thread.yield();

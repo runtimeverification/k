@@ -1,9 +1,11 @@
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.junit.Test;
 
@@ -11,35 +13,38 @@ public class RunPrograms {
 
 	@Test
 	public void runPrograms() throws InterruptedException {
+		
 		System.out.println("\nRunning programs...");
+
+		// Check the existence of the configuration file
 		String configuration = StaticK.configuration;
+		if (!new File(configuration).exists()){
+			System.out.println("INTERNAL JENKINS ERROR: " + new File(configuration).getAbsolutePath() + " doesn't exists.");
+			System.exit(1);
+		}
 		
-		assertTrue(new File(configuration).exists());
-		
+		// collecting examples to be compiled
 		List<Example> examples = StaticK.getExamples(configuration, StaticK.k3Jar, "example", StaticK.kbasedir);
 		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression", StaticK.kbasedir);
+		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		
-		
-		ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(StaticK.initPoolSize());
 		for (Example example : examples)
 		{
 			example.runPrograms = true;
-			pool.execute(example);
+			tasks.add(Executors.callable(example));
 		}
-		for (Example example : regression)
+		for (Example r : regression)
 		{
-			example.runPrograms = true;
-			pool.execute(example);
+			r.runPrograms = true;
+			tasks.add(Executors.callable(r));
 		}
-
-		// wait until examples are running
-		while (pool.getCompletedTaskCount() != examples.size() + regression.size()) {
-			Thread.sleep(1);
-		}
-
-		pool.shutdown();
 		
+		// running
+		ExecutorService es = Executors.newFixedThreadPool(StaticK.initPoolSize());
+		es.invokeAll(tasks);
+
+		
+		// report
 		for(Example example : examples)
 		{
 			Report report = StaticK.reports.get(example.getJenkinsSuiteName());

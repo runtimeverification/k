@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,7 +28,6 @@ public class StaticK {
 	public static String configuration;
 	public static String reportsDir;
 	public static Map<String, Report> reports = new HashMap<String, Report>();
-	public static ThreadPoolExecutor pool = (ThreadPoolExecutor)Executors.newFixedThreadPool(initPoolSize());
 
 	public static int initPoolSize()
 	{
