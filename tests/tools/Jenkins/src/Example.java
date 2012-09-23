@@ -61,7 +61,7 @@ public class Example extends Thread {
 			exitCode = compile.getExitValue();
 			timedout = compile.getTimedOut();
 			time = System.currentTimeMillis() - millis;
-			System.out.println(compile + "\n" + this);
+			System.out.println(compile + "\n" + this + "\nTook: " + time + " ms.");
 		} else {
 
 			String krun = new File(k3jar).getAbsolutePath();
