@@ -48,6 +48,14 @@ module STRING-HOOKS
   syntax Bool ::= String "=/=String" String      [function, left]
   rule S1:String =/=String S2:String => notBool(S1 ==String S2) [function, anywhere]
 
+  syntax String ::= String "<String" String [function, hook(#STRING:_<String_)]
+                  | String "<=String" String [function]
+                  | String ">String" String [function]
+                  | String ">=String" String [function]
+
+  rule S1:String <=String S2:String => notBool(S2 <String S1) [function, anywhere]
+  rule S1:String >String S2:String => S2 <String S1 [function, anywhere]
+  rule S1:String >=String S2:String => notBool(S1 <String S2) [function, anywhere]
 
   syntax Char ::= "dummyChar"
 

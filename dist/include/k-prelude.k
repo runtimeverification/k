@@ -39,6 +39,10 @@ module K-MAP-EXTRAS
   rule M:Map[K2:K / K1:K] => M K1 |-> K2 
     when notBool(K1 in keys(M)) [structural, anywhere]
   
+  rule M:Map[undef/ K,,Kl:List{K}] => M[undef/ K][undef/ Kl] when Kl =/=List{K} .List{K} [structural, anywhere]
+  rule M:Map[undef/ .List{K}] => M [structural, anywhere]
+  rule (M:Map K |-> _)[undef/ K] => M [structural, anywhere]
+
   syntax Map ::= Map "[" Map "]"   [function, cons(Map1UpdateMapWithMapSyn)]
   rule M:Map[M':Map K1 |-> K2] => M[K2/K1][M'] [structural]
   rule M:Map[.Map] => M [structural]
@@ -80,6 +84,10 @@ module K-SET-EXTRAS
    rule K #in SetItem(K) S:Set => true
      [structural, anywhere]
 
+   rule (SetItem(K:K) S1:Set) -Set (SetItem(K:K) S2:Set) => S1 -Set (SetItem(K:K) S2) [structural, anywhere]
+   rule (SetItem(K:K) S1:Set) -Set S2:Set => SetItem(K:K) (S1 -Set S2) when notBool K in S2 [structural, anywhere]
+   rule .Set -Set S:Set => .Set [structural, snywhere]
+
 endmodule
 
 interface K-BAG-EXTRAS
@@ -98,7 +106,10 @@ interface K-LIST-EXTRAS
 
 //	syntax List ::= "List" List{K}
 
-//	syntax Int ::= "lengthList" List [function]
+	syntax Int ::= "lengthList" List [function]
+
+   rule lengthList ( ListItem(K:K) L:List ) => 1 +Int lengthList L [structural, anywhere]
+   rule lengthList .List => 0 [structural, anywhere]
 endinterface
 
 interface K-RESULT

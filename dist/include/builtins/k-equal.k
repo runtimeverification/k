@@ -56,11 +56,11 @@ module K-EQUAL-HOOKS
   rule Map1:Map =/=Map Map2:Map => notBool(Map1 ==Map Map2) [anywhere]
 
 
-  // equality over lists
+  // equality over List{K}
   syntax Bool ::= List{K} "==List{K}" List{K}    [function]
   rule LK1:List{K} ==List{K} LK2:List{K} => 'dummy(LK1) ==K 'dummy(LK2) [function, anywhere]
 
-  // disequality over lists
+  // disequality over List{K}
   syntax Bool ::= List{K} "=/=List{K}" List{K}   [function]
   rule LK1:List{K} =/=List{K} LK2:List{K}  => notBool(LK1 ==List{K} LK2) [function, anywhere]
 
@@ -71,5 +71,18 @@ module K-EQUAL-HOOKS
   // disequality over KLabel
   syntax Bool ::= KLabel "=/=KLabel" KLabel  [function]
   rule Lbl1:KLabel =/=KLabel Lbl2:KLabel => notBool(Lbl1 ==KLabel Lbl2) [function, anywhere]
+
+  // equality over lists
+  syntax Bool ::= List "==List" List [function]
+  rule ListItem(K1:K) L1:List ==List ListItem(K2:K) L2:List
+       =>
+       K1 ==K K2 andBool L1 ==List L2 [function, anywhere]
+  rule .List ==List ListItem(_:K) _:List => false [function, anywhere]
+  rule ListItem(_:K) _:List ==List .List => false [function, anywhere]
+  rule .List ==List .List => true [function, anywhere]
+
+  // disequality over lists
+  syntax Bool ::= List "=/=List" List [function]
+  rule L1:List =/=List L2:List => notBool(L1 ==List L2) [function, anywhere]
 
 endmodule
