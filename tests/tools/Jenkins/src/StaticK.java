@@ -31,6 +31,7 @@ public class StaticK {
 	public static String reportsDir;
 	public static Map<String, Report> reports = new HashMap<String, Report>();
 	public static ThreadPoolExecutor pool = (ThreadPoolExecutor)Executors.newFixedThreadPool(initPoolSize());
+
 	public static int initPoolSize()
 	{
 		int poolSize = 1;

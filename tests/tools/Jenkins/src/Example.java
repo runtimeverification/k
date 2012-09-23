@@ -44,10 +44,10 @@ public class Example extends Thread {
 			Executor compile = new Executor(new String[] { "java", "-ss8m",
 					"-Xms64m", "-Xmx1G", "-jar", k3jar, "-kompile", mainFile,
 					"-l", mainModule }, dir, null, StaticK.ulimit);
-			ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(StaticK.initPoolSize());
-			tpe.execute(compile);
-			
-			while (tpe.getCompletedTaskCount() != 1) {
+
+			StaticK.pool.execute(compile);
+
+			while (compile.isAlive()) {
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
@@ -55,7 +55,6 @@ public class Example extends Thread {
 					e.printStackTrace();
 				}
 			}
-			tpe.shutdown();
 			
 			output = compile.getOutput();
 			error = compile.getError();
