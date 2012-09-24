@@ -1,0 +1,8 @@
+K Tutorial --- IMP++ --- Syntax of IMP++; Changing Existing IMP Semantics
+by Grigore Rosu
+
+- add new constructs
+- change existing syntax of programs (from globals to locals)
+- run existing programs and show they get stuck
+- change semantics of programs, too
+- run all existing programs
