@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -144,6 +145,7 @@ public class DefinitionLoader {
 		javaDef.accept(new UpdateReferencesVisitor());
 		javaDef.accept(new CollectConsesVisitor());
 		javaDef.accept(new CollectSubsortsVisitor());
+		javaDef.accept(new CollectConfigCellsVisitor());
 		// disambiguation steps
 
 		javaDef = (org.kframework.kil.Definition) javaDef.accept(new CellTypesFilter());

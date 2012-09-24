@@ -14,7 +14,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.parser.basic.KParser;
@@ -38,7 +37,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 
 public class Definition implements Cloneable {
 	private List<ModuleItem> modules;
@@ -1023,13 +1021,14 @@ public class Definition implements Cloneable {
 			}
 		}
 
-		String term = "[  ";
-		for (Map.Entry<String, Cell> c : cells.entrySet()) {
-			term += "(\"" + c.getKey() + "\", \"" + c.getValue().getSort() + "\")\n, ";
-			DefinitionHelper.cells.put(c.getKey(), c.getValue().getSort());
-		}
-
-		return term.substring(0, term.length() - 2) + "]";
+		// String term = "[  ";
+		// for (Map.Entry<String, Cell> c : cells.entrySet()) {
+		// term += "(\"" + c.getKey() + "\", \"" + c.getValue().getSort() + "\")\n, ";
+		// DefinitionHelper.cells.put(c.getKey(), c.getValue().getSort());
+		// }
+		//
+		// return term.substring(0, term.length() - 2) + "]";
+		return "[]";
 	}
 
 	public void parseRules() {

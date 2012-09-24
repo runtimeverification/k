@@ -17,12 +17,10 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-
 public class CellTypesFilter extends BasicTransformer {
 
 	public CellTypesFilter() {
 		super("Cell types");
-		// TODO Auto-generated constructor stub
 	}
 
 	// don't do anything for configuration and syntax
@@ -35,7 +33,7 @@ public class CellTypesFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(Cell cell) throws TransformerException {
-		String sort = DefinitionHelper.cells.get(cell.getLabel());
+		String sort = DefinitionHelper.cellSorts.get(cell.getLabel());
 
 		if (sort != null) {
 			if (cell.getContents() instanceof Ambiguity) {
@@ -60,8 +58,10 @@ public class CellTypesFilter extends BasicTransformer {
 					String msg = "Wrong type in cell '" + cell.getLabel() + "'. Expected sort: " + sort + " but found " + cell.getContents().getSort();
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cell.getFilename(), cell.getLocation(), 0));
 				}
-		} else
-			; // TODO: should give warning saying that the cell was not declared
+		} else {
+			String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cell.getFilename(), cell.getLocation(), 0));
+		}
 		return super.transform(cell);
 	}
 }
