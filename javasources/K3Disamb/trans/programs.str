@@ -4,10 +4,10 @@ imports
   libstratego-lib
   libstratego-sglr
   include/K3Disamb
-  xmlify
-  config
-  disamb
-  disambSup
+  //xmlify
+  //config
+  //disamb
+  //disambSup
 
 rules
 

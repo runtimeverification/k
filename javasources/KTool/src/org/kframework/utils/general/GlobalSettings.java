@@ -18,7 +18,6 @@ public class GlobalSettings {
 	public static File mainFile;
 	public static String mainFileWithNoExtension;
 	public static int warningslevel = 2;
-	public static boolean tempDisamb = true;
 	public static boolean typeWarnings = false;
 	public static List<String> transition = new ArrayList<String>();
 	public static List<String> superheat = new ArrayList<String>();

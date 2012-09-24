@@ -8,7 +8,7 @@ imports Integration
 
 exports
 context-free start-symbols
-	StartDz
+	StartDz RuleContentDz
 
 context-free syntax
 	KSentence+	-> StartDz {cons("KSentenceList")}
@@ -19,7 +19,7 @@ context-free syntax
 	"context" K					-> KSimpleSentence {cons("Context")}
 	%%"predicate" K				-> KSimpleSentence {cons("Predicate")}
 	
-	ListDlKDr	-> RuleContentDz
+	K			-> RuleContentDz
 	Map			-> RuleContentDz
 	Bag			-> RuleContentDz
 	Set			-> RuleContentDz

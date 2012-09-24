@@ -1,12 +1,20 @@
 package org.kframework.parser.concrete;
 
-import org.kframework.parser.concrete.lib.*;
-import org.kframework.utils.general.GlobalSettings;
-import org.spoofax.interpreter.terms.*;
+import org.kframework.parser.concrete.lib.K3Str;
+import org.kframework.parser.concrete.lib.import$Cells_0_0;
+import org.kframework.parser.concrete.lib.import$Cons_0_0;
+import org.kframework.parser.concrete.lib.import$Sbs_0_0;
+import org.kframework.parser.concrete.lib.import$Tbl$Pgm_0_0;
+import org.kframework.parser.concrete.lib.import$Tbl_0_0;
+import org.kframework.parser.concrete.lib.init$Me_0_0;
+import org.kframework.parser.concrete.lib.java$Parse$String$Config_0_0;
+import org.kframework.parser.concrete.lib.java$Parse$String$Pgm_0_0;
+import org.kframework.parser.concrete.lib.java$Parse$String$Rules_0_0;
+import org.kframework.parser.concrete.lib.java$Parse$String$Cmd_0_0;
+import org.spoofax.interpreter.terms.IStrategoString;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
-
-
 
 public class KParser {
 	private static Context context = null;
@@ -257,15 +265,52 @@ public class KParser {
 		IStrategoTerm result = null;
 		try {
 			try {
-				if (GlobalSettings.tempDisamb)
-					result = context.invokeStrategyCLI(java$Parse$String$Rules_0_0.instance, "a.exe", kDefinition, "half");
-				else
-					result = context.invokeStrategyCLI(java$Parse$String$Rules_0_0.instance, "a.exe", kDefinition, "full");
+				result = context.invokeStrategyCLI(java$Parse$String$Rules_0_0.instance, "a.exe", kDefinition);
 			} finally {
 				context.getIOAgent().closeAllFiles();
 			}
 			if (result == null) {
 				System.out.println("Input: " + kDefinition);
+				System.err.println("rewriting failed, trace:");
+				context.printStackTrace();
+				context.setStandAlone(false);
+				System.exit(1);
+			} else {
+				context.setStandAlone(false);
+			}
+		} catch (StrategoExit exit) {
+			context.setStandAlone(false);
+			System.exit(exit.getValue());
+		}
+
+		if (result.getTermType() == IStrategoTerm.STRING) {
+			rez = (((IStrategoString) result).stringValue());
+		} else {
+			rez = result.toString();
+		}
+		return rez;
+	}
+
+	/**
+	 * Parses a term that is subsorted to K, List, Set, Bag or Map
+	 * 
+	 * @param argument
+	 *            The string content of the term.
+	 * @return The xml representation of the parsed term, or an error in the xml format.
+	 */
+	public static String ParseKCmdString(String argument) {
+		init();
+		String rez = "";
+		context.setStandAlone(true);
+		IStrategoTerm result = null;
+		try {
+			try {
+				result = context.invokeStrategyCLI(java$Parse$String$Cmd_0_0.instance, "a.exe", argument);
+			} finally {
+				context.getIOAgent().closeAllFiles();
+			}
+			if (result == null) {
+				System.out.println("Input: " + argument);
 				System.err.println("rewriting failed, trace:");
 				context.printStackTrace();
 				context.setStandAlone(false);

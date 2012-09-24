@@ -5,9 +5,7 @@ imports
   libstratego-sglr
   include/K3Disamb
   xmlify
-  config
   disamb
-  disambSup
   programs
 
 rules
@@ -54,14 +52,13 @@ rules
 	importCells  = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyCells  : _ -> trm)
 	importTblPgm = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTblPgm : _ -> trm)
 
-	javaParseStringConfig = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>)> b ; (handleErrors <+ justFineConfig)
-	javaParseStringRules  = ?[a, b, c] ; <parse-string(my-parse-error|<MemoMyTbl>)> b ; (handleErrors <+ justFineRule(|c))
-	javaParseStringPgm    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblPgm>)> b ; (handleErrors <+ justFinePgms)
+	javaParseStringConfig = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b       ; (handleErrors <+ justFine)
+	javaParseStringRules  = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b       ; (handleErrors <+ justFine)
+	javaParseStringCmd    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "RuleContentDz")> b ; (handleErrors <+ justFine)
+	javaParseStringPgm    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblPgm>, "Start")> b    ; (handleErrors <+ justFinePgms)
 
-	justFineRule(|c) =
-		mydisambiguate(|c) ; justFine2
-	justFineConfig =
-		mydisambiguateConfig ; justFine2
+	justFine =
+		mydisambiguate ; justFine2
 	justFinePgms = bottomup(try(removeDuplicateAmb)) ; makeConsLists ; justFinePgms2
 
 	removeDuplicateAmb:
@@ -148,5 +145,5 @@ rules
 		(ast, path, project-path) -> <testMe5> ast
 
 	testDisambig =
-		(?Config(_) ; mydisambiguateConfig) <+ mydisambiguate(|"full")
+		(?Config(_) ; mydisambiguate) <+ mydisambiguate
 

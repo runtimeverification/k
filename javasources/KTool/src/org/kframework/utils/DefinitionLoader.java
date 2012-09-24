@@ -3,10 +3,11 @@ package org.kframework.utils;
 import java.io.File;
 import java.io.IOException;
 
-
 import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.kil.Term;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -28,7 +29,6 @@ import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 
 import com.thoughtworks.xstream.XStream;
 
@@ -146,26 +146,53 @@ public class DefinitionLoader {
 		javaDef.accept(new CollectSubsortsVisitor());
 		// disambiguation steps
 
-		if (GlobalSettings.tempDisamb) {
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new CellTypesFilter());
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new CorrectRewritePriorityFilter());
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new CorrectKSeqFilter());
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new VariableTypeInferenceFilter());
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AmbDuplicateFilter());
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new TypeSystemFilter());
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new FlattenListsFilter());
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new CorrectRewriteSortFilter());
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Disambiguate    = ");
-		}
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new CellTypesFilter());
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new CorrectRewritePriorityFilter());
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new CorrectKSeqFilter());
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new VariableTypeInferenceFilter());
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new AmbDuplicateFilter());
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new TypeSystemFilter());
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new TypeInferenceSupremumFilter());
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new FlattenListsFilter());
+		javaDef = (org.kframework.kil.Definition) javaDef.accept(new CorrectRewriteSortFilter());
 		// last resort disambiguation
 		javaDef = (org.kframework.kil.Definition) javaDef.accept(new AmbFilter());
 
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Disambiguate    = ");
+
 		javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
+
+		return javaDef;
+	}
+
+	public static Term parseCmdString(String content, String sort) throws Exception {
+		String parsed = org.kframework.parser.concrete.KParser.ParseKCmdString(content);
+		System.out.println("Parsed: " + parsed);
+		Document doc = XmlLoader.getXMLDoc(parsed);
+		XmlLoader.addFilename(doc.getFirstChild(), "Command Line Argument");
+		XmlLoader.reportErrors(doc);
+
+		org.kframework.kil.Term javaDef = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
+
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new CellTypesFilter());
+		// javaDef = (org.kframework.kil.Term) javaDef.accept(new CorrectRewritePriorityFilter()); // not the case, as it should be a ground term
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new CorrectKSeqFilter());
+		// javaDef = (org.kframework.kil.Term) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
+		// javaDef = (org.kframework.kil.Term) javaDef.accept(new VariableTypeInferenceFilter());
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new AmbDuplicateFilter());
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new TypeSystemFilter());
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new TypeInferenceSupremumFilter());
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new FlattenListsFilter());
+		// javaDef = (org.kframework.kil.Term) javaDef.accept(new CorrectRewriteSortFilter());
+		// last resort disambiguation
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new AmbFilter());
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new AddEmptyLists());
 
 		return javaDef;
 	}

@@ -4,14 +4,18 @@ imports
   libstratego-lib
   libstratego-sglr
   include/K3Disamb
-  config
   disamb
-  disambSup
   starter
 
 rules
 
-
+	external string-unescape-sort(|)
+	external string-trim-last-one(|)
+	
+	getSort:
+		x -> y
+		where y := <string-trim-last-one ; string-unescape-sort> x
+	
 	to-xml =
 		to-xml1 <+ to-xml2 <+ to-xml3 <+ to-xml4 <+ (debug(!"Error XMLifying at: ") ; !"<error/>")
 
@@ -25,12 +29,8 @@ rules
 				[<to-xml> x1]
 			</body>
 		</config>
-		<summary>
-			[sum]
-		</summary>
 		]
 		where mydebug(!"Config: ")
- 		where sum := <collectCellSorts ; all(cels2Xml)> x1
 		where loc := <getLocAsString>
 
 	// generate xml for cells

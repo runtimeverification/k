@@ -8,11 +8,6 @@ imports
 
 	include/K3Disamb
 	xmlify
-	disambCells
-	disambEmph
-	disambSup
-	disambVar
-	disambFit
 	starter
 
 strategies
@@ -21,7 +16,7 @@ strategies
 	external annolocation(|)
 	external annolocationremove(|)
 
-	mydisambiguate(|c) =
+	mydisambiguate =
 			topdown(try(annolocation)) ;
 			flatten-amb-top ;
 			topdown(try(merge-amb ; flatten-amb-top )) ;
@@ -45,7 +40,8 @@ strategies
 	mydisambiguateConfig =
 		topdown(try(annolocation)) ;
 		flatten-amb-top ;
-		topdown(try(merge-amb ; flatten-amb-top ))
+		topdown(try(merge-amb ; flatten-amb-top )) ;
+		topdown(try(removeDouaPuncte))
 			
 
 
@@ -54,7 +50,7 @@ strategies
 		where rez := <mergeamb> a*
 		where x := <if <lt>(<length> rez, 2) then !<last> rez else !amb(rez){anno} end>
 
-	mydisambiguate2 = all(mydisambiguate(|"full"))
+	mydisambiguate2 = all(mydisambiguate)
 
 	removeDouaPuncte:
 		a#(b){loc} -> a#(b'){loc}

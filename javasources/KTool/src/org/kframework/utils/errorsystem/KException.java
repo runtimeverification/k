@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KException {
-
 	protected ExceptionType type;
 	protected KExceptionGroup exceptionGroup;
 	protected String filename;
@@ -12,21 +11,9 @@ public class KException {
 	protected int level;
 	protected String message;
 
-	private Map<ExceptionType, String> types;
-	private Map<KExceptionGroup, String> labels;
-
-	public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location, int level) {
-		super();
-		this.type = type;
-		this.exceptionGroup = label;
-		this.message = message;
-		this.filename = filename;
-		this.location = location;
-		this.level = level;
-		initialize();
-	}
-
-	private void initialize() {
+	protected static Map<ExceptionType, String> types;
+	protected static Map<KExceptionGroup, String> labels;
+	static {
 		types = new HashMap<KException.ExceptionType, String>();
 		types.put(ExceptionType.ERROR, "Error");
 		types.put(ExceptionType.WARNING, "Warning");
@@ -38,6 +25,16 @@ public class KException {
 		labels.put(KExceptionGroup.LISTS, "Lists");
 		labels.put(KExceptionGroup.INTERNAL, "Internal");
 		labels.put(KExceptionGroup.CRITICAL, "Critical");
+	}
+
+	public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location, int level) {
+		super();
+		this.type = type;
+		this.exceptionGroup = label;
+		this.message = message;
+		this.filename = filename;
+		this.location = location;
+		this.level = level;
 	}
 
 	public enum KExceptionGroup {

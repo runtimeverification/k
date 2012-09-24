@@ -86,10 +86,6 @@ public class KompileFrontEnd {
 			GlobalSettings.noFilename = true;
 		}
 
-		// TODO: temporary to test the java disambiguator
-		if (cmd.hasOption("tempDisamb"))
-			GlobalSettings.tempDisamb = false;
-
 		if (cmd.hasOption("warnings"))
 			GlobalSettings.warningslevel = Integer.parseInt(cmd.getOptionValue("warnings"));
 
