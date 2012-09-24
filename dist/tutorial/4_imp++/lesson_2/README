@@ -1,0 +1,8 @@
+K Tutorial --- IMP++ --- Configuration Refinement; Freshness
+by Grigore Rosu
+
+- split state into env/store
+- modify all rules to deal with it
+- analyze first variable declaration rule in depth, with emphasis on fresh(S:Sort)
+- run sum.imp and note how the fresh condition adds symbolic locations
+- kompile --pdf

@@ -6,3 +6,5 @@ by Grigore Rosu
 - run existing programs and show they get stuck
 - change semantics of programs, too
 - run all existing programs
+- write new programs, making use of the new syntax;
+  show how/where they get stuck.

@@ -1,0 +1,9 @@
+K Tutorial --- IMP++ --- Tagging; Superheat/Supercool Kompilation Options
+by Grigore Rosu
+
+- add the rule for increment
+- krun div.imp
+- krun div.imp --search; only one behavior
+- add division, lookup, increment tags
+- kompile imp.k --superheat="division" --supercool="lookup increment"
+- krun div.imp --search; see the five behaviors
