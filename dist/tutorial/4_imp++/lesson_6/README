@@ -1,0 +1,26 @@
+K Tutorial --- IMP++ ---
+  Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2
+by Grigore Rosu
+
+- to get ready for the threads, group <k/> and <env/> cells in <thread/>
+  cells, which can be added/deleted dynamically (so use multiplicity "*").
+  Also, for good encapsulation, group all <thread/> cells in a <threads/>
+  cell.
+- krun sum-io.imp and note that, in spite of the radical configuration
+  changes, everything still works just fine.  This is configuration
+  abstraction at work: the rules have been automatically updated to fit
+  the declared configuration.  The resulting configuration shows that
+  the <k/> and <env/> cells are wrapped in a <thread/> cell, inside
+  <threads/>.  Note also that the principle of locality has been applied.
+- add the dynamic thread creation/termination rules.
+- krun spawn.imp and see the following: the <threads/> cell is empty, so
+  everything terminated normally; the value printed is different from the
+  value in memory; the value in memory is not even the one obtained if the
+  threads executed sequentially.  This shows that interesting behaviors may
+  happen; we would like to see all of them.
+- krun spawn.imp --search shows only one behavior, same as above.  But
+  run it with "echo 23 | krun spawn.imp --search", since search is not
+  interactive.
+- kompile imp --transition="lookup increment assignment read print" genetates
+  the desired model.
+- "echo 23 | krun spawn.imp --search" shows 10 solutions
