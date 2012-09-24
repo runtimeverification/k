@@ -29,6 +29,7 @@ import org.kframework.compile.transformers.ResolveBlockingInput;
 import org.kframework.compile.transformers.ResolveFresh;
 import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.kil.Definition;
+import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
@@ -493,6 +494,7 @@ public class KompileFrontEnd {
 			def.accept(new UpdateReferencesVisitor());
 			def.accept(new CollectConsesVisitor());
 			def.accept(new CollectSubsortsVisitor());
+			def.accept(new CollectConfigCellsVisitor());
 			def.accept(new AddConsesVisitor());
 
 			if (GlobalSettings.verbose)

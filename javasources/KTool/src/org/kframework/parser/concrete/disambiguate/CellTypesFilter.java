@@ -60,7 +60,7 @@ public class CellTypesFilter extends BasicTransformer {
 				}
 		} else {
 			String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cell.getFilename(), cell.getLocation(), 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, cell.getFilename(), cell.getLocation(), 3));
 		}
 		return super.transform(cell);
 	}
