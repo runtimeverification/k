@@ -55,7 +55,7 @@ module IMP
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
-// Pgm
+
   rule <k> int (X:Id,Xs:Ids => Xs); ...</k> <state> Rho:Map (. => X|->0) </state>
     when notBool (X in keys(Rho))
   rule int .Ids; => .  [structural]

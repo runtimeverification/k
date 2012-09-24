@@ -1,0 +1,8 @@
+K Tutorial --- IMP++ --- Deleting, Saving and Restoring Cell Contents
+by Grigore Rosu
+
+- add semantics for "halt;", deleting the contents of the <k/> cell
+- krun sum-io.imp and see that it works
+- however, the semantics of blocks is wrong: krun locals.imp
+- give the environment-save/-restore semantics of blocks
+- krun locals.imp and see that it works well now

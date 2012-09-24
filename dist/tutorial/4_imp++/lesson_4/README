@@ -1,0 +1,14 @@
+K Tutorial --- IMP++ --- Semantic Lists; Input/Output Streaming
+by Grigore Rosu
+
+- add list <in/> and <out/> cells, to be used for read() and print(a1,...,an)
+- add strings as results, plus overload addition on them (as concatenation)
+- give semantics of read and print
+- krun io.imp and see how it gets stuck on read
+- add some items in the <in/> cell, for example
+  <in> ListItem(3) ListItem(5) ListItem(7) </in>
+- krun io.imp and see/understand the resulting configuration
+- stream <in/> and <out/> to stdin and stdout, resp.
+- krun io.imp and see the configuration
+- krun io.imp --no-config to not see the configuration; got an IMP interpreter
+- krun sum-io.imp and see how it gets stuck on halt;

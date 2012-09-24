@@ -63,7 +63,7 @@ module IMP
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
-// Pgm
+
   rule <k> int (X:Id,Xs:Ids => Xs); ...</k>
        <env> Rho:Map => Rho[N/X] </env>
        <store>... . => N|->0 ...</store>

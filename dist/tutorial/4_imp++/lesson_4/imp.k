@@ -2,7 +2,7 @@ module IMP-SYNTAX
   syntax AExp  ::= Int | Id | String
                  | "++" Id
                  | "read" "(" ")"
-                 > AExp "/" AExp              [left, strict]
+                 > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
@@ -30,20 +30,28 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  syntax KResult ::= Int | Bool
+  syntax KResult ::= Int | Bool | String
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Stmt </k>
                   <env color="LightSkyBlue"> .Map </env>
                   <store color="red"> .Map </store>
+                  <in color="magenta" stream="stdin"> .List </in>
+                  <out color="Orchid" stream="stdout"> .List </out>
                 </T>
 
 // AExp
   rule <k> X:Id => I ...</k>
        <env>... X |-> N ...</env>
-	   <store>... N |-> I ...</store>
+	   <store>... N |-> I ...</store>  [lookup]
+  rule <k> ++X => I +Int 1 ...</k>
+       <env>... X |-> N ...</env>
+	   <store>... N |-> (I => I +Int 1) ...</store>  [increment]
+  rule <k> read() => I ...</k>
+       <in> ListItem(I:Int) => . ...</in>
   rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
+  rule Str1:String + Str2:String => Str1 +String Str2
 // BExp
   rule I1:Int <= I2:Int => I1 <=Int I2
   rule ! T:Bool => notBool T
@@ -66,4 +74,9 @@ module IMP
        <store>... . => N|->0 ...</store>
     when fresh(N:Nat)
   rule int .Ids; => .  [structural]
+
+  syntax Printable ::= Int | String
+  rule <k> print(P:Printable,AEs:AExps => AEs); ...</k>
+       <out>... . => ListItem(P) </out>
+  rule print(.AExps); => .  [structural]
 endmodule
