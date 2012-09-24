@@ -128,11 +128,11 @@ of \texttt{\&\&}; this is the reason we annotated the syntax of
   rule true && B => B
   rule false && _ => false
 
-/*@ \subsection{Statements}
+/*@ \subsection{Blocks and Statements}
 There is one rule per statement construct except for the conditional,
 which needs two rules. */
 
-/*@ \subsubsection{Skip}
+/*@ \subsubsection{Blocks}
 The empty block \texttt{\{\}} is simply dissolved.  The $\kdot$ below is the
 unit of the computation list structure $K$, that is, the empty task.
 Similarly, the non-empty blocks are dissolved and replaced by their statement

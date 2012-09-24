@@ -5,14 +5,14 @@ Here we learn how to define a configuration in K.  We also learn how to
 initialize and how to display it.
 
 As explained in the overview presentation on K, configurations are quite
-important in K, because all semantic rules match and apply on them.
-Moreover, they are the backbone for the process of "configuation abstraction",
-which allows users to only mention the relevant cells in each semantic rule,
-the rest of the configuration context being inferred automatically.
-The importance of configuration abstraction will become clear when we define
-more complex languages (even in IMP++).  IMP does not really need it.
-K configurations are constructed making use of cells, which are labeled
-and can be arbitrarily nested.
+important, because all semantic rules match and apply on them.
+Moreover, they are the backbone of "configuation abstraction", which allows
+you to only mention the relevant cells in each semantic rule, the rest of
+the configuration context being inferred automatically.  The importance of
+configuration abstraction will become clear when we define more complex
+languages (even in IMP++).  IMP does not really need it.  K configurations
+are constructed making use of cells, which are labeled and can be arbitrarily
+nested.
 
 Configurations are defined with the keyword "configuration".  Cells are
 defined using an XML-ish notation stating clearly where the cell starts
@@ -27,18 +27,18 @@ Cells can have other cells inside.  In our case of IMP, we need a cell to
 hold the remaining program, which we typically call k, and a cell to hold
 the program state.  Let us add them:
 
-  configuration <T> <k>...</k> <state>...</state>  </T>
+  configuration <T> <k>...</k> <state>...</state> </T>
 
 K allows us to also specify how to initialize a configuration at the same
 time with declaring the configuration.  All we have to do is to fill in
 the contents of the cells with some terms.  The syntactic categories of
 those terms will also indirectly define the types of the corresponding
-terms.
+cells.
 
 For example, we want the k cell to initially hold the program that is passed
 to krun.  K provides a builtin configuration variable, called $PGM, which is
 specifically designed for this purpose: krun will place its program there
-(after it parses it).  The K tool allows users to define their own
+(after it parses it, or course).  The K tool allows users to define their own
 configuration variables, too, which can be used to develop custom
 initializations of program configurations with the help of krun; this can be
 quite useful when defining complex languages, but we do not discuss it in
@@ -48,7 +48,7 @@ this tutorial.
 
 Moreveor, we want the program to be a proper Pgm term (because we do not
 want to allow krun to take fragments of programs, for example, statements).
-Therefore, we tag $PGM with the desired syntactic category.
+Therefore, we tag $PGM with the desired syntactic category, pgm:
 
   configuration <T> <k> $PGM:Pgm </k> <state>...</state>  </T>
 

@@ -21,7 +21,7 @@ be a BExp; that's because there is no rule that can touch such a B (this will
 become clearer shortly, when we discuss the first step of configuration
 abstraction).  Second, since we know that B will be a BExp anyway, we can
 save the time it takes to check its sort; such times may look minor, but they
-accumulate, so in general we try to avoid as much as possible.
+accumulate, so in general we try to avoid runtime checks as much as possible.
 
 The block rules are trivial.  However, the rule for non-empty blocks works
 only because we do not have local variable declarations in IMP.  We will have
@@ -29,7 +29,7 @@ to change this rule in IMP++.
 
 The assignment rule has two "=>": one in the k cell dissolving the assignment
 statement, and the other in the state updating the value of the assigned
-variable.  Note that the one on the state is surrounded by parentheses:
+variable.  Note that the one in the state is surrounded by parentheses:
 (_ => I).  That is because => is greedy: it matches as much as it can to the
 left and to the right, until it reaches the cell boundaries (closed or open).
 If you want to limit its scope, or for clarity, you can use parenthese as here.
@@ -55,8 +55,8 @@ which we execute before the semantics and reject inappropriate programs.
 
 The use of the ".Ids" in the second rule is not necessary.  We could have
 written "int; S" instead of "int .Ids; S" and the K tool would parse it and
-kompile the definition correctly, as it uses the same parser used for parsing
-programs also to parse the semantics.  However, we typically prefer to
+kompile the definition correctly, because it uses the same parser used for
+parsing programs also to parse the semantics.  However, we typically prefer to
 explicitly write the "nothing" values in the semantics, for clarity;
 the parser has been extended to accept these.  Note that the first rule
 matches the entire k cell, because "int_;_" is the top-level program construct
@@ -76,10 +76,10 @@ In K, all semantic rules are in fact rules between configurations.  As soon
 explained in the IMP++ tutorial, the declared configuration cell structure is
 used to automatically complete the missing configuration parts in rules.
 However, many rules do not involve any cells, being rules between syntactic
-terms (of sort K); for example, we had only three rules involving cell in our
+terms (of sort K); for example, we had only three rules involving cells in our
 IMP semantics.  In this case, the k cell will be added automatically and the
 actual rewrite will happen on top of the enclosed computation.  For example,
-the rule for the while loops is automatically translated into the following:
+the rule for the while loop is automatically translated into the following:
 
   rule <k> while (B) S => if (B) {S while (B) S} else {} ...</k>
 
@@ -129,3 +129,14 @@ too few to lose behaviors.  For example, making the block rules structural
 loses no meaningful behaviors.  Similarly, the sequential composition,
 the while loop unrolling, and the no-variable declaration rules can all
 safely be structural.
+
+Kompile and then krun the programs that you only parsed in Lesson 1.  They
+should all execute as expected.  The state cell shows the final state
+of the program.  The k cell shows the final code contents, which should be
+empty whenever the IMP program executes correctly.
+
+Kompile also with the --pdf option and take a look at the generated
+documentation.  The assignment rule should particularly be of interest,
+because it contains two local rewrites.
+
+In the next lesson we comment the IMP definition and conclude this tutorial.

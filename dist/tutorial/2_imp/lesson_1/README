@@ -10,7 +10,7 @@ builtin support for syntactic lists.
 The K tool provides modules for grouping language features.  In general, we
 can organize our languages in arbitrarily complex module structures.
 While there are no rigid requirements or even guidelines for how to group
-language features inmodules, we often separate the language syntax from the
+language features in modules, we often separate the language syntax from the
 language semantics in different modules.
 
 In our case here, we start by defining two modules, IMP-SYNTAX and IMP, and
@@ -97,7 +97,7 @@ Since IMP is a fragment of C, you may want to select the C mode in your
 editor when writing these programs.  This will also give your the feel that
 you are writing programs in a real programming language :)
 
-For example, here is sum.imp, which sums in s all numbers up to n:
+For example, here is sum.imp, which sums in sum all numbers up to n:
 
 int n, sum;
 n = 100;

@@ -12,7 +12,7 @@ while (!(m<=2)) {
     r = q+q+1;
     if (r<=n) {
       n = n+n+n+1;         // n becomes 3*n+1 if odd
-    } else {n=q;}          //        of   n/2 if even
+    } else {n=q;}          //        or   n/2 if even
   }
 }
 
