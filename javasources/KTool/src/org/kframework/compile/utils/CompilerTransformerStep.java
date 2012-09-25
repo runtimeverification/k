@@ -31,7 +31,7 @@ public class CompilerTransformerStep implements CompilerStep {
 					KExceptionGroup.INTERNAL, 
 					"Expecting Definition, but got " + result.getClass() 
 					+ " while applying" + getName() + ".", 
-					def.getFilename(), def.getLocation(), 0));					
+					def.getFilename(), def.getLocation()));					
 		}
 		return (Definition) result;
 	}

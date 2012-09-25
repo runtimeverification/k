@@ -21,7 +21,6 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-
 public class AddEmptyLists extends BasicTransformer {
 
 	public AddEmptyLists() {
@@ -72,7 +71,7 @@ public class AddEmptyLists extends BasicTransformer {
 						}
 
 						if (!avoid) {
-							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.LISTS, KMessages.WARNING1000, new File(tc.getFilename()).getName(), tc.getLocation(), 3));
+							GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, KMessages.WARNING1000, new File(tc.getFilename()).getName(), tc.getLocation()));
 						}
 					}
 				}

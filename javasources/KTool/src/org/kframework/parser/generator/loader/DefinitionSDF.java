@@ -21,7 +21,7 @@ import org.kframework.utils.Error;
 import org.kframework.utils.StringUtil;
 
 
-public class ProgramSDF {
+public class DefinitionSDF {
 
 	public static String getSdfForPrograms(Definition def) {
 

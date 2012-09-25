@@ -15,7 +15,7 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
 
-public class ProgramSDFVisitor extends BasicVisitor {
+public class DefinitionSDFVisitor extends BasicVisitor {
 
 	private String sdf;
 	public List<Production> outsides = new ArrayList<Production>();
@@ -25,7 +25,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 	public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
 	public Set<String> userSort = new HashSet<String>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
 
-	public ProgramSDFVisitor() {
+	public DefinitionSDFVisitor() {
 	}
 
 	public void visit(Syntax syn) {

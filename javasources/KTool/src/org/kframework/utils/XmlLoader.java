@@ -25,7 +25,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-
 public class XmlLoader {
 
 	public static Document getXMLDoc(String toParse) {
@@ -61,7 +60,7 @@ public class XmlLoader {
 						String msg = node.getAttribute("message");
 						String file = node.getAttribute("filename");
 						String location = node.getAttribute("loc");
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location, 0));
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
 					}
 				}
 			}
@@ -85,7 +84,7 @@ public class XmlLoader {
 							msg = "Unexpected end of " + fromWhere;
 						String file = node.getAttribute("filename");
 						String location = node.getAttribute("loc");
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location, 0));
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
 					}
 				}
 			}

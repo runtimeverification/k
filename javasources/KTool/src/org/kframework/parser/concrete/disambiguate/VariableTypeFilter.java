@@ -12,7 +12,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-
 public class VariableTypeFilter extends BasicTransformer {
 
 	private Map<String, String> variableTypes = null;
@@ -32,7 +31,7 @@ public class VariableTypeFilter extends BasicTransformer {
 			return newV;
 		}
 		String msg = "Variable " + r.getName() + " cannot have sort " + correctSort + " at this location.";
-		KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation(), 0);
+		KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation());
 		throw new VariableTypeClashException(kex);
 	}
 }

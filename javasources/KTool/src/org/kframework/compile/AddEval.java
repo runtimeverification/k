@@ -48,7 +48,7 @@ public class AddEval implements CompilerStep {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Configuration Cleaner failed.", 
-					cfg.getFilename(), cfg.getLocation(), 0));
+					cfg.getFilename(), cfg.getLocation()));
 		}
 		Configuration cfgCleaned = (Configuration)cfgCleanedNode;
 
@@ -130,7 +130,7 @@ public class AddEval implements CompilerStep {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.INTERNAL, 
 						"Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.", 
-						node.getFilename(), node.getLocation(), 0));
+						node.getFilename(), node.getLocation()));
 			}
 			if (result == node) {
 				node = node.shallowCopy();

@@ -18,7 +18,6 @@ import org.kframework.utils.utils.strings.StringUtil;
 import org.kframework.utils.utils.xml.XML;
 import org.w3c.dom.Element;
 
-
 public class Syntax extends ModuleItem {
 	Sort sort;
 	java.util.List<PriorityBlock> priorityBlocks;
@@ -103,10 +102,9 @@ public class Syntax extends ModuleItem {
 
 					String metadata = p.getAttributes().toMaude();
 					String operation = p.toString().replaceAll("\"", "");
-					
-					if (operation.equals(""))
-					{
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot declare empty terminal.", p.filename, p.location, 0));
+
+					if (operation.equals("")) {
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot declare empty terminal.", p.filename, p.location));
 						continue;
 					}
 					if (sort.toString().equals("KLabel") || sort.toString().equals("CellLabel"))
@@ -140,12 +138,11 @@ public class Syntax extends ModuleItem {
 
 					String maudelabel = p.getLabel().replaceAll("` ", "`");
 
-					if (maudelabel.equals(""))
-					{
-						GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Empty production. Please use `prefixlabel` attribute.", p.filename, p.location, 0));
+					if (maudelabel.equals("")) {
+						GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Empty production. Please use `prefixlabel` attribute.", p.filename, p.location));
 						continue;
 					}
-					
+
 					if (!p.attributes.containsKey("bracket"))
 						if (metadata.equals(""))
 							contents += "op " + maudelabel + " : " + p.toMaude() + " -> " + sort + " .\n";

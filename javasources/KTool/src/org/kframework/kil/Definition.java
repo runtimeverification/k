@@ -20,7 +20,6 @@ import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.utils.xml.XML;
 import org.w3c.dom.Element;
 
-
 public class Definition extends ASTNode {
 
 	private java.util.List<DefinitionItem> items;
@@ -153,7 +152,7 @@ public class Definition extends ASTNode {
 				modules.add((Module) i);
 		}
 		if (modules.size() != 1) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this.getLocation(), 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this.getLocation()));
 		}
 		return modules.get(0);
 	}
@@ -170,7 +169,7 @@ public class Definition extends ASTNode {
 			}
 		}
 		if (moduleCount != 1) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this.getLocation(), 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this.getLocation()));
 		}
 		Definition result = new Definition(this);
 		result.setItems(newDefinitionItems);

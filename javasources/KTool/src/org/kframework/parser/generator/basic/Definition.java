@@ -82,15 +82,15 @@ public class Definition implements Cloneable {
 	 */
 	public void slurp(File file, boolean firstTime) {
 		if (!file.exists()) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + file.getName() + " not found.", file.getAbsolutePath(), "File system.", 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + file.getName() + " not found.", file.getAbsolutePath(), "File system."));
 		}
 		try {
 			String cannonicalPath = file.getCanonicalPath();
 			if (!filePaths.contains(cannonicalPath)) {
 				if (file.isDirectory())
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, file.getName() + " is a directory, not a file.", file.getAbsolutePath(), "File system.", 0));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, file.getName() + " is a directory, not a file.", file.getAbsolutePath(), "File system."));
 				if (!file.getAbsolutePath().endsWith(".k"))
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, file.getName() + " is not a K file.", file.getAbsolutePath(), "File system.", 0));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, file.getName() + " is not a K file.", file.getAbsolutePath(), "File system."));
 
 				String content = FileUtil.getFileContent(file.getAbsolutePath());
 
@@ -222,7 +222,7 @@ public class Definition implements Cloneable {
 			}
 
 			file = new File(filepath);
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + file.getName() + " not found.", file.getAbsolutePath(), "File system.", 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + file.getName() + " not found.", file.getAbsolutePath(), "File system."));
 		}
 		return new File(file.getCanonicalPath());
 	}
@@ -544,7 +544,7 @@ public class Definition implements Cloneable {
 			if (!this.modulesMap.containsKey(mainSynModName)) {
 				mainSynModName = mainModule;
 				GlobalSettings.synModule = mainModule;
-				GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Could not find a specilized module for syntax. Using main module instead.", this.mainFile.getAbsolutePath(), this.mainModule, 3));
+				GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, "Could not find a specilized module for syntax. Using main module instead.", this.mainFile.getAbsolutePath(), this.mainModule));
 			}
 		} else
 			mainSynModName = GlobalSettings.synModule;
@@ -1132,18 +1132,18 @@ public class Definition implements Cloneable {
 									// don't add cons to bracket production
 									String cons = p.getAttributes().get("cons");
 									if (cons != null)
-										GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "'bracket' productions are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation(), 0));
+										GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "'bracket' productions are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation()));
 								} else if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ItemType.TERMINAL && p.getProdSort().getSortName().startsWith("#")) {
 									// don't add any cons, if it is a constant
 									// a constant is a single terminal for a builtin sort
 									String cons = p.getAttributes().get("cons");
 									if (cons != null)
-										GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Constants are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation(), 0));
+										GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Constants are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation()));
 								} else if (p.isSubsort()) {
 									// cons are not allowed for subsortings
 									String cons = p.getAttributes().get("cons");
 									if (cons != null)
-										GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Subsortings are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation(), 0));
+										GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Subsortings are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation()));
 								} else {
 									if (!p.getAttributes().containsKey("cons")) {
 										String cons;
@@ -1173,11 +1173,11 @@ public class Definition implements Cloneable {
 										String escSort = StringUtil.escapeSortName(p.getProdSort().getSortName());
 
 										if (!cons.startsWith(escSort))
-											GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must start with '" + escSort + "' and not with " + cons, p.getFilename(), p.getLocation(), 0));
+											GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must start with '" + escSort + "' and not with " + cons, p.getFilename(), p.getLocation()));
 										if (!cons.endsWith("Syn")) // a normal cons must end with 'Syn'
-											GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'Syn' and not with " + cons, p.getFilename(), p.getLocation(), 0));
+											GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'Syn' and not with " + cons, p.getFilename(), p.getLocation()));
 										if (p.isListDecl() && !cons.endsWith("ListSyn")) // if this is a list, it must end with 'ListSyn'
-											GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'ListSyn' and not with " + cons, p.getFilename(), p.getLocation(), 0));
+											GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The cons attribute must end with 'ListSyn' and not with " + cons, p.getFilename(), p.getLocation()));
 									}
 								}
 							}
@@ -1190,7 +1190,7 @@ public class Definition implements Cloneable {
 	public void setMainModule(String mainModule) {
 		this.mainModule = mainModule;
 		if (!this.modulesMap.containsKey(this.mainModule))
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1002 + mainModule + ". Use --lang <arg> to specify another.", this.mainFile.getName(), "definition", 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1002 + mainModule + ". Use --lang <arg> to specify another.", this.mainFile.getName(), "definition"));
 	}
 
 	public String getMainModule() {

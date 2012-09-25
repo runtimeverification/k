@@ -153,7 +153,7 @@ public class Cell extends Term {
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
 					"Unknown multiplicity in configuration for cell " + this.getLabel() + ".", 
-					this.getFilename(), this.getLocation(), 0));
+					this.getFilename(), this.getLocation()));
 		}
 		return Multiplicity.ONE;
 	}

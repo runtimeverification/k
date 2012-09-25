@@ -48,16 +48,16 @@ public class KompileOptionsParser {
 		Option latex = new Option("latex", false, "generate latex from definition");
 		Option maudify = new Option("m", "maudify", false, "maudify the definition");
 		Option compile = new Option("c", "compile", false, "compile the definition");
-		// Option tempcompile = new Option("tempc", "tempce", false, "test new implementation");
+		Option tempcompile = new Option("tempc", "tempc", false, "test new implementation");
 
 		tex.addOption(latex);
 		tex.addOption(pdf);
 		tex.addOption(compile);
-		// tex.addOption(tempcompile);
+		tex.addOption(tempcompile);
 		tex.addOption(maudify);
 
 		OptionGroup warn = new OptionGroup();
-		Option warnings = new Option("w", "warnings", true, "display warnings - default level = 2");
+		Option warnings = new Option("w", "warnings", false, "display all warnings");
 		warn.addOption(warnings);
 
 		// xml

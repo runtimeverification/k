@@ -33,7 +33,7 @@ public class CopyOnWriteTransformer implements Transformer {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 							KExceptionGroup.INTERNAL, 
 							"Expecting DefinitionItem, but got " + result.getClass() + " while transforming.", 
-							di.getFilename(), di.getLocation(), 0));					
+							di.getFilename(), di.getLocation()));					
 				}
 				items.add((DefinitionItem) result);
 			}
@@ -67,7 +67,7 @@ public class CopyOnWriteTransformer implements Transformer {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 							KExceptionGroup.INTERNAL, 
 							"Expecting ModuleItem, but got " + result.getClass() + " while transforming.", 
-							mi.getFilename(), mi.getLocation(), 0));					
+							mi.getFilename(), mi.getLocation()));					
 				}
 				items.add((ModuleItem) result);
 			}
@@ -105,7 +105,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Term, but got " + bodyAST.getClass() + " while transforming.", 
-					body.getFilename(), body.getLocation(), 0));					
+					body.getFilename(), body.getLocation()));					
 		}
 		body = (Term) bodyAST;
 		Term condition = node.getCondition();
@@ -117,7 +117,7 @@ public class CopyOnWriteTransformer implements Transformer {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.INTERNAL, 
 						"Expecting Term, but got " + conditionAST.getClass() + " while transforming.", 
-						condition.getFilename(), condition.getLocation(), 0));					
+						condition.getFilename(), condition.getLocation()));					
 			}
 			condition = (Term) conditionAST;
 		}
@@ -156,7 +156,7 @@ public class CopyOnWriteTransformer implements Transformer {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 							KExceptionGroup.INTERNAL, 
 							"Expecting PriorityBlock, but got " + result.getClass() + " while transforming.", 
-							pb.getFilename(), pb.getLocation(), 0));					
+							pb.getFilename(), pb.getLocation()));					
 				}
 				pbs.add((PriorityBlock) result);
 			}
@@ -180,7 +180,7 @@ public class CopyOnWriteTransformer implements Transformer {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 							KExceptionGroup.INTERNAL, 
 							"Expecting Production, but got " + result.getClass() + " while transforming.", 
-							p.getFilename(), p.getLocation(), 0));					
+							p.getFilename(), p.getLocation()));					
 				}
 				prods.add((Production) result);
 			}
@@ -204,7 +204,7 @@ public class CopyOnWriteTransformer implements Transformer {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 							KExceptionGroup.INTERNAL, 
 							"Expecting Production, but got " + result.getClass() + " while transforming.", 
-							pi.getFilename(), pi.getLocation(), 0));					
+							pi.getFilename(), pi.getLocation()));					
 				}
 				pis.add((ProductionItem) result);
 			}
@@ -252,7 +252,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Term, but got " + result.getClass() + " while transforming.", 
-					term.getFilename(), term.getLocation(), 0));					
+					term.getFilename(), term.getLocation()));					
 		}
 		if (result != term) {
 			node = node.shallowCopy();
@@ -273,7 +273,7 @@ public class CopyOnWriteTransformer implements Transformer {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 							KExceptionGroup.INTERNAL, 
 							"Expecting Term, but got " + result.getClass() + " while transforming.", 
-							t.getFilename(), t.getLocation(), 0));					
+							t.getFilename(), t.getLocation()));					
 				}
 				terms.add((Term) result);
 			}
@@ -329,7 +329,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Term, but got " + result.getClass() + " while transforming.", 
-					term.getFilename(), term.getLocation(), 0));					
+					term.getFilename(), term.getLocation()));					
 		}
 		if (result != term) {
 			node = node.shallowCopy();
@@ -358,7 +358,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Term, but got " + key.getClass() + " while transforming.", 
-					term.getFilename(), term.getLocation(), 0));					
+					term.getFilename(), term.getLocation()));					
 		}
 		if (key != term) {
 			change = true;
@@ -370,7 +370,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Term, but got " + value.getClass() + " while transforming.", 
-					term.getFilename(), term.getLocation(), 0));					
+					term.getFilename(), term.getLocation()));					
 		}
 		if (value != term) {
 			change = true;
@@ -413,7 +413,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Term, but got " + label.getClass() + " while transforming.", 
-					term.getFilename(), term.getLocation(), 0));					
+					term.getFilename(), term.getLocation()));					
 		}
 		if (label != term) {
 			change = true;
@@ -425,7 +425,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Term, but got " + child.getClass() + " while transforming.", 
-					term.getFilename(), term.getLocation(), 0));					
+					term.getFilename(), term.getLocation()));					
 		}
 		if (child != term) {
 			change = true;
@@ -453,7 +453,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Term, but got " + left.getClass() + " while transforming.", 
-					term.getFilename(), term.getLocation(), 0));					
+					term.getFilename(), term.getLocation()));					
 		}
 		if (left != term) {
 			change = true;
@@ -465,7 +465,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Term, but got " + right.getClass() + " while transforming.", 
-					term.getFilename(), term.getLocation(), 0));					
+					term.getFilename(), term.getLocation()));					
 		}
 		if (right != term) {
 			change = true;
@@ -490,7 +490,7 @@ public class CopyOnWriteTransformer implements Transformer {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 							KExceptionGroup.INTERNAL, 
 							"Expecting Term, but got " + result.getClass() + " while transforming.", 
-							t.getFilename(), t.getLocation(), 0));					
+							t.getFilename(), t.getLocation()));					
 				}
 				terms.add((Term) result);
 			}
@@ -519,7 +519,7 @@ public class CopyOnWriteTransformer implements Transformer {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 							KExceptionGroup.INTERNAL, 
 							"Expecting Attribute, but got " + result.getClass() + " while transforming.", 
-							at.getFilename(), at.getLocation(), 0));					
+							at.getFilename(), at.getLocation()));					
 				}
 				contents.add((Attribute) result);
 			}

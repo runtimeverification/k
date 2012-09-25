@@ -18,7 +18,6 @@ import org.kframework.utils.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
 public class ProgramLoader {
 
 	public static ASTNode loadPgmAst2(File pgmFile, File dotk) throws IOException {
@@ -134,7 +133,7 @@ public class ProgramLoader {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), pgmFile.getAbsolutePath(), "File system.", 0));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), pgmFile.getAbsolutePath(), "File system."));
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();

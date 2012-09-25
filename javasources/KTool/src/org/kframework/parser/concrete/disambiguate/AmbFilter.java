@@ -13,7 +13,6 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-
 public class AmbFilter extends BasicTransformer {
 	public AmbFilter() {
 		super("Ambiguity filter");
@@ -35,7 +34,7 @@ public class AmbFilter extends BasicTransformer {
 		}
 		msg = msg.substring(0, msg.length() - 2);
 		msg += "    Arbitrarily choosing the first.";
-		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Parsing ambiguity between: " + msg, amb.getFilename(), amb.getLocation(), 0));
+		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Parsing ambiguity between: " + msg, amb.getFilename(), amb.getLocation()));
 
 		ASTNode astNode = amb.getContents().get(0);
 

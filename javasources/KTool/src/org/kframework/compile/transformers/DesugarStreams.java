@@ -34,7 +34,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting Cell, but got " + result.getClass() + " in Streams Desugarer.", 
-					result.getFilename(), result.getLocation(), 0));
+					result.getFilename(), result.getLocation()));
 		}
 		Cell cell = (Cell) result;
 		String stream = cell.getAttributes().get("stream");

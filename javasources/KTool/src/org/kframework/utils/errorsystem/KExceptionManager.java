@@ -7,26 +7,24 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-
 public class KExceptionManager {
 	private List<KException> exceptions = new ArrayList<KException>();
 
 	public void register(KException exception) {
 		exceptions.add(exception);
-		if (exception.exceptionGroup.equals(KExceptionGroup.CRITICAL)) {
+		if (exception.type == ExceptionType.ERROR)
 			print();
-		}
 	}
 
 	public void print() {
 		boolean errors = false;
 		for (KException e : exceptions) {
-			if (e.type == ExceptionType.WARNING && e.level <= GlobalSettings.warningslevel)
-				System.err.println(e);
-			if (e.type == ExceptionType.ERROR) {
-				System.err.println(e);
+			if (!GlobalSettings.hiddenWarnings && e.type == ExceptionType.WARNING)
+				continue;
+
+			if (e.type == ExceptionType.ERROR)
 				errors = true;
-			}
+			System.err.println(e);
 		}
 		if (errors)
 			System.exit(1);
@@ -36,12 +34,12 @@ public class KExceptionManager {
 		boolean errors = false;
 		for (KException e : exceptions)
 			if (e.exceptionGroup == keg) {
-				if (e.type == ExceptionType.WARNING && e.level <= GlobalSettings.warningslevel)
-					System.err.println(e);
-				if (e.type == ExceptionType.ERROR) {
-					System.err.println(e);
+				if (!GlobalSettings.hiddenWarnings && e.type == ExceptionType.WARNING)
+					continue;
+
+				if (e.type == ExceptionType.ERROR)
 					errors = true;
-				}
+				System.err.println(e);
 			}
 		if (errors)
 			System.exit(1);

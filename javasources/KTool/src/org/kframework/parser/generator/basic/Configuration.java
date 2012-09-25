@@ -3,7 +3,6 @@ package org.kframework.parser.generator.basic;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.Tag;
 import org.kframework.utils.XmlLoader;
@@ -16,7 +15,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 
 public class Configuration extends Sentence {
 	private String content;
@@ -93,7 +91,7 @@ public class Configuration extends Sentence {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse configuration: " + e.getLocalizedMessage(), this.filename, location, 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse configuration: " + e.getLocalizedMessage(), this.filename, location));
 		}
 
 		parsed = true;

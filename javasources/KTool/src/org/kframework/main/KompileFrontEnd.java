@@ -63,9 +63,8 @@ public class KompileFrontEnd {
 		CommandLine cmd = op.parse(args);
 
 		// options: help
-		if (cmd.hasOption("help")) {
+		if (cmd.hasOption("help"))
 			org.kframework.utils.Error.helpExit(op.getHelp(), op.getOptions());
-		}
 
 		if (cmd.hasOption("version")) {
 			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + "/bin/version.txt");
@@ -74,21 +73,18 @@ public class KompileFrontEnd {
 		}
 
 		// set verbose
-		if (cmd.hasOption("verbose")) {
+		if (cmd.hasOption("verbose"))
 			GlobalSettings.verbose = true;
-		}
 
 		// set literate
-		if (cmd.hasOption("literate")) {
+		if (cmd.hasOption("literate"))
 			GlobalSettings.literate = true;
-		}
 
-		if (cmd.hasOption("nofilename")) {
+		if (cmd.hasOption("nofilename"))
 			GlobalSettings.noFilename = true;
-		}
 
 		if (cmd.hasOption("warnings"))
-			GlobalSettings.warningslevel = Integer.parseInt(cmd.getOptionValue("warnings"));
+			GlobalSettings.hiddenWarnings = true;
 
 		if (cmd.hasOption("transition"))
 			GlobalSettings.transition = metadataParse(cmd.getOptionValue("transition"));
@@ -97,9 +93,8 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("superheat"))
 			GlobalSettings.superheat = metadataParse(cmd.getOptionValue("superheat"));
 
-		if (cmd.hasOption("addTopCell")) {
+		if (cmd.hasOption("addTopCell"))
 			GlobalSettings.addTopCell = true;
-		}
 
 		// set lib if any
 		if (cmd.hasOption("lib")) {
@@ -109,9 +104,8 @@ public class KompileFrontEnd {
 			GlobalSettings.synModule = cmd.getOptionValue("syntax-module");
 
 		String step = "RESOLVE-HOOKS";
-		if (cmd.hasOption("step")) {
+		if (cmd.hasOption("step"))
 			step = cmd.getOptionValue("step");
-		}
 
 		if (cmd.hasOption("fromxml")) {
 			File xmlFile = new File(cmd.getOptionValue("fromxml"));
@@ -128,7 +122,7 @@ public class KompileFrontEnd {
 		else {
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 1)
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to compile!.", "command line", "System file.", 0));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to compile!.", "command line", "System file."));
 			else
 				def = restArgs[0];
 		}
@@ -140,7 +134,7 @@ public class KompileFrontEnd {
 			File errorFile = mainFile;
 			mainFile = new File(def + ".k");
 			if (!mainFile.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system.", 0));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system."));
 		}
 
 		String lang = null;
@@ -219,7 +213,7 @@ public class KompileFrontEnd {
 				}
 				process.waitFor();
 				if (process.exitValue() != 0) {
-					KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", "", 0);
+					KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", "");
 					GlobalSettings.kem.register(exception);
 				}
 				process = pb.start();
@@ -236,7 +230,7 @@ public class KompileFrontEnd {
 			}
 
 		} catch (IOException e) {
-			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", "", 0);
+			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", "");
 			GlobalSettings.kem.register(exception);
 		}
 		pdfClean(new String[] { ".aux", ".log", ".mrk", ".out" });
@@ -513,7 +507,7 @@ public class KompileFrontEnd {
 
 			// make a set of all the syntax modules
 			if (def.getModulesMap().get(def.getMainSyntaxModule()) == null) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, "Could not find main syntax module used to generate a parser for programs: " + def.getMainSyntaxModule(), def.getMainFile(), "File system.", 0));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, "Could not find main syntax module used to generate a parser for programs: " + def.getMainSyntaxModule(), def.getMainFile(), "File system."));
 			} else {
 				FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", ProgramSDF.getSdfForPrograms(def));
 			}
@@ -673,7 +667,7 @@ public class KompileFrontEnd {
 			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
 			load += maudeLib;
 
-			String transition = metadataTags(GlobalSettings.transition); 
+			String transition = metadataTags(GlobalSettings.transition);
 			String superheat = metadataTags(GlobalSettings.superheat);
 			String supercool = metadataTags(GlobalSettings.supercool);
 
@@ -681,8 +675,8 @@ public class KompileFrontEnd {
 			javaDef = (Definition) javaDef.accept(new AddDefaultComputational());
 			javaDef = (Definition) javaDef.accept(new AddOptionalTags());
 
-			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools "
-					+ supercool + " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
+			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats "
+					+ superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 
@@ -716,7 +710,7 @@ public class KompileFrontEnd {
 			result.add(alltags[i]);
 		return result;
 	}
-	
+
 	private static String metadataTags(List<String> tags) {
 		String result = "";
 		for (String s : tags) {

@@ -13,7 +13,6 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-
 public class FileUtil {
 
 	public static void saveInFile(String file, String content) {
@@ -30,7 +29,7 @@ public class FileUtil {
 				out.close();
 			}
 		} catch (IOException e) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot save file content: " + file, "internal", "FileUtil.java", 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot save file content: " + file, "internal", "FileUtil.java"));
 		}
 	}
 
@@ -49,8 +48,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * Get language name in uppercase (main module name) given the
-	 * filename of definition.
+	 * Get language name in uppercase (main module name) given the filename of definition.
 	 */
 	public static String getMainModule(String filename) {
 		return stripExtension(filename).toUpperCase();
@@ -70,9 +68,9 @@ public class FileUtil {
 			return stringBuilder.toString();
 
 		} catch (FileNotFoundException e) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. Make sure that file: " + file + " exists.", "internal", "FileUtil.java", 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. Make sure that file: " + file + " exists.", "internal", "FileUtil.java"));
 		} catch (IOException e) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. An IO error occured: " + file, "internal", "FileUtil.java", 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. An IO error occured: " + file, "internal", "FileUtil.java"));
 		}
 
 		return "";

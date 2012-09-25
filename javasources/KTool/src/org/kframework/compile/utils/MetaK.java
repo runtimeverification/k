@@ -211,7 +211,7 @@ public class MetaK {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Internal compiler error --- Cannot find configuration.", 
-					node.getFilename(), node.getLocation(), 0));
+					node.getFilename(), node.getLocation()));
 		}
 		return result.get(0);
 	}
@@ -226,7 +226,7 @@ public class MetaK {
 		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 				KExceptionGroup.COMPILER, 
 				"Don't know the default value for term " + v.toString() + ". Assuming .K", 
-				v.getFilename(), v.getLocation(), 0));
+				v.getFilename(), v.getLocation()));
 		return new Empty("K");
 	}
 	

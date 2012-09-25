@@ -3,7 +3,6 @@ package org.kframework.main;
 import java.io.File;
 import java.io.IOException;
 
-
 import org.apache.commons.cli.CommandLine;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
@@ -15,7 +14,6 @@ import org.kframework.utils.utils.file.FileUtil;
 import org.kframework.utils.utils.file.KPaths;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 
 public class KastFrontEnd {
 
@@ -48,20 +46,20 @@ public class KastFrontEnd {
 		else {
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 1)
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to kast a program!.", "command line", "System file.", 0));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to kast a program!.", "command line", "System file."));
 			else
 				pgm = restArgs[0];
 		}
 
 		File mainFile = new File(pgm);
 		if (!mainFile.exists())
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file.", 0));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
 
 		File def = null;
 		if (cmd.hasOption("def")) {
 			def = new File(cmd.getOptionValue("def"));
 			if (!def.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file.", 0));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
 		} else {
 			// search for the definition
 			try {
@@ -76,7 +74,7 @@ public class KastFrontEnd {
 					if (dotk.exists()) {
 						File defXml = new File(dotk.getCanonicalPath() + "/def.xml");
 						if (!defXml.exists()) {
-							GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition in: " + dotk, "command line", pgm, 0));
+							GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition in: " + dotk, "command line", pgm));
 						}
 
 						Document doc = XmlLoader.getXMLDoc(FileUtil.getFileContent(defXml.getAbsolutePath()));
@@ -87,7 +85,7 @@ public class KastFrontEnd {
 				}
 
 				if (def == null)
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find a compiled definition, please provide one using the -def option", "command line", pgm, 0));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find a compiled definition, please provide one using the -def option", "command line", pgm));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

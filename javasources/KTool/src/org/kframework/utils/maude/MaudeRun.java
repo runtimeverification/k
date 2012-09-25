@@ -15,7 +15,6 @@ import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.utils.file.FileUtil;
 import org.kframework.utils.utils.file.KPaths;
 
-
 public class MaudeRun {
 
 	static String maudeExe = initializeMaudeExecutable();
@@ -25,8 +24,8 @@ public class MaudeRun {
 	 */
 	public static String initializeMaudeExecutable() {
 		if (checkLocalMaudeInstallation()) {
-			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INTERNAL, "Maude is already installed on this machine. Please remove directory k-install-dir/bin/maude/binaries to use your local maude installation. ",
-					"", "", 3));
+			String msg = "Maude is already installed on this machine. Please remove directory k-install-dir/bin/maude/binaries to use your local maude installation. ";
+			GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, msg, "File System", KPaths.getKBase(false) + "/bin/maude/binaries"));
 		}
 
 		// get system properties: file separator, os name, os architecture

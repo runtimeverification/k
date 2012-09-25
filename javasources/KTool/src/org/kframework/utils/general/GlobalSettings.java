@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
 
-
 public class GlobalSettings {
 	public static boolean verbose = false;
 	public static boolean noFilename = false;
@@ -17,7 +16,7 @@ public class GlobalSettings {
 	public static KExceptionManager kem = new KExceptionManager();
 	public static File mainFile;
 	public static String mainFileWithNoExtension;
-	public static int warningslevel = 2;
+	public static boolean hiddenWarnings = false;
 	public static boolean typeWarnings = false;
 	public static List<String> transition = new ArrayList<String>();
 	public static List<String> superheat = new ArrayList<String>();

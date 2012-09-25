@@ -67,7 +67,7 @@ public abstract class Collection extends Term {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.INTERNAL, 
 						"NULL Term encountered when printing collection " + contents + ".", 
-						getFilename(), getLocation(), 0));				
+						getFilename(), getLocation()));				
 			}
 			content += term.toMaude() + ",";
 		}

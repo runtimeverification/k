@@ -17,7 +17,7 @@ public class KException {
 		types = new HashMap<KException.ExceptionType, String>();
 		types.put(ExceptionType.ERROR, "Error");
 		types.put(ExceptionType.WARNING, "Warning");
-		types.put(ExceptionType.STATUS, "Status");
+		types.put(ExceptionType.HIDDENWARNING, "Warning");
 
 		labels = new HashMap<KException.KExceptionGroup, String>();
 		labels.put(KExceptionGroup.COMPILER, "Compiler");
@@ -27,23 +27,22 @@ public class KException {
 		labels.put(KExceptionGroup.CRITICAL, "Critical");
 	}
 
-	public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location, int level) {
+	public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location) {
 		super();
 		this.type = type;
 		this.exceptionGroup = label;
 		this.message = message;
 		this.filename = filename;
 		this.location = location;
-		this.level = level;
 	}
 
 	public enum KExceptionGroup {
 		PARSER, COMPILER, LISTS, INTERNAL, CRITICAL
-	};
+	}
 
 	public enum ExceptionType {
-		ERROR, WARNING, STATUS
-	};
+		ERROR, WARNING, HIDDENWARNING
+	}
 
 	@Override
 	public String toString() {

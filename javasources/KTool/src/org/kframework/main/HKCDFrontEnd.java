@@ -52,7 +52,7 @@ public class HKCDFrontEnd {
 						       KExceptionGroup.CRITICAL,
 						       "You have to provide a language definition in order to compile!",
 						       "command line",
-						       "System file.", 0));
+						       "System file."));
 			else
 				def = restArgs[0];
 		}
@@ -70,7 +70,7 @@ public class HKCDFrontEnd {
 					new KException(ExceptionType.ERROR,
 						       KExceptionGroup.CRITICAL,
 						       "File: " + errorFile.getName() + "(.k) not found.",
-						       errorFile.getAbsolutePath(), "File system.", 0));
+						       errorFile.getAbsolutePath(), "File system."));
 		}
 
 		// Load .pgm
@@ -85,7 +85,7 @@ public class HKCDFrontEnd {
 						       KExceptionGroup.CRITICAL,
 						       "You have to provide a program source!",
 						       "command line",
-						       "System file.", 0));
+						       "System file."));
 			else
 				pgm = restArgs[1];
 		}
