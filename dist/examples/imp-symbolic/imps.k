@@ -1,5 +1,6 @@
 //require "../symbolic/symbolic-calculus.k"
 require "builtins/symbolic-calculus.k"
+require "builtins/smt.k"
 
 /*!
 \setlength{\parindent}{1em}
