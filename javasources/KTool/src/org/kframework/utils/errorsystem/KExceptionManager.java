@@ -19,7 +19,7 @@ public class KExceptionManager {
 	public void print() {
 		boolean errors = false;
 		for (KException e : exceptions) {
-			if (!GlobalSettings.hiddenWarnings && e.type == ExceptionType.WARNING)
+			if (!GlobalSettings.hiddenWarnings && e.type == ExceptionType.HIDDENWARNING)
 				continue;
 
 			if (e.type == ExceptionType.ERROR)
@@ -34,7 +34,7 @@ public class KExceptionManager {
 		boolean errors = false;
 		for (KException e : exceptions)
 			if (e.exceptionGroup == keg) {
-				if (!GlobalSettings.hiddenWarnings && e.type == ExceptionType.WARNING)
+				if (!GlobalSettings.hiddenWarnings && e.type == ExceptionType.HIDDENWARNING)
 					continue;
 
 				if (e.type == ExceptionType.ERROR)

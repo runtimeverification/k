@@ -35,6 +35,13 @@ public class CellTypesFilter extends BasicTransformer {
 	public ASTNode transform(Cell cell) throws TransformerException {
 		String sort = DefinitionHelper.cellSorts.get(cell.getLabel());
 
+		if (sort == null) {
+			if (cell.getLabel().equals("k"))
+				sort = "K";
+			else if (cell.getLabel().equals("T"))
+				sort = "Bag";
+		}
+
 		if (sort != null) {
 			if (cell.getContents() instanceof Ambiguity) {
 				List<Term> children = new ArrayList<Term>();
@@ -60,7 +67,7 @@ public class CellTypesFilter extends BasicTransformer {
 				}
 		} else {
 			String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
-			GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, cell.getFilename(), cell.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, cell.getFilename(), cell.getLocation()));
 		}
 		return super.transform(cell);
 	}
