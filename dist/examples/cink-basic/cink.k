@@ -1,3 +1,4 @@
+require "builtins/model-checker.k"
 /*!
 \usepackage{ucs} % for unicode characters (just for \Rosu and \Serbanuta)
 
