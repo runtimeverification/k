@@ -901,6 +901,7 @@ Since any builtin sort is subsorted to the sort \texttt{K}, it follows that
 module CINK-SYNTAX
   imports CINK-LANG-SYNTAX
   imports LTL-HOOKS
+  imports MODEL-CHECKER-HOOKS
 
   /*@
     This module combines the syntax of the \Cink language with that of 
