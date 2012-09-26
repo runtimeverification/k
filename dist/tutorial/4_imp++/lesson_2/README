@@ -1,6 +1,8 @@
 K Tutorial --- IMP++ --- Configuration Refinement; Freshness
 by Grigore Rosu
 
+In this
+
 - split state into env/store
 - modify all rules to deal with it
 - analyze first variable declaration rule in depth, with emphasis on fresh(S:Sort)
