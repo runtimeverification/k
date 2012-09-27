@@ -46,7 +46,7 @@ public class DefinitionSDF {
 		
 		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor();
 		def.accept(psdfv);
-
+/*
 		{
 			if (psdfv.prilist.size() > 0) {
 				if (prilist.size() <= 1 && syn.getPriorities().get(0).getBlockAssoc() == null) {
@@ -282,7 +282,7 @@ public class DefinitionSDF {
 		sdf += "	DzDzId  -/- [a-zA-Z0-9]\n";
 		sdf += "	DzDzInt -/- [0-9]\n";
 		sdf += "	\"is\" -/- [\\#A-Z]\n";
-
+*/
 		return sdf + "\n";
 	}
 }
