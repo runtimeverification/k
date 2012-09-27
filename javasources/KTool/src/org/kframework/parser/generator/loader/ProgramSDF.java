@@ -20,7 +20,12 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.utils.Error;
 import org.kframework.utils.StringUtil;
 
-
+/**
+ * Collect the syntax module, call the syntax collector and print SDF for programs.
+ * 
+ * @author RaduFmse
+ * 
+ */
 public class ProgramSDF {
 
 	public static String getSdfForPrograms(Definition def) {
