@@ -94,6 +94,8 @@ public class Definition implements Cloneable {
 
 				String content = FileUtil.getFileContent(file.getAbsolutePath());
 
+				if (GlobalSettings.verbose)
+					System.out.println("Including file: " + file);
 				String parsed = KParser.ParseKString(content);
 				Document doc = XmlLoader.getXMLDoc(parsed);
 				XmlLoader.addFilename(doc.getFirstChild(), file.getAbsolutePath());
@@ -111,8 +113,6 @@ public class Definition implements Cloneable {
 
 				if (firstTime) {
 					// add automatically the autoinclude.k file
-					if (GlobalSettings.verbose)
-						System.out.println("Including file: " + "autoinclude.k");
 					File newFilePath = buildInclPath(file, "autoinclude.k");
 					slurp(newFilePath, false);
 				}
@@ -123,8 +123,6 @@ public class Definition implements Cloneable {
 				NodeList xmlIncludes = doc.getDocumentElement().getElementsByTagName(Tag.require);
 				for (int i = 0; i < xmlIncludes.getLength(); i++) {
 					String inclFile = xmlIncludes.item(i).getAttributes().getNamedItem("value").getNodeValue();
-					if (GlobalSettings.verbose)
-						System.out.println("Including file: " + inclFile);
 					File newFilePath = buildInclPath(file, inclFile);
 					slurp(newFilePath, false);
 					DefinitionHelper.addFileRequirement(newFilePath.getCanonicalPath(), file.getCanonicalPath());
