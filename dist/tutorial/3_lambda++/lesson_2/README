@@ -1,0 +1,19 @@
+- closures are like lambda abstractions, but ones which also freeze their
+  declaration environment in themselves.  this way, when invoked, they
+  can immediately recover their environment and execute there.
+
+- the env(Rho) item is like a sort of a silent closure.
+
+- non-syntactic values have to be added to syntax as well, if you want to use
+  concrete syntax in your rules.  This does not affect parsing your programs,
+  because you can/should use a different module for parsing.  The
+  default  -SYNTAX module.
+
+- krun identity.lambda
+- krun closed-variable-capture.lambda
+- krun free-variable-capture.lambda
+  note that it gets stuck on z, because it is free, so it cannnot evaluate it;
+  needs to be provided in the environment/store
+- krun omega.lambda
+  should still loop
+
