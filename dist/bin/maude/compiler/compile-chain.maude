@@ -1,18 +1,21 @@
 mod COMPILE-ONESHOT is
- including MANY-MODULES-META 
-+ ADD-EVAL-META 
-+ RESOLVE-BINDER-META
-+ RESOLVE-DITTO-META + COMPLETE-K-SORTS-META + ANONYMOUS-CONSTANTS-META 
+ including 
+---  MANY-MODULES-META 
+---+ ADD-EVAL-META 
+---+ RESOLVE-BINDER-META
+---+ RESOLVE-DITTO-META 
+---+ COMPLETE-K-SORTS-META 
+---+ ANONYMOUS-CONSTANTS-META 
+---+ ANONYMOUS-VARIABLES-META 
 --- + SANITY-CHECKS-META 
-+ REMOVE-PARSER-META 
-+ SYNTAX-PREDICATES-META 
+---+ REMOVE-PARSER-META 
 --- + MISSING-SUBSORTS-META 
-+ BLOCKING-INPUT-META 
+---+ BLOCKING-INPUT-META 
+ SYNTAX-PREDICATES-META 
 + DEFAULT-TERMS-META 
 + CONTEXT-TRANSFORMERS-META 
 + OPEN-CELLS-META 
 + APPLY-MAPEQS-META
-+ ANONYMOUS-VARIABLES-META 
 + MAKE-K-RULES-META 
 --- + REMOVE-SUBLISTS-META
 --- + LISTS-TO-WRAPPERS-META 
@@ -34,24 +37,24 @@ mod COMPILE-ONESHOT is
   eq compile(M, Q QIL, AS) = compile(compile1(M,Q, AS), QIL, AS) .
 
   op compile1 : Module Qid AttrSet ~> Module .
-  eq compile1(M, 'MANY-MODULES, AS) = compileMANY-MODULES(M, AS) .
-  eq compile1(M, 'REMOVE-PARSER, AS) = compileREMOVE-PARSER(M, AS) .
+---  eq compile1(M, 'MANY-MODULES, AS) = compileMANY-MODULES(M, AS) .
+---  eq compile1(M, 'REMOVE-PARSER, AS) = compileREMOVE-PARSER(M, AS) .
   eq compile1(M, 'DUMMY, AS) = M .
-  eq compile1(M, 'ADD-EVAL, AS) = compileADD-EVAL(M, AS) .
-  eq compile1(M, 'RESOLVE-DITTO, AS) = compileRESOLVE-DITTO(M, AS) .
-  eq compile1(M, 'RESOLVE-BINDER, AS) = compileRESOLVE-BINDER(M, AS) .
-  eq compile1(M, 'COMPLETE-K-SORTS, AS) = compileCOMPLETE-K-SORTS(M, AS) .
-  eq compile1(M, 'ANONYMOUS-CONSTANTS, AS) = compileANONYMOUS-CONSTANTS(M, AS) . 
+---  eq compile1(M, 'ADD-EVAL, AS) = compileADD-EVAL(M, AS) .
+---  eq compile1(M, 'RESOLVE-DITTO, AS) = compileRESOLVE-DITTO(M, AS) .
+---  eq compile1(M, 'RESOLVE-BINDER, AS) = compileRESOLVE-BINDER(M, AS) .
+---  eq compile1(M, 'COMPLETE-K-SORTS, AS) = compileCOMPLETE-K-SORTS(M, AS) .
+---  eq compile1(M, 'ANONYMOUS-CONSTANTS, AS) = compileANONYMOUS-CONSTANTS(M, AS) . 
 ---  eq compile1(M, 'SANITY-CHECKS, AS) = compileSANITY-CHECKS(M, AS) . 
  
 ---  eq compile1(M, 'MISSING-SUBSORTS, AS) = compileMISSING-SUBSORTS(M, AS) . 
   eq compile1(M, 'SYNTAX-PREDICATES, AS) = compileSYNTAX-PREDICATES(M, AS) . 
-  eq compile1(M, 'BLOCKING-INPUT, AS) = compileBLOCKING-INPUT(M, AS) . 
+---  eq compile1(M, 'BLOCKING-INPUT, AS) = compileBLOCKING-INPUT(M, AS) . 
   eq compile1(M, 'DEFAULT-TERMS, AS) = compileDEFAULT-TERMS(M, AS) . 
   eq compile1(M, 'CONTEXT-TRANSFORMERS, AS) = compileCONTEXT-TRANSFORMERS(M, AS) . 
   eq compile1(M, 'OPEN-CELLS, AS) = compileOPEN-CELLS(M, AS) . 
   eq compile1(M, 'APPLY-MAPEQS, AS) = compileAPPLY-MAPEQS(M, AS) . 
-  eq compile1(M, 'ANONYMOUS-VARIABLES, AS) = compileANONYMOUS-VARIABLES(M, AS) . 
+---  eq compile1(M, 'ANONYMOUS-VARIABLES, AS) = compileANONYMOUS-VARIABLES(M, AS) . 
   eq compile1(M, 'MAKE-K-RULES, AS) = compileMAKE-K-RULES(M, AS) . 
 ---  eq compile1(M, 'REMOVE-SUBLISTS, AS) = compileREMOVE-SUBLISTS(M, AS) . 
 ---  eq compile1(M, 'LISTS-TO-WRAPPERS, AS) = compileLISTS-TO-WRAPPERS(M, AS) . 

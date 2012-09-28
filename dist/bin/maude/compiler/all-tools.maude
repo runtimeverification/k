@@ -8,21 +8,21 @@ load printing
 --- load xml-printing
 --- load sanity-checks-interface
 
-load many-modules-interface
-load add-eval-interface
-load resolve-ditto-interface
-load resolve-binder-interface
-load complete-k-sorts-interface
-load anon-consts-interface
-load anon-vars-interface
-load remove-parser-interface
+---load many-modules-interface
+---load add-eval-interface
+---load resolve-ditto-interface
+---load resolve-binder-interface
+---load complete-k-sorts-interface
+---load anon-consts-interface
+---load anon-vars-interface
+---load remove-parser-interface
+---load blocking-input-interface
 load syntax-predicates-interface
 load subsorts-to-wrappers-interface
 load homogenous-arguments-interface
 load make-all-labels-interface
 
 load strict-ops2cxt-interface
-load blocking-input-interface
 
 load default-terms-interface
 load context-transformers-interface
