@@ -10,7 +10,7 @@ The variable increment rule is self-explanatory:
 
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-	   <store>... N |-> (I => I +Int 1) ...</store>
+       <store>... N |-> (I => I +Int 1) ...</store>
 
 We can now run programs like our div.imp program introduced in Lesson 1.
 Do it.
@@ -26,7 +26,7 @@ other behaviors, too.
 To see all the (final-state) behaviors that a program can have, you can call
 the krun tool with the option --search.  For example:
 
-krun div.imp --search
+  krun div.imp --search
 
 Ooops, we see only one solution, the same as when we ran it without search. :(
 
@@ -79,7 +79,7 @@ The least intrusive way to enforce our current language to explore the
 entire non-determinism due to the strictness of division, is to kompile it
 with the following options:
 
-kompile imp.k --superheat="division" --supercool="lookup increment"
+  kompile imp.k --superheat="division" --supercool="lookup increment"
 
 In other words, we want to explore the non-determinism due only to the
 heating rules corresponding to the division construct, and we want to search
@@ -89,7 +89,7 @@ operation is heated.
 
 Now the command
 
-krun div.imp --search
+  krun div.imp --search
 
 shows us all five behaviors of this program.  Note that, interestingly, one
 of the five behaviors yields a division by zero!
@@ -107,7 +107,7 @@ their corresponding options.  For example, if you tag the division production
 with "superheat" and the lookup and increment rules with "supercool", then 
 the command 
 
-kompile imp
+  kompile imp
 
 is completely equivalent to the previous kompile command!
 

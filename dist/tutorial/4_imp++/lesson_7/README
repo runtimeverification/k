@@ -5,10 +5,9 @@ In this lesson we wrap up IMP++'s semantics and also generate its poster.
 While doing so, we also learn how to display larger configurations in order
 to make them easier to read and print.
 
-
 Tutorial 4 is now complete.  At this moment you should know most of K
 framework's features and how to use the K tool.  You can now define or design
 your own programming languages, and then execute and analyze programs.
 
 Tutorial 5 discusses a few other features of the K framework, which you
-may find useful when defining more complex or tricky languages.
+may find useful when defining more complex or tricky language features.

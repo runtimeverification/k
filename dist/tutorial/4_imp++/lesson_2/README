@@ -37,7 +37,7 @@ We modify it as follows:
 
   rule <k> X:Id => I ...</k>
        <env>... X |-> N ...</env>
-	   <store>... N |-> I ...</store>
+       <store>... N |-> I ...</store>
 
 So we first match the location N of X in the environment, then the value I
 at location N in the store, and finally we rewrite X to I into the

@@ -41,10 +41,10 @@ module IMP
 // AExp
   rule <k> X:Id => I ...</k>
        <env>... X |-> N ...</env>
-	   <store>... N |-> I ...</store>  [lookup]
+       <store>... N |-> I ...</store>  [lookup]
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-	   <store>... N |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... N |-> (I => I +Int 1) ...</store>  [increment]
   rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
 // BExp
