@@ -1,3 +1,35 @@
+K Tutorial --- LAMBDA++ ---Semantic, Non-Syntactic Computation Items
+by Grigore Rosu
+
+In this lesson we start another semantic definition of LAMBDA++, which
+follows a style based on environments instead of substitution.  In terms of
+K, we will learn how easy it is to add new items to the syntactic category
+of computations K, even ones which do not have a syntactic nature (like the
+current-continuation items that we added in Lesson 1).
+
+An environment binds variable names of interest to locations where their
+values are stored.  The idea of environment-based definitions is to maintain
+a global "store" mapping locations to values, and then have enviroments
+available when we evaluate expressions telling where the variables are
+located in the store.  Since LAMBDA++ is a relatively simple language, we
+only need to maintain one global environment.  Following a similar style
+like in IMP, we place all cells into a top cell T:
+
+  configuration <T>
+                  <k> $PGM:Exp </k>
+                  <env> .Map </env>
+                  <store> .Map </store>
+                </T>
+
+Recall that $PGM is where the program is placed by krun after parsing.  So
+the program execution starts with an empty environment and an empty store.
+
+
+Since our new definition of LAMBDA++ is not based on substitution,
+
+
+ different
+
 - closures are like lambda abstractions, but ones which also freeze their
   declaration environment in themselves.  this way, when invoked, they
   can immediately recover their environment and execute there.
@@ -17,3 +49,22 @@
 - krun omega.lambda
   should still loop
 
+
+
+Add this somewhere here:
+
+Although unnecessary here, it is insightful and useful
+to understand the relationship between your language's values and other
+syntactic categories.  It is often the case that values form a
+subset of the existing language syntax, like here, but sometimes that
+is not immediately obvious and sometimes even not true by default (for
+example, when defining functional languages we may add closures as
+values, even though closures were not expressions in the original
+language).  When that happens, in order for the semantics to be
+given smoothly and uniformly you may need to extend your language's
+original syntactic categories with the new values.  This is not needed
+for our IMP semantics here, since its values are trivial and already
+part of the original syntax.  Nevertheless, we still have to tell the
+\K tool that it should interpret our intended values as results of
+computations (note that this is not automatic, since sometimes other
+syntactic categories are results; e.g., types when defining a type system).
