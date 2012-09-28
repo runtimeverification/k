@@ -1,0 +1,4 @@
+- Fix callcc with environment closures.
+- krun callcc-env1.lambda and callcc-env2.lambda; they should both eval to 3.
+
+

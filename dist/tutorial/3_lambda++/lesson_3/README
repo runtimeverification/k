@@ -1,0 +1,7 @@
+Reusing Semantics
+
+Just cut-and-paste the rest from 1_lambda/lesson_7.
+
+Then run all programs.  Everything should work, although the store contains
+lots of "garbage".  Garbage collection is an interesting topic, but we do not
+do it here.
