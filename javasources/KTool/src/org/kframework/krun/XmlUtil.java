@@ -58,7 +58,7 @@ public class XmlUtil {
 	}
 
 	public static ArrayList<Element> getChildElements(Node node) {
-		ArrayList l = new ArrayList();
+		ArrayList<Element> l = new ArrayList<Element>();
 		for (Node childNode = node.getFirstChild(); childNode != null;) {
 			if (childNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element elem = (Element) childNode;
@@ -95,6 +95,7 @@ public class XmlUtil {
 		return null;
 	}
 
+	//convert a node to its string representation
 	public static String convertNodeToString(Node node) {
 		try {
 			Transformer t = TransformerFactory.newInstance().newTransformer();
@@ -143,7 +144,7 @@ public class XmlUtil {
 		}
 	}
 	
-	//convert the xml obtained from Maude with the -xml-log option into Maude representation
+	//convert the xml obtained from Maude with the -xml-log option back into its Maude representation
 	public static String xmlToMaude (String fileName) {
 		File input = new File(fileName);
 		Document doc = XmlUtil.readXML(input);

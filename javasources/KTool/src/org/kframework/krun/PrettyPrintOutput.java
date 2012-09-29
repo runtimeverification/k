@@ -32,6 +32,7 @@ public class PrettyPrintOutput {
 	public static final String ANSI_PURPLE = "\u001B[35m";
 	public static final String ANSI_CYAN = "\u001B[36m";
 	public static final String ANSI_WHITE = "\u001B[37m";
+	
 	//addnewLine is used to prevent adding an additional new line at the first BagItem located in the top of XML file
     public static boolean addNewLine = false;
 	
@@ -42,38 +43,6 @@ public class PrettyPrintOutput {
 	public PrettyPrintOutput(CommandLine cmd_) {
 		this.cmd = cmd_;
 	}
-
-	/* return the value for the attribute attrName of result tag */
-/*	public String getResultTagAttr(File file, String attrName) {
-		Document doc = XmlUtil.readXML(file);
-		NodeList list = doc.getElementsByTagName("result");
-		Node nod = list.item(0);
-
-		if (nod == null) {
-			Error.report("Pretty Print Output: The node with result tag wasn't found");
-		} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
-			Element elem = (Element) nod;
-			String attr = elem.getAttribute(attrName);
-			return attr;
-		}
-		return null;
-	}*/
-
-	/* return the value for the attribute attrName of search-result tag */
-	/*public String getSearchTagAttr(File file, String attrName) {
-		Document doc = XmlUtil.readXML(file);
-		NodeList list = doc.getElementsByTagName("search-result");
-		Node nod = list.item(0);
-
-		if (nod == null) {
-			Error.report("Pretty Print Output: The node with search-result tag wasn't found");
-		} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
-			Element elem = (Element) nod;
-			String attr = elem.getAttribute(attrName);
-			return attr;
-		}
-		return null;
-	}*/
 
 	public void preprocessDoc(String fileName, String processedFile) {
 		File input = new File(fileName);
@@ -138,6 +107,7 @@ public class PrettyPrintOutput {
 
 	}
 	
+	//needed for --search command
 	public static String printSearchResults(Element elem) {
 		String result = "";
 		String solutionNumber = elem.getAttribute("solution-number");
@@ -148,6 +118,7 @@ public class PrettyPrintOutput {
 		return result;
 	}
 	
+	//needed for --statistics command
 	public static String printStatistics(Element elem) {
 		String result = "";
 		if ("search".equals(K.maude_cmd)) {

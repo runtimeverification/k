@@ -103,6 +103,7 @@ public class FileUtil {
 		return "";
 	}
 
+	//delete a file specified by the fileName
 	public static void deleteFile(String fileName) {
 
 		File f = new File(fileName);
@@ -118,6 +119,7 @@ public class FileUtil {
 			throw new IllegalArgumentException("Delete: deletion failed");
 	}
 
+	//delete a directory specified by the path
 	public static boolean deleteDirectory(File path) {
 		if (path.exists()) {
 			File[] files = path.listFiles();
@@ -134,6 +136,7 @@ public class FileUtil {
 		return (path.delete());
 	}
 	
+	//rename a folder having it's current name oldName with the specified newName 
 	public static void renameFolder(String oldName, String newName) throws IOException {
 		File srcFile = new File(oldName);
 		boolean bSucceeded = false;
@@ -161,7 +164,7 @@ public class FileUtil {
 		}
 	}
 
-	// parse the output of Maude when --output-mode=raw
+	//parse the output of Maude when --output-mode=raw
 	public static String parseResultOutputMaude(String file) {
 		BufferedReader reader = null;
 		try {
@@ -204,7 +207,7 @@ public class FileUtil {
 		return null;
 	}
 	
-	// parse the output of Maude when --output-mode=raw and --ltlmc options are provided
+	//parse the output of Maude when --output-mode=raw and --ltlmc options are provided
 	public static String parseModelCheckingOutputMaude(String file) {
 		BufferedReader reader = null;
 		try {
@@ -323,7 +326,7 @@ public class FileUtil {
 		return result;
 	}
 	
-	//search for subfolders in the given path and having a name that matches the pattern
+	//search for subfolders in the given path, having a name that matches the pattern
 	public static File[] searchSubFolders (String path, final String pattern) {
 		// This filter only returns directories with a name that matches the pattern
 		FileFilter fileFilter = new FileFilter() {
@@ -351,14 +354,14 @@ public class FileUtil {
 		}
 	}
     
-	// for folder/subfolder/fileName.extension it will return fileName ("." - extensionSeparator and "/" - pathSeparator)
+	//for folder/subfolder/fileName.extension it will return fileName (where e.g. "." - extensionSeparator and "/" - pathSeparator)
 	public static String getFilename(String fullPath, String extensionSeparator, String pathSeparator) {
 		int dot = fullPath.lastIndexOf(extensionSeparator);
 		int sep = fullPath.lastIndexOf(pathSeparator);
 		return fullPath.substring(sep + 1, dot);
 	}
 
-	// for folder/subfolder/fileName.extension it will return folder/subfolder/fileName
+	//for folder/subfolder/fileName.extension it will return folder/subfolder/fileName
 	public static String dropExtension(String fullPath, String extensionSeparator, String pathSeparator) {
 		int dot = fullPath.lastIndexOf(extensionSeparator);
 		return fullPath.substring(0, dot);

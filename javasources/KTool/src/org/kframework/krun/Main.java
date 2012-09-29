@@ -21,7 +21,6 @@ import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.krun.runner.KRunner;
 
-
 public class Main {
 
 	private static final String USAGE_KRUN = "krun [options] <file>" + K.lineSeparator;
@@ -29,6 +28,7 @@ public class Main {
 	private static final String HEADER = "";
 	private static final String FOOTER = "";
 
+	//needed for displaying the krun help
 	public static void printKRunUsage(Options options) {
 		HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.setOptionComparator(new CommandlineOptions.OptionComparator());
@@ -37,6 +37,7 @@ public class Main {
 		System.out.println();
 	}
 
+	//needed for displaying the krun debugger help
 	public static void printDebugUsage(Options options) {
 		HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.setOptionComparator(new CommandlineOptions.OptionComparator());
@@ -263,7 +264,7 @@ public class Main {
 			if (cmd.hasOption("output")) {
 				FileUtil.createFile(K.output, aux1.toString());
 			}
-
+		
 			ProcessBean bean = new ProcessBean();
 			bean.setExitCode(0);
 			System.exit(bean.getExitCode());
@@ -350,7 +351,7 @@ public class Main {
 				String[] cmds = new String[] { "--" + input };
 				CommandlineOptions cmd_options = new CommandlineOptions();
 				CommandLine cmd = cmd_options.parse(cmds);
-				// when an error occurred during parsing the commandline
+				// when an error occurred during parsing the commandline continue the execution of the stepper
 				if (cmd == null) {
 					continue;
 				} else {
@@ -672,7 +673,9 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		
 		execute_Krun(args);
+		
 	}
 
 }

@@ -1,7 +1,6 @@
 package org.kframework.krun;
 
 import java.util.List;
-
 import org.w3c.dom.Element;
 
 public class Utils {
@@ -142,5 +141,6 @@ public class Utils {
 			sb.append(" ");
 		return sb.toString();
 	}
+	
 	
 }

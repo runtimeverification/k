@@ -167,7 +167,16 @@ public class DefinitionLoader {
 			sw.printIntermediate("Disambiguate    = ");
 
 		javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
+		
+		// print defx.xml which contains the xstream version of the definition
+		XStream xstream = new XStream();
+		xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
+		/*String xml = xstream.toXML(javaDef);
+
+		FileUtil.saveInFile(dotk.getAbsolutePath() + "/defx.xml", xml);*/
+
+		
 		return javaDef;
 	}
 

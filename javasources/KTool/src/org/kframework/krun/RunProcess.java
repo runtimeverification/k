@@ -150,6 +150,7 @@ public class RunProcess {
 		return maude.returnValue;
 	}
 
+	//check if the execution of Maude process produced some errors 
 	public void checkMaudeForErrors(File errFile, String lang) {
 		try {
 			if (errFile.exists()) {

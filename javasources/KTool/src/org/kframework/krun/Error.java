@@ -1,5 +1,6 @@
 package org.kframework.krun;
 
+// helper class for handling error messages
 public class Error {
 
 	public static void report(String message) {
