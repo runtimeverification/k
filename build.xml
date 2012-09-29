@@ -87,30 +87,35 @@
 
 	<target name="release">
 		<antcall target="build" />
-		<delete dir="./k/" />
+		<delete dir="./release" />
 
-		<exec command="svn export dist k" failonerror="true" />
-		<copy file="./dist/bin/java/k3.jar" todir="./k/bin/java/" />
-		<copy file="./dist/bin/version.txt" todir="./k/bin/" />
+		<mkdir dir="release" />
+		<exec executable="svn" failonerror="true">
+			<arg value="export" />
+			<arg value="dist" />
+			<arg value="release/k" />
+		</exec>
+		<copy file="./dist/bin/java/k3.jar" todir="./release/k/bin/java/" />
+		<copy file="./dist/bin/version.txt" todir="./release/k/bin/" />
 
 		<delete file="k-${version}.zip" />
 		<delete file="k-${version}.tgz" />
-		<zip destfile="k-${version}.zip" basedir="k" />
+		<zip destfile="k-${version}.zip" basedir="release" />
 		<tar destfile="k-${version}.tgz" compression="gzip">
-			<tarfileset filemode="755" dir="./k">
-				<include name="bin/kast" />
-				<include name="bin/kompile" />
-				<include name="bin/krun" />
-				<include name="bin/ksettest" />
-				<include name="bin/hkcd" />
+			<tarfileset filemode="755" dir="./release">
+				<include name="k/bin/kast" />
+				<include name="k/bin/kompile" />
+				<include name="k/bin/krun" />
+				<include name="k/bin/ksettest" />
+				<include name="k/bin/hkcd" />
 			</tarfileset>
-			<tarfileset dir="./k">
+			<tarfileset dir="./release">
 				<include name="**" />
-				<exclude name="bin/kast" />
-				<exclude name="bin/kompile" />
-				<exclude name="bin/krun" />
-				<exclude name="bin/ksettest" />
-				<exclude name="bin/hkcd" />
+				<exclude name="k/bin/kast" />
+				<exclude name="k/bin/kompile" />
+				<exclude name="k/bin/krun" />
+				<exclude name="k/bin/ksettest" />
+				<exclude name="k/bin/hkcd" />
 			</tarfileset>
 		</tar>
 	</target>
