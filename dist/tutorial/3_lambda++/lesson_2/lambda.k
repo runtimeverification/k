@@ -20,6 +20,8 @@ module LAMBDA
        <store>... . => (N |-> V) ...</store>
     when fresh(N:Nat)
   rule <k> X => V ...</k> <env>...X|->N...</k> <store>...N|->V...</store>
+
+// Auxiliary task
   syntax K ::= env(Map)
   rule <k> _:Val ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>
     [structural]
