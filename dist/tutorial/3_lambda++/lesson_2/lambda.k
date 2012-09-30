@@ -15,6 +15,7 @@ module LAMBDA
   syntax KResult ::= Val
 
   rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k> <env> Rho </env>
+    [structural]
   rule <k> closure(Rho,X,E) V:Val => E ~> env(Rho') ...</k>
        <env> Rho' => Rho[N/X] </env>
        <store>... . => (N |-> V) ...</store>

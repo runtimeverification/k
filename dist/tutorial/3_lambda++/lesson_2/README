@@ -4,12 +4,11 @@ by Grigore Rosu
 In this lesson we start another semantic definition of LAMBDA++, which
 follows a style based on environments instead of substitution.  In terms of
 K, we will learn how easy it is to add new items to the syntactic category
-of computations K, even ones which do not have a syntactic nature (like the
-current-continuation items that we added in Lesson 1).
+of computations K, even ones which do not have a syntactic nature.
 
 An environment binds variable names of interest to locations where their
 values are stored.  The idea of environment-based definitions is to maintain
-a global "store" mapping locations to values, and then have enviroments
+a global "store" mapping locations to values, and then have environments
 available when we evaluate expressions telling where the variables are
 located in the store.  Since LAMBDA++ is a relatively simple language, we
 only need to maintain one global environment.  Following a similar style
@@ -60,7 +59,7 @@ This was the most complex K rule we've seen so far in the tutorial.  Note,
 however, that this one rule achieves a lot.  It is, in fact, quite compact
 considering how much it does.  Note also that everything that this K rule
 mentions is needed also conceptually in order to achieve this task, so it
-is minimial from that point of view.  That would not be the case if we
+is minimal from that point of view.  That would not be the case if we
 used, instead, a conventional rewrite rule, because we would have had to
 mention the remaining store, say Sigma, in both sides of the rule, to say it
 stays unchanged.  Here we just use "...".
@@ -72,16 +71,19 @@ Unlike in the substitution-based definition, we now also need a lookup rule:
 This rule speaks for itself: replace X by the value V located in the store
 at X's location N in the current environment.
 
-The only thing left to define is the auxilliary environment-recovery operation:
+The only thing left to define is the auxiliary environment-recovery operation:
 
   syntax K ::= env(Map)
   rule <k> _:Val ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>
     [structural]
 
-When the preceeding expression becomes a value, env(Rho) replaces the current
-environment to Rho and dissolves itself.  This rule is obviously structural.
-Note that, syntactically, we prefered env(Rho) to be a K term.  Indeed, it
-does not make much sense for it to be an expression construct.
+When the preceding expression becomes a value, env(Rho) replaces the current
+environment to Rho and dissolves itself.  Note that, syntactically, we
+preferred env(Rho) to be a K term.  Indeed, it does not make much sense for
+it to be an expression construct.
+
+Before we kompile, let us make this rule and the lambda evaluation rule
+structural, because we do not want these to count as transitions.
 
 Let us kompile and ... fail:
 
@@ -90,7 +92,7 @@ Let us kompile and ... fail:
 gives a parsing error saying that V:Val does not fit there in the closure
 invocation rule ... That's because Val and Exp are currently completely
 disconnected, so K rightfully complains that we want to apply a value to
-another one, because application was defined to work with epxressions, not
+another one, because application was defined to work with expressions, not
 values.  What we forgot here was to state that Exp includes Val:
 
   syntax Exp ::= Val
@@ -103,14 +105,14 @@ LAMBDA programs with closures in them?  Interestingly, with our current
 definition of LAMBDA, which purposely did not follow the nice organization
 of IMP into syntax and semantic modules, and with K's default parser, kast,
 you can.  But you are not supposed to speculate this!  In fact, if you use
-and external parser, like many real languages require, that parser will
+an external parser, like many real languages require, that parser will
 reject programs with explicit closures.  Also, if we split the LAMBDA
 definition into two modules, one called LAMBDA-SYNTAX containing exclusively
 the desired program syntax and one called LAMBDA importing the former and
 defining the syntax of the auxiliary operations and the semantics, then even
 K's default parser will reject programs using auxiliary syntactic constructs.
 
-Indeed, when you kompile a language, say lang.k, the tool will be default
+Indeed, when you kompile a language, say lang.k, the tool will by default
 attempt to find a module LANG-SYNTAX and generate the program parser from that.
 If it cannot find it, then it will use the module LANG instead.  There are also
 ways to tell kompile precisely which syntax module you want to use for the
@@ -125,18 +127,17 @@ syntax, you need to extend your language's original syntactic categories with
 the new values.  The same holds true in other semantic approaches, not only in
 K, even in ones which are considered purely syntactic.  As it should be clear
 by now, K does not enforce you to use a purely syntactic style in your
-definitions; nevertheless, K does allows you to develop prefer purely
-syntactic definitions, like LAMBDA in Tutorial 1, if you prefer those.
+definitions; nevertheless, K does allow you to develop purely syntactic
+definitions, like LAMBDA in Tutorial 1, if you prefer those.
 
-Kompile and krun some programs.  We have placed all the programs from
-Tutorial 1, plus several others in the "programs" folder.  When you krun
-the old LAMBDA programs, note the closures, both as results in the <k/> cell,
+Krun some programs, such as those provided in Lesson 1 of the LAMBDA tutorial
+(Tutorial 1).  Note the closures, both as results in the <k/> cell,
 and as values in the store.  Also, since variables are not values anymore,
 expressions that contain free variables may get stuck with one of those on
-top of the computation.  See, for example, free-variable-capture.lambda,
-which gets stuck on z, because it is free, so it cannnot evaluate it.
+top of their computation.  See, for example, free-variable-capture.lambda,
+which gets stuck on z, because z is free, so it cannot evaluate it.
 If you want, you can go ahead and manually provide a configuration with
-z maped to some location in the environment and that location maped to some
+z mapped to some location in the environment and that location mapped to some
 value in the store, and then you can also execute this program.  The program
 omega.lambda should still loop.
 
