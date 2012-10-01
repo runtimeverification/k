@@ -165,7 +165,7 @@ back to the fixed-point. */
   rule <k> muclosure(Rho,E) => E ~> env(Rho') ...</k>
        <env> Rho' => Rho </env>
 
-/*@ \subsubsection{Callcc}
+/*@ \subsection{Callcc}
 For \texttt{callcc}, we need to create a new closure-like value which
 wraps both the remaining computation and the environment in which it is
 supposed to be executed.  Forget the environment and you get a wrong
