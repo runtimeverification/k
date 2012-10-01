@@ -1,7 +1,7 @@
 
 /*!
 \setlength{\parindent}{1em}
-\title{Tutorial 13--- LAMBDA++}
+\title{Tutorial 3--- LAMBDA++}
 \author {Grigore Ro\c{s}u (\texttt{grosu@illinois.edu})}
 \organization{University of Illinois at Urbana-Champaign}
 */

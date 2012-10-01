@@ -31,15 +31,15 @@ which we will discuss later in this tutorial.
 Compile lambda.k and write some programs using let binders.  
 
 For example, consider a lets.lambda program which takes arithmetic.lambda
-and replaces each integer by a let-bound variable.  It should evaluate to "true",
-just like the original arithmetic.lambda.
+and replaces each integer by a let-bound variable.  It should evaluate to
+"true", just like the original arithmetic.lambda.
 
 Let us now consider a more interesting program, namely one that calculates the
 factorial of 10:
 
 let f = lambda x . (
           (lambda t . lambda x . (t t x))
-          (lambda f . lambda x . if (x <= 1) then 1 else (x * (f f (x + -1))))
+          (lambda f . lambda x . (if x <= 1 then 1 else (x * (f f (x + -1)))))
           x
         )
 in (f 10)
@@ -58,26 +58,27 @@ let fix = lambda f . (
             (lambda x . (f (lambda y . (x x y))))
             (lambda x . (f (lambda y . (x x y))))
           )
-in let f = fix (lambda f . lambda x . if x <= 1 then 1 else (x * (f (x + -1))))
+in let f = fix (lambda f . lambda x .
+                  (if x <= 1 then 1 else (x * (f (x + -1)))))
    in (f 10)
 
-Although the above techniques are interesting and powerful (indeed, untyped lambda
-calculus is in fact Turing complete), programmers will probably not like to
-write programs this way.
+Although the above techniques are interesting and powerful (indeed, untyped
+lambda calculus is in fact Turing complete), programmers will probably not
+like to write programs this way.
 
 We can easily define a more complex derived construct, called letrec and
 conventionally encountered in functional programming languages, whose semantics
-captures the fixed-point idea above.  In order to keep its definition simple and
-intuitive, we define a simplified variant of letrec, namely one which only allows
-to define one recursive one-argument function.  See lambda.k.
+captures the fixed-point idea above.  In order to keep its definition simple
+and intuitive, we define a simplified variant of letrec, namely one which only
+allows to define one recursive one-argument function.  See lambda.k.
 
 There are two interinsting observations here.
 
 First, note that we have already inlined the definition of the "fix" combinator
-in the definition of the factorial, to save one application of the beta reduction
-rule (and the involved substitution steps).  We could have inlined the definition
-of the remaining "let", too, but we believe that the current definition is easier
-to read.
+in the definition of the factorial, to save one application of the beta
+reduction rule (and the involved substitution steps).  We could have inlined
+the definition of the remaining "let", too, but we believe that the current
+definition is easier to read.
 
 Second, note that we extended the predefined "Id" syntactic category with two
 new constants, "$x" and "$y".  The predefined identifiers cannot start with

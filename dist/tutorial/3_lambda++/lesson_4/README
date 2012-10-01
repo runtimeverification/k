@@ -20,7 +20,7 @@ and that environment should also be restored when cc(K) is invoked.
 Let's try to illustrate this bug with callcc-env1.lambda
 
 let x = 1 in
-  ((callcc lambda k . let x = 2 in (k x)) + x)
+  ((callcc lambda k . (let x = 2 in (k x))) + x)
 
 where the second argument of +, x, should be bound to the top x, which is 1.
 However, since callcc does not restore the environment, that x should
@@ -43,7 +43,7 @@ enforce the left-to-right evaluation order using let binders, as we do in
 callcc-env2.lambda:
 
 let x = 1 in
-  let a = callcc lambda k . let x = 2 in (k x) in
+  let a = callcc lambda k . (let x = 2 in (k x)) in
     let b = x in
 	  (a + b)
 
