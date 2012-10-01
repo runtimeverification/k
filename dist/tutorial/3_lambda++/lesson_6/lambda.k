@@ -78,7 +78,7 @@ for an environment-based semantics: it only contains the \textsf{k} cell,
 an environment cell, and a store cell.  An environment binds variable names
 to locations, and a store binds locations to values. */
 
-  configuration <T>
+  configuration <T color="yellow">
                   <k color="green"> $PGM:Exp </k>
                   <env color="blue"> .Map </env>
                   <store color="red"> .Map </store>
