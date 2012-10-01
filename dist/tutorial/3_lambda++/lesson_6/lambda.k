@@ -157,6 +157,7 @@ itself.  This has the same effect as binding $X$ to a reference that points
 back to the fixed-point. */
 
   syntax Exp ::= muclosure(Map,Exp)
+    [latex(\textsf{closure}_\mu({#1},{#2}))]
   rule <k> mu X . E => muclosure(Rho[N/X],E) ...</k>
        <env> Rho </env>
        <store>... . => (N |-> muclosure(Rho[N/X],E)) ...</store>
@@ -171,6 +172,7 @@ supposed to be executed.  Forget the environment and you get a wrong
 \texttt{callcc}. */
 
   syntax Val ::= cc(Map,K)
+    [latex(\textsf{closure}_{\texttt{callcc}}({#1},{#2}))]
   rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k> <env> Rho </env>
   rule <k> cc(Rho,K) V ~> _ =>  V ~> K </k> <env> _ => Rho </env>
 endmodule
