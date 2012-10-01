@@ -32,13 +32,12 @@ it happens.  So, why do we get 3?  Well, recall that + is strict, which means
 that it can evaluate its arguments in any order.  It just happened that in the
 execution that we saw, its second argument was evaluated first, to 1, and then
 the callcc was evaluated, but its cc value K had already included the 1 instead
-of x ...  In Tutorial 3 we will see how to explore all non-deterministic 
-behaviors of a program; we could use that feature of K to debug semantics, too,
-like we would use it here.
+of x ...  In Tutorial 4 we will see how to explore all non-deterministic 
+behaviors of a program; we could use that feature of K to debug semantics, too.
 
 There are two simple ways to fix this problem and thus illustrate the semantic
 problem that we have here.  One is to make + "seqstrict" in the semantics, to
-enforce its evaluation from left-to-right.  Do it an convince yourself that
+enforce its evaluation from left-to-right.  Do it to convince yourself that
 the program evaluates to 4 then.  Another is to modify the program, to
 enforce the left-to-right evaluation order using let binders, as we do in
 callcc-env2.lambda:

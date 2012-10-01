@@ -50,12 +50,12 @@ module LAMBDA
   rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
     [structural]
 
-  syntax Exp ::= mu(Map,Exp)
-  rule <k> mu X . E => mu(Rho[N/X],E) ...</k>
+  syntax Exp ::= muclosure(Map,Exp)
+  rule <k> mu X . E => muclosure(Rho[N/X],E) ...</k>
        <env> Rho </env>
-       <store>... . => (N |-> mu(Rho[N/X],E)) ...</store>
-    when fresh(N:Nat)
-  rule <k> mu(Rho,E) => E ~> env(Rho') ...</k>
+       <store>... . => (N |-> muclosure(Rho[N/X],E)) ...</store>
+    when fresh(N:Nat)  [structural]
+  rule <k> muclosure(Rho,E) => E ~> env(Rho') ...</k>
        <env> Rho' => Rho </env>
 
   syntax Exp ::= "callcc" Exp  [strict]

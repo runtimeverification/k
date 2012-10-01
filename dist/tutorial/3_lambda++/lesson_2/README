@@ -142,4 +142,4 @@ value in the store, and then you can also execute this program.  The program
 omega.lambda should still loop.
 
 Although we completely changed the definitional style of LAMBDA, the semantics
-of the other constructs need not change, as seen in the next lecture.
+of the other constructs do not need to change, as seen in the next lecture.
