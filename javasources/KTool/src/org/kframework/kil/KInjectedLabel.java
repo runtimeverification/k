@@ -36,10 +36,22 @@ public class KInjectedLabel extends Term {
 		return "# " + term;
 	}
 
+	private String getInjectedSort(String sort) {
+		if (sort.equals("BagItem"))
+			return "Bag";
+		if (sort.equals("SetItem"))
+			return "Set";
+		if (sort.equals("MapItem"))
+			return "Map";
+		if (sort.equals("ListItem"))
+			return "List";
+		return sort;		
+	}
+
 	@Override
 	public String toMaude() {
 		if (MetaK.isKSort(term.getSort())) {
-			return term.getSort() + "2KLabel_(" + term.toMaude() + ")";
+			return getInjectedSort(term.getSort()) + "2KLabel_(" + term.toMaude() + ")";
 		}
 		return "#_(" + term.toMaude() + ")";
 	}

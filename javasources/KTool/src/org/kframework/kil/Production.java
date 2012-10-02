@@ -127,7 +127,7 @@ public class Production extends ASTNode {
 
 	public String getKLabel() {
 		if (attributes.containsKey("klabel"))
-			return attributes.get("klabel");
+			return "'" + attributes.get("klabel");
 		return attributes.get("kgeneratedlabel");
 	}
 

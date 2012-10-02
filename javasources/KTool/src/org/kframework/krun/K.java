@@ -1,5 +1,7 @@
 package org.kframework.krun;
 
+import java.util.Properties;
+
 public class K {
 
 	public static boolean verbose = false;
@@ -60,5 +62,7 @@ public class K {
 	//delete temp folders created by krun by default
 	public static boolean deleteTempDir = true;
 
+
+	public static Properties configuration_variables = new Properties();
 	
 }

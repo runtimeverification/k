@@ -49,6 +49,7 @@
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
             <src path="src"/>
             <classpath refid="KTool.classpath"/>
+            <compilerarg value="-Xlint:unchecked"/>
         </javac>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
             <src path="lib/resources"/>

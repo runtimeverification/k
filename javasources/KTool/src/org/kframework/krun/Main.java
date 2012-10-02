@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import jline.ArgumentCompletor;
 import jline.ConsoleReader;
@@ -20,6 +22,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.krun.runner.KRunner;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Term;
+import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.utils.MetaK;
 
 public class Main {
 
@@ -115,6 +121,41 @@ public class Main {
 		}
 	}
 
+	public static String makeConfiguration(String kast, Properties configuration_variables) {
+		org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/K3Disamb.tbl");
+		String output = "";
+		boolean hasPGM = false;
+		int items = 0;
+		Enumeration<Object> en = configuration_variables.keys();
+		while(en.hasMoreElements()) {
+			String name = (String) en.nextElement();
+			String value = configuration_variables.getProperty(name);
+			//TODO: get sort from configuration term in definition and pass it here
+			String parsed = "";
+			try {
+				ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "");
+				term = term.accept(new FlattenSyntax());
+				term = MetaK.kWrapper((Term) term);
+				parsed = term.toMaude();
+			} catch (Exception e1) {
+				Error.report(e1.getMessage());
+			}
+			output += "__(_|->_((# \"$" + name + "\"(.List{K})), (" + parsed + ")), ";
+			hasPGM = hasPGM || name.equals("PGM");
+			items++;
+		}
+		if (!hasPGM) {
+			output += "__(_|->_((# \"$PGM\"(.List{K})), (" + kast + ")), ";
+			items++;
+		}
+		output += "(.).Map";
+		for (int i = 0; i < items; i++) {
+			output += ")";
+		}
+		return output;
+	}
+
+
 	// execute krun in normal mode (i.e. not in debug mode)
 	public static void normalExecution(String KAST, String lang, RunProcess rp, CommandlineOptions cmd_options) {
 		try {
@@ -145,21 +186,21 @@ public class Main {
 						}
 					}
 					if (cmd.hasOption("bound") && cmd.hasOption("depth")) {
-						s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "," + K.depth + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
+						s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "," + K.depth + "] " + "#eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
 								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
 					} else if (cmd.hasOption("bound")) {
-						s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
+						s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "] " + "#eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
 								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
 					} else if (cmd.hasOption("depth")) {
-						s = "set show command off ." + K.lineSeparator + "search [," + K.depth + "] " + "#eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
+						s = "set show command off ." + K.lineSeparator + "search [," + K.depth + "] " + "#eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
 								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
 					} else {
-						s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + ")))" + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
+						s = "set show command off ." + K.lineSeparator + "search #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
 								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
 					}
 					s += K.pattern + " .";
 					/*
-					 * if (cmd.hasOption("xsearch-pattern")) { s += K.xsearch_pattern + " ."; //s = "set show command off ." + K.lineSeparator + "search #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) " + "\"" + K.xsearch_pattern +
+					 * if (cmd.hasOption("xsearch-pattern")) { s += K.xsearch_pattern + " ."; //s = "set show command off ." + K.lineSeparator + "search #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) " + "\"" + K.xsearch_pattern +
 					 * "\"" + " ."; } else s += " =>! B:Bag .";
 					 */
 
@@ -167,9 +208,9 @@ public class Main {
 					Error.report("For the do-search option you need to specify that --maude-cmd=search");
 				}
 			} else if (cmd.hasOption("maude-cmd")) {
-				s = "set show command off ." + K.lineSeparator + K.maude_cmd + " #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
+				s = "set show command off ." + K.lineSeparator + K.maude_cmd + " #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) .";
 			} else {
-				s = "set show command off ." + K.lineSeparator + "erew #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) .";
+				s = "set show command off ." + K.lineSeparator + "erew #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) .";
 			}
 
 			if (K.trace) {
@@ -194,7 +235,7 @@ public class Main {
 				sb.append(" including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator);
 				sb.append(" op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator);
 				sb.append(" eq #initConfig =" + K.lineSeparator);
-				sb.append("  #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + KAST + "))),(.).Map)) ." + K.lineSeparator);
+				sb.append("  #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) ." + K.lineSeparator);
 				sb.append("endm" + K.lineSeparator + K.lineSeparator);
 				sb.append("red" + K.lineSeparator);
 				sb.append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(#_(KItem`(_`)(#initConfig)),.List`{K`}),");
@@ -302,7 +343,7 @@ public class Main {
 			System.out.println("After running one step of execution the result is:");
 			String compiledFile = new String();
 			compiledFile = new File(K.compiled_def).getCanonicalPath();
-			String maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__((_|->_((# \"$PGM\"(.List{K})) ,(" + kast + "))),(.).Map)) .";
+			String maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__(" + makeConfiguration(kast, K.configuration_variables) + ",(.).Map)) .";
 			File outFile = FileUtil.createFile(K.maude_out);
 			File errFile = FileUtil.createFile(K.maude_err);
 			RunProcess rp = new RunProcess();
@@ -573,6 +614,9 @@ public class Main {
 			}
 			if (cmd.hasOption("output")) {
 				K.output = new File(cmd.getOptionValue("output")).getCanonicalPath();
+			}
+			if (cmd.hasOption("c")) {
+				K.configuration_variables = cmd.getOptionProperties("c");
 			}
 
 			// printing the output according to the given options

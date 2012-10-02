@@ -149,6 +149,10 @@ public class CommandlineOptions {
 		Option model_checking = OptionBuilder.hasArg(true).withArgName("FILE/STRING").withLongOpt("ltlmc").withDescription("Specify the formula for model checking through" + K.lineSeparator + "a file or at commandline").create();
 		options.addOption(model_checking); getOptionList().add(model_checking);
 
+		//for configuration variables
+		Option configuration_variables = OptionBuilder.withArgName("name=value").hasArgs(2).withValueSeparator().withDescription("Specify values for variables in the configuration").create("c");
+		options.addOption(configuration_variables); getOptionList().add(configuration_variables);
+
 	}
 	
 	//create options displayed in the krun debugger help
