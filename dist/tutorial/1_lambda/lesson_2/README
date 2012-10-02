@@ -29,7 +29,7 @@ substitution that your lambda construct is meant to be a binder.  This is
 simply done using the attribute "binder".
 
 Now we are ready to define our first K rule.  Rules are introduced with the
-keywork "rule" and make use of the "rewrite" symbol, "=>".  In our case,
+keyword "rule" and make use of the "rewrite" symbol, "=>".  In our case,
 the rule defines the so-called lambda calculus beta-reduction, which
 makes use of substitution in its right-hand side, as shown in lambda.k.
 
@@ -37,7 +37,7 @@ By convention, variables that appear in rules start with a capital letter
 (the current implementation of the K tool may even enforce that).
 
 Variables may be explicitly tagged with their syntactic category (also called
-"sort").  If tagged, the matching term will be checked at runtime for
+"sort").  If tagged, the matching term will be checked at run-time for
 membership to the claimed sort.  If not tagged, then no check will be made.
 The former is safer, but involves the generation of a side condition to the
 rule, so the resulting definition may execute slightly slower overall.

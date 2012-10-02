@@ -1,9 +1,10 @@
 K Tutorial --- LAMBDA --- Derived Constructs, Extending Predefined Syntax
 by Grigore Rosu
 
-In this lesson we will learn how to define derived language constructs, that is,
-ones whose semantics is defined completely in terms of other language constructs.
-We will also learn how to add new constructs to predefined syntactic categories.
+In this lesson we will learn how to define derived language constructs, that
+is, ones whose semantics is defined completely in terms of other language
+constructs.  We will also learn how to add new constructs to predefined
+syntactic categories.
 
 When defining a language, we often want certain language constructs to be
 defined in terms of other constructs.  For example, a let-binding construct
@@ -19,13 +20,13 @@ This can be easily achieved with a rule, as shown in lambda.k.
 
 As a side point, which is not very relevant here but good to know, we may
 want the "desugaring" of let to not even count as a computational step, but
-as a mere "structural rearangement" of the program so that other semantic
+as a mere "structural rearrangement" of the program so that other semantic
 rules (beta reduction, in our case) can match and apply.
 
 The K tool allows us to tag rules with the attribute "structural", with
 precisely the intuition above.  You can think of structural rules as a kind
 of light rules, almost like macros, or like ones which apply "under the hood",
-instanteneously.  There are several other uses for structural rules in K,
+instantaneously.  There are several other uses for structural rules in K,
 which we will discuss later in this tutorial.
 
 Compile lambda.k and write some programs using let binders.  
@@ -72,13 +73,13 @@ captures the fixed-point idea above.  In order to keep its definition simple
 and intuitive, we define a simplified variant of letrec, namely one which only
 allows to define one recursive one-argument function.  See lambda.k.
 
-There are two interinsting observations here.
+There are two interesting observations here.
 
-First, note that we have already inlined the definition of the "fix" combinator
-in the definition of the factorial, to save one application of the beta
-reduction rule (and the involved substitution steps).  We could have inlined
-the definition of the remaining "let", too, but we believe that the current
-definition is easier to read.
+First, note that we have already in-lined the definition of the "fix"
+combinator in the definition of the factorial, to save one application of the 
+beta reduction rule (and the involved substitution steps).  We could have
+in-lined the definition of the remaining "let", too, but we believe that the
+current definition is easier to read.
 
 Second, note that we extended the predefined "Id" syntactic category with two
 new constants, "$x" and "$y".  The predefined identifiers cannot start with

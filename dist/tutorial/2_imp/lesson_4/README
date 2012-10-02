@@ -21,7 +21,7 @@ be a BExp; that's because there is no rule that can touch such a B (this will
 become clearer shortly, when we discuss the first step of configuration
 abstraction).  Second, since we know that B will be a BExp anyway, we can
 save the time it takes to check its sort; such times may look minor, but they
-accumulate, so in general we try to avoid runtime checks as much as possible.
+accumulate, so in general we try to avoid run-time checks as much as possible.
 
 The block rules are trivial.  However, the rule for non-empty blocks works
 only because we do not have local variable declarations in IMP.  We will have
@@ -32,7 +32,8 @@ statement, and the other in the state updating the value of the assigned
 variable.  Note that the one in the state is surrounded by parentheses:
 (_ => I).  That is because => is greedy: it matches as much as it can to the
 left and to the right, until it reaches the cell boundaries (closed or open).
-If you want to limit its scope, or for clarity, you can use parenthese as here.
+If you want to limit its scope, or for clarity, you can use parentheses like
+here.
 
 The rule for sequential composition simply desugars S1 S2 into S1 ~> S2.
 Indeed, the two have exactly the same semantics.  Note that statements

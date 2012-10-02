@@ -11,7 +11,7 @@ the K tool commands in the left window.
 
 Let us start by defining a K module, containing the syntax of LAMBDA.
 
-K modules are introduced with the kewords "module" ... "endmodule".
+K modules are introduced with the keywords "module" ... "endmodule".
 
 The keyword "syntax" adds new productions to the syntax grammar, using a
 BNF-like notation.

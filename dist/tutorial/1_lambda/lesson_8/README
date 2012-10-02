@@ -1,7 +1,7 @@
 K Tutorial --- LAMBDA --- Multiple Binding Constructs
 by Grigore Rosu
 
-Here we learn how multiple language constructs that bind variables can coexsit.
+Here we learn how multiple language constructs that bind variables can coexist.
 We will also learn about or recall another famous binder besides "lambda",
 namely "mu", which can be used to elegantly define all kinds of interesting
 fixed-point constructs.
@@ -49,7 +49,7 @@ mu X . E for each free occurrence of X in E:
 
 Compile lambda.k and execute some recursive programs.  They should be now
 several times faster.  Write a few more recursive programs, for example ones
-for calculating the Ackerman function, for calculating the number of moves
+for calculating the Ackermann function, for calculating the number of moves
 needed to solve the Hanoi tower problem, etc.
 
 We have defined our first programming language in K, which allows us to

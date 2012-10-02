@@ -33,9 +33,9 @@ resumes to 5 + 10.  On the other hand, the program callcc-not-jump.lambda
 
 evaluates to 17.
 
-If you like playing games, you can metaphorcally thing of "callcc e" as
+If you like playing games, you can metaphorically thing of "callcc e" as
 "saving your game in a file and passing it to your friend e".  Then e
-can decide at some moment to drop eveything she was doing, load your game
+can decide at some moment to drop everything she was doing, load your game
 and continue to play it from where you were.
 
 The behavior of many popular control-changing constructs can be obtained
@@ -76,7 +76,7 @@ current-continuation), which holds any computation.
 
 Note that, inspired from SDF, K allows you to define the syntax of
 helping semantic operations, like cc, more compactly.  Typically, we do not
-need a fancy synax for such operators; all we need is a name, followed by open
+need a fancy syntax for such operators; all we need is a name, followed by open
 parenthesis, followed by a comma-separated list of arguments, followed by
 closed parenthesis.  If this is the syntax that you want for a particular
 construct, then K allows you to drop all the quotes surrounding the terminals.

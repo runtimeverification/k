@@ -1,4 +1,4 @@
-K Tutorial --- LAMBDA --- A Complete and Docummented K Definition
+K Tutorial --- LAMBDA --- A Complete and Documented K Definition
 by Grigore Rosu
 
 In this lesson you will learn how to add formal comments to your K definition,
@@ -8,7 +8,7 @@ to send it to others, etc.
 
 The K tool allows a literate programming style, where the executable
 language definition can be documented by means of annotations.  Some
-backends of the K tool, such as those enabled with the --latex, --pdf and the
+back-ends of the K tool, such as those enabled with the --latex, --pdf and the
 --html options to the kompile tool, know how to interpret such annotations.
 
 There are three types of comments, which we discuss next.
@@ -54,11 +54,9 @@ Compile the documentation and take a look at the results.  Notice the title.
 Feel free to now add lots of annotations to lambda.k.
 
 Then compile and check the result.  Depending on your PDF viewer, you
-may also see a nice clickable table of contents, with all the sections
+may also see a nice click-able table of contents, with all the sections
 of your document.  This could be quite convenient when you define large
 languages, because it helps you jump to any part of the semantics.
-
-
 
 Tutorial 1 is now complete.  The next tutorial will take us through the
 definition of a simple imperative language and will expose us to more

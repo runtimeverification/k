@@ -1,0 +1,7 @@
+* Cut-and-paste is a poor-man's approach to reuse.
+
+Indeed, it is.  A better way to reuse, which requires a bit of planning ahead,
+is to put each feature in its own module.  Then you can simply include the
+modules containing the features you want to reuse.  Our point in this lesson
+was that such reuse is possible, not to teach the best way to do it in
+practice.  Good methodologies on how to use a technology are equally important.
