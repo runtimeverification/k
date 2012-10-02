@@ -90,8 +90,10 @@
 		<delete dir="./release" />
 
 		<mkdir dir="release" />
+		<echo message="Exporting with svn." />
 		<exec executable="svn" failonerror="true">
 			<arg value="export" />
+			<arg value="-q" />
 			<arg value="dist" />
 			<arg value="release/k" />
 		</exec>
@@ -108,6 +110,13 @@
 				<include name="k/bin/krun" />
 				<include name="k/bin/ksettest" />
 				<include name="k/bin/hkcd" />
+				<include name="k/bin/maude/binaries/maude.intelDarwin" />
+				<include name="k/bin/maude/binaries/maude.linux" />
+				<include name="k/bin/maude/binaries/maude.linux64" />
+				<include name="k/bin/native/linux/sdf2table" />
+				<include name="k/bin/native/linux/implodePT" />
+				<include name="k/bin/native/macosx/sdf2table" />
+				<include name="k/bin/native/macosx/implodePT" />
 			</tarfileset>
 			<tarfileset dir="./release">
 				<include name="**" />
@@ -116,6 +125,13 @@
 				<exclude name="k/bin/krun" />
 				<exclude name="k/bin/ksettest" />
 				<exclude name="k/bin/hkcd" />
+				<exclude name="k/bin/maude/binaries/maude.intelDarwin" />
+				<exclude name="k/bin/maude/binaries/maude.linux" />
+				<exclude name="k/bin/maude/binaries/maude.linux64" />
+				<exclude name="k/bin/native/linux/sdf2table" />
+				<exclude name="k/bin/native/linux/implodePT" />
+				<exclude name="k/bin/native/macosx/sdf2table" />
+				<exclude name="k/bin/native/macosx/implodePT" />
 			</tarfileset>
 		</tar>
 	</target>
