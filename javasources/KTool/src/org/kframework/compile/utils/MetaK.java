@@ -12,6 +12,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Empty;
@@ -353,6 +354,12 @@ public class MetaK {
 	}
 
 	public static Term getTerm(Production prod) {
+		if (prod.isSubsort()) return getFreshVar(prod.getItems().get(0).toString());
+		if (prod.isListDecl()) {
+			UserList ul = (UserList) prod.getItems().get(0);
+			
+		}
+//		if (prod.isConstant()) return new Constant(prod.getSort(), prod.getItems().toString());
 		TermCons t = new TermCons(prod.getSort(), prod.getCons());
 		for (ProductionItem item : prod.getItems()) {
 			if (item.getType() == ProductionType.SORT) {

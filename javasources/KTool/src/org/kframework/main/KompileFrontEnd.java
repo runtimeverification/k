@@ -23,10 +23,12 @@ import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddKCell;
 import org.kframework.compile.transformers.AddTopCell;
 import org.kframework.compile.transformers.DesugarStreams;
+import org.kframework.compile.transformers.GenerateSyntaxPredicates;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.compile.transformers.ResolveBinder;
 import org.kframework.compile.transformers.ResolveBlockingInput;
 import org.kframework.compile.transformers.ResolveFresh;
+import org.kframework.compile.transformers.ResolveSyntaxPredicates;
 import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
@@ -631,29 +633,80 @@ public class KompileFrontEnd {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Automatic Module Imports         = ");
+			}
+
 
 			DittoFilter df = new DittoFilter();
 			javaDef.accept(df);
 
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Ditto Filter        = ");
+			}
+
+			
+			
 			javaDef = new FlattenModules().compile(javaDef);
 
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Flatten Modules        = ");
+			}
+			
 			javaDef = new CompilerTransformerStep(new DesugarStreams()).compile(javaDef);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Desugar  Streams        = ");
+			}
 
 			javaDef = new CompilerTransformerStep(new AddKCell()).compile(javaDef);
 
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Desugar  Streams        = ");
+			}
+
 			javaDef = new CompilerTransformerStep(new ResolveFresh()).compile(javaDef);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Fresh        = ");
+			}
 
 			if (GlobalSettings.addTopCell) {
 				javaDef = new CompilerTransformerStep(new AddTopCell()).compile(javaDef);
 			}
 
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Add Top Cell        = ");
+			}
+
 			javaDef = new AddEval().compile(javaDef);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Add Eval        = ");
+			}
 
 			javaDef = new CompilerTransformerStep(new ResolveBinder()).compile(javaDef);
 
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Binder        = ");
+			}
+
 			javaDef = new CompilerTransformerStep(new ResolveAnonymousVariables()).compile(javaDef);
 
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Anonymous Variables        = ");
+			}
+
 			javaDef = new CompilerTransformerStep(new ResolveBlockingInput()).compile(javaDef);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Blocking Input        = ");
+			}
+			
+//			javaDef = new CompilerTransformerStep(new GenerateSyntaxPredicates()).compile(javaDef);
+			
+//			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
 
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
@@ -672,8 +725,22 @@ public class KompileFrontEnd {
 			String supercool = metadataTags(GlobalSettings.supercool);
 
 			javaDef = (Definition) javaDef.accept(new AddStrictStar());
+			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Add Strict Star        = ");
+			}
+			
 			javaDef = (Definition) javaDef.accept(new AddDefaultComputational());
+			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Add Default Computational        = ");
+			}
+			
 			javaDef = (Definition) javaDef.accept(new AddOptionalTags());
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Add Optional Tags        = ");
+			}
 
 			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats "
 					+ superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";

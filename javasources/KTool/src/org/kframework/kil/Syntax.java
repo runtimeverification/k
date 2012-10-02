@@ -104,7 +104,7 @@ public class Syntax extends ModuleItem {
 					String operation = p.toString().replaceAll("\"", "");
 
 					if (operation.equals("")) {
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot declare empty terminal.", p.filename, p.location));
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot declare empty terminal.", p.getFilename(), p.getLocation()));
 						continue;
 					}
 					if (sort.toString().equals("KLabel") || sort.toString().equals("CellLabel"))
@@ -139,7 +139,7 @@ public class Syntax extends ModuleItem {
 					String maudelabel = p.getLabel().replaceAll("` ", "`");
 
 					if (maudelabel.equals("")) {
-						GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Empty production. Please use `prefixlabel` attribute.", p.filename, p.location));
+						GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Empty production. Please use `prefixlabel` attribute.", p.getFilename(), p.getLocation()));
 						continue;
 					}
 

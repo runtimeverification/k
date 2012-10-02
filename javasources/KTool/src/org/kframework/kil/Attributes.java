@@ -37,7 +37,6 @@ public class Attributes extends ASTNode {
 	}
 
 	public Attributes() {
-		super();
 		contents = new LinkedList<Attribute>();
 	}
 
