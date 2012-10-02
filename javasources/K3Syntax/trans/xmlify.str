@@ -212,16 +212,20 @@ rules
 
 	to-xml:	// print an annotated production rule
 		ShortAnnoProd(x, a*, b*) -> $[<production loc="[loc]">
+										<terminal value="[x]" loc="[loc]" />
+										<terminal value="(" loc="[loc]" />
 										[a'*]
+										<terminal value=")" loc="[loc]" />
 										<attributes loc="[loc]">
+											<tag key="klabel" vlue="'[x]" />
 											[b'*]
 										</attributes>
 						</production>
 						]
-		where mydebug(!"AnnoProd: ")
+		where mydebug(!"ShortAnnoProd: ")
 		where aa  := <all({z: \z -> Sort(z)\}) ; add-commas ; flatten-list> a*
-		where a'* := <flatten-list ; all(to-xml)> [Terminal(<concat-strings> ["\"", x, "\""]), Terminal("\"(\""), aa, Terminal("\")\"")]
-		where b'* := <flatten-list ; all(to-xml)> [b*, TagParam("klabel", <concat-strings> ["'", x])]
+		where a'* := <all(to-xml)> aa
+		where b'* := <all(to-xml)> b*
 		where loc := <getLocAsString>
 
 	to-xml:	// print a production rule
@@ -235,15 +239,18 @@ rules
 
 	to-xml:	// print a production rule
 		ShortProd(x, a*) -> $[<production loc="[loc]">
+								<terminal value="[x]" loc="[loc]" />
+								<terminal value="(" loc="[loc]" />
 								[a'*]
+								<terminal value=")" loc="[loc]" />
 								<attributes loc="[loc]">
-									<tag key="klabel" value="'[x]" loc="[loc]" />
+									<tag key="klabel" value="'[x]" />
 								</attributes>
 					</production>
 					]
-		where mydebug(!"Prod: ")
+		where mydebug(!"ShortProd: ")
 		where aa  := <all({z: \z -> Sort(z)\}) ; add-commas ; flatten-list> a*
-		where a'* := <flatten-list ; all(to-xml)> [Terminal(<concat-strings> ["\"", x, "\""]), Terminal("\"(\""), aa, Terminal("\")\"")]
+		where a'* := <all(to-xml)> aa
 		where loc := <getLocAsString>
 
 	add-commas:
