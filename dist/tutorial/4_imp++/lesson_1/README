@@ -1,9 +1,11 @@
-K Tutorial --- IMP++ --- Syntax of IMP++; Changing Existing IMP Semantics
+K Tutorial --- IMP++ --- Extending/Changing an Existing Language Syntax
 by Grigore Rosu
 
 Here we learn how to extend the syntax of an existing language, both with
 new syntactic constructs and with more general uses of existing constructs.
 The latter, in particular, requires changes of the existing semantics.
+
+Consider the IMP language, as defined in Lesson 4 of Tutorial 2.
 
 Let us first add the new syntactic constructs, with their precedences:
 - variable increment, which increments an integer variable and evaluates to
@@ -19,8 +21,8 @@ Let us first add the new syntactic constructs, with their precedences:
   expressions, because we intend print to also take strings, in order to print
   nice messages to the user.
 - halt, which abruptly terminates the program; and
-- spawn, which takes a statement and creates a new thread executing it and
-  sharing its environment with the parent thread.
+- spawn, which takes a statement and creates a new concurrent thread executing 
+  it and sharing its environment with the parent thread.
 Also, we want to allow local variable declarations, which can appear anywhere
 a statement can appear.  Their scope ranges from the place they are defined
 until the end of the current block, and they can shadow previous declarations,
@@ -42,7 +44,8 @@ This makes the old IMP rule for global variable declarations not match anymore.
 We can easily fix it by replacing the anonymous variable "_", which matched
 the program's statement that now turned into the remaining computation in
 the <k/> cell, with the cell frame variable "...", which matches the
-remaining computation.
+remaining computation.  Similarly, we have to change the rule for the case
+where there are no variables left to declare into one that dissolves itself.
 
 We can now run all the previous IMP programs, in spite of the fact that
 our IMP++ semantics is incomplete and, more interestingly, in spite of the
@@ -84,4 +87,4 @@ Finally, locals.imp tests whether variable shadowing/unshadowing works well.
 In the next lesson we will prepare the configuration for the new constructs,
 and will see what it takes to adapt the semantics to the new configuration.
 Specifically, we will split the state cell into an environment cell and a
-store cell.
+store cell, like in LAMBDA++ in Tutorial 3.
