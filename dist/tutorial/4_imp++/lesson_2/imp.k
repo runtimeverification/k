@@ -17,7 +17,7 @@ module IMP-SYNTAX
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
-				 | "int" Ids ";"
+                 | "int" Ids ";"
                  | "print" "(" AExps ")" ";"  [strict]
                  | "halt" ";"
                  > "spawn" Stmt
