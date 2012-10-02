@@ -2,7 +2,7 @@ K Tutorial --- IMP++
 by Grigore Rosu
 
 IMP++ extends IMP, which was discussed in Tutorial 2, with several new
-syntactic constructs.  Also, some exisiting syntax is generalized, which
+syntactic constructs.  Also, some existing syntax is generalized, which
 requires non-modular changes of the existing IMP semantics.  For example,
 global variable declarations become local declarations and can occur
 anywhere a statement can occur.  In this tutorial we will learn the following:

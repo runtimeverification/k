@@ -4,7 +4,7 @@ by Grigore Rosu
 In this lesson we add the semantics of variable increment.  In doing so, we
 learn how to tag syntactic constructs and rules and then use such tags to
 instruct the kompile tool to generate the desired language model that is
-ameanable for exhaustive analysis.
+amenable for exhaustive analysis.
 
 The variable increment rule is self-explanatory:
 
@@ -20,7 +20,7 @@ effects.  That, in combination with the non-determinism allowed by the
 strictness attributes in how expression constructs evaluate their
 arguments, makes expressions in particular and programs in general have
 non-deterministic behaviors.  One possible execution of the div.imp program
-assigns 1 to y's location, for example, but this program minifests several
+assigns 1 to y's location, for example, but this program manifests several
 other behaviors, too.
 
 To see all the (final-state) behaviors that a program can have, you can call
@@ -28,7 +28,7 @@ the krun tool with the option --search.  For example:
 
   krun div.imp --search
 
-Ooops, we see only one solution, the same as when we ran it without search. :(
+Oops, we see only one solution, the same as when we ran it without search. :(
 
 Here is what happens.  krun can only explore as much of the transition
 system associated to a program as kompile allowed the generated language

@@ -23,7 +23,7 @@ semantic change, which, unfortunately, requires us to revisit the existing
 rules that used the state cell.  Once could, of course, argue that we could
 have avoided this problem if we had followed from the very beginning the
 good-practice style to work with an environment and a store, instead of a
-monolithic state.  While that is a valid argument, highligting the fact that
+monolithic state.  While that is a valid argument, highlighting the fact that
 modularity is not only a feature of the framework alone, but one should also
 follow good practices to achieve it, it is also true that if all we wanted
 in Tutorial 2 was to define IMP as is, then the split of the state in an
@@ -59,7 +59,7 @@ the environment-based definition of LAMBDA++ in Tutorial 3.
 The side condition "fresh(N:Nat)" generates an "element" of sort Nat that has
 not been generated so far.  We quoted "element", because, like also explained
 in the LAMBDA++ tutorial, technically it is nothing but K syntactic sugar for
-a straighforward operation: it generates a term of the form symNat(n) of sort
+a straightforward operation: it generates a term of the form symNat(n) of sort
 Nat, where n is a natural number, thought of as the n-th symbolic natural
 number that had been generated so far; the counter n is maintained in a
 cell that the K tool automatically adds to the configuration for this purpose.

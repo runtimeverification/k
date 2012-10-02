@@ -6,7 +6,7 @@ In this lesson we add dynamic thread creation and termination to IMP, and
 while doing so we learn how to define and use configurations whose structure
 can evolve dynamically.
 
-Recall that the intended sematics of "spawn S" is to spawn a new concurrent
+Recall that the intended semantics of "spawn S" is to spawn a new concurrent
 thread that executes S.  The new thread is being passed at creation time
 its parent's environment, so it can share with its parent the memory
 locations that its parent had access to at creation time.  No other locations
@@ -35,7 +35,7 @@ for example static analyzers to give you error messages when you create cells
 where you should not, or K compilers to improve performance by starting
 actual concurrent hardware threads or processes corresponding to each cell
 instance; and (3) it may help you better understand and control the dynamics
-of your confuiguration, and thus your overall semantics.
+of your configuration, and thus your overall semantics.
 
 For good encapsulation, I (admittedly subjectively) also prefer to put all
 thread cells into one cell, <threads/>.  This is totally unnecessary here; to
@@ -98,9 +98,9 @@ We are now ready to give the semantics of spawn:
 
 Note configuration abstraction at work, again.  Taking into account
 the declared configuration, and in particular the multiplicity information
-"*" in the <thead/> cell, the only reasonable way to complete the rule
+"*" in the <thread/> cell, the only reasonable way to complete the rule
 above is to wrap the <k/> and <env/> cells on the first line within a
-<thread/> cell, and to fillin the "..."s in the child thread with the
+<thread/> cell, and to fill-in the "..."s in the child thread with the
 default contents of the other subcells in <thread/>.  In this case there
 are no other cells, so we can get rid of those "..."s, but that would
 decrease the modularity of this rule: indeed, we may later on add other
@@ -145,11 +145,11 @@ run with or without the --search option).  For example:
 
   echo 23 | krun spawn.imp --search
 
-puts 23 in the standard input buffer, which is then transfered in the <in/>
-cell as a list item, and then the exhausitve search procedure is invoked.
+puts 23 in the standard input buffer, which is then transferred in the <in/>
+cell as a list item, and then the exhaustive search procedure is invoked.
 
 Second, even after piping some input, the spawn.imp program still manifests
-only one bahavior, which does not seem right.  There should be many more.
+only one behavior, which does not seem right.  There should be many more.
 
 Like with the superheat/supercool options discussed in Lesson 3, kompile
 optimizes the generated model for execution by default.  In particular, it
@@ -163,7 +163,7 @@ Even more than in the case of superheating and supercooling, such a naive
 solution would make the number of behaviors, and thus krun, explode.
 Remember that a two-thread program with 50 statements each manifests more
 behaviors than particles in the known universe!  Consequently, unless your
-multithreaded programs are very small, you will most likely want to control
+multi-threaded programs are very small, you will most likely want to control
 which rules should be considered transitions and which should not.
 
 A good rule of thumb is to include as transitions only those rules which
@@ -172,7 +172,7 @@ behavior if we choose to apply them when other rules match as well.
 The rule for addition, for example, is a clear example of a rule which
 should not be a transition: indeed, 3+7 will rewrite to 10 now and also
 later.  On the other hand, the lookup rule should be a transition.  Indeed,
-if we delay the lookp of variable x, then other threads may write x in the
+if we delay the lookup of variable x, then other threads may write x in the
 meanwhile (with an increment or an assignment rule) and thus yield a
 different behavior.
 
@@ -193,4 +193,4 @@ It is highly non-trivial to say precisely which rules need to be transitions,
 so krun makes no attempt to automatically detect it.  Instead, it provides the
 functionality to let the user decide it.
 
-In the next lesson we wrap up and document the defintion of IMP++.
+In the next lesson we wrap up and document the definition of IMP++.

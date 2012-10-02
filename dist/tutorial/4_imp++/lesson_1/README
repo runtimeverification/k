@@ -32,12 +32,12 @@ Programs are now just statements.
 We are now done with adding the new syntax and modifying the old one.
 Note that the old syntax was modified in a way which makes the previous IMP
 programs still parse, but this time as statements.  Let us then modify
-the configuration variable $PGM to have the sort Stmt instead og Pgm, and let
+the configuration variable $PGM to have the sort Stmt instead of Pgm, and let
 us try to run the old IMP programs, for example sum.imp.
 
 Note that they actually get stuck with the "global" declaration on the top
 of their computations.  This is because variable declarations are now treated
-like any statements, in particular, the seqential composition rule applies.
+like any statements, in particular, the sequential composition rule applies.
 This makes the old IMP rule for global variable declarations not match anymore.
 We can easily fix it by replacing the anonymous variable "_", which matched
 the program's statement that now turned into the remaining computation in

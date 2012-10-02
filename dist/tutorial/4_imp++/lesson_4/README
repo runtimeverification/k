@@ -34,7 +34,7 @@ string values, to avoid writing two rules, one for each type of value, we
 instead add a new syntactic category, Printable, which is the union of
 integers and strings.  Note that there is no need to also add syntactic lists
 of Printable elements, because we can use a variable over syntactic lists of
-arithmetic expressions to match the remaning arguments of print (in other
+arithmetic expressions to match the remaining arguments of print (in other
 words, we can output the first argument of the print statement as soon as it
 becomes a Printable, even if the remaining arguments are not evaluated yet).
 
@@ -51,7 +51,7 @@ two read constructs from the <in/> cell, and that the desired strings and
 numbers have been placed into the <out/> cell.
 
 Cells holding semantic lists can be connected to the standard input and
-stadard output buffers, and krun knows how to handle these appropriately.
+standard output buffers, and krun knows how to handle these appropriately.
 Let us connect the <in/> cell to the standard input and the <out/> cell to
 the standard output.  A cell connected to the standard input will take its
 items from the standard input and block the rewriting process when an input
