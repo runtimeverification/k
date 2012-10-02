@@ -86,7 +86,7 @@ ceq syntaxPredsMb(SS,Mb)
   eq flattenSyntaxT(SS, empty) = empty .
   eq flattenSyntaxT(SS, (CV, Trms'))  
    = if getType(CV) in SS 
-     then if CV :: Variable and-then isAnyAnyVar(CV) then setType(CV,K) else setType(CV, KItem) fi
+     then if (CV :: Variable and-then isAnyAnyVar(CV)) or (CV :: Constant) then setType(CV,K) else setType(CV, KItem) fi
      else if getType(CV) == ResultList 
           then setType(CV, KList)
           else CV 
