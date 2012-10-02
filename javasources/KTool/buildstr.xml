@@ -13,7 +13,7 @@
 			<srcfileset file="../K3Syntax/trans/*.str" />
 			<srcfileset file="../K3Syntax/include/K3Syntax.str" />
 			<srcfileset file="../K3Syntax/include/K3Syntax.tbl" />
-			<targetfileset dir="src/k2parser/lib">
+			<targetfileset dir="src/org/kframework/parser/basic/lib/">
 				<include name="*.java" />
 				<include name="K3Syntax.tbl" />
 				<exclude name="xml_string_escape_from_string_0_0.java" />
