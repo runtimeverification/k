@@ -56,6 +56,7 @@ public class Production extends ASTNode {
 		super(node);
 		this.attributes = node.attributes;
 		this.items = node.items;
+		this.sort = node.sort;
 	}
 
 	public Production(Sort sort, java.util.List<ProductionItem> items) {
