@@ -12,7 +12,6 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Empty;
@@ -85,6 +84,7 @@ public class MetaK {
 	public static String kSorts[] = {
 		"Bag",
 		"BagItem",
+		"CellLabel",
 		"K",
 		"KLabel",
 		"List",
@@ -355,12 +355,13 @@ public class MetaK {
 
 	public static Term getTerm(Production prod) {
 		if (prod.isSubsort()) return getFreshVar(prod.getItems().get(0).toString());
-		if (prod.isListDecl()) {
-			UserList ul = (UserList) prod.getItems().get(0);
-			
-		}
 //		if (prod.isConstant()) return new Constant(prod.getSort(), prod.getItems().toString());
 		TermCons t = new TermCons(prod.getSort(), prod.getCons());
+		if (prod.isListDecl()) {
+			t.getContents().add(getFreshVar(((UserList)prod.getItems().get(0)).getSort()));
+			t.getContents().add(getFreshVar(prod.getSort()));
+			return t;
+		}
 		for (ProductionItem item : prod.getItems()) {
 			if (item.getType() == ProductionType.SORT) {
 				t.getContents().add(getFreshVar(((Sort)item).getName()));
@@ -375,6 +376,10 @@ public class MetaK {
 
 	public static boolean isBuiltinSort(String sort) {
 		return (Arrays.binarySearch(builtinSorts, sort) >= 0);		
+	}
+
+	public static boolean isSyntaxSort(String name) {
+		return ("K".equals(name) || !isKSort(name));
 	}
 	
 	
