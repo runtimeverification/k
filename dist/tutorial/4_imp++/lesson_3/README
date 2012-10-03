@@ -37,7 +37,7 @@ that execute efficiently, that is, in faster interpreters for the defined
 languages, by default kompile optimizes the generated language model for
 execution.  In particular, it inserts no backtracking markers, which krun
 uses when called with the --search option in order to systematically generate
-the entire transition system associated to a program.  This is why krun only
+the entire transition system associated to a program.  This is why krun
 showed us only one solution when run with the --search option on div.imp.
 
 We next explain how to tell kompile in what kind of language model we are
@@ -91,7 +91,7 @@ Now the command
 
   krun div.imp --search
 
-shows us all five behaviors of this program.  Note that, interestingly, one
+shows us all five behaviors of this program.  Interestingly, one
 of the five behaviors yields a division by zero!
 
 It will take you a little to master the use of these "super" options, but
