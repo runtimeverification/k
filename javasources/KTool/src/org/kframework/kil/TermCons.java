@@ -49,6 +49,12 @@ public class TermCons extends Term {
 		this.contents = node.contents;
 	}
 
+	public TermCons(String psort, String listCons, List<Term> genContents) {
+		super(psort);
+		cons = listCons;
+		contents = genContents;
+	}
+
 	public Production getProduction() {
 		return DefinitionHelper.conses.get(getCons());
 	}

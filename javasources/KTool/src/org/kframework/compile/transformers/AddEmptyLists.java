@@ -52,9 +52,9 @@ public class AddEmptyLists extends BasicTransformer {
 					if (isListSort(psort) && subsort(tsort, psort)) {
 						List<Term> genContents = new LinkedList<Term>();
 						genContents.add(tc.getContents().get(j));
-						genContents.add(new Empty("generated", "generated", psort));
+						genContents.add(new Empty(psort));
 
-						tc.getContents().set(j, new TermCons("generated", "generated", psort, getListCons(psort), genContents));
+						tc.getContents().set(j, new TermCons(psort, getListCons(psort), genContents));
 						// System.out.println("Adding cons at "
 						// + tc.getLocation());
 					}
