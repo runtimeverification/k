@@ -64,7 +64,7 @@ Nat, where n is a natural number, thought of as the n-th symbolic natural
 number that had been generated so far; the counter n is maintained in a
 cell that the K tool automatically adds to the configuration for this purpose.
 
-Kompile and run sum.imp to see how the fresh locations have been generated and
+Kompile and krun sum.imp to see how the fresh locations have been generated and
 used.  There were two fresh locations needed, for the two variables.  Note
 also that a cell holding the counter has been added to the configuration.
 
