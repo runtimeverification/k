@@ -83,19 +83,22 @@ module STRING-HOOKS
 		when findString(Source, ToReplace, 0) <Int 0 [function, anywhere]
   
   
-  rule replace(Source:String, ToReplace:String, Replacement:String, Count:Int) => replace(replaceFirst(Source, ToReplace, Replacement), ToReplace, Replacement, Count -Int 1) 
+  rule replace(Source:String, ToReplace:String, Replacement:String, Count:Int) => 
+       substrString(Source, 0, findString(Source, ToReplace, 0)) +String Replacement +String
+       replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
 		when Count >Int 0 [function, anywhere]
   rule replace(Source, ToReplace, Replacement, 0) => Source [function, anywhere]
   rule replaceAll(Source, ToReplace, Replacement) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace)) [function, anywhere] 
 
   rule ltrim(S:String) => replaceFirst(S, " ", "") when findString(S, " ", 0) ==Int 0 [function, anywhere]
   rule ltrim(S:String) => S when findString(S, " ", 0) =/=Int 0 [function, anywhere]
+  rule ltrim("") => "" [function, anywhere]
 
   rule rtrim(S:String) => rtrim(substrString(S,0, lengthString(S) -Int 1)) when substrString(S, lengthString(S) -Int 1, lengthString(S)) ==String " " [function, anywhere]
   rule rtrim(S:String) => S when substrString(S, lengthString(S) -Int 1, lengthString(S)) =/=String " " [function, anywhere]
+  rule rtrim("") => "" [function, anywhere]
   
   rule trim(S) => ltrim(rtrim(S)) [function, anywhere]
-
 
   syntax K ::= "#parseToken" "(" String "," String ")"  [function]
   rule #parseToken("Int",S:String) => (String2Int(S +String "0") /Int 10) [anywhere]

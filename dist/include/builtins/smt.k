@@ -154,8 +154,8 @@ module SMT-SYNTAX-HOOKS
   
   syntax SmtResponse ::= "sat"
                        | "unsat"
-					   | "unknown"
-					   | "model" "(" Map ")"
+		       | "unknown"
+		       | "model" "(" Map ")"
 
   syntax SmtResponse ::= "checkSat" "(" Bool ")" [function]
                        | "getModel" "(" Bool ")" [function]
@@ -166,65 +166,43 @@ module SMT-HOOKS
   imports #SMT
   imports SMT-SYNTAX-HOOKS
   imports SMTLIB-CONVERSION
- 
+  imports S-EXP-PARSER
+
+
   // hook to #smtCall
   syntax String ::= "smtCall" "(" String ")" [function, hook(#SMT:#smtCall_)]
-  
-  rule checkSat(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) " +String
-                            createSmtCommand(collectConstants(B), Smtlib(B)) 
-							+String " (check-sat)")) [function, anywhere]
 
-  rule getModel(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) " +String
-                            createSmtCommand(collectConstants(B), Smtlib(B)) 
-							+String " (check-sat) (get-model)")) [function, anywhere]
-  
+  // parse SMT response  
+  syntax SmtResponse ::= "parseSmtResponse" "(" String ")" [function]
+
+  // basic smt interface rules
+  rule checkSat(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) " +String  createSmtCommand(collectConstants(B), Smtlib(B)) +String " (check-sat)")) [function, anywhere]
+  rule getModel(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) " +String  createSmtCommand(collectConstants(B), Smtlib(B)) +String " (check-sat) (get-model)")) [function, anywhere]
+
+    
+  // main smt responses
   rule parseSmtResponse(S:String) => sat when trim(S) ==String "sat\n" [function, anywhere]
   rule parseSmtResponse(S:String) => unsat when trim(S) ==String "unsat\n" [function, anywhere]
   rule parseSmtResponse(S:String) => unknown when trim(S) ==String "unknown\n" orBool trim(S) ==String "unsupported\n" [function, anywhere]
 
-
-/*  rule checkSat(B:Bool) =>  parseSmtResponse( parseToKSExpString( replaceAll(smtCall ( "(set-logic AUFNIRA) " +String
-                            createSmtCommand(collectConstants(B), Smtlib(B)) 
-							+String " (check-sat)"), "\n", " ")))
-							[function, anywhere] 
-
-  rule getModel(B:Bool) =>  parseSmtResponse( parseToKSExpString( replaceAll(smtCall ( "(set-logic AUFNIRA) " +String
-                            createSmtCommand(collectConstants(B), Smtlib(B)) 
-							+String " (check-sat) (get-model)"), "\n", " ")))
-							[function, anywhere]
-*/ 
-
-  syntax SmtResponse ::= "parseSmtResponse" "(" String ")" [function]
-
-  syntax String ::= "parseToKSExpString" "(" String ")" [function]
   
-  rule parseToKSExpString(S:String) => #tcpRequest("smtlib#" +String Int2String(-1) +String "#" +String S +String "#") [function, anywhere]
+  // parse SEXPRESSIONS
+/*  rule parseSmtResponse(S:String) => getModelMap(parseSExpression("(" +String trim(replaceAll(S, "\n", " ")) +String ")"))
+       when (trim(S) =/=String "sat\n") andBool
+       	    (trim(S) =/=String "unsat\n") andBool
+  	    (trim(S) =/=String "unknown\n") andBool
+	    (trim(S) =/=String "unsupported\n") [function, anywhere]
+*/
+
+  // create model
+//  syntax SmtResponse ::= "getModelMap" "(" SExpression ")" [function]
+
+//  rule getModelMap(S1:SExpressions [ stoken("define-fun") stoken(Var:String) T:Token stoken(Type:String) S:SExpressions stoken(Val:String) ] S2:SExpressions) => Var |-> Val [anywhere]
 
 
-//  rule parseSmtResponse(S:String) => model ( toMap(replaceAll(S, "()", " "))) 
-//	   when trim(S) =/=String "sat" andBool trim(S) =/=String "unsat" andBool trim(S) =/=String "unknown" [function, anywhere]
-  
-  syntax Map ::= "toMap" "(" String ")"
-  syntax MapItem ::= "processToMap" "(" String ")"
-
-  rule toMap(S:String) => processToMap( substrString(S, 1, findString(S , "$", 0) -Int 1) )
-                          toMap(substrString(S, findString(S, "$", 0) +Int 1, lengthString(S)))
-                          when S =/=String "" [anywhere]
-  rule toMap("") => .Map [anywhere]
-
-  syntax MapItem ::= "castKey" "(" String "," String ")"
-                    | "castToMapItem" "(" String "," String "," String ")"
-                    
-  rule processToMap(S:String) => castKey(substrString(S, 0, findString(S, "#", 0) ), substrString(S, findString(S, "#", 0) +Int 1, lengthString(S))) [anywhere]
-  rule castKey(Key:String, S:String) => castToMapItem(Key, substrString(S, 0, findString(S, "#", 0)), substrString(S, findString(S, "#", 0) +Int 1, lengthString(S))) [anywhere]
-
-  rule castToMapItem(Key:String, "Int", Value:String) => String2Id(Key) |-> String2Int(Value) [anywhere]
-  rule castToMapItem(Key:String, "Bool", Value:String) => String2Id(Key) |-> String2Bool(Value) [anywhere]
-
-  
   // utils 
   syntax String ::= "createSmtCommand" "(" Set "," String ")" [function]
-				  | "declareConstants" "(" Set ")" [function]
+		  | "declareConstants" "(" Set ")" [function]
 
   rule createSmtCommand(S:Set, Assert:String) => declareConstants(S) +String " " +String " (assert " +String Assert +String ")" [function, anywhere]
   rule declareConstants(.Set) => " " [function, anywhere]
@@ -232,5 +210,48 @@ module SMT-HOOKS
   rule declareConstants(SetItem(symInt (V:Id )) Rest:Set) => "(declare-const " +String Id2String(V) +String " Int)" +String " " +String declareConstants(Rest) [function, anywhere]
   rule declareConstants(SetItem(symBool(V:Int)) Rest:Set) => "(declare-const var" +String Int2String(V) +String " Int)" +String " " +String declareConstants(Rest) [function, anywhere]
   rule declareConstants(SetItem(symBool(V:Id )) Rest:Set) => "(declare-const " +String Id2String(V) +String " Int)" +String " " +String declareConstants(Rest) [function, anywhere]
+endmodule
+
+module S-EXP-PARSER
+  syntax Token ::= SExpression | Int | Id | Float | String 
+  syntax SExpressions ::= List{Token, ",Token"} [strict]
+  syntax SExpression  ::= "[" SExpressions "]"
+  
+  syntax SExpression  ::= "parseSExpression" "(" String ")" [function]
+  syntax SExpression  ::= "scan" "(" String  ")" [function]
+  syntax SExpressions ::= "scanList" "(" String ")" [function]
+  
+  syntax Token ::= "stoken" "(" String ")" [function]
+  syntax String ::= "getBalanced" "(" String ")" [function]
+  syntax Int ::= "getFirstBalancedClosedParen" "(" String "," Int ")" [function]
+  	       | "getFirstBalancedClosedParen" "(" String "," Int "," Int "," Int ")" [function]
+
+  rule parseSExpression(S:String) => scan(trim(replaceAll(replaceAll(S,"(", " ( "), ")", " ) "))) [function, anywhere]
+
+  rule scan(S:String) => [ scanList(trim(substrString(S, 1, lengthString(S) -Int 2))) ] 
+       when (substrString(S, 0, 1) ==String "(") andBool (substrString(S, lengthString(S) -Int 1, 1) ==String ")" ) [anywhere]
+
+  rule scanList(S:String) => stoken(substrString(S, 0, findString(S," ",0))) ,Token scanList(trim(substrString(S, findString(S," ",0) +Int 1, lengthString(S))))
+       when (substrString(S, 0, 1) =/=String "(") andBool S =/=String "" andBool findString(S, " ", 0) =/=Int -1 [anywhere]
+
+  rule scanList(S:String) => scan(trim(substrString(S, 0, getFirstBalancedClosedParen(S, 0)))) ,Token 
+       scanList(trim(substrString(S, getFirstBalancedClosedParen(S, 0) +Int 1, lengthString(S)))) 
+       when (substrString(S, 0, 1) ==String  "(") [anywhere]
+  rule scanList("") => . [anywhere]
+
+
+  rule getFirstBalancedClosedParen(S:String, Position:Int, Open:Int, Closed:Int) => 
+       getFirstBalancedClosedParen(S:String, findString(S, ")", Position) +Int 1, 
+       					     countAllOccurences(substrString(S, 0, findString(S,")",Position +Int 1)), "("), 
+					     countAllOccurences(substrString(S, 0, findString(S,")",Position +Int 1) +Int 1), ")"))
+       when Position =/=Int 0 andBool Open =/=Int Closed  andBool Position <Int lengthString(S) [anywhere] 
+  rule getFirstBalancedClosedParen(S:String, 0) => 
+       getFirstBalancedClosedParen(S:String, findString(S, ")", 0) +Int 1,
+       					     countAllOccurences(substrString(S, 0, findString(S,")",0) +Int 1), "("), 
+					     countAllOccurences(substrString(S, 0, findString(S,")",0) +Int 1), ")")) 
+	when countAllOccurences(substrString(S, 0, findString(S,")",0)), "(") >Int countAllOccurences(substrString(S, 0, findString(S,")",0)), ")") [anywhere]
+  rule getFirstBalancedClosedParen(S:String, Position:Int, Count:Int, Count) => Position [anywhere]
+
+  rule stoken(S:String) => . when trim(S) ==String "" [function, anywhere]
 
 endmodule
