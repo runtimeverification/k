@@ -15,7 +15,7 @@ module SUBSTITUTION
 
   //beta-substitution definition using the K AST visitor pattern
   syntax K ::= K "[" K "/" Id "]"
-             | "beta" K "[" K "/" Id "]" [latex({#1}\sqbracket{\framebox{${#2}$}/{#3}})]
+             | "beta" List{K} "[" K "/" Id "]" [latex({#1}\sqbracket{\framebox{${#2}$}/{#3}})]
              | "eval" K "," "then" "apply" "[" K "/" Id "]" [strict(1), latex(eval({#1})\sqbracket{\framebox{${#2}$}/{#3}})]
                
   syntax KLabel ::= "beta" "[" K "/" Id "]" 
@@ -32,9 +32,9 @@ module SUBSTITUTION
 
 //  syntax CellLabel ::= "nextId"
 
-  rule beta[K/Y](L:KLabel(X:Id,,K')) => 
+  rule beta[K/Y](L:KLabel(X:Id,,Ks)) => 
            visitedL(L)(visitedK(F) 
-                visitedL(,,) eval (beta K' [F/X]), then apply [K/Y])
+                visitedL(,,) eval (beta Ks [F/X]), then apply [K/Y])
       when fresh(F:Id) 
 //     <nextId>N:Nat => N +Int 1 </nextId>
 //   when Y =/=Bool X [structural] //renaming bound variables
@@ -42,7 +42,7 @@ module SUBSTITUTION
 
   // This was a macro 
 
-  rule beta K':K [K:K/Y:Id]
-    => visit K' applying beta[K/Y] if isBinder or Y
+  rule beta Ks [K:K/Y:Id]
+    => visit Ks applying beta[K/Y] if isBinder or Y
     [structural]
 endmodule
