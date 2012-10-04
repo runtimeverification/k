@@ -346,7 +346,7 @@ mod K-WRAPPERS-LABELS is
   including #STRING-INTERFACE .
   op KLabel2KLabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
   op CellLabel2KLabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
-  op kList : #String -> KLabel [metadata "wrapper=(list)"] .
+  op List`{K`}2KLabel_ : List{K} -> KLabel [metadata "wrapper=(builtin)"] .
   op Bag2KLabel_ : Bag -> KLabel [metadata "wrapper=(builtin)"] .
   op Set2KLabel_ : Set -> KLabel [metadata "wrapper=(builtin)"] .
   op List2KLabel_ : List -> KLabel [metadata "wrapper=(builtin)"] .
@@ -361,7 +361,7 @@ mod K-WRAPPERS is
   including K-TECHNIQUE .
   op KLabel2K_ : KLabel -> K [metadata "wrapper=(builtin)"] .
   op CellLabel2K_ : CellLabel -> K [metadata "wrapper=(builtin)"] .
-  op List{K}2K_ : List{K} -> K [metadata "wrapper=(list)"] .
+  op List`{K`}2K_ : List{K} -> K [metadata "wrapper=(builtin)"] .
   op Set2K_ : Set -> K [metadata "wrapper=(builtin)"] .
   op Bag2K_ : Bag -> K [metadata "wrapper=(builtin)"] .
   op List2K_ : List -> K [metadata "wrapper=(builtin)"] .

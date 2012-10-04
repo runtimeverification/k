@@ -165,8 +165,8 @@ ceq labelsT(Q[T1,T2], T, M, OPDS, OPDM)
 
  op labelsT : Term Type Module OpDeclSet OpDeclOpDeclSetMap OpDecl ~> Term .
 --- subsorted terms becoming klabels
- eq labelsT(Q[Trms], T, M, OPDS, OPDM (Op |-> none), Op)
-  =  kApply(mkListLabel(Q), labelsTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, OPDM (Op |-> none))) .
+--- eq labelsT(Q[Trms], T, M, OPDS, OPDM (Op |-> none), Op)
+---  =  kApply(mkListLabel(Q), labelsTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, OPDM (Op |-> none))) .
  eq labelsT(Q[Trms], T, M, OPDS, OPDM (Op |-> (op Q' : nil -> T' [AS] .)), Op)
   =  kApply(mkConstant(Q',T'), labelsTs(Trms, getTypes(countTerms(Trms), Op), M, OPDS, OPDM (Op |-> (op Q' : nil -> T' [AS] .)))) .
  eq labelsT(Q[Trm], T, M, OPDS, OPDM (Op |-> (op Q' : T' -> T'' [AS] .)), Op)

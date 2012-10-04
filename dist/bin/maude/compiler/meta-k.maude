@@ -791,8 +791,9 @@ fmod META-K-WRAPPERS is
      if T == 'Set or-else T == 'SetItem then 'Set2KLabel_ else
      if T == 'Bag or-else T == 'BagItem then 'Bag2KLabel_ else
      if T == 'List or-else T == 'ListItem then 'List2KLabel_ else
-     if T == 'Map or-else T == 'MapItem then 'Map2KLabel_ else '#_
-     fi fi fi fi fi fi .
+     if T == 'Map or-else T == 'MapItem then 'Map2KLabel_ else 
+     if T == 'List`{K`}  then 'List`{K`}2KLabel_ else '#_
+     fi fi fi fi fi fi fi .
 
      
   op isWrapped : OpDeclSet Type -> Bool .
