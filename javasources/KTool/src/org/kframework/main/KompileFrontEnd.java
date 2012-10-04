@@ -743,7 +743,7 @@ public class KompileFrontEnd {
 			}
 
 			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats "
-					+ superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
+					+ superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 
