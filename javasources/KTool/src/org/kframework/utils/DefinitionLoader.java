@@ -131,14 +131,17 @@ public class DefinitionLoader {
 		// ----------------------------------- parse rules
 		def.parseRules();
 
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Parsing Rules   = ");
+
 		// ----------------------------------- preprocessiong steps
 		Preprocessor preprocessor = new Preprocessor();
 		Document preprocessedDef = preprocessor.run(def.getDefAsXML());
 
 		XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
-
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("Parsing Rules   = ");
+			sw.printIntermediate("Preprocess      = ");
+
 
 		org.kframework.kil.Definition javaDef = new org.kframework.kil.Definition((Element) preprocessedDef.getFirstChild());
 
