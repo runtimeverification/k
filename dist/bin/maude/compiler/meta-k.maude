@@ -837,7 +837,7 @@ fmod META-K-LABELS is
   var Q : Qid . var T T' : Type .  var Str : String . 
 
   op klistLabelS : -> Qid .
-  eq klistLabelS = 'kList .
+  eq klistLabelS = 'List`{K`}2KLabel_ .
 
   op mkKLabel : Qid -> Qid .
   eq mkKLabel(Q) = qid("'" + string(Q)) .
@@ -845,8 +845,8 @@ fmod META-K-LABELS is
   op downKLabel : Qid -> Qid .
   eq downKLabel(Q) = Q .
 
-  op mkListLabel : Qid -> Term .
-  eq mkListLabel(Q) = klistLabelS[stringCt(string(Q))] .
+  op mkListLabel : Term -> Term .
+  eq mkListLabel(Trm) = klistLabelS[Trm] .
 
   op mkKLabelSort : Type AttrSet -> Type .
   eq mkKLabelSort(T,AS metadata(Str))
