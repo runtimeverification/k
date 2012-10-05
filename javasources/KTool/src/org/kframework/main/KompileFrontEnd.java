@@ -23,12 +23,15 @@ import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddKCell;
 import org.kframework.compile.transformers.AddTopCell;
 import org.kframework.compile.transformers.DesugarStreams;
+import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.GenerateSyntaxPredicates;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.compile.transformers.ResolveBinder;
 import org.kframework.compile.transformers.ResolveBlockingInput;
 import org.kframework.compile.transformers.ResolveFresh;
+import org.kframework.compile.transformers.ResolveHybrid;
 import org.kframework.compile.transformers.ResolveSyntaxPredicates;
+import org.kframework.compile.transformers.ResolveUserLists;
 import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
@@ -704,9 +707,16 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Blocking Input        = ");
 			}
 			
-//			javaDef = new CompilerTransformerStep(new GenerateSyntaxPredicates()).compile(javaDef);
+//			javaDef = new CompilerTransformerStep(new ResolveUserLists()).compile(javaDef);
 			
-//			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
+			
+			javaDef = new CompilerTransformerStep(new GenerateSyntaxPredicates()).compile(javaDef);
+			
+			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
+			
+			javaDef = new CompilerTransformerStep(new FlattenSyntax()).compile(javaDef);
+			
+			javaDef = new CompilerTransformerStep(new ResolveHybrid()).compile(javaDef);		
 
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
@@ -742,8 +752,19 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Add Optional Tags        = ");
 			}
 
-			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats "
-					+ superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
+			String compile = load 
+					+ javaDef.toMaude() 
+					+ " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n"
+					+ "---(\n"
+					+ "red in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n"
+					+ "quit\n"
+					+ "---)\n"
+					+ " loop compile .\n" + 
+					"(compile " + javaDef.getMainModule() + " " + step 
+					+ " transitions " + transition + " superheats " + superheat + " supercools " + supercool 
+					+ " anywheres \"anywhere=() function=() predicate=() macro=()\" " 
+					+  "defineds \"function=() predicate=() defined=()\" .)\n" 
+					+ "quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 

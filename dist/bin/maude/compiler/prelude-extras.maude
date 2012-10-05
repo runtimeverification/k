@@ -1336,7 +1336,7 @@ fmod META-LEVEL-EXTRAS is
     = maximalArityOp(M, (op Q : Tl -> T [AS] .) OPDS) 
    if sortsLeq(M, Tl' T', Tl T) .
   eq maximalArityOp(M, (op Q : Tl -> T [AS] .) Op OPDS)
-   = errorOp("Multiple maximal ops for '" + string(Q) + "'",AS) .
+   = errorOp("Multiple maximal ops for '" + string(Q) + "'",AS) [print "Multiple maximal ops for " Q " one: " Op " other: op " Q " : " Tl " -> " T " [" AS "] ."] .
   eq maximalArityOp(M, none)
    = errorOp("No ops found for",none) .
   

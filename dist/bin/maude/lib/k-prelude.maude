@@ -489,12 +489,18 @@ endm
 
 mod K-BUILTINS is
   including K-TECHNIQUE .
-  including K-RESULT .
   including PL-BUILTINS .
-  including #K-EQUAL-INTERFACE .
-  including #TCP-INTERFACE .
-  subsort #Bool #Int #String #Float #Id < K .
-  subsort Bottom < KResult .
+  op #_ : #Bool -> KLabel .
+  op #_ : #Int -> KLabel .
+  op #_ : #String -> KLabel .
+  op #_ : #Float -> KLabel .
+  op #_ : #Id -> KLabel .
+  ops is#Bool is#Int is#String is#Float is#Id : -> KLabel .
+  eq is#Bool(# B:#Bool (.List{K})) = # true(.List{K}) .
+  eq is#Int(# I:#Int (.List{K})) = # true(.List{K}) .
+  eq is#String(# S:#String (.List{K})) = # true(.List{K}) .
+  eq is#Float(# F:#Float (.List{K})) = # true(.List{K}) .
+  eq is#Id(# X:#Id (.List{K})) = # true(.List{K}) .
 endm
 
 mod K is 
