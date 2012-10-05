@@ -713,8 +713,6 @@ public class KompileFrontEnd {
 			
 			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
 			
-			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);		
-			
 			javaDef = new CompilerTransformerStep(new ResolveListOfK()).compile(javaDef);		
 			
 			javaDef = new CompilerTransformerStep(new FlattenSyntax()).compile(javaDef);
