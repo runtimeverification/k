@@ -144,10 +144,12 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		
 		@Override
 		public ASTNode transform(KApp node) throws TransformerException {
+			Term label = (Term)node.getLabel().accept(trans);
 			Term child = (Term)node.getChild().accept(trans);
-			if (child != node.getChild()) {
+			if (child != node.getChild() || label != node.getLabel()) {
 				node = node.shallowCopy();
 				node.setChild(child);
+				node.setLabel(label);
 			}
 			return node;
 		}
