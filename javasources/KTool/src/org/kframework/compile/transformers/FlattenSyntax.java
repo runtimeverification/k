@@ -178,10 +178,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			String l = cst.getLocation();
 			String f = cst.getFilename();
 			
-			if (!cst.getSort().equals("KLabel"))
-				return new KApp(l, f, new KInjectedLabel(cst), new Empty(l, f, "List{K}"));
-
-			return cst;
+			return new KApp(l, f, new KInjectedLabel(cst), new Empty(l, f, "List{K}"));
 		}
 
 		@Override
