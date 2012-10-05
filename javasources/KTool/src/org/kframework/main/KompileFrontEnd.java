@@ -23,14 +23,11 @@ import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddKCell;
 import org.kframework.compile.transformers.AddTopCell;
 import org.kframework.compile.transformers.DesugarStreams;
-import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.GenerateSyntaxPredicates;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.compile.transformers.ResolveBinder;
 import org.kframework.compile.transformers.ResolveBlockingInput;
 import org.kframework.compile.transformers.ResolveFresh;
-import org.kframework.compile.transformers.ResolveHybrid;
-import org.kframework.compile.transformers.ResolveListOfK;
 import org.kframework.compile.transformers.ResolveSyntaxPredicates;
 import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.kil.Definition;
@@ -646,7 +643,7 @@ public class KompileFrontEnd {
 			javaDef.accept(df);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Ditto Filter                     = ");
+				sw.printIntermediate("Ditto Filter        = ");
 			}
 
 			
@@ -654,70 +651,62 @@ public class KompileFrontEnd {
 			javaDef = new FlattenModules().compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Flatten Modules                  = ");
+				sw.printIntermediate("Flatten Modules        = ");
 			}
 			
 			javaDef = new CompilerTransformerStep(new DesugarStreams()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Desugar  Streams                 = ");
+				sw.printIntermediate("Desugar  Streams        = ");
 			}
 
 			javaDef = new CompilerTransformerStep(new AddKCell()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Desugar  Streams                 = ");
+				sw.printIntermediate("Desugar  Streams        = ");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveFresh()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Fresh                    = ");
+				sw.printIntermediate("Resolve Fresh        = ");
 			}
 
 			if (GlobalSettings.addTopCell) {
 				javaDef = new CompilerTransformerStep(new AddTopCell()).compile(javaDef);
-				if (GlobalSettings.verbose) {
-					sw.printIntermediate("Add Top Cell                     = ");
-				}
+			}
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Add Top Cell        = ");
 			}
 
 			javaDef = new AddEval().compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Eval                         = ");
+				sw.printIntermediate("Add Eval        = ");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveBinder()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Binder                   = ");
+				sw.printIntermediate("Resolve Binder        = ");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveAnonymousVariables()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Anonymous Variables      = ");
+				sw.printIntermediate("Resolve Anonymous Variables        = ");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveBlockingInput()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Blocking Input           = ");
+				sw.printIntermediate("Resolve Blocking Input        = ");
 			}
 			
-//			javaDef = new CompilerTransformerStep(new ResolveUserLists()).compile(javaDef);
+//			javaDef = new CompilerTransformerStep(new GenerateSyntaxPredicates()).compile(javaDef);
 			
-			
-			javaDef = new CompilerTransformerStep(new GenerateSyntaxPredicates()).compile(javaDef);
-			
-			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
-			
-			javaDef = new CompilerTransformerStep(new ResolveListOfK()).compile(javaDef);		
-			
-			javaDef = new CompilerTransformerStep(new FlattenSyntax()).compile(javaDef);
-			
-			javaDef = new CompilerTransformerStep(new ResolveHybrid()).compile(javaDef);		
+//			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
 
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
@@ -753,19 +742,8 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Add Optional Tags        = ");
 			}
 
-			String compile = load 
-					+ javaDef.toMaude() 
-					+ " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n"
-					+ "---(\n"
-					+ "red in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n"
-					+ "quit\n"
-					+ "---)\n"
-					+ " loop compile .\n" + 
-					"(compile " + javaDef.getMainModule() + " " + step 
-					+ " transitions " + transition + " superheats " + superheat + " supercools " + supercool 
-					+ " anywheres \"anywhere=() function=() predicate=() macro=()\" " 
-					+  "defineds \"function=() predicate=() defined=()\" .)\n" 
-					+ "quit\n";
+			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n loop compile .\n(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats "
+					+ superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" defineds \"function=() predicate=() defined=()\" .)\n quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 

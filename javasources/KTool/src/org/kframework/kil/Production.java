@@ -147,16 +147,6 @@ public class Production extends ASTNode {
 	public void setAttributes(Attributes attributes) {
 		this.attributes = attributes;
 	}
-	
-	
-	public int getArity() {
-		int arity = 0;
-		for (ProductionItem i : items) {
-			if (i.getType() != ProductionType.TERMINAL) arity++;
-		}
-		return arity;
-	}
-	
 
 	@Override
 	public void applyToAll(Modifier visitor) {

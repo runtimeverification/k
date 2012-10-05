@@ -6,7 +6,6 @@ import java.io.File;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.CollectConsesVisitor;
-import org.kframework.kil.loader.CollectListConsesVisitor;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -29,7 +28,6 @@ public class KastParser {
 		ASTNode outDef = JavaClassesFactory.getTerm(defDoc.getDocumentElement());
 		outDef.accept(new UpdateReferencesVisitor());
 		outDef.accept(new CollectConsesVisitor());
-		outDef.accept(new CollectListConsesVisitor());
 
 		initialized = true;
 		// TODO: save outDef somewhere - maybe you will need it later

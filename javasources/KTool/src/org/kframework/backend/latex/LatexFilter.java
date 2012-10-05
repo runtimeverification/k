@@ -339,8 +339,6 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Attribute entry) {
-		if (Constants.GENERATED_LOCATION.equals(entry.getLocation())) 
-			return;
 		if (DefinitionHelper.isTagGenerated(entry.getKey()))
 			return;
 		if (DefinitionHelper.isParsingTag(entry.getKey()))

@@ -13,7 +13,6 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
-import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -25,7 +24,6 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -35,38 +33,16 @@ public class GenerateSyntaxPredicates extends CopyOnWriteTransformer {
 	public class SyntaxPredicatesVisitor extends BasicVisitor {
 		List<ModuleItem> result = new ArrayList<ModuleItem>();
 		Set<String> declarations = new HashSet<String>();
-		Set<String> lists = new HashSet<String>();
-				
-		@Override
-		public void visit(Module node) {
-			lists.clear();
-			super.visit(node);
-			if (!lists.isEmpty()) {
-				for (String lsort : lists) {
-					Rule rule = new Rule();
-					rule.setBody(new Rewrite(
-							new KApp(new Constant("KLabel", "is" + lsort), 
-									new Empty(lsort)), 
-							new Constant("#Bool", "true")));
-					rule.getAttributes().getContents().add(new Attribute("predicate", ""));
-					result.add(rule);
-					rule = new Rule();
-					rule.setBody(new Rewrite(
-							new KApp(new Constant("KLabel", "isKResult"), 
-									new Empty(lsort)), 
-							new Constant("#Bool", "true")));
-					rule.getAttributes().getContents().add(new Attribute("predicate", ""));
-					result.add(rule);
-				}
-			}
+		private String sort;
+		
+		public SyntaxPredicatesVisitor() {
 		}
+
 		
 		@Override
 		public void visit(Syntax node) {
-			String sort = node.getSort().getName();
-			if (DefinitionHelper.isListSort(sort)) 
-				lists.add(sort);
-			if (MetaK.isKSort(sort)) return;
+			sort = node.getSort().getName();
+			if (MetaK.isKSort(sort) || "CellLabel".equals(sort)) return;
 			super.visit(node);
 		}
 		
@@ -75,11 +51,11 @@ public class GenerateSyntaxPredicates extends CopyOnWriteTransformer {
 			if (node.getAttributes().containsKey("bracket")) return;
 			if (node.getAttributes().containsKey("function")) return;
 			if (node.getAttributes().containsKey("predicate")) return;
-			if (!declarations.contains("is" + node.getSort()))
-				declarePredicate(node.getSort());
+			if (!declarations.contains("is" + sort))
+				declarePredicate();
 			Rule rule = new Rule();
 			rule.setBody(new Rewrite(
-					new KApp(new Constant("KLabel", "is" + node.getSort()), 
+					new KApp(new Constant("KLabel", "is" + sort), 
 							MetaK.getTerm(node)), 
 					new Constant("#Bool", "true")));
 			rule.getAttributes().getContents().add(new Attribute("predicate", ""));
@@ -87,7 +63,7 @@ public class GenerateSyntaxPredicates extends CopyOnWriteTransformer {
 		}
 
 
-		private void declarePredicate(String sort) {
+		private void declarePredicate() {
 			{				
 				Sort KLabel = new Sort("KLabel");
 				List<PriorityBlock> priorities = new LinkedList<PriorityBlock>();

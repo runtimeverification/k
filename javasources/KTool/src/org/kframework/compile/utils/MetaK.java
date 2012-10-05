@@ -55,7 +55,6 @@ public class MetaK {
 //	};
 
 	public static String kModules[] = {
-		"K-BUILTINS",
 		"K-CONDITION-SEARCH", 
 		"K-CONFIG",
 		"K-CONTEXTS", 
@@ -379,14 +378,10 @@ public class MetaK {
 		return (Arrays.binarySearch(builtinSorts, sort) >= 0);		
 	}
 
-	public static boolean isComputationSort(String name) {
+	public static boolean isSyntaxSort(String name) {
 		return ("K".equals(name) || !isKSort(name));
 	}
 	
-	
-	public static String getListUnitLabel(String separator) {
-		return "'.List`{\"" + separator + "\"`}";
-	}
 	
 	
 }

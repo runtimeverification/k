@@ -159,10 +159,6 @@ interface K-EVAL
   syntax Bag ::= "#evalHelper" Map    [cons(Bag1EvalHelperSyn)]
 endinterface
 
-module K-BUILTINS
-  syntax KLabel ::=  "#" #Bool | "#" #Int | "#" #Float | "#" #Id
-endmodule
-
 
 interface K-FRESH
   imports K-TECHNIQUE
@@ -175,7 +171,7 @@ interface K
   imports K-TECHNIQUE
   imports K-WRAPPERS
   imports K-WRAPPERS-LABELS
-  imports K-BUILTINS
+  //imports K-BUILTINS
   imports K-RESULT             // to express results syntactically
   imports K-RULES              // to write k rules with in-place rewriting
   imports K-CONFIG             // to specify the global configuration term

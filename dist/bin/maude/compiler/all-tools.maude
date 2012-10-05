@@ -17,10 +17,10 @@ load printing
 ---load anon-vars-interface
 ---load remove-parser-interface
 ---load blocking-input-interface
----load syntax-predicates-interface
----load subsorts-to-wrappers-interface
----load homogenous-arguments-interface
----load make-all-labels-interface
+load syntax-predicates-interface
+load subsorts-to-wrappers-interface
+load homogenous-arguments-interface
+load make-all-labels-interface
 
 load strict-ops2cxt-interface
 

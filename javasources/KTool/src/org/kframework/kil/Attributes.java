@@ -118,8 +118,6 @@ public class Attributes extends ASTNode {
 	
 	@Override
 	public Attributes shallowCopy() {
-		Attributes result = new Attributes();
-		result.contents.addAll(contents);
-		return result;
+		return new Attributes(this);
 	}
 }
