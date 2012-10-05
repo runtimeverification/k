@@ -31,7 +31,6 @@ import org.kframework.compile.transformers.ResolveBlockingInput;
 import org.kframework.compile.transformers.ResolveFresh;
 import org.kframework.compile.transformers.ResolveHybrid;
 import org.kframework.compile.transformers.ResolveSyntaxPredicates;
-import org.kframework.compile.transformers.ResolveUserLists;
 import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
