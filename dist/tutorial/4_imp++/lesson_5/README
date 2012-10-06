@@ -4,9 +4,9 @@ by Grigore Rosu
 In this lesson we will see how easily we can delete, save and/or restore
 contents of cells in order to achieve the desired semantics of language
 constructs that involve abrupt changes of control or environments.  We have
-seen similar or related K features in the LAMBDA++ language.
+seen similar or related K features in the LAMBDA++ language in Tutorial 3.
 
-Let us start by adding semantics to the halt statement.  As it names says,
+Let us start by adding semantics to the halt statement.  As its name says,
 what we want is to abruptly terminate the execution of the program.  Moreover,
 we want the program configuration to look as if the program terminated
 normally, with an empty computation cell.  The simplest way to achieve that is
