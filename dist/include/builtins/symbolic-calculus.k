@@ -30,27 +30,33 @@ module SYMBOLIC-CALCULUS
 
   rule (F1:K andBool F2:K) [ V:K / X:K ]
         =>
-        F1 [ V:K / X:K ] andBool F2[ V:K / X:K ]
+        (F1 [ V:K / X:K ]) andBool (F2[ V:K / X:K ])
         [anywhere]
+
+  rule (notBool F:K) [ V:K / X:K ]
+        =>
+        notBool (F[ V:K / X:K ])
+        [anywhere]
+
 
   rule (I1:Int <=Int I2:Int) [ E1:K / E2:K ]
        =>
-       (I1 [ E1 /E2 ]) <=Int (I2 [ E1 / E2 ])
+       (I1 [ E1 / E2 ]) <=Int (I2 [ E1 / E2 ])
        [anywhere]
 
   rule (I1:Int ==Int I2:Int) [ E1:K / E2:K ]
        =>
-       (I1 [ E1 /E2 ]) ==Int (I2 [ E1 / E2 ])
+       (I1 [ E1 / E2 ]) ==Int (I2 [ E1 / E2 ])
        [anywhere]
 
   rule (I1:Int +Int I2:Int) [ E1:K / E2:K ]
        =>
-       (I1 [ E1 /E2 ]) +Int (I2 [ E1 / E2 ])
+       (I1 [ E1 / E2 ]) +Int (I2 [ E1 / E2 ])
        [anywhere]
 
   rule (I1:Int *Int I2:Int) [ E1:K / E2:K ]
        =>
-       (I1 [ E1 /E2 ]) *Int (I2 [ E1 / E2 ])
+       (I1 [ E1 / E2 ]) *Int (I2 [ E1 / E2 ])
        [anywhere]
 
   rule I:Int [ E1:K / E2:K ] => E1 
