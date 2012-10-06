@@ -12,6 +12,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Empty;
@@ -30,6 +31,7 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
+import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -50,58 +52,60 @@ public class MetaK {
 
 	static String anyVarSymbol = "_";
 
-//	public static String nextIdModules[] = {
-//		"SUBSTITUTION",
-//	};
-
-	public static String kModules[] = {
-		"K-CONDITION-SEARCH", 
-		"K-CONFIG",
-		"K-CONTEXTS", 
-		"K-LATEX",
-		"K-OPEN-CELLS",
-		"K-POLYMORPHIC-VARIABLES",  
-		"K-PROPER", 
-		"K-QUOTED-LABELS",
-		"K-RESULT",
-		"K-RULES", 
-		"K-SENTENCE", 
-		"K-STRICNESS",
-		"K-TECHNIQUE",
-		"K-WHERE",  
-		"K-WRAPPERS", 
-		"K-WRAPPERS-LABELS", 
+	public static Set<String> kModules = new HashSet<String>();
+	static {
+		kModules.add("K-BUILTINS");
+		kModules.add("K-CONDITION-SEARCH"); 
+		kModules.add("K-CONFIG");
+		kModules.add("K-CONTEXTS"); 
+		kModules.add("K-LATEX");
+		kModules.add("K-OPEN-CELLS");
+		kModules.add("K-POLYMORPHIC-VARIABLES");  
+		kModules.add("K-PROPER"); 
+		kModules.add("K-QUOTED-LABELS");
+		kModules.add("K-RESULT");
+		kModules.add("K-RULES"); 
+		kModules.add("K-SENTENCE"); 
+		kModules.add("K-STRICNESS");
+		kModules.add("K-TECHNIQUE");
+		kModules.add("K-WHERE");  
+		kModules.add("K-WRAPPERS"); 
+		kModules.add("K-WRAPPERS-LABELS"); 
 	};
 	
-	public static String defaultableSorts[] = {
-		"Bag",
-		"K",
-		"List",
-		"Map",
-		"Set",
+	public static Set<String> defaultableSorts = new HashSet<String>(); 
+	static {
+		defaultableSorts.add("Bag");
+		defaultableSorts.add("K");
+		defaultableSorts.add("List");
+		defaultableSorts.add("Map");
+		defaultableSorts.add("Set");
 	};
 
-	public static String kSorts[] = {
-		"Bag",
-		"BagItem",
-		"CellLabel",
-		"K",
-		"KLabel",
-		"List",
-		"List{K}",
-		"ListItem",
-		"Map",
-		"MapItem",
-		"Set",
-		"SetItem",
+	public static Set<String> kSorts = new HashSet<String>();
+	static {
+		kSorts.add("Bag");
+		kSorts.add("BagItem");
+		kSorts.add("CellLabel");
+		kSorts.add("K");
+		kSorts.add("KLabel");
+		kSorts.add("List");
+		kSorts.add("List{K}");
+		kSorts.add("ListItem");
+		kSorts.add("Map");
+		kSorts.add("MapItem");
+		kSorts.add("Set");
+		kSorts.add("SetItem");
+		kSorts.add("Bag");
 	};
 	
-	public static String builtinSorts[] = {
-		"Bool",
-		"Float",
-		"Id",
-		"Int",
-		"String",
+	public static Set<String> builtinSorts = new HashSet<String>();
+	static {
+		builtinSorts.add("Bool");
+		builtinSorts.add("Float");
+		builtinSorts.add("Id");
+		builtinSorts.add("Int");
+		builtinSorts.add("String");
 	};
 	
 	public static java.util.Map<String,String> mainSort = new HashMap<String, String>();
@@ -134,7 +138,7 @@ public class MetaK {
 	}
 
 	public static boolean isKModule(String key) {
-		return (Arrays.binarySearch(kModules, key) >= 0);		
+		return kModules.contains(key);		
 	}
 
 //	public static boolean isNextIdModule(String key) {
@@ -237,11 +241,11 @@ public class MetaK {
 	}
 
 	public static boolean isKSort(String sort) {
-		return (Arrays.binarySearch(kSorts, sort) >= 0);		
+		return kSorts.contains(sort);		
 	}
 		
 	public static boolean isDefaulable(String sort) {
-		return (Arrays.binarySearch(defaultableSorts, sort) >= 0);		
+		return defaultableSorts.contains(sort);		
 	}
 	
 	public static boolean isAnywhere(Rule r) {
@@ -355,7 +359,7 @@ public class MetaK {
 
 	public static Term getTerm(Production prod) {
 		if (prod.isSubsort()) return getFreshVar(prod.getItems().get(0).toString());
-//		if (prod.isConstant()) return new Constant(prod.getSort(), prod.getItems().toString());
+		if (prod.isConstant()) return new Constant(prod.getSort(), ((Terminal)prod.getItems().get(0)).getTerminal());
 		TermCons t = new TermCons(prod.getSort(), prod.getCons());
 		if (prod.isListDecl()) {
 			t.getContents().add(getFreshVar(((UserList)prod.getItems().get(0)).getSort()));
@@ -375,13 +379,17 @@ public class MetaK {
 	}
 
 	public static boolean isBuiltinSort(String sort) {
-		return (Arrays.binarySearch(builtinSorts, sort) >= 0);		
+		return builtinSorts.contains(sort);		
 	}
 
-	public static boolean isSyntaxSort(String name) {
+	public static boolean isComputationSort(String name) {
 		return ("K".equals(name) || !isKSort(name));
 	}
 	
+	
+	public static String getListUnitLabel(String separator) {
+		return "'.List`{\"" + separator + "\"`}";
+	}
 	
 	
 }

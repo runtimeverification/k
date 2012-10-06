@@ -5,6 +5,7 @@ import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.utils.strings.StringUtil;
 
 public class KInjectedLabel extends Term {
 
@@ -51,7 +52,7 @@ public class KInjectedLabel extends Term {
 	@Override
 	public String toMaude() {
 		if (MetaK.isKSort(term.getSort())) {
-			return getInjectedSort(term.getSort()) + "2KLabel_(" + term.toMaude() + ")";
+			return StringUtil.escape(getInjectedSort(term.getSort())) + "2KLabel_(" + term.toMaude() + ")";
 		}
 		return "#_(" + term.toMaude() + ")";
 	}

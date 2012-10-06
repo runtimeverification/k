@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.kframework.kil.Cell;
+import org.kframework.kil.Constant;
 import org.kframework.kil.Production;
 
 public class DefinitionHelper {
@@ -135,5 +136,11 @@ public class DefinitionHelper {
 
 	public static boolean isParsingTag(String key) {
 		return Arrays.binarySearch(parsingTags, key) >= 0;
+	}
+
+	public static boolean isListUnit(Constant cst) {
+		if (!isListSort(cst.getSort())) return false;
+		assert(cst.getValue().equals("." + cst.getSort()));
+		return true;
 	}
 }

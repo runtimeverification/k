@@ -101,7 +101,8 @@ public class Syntax extends ModuleItem {
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof Terminal) && MaudeHelper.constantSorts.contains(sort.getName())) {
 
 					String metadata = p.getAttributes().toMaude();
-					String operation = p.toString().replaceAll("\"", "");
+					String operation = p.toString();
+					if (operation.startsWith("\"")) operation = operation.substring(1, operation.length()-2);
 
 					if (operation.equals("")) {
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot declare empty terminal.", p.getFilename(), p.getLocation()));
@@ -109,9 +110,9 @@ public class Syntax extends ModuleItem {
 					}
 					if (sort.toString().equals("KLabel") || sort.toString().equals("CellLabel"))
 						if (!metadata.trim().equals(""))
-							contents += "op " + operation + ": -> " + sort + " [metadata \"" + metadata + "\"] .\n";
+							contents += "op " + operation + " : -> " + sort + " [metadata \"" + metadata + "\"] .\n";
 						else
-							contents += "op " + operation + ": -> " + sort + " .\n";
+							contents += "op " + operation + " : -> " + sort + " .\n";
 					// ignore K constants declarations
 				} else if (p.items.size() == 1 && (p.items.get(0) instanceof UserList)) {
 					// user declared lists case
@@ -121,17 +122,8 @@ public class Syntax extends ModuleItem {
 					if (!MaudeHelper.separators.contains(list.separator)) {
 						contents += "op _" + StringUtil.escape(list.separator) + "_ : K K -> K [prec 120 metadata \"" + metadata + "\"] .\n";
 						contents += "op .List`{\"" + list.separator + "\"`} : -> K .\n";
-						contents += "eq isKResult(.List`{\"" + list.separator + "\"`}) = true .\n";
 						MaudeHelper.separators.add(list.separator);
 					}
-
-					contents += "op ." + sort + " : -> " + sort + " .\n";
-					contents += "subsort " + list.sort + " < K .\n";
-					contents += "op is" + list.sort + " : -> KLabel .\n";
-					contents += "op is" + sort + " : -> KLabel .\n";
-					contents += "eq is" + sort + "(.List`{\"" + list.separator + "\"`}) = true .\n";
-					contents += "eq is" + sort + "(_" + StringUtil.escape(StringUtil.equationSpaceElimination(list.separator)) + "_( X:" + list.sort + ", L:" + sort + " )) = true .\n";
-					contents += "eq ." + sort + " = .List`{\"" + list.separator + "\"`} .\n";
 				} else {
 					String metadata = p.getAttributes().toMaude();
 					metadata += " location=" + p.getMaudeLocation();
