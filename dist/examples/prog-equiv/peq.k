@@ -719,14 +719,14 @@ module PEQ
 
   syntax Bool ::= "applySubst" "(" Map "," K ")" [function]
 
-  rule applySubst((M:Map I:IntSymbolic |-> A:K), F:K) => 
+  rule applySubst((M:Map I:IntSymbolic |-> A:K), F:Bool) => 
        applySubst(M:Map, (F [ A /I ]))
 //       when M =/=Map .Map
        [anywhere]
 
-  rule applySubst((I:IntSymbolic |-> A:K), F:K) => (F [ A / I ])  [anywhere]
+  rule applySubst((I:IntSymbolic |-> A:K), F:Bool) => (F [ A / I ])  [anywhere]
 
-  rule applySubst(.Map, F:K) => F
+  rule applySubst(.Map, F:Bool) => F
        [anywhere]
 
 /*@
@@ -822,30 +822,30 @@ module PEQ
        </config>
      </goal>)
      => 
-checkSat(F' andBool 
-//                      notBool applySubst((getSubst(K1, K1') getSubst(K2, K2')), F))
-                      (notBool F))
-/*     true
-     when ((isMap4Subst(getSubst(K1, K1') getSubst(K2, K2')
+     true
+     when (((isMap4Subst(getSubst(K1, K1') getSubst(K2, K2')
                         getSubstMap(Rho1, Rho1') getSubstMap(Rho2, Rho2')
-                       ) ==K true
-            andBool isSubst(getSubst(K1, K1') getSubst(K2, K2')
+                       ) ==K true)
+            andBool (isSubst(getSubst(K1, K1') getSubst(K2, K2')
                             getSubstMap(Rho1, Rho1') getSubstMap(Rho2, Rho2')
-                           ) =/=K false
+                           ) =/=K false)
+//            andBool (checkSat(F' andBool 
+//                    notBool applySubst((getSubst(K1, K1') getSubst(K2, K2')
+//                                  getSubstMap(Rho1, Rho1') getSubstMap(Rho2, Rho2')), F)
+//                             ) ==K unsat)
            ) orBool
-           (isMap4Subst(getSubst(K1, K2') getSubst(K2, K1')
+           ((isMap4Subst(getSubst(K1, K2') getSubst(K2, K1')
                         getSubstMap(Rho1, Rho2') getSubstMap(Rho2, Rho1')
-                       ) ==K true
-            andBool isSubst(getSubst(K1, K1') getSubst(K2, K2')
+                       ) ==K true)
+            andBool (isSubst(getSubst(K1, K2') getSubst(K2, K1')
                             getSubstMap(Rho1, Rho2') getSubstMap(Rho2, Rho1')
-                           ) =/=K false
+                           ) =/=K false)
+//            andBool (checkSat(F' andBool 
+//                    notBool applySubst((getSubst(K1, K2') getSubst(K2, K1')
+//                                  getSubstMap(Rho1, Rho2') getSubstMap(Rho2, Rho1')), F)
+//                             ) ==K unsat)
            )
           )
-     andBool checkSat(F' andBool 
-//                      notBool applySubst((getSubst(K1, K1') getSubst(K2, K2')), F))
-                      (notBool F))
-             ==K unsat
-*/
      [anywhere]
 
 
@@ -858,23 +858,7 @@ checkSat(F' andBool
   rule [circularity] :
        (<goal>
          <config> 
-           <k> storeHypo(L:Id, K1:K)
-=>
-       (KItem(Hypos)
-        |-subst 
-        KItem(<goal>
-         <config> 
-           <k> K1 </k>
-           <env> Env1 </env>
-         </config> 
-         <config> 
-           <k> K2 </k>
-           <env> Env2 </env>
-         </config>
-         <condition> F </condition>
-        </goal>)
-      )
- ...</k>
+           <k> storeHypo(L:Id, K1:K) ...</k>
            <env> Env1:Map </env>
          </config> 
          <config> 
@@ -882,12 +866,11 @@ checkSat(F' andBool
            <env> Env2:Map </env>
          </config>
          <condition> F:K </condition>
-       </goal>/*
+       </goal>
        =>
-       success */)
+       success)
        <hypos> Hypos:Bag </hypos>
        when
-/*
        (KItem(Hypos)
         |-subst 
         KItem(<goal>
@@ -902,8 +885,6 @@ checkSat(F' andBool
          <condition> F </condition>
         </goal>)
       ) ==K true
-*/
-KItem(Hypos) =/=K KItem(.Bag)
       [transition]
 
 /*@
@@ -934,7 +915,6 @@ KItem(Hypos) =/=K KItem(.Bag)
          <env> . </env>
        </config>)
        <observers> . => Ids2List(Obs) </observers>
-//       <syncs> . => Strings2Set(Syncs) </syncs> 
 
 /*@
   The auxiliary construct \texttt{initVal()} is used for initializing the 
