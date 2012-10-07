@@ -20,7 +20,7 @@ own environment.  This can be elegantly achieved if we group the <k/> and
 <env/> cells in a <thread/> cell in the configuration.  Since at any given
 moment during the execution of a program there could be zero, one or more
 instances of such a <thread/> cell in the configuration, it is a good idea
-to declare the <thread/> cell with multiplicity "*":
+to declare the <thread/> cell with multiplicity "*" (i.e., zero, one or more):
 
   <thread multiplicity="*" color="blue">
     <k color="green"> $PGM:Stmt </k>
@@ -62,8 +62,8 @@ namely to place the <k/> and </env> cells inside a <thread/> cell, inside a
          <thread>...
            <k> X:Id => I ...</k>
            <env>... X |-> N ...</env>
-         </thread>
-       <threads/>
+         ...</thread>
+       ...<threads/>
        <store>... N |-> I ...</store>  [lookup]
 
 This is the most direct, compact and local way to complete the configuration
@@ -73,10 +73,10 @@ need to explicitly tell K so, by mentioning the two thread cells, for example:
 
   rule <thread>...
            <k> X:Id => I ...</k>
-       </thread>
-       <thread>
+       ...</thread>
+       <thread>...
            <env>... X |-> N ...</env>
-       </thread>
+       ...</thread>
        <store>... N |-> I ...</store>  [lookup]
 
 By default, K completes rules in a greedy style.  Think this way: what is the
@@ -105,8 +105,10 @@ default contents of the other subcells in <thread/>.  In this case there
 are no other cells, so we can get rid of those "..."s, but that would
 decrease the modularity of this rule: indeed, we may later on add other
 cells within <thread/> as the language evolves, for example a function
-or an exception stack, etc.  In theory, we should be able to write the
-rule above even more compactly and modularly, namely as
+or an exception stack, etc.
+
+In theory, we should be able to write the rule above even more compactly
+and modularly, namely as
 
   rule <k> spawn S => . ...</k> <env> Rho </env>
        (. => <k> S </k> <env> Rho </env>)
@@ -127,9 +129,9 @@ Let's see what we've got.  Kompile and krun spawn.imp.  Note the following:
 - The <threads/> cell is empty, so all threads terminated normally;
 - The value printed is different from the value in the store; the store value
   is not even the one obtained if the threads executed sequentially.
-Therefore, interesting behaviors may happen; we would like to see all!
+Therefore, interesting behaviors may happen; we would like to see them all!
 
-Based on prior experience with krun, we would hope that
+Based on prior experience with krun search, we would hope that
 
   krun spawn.imp --search
 
@@ -138,10 +140,11 @@ shows all the behaviors.  However, the above does not work, for two reasons.
 First, spawn.imp is an interactive program, which reads a number from the
 standard input.  When analyzing programs exhaustively using the search option,
 krun has to disable the streaming capabilities (just think about it and you
-will realize why).  The best you can do in terms of interactivity is to pipe
-some input to krun, because krun will first flush the standard input buffer
-into the cells connected to it when creating the initial configuration (when
-run with or without the --search option).  For example:
+will realize why).  The best you can do in terms of interactivity with search
+is to pipe some input to krun: krun will flush the standard input buffer
+into the cells connected to it when creating the initial configuration (will
+do that no matter whether you run it with or without the --search option).
+For example:
 
   echo 23 | krun spawn.imp --search
 
@@ -151,8 +154,8 @@ cell as a list item, and then the exhaustive search procedure is invoked.
 Second, even after piping some input, the spawn.imp program still manifests
 only one behavior, which does not seem right.  There should be many more.
 
-Like with the superheat/supercool options discussed in Lesson 3, kompile
-optimizes the generated model for execution by default.  In particular, it
+Like with the superheat/supercool options discussed in Lesson 3, by default
+kompile optimizes the generated model for execution.  In particular, it
 does not insert any backtracking markers where transition attempts should be
 made, so krun lacks the information it needs to exhaustively search the
 generated language model.  Like with the other options, we also have to
@@ -161,7 +164,7 @@ transitions.  A theoretically correct but practically infeasible approach
 to search all possible behaviors is to consider all rules as transitions.
 Even more than in the case of superheating and supercooling, such a naive
 solution would make the number of behaviors, and thus krun, explode.
-Remember that a two-thread program with 50 statements each manifests more
+Remember that a two-thread program with 150 statements each manifests more
 behaviors than particles in the known universe!  Consequently, unless your
 multi-threaded programs are very small, you will most likely want to control
 which rules should be considered transitions and which should not.
@@ -176,11 +179,11 @@ if we delay the lookup of variable x, then other threads may write x in the
 meanwhile (with an increment or an assignment rule) and thus yield a
 different behavior.
 
-Let us tag those rules which should be transitions: lookup and increment
-are already tagged, because they happened to also be supercool rules;
-the read rule needs to also be a transition, because it may complete with
-other instances of itself in other threads; assignment needs to also be
-a transition, and so should be the first rule for print.
+Let us tag those rules which should be transitions: lookup and increment need
+to be transitions (they may be already tagged, because they happened to also
+be supercool rules); the read rule needs to also be a transition, because it
+may complete with other instances of itself in other threads; assignment
+needs to also be a transition, and so should be the first rule for print.
 
 Let us now kompile with the transition option set as desired:
 
@@ -191,6 +194,6 @@ spawn program.
   
 It is highly non-trivial to say precisely which rules need to be transitions,
 so krun makes no attempt to automatically detect it.  Instead, it provides the
-functionality to let the user decide it.
+functionality to let you decide it.
 
 In the next lesson we wrap up and document the definition of IMP++.
