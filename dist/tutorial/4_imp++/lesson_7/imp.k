@@ -1,8 +1,4 @@
-//
-// WARNING
-//
-// This is a heavily commented K definition, part of the K
-// tutorial.
+// This is a heavily commented K definition, part of the K tutorial.
 
 /*!
 \setlength{\parindent}{1em}
@@ -220,7 +216,7 @@ standard output.  This way, \textsf{krun} can be used to obtain
 interactive interpreters based directly on the \K semantics of the
 language.  For example:
 \begin{verbatim}
-bash$ krun programs/sum-3.imppp --no-config
+bash$ krun sum-io.imp --no-config
 Add numbers up to (<= 0 to quit)? 10
 Sum = 55
 Add numbers up to (<= 0 to quit)? 1000
