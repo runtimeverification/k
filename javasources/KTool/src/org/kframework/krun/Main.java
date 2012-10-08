@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 
 import jline.ArgumentCompletor;
+import jline.Completor;
 import jline.ConsoleReader;
 import jline.FileNameCompletor;
 import jline.MultiCompletor;
@@ -332,10 +333,10 @@ public class Main {
 			ConsoleReader reader = new ConsoleReader();
 			reader.setBellEnabled(false);
 
-			List argCompletor = new LinkedList();
+			List<Completor> argCompletor = new LinkedList<Completor>();
 			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "show path labels" }));
 			argCompletor.add(new FileNameCompletor());
-			List completors = new LinkedList();
+			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
 			reader.addCompletor(new MultiCompletor(completors));
 
