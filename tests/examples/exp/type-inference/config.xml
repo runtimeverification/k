@@ -2,7 +2,7 @@
     <test def="/dist/examples/exp/type-inference/exp-type-inference.k" program-extension="exp" compiled-file-name="exp-type-inference-compiled.maude"/>
     <krun-options>
 	      <general>
-		    <option name="--output-mode" value="pretty"/>
+		    <option name="--output-mode" value="none"/>
 			<option name="--no-color" value=""/>
 		  </general>
     </krun-options>

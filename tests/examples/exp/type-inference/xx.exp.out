@@ -1,14 +1,1 @@
- <freshCounter>
-  2 
- </freshCounter> 
- <T>  
-   <k>
-     (symUnificationVar( 0 )) -> (symUnificationVar( 1 )) 
-   </k> 
-   <mgu>
-    unifyEqs(subst, eqns(eqn(symUnificationVar( 0 ), (symUnificationVar( 0 )) -> (symUnificationVar( 1 )))))
-   </mgu> 
-   <tenv>
-    .
-   </tenv> 
- </T> 
+Type could not be inferred due to a cycle.

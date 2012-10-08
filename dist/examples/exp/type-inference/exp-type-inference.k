@@ -189,11 +189,11 @@ variables.  The top cell holds a cell \textsf{mgu} which
 holds the current most-general unifier. */
 
   configuration <T color="yellow" multiplicity="?">
-                  <k color="green"> $PGM:Exp </k>
+                  <k color="green"> $PGM:Exp ~> print </k>
                   <tenv color="LightSkyBlue"> .Map </tenv>
                   <mgu color="blue"> subst(.List{K}) </mgu>
                 </T>
-                <resultType multiplicity="?"> .K </resultType>
+                <out stream="stdout"> .List </out>
 				
 /*@ \subsection{Arithmetic expressions}
 Primitive values rewrite to their types.  Arithmetic constructs, which
@@ -304,7 +304,8 @@ When there is only one type left in the computation cell and all the
 type constraints are solved, we apply the resulting mgu to that type
 and that is the final result of the typing procedure. */
 
-  rule <T>... <k> T:Type </k> <mgu> subst(Theta:List{K}) </mgu> ...</T> => <resultType> applySubst(subst(Theta), T) </resultType>
+  rule <k> T:Type ~> print => printType(T) ~> printStr("\n") </k> 
+       <mgu> subst(Theta:List{K}) </mgu>
 
 /*@ Type constraints are used to update the mgu as soon as they
 are matched on the top of the computation. */
@@ -313,4 +314,37 @@ are matched on the top of the computation. */
   rule <k> T:Type = T':Type => . ...</k>
        <mgu> subst(Theta:List{K}) => updateMgu(subst(Theta), T, T') </mgu>
 
+
+  syntax K ::= "print" | printType( Type ) | printStr( String )
+/*
+  syntax Type ::= TypeVar             // type variables
+                | BasicType
+                | Type "->" Type  [strict]      // function type
+  syntax BasicType ::= "int" | "bool"        // basic types
+
+ 
+*/
+  syntax KLabel ::= "symUnificationVar"
+
+  rule printType(symUnificationVar(I:Int))
+    => printStr("_" +String Int2String(I))
+
+  rule printType(int) => printStr("int")
+  rule printType(bool) => printStr("bool")
+  rule printType(T1:Type -> T2:Type)
+    => printStr("(") ~> printType(T1) ~> printStr(" -> ") ~> printType(T2) 
+       ~> printStr(")")
+
+  rule <k> printStr(Str:String) => . ...</k>
+       <out>... .List => ListItem(Str) </out>
+
+  rule <mgu> cycle(_) => . </mgu>
+       <k> _ => .K </k>
+       <out>... .List => ListItem("Type could not be inferred due to a cycle.\n")
+       </out>
+
+  rule <mgu> clash(_) => . </mgu>
+       <k> _ => .K </k>
+       <out>... .List => ListItem("Type inference failed due to type clash.\n")
+       </out>
 endmodule

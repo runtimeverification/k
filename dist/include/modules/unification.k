@@ -16,7 +16,19 @@ Matching on any KAST label, the
     when (isUnificationVar(L(K1,,Ks)) =/=K true)
          andBool (isUnificationVar(L(K2,,Ks')) =/=K true)
     [structural, anywhere]
-  rule eqns((eqn(K,,X:K) => eqn(X,,K)),,_) when isUnificationVar(X) andBool (isUnificationVar(K) =/=K true)   [structural, anywhere]
+  rule eqns((eqn(K:K,,X:UnificationVar) => eqn(X,,K)),,_) when isUnificationVar(K) =/=K true   [structural, anywhere]
+
+
+  rule unifyEqs(subst(Ks:List{K}),,eqns( 
+            eqn(L1:KLabel(Ks:List{K}),,
+                L2:KLabel(Ks':List{K})),,_))
+    => clash(L1:KLabel(Ks:List{K}),,
+                L2:KLabel(Ks':List{K}))
+    when (isUnificationVar(L1(Ks)) =/=K true)
+         andBool (isUnificationVar(L2(Ks')) =/=K true)
+         andBool L1 =/=KLabel L2
+    [structural, anywhere]
+
 
 /*@ When an equation contains a variable, it can be added as a binding
 to the mgu.  While we know that the variables in the domain of the mgu
@@ -29,9 +41,14 @@ remaining equations by applying the new mgu binding to them. */
 
 
   rule unifyEqs(subst(Ks:List{K} => eqn(X,,K),,substitute(X,,K,,Ks)),,
-              (eqns(eqn(X,,K),,Eqns:List{K}) => substitute(X,, K,, eqns(Eqns))))
-    when isUnificationVar(X) andBool notBool(X subTerm K)
+              (eqns(eqn(X:UnificationVar,,K:K),,Eqns:List{K}) => substitute(X,, K,, eqns(Eqns))))
+    when notBool(X subTerm K)
    [structural, anywhere]
+
+  rule unifyEqs(subst(_),,eqns(eqn(X:UnificationVar,,K:K),,_))
+    => cycle(X,,K)
+    when X subTerm K [anywhere]
+
 /*@ Final rule of the unification algorithm, retrieving the substitution 
 once all constraints were incorporated.
 */
@@ -77,16 +94,16 @@ constraint.
   
   syntax KLabel ::= "unifyEqs" | "subst" | "vars" | "substitute" 
                   | "eqn" | "eqns" | "mgu"
-                  | "getVars" | "accumulateVars"
+                  | "getVars" | "accumulateVars" 
+                  | "clash" | "cycle" 
 
   rule getVars(K) => accumulateVars(vars(.List{K}),, K)   [structural, anywhere]
 
-  rule accumulateVars(vars(Xs:List{K}),,X,,Ks:List{K}) 
+  rule accumulateVars(vars(Xs:List{K}),,X:UnificationVar,,Ks:List{K}) 
      => #if (X inList{K} Xs)
         #then accumulateVars(vars(Xs),,Ks)
         #else accumulateVars(vars(Xs,,X),,Ks)
         #fi
-     when isUnificationVar(X)
    [structural, anywhere]
    rule accumulateVars(_:K,,(L:KLabel(Ks:List{K}) => Ks),,_)
      when isUnificationVar(L(Ks)) =/=K true
