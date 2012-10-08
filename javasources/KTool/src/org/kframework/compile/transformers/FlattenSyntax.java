@@ -18,6 +18,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.ListOfK;
+import org.kframework.kil.MapItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
@@ -207,6 +208,11 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		
 		@Override
 		public ASTNode transform(CollectionItem node) throws TransformerException {
+			return new KApp(new KInjectedLabel((Term)node.accept(trans)), new Empty("List{K}"));
+		}
+		
+		@Override
+		public ASTNode transform(MapItem node) throws TransformerException {
 			return new KApp(new KInjectedLabel((Term)node.accept(trans)), new Empty("List{K}"));
 		}
 
