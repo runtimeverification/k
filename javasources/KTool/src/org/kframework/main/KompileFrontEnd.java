@@ -28,6 +28,7 @@ import org.kframework.compile.transformers.GenerateSyntaxPredicates;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.compile.transformers.ResolveBinder;
 import org.kframework.compile.transformers.ResolveBlockingInput;
+import org.kframework.compile.transformers.ResolveBuiltins;
 import org.kframework.compile.transformers.ResolveFresh;
 import org.kframework.compile.transformers.ResolveHybrid;
 import org.kframework.compile.transformers.ResolveListOfK;
