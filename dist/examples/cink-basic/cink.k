@@ -949,7 +949,7 @@ module CINK
     equal to $I$: 
    */
 
-  rule KItem(B:Bag) LTL|= #eqTo(X:Id, I:Int) => true when val(B, X) ==K I [anywhere]
+//  rule KItem(B:Bag) LTL|= #eqTo(X:Id, I:Int) => true when val(B, X) ==K I [anywhere]
 
 
 endmodule

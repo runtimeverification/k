@@ -77,6 +77,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(Production node) throws TransformerException {
+		if (node.getAttributes().containsKey("KLabelWrapper")) return node;
 		if (!isComputation) return super.transform(node);
 		if (node.isSubsort()) return null;
 		String arity = String.valueOf(node.getArity());
@@ -225,7 +226,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		@Override
 		public ASTNode transform(Variable node) throws TransformerException {
 			if ("K".equals(node.getSort())) return node;
-			if (MetaK.isKSort(node.getSort())) 			
+			if (MetaK.isKSort(node.getSort()) || MetaK.isBuiltinSort(node.getSort())) 			
 				return new KApp(new KInjectedLabel(node), new Empty("List{K}"));
 			node = node.shallowCopy();
 			node.setSort("KItem");

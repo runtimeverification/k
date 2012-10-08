@@ -717,6 +717,12 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Syntax Predicates        = ");
 			}
+						
+			javaDef = new CompilerTransformerStep(new ResolveBuiltins()).compile(javaDef);
+			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Builtins                 = ");
+			}
 			
 			javaDef = new CompilerTransformerStep(new ResolveListOfK()).compile(javaDef);		
 			

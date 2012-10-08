@@ -379,7 +379,8 @@ public class MetaK {
 	}
 
 	public static boolean isBuiltinSort(String sort) {
-		return builtinSorts.contains(sort);		
+		return sort.startsWith("#"); 
+//		return builtinSorts.contains(sort);		
 	}
 
 	public static boolean isComputationSort(String name) {

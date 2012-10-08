@@ -488,6 +488,7 @@ mod #K-EQUAL is
 endm
 
 mod K-BUILTINS is
+---(
   including K-TECHNIQUE .
   including PL-BUILTINS .
   op #_ : #Bool -> KLabel .
@@ -501,6 +502,7 @@ mod K-BUILTINS is
   eq is#String(# S:#String (.List{K})) = # true(.List{K}) .
   eq is#Float(# F:#Float (.List{K})) = # true(.List{K}) .
   eq is#Id(# X:#Id (.List{K})) = # true(.List{K}) .
+---)
 endm
 
 mod K is 

@@ -160,7 +160,7 @@ interface K-EVAL
 endinterface
 
 module K-BUILTINS
-  syntax KLabel ::=  "#" #Bool | "#" #Int | "#" #Float | "#" #Id
+  syntax KLabel ::=  "#" K
 endmodule
 
 

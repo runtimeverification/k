@@ -129,11 +129,11 @@ public class ResolveBlockingInput extends GetLhsPattern {
 			return node;			
 		}
 		ListItem item = (ListItem) rewrite.getLeft();
-		if (!(item.getItem() instanceof Variable &&
-				MetaK.isBuiltinSort(item.getItem().getSort()))) {
+		if (!(item.getItem() instanceof Variable //&&	MetaK.isBuiltinSort(item.getItem().getSort())
+				)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
-					"Expecting a basic type variable but got " + item.getItem().getClass() + "." +
+					"Expecting an input type variable but got " + item.getItem().getClass() + "." +
 							System.getProperty("line.separator") + "Won't transform.", 
 							item.getItem().getFilename(), item.getItem().getLocation()));
 			return node;
