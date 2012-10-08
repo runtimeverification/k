@@ -33,7 +33,7 @@ public class string_trim_last_one_0_0 extends Strategy {
 			ITermFactory factory = context.getFactory();
 			return factory.makeString(str);
 		} else {
-			context.popOnFailure();
+			//context.popOnFailure();
 			return null;
 		}
 	}
