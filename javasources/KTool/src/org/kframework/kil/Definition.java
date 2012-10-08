@@ -5,10 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
-import org.kframework.kil.loader.CollectListConsesVisitor;
+import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -132,9 +134,11 @@ public class Definition extends ASTNode {
 	}
 
 	public void preprocess() {
-		// Collect conses
+		// Collect information
+		this.accept(new UpdateReferencesVisitor());
 		this.accept(new CollectConsesVisitor());
-		this.accept(new CollectListConsesVisitor());
+		this.accept(new CollectSubsortsVisitor());
+		this.accept(new CollectConfigCellsVisitor());
 	}
 
 	public Map<String, Module> getModulesMap() {

@@ -5,11 +5,7 @@ import java.io.IOException;
 
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.CollectConfigCellsVisitor;
-import org.kframework.kil.loader.CollectConsesVisitor;
-import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
@@ -145,10 +141,7 @@ public class DefinitionLoader {
 
 		org.kframework.kil.Definition javaDef = new org.kframework.kil.Definition((Element) preprocessedDef.getFirstChild());
 
-		javaDef.accept(new UpdateReferencesVisitor());
-		javaDef.accept(new CollectConsesVisitor());
-		javaDef.accept(new CollectSubsortsVisitor());
-		javaDef.accept(new CollectConfigCellsVisitor());
+		javaDef.preprocess();
 		// disambiguation steps
 
 		javaDef = (org.kframework.kil.Definition) javaDef.accept(new CellTypesFilter());
@@ -175,9 +168,9 @@ public class DefinitionLoader {
 		XStream xstream = new XStream();
 		xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
-		/*String xml = xstream.toXML(javaDef);
+		String xml = xstream.toXML(javaDef);
 
-		FileUtil.saveInFile(dotk.getAbsolutePath() + "/defx.xml", xml);*/
+		FileUtil.saveInFile(dotk.getAbsolutePath() + "/defx.xml", xml);
 
 		
 		return javaDef;

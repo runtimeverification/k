@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Definition;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
@@ -115,6 +116,9 @@ public class ProgramLoader {
 				sw.printIntermediate("Importing Files = ");
 
 			try {
+				Definition def = DefinitionLoader.loadDefinition(new File(dotk.getAbsoluteFile() + "/defx.xml"), null);
+				def.preprocess();
+				
 				ASTNode out = loadPgmAst(pgmFile, dotk);
 				if (GlobalSettings.verbose) {
 					sw.printIntermediate("Parsing Program = ");
