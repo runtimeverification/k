@@ -128,8 +128,8 @@ public class Production extends ASTNode {
 
 	public String getKLabel() {
 		if (attributes.containsKey("klabel"))
-			return "'" + attributes.get("klabel");
-		return attributes.get("kgeneratedlabel");
+			return "'" + attributes.get("klabel").replace(" ", "");
+		return attributes.get("kgeneratedlabel").replace(" ", "");
 	}
 
 	public java.util.List<ProductionItem> getItems() {

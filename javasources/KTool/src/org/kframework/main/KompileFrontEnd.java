@@ -705,20 +705,37 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Blocking Input           = ");
 			}
-			
-//			javaDef = new CompilerTransformerStep(new ResolveUserLists()).compile(javaDef);
-			
-			
+						
 			javaDef = new CompilerTransformerStep(new GenerateSyntaxPredicates()).compile(javaDef);
+			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Generate Syntax Predicates       = ");
+			}
 			
 			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
 			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Syntax Predicates        = ");
+			}
+			
 			javaDef = new CompilerTransformerStep(new ResolveListOfK()).compile(javaDef);		
+			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve ListOfK                  = ");
+			}
 			
 			javaDef = new CompilerTransformerStep(new FlattenSyntax()).compile(javaDef);
 			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Flatten Syntax                   = ");
+			}
+			
 			javaDef = new CompilerTransformerStep(new ResolveHybrid()).compile(javaDef);		
 
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Hybrid                   = ");
+			}
+			
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");
@@ -738,7 +755,7 @@ public class KompileFrontEnd {
 			javaDef = (Definition) javaDef.accept(new AddStrictStar());
 			
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Strict Star        = ");
+				sw.printIntermediate("Add Strict Star                  = ");
 			}
 			
 			javaDef = (Definition) javaDef.accept(new AddDefaultComputational());
@@ -750,7 +767,7 @@ public class KompileFrontEnd {
 			javaDef = (Definition) javaDef.accept(new AddOptionalTags());
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Optional Tags        = ");
+				sw.printIntermediate("Add Optional Tags                = ");
 			}
 
 			String compile = load 
@@ -770,7 +787,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Java Compiler   = ");
+				sw.printIntermediate("Generate Maude file              = ");
 
 			// call maude to kompile the definition
 			String compiled = MaudeRun.run_maude(dotk.getAbsoluteFile(), compile);
@@ -783,7 +800,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(defFile + "-compiled.maude", load + compiled);
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("RunMaude        = ");
+				sw.printIntermediate("RunMaude                         = ");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (TransformerException e) {
