@@ -126,7 +126,7 @@ we prefer to keep two different syntactic constructs for blocks. */
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
-				 | "int" Ids ";"
+                 | "int" Ids ";"
                  | "print" "(" AExps ")" ";"  [strict]
                  | "halt" ";"
                  > "spawn" Stmt
