@@ -30,9 +30,11 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
+
   syntax BlockOrStmtType ::= "block" | "stmt"
   syntax PrintableType  ::= "int" | "string"
   syntax Type ::= PrintableType | "bool" | BlockOrStmtType
+
   syntax KResult ::= Type
 
   configuration <T color="yellow">
@@ -51,18 +53,21 @@ module IMP
   rule int / int => int
   rule int + int => int
   rule string + string => string
+
 // BExp
   syntax BExp ::= Type
   rule _:Bool => bool
   rule int <= int => bool
   rule ! bool => bool
   rule bool && bool => bool
+
 // Block
   rule {} => block
   rule <k> {S} => S ~> tenv(Rho) ...</k> <tenv> Rho </tenv>
   syntax K ::= tenv(Map)
   rule <k> _:BlockOrStmtType ~> tenv(Rho) => block ...</k>
        <tenv> _ => Rho </tenv>
+
 // Stmt
   rule <k> X = T; => stmt ...</k> <tenv>... X |-> T ...</env>
 
@@ -79,5 +84,5 @@ module IMP
   rule print(.AExps); => stmt
   
   rule halt; => stmt
-  rule spawn stmt => stmt
+  rule spawn _:BlockOrStmtType => stmt
 endmodule
