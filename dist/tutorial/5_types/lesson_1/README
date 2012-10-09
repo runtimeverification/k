@@ -118,3 +118,5 @@ statement ... or block.
 
 kompile imp.k and krun all the programs in Tutorial 4.  They should all type 
 to "stmt".
+
+In the next lesson we will define a substitution-based type system for LAMBDA.
