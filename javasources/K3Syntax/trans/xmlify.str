@@ -230,6 +230,22 @@ rules
 		where b'* := <all(to-xml)> b*
 		where loc := <getLocAsString>
 
+	to-xml:	// print an annotated production rule
+		TupleAnnoProd(a*, b*) -> $[<production loc="[loc]">
+										<terminal value="(" loc="[loc]" />
+										[a'*]
+										<terminal value=")" loc="[loc]" />
+										<attributes loc="[loc]">
+											[b'*]
+										</attributes>
+						</production>
+						]
+		where mydebug(!"ShortAnnoProd: ")
+		where aa  := <all({z: \z -> Sort(z)\}) ; add-commas ; flatten-list> a*
+		where a'* := <all(to-xml)> aa
+		where b'* := <all(to-xml)> b*
+		where loc := <getLocAsString>
+
 	to-xml:	// print a production rule
 		Prod(a*) -> $[<production loc="[loc]">
 						[a'*]
@@ -248,6 +264,18 @@ rules
 								<attributes loc="[loc]">
 									<tag key="klabel" value="'[x]" />
 								</attributes>
+					</production>
+					]
+		where mydebug(!"ShortProd: ")
+		where aa  := <all({z: \z -> Sort(z)\}) ; add-commas ; flatten-list> a*
+		where a'* := <all(to-xml)> aa
+		where loc := <getLocAsString>
+
+	to-xml:	// print a production rule
+		TupleProd(a*) -> $[<production loc="[loc]">
+								<terminal value="(" loc="[loc]" />
+								[a'*]
+								<terminal value=")" loc="[loc]" />
 					</production>
 					]
 		where mydebug(!"ShortProd: ")

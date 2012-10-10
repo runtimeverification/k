@@ -31,6 +31,9 @@ context-free syntax
 	ID "(" {BASICID ","}+ ")"	-> Prod2 {cons("ShortProd")}
 	ID "(" {BASICID ","}+ ")"	"[" {Tag ","}+ "]" -> Prod2 {cons("ShortAnnoProd")}
 
+	   "(" {BASICID ","}+ ")"	-> Prod2 {cons("TupleProd")}
+	   "(" {BASICID ","}+ ")"	"[" {Tag ","}+ "]" -> Prod2 {cons("TupleAnnoProd")}
+
 	SyntaxElement+	-> Prod2 {cons("Prod")}
 	SyntaxElement+	"[" {Tag ","}+ "]" -> Prod2 {cons("AnnoProd")}
 	STRING		-> SyntaxElement {cons("Terminal")}
