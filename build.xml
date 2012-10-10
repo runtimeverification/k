@@ -12,6 +12,11 @@
 		<ant antfile="${javasources}/KTool/buildjar.xml" dir="${javasources}/KTool" />
 	</target>
 
+	<target name="parallel">
+		<ant antfile="${javasources}/KTool/build.xml" dir="${javasources}/KTool" target="parallellocal"/>
+		<antcall target="makeversion" />
+	</target>
+	
 	<target name="build">
 		<ant antfile="${javasources}/KTool/build.xml" dir="${javasources}/KTool" />
 		<antcall target="makeversion" />

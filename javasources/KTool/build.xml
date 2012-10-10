@@ -8,4 +8,22 @@
 
 	<target name="alllocal" depends="allsig,allstr,build,jar" />
 
+	<target name="parallellocal">
+		<echo message="Parallel" />
+		<parallel>
+			<sequential>
+				<antcall target="k3syntaxsig" />
+				<antcall target="k2syntax" />
+			</sequential>
+			<sequential>
+				<antcall target="k3latexsig" />
+				<antcall target="k3latex" />
+			</sequential>
+			<sequential>
+				<antcall target="k3sig" />
+				<antcall target="k3" />
+			</sequential>
+		</parallel>
+	</target>
+
 </project>
