@@ -13,7 +13,7 @@ builders
   provider : include/k3syntax.ctree                                                                                         
   provider : include/k3syntax-java.jar                                                                                      
                                                                                                                             
-  observer : editor-analyze                        (multifile)                                                              
+  //observer : editor-analyze                        (multifile)                                                              
                                                                                                                             
   builder  : "Show abstract syntax"                = debug-generate-aterm (openeditor) (realtime) (meta) (source)
   builder  : "Generate XML"                        = callxml (openeditor) (realtime)           

@@ -2,6 +2,7 @@ package org.kframework.parser.concrete.lib;
 
 import static org.strategoxt.lang.Term.NO_STRATEGIES;
 
+import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
@@ -31,8 +32,13 @@ public class annolocation_0_0 extends Strategy {
 	public IStrategoTerm invoke(Context context, IStrategoTerm currentList) {
 		context.push("annolocation_0_0");
 
-		IStrategoTerm loc1 = context.invokePrimitive("SSL_EXT_origin_location", currentList, NO_STRATEGIES, new IStrategoTerm[] { currentList });
-		IStrategoList locList = context.getFactory().makeList(loc1);
+		IStrategoTerm loc = context.invokePrimitive("SSL_EXT_origin_location", currentList, NO_STRATEGIES, new IStrategoTerm[] { currentList });
+		IStrategoInt loc0 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(0)).intValue());
+		IStrategoInt loc1 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(1)).intValue() + 1);
+		IStrategoInt loc2 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(2)).intValue());
+		IStrategoInt loc3 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(3)).intValue() + 2);
+
+		IStrategoList locList = context.getFactory().makeList(context.getFactory().makeTuple(loc0, loc1, loc2, loc3));
 		currentList = context.getFactory().annotateTerm(currentList, locList);
 		context.popOnSuccess();
 		return currentList;

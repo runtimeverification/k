@@ -94,7 +94,9 @@ rules
 	xmlStringEscape         = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\"", "&quot;")
 	//xmlStringEscape           = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\", "\\\\") ; string-replace(|"\"", "&quot;")
 	//xmlStringEscapeFromString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
-	getLocAsString        = prim("SSL_EXT_origin_location", <id>) ; write-to-string <+ !"(0,0,0,0)"
+	getLocAsString        = prim("SSL_EXT_origin_location", <id>) ; ?(a, b, c, d) ; !(a, <add> (b, 1), c, <add> (d, 2)) ; write-to-string <+ !"(0,0,0,0)"
+	//external myorigin(|)
+	//getLocAsString        = myorigin ; write-to-string <+ !"(0,0,0,0)"
 	get-original-sentence = prim("SSL_EXT_origin_text", <id>) ; xmlStringEscape ; escape
 	
 	external xml-string-escape-from-string(|)
