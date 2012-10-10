@@ -17,13 +17,13 @@ automatically (when one uses an external parser) or manually
 There are two types of declarations: for variables (including arrays) and
 for functions. */
 
-  syntax Start ::= Stmts
-  syntax Ids ::= List{Id,","} [strict, hybrid]
+//  syntax Start ::= Stmts
+  syntax Ids ::= List{Id,","}  [strict, hybrid]
   syntax Exps ::=  List{Exp,","}
 
 
-  syntax Decl ::= "var" Exps ";" 
-                | "function" Id "(" Ids ")" Stmt 
+  syntax Decl ::= "var" Exps ";"
+                | "function" Id "(" Ids ")" Stmt
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -37,23 +37,23 @@ Exceptions are the increment (since its first argument gets updated, so it
 cannot be evaluated) and the assignment which is only strict in its second
 argument (for the same reason as the increment). */
 
-  syntax Exp ::= Int | Bool | Id | String
-               | "(" Exp ")"            [bracket]
-               | "++" Exp        
+  syntax Exp ::= Int | Bool | String | Id
+               | "(" Exp ")"             [bracket]
+               | "++" Exp
                > Exp "[" Exps "]"        [strict]
                > Exp "(" Exps ")"        [strict]
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
-               | "read" "(" ")"    
+               | "read" "(" ")"
                > left:
-                    Exp "*" Exp          [strict, left]
+                 Exp "*" Exp             [strict, left]
                | Exp "/" Exp             [strict, left]
                | Exp "%" Exp             [strict, left]
                > left:
-                    Exp "+" Exp          [strict, left]
+                 Exp "+" Exp             [strict, left]
                | Exp "-" Exp             [strict, left]
                > non-assoc:
-                    Exp "<" Exp          [strict, non-assoc]
+                 Exp "<" Exp             [strict, non-assoc]
                | Exp "<=" Exp            [strict, non-assoc]
                | Exp ">" Exp             [strict, non-assoc]
                | Exp ">=" Exp            [strict, non-assoc]
@@ -61,7 +61,7 @@ argument (for the same reason as the increment). */
                | Exp "!=" Exp            [strict, non-assoc]
                > "not" Exp               [strict]
                > left:
-                    Exp "and" Exp        [strict, left]
+                 Exp "and" Exp           [strict, left]
                | Exp "or" Exp            [strict, left]
                > Exp "=" Exp             [strict(2), right]
 
@@ -82,19 +82,19 @@ particular, the if-then-else construct is strict only in its first argument
 constructs are not strict in any arguments.  The \texttt{print} statement
 constructs is variadic, that is, it takes an arbitrary number of arguments. */
 
-  syntax Stmt ::= "{" "}"        
+  syntax Stmt ::= "{" "}"
                 | "{" Stmts "}"        
                 | Exp ";"                             [strict]
                 | "if" Exp "then" Stmt "else" Stmt    [avoid, strict(1)]
-                | "if" Exp "then" Stmt               
-                | "while" Exp "do" Stmt               
-                | "for" Id "=" Exp "to" Exp "do" Stmt  
+                | "if" Exp "then" Stmt
+                | "while" Exp "do" Stmt
+                | "for" Id "=" Exp "to" Exp "do" Stmt
                 | "return" Exp ";"                    [strict]
-                | "return" ";"                      
+                | "return" ";"
                 | "write" "(" Exp ")" ";"             [strict]
-                | "try" Stmt "catch" "(" Id ")" Stmt 
+                | "try" Stmt "catch" "(" Id ")" Stmt
                 | "throw" Exp ";"                     [strict]
-                | "spawn" Stmt                     
+                | "spawn" Stmt
                 | "acquire" Exp ";"                   [strict]
                 | "release" Exp ";"                   [strict]
                 | "rendezvous" Exp ";"                [strict]
@@ -116,18 +116,15 @@ functions take a list of arguments, that each conditional has both branches,
 that there are only \texttt{while} loops, and that each variable is
 declared alone and is initialized. */
 
-  rule if E:Exp then S:Stmt => if E then S else {}
-  rule (for X:Id = E1 to E2 do S)
-        =>
-       {var X=E1; while X <= E2 do {S X = (X + 1);}}
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
-  rule var X:Id = E:Exp; => var X; X = E;
+  rule if E:Exp then S:Stmt => if E then S else {}              [macro]
+  rule for X:Id = E1 to E2 do S
+    => {var X=E1; while X<=E2 do {S X=X+1;}}                    [macro]
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;      [macro]
+  rule var X:Id = E:Exp; => var X; X = E;                       [macro]
 
-  syntax #Id ::= "main"
+  syntax Id ::= "main"
 
 endmodule
-
-
 
 
 module SIMPLE-UNTYPED
@@ -161,9 +158,9 @@ function definitions cannot be nested).  Like in IMP and other
 languages, we finally tell the tool that values are \K results. */
 
   syntax Val ::= Int | Bool | String
-               | "arrayRef" "(" Int "," Int ")" 
-               | "lambda" "(" Ids "," Stmt ")"  
-  syntax Vals ::= List{Val,","} 
+               | arrayRef(Int,Int)
+               | lambda(Ids,Stmt)
+  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val
 
@@ -212,15 +209,17 @@ to the \K tool, as indicated by the \textit{\$PGM} variable. */
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
                       <k color="green"> ($PGM:K ~> execute) </k>
+                      <br/>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
                       </control>
+                      <br/>
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
                     </thread>
                   </threads>
-                  //<br/>
+                  <br/>
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
@@ -268,13 +267,12 @@ structure.
 fresh locations is rather low level and hopefully temporary; we intend to
 soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
-  syntax K ::= "undefined"  
-
+  syntax K ::= "undefined"  [latex(\bot)]
 
   rule <k> var X:Id; => . ...</k>
-       <env> Env:Map => Env[L:Int/X] </env>
-       <store>... . => L|->undefined ...</store>
-       <nextLoc> L => L +Int 1 </nextLoc>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> undefined ...</store>
+       <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 /*@ \subsection{Array Declaration}
 The \K semantics of the uni-dimensional array declaration is somehow similar
@@ -290,8 +288,8 @@ of array declarations can be arbitrary expressions, this virtually
 means that we can dynamically allocate memory in SIMPLE by means of
 array declarations. */
 
-  rule <k> var X[N:Int]; => . ...</k>
-       <env> Env:Map => Env[L/X:Id] </env>
+  rule <k> var X:Id[N:Int]; => . ...</k>
+       <env> Env => Env[L/X] </env>
        <store>... . => L |-> arrayRef(L +Int 1, N)
                        Map((L +Int 1) .. (L +Int N) |-> undefined)
        ...</store>
@@ -303,7 +301,7 @@ This way, we will only need to give semantics to uni-dimensional arrays.
 First, the context rule below is used to request the evaluation of array
 dimensions: */
 
-  context var X:Id[HOLE],.Exps;
+  context var _:Id[HOLE];
 
 /*@  Upon evaluating the array dimensions, the code generation rule below
 desugars multi-dimensional array declaration to uni-dimensional declarations.
@@ -314,9 +312,9 @@ inside the loop body with fewer dimensions.  The second variable,
 \texttt{\$2}, iterates through and initializes each element of the current
 dimension: */
 
-  syntax #Id ::= "$1" | "$2"
-  rule var X:Id[N1:Int, N2:Int, Vs:Vals]; =>
-       var X[N1];
+  syntax Id ::= "$1" | "$2"
+  rule var X:Id[N1:Int, N2:Int, Vs:Vals];
+    => var X[N1];
        {
          var $1 = X;
          for $2 = 0 to N1 - 1 do 
@@ -325,7 +323,7 @@ dimension: */
            $1[$2] = X;
          }
        }
-       [structural]
+    [structural]
 
 /*@ Ideally, one would like to perform syntactic desugarings like the one
 above before the actual semantics.  Unfortunately, that was not possible in
@@ -358,7 +356,7 @@ discards programs which do not respect this requirement. */
 
 
   rule <k> function F:Id(Xs:Ids) S:Stmt => . ...</k>
-       <env> Env:Map => Env[L/F] </env>
+       <env> Env => Env[L/F] </env>
        <store>... . => L |-> lambda(Xs, S) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
@@ -380,11 +378,11 @@ bound in the global environment and, as seen below, they are executed in that
 same global environment; all these mean, in particular, that the functions
 ``see'' each other, allowing for mutual recursion, etc. */
 
-  syntax K ::= "execute" 
-  rule <k> execute => (main(.Exps);) </k>
-       <env> Env:Map </env>
+  syntax K ::= "execute"
+  rule <k> execute => main(.Exps); </k>
+       <env> Env </env>
        <genv> . => Env </genv>
-       [structural]
+    [structural]
 
 /*@ \section{Expressions}
 We next define the \K semantics of all the expression constructs, in the
@@ -396,10 +394,9 @@ When a variable $X$ is the first computational task (note the rupture of the
 environment (note the rupture of the \textsf{env} cell at both sides), and
 $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
-  rule [look-up]:
-       <k> X:Id => V ...</k>
-       <env>... X |-> L:Int ...</env>
-       <store>... L |-> V:Val ...</store>  [transition]
+  rule <k> X:Id => V ...</k>
+       <env>... X |-> L ...</env>
+       <store>... L |-> V ...</store>  [lookup]
 
 /*@ Note that this excludes reading $\bot$, as $\bot$ is not a value. */
 
@@ -412,9 +409,9 @@ The semantics of the auxiliary lvalue operation is defined below.
 For now, all we need to know is that it takes an expression and evaluates
 to a location value, also introduced below with the auxiliary operations. */
 
-  context ++(HOLE => lvalue(HOLE))
-  rule <k> ++loc(L) => I:Int +Int 1 ...</k>
-       <store>... L:Int |-> (I => I +Int 1) ...</store>  [transition]
+  context ++(HOLE:Id => lvalue(HOLE))
+  rule <k> ++loc(L) => I +Int 1 ...</k>
+       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
@@ -451,18 +448,17 @@ anonymous variable in \K matching any subterm (like in Prolog); informally,
 The semantics of the \texttt{lookup} operation is straightforward. */
 
   rule V:Val[N1:Int, N2:Int, Vs:Vals] 
-       =>
-       V[N1, .Exps][N2, Vs]
-       [structural, anywhere]
+    => V[N1][N2, Vs]
+    [structural, anywhere]
 
   rule arrayRef(L:Int,_:Int)[N:Int] => lookup(L +Int N)  
-       [structural, anywhere]
+    [structural, anywhere]
 
-  syntax K ::= "lookup" "(" Int ")" 
+  syntax K ::= lookup(Int)
 
-  rule <k> lookup(L:Int) => V ...</k>
-       <store>... L |-> V:Val ...</store>
-       [transition]
+  rule <k> lookup(L) => V ...</k>
+       <store>... L |-> V ...</store>
+    [loc-lookup]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -501,37 +497,27 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax ListItem ::=  "(" Map "," K "," Bag ")" 
+  syntax ListItem ::=  "(" Map "," K "," Bag ")"
 
-  rule <k>
-          lambda(Xs:Ids,S)(Vs:Vals) ~> K:K
-          =>
-          bindto(Xs,Vs) ~> S ~> return;
-       </k>
-       <control> 
-         <fstack> . => (Env,K,C) ...</fstack>
-         C:Bag
-       </control>
-       <env> Env:Map => GEnv </env>
-       <genv> GEnv:Map </genv>
+  rule <k> lambda(Xs,S)(Vs:Vals) ~> K => bindto(Xs,Vs) ~> S ~> return; </k>
+       <control> <fstack> . => (Env,K,C) ...</fstack> C </control>
+       <env> Env => GEnv </env>
+       <genv> GEnv </genv>
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
-       <control>
-         <fstack> (Env:Map, K:K, C:Bag) => . ...</fstack>
-         (_ => C)
-       </control>
+       <control> <fstack> (Env, K, C) => . ...</fstack> (_ => C) </control>
        <env> _ => Env </env>
 
   syntax Val ::= "nothing"
 
-  rule return; => return nothing;   [structural]
+  rule return; => return nothing;   [macro]
 
 /*@ The \texttt{bindto} auxilliary construct binds a list of variables
 to a list of values.  Specifically, it allocates a fresh location for
 each variable, binding the variable to that location in the
 environment and writing the value to that location in the store. */
 
-  syntax K ::= "bindto" "(" Ids "," Vals ")"
+  syntax K ::= bindto(Ids,Vals)
 
   rule <k> bindto((X:Id, Xs:Ids => Xs),(V:Val, Vs:Vals => Vs)) ...</k>
        <env> Env:Map => Env[L/X] </env>
@@ -872,9 +858,8 @@ corresponding store lookup operation. */
 
 // For parsing reasons, we prefer to allow lvalue to take a K
 
-  syntax Exp ::= "lvalue" "(" K ")"
-
-  syntax Val ::= "loc" "(" Int ")"
+  syntax Exp ::= lvalue(K)
+  syntax Val ::= loc(Int)
 
 // Local variable
   rule <k> lvalue(X:Id) => loc(L) ...</k>
