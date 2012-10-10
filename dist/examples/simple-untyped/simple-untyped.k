@@ -396,7 +396,7 @@ $L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
 
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V ...</store>  [lookup]
+       <store>... L |-> V ...</store>  [transition]
 
 /*@ Note that this excludes reading $\bot$, as $\bot$ is not a value. */
 
@@ -409,9 +409,9 @@ The semantics of the auxiliary lvalue operation is defined below.
 For now, all we need to know is that it takes an expression and evaluates
 to a location value, also introduced below with the auxiliary operations. */
 
-  context ++(HOLE:Id => lvalue(HOLE))
+  context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I => I +Int 1) ...</store>  [transition]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
@@ -458,7 +458,7 @@ The semantics of the \texttt{lookup} operation is straightforward. */
 
   rule <k> lookup(L) => V ...</k>
        <store>... L |-> V ...</store>
-    [loc-lookup]
+    [transition]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -520,11 +520,11 @@ environment and writing the value to that location in the store. */
   syntax K ::= bindto(Ids,Vals)
 
   rule <k> bindto((X:Id, Xs:Ids => Xs),(V:Val, Vs:Vals => Vs)) ...</k>
-       <env> Env:Map => Env[L/X] </env>
+       <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L => L:Int +Int 1 </nextLoc>
 
-  rule <k> bindto(.Ids, .Vals) => . ...</k>  [structural]
+  rule bindto(.Ids, .Vals) => .  [structural]
 
 /*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next
@@ -533,7 +533,7 @@ input value, at the same time discarding the input value from the
 
   rule <k> read() => I ...</k>
        <in> ListItem(I:Int) => . ...</in>
-       [transition]
+    [transition]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -551,7 +551,7 @@ that \texttt{lvalue(...)} eventually evaluates to a location value
 
   rule <k> loc(L:Int) = V:Val => V ...</k>
        <store>... L |-> (_ => V) ...</store>
-       [transition]
+    [transition]
 
 /*@ \section{Statements}
 We next define the \K semantics of statements, also in the order their syntax
@@ -571,7 +571,7 @@ computational if one wants them to count as computational steps. */
 
   rule <k> { Ss:Stmts } => Ss ~> env(Env) ...</k>
        <env> Env:Map </env>
-       [structural]
+    [structural]
 
 /*@ The basic definition of environment recovery is straightforward: */
 
