@@ -48,12 +48,13 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-
 public class BasicTransformer implements Transformer {
-	
+
 	private String name;
 
-	public BasicTransformer(String name) {this.name = name;}
+	public BasicTransformer(String name) {
+		this.name = name;
+	}
 
 	@Override
 	public ASTNode transform(ASTNode node) throws TransformerException {
@@ -220,12 +221,12 @@ public class BasicTransformer implements Transformer {
 			try {
 				result = t.accept(this);
 				terms.add((Term) result);
-			}
-			catch (TransformerException e) {
+			} catch (TransformerException e) {
 				exception = e;
 			}
 		}
-		if (terms.isEmpty()) throw new TransformerException(exception);
+		if (terms.isEmpty())
+			throw exception;
 		if (terms.size() == 1) {
 			return terms.get(0);
 		}
