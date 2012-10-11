@@ -1,6 +1,5 @@
 package org.kframework.compile.utils;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -25,6 +24,7 @@ import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Rule;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
@@ -34,7 +34,6 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;

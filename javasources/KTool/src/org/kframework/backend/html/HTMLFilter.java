@@ -563,7 +563,8 @@ public class HTMLFilter extends BasicVisitor {
 		/* This loop takes care of the latex instructions that contain arguments.
 		 * These arguments are found by multipleLatexExtracts(). They can then be used to replace 
 		 * the latex instruction by the corresponding html representation.  */
-		for (Enumeration e = Latex2HTMLone.keys() ; e.hasMoreElements() ;) {
+		for (@SuppressWarnings("rawtypes")
+		Enumeration e = Latex2HTMLone.keys() ; e.hasMoreElements() ;) {
 			String key = (String) e.nextElement();
 			if(key != null) {
 				
@@ -584,7 +585,8 @@ public class HTMLFilter extends BasicVisitor {
 	     }
 		
 		/* This loop takes care of the latex instructions take can be transformed to HTML by a direct replacement.  */
-		for (Enumeration e = Latex2HTMLzero.keys() ; e.hasMoreElements() ;) {
+		for (@SuppressWarnings("rawtypes")
+		Enumeration e = Latex2HTMLzero.keys() ; e.hasMoreElements() ;) {
 			String key = (String) e.nextElement();
 			
 			if(key != null)

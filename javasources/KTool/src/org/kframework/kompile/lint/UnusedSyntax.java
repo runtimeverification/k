@@ -10,6 +10,7 @@ import org.kframework.kil.loader.DefinitionHelper;
  */
 public class UnusedSyntax extends KlintRule {
 
+	@SuppressWarnings("unused")
 	private static boolean debug = false;
 
 	public UnusedSyntax(Definition javaDef) {

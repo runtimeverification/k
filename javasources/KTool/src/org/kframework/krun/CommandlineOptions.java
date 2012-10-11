@@ -20,7 +20,7 @@ public class CommandlineOptions {
     private ArrayList<Option> optionList = new ArrayList<Option>();
     
     //Comparator class needed to display the help options in the order they were created  
-    static class OptionComparator implements Comparator {
+    static class OptionComparator implements Comparator<Object> {
 		public int compare(Object obj1, Object obj2) {
 			Option opt1 = (Option) obj1;
 			Option opt2 = (Option) obj2;
@@ -49,6 +49,7 @@ public class CommandlineOptions {
     }
 	
     //create options displayed in the krun help
+	@SuppressWarnings("static-access")
 	public void initializeKRunOptions() {
 		//krun options
 		
@@ -156,6 +157,7 @@ public class CommandlineOptions {
 	}
 	
 	//create options displayed in the krun debugger help
+	@SuppressWarnings("static-access")
 	public void initializeDebugOptions() {
 		//stepper options
 		Option step = OptionBuilder.hasArg(false).withLongOpt("step").withDescription("Execute one step or multiple steps at one time if you specify a positive integer argument").create();

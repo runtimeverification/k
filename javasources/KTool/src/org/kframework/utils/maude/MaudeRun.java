@@ -31,13 +31,13 @@ public class MaudeRun {
 		// get system properties: file separator, os name, os architecture
 		String fileSeparator = System.getProperty("file.separator");
 		String osname = System.getProperty("os.name");
-		String arch = System.getProperty("os.arch");
+//		String arch = System.getProperty("os.arch");
 
 		// set different maude executables
 		String maude_win = "maude.exe";
 		String maude_mac = "maude.intelDarwin";
 		String maude_linux_32 = "maude.linux";
-		String maude_linux_64 = "maude.linux64";
+//		String maude_linux_64 = "maude.linux64";
 
 		// System.out.println("OS: |" + osname + "|" + arch + "|");
 		// System.out.println(KPaths.getKBase(true));
@@ -55,9 +55,9 @@ public class MaudeRun {
 			maudeExe = maudeDir + fileSeparator + maude_mac;
 		} else if (osname.toLowerCase().contains("linux")) {
 			// in this case we assume linux
-			if (arch.toLowerCase().contains("64")) {
-				maudeExe = maudeDir + fileSeparator + maude_linux_64;
-			} else
+//			if (arch.toLowerCase().contains("64")) {
+//				maudeExe = maudeDir + fileSeparator + maude_linux_64;
+//			} else
 				maudeExe = maudeDir + fileSeparator + maude_linux_32;
 		}
 

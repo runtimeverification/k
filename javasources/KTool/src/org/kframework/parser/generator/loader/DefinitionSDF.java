@@ -1,37 +1,14 @@
 package org.kframework.parser.generator.loader;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.Import;
-import org.kframework.kil.Module;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.parser.generator.basic.Item;
-import org.kframework.parser.generator.basic.ModuleItem;
-import org.kframework.parser.generator.basic.Priority;
-import org.kframework.parser.generator.basic.Sentence;
-import org.kframework.parser.generator.basic.Subsort;
-import org.kframework.parser.generator.basic.Syntax;
-import org.kframework.parser.generator.basic.Item.ItemType;
-import org.kframework.parser.generator.basic.ModuleItem.ModuleType;
-import org.kframework.parser.generator.basic.Sentence.SentenceType;
-import org.kframework.utils.Error;
-import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
 
 public class DefinitionSDF {
 
+	@SuppressWarnings("unused")
 	public static String getSdfForPrograms(Definition def) {
 
 		String sdf = "module Integration\n\n";

@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Configuration;

@@ -34,7 +34,7 @@ public class MaudeTask extends Thread {
 
 	public MaudeTask(String command, String outputFile, String errorFile, Logger parentLogger) {
 		this(command, outputFile, errorFile);
-		_logger = parentLogger;
+		set_logger(parentLogger);
 	}
 
 	@Override
@@ -103,5 +103,13 @@ public class MaudeTask extends Thread {
 			errorFile.write(line + K.lineSeparator);
 		}
 		errorFile.close();
+	}
+
+	public Logger get_logger() {
+		return _logger;
+	}
+
+	public void set_logger(Logger _logger) {
+		this._logger = _logger;
 	}
 }

@@ -123,6 +123,7 @@ public class KRunner {
 		_logger.info("Maude command:" + K.lineSeparator + command);
 
 		maude.join();
+		@SuppressWarnings("unused")
 		int returnValue = maude.returnValue;
 	}
 
