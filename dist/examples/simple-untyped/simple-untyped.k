@@ -497,7 +497,7 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax ListItem ::=  "(" Map "," K "," Bag ")"
+  syntax ListItem ::=  (Map,K,Bag)
 
   rule <k> lambda(Xs,S)(Vs:Vals) ~> K => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C </control>
@@ -575,7 +575,7 @@ computational if one wants them to count as computational steps. */
 
 /*@ The basic definition of environment recovery is straightforward: */
 
-  syntax K ::= "env" "(" Map ")"
+  syntax K ::= env(Map)
 
   rule <k> env(Env:Map) => . ...</k>
        <env> _ => Env </env>  [structural]
@@ -711,7 +711,7 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax ListItem ::= "(" Id "," Stmt "," K "," Map "," Bag ")"
+  syntax ListItem ::= (Id,Stmt,K,Map,Bag)
 
   syntax K ::= "popx" 
 
