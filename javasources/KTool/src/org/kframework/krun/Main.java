@@ -239,7 +239,7 @@ public class Main {
 				sb.append("  #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) ." + K.lineSeparator);
 				sb.append("endm" + K.lineSeparator + K.lineSeparator);
 				sb.append("red" + K.lineSeparator);
-				sb.append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(#_(KItem`(_`)(#initConfig)),.List`{K`}),");
+				sb.append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.List`{K`}),");
 				sb.append(K.lineSeparator);
 				sb.append(KAST1 + ")" + K.lineSeparator + ") .");
 				s = sb.toString();

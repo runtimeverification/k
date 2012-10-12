@@ -19,16 +19,6 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 ***)
 
-set include BOOL off .
-set show advisories off .
-
-
-mod #BOOL-INTERFACE is
-  sort #Bool .
-  op true : -> #Bool [ctor special (id-hook SystemTrue)] .
-  op false : -> #Bool [ctor special (id-hook SystemFalse)] .
-endm
-
 mod #BOOL is  including #BOOL-INTERFACE .
   op if_then_else_fi : #Bool Universal Universal -> Universal 
     [poly (2 3 0) special (
@@ -48,9 +38,6 @@ mod #BOOL is  including #BOOL-INTERFACE .
   eq B1:#Bool ==Bool B2:#Bool = B1:#Bool ==Universal B2:#Bool .
 endm
 
-mod #EXT-BOOL-INTERFACE is
-endm
-
 mod #EXT-BOOL is
   protecting #BOOL .
   op _and-then_ : #Bool #Bool -> #Bool [strat (1 0) gather (e E) prec 55] .
@@ -60,18 +47,6 @@ mod #EXT-BOOL is
   eq false and-then B = false .
   eq true or-else B = true .
   eq false or-else B = B .
-endm
-
-
-mod #NAT-INTERFACE is
-  sorts #Zero #NzNat #Nat .
-  subsort #Zero #NzNat < #Nat .
-  op 0 : -> #Zero [ctor] .
-
-  op sNat_ : #Nat -> #NzNat
-        [ctor iter metadata "latex=(renameTo s\\subscript{{\\scriptstyle\\it{}Nat}}_)"
-         special (id-hook SuccSymbol
-                  term-hook zeroTerm (0))] .
 endm
 
 mod #NAT is
@@ -203,21 +178,6 @@ mod #NAT is
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
                   term-hook trueTerm (true)
                   term-hook falseTerm (false))] .
-endm
-
-mod #INT-INTERFACE is
-  protecting #NAT-INTERFACE .
-  sorts #NzInt #Int .
-  subsorts #NzNat < #NzInt #Nat < #Int .
-  subsort #Zero #NzNat < #Int . 
-
-  op --Int_ : #NzNat -> #NzInt
-        [ctor metadata "latex=(renameTo \\ensuremath{-{}}\\subscript{{\\scriptstyle\\it{}Int}}_)"
-         special (id-hook MinusSymbol
-                  op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
-  op --Int_ : #NzInt -> #NzInt [ditto] .
-  op --Int_ : #Int -> #Int [ditto] .
 endm
 
 mod #INT is 
@@ -401,28 +361,6 @@ mod #INT is
   eq I1:#Int ==Int I2:#Int = I1:#Int ==Universal I2:#Int .
 endm
 
-
-
-mod #RAT-INTERFACE is
-  protecting #INT-INTERFACE .
-  sorts #PosRat #NzRat #Rat .
-  subsorts #NzInt < #NzRat #Int < #Rat .
-  subsorts #NzNat < #PosRat < #NzRat .
-
-  op _/Rat_ : #NzInt #NzNat -> #NzRat
-        [ctor prec 31 gather (E e)
-         special (id-hook DivisionSymbol
-                  op-hook succSymbol (sNat_ : #Nat ~> #NzNat)
-                  op-hook minusSymbol (--Int_ : #NzNat ~> #Int))] .
-
-  op _/Rat_ : #NzNat #NzNat -> #PosRat [ctor ditto] .
-  op _/Rat_ : #PosRat #PosRat -> #PosRat [ditto] .
-  op _/Rat_ : #NzRat #NzRat -> #NzRat [ditto] .
-  op _/Rat_ : #Rat #NzRat -> #Rat [ditto] .
-  op --Int_ : #NzRat -> #NzRat [ditto] .
-  op --Int_ : #Rat -> #Rat [ditto] .
-endm
-
 mod #RAT is
   protecting #RAT-INTERFACE .
   protecting #INT .
@@ -587,15 +525,6 @@ mod #RAT is
   eq ceilingRat(--Int N /Rat M) = --Int floorRat(N /Rat M) .
 endm
 
-mod #FLOAT-INTERFACE is
-  sorts #FiniteFloat #Float .
-  subsort #FiniteFloat < #Float .
-
---- pseudo constructor for the set of double precision floats
-  op <Floats> : -> #FiniteFloat [special (id-hook FloatSymbol)] .
-  op <Floats> : -> #Float [ditto] .
-endm
-
 mod #FLOAT is
   protecting #BOOL .
   protecting #FLOAT-INTERFACE .
@@ -739,17 +668,6 @@ mod #FLOAT is
 
 endm
 
-
-mod #STRING-INTERFACE is
-  sorts #String #Char .
-  subsort #Char < #String .
----  subsort #Int < FindResult .
-
---- pseudo constructor for the infinite set of strings
-  op <Strings> : -> #Char [special (id-hook StringSymbol)] .
-  op <Strings> : -> #String [ditto] .
-endm
-
 mod #STRING is
   protecting #STRING-INTERFACE .
   protecting #INT .
@@ -825,22 +743,9 @@ mod #STRING is
   eq S1:#String ==String S2:#String = S1:#String ==Universal S2:#String .
 endm
 
-mod #ID-INTERFACE is 
-  including #STRING-INTERFACE .
-  sort #Id .
-  op #id_ : #String -> #Id [ctor prec 0] .
-endm
-
 mod #ID is 
   including #ID-INTERFACE .
   including #STRING .
-endm
-
-mod #CONVERSION-INTERFACE is
-  protecting #INT-INTERFACE .
-  protecting #STRING-INTERFACE .
-  sort #DecFloat .
-  op #DecFloat : #Int #String #Int -> #DecFloat [ctor] .
 endm
 
 mod #CONVERSION is
@@ -948,18 +853,12 @@ mod #QID is
 endm
 
 
-mod #RANDOM-INTERFACE is
-endm
-
 mod #RANDOM is
   protecting #RANDOM-INTERFACE .
   protecting #NAT .
   op randomRandom : #Nat -> #Nat
         [special (id-hook RandomOpSymbol
                   op-hook succSymbol (sNat_ : #Nat ~> #NzNat))] .
-endm
-
-mod #COUNTER-INTERFACE is
 endm
 
 mod #COUNTER is
@@ -972,31 +871,36 @@ mod #COUNTER is
   eq kcounter = counter .
 endm
 
-mod BOTTOM is
-  sort Bottom .
+mod #K-EQUAL is
+  including #BOOL .
+  including K-TECHNIQUE .
+  op _==K_ : K K -> #Bool .
+  eq K1:K ==K K2:K = K1:K ==Universal K2:K .
 endm
 
 load k-model-checker
+load socket.maude
+load TCPSupport
+load smt.maude
+--- load pl-meta-level
 
-mod PL-BUILTINS is
-including #BOOL-INTERFACE .
-including #EXT-BOOL-INTERFACE .
-including #NAT-INTERFACE .
-including #INT-INTERFACE .
-including #RAT-INTERFACE .
-including #FLOAT-INTERFACE .
-including #STRING-INTERFACE .
-including #CONVERSION-INTERFACE .
+
+mod BUILTINS is
+including #BOOL .
+including #EXT-BOOL .
+including #NAT .
+including #INT .
+including #RAT .
+including #FLOAT .
+including #STRING .
+including #CONVERSION .
 ---including #QID .
-including #RANDOM-INTERFACE .
-including #COUNTER-INTERFACE .
-including #BOOL-INTERFACE .
-including #ID-INTERFACE .
-including BOTTOM .
-including #LTL-INTERFACE .
-including #MODEL-CHECKER-INTERFACE .
+including #RANDOM .
+including #COUNTER .
+including #BOOL .
+including #ID .
+including #LTL .
+including #MODEL-CHECKER .
 endm
 
----set include #BOOL on .
-set show advisories on .
 

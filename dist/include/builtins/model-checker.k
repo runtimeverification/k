@@ -69,13 +69,24 @@ module MODEL-CHECKER-SYNTAX-HOOKS
 endmodule
 
 
-module MODEL-CHECKER-HOOKS
+module  MODEL-CHECKER-INTERFACE
   imports #MODEL-CHECKER-INTERFACE
+//  sorts #ModelCheckerState #Prop .
+//  sort #ModelCheckResult .
+
+//  op _LTL|=_ : #ModelCheckerState #Prop -> #Bool [frozen] .
+
+  syntax Bool ::= Bag "LTL|=" K
+
+endmodule
+
+module MODEL-CHECKER-HOOKS
+  imports MODEL-CHECKER-INTERFACE
   imports MODEL-CHECKER-SYNTAX-HOOKS
   imports BOOL-HOOKS
 
   syntax ModelCheckResult ::= "modelCheck" "(" ModelCheckerState "," LTLFormula ")" 
-         [function, hook(#MODEL-CHECKER:modelCheck)]
+       //  [function, hook(#MODEL-CHECKER:modelCheck)]
 
 
 endmodule

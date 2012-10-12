@@ -88,10 +88,6 @@ mod #TCP-CLIENT is
 
 endm
 
-mod #TCP-INTERFACE is
-  including #STRING-INTERFACE .
-endm
-
 mod #TCP is
         including #TCP-INTERFACE .
 	including #TCP-SYNTAX .

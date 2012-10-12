@@ -1,9 +1,4 @@
-load pl-builtins.maude
-load socket.maude
-load TCPSupport
-load smt.maude
-*** load k-model-checker.maude
---- load pl-meta-level
+load builtins-interface.maude
 
 --- Level 0
 
@@ -352,6 +347,7 @@ mod K-WRAPPERS-LABELS is
   op List2KLabel_ : List -> KLabel [metadata "wrapper=(builtin)"] .
   op Map2KLabel_ : Map -> KLabel [metadata "wrapper=(builtin)"] .
   op 'wrap-with : -> KLabel .
+  op #_ : #Bool -> KLabel [metadata "wrapper=(builtin)"] .
 endm
 
 
@@ -459,11 +455,6 @@ mod K-CONFIG is
   op type : -> CellKey .
   op stream : -> CellKey .
   op color : -> CellKey .
----(
-  op _* : CellLabel -> CellLabel .
-  op _? : CellLabel -> CellLabel .
-  op _+ : CellLabel -> CellLabel .
----)
 endm
 
 --- Latex Annotations
@@ -477,32 +468,7 @@ mod K-LATEX is
   op k-result : K -> K .
 endm
 
-mod #K-EQUAL-INTERFACE is
-endm
-
-mod #K-EQUAL is
-  including #BOOL .
-  including K-TECHNIQUE .
-  op _==K_ : K K -> #Bool .
-  eq K1:K ==K K2:K = K1:K ==Universal K2:K .
-endm
-
 mod K-BUILTINS is
----(
-  including K-TECHNIQUE .
-  including PL-BUILTINS .
-  op #_ : #Bool -> KLabel .
-  op #_ : #Int -> KLabel .
-  op #_ : #String -> KLabel .
-  op #_ : #Float -> KLabel .
-  op #_ : #Id -> KLabel .
-  ops is#Bool is#Int is#String is#Float is#Id : -> KLabel .
-  eq is#Bool(# B:#Bool (.List{K})) = # true(.List{K}) .
-  eq is#Int(# I:#Int (.List{K})) = # true(.List{K}) .
-  eq is#String(# S:#String (.List{K})) = # true(.List{K}) .
-  eq is#Float(# F:#Float (.List{K})) = # true(.List{K}) .
-  eq is#Id(# X:#Id (.List{K})) = # true(.List{K}) .
----)
 endm
 
 mod K is 
@@ -526,3 +492,5 @@ mod K is
   including K-LATEX .
 endm
 
+
+load builtins.maude

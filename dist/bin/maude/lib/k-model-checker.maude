@@ -27,11 +27,6 @@
 ---	Version 2.3.
 ---
 
-mod #LTL-INTERFACE is
-  sort #LTLFormula .
-  ops LTLTrue LTLFalse : -> #LTLFormula [ctor format (g o)] .
-endm
-
 mod #LTL is
   protecting #BOOL .
   protecting #LTL-INTERFACE .
@@ -219,19 +214,24 @@ mod #SAT-SOLVER is
   eq LTL$invert(LTLmodel(L, C)) = LTLcounterexample(L, C) .
 endm
 
-mod #MODEL-CHECKER-INTERFACE is
-  protecting #BOOL .
-  sorts #ModelCheckerState #Prop .
-  sort #ModelCheckResult .
-
-  op _LTL|=_ : #ModelCheckerState #Prop -> #Bool [frozen] .
-
-endm
-
 mod #MODEL-CHECKER is
   protecting #QID .
   including #MODEL-CHECKER-INTERFACE .
   including #LTL .
+  including K-WRAPPERS-LABELS .
+
+  subsort Bag < #ModelCheckerState .
+  subsort K < #Prop .
+  op #_ : #ModelCheckResult -> KLabel .
+  op '_LTL|=_ : -> KLabel .
+  op 'modelCheck`(_`,_`) : -> KLabel .
+
+  eq 'modelCheck`(_`,_`)(Bag2KLabel(B:Bag)(.List{K}),,Formula:#LTLFormula) 
+   = # modelCheck(B:Bag,Formula:#LTLFormula)(.List{K}) .
+
+  ceq B:Bag LTL|= Prop:K = true 
+   if '_LTL|=_(Bag2KLabel(B:Bag)(.List{K}),,Prop:K) ==Universal # true(.List{K}) .
+
   subsort #Prop < #LTLFormula .
 
   --- transitions and results
