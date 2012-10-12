@@ -10,11 +10,32 @@ import org.kframework.kil.Constant;
 import org.kframework.kil.Production;
 
 public class DefinitionHelper {
-	public static String generatedTags[] = { "cons", "kgeneratedlabel", "prefixlabel", };
+	public static Set<String> generatedTags = new HashSet<String>();
+	static { 
+		generatedTags.add("cons");
+		generatedTags.add("kgeneratedlabel");
+		generatedTags.add("prefixlabel");
+	};
 
-	public static String parsingTags[] = { "left", "right" };
+	public static Set<String> parsingTags = new HashSet<String>();
+	
+	static {
+		parsingTags.add("left");
+		parsingTags.add("right");
+		parsingTags.add("non-assoc");
+	}
 
-	public static String specialTerminals[] = { "(", ")", ",", "[", "]", "{", "}", };
+	public static Set<String> specialTerminals =  new HashSet<String>();
+	
+	static { 
+		specialTerminals.add("(");
+		specialTerminals.add(")");
+		specialTerminals.add(",");
+		specialTerminals.add("[");
+		specialTerminals.add("]");
+		specialTerminals.add("{");
+		specialTerminals.add("}");
+	};
 
 	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
 	public static java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
@@ -127,15 +148,15 @@ public class DefinitionHelper {
 	}
 
 	public static boolean isTagGenerated(String key) {
-		return (Arrays.binarySearch(generatedTags, key) >= 0);
+		return generatedTags.contains(key);
 	}
 
 	public static boolean isSpecialTerminal(String terminal) {
-		return (Arrays.binarySearch(specialTerminals, terminal) >= 0);
+		return specialTerminals.contains(terminal);
 	}
 
 	public static boolean isParsingTag(String key) {
-		return Arrays.binarySearch(parsingTags, key) >= 0;
+		return parsingTags.contains(key);
 	}
 
 	public static boolean isListUnit(Constant cst) {

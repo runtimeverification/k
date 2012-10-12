@@ -667,7 +667,7 @@ public class KompileFrontEnd {
 			javaDef = new CompilerTransformerStep(new AddKCell()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Desugar  Streams                 = ");
+				sw.printIntermediate("Add K Cell                      = ");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveFresh()).compile(javaDef);
