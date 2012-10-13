@@ -1,5 +1,6 @@
 require "bool-symbolic.k"
 require "int-symbolic.k"
+require "smt.k"
 
 //@ \subsection{Symbolic Calculus}
 module SYMBOLIC-CALCULUS-SYNTAX

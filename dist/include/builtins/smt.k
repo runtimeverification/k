@@ -26,7 +26,8 @@ module SMTLIB-CONVERSION
   rule Smtlib(notBool B:Bool) => "(not " +String Smtlib(B) +String ")" [anywhere]
 
   // Smtlib: integers
-  rule Smtlib(I:#Int) => Int2String(I) [anywhere]
+  rule Smtlib(I:#Int) => Int2String(I) when I >=Int 0 [anywhere]
+  rule Smtlib(I:#Int) => "(- " +String Int2String(0 -Int I) +String ")" when I <Int 0 [anywhere]
   rule Smtlib(symInt(I:Int)) => "var" +String Int2String(I) [anywhere]
   rule Smtlib(symInt(Var:Id)) => Id2String(Var) [anywhere]
 
@@ -82,6 +83,7 @@ module SMTLIB-CONVERSION
   
 endmodule
 
+/*
 module SMT-IO
   imports URIS
 
@@ -149,7 +151,7 @@ module SMT
   rule castToMapItem(Key:String, "Bool", Value:String) => String2Id(Key) |-> String2Bool(Value) [anywhere]
 
 endmodule
-
+*/
 module SMT-SYNTAX-HOOKS
   
   syntax SmtResponse ::= "sat"
