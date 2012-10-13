@@ -874,12 +874,8 @@ endmodule
 /*@ \section{Modules for Model-Checking}
 The \KTool includes a copy of the Maude LTL model-checker, where the sorts
 and the operations were renamed to avoid name clashes and to follow the \K 
-convention for naming builtin items. For instance, the sort name for the 
-transition system states is \texttt{\#ModelCheckerState} and that for the 
-atomic propositions is \texttt{\#Prop}.
-For similar reasons, the operators for LTL formulas are prefixed with "LTL".
-Since any builtin sort is subsorted to the sort \texttt{K}, it follows that 
-\texttt{\#ModelCheckerState} is a  subsort of \texttt{K}. 
+convention for naming builtin items. 
+Therefore, the operators for LTL formulas are prefixed with "LTL".
 */
 
 module CINK-SYNTAX
@@ -916,18 +912,6 @@ module CINK
       by the configurations of \Cink programs, which are of sort \texttt{Bag}:
   */
 
-  syntax #ModelCheckerState ::= "KItem" "(" Bag ")"
-
-  /*@
-   The following two constructions is a trick by which the atomic propositions
-   are "hooked" by similar propositions defined over builtin sorts.
-   In the future, these should be automatically generated.
-  */
-  syntax #Prop ::= "#eqTo" "(" Id "," Val ")" [function]
-  
-
-  rule eqTo(X:Id, V:Val) => #eqTo(X, V) [anywhere]
-
   /*@
     In order to give semantics to the proposition \texttt{eqTo}, we use an 
     auxiliary function \texttt{val} that returns the value of a given variable
@@ -949,7 +933,7 @@ module CINK
     equal to $I$: 
    */
 
-  rule B:Bag LTL|= #eqTo(X:Id, I:Int) => true when val(B, X) ==K I [anywhere]
+  rule B:Bag LTL|= eqTo(X:Id, I:Int) => true when val(B, X) ==K I [anywhere]
 
 
 endmodule

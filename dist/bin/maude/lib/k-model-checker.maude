@@ -229,8 +229,46 @@ mod #MODEL-CHECKER is
   eq 'modelCheck`(_`,_`)(Bag2KLabel(B:Bag)(.List{K}),,Formula:#LTLFormula) 
    = # modelCheck(B:Bag,Formula:#LTLFormula)(.List{K}) .
 
+op '_LTL->_ : -> KLabel[metadata
+    "function=() gather=(e E) arity=(2)"].
+op '_LTL/\\_ : -> KLabel[metadata "function=() arity=(2)"].
+op '_LTL<->_ : -> KLabel[metadata
+    "function=() hook=(#LTL:_LTL<->_) arity=(2)"].
+op '_LTL<=>_ : -> KLabel[metadata
+    "function=() hook=(#LTL:_LTL<=>_) arity=(2)"].
+op '_LTL=>_ : -> KLabel[metadata "function=() arity=(2)"].
+op '_LTLR_ : -> KLabel[metadata "function=() arity=(2)"].
+op '_LTLU_ : -> KLabel[metadata "function=() arity=(2)"].
+op '_LTLW_ : -> KLabel[metadata "function=() arity=(2)"].
+op '_LTL\\/_ : -> KLabel[metadata "function=() arity=(2)"].
+op '_LTL|->_ : -> KLabel[metadata
+    "function=() arity=(2)"].
+op '_LTL|=_ : -> KLabel[metadata "arity=(2)"].
+op 'LTL<>_ : -> KLabel[metadata "function=() arity=(1)"].
+op 'LTLO_ : -> KLabel[metadata "function=() arity=(1)"].
+op 'LTL`[`]_ : -> KLabel[metadata "function=() arity=(1)"].
+op 'LTL~_ : -> KLabel[metadata "function=() arity=(1)"].
+
+  var F F1 F2 : #LTLFormula .
+
+  eq '_LTL->_(F1,,F2) = F1 LTL-> F2 .
+  eq '_LTL/\\_(F1,,F2) = F1 LTL&& F2 .
+  eq '_LTL<->_(F1,,F2) = F1 LTL<-> F2 .
+  eq '_LTL<=>_(F1,,F2) = F1 LTL<=> F2 .
+  eq '_LTL=>_(F1,,F2) = F1 LTL=> F2 .
+  eq '_LTLR_(F1,,F2) = F1 LTLR F2 .
+  eq '_LTLU_(F1,,F2) = F1 LTLU F2 .
+  eq '_LTLW_(F1,,F2) = F1 LTLW F2 .
+  eq '_LTL\\/_(F1,,F2) = F1 LTL|| F2 .
+  eq '_LTL->_(F1,,F2) = F1 LTL-> F2 .
+  eq 'LTL`[`]_(F) = LTL@ F .
+  eq 'LTL~_(F) = LTL~ F .
+  eq 'LTLO_(F) = LTLO F .
+  eq 'LTL<>_(F) = LTL<> F .
+
+
   ceq B:Bag LTL|= Prop:K = true 
-   if '_LTL|=_(Bag2KLabel(B:Bag)(.List{K}),,Prop:K) ==Universal # true(.List{K}) .
+   if '_LTL|=_(Bag2KLabel(B:Bag)(.List{K}),,Prop:K) = # true(.List{K}) .
 
   subsort #Prop < #LTLFormula .
 
