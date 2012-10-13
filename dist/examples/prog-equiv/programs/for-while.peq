@@ -1,18 +1,19 @@
 <k>
-  L : for i from symInt(a1) to symInt(a2) do symStmt(s)
+  L : for i from symAExp(a1) to symAExp(a2) do symStmt(s)
 </k>
 <env>
-  i -> symInt(i0)
+  i -> symInt(i1), SymMap(M)
 </env>
 ~
 <k>
- L :	while (i <= symInt(a2)) do (
-	  symStmt(s);
-	  i := i + 1
-	)
+ L:   i := symAExp(a1);
+  while (i <= symAExp(a2)) do (
+      symStmt(s);
+ L:     i := i + 1
+    )
 </k>
 <env>
-  i -> symInt(a1)
+  i -> symInt(i1), SymMap(M)
 </env>
 
 if
@@ -20,6 +21,6 @@ if
 i isNotModifiedBy symStmt(s)
 
 
-using observers: ;
+using observers: allObs;
 
 

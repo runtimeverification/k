@@ -60,7 +60,11 @@ module IMP-SYNTAX
 */
 
 
-  syntax InitVal ::= Id "->" Int
+  syntax BExps ::= List{BExp, ","}
+
+  syntax BExp ::= "allObs"
+
+  syntax InitVal ::= Id "->" Int | "SymMap" "(" Id ")"
   syntax InitVals ::= List{InitVal,","}
 
   syntax EqvPgm ::= "<k>" Stmt "</k>"
@@ -69,7 +73,7 @@ module IMP-SYNTAX
                     "<k>" Stmt "</k>"
                     "<env>" InitVals "</env>"
                     "if" BExp
-                    "using" "observers:" Ids ";"
+                    "using" "observers:" BExps ";"
 
   syntax Start ::= EqvPgm  
 
@@ -85,12 +89,18 @@ module IMP-SYNTAX
   syntax Bool ::= Id "isNotModifiedBy" Stmt 
 
   /*@
-    Extending the statements with symbolic values:
+    Extending with symbolic values:
    */
 
   syntax StmtSymbolic ::= "symStmt" "(" Id ")"
   
   syntax Stmt ::= StmtSymbolic
+
+  syntax AExpSymbolic ::= "symAExp" "(" Id ")"
+ 
+  syntax AExp ::= AExpSymbolic
+
+  syntax Map ::= "symMap" "(" Id ")"
 
 endmodule
 
@@ -223,6 +233,7 @@ module PEQ
   context _ : for _ from HOLE to _ do _
   context _ : for _ from_ to HOLE do _
   context _ : if HOLE then _ else _
+  context _ : _ := HOLE
 
 /*@
   The labelled recursive statements have a special semantics because
@@ -282,11 +293,18 @@ module PEQ
   Semantics of the symbolic statements:
 */
 
-  syntax Map ::= "execute" "(" Stmt "," Map ")" 
+  syntax Map ::= "execute" "(" Stmt "," Map ")" // it should be a MapSymbolic
 
   rule [symbolic-stmt] : 
        <k> SS:StmtSymbolic => .  ...</k>
        <env> M:Map => execute(SS, M) </env>
+       [transition] 
+
+  syntax IntSymbolic ::= "eval" "(" AExp ","  Map ")"
+
+  rule [symbolic-aexp] : 
+       <k> symAExp(A:Id) => symInt(A)  ...</k>
+       <env> M:Map </env>
        [transition] 
 
 /*@
@@ -309,6 +327,16 @@ module PEQ
        ...</k>
        <condition> F:K </condition>
        when F impliesBool (X isNotModifiedBy SS)
+
+  rule [lookup] :
+       <k> lookup(X:Id, execute(SS:StmtSymbolic, Rho:Map) Rho':Map) 
+           => 
+           lookup(X, Rho)
+       ...</k>
+       <condition> F:K </condition>
+       when F impliesBool (X isNotModifiedBy SS)
+       andBool notBool(X in keys(Rho'))
+
 
 /*@
   The semantics of the assignment is modified because of the symbolic  
@@ -343,7 +371,9 @@ module PEQ
           =>
           checkSat(F andBool B) ~> checkSat(F andBool notBool B) ~> B
        ...</k>
+       <env> Rho:Map </env>
        <condition> F:Bool </condition>
+       when notBool(B in keys(Rho))
 
   rule [derive-with-case-analysis]:
        <goal>
@@ -464,6 +494,8 @@ module PEQ
 
   rule success success => success 
 
+//  rule <T> <goals> success </goals> B:Bag </T> => success
+
 /*@
   The next rule implements the basic entailment relation. The current version
   is incomplete because the formula is ignored (we tested only examples where
@@ -507,6 +539,13 @@ module PEQ
        true
        [anywhere]
 
+  rule eqObs(<env> Env1:Map </env>
+             <env> Env2:Map </env>
+             <observers> ListItem(allObs) </observers>, F:K)
+       =>
+       eqEnv(Env1, Env2)
+       [anywhere]
+
   rule eqObs( <env>... X:Id |-> V1:Int ...</env>
               <env>... X |-> V2:Int ...</env>
               <observers> ListItem(X) => . ...</observers>, F:K )
@@ -521,6 +560,25 @@ module PEQ
        when  checkSat(F andBool V1 =/=Int V2) ==K sat            // to be revised
        [anywhere]
 
+/*@
+  the equality of two envirnments
+*/
+
+  syntax Bool ::= "eqEnv" "(" Map "," Map ")" [function]
+  
+  rule eqEnv(Env:Map, Env) => true [anywhere] 
+
+  rule eqEnv((X:K |-> V:K Env1:Map), (X |-> K Env2:Map)) => eqEnv(Env1, Env2)
+       [anywhere]
+
+  rule eqEnv((B:BExp |-> V:K Env1:Map), Env2:Map) => eqEnv(Env1, Env2) [anywhere]
+
+  rule eqEnv(Env1:Map, (B:BExp |-> V:K Env2:Map)) => eqEnv(Env1, Env2) [anywhere]
+
+  rule eqEnv(execute(S:Stmt, Env1:Map), execute(S:Stmt, Env2:Map))
+       => 
+       eqEnv(Env1, Env2)
+       [anywhere]
 
 /*@
   The next rule gives semantics to the new construct \texttt{storeHyp}, which 
@@ -530,6 +588,75 @@ module PEQ
   values and add to path condition the corresponding contraints.
 /n-*/
 
+/*   // for debugging only
+  rule [store-hypo] :
+       <goal>
+         <config> 
+           <k> storeHypo(L:Id, K1:K) => . ...</k>
+           <env> Env1:Map </env>
+         </config> 
+         <config> 
+           <k> storeHypo(L, K2:K) => . ...</k>
+           <env> Env2:Map </env>
+         </config>
+         <condition> F:K </condition>
+       </goal>
+       <hypos>
+         .
+         =>
+         <hypo>
+           <patt1> 
+             <k1> K1 </k1>
+             <env1> Env1 </env1>
+           </patt1> 
+           <patt2> 
+             <k2> K2 </k2>
+             <env2> Env2 </env2>
+           </patt2>
+           <condition> F </condition>
+         </hypo>
+       </hypos>
+
+
+
+  rule [store-hypo] :
+       <goal>
+         <config> 
+           <k> storeHypo(L:Id, K1:K) => 
+KItem(getSubst(K1', K1) getSubst(K2', K2)
+                        getSubstMap(Rho1', Env1) getSubstMap(Rho2', Env2)
+                       )
+ ...</k>
+           <env> Env1:Map </env>
+         </config> 
+         <config> 
+           <k> storeHypo(L, K2:K) => . ...</k>
+           <env> Env2:Map </env>
+         </config>
+         <condition> F:K </condition>
+       </goal>
+     <hypo>      
+       <condition>
+         F':Bool
+       </condition> 
+       <patt1>        
+         <k1>
+          K1':K 
+         </k1> 
+         <env1>
+          Rho1':Map
+         </env1> 
+       </patt1> 
+       <patt2>        
+         <k2> 
+           K2':K
+         </k2> 
+         <env2>
+          Rho2':Map
+         </env2> 
+       </patt2> 
+     </hypo>
+*/
 
   rule [store-hypo] :
        <goal>
@@ -561,8 +688,8 @@ module PEQ
        </hypos>
        <observers> Obs:List </observers>
        when (eqObs(<env> Env1 </env> 
-                  <env> Env2 </env> 
-                  <observers> Obs </observers>, F) ==K true)
+                   <env> Env2 </env> 
+                   <observers> Obs </observers>, F) ==K true)
             andBool
             ((KItem(Hypos)
             |-subst
@@ -579,7 +706,6 @@ module PEQ
              </goal>))
              =/=K true)
        [transition]
-
 
   rule [store-hypo]:
        <goal>
@@ -653,10 +779,23 @@ module PEQ
   rule getSubst(X:K := A1:K, X := A2:K) => getSubst(A1, A2)
        [anywhere]
 
-  rule getSubst(L1:K : S1:K, L2:K : S2:K) => getSubst(S1, S2)
+  rule getSubst(K1:K ~> K2:K, K1':K ~> K2':K) => getSubst(K1, K1') getSubst(K2, K2')
+       when (K1 =/=K .K)
+       andBool (K2 =/=K .K)
+       andBool (K1' =/=K .K)
+       andBool (K2' =/=K .K)
+       [anywhere]
+
+  rule getSubst(L1:Id : S1:K, L2:Id : S2:K) => getSubst(S1, S2)
        [anywhere]
 
   rule getSubst(I:IntSymbolic, A:K) => (I |-> A) [anywhere]
+
+  // statements with labels
+//  rule getSubst(L1:Id : X:K := A1:K, L2:Id : X := A2:K) => getSubst(A1, A2)
+//       [anywhere]
+
+  // to be completed
 
 /*@
   Compute the substitution given by the maps stored in the environments
@@ -691,6 +830,29 @@ module PEQ
        getSubstMap(M1, Env)
        [anywhere]
 
+  rule getSubstMap((symMap(IM:Id) M1:Map), (symMap(IM) Env:Map))
+       =>
+       getSubstMap(M1, Env)
+       [anywhere]
+
+  rule getSubstMap(symMap(IM:Id), symMap(IM))
+       =>
+       .Map
+       [anywhere]
+
+
+  rule getSubstMap(symMap(IM:Id), (symMap(IM) Env:Map))
+       =>
+       .Map
+       [anywhere]
+
+
+/*
+  rule getSubstMap((symMap(IM:Id) M1:Map), Env:Map)
+       =>
+       getSubstMap(M1, Env)
+       [anywhere]
+*/
   rule getSubstMap((X:Id |-> I:IntSymbolic), (M2:Map execute(S:Stmt, Env:Map)))
        =>
        getSubstMap((X:Id |-> I:IntSymbolic), Env)
@@ -901,7 +1063,7 @@ module PEQ
            <k> P2:Stmt </k>
            <env> Inits2:InitVals </env>
            if F:BExp
-           using observers: Obs:Ids; 
+           using observers: Obs:BExps; 
            =>
            setInitValObs(Obs) ~> setInitVal(Inits1) ~> P1
          </k>
@@ -914,7 +1076,7 @@ module PEQ
          </k>
          <env> . </env>
        </config>)
-       <observers> . => Ids2List(Obs) </observers>
+       <observers> . => BExps2List(Obs) </observers>
 
 /*@
   The auxiliary construct \texttt{initVal()} is used for initializing the 
@@ -932,12 +1094,21 @@ module PEQ
        <env>... . => X |-> V ...</env>
        [structural]
 
-  syntax K ::= "setInitValObs" "(" Ids ")"
-
-  rule <k> setInitValObs(.Ids) => . ...</k>
-       <k> setInitValObs(.Ids) => . ...</k>
+  rule <k> setInitVal((SymMap(M:Id), XVs:InitVals) => XVs) ...</k>
+       <env>... . => symMap(M) ...</env>
        [structural]
 
+  syntax K ::= "setInitValObs" "(" BExps ")"
+
+  rule <k> setInitValObs(.BExps) => . ...</k>
+       <k> setInitValObs(.BExps) => . ...</k>
+       [structural]
+
+  rule <k> setInitValObs(allObs) => . ...</k>
+       <k> setInitValObs(allObs) => . ...</k>
+       [structural]
+
+/*
   rule <config>
          <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
          <env>... . => X |-> symInt(I) ...</env>
@@ -949,6 +1120,7 @@ module PEQ
        <condition> B:K => B andBool (symInt(I) ==Int symInt(I +Int 1)) </condition>
        <nextSymvar> I:Int => I +Int 2 </nextSymVar>
        [structural]
+*/
 
 /*@ 
   The next function translates the initial condition into internal
@@ -958,6 +1130,8 @@ module PEQ
 
 
   syntax Bool ::= "injectForm" "(" BExp ")" [function]
+
+  rule injectForm(true) => true [anywhere]
 
   rule injectForm(A1:AExp == A2:AExp)
        =>
@@ -1001,10 +1175,15 @@ module PEQ
   rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
        [anywhere]
 
+  syntax List ::= "BExps2List" "(" BExps ")" [function]
+  rule BExps2List(.BExps) => .List [anywhere]
+  rule BExps2List(X:BExp, Xs:BExps) => ListItem(X) BExps2List(Xs)
+       [anywhere]
+
 //@ rules that translate the locally defined predicates to SMTLIB
 
   rule collectConstants( X:Id isNotModifiedBy S:Stmt ) => .Set [anywhere]
-  rule Smtlib( X:Id isNotModifiedBy S:Stmt ) => "" [anywhere]
+  rule Smtlib( X:Id isNotModifiedBy S:Stmt ) => "true" [anywhere]
 
 
 endmodule
