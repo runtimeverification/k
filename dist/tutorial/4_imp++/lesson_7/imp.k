@@ -12,8 +12,7 @@ module IMP-SYNTAX
                  | "!" BExp                   [strict]
                  > BExp "&&" BExp             [left, strict(1)]
                  | "(" BExp ")"               [bracket]
-  syntax Block ::= "{" "}"
-                 | "{" Stmt "}"
+  syntax Block ::= "{" Stmts "}"
   syntax Stmt  ::= Block
                  | AExp ";"                   [strict]
                  | "if" "(" BExp ")"
@@ -23,10 +22,10 @@ module IMP-SYNTAX
                  | "print" "(" AExps ")" ";"  [strict]
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
-                 > Stmt Stmt                  [left]
 
   syntax Ids   ::= List{Id,","}               [strict]
   syntax AExps ::= List{AExp,","}             [strict]
+  syntax Stmts ::= List{Stmt,""}
 endmodule
 
 
@@ -37,7 +36,7 @@ module IMP
   configuration <T color="yellow">
                   <threads color="orange">
                     <thread multiplicity="*" color="blue">
-                      <k color="green"> $PGM:Stmt </k>
+                      <k color="green"> $PGM:Stmts </k>
                       <env color="LightSkyBlue"> .Map </env>
                       <id color="black"> 0 </id>
                     </thread>
@@ -65,8 +64,8 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule {} => .   [structural]
-  rule <k> {S} => S ~> env(Rho) ...</k> <env> Rho </env>  [structural]
+  rule .Stmts => .
+  rule <k> {Ss} => Ss ~> env(Rho) ...</k> <env> Rho </env>  [structural]
   syntax K ::= env(Map)
   rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>    [structural]
 // Stmt
@@ -77,7 +76,7 @@ module IMP
   rule S1 S2 => S1 ~> S2  [structural]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
 
   rule <k> int (X:Id,Xs:Ids => Xs); ...</k>
        <env> Rho:Map => Rho[N/X] </env>
