@@ -60,9 +60,7 @@ module IMP-SYNTAX
 */
 
 
-  syntax BExps ::= List{BExp, ","}
-
-  syntax BExp ::= "allObs"
+  syntax Id ::= "allObs"
 
   syntax InitVal ::= Id "->" Int | "SymMap" "(" Id ")"
   syntax InitVals ::= List{InitVal,","}
@@ -73,7 +71,7 @@ module IMP-SYNTAX
                     "<k>" Stmt "</k>"
                     "<env>" InitVals "</env>"
                     "if" BExp
-                    "using" "observers:" BExps ";"
+                    "using" "observers:" Ids ";"
 
   syntax Start ::= EqvPgm  
 
@@ -87,6 +85,9 @@ module IMP-SYNTAX
 
   //@ get if no effect
   syntax Bool ::= Id "isNotModifiedBy" Stmt 
+  syntax Bool ::= "occurs" "(" Id "," Stmt ")"
+
+  rule notBool occurs(X:Id, S:Stmt) => (X  isNotModifiedBy S) [anywhere]  //trick
 
   /*@
     Extending with symbolic values:
@@ -326,7 +327,7 @@ module PEQ
            lookup(X, Rho)
        ...</k>
        <condition> F:K </condition>
-       when F impliesBool (X isNotModifiedBy SS)
+       when F impliesBool (X isNotModifiedBy SS) // to be revised
 
   rule [lookup] :
        <k> lookup(X:Id, execute(SS:StmtSymbolic, Rho:Map) Rho':Map) 
@@ -335,7 +336,7 @@ module PEQ
        ...</k>
        <condition> F:K </condition>
        when F impliesBool (X isNotModifiedBy SS)
-       andBool notBool(X in keys(Rho'))
+       andBool notBool(X in keys(Rho')) // to be revised
 
 
 /*@
@@ -546,19 +547,21 @@ module PEQ
        eqEnv(Env1, Env2)
        [anywhere]
 
-  rule eqObs( <env>... X:Id |-> V1:Int ...</env>
-              <env>... X |-> V2:Int ...</env>
+  rule eqObs( <env>... X:Id |-> V1:K ...</env>
+              <env>... X:Id |-> V2:K ...</env>
               <observers> ListItem(X) => . ...</observers>, F:K )
-       when checkSat(F andBool V1 =/=Int V2) ==K unsat            // to be revised
+       when checkSat(F andBool V1 =/=Int V2) ==K unsat  // to be revised
        [anywhere]
 
-  rule eqObs( <env>... X:Id |-> V1:Int ...</env>
-              <env>... X |-> V2:Int ...</env>
-              <observers> ListItem(X) ...</observers> , F:K)
+  rule eqObs( <env>... X:Id |-> V1:K ...</env>
+              <env>... X:Id |-> V2:K ...</env>
+              <observers> ListItem(X) ...</observers>, F:K )
        =>
        false
-       when  checkSat(F andBool V1 =/=Int V2) ==K sat            // to be revised
+       when checkSat(F andBool V1 =/=Int V2) ==K sat  // to be revised
        [anywhere]
+
+// symbolic maps?
 
 /*@
   the equality of two envirnments
@@ -1063,7 +1066,7 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
            <k> P2:Stmt </k>
            <env> Inits2:InitVals </env>
            if F:BExp
-           using observers: Obs:BExps; 
+           using observers: Obs:Ids; 
            =>
            setInitValObs(Obs) ~> setInitVal(Inits1) ~> P1
          </k>
@@ -1076,7 +1079,7 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
          </k>
          <env> . </env>
        </config>)
-       <observers> . => BExps2List(Obs) </observers>
+       <observers> . => Ids2List(Obs) </observers>
 
 /*@
   The auxiliary construct \texttt{initVal()} is used for initializing the 
@@ -1098,17 +1101,17 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
        <env>... . => symMap(M) ...</env>
        [structural]
 
-  syntax K ::= "setInitValObs" "(" BExps ")"
+  syntax K ::= "setInitValObs" "(" Ids ")"
 
-  rule <k> setInitValObs(.BExps) => . ...</k>
-       <k> setInitValObs(.BExps) => . ...</k>
+  rule <k> setInitValObs(.Ids) => . ...</k>
+       <k> setInitValObs(.Ids) => . ...</k>
        [structural]
 
   rule <k> setInitValObs(allObs) => . ...</k>
        <k> setInitValObs(allObs) => . ...</k>
        [structural]
 
-/*
+
   rule <config>
          <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
          <env>... . => X |-> symInt(I) ...</env>
@@ -1120,7 +1123,7 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
        <condition> B:K => B andBool (symInt(I) ==Int symInt(I +Int 1)) </condition>
        <nextSymvar> I:Int => I +Int 2 </nextSymVar>
        [structural]
-*/
+
 
 /*@ 
   The next function translates the initial condition into internal
@@ -1143,6 +1146,11 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
        injectForm(B1) andBool injectForm(B2)
        [anywhere]
 
+  rule injectForm(not B:BExp)
+       =>
+       notBool injectForm(B)
+       [anywhere]
+
   syntax Int ::= "injectAExp" "(" AExp ")" [function]
   rule injectAExp(I:Int) => I [anywhere]
   rule injectAExp(A1:AExp + A2:AExp)
@@ -1162,7 +1170,12 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
 
   rule injectForm(X:Id isNotModifiedBy S:Stmt ) 
        =>
-       X:Id isNotModifiedBy S:Stmt 
+       X isNotModifiedBy S
+       [anywhere]
+
+  rule injectForm(occurs(X:Id, S:Stmt)) 
+       =>
+       occurs(X, S) 
        [anywhere]
 
 /*@
@@ -1175,10 +1188,10 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
   rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
        [anywhere]
 
-  syntax List ::= "BExps2List" "(" BExps ")" [function]
-  rule BExps2List(.BExps) => .List [anywhere]
-  rule BExps2List(X:BExp, Xs:BExps) => ListItem(X) BExps2List(Xs)
-       [anywhere]
+//  syntax List ::= "BExps2List" "(" BExps ")" [function]
+//  rule BExps2List(.BExps) => .List [anywhere]
+//  rule BExps2List(X:BExp, Xs:BExps) => ListItem(X) BExps2List(Xs)
+//       [anywhere]
 
 //@ rules that translate the locally defined predicates to SMTLIB
 

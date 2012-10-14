@@ -1,5 +1,5 @@
 <k>
-  L : while (i <= n) do (
+  L : while (true) do (
         s := s + i * i;
         i := i + 1
       )
@@ -10,7 +10,7 @@
 
 ~
 <k>
-  L : while (i <= n) do (
+  L : while (true) do (
         s := s + k;
         k := k + i + i + 1;
         i := i + 1

@@ -18,8 +18,8 @@
 
 if
 
-i isNotModifiedBy symStmt(s)
-
+//i isNotModifiedBy symStmt(s)
+not occurs(i, symStmt(s))
 
 using observers: allObs;
 
