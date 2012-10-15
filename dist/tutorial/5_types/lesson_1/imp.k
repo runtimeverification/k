@@ -1,30 +1,31 @@
 module IMP-SYNTAX
-  syntax AExp  ::= Int | Id | String
+  syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
                  > AExp "/" AExp              [left, strict]
                  > AExp "+" AExp              [left, strict]
+                 > "spawn" Block              [strict]
+                 > Id "=" AExp                [strict(2)]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [strict, latex({#1}\leq{#2})]
                  | "!" BExp                   [strict]
                  > BExp "&&" BExp             [left, strict]
                  | "(" BExp ")"               [bracket]
-  syntax Block ::= "{" "}"
-                 | "{" Stmt "}"
+  syntax Block ::= "{" Stmts "}"
   syntax Stmt  ::= Block
-                 | Id "=" AExp ";"            [strict(2)]
+                 | AExp ";"                   [strict]
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict]
                  | "while" "(" BExp ")" Block [strict]
                  | "int" Ids ";"
                  | "print" "(" AExps ")" ";"  [strict]
                  | "halt" ";"
-                 > "spawn" Stmt               [strict]
-                 > Stmt Stmt                  [left,seqstrict]
+                 > "join" AExp ";"            [strict]
 
   syntax Ids   ::= List{Id,","}               [strict]
   syntax AExps ::= List{AExp,","}             [strict]
+  syntax Stmts ::= List{Stmt,""}              [seqstrict]
 endmodule
 
 
@@ -38,7 +39,7 @@ module IMP
   syntax KResult ::= Type
 
   configuration <T color="yellow">
-                  <k color="green"> $PGM:Stmt </k>
+                  <k color="green"> $PGM:Stmts </k>
                   <tenv color="LightSkyBlue"> .Map </tenv>
                 </T>
 
@@ -54,6 +55,9 @@ module IMP
   rule int + int => int
   rule string + string => string
 
+  rule spawn block => int
+  rule <k> X = T => T ...</k> <tenv>... X |-> T ...</env>
+
 // BExp
   syntax BExp ::= Type
   rule _:Bool => bool
@@ -62,16 +66,13 @@ module IMP
   rule bool && bool => bool
 
 // Block
-  rule {} => block
-  rule <k> {S} => S ~> tenv(Rho) ...</k> <tenv> Rho </tenv>
+  rule <k> {Ss} => Ss ~> tenv(Rho) ...</k> <tenv> Rho </tenv>
   syntax K ::= tenv(Map)
   rule <k> _:BlockOrStmtType ~> tenv(Rho) => block ...</k>
        <tenv> _ => Rho </tenv>
 
 // Stmt
-  rule <k> X = T; => stmt ...</k> <tenv>... X |-> T ...</env>
-
-  rule _:BlockOrStmtType _:BlockOrStmtType => stmt
+  rule int; => stmt
 
   syntax Block ::= Type
   rule if (bool) block else block => stmt
@@ -84,5 +85,10 @@ module IMP
   rule print(.AExps); => stmt
   
   rule halt; => stmt
-  rule spawn _:BlockOrStmtType => stmt
+
+  rule join int; => stmt
+
+// Stmts
+  rule .Stmts => stmt
+  rule _:BlockOrStmtType Ss => Ss
 endmodule

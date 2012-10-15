@@ -4,7 +4,7 @@ module IMP-SYNTAX
                  | "read" "(" ")"
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
-                 > "spawn" Stmt
+                 > "spawn" Block
                  > Id "=" AExp                [strict(2)]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
@@ -64,7 +64,6 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule .Stmts => .
   rule <k> {Ss} => Ss ~> env(Rho) ...</k> <env> Rho </env>  [structural]
   syntax K ::= env(Map)
   rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>    [structural]
@@ -73,7 +72,6 @@ module IMP
   rule <k> X = I:Int => I ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> (_ => I) ...</store>  [assignment]
-  rule S1 S2 => S1 ~> S2  [structural]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
@@ -95,4 +93,8 @@ module IMP
        (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
     when fresh(T:Int)
   rule <k> join(T); => . ...</k> <thread>... <k>.</k> <id>T</id> ...</thread>
+
+// Stmts
+  rule .Stmts => .
+  rule S1 S2 => S1 ~> S2  [structural]
 endmodule

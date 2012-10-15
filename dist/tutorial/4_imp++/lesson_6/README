@@ -196,4 +196,5 @@ It is highly non-trivial to say precisely which rules need to be transitions,
 so krun makes no attempt to automatically detect it.  Instead, it provides the
 functionality to let you decide it.
 
-In the next lesson we wrap up and document the definition of IMP++.
+We currently have no mechanism for thread synchronization.  In the next lesson
+we add a join statement, which allows a thread to wait until another completes.
