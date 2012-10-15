@@ -21,8 +21,8 @@ public class StringUtil {
 		return sb.toString();
 	}
 
-	public static String escape(String tag) {
-		return tag.replaceAll("([\\(\\)\\[\\]\\{\\},])", "`$1");
+	public static String escapeMaude(String tag) {
+		return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
 	}
 
 	/**

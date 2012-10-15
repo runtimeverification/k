@@ -52,7 +52,7 @@ public class KInjectedLabel extends Term {
 	@Override
 	public String toMaude() {
 		if (MetaK.isKSort(term.getSort())) {
-			return StringUtil.escape(getInjectedSort(term.getSort())) + "2KLabel_(" + term.toMaude() + ")";
+			return StringUtil.escapeMaude(getInjectedSort(term.getSort())) + "2KLabel_(" + term.toMaude() + ")";
 		}
 		return "#_(" + term.toMaude() + ")";
 	}

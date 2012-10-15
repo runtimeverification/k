@@ -49,7 +49,7 @@ public class LabelGenerator {
 				}
 			}
 
-			String generatedLabel = StringUtil.escape(computeKLabel(production));
+			String generatedLabel = StringUtil.escapeMaude(computeKLabel(production));
 			if (!generatedLabel.equals("")) { // subsorts are ignored
 				// append a new tag element with the generated cons
 				Element element = doc.createElement(TAG);

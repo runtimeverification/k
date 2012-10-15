@@ -54,7 +54,8 @@ public class Attributes extends ASTNode {
 	public String toMaude() {
 		String attributes = "";
 		for (Attribute entry : contents) {
-			attributes += entry.toMaude();
+			if (!entry.getKey().equals("klabel"))
+				attributes += entry.toMaude();
 		}
 
 		return attributes.trim();

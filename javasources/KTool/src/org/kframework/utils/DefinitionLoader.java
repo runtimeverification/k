@@ -23,7 +23,6 @@ import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.generator.basic.Definition;
-import org.kframework.parser.generator.preprocessor.Preprocessor;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.utils.file.FileUtil;
 import org.w3c.dom.Document;
@@ -133,14 +132,14 @@ public class DefinitionLoader {
 			sw.printIntermediate("Parsing Rules   = ");
 
 		// ----------------------------------- preprocessiong steps
-		Preprocessor preprocessor = new Preprocessor();
-		Document preprocessedDef = preprocessor.run(def.getDefAsXML());
-
-		XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
+//		Preprocessor preprocessor = new Preprocessor();
+//		Document preprocessedDef = preprocessor.run(def.getDefAsXML());
+		Document defXML = def.getDefAsXML();
+		XmlLoader.writeXmlFile(defXML, dotk.getAbsolutePath() + "/def.xml");
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Preprocess      = ");
 
-		org.kframework.kil.Definition javaDef = new org.kframework.kil.Definition((Element) preprocessedDef.getFirstChild());
+		org.kframework.kil.Definition javaDef = new org.kframework.kil.Definition((Element) defXML.getFirstChild());
 
 		try {
 			javaDef = (org.kframework.kil.Definition) javaDef.accept(new SentenceVariablesFilter());

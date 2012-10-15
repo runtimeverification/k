@@ -22,9 +22,9 @@ public class Terminal extends ProductionItem {
 		this.terminal = terminal;
 	}
 
-	public Terminal(Terminal terminal2) {
-		super(terminal2);
-		terminal = terminal2.terminal;
+	public Terminal(Terminal terminal) {
+		super(terminal);
+		this.terminal = terminal.terminal;
 	}
 
 	public void setTerminal(String terminal) {

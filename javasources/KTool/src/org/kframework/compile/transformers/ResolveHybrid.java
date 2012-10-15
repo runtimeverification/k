@@ -16,6 +16,7 @@ import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Terminal;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -45,8 +46,9 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
 		if (!node.getAttributes().containsKey("hybrid")) return node;
 		Rule rule = new Rule();
 		rule.setBody(new Rewrite(
-				new KApp(new Constant("KLabel", "isKResult"), 
-						new KApp(new Constant("KLabel", node.getKLabel()), new Variable("Ks", "List{K}"))), 
+						new KApp(new Constant("KLabel", "isKResult"), 
+								new KApp(new Constant("KLabel", ((Terminal) node.getItems().get(0)).getTerminal()), new Variable("Ks", "List{K}"))), 
+								
 						new KApp(new KInjectedLabel(new Constant("#Bool", "true")),new Empty("List{K}"))));
 		rule.setCondition(new KApp(new Constant("KLabel", "isKResult"), new Variable("Ks", "List{K}")));
 		rule.getAttributes().getContents().add(new Attribute("predicate", ""));

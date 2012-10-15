@@ -13,6 +13,8 @@ public class Constant extends Term {
 
 	public Constant(String sort, String value) {
 		super(sort);
+		if (value.equals("'_``,_"))
+			System.out.println(value);
 		this.value = value;
 	}
 	
