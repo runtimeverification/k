@@ -102,8 +102,8 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		proditems.add(new Terminal(")"));
 		Production production = new Production(new Sort("Symbolic" + sort), proditems );
 		production.getAttributes().getContents().add(new Attribute("cons", sort + "1FreshSyn"));
-//		production.getAttributes().getContents().add(new Attribute("prefixlabel", "sym" + sort + "`(_`)"));
-		production.getAttributes().getContents().add(new Attribute("kgeneratedlabel", "sym" + sort));
+		production.getAttributes().getContents().add(new Attribute("prefixlabel", "sym" + sort));
+		production.getAttributes().getContents().add(new Attribute("klabel", "sym" + sort));
 		pBlock.getProductions().add(production);
 		pBlocks.add(pBlock);
 		DefinitionHelper.conses.put(sort + "1FreshSyn", production);
