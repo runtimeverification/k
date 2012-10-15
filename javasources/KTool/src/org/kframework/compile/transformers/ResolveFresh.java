@@ -75,6 +75,18 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		for (String sort : sorts) {
 			Syntax sDecl = declareFreshWrapper(sort);
 			node.getItems().add(sDecl);			
+			
+			List<PriorityBlock> priorities = new ArrayList<PriorityBlock>();
+			PriorityBlock block = new PriorityBlock();
+			List<Production> productions = new ArrayList<Production>();
+			List<ProductionItem> items = new ArrayList<ProductionItem>();
+			items.add(new Sort("Symbolic" + sort));
+			Production e = new Production(new Sort(sort), items );
+			productions.add(e);
+			block.setProductions(productions );
+			priorities.add(block);
+			sDecl = new Syntax(new Sort(sort), priorities );
+			node.getItems().add(sDecl);
 		}
 		return node;
 	}
@@ -88,14 +100,14 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		proditems.add(new Terminal("("));
 		proditems.add(new Sort("Int"));
 		proditems.add(new Terminal(")"));
-		Production production = new Production(new Sort(sort), proditems );
+		Production production = new Production(new Sort("Symbolic" + sort), proditems );
 		production.getAttributes().getContents().add(new Attribute("cons", sort + "1FreshSyn"));
 		production.getAttributes().getContents().add(new Attribute("prefixlabel", "sym" + sort + "`(_`)"));
 		production.getAttributes().getContents().add(new Attribute("kgeneratedlabel", "sym" + sort));
 		pBlock.getProductions().add(production);
 		pBlocks.add(pBlock);
 		DefinitionHelper.conses.put(sort + "1FreshSyn", production);
-		return new Syntax(new Sort(sort), pBlocks );
+		return new Syntax(new Sort("Symbolic" + sort), pBlocks );
 	}
 	
 	@Override
