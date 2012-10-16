@@ -13,75 +13,55 @@ public class RunPrograms {
 
 	@Test
 	public void runPrograms() throws InterruptedException {
-		
+
 		System.out.println("\nRunning programs...");
 
 		// Check the existence of the configuration file
 		String configuration = StaticK.configuration;
-		if (!new File(configuration).exists()){
-			System.out.println("INTERNAL JENKINS ERROR: " + new File(configuration).getAbsolutePath() + " doesn't exists.");
+		if (!new File(configuration).exists()) {
+			System.out.println("INTERNAL JENKINS ERROR: "
+					+ new File(configuration).getAbsolutePath()
+					+ " doesn't exists.");
 			System.exit(1);
 		}
-		
+
 		// collecting examples to be compiled
-		List<Example> examples = StaticK.getExamples(configuration, StaticK.k3Jar, "example", StaticK.kbasedir);
-		List<Example> regression = StaticK.getExamples(configuration, StaticK.k3Jar, "regression", StaticK.kbasedir);
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
-		
-		for (Example example : examples)
-		{
-			example.runPrograms = true;
-			tasks.add(Executors.callable(example));
+		List<List<Example>> all = new ArrayList<List<Example>>();
+
+		for (String tag : StaticK.tags) {
+			List<Example> examples = StaticK.getExamples(configuration,
+					StaticK.k3Jar, tag, StaticK.kbasedir);
+			for (Example example : examples) {
+				example.runPrograms = true;
+				tasks.add(Executors.callable(example));
+			}
+			all.add(examples);
 		}
-		for (Example r : regression)
-		{
-			r.runPrograms = true;
-			tasks.add(Executors.callable(r));
-		}
-		
+
 		// running
-		ExecutorService es = Executors.newFixedThreadPool(StaticK.initPoolSize());
+		ExecutorService es = Executors.newFixedThreadPool(StaticK
+				.initPoolSize());
 		es.invokeAll(tasks);
 
-		
 		// report
-		for(Example example : examples)
-		{
-			Report report = StaticK.reports.get(example.getJenkinsSuiteName());
-			for(Program program : example.programs)
-			{
-				report.report(program);
+		for (List<Example> examples : all)
+			for (Example example : examples) {
+				Report report = StaticK.reports.get(example
+						.getJenkinsSuiteName());
+				for (Program program : example.programs) {
+					report.report(program);
+				}
+				report.save();
+				StaticK.reports.put(example.getJenkinsSuiteName(), report);
 			}
-			report.save();
-			StaticK.reports.put(example.getJenkinsSuiteName(), report);
-		}
-		
-		for(Example r : regression)
-		{
-			Report report = StaticK.reports.get(r.getJenkinsSuiteName());
-			for(Program program : r.programs)
-			{
-				report.report(program);
-			}
-			report.save();
-			StaticK.reports.put(r.getJenkinsSuiteName(), report);
-		}
 
-		for(Example example : examples)
-		{
-			for(Program program : example.programs)
-			{
-				assertTrue(program.isCorrect());
+		for (List<Example> examples : all)
+			for (Example example : examples) {
+				for (Program program : example.programs) {
+					assertTrue(program.isCorrect());
+				}
 			}
-		}
-		for(Example r : regression)
-		{
-			for(Program program : r.programs)
-			{
-				assertTrue(program.isCorrect());
-			}
-		}
-
 		System.out.println("\nDone.");
 	}
 
