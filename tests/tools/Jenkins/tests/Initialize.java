@@ -304,6 +304,8 @@ public class Initialize {
 
 	private String searchRecFile(String directory, String file, String relativeTo) {
 		File dir = new File(directory);
+		if (file.equals("spawn.imp"))
+		System.out.println("Search: " + file + " in " + directory);
 		if (dir.exists())
 		{
 			String[] dirFiles = dir.list();
