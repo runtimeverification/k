@@ -50,17 +50,6 @@ public class Attributes extends ASTNode {
 		return content.substring(0, content.length() - 2) + "]";
 	}
 
-	@Override
-	public String toMaude() {
-		String attributes = "";
-		for (Attribute entry : contents) {
-			if (!entry.getKey().equals("klabel"))
-				attributes += entry.toMaude();
-		}
-
-		return attributes.trim();
-	}
-
 	public boolean containsKey(String key) {
 		if (contents == null)
 			return false;

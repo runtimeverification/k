@@ -1,6 +1,5 @@
 package org.kframework.kil;
 
-import org.kframework.backend.maude.IMaude;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Modifiable;
 import org.kframework.kil.visitors.Modifier;
@@ -8,8 +7,7 @@ import org.kframework.kil.visitors.Transformable;
 import org.kframework.kil.visitors.Visitable;
 import org.w3c.dom.Element;
 
-
-public abstract class ASTNode implements IMaude, Modifiable, Visitable,
+public abstract class ASTNode implements Modifiable, Visitable,
 		Transformable {
 	protected Attributes attributes = null;
 

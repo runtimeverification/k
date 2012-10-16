@@ -32,12 +32,6 @@ public class StringSentence extends ModuleItem {
 	}
 
 	@Override
-	public String toMaude() {
-
-		return "StringSentence should not be maudifiable.";
-	}
-
-	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}

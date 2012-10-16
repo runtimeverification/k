@@ -93,20 +93,6 @@ public class Module extends DefinitionItem {
 		return type + " " + name + "\n" + content + "\nend" + type;
 	}
 
-	@Override
-	public String toMaude() {
-		if (type.equals("interface"))
-			return "";
-
-		String content = "";
-
-		for (ModuleItem mi : items) {
-			content += mi.toMaude() + "\n";
-		}
-
-		return "mod " + name + " is\n" + content + "\nendm";
-	}
-
 	public List<String> getModuleKLabels() {
 		List<String> mkl = new LinkedList<String>();
 

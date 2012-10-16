@@ -38,14 +38,6 @@ public class Constant extends Term {
 		return value + " ";
 	}
 
-	@Override
-	public String toMaude() {
-		if (sort.equals("#Id"))
-			return "#id \"" + value + "\"";
-
-		return value;
-	}
-
 	public String getSort() {
 		return sort;
 	}

@@ -73,17 +73,6 @@ public class Definition extends ASTNode {
 	}
 
 	@Override
-	public String toMaude() {
-		String content = "";
-
-		for (DefinitionItem di : items) {
-			content += di.toMaude() + " \n";
-		}
-
-		return content;
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.items.size(); i++) {
 			DefinitionItem di = (DefinitionItem) visitor.modify(this.items.get(i));

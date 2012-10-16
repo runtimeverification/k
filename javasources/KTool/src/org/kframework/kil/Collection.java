@@ -3,16 +3,10 @@ package org.kframework.kil;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Modifier;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.utils.xml.XML;
 import org.w3c.dom.Element;
-
 
 public abstract class Collection extends Term {
 
@@ -48,34 +42,6 @@ public abstract class Collection extends Term {
 		for (Term t : contents)
 			content += t;
 		return content;
-	}
-
-	@Override
-	public String toMaude() {
-		String content = "";
-		
-		if (contents.size()==0) {
-			return new Empty(sort).toMaude();
-		}
-		
-		if (contents.size()==1) {
-			return contents.get(0).toMaude();
-		}
-
-		for (Term term : contents) {
-			if (term == null) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-						KExceptionGroup.INTERNAL, 
-						"NULL Term encountered when printing collection " + contents + ".", 
-						getFilename(), getLocation()));				
-			}
-			content += term.toMaude() + ",";
-		}
-
-		if (content.length() > 1)
-			content = content.substring(0, content.length() - 1);
-        String constructor = MetaK.getMaudeConstructor(sort);
-		return constructor + "(" + content + ")";
 	}
 
 	public java.util.List<Term> getContents() {

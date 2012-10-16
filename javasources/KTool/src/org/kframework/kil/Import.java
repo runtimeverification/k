@@ -32,11 +32,6 @@ public class Import extends ModuleItem {
 	}
 
 	@Override
-	public String toMaude() {
-		return "including " + name + " .";
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 	}
 

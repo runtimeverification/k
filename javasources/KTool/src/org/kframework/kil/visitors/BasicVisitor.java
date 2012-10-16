@@ -269,4 +269,14 @@ public class BasicVisitor implements Visitor {
 	public void visit(Attribute attribute) {
 		visit((ASTNode) attribute);
 	}
+
+	@Override
+	public void visit(StringSentence node) {
+		visit((ModuleItem) node);
+	}
+	
+	@Override
+	public void visit(KInjectedLabel kInjectedLabel) {
+		visit((Term)kInjectedLabel);
+	}
 }

@@ -81,28 +81,6 @@ public class TermCons extends Term {
 		return str;
 	}
 
-	@Override
-	public String toMaude() {
-		Production pr = DefinitionHelper.conses.get(cons);
-		String cons = pr.getLabel();
-
-		if (pr.attributes.containsKey("maudeop"))
-			cons = pr.attributes.get("maudeop").replaceAll("\"", "");
-
-		String contents = "";
-		for (Term term : this.contents)
-			if (term != null)
-				contents += term.toMaude() + ",";
-			else
-				contents += term + ",";
-
-		if (contents.length() >= 1)
-			contents = "(" + contents.substring(0, contents.length() - 1) + ")";
-			
-		cons = cons.replaceAll(" ", "`");
-		return cons + contents;
-	}
-
 	public String getSort() {
 		return sort;
 	}

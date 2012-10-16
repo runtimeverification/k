@@ -69,11 +69,6 @@ public class PriorityBlock extends ASTNode {
 	}
 
 	@Override
-	public String toMaude() {
-		return "production";
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.productions.size(); i++) {
 			Production elem = (Production) visitor.modify(this.productions.get(i));

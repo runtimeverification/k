@@ -52,11 +52,6 @@ public class Sort extends ProductionItem {
 		return name;
 	}
 
-	@Override
-	public String toMaude() {
-		return name;
-	}
-
 	public void accept(Modifier visitor) {
 		visitor.modify(this);
 	}

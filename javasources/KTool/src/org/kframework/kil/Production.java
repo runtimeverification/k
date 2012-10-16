@@ -116,17 +116,6 @@ public class Production extends ASTNode {
 		return true;
 	}
 
-	@Override
-	public String toMaude() {
-		String content = "";
-		for (ProductionItem pi : items) {
-			if (pi.getType().equals(ProductionType.SORT))
-				content += pi + " ";
-		}
-
-		return content.trim();
-	}
-
 	public String getLabel() {
 		String label = attributes.get("prefixlabel");
 		if (label == null) {

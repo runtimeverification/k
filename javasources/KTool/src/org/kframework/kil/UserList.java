@@ -34,11 +34,6 @@ public class UserList extends ProductionItem {
 		return "List{" + sort + ",\"" + separator + "\"} ";
 	}
 
-	@Override
-	public String toMaude() {
-		return "";
-	}
-
 	public void accept(Modifier visitor) {
 		visitor.modify(this);
 	}

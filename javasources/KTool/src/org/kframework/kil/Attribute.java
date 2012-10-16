@@ -1,7 +1,5 @@
 package org.kframework.kil;
 
-import java.util.LinkedList;
-
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
@@ -32,20 +30,6 @@ public class Attribute extends ASTNode {
 		super(attribute);
 		key = attribute.key;
 		value = attribute.value;
-	}
-
-	@Override
-	public String toMaude() {
-		java.util.List<String> reject = new LinkedList<String>();
-		reject.add("cons");
-		reject.add("kgeneratedlabel");
-		reject.add("latex");
-		reject.add("prefixlabel");
-
-		if (!reject.contains(this.getKey()))
-			return " " + this.getKey() + "=(" + this.getValue() + ")";
-
-		return "";
 	}
 
 	@Override

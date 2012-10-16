@@ -23,11 +23,6 @@ public class Hole extends Term {
 	}
 
 	@Override
-	public String toMaude() {
-		return "HOLE";
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 	}
 

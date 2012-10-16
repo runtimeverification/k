@@ -3,6 +3,7 @@ package org.kframework.utils;
 import java.io.File;
 import java.io.IOException;
 
+import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
@@ -124,7 +125,9 @@ public class ProgramLoader {
 					sw.printIntermediate("Parsing Program");
 				}
 
-				String kast = out.toMaude();
+				MaudeFilter maudeFilter = new MaudeFilter();
+				out.accept(maudeFilter);
+				String kast = maudeFilter.getResult();
 
 				System.out.println(kast);
 

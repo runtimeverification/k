@@ -58,11 +58,6 @@ public class MapItem extends CollectionItem {
 	}
 
 	@Override
-	public String toMaude() {
-		return "_|->_(" + key.toMaude() + "," + value.toMaude() + ")";
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 		key = (Term) visitor.modify(key);
 		value = (Term) visitor.modify(value);

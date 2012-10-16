@@ -33,11 +33,6 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
 	}
 
 	@Override
-	public String toMaude() {
-		return "";
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 	}
 

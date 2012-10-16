@@ -23,11 +23,6 @@ public class Context extends Sentence {
 	}
 
 	@Override
-	public String toMaude() {
-		return "mb context " + super.toMaude();
-	}
-
-	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}

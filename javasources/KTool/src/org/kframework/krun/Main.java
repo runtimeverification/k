@@ -25,6 +25,7 @@ import org.fusesource.jansi.AnsiConsole;
 import org.kframework.krun.runner.KRunner;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
+import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 
@@ -137,7 +138,9 @@ public class Main {
 				ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "");
 				term = term.accept(new FlattenSyntax());
 				term = MetaK.kWrapper((Term) term);
-				parsed = term.toMaude();
+				MaudeFilter maudeFilter = new MaudeFilter();
+				term.accept(maudeFilter);
+				parsed = maudeFilter.getResult();
 			} catch (Exception e1) {
 				Error.report(e1.getMessage());
 			}

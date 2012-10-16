@@ -1,11 +1,9 @@
 package org.kframework.kil;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.utils.strings.StringUtil;
 
 public class KInjectedLabel extends Term {
 
@@ -37,7 +35,7 @@ public class KInjectedLabel extends Term {
 		return "# " + term;
 	}
 
-	private String getInjectedSort(String sort) {
+	public String getInjectedSort(String sort) {
 		if (sort.equals("BagItem"))
 			return "Bag";
 		if (sort.equals("SetItem"))
@@ -47,14 +45,6 @@ public class KInjectedLabel extends Term {
 		if (sort.equals("ListItem"))
 			return "List";
 		return sort;		
-	}
-
-	@Override
-	public String toMaude() {
-		if (MetaK.isKSort(term.getSort())) {
-			return StringUtil.escapeMaude(getInjectedSort(term.getSort())) + "2KLabel_(" + term.toMaude() + ")";
-		}
-		return "#_(" + term.toMaude() + ")";
 	}
 
 	@Override

@@ -32,11 +32,6 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 	}
 
 	@Override
-	public String toMaude() {
-		return "";
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 	}
 

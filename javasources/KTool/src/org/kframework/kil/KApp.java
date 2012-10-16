@@ -49,11 +49,6 @@ public class KApp extends Term {
 		return this.label + "(" + this.child + ")";
 	}
 
-	@Override
-	public String toMaude() {
-		return "_`(_`)(" + label.toMaude() + ", " + child.toMaude() + ") ";
-	}
-
 	public Term getLabel() {
 		return label;
 	}

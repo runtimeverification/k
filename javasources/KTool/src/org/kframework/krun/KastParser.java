@@ -3,6 +3,7 @@ package org.kframework.krun;
 import java.io.File;
 
 
+import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.CollectConsesVisitor;
@@ -38,7 +39,9 @@ public class KastParser {
 	public static String getKAST(String pgm) {
 		ASTNode out = getKastTerm(pgm);
 
-		return out.toMaude();
+		MaudeFilter maudeFilter = new MaudeFilter();
+		out.accept(maudeFilter);
+		return maudeFilter.getResult();
 	}
 
 	public static ASTNode getKastTerm(String pgm) {

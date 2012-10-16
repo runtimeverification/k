@@ -25,11 +25,6 @@ public class SetItem extends CollectionItem {
 	}
 
 	@Override
-	public String toMaude() {
-		return "SetItem(" + value.toMaude() + ")";
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 		value = (Term) visitor.modify(value);
 	}

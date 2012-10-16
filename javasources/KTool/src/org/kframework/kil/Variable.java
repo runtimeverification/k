@@ -41,13 +41,6 @@ public class Variable extends Term {
 		return name + ":" + sort + " ";
 	}
 
-	@Override
-	public String toMaude() {
-		if (name.equals("_"))
-			return "?:" + sort;
-		return name + ":" + sort;
-	}
-
 	public void accept(Modifier visitor) {
 		visitor.modify(this);
 	}

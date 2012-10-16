@@ -18,6 +18,7 @@ import org.kframework.kil.Empty;
 import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabel;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.List;
@@ -39,6 +40,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermComment;
@@ -108,4 +110,7 @@ public interface Visitor {
 	public void visit(Attributes attributes);
 	public void visit(Attribute attribute);
 	public void visit(TermComment node);
+	// Others
+	public void visit(StringSentence stringSentence);
+	public void visit(KInjectedLabel kInjectedLabel);
 }

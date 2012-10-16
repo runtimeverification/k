@@ -18,11 +18,6 @@ public class TermComment extends Term {
 	}
 
 	@Override
-	public String toMaude() {
-		return " (.).Bag ";
-	}
-
-	@Override
 	public String toString() {
 		return "<br />";
 	}

@@ -48,16 +48,6 @@ public abstract class Sentence extends ModuleItem {
 			attributes = new Attributes("generated", "generated");
 	}
 
-	@Override
-	public String toMaude() {
-
-		String cond = "";
-		if (condition != null)
-			cond = "when " + condition.toMaude();
-
-		return body.toMaude() + " " + cond + " : KSentence [metadata \"" + attributes.toMaude() + " location=" + getMaudeLocation() + "\"] .";
-	}
-
 	public Term getBody() {
 		return body;
 	}

@@ -1,14 +1,11 @@
 package org.kframework.kil;
 
-import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
-
 
 public class Empty extends Term {
 
@@ -31,20 +28,6 @@ public class Empty extends Term {
 
 	public String toString() {
 		return "." + sort + " ";
-	}
-
-	@Override
-	public String toMaude() {
-		if (MaudeHelper.basicSorts.contains(sort)) {
-			if (!sort.equals("List{K}"))
-				return "(.)." + sort;
-			else
-				return "." + sort;
-		}
-		// search for the separator for the empty list
-		Production prd = DefinitionHelper.listConses.get(getSort());
-		UserList ul = (UserList) prd.getItems().get(0);
-		return ".List`{\"" + ul.separator + "\"`}";
 	}
 
 	public String getSort() {

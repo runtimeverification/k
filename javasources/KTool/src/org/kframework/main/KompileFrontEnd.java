@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.html.HTMLFilter;
 import org.kframework.backend.latex.LatexFilter;
+import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
@@ -439,7 +440,10 @@ public class KompileFrontEnd {
 
 			Stopwatch sw = new Stopwatch();
 
-			String maudified = javaDef.toMaude();
+			MaudeFilter maudeFilter = new MaudeFilter();
+			javaDef.accept(maudeFilter);
+
+			String maudified = maudeFilter.getResult();
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
 
@@ -775,8 +779,11 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Optional Tags");
 			}
+			
+			MaudeFilter maudeFilter = new MaudeFilter();
+			javaDef.accept(maudeFilter);
 
-			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "red in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n"
+			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "red in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n"
 					+ "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
 					+ " anywheres \"anywhere=() function=() predicate=() macro=()\" " + "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 

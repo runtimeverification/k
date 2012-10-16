@@ -44,11 +44,6 @@ public class Terminal extends ProductionItem {
 		return "\"" + terminal + "\"";
 	}
 
-	@Override
-	public String toMaude() {
-		return "";
-	}
-
 	public void accept(Modifier visitor) {
 		visitor.modify(this);
 	}

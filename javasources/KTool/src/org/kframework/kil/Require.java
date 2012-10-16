@@ -22,11 +22,6 @@ public class Require extends DefinitionItem {
 	}
 
 	@Override
-	public String toMaude() {
-		return "";
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 	}
 

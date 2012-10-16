@@ -59,14 +59,6 @@ public class Rewrite extends Term {
 	}
 
 	@Override
-	public String toMaude() {
-		String left = this.left == null ? "null" : this.left.toMaude();
-		String right = this.right == null ? "null" : this.right.toMaude();
-
-		return "_=>_(" + left + "," + right + ")";
-	}
-
-	@Override
 	public void applyToAll(Modifier visitor) {
 		left = (Term) visitor.modify(left);
 		right = (Term) visitor.modify(right);

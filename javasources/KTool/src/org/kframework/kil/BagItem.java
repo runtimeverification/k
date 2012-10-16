@@ -27,11 +27,6 @@ public class BagItem extends CollectionItem {
 		return this.value.toString();
 	}
 
-	@Override
-	public String toMaude() {
-		return "BagItem(" + value.toMaude() + ")";
-	}
-
 	public Term getItem() {
 		return value;
 	}
