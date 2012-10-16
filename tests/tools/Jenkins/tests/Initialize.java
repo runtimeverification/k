@@ -95,12 +95,12 @@ public class Initialize {
 	{
 		String kframework = StaticK.kbasedir;
 
-		String tutorial = kframework + StaticK.fileSep + "tutorial";
+		String tutorial = kframework + StaticK.fileSep + "dist" + StaticK.fileSep + "tutorial";
 		
 		List<String> tTests = getKFilesFromDir(tutorial);
 		
-		System.out.println("Found: " + tTests.size() + " tests.");
-		System.out.println(tTests);
+//		System.out.println("Found: " + tTests.size() + " tests.");
+//		System.out.println(tTests);
 		
 		for(String t : tTests)
 		{
