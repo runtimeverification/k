@@ -163,7 +163,7 @@ public class HKCDFrontEnd {
 				pgmDump);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("HKCD         = ");
+				sw.printIntermediate("HKCD");
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();

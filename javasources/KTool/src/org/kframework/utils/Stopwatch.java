@@ -1,8 +1,11 @@
 package org.kframework.utils;
 
+import java.util.Formatter;
+
 public class Stopwatch {
 	private long start = 0;
 	private long start2 = 0;
+	Formatter f = new Formatter(System.out);
 
 	public Stopwatch() {
 		start = System.currentTimeMillis();
@@ -16,12 +19,12 @@ public class Stopwatch {
 
 	public void printIntermediate(String message) {
 		long endd = System.currentTimeMillis();
-		System.out.println(message + (endd - start2));
+		f.format("%-35s = %5d%n", message, endd - start2);
 		start2 = endd;
 	}
 
 	public void printTotal(String message) {
 		long endd = System.currentTimeMillis();
-		System.out.println(message + (endd - start));
+		f.format("%-35s = %5d%n", message, endd - start);
 	}
 }

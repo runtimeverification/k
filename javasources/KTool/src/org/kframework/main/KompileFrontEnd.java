@@ -172,7 +172,7 @@ public class KompileFrontEnd {
 			compile(mainFile, lang, step);
 		}
 		if (GlobalSettings.verbose)
-			sw.printTotal("Total           = ");
+			sw.printTotal("Total");
 		GlobalSettings.kem.print();
 	}
 
@@ -278,7 +278,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".tex", latexified);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Latexify        = ");
+				sw.printIntermediate("Latex Generation");
 			}
 
 			return latexified;
@@ -316,7 +316,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".html", html);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Latexif         = ");
+				sw.printIntermediate("Html Generation");
 			}
 
 			return html;
@@ -351,7 +351,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".unparsed.k", unparsedText);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Unparsing       = ");
+				sw.printIntermediate("Unparsing");
 			}
 
 			return unparsedText;
@@ -388,7 +388,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".xml", xml);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Xmlify         = ");
+				sw.printIntermediate("XML Generation");
 			}
 
 			return xml;
@@ -444,7 +444,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Maudify         = ");
+				sw.printIntermediate("Maude Generation");
 			}
 
 			return maudified;
@@ -498,7 +498,7 @@ public class KompileFrontEnd {
 			def.accept(new AddConsesVisitor());
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Basic Parsing   = ");
+				sw.printIntermediate("Basic Parsing");
 
 			// ------------------------------------- generate files
 			ResourceExtractor.ExtractAllSDF(dotk);
@@ -521,13 +521,13 @@ public class KompileFrontEnd {
 			String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Pgm    = ");
+				sw.printIntermediate("File Gen Pgm");
 
 			if (!oldSdf.equals(newSdf))
 				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/pgm"), "Program");
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLPgm = ");
+				sw.printIntermediate("Generate TBLPgm");
 
 			// generate a copy for the definition and modify it to generate the intermediate data
 			// Definition def2 = def.clone();// (Definition) Cloner.copy(def);
@@ -546,13 +546,13 @@ public class KompileFrontEnd {
 			newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Def    = ");
+				sw.printIntermediate("File Gen Def");
 
 			if (!oldSdf.equals(newSdf))
 				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3Disamb");
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLDef = ");
+				sw.printIntermediate("Generate TBLDef");
 
 			// ------------------------------------- import files in Stratego
 			// k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
@@ -560,14 +560,14 @@ public class KompileFrontEnd {
 			// k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Importing Files = ");
+				sw.printIntermediate("Importing Files");
 
 			// ------------------------------------- parse configs
 			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
 			// k3parser.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Configs = ");
+				sw.printIntermediate("Parsing Configs");
 
 			// ----------------------------------- parse rules
 			// def.parseRules();
@@ -579,7 +579,7 @@ public class KompileFrontEnd {
 			// XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Rules   = ");
+				sw.printIntermediate("Parsing Rules");
 
 			// ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
 			//
@@ -592,7 +592,7 @@ public class KompileFrontEnd {
 			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Maudify         = ");
+				sw.printIntermediate("Maudify");
 			}
 
 			// return maudified;
@@ -639,7 +639,7 @@ public class KompileFrontEnd {
 			}
 			
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Automatic Module Imports         = ");
+				sw.printIntermediate("Automatic Module Imports");
 			}
 
 
@@ -647,7 +647,7 @@ public class KompileFrontEnd {
 			javaDef.accept(df);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Ditto Filter                     = ");
+				sw.printIntermediate("Ditto Filter");
 			}
 
 			
@@ -655,92 +655,92 @@ public class KompileFrontEnd {
 			javaDef = new FlattenModules().compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Flatten Modules                  = ");
+				sw.printIntermediate("Flatten Modules");
 			}
 			
 			javaDef = new CompilerTransformerStep(new DesugarStreams()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Desugar  Streams                 = ");
+				sw.printIntermediate("Desugar  Streams");
 			}
 
 			javaDef = new CompilerTransformerStep(new AddKCell()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add K Cell                      = ");
+				sw.printIntermediate("Add K Cell");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveFresh()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Fresh                    = ");
+				sw.printIntermediate("Resolve Fresh");
 			}
 
 			if (GlobalSettings.addTopCell) {
 				javaDef = new CompilerTransformerStep(new AddTopCell()).compile(javaDef);
 				if (GlobalSettings.verbose) {
-					sw.printIntermediate("Add Top Cell                     = ");
+					sw.printIntermediate("Add Top Cell");
 				}
 			}
 
 			javaDef = new AddEval().compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Eval                         = ");
+				sw.printIntermediate("Add Eval");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveBinder()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Binder                   = ");
+				sw.printIntermediate("Resolve Binder");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveAnonymousVariables()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Anonymous Variables      = ");
+				sw.printIntermediate("Resolve Anonymous Variables");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveBlockingInput()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Blocking Input           = ");
+				sw.printIntermediate("Resolve Blocking Input");
 			}
 						
 			javaDef = new CompilerTransformerStep(new GenerateSyntaxPredicates()).compile(javaDef);
 			
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Generate Syntax Predicates       = ");
+				sw.printIntermediate("Generate Syntax Predicates");
 			}
 			
 			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
 			
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Syntax Predicates        = ");
+				sw.printIntermediate("Resolve Syntax Predicates");
 			}
 						
 			javaDef = new CompilerTransformerStep(new ResolveBuiltins()).compile(javaDef);
 			
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Builtins                 = ");
+				sw.printIntermediate("Resolve Builtins");
 			}
 			
 			javaDef = new CompilerTransformerStep(new ResolveListOfK()).compile(javaDef);		
 			
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve ListOfK                  = ");
+				sw.printIntermediate("Resolve ListOfK");
 			}
 			
 			javaDef = new CompilerTransformerStep(new FlattenSyntax()).compile(javaDef);
 			
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Flatten Syntax                   = ");
+				sw.printIntermediate("Flatten Syntax");
 			}
 			
 			javaDef = new CompilerTransformerStep(new ResolveHybrid()).compile(javaDef);		
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Hybrid                   = ");
+				sw.printIntermediate("Resolve Hybrid");
 			}
 			
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
@@ -762,19 +762,19 @@ public class KompileFrontEnd {
 			javaDef = (Definition) javaDef.accept(new AddStrictStar());
 			
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Strict Star                  = ");
+				sw.printIntermediate("Add Strict Star");
 			}
 			
 			javaDef = (Definition) javaDef.accept(new AddDefaultComputational());
 			
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Default Computational        = ");
+				sw.printIntermediate("Add Default Computational");
 			}
 			
 			javaDef = (Definition) javaDef.accept(new AddOptionalTags());
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Optional Tags                = ");
+				sw.printIntermediate("Add Optional Tags");
 			}
 
 			String compile = load 
@@ -794,7 +794,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate Maude file              = ");
+				sw.printIntermediate("Generate Maude file");
 
 			// call maude to kompile the definition
 			String compiled = MaudeRun.run_maude(dotk.getAbsoluteFile(), compile);
@@ -807,7 +807,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(defFile + "-compiled.maude", load + compiled);
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("RunMaude                         = ");
+				sw.printIntermediate("RunMaude");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (TransformerException e) {

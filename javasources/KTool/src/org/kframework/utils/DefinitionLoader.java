@@ -61,7 +61,7 @@ public class DefinitionLoader {
 		def.addConsToProductions();
 
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("Basic Parsing   = ");
+			sw.printIntermediate("Basic Parsing");
 
 		// ------------------------------------- generate files
 		ResourceExtractor.ExtractAllSDF(dotk);
@@ -78,13 +78,13 @@ public class DefinitionLoader {
 		String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("File Gen Pgm    = ");
+			sw.printIntermediate("File Gen Pgm");
 
 		if (!oldSdf.equals(newSdf))
 			Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/pgm"), "Program");
 
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("Generate TBLPgm = ");
+			sw.printIntermediate("Generate TBLPgm");
 
 		// generate a copy for the definition and modify it to generate the intermediate data
 		Definition def2 = def.clone();// (Definition) Cloner.copy(def);
@@ -102,13 +102,13 @@ public class DefinitionLoader {
 		newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("File Gen Def    = ");
+			sw.printIntermediate("File Gen Def");
 
 		if (!oldSdf.equals(newSdf))
 			Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3Disamb");
 
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("Generate TBLDef = ");
+			sw.printIntermediate("Generate TBLDef");
 
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
@@ -116,20 +116,20 @@ public class DefinitionLoader {
 		org.kframework.parser.concrete.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
 
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("Importing Files = ");
+			sw.printIntermediate("Importing Files");
 
 		// ------------------------------------- parse configs
 		FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
 		org.kframework.parser.concrete.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
 
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("Parsing Configs = ");
+			sw.printIntermediate("Parsing Configs");
 
 		// ----------------------------------- parse rules
 		def.parseRules();
 
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("Parsing Rules   = ");
+			sw.printIntermediate("Parsing Rules");
 
 		// ----------------------------------- preprocessiong steps
 //		Preprocessor preprocessor = new Preprocessor();
@@ -137,7 +137,7 @@ public class DefinitionLoader {
 		Document defXML = def.getDefAsXML();
 		XmlLoader.writeXmlFile(defXML, dotk.getAbsolutePath() + "/def.xml");
 		if (GlobalSettings.verbose)
-			sw.printIntermediate("Preprocess      = ");
+			sw.printIntermediate("Preprocess");
 
 		org.kframework.kil.Definition javaDef = new org.kframework.kil.Definition((Element) defXML.getFirstChild());
 
@@ -162,7 +162,7 @@ public class DefinitionLoader {
 			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AmbFilter());
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Disambiguate    = ");
+				sw.printIntermediate("Disambiguate");
 
 			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
 		} catch (TransformerException ex) {

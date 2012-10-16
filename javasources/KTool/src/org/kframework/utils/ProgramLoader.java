@@ -113,7 +113,7 @@ public class ProgramLoader {
 			dotk.mkdirs();
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Importing Files = ");
+				sw.printIntermediate("Importing Files");
 
 			try {
 				Definition def = DefinitionLoader.loadDefinition(new File(dotk.getAbsoluteFile() + "/defx.xml"), null);
@@ -121,7 +121,7 @@ public class ProgramLoader {
 				
 				ASTNode out = loadPgmAst(pgmFile, dotk);
 				if (GlobalSettings.verbose) {
-					sw.printIntermediate("Parsing Program = ");
+					sw.printIntermediate("Parsing Program");
 				}
 
 				String kast = out.toMaude();
@@ -132,8 +132,8 @@ public class ProgramLoader {
 				writeMaudifiedPgm(kast, language, dotk);
 
 				if (GlobalSettings.verbose) {
-					sw.printIntermediate("Maudify Program = ");
-					sw.printTotal("Total           = ");
+					sw.printIntermediate("Maudify Program");
+					sw.printTotal("Total");
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
