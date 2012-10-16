@@ -219,7 +219,7 @@ rules
 										[a'*]
 										<terminal value=")" loc="[loc]" />
 										<attributes loc="[loc]">
-											<tag key="klabel" vlue="'[x]" />
+											<tag key="klabel" value="'[x]" />
 											[b'*]
 										</attributes>
 						</production>

@@ -98,7 +98,6 @@ public class MaudeFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Syntax syn) {
-			String contents = "";
 			for (PriorityBlock pb : syn.getPriorityBlocks()) {
 				for (Production p : pb.getProductions()) {
 					if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Sort)) {

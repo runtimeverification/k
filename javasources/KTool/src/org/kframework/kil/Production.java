@@ -1,7 +1,6 @@
 package org.kframework.kil;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
@@ -37,7 +36,7 @@ public class Production extends ASTNode {
 	public Production(Element element) {
 		super(element);
 
-		java.util.List<String> strings = new LinkedList<String>();
+		java.util.List<String> strings = new ArrayList<String>();
 		strings.add(Constants.SORT);
 		strings.add(Constants.TERMINAL);
 		strings.add(Constants.USERLIST);

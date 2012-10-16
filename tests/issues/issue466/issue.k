@@ -1,4 +1,4 @@
-module LAMBDA
+module ISSUE
 
   syntax Val ::= "closure(" K ")" [latex(a)]
   syntax Val ::= "closure(" K ")" [latex(a), klabel('closure)]
