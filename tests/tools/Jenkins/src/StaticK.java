@@ -28,7 +28,10 @@ public class StaticK {
 	public static String configuration;
 	public static String reportsDir;
 	public static Map<String, Report> reports = new HashMap<String, Report>();
-
+	public static List<String> tags = getImportantTags();
+	
+	
+	
 	public static int initPoolSize()
 	{
 		int poolSize = 1;
@@ -40,6 +43,14 @@ public class StaticK {
 		return poolSize;
 	}
 	
+	private static List<String> getImportantTags() {
+		List<String> tags = new LinkedList<String>();
+		tags.add("examples");
+		tags.add("regression");
+		tags.add("tutorial");
+		return tags;
+	}
+
 	public static List<Example> getExamples(String configuration, String k3jar, String tagName, String kbasedir) {
 		Document document = getDocument(configuration);
 
