@@ -15,10 +15,10 @@ module URIS
              | "String2Bool" "(" String ")"
              | "#ioError" "(" String ")"
  
-  syntax K ::= "#fPutByte" "(" Int "," Int ")"   [function, klabel(#fPutByte)]
-             | "#flush" "(" Int ")"              [function, klabel(#flush)]
-             | "#fReadByte" "(" Int ")"          [function, klabel(#fReadByte)]
-
+  syntax K ::= "#fPutByte" "(" Int "," Int ")"      [function, klabel(#fPutByte)]
+             | "#flush" "(" Int ")"                 [function, klabel(#flush)]
+             | "#fReadByte" "(" Int ")"             [function, klabel(#fReadByte)]
+             | "#fPutBytes" "(" Int "," String ")" [function, klabel(#fPutBytes)]
             
   rule #open(S:String) => String2Int((#tcpRequest("open#" +String S +String "#"))) [function, anywhere]
 
@@ -74,6 +74,10 @@ module URIS
     => String2DotK((#tcpRequest("writebyte#" +String Int2String(N) +String "#"
                               +String Int2String(B) +String "#"))) [function, anywhere]
 
+  rule #fPutBytes(N:Int,S:String)
+    => String2DotK((#tcpRequest("writebytes#" +String Int2String(N) +String "#"
+                              +String S +String "#"))) [function, anywhere]
+
   rule #peekByte() => #fPeekByte(#stdin) [function, anywhere]
   rule #fPeekByte(N:Int)
     => String2Int((#tcpRequest("peek#" +String Int2String(N) +String "#"))) [function, anywhere]
@@ -110,17 +114,17 @@ module URIS
   rule #buffer(Buffer:String => Buffer +String S) (ListItem(S:String) => .List)
 
   // Send first char from the buffer to the server
-  rule #ostream(N:Int) (.List =>  ListItem(#fPrintChar(N,substrString(S,0,1)))
-       #removeCharUponAck) #buffer(S:String)
+  rule #ostream(N:Int) (.List =>  ListItem(#fPutBytes(N,S))
+       #removeCharsUponAck(lengthString(S))) #buffer(S:String)
     when S =/=String ""
   // Flush when the buffer becomes empty
   rule #ostream(N:Int) (.List => ListItem(#flush(N))) #buffer("" => .K)
 
   rule #ostream(_:Int) (ListItem(.K) => .List) 
   // consume a char from the buffer only on succesfull communication 
-  rule #ostream(_:Int) (#removeCharUponAck => .List) #buffer(S:String => substrString(S,1, lengthString(S)))
+  rule #ostream(_:Int) (#removeCharsUponAck(I:Int) => .List) #buffer(S:String => substrString(S,I, lengthString(S)))
  
-  syntax List ::= "#removeCharUponAck"
+  syntax List ::= "#removeCharsUponAck" "(" Int ")"
   
   syntax List ::= "#parse" "(" String "," K ")"   [cons(List1ParseSyn)]
 

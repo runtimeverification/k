@@ -38,6 +38,10 @@ public class ResourceInFile extends FileResource {
 	}
 
 	@Override
+	public void writebytes(byte[] bite) throws Exception {
+		in.writebytes(bite);
+	}
+	@Override
 	public Long position() throws Exception {
 		return in.position();
 	}

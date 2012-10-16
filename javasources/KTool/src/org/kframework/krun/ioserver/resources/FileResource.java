@@ -13,6 +13,7 @@ public abstract class FileResource extends Resource {
 	public abstract Byte readbyte() throws Exception;
 	public abstract void seek(int position) throws Exception;
 	public abstract void writebyte(byte ascii) throws Exception;
+	public abstract void writebytes(byte[] bytes) throws Exception;
 	public abstract Long position() throws Exception;
 	public abstract Byte eof() throws Exception;
 }

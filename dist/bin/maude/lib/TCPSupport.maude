@@ -101,7 +101,7 @@ mod #TCP is
 
 	op #tcpRequest : #String [#Nat] -> [#String] .
 	eq #tcpRequest(S:#String, N:#Nat) = 
-#checkResult(#containedRequest(#start(N:#Nat) #Socket #toSend(int2String(N:#Nat) +String "#" +String S:#String +String "\r\n"))) .
+#checkResult(#containedRequest(#start(N:#Nat) #Socket #toSend(int2String(N:#Nat) +String "#" +String int2String(lengthString(S:#String)) +String "#" +String S:#String))) .
 
 	op #checkResult : #String -> #String .
 	op #getTCPData : #String -> #String .

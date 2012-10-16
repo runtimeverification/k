@@ -70,6 +70,11 @@ public class BufferedReader extends FileResource{
 	}
 
 	@Override
+	public void writebytes(byte[] ascii) throws Exception {
+		throw new IIOException("Writebytes not implemented for input streams");
+	}
+
+	@Override
 	public void sendToInput(String s) throws Exception {
 		throw new Exception("Not applicable for streams.");
 	}

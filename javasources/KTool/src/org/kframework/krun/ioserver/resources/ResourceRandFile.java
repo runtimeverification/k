@@ -53,6 +53,11 @@ public class ResourceRandFile extends FileResource {
 	}
 
 	@Override
+	public void writebytes(byte[] bite) throws Exception {
+		raf.write(bite);
+	}
+
+	@Override
 	public Long position() throws Exception {
 		return raf.getFilePointer();
 	}

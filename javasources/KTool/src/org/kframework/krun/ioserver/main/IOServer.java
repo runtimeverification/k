@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Logger;
+import java.util.Scanner;
 
 import org.kframework.krun.ioserver.commands.*;
 
@@ -56,9 +58,23 @@ public class IOServer {
 	}
 	
 	private String getMessage(Socket clientSocket) throws IOException {
+		StringWriter writer = new StringWriter();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		int n = 0;
+		while (n < 2) {
+			int c = reader.read();
+			writer.write(c);
+			if (c == (int)'#') {
+				n++;
+			}
+		}
+		String inputLine = writer.toString();
+		int length = Integer.parseInt(inputLine.split("#")[1]);
+		char[] buffer = new char[length];
+		int numRead = reader.read(buffer, 0, length);
+		writer.write(buffer, 0, numRead);
+		inputLine = writer.toString();
 
-		String inputLine = reader.readLine();
 		if (inputLine == null) {
 			throw new IOException("Tried to read a line, but was already at EOF");
 		}
@@ -80,10 +96,10 @@ public class IOServer {
 		// parse
 		// TODO: here XML should be used...
 		// maudeId#command#args#
-		String[] args = inputLine.split("#");
+		String[] args = inputLine.split("#", -1);
 		String[] args1 = new String[args.length];
 		
-		System.arraycopy(args, 1, args1, 0, args.length-1);
+		System.arraycopy(args, 2, args1, 0, args.length-2);
 		
 		Command command = createCommand(args1, clientSocket, _logger);
 		
@@ -129,6 +145,9 @@ public class IOServer {
 		}
 		if (command.equals("writebyte")) {
 			return new CommandWritebyte(args, socket, logger); //, maudeId);
+		}
+		if (command.equals("writebytes")) {
+			return new CommandWritebytes(args, socket, logger); //, maudeId);
 		}
 		if (command.equals("flush")) {
 			return new CommandFlush(args, socket, logger); //, maudeId);

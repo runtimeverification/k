@@ -59,6 +59,11 @@ public class ResourceOutFile extends FileResource {
 	}
 
 	@Override
+	public void writebytes(byte[] bite) throws Exception {
+		of.write(bite);
+	}
+
+	@Override
 	public Long position() throws Exception {
 		throw new IIOException("Position not implemented.");
 	}
