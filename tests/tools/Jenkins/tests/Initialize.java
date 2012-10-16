@@ -110,7 +110,6 @@ public class Initialize {
 			String programsRelDir = new File(t).getParent().substring(kframework.length());
 			String testsRelDir = (tutorialTestDir + new File(t).getParentFile().getAbsolutePath().substring(tutorialDefDir.length())).substring(kframework.length());
 			root.appendChild(createTest(kframework, defRelPath, programsRelDir, testsRelDir, doc, "tutorial"));
-			System.out.println(searchRecFile(kframework + StaticK.fileSep + testsRelDir, "spawn.imp", kframework));
 		}
 		
 		save();
@@ -309,8 +308,6 @@ public class Initialize {
 
 	private String searchRecFile(String directory, String file, String relativeTo) {
 		File dir = new File(directory);
-		if (file.equals("spawn.imp"))
-		System.out.println("Search: " + file + " in " + directory);
 		if (dir.exists())
 		{
 			String[] dirFiles = dir.list();

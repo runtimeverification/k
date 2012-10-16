@@ -45,7 +45,7 @@ public class StaticK {
 	
 	private static List<String> getImportantTags() {
 		List<String> tags = new LinkedList<String>();
-		tags.add("examples");
+		tags.add("example");
 		tags.add("regression");
 		tags.add("tutorial");
 		return tags;
