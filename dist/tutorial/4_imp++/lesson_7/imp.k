@@ -1,5 +1,5 @@
 module IMP-SYNTAX
-  syntax AExp  ::= Int | Id | String
+  syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
                  > AExp "/" AExp              [left, strict, division]
@@ -76,14 +76,14 @@ module IMP
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
 
-  rule <k> int (X:Id,Xs:Ids => Xs); ...</k>
-       <env> Rho:Map => Rho[N/X] </env>
+  rule <k> int (X:Id,Xs => Xs); ...</k>
+       <env> Rho => Rho[N/X] </env>
        <store>... . => N|->0 ...</store>
     when fresh(N:Nat)
   rule int .Ids; => .  [structural]
 
   syntax Printable ::= Int | String
-  rule <k> print(P:Printable,AEs:AExps => AEs); ...</k>
+  rule <k> print(P:Printable,AEs => AEs); ...</k>
        <out>... . => ListItem(P) </out>  [print]
   rule print(.AExps); => .  [structural]
   
@@ -96,5 +96,5 @@ module IMP
 
 // Stmts
   rule .Stmts => .
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S Ss => S ~> Ss  [structural]
 endmodule

@@ -11,12 +11,12 @@
 This is the \K semantic definition of the IMP++ language.
 IMP++ extends the IMP language with the features listed below.  We
 strongly recommend you to first familiarize yourself with the IMP
-language and its \K definition before proceeding.
+language and its \K definition in Tutorial 2 before proceeding.
 \begin{description}
 \item [Strings and concatenation of strings.]  Strings are useful
 for the \texttt{print} statement, which is discussed below.  For
 string concatenation, we use the same \texttt{+} construct that we use
-for addition.
+for addition (so we overload it).
 \item [Variable increment.]  We only add a pre-increment construct:
 \texttt{++x} increments variable \texttt{x} and evaluates to the
 incremented value.  Variable increment makes the evaluation of
@@ -37,16 +37,21 @@ program terminated normally.  We therefore assume that an external
 observer does not care whether the program terminates normally or
 abruptly, same like with \texttt{exit} statements in conventional
 programming languages like C\@.
-\item [Dynamic threads.] The statement \texttt{spawn s} starts a new
-concurrent thread that executes statement \texttt{s}.  The newly
-created thread is given at creation time the {\em environment} of its
+\item [Dynamic threads.] The expression construct \texttt{spawn s}
+starts a new concurrent thread that executes statement \texttt{s},
+which is expected to be a block, and evaluates immediately to a fresh
+thread identifier that is also assigned to the newly created thread.
+The new thread is given at creation time the {\em environment} of its
 parent, so it can access all its parent's variables.  This allows for
 the parent thread and the child thread to communicate; it also allows
 for races and ``unexpected'' behaviors, so be careful.
-For simplicity, we here assume a sequentially consistent shared memory
-model.  To experiment with other memory models, see the definition of
-KERNELC\@.
-\item [Blocks and local variables.]  IMP++ allows blocks enclosed by 
+For thread synchronization, IMP++ provides a thread join statement
+construct ``\texttt{join t;}'', where \texttt{t} evaluates to a thread
+identifier, which stalls the current thread until thread \texttt{t}
+completes its computation.  For simplicity, we here assume a
+sequentially consistent shared memory model.  To experiment with other
+memory models, see the definition of KERNELC\@.
+\item [Blocks and local variables.]  IMP++ allows blocks enclosed by
 curly brackets.  Also, IMP's global variable declaration construct is
 generalized to be used anywhere as a statement, not only at the
 beginning of the program.  As expected, the scope of the declared
@@ -79,61 +84,62 @@ statement can be used, not only at the beginning of the program, we
 need to remove the previous global variable declaration of IMP and
 instead add a variable declaration statement construct
 
-We do not re-discuss the constructs which are taken over from IMP\@;
-go the last lesson of Tutorial 2 if you are interested in those.
-For execution purposes, we tag the addition and division operations
-with the \texttt{addition} and \texttt{division} tags.
-These attributes have no theoretical significance, in that they
-does not affect the semantics of the language in any way.  They only have
-practical relevance, specific to our implementation of the \K tool.
-Specifically, we can tell the \K tool (using its \texttt{superheat} and
-\texttt{supercool} options) that we want to exhaustively explore
-all the non-deterministic behaviors (due to strictness) of these
-language constructs.  For performance reasons, by default the \K tool
-chooses an arbitrary but fixed order to evaluate the arguments of the strict
-language constructs, thus possibly losing behaviors due to missed
-interleavings.  This aspect was irrelevant in IMP, because its expressions
-had no side effects, but it becomes relevant in IMP++\@. 
+We do not re-discuss the constructs which are taken over from IMP,
+except when their syntax has been subtly modified (such as, for
+example, the syntax of the previous ``statement'' assignment which
+is now obtained by composing the new assignment expression and the
+new expression statement constructs); go the last lesson of
+Tutorial 2 if you are interested in IMP's constructs.  For execution
+purposes, we tag the addition and division operations with the
+\texttt{addition} and \texttt{division} tags.  These attributes have
+no theoretical significance, in that they do not affect the semantics
+of the language in any way.  They only have practical relevance,
+specific to our implementation of the \K tool.  Specifically, we can
+tell the \K tool (using its \texttt{superheat} and \texttt{supercool}
+options) that we want to exhaustively explore all the non-deterministic
+behaviors (due to strictness) of these language constructs.  For performance
+reasons, by default the \K tool chooses an arbitrary but fixed order to
+evaluate the arguments of the strict language constructs, thus possibly
+losing behaviors due to missed interleavings.  This aspect was irrelevant in
+IMP, because its expressions had no side effects, but it becomes relevant
+in IMP++\@.
 
-The syntax of the IMP++ constructs is self-explanatory.
-Note that \texttt{print} is variadic, taking a list of expressions as
-argument.  It is also strict, which means that the entire list of
-expressions, that is, each expression in the list, will be evaluated.
-Note also that we have a special \texttt{\{\}} construct for empty
-blocks, in addition to a general \texttt{\{$\it Stmt$\}} block
-construct.  To have only one block construct, we would need to define
-semicolon-separated lists of statements with a construct of the form
-``${\it Stmts} ::= {\it List}\{{\it Stmt},{\it ";"}\}$'',
-and then define the syntax of blocks as \texttt{\{$\it Stmts$\}}.
-However, several other changes would be needed in order to do that, so
-we prefer to keep two different syntactic constructs for blocks. */
+The syntax of the IMP++ constructs is self-explanatory.  Note that assignment
+is now an expression construct.  Also, \texttt{print} is variadic, taking a
+list of expressions as argument.  It is also strict, which means that the
+entire list of expressions, that is, each expression in the list, will be
+evaluated.  Note also that we have now defined sequential composition
+of statements as a whitespace-separated list of statements, aliased with
+the nonterminal \texttt{Stmts}, and block as such a (possibly empty) sequence
+of statements surrounded by curly brackets.  */
 
-  syntax AExp  ::= Int | Id | String
+  syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
                  > AExp "/" AExp              [left, strict, division]
-                 > AExp "+" AExp              [left, strict, addition]
+                 > AExp "+" AExp              [left, strict]
+                 > "spawn" Block
+                 > Id "=" AExp                [strict(2)]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
                  | "!" BExp                   [strict]
                  > BExp "&&" BExp             [left, strict(1)]
                  | "(" BExp ")"               [bracket]
-  syntax Block ::= "{" "}"
-                 | "{" Stmt "}"
+  syntax Block ::= "{" Stmts "}"
   syntax Stmt  ::= Block
-                 | Id "=" AExp ";"            [strict(2)]
+                 | AExp ";"                   [strict]
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
                  | "int" Ids ";"
                  | "print" "(" AExps ")" ";"  [strict]
                  | "halt" ";"
-                 > "spawn" Stmt
-                 > Stmt Stmt                  [left]
+                 > "join" AExp ";"            [strict]
 
   syntax Ids   ::= List{Id,","}               [strict]
   syntax AExps ::= List{AExp,","}             [strict]
+  syntax Stmts ::= List{Stmt,""}
 endmodule
 
 
@@ -157,10 +163,10 @@ can be anything.  For simplicity, here we assume they are natural
 numbers.  Moreover, each thread has its own environment, so it knows
 where all the variables that it has access to are located in the store
 (that includes its locally declared variables as well as the variables
-of its parent thread).  The store is shared by all threads.  For
-simplicity, we assume a sequentially consistent memory model in
-IMP++\@.  Note that the \textsf{thread} cell has multiplicity ``*'',
-meaning that there could be zero, one, or more instances of that cell
+of its parent thread), and its own unique identifier.  The store is
+shared by all threads.  For simplicity, we assume a sequentially consistent
+memory model in IMP++\@.  Note that the \textsf{thread} cell has multiplicity
+``*'', meaning that there could be zero, one, or more instances of that cell
 in the configuration at any given time.  This multiplicity information
 is important for \K's {\em configuration abstraction} process: it tells
 \K how to complete rules which, in order to increase the modularity of the
@@ -171,8 +177,9 @@ buffers as lists of items. */
   configuration <T color="yellow">
                   <threads color="orange">
                     <thread multiplicity="*" color="blue">
-                      <k color="green"> $PGM:Stmt </k>
+                      <k color="green"> $PGM:Stmts </k>
                       <env color="LightSkyBlue"> .Map </env>
+                      <id color="black"> 0 </id>
                     </thread>
                   </threads>
                   <br/>
@@ -240,13 +247,13 @@ program's execution encounters more \texttt{read()} constructs. */
 /*@ \subsection{The old IMP constructs}
 The semantics of the old IMP constructs is almost identical to their
 semantics in the original IMP language, except for those constructs
-making use of the program state.  Indeed, the rules for variable
-lookup and assignment in IMP accessed the \textsf{state} cell, but
-that cell is not available in IMP++ anymore.  Instead, we have to use the
-combination of environment and store cells.  Thanks to \K's implicit
-configuration abstraction, we do not have to mention the
-\textsf{thread} and \textsf{threads} cells: these are automatically
-inferred (and added by the \K tool at compile time) from the
+making use of the program state and for those whose syntax has slightly
+changed.  Indeed, the rules for variable lookup and assignment in IMP
+accessed the \textsf{state} cell, but that cell is not available in IMP++
+anymore.  Instead, we have to use the combination of environment and store
+cells.  Thanks to \K's implicit configuration abstraction, we do not have
+to mention the \textsf{thread} and \textsf{threads} cells: these are
+automatically inferred (and added by the \K tool at compile time) from the
 definition of the configuration above, as there is only one correct
 way to complete the configuration context of these rules in order to
 match the configuration declared above. In our case here, ``correct way''
@@ -300,30 +307,40 @@ them is chosen first. */
   rule true && B => B
   rule false && _ => false
 
-/*@ \subsubsection{Empty block}
-Non-empty block needs a different semantics, so we move it below
-with the semantics of the new IMP++ constructs. */
+/*@ \subsubsection{Variable assignment}
+Note that the old IMP assignment statement ``X = I;'' is now composed of two
+constructs: an assignment expression construct ``X = I'', followed by a
+semicolon ``;'' turning the expression into a statement.  The rationale behind
+this syntactic restructuring has been explained in Lesson 7.  Here is the
+semantics of the two constructs: */
 
-  rule {} => .   [structural]
-
-//@ \subsubsection{Variable assignment}
-
-  rule <k> X = I:Int; => . ...</k>
+  rule _:Int; => .
+  rule <k> X = I:Int => I ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> (_ => I) ...</store>  [assignment]
 
-//@ \subsubsection{Sequential composition}
+/*@ \subsubsection{Sequential composition}
+Sequential composition has been defined as a whitespace-separated syntactic
+list of statements.  Recall that syntactic lists are actually syntactic
+sugar for cons-lists.  Therefore, the following two rules eventually
+sequentialize a syntactic list of statements ``s1 s2 ... sn.. into the
+corresponding computation ``s1 ~> s2 ~> ... ~> sn''. */
 
-  rule S1 S2 => S1 ~> S2  [structural]
+   rule .Stmts => .
+   rule S Ss => S ~> Ss  [structural]
 
 //@ \subsubsection{Conditional statement}
 
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
 
-//@ \subsubsection{While loop}
+/*@ \subsubsection{While loop}
+The only thing to notice here is that the empty block has been replaced
+with the block holding the explicit empty sequence.  That's because in
+the semantics all empty lists become explicit corresponding dots
+(to avoid parsing ambiguities) */
 
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
 
 /*@ \subsection{The new IMP++ constructs}
 We next discuss the semantics of the new IMP++ constructs. */
@@ -338,12 +355,12 @@ reduction to the built-in string concatenation operation. */
   rule Str1:String + Str2:String => Str1 +String Str2
 
 /*@ \subsubsection{Variable increment}
-Like variable lookup, this is also a supercool transition: we want it
-to count both in the non-determinism due to strict operations above it
-in the computation and in the non-determinism due to thread
-interleavings.  This rule also relies on \K's configuration
-abstraction. Without abstraction, you would have to also include the
-\textsf{thread} and \textsf{threads} cells. */
+Like variable lookup, this is also meant to be a supercool transition: we
+want it to count both in the non-determinism due to strict operations above
+it in the computation and in the non-determinism due to thread
+interleavings.  This rule also relies on \K's configuration abstraction.
+Without abstraction, you would have to also include the \textsf{thread} and
+\textsf{threads} cells. */
 
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
@@ -379,7 +396,7 @@ all behaviors.  The second rule is structural because we do not want it to
 count as a computational step. */
 
   syntax Printable ::= Int | String
-  rule <k> print(P:Printable,AEs:AExps => AEs); ...</k>
+  rule <k> print(P:Printable,AEs => AEs); ...</k>
        <out>... . => ListItem(P) </out>  [print]
   rule print(.AExps); => .  [structural]
 
@@ -397,21 +414,22 @@ because there is nothing else to rewrite.  */
   
 /*@ \subsubsection{Spawn thread}
 A spawned thread is passed its parent's environment at creation time.
-The \texttt{spawn} statement in the parent thread is immediately
-dissolved so the parent thread can continue its execution.  We only
-consider a sequentially consistent shared memory model for IMP++, but
-other memory models can also be defined in \K; see, for example, the
-definition of KERNELC\@.  Note that the rule below does not need to be
-tagged in order to make it a transition when we kompile, because the creation
-of the thread itself does not interfere with the execution of other threads.
-Also, note that \K's configuration abstraction is at heavy work here, in two
-different places.  First, the parent thread's \textsf{k} and \textsf{env} cells
-are wrapped within a \textsf{thread} cell.  Second, the child thread's
-\textsf{k} and \textsf{env} cells are also wrapped within a \textsf{thread}
-cell.  Why that way and not putting all these four cells together within the
+The \texttt{spawn} expression in the parent thread is immediately
+replaced by the unique identifier of the newly created thread, so the
+parent thread can continue its execution.  We only consider a sequentially
+consistent shared memory model for IMP++, but other memory models can also
+be defined in \K; see, for example, the definition of KERNELC\@.  Note that
+the rule below does not need to be tagged in order to make it a transition
+when we kompile, because the creation of the thread itself does not interfere
+with the execution of other threads.  Also, note that \K's configuration
+abstraction is at heavy work here, in two different places.  First, the
+parent thread's \textsf{k} and \textsf{env} cells are wrapped within a
+\textsf{thread} cell.  Second, the child thread's \textsf{k}, \textsf{env}
+and \textsf{id} cells are also wrapped within a \textsf{thread} cell.  Why
+that way and not putting all these four cells together within the
 same thread, or even create an additional \textsf{threads} cell at top
-holding a \textsf{thread} cell with the new \textsf{k} and
-\textsf{env}?  Because in the original configuration we declared
+holding a \textsf{thread} cell with the new \textsf{k}, \textsf{env}
+and \textsf{id}?  Because in the original configuration we declared
 the multiplicity of the \textsf{thread} cell to be ``$*$'', which
 effectively tells the \K tool that zero, one or more such cells can
 co-exist in a configuration at any moment.  The other cells have the
@@ -421,20 +439,23 @@ the declared configuration is to wrap the first two cells in a
 \textsf{thread} cell, and the latter two cells under the ``$\kdot$''
 also in a \textsf{thread} cell.  Once the rule applies, the spawning
 thread cell will add a new thread cell next to it, which is consistent
-with the declared configuration cell multiplicity. */
+with the declared configuration cell multiplicity.  The unique identifier
+of the new thread is generated using the ``fresh'' side condition. */
 
-  rule <k> spawn S => . ...</k> <env> Rho </env>
-       (. => <thread>... <k> S </k> <env> Rho </env> ...</thread>)
+  rule <k> spawn S => T ...</k> <env> Rho </env>
+       (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
+    when fresh(T:Int)
 
-/*@ \subsubsection{Terminate thread}
-When the computation of a thread is empty, the thread is dissolved.
-This rule can be regarded as a configuration cleanup operation, so it
-needs not count as a computational step; we therefore tag it structural. */
+/*@ \subsubsection{Join thread}
+A thread who wants to join another thread \texttt{T} has to wait until
+the computation of \texttt{T} becomes empty.  When that happens, the
+join statement is simply dissolved.  The terminated thread is not removed,
+because we want to allow possible other join statements to also dissolve. */
 
-  rule <thread>... <k> . </k> ...</thread> => .  [structural]
+  rule <k> join(T); => . ...</k> <thread>... <k>.</k> <id>T</id> ...</thread>
 
-/*@ \subsubsection{Nonempty Blocks}
-The body statement of a non-empty block is executed normally, making sure
+/*@ \subsubsection{Blocks}
+The body statement of a block is executed normally, making sure
 that the environment at the block entry point is saved in the computation,
 in order to be recovered after the block body statement.  This step is
 necessary because blocks can declare new variables having the same
@@ -451,20 +472,20 @@ approach is to actually maintain a stack of environments and to push a
 new layer at block entrance and pop it at block exit.  The variable
 lookup/assign/increment operations then also need to change, so we do
 not prefer that non-modular approach. Compilers solve this problem by
-statically renaming all local variables into fresh ones, to
-completely eliminate shadowing and thus environment
-saving/restoring.  The second rule below can also be structural,
-because what it effectively does is to take a snapshot of the current
-environment; this operation is arguably not a computational step. */
+statically renaming all local variables into fresh ones, to completely
+eliminate shadowing and thus environment saving/restoring.  The rule
+below can be structural, because what it effectively does is to take a
+snapshot of the current environment; this operation is arguably not a
+computational step. */
 
-  rule <k> {S} => S ~> env(Rho) ...</k> <env> Rho </env>  [structural]
+  rule <k> {Ss} => Ss ~> env(Rho) ...</k> <env> Rho </env>  [structural]
 
 /*@ \subsubsection{Variable declaration}
 We allocate a fresh location for each newly declared variable and
 initialize it with 0. */
 
-  rule <k> int (X:Id,Xs:Ids => Xs); ...</k>
-       <env> Rho:Map => Rho[N/X] </env>
+  rule <k> int (X:Id,Xs => Xs); ...</k>
+       <env> Rho => Rho[N/X] </env>
        <store>... . => N|->0 ...</store>
     when fresh(N:Nat)
   rule int .Ids; => .  [structural]

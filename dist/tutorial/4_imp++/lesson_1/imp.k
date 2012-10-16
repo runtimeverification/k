@@ -1,5 +1,5 @@
 module IMP-SYNTAX
-  syntax AExp  ::= Int | Id | String
+  syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
                  > AExp "/" AExp              [left, strict]
@@ -56,8 +56,8 @@ module IMP
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 
-  rule <k> int (X:Id,Xs:Ids => Xs);...</k>
-       <state> Rho:Map (. => X |-> 0) </state>
+  rule <k> int (X:Id,Xs => Xs);...</k>
+       <state> Rho (. => X |-> 0) </state>
     when notBool (X in keys(Rho))
   rule int .Ids; => .  [structural]
 endmodule
