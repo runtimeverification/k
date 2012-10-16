@@ -93,7 +93,12 @@ public class Initialize {
 	
 	public void testTutorial()
 	{
+		
 		String kframework = StaticK.kbasedir;
+		String tutorialDefDir = kframework + StaticK.fileSep + "dist"
+				+ StaticK.fileSep + "tutorial";
+		String tutorialTestDir = kframework + StaticK.fileSep + "tests"
+				+ StaticK.fileSep + "tutorial";
 
 		String tutorial = kframework + StaticK.fileSep + "dist" + StaticK.fileSep + "tutorial";
 		
@@ -103,7 +108,7 @@ public class Initialize {
 		{
 			String defRelPath = t.substring(kframework.length());
 			String programsRelDir = new File(t).getParent().substring(kframework.length());
-			String testsRelDir = programsRelDir + StaticK.fileSep + "tests" + StaticK.fileSep + "tutorial";
+			String testsRelDir = (tutorialTestDir + new File(t).getParentFile().getAbsolutePath().substring(tutorialDefDir.length())).substring(kframework.length());
 			root.appendChild(createTest(kframework, defRelPath, programsRelDir, testsRelDir, doc, "tutorial"));
 			System.out.println(searchRecFile(kframework + StaticK.fileSep + testsRelDir, "spawn.imp", kframework));
 		}
