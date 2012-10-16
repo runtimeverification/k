@@ -320,6 +320,7 @@ dimension: */
          while($2 <= N1 - 1) {
            var X[N2,Vs]; 
            $1[$2] = X;
+           ++$2;
          }
        }
     [structural]

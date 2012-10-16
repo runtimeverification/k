@@ -4,6 +4,7 @@ function factorial(y) {
   print("Factorial of ", y, " is: ");
   var t=1, i;
   for(i=1; i<=y; ++i) {
+var a[10,2];
     t = t*i;
   }
   return t;
