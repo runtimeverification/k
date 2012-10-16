@@ -83,9 +83,9 @@ public class Initialize {
 		for(String t : regTests)
 		{
 			String defRelPath = t.substring(kframework.length());
-//			String programsRelDir = new File(t).getParent().substring(kframework.length());
-//			String testsRelDir = programsRelDir + StaticK.fileSep + "tests";
-			root.appendChild(createTest(kframework, defRelPath, "somedir", "somedir", doc, "regression"));
+			String programsRelDir = new File(t).getParent().substring(kframework.length());
+			String testsRelDir = programsRelDir + StaticK.fileSep + "tests";
+			root.appendChild(createTest(kframework, defRelPath, programsRelDir, testsRelDir, doc, "regression"));
 		}
 		
 		save();
@@ -106,7 +106,7 @@ public class Initialize {
 		{
 			String defRelPath = t.substring(kframework.length());
 			String programsRelDir = new File(t).getParent().substring(kframework.length());
-			String testsRelDir = programsRelDir;// + StaticK.fileSep + "tests";
+			String testsRelDir = programsRelDir + StaticK.fileSep + "tests" + StaticK.fileSep + "tutorial";
 			root.appendChild(createTest(kframework, defRelPath, programsRelDir, testsRelDir, doc, "tutorial"));
 		}
 		
