@@ -16,12 +16,13 @@ import org.kframework.kil.visitors.BasicVisitor;
 
 public class DefinitionSDFVisitor extends BasicVisitor {
 
-	private List<Production> outsides = new ArrayList<Production>();
-	private List<Production> constants = new ArrayList<Production>();
-	private Set<Sort> startSorts = new HashSet<Sort>(); // list of sorts that are start symbols
-	private Set<Subsort> subsorts = new HashSet<Subsort>();
-	private Set<Production> listProds = new HashSet<Production>(); // list of sorts declared as being list
-	private Set<Sort> userSorts = new HashSet<Sort>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
+	public List<Production> outsides = new ArrayList<Production>();
+	public List<Production> constants = new ArrayList<Production>();
+	public Set<Sort> startSorts = new HashSet<Sort>(); // list of sorts that are start symbols
+	public Set<Subsort> subsorts = new HashSet<Subsort>();
+	public Set<Production> listProds = new HashSet<Production>(); // list of sorts declared as being list
+	public Set<Sort> userSorts = new HashSet<Sort>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
+	public List<PriorityBlock> prilist = new ArrayList<PriorityBlock>();
 
 	public DefinitionSDFVisitor() {
 	}
@@ -29,7 +30,6 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 	public void visit(Syntax syn) {
 
 		userSorts.add(syn.getSort());
-		List<PriorityBlock> prilist = new ArrayList<PriorityBlock>();
 		for (PriorityBlock prt : syn.getPriorityBlocks()) {
 			PriorityBlock p = new PriorityBlock();
 			p.setAssoc(prt.getAssoc());

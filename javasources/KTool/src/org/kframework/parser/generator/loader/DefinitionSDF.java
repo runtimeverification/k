@@ -1,10 +1,21 @@
 package org.kframework.parser.generator.loader;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.kframework.kil.Definition;
+import org.kframework.kil.PriorityBlock;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
+import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.loader.Subsort;
+import org.kframework.parser.generator.basic.Item.ItemType;
+import org.kframework.utils.StringUtil;
+import org.kframework.utils.general.GlobalSettings;
 
 public class DefinitionSDF {
 
@@ -20,50 +31,50 @@ public class DefinitionSDF {
 
 		Set<Sort> sorts = new HashSet<Sort>(); // list of inserted sorts that need to avoid the priority filter
 
-		
 		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor();
 		def.accept(psdfv);
 /*
 		{
 			if (psdfv.prilist.size() > 0) {
-				if (prilist.size() <= 1 && syn.getPriorities().get(0).getBlockAssoc() == null) {
-					// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
-					// you need to have at least 2 productions or a block association
-					Priority prt = prilist.get(0);
-					for (Production p : prt.getProductions())
-						outsides.add(p);
-				} else {
+				// if (psdfv.prilist.size() <= 1 && syn.getPriorities().get(0).getBlockAssoc() == null) {
+				// // weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
+				// // you need to have at least 2 productions or a block association
+				// PriorityBlock prt = psdfv.prilist.get(0);
+				// for (Production p : prt.getProductions())
+				// psdfv.outsides.add(p);
+				// } else
+				{
 					sdf += "context-free priorities\n";
 
-					for (Priority prt : prilist) {
-						if (prt.getBlockAssoc() == null)
+					for (PriorityBlock prt : psdfv.prilist) {
+						if (prt.getAssoc() == null)
 							sdf += "{\n";
 						else
-							sdf += "{ " + prt.getBlockAssoc() + ":\n";
+							sdf += "{ " + prt.getAssoc() + ":\n";
 						for (Production p : prt.getProductions()) {
 							sdf += "	";
-							List<Item> items = p.getItems();
+							List<ProductionItem> items = p.getItems();
 							for (int i = 0; i < items.size(); i++) {
-								Item itm = items.get(i);
-								if (itm.getType() == ItemType.TERMINAL) {
+								ProductionItem itm = items.get(i);
+								if (itm.getType() == ProductionType.TERMINAL) {
 									Terminal t = (Terminal) itm;
 									if (t.getTerminal().equals(":"))
 										sdf += "DouaPuncteDz ";
 									else
 										sdf += "\"" + t.getTerminal() + "\" ";
-								} else if (itm.getType() == ItemType.SORT) {
+								} else if (itm.getType() == ProductionType.SORT) {
 									Sort srt = (Sort) itm;
 									// if we are on the first or last place and this sort is not a list, just print the sort
 									if (i == 0 || i == items.size() - 1) {
-										sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
+										sdf += StringUtil.escapeSortName(srt.getName()) + " ";
 									} else {
 										// if this sort should be inserted to avoid the priority filter, then add it to the list
 										sorts.add(srt);
-										sdf += "InsertDz" + StringUtil.escapeSortName(srt.getSortName()) + " ";
+										sdf += "InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ";
 									}
 								}
 							}
-							sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+							sdf += "-> " + StringUtil.escapeSortName(p.getSort());
 							sdf += getSDFAttributes(p.getAttributes()) + "\n";
 						}
 						sdf += "} > ";
@@ -73,21 +84,20 @@ public class DefinitionSDF {
 			}
 		}
 
-		Set<Subsort> sbs = getSubsorts();
-		for (Production p1 : listProds)
-			for (Production p2 : listProds)
+		for (Production p1 : psdfv.listProds)
+			for (Production p2 : psdfv.listProds)
 				if (p1 != p2) {
 					Sort srt1 = ((UserList) p1.getItems().get(0)).getSort();
 					Sort srt2 = ((UserList) p2.getItems().get(0)).getSort();
 					if (sbs.contains(new Subsort(srt1, srt2)))
-						subsorts.add(new Subsort(p1.getProdSort(), p2.getProdSort()));
+						psdfv.subsorts.add(new Subsort(p1.getSort(), p2.getSort()));
 				}
 
 		sdf += "%% subsorts 1\n";
 		sdf += "context-free priorities\n{\n";
 		// 1
 		// print Sort -> K > A -> B > K -> Sort
-		for (Sort s : userSorts) {
+		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
 				sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + " -> K";
 				// sdf += " {cons(\"K12" + StringUtil.escapeSortName(s.getSortName()) + "\")}";
@@ -95,7 +105,7 @@ public class DefinitionSDF {
 			}
 		}
 		sdf += "} > {\n";
-		for (Subsort subs : subsorts) {
+		for (Subsort subs : psdfv.subsorts) {
 			Sort s1 = (Sort) subs.getSmallSort();
 			Sort s2 = subs.getBigSort();
 			if (!s1.isBaseSort() && !s2.isBaseSort()) {
@@ -105,10 +115,10 @@ public class DefinitionSDF {
 			}
 		}
 		sdf += "} > {\n";
-		for (Sort s : userSorts) {
+		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf += "	K -> " + StringUtil.escapeSortName(s.getSortName());
-				// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12K\")}";
+				sdf += "	K -> " + StringUtil.escapeSortName(s.getName());
+				// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12K\")}";
 				sdf += "\n";
 			}
 		}
@@ -119,16 +129,16 @@ public class DefinitionSDF {
 			// 2
 			sdf += "%% subsorts 2\n";
 			// print Sort -> K > K -> Sort
-			for (Sort s : userSorts) {
+			for (Sort s : psdfv.userSorts) {
 				if (!s.isBaseSort()) {
 					sdf += "context-free priorities\n{\n";
-					sdf += "        K -> " + StringUtil.escapeSortName(s.getSortName());
+					sdf += "        K -> " + StringUtil.escapeSortName(s.getName());
 					// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12K\")}";
 					sdf += "\n";
 					sdf += "} .> {\n";
-					for (Sort ss : userSorts) {
+					for (Sort ss : psdfv.userSorts) {
 						if (!ss.isBaseSort() && (ss.equals(s) || sbs.contains(new Subsort(s, ss)))) {
-							sdf += "        " + StringUtil.escapeSortName(ss.getSortName()) + " -> K";
+							sdf += "        " + StringUtil.escapeSortName(ss.getName()) + " -> K";
 							// sdf += " {cons(\"K12" + StringUtil.escapeSortName(ss.getSortName()) + "\")}";
 							sdf += "\n";
 						}
@@ -141,17 +151,17 @@ public class DefinitionSDF {
 			sdf += "%% subsorts 2\n";
 			// print K -> Sort > Sort -> K
 			sdf += "context-free priorities\n{\n";
-			for (Sort s : userSorts) {
+			for (Sort s : psdfv.userSorts) {
 				if (!s.isBaseSort()) {
-					sdf += "	K -> " + StringUtil.escapeSortName(s.getSortName());
+					sdf += "	K -> " + StringUtil.escapeSortName(s.getName());
 					// sdf += " {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12K\")}";
 					sdf += "\n";
 				}
 			}
 			sdf += "} .> {\n";
-			for (Sort s : userSorts) {
+			for (Sort s : psdfv.userSorts) {
 				if (!s.isBaseSort()) {
-					sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + " -> K";
+					sdf += "	" + StringUtil.escapeSortName(s.getName()) + " -> K";
 					// sdf += " {cons(\"K12" + StringUtil.escapeSortName(s.getSortName()) + "\")}";
 					sdf += "\n";
 				}
@@ -161,49 +171,49 @@ public class DefinitionSDF {
 
 		sdf += "context-free syntax\n";
 
-		for (Production p : outsides) {
+		for (Production p : psdfv.outsides) {
 			if (p.isListDecl()) {
 				UserList si = (UserList) p.getItems().get(0);
-				sdf += "	" + StringUtil.escapeSortName(si.getSort().getSortName()) + " \"" + si.getTerminal() + "\" " + StringUtil.escapeSortName(p.getProdSort().getSortName()) + " -> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+				sdf += "	" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\" " + StringUtil.escapeSortName(p.getSort()) + " -> " + StringUtil.escapeSortName(p.getSort());
 				sdf += " {cons(\"" + p.getAttributes().get("cons") + "\")}\n";
-				sdf += "	\"." + p.getProdSort().getSortName() + "\" -> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
-				sdf += " {cons(\"" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "1Empty\")}\n";
+				sdf += "	\"." + p.getSort() + "\" -> " + StringUtil.escapeSortName(p.getSort());
+				sdf += " {cons(\"" + StringUtil.escapeSortName(p.getSort()) + "1Empty\")}\n";
 			} else if (p.getAttributes().containsKey("bracket")) {
 				// don't add bracket attributes added by the user
 			} else {
 				sdf += "	";
-				List<Item> items = p.getItems();
+				List<ProductionItem> items = p.getItems();
 				for (int i = 0; i < items.size(); i++) {
-					Item itm = items.get(i);
-					if (itm.getType() == ItemType.TERMINAL) {
+					ProductionItem itm = items.get(i);
+					if (itm.getType() == ProductionType.TERMINAL) {
 						Terminal t = (Terminal) itm;
 						if (t.getTerminal().equals(":"))
 							sdf += "DouaPuncteDz ";
 						else
 							sdf += "\"" + t.getTerminal() + "\" ";
-					} else if (itm.getType() == ItemType.SORT) {
+					} else if (itm.getType() == ProductionType.SORT) {
 						Sort srt = (Sort) itm;
-						sdf += StringUtil.escapeSortName(srt.getSortName()) + " ";
+						sdf += StringUtil.escapeSortName(srt.getName()) + " ";
 					}
 				}
-				sdf += "-> " + StringUtil.escapeSortName(p.getProdSort().getSortName());
+				sdf += "-> " + StringUtil.escapeSortName(p.getSort());
 				sdf += getSDFAttributes(p.getAttributes()) + "\n";
 			}
 		}
 		for (Sort ss : sorts)
-			sdf += "	" + StringUtil.escapeSortName(ss.getSortName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getSortName()) + "\n";
+			sdf += "	" + StringUtil.escapeSortName(ss.getName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getName()) + "\n";
 
 		sdf += "\n\n";
 		// print variables, HOLEs
-		for (Sort s : userSorts) {
+		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf += "	VARID  \":\" \"" + s.getSortName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12Var\")}\n";
+				sdf += "	VARID  \":\" \"" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n";
 			}
 		}
 		sdf += "\n";
-		for (Sort s : userSorts) {
+		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf += "	\"HOLE\" \":\" \"" + s.getSortName() + "\"      -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getSortName()) + "12Hole\")}\n";
+				sdf += "	\"HOLE\" \":\" \"" + s.getName() + "\"      -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n";
 			}
 		}
 
@@ -232,14 +242,14 @@ public class DefinitionSDF {
 		sdf += "	DouaPuncteDz -/- [A-Z]\n\n";
 
 		sdf += "lexical syntax\n";
-		for (Production p : constants) {
-			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getProdSort().getSortName()) + "\n";
+		for (Production p : psdfv.constants) {
+			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getSort().getSortName()) + "\n";
 		}
 
 		sdf += "\n\n%% sort predicates\n";
 		// print is<Sort> predicates (actually KLabel)
-		for (Sort s : userSorts) {
-			sdf += "	\"is" + s.getSortName() + "\"      -> DzKLabel\n";
+		for (Sort s : psdfv.userSorts) {
+			sdf += "	\"is" + s.getName() + "\"      -> DzKLabel\n";
 		}
 
 		sdf += "\n\n";

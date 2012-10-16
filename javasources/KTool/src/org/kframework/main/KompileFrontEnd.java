@@ -486,16 +486,22 @@ public class KompileFrontEnd {
 			def.setModulesMap(bparser.getModulesMap());
 			def.setItems(bparser.getModuleItems());
 
-			if (GlobalSettings.synModule == null)
-				def.setMainSyntaxModule(mainModule + "-SYNTAX");
-			else
+			if (GlobalSettings.synModule == null) {
+				String synModule = mainModule + "-SYNTAX";
+				if (!def.getModulesMap().containsKey(synModule)) {
+					synModule = mainModule;
+					String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + def.getMainSyntaxModule() + "' instead.";
+					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
+				}
+				def.setMainSyntaxModule(synModule);
+			} else
 				def.setMainSyntaxModule(GlobalSettings.synModule);
 
 			def.accept(new UpdateReferencesVisitor());
+			def.accept(new AddConsesVisitor());
 			def.accept(new CollectConsesVisitor());
 			def.accept(new CollectSubsortsVisitor());
 			def.accept(new CollectConfigCellsVisitor());
-			def.accept(new AddConsesVisitor());
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Basic Parsing");
@@ -512,11 +518,7 @@ public class KompileFrontEnd {
 				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
 			// make a set of all the syntax modules
-			if (def.getModulesMap().get(def.getMainSyntaxModule()) == null) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, "Could not find main syntax module used to generate a parser for programs: " + def.getMainSyntaxModule(), def.getMainFile(), "File system."));
-			} else {
-				FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", ProgramSDF.getSdfForPrograms(def));
-			}
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", ProgramSDF.getSdfForPrograms(def));
 
 			String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
@@ -637,11 +639,10 @@ public class KompileFrontEnd {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Automatic Module Imports");
 			}
-
 
 			DittoFilter df = new DittoFilter();
 			javaDef.accept(df);
@@ -650,14 +651,12 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Ditto Filter");
 			}
 
-			
-			
 			javaDef = new FlattenModules().compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Flatten Modules");
 			}
-			
+
 			javaDef = new CompilerTransformerStep(new DesugarStreams()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
@@ -706,43 +705,43 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Blocking Input");
 			}
-						
+
 			javaDef = new CompilerTransformerStep(new GenerateSyntaxPredicates()).compile(javaDef);
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Generate Syntax Predicates");
 			}
-			
+
 			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Syntax Predicates");
 			}
-						
+
 			javaDef = new CompilerTransformerStep(new ResolveBuiltins()).compile(javaDef);
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Builtins");
 			}
-			
-			javaDef = new CompilerTransformerStep(new ResolveListOfK()).compile(javaDef);		
-			
+
+			javaDef = new CompilerTransformerStep(new ResolveListOfK()).compile(javaDef);
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve ListOfK");
 			}
-			
+
 			javaDef = new CompilerTransformerStep(new FlattenSyntax()).compile(javaDef);
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Flatten Syntax");
 			}
-			
-			javaDef = new CompilerTransformerStep(new ResolveHybrid()).compile(javaDef);		
+
+			javaDef = new CompilerTransformerStep(new ResolveHybrid()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Hybrid");
 			}
-			
+
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");
@@ -760,36 +759,26 @@ public class KompileFrontEnd {
 			String supercool = metadataTags(GlobalSettings.supercool);
 
 			javaDef = (Definition) javaDef.accept(new AddStrictStar());
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Strict Star");
 			}
-			
+
 			javaDef = (Definition) javaDef.accept(new AddDefaultComputational());
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Default Computational");
 			}
-			
+
 			javaDef = (Definition) javaDef.accept(new AddOptionalTags());
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Optional Tags");
 			}
 
-			String compile = load 
-					+ javaDef.toMaude() 
-					+ " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n"
-					+ "---(\n"
-					+ "red in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n"
-					+ "quit\n"
-					+ "---)\n"
-					+ " loop compile .\n" + 
-					"(compile " + javaDef.getMainModule() + " " + step 
-					+ " transitions " + transition + " superheats " + superheat + " supercools " + supercool 
-					+ " anywheres \"anywhere=() function=() predicate=() macro=()\" " 
-					+  "defineds \"function=() predicate=() defined=()\" .)\n" 
-					+ "quit\n";
+			String compile = load + javaDef.toMaude() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "red in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n"
+					+ "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
+					+ " anywheres \"anywhere=() function=() predicate=() macro=()\" " + "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 
