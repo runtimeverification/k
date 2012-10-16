@@ -99,15 +99,13 @@ public class Initialize {
 		
 		List<String> tTests = getKFilesFromDir(tutorial);
 		
-//		System.out.println("Found: " + tTests.size() + " tests.");
-//		System.out.println(tTests);
-		
 		for(String t : tTests)
 		{
 			String defRelPath = t.substring(kframework.length());
 			String programsRelDir = new File(t).getParent().substring(kframework.length());
 			String testsRelDir = programsRelDir + StaticK.fileSep + "tests" + StaticK.fileSep + "tutorial";
 			root.appendChild(createTest(kframework, defRelPath, programsRelDir, testsRelDir, doc, "tutorial"));
+			System.out.println(searchRecFile(kframework + StaticK.fileSep + testsRelDir, "spawn.imp", kframework));
 		}
 		
 		save();
