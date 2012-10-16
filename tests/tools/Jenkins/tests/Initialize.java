@@ -46,6 +46,7 @@ public class Initialize {
 	{
 		testExamples();
 		testRegression();
+		testTutorial();
 	}
 	
 	public void testExamples() {
@@ -89,6 +90,26 @@ public class Initialize {
 		
 		save();
 	}
+	
+	public void testTutorial()
+	{
+		String kframework = StaticK.kbasedir;
+
+		String tutorial = kframework + StaticK.fileSep + "tutorial";
+		
+		List<String> tTests = getKFilesFromDir(tutorial);
+		
+		for(String t : tTests)
+		{
+			String defRelPath = t.substring(kframework.length());
+			String programsRelDir = new File(t).getParent().substring(kframework.length());
+			String testsRelDir = programsRelDir;// + StaticK.fileSep + "tests";
+			root.appendChild(createTest(kframework, defRelPath, programsRelDir, testsRelDir, doc, "tutorial"));
+		}
+		
+		save();
+	}
+	
 	
 	private List<String> getKFilesFromDir(String dir) {
 		List<String> files = new LinkedList<String>();
