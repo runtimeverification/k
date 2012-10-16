@@ -99,6 +99,9 @@ public class Initialize {
 		
 		List<String> tTests = getKFilesFromDir(tutorial);
 		
+		System.out.println("Found: " + tTests.size() + " tests.");
+		System.out.println(tTests);
+		
 		for(String t : tTests)
 		{
 			String defRelPath = t.substring(kframework.length());
