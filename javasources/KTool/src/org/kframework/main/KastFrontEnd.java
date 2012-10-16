@@ -63,25 +63,17 @@ public class KastFrontEnd {
 		} else {
 			// search for the definition
 			try {
-				File pgmFolder = new File(".").getCanonicalFile();
-				boolean found = false;
-				while (!found) {
-					// check to see if I got to / or drive folder
-					if (pgmFolder.getAbsoluteFile().getParentFile() == null)
-						break;
-					File dotk = new File(pgmFolder.getCanonicalPath() + "/.k");
-					pgmFolder = pgmFolder.getParentFile();
-					if (dotk.exists()) {
-						File defXml = new File(dotk.getCanonicalPath() + "/def.xml");
-						if (!defXml.exists()) {
-							GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition in: " + dotk, "command line", pgm));
-						}
-
-						Document doc = XmlLoader.getXMLDoc(FileUtil.getFileContent(defXml.getAbsolutePath()));
-						Element el = (Element) doc.getElementsByTagName("def").item(0);
-						def = new File(el.getAttribute("mainFile"));
-						found = true;
+				// check to see if I got to / or drive folder
+				File dotk = new File(new File(".").getCanonicalPath() + "/.k");
+				if (dotk.exists()) {
+					File defXml = new File(dotk.getCanonicalPath() + "/def.xml");
+					if (!defXml.exists()) {
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
 					}
+
+					Document doc = XmlLoader.getXMLDoc(FileUtil.getFileContent(defXml.getAbsolutePath()));
+					Element el = (Element) doc.getElementsByTagName("def").item(0);
+					def = new File(el.getAttribute("mainFile"));
 				}
 
 				if (def == null)
