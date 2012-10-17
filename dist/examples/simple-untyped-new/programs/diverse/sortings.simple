@@ -1,7 +1,7 @@
 function init(n) {
-  var x[n];
+  var x[n], i;
   print("Type ",n," numbers: ");
-  for i = 0 to n - 1 do {
+  for (i = 0; i <= n - 1; ++i) {
     x[i] = read();
   }
   print("Finished reading the ",n," numbers\n");
@@ -10,15 +10,16 @@ function init(n) {
 
 function printArray(x) {
   print("\n");
-  for i = 0 to sizeOf(x) - 1 do {
+  var i;
+  for (i = 0; i <= sizeOf(x) - 1; ++i) {
     print(x[i]," ");
   }
   print("\n");
 }
 
 function reverse(x) {
-  var n = sizeOf(x);
-  for i = 0 to n/2 - 1 do {
+  var n = sizeOf(x), i;
+  for (i = 0; i <= n/2 - 1; ++i) {
     var t = x[i];
     x[i] = x[n - i - 1];
     x[n - i - 1] = t;
@@ -26,50 +27,59 @@ function reverse(x) {
 }
 
 function map(m,f,x) {
-  for i = 0 to sizeOf(f) - 1 do {
+  var i;
+  for (i = 0; i <= sizeOf(f) - 1; ++i) {
     print(m[i]);
     f[i](x);
   }
 }
 
 function insertionSort(x) {
-  for i = 1 to sizeOf(x) - 1 do {
+  var i;
+  for (i = 1; i <= sizeOf(x) - 1; ++i) {
     var v = x[i], j = i - 1;
-    while (j > 0 and x[j] > v) {  // doing the loop only up to 1
+    while (j > 0 && x[j] > v) {  // doing the loop only up to 1
       x[j + 1] = x[j];
       j = j - 1;
     }
-    if (x[0] > v) then { 
+    if (x[0] > v) { 
       x[1] = x[0];
       x[0] = v;
-    } else x[j+1] = v;
+    }
+    else {
+      x[j+1] = v;
+    }
   }
 }
 
 function bubbleSort(v) {
-  var n = sizeOf(v);
-  for i = 0 to n - 1 do
-    for j = 0 to n - 2 do
-      if v[j] > v[j+1] then {
+  var n = sizeOf(v), i, j;
+  for (i = 0; i <= n - 1; ++i) {
+    for (j = 0; j <= n - 2; ++j) {
+      if (v[j] > v[j+1]) {
         var t = v[j+1];
         v[j+1] = v[j];
         v[j] = t;
       }
+    }
+  }
 }
 
 function siftDown(x, root, bottom) {
   var done = false, maxChild;
-  while (root*2 <= bottom and not done) do {
-    if (root*2 == bottom) then {
-      maxChild = root*2;
-    }
-    else if (x[root*2] > x[root*2 + 1]) then {
+  while (root*2 <= bottom && !done) {
+    if (root*2 == bottom) {
       maxChild = root*2;
     }
     else {
-      maxChild = root*2 + 1;
+      if (x[root*2] > x[root*2 + 1]) {
+        maxChild = root*2;
+      }
+      else {
+        maxChild = root*2 + 1;
+      }
     }
-    if (x[root] < x[maxChild]) then {
+    if (x[root] < x[maxChild]) {
       var t = x[root];
       x[root] = x[maxChild];
       x[maxChild] = t;
@@ -83,12 +93,12 @@ function siftDown(x, root, bottom) {
 
 function heapSort(x) {
   var n = sizeOf(x), i = n/2 - 1;
-  while (i >= 0) do {
+  while (i >= 0) {
     siftDown(x, i, n - 1);
     i = i - 1;
   }
   i = n - 1;
-  while (i >= 1 ) do {
+  while (i >= 1 ) {
     var t = x[0];
     x[0] = x[i] ;
     x[i] = t;

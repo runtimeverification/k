@@ -99,19 +99,19 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
                 | "rendezvous" Exp ";"                  [strict]
                 | "print" "(" Exps ")" ";"              [strict]
 
-//  syntax Stmts ::= Stmt
-//                 | Stmts Stmts                          [right]
-//
-//  syntax Pgm ::= "function" Id "(" Ids ")" Block
-//               | Stmts
-//               | Pgm Pgm                                [right]
+  syntax Stmts ::= Stmt
+                 | Stmts Stmts                          [right]
+
+  syntax Pgm ::= "function" Id "(" Ids ")" Block
+               | Stmts
+               | Pgm Pgm                                [right]
 
 // I wish I were able to write the following instead, but the parser
 // gets confused.
 //
- syntax Stmts ::= List{Stmt,""}
- syntax Top ::= Stmt | "function" Id "(" Ids ")" Block
- syntax Pgm ::= List{Top,""}
+// syntax Stmts ::= List{Stmt,""}
+// syntax Top ::= Stmt | "function" Id "(" Ids ")" Block
+// syntax Pgm ::= List{Top,""}
 
 
 /*@ \section{Desugared Syntax}
@@ -124,10 +124,10 @@ that there are only \texttt{while} loops, and that each variable is
 declared alone and is initialized. */
 
   rule if (E) S => if (E) S else {}                             [macro]
-  rule for(Start:Exp; Cond:Exp; Step:Exp) {Ss:Stmts}
-    => Start; while (Cond) {Ss Step;}                            [macro]
+  rule for(Start; Cond; Step) {Ss}
+    => Start; while (Cond) {Ss Step;}                           [macro]
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;      [macro]
-  rule var X:Id = E; => var X; X = E;                       [macro]
+  rule var X:Id = E; => var X; X = E;                           [macro]
 
   syntax Id ::= "main"
 
