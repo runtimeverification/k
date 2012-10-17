@@ -636,6 +636,11 @@ public class KompileFrontEnd {
 
 		try {
 
+			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Add Empty Lists");
+			}
+
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
 			try {
 				javaDef = (org.kframework.kil.Definition) javaDef.accept(amit);

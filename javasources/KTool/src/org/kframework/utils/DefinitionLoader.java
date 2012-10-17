@@ -163,8 +163,6 @@ public class DefinitionLoader {
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Disambiguate");
-
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
 		} catch (TransformerException ex) {
 			ex.report();
 		}
