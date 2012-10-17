@@ -17,12 +17,7 @@ automatically (when one uses an external parser) or manually
 There are two types of declarations: for variables (including arrays) and
 for functions. */
 
-  syntax Ids ::= List{Id,","}            [strict, hybrid]
-  syntax Exps ::=  List{Exp,","}
 
-
-  syntax Decl ::= "var" Exps ";"
-                | "function" Id "(" Ids ")" Block
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -64,6 +59,9 @@ argument (for the same reason as the increment). */
                | Exp "||" Exp            [strict(1), left]
                > Exp "=" Exp             [strict(2), right]
 
+  syntax Ids  ::= List{Id,","}
+  syntax Exps ::=  List{Exp,","}         [strict, hybrid]
+
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
 We syntactically distinguish between empty and non-empty blocks, because we
@@ -85,6 +83,7 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
                 | "{" Stmts "}"
  
   syntax Stmt ::= Block
+                | "var" Exps ";"
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
@@ -100,8 +99,12 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
                 | "rendezvous" Exp ";"                  [strict]
                 | "print" "(" Exps ")" ";"              [strict]
 
-  syntax Stmts ::= Decl | Stmt
+  syntax Stmts ::= Stmt
                  | Stmts Stmts                          [right]
+
+  syntax Pgm ::= "function" Id "(" Ids ")" Block
+               | Stmts
+               | Pgm Pgm                                
 
 //  syntax Stmts ::= Decl | StmtList
 //  syntax StmtList ::= List{Stmt,""}
@@ -208,7 +211,7 @@ to the \K tool, as indicated by the \textit{\$PGM} variable. */
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
-                      <k color="green"> ($PGM:K ~> execute) </k>
+                      <k color="green"> ($PGM:Pgm ~> execute) </k>
                       <br/>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
