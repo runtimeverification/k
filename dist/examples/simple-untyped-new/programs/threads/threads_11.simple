@@ -6,12 +6,12 @@ function main() {
     rendezvous 1;
     print(x," ");
     rendezvous 2;
-  }
+  };
   spawn {
     rendezvous 3;
     print(x,"\n");
     rendezvous 4;
-  }
+  };
   print(x," ");
   x = x+1;
   rendezvous 1;  rendezvous 2;

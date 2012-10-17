@@ -26,7 +26,7 @@ function main() {
     } catch(e) {
       print(e);
     }
-  }
+  };
   spawn {
     var e;
     try {
@@ -51,7 +51,7 @@ function main() {
     } catch(e) {
       print(e);
     }
-  }
+  };
 }
 
 // 221 solutions, each outputing two 1, two 2, two 3, two 4 and two 5

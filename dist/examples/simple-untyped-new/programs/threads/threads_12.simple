@@ -4,12 +4,17 @@
 var x;
 
 function main() {
-  var n = 5;
+  var n = 5, i;
   x = 1;
-  for i = 1 to n do { var t=i;
-    spawn multX(t);}
-  for i = 1 to n do
+  for (i = 1; i <= n; ++i) {
+    var t=i;
+    spawn {
+      multX(t);
+    };
+  }
+  for (i=1; i<=n; ++i) {
     rendezvous i;
+  }
   print(x,"\n");
 }
 
@@ -22,7 +27,7 @@ function multX(v) {
 
 // 120, but also many many other behaviors ...
 
-// The problem here is that "spawn multX(i);" does not evaluate the "i" argument,
+// The problem is that "spawn multX(i);" does not evaluate the "i" argument,
 // it only spawns a thread calculating the expression statement "multX(i);".
 // It can be possible that the loop counter "i" is incremented right after the
 // spawning but before the evaluation of the expression "multX(i)".  In fact,
@@ -33,9 +38,9 @@ function multX(v) {
 // see all these "unexpected" behaviors if you use the search option in krun.
 // (please make n smaller, e.g. 2, because theare are LOTS of behaviors here!)
 //
-// To fix this problem , replace the loop "for i = 1 to n do spawn multX(i);"
-// with "for i = 1 to n do { var t=i; spawn multX(t); }".  This way, each thread
+// To fix this problem , replace loop "for(i=1;i<=n;++i) {spawn {multX(i);};}"
+// with "for(i=1;i<=n;++i) {var t=i; spawn {multX(t);};}".  Now, each thread
 // sees its own local "t", which has the right value and does not change.
 // Now the search option in krun only shows you solutions which output the
-// correct factorial.  (like before, please make n smaller, e.g. 2, when running
+// correct factorial.  (like before, please make n smaller (2?) when running
 // the search option in krun, because theare are LOTS of behaviors here!)

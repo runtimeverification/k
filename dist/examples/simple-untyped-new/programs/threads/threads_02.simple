@@ -3,7 +3,7 @@
 
 function main() {
   var x;
-  spawn x = 7;
+  spawn { x = 7; };
   x = 5;
   print(x,"\n");
 }

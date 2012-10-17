@@ -5,11 +5,11 @@ function main() {
   spawn {
     var x = 2;
     print(x," ");
-  }
+  };
   spawn {
     var x = 3;
     print(x," ");
-  }
+  };
 }
 
 // 4 solutions, namely all interleavings of "2_" and "3_", where "_" is space
