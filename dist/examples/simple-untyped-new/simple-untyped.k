@@ -57,10 +57,11 @@ argument (for the same reason as the increment). */
                > left:
                  Exp "&&" Exp            [strict(1), left]
                | Exp "||" Exp            [strict(1), left]
+               > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
 
   syntax Ids  ::= List{Id,","}
-  syntax Exps ::=  List{Exp,","}         [strict, hybrid]
+  syntax Exps ::= List{Exp,","}         [strict, hybrid]
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
@@ -93,7 +94,7 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
                 | "return" ";"
                 | "try" Block "catch" "(" Id ")" Block
                 | "throw" Exp ";"                       [strict]
-                | "spawn" Stmt
+                | "join" Exp ";"                        [strict]
                 | "acquire" Exp ";"                     [strict]
                 | "release" Exp ";"                     [strict]
                 | "rendezvous" Exp ";"                  [strict]
@@ -224,12 +225,14 @@ to the \K tool, as indicated by the \textit{\$PGM} variable. */
                       <br/>
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
+                      <id color="pink"> 0 </id>
                     </thread>
                   </threads>
                   <br/>
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
+                  <terminated color="red"> .Set </terminated>
                   <in color="magenta" stream="stdin"> .List </in>
                   <out color="brown" stream="stdout"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
@@ -506,7 +509,7 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax ListItem ::=  "(" Map "," K "," Bag ")"
+  syntax ListItem ::=  (Map,K,Bag)
 
   rule <k> lambda(Xs,S)(Vs:Vals) ~> K => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C </control>
@@ -576,18 +579,16 @@ environment after the block.  This allows us to have a very simple semantics
 for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps. */
 
-  rule {} => . [structural]
+  rule {} => .  [structural]
 
-  rule <k> { Ss:Stmts } => Ss ~> env(Env) ...</k>
-       <env> Env:Map </env>
+  rule <k> { Ss:Stmts } => Ss ~> env(Env) ...</k>  <env> Env </env>
     [structural]
 
 /*@ The basic definition of environment recovery is straightforward: */
 
   syntax K ::= env(Map)
 
-  rule <k> env(Env:Map) => . ...</k>
-       <env> _ => Env </env>  [structural]
+  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
 
 /*@  While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop \texttt{while E do S},
@@ -645,14 +646,14 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule S1:K S2:K => S1 ~> S2  [structural]
+  rule S1 S2 => S1 ~> S2  [structural]
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
 value is simply discarded.  Common examples of expression statements are ones
 of the form \texttt{++x;}, \texttt{x=e;}, \texttt{e1[e2]=e3;}, etc. */
 
-  rule V:Val; => .
+  rule _:Val; => .
 
 /*@ \subsection{Conditional}
 Since the conditional was declared with the \texttt{strict(1)} attribute, we
@@ -675,7 +676,7 @@ below works because our while loops in SIMPLE are indeed very basic.  If we
 allowed break/continue of loops then we would need a completely different
 semantics, which would also involve the \textsf{control} cell. */
 
-  rule while(E)S => if (E) {S while(E)S}  [structural]
+  rule while (E) S => if (E) {S while(E)S}  [structural]
 
 /*@ \subsection{Print}
 The \texttt{print} statement was strict, so all its arguments are now
@@ -714,7 +715,7 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax ListItem ::= "(" Id "," Stmt "," K "," Map "," Bag ")"
+  syntax ListItem ::= (Id,Stmt,K,Map,Bag)
 
   syntax K ::= "popx" 
 
@@ -760,11 +761,16 @@ That means that the remaining cells are added and initialized automatically as
 described in the definition of SIMPLE's configuration.  This is part of \K's
 configuration abstraction/concretization mechanism. */
 
-   rule <thread>... 
-          <k> spawn S:Stmt => . ...</k>
-          <env> Env:Map </env>
+   rule <thread>...
+          <k> spawn S => T ...</k>
+          <env> Env </env>
         ...</thread>
-        (. => <thread>... <k> S </k> <env> Env </env> ...</thread>)
+        (. => <thread>...
+                <k> S </k>
+                <env> Env </env>
+                <id> T </id>
+              ...</thread>)
+     when fresh(T:Int)
 
 /*@ \subsubsection{Thread termination}
 Dually to the above, when a thread terminates its assigned computation (the
@@ -779,8 +785,13 @@ the locks themselves ignoring their multiplicity).  As seen below, a lock is
 added to the \textsf{busy} cell as soon as it is acquired for the first time
 by a thread. */
 
-   rule (<thread>... <k> .K </k> <holds> H:Map </holds> ...</thread> => .)
+   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
         <busy> Busy:Set => Busy -Set keys(H) </busy>
+        <terminated>... . => SetItem(T) ...</terminated>
+
+   rule <k> join T:Int; => . ...</k>
+        <terminated>... SetItem(T) ...</terminated>
+
 
 /*@ \subsubsection{Acquire lock}
 There are two cases to distinguish when a thread attempts to acquire a lock
