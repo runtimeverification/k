@@ -58,10 +58,10 @@ argument (for the same reason as the increment). */
                | Exp ">=" Exp            [strict, non-assoc]
                | Exp "==" Exp            [strict, non-assoc]
                | Exp "!=" Exp            [strict, non-assoc]
-               > "not" Exp               [strict]
+               > "!" Exp                 [strict]
                > left:
-                 Exp "and" Exp           [strict, left]
-               | Exp "or" Exp            [strict, left]
+                 Exp "&&" Exp            [strict(1), left]
+               | Exp "||" Exp            [strict(1), left]
                > Exp "=" Exp             [strict(2), right]
 
 /*@ \subsection{Statements}
@@ -120,7 +120,7 @@ declared alone and is initialized. */
   rule for(Start; Cond; Step) {S}
     => Start; while (Cond) {S Step;}                            [macro]
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;      [macro]
-  rule var X:Id = E:Exp; => var X; X = E;                       [macro]
+  rule var X:Id = E; => var X; X = E;                       [macro]
 
   syntax Id ::= "main"
 
@@ -316,9 +316,10 @@ dimension: */
   rule var X:Id[N1:Int, N2:Int, Vs:Vals];
     => var X[N1];
        {
-         var $1=X, $2=0;
+         var $1=X;
+         var $2=0;
          while($2 <= N1 - 1) {
-           var X[N2,Vs]; 
+           var X[N2,Vs];
            $1[$2] = X;
            ++$2;
          }
@@ -430,9 +431,11 @@ become values of expected sorts: */
   rule I1:Int >= I2:Int => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
-  rule B1:Bool and B2:Bool => B1 andBool B2
-  rule B1:Bool or B2:Bool => B1 orBool B2
-  rule not(B:Bool) => notBool(B)
+  rule ! T:Bool => notBool(T)
+  rule true  && E => E
+  rule false && _ => false
+  rule true  || _ => true
+  rule false || E => E
 
 /*@ \subsection{Array lookup}
 Untyped SIMPLE does not check array bounds (the dynamically typed version of
@@ -496,7 +499,7 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax ListItem ::=  (Map,K,Bag)
+  syntax ListItem ::=  "(" Map "," K "," Bag ")"
 
   rule <k> lambda(Xs,S)(Vs:Vals) ~> K => bindto(Xs,Vs) ~> S ~> return; </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C </control>
@@ -704,7 +707,7 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax ListItem ::= (Id,Stmt,K,Map,Bag)
+  syntax ListItem ::= "(" Id "," Stmt "," K "," Map "," Bag ")"
 
   syntax K ::= "popx" 
 
