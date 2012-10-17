@@ -8,7 +8,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-
 public class BestFitFilter extends BasicTransformer {
 
 	public BestFitFilter(GetFitnessUnitBasicVisitor gfubv) {
@@ -19,8 +18,8 @@ public class BestFitFilter extends BasicTransformer {
 	private GetFitnessUnitBasicVisitor getFitnessUnit;
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
+		amb = (Ambiguity) super.transform(amb);
 
-		// TODO: make this bottom up
 		int maximum = getFitnessUnit(amb.getContents().get(0));
 
 		// choose the maximums from the list of ambiguities
@@ -37,11 +36,11 @@ public class BestFitFilter extends BasicTransformer {
 		}
 
 		if (terms.size() == 1)
-			return terms.get(0).accept(this);
+			return terms.get(0);
 		else
 			amb.setContents(terms);
 
-		return super.transform(amb);
+		return amb;
 	}
 
 	private int getFitnessUnit(Term t) {

@@ -2,31 +2,33 @@ package org.kframework.kil.loader;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Production;
+import org.kframework.kil.UserList;
 
 public class DefinitionHelper {
 	public static Set<String> generatedTags = new HashSet<String>();
-	static { 
+	static {
 		generatedTags.add("cons");
 		generatedTags.add("kgeneratedlabel");
 		generatedTags.add("prefixlabel");
 	};
 
 	public static Set<String> parsingTags = new HashSet<String>();
-	
+
 	static {
 		parsingTags.add("left");
 		parsingTags.add("right");
 		parsingTags.add("non-assoc");
 	}
 
-	public static Set<String> specialTerminals =  new HashSet<String>();
-	
-	static { 
+	public static Set<String> specialTerminals = new HashSet<String>();
+
+	static {
 		specialTerminals.add("(");
 		specialTerminals.add(")");
 		specialTerminals.add(",");
@@ -40,7 +42,6 @@ public class DefinitionHelper {
 	public static java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
 	public static java.util.Map<String, String> cellSorts = new HashMap<String, String>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
-	// contains a mapping from listSort to list separator
 	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
 	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
 
@@ -71,6 +72,17 @@ public class DefinitionHelper {
 	public static void addSubsort(String bigSort, String smallSort) {
 		// add the new subsorting
 		subsorts.add(new Subsort(bigSort, smallSort));
+
+		// detect if lists are subsorted (Vals Ids < Exps)
+		for (Map.Entry<String, Production> ls1 : listConses.entrySet()) {
+			for (Map.Entry<String, Production> ls2 : listConses.entrySet()) {
+				String sort1 = ((UserList) ls1.getValue().getItems().get(0)).getSort();
+				String sort2 = ((UserList) ls2.getValue().getItems().get(0)).getSort();
+				if (DefinitionHelper.isSubsorted(sort1, sort2)) {
+					subsorts.add(new Subsort(ls1.getValue().getSort(), ls2.getValue().getSort()));
+				}
+			}
+		}
 
 		// closure for sorts
 		boolean finished = false;
@@ -159,8 +171,9 @@ public class DefinitionHelper {
 	}
 
 	public static boolean isListUnit(Constant cst) {
-		if (!isListSort(cst.getSort())) return false;
-		assert(cst.getValue().equals("." + cst.getSort()));
+		if (!isListSort(cst.getSort()))
+			return false;
+		assert (cst.getValue().equals("." + cst.getSort()));
 		return true;
 	}
 }

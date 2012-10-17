@@ -24,6 +24,7 @@
 				<antcall target="k3" />
 			</sequential>
 		</parallel>
+		<antcall target="build" />
+		<antcall target="jar" />
 	</target>
-
 </project>

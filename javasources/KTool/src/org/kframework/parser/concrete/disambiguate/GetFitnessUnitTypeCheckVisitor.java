@@ -18,6 +18,8 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
 	@Override
 	public void visit(TermCons tc) {
+
+		// TODO: make this as a hard type checker where you throw exceptions every time you get a typing error
 		super.visit(tc);
 
 		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {
