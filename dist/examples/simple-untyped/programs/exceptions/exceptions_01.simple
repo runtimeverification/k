@@ -1,0 +1,16 @@
+function main() {
+  var e = 100;
+  try {
+    var x = 5;
+    if (x >= 0) {
+      throw x+2;
+    }
+    print(20);      // should not be printed
+  } catch(e) {
+    print(e," ");   // should print 7
+  }
+  print(e," ");     // should print 100
+  print(10,"\n");
+}
+
+// 7 100 10

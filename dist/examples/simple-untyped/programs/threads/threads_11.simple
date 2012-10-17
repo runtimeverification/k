@@ -1,0 +1,22 @@
+// This is a well-synchronized program, which has only one behavior.
+
+function main() {
+  var x = 1;
+  spawn {
+    rendezvous 1;
+    print(x," ");
+    rendezvous 2;
+  };
+  spawn {
+    rendezvous 3;
+    print(x,"\n");
+    rendezvous 4;
+  };
+  print(x," ");
+  x = x+1;
+  rendezvous 1;  rendezvous 2;
+  x = x+1;
+  rendezvous 3; rendezvous 4;
+}
+
+// 1 2 3

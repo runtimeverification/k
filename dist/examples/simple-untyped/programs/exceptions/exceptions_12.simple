@@ -1,0 +1,19 @@
+var i, j;
+
+function main() {
+  i = 0;
+  while (++i <= 3) {
+    print(i," ");
+  }
+  try {
+    i = 10;
+    print(i," ");
+  } catch(j) {
+    i = 20;
+    print(i);  // should not print this
+  }
+  i = 15;
+  print(i,"\n");
+}
+
+// 1 2 3 10 15

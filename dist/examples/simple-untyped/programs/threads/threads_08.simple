@@ -1,0 +1,57 @@
+// Program that tests both exceptions and threads.  The threads are not
+// synchronized and indeed manifest into lots of different behaviors.
+
+function main() {
+  spawn {
+    var e;
+    try {
+      try {
+        try {
+          try {
+            var x = 1;
+            print(x);
+            throw ++x;
+          } catch(e) {
+            print(e);
+            throw ++e;
+          }
+        } catch(e) {
+          print(e);
+          throw ++e;
+        }
+      } catch(e) {
+        print(e);
+        throw ++e;
+      }
+    } catch(e) {
+      print(e);
+    }
+  };
+  spawn {
+    var e;
+    try {
+      try {
+        try {
+          try {
+            var x = 1;
+            print(x);
+            throw ++x;
+          } catch(e) {
+            print(e);
+            throw ++e;
+          }
+        } catch(e) {
+          print(e);
+          throw ++e;
+        }
+      } catch(e) {
+        print(e);
+        throw ++e;
+      }
+    } catch(e) {
+      print(e);
+    }
+  };
+}
+
+// 221 solutions, each outputing two 1, two 2, two 3, two 4 and two 5

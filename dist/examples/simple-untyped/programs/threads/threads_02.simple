@@ -1,0 +1,14 @@
+// Simple multithreaded program with two output behaviors
+// but with three overall behaviors
+
+function main() {
+  var x;
+  spawn { x = 7; };
+  x = 5;
+  print(x,"\n");
+}
+
+// 5
+// 5 (yes, it admits two behaviors where the output is 5, one in which the 
+//    store ends up with value 5 and another with value 7 at the location of x)
+// 7
