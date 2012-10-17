@@ -2,19 +2,18 @@ var i, j;
 
 function main() {
   i = 0;
-  while (++i <= 3) do {
+  while (++i <= 3) {
     print(i," ");
   }
   try {
-    throw j=1;
     i = 10;
-    print(i);   // should not print this
+    print(i," ");
   } catch(j) {
     i = 20;
-    print(i," ");   // should print this
+    print(i);  // should not print this
   }
   i = 15;
   print(i,"\n");
 }
 
-// 1 2 3 20 15
+// 1 2 3 10 15

@@ -1,8 +1,10 @@
 function main() {
-  try
+  try {
     foo();
-  catch(e)
+  }
+  catch(e) {
     print(e,"\n");  // should print 7
+  }
 }
 
 function foo() {

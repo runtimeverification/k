@@ -4,7 +4,9 @@ function main() {
     try {
       try {
         try {
-          var x = 1; print(x," "); throw ++x;
+          var x = 1;
+          print(x," ");
+          throw ++x;
         } catch(e) {
           print(e," ");
           throw ++e;

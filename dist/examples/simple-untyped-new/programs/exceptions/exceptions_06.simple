@@ -8,8 +8,10 @@ function f(y) {
   } catch(p) {
     print(p+10);  // not reachable
   }
-  for i = 1 to y do
+  var i;
+  for (i = 1; i <= y; ++i) {
     t = t*i;
+  }
   return t;
 }
 
