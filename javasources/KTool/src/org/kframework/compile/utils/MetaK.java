@@ -124,6 +124,9 @@ public class MetaK {
 	public static Set<Attribute> anywheres = new HashSet<Attribute>();
 	static {
 		anywheres.add(new Attribute("anywhere", ""));
+		anywheres.add(new Attribute("macro", ""));
+		anywheres.add(new Attribute("predicate", ""));
+		anywheres.add(new Attribute("function", ""));
 	}
 	
 	private static java.util.Map<String,String> maudeCollectionConstructors = new HashMap<String, String>();
