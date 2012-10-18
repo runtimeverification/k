@@ -210,9 +210,9 @@ typed SIMPLE, so we do not discuss them much here. */
 semantics, the \texttt{types(...)} operation stays the same. */
 
   syntax Types ::= "types" "(" Exps ")"   [function, klabel(types)]
-  rule types(.Exps) => void, .Types       [anywhere]             
-  rule types(X:Id : T:Type, .Exps) => T, .Types   [anywhere]         
-  rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E,Es) [anywhere]
+  rule types(.Exps) => void, .Types
+  rule types(X:Id : T:Type, .Exps) => T, .Types
+  rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E,Es)
 
   rule <k> I:Int => int ...</k>
   rule <k> B:Bool => bool ...</k>

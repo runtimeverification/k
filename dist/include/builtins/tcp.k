@@ -8,11 +8,11 @@ module TCP-HOOKS
   rule isKResult(#EOF) => true [function, anywhere]
 
   syntax TCPAnswer ::= "#tcpRequest" "(" String ")"   [function, klabel(#tcpRequest)]
-  rule #tcpRequest(S:String) => #checkTCPAnswer(##tcpRequest(S)) [function, anywhere]
+  rule #tcpRequest(S:String) => #checkTCPAnswer(##tcpRequest(S))
 
   syntax TCPAnswer ::= "#checkTCPAnswer" "(" String ")"   [function, klabel(#checkTCPAnswer)]
   rule #checkTCPAnswer(S:String) 
-      => #if #isTCPError(S) #then #tcpError(#retrieveTCPError(S)) #else S #fi [function, anywhere]
+      => #if #isTCPError(S) #then #tcpError(#retrieveTCPError(S)) #else S #fi
 
   rule #tcpError("EOF") => #EOF [function, anywhere]
 

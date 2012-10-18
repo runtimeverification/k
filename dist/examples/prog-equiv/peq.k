@@ -243,9 +243,9 @@ module PEQ
 */
 
   syntax Boolean ::= "isRecursive" "(" Stmt ")" [function]
-  rule isRecursive(while B:BExp do S:Stmt) => true [anywhere]
+  rule isRecursive(while B:BExp do S:Stmt) => true
   rule isRecursive(for I:Id from A1:AExp to A2:AExp do S:Stmt) => true
-       [anywhere]
+
 
 /*@
   For the non-recursive statements, the labels are translated into 
@@ -538,20 +538,20 @@ module PEQ
              <observers> .List </observers>, F:K)
        =>
        true
-       [anywhere]
+
 
   rule eqObs(<env> Env1:Map </env>
              <env> Env2:Map </env>
              <observers> ListItem(allObs) </observers>, F:K)
        =>
        eqEnv(Env1, Env2)
-       [anywhere]
+
 
   rule eqObs( <env>... X:Id |-> V1:K ...</env>
               <env>... X:Id |-> V2:K ...</env>
               <observers> ListItem(X) => . ...</observers>, F:K )
        when checkSat(F andBool V1 =/=Int V2) ==K unsat  // to be revised
-       [anywhere]
+
 
   rule eqObs( <env>... X:Id |-> V1:K ...</env>
               <env>... X:Id |-> V2:K ...</env>
@@ -559,7 +559,7 @@ module PEQ
        =>
        false
        when checkSat(F andBool V1 =/=Int V2) ==K sat  // to be revised
-       [anywhere]
+
 
 // symbolic maps?
 
@@ -569,19 +569,19 @@ module PEQ
 
   syntax Bool ::= "eqEnv" "(" Map "," Map ")" [function]
   
-  rule eqEnv(Env:Map, Env) => true [anywhere] 
+  rule eqEnv(Env:Map, Env) => true
 
   rule eqEnv((X:K |-> V:K Env1:Map), (X |-> K Env2:Map)) => eqEnv(Env1, Env2)
-       [anywhere]
 
-  rule eqEnv((B:BExp |-> V:K Env1:Map), Env2:Map) => eqEnv(Env1, Env2) [anywhere]
 
-  rule eqEnv(Env1:Map, (B:BExp |-> V:K Env2:Map)) => eqEnv(Env1, Env2) [anywhere]
+  rule eqEnv((B:BExp |-> V:K Env1:Map), Env2:Map) => eqEnv(Env1, Env2) 
+
+  rule eqEnv(Env1:Map, (B:BExp |-> V:K Env2:Map)) => eqEnv(Env1, Env2)
 
   rule eqEnv(execute(S:Stmt, Env1:Map), execute(S:Stmt, Env2:Map))
        => 
        eqEnv(Env1, Env2)
-       [anywhere]
+
 
 /*@
   The next rule gives semantics to the new construct \texttt{storeHyp}, which 
@@ -738,65 +738,65 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
 
   syntax Map ::= "getSubst" "(" K "," K ")" [function]
 
-  rule getSubst(K:K, K) => .Map [anywhere]
+  rule getSubst(K:K, K) => .Map
 
   rule getSubst(A1:K + A1':K, A2:K + A2':K) => getSubst(A1, A2) getSubst(A1', A2')
-       [anywhere]
+
 
   rule getSubst(A1:K * A1':K, A2:K * A2':K) => getSubst(A1, A2) getSubst(A1', A2')
-       [anywhere]
+
 
   rule getSubst(A1:K / A1':K, A2:K / A2':K) => getSubst(A1, A2) getSubst(A1', A2')
-       [anywhere]
+
 
   rule getSubst(A1:K <= A1':K, A2:K <= A2':K) => getSubst(A1, A2) getSubst(A1', A2')
-       [anywhere]
+
 
   rule getSubst(B1:K and B1':K, B2:K and B2':K) => getSubst(B1, B2) getSubst(B1', B2')
-       [anywhere]
+
 
   rule getSubst(B1:K and B1':K, B2:K and B2':K) => getSubst(B1, B2) getSubst(B1', B2')
-       [anywhere]
+
 
   rule getSubst(not B1:K, not B2:K) => getSubst(B1, B2)
-       [anywhere]
+
 
   rule getSubst(S1:K ; S1':K, S2:K ; S2':K) => getSubst(S1, S2) getSubst(S1', S2')
-       [anywhere]
+
 
   rule getSubst(if B1:K then S1:K else S2:K, if B1':K then S1':K else S2':K)
        =>
        getSubst(B1, B1') getSubst(S1, S1') getSubst(S2, S2')
-       [anywhere]
+
 
   rule getSubst(while B:K do S:K, while B':K do S':K)
        =>
        getSubst(B, B') getSubst(S, S')
-       [anywhere]
+
 
   rule getSubst(for X:K from A1:K to A2:K do S:K, for X:K from A1':K to A2':K do S':K)
        =>
        getSubst(A1, A1')  getSubst(A2, A2') getSubst(S, S')
-       [anywhere]
+
 
   rule getSubst(X:K := A1:K, X := A2:K) => getSubst(A1, A2)
-       [anywhere]
+
 
   rule getSubst(K1:K ~> K2:K, K1':K ~> K2':K) => getSubst(K1, K1') getSubst(K2, K2')
        when (K1 =/=K .K)
        andBool (K2 =/=K .K)
        andBool (K1' =/=K .K)
        andBool (K2' =/=K .K)
-       [anywhere]
+
 
   rule getSubst(L1:Id : S1:K, L2:Id : S2:K) => getSubst(S1, S2)
-       [anywhere]
 
-  rule getSubst(I:IntSymbolic, A:K) => (I |-> A) [anywhere]
+
+  rule getSubst(I:IntSymbolic, A:K) => (I |-> A)
 
   // statements with labels
 //  rule getSubst(L1:Id : X:K := A1:K, L2:Id : X := A2:K) => getSubst(A1, A2)
-//       [anywhere]
+//
 
   // to be completed
 
@@ -806,67 +806,67 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
 
   syntax Map ::= "getSubstMap" "(" Map "," Map ")" [function]
 
-  rule getSubstMap(.Map, M:Map) => .Map [anywhere]
+  rule getSubstMap(.Map, M:Map) => .Map
 
   rule getSubstMap((M1:Map B:BoolSymbolic |-> A:K), M2:Map)
        =>
        getSubstMap(M1, M2) 
-       [anywhere]
+
 
   rule getSubstMap((X:Id |-> I:IntSymbolic), (X |-> A:K))
        =>
        I |-> A
-       [anywhere]
+
 
   rule getSubstMap((X:Id |-> I:IntSymbolic), (M2:Map X |-> A:K))
        =>
        I |-> A
-       [anywhere]
+
 
   rule getSubstMap((M1:Map X:Id |-> I:IntSymbolic), (M2:Map X |-> A:K))
        =>
        I |-> A getSubstMap(M1, M2) 
-       [anywhere]
+
 
   rule getSubstMap(M1:Map, execute(S:Stmt, Env:Map))
        =>
        getSubstMap(M1, Env)
-       [anywhere]
+
 
   rule getSubstMap((symMap(IM:Id) M1:Map), (symMap(IM) Env:Map))
        =>
        getSubstMap(M1, Env)
-       [anywhere]
+
 
   rule getSubstMap(symMap(IM:Id), symMap(IM))
        =>
        .Map
-       [anywhere]
+
 
 
   rule getSubstMap(symMap(IM:Id), (symMap(IM) Env:Map))
        =>
        .Map
-       [anywhere]
+
 
 
 /*
   rule getSubstMap((symMap(IM:Id) M1:Map), Env:Map)
        =>
        getSubstMap(M1, Env)
-       [anywhere]
+
 */
   rule getSubstMap((X:Id |-> I:IntSymbolic), (M2:Map execute(S:Stmt, Env:Map)))
        =>
        getSubstMap((X:Id |-> I:IntSymbolic), Env)
        when notBool ( X in keys(M2))
-       [anywhere]
+
 
   rule getSubstMap((M1:Map X:Id |-> I:IntSymbolic), (M2:Map execute(S:Stmt, Env:Map)))
        =>
        getSubstMap((X:Id |-> I:IntSymbolic), Env) getSubstMap(M1, (M2 execute(S, Env)))
        when notBool ( X in keys(M2))
-       [anywhere]
+
 
 /*@
   Check if a Map is a substitution (real map):
@@ -887,12 +887,12 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
   rule applySubst((M:Map I:IntSymbolic |-> A:K), F:Bool) => 
        applySubst(M:Map, (F [ A /I ]))
 //       when M =/=Map .Map
-       [anywhere]
 
-  rule applySubst((I:IntSymbolic |-> A:K), F:Bool) => (F [ A / I ])  [anywhere]
+
+  rule applySubst((I:IntSymbolic |-> A:K), F:Bool) => (F [ A / I ])
 
   rule applySubst(.Map, F:Bool) => F
-       [anywhere]
+
 
 /*@
    Extend the substitution to specific expressions:
@@ -906,12 +906,12 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
 
   syntax Bool ::= "isMap4Subst" "(" Map ")" [function]
 
-  rule isMap4Subst(M:Map I:IntSymbolic |-> A:K) => isMap4Subst(M) [anywhere]
+  rule isMap4Subst(M:Map I:IntSymbolic |-> A:K) => isMap4Subst(M)
 //       when M =/=Map .Map
 
-  rule isMap4Subst(I:IntSymbolic |-> A:K) => true [anywhere]
+  rule isMap4Subst(I:IntSymbolic |-> A:K) => true
 
-  rule isMap4Subst(.Map) => true  [anywhere]
+  rule isMap4Subst(.Map) => true
 
 
 /*@
@@ -934,10 +934,10 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
        orBool
        KItem (H2) |-subst KItem(G)
        when (KItem(H1) =/=K KItem(.Bag)) andBool (KItem(H2) =/=K KItem(.Bag))
-       [anywhere]
 
 
-  rule KItem(.Bag) |-subst KItem(G:Bag) => false [anywhere]
+
+  rule KItem(.Bag) |-subst KItem(G:Bag) => false
 
 
   rule KItem(
@@ -1011,7 +1011,6 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
 //                             ) ==K unsat)
            )
           )
-     [anywhere]
 
 
 /*@
@@ -1134,49 +1133,49 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
 
   syntax Bool ::= "injectForm" "(" BExp ")" [function]
 
-  rule injectForm(true) => true [anywhere]
+  rule injectForm(true) => true
 
   rule injectForm(A1:AExp == A2:AExp)
        =>
        injectAExp(A1)  ==Int injectAExp(A2)
-       [anywhere]
+
 
   rule injectForm(B1:BExp and B2:BExp)
        =>
        injectForm(B1) andBool injectForm(B2)
-       [anywhere]
+
 
   rule injectForm(not B:BExp)
        =>
        notBool injectForm(B)
-       [anywhere]
+
 
   syntax Int ::= "injectAExp" "(" AExp ")" [function]
-  rule injectAExp(I:Int) => I [anywhere]
+  rule injectAExp(I:Int) => I
   rule injectAExp(A1:AExp + A2:AExp)
        =>
        injectAExp(A1)  +Int injectAExp(A2)
-       [anywhere]
+
 
   rule injectAExp(A1:AExp * A2:AExp)
        =>
        injectAExp(A1)  *Int injectAExp(A2)
-       [anywhere]
+
 
   rule injectAExp(A1:AExp / A2:AExp)
        =>
        injectAExp(A1)  /Int injectAExp(A2)
-       [anywhere]
+
 
   rule injectForm(X:Id isNotModifiedBy S:Stmt ) 
        =>
        X isNotModifiedBy S
-       [anywhere]
+
 
   rule injectForm(occurs(X:Id, S:Stmt)) 
        =>
        occurs(X, S) 
-       [anywhere]
+
 
 /*@
   The following is a helper function that transform a list of
@@ -1184,9 +1183,9 @@ KItem(getSubst(K1', K1) getSubst(K2', K2)
   variables into the cell \texttt{observers}.
 */ 
   syntax List ::= "Ids2List" "(" Ids ")" [function]
-  rule Ids2List(.Ids) => .List [anywhere]
+  rule Ids2List(.Ids) => .List
   rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
-       [anywhere]
+
 
 //  syntax List ::= "BExps2List" "(" BExps ")" [function]
 //  rule BExps2List(.BExps) => .List [anywhere]

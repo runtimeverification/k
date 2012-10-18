@@ -15,11 +15,11 @@ module LAMBDAPP-SYNTAX
   syntax Id ::= "$thunk"
   rule if E:Exp then E1:Exp else E2:Exp 
     => (ite E (lambda $thunk . E1) (lambda $thunk . E2)) $thunk  
-   [macro, anywhere]
+   [macro]
 
 //@ Desugaring let constructs into more basic ones
-  rule (letrec X:Id = E:Exp in E':Exp) => (let X = (mu X . E) in E') [macro, anywhere]
-  rule (let X:Id = E:Exp in E':Exp) => (lambda X . E') E [macro, anywhere]
+  rule (letrec X:Id = E:Exp in E':Exp) => (let X = (mu X . E) in E') [macro]
+  rule (let X:Id = E:Exp in E':Exp) => (lambda X . E') E [macro]
 
 //@ I/O additions
   syntax Exp ::= "read"

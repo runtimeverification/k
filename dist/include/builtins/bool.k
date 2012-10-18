@@ -20,26 +20,26 @@ module BOOL-HOOKS
 				  Bool "==Bool" Bool		[function, left, hook(#BOOL:_==Bool_)]
 				| Bool "=/=Bool" Bool		[function, left]
 
-  rule true orBool B:Bool => true [function, anywhere]
-  rule false orBool B:Bool => B [function, anywhere]
+  rule true orBool B:Bool => true
+  rule false orBool B:Bool => B
 
-  rule true andBool A:Bool => A:Bool [function, anywhere]
-  rule false andBool A:Bool => false [function, anywhere]
+  rule true andBool A:Bool => A:Bool
+  rule false andBool A:Bool => false
 
-  rule false xorBool A:Bool => A:Bool [function, anywhere]
-  rule A:Bool xorBool A:Bool => false [function, anywhere]
+  rule false xorBool A:Bool => A:Bool
+  rule A:Bool xorBool A:Bool => false
 
-  rule notBool true => false [function, anywhere]
-  rule notBool false => true [function, anywhere]
+  rule notBool true => false
+  rule notBool false => true
 
-  rule true impliesBool B:Bool => B [function, anywhere]
-  rule false impliesBool _:Bool => true [function, anywhere]
+  rule true impliesBool B:Bool => B
+  rule false impliesBool _:Bool => true
 
-  rule true orElseBool _ => true [anywhere]
-  rule false orElseBool K:K => K [anywhere]
+  rule true orElseBool _ => true
+  rule false orElseBool K:K => K
 
-  rule false andThenBool _ => false [anywhere]
-  rule true andThenBool K:K => K [anywhere]
+  rule false andThenBool _ => false
+  rule true andThenBool K:K => K
 
   //syntax KLabel ::= "'#andBool" // People should not be using this
 

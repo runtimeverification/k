@@ -447,15 +447,15 @@ When done with the first pass, call \texttt{main()}. */
 
   syntax Type ::= "typeOf" "(" K ")"   [function, klabel(typeOf)]
 
-  rule typeOf(_:Int) => int        [anywhere]
-  rule typeOf(_:Bool) => bool      [anywhere]
-  rule typeOf(_:String) => string  [anywhere]
+  rule typeOf(_:Int) => int
+  rule typeOf(_:Bool) => bool
+  rule typeOf(_:String) => string
 
-  rule typeOf(arrayRef(T:Type ,_:Int,_:Int)) => T  [anywhere]
-  rule typeOf(lambda(_, _, T:Type)) => T           [anywhere]
+  rule typeOf(arrayRef(T:Type ,_:Int,_:Int)) => T
+  rule typeOf(lambda(_, _, T:Type)) => T
 
-  rule typeOf(undefined(T:Type)) => T  [anywhere]
-  rule typeOf(nothing) => void         [anywhere]
+  rule typeOf(undefined(T:Type)) => T
+  rule typeOf(nothing) => void
 
 /*@ Recall that lists of the form "a,b,c" are a syntactic convenience,
 which eventually are translated into cons-lists "(a,(b,(c,.)))".
@@ -464,12 +464,12 @@ the RHSes of the rules below, so we have to do it manually.  */
 
   syntax Types ::= "types" "(" Exps ")"   [function, klabel(types)]
 
-  rule types(.Exps) => void, .Types  [anywhere]
-  rule types('_:_(X:Id,, T:Type), .Exps) => T,.Types  [anywhere]
+  rule types(.Exps) => void, .Types
+  rule types('_:_(X:Id,, T:Type), .Exps) => T,.Types
   rule types('_:_(X:Id,, T:Type), (E:Exp, Es:Exps))
         => 
        (T, types(E,Es))
-       [anywhere]
+
 
 
 //@ Sequences of locations

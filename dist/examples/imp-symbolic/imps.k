@@ -315,42 +315,42 @@ module IMPS
   rule injectForm(A1:AExp == A2:AExp)
        =>
        injectAExp(A1)  ==Int injectAExp(A2)
-       [anywhere]
+
 
   rule injectForm(A1:AExp <= A2:AExp)
        =>
        injectAExp(A1)  <=Int injectAExp(A2)
-       [anywhere]
+
 
   rule injectForm(B1:BExp and B2:BExp)
        =>
        injectForm(B1) andBool injectForm(B2)
-       [anywhere]
+
 
   syntax Int ::= "injectAExp" "(" AExp ")" [function]
-  rule injectAExp(I:Int) => I [anywhere]
+  rule injectAExp(I:Int) => I
   rule injectAExp(A1:AExp + A2:AExp)
        =>
        injectAExp(A1)  +Int injectAExp(A2)
-       [anywhere]
+
 
   rule injectAExp(A1:AExp * A2:AExp)
        =>
        injectAExp(A1)  *Int injectAExp(A2)
-       [anywhere]
+
 
   rule injectAExp(A1:AExp / A2:AExp)
        =>
        injectAExp(A1)  /Int injectAExp(A2)
-       [anywhere]
+
 
   rule injectForm(X:Id isNotModifiedBy S:Stmt ) 
        =>
        X:Id isNotModifiedBy S:Stmt 
-       [anywhere]
 
-  rule injectForm(true) => true [anywhere]
-  rule injectForm(false) => false [anywhere]
+
+  rule injectForm(true) => true
+  rule injectForm(false) => false
 
 //@ rules that translate the locally defined predicates to SMTLIB
 

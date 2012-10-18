@@ -36,17 +36,17 @@ module INT-HOOKS
 				| Int "==Int" Int	[function, left,latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(#INT:_==Int_)]
 				| Int "=/=Int" Int	[function, left,latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2})]
 
-  rule I1:Int =/=Int I2:Int => notBool(I1 ==Int I2) [function, anywhere]
+  rule I1:Int =/=Int I2:Int => notBool(I1 ==Int I2)
 
   //sort Nat  // ::= {I:Int | I >=Int 0}
   syntax Nat ::= "dummyNat"
   rule isNat(I:Int) => I >=Int 0 [function, anywhere]
 
   syntax Bool ::= Int "dividesInt" Int    [function]
-  rule I1:Int dividesInt I2:Int => I2 %Int I1 ==Int 0 [function, anywhere]
+  rule I1:Int dividesInt I2:Int => I2 %Int I1 ==Int 0
 
   syntax Int ::= "absInt" "(" Int ")" [function, klabel(absInt)]
-  rule absInt(I:Int) => I when isNat(I) [function, anywhere]
-  rule absInt(I:Int) => 0 -Int I when notBool(isNat(I)) [function, anywhere]
+  rule absInt(I:Int) => I when isNat(I)
+  rule absInt(I:Int) => 0 -Int I when notBool(isNat(I))
 
 endmodule

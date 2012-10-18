@@ -10,14 +10,14 @@ endmodule
 module QUOTE-UNQUOTE 
   imports QUOTE-UNQUOTE-SYNTAX
   imports K-VISITOR
-  syntax K ::= "isQuote" "(" K ")"  [klabel(isQuote)]
-  rule isQuote(quote K) => true [anywhere]
-  rule isQuote(unquote K) => true [anywhere]
+  syntax K ::= "isQuote" "(" K ")"  [function, klabel(isQuote)]
+  rule isQuote(quote K) => true
+  rule isQuote(unquote K) => true
 
-  syntax K ::= "mQuote" "(" K "," Int ")" [klabel(mQuote), latex({\it quote}({#1},{#2}))]
+  syntax K ::= "mQuote" "(" K "," Int ")" [function, klabel(mQuote), latex({\it quote}({#1},{#2}))]
   rule mQuote(K,N) 
     => visit K applying quoteit[N] if 'isQuote
-    [structural, anywhere]
+    [structural]
 
 // Code generation (via reflection)
   syntax KLabel ::= "quoteit" "[" Int "]" [latex({\it quote}_{\mbox{\scriptsize\ensuremath{#1}}})]

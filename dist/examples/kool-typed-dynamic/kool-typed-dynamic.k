@@ -355,18 +355,18 @@ KOOL).  */
 // typeOf
   syntax Type ::= "typeOf" "(" K ")"   [function, klabel(typeOf)]
 
-  rule typeOf(I:Int) => int [anywhere]              
-  rule typeOf(B:Bool) => bool  [anywhere]     
-  rule typeOf(_:String) => string  [anywhere] 
-  rule typeOf(arrayRef(T:Type, _:Nat, _:Nat)) => T  [anywhere]
-  rule typeOf(undefined(T:Type)) => T   [anywhere]
-  rule typeOf(nothing) => void   [anywhere] 
+  rule typeOf(I:Int) => int              
+  rule typeOf(B:Bool) => bool     
+  rule typeOf(_:String) => string 
+  rule typeOf(arrayRef(T:Type, _:Nat, _:Nat)) => T
+  rule typeOf(undefined(T:Type)) => T
+  rule typeOf(nothing) => void 
 
   syntax Types ::= "types" "(" Exps ")"   [function, klabel(types)]
 
-  rule types(.Exps) => void,.Types     [anywhere]
-  rule types('_:_(X:Id,, T:Type), .Exps) => T,.Types  [anywhere]
-  rule types('_:_(X:Id,, T:Type), (E:Exp, Es:Exps)) => T, types(E,Es)  [anywhere]
+  rule types(.Exps) => void,.Types
+  rule types('_:_(X:Id,, T:Type), .Exps) => T,.Types
+  rule types('_:_(X:Id,, T:Type), (E:Exp, Es:Exps)) => T, types(E,Es)
 
   syntax List{K} ::= Int ".." Int
 
@@ -742,13 +742,13 @@ Like in untyped KOOL. */
                     ...</envStack>, X)
        =>
        lookup(L) 
-       [anywhere] 
+ 
 
   rule lookupMember(<envStack> 
                       ListItem(_:Id :: <env> Env:Map </env>) => .
                     ...</envStack>, X:Id)
        when notBool(X in keys(Env))     
-       [anywhere]             
+             
 
 //@ \subsection{Auxilliary operations and rules}
 
@@ -760,9 +760,9 @@ Like in untyped KOOL. */
                               ...</envStack>))
        =>
        class Class
-       [anywhere]
 
-  rule typeOf(methodClosure(_:Id, _:Nat, _, _, T:Type)) => T [anywhere]
+
+  rule typeOf(methodClosure(_:Id, _:Nat, _, _, T:Type)) => T
 
 /*@ \subsubsection{Subtyping constraints}
 The subclass relation introduces a subtyping relation. */
@@ -802,11 +802,11 @@ the subtype relation above.  */
                   class Class:Id)
        =>
        objectClosure(<crntClass> Class </crntClass> Obj)
-       [anywhere]
+
 
   rule unsafeCast(V:Val, T:Type) => V 
        when typeOf(V) ==K T 
-       [anywhere]
+
 
 /*@ \subsubsection{Generic guard}
 A generic computational guard (should be builtin): it allows the

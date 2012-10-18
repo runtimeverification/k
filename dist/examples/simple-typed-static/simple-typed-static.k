@@ -294,11 +294,11 @@ XTs$ are actually nothing but typed identifiers. */
 
   syntax Types ::= "types" "(" Exps ")"      [function, klabel(types)]
  
-  rule types(.Exps) => void,.Types  [anywhere]
+  rule types(.Exps) => void,.Types
 
-  rule types(X:Id : T:Type, .Exps) => T, .Types  [anywhere]
+  rule types(X:Id : T:Type, .Exps) => T, .Types
 
-  rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E, Es)  [anywhere]
+  rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E, Es)
 
 /*@ Once the entire program is processed (generating appropriate tasks
 to type check its function bodies), we can dissolve the main

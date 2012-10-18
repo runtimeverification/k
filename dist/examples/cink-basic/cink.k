@@ -283,7 +283,7 @@ module CINK-LANG-SEMANTICS
    */
 
   /*@ The desugaring rule for the if-then statement: */
-  rule if(B:Exp) St:Stmt => if(B) St else {}  [anywhere]
+  rule if(B:Exp) St:Stmt => if(B) St else {}  [macro]
   
   /*@
     The desugaring rule for statements declaring multiple variables. Here
@@ -817,7 +817,7 @@ module CINK-LANG-SEMANTICS
        when       KL ==KLabel 'int_
        orElseBool KL ==KLabel 'bool_ 
        orElseBool KL ==KLabel 'void_
-       [anywhere]
+
 
   /*@
    The function \texttt{isDeclLabel} tests whether an initialization expression
@@ -825,7 +825,7 @@ module CINK-LANG-SEMANTICS
   */
   syntax K ::= "isAlias" "(" Exp ")" [function]
 
-  rule isAlias(& X:Id = E:Exp) => true [anywhere]
+  rule isAlias(& X:Id = E:Exp) => true
 
   /*@
    In some places we needed to test whether an expression is an l-value.
@@ -833,13 +833,13 @@ module CINK-LANG-SEMANTICS
   */
   syntax Bool ::= "isLValue" "(" Exp ")" [function]
 
-  rule isLValue(lvalue(E:Exp)) => true [anywhere]
+  rule isLValue(lvalue(E:Exp)) => true
 
-  rule isLValue(loc(L:Int)) => true [anywhere]
+  rule isLValue(loc(L:Int)) => true
 
-  rule isLValue(X:Id) => true [anywhere]
+  rule isLValue(X:Id) => true
 
-  rule isLValue(* X:Id) => true [anywhere]
+  rule isLValue(* X:Id) => true
 
   /*@
     The next operator returns the variable name from an expression occurring
@@ -847,16 +847,16 @@ module CINK-LANG-SEMANTICS
   */
   syntax  Id ::= "getName" "(" Exp ")" [function]
 
-  rule getName(X:Id) => X       [anywhere]
-  rule getName(& X:Id) => X     [anywhere]
-  rule getName(* X:Id) => X     [anywhere]
+  rule getName(X:Id) => X
+  rule getName(& X:Id) => X
+  rule getName(* X:Id) => X
   rule getName(KL:KLabel(E:Exp)) => getName(E)
        when isDeclLabel(KL) ==Bool true
-       [anywhere]
-  rule getName(E1:Exp = E2:Exp) => getName(E1) [anywhere]
+
+  rule getName(E1:Exp = E2:Exp) => getName(E1)
   rule getName(KL:KLabel('_`,_(E:Exp,, .Exps))) => getName(E)
        when isDeclLabel(KL) ==Bool true
-       [anywhere]
+
 
 
   /*@
@@ -926,7 +926,7 @@ module CINK
            ...</T>, X)
        =>
        I
-       [anywhere]
+
   /*@
     We are ready now to give the semantics for \texttt{eqTo}$(X,I)$: it is 
     satisfied by a configuration (state) $B$ iff the value of $X$ in $B$ is

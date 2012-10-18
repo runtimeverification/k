@@ -32,6 +32,7 @@ import org.kframework.compile.transformers.ResolveBlockingInput;
 import org.kframework.compile.transformers.ResolveBuiltins;
 import org.kframework.compile.transformers.ResolveContextAbstraction;
 import org.kframework.compile.transformers.ResolveFresh;
+import org.kframework.compile.transformers.ResolveFunctions;
 import org.kframework.compile.transformers.ResolveHybrid;
 import org.kframework.compile.transformers.ResolveListOfK;
 import org.kframework.compile.transformers.ResolveSyntaxPredicates;
@@ -671,6 +672,12 @@ public class KompileFrontEnd {
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Desugar  Streams");
+			}
+
+			javaDef = new CompilerTransformerStep(new ResolveFunctions()).compile(javaDef);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Functions");
 			}
 
 			javaDef = new CompilerTransformerStep(new AddKCell()).compile(javaDef);

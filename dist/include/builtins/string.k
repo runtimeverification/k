@@ -46,16 +46,16 @@ module STRING-HOOKS
   syntax String ::= "rtrim" "(" String ")" [function]
   
   syntax Bool ::= String "=/=String" String      [function, left]
-  rule S1:String =/=String S2:String => notBool(S1 ==String S2) [function, anywhere]
+  rule S1:String =/=String S2:String => notBool(S1 ==String S2)
 
   syntax String ::= String "<String" String [function, hook(#STRING:_<String_)]
                   | String "<=String" String [function]
                   | String ">String" String [function]
                   | String ">=String" String [function]
 
-  rule S1:String <=String S2:String => notBool(S2 <String S1) [function, anywhere]
-  rule S1:String >String S2:String => S2 <String S1 [function, anywhere]
-  rule S1:String >=String S2:String => notBool(S1 <String S2) [function, anywhere]
+  rule S1:String <=String S2:String => notBool(S2 <String S1)
+  rule S1:String >String S2:String => S2 <String S1
+  rule S1:String >=String S2:String => notBool(S1 <String S2)
 
   syntax Char ::= "dummyChar"
 
@@ -64,47 +64,47 @@ module STRING-HOOKS
   syntax Bool ::= "#isWhiteSpace" "(" Char ")"   [function, klabel(#isWhiteSpace)]
   rule #isWhiteSpace(C:Char)
       => (asciiString(C) >=Int 9 andBool asciiString(C) <=Int 13)  
-           orBool (C ==String " ") [function, anywhere]
+           orBool (C ==String " ")
 
   syntax Bool ::= "#isDigit" "(" Char ")"        [function, klabel(#isDigit)]
   rule #isDigit(C:Char) 
       => (asciiString(C) >=Int asciiString("0")) 
-           andBool (asciiString(C) <=Int asciiString("9")) [function, anywhere]
+           andBool (asciiString(C) <=Int asciiString("9"))
 
   rule countAllOccurences(Source:String, ToCount:String) => 0 
-			when findString(Source, ToCount, 0) <Int 0 [function, anywhere]
+			when findString(Source, ToCount, 0) <Int 0
   rule countAllOccurences(Source:String, ToCount:String) => 1 +Int countAllOccurences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount) 
-			when findString(Source, ToCount, 0) >=Int 0 [function, anywhere]
+			when findString(Source, ToCount, 0) >=Int 0
 			
   rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => substrString(Source, 0, findString(Source, ToReplace, 0))
 				+String Replacement +String substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)) 
-				when findString(Source, ToReplace, 0) >=Int 0 [function, anywhere]
+				when findString(Source, ToReplace, 0) >=Int 0
   rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => Source 
-		when findString(Source, ToReplace, 0) <Int 0 [function, anywhere]
+		when findString(Source, ToReplace, 0) <Int 0
   
   
   rule replace(Source:String, ToReplace:String, Replacement:String, Count:Int) => 
        substrString(Source, 0, findString(Source, ToReplace, 0)) +String Replacement +String
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
-		when Count >Int 0 [function, anywhere]
-  rule replace(Source, ToReplace, Replacement, 0) => Source [function, anywhere]
-  rule replaceAll(Source, ToReplace, Replacement) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace)) [function, anywhere] 
+		when Count >Int 0
+  rule replace(Source, ToReplace, Replacement, 0) => Source
+  rule replaceAll(Source, ToReplace, Replacement) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace))
 
-  rule ltrim(S:String) => replaceFirst(S, " ", "") when findString(S, " ", 0) ==Int 0 [function, anywhere]
-  rule ltrim(S:String) => S when findString(S, " ", 0) =/=Int 0 [function, anywhere]
-  rule ltrim("") => "" [function, anywhere]
+  rule ltrim(S:String) => replaceFirst(S, " ", "") when findString(S, " ", 0) ==Int 0
+  rule ltrim(S:String) => S when findString(S, " ", 0) =/=Int 0
+  rule ltrim("") => ""
 
-  rule rtrim(S:String) => rtrim(substrString(S,0, lengthString(S) -Int 1)) when substrString(S, lengthString(S) -Int 1, lengthString(S)) ==String " " [function, anywhere]
-  rule rtrim(S:String) => S when substrString(S, lengthString(S) -Int 1, lengthString(S)) =/=String " " [function, anywhere]
-  rule rtrim("") => "" [function, anywhere]
+  rule rtrim(S:String) => rtrim(substrString(S,0, lengthString(S) -Int 1)) when substrString(S, lengthString(S) -Int 1, lengthString(S)) ==String " "
+  rule rtrim(S:String) => S when substrString(S, lengthString(S) -Int 1, lengthString(S)) =/=String " "
+  rule rtrim("") => ""
   
-  rule trim(S) => ltrim(rtrim(S)) [function, anywhere]
+  rule trim(S) => ltrim(rtrim(S))
 
   syntax K ::= "#parseToken" "(" String "," String ")"  [function]
-  rule #parseToken("Int",S:String) => (String2Int(S +String "0") /Int 10) [anywhere]
-  rule #parseToken("Float",S:String) => (String2Float(S))  [anywhere]
-  rule #parseToken("String",S:String) => (S)  [anywhere]
-  rule #parseToken("Id",S:String) => (String2Id(S))  [anywhere]
+  rule #parseToken("Int",S:String) => (String2Int(S +String "0") /Int 10)
+  rule #parseToken("Float",S:String) => (String2Float(S)) 
+  rule #parseToken("String",S:String) => (S) 
+  rule #parseToken("Id",S:String) => (String2Id(S))
 
   rule String2Int("00") => 0  [anywhere]
 
