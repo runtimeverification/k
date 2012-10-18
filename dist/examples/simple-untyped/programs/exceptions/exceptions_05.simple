@@ -9,8 +9,7 @@ function f(y) {
   } catch(p) {
     print(p+10," ");
   }
-  var i;
-  for (i = 1; i <= y; ++i) {
+  for (var i = 1; i <= y; ++i) {
     t = t*i;
   }
   return t;

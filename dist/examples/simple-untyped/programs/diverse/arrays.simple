@@ -1,26 +1,26 @@
 // This program tests multi-dimensional arrays.
 
 function readArray(a) {
-  var m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1, i, j;
-  for(i=0; i<=m; ++i) {
+  var m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1;
+  for(var i=0; i<=m; ++i) {
     print("Line ",i+1," (",n+1," elements): ");
-    for(j=0; j<=n; ++j) { a[i][j] = read(); }
+    for(var j=0; j<=n; ++j) { a[i][j] = read(); }
   }
 }
 
 function printArray(a) {
-  var m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1, i, j;
-  for(i=0; i<=m; ++i) {
+  var m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1;
+  for(var i=0; i<=m; ++i) {
     print("Line ",i+1," (",n+1," elements):");
-    for(j=0; j<=n; ++j) { print(" ",a[i,j]); }
+    for(var j=0; j<=n; ++j) { print(" ",a[i,j]); }
   print("\n");
   }
 }
 
 function transArray(a) {
-  var  m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1, b[n+1,m+1], i, j;
-  for (i=0; i<=m; ++i) {
-    for (j=0; j<=n; ++j) {
+  var  m = sizeOf(a) - 1, n = sizeOf(a[0]) - 1, b[n+1,m+1];
+  for (var i=0; i<=m; ++i) {
+    for (var j=0; j<=n; ++j) {
       b[j,i] = a[i,j];
     }
   }
@@ -29,11 +29,10 @@ function transArray(a) {
 
 function mulArray(a,b) {
   var m = sizeOf(a) - 1, n = sizeOf(b) - 1, p = sizeOf(b[0]) - 1, c[m+1,p+1];
-  var i, j, k;
-  for (i=0; i<=m; ++i) {
-    for (j=0; j<=p; ++j) {
+  for (var i=0; i<=m; ++i) {
+    for (var j=0; j<=p; ++j) {
       c[i,j] = 0;
-      for (k=0; k<=n; ++k) {
+      for (var k=0; k<=n; ++k) {
         c[i,j] = c[i,j] + a[i,k] * b[k,j];
       }
     }

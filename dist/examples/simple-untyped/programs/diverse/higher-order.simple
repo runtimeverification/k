@@ -45,16 +45,14 @@ function app2(f,x) {
 }
 
 function map(f,x) {
-  var i;
-  for (i = 0; i <= sizeOf(x) - 1; ++i) {
+  for (var i = 0; i <= sizeOf(x) - 1; ++i) {
     x[i] = app2(f,x[i]);
   }
 }
 
 function printall() {
   print("x = ",x, ";  a[] = ");
-  var i;
-  for (i = 0; i <= sizeOf(a) - 1; ++i) {
+  for (var i = 0; i <= sizeOf(a) - 1; ++i) {
     print(a[i], " ");
   }
   print("\n");
@@ -62,7 +60,7 @@ function printall() {
 
 function main() {
   x = 0; var i;
-  for (i=0; i <= sizeOf(a) - 1; ++i) {
+  for (var i=0; i <= sizeOf(a) - 1; ++i) {
     a[i]=i;
   }
   printall();

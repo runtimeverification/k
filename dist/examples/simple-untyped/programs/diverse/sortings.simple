@@ -1,7 +1,7 @@
 function init(n) {
-  var x[n], i;
+  var x[n];
   print("Type ",n," numbers: ");
-  for (i = 0; i <= n - 1; ++i) {
+  for (var i = 0; i <= n - 1; ++i) {
     x[i] = read();
   }
   print("Finished reading the ",n," numbers\n");
@@ -10,16 +10,15 @@ function init(n) {
 
 function printArray(x) {
   print("\n");
-  var i;
-  for (i = 0; i <= sizeOf(x) - 1; ++i) {
+  for (var i = 0; i <= sizeOf(x) - 1; ++i) {
     print(x[i]," ");
   }
   print("\n");
 }
 
 function reverse(x) {
-  var n = sizeOf(x), i;
-  for (i = 0; i <= n/2 - 1; ++i) {
+  var n = sizeOf(x);
+  for (var i = 0; i <= n/2 - 1; ++i) {
     var t = x[i];
     x[i] = x[n - i - 1];
     x[n - i - 1] = t;
@@ -27,16 +26,14 @@ function reverse(x) {
 }
 
 function map(m,f,x) {
-  var i;
-  for (i = 0; i <= sizeOf(f) - 1; ++i) {
+  for (var i = 0; i <= sizeOf(f) - 1; ++i) {
     print(m[i]);
     f[i](x);
   }
 }
 
 function insertionSort(x) {
-  var i;
-  for (i = 1; i <= sizeOf(x) - 1; ++i) {
+  for (var i = 1; i <= sizeOf(x) - 1; ++i) {
     var v = x[i], j = i - 1;
     while (j > 0 && x[j] > v) {  // doing the loop only up to 1
       x[j + 1] = x[j];
@@ -53,9 +50,9 @@ function insertionSort(x) {
 }
 
 function bubbleSort(v) {
-  var n = sizeOf(v), i, j;
-  for (i = 0; i <= n - 1; ++i) {
-    for (j = 0; j <= n - 2; ++j) {
+  var n = sizeOf(v);
+  for (var i = 0; i <= n - 1; ++i) {
+    for (var j = 0; j <= n - 2; ++j) {
       if (v[j] > v[j+1]) {
         var t = v[j+1];
         v[j+1] = v[j];

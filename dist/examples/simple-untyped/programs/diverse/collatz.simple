@@ -13,7 +13,7 @@ function collatz(n) {
 
 function main() {
   print("Testing Collatz' conjecture up to what number? ");
-  var m = read(), i;
-  for (i=1; i<=m; ++i) { collatz(i); }
+  var m = read();
+  for (var i=1; i<=m; ++i) { collatz(i); }
   print("Done.  It appears to hold.\n");
 }

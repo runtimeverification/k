@@ -4,15 +4,15 @@
 var x;
 
 function main() {
-  var n = 5, i;
+  var n = 5;
   x = 1;
-  for (i = 1; i <= n; ++i) {
+  for (var i = 1; i <= n; ++i) {
     var t=i;
     spawn {
       multX(t);
     };
   }
-  for (i=1; i<=n; ++i) {
+  for (var i=1; i<=n; ++i) {
     rendezvous i;
   }
   print(x,"\n");

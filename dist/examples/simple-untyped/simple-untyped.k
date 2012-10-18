@@ -89,7 +89,7 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-                | "for" "(" Exp ";" Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "try" Block "catch" "(" Id ")" Block
@@ -125,8 +125,8 @@ that there are only \texttt{while} loops, and that each variable is
 declared alone and is initialized. */
 
   rule if (E) S => if (E) S else {}                             [macro]
-  rule for(Start; Cond; Step) {Ss}
-    => Start; while (Cond) {Ss Step;}                           [macro]
+  rule for(Start Cond; Step) {Ss}
+    => {Start while (Cond) {Ss Step;}}                          [macro]
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;      [macro]
   rule var X:Id = E; => var X; X = E;                           [macro]
 
