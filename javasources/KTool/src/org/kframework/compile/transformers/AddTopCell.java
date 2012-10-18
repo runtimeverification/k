@@ -15,6 +15,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -66,14 +67,14 @@ public class AddTopCell extends CopyOnWriteTransformer {
 		if (MetaK.isAnywhere(node)) return node;
 		if (!MetaK.hasCell(node.getBody())) return node; 
 		node = node.shallowCopy();
-		node.setBody(MetaK.wrap(node.getBody(),"generatedTop","both"));
+		node.setBody(MetaK.wrap(node.getBody(),"generatedTop",Ellipses.BOTH));
 		return node;
 	}
 	
 	@Override
 	public ASTNode transform(Configuration node) {
 		node = node.shallowCopy();
-		node.setBody(MetaK.wrap(node.getBody(),"generatedTop","none"));
+		node.setBody(MetaK.wrap(node.getBody(),"generatedTop",Ellipses.NONE));
 		return node;
 	}
 	

@@ -22,6 +22,7 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -102,7 +103,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		if ((!inputCells.contains(node.getLabel()))) {
 			return super.transform(node);
 		}
-		if (!(node.getElipses().equals("right"))) {
+		if (!(node.getEllipses() == Ellipses.RIGHT)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
 					"cell should have right ellipses but it doesn't." +

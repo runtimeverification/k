@@ -16,7 +16,7 @@ fmod DEFAULT-TERMS is
   
   op defaultTerms : Qid Module Term ~> Module .
   var IL : ImportList . var SSDS : SubsortDeclSet . 
-  eq defaultTerms(Q, M, T) = setName(setRls(setEqs(setMbs(M, defaultTermsMbs(getMbs(M),T)),defaultTermsEqs(getEqs(M),T)),defaultTermsRls(getRls(M),T)),Q) [print "Applying default terms. Configuration: " T] . 
+  eq defaultTerms(Q, M, T) = setName(setRls(setEqs(setMbs(M, defaultTermsMbs(removeConfTerm(getMbs(M)),T)),defaultTermsEqs(getEqs(M),T)),defaultTermsRls(getRls(M),T)),Q) [print "Applying default terms. Configuration: " T] . 
 
   sort TermBool .  op {_,_} : TermList Bool -> TermBool .
   op getTerm : TermBool -> Term .  eq getTerm({T,B}) = T .

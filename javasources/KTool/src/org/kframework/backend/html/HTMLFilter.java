@@ -17,6 +17,7 @@ import org.kframework.backend.html.HTMLPatternsVisitor.HTMLPatternType;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
@@ -229,13 +230,14 @@ public class HTMLFilter extends BasicVisitor {
 		String tabClasses = "tab";
 		
 		//this condition checks how the edges of the cell should be.
-		if (c.getElipses().equals("left")) {
+		Ellipses ellipses = c.getEllipses();
+		if (ellipses == Ellipses.LEFT) {
 			blockClasses += " left";
 			tabClasses += " straightEdge";
-		} else if (c.getElipses().equals("right")) {
+		} else if (ellipses == Ellipses.RIGHT) {
 			blockClasses += " right";
 			tabClasses += " curvedEdge";
-		} else if (c.getElipses().equals("both")) {
+		} else if (ellipses == Ellipses.BOTH) {
 			blockClasses += " left right";
 			tabClasses += " straightEdge";
 		} else {

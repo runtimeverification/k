@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Modifier;
@@ -27,9 +28,15 @@ public class Cell extends Term {
 		SOME,
 	}
 	
+	public enum Ellipses {
+		LEFT,
+		RIGHT,
+		BOTH,
+		NONE,
+	}
+	
 	String label;
 	Term contents;
-	String ellipses;
 	Map<String, String> attributes;
 
 	public Cell(String location, String filename) {
@@ -41,11 +48,11 @@ public class Cell extends Term {
 		super(element);
 		this.sort = "BagItem";
 		this.label = element.getAttribute(Constants.LABEL_label_ATTR);
-		this.ellipses = element.getAttribute(Constants.ELLIPSES_ellipses_ATTR);
 		this.contents = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
 
 		NamedNodeMap its = element.getAttributes();
 		attributes = new HashMap<String, String>();
+		setEllipses(element.getAttribute(Constants.ELLIPSES_ellipses_ATTR));
 
 		for (int i = 0; i < its.getLength(); i++) {
 			if (!its.item(i).getNodeName().equals(Constants.FILENAME_filename_ATTR) && !its.item(i).getNodeName().equals(Constants.LOC_loc_ATTR) // && !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
@@ -59,7 +66,6 @@ public class Cell extends Term {
 		super(node);
 		this.label = node.label;
 		this.attributes = node.attributes;
-		this.ellipses = node.ellipses;
 		this.contents = node.contents;
 	}
 
@@ -69,13 +75,13 @@ public class Cell extends Term {
 	}
 
 	public boolean hasRightEllipsis() {
-		return ellipses != null &&
-				(ellipses.equals("right") || ellipses.equals("both"));
+		Ellipses e = getEllipses();
+		return (e == Ellipses.RIGHT || e == Ellipses.BOTH);
 	}
 
 	public boolean hasLeftEllipsis() {
-		return ellipses != null &&
-				(ellipses.equals("left") || ellipses.equals("both"));
+		Ellipses e = getEllipses();
+		return (e == Ellipses.LEFT || e == Ellipses.BOTH);
 	}
 
 	@Override
@@ -85,19 +91,11 @@ public class Cell extends Term {
 			attributes += " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
 
 				String content = "<" + this.label + attributes + ">";
+				
+				if (hasLeftEllipsis()) content += "..."; 
+				content += " " + this.contents + " ";
+				if (hasRightEllipsis()) content += "..."; 
 
-				if (ellipses != null && !ellipses.equals("none")) {
-					if (ellipses.equals("left")) {
-						content += "... " + this.contents + " ";
-					} else if (ellipses.equals("right")) {
-						content += " " + this.contents + " ...";
-					} else if (ellipses.equals("both")) {
-						content += "... " + this.contents + " ...";
-					}
-
-				} else {
-					content += " " + this.contents;
-				}
 				return content + "</" + this.label + "> ";
 	}
 
@@ -136,13 +134,24 @@ public class Cell extends Term {
 		return Multiplicity.ONE;
 	}
 	
-	public String getElipses() {
-		return ellipses;
+	public Ellipses getEllipses() {
+		String attr = attributes.get("ellipses");
+		try {
+			if (attr!=null) {
+				return Ellipses.valueOf(attr.toUpperCase());
+			}
+		} catch (IllegalArgumentException e){
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
+					KExceptionGroup.COMPILER, 
+					"Unknown multiplicity in configuration for cell " + this.getLabel() + ". Assuming none.", 
+					this.getFilename(), this.getLocation()));
+		}
+		return Ellipses.NONE;
 	}
 
-	public void setElipses(String ellipses) {
-		this.ellipses = ellipses;
-		attributes.put("ellipses", ellipses);
+	public void setEllipses(String ellipses) {
+		if (ellipses.isEmpty()) ellipses = "none";
+		attributes.put("ellipses", ellipses.toLowerCase());
 	}
 
 	public Map<String, String> getAttributes() {
@@ -177,5 +186,20 @@ public class Cell extends Term {
 	@Override
 	public Cell shallowCopy() {
 		return new Cell(this);
+	}
+
+	public String getId() {
+		String id = attributes.get("id");
+		if (null == id) id = this.label;
+		return id;
+	}
+
+	public void setEllipses(Ellipses e) {
+		setEllipses(e.toString());
+	}
+
+	public void setId(String id) {
+		if (getId().equals(id)) return;
+		attributes.put("id", id);
 	}
 }

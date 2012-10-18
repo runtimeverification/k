@@ -9,6 +9,7 @@ import org.kframework.compile.utils.CompilerStep;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
@@ -136,7 +137,7 @@ public class AddEval implements CompilerStep {
 				node = node.shallowCopy();
 			} else node = (Cell) result;
 			node.setDefaultAttributes();
-			node.setElipses("none");
+			node.setEllipses(Ellipses.NONE);
 			return node;
 		}
 

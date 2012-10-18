@@ -30,6 +30,7 @@ import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.compile.transformers.ResolveBinder;
 import org.kframework.compile.transformers.ResolveBlockingInput;
 import org.kframework.compile.transformers.ResolveBuiltins;
+import org.kframework.compile.transformers.ResolveContextAbstraction;
 import org.kframework.compile.transformers.ResolveFresh;
 import org.kframework.compile.transformers.ResolveHybrid;
 import org.kframework.compile.transformers.ResolveListOfK;
@@ -751,6 +752,14 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Hybrid");
 			}
 
+			javaDef = new CompilerTransformerStep(new ResolveContextAbstraction()).compile(javaDef);		
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Context Abstraction");
+			}
+			
+			
+			
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");
@@ -788,7 +797,7 @@ public class KompileFrontEnd {
 			MaudeFilter maudeFilter = new MaudeFilter();
 			javaDef.accept(maudeFilter);
 
-			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "red in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n"
+			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n"
 					+ "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
 					+ " anywheres \"anywhere=() function=() predicate=() macro=()\" " + "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 

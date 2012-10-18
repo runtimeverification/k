@@ -10,6 +10,7 @@ import org.kframework.kil.List;
 import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Set;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.maude.xml.basic.Term;
 
 
@@ -22,7 +23,7 @@ public class JavaClassesFactory {
 			cl.setLabel(cellLabel.getOp());
 
 			cl.setContents((org.kframework.kil.Term) JavaClassesFactory.getTerm(t.getChildren().get(1)));
-			cl.setElipses("none");
+			cl.setEllipses(Ellipses.NONE);
 
 			return cl;
 		}

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.kframework.kil.*;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
@@ -135,11 +136,12 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Cell c) {
-		if (c.getElipses().equals("left")) {
+		Ellipses ellipses = c.getEllipses();
+		if (ellipses == Ellipses.LEFT) {
 			result += "\\ksuffix";
-		} else if (c.getElipses().equals("right")) {
+		} else if (ellipses == Ellipses.RIGHT) {
 			result += "\\kprefix";
-		} else if (c.getElipses().equals("both")) {
+		} else if (ellipses == Ellipses.BOTH) {
 			result += "\\kmiddle";
 		} else {
 			result += "\\kall";

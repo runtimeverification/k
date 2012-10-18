@@ -3,18 +3,12 @@ package org.kframework.kil;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.utils.strings.StringUtil;
 import org.kframework.utils.utils.xml.XML;
 import org.w3c.dom.Element;
 

@@ -1,5 +1,6 @@
 package org.kframework.compile.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
@@ -260,13 +262,13 @@ public class MetaK {
 	}
 	
 	public static Term kWrap(Term t) {
-		return wrap(t, "k", "right");
+		return wrap(t, "k", Ellipses.RIGHT);
 	}
 	
-	public static Term wrap(Term t, String label, String ellipses) {
+	public static Term wrap(Term t, String label, Ellipses ellipses) {
 		Cell cell = new Cell();
 		cell.setLabel(label);
-		cell.setElipses(ellipses);
+		cell.setEllipses(ellipses);
 		cell.setContents(t);
 		return cell;		
 	}
@@ -392,6 +394,18 @@ public class MetaK {
 	
 	public static String getListUnitLabel(String separator) {
 		return "'.List`{\"" + separator + "\"`}";
+	}
+	
+
+	public static List<Cell> getTopCells(Term t) {
+		final List<Cell> cells = new ArrayList<Cell>();
+		t.accept(new BasicVisitor() {
+			@Override
+			public void visit(Cell node) {
+				cells.add(node);
+			}
+		});
+		return cells;
 	}
 	
 	

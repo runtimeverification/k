@@ -10,6 +10,7 @@ import java.util.Set;
 import org.kframework.compile.utils.CompilerStep;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
@@ -94,7 +95,7 @@ public class FlattenModules  implements CompilerStep {
 				cfg = new Configuration();
 				Cell k = new Cell();
 				k.setLabel("k");
-				k.setElipses("none");
+				k.setEllipses(Ellipses.NONE);
 				k.setSort("K");
 				k.setContents(new Variable("$PGM","K"));
 				cfg.setBody(k);

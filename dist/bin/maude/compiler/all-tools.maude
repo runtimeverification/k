@@ -25,7 +25,7 @@ load printing
 load strict-ops2cxt-interface
 
 load default-terms-interface
-load context-transformers-interface
+---load context-transformers-interface
 load open-cells-interface
 load apply-mapeqs-interface
 load make-k-rules-interface
