@@ -100,7 +100,7 @@ public class RunProcess {
 				e.printStackTrace();
 			}
 			String parserName = new File(parserPath).getName();
-			System.out.println("The external parser to be used is:" + parserName);
+//			System.out.println("The external parser to be used is:" + parserName);
 			if ("kast".equals(parserName)) {
 				return KastParser.getKAST(pgm);
 				// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
