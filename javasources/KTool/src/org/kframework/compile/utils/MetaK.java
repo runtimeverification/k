@@ -408,5 +408,16 @@ public class MetaK {
 		return cells;
 	}
 	
+	public static List<String> getAllCellLabels(Term t) {
+		final List<String> cells = new ArrayList<String>();
+		t.accept(new BasicVisitor() {
+			@Override
+			public void visit(Cell node) {
+				cells.add(node.getLabel());
+				super.visit(node);
+			}
+		});
+		return cells;
+	}
 	
 }

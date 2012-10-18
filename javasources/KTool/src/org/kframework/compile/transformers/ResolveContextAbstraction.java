@@ -7,9 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Stack;
-import java.util.logging.Level;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -17,7 +15,6 @@ import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
-import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
@@ -115,6 +112,14 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		Cell cell = (Cell)super.transform(node);
 		if (cell.getEllipses() == Ellipses.NONE) return cell;
 		ConfigurationStructure confCell = config.get(cell.getId());
+		if (confCell == null)
+		{
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+					KExceptionGroup.CRITICAL, 
+					"Cell " + cell.getLabel() + " is not part of the configuration ", 
+					node.getFilename(), node.getLocation()));
+		}
+		
 		if (confCell.sons.isEmpty()) return cell;
 		SplitByLevelVisitor visitor = new SplitByLevelVisitor(confCell.level);
 		cell.getContents().accept(visitor);

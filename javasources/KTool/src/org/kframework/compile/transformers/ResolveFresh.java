@@ -51,12 +51,12 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		Configuration cfg = MetaK.getConfiguration(node);
 		Bag bag;
 		if (cfg.getBody() instanceof Bag) {
-			bag = (Bag) cfg.getBody();
+			bag = (Bag) cfg.getBody().shallowCopy();
 		} else {
 			bag = new Bag();
 			bag.getContents().add(cfg.getBody());
-			cfg.setBody(bag);
 		}
+		cfg.setBody(bag);
 		Cell nId = new Cell();
 		nId.setLabel("freshCounter");
 		nId.setEllipses(Ellipses.NONE);
