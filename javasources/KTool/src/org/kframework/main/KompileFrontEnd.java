@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.html.HTMLFilter;
@@ -31,12 +32,15 @@ import org.kframework.compile.transformers.ResolveBinder;
 import org.kframework.compile.transformers.ResolveBlockingInput;
 import org.kframework.compile.transformers.ResolveBuiltins;
 import org.kframework.compile.transformers.ResolveContextAbstraction;
+import org.kframework.compile.transformers.ResolveDefaultTerms;
 import org.kframework.compile.transformers.ResolveFresh;
 import org.kframework.compile.transformers.ResolveFunctions;
 import org.kframework.compile.transformers.ResolveHybrid;
 import org.kframework.compile.transformers.ResolveListOfK;
 import org.kframework.compile.transformers.ResolveSyntaxPredicates;
 import org.kframework.compile.utils.CompilerTransformerStep;
+import org.kframework.compile.utils.ConfigurationStructureVisitor;
+import org.kframework.compile.utils.ConfigurationStructureVisitor.ConfigurationStructure;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
@@ -759,12 +763,22 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Hybrid");
 			}
 
-			javaDef = new CompilerTransformerStep(new ResolveContextAbstraction()).compile(javaDef);		
+			ConfigurationStructureVisitor cfgStrVisitor = new ConfigurationStructureVisitor();
+			javaDef.accept(cfgStrVisitor);
+			int cfgMaxLevel = cfgStrVisitor.getMaxLevel();
+			Map<String, ConfigurationStructure> cfgStr = cfgStrVisitor.getConfig();
+			
+			javaDef = new CompilerTransformerStep(new ResolveContextAbstraction(cfgMaxLevel, cfgStr)).compile(javaDef);		
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Context Abstraction");
 			}
-			
+						
+			javaDef = new CompilerTransformerStep(new ResolveDefaultTerms(cfgStr)).compile(javaDef);		
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Default Terms");
+			}
 			
 			
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();

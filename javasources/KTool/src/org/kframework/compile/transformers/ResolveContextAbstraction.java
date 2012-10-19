@@ -7,9 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Stack;
 
 import org.kframework.compile.utils.MetaK;
+import org.kframework.compile.utils.ConfigurationStructureVisitor.ConfigurationStructure;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
@@ -27,7 +27,6 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -36,18 +35,22 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 
-	Map<String, ConfigurationStructure> config = new HashMap<String, ConfigurationStructure>();
-	int maxLevel = 0;
+	private int maxLevel;
+	private Map<String, ConfigurationStructure> config;
 
 	public ResolveContextAbstraction() {
 		super("Resolve Context Abstraction");
 	}
 	
+	public ResolveContextAbstraction(int maxLevel, 	Map<String, ConfigurationStructure> config) {
+		this();
+		this.maxLevel = maxLevel;
+		this.config = config;
+	}
+	
 	
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
-		Visitor visitor = new ConfigurationStructureVisitor();
-		node.accept(visitor);
 		if (config.isEmpty()) return node;
 		return super.transform(node);
 	}
@@ -176,9 +179,9 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 				for (Cell cell : inCells) {
 					ConfigurationStructure cellCfg = potentialSons.get(cell.getId());
 					if (cellCfg == null) {
-						GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
+						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, 
 								KExceptionGroup.INTERNAL, 
-								"Cell " + cell + " appears more than its multiplicity in " + t + " while " + getName(), 
+								"Cell " + cell + " appears more than its multiplicity in " + t + ". \n\tTransformation: " + getName(), 
 								t.getFilename(), t.getLocation()));								
 						continue;
 					}
@@ -226,16 +229,6 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		return parent;
 	}
 
-	public class ConfigurationStructure {
-		Cell cell;
-		String id;
-		ConfigurationStructure parent = null;
-		Map<String,ConfigurationStructure> sons = new HashMap<String, ConfigurationStructure>();
-		Multiplicity multiplicity;
-		int level = 0;
-	}
-	
-	
 	private class SplitByLevelVisitor extends BasicVisitor {
 		ArrayList<LinkedList<Term>> levels;
 		private int level;
@@ -295,52 +288,6 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 					}
 			}
 			levels.get(level).add(node);
-		}
-	}
-
-	private class ConfigurationStructureVisitor extends BasicVisitor {
-		
-		Stack<ConfigurationStructure> ancestors = new Stack<ResolveContextAbstraction.ConfigurationStructure>();
-		
-		
-		@Override
-		public void visit(Configuration node) {
-			Term t = node.getBody();
-			Cell top = new Cell();
-			top.setLabel("___CONTEXT_ABSTRACTION_TOP_CELL___");
-			top.setContents(t);
-			top.accept(this);
-		}
-		
-		@Override
-		public void visit(Cell node) {
-			ConfigurationStructure cfg = new ConfigurationStructure();
-			cfg.multiplicity = node.getMultiplicity();
-			cfg.id = node.getId();
-			cfg.cell = node;
-			if (!ancestors.empty()) {
-				ConfigurationStructure parent = ancestors.peek();
-				cfg.level = parent.level+1;
-				cfg.parent = parent;
-				if (cfg.level > maxLevel) maxLevel = cfg.level;
-				parent.sons.put(cfg.id, cfg);
-			}
-			ancestors.push(cfg);
-			super.visit(node);
-			ancestors.pop();
-			config.put(cfg.id, cfg);
-		}
-		
-		@Override
-		public void visit(Context node) {
-		}
-
-		@Override
-		public void visit(Syntax node) {
-		}
-
-		@Override
-		public void visit(Rule node) {
 		}
 	}
 
