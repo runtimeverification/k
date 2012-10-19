@@ -5,6 +5,7 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.Runtime;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -310,21 +311,15 @@ public class Main {
 				FileUtil.createFile(K.output, aux1.toString());
 			}
 		
-			ProcessBean bean = new ProcessBean();
-			bean.setExitCode(0);
-			System.exit(bean.getExitCode());
+			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();
-			ProcessBean bean = new ProcessBean();
-			bean.setExitCode(1);
-			System.exit(bean.getExitCode());
+			System.exit(1);
 		} catch (Exception e) {
 			System.out.println("You provided bad program arguments!");
 			e.printStackTrace();
-			ProcessBean bean = new ProcessBean();
-			bean.setExitCode(1);
 			printKRunUsage(cmd_options.getOptions());
-			System.exit(bean.getExitCode());
+			System.exit(1);
 		}
 
 	}
@@ -404,9 +399,7 @@ public class Main {
 						printDebugUsage(cmd_options.getOptions());
 					}
 					if (cmd.hasOption("abort")) {
-						ProcessBean bean = new ProcessBean();
-						bean.setExitCode(0);
-						System.exit(bean.getExitCode());
+						System.exit(0);
 					}
 					if (cmd.hasOption("resume")) {
 						// get the maudified version of the current configuration based on the xml obtained from -xml-log option
@@ -423,9 +416,7 @@ public class Main {
 						red = p.processDoc(K.processed_maude_output);
 						AnsiConsole.out.println(red.get(0));
 
-						ProcessBean bean = new ProcessBean();
-						bean.setExitCode(0);
-						System.exit(bean.getExitCode());
+						System.exit(0);
 					}
 					// one step execution (by default) or more if you specify an argument
 					if (cmd.hasOption("step")) {
@@ -489,9 +480,7 @@ public class Main {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			ProcessBean bean = new ProcessBean();
-			bean.setExitCode(1);
-			System.exit(bean.getExitCode());
+			System.exit(1);
 		}
 
 	}
@@ -503,6 +492,16 @@ public class Main {
 	public static void execute_Krun(String cmds[]) {
 		// delete temporary krun directory
 		FileUtil.deleteDirectory(new File(K.krunDir));
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				try {
+					FileUtil.renameFolder(K.krunTempDir, K.krunDir);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
 
 		CommandlineOptions cmd_options = new CommandlineOptions();
 		CommandLine cmd = cmd_options.parse(cmds);
@@ -707,16 +706,12 @@ public class Main {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			ProcessBean bean = new ProcessBean();
-			bean.setExitCode(1);
-			System.exit(bean.getExitCode());
+			System.exit(1);
 		} catch (Exception e) {
 			System.out.println("You provided bad program arguments!");
 			e.printStackTrace();
-			ProcessBean bean = new ProcessBean();
-			bean.setExitCode(1);
 			printKRunUsage(cmd_options.getOptions());
-			System.exit(bean.getExitCode());
+			System.exit(1);
 		}
 	}
 

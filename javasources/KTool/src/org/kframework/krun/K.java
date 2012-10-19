@@ -59,8 +59,8 @@ public class K {
 	public static boolean log_io = false;
 	public static boolean debug = false;
 	public static boolean trace = false;
-	//delete temp folders created by krun by default
-	public static boolean deleteTempDir = true;
+	//don't delete temp folders created by krun by default
+	public static boolean deleteTempDir = false;
 
 
 	public static Properties configuration_variables = new Properties();

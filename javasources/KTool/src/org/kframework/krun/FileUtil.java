@@ -8,6 +8,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -141,6 +144,10 @@ public class FileUtil {
 		File srcFile = new File(oldName);
 		boolean bSucceeded = false;
 		
+		File lockFile = new File(K.kdir + K.fileSeparator + "krun.lock");
+		FileChannel channel = new RandomAccessFile(lockFile, "rw").getChannel();
+		FileLock lock = channel.lock();
+
 		if (srcFile.exists()) {
 			try {
 				File destFile = new File(newName);
@@ -162,6 +169,9 @@ public class FileUtil {
 				}
 			}
 		}
+
+		lock.release();
+		channel.close();
 	}
 
 	//parse the output of Maude when --output-mode=raw
