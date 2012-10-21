@@ -9,33 +9,31 @@ the desired evaluation strategies of the various language constructs .  */
 
 //@ \subsection{Types}
 
-  syntax Type ::= "int"
-                | "bool"
-                | "string"
-                | "void"
-                | "arrayOf" Type
-                    [latex({#1}\texttt{\char91\char93})]
-                | "function" "from" Types "to" Type
-                    [latex(({#1}\ \texttt{->}\ {#2}))]
+  syntax Type ::= "void" | "int" | "bool" | "string"
+                | Type "[" "]"
+                > Types "->" Type
+                | "(" Type ")"             [bracket]
 
-  syntax Types ::= List{Type,","}  [strict]
+  syntax Types ::= List{Type,","}
 
 //@ \subsection{Declarations}
 
-  syntax Decl ::= "var" Exps ";"
-                | "function" Id "(" Exps ")" ":" Type Stmt
+  syntax Param ::= Type Id
+  syntax Params ::= List{Param,","}
+
+  syntax Decl ::= Type Exps ";"
+                | Type Id "(" Params ")" Block
 
 //@ \subsection{Expressions}
 
-
   syntax Exp ::= Int | Bool | String | Id
-               | "(" Exp ")"            [bracket]
-               | "++" Exp     
-               > Exp "[" Exps "]"       [strict]
-               > Exp "(" Exps ")"       [strict]
-               | "-" Exp                [strict]
-               | "sizeOf" "(" Exp ")"   [strict]
-               | "read" "(" ")"    
+               | "(" Exp ")"             [bracket]
+               | "++" Exp
+               > Exp "[" Exps "]"        [strict]
+               > Exp "(" Exps ")"        [strict]
+               | "-" Exp                 [strict]
+               | "sizeOf" "(" Exp ")"    [strict]
+               | "read" "(" ")"
                > left:
                  Exp "*" Exp             [strict, left]
                | Exp "/" Exp             [strict, left]
@@ -50,207 +48,157 @@ the desired evaluation strategies of the various language constructs .  */
                | Exp ">=" Exp            [strict, non-assoc]
                | Exp "==" Exp            [strict, non-assoc]
                | Exp "!=" Exp            [strict, non-assoc]
-               > "not" Exp               [strict]
+               > "!" Exp                 [strict]
                > left:
-                 Exp "and" Exp           [strict, left]
-               | Exp "or" Exp            [strict, left]
+                 Exp "&&" Exp            [strict(1), left]
+               | Exp "||" Exp            [strict(1), left]
+               > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
-               | Exp ":" Type           // allowed only for declarations
-//               | Exp "of" Type           // allowed only for declarations
 
-  syntax Exps ::= List{Exp,","}
+  syntax Exps ::= List{Exp,","}          [strict, hybrid]
 
 //@ \subsection{Statements}
 
-  syntax Stmt ::= "{" "}"
+  syntax Block ::= "{" "}"
                 | "{" Stmts "}"
+
+  syntax Stmt ::= Decl | Block
                 | Exp ";"                               [strict]
-                | "if" Exp "then" Stmt "else" Stmt      [avoid, strict(1)]
-                | "if" Exp "then" Stmt  
-                | "while" Exp "do" Stmt
-                | "for" Id "=" Exp "to" Exp "do" Stmt
+                | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
+                | "if" "(" Exp ")" Block
+                | "while" "(" Exp ")" Block
+        	| "for" "(" Stmt Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
-                | "try" Stmt "catch" "(" Id ")" Stmt 
-                | "throw" Exp ";"                       [strict]
-                | "spawn" Stmt 
+                | "try" Block "catch" "(" Param ")" Block
+        	| "throw" Exp ";"                       [strict]
+                | "join" Exp ";"                        [strict]
                 | "acquire" Exp ";"                     [strict]
                 | "release" Exp ";"                     [strict]
                 | "rendezvous" Exp ";"                  [strict]
 
-  syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts                      [right]
-
+  syntax Stmts ::= Stmt
+                 | Stmts Stmts                          [right]
 
 //@ We use the same desugaring macros like in typed SIMPLE
 
-  rule if E:Exp then S:Stmt => if E then S else {}
-  rule (for X:Id = E1:Exp to E2:Exp do S:Stmt)
-        =>
-       {var X : int = E1; while X <= E2 do {S X = (X + 1);}}
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
-  rule var (X:Id : T:Type) = E:Exp;
-       =>
-       var X : T; X = E;
+  rule if (E) S => if (E) S else {}                                 [macro]
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;           [macro]
+  rule T:Type X:Id = E; => T X; X = E;                              [macro]
+
+  syntax Id ::= "main"
 endmodule
 
 
 module SIMPLE-TYPED-DYNAMIC
   imports SIMPLE-TYPED-DYNAMIC-SYNTAX
 
-//@ \section{Semantics}
-
-/*@ \subsection{Values and results}
-These are similar to those of untyped SIMPLE, except that the array
-references and the function abstrations now also hold their types.
-These types are needed in order to easily compute the type of any
-value inthe language (see the auxiliary \texttt{typeOf} operation at
-the end of this module).  Note that our more-generous-than-needed
-syntax here allows function abstractions to take a list of expressions
-as parameters; in fact, the semantics will be given in a way that
-those expressions can only be typed identifiers.  Recall that the
-purpose of syntax in a \K definition is not to parse programs in order
-to reject those not satisfying the expected syntactic/typing
-conventions (this is what a static semantics does---see the statically
-typed SIMPLE), but only to parse programs ``enough'' to give them
-semantics.  In other words, the \K syntax is the ``syntax of the
-semantics''.  */
-
   syntax Val ::= Int | Bool | String
-               | "arrayRef" "(" Type "," Int "," Int ")"
-               | "lambda" "(" Exps "," Stmt "," Type ")"
-                     [latex((\lambda{#1}\,.\,{#2}):{#3})]
+               | array(Type,Int,Int)
+               | lambda(Type,Params,Stmts)
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val
 
-/*@ \subsection{Configuration}
-The configuration is almost identical to that of untyped SIMPLE,
-except for a \textsf{return} cell inside the \textsf{control} cell.
-This \textsf{return} cell will hold, like in the static semantics of
-typed SIMPLE, the expected type of the value returned by the function
-being executed.  The contents of this cell will be set whenever a
-function is invoked and will be checked whenever the evaluation of the
-function body encounters an explicit \texttt{return} statement. */
+//@ \section{Configuration}
 
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
-                      <k color="green"> ($PGM:K ~> execute) </k>
+                      <k color="green"> ($PGM:Stmts ~> execute) </k>
+                      <br/>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
-                        <return color="LimeGreen"> void </return>
-                          // holds return type
+                        <return color="LimeGreen"> void </return> //return type
                        </control>
+                      <br/>
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
+                      <id color="pink"> 0 </id>
                     </thread>
                   </threads>
-//                  <br/>
+                  <br/>
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
+                  <terminated color="red"> .Set </terminated>
                   <in color="magenta" stream="stdin"> .List </in>
                   <out color="brown" stream="stdout"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
+//@ \section{Declarations and Initialization}
 
-//@ \subsection{Declarations and Initializations}
+//@ \subsection{Variable Declaration}
 
-/*@ The ``undefined'' construct is now parameterized by a type.
-A main difference between untyped SIMPLE and dynamically typed SIMPLE
-is that the latter assigns a type to each of its locations and that
-type cannot be changed during the execution of the program.  We do not
-do any memory management in our semantic definitions here, so
-locations cannot be reclaimed, garbage collected and/or reused.  Each
-location corresponds precisely to an allocated variable or array
-element, whose type was explicitly or implicitly declared in the
-program and does not change.  It is therefore safe to type each
-location and then never allow that type to change.  The typed
-undefined values effectively assign both a type and an undefined value
-to a location. */
+  syntax K ::= undefined(Type)  [latex(\bot_{#1})]
 
-  syntax K ::= "undefined" "(" Type ")" [latex(\bot_{#1})]
-
-  rule <k> var '_:_(X:Id,, T:Type), .Exps; => . ...</k>
-       <env> Env:Map => Env[L/X] </env>
+  rule <k> T:Type X:Id; => . ...</k>
+       <env> Env => Env[L/X] </env>
        <store>... . => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
-/*@ The dynamic semantics of typed array declarations is
-similar to that in untyped SIMPLE, but we have to enforce that the
-type of an array declaration be of the form \texttt{arrayOf $T$}
-and assign the right type ($T$) to the allocated array locations. */
+//@ \subsection{Array Declaration}
 
-  rule <k> var '_:_(X[N:Int, (.Vals)],, arrayOf T), .Exps; => . ...</k> 
-       <env> Env:Map => Env[L/X] </env>
-       <store>... . => L |-> arrayRef(arrayOf T, L +Int 1, N)
-                       Map(L +Int 1 .. L +Int N |-> undefined(T)) ...</store>
+  rule <k> T:Type X:Id[N:Int]; => . ...</k>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> array(T, L +Int 1, N)
+                       (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
 
-  context var '_:_(_[HOLE],, _),.Exps ;
-
-/*@ The desugaring of multi-dimensional arrays into unidimensional
-ones is also similar to that in untyped SIMPLE, although we have to
-make sure that all the declared temporary variables have the right
-types. */
+  context _:Type _[HOLE];
 
   syntax Id ::= "$1" | "$2"
-  rule var X[N1:Int, N2:Int, Vs:Vals] : arrayOf arrayOf T; =>
-       var X[N1] : arrayOf (arrayOf T);
+  rule T:Type X:Id[N1:Int, N2:Int, Vs:Vals];
+    => T[]<Vs> X[N1];
        {
-         var ($1 : arrayOf (arrayOf T)) = X;
-         for $2 = 0 to N1 - 1 do
-         {
-           var X[N2,Vs] : arrayOf T;
+         T[][]<Vs> $1=X;
+         for(int $2=0; $2 <= N1 - 1; ++$2) {
+           T X[N2,Vs];
            $1[$2] = X;
          }
        }
-       [structural]
+    [structural]
+  syntax Type ::= Type "<" Vals ">"  [function]
+  rule T:Type<_,Vs:Vals> => T[]<Vs>
+  rule T:Type<.Vals> => T
 
-/*@ Store all function parameters, as well as the return type, as part
-of the lambda abstraction.  In the spirit of dynamic typing, we will
-make sure that parameters are well typed when the function is invoked. */
+//@ \subsection{Function declaration}
 
-  rule <k> function F:Id(XTs:Exps) : T:Type S:Stmt => . ...</k>
-       <env> Env:Map => Env[L/F] </env>
-       <store>...
-         . => L |-> lambda(XTs, S, function from types(XTs) to T)
-       ...</store>
-       <nextLoc> L:Int => L +Int 1 </nextLoc>
-
-/*@ \subsection{Calling \texttt{main()}}
-When done with the first pass, call \texttt{main()}. */
+  rule <k> T:Type F:Id(Ps:Params) B => . ...</k>
+       <env> Env => Env[L/F] </env>
+       <store>... . => L |-> lambda(T, Ps, B) ...</store>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
   syntax K ::= "execute"
-  rule <k> execute => String2Id("main")(.Exps); </k>
-       <env> Env:Map </env>
+  rule <k> execute => main(.Exps); </k>
+       <env> Env </env>
        <genv> . => Env </genv>
-       [structural]
+    [structural]
 
-
-//@ \subsection{Expressions and statements}
+//@ \section{Expressions}
 
   rule <k> X:Id => V ...</k>
-       <env>... X |-> L:Int ...</env>
-       <store>... L |-> V:Val ...</store>
-       [transition]
+       <env>... X |-> L ...</env>
+       <store>... L |-> V ...</store>  [transition]
+
+//@ \subsection{Variable/Array increment}
 
   context ++(HOLE => lvalue(HOLE))
+  rule <k> ++loc(L) => I +Int 1 ...</k>
+       <store>... L |-> (I => I +Int 1) ...</store>  [transition]
 
-  rule <k> ++loc(L:Int) => I +Int 1 ...</k>
-       <store>... L |-> (I:Int => I +Int 1) ...</store>
-       [transition]
+//@ \subsection{Arithmetic operators}
 
   rule I1:Int + I2:Int => I1 +Int I2
   rule Str1:String + Str2:String => Str1 +String Str2
-  rule '_-_(I1:Int,, I2:Int) => '_-Int_(I1,, I2)
+  rule I1:Int - I2:Int => I1 -Int I2
   rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=Int 0
-  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=Int 0
+  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
+  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
   rule - I:Int => 0 -Int I
   rule I1:Int < I2:Int => I1 <Int I2
   rule I1:Int <= I2:Int => I1 <=Int I2
@@ -258,224 +206,223 @@ When done with the first pass, call \texttt{main()}. */
   rule I1:Int >= I2:Int => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
-  rule B1:Bool and B2:Bool => B1 andBool B2
-  rule B1:Bool or B2:Bool => B1 orBool B2
-  rule not(B:Bool) => notBool(B)
+  rule ! T:Bool => notBool(T)
+  rule true  && E => E
+  rule false && _ => false
+  rule true  || _ => true
+  rule false || E => E
 
-//@ Check array bounds, as part of the dynamic typing policy.
+//@ \subsection{Array lookup}
 
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2,Vs] [anywhere]
+// It would be nice to get rid of the next two anywhere rules!
+// Besides the top level of the computation, they are only needed inside the
+// lvalue wrapper.  Maybe we need some additional notation for this?
 
-  rule arrayRef(_, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-       when N >=Int 0 andBool N <Int M
-       [anywhere]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
+    [structural, anywhere]
 
-  rule sizeOf(arrayRef(_,_:Nat,N)) => N
+  rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
+    when N >=Int 0 andBool N <Int M
+    [structural, anywhere]
 
-//@ Define function call and return together, to see their relationship.
+  syntax K ::= lookup(Int)
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>
+    [transition]
 
-  syntax K ::=  "(" Map "," K "," Bag ")"
+//@ \subsection{Size of an array}
 
-  rule <k>
-         '_`(_`)(lambda(XTs:Exps, S:Stmt,
-                       function from _ to T:Type),, Vs:Vals) ~> K
-         =>
-         bindto(XTs, Vs) ~> S ~> return;
-       </k>
+  rule sizeOf(array(_,_,N)) => N
+
+//@ \subsection{Function call}
+
+  syntax ListItem ::=  (Type,Map,K,Bag)
+
+  rule <k> lambda(T,Ps,B)(Vs:Vals) ~> K => bind(Ps,Vs) ~> B ~> return; </k>
        <control>
-         <fstack> . => ListItem((Env, K, <return> T' </return> C)) ...</fstack>
-         <return> T':Type => T </return>
-         C:Bag
+         <fstack> . => (T',Env,K,C) ...</fstack>
+         <return> T' => T </return>
+         C
        </control>
-       <env> Env:Map => GEnv </env>
-       <genv> GEnv:Map </genv>
+       <env> Env => GEnv </env>
+       <genv> GEnv </genv>
 
   rule <k> return V:Val; ~> _ => V ~> K </k>
        <control>
-         <fstack> ListItem((Env:Map, K:K, C:Bag)) => . ...</fstack>
-         (<return> T:Type </return> _ => C)
+         <fstack> (T',Env,K,C) => . ...</fstack>
+         <return> T => T' </return>
+         (_ => C)
        </control>
        <env> _ => Env </env>
-       when typeOf(V) ==K T
+    when type(V) ==K T
 
-  syntax Val ::= "nothing"
+  syntax Val ::= nothing(Type)
+  rule <k> return; => return nothing(T); ...</k> <return> T </return>
+    [structural]
 
-  rule return; => return nothing;   [ structural ]
+  syntax K ::= bind(Params,Vals)
 
-  rule <k> read() => I ...</k>
-       <in> ListItem(I:Int) => . ...</in>
-       [transition]
+  rule <k> bind((T:Type X:Id,Ps:Params => Ps),(V:Val,Vs:Vals => Vs)) ...</k>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> V ...</store>
+       <nextLoc> L => L:Int +Int 1 </nextLoc>
+    when type(V) ==K T  [structural]
+
+  rule bind(.Params, .Vals) => .  [structural]
+
+//@ \subsection{Read}
+
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>
+    [transition]
+
+//@ \subsection{Assignment}
 
   context (HOLE => lvalue(HOLE)) = _
 
-  rule <k> loc(L:Int) = V:Val => V ...</k>
-       <store>... L |-> (K:K => V) ...</store>
-       when typeOf(V) ==K typeOf(K)
-       [transition]
+  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (V' => V) ...</store>
+    when type(V) ==K type(V')
+    [transition]
 
-  rule {} => . [structural]
+//@ \section{Statements}
 
-  rule <k> { Ss:Stmts } => Ss ~> env(Env) ...</k>
-       <env> Env:Map </env>
-       [structural]
+//@ \subsection{Blocks}
 
-  rule Ss1:Stmts Ss2:Stmts => Ss1 ~> Ss2  [structural]
+  rule {} => .  [structural]
+  rule <k> { Ss:Stmts } => Ss ~> env(Env) ...</k>  <env> Env </env>
+    [structural]
 
-  rule V:Val; => .
+//@ Environment recovery
 
-  rule if  true then S:Stmt else _ => S
-  rule if false then _ else S:Stmt => S
+  syntax K ::= env(Map)
+  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  rule (env(_) => .) ~> env(_)  [structural]
 
-  rule <k>
-         while E:Exp do S:Stmt
-         =>
-         if E then {S while E do S} else {} 
-       ...</k>
-       [structural]
+//@ \subsection{Sequential composition}
 
-//@ We only allow printing integers and strings
+  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
 
-  rule <k> print(V:Val, Vs:Vals => Vs);...</k>
-       <out>... . => ListItem(V) </out>
-       when typeOf(V) ==K int orBool typeOf(V) ==K string
-      [transition]
+//@ \subsection{Expression statements}
 
-  rule print((.Vals)); => .  [structural]
+  rule _:Val; => .
 
-  syntax K ::= "(" Exp "," Stmt "," K "," Map "," Bag ")"
+//@ \subsection{Conditional}
+
+  rule if ( true) S else _ => S
+  rule if (false) _ else S => S
+
+//@ \subsection{While loop}
+
+  rule while (E) S => if (E) {S while(E)S}  [structural]
+
+//@ \subsection{Print}
+
+  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+    when type(V) ==K int orBool type(V) ==K string
+    [transition]
+  rule print(.Vals); => .  [structural]
+
+//@ \subsection{Exceptions}
+
+ syntax ListItem ::= (Param,Stmt,K,Map,Bag)
 
   syntax K ::= "popx"
 
-  rule <k> (try S1:Stmt catch(X:Id) S2:Stmt => S1 ~> popx) ~> K:K </k>
-       <control> 
-         <xstack> . => ListItem((X,S2,K,Env,C)) ...</xstack>
-         C:Bag
+  rule <k> (try B catch(P) {Ss} => B ~> popx) ~> K </k>
+       <control>
+         <xstack> . => (P, Ss, K, Env, C) ...</xstack>
+         C
        </control>
-       <env> Env:Map </env>
+       <env> Env </env>
 
-  rule <k> popx => . ...</k> 
+  rule <k> popx => . ...</k>
        <xstack> _:ListItem => . ...</xstack>
 
-  rule <k> throw V:Val; ~> _ => { var '_:_(X,, int)=V; S2 } ~> K </k>
-       <control> 
-         <xstack> ListItem((X:Id, S2:Stmt, K:K, Env:Map, C:Bag))
-                  =>
-                  .
-         ...</xstack>
+  rule <k> throw V:Val; ~> _ => { T X = V; Ss } ~> K </k>
+       <control>
+         <xstack> (T:Type X:Id, Ss, K, Env, C) => . ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
 
-   rule <thread>... 
-          <k> spawn S:Stmt => . ...</k>
-          <env> Env:Map </env>
-        ...</thread>
-        (. => <thread>... <k> S </k> <env> Env </env> ...</thread>)
+//@ \subsection{Threads}
 
-   rule (<thread>... <k> .K </k> <holds> H:Map </holds> ...</thread> => .)
-        <busy> Busy:Set => Busy -Set keys(H) </busy>
+//@ \subsubsection{Thread creation}
+
+   rule <thread>...
+          <k> spawn S => T ...</k>
+          <env> Env </env>
+        ...</thread>
+        (. => <thread>...
+                <k> S </k>
+                <env> Env </env>
+                <id> T </id>
+              ...</thread>)
+     when fresh(T:Int)
+
+//@ \subsubsection{Thread termination}
+
+   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
+        <busy> Busy => Busy -Set keys(H) </busy>
+        <terminated>... . => SetItem(T) ...</terminated>
+
+   rule <k> join T:Int; => . ...</k>
+        <terminated>... SetItem(T) ...</terminated>
+
+//@ \subsubsection{Acquire lock}
 
    rule <k> acquire V:Val; => . ...</k>
         <holds>... . => V |-> 0 ...</holds>
-        <busy> Busy:Set (. => SetItem(V)) </busy>
-        when notBool(V in Busy)
+        <busy> Busy (. => SetItem(V)) </busy>
+        when (notBool(V in Busy:Set))
         [transition]
 
-   rule <k> acquire V:Val; => . ...</k>
-        <holds>...V |-> (N:Int => N +Int 1) ...</holds>
+   rule <k> acquire V; => . ...</k>
+        <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
+
+//@ \subsubsection{Release lock}
 
    rule <k> release V:Val; => . ...</k>
-        <holds>... V:Val |-> (N:Int => N -Int 1) ...</holds>
-     when N >Int 0
+        <holds>... V|->(N => N:Int -Int 1) ...</holds>
+        when N >Int 0
 
-   rule <k> release V:Val; => . ...</k>
-        <holds>... V |-> 0 => . ...</holds>
-        <busy>... SetItem(V) => . ...</busy>
+   rule <k> release V; => . ...</k> <holds>... V:Val|->0 => . ...</holds>
+        <busy>... SetItem(V)=>. ...</busy>
+
+//@ \subsubsection{Rendezvous synchronization}
 
    rule <k> rendezvous V:Val; => . ...</k>
-        <k> rendezvous V; => . ...</k> [transition]
+        <k> rendezvous V; => . ...</k>  [transition]
 
-//@ \subsection{Auxiliary operations}
+//@ \section{Auxiliary declarations and operations}
 
-//@ \texttt{lvalue}
-  syntax Exp ::= "lvalue" "(" K ")"
+  syntax Exp ::= lvalue(K)
+  syntax Val ::= loc(Int)
 
-  syntax Val ::= "loc" "(" Int ")"
-
-  rule <k> lvalue(X:Id) => loc(L:Int) ...</k>
-       <env>... X |-> L:Int ...</env>
-       [structural]
+  rule <k> lvalue(X:Id) => loc(L) ...</k>  <env>... X |-> L:Int ...</env>
+    [structural]
 
   context lvalue(_[HOLE])
   context lvalue(HOLE[_])
 
-  rule <k> lvalue(lookup(L:Int)) => loc(L) ...</k>  [structural]
+  rule lvalue(lookup(L:Int)) => loc(L)  [structural]
 
-//@ \texttt{lookup}
+//@ \subsection{Sequences of locations}
 
-  syntax K ::= "lookup" "(" Int ")"
+  syntax Map ::= Int "..." Int "|->" K
+    [function, latex({#1}\ldots{#2}\mapsto{#3})]
+  rule N...M |-> _ => .Map  when N >Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
-  rule <k> lookup(L:Int) => V ...</k>
-       <store>... L |-> V:Val ...</store>
-       [transition]
+  syntax Type ::= type(K)  [function]
+  rule type(_:Int) => int
+  rule type(_:Bool) => bool
+  rule type(_:String) => string
+  rule type(array(T,_,_)) => (T[])   // () needed! K parses [] as no rule tags
+  rule type(lambda(T,Ps,_)) => types(Ps) -> T
+  rule type(undefined(T)) => T
+  rule type(nothing(T)) => T
 
-//@ \texttt{bindto} also checks the well-formedness of the function parameters
-
-  syntax K ::= "bindto" "(" Exps "," Vals ")"
-
-  rule <k> bindto(('_:_(X,, T), XTs:Exps => XTs),
-                  (V:Val, Vs:Vals => Vs))
-       ...</k>
-       <env> Env:Map => Env[L/X] </env>
-       <store>... . => L |-> V ...</store>
-       <nextLoc> L:Int => L +Int 1 </nextLoc>
-       when typeOf(V) ==K T
-
-  rule <k> bindto(.Exps,.Vals) => . ...</k>  [structural]
-
-//@ \texttt{env}
-
-  syntax K ::= "env" "(" Map ")"
-
-  rule <k> env(Env:Map) => . ...</k>
-       <env> _ => Env </env>
-       [structural]
-
-  rule (env(_) => .) ~> env(_) [structural]
-
-//@ \texttt{typeOf}
-
-  syntax Type ::= "typeOf" "(" K ")"   [function, klabel(typeOf)]
-
-  rule typeOf(_:Int) => int
-  rule typeOf(_:Bool) => bool
-  rule typeOf(_:String) => string
-
-  rule typeOf(arrayRef(T:Type ,_:Int,_:Int)) => T
-  rule typeOf(lambda(_, _, T:Type)) => T
-
-  rule typeOf(undefined(T:Type)) => T
-  rule typeOf(nothing) => void
-
-/*@ Recall that lists of the form "a,b,c" are a syntactic convenience,
-which eventually are translated into cons-lists "(a,(b,(c,.)))".
-Unfortunately, the current K tool is not able to cons-listify
-the RHSes of the rules below, so we have to do it manually.  */
-
-  syntax Types ::= "types" "(" Exps ")"   [function, klabel(types)]
-
-  rule types(.Exps) => void, .Types
-  rule types('_:_(X:Id,, T:Type), .Exps) => T,.Types
-  rule types('_:_(X:Id,, T:Type), (E:Exp, Es:Exps))
-        => 
-       (T, types(E,Es))
-
-
-
-//@ Sequences of locations
-
-  syntax List{K} ::= Int ".." Int
-  rule N1:Int..N2:Int => .List{K}              when N1  >Int N2 [anywhere]
-  rule N1:Int..N2:Int => N1 ,, (N1 +Int 1)..N2 when N1 <=Int N2 [anywhere]
-
+  syntax Types ::= types(Params)  [function]
+  rule types(T:Type _:Id) => T, .Types
+  rule types(T:Type _:Id, P, Ps) => T, types(P,Ps)
+  rule types(.Params) => void, .Types
 endmodule

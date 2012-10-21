@@ -17,7 +17,10 @@ automatically (when one uses an external parser) or manually
 There are two types of declarations: for variables (including arrays) and
 for functions. */
 
+  syntax Decl ::= "var" Exps ";"
+                | "function" Id "(" Ids ")" Block
 
+  syntax Ids  ::= List{Id,","}
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -60,8 +63,7 @@ argument (for the same reason as the increment). */
                > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
 
-  syntax Ids  ::= List{Id,","}
-  syntax Exps ::= List{Exp,","}         [strict, hybrid]
+  syntax Exps ::= List{Exp,","}          [strict, hybrid]
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
@@ -82,9 +84,8 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
 
   syntax Block ::= "{" "}"
                 | "{" Stmts "}"
- 
-  syntax Stmt ::= Block
-                | "var" Exps ";"
+
+  syntax Stmt ::= Decl | Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
@@ -103,10 +104,6 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
   syntax Stmts ::= Stmt
                  | Stmts Stmts                          [right]
 
-  syntax Pgm ::= "function" Id "(" Ids ")" Block
-               | Stmts
-               | Pgm Pgm                                [right]
-
 // I wish I were able to write the following instead, but the parser
 // gets confused.
 //
@@ -124,11 +121,10 @@ functions take a list of arguments, that each conditional has both branches,
 that there are only \texttt{while} loops, and that each variable is
 declared alone and is initialized. */
 
-  rule if (E) S => if (E) S else {}                             [macro]
-  rule for(Start Cond; Step) {Ss}
-    => {Start while (Cond) {Ss Step;}}                          [macro]
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;      [macro]
-  rule var X:Id = E; => var X; X = E;                           [macro]
+  rule if (E) S => if (E) S else {}                                 [macro]
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
+  rule var X:Id = E; => var X; X = E;                               [macro]
 
   syntax Id ::= "main"
 
@@ -137,7 +133,6 @@ endmodule
 
 module SIMPLE-UNTYPED
   imports SIMPLE-UNTYPED-SYNTAX
-  imports BUILTIN-HOOKS
 
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
@@ -166,7 +161,7 @@ function definitions cannot be nested).  Like in IMP and other
 languages, we finally tell the tool that values are \K results. */
 
   syntax Val ::= Int | Bool | String
-               | arrayRef(Int,Int)
+               | array(Int,Int)
                | lambda(Ids,Stmt)
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
@@ -216,7 +211,7 @@ to the \K tool, as indicated by the \textit{\$PGM} variable. */
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
-                      <k color="green"> ($PGM:Pgm ~> execute) </k>
+                      <k color="green"> ($PGM:Stmts ~> execute) </k>
                       <br/>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
@@ -289,7 +284,7 @@ The \K semantics of the uni-dimensional array declaration is somehow similar
 to the above declaration of ordinary variables.  $N+1$ locations are allocated
 in the store for an array of size $N$, the additional location (chosen to be
 the first one allocated) holding the array reference value.  The array
-reference value \texttt{arrayRef(L,N)} states that the array has size
+reference value \texttt{array(L,N)} states that the array has size
 $N$ and its elements are located contiguously in the store starting
 with location $L$.  Recall that $L..L'$ is the list of locations
 between $L$ and $L'$ and that $L..L'\mapsto V$ initializes each
@@ -300,10 +295,9 @@ array declarations. */
 
   rule <k> var X:Id[N:Int]; => . ...</k>
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> arrayRef(L +Int 1, N)
-                       Map((L +Int 1) .. (L +Int N) |-> undefined)
-       ...</store>
-       <nextLoc> L:Int => (L +Int 1) +Int N </nextLoc>
+       <store>... . => L |-> array(L +Int 1, N)
+                       (L +Int 1) ... (L +Int N) |-> undefined ...</store>
+       <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
 
 /*@ SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we
 desugar them all into uni-dimensional arrays by code transformation.
@@ -327,11 +321,9 @@ dimension: */
     => var X[N1];
        {
          var $1=X;
-         var $2=0;
-         while($2 <= N1 - 1) {
+         for(var $2=0; $2 <= N1 - 1; ++$2) {
            var X[N2,Vs];
            $1[$2] = X;
-           ++$2;
          }
        }
     [structural]
@@ -463,20 +455,19 @@ The semantics of the \texttt{lookup} operation is straightforward. */
     => V[N1][N2, Vs]
     [structural, anywhere]
 
-  rule arrayRef(L:Int,_:Int)[N:Int] => lookup(L +Int N)
+  rule array(L,_)[N:Int] => lookup(L +Int N)
     [structural, anywhere]
 
   syntax K ::= lookup(Int)
 
-  rule <k> lookup(L) => V ...</k>
-       <store>... L |-> V ...</store>
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>
     [transition]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
 \texttt{sizeOf} construct was declared strict, so: */
 
-  rule sizeOf(arrayRef(_:Int,N:Int)) => N
+  rule sizeOf(array(_,N)) => N
 
 /*@ \subsection{Function call}
 Function application was strict in both its arguments, so we can
@@ -511,7 +502,7 @@ nulary \texttt{return;} statements. */
 
   syntax ListItem ::=  (Map,K,Bag)
 
-  rule <k> lambda(Xs,S)(Vs:Vals) ~> K => bindto(Xs,Vs) ~> S ~> return; </k>
+  rule <k> lambda(Xs,S)(Vs:Vals) ~> K => bind(Xs,Vs) ~> S ~> return; </k>
        <control> <fstack> . => (Env,K,C) ...</fstack> C </control>
        <env> Env => GEnv </env>
        <genv> GEnv </genv>
@@ -524,27 +515,29 @@ nulary \texttt{return;} statements. */
 
   rule return; => return nothing;   [macro]
 
-/*@ The \texttt{bindto} auxilliary construct binds a list of variables
+// say that nothing+7, etc., is same like division by zero; nothing is
+// guaranteed.
+
+/*@ The \texttt{bind} auxilliary construct binds a list of variables
 to a list of values.  Specifically, it allocates a fresh location for
 each variable, binding the variable to that location in the
 environment and writing the value to that location in the store. */
 
-  syntax K ::= bindto(Ids,Vals)
+  syntax K ::= bind(Ids,Vals)
 
-  rule <k> bindto((X:Id, Xs:Ids => Xs),(V:Val, Vs:Vals => Vs)) ...</k>
+  rule <k> bind((X:Id, Xs:Ids => Xs),(V:Val, Vs:Vals => Vs)) ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
-       <nextLoc> L => L:Int +Int 1 </nextLoc>
+       <nextLoc> L => L:Int +Int 1 </nextLoc>  [structural]
 
-  rule bindto(.Ids, .Vals) => .  [structural]
+  rule bind(.Ids, .Vals) => .  [structural]
 
 /*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next
 input value, at the same time discarding the input value from the
 \textsf{in} cell. */
 
-  rule <k> read() => I ...</k>
-       <in> ListItem(I:Int) => . ...</in>
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>
     [transition]
 
 /*@ \subsection{Assignment}
@@ -561,8 +554,7 @@ that \texttt{lvalue(...)} eventually evaluates to a location value
 
   context (HOLE => lvalue(HOLE)) = _
 
-  rule <k> loc(L:Int) = V:Val => V ...</k>
-       <store>... L |-> (_ => V) ...</store>
+  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
     [transition]
 
 /*@ \section{Statements}
@@ -719,19 +711,19 @@ exception stack.  The three rules below modularly do precisely the above. */
 
   syntax K ::= "popx" 
 
-  rule <k> (try S1:Stmt catch(X:Id) S2:Stmt => S1 ~> popx) ~> K </k>
+  rule <k> (try B catch(X) {Ss} => B ~> popx) ~> K </k>
        <control>
-         <xstack> . => (X,S2, K, Env, C) ...</xstack>
-         C:Bag
+         <xstack> . => (X, Ss, K, Env, C) ...</xstack>
+         C
        </control>
-       <env> Env:Map </env>
+       <env> Env </env>
 
   rule <k> popx => . ...</k>
        <xstack> _:ListItem => . ...</xstack>
 
-  rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
+  rule <k> throw V:Val; ~> _ => { var X = V; Ss } ~> K </k>
        <control>
-         <xstack> (X:Id, S2:Stmt, K:K, Env:Map, C:Bag) => . ...</xstack>
+         <xstack> (X, Ss, K, Env, C) => . ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -786,7 +778,7 @@ added to the \textsf{busy} cell as soon as it is acquired for the first time
 by a thread. */
 
    rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
-        <busy> Busy:Set => Busy -Set keys(H) </busy>
+        <busy> Busy => Busy -Set keys(H) </busy>
         <terminated>... . => SetItem(T) ...</terminated>
 
    rule <k> join T:Int; => . ...</k>
@@ -876,9 +868,8 @@ corresponding store lookup operation. */
   syntax Val ::= loc(Int)
 
 // Local variable
-  rule <k> lvalue(X:Id) => loc(L) ...</k>
-       <env>... X |-> L:Int ...</env>
-       [structural]
+  rule <k> lvalue(X:Id) => loc(L) ...</k> <env>... X |-> L:Int ...</env>
+    [structural]
 
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
@@ -888,22 +879,17 @@ corresponding store lookup operation. */
 
 // Finally, return the address of the desired object member
 
-  rule <k> lvalue(lookup(L:Int)) => loc(L) ...</k>  [structural]
+  rule lvalue(lookup(L:Int)) => loc(L)  [structural]
 
 /*@ \subsection{Sequences of locations}
 The following operation expands to the list of natural numbers between two
 given numbers.  The first number is expected to be no larger than the second.
 The two rules below are structural, for the same reason as above. */
 
-
-  syntax List{K} ::= Int ".." Int
-  rule N1:Int..N2:Int => .List{K}
-       when N1  >Int N2
-       [structural, anywhere]
-
-  rule N1:Int..N2:Int => N1 ,, (N1 +Int 1)..N2
-       when N1 <=Int N2  
-       [structural, anywhere]
+  syntax Map ::= Int "..." Int "|->" K
+    [function, latex({#1}\ldots{#2}\mapsto{#3})]
+  rule N...M |-> _ => .Map  when N >Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
 /*@ The semantics of SIMPLE is now complete. */
 endmodule 

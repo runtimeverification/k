@@ -9,15 +9,12 @@ for declaring types to variables and functions. */
 Primitive, array and function types, as well as lists (or tuples) of types.
 The lists of types are useful for function arguments. */
 
-  syntax Type ::= "int"
-                | "bool"
-                | "string"
-                | "void"
-                | "arrayOf" Type
-                    [latex({#1}\texttt{\char91\char93})]
-                | "function" "from" Types "to" Type
-                    [latex(({#1}\ \texttt{->}\ {#2}))]
-  syntax Types ::= List{Type,","} [strict]
+  syntax Type ::= "void" | "int" | "bool" | "string"
+                | Type "[" "]"
+                > Types "->" Type
+                | "(" Type ")"             [bracket]
+
+  syntax Types ::= List{Type,","}
 
 /*@ \subsection{Declarations}
 Variable and function declarations are allowed to have a more generous
@@ -34,8 +31,11 @@ While \K's syntax is good enough to parse simple and pedagogical
 languages like this one, in practice you are expected to use external
 parsers for complex languages. */
 
-  syntax Decl ::= "var" Exps ";"
-                | "function" Id "(" Exps ")" ":" Type Stmt
+  syntax Param ::= Type Id
+  syntax Params ::= List{Param,","}
+
+  syntax Decl ::= Type Exps ";"
+                | Type Id "(" Params ")" Block
 
 /*@ \subsection{Expressions}
 The syntax of expressions is identical to that in untyped SIMPLE,
@@ -44,15 +44,13 @@ exclusively only for parsing declarations, as described above.  It
 will be given no semantics. */
 
   syntax Exp ::= Int | Bool | String | Id
-               | "this"
-               | "super"
-               | "(" Exp ")"            [bracket]
-               | "++" Exp                
-               > Exp "[" Exps "]"       [strict]
-               > Exp "(" Exps ")"       [strict]
-               | "-" Exp                [strict]
-               | "sizeOf" "(" Exp ")"   [strict]
-               | "read" "(" ")"    
+               | "(" Exp ")"             [bracket]
+               | "++" Exp
+               > Exp "[" Exps "]"        [strict]
+               > Exp "(" Exps ")"        [strict]
+               | "-" Exp                 [strict]
+               | "sizeOf" "(" Exp ")"    [strict]
+               | "read" "(" ")"
                > left:
                  Exp "*" Exp             [strict, left]
                | Exp "/" Exp             [strict, left]
@@ -67,16 +65,15 @@ will be given no semantics. */
                | Exp ">=" Exp            [strict, non-assoc]
                | Exp "==" Exp            [strict, non-assoc]
                | Exp "!=" Exp            [strict, non-assoc]
-               > "not" Exp               [strict]
+               > "!" Exp                 [strict]
                > left:
-                 Exp "and" Exp           [strict, left]
-               | Exp "or" Exp            [strict, left]
+                 Exp "&&" Exp            [strict, left]
+               | Exp "||" Exp            [strict, left]
+               > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
-               | Exp ":" Type  
-                                       // allowed only for declarations
 
+  syntax Exps ::= List{Exp,","}          [strict, hybrid]
 
-  syntax Exps ::= List{Exp,","}
 
 /*@ \subsection{Statements}
 The statements have the same syntax as in untyped SIMPLE.  That is
@@ -88,41 +85,37 @@ conditional and the \texttt{while}.  Indeed, from a typing
 perspective, they are all strict: first type their arguments and then
 type the actual construct. */
 
-  syntax Stmt ::= "{" "}"
+  syntax Block ::= "{" "}"
                 | "{" Stmts "}"
-                | Exp ";"                               [strict]
-                | "if" Exp "then" Stmt "else" Stmt      [strict]
-                | "if" Exp "then" Stmt 
-                | "while" Exp "do" Stmt                 [strict]
-                | "for" Id "=" Exp "to" Exp "do" Stmt
-                | "return" Exp ";"                      [strict]
-                | "return" ";"
-                | "print" "(" Exps ")" ";"              [strict]
-                | "try" Stmt "catch" "(" Id ")" Stmt   [strict(1)]
-                | "throw" Exp ";"                       [strict]
-                | "spawn" Stmt                          [strict]
-                | "acquire" Exp ";"                     [strict]
-                | "release" Exp ";"                     [strict]
-                | "rendezvous" Exp ";"                  [strict]
 
-  syntax Stmts ::= Decl | Stmt
-                 | Stmts Stmts            [seqstrict, right]
+  syntax Stmt ::= Decl | Block
+                | Exp ";"                                  [strict]
+                | "if" "(" Exp ")" Block "else" Block      [avoid, strict]
+                | "if" "(" Exp ")" Block
+                | "while" "(" Exp ")" Block                [strict]
+                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "return" Exp ";"                         [strict]
+                | "return" ";"
+                | "print" "(" Exps ")" ";"                 [strict]
+                | "try" Block "catch" "(" Param ")" Block  [stict(1)]
+                | "throw" Exp ";"                          [strict]
+                | "join" Exp ";"                           [strict]
+                | "acquire" Exp ";"                        [strict]
+                | "release" Exp ";"                        [strict]
+                | "rendezvous" Exp ";"                     [strict]
+
+  syntax Stmts ::= Stmt
+                |  Stmts Stmts                             [seqstrict, right]
 
 /*@ We use the same desugaring macros like in untyped SIMPLE, but, of
 course, including the types of the involved variables. */
 
-  rule if E:Exp then S:Stmt => if E then S else {}
-  rule (for X:Id = E1:Exp to E2:Exp do S:Stmt)
-       =>
-       {var X : int = E1, .Exps; while X <= E2 do {S X = (X + 1);}}
+  rule if (E) S => if (E) S else {}                                 [macro]
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;           [macro]
+  rule T:Type X:Id = E; => T X; X = E;                              [macro]
 
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
-
-//  rule var X:Id : T:Type = E:Exp; => var X : T; X = E;
-  rule var X:Id : T:Type = E:Exp;
-       =>
-       var X : T; X = E;
-    
+  syntax Id ::= "main"
 endmodule
 
 
@@ -173,8 +166,10 @@ Also, since programs and fragments of program will ``evaluate'' to
 their types, in order for the strictness and context declarations to
 be executable we state that types are results. */
 
+  syntax BlockOrStmtType ::= "block" | "stmt"
+  syntax Type ::= BlockOrStmtType
   syntax Exp ::= Type
-  syntax Stmt ::= Type
+  syntax Block ::= Type
   syntax KResult ::= Type
 
 /*@ \subsection{Configuration}
@@ -192,15 +187,17 @@ included in the initial configuration, the \textsf{task} cell holding
 the original program in its \textsf{k} cell will contain no other
 subcells. */
 
-  configuration <T color="red">
+  configuration <T color="yello">
                   <tasks color="orange">
                     <task multiplicity="*" color="yellow">
                       <k color="green"> $PGM:Stmts </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
-                      <return multiplicity="?"> void </return>
+                      <return multiplicity="?" color="black"> void </return>
                     </task>
                   </tasks>
-                  <gtenv color="blue"> .Map </gtenv>
+                  <br/>
+                  <itenv color="red"> .Map </itenv>  // initial tenv
+                  <gtenv multiplicity="?" color="blue"> .Map </gtenv>
                   <out color="brown" stream="stdout"> .List </out>
                 </T>
 
@@ -230,44 +227,24 @@ or equal to the depth of the declared type (it can be strictly
 smaller, e.g., when we want the declared array to hold array
 references). */
 
-  syntax Type ::= "stmt"
-
-  rule var .Exps; => stmt   [structural]
-
-  rule <task>
-         <k> var X:Id : T:Type; => stmt ...</k>
-       </task>
-       <gtenv> Rho:Map (. => X |-> T) </gtenv>
+  rule <task> <k> T:Type X:Id; => stmt ...</k> </task>
+       <itenv> Rho (. => X |-> T) </itenv>
     when notBool(X in keys(Rho))
 
-  rule <task>
-         <k> var X:Id : T:Type;
-               => stuck(var X : T;) 
-         ...</k>
-       </task>
-       <gtenv>... X |-> _ ...</gtenv>
-       <out>... . => ListItem("Global identifier \"" +String 
-                              Id2String(X) +String 
-                              "\" declared twice!\n")
-       </out>
-      [structural]
+  rule <task> <k> T:Type X:Id; => stuck(T X;) ...</k> </task>
+       <itenv>... X |-> _ ...</itenv>
+       <out>... . => ListItem("Global identifier \"" +String Id2String(X)
+                              +String "\" declared twice!\n") </out>
+    [structural]
 
-  rule <k> var X:Id : T:Type; => stmt ...</k>
-       <tenv> Rho:Map => Rho[T / X] </tenv>
+// so we allow the same variables declared multiple times locally
+  rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[T/X] </tenv>
 
-  context var _[HOLE] : _;
+  context _:Type _[HOLE];
 
-  rule var X:Id[Ts:Types] : T:Type; 
-       =>
-       checkDepth(Ts, T) ~> var X : T;
-       [structural]
-
-  syntax K ::= "checkDepth" "(" Types "," Type ")"
-
-  rule checkDepth((int, Ts:Types => Ts), (arrayOf T:Type => T))   [structural]
-
-  rule checkDepth(.Types,_) => .K                     [structural]
-
+// E can be X[7,8][3,4], etc.
+  rule T:Type E[int,Ts:Types]; => T[] E[Ts];  [structural]
+  rule _:Type (E[.Types] => E);               [structural]
 
 /*@ \subsection{Function declarations}
 Functions are allowed to be declared only at the top level (the
@@ -280,25 +257,15 @@ together with the expected return type of the function.  The
 \texttt{types} operation ensures that all the ``expressions'' in $\it
 XTs$ are actually nothing but typed identifiers. */
 
-  rule <task>
-         <k> function F:Id(XTs:Exps) : T:Type S:Stmt
-             =>
-             var F : function from types(XTs) to T;
-         ...</k>
-       </task>
+  rule <task> <k> T:Type F:Id(Ps:Params) S => types(Ps)->T F; ...</k> </task>
        (. => <task>
-               <k> var XTs; S </k>
-               <tenv> . </tenv>
-               <return> T </return>
-             </task>)                                  [structural]
+               <k> mkDecl(Ps) S </k> <tenv> . </tenv> <return> T </return>
+             </task>)
+    [structural]
 
-  syntax Types ::= "types" "(" Exps ")"      [function, klabel(types)]
- 
-  rule types(.Exps) => void,.Types
-
-  rule types(X:Id : T:Type, .Exps) => T, .Types
-
-  rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E, Es)
+  syntax Decl ::= mkDecl(Params)
+  rule mkDecl(T:Type X:Id, Ps:Params) => T X; mkDecl(Ps)
+  rule mkDecl(.Params) => stmt
 
 /*@ Once the entire program is processed (generating appropriate tasks
 to type check its function bodies), we can dissolve the main
@@ -308,12 +275,11 @@ generate a function task executing \texttt{main()} to ensure that it
 types (remove this task creation if you do not want your type system
 to reject programs without a \texttt{main} function). */
 
-  rule <task>
-         <k> stmt => String2Id("main")(.Exps); </k>
-         (. => <tenv> . </tenv>
-               <return> void </return>)
-       </task>
-       [structural]
+// note that a return cell not needed to be added
+// we move the global type environment atomically in gtenv
+  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> . </tenv>) </task>
+       (<itenv> Rho </itenv> => <gtenv> Rho </gtenv>)
+    [structural]
 
 /*@ Similarly, once a non-main task (i.e., one which also contains
 \textsf{tenv} and \textsf{return} subcells) is completed using the
@@ -323,16 +289,13 @@ there should be no task cell left in the configuration when the
 program correctly type checks, so we can also issue a corresponding
 success message. */
 
-  rule <task>...
-         <k> stmt </k>
-         <tenv> _:Map </tenv>  // only to ensure this is a function task
-       ...</task>
-       =>
-       .
+// tenv needed only to ensure this is not the global task
+// T can also be a block (e.g., when having nested blocks {{S}}
+  rule <task>... <k> _:BlockOrStmtType </k> <tenv> _ </tenv> ...</task> => .
 
   rule (<tasks> .Bag </tasks> => .)
        <out>... . => ListItem("Type checked!\n") </out>
-       [structural]
+    [structural]
 
 /*@ \subsection{Expressions}
 In theory, the first three rewrite rules below can apply anywhere
@@ -342,30 +305,23 @@ by rewriting, that would get into conflict with the internals of our
 implementation, so we restrict their application to the top of the
 \textsf{k} cell. */
 
-  rule I:Int => int
-  rule B:Bool => bool
-  rule Str:String => string
+  rule _:Int => int
+  rule _:Bool => bool
+  rule _:String => string
 
 /*@ The are two cases to distinguish for variable lookup: if the
 variable is bound in the local type environment, then look its type up
 there; otherwise, look its type up in the global environment. */
 
-  rule <k> X:Id => T:Type ...</k>
-       <tenv>... X |-> T ...</tenv>
+  rule <k> X:Id => T ...</k> <tenv>... X |-> T ...</tenv>
 
-  rule <k> X:Id => T ...</k>
-       <tenv> Rho:Map </tenv>
-       <gtenv>... X |-> T:Type ...</gtenv> 
+  rule <k> X:Id => T ...</k> <tenv> Rho </tenv> <gtenv>... X |-> T ...</gtenv> 
     when notBool(X in keys(Rho))
 
-  rule <k> X:Id => stuck(X) ...</k>
-       <tenv> Rho:Map </tenv>
-       <gtenv> Rho':Map </gtenv>
-       <out>... . => ListItem("Identifier \"" +String
-                     Id2String(X) +String 
-                     "\" not declared!")
-       </out>
-      when notBool(X in keys(Rho) keys(Rho'))
+  rule <k> X:Id => stuck(X) ...</k> <tenv> Rho </tenv> <gtenv> Rho' </gtenv>
+       <out>... . => ListItem("Identifier \"" +String Id2String(X)
+                              +String "\" not declared!") </out>
+    when notBool(X in keys(Rho) keys(Rho'))
 
 /*@ We want the increment operation to apply to any lvalue, including
 array elements, not only to variables.  For that reason, we define a
@@ -375,11 +331,10 @@ process gets stuck.  The type of the lvalue is expected to be an
 integer in order to be allowed to be incremented, as seen in the rule
 ``\texttt{++ int => int}'' below. */
 
-  syntax Exp ::= "ltype" "(" Exp ")"
-
+// move to auxilliary
+  syntax Exp ::= ltype(Exp)
   rule ltype(X:Id) => X                   [structural]
-
-  rule ltype(E:Exp [Es:Exps]) => E[Es]  [structural]
+  rule ltype(E:Exp [Es:Exps]) => E[Es]    [structural]
 
   context ++(HOLE => ltype(HOLE))
   rule ++ int => int
@@ -396,15 +351,22 @@ integer in order to be allowed to be incremented, as seen in the rule
   rule int >= int => bool
   rule T:Type == T => bool
   rule T:Type != T => bool
-  rule bool and bool => bool
-  rule bool or bool => bool
-  rule not(bool) => bool
-  rule (arrayOf T:Type)[int, Ts:Types] => '_`[_`](T,, Ts)
-  rule T:Type [.Types] => T
-  rule sizeOf(arrayOf T:Type) => int
-  rule '_`(_`)(function from Ts:Types to T:Type,, Ts) => T
-       when Ts =/=K .Types
-  rule '_`(_`)(function from void to T:Type,, .Types) => T
+  rule bool && bool => bool
+  rule bool || bool => bool
+  rule ! bool => bool
+
+  rule (T[])[int, Ts:Types] => T[Ts]
+  rule T[.Types] => T
+
+  rule sizeOf(T[]) => int
+
+  rule (Ts:Types -> T)(Ts) => T
+    when Ts =/=K .Types
+  rule (void -> T)(.Types) => T
+
+  rule <k> return T:Type; => stmt ...</k> <return> T </return>
+  rule <k> return; => stmt ...</k> <return> _ </return>
+
   rule read() => int
 
 /*@ The special context and the rule for assignment below are similar
@@ -425,53 +387,38 @@ stated in the \textsf{return} cell.  The \texttt{print} variadic
 function is allowed to only print integers and strings.  The thrown
 exceptions can only have integer type. */
 
-  rule {} => stmt
+  rule {} => block
 
-  rule <task>
-         <k> { Ss:Stmts } => stmt ...</k>
-         <tenv> Rho:Map </tenv>
-         Rest:Bag  // this ensures function task
-       </task>
-       (. => <task>
-               <k> Ss </k>
-               <tenv> Rho </tenv> Rest:Bag
-             </task>)
+  rule <task>... <k> {S} => block ...</k> <tenv> Rho </tenv> ...</task>
+       (. => <task> <k> S </k> <tenv> Rho </tenv> </task>)
 
   rule T:Type; => stmt
-
-  rule if bool then stmt else stmt => stmt
-
-  rule while bool do stmt  => stmt
-
-  rule <k> return T:Type; => stmt ...</k>
-       <return> T </return>
-
-  rule return; => stmt
-
-  rule print(T:Type, Ts:Types => Ts);
-       when T ==K int orBool T ==K string
-
+  rule if (bool) block else block => stmt
+  rule while (bool) block  => stmt
+  rule print(T:Type, Ts => Ts); when T ==K int orBool T ==K string
   rule print(.Types); => stmt
-
-  rule try stmt catch(X:Id) S:Stmt => {var X:int; S}  [structural]
-
+  rule try block catch(int X:Id) {S} => {int X; S}  [structural]
   rule throw int; => stmt
-
-  rule spawn stmt => stmt
-
+// no return cell in the spawned thread on purpose (not allowed to return)
+  rule <k> spawn {S} => int </k>
+       (. => <task> <k> S </k> <tenv> . </tenv> </task>)
+  rule join int; => stmt
   rule acquire T:Type; => stmt
-
   rule release T:Type; => stmt
-
   rule rendezvous T:Type; => stmt
 
-  rule stmt stmt => stmt
+  rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 
 /*@ An auxiliary \texttt{stuck} construct, displayed as a frame in
 the generated PDF, used to stuck computations with whatever
 computation we want as argument.  This should be generic, part of the
 \K framework. */
 
-  syntax K ::= "stuck" "(" K ")"  [latex(\framebox{${#1}$})]
+  syntax K ::= stuck(K)  [latex(\framebox{${#1}$})]
+
+  syntax Types ::= types(Params)  [function]
+  rule types(T:Type _:Id) => T, .Types
+  rule types(T:Type _:Id, P, Ps) => T, types(P,Ps)
+  rule types(.Params) => void, .Types
 
 endmodule
