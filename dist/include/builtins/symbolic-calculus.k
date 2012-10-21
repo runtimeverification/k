@@ -87,5 +87,13 @@ module SYMBOLIC-CALCULUS
        [anywhere]
 
 
+// FOL
+  syntax Fol ::= Bool
+  	       | Fol "andFol" Fol 
+	       | "notFol" Fol
+
+  rule B1:Bool andFol B2:Bool => B1 andBool B2 [anywhere]
+  rule notFol B:Bool => notBool B [anywhere]
+
 endmodule
 

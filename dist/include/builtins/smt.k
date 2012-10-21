@@ -159,8 +159,8 @@ module SMT-SYNTAX-HOOKS
 		       | "unknown"
 		       | "model" "(" Map ")"
 
-  syntax SmtResponse ::= "checkSat" "(" Bool ")" [function]
-                       | "getModel" "(" Bool ")" [function]
+  syntax SmtResponse ::= "checkSat" "(" K ")" [function]
+                       | "getModel" "(" K ")" [function]
 					   
 endmodule
 
