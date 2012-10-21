@@ -3,6 +3,7 @@ package org.kframework.krun;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.Runtime;
@@ -29,6 +30,8 @@ import org.kframework.kil.Term;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class Main {
 
@@ -332,7 +335,8 @@ public class Main {
 			reader.setBellEnabled(false);
 
 			List<Completor> argCompletor = new LinkedList<Completor>();
-			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "show path labels" }));
+			//argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "show path labels" }));
+			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "select" }));
 			argCompletor.add(new FileNameCompletor());
 			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
@@ -429,8 +433,9 @@ public class Main {
 						}
 						// get the maudified version of the current configuration based on the xml obtained from -xml-log option
 						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
-						// System.out.println("config=" + maudeConfig);
+						//System.out.println("config=" + maudeConfig);
 						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[" + arg + "] " + maudeConfig + " .";
+						//System.out.println("Maude cmd:" + maudeCmd);
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
 						rp.checkMaudeForErrors(errFile, lang);
@@ -468,14 +473,39 @@ public class Main {
 							AnsiConsole.out.println(result);
 						}
 					}
-					if (cmd.hasOption("show path labels")) {
+					if (cmd.hasOption("select")) {
+						int arg = Integer.parseInt(cmd.getOptionValue("select").trim());
+						Element elem = XmlUtil.getSearchSolution(K.maude_output, arg);
+						if (elem != null) {
+							String s = XmlUtil.printSearchSolution(K.processed_maude_output, arg);
+							System.out.println("Selected solution is:" + s);
+							
+							Document doc = XmlUtil.createXmlRewriteForm(elem);
+							
+					        //delete the content of the xml file
+							FileOutputStream writer = new FileOutputStream(K.maude_output);
+							writer.write((new String()).getBytes());
+							writer.close();
+							
+							//place the corresponding content in the xml file according to the selected solution
+							XmlUtil.serializeXML(doc, K.maude_output);
+							
+							K.maude_cmd = "erewrite";
+							
+						}
+						else {
+							System.out.println("A solution with the specified solution-number could not be found in the" + K.lineSeparator + "previous search result");
+						}
+						
+					}
+					/*if (cmd.hasOption("show path labels")) {
 						String arg = cmd.getOptionValue("show path labels");
 						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "show path labels " + arg + " .";
 						// System.out.println("maude cmd=" + maudeCmd);
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
 						rp.checkMaudeForErrors(errFile, lang);
-					}
+					}*/
 				}
 			}
 		} catch (IOException e) {

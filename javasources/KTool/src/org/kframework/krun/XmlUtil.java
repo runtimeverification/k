@@ -21,6 +21,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -214,6 +218,129 @@ public class XmlUtil {
 			
 		}
 		
+	}
+	
+	// retrieve the solution (a node in the xml file denoted by fileName) specified by its solution-number obtained from a search command 
+	public static Element getSearchSolution(String fileName, int solutionNumber) {
+		Element result = null;
+		File input = new File(fileName);
+		Document doc = XmlUtil.readXML(input);
+		NodeList list = null;
+		Node nod = null;
+		
+		list = doc.getElementsByTagName("search-result");
+		for (int i = 0; i < list.getLength(); i++) {
+			nod = list.item(i);
+			if (nod == null) {
+				Error.report("The node with search-result tag wasn't found");
+			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
+				Element elem = (Element) nod;
+				if (elem.getAttribute("solution-number").equals("NONE")) {
+					continue;
+				}
+				int solNumber = Integer.parseInt(elem.getAttribute("solution-number"));
+				//we found the desired search solution
+				if (solNumber == solutionNumber) {
+					// using XPath for direct access to the desired node
+					XPathFactory factory = XPathFactory.newInstance();
+					XPath xpath = factory.newXPath();
+					String s = null;
+					Object result1;
+					s = "substitution/assignment/term[2]";
+					try {
+						result1 = xpath.evaluate(s, nod, XPathConstants.NODESET);
+						if (result1 != null) {
+							NodeList nodes = (NodeList) result1;
+							nod = nodes.item(0);
+							result = (Element)nod;
+						}
+						else {
+							String output = FileUtil.getFileContent(K.maude_out);
+							Error.report("Unable to parse Maude's search results:\n" + output);
+						}
+
+					} catch (XPathExpressionException e) {
+						Error.report("XPathExpressionException " + e.getMessage());
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	// pretty-print the solution (a node in the xml file denoted by fileName) specified by its solution-number obtained from a search command 
+	public static String printSearchSolution(String fileName, int solutionNumber) {
+		String result = null;
+		File input = new File(fileName);
+		Document doc = XmlUtil.readXML(input);
+		NodeList list = null;
+		Node nod = null;
+		
+		list = doc.getElementsByTagName("search-result");
+		for (int i = 0; i < list.getLength(); i++) {
+			nod = list.item(i);
+			if (nod == null) {
+				Error.report("The node with search-result tag wasn't found");
+			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
+				Element elem = (Element) nod;
+				if (elem.getAttribute("solution-number").equals("NONE")) {
+					continue;
+				}
+				int solNumber = Integer.parseInt(elem.getAttribute("solution-number"));
+				//we found the desired search solution
+				if (solNumber == solutionNumber) {
+					// using XPath for direct access to the desired node
+					XPathFactory factory = XPathFactory.newInstance();
+					XPath xpath = factory.newXPath();
+					String s = null;
+					Object result1;
+					s = "substitution/assignment/term[2]";
+					try {
+						result1 = xpath.evaluate(s, nod, XPathConstants.NODESET);
+						if (result1 != null) {
+							NodeList nodes = (NodeList) result1;
+							nod = nodes.item(0);
+							result = PrettyPrintOutput.print((Element) nod, false, 0, PrettyPrintOutput.ANSI_NORMAL);
+						}
+						else {
+							String output = FileUtil.getFileContent(K.maude_out);
+							Error.report("Unable to parse Maude's search results:\n" + output);
+						}
+
+					} catch (XPathExpressionException e) {
+						Error.report("XPathExpressionException " + e.getMessage());
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	//create a xml document that contains the elem node (should be in the form a xml file obtained after a maude rewrite command) 
+	public static Document createXmlRewriteForm(Element elem) {
+		Document doc = null;
+		
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder;
+		try {
+			docBuilder = docFactory.newDocumentBuilder();
+			// root element
+			doc = docBuilder.newDocument();
+			Element rootElement = doc.createElement("maudeml");
+			doc.appendChild(rootElement);
+			
+			Element resultNode = doc.createElement("result");
+			resultNode.appendChild(doc.adoptNode(elem.cloneNode(true)));
+			rootElement.appendChild(resultNode);
+			
+			return doc;
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+ 
+		return doc;
 	}
 
 }

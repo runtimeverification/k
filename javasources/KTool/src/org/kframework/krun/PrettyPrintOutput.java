@@ -234,7 +234,7 @@ public class PrettyPrintOutput {
 		return result;
 	}
 
-	private static String print(Element node, boolean lineskip, int whitespace, String color) {
+	public static String print(Element node, boolean lineskip, int whitespace, String color) {
 		StringBuilder sb = new StringBuilder();
 		String op = node.getAttribute("op");
 		String sort = node.getAttribute("sort");
