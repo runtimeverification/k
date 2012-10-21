@@ -1,0 +1,26 @@
+void main() {
+  try {
+    try {
+      try {
+        try {
+          int x = 1;
+          print(x," ");
+          throw ++x;
+        } catch(int e) {
+          print(e," ");
+          throw ++e;
+        }
+      } catch(int e) {
+        print(e," ");
+        throw ++e;
+      }
+    } catch(int e) {
+      print(e," ");
+      throw ++e;
+    }
+  } catch(int e) {
+    print(e,"\n");
+  }
+}
+
+// 1 2 3 4 5
