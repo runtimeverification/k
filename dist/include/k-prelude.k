@@ -68,7 +68,7 @@ module K-SET-EXTRAS
 	imports K-TECHNIQUE
 
 //	syntax Set ::= "Set" List{K}
-        syntax Set ::= Set "-Set" Set  [function]
+        syntax Set ::= Set "-Set" Set  [function, latex({#1}-_{\it Set}{#2})]
   rule S1:Set -Set (SI1:SetItem SI2:SetItem S2:Set)
     => ((S1 -Set SI1) -Set SI2) -Set S2
   rule S1:Set -Set . => S1 
