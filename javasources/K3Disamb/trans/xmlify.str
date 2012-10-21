@@ -102,8 +102,8 @@ rules
 		Tag(x) -> $[<tag key="[x]" loc="[loc]" />
 		]
 		where loc := <getLocAsString>
-	to-xml1:
-		NoTags() -> $[]
+	//to-xml1:
+	//	NoTags() -> $[]
 	to-xml1:
 		TagList(x1, x2) -> $[[<to-xml> x1][<to-xml> x2]]
 

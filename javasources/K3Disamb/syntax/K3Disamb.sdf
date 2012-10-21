@@ -57,7 +57,7 @@ context-free syntax
 	"[" LABELDz "]" ":"	-> LabelDz {cons("Label")}
 
 
-							-> TagListDz {cons("NoTags")}
+	%%						-> TagListDz {cons("NoTags")}
 	TagDz					-> TagListDz
 	TagListDz "," TagListDz -> TagListDz {left, cons("TagList")}
 	

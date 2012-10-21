@@ -207,6 +207,7 @@ public class KompileFrontEnd {
 
 	private static void pdf(File mainFile, String lang) {
 		latex(mainFile, lang);
+		Stopwatch sw = new Stopwatch();
 
 		try {
 			// Run pdflatex.
@@ -247,6 +248,7 @@ public class KompileFrontEnd {
 			GlobalSettings.kem.register(exception);
 		}
 		pdfClean(new String[] { ".aux", ".log", ".mrk", ".out" });
+		sw.printIntermediate("Generate PDF");
 	}
 
 	private static void pdfClean(String[] extensions) {
@@ -767,20 +769,19 @@ public class KompileFrontEnd {
 			javaDef.accept(cfgStrVisitor);
 			int cfgMaxLevel = cfgStrVisitor.getMaxLevel();
 			Map<String, ConfigurationStructure> cfgStr = cfgStrVisitor.getConfig();
-			
-			javaDef = new CompilerTransformerStep(new ResolveContextAbstraction(cfgMaxLevel, cfgStr)).compile(javaDef);		
+
+			javaDef = new CompilerTransformerStep(new ResolveContextAbstraction(cfgMaxLevel, cfgStr)).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Context Abstraction");
 			}
-						
-			javaDef = new CompilerTransformerStep(new ResolveDefaultTerms(cfgStr)).compile(javaDef);		
+
+			javaDef = new CompilerTransformerStep(new ResolveDefaultTerms(cfgStr)).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Default Terms");
 			}
-			
-			
+
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
 
 			File dotk = new File(f.getParent() + "/.k");
@@ -814,12 +815,12 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Optional Tags");
 			}
-			
+
 			MaudeFilter maudeFilter = new MaudeFilter();
 			javaDef.accept(maudeFilter);
 
-			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n"
-					+ "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
+			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n"
+					+ "quit\n" + "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
 					+ " anywheres \"anywhere=() function=() predicate=() macro=()\" " + "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
