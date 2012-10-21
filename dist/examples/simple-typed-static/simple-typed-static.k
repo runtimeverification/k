@@ -97,7 +97,7 @@ type the actual construct. */
                 | "return" Exp ";"                         [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                 [strict]
-                | "try" Block "catch" "(" Param ")" Block  [stict(1)]
+                | "try" Block "catch" "(" Param ")" Block  [strict(1)]
                 | "throw" Exp ";"                          [strict]
                 | "join" Exp ";"                           [strict]
                 | "acquire" Exp ";"                        [strict]
@@ -169,7 +169,7 @@ be executable we state that types are results. */
   syntax BlockOrStmtType ::= "block" | "stmt"
   syntax Type ::= BlockOrStmtType
   syntax Exp ::= Type
-  syntax Block ::= Type
+//  syntax Block ::= Type
   syntax KResult ::= Type
 
 /*@ \subsection{Configuration}
@@ -196,9 +196,7 @@ subcells. */
                     </task>
                   </tasks>
                   <br/>
-                  <itenv color="red"> .Map </itenv>  // initial tenv
-                  <gtenv multiplicity="?" color="blue"> .Map </gtenv>
-                  <out color="brown" stream="stdout"> .List </out>
+                  <gtenv color="blue"> .Map </gtenv>
                 </T>
 
 /*@ \subsection{Variable declarations}
@@ -228,14 +226,8 @@ smaller, e.g., when we want the declared array to hold array
 references). */
 
   rule <task> <k> T:Type X:Id; => stmt ...</k> </task>
-       <itenv> Rho (. => X |-> T) </itenv>
+       <gtenv> Rho (. => X |-> T) </gtenv>
     when notBool(X in keys(Rho))
-
-  rule <task> <k> T:Type X:Id; => stuck(T X;) ...</k> </task>
-       <itenv>... X |-> _ ...</itenv>
-       <out>... . => ListItem("Global identifier \"" +String Id2String(X)
-                              +String "\" declared twice!\n") </out>
-    [structural]
 
 // so we allow the same variables declared multiple times locally
   rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[T/X] </tenv>
@@ -244,7 +236,8 @@ references). */
 
 // E can be X[7,8][3,4], etc.
   rule T:Type E[int,Ts:Types]; => T[] E[Ts];  [structural]
-  rule _:Type (E[.Types] => E);               [structural]
+// I want to write the rule below as _:Type (E:Exp[.Types] => E);
+  rule T:Type E:Exp[.Types]; => T E;          [structural]
 
 /*@ \subsection{Function declarations}
 Functions are allowed to be declared only at the top level (the
@@ -278,7 +271,6 @@ to reject programs without a \texttt{main} function). */
 // note that a return cell not needed to be added
 // we move the global type environment atomically in gtenv
   rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> . </tenv>) </task>
-       (<itenv> Rho </itenv> => <gtenv> Rho </gtenv>)
     [structural]
 
 /*@ Similarly, once a non-main task (i.e., one which also contains
@@ -292,10 +284,6 @@ success message. */
 // tenv needed only to ensure this is not the global task
 // T can also be a block (e.g., when having nested blocks {{S}}
   rule <task>... <k> _:BlockOrStmtType </k> <tenv> _ </tenv> ...</task> => .
-
-  rule (<tasks> .Bag </tasks> => .)
-       <out>... . => ListItem("Type checked!\n") </out>
-    [structural]
 
 /*@ \subsection{Expressions}
 In theory, the first three rewrite rules below can apply anywhere
@@ -318,10 +306,7 @@ there; otherwise, look its type up in the global environment. */
   rule <k> X:Id => T ...</k> <tenv> Rho </tenv> <gtenv>... X |-> T ...</gtenv> 
     when notBool(X in keys(Rho))
 
-  rule <k> X:Id => stuck(X) ...</k> <tenv> Rho </tenv> <gtenv> Rho' </gtenv>
-       <out>... . => ListItem("Identifier \"" +String Id2String(X)
-                              +String "\" not declared!") </out>
-    when notBool(X in keys(Rho) keys(Rho'))
+  rule <task> <k> X:Id => T ...</k> </task> <gtenv>... X |-> T ...</gtenv> 
 
 /*@ We want the increment operation to apply to any lvalue, including
 array elements, not only to variables.  For that reason, we define a
@@ -355,13 +340,13 @@ integer in order to be allowed to be incremented, as seen in the rule
   rule bool || bool => bool
   rule ! bool => bool
 
-  rule (T[])[int, Ts:Types] => T[Ts]
+// need parentheses in the RHS for now, to avoid caturing Ts as rule tag
+  rule (T[])[int, Ts:Types] => (T[Ts])
   rule T[.Types] => T
 
   rule sizeOf(T[]) => int
 
-  rule (Ts:Types -> T)(Ts) => T
-    when Ts =/=K .Types
+  rule (Ts:Types -> T)(Ts) => T when Ts =/=K .Types
   rule (void -> T)(.Types) => T
 
   rule <k> return T:Type; => stmt ...</k> <return> T </return>
@@ -389,19 +374,24 @@ exceptions can only have integer type. */
 
   rule {} => block
 
-  rule <task>... <k> {S} => block ...</k> <tenv> Rho </tenv> ...</task>
-       (. => <task> <k> S </k> <tenv> Rho </tenv> </task>)
+  rule <task> <k> {S} => block ...</k> <tenv> Rho </tenv> R </task>
+       (. => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
 
   rule T:Type; => stmt
-  rule if (bool) block else block => stmt
-  rule while (bool) block  => stmt
+// nasty parentheses needed around first block; why not the second, too?
+// well, the second is needed too, otherwise same error as below
+  rule if (bool) (block) else (block) => stmt
+// didn't need parantheses around block; why?
+// well, we needed them
+  rule while (bool) (block) => stmt
   rule print(T:Type, Ts => Ts); when T ==K int orBool T ==K string
   rule print(.Types); => stmt
-  rule try block catch(int X:Id) {S} => {int X; S}  [structural]
+// had to put parenteses around block, to trick the parser it is K
+  rule try (block) catch(int X:Id) {S} => {int X; S}  [structural]
   rule throw int; => stmt
 // no return cell in the spawned thread on purpose (not allowed to return)
-  rule <k> spawn {S} => int </k>
-       (. => <task> <k> S </k> <tenv> . </tenv> </task>)
+  rule <k> spawn S => int ...</k> <tenv> Rho </tenv>
+       (. => <task> <k> S </k> <tenv> Rho </tenv> </task>)
   rule join int; => stmt
   rule acquire T:Type; => stmt
   rule release T:Type; => stmt
