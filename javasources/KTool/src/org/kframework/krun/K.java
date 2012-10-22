@@ -54,6 +54,7 @@ public class K {
 	public static boolean statistics = false;
 	public static boolean color = true;
 	public static boolean do_search = false;
+	public static boolean showSearchGraph = false;
 	//apply parenthesis by default
 	public static boolean parens = true;
 	public static boolean log_io = false;

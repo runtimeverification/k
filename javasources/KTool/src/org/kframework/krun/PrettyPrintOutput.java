@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
@@ -710,6 +711,94 @@ public class PrettyPrintOutput {
 		op = sb1.toString();
 		sb.append(op);
 		return sb;
+	}
+	
+	public String printSearchGraph(String fileName) {
+		StringBuilder sb = new StringBuilder();
+		File input = new File(fileName);
+		Document doc = XmlUtil.readXML(input);
+		Node nod = null;
+		
+		XPathFactory factory = XPathFactory.newInstance();
+		XPath xpath = factory.newXPath();
+		//search for all edge nodes in the XML
+		String s = "//edge";
+		try {
+			Object result1 = xpath.evaluate(s, doc, XPathConstants.NODESET);
+			NodeList nodes = (NodeList) result1;
+		    for (int i = 0; i < nodes.getLength(); i++) {
+		        nod = nodes.item(i); 
+				if (nod == null) {
+					Error.report("The node with edge tag wasn't found");
+				} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
+					Element elem = (Element) nod;
+					String source = elem.getAttribute("source");
+					String target = elem.getAttribute("target");
+					String label = new String();
+
+					sb.append(source + " ---");
+
+					XPathExpression expr = xpath.compile("data/rule");
+					Object result = expr.evaluate(nod, XPathConstants.NODESET);
+					if (result != null) {
+						NodeList nodes1 = (NodeList) result;
+						Element elem1 = (Element) nodes1.item(0);
+						if (elem1.hasAttribute("label")) {
+							label = elem1.getAttribute("label");
+							sb.append(" [" + label + "] ");
+						}
+						sb.append("---> " + target + K.lineSeparator);
+					}
+				}
+			}
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		}
+		return sb.toString();
+	}
+	
+	//displays info about the node specified by its id from the search graph
+	public String printNodeSearchGraph(String fileName, String nodeId) {
+		String output = null;
+		File input = new File(fileName);
+		Document doc = XmlUtil.readXML(input);
+		Node nod = null;
+		Element foundNode = null; 
+		
+		XPathFactory factory = XPathFactory.newInstance();
+		XPath xpath = factory.newXPath();
+		//search for all edge nodes in the XML
+		String s = "//node";
+		try {
+			Object result1 = xpath.evaluate(s, doc, XPathConstants.NODESET);
+			NodeList nodes = (NodeList) result1;
+		    for (int i = 0; i < nodes.getLength(); i++) {
+		        nod = nodes.item(i); 
+				if (nod == null) {
+					Error.report("The node with edge tag wasn't found");
+				} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
+					Element elem = (Element) nod;
+					String id = elem.getAttribute("id");
+					if (id.equals(nodeId)) {
+						foundNode = elem;
+						break;
+					}
+				}
+			}
+		    if (foundNode != null) {
+		    	XPathExpression expr = xpath.compile("data/term");
+				Object result = expr.evaluate(foundNode, XPathConstants.NODESET);
+				if (result != null) {
+					NodeList nodes1 = (NodeList) result;
+					Element elem1 = (Element) nodes1.item(0);
+					output = print(elem1, false, 0, ANSI_NORMAL);
+				}	
+		    }
+		    
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		}
+		return output;
 	}
 
 	public void setCmd(CommandLine cmd) {

@@ -207,6 +207,9 @@ public class Main {
 								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
 					}
 					s += K.pattern + " .";
+					if (K.showSearchGraph) {
+						s += K.lineSeparator + "show search graph" + " .";
+					}
 					/*
 					 * if (cmd.hasOption("xsearch-pattern")) { s += K.xsearch_pattern + " ."; //s = "set show command off ." + K.lineSeparator + "search #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) " + "\"" + K.xsearch_pattern +
 					 * "\"" + " ."; } else s += " =>! B:Bag .";
@@ -283,6 +286,12 @@ public class Main {
 						AnsiConsole.out.println(result);
 					}
 				}
+				//print search graph
+				if ("search".equals(K.maude_cmd) && K.do_search) {
+					System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
+					String result = p.printSearchGraph(K.processed_maude_output);
+					AnsiConsole.out.println(result);
+				}
 			} else if ("raw".equals(K.output_mode)) {
 				String output = new String();
 				if (K.model_checking.length() > 0) {
@@ -336,7 +345,7 @@ public class Main {
 
 			List<Completor> argCompletor = new LinkedList<Completor>();
 			//argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "show path labels" }));
-			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "select" }));
+			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "select", "show-search-graph", "show-node" }));
 			argCompletor.add(new FileNameCompletor());
 			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
@@ -459,6 +468,7 @@ public class Main {
 						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
 						// System.out.println("config=" + maudeConfig);
 						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "search[," + arg + "] " + maudeConfig + "=>+ B:Bag .";
+						maudeCmd += K.lineSeparator + "show search graph" + " .";
 						// System.out.println("maude cmd=" + maudeCmd);
 						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
 						// check whether Maude produced errors
@@ -495,6 +505,21 @@ public class Main {
 						}
 						else {
 							System.out.println("A solution with the specified solution-number could not be found in the" + K.lineSeparator + "previous search result");
+						}
+					}
+					if (cmd.hasOption("show-search-graph")) {
+						System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
+						String result = p.printSearchGraph(K.processed_maude_output);
+						System.out.println(result);
+					}
+					if (cmd.hasOption("show-node")) {
+						String nodeId = cmd.getOptionValue("show-node").trim();
+						String result = p.printNodeSearchGraph(K.processed_maude_output, nodeId);
+						if (result != null) {
+							System.out.println(result);
+						}
+						else {
+							System.out.println("A node with the specified id couldn't be found in the search graph");
 						}
 						
 					}
@@ -617,6 +642,9 @@ public class Main {
 			}
 			if (cmd.hasOption("depth")) {
 				K.depth = cmd.getOptionValue("depth");
+			}
+			if (cmd.hasOption("graph")) {
+				K.showSearchGraph = true;
 			}
 			if (cmd.hasOption("output-mode")) {
 				K.output_mode = cmd.getOptionValue("output-mode");
