@@ -632,6 +632,10 @@ public class KompileFrontEnd {
 
 			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
 
+			MaudeFilter maudeFilter = new MaudeFilter();
+			javaDef.accept(maudeFilter);
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudeFilter.getResult());
+
 			compile(javaDef, step);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -643,11 +647,18 @@ public class KompileFrontEnd {
 		Stopwatch sw = new Stopwatch();
 
 		try {
+			File f = new File(javaDef.getMainFile()).getCanonicalFile();
+			File dotk = new File(f.getParent() + "/.k");
+			dotk.mkdirs();
 
 			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Empty Lists");
 			}
+
+			MaudeFilter maudeFilter1 = new MaudeFilter();
+			javaDef.accept(maudeFilter1);
+			FileUtil.saveInFile(dotk.getAbsolutePath() + "/lists.maude", maudeFilter1.getResult());
 
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
 			try {
@@ -782,11 +793,6 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Default Terms");
 			}
 
-			File f = new File(javaDef.getMainFile()).getCanonicalFile();
-
-			File dotk = new File(f.getParent() + "/.k");
-			dotk.mkdirs();
-
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";
 
@@ -819,9 +825,9 @@ public class KompileFrontEnd {
 			MaudeFilter maudeFilter = new MaudeFilter();
 			javaDef.accept(maudeFilter);
 
-			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n"
-					+ "quit\n" + "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
-					+ " anywheres \"anywhere=() function=() predicate=() macro=()\" " + "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
+			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n" + "---)\n"
+					+ " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
+					+ "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
 
