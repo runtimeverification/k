@@ -287,7 +287,7 @@ public class Main {
 					}
 				}
 				//print search graph
-				if ("search".equals(K.maude_cmd) && K.do_search) {
+				if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
 					System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
 					String result = p.printSearchGraph(K.processed_maude_output);
 					AnsiConsole.out.println(result);
