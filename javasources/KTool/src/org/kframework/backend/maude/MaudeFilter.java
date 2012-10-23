@@ -622,7 +622,6 @@ public class MaudeFilter extends BasicVisitor {
 		// do nothing
 	}
 
-
 	private static java.util.Map<KSort,String> maudeCollectionConstructors = new HashMap<KSort, String>();
 	static {
 		maudeCollectionConstructors.put(KSort.Bag, "__");
@@ -633,9 +632,7 @@ public class MaudeFilter extends BasicVisitor {
 		maudeCollectionConstructors.put(KSort.ListOfK, "_`,`,_");
 	}
 
-	private String getMaudeConstructor(String sort) {
+	public static String getMaudeConstructor(String sort) {
 		return maudeCollectionConstructors.get(KSort.getKSort(sort));
 	}
-	
-
 }

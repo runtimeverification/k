@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.kframework.backend.maude.MaudeFilter;
+import org.kframework.backend.unparser.KastFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
@@ -125,9 +126,11 @@ public class ProgramLoader {
 					sw.printIntermediate("Parsing Program");
 				}
 
+				KastFilter kastFilter = new KastFilter();
+				out.accept(kastFilter);
 				MaudeFilter maudeFilter = new MaudeFilter();
 				out.accept(maudeFilter);
-				String kast = maudeFilter.getResult();
+				String kast = "NEW:\n" + kastFilter.getResult() + "\n\nOLD:\n" + maudeFilter.getResult();
 
 				System.out.println(kast);
 
