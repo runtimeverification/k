@@ -27,6 +27,7 @@ module BOOL-HOOKS
   rule false andBool A:Bool => false
 
   rule false xorBool A:Bool => A:Bool
+  rule A:Bool xorBool false => A:Bool
   rule A:Bool xorBool A:Bool => false
 
   rule notBool true => false
