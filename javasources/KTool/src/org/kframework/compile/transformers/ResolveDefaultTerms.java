@@ -73,12 +73,12 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 		@Override
 		public ASTNode transform(Cell node) throws TransformerException {
 			Cell cell = (Cell) super.transform(node);
-			if (cell.getEllipses() != Ellipses.BOTH) return cell;
+			if (cell.getEllipses() == Ellipses.NONE) return cell;
 			cell = cell.shallowCopy();
 			cell.setEllipses(Ellipses.NONE);
 			ConfigurationStructure cellStr = config.get(cell.getId());
 			if (cellStr.sons.isEmpty()) {
-				GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.COMPILER, 
 						"Cell " + node + " is a leaf in the configuration and it's not closed in the RHS.", 
 						getName(), node.getFilename(), node.getLocation()));								
