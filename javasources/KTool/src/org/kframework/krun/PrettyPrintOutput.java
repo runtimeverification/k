@@ -241,6 +241,7 @@ public class PrettyPrintOutput {
 		String sort = node.getAttribute("sort");
 		ArrayList<Element> list = XmlUtil.getChildElements(node);
 
+		//System.out.println("op="+ op + " sort=" + sort);
 		if (sort.equals("BagItem") && op.equals("<_>_</_>")
 				|| sort.equals("[Bag]") && op.equals("<_>_</_>")) {
 			sb = new StringBuilder();
@@ -280,6 +281,10 @@ public class PrettyPrintOutput {
 			}
 			else if (m < n && n > 0 && m > 0) {
 				sb = lessUnderscoresCase(list, op, n, m, false, whitespace + indent, ANSI_NORMAL);
+			}
+			//(equal number of underscores and children)
+			else if (m == n) {
+				sb = generalCase(list, op, false, whitespace, ANSI_NORMAL, true);
 			}
 			return sb.toString();
 		}
@@ -475,10 +480,14 @@ public class PrettyPrintOutput {
 			}
 			//like the case of #Zero, #Bool, #Char and #String sorts
 			else if ((m == 0) && (n == 0) ||
-					(sort.equals("#Zero") || sort.equals("#Bool") || sort.equals("#Char") || sort.equals("#String"))) {
+					(sort.equals("#Zero") || sort.equals("#Bool") || sort.equals("#Char") || sort.equals("#String"))
+					|| (sort.equals("[#Zero]") || sort.equals("[#Bool]") || sort.equals("[#Char]") || sort.equals("[#String]")) ) {
 				sb = new StringBuilder();
 				sb.append(op);
 				return sb.toString();
+			}
+			else if (m == 0 && n == 0) {
+				sb.append(op);
 			}
 			//freezer case
 			else if (m == 0 && n > 0) {

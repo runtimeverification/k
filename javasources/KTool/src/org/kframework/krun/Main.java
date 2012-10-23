@@ -291,6 +291,30 @@ public class Main {
 					System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
 					String result = p.printSearchGraph(K.processed_maude_output);
 					AnsiConsole.out.println(result);
+					//offer the user the possibility to request info about some nodes in the search graph  
+					while (true) {
+						System.out.print(K.lineSeparator + "Do you want to show information about a node from the search graph? (y/n):");
+						BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+						String input = stdin.readLine();
+						if (input.equals("y")) {
+							System.out.print("Specify the id of the node:");
+							stdin = new BufferedReader(new InputStreamReader (System.in));
+							input = stdin.readLine();
+							String result1 = p.printNodeSearchGraph(K.processed_maude_output, input);
+							if (result1 != null) {
+								System.out.println(result1);
+							}
+							else {
+								System.out.println("A node with the specified id couldn't be found in the search graph");
+							}
+						}
+						else if (input.equals("n")) {
+							break;
+						}
+						else {
+							System.out.println("You should specify one of the possible answers:y or n");
+						}
+					}
 				}
 			} else if ("raw".equals(K.output_mode)) {
 				String output = new String();
@@ -417,19 +441,25 @@ public class Main {
 					if (cmd.hasOption("resume")) {
 						// get the maudified version of the current configuration based on the xml obtained from -xml-log option
 						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
-						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew " + maudeConfig + " .";
-						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
-						// check whether Maude produced errors
-						rp.checkMaudeForErrors(errFile, lang);
-
-						// pretty-print the obtained configuration
-						K.maude_cmd = "erewrite";
-						p = new PrettyPrintOutput();
-						p.preprocessDoc(K.maude_output, K.processed_maude_output);
-						red = p.processDoc(K.processed_maude_output);
-						AnsiConsole.out.println(red.get(0));
-
-						System.exit(0);
+						//check first to see if we have a current configuration obtained at previous steps
+						if (maudeConfig != null && maudeConfig.length() > 0) {
+							maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew " + maudeConfig + " .";
+							rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
+							// check whether Maude produced errors
+							rp.checkMaudeForErrors(errFile, lang);
+	
+							// pretty-print the obtained configuration
+							K.maude_cmd = "erewrite";
+							p = new PrettyPrintOutput();
+							p.preprocessDoc(K.maude_output, K.processed_maude_output);
+							red = p.processDoc(K.processed_maude_output);
+							AnsiConsole.out.println(red.get(0));
+	
+							System.exit(0);
+						}
+						else {
+							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator + "first a solution with step command before executing steps of rewrites!");
+						}
 					}
 					// one step execution (by default) or more if you specify an argument
 					if (cmd.hasOption("step")) {
@@ -443,18 +473,24 @@ public class Main {
 						// get the maudified version of the current configuration based on the xml obtained from -xml-log option
 						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
 						//System.out.println("config=" + maudeConfig);
-						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[" + arg + "] " + maudeConfig + " .";
-						//System.out.println("Maude cmd:" + maudeCmd);
-						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
-						// check whether Maude produced errors
-						rp.checkMaudeForErrors(errFile, lang);
-
-						// pretty-print the obtained configuration
-						K.maude_cmd = "erewrite";
-						p = new PrettyPrintOutput();
-						p.preprocessDoc(K.maude_output, K.processed_maude_output);
-						red = p.processDoc(K.processed_maude_output);
-						AnsiConsole.out.println(red.get(0));
+						//check first to see if we have a current configuration obtained at previous steps
+						if (maudeConfig != null && maudeConfig.length() > 0) {
+							maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew[" + arg + "] " + maudeConfig + " .";
+							//System.out.println("Maude cmd:" + maudeCmd);
+							rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
+							// check whether Maude produced errors
+							rp.checkMaudeForErrors(errFile, lang);
+	
+							// pretty-print the obtained configuration
+							K.maude_cmd = "erewrite";
+							p = new PrettyPrintOutput();
+							p.preprocessDoc(K.maude_output, K.processed_maude_output);
+							red = p.processDoc(K.processed_maude_output);
+							AnsiConsole.out.println(red.get(0));
+						}
+						else {
+							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator + "first a solution with step command before executing steps of rewrites!");
+						}
 					}
 					if (cmd.hasOption("step-all")) {
 						// by default compute all successors in one transition
@@ -467,24 +503,37 @@ public class Main {
 						// get the maudified version of the current configuration based on the xml obtained from -xml-log option
 						String maudeConfig = XmlUtil.xmlToMaude(K.maude_output);
 						// System.out.println("config=" + maudeConfig);
-						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "search[," + arg + "] " + maudeConfig + "=>+ B:Bag .";
-						maudeCmd += K.lineSeparator + "show search graph" + " .";
-						// System.out.println("maude cmd=" + maudeCmd);
-						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
-						// check whether Maude produced errors
-						rp.checkMaudeForErrors(errFile, lang);
-
-						// pretty-print the obtained search results
-						K.maude_cmd = "search";
-						p = new PrettyPrintOutput();
-						p.preprocessDoc(K.maude_output, K.processed_maude_output);
-						red = p.processDoc(K.processed_maude_output);
-						for (String result : red) {
-							AnsiConsole.out.println(result);
+						//check first to see if we have a current configuration obtained at previous steps
+						if (maudeConfig != null && maudeConfig.length() > 0) {
+							maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "search[," + arg + "] " + maudeConfig + "=>+ B:Bag .";
+							maudeCmd += K.lineSeparator + "show search graph" + " .";
+							// System.out.println("maude cmd=" + maudeCmd);
+							rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
+							// check whether Maude produced errors
+							rp.checkMaudeForErrors(errFile, lang);
+	
+							// pretty-print the obtained search results
+							K.maude_cmd = "search";
+							p = new PrettyPrintOutput();
+							p.preprocessDoc(K.maude_output, K.processed_maude_output);
+							red = p.processDoc(K.processed_maude_output);
+							for (String result : red) {
+								AnsiConsole.out.println(result);
+							}
+						}
+						else {
+							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator + "first a solution with step command before executing steps of rewrites!");
 						}
 					}
 					if (cmd.hasOption("select")) {
-						int arg = Integer.parseInt(cmd.getOptionValue("select").trim());
+						int arg = 0;
+						try {
+							arg = Integer.parseInt(cmd.getOptionValue("select").trim());
+						}
+						catch (NumberFormatException e) {
+							System.out.println("You must provide an integer argument for the select command");
+							continue;
+						}
 						Element elem = XmlUtil.getSearchSolution(K.maude_output, arg);
 						if (elem != null) {
 							String s = XmlUtil.printSearchSolution(K.processed_maude_output, arg);

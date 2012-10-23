@@ -229,6 +229,10 @@ public class XmlUtil {
 		Node nod = null;
 		
 		list = doc.getElementsByTagName("search-result");
+		if (list.getLength() == 0) {
+			Error.silentReport("The node with search-result tag wasn't found. Make sure that you applied a" + K.lineSeparator + "search before using select command");
+			return result;
+		}
 		for (int i = 0; i < list.getLength(); i++) {
 			nod = list.item(i);
 			if (nod == null) {
