@@ -96,7 +96,12 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 			ConfigurationStructure parent = findParent(cells.peek());
 			parentCell = createParentCell(parent, cells);
 			if (!cells.isEmpty()) {
-				assert(min>1);
+				if (min <= 1) {
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+							KExceptionGroup.COMPILER, 
+							"Got to the top cell while trying to fill up context for cell " + cells.peek() + ".  Perhaps missing a multiplicity declaration in configuration? ", 
+							getName(), node.getFilename(), node.getLocation()));					
+				}
 				change = true;
 				min--;
 				visitor.levels.get(min).add(parentCell);

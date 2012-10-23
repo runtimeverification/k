@@ -53,7 +53,7 @@ public class KException {
 	@Override
 	public String toString() {
 		return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message + "\n\tFile: " + filename + "\n\tLocation: " + location
-				+ compilationPhase == null ? "" : ("\n\t Compilation Phase: " + compilationPhase);
+				+ (compilationPhase == null ? "" : "\n\t Compilation Phase: " + compilationPhase);
 		
 	}
 }
