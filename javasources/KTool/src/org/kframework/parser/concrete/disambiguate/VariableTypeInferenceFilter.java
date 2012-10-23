@@ -59,7 +59,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 						if (v1 != v2)
 							if (!v1.getSort().equals(v2.getSort())) {
 								String msg = "Variable '" + v1.getName() + "' declared with two different sorts: " + v1.getSort() + " and " + v2.getSort();
-								GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, v1.getFilename(), v1.getLocation()));
+								GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getFilename(), v1.getLocation()));
 							}
 			}
 

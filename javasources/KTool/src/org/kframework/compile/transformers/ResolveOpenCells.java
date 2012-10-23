@@ -40,8 +40,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 			if (col == null) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.COMPILER, 
-						"Expecting a collection item here but got " + node.getContents() + " which is of sort " + sort + 
-						"Compilation Phase: " + getName(), 
+						"Expecting a collection item here but got " + node.getContents() + " which is of sort " + sort, getName(), 
 						node.getFilename(), node.getLocation()));
 								
 			}
