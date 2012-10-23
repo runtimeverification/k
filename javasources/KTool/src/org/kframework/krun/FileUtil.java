@@ -144,11 +144,11 @@ public class FileUtil {
 		File srcFile = new File(oldName);
 		boolean bSucceeded = false;
 		
-		File lockFile = new File(K.kdir + K.fileSeparator + "krun.lock");
-		FileChannel channel = new RandomAccessFile(lockFile, "rw").getChannel();
-		FileLock lock = channel.lock();
-
 		if (srcFile.exists()) {
+			File lockFile = new File(K.kdir + K.fileSeparator + "krun.lock");
+			FileChannel channel = new RandomAccessFile(lockFile, "rw").getChannel();
+			FileLock lock = channel.lock();
+
 			try {
 				File destFile = new File(newName);
 				//test if the krun directory is empty and if is not empty delete it
@@ -168,10 +168,9 @@ public class FileUtil {
 					srcFile.delete();
 				}
 			}
+			lock.release();
+			channel.close();
 		}
-
-		lock.release();
-		channel.close();
 	}
 
 	//parse the output of Maude when --output-mode=raw
