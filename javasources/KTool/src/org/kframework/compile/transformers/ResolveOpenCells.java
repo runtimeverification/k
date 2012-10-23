@@ -1,6 +1,7 @@
 package org.kframework.compile.transformers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -32,6 +33,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 		if (ellipses == Ellipses.NONE) 
 			return node;
 		node = node.shallowCopy();
+		node.setAttributes(new HashMap<String, String>(node.getAttributes()));
 		node.setEllipses(Ellipses.NONE);
 		KSort sort = KSort.getKSort(node.getContents().getSort()).mainSort();
 		Collection col;

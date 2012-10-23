@@ -75,6 +75,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 			Cell cell = (Cell) super.transform(node);
 			if (cell.getEllipses() == Ellipses.NONE) return cell;
 			cell = cell.shallowCopy();
+			cell.setAttributes(new HashMap<String, String>(cell.getAttributes()));
 			cell.setEllipses(Ellipses.NONE);
 			ConfigurationStructure cellStr = config.get(cell.getId());
 			if (cellStr.sons.isEmpty()) {
