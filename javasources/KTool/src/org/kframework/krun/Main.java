@@ -668,8 +668,10 @@ public class Main {
 			if (cmd.hasOption("no-parens")) {
 				K.parens = false;
 			}
-			if (cmd.hasOption("compiled-def")) {
+			// k-definition beats compiled-def in a fight
+			if (cmd.hasOption("compiled-def") && !cmd.hasOption("k-definition")) {
 				K.compiled_def = new File(cmd.getOptionValue("compiled-def")).getCanonicalPath();
+				K.kdir = new File(K.compiled_def).getParent() + K.fileSeparator + ".k";
 			}
 			if (cmd.hasOption("do-search")) {
 				K.do_search = true;
@@ -774,7 +776,7 @@ public class Main {
 
 			initOptions(K.userdir);
 
-			if (!cmd.hasOption("compiled-def")) {
+			if (K.compiled_def == null) {
 				resolveOption("compiled-def", cmd);
 			}
 			if (!cmd.hasOption("main-module")) {
