@@ -169,6 +169,8 @@ be executable we state that types are results. */
   syntax BlockOrStmtType ::= "block" | "stmt"
   syntax Type ::= BlockOrStmtType
   syntax Exp ::= Type
+// I had to comment the sort inclusion below out, because the current
+// parser parses declarations "T X;" as statement composition "T" "X;"
 //  syntax Block ::= Type
   syntax KResult ::= Type
 
@@ -235,6 +237,8 @@ references). */
   context _:Type _[HOLE];
 
 // E can be X[7,8][3,4], etc.
+// I don't understand why the rule below works well, that is, why its LHS
+// completed into T E[int,Ts],.Exps; (and similarly for the RHS)
   rule T:Type E[int,Ts:Types]; => T[] E[Ts];  [structural]
 // I want to write the rule below as _:Type (E:Exp[.Types] => E);
   rule T:Type E:Exp[.Types]; => T E;          [structural]
