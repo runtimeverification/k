@@ -1,3 +1,61 @@
+/*!
+\title{SIMPLE --- Untyped}
+\author{Grigore Ro\c{s}u and 
+        Traian Florin \c{S}erb\u{a}nu\c{t}\u{a} (\texttt{\{grosu,tserban2\}@illinois.edu})}
+\organization{University of Illinois at Urbana-Champaign}
+*/
+
+/*@ \section{Abstract}
+This is the \K semantic definition of the untyped SIMPLE language.
+SIMPLE is intended to be a pedagogical and research language that captures
+the essence of the imperative programming paradigm, extended with several
+features often encountered in imperative programming languages.
+A program consists of a set of global variable declarations and
+function definitions.  Like in C, function definitions cannot be
+nested and each program must have one function called \texttt{main},
+which is invoked when the program is executed.  To make it more
+interesting and to highlight some of \K's strengths, SIMPLE includes
+the following features in addition to the conventional imperative
+expression and statement constructs:
+\begin{itemize}
+\item Multidimensional arrays and array references.  An array evaluates
+to an array reference, which is a special value holding a location (where
+the elements of the array start) together with the size of the array;
+the elements of the array can be array references themselves (particularly
+when the array is multi-dimensional).  Array references are ordinary values,
+so they can be assigned to variables and passed/received by functions.
+\item Functions and function values.  Functions can have zero or
+more parameters and can return abruptly using a \texttt{return} statement.
+SIMPLE follows a call-by-value parameter passing style, with static scoping.
+Function names evaluate to function abstractions, which hereby become ordinary
+values in the language, same like the array references.
+\item Blocks with locals.  SIMPLE variables can be declared
+anywhere, their scope being from the place where they are declared
+until the end of the most nested enclosing block.
+\item Input/Output.  The expression \texttt{read()} evaluates to the
+next value in the input buffer, and the statement \texttt{write(e)}
+evaluates \texttt{e} and outputs its value to the output buffer.  The
+input and output buffers are lists of values.
+\item Exceptions.  SIMPLE has parametric exceptions (the value thrown as
+an exception can be caught and bound).
+\item Concurrency via dynamic thread creation/termination and
+synchronization.  One can spawn a thread to execute any statement.
+The spawned thread shares with its parent its environment at creation time.
+Threads can be synchronized via a join command which blocks the current thread
+until the joined thread completes, via re-entrant locks which can be acquired
+and released, as well as through rendezvous commands.
+\end{itemize}
+Like in many other languages, some of SIMPLE's constructs can be
+desugared into a smaller set of basic constructs.  We do that at the end
+of the syntax module, and then we only give semantics to the core constructs.
+
+\paragraph{Note:}{
+This definition is commented slightly more than others, because it is
+intended to be one of the first non-trivial definitions that the new
+user of \K sees.  We recommend the beginner user to first check the
+language definitions discussed in the \K tutorial.} */
+
+
 module SIMPLE-UNTYPED-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
 
@@ -8,31 +66,57 @@ we annotate the syntax with appropriate strictness attributes, thus giving
 each language construct the desired evaluation strategy. */
 
 /*@ \subsection{Identifiers}
-The special identifier for the function ``main'' belongs to all programs.
-Each program may use additional identifiers, which need to be declared either
-automatically (when one uses an external parser) or manually
-(when one writes the program). */
+Recall from the \K tutorial that identifiers are builtin and come under the
+syntactic category \textit{Id}.  The special identifier for the function
+``main'' belongs to all programs, and plays a special role in the semantics,
+so we declare it explicitly.  This would not be necessary if the identifiers
+were all included automatically in semantic definitions, but that is not
+possible because of parsing reasons (e.g., \K variables used to match
+concrete identifiers would then be ambiguously parsed as identifiers).  They
+are only included in the parser generated to parse programs (and used by the
+\texttt{kast} tool).  Consequently, we have to explicitly declare all the
+concrete identifiers that play a special role in the semantics, like
+\texttt{main} below. */
+
+  syntax Id ::= "main"
 
 /*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and
-for functions. */
+for functions.  We are going to allow declarations of the form
+``\texttt{var x=10, a[10,10], y=23;}'', which is why we allow the \texttt{var}
+keyword to take a list of expressions.  The non-terminals used in the two
+productions below are defined shortly. */
 
   syntax Decl ::= "var" Exps ";"
                 | "function" Id "(" Ids ")" Block
 
-  syntax Ids  ::= List{Id,","}
-
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
 an expression rather than a variable because it can also increment an array
-element.  Arrays can be multidimensional and can hold other arrays, so their
+element.  Recall that the syntax we define in \K is what we call ``the syntax
+of the semantics'': while powerful enough to define non-trivial syntaxes
+(thanks to the underlying SDF technology that we use), we typically refrain
+from defining precise syntaxes, that is, ones which accept precisely the
+well-formed programs (that would not be possible anyway in general).  That job
+is deferred to type systems, which can also be defined in \K.  In other words,
+we are not making any effort to guarantee syntactically that only variables
+or array elements are passed to the increment construct, we allow any
+expression.  Nevertheless, we will only give semantics to those, so expressions
+of the form \texttt{++5}, which parse (but which will be rejected by our type
+system in the typed version of SIMPLE later), will get stuck when executed.
+Arrays can be multidimensional and can hold other arrays, so their
 lookup operation takes a list of expressions as argument and applies to an
 expression (which can in particular be another array lookup), respectively.
 The construct \texttt{sizeof} gives the size of an array in number of elements
-of its first dimension.  Note that almost all constructs are strict.
-Exceptions are the increment (since its first argument gets updated, so it
-cannot be evaluated) and the assignment which is only strict in its second
-argument (for the same reason as the increment). */
+of its first dimension.  Note that almost all constructs are strict.  The only
+constructs which are not strict are the increment (since its first argument
+gets updated, so it cannot be evaluated), the input read which takes no
+arguments so strictness is irrelevant for it, the logical and and or constructs
+which are short-circuited, the thread spawning construct which creates a new
+thread executing the argument expression and return its unique identifier to
+the creating thread (so it cannot just evaluate its argument in place), and the
+assignment which is only strict in its second argument (for the same reason as
+the increment). */
 
   syntax Exp ::= Int | Bool | String | Id
                | "(" Exp ")"             [bracket]
@@ -63,6 +147,12 @@ argument (for the same reason as the increment). */
                > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
 
+/*@ We also need comma-separated lists of identifiers and of expressions.
+Moreover, we want them to be strict and hybrid, that is, to evaluate to lists
+of results whenever requested (e.g., when they appear as strict arguments of
+the constructs above), and the lists of results to be results themselves. */
+
+  syntax Ids  ::= List{Id,","}
   syntax Exps ::= List{Exp,","}          [strict, hybrid]
 
 /*@ \subsection{Statements}
@@ -74,13 +164,14 @@ ending with the block.  Expressions are allowed to be used for their side
 effects only (followed by a semicolon ``\texttt{;}'').  Functions are allowed
 to abruptly return.  The exceptions are parametric, i.e., one can throw a value
 which is bound to the variable declared by \texttt{catch}.  Threads can be
-dynamically created and terminated, and can synchronize with \texttt{acquire},
-\texttt{release} and \texttt{rendezvous}.  Note that the strictness attributes
-obey the intended evaluation strategy of the various constructs.  In
-particular, the if-then-else construct is strict only in its first argument
-(the if-then construct will be desugared into if-then-else), while the loops
-constructs are not strict in any arguments.  The \texttt{print} statement
-constructs is variadic, that is, it takes an arbitrary number of arguments. */
+dynamically created and terminated, and can synchronize with \texttt{join},
+\texttt{acquire}, \texttt{release} and \texttt{rendezvous}.  Note that the
+strictness attributes obey the intended evaluation strategy of the various
+constructs.  In particular, the if-then-else construct is strict only in its
+first argument (the if-then construct will be desugared into if-then-else),
+while the loop constructs are not strict in any arguments.  The \texttt{print}
+statement construct is variadic, that is, it takes an arbitrary number of
+arguments. */
 
   syntax Block ::= "{" "}"
                 | "{" Stmts "}"
@@ -104,29 +195,29 @@ constructs is variadic, that is, it takes an arbitrary number of arguments. */
   syntax Stmts ::= Stmt
                  | Stmts Stmts                          [right]
 
-// I wish I were able to write the following instead, but the parser
-// gets confused.
+// I wish I were able to write the following instead, but confuses the parser.
 //
 // syntax Stmts ::= List{Stmt,""}
 // syntax Top ::= Stmt | "function" Id "(" Ids ")" Block
 // syntax Pgm ::= List{Top,""}
-
+//
+// With that, I could have also eliminated the empty block
 
 /*@ \section{Desugared Syntax}
 This part desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
 derived ones before we start the semantics.  All desugaring macros below are
-straightforward.  For the semantics, we can therefore assume that all
-functions take a list of arguments, that each conditional has both branches,
-that there are only \texttt{while} loops, and that each variable is
-declared alone and is initialized. */
+straightforward. */
 
   rule if (E) S => if (E) S else {}                                 [macro]
   rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
   rule var X:Id = E; => var X; X = E;                               [macro]
 
-  syntax Id ::= "main"
+/*@ For the semantics, we can therefore assume from now on that each
+conditional has both branches, that there are only \texttt{while} loops, and
+that each variable is declared alone and without any initialization as part of
+the declaration. */
 
 endmodule
 
@@ -137,17 +228,17 @@ module SIMPLE-UNTYPED
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
 define the basic semantic infrastructure consisting of definitions for
-{\em values} and {\em configuration}.  As discussed in the \K
-definition of IMP, the values are needed to know when to stop applying
-the heating rules and when to start applying the cooling rules
-corresponding to strictness or context declarations.  The
-configuration serves as a backbone for the process of configuration
-abstraction which allows users to only mention the relevant cells in each
-semantic rule, the rest of the configuration context being inferred
-automatically.  Although the configuration could potentially be automatically
-inferred from the rules, we believe that it is very useful for language
-designers/semanticists to actually think of and design their configuration
-explicitly, so the current implementation of \K requires one to define it. */
+{\em values} and {\em configuration}.  As discussed in the definitions
+in the \K tutorial, the values are needed to know when to stop applying
+the heating rules and when to start applying the cooling rules corresponding
+to strictness or context declarations.  The configuration serves as a backbone
+for the process of configuration abstraction which allows users to only
+mention the relevant cells in each semantic rule, the rest of the configuration
+context being inferred automatically.  Although in some cases the configuration
+could be automatically inferred from the rules, we believe that it is very
+useful for language designers/semanticists to actually think of and design
+their configuration explicitly, so the current implementation of \K requires
+one to define it. */
 
 /*@ \subsection{Values}
 We here define the values of the language that the various fragments of
@@ -176,20 +267,22 @@ with additional values) parser.  If writing the semantics directly on the \K
 AST, using the associated labels instead of the syntactic constructs, then one
 would not need to include values in expressions. */
 
-/*@ \section{Configuration}
+/*@ \subsection{Configuration}
 The \K configuration of SIMPLE consists of a top level cell, \textsf{T},
 holding a \textsf{threads} cell, a global environment map cell \textsf{genv}
 mapping the global variables and function names to their locations, a shared
 store map cell \textsf{store} mapping each location to some value, a set cell
 \textsf{busy} holding the locks which have been acquired but not yet released
-by threads, \textsf{input} and \textsf{output} list cells, and a
-\textsf{nextLoc} cell holding a natural number indicating the next available
-location.  For simplicity, the location counter in \textsf{nextLoc} models an
-actual physical location in the store (and assumes no garbage collection).
-In other definitions (such as KERNELC) we show how one can model locations in
-the store to be symbolic and thus abstract away form the memory allocator
-library.   The \textsf{threads} cell contains one \textsf{thread} cell for
-each existing thread in the program.  Note that the thread cell has
+by threads, a set cell \textsf{terminated} holding the unique identifiers of
+the threads which already terminated (needed for \texttt{join}), \textsf{input}
+and \textsf{output} list cells, and a \textsf{nextLoc} cell holding a natural
+number indicating the next available location.  Unlike in the small languages
+in the \K tutorial, where we used the fresh predicate to generate fresh
+locations, in larger languages, like SIMPLE, we prefer to explicitly manage
+memory.  The location counter in \textsf{nextLoc} models an actual physical
+location in the store; for simplicity, we assume arbitrarily large memory and
+no garbage collection.  The \textsf{threads} cell contains one \textsf{thread}
+cell for each existing thread in the program.  Note that the thread cell has
 multiplicity ``*'', which means that at any given moment there could be zero,
 one or more \textsf{thread} cells.  Each \textsf{thread} cell contains a
 computation cell \textsf{k}, a \textsf{control} cell holding the various
@@ -205,8 +298,8 @@ stack for break/continue of loops, etc., if the language is extended with more
 control-changing constructs.  Note that all cells except for \textsf{k} are
 also initialized, in that they contain a ground term of their corresponding
 sort.  The \textsf{k} cell is initialized with the program that will be passed
-to the \K tool, as indicated by the \textit{\$PGM} variable. */
-
+to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
+\texttt{execute} task (defined shortly). */
 
   configuration <T color="red">
                   <threads color="orange">
@@ -248,29 +341,27 @@ location $L$ in the store which is initialized with a special value
 $\bot$ (indeed, the unit ``$\kdot$'', or nothing, is matched anywhere
 in the map---note the tears at both sides---and replaced with the
 mapping $L\mapsto \bot$), and binds $X$ to $L$ in the local
-environment shadowing previous declarations of $X$, if any.  It is
-this possible shadowing of $X$ which disallows us to use a similar
-technique for updating the environment as for updating the store, as
-we know that $L$ is not already bound in the store when we add $L
-\mapsto \bot$.  We prefer the approach used for updating the store
-whenever possible, because it offers more true concurrency than the
-latter; indeed, according to the concurrent semantics of $K$, the
-store is not frozen while $L\mapsto \bot$ is added to it, while the
-environment is frozen during the update operation
-$\textit{Env}[L/X]$.  The variable declaration command is also removed
-from the top of the computation cell and the fresh location counter is
-incremented.  All the above happen in one transactional step, with the
-rule below.  Note also how configuration abstraction allows us to only
+environment shadowing previous declarations of $X$, if any.
+This possible shadowing of $X$ requires us to therefore update the
+entire environment map, which is expensive and can significantly slow
+down the execution of larger programs.  On the other hand, since we know
+that $L$ is not already bound in the store, we simply add the binding
+$L \mapsto \bot$ to the store, thus avoiding a potentially complete
+traversal of the the store map in order to update it.  We prefer the approach
+used for updating the store whenever possible, because, in addition to being
+faster, it offers more true concurrency than the latter; indeed, according
+to the concurrent semantics of $K$, the store is not frozen while
+$L\mapsto \bot$ is added to it, while the environment is frozen during the
+update operation $\textit{Env}[L/X]$.  The variable declaration command is
+also removed from the top of the computation cell and the fresh location
+counter is incremented.  All the above happen in one transactional step, with
+the rule below.  Note also how configuration abstraction allows us to only
 mention the needed cells; indeed, as the configuration above states,
 the \textsf{k} and \textsf{env} cells are actually located within a
 \textsf{thread} cell within the \textsf{threads} cell, but one needs
 not mention these: the configuration context of the rule is
 automatically transformed to match the declared configuration
-structure.
-
-\paragraph{Note:}{The "trick" with using a \textsf{nextLoc} cell to generate
-fresh locations is rather low level and hopefully temporary; we intend to
-soon allow instead a side-condition of the form ``where $L$ fresh''.} */
+structure. */
 
   syntax K ::= "undefined"  [latex(\bot)]
 
@@ -281,17 +372,16 @@ soon allow instead a side-condition of the form ``where $L$ fresh''.} */
 
 /*@ \subsection{Array Declaration}
 The \K semantics of the uni-dimensional array declaration is somehow similar
-to the above declaration of ordinary variables.  $N+1$ locations are allocated
-in the store for an array of size $N$, the additional location (chosen to be
-the first one allocated) holding the array reference value.  The array
-reference value \texttt{array(L,N)} states that the array has size
-$N$ and its elements are located contiguously in the store starting
-with location $L$.  Recall that $L..L'$ is the list of locations
-between $L$ and $L'$ and that $L..L'\mapsto V$ initializes each
-location in the list $L..L'$ to $V$.  Note that, since the dimensions
-of array declarations can be arbitrary expressions, this virtually
-means that we can dynamically allocate memory in SIMPLE by means of
-array declarations. */
+to the above declaration of ordinary variables.  $N+_{\it \scriptsize Int}1$
+locations are allocated in the store for an array of size $N$, the additional
+location (chosen to be the first one allocated) holding the array reference
+value.  The array reference value \texttt{array(L,N)} states that the array
+has size $N$ and its elements are located contiguously in the store starting
+with location $L$.  The operation $L \ldots L'\mapsto V$, defined at the end
+of this file in the auxiliary operation section, initializes each location in
+the list $L \ldots L'$ to $V$.  Note that, since the dimensions of array
+declarations can be arbitrary expressions, this virtually means that we can
+dynamically allocate memory in SIMPLE by means of array declarations. */
 
   rule <k> var X:Id[N:Int]; => . ...</k>
        <env> Env => Env[L/X] </env>
@@ -303,7 +393,7 @@ array declarations. */
 desugar them all into uni-dimensional arrays by code transformation.
 This way, we will only need to give semantics to uni-dimensional arrays.
 First, the context rule below is used to request the evaluation of array
-dimensions: */
+dimensions (that's why we defined the expression lists strict and hybrid!): */
 
   context var _:Id[HOLE];
 
@@ -354,7 +444,7 @@ whenever functions are invoked, which is consistent with our requirement that
 functions should only be declared at the top.  Thus, if one declares local
 functions, then one may see unexpected behaviors (e.g., when one shadows a
 global variable before declaring a local function).  The type checker of
-SIMPLE, also defined in \K (see simple/typed/static),
+SIMPLE, also defined in \K (see \texttt{examples/simple/typed/static}),
 discards programs which do not respect this requirement. */
 
   rule <k> function F(Xs) S => . ...</k>
@@ -363,57 +453,57 @@ discards programs which do not respect this requirement. */
        <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ When we are done with the first pass (pre-processing), the computation
-cell \textsf{k} contains only the token \texttt{execute} (see the module
-SIMPLE-UNTYPED below, whose rule for initiating the execution of a program
-adds the token \texttt{execute} at the end of the program) and the cell
-\textsf{genv} is empty.  In this case, we have to call \texttt{main()} and to
-initialize the global environment by transferring the contents of the local
-environment into it.  We prefer to do it this way, as opposed to processing
-all the top level declarations directly within the global environment, because
-we want to avoid duplication of semantics: the syntax of the global
-declarations is identical to that of their corresponding local declarations,
-so the semantics of the latter suffices provided that we copy the local
-environment into the global one once we are done with the pre-processing.
-We want this separate pre-processing step precisely because we want to create
-the global environment.  All (top-level) functions end up having their names
-bound in the global environment and, as seen below, they are executed in that
-same global environment; all these mean, in particular, that the functions
-``see'' each other, allowing for mutual recursion, etc. */
+cell \textsf{k} contains only the token \texttt{execute} (see the configuration
+declaration above, where the computation item \texttt{execute} was placed
+right after the program in the \textsf{k} cell of the initial configuration)
+and the cell \textsf{genv} is empty.  In this case, we have to call
+\texttt{main()} and to initialize the global environment by transferring the
+contents of the local environment into it.  We prefer to do it this way, as
+opposed to processing all the top level declarations directly within the global
+environment, because we want to avoid duplication of semantics: the syntax of
+the global declarations is identical to that of their corresponding local
+declarations, so the semantics of the latter suffices provided that we copy
+the local environment into the global one once we are done with the
+pre-processing.  We want this separate pre-processing step precisely because
+we want to create the global environment.  All (top-level) functions end up
+having their names bound in the global environment and, as seen below, they
+are executed in that same global environment; all these mean, in particular,
+that the functions ``see'' each other, allowing for mutual recursion, etc. */
 
   syntax K ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> . => Env </genv>
-    [structural]
+       <genv> . => Env </genv>  [structural]
 
 /*@ \section{Expressions}
-We next define the \K semantics of all the expression constructs, in the
-order in which their syntax was declared. */
+We next define the \K semantics of all the expression constructs. */
 
 /*@ \subsection{Variable lookup}
-When a variable $X$ is the first computational task (note the rupture of the
-\textsf{k} cell to the right), and $X$ is bound to some location $L$ in the
-environment (note the rupture of the \textsf{env} cell at both sides), and
-$L$ is mapped to some value $V$ in the store, then rewrite $X$ by $V$: */
+When a variable $X$ is the first computational task, and $X$ is bound to some
+location $L$ in the environment, and $L$ is mapped to some value $V$ in the
+store, then we rewrite $X$ into $V$: */
 
-  rule <k> X:Id => V ...</k>
+  rule <k> X:Id => V:Val ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V ...</store>  [transition]
+       <store>... L |-> V ...</store>  [lookup]
 
-/*@ Note that this excludes reading $\bot$, as $\bot$ is not a value. */
+/*@ Note that the rule above excludes reading $\bot$, because $\bot$ is not
+a value and $V$ is checked at runtime to be a value. */
 
 /*@ \subsection{Variable/Array increment}
 This is tricky, because we want to allow both {\tt ++x} and {\tt ++a[5]}.
 Therefore, we need to extract the lvalue of the expression to increment.
 To do that, we state that the expression to increment should be wrapped
-by the auxiliary ``lvalue'' operation and then evaluated.
-The semantics of the auxiliary lvalue operation is defined below.
-For now, all we need to know is that it takes an expression and evaluates
-to a location value, also introduced below with the auxiliary operations. */
+by the auxiliary \texttt{lvalue} operation and then evaluated.  The semantics
+of this auxiliary operation is defined at the end of this file.  For now, all
+we need to know is that it takes an expression and evaluates to a location
+value.  Location values, also defined at the end of the file, are integers
+wrapped with the operation \texttt{loc}, to distinguish them from ordinary
+integers. */
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store>  [transition]
+       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
@@ -431,8 +521,16 @@ become values of expected sorts: */
   rule I1:Int <= I2:Int => I1 <=Int I2
   rule I1:Int > I2:Int => I1 >Int I2
   rule I1:Int >= I2:Int => I1 >=Int I2
+
+/*@ The equality and inequality constructs reduce to syntactic comparison
+of the two argument values (which is what the equality on $K$ terms does). */
+
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
+
+/*@ The logical negation is clear, but the logical conjunction and disjunction
+are short-circuited: */
+
   rule ! T:Bool => notBool(T)
   rule true  && E => E
   rule false && _ => false
@@ -441,27 +539,20 @@ become values of expected sorts: */
 
 /*@ \subsection{Array lookup}
 Untyped SIMPLE does not check array bounds (the dynamically typed version of
-it, in ../typed/dynamic, does check for array out of bounds).  The first rule
-below desugars multi-dimensional array access to uni-dimensional array access;
-recall that the array access operation was declared strict, so all
-sub-expressions involved are already values at this stage.  The second rule
-rewrites the array access to a lookup operation at a precise location; we
-prefer to do it this way to avoid locking the store.  Recall that ``---'' is an
-anonymous variable in \K matching any subterm (like in Prolog); informally,
-``there is something there but we don't care what''.
-The semantics of the \texttt{lookup} operation is straightforward. */
+it, in \texttt{examples/simple/typed/dynamic}, does check for array out of
+bounds).  The first rule below desugars the multi-dimensional array access to
+uni-dimensional array access; recall that the array access operation was
+declared strict, so all sub-expressions involved are already values at this
+stage.  The second rule rewrites the array access to a lookup operation at a
+precise location; we prefer to do it this way to avoid locking the store.
+The semantics of the auxiliary \texttt{lookup} operation is straightforward,
+and is defined at the end of the file. */
 
-  rule V:Val[N1:Int, N2:Int, Vs:Vals]
-    => V[N1][N2, Vs]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
     [structural, anywhere]
 
   rule array(L,_)[N:Int] => lookup(L +Int N)
     [structural, anywhere]
-
-  syntax K ::= lookup(Int)
-
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>
-    [transition]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -515,30 +606,28 @@ nulary \texttt{return;} statements. */
 
   rule return; => return nothing;   [macro]
 
-// say that nothing+7, etc., is same like division by zero; nothing is
-// guaranteed.
-
-/*@ The \texttt{bind} auxilliary construct binds a list of variables
+/*@ The auxiliary \texttt{bind} construct binds a list of variables
 to a list of values.  Specifically, it allocates a fresh location for
 each variable, binding the variable to that location in the
-environment and writing the value to that location in the store. */
+environment and writing the value to that location in the store. 
+Its definition can be found at the end of the file, in the auxiliary
+operations section.
 
-  syntax K ::= bind(Ids,Vals)
-
-  rule <k> bind((X:Id, Xs:Ids => Xs),(V:Val, Vs:Vals => Vs)) ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> V ...</store>
-       <nextLoc> L => L:Int +Int 1 </nextLoc>  [structural]
-
-  rule bind(.Ids, .Vals) => .  [structural]
+Like for division-by-zero, it is left unspecified what happens
+when the \texttt{nothing} value is used in domain calculations.  For
+example, from the the perspective of the language semantics,
+$7+_{\scriptsize\it Int}\texttt{nothing}$ can evaluate to anything, or
+may not evaluate at all (be undefined).  If one wants to make sure that
+such artificial values are never misused, then one needs to define a static
+checker (also using \K, like our the type checker in
+\texttt{examples/simple/typed/static}) and reject programs that do. */
 
 /*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next
 input value, at the same time discarding the input value from the
 \textsf{in} cell. */
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>
-    [transition]
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -548,18 +637,16 @@ Like for the increment, we want to allow assignments not only to variables but
 also to array elements, e.g., \texttt{e1[e2] = e3} where \texttt{e1} evaluates
 to an array reference, \texttt{e2} to a natural number, and \texttt{e3} to any 
 value.  Thus, we first compute the lvalue of the left-hand-side expression
-that appears in an assignment.  Like for the increment, all we need to know is
-that \texttt{lvalue(...)} eventually evaluates to a location value
-\texttt{loc(...)}. */
+that appears in an assignment, and then we do the actual assignment to the
+resulting location: */
 
   context (HOLE => lvalue(HOLE)) = _
 
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
-    [transition]
+    [assignment]
 
 /*@ \section{Statements}
-We next define the \K semantics of statements, also in the order their syntax
-was given. */
+We next define the \K semantics of statements. */
 
 /*@ \subsection{Blocks}
 Empty blocks are simply discarded, as shown in the first rule below.
@@ -576,34 +663,8 @@ computational if one wants them to count as computational steps. */
   rule <k> { Ss:Stmts } => Ss ~> env(Env) ...</k>  <env> Env </env>
     [structural]
 
-/*@ The basic definition of environment recovery is straightforward: */
-
-  syntax K ::= env(Map)
-
-  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
-
-/*@  While theoretically sufficient, the basic definition for environment
-recovery alone is suboptimal.  Consider a loop \texttt{while E do S},
-whose semantics (see below) is given by unrolling.  Typically \texttt{S}
-is a block.  Then the semantics of blocks above, together with the
-unrolling semantics of the while loop below, will yield a computation
-structure in the \textsf{k} cell that increasingly grows, adding a new
-environment recovery task right in front of the already existing sequence of
-similar environment recovery tasks (this phenomenon is similar to the ``tail
-recursion'' problem).  Of course, when we have a sequence of environment
-recovery tasks, we only need to keep the last one.  The elegant rule below
-does precisely that, thus avoiding the unnecessary computation explosion
-problem:  */
-
-  rule (env(_) => .) ~> env(_)  [structural]
-
-/* In fact, the above follows a common convention in \K for recovery
-operations of cell contents.  More precisely, the conventional meaning of a
-computation task of the form \texttt{cell($C$)} that reaches the top of the
-computation is that the current contents of cell \textsf{cell} is discarded
-and gets replaced with $C$.  We did not add support for these special
-computation tasks in our current implementation of \K, so we need to define
-them as above. */
+/*@ The basic definition of environment recovery is straightforward and
+given in the section on auxiliary constructs at the end of the file. */
 
 /*@ There are two common alternatives to the above semantics of blocks.
 One is to keep track of the variables which are declared in the block and only
@@ -677,8 +738,7 @@ its evaluated arguments to the output buffer, and discard the residual
 \texttt{print} statement with an empty list of arguments. */
 
   rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
-    [transition]
-
+    [print]
   rule print(.Vals); => .  [structural]
 
 /*@ \subsection{Exceptions}
@@ -711,9 +771,9 @@ exception stack.  The three rules below modularly do precisely the above. */
 
   syntax K ::= "popx" 
 
-  rule <k> (try B catch(X) {Ss} => B ~> popx) ~> K </k>
+  rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => (X, Ss, K, Env, C) ...</xstack>
+         <xstack> . => (X, S2, K, Env, C) ...</xstack>
          C
        </control>
        <env> Env </env>
@@ -721,9 +781,9 @@ exception stack.  The three rules below modularly do precisely the above. */
   rule <k> popx => . ...</k>
        <xstack> _:ListItem => . ...</xstack>
 
-  rule <k> throw V:Val; ~> _ => { var X = V; Ss } ~> K </k>
+  rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
-         <xstack> (X, Ss, K, Env, C) => . ...</xstack>
+         <xstack> (X, S2, K, Env, C) => . ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -732,11 +792,9 @@ exception stack.  The three rules below modularly do precisely the above. */
 but where the thrown value $V$ is bound to the catch variable $X$.  We here
 chose to rely on two previously defined constructs when giving semantics to
 the catch part of the statement: (1) the variable declaration with
-initialization, for binding $X$ for $V$; and (2) the block construct for
+initialization, for binding $X$ to $V$; and (2) the block construct for
 preventing $X$ from shadowing variables in the original environment upon the
-completion of $S_2$.  Note, however, that the semantics of {\tt throw} can
-also be given directly, in one computational step, especially in languages
-without variable initializers and blocks. */
+completion of $S_2$. */
 
 /*@ \subsection{Threads}
 SIMPLE's threads can be created and terminated dynamically, and can
@@ -745,13 +803,13 @@ We discuss the seven rules giving the semantics of these operations below. */
 
 /*@ \subsubsection{Thread creation}
 Threads can be created by any other threads using the ``\texttt{spawn $S$}''
-statement.  The spawn statement is consumed in the creating thread and, at the
-same time, a new thread cell is added to the top of the configuration,
-initialized with the $S$ statement and sharing the same environment with the
-spawning thread.  Note that the newly created \textsf{thread} cell is torn.
-That means that the remaining cells are added and initialized automatically as
-described in the definition of SIMPLE's configuration.  This is part of \K's
-configuration abstraction/concretization mechanism. */
+construct.  The spawn expression construct evaluates to the unique identifier
+of the newly created thread and, at the same time, a new thread cell is added
+into the configuration, initialized with the $S$ statement and sharing the
+same environment with the parent thread.  Note that the newly created
+\textsf{thread} cell is torn.  That means that the remaining cells are added
+and initialized automatically as described in the definition of SIMPLE's
+configuration.  This is part of \K's configuration abstraction mechanism. */
 
    rule <thread>...
           <k> spawn S => T ...</k>
@@ -775,15 +833,22 @@ We achieve that by removing all the locks held by the terminating thread in its
 (\texttt{keys($H$)} returns the domain of the map $H$ as a set, that is, only
 the locks themselves ignoring their multiplicity).  As seen below, a lock is
 added to the \textsf{busy} cell as soon as it is acquired for the first time
-by a thread. */
+by a thread.  The unique identifier of the terminated thread is also collected
+into the \textsf{terminated} cell, so the \texttt{join} construct knows which
+threads have terminated. */
 
    rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
         <busy> Busy => Busy -Set keys(H) </busy>
         <terminated>... . => SetItem(T) ...</terminated>
 
+/*@ \subsubsection{Thread joining}
+Thread joining is now straightforward: all we need to do is to check whether
+the identifier of the thread to be joined is in the \textsf{terminated} cell.
+If yes, then the \texttt{join} statement dissolves and the joining thread
+continues normally; if not, then the joining thread gets stuck. */
+
    rule <k> join T:Int; => . ...</k>
         <terminated>... SetItem(T) ...</terminated>
-
 
 /*@ \subsubsection{Acquire lock}
 There are two cases to distinguish when a thread attempts to acquire a lock
@@ -798,8 +863,7 @@ by the two rules below: */
    rule <k> acquire V:Val; => . ...</k>
         <holds>... . => V |-> 0 ...</holds>
         <busy> Busy (. => SetItem(V)) </busy>
-        when (notBool(V in Busy:Set))
-        [transition]
+     when (notBool(V in Busy:Set))  [acquire]
 
    rule <k> acquire V; => . ...</k>
         <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
@@ -837,11 +901,65 @@ actual configuration of SIMPLE is to include each \textsf{k} cell in a
 \textsf{thread} cell. */
 
    rule <k> rendezvous V:Val; => . ...</k>
-        <k> rendezvous V; => . ...</k>  [transition]
+        <k> rendezvous V; => . ...</k>  [rendezvous]
 
+/*@ \section{Auxiliary declarations and operations}
+In this section we define all the auxiliary constructs used in the
+above semantics. */
 
-//@ \section{Auxiliary declarations and operations}
+/*@ \subsection{Bind}
+The \texttt{bind} auxiliary construct binds a list of variables
+to a list of values.  In words, it allocates a fresh location for
+each variable, and binds the variable to that location in the
+environment and writes the value to that location in the store.
+Formally: */
 
+  syntax K ::= bind(Ids,Vals)
+
+  rule <k> bind((X:Id, Xs:Ids => Xs),(V:Val, Vs:Vals => Vs)) ...</k>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> V ...</store>
+       <nextLoc> L => L:Int +Int 1 </nextLoc>  [structural]
+
+  rule bind(.Ids, .Vals) => .  [structural]
+
+/*@ \subsection{Location lookup}
+The operation below is straightforward.  Note that we tag it with the same
+\texttt{lookup} tag as the variable lookup rule defined above.  This way,
+both rules will be considered transitions when we include the \texttt{lookup}
+tag in the transition option of \texttt{kompile}. */
+
+  syntax K ::= lookup(Int)
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>  [lookup]
+
+/*@ \subsubsection{Environment recovery}
+We have already discussed the environment recovery auxiliary operation in the
+IMP++ tutorial: */
+
+  syntax K ::= env(Map)
+  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+
+/*@  While theoretically sufficient, the basic definition for environment
+recovery alone is suboptimal.  Consider a loop \texttt{while (E)S},
+whose semantics (see above) was given by unrolling.  \texttt{S}
+is a block.  Then the semantics of blocks above, together with the
+unrolling semantics of the while loop, will yield a computation
+structure in the \textsf{k} cell that increasingly grows, adding a new
+environment recovery task right in front of the already existing sequence of
+similar environment recovery tasks (this phenomenon is similar to the ``tail
+recursion'' problem).  Of course, when we have a sequence of environment
+recovery tasks, we only need to keep the last one.  The elegant rule below
+does precisely that, thus avoiding the unnecessary computation explosion
+problem: */
+
+  rule (env(_) => .) ~> env(_)  [structural]
+
+/* In fact, the above follows a common convention in \K for recovery
+operations of cell contents: the meaning of a computation task of the form
+\texttt{cell($C$)} that reaches the top of the computation is that the current
+contents of cell \textsf{cell} is discarded and gets replaced with $C$.  We
+did not add support for these special computation tasks in our current
+implementation of \K, so we need to define them as above. */
 
 /*@ \subsection{lvalue and loc}
 For convenience in giving the semantics of constructs like the increment and
@@ -881,15 +999,20 @@ corresponding store lookup operation. */
 
   rule lvalue(lookup(L:Int)) => loc(L)  [structural]
 
-/*@ \subsection{Sequences of locations}
-The following operation expands to the list of natural numbers between two
-given numbers.  The first number is expected to be no larger than the second.
-The two rules below are structural, for the same reason as above. */
+/*@ \subsection{Initializing multiple locations}
+The following operation initializes a sequence of locations with the same
+value: */
 
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
   rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
-/*@ The semantics of SIMPLE is now complete. */
+/*@ The semantics of SIMPLE is now complete.  Make sure you kompile the
+definition with the right options in order to generate the desired model.
+No kompile options are needed if you only only want to execute the definition
+(and thus get an interpreter), but if you want to search for a different
+program behaviors then you need to kompile with the transition option
+including rule tags such as lookup, increment, acquire, etc.  See the
+IMP++ tutorial for what the transition option means how to use it. */
 endmodule 
