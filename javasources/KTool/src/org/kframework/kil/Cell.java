@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Modifier;
@@ -143,15 +142,18 @@ public class Cell extends Term {
 		} catch (IllegalArgumentException e){
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
-					"Unknown multiplicity in configuration for cell " + this.getLabel() + ". Assuming none.", 
+					"Unknown ellipses value in configuration for cell " + this.getLabel() + ". Assuming none.", 
 					this.getFilename(), this.getLocation()));
 		}
 		return Ellipses.NONE;
 	}
 
 	public void setEllipses(String ellipses) {
-		if (ellipses.isEmpty()) ellipses = "none";
-		attributes.put("ellipses", ellipses.toLowerCase());
+		ellipses = ellipses.toLowerCase();
+		if (ellipses.isEmpty() || ellipses.equals("none")) {
+			attributes.remove("ellipses");
+		} else 
+			attributes.put("ellipses", ellipses);
 	}
 
 	public Map<String, String> getAttributes() {

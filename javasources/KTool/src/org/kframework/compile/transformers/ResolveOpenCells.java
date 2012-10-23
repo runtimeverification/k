@@ -27,9 +27,12 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(Cell node) throws TransformerException {
-		if (node.getEllipses() == Ellipses.NONE) 
+		node = (Cell) super.transform(node);
+		Ellipses ellipses = node.getEllipses();
+		if (ellipses == Ellipses.NONE) 
 			return node;
 		node = node.shallowCopy();
+		node.setEllipses(Ellipses.NONE);
 		KSort sort = KSort.getKSort(node.getContents().getSort()).mainSort();
 		Collection col;
 		if (node.getContents() instanceof Collection) {
@@ -46,8 +49,14 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 			}
 		}
 		node.setContents(col);
-		if (node.getEllipses() == Ellipses.BOTH) {
-			
+		if (ellipses == Ellipses.BOTH && sort != KSort.K && sort != KSort.List) {
+			ellipses = Ellipses.RIGHT;
+		}
+		if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {
+			col.getContents().add(0, MetaK.getFreshVar(sort.toString()));
+		}
+		if (ellipses == Ellipses.BOTH || ellipses == Ellipses.RIGHT) {
+			col.getContents().add(MetaK.getFreshVar(sort.toString()));
 		}
 		return node;
 	}

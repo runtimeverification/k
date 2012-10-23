@@ -794,11 +794,11 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Default Terms");
 			}
 
-//			javaDef = new CompilerTransformerStep(new ResolveOpenCells()).compile(javaDef);
-//
-//			if (GlobalSettings.verbose) {
-//				sw.printIntermediate("Resolve Open Cells");
-//			}
+			javaDef = new CompilerTransformerStep(new ResolveOpenCells()).compile(javaDef);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Open Cells");
+			}
 
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";
