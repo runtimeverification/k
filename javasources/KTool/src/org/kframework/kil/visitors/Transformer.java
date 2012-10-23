@@ -18,6 +18,7 @@ import org.kframework.kil.Empty;
 import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabel;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.List;
@@ -101,6 +102,7 @@ public interface Transformer {
 	public ASTNode transform(Hole node) throws TransformerException;
 	public ASTNode transform(KApp node) throws TransformerException;
 	public ASTNode transform(KLabel node) throws TransformerException;
+	public ASTNode transform(KInjectedLabel node) throws TransformerException;
 	public ASTNode transform(Rewrite node) throws TransformerException;
 	public ASTNode transform(TermCons node) throws TransformerException;
 	public ASTNode transform(Variable node) throws TransformerException;

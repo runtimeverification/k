@@ -20,6 +20,7 @@ import org.kframework.kil.Empty;
 import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabel;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.List;
@@ -371,5 +372,13 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public ASTNode transform(KInjectedLabel node) throws TransformerException {
+		Term term = (Term) node.getTerm().accept(this);
+		KInjectedLabel result = new KInjectedLabel(node);
+		result.setTerm(term);
+		return transform((Term) node);
 	}
 }

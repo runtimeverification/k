@@ -442,7 +442,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	public ASTNode transform(KLabel node) throws TransformerException {
 		return transform((Term) node);
 	}
-
+	
 	@Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		boolean change = false;
@@ -539,5 +539,26 @@ public class CopyOnWriteTransformer implements Transformer {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public ASTNode transform(KInjectedLabel node) throws TransformerException {
+		boolean change = false;
+		Term body = node.getTerm();
+		ASTNode bodyAST = body.accept(this);
+		if (bodyAST != body) change = true;
+		if (null == bodyAST) return null;
+		if (!(bodyAST instanceof Term)) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+					KExceptionGroup.INTERNAL, 
+					"Expecting Term, but got " + bodyAST.getClass() + ".", 
+					getName(), body.getFilename(), body.getLocation()));					
+		}
+		body = (Term) bodyAST;
+		if (change) {
+			node = node.shallowCopy();
+			node.setTerm(body);
+		}
+		return node;
 	}
 }
