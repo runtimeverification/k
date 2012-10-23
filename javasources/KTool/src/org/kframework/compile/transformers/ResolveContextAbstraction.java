@@ -120,7 +120,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.CRITICAL, 
 					"Cell " + cell.getLabel() + " is not part of the configuration ", 
-					node.getFilename(), node.getLocation()));
+					getName(), node.getFilename(), node.getLocation()));
 		}
 		
 		if (confCell.sons.isEmpty()) return cell;
@@ -247,8 +247,8 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 			if (level < 0) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.INTERNAL, 
-						"Cell " + node + " Has a higher level than its parent while " + getName(), 
-						node.getFilename(), node.getLocation()));								
+						"Cell " + node + " Has a higher level than its parent.", 
+						getName(), node.getFilename(), node.getLocation()));								
 				
 			}
 			if (max<level) max = level;
@@ -284,7 +284,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 								KExceptionGroup.INTERNAL, 
 								"Expecting all cells in " + node + " to be at the same level when " + getName(), 
-								node.getFilename(), node.getLocation()));														
+								getName(), node.getFilename(), node.getLocation()));														
 					}
 			}
 			levels.get(level).add(node);

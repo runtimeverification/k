@@ -1,5 +1,6 @@
 package org.kframework.backend.maude;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
@@ -23,6 +24,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabel;
 import org.kframework.kil.KSequence;
+import org.kframework.kil.KSort;
 import org.kframework.kil.ListItem;
 import org.kframework.kil.ListOfK;
 import org.kframework.kil.LiterateDefinitionComment;
@@ -469,7 +471,7 @@ public class MaudeFilter extends BasicVisitor {
 		} else if (collection.getContents().size() == 1) {
 			collection.getContents().get(0).accept(this);
 		} else {
-			String constructor = MetaK.getMaudeConstructor(collection.getSort());
+			String constructor = getMaudeConstructor(collection.getSort());
 			result.append(constructor);
 			result.append("(");
 
@@ -491,8 +493,8 @@ public class MaudeFilter extends BasicVisitor {
 
 			result.append(")");
 		}
-	}
-
+	}	
+	
 	@Override
 	public void visit(CollectionItem collectionItem) {
 		throw new RuntimeException("don't know how to maudify CollectionItem");
@@ -619,4 +621,21 @@ public class MaudeFilter extends BasicVisitor {
 	public void visit(org.kframework.kil.Require require) {
 		// do nothing
 	}
+
+
+	private static java.util.Map<KSort,String> maudeCollectionConstructors = new HashMap<KSort, String>();
+	static {
+		maudeCollectionConstructors.put(KSort.Bag, "__");
+		maudeCollectionConstructors.put(KSort.Map, "__");
+		maudeCollectionConstructors.put(KSort.Set, "__");
+		maudeCollectionConstructors.put(KSort.List, "__");
+		maudeCollectionConstructors.put(KSort.K, "_~>_");
+		maudeCollectionConstructors.put(KSort.ListOfK, "_`,`,_");
+	}
+
+	private String getMaudeConstructor(String sort) {
+		return maudeCollectionConstructors.get(KSort.getKSort(sort));
+	}
+	
+
 }

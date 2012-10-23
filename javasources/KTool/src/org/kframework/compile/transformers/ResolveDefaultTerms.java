@@ -80,8 +80,8 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 			if (cellStr.sons.isEmpty()) {
 				GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 						KExceptionGroup.COMPILER, 
-						"Cell " + node + " is a leaf in the configuration and it's not closed in the RHS.\n\tTransformation: " + getName(), 
-						node.getFilename(), node.getLocation()));								
+						"Cell " + node + " is a leaf in the configuration and it's not closed in the RHS.", 
+						getName(), node.getFilename(), node.getLocation()));								
 				
 				return cell;
 			}

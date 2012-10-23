@@ -36,6 +36,11 @@ public abstract class Collection extends Term {
 			contents.add((Term) JavaClassesFactory.getTerm(e));
 	}
 
+	public Collection(String sort, List<Term> col) {
+		super(sort);
+		this.contents = col;
+	}
+
 	@Override
 	public String toString() {
 		String content = "";

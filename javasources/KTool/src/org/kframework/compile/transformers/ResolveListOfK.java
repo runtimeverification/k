@@ -48,9 +48,8 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
 				if (!(resultAST instanceof Term)) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 							KExceptionGroup.INTERNAL, 
-							"Expecting Term, but got " + resultAST.getClass() 
-							+ " while transforming.", 
-							t.getFilename(), t.getLocation()));					
+							"Expecting Term, but got " + resultAST.getClass() + ".", 
+							getName(), t.getFilename(), t.getLocation()));					
 				}
 				Term result = (Term) resultAST;
 				if (pitem instanceof Sort 

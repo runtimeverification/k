@@ -63,7 +63,7 @@ public class CellTypesFilter extends BasicTransformer {
 				if (!DefinitionHelper.isSubsortedEq(sort, cell.getContents().getSort())) {
 					// if the found sort is not a subsort of what I was expecting
 					String msg = "Wrong type in cell '" + cell.getLabel() + "'. Expected sort: " + sort + " but found " + cell.getContents().getSort();
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cell.getFilename(), cell.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), cell.getFilename(), cell.getLocation()));
 				}
 		} else {
 			String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";

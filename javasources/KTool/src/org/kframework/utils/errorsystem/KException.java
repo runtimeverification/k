@@ -10,6 +10,7 @@ public class KException {
 	protected String location;
 	protected int level;
 	protected String message;
+	private String compilationPhase = null;
 
 	protected static Map<ExceptionType, String> types;
 	protected static Map<KExceptionGroup, String> labels;
@@ -35,6 +36,11 @@ public class KException {
 		this.filename = filename;
 		this.location = location;
 	}
+	
+	public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, String filename, String location) {
+		this(type,label,message,filename,location);
+		this.compilationPhase = compilationPhase;
+	}
 
 	public enum KExceptionGroup {
 		PARSER, COMPILER, LISTS, INTERNAL, CRITICAL
@@ -46,6 +52,8 @@ public class KException {
 
 	@Override
 	public String toString() {
-		return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message + "\n\tFile: " + filename + "\n\tLocation: " + location;
+		return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message + "\n\tFile: " + filename + "\n\tLocation: " + location
+				+ compilationPhase == null ? "" : ("\n\t Compilation Phase: " + compilationPhase);
+		
 	}
 }

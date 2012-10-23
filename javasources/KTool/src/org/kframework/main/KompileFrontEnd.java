@@ -37,6 +37,7 @@ import org.kframework.compile.transformers.ResolveFresh;
 import org.kframework.compile.transformers.ResolveFunctions;
 import org.kframework.compile.transformers.ResolveHybrid;
 import org.kframework.compile.transformers.ResolveListOfK;
+import org.kframework.compile.transformers.ResolveOpenCells;
 import org.kframework.compile.transformers.ResolveSyntaxPredicates;
 import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.compile.utils.ConfigurationStructureVisitor;
@@ -792,6 +793,12 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Default Terms");
 			}
+
+//			javaDef = new CompilerTransformerStep(new ResolveOpenCells()).compile(javaDef);
+//
+//			if (GlobalSettings.verbose) {
+//				sw.printIntermediate("Resolve Open Cells");
+//			}
 
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";

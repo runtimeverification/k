@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.List;
+
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -21,6 +23,10 @@ public class Bag extends Collection {
 
 	public Bag() {
 		super("Bag");
+	}
+
+	public Bag(List<Term> col) {
+		super("Bag", col);
 	}
 
 	@Override

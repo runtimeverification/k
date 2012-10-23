@@ -76,7 +76,7 @@ public class FlattenModules  implements CompilerStep {
 								GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 										KExceptionGroup.COMPILER, 
 										"Module " + name + " undefined.", 
-										i.getFilename(), i.getLocation()));
+										getName(), i.getFilename(), i.getLocation()));
 							}
 							continue;
 						} else included.add(name);

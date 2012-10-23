@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.List;
+
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -13,6 +15,14 @@ public class KSequence extends Collection {
 
 	public KSequence(KSequence node) {
 		super(node);
+	}
+
+	public KSequence() {
+		super("K");
+	}
+
+	public KSequence(List<Term> col) {
+		super("K", col);
 	}
 
 	@Override

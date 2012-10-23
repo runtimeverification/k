@@ -34,7 +34,7 @@ public class AmbFilter extends BasicTransformer {
 		}
 		msg = msg.substring(0, msg.length() - 2);
 		msg += "    Arbitrarily choosing the first.";
-		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Parsing ambiguity between: " + msg, amb.getFilename(), amb.getLocation()));
+		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Parsing ambiguity between: " + msg, getName(), amb.getFilename(), amb.getLocation()));
 
 		ASTNode astNode = amb.getContents().get(0);
 

@@ -24,6 +24,10 @@ public class List extends Collection {
 		super("List");
 	}
 
+	public List(java.util.List<Term> col) {
+		super("List", col);
+	}
+
 	@Override
 	public String toString() {
 		return super.toString();

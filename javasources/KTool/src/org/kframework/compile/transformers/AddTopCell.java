@@ -38,8 +38,8 @@ public class AddTopCell extends CopyOnWriteTransformer {
 		if (result == null) { 
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.COMPILER, 
-					"Expecting Module, but got null while transforming. Returning the untransformed ", 
-					node.getFilename(), node.getLocation()));					
+					"Expecting Module, but got null. Returning the untransformed module.", 
+					getName(), node.getFilename(), node.getLocation()));					
 			return node;
 		}
 		if (!(result instanceof Module)) {

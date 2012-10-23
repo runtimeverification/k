@@ -10,8 +10,10 @@ import java.util.Set;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.Collection;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
@@ -20,6 +22,7 @@ import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KSequence;
+import org.kframework.kil.KSort;
 import org.kframework.kil.ListItem;
 import org.kframework.kil.ListOfK;
 import org.kframework.kil.Map;
@@ -52,7 +55,7 @@ public class MetaK {
 	static int nextVarId = 0;
 
 	static String anyVarSymbol = "_";
-
+	
 	public static Set<String> kModules = new HashSet<String>();
 	static {
 		kModules.add("K-BUILTINS");
@@ -74,32 +77,6 @@ public class MetaK {
 		kModules.add("K-WRAPPERS-LABELS"); 
 	};
 	
-	public static Set<String> defaultableSorts = new HashSet<String>(); 
-	static {
-		defaultableSorts.add("Bag");
-		defaultableSorts.add("K");
-		defaultableSorts.add("List");
-		defaultableSorts.add("Map");
-		defaultableSorts.add("Set");
-	};
-
-	public static Set<String> kSorts = new HashSet<String>();
-	static {
-		kSorts.add("Bag");
-		kSorts.add("BagItem");
-		kSorts.add("CellLabel");
-		kSorts.add("K");
-		kSorts.add("KLabel");
-		kSorts.add("List");
-		kSorts.add("List{K}");
-		kSorts.add("ListItem");
-		kSorts.add("Map");
-		kSorts.add("MapItem");
-		kSorts.add("Set");
-		kSorts.add("SetItem");
-		kSorts.add("Bag");
-	};
-	
 	public static Set<String> builtinSorts = new HashSet<String>();
 	static {
 		builtinSorts.add("Bool");
@@ -108,21 +85,7 @@ public class MetaK {
 		builtinSorts.add("Int");
 		builtinSorts.add("String");
 	};
-	
-	public static java.util.Map<String,String> mainSort = new HashMap<String, String>();
-	static {
-		mainSort.put("Bag", "Bag");
-		mainSort.put("BagItem", "Bag");
-		mainSort.put("Map", "Map");
-		mainSort.put("MapItem", "Map");
-		mainSort.put("Set", "Set");
-		mainSort.put("SetItem", "Set");
-		mainSort.put("List", "List");
-		mainSort.put("ListItem", "List");
-		mainSort.put("K", "List{K}");
-		mainSort.put("List{K}", "List{K}");
-	}
-	
+		
 	public static Set<Attribute> anywheres = new HashSet<Attribute>();
 	static {
 		anywheres.add(new Attribute("anywhere", ""));
@@ -131,23 +94,9 @@ public class MetaK {
 		anywheres.add(new Attribute("function", ""));
 	}
 	
-	private static java.util.Map<String,String> maudeCollectionConstructors = new HashMap<String, String>();
-	static {
-		maudeCollectionConstructors.put("Bag", "__");
-		maudeCollectionConstructors.put("Map", "__");
-		maudeCollectionConstructors.put("Set", "__");
-		maudeCollectionConstructors.put("List", "__");
-		maudeCollectionConstructors.put("K", "_~>_");
-		maudeCollectionConstructors.put("List{K}", "_`,`,_");
-	}
-
 	public static boolean isKModule(String key) {
 		return kModules.contains(key);		
 	}
-
-//	public static boolean isNextIdModule(String key) {
-//		return (Arrays.binarySearch(nextIdModules, key) >= 0);		
-//	}
 
 	public static boolean isBuiltinModule(String key) {
 		return key.startsWith("#");
@@ -227,11 +176,8 @@ public class MetaK {
 	
 	public static Term defaultTerm(Term v) {
 		String sort = v.getSort();
-		if (!isKSort(sort)) sort = "K";
-		if (!"K".equals(sort)) {
-			sort = mainSort.get(sort);
-		}
-		if (isDefaulable(sort)) return new Empty(sort);
+		KSort ksort = KSort.getKSort(sort).mainSort();
+		if (ksort.isDefaulable()) return new Empty(ksort.toString());
 		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 				KExceptionGroup.COMPILER, 
 				"Don't know the default value for term " + v.toString() + ". Assuming .K", 
@@ -245,13 +191,14 @@ public class MetaK {
 	}
 
 	public static boolean isKSort(String sort) {
-		return kSorts.contains(sort);		
+		try {
+			KSort.valueOf(sort);
+		} catch (IllegalArgumentException e) {
+			return sort.equals("List{K}");
+		}
+		return true;
 	}
 		
-	public static boolean isDefaulable(String sort) {
-		return defaultableSorts.contains(sort);		
-	}
-	
 	public static boolean isAnywhere(Rule r) {
 		Attributes attrs = r.getAttributes();
 		if (null == attrs) return false;
@@ -353,10 +300,6 @@ public class MetaK {
 		return false;
 	}
 
-	public static String getMaudeConstructor(String sort) {
-		return maudeCollectionConstructors.get(sort);
-	}
-	
 	public static Variable getFreshVar(String sort) {
 		return new Variable("GeneratedFreshVar" + nextVarId++, sort);
 	}
@@ -418,6 +361,19 @@ public class MetaK {
 			}
 		});
 		return cells;
+	}
+
+	public static Collection createCollection(Term contents, KSort sort) {
+		List<Term> col = new ArrayList<Term>();
+		col.add(contents);
+		switch (sort) {
+		case Bag: return new Bag(col);
+		case List: return new org.kframework.kil.List(col);
+		case Set: return new org.kframework.kil.Set(col);
+		case Map: return new Map(col);
+		case K: return new KSequence(col);
+		}
+		return null;
 	}
 	
 }

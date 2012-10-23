@@ -131,7 +131,7 @@ public class AddEval implements CompilerStep {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.INTERNAL, 
 						"Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.", 
-						node.getFilename(), node.getLocation()));
+						getName(), node.getFilename(), node.getLocation()));
 			}
 			if (result == node) {
 				node = node.shallowCopy();

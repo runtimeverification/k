@@ -64,8 +64,8 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		if (result != node) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
-					"Should have obtained the same module ", 
-					node.getFilename(), node.getLocation()));					
+					"Should have obtained the same module.", 
+					getName(), node.getFilename(), node.getLocation()));					
 		}
 		if (generated.isEmpty()) return node;
 		node = node.shallowCopy();
@@ -108,7 +108,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 					KExceptionGroup.COMPILER, 
 					"cell should have right ellipses but it doesn't." +
 							System.getProperty("line.separator") + "Won't transform.", 
-							node.getFilename(), node.getLocation()));
+							getName(), node.getFilename(), node.getLocation()));
 			return node;
 		}
 		Term contents = node.getContents();
@@ -117,7 +117,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 					KExceptionGroup.COMPILER, 
 					"Expecting a rewrite of a basic type variable into the empty list but got " + contents.getClass() + "." +
 							System.getProperty("line.separator") + "Won't transform.", 
-							contents.getFilename(), contents.getLocation()));
+							getName(), contents.getFilename(), contents.getLocation()));
 			return node;
 		}
 		Rewrite rewrite = (Rewrite) contents;
@@ -126,7 +126,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 					KExceptionGroup.COMPILER, 
 					"Expecting a list item but got " + rewrite.getLeft().getClass() + "." +
 							System.getProperty("line.separator") + "Won't transform.", 
-							rewrite.getLeft().getFilename(), rewrite.getLeft().getLocation()));
+							getName(), rewrite.getLeft().getFilename(), rewrite.getLeft().getLocation()));
 			return node;			
 		}
 		ListItem item = (ListItem) rewrite.getLeft();
@@ -136,7 +136,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 					KExceptionGroup.COMPILER, 
 					"Expecting an input type variable but got " + item.getItem().getClass() + "." +
 							System.getProperty("line.separator") + "Won't transform.", 
-							item.getItem().getFilename(), item.getItem().getLocation()));
+							getName(), item.getItem().getFilename(), item.getItem().getLocation()));
 			return node;
 		}			
 		if (!(rewrite.getRight() instanceof Empty && rewrite.getRight().getSort().equals("List"))) {
@@ -145,7 +145,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 					"Expecting an empty list but got " + rewrite.getRight().getClass() + " of sort " + 
 							rewrite.getRight().getSort() + "." +
 							System.getProperty("line.separator") + "Won't transform.", 
-							rewrite.getRight().getFilename(), rewrite.getRight().getLocation()));
+							getName(), rewrite.getRight().getFilename(), rewrite.getRight().getLocation()));
 			return node;						
 		}
 		

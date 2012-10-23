@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.List;
+
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -19,6 +21,10 @@ public class Set extends Collection {
 
 	public Set(String location, String filename) {
 		super(location, filename, "Set");
+	}
+
+	public Set(List<Term> col) {
+		super("Set", col);
 	}
 
 	@Override
