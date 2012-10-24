@@ -82,22 +82,22 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 					UserList ul1 = (UserList) itm1;
 					UserList ul2 = (UserList) itm2;
 
-					if (DefinitionHelper.isSubsortedEq(ul1.getSort(), ul2.getSort()))
+					if (DefinitionHelper.isSubsorted(ul1.getSort(), ul2.getSort()))
 						left++;
-					else if (DefinitionHelper.isSubsortedEq(ul2.getSort(), ul1.getSort()))
+					else if (DefinitionHelper.isSubsorted(ul2.getSort(), ul1.getSort()))
 						right++;
-					else
+					else if (!ul1.getSort().equals(ul2.getSort()))
 						return false;
 				} else {
 					// only sort possible now.
 					Sort srt1 = (Sort) itm1;
 					Sort srt2 = (Sort) itm2;
 
-					if (DefinitionHelper.isSubsortedEq(srt1.getName(), srt2.getName()))
+					if (DefinitionHelper.isSubsorted(srt1.getName(), srt2.getName()))
 						left++;
-					else if (DefinitionHelper.isSubsortedEq(srt2.getName(), srt1.getName()))
+					else if (DefinitionHelper.isSubsorted(srt2.getName(), srt1.getName()))
 						right++;
-					else
+					else if (!srt1.equals(srt2))
 						return false;
 				}
 			}
