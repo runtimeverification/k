@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.kframework.backend.maude.MaudeFilter;
+import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
@@ -105,8 +106,11 @@ public class ProgramLoader {
 	 * Print maudified program to standard output.
 	 * 
 	 * Save it in dotk cache under pgm.maude.
+	 * @param indentationOptions 
+	 * @param prettyPrint 
+	 * @param nextline 
 	 */
-	public static void processPgm(File pgmFile, File defFile) {
+	public static void processPgm(File pgmFile, File defFile, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions) {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -122,11 +126,16 @@ public class ProgramLoader {
 				sw.printIntermediate("Parsing Program");
 			}
 
-			KastFilter kastFilter = new KastFilter();
-			out.accept(kastFilter);
-			MaudeFilter maudeFilter = new MaudeFilter();
-			out.accept(maudeFilter);
-			String kast = "NEW:\n" + kastFilter.getResult() + "\n\nOLD:\n" + maudeFilter.getResult();
+			String kast;
+			if (prettyPrint) {
+				KastFilter kastFilter = new KastFilter(indentationOptions, nextline);
+				out.accept(kastFilter);
+				kast = kastFilter.getResult();
+			} else {
+				MaudeFilter maudeFilter = new MaudeFilter();
+				out.accept(maudeFilter);
+				kast = maudeFilter.getResult();
+			}
 
 			System.out.println(kast);
 

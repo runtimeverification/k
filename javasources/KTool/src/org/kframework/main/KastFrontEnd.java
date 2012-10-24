@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
@@ -93,7 +95,29 @@ public class KastFrontEnd {
 				e.printStackTrace();
 			}
 		}
-		org.kframework.utils.ProgramLoader.processPgm(mainFile, def);
+		
+		boolean prettyPrint = false;
+		boolean nextline = false;
+		IndentationOptions indentationOptions = new IndentationOptions();
+		if (cmd.hasOption("pretty")) {
+			prettyPrint = true;
+			if (cmd.hasOption("tabsize")) {
+				indentationOptions.setTabSize(new Integer(cmd.getOptionValue("tabsize")));
+			}
+			if (cmd.hasOption("maxwidth")) {
+				indentationOptions.setWidth(new Integer(cmd.getOptionValue("maxwidth")));
+			} else {
+				indentationOptions.setWidth(Integer.MAX_VALUE);
+			}
+			if (cmd.hasOption("auxtabsize")) {
+				indentationOptions.setAuxTabSize(new Integer(cmd.getOptionValue("auxtabsize")));
+			}
+			if (cmd.hasOption("nextline")) {
+				nextline = true;
+			}
+		}
+		
+		org.kframework.utils.ProgramLoader.processPgm(mainFile, def, prettyPrint, nextline, indentationOptions);
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
 		GlobalSettings.kem.print();

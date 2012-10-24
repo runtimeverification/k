@@ -32,20 +32,33 @@ public class KastOptionsParser {
 		verb.addOption(version);
 		verb.addOption(verbose);
 
-		// verbose and help
+		// no filename
 		OptionGroup nofile = new OptionGroup();
 		Option nofileopt = new Option("nofile", "nofilename", false, "don't include the long filenames in the XML.");
 		nofile.addOption(nofileopt);
 
+		/// program
 		OptionGroup tex2 = new OptionGroup();
 		Option tbl = new Option("pgm", "program", true, "the program to parse");
 		tex2.addOption(tbl);
-
+		
+		// indentation options
+		Option prettyPrint = new Option("pretty", false, "pretty print the output");
+		Option tabSize = new Option("tabsize", true, "how many spaces to use for each indentation level");
+		Option maxWidth = new Option("maxwidth", true, "the indicative maximal width of the output");
+		Option auxSize = new Option("auxtabsize", true, "how many spaces to indent lines which do not fit into max-width");
+		Option nextLine = new Option("nextline", false, "force newline before first argument");
+		
 		// add options
 		options.addOptionGroup(verb);
 		options.addOptionGroup(main);
 		options.addOptionGroup(tex2);
 		options.addOptionGroup(nofile);
+		options.addOption(prettyPrint);
+		options.addOption(tabSize);
+		options.addOption(maxWidth);
+		options.addOption(auxSize);
+		options.addOption(nextLine);
 	}
 
 	public CommandLine parse(String[] cmd) {

@@ -50,10 +50,16 @@ import org.kframework.utils.utils.strings.StringUtil;
 
 public class KastFilter extends BasicVisitor {
     protected Indenter result;
+    private boolean nextline;
     
 	public KastFilter() {
 		result = new Indenter();
 		result.setWidth(Integer.MAX_VALUE);
+	}
+	
+	public KastFilter(IndentationOptions indentationOptions, boolean nextline) {
+		result = new Indenter(indentationOptions);
+		this.nextline = nextline;
 	}
 
 	public String getResult() {
@@ -190,7 +196,12 @@ public class KastFilter extends BasicVisitor {
 	public void visit(KApp kapp) {
 		kapp.getLabel().accept(this);
 		result.write("(");
-		result.indentToCurrent();
+		if (nextline) {
+			result.endLine();
+			result.indent(1);
+		} else {
+			result.indentToCurrent();
+		}
 		kapp.getChild().accept(this);
 		result.write(")");
 		result.unindent();

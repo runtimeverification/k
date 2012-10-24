@@ -1,17 +1,22 @@
 package org.kframework.backend.unparser;
 
-
 public class Indenter {
 	String endl = System.getProperty("line.separator");
 	protected java.util.Stack<Integer> indents;
 	protected java.lang.StringBuilder stringBuilder;
 	protected boolean atBOL = true;
-	private int width = 78;
-	private static int auxIndent = 2;
+	protected IndentationOptions indentationOptions;
 
 	public Indenter() {
 		indents = new java.util.Stack<Integer>();
 		stringBuilder = new java.lang.StringBuilder();
+		indentationOptions = new IndentationOptions();
+	}
+
+	public Indenter(IndentationOptions indentationOptions) {
+		indents = new java.util.Stack<Integer>();
+		stringBuilder = new java.lang.StringBuilder();
+		this.indentationOptions = indentationOptions;
 	}
 
 	private int indentSize() {
@@ -23,7 +28,15 @@ public class Indenter {
 	}
 	
 	public void setWidth(int newWidth) {
-		width = newWidth;
+		indentationOptions.setWidth(newWidth);
+	}
+	
+	public int getWidth() {
+		return indentationOptions.getWidth();
+	}
+
+	public int getAuxTabSize() {
+		return indentationOptions.getAuxTabSize();
 	}
 
 	public void write(String string) {
@@ -34,9 +47,9 @@ public class Indenter {
 		}
 		int indexEndLine = stringBuilder.lastIndexOf(endl);
 		int indexEndString = stringBuilder.length();
-		if (indexEndString - indexEndLine + string.length() > width) {
+		if (indexEndString - indexEndLine + string.length() > getWidth()) {
 			stringBuilder.append(endl);
-			for (int i = 0; i < indentSize() + auxIndent; ++i) {
+			for (int i = 0; i < indentSize() + getAuxTabSize(); ++i) {
 				stringBuilder.append(" ");
 			}
 		}
@@ -56,7 +69,7 @@ public class Indenter {
 	}
 
 	public void indent(int size) {
-		indents.push(size);
+		indents.push(indentationOptions.getTabSize() * size);
 	}
 
 	public void unindent() {
