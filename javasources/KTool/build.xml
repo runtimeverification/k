@@ -12,7 +12,7 @@
 		<echo message="Parallel" />
 		<parallel>
 			<sequential>
-				<antcall target="k3syntaxsig" />
+				<antcall target="k2syntaxsig" />
 				<antcall target="k2syntax" />
 			</sequential>
 			<sequential>

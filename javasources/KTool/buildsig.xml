@@ -27,18 +27,18 @@
 	<property name="build.strategoxt.sdf" value="${basedir}/../../dist/bin/native/${osNativesDir}/" />
 
 	<!-- call both targets -->
-	<target name="allsig" depends="k3syntaxsig, k3latexsig, k3sig" />
+	<target name="allsig" depends="k2syntaxsig, k3latexsig, k3sig" />
 
-	<target name="k3syntaxsig">
+	<target name="k2syntaxsig">
 		<dependset>
 			<srcfileset file="../K3Syntax/syntax/*.sdf" />
 			<targetfileset file="../K3Syntax/include/*.tbl" />
 			<targetfileset file="../K3Syntax/include/*.str" />
 		</dependset>
 		<available file="../K3Syntax/include/K3Syntax.tbl" property="k3syntaxsig.available" />
-		<antcall target="k3syntaxsig.helper" />
+		<antcall target="k2syntaxsig.helper" />
 	</target>
-	<target name="k3syntaxsig.helper" unless="k3syntaxsig.available">
+	<target name="k2syntaxsig.helper" unless="k3syntaxsig.available">
 		<!-- pack the definition into a single .def file -->
 		<mkdir dir="../K3Syntax/include" />
 		<java jar="./lib/strj.jar" fork="true" failonerror="true">
