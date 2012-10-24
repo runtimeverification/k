@@ -110,10 +110,10 @@ type the actual construct. */
 /*@ We use the same desugaring macros like in untyped SIMPLE, but, of
 course, including the types of the involved variables. */
 
-  rule if (E) S => if (E) S else {}                                 [macro]
-  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;           [macro]
-  rule T:Type X:Id = E; => T X; X = E;                              [macro]
+  rule if (E) S => if (E) S else {}                                     [macro]
+  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
+  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
   syntax Id ::= "main"
 endmodule
@@ -322,8 +322,8 @@ integer in order to be allowed to be incremented, as seen in the rule
 
 // move to auxilliary
   syntax Exp ::= ltype(Exp)
-  rule ltype(X:Id) => X                   [structural]
-  rule ltype(E:Exp [Es:Exps]) => E[Es]    [structural]
+  rule ltype(X:Id) => X                 [structural]
+  rule ltype(E:Exp [Es:Exps]) => E[Es]  [structural]
 
   context ++(HOLE => ltype(HOLE))
   rule ++ int => int
