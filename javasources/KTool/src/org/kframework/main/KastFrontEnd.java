@@ -103,6 +103,8 @@ public class KastFrontEnd {
 			prettyPrint = true;
 			if (cmd.hasOption("tabsize")) {
 				indentationOptions.setTabSize(new Integer(cmd.getOptionValue("tabsize")));
+			} else {
+				indentationOptions.setTabSize(4);
 			}
 			if (cmd.hasOption("maxwidth")) {
 				indentationOptions.setWidth(new Integer(cmd.getOptionValue("maxwidth")));

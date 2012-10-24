@@ -197,8 +197,22 @@ public class KastFilter extends BasicVisitor {
 		kapp.getLabel().accept(this);
 		result.write("(");
 		if (nextline) {
-			result.endLine();
-			result.indent(1);
+			boolean stopnextline = false;
+			if (kapp.getChild() instanceof ListOfK) {
+				ListOfK listOfK = (ListOfK)kapp.getChild();
+				if (listOfK.getContents().size() <= 1) {
+					stopnextline = true;
+				}
+			}
+			if (kapp.getChild() instanceof Empty) {
+				stopnextline = true;
+			}
+			if (!stopnextline) {
+				result.endLine();
+				result.indent(1);
+			} else {
+				result.indentToCurrent();
+			}
 		} else {
 			result.indentToCurrent();
 		}
