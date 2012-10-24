@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
@@ -58,15 +59,25 @@ public class KastFrontEnd {
 		File def = null;
 		if (cmd.hasOption("def")) {
 			def = new File(cmd.getOptionValue("def"));
-			if (!def.exists())
+			if (!def.exists()) 
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
+			if (DefinitionHelper.dotk == null) {
+				try {
+					DefinitionHelper.dotk = new File(def.getCanonicalFile().getParent() + File.separator + ".k");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}			
 		} else {
 			// search for the definition
 			try {
 				// check to see if I got to / or drive folder
-				File dotk = new File(new File(".").getCanonicalPath() + "/.k");
-				if (dotk.exists()) {
-					File defXml = new File(dotk.getCanonicalPath() + "/def.xml");
+				if (DefinitionHelper.dotk == null) {
+					DefinitionHelper.dotk = new File(new File(".").getCanonicalPath() + "/.k");
+				}
+				if (DefinitionHelper.dotk.exists()) {
+					File defXml = new File(DefinitionHelper.dotk.getCanonicalPath() + "/def.xml");
 					if (!defXml.exists()) {
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
 					}

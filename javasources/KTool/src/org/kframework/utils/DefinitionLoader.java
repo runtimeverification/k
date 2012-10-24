@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
@@ -44,9 +45,7 @@ public class DefinitionLoader {
 			javaDef.preprocess();
 
 		} else {
-			File dotk = new File(canoFile.getParent() + "/.k");
-			dotk.mkdirs();
-			javaDef = parseDefinition(lang, canoFile, dotk);
+			javaDef = parseDefinition(lang, canoFile, DefinitionHelper.dotk);
 		}
 		return javaDef;
 	}

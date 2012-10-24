@@ -27,6 +27,7 @@ import org.fusesource.jansi.AnsiConsole;
 import org.kframework.krun.runner.KRunner;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
@@ -633,7 +634,9 @@ public class Main {
 			}
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
-				K.kdir = new File(K.k_definition).getParent() + K.fileSeparator + ".k";
+				DefinitionHelper.dotk = new File(new File(K.k_definition).getParent() + File.separator + ".k");
+				
+				K.kdir = DefinitionHelper.dotk.getCanonicalPath();
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");

@@ -46,6 +46,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kompile.lint.InfiniteRewrite;
@@ -140,6 +141,8 @@ public class KompileFrontEnd {
 			else
 				def = restArgs[0];
 		}
+		
+		
 
 		File mainFile = new File(def);
 		GlobalSettings.mainFile = mainFile;
@@ -151,6 +154,16 @@ public class KompileFrontEnd {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system."));
 		}
 
+//		DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-compiled"); 
+		if (DefinitionHelper.dotk == null) {
+			try {
+				DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
+			} catch (IOException e) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Output dir cannot be used.", mainFile.getAbsolutePath(), "File system."));
+			}
+		}
+		DefinitionHelper.dotk.mkdirs();
+		
 		String lang = null;
 		if (cmd.hasOption("lang"))
 			lang = cmd.getOptionValue("lang");
@@ -200,9 +213,7 @@ public class KompileFrontEnd {
 	private static void lint(File mainFile, String mainModule) {
 		try {
 			File canonicalFile = mainFile.getCanonicalFile();
-			File dotk = new File(canonicalFile.getParent() + "/.k");
-			dotk.mkdirs();
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
+			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, DefinitionHelper.dotk);
 
 			KlintRule lintRule = new UnusedName(javaDef);
 			lintRule.run();
@@ -283,8 +294,6 @@ public class KompileFrontEnd {
 			File canonicalFile = mainFile.getCanonicalFile();
 
 			String fileSep = System.getProperty("file.separator");
-			File dotk = new File(canonicalFile.getParent() + fileSep + ".k");
-			dotk.mkdirs();
 
 			GlobalSettings.literate = true;
 			// compile a definition here
@@ -302,7 +311,7 @@ public class KompileFrontEnd {
 			String endl = System.getProperty("line.separator");
 
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
-			String dotKLatexStyle = dotk.getAbsolutePath()  + fileSep + "k.sty";
+			String dotKLatexStyle = DefinitionHelper.dotk.getAbsolutePath()  + fileSep + "k.sty";
 
 			FileUtil.saveInFile(dotKLatexStyle, FileUtil.getFileContent(kLatexStyle));
 
@@ -310,7 +319,7 @@ public class KompileFrontEnd {
 			String preamble = lf.getPreamble().toString();
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
-			String latexifiedFile = dotk.getAbsolutePath()  + fileSep  + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
+			String latexifiedFile = DefinitionHelper.dotk.getAbsolutePath()  + fileSep  + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
 			result.add(new File(latexifiedFile));
 			result.add(new File(dotKLatexStyle));
 			FileUtil.saveInFile(latexifiedFile, latexified);
@@ -340,16 +349,13 @@ public class KompileFrontEnd {
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();
 
-			File dotk = new File(canonicalFile.getParent() + "/.k");
-			dotk.mkdirs();
-
 			Stopwatch sw = new Stopwatch();
 			HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath);
 			javaDef.accept(htmlFilter);
 
 			String html = htmlFilter.getHTML();
 
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.html", html);
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.html", html);
 
 			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".html", html);
 
@@ -375,16 +381,13 @@ public class KompileFrontEnd {
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();
 
-			File dotk = new File(canonicalFile.getParent() + "/.k");
-			dotk.mkdirs();
-
 			Stopwatch sw = new Stopwatch();
 			UnparserFilter unparserFilter = new UnparserFilter();
 			javaDef.accept(unparserFilter);
 
 			String unparsedText = unparserFilter.getResult();
 
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.k", unparsedText);
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.k", unparsedText);
 
 			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".unparsed.k", unparsedText);
 
@@ -406,12 +409,9 @@ public class KompileFrontEnd {
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();
 
-			File dotk = new File(canonicalFile.getParent() + "/.k");
-			dotk.mkdirs();
-
 			// compile a definition here
 
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, dotk);
+			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, DefinitionHelper.dotk);
 
 			Stopwatch sw = new Stopwatch();
 			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
@@ -421,7 +421,7 @@ public class KompileFrontEnd {
 
 			String xml = xstream.toXML(javaDef);
 
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.xml", xml);
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.xml", xml);
 
 			FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".xml", xml);
 
@@ -442,8 +442,6 @@ public class KompileFrontEnd {
 		try {
 			// initial setup
 			File canoFile = xmlFile.getCanonicalFile();
-			File dotk = new File(canoFile.getParent() + "/.k");
-			dotk.mkdirs();
 
 			// unmarshalling
 			XStream xstream = new XStream();
@@ -470,10 +468,7 @@ public class KompileFrontEnd {
 			// for now just use this file as main argument
 			File f = mainFile.getCanonicalFile();
 
-			File dotk = new File(f.getParent() + "/.k");
-			dotk.mkdirs();
-
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
+			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, f, DefinitionHelper.dotk);
 
 			Stopwatch sw = new Stopwatch();
 
@@ -482,7 +477,7 @@ public class KompileFrontEnd {
 
 			String maudified = maudeFilter.getResult();
 
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.maude", maudified);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Maude Generation");
@@ -511,9 +506,6 @@ public class KompileFrontEnd {
 
 			// for now just use this file as main argument
 			File f = mainFile.getCanonicalFile();
-
-			File dotk = new File(f.getParent() + "/.k");
-			dotk.mkdirs();
 
 			// ------------------------------------- basic parsing
 
@@ -548,26 +540,26 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Basic Parsing");
 
 			// ------------------------------------- generate files
-			ResourceExtractor.ExtractAllSDF(dotk);
+			ResourceExtractor.ExtractAllSDF(DefinitionHelper.dotk);
 
-			ResourceExtractor.ExtractProgramSDF(dotk);
+			ResourceExtractor.ExtractProgramSDF(DefinitionHelper.dotk);
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
 			String oldSdf = "";
-			if (new File(dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
-				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
+			if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
+				oldSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
 			// make a set of all the syntax modules
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm/Program.sdf", ProgramSDF.getSdfForPrograms(def));
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf", ProgramSDF.getSdfForPrograms(def));
 
-			String newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/pgm/Program.sdf");
+			String newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("File Gen Pgm");
 
 			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/pgm"), "Program");
+				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Generate TBLPgm");
@@ -583,16 +575,16 @@ public class KompileFrontEnd {
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
 			oldSdf = "";
-			if (new File(dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
-				oldSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
+			if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
+				oldSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
 			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def2.getSDFForDefinition());
-			newSdf = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def/Integration.sdf");
+			newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("File Gen Def");
 
 			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(dotk.getAbsoluteFile() + "/def"), "K3Disamb");
+				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "K3Disamb");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Generate TBLDef");
@@ -656,14 +648,11 @@ public class KompileFrontEnd {
 			// for now just use this file as main argument
 			File f = mainFile.getCanonicalFile();
 
-			File dotk = new File(f.getParent() + "/.k");
-			dotk.mkdirs();
-
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, f, dotk);
+			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, f, DefinitionHelper.dotk);
 
 			MaudeFilter maudeFilter = new MaudeFilter();
 			javaDef.accept(maudeFilter);
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudeFilter.getResult());
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.maude", maudeFilter.getResult());
 
 			compile(javaDef, step);
 		} catch (Exception e) {
@@ -677,8 +666,6 @@ public class KompileFrontEnd {
 
 		try {
 			File f = new File(javaDef.getMainFile()).getCanonicalFile();
-			File dotk = new File(f.getParent() + "/.k");
-			dotk.mkdirs();
 
 			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
 			if (GlobalSettings.verbose) {
@@ -687,7 +674,7 @@ public class KompileFrontEnd {
 
 			MaudeFilter maudeFilter1 = new MaudeFilter();
 			javaDef.accept(maudeFilter1);
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/lists.maude", maudeFilter1.getResult());
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/lists.maude", maudeFilter1.getResult());
 
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
 			try {
@@ -864,13 +851,13 @@ public class KompileFrontEnd {
 					+ " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
 					+ "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/compile.maude", compile);
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/compile.maude", compile);
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Generate Maude file");
 
 			// call maude to kompile the definition
-			String compiled = MaudeRun.run_maude(dotk.getAbsoluteFile(), compile);
+			String compiled = MaudeRun.run_maude(DefinitionHelper.dotk.getAbsoluteFile(), compile);
 
 			int start = compiled.indexOf("---K-MAUDE-GENERATED-OUTPUT-BEGIN---") + "---K-MAUDE-GENERATED-OUTPUT-BEGIN---".length();
 			int enddd = compiled.indexOf("---K-MAUDE-GENERATED-OUTPUT-END-----");

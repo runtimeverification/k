@@ -9,6 +9,7 @@ import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -106,47 +107,39 @@ public class ProgramLoader {
 	 * Save it in dotk cache under pgm.maude.
 	 */
 	public static void processPgm(File pgmFile, File defFile) {
+		// compile a definition here
+		Stopwatch sw = new Stopwatch();
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Importing Files");
+
 		try {
-			// compile a definition here
-			Stopwatch sw = new Stopwatch();
+			Definition def = DefinitionLoader.loadDefinition(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/defx.xml"), null);
+			def.preprocess();
 
-			File dotk = new File(defFile.getCanonicalFile().getParent() + "/.k");
-
-			dotk.mkdirs();
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Importing Files");
-
-			try {
-				Definition def = DefinitionLoader.loadDefinition(new File(dotk.getAbsoluteFile() + "/defx.xml"), null);
-				def.preprocess();
-				
-				ASTNode out = loadPgmAst(pgmFile, dotk);
-				if (GlobalSettings.verbose) {
-					sw.printIntermediate("Parsing Program");
-				}
-
-				KastFilter kastFilter = new KastFilter();
-				out.accept(kastFilter);
-				MaudeFilter maudeFilter = new MaudeFilter();
-				out.accept(maudeFilter);
-				String kast = "NEW:\n" + kastFilter.getResult() + "\n\nOLD:\n" + maudeFilter.getResult();
-
-				System.out.println(kast);
-
-				String language = FileUtil.stripExtension(defFile.getName());
-				writeMaudifiedPgm(kast, language, dotk);
-
-				if (GlobalSettings.verbose) {
-					sw.printIntermediate("Maudify Program");
-					sw.printTotal("Total");
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), pgmFile.getAbsolutePath(), "File system."));
+			ASTNode out = loadPgmAst(pgmFile, DefinitionHelper.dotk);
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Parsing Program");
 			}
-		} catch (IOException e1) {
-			e1.printStackTrace();
+
+			KastFilter kastFilter = new KastFilter();
+			out.accept(kastFilter);
+			MaudeFilter maudeFilter = new MaudeFilter();
+			out.accept(maudeFilter);
+			String kast = "NEW:\n" + kastFilter.getResult() + "\n\nOLD:\n" + maudeFilter.getResult();
+
+			System.out.println(kast);
+
+			String language = FileUtil.stripExtension(defFile.getName());
+			writeMaudifiedPgm(kast, language, DefinitionHelper.dotk);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Maudify Program");
+				sw.printTotal("Total");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), pgmFile.getAbsolutePath(), "File system."));
 		}
 	}
 

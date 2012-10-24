@@ -1,6 +1,10 @@
 package org.kframework.krun;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
+
+import org.kframework.kil.loader.DefinitionHelper;
 
 public class K {
 
@@ -12,7 +16,18 @@ public class K {
 	public static final String lineSeparator = System.getProperty("line.separator");
 	public static final String k_base = KPaths.getKBase(false);
 
-	public static String kdir = userdir + fileSeparator + ".k";
+	public static String kdir;
+	static {
+		if (DefinitionHelper.dotk == null) {
+			DefinitionHelper.dotk = new File(userdir + File.separator + ".k");		
+		}
+		try {
+			kdir = DefinitionHelper.dotk.getCanonicalPath();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public static final String krunDir = kdir + fileSeparator + "krun";
 	public static final String krunTempDir = kdir + fileSeparator + FileUtil.generateUniqueFolderName("krun");
 	public static final String maude_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_in.maude");

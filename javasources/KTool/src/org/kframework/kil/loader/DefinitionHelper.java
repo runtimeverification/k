@@ -1,5 +1,6 @@
 package org.kframework.kil.loader;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,6 +45,7 @@ public class DefinitionHelper {
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
 	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
+	public static File dotk = null;
 
 	public static void addCellDecl(Cell c) {
 		cells.put(c.getLabel(), c);
