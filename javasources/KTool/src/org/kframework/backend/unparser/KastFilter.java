@@ -196,29 +196,29 @@ public class KastFilter extends BasicVisitor {
 	public void visit(KApp kapp) {
 		kapp.getLabel().accept(this);
 		result.write("(");
-		if (nextline) {
-			boolean stopnextline = false;
-			if (kapp.getChild() instanceof ListOfK) {
-				ListOfK listOfK = (ListOfK)kapp.getChild();
-				if (listOfK.getContents().size() <= 1) {
-					stopnextline = true;
-				}
-			}
-			if (kapp.getChild() instanceof Empty) {
+		boolean stopnextline = false;
+		if (kapp.getChild() instanceof ListOfK) {
+			ListOfK listOfK = (ListOfK)kapp.getChild();
+			if (listOfK.getContents().size() <= 1) {
 				stopnextline = true;
 			}
+		}
+		if (kapp.getChild() instanceof Empty) {
+			stopnextline = true;
+		}
+		if (nextline) {
 			if (!stopnextline) {
 				result.endLine();
 				result.indent(1);
-			} else {
-				result.indentToCurrent();
 			}
 		} else {
 			result.indentToCurrent();
 		}
 		kapp.getChild().accept(this);
 		result.write(")");
-		result.unindent();
+		if (!nextline || !stopnextline) {
+			result.unindent();
+		}
 	}
 
 	@Override
