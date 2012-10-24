@@ -117,16 +117,16 @@ public class KastFilter extends BasicVisitor {
 		} else if (listOfK.getContents().size() == 1) {
 			listOfK.getContents().get(0).accept(this);
 		} else {
-			String constructor = MaudeFilter.getMaudeConstructor(listOfK.getSort());
-			result.write(constructor);
-			result.write("(");
-			result.endLine();
-			result.indent(4);
+//			String constructor = MaudeFilter.getMaudeConstructor(listOfK.getSort());
+//			result.write(constructor);
+//			result.write("(");
+//			result.endLine();
+//			result.indent(4);
 
 			boolean first = true;
 			for (Term term : listOfK.getContents()) {
 				if (!first) {
-					result.write(",");
+					result.write(",,");
 					result.endLine();
 				} else {
 					first = false;
@@ -140,8 +140,8 @@ public class KastFilter extends BasicVisitor {
 				term.accept(this);
 			}
 
-			result.unindent();
-			result.write(")");
+//			result.unindent();
+//			result.write(")");
 		}
 	}
 
@@ -200,9 +200,10 @@ public class KastFilter extends BasicVisitor {
 //		result.write("_`(_`)(");
 //		result.endLine();
 		kapp.getLabel().accept(this);
+		result.indentToCurrent();
 		result.write("(");
-		result.endLine();
-		result.indent(4);
+//		result.endLine();
+//		result.indent(4);
 		kapp.getChild().accept(this);
 		result.write(")");
 		result.unindent();
