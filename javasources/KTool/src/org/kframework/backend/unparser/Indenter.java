@@ -6,7 +6,7 @@ public class Indenter {
 	protected java.util.Stack<Integer> indents;
 	protected java.lang.StringBuilder stringBuilder;
 	protected boolean atBOL = true;
-	private static int width = 78;
+	private int width = 78;
 	private static int auxIndent = 2;
 
 	public Indenter() {
@@ -20,6 +20,10 @@ public class Indenter {
 			size += i;
 		}
 		return size;
+	}
+	
+	public void setWidth(int newWidth) {
+		width = newWidth;
 	}
 
 	public void write(String string) {

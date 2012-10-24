@@ -1,6 +1,5 @@
 package org.kframework.backend.unparser;
 
-import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Attribute;
@@ -54,6 +53,7 @@ public class KastFilter extends BasicVisitor {
     
 	public KastFilter() {
 		result = new Indenter();
+		result.setWidth(Integer.MAX_VALUE);
 	}
 
 	public String getResult() {
@@ -117,12 +117,6 @@ public class KastFilter extends BasicVisitor {
 		} else if (listOfK.getContents().size() == 1) {
 			listOfK.getContents().get(0).accept(this);
 		} else {
-//			String constructor = MaudeFilter.getMaudeConstructor(listOfK.getSort());
-//			result.write(constructor);
-//			result.write("(");
-//			result.endLine();
-//			result.indent(4);
-
 			boolean first = true;
 			for (Term term : listOfK.getContents()) {
 				if (!first) {
@@ -139,9 +133,6 @@ public class KastFilter extends BasicVisitor {
 				}	
 				term.accept(this);
 			}
-
-//			result.unindent();
-//			result.write(")");
 		}
 	}
 
@@ -197,13 +188,9 @@ public class KastFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KApp kapp) {
-//		result.write("_`(_`)(");
-//		result.endLine();
 		kapp.getLabel().accept(this);
-		result.indentToCurrent();
 		result.write("(");
-//		result.endLine();
-//		result.indent(4);
+		result.indentToCurrent();
 		kapp.getChild().accept(this);
 		result.write(")");
 		result.unindent();
@@ -291,7 +278,6 @@ public class KastFilter extends BasicVisitor {
 	@Override
 	public void visit(KLabel kLabel) {
 		throw new RuntimeException("don't know how to kast KLabel");
-		// TODO
 	}
 
 	@Override
