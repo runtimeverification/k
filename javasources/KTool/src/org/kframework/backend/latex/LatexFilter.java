@@ -17,27 +17,28 @@ import org.kframework.utils.utils.strings.StringUtil;
 
 public class LatexFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
-	private String result = "";
-	private String preamble = "";
+	private StringBuilder result = new StringBuilder();
+	private StringBuilder preamble = new StringBuilder();
 	private boolean firstProduction = false;
 	private Map<String, String> colors = new HashMap<String, String>();
 	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
 	private boolean parentParens = false;
+	private boolean hasTitle = false;
 
-	public void setResult(String result) {
+	public void setResult(StringBuilder result) {
 		this.result = result;
 	}
 
-	public void setPreamble(String preamble) {
+	public void setPreamble(StringBuilder preamble) {
 		this.preamble = preamble;
 	}
 
-	public String getPreamble() {
+	public StringBuilder getPreamble() {
 		return preamble;
 	}
 
-	public String getResult() {
+	public StringBuilder getResult() {
 		return result;
 	}
 
@@ -52,11 +53,12 @@ public class LatexFilter extends BasicVisitor {
 	@Override
 	public void visit(Definition def) {
 		def.accept(patternsVisitor);
-		result += "\\begin{kdefinition}" + endl + "\\maketitle" + endl;
+		result.append("\\begin{kdefinition}" + endl + "\\maketitle" + endl);
 		super.visit(def);
-		result += "\\end{kdefinition}" + endl;
-		if (!preamble.contains("\\title{")) {
-			preamble += "\\title{" + def.getMainModule() + "}" + endl;
+		result.append("\\end{kdefinition}" + endl);
+		if (!hasTitle) {
+			preamble.append("\\title{" + def.getMainModule() + "}" + endl);
+			hasTitle = true;
 		}
 	}
 
@@ -64,31 +66,31 @@ public class LatexFilter extends BasicVisitor {
 	public void visit(Module mod) {
 		if (mod.isPredefined())
 			return;
-		result += "\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl;
+		result.append("\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl);
 		super.visit(mod);
-		result += "\\end{module}" + endl;
+		result.append("\\end{module}" + endl);
 	}
 
 	@Override
 	public void visit(Syntax syn) {
-		result += endl + "\\begin{syntaxBlock}";
+		result.append(endl + "\\begin{syntaxBlock}");
 		firstProduction = true;
 		super.visit(syn);
-		result += endl + "\\end{syntaxBlock}" + endl;
+		result.append(endl + "\\end{syntaxBlock}" + endl);
 	}
 
 	@Override
 	public void visit(Sort sort) {
-		result += "{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getName()) + "}}}";
+		result.append("{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getName()) + "}}}");
 	}
 
 	@Override
 	public void visit(Production p) {
 		if (firstProduction) {
-			result += "\\syntax{";
+			result.append("\\syntax{");
 			firstProduction = false;
 		} else {
-			result += "\\syntaxCont{";
+			result.append("\\syntaxCont{");
 		}
 		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.getAttributes().containsKey(Constants.CONS_cons_ATTR) && patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
 			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
@@ -96,18 +98,18 @@ public class LatexFilter extends BasicVisitor {
 			LatexFilter termFilter = new LatexFilter();
 			for (ProductionItem pi : p.getItems()) {
 				if (pi.getType() != ProductionType.TERMINAL) {
-					termFilter.setResult("");
+					termFilter.setResult(new StringBuilder());
 					pi.accept(termFilter);
 					pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
 				}
 			}
-			result += pattern;
+			result.append(pattern);
 		} else {
 			super.visit(p);
 		}
-		result += "}{";
+		result.append("}{");
 		p.getAttributes().accept(this);
-		result += "}";
+		result.append("}");
 	}
 
 	@Override
@@ -116,45 +118,45 @@ public class LatexFilter extends BasicVisitor {
 		if (terminal.isEmpty())
 			return;
 		if (DefinitionHelper.isSpecialTerminal(terminal)) {
-			result += StringUtil.latexify(terminal);
+			result.append(StringUtil.latexify(terminal));
 		} else {
-			result += "\\terminal{" + StringUtil.latexify(terminal) + "}";
+			result.append("\\terminal{" + StringUtil.latexify(terminal) + "}");
 		}
 	}
 
 	@Override
 	public void visit(UserList ul) {
-		result += "List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}";
+		result.append("List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
 	}
 
 	@Override
 	public void visit(Configuration conf) {
-		result += "\\kconfig{";
+		result.append("\\kconfig{");
 		super.visit(conf);
-		result += "}" + endl;
+		result.append("}" + endl);
 	}
 
 	@Override
 	public void visit(Cell c) {
 		Ellipses ellipses = c.getEllipses();
 		if (ellipses == Ellipses.LEFT) {
-			result += "\\ksuffix";
+			result.append("\\ksuffix");
 		} else if (ellipses == Ellipses.RIGHT) {
-			result += "\\kprefix";
+			result.append("\\kprefix");
 		} else if (ellipses == Ellipses.BOTH) {
-			result += "\\kmiddle";
+			result.append("\\kmiddle");
 		} else {
-			result += "\\kall";
+			result.append("\\kall");
 		}
 		if (c.getAttributes().containsKey("color")) {
 			colors.put(c.getLabel(), c.getAttributes().get("color"));
 		}
 		if (colors.containsKey(c.getLabel())) {
-			result += "[" + colors.get(c.getLabel()) + "]";
+			result.append("[" + colors.get(c.getLabel()) + "]");
 		}
-		result += "{" + StringUtil.latexify(c.getLabel() + StringUtil.emptyIfNull(c.getAttributes().get("multiplicity"))) + "}{";
+		result.append("{" + StringUtil.latexify(c.getLabel() + StringUtil.emptyIfNull(c.getAttributes().get("multiplicity"))) + "}{");
 		super.visit(c);
-		result += "}" + endl;
+		result.append("}" + endl);
 	}
 
 	public void visit(Collection col) {
@@ -163,36 +165,36 @@ public class LatexFilter extends BasicVisitor {
 	}
 
 	private void printList(List<Term> contents, String str) {
-//		result += "\\begin{array}{l}";
+//		result.append("\\begin{array}{l}");
 		boolean first = true;
 		for (Term trm : contents) {
 			if (first) {
 				first = false;
 			} else {
-				result += str;
+				result.append(str);
 			}
 			trm.accept(this);
 		}
-//		result += "\\end{array}";
+//		result.append("\\end{array}");
 	}
 	
 	public void visit(TermComment tc) {
-		result += "\\\\";
+		result.append("\\\\");
 		super.visit(tc);
 	}
 
 	@Override
 	public void visit(Variable var) {
 		if (var.getName().equals("_")) {
-			result += "\\AnyVar";
+			result.append("\\AnyVar");
 		} else {
-			result += "\\variable";
+			result.append("\\variable");
 		}
 		if (var.getSort() != null) {
-			result += "[" + StringUtil.latexify(var.getSort()) + "]";
+			result.append("[" + StringUtil.latexify(var.getSort()) + "]");
 		}
 		if (!var.getName().equals("_")) {
-			result += "{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}";
+			result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
 		}
 	}
 
@@ -209,52 +211,52 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Empty e) {
-		result += "\\dotCt{" + e.getSort() + "}";
+		result.append("\\dotCt{" + e.getSort() + "}");
 	}
 
 	@Override
 	public void visit(Rule rule) {
-		result += "\\krule";
+		result.append("\\krule");
 		if (!rule.getLabel().equals("")) {
-			result += "[" + rule.getLabel() + "]";
+			result.append("[" + rule.getLabel() + "]");
 		}
-		result += "{" + endl;
+		result.append("{" + endl);
 		rule.getBody().accept(this);
-		result += "}{";
+		result.append("}{");
 		if (rule.getCondition() != null) {
 			rule.getCondition().accept(this);
 		}
-		result += "}{";
+		result.append("}{");
 		rule.getAttributes().accept(this);
-		result += "}" + endl;
+		result.append("}" + endl);
 	}
 
 	@Override
 	public void visit(Context cxt) {
-		result += "\\kcontext";
-		result += "{" + endl;
+		result.append("\\kcontext");
+		result.append("{" + endl);
 		cxt.getBody().accept(this);
-		result += "}{";
+		result.append("}{");
 		if (cxt.getCondition() != null) {
 			cxt.getCondition().accept(this);
 		}
-		result += "}{";
+		result.append("}{");
 		cxt.getAttributes().accept(this);
-		result += "}" + endl;
+		result.append("}" + endl);
 	}
 
 	@Override
 	public void visit(Hole hole) {
-		result += "\\khole{}";
+		result.append("\\khole{}");
 	}
 
 	@Override
 	public void visit(Rewrite rew) {
-		result += "\\reduce{";
+		result.append("\\reduce{");
 		rew.getLeft().accept(this);
-		result += "}{";
+		result.append("}{");
 		rew.getRight().accept(this);
-		result += "}";
+		result.append("}");
 	}
 
 	@Override
@@ -274,7 +276,7 @@ public class LatexFilter extends BasicVisitor {
 		int n = 1;
 		LatexFilter termFilter = new LatexFilter();
 		for (Term t : trm.getContents()) {
-			termFilter.setResult("");
+			termFilter.setResult(new StringBuilder());
 			regex = "\\{#\\d+\\}\\{#" + n + "\\}";
 			p = Pattern.compile(regex);
 			if (pattern.contains("{#" + n + "}{#") || p.matcher(pattern).matches()) {
@@ -283,18 +285,18 @@ public class LatexFilter extends BasicVisitor {
 			t.accept(termFilter);
 			pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
 		}
-		result += pattern;
+		result.append(pattern);
 	}
 
 	@Override
 	public void visit(Constant c) {
-		result += "\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}";
+		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}");
 	}
 
 	@Override
 	public void visit(MapItem mi) {
 		mi.getKey().accept(this);
-		result += "\\mapsto";
+		result.append("\\mapsto");
 		mi.getItem().accept(this);
 	}
 
@@ -307,9 +309,9 @@ public class LatexFilter extends BasicVisitor {
 	@Override
 	public void visit(KApp app) {
 		app.getLabel().accept(this);
-		result += "(";
+		result.append("(");
 		app.getChild().accept(this);
-		result += ")";
+		result.append(")");
 	}
 
 	@Override
@@ -320,22 +322,28 @@ public class LatexFilter extends BasicVisitor {
 	@Override
 	public void visit(LiterateDefinitionComment comment) {
 		if (comment.getType() == LiterateCommentType.LATEX) {
-			result += "\\begin{kblock}[text]" + endl;
-			result += comment.getValue();
-			result += "\\end{kblock}" + endl;
+			result.append("\\begin{kblock}[text]" + endl);
+			result.append(comment.getValue());
+			result.append("\\end{kblock}" + endl);
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
-			preamble += comment.getValue();
+			preamble.append(comment.getValue());
+			if (comment.getValue().contains("\\title{")) {
+				hasTitle = true;
+			}
 		}
 	}
 
 	@Override
 	public void visit(LiterateModuleComment comment) {
 		if (comment.getType() == LiterateCommentType.LATEX) {
-			result += "\\begin{kblock}[text]" + endl;
-			result += comment.getValue();
-			result += "\\end{kblock}" + endl;
+			result.append("\\begin{kblock}[text]" + endl);
+			result.append(comment.getValue());
+			result.append("\\end{kblock}" + endl);
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
-			preamble += comment.getValue();
+			preamble.append(comment.getValue());
+			if (comment.getValue().contains("\\title{")) {
+				hasTitle = true;
+			}
 		}
 	}
 
@@ -354,13 +362,13 @@ public class LatexFilter extends BasicVisitor {
 		if (firstAttribute) {
 			firstAttribute = false;
 		} else {
-			result += ", ";
+			result.append(", ");
 		}
-		result += "\\kattribute{" +
-				StringUtil.latexify(entry.getKey()) +"}";
+		result.append("\\kattribute{" +
+				StringUtil.latexify(entry.getKey()) +"}");
 		String value = entry.getValue();
 		if (!value.isEmpty()) {
-			result += "(" + StringUtil.latexify(value) + ")";
+			result.append("(" + StringUtil.latexify(value) + ")");
 		}
 	}
 

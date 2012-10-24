@@ -166,9 +166,22 @@ public class KompileFrontEnd {
 		} else if (cmd.hasOption("tempc")) {
 			tempc(mainFile, lang);
 		} else if (cmd.hasOption("latex")) {
-			latex(mainFile, lang);
+			List<File> files = latex(mainFile, lang);
+			try {
+				FileUtil.copyFiles(files, mainFile.getCanonicalFile().getParentFile());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else if (cmd.hasOption("pdf")) {
-			pdf(mainFile, lang);
+			List<File> files = latex(mainFile, lang);
+			files = pdf(files, lang);
+			try {
+				FileUtil.copyFiles(files, mainFile.getCanonicalFile().getParentFile());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else if (cmd.hasOption("xml")) {
 			xml(mainFile, lang);
 		} else if (cmd.hasOption("html")) {
@@ -206,17 +219,19 @@ public class KompileFrontEnd {
 		}
 	}
 
-	private static void pdf(File mainFile, String lang) {
-		latex(mainFile, lang);
-		Stopwatch sw = new Stopwatch();
-
+	private static List<File> pdf(List<File> files, String lang) {
+		File latexFile = files.get(0);
+		files.clear();
+		
 		try {
+			Stopwatch sw = new Stopwatch();
 			// Run pdflatex.
 			String pdfLatex = "pdflatex";
-			String argument = GlobalSettings.mainFileWithNoExtension + ".tex";
+			String argument = latexFile.getCanonicalPath(); 
 			// System.out.println(argument);
 
 			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
+			pb.directory(latexFile.getParentFile());
 
 			pb.redirectErrorStream(true);
 			try {
@@ -238,18 +253,19 @@ public class KompileFrontEnd {
 				while (br.readLine() != null) {
 				}
 				process.waitFor();
-				pdfClean(new String[] { ".tex", ".aux", ".log", ".mrk", ".out", ".sty" });
-				new File("k.sty").delete();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			
+			sw.printIntermediate("Latex2PDF");
 
+			files.add(new File(FileUtil.stripExtension(latexFile.getCanonicalPath()) + ".pdf"));
 		} catch (IOException e) {
 			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", "");
 			GlobalSettings.kem.register(exception);
 		}
-		pdfClean(new String[] { ".aux", ".log", ".mrk", ".out" });
-		sw.printIntermediate("Generate PDF");
+
+		return files;
 	}
 
 	private static void pdfClean(String[] extensions) {
@@ -257,8 +273,12 @@ public class KompileFrontEnd {
 			new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
 	}
 
-	public static String latex(File mainFile, String mainModule) {
+	public static List<File> latex(File mainFile, String mainModule) {
+		List<File> result = new ArrayList<File>();
 		try {
+			
+			Stopwatch sw = new Stopwatch();
+			
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();
 
@@ -270,34 +290,42 @@ public class KompileFrontEnd {
 			// compile a definition here
 
 			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, mainModule);
+			
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Total parsing");
+			}
 
-			Stopwatch sw = new Stopwatch();
+
 			LatexFilter lf = new LatexFilter();
 			javaDef.accept(lf);
 
 			String endl = System.getProperty("line.separator");
+
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
-			FileUtil.saveInFile(canonicalFile.getParent() + fileSep + "k.sty", FileUtil.getFileContent(kLatexStyle));
+			String dotKLatexStyle = dotk.getAbsolutePath()  + fileSep + "k.sty";
+
+			FileUtil.saveInFile(dotKLatexStyle, FileUtil.getFileContent(kLatexStyle));
 
 			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[poster,style=bubble]{k}" + endl;
-			String preamble = lf.getPreamble();
+			String preamble = lf.getPreamble().toString();
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
-			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.tex", latexified);
-
-			FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".tex", latexified);
-
+			String latexifiedFile = dotk.getAbsolutePath()  + fileSep  + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
+			result.add(new File(latexifiedFile));
+			result.add(new File(dotKLatexStyle));
+			FileUtil.saveInFile(latexifiedFile, latexified);
+			
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Latex Generation");
 			}
 
-			return latexified;
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		
+		return result;
 	}
 
 	private static String html(File mainFile, String lang) {

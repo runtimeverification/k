@@ -3,10 +3,14 @@ package org.kframework.utils.utils.file;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.util.List;
 
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -78,5 +82,27 @@ public class FileUtil {
 
 	public static void delete(String file) {
 		new File(file).delete();
+	}
+
+	public static void copyFiles(List<File> files, File parentFile) {
+		for (File file : files) {
+			try {
+				copyFile(file.getCanonicalPath(), parentFile.getCanonicalPath() + File.separator + file.getName());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private static void copyFile(String fromFile, String toFile) throws IOException {
+        FileInputStream source = new FileInputStream(fromFile);
+        FileOutputStream destination = new FileOutputStream(toFile);
+ 
+        FileChannel sourceFileChannel = source.getChannel();
+        FileChannel destinationFileChannel = destination.getChannel();
+ 
+        long size = sourceFileChannel.size();
+        sourceFileChannel.transferTo(0, size, destinationFileChannel);
 	}
 }
