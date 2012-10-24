@@ -895,7 +895,7 @@ rectangle,rectangle
 \newcommand{\ksentence}[5]{%
 \wrapRules{%
   \rulebox{%
-    \k@ruleLabel{#2}{#1}\hspace{1em}$#3$%
+  \k@ruleLabel{#2}{#1}\hspace{1em}$\begin{array}[t]{@{}c@{}}#3\end{array}$%
   }%
   \ifthenelse{\equal{#4}{}}{}{%
     \when{#4}%

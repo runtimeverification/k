@@ -287,6 +287,7 @@ of Java.  In fact, the latter can be implemented in terms of
 
   rule <k> bindto((X:Id, Xs:Ids => Xs), (V:Val,Vs:Vals => Vs)) ...</k>
        <env> Env:Map => Env[L/X] </env>
+       <br/>
        <store>... . => L |-> V ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
