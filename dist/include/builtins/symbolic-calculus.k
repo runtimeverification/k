@@ -70,7 +70,7 @@ module SYMBOLIC-CALCULUS
 
   rule (I1:Int ==Int I2:Int) andBool F:K impliesBool B:K
        =>
-       F impliesBool B [ I2 / I1 ]
+       (F impliesBool (B [ I2 / I1 ]))
        [anywhere]
 
   rule (I1:Int ==Int I2:Int) impliesBool B:K
