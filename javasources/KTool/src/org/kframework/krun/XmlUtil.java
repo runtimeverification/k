@@ -355,44 +355,8 @@ public class XmlUtil {
 		else {
 			result = prettyPrintTerm(doc, "node", "id", "data/term", solutionIdentifier);
 		}
-		return result;
-		/*list = doc.getElementsByTagName("search-result");
-		for (int i = 0; i < list.getLength(); i++) {
-			nod = list.item(i);
-			if (nod == null) {
-				Error.report("The node with search-result tag wasn't found");
-			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
-				Element elem = (Element) nod;
-				if (elem.getAttribute("solution-number").equals("NONE")) {
-					continue;
-				}
-				String solNumber = elem.getAttribute("solution-number");
-				//we found the desired search solution
-				if (solNumber.equals(solutionIdentifier)) {
-					// using XPath for direct access to the desired node
-					XPathFactory factory = XPathFactory.newInstance();
-					XPath xpath = factory.newXPath();
-					String s = null;
-					Object result1;
-					s = "substitution/assignment/term[2]";
-					try {
-						result1 = xpath.evaluate(s, nod, XPathConstants.NODESET);
-						if (result1 != null) {
-							NodeList nodes = (NodeList) result1;
-							nod = nodes.item(0);
-							result = PrettyPrintOutput.print((Element) nod, false, 0, PrettyPrintOutput.ANSI_NORMAL);
-						}
-						else {
-							String output = FileUtil.getFileContent(K.maude_out);
-							Error.report("Unable to parse Maude's search results:\n" + output);
-						}
-
-					} catch (XPathExpressionException e) {
-						Error.report("XPathExpressionException " + e.getMessage());
-					}
-				}
-			}
-		}*/
+		
+		return result;		
 	}
 	
 	//create a xml document that contains the elem node (should be in the form a xml file obtained after a maude rewrite command) 
