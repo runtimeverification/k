@@ -892,23 +892,31 @@ rectangle,rectangle
 %%% Rules.
 \newcommand{\ruleAttributes}[1]{\hfill[#1]}
 
-\newcommand{\ksentence}[5]{%
+\newcommand{\ksentence}[6][]{%
 \wrapRules{%
   \rulebox{%
-  \k@ruleLabel{#2}{#1}\hspace{1em}$\begin{array}[t]{@{}c@{}}#3\end{array}$%
+  \k@ruleLabel{#3}{#2}\hspace{1em}$%
+  \ifthenelse{\equal{#1}{}}{}{%  
+   \left(% 
   }%
-  \ifthenelse{\equal{#4}{}}{}{%
-    \when{#4}%
+  \begin{array}{@{}c@{}}#4\end{array}%
+  \ifthenelse{\equal{#1}{}}{}{%  
+   \right)% 
+  }%
+    $%
+  }%
+  \ifthenelse{\equal{#5}{}}{}{%
+    \when{#5}%
   }%
   \k@markPosition%
-  \ifthenelse{\equal{#5}{}}{}{%  
-   \ruleAttributes{#5}% 
+  \ifthenelse{\equal{#6}{}}{}{%  
+   \ruleAttributes{#6}% 
   }%
 }%
 }
 
-\newcommand{\krule}[4][]{%
-\ksentence{rule}{#1}{#2}{#3}{#4}
+\newcommand{\krule}[5][]{%
+\ksentence[#5]{rule}{#1}{#2}{#3}{#4}
 }
 
 \newcommand{\kruleb}[4]{\begin{kblock}\krule[#1]{#2}{#3}{#4}\end{kblock}}

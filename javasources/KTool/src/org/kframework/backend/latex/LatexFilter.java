@@ -25,6 +25,7 @@ public class LatexFilter extends BasicVisitor {
 	private boolean firstAttribute;
 	private boolean parentParens = false;
 	private boolean hasTitle = false;
+	private boolean termComment;
 
 	public void setResult(StringBuilder result) {
 		this.result = result;
@@ -179,6 +180,7 @@ public class LatexFilter extends BasicVisitor {
 	}
 	
 	public void visit(TermComment tc) {
+		termComment = true;
 		result.append("\\\\");
 		super.visit(tc);
 	}
@@ -216,6 +218,7 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Rule rule) {
+		termComment = false;
 		result.append("\\krule");
 		if (!rule.getLabel().equals("")) {
 			result.append("[" + rule.getLabel() + "]");
@@ -228,7 +231,11 @@ public class LatexFilter extends BasicVisitor {
 		}
 		result.append("}{");
 		rule.getAttributes().accept(this);
-		result.append("}" + endl);
+		result.append("}");
+		result.append("{");
+		if (termComment) result.append("large");
+		result.append("}");
+		result.append(endl);
 	}
 
 	@Override
