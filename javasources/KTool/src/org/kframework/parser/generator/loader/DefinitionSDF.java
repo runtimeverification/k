@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
@@ -12,8 +13,8 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.Subsort;
-import org.kframework.parser.generator.basic.Item.ItemType;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -29,11 +30,13 @@ public class DefinitionSDF {
 		sdf += "exports\n\n";
 		sdf += "context-free syntax\n";
 
-		Set<Sort> sorts = new HashSet<Sort>(); // list of inserted sorts that need to avoid the priority filter
+/*		Set<Sort> sorts = new HashSet<Sort>(); // list of inserted sorts that need to avoid the priority filter
 
 		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor();
+		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor();
 		def.accept(psdfv);
-/*
+		def.accept(terminals);
+
 		{
 			if (psdfv.prilist.size() > 0) {
 				// if (psdfv.prilist.size() <= 1 && syn.getPriorities().get(0).getBlockAssoc() == null) {
@@ -84,33 +87,24 @@ public class DefinitionSDF {
 			}
 		}
 
-		for (Production p1 : psdfv.listProds)
-			for (Production p2 : psdfv.listProds)
-				if (p1 != p2) {
-					Sort srt1 = ((UserList) p1.getItems().get(0)).getSort();
-					Sort srt2 = ((UserList) p2.getItems().get(0)).getSort();
-					if (sbs.contains(new Subsort(srt1, srt2)))
-						psdfv.subsorts.add(new Subsort(p1.getSort(), p2.getSort()));
-				}
-
 		sdf += "%% subsorts 1\n";
 		sdf += "context-free priorities\n{\n";
 		// 1
 		// print Sort -> K > A -> B > K -> Sort
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf += "	" + StringUtil.escapeSortName(s.getSortName()) + " -> K";
+				sdf += "	" + StringUtil.escapeSortName(s.getName()) + " -> K";
 				// sdf += " {cons(\"K12" + StringUtil.escapeSortName(s.getSortName()) + "\")}";
 				sdf += "\n";
 			}
 		}
 		sdf += "} > {\n";
 		for (Subsort subs : psdfv.subsorts) {
-			Sort s1 = (Sort) subs.getSmallSort();
-			Sort s2 = subs.getBigSort();
-			if (!s1.isBaseSort() && !s2.isBaseSort()) {
-				sdf += "	" + StringUtil.escapeSortName(s1.getSortName()) + " -> " + StringUtil.escapeSortName(s2.getSortName());
-				// sdf += " {cons(\"" + StringUtil.escapeSortName(s2.getSortName()) + "12" + StringUtil.escapeSortName(s1.getSortName()) + "\")}";
+			String s1 = subs.getSmallSort();
+			String s2 = subs.getBigSort();
+			if (!Sort.isBasesort(s1) && !Sort.isBasesort(s2)) {
+				sdf += "	" + StringUtil.escapeSortName(s1) + " -> " + StringUtil.escapeSortName(s2);
+				// sdf += " {cons(\"" + StringUtil.escapeSortName(s2) + "12" + StringUtil.escapeSortName(s1) + "\")}";
 				sdf += "\n";
 			}
 		}
@@ -137,7 +131,7 @@ public class DefinitionSDF {
 					sdf += "\n";
 					sdf += "} .> {\n";
 					for (Sort ss : psdfv.userSorts) {
-						if (!ss.isBaseSort() && (ss.equals(s) || sbs.contains(new Subsort(s, ss)))) {
+						if (!ss.isBaseSort() && DefinitionHelper.isSubsortedEq(s.getName(), ss.getName())) {
 							sdf += "        " + StringUtil.escapeSortName(ss.getName()) + " -> K";
 							// sdf += " {cons(\"K12" + StringUtil.escapeSortName(ss.getSortName()) + "\")}";
 							sdf += "\n";
@@ -243,7 +237,7 @@ public class DefinitionSDF {
 
 		sdf += "lexical syntax\n";
 		for (Production p : psdfv.constants) {
-			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getSort().getSortName()) + "\n";
+			sdf += "	\"" + p.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(p.getSort()) + "\n";
 		}
 
 		sdf += "\n\n%% sort predicates\n";
@@ -255,9 +249,9 @@ public class DefinitionSDF {
 		sdf += "\n\n";
 
 		sdf += "\n%% terminals reject\n";
-		for (Terminal t : getTerminals(false)) {
-			if (t.getTerminal().matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
-				sdf += "	\"" + t.getTerminal() + "\" -> VARID {reject}\n";
+		for (String t : terminals.defterminals) {
+			if (t.matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
+				sdf += "	\"" + t + "\" -> VARID {reject}\n";
 			}
 		}
 
@@ -271,5 +265,29 @@ public class DefinitionSDF {
 		sdf += "	\"is\" -/- [\\#A-Z]\n";
 */
 		return sdf + "\n";
+	}
+
+	private static String getSDFAttributes(Attributes attrs) {
+		String str = " {";
+
+		if (attrs.containsKey("prefer"))
+			str += "prefer, ";
+		if (attrs.containsKey("avoid"))
+			str += "avoid, ";
+		if (attrs.containsKey("left"))
+			str += "left, ";
+		if (attrs.containsKey("right"))
+			str += "right, ";
+		if (attrs.containsKey("non-assoc"))
+			str += "non-assoc, ";
+		if (attrs.containsKey("bracket"))
+			str += "bracket, ";
+		if (attrs.containsKey("cons"))
+			str += "cons(\"" + attrs.get("cons") + "\"), ";
+
+		if (str.endsWith(", "))
+			return str.substring(0, str.length() - 2) + "}";
+		else
+			return "";
 	}
 }
