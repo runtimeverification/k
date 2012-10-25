@@ -220,43 +220,41 @@ public class XmlUtil {
 		
 	}
 	
-	// retrieve the solution (a node in the xml file denoted by fileName) specified by its solution-number obtained from a search command 
-	public static Element getSearchSolution(String fileName, int solutionNumber) {
+	public static Element getTerm(Document doc, String tagName, String attributeName, String xpathExpression, String solutionIdentifier) {
 		Element result = null;
-		File input = new File(fileName);
-		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
 		Node nod = null;
 		
-		list = doc.getElementsByTagName("search-result");
+		list = doc.getElementsByTagName(tagName);
 		if (list.getLength() == 0) {
-			Error.silentReport("The node with search-result tag wasn't found. Make sure that you applied a" + K.lineSeparator + "search before using select command");
+			Error.silentReport("The node with " +  tagName + "tag wasn't found. Make sure that you applied a" + K.lineSeparator + "search before using select command");
 			return result;
 		}
 		for (int i = 0; i < list.getLength(); i++) {
 			nod = list.item(i);
 			if (nod == null) {
-				Error.report("The node with search-result tag wasn't found");
+				Error.report("The node with " + tagName + " tag wasn't found");
 			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
 				Element elem = (Element) nod;
-				if (elem.getAttribute("solution-number").equals("NONE")) {
+				if (elem.getAttribute(attributeName).equals("NONE")) {
 					continue;
 				}
-				int solNumber = Integer.parseInt(elem.getAttribute("solution-number"));
+				String solIdentifier = elem.getAttribute(attributeName);
 				//we found the desired search solution
-				if (solNumber == solutionNumber) {
+				if (solIdentifier.equals(solutionIdentifier)) {
 					// using XPath for direct access to the desired node
 					XPathFactory factory = XPathFactory.newInstance();
 					XPath xpath = factory.newXPath();
 					String s = null;
 					Object result1;
-					s = "substitution/assignment/term[2]";
+					s = xpathExpression;
 					try {
 						result1 = xpath.evaluate(s, nod, XPathConstants.NODESET);
 						if (result1 != null) {
 							NodeList nodes = (NodeList) result1;
 							nod = nodes.item(0);
 							result = (Element)nod;
+							break;
 						}
 						else {
 							String output = FileUtil.getFileContent(K.maude_out);
@@ -269,19 +267,96 @@ public class XmlUtil {
 				}
 			}
 		}
-		
 		return result;
 	}
 	
-	// pretty-print the solution (a node in the xml file denoted by fileName) specified by its solution-number obtained from a search command 
-	public static String printSearchSolution(String fileName, int solutionNumber) {
+	public static String prettyPrintTerm(Document doc, String tagName, String attributeName, String xpathExpression, String solutionIdentifier) {
 		String result = null;
-		File input = new File(fileName);
-		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
 		Node nod = null;
 		
-		list = doc.getElementsByTagName("search-result");
+		list = doc.getElementsByTagName(tagName);
+		if (list.getLength() == 0) {
+			Error.silentReport("The node with " +  tagName + " tag wasn't found. Make sure that you applied a" + K.lineSeparator + "search before using select command");
+			return result;
+		}
+		for (int i = 0; i < list.getLength(); i++) {
+			nod = list.item(i);
+			if (nod == null) {
+				Error.report("The node with " + tagName + " tag wasn't found");
+			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
+				Element elem = (Element) nod;
+				if (elem.getAttribute(attributeName).equals("NONE")) {
+					continue;
+				}
+				String solIdentifier = elem.getAttribute(attributeName);
+				//we found the desired search solution
+				if (solIdentifier.equals(solutionIdentifier)) {
+					// using XPath for direct access to the desired node
+					XPathFactory factory = XPathFactory.newInstance();
+					XPath xpath = factory.newXPath();
+					String s = null;
+					Object result1;
+					s = xpathExpression;
+					try {
+						result1 = xpath.evaluate(s, nod, XPathConstants.NODESET);
+						if (result1 != null) {
+							NodeList nodes = (NodeList) result1;
+							nod = nodes.item(0);
+							result = PrettyPrintOutput.print((Element) nod, false, 0, PrettyPrintOutput.ANSI_NORMAL);
+							break;
+						}
+						else {
+							String output = FileUtil.getFileContent(K.maude_out);
+							Error.report("Unable to parse Maude's search results:\n" + output);
+						}
+
+					} catch (XPathExpressionException e) {
+						Error.report("XPathExpressionException " + e.getMessage());
+					}
+				}
+			}
+		}
+		return result;
+	}
+	
+	/* retrieve the solution (a node in the xml file denoted by fileName) specified by its solution-number attribute 
+	or retrieve the term node from a node in the search graph obtained from a search command */
+	public static Element getSearchSolution(String fileName, String solutionIdentifier) {
+		Element result = null;
+		File input = new File(fileName);
+		Document doc = XmlUtil.readXML(input);
+		
+		//if solutionIdentifier represents a numeric value that it identifies a solution (specified by its solution-number attribute) from the search-result
+		//otherwise solutionIdentifier identifies an id of a node from the search graph
+		boolean isNumber = Utils.isNumber(solutionIdentifier);
+		if (isNumber) {
+			result = getTerm(doc, "search-result", "solution-number", "substitution/assignment/term[2]", solutionIdentifier);
+		}
+		else {
+			result = getTerm(doc, "node", "id", "data/term", solutionIdentifier);
+		}
+		return result;
+	}
+	
+	/* pretty-print the solution (a node in the xml file denoted by fileName) specified by its solution-number obtained from a search command 
+	or pretty-print the term node from a node in the search graph obtained from a search command */
+	public static String printSearchSolution(String fileName, String solutionIdentifier) {
+		String result = null;
+		File input = new File(fileName);
+		Document doc = XmlUtil.readXML(input);
+	    
+		//if solutionIdentifier represents a numeric value that it identifies a solution (specified by its solution-number attribute) from the search-result
+		//otherwise solutionIdentifier identifies an id of a node from the search graph
+		boolean isNumber = Utils.isNumber(solutionIdentifier);
+		if (isNumber) {
+			result = prettyPrintTerm(doc, "search-result", "solution-number", "substitution/assignment/term[2]", solutionIdentifier);
+		}
+		else {
+			result = prettyPrintTerm(doc, "node", "id", "data/term", solutionIdentifier);
+		}
+		return result;
+		/*list = doc.getElementsByTagName("search-result");
 		for (int i = 0; i < list.getLength(); i++) {
 			nod = list.item(i);
 			if (nod == null) {
@@ -291,9 +366,9 @@ public class XmlUtil {
 				if (elem.getAttribute("solution-number").equals("NONE")) {
 					continue;
 				}
-				int solNumber = Integer.parseInt(elem.getAttribute("solution-number"));
+				String solNumber = elem.getAttribute("solution-number");
 				//we found the desired search solution
-				if (solNumber == solutionNumber) {
+				if (solNumber.equals(solutionIdentifier)) {
 					// using XPath for direct access to the desired node
 					XPathFactory factory = XPathFactory.newInstance();
 					XPath xpath = factory.newXPath();
@@ -317,9 +392,7 @@ public class XmlUtil {
 					}
 				}
 			}
-		}
-		
-		return result;
+		}*/
 	}
 	
 	//create a xml document that contains the elem node (should be in the form a xml file obtained after a maude rewrite command) 

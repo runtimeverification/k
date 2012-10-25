@@ -369,7 +369,6 @@ public class Main {
 			reader.setBellEnabled(false);
 
 			List<Completor> argCompletor = new LinkedList<Completor>();
-			//argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "show path labels" }));
 			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "select", "show-search-graph", "show-node" }));
 			argCompletor.add(new FileNameCompletor());
 			List<Completor> completors = new LinkedList<Completor>();
@@ -526,15 +525,10 @@ public class Main {
 							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator + "first a solution with step command before executing steps of rewrites!");
 						}
 					}
+					//"select n7" or "select 3" are both valid commands
 					if (cmd.hasOption("select")) {
-						int arg = 0;
-						try {
-							arg = Integer.parseInt(cmd.getOptionValue("select").trim());
-						}
-						catch (NumberFormatException e) {
-							System.out.println("You must provide an integer argument for the select command");
-							continue;
-						}
+						String arg = new String();
+						arg = cmd.getOptionValue("select").trim();
 						Element elem = XmlUtil.getSearchSolution(K.maude_output, arg);
 						if (elem != null) {
 							String s = XmlUtil.printSearchSolution(K.processed_maude_output, arg);
@@ -573,14 +567,6 @@ public class Main {
 						}
 						
 					}
-					/*if (cmd.hasOption("show path labels")) {
-						String arg = cmd.getOptionValue("show path labels");
-						maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "show path labels " + arg + " .";
-						// System.out.println("maude cmd=" + maudeCmd);
-						rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
-						// check whether Maude produced errors
-						rp.checkMaudeForErrors(errFile, lang);
-					}*/
 				}
 			}
 		} catch (IOException e) {
