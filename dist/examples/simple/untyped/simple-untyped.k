@@ -1,7 +1,7 @@
 /*!
 \title{SIMPLE --- Untyped}
-\author{Grigore Ro\c{s}u and 
-        Traian Florin \c{S}erb\u{a}nu\c{t}\u{a} (\texttt{\{grosu,tserban2\}@illinois.edu})}
+\author{Grigore Ro\c{s}u and Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
+        (\texttt{\{grosu,tserban2\}@illinois.edu})}
 \organization{University of Illinois at Urbana-Champaign}
 */
 
@@ -107,7 +107,7 @@ system in the typed version of SIMPLE later), will get stuck when executed.
 Arrays can be multidimensional and can hold other arrays, so their
 lookup operation takes a list of expressions as argument and applies to an
 expression (which can in particular be another array lookup), respectively.
-The construct \texttt{sizeof} gives the size of an array in number of elements
+The construct \texttt{sizeOf} gives the size of an array in number of elements
 of its first dimension.  Note that almost all constructs are strict.  The only
 constructs which are not strict are the increment (since its first argument
 gets updated, so it cannot be evaluated), the input read which takes no
@@ -148,12 +148,12 @@ the increment). */
                > Exp "=" Exp             [strict(2), right]
 
 /*@ We also need comma-separated lists of identifiers and of expressions.
-Moreover, we want them to be strict and hybrid, that is, to evaluate to lists
-of results whenever requested (e.g., when they appear as strict arguments of
-the constructs above), and the lists of results to be results themselves. */
+Moreover, we want them to be strict, that is, to evaluate to lists of results
+whenever requested (e.g., when they appear as strict arguments of
+the constructs above). */
 
   syntax Ids  ::= List{Id,","}
-  syntax Exps ::= List{Exp,","}          [strict, hybrid]
+  syntax Exps ::= List{Exp,","}          [strict]  // automatically hybrid now
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
@@ -182,6 +182,7 @@ arguments. */
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
                 | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "try" Block "catch" "(" Id ")" Block
@@ -190,7 +191,6 @@ arguments. */
                 | "acquire" Exp ";"                     [strict]
                 | "release" Exp ";"                     [strict]
                 | "rendezvous" Exp ";"                  [strict]
-                | "print" "(" Exps ")" ";"              [strict]
 
   syntax Stmts ::= Stmt
                  | Stmts Stmts                          [right]
@@ -594,16 +594,21 @@ nulary \texttt{return;} statements. */
   syntax ListItem ::=  (Map,K,Bag)
 
   rule <k> lambda(Xs,S)(Vs:Vals) ~> K => bind(Xs,Vs) ~> S ~> return; </k>
-       <control> <fstack> . => (Env,K,C) ...</fstack> C </control>
+       <control>
+         <fstack> . => (Env,K,C) ...</fstack>
+         C
+       </control>
        <env> Env => GEnv </env>
        <genv> GEnv </genv>
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
-       <control> <fstack> (Env, K, C) => . ...</fstack> (_ => C) </control>
+       <control>
+         <fstack> (Env,K,C) => . ...</fstack>
+         (_ => C)
+       </control>
        <env> _ => Env </env>
 
   syntax Val ::= "nothing"
-
   rule return; => return nothing;   [macro]
 
 /*@ The auxiliary \texttt{bind} construct binds a list of variables
@@ -659,9 +664,7 @@ for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps. */
 
   rule {} => .  [structural]
-
-  rule <k> { Ss:Stmts } => Ss ~> env(Env) ...</k>  <env> Env </env>
-    [structural]
+  rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
 
 /*@ The basic definition of environment recovery is straightforward and
 given in the section on auxiliary constructs at the end of the file. */
@@ -878,11 +881,11 @@ from its \textsf{holds} cell and also from the the shared \textsf{busy} cell,
 so other threads can acquire it if they need to. */
 
    rule <k> release V:Val; => . ...</k>
-        <holds>... V|->(N => N:Int -Int 1) ...</holds>
-        when N >Int 0
+        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
+     when N >Int 0
 
-   rule <k> release V; => . ...</k> <holds>... V:Val|->0 => . ...</holds>
-        <busy>... SetItem(V)=>. ...</busy>
+   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
+        <busy>... SetItem(V) => . ...</busy>
 
 /*@ \subsubsection{Rendezvous synchronization}
 In addition to synchronization through acquire and release of locks, SIMPLE
@@ -916,7 +919,7 @@ Formally: */
 
   syntax K ::= bind(Ids,Vals)
 
-  rule <k> bind((X:Id, Xs:Ids => Xs),(V:Val, Vs:Vals => Vs)) ...</k>
+  rule <k> bind((X:Id, Xs:Ids => Xs), (V:Val, Vs:Vals => Vs)) ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
        <nextLoc> L => L:Int +Int 1 </nextLoc>  [structural]

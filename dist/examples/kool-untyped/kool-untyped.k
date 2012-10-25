@@ -25,7 +25,7 @@ into \texttt{strict(2)}.\\
 Finally, we add syntax and corresponding strictness
 for the KOOL object-oriented constructs. */
 
-  syntax Ids ::= List{Id,","} [strict, hibrid]
+  syntax Ids ::= List{Id,","} [strict, hybrid]
   syntax Exps ::=  List{Exp,","} 
 
   syntax Decl ::= "var" Exps ";" 
@@ -96,15 +96,14 @@ for the KOOL object-oriented constructs. */
   rule if E:Exp then S:Stmt => if E then S else {}
   rule (for X:Id = E1:Exp to E2:Exp do S:Stmt)
        =>
-       {var X=E1, .Exps; while X <= E2 do {S X = (X + 1);}}
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
-  rule var X:Id = E:Exp, .Exps; => var X, .Exps; X = E;
+       {var X=E1; while X <= E2 do {S X = (X + 1);}}
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
+  rule var X:Id = E:Exp; => var X; X = E;
 
   rule class Class:Id {Ss:Stmts} => class Class extends object {Ss}
 
 
-  syntax #Id ::= "object"
-  syntax #Id ::= "main"
+  syntax Id ::= "object" | "main"
 
 endmodule
 
@@ -143,12 +142,12 @@ module KOOL-UNTYPED
                       <k color="green"> ($PGM:K ~> execute) </k>
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
-                      //<br/>
+                      <br/>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
 // KOOL addition
-                        //<br/>
+                        <br/>
                         <crntObj color="Fuchsia">
                            <crntClass> object </crntClass>
                            <envStack> .List </envStack>
@@ -157,14 +156,14 @@ module KOOL-UNTYPED
                       </control>
                     </thread>
                   </threads>
-                  //<br/>
+                  <br/>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set </busy>
                   <in color="magenta" stream="stdin"> .List </in>
                   <out color="brown" stream="stdout"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
 // KOOL addition
-                  //<br/>
+                  <br/>
                   <classes color="Fuchsia">
                      <class multiplicity="*" color="Fuchsia">
                         <className color="Fuchsia"> main </className>
@@ -517,6 +516,7 @@ refer to it (see rule above). */
            create(Class) ~> (storeObj ~> (Class(Vs); return this;))
        </k>
        <env> Env:Map => . </env>
+       <br/>
        <control> C:Bag
          <crntObj> Obj:Bag
                    =>
