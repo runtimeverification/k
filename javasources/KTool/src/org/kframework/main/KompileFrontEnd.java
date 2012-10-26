@@ -56,6 +56,8 @@ import org.kframework.kompile.lint.UnusedSyntax;
 import org.kframework.parser.generator.loader.AddConsesVisitor;
 import org.kframework.parser.generator.loader.BasicParser;
 import org.kframework.parser.generator.loader.DefinitionSDF;
+import org.kframework.parser.generator.loader.ParseConfigsFilter;
+import org.kframework.parser.generator.loader.ParseRulesFilter;
 import org.kframework.parser.generator.loader.ProgramSDF;
 import org.kframework.utils.ResourceExtractor;
 import org.kframework.utils.Sdf2Table;
@@ -150,8 +152,7 @@ public class KompileFrontEnd {
 			File errorFile = mainFile;
 			mainFile = new File(def + ".k");
 			if (!mainFile.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(),
-						"File system."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system."));
 		}
 
 		// DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-compiled");
@@ -535,7 +536,6 @@ public class KompileFrontEnd {
 			def.accept(new AddConsesVisitor());
 			def.accept(new CollectConsesVisitor());
 			def.accept(new CollectSubsortsVisitor());
-			def.accept(new CollectConfigCellsVisitor());
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Basic Parsing");
@@ -565,14 +565,6 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Generate TBLPgm");
 
-			// generate a copy for the definition and modify it to generate the intermediate data
-			// Definition def2 = def.clone();// (Definition) Cloner.copy(def);
-			// def2.makeConsLists();
-			//
-			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.sbs", def2.getSubsortingAsStrategoTerms());
-			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cons", def2.getConsAsStrategoTerms());
-			//
-
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
 			oldSdf = "";
@@ -591,44 +583,33 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Generate TBLDef");
 
 			// ------------------------------------- import files in Stratego
-			// k3parser.KParser.ImportSbs(dotk.getAbsolutePath() + "/Integration.sbs");
-			// k3parser.KParser.ImportCons(dotk.getAbsolutePath() + "/Integration.cons");
-			// k3parser.KParser.ImportTbl(dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
+			org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Importing Files");
 
 			// ------------------------------------- parse configs
-			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/Integration.cells", def.getCellsFromConfigAsStrategoTerm());
-			// k3parser.KParser.ImportCells(dotk.getAbsolutePath() + "/Integration.cells");
+			def = (Definition) def.accept(new ParseConfigsFilter());
+			def.accept(new CollectConfigCellsVisitor());
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Configs");
 
 			// ----------------------------------- parse rules
-			// def.parseRules();
-
-			// ----------------------------------- preprocessiong steps
-			// Preprocessor preprocessor = new Preprocessor();
-			// Document preprocessedDef = preprocessor.run(def.getDefAsXML());
-			//
-			// XmlLoader.writeXmlFile(preprocessedDef, dotk.getAbsolutePath() + "/def.xml");
+			def = (Definition) def.accept(new ParseRulesFilter());
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Rules");
 
-			// ro.uaic.info.fmse.k.Definition javaDef = new ro.uaic.info.fmse.k.Definition((Element) preprocessedDef.getFirstChild());
-			//
-			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new AmbFilter());
-			// javaDef.accept(new CollectSubsortsVisitor());
-			// javaDef = (ro.uaic.info.fmse.k.Definition) javaDef.accept(new EmptyListsVisitor());
-			//
-			// String maudified = javaDef.toMaude();
-			//
-			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.maude", maudified);
+			XStream xstream = new XStream();
+			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+
+			String xml = xstream.toXML(def);
+
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml", xml);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Maudify");
+				sw.printIntermediate("Save in file");
 			}
 
 			// return maudified;
@@ -848,9 +829,8 @@ public class KompileFrontEnd {
 			MaudeFilter maudeFilter = new MaudeFilter();
 			javaDef.accept(maudeFilter);
 
-			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('"
-					+ javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n" + "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition
-					+ " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
+			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n" + "---)\n"
+					+ " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
 					+ "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/compile.maude", compile);

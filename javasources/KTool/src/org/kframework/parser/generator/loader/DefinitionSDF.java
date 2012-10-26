@@ -210,7 +210,7 @@ public class DefinitionSDF {
 		}
 
 		sdf.append("\n");
-		sdf.append(FollowRestrictionsForTerminals.getFollowRestrictionsForTerminals(terminals.terminals));
+		sdf.append(SDFHelper.getFollowRestrictionsForTerminals(terminals.terminals));
 
 		sdf.append("lexical restrictions\n");
 		sdf.append("%% some restrictions to ensure greedy matching for user defined constants\n");

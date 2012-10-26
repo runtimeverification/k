@@ -41,6 +41,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -380,5 +381,10 @@ public class BasicTransformer implements Transformer {
 		KInjectedLabel result = new KInjectedLabel(node);
 		result.setTerm(term);
 		return transform((Term) node);
+	}
+
+	@Override
+	public ASTNode transform(StringSentence node) throws TransformerException {
+		return node;
 	}
 }

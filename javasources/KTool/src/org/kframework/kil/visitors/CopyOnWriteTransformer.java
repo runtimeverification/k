@@ -561,4 +561,9 @@ public class CopyOnWriteTransformer implements Transformer {
 		}
 		return node;
 	}
+
+	@Override
+	public ASTNode transform(StringSentence node) throws TransformerException {
+		return node;
+	}
 }

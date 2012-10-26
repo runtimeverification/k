@@ -39,6 +39,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -61,6 +62,7 @@ public interface Transformer {
 	public ASTNode transform(LiterateModuleComment node) throws TransformerException;
 	public ASTNode transform(Sentence node) throws TransformerException;
 	//	<Sentences>
+	public ASTNode transform(StringSentence node) throws TransformerException;
 	public ASTNode transform(Configuration node) throws TransformerException;
 	public ASTNode transform(Context node) throws TransformerException;
 	public ASTNode transform(Rule node) throws TransformerException;

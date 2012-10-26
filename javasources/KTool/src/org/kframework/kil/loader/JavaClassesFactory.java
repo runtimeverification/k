@@ -90,7 +90,7 @@ public class JavaClassesFactory {
 		if (Constants.ATTRIBUTES.equals(element.getNodeName()))
 			return new Attributes(element);
 
-		System.out.println(">>> " + element.getNodeName() + " <<< - unimplemented yet: JavaClassesFactory");
+		System.out.println(">>> " + element.getNodeName() + " <<< - unimplemented yet: org.kframework.kil.loader.JavaClassesFactory");
 		return null;
 	}
 }

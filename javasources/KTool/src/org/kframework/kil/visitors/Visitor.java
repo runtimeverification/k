@@ -64,6 +64,7 @@ public interface Visitor {
 	public void visit(LiterateModuleComment node);
 	public void visit(Sentence node);
 	// <Sentences>
+	public void visit(StringSentence node);
 	public void visit(Configuration node);
 	public void visit(Context node);
 	public void visit(Rule node);
@@ -111,6 +112,5 @@ public interface Visitor {
 	public void visit(Attribute attribute);
 	public void visit(TermComment node);
 	// Others
-	public void visit(StringSentence stringSentence);
 	public void visit(KInjectedLabel kInjectedLabel);
 }

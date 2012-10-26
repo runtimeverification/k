@@ -5,8 +5,8 @@ import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
-
 
 /**
  * Used as a container for unparsed sentences like rule, context and configuration.
@@ -16,10 +16,12 @@ import org.w3c.dom.Element;
  */
 public class StringSentence extends ModuleItem {
 	private String content;
+	private String type;
 
 	public StringSentence(Element element) {
 		super(element);
-		content = element.getAttribute(Constants.VALUE_value_ATTR);
+		content = StringUtil.unescape(element.getAttribute(Constants.VALUE_value_ATTR));
+		type = element.getNodeName();
 	}
 
 	public StringSentence(StringSentence node) {
@@ -56,5 +58,13 @@ public class StringSentence extends ModuleItem {
 	@Override
 	public StringSentence shallowCopy() {
 		return new StringSentence(this);
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getType() {
+		return type;
 	}
 }

@@ -50,8 +50,7 @@ public class ProgramSDF {
 		for (Production p : psdfv.outsides) {
 			if (p.isListDecl()) {
 				UserList si = (UserList) p.getItems().get(0);
-				sdf.append("	{" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\"}* -> " + StringUtil.escapeSortName(p.getSort()) + " {cons(" + p.getAttributes().get("cons")
-						+ ")}\n");
+				sdf.append("	{" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\"}* -> " + StringUtil.escapeSortName(p.getSort()) + " {cons(" + p.getAttributes().get("cons") + ")}\n");
 			} else {
 				sdf.append("	");
 				List<ProductionItem> items = p.getItems();
@@ -99,7 +98,7 @@ public class ProgramSDF {
 
 		sdf.append("lexical syntax\n");
 		for (Production prd : psdfv.constants) {
-			sdf.append("	\"" + prd.getItems().get(0) + "\" -> Dz" + StringUtil.escapeSortName(prd.getSort()) + "\n");
+			sdf.append("	" + prd.getItems().get(0) + " -> Dz" + StringUtil.escapeSortName(prd.getSort()) + "\n");
 		}
 
 		sdf.append("\n\n");
@@ -111,7 +110,7 @@ public class ProgramSDF {
 		}
 
 		sdf.append("\n");
-		sdf.append(FollowRestrictionsForTerminals.getFollowRestrictionsForTerminals(ctv.terminals));
+		sdf.append(SDFHelper.getFollowRestrictionsForTerminals(ctv.terminals));
 
 		sdf.append("\n");
 
