@@ -292,24 +292,17 @@ public class Main {
 					System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
 					String result = p.printSearchGraph(K.processed_maude_output);
 					AnsiConsole.out.println(result);
-					//offer the user the possibility to request info about some nodes in the search graph  
+					//offer the user the possibility to turn execution into debug mode  
 					while (true) {
-						System.out.print(K.lineSeparator + "Do you want to show information about a node from the search graph? (y/n):");
+						System.out.print(K.lineSeparator + "Do you want to enter in debug mode? (y/n):");
 						BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 						String input = stdin.readLine();
 						if (input.equals("y")) {
-							System.out.print("Specify the id of the node:");
-							stdin = new BufferedReader(new InputStreamReader (System.in));
-							input = stdin.readLine();
-							String result1 = p.printNodeSearchGraph(K.processed_maude_output, input);
-							if (result1 != null) {
-								System.out.println(result1);
-							}
-							else {
-								System.out.println("A node with the specified id couldn't be found in the search graph");
-							}
+							K.debug = true;
+							debugExecution(KAST, lang, true);
 						}
 						else if (input.equals("n")) {
+							K.debug  = false;
 							break;
 						}
 						else {
@@ -362,7 +355,8 @@ public class Main {
 	}
 
 	// execute krun in debug mode (i.e. step by step execution)
-	public static void debugExecution(String kast, String lang) {
+	//isSwitch variable is true if we enter in debug execution from normal execution (we use the search command with --graph option)  
+	public static void debugExecution(String kast, String lang, boolean isSwitch) {
 		try {
 			// adding autocompletion and history feature to the stepper internal commandline by using the JLine library
 			ConsoleReader reader = new ConsoleReader();
@@ -374,25 +368,28 @@ public class Main {
 			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
 			reader.addCompletor(new MultiCompletor(completors));
-
-			// first execute one step then prompt from the user an input
-			System.out.println("After running one step of execution the result is:");
-			String compiledFile = new String();
-			compiledFile = new File(K.compiled_def).getCanonicalPath();
-			String maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__(" + makeConfiguration(kast, K.configuration_variables) + ",(.).Map)) .";
+           
+			String compiledFile = new File(K.compiled_def).getCanonicalPath();
+			String maudeCmd = new String();
 			File outFile = FileUtil.createFile(K.maude_out);
 			File errFile = FileUtil.createFile(K.maude_err);
 			RunProcess rp = new RunProcess();
-			rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
-			// check whether Maude produced errors
-			rp.checkMaudeForErrors(errFile, lang);
-
-			// pretty-print the obtained configuration
-			PrettyPrintOutput p = new PrettyPrintOutput();
-			p.preprocessDoc(K.maude_output, K.processed_maude_output);
-			List<String> red = p.processDoc(K.processed_maude_output);
-			for (String result : red) {
-				AnsiConsole.out.println(result);
+			PrettyPrintOutput p = null;
+			List<String> red = null;
+			if (!isSwitch) {
+				// first execute one step then prompt from the user an input
+				System.out.println("After running one step of execution the result is:");
+				rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
+				// check whether Maude produced errors
+				rp.checkMaudeForErrors(errFile, lang);
+	
+				// pretty-print the obtained configuration
+			    p = new PrettyPrintOutput();
+				p.preprocessDoc(K.maude_output, K.processed_maude_output);
+				red = p.processDoc(K.processed_maude_output);
+				for (String result : red) {
+					AnsiConsole.out.println(result);
+				}
 			}
 
 			while (true) {
@@ -545,7 +542,6 @@ public class Main {
 							XmlUtil.serializeXML(doc, K.maude_output);
 							
 							K.maude_cmd = "erewrite";
-							
 						}
 						else {
 							System.out.println("A solution with the specified solution-number could not be found in the" + K.lineSeparator + "previous search result");
@@ -553,11 +549,13 @@ public class Main {
 					}
 					if (cmd.hasOption("show-search-graph")) {
 						System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
+						p = new PrettyPrintOutput();
 						String result = p.printSearchGraph(K.processed_maude_output);
 						System.out.println(result);
 					}
 					if (cmd.hasOption("show-node")) {
 						String nodeId = cmd.getOptionValue("show-node").trim();
+						p = new PrettyPrintOutput();
 						String result = p.printNodeSearchGraph(K.processed_maude_output, nodeId);
 						if (result != null) {
 							System.out.println(result);
@@ -800,7 +798,7 @@ public class Main {
 			if (!K.debug) {
 				normalExecution(KAST, lang, rp, cmd_options);
 			} else {
-				debugExecution(KAST, lang);
+				debugExecution(KAST, lang, false);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
