@@ -55,6 +55,7 @@ import org.kframework.kompile.lint.UnusedName;
 import org.kframework.kompile.lint.UnusedSyntax;
 import org.kframework.parser.generator.loader.AddConsesVisitor;
 import org.kframework.parser.generator.loader.BasicParser;
+import org.kframework.parser.generator.loader.DefinitionSDF;
 import org.kframework.parser.generator.loader.ProgramSDF;
 import org.kframework.utils.ResourceExtractor;
 import org.kframework.utils.Sdf2Table;
@@ -141,8 +142,6 @@ public class KompileFrontEnd {
 			else
 				def = restArgs[0];
 		}
-		
-		
 
 		File mainFile = new File(def);
 		GlobalSettings.mainFile = mainFile;
@@ -151,10 +150,11 @@ public class KompileFrontEnd {
 			File errorFile = mainFile;
 			mainFile = new File(def + ".k");
 			if (!mainFile.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(),
+						"File system."));
 		}
 
-//		DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-compiled"); 
+		// DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-compiled");
 		if (DefinitionHelper.dotk == null) {
 			try {
 				DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
@@ -163,7 +163,7 @@ public class KompileFrontEnd {
 			}
 		}
 		DefinitionHelper.dotk.mkdirs();
-		
+
 		String lang = null;
 		if (cmd.hasOption("lang"))
 			lang = cmd.getOptionValue("lang");
@@ -233,12 +233,12 @@ public class KompileFrontEnd {
 	private static List<File> pdf(List<File> files, String lang) {
 		File latexFile = files.get(0);
 		files.clear();
-		
+
 		try {
 			Stopwatch sw = new Stopwatch();
 			// Run pdflatex.
 			String pdfLatex = "pdflatex";
-			String argument = latexFile.getCanonicalPath(); 
+			String argument = latexFile.getCanonicalPath();
 			// System.out.println(argument);
 
 			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
@@ -267,7 +267,7 @@ public class KompileFrontEnd {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Latex2PDF");
 			}
@@ -289,9 +289,9 @@ public class KompileFrontEnd {
 	public static List<File> latex(File mainFile, String mainModule) {
 		List<File> result = new ArrayList<File>();
 		try {
-			
+
 			Stopwatch sw = new Stopwatch();
-			
+
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();
 
@@ -301,11 +301,10 @@ public class KompileFrontEnd {
 			// compile a definition here
 
 			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, mainModule);
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Total parsing");
 			}
-
 
 			LatexFilter lf = new LatexFilter();
 			javaDef.accept(lf);
@@ -313,7 +312,7 @@ public class KompileFrontEnd {
 			String endl = System.getProperty("line.separator");
 
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
-			String dotKLatexStyle = DefinitionHelper.dotk.getAbsolutePath()  + fileSep + "k.sty";
+			String dotKLatexStyle = DefinitionHelper.dotk.getAbsolutePath() + fileSep + "k.sty";
 
 			FileUtil.saveInFile(dotKLatexStyle, FileUtil.getFileContent(kLatexStyle));
 
@@ -321,11 +320,11 @@ public class KompileFrontEnd {
 			String preamble = lf.getPreamble().toString();
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
-			String latexifiedFile = DefinitionHelper.dotk.getAbsolutePath()  + fileSep  + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
+			String latexifiedFile = DefinitionHelper.dotk.getAbsolutePath() + fileSep + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
 			result.add(new File(latexifiedFile));
 			result.add(new File(dotKLatexStyle));
 			FileUtil.saveInFile(latexifiedFile, latexified);
-			
+
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Latex Generation");
 			}
@@ -335,7 +334,7 @@ public class KompileFrontEnd {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
 
@@ -579,7 +578,7 @@ public class KompileFrontEnd {
 			oldSdf = "";
 			if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
 				oldSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
-			// FileUtil.saveInFile(dotk.getAbsolutePath() + "/def/Integration.sdf", def2.getSDFForDefinition());
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForPrograms(def));
 			newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
@@ -849,8 +848,9 @@ public class KompileFrontEnd {
 			MaudeFilter maudeFilter = new MaudeFilter();
 			javaDef.accept(maudeFilter);
 
-			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n" + "---)\n"
-					+ " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
+			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('"
+					+ javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n" + "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition
+					+ " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
 					+ "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/compile.maude", compile);

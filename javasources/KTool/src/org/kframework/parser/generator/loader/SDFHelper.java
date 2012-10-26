@@ -21,7 +21,7 @@ public class SDFHelper {
 		if (attrs.containsKey("bracket"))
 			str += "bracket, ";
 		if (attrs.containsKey("cons"))
-			str += "cons(" + attrs.get("cons") + "), ";
+			str += "cons(\"" + attrs.get("cons") + "\"), ";
 
 		if (str.endsWith(", "))
 			return str.substring(0, str.length() - 2) + "}";

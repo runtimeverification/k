@@ -1,15 +1,8 @@
 package org.kframework.parser.generator.loader;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.Import;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
@@ -18,10 +11,6 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
@@ -33,43 +22,18 @@ public class ProgramSDF {
 
 	public static String getSdfForPrograms(Definition def) {
 
-		Set<Module> synMods = new HashSet<Module>();
-		List<Module> synQue = new LinkedList<Module>();
-		synQue.add(def.getModulesMap().get(def.getMainSyntaxModule()));
+		// collect all the syntax modules
+		CollectSynModulesVisitor csmv = new CollectSynModulesVisitor();
+		def.accept(csmv);
 
-		Module bshm = def.getModulesMap().get("BUILTIN-SYNTAX-HOOKS");
-		if (bshm != null)
-			synQue.add(bshm);
-		else {
-			String msg = "Could not find module BUILTIN-SYNTAX-HOOKS (automatically included in the main syntax module)!";
-			GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
+		// collect the syntax from those modules
+		ProgramSDFVisitor psdfv = new ProgramSDFVisitor();
+		CollectTerminalsVisitor ctv = new CollectTerminalsVisitor();
+		for (String modName : csmv.synModNames) {
+			Module m = def.getModulesMap().get(modName);
+			m.accept(psdfv);
+			m.accept(ctv);
 		}
-
-		while (!synQue.isEmpty()) {
-			Module m = synQue.remove(0);
-			if (!synMods.contains(m)) {
-				synMods.add(m);
-				CollectIncludesVisitor civ = new CollectIncludesVisitor();
-				m.accept(civ);
-				List<Import> ss = civ.getImportList();
-				for (Import s : ss) {
-					String mname = s.getName();
-					Module mm = def.getModulesMap().get(mname);
-					// if the module starts with # it means it is predefined in maude
-					if (!mname.startsWith("#"))
-						if (mm != null)
-							synQue.add(mm);
-						else if (!MetaK.isKModule(mname)) {
-							String msg = "Could not find module: " + mname + " imported from: " + m.getName();
-							GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
-						}
-				}
-			}
-		}
-
-		Definition def2 = new Definition(def);
-		def2.setItems(new ArrayList<DefinitionItem>());
-		def2.getItems().addAll(synMods);
 
 		StringBuilder sdf = new StringBuilder();
 		sdf.append("module Program\n\n");
@@ -77,10 +41,7 @@ public class ProgramSDF {
 		sdf.append("imports KBuiltinsBasic\n");
 		sdf.append("exports\n\n");
 		sdf.append("context-free syntax\n");
-
-		// TODO: visit here
-		ProgramSDFVisitor psdfv = new ProgramSDFVisitor();
-		def2.accept(psdfv);
+		sdf.append(psdfv.sdf);
 
 		sdf.append("context-free start-symbols\n");
 		sdf.append("	Start\n");
@@ -89,7 +50,8 @@ public class ProgramSDF {
 		for (Production p : psdfv.outsides) {
 			if (p.isListDecl()) {
 				UserList si = (UserList) p.getItems().get(0);
-				sdf.append("	{" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\"}* -> " + StringUtil.escapeSortName(p.getSort()) + " {cons(" + p.getAttributes().get("cons") + ")}\n");
+				sdf.append("	{" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\"}* -> " + StringUtil.escapeSortName(p.getSort()) + " {cons(" + p.getAttributes().get("cons")
+						+ ")}\n");
 			} else {
 				sdf.append("	");
 				List<ProductionItem> items = p.getItems();
@@ -124,12 +86,14 @@ public class ProgramSDF {
 		sdf.append("	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n");
 		sdf.append("	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n");
 		sdf.append("	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n");
+		sdf.append("	DzDzFloat	-> DzFloat	{cons(\"DzFloat1Const\")}\n");
 
 		sdf.append("\n");
 		sdf.append("	DzDzINT		-> DzDzInt\n");
 		sdf.append("	DzDzID		-> DzDzId\n");
 		sdf.append("	DzDzBOOL	-> DzDzBool\n");
 		sdf.append("	DzDzSTRING	-> DzDzString\n");
+		sdf.append("	DzDzFLOAT	-> DzDzFloat\n");
 
 		sdf.append("\n");
 
@@ -140,15 +104,14 @@ public class ProgramSDF {
 
 		sdf.append("\n\n");
 
-		// TODO: uncomment and fix
-		// for (Terminal t : getTerminals(true)) {
-		// if (t.getTerminal().matches("[a-zA-Z][a-zA-Z0-9]*")) {
-		// sdf.append("	\"" + t.getTerminal() + "\" -> DzDzID {reject}\n";
-		// }
-		// }
-		//
-		// sdf.append("\n");
-		// sdf.append(getFollowRestrictionsForTerminals(true));
+		for (String t : ctv.terminals) {
+			if (t.matches("[a-zA-Z][a-zA-Z0-9]*")) {
+				sdf.append("	\"" + t + "\" -> DzDzID {reject}\n");
+			}
+		}
+
+		sdf.append("\n");
+		sdf.append(FollowRestrictionsForTerminals.getFollowRestrictionsForTerminals(ctv.terminals));
 
 		sdf.append("\n");
 
