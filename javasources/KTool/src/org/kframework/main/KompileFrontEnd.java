@@ -268,7 +268,9 @@ public class KompileFrontEnd {
 				e.printStackTrace();
 			}
 			
-			sw.printIntermediate("Latex2PDF");
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Latex2PDF");
+			}
 
 			files.add(new File(FileUtil.stripExtension(latexFile.getCanonicalPath()) + ".pdf"));
 		} catch (IOException e) {
