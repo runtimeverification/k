@@ -16,6 +16,7 @@ import org.kframework.kil.Cell.Multiplicity;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Context;
 import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -37,7 +38,14 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 		this();
 		this.config = config;
 	}
-		
+	
+	
+	@Override
+	public ASTNode transform(Rule node) throws TransformerException {
+		if (MetaK.isAnywhere(node)) return node;
+		return super.transform(node);
+	}
+	
 	@Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		ASTNode right = node.getRight().accept(new DefaultTermsResolver());

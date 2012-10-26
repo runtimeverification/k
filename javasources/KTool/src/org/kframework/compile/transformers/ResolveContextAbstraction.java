@@ -73,6 +73,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
+		if (MetaK.isAnywhere(node)) return node;
 		boolean change = false;		
 		if (MetaK.getTopCells(node.getBody()).isEmpty()) return node;
 		Rule rule = (Rule) super.transform(node);
