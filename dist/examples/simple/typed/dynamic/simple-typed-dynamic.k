@@ -8,8 +8,8 @@
 /*@ \section{Abstract}
 This is the \K dynamic semantics of the typed SIMPLE language.
 It is very similar to the semantics of the untyped SIMPLE, the
-difference being that we now check the typing policy (described in
-the static semantics of typed SIMPLE) dynamically.  Because of the
+difference being that we now dynamically check the typing policy
+described in the static semantics of typed SIMPLE.  Because of the
 dynamic nature of the semantics, we can also perform some additional
 checks which were not possible in the static semantics, such as
 memory leaks due to accessing an array out of its bounds.  We will
@@ -107,8 +107,7 @@ constructs. */
   syntax Stmts ::= Stmt
                  | Stmts Stmts                          [right]
 
-/*@ We use the same desugaring macros like in untyped SIMPLE, but with new
-declarations syntax. */
+/*@ The same desugaring macros like in the statically typed SIMPLE. */
 
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
@@ -127,17 +126,8 @@ module SIMPLE-TYPED-DYNAMIC
 These are similar to those of untyped SIMPLE, except that the array
 references and the function abstrations now also hold their types.
 These types are needed in order to easily compute the type of any
-value inthe language (see the auxiliary \texttt{typeOf} operation at
-the end of this module).  Note that our more-generous-than-needed
-syntax here allows function abstractions to take a list of expressions
-as parameters; in fact, the semantics will be given in a way that
-those expressions can only be typed identifiers.  Recall that the
-purpose of syntax in a \K definition is not to parse programs in order
-to reject those not satisfying the expected syntactic/typing
-conventions (this is what a static semantics does---see the statically
-typed SIMPLE), but only to parse programs ``enough'' to give them
-semantics.  In other words, the \K syntax is the ``syntax of the
-semantics''.  */
+value in the language (see the auxiliary \texttt{typeOf} operation at
+the end of this module). */
 
   syntax Val ::= Int | Bool | String
                | array(Type,Int,Int)
@@ -205,24 +195,24 @@ to a location. */
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 /*@ \subsection{Array Declaration}
-The dynamic semantics of typed array declarations is
-similar to that in untyped SIMPLE, but we have to enforce that the
-type of an array declaration be of the form \texttt{arrayOf $T$}
-and assign the right type ($T$) to the allocated array locations. */
+The dynamic semantics of typed array declarations is similar to that
+in untyped SIMPLE, but we have to make sure that we associate the
+right type to the allocated locations. */
 
   rule <k> T:Type X:Id[N:Int]; => . ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> array(T, L +Int 1, N)
                        (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
+    when N >=Int 0
 
   context _:Type _[HOLE];
 
-
 /*@ The desugaring of multi-dimensional arrays into unidimensional
 ones is also similar to that in untyped SIMPLE, although we have to
-make sure that all the declared temporary variables have the right
-types. */
+make sure that all the declared variables have the right types.  The
+auxiliary operation \texttt{T<Vs>}, defined at the end of the file,
+adds the length of \texttt{Vs} dimensions to the type \texttt{T}. */
 
   syntax Id ::= "$1" | "$2"
   rule T:Type X:Id[N1:Int, N2:Int, Vs:Vals];
@@ -235,18 +225,15 @@ types. */
          }
        }
     [structural]
-  syntax Type ::= Type "<" Vals ">"  [function]
-  rule T:Type<_,Vs:Vals> => T[]<Vs>
-  rule T:Type<.Vals> => T
 
 /*@ \subsection{Function declaration}
 Store all function parameters, as well as the return type, as part
 of the lambda abstraction.  In the spirit of dynamic typing, we will
 make sure that parameters are well typed when the function is invoked. */
 
-  rule <k> T:Type F:Id(Ps:Params) B => . ...</k>
+  rule <k> T:Type F:Id(Ps:Params) S => . ...</k>
        <env> Env => Env[L/F] </env>
-       <store>... . => L |-> lambda(T, Ps, B) ...</store>
+       <store>... . => L |-> lambda(T, Ps, S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ \subsection{Calling \texttt{main()}}
@@ -258,6 +245,8 @@ When done with the first pass, call \texttt{main()}. */
        <genv> . => Env </genv>  [structural]
 
 //@ \section{Expressions}
+
+//@ \subsection{Variable lookup}
 
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
@@ -290,13 +279,9 @@ When done with the first pass, call \texttt{main()}. */
   rule true  || _ => true
   rule false || E => E
 
-//@ \subsection{Array lookup}
+/*@ \subsection{Array lookup}
 
-//@ Check array bounds, as part of the dynamic typing policy.
-
-// It would be nice to get rid of the next two anywhere rules!
-// Besides the top level of the computation, they are only needed inside the
-// lvalue wrapper.  Maybe we need some additional notation for this?
+Check array bounds, as part of the dynamic typing policy. */
 
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
     [structural, anywhere]
@@ -308,13 +293,16 @@ When done with the first pass, call \texttt{main()}. */
 
   rule sizeOf(array(_,_,N)) => N
 
-//@ \subsection{Function call}
+/*@ \subsection{Function call}
 
-//@ Define function call and return together, to see their relationship.
+Define function call and return together, to see their relationship.
+Note that the operation \texttt{mkDecls} now declares properly typed
+instantiated variables, and that the semantics of \texttt{return} also
+checks that that type of the returned value is expected one. */
 
   syntax ListItem ::=  (Type,Map,K,Bag)
 
-  rule <k> lambda(T,Ps,S)(Vs:Vals) ~> K => bind(Ps,Vs) ~> S ~> return; </k>
+  rule <k> lambda(T,Ps,S)(Vs:Vals) ~> K => mkDecls(Ps,Vs) S return; </k>
        <control>
          <fstack> . => (T',Env,K,C) ...</fstack>
          <return> T' => T </return>
@@ -332,6 +320,10 @@ When done with the first pass, call \texttt{main()}. */
        <env> _ => Env </env>
     when typeOf(V) ==K T   // check the type of the returned value
 
+/*@ Like the \texttt{undefined} above, \texttt{nothing} also gets
+tagged with a type now.  The empty \texttt{return} statement is
+completed to return the \texttt{nothing} value tagged as expected. */
+
   syntax Val ::= nothing(Type)
   rule <k> return; => return nothing(T); ...</k> <return> T </return>
     [structural]
@@ -340,7 +332,9 @@ When done with the first pass, call \texttt{main()}. */
 
   rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
 
-//@ \subsection{Assignment}
+/*@ \subsection{Assignment}
+The assignment now checks that the type of the assigned location is
+preserved: */
 
   context (HOLE => lvalue(HOLE)) = _
 
@@ -371,15 +365,19 @@ When done with the first pass, call \texttt{main()}. */
 
   rule while (E) S => if (E) {S while(E)S}  [structural]
 
-//@ \subsection{Print}
-
-//@ We only allow printing integers and strings
+/*@ \subsection{Print}
+We only allow printing integers and strings: */
 
   rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
-    when typeOf(V) ==K int orBool typeOf(V) ==K string  [transition]
+    when typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
   rule print(.Vals); => .  [structural]
 
-//@ \subsection{Exceptions}
+/*@ \subsection{Exceptions}
+Exception parameters are now typed, but note that the semantics below
+works correctly only when the thrown exception has the same type as
+the innermost try-catch paramete.  To keep things simple, for the time
+being we can assume that SIMPLE only throws and catches integer
+values, in which case our semantics below works fine: */
 
  syntax ListItem ::= (Param,Stmt,K,Map,Bag)  // Param instead of Id
 
@@ -423,6 +421,8 @@ When done with the first pass, call \texttt{main()}. */
         <busy> Busy => Busy -Set keys(H) </busy>
         <terminated>... . => SetItem(T) ...</terminated>
 
+//@ \subsubsection{Thread joining}
+
    rule <k> join T:Int; => . ...</k>
         <terminated>... SetItem(T) ...</terminated>
 
@@ -452,22 +452,25 @@ When done with the first pass, call \texttt{main()}. */
 
 //@ \section{Auxiliary declarations and operations}
 
-  syntax K ::= bind(Params,Vals)
+/*@ Turns a list of parameters and a list of instance values for them
+into a list of variable declarations. */
+  syntax Decl ::= mkDecls(Params,Vals)  [function]
+  rule mkDecls((T:Type X:Id, Ps:Params), (V:Val, Vs:Vals))
+    => T X=V; mkDecls(Ps,Vs)
+  rule mkDecls(.Params,.Vals) => {}
 
-  rule <k> bind((T:Type X:Id, Ps:Params => Ps), (V:Val, Vs:Vals => Vs)) ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> V ...</store>
-       <nextLoc> L => L:Int +Int 1 </nextLoc>
-    when typeOf(V) ==K T  [structural]  // check type
-
-  rule bind(.Params, .Vals) => .  [structural]
+//@ Location lookup.
 
   syntax K ::= lookup(Int)
   rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>  [lookup]
 
+//@ Environment recovery.
+
   syntax K ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
   rule (env(_) => .) ~> env(_)  [structural]
+
+//@ lvalue and loc
 
   syntax Exp ::= lvalue(K)
   syntax Val ::= loc(Int)
@@ -480,14 +483,19 @@ When done with the first pass, call \texttt{main()}. */
 
   rule lvalue(lookup(L:Int)) => loc(L)  [structural]
 
-//@ \subsection{Sequences of locations}
+/*@ Adds the corresponding depth to an array type */
 
+  syntax Type ::= Type "<" Vals ">"  [function]
+  rule T:Type<_,Vs:Vals> => T[]<Vs>
+  rule T:Type<.Vals> => T
+
+//@ Sequences of locations.
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
   rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
-// new
+// Type of a value.
   syntax Type ::= typeOf(K)  [function]
   rule typeOf(_:Int) => int
   rule typeOf(_:Bool) => bool
@@ -497,6 +505,7 @@ When done with the first pass, call \texttt{main()}. */
   rule typeOf(undefined(T)) => T
   rule typeOf(nothing(T)) => T
 
+//@ List of types of a parameter.       
   syntax Types ::= getTypes(Params)  [function]
   rule getTypes(T:Type _:Id) => T, .Types   // I would like to not use .Types
   rule getTypes(T:Type _:Id, P, Ps) => T, getTypes(P,Ps)

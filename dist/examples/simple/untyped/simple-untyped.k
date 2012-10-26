@@ -372,32 +372,36 @@ structure. */
 
 /*@ \subsection{Array Declaration}
 The \K semantics of the uni-dimensional array declaration is somehow similar
-to the above declaration of ordinary variables.  $N+_{\it \scriptsize Int}1$
-locations are allocated in the store for an array of size $N$, the additional
-location (chosen to be the first one allocated) holding the array reference
-value.  The array reference value \texttt{array(L,N)} states that the array
-has size $N$ and its elements are located contiguously in the store starting
-with location $L$.  The operation $L \ldots L'\mapsto V$, defined at the end
-of this file in the auxiliary operation section, initializes each location in
-the list $L \ldots L'$ to $V$.  Note that, since the dimensions of array
-declarations can be arbitrary expressions, this virtually means that we can
-dynamically allocate memory in SIMPLE by means of array declarations. */
+to the above declaration of ordinary variables.  First, note the
+context declaration below, which requests the evaluation of the array
+dimension.  Once evaluated, say to a natural number $N$, then
+$N+_{\it \scriptsize Int}1$ locations are allocated in the store for
+an array of size $N$, the additional location (chosen to be the first
+one allocated) holding the array reference value.  The array reference
+value \texttt{array(L,N)} states that the array has size $N$ and its
+elements are located contiguously in the store starting with location
+$L$.  The operation $L \ldots L'\mapsto V$, defined at the end of this
+file in the auxiliary operation section, initializes each location in
+the list $L \ldots L'$ to $V$.  Note that, since the dimensions of
+array declarations can be arbitrary expressions, this virtually means
+that we can dynamically allocate memory in SIMPLE by means of array
+declarations. */ 
+
+  context var _:Id[HOLE];
 
   rule <k> var X:Id[N:Int]; => . ...</k>
        <env> Env => Env[L/X] </env>
        <store>... . => L |-> array(L +Int 1, N)
                        (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
+    when N >=Int 0
 
 /*@ SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we
 desugar them all into uni-dimensional arrays by code transformation.
-This way, we will only need to give semantics to uni-dimensional arrays.
-First, the context rule below is used to request the evaluation of array
-dimensions (that's why we defined the expression lists strict and hybrid!): */
-
-  context var _:Id[HOLE];
-
-/*@  Upon evaluating the array dimensions, the code generation rule below
+This way, we only need to give semantics to uni-dimensional arrays.
+First, note that the context rule above actually evaluates all the array
+dimensions (that's why we defined the expression lists strict!):
+Upon evaluating the array dimensions, the code generation rule below
 desugars multi-dimensional array declaration to uni-dimensional declarations.
 To this aim, we introduce two special unique variable identifiers,
 \texttt{\$1} and \texttt{\$2}.  The first, \texttt{\$1}, is assigned the array
@@ -548,6 +552,10 @@ precise location; we prefer to do it this way to avoid locking the store.
 The semantics of the auxiliary \texttt{lookup} operation is straightforward,
 and is defined at the end of the file. */
 
+// It would be nice to get rid of the next two anywhere rules!
+//
+// Besides the top level of the computation, they are only needed
+// inside the lvalue wrapper.  Maybe add to K some additional notation?
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
     [structural, anywhere]
 
@@ -577,7 +585,10 @@ current environment (which is being pushed on the function stack) to
 the global environment, which is where the free variables in the
 function body should be looked up; it binds the formal parameters to
 fresh locations in the new environment, and stores the actual
-arguments to those locations in the store.  The second rule pops the
+arguments to those locations in the store (this latter step is easily
+done by reducing the problem to variable declarations, whose semantics
+we have already defined; the auxiliary operation \texttt{mkDecls} is
+defined at the end of the file).  The second rule pops the
 computation, the environment and the control data from the function
 stack when a \texttt{return} statement is encountered as the next
 computational task, passing the returned value to the popped
@@ -593,7 +604,7 @@ nulary \texttt{return;} statements. */
 
   syntax ListItem ::=  (Map,K,Bag)
 
-  rule <k> lambda(Xs,S)(Vs:Vals) ~> K => bind(Xs,Vs) ~> S ~> return; </k>
+  rule <k> lambda(Xs,S)(Vs:Vals) ~> K => mkDecls(Xs,Vs) S return; </k>
        <control>
          <fstack> . => (Env,K,C) ...</fstack>
          C
@@ -611,14 +622,7 @@ nulary \texttt{return;} statements. */
   syntax Val ::= "nothing"
   rule return; => return nothing;   [macro]
 
-/*@ The auxiliary \texttt{bind} construct binds a list of variables
-to a list of values.  Specifically, it allocates a fresh location for
-each variable, binding the variable to that location in the
-environment and writing the value to that location in the store. 
-Its definition can be found at the end of the file, in the auxiliary
-operations section.
-
-Like for division-by-zero, it is left unspecified what happens
+/*@ Like for division-by-zero, it is left unspecified what happens
 when the \texttt{nothing} value is used in domain calculations.  For
 example, from the the perspective of the language semantics,
 $7+_{\scriptsize\it Int}\texttt{nothing}$ can evaluate to anything, or
@@ -640,7 +644,7 @@ constructs.  To make it a statement all one needs to do is to follow it by a
 semi-colon ``\texttt{;}'' (see the semantics for expression statements below).
 Like for the increment, we want to allow assignments not only to variables but
 also to array elements, e.g., \texttt{e1[e2] = e3} where \texttt{e1} evaluates
-to an array reference, \texttt{e2} to a natural number, and \texttt{e3} to any 
+to an array reference, \texttt{e2} to a natural number, and \texttt{e3} to any
 value.  Thus, we first compute the lvalue of the left-hand-side expression
 that appears in an assignment, and then we do the actual assignment to the
 resulting location: */
@@ -910,21 +914,14 @@ actual configuration of SIMPLE is to include each \textsf{k} cell in a
 In this section we define all the auxiliary constructs used in the
 above semantics. */
 
-/*@ \subsection{Bind}
-The \texttt{bind} auxiliary construct binds a list of variables
-to a list of values.  In words, it allocates a fresh location for
-each variable, and binds the variable to that location in the
-environment and writes the value to that location in the store.
-Formally: */
+/*@ \subsection{Making declarations}
+The \texttt{mkDecls} auxiliary construct turns a list of identifiers
+and a list of values in a sequence of corresponding variable
+declarations. */
 
-  syntax K ::= bind(Ids,Vals)
-
-  rule <k> bind((X:Id, Xs:Ids => Xs), (V:Val, Vs:Vals => Vs)) ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> V ...</store>
-       <nextLoc> L => L:Int +Int 1 </nextLoc>  [structural]
-
-  rule bind(.Ids, .Vals) => .  [structural]
+  syntax Decl ::= mkDecls(Ids,Vals)  [function]
+  rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
+  rule mkDecls(.Ids,.Vals) => {}
 
 /*@ \subsection{Location lookup}
 The operation below is straightforward.  Note that we tag it with the same
@@ -989,6 +986,7 @@ corresponding store lookup operation. */
   syntax Val ::= loc(Int)
 
 // Local variable
+
   rule <k> lvalue(X:Id) => loc(L) ...</k> <env>... X |-> L:Int ...</env>
     [structural]
 
