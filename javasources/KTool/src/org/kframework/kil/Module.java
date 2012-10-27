@@ -14,12 +14,10 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.utils.xml.XML;
 import org.w3c.dom.Element;
 
-
 public class Module extends DefinitionItem {
 	private String name;
 	private List<ModuleItem> items;
 	private String type;
-	private boolean predefined = false;
 
 	public Module(Element element) {
 		super(element);
@@ -133,14 +131,6 @@ public class Module extends DefinitionItem {
 	@Override
 	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
-	}
-
-	public void setPredefined(boolean predefined) {
-		this.predefined = predefined;
-	}
-
-	public boolean isPredefined() {
-		return predefined;
 	}
 
 	public Module addModuleItems(List<ModuleItem> rules) {

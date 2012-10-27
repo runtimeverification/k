@@ -115,8 +115,11 @@ public class BasicParser {
 				}
 			}
 
+			boolean predefined = file.getCanonicalPath().startsWith(KPaths.getKBase(false) + File.separator + "include");
 			// add the modules to the modules list and to the map for easy access
 			for (DefinitionItem di : defItemList) {
+				if (predefined)
+					di.setPredefined(true);
 				this.moduleItems.add(di);
 				if (di instanceof Module) {
 					Module m = (Module) di;
