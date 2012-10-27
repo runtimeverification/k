@@ -129,7 +129,7 @@ public class Main {
 	}
 
 	public static String makeConfiguration(String kast, Properties configuration_variables) {
-		org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/K3Disamb.tbl");
+		org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
 		String output = "";
 		boolean hasPGM = false;
 		int items = 0;

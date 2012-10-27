@@ -48,12 +48,13 @@
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</fileset>
 		</delete>
-		<delete file="${javasources}/K3Disamb/trans/K3Str.rtree" />
-		<delete file="${javasources}/K3Disamb/trans/K3Str.dep" />
-		<delete dir="${javasources}/K3Disamb/trans/K3Str" />
-		<delete dir="${javasources}/K3Disamb/include" />
+		<delete file="${javasources}/parsers/Concrete/trans/ConcreteMain.rtree" />
+		<delete file="${javasources}/parsers/Concrete/trans/ConcreteMain.dep" />
+		<delete dir="${javasources}/parsers/Concrete/trans/ConcreteMain" />
+		<delete dir="${javasources}/parsers/Concrete/include" />
 
 		<delete dir="${javasources}/KTool/bin" />
+		<delete file="${javasources}/KTool/lib/resources/sdf/*" />
 
 		<delete file="${javasources}/../dist/bin/java/k3.jar" />
 		<delete file="${javasources}/../dist/bin/version.txt" />

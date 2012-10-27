@@ -1,6 +1,6 @@
 package org.kframework.parser.concrete;
 
-import org.kframework.parser.concrete.lib.K3Str;
+import org.kframework.parser.concrete.lib.ConcreteMain;
 import org.kframework.parser.concrete.lib.import$Tbl$Pgm_0_0;
 import org.kframework.parser.concrete.lib.import$Tbl_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Cmd_0_0;
@@ -18,7 +18,7 @@ public class KParser {
 	private static void init() {
 		synchronized (KParser.class) {
 			if (context == null) {
-				context = K3Str.init();
+				context = ConcreteMain.init();
 			}
 		}
 	}

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="all.stratego" name="K3Java Build requriements">
+<project basedir="." default="all.stratego2java" name="K3Java Build requriements">
 	<!-- This is an automatic way of compiling K3.
 	To be able to call this script, you will first have to install the appropriate version of
 	the stratego-sdf bundle found here: http://strategoxt.org/Stratego/StrategoDownload
 	Don't forget to set up the propper execution rights for those programs.
 	-->
 
-	<target name="all.stratego" depends="basic.stratego, k3" />
+	<target name="all.stratego2java" depends="basic.stratego2java, concrete.stratego2java" />
 
-	<target name="basic.stratego">
+	<target name="basic.stratego2java">
 		<dependset>
 			<srcfileset file="../parsers/Basic/trans/*.str" />
 			<srcfileset file="../parsers/Basic/include/Basic.str" />
@@ -21,10 +21,10 @@
 				<exclude name="get_layout_0_0.java" />
 			</targetfileset>
 		</dependset>
-		<available file="src/org/kframework/parser/basic/lib/BasicMain.java" property="basic.stratego.available" />
-		<antcall target="basic.stratego.helper" />
+		<available file="src/org/kframework/parser/basic/lib/BasicMain.java" property="basic.stratego2java.available" />
+		<antcall target="basic.stratego2java.helper" />
 	</target>
-	<target name="basic.stratego.helper" unless="basic.stratego.available">
+	<target name="basic.stratego2java.helper" unless="basic.stratego2java.available">
 		<delete file="../parsers/Basic/trans/BasicMain.rtree" />
 		<delete file="../parsers/Basic/trans/BasicMain.dep" />
 		<delete dir="../parsers/Basic/trans/BasicMain" />
@@ -50,10 +50,10 @@
 		<delete dir="../parsers/Basic/trans/BasicMain" />
 	</target>
 
-	<target name="k3">
+	<target name="concrete.stratego2java">
 		<dependset>
-			<srcfileset file="../K3Disamb/trans/*.str" />
-			<srcfileset file="../K3Disamb/include/K3Disamb.str" />
+			<srcfileset file="../parsers/Concrete/trans/*.str" />
+			<srcfileset file="../parsers/Concrete/include/Concrete.str" />
 			<targetfileset dir="src/org/kframework/parser/concrete/lib">
 				<include name="*.java" />
 				<exclude name="string_trim_last_one_0_0.java" />
@@ -65,19 +65,19 @@
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 			</targetfileset>
 		</dependset>
-		<available file="src/org/kframework/parser/concrete/lib/K3Str.java" property="k3.available" />
-		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/Common.sdf" />
-		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/K3Disamb.sdf" />
-		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/KBuiltinsBasic.sdf" />
-		<copy todir="lib/resources/sdf" file="../K3Disamb/syntax/KTechnique.sdf" />
-		<antcall target="k3.helper" />
+		<available file="src/org/kframework/parser/concrete/lib/ConcreteMain.java" property="concrete.stratego2java.available" />
+		<copy todir="lib/resources/sdf" file="../parsers/Concrete/syntax/Common.sdf" />
+		<copy todir="lib/resources/sdf" file="../parsers/Concrete/syntax/Concrete.sdf" />
+		<copy todir="lib/resources/sdf" file="../parsers/Concrete/syntax/KBuiltinsBasic.sdf" />
+		<copy todir="lib/resources/sdf" file="../parsers/Concrete/syntax/KTechnique.sdf" />
+		<antcall target="concrete.stratego2java.helper" />
 	</target>
-	<target name="k3.helper" unless="k3.available">
-		<delete file="../K3Disamb/trans/K3Str.rtree" />
-		<delete file="../K3Disamb/trans/K3Str.dep" />
-		<delete dir="../K3Disamb/trans/K3Str" />
-		<java failonerror="true" dir="../K3Disamb/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
-			<arg line="-i starter.str -o K3Str -la stratego-sglr --lib -I .. -p org.kframework.parser.concrete.lib --clean" />
+	<target name="concrete.stratego2java.helper" unless="concrete.stratego2java.available">
+		<delete file="../parsers/Concrete/trans/ConcreteMain.rtree" />
+		<delete file="../parsers/Concrete/trans/ConcreteMain.dep" />
+		<delete dir="../parsers/Concrete/trans/ConcreteMain" />
+		<java failonerror="true" dir="../parsers/Concrete/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
+			<arg line="-i starter.str -o ConcreteMain -la stratego-sglr --lib -I .. -p org.kframework.parser.concrete.lib --clean" />
 		</java>
 		<delete>
 			<fileset dir="src/org/kframework/parser/concrete/lib">
@@ -92,13 +92,13 @@
 			</fileset>
 		</delete>
 		<copy todir="src/org/kframework/parser/concrete/lib/">
-			<fileset dir="../K3Disamb/trans/K3Str">
+			<fileset dir="../parsers/Concrete/trans/ConcreteMain">
 				<include name="*" />
 			</fileset>
 		</copy>
 
-		<delete file="../K3Disamb/trans/K3Str.rtree" />
-		<delete file="../K3Disamb/trans/K3Str.dep" />
-		<delete dir="../K3Disamb/trans/K3Str" />
+		<delete file="../parsers/Concrete/trans/ConcreteMain.rtree" />
+		<delete file="../parsers/Concrete/trans/ConcreteMain.dep" />
+		<delete dir="../parsers/Concrete/trans/ConcreteMain" />
 	</target>
 </project>

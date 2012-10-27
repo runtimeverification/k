@@ -27,7 +27,7 @@
 	<property name="build.strategoxt.sdf" value="${basedir}/../../dist/bin/native/${osNativesDir}/" />
 
 	<!-- call both targets -->
-	<target name="all.signature" depends="basic.signature, k3sig" />
+	<target name="all.signature" depends="basic.signature, concrete.signature" />
 
 	<target name="basic.signature">
 		<dependset>
@@ -86,48 +86,48 @@
 		</exec>
 	</target>
 
-	<target name="k3sig">
+	<target name="concrete.signature">
 		<dependset>
-			<srcfileset file="../K3Disamb/syntax/*.sdf" />
-			<targetfileset file="../K3Disamb/include/*.str" />
+			<srcfileset file="../parsers/Concrete/syntax/*.sdf" />
+			<targetfileset file="../parsers/Concrete/include/*.str" />
 		</dependset>
-		<available file="../K3Disamb/include/K3Disamb.str" property="k3sig.available" />
-		<antcall target="k3sig.helper" />
+		<available file="../parsers/Concrete/include/Concrete.str" property="concrete.signature.available" />
+		<antcall target="concrete.signature.helper" />
 	</target>
-	<target name="k3sig.helper" unless="k3sig.available">
+	<target name="concrete.signature.helper" unless="concrete.signature.available">
 		<!-- pack the definition into a single .def file -->
-		<mkdir dir="../K3Disamb/include" />
+		<mkdir dir="../parsers/Concrete/include" />
 		<java jar="./lib/strj.jar" fork="true" failonerror="true">
 			<arg value="org.strategoxt.tools.main-pack-sdf" />
 			<arg value="-i" />
-			<arg value="../K3Disamb/syntax/K3Disamb.sdf" />
+			<arg value="../parsers/Concrete/syntax/Concrete.sdf" />
 			<arg value="-o" />
-			<arg value="../K3Disamb/include/K3Disamb.def" />
+			<arg value="../parsers/Concrete/include/Concrete.def" />
 		</java>
 		<echo>Packed to .def</echo>
 		<!-- create the rtg file -->
 		<java jar="./lib/strj.jar" fork="true" failonerror="true">
 			<arg value="org.strategoxt.tools.main-sdf2rtg" />
 			<arg value="-i" />
-			<arg value="../K3Disamb/include/K3Disamb.def" />
+			<arg value="../parsers/Concrete/include/Concrete.def" />
 			<arg value="-o" />
-			<arg value="../K3Disamb/include/K3Disamb.rtg" />
+			<arg value="../parsers/Concrete/include/Concrete.rtg" />
 			<arg value="--ignore-missing-cons" />
 			<arg value="-Xnativepath" />
 			<arg value="${build.strategoxt.sdf}" />
 			<arg value="-m" />
-			<arg value="K3Disamb" />
+			<arg value="Concrete" />
 		</java>
 		<echo>Def -> Rtg</echo>
 		<!-- create the .str file representing the signature -->
 		<java jar="./lib/strj.jar" fork="true" failonerror="true">
 			<arg value="org.strategoxt.tools.main-rtg2sig" />
 			<arg value="-i" />
-			<arg value="../K3Disamb/include/K3Disamb.rtg" />
+			<arg value="../parsers/Concrete/include/Concrete.rtg" />
 			<arg value="-o" />
-			<arg value="../K3Disamb/include/K3Disamb.str" />
+			<arg value="../parsers/Concrete/include/Concrete.str" />
 			<arg value="--module" />
-			<arg value="K3Disamb" />
+			<arg value="Concrete" />
 		</java>
 	</target>
 

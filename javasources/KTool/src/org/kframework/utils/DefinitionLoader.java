@@ -138,13 +138,13 @@ public class DefinitionLoader {
 				sw.printIntermediate("File Gen Def");
 
 			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "K3Disamb");
+				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Generate TBLDef");
 
 			// ------------------------------------- import files in Stratego
-			org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getAbsolutePath() + "/def/K3Disamb.tbl");
+			org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getAbsolutePath() + "/def/Concrete.tbl");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Importing Files");

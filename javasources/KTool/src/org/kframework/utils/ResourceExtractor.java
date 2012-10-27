@@ -21,7 +21,7 @@ public class ResourceExtractor {
 	public static void ExtractAllSDF(File basePath) throws IOException {
 		File def = new File(basePath.getAbsolutePath() + "/def");
 		def.mkdirs();
-		Extract("/sdf/K3Disamb.sdf", new File(def.getAbsoluteFile() + "/K3Disamb.sdf"));
+		Extract("/sdf/Concrete.sdf", new File(def.getAbsoluteFile() + "/Concrete.sdf"));
 		Extract("/sdf/Common.sdf", new File(def.getAbsoluteFile() + "/Common.sdf"));
 		Extract("/sdf/KBuiltinsBasic.sdf", new File(def.getAbsoluteFile() + "/KBuiltinsBasic.sdf"));
 		Extract("/sdf/KTechnique.sdf", new File(def.getAbsoluteFile() + "/KTechnique.sdf"));
