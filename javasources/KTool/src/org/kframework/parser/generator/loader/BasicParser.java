@@ -216,6 +216,8 @@ public class BasicParser {
 		nodes = BasicParser.sort(nodes);
 		List<ASTNode> defItemListTemp = new ArrayList<ASTNode>();
 
+		List<ASTNode> commentsToRemove = new ArrayList<ASTNode>();
+
 		for (int i = 0; i < nodes.size(); i++) {
 			ASTNode current = nodes.get(i);
 			if (current instanceof Module) {
@@ -224,6 +226,7 @@ public class BasicParser {
 					ASTNode next = nodes.get(i + 1);
 					if (next instanceof LiterateDefinitionComment && isInside(m, next)) {
 						m.getItems().add(new LiterateModuleComment((LiterateDefinitionComment) next));
+						commentsToRemove.add(next);
 					} else
 						break;
 				}
@@ -232,6 +235,9 @@ public class BasicParser {
 
 			defItemListTemp.add(current);
 		}
+
+		for (ASTNode anode : commentsToRemove)
+			nodes.remove(anode);
 
 		return nodes;
 	}
