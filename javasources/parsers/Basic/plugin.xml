@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?eclipse version="3.0"?>
+
+<plugin>
+       <extension point="org.eclipse.imp.runtime.languageDescription">
+          <language extensions="k" description="Basic" language="Basic" derivedFrom="DynamicRoot" validator="Basic.BasicValidator" validatorClass="Basic.BasicValidator"></language>
+       </extension>
+       <extension id="Basic.parser" name="Basic Parser" point="org.eclipse.imp.runtime.parser">
+          <parser class="Basic.BasicParseController" language="Basic">
+          </parser>
+       </extension>    
+    </plugin>
