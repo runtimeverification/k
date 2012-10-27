@@ -28,8 +28,8 @@
 				<include name="*.java" />
 				<include name="K3Syntax.tbl" />
 				<exclude name="xml_string_escape_from_string_0_0.java" />
-				<exclude name="clear_console.java" />
-				<exclude name="get_layout.java" />
+				<exclude name="clear_console_0_0.java" />
+				<exclude name="get_layout_0_0.java" />
 			</fileset>
 		</delete>
 		<delete file="${javasources}/K3Syntax/trans/K2Str.rtree" />
