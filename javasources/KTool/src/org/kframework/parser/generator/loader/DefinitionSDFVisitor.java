@@ -88,7 +88,10 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 							ProductionItem itm = items.get(i);
 							if (itm.getType() == ProductionType.TERMINAL) {
 								Terminal t = (Terminal) itm;
-								sdf.append("\"" + t.getTerminal() + "\" ");
+								if (t.getTerminal().equals(":"))
+									sdf.append("DouaPuncteDz ");
+								else
+									sdf.append("\"" + t.getTerminal() + "\" ");
 							} else if (itm.getType() == ProductionType.SORT) {
 								Sort srt = (Sort) itm;
 								// if we are on the first or last place and this sort is not a list, just print the sort

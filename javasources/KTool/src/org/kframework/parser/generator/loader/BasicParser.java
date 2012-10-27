@@ -91,14 +91,12 @@ public class BasicParser {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void slurp2(File file) throws IOException {
 		String cannonicalPath = file.getCanonicalPath();
 		if (!filePaths.contains(cannonicalPath)) {
 			filePaths.add(cannonicalPath);
 
 			List<DefinitionItem> defItemList = parseFile(file);
-			defItemList = (List<DefinitionItem>) BasicParser.relocateComments(defItemList);
 
 			// go through every required file
 			for (ASTNode di : defItemList) {
@@ -118,16 +116,17 @@ public class BasicParser {
 			}
 
 			// add the modules to the modules list and to the map for easy access
-			for (ASTNode di : defItemList) {
+			for (DefinitionItem di : defItemList) {
+				this.moduleItems.add(di);
 				if (di instanceof Module) {
 					Module m = (Module) di;
-					this.moduleItems.add(m);
 					this.modulesMap.put(m.getName(), m);
 				}
 			}
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static List<DefinitionItem> parseFile(File file) {
 		String content = FileUtil.getFileContent(file.getAbsolutePath());
 
@@ -145,7 +144,7 @@ public class BasicParser {
 				defItemList.add((DefinitionItem) JavaClassesFactory.getTerm(elm));
 			}
 		}
-
+		defItemList = (List<DefinitionItem>) BasicParser.relocateComments(defItemList);
 		return defItemList;
 	}
 
