@@ -2,19 +2,16 @@ package org.kframework.krun;
 
 import java.io.File;
 
-
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.CollectConsesVisitor;
-import org.kframework.kil.loader.CollectListConsesVisitor;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.XmlLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.thoughtworks.xstream.XStream;
 
 public class KastParser {
 	private static boolean initialized = false;
@@ -25,12 +22,12 @@ public class KastParser {
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
 
-		String definition = FileUtil.getFileContent(K.kdir + "/def.xml");
-		Document defDoc = org.kframework.utils.utils.xml.XML.getDocument(definition);
-		ASTNode outDef = JavaClassesFactory.getTerm(defDoc.getDocumentElement());
-		outDef.accept(new UpdateReferencesVisitor());
-		outDef.accept(new CollectConsesVisitor());
-		outDef.accept(new CollectListConsesVisitor());
+		XStream xstream = new XStream();
+		xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+
+		org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.kdir + "/defx.xml"));
+		// This is essential for generating maude
+		javaDef.preprocess();
 
 		initialized = true;
 		// TODO: save outDef somewhere - maybe you will need it later

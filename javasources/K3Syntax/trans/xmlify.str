@@ -98,9 +98,11 @@ rules
 	//external myorigin(|)
 	//getLocAsString        = myorigin ; write-to-string <+ !"(0,0,0,0)"
 	get-original-sentence = prim("SSL_EXT_origin_text", <id>) ; xmlStringEscape ; escape
-	
-	external xml-string-escape-from-string(|)
 
+	disamb = clear-console
+	external clear-console(|)
+	external xml-string-escape-from-string(|)
+	external get-layout(|)
 
 	// print the K definition as an XML - parsing only the syntax
 	to-xml:
@@ -108,13 +110,14 @@ rules
 			<def loc="[loc]">
 				[i']
 				[x']
+				[lay]
 			</def>
 			]
 		where mydebug(!"KModuleList: ")
 		where i' := <all(to-xml)> i*
 		where x' := <all(to-xml)> x*		// print to XML all the modules
-		where mydebug(!"KModuleList**: ")
 		where loc := <getLocAsString>		// get the location info
+		where lay := <get-layout ; all(to-xml)>
 
 	to-xml:
 		Require(x) -> $[<require value="[<xml-string-escape-from-string>x]" loc="[loc]"/>
@@ -330,5 +333,9 @@ rules
 		TagString(x, y) -> $[<tag key="[x]" value="[<xml-string-escape-from-string> y]" loc="[loc]" />
 		]
 		where loc := <getLocAsString>
+
+	to-xml:
+		"Comment"#([a, b]) -> $[<comment value="[<xmlStringEscape> a]" loc="[b]" />
+		]
 
 

@@ -31,6 +31,13 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 		lcType = literateModuleComment.lcType;
 	}
 
+	public LiterateModuleComment(LiterateDefinitionComment ldc) {
+		setFilename(ldc.getFilename());
+		setLocation(ldc.getLocation());
+		value = ldc.getValue();
+		lcType = ldc.getType();
+	}
+
 	@Override
 	public void applyToAll(Modifier visitor) {
 	}
@@ -61,5 +68,13 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 	@Override
 	public LiterateModuleComment shallowCopy() {
 		return new LiterateModuleComment(this);
+	}
+
+	@Override
+	public String toString() {
+		String shortStr = value;
+		if (value.indexOf("\n") > 0)
+			shortStr = value.substring(0, value.indexOf("\n") - 1) + "...";
+		return shortStr;
 	}
 }

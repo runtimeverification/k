@@ -7,7 +7,6 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
-
 public class LiterateDefinitionComment extends DefinitionItem implements LiterateComment {
 	private String value;
 	private LiterateCommentType lcType;
@@ -25,11 +24,10 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
 			this.lcType = LiterateCommentType.COMMON;
 	}
 
-	public LiterateDefinitionComment(
-			LiterateDefinitionComment literateDefinitionComment) {
+	public LiterateDefinitionComment(LiterateDefinitionComment literateDefinitionComment) {
 		super(literateDefinitionComment);
 		value = literateDefinitionComment.value;
-		lcType = literateDefinitionComment.lcType; 
+		lcType = literateDefinitionComment.lcType;
 	}
 
 	@Override
@@ -62,5 +60,13 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
 	@Override
 	public LiterateDefinitionComment shallowCopy() {
 		return new LiterateDefinitionComment(this);
+	}
+
+	@Override
+	public String toString() {
+		String shortStr = value;
+		if (value.indexOf("\n") > 0)
+			value.substring(0, value.indexOf("\n") - 1);
+		return shortStr;
 	}
 }

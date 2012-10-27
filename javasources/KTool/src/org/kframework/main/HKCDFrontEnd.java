@@ -3,7 +3,6 @@ package org.kframework.main;
 import java.io.File;
 import java.io.IOException;
 
-
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.hkcd.HaskellDefFilter;
 import org.kframework.backend.hkcd.HaskellPgmFilter;
@@ -15,13 +14,10 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.utils.file.FileUtil;
 
-
-
 /**
  * Haskell K Compiler dump tool frontend
- *
- * @todo .def and .pgm loading routines is the same as in
- * kast/kompile — refactor it as well
+ * 
+ * @todo .def and .pgm loading routines is the same as in kast/kompile — refactor it as well
  */
 public class HKCDFrontEnd {
 
@@ -47,12 +43,7 @@ public class HKCDFrontEnd {
 		else {
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 1)
-				GlobalSettings.kem.register(
-					new KException(ExceptionType.ERROR,
-						       KExceptionGroup.CRITICAL,
-						       "You have to provide a language definition in order to compile!",
-						       "command line",
-						       "System file."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a language definition in order to compile!", "command line", "System file."));
 			else
 				def = restArgs[0];
 		}
@@ -60,17 +51,12 @@ public class HKCDFrontEnd {
 		// Load .def
 		File defFile = new File(def);
 		GlobalSettings.mainFile = defFile;
-		GlobalSettings.mainFileWithNoExtension =
-			defFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
+		GlobalSettings.mainFileWithNoExtension = defFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
 		if (!defFile.exists()) {
 			File errorFile = defFile;
 			defFile = new File(def + ".k");
 			if (!defFile.exists())
-				GlobalSettings.kem.register(
-					new KException(ExceptionType.ERROR,
-						       KExceptionGroup.CRITICAL,
-						       "File: " + errorFile.getName() + "(.k) not found.",
-						       errorFile.getAbsolutePath(), "File system."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system."));
 		}
 
 		// Load .pgm
@@ -80,12 +66,7 @@ public class HKCDFrontEnd {
 		else {
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 2)
-				GlobalSettings.kem.register(
-					new KException(ExceptionType.ERROR,
-						       KExceptionGroup.CRITICAL,
-						       "You have to provide a program source!",
-						       "command line",
-						       "System file."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a program source!", "command line", "System file."));
 			else
 				pgm = restArgs[1];
 		}
@@ -100,7 +81,7 @@ public class HKCDFrontEnd {
 		else
 			lang = FileUtil.getMainModule(defFile.getName());
 
-		/// Do the actual processing
+		// / Do the actual processing
 		hkcd(defFile, pgmFile, lang);
 
 		if (GlobalSettings.verbose)
@@ -108,10 +89,8 @@ public class HKCDFrontEnd {
 		GlobalSettings.kem.print();
 	}
 
-
 	/**
-	 * Dump language definition and program tree to hkc-readable
-	 * form
+	 * Dump language definition and program tree to hkc-readable form
 	 */
 	public static void hkcd(File defFile, File pgmFile, String mainModule) {
 		try {
@@ -125,14 +104,9 @@ public class HKCDFrontEnd {
 
 			GlobalSettings.literate = true;
 
-			org.kframework.kil.Definition langDef =
-				org.kframework.utils.DefinitionLoader.loadDefinition(
-					defFile,
-					mainModule);
+			org.kframework.kil.Definition langDef = org.kframework.utils.DefinitionLoader.loadDefinition(defFile, mainModule);
 
-			ASTNode pgmAst = 
-				org.kframework.utils.ProgramLoader.loadPgmAst(
-					pgmFile, dotk, false);
+			ASTNode pgmAst = org.kframework.utils.ProgramLoader.loadPgmAst(pgmFile, false);
 
 			HaskellPgmFilter hpf = new HaskellPgmFilter();
 			pgmAst.accept(hpf);
@@ -152,15 +126,9 @@ public class HKCDFrontEnd {
 
 			FileUtil.saveInFile(dotk.getAbsolutePath() + "/def.hkcd", defDump);
 
-			FileUtil.saveInFile(
-				FileUtil.stripExtension(defCanonical.getAbsolutePath()) +
-				".hkcd",
-				defDump);
+			FileUtil.saveInFile(FileUtil.stripExtension(defCanonical.getAbsolutePath()) + ".hkcd", defDump);
 
-			FileUtil.saveInFile(
-				FileUtil.stripExtension(pgmCanonical.getAbsolutePath()) +
-				".hkcd",
-				pgmDump);
+			FileUtil.saveInFile(FileUtil.stripExtension(pgmCanonical.getAbsolutePath()) + ".hkcd", pgmDump);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("HKCD");

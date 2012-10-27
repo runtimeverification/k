@@ -13,10 +13,10 @@
 	</target>
 
 	<target name="parallel">
-		<ant antfile="${javasources}/KTool/build.xml" dir="${javasources}/KTool" target="parallellocal"/>
+		<ant antfile="${javasources}/KTool/build.xml" dir="${javasources}/KTool" target="parallellocal" />
 		<antcall target="makeversion" />
 	</target>
-	
+
 	<target name="build">
 		<ant antfile="${javasources}/KTool/build.xml" dir="${javasources}/KTool" />
 		<antcall target="makeversion" />
@@ -28,6 +28,8 @@
 				<include name="*.java" />
 				<include name="K3Syntax.tbl" />
 				<exclude name="xml_string_escape_from_string_0_0.java" />
+				<exclude name="clear_console.java" />
+				<exclude name="get_layout.java" />
 			</fileset>
 		</delete>
 		<delete file="${javasources}/K3Syntax/trans/K2Str.rtree" />

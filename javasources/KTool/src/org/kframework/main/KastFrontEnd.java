@@ -4,19 +4,17 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.utils.file.FileUtil;
 import org.kframework.utils.utils.file.KPaths;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+
+import com.thoughtworks.xstream.XStream;
 
 public class KastFrontEnd {
 
@@ -59,9 +57,10 @@ public class KastFrontEnd {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
 
 		File def = null;
+		org.kframework.kil.Definition javaDef = null;
 		if (cmd.hasOption("def")) {
 			def = new File(cmd.getOptionValue("def"));
-			if (!def.exists()) 
+			if (!def.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
 			if (DefinitionHelper.dotk == null) {
 				try {
@@ -70,7 +69,7 @@ public class KastFrontEnd {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}			
+			}
 		} else {
 			// search for the definition
 			try {
@@ -79,14 +78,19 @@ public class KastFrontEnd {
 					DefinitionHelper.dotk = new File(new File(".").getCanonicalPath() + "/.k");
 				}
 				if (DefinitionHelper.dotk.exists()) {
-					File defXml = new File(DefinitionHelper.dotk.getCanonicalPath() + "/def.xml");
+					File defXml = new File(DefinitionHelper.dotk.getCanonicalPath() + "/defx.xml");
 					if (!defXml.exists()) {
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
 					}
 
-					Document doc = XmlLoader.getXMLDoc(FileUtil.getFileContent(defXml.getAbsolutePath()));
-					Element el = (Element) doc.getElementsByTagName("def").item(0);
-					def = new File(el.getAttribute("mainFile"));
+					XStream xstream = new XStream();
+					xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+
+					javaDef = (org.kframework.kil.Definition) xstream.fromXML(defXml);
+					// This is essential for generating maude
+					javaDef.preprocess();
+
+					def = new File(javaDef.getMainFile());
 				}
 
 				if (def == null)
@@ -95,7 +99,7 @@ public class KastFrontEnd {
 				e.printStackTrace();
 			}
 		}
-		
+
 		boolean prettyPrint = false;
 		boolean nextline = false;
 		IndentationOptions indentationOptions = new IndentationOptions();
@@ -118,8 +122,8 @@ public class KastFrontEnd {
 				nextline = true;
 			}
 		}
-		
-		org.kframework.utils.ProgramLoader.processPgm(mainFile, def, prettyPrint, nextline, indentationOptions);
+
+		org.kframework.utils.ProgramLoader.processPgm(mainFile, javaDef, prettyPrint, nextline, indentationOptions);
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
 		GlobalSettings.kem.print();

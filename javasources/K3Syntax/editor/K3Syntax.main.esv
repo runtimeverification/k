@@ -14,3 +14,4 @@ language General properties
   extensions    : k
   table         : include/K3Syntax.tbl
   start symbols : Start
+  disambiguator : disamb

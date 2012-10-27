@@ -30,7 +30,10 @@ public class StringSentence extends ModuleItem {
 	}
 
 	public String toString() {
-		return "String sentence.";
+		String shortStr = content;
+		if (content.indexOf("\n") > 0)
+			shortStr = content.substring(0, content.indexOf("\n") - 1) + "...";
+		return shortStr;
 	}
 
 	@Override

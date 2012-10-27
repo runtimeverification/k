@@ -214,7 +214,7 @@ public class KompileFrontEnd {
 	private static void lint(File mainFile, String mainModule) {
 		try {
 			File canonicalFile = mainFile.getCanonicalFile();
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, DefinitionHelper.dotk);
+			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(canonicalFile, mainModule);
 
 			KlintRule lintRule = new UnusedName(javaDef);
 			lintRule.run();
@@ -413,7 +413,7 @@ public class KompileFrontEnd {
 
 			// compile a definition here
 
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, canonicalFile, DefinitionHelper.dotk);
+			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(canonicalFile, mainModule);
 
 			Stopwatch sw = new Stopwatch();
 			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
@@ -470,7 +470,7 @@ public class KompileFrontEnd {
 			// for now just use this file as main argument
 			File f = mainFile.getCanonicalFile();
 
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, f, DefinitionHelper.dotk);
+			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(f, mainModule);
 
 			Stopwatch sw = new Stopwatch();
 
@@ -507,8 +507,6 @@ public class KompileFrontEnd {
 			Stopwatch sw = new Stopwatch();
 
 			// for now just use this file as main argument
-			File f = mainFile.getCanonicalFile();
-
 			// ------------------------------------- basic parsing
 
 			BasicParser bparser = new BasicParser();
@@ -630,11 +628,24 @@ public class KompileFrontEnd {
 			// for now just use this file as main argument
 			File f = mainFile.getCanonicalFile();
 
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(mainModule, f, DefinitionHelper.dotk);
+			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(f, mainModule);
+
+			Stopwatch sw = new Stopwatch();
 
 			MaudeFilter maudeFilter = new MaudeFilter();
 			javaDef.accept(maudeFilter);
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.maude", maudeFilter.getResult());
+
+			XStream xstream = new XStream();
+			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+
+			String xml = xstream.toXML(javaDef);
+
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml", xml);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Save in file");
+			}
 
 			compile(javaDef, step);
 		} catch (Exception e) {
@@ -647,8 +658,6 @@ public class KompileFrontEnd {
 		Stopwatch sw = new Stopwatch();
 
 		try {
-			File f = new File(javaDef.getMainFile()).getCanonicalFile();
-
 			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Empty Lists");
@@ -850,8 +859,6 @@ public class KompileFrontEnd {
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("RunMaude");
-		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (TransformerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

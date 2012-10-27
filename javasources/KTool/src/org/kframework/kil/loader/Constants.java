@@ -49,7 +49,7 @@ public class Constants {
 	public static final String DEFINITION = "def";
 	public static final String AMB = "amb";
 	public static final String MODULECOMMENT = "moduleComment";
-	public static final String DEFCOMMENT = "defComment";
+	public static final String DEFCOMMENT = "comment";
 	public static final String MAINFILE = "mainFile";
 	public static final String MAINMODULE = "mainModule";
 	public static final String MAINSYNTAXMODULE = "mainSyntaxModule";

@@ -9,10 +9,8 @@ import org.kframework.backend.unparser.KastFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.utils.errorsystem.KException;
@@ -55,8 +53,8 @@ public class ProgramLoader {
 	 * @param kappize
 	 *            If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(File pgmFile, File dotk, Boolean kappize) throws IOException {
-		File tbl = new File(dotk.getCanonicalPath() + "/pgm/Program.tbl");
+	public static ASTNode loadPgmAst(File pgmFile, Boolean kappize) throws IOException {
+		File tbl = new File(DefinitionHelper.dotk.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
@@ -70,14 +68,7 @@ public class ProgramLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), pgmFile.getAbsolutePath());
 		XmlLoader.reportErrors(doc);
-		XmlLoader.writeXmlFile(doc, dotk.getAbsolutePath() + "/pgm.xml");
-
-		String definition = FileUtil.getFileContent(dotk.getAbsolutePath() + "/def.xml");
-		Document defDoc = org.kframework.utils.utils.xml.XML.getDocument(definition);
-		ASTNode outDef = JavaClassesFactory.getTerm(defDoc.getDocumentElement());
-		outDef.accept(new UpdateReferencesVisitor());
-		outDef.accept(new CollectConsesVisitor());
-
+		XmlLoader.writeXmlFile(doc, DefinitionHelper.dotk.getAbsolutePath() + "/pgm.xml");
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
 		try {
@@ -98,19 +89,20 @@ public class ProgramLoader {
 		return out;
 	}
 
-	public static ASTNode loadPgmAst(File pgmFile, File dotk) throws IOException {
-		return loadPgmAst(pgmFile, dotk, true);
+	public static ASTNode loadPgmAst(File pgmFile) throws IOException {
+		return loadPgmAst(pgmFile, true);
 	}
 
 	/**
 	 * Print maudified program to standard output.
 	 * 
 	 * Save it in dotk cache under pgm.maude.
-	 * @param indentationOptions 
-	 * @param prettyPrint 
-	 * @param nextline 
+	 * 
+	 * @param indentationOptions
+	 * @param prettyPrint
+	 * @param nextline
 	 */
-	public static void processPgm(File pgmFile, File defFile, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions) {
+	public static void processPgm(File pgmFile, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions) {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -118,10 +110,7 @@ public class ProgramLoader {
 			sw.printIntermediate("Importing Files");
 
 		try {
-			Definition def = DefinitionLoader.loadDefinition(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/defx.xml"), null);
-			def.preprocess();
-
-			ASTNode out = loadPgmAst(pgmFile, DefinitionHelper.dotk);
+			ASTNode out = loadPgmAst(pgmFile);
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Parsing Program");
 			}
@@ -139,7 +128,7 @@ public class ProgramLoader {
 
 			System.out.println(kast);
 
-			String language = FileUtil.stripExtension(defFile.getName());
+			String language = FileUtil.stripExtension(def.getMainFile());
 			writeMaudifiedPgm(kast, language, DefinitionHelper.dotk);
 
 			if (GlobalSettings.verbose) {
