@@ -54,11 +54,6 @@
 		<delete dir="${javasources}/K3Disamb/trans/K3Str" />
 		<delete dir="${javasources}/K3Disamb/include" />
 
-		<delete file="${javasources}/LatexComments/trans/K3Str.rtree" />
-		<delete file="${javasources}/LatexComments/trans/K3Str.dep" />
-		<delete dir="${javasources}/LatexComments/trans/K3Str" />
-		<delete dir="${javasources}/LatexComments/include" />
-
 		<delete dir="${javasources}/KTool/bin" />
 
 		<delete file="${javasources}/../dist/bin/java/k3.jar" />

@@ -6,7 +6,7 @@
 	Don't forget to set up the propper execution rights for those programs.
 	-->
 
-	<target name="allstr" depends="k2syntax, k3latex, k3" />
+	<target name="allstr" depends="k2syntax, k3" />
 
 	<target name="k2syntax">
 		<dependset>
@@ -48,42 +48,6 @@
 		<delete file="../K3Syntax/trans/K2Str.rtree" />
 		<delete file="../K3Syntax/trans/K2Str.dep" />
 		<delete dir="../K3Syntax/trans/K2Str" />
-	</target>
-
-	<target name="k3latex">
-		<dependset>
-			<srcfileset file="../LatexComments/trans/*.str" />
-			<srcfileset file="../LatexComments/include/LatexComments.str" />
-			<srcfileset file="../LatexComments/include/LatexComments.tbl" />
-			<targetfileset dir="src/org/kframework/parser/latex/lib">
-				<include name="*.java" />
-				<include name="LatexComments.tbl" />
-			</targetfileset>
-		</dependset>
-		<available file="src/org/kframework/parser/latex/lib/K3Latex.java" property="k3latex.available" />
-		<antcall target="k3latex.helper" />
-	</target>
-	<target name="k3latex.helper" unless="k3latex.available">
-		<delete file="../LatexComments/trans/K3Latex.rtree" />
-		<delete file="../LatexComments/trans/K3Latex.dep" />
-		<delete dir="../LatexComments/trans/K3Latex" />
-		<java failonerror="true" dir="../LatexComments/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
-			<arg line="-i xmlify.str -o K3Latex -la stratego-sglr --lib -I .. -p org.kframework.parser.latex.lib --clean" />
-		</java>
-		<delete>
-			<fileset dir="src/org/kframework/parser/latex/lib">
-				<include name="*.java" />
-				<include name="LatexComments.tbl" />
-			</fileset>
-		</delete>
-		<copy todir="src/org/kframework/parser/latex/lib/">
-			<fileset dir="../LatexComments/trans/K3Latex">
-				<include name="*" />
-			</fileset>
-		</copy>
-		<delete file="../LatexComments/trans/K3Latex.rtree" />
-		<delete file="../LatexComments/trans/K3Latex.dep" />
-		<delete dir="../LatexComments/trans/K3Latex" />
 	</target>
 
 	<target name="k3">

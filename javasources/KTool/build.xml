@@ -16,10 +16,6 @@
 				<antcall target="k2syntax" />
 			</sequential>
 			<sequential>
-				<antcall target="k3latexsig" />
-				<antcall target="k3latex" />
-			</sequential>
-			<sequential>
 				<antcall target="k3sig" />
 				<antcall target="k3" />
 			</sequential>
