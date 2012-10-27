@@ -57,8 +57,8 @@ module K-MAP-EXTRAS
   rule keys . => .
   rule (keys ((K:K |->_  => .) _)) (. => SetItem(K))
 
-  syntax Bool ::= "$hasMapping" "(" Map "," K ")" [function, latex(latex=(renameTo \\$hasMapping\\mybracket{_,_})), maudeop("$hasMapping")]
-  syntax Bool ::= "#hasMapping" "(" Map "," K ")" [function, latex(latex=(renameTo \\$hasMapping\\mybracket{_,_})), maudeop("#hasMapping")]
+  syntax Bool ::= "$hasMapping" "(" Map "," K ")" [function,maudeop("$hasMapping")]
+  syntax Bool ::= "#hasMapping" "(" Map "," K ")" [function, maudeop("#hasMapping")]
   rule $hasMapping(M:Map,K:K) => #hasMapping(M,K) ==K true [structural, anywhere]
 
   rule #hasMapping(M:Map K:K |-> _,K) => true [structural, anywhere]

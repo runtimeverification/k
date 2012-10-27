@@ -111,6 +111,15 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("superheat"))
 			GlobalSettings.superheat = metadataParse(cmd.getOptionValue("superheat"));
 
+		if (cmd.hasOption("style")) {
+			String style = cmd.getOptionValue("style");
+			if (style.startsWith("+")) {
+				GlobalSettings.style += style.replace("+", ",");
+			} else {
+				GlobalSettings.style = style;
+			}
+		}
+		
 		if (cmd.hasOption("addTopCell"))
 			GlobalSettings.addTopCell = true;
 
@@ -317,7 +326,7 @@ public class KompileFrontEnd {
 
 			FileUtil.saveInFile(dotKLatexStyle, FileUtil.getFileContent(kLatexStyle));
 
-			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[poster,style=bubble]{k}" + endl;
+			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[" + GlobalSettings.style + "]{k}" + endl;
 			String preamble = lf.getPreamble().toString();
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 

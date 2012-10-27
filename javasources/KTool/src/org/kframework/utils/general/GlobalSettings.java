@@ -27,4 +27,5 @@ public class GlobalSettings {
 		supercool.add("supercool");
 	}
 	public static boolean addTopCell = false;
+	public static String style = "poster,style=bubble";
 }

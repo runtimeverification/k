@@ -46,6 +46,7 @@ public class KompileOptionsParser {
 		OptionGroup tex = new OptionGroup();
 		Option pdf = new Option("pdf", false, "generate pdf from definition");
 		Option latex = new Option("latex", false, "generate latex from definition");
+		Option style = new Option("style", true, "pass styling information to the k.sty package");
 		Option maudify = new Option("m", "maudify", false, "maudify the definition");
 		Option compile = new Option("c", "compile", false, "compile the definition");
 		Option tempcompile = new Option("tempc", "tempc", false, "test new implementation");
@@ -119,6 +120,9 @@ public class KompileOptionsParser {
 		options.addOption(transition);
 		options.addOption(supercool);
 		options.addOption(superheat);
+		
+		options.addOption(style);
+
 	}
 
 	public CommandLine parse(String[] cmd) {
