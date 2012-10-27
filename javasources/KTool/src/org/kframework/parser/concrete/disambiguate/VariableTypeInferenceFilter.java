@@ -21,7 +21,6 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 
 	public VariableTypeInferenceFilter() {
 		super("Variable type inference");
-		// TODO Auto-generated constructor stub
 	}
 
 	public ASTNode transform(Sentence r) {

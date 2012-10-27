@@ -16,6 +16,7 @@ import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Require;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.parser.basic.KParser;
 import org.kframework.utils.XmlLoader;
@@ -56,13 +57,22 @@ public class BasicParser {
 			File file = new File(fileName);
 			if (!file.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " given at console.", "", ""));
-			slurp2(file, new File("."));
+			if (GlobalSettings.verbose)
+				System.out.println("Including file: " + file.getCanonicalPath());
+
+			slurp2(file);
 
 			// parse the autoinclude file
 			file = buildCanonicalPath("autoinclude.k", new File(fileName));
 			if (file == null)
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
-			slurp2(file, new File("."));
+
+			DefinitionHelper.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
+
+			if (GlobalSettings.verbose)
+				System.out.println("Including file: " + file.getCanonicalPath());
+
+			slurp2(file);
 
 			setMainFile(file);
 		} catch (IOException e) {
@@ -82,7 +92,7 @@ public class BasicParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void slurp2(File file, File parentFile) throws IOException {
+	private void slurp2(File file) throws IOException {
 		String cannonicalPath = file.getCanonicalPath();
 		if (!filePaths.contains(cannonicalPath)) {
 			filePaths.add(cannonicalPath);
@@ -95,13 +105,15 @@ public class BasicParser {
 				if (di instanceof Require) {
 					Require req = (Require) di;
 
-					if (GlobalSettings.verbose)
-						System.out.println("Including file: " + req.getValue());
-
 					File newFile = buildCanonicalPath(req.getValue(), file);
+
+					if (GlobalSettings.verbose)
+						System.out.println("Including file: " + newFile.getCanonicalPath());
+
 					if (newFile == null)
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + req.getValue(), req.getFilename(), req.getLocation()));
-					slurp2(newFile, file);
+					slurp2(newFile);
+					DefinitionHelper.addFileRequirement(newFile.getCanonicalPath(), file.getCanonicalPath());
 				}
 			}
 

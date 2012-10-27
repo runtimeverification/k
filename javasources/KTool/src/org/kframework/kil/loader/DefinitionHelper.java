@@ -1,6 +1,7 @@
 package org.kframework.kil.loader;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -131,6 +132,12 @@ public class DefinitionHelper {
 	}
 
 	public static boolean isRequiredEq(String required, String local) {
+		try {
+			required = new File(required).getCanonicalPath();
+			local = new File(local).getCanonicalPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		if (required.equals(local))
 			return true;
 		return fileRequirements.contains(new Subsort(required, local));

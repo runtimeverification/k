@@ -30,7 +30,7 @@ public class VariableTypeFilter extends BasicTransformer {
 			newV.setSort(correctSort);
 			return newV;
 		}
-		String msg = "Variable " + r.getName() + " cannot have sort " + correctSort + " at this location.";
+		String msg = "Variable " + r.getName() + " cannot have sort " + r.getSort() + " at this location. Expected sort " + correctSort + ".";
 		KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation());
 		throw new VariableTypeClashException(kex);
 	}

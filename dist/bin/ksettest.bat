@@ -1,6 +1,6 @@
 @ECHO off
 :: This is not designed for the users of K
-:: It's justa simple script that I use to test the parsers.
+:: It's just a simple script that I use to test the parsers.
 
 cp -r ".k" "%~dp0\\..\\..\\javasources\\K3Syntax\\test"
 

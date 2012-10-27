@@ -19,7 +19,7 @@ public class GetFitnessUnitFileCheckVisitor extends GetFitnessUnitBasicVisitor {
 		String consFile = tc.getProduction().getFilename();
 		if (!DefinitionHelper.isRequiredEq(consFile, localFile)) {// if shouldn't be in this file add -1
 			score += -1;
-			// System.out.println("TC: " + tc.getCons() + " in file: " + localFile);
+			// System.out.println("TC: " + tc.getCons() + " in file: " + localFile + ":" + tc.getLocation());
 		}
 	}
 

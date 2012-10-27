@@ -47,9 +47,6 @@ rules
 
 
 	importTbl    = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTbl    : _ -> trm)
-	importSbs    = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMySbs    : _ -> trm)
-	importCons   = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyCons   : _ -> trm)
-	importCells  = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyCells  : _ -> trm)
 	importTblPgm = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTblPgm : _ -> trm)
 
 	javaParseStringConfig = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b       ; (handleErrors <+ justFine)
@@ -124,18 +121,7 @@ rules
 	// How to add the auxiliary files - first call a store rule that read the file and creates a new rule that reproduces the term
 	// call that dynamic rule each time you want the term
 	// How to test - the disambiguator rule calls testMe5 which disambiguates - then press "Gen XML" to generate XML
-	initMe =
-		where(
-		<importSbs>  ["a.exe", "../K3Syntax/test/.k/Integration.sbs"] ;
-		<importCons> ["a.exe", "../K3Syntax/test/.k/Integration.cons"] ;
-		<importTbl>  ["a.exe", "../K3Syntax/test/.k/def/K3Dist.tbl"] ;
-		<importCells>["a.exe", "../K3Syntax/test/.k/Integration.cells"])
-
 	testMe5 =
-		where(
-		<importSbs>  ["a.exe", "../K3Syntax/test/.k/Integration.sbs"] ;
-		<importCons> ["a.exe", "../K3Syntax/test/.k/Integration.cons"] ;
-		<importCells>["a.exe", "../K3Syntax/test/.k/Integration.cells"]) ;
 		all(all(testDisambig))
 
 	external clear-console(|)
