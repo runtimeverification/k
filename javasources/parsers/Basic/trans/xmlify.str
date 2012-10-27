@@ -50,7 +50,7 @@ rules
 
 	//safecallcmd1 = ?[a, b] ; <parse-file(my-open-error, my-parse-error|<import-term(include/KSyntax.tbl)>)> b ; to-xml
 
-	javaParseString = ?[a, b] ; <parse-string(my-parse-error|<import-term(include/K3Syntax.tbl)>)> b ; processParse
+	javaParseString = ?[a, b] ; <parse-string(my-parse-error|<import-term(include/Basic.tbl)>)> b ; processParse
 
 	processParse =
 		(handleErrors <+ to-xml)
