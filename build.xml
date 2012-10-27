@@ -25,17 +25,16 @@
 	<target name="clean">
 		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic/lib">
-				<include name="*.java" />
-				<include name="K3Syntax.tbl" />
+				<include name="*" />
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 				<exclude name="clear_console_0_0.java" />
 				<exclude name="get_layout_0_0.java" />
 			</fileset>
 		</delete>
-		<delete file="${javasources}/K3Syntax/trans/K2Str.rtree" />
-		<delete file="${javasources}/K3Syntax/trans/K2Str.dep" />
-		<delete dir="${javasources}/K3Syntax/trans/K2Str" />
-		<delete dir="${javasources}/K3Syntax/include" />
+		<delete file="${javasources}/parsers/Basic/trans/BasicMain.rtree" />
+		<delete file="${javasources}/parsers/Basic/trans/BasicMain.dep" />
+		<delete dir="${javasources}/parsers/Basic/trans/BasicMain" />
+		<delete dir="${javasources}/parsers/Basic/include" />
 
 		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/concrete/lib">

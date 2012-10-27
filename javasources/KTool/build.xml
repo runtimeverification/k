@@ -6,14 +6,14 @@
 	<import file="buildjava.xml" />
 	<import file="buildjar.xml" />
 
-	<target name="alllocal" depends="allsig,allstr,build,jar" />
+	<target name="alllocal" depends="all.signature,all.stratego,build,jar" />
 
 	<target name="parallellocal">
 		<echo message="Parallel" />
 		<parallel>
 			<sequential>
-				<antcall target="k2syntaxsig" />
-				<antcall target="k2syntax" />
+				<antcall target="basic.signature" />
+				<antcall target="basic.stratego" />
 			</sequential>
 			<sequential>
 				<antcall target="k3sig" />

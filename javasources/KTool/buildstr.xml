@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="allstr" name="K3Java Build requriements">
+<project basedir="." default="all.stratego" name="K3Java Build requriements">
 	<!-- This is an automatic way of compiling K3.
 	To be able to call this script, you will first have to install the appropriate version of
 	the stratego-sdf bundle found here: http://strategoxt.org/Stratego/StrategoDownload
 	Don't forget to set up the propper execution rights for those programs.
 	-->
 
-	<target name="allstr" depends="k2syntax, k3" />
+	<target name="all.stratego" depends="basic.stratego, k3" />
 
-	<target name="k2syntax">
+	<target name="basic.stratego">
 		<dependset>
-			<srcfileset file="../K3Syntax/trans/*.str" />
-			<srcfileset file="../K3Syntax/include/K3Syntax.str" />
-			<srcfileset file="../K3Syntax/include/K3Syntax.tbl" />
+			<srcfileset file="../parsers/Basic/trans/*.str" />
+			<srcfileset file="../parsers/Basic/include/Basic.str" />
+			<srcfileset file="../parsers/Basic/include/Basic.tbl" />
 			<targetfileset dir="src/org/kframework/parser/basic/lib/">
 				<include name="*.java" />
-				<include name="K3Syntax.tbl" />
+				<include name="Basic.tbl" />
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 				<exclude name="clear_console_0_0.java" />
 				<exclude name="get_layout_0_0.java" />
 			</targetfileset>
 		</dependset>
-		<available file="src/org/kframework/parser/basic/lib/K2Str.java" property="k2syntax.available" />
-		<antcall target="k2syntax.helper" />
+		<available file="src/org/kframework/parser/basic/lib/BasicMain.java" property="basic.stratego.available" />
+		<antcall target="basic.stratego.helper" />
 	</target>
-	<target name="k2syntax.helper" unless="k2syntax.available">
-		<delete file="../K3Syntax/trans/K2Str.rtree" />
-		<delete file="../K3Syntax/trans/K2Str.dep" />
-		<delete dir="../K3Syntax/trans/K2Str" />
-		<java failonerror="true" dir="../K3Syntax/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
-			<arg line="-i xmlify.str -o K2Str -la stratego-sglr --lib -I .. -p org.kframework.parser.basic.lib --clean" />
+	<target name="basic.stratego.helper" unless="basic.stratego.available">
+		<delete file="../parsers/Basic/trans/BasicMain.rtree" />
+		<delete file="../parsers/Basic/trans/BasicMain.dep" />
+		<delete dir="../parsers/Basic/trans/BasicMain" />
+		<java failonerror="true" dir="../parsers/Basic/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
+			<arg line="-i xmlify.str -o BasicMain -la stratego-sglr --lib -I .. -p org.kframework.parser.basic.lib --clean" />
 		</java>
 		<delete>
 			<fileset dir="src/org/kframework/parser/basic/lib">
 				<include name="*.java" />
-				<include name="K3Syntax.tbl" />
+				<include name="Basic.tbl" />
 				<exclude name="xml_string_escape_from_string_0_0.java" />
 				<exclude name="clear_console_0_0.java" />
 				<exclude name="get_layout_0_0.java" />
 			</fileset>
 		</delete>
 		<copy todir="src/org/kframework/parser/basic/lib/">
-			<fileset dir="../K3Syntax/trans/K2Str">
+			<fileset dir="../parsers/Basic/trans/BasicMain">
 				<include name="*" />
 			</fileset>
 		</copy>
-		<delete file="../K3Syntax/trans/K2Str.rtree" />
-		<delete file="../K3Syntax/trans/K2Str.dep" />
-		<delete dir="../K3Syntax/trans/K2Str" />
+		<delete file="../parsers/Basic/trans/BasicMain.rtree" />
+		<delete file="../parsers/Basic/trans/BasicMain.dep" />
+		<delete dir="../parsers/Basic/trans/BasicMain" />
 	</target>
 
 	<target name="k3">

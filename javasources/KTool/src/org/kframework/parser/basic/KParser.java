@@ -1,7 +1,9 @@
 package org.kframework.parser.basic;
 
-import org.kframework.parser.basic.lib.*;
-import org.spoofax.interpreter.terms.*;
+import org.kframework.parser.basic.lib.BasicMain;
+import org.kframework.parser.basic.lib.java$Parse$String_0_0;
+import org.spoofax.interpreter.terms.IStrategoString;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 
@@ -12,7 +14,7 @@ public class KParser {
 	private static void init() {
 		synchronized (KParser.class) {
 			if (context == null) {
-				context = K2Str.init();
+				context = BasicMain.init();
 			}
 		}
 	}
