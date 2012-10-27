@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?eclipse version="3.0"?>
+
+<plugin>
+       <extension point="org.eclipse.imp.runtime.languageDescription">
+          <language extensions="krule" description="Concrete" language="Concrete" derivedFrom="DynamicRoot" validator="Concrete.ConcreteValidator" validatorClass="Concrete.ConcreteValidator"></language>
+       </extension>
+       <extension id="Concrete.parser" name="Concrete Parser" point="org.eclipse.imp.runtime.parser">
+          <parser class="Concrete.ConcreteParseController" language="Concrete">
+          </parser>
+       </extension>    
+    </plugin>
