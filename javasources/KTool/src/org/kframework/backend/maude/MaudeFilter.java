@@ -35,6 +35,7 @@ import org.kframework.kil.ModuleItem;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
@@ -48,14 +49,13 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.utils.strings.StringUtil;
 
 public class MaudeFilter extends BasicVisitor {
     protected java.lang.StringBuilder result;

@@ -6,7 +6,7 @@ import java.util.Map;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.utils.strings.StringUtil;
+import org.kframework.utils.StringUtil;
 
 
 public class LatexPatternsVisitor extends BasicVisitor {

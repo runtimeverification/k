@@ -335,7 +335,7 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml:
-		"Comment"#([a, b]) -> $[<comment value="[<xmlStringEscape> a]" loc="[b]" />
+		"Comment"#([a, b]) -> $[<comment value="[<xmlStringEscape ; escape> a]" loc="[b]" />
 		]
 
 

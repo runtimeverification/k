@@ -41,19 +41,35 @@ public class get_layout_0_0 extends Strategy {
 			if (tk.getKind() == IToken.TK_LAYOUT && !tk.toString().trim().equals("")) {
 				// if (tk.getStartOffset() >= tkz.getStartOffset() && tk.getEndLine() <= tkz.getEndLine())
 				// tk.setKind(IToken.TK_STRING);
-				//context.getIOAgent().printError("MSG(" + tk.getLine() + "," + tk.getColumn() + "): " + tk.toString());
+				// context.getIOAgent().printError("MSG(" + tk.getLine() + "," + tk.getColumn() + "): " + tk.toString());
 
 				IStrategoConstructor constr = context.getFactory().makeConstructor("Comment", 1);
 				// IStrategoList ilist = context.getFactory().makeList(context.getFactory().makeString(tk.toString()));
-				IStrategoString content = context.getFactory().makeString(tk.toString());
 				String loc = "(" + tk.getLine() + "," + tk.getColumn() + "," + tk.getEndLine() + "," + tk.getEndColumn() + ")";
+				String str = tk.toString();
+				if (str.startsWith("/*")) {
+					while (true) {
+						if (str.contains("*/"))
+							break;
+						i++;
+						if (!(i < tkz.getTokenCount()))
+							break;
+						IToken tk2 = tkz.getTokenAt(i);
+						if (tk.getKind() != IToken.TK_LAYOUT)
+							break;
+						str += tk2.toString();
+						loc = "(" + tk.getLine() + "," + tk.getColumn() + "," + tk2.getEndLine() + "," + tk2.getEndColumn() + ")";
+					}
+				}
+
+				IStrategoString content = context.getFactory().makeString(str);
 				IStrategoString location = context.getFactory().makeString(loc);
 				IStrategoAppl appl = context.getFactory().makeAppl(constr, content, location);
 				list2.add(appl);
 			}
 		}
 
-		//context.getIOAgent().printError("Size: " + list2.size());
+		// context.getIOAgent().printError("Size: " + list2.size());
 		IStrategoList ambl = context.getFactory().makeList(list2);
 
 		return ambl;

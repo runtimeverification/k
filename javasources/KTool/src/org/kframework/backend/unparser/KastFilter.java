@@ -42,11 +42,11 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.utils.strings.StringUtil;
 
 public class KastFilter extends BasicVisitor {
     protected Indenter result;

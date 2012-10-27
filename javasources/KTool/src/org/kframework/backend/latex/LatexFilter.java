@@ -12,7 +12,7 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.utils.strings.StringUtil;
+import org.kframework.utils.StringUtil;
 
 
 public class LatexFilter extends BasicVisitor {

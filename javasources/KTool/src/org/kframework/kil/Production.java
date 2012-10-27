@@ -9,6 +9,7 @@ import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.utils.xml.XML;
 import org.w3c.dom.Element;
 
@@ -18,19 +19,15 @@ public class Production extends ASTNode {
 	protected String sort;
 
 	public boolean isListDecl() {
-		return items.size() == 1
-				&& items.get(0).getType() == ProductionType.USERLIST;
+		return items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST;
 	}
 
 	public boolean isSubsort() {
-		return items.size() == 1
-				&& items.get(0).getType() == ProductionType.SORT;
+		return items.size() == 1 && items.get(0).getType() == ProductionType.SORT;
 	}
 
 	public boolean isConstant() {
-		return items.size() == 1
-				&& items.get(0).getType() == ProductionType.TERMINAL
-				&& (sort.startsWith("#") || sort.equals("KLabel"));
+		return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals("KLabel"));
 	}
 
 	public Production(Element element) {
@@ -40,8 +37,7 @@ public class Production extends ASTNode {
 		strings.add(Constants.SORT);
 		strings.add(Constants.TERMINAL);
 		strings.add(Constants.USERLIST);
-		java.util.List<Element> its = XML.getChildrenElementsByTagName(element,
-				strings);
+		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, strings);
 
 		items = new ArrayList<ProductionItem>();
 		for (Element e : its)
@@ -78,10 +74,8 @@ public class Production extends ASTNode {
 	}
 
 	public boolean equals(Production other) {
-		ArrayList<ProductionItem> p1List = (ArrayList<ProductionItem>) this
-				.getItems();
-		ArrayList<ProductionItem> p2List = (ArrayList<ProductionItem>) other
-				.getItems();
+		ArrayList<ProductionItem> p1List = (ArrayList<ProductionItem>) this.getItems();
+		ArrayList<ProductionItem> p2List = (ArrayList<ProductionItem>) other.getItems();
 
 		if (p1List.size() != p2List.size())
 			return false;
@@ -91,23 +85,17 @@ public class Production extends ASTNode {
 			ProductionItem p2Term = p2List.get(i);
 
 			if ((p1Term instanceof Terminal) && (p2Term instanceof Terminal))
-				if (!((Terminal) p1Term).getTerminal().equals(
-						((Terminal) p2Term).getTerminal()))
+				if (!((Terminal) p1Term).getTerminal().equals(((Terminal) p2Term).getTerminal()))
 					return false;
 
 				else if ((p1Term instanceof Sort) && (p2Term instanceof Sort))
-					if (!((Sort) p1Term).getName().equals(
-							((Sort) p2Term).getName()))
+					if (!((Sort) p1Term).getName().equals(((Sort) p2Term).getName()))
 						return false;
 					else {
-						if (!(p1Term instanceof Sort)
-								&& !(p1Term instanceof Terminal))
-							System.out.println("Not sort or terminal: "
-									+ p1Term);
-						if (!(p2Term instanceof Sort)
-								&& !(p2Term instanceof Terminal))
-							System.out.println("Not sort or terminal: "
-									+ p2Term);
+						if (!(p1Term instanceof Sort) && !(p1Term instanceof Terminal))
+							System.out.println("Not sort or terminal: " + p1Term);
+						if (!(p2Term instanceof Sort) && !(p2Term instanceof Terminal))
+							System.out.println("Not sort or terminal: " + p2Term);
 						return false;
 					}
 
@@ -121,7 +109,7 @@ public class Production extends ASTNode {
 			label = getPrefixLabel();
 			attributes.set("prefixlabel", label);
 		}
-		return org.kframework.utils.utils.strings.StringUtil.escapeMaude(label).replace(" ", "");
+		return StringUtil.escapeMaude(label).replace(" ", "");
 	}
 
 	public String getCons() {
@@ -132,20 +120,25 @@ public class Production extends ASTNode {
 		String klabel;
 		klabel = attributes.get("klabel");
 		if (klabel == null) {
-			klabel = "'" + getPrefixLabel();		
+			klabel = "'" + getPrefixLabel();
 			attributes.set("klabel", klabel);
 		}
-		return org.kframework.utils.utils.strings.StringUtil.escapeMaude(klabel).replace(" ", "");
+		return StringUtil.escapeMaude(klabel).replace(" ", "");
 	}
 
 	private String getPrefixLabel() {
 		String klabel = "";
 		for (ProductionItem pi : items) {
-			switch (pi.getType())
-			{
-			case SORT: klabel += "_"; break;
-			case TERMINAL: klabel += ((Terminal)pi).getTerminal(); break;
-			case USERLIST: klabel += "_" + ((UserList)pi).separator + "_"; break;
+			switch (pi.getType()) {
+			case SORT:
+				klabel += "_";
+				break;
+			case TERMINAL:
+				klabel += ((Terminal) pi).getTerminal();
+				break;
+			case USERLIST:
+				klabel += "_" + ((UserList) pi).separator + "_";
+				break;
 			}
 		}
 		return klabel;
@@ -179,8 +172,7 @@ public class Production extends ASTNode {
 	@Override
 	public void applyToAll(Modifier visitor) {
 		for (int i = 0; i < this.items.size(); i++) {
-			ProductionItem elem = (ProductionItem) visitor.modify(this.items
-					.get(i));
+			ProductionItem elem = (ProductionItem) visitor.modify(this.items.get(i));
 			this.items.set(i, elem);
 		}
 	}
