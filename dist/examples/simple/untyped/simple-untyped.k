@@ -818,16 +818,16 @@ same environment with the parent thread.  Note that the newly created
 and initialized automatically as described in the definition of SIMPLE's
 configuration.  This is part of \K's configuration abstraction mechanism. */
 
-   rule <thread>...
-          <k> spawn S => T ...</k>
-          <env> Env </env>
-        ...</thread>
-        (. => <thread>...
-                <k> S </k>
-                <env> Env </env>
-                <id> T </id>
-              ...</thread>)
-     when fresh(T:Int)
+  rule <thread>...
+         <k> spawn S => T ...</k>
+         <env> Env </env>
+       ...</thread>
+       (. => <thread>...
+               <k> S </k>
+               <env> Env </env>
+               <id> T </id>
+             ...</thread>)
+    when fresh(T:Int)
 
 /*@ \subsubsection{Thread termination}
 Dually to the above, when a thread terminates its assigned computation (the
@@ -844,9 +844,9 @@ by a thread.  The unique identifier of the terminated thread is also collected
 into the \textsf{terminated} cell, so the \texttt{join} construct knows which
 threads have terminated. */
 
-   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
-        <busy> Busy => Busy -Set keys(H) </busy>
-        <terminated>... . => SetItem(T) ...</terminated>
+  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
+       <busy> Busy => Busy -Set keys(H) </busy>
+       <terminated>... . => SetItem(T) ...</terminated>
 
 /*@ \subsubsection{Thread joining}
 Thread joining is now straightforward: all we need to do is to check whether
@@ -854,8 +854,8 @@ the identifier of the thread to be joined is in the \textsf{terminated} cell.
 If yes, then the \texttt{join} statement dissolves and the joining thread
 continues normally; if not, then the joining thread gets stuck. */
 
-   rule <k> join T:Int; => . ...</k>
-        <terminated>... SetItem(T) ...</terminated>
+  rule <k> join T:Int; => . ...</k>
+       <terminated>... SetItem(T) ...</terminated>
 
 /*@ \subsubsection{Acquire lock}
 There are two cases to distinguish when a thread attempts to acquire a lock
@@ -867,13 +867,13 @@ the side condition of the first rule).\\
 counter for the lock (the locks are re-entrant).  These two cases are captured
 by the two rules below: */
 
-   rule <k> acquire V:Val; => . ...</k>
-        <holds>... . => V |-> 0 ...</holds>
-        <busy> Busy (. => SetItem(V)) </busy>
-     when (notBool(V in Busy:Set))  [acquire]
+  rule <k> acquire V:Val; => . ...</k>
+       <holds>... . => V |-> 0 ...</holds>
+       <busy> Busy (. => SetItem(V)) </busy>
+    when (notBool(V in Busy:Set))  [acquire]
 
-   rule <k> acquire V; => . ...</k>
-        <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
+  rule <k> acquire V; => . ...</k>
+       <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 
 /*@ \subsubsection{Release lock}
 Similarly, there are two corresponding cases to distinguish when a thread
@@ -884,12 +884,12 @@ is to decrement the lock counter.\\
 from its \textsf{holds} cell and also from the the shared \textsf{busy} cell,
 so other threads can acquire it if they need to. */
 
-   rule <k> release V:Val; => . ...</k>
-        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
-     when N >Int 0
+  rule <k> release V:Val; => . ...</k>
+       <holds>... V |-> (N => N:Int -Int 1) ...</holds>
+    when N >Int 0
 
-   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-        <busy>... SetItem(V) => . ...</busy>
+  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
+       <busy>... SetItem(V) => . ...</busy>
 
 /*@ \subsubsection{Rendezvous synchronization}
 In addition to synchronization through acquire and release of locks, SIMPLE
@@ -907,8 +907,8 @@ the \textsf{thread} cell, the only way to concretize the rule below to the
 actual configuration of SIMPLE is to include each \textsf{k} cell in a
 \textsf{thread} cell. */
 
-   rule <k> rendezvous V:Val; => . ...</k>
-        <k> rendezvous V; => . ...</k>  [rendezvous]
+  rule <k> rendezvous V:Val; => . ...</k>
+       <k> rendezvous V; => . ...</k>  [rendezvous]
 
 /*@ \section{Auxiliary declarations and operations}
 In this section we define all the auxiliary constructs used in the
