@@ -61,13 +61,13 @@ public class BasicParser {
 				System.out.println("Including file: " + file.getCanonicalPath());
 
 			slurp2(file);
+			DefinitionHelper.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
 
 			// parse the autoinclude file
 			file = buildCanonicalPath("autoinclude.k", new File(fileName));
 			if (file == null)
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
 
-			DefinitionHelper.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
 
 			if (GlobalSettings.verbose)
 				System.out.println("Including file: " + file.getCanonicalPath());
