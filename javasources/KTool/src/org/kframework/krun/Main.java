@@ -377,6 +377,7 @@ public class Main {
 			PrettyPrintOutput p = null;
 			List<String> red = null;
 			if (!isSwitch) {
+				maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__(" + makeConfiguration(kast, K.configuration_variables) + ",(.).Map)) .";
 				// first execute one step then prompt from the user an input
 				System.out.println("After running one step of execution the result is:");
 				rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
