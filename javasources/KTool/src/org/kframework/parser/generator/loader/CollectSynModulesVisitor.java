@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
 import org.kframework.kil.Module;
@@ -44,8 +45,7 @@ public class CollectSynModulesVisitor extends BasicVisitor {
 						if (!mname2.startsWith("#"))
 							if (mm != null)
 								synQue.add(mm.getName());
-							else // if (!MetaK.isKModule(mname2))
-							{
+							else if (!MetaK.isKModule(mname2)) {
 								String msg = "Could not find module: " + mname2 + " imported from: " + m.getName();
 								GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, msg, imp.getFilename(), imp.getLocation()));
 							}

@@ -49,33 +49,32 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-
 public class MetaK {
 	static int nextVarId = 0;
 
 	static String anyVarSymbol = "_";
-	
+
 	public static Set<String> kModules = new HashSet<String>();
 	static {
 		kModules.add("K-BUILTINS");
-		kModules.add("K-CONDITION-SEARCH"); 
+		kModules.add("K-CONDITION-SEARCH");
 		kModules.add("K-CONFIG");
-		kModules.add("K-CONTEXTS"); 
+		kModules.add("K-CONTEXTS");
 		kModules.add("K-LATEX");
 		kModules.add("K-OPEN-CELLS");
-		kModules.add("K-POLYMORPHIC-VARIABLES");  
-		kModules.add("K-PROPER"); 
+		kModules.add("K-POLYMORPHIC-VARIABLES");
+		kModules.add("K-PROPER");
 		kModules.add("K-QUOTED-LABELS");
 		kModules.add("K-RESULT");
-		kModules.add("K-RULES"); 
-		kModules.add("K-SENTENCE"); 
+		kModules.add("K-RULES");
+		kModules.add("K-SENTENCE");
 		kModules.add("K-STRICNESS");
 		kModules.add("K-TECHNIQUE");
-		kModules.add("K-WHERE");  
-		kModules.add("K-WRAPPERS"); 
-		kModules.add("K-WRAPPERS-LABELS"); 
+		kModules.add("K-WHERE");
+		kModules.add("K-WRAPPERS");
+		kModules.add("K-WRAPPERS-LABELS");
 	};
-	
+
 	public static Set<String> builtinSorts = new HashSet<String>();
 	static {
 		builtinSorts.add("Bool");
@@ -84,7 +83,7 @@ public class MetaK {
 		builtinSorts.add("Int");
 		builtinSorts.add("String");
 	};
-		
+
 	public static Set<Attribute> anywheres = new HashSet<Attribute>();
 	static {
 		anywheres.add(new Attribute("anywhere", ""));
@@ -92,9 +91,9 @@ public class MetaK {
 		anywheres.add(new Attribute("predicate", ""));
 		anywheres.add(new Attribute("function", ""));
 	}
-	
+
 	public static boolean isKModule(String key) {
-		return kModules.contains(key);		
+		return kModules.contains(key);
 	}
 
 	public static boolean isBuiltinModule(String key) {
@@ -111,7 +110,7 @@ public class MetaK {
 		});
 		return result;
 	}
-	
+
 	public static Definition setConfiguration(Definition node, final Configuration conf) {
 		try {
 			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter") {
@@ -140,7 +139,7 @@ public class MetaK {
 		}
 		return node;
 	}
-	
+
 	public static Configuration getConfiguration(Definition node) {
 		final List<Configuration> result = new LinkedList<Configuration>();
 		node.accept(new BasicVisitor() {
@@ -165,27 +164,25 @@ public class MetaK {
 			}
 		});
 		if (result.size() == 0) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-					KExceptionGroup.INTERNAL, 
-					"Internal compiler error --- Cannot find configuration.", 
-					node.getFilename(), node.getLocation()));
+			GlobalSettings.kem
+					.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Internal compiler error --- Cannot find configuration.", node.getFilename(), node.getLocation()));
 		}
 		return result.get(0);
 	}
-	
+
 	public static Term defaultTerm(Term v) {
 		String sort = v.getSort();
 		KSort ksort = KSort.getKSort(sort).mainSort();
-		if (ksort.isDefaulable()) return new Empty(ksort.toString());
-		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
-				KExceptionGroup.COMPILER, 
-				"Don't know the default value for term " + v.toString() + ". Assuming .K", 
-				v.getFilename(), v.getLocation()));
+		if (ksort.isDefaulable())
+			return new Empty(ksort.toString());
+		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
+				.getLocation()));
 		return new Empty("K");
 	}
-	
+
 	public static Term kWrapper(Term t) {
-		if (DefinitionHelper.isSubsortedEq("K",t.getSort())) return t;
+		if (DefinitionHelper.isSubsortedEq("K", t.getSort()))
+			return t;
 		return new KApp(new KInjectedLabel(t), new ListOfK());
 	}
 
@@ -197,98 +194,101 @@ public class MetaK {
 		}
 		return true;
 	}
-		
+
 	public static boolean isAnywhere(Rule r) {
 		Attributes attrs = r.getAttributes();
-		if (null == attrs) return false;
+		if (null == attrs)
+			return false;
 		for (Attribute any : anywheres) {
-			if (any.getValue() == attrs.get(any.getKey())) return true;
+			if (any.getValue() == attrs.get(any.getKey()))
+				return true;
 		}
 		return false;
 	}
-	
+
 	public static Term kWrap(Term t) {
 		return wrap(t, "k", Ellipses.RIGHT);
 	}
-	
+
 	public static Term wrap(Term t, String label, Ellipses ellipses) {
 		Cell cell = new Cell();
 		cell.setLabel(label);
 		cell.setEllipses(ellipses);
 		cell.setContents(t);
-		return cell;		
+		return cell;
 	}
 
 	public static Variable freshVar(Set<Variable> vars, String sort) {
 		String prefix = "?";
 		int i = 0;
-		Variable v = new Variable(prefix+i,sort);
+		Variable v = new Variable(prefix + i, sort);
 		while (vars.contains(v)) {
-			v.setName(prefix+(++i));
+			v.setName(prefix + (++i));
 		}
 		return v;
 	}
-	
+
 	public static boolean hasCell(Term t) {
 		Visitor cellFinder = new BasicVisitor() {
 			@Override
 			public void visit(KSequence node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(org.kframework.kil.List node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(ListItem node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(TermCons node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(org.kframework.kil.Set node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(SetItem node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(KApp node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(ListOfK node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(Map node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(MapItem node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(UserList node) {
 				return;
 			}
-			
+
 			@Override
 			public void visit(Cell node) {
-				if(10 / 0 == 0) return;
+				if (10 / 0 == 0)
+					return;
 			}
 		};
 		try {
@@ -304,17 +304,19 @@ public class MetaK {
 	}
 
 	public static Term getTerm(Production prod) {
-		if (prod.isSubsort()) return getFreshVar(prod.getItems().get(0).toString());
-		if (prod.isConstant()) return new Constant(prod.getSort(), ((Terminal)prod.getItems().get(0)).getTerminal());
+		if (prod.isSubsort())
+			return getFreshVar(prod.getItems().get(0).toString());
+		if (prod.isConstant())
+			return new Constant(prod.getSort(), ((Terminal) prod.getItems().get(0)).getTerminal());
 		TermCons t = new TermCons(prod.getSort(), prod.getCons());
 		if (prod.isListDecl()) {
-			t.getContents().add(getFreshVar(((UserList)prod.getItems().get(0)).getSort()));
+			t.getContents().add(getFreshVar(((UserList) prod.getItems().get(0)).getSort()));
 			t.getContents().add(getFreshVar(prod.getSort()));
 			return t;
 		}
 		for (ProductionItem item : prod.getItems()) {
 			if (item.getType() == ProductionType.SORT) {
-				t.getContents().add(getFreshVar(((Sort)item).getName()));
+				t.getContents().add(getFreshVar(((Sort) item).getName()));
 			}
 		}
 		return t;
@@ -325,19 +327,17 @@ public class MetaK {
 	}
 
 	public static boolean isBuiltinSort(String sort) {
-		return sort.startsWith("#"); 
-//		return builtinSorts.contains(sort);		
+		return sort.startsWith("#");
+		// return builtinSorts.contains(sort);
 	}
 
 	public static boolean isComputationSort(String name) {
 		return ("K".equals(name) || !isKSort(name));
 	}
-	
-	
+
 	public static String getListUnitLabel(String separator) {
 		return "'.List`{\"" + separator + "\"`}";
 	}
-	
 
 	public static List<Cell> getTopCells(Term t) {
 		final List<Cell> cells = new ArrayList<Cell>();
@@ -349,7 +349,7 @@ public class MetaK {
 		});
 		return cells;
 	}
-	
+
 	public static List<String> getAllCellLabels(Term t) {
 		final List<String> cells = new ArrayList<String>();
 		t.accept(new BasicVisitor() {
@@ -366,13 +366,18 @@ public class MetaK {
 		List<Term> col = new ArrayList<Term>();
 		col.add(contents);
 		switch (sort) {
-		case Bag: return new Bag(col);
-		case List: return new org.kframework.kil.List(col);
-		case Set: return new org.kframework.kil.Set(col);
-		case Map: return new Map(col);
-		case K: return new KSequence(col);
+		case Bag:
+			return new Bag(col);
+		case List:
+			return new org.kframework.kil.List(col);
+		case Set:
+			return new org.kframework.kil.Set(col);
+		case Map:
+			return new Map(col);
+		case K:
+			return new KSequence(col);
 		}
 		return null;
 	}
-	
+
 }

@@ -8,7 +8,6 @@ import java.util.Map;
 import org.kframework.compile.utils.ConfigurationStructureVisitor.ConfigurationStructure;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attributes;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;

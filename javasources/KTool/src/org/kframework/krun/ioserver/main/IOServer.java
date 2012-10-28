@@ -4,16 +4,30 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Logger;
-import java.util.Scanner;
 
-import org.kframework.krun.ioserver.commands.*;
+import org.kframework.krun.ioserver.commands.Command;
+import org.kframework.krun.ioserver.commands.CommandClose;
+import org.kframework.krun.ioserver.commands.CommandEnd;
+import org.kframework.krun.ioserver.commands.CommandEof;
+import org.kframework.krun.ioserver.commands.CommandFlush;
+import org.kframework.krun.ioserver.commands.CommandOpen;
+import org.kframework.krun.ioserver.commands.CommandPeek;
+import org.kframework.krun.ioserver.commands.CommandPosition;
+import org.kframework.krun.ioserver.commands.CommandReadbyte;
+import org.kframework.krun.ioserver.commands.CommandReopen;
+import org.kframework.krun.ioserver.commands.CommandSeek;
+import org.kframework.krun.ioserver.commands.CommandSmt;
+import org.kframework.krun.ioserver.commands.CommandSmtlib;
+import org.kframework.krun.ioserver.commands.CommandUnknown;
+import org.kframework.krun.ioserver.commands.CommandWritebyte;
+import org.kframework.krun.ioserver.commands.CommandWritebytes;
 
 
 public class IOServer {

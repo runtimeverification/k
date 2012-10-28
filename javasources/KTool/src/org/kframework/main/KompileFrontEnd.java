@@ -119,7 +119,7 @@ public class KompileFrontEnd {
 				GlobalSettings.style = style;
 			}
 		}
-		
+
 		if (cmd.hasOption("addTopCell"))
 			GlobalSettings.addTopCell = true;
 
@@ -161,7 +161,8 @@ public class KompileFrontEnd {
 			File errorFile = mainFile;
 			mainFile = new File(def + ".k");
 			if (!mainFile.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(),
+						"File system."));
 		}
 
 		// DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-compiled");
@@ -291,7 +292,7 @@ public class KompileFrontEnd {
 		return files;
 	}
 
-	private static void pdfClean(String[] extensions) {
+	public static void pdfClean(String[] extensions) {
 		for (int i = 0; i < extensions.length; i++)
 			new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
 	}
@@ -847,8 +848,9 @@ public class KompileFrontEnd {
 			MaudeFilter maudeFilter = new MaudeFilter();
 			javaDef.accept(maudeFilter);
 
-			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('" + javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n" + "---)\n"
-					+ " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
+			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('"
+					+ javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n" + "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition
+					+ " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
 					+ "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/compile.maude", compile);
