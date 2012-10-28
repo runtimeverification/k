@@ -127,7 +127,9 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(UserList ul) {
-		result.append("List\\{" + StringUtil.latexify(ul.getSort()) + ", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
+		result.append("List\\{");
+		new Sort(ul.getSort()).accept(this);
+		result.append(", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
 	}
 
 	@Override
