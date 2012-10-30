@@ -62,7 +62,6 @@ public class BasicParser {
 				System.out.println("Including file: " + file.getCanonicalPath());
 
 			slurp2(file);
-			DefinitionHelper.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
 
 			// parse the autoinclude file
 			file = buildCanonicalPath("autoinclude.k", new File(fileName));
@@ -116,10 +115,14 @@ public class BasicParser {
 			}
 
 			boolean predefined = file.getCanonicalPath().startsWith(KPaths.getKBase(false) + File.separator + "include");
+			if (!predefined)
+				DefinitionHelper.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
+
 			// add the modules to the modules list and to the map for easy access
 			for (DefinitionItem di : defItemList) {
 				if (predefined)
 					di.setPredefined(true);
+
 				this.moduleItems.add(di);
 				if (di instanceof Module) {
 					Module m = (Module) di;

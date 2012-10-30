@@ -109,6 +109,11 @@ public class DefinitionHelper {
 
 	public static void addFileRequirement(String required, String local) {
 		// add the new subsorting
+		if (required.equals(local))
+			return;
+
+		if (fileRequirements.contains(new Subsort(required, local)))
+			return;
 		fileRequirements.add(new Subsort(required, local));
 
 		// closure for sorts
