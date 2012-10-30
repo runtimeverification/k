@@ -26,6 +26,7 @@ public class Main {
 	public static void main(String[] args) {
 
 		// a little bit hack-ish but it works until somebody complains
+		System.out.println(Configuration.getHomeDir());
 		if (Configuration.getHomeDir().contains("jenkins"))
 		{
 			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "k"} , "");
