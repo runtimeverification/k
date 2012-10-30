@@ -32,6 +32,7 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -744,6 +745,7 @@ public class Main {
 			RunProcess rp = new RunProcess();
 
 			KAST = rp.runParser(K.parser, K.pgm, true);
+			GlobalSettings.kem.print();
 
 			if (!K.debug) {
 				normalExecution(KAST, lang, rp, cmd_options);
