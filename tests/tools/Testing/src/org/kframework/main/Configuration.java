@@ -14,6 +14,7 @@ public class Configuration {
 	public static String k = "/var/lib/jenkins/workspace/k-framework-tests/k";
 
 	public static String getHome() {
+		System.out.println("Calling getHOME: " + System.getProperty("user.dir"));
 		if (System.getProperty("user.dir").contains("jenkins"))
 			return k;
 		
