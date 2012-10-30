@@ -367,7 +367,7 @@ public class Test {
 		save();
 	}
 
-	private boolean compiledPdf(Task task) {
+	public boolean compiledPdf(Task task) {
 		if (task.getExit() != 0)
 			return false;
 

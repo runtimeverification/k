@@ -8,7 +8,7 @@ import org.kframework.main.Configuration;
 
 
 public class Execution {
-	public static int SIZE = 4;
+	public static int SIZE = initPoolSize();
 	public static ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(SIZE);
 	
 	public static void execute(Task definitionTask) {
@@ -26,4 +26,15 @@ public class Execution {
 		Execution.tpe.shutdownNow();
 		Execution.tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(SIZE);
 	}
+	
+	public static int initPoolSize()
+    {
+            int poolSize = 1;
+            int cores = Runtime.getRuntime().availableProcessors();
+            int pS = cores - cores / 4;
+            if (pS > poolSize)
+                    return pS;
+            
+            return poolSize;
+    }
 }

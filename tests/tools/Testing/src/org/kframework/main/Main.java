@@ -26,7 +26,19 @@ public class Main {
 	public static void main(String[] args) {
 		
 		// a little bit hack-ish but it works until somebody complains
+		if (Configuration.getHomeDir().contains("jenkins"))
+		{
+			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "."} , "");
+			System.exit(1);
+		}
 		
+		// execute the right scripts 
+		String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("win"))
+		{
+			Configuration.kompile = Configuration.kompile + ".bat";
+			Configuration.krun = Configuration.kompile + ".bat";
+		}
 		
 		List<Test> alltests = new LinkedList<Test>();
 
@@ -94,7 +106,7 @@ public class Main {
 		// console display
 		System.out.println("Pdf compilation failed for: ");
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
-			if (!entry.getKey().compiled(entry.getValue()))
+			if (!entry.getKey().compiledPdf(entry.getValue()))
 				System.out.println("Compiling pdf "
 						+ entry.getKey().getLanguage()
 								.substring(Configuration.getHomeDir().length())
