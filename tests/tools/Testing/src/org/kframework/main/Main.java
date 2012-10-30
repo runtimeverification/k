@@ -26,13 +26,25 @@ public class Main {
 	public static void main(String[] args) {
 
 		// a little bit hack-ish but it works until somebody complains
+		System.out.println("UDIR: " + System.getProperty("user.dir"));
 		if (System.getProperty("user.dir").contains("jenkins"))
 		{
+			// first copy the k-framework artifacts
 			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "k"} , "");
 			Execution.execute(copy);
 			Execution.finish();
 			
+			// setup the new path
 			Configuration.HOME_DIR = "/var/lib/jenkins/workspace/k-framework-tests/k";
+			
+			// build K
+			Task build = new Task(new String[]{"cd", "/var/lib/jenkins/workspace/k-framework-tests/k", ";", "ant"}, "");
+			Execution.execute(build);
+			Execution.finish();
+			System.out.println(build.getStdout());
+			System.out.println(build.getStderr());
+			if (build.getExit() != 0)
+				System.exit(1);
 		}
 		
 		// execute the right scripts 
