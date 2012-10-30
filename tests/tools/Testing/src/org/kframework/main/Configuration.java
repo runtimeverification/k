@@ -1,9 +1,12 @@
 package org.kframework.main;
 
+import java.util.Stack;
+
 
 public class Configuration {
 
-	public static String HOME_DIR = null;
+	public static Stack<String> home = new Stack<String>();
+	public static String HOME_DIR = home.pop();
 	public static final String FS = System.getProperty("file.separator");
 	public static String kompile = HOME_DIR + FS + "dist" + FS + "bin" + FS + "kompile";
 	public static String krun = HOME_DIR + FS + "dist" + FS + "bin" + FS + "krun";

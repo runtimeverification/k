@@ -69,7 +69,7 @@ public class Main {
 			}
 			
 			// setup the new path
-			Configuration.HOME_DIR = k;
+			Configuration.home.push(k);
 
 			// build K
 			try {
@@ -96,8 +96,8 @@ public class Main {
 		}
 
 		if (Configuration.HOME_DIR == null)
-			new File(System.getProperty("user.dir")).getParentFile()
-			.getParentFile().getParentFile().getAbsolutePath();
+			Configuration.home.push(new File(System.getProperty("user.dir")).getParentFile()
+			.getParentFile().getParentFile().getAbsolutePath());
 		
 		List<Test> alltests = new LinkedList<Test>();
 
