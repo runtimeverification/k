@@ -47,6 +47,7 @@ public class Main {
 			// build K
 			try {
 				ProcessBuilder pb = new ProcessBuilder("ant");
+				pb.directory(new File(Configuration.HOME_DIR));
 				Process process = pb.start();
 				int exit = process.waitFor();
 				String out = Task.readString(process.getInputStream());
