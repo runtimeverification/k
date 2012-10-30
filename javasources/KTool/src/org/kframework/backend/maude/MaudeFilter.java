@@ -288,9 +288,8 @@ public class MaudeFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Configuration configuration) {
-		//return;
-		result.append("mb configuration ");
-		this.visit((Sentence)configuration);
+		//result.append("mb configuration ");
+		//this.visit((Sentence)configuration);
 	}
 
 	@Override
