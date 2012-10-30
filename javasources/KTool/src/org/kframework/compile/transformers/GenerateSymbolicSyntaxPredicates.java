@@ -30,9 +30,9 @@ import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-public class GenerateSyntaxPredicates extends CopyOnWriteTransformer {
+public class GenerateSymbolicSyntaxPredicates extends CopyOnWriteTransformer {
 	
-	public class SyntaxPredicatesVisitor extends BasicVisitor {
+	public class SymbolicSyntaxPredicatesVisitor extends BasicVisitor {
 		List<ModuleItem> result = new ArrayList<ModuleItem>();
 		Set<String> declarations = new HashSet<String>();
 		Set<String> lists = new HashSet<String>();
@@ -125,7 +125,7 @@ public class GenerateSyntaxPredicates extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
-		SyntaxPredicatesVisitor moduleVisitor = new SyntaxPredicatesVisitor(); 
+		SymbolicSyntaxPredicatesVisitor moduleVisitor = new SymbolicSyntaxPredicatesVisitor(); 
 		node.accept(moduleVisitor);
 		List<ModuleItem> predicates = moduleVisitor.getResult();
 		if (predicates.isEmpty()) return node;
@@ -136,7 +136,7 @@ public class GenerateSyntaxPredicates extends CopyOnWriteTransformer {
 		return node;
 	}
 	
-	public GenerateSyntaxPredicates() {
+	public GenerateSymbolicSyntaxPredicates() {
 		super("Generate syntax predicates");
 	}
 

@@ -27,6 +27,7 @@ import org.kframework.compile.transformers.AddTopCell;
 import org.kframework.compile.transformers.DesugarStreams;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.GenerateSyntaxPredicates;
+import org.kframework.compile.transformers.GenerateSymbolicSyntaxPredicates;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.compile.transformers.ResolveBinder;
 import org.kframework.compile.transformers.ResolveBlockingInput;
@@ -761,6 +762,12 @@ public class KompileFrontEnd {
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Generate Syntax Predicates");
+			}
+
+			javaDef = new CompilerTransformerStep(new GenerateSymbolicSyntaxPredicates()).compile(javaDef);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Generate Symbolic Syntax Predicates");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
