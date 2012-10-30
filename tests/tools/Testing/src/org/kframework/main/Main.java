@@ -29,15 +29,13 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		String k = "/var/lib/jenkins/workspace/k-framework-tests/k";
 		
 		// a little bit hack-ish but it works until somebody complains
-		System.out.println("UDIR: " + System.getProperty("user.dir"));
 		if (System.getProperty("user.dir").contains("jenkins")) {
 			
 			// remove anything from previous build
 			try {
-				ProcessBuilder pb = new ProcessBuilder("rm", "-rf", k);
+				ProcessBuilder pb = new ProcessBuilder("rm", "-rf", Configuration.k);
 				Process process = pb.start();
 				int exit = process.waitFor();
 				String out = Task.readString(process.getInputStream());
@@ -54,7 +52,7 @@ public class Main {
 			
 			// first copy the k-framework artifacts
 			try {
-				ProcessBuilder pb = new ProcessBuilder("cp", "-r", "/var/lib/jenkins/workspace/k-framework", k);
+				ProcessBuilder pb = new ProcessBuilder("cp", "-r", "/var/lib/jenkins/workspace/k-framework", Configuration.k);
 				Process process = pb.start();
 				int exit = process.waitFor();
 				String out = Task.readString(process.getInputStream());
@@ -68,9 +66,6 @@ public class Main {
 				e.printStackTrace();
 			}
 			
-			// setup the new path
-			Configuration.home.push(k);
-
 			// build K
 			try {
 				ProcessBuilder pb = new ProcessBuilder("ant");
@@ -95,10 +90,6 @@ public class Main {
 			Configuration.krun = Configuration.kompile + ".bat";
 		}
 
-		if (Configuration.HOME_DIR == null)
-			Configuration.home.push(new File(System.getProperty("user.dir")).getParentFile()
-			.getParentFile().getParentFile().getAbsolutePath());
-		
 		List<Test> alltests = new LinkedList<Test>();
 
 		// load config
