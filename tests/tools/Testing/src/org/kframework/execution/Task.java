@@ -30,7 +30,7 @@ public class Task extends Thread {
 		try {
 			ProcessBuilder pb = new ProcessBuilder(arguments);
 
-			String message = "Execute ";
+			String message = "Executing ";
 			for(String cmd : pb.command())
 				message += cmd.replaceAll(Configuration.getHome(), "") + " ";
 			elapsed = System.currentTimeMillis();

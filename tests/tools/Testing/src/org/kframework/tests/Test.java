@@ -382,6 +382,7 @@ public class Test {
 	}
 
 	public void save() {
+		new File(Configuration.JR).mkdirs();
 		try {
 			FileWriter fstream = new FileWriter(Configuration.JR + Configuration.FS + getReportFilename());
 			BufferedWriter out = new BufferedWriter(fstream);
