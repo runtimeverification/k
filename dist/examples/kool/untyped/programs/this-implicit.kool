@@ -1,7 +1,7 @@
 // Testing the implicit use of "this"
 
-class c {
-  method c() {}
+class C {
+  method C() {}
   method m1() {
     return m2();
   }
@@ -10,9 +10,9 @@ class c {
   }
 }
 
-class main {
-  method main() {
-    print((new c()).m1(), "\n");
+class Main {
+  method Main() {
+    print((new C()).m1(), "\n");
   }
 }
 

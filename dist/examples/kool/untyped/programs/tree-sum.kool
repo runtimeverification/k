@@ -1,9 +1,9 @@
 // Building and traversing a tree.
 // Testing the difference between this.val and val.
 
-class node {
+class Node {
   var left, right;
-  method node(left,right) {
+  method Node(left,right) {
     this.left = left;
     this.right = right;
   }
@@ -12,9 +12,9 @@ class node {
   }
 }
 
-class leaf {
+class Leaf {
   var val;
-  method leaf(val) {
+  method Leaf(val) {
     this.val = val;
   }
   method sum() {
@@ -22,10 +22,10 @@ class leaf {
   }
 }
 
-class main {
-  method main() {
+class Main {
+  method Main() {
     var o;
-    o = new node(new node(new leaf(3), new leaf(4)), new leaf(5));
+    o = new Node(new Node(new Leaf(3), new Leaf(4)), new Leaf(5));
     print(o.sum(), "\n");
   }
 }

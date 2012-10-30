@@ -1,17 +1,17 @@
 // Testing the explicit use of "this"
 
 class C {
-  method C() {}
-  method m1() {
+  void C() {}
+  int m1() {
     return this.m2();
   }
-  method m2() {
+  int m2() {
     return 13;
   }
 }
 
 class Main {
-  method Main() {
+  void Main() {
     print((new C()).m1(), "\n");
   }
 }

@@ -3,12 +3,13 @@
 // in an array and then executed one by one (see method map in main).
 
 class Sorting {
-  var array, size;
+  int[] array;
+  int size;
 
-  method Sorting(n) {
-    var x[n];
+  void Sorting(int n) {
+    int x[n];
     print("Type ",n," numbers: ");
-    for (var i=0; i<n; ++i) {
+    for (int i=0; i<n; ++i) {
       x[i] = read();
     }
     print("Finished reading the ",n," numbers\n");
@@ -16,25 +17,25 @@ class Sorting {
     size = n;
   }
 
-  method printArray() {
+  void printArray() {
     print("\n");
-    for (var i=0; i<size; ++i) {
+    for (int i=0; i<size; ++i) {
       print(array[i]," ");
     }
     print("\n");
   }
 
-  method reverse() {
-    for (var i=0; i<size/2; ++i) {
-      var t = array[i];
+  void reverse() {
+    for (int i=0; i<size/2; ++i) {
+      int t = array[i];
       array[i] = array[size - i - 1];
       array[size - i - 1] = t;
     }
   }
 
-  method insertionSort() {
-    for (var i=1; i<size; ++i) {
-      var v = array[i], j = i - 1;
+  void insertionSort() {
+    for (int i=1; i<size; ++i) {
+      int v = array[i], j = i - 1;
       while (j > 0 && array[j] > v) {  // doing the loop only up to 1
         array[j + 1] = array[j];
         j = j - 1;
@@ -46,11 +47,11 @@ class Sorting {
     }
   }
 
-  method bubbleSort() {
-    for (var i=0; i<size; ++i) {
-      for (var j=0; j<size- 1; ++j) {
+  void bubbleSort() {
+    for (int i=0; i<size; ++i) {
+      for (int j=0; j<size- 1; ++j) {
         if (array[j] > array[j + 1]) {
-          var t = array[j + 1];
+          int t = array[j + 1];
           array[j + 1] = array[j];
           array[j] = t;
         }
@@ -58,8 +59,9 @@ class Sorting {
     }
   }
 
-  method siftDown(root, bottom) {
-    var done = false, maxChild;
+  void siftDown(int root, int bottom) {
+    bool done = false;
+    int maxChild;
     while (root*2 <= bottom && !done) {
       if (root*2 == bottom) {
         maxChild = root*2;
@@ -73,7 +75,7 @@ class Sorting {
         }
       }
       if (array[root] < array[maxChild]) {
-        var t = array[root];
+        int t = array[root];
         array[root] = array[maxChild];
         array[maxChild] = t;
         root = maxChild;
@@ -84,15 +86,15 @@ class Sorting {
     }
   }
 
-  method heapSort() {
-    var i = size/2 - 1;
+  void heapSort() {
+    int i = size/2 - 1;
     while (i >= 0) {
       siftDown(i, size - 1);
       i = i - 1;
     }
     i = size - 1;
     while (i >= 1 ) {
-      var t = array[0];
+      int t = array[0];
       array[0] = array[i] ;
       array[i] = t;
       siftDown(0, i - 1);
@@ -105,16 +107,18 @@ class Sorting {
 
 class Main {
 
-  method map(m,f) {
-    for (var i=0; i<sizeOf(f); ++i) {
+  void map(string[] m, (void -> void)[] f) {
+    for (int i=0; i<sizeOf(f); ++i) {
       print(m[i]);
       (f[i])();
     }
   }
 
-  method Main() {
+  void Main() {
     print("Size of the array to sort = ");
-    var s = new Sorting(read()), m[11], f[11];
+    Sorting s = new Sorting(read());
+    string m[11];
+    void->void f[11];
     m[ 0] = "The original unsorted array is:";
     f[ 0] = s.printArray;
     m[ 1] = "Reversing the array ... ";

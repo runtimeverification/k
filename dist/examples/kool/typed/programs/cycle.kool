@@ -3,15 +3,15 @@
 // new object.  The program should run if you don't create any new object.
 
 class C1 extends C2 {
-  method C1() { }
+  void C1() { }
 }
 
 class C2 extends C1 {
-  method C2() { }
+  void C2() { }
 }
 
 class Main {
-  method Main() {
+  void Main() {
 // Should work if you comment next line
 //    new C1();
     print("No cycle detected\n");

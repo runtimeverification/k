@@ -1,30 +1,31 @@
 // Testing dynamic method dispatch and super
 
-class c1 {
-  method c1() {}
+class C1 {
+  method C1() {}
   method m1() {
     return(m2());
   }
   method m2() { return 13; }
 }
 
-class c2 extends c1 {
-  method c2() {}
+class C2 extends C1 {
+  method C2() {}
   method m1() { return 22; }
   method m2() { return 23; }
   method m3() {
     return(super.m1());
   }
 }
-class c3 extends c2 {
-  method c3() {}
+
+class C3 extends C2 {
+  method C3() {}
   method m1() { return 32; }
   method m2() { return 33; }
 }
 
-class main {
-  method main() {
-    var o3 = new c3();
+class Main {
+  method Main() {
+    var o3 = new C3();
     print(o3.m3(), "\n");
   }
 }

@@ -1,7 +1,7 @@
 // Testing main
 
 class Main {
-  method Main() {
+  void Main() {
     print("Hello world!\n");
   }
 }

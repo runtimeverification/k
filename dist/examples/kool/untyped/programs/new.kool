@@ -1,14 +1,14 @@
 // Testing new and method invocation.
 
-class c {
+class C {
   var a=5;
-  method c() {}
+  method C() {}
   method g() { return a; }
 }
 
-class main {
-  method main() {
-    print("a = ", (new c()).g(), "\n");
+class Main {
+  method Main() {
+    print("a = ", (new C()).g(), "\n");
   }
 }
 

@@ -2,25 +2,25 @@
 // whether the object stack environment works.
 
 class C1 {
-  var x, y;
-  method C1() {}
-  method setx1(v) { x = v; }
-  method sety1(v) { y = v; }
-  method getx1() { return x; }
-  method gety1() { return y; }
+  int x, y;
+  void C1() {}
+  void setx1(int v) { x = v; }
+  void sety1(int v) { y = v; }
+  int getx1() { return x; }
+  int gety1() { return y; }
 }
 
 class C2 extends C1 {
-  var y;
-  method C2() {}
-  method sety2(v) { y = v; }
-  method getx2() { return x; }
-  method gety2() { return y; }
+  int y;
+  void c2() {}
+  void sety2(int v) { y = v; }
+  get getx2() { return x; }
+  get gety2() { return y; }
 }
 
 class Main {
-  method Main() {
-    var o2 = new C2();
+  void Main() {
+    C2 o2 = new C2();
     o2.setx1(11);
     o2.sety1(12); 
     o2.sety2(99);

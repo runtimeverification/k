@@ -4,24 +4,24 @@
 // looking up run(), as run is a member in their parent thread's object.
 
 class Thread {
-  method Thread() { }
+  void Thread() { }
 
-  method run() { }  // you are supposed to override this method
+  void run() { }  // you are supposed to override this method
 
-  method start() {
+  void start() {
     spawn { run(); };
   }
 }
 
 
 class Cell {
-  var v;
+  int v;
 
-  method Cell(v) {
+  void Cell(v) {
     this.v = v;
   }
 
-  method inc() {
+  void inc() {
     ++v;
   }
 
@@ -29,13 +29,13 @@ class Cell {
 
 
 class MyThread extends Thread {
-  var c;
+  int c;
 
-  method MyThread(c) {
+  void MyThread(c) {
     this.c = c;
   }
 
-  method run() {
+  void run() {
     c.inc();
   }
 
@@ -44,10 +44,10 @@ class MyThread extends Thread {
 
 class Main {
 
-  method Main() {
-    var c = new Cell(7);
-    var t1 = new MyThread(c);
-    var t2 = new MyThread(c);
+  void Main() {
+    Cell c = new Cell(7);
+    MyThread t1 = new MyThread(c);
+    MyThread t2 = new MyThread(c);
     t1.start();
     t2.start();
     print(c.v,"\n");

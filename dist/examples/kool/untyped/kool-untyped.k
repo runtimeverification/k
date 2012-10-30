@@ -21,13 +21,13 @@ following features:
 \item Class declarations, where a class may or may not explicitly
 extend another class.  In case a class does not explicitly extend
 another class, then it is assumed that it extends the default top-most
-and empty (i.e., no members) class called \texttt{object}.  Each class
+and empty (i.e., no members) class called \texttt{Object}.  Each class
 is required to declare precisely one homonymous method, called its
 \textit{constructor}.  Each valid program should contain one class
-named \texttt{main}, whose constructor, \texttt{main()}, takes no
+named \texttt{Main}, whose constructor, \texttt{Main()}, takes no
 arguments.  The execution of a program consists of creating an object
-instance of class \texttt{main} and invoking the constructor
-\texttt{main()} on it, that is, of executing ``\texttt{new main();}''.
+instance of class \texttt{Main} and invoking the constructor
+\texttt{Main()} on it, that is, of executing ``\texttt{new Main();}''.
 \item All features of SIMPLE (see {\texttt{examples/simple/untyped}}),
 i.e., multidimensional arrays, function (here called ``method'')
 abstractions with call-by-value parameter passing style and static
@@ -135,30 +135,26 @@ module KOOL-UNTYPED-SYNTAX
 /*@ \section{Syntax}
 
 The syntax of KOOL extends that of SIMPLE with object-oriented
-constructs. */
-
-/*@ \subsection{Syntax from SIMPLE}
-
-The syntax below extends that from SIMPLE.
-We removed from the \K annotated syntax of SIMPLE two constructs,
-namely the one for function declarations (because we want to call them
-``methods'' now) and the one for function application (because
-application is not strict in the first argument anymore---needs to
-initiate dynamic method dispatch).  The additional syntax includes:
+constructs.  We removed from the \K annotated syntax of SIMPLE two
+constructs, namely the one for function declarations (because we want
+to call them ``methods'' now) and the one for function application
+(because application is not strict in the first argument
+anymore---needs to initiate dynamic method dispatch).  The additional
+syntax includes:
 \begin{itemize}
-\item First, we need a new dedicated identifier, \texttt{object}, for
+\item First, we need a new dedicated identifier, \texttt{Object}, for
 the default top-most class.
 \item Second, we rename the \texttt{function} keyword of SIMPLE into
 \texttt{method}.
 \item Third, we add syntax for class declarations together with a
-macro making classes which extend nothing to extend \texttt{object}.
+macro making classes which extend nothing to extend \texttt{Object}.
 \item Fourth, we change the strictness attribute of application
 into \texttt{strict(2)}.
 \item Finally, we add syntax and corresponding strictness
 for the KOOL object-oriented constructs.
 \end{itemize} */
 
-  syntax Id ::= "object" | "main"
+  syntax Id ::= "Object" | "Main"
 
   syntax Decl ::= "var" Exps ";"
                 | "method" Id "(" Ids ")" Block  // called "function" in SIMPLE
@@ -237,7 +233,7 @@ for the KOOL object-oriented constructs.
 
 //@ New desugaring rule
 
-  rule class C:Id S => class C extends object S                     // KOOL
+  rule class C:Id S => class C extends Object S                     // KOOL
 
 endmodule
 
@@ -281,7 +277,7 @@ member declarations (\textsf{declarations}). */
                         <xstack color="purple"> .List </xstack>
                         <br/>
                         <crntObj color="Fuchsia">  // KOOL
-                           <crntClass> object </crntClass>
+                           <crntClass> Object </crntClass>
                            <envStack> .List </envStack>
                            <location multiplicity="?"> .K </location>
                         </crntObj>
@@ -302,8 +298,8 @@ member declarations (\textsf{declarations}). */
                   <br/>
                   <classes color="Fuchsia">        // KOOL
                      <class multiplicity="*" color="Fuchsia">
-                        <className color="Fuchsia"> main </className>
-                        <extends color="Fuchsia"> object </extends>
+                        <className color="Fuchsia"> Main </className>
+                        <extends color="Fuchsia"> Object </extends>
                         <declarations color="Fuchsia"> .K </declarations>
                      </class>
                   </classes>
@@ -317,9 +313,9 @@ use of the special \texttt{lambda} abstraction value, needs to change
 in order to account for the fact that methods are now invoked into
 their object's environment.  The semantics of function return actually
 stays unchanged.  Also, the semantics of program initialization is
-different: now we have to create an instance of the \texttt{main}
-class which also calls the constructor \texttt{main()}, while in
-SIMPLE we only had to invoke the function \texttt{main()}. 
+different: now we have to create an instance of the \texttt{Main}
+class which also calls the constructor \texttt{Main()}, while in
+SIMPLE we only had to invoke the function \texttt{Main()}. 
 Finally, the semantics of thread spawning needs to change, too: the
 parent thread needs to also share its object environment with the
 spawned thread (in addition to its local environment, like in SIMPLE).
@@ -577,15 +573,15 @@ corresponding cells: */
 Once all the classes are processed as above, the computation item
 \texttt{execute}, which was placed right after the program in the
 initial configuration, is reached.  In SIMPLE, the program was
-initialized by calling the method \texttt{main()}.  In KOOL, the
-program is initialized by creating an object of class \texttt{main}.
-This will also implicitly call the method \texttt{main()} (the
-\texttt{main} class constructor).  The emptiness of the \textsf{env}
+initialized by calling the method \texttt{Main()}.  In KOOL, the
+program is initialized by creating an object of class \texttt{Main}.
+This will also implicitly call the method \texttt{Main()} (the
+\texttt{Main} class constructor).  The emptiness of the \textsf{env}
 cell below is just a sanity check, to make sure that the user has not
 declared anything but classes at the top level of the program. */
 
   syntax K ::= "execute" 
-  rule <k> execute => new main(.Exps); </k> <env> . </env>  [structural]
+  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
 
 /*@ The semantics of \texttt{new} (defined shortly) requires the
 execution of all the class' declarations (and also of its superclasses').
@@ -644,8 +640,8 @@ refer to it (see rule above). */
        <br/>
        <control> C
          <crntObj> Obj
-                   => <crntClass> object </crntClass>
-                      <envStack> ListItem(object::<env>.Map</env>) </envStack>
+                   => <crntClass> Object </crntClass>
+                      <envStack> ListItem(Object::<env>.Map</env>) </envStack>
                       <location> L </location>
          </crntObj>
          <fstack> . => (Env, K, C <crntObj> Obj </crntObj>) ...</fstack>
@@ -665,7 +661,7 @@ members (both fields and methods) of that class. */
        <className> Class </className> <extends> Class1:Id </extends>
        <declarations> S </declarations>  [structural]
 
-  rule <k> create(object) => . ...</k>  [structural]
+  rule <k> create(Object) => . ...</k>  [structural]
 
 /*@ The next operation sets the current class of the current object.
 This is necessary to be done at each layer, because the current class

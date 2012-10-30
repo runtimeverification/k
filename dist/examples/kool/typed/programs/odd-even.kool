@@ -1,11 +1,11 @@
 // Testing mutually recursive uses of this.method
 
 class OddEven {
-  var n;
-  method OddEven(x) {
+  int n;
+  void OddEven(x) {
     n = x;
   }
-  method even() {
+  int even() {
     if (n == 0) {
       return 1;
     }
@@ -14,7 +14,7 @@ class OddEven {
       return this.odd();
     }
   }
-  method odd() {
+  int odd() {
     if (n == 0) {
       return 0;
     }
@@ -26,7 +26,7 @@ class OddEven {
 }
 
 class Main {
-  method Main() {
+  void Main() {
     print((new OddEven(17)).odd(), "\n");
   }
 }

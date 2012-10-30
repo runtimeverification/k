@@ -1,25 +1,25 @@
 // Test returning objects in methods and then invoking methods on them
 
 class C {
-  var val;
-  method C(v) {
+  int val;
+  void C(int v) {
     val = v;
   }
-  method m1() {
+  G m1() {
     return (new G(val + 9));
   }
 }
 
 class G {
-  var a;
-  method G(t) {
+  int a;
+  void G(int t) {
     a = t;
   }
-  method print2() { print(a, "\n"); }
+  void print2() { print(a, "\n"); }
 }
 
 class Main {
-  method Main() {
+  void Main() {
     ((new C(1)).m1()).print2();
   }
 }

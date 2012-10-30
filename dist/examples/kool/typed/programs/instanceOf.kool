@@ -1,8 +1,8 @@
 // Testing instance of
 
 class C {
-  method C() {}
-  method test() {
+  void C() {}
+  void test() {
     print("Instance of class C");
     if (this instanceOf C1) { print(1); }
     if (this instanceOf C2) { print(2); }
@@ -12,19 +12,19 @@ class C {
 }
 
 class C1 extends C {
-  method C1() {}
+  void C1() {}
 }
 
 class C2 extends C {
-  method C2() {}
+  void C2() {}
 }
 
 class C3 extends C {
-  method C3() {}
+  void C3() {}
 }
 
 class Main {
-  method Main() {
+  void Main() {
     (new C()).test();
     (new C1()).test();
     (new C2()).test();

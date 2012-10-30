@@ -2,32 +2,34 @@
 // methods, bound to local variables, and then invoked.
 
 class A {
-  var c;
-  method A() {
+  int c;
+  void A() {
     c = 0;
   }
-  method inc() {
+  void inc() {
     ++c;
   }
 }
 
 class B {
-  var a = new A(), m = a.inc, x = 0;
-  method B() {
+  A a = new A();
+  void->void m = a.inc;
+  int x = 0;
+  void B() {
     print(a.c, " ");
     m();
     print(a.c, " ");
   }
-  method getM() {
+  void->void getM() {
     return m;
   }
 }
 
 class Main {
-  var f;
-  method Main() {
-    var b = new B();
-    var t = f = b.getM();
+  void->void f;
+  void Main() {
+    B b = new B();
+    void->void t = f = b.getM();
     f();
     print(b.a.c, " ");
     t();
