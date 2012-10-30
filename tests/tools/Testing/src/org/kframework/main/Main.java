@@ -29,6 +29,8 @@ public class Main {
 		if (Configuration.getHomeDir().contains("jenkins"))
 		{
 			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "."} , "");
+			copy.start();
+			copy.join();
 			System.out.println("Copied in " + new File(".").getAbsolutePath());
 		}
 		System.exit(1);
