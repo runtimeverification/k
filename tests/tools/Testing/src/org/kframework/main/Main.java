@@ -24,7 +24,7 @@ import org.xml.sax.SAXException;
 public class Main {
 
 	public static void main(String[] args) {
-		
+
 		// a little bit hack-ish but it works until somebody complains
 		if (Configuration.getHomeDir().contains("jenkins"))
 		{
