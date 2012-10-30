@@ -102,6 +102,10 @@
 		</exec>
 		<copy file="./dist/bin/java/k3.jar" todir="./release/k/bin/java/" />
 		<copy file="./dist/bin/version.txt" todir="./release/k/bin/" />
+		<!-- not needed at runtime -->
+		<delete file="./release/k/bin/native/linux/implodePT" />
+		<delete file="./release/k/bin/native/macosx/implodePT" />
+		<delete file="./release/k/bin/native/cygwin/implodePT.exe" />
 
 		<delete file="k-${version}.zip" />
 		<delete file="k-${version}.tgz" />
@@ -117,9 +121,9 @@
 				<include name="k/bin/maude/binaries/maude.linux" />
 				<include name="k/bin/maude/binaries/maude.linux64" />
 				<include name="k/bin/native/linux/sdf2table" />
-				<include name="k/bin/native/linux/implodePT" />
+				<!--<include name="k/bin/native/linux/implodePT" />-->
 				<include name="k/bin/native/macosx/sdf2table" />
-				<include name="k/bin/native/macosx/implodePT" />
+				<!--<include name="k/bin/native/macosx/implodePT" />-->
 			</tarfileset>
 			<tarfileset dir="./release">
 				<include name="**" />
@@ -132,9 +136,9 @@
 				<exclude name="k/bin/maude/binaries/maude.linux" />
 				<exclude name="k/bin/maude/binaries/maude.linux64" />
 				<exclude name="k/bin/native/linux/sdf2table" />
-				<exclude name="k/bin/native/linux/implodePT" />
+				<!--<exclude name="k/bin/native/linux/implodePT" />-->
 				<exclude name="k/bin/native/macosx/sdf2table" />
-				<exclude name="k/bin/native/macosx/implodePT" />
+				<!--<exclude name="k/bin/native/macosx/implodePT" />-->
 			</tarfileset>
 		</tar>
 	</target>

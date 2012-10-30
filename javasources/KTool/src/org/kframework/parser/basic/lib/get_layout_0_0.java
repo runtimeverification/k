@@ -43,7 +43,7 @@ public class get_layout_0_0 extends Strategy {
 				// tk.setKind(IToken.TK_STRING);
 				// context.getIOAgent().printError("MSG(" + tk.getLine() + "," + tk.getColumn() + "): " + tk.toString());
 
-				IStrategoConstructor constr = context.getFactory().makeConstructor("Comment", 1);
+				IStrategoConstructor constr = context.getFactory().makeConstructor("Comment", 2);
 				// IStrategoList ilist = context.getFactory().makeList(context.getFactory().makeString(tk.toString()));
 				String loc = "(" + tk.getLine() + "," + tk.getColumn() + "," + tk.getEndLine() + "," + tk.getEndColumn() + ")";
 				String str = tk.toString();

@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DefinitionItem;
@@ -67,7 +68,6 @@ public class BasicParser {
 			file = buildCanonicalPath("autoinclude.k", new File(fileName));
 			if (file == null)
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
-
 
 			if (GlobalSettings.verbose)
 				System.out.println("Including file: " + file.getCanonicalPath());
@@ -213,6 +213,11 @@ public class BasicParser {
 	 */
 	@SuppressWarnings("unchecked")
 	private static List<? extends ASTNode> relocateComments(List<? extends ASTNode> nodes) {
+
+		Properties p = System.getProperties();
+		p.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+		System.setProperties(p);
+
 		nodes = BasicParser.sort(nodes);
 		List<ASTNode> defItemListTemp = new ArrayList<ASTNode>();
 
