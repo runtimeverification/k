@@ -34,6 +34,24 @@ public class Main {
 		// a little bit hack-ish but it works until somebody complains
 		System.out.println("UDIR: " + System.getProperty("user.dir"));
 		if (System.getProperty("user.dir").contains("jenkins")) {
+			
+			// remove anything from previous build
+			try {
+				ProcessBuilder pb = new ProcessBuilder("rm", "-rf", k);
+				Process process = pb.start();
+				int exit = process.waitFor();
+				String out = Task.readString(process.getInputStream());
+				String err = Task.readString(process.getErrorStream());
+				System.out.println(out);
+				System.out.println(err);
+				System.out.println(exit);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
+			
 			// first copy the k-framework artifacts
 			try {
 				ProcessBuilder pb = new ProcessBuilder("cp", "-r", "/var/lib/jenkins/workspace/k-framework", k);
