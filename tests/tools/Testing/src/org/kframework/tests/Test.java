@@ -273,7 +273,7 @@ public class Test {
 	private Element getInitialElement(String definition) {
 		Element testsuite = doc.createElement("testsuite");
 		testsuite.setAttribute("name",
-				language.substring(Configuration.getHome().length()));
+				new File(language).getParent().substring(Configuration.getHome().length()));
 		return testsuite;
 	}
 
