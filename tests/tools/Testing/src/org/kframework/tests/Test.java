@@ -309,7 +309,7 @@ public class Test {
 
 	public Task getDefinitionTask() {
 		ArrayList<String> command = new ArrayList<String>();
-		command.add(Configuration.kompile);
+		command.add(Configuration.getKompile());
 		command.add(language);
 		for (Entry<String, String> entry : kompileOptions.entrySet()) {
 			command.add(entry.getKey());
@@ -420,7 +420,7 @@ public class Test {
 
 	public Task getPdfDefinitionTask() {
 		ArrayList<String> command = new ArrayList<String>();
-		command.add(Configuration.kompile);
+		command.add(Configuration.getKompile());
 		command.add(language);
 		command.add("--pdf");
 		String[] arguments = new String[command.size()];

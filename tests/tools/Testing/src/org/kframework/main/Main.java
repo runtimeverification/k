@@ -80,13 +80,6 @@ public class Main {
 			}
 		}
 
-		// execute the right scripts
-		String os = System.getProperty("os.name").toLowerCase();
-		if (os.contains("win")) {
-			Configuration.kompile = Configuration.kompile + ".bat";
-			Configuration.krun = Configuration.kompile + ".bat";
-		}
-
 		List<Test> alltests = new LinkedList<Test>();
 
 		// load config
@@ -94,8 +87,8 @@ public class Main {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			System.out.println(Configuration.config);
-			Document doc = dBuilder.parse(new File(Configuration.config));
+			System.out.println(Configuration.getConfig());
+			Document doc = dBuilder.parse(new File(Configuration.getConfig()));
 			Element root = doc.getDocumentElement();
 
 			NodeList test = root.getElementsByTagName("test");
