@@ -383,7 +383,7 @@ public class Test {
 
 	public void save() {
 		try {
-			FileWriter fstream = new FileWriter(getReportFilename());
+			FileWriter fstream = new FileWriter(Configuration.JR + Configuration.FS + getReportFilename());
 			BufferedWriter out = new BufferedWriter(fstream);
 			out.write(format(doc));
 			out.close();
