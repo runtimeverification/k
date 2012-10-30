@@ -31,9 +31,9 @@ public class Main {
 			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "k"} , "");
 			Execution.execute(copy);
 			Execution.finish();
+			
+			Configuration.HOME_DIR = "/var/lib/jenkins/workspace/k-framework-tests/k";
 		}
-		System.out.println("Copied in " + new File("k").getAbsolutePath());
-		System.exit(1);
 		
 		// execute the right scripts 
 		String os = System.getProperty("os.name").toLowerCase();
