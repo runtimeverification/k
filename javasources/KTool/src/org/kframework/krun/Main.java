@@ -9,8 +9,10 @@ import java.io.InputStreamReader;
 import java.lang.Runtime;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import jline.ArgumentCompletor;
@@ -24,7 +26,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
-import org.kframework.krun.runner.KRunner;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -128,11 +129,10 @@ public class Main {
 		}
 	}
 
-	public static String makeConfiguration(String kast, Properties configuration_variables) {
+	public static Map<String, String> makeConfiguration(String kast, Properties configuration_variables, String stdin) {
 		org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
-		String output = "";
+		HashMap<String, String> output = new HashMap<String, String>();
 		boolean hasPGM = false;
-		int items = 0;
 		Enumeration<Object> en = configuration_variables.keys();
 		while(en.hasMoreElements()) {
 			String name = (String) en.nextElement();
@@ -149,17 +149,18 @@ public class Main {
 			} catch (Exception e1) {
 				Error.report(e1.getMessage());
 			}
-			output += "__(_|->_((# \"$" + name + "\"(.List{K})), (" + parsed + ")), ";
+			output.put(name, parsed);
 			hasPGM = hasPGM || name.equals("PGM");
-			items++;
 		}
 		if (!hasPGM) {
-			output += "__(_|->_((# \"$PGM\"(.List{K})), (" + kast + ")), ";
-			items++;
+			output.put("PGM", kast);
 		}
-		output += "(.).Map";
-		for (int i = 0; i < items; i++) {
-			output += ")";
+		if(!K.io) {
+			stdin = "";
+		}
+		if (stdin != null) {
+			output.put("noIO", "List2KLabel_(#noIO)(.List{K})");
+			output.put("stdin", "# \"" + stdin + "\\n\"(.List{K})");
 		}
 		return output;
 	}
@@ -172,126 +173,84 @@ public class Main {
 			List<String> red = new ArrayList<String>();
 			StringBuilder aux1 = new StringBuilder();
 			CommandLine cmd = cmd_options.getCommandLine();
-			
-			if (K.do_search) {
-				if ("search".equals(K.maude_cmd)) {
-					BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-					String buffer = null;
-					// detect if the input comes from console or redirected from a pipeline
-					Console c = System.console();
-					if (c == null) {
-						try {
-							buffer = br.readLine();
-						} catch (IOException ioe) {
-							ioe.printStackTrace();
-						} finally {
-							if (br != null) {
-								try {
-									br.close();
-								} catch (IOException e) {
-									e.printStackTrace();
+
+			KRun result = null;
+			try {
+				if (K.do_search) {
+					if ("search".equals(K.maude_cmd)) {
+						BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+						String buffer = "";
+						// detect if the input comes from console or redirected from a pipeline
+						Console c = System.console();
+						if (c == null) {
+							try {
+								buffer = br.readLine();
+							} catch (IOException ioe) {
+								ioe.printStackTrace();
+							} finally {
+								if (br != null) {
+									try {
+										br.close();
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 						}
-					}
-					if (cmd.hasOption("bound") && cmd.hasOption("depth")) {
-						s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "," + K.depth + "] " + "#eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
-								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
-					} else if (cmd.hasOption("bound")) {
-						s = "set show command off ." + K.lineSeparator + "search [" + K.bound + "] " + "#eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
-								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
-					} else if (cmd.hasOption("depth")) {
-						s = "set show command off ." + K.lineSeparator + "search [," + K.depth + "] " + "#eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
-								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
+						String depth = null;
+						String bound = null;
+						if (cmd.hasOption("bound") && cmd.hasOption("depth")) {
+							bound = K.bound;
+							depth = K.depth;
+						} else if (cmd.hasOption("bound")) {
+							bound = K.bound;
+						} else if (cmd.hasOption("depth")) {
+							depth = K.depth;
+						}
+						result = KRun.search(bound, depth, K.pattern, makeConfiguration(KAST, K.configuration_variables, buffer), K.showSearchGraph);
 					} else {
-						s = "set show command off ." + K.lineSeparator + "search #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(_|->_((# \"$noIO\"(.List{K})) , (List2KLabel_(#noIO)(.List{K}))))"
-								+ ",(_|->_((# \"$stdin\"(.List{K})) , ((# \"" + buffer + "\\n\"(.List{K})))))" + ",(.).Map)) ";
+						Error.report("For the do-search option you need to specify that --maude-cmd=search");
 					}
-					s += K.pattern + " .";
-					if (K.showSearchGraph) {
-						s += K.lineSeparator + "show search graph" + " .";
-					}
-					/*
-					 * if (cmd.hasOption("xsearch-pattern")) { s += K.xsearch_pattern + " ."; //s = "set show command off ." + K.lineSeparator + "search #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) " + "\"" + K.xsearch_pattern +
-					 * "\"" + " ."; } else s += " =>! B:Bag .";
-					 */
-
+				} else if (cmd.hasOption("maude-cmd")) {
+					result = KRun.run(K.maude_cmd, makeConfiguration(KAST, K.configuration_variables, null));
 				} else {
-					Error.report("For the do-search option you need to specify that --maude-cmd=search");
-				}
-			} else if (cmd.hasOption("maude-cmd")) {
-				s = "set show command off ." + K.lineSeparator + K.maude_cmd + " #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) .";
-			} else {
-				s = "set show command off ." + K.lineSeparator + "erew #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) .";
-			}
-
-			if (K.trace) {
-				s = "set trace on ." + K.lineSeparator + s;
-			}
-
-			StringBuilder sb = new StringBuilder();
-			if (K.model_checking.length() > 0) {
-				// run kast for the formula to be verified
-				File formulaFile = new File(K.model_checking);
-				String KAST1 = new String();
-				if (!formulaFile.exists()) {
-					// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
-					// assume that the specified argument is not a file and maybe represents a formula
-					KAST1 = rp.runParser(K.parser, K.model_checking, false);
-				} else {
-					// the specified argument represents a file
-					KAST1 = rp.runParser(K.parser, K.model_checking, true);
+					result = KRun.run("erew", makeConfiguration(KAST, K.configuration_variables, null));
 				}
 
-				sb.append("mod MCK is" + K.lineSeparator);
-				sb.append(" including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator);
-				sb.append(" op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator);
-				sb.append(" eq #initConfig =" + K.lineSeparator);
-				sb.append("  #eval(__(" + makeConfiguration(KAST, K.configuration_variables) + ",(.).Map)) ." + K.lineSeparator);
-				sb.append("endm" + K.lineSeparator + K.lineSeparator);
-				sb.append("red" + K.lineSeparator);
-				sb.append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.List`{K`}),");
-				sb.append(K.lineSeparator);
-				sb.append(KAST1 + ")" + K.lineSeparator + ") .");
-				s = sb.toString();
+				if (K.model_checking.length() > 0) {
+					// run kast for the formula to be verified
+					File formulaFile = new File(K.model_checking);
+					String KAST1 = new String();
+					if (!formulaFile.exists()) {
+						// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
+						// assume that the specified argument is not a file and maybe represents a formula
+						KAST1 = rp.runParser(K.parser, K.model_checking, false);
+					} else {
+						// the specified argument represents a file
+						KAST1 = rp.runParser(K.parser, K.model_checking, true);
+					}
+
+					result = KRun.modelCheck(KAST1, makeConfiguration(KAST, K.configuration_variables, null));
+				}
+			} catch (KRunExecutionException e) {
+				rp.printError(e.getMessage(), lang);
 			}
-
-			FileUtil.createFile(K.maude_in, s);
-
-			// run IOServer
-			File outFile = FileUtil.createFile(K.maude_out);
-			File errFile = FileUtil.createFile(K.maude_err);
-
-			if (K.log_io) {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" });
-			}
-			if (!K.io) {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--noServer" });
-			} else {
-				KRunner.main(new String[] { "--maudeFile", K.compiled_def, "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
-			}
-
-			// check whether Maude produced errors
-			rp.checkMaudeForErrors(errFile, lang);
 
 			if ("search".equals(K.maude_cmd) && K.do_search && !cmd.hasOption("output")) {
 				System.out.println("Search results:");
 			}
 			if ("pretty".equals(K.output_mode)) {
-				PrettyPrintOutput p = new PrettyPrintOutput();
-				p.preprocessDoc(K.maude_output, K.processed_maude_output);
-				red = p.processDoc(K.processed_maude_output);
-				for (String result : red) {
-					aux1.append(result);
+				red = result.prettyPrint();
+				for (String result2 : red) {
+					aux1.append(result2);
 					if (!cmd.hasOption("output")) {
-						AnsiConsole.out.println(result);
+						AnsiConsole.out.println(result2);
 					}
 				}
 				//print search graph
 				if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
 					System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
-					String result = p.printSearchGraph(K.processed_maude_output);
-					AnsiConsole.out.println(result);
+					AnsiConsole.out.println(result.printSearchGraph());
 					//offer the user the possibility to turn execution into debug mode  
 					while (true) {
 						System.out.print(K.lineSeparator + "Do you want to enter in debug mode? (y/n):");
@@ -311,24 +270,11 @@ public class Main {
 					}
 				}
 			} else if ("raw".equals(K.output_mode)) {
-				String output = new String();
-				if (K.model_checking.length() > 0) {
-					output = FileUtil.parseModelCheckingOutputMaude(K.maude_out);
-				} else {
-					if ("search".equals(K.maude_cmd)) {
-						List<String> l = FileUtil.parseSearchOutputMaude(K.maude_out);
-						if (l.size() > 0) {
-							output = l.get(0);
-						} else {
-							output = "";
-						}
-					} else if ("erewrite".equals(K.maude_cmd)) {
-						output = FileUtil.parseResultOutputMaude(K.maude_out);
-					}
-				}
+				String output = result.rawOutput();;
 				if (!cmd.hasOption("output")) {
 					System.out.println(output);
 				}
+				aux1.append(output);
 
 			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
@@ -377,7 +323,7 @@ public class Main {
 			PrettyPrintOutput p = null;
 			List<String> red = null;
 			if (!isSwitch) {
-				maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__(" + makeConfiguration(kast, K.configuration_variables) + ",(.).Map)) .";
+				maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__(" + KRun.flatten(makeConfiguration(kast, K.configuration_variables, null)) + ",(.).Map)) .";
 				// first execute one step then prompt from the user an input
 				System.out.println("After running one step of execution the result is:");
 				rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
@@ -529,7 +475,7 @@ public class Main {
 						arg = cmd.getOptionValue("select").trim();
 						Element elem = XmlUtil.getSearchSolution(K.maude_output, arg);
 						if (elem != null) {
-							String s = XmlUtil.printSearchSolution(K.processed_maude_output, arg);
+							String s = XmlUtil.printSearchSolution(K.processed_maude_output, arg, new PrettyPrintOutput());
 							System.out.println("Selected solution is:" + s);
 							
 							Document doc = XmlUtil.createXmlRewriteForm(elem);
@@ -713,6 +659,9 @@ public class Main {
 				K.deleteTempDir = false;
 			}
 			if (cmd.hasOption("output")) {
+				if (!cmd.hasOption("color")) {
+					K.color = false;
+				}
 				K.output = new File(cmd.getOptionValue("output")).getCanonicalPath();
 			}
 			if (cmd.hasOption("c")) {

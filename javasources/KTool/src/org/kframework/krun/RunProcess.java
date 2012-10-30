@@ -150,12 +150,18 @@ public class RunProcess {
 		return maude.returnValue;
 	}
 
-	//check if the execution of Maude process produced some errors 
 	public void checkMaudeForErrors(File errFile, String lang) {
+		if (errFile.exists()) {
+			String content = FileUtil.getFileContent(K.maude_err);
+			if (!content.equals("")) {
+				printError(content, lang);
+			}
+		}
+	}
+
+	//check if the execution of Maude process produced some errors 
+	public void printError(String content, String lang) {
 		try {
-			if (errFile.exists()) {
-				String content = FileUtil.getFileContent(K.maude_err);
-				if (content.length() > 0) {
 					System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "k_definition=" + K.k_definition + K.lineSeparator + "syntax_module=" + K.syntax_module + K.lineSeparator + "main_module=" + K.main_module
 							+ K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
 					String compiledDefName = FileUtil.getFilename(K.compiled_def, ".", K.fileSeparator);
@@ -179,8 +185,6 @@ public class RunProcess {
 							Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
 						}
 					}
-				}
-			}
 		} catch (IOException e) {
 			Error.report("Error in checkMaudeForErrors method:" + e.getMessage());
 		}

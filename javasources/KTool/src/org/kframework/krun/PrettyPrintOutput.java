@@ -23,25 +23,51 @@ public class PrettyPrintOutput {
 
 	public static final int indent = 1;
 
-	public static final String ANSI_NORMAL = "\u001b[0m";
+	public final String ANSI_NORMAL;
 
-	public static final String ANSI_BLACK = "\u001B[30m";
-	public static final String ANSI_RED = "\u001B[31m";
-	public static final String ANSI_GREEN = "\u001B[32m";
-	public static final String ANSI_YELLOW = "\u001B[33m";
-	public static final String ANSI_BLUE = "\u001B[34m";
-	public static final String ANSI_PURPLE = "\u001B[35m";
-	public static final String ANSI_CYAN = "\u001B[36m";
-	public static final String ANSI_WHITE = "\u001B[37m";
+	public final String ANSI_BLACK;
+	public final String ANSI_RED;
+	public final String ANSI_GREEN;
+	public final String ANSI_YELLOW;
+	public final String ANSI_BLUE;
+	public final String ANSI_PURPLE;
+	public final String ANSI_CYAN;
+	public final String ANSI_WHITE;
 	
 	//addnewLine is used to prevent adding an additional new line at the first BagItem located in the top of XML file
     public static boolean addNewLine = false;
 	
 	public PrettyPrintOutput() {
+		this(false);
 		this.cmd = null;
 	}
 
+	public PrettyPrintOutput(boolean color) {
+		if (!color) {
+			ANSI_NORMAL = "";
+			ANSI_BLACK = "";
+			ANSI_RED = "";
+			ANSI_GREEN = "";
+			ANSI_YELLOW = "";
+			ANSI_BLUE = "";
+			ANSI_PURPLE = "";
+			ANSI_CYAN = "";
+			ANSI_WHITE = "";
+		} else {
+			ANSI_NORMAL = "\u001b[0m";
+			ANSI_BLACK = "\u001b[30m";
+			ANSI_RED = "\u001b[31m";
+			ANSI_GREEN = "\u001b[32m";
+			ANSI_YELLOW = "\u001b[33m";
+			ANSI_BLUE = "\u001b[34m";
+			ANSI_PURPLE = "\u001b[35m";
+			ANSI_CYAN = "\u001b[36m";
+			ANSI_WHITE = "\u001b[37m";
+		}
+	}
+
 	public PrettyPrintOutput(CommandLine cmd_) {
+		this(false);
 		this.cmd = cmd_;
 	}
 
@@ -109,18 +135,18 @@ public class PrettyPrintOutput {
 	}
 	
 	//needed for --search command
-	public static String printSearchResults(Element elem) {
+	public String printSearchResults(Element elem) {
 		String result = "";
 		String solutionNumber = elem.getAttribute("solution-number");
 		String stateNumber = elem.getAttribute("state-number");
 		if (!solutionNumber.equals("NONE")) {
-			result += K.lineSeparator + (PrettyPrintOutput.ANSI_BLUE + "Solution " + solutionNumber + ", state " + stateNumber + ":" + PrettyPrintOutput.ANSI_NORMAL);
+			result += K.lineSeparator + (ANSI_BLUE + "Solution " + solutionNumber + ", state " + stateNumber + ":" + ANSI_NORMAL);
 		}
 		return result;
 	}
 	
 	//needed for --statistics command
-	public static String printStatistics(Element elem) {
+	public String printStatistics(Element elem) {
 		String result = "";
 		if ("search".equals(K.maude_cmd)) {
 			String totalStates = elem.getAttribute("total-states");
@@ -128,13 +154,13 @@ public class PrettyPrintOutput {
 			String realTime = elem.getAttribute("real-time-ms");
 			String cpuTime = elem.getAttribute("cpu-time-ms");
 			String rewritesPerSecond = elem.getAttribute("rewrites-per-second");
-			result += PrettyPrintOutput.ANSI_BLUE + "states: " + totalStates + " rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL;
+			result += ANSI_BLUE + "states: " + totalStates + " rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + ANSI_NORMAL;
 		} else if ("erewrite".equals(K.maude_cmd)){
 			String totalRewrites = elem.getAttribute("total-rewrites");
 			String realTime = elem.getAttribute("real-time-ms");
 			String cpuTime = elem.getAttribute("cpu-time-ms");
 			String rewritesPerSecond = elem.getAttribute("rewrites-per-second");
-			result += PrettyPrintOutput.ANSI_BLUE + "rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + PrettyPrintOutput.ANSI_NORMAL;
+			result += ANSI_BLUE + "rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)" + ANSI_NORMAL;
 		}
 		return result;
 	}
@@ -235,7 +261,7 @@ public class PrettyPrintOutput {
 		return result;
 	}
 
-	public static String print(Element node, boolean lineskip, int whitespace, String color) {
+	public String print(Element node, boolean lineskip, int whitespace, String color) {
 		StringBuilder sb = new StringBuilder();
 		String op = node.getAttribute("op");
 		String sort = node.getAttribute("sort");
@@ -544,7 +570,7 @@ public class PrettyPrintOutput {
 	}
 
 	//pretty print a text according to specified lineskip, whitespace and color
-	private static String prettyPrint(String text, boolean lineskip, int whitespace, String color) {
+	private String prettyPrint(String text, boolean lineskip, int whitespace, String color) {
 		StringBuilder output = new StringBuilder();
 		StringBuilder aux;
 
@@ -559,7 +585,6 @@ public class PrettyPrintOutput {
 			String space = Utils.buildWhitespace(whitespace);
 			output.append(space);
 		}
-		if (K.color) {
 			if (!color.equals(ANSI_NORMAL)) {
 				output.append(color);
 				output.append(text);
@@ -567,21 +592,17 @@ public class PrettyPrintOutput {
 			}
 			else if (text.indexOf("|->") != -1) {
 				aux = new StringBuilder();
-				aux = Utils.colorSymbol(text, "|->", ANSI_PURPLE);
+				aux = Utils.colorSymbol(text, "|->", ANSI_PURPLE, ANSI_NORMAL);
 				output.append(aux);
 			}
 			else if (text.indexOf("~>") != -1) {
 				aux = new StringBuilder();
-				aux = Utils.colorSymbol(text, "~>", ANSI_BLUE);
+				aux = Utils.colorSymbol(text, "~>", ANSI_BLUE, ANSI_NORMAL);
 				output.append(aux);
 			}
 			else {
 				output.append(text);
 			}
-		}
-		else {
-			output.append(text);
-		}
 
 		return output.toString();
 	}
@@ -611,7 +632,7 @@ public class PrettyPrintOutput {
 	}
 
 	//when the number of underscores = 0 and the number of children > 0 
-	public static StringBuilder freezerCase(List<Element> list, String op, int n, boolean lineskip, int whitespace, String color) {
+	public StringBuilder freezerCase(List<Element> list, String op, int n, boolean lineskip, int whitespace, String color) {
 		StringBuilder sb = new StringBuilder();
 		List<String> elements = new ArrayList<String>();
 
@@ -640,7 +661,7 @@ public class PrettyPrintOutput {
 	}
 
 	//when the number of underscores is less than the number of children
-	public static StringBuilder lessUnderscoresCase(List<Element> list, String op, int n, int m, boolean lineskip, int whitespace, String color) {
+	public StringBuilder lessUnderscoresCase(List<Element> list, String op, int n, int m, boolean lineskip, int whitespace, String color) {
 		StringBuilder sb = new StringBuilder();
 		List<String> elements = new ArrayList<String>();
 
@@ -671,7 +692,7 @@ public class PrettyPrintOutput {
 	}
 
 	//when the number of underscores is less than the number of children and the operator is associative
-	public static StringBuilder lessUnderscoresAssocCase(List<Element> list, String op, boolean lineskip, int whitespace, String color) {
+	public StringBuilder lessUnderscoresAssocCase(List<Element> list, String op, boolean lineskip, int whitespace, String color) {
 		StringBuilder sb = new StringBuilder();
 		List<String> elements = new ArrayList<String>();
 
@@ -688,7 +709,7 @@ public class PrettyPrintOutput {
 	}
 
 	//when the number of underscores is equal with the number of children
-	public static StringBuilder generalCase(List<Element> list, String op, boolean lineskip, int whitespace, String color, boolean addParens) {
+	public StringBuilder generalCase(List<Element> list, String op, boolean lineskip, int whitespace, String color, boolean addParens) {
 		StringBuilder sb = new StringBuilder();
 		List<String> elements = new ArrayList<String>();
 

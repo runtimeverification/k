@@ -120,7 +120,7 @@ public class Utils {
 	}
 	
 	//color the symbol found in text with the specified color
-	public static StringBuilder colorSymbol(String text, String symbol, String color) {
+	public static StringBuilder colorSymbol(String text, String symbol, String color, String oldColor) {
 		StringBuilder aux = new StringBuilder();
 		String[] tokens;
 		tokens = text.split("\\" + symbol);
@@ -128,7 +128,7 @@ public class Utils {
 			aux.append(tokens[i]);
 			aux.append(color);
 			aux.append(symbol);
-			aux.append(PrettyPrintOutput.ANSI_NORMAL);
+			aux.append(oldColor);
 		}
 		aux.append(tokens[tokens.length - 1]);
 		return aux;

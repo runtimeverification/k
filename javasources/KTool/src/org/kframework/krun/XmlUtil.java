@@ -270,7 +270,7 @@ public class XmlUtil {
 		return result;
 	}
 	
-	public static String prettyPrintTerm(Document doc, String tagName, String attributeName, String xpathExpression, String solutionIdentifier) {
+	public static String prettyPrintTerm(Document doc, String tagName, String attributeName, String xpathExpression, String solutionIdentifier, PrettyPrintOutput printer) {
 		String result = null;
 		NodeList list = null;
 		Node nod = null;
@@ -303,7 +303,7 @@ public class XmlUtil {
 						if (result1 != null) {
 							NodeList nodes = (NodeList) result1;
 							nod = nodes.item(0);
-							result = PrettyPrintOutput.print((Element) nod, false, 0, PrettyPrintOutput.ANSI_NORMAL);
+							result = printer.print((Element) nod, false, 0, printer.ANSI_NORMAL);
 							break;
 						}
 						else {
@@ -341,7 +341,7 @@ public class XmlUtil {
 	
 	/* pretty-print the solution (a node in the xml file denoted by fileName) specified by its solution-number obtained from a search command 
 	or pretty-print the term node from a node in the search graph obtained from a search command */
-	public static String printSearchSolution(String fileName, String solutionIdentifier) {
+	public static String printSearchSolution(String fileName, String solutionIdentifier, PrettyPrintOutput printer) {
 		String result = null;
 		File input = new File(fileName);
 		Document doc = XmlUtil.readXML(input);
@@ -350,10 +350,10 @@ public class XmlUtil {
 		//otherwise solutionIdentifier identifies an id of a node from the search graph
 		boolean isNumber = Utils.isNumber(solutionIdentifier);
 		if (isNumber) {
-			result = prettyPrintTerm(doc, "search-result", "solution-number", "substitution/assignment/term[2]", solutionIdentifier);
+			result = prettyPrintTerm(doc, "search-result", "solution-number", "substitution/assignment/term[2]", solutionIdentifier, printer);
 		}
 		else {
-			result = prettyPrintTerm(doc, "node", "id", "data/term", solutionIdentifier);
+			result = prettyPrintTerm(doc, "node", "id", "data/term", solutionIdentifier, printer);
 		}
 		
 		return result;		
