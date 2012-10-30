@@ -1,0 +1,26 @@
+<tests>
+	<test folder="dist/examples/imp/programs"
+          recursive="yes"
+          extensions="imp"
+          exclude="collatz.imp primes.imp"
+          language="dist/examples/imp/imp.k"
+          results="tests/examples/imp">
+	<kompile-option name="-v" value=""/>
+	<all-programs>
+		<krun-option name="--no-color" value=""/>
+		<krun-option name="--output-mode" value="none"/>
+	</all-programs>
+	</test>
+	
+	<test folder="dist/examples/simple/untyped/programs"
+		  recursive="yes"
+		  extensions="simple"
+		  exclude="diverse/dekker.simple diverse/div-nondet.simple"
+		  language="dist/examples/simple/untyped/simple-untyped.k"
+		  results="tests/examples/simple-untyped">
+		<all-programs>
+			<krun-option name="--no-color"/>
+			<krun-option name="--output-mode" value="none"/>
+		</all-programs>
+	</test>
+</tests>
