@@ -125,14 +125,18 @@ public class GenerateSymbolicSyntaxPredicates extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
-		SymbolicSyntaxPredicatesVisitor moduleVisitor = new SymbolicSyntaxPredicatesVisitor(); 
+    /*
+		SymbolicSyntaxPredicatesVisitor moduleVisitor =
+      new SymbolicSyntaxPredicatesVisitor(); 
 		node.accept(moduleVisitor);
 		List<ModuleItem> predicates = moduleVisitor.getResult();
-		if (predicates.isEmpty()) return node;
+		if (predicates.isEmpty())
+      return node;
 		node = node.shallowCopy();
 		List<ModuleItem> items = new ArrayList<ModuleItem>(node.getItems());
 		items.addAll(predicates);
 		node.setItems(items);
+    */
 		return node;
 	}
 	
