@@ -29,8 +29,9 @@ public class Main {
 		if (Configuration.getHomeDir().contains("jenkins"))
 		{
 			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "."} , "");
-			System.exit(1);
+			System.out.println("Copied.");
 		}
+		System.exit(1);
 		
 		// execute the right scripts 
 		String os = System.getProperty("os.name").toLowerCase();
