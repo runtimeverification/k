@@ -7,6 +7,7 @@ import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.utils.XmlLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -57,7 +58,9 @@ public class KastParser {
 		XmlLoader.writeXmlFile(doc, K.kdir + "/pgm.xml");
 
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+
 		try {
+			out = out.accept(new AmbFilter());
 			out = out.accept(new FlattenSyntax());
 		} catch (TransformerException e) {
 			e.printStackTrace();

@@ -10,7 +10,6 @@ import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitFileCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
@@ -51,7 +50,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 
 				config = config.accept(new SentenceVariablesFilter());
 				// config = config.accept(new CellTypesFilter()); not the case on configs
-				config = config.accept(new CorrectRewritePriorityFilter());
+				// config = config.accept(new CorrectRewritePriorityFilter());
 				config = config.accept(new CorrectKSeqFilter());
 				config = config.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
 				config = config.accept(new VariableTypeInferenceFilter());

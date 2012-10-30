@@ -15,7 +15,6 @@ public class CorrectKSeqFilter extends BasicTransformer {
 
 	public CorrectKSeqFilter() {
 		super("Correct K sequences");
-		// TODO Auto-generated constructor stub
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {

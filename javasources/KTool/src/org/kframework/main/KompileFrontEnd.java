@@ -44,24 +44,12 @@ import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.compile.utils.ConfigurationStructureVisitor;
 import org.kframework.compile.utils.ConfigurationStructureVisitor.ConfigurationStructure;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.CollectConfigCellsVisitor;
-import org.kframework.kil.loader.CollectConsesVisitor;
-import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kompile.lint.InfiniteRewrite;
 import org.kframework.kompile.lint.KlintRule;
 import org.kframework.kompile.lint.UnusedName;
 import org.kframework.kompile.lint.UnusedSyntax;
-import org.kframework.parser.generator.loader.AddConsesVisitor;
-import org.kframework.parser.generator.loader.BasicParser;
-import org.kframework.parser.generator.loader.DefinitionSDF;
-import org.kframework.parser.generator.loader.ParseConfigsFilter;
-import org.kframework.parser.generator.loader.ParseRulesFilter;
-import org.kframework.parser.generator.loader.ProgramSDF;
-import org.kframework.utils.ResourceExtractor;
-import org.kframework.utils.Sdf2Table;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -188,8 +176,6 @@ public class KompileFrontEnd {
 
 		if (cmd.hasOption("maudify")) {
 			maudify(mainFile, lang);
-		} else if (cmd.hasOption("tempc")) {
-			tempc(mainFile, lang);
 		} else if (cmd.hasOption("latex")) {
 			List<File> files = latex(mainFile, lang);
 			try {
@@ -497,132 +483,6 @@ public class KompileFrontEnd {
 			}
 
 			return maudified;
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	/**
-	 * TODO: make this the new basic parsing step. 1. slurp 2. gen files 3. gen TBLs 4. import files in stratego 5. parse configs 6. parse rules 7. ???
-	 * 
-	 * @param mainFile
-	 * @param mainModule
-	 * @return
-	 */
-	public static String tempc(File mainFile, String mainModule) {
-		try {
-			// compile a definition here
-			Stopwatch sw = new Stopwatch();
-
-			// for now just use this file as main argument
-			// ------------------------------------- basic parsing
-
-			BasicParser bparser = new BasicParser();
-			bparser.slurp(mainFile.getPath());
-
-			// transfer information from the BasicParser object, to the Definition object
-			org.kframework.kil.Definition def = new org.kframework.kil.Definition();
-			def.setMainFile(mainFile.getCanonicalPath());
-			def.setMainModule(mainModule);
-			def.setModulesMap(bparser.getModulesMap());
-			def.setItems(bparser.getModuleItems());
-
-			if (GlobalSettings.synModule == null) {
-				String synModule = mainModule + "-SYNTAX";
-				if (!def.getModulesMap().containsKey(synModule)) {
-					synModule = mainModule;
-					String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + def.getMainSyntaxModule() + "' instead.";
-					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
-				}
-				def.setMainSyntaxModule(synModule);
-			} else
-				def.setMainSyntaxModule(GlobalSettings.synModule);
-
-			def.accept(new UpdateReferencesVisitor());
-			def.accept(new AddConsesVisitor());
-			def.accept(new CollectConsesVisitor());
-			def.accept(new CollectSubsortsVisitor());
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Basic Parsing");
-
-			// ------------------------------------- generate files
-			ResourceExtractor.ExtractAllSDF(DefinitionHelper.dotk);
-
-			ResourceExtractor.ExtractProgramSDF(DefinitionHelper.dotk);
-
-			// ------------------------------------- generate parser TBL
-			// cache the TBL if the sdf file is the same
-			String oldSdf = "";
-			if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
-				oldSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
-
-			// make a set of all the syntax modules
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf", ProgramSDF.getSdfForPrograms(def));
-
-			String newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Pgm");
-
-			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLPgm");
-
-			// ------------------------------------- generate parser TBL
-			// cache the TBL if the sdf file is the same
-			oldSdf = "";
-			if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
-				oldSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForPrograms(def));
-			newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Def");
-
-			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLDef");
-
-			// ------------------------------------- import files in Stratego
-			org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getAbsolutePath() + "/def/Concrete.tbl");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Importing Files");
-
-			// ------------------------------------- parse configs
-			def = (Definition) def.accept(new ParseConfigsFilter());
-			def.accept(new CollectConfigCellsVisitor());
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Configs");
-
-			// ----------------------------------- parse rules
-			def = (Definition) def.accept(new ParseRulesFilter());
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Rules");
-
-			XStream xstream = new XStream();
-			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
-
-			String xml = xstream.toXML(def);
-
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml", xml);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Save in file");
-			}
-
-			// return maudified;
-			return "";
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (Exception e) {

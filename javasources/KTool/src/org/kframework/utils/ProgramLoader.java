@@ -23,28 +23,6 @@ import org.w3c.dom.Element;
 
 public class ProgramLoader {
 
-	public static ASTNode loadPgmAst2(File pgmFile, File dotk) throws IOException {
-		File tbl = new File(dotk.getCanonicalPath() + "/pgm/Program.tbl");
-
-		// ------------------------------------- import files in Stratego
-		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
-
-		File f = pgmFile.getCanonicalFile();
-
-		String content = FileUtil.getFileContent(f.getAbsolutePath());
-
-		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content);
-		Document doc = XmlLoader.getXMLDoc(parsed);
-
-		XmlLoader.addFilename(doc.getFirstChild(), pgmFile.getAbsolutePath());
-		XmlLoader.reportErrors(doc);
-		XmlLoader.writeXmlFile(doc, dotk.getAbsolutePath() + "/pgm.xml");
-
-		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
-
-		return out;
-	}
-
 	/**
 	 * Load program file to ASTNode.
 	 * 

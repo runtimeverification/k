@@ -22,13 +22,13 @@ public class CollectSynModulesVisitor extends BasicVisitor {
 	public void visit(Definition def) {
 		List<String> synQue = new LinkedList<String>();
 		synQue.add(def.getMainSyntaxModule());
-		synQue.add("AUTO-INCLUDED-MODULE-SYNTAX");
 
 		Module bshm = def.getModulesMap().get("AUTO-INCLUDED-MODULE-SYNTAX");
 		if (bshm == null) {
 			String msg = "Could not find module AUTO-INCLUDED-MODULE-SYNTAX (automatically included in the main syntax module)!";
 			GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
-		}
+		} else
+			synQue.add("AUTO-INCLUDED-MODULE-SYNTAX");
 
 		while (!synQue.isEmpty()) {
 			String mname = synQue.remove(0);

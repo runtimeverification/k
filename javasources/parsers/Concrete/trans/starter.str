@@ -122,14 +122,11 @@ rules
 	// call that dynamic rule each time you want the term
 	// How to test - the disambiguator rule calls testMe5 which disambiguates - then press "Gen XML" to generate XML
 	testMe5 =
-		all(all(testDisambig))
+		all(all(mydisambiguate)) ; topdown(try(annolocationremove))
 
 	external clear-console(|)
 
 	disambig0 = clear-console ; (disambig2 <+ testMe5)
 	disambig2:
 		(ast, path, project-path) -> <testMe5> ast
-
-	testDisambig =
-		(?Config(_) ; mydisambiguate) <+ mydisambiguate
 

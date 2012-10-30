@@ -49,12 +49,10 @@ public class KompileOptionsParser {
 		Option style = new Option("style", true, "pass styling information to the k.sty package");
 		Option maudify = new Option("m", "maudify", false, "maudify the definition");
 		Option compile = new Option("c", "compile", false, "compile the definition");
-		Option tempcompile = new Option("tempc", "tempc", false, "test new implementation");
 
 		tex.addOption(latex);
 		tex.addOption(pdf);
 		tex.addOption(compile);
-		tex.addOption(tempcompile);
 		tex.addOption(maudify);
 
 		OptionGroup warn = new OptionGroup();
@@ -120,7 +118,7 @@ public class KompileOptionsParser {
 		options.addOption(transition);
 		options.addOption(supercool);
 		options.addOption(superheat);
-		
+
 		options.addOption(style);
 
 	}
