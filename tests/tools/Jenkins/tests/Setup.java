@@ -31,7 +31,7 @@ public class Setup {
 		String[] removeCommands = new String[] { "rm", "-rf", StaticK.kbase };
 		Executor rmexecutor = new Executor(removeCommands, ".", null);
 		rmexecutor.start();
-		rmexecutor.join(StaticK.ulimit * 1000);
+		rmexecutor.join();
 		Thread.yield();
 		assertFalse(new File(StaticK.kbase).exists());
 		System.out.println("Removed.");
@@ -40,7 +40,7 @@ public class Setup {
 		String[] copyCommands = new String[] { "cp", "-r", "/var/lib/jenkins/workspace/k-framework" , StaticK.kbase };
 		Executor cpexecutor = new Executor(copyCommands, ".", null);
 		cpexecutor.start();
-		cpexecutor.join(StaticK.ulimit * 1000);
+		cpexecutor.join();
 		Thread.yield();
 		assertTrue(new File(StaticK.kbase).exists());
 		assertTrue(new File(StaticK.kbasedir).exists());
