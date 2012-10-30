@@ -44,7 +44,7 @@ public class Main {
 			System.out.println(build.getStdout());
 			System.out.println(build.getStderr());
 			if (build.getExit() != 0)
-				System.exit(1);
+				System.exit(2);
 		}
 		
 		// execute the right scripts 
