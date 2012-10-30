@@ -1,6 +1,5 @@
 package org.kframework.main;
 
-import java.io.File;
 
 public class Configuration {
 
@@ -8,8 +7,7 @@ public class Configuration {
 		return HOME_DIR;
 	}
 	
-	public static String HOME_DIR = new File(System.getProperty("user.dir")).getParentFile()
-			.getParentFile().getParentFile().getAbsolutePath();
+	public static String HOME_DIR = null;
 	public static final String FS = System.getProperty("file.separator");
 	public static String kompile = HOME_DIR + FS + "dist" + FS + "bin" + FS + "kompile";
 	public static String krun = HOME_DIR + FS + "dist" + FS + "bin" + FS + "krun";

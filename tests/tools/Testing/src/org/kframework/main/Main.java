@@ -49,6 +49,7 @@ public class Main {
 			{
 				e.printStackTrace();
 			}
+			
 			// setup the new path
 			Configuration.HOME_DIR = k;
 
@@ -76,6 +77,10 @@ public class Main {
 			Configuration.krun = Configuration.kompile + ".bat";
 		}
 
+		if (Configuration.HOME_DIR == null)
+			new File(System.getProperty("user.dir")).getParentFile()
+			.getParentFile().getParentFile().getAbsolutePath();
+		
 		List<Test> alltests = new LinkedList<Test>();
 
 		// load config
