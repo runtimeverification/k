@@ -13,8 +13,7 @@ public class Configuration {
 		if (System.getProperty("user.dir").contains("jenkins"))
 			return k;
 
-		return new File(System.getProperty("user.dir")).getParentFile()
-				.getParentFile().getParentFile().getAbsolutePath();
+		return new File(System.getProperty("user.dir")).getAbsolutePath();
 	}
 
 	public static String getConfig() {
