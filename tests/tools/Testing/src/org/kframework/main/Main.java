@@ -29,13 +29,13 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		
 		// a little bit hack-ish but it works until somebody complains
 		if (System.getProperty("user.dir").contains("jenkins")) {
-			
+
 			// remove anything from previous build
 			try {
-				ProcessBuilder pb = new ProcessBuilder("rm", "-rf", Configuration.k);
+				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
+						Configuration.k);
 				Process process = pb.start();
 				int exit = process.waitFor();
 				String out = Task.readString(process.getInputStream());
@@ -43,16 +43,15 @@ public class Main {
 				System.out.println(out);
 				System.out.println(err);
 				System.out.println(exit);
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
-			
 			// first copy the k-framework artifacts
 			try {
-				ProcessBuilder pb = new ProcessBuilder("cp", "-r", "/var/lib/jenkins/workspace/k-framework", Configuration.k);
+				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
+						"/var/lib/jenkins/workspace/k-framework",
+						Configuration.k);
 				Process process = pb.start();
 				int exit = process.waitFor();
 				String out = Task.readString(process.getInputStream());
@@ -60,16 +59,14 @@ public class Main {
 				System.out.println(out);
 				System.out.println(err);
 				System.out.println(exit);
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+
 			// build K
 			try {
 				ProcessBuilder pb = new ProcessBuilder("ant");
-				pb.directory(new File(Configuration.HOME_DIR));
+				pb.directory(new File(Configuration.getHome()));
 				Process process = pb.start();
 				int exit = process.waitFor();
 				String out = Task.readString(process.getInputStream());
@@ -149,7 +146,7 @@ public class Main {
 			if (!entry.getKey().compiled(entry.getValue()))
 				System.out.println("Compiling "
 						+ entry.getKey().getLanguage()
-								.substring(Configuration.HOME_DIR.length())
+								.substring(Configuration.getHome().length())
 						+ " failed.");
 		}
 		System.out.println();
@@ -160,7 +157,7 @@ public class Main {
 			if (!entry.getKey().compiledPdf(entry.getValue()))
 				System.out.println("Compiling pdf "
 						+ entry.getKey().getLanguage()
-								.substring(Configuration.HOME_DIR.length())
+								.substring(Configuration.getHome().length())
 						+ " failed.");
 		}
 
@@ -190,7 +187,7 @@ public class Main {
 				System.out.println("\n");
 				System.out.println("Failed "
 						+ test.getLanguage().substring(
-								Configuration.HOME_DIR.length())
+								Configuration.getHome().length())
 						+ " programs:");
 				for (Entry<Program, Task> entry : all.entrySet()) {
 					if (!entry.getKey().success(entry.getValue())) {
@@ -199,8 +196,7 @@ public class Main {
 										+ entry.getKey()
 												.getAbsolutePath()
 												.substring(
-														Configuration
-																.HOME_DIR
+														Configuration.getHome()
 																.length())
 										+ " failed.");
 					}

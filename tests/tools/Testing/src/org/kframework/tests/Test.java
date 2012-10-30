@@ -60,14 +60,14 @@ public class Test {
 	private void initializePrograms() {
 		programs = new LinkedList<Program>();
 
-		List<String> allProgramPaths = searchAll(Configuration.HOME_DIR
+		List<String> allProgramPaths = searchAll(Configuration.getHome()
 				+ Configuration.FS + programsFolder, extensions, recursive);
 
 		for (String programPath : allProgramPaths) {
 			// ignore the programs from exclude list
 			boolean excluded = false;
 			for (String exclude : excludePrograms)
-				if (programPath.equals(Configuration.HOME_DIR
+				if (programPath.equals(Configuration.getHome()
 						+ Configuration.FS + programsFolder + Configuration.FS
 						+ exclude))
 					excluded = true;
@@ -87,7 +87,7 @@ public class Test {
 			if (!special)
 				krunOptions = this.generalKrunOptions;
 
-			String inputFile = searchInputFile(Configuration.HOME_DIR
+			String inputFile = searchInputFile(Configuration.getHome()
 					+ Configuration.FS + resultsFolder,
 					new File(programPath).getName(), recursive);
 			String input = "";
@@ -98,7 +98,7 @@ public class Test {
 					e.printStackTrace();
 				}
 
-			String outputFile = searchOutputFile(Configuration.HOME_DIR
+			String outputFile = searchOutputFile(Configuration.getHome()
 					+ Configuration.FS + resultsFolder,
 					new File(programPath).getName(), recursive);
 			String output = "";
@@ -185,7 +185,7 @@ public class Test {
 	}
 
 	private void init(Element test) {
-		String homeDir = Configuration.HOME_DIR;
+		String homeDir = Configuration.getHome();
 
 		// get full name
 		language = homeDir + Configuration.FS + test.getAttribute("language");
@@ -273,7 +273,7 @@ public class Test {
 	private Element getInitialElement(String definition) {
 		Element testsuite = doc.createElement("testsuite");
 		testsuite.setAttribute("name",
-				language.substring(Configuration.HOME_DIR.length()));
+				language.substring(Configuration.getHome().length()));
 		return testsuite;
 	}
 
