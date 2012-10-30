@@ -28,7 +28,7 @@ public class Program {
 
 	public Task getTask() {
 		ArrayList<String> command = new ArrayList<String>();
-		command.add(Configuration.krun);
+		command.add(Configuration.getKrun());
 		command.add(absolutePath);
 		command.add("--k-definition");
 		command.add(test.getLanguage());
