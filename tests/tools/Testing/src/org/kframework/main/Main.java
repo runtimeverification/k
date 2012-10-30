@@ -34,13 +34,20 @@ public class Main {
 		if (System.getProperty("user.dir").contains("jenkins")) {
 			// first copy the k-framework artifacts
 			try {
-				copyFolder(new File("/var/lib/jenkins/workspace/k-framework"),
-						new File("k"));
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				ProcessBuilder pb = new ProcessBuilder("cp", "-r", "/var/lib/jenkins/workspace/k-framework", "k");
+				pb.directory(new File(Configuration.HOME_DIR));
+				Process process = pb.start();
+				int exit = process.waitFor();
+				String out = Task.readString(process.getInputStream());
+				String err = Task.readString(process.getErrorStream());
+				System.out.println(out);
+				System.out.println(err);
+				System.out.println(exit);
 			}
-
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 			// setup the new path
 			Configuration.HOME_DIR = "/var/lib/jenkins/workspace/k-framework-tests/k";
 
