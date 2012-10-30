@@ -29,7 +29,7 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		String k = "/var/lib/jenkins/workspace/k-framework";
+		String k = "/var/lib/jenkins/workspace/k-framework-tests/k";
 		
 		// a little bit hack-ish but it works until somebody complains
 		System.out.println("UDIR: " + System.getProperty("user.dir"));
