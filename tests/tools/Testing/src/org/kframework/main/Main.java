@@ -158,7 +158,7 @@ public class Main {
 			if (!entry.getKey().compiled(entry.getValue()))
 				System.out.println("Compiling "
 						+ entry.getKey().getLanguage()
-								.substring(Configuration.getHomeDir().length())
+								.substring(Configuration.HOME_DIR.length())
 						+ " failed.");
 		}
 		System.out.println();
@@ -169,7 +169,7 @@ public class Main {
 			if (!entry.getKey().compiledPdf(entry.getValue()))
 				System.out.println("Compiling pdf "
 						+ entry.getKey().getLanguage()
-								.substring(Configuration.getHomeDir().length())
+								.substring(Configuration.HOME_DIR.length())
 						+ " failed.");
 		}
 
@@ -199,7 +199,7 @@ public class Main {
 				System.out.println("\n");
 				System.out.println("Failed "
 						+ test.getLanguage().substring(
-								Configuration.getHomeDir().length())
+								Configuration.HOME_DIR.length())
 						+ " programs:");
 				for (Entry<Program, Task> entry : all.entrySet()) {
 					if (!entry.getKey().success(entry.getValue())) {
@@ -209,7 +209,7 @@ public class Main {
 												.getAbsolutePath()
 												.substring(
 														Configuration
-																.getHomeDir()
+																.HOME_DIR
 																.length())
 										+ " failed.");
 					}

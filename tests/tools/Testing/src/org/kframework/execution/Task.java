@@ -32,7 +32,7 @@ public class Task extends Thread {
 
 			String message = "Execute ";
 			for(String cmd : pb.command())
-				message += cmd.replaceAll(Configuration.getHomeDir(), "") + " ";
+				message += cmd.replaceAll(Configuration.HOME_DIR, "") + " ";
 			elapsed = System.currentTimeMillis();
 			Process p = pb.start();
 
