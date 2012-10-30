@@ -28,11 +28,11 @@ public class Main {
 		// a little bit hack-ish but it works until somebody complains
 		if (Configuration.getHomeDir().contains("jenkins"))
 		{
-			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "."} , "");
+			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "k"} , "");
 			Execution.execute(copy);
 			Execution.finish();
-			System.out.println("Copied in " + new File(".").getAbsolutePath());
 		}
+		System.out.println("Copied in " + new File("k").getAbsolutePath());
 		System.exit(1);
 		
 		// execute the right scripts 
