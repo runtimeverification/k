@@ -144,10 +144,6 @@
 	</target>
 
 	<target name="test">
-		<javac srcdir="./tests/tools/Jenkins/src" includeantruntime="false" />
-		<javac srcdir="./tests/tools/Jenkins/tests" classpath="tests/tools/Jenkins/lib/junit-4.10.jar:tests/tools/Jenkins/src" includeantruntime="false" />
-		<java classname="org.junit.runner.JUnitCore" classpath="tests/tools/Jenkins/lib/junit-4.10.jar:tests/tools/Jenkins/src:tests/tools/Jenkins/tests">
-			<arg value="LocalTests" />
-		</java>
+	  <ant antfile="build.xml" dir="./tests/tools/Testing"/>
 	</target>
 </project>
