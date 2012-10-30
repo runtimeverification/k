@@ -190,6 +190,9 @@ public class Main {
 	public static void copyFolder(File src, File dest)
 	    	throws IOException{
 	 
+			if (src.getName().startsWith("."))
+				return;
+		
 	    	if(src.isDirectory()){
 	 
 	    		//if directory not exists, create it
