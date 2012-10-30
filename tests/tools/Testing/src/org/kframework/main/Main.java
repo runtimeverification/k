@@ -34,15 +34,12 @@ public class Main {
 		if (System.getProperty("user.dir").contains("jenkins"))
 		{
 			// first copy the k-framework artifacts
-			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "k"} , "");
-			copy.start();
 			try {
-				copy.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				copyFolder(new File("/var/lib/jenkins/workspace/k-framework"), new File("k"));
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-
-			copyFolder(new File("/var/lib/jenkins/workspace/k-framework"), new File("k"));
 			
 			// setup the new path
 			Configuration.HOME_DIR = "/var/lib/jenkins/workspace/k-framework-tests/k";
@@ -231,4 +228,5 @@ public class Main {
 	    	        out.close();
 	    	        System.out.println("File copied from " + src + " to " + dest);
 	    	}
+	}
 }
