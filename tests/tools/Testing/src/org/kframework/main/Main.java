@@ -29,13 +29,14 @@ public class Main {
 
 	public static void main(String[] args) {
 
+		String k = "/var/lib/jenkins/workspace/k-framework";
+		
 		// a little bit hack-ish but it works until somebody complains
 		System.out.println("UDIR: " + System.getProperty("user.dir"));
 		if (System.getProperty("user.dir").contains("jenkins")) {
 			// first copy the k-framework artifacts
 			try {
-				ProcessBuilder pb = new ProcessBuilder("cp", "-r", "/var/lib/jenkins/workspace/k-framework", "k");
-				pb.directory(new File(Configuration.HOME_DIR));
+				ProcessBuilder pb = new ProcessBuilder("cp", "-r", "/var/lib/jenkins/workspace/k-framework", k);
 				Process process = pb.start();
 				int exit = process.waitFor();
 				String out = Task.readString(process.getInputStream());
@@ -49,7 +50,7 @@ public class Main {
 				e.printStackTrace();
 			}
 			// setup the new path
-			Configuration.HOME_DIR = "/var/lib/jenkins/workspace/k-framework-tests/k";
+			Configuration.HOME_DIR = k;
 
 			// build K
 			try {
