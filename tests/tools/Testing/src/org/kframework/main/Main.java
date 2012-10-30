@@ -47,6 +47,7 @@ public class Main {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			System.out.println(Configuration.config);
 			Document doc = dBuilder.parse(new File(Configuration.config));
 			Element root = doc.getDocumentElement();
 
