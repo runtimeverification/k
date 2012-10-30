@@ -31,16 +31,25 @@ public class Main {
 		{
 			// first copy the k-framework artifacts
 			Task copy = new Task(new String[]{"cp", "-r", "/var/lib/jenkins/workspace/k-framework", "k"} , "");
-			Execution.execute(copy);
-			Execution.finish();
+			copy.start();
+			try {
+				copy.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			
 			// setup the new path
 			Configuration.HOME_DIR = "/var/lib/jenkins/workspace/k-framework-tests/k";
 			
 			// build K
 			Task build = new Task(new String[]{"cd", "/var/lib/jenkins/workspace/k-framework-tests/k", ";", "ant"}, "");
-			Execution.execute(build);
-			Execution.finish();
+			build.start();
+			try {
+				build.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
 			System.out.println(build.getStdout());
 			System.out.println(build.getStderr());
 			if (build.getExit() != 0)

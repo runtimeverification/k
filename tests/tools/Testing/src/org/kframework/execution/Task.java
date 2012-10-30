@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 
 import org.kframework.main.Configuration;
 
-public class Task implements Runnable {
+public class Task extends Thread {
 
 	// standard
 	private String stderr, stdout;
