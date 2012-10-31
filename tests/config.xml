@@ -10,4 +10,49 @@
 		<krun-option name="--output-mode" value="none"/>
 	</all-programs>
 	</test>
+	
+	<test folder="dist/examples/simple/untyped/programs"
+		  recursive="yes"
+		  extensions="simple"
+		  exclude="diverse/dekker.simple"
+		  language="dist/examples/simple/untyped/simple-untyped.k"
+		  results="tests/examples/simple-untyped">
+		<all-programs>
+			<krun-option name="--no-color"/>
+			<krun-option name="--output-mode" value="none"/>
+		</all-programs>
+	</test>
+	<test folder="dist/examples/simple/typed/programs"
+		  recursive="yes"
+		  extensions="simple"
+		  exclude="diverse/dekker.simple"
+		  language="dist/examples/simple/typed/static/simple-typed-static.k"
+		  results="tests/examples/simple-typed-static">
+		<all-programs>
+			<krun-option name="--no-color"/>
+			<krun-option name="--output-mode" value="none"/>
+		</all-programs>
+	</test>
+	<test folder="dist/examples/simple/typed/programs"
+		  recursive="yes"
+		  extensions="simple"
+		  exclude="diverse/dekker.simple"
+		  language="dist/examples/simple/typed/dynamic/simple-typed-dynamic.k"
+		  results="tests/examples/simple-typed-dynamic">
+		<all-programs>
+			<krun-option name="--no-color"/>
+			<krun-option name="--output-mode" value="none"/>
+		</all-programs>
+	</test>
+	<test folder="dist/examples/kool/untyped/programs"
+		  recursive="yes"
+		  extensions="kool"
+		  language="dist/examples/kool/untyped/kool-untyped.k"
+		  results="tests/examples/kool-untyped">
+		<all-programs>
+			<krun-option name="--no-color"/>
+			<krun-option name="--output-mode" value="none"/>
+		</all-programs>
+	</test>
+
 </tests>
