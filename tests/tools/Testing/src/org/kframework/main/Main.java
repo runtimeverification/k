@@ -108,6 +108,7 @@ public class Main {
 
 		// compile definitions first
 		System.out.print("Kompiling the language definition...");
+		System.out.flush();
 		Map<Test, Task> definitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
 			Task def = test.getDefinitionTask();
@@ -135,6 +136,7 @@ public class Main {
 
 		// compile pdf definitions
 		System.out.print("Generating PDF documentation...");
+		System.out.flush();
 		Map<Test, Task> pdfDefinitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
 			// also compile pdf if set
@@ -178,7 +180,8 @@ public class Main {
 						+ test.getLanguage().substring(
 								Configuration.getHome().length())
 						+ " programs... ");
-
+				System.out.flush();
+				
 				// execute
 				List<Program> pgms = test.getPrograms();
 				Map<Program, Task> all = new HashMap<Program, Task>();
