@@ -163,7 +163,7 @@ public class Main {
 						+ "\n";
 		}
 		if(pdfKompileStatus.equals("\n"))
-			pdfKompileStatus = "\tSUCCESS";
+			pdfKompileStatus = "\t\tSUCCESS";
 		System.out.println(pdfKompileStatus + "\n");
 		
 		
@@ -202,7 +202,7 @@ public class Main {
 												.substring(
 														Configuration.getHome()
 																.length())
-										+ "\n.";
+										+ "\n";
 					}
 				}
 				if (pgmOut.equals("\n"))
