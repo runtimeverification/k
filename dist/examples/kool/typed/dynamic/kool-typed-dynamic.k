@@ -146,5 +146,152 @@ endmodule
 module KOOL-TYPED-DYNAMIC
   imports KOOL-TYPED-DYNAMIC-SYNTAX
 
+  configuration <T color="red">
+                  <threads color="orange">
+                    <thread multiplicity="*" color="yellow">
+                      <k color="green"> ($PGM:Stmts ~> execute) </k>
+                      <br/>
+                      <control color="cyan">
+                        <fstack color="blue"> .List </fstack>
+                        <xstack color="purple"> .List </xstack>
+                        <br/>
+                        <crntObj color="Fuchsia">  // KOOL
+                           <crntClass> Object </crntClass>
+                           <envStack> .List </envStack>
+                           <location multiplicity="?"> .K </location>
+                           <return color="LimeGreen"> void </return>
+                        </crntObj>
+                      </control>
+                      <br/>
+                      <env color="violet"> .Map </env>
+                      <holds color="black"> .Map </holds>
+                      <id color="pink"> 0 </id>
+                    </thread>
+                  </threads>
+                  <br/>
+                  <store color="white"> .Map </store>
+                  <busy color="cyan">.Set </busy>
+                  <terminated color="red"> .Set </terminated>
+                  <in color="magenta" stream="stdin"> .List </in>
+                  <out color="brown" stream="stdout"> .List </out>
+                  <nextLoc color="gray"> 0 </nextLoc>
+                  <br/>
+                  <classes color="Fuchsia">        // KOOL
+                     <class multiplicity="*" color="Fuchsia">
+                        <className color="Fuchsia"> Main </className>
+                        <extends color="Fuchsia"> Object </extends>
+                        <declarations color="Fuchsia"> .K </declarations>
+                     </class>
+                  </classes>
+                </T>
+
+
+//@ \subsection{Unchanged Semantics from dynamically typed SIMPLE}
+
+  syntax Val ::= Int | Bool | String
+               | array(Type,Int,Int)
+  syntax Vals ::= List{Val,","}
+  syntax Exp ::= Val
+  syntax KResult ::= Val
+
+
+  syntax K ::= undefined(Type)  [latex(\bot_{#1})]
+
+  rule <k> T:Type X:Id; => . ...</k>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> undefined(T) ...</store>
+       <nextLoc> L:Int => L +Int 1 </nextLoc>
+
+
+  rule <k> T:Type X:Id[N:Int]; => . ...</k>
+       <env> Env => Env[L/X] </env>
+       <store>... . => L |-> array(T, L +Int 1, N)
+                       (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
+       <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
+    when N >=Int 0
+
+  context _:Type _[HOLE];
+
+
+  syntax Id ::= "$1" | "$2"
+  rule T:Type X:Id[N1:Int, N2:Int, Vs:Vals];
+    => T[]<Vs> X[N1];
+       {
+         T[][]<Vs> $1=X;
+         for(int $2=0; $2 <= N1 - 1; ++$2) {
+           T X[N2,Vs];
+           $1[$2] = X;
+         }
+       }
+    [structural]
+
+
+  rule <k> X:Id => V ...</k>
+       <env>... X |-> L ...</env>
+       <store>... L |-> V ...</store>  [lookup]
+
+
+  context ++(HOLE => lvalue(HOLE))
+  rule <k> ++loc(L) => I +Int 1 ...</k>
+       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
+
+
+  rule I1:Int + I2:Int => I1 +Int I2
+  rule Str1:String + Str2:String => Str1 +String Str2
+  rule I1:Int - I2:Int => I1 -Int I2
+  rule I1:Int * I2:Int => I1 *Int I2
+  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
+  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
+  rule - I:Int => 0 -Int I
+  rule I1:Int < I2:Int => I1 <Int I2
+  rule I1:Int <= I2:Int => I1 <=Int I2
+  rule I1:Int > I2:Int => I1 >Int I2
+  rule I1:Int >= I2:Int => I1 >=Int I2
+  rule V1:Val == V2:Val => V1 ==K V2
+  rule V1:Val != V2:Val => V1 =/=K V2
+  rule ! T:Bool => notBool(T)
+  rule true  && E => E
+  rule false && _ => false
+  rule true  || _ => true
+  rule false || E => E
+
+
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
+    [structural, anywhere]
+
+  rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
+    when N >=Int 0 andBool N <Int M  [structural, anywhere]
+
+  rule sizeOf(array(_,_,N)) => N
+
+
+  syntax Val ::= nothing(Type)
+  rule <k> return; => return nothing(T); ...</k> <return> T </return>
+    [structural]
+
+
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
+
+
+  rule {} => .  [structural]
+  rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
+
+
+  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
+
+
+  rule _:Val; => .
+
+
+  rule if ( true) S else _ => S
+  rule if (false) _ else S => S
+
+
+  rule while (E) S => if (E) {S while(E)S}  [structural]
+
+
+  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+    when typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
+  rule print(.Vals); => .  [structural]
 
 endmodule
