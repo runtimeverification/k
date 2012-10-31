@@ -107,6 +107,7 @@ public class Main {
 		}
 
 		// compile definitions first
+		System.out.print("Kompiling the language definition...");
 		Map<Test, Task> definitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
 			Task def = test.getDefinitionTask();
@@ -120,7 +121,20 @@ public class Main {
 			entry.getKey().reportCompilation(entry.getValue());
 		}
 
+		// console display
+		String kompileStatus = "\n";
+		for (Entry<Test, Task> entry : definitions.entrySet()) {
+			if (!entry.getKey().compiled(entry.getValue()))
+				kompileStatus += "FAIL: " + entry.getKey().getLanguage()
+								.substring(Configuration.getHome().length())
+						+ "\n";
+		}
+		if (kompileStatus.equals("\n"))
+			kompileStatus = "\tSUCCESS";
+		System.out.println(kompileStatus + "\n");
+
 		// compile pdf definitions
+		System.out.print("Generating PDF documentation...");
 		Map<Test, Task> pdfDefinitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
 			// also compile pdf if set
@@ -139,21 +153,8 @@ public class Main {
 		System.out.println();
 
 		
-		// console display
-		System.out.print("Kompiling the language definition...");
-		String kompileStatus = "\n";
-		for (Entry<Test, Task> entry : definitions.entrySet()) {
-			if (!entry.getKey().compiled(entry.getValue()))
-				kompileStatus += "FAIL: " + entry.getKey().getLanguage()
-								.substring(Configuration.getHome().length())
-						+ "\n";
-		}
-		if (kompileStatus.equals("\n"))
-			kompileStatus = "\tSUCCESS.";
-		System.out.println(kompileStatus + "\n");
 
 		// console display
-		System.out.print("Generating PDF documentation...");
 		String pdfKompileStatus = "\n";
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
 			if (!entry.getKey().compiledPdf(entry.getValue()))
@@ -173,6 +174,11 @@ public class Main {
 			Test test = dentry.getKey();
 			if (test.compiled(dentry.getValue())) {
 
+				System.out.print("Running "
+						+ test.getLanguage().substring(
+								Configuration.getHome().length())
+						+ " programs... ");
+
 				// execute
 				List<Program> pgms = test.getPrograms();
 				Map<Program, Task> all = new HashMap<Program, Task>();
@@ -190,10 +196,6 @@ public class Main {
 				}
 
 				// console
-				System.out.print("Running "
-						+ test.getLanguage().substring(
-								Configuration.getHome().length())
-						+ " programs... ");
 				String pgmOut = "\n";
 				for (Entry<Program, Task> entry : all.entrySet()) {
 					if (!entry.getKey().success(entry.getValue())) {
