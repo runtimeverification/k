@@ -51,7 +51,7 @@ public class Task extends Thread {
 			exit = p.waitFor();
 
 			// time
-			elapsed = (System.currentTimeMillis() - elapsed) / 1000;
+			elapsed = (System.currentTimeMillis() - elapsed);
 
 			// clean
 			p.getInputStream().close();
@@ -100,6 +100,6 @@ public class Task extends Thread {
 	}
 
 	public long getElapsed() {
-		return elapsed;
+		return elapsed / 1000;
 	}
 }
