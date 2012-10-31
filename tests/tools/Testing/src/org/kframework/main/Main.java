@@ -131,7 +131,7 @@ public class Main {
 		}
 		if (kompileStatus.equals("\n"))
 			kompileStatus = "\tSUCCESS";
-		System.out.println(kompileStatus + "\n");
+		System.out.println(kompileStatus);
 
 		// compile pdf definitions
 		System.out.print("Generating PDF documentation...");
@@ -162,7 +162,7 @@ public class Main {
 		}
 		if(pdfKompileStatus.equals("\n"))
 			pdfKompileStatus = "\t\tSUCCESS";
-		System.out.println(pdfKompileStatus + "\n");
+		System.out.println(pdfKompileStatus);
 		
 		
 		// execute all programs (for which corresponding definitions are
@@ -206,7 +206,7 @@ public class Main {
 				}
 				if (pgmOut.equals("\n"))
 					pgmOut = "\tSUCCESS";
-				System.out.println(pgmOut + "\n");
+				System.out.println(pgmOut);
 			}
 		}
 
