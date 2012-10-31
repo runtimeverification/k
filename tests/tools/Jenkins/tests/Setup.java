@@ -8,10 +8,9 @@ import org.junit.Test;
 
 public class Setup {
 
-	@Test
 	public void allTests() throws URISyntaxException
 	{
-		System.out.println("Using " + StaticK.initPoolSize() + " core(s).");
+		System.out.println("Started " + StaticK.initPoolSize() + " thread(s).");
 		
 		StaticK.file = new File(getClass().getProtectionDomain()
 				.getCodeSource().getLocation().toURI().getPath());
@@ -25,6 +24,8 @@ public class Setup {
 	@Test
 	public void checkout() throws InterruptedException, URISyntaxException {
 
+		allTests();
+		
 		// first, copy K -> verify the existence of k-framework dir.
 		
 		System.out.print("\nRemoving old K artifacts ...");
@@ -46,8 +47,8 @@ public class Setup {
 		
 		Thread.sleep(3000);
 		
-		System.out.println(new File(StaticK.kbase).exists());
-		System.out.println(new File(StaticK.kbasedir).exists());
+		System.out.println("KBASE:" + new File(StaticK.kbase).exists());
+		System.out.println("KDIR: " + new File(StaticK.kbasedir).exists());
 		assertTrue(new File(StaticK.kbase).exists());
 		assertTrue(new File(StaticK.kbasedir).exists());
 		System.out.println("Copied.");
