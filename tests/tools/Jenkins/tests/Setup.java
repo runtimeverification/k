@@ -34,6 +34,7 @@ public class Setup {
 		rmexecutor.join();
 		Thread.yield();
 		assertFalse(new File(StaticK.kbase).exists());
+		Thread.sleep(3000);
 		System.out.println("Removed.");
 		
 		System.out.print("Copying K from k-framework project ...");
@@ -42,6 +43,9 @@ public class Setup {
 		cpexecutor.start();
 		cpexecutor.join();
 		Thread.yield();
+		
+		Thread.sleep(3000);
+		
 		assertTrue(new File(StaticK.kbase).exists());
 		assertTrue(new File(StaticK.kbasedir).exists());
 		System.out.println("Copied.");
@@ -50,6 +54,7 @@ public class Setup {
 		System.out.print("Removing maude binaries ...");
 		deleteFolder(new File(StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin" + StaticK.fileSep + "maude" + StaticK.fileSep + "binaries"));
 		assertFalse(new File(StaticK.kbasedir + StaticK.fileSep + "dist" + StaticK.fileSep + "bin" + StaticK.fileSep + "maude" + StaticK.fileSep + "binaries").exists());
+		Thread.sleep(3000);
 		System.out.println("Removed.");
 		
 		System.out.println("Done with setup.");
