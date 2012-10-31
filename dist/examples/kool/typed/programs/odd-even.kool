@@ -2,7 +2,7 @@
 
 class OddEven {
   int n;
-  void OddEven(x) {
+  void OddEven(int x) {
     n = x;
   }
   int even() {

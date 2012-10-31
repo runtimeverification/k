@@ -17,7 +17,7 @@ class Thread {
 class Cell {
   int v;
 
-  void Cell(v) {
+  void Cell(int v) {
     this.v = v;
   }
 
@@ -31,7 +31,7 @@ class Cell {
 class MyThread extends Thread {
   int c;
 
-  void MyThread(c) {
+  void MyThread(int c) {
     this.c = c;
   }
 

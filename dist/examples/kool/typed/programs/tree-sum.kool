@@ -18,7 +18,7 @@ class Node extends Summable {
 
 class Leaf extends Summable {
   int val;
-  void Leaf(val) {
+  void Leaf(int val) {
     this.val = val;
   }
   method sum() {

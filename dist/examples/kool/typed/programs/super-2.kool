@@ -58,7 +58,7 @@ class C extends B {
 }
 
 class Main {
-  void p(o) {
+  void p(A o) {
     print(o.f(), " ");
     print(o.g(), " ");
     print(o.h(), "\n");

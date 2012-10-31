@@ -19,7 +19,7 @@ class ColorPoint extends Point {
     this.Point(initx, inity);
     color = initcolor;
   }
-  void setColor(c) {
+  void setColor(int c) {
     color = c;
   }
   void printColor() {
