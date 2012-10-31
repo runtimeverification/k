@@ -56,7 +56,7 @@ rules
 
 	justFine =
 		mydisambiguate ; justFine2
-	justFinePgms = bottomup(try(removeDuplicateAmb)) ; makeConsLists ; justFinePgms2
+	justFinePgms = bottomup(try(removeDuplicateAmb)) ; topdown(try(annolocation)) ; makeConsLists ; justFinePgms2
 
 	removeDuplicateAmb:
 		amb([x, x]) -> x

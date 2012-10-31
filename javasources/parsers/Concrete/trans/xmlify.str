@@ -340,7 +340,7 @@ rules
 		where mydebug(!"SynTerm: ")
 		where children := <all(to-xml-p)> b
 		where srt := <getSort> a
-		where loc := <getLocAsString2>
+		where loc := <getLocAsString>
 
 	to-xml-p:
 		a#(b) -> $[<empty sort="[srt]" loc="[loc]"/>
@@ -348,7 +348,7 @@ rules
 		where <string-ends-with(|"Empty")> a
 		where mydebug(!"SynTerm: ")
 		where srt := <getSort> a
-		where loc := <getLocAsString2>
+		where loc := <getLocAsString>
 
 	to-xml-p:
 		a#(b) -> $[<const sort="[srt]" value="[<all(xmlStringEscape)> b]" loc="[loc]"/>
@@ -356,7 +356,7 @@ rules
 		where <string-ends-with(|"Const")> a
 		where srt := <getSort> a
 		where mydebug(!"Const: ")
-		where loc := <getLocAsString2>
+		where loc := <getLocAsString>
 
 	to-xml-p:
 		amb(b) -> $[<amb loc="[loc]">
@@ -365,5 +365,5 @@ rules
 		]
 		where mydebug(!"XmlifyingAmb: ")
 		where children := <all(to-xml-p)> b
-		where loc := <getLocAsString2>
+		where loc := <getLocAsString>
 

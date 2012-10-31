@@ -50,7 +50,7 @@ public class ProgramSDF {
 		for (Production p : psdfv.outsides) {
 			if (p.isListDecl()) {
 				UserList si = (UserList) p.getItems().get(0);
-				sdf.append("	{" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\"}* -> " + StringUtil.escapeSortName(p.getSort()) + " {cons(" + p.getAttributes().get("cons") + ")}\n");
+				sdf.append("	{" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\"}* -> " + StringUtil.escapeSortName(p.getSort()) + " {cons(\"" + p.getAttributes().get("cons") + "\")}\n");
 			} else {
 				sdf.append("	");
 				List<ProductionItem> items = p.getItems();
