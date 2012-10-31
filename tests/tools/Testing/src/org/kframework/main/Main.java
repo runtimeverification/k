@@ -87,7 +87,7 @@ public class Main {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			System.out.println(Configuration.getConfig());
+			System.out.println("Buildfile: " + Configuration.getConfig());
 			Document doc = dBuilder.parse(new File(Configuration.getConfig()));
 			Element root = doc.getDocumentElement();
 
@@ -140,26 +140,33 @@ public class Main {
 
 		
 		// console display
-		System.out.println("Compilation failed for: ");
+		System.out.print("Kompiling the language definition...");
+		String kompileStatus = "\n";
 		for (Entry<Test, Task> entry : definitions.entrySet()) {
 			if (!entry.getKey().compiled(entry.getValue()))
-				System.out.println("Compiling "
-						+ entry.getKey().getLanguage()
+				kompileStatus += "FAIL: " + entry.getKey().getLanguage()
 								.substring(Configuration.getHome().length())
-						+ " failed.");
+						+ "\n";
 		}
-		System.out.println();
+		if (kompileStatus.equals("\n"))
+			kompileStatus = "\tSUCCESS.";
+		System.out.println(kompileStatus + "\n");
 
 		// console display
-		System.out.println("Pdf compilation failed for: ");
+		System.out.print("Generating PDF documentation...");
+		String pdfKompileStatus = "\n";
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
 			if (!entry.getKey().compiledPdf(entry.getValue()))
-				System.out.println("Compiling pdf "
+				pdfKompileStatus = "FAIL: "
 						+ entry.getKey().getLanguage()
 								.substring(Configuration.getHome().length())
-						+ " failed.");
+						+ "\n";
 		}
-
+		if(pdfKompileStatus.equals("\n"))
+			pdfKompileStatus = "\tSUCCESS";
+		System.out.println(pdfKompileStatus + "\n");
+		
+		
 		// execute all programs (for which corresponding definitions are
 		// compiled)
 		for (Entry<Test, Task> dentry : definitions.entrySet()) {
@@ -183,23 +190,24 @@ public class Main {
 				}
 
 				// console
-				System.out.println("\n");
-				System.out.println("Failed "
+				System.out.print("Running "
 						+ test.getLanguage().substring(
 								Configuration.getHome().length())
-						+ " programs:");
+						+ " programs... ");
+				String pgmOut = "\n";
 				for (Entry<Program, Task> entry : all.entrySet()) {
 					if (!entry.getKey().success(entry.getValue())) {
-						System.out
-								.println("Running "
-										+ entry.getKey()
+						pgmOut += "FAIL: " + entry.getKey()
 												.getAbsolutePath()
 												.substring(
 														Configuration.getHome()
 																.length())
-										+ " failed.");
+										+ "\n.";
 					}
 				}
+				if (pgmOut.equals("\n"))
+					pgmOut = "\tSUCCESS";
+				System.out.println(pgmOut + "\n");
 			}
 		}
 
