@@ -87,10 +87,14 @@ public class Test {
 			if (!special)
 				krunOptions = this.generalKrunOptions;
 
+			String input = null;
+			String output = null;
+			if (resultsFolder != null)
+			{
+			
 			String inputFile = searchInputFile(Configuration.getHome()
 					+ Configuration.FS + resultsFolder,
 					new File(programPath).getName(), recursive);
-			String input = "";
 			if (inputFile != null)
 				try {
 					input = Task.readString(new FileInputStream(inputFile));
@@ -101,17 +105,18 @@ public class Test {
 			String outputFile = searchOutputFile(Configuration.getHome()
 					+ Configuration.FS + resultsFolder,
 					new File(programPath).getName(), recursive);
-			String output = "";
 			if (outputFile != null)
 				try {
 					output = Task.readString(new FileInputStream(outputFile));
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-
+			}
+			
 			Program p = new Program(programPath, krunOptions, this, input,
 					output);
 			programs.add(p);
+			
 		}
 	}
 
@@ -195,7 +200,9 @@ public class Test {
 
 		// get tests results
 		resultsFolder = test.getAttribute("results");
-
+		if (resultsFolder.equals(""))
+			resultsFolder = null;
+		
 		// get pdf
 		if (test.getAttribute("pdf").equals("yes")
 				|| test.getAttribute("pdf").equals(""))
@@ -235,8 +242,8 @@ public class Test {
 			Map<String, String> map = getKrunOptions(pgm);
 
 			Program program = new Program(homeDir + Configuration.FS
-					+ programsFolder + Configuration.FS + name, map, this, "",
-					"");
+					+ programsFolder + Configuration.FS + name, map, this, null,
+					null);
 			specialPrograms.add(program);
 		}
 

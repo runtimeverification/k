@@ -55,7 +55,7 @@ public class Program {
 		if (!task.getStderr().equals(""))
 			return false;
 		
-		if (!task.getStdout().equals(output))
+		if (!task.getStdout().equals(output) && output != null)
 			return false;
 		
 		return true;
