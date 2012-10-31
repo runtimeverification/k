@@ -46,6 +46,8 @@ public class Setup {
 		
 		Thread.sleep(3000);
 		
+		System.out.println(new File(StaticK.kbase).exists());
+		System.out.println(new File(StaticK.kbasedir).exists());
 		assertTrue(new File(StaticK.kbase).exists());
 		assertTrue(new File(StaticK.kbasedir).exists());
 		System.out.println("Copied.");
