@@ -107,8 +107,7 @@ public class Main {
 		}
 
 		// compile definitions first
-		System.out.print("Kompiling the language definition...");
-		System.out.flush();
+		System.out.print("Kompiling the language definitions...");
 		Map<Test, Task> definitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
 			Task def = test.getDefinitionTask();
@@ -136,7 +135,6 @@ public class Main {
 
 		// compile pdf definitions
 		System.out.print("Generating PDF documentation...");
-		System.out.flush();
 		Map<Test, Task> pdfDefinitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
 			// also compile pdf if set
@@ -152,15 +150,12 @@ public class Main {
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
 			entry.getKey().reportPdfCompilation(entry.getValue());
 		}
-		System.out.println();
-
-		
 
 		// console display
 		String pdfKompileStatus = "\n";
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
 			if (!entry.getKey().compiledPdf(entry.getValue()))
-				pdfKompileStatus = "FAIL: "
+				pdfKompileStatus += "FAIL: "
 						+ entry.getKey().getLanguage()
 								.substring(Configuration.getHome().length())
 						+ "\n";
@@ -180,7 +175,6 @@ public class Main {
 						+ test.getLanguage().substring(
 								Configuration.getHome().length())
 						+ " programs... ");
-				System.out.flush();
 				
 				// execute
 				List<Program> pgms = test.getPrograms();
