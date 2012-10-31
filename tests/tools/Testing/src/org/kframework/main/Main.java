@@ -108,12 +108,21 @@ public class Main {
 
 		// compile definitions first
 		Map<Test, Task> definitions = new HashMap<Test, Task>();
-		Map<Test, Task> pdfDefinitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
 			Task def = test.getDefinitionTask();
 			definitions.put(test, def);
 			Execution.execute(def);
+		}
+		Execution.finish();
 
+		// report
+		for (Entry<Test, Task> entry : definitions.entrySet()) {
+			entry.getKey().reportCompilation(entry.getValue());
+		}
+
+		// compile pdf definitions
+		Map<Test, Task> pdfDefinitions = new HashMap<Test, Task>();
+		for (Test test : alltests) {
 			// also compile pdf if set
 			if (test.getPdf()) {
 				Task pdfDef = test.getPdfDefinitionTask();
@@ -123,16 +132,13 @@ public class Main {
 		}
 
 		Execution.finish();
-
-		// report
-		for (Entry<Test, Task> entry : definitions.entrySet()) {
-			entry.getKey().reportCompilation(entry.getValue());
-		}
+		//report
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
 			entry.getKey().reportPdfCompilation(entry.getValue());
 		}
 		System.out.println();
 
+		
 		// console display
 		System.out.println("Compilation failed for: ");
 		for (Entry<Test, Task> entry : definitions.entrySet()) {
