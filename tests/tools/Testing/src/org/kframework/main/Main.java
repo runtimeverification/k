@@ -107,7 +107,7 @@ public class Main {
 		}
 
 		// compile definitions first
-		System.out.print("Kompiling the language definitions...");
+		System.out.println("Kompiling the language definitions...");
 		Map<Test, Task> definitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
 			Task def = test.getDefinitionTask();
@@ -134,7 +134,7 @@ public class Main {
 		System.out.println(kompileStatus);
 
 		// compile pdf definitions
-		System.out.print("Generating PDF documentation...");
+		System.out.println("Generating PDF documentation...");
 		Map<Test, Task> pdfDefinitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
 			// also compile pdf if set
@@ -171,7 +171,7 @@ public class Main {
 			Test test = dentry.getKey();
 			if (test.compiled(dentry.getValue())) {
 
-				System.out.print("Running "
+				System.out.println("Running "
 						+ test.getLanguage().substring(
 								Configuration.getHome().length())
 						+ " programs... ");
@@ -193,7 +193,7 @@ public class Main {
 				}
 
 				// console
-				String pgmOut = "\n";
+				String pgmOut = "";
 				for (Entry<Program, Task> entry : all.entrySet()) {
 					if (!entry.getKey().success(entry.getValue())) {
 						pgmOut += "FAIL: " + entry.getKey()
@@ -204,7 +204,7 @@ public class Main {
 										+ "\n";
 					}
 				}
-				if (pgmOut.equals("\n"))
+				if (pgmOut.equals(""))
 					pgmOut = "\tSUCCESS";
 				System.out.println(pgmOut);
 			}
