@@ -249,7 +249,7 @@ public class Test {
 
 		// general krun options
 		NodeList genOpts = test.getElementsByTagName("all-programs");
-		if (genOpts.getLength() > 0) {
+		if (genOpts != null && genOpts.getLength() > 0) {
 			Element all = (Element) genOpts.item(0);
 			generalKrunOptions = getKrunOptions(all);
 		}

@@ -130,7 +130,7 @@ public class Main {
 						+ "\n";
 		}
 		if (kompileStatus.equals("\n"))
-			kompileStatus = "\tSUCCESS";
+			kompileStatus = "SUCCESS";
 		System.out.println(kompileStatus);
 
 		// compile pdf definitions
@@ -161,7 +161,7 @@ public class Main {
 						+ "\n";
 		}
 		if(pdfKompileStatus.equals("\n"))
-			pdfKompileStatus = "\t\tSUCCESS";
+			pdfKompileStatus = "SUCCESS";
 		System.out.println(pdfKompileStatus);
 		
 		
@@ -205,7 +205,7 @@ public class Main {
 					}
 				}
 				if (pgmOut.equals(""))
-					pgmOut = "\tSUCCESS";
+					pgmOut = "SUCCESS";
 				System.out.println(pgmOut);
 			}
 		}
