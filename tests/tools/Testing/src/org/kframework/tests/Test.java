@@ -103,7 +103,7 @@ public class Test {
 				if (resultsFolder != null) {
 
 					if (!new File(Configuration.getHome() + Configuration.FS + resultsFolder).exists())
-						System.out.println("Folder: " + Configuration.getHome() + Configuration.FS + programsFolder + " does not exists.");
+						System.out.println("Folder: " + Configuration.getHome() + Configuration.FS + resultsFolder + " does not exists.");
 					
 					String inputFile = searchInputFile(Configuration.getHome()
 							+ Configuration.FS + resultsFolder, new File(
