@@ -60,6 +60,9 @@ public class Test {
 	private void initializePrograms() {
 		programs = new LinkedList<Program>();
 
+		if (programsFolder == null || programsFolder.equals(""))
+			return;
+		
 		List<String> allProgramPaths = searchAll(Configuration.getHome()
 				+ Configuration.FS + programsFolder, extensions, recursive);
 
@@ -252,6 +255,12 @@ public class Test {
 		if (genOpts != null && genOpts.getLength() > 0) {
 			Element all = (Element) genOpts.item(0);
 			generalKrunOptions = getKrunOptions(all);
+		}
+		
+		if (genOpts.getLength() == 0)
+		{
+			generalKrunOptions.put("--no-color", "");
+			generalKrunOptions.put("--output-mode", "none");
 		}
 
 		// reports
