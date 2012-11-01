@@ -1,36 +1,242 @@
+<!--
+  Use these tags for comments.  To test only one language,
+  just comment out the other tests and then type "ant test".
+-->
+
 <tests>
-	<test folder="dist/examples/imp/programs"
-          recursive="yes"
-          extensions="imp"
-          language="dist/examples/imp/imp.k"
-          results="tests/examples/imp">
-	<kompile-option name="-v" value=""/>
-	<all-programs>
-		<krun-option name="--no-color" value=""/>
-		<krun-option name="--output-mode" value="none"/>
-	</all-programs>
-	</test>
-	
-	<test folder="dist/examples/simple/untyped/programs"
-		  recursive="yes"
-		  extensions="simple"
-		  exclude="diverse/dekker.simple"
-		  language="dist/examples/simple/untyped/simple-untyped.k"
-		  results="tests/examples/simple-untyped">
+<!--
+  Testing the Tutorial languages and programs
+-->
+
+<!-- LAMBDA -->
+  <test 
+      language="dist/tutorial/1_lambda/lesson_1/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      />
+  <test 
+      language="dist/tutorial/1_lambda/lesson_2/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test 
+      language="dist/tutorial/1_lambda/lesson_3/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test 
+      language="dist/tutorial/1_lambda/lesson_4/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_5/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1
+              dist/tutorial/1_lambda/lesson_5"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_6/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1
+              dist/tutorial/1_lambda/lesson_5
+              dist/tutorial/1_lambda/lesson_6"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_7/lambda.k"
+      folder="dist/tutorial/1_lambda"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_8/lambda.k"
+      folder="dist/tutorial/1_lambda"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_9/lambda.k"
+      folder="dist/tutorial/1_lambda"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+
+<!-- IMP -->
+
+  <test
+      language="dist/tutorial/2_imp/lesson_1/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+  <test
+      language="dist/tutorial/2_imp/lesson_2/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+  <test
+      language="dist/tutorial/2_imp/lesson_3/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+  <test
+      language="dist/tutorial/2_imp/lesson_4/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+  <test
+      language="dist/tutorial/2_imp/lesson_5/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+
+<!-- LAMBDA++ -->
+
+  <test
+      language="dist/tutorial/3_lambda++/lesson_1/lambda.k"
+      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_2/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_3/lambda.k"
+      folder="dist/tutorial/1_lambda"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_4/lambda.k"
+      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_5/lambda.k"
+      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_6/lambda.k"
+      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+
+<!-- IMP++ -->
+
+  <test
+      language="dist/tutorial/4_imp++/lesson_1/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_2/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_3/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_4/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_4"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_5/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_5"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_6/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_5"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_7/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_1/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_5"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_8/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_1/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_5"
+      />
+
+<!-- TYPES -->
+
+  <test
+      language="dist/tutorial/5_types/lesson_1/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_1/spawn.imp"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_2/lambda.k"
+      folder="dist/tutorial/5_types/lesson_2"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_3/lambda.k"
+      folder="dist/tutorial/5_types/lesson_2"
+      extensions="lambda"
+      />
+
+<!--
+  SIMPLE
+-->
+
+
+
+<!--
+
+	<test
+	    folder="dist/examples/simple/untyped/programs"
+	    extensions="simple"
+	    exclude="diverse/dekker.simple"
+	    language="dist/examples/simple/untyped/simple-untyped.k"
+	    results="tests/examples/simple-untyped">
 		<all-programs>
-			<krun-option name="--no-color"/>
-			<krun-option name="--output-mode" value="none"/>
+			<krun-option name="-no-color"/>
+			<krun-option name="-output-mode" value="none"/>
 		</all-programs>
 	</test>
+
 	<test folder="dist/examples/simple/typed/programs"
 		  recursive="yes"
 		  extensions="simple"
 		  exclude="diverse/dekker.simple"
 		  language="dist/examples/simple/typed/static/simple-typed-static.k"
-		  results="tests/examples/simple-typed-static">
+		  >
 		<all-programs>
-			<krun-option name="--no-color"/>
-			<krun-option name="--output-mode" value="none"/>
+			<krun-option name="-no-color"/>
+			<krun-option name="-output-mode" value="none"/>
 		</all-programs>
 	</test>
 	<test folder="dist/examples/simple/typed/programs"
@@ -40,19 +246,21 @@
 		  language="dist/examples/simple/typed/dynamic/simple-typed-dynamic.k"
 		  results="tests/examples/simple-typed-dynamic">
 		<all-programs>
-			<krun-option name="--no-color"/>
-			<krun-option name="--output-mode" value="none"/>
+			<krun-option name="-no-color"/>
+			<krun-option name="-output-mode" value="none"/>
 		</all-programs>
 	</test>
+
 	<test folder="dist/examples/kool/untyped/programs"
 		  recursive="yes"
 		  extensions="kool"
 		  language="dist/examples/kool/untyped/kool-untyped.k"
 		  results="tests/examples/kool-untyped">
 		<all-programs>
-			<krun-option name="--no-color"/>
-			<krun-option name="--output-mode" value="none"/>
+			<krun-option name="-no-color"/>
+			<krun-option name="-output-mode" value="none"/>
 		</all-programs>
 	</test>
+-->
 
 </tests>
