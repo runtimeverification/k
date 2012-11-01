@@ -1,14 +1,6 @@
 package org.kframework.main;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.thoughtworks.xstream.XStream;
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.html.HTMLFilter;
 import org.kframework.backend.latex.LatexFilter;
@@ -21,25 +13,7 @@ import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.AddKCell;
-import org.kframework.compile.transformers.AddTopCell;
-import org.kframework.compile.transformers.DesugarStreams;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.GenerateSyntaxPredicates;
-import org.kframework.compile.transformers.GenerateSymbolicSyntaxPredicates;
-import org.kframework.compile.transformers.ResolveAnonymousVariables;
-import org.kframework.compile.transformers.ResolveBinder;
-import org.kframework.compile.transformers.ResolveBlockingInput;
-import org.kframework.compile.transformers.ResolveBuiltins;
-import org.kframework.compile.transformers.ResolveContextAbstraction;
-import org.kframework.compile.transformers.ResolveDefaultTerms;
-import org.kframework.compile.transformers.ResolveFresh;
-import org.kframework.compile.transformers.ResolveFunctions;
-import org.kframework.compile.transformers.ResolveHybrid;
-import org.kframework.compile.transformers.ResolveListOfK;
-import org.kframework.compile.transformers.ResolveOpenCells;
-import org.kframework.compile.transformers.ResolveSyntaxPredicates;
+import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.compile.utils.ConfigurationStructureVisitor;
 import org.kframework.compile.utils.ConfigurationStructureVisitor.ConfigurationStructure;
@@ -60,7 +34,10 @@ import org.kframework.utils.maude.MaudeRun;
 import org.kframework.utils.utils.file.FileUtil;
 import org.kframework.utils.utils.file.KPaths;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class KompileFrontEnd {
 	public static void kompile(String[] args) {
@@ -677,11 +654,23 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Default Terms");
 			}
 
-			javaDef = new CompilerTransformerStep(new ResolveOpenCells()).compile(javaDef);
+            javaDef = new CompilerTransformerStep(new ResolveOpenCells()).compile(javaDef);
+
+            if (GlobalSettings.verbose) {
+                sw.printIntermediate("Resolve Open Cells");
+            }
+
+			javaDef = new CompilerTransformerStep(new ResolveRewrite()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Open Cells");
+				sw.printIntermediate("Push local rewrites to the top");
 			}
+
+//			javaDef = new CompilerTransformerStep(new ContextsToHeating()).compile(javaDef);
+//
+//			if (GlobalSettings.verbose) {
+//				sw.printIntermediate("Transform Contexts into Heat/Cool Rules");
+//			}
 
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";

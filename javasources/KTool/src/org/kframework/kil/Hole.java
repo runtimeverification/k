@@ -18,6 +18,10 @@ public class Hole extends Term {
 		super(hole);
 	}
 
+    public Hole(String sort) {
+        super(sort);
+    }
+
 	public String toString() {
 		return "[]:" + sort + " ";
 	}
