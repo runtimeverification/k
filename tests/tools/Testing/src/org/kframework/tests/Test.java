@@ -60,66 +60,74 @@ public class Test {
 	private void initializePrograms() {
 		programs = new LinkedList<Program>();
 
-		if (programsFolder == null || programsFolder.equals(""))
-			return;
-		
-		List<String> allProgramPaths = searchAll(Configuration.getHome()
-				+ Configuration.FS + programsFolder, extensions, recursive);
+		String[] pgmsFolders = this.programsFolder.split("\\s+");
 
-		for (String programPath : allProgramPaths) {
-			// ignore the programs from exclude list
-			boolean excluded = false;
-			for (String exclude : excludePrograms)
-				if (programPath.equals(Configuration.getHome()
-						+ Configuration.FS + programsFolder + Configuration.FS
-						+ exclude))
-					excluded = true;
-			if (excluded)
-				continue;
+		for (int i = 0; i < pgmsFolders.length; i++) {
+			String programsFolder = pgmsFolders[i];
 
-			Map<String, String> krunOptions = null;
-			boolean special = false;
-			// treat special programs
-			for (Program p : specialPrograms) {
-				if (p.absolutePath.equals(programPath)) {
-					krunOptions = p.krunOptions;
-					special = true;
+			if (programsFolder == null || programsFolder.equals(""))
+				return;
+
+			List<String> allProgramPaths = searchAll(Configuration.getHome()
+					+ Configuration.FS + programsFolder, extensions, recursive);
+
+			for (String programPath : allProgramPaths) {
+				// ignore the programs from exclude list
+				boolean excluded = false;
+				for (String exclude : excludePrograms)
+					if (programPath.equals(Configuration.getHome()
+							+ Configuration.FS + programsFolder
+							+ Configuration.FS + exclude))
+						excluded = true;
+				if (excluded)
 					continue;
-				}
-			}
-			if (!special)
-				krunOptions = this.generalKrunOptions;
 
-			String input = null;
-			String output = null;
-			if (resultsFolder != null)
-			{
-			
-			String inputFile = searchInputFile(Configuration.getHome()
-					+ Configuration.FS + resultsFolder,
-					new File(programPath).getName(), recursive);
-			if (inputFile != null)
-				try {
-					input = Task.readString(new FileInputStream(inputFile));
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
+				Map<String, String> krunOptions = null;
+				boolean special = false;
+				// treat special programs
+				for (Program p : specialPrograms) {
+					if (p.absolutePath.equals(programPath)) {
+						krunOptions = p.krunOptions;
+						special = true;
+						continue;
+					}
+				}
+				if (!special)
+					krunOptions = this.generalKrunOptions;
+
+				String input = null;
+				String output = null;
+				if (resultsFolder != null) {
+
+					String inputFile = searchInputFile(Configuration.getHome()
+							+ Configuration.FS + resultsFolder, new File(
+							programPath).getName(), recursive);
+					if (inputFile != null)
+						try {
+							input = Task.readString(new FileInputStream(
+									inputFile));
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						}
+
+					String outputFile = searchOutputFile(
+							Configuration.getHome() + Configuration.FS
+									+ resultsFolder,
+							new File(programPath).getName(), recursive);
+					if (outputFile != null)
+						try {
+							output = Task.readString(new FileInputStream(
+									outputFile));
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						}
 				}
 
-			String outputFile = searchOutputFile(Configuration.getHome()
-					+ Configuration.FS + resultsFolder,
-					new File(programPath).getName(), recursive);
-			if (outputFile != null)
-				try {
-					output = Task.readString(new FileInputStream(outputFile));
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
+				Program p = new Program(programPath, krunOptions, this, input,
+						output);
+				programs.add(p);
+
 			}
-			
-			Program p = new Program(programPath, krunOptions, this, input,
-					output);
-			programs.add(p);
-			
 		}
 	}
 
@@ -205,7 +213,7 @@ public class Test {
 		resultsFolder = test.getAttribute("results");
 		if (resultsFolder.equals(""))
 			resultsFolder = null;
-		
+
 		// get pdf
 		if (test.getAttribute("pdf").equals("yes")
 				|| test.getAttribute("pdf").equals(""))
@@ -245,8 +253,8 @@ public class Test {
 			Map<String, String> map = getKrunOptions(pgm);
 
 			Program program = new Program(homeDir + Configuration.FS
-					+ programsFolder + Configuration.FS + name, map, this, null,
-					null);
+					+ programsFolder + Configuration.FS + name, map, this,
+					null, null);
 			specialPrograms.add(program);
 		}
 
@@ -256,9 +264,8 @@ public class Test {
 			Element all = (Element) genOpts.item(0);
 			generalKrunOptions = getKrunOptions(all);
 		}
-		
-		if (genOpts.getLength() == 0)
-		{
+
+		if (genOpts.getLength() == 0) {
 			generalKrunOptions.put("--no-color", "");
 			generalKrunOptions.put("--output-mode", "none");
 		}
@@ -288,13 +295,14 @@ public class Test {
 
 	private Element getInitialElement(String definition) {
 		Element testsuite = doc.createElement("testsuite");
-		testsuite.setAttribute("name",
-				new File(language).getParent().substring(Configuration.getHome().length()));
+		testsuite.setAttribute("name", new File(language).getParent()
+				.substring(Configuration.getHome().length()));
 		return testsuite;
 	}
 
 	public Element createReportElement(String testcase, String status,
-			String time, String output, String error, Task task, String expected, boolean failureCondition) {
+			String time, String output, String error, Task task,
+			String expected, boolean failureCondition) {
 		Element testcaseE = doc.createElement("testcase");
 		testcaseE.setAttribute("name", testcase);
 		testcaseE.setAttribute("status", status);
@@ -309,17 +317,17 @@ public class Test {
 		testcaseE.appendChild(syserr);
 		testcaseE.appendChild(sysout);
 
-		if (failureCondition)
-		{
+		if (failureCondition) {
 			Element error_ = doc.createElement("error");
 			error_.setTextContent(task.getStderr());
 			testcaseE.appendChild(error_);
-			
+
 			Element failure = doc.createElement("failure");
-			failure.setTextContent("Expecting:\n" + expected + "\nbut returned:\n" + task.getStdout());
+			failure.setTextContent("Expecting:\n" + expected
+					+ "\nbut returned:\n" + task.getStdout());
 			testcaseE.appendChild(failure);
 		}
-		
+
 		return testcaseE;
 	}
 
@@ -400,7 +408,8 @@ public class Test {
 	public void save() {
 		new File(Configuration.JR).mkdirs();
 		try {
-			FileWriter fstream = new FileWriter(Configuration.JR + Configuration.FS + getReportFilename());
+			FileWriter fstream = new FileWriter(Configuration.JR
+					+ Configuration.FS + getReportFilename());
 			BufferedWriter out = new BufferedWriter(fstream);
 			out.write(format(doc));
 			out.close();
