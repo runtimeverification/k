@@ -62,6 +62,9 @@ public class Test {
 
 		String[] pgmsFolders = this.programsFolder.split("\\s+");
 
+		if (!new File(Configuration.getHome() + Configuration.FS + resultsFolder).exists())
+			System.out.println("Folder: " + Configuration.getHome() + Configuration.FS + resultsFolder + " does not exists.");
+		
 		for (int i = 0; i < pgmsFolders.length; i++) {
 			String programsFolder = pgmsFolders[i];
 
@@ -102,8 +105,6 @@ public class Test {
 				String output = null;
 				if (resultsFolder != null) {
 
-					if (!new File(Configuration.getHome() + Configuration.FS + resultsFolder).exists())
-						System.out.println("Folder: " + Configuration.getHome() + Configuration.FS + resultsFolder + " does not exists.");
 					
 					String inputFile = searchInputFile(Configuration.getHome()
 							+ Configuration.FS + resultsFolder, new File(
