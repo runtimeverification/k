@@ -235,6 +235,7 @@ public class Main {
 				}
 			} catch (KRunExecutionException e) {
 				rp.printError(e.getMessage(), lang);
+				System.exit(1);
 			}
 
 			if ("search".equals(K.maude_cmd) && K.do_search && !cmd.hasOption("output")) {
