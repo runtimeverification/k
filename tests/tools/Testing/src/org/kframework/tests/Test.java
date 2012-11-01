@@ -65,6 +65,9 @@ public class Test {
 		for (int i = 0; i < pgmsFolders.length; i++) {
 			String programsFolder = pgmsFolders[i];
 
+			if (!new File(Configuration.getHome() + Configuration.FS + programsFolder).exists())
+				System.out.println("Folder: " + Configuration.getHome() + Configuration.FS + programsFolder + " does not exists.");
+				
 			if (programsFolder == null || programsFolder.equals(""))
 				return;
 
@@ -99,6 +102,9 @@ public class Test {
 				String output = null;
 				if (resultsFolder != null) {
 
+					if (!new File(Configuration.getHome() + Configuration.FS + resultsFolder).exists())
+						System.out.println("Folder: " + Configuration.getHome() + Configuration.FS + programsFolder + " does not exists.");
+					
 					String inputFile = searchInputFile(Configuration.getHome()
 							+ Configuration.FS + resultsFolder, new File(
 							programPath).getName(), recursive);
