@@ -1,6 +1,0 @@
-<config>
-	<test def="/dist/examples/simple-typed-dynamic/simple-typed-dynamic.k" program-extension="simple" compiled-file-name="simple-typed-dynamic-compiled.maude"/>
-	<krun-options>
-	    <program name="dekker.simple" ignore="yes"/>
-	</krun-options>
-</config>
