@@ -1,6 +1,7 @@
 <!--
   Use these tags for comments.  To test only one language,
   just comment out the other tests and then type "ant test".
+  Or temporarily replace this config.xml file with yours.
 -->
 
 <tests>
@@ -9,6 +10,7 @@
 -->
 
 <!-- LAMBDA -->
+
   <test 
       language="dist/tutorial/1_lambda/lesson_1/lambda.k"
       folder="dist/tutorial/1_lambda/lesson_1"
@@ -212,55 +214,43 @@
   SIMPLE
 -->
 
-
+  <test
+      language="dist/examples/simple/untyped/simple-untyped.k"
+      folder="dist/examples/simple/untyped/programs"
+      extensions="simple"
+      exclude="diverse/dekker.simple"
+      results="tests/examples/simple-untyped"
+      />
+  <test 
+      language="dist/examples/simple/typed/dynamic/simple-typed-dynamic.k"
+      folder="dist/examples/simple/typed/programs"
+      extensions="simple"
+      exclude="diverse/dekker.simple"
+      results="tests/examples/simple-typed-dynamic"
+      />
+  <test 
+      language="dist/examples/simple/typed/static/simple-typed-static.k"
+      folder="dist/examples/simple/typed/programs"
+      extensions="simple"
+      exclude="diverse/dekker.simple"
+      />
 
 <!--
-
-	<test
-	    folder="dist/examples/simple/untyped/programs"
-	    extensions="simple"
-	    exclude="diverse/dekker.simple"
-	    language="dist/examples/simple/untyped/simple-untyped.k"
-	    results="tests/examples/simple-untyped">
-		<all-programs>
-			<krun-option name="-no-color"/>
-			<krun-option name="-output-mode" value="none"/>
-		</all-programs>
-	</test>
-
-	<test folder="dist/examples/simple/typed/programs"
-		  recursive="yes"
-		  extensions="simple"
-		  exclude="diverse/dekker.simple"
-		  language="dist/examples/simple/typed/static/simple-typed-static.k"
-		  >
-		<all-programs>
-			<krun-option name="-no-color"/>
-			<krun-option name="-output-mode" value="none"/>
-		</all-programs>
-	</test>
-	<test folder="dist/examples/simple/typed/programs"
-		  recursive="yes"
-		  extensions="simple"
-		  exclude="diverse/dekker.simple"
-		  language="dist/examples/simple/typed/dynamic/simple-typed-dynamic.k"
-		  results="tests/examples/simple-typed-dynamic">
-		<all-programs>
-			<krun-option name="-no-color"/>
-			<krun-option name="-output-mode" value="none"/>
-		</all-programs>
-	</test>
-
-	<test folder="dist/examples/kool/untyped/programs"
-		  recursive="yes"
-		  extensions="kool"
-		  language="dist/examples/kool/untyped/kool-untyped.k"
-		  results="tests/examples/kool-untyped">
-		<all-programs>
-			<krun-option name="-no-color"/>
-			<krun-option name="-output-mode" value="none"/>
-		</all-programs>
-	</test>
+  KOOL
 -->
+
+  <test 
+      language="dist/examples/kool/untyped/kool-untyped.k"
+      folder="dist/examples/kool/untyped/programs"
+      extensions="kool"
+      results="tests/examples/kool-untyped"
+      />
+  <test 
+      language="dist/examples/kool/typed/dynamic/kool-typed-dynamic.k"
+      folder="dist/examples/kool/typed/programs"
+      extensions="kool"
+      results="tests/examples/kool-typed-dynamic"
+      />
+
 
 </tests>
