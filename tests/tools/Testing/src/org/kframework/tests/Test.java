@@ -413,7 +413,8 @@ public class Test {
 	}
 
 	public void save() {
-		new File(Configuration.JR).mkdirs();
+		new File(Configuration.JR
+				+ Configuration.FS + getReportFilename()).mkdirs();
 		try {
 			FileWriter fstream = new FileWriter(Configuration.JR
 					+ Configuration.FS + getReportFilename());
