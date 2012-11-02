@@ -62,15 +62,21 @@ public class Test {
 
 		String[] pgmsFolders = this.programsFolder.split("\\s+");
 
-		if (resultsFolder != null && !new File(Configuration.getHome() + Configuration.FS + resultsFolder).exists())
-			System.out.println("Folder: " + Configuration.getHome() + Configuration.FS + resultsFolder + " does not exists.");
-		
+		if (resultsFolder != null
+				&& !new File(Configuration.getHome() + Configuration.FS
+						+ resultsFolder).exists())
+			System.out.println("Folder: " + Configuration.getHome()
+					+ Configuration.FS + resultsFolder + " does not exists.");
+
 		for (int i = 0; i < pgmsFolders.length; i++) {
 			String programsFolder = pgmsFolders[i];
 
-			if (!new File(Configuration.getHome() + Configuration.FS + programsFolder).exists())
-				System.out.println("Folder: " + Configuration.getHome() + Configuration.FS + programsFolder + " does not exists.");
-				
+			if (!new File(Configuration.getHome() + Configuration.FS
+					+ programsFolder).exists())
+				System.out.println("Folder: " + Configuration.getHome()
+						+ Configuration.FS + programsFolder
+						+ " does not exists.");
+
 			if (programsFolder == null || programsFolder.equals(""))
 				return;
 
@@ -105,7 +111,6 @@ public class Test {
 				String output = null;
 				if (resultsFolder != null) {
 
-					
 					String inputFile = searchInputFile(Configuration.getHome()
 							+ Configuration.FS + resultsFolder, new File(
 							programPath).getName(), recursive);
@@ -377,7 +382,9 @@ public class Test {
 	}
 
 	private String getReportFilename() {
-		return new File(language).getAbsolutePath().substring(Configuration.getHome().length())
+		return new File(language).getAbsolutePath()
+				.substring(Configuration.getHome().length())
+				.replaceAll(Configuration.FS, ".")
 				.replaceFirst("\\.k$", "-report.xml");
 	}
 
@@ -413,8 +420,7 @@ public class Test {
 	}
 
 	public void save() {
-		new File(Configuration.JR
-				+ Configuration.FS + getReportFilename()).mkdirs();
+		new File(Configuration.JR).mkdirs();
 		try {
 			FileWriter fstream = new FileWriter(Configuration.JR
 					+ Configuration.FS + getReportFilename());
