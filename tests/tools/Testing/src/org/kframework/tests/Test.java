@@ -377,7 +377,7 @@ public class Test {
 	}
 
 	private String getReportFilename() {
-		return new File(language).getName()
+		return new File(language).getAbsolutePath().substring(Configuration.getHome().length())
 				.replaceFirst("\\.k$", "-report.xml");
 	}
 
