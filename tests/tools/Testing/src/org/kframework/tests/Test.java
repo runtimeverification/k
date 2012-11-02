@@ -62,7 +62,7 @@ public class Test {
 
 		String[] pgmsFolders = this.programsFolder.split("\\s+");
 
-		if (!new File(Configuration.getHome() + Configuration.FS + resultsFolder).exists())
+		if (resultsFolder != null && !new File(Configuration.getHome() + Configuration.FS + resultsFolder).exists())
 			System.out.println("Folder: " + Configuration.getHome() + Configuration.FS + resultsFolder + " does not exists.");
 		
 		for (int i = 0; i < pgmsFolders.length; i++) {
