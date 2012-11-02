@@ -18,7 +18,7 @@ class C2 extends C1 {
 }
 
 class C3 extends C2 {
-  void c3() {}
+  void C3() {}
   int m1() { return 32; }
   int m2() { return 33; }
 }

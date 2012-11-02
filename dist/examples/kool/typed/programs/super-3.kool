@@ -31,7 +31,7 @@ class C3 extends C2 {
 
 class Main {
   void Main() {
-    var o = new C3();
+    C3 o = new C3();
     print(o.x, " ", o.y, " ", o.z, " ", o.u, " ", o.w, "\n");
   }
 }

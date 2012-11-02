@@ -1,0 +1,34 @@
+// This program is correct here in the untyped version of KOOL, but
+// it will be rejected by the type checker and will get stuck for
+// various reasons in typed KOOL.  See the same program there for more
+// details.  For now, imagine that each variable starting with letter
+// x (or y, or z) will have the type X (or Y, or Z), and follow the
+// comments on the right.
+
+class X { method X() {} }
+class Y extends X { method Y() {} }
+class Z extends X { method Z() {} }
+
+class Main {
+  method Main() {
+    var x  = new X();
+    var y  = new Y();
+    var z  = new Z();
+    var xy = new Y();      // "var" is "X" in typed KOOL; ok (Y subclass of X)
+    var xz = new Z();      // ok (Z is a subclass of X)
+    var yz = new Z();      // incompatible types; typed KOOL will get stuck
+    var y1 = new X();      // X is not a Y
+    var z1 = new X();      // X is not a Z
+    var x1 = y;            // ok (Y is subclass of X)
+    var x2 = z;            // ok (Z is subclass of X)
+    var y1 = cast x to Y;  // types ok but produces runtime error in typed KOOL
+    var z1 = cast x to Z;  // types ok but produces runtime error in typed KOOL
+    var y2 = cast x1 to Y; // types and runs ok (x1 is type Y)
+    var z2 = cast x2 to Z; // types and runs ok (x2 is type Z)
+    var y3 = cast z to Y;  // inconvertible types
+    var z3 = cast y to Z;  // inconvertible types
+    var o = z;             // "o" declared of type "Object" in typed KOOL
+    var o1 = cast o to Y;  // types ok but produces runtime error in typed KOOL
+    print("OK\n");
+  }
+}

@@ -29,9 +29,9 @@ class Cell {
 
 
 class MyThread extends Thread {
-  int c;
+  Cell c;
 
-  void MyThread(int c) {
+  void MyThread(Cell c) {
     this.c = c;
   }
 

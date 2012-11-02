@@ -8,4 +8,4 @@ function main() {
   spawn {print(x,"\n");};
 }
 
-// 5, but the search option of krun finds 42 solutions in total!
+// The search option of krun finds 42 solutions in total!

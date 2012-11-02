@@ -1,6 +1,6 @@
-class point {
+class Point {
   var x, y;
-  method point(initx, inity) {
+  method Point(initx, inity) {
     x = initx;
     y = inity;
   }
@@ -13,11 +13,10 @@ class point {
   }
 }
 
-class colorpoint extends point {
+class ColorPoint extends Point {
   var color;
-  method colorpoint(initx,inity,initcolor) {
-    x = initx;
-    y = inity;
+  method ColorPoint(initx,inity,initcolor) {
+    this.Point(initx, inity);
     color = initcolor;
   }
   method setColor(c) {
@@ -28,9 +27,9 @@ class colorpoint extends point {
   }
 }
 
-class main {
-  method main() {
-    var p = new point(3,4), cp = new colorpoint(10,20,87);
+class Main {
+  method Main() {
+    var p = new Point(3,4), cp = new ColorPoint(10,20,87);
     p.move(1,2);
     p.printLocation();
     cp.move(7, 8);

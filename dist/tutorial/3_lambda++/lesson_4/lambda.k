@@ -42,8 +42,7 @@ module LAMBDA
   rule if false then _ else E => E
 
   syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E
-    [structural]
+  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
 
   syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
   syntax Id ::= "$x" | "$y"
@@ -51,8 +50,7 @@ module LAMBDA
     => let F =
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
-       in E'
-    [structural]
+       in E'                                                            [macro]
 
   syntax Exp ::= "callcc" Exp  [strict]
   syntax Val ::= cc(K)

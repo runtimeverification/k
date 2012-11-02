@@ -10,7 +10,7 @@ class C {
 
 class G {
   C o;
-  void g(C o) {
+  void G(C o) {
     this.o = o;
   }
   int d() {

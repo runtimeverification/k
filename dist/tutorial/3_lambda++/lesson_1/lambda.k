@@ -27,13 +27,11 @@ module LAMBDA
   rule if false then _ else E => E
 
   syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E
-    [structural]
+  rule let X = E in E':Exp => (lambda X . E') E                        [macro]
 
   syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-               | "mu" Id "." Exp      [binder, latex(\mu{#1}.{#2})]
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
-    [structural]
+               | "mu" Id "." Exp                 [binder, latex(\mu{#1}.{#2})]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'    [macro]
   rule mu X . E => E[(mu X . E) / X]
 
   syntax Exp ::= "callcc" Exp  [strict]

@@ -138,8 +138,7 @@ The let binder is a derived construct, because it can be defined using
 $\lambda$. */
 
   syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E
-    [structural]
+  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
 
 /*@ \section{Letrec Binder}
 We prefer a definition based on the $\mu$ construct.  Note that $\mu$ is not
@@ -147,8 +146,7 @@ really necessary, but it makes the definition of letrec easier to understand
 and faster to execute. */
 
   syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-               | "mu" Id "." Exp      [binder, latex(\mu{#1}.{#2})]
-  rule letrec F:Id X :Id = E in E' => let F = mu F . lambda X . E in E'
-    [structural]
+               | "mu" Id "." Exp                  [binder, latex(\mu{#1}.{#2})]
+  rule letrec F:Id X :Id = E in E' => let F = mu F . lambda X . E in E' [macro]
   rule mu X . E => E[(mu X . E) / X]
 endmodule

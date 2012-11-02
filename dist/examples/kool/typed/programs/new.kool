@@ -8,7 +8,7 @@ class C {
 
 class Main {
   void Main() {
-    print("a = ", (new c()).g(), "\n");
+    print("a = ", (new C()).g(), "\n");
   }
 }
 

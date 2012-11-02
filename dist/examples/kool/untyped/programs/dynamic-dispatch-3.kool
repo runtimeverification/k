@@ -1,0 +1,57 @@
+// This program illustrates a very interesting aspect of the typed version of
+// KOOL, namely that if a method of type t1 -> t2 is overridden with
+// one of type t1' -> t2', then it should be the case that t2' is a
+// subtype of t2 and that t1 is a subtype of t1'.  See the same
+// program in typed KOOL for more comments in this.  For now, just
+// follow the control flow of this program keeping in mind that in the
+// typed version of KOOL the variables a, b and c will have the types A,
+// B, and C, respectively, and note how the type of method m1 is being
+// made more concrete when overridden in class C.
+
+class A {
+  var x;
+  method A() {
+    x = 1;
+  }
+  method m1(b) {    // meant to have type B->B
+    b.y = 10;
+    return b;
+  }
+}
+
+class B extends A {
+  var y;
+  method B() {
+    super.A();
+    y = 100;
+  }
+  method m2(b) {
+    return m1(b);   // HOT-SPOT! If we override m1 into one of type C1->C2,
+                    // then it should be the case that C1 <= B and B >= C2.
+  }
+}
+
+class C extends B {
+  var z;
+  method C() {
+    super.B();
+    z = 1000;
+  }
+  method m1(a) {
+    z = a.x;
+    return this;
+  }
+}
+
+class Main {
+  method Main() {
+    var a = new A(), b = new B(), c = new C();
+    print(b.y, " ", c.z, "\n");
+    print((b.m2(b)).y, " ", (c.m2(b)).y, "\n");
+    print(b.y, " ", c.z, "\n");
+  }
+}
+
+// 100 100
+// 10 100
+// 10 1

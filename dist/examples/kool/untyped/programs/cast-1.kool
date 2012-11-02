@@ -1,4 +1,6 @@
 // Testing cast
+// This program is OK in untyped KOOL, but it will be statically rejected
+// by the type system of typed KOOL.
 
 class A {
   var x;
@@ -21,12 +23,12 @@ class B extends A {
   }
 }
 
-class main {
-  method main() {
+class Main {
+  method Main() {
     var b = new B(), a = cast b to A;
     print("b.x = ", b.x, "\n");
     print("a.x = ", a.x, "\n");
-    print("a.getB() = ", a.getB(), "\n");
+    print("a.getB() = ", a.getB(), "\n");  // this should not type check.  why?
     print("a.getA() = ", a.getA(), "\n");
   }
 }

@@ -383,7 +383,7 @@ values, in which case our semantics below works fine: */
 
   syntax K ::= "popx"
 
-  rule <k> (try S1 catch(P) {S2} => S1 ~> popx) ~> K </k>
+  rule <k> (try S1 catch(P) S2 => S1 ~> popx) ~> K </k>
        <control>
          <xstack> . => (P, S2, K, Env, C) ...</xstack>
          C

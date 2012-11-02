@@ -525,7 +525,7 @@ its parent's object environment. */
   rule <thread>...
          <k> spawn S => T ...</k>
          <env> Env </env>
-         <crntObj> Obj:Bag </crntObj>
+         <crntObj> Obj </crntObj>
        ...</thread>
        (. => <thread>...
                <k> S </k>
@@ -553,7 +553,7 @@ the object stored at the location specified as the second argument of
 \texttt{methodClosure}). */
 
   syntax Val ::= objectClosure(Bag)
-               | methodClosure(Id,Nat,Ids,Stmt)
+               | methodClosure(Id,Int,Ids,Stmt)
 
 /*@ \subsection{Class declaration}
 
@@ -633,8 +633,8 @@ shortly).  The location where the object will be stored is also made
 available in the \textsf{crntObj} cell, so that method closures can
 refer to it (see rule above). */
 
-  rule <k> (new Class:Id(Vs:Vals) ~> K)
-           => create(Class) ~> (storeObj ~> (Class(Vs); return this;)) </k>
+  rule <k> new Class:Id(Vs:Vals) ~> K
+           => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
        <env> Env => . </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
        <br/>
@@ -658,7 +658,8 @@ members (both fields and methods) of that class. */
 
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
-       <className> Class </className> <extends> Class1:Id </extends>
+       <className> Class </className>
+       <extends> Class1:Id </extends>
        <declarations> S </declarations>  [structural]
 
   rule <k> create(Object) => . ...</k>  [structural]
@@ -671,8 +672,7 @@ semantics of method declarations above). */
   syntax K ::= setCrntClass(Id)
 
   rule <k> setCrntClass(C) => . ...</k>
-       <crntClass> _ => C </crntClass>
-    [structural]
+       <crntClass> _ => C </crntClass>  [structural]
 
 /*@ The next operation adds a new tagged environment layer to the
 current object and gets ready for the next layer by clearing the
@@ -811,7 +811,7 @@ construct is the one that came with the semantics of SIMPLE.  */
           C
           <fstack> . => (Env, K, C <crntObj> Obj' </crntObj>) ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
-        </control>
+       </control>
 
 /*@ \subsection{Instance Of}
 

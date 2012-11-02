@@ -12,10 +12,10 @@ class C1 {
 
 class C2 extends C1 {
   int y;
-  void c2() {}
+  void C2() {}
   void sety2(int v) { y = v; }
-  get getx2() { return x; }
-  get gety2() { return y; }
+  int getx2() { return x; }
+  int gety2() { return y; }
 }
 
 class Main {
