@@ -250,13 +250,13 @@ When done with the first pass, call \texttt{main()}. */
 
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [lookup]
 
 //@ \subsection{Variable/Array increment}
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
 
 //@ \subsection{Arithmetic operators}
 
@@ -462,7 +462,7 @@ into a list of variable declarations. */
 //@ Location lookup.
 
   syntax K ::= lookup(Int)
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>  [lookup]
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 //@ Environment recovery.
 

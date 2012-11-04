@@ -354,7 +354,10 @@ to the concurrent semantics of $K$, the store is not frozen while
 $L\mapsto \bot$ is added to it, while the environment is frozen during the
 update operation $\textit{Env}[L/X]$.  The variable declaration command is
 also removed from the top of the computation cell and the fresh location
-counter is incremented.  All the above happen in one transactional step, with
+counter is incremented.  The undefined symbol $\bot$ added in the store
+is of sort $K$, instead of $\it Val$, on purpose; this way, the store
+lookup rules will get stuck when one attempts to lookup an initialized
+location.  All the above happen in one transactional step, with
 the rule below.  Note also how configuration abstraction allows us to only
 mention the needed cells; indeed, as the configuration above states,
 the \textsf{k} and \textsf{env} cells are actually located within a
@@ -487,9 +490,9 @@ When a variable $X$ is the first computational task, and $X$ is bound to some
 location $L$ in the environment, and $L$ is mapped to some value $V$ in the
 store, then we rewrite $X$ into $V$: */
 
-  rule <k> X:Id => V:Val ...</k>
+  rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [lookup]
 
 /*@ Note that the rule above excludes reading $\bot$, because $\bot$ is not
 a value and $V$ is checked at runtime to be a value. */
@@ -507,7 +510,7 @@ integers. */
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
@@ -629,7 +632,15 @@ $7+_{\scriptsize\it Int}\texttt{nothing}$ can evaluate to anything, or
 may not evaluate at all (be undefined).  If one wants to make sure that
 such artificial values are never misused, then one needs to define a static
 checker (also using \K, like our the type checker in
-\texttt{examples/simple/typed/static}) and reject programs that do. */
+\texttt{examples/simple/typed/static}) and reject programs that do. 
+Note that, unlike the undefined symbol $\bot$ which had the sort $K$
+instead of $\it Val$, we defined \texttt{nothing} to be a value.  That
+is because, as explained above, we do not want the program to get
+stuck when nothing is returned by a function.  Instead, we want the
+behavior to be unspecified; in particular, if one is careful to never
+use the returned value in domain computation, like it happens when we
+call a function for its side effects (e.g., with a statement of the
+form ``\texttt{f(x);}''), then the program does not get stuck. */
 
 /*@ \subsection{Read}
 The \texttt{read()} expression construct simply evaluates to the next
@@ -930,7 +941,7 @@ both rules will be considered transitions when we include the \texttt{lookup}
 tag in the transition option of \texttt{kompile}. */
 
   syntax K ::= lookup(Int)
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>  [lookup]
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 /*@ \subsubsection{Environment recovery}
 We have already discussed the environment recovery auxiliary operation in the

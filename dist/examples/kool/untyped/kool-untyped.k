@@ -372,14 +372,14 @@ definition. */
     [structural]
 
 
-  rule <k> X:Id => V:Val ...</k>
+  rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [lookup]
 
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
 
 
   rule I1:Int + I2:Int => I1 +Int I2
@@ -633,6 +633,9 @@ shortly).  The location where the object will be stored is also made
 available in the \textsf{crntObj} cell, so that method closures can
 refer to it (see rule above). */
 
+  syntax ListItem ::= (Id,BagItem)
+  // Id is the class name, BagItem is its corresponding environment
+
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
        <env> Env => . </env>
@@ -641,7 +644,7 @@ refer to it (see rule above). */
        <control> C
          <crntObj> Obj
                    => <crntClass> Object </crntClass>
-                      <envStack> ListItem(Object::<env>.Map</env>) </envStack>
+                      <envStack> (Object, <env>.Map</env>) </envStack>
                       <location> L </location>
          </crntObj>
          <fstack> . => (Env, K, C <crntObj> Obj </crntObj>) ...</fstack>
@@ -684,7 +687,7 @@ empty). */
   rule <k> addEnvLayer => . ...</k>
        <env> Env => . </env>
        <crntClass> Class:Id </crntClass>
-       <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack>
+       <envStack> . => (Class, <env>Env</env>) ...</envStack>
     [structural]
 
 /*@ The following operation stores the created object at the location
@@ -736,14 +739,14 @@ invocations see the entire object, as needed for dynamic method dispatch. */
   context HOLE . _ when (HOLE =/=K super)
 
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack>... ListItem(Class::EnvC) EStack </envStack>)
+                     <envStack>... (Class,EnvC) EStack </envStack>)
        . X:Id
-    => lookupMember(<envStack> ListItem(Class::EnvC) EStack </envStack>, X)
+    => lookupMember(<envStack> (Class,EnvC) EStack </envStack>, X)
     [structural]
 
   rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
        <crntClass> Class </crntClass>
-       <envStack>... ListItem(Class::EnvC) EStack </envStack>
+       <envStack>... (Class,EnvC) EStack </envStack>
     [structural]
 
 /*@\subsection{Method invocation}
@@ -770,7 +773,7 @@ method call or the array access.  */
 
   rule <k> (X:Id => V)(_:Exps) ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V ...</store>
+       <store>... L |-> V:Val ...</store>  [lookup]
 
   rule <k> (X:Id => this . X)(_:Exps) ...</k>
        <env> Env </env>
@@ -784,7 +787,7 @@ method call or the array access.  */
   rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
-       <envStack>... ListItem(Class::_) EStack </envStack>
+       <envStack>... (Class,_) EStack </envStack>
     [structural]
 
   context HOLE(_:Exps)
@@ -798,7 +801,8 @@ and control are stacked, then we switch to method closure's class and
 object environment and execute the method body.  The \texttt{mkDecls}
 construct is the one that came with the semantics of SIMPLE.  */
 
-  rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V ...</store>
+  rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
+    [lookup]
 
   syntax ListItem ::=  (Map,K,Bag)
 
@@ -819,10 +823,10 @@ It searches the object environment for a layer corresponding to the
 desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it never gets stuck.  */
 
-  rule objectClosure(<envStack> ListItem(C::_) ...</envStack> _)
+  rule objectClosure(<envStack> (C,_) ...</envStack> _)
        instanceOf C => true
 
-  rule objectClosure(<envStack> ListItem(C::_) => . ...</envStack> _)
+  rule objectClosure(<envStack> (C,_) => . ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 
   rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false
@@ -854,7 +858,7 @@ KOOL-specific ones. */
   rule mkDecls(.Ids,.Vals) => {}
 
   syntax K ::= lookup(Int)
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>  [lookup]
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
   syntax K ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
@@ -894,27 +898,24 @@ member's location based on the current class of the object. */
   context lvalue(HOLE . _)
 
   rule lvalue(objectClosure(<crntClass> C </crntClass>
-                            <envStack>... ListItem(C::EnvC) EStack </envStack>)
+                            <envStack>... (C,EnvC) EStack </envStack>)
               . X
-              => lookupMember(<envStack> ListItem(C::EnvC) EStack </envStack>,
+              => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
                               X))  [structural]
 
 /*@ \subsection{Lookup member}
 It searches for the given member in the given environment stack,
 starting with the most concrete class and going up in the hierarchy. */
 
-  syntax K ::= Id "::" BagItem
-  // Id is the class name, BagItem is its corresponding environment
-
   syntax K ::= lookupMember(BagItem,Id)  [function]
   // BagItem is the envStack cell, Id is the member name
 
   // First look for the member in the top environment; if found then done.
-  rule lookupMember(<envStack> ListItem(_::<env>... X |-> L ...</env>)
-                    ...</envStack>, X) => lookup(L)
+  rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
+    => lookup(L)
 
   // Otherwise, recurse through the object environment stack
-  rule lookupMember(<envStack> ListItem(_::<env> Env </env>) => .
-                    ...</envStack>, X)  when notBool(X in keys(Env))
+  rule lookupMember(<envStack> (_, <env> Env </env>) => . ...</envStack>, X)
+    when notBool(X in keys(Env))
 
 endmodule

@@ -94,9 +94,9 @@ the \K strictness attributes and the desugaring macros. */
        =>
        {var (X : int) = E1; while X <= E2 do {S X = (X + 1);}}
 
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1, .Exps; var E2, Es;
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
 
-  rule var (X:Id : T:Type) = E:Exp; => var X : T, .Exps; X = E;
+  rule var (X:Id : T:Type) = E:Exp; => var X : T; X = E;
 
 /*@ \subsection{KOOL Additional Syntax}
 Note the strictness attributes, telling which arguments need to be
@@ -104,7 +104,7 @@ typed before the actual construct can be typed. */
 
   syntax Id ::= "object"
 
-  syntax Type ::= "class" Id
+  syntax Type ::= "classType" Id  [latex({#1})]
    
   syntax Decl ::= "method" Id "(" Exps ")" ":" Type Stmt
                 | "method" Id "(" Exps ")" Stmt
@@ -114,7 +114,7 @@ typed before the actual construct can be typed. */
   syntax Decl ::= "class" Id "{" Stmts "}"
                 | "class" Id "extends" Id "{" Stmts "}"
 
-  rule 'class_`{_`}(C:Id,, Ss:Stmts ) => class C extends object { Ss }
+  rule class C:Id {Ss:Stmts} => class C extends object { Ss }
 
 endmodule 
 
@@ -175,7 +175,7 @@ class extends relation. */
                       <inClass multiplicity="?" color="Fuchsia"> .K </inClass>
                     </task>
                   </tasks>
-//                  <br/>
+                  <br/>
                   <classes color="Fuchsia">
                     <class multiplicity="*">
                       <className color="Fuchsia"> object </className>
@@ -198,7 +198,7 @@ typed SIMPLE, so we do not discuss them much here. */
   syntax Type ::= "stmt"
 
   rule var .Exps ; => stmt   [ structural]
-  context var _[HOLE] : _,.Exps;
+  context var _[HOLE] : _;
   rule var X[Ts:Types] : T; => checkDepth(Ts,T) ~> var X : T;
        [structural]
 
@@ -211,12 +211,12 @@ semantics, the \texttt{types(...)} operation stays the same. */
 
   syntax Types ::= "types" "(" Exps ")"   [function, klabel(types)]
   rule types(.Exps) => void, .Types
-  rule types(X:Id : T:Type, .Exps) => T, .Types
+  rule types(X:Id : T:Type) => T, .Types
   rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E,Es)
 
-  rule <k> I:Int => int ...</k>
-  rule <k> B:Bool => bool ...</k>
-  rule <k> Str:String => string ...</k>
+  rule I:Int => int
+  rule B:Bool => bool
+  rule Str:String => string
 
 //@ Local type environment lookup also stays the same.
 
@@ -230,7 +230,7 @@ semantics, the \texttt{types(...)} operation stays the same. */
   rule ++ int => int
   rule int + int => int
   rule string + string => string
-  rule '_-_(int,, int) => int
+  rule int - int => int
   rule int * int => int
   rule int / int => int
   rule int % int => int
@@ -289,7 +289,7 @@ The operation \texttt{checkType}, defined at the end of this module,
 checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
-  rule <k> var X:Id : T:Type, .Exps;
+  rule <k> var X:Id : T:Type;
             =>
             checkType(T) ~> stmt 
        ...</k>
@@ -313,13 +313,14 @@ with it; this \texttt{stuck} operation is displayed as a frame in this
 PDF document because of its latex attribute (see the ASCII .k file,
 at the end of this module). */
 
-  rule <k> var X:Id : T:Type, .Exps; => checkType(T) ~> stmt ...</k>
+  rule <k> var X:Id : T:Type; => checkType(T) ~> stmt ...</k>
        <ctenvT> Rho:Map (. => X |-> T) </ctenvT>
     when notBool(X in keys(Rho))
 
-  rule <k> var X:Id : T:Type, .Exps; => stuck(var X : T;) ...</k>
+  rule <k> var X:Id : T:Type; => stuck(var X : T;) ...</k>
        <ctenvT>... X |-> _ ...</ctenvT>
        <inClass> C:Id </inClass>
+<br/>
        <out>... . => ListItem("Member \"" +String Id2String(X)
                               +String "\" declared twice in class \""
                               +String Id2String(C) +String "\"!\n") </out>
@@ -361,8 +362,6 @@ instance of this rule). */
 // as the rule below does not work when rewriting . to both the task
 // and the class cells; I had to include two separate . rewrites
 
-syntax K ::= "blabla"
-
   rule <task>
           <k> class C:Id extends C':Id { Ss:Stmts }
               =>
@@ -373,8 +372,9 @@ syntax K ::= "blabla"
                <className> C </className>
                <extends> C' </extends>
              ...</class>)
+<br/>
        (. => <task>
-                <k> checkType(class C') ~> Ss:Stmts </k>
+                <k> checkType(classType C') ~> Ss:Stmts </k>
                 <inClass> C </inClass>
                 <ctenvT> . </ctenvT>
              </task>)  [structural]
@@ -439,10 +439,12 @@ for example, inside other methods). */
   rule <k> method M:Id(XTs:Exps) : T:Type S:Stmt
         => checkMethod(M, function from types(XTs) to T, C')
            ~> var M : function from types(XTs) to T; ...</k>
+<br/>
        <inClass> C:Id </inClass>
        <ctenvT> _:Map </ctenvT> // to ensure we are in a class pass
        <className> C </className>
        <extends> C':Id </extends>
+<br/>
        (. => <task>
                <k> var XTs; S </k>
                <inClass> C </inClass>
@@ -485,14 +487,14 @@ succeeds, meaning that it types to \texttt{stmt}, then we discard the
 the new object.  The auxiliary \texttt{discard} operation is defined
 also at the end of this module. */
 
-  rule new C:Id(Ts:Types) => '_`(_`)('_._((class C),, C),, Ts) ~> discard ~> class C
+  rule new C:Id(Ts:Types) => (classType C . C)(Ts) ~> discard ~> classType C
 
 
 /*@ \subsection{Self reference}
 The typing rule for \texttt{this} is straightforward: reduce to the
 current class type. */
 
-  rule <k> this => class C ...</k>
+  rule <k> this => classType C ...</k>
        <inClass> C:Id </inClass>
 
 
@@ -501,7 +503,7 @@ Similarly, \texttt{super} types to the parent class type.
 Note that for typing concerns, super can be considered as an object 
 (recall that this was not the case in the dynamic semantics). */
 
-   rule <k> super => class C' ...</k>
+   rule <k> super => classType C' ...</k>
         <inClass> C:Id </inClass>
         <className> C </className>
         <extends> C':Id </extends>
@@ -527,24 +529,25 @@ yet available, in which case these rules have to wait.  Finally, the
 fifth rule below reports an error when the \texttt{object} class is
 reached. */ 
 
-  rule <k> X:Id => '_._(this,, X) ...</k>
+  rule <k> X:Id => this . X ...</k>
        <tenv> Rho:Map </tenv>
        when notBool(X in keys(Rho))
 
-  rule ltype(E:Exp . X:Id) => '_._(E,, X)  [structural]
+  rule ltype(E:Exp . X:Id) => E . X  [structural]
 
-  rule <k> '_._(class C:Id,, X:Id) => T ...</k>
+  rule <k> classType C:Id . X:Id => T ...</k>
        <className> C </className>
        <ctenv>... X |-> T:Type ...</ctenv>
 
-  rule <k> '_._(class (C1:Id => C2),, X:Id) ...</k>
+  rule <k> classType (C1:Id => C2) . X:Id ...</k>
        <className> C1 </className>
        <extends> C2:Id </extends>
        <ctenv> Rho:Map </ctenv>
     when notBool(X in keys(Rho))  [structural]
 
-  rule <k> '_._(class object,, X:Id) => stuck('_._(class object,, X)) ...</k>
+  rule <k> classType object . X:Id => stuck(classType object . X) ...</k>
        <inClass> C:Id </inClass>
+<br/>
        <out>... . => ListItem("Member \"" +String Id2String(X)
                               +String "\" not declared! (see class \""
                               +String Id2String(C) +String "\")\n") </out>
@@ -560,7 +563,7 @@ arguments is treated as a value of type \texttt{void}. */
            => checkSubtype((T',Ts'),Ts) ~> T 
        ...</k>
 
-  rule '_`(_`)(function from void to T:Type,, .Types) => T
+  rule function from void to T:Type (.Types) => T
 
 
 /*@ \subsection{Instance of and casting}
@@ -569,8 +572,8 @@ the programmer is simply trusted from a typing perspective.  Dynamic
 semantics or implementations of the language may insert a runtime
 check for the casting. */
 
-  rule  (class C1:Id) instanceOf C2:Id => bool
-  rule cast (class C1) to C2 => (class C2) 
+  rule  (classType C1:Id) instanceOf C2:Id => bool
+  rule cast (classType C1) to C2 => (classType C2) 
 
 
 /*@ \subsection{Exceptions}
@@ -580,9 +583,9 @@ we cannot test the full type safety of exceptions.  Instead, we
 only check that the \texttt{try} and the \texttt{catch} statements
 type correctly. */
 
-  rule try stmt catch(X:Id : class C:Id) S:Stmt => {var X : class C; S}
+  rule try stmt catch(X:Id : classType C:Id) S:Stmt => {var X : classType C; S}
     [structural]
-  rule throw class _:Id ; => stmt
+  rule throw classType _:Id ; => stmt
 
 
 /*@ \subsection{Cleanup tasks}
@@ -646,8 +649,8 @@ The subclass relation introduces a subtyping relation.
   rule checkSubtype((T1:Type, T2:Type, Ts:Types), (T1':Type,T2':Type,Ts':Types))
     => checkSubtype(T1, T1') ~> checkSubtype((T2, Ts), (T2', Ts'))
   rule checkSubtype(T:Type, T) => .
-  rule <k> checkSubtype(class C1:Id, class C:Id)
-           => checkSubtype(class C2, class C) 
+  rule <k> checkSubtype(classType C1:Id, classType C:Id)
+           => checkSubtype(classType C2, classType C) 
        ...</k>
        <className> C1 </className>
        <extends> C2:Id </extends>
@@ -668,8 +671,8 @@ that the types used in the program actually exists */
   rule checkType(bool) => .
   rule checkType(string) => .
   rule checkType(void) => .
-  rule <k> checkType(class C:Id) => . ...</k> <className> C </className>
-  rule checkType(class object) => .
+  rule <k> checkType(classType C:Id) => . ...</k> <className> C </className>
+  rule checkType(classType object) => .
   rule checkType(function from Ts:Types to T:Type) => checkType(T,Ts)
   rule checkType(arrayOf T:Type) => checkType(T)
 

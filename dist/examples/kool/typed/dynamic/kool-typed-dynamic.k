@@ -143,10 +143,22 @@ form \textit{Id:Type}. */
 endmodule
 
 
-//@ \section{Semantics}
+/*@ \section{Semantics}
+We first discuss the new configuration, then we include the semantics of
+the constructs borrowed from SIMPLE which stay unchanged, and then we
+discuss the semantics of the additional KOOL constructs and of those
+from SIMPLE whose smeantics had to change. */
 
 module KOOL-TYPED-DYNAMIC
   imports KOOL-TYPED-DYNAMIC-SYNTAX
+
+/*@ \subsection{Configuration}
+The configuration of dynamically typed KOOL is almost identical to
+that of its untyped variant.  The only difference is the cell
+\textsf{return}, inside the \textsf{control} cell, whose role is to
+hold the expected return type of the invoked method.  That is because
+we want to dynamically check that the value that a method returns has
+the expected type. */
 
   configuration <T color="red">
                   <threads color="orange">
@@ -187,8 +199,18 @@ module KOOL-TYPED-DYNAMIC
                   </classes>
                 </T>
 
-
-//@ \subsection{Unchanged semantics from dynamically typed SIMPLE}
+/*@ \subsection{Unchanged semantics from dynamically typed SIMPLE}
+The semantics below is taken over from dynamically typed SIMPLE
+unchanged.  Like for untyped KOOL, the semantics of function/method
+declaration and invocation, and of program initialization needs to
+change.  Moreover, due to subtyping, the semantics of several imported
+SIMPLE constructs can be made more general, such as that of the
+return statement and of the the assignment.  Finally, since the
+exceptions are now typed, they also need a different semantics.  We
+removed all these from the imported semantics of SIMPLE below and gave
+their typed KOOL semantics right after, together with the extended
+semantics of thread spawning (which is identical to that of untyped
+KOOL).  */
 
   syntax Val ::= Int | Bool | String
                | array(Type,Int,Int)
@@ -230,12 +252,12 @@ module KOOL-TYPED-DYNAMIC
 
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [lookup]
 
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
 
 
   rule I1:Int + I2:Int => I1 +Int I2
@@ -333,7 +355,7 @@ module KOOL-TYPED-DYNAMIC
   rule mkDecls(.Params,.Vals) => {}
 
   syntax K ::= lookup(Int)
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V ...</store>  [lookup]
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
   syntax K ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
@@ -372,7 +394,13 @@ module KOOL-TYPED-DYNAMIC
   rule getTypes(.Params) => void, .Types
 
 
-//@ \subsection{Changes to the Existing dynamically typed SIMPLE Semantics}
+/*@ \subsection{Changes to the existing dynamically typed SIMPLE Semantics}
+We extend/change the semantics of several SIMPLE constructs in order
+to take advantage of the richer KOOL semantic infrastructure and thus
+get more from the existing SIMPLE constructs. */
+
+/*@ \subsubsection{Spawn}
+Like in untyped KOOL. */
 
   rule <thread>...
          <k> spawn S => T ...</k>
@@ -392,7 +420,7 @@ module KOOL-TYPED-DYNAMIC
 Typed KOOL allows to assign subtype instance values to supertype lvalues. */
 
   rule <k> loc(L) = V:Val
-           => subtype(typeOf(V), typeOf(V')) ~> true?
+           => subtype(typeOf(V),typeOf(V')) ~> true?
               ~> unsafeCast(V, typeOf(V')) ...</k>
        <store>... L |-> (V' => unsafeCast(V, typeOf(V'))) ...</store>
     [assignment]
@@ -458,10 +486,10 @@ time.  The rule below is conceptually similar to that of untyped KOOL;
 the only difference is the addition of the types. */
 
   rule <k> T:Type F:Id(Ps:Params) S => . ...</k>
-       <crntClass> Class:Id </crntClass>
-       <location> OL:Int </location>
+       <crntClass> C </crntClass>
+       <location> OL </location>
        <env> Env => Env[L/F] </env>
-       <store>... . => L |-> methodClosure(T,Class,OL,Ps,S) ...</store>
+       <store>... . => L|->methodClosure(getTypes(Ps)->T,C,OL,Ps,S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 
@@ -474,6 +502,9 @@ order to be recovered after the creation of the new object.  Only the
 first rule below needs to be changed; the others are identical to
 those in untyped KOOL. */
 
+  syntax ListItem ::= (Id,BagItem)
+  // Id is the class name, BagItem is its corresponding environment
+
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> (storeObj ~> ((Class(Vs)); return this;)) </k>
        <env> Env => . </env>
@@ -482,7 +513,7 @@ those in untyped KOOL. */
        <control> C
          <crntObj> Obj
                    => <crntClass> Object </crntClass>
-                      <envStack> ListItem(Object::<env>.Map</env>) </envStack>
+                      <envStack> (Object, <env>.Map</env>) </envStack>
                       <location> L </location>
          </crntObj>
          <return> T => Class </return>
@@ -510,7 +541,7 @@ those in untyped KOOL. */
   rule <k> addEnvLayer => . ...</k>
        <env> Env => . </env>
        <crntClass> Class:Id </crntClass>
-       <envStack> . => ListItem(Class::<env>Env</env>) ...</envStack>
+       <envStack> . => (Class, <env>Env</env>) ...</envStack>
     [structural]
 
   syntax K ::= "storeObj"
@@ -536,14 +567,14 @@ Like in untyped KOOL. */
   context HOLE . _ when (HOLE =/=K super)
 
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack>... ListItem(Class::EnvC) EStack </envStack>)
+                     <envStack>... (Class,EnvC) EStack </envStack>)
        . X:Id
-    => lookupMember(<envStack> ListItem(Class::EnvC) EStack </envStack>, X)
+    => lookupMember(<envStack> (Class,EnvC) EStack </envStack>, X)
     [structural]
 
   rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
        <crntClass> Class </crntClass>
-       <envStack>... ListItem(Class::EnvC) EStack </envStack>
+       <envStack>... (Class,EnvC) EStack </envStack>
     [structural]
 
 
@@ -556,7 +587,7 @@ rules below are identical to those in untyped KOOL. */
 
   rule <k> (X:Id => V)(_:Exps) ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V ...</store>
+       <store>... L |-> V:Val ...</store>  [lookup]
 
   rule <k> (X:Id => this . X)(_:Exps) ...</k>
        <env> Env </env>
@@ -570,13 +601,14 @@ rules below are identical to those in untyped KOOL. */
   rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
-       <envStack>... ListItem(Class::_) EStack </envStack>
+       <envStack>... (Class,_) EStack </envStack>
     [structural]
 
   context HOLE(_:Exps)
     when getKLabel HOLE ==KLabel '_`(_`) orBool getKLabel HOLE ==KLabel '_`[_`]
 
-  rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V ...</store>
+  rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
+    [lookup]
 
 /*@ Closure application needs to also set a new return type in the
 \textsf{return} cell, in order for the values returned by its body to
@@ -586,7 +618,9 @@ and then pop it when the method returns. */
 
   syntax ListItem ::=  (Map,K,Bag)
 
-  rule <k> methodClosure(T,Class,OL,Ps,S)(Vs:Vals) ~> K
+// discuss the possible casting HERE!
+// any why the type is stored differently here from in SIMPLE
+  rule <k> methodClosure(_->T,Class,OL,Ps,S)(Vs:Vals) ~> K
            => mkDecls(Ps,Vs) S return; </k>
        <env> Env => . </env>
        <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
@@ -617,10 +651,10 @@ expected type. */
 /*@ \subsection{Instance Of}
 Like in untyped KOOL.  */
 
-  rule objectClosure(<envStack> ListItem(C::_) ...</envStack> _)
+  rule objectClosure(<envStack> (C,_) ...</envStack> _)
        instanceOf C => true
 
-  rule objectClosure(<envStack> ListItem(C::_) => . ...</envStack> _)
+  rule objectClosure(<envStack> (C,_) => . ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 
   rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false
@@ -644,22 +678,21 @@ Like in untyped KOOL. */
   context lvalue(HOLE . _)
 
   rule lvalue(objectClosure(<crntClass> C </crntClass>
-                            <envStack>... ListItem(C::EnvC) EStack </envStack>)
+                            <envStack>... (C,EnvC) EStack </envStack>)
               . X
-              => lookupMember(<envStack> ListItem(C::EnvC) EStack </envStack>,
+              => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
                               X))  [structural]
 
 
 /*@ \subsection{Lookup member}
 Like in untyped KOOL. */
 
-  syntax K ::= Id "::" BagItem
   syntax K ::= lookupMember(BagItem,Id)  [function]
 
-  rule lookupMember(<envStack> ListItem(_::<env>... X |-> L ...</env>)
+  rule lookupMember(<envStack> (_, <env>... X |-> L ...</env>)
                     ...</envStack>, X) => lookup(L)
 
-  rule lookupMember(<envStack> ListItem(_::<env> Env </env>) => .
+  rule lookupMember(<envStack> (_, <env> Env </env>) => .
                     ...</envStack>, X)  when notBool(X in keys(Env))
 
 
@@ -668,25 +701,33 @@ Like in untyped KOOL. */
 /*@ \subsubsection{\texttt{typeOf}}
 \texttt{typeOf} for the additional values. */
 
-  rule typeOf(objectClosure(_ <envStack> ListItem(C::_) ...</envStack>)) => C
-  rule typeOf(methodClosure(T:Type,_,_,Ps:Params,_)) => getTypes(Ps) -> T
+  rule typeOf(objectClosure(_ <crntClass> C </crntClass>)) => C
+  rule typeOf(methodClosure(T:Type,_,_,Ps:Params,_)) => T
 
 
 /*@ \subsubsection{Subtyping constraints}
 The subclass relation introduces a subtyping relation. */
 
-  syntax Exp ::= subtype(Type,Type)
+  syntax Exp ::= subtype(Types,Types)
 
   rule subtype(T:Type, T) => true  [structural]
 
   rule <k> subtype(C1:Id, C:Id) => subtype(C2, C) ...</k>
        <className> C1 </className>
-       <extends> C2 </extends>
+       <extends> C2:Id </extends>
     when C1 =/=K C  [structural]
 
   rule subtype(Object,Class) => false
     when Class =/=K Object  [structural]
 
+  rule subtype(Ts1->T2,Ts1'->T2') => subtype((T2,Ts1'),(T2',Ts1))
+
+// note that the following rule would be wrong!
+//  rule subtype(T[],T'[]) => subtype(T,T')
+
+  rule subtype((T:Type,Ts),(T':Type,Ts')) => subtype(T,T') && subtype(Ts,Ts')
+    when Ts =/=K .Types
+  rule subtype(.Types,.Types) => true
 
 /*@ \subsubsection{Unsafe Casting}
 Performs unsafe casting.  One should only use it in combination with
@@ -696,6 +737,8 @@ the subtype relation above. */
 
   rule unsafeCast(objectClosure(<crntClass>_</crntClass> Obj), C:Id)
     => objectClosure(<crntClass> C </crntClass> Obj)
+
+  rule unsafeCast(methodClosure(T',C,OL,Ps,S), T) => methodClosure(T,C,OL,Ps,S)
 
   rule unsafeCast(V:Val, T:Type) => V  when typeOf(V) ==K T
 

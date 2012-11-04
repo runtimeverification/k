@@ -31,8 +31,8 @@ class B extends A {
     return m1(b);   // HOT-SPOT
 // If m1 gets overridden in an extension of B, then the following must hold:
 // (1) The new m1 should not get stuck when called above, so B must be
-// an instance of its argument's type.
-// (2) The type of the value returned by the new m1 should be an instance
+// a subtype of its new argument's type.
+// (2) The type of the value returned by the new m1 should be a subtype
 // of B, so it can serve as a value returned by m2().
 // Hence, if we override m1 into one of type C1 -> C2, then it should be
 // the case that C1 <= B and B >= C2.  This is precisely what we do next.
