@@ -104,11 +104,11 @@ public class BasicParser {
 
 					File newFile = buildCanonicalPath(req.getValue(), file);
 
+					if (newFile == null)
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + req.getValue(), req.getFilename(), req.getLocation()));
 					if (GlobalSettings.verbose)
 						System.out.println("Including file: " + newFile.getCanonicalPath());
 
-					if (newFile == null)
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + req.getValue(), req.getFilename(), req.getLocation()));
 					slurp2(newFile);
 					DefinitionHelper.addFileRequirement(newFile.getCanonicalPath(), file.getCanonicalPath());
 				}
