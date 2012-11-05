@@ -30,12 +30,14 @@ public class Main {
 	public static void main(String[] args) {
 
 		if (args.length == 1)
-			Configuration.CONFIG = args[0];
+			Configuration.CONFIG = Configuration.getHome() + Configuration.FS + args[0];
 		
 		if (!new File(Configuration.getConfig()).exists()){
 			System.out.println("Configuration file " + Configuration.getConfig() + " does not exists.");
 			System.exit(1);
 		}
+		
+		int exitCode = 0;
 		
 		// a little bit hack-ish but it works until somebody complains
 		if (System.getProperty("user.dir").contains("jenkins")) {
@@ -53,6 +55,7 @@ public class Main {
 				System.out.println(exit);
 			} catch (Exception e) {
 				e.printStackTrace();
+				exitCode = 1;
 			}
 
 			// first copy the k-framework artifacts
@@ -68,6 +71,7 @@ public class Main {
 				System.out.println(err);
 				System.out.println(exit);
 			} catch (Exception e) {
+				exitCode = 1;
 				e.printStackTrace();
 			}
 
@@ -84,6 +88,7 @@ public class Main {
 				if (exit != 0)
 					System.exit(exit);
 			} catch (Exception e) {
+				exitCode = 1;
 				e.printStackTrace();
 			}
 		}
@@ -105,12 +110,15 @@ public class Main {
 
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
+			exitCode = 1;
 			e.printStackTrace();
 		} catch (SAXException e) {
 			// TODO Auto-generated catch block
+			exitCode = 1;
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			exitCode = 1;
 			e.printStackTrace();
 		}
 
@@ -133,9 +141,12 @@ public class Main {
 		String kompileStatus = "\n";
 		for (Entry<Test, Task> entry : definitions.entrySet()) {
 			if (!entry.getKey().compiled(entry.getValue()))
+			{
 				kompileStatus += "FAIL: " + entry.getKey().getLanguage()
 								.substring(Configuration.getHome().length())
 						+ "\n";
+				exitCode = 1;
+			}
 		}
 		if (kompileStatus.equals("\n"))
 			kompileStatus = "SUCCESS";
@@ -163,10 +174,13 @@ public class Main {
 		String pdfKompileStatus = "\n";
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
 			if (!entry.getKey().compiledPdf(entry.getValue()))
+			{
 				pdfKompileStatus += "FAIL: "
 						+ entry.getKey().getLanguage()
 								.substring(Configuration.getHome().length())
 						+ "\n";
+				exitCode = 1;
+			}
 		}
 		if(pdfKompileStatus.equals("\n"))
 			pdfKompileStatus = "SUCCESS";
@@ -210,6 +224,7 @@ public class Main {
 														Configuration.getHome()
 																.length())
 										+ "\n";
+						exitCode = 1;
 					}
 				}
 				if (pgmOut.equals(""))
@@ -218,6 +233,7 @@ public class Main {
 			}
 		}
 
+		System.exit(exitCode);
 	}
 
 	public static void copyFolder(File src, File dest) throws IOException {
