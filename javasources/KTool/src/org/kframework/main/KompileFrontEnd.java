@@ -601,7 +601,7 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Generate Syntax Predicates");
 			}
 
-			javaDef = new CompilerTransformerStep(new GenerateSymbolicSyntaxPredicates()).compile(javaDef);
+			//javaDef = new CompilerTransformerStep(new GenerateSymbolicSyntaxPredicates()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Generate Symbolic Syntax Predicates");
