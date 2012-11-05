@@ -118,13 +118,15 @@ public class MaudeFilter extends BasicVisitor {
 							result.append(syn.getSort());
 							result.append(" .\n");
 						}
-					} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Terminal) && MaudeHelper.constantSorts.contains(syn.getSort().getName())) {
+					} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Terminal)) {
 						String operation = p.toString();
 						if (operation.startsWith("\"")) {
 							operation = operation.substring(1, operation.length()-2);
 						}
-						if (operation.equals("")) {
-							GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot declare empty terminal.", p.getFilename(), p.getLocation()));
+						if (operation.equals("") && !p.getAttributes().containsKey("onlyLabel")) {
+							String msg = "Cannot declare empty terminals in the definition.\n";
+							msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
+							GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
 							continue;
 						}
 						if (syn.getSort().toString().equals("KLabel") || syn.getSort().toString().equals("CellLabel")) {
@@ -160,7 +162,8 @@ public class MaudeFilter extends BasicVisitor {
 					} else {
 						String maudelabel = p.getLabel();
 						if (maudelabel.equals("")) {
-							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Empty production. Please use `prefixlabel` attribute.", p.getFilename(), p.getLocation()));
+							String msg = "Empty production. Please use `prefixlabel` attribute.";
+							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, p.getFilename(), p.getLocation()));
 							continue;
 						}
 
