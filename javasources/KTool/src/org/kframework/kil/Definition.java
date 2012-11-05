@@ -19,7 +19,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.utils.xml.XML;
+import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 public class Definition extends ASTNode {

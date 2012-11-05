@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Modifier;
-import org.kframework.utils.utils.xml.XML;
+import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 public abstract class Collection extends Term {

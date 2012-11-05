@@ -1,4 +1,4 @@
-package org.kframework.parser.generator.loader;
+package org.kframework.parser.generator;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,9 +25,9 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KMessages;
+import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.utils.file.FileUtil;
-import org.kframework.utils.utils.file.KPaths;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

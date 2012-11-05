@@ -10,7 +10,7 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.utils.xml.XML;
+import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 public class Production extends ASTNode {

@@ -3,7 +3,7 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Modifier;
-import org.kframework.utils.utils.xml.XML;
+import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 

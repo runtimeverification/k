@@ -1,4 +1,4 @@
-package org.kframework.utils.utils.file;
+package org.kframework.utils.file;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;

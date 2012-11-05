@@ -11,8 +11,8 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.utils.file.FileUtil;
 
 /**
  * Haskell K Compiler dump tool frontend

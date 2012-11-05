@@ -16,8 +16,8 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

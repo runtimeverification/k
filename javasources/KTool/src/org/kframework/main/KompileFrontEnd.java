@@ -29,10 +29,10 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KMessages;
+import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.maude.MaudeRun;
-import org.kframework.utils.utils.file.FileUtil;
-import org.kframework.utils.utils.file.KPaths;
 
 import java.io.*;
 import java.util.ArrayList;

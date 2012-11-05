@@ -22,17 +22,17 @@ import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
-import org.kframework.parser.generator.loader.AddConsesVisitor;
-import org.kframework.parser.generator.loader.BasicParser;
-import org.kframework.parser.generator.loader.DefinitionSDF;
-import org.kframework.parser.generator.loader.ParseConfigsFilter;
-import org.kframework.parser.generator.loader.ParseRulesFilter;
-import org.kframework.parser.generator.loader.ProgramSDF;
+import org.kframework.parser.generator.AddConsesVisitor;
+import org.kframework.parser.generator.BasicParser;
+import org.kframework.parser.generator.DefinitionSDF;
+import org.kframework.parser.generator.ParseConfigsFilter;
+import org.kframework.parser.generator.ParseRulesFilter;
+import org.kframework.parser.generator.ProgramSDF;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -86,7 +86,7 @@ public class DefinitionLoader {
 				String synModule = mainModule + "-SYNTAX";
 				if (!def.getModulesMap().containsKey(synModule)) {
 					synModule = mainModule;
-					String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + def.getMainSyntaxModule() + "' instead.";
+					String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + synModule + "' instead.";
 					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
 				}
 				def.setMainSyntaxModule(synModule);

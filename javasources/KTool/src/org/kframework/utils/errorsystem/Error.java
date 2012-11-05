@@ -1,5 +1,6 @@
-package org.kframework.utils.utils.errors;
+package org.kframework.utils.errorsystem;
 
+@Deprecated
 public class Error {
 
 	public static void report(String message) {

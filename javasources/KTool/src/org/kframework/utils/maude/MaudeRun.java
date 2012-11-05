@@ -11,9 +11,9 @@ import java.io.OutputStream;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.utils.file.FileUtil;
-import org.kframework.utils.utils.file.KPaths;
 
 public class MaudeRun {
 
@@ -171,7 +171,7 @@ public class MaudeRun {
 			if (!error.equals("")) {
 				if (error.length() > 500) {
 					FileUtil.saveInFile(kompile_err, error);
-					org.kframework.utils.utils.errors.Error.report(error.substring(0, 500) + "...\nCheck " + kompile_err + " to see the complete error.");
+					org.kframework.utils.errorsystem.Error.report(error.substring(0, 500) + "...\nCheck " + kompile_err + " to see the complete error.");
 				} else {
 					FileUtil.saveInFile(kompile_err, error);
 					System.out.println("Error: " + error);

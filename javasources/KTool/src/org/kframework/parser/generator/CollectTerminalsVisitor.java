@@ -1,4 +1,4 @@
-package org.kframework.parser.generator.loader;
+package org.kframework.parser.generator;
 
 import java.util.HashSet;
 import java.util.Set;

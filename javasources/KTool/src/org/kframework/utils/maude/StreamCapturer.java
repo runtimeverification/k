@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.kframework.utils.utils.file.FileUtil;
+import org.kframework.utils.file.FileUtil;
 
 
 public class StreamCapturer extends Thread {

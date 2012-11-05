@@ -1,4 +1,4 @@
-package org.kframework.parser.generator.loader;
+package org.kframework.parser.generator;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,28 +12,31 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.loader.Subsort;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
 
-public class DefinitionSDFVisitor extends BasicVisitor {
+/**
+ * Collect all the syntax declarations into containers according to their function.
+ * 
+ * @author Radu
+ * 
+ */
+public class ProgramSDFVisitor extends BasicVisitor {
 
 	public List<Production> outsides = new ArrayList<Production>();
 	public List<Production> constants = new ArrayList<Production>();
-	public Set<Sort> startSorts = new HashSet<Sort>(); // list of sorts that are start symbols
-	public Set<Sort> insertSorts = new HashSet<Sort>(); // list of inserted sorts that need to avoid the priority filter
-	public Set<Subsort> subsorts = new HashSet<Subsort>();
-	public Set<Production> listProds = new HashSet<Production>(); // list of sorts declared as being list
-	public Set<Sort> userSorts = new HashSet<Sort>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
-	public StringBuilder sdf = new StringBuilder();
+	public Set<String> sorts = new HashSet<String>(); // list of inserted sorts that need to avoid the priority filter
+	public Set<String> startSorts = new HashSet<String>(); // list of sorts that are start symbols
+	public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
+	public Set<String> userSort = new HashSet<String>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
+	public StringBuilder sdf = new StringBuilder("");
 
-	public DefinitionSDFVisitor() {
+	public ProgramSDFVisitor() {
 	}
 
 	public void visit(Syntax syn) {
 
-		userSorts.add(syn.getSort());
+		userSort.add(syn.getSort().getName());
 		List<PriorityBlock> prilist = new ArrayList<PriorityBlock>();
 		for (PriorityBlock prt : syn.getPriorityBlocks()) {
 			PriorityBlock p = new PriorityBlock();
@@ -41,23 +44,17 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 
 			// filter the productions according to their form
 			for (Production prd : prt.getProductions()) {
-				if (prd.getAttributes().containsKey("onlyLabel")) {
-					// if a production has this attribute, don't add it to the list
-				} else if (prd.isSubsort()) {
+				if (prd.isSubsort()) {
 					outsides.add(prd);
-					subsorts.add(new Subsort(prd.getSort(), ((Sort) prd.getItems().get(0)).getName()));
-					if (prd.getSort().equals(new Sort("Start")))
-						startSorts.add((Sort) prd.getItems().get(0));
-					// add the small sort to the user sorts to add it to the variable declarations
-					userSorts.add((Sort) prd.getItems().get(0));
-				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().size() == 1 && prd.isConstant()) {
+					if (prd.getSort().equals("Start"))
+						startSorts.add(((Sort) prd.getItems().get(0)).getName());
+				} else if (prd.isConstant()) {
 					constants.add(prd);
 				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {
 					outsides.add(prd);
-				} else if (prd.isListDecl()) {
+				} else if (prd.getItems().get(0).getType() == ProductionType.USERLIST) {
 					outsides.add(prd);
-					listProds.add(prd);
-					subsorts.add(new Subsort(prd.getSort(), ((UserList) prd.getItems().get(0)).getSort()));
+					listSorts.add(prd.getSort());
 				} else {
 					p.getProductions().add(prd);
 				}
@@ -88,10 +85,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 							ProductionItem itm = items.get(i);
 							if (itm.getType() == ProductionType.TERMINAL) {
 								Terminal t = (Terminal) itm;
-								if (t.getTerminal().equals(":"))
-									sdf.append("DouaPuncteDz ");
-								else
-									sdf.append("\"" + t.getTerminal() + "\" ");
+								sdf.append("\"" + t.getTerminal() + "\" ");
 							} else if (itm.getType() == ProductionType.SORT) {
 								Sort srt = (Sort) itm;
 								// if we are on the first or last place and this sort is not a list, just print the sort
@@ -99,7 +93,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 									sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
 								} else {
 									// if this sort should be inserted to avoid the priority filter, then add it to the list
-									insertSorts.add(srt);
+									sorts.add(srt.getName());
 									sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
 								}
 							}

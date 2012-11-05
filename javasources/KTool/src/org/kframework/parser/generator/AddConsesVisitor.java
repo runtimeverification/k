@@ -1,4 +1,4 @@
-package org.kframework.parser.generator.loader;
+package org.kframework.parser.generator;
 
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;

@@ -1,4 +1,4 @@
-package org.kframework.utils.utils.xml;
+package org.kframework.utils.xml;
 
 import java.io.StringWriter;
 
