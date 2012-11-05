@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="build" name="Testing">    
+<project basedir="." default="build" name="Testing">
+  <property name="cfg" value="../../config.xml"/>
   <target name="build">
     <javac srcdir="src" includeantruntime="false"/>
-    <java classname="org.kframework.main.Main" classpath="src"/>
+    <java classname="org.kframework.main.Main" classpath="src">
+      <arg value="${cfg}"/>
+    </java>
   </target>
 </project>

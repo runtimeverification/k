@@ -143,7 +143,11 @@
 		</tar>
 	</target>
 
+
+	<property name="config" value="/tests/config.xml"/>
 	<target name="test">
-	  <ant antfile="build.xml" dir="./tests/tools/Testing"/>
+	  <ant antfile="build.xml" dir="./tests/tools/Testing">
+	    <property name="cfg" value="${config}"/>
+	  </ant>
 	</target>
 </project>

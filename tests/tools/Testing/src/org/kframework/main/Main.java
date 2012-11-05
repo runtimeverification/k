@@ -29,6 +29,14 @@ public class Main {
 
 	public static void main(String[] args) {
 
+		if (args.length == 1)
+			Configuration.CONFIG = args[0];
+		
+		if (!new File(Configuration.getConfig()).exists()){
+			System.out.println("Configuration file " + Configuration.getConfig() + " does not exists.");
+			System.exit(1);
+		}
+		
 		// a little bit hack-ish but it works until somebody complains
 		if (System.getProperty("user.dir").contains("jenkins")) {
 
