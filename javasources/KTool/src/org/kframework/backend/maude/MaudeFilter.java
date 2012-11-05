@@ -58,9 +58,9 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class MaudeFilter extends BasicVisitor {
-    protected java.lang.StringBuilder result;
+	protected java.lang.StringBuilder result;
 	private boolean firstAttribute;
-    
+
 	public MaudeFilter() {
 		result = new java.lang.StringBuilder();
 	}
@@ -100,92 +100,91 @@ public class MaudeFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Syntax syn) {
-			for (PriorityBlock pb : syn.getPriorityBlocks()) {
-				for (Production p : pb.getProductions()) {
-					if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Sort)) {
-						// sub-sort case
-						ProductionItem item = p.getItems().get(0);
-						if (item instanceof Sort) {
-							if (!MaudeHelper.declaredSorts.contains(p.getItems().get(0).toString()) && !MaudeHelper.basicSorts.contains(p.getItems().get(0).toString())) {
-								result.append("sort ");
-								result.append(p.getItems().get(0));
-								result.append(" .\n");
-								MaudeHelper.declaredSorts.add(p.getItems().get(0).toString());
-							}
-							result.append("subsort ");
+		for (PriorityBlock pb : syn.getPriorityBlocks()) {
+			for (Production p : pb.getProductions()) {
+				if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Sort)) {
+					// sub-sort case
+					ProductionItem item = p.getItems().get(0);
+					if (item instanceof Sort) {
+						if (!MaudeHelper.declaredSorts.contains(p.getItems().get(0).toString()) && !MaudeHelper.basicSorts.contains(p.getItems().get(0).toString())) {
+							result.append("sort ");
 							result.append(p.getItems().get(0));
-							result.append(" < ");
-							result.append(syn.getSort());
 							result.append(" .\n");
+							MaudeHelper.declaredSorts.add(p.getItems().get(0).toString());
 						}
-					} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Terminal)) {
-						String operation = p.toString();
-						if (operation.startsWith("\"")) {
-							operation = operation.substring(1, operation.length()-2);
-						}
-						if (operation.equals("") && !p.getAttributes().containsKey("onlyLabel")) {
-							String msg = "Cannot declare empty terminals in the definition.\n";
-							msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
-							GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
-							continue;
-						}
-						if (syn.getSort().toString().equals("KLabel") || syn.getSort().toString().equals("CellLabel")) {
-							result.append("op ");
-							result.append(operation);
-							result.append(" : -> ");
-							result.append(syn.getSort());
-							if (!isEmptyAttributes(p.getAttributes())) {
-								result.append(" [metadata \"");
-								p.getAttributes().accept(this);
-								result.append( "\"]");
-							}
-							result.append(" .\n");
-						}
-						// ignore K constants declarations
-					} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof UserList)) {
-						// user declared lists case
-						UserList list = (UserList) p.getItems().get(0);
-						if (!MaudeHelper.separators.contains(list.getSeparator())) {
-							result.append("op _");
-							result.append(StringUtil.escapeMaude(list.getSeparator()));
-							result.append("_ : K K -> K [prec 120 metadata \"");
+						result.append("subsort ");
+						result.append(p.getItems().get(0));
+						result.append(" < ");
+						result.append(syn.getSort());
+						result.append(" .\n");
+					}
+				} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Terminal)) {
+					String operation = p.toString();
+					if (operation.startsWith("\"")) {
+						operation = operation.substring(1, operation.length() - 2);
+					}
+					if (operation.equals("") && !p.getAttributes().containsKey("onlyLabel")) {
+						String msg = "Cannot declare empty terminals in the definition.\n";
+						msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
+					}
+					if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals("KLabel") || !syn.getSort().toString().equals("CellLabel")) {
+						result.append("op ");
+						result.append(operation);
+						result.append(" : -> ");
+						result.append(syn.getSort());
+						if (!isEmptyAttributes(p.getAttributes())) {
+							result.append(" [metadata \"");
 							p.getAttributes().accept(this);
-							result.append(" hybrid=()");
-							result.append(" location=");
-							result.append(p.getMaudeLocation());
-							result.append("\"] .\n");
-							result.append("op .List`{\"");
-							result.append(list.getSeparator());
-							result.append("\"`} : -> K .\n");
-							MaudeHelper.separators.add(list.getSeparator());
+							result.append("\"]");
 						}
-					} else {
-						String maudelabel = p.getLabel();
-						if (maudelabel.equals("")) {
-							String msg = "Empty production. Please use `prefixlabel` attribute.";
-							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, p.getFilename(), p.getLocation()));
-							continue;
-						}
+						result.append(" .\n");
+					}
+					// ignore K constants declarations
+				} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof UserList)) {
+					// user declared lists case
+					UserList list = (UserList) p.getItems().get(0);
+					if (!MaudeHelper.separators.contains(list.getSeparator())) {
+						result.append("op _");
+						result.append(StringUtil.escapeMaude(list.getSeparator()));
+						result.append("_ : K K -> K [prec 120 metadata \"");
+						p.getAttributes().accept(this);
+						result.append(" hybrid=()");
+						result.append(" location=");
+						result.append(p.getMaudeLocation());
+						result.append("\"] .\n");
+						result.append("op .List`{\"");
+						result.append(list.getSeparator());
+						result.append("\"`} : -> K .\n");
+						MaudeHelper.separators.add(list.getSeparator());
+					}
+				} else {
+					String maudelabel = p.getLabel();
+					if (maudelabel.equals("")) {
+						String msg = "Empty production. Please use `prefixlabel` attribute.";
+						GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, p.getFilename(), p.getLocation()));
+						continue;
+					}
 
-						if (!p.getAttributes().containsKey("bracket")) {
-							result.append("op ");
-							result.append(maudelabel);
-							result.append(" : ");
-							p.accept(this);
-							result.append(" -> ");
-							result.append(syn.getSort());
-							//if (!isEmptyAttributes(p.getAttributes())) {
-								result.append(" [metadata \"");
-								p.getAttributes().accept(this);
-								result.append(" location=");
-								result.append(p.getMaudeLocation());
-								result.append("\"]");
-							//}
-							result.append(" .\n");
-						}
+					if (!p.getAttributes().containsKey("bracket")) {
+						result.append("op ");
+						result.append(maudelabel);
+						result.append(" : ");
+						p.accept(this);
+						result.append(" -> ");
+						result.append(syn.getSort());
+						// if (!isEmptyAttributes(p.getAttributes())) {
+						result.append(" [metadata \"");
+						p.getAttributes().accept(this);
+						result.append(" location=");
+						result.append(p.getMaudeLocation());
+						result.append("\"]");
+						// }
+						result.append(" .\n");
 					}
 				}
 			}
+		}
 	}
 
 	@Override
@@ -209,7 +208,7 @@ public class MaudeFilter extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(Sort sort) {		
+	public void visit(Sort sort) {
 		result.append(sort.getName());
 	}
 
@@ -230,8 +229,8 @@ public class MaudeFilter extends BasicVisitor {
 
 	@Override
 	public void visit(ListOfK listOfK) {
-		this.visit((Collection)listOfK);
-//		throw new RuntimeException("don't know how to maudify ListOfK");
+		this.visit((Collection) listOfK);
+		// throw new RuntimeException("don't know how to maudify ListOfK");
 	}
 
 	@Override
@@ -254,7 +253,7 @@ public class MaudeFilter extends BasicVisitor {
 		}
 		return true;
 	}
-	
+
 	private boolean isEmptyAttribute(Attribute entry) {
 		java.util.List<String> reject = new LinkedList<String>();
 		reject.add("cons");
@@ -291,8 +290,8 @@ public class MaudeFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Configuration configuration) {
-		//result.append("mb configuration ");
-		//this.visit((Sentence)configuration);
+		// result.append("mb configuration ");
+		// this.visit((Sentence)configuration);
 	}
 
 	@Override
@@ -359,9 +358,9 @@ public class MaudeFilter extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(Rule rule) {		
+	public void visit(Rule rule) {
 		result.append("mb rule ");
-		this.visit((Sentence)rule);
+		this.visit((Sentence) rule);
 	}
 
 	@Override
@@ -375,8 +374,8 @@ public class MaudeFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KSequence ksequence) {
-		this.visit((Collection)ksequence);
-//		throw new RuntimeException("don't know how to maudify KSequence");
+		this.visit((Collection) ksequence);
+		// throw new RuntimeException("don't know how to maudify KSequence");
 	}
 
 	@Override
@@ -409,7 +408,7 @@ public class MaudeFilter extends BasicVisitor {
 			result.append(")");
 		}
 	}
-	
+
 	@Override
 	public void visit(Sentence sentence) {
 		sentence.getBody().accept(this);
@@ -418,10 +417,10 @@ public class MaudeFilter extends BasicVisitor {
 			result.append("when ");
 			sentence.getCondition().accept(this);
 		}
-		
+
 		result.append(" : KSentence [");
 		if (sentence instanceof Rule) {
-			Rule rule = (Rule)sentence;
+			Rule rule = (Rule) sentence;
 			if (rule.getLabel() != null && !rule.getLabel().equals("")) {
 				result.append("label " + rule.getLabel() + " metadata");
 			} else {
@@ -436,7 +435,7 @@ public class MaudeFilter extends BasicVisitor {
 		result.append(sentence.getMaudeLocation());
 		result.append("\"] .");
 	}
-	
+
 	@Override
 	public void visit(Rewrite rewrite) {
 		result.append("_=>_(");
@@ -452,7 +451,7 @@ public class MaudeFilter extends BasicVisitor {
 			rewrite.getRight().accept(this);
 		}
 		result.append(")");
-	
+
 	}
 
 	@Override
@@ -485,18 +484,16 @@ public class MaudeFilter extends BasicVisitor {
 					first = false;
 				}
 				if (term == null) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-							KExceptionGroup.INTERNAL, 
-							"NULL Term encountered when MaudeFilter ran on collection " + collection.getContents() + ".", 
-							collection.getFilename(), collection.getLocation()));				
-				}	
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "NULL Term encountered when MaudeFilter ran on collection " + collection.getContents()
+							+ ".", collection.getFilename(), collection.getLocation()));
+				}
 				term.accept(this);
 			}
 
 			result.append(")");
 		}
-	}	
-	
+	}
+
 	@Override
 	public void visit(CollectionItem collectionItem) {
 		throw new RuntimeException("don't know how to maudify CollectionItem");
@@ -542,7 +539,7 @@ public class MaudeFilter extends BasicVisitor {
 		Term term = kInjectedLabel.getTerm();
 		if (MetaK.isKSort(term.getSort())) {
 			result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
-			result.append("2KLabel_("); 
+			result.append("2KLabel_(");
 		} else {
 			result.append("#_(");
 		}
@@ -562,26 +559,26 @@ public class MaudeFilter extends BasicVisitor {
 
 	@Override
 	public void visit(org.kframework.kil.List list) {
-		this.visit((Collection)list);
-//		throw new RuntimeException("don't know how to maudify List");
+		this.visit((Collection) list);
+		// throw new RuntimeException("don't know how to maudify List");
 	}
 
 	@Override
 	public void visit(org.kframework.kil.Map map) {
-		this.visit((Collection)map);
-//		throw new RuntimeException("don't know how to maudify Map");
+		this.visit((Collection) map);
+		// throw new RuntimeException("don't know how to maudify Map");
 	}
 
 	@Override
 	public void visit(Bag bag) {
-		this.visit((Collection)bag);
-//		throw new RuntimeException("don't know how to maudify Bag");
+		this.visit((Collection) bag);
+		// throw new RuntimeException("don't know how to maudify Bag");
 	}
 
 	@Override
 	public void visit(org.kframework.kil.Set set) {
-		this.visit((Collection)set);
-//		throw new RuntimeException("don't know how to maudify Set");
+		this.visit((Collection) set);
+		// throw new RuntimeException("don't know how to maudify Set");
 	}
 
 	@Override
@@ -606,7 +603,7 @@ public class MaudeFilter extends BasicVisitor {
 	@Override
 	public void visit(org.kframework.kil.Context context) {
 		result.append("mb context ");
-		this.visit((Sentence)context);
+		this.visit((Sentence) context);
 	}
 
 	@Override
@@ -618,13 +615,13 @@ public class MaudeFilter extends BasicVisitor {
 	public void visit(LiterateModuleComment literateModuleComment) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void visit(org.kframework.kil.Require require) {
 		// do nothing
 	}
 
-	private static java.util.Map<KSort,String> maudeCollectionConstructors = new HashMap<KSort, String>();
+	private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();
 	static {
 		maudeCollectionConstructors.put(KSort.Bag, "__");
 		maudeCollectionConstructors.put(KSort.Map, "__");
