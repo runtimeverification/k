@@ -558,6 +558,12 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Add K Cell");
 			}
 
+            javaDef = new CompilerTransformerStep(new AddSymbolicSorts()).compile(javaDef);
+
+            if (GlobalSettings.verbose) {
+                sw.printIntermediate("Add Symbolic Stuff");
+            }
+
 			javaDef = new CompilerTransformerStep(new ResolveFresh()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
@@ -601,7 +607,7 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Generate Syntax Predicates");
 			}
 
-			//javaDef = new CompilerTransformerStep(new GenerateSymbolicSyntaxPredicates()).compile(javaDef);
+			javaDef = new CompilerTransformerStep(new GenerateSymbolicSyntaxPredicates()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Generate Symbolic Syntax Predicates");

@@ -293,7 +293,7 @@ public class MetaK {
 		return t;
 	}
 
-	public static boolean isAnonVar(Variable node) {
+    public static boolean isAnonVar(Variable node) {
 		return node.getName().startsWith(anyVarSymbol);
 	}
 

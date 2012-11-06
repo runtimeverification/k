@@ -1,6 +1,5 @@
 package org.kframework.compile.transformers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,34 +9,27 @@ import java.util.Set;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
-import org.kframework.kil.Module;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
+import org.kframework.kil.KApp;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sentence;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 
 public class ResolveFresh extends CopyOnWriteTransformer {
-	boolean isFresh;
-	Set<Variable> vars;
-	Set<String> sorts = new HashSet<String>();
+
+	private boolean isFresh;
+	private Set<Variable> vars = new HashSet<Variable>();
+
 	public ResolveFresh() {
 		super("Resolve fresh variables condition.");
 	}
@@ -66,57 +58,17 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 
 		return node;
 	}
-	
-	@Override
-	public ASTNode transform(Module node) throws TransformerException {
-		sorts = new HashSet<String>();
-		ASTNode modNode = super.transform(node);
-		if (sorts.isEmpty()) return node;
-		node = (Module) modNode;
-		for (String sort : sorts) {
-			Syntax sDecl = declareFreshWrapper(sort);
-			node.getItems().add(sDecl);			
-			
-			List<PriorityBlock> priorities = new ArrayList<PriorityBlock>();
-			PriorityBlock block = new PriorityBlock();
-			List<Production> productions = new ArrayList<Production>();
-			List<ProductionItem> items = new ArrayList<ProductionItem>();
-			items.add(new Sort("Symbolic" + sort));
-			Production e = new Production(new Sort(sort), items );
-			productions.add(e);
-			block.setProductions(productions );
-			priorities.add(block);
-			sDecl = new Syntax(new Sort(sort), priorities );
-			node.getItems().add(sDecl);
-		}
-		return node;
-	}
 
-
-	private Syntax declareFreshWrapper(String sort) {
-		List<PriorityBlock> pBlocks = new ArrayList<PriorityBlock>();
-		PriorityBlock pBlock = new PriorityBlock();
-		List<ProductionItem> proditems = new ArrayList<ProductionItem>();
-		proditems.add(new Terminal("sym" + sort));
-		proditems.add(new Terminal("("));
-		proditems.add(new Sort("Int"));
-		proditems.add(new Terminal(")"));
-		Production production = new Production(new Sort("Symbolic" + sort), proditems );
-		production.getAttributes().getContents().add(new Attribute("cons", sort + "1FreshSyn"));
-		production.getAttributes().getContents().add(new Attribute("prefixlabel", "sym" + sort));
-		production.getAttributes().getContents().add(new Attribute("klabel", "sym" + sort));
-		pBlock.getProductions().add(production);
-		pBlocks.add(pBlock);
-		DefinitionHelper.conses.put(sort + "1FreshSyn", production);
-		return new Syntax(new Sort("Symbolic" + sort), pBlocks );
-	}
-	
 	@Override
 	public ASTNode transform(Sentence node) throws TransformerException {
-		vars = new HashSet<Variable>();
-		if (null == node.getCondition()) return node;
+		if (null == node.getCondition())
+			return node;
+
+		vars.clear();
 		ASTNode condNode = node.getCondition().accept(this);
-		if (vars.isEmpty()) return node;
+		if (vars.isEmpty())
+			return node;
+
 		node = node.shallowCopy();
 		node.setCondition((Term) condNode);
 		Variable freshVar = MetaK.getFreshVar("Int"); 
@@ -148,28 +100,39 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		if ("Bool1FreshSyn".equals(node.getCons())) {
 			assert(1 == node.getContents().size());
 			assert(node.getContents().get(0) instanceof Variable);
+
 			Variable var = (Variable)node.getContents().get(0);
-			isFresh = true;
-			vars.add(var);
-			sorts.add(var.getSort());
+			this.vars.add(var);
+			this.isFresh = true;
 			return new Constant("Bool", "true");
 		}
+
 		return super.transform(node);
 	}
 
-	private Map<Term, Term> createFreshSubstitution(Set<Variable> vars2,
-			Variable freshVar) {
+	private static Map<Term, Term> createFreshSubstitution(
+			Set<Variable> vars,
+			Variable idxVar) {
 		Map<Term, Term> result = new HashMap<Term, Term>();
-		int i = 0;
-		for (Variable var : vars2) {
-			TermCons fTerm = new TermCons(var.getSort(), var.getSort() + "1FreshSyn");
-			TermCons t = new TermCons("Int", "Int1PlusSyn");
-			t.getContents().add(freshVar);
-			t.getContents().add(new Constant("Int", Integer.toString(i)));
-			fTerm.getContents().add(t);
-			result.put(var, fTerm);
+		int idx = 0;
+		for (Variable var : vars) {
+			TermCons idxTerm = new TermCons("Int", "Int1PlusSyn");
+			List<Term> subterms = idxTerm.getContents();
+			subterms.add(idxVar);
+			subterms.add(new Constant("Int", Integer.toString(idx)));
+			++idx;
+
+			String sort = var.getSort();
+			String ctor = AddSymbolicSorts.getDefaultSymbolicConstructor(sort);
+			Term freshTerm = new KApp(new Constant("KLabel", ctor), idxTerm);
+			//TermCons fTerm = new TermCons(var.getSort(), var.getSort() + "1FreshSyn");
+			//fTerm.getContents().add(t);
+			//result.put(var, fTerm);
+			result.put(var, freshTerm);
 		}
+
 		return result;
 	}
 
 }
+

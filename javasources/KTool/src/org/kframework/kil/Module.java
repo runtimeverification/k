@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Modifier;
@@ -147,13 +148,20 @@ public class Module extends DefinitionItem {
 	}
 
 	public void addSubsort(String sort, String subsort) {
-		this.addSyntaxItem(new Sort(sort), new Sort(subsort));
-	}
-	public void addConstant(String ctSort, String ctName) {
-		this.addSyntaxItem(new Sort(ctSort), new Terminal(ctName));
+		this.addProduction(sort, new Sort(subsort));
 	}
 
-	public void addSyntaxItem(Sort sort, ProductionItem prodItem) {
+	public void addConstant(String ctSort, String ctName) {
+		this.addProduction(ctSort, new Terminal(ctName));
+	}
+
+    public void addProduction(String sort, ProductionItem prodItem) {
+        List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
+        prodItems.add(prodItem);
+        this.addProduction(sort, new Production(new Sort(sort), prodItems));
+    }
+
+    public void addProduction(String sort, Production prod) {
 		List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
 		PriorityBlock pb = new PriorityBlock();
 		pbs.add(pb);
@@ -161,12 +169,11 @@ public class Module extends DefinitionItem {
 		List<Production> prods = new LinkedList<Production>();
 		pb.setProductions(prods);
 
-		List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
-		prods.add(new Production(sort, prodItems));
+		prods.add(prod);
 
-		prodItems.add(prodItem);
-
-		this.items.add(new Syntax(sort, pbs));
+		this.items.add(new Syntax(new Sort(sort), pbs));
+        if (prod.getItems() == null)
+            System.err.println("*** " + prod);
 	}
 
 }
