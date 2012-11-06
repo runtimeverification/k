@@ -25,6 +25,7 @@ public class AddSymbolicSorts extends CopyOnWriteTransformer {
 		// just for Bool and Int
 		//return sort.equals("Bool") || sort.equals("Int");
 		return MetaK.isComputationSort(sort) &&
+                !MetaK.isBuiltinSort(sort) &&
                 !sort.startsWith(SymbolicSortPrefix);
 	}
 
