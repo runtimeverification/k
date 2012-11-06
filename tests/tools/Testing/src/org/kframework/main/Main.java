@@ -96,6 +96,12 @@ public class Main {
 				exitCode = 1;
 				e.printStackTrace();
 			}
+			
+			if (!new File(Configuration.getHome() + Configuration.FS + "dist" + Configuration.FS + "bin" + Configuration.FS + "java" + Configuration.FS + "k3.jar").exists())
+			{
+				System.out.println("K3 build failed. k3.jar does not exist.");
+				System.exit(2);
+			}
 		}
 
 		List<Test> alltests = new LinkedList<Test>();
