@@ -185,6 +185,10 @@ public class DefinitionSDF {
 
 		sdf.append("\n");
 
+		for (Sort s : psdfv.userSorts) {
+			sdf.append("	\"sym" + s.getName() + "\" \"(\" K \")\"      -> " + StringUtil.escapeSortName(s.getName()) + "\n");
+		}
+
 		sdf.append("context-free restrictions\n");
 		sdf.append("	VariableDz -/- ~[\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]\n");
 		sdf.append("	DouaPuncteDz -/- [A-Z]\n\n");
