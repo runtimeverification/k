@@ -145,4 +145,29 @@ public class Module extends DefinitionItem {
 	public Module shallowCopy() {
 		return new Module(this);
 	}
+
+	public void addSubsort(String sort, String subsort) {
+		this.addSyntaxItem(new Sort(sort), new Sort(subsort));
+	}
+	public void addConstant(String ctSort, String ctName) {
+		this.addSyntaxItem(new Sort(ctSort), new Terminal(ctName));
+	}
+
+	public void addSyntaxItem(Sort sort, ProductionItem prodItem) {
+		List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
+		PriorityBlock pb = new PriorityBlock();
+		pbs.add(pb);
+
+		List<Production> prods = new LinkedList<Production>();
+		pb.setProductions(prods);
+
+		List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
+		prods.add(new Production(sort, prodItems));
+
+		prodItems.add(prodItem);
+
+		this.items.add(new Syntax(sort, pbs));
+	}
+
 }
+
