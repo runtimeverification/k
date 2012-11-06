@@ -198,6 +198,7 @@ public class DefinitionSDF {
 		// print is<Sort> predicates (actually KLabel)
 		for (Sort s : psdfv.userSorts) {
 			sdf.append("	\"is" + s.getName() + "\"      -> DzKLabel\n");
+			sdf.append("	\"isSymbolic" + s.getName() + "\"      -> DzKLabel\n");
 		}
 
 		sdf.append("\n\n");
