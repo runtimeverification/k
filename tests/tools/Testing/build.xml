@@ -2,8 +2,8 @@
 <project basedir="." default="build" name="Testing">
   <property name="cfg" value="tests/config.xml"/>
   <target name="build">
-    <javac srcdir="src" includeantruntime="false"/>
-    <java classname="org.kframework.main.Main" classpath="src">
+    <javac srcdir="src" includeantruntime="false" failonerror="true"/>
+    <java classname="org.kframework.main.Main" classpath="src" failonerror="true">
       <arg value="${cfg}"/>
     </java>
   </target>
