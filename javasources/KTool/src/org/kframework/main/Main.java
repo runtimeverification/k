@@ -1,6 +1,6 @@
 package org.kframework.main;
 
-import org.kframeork.utils.Error;
+import org.kframework.utils.Error;
 
 public class Main {
 
