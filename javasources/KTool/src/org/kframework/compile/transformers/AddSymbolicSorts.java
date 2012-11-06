@@ -1,61 +1,73 @@
 package org.kframework.compile.transformers;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Production;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class AddSymbolicSorts extends CopyOnWriteTransformer {
 
-    private static final String SymbolicSortPrefix = "Symbolic";
-    private static final String symbolicConstructorPrefix = "sym";
+	private static final String SymbolicSortPrefix = "Symbolic";
+	private static final String SymbolicConstructorPrefix = "sym";
+    private static final String SymbolicConstructorArgumentSort = "Int";
 
-    public AddSymbolicSorts() {
-        super("Add symbolic sorts and default symbolic constructors");
-    }
+	public AddSymbolicSorts() {
+		super("Add symbolic sorts and default symbolic constructors");
+	}
 
-    public final static boolean hasSymbolicSubsort(String sort) {
-        // just for Bool and Int
-        //return sort.equals("Bool") || sort.equals("Int");
-        return !sort.startsWith(SymbolicSortPrefix);
-    }
+	public static final boolean hasSymbolicSubsort(String sort) {
+		// just for Bool and Int
+		//return sort.equals("Bool") || sort.equals("Int");
+		return MetaK.isComputationSort(sort) &&
+                !sort.startsWith(SymbolicSortPrefix);
+	}
 
-    public final static String getSymbolicSubsort(String sort) {
+	public static final String getSymbolicSubsort(String sort) {
+		assert hasSymbolicSubsort(sort);
+
+		return SymbolicSortPrefix + sort;
+	}
+
+	public static final String getDefaultSymbolicConstructor(String sort) {
+		assert hasSymbolicSubsort(sort);
+
+		return SymbolicConstructorPrefix + sort;
+	}
+
+    public static final Production getDefaultSymbolicProduction(String sort) {
         assert hasSymbolicSubsort(sort);
 
-        return SymbolicSortPrefix + sort;
+        return Production.makeFunction(
+                getSymbolicSubsort(sort),
+                getDefaultSymbolicConstructor(sort),
+                SymbolicConstructorArgumentSort);
     }
 
-    public final static String getDefaultSymbolicConstructor(String sort) {
-        assert hasSymbolicSubsort(sort);
+	@Override
+	public ASTNode transform(Module node) throws TransformerException {
+		Module retNode = node.shallowCopy();
+		retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
-        return symbolicConstructorPrefix + sort;
-    }
+		for (String sort : node.getAllSorts()) {
+			if (hasSymbolicSubsort(sort)) {
+				String symSort = getSymbolicSubsort(sort);
+				retNode.addSubsort(sort, symSort);
+                Production symProd = getDefaultSymbolicProduction(sort);
+				retNode.addProduction(symSort, symProd);
+			}
+		}
 
-    @Override
-    public ASTNode transform(Module node) throws TransformerException {
-        Module retNode = node.shallowCopy();
-        retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
-
-        for (String sort : node.getAllSorts()) {
-            if (hasSymbolicSubsort(sort)) {
-                String symSort = getSymbolicSubsort(sort);
-                retNode.addSubsort(sort, symSort);
-                String symCtor = getDefaultSymbolicConstructor(sort);
-                retNode.addConstant("KLabel", symCtor);
-            }
-        }
-
-        if (retNode.getItems().size() != node.getItems().size())
-            return retNode;
-        else
-            return node;
-    }
+		if (retNode.getItems().size() != node.getItems().size())
+			return retNode;
+		else
+			return node;
+	}
 
 }
 
