@@ -2,8 +2,12 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class AddSymbolicSorts extends CopyOnWriteTransformer {
@@ -35,13 +39,22 @@ public class AddSymbolicSorts extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Module node) throws TransformerException {
+        Module retNode = node.shallowCopy();
+        retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
+
         for (String sort : node.getAllSorts()) {
             if (hasSymbolicSubsort(sort)) {
-                node.addSubsort(sort, getSymbolicSubsort(sort));
-                node.addConstant("KLabel", getDefaultSymbolicConstructor(sort));
+                String symSort = getSymbolicSubsort(sort);
+                retNode.addSubsort(sort, symSort);
+                String symCtor = getDefaultSymbolicConstructor(sort);
+                retNode.addConstant("KLabel", symCtor);
             }
         }
-        return node;
+
+        if (retNode.getItems().size() != node.getItems().size())
+            return retNode;
+        else
+            return node;
     }
 
 }
