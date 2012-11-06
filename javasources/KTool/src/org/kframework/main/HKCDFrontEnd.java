@@ -102,8 +102,6 @@ public class HKCDFrontEnd {
 			File dotk = new File(defCanonical.getParent() + fileSep + ".k");
 			dotk.mkdirs();
 
-			GlobalSettings.literate = true;
-
 			org.kframework.kil.Definition langDef = org.kframework.utils.DefinitionLoader.loadDefinition(defFile, mainModule);
 
 			ASTNode pgmAst = org.kframework.utils.ProgramLoader.loadPgmAst(pgmFile, false);

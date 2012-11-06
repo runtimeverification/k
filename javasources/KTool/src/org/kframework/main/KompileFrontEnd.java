@@ -60,10 +60,6 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("verbose"))
 			GlobalSettings.verbose = true;
 
-		// set literate
-		if (cmd.hasOption("literate"))
-			GlobalSettings.literate = true;
-
 		if (cmd.hasOption("nofilename"))
 			GlobalSettings.noFilename = true;
 
@@ -272,9 +268,6 @@ public class KompileFrontEnd {
 
 			String fileSep = System.getProperty("file.separator");
 
-			GlobalSettings.literate = true;
-			// compile a definition here
-
 			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, mainModule);
 
 			if (GlobalSettings.verbose) {
@@ -316,8 +309,6 @@ public class KompileFrontEnd {
 	private static String html(File mainFile, String lang) {
 		org.kframework.kil.Definition javaDef;
 		try {
-			GlobalSettings.literate = true;
-
 			String fileSep = System.getProperty("file.separator");
 			String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
 
@@ -351,8 +342,6 @@ public class KompileFrontEnd {
 	private static String unparse(File mainFile, String lang) {
 		org.kframework.kil.Definition javaDef;
 		try {
-			GlobalSettings.literate = true;
-
 			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang);
 			// for now just use this file as main argument
 			File canonicalFile = mainFile.getCanonicalFile();

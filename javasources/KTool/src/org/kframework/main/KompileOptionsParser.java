@@ -91,8 +91,6 @@ public class KompileOptionsParser {
 
 		Option unparse = new Option("unparse", false, "unparse a definition");
 
-		Option literate = new Option("literate", false, "preserve literate comments");
-
 		Option addTopCell = new Option("addTopCell", false, "add a top cell to configuration and all rules");
 
 		// transition
@@ -113,7 +111,6 @@ public class KompileOptionsParser {
 		// options.addOption(tempDisamb);
 		options.addOption(toHTML);
 		options.addOption(unparse);
-		options.addOption(literate);
 		options.addOption(addTopCell);
 		options.addOption(transition);
 		options.addOption(supercool);

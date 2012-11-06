@@ -93,6 +93,11 @@ public class DefinitionLoader {
 			} else
 				def.setMainSyntaxModule(GlobalSettings.synModule);
 
+			if (!def.getModulesMap().containsKey(mainModule)) {
+				String msg = "Could not find main module '" + mainModule + "'. Use -l(ang) option to specify another.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
+			}
+
 			def.accept(new UpdateReferencesVisitor());
 			def.accept(new AddConsesVisitor());
 			def.accept(new CollectConsesVisitor());

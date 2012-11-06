@@ -11,7 +11,6 @@ public class GlobalSettings {
 	public static boolean noFilename = false;
 	public static String startFile = "";
 	public static String lib = "";
-	public static boolean literate = false;
 	public static String synModule = null;
 	public static KExceptionManager kem = new KExceptionManager();
 	public static File mainFile;
