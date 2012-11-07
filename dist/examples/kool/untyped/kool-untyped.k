@@ -209,9 +209,9 @@ for the KOOL object-oriented constructs.
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
         	| "for" "(" Stmt Exp ";" Exp ")" Block
-                | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
+                | "print" "(" Exps ")" ";"              [strict]
                 | "try" Block "catch" "(" Id ")" Block
                 | "throw" Exp ";"                       [strict]
                 | "join" Exp ";"                        [strict]

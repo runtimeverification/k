@@ -419,6 +419,12 @@ Like in untyped KOOL. */
 /*@ \subsection{Assignment}
 Typed KOOL allows to assign subtype instance values to supertype lvalues. */
 
+/* Explain that unsafeCast changes the type of the corresponding value;
+this happens only when the value is an object or a method, otherwise the
+type stays the same.  Explain also that the type of the location never
+changes; the initial term placed there, undefined(Type), determines it
+type during the entire execution of the program. */
+
   rule <k> loc(L) = V:Val
            => subtype(typeOf(V),typeOf(V')) ~> true?
               ~> unsafeCast(V, typeOf(V')) ...</k>
@@ -720,14 +726,14 @@ The subclass relation introduces a subtyping relation. */
   rule subtype(Object,Class) => false
     when Class =/=K Object  [structural]
 
-  rule subtype(Ts1->T2,Ts1'->T2') => subtype((T2,Ts1'),(T2',Ts1))
+  rule subtype(Ts1->T2,Ts1'->T2') => subtype((T2,Ts1'),(T2',Ts1))  [structural]
 
 // note that the following rule would be wrong!
 //  rule subtype(T[],T'[]) => subtype(T,T')
 
   rule subtype((T:Type,Ts),(T':Type,Ts')) => subtype(T,T') && subtype(Ts,Ts')
-    when Ts =/=K .Types
-  rule subtype(.Types,.Types) => true
+    when Ts =/=K .Types  [structural]
+  rule subtype(.Types,.Types) => true  [structural]
 
 /*@ \subsubsection{Unsafe Casting}
 Performs unsafe casting.  One should only use it in combination with

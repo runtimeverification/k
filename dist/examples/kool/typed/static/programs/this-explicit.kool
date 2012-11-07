@@ -1,9 +1,9 @@
-// Testing the implicit use of "this"
+// Testing the explicit use of "this"
 
 class C {
   void C() {}
   int m1() {
-    return m2();
+    return this.m2();
   }
   int m2() {
     return 13;
