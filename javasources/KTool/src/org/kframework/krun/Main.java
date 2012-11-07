@@ -24,6 +24,7 @@ import jline.SimpleCompletor;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kil.ASTNode;
@@ -130,25 +131,31 @@ public class Main {
 		}
 	}
 
-	public static Map<String, String> makeConfiguration(String kast, Properties configuration_variables, String stdin) {
+	public static Map<String, String> makeConfiguration(String kast, String stdin, RunProcess rp) {
 		org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
 		HashMap<String, String> output = new HashMap<String, String>();
 		boolean hasPGM = false;
-		Enumeration<Object> en = configuration_variables.keys();
+		Enumeration<Object> en = K.configuration_variables.keys();
 		while(en.hasMoreElements()) {
 			String name = (String) en.nextElement();
-			String value = configuration_variables.getProperty(name);
+			String value = K.configuration_variables.getProperty(name);
+			String parser = K.cfg_parsers.getProperty(name);
 			//TODO: get sort from configuration term in definition and pass it here
 			String parsed = "";
-			try {
-				ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "");
-				term = term.accept(new FlattenSyntax());
-				term = MetaK.kWrapper((Term) term);
-				MaudeFilter maudeFilter = new MaudeFilter();
-				term.accept(maudeFilter);
-				parsed = maudeFilter.getResult();
-			} catch (Exception e1) {
-				Error.report(e1.getMessage());
+			if (parser == null) {
+				try {
+					ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "");
+					term = term.accept(new FlattenSyntax());
+					term = MetaK.kWrapper((Term) term);
+					MaudeFilter maudeFilter = new MaudeFilter();
+					term.accept(maudeFilter);
+					parsed = maudeFilter.getResult();
+				} catch (Exception e1) {
+					Error.report(e1.getMessage());
+				}
+			}
+			else {
+				parsed = rp.runParser(parser, value, true);
 			}
 			output.put(name, parsed);
 			hasPGM = hasPGM || name.equals("PGM");
@@ -208,14 +215,14 @@ public class Main {
 						} else if (cmd.hasOption("depth")) {
 							depth = K.depth;
 						}
-						result = KRun.search(bound, depth, K.pattern, makeConfiguration(KAST, K.configuration_variables, buffer), K.showSearchGraph);
+						result = KRun.search(bound, depth, K.pattern, makeConfiguration(KAST, buffer, rp), K.showSearchGraph);
 					} else {
 						Error.report("For the do-search option you need to specify that --maude-cmd=search");
 					}
 				} else if (cmd.hasOption("maude-cmd")) {
-					result = KRun.run(K.maude_cmd, makeConfiguration(KAST, K.configuration_variables, null));
+					result = KRun.run(K.maude_cmd, makeConfiguration(KAST, null, rp));
 				} else {
-					result = KRun.run("erew", makeConfiguration(KAST, K.configuration_variables, null));
+					result = KRun.run("erew", makeConfiguration(KAST, null, rp));
 				}
 
 				if (K.model_checking.length() > 0) {
@@ -231,7 +238,7 @@ public class Main {
 						KAST1 = rp.runParser(K.parser, K.model_checking, true);
 					}
 
-					result = KRun.modelCheck(KAST1, makeConfiguration(KAST, K.configuration_variables, null));
+					result = KRun.modelCheck(KAST1, makeConfiguration(KAST, null, rp));
 				}
 			} catch (KRunExecutionException e) {
 				rp.printError(e.getMessage(), lang);
@@ -325,7 +332,7 @@ public class Main {
 			PrettyPrintOutput p = null;
 			List<String> red = null;
 			if (!isSwitch) {
-				maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__(" + KRun.flatten(makeConfiguration(kast, K.configuration_variables, null)) + ",(.).Map)) .";
+				maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__(" + KRun.flatten(makeConfiguration(kast, null, rp)) + ",(.).Map)) .";
 				// first execute one step then prompt from the user an input
 				System.out.println("After running one step of execution the result is:");
 				rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
@@ -668,6 +675,15 @@ public class Main {
 			}
 			if (cmd.hasOption("c")) {
 				K.configuration_variables = cmd.getOptionProperties("c");
+				String parser = null;
+				for (Option opt : cmd.getOptions()) {
+					if (opt.equals(cmd_options.getOptions().getOption("c")) && parser != null) {
+						K.cfg_parsers.setProperty(opt.getValue(0), parser);
+					}
+					if (opt.equals(cmd_options.getOptions().getOption("cfg-parser"))) {
+						parser = opt.getValue();
+					}
+				}
 			}
 
 			// printing the output according to the given options

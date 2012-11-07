@@ -178,7 +178,6 @@ public class DefinitionLoader {
 
 	public static Term parseCmdString(String content, String sort) throws Exception {
 		String parsed = org.kframework.parser.concrete.KParser.ParseKCmdString(content);
-		System.out.println("Parsed: " + parsed);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 		XmlLoader.addFilename(doc.getFirstChild(), "Command Line Argument");
 		XmlLoader.reportErrors(doc);

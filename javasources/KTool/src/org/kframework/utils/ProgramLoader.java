@@ -1,4 +1,5 @@
 package org.kframework.utils;
+import org.apache.commons.cli.OptionBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,8 +8,10 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -31,20 +34,15 @@ public class ProgramLoader {
 	 * @param kappize
 	 *            If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(File pgmFile, Boolean kappize) throws IOException {
+	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize) throws IOException {
 		File tbl = new File(DefinitionHelper.dotk.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
-
-		File f = pgmFile.getCanonicalFile();
-
-		String content = FileUtil.getFileContent(f.getAbsolutePath());
-
 		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
-		XmlLoader.addFilename(doc.getFirstChild(), pgmFile.getAbsolutePath());
+		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
 		XmlLoader.writeXmlFile(doc, DefinitionHelper.dotk.getAbsolutePath() + "/pgm.xml");
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
@@ -67,8 +65,14 @@ public class ProgramLoader {
 		return out;
 	}
 
-	public static ASTNode loadPgmAst(File pgmFile) throws IOException {
-		return loadPgmAst(pgmFile, true);
+	public static ASTNode loadPgmAst(String content, String filename) throws IOException {
+		return loadPgmAst(content, filename, true);
+	}
+
+	public static ASTNode loadPgmAst(File pgmFile, boolean kappize) throws IOException {
+		String filename = pgmFile.getCanonicalFile().getAbsolutePath();
+		String content = FileUtil.getFileContent(filename);
+		return loadPgmAst(content, filename, kappize);
 	}
 
 	/**
@@ -80,7 +84,7 @@ public class ProgramLoader {
 	 * @param prettyPrint
 	 * @param nextline
 	 */
-	public static void processPgm(File pgmFile, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions) {
+	public static void processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions, boolean useDefParser) {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -88,7 +92,15 @@ public class ProgramLoader {
 			sw.printIntermediate("Importing Files");
 
 		try {
-			ASTNode out = loadPgmAst(pgmFile);
+			ASTNode out;
+			if (useDefParser) {
+				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getCanonicalPath() + "/def/Concrete.tbl");
+				out = DefinitionLoader.parseCmdString(content, "");
+				out = out.accept(new FlattenSyntax());
+				out = MetaK.kWrapper((Term) out);
+			} else {
+				out = loadPgmAst(content, filename);
+			}
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Parsing Program");
 			}
@@ -115,7 +127,7 @@ public class ProgramLoader {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), pgmFile.getAbsolutePath(), "File system."));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename, "File system."));
 		}
 	}
 

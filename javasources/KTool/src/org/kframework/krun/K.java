@@ -80,5 +80,5 @@ public class K {
 
 
 	public static Properties configuration_variables = new Properties();
-	
+	public static Properties cfg_parsers = new Properties();	
 }

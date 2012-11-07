@@ -42,19 +42,26 @@ public class KastFrontEnd {
 			org.kframework.utils.Error.helpExit(op.getHelp(), op.getOptions());
 		}
 		String pgm = null;
-		if (cmd.hasOption("pgm"))
-			pgm = cmd.getOptionValue("pgm");
-		else {
-			String[] restArgs = cmd.getArgs();
-			if (restArgs.length < 1)
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to kast a program!.", "command line", "System file."));
-			else
-				pgm = restArgs[0];
-		}
-
-		File mainFile = new File(pgm);
-		if (!mainFile.exists())
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
+		String path;
+		if (cmd.hasOption("e")) {
+			pgm = cmd.getOptionValue("e");
+			path = "Command line";
+		} else {
+			if (cmd.hasOption("pgm")) {
+				pgm = cmd.getOptionValue("pgm");
+			} else {
+				String[] restArgs = cmd.getArgs();
+				if (restArgs.length < 1)
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to kast a program!.", "command line", "System file."));
+				else
+					pgm = restArgs[0];
+			}
+			path = pgm;
+			File mainFile = new File(pgm);
+			if (!mainFile.exists())
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
+			pgm = FileUtil.getFileContent(mainFile.getAbsolutePath());
+		} 
 
 		File def = null;
 		org.kframework.kil.Definition javaDef = null;
@@ -122,8 +129,7 @@ public class KastFrontEnd {
 				nextline = true;
 			}
 		}
-
-		org.kframework.utils.ProgramLoader.processPgm(mainFile, javaDef, prettyPrint, nextline, indentationOptions);
+		org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, cmd.hasOption("def-parser"));
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
 		GlobalSettings.kem.print();

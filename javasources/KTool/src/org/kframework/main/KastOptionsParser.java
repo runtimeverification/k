@@ -4,6 +4,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -40,8 +41,10 @@ public class KastOptionsParser {
 		/// program
 		OptionGroup tex2 = new OptionGroup();
 		Option tbl = new Option("pgm", "program", true, "the program to parse");
+		Option exp = new Option("e", "expression", true, "an expression to parse passed on the command line");
 		tex2.addOption(tbl);
-		
+		tex2.addOption(exp);		
+
 		// indentation options
 		Option prettyPrint = new Option("pretty", false, "pretty print the output");
 		Option tabSize = new Option("tabsize", true, "how many spaces to use for each indentation level");
@@ -49,6 +52,9 @@ public class KastOptionsParser {
 		Option auxSize = new Option("auxtabsize", true, "how many spaces to indent lines which do not fit into max-width");
 		Option nextLine = new Option("nextline", false, "force newline before first argument");
 		
+		// which parser to use
+		Option defParser = OptionBuilder.withLongOpt("def-parser").withDescription("use k definition parser").create();
+
 		// add options
 		options.addOptionGroup(verb);
 		options.addOptionGroup(main);
@@ -59,6 +65,7 @@ public class KastOptionsParser {
 		options.addOption(maxWidth);
 		options.addOption(auxSize);
 		options.addOption(nextLine);
+		options.addOption(defParser);
 	}
 
 	public CommandLine parse(String[] cmd) {

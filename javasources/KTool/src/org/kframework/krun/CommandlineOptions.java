@@ -68,6 +68,7 @@ public class CommandlineOptions {
 		Option main_module = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("main-module").withDescription("Module the program should execute in").create();
 		Option syntax_module = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("syntax-module").withDescription("Name of the syntax module").create();
 		Option parser = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("parser").withDescription("Command used to parse programs (default: kast)." + K.lineSeparator + "You need to specify the path where you parser" + K.lineSeparator + "is located on the disk").create();
+		Option cfg_parser = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("cfg-parser").withDescription("Command used to parse configuration variables (default: kast --def -e)." + K.lineSeparator + "See --parser above.  Applies to subsequent -c options until another parser is specified with this option").create();
 		Option io = OptionBuilder.hasArg(false).withLongOpt("io").withDescription("Use real IO when running the definition").create();
 		Option no_io = OptionBuilder.hasArg(false).withLongOpt("no-io").create();
 		Option statistics = OptionBuilder.hasArg(false).withLongOpt("statistics").withDescription("Print Maude's rewrite statistics").create();
@@ -82,6 +83,7 @@ public class CommandlineOptions {
 		options.addOption(main_module); getOptionList().add(main_module);
 		options.addOption(syntax_module); getOptionList().add(syntax_module);
 		options.addOption(parser); getOptionList().add(parser);
+		options.addOption(cfg_parser); getOptionList().add(cfg_parser);
 		options.addOption(io); getOptionList().add(io);
 		options.addOption(no_io); getOptionList().add(no_io);
 		options.addOption(statistics); getOptionList().add(statistics);
