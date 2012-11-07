@@ -297,7 +297,7 @@ types are results (same like we did in the IMP++ tutorial). */
 // The drawback of this is that I now need explicit casting of types into K,
 // by putting parentheses around the terms to cast.  The places where that
 // happens will be clearly marked.  Sorry for the inconvenience.  We will fix
-// it soon.
+// it soon, when we allow arbitrary priorities to be declared in the tool.
 //
 //  syntax Block ::= Type
   syntax KResult ::= Type
@@ -381,7 +381,7 @@ include such a similar \texttt{return} statement here.  That's because
 the \texttt{return} statements type to \texttt{stmt} anyway, and the
 entire code of the function body needs to type anyway. */
 
-  rule <task> <k> T:Type F:Id(Ps:Params) S => types(Ps)->T F; ...</k> </task>
+  rule <task> <k> T:Type F:Id(Ps:Params) S => getTypes(Ps)->T F;...</k> </task>
        (. => <task>
                <k> mkDecls(Ps) S </k> <tenv> . </tenv> <return> T </return>
              </task>)
@@ -546,7 +546,7 @@ exceptions can only have integer type. */
 
 //@ \subsection{Expression statement}
 
-  rule T:Type; => stmt
+  rule _:Type; => stmt
 
 //@ \subsection{Conditional and \texttt{while} loop}
 
@@ -578,9 +578,9 @@ exceptions which are not caught. */
   rule <k> spawn S => int ...</k> <tenv> Rho </tenv>
        (. => <task> <k> S </k> <tenv> Rho </tenv> </task>)
   rule join int; => stmt
-  rule acquire T:Type; => stmt
-  rule release T:Type; => stmt
-  rule rendezvous T:Type; => stmt
+  rule acquire _:Type; => stmt
+  rule release _:Type; => stmt
+  rule rendezvous _:Type; => stmt
 
   rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 
@@ -600,11 +600,10 @@ only on expressions which have an lvalue. */
   rule ltype(X:Id) => X
   rule ltype(E:Exp [Es:Exps]) => (E[Es])
 
-//@ The function \texttt{types} returns the list of types of a parameter.
+//@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.
 
-  syntax Types ::= types(Params)  [function]
-  rule types(T:Type _:Id) => T, .Types
-  rule types(T:Type _:Id, P, Ps) => T, types(P,Ps)
-  rule types(.Params) => void, .Types
-
+  syntax Types ::= getTypes(Params)  [function]
+  rule getTypes(T:Type _:Id) => T, .Types   // I would like to not use .Types
+  rule getTypes(T:Type _:Id, P, Ps) => T, getTypes(P,Ps)
+  rule getTypes(.Params) => void, .Types
 endmodule
