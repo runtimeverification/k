@@ -1,5 +1,7 @@
 package org.kframework.parser.concrete.disambiguate;
 
+import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -22,15 +24,15 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {
 			UserList ulist = (UserList) tc.getProduction().getItems().get(0);
 
-			score += getFitnessUnit2(ulist.getSort(), tc.getContents().get(0).getSort());
-			score += getFitnessUnit2(tc.getProduction().getSort(), tc.getContents().get(1).getSort());
+			score += getFitnessUnit2(ulist.getSort(), tc.getContents().get(0));
+			score += getFitnessUnit2(tc.getProduction().getSort(), tc.getContents().get(1));
 		} else {
 			int j = 0;
 			for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
 				if (tc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
 					Sort sort = (Sort) tc.getProduction().getItems().get(i);
 					Term child = (Term) tc.getContents().get(j);
-					score += getFitnessUnit2(sort.getName(), child.getSort());
+					score += getFitnessUnit2(sort.getName(), child);
 					j++;
 				}
 			}
@@ -46,7 +48,19 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 	 *            - the sort found in the term.
 	 * @return
 	 */
-	private int getFitnessUnit2(String declSort, String termSort) {
+	private int getFitnessUnit2(String declSort, Term childTerm) {
+		if (childTerm instanceof Rewrite) {
+			Rewrite rw = (Rewrite) childTerm;
+			return getFitnessUnit3(declSort, rw.getLeft().getSort()) + getFitnessUnit3(declSort, rw.getRight().getSort());
+		} else if (childTerm instanceof Ambiguity) {
+			// if there is an ambiguity, choose only the subsorts (if that doesn't eliminate the node completely)
+			return 0;
+		}
+
+		return getFitnessUnit3(declSort, childTerm.getSort());
+	}
+
+	private int getFitnessUnit3(String declSort, String termSort) {
 		if (termSort.equals(""))
 			return 0; // if it is amb it won't have a sort
 		int score;
@@ -57,7 +71,7 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 			score = -1; // if I insert a K where I would expect a more specific kind of sort, put -1
 		else {
 			score = -1;
-			//System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
+			// System.out.println("Score: (" + declSort + "," + termSort + "," + score + ")");
 		}
 		return score;
 	}

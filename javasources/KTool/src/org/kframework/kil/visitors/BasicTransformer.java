@@ -65,13 +65,10 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Definition node) throws TransformerException {
-		ArrayList<DefinitionItem> items = new ArrayList<DefinitionItem>();
-		for (DefinitionItem di : node.getItems()) {
-			items.add((DefinitionItem) di.accept(this));
+		for (int i = 0; i < node.getItems().size(); i++) {
+			node.getItems().set(i, (DefinitionItem) node.getItems().get(i).accept(this));
 		}
-		Definition result = new Definition(node);
-		result.setItems(items);
-		return transform((ASTNode) result);
+		return transform((ASTNode) node);
 	}
 
 	@Override
@@ -86,13 +83,10 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
-		ArrayList<ModuleItem> items = new ArrayList<ModuleItem>();
-		for (ModuleItem mi : node.getItems()) {
-			items.add((ModuleItem) mi.accept(this));
+		for (int i = 0; i < node.getItems().size(); i++) {
+			node.getItems().set(i, (ModuleItem) node.getItems().get(i).accept(this));
 		}
-		Module result = new Module(node);
-		result.setItems(items);
-		return transform((DefinitionItem) result);
+		return transform((DefinitionItem) node);
 	}
 
 	@Override
@@ -141,35 +135,26 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Syntax node) throws TransformerException {
-		ArrayList<PriorityBlock> pbs = new ArrayList<PriorityBlock>();
-		for (PriorityBlock pb : node.getPriorityBlocks()) {
-			pbs.add((PriorityBlock) pb.accept(this));
+		for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
+			node.getPriorityBlocks().set(i, (PriorityBlock) node.getPriorityBlocks().get(i).accept(this));
 		}
-		Syntax result = new Syntax(node);
-		result.setPriorityBlocks(pbs);
-		return transform((ModuleItem) result);
+		return transform((ModuleItem) node);
 	}
 
 	@Override
 	public ASTNode transform(PriorityBlock node) throws TransformerException {
-		ArrayList<Production> prods = new ArrayList<Production>();
-		for (Production p : node.getProductions()) {
-			prods.add((Production) p.accept(this));
+		for (int i = 0; i < node.getProductions().size(); i++) {
+			node.getProductions().set(i, (Production) node.getProductions().get(i).accept(this));
 		}
-		PriorityBlock result = new PriorityBlock(node);
-		result.setProductions(prods);
-		return transform((ASTNode) result);
+		return transform((ASTNode) node);
 	}
 
 	@Override
 	public ASTNode transform(Production node) throws TransformerException {
-		ArrayList<ProductionItem> pis = new ArrayList<ProductionItem>();
-		for (ProductionItem pi : node.getItems()) {
-			pis.add((ProductionItem) pi.accept(this));
+		for (int i = 0; i < node.getItems().size(); i++) {
+			node.getItems().set(i, (ProductionItem) node.getItems().get(i).accept(this));
 		}
-		Production result = new Production(node);
-		result.setItems(pis);
-		return transform((ASTNode) result);
+		return transform((ASTNode) node);
 	}
 
 	@Override
@@ -206,11 +191,9 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Collection node) throws TransformerException {
-		ArrayList<Term> terms = new ArrayList<Term>();
-		for (Term t : node.getContents()) {
-			terms.add((Term) t.accept(this));
+		for (int i = 0; i < node.getContents().size(); i++) {
+			node.getContents().set(i, (Term) node.getContents().get(i).accept(this));
 		}
-		node.setContents(terms);
 		return transform((Term) node);
 	}
 
@@ -342,13 +325,10 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(TermCons node) throws TransformerException {
-		ArrayList<Term> terms = new ArrayList<Term>();
-		for (Term t : node.getContents()) {
-			terms.add((Term) t.accept(this));
+		for (int i = 0; i < node.getContents().size(); i++) {
+			node.getContents().set(i, (Term) node.getContents().get(i).accept(this));
 		}
-		TermCons result = new TermCons(node);
-		result.setContents(terms);
-		return transform((Term) result);
+		return transform((Term) node);
 	}
 
 	@Override
@@ -358,10 +338,9 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Attributes node) throws TransformerException {
-		java.util.List<Attribute> contents = new ArrayList<Attribute>();
-		for (Attribute at : node.getContents())
-			contents.add((Attribute) at.accept(this));
-		node.setContents(contents);
+		for (int i = 0; i < node.getContents().size(); i++) {
+			node.getContents().set(i, (Attribute) node.getContents().get(i).accept(this));
+		}
 		return node;
 	}
 
