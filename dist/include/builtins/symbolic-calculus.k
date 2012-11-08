@@ -85,15 +85,5 @@ module SYMBOLIC-CALCULUS
   rule B1:Bool SMT|= B2:Bool => true
        when checkSat(B1 andBool (notBool B2)) ==K "unsat"
        [anywhere]
-
-
-// FOL
-  syntax Fol ::= Bool
-  	       | Fol "andFol" Fol 
-	       | "notFol" Fol
-
-  rule B1:Bool andFol B2:Bool => B1 andBool B2 [anywhere]
-  rule notFol B:Bool => notBool B [anywhere]
-
 endmodule
 
