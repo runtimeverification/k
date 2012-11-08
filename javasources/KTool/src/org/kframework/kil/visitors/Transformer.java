@@ -6,6 +6,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
+import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Collection;
 import org.kframework.kil.CollectionItem;
@@ -107,6 +108,7 @@ public interface Transformer {
 	public ASTNode transform(KInjectedLabel node) throws TransformerException;
 	public ASTNode transform(Rewrite node) throws TransformerException;
 	public ASTNode transform(TermCons node) throws TransformerException;
+	public ASTNode transform(Bracket node) throws TransformerException;
 	public ASTNode transform(Variable node) throws TransformerException;
 	//</Terms>
 	public String getName();

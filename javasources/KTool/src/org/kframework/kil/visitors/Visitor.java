@@ -6,6 +6,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
+import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Collection;
 import org.kframework.kil.CollectionItem;
@@ -106,6 +107,7 @@ public interface Visitor {
 	public void visit(KLabel node);
 	public void visit(Rewrite node);
 	public void visit(TermCons node);
+	public void visit(Bracket node);
 	public void visit(Variable node);
 	// </Terms>
 	public void visit(Attributes attributes);

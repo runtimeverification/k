@@ -11,7 +11,6 @@ import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -70,14 +69,6 @@ public class Definition extends ASTNode {
 			content += di + " \n";
 
 		return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
-		for (int i = 0; i < this.items.size(); i++) {
-			DefinitionItem di = (DefinitionItem) visitor.modify(this.items.get(i));
-			this.items.set(i, di);
-		}
 	}
 
 	public void setItems(List<DefinitionItem> items) {
@@ -145,7 +136,8 @@ public class Definition extends ASTNode {
 				modules.add((Module) i);
 		}
 		if (modules.size() != 1) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this
+					.getLocation()));
 		}
 		return modules.get(0);
 	}
@@ -162,7 +154,8 @@ public class Definition extends ASTNode {
 			}
 		}
 		if (moduleCount != 1) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this
+					.getLocation()));
 		}
 		Definition result = new Definition(this);
 		result.setItems(newDefinitionItems);

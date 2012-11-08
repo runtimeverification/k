@@ -14,15 +14,16 @@ context-free priorities
 } > { non-assoc:
 	K "=>" K	-> K {non-assoc, cons("K1Rewrite")}
 	ListDlKDr  "=>" ListDlKDr	-> ListDlKDr {non-assoc, cons("ListDlKDr1Rewrite")}
+	KLabel "=>" KLabel		-> KLabel {cons("KLabel1Rewrite")}
 }
 context-free syntax
 	KLabel "(" ListDlKDr ")"	-> K {cons("K1App")}
 	K					-> ListDlKDr %%{cons("ListOfK3K")}
 	"HOLE"				-> K {cons("K1Hole")}
 	"HOLE" ":" "K"		-> K {cons("K12Hole")}
-	"(" ListDlKDr ")"	-> ListDlKDr {bracket}
-	"(" K ")"			-> K {bracket}
-	KLabel "=>" KLabel	-> KLabel {cons("KLabel1Rewrite")}
+	"(" ListDlKDr ")"	-> ListDlKDr {cons("ListDlKDr1Bracket")}
+	"(" K ")"			-> K {cons("K1Bracket")}
+	"(" KLabel ")"		-> KLabel {cons("KLabel1Bracket")}
 
 context-free priorities
 {
@@ -35,7 +36,7 @@ context-free priorities
 	List "=>" List			-> List {non-assoc, cons("List1Rewrite")}
 }
 context-free syntax
-	"(" List ")"			-> List {bracket}
+	"(" List ")"			-> List {cons("List1Bracket")}
 
 context-free priorities
 {
@@ -50,7 +51,7 @@ context-free priorities
 }
 context-free syntax
 	%%"(" BagItem ")"	-> BagItem {bracket}
-	"(" Bag ")"			-> Bag {bracket}
+	"(" Bag ")"			-> Bag {cons("Bag1Bracket")}
 
 context-free priorities
 {
@@ -65,7 +66,7 @@ context-free priorities
 }
 context-free syntax
 	%%"(" SetItem ")"		-> SetItem {bracket}
-	"(" Set ")"				-> Set {bracket}
+	"(" Set ")"				-> Set {cons("Set1Bracket")}
 
 context-free priorities
 {
@@ -82,7 +83,7 @@ context-free priorities
 }
 context-free syntax
 	%%"(" MapItem ")"		-> MapItem {bracket}
-	"(" Map ")"				-> Map {bracket}
+	"(" Map ")"				-> Map {cons("Map1Bracket")}
 
 context-free syntax
 	%% TODO: Variables Dunno what to do with the variables

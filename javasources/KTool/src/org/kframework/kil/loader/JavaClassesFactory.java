@@ -3,7 +3,6 @@ package org.kframework.kil.loader;
 import org.kframework.kil.*;
 import org.w3c.dom.Element;
 
-
 public class JavaClassesFactory {
 
 	public static ASTNode getTerm(Element element) {
@@ -35,6 +34,8 @@ public class JavaClassesFactory {
 			return new Rewrite(element);
 		if (Constants.TERM.equals(element.getNodeName()))
 			return new TermCons(element);
+		if (Constants.BRACKET.equals(element.getNodeName()))
+			return new Bracket(element);
 		if (Constants.VAR.equals(element.getNodeName()))
 			return new Variable(element);
 		if (Constants.TERMINAL.equals(element.getNodeName()))

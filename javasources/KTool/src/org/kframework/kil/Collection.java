@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 public abstract class Collection extends Term {
 
 	protected java.util.List<Term> contents;
-	
+
 	public Collection(String sort) {
 		super(sort);
 		contents = new ArrayList<Term>();
@@ -57,14 +56,6 @@ public abstract class Collection extends Term {
 		this.contents = contents;
 	}
 
-	@Override
-	public void applyToAll(Modifier visitor) {
-		for (int i = 0; i < this.contents.size(); i++) {
-			Term elem = (Term) visitor.modify(this.contents.get(i));
-			this.contents.set(i, elem);
-		}
-	}
-	
 	@Override
 	public abstract Collection shallowCopy();
 }

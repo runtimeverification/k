@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -18,22 +17,15 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
-
 public class Cell extends Term {
 	public enum Multiplicity {
-		ONE,
-		MAYBE,
-		ANY,
-		SOME,
+		ONE, MAYBE, ANY, SOME,
 	}
-	
+
 	public enum Ellipses {
-		LEFT,
-		RIGHT,
-		BOTH,
-		NONE,
+		LEFT, RIGHT, BOTH, NONE,
 	}
-	
+
 	String label;
 	Term contents;
 	Map<String, String> attributes;
@@ -54,7 +46,8 @@ public class Cell extends Term {
 		setEllipses(element.getAttribute(Constants.ELLIPSES_ellipses_ATTR));
 
 		for (int i = 0; i < its.getLength(); i++) {
-			if (!its.item(i).getNodeName().equals(Constants.FILENAME_filename_ATTR) && !its.item(i).getNodeName().equals(Constants.LOC_loc_ATTR) // && !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
+			if (!its.item(i).getNodeName().equals(Constants.FILENAME_filename_ATTR) && !its.item(i).getNodeName().equals(Constants.LOC_loc_ATTR) // &&
+																																					// !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
 					&& !its.item(i).getNodeName().equals(Constants.SORT_sort_ATTR) && !its.item(i).getNodeName().equals(Constants.LABEL_label_ATTR)) {
 				attributes.put(its.item(i).getNodeName(), its.item(i).getNodeValue());
 			}
@@ -89,13 +82,15 @@ public class Cell extends Term {
 		for (Entry<String, String> entry : this.attributes.entrySet())
 			attributes += " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
 
-				String content = "<" + this.label + attributes + ">";
-				
-				if (hasLeftEllipsis()) content += "..."; 
-				content += " " + this.contents + " ";
-				if (hasRightEllipsis()) content += "..."; 
+		String content = "<" + this.label + attributes + ">";
 
-				return content + "</" + this.label + "> ";
+		if (hasLeftEllipsis())
+			content += "...";
+		content += " " + this.contents + " ";
+		if (hasRightEllipsis())
+			content += "...";
+
+		return content + "</" + this.label + "> ";
 	}
 
 	public String getLabel() {
@@ -117,32 +112,32 @@ public class Cell extends Term {
 	public void setSort(String sort) {
 		this.sort = sort;
 	}
-	
+
 	public Multiplicity getMultiplicity() {
-		if (attributes.containsKey("multiplicity")) {	
+		if (attributes.containsKey("multiplicity")) {
 			String attr = attributes.get("multiplicity");
-			if ("?".equals(attr)) return Multiplicity.MAYBE;
-			if ("*".equals(attr)) return Multiplicity.ANY;
-			if ("+".equals(attr)) return Multiplicity.SOME;
-			if ("1".equals(attr)) return Multiplicity.ONE;
-			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
-					KExceptionGroup.COMPILER, 
-					"Unknown multiplicity in configuration for cell " + this.getLabel() + ".", 
-					this.getFilename(), this.getLocation()));
+			if ("?".equals(attr))
+				return Multiplicity.MAYBE;
+			if ("*".equals(attr))
+				return Multiplicity.ANY;
+			if ("+".equals(attr))
+				return Multiplicity.SOME;
+			if ("1".equals(attr))
+				return Multiplicity.ONE;
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Unknown multiplicity in configuration for cell " + this.getLabel() + ".", this.getFilename(),
+					this.getLocation()));
 		}
 		return Multiplicity.ONE;
 	}
-	
+
 	public Ellipses getEllipses() {
 		String attr = attributes.get("ellipses");
 		try {
-			if (attr!=null) {
+			if (attr != null) {
 				return Ellipses.valueOf(attr.toUpperCase());
 			}
-		} catch (IllegalArgumentException e){
-			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
-					KExceptionGroup.COMPILER, 
-					"Unknown ellipses value in configuration for cell " + this.getLabel() + ". Assuming none.", 
+		} catch (IllegalArgumentException e) {
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Unknown ellipses value in configuration for cell " + this.getLabel() + ". Assuming none.",
 					this.getFilename(), this.getLocation()));
 		}
 		return Ellipses.NONE;
@@ -152,7 +147,7 @@ public class Cell extends Term {
 		ellipses = ellipses.toLowerCase();
 		if (ellipses.isEmpty() || ellipses.equals("none")) {
 			attributes.remove("ellipses");
-		} else 
+		} else
 			attributes.put("ellipses", ellipses);
 	}
 
@@ -169,13 +164,10 @@ public class Cell extends Term {
 	}
 
 	@Override
-	public void applyToAll(Modifier visitor) {
-		this.contents = (Term) visitor.modify(contents);
-	}
-	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+
 	@Override
 	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
@@ -184,7 +176,7 @@ public class Cell extends Term {
 	public void setDefaultAttributes() {
 		attributes = new HashMap<String, String>();
 	}
-	
+
 	@Override
 	public Cell shallowCopy() {
 		return new Cell(this);
@@ -192,7 +184,8 @@ public class Cell extends Term {
 
 	public String getId() {
 		String id = attributes.get("id");
-		if (null == id) id = this.label;
+		if (null == id)
+			id = this.label;
 		return id;
 	}
 
@@ -201,7 +194,8 @@ public class Cell extends Term {
 	}
 
 	public void setId(String id) {
-		if (getId().equals(id)) return;
+		if (getId().equals(id))
+			return;
 		attributes.put("id", id);
 	}
 }

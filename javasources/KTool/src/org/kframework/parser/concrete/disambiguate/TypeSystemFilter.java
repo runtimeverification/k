@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Bracket;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
@@ -14,7 +15,6 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-
 
 public class TypeSystemFilter extends BasicTransformer {
 
@@ -53,6 +53,9 @@ public class TypeSystemFilter extends BasicTransformer {
 			Rewrite rw = (Rewrite) t;
 			rw.setLeft(applyTypeFilter(rw.getLeft(), maxSort));
 			rw.setRight(applyTypeFilter(rw.getRight(), maxSort));
+		} else if (t instanceof Bracket) {
+			Bracket br = (Bracket) t;
+			br.setContent(applyTypeFilter(br.getContent(), maxSort));
 		} else if (t instanceof Ambiguity) {
 			// if there is an ambiguity, choose only the subsorts (if that doesn't eliminate the node completely)
 			Ambiguity amb = (Ambiguity) t;

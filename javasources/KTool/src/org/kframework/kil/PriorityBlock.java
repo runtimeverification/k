@@ -4,13 +4,11 @@ import java.util.ArrayList;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
 
 public class PriorityBlock extends ASTNode {
 
@@ -66,14 +64,6 @@ public class PriorityBlock extends ASTNode {
 		if (assoc.equals(""))
 			return content;
 		return assoc + ": " + content;
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
-		for (int i = 0; i < this.productions.size(); i++) {
-			Production elem = (Production) visitor.modify(this.productions.get(i));
-			this.productions.set(i, elem);
-		}
 	}
 
 	@Override

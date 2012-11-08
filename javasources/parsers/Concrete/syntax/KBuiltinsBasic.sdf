@@ -6,8 +6,6 @@ exports
 context-free syntax
 	%% KLabel
 	DzKLabel	-> KLabel {cons("KLabel1Const")}
-	"(" KLabel ")"			-> KLabel {bracket}
-	KLabel "=>" KLabel		-> KLabel {cons("KLabel1Rewrite")}
 
 lexical syntax
 	"true"				-> DzDzBOOL

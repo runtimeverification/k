@@ -495,6 +495,8 @@ public class KompileFrontEnd {
 		Stopwatch sw = new Stopwatch();
 
 		try {
+			javaDef = (org.kframework.kil.Definition) javaDef.accept(new RemoveBrackets());
+
 			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Empty Lists");
@@ -547,11 +549,11 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Add K Cell");
 			}
 
-            javaDef = new CompilerTransformerStep(new AddSymbolicSorts()).compile(javaDef);
+			javaDef = new CompilerTransformerStep(new AddSymbolicSorts()).compile(javaDef);
 
-            if (GlobalSettings.verbose) {
-                sw.printIntermediate("Add Symbolic Stuff");
-            }
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Add Symbolic Stuff");
+			}
 
 			javaDef = new CompilerTransformerStep(new ResolveFresh()).compile(javaDef);
 
@@ -649,11 +651,11 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Default Terms");
 			}
 
-            javaDef = new CompilerTransformerStep(new ResolveOpenCells()).compile(javaDef);
+			javaDef = new CompilerTransformerStep(new ResolveOpenCells()).compile(javaDef);
 
-            if (GlobalSettings.verbose) {
-                sw.printIntermediate("Resolve Open Cells");
-            }
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Resolve Open Cells");
+			}
 
 			javaDef = new CompilerTransformerStep(new ResolveRewrite()).compile(javaDef);
 
@@ -661,11 +663,11 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Push local rewrites to the top");
 			}
 
-//			javaDef = new CompilerTransformerStep(new ContextsToHeating()).compile(javaDef);
-//
-//			if (GlobalSettings.verbose) {
-//				sw.printIntermediate("Transform Contexts into Heat/Cool Rules");
-//			}
+			// javaDef = new CompilerTransformerStep(new ContextsToHeating()).compile(javaDef);
+			//
+			// if (GlobalSettings.verbose) {
+			// sw.printIntermediate("Transform Contexts into Heat/Cool Rules");
+			// }
 
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";

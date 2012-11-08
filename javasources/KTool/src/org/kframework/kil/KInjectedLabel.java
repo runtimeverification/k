@@ -1,6 +1,5 @@
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -17,7 +16,7 @@ public class KInjectedLabel extends Term {
 		super(l);
 		term = l.term;
 	}
-	
+
 	public KInjectedLabel(Term t) {
 		super("KLabel");
 		term = t;
@@ -44,7 +43,7 @@ public class KInjectedLabel extends Term {
 			return "Map";
 		if (sort.equals("ListItem"))
 			return "List";
-		return sort;		
+		return sort;
 	}
 
 	@Override
@@ -55,10 +54,6 @@ public class KInjectedLabel extends Term {
 	@Override
 	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
 	}
 
 	@Override

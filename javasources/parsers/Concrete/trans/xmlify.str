@@ -246,6 +246,17 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:
+		a#(b) -> $[<bracket sort="[sort]" loc="[loc]">
+					[children]
+		</bracket>
+		]
+		where <string-ends-with(|"Bracket")> a
+		where mydebug(!"Bracket: ")
+		where children := <all(to-xml)> b
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
 		a#([b, c]) -> $[<rewrite sort="[sort]" loc="[loc]">
 							<left>
 								[<to-xml> b]

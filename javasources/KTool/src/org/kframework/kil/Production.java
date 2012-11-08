@@ -8,7 +8,6 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -21,30 +20,27 @@ public class Production extends ASTNode {
 	protected Attributes attributes;
 	protected String sort;
 
-    public static Production makeFunction(
-            String funSort,
-            String funName,
-            String argSort) {
-        List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
-        prodItems.add(new Terminal(funName));
-        //prodItems.add(new Terminal("("));
-        prodItems.add(new Sort(argSort));
-        //prodItems.add(new Terminal(")"));
+	public static Production makeFunction(String funSort, String funName, String argSort) {
+		List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
+		prodItems.add(new Terminal(funName));
+		// prodItems.add(new Terminal("("));
+		prodItems.add(new Sort(argSort));
+		// prodItems.add(new Terminal(")"));
 
-        Production funProd = new Production(new Sort(funSort), prodItems);
-        java.util.List<Attribute> attrs = funProd.getAttributes().getContents();
-        attrs.add(new Attribute("prefixlabel", funName));
-        if (MetaK.isComputationSort(funSort)) {
-            attrs.add(new Attribute("klabel", funName));
-            String consAttr = funSort + "1" + funName + "Syn";
-            attrs.add(new Attribute("cons", consAttr));
-            DefinitionHelper.conses.put(consAttr, funProd);
-        }
+		Production funProd = new Production(new Sort(funSort), prodItems);
+		java.util.List<Attribute> attrs = funProd.getAttributes().getContents();
+		attrs.add(new Attribute("prefixlabel", funName));
+		if (MetaK.isComputationSort(funSort)) {
+			attrs.add(new Attribute("klabel", funName));
+			String consAttr = funSort + "1" + funName + "Syn";
+			attrs.add(new Attribute("cons", consAttr));
+			DefinitionHelper.conses.put(consAttr, funProd);
+		}
 
-        return funProd;
-    }
+		return funProd;
+	}
 
-    public boolean isListDecl() {
+	public boolean isListDecl() {
 		return items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST;
 	}
 
@@ -193,14 +189,6 @@ public class Production extends ASTNode {
 				arity++;
 		}
 		return arity;
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
-		for (int i = 0; i < this.items.size(); i++) {
-			ProductionItem elem = (ProductionItem) visitor.modify(this.items.get(i));
-			this.items.set(i, elem);
-		}
 	}
 
 	@Override

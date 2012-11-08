@@ -5,13 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
 
 public class Attributes extends ASTNode {
 
@@ -89,23 +87,15 @@ public class Attributes extends ASTNode {
 	}
 
 	@Override
-	public void applyToAll(Modifier visitor) {
-		for (int i = 0; i < this.contents.size(); i++) {
-			Attribute elem = (Attribute) visitor.modify(this.contents.get(i));
-			this.contents.set(i, elem);
-		}
-	}
-
-	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException  {
+	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
 	}
-	
+
 	@Override
 	public Attributes shallowCopy() {
 		Attributes result = new Attributes();

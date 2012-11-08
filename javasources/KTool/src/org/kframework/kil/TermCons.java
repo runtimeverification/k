@@ -8,13 +8,11 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
 
 public class TermCons extends Term {
 	String cons;
@@ -36,7 +34,7 @@ public class TermCons extends Term {
 		this.cons = cons;
 		contents = new ArrayList<Term>();
 	}
-	
+
 	public TermCons(String location, String filename, String sort, String listCons, List<Term> genContents) {
 		super(location, filename, sort);
 		cons = listCons;
@@ -103,14 +101,6 @@ public class TermCons extends Term {
 
 	public void setContents(java.util.List<Term> contents) {
 		this.contents = contents;
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
-		for (int i = 0; i < this.contents.size(); i++) {
-			Term elem = (Term) visitor.modify(this.contents.get(i));
-			this.contents.set(i, elem);
-		}
 	}
 
 	@Override

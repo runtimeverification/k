@@ -1,12 +1,10 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
-
 
 public class Variable extends Term {
 	private String name;
@@ -39,14 +37,6 @@ public class Variable extends Term {
 
 	public String toString() {
 		return name + ":" + sort + " ";
-	}
-
-	public void accept(Modifier visitor) {
-		visitor.modify(this);
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Bracket;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
@@ -63,10 +64,13 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 	private int getFitnessUnit2(String declSort, Term childTerm) {
 		if (childTerm instanceof Rewrite) {
 			Rewrite rw = (Rewrite) childTerm;
-			return getFitnessUnit3(declSort, rw.getLeft().getSort()) + getFitnessUnit3(declSort, rw.getRight().getSort());
+			return getFitnessUnit2(declSort, rw.getLeft()) + getFitnessUnit2(declSort, rw.getRight());
 		} else if (childTerm instanceof Ambiguity) {
 			// if there is an ambiguity, choose only the subsorts (if that doesn't eliminate the node completely)
 			return 0;
+		} else if (childTerm instanceof Bracket) {
+			Bracket br = (Bracket) childTerm;
+			return getFitnessUnit2(declSort, br.getContent());
 		}
 
 		return getFitnessUnit3(declSort, childTerm.getSort());

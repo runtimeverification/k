@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -76,15 +75,6 @@ public class Syntax extends ModuleItem {
 		List<String> sorts = new LinkedList<String>();
 		sorts.add(sort.toString());
 		return sorts;
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
-		sort = (Sort) visitor.modify(sort);
-		for (int i = 0; i < this.priorityBlocks.size(); i++) {
-			PriorityBlock elem = (PriorityBlock) visitor.modify(this.priorityBlocks.get(i));
-			this.priorityBlocks.set(i, elem);
-		}
 	}
 
 	@Override

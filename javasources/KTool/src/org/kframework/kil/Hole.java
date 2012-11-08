@@ -1,12 +1,10 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
-
 
 public class Hole extends Term {
 	public Hole(Element element) {
@@ -18,16 +16,12 @@ public class Hole extends Term {
 		super(hole);
 	}
 
-    public Hole(String sort) {
-        super(sort);
-    }
+	public Hole(String sort) {
+		super(sort);
+	}
 
 	public String toString() {
 		return "[]:" + sort + " ";
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
 	}
 
 	@Override

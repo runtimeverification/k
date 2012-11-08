@@ -2,10 +2,8 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
 
 public abstract class Sentence extends ModuleItem {
 	Term body;
@@ -64,13 +62,6 @@ public abstract class Sentence extends ModuleItem {
 		this.condition = condition;
 	}
 
-	@Override
-	public void applyToAll(Modifier visitor) {
-		this.body = (Term) visitor.modify(body);
-		if (this.condition != null)
-			this.condition = (Term) visitor.modify(condition);
-	}
-
 	public Attributes getAttributes() {
 		return attributes;
 	}
@@ -78,7 +69,7 @@ public abstract class Sentence extends ModuleItem {
 	public void setAttributes(Attributes attributes) {
 		this.attributes = attributes;
 	}
-	
+
 	@Override
 	public abstract Sentence shallowCopy();
 }

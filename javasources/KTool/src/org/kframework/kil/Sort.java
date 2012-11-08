@@ -1,7 +1,6 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -27,8 +26,8 @@ public class Sort extends ProductionItem {
 	}
 
 	public static boolean isBasesort(String sort) {
-		return sort.equals("VARID") || sort.equals("Map") || sort.equals("K") || sort.equals("List") || sort.equals("Bag") || sort.equals("Set") || sort.equals("MapItem") || sort.equals("ListItem") || sort.equals("BagItem") || sort.equals("SetItem")
-				|| sort.equals("List{K}") || sort.equals("KLabel") || sort.equals("CellLabel");
+		return sort.equals("VARID") || sort.equals("Map") || sort.equals("K") || sort.equals("List") || sort.equals("Bag") || sort.equals("Set") || sort.equals("MapItem") || sort.equals("ListItem")
+				|| sort.equals("BagItem") || sort.equals("SetItem") || sort.equals("List{K}") || sort.equals("KLabel") || sort.equals("CellLabel");
 	}
 
 	public boolean isBaseSort() {
@@ -50,14 +49,6 @@ public class Sort extends ProductionItem {
 	@Override
 	public String toString() {
 		return name;
-	}
-
-	public void accept(Modifier visitor) {
-		visitor.modify(this);
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
 	}
 
 	@Override

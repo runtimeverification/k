@@ -8,6 +8,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
+import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Collection;
 import org.kframework.kil.CollectionItem;
@@ -328,6 +329,12 @@ public class BasicTransformer implements Transformer {
 		for (int i = 0; i < node.getContents().size(); i++) {
 			node.getContents().set(i, (Term) node.getContents().get(i).accept(this));
 		}
+		return transform((Term) node);
+	}
+
+	@Override
+	public ASTNode transform(Bracket node) throws TransformerException {
+		node.setContent((Term) node.getContent().accept(this));
 		return transform((Term) node);
 	}
 

@@ -1,12 +1,10 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
-
 
 public class UserList extends ProductionItem {
 	protected String sort;
@@ -34,10 +32,6 @@ public class UserList extends ProductionItem {
 		return "List{" + sort + ",\"" + separator + "\"} ";
 	}
 
-	public void accept(Modifier visitor) {
-		visitor.modify(this);
-	}
-
 	public String getSort() {
 		return sort;
 	}
@@ -52,10 +46,6 @@ public class UserList extends ProductionItem {
 
 	public void setSeparator(String separator) {
 		this.separator = separator;
-	}
-
-	@Override
-	public void applyToAll(Modifier visitor) {
 	}
 
 	@Override

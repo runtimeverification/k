@@ -1,13 +1,11 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Modifiable;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformable;
 import org.kframework.kil.visitors.Visitable;
 import org.w3c.dom.Element;
 
-public abstract class ASTNode implements Modifiable, Visitable,
+public abstract class ASTNode implements Visitable,
 		Transformable {
 	protected Attributes attributes = null;
 
@@ -44,8 +42,6 @@ public abstract class ASTNode implements Modifiable, Visitable,
 
 		return location;
 	}
-
-	public abstract void applyToAll(Modifier visitor);
 
 	public String getLocation() {
 		if (null == attributes) return Constants.GENERATED_LOCATION;

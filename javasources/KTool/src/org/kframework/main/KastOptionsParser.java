@@ -53,6 +53,7 @@ public class KastOptionsParser {
 		Option nextLine = new Option("nextline", false, "force newline before first argument");
 		
 		// which parser to use
+		@SuppressWarnings("static-access")
 		Option defParser = OptionBuilder.withLongOpt("def-parser").withDescription("use k definition parser").create();
 
 		// add options

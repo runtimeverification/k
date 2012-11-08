@@ -5,10 +5,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -117,14 +115,6 @@ public class Module extends DefinitionItem {
 	}
 
 	@Override
-	public void applyToAll(Modifier visitor) {
-		for (int i = 0; i < this.items.size(); i++) {
-			ModuleItem elem = (ModuleItem) visitor.modify(this.items.get(i));
-			this.items.set(i, elem);
-		}
-	}
-
-	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
@@ -155,13 +145,13 @@ public class Module extends DefinitionItem {
 		this.addProduction(ctSort, new Terminal(ctName));
 	}
 
-    public void addProduction(String sort, ProductionItem prodItem) {
-        List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
-        prodItems.add(prodItem);
-        this.addProduction(sort, new Production(new Sort(sort), prodItems));
-    }
+	public void addProduction(String sort, ProductionItem prodItem) {
+		List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
+		prodItems.add(prodItem);
+		this.addProduction(sort, new Production(new Sort(sort), prodItems));
+	}
 
-    public void addProduction(String sort, Production prod) {
+	public void addProduction(String sort, Production prod) {
 		List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
 		PriorityBlock pb = new PriorityBlock();
 		pbs.add(pb);
@@ -172,9 +162,8 @@ public class Module extends DefinitionItem {
 		prods.add(prod);
 
 		this.items.add(new Syntax(new Sort(sort), pbs));
-        if (prod.getItems() == null)
-            System.err.println("*** " + prod);
+		if (prod.getItems() == null)
+			System.err.println("*** " + prod);
 	}
 
 }
-

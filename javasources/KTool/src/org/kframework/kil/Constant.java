@@ -1,12 +1,10 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Modifier;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
-
 
 public class Constant extends Term {
 	String value;
@@ -17,7 +15,7 @@ public class Constant extends Term {
 			System.out.println(value);
 		this.value = value;
 	}
-	
+
 	public Constant(String location, String filename, String sort, String value) {
 		super(location, filename, sort);
 		this.value = value;
@@ -55,10 +53,6 @@ public class Constant extends Term {
 	}
 
 	@Override
-	public void applyToAll(Modifier visitor) {
-	}
-
-	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
@@ -67,7 +61,7 @@ public class Constant extends Term {
 	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
 	}
-	
+
 	@Override
 	public Constant shallowCopy() {
 		return new Constant(this);

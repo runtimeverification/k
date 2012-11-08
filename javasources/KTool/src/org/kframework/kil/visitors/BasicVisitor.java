@@ -36,7 +36,7 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
-        public void visit(Require require) {
+	public void visit(Require require) {
 		visit((DefinitionItem) require);
 	}
 
@@ -254,6 +254,12 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(Bracket node) {
+		node.getContent().accept(this);
+		visit((Term) node);
+	}
+
+	@Override
 	public void visit(Variable node) {
 		visit((Term) node);
 	}
@@ -274,9 +280,9 @@ public class BasicVisitor implements Visitor {
 	public void visit(StringSentence node) {
 		visit((ModuleItem) node);
 	}
-	
+
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
-		visit((Term)kInjectedLabel);
+		visit((Term) kInjectedLabel);
 	}
 }
