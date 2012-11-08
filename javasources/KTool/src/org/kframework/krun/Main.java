@@ -133,6 +133,7 @@ public class Main {
 
 	public static Map<String, String> makeConfiguration(String kast, String stdin, RunProcess rp) {
 		org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
+		KastParser.initParser();
 		HashMap<String, String> output = new HashMap<String, String>();
 		boolean hasPGM = false;
 		Enumeration<Object> en = K.configuration_variables.keys();
@@ -151,6 +152,7 @@ public class Main {
 					term.accept(maudeFilter);
 					parsed = maudeFilter.getResult();
 				} catch (Exception e1) {
+					e1.printStackTrace();
 					Error.report(e1.getMessage());
 				}
 			}
