@@ -1,4 +1,5 @@
 require "smt.k"
+require "fol.k"
 
 //@ \subsection{Symbolic Calculus}
 module SYMBOLIC-CALCULUS-SYNTAX
@@ -11,6 +12,7 @@ module SYMBOLIC-CALCULUS
 //  imports BOOL-SYMBOLIC
 //  imports INT-SYMBOLIC
   imports SMT-HOOKS
+  imports FOL
 
 /*@ 
   The following function is used to generate fresh names for symbolic values.
