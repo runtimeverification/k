@@ -86,6 +86,7 @@ typed before the actual construct can be typed. */
 //@ \subsection{Types}
 
   syntax Type ::= "void" | "int" | "bool" | "string"
+                | Id   [function]  // don't change: it tells Id is NOT a result
                 | class(Id)         [latex({#1})]               // KOOL class
                 | Type "[" "]"
                 > Types "->" Type
@@ -177,7 +178,6 @@ typed before the actual construct can be typed. */
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
   rule class C:Id S => class C extends Object S
-
 endmodule 
 
 //HERE
@@ -364,7 +364,7 @@ checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
   rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
-       <tenv> Rho => Rho[T / X] </tenv>
+       <tenv> Rho => Rho[mkId2Class(T) / X] </tenv>
 
 /*@ \subsubsection{Class member declaration}
 In class tasks, variable declarations mean class member declarations.
@@ -385,7 +385,7 @@ PDF document because of its latex attribute (see the ASCII .k file,
 at the end of this module). */
 
   rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
-       <ctenvT> Rho (. => X |-> T) </ctenvT>
+       <ctenvT> Rho (. => X |-> mkId2Class(T)) </ctenvT>
     when notBool(X in keys(Rho))
 
   rule <k> T:Type X:Id; => stuck(T X;) ...</k>
@@ -450,7 +450,7 @@ instance of this rule). */
              ...</class>)
        <br/>
        (. => <task>
-                <k> checkType(class(C')) ~> S </k>
+                <k> checkType(C') ~> S </k>
                 <inClass> C </inClass>
                 <ctenvT> . </ctenvT>
              </task>)  [structural]
@@ -754,12 +754,22 @@ that the types used in the program actually exists */
   rule checkType(bool) => .  [structural]
   rule checkType(string) => .  [structural]
   rule checkType(void) => .  [structural]
-  rule <k> checkType(class(C:Id)) => . ...</k> <className> C </className>
+  rule <k> checkType(C:Id) => . ...</k> <className> C </className>
     [structural]
-  rule checkType(class(Object)) => .  [structural]
+  rule checkType(Object) => .  [structural]
   rule checkType(Ts:Types -> T:Type) => checkType(T,Ts)  [structural]
   rule checkType(T:Type[]) => checkType(T)  [structural]
 
+  syntax Type ::= mkId2Class(Type)  [function]
+  syntax List{K} ::= "mkId2ClassAux" "(" List{K} ")"  [function]
+  rule mkId2Class(T:Type) => T
+//  rule mkId2Class(T:Type) => mkId2ClassAux(T)
+  rule mkId2ClassAux(X:Id) => class(X)
+  rule mkId2ClassAux(L:KLabel(Kl:List{K})) => L(mkId2ClassAux(Kl))
+//    when L =/=KLabel 'id
+  rule mkId2ClassAux(K,,Kl) => mkId2ClassAux(K),,mkId2ClassAux(Kl)
+    when Kl =/=List{K} .List{K}
+  rule mkId2ClassAux(.List{K}) => .List{K}
 
 //@ These should be generic, belonging to the K framework
   syntax K ::= stuck(K)  [latex(\framebox{${#1}$})]
