@@ -1,17 +1,15 @@
-require "bool-symbolic.k"
-require "int-symbolic.k"
 require "smt.k"
 
 //@ \subsection{Symbolic Calculus}
 module SYMBOLIC-CALCULUS-SYNTAX
-  imports BOOL-SYMBOLIC-SYNTAX
-  imports INT-SYMBOLIC-SYNTAX
+//  imports BOOL-SYMBOLIC-SYNTAX
+//  imports INT-SYMBOLIC-SYNTAX
 endmodule
 
 module SYMBOLIC-CALCULUS
   imports SYMBOLIC-CALCULUS-SYNTAX
-  imports BOOL-SYMBOLIC
-  imports INT-SYMBOLIC
+//  imports BOOL-SYMBOLIC
+//  imports INT-SYMBOLIC
   imports SMT-HOOKS
 
 /*@ 
