@@ -28,11 +28,11 @@ context-free syntax
 	"non-assoc:" {Prod2 "|"}+ -> Prod1 {cons("NonAssocOrList")}
 	{Prod2 "|"}+ -> Prod1 {cons("OrList")}
 
-	ID "(" {BASICID ","}+ ")"	-> Prod2 {cons("ShortProd")}
-	ID "(" {BASICID ","}+ ")"	"[" {Tag ","}+ "]" -> Prod2 {cons("ShortAnnoProd")}
+	ID "(" {SORTID ","}+ ")"	-> Prod2 {cons("ShortProd")}
+	ID "(" {SORTID ","}+ ")"	"[" {Tag ","}+ "]" -> Prod2 {cons("ShortAnnoProd")}
 
-	   "(" {BASICID ","}+ ")"	-> Prod2 {cons("TupleProd")}
-	   "(" {BASICID ","}+ ")"	"[" {Tag ","}+ "]" -> Prod2 {cons("TupleAnnoProd")}
+	   "(" {SORTID ","}+ ")"	-> Prod2 {cons("TupleProd")}
+	   "(" {SORTID ","}+ ")"	"[" {Tag ","}+ "]" -> Prod2 {cons("TupleAnnoProd")}
 
 	SyntaxElement+	-> Prod2 {cons("Prod")}
 	SyntaxElement+	"[" {Tag ","}+ "]" -> Prod2 {cons("AnnoProd")}
