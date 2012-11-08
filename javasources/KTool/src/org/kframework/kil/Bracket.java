@@ -1,0 +1,54 @@
+package org.kframework.kil;
+
+import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.visitors.Transformer;
+import org.kframework.kil.visitors.Visitor;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.xml.XML;
+import org.w3c.dom.Element;
+
+public class Bracket extends Term {
+
+	private Term content;
+
+	public Term getContent() {
+		return content;
+	}
+
+	public void setContent(Term content) {
+		this.content = content;
+	}
+
+	public Bracket(Bracket i) {
+		super(i);
+		this.content = i.content;
+	}
+
+	public Bracket(String location, String filename, String sort) {
+		super(location, filename, sort);
+	}
+
+	public Bracket(Element element) {
+		super(element);
+		this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+	}
+
+	public Bracket(String sort) {
+		super(sort);
+	}
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+	}
+
+	@Override
+	public ASTNode accept(Transformer visitor) throws TransformerException {
+		return visitor.transform(this);
+	}
+
+	@Override
+	public Bracket shallowCopy() {
+		return new Bracket(this);
+	}
+}
