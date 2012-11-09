@@ -29,6 +29,8 @@ module INT-SYMBOLIC
   rule isIntSymbolic(I1:IntSymbolic /Int I2:Int) => true when I2 =/=Int 0 [anywhere]
   rule isIntSymbolic(I1:Int /Int I2:IntSymbolic) => true [anywhere]
 
+  rule isIntSymbolic(minInt(I1:IntSymbolic, I2:Int)) => true [anywhere]
+  rule isIntSymbolic(minInt(I1:Int, I2:IntSymbolic)) => true [anywhere]
 
   // relational
   rule isBoolSymbolic(I1:IntSymbolic <=Int I2:Int) => true [anywhere]

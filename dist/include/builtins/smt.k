@@ -23,6 +23,7 @@ module SMTLIB-CONVERSION
   rule Smtlib(B1:Bool andBool B2:Bool) => "(and " +String Smtlib(B1) +String  " " +String Smtlib(B2) +String ")"
   rule Smtlib(B1:Bool orBool B2:Bool) => "(or " +String Smtlib(B1) +String  " " +String Smtlib(B2) +String ")"
   rule Smtlib(B1:Bool xorBool B2:Bool) => "(xor " +String Smtlib(B1) +String  " " +String Smtlib(B2) +String ")"
+  rule Smtlib(B1:Bool impliesBool B2:Bool) => "(=> " +String Smtlib(B1) +String  " " +String Smtlib(B2) +String ")"
   rule Smtlib(notBool B:Bool) => "(not " +String Smtlib(B) +String ")"
 
   // Smtlib: integers
@@ -44,6 +45,7 @@ module SMTLIB-CONVERSION
   rule Smtlib(I1:Int ==Int I2:Int) => "(= " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")"
   rule Smtlib(I1:Int =/=Int I2:Int) => "(not (= " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String "))"
 
+  rule Smtlib(minInt(I1:Int, I2:Int)) => "(minInt " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")"
 
   //@ Collecting constants declarations
   
@@ -62,6 +64,7 @@ module SMTLIB-CONVERSION
   rule collectConstants(B1:Bool andBool B2:Bool) => collectConstants(B1) collectConstants(B2)
   rule collectConstants(B1:Bool orBool B2:Bool)  => collectConstants(B1) collectConstants(B2)
   rule collectConstants(B1:Bool xorBool B2:Bool) => collectConstants(B1) collectConstants(B2)
+  rule collectConstants(B1:Bool impliesBool B2:Bool) => collectConstants(B1) collectConstants(B2)
 
   // collectConstants: integers
   rule collectConstants(symInt(I:Int)) => SetItem(symInt(I))
@@ -80,6 +83,7 @@ module SMTLIB-CONVERSION
   rule collectConstants(I1:Int *Int I2:Int)  => collectConstants(I1) collectConstants(I2)
   rule collectConstants(I1:Int /Int I2:Int)   => collectConstants(I1) collectConstants(I2)
   rule collectConstants(I1:Int %Int I2:Int)  => collectConstants(I1) collectConstants(I2)
+  rule collectConstants(minInt(I1:Int, I2:Int))  => collectConstants(I1) collectConstants(I2)
   
 endmodule
 module SMT-SYNTAX-HOOKS
@@ -108,8 +112,8 @@ module SMT-HOOKS
   syntax SmtResponse ::= "parseSmtResponse" "(" String ")" [function]
 
   // basic smt interface rules
-  rule checkSat(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) " +String  createSmtCommand(collectConstants(B), Smtlib(B)) +String " (check-sat)"))
-  rule getModel(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) " +String  createSmtCommand(collectConstants(B), Smtlib(B)) +String " (check-sat) (get-model)"))
+  rule checkSat(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) (define-fun minInt ((x1 Int) (x2 Int)) Int (ite (<= x1 x2) x1 x2)) " +String  createSmtCommand(collectConstants(B), Smtlib(B)) +String " (check-sat)"))
+  rule getModel(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) (define-fun minInt ((x1 Int) (x2 Int)) Int (ite (<= x1 x2) x1 x2))" +String  createSmtCommand(collectConstants(B), Smtlib(B)) +String " (check-sat) (get-model)"))
 
     
   // main smt responses
