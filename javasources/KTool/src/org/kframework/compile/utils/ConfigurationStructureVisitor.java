@@ -1,32 +1,15 @@
 package org.kframework.compile.utils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
-
-import org.kframework.kil.Cell;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Context;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.Cell.Multiplicity;
+import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
 
+import java.util.*;
+
 public class ConfigurationStructureVisitor extends BasicVisitor {
-	
-	public class ConfigurationStructure {
-		public Cell cell;
-		public String id;
-		public ConfigurationStructure parent = null;
-		public Map<String,ConfigurationStructure> sons = new HashMap<String, ConfigurationStructure>();
-		public Multiplicity multiplicity;
-		public int level = 0;
-	}
 
-	Stack<ConfigurationStructure> ancestors = new Stack<ConfigurationStructureVisitor.ConfigurationStructure>();
+    Stack<ConfigurationStructure> ancestors = new Stack<ConfigurationStructure>();
 
-	private Map<String, ConfigurationStructureVisitor.ConfigurationStructure> config = new HashMap<String, ConfigurationStructureVisitor.ConfigurationStructure>();
+	private ConfigurationStructureMap config = new ConfigurationStructureMap();
 	private int maxLevel = 0;
 	
 	
@@ -70,7 +53,7 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
 	public void visit(Rule node) {
 	}
 
-	public Map<String, ConfigurationStructureVisitor.ConfigurationStructure> getConfig() {
+	public ConfigurationStructureMap getConfig() {
 		return config;
 	}
 

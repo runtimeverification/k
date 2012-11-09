@@ -1,30 +1,11 @@
 package org.kframework.compile.transformers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-
+import org.kframework.compile.utils.ConfigurationStructure;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.compile.utils.ConfigurationStructureVisitor.ConfigurationStructure;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Bag;
-import org.kframework.kil.Cell;
+import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Context;
-import org.kframework.kil.Module;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -33,16 +14,20 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.util.*;
+import java.util.List;
+import java.util.Map;
+
 public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 
 	private int maxLevel;
-	private Map<String, ConfigurationStructure> config;
+	private ConfigurationStructureMap config;
 
 	public ResolveContextAbstraction() {
 		super("Resolve Context Abstraction");
 	}
 	
-	public ResolveContextAbstraction(int maxLevel, 	Map<String, ConfigurationStructure> config) {
+	public ResolveContextAbstraction(int maxLevel, 	ConfigurationStructureMap config) {
 		this();
 		this.maxLevel = maxLevel;
 		this.config = config;
@@ -120,7 +105,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		boolean change = false;
 		Cell cell = (Cell)super.transform(node);
 		if (cell.getEllipses() == Ellipses.NONE) return cell;
-		ConfigurationStructure confCell = config.get(cell.getId());
+		ConfigurationStructure confCell = config.get(cell);
 		if (confCell == null)
 		{
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
@@ -205,7 +190,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 
 	private ConfigurationStructure findParent(Term t) {
 		if (t instanceof Cell) {
-			 return config.get(((Cell)t).getId()).parent; 
+			 return config.get(((Cell)t)).parent;
 		}
 		if (!(t instanceof Rewrite)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
@@ -222,9 +207,9 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 					t.getFilename(), t.getLocation()));								
 		}
 		Iterator<Cell> i = cells.iterator();
-		ConfigurationStructure parent = config.get(i.next().getId()).parent;
+		ConfigurationStructure parent = config.get(i.next()).parent;
 		while (i.hasNext()) {
-			if (parent != config.get(i.next().getId()).parent) {
+			if (parent != config.get(i.next()).parent) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.INTERNAL, 
 						"Not all cells " + cells + "have parent " + parent + " while " + getName(), 
@@ -249,7 +234,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		
 		@Override
 		public void visit(Cell node) {
-			int level = config.get(node.getId()).level - this.level;
+			int level = config.get(node).level - this.level;
 			if (level < 0) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.INTERNAL, 
@@ -282,14 +267,19 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 			int level = 0;
 			if (!cells.isEmpty()) {
 				Iterator<Cell> i = cells.iterator();
-				level = config.get(i.next().getId()).level - this.level;
-				assert(level >= 0);
+				level = config.get(i.next()).level - this.level;
+				if (!(level >= 0)) {
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                            KExceptionGroup.INTERNAL,
+                            "Rewrite not at the right level in configuration",
+                            getName(), node.getFilename(), node.getLocation()));
+                }
 				if (max < level) max = level;
 				while(i.hasNext()) //Sanity check -- see that all cells in a rewrite are at the same level
-					if (level != config.get(i.next().getId()).level - this.level) {
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+					if (level != config.get(i.next()).level - this.level) {
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
 								KExceptionGroup.INTERNAL, 
-								"Expecting all cells in " + node + " to be at the same level when " + getName(), 
+								"Expecting all cells in " + node + " to be at the same level when " + getName(),
 								getName(), node.getFilename(), node.getLocation()));														
 					}
 			}

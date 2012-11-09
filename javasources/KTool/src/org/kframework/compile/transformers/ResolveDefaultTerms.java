@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.kframework.compile.utils.ConfigurationStructureVisitor.ConfigurationStructure;
+import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Bag;

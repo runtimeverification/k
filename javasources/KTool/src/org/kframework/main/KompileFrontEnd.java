@@ -15,8 +15,8 @@ import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CompilerTransformerStep;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.ConfigurationStructureVisitor;
-import org.kframework.compile.utils.ConfigurationStructureVisitor.ConfigurationStructure;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -37,7 +37,6 @@ import org.kframework.utils.maude.MaudeRun;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class KompileFrontEnd {
 	public static void kompile(String[] args) {
@@ -637,7 +636,7 @@ public class KompileFrontEnd {
 			ConfigurationStructureVisitor cfgStrVisitor = new ConfigurationStructureVisitor();
 			javaDef.accept(cfgStrVisitor);
 			int cfgMaxLevel = cfgStrVisitor.getMaxLevel();
-			Map<String, ConfigurationStructure> cfgStr = cfgStrVisitor.getConfig();
+			ConfigurationStructureMap cfgStr = cfgStrVisitor.getConfig();
 
 			javaDef = new CompilerTransformerStep(new ResolveContextAbstraction(cfgMaxLevel, cfgStr)).compile(javaDef);
 
