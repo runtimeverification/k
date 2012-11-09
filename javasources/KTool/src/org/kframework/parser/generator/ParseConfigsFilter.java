@@ -13,6 +13,7 @@ import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitFileCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKSeqVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
@@ -52,6 +53,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 				// config = config.accept(new CellTypesFilter()); not the case on configs
 				// config = config.accept(new CorrectRewritePriorityFilter());
 				config = config.accept(new CorrectKSeqFilter());
+				config = config.accept(new BestFitFilter(new GetFitnessUnitKSeqVisitor()));
 				config = config.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
 				config = config.accept(new VariableTypeInferenceFilter());
 				config = config.accept(new AmbDuplicateFilter());
@@ -67,7 +69,8 @@ public class ParseConfigsFilter extends BasicTransformer {
 				return config;
 			} catch (Exception e) {
 				e.printStackTrace();
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse configuration: " + e.getLocalizedMessage(), ss.getFilename(), ss.getLocation()));
+				GlobalSettings.kem
+						.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse configuration: " + e.getLocalizedMessage(), ss.getFilename(), ss.getLocation()));
 			}
 		}
 		return ss;
