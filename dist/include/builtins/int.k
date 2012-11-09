@@ -28,6 +28,7 @@ module INT-HOOKS
 				 Int "xorInt" Int [function, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(#INT:_xorInt_)]
 			   > left:
 				 Int "|Int" Int [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(#INT:_|Int_)]
+		 	   | "minInt" "(" Int "," Int ")" [function, hook(#INT:minInt)]
 
   syntax Bool ::= Int "<=Int" Int	[function, left, latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(#INT:_<=Int_)]
 				| Int "<Int" Int	[function, left, latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(#INT:_<Int_)]
