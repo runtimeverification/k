@@ -15,7 +15,7 @@ class A {
   void A() {
     x = 1;
   }
-  B m1(B b) {
+  class(B) m1(class(B) b) {
     b.y = 10;
     return b;
   }
@@ -27,7 +27,7 @@ class B extends A {
     super.A();
     y = 100;
   }
-  B m2(B b) {
+  class(B) m2(class(B) b) {
     return m1(b);   // HOT-SPOT
 // If m1 gets overridden in an extension of B, then the following must hold:
 // (1) The new m1 should not get stuck when called above, so B must be
@@ -45,7 +45,7 @@ class C extends B {
     super.B();
     z = 1000;
   }
-  C m1(A a) {
+  class(C) m1(class(A) a) {
     z = a.x;
     return this;
   }
@@ -64,9 +64,9 @@ class C extends B {
 
 class Main {
   void Main() {
-    A a = new A();
-    B b = new B();
-    C c = new C();
+    class(A) a = new A();
+    class(B) b = new B();
+    class(C) c = new C();
     print(b.y, " ", c.z, "\n");
     print((b.m2(b)).y, " ", (c.m2(b)).y, "\n");
     print(b.y, " ", c.z, "\n");

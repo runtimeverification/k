@@ -21,14 +21,14 @@ class Main {
     var z1 = new X();      // X is not a Z
     var x1 = y;            // ok (Y is subclass of X)
     var x2 = z;            // ok (Z is subclass of X)
-    var y1 = cast x to Y;  // types ok but produces runtime error in typed KOOL
-    var z1 = cast x to Z;  // types ok but produces runtime error in typed KOOL
-    var y2 = cast x1 to Y; // types and runs ok (x1 is type Y)
-    var z2 = cast x2 to Z; // types and runs ok (x2 is type Z)
-    var y3 = cast z to Y;  // inconvertible types
-    var z3 = cast y to Z;  // inconvertible types
+    var y1 = (Y) x;        // types ok but produces runtime error in typed KOOL
+    var z1 = (Z) x;        // types ok but produces runtime error in typed KOOL
+    var y2 = (Y) x1;       // types and runs ok (x1 is type Y)
+    var z2 = (Z) x2;       // types and runs ok (x2 is type Z)
+    var y3 = (Y) z;        // inconvertible types
+    var z3 = (Z) y;        // inconvertible types
     var o = z;             // "o" declared of type "Object" in typed KOOL
-    var o1 = cast o to Y;  // types ok but produces runtime error in typed KOOL
+    var o1 = (Y) o;        // types ok but produces runtime error in typed KOOL
     print("OK\n");
   }
 }

@@ -32,7 +32,7 @@ instance of class \texttt{Main} and invoking the constructor
 i.e., multidimensional arrays, function (here called ``method'')
 abstractions with call-by-value parameter passing style and static
 scoping, blocks with locals, input/output, parametric exceptions, and
-concurrency via dynamic thread creation/termination and synchronization.  
+concurrency via dynamic thread creation/termination and synchronization.
 The only change in the syntax of SIMPLE when imported in KOOL is the
 function declaration keyword, \texttt{function}, which is changed into
 \texttt{method}.  The exact same desugaring macros from SIMPLE are
@@ -58,7 +58,7 @@ is an expression (either an expression expected to evaluate to an object
 or the \texttt{super} construct) and \texttt{x} is a class member name,
 that is, a field or a method name.
 \item Expression constructs ``\texttt{e instanceOf C}'' and
-``\texttt{cast e to C}'', where \texttt{e} is an expression expected
+``\texttt{(C) e}'', where \texttt{e} is an expression expected
 to evaluate to an object and \texttt{C} a class name.  The former
 tells whether the class of \texttt{e} is a subclass of \texttt{C},
 that is, whether \texttt{e} can be used as an instance of \texttt{C},
@@ -167,7 +167,7 @@ for the KOOL object-oriented constructs.
                | "(" Exp ")"             [bracket]
                | "++" Exp
                | Exp "instanceOf" Id     [strict(1)]    // KOOL
-               | "cast" Exp "to" Id      [strict(1)]    // KOOL
+               | "(" Id ")" Exp          [strict(2)]    // KOOL  cast
                | "new" Id "(" Exps ")"   [strict(2)]    // KOOL
                | Exp "." Id                             // KOOL
                > Exp "[" Exps "]"        [strict]
@@ -243,8 +243,9 @@ We first discuss the new configuration of KOOL, which extends that of
 SIMPLE.  Then we include the semantics of the constructs borrowed from
 SIMPLE unchanged; we refrain from discussing those, because they were
 already discussed in the \K definition of SIMPLE.  Then we discuss
-changes to SIMPLE's semantics, more precisely a slight extension to
-the semantics of \texttt{spawn}.  Finally, we discuss in detail the
+changes to SIMPLE's semantics needed for the more general meaning of
+the previous SIMPLE constructs (for example for thread spawning,
+assignment, etc.).  Finally, we discuss in detail the
 semantics of the additional KOOL constructs. */
 
 module KOOL-UNTYPED
@@ -252,20 +253,30 @@ module KOOL-UNTYPED
 
 /*@ \subsection{Configuration}
 
-KOOL adds two nested cells to the configuration of SIMPLE.
-The cell \textsf{crntObj} holds data pertaining to the current object,
-that is, the object environment in which the code in cell
+KOOL removes one cell and adds two nested cells to the configuration
+of SIMPLE.  The cell which is removed is the one holding the global
+environment, because a KOOL program consists of a set of classes only,
+with no global declarations.  In fact, since informally speaking each
+KOOL class now includes a SIMPLE program, it is safe to say that the
+global variables in SIMPLE became class fields in KOOL.  Let us now
+discuss the new cells that are added to the configuration of SIMPLE.
+\begin{itemize}
+\item The cell \textsf{crntObj} holds data pertaining to the current
+object, that is, the object environment in which the code in cell
 \textsf{k} executes: \textsf{crntClass} holds the current class (which
 can change as methods of the current object are invoked);
 \textsf{envStack} holds the stack of environments as a list,
 each layer corresponding to one class in the objects' instance class
 hierarchy; \textsf{location}, which is optional, holds the location in
 the store where the current object is or has to be located (this is
-useful both for method closures and for the semantics of object creation).
-The cell \textsf{classes} holds all the declared classes, each class
-being held in its own \textsf{class} cell which contains a name
+useful both for method closures and for the semantics of object
+creation).
+\item The cell \textsf{classes} holds all the declared classes, each
+class being held in its own \textsf{class} cell which contains a name
 (\textsf{className}), a parent (\textsf{extends}), and the actual
-member declarations (\textsf{declarations}). */
+member declarations (\textsf{declarations}).
+\end{itemize}
+*/
 
   configuration <T color="red">
                   <threads color="orange">
@@ -305,7 +316,7 @@ member declarations (\textsf{declarations}). */
                   </classes>
                 </T>
 
-/*@ \subsection{Unchanged Semantics from SIMPLE}
+/*@ \subsection{Unchanged Semantics from untyped SIMPLE}
 
 The semantics below is taken over from SIMPLE unchanged.
 The semantics of function declaration and invocation, including the
@@ -413,8 +424,8 @@ definition. */
 
 
 /*@ The semantics of function application needs to change into dynamic
-method dispatch invocation, which is defined later, but the semantics
-of return stays unchanged. */
+method dispatch invocation, which is defined shortly.  However,
+interestingly, the semantics of return stays unchanged. */
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
@@ -476,8 +487,10 @@ of return stays unchanged. */
        <env> _ => Env </env>
 
 /*@ Thread spawning needs a new semantics, because we want the child
-thread to also share the object environment with its parent, but the
-other concurrency constructs keep their semantics from SIMPLE. */
+thread to also share the object environment with its parent.  The new
+semantics of thread spawning will be defined shortly.  However,
+interestingly, the other concurrency constructs keep their semantics
+from SIMPLE unchanged. */
 
   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
        <busy> Busy => Busy -Set keys(H) </busy>
@@ -504,23 +517,128 @@ other concurrency constructs keep their semantics from SIMPLE. */
   rule <k> rendezvous V:Val; => . ...</k>
        <k> rendezvous V; => . ...</k>  [rendezvous]
 
+//@ \subsection{Unchanged auxiliary operations from untyped SIMPLE}
 
-/*@ \subsection{Changes to the Existing SIMPLE Semantics}
+  syntax Decl ::= mkDecls(Ids,Vals)  [function]
+  rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
+  rule mkDecls(.Ids,.Vals) => {}
+
+  syntax K ::= lookup(Int)
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
+
+  syntax K ::= env(Map)
+  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  rule (env(_) => .) ~> env(_)  [structural]
+
+  syntax Exp ::= lvalue(K)
+  syntax Val ::= loc(Int)
+
+  rule <k> lvalue(X:Id) => loc(L) ...</k> <env>... X |-> L:Int ...</env>
+    [structural]
+
+  context lvalue(_[HOLE])
+  context lvalue(HOLE[_])
+
+  rule lvalue(lookup(L:Int)) => loc(L)  [structural]
+
+
+  syntax Map ::= Int "..." Int "|->" K
+    [function, latex({#1}\ldots{#2}\mapsto{#3})]
+  rule N...M |-> _ => .Map  when N >Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+
+
+/*@ \subsection{Changes to the existing untyped SIMPLE semantics}
 
 When we extend a language, sometimes we need to do more than just add
 new language constructs and semantics for them.  Sometimes we want to
 also extend the semantics of existing language constructs, in order to
 get more from them. */
 
+/*@ \subsubsection{Program initialization}
+
+In SIMPLE, once all the global declarations were processed, the
+function \texttt{main()} was invoked.  In KOOL, the global
+declarations are classes, and their specific semantics is given
+shortly; essentially, they are pre-processed one by one and added
+into the \textsf{class} cell structure in the configuration.
+Once all the classes are processed, the computation item
+\texttt{execute}, which was placed right after the program in the
+initial configuration, is reached.  In SIMPLE, the program was
+initialized by calling the method \texttt{main()}.  In KOOL, the
+program is initialized by creating an object instance of class
+\texttt{Main}.  This will also implicitly call the method
+\texttt{Main()} (the \texttt{Main} class constructor).  The emptiness
+of the \textsf{env} cell below is just a sanity check, to make sure
+that the user has not declared anything but classes at the top level
+of the program. */
+
+  syntax K ::= "execute" 
+  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
+
+/*@ The semantics of \texttt{new} (defined below) requires the
+execution of all the class' declarations (and also of its
+superclasses'). */
+
+
+/*@ \subsubsection{Object and method closures}
+
+Before we can define the semantics of method application (previously
+called function application in SIMPLE), we need to add two more values
+to the language, namely object and method closures: */
+
+  syntax Val ::= objectClosure(Bag)
+               | methodClosure(Id,Int,Ids,Stmt)
+
+/*@  An object value consists of an \texttt{objectClosure}-wrapped bag
+containing the current class of the object and the environment stack
+of the object.  The current class of an object will always be one of
+the classes mapped to an environment in the environment stack of the
+object.  A method closure encapsulates the method's parameters and
+code (last two arguments), as well as the object context in which the
+method code should execute.  This object context includes the current
+class of the object (the first argument of \texttt{methodClosure}) and
+the object environment stack (located in the object stored at the
+location specified as the second argument of \texttt{methodClosure}). */
+
+
+/*@ \subsubsection{Method application}
+
+KOOL has a complex mechanism to invoke methods, because it allows both
+dynamic method dispatch and methods as first-class-citizen values (the
+latter making it a higher-order language).  The invocation mechanism
+will be defined later.  What is sufficient to know for now is that
+the two arguments of the application construct eventually reduce to
+values, the first being a method closure and the latter a list of
+values.  The semantics of the method closure application is then as
+expected: the local environment and control are stacked, then we
+switch to method closure's class and object environment and execute
+the method body.  The \texttt{mkDecls} construct is the one that came
+with the unchanged semantics of SIMPLE above.  */
+
+  syntax ListItem ::=  (Map,K,Bag)
+
+  rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
+           => mkDecls(Xs,Vs) S return; </k>
+       <env> Env => . </env>
+       <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
+       <br/>
+       <control>
+          C
+          <fstack> . => (Env, K, C <crntObj> Obj' </crntObj>) ...</fstack>
+          <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
+       </control>
+
+
 /*@ \subsubsection{Spawn}
 
-In our case here, we want to extend the semantics of \texttt{spawn} to
-also share the current object environment with the child thread, in
-addition to the current environment.  This extension will allow us to
-also use method invocations in the spawned statements, which will be
-thus looked up as expected, using dynamic method dispatch.  This
-lookup operation would fail if the child thread did not have access to
-its parent's object environment. */
+We want to extend the semantics of \texttt{spawn} to also share the
+current object environment with the child thread, in addition to the
+current environment.  This extension will allow us to also use method
+invocations in the spawned statements, which will be thus looked up as
+expected, using dynamic method dispatch.  This lookup operation would
+fail if the child thread did not have access to its parent's object
+environment. */
 
   rule <thread>...
          <k> spawn S => T ...</k>
@@ -535,27 +653,10 @@ its parent's object environment. */
              ...</thread>)
     when fresh(T:Int)
 
-//@ We next define the semantics of the additional KOOL features.
 
-/*@ \subsection{Object and method closures}
+//@ \subsection{Semantics of the new KOOL constructs}
 
-We need to add two more values to the language, namely object and
-method closures.  An object value consists of an
-\texttt{objectClosure}-wrapped bag containing the current class of the
-object and the environment stack of the object.  The current class of
-an object will always be one of the classes mapped to an environment
-in the environment stack of the object.  A method closure encapsulates
-the method's parameters and code, as well as the object context in
-which the method code should execute.  This object context includes
-the current class of the object (the first argument of
-\texttt{methodClosure}) and the object environment stack (located in
-the object stored at the location specified as the second argument of
-\texttt{methodClosure}). */
-
-  syntax Val ::= objectClosure(Bag)
-               | methodClosure(Id,Int,Ids,Stmt)
-
-/*@ \subsection{Class declaration}
+/*@ \subsubsection{Class declaration}
 
 Initially, the classes forming the program are moved into their
 corresponding cells: */
@@ -568,28 +669,7 @@ corresponding cells: */
                         </class>)
        ...</classes>  [structural]
 
-/*@ \subsection{Program initialization}
-
-Once all the classes are processed as above, the computation item
-\texttt{execute}, which was placed right after the program in the
-initial configuration, is reached.  In SIMPLE, the program was
-initialized by calling the method \texttt{Main()}.  In KOOL, the
-program is initialized by creating an object of class \texttt{Main}.
-This will also implicitly call the method \texttt{Main()} (the
-\texttt{Main} class constructor).  The emptiness of the \textsf{env}
-cell below is just a sanity check, to make sure that the user has not
-declared anything but classes at the top level of the program. */
-
-  syntax K ::= "execute" 
-  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
-
-/*@ The semantics of \texttt{new} (defined shortly) requires the
-execution of all the class' declarations (and also of its superclasses').
-Field declarations are executed using the already existing semantics
-of \texttt{var} from SIMPLE, but method declarations need a new
-semantics.  This is defined next.  */
-
-/*@ \subsection{Method declaration}
+/*@ \subsubsection{Method declaration}
 
 Like in SIMPLE, method names are added to the environment and bound
 to their code.  However, unlike in SIMPLE where each function was
@@ -613,7 +693,8 @@ understand and reason about if one overuses these features. */
        <store>... . => L |-> methodClosure(Class,OL,Xs,S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
-/*@ \subsection{New}
+
+/*@ \subsubsection{New}
 
 The semantics of \texttt{new} consists of two actions: memory
 allocation for the new object and execution of the corresponding
@@ -634,7 +715,6 @@ available in the \textsf{crntObj} cell, so that method closures can
 refer to it (see rule above). */
 
   syntax ListItem ::= (Id,BagItem)
-  // Id is the class name, BagItem is its corresponding environment
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
@@ -704,7 +784,8 @@ the location is unnecessary and thus we delete it from the
        <crntObj> Obj (<location> L:Int </location> => .) </crntObj>
        <store>... . => L |-> objectClosure(Obj) ...</store>
 
-/*@ \subsection{Self reference}
+
+/*@ \subsubsection{Self reference}
 
 The semantics of \texttt{this} is straightforward: evaluate to the
 current object. */
@@ -712,7 +793,8 @@ current object. */
   rule <k> this => objectClosure(Obj) ...</k>
        <crntObj> Obj </crntObj>
 
-/*@ \subsection{Object member access}
+
+/*@ \subsubsection{Object member access}
 
 We can access an object member (field or method) either explicitly,
 using the construct \texttt{e.x}, or implicitly, using only the member
@@ -749,7 +831,8 @@ invocations see the entire object, as needed for dynamic method dispatch. */
        <envStack>... (Class,EnvC) EStack </envStack>
     [structural]
 
-/*@\subsection{Method invocation}
+
+/*@\subsubsection{Method invocation}
 
 Unlike in SIMPLE, in KOOL application was declared strict only in its
 second argument.  That is because we want to ensure dynamic method
@@ -795,33 +878,22 @@ method call or the array access.  */
 
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
 task as a replacement for the method.  When that happens, we just
-lookup the method closure at location \texttt{L}.  The semantics
-of \texttt{methodClosure} is then as expected: the local environment
-and control are stacked, then we switch to method closure's class and
-object environment and execute the method body.  The \texttt{mkDecls}
-construct is the one that came with the semantics of SIMPLE.  */
+lookup the value at location \texttt{L}: */
 
   rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
     [lookup]
 
-  syntax ListItem ::=  (Map,K,Bag)
+/*@  The value $V$ looked up above is expected to be a method closure,
+in which case the semantics of method application given above will
+apply.  Otherwise, the execution will get stuck. */
 
-  rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
-           => mkDecls(Xs,Vs) S return; </k>
-       <env> Env => . </env>
-       <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
-       <br/>
-       <control>
-          C
-          <fstack> . => (Env, K, C <crntObj> Obj' </crntObj>) ...</fstack>
-          <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
-       </control>
 
-/*@ \subsection{Instance Of}
+/*@ \subsubsection{Instance Of}
 
 It searches the object environment for a layer corresponding to the
 desired class.  It returns \texttt{true} iff it can find the class,
-otherwise it returns \texttt{false}; it never gets stuck.  */
+otherwise it returns \texttt{false}; it only gets stuck when its first
+argument does not evaluate to an object.  */
 
   rule objectClosure(<envStack> (C,_) ...</envStack> _)
        instanceOf C => true
@@ -831,7 +903,8 @@ otherwise it returns \texttt{false}; it never gets stuck.  */
 
   rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false
 
-/*@ \subsection{Cast}
+
+/*@ \subsubsection{Cast}
 
 In untyped KOOL, we prefer to not check the validity of casting.  In
 other words, any cast is allowed on any object, simply changing the
@@ -841,47 +914,17 @@ available.  Moreover, the execution may complete successfully even
 in the presence of invalid casts, provided that each accessed member
 during the current execution is, or happens to be, available.  */
 
-  rule cast objectClosure(<crntClass> _ </crntClass> Obj) to C
+  rule (C) objectClosure(<crntClass> _ </crntClass> Obj)
     => objectClosure(<crntClass> C </crntClass> Obj)
 
-/*@ \section{Auxiliary declarations and operations}
-         
-In this section we define all the auxiliary constructs used in the
-above semantics.  We start with listing the auxiliary operations
-borrowed unchanged from untyped SIMPLE, and then we discuss the
-KOOL-specific ones. */
 
-//@ \subsection{Auxiliary declarations from SIMPLE}
+/*@ \subsection{KOOL-specific auxiliary declarations and operations}
 
-  syntax Decl ::= mkDecls(Ids,Vals)  [function]
-  rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
-  rule mkDecls(.Ids,.Vals) => {}
+Here we define all the auxiliary constructs used in the above
+KOOL-specific semantics (those used in the SIMPLE fragment
+have already been defined in a corresponding section above). */
 
-  syntax K ::= lookup(Int)
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
-
-  syntax K ::= env(Map)
-  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
-  rule (env(_) => .) ~> env(_)  [structural]
-
-  syntax Exp ::= lvalue(K)
-  syntax Val ::= loc(Int)
-
-  rule <k> lvalue(X:Id) => loc(L) ...</k> <env>... X |-> L:Int ...</env>
-    [structural]
-
-  context lvalue(_[HOLE])
-  context lvalue(HOLE[_])
-
-  rule lvalue(lookup(L:Int)) => loc(L)  [structural]
-
-
-  syntax Map ::= Int "..." Int "|->" K
-    [function, latex({#1}\ldots{#2}\mapsto{#3})]
-  rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
-
-/*@ \subsection{Objects as lvalues}
+/*@ \subsubsection{Objects as lvalues}
 
 The current machinery borrowed with the semantics of SIMPLE allows us
 to enrich the set of lvalues, this way allowing new means to assign
@@ -903,18 +946,16 @@ member's location based on the current class of the object. */
               => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
                               X))  [structural]
 
-/*@ \subsection{Lookup member}
+/*@ \subsubsection{Lookup member}
+
 It searches for the given member in the given environment stack,
 starting with the most concrete class and going up in the hierarchy. */
 
   syntax K ::= lookupMember(BagItem,Id)  [function]
-  // BagItem is the envStack cell, Id is the member name
 
-  // First look for the member in the top environment; if found then done.
   rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
     => lookup(L)
 
-  // Otherwise, recurse through the object environment stack
   rule lookupMember(<envStack> (_, <env> Env </env>) => . ...</envStack>, X)
     when notBool(X in keys(Env))
 

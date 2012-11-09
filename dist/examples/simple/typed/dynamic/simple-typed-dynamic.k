@@ -171,9 +171,9 @@ function body encounters an explicit \texttt{return} statement. */
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
-//@ \section{Declarations and Initialization}
+//@ \subsection{Declarations and Initialization}
 
-/*@ \subsection{Variable Declaration}
+/*@ \subsubsection{Variable Declaration}
 The ``undefined'' construct is now parameterized by a type.
 A main difference between untyped SIMPLE and dynamically typed SIMPLE
 is that the latter assigns a type to each of its locations and that
@@ -194,7 +194,7 @@ to a location. */
        <store>... . => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
-/*@ \subsection{Array Declaration}
+/*@ \subsubsection{Array Declaration}
 The dynamic semantics of typed array declarations is similar to that
 in untyped SIMPLE, but we have to make sure that we associate the
 right type to the allocated locations. */
@@ -226,7 +226,7 @@ adds the length of \texttt{Vs} dimensions to the type \texttt{T}. */
        }
     [structural]
 
-/*@ \subsection{Function declaration}
+/*@ \subsubsection{Function declaration}
 Store all function parameters, as well as the return type, as part
 of the lambda abstraction.  In the spirit of dynamic typing, we will
 make sure that parameters are well typed when the function is invoked. */
@@ -244,21 +244,21 @@ When done with the first pass, call \texttt{main()}. */
        <env> Env </env>
        <genv> . => Env </genv>  [structural]
 
-//@ \section{Expressions}
+//@ \subsection{Expressions}
 
-//@ \subsection{Variable lookup}
+//@ \subsubsection{Variable lookup}
 
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
        <store>... L |-> V:Val ...</store>  [lookup]
 
-//@ \subsection{Variable/Array increment}
+//@ \subsubsection{Variable/Array increment}
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
        <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
 
-//@ \subsection{Arithmetic operators}
+//@ \subsubsection{Arithmetic operators}
 
   rule I1:Int + I2:Int => I1 +Int I2
   rule Str1:String + Str2:String => Str1 +String Str2
@@ -279,7 +279,7 @@ When done with the first pass, call \texttt{main()}. */
   rule true  || _ => true
   rule false || E => E
 
-/*@ \subsection{Array lookup}
+/*@ \subsubsection{Array lookup}
 
 Check array bounds, as part of the dynamic typing policy. */
 
@@ -289,11 +289,11 @@ Check array bounds, as part of the dynamic typing policy. */
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
     when N >=Int 0 andBool N <Int M  [structural, anywhere]
 
-//@ \subsection{Size of an array}
+//@ \subsubsection{Size of an array}
 
   rule sizeOf(array(_,_,N)) => N
 
-/*@ \subsection{Function call}
+/*@ \subsubsection{Function call}
 
 Define function call and return together, to see their relationship.
 Note that the operation \texttt{mkDecls} now declares properly typed
@@ -328,11 +328,11 @@ completed to return the \texttt{nothing} value tagged as expected. */
   rule <k> return; => return nothing(T); ...</k> <return> T </return>
     [structural]
 
-//@ \subsection{Read}
+//@ \subsubsection{Read}
 
   rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
 
-/*@ \subsection{Assignment}
+/*@ \subsubsection{Assignment}
 The assignment now checks that the type of the assigned location is
 preserved: */
 
@@ -341,38 +341,40 @@ preserved: */
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (V' => V) ...</store>
     when typeOf(V) ==K typeOf(V')  [assignment]
 
-//@ \section{Statements}
+//@ \subsection{Statements}
 
-//@ \subsection{Blocks}
+//@ \subsubsection{Blocks}
 
   rule {} => .  [structural]
   rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
 
-//@ \subsection{Sequential composition}
+//@ \subsubsection{Sequential composition}
 
   rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
 
-//@ \subsection{Expression statements}
+//@ \subsubsection{Expression statements}
 
   rule _:Val; => .
 
-//@ \subsection{Conditional}
+//@ \subsubsection{Conditional}
 
   rule if ( true) S else _ => S
   rule if (false) _ else S => S
 
-//@ \subsection{While loop}
+//@ \subsubsection{While loop}
 
   rule while (E) S => if (E) {S while(E)S}  [structural]
 
-/*@ \subsection{Print}
+/*@ \subsubsection{Print}
+
 We only allow printing integers and strings: */
 
   rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
     when typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
   rule print(.Vals); => .  [structural]
 
-/*@ \subsection{Exceptions}
+/*@ \subsubsection{Exceptions}
+
 Exception parameters are now typed, but note that the semantics below
 works correctly only when the thrown exception has the same type as
 the innermost try-catch paramete.  To keep things simple, for the time
@@ -400,9 +402,9 @@ values, in which case our semantics below works fine: */
        </control>
        <env> _ => Env </env>
 
-//@ \subsection{Threads}
+//@ \subsubsection{Threads}
 
-//@ \subsubsection{Thread creation}
+//@ {Thread creation}
 
    rule <thread>...
           <k> spawn S => T ...</k>
@@ -415,18 +417,18 @@ values, in which case our semantics below works fine: */
               ...</thread>)
      when fresh(T:Int)
 
-//@ \subsubsection{Thread termination}
+//@ {Thread termination}
 
    rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
         <busy> Busy => Busy -Set keys(H) </busy>
         <terminated>... . => SetItem(T) ...</terminated>
 
-//@ \subsubsection{Thread joining}
+//@ {Thread joining}
 
    rule <k> join T:Int; => . ...</k>
         <terminated>... SetItem(T) ...</terminated>
 
-//@ \subsubsection{Acquire lock}
+//@ {Acquire lock}
 
    rule <k> acquire V:Val; => . ...</k>
         <holds>... . => V |-> 0 ...</holds>
@@ -436,7 +438,7 @@ values, in which case our semantics below works fine: */
    rule <k> acquire V; => . ...</k>
         <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 
-//@ \subsubsection{Release lock}
+//@ {Release lock}
 
    rule <k> release V:Val; => . ...</k>
         <holds>... V |-> (N => N:Int -Int 1) ...</holds>
@@ -445,12 +447,12 @@ values, in which case our semantics below works fine: */
    rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
         <busy>... SetItem(V) => . ...</busy>
 
-//@ \subsubsection{Rendezvous synchronization}
+//@ {Rendezvous synchronization}
 
    rule <k> rendezvous V:Val; => . ...</k>
         <k> rendezvous V; => . ...</k>  [rendezvous]
 
-//@ \section{Auxiliary declarations and operations}
+//@ \subsection{Auxiliary declarations and operations}
 
 /*@ Turns a list of parameters and a list of instance values for them
 into a list of variable declarations. */

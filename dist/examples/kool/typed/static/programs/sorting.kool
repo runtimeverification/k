@@ -116,7 +116,7 @@ class Main {
 
   void Main() {
     print("Size of the array to sort = ");
-    Sorting s = new Sorting(read());
+    class(Sorting) s = new Sorting(read());
     string m[11];
     void->void f[11];
     m[ 0] = "The original unsorted array is:";

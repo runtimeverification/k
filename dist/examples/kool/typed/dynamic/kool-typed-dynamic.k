@@ -11,42 +11,30 @@ This is the \K dynamic semantics of the typed KOOL language.  It is
 very similar to the semantics of the untyped KOOL, the difference
 being that we now check the typing policy dynamically.  Since we have
 to now declare the types of variables and methods, we adopt a syntax
-for those which is closed to that of Java.  Like in the semantics of
+for those which is close to Java.  Like in the semantics of
 untyped KOOL, where we borrowed almost all the semantics of untyped
 SIMPLE, we are going to also borrow much of the semantics of
 dynamically typed SIMPLE here.  We will highlight the differences
 between the dynamically typed and the untyped KOOL as we proceed with
-the semantics. */
+the semantics.  In general, the type policy of the typed KOOL language
+is similar to that of Java.  You may find it useful to also read
+the discussion in the preamble of the static semantics of typed KOOL
+before proceeding. */
 
 module KOOL-TYPED-DYNAMIC-SYNTAX
 
 /*@ \section{Syntax}
+
 Like for the untyped KOOL language, the syntax of typed KOOL extends
 that of typed SIMPLE with object-oriented constructs.
- */
-
-/*@ \subsection{Syntax from SIMPLE}
-The syntax below is taken ad litteram from dynamically typed SIMPLE.
-Like in untyped KOOL, we removed from the \K annotated syntax of
-SIMPLE the construct for function declarations (because we want to
-call them methods now) and the one for function application (because
-application is not strict in the first argument anymore due to dynamic
-method dispatch).  Moreover, we removed the syntax of \texttt{try-catch}
-from that of SIMPLE, because we want to have typed exceptions in KOOL. */
-
-/*@ \subsection{KOOL Additional Syntax}
-The KOOL syntactic extensions below are almost identical to their
-untyped variants in untyped KOOL.  The only difference is that we add
-a new type construct for class types and that now methods take typed
-arguments (we achieved this the same way as in typed SIMPLE) and can
-also have an explicit return type.  As a convenience to the
-programmer, a macro adds an explicit type \texttt{void} whenever a
-return type is not provided (e.g., one may not want to write a return
-type for constructors in KOOL typed programs).  The syntax of typed
-exceptions differs from that of typed SIMPLE in that the variable
-bound by \texttt{catch} is now expected to be typed (we use
-\textit{Exp}, but we only give semantics for the case when it has the
-form \textit{Id:Type}. */
+The syntax below was produced by copying and modifying/extending the
+syntax of dynamically typed SIMPLE.  In fact, the only change we made
+to the existing syntax of dynamically typed SIMPLE was to change the
+strictness of the application construct like in untyped KOOL, from
+\texttt{strict} to \texttt{strict(2)} (because application is not
+strict in the first argument anymore due to dynamic method dispatch).
+The KOOL-specific syntactic extensions are identical to those in
+untyped KOOL.  */
 
   syntax Id ::= "Object" | "Main"
 
@@ -67,7 +55,7 @@ form \textit{Id:Type}. */
   syntax Decl ::= Type Exps ";"
                 | Type Id "(" Params ")" Block    // stays like in typed SIMPLE
                 | "class" Id Block                // KOOL
-                | "class" Id "extends" Id Block   // KOOL    
+                | "class" Id "extends" Id Block   // KOOL
 
 //@ \subsection{Expressions}
 
@@ -133,6 +121,7 @@ form \textit{Id:Type}. */
                  | Stmts Stmts                          [right]
 
 //@ \subsection{Desugaring macros}
+
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
@@ -145,9 +134,9 @@ endmodule
 
 /*@ \section{Semantics}
 We first discuss the new configuration, then we include the semantics of
-the constructs borrowed from SIMPLE which stay unchanged, and then we
-discuss the semantics of the additional KOOL constructs and of those
-from SIMPLE whose smeantics had to change. */
+the constructs borrowed from SIMPLE which stay unchanged, then those
+whose semantics had to change, and finally the semantics of the
+KOOL-specific constructs.  */
 
 module KOOL-TYPED-DYNAMIC
   imports KOOL-TYPED-DYNAMIC-SYNTAX
@@ -200,15 +189,15 @@ the expected type. */
                 </T>
 
 /*@ \subsection{Unchanged semantics from dynamically typed SIMPLE}
+
 The semantics below is taken over from dynamically typed SIMPLE
 unchanged.  Like for untyped KOOL, the semantics of function/method
 declaration and invocation, and of program initialization needs to
 change.  Moreover, due to subtyping, the semantics of several imported
 SIMPLE constructs can be made more general, such as that of the
-return statement and of the the assignment.  Finally, since the
-exceptions are now typed, they also need a different semantics.  We
-removed all these from the imported semantics of SIMPLE below and gave
-their typed KOOL semantics right after, together with the extended
+return statement, that of the assignment, and that of the exceptions.
+We removed all these from the imported semantics of SIMPLE below and
+gave their modified semantics right after, together with the extended
 semantics of thread spawning (which is identical to that of untyped
 KOOL).  */
 
@@ -322,32 +311,32 @@ KOOL).  */
   rule print(.Vals); => .  [structural]
 
 
-   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
-        <busy> Busy => Busy -Set keys(H) </busy>
-        <terminated>... . => SetItem(T) ...</terminated>
+  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
+       <busy> Busy => Busy -Set keys(H) </busy>
+       <terminated>... . => SetItem(T) ...</terminated>
 
-   rule <k> join T:Int; => . ...</k>
-        <terminated>... SetItem(T) ...</terminated>
+  rule <k> join T:Int; => . ...</k>
+       <terminated>... SetItem(T) ...</terminated>
 
-   rule <k> acquire V:Val; => . ...</k>
-        <holds>... . => V |-> 0 ...</holds>
-        <busy> Busy (. => SetItem(V)) </busy>
-     when (notBool(V in Busy:Set))  [acquire]
+  rule <k> acquire V:Val; => . ...</k>
+       <holds>... . => V |-> 0 ...</holds>
+       <busy> Busy (. => SetItem(V)) </busy>
+    when (notBool(V in Busy:Set))  [acquire]
 
-   rule <k> acquire V; => . ...</k>
-        <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
+  rule <k> acquire V; => . ...</k>
+       <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 
-   rule <k> release V:Val; => . ...</k>
-        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
-      when N >Int 0
+  rule <k> release V:Val; => . ...</k>
+       <holds>... V |-> (N => N:Int -Int 1) ...</holds>
+    when N >Int 0
 
-   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-        <busy>... SetItem(V) => . ...</busy>
+  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
+       <busy>... SetItem(V) => . ...</busy>
 
-   rule <k> rendezvous V:Val; => . ...</k>
-        <k> rendezvous V; => . ...</k>  [rendezvous]
+  rule <k> rendezvous V:Val; => . ...</k>
+       <k> rendezvous V; => . ...</k>  [rendezvous]
 
-//@ \subsubsection{Auxiliary operations}
+//@\subsubsection{Unchanged auxiliary operations from dynamically typed SIMPLE}
 
   syntax Decl ::= mkDecls(Params,Vals)  [function]
   rule mkDecls((T:Type X:Id, Ps:Params), (V:Val, Vs:Vals))
@@ -384,46 +373,104 @@ KOOL).  */
   rule typeOf(_:Int) => int
   rule typeOf(_:Bool) => bool
   rule typeOf(_:String) => string
-  rule typeOf(array(T,_,_)) => (T[])   // () needed! K parses [] as "no tags"   
+  rule typeOf(array(T,_,_)) => (T[])
   rule typeOf(undefined(T)) => T
   rule typeOf(nothing(T)) => T
 
   syntax Types ::= getTypes(Params)  [function]
-  rule getTypes(T:Type _:Id) => T, .Types   // I would like to not use .Types   
+  rule getTypes(T:Type _:Id) => T, .Types
   rule getTypes(T:Type _:Id, P, Ps) => T, getTypes(P,Ps)
   rule getTypes(.Params) => void, .Types
 
 
-/*@ \subsection{Changes to the existing dynamically typed SIMPLE Semantics}
+/*@ \subsection{Changes to the existing dynamically typed SIMPLE semantics}
+
 We extend/change the semantics of several SIMPLE constructs in order
 to take advantage of the richer KOOL semantic infrastructure and thus
 get more from the existing SIMPLE constructs. */
 
-/*@ \subsubsection{Spawn}
+
+/*@ \subsubsection{Program initialization}
+
 Like in untyped KOOL. */
 
-  rule <thread>...
-         <k> spawn S => T ...</k>
-         <env> Env </env>
-         <crntObj> Obj </crntObj>
-       ...</thread>
-       (. => <thread>...
-               <k> S </k>
-               <env> Env </env>
-               <id> T </id>
-               <crntObj> Obj </crntObj>
-             ...</thread>)
-    when fresh(T:Int)
+  syntax K ::= "execute"
+  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
 
 
-/*@ \subsection{Assignment}
-Typed KOOL allows to assign subtype instance values to supertype lvalues. */
+/*@ \subsubsection{Method application}
 
-/* Explain that unsafeCast changes the type of the corresponding value;
-this happens only when the value is an object or a method, otherwise the
-type stays the same.  Explain also that the type of the location never
-changes; the initial term placed there, undefined(Type), determines it
-type during the entire execution of the program. */
+The only change to untyped KOOL's values is that method closures are
+now typed (their first argument holds their type): */
+
+ syntax Val ::= objectClosure(Bag)
+              | methodClosure(Type,Id,Int,Params,Stmt)
+
+/*@ The type held by a method clossure will be the entire type of the
+method, not only its result type like the lambda-closure of typed
+SIMPLE.  The reason for this change comes from the the need to
+dynamically upcast values when passed to contexts where values of
+superclass types are expected; since we want method closures to be
+first-class-citizen values in our language, we have to be able to
+dynamically upcast them, and in order to do that elegantly it is
+convenient to store the entire ``current type'' of the method closure
+instead of just its result type.  Note that this was unnecessary in
+the semantics of the dynamically typed SIMPLE language. */
+
+/*@ Method closure application needs to also set a new return type in
+the \textsf{return} cell, like in dynamically typed SIMPLE, in order
+for the values returned by its body to be checked against the return
+type of the method.  To do this correctly, we also need to stack the
+current status of the \textsf{return} cell and then pop it when the
+method returns.  We have to do the same with the current object
+environment, so we group them together in the stack frame.  */
+
+  syntax ListItem ::=  (Map,K,Bag)
+
+  rule <k> methodClosure(_->T,Class,OL,Ps,S)(Vs:Vals) ~> K
+           => mkDecls(Ps,Vs) S return; </k>
+       <env> Env => . </env>
+       <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
+       <br/>
+       <control>
+          C
+          <fstack> . => (Env, K, C <crntObj> Obj' </crntObj>
+                                   <return> T' </return>) ...</fstack>
+          <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
+          <return> T' => T </return>
+       </control>
+
+/*@ At method return, we have to check that the type of the returned
+value is a subtype of the expected return type.  Moreover, if that is
+the case, then we also upcast the returned value to one of the
+expected type.  The computation item \texttt{unsafeCast(V,T)} changes
+the typeof $V$ to $T$ without any additional checks; however, it only
+does it when $V$ is an object or a method, otherwise it returns $V$
+unchanged.  */
+
+  rule <k> return V:Val; ~> _
+           => subtype(typeOf(V), T) ~> true? ~> unsafeCast(V, T) ~> K
+       </k>
+       <control>
+         <fstack> (Env, K, C) => . ...</fstack>
+         (<return> T:Type </return> _ => C)
+       </control>
+       <env> _ => Env </env>
+
+
+/*@ \subsubsection{Assignment}
+
+Typed KOOL allows to assign subtype instance values to supertype
+lvalues.  The semantics of assignment below is similar in spirit to
+dynamically typed SIMPLE's, but a check is performed that the assigned
+value's type is a subtype of the location's type.  If that is the
+case, then the assigned value is returned as a result and stored, but
+it is upcast appropriately first, so the context will continue to see
+a value of the expected type of the location.  Note that the type of a
+location is implicit in the type of its contents and it never changes
+during the execution of a program; its type is assigned when the
+location is allocated and initialized, and then only type-preserving
+values are allowed to be stored in each location.  */
 
   rule <k> loc(L) = V:Val
            => subtype(typeOf(V),typeOf(V')) ~> true?
@@ -433,6 +480,7 @@ type during the entire execution of the program. */
 
 
 /*@ \subsubsection{Typed exceptions}
+
 Exceptions are propagated now until a catch that can handle them is
 encountered. */
 
@@ -459,14 +507,28 @@ encountered. */
        <env> _ => Env </env>
 
 
-/*@ \subsection{Object and method closures}
-The only change to untyped KOOL's values is that closures are now typed
-(their last argument holds their type). */
+/*@ \subsubsection{Spawn}
 
- syntax Val ::= objectClosure(Bag)
-              | methodClosure(Type,Id,Int,Params,Stmt)
+Like in untyped KOOL. */
 
-/*@ \subsection{Class declaration}
+  rule <thread>...
+         <k> spawn S => T ...</k>
+         <env> Env </env>
+         <crntObj> Obj </crntObj>
+       ...</thread>
+       (. => <thread>...
+               <k> S </k>
+               <env> Env </env>
+               <id> T </id>
+               <crntObj> Obj </crntObj>
+             ...</thread>)
+    when fresh(T:Int)
+
+
+//@ \subsection{Semantics of the new KOOL constructs}
+
+/*@ \subsubsection{Class declaration}
+
 Like in untyped KOOL. */
 
   rule <k> class Class1 extends Class2 { S } => . ...</k>
@@ -478,14 +540,8 @@ Like in untyped KOOL. */
        ...</classes>  [structural]
 
 
-/*@ \subsection{Program initialization}
-Like in untyped KOOL. */
+/*@ \subsubsection{Method declaration}
 
-  syntax K ::= "execute"
-  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
-
-
-/*@ \subsection{Method declaration}
 Methods are now typed and we need to store their types in their
 closures, so that their type contract can be checked at invocation
 time.  The rule below is conceptually similar to that of untyped KOOL;
@@ -499,7 +555,8 @@ the only difference is the addition of the types. */
        <nextLoc> L => L +Int 1 </nextLoc>
 
 
-/*@ \subsection{New}
+/*@ \subsubsection{New}
+
 The semantics of \texttt{new} in dynamically typed KOOL is also
 similar to that in untyped KOOL, the main difference being the
 management of the return types.  Indeed, when a new object is created
@@ -509,7 +566,6 @@ first rule below needs to be changed; the others are identical to
 those in untyped KOOL. */
 
   syntax ListItem ::= (Id,BagItem)
-  // Id is the class name, BagItem is its corresponding environment
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> (storeObj ~> ((Class(Vs)); return this;)) </k>
@@ -557,14 +613,16 @@ those in untyped KOOL. */
        <store>... . => L |-> objectClosure(Obj) ...</store>
 
 
-/*@ \subsection{Self reference}
+/*@ \subsubsection{Self reference}
+
 Like in untyped KOOL. */
 
   rule <k> this => objectClosure(Obj) ...</k>
        <crntObj> Obj </crntObj>
 
 
-/*@ \subsection{Object member access}
+/*@ \subsubsection{Object member access}
+
 Like in untyped KOOL. */
 
   rule <k> X:Id => this . X ...</k> <env> Env:Map </env>
@@ -584,12 +642,9 @@ Like in untyped KOOL. */
     [structural]
 
 
-/*@\subsection{Method invocation}
-The method lookup is the same as in untyped KOOL.
-The method closure application and return are slightly different,
-since we need to check that the type of the returned value is an
-instance of the claimed return type of the method.  The first group of
-rules below are identical to those in untyped KOOL. */
+/*@\subsubsection{Method invocation}
+
+The method lookup is the same as in untyped KOOL.  */
 
   rule <k> (X:Id => V)(_:Exps) ...</k>
        <env>... X |-> L ...</env>
@@ -616,45 +671,9 @@ rules below are identical to those in untyped KOOL. */
   rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
     [lookup]
 
-/*@ Closure application needs to also set a new return type in the
-\textsf{return} cell, in order for the values returned by its body to
-be checked against the return type of the method.  To do this correctly,
-we also need to stack the current status of the \textsf{return} cell
-and then pop it when the method returns. */
 
-  syntax ListItem ::=  (Map,K,Bag)
+/*@ \subsubsection{Instance of}
 
-// discuss the possible casting HERE!
-// any why the type is stored differently here from in SIMPLE
-  rule <k> methodClosure(_->T,Class,OL,Ps,S)(Vs:Vals) ~> K
-           => mkDecls(Ps,Vs) S return; </k>
-       <env> Env => . </env>
-       <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
-       <br/>
-       <control>
-          C
-          <fstack> . => (Env, K, C <crntObj> Obj' </crntObj>
-                                   <return> T' </return>) ...</fstack>
-          <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
-          <return> T' => T </return>
-       </control>
-
-/*@ At method return, we have to check that the type of the returned
-value is a subtype of the expected return type.  Moreover, if that is
-the case, then we also upcast the returned value to one of the
-expected type. */
-
-  rule <k> return V:Val; ~> _
-           => subtype(typeOf(V), T) ~> true? ~> unsafeCast(V, T) ~> K
-       </k>
-       <control>
-         <fstack> (Env, K, C) => . ...</fstack>
-         (<return> T:Type </return> _ => C)
-       </control>
-       <env> _ => Env </env>
-
-
-/*@ \subsection{Instance Of}
 Like in untyped KOOL.  */
 
   rule objectClosure(<envStack> (C,_) ...</envStack> _)
@@ -666,7 +685,8 @@ Like in untyped KOOL.  */
   rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false
 
 
-/*@ \subsection{Cast}
+/*@ \subsubsection{Cast}
+
 Unlike in untyped KOOL, in typed KOOL we actually check that the object
 can indeed be cast to the claimed type. */
 
@@ -675,7 +695,10 @@ can indeed be cast to the claimed type. */
        ~> objectClosure(<crntClass> C </crntClass> Obj)
 
 
-/*@ \subsection{Objects as lvalues}
+/*@ \subsection{KOOL-specific auxiliary declarations and operations}
+
+/*@ \subsubsection{Objects as lvalues}
+
 Like in untyped KOOL. */
 
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
@@ -690,7 +713,8 @@ Like in untyped KOOL. */
                               X))  [structural]
 
 
-/*@ \subsection{Lookup member}
+/*@ \subsubsection{Lookup member}
+
 Like in untyped KOOL. */
 
   syntax K ::= lookupMember(BagItem,Id)  [function]
@@ -702,17 +726,15 @@ Like in untyped KOOL. */
                     ...</envStack>, X)  when notBool(X in keys(Env))
 
 
-//@ \subsection{Auxiliary operations}
-
-/*@ \subsubsection{\texttt{typeOf}}
-\texttt{typeOf} for the additional values. */
+//@ \subsubsection{\texttt{typeOf} for the additional values}
 
   rule typeOf(objectClosure(_ <crntClass> C </crntClass>)) => C
   rule typeOf(methodClosure(T:Type,_,_,Ps:Params,_)) => T
 
 
-/*@ \subsubsection{Subtyping constraints}
-The subclass relation introduces a subtyping relation. */
+/*@ \subsubsection{Subtype checking}
+
+The subclass relation induces a subtyping relation. */
 
   syntax Exp ::= subtype(Types,Types)
 
@@ -728,14 +750,16 @@ The subclass relation introduces a subtyping relation. */
 
   rule subtype(Ts1->T2,Ts1'->T2') => subtype((T2,Ts1'),(T2',Ts1))  [structural]
 
-// note that the following rule would be wrong!
+// Note that the following rule would be wrong!
 //  rule subtype(T[],T'[]) => subtype(T,T')
 
   rule subtype((T:Type,Ts),(T':Type,Ts')) => subtype(T,T') && subtype(Ts,Ts')
     when Ts =/=K .Types  [structural]
   rule subtype(.Types,.Types) => true  [structural]
 
+
 /*@ \subsubsection{Unsafe Casting}
+
 Performs unsafe casting.  One should only use it in combination with
 the subtype relation above. */
 
@@ -750,10 +774,11 @@ the subtype relation above. */
 
 
 /*@ \subsubsection{Generic guard}
-A generic computational guard (should be builtin): it allows the
-computation to continue only if a prefix guard evaluates to true. */
+
+A generic computational guard: it allows the computation to continue
+only if a prefix guard evaluates to true. */
 
   syntax K ::= "true?"
   rule true ~> true? => .  [structural]
 
- endmodule
+endmodule

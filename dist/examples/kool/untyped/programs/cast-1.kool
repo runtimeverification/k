@@ -25,7 +25,7 @@ class B extends A {
 
 class Main {
   method Main() {
-    var b = new B(), a = cast b to A;
+    var b = new B(), a = (A) b;
     print("b.x = ", b.x, "\n");
     print("a.x = ", a.x, "\n");
     print("a.getB() = ", a.getB(), "\n");  // this should not type check.  why?

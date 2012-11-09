@@ -20,9 +20,9 @@ Specifically, we define the following typing policy for KOOL,
 everything else not mentioned below borrowing its semantics from
 SIMPLE:
 \begin{itemize}
-\item Each class \texttt{C} yields a type ``\texttt{class C}'', which
-can be explicitly used in programs to type variables and methods,
-possibly in combination with other types.
+\item Each class \texttt{C} yields a homonymous type, which can be
+explicitly used in programs to type variables and methods, possibly in
+combination with other types.
 \item Since now we have user-defined types, we check that each type
 used in a KOOL program is well-formed, that is, it is constructed only
 from primitive and class types corresponding to declared classes.
@@ -36,12 +36,11 @@ declaring both a field and a method with the same name.
 will be searched for in the current class type environment.  If not
 there, then it will be searched for in its superclass' type
 environment.  And so on and so forth.  If not found until the
-\texttt{object} class is reached, a typing error is reported.
+\texttt{Object} class is reached, a typing error is reported.
 \item The assignment allows variables to be assigned values of
 more concrete types.  The result type of the assignment expression
 construct will be the (more abstract) type of the assigned variable,
 and not the (more concrete) type of the expression, like in Java.
-% explain why is that?
 \item Exceptions are changed (from SIMPLE) to allow throwing and
 catching only objects, like in Java.  Also, unlike in SIMPLE, we do
 not check whether the type of the thrown exception matches the type of
@@ -65,35 +64,55 @@ and contra-variant in the domain.
 module KOOL-TYPED-STATIC-SYNTAX
 
 /*@ \section{Syntax}
+
 The syntax of statically typed KOOL is identical to that of
 dynamically typed KOOL, they both taking as input the same programs.
 What differs is the \K strictness attributes.  Like in statically
 typed KOOL, almost all language constructs are strict now, since we
 want each to type its arguments almost all the time.  Like in the
-other two KOOL definitions, we prefer to first list the syntax
-borrowed unchanged from SIMPLE and then add the KOOL new constructs. */
+other two KOOL definitions, we prefer to copy and then modify/extend
+the syntax of statically typed SIMPLE. */
 
-/*@ \subsection{Syntax from SIMPLE}
-The syntax below is taken over unchanged from SIMPLE, including all
-the \K strictness attributes and the desugaring macros. */
-
-/*@ \subsection{KOOL Additional Syntax}
-Note the strictness attributes, telling which arguments need to be
-typed before the actual construct can be typed. */
+/*@
+\paragraph{Annoying \K-tool technical problem:}
+Currently, the \K tool treats the ``non-terminal'' productions (i.e.,
+productions consisting of just one non-terminal), also called
+``subsorting'' production, differently from the other productions.
+Specifically, it does not insert a node in the AST for them.  This may
+look desirable at first, but it has a big problem: it does not allow
+us to treat the subsort differently in different context.  For
+example, since we want $\it Id$ to be both a type (a class name) and a
+program variable, and since we want expressions to reduce to their
+types, we are in an impossible situations in which we do not know how
+to treat an identifier in the semantics: as a type, i.e., a result of
+computations, or as a program variable, i.e., a non-result.  Ideally,
+we would like to tag the identifiers at parse-time with their local
+interpretation, but that, unfortunately, is not possible with the
+current parsing capabilities of the \K tool, because it requires to
+insert additional information in the AST for the subsort productions.
+This will be fixed soon.  Until then, unfortunately, we have to do the
+job of the parser manually.  Instead of subsorting $\it Id$ directly
+to $\it Type$, we ``wrap'' it first, say with a wrapper called
+\texttt{class(...)}, exactly how the parser should have done.
+The major drawback of this is that all the typed KOOL programs
+in \texttt{kool/typed/programs} need to also be modified to always
+declare class types accordingly.  The modified programs can be found
+in \texttt{kool/typed/static/programs}.  So make sure you execute the
+static semantics of KOOL using the modified programs.  To avoid seeing
+the wrapper in the generated documentation, we associate it an
+``invisibility'' latex attribute below.  */
 
   syntax Id ::= "Object" | "Main"
 
 //@ \subsection{Types}
 
   syntax Type ::= "void" | "int" | "bool" | "string"
-                | Id   [function]  // don't change: it tells Id is NOT a result
                 | class(Id)         [latex({#1})]               // KOOL class
                 | Type "[" "]"
                 > Types "->" Type
                 | "(" Type ")"           [bracket]
 
   syntax Types ::= List{Type,","}
-//  syntax Types ::= List{Type,","}  [strict]  // could it be strict?
 
 //@ \subsection{Declarations}
 
@@ -178,12 +197,9 @@ typed before the actual construct can be typed. */
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
   rule class C:Id S => class C extends Object S
+
 endmodule 
 
-//HERE
-
-module KOOL-TYPED-STATIC
-  imports KOOL-TYPED-STATIC-SYNTAX
 
 /*@ \section{Static semantics}
 We first discuss the configuration, then give the static semantics
@@ -192,12 +208,17 @@ SIMPLE syntactic constructs that needs to change, and in the end we
 discuss the static semantics and additional checks specifically
 related to the KOOL proper syntax. */
 
+module KOOL-TYPED-STATIC
+  imports KOOL-TYPED-STATIC-SYNTAX
+
 /*@ \subsection{Configuration}
+
 The configuration of our type system consists of a \textsf{tasks}
-cell and of an \textsf{out} cell with the same meaning like in
-statically typed SIMPLE, plus a cell \texttt{classes} holding data
-about each class in a separate \textsf{class} cell.  The \textsf{task}
-cells now have two additional optional subcells, namely
+cell with the same meaning like in statically typed SIMPLE, of an
+\textsf{out} cell streamed to the standard output that will be used to
+display typing error messages, and of a cell \texttt{classes} holding
+data about each class in a separate \textsf{class} cell.  The
+\textsf{task} cells now have two additional optional subcells, namely
 \textsf{ctenvT} and \textsf{inClass}.  The former holds a temporary
 class type environment; its contents will be transferred into the
 \textsf{ctenv} cell of the corresponding class as soon as all the
@@ -225,8 +246,8 @@ Each \textsf{class} cell hods its name (in the \textsf{className}
 cell) and the name of the class it extends (in the \textsf{extends}
 cell), as well as its type environment (in the \textsf{ctenv} cell)
 and the set of all its superclasses (in the \textsf{extendsAll} cell).
-The later is useful for checking whether there are cycles in the
-class extends relation. */
+The later is useful for example for checking whether there are cycles
+in the class extends relation. */
 
   configuration <T color="yellow">
                   <tasks color="orange">
@@ -250,7 +271,8 @@ class extends relation. */
                   <out color="brown" stream="stdout"> .List </out>
                 </T>
 
-/*@ \subsection{Static semantics from SIMPLE}
+/*@ \subsection{Unchanged semantics from statically typed SIMPLE}
+
 The syntax and rules below are borrowed unchanged from statically
 typed SIMPLE, so we do not discuss them much here. */
 
@@ -313,7 +335,6 @@ typed SIMPLE, so we do not discuss them much here. */
   context (HOLE => ltype(HOLE)) = _
 
 
-// check this!
   rule <k> return; => stmt ...</k> <return> _ </return>
 
 
@@ -323,7 +344,7 @@ typed SIMPLE, so we do not discuss them much here. */
        (. => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
 
   rule _:Type; => stmt
-// remove unnecessary parentheses once K tool bug is fixed
+// remove unnecessary parentheses around "block" once K tool bug is fixed
   rule if (bool) (block) else (block) => stmt
   rule while (bool) (block) => stmt
 
@@ -335,7 +356,7 @@ typed SIMPLE, so we do not discuss them much here. */
   rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 
 
-//@ \subsubsection{Auxiliary constructs}
+//@\subsubsection{Unchanged auxiliary operations from dynamically typed SIMPLE}
 
   syntax Decl ::= mkDecls(Params)  [function]
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
@@ -351,12 +372,15 @@ typed SIMPLE, so we do not discuss them much here. */
   rule getTypes(.Params) => void, .Types
 
 
-/*@ \subsection{Changes to SIMPLE static semantics}
+/*@ \subsection{Changes to the existing statically typed SIMPLE semantics}
+
 Below we give the new static semantics for language constructs that
 come from SIMPLE, but whose SIMPLE static semantics was too
 restrictive or too permissive and thus had to change. */
 
+
 /*@ \subsubsection{Local variable declaration}
+
 Since we can define new types in KOOL (corresponding to classes), the
 variable declaration needs to now check that the claimed types exist.
 The operation \texttt{checkType}, defined at the end of this module,
@@ -364,9 +388,11 @@ checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
   rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
-       <tenv> Rho => Rho[mkId2Class(T) / X] </tenv>
+       <tenv> Rho => Rho[T / X] </tenv>
+
 
 /*@ \subsubsection{Class member declaration}
+
 In class tasks, variable declarations mean class member declarations.
 Since we reduce method declarations to variable declarations (see
 below), a variable declaration in a class task can mean either a field
@@ -385,7 +411,7 @@ PDF document because of its latex attribute (see the ASCII .k file,
 at the end of this module). */
 
   rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
-       <ctenvT> Rho (. => X |-> mkId2Class(T)) </ctenvT>
+       <ctenvT> Rho (. => X |-> T) </ctenvT>
     when notBool(X in keys(Rho))
 
   rule <k> T:Type X:Id; => stuck(T X;) ...</k>
@@ -397,106 +423,12 @@ at the end of this module). */
                               +String Id2String(C) +String "\"!\n") </out>
     [structural]
 
-/*@ \subsubsection{Assignment}
-A more concrete value is allowed to be assigned to a more abstract
-variable.  The operation \textsf{checkSubtype} is defined at the end
-of the module and it also works with pairs of lists of types. */
 
-  rule T:Type = T':Type => checkSubtype(T', T) ~> T
+/*@ \subsubsection{Method declaration}
 
-/*@ \subsubsection{Return}
-Similarly, we allow values of more concrete types to be returned by
-methods. */
-
-  rule <k> return T:Type; => checkSubtype(T,T') ~> stmt ...</k>
-       <return> T':Type </return>
-
-
-/*@ \subsubsection{Spawn}
-The spawned cell needs to also be passed the parent's class. */
-// explain why
-
-  rule <k> spawn S => int ...</k>
-       <tenv> Rho </tenv>
-       <inClass> C </inClass>
-       (. => <task>
-               <k> S </k>
-               <tenv> Rho </tenv>
-               <inClass> C </inClass>
-             </task>)
-
-
-//@ We now move to the specific KOOL constructs.
-
-/*@ \subsection{Class declaration}
-We process each class in the main task, adding the corresponding data
-into its \textsf{class} cell and also adding a class task for it.  We
-also perform some well-formedness checks on the class hierarchy. */
-
-/*@ \subsubsection{Initiate class processing}
-We create a class cell and a class task for each task.  Also, we start
-the class task with a check that the class it extends is declared
-(this delays the task until that class is processed using another
-instance of this rule). */
-
-// There seems to be some error with the configuration concretization,
-// as the rule below does not work when rewriting . to both the task
-// and the class cells; I had to include two separate . rewrites
-
-  rule <task> <k> class C:Id extends C':Id { S } => stmt ...</k> </task>
-       (. => <class>...
-               <className> C </className>
-               <extends> C' </extends>
-             ...</class>)
-       <br/>
-       (. => <task>
-                <k> checkType(C') ~> S </k>
-                <inClass> C </inClass>
-                <ctenvT> . </ctenvT>
-             </task>)  [structural]
-
-//@ \subsubsection{Check for unique class names}
-
-// The rule below is also more complicated than needed because of the
-// configuration abstraction which does not seem to work right.  We
-// should not need to mention the classes cell.
-  rule <T> (<classes>... <className> C </className>
-                         <className> C </className>
-            ...</classes> _ => .)
-           <out>... . => ListItem("Class \"" +String Id2String(C)
-                                  +String "\" declared twice!\n") </out>
-       </T>  [structural]
-
-/*@ \subsubsection{Check for cycles in class hierarchy}
-We check for cycles in the class hierarchy by transitively closing the
-class extends relation using the \textsf{extendsAll} cells, and
-checking that a class will never appear in its own \texttt{extendsAll}
-cell.  The first rule below initiates the transitive closure of the
-superclass relation, the second transitively closes it, and the third
-checks for cycles. */
-
-  rule <extends> C </extends>
-       <extendsAll> . => SetItem(C) </extendsAll>  [structural]
-
-  rule <class>...
-         <extendsAll> SetItem(C) Cs:Set (. => SetItem(C')) </extendsAll>
-       ...</class>
-       <class>... <className>C</className> <extends>C'</extends> ...</class>
-    when notBool(C' in SetItem(C) Cs)  [structural]
-
-// similarly, we should not need to mention the classes cell below
-  rule <T> (<classes>... <className> C </className>
-                         <extendsAll>... SetItem(C) ...</extendsAll>
-            ...</classes> _ => .)
-           <out>... . => ListItem("Class \"" +String Id2String(C)
-                                  +String "\" is in a cycle!\n") </out>
-       </T>  [structural]
-
-
-/*@ \subsection{Method declaration}
 A method declaration requires two conceptual checks to be performed:
 first, that the method's type is consistent with the type of the
-homonymous method that it overrides, if any; and second, that it body
+homonymous method that it overrides, if any; and second, that its body
 types correctly.  At the same time, it should also be added to the
 type environment of its class.  The first conceptual task is performed
 using the \texttt{checkMethod} operation defined below, and the second
@@ -525,31 +457,126 @@ for example, inside other methods). */
              </task>)
     [structural]
 
-/*@ The \texttt{checkMethod} operation below searches to see whether
-the current method overrides some other method in some superclass.
-If yes, then it issues an additional check that the new method's type
-is more concrete than the overridden method's.  The types $T$ and $T'$
-below can only be function types.  See the definition of
-\texttt{checkSubtype} on function types at the end of this module (it
-is co-variant in the codomain and contra-variant in the domain). */
 
-  syntax K ::= checkMethod(Id,Type,Id)
+/*@ \subsubsection{Assignment}
+A more concrete value is allowed to be assigned to a more abstract
+variable.  The operation \textsf{checkSubtype} is defined at the end
+of the module and it also works with pairs of lists of types. */
 
-  rule <k> checkMethod(F:Id, T:Type, C:Id) => checkSubtype(T, T') ...</k>
-       <className> C </className>
-       <ctenv>... F |-> T':Type ...</ctenv>
-    [structural]
-
-  rule <k> checkMethod(F:Id, T:Type, (C:Id => C')) ...</k>
-       <className> C </className>
-       <extends> C':Id </extends>
-       <ctenv> Rho </ctenv>
-    when notBool(F in keys(Rho))  [structural]
-
-  rule checkMethod(_:Id,_,Object) => .
+  rule T:Type = T':Type => checkSubtype(T', T) ~> T
 
 
-/*@ \subsection{New}
+/*@\subsubsection{Method invocation and return}
+
+Methods can be applied on values of more concrete types than their
+arguments:  */
+
+  rule (Ts:Types -> T:Type) (Ts':Types) => checkSubtype(Ts',Ts) ~> T
+
+
+/*@ Similarly, we allow values of more concrete types to be returned by
+methods: */
+
+  rule <k> return T:Type; => checkSubtype(T,T') ~> stmt ...</k>
+       <return> T':Type </return>
+
+
+/*@ \subsubsection{Exceptions}
+
+Exceptions can throw and catch values of any types.  Since unlike in Java
+KOOL's methods do not declare the exception types that they can throw,
+we cannot test the full type safety of exceptions.  Instead, we
+only check that the \texttt{try} and the \texttt{catch} statements
+type correctly. */
+
+  rule try (block) catch(T:Type X:Id) S => {T X; S}  [structural]
+  rule throw T:Type ; => stmt
+
+
+/*@ \subsubsection{Spawn}
+The spawned cell needs to also be passed the parent's class. */
+// explain why
+
+  rule <k> spawn S => int ...</k>
+       <tenv> Rho </tenv>
+       <inClass> C </inClass>
+       (. => <task>
+               <k> S </k>
+               <tenv> Rho </tenv>
+               <inClass> C </inClass>
+             </task>)
+
+
+//@ \subsection{Semantics of the new KOOL constructs}
+
+/*@ \subsubsection{Class declaration}
+
+We process each class in the main task, adding the corresponding data
+into its \textsf{class} cell and also adding a class task for it.  We
+also perform some well-formedness checks on the class hierarchy. */
+
+/*@ \paragraph{Initiate class processing}
+We create a class cell and a class task for each task.  Also, we start
+the class task with a check that the class it extends is declared
+(this delays the task until that class is processed using another
+instance of this rule). */
+
+// There seems to be some error with the configuration concretization,
+// as the rule below does not work when rewriting . to both the task
+// and the class cells; I had to include two separate . rewrites
+
+  rule <task> <k> class C:Id extends C':Id { S } => stmt ...</k> </task>
+       (. => <class>...
+               <className> C </className>
+               <extends> C' </extends>
+             ...</class>)
+       <br/>
+       (. => <task>
+                <k> checkType(class(C')) ~> S </k>
+                <inClass> C </inClass>
+                <ctenvT> . </ctenvT>
+             </task>)  [structural]
+
+//@ \paragraph{Check for unique class names}
+
+// The rule below is also more complicated than needed because of the
+// configuration abstraction which does not seem to work right.  We
+// should not need to mention the classes cell.
+  rule <T> (<classes>... <className> C </className>
+                         <className> C </className>
+            ...</classes> _ => .)
+           <out>... . => ListItem("Class \"" +String Id2String(C)
+                                  +String "\" declared twice!\n") </out>
+       </T>  [structural]
+
+/*@ \paragraph{Check for cycles in class hierarchy}
+We check for cycles in the class hierarchy by transitively closing the
+class extends relation using the \textsf{extendsAll} cells, and
+checking that a class will never appear in its own \texttt{extendsAll}
+cell.  The first rule below initiates the transitive closure of the
+superclass relation, the second transitively closes it, and the third
+checks for cycles. */
+
+  rule <extends> C </extends>
+       <extendsAll> . => SetItem(C) </extendsAll>  [structural]
+
+  rule <class>...
+         <extendsAll> SetItem(C) Cs:Set (. => SetItem(C')) </extendsAll>
+       ...</class>
+       <class>... <className>C</className> <extends>C'</extends> ...</class>
+    when notBool(C' in SetItem(C) Cs)  [structural]
+
+// similarly, we should not need to mention the classes cell below
+  rule <T> (<classes>... <className> C </className>
+                         <extendsAll>... SetItem(C) ...</extendsAll>
+            ...</classes> _ => .)
+           <out>... . => ListItem("Class \"" +String Id2String(C)
+                                  +String "\" is in a cycle!\n") </out>
+       </T>  [structural]
+
+
+/*@ \subsubsection{New}
+
 To type \texttt{new} we only need to check that the class constructor
 can be called with arguments of the given types, so we initiate a call
 to the constructor method in the corresponding class.  If that
@@ -560,11 +587,9 @@ also at the end of this module. */
 
   rule new C:Id(Ts:Types) => class(C) . C (Ts) ~> discard ~> class(C)
 
-// should be builtin
-  syntax K ::= "discard"
-  rule _:KResult ~> discard => .
 
-/*@ \subsection{Self reference}
+/*@ \subsubsection{Self reference}
+
 The typing rule for \texttt{this} is straightforward: reduce to the
 current class type. */
 
@@ -572,7 +597,8 @@ current class type. */
        <inClass> C:Id </inClass>
 
 
-/*@ \subsection{Super}
+/*@ \subsubsection{Super}
+
 Similarly, \texttt{super} types to the parent class type.
 Note that for typing concerns, super can be considered as an object 
 (recall that this was not the case in the dynamic semantics). */
@@ -583,25 +609,35 @@ Note that for typing concerns, super can be considered as an object
         <extends> C':Id </extends>
 
 
-/*@ \subsection{Object member access}
-There are several cases to consider here.  First, we should redirect
-variable lookups to member accesses when the variable is not local
-(the local variables are handled by the rule borrowed from SIMPLE).
-This is what the first rule below does.  Second, we should allow
-object member accesses as lvalues, which is done by the second rule
-below.  These two rules therefore ensure that each necessary object
-member access is explicitly allowed for evaluation.  Recall from the
-annotated syntax module above that the member access operation is
-strict in the object.  That means that that the object is expected to
-evaluate to a class type.  The next two rules below define the actual
-member lookup operation, moving the search to the superclass when the
-member is not found in the current class.  Note that this works
-because we create the class type environments atomically; thus, a
-class either has its complete type environment available, in which
-case these rules can safely apply, or its cell \textsf{ctenv} is not
-yet available, in which case these rules have to wait.  Finally, the
-fifth rule below reports an error when the \texttt{object} class is
-reached. */ 
+/*@ \subsubsection{Object member access}
+
+There are several cases to consider here.  First, if we are in a class
+task, we should lookup the member into the temporary class type
+environemnt in cell \textsf{ctenvT}.  That is because we want to allow
+initialized field declarations in classes, such as ``\texttt{int x=10;}''.
+This is desugared to a declaration of \texttt{x}, which is added to
+\textsf{ctenvT} during the class task processing, followed by an
+assignment of \texttt{x} to 10.  In order for the assignment to type
+check, we need to know that \texttt{x} has been declared with type
+\texttt{int}; this information can only be found in the
+\textsf{ctenvT} cell.  Second, we should redirect non-local variable
+lookups in method tasks to corresponding member accesses (the
+local variables are handled by the rule borrowed from SIMPLE). 
+This is what the second rule below does.  Third, we should allow
+object member accesses as lvalues, which is done by the third rule
+below.  These last two rules therefore ensure that each necessary
+object member access is explicitly allowed for evaluation.  Recall
+from the annotated syntax module above that the member access
+operation is strict in the object.  That means that the object is
+expected to evaluate to a class type.  The next two rules below define
+the actual member lookup operation, moving the search to the
+superclass when the member is not found in the current class.  Note
+that this works because we create the class type environments
+atomically; thus, a class either has its complete type environment
+available, in which case these rules can safely apply, or its cell
+\textsf{ctenv} is not yet available, in which case these rules have to
+wait.  Finally, the sixth rule below reports an error when the
+\texttt{Object} class is reached. */ 
 
   rule <k> X:Id => T ...</k>
        <ctenvT>... X |-> T ...</ctenvT>
@@ -631,37 +667,39 @@ reached. */
     [structural]
 
 
-/*@\subsection{Method invocation}
-Methods can be applied on values of more concrete types than their
-arguments.  The second rule below ensures that the empty list of
-arguments is treated as a value of type \texttt{void}. */
+/*@ \subsubsection{Instance of and casting}
 
-  rule (Ts:Types -> T:Type) (Ts':Types) => checkSubtype(Ts',Ts) ~> T
-
-
-/*@ \subsection{Instance of and casting}
 As it is hard to check statically whether casting is always safe,
-the programmer is simply trusted from a typing perspective.  Dynamic
-semantics or implementations of the language may insert a runtime
-check for the casting. */
+the programmer is simply trusted from a typing perspective.  We only
+do some basic upcasting and downcasting checks, to reject casts which
+will absolutely fail.  However, dynamic semantics or implementations
+of the language need to insert runtime checks for downcasting to be safe. */
 
   rule class(C1:Id) instanceOf C2:Id => bool
-  rule (C2) class(C1:Id) => class(C2)
+  rule (C:Id) class(C) => class(C)
+  rule <k> (C2:Id) class(C1:Id) => class(C2) ...</k>
+       <className> C1 </className>
+       <extendsAll>...SetItem(C2)...</extendsAll>    // upcast
+  rule <k> (C2:Id) class(C1:Id) => class(C2) ...</k>
+       <className> C2 </className>
+       <extendsAll>...SetItem(C1)...</extendsAll>    // downcast
+  rule <k> (C2) class(C1:Id) => stuck((C2) class(C1)) ...</k>
+       <class>...
+         <className> C1 </className>
+         <extendsAll> S1 </extendsAll>
+       ...</class>
+       <class>...
+         <className> C2 </className>
+         <extendsAll> S2 </extendsAll>
+       ...</class>
+       <out>... . => ListItem("Classes \"" +String Id2String(C1)
+                              +String "\" and \"" +String Id2String(C2)
+                              +String "\" are incompatible!\n") </out>
+    when notBool(C1 in S2) andBool notBool(C2 in S1)
 
 
-/*@ \subsection{Exceptions}
-Exceptions can throw and catch only class types.  Since unlike in Java
-KOOL's methods do not declare the exception types that they can throw,
-we cannot test the full type safety of exceptions.  Instead, we
-only check that the \texttt{try} and the \texttt{catch} statements
-type correctly. */
+/*@ \subsubsection{Cleanup tasks}
 
-  rule try (block) catch(T:Type X:Id) S => {T X; S}  [structural]
-// big problem to be solved!  Id cannot be both value and proper
-  rule throw T:Type ; => stmt
-
-
-/*@ \subsection{Cleanup tasks}
 Finally, we need to clean up the terminated tasks.  Each of the three
 types of tasks is handled differently.  The main task is replaced by a
 method task holding ``\texttt{new main();}'', which will ensure that a
@@ -698,6 +736,7 @@ the \textsf{tasks} cell has been removed. */
     [structural]
 
 // discard method task when done
+
   rule <task>...
          <k> stmt </k>
          <tenv> _ </tenv>  // only to ensure that this is a method task
@@ -705,28 +744,25 @@ the \textsf{tasks} cell has been removed. */
     [structural]
 
 // cleanup tasks and output a success message when done
+
   rule (<tasks> .Bag </tasks> => .)
-       <out>... . => ListItem("All typing tasks completed.\n") </out>
+       <out>... . => ListItem("Type checked!\n") </out>
     [structural]
 
 
+//@\subsection{KOOL-specific auxiliary declarations and operations}
 
-//@\subsection{Auxiliary operations}
+/*@\subsubsection{Subtype checking}
 
-/*@\subsection{Subtyping constraints}
-The subclass relation introduces a subtyping relation.  
-*/
+The subclass relation introduces a subtyping relation.  */
+
   syntax K ::= checkSubtype(Types,Types)
 
   rule checkSubtype(T:Type, T) => .  [structural]
 
-  rule <k> checkSubtype(class(C1:Id => C2), class(C:Id)) ...</k>
-       <className> C1 </className>
-       <extends> C2:Id </extends>
-    when C1 =/=K C  [structural]
-
-  rule checkSubtype(class(Object),class(Class)) => false
-    when Class =/=K Object  [structural]
+  rule <k> checkSubtype(class(C:Id), class(C':Id)) => . ...</k>
+       <className> C </className>
+       <extendsAll>... SetItem(C') ...</extends>  [structural]
 
   rule checkSubtype(Ts1->T2,Ts1'->T2')
     => checkSubtype((T2,Ts1'),(T2',Ts1))  [structural]
@@ -742,9 +778,11 @@ The subclass relation introduces a subtyping relation.
   rule checkSubtype(.Types,void) => .  [structural]
 
 
+/*@\subsubsection{Checking well-formedness of types}
 
-/*@  Since now any id can be used as the type of a class, we need to check
-that the types used in the program actually exists */
+Since now any $\it Id$ can be used as the type of a class, we need to
+check that the types used in the program actually exists */
+
   syntax K ::= checkType(Types)
 
   rule checkType(T:Type,Ts:Types) => checkType(T) ~> checkType(Ts)
@@ -754,45 +792,47 @@ that the types used in the program actually exists */
   rule checkType(bool) => .  [structural]
   rule checkType(string) => .  [structural]
   rule checkType(void) => .  [structural]
-  rule <k> checkType(C:Id) => . ...</k> <className> C </className>
+  rule <k> checkType(class(C:Id)) => . ...</k> <className> C </className>
     [structural]
-  rule checkType(Object) => .  [structural]
+  rule checkType(class(Object)) => .  [structural]
   rule checkType(Ts:Types -> T:Type) => checkType(T,Ts)  [structural]
   rule checkType(T:Type[]) => checkType(T)  [structural]
 
-  syntax Type ::= mkId2Class(Type)  [function]
-  syntax List{K} ::= "mkId2ClassAux" "(" List{K} ")"  [function]
-  rule mkId2Class(T:Type) => T
-//  rule mkId2Class(T:Type) => mkId2ClassAux(T)
-  rule mkId2ClassAux(X:Id) => class(X)
-  rule mkId2ClassAux(L:KLabel(Kl:List{K})) => L(mkId2ClassAux(Kl))
-//    when L =/=KLabel 'id
-  rule mkId2ClassAux(K,,Kl) => mkId2ClassAux(K),,mkId2ClassAux(Kl)
-    when Kl =/=List{K} .List{K}
-  rule mkId2ClassAux(.List{K}) => .List{K}
 
-//@ These should be generic, belonging to the K framework
+/*@\subsubsection{Checking correct  overiding of methods}
+
+The \texttt{checkMethod} operation below searches to see whether
+the current method overrides some other method in some superclass.
+If yes, then it issues an additional check that the new method's type
+is more concrete than the overridden method's.  The types $T$ and $T'$
+below can only be function types.  See the definition of
+\texttt{checkSubtype} on function types at the end of this module (it
+is co-variant in the codomain and contra-variant in the domain). */
+
+  syntax K ::= checkMethod(Id,Type,Id)
+
+  rule <k> checkMethod(F:Id, T:Type, C:Id) => checkSubtype(T, T') ...</k>
+       <className> C </className>
+       <ctenv>... F |-> T':Type ...</ctenv>
+    [structural]
+
+  rule <k> checkMethod(F:Id, T:Type, (C:Id => C')) ...</k>
+       <className> C </className>
+       <extends> C':Id </extends>
+       <ctenv> Rho </ctenv>
+    when notBool(F in keys(Rho))  [structural]
+
+  rule checkMethod(_:Id,_,Object) => .
+
+
+//@\subsubsection{Generic operations which could be part of the \K framework}
+
   syntax K ::= stuck(K)  [latex(\framebox{${#1}$})]
-//  syntax K ::= "discard"
-//  rule _:KResult ~> discard => .  [structural]
+
+  syntax K ::= "discard"
+  rule _:KResult ~> discard => .  [structural]
 
   rule Id2String(Main) => "Main"
-
-
-
-
-
-
-/*@ Although functions turn into methods and get a slightly different
-semantics, the \texttt{types(...)} operation stays the same. */
-
-//  syntax Types ::= "types" "(" Exps ")"   [function, klabel(types)]
-//  rule types(.Exps) => void, .Types
-//  rule types(X:Id : T:Type) => T, .Types
-//  rule types(X:Id : T:Type, E:Exp, Es:Exps) => T, types(E,Es)
-
-//  syntax Exp ::= "ltype" "(" Exp ")"
-//  rule ltype(X:Id) => X                [structural]
-//  rule ltype(E:Exp[Es:Exps]) => E[Es]  [structural]
+  rule Id2String(Object) => "Object"
 
 endmodule
