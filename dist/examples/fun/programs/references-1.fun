@@ -1,7 +1,3 @@
-// parenthese around the second "and" in the binding are needed because of
-// the list construct is not an append yet and we did not want to define
-// an append operation; this should be provided by the framework
-
 letrec
 max l (x, y) =
   if (* x) != y
@@ -12,15 +8,19 @@ max l (x, y) =
             in if (x <= car l)
                then (car l)
                else x
-and (
+
+and 
+
 map f l = 
   if null? l
   then []
   else cons (f (car l)) (map f (cdr l))
+
 and
+
 factorial x =
   if x <= 0
   then 1
   else x * factorial(x - 1)
-)
+
 in max (map factorial [1, 2, 3, 4, 5, factorial 5]) (ref 1, 1)
