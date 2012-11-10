@@ -8,6 +8,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.CollectPrioritiesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -102,6 +103,7 @@ public class DefinitionLoader {
 			def.accept(new AddConsesVisitor());
 			def.accept(new CollectConsesVisitor());
 			def.accept(new CollectSubsortsVisitor());
+			def.accept(new CollectPrioritiesVisitor());
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Basic Parsing");

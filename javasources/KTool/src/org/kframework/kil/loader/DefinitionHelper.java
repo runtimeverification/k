@@ -45,6 +45,7 @@ public class DefinitionHelper {
 	public static java.util.Map<String, String> cellSorts = new HashMap<String, String>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
+	private static java.util.Set<Subsort> priorities = new HashSet<Subsort>();
 	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
 	public static File dotk = null;
 
@@ -104,6 +105,30 @@ public class DefinitionHelper {
 				}
 			}
 			subsorts.addAll(ssTemp);
+		}
+	}
+
+	public static void addPriority(String bigPriority, String smallPriority) {
+		// add the new priority
+		priorities.add(new Subsort(bigPriority, smallPriority));
+
+		// closure for sorts
+		boolean finished = false;
+		while (!finished) {
+			finished = true;
+			Set<Subsort> ssTemp = new HashSet<Subsort>();
+			for (Subsort s1 : priorities) {
+				for (Subsort s2 : priorities) {
+					if (s1.getBigSort().equals(s2.getSmallSort())) {
+						Subsort sTemp = new Subsort(s2.getBigSort(), s1.getSmallSort());
+						if (!priorities.contains(sTemp)) {
+							ssTemp.add(sTemp);
+							finished = false;
+						}
+					}
+				}
+			}
+			priorities.addAll(ssTemp);
 		}
 	}
 

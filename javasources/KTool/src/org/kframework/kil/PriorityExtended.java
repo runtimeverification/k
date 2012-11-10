@@ -11,49 +11,34 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-public class Syntax extends ModuleItem {
-	Sort sort;
-	java.util.List<PriorityBlock> priorityBlocks;
+public class PriorityExtended extends ModuleItem {
+	java.util.List<PriorityBlockExtended> priorityBlocks;
 
-	public Syntax(Sort sort, java.util.List<PriorityBlock> priorities) {
+	public PriorityExtended(Sort sort, java.util.List<PriorityBlockExtended> priorities) {
 		super();
-		this.sort = sort;
 		this.priorityBlocks = priorities;
 	}
 
-	public Sort getSort() {
-		return sort;
-	}
-
-	public void setSort(Sort sort) {
-		this.sort = sort;
-	}
-
-	public java.util.List<PriorityBlock> getPriorityBlocks() {
+	public java.util.List<PriorityBlockExtended> getPriorityBlocks() {
 		return priorityBlocks;
 	}
 
-	public void setPriorityBlocks(java.util.List<PriorityBlock> priorityBlocks) {
+	public void setPriorityBlocks(java.util.List<PriorityBlockExtended> priorityBlocks) {
 		this.priorityBlocks = priorityBlocks;
 	}
 
-	public Syntax(Element element) {
+	public PriorityExtended(Element element) {
 		super(element);
 
-		List<Element> sorts = XML.getChildrenElementsByTagName(element, Constants.SORT);
-
 		// assumption: sorts contains only one element
-		sort = (Sort) JavaClassesFactory.getTerm(sorts.get(0));
-
-		this.priorityBlocks = new ArrayList<PriorityBlock>();
-		List<Element> priorities = XML.getChildrenElementsByTagName(element, Constants.PRIORITY);
+		this.priorityBlocks = new ArrayList<PriorityBlockExtended>();
+		List<Element> priorities = XML.getChildrenElementsByTagName(element, Constants.PRIBLOCK);
 		for (Element priority : priorities)
-			priorityBlocks.add((PriorityBlock) JavaClassesFactory.getTerm(priority));
+			priorityBlocks.add((PriorityBlockExtended) JavaClassesFactory.getTerm(priority));
 	}
 
-	public Syntax(Syntax node) {
+	public PriorityExtended(PriorityExtended node) {
 		super(node);
-		this.sort = node.sort;
 		this.priorityBlocks = node.priorityBlocks;
 	}
 
@@ -61,20 +46,13 @@ public class Syntax extends ModuleItem {
 	public String toString() {
 		String blocks = "";
 
-		for (PriorityBlock pb : priorityBlocks) {
+		for (PriorityBlockExtended pb : priorityBlocks) {
 			blocks += pb + "\n> ";
 		}
 		if (blocks.length() > 2)
 			blocks = blocks.substring(0, blocks.length() - 3);
 
-		return "  syntax " + sort + " ::= " + blocks + "\n";
-	}
-
-	@Override
-	public List<String> getAllSorts() {
-		List<String> sorts = new ArrayList<String>();
-		sorts.add(sort.toString());
-		return sorts;
+		return "  syntax priorities" + blocks + "\n";
 	}
 
 	@Override
@@ -93,12 +71,9 @@ public class Syntax extends ModuleItem {
 			return false;
 		if (this == obj)
 			return true;
-		if (!(obj instanceof Syntax))
+		if (!(obj instanceof PriorityExtended))
 			return false;
-		Syntax syn = (Syntax) obj;
-
-		if (!syn.getSort().equals(this.sort))
-			return false;
+		PriorityExtended syn = (PriorityExtended) obj;
 
 		if (syn.priorityBlocks.size() != priorityBlocks.size())
 			return false;
@@ -113,15 +88,15 @@ public class Syntax extends ModuleItem {
 
 	@Override
 	public int hashCode() {
-		int hash = sort.hashCode();
+		int hash = 0;
 
-		for (PriorityBlock pb : priorityBlocks)
+		for (PriorityBlockExtended pb : priorityBlocks)
 			hash += pb.hashCode();
 		return hash;
 	}
 
 	@Override
-	public Syntax shallowCopy() {
-		return new Syntax(this);
+	public PriorityExtended shallowCopy() {
+		return new PriorityExtended(this);
 	}
 }

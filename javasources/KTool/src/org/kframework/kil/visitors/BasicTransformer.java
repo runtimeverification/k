@@ -34,6 +34,8 @@ import org.kframework.kil.MapItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.PriorityBlock;
+import org.kframework.kil.PriorityBlockExtended;
+import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Rewrite;
@@ -143,9 +145,25 @@ public class BasicTransformer implements Transformer {
 	}
 
 	@Override
+	public ASTNode transform(PriorityExtended node) throws TransformerException {
+		for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
+			node.getPriorityBlocks().set(i, (PriorityBlockExtended) node.getPriorityBlocks().get(i).accept(this));
+		}
+		return transform((ModuleItem) node);
+	}
+
+	@Override
 	public ASTNode transform(PriorityBlock node) throws TransformerException {
 		for (int i = 0; i < node.getProductions().size(); i++) {
 			node.getProductions().set(i, (Production) node.getProductions().get(i).accept(this));
+		}
+		return transform((ASTNode) node);
+	}
+
+	@Override
+	public ASTNode transform(PriorityBlockExtended node) throws TransformerException {
+		for (int i = 0; i < node.getProductions().size(); i++) {
+			node.getProductions().set(i, (Constant) node.getProductions().get(i).accept(this));
 		}
 		return transform((ASTNode) node);
 	}

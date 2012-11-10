@@ -22,6 +22,12 @@ public class JavaClassesFactory {
 			return new Import(element);
 		if (Constants.SYNTAX.equals(element.getNodeName()))
 			return new Syntax(element);
+
+		if (Constants.PRISENT.equals(element.getNodeName()))
+			return new PriorityExtended(element);
+		if (Constants.PRIBLOCK.equals(element.getNodeName()))
+			return new PriorityBlockExtended(element);
+
 		if (Constants.SORT.equals(element.getNodeName()))
 			return new Sort(element);
 		if (Constants.PRIORITY.equals(element.getNodeName()))

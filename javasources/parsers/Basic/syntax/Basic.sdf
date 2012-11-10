@@ -21,6 +21,24 @@ context-free syntax
 	"context"			HIDDEN+	-> KSentence {cons("Context")}
 
 	"syntax" SORTID "::=" {Prod1 ">"}+	-> KSentence {cons("Syntax")}
+	
+	"syntax" "priorities" {KLList ">"}+-> KSentence {cons("Priority")}
+	
+				 KLABEL+ -> KLList {cons("PriorityBlock")}
+	"left:"		 KLABEL+ -> KLList {cons("LeftPriorityBlock")}
+	"right:"	 KLABEL+ -> KLList {cons("RightPriorityBlock")}
+	"non-assoc:" KLABEL+ -> KLList {cons("NonAPriorityBlock")}
+	HIDDEN -> KLABEL {cons("KLabel")}
+	">" -> KLABEL {reject}
+	"left:" -> KLABEL {reject}
+	"right:" -> KLABEL {reject}
+	"non-assoc:" -> KLABEL {reject}
+
+context-free restrictions
+	KLABEL			-/- ~[\t\n\r\ ]
+	"left:"			-/- ~[\t\n\r\ ]
+	"right:"		-/- ~[\t\n\r\ ]
+	"non-assoc:"	-/- ~[\t\n\r\ ]
 
 context-free syntax
 	"left:" {Prod2 "|"}+ -> Prod1 {cons("LeftOrList")}
@@ -96,6 +114,7 @@ lexical syntax
 
 lexical restrictions
 	HIDDEN			-/- ~[\t\n\r\ ]
+	KLABEL			-/- ~[\t\n\r\ ]
 	MODNAME			-/- [A-Z\-]
 	BASICID 		-/- [a-zA-Z0-9\{\}]
 	ID 				-/- [a-zA-Z0-9\{\}]

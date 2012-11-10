@@ -32,6 +32,8 @@ import org.kframework.kil.MapItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.PriorityBlock;
+import org.kframework.kil.PriorityBlockExtended;
+import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Require;
@@ -71,8 +73,10 @@ public interface Visitor {
 	public void visit(Rule node);
 	// </Sentences>
 	public void visit(Syntax node);
+	public void visit(PriorityExtended node);
 	// <ModuleItems>
 	public void visit(PriorityBlock node);
+	public void visit(PriorityBlockExtended node);
 	public void visit(Production node);
 	public void visit(ProductionItem node);
 	// <ProductionItems>

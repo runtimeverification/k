@@ -32,6 +32,8 @@ import org.kframework.kil.MapItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.PriorityBlock;
+import org.kframework.kil.PriorityBlockExtended;
+import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Rewrite;
@@ -69,8 +71,10 @@ public interface Transformer {
 	public ASTNode transform(Rule node) throws TransformerException;
 	//	</Sentences>
 	public ASTNode transform(Syntax node) throws TransformerException;
+	public ASTNode transform(PriorityExtended node) throws TransformerException;
 	//</ModuleItems>	
 	public ASTNode transform(PriorityBlock node) throws TransformerException;
+	public ASTNode transform(PriorityBlockExtended node) throws TransformerException;
 	public ASTNode transform(Production node) throws TransformerException;
 	public ASTNode transform(ProductionItem node) throws TransformerException;
 	public ASTNode transform(Attributes node) throws TransformerException;
