@@ -41,6 +41,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitable;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -336,8 +337,10 @@ public class MetaK {
 		return ("K".equals(sort) || !isKSort(sort));
 	}
 
-	public static String getListUnitLabel(String separator) {
-		return "'.List`{\"" + separator + "\"`}";
+	public static String getListUnitLabel(String sep) {
+		//return "'.List`{\"" + sep + "\"`}";
+        String unitStr = "'.List{\"" + sep + "\"}";
+        return StringUtil.escapeMaude(unitStr).replace(" ", "");
 	}
 
 	public static List<Cell> getTopCells(Term t) {

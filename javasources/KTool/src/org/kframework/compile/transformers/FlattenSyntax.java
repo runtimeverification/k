@@ -49,16 +49,20 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		node = (Module) super.transform(node);
 		if (listSeparators.isEmpty())
 			return node;
-		List<PriorityBlock> pbs = new ArrayList<PriorityBlock>();
-		PriorityBlock pb = new PriorityBlock();
-		pbs.add(pb);
-		Syntax syn = new Syntax(new Sort("KLabel"), pbs);
-		node.getItems().add(syn);
-		for (String separator : listSeparators) {
-			List<ProductionItem> pis = new ArrayList<ProductionItem>();
-			pis.add(new Terminal(MetaK.getListUnitLabel(separator)));
-			pb.getProductions().add(new Production(new Sort("KLabel"), pis));
-		}
+
+//		List<PriorityBlock> pbs = new ArrayList<PriorityBlock>();
+//		PriorityBlock pb = new PriorityBlock();
+//		pbs.add(pb);
+//		Syntax syn = new Syntax(new Sort("KLabel"), pbs);
+//		node.getItems().add(syn);
+//		for (String separator : listSeparators) {
+//			List<ProductionItem> pis = new ArrayList<ProductionItem>();
+//			pis.add(new Terminal(MetaK.getListUnitLabel(separator)));
+//			pb.getProductions().add(new Production(new Sort("KLabel"), pis));
+//		}
+        for (String sep : listSeparators) {
+            node.addConstant("KLabel", MetaK.getListUnitLabel(sep));
+        }
 		return node;
 	}
 
