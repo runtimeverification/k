@@ -349,7 +349,6 @@ public class MaudeFilter extends BasicVisitor {
 				result.append(sort);
 			}
 		} else {
-            System.err.println("### " + empty + " ### " + sort);
 			Production prd = DefinitionHelper.listConses.get(sort);
 			UserList ul = (UserList) prd.getItems().get(0);
 			result.append(".List`{\"");

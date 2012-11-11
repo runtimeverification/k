@@ -1,5 +1,5 @@
 require "k-prelude.k"
-//require "builtins/symbolic-k.k"
+require "builtins/symbolic-k.k"
 require "modules/uris.k"
 // require "builtins/smt.k"
 // require "modules/substitution.k"
@@ -12,7 +12,7 @@ endinterface
 interface AUTO-INCLUDED-MODULE
   imports BUILTIN-SYNTAX
   imports K
-  //imports SYMBOLIC-K
+  imports SYMBOLIC-K
   imports URIS
 
 endinterface
