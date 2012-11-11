@@ -16,6 +16,12 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 public class Production extends ASTNode {
+
+    /*
+    * Andrei S: It appears that the cons attribute is mandatory for all new
+    * production added during compilation, otherwise a null pointer exception
+    * can be thrown in one of the later compilation steps.
+    * */
 	protected List<ProductionItem> items;
 	protected Attributes attributes;
 	protected String sort;
@@ -23,9 +29,9 @@ public class Production extends ASTNode {
 	public static Production makeFunction(String funSort, String funName, String argSort) {
 		List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
 		prodItems.add(new Terminal(funName));
-		// prodItems.add(new Terminal("("));
+		prodItems.add(new Terminal("("));
 		prodItems.add(new Sort(argSort));
-		// prodItems.add(new Terminal(")"));
+		prodItems.add(new Terminal(")"));
 
 		Production funProd = new Production(new Sort(funSort), prodItems);
 		java.util.List<Attribute> attrs = funProd.getAttributes().getContents();
@@ -139,10 +145,16 @@ public class Production extends ASTNode {
 	}
 
 	public String getKLabel() {
+        assert MetaK.isComputationSort(sort) ||
+                sort.equals("KLabel") && isConstant();
+
 		String klabel;
 		klabel = attributes.get("klabel");
 		if (klabel == null) {
-			klabel = "'" + getPrefixLabel();
+            if (sort.toString().equals("KLabel"))
+                klabel = getPrefixLabel();
+            else
+			    klabel = "'" + getPrefixLabel();
 			attributes.set("klabel", klabel);
 		}
 		return StringUtil.escapeMaude(klabel).replace(" ", "");

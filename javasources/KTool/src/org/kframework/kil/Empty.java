@@ -8,6 +8,8 @@ import org.w3c.dom.Element;
 
 public class Empty extends Term {
 
+    public static final Empty ListOfK = new Empty("List{K}");
+
 	public Empty(String sort) {
 		super(sort);
 	}

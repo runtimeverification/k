@@ -23,6 +23,10 @@ public abstract class ModuleItem extends ASTNode {
 		return null;
 	}
 
+    public java.util.List<String> getKLabels() {
+        return null;
+    }
+
 	public java.util.List<String> getAllSorts() {
 		return null;
 	}

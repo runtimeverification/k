@@ -1,10 +1,40 @@
 package org.kframework.compile.utils;
 
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
+import org.kframework.kil.Bag;
+import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
+import org.kframework.kil.Collection;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Context;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Empty;
+import org.kframework.kil.Hole;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.KSort;
+import org.kframework.kil.ListItem;
+import org.kframework.kil.ListOfK;
 import org.kframework.kil.Map;
+import org.kframework.kil.Map;
+import org.kframework.kil.MapItem;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Rule;
+import org.kframework.kil.SetItem;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -302,8 +332,8 @@ public class MetaK {
 		// return builtinSorts.contains(sort);
 	}
 
-	public static boolean isComputationSort(String name) {
-		return ("K".equals(name) || !isKSort(name));
+	public static boolean isComputationSort(String sort) {
+		return ("K".equals(sort) || !isKSort(sort));
 	}
 
 	public static String getListUnitLabel(String separator) {

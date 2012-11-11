@@ -548,7 +548,7 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Add K Cell");
 			}
 
-			javaDef = new CompilerTransformerStep(new AddSymbolicSorts()).compile(javaDef);
+			javaDef = new CompilerTransformerStep(new AddSymbolicK()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Symbolic Stuff");
@@ -591,16 +591,10 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Blocking Input");
 			}
 
-			javaDef = new CompilerTransformerStep(new GenerateSyntaxPredicates()).compile(javaDef);
+			javaDef = new CompilerTransformerStep(new AddSyntaxPredicates()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Generate Syntax Predicates");
-			}
-
-			javaDef = new CompilerTransformerStep(new GenerateSymbolicSyntaxPredicates()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Generate Symbolic Syntax Predicates");
+				sw.printIntermediate("Add Syntax Predicates");
 			}
 
 			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
@@ -626,6 +620,12 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Flatten Syntax");
 			}
+
+            javaDef = new CompilerTransformerStep(new AddKLabelToString()).compile(javaDef);
+
+            if (GlobalSettings.verbose) {
+                sw.printIntermediate("Add KLabel2String definitions");
+            }
 
 			javaDef = new CompilerTransformerStep(new ResolveHybrid()).compile(javaDef);
 

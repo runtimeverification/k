@@ -95,6 +95,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		node.setItems(pis);
 		attrs.set("arity", arity);
 		node.setAttributes(attrs);
+        node.setSort("KLabel");
 		return node;
 	}
 

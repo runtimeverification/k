@@ -94,7 +94,7 @@ public class Module extends DefinitionItem {
 		List<String> mkl = new LinkedList<String>();
 
 		for (ModuleItem mi : items) {
-			List<String> list = mi.getLabels();
+			List<String> list = mi.getKLabels();
 			if (list != null)
 				mkl.addAll(list);
 		}
@@ -162,8 +162,6 @@ public class Module extends DefinitionItem {
 		prods.add(prod);
 
 		this.items.add(new Syntax(new Sort(sort), pbs));
-		if (prod.getItems() == null)
-			System.err.println("*** " + prod);
 	}
 
 }

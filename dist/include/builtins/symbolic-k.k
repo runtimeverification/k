@@ -6,10 +6,10 @@ module SYMBOLIC-K
   rule
     isSymbolicK(KL:KLabel(LK:List{K}))
   =>
-    #if notBool (KL ==KLabel '#symBool orBool KL ==KLabel '#symInt) #then
-      isSymbolicK(LK)
-    #else
+    #if substrString(KLabel2String(KL), 0, 5) ==String "'#sym" #then
       true
+    #else
+      isSymbolicK(LK)
     #fi
   [predicate]
   rule

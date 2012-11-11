@@ -3,6 +3,7 @@ package org.kframework.kil;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
@@ -69,6 +70,30 @@ public class Syntax extends ModuleItem {
 
 		return "  syntax " + sort + " ::= " + blocks + "\n";
 	}
+
+    @Override
+    public List<String> getLabels() {
+        List<String> lbls = new LinkedList<String>();
+        for (PriorityBlock pb : priorityBlocks) {
+            for (Production prod : pb.getProductions()) {
+                lbls.add(prod.getLabel());
+            }
+        }
+        return lbls;
+    }
+
+    @Override
+    public List<String> getKLabels() {
+        List<String> lbls = new LinkedList<String>();
+        for (PriorityBlock pb : priorityBlocks) {
+            for (Production prod : pb.getProductions()) {
+                if (MetaK.isComputationSort(prod.getSort()) ||
+                        prod.getSort().equals("KLabel") && prod.isConstant())
+                    lbls.add(prod.getKLabel());
+            }
+        }
+        return lbls;
+    }
 
 	@Override
 	public List<String> getAllSorts() {

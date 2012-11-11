@@ -15,7 +15,6 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
-import org.kframework.kil.KApp;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
@@ -37,9 +36,10 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 	@Override
 	public ASTNode transform(Definition node) throws TransformerException {
 		isFresh = false;
-		ASTNode defNode =  super.transform(node);
-		if (!isFresh) return node;
-		node = (Definition) defNode;
+		node = (Definition) super.transform(node);
+		if (!isFresh)
+            return node;
+
 		Configuration cfg = MetaK.getConfiguration(node);
 		Bag bag;
 		if (cfg.getBody() instanceof Bag) {
@@ -49,6 +49,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 			bag.getContents().add(cfg.getBody());
 		}
 		cfg.setBody(bag);
+
 		Cell nId = new Cell();
 		nId.setLabel("freshCounter");
 		nId.setEllipses(Ellipses.NONE);
@@ -72,7 +73,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		node = node.shallowCopy();
 		node.setCondition((Term) condNode);
 		Variable freshVar = MetaK.getFreshVar("Int"); 
-		ASTNode bodyNode = node.getBody().accept(new Substitution(createFreshSubstitution(vars, freshVar)));
+		ASTNode bodyNode = node.getBody().accept(freshSubstitution(vars, freshVar));
 		assert(bodyNode instanceof Term);
 		Bag bag;
 		if (bodyNode instanceof Bag) {
@@ -101,7 +102,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 			assert(1 == node.getContents().size());
 			assert(node.getContents().get(0) instanceof Variable);
 
-			Variable var = (Variable)node.getContents().get(0);
+			Variable var = (Variable) node.getContents().get(0);
 			this.vars.add(var);
 			this.isFresh = true;
 			return new Constant("Bool", "true");
@@ -110,10 +111,10 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		return super.transform(node);
 	}
 
-	private static Map<Term, Term> createFreshSubstitution(
-			Set<Variable> vars,
-			Variable idxVar) {
-		Map<Term, Term> result = new HashMap<Term, Term>();
+	private static Substitution freshSubstitution(
+            Set<Variable> vars,
+            Variable idxVar) {
+		Map<Term, Term> symMap = new HashMap<Term, Term>();
 		int idx = 0;
 		for (Variable var : vars) {
 			TermCons idxTerm = new TermCons("Int", "Int1PlusSyn");
@@ -123,15 +124,11 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 			++idx;
 
 			String sort = var.getSort();
-			String ctor = AddSymbolicSorts.getDefaultSymbolicConstructor(sort);
-			Term freshTerm = new KApp(new Constant("KLabel", ctor), idxTerm);
-			//TermCons fTerm = new TermCons(var.getSort(), var.getSort() + "1FreshSyn");
-			//fTerm.getContents().add(t);
-			//result.put(var, fTerm);
-			result.put(var, freshTerm);
+            Term symTerm = AddSymbolicK.makeSymbolicTerm(sort, idxTerm);
+            symMap.put(var, symTerm);
 		}
 
-		return result;
+		return new Substitution(symMap);
 	}
 
 }
