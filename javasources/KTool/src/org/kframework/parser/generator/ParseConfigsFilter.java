@@ -15,6 +15,7 @@ import org.kframework.parser.concrete.disambiguate.GetFitnessUnitFileCheckVisito
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKSeqVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
@@ -58,6 +59,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 				config = config.accept(new VariableTypeInferenceFilter());
 				config = config.accept(new AmbDuplicateFilter());
 				config = config.accept(new TypeSystemFilter());
+				config = config.accept(new PriorityFilter());
 				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
 				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 				config = config.accept(new TypeInferenceSupremumFilter());

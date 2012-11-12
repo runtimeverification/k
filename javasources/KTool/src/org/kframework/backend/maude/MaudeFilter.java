@@ -33,6 +33,7 @@ import org.kframework.kil.MapItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.PriorityBlock;
+import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -96,6 +97,10 @@ public class MaudeFilter extends BasicVisitor {
 			}
 			result.append("\nendm");
 		}
+	}
+
+	@Override
+	public void visit(PriorityExtended syn) {
 	}
 
 	@Override

@@ -13,7 +13,7 @@ public class RemoveBrackets extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Bracket node) throws TransformerException {
-//		System.out.println("Remove: " + node.getFilename() + ":" + node.getLocation());
-		return super.transform(node.getContent());
+		// System.out.println("Remove: " + node.getFilename() + ":" + node.getLocation());
+		return node.getContent().accept(this);
 	}
 }

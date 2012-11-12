@@ -132,6 +132,16 @@ public class DefinitionHelper {
 		}
 	}
 
+	/**
+	 * Check to see if the two klabels are in the wrong order according to the priority filter.
+	 * @param klabelParent
+	 * @param klabelChild
+	 * @return 
+	 */
+	public static boolean isPriorityWrong(String klabelParent, String klabelChild) {
+		return priorities.contains(new Subsort(klabelParent, klabelChild));
+	}
+
 	public static void addFileRequirement(String required, String local) {
 		// add the new subsorting
 		if (required.equals(local))

@@ -223,7 +223,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			if (result != pb)
 				change = true;
 			if (result != null) {
-				if (!(result instanceof PriorityBlock)) {
+				if (!(result instanceof PriorityBlockExtended)) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting PriorityBlock, but got " + result.getClass() + " while transforming.",
 							getName(), pb.getFilename(), pb.getLocation()));
 				}
@@ -269,8 +269,8 @@ public class CopyOnWriteTransformer implements Transformer {
 			if (result != p)
 				change = true;
 			if (result != null) {
-				if (!(result instanceof Production)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Production, but got " + result.getClass() + ".", getName(), p.getFilename(), p
+				if (!(result instanceof Constant)) {
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + ".", getName(), p.getFilename(), p
 							.getLocation()));
 				}
 				prods.add((Constant) result);
