@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class MetaK {
 
-    public static class Constants {
+   public static class Constants {
 
         public static String anyVarSymbol = "_";
         public static String heatingTag = "heating";
@@ -382,4 +382,12 @@ public class MetaK {
 
         return null;  //To change body of created methods use File | Settings | File Templates.
     }
-}
+
+    public static boolean isPredicateLabel(String name) {
+        if (name.startsWith("is")) {
+            return true;
+        }
+        return false;
+    }
+
+ }

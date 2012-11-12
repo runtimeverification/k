@@ -1,14 +1,7 @@
 package org.kframework.compile.transformers;
 
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Context;
-import org.kframework.kil.Production;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -28,15 +21,29 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
 		if (body instanceof TermCons) {
 			Production prod = DefinitionHelper.conses.get(((TermCons)body).getCons());
 			if (prod.getAttributes().containsKey("function")) {
-				node = node.shallowCopy();
-				node.setAttributes(node.getAttributes().shallowCopy());
-				node.getAttributes().set("function", "");
+                node = addFunction(node);
 			}
 		}
+        if (body instanceof KApp) {
+            Term l = ((KApp)body).getLabel();
+            if (l instanceof Constant) {
+                String name = ((Constant) l).getValue();
+                if (MetaK.isPredicateLabel(name)) {
+                    node = addFunction(node);
+                }
+            }
+        }
 		return node;
 	}
 
-	@Override
+    private Rule addFunction(Rule node) {
+        node = node.shallowCopy();
+        node.setAttributes(node.getAttributes().shallowCopy());
+        node.getAttributes().set("function", "");
+        return node;
+    }
+
+    @Override
 	public ASTNode transform(Syntax node) throws TransformerException {
 		return node;
 	}
