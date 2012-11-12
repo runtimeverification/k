@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
 
@@ -13,8 +12,11 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
     private static final Constant KLabel2String =
             new Constant("KLabel", "KLabel2String");
 
+    private static final String String2KLabelCons =
+            "KLabel1String2KLabelSyn";
+
     public AddKLabelToString() {
-        super("Define KLabel2String for KLabel constants");
+        super("Define KLabel2String and String2Klabel for KLabel constants");
     }
 
     @Override
@@ -33,6 +35,14 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
             Term rhs = new KApp(new KInjectedLabel(strCt), Empty.ListOfK);
             Rule rule = new Rule();
             rule.setBody(new Rewrite(lhs, rhs));
+            rule.getAttributes().getContents().add(new Attribute("function", ""));
+            retNode.appendModuleItem(rule);
+
+            java.util.List<Term> termList = new ArrayList<Term>();
+            termList.add(rhs);
+            TermCons termCons = new TermCons("KLabel", String2KLabelCons, termList);
+            rule = new Rule();
+            rule.setBody(new Rewrite(termCons,klblCt));
             rule.getAttributes().getContents().add(new Attribute("function", ""));
             retNode.appendModuleItem(rule);
         }

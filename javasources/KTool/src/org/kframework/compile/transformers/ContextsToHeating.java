@@ -31,7 +31,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Context node) {
-        Variable x = MetaK.getFreshVar("KItem");
+        Variable x = MetaK.getFreshVar(MetaK.Constants.KItem);
         Term body = node.getBody();
         Term leftHeat = MetaK.fillHole(body, x);
         Term cond = node.getCondition();
@@ -42,6 +42,12 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         seq.add(x);
         seq.add(MetaK.createFreezer(body));
         KSequence rightHeat = new KSequence(seq);
+        Rewrite rew = new Rewrite(leftHeat,rightHeat);
+        Rule rule = new Rule();
+        rule.setBody(rew);
+        rule.setCondition(cond);
+        rule.getAttributes().set(MetaK.Constants.heatingTag,"");
+        heating.add(rule);
         return null;
     }
 

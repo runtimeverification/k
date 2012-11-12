@@ -1,40 +1,10 @@
 package org.kframework.compile.utils;
 
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.Bag;
-import org.kframework.kil.Cell;
+import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
-import org.kframework.kil.Collection;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Context;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Empty;
-import org.kframework.kil.Hole;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.KSort;
-import org.kframework.kil.ListItem;
-import org.kframework.kil.ListOfK;
 import org.kframework.kil.Map;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.Rule;
-import org.kframework.kil.SetItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -52,11 +22,17 @@ import java.util.List;
 import java.util.Set;
 
 public class MetaK {
+
+    public static class Constants {
+
+        public static String anyVarSymbol = "_";
+        public static String heatingTag = "heating";
+        public static String KItem = "KItem";
+    }
+
 	static int nextVarId = 0;
 
-	static String anyVarSymbol = "_";
-
-	public static Set<String> kModules = new HashSet<String>();
+    public static Set<String> kModules = new HashSet<String>();
 	static {
 		kModules.add("K-BUILTINS");
 		kModules.add("K-CONDITION-SEARCH");
@@ -325,7 +301,7 @@ public class MetaK {
 	}
 
     public static boolean isAnonVar(Variable node) {
-		return node.getName().startsWith(anyVarSymbol);
+		return node.getName().startsWith(Constants.anyVarSymbol);
 	}
 
 	public static boolean isBuiltinSort(String sort) {
