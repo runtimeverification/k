@@ -1,397 +1,221 @@
-
 module FUN-UNTYPED-SYNTAX
-/*@ \section{Syntax}
-FUN is an expression language.  The constructs below are split into
-several categories, for clarity: arithmetic constructs, conventional
-functional constructs, lists, references, and
-call-with-current-continuation (callcc).  */
 
-/*@ \subsection{Arithmetic constructs}
-The constructs below are standard; they are present in almost all our
-\K language definitions. */
+  syntax Id ::= "head" | "tail" | "null?"
 
-  syntax Exp ::= Int | Bool | String | Id
-               | Exp "+" Exp           [strict prec(33) gather(E e)]
-               | Exp "-" Exp           [strict prec(33) gather(E e)]
-               | Exp "*" Exp           [strict prec(31) gather(E e)]
-               | Exp "/" Exp           [strict prec(31) gather(E e)]
-               | Exp "%" Exp           [strict prec(31) gather(E e)]
-               | "-" Exp               [strict]
-               | Exp "<" Exp           [strict prec(37)]
-               | Exp "<=" Exp          [strict prec(37)]
-               | Exp ">" Exp           [strict prec(37)]
-               | Exp ">=" Exp          [strict prec(37)]
-               | Exp "==" Exp          [strict prec(37)]
-               | Exp "!=" Exp          [strict prec(37)]
-               | Exp "and" Exp         [strict prec(55) gather(E e)]
-               | Exp "or" Exp          [strict prec(59) gather(E e)]
-               | "not" Exp             [strict prec(53)]
+  syntax Exp ::= Int | Bool | Id
+               | "(" Exp ")"             [bracket]
+//               | "-" Exp                 [strict]
+               | Exp Exp                 [strict, left]
+               | "ref" Exp
+               | "&" Id
+               | "@" Exp                 [strict]
+               | "callcc" Exp            [strict]
+               | "cons" Exp Exp          [strict]
+               > left:
+                 Exp "*" Exp             [strict, left]
+               | Exp "/" Exp             [strict, left]
+               | Exp "%" Exp             [strict, left]
+               > left:
+                 Exp "+" Exp             [strict, left]
+               | Exp "-" Exp             [strict, left]
+               > non-assoc:
+                 Exp "<" Exp             [strict, non-assoc]
+               | Exp "<=" Exp            [strict, non-assoc]
+               | Exp ">" Exp             [strict, non-assoc]
+               | Exp ">=" Exp            [strict, non-assoc]
+               | Exp "==" Exp            [strict, non-assoc]
+               | Exp "!=" Exp            [strict, non-assoc]
+               > "!" Exp                 [strict]
+               > left:
+                 Exp "&&" Exp            [strict(1), left]
+               | Exp "||" Exp            [strict(1), left]
+               > Exp ":=" Exp          [strict]
+               > "let" Bindings "in" Exp
+// change next to letrec as soon as bug is fixed
+               | "rec" Bindings "in" Exp
+               | "if" Exp "then" Exp "else" Exp  [strict(1)]
+               | "try" Exp "catch" "(" Id ")" Exp
+               > Exp ";" Exp           [seqstrict, right]
+               > "fun" Cases
 
-/*@ \subsection{Functional constructs}
-The following constructs are like those of EXP, but slightly more
-complex.  Recall that the syntax that we define in \K is not meant to
-serve as a ultimate parser for the defined language, but rather as a
-convenient notation for \K abstract syntax trees, which we prefer when
-we write the semantic rules.  Thus, like in other languages, we take
-the freedom to define the syntax in ways which are convenient both in
-terms of parsing a reasonable number of programs without a need for an
-external parser, and in terms of elegance for the semantic rules.
-Parsing precisely the desired programs or giving good parsing error
-messages have a lower priority.  In our case here, note that we want
-to be able to parse functions of the form
-``\texttt{fun (a,b) (x,y) -> a(x,y) + b(x,y)}''
-and similarly for bindings, that is, 
-``\texttt{let f (a,b) (x,y) = a(x,y) + b(x,y) in ...}''.
-
-One way to parse such expressions is to define a more ``generous''
-syntax, like we do below.  More precisely, we allow \texttt{fun} to
-take any list of expressions as first argument (first production),
-making sure that application is extended to allow any list of
-expressions to be applied to any list of expressions.  Of course, this
-syntactic relaxation permits many wrong programs to be parsed, but
-that is not a problem because we are not going to give semantics to
-wrong combinations, so those programs will get stuck; moreover, our
-type inferencer will reject those programs anyway.  In an ideal world,
-we would define a new syntactic category of space-separated
-parenthesis-enclosed identifier lists, say \textit{Parameters}, and
-then have \texttt{fun} take \textit{Parameters} as its first argument.
-Unfortunately, the current \K tool eventually collapses all the
-syntactic categories into one, $K$, and thus the space-separated
-parameters get in parsing conflict with function application.  It is
-highly recommended in the current version of the \K tool to avoid
-defining syntactic constructs which have the same signature when
-non-terminals are collapsed.  If you are willing to change the
-parameter separator from space into something else, say
-``\texttt{:}'', then you can define a more precise syntax but your
-programs will look uglier, e.g.,
-``\texttt{fun (a,b):(x,y) -> a(x,y) + b(x,y)}'', etc.
-
-Similarly, we allow \texttt{let} and \texttt{letrec} to take any
-expression in place of its binding and define the ``\texttt{=}''
-binder as an expression construct.  This allows us to use the already
-existing Boolean conjunction construct, \texttt{and}, to create larger
-bindings, e.g., like in ``\texttt{let x = 7 and y = 5 in ...}''.
-Again, semantics will be given only to the correct programs.
-Moreover, the \texttt{and} used to create binders will never be
-evaluated as a the Boolean arithmetic construct, as evaluation
-permission will never be given to the first argument of \texttt{let}
-or \texttt{letrec}.  Some desugaring macros curry function 
-declarations and group bindings, so that the semantics only needs to
-consider the cases where function declarations have the form
-``\texttt{fun (x1,...,xn) -> e}'' and where let-bindings have the form
-``\texttt{let (x1,...,xn) = (e1,...,en) in e}''
-(and similarly for \texttt{letrec}). */
-
-  syntax Exp ::= "fun" Exps "->" Exp
-               | Exps Exps             [strict prec(10) gather(E e)]
-               | Exps "=" Exps         [prec(53)]   --- Bindings
-               | "let" Exp "in" Exp
-               | "letrec" Exp "in" Exp
-               | "if" Exp
-                 "then" Exp
-                 "else" Exp            [strict(1)]
   syntax Exps ::= List{Exp,","}        [strict]
   syntax Ids  ::= List{Id,","}
-  macro fun Es1:Exps Es2:Exps -> E:Exp = fun Es1 -> fun Es2 -> E
-  macro (E1:Exp Es:Exps = E) = (E1 = fun Es -> E)
-  macro (X:Id = E:Exp) and (Xs:Ids = Es:Exps) = ((X,Xs) = (E,Es))
 
-/*@ We want to allow the syntax \texttt{()} for the empty list of
-expressions/identifiers in FUN programs, so we also add it to the
-syntax together with a desugaring macro: */
+  syntax Case  ::= Exp "->" Exp
+  syntax Cases ::= List{Case, "|"}
 
-  syntax Exps ::= "(" ")"
-  macro () = .Exps
+  syntax Binding  ::= Exp "=" Exp
+  syntax Bindings ::= List{Binding,"and"}
 
-/*@ \subsection{Lists}
-FUN lists are formed by enclosing comma-separated lists of
-expressions (i.e., terms of sort \textit{Exps}) in square brackets.
-We use the conventional Lisp/Scheme terminology for the list
-constructs: \texttt{car} extracts the first element of the list if the
-list has at least one element (and gets stuck otherwise), \texttt{cdr}
-evaluates to the rest of the list except the first element and fails
-if the list is empty, \texttt{null?} checks whether the list is empty,
-and \texttt{cons} is the dual of \texttt{car} and \texttt{cdr}
-together, that is, it places an element in from of a list. */
+//  syntax Cases ::= Exp "->" Exp
+//                 | Cases "|" Cases  [right]
+//  syntax Bindings  ::= Exp "=" Exp
+//                    | Bindings "and" Bindings  [right]
 
-  syntax Exp ::= "[" Exps "]"          [strict hybrid prec(0)]
-               | "car" Exp             [strict prec(0)]
-               | "cdr" Exp             [strict prec(0)]
-               | "null?" Exp           [strict prec(0)]
-               | "cons" Exp Exp        [strict]
+  rule P1 P2 -> E => P1 -> fun P2 -> E  [macro]
+  rule F P = E => F = fun P -> E        [macro]
+  rule [E,Es|T] => [E|[Es|T]]  when Es =/=K .Exps  [macro]
 
-/*@ \subsection{References}
-The construct \texttt{ref} takes an expression, evaluates it and
-returns a reference to where that value is stored.  This way,
-references become first class values in FUN.  The construct
-\texttt{\&} also evaluates to a reference, but one where the
-variable passed as argument stores its value.  The construct
-\texttt{*} takes a reference and evaluates to the value stored there.
-The construct \texttt{:=} takes two expressions, the first expected to
-evaluate to a reference; the value of its second argument will be
-stored at the location to which the first points (the old value is
-thus lost).  Finally, since expression evaluation now has side
-effects, it makes sense to also add a sequential composition
-construct, which is sequentially strict.  This evaluates to the value
-of its second argument; the value of the first argument is lost (which
-has therefore been evaluated only for its side effects. */
+// I wish I were able to use just parentheses for tuples ...
+// Unfortunately, that gets into parsing ambiguities with (...) for grouping
+  syntax Exp ::= "{" Exps "}"          [strict, hybrid]  // tuple
+  syntax Exp ::= "[" Exps "]"          [strict, hybrid]
+               | "[" Exps "|" Exp "]"
 
-  syntax Exp ::= "ref" Exp             [strict]
-               | "&" Id               [prec(0)]
-               | "*" Exp               [strict]
-               | Exp ":=" Exp          [strict]
-               | Exp ";" Exp           [seqstrict prec(110) gather(e E)]
-
-/*@ \subsection{Call-with-current-continuation}
-Call-with-current-continuation, named \texttt{callcc} in FUN, is a
-powerful control operator that originated in the Scheme programming
-language, but it now exists in many other functional languages.  It
-works by evaluating its argument, expected to evaluate to a function,
-and passing the current continuation, or evaluation context (or
-computation, in \K terminology), as a special value to it.  When/If
-this special value is invoked, the current context is discarded and
-replaced with the one held by the special value and the computation
-continues from there.  It is like taking a snapshot of the execution
-context at some moment in time and then, when desired, being able to
-get back in time to that point.  If you like games, it is like saving
-the game now (so you can work on your homework!) and then continuing
-the game tomorrow or whenever you wish. */
-
-  syntax Exp ::= "callcc" Exp          [strict]
-
-/*@ To highlight the power of callcc, we include exceptions in FUN by
-simply desugaring them to callcc using a macro. */
-
-  syntax Exp ::= "try" Exp "catch" "(" Id ")" Exp
-
-end module
+  syntax Id ::= "$h" | "$t" | "$l"
+  rule head => fun [$h|$t] -> $h  [macro]
+  rule tail => fun [$h|$t] -> $t  [macro]
+  rule null? => fun [.Exps] -> true | $l -> false  [macro]
+endmodule
 
 
 module FUN-UNTYPED
   imports FUN-UNTYPED-SYNTAX
-
-/*@ \section{Semantics}
-The semantics below is environment-based.  See the EXP language for an
-example of a substitution-based definition of a simpler functional
-language and AGENT for a more complex one.
-We preferred an environment-based definition here for two reasons:
-first, FUN has the variable address construct \texttt{\&x}, which
-grabs the reference of variable \texttt{x}, and this is easier to
-define in an environment-based style; and second, environment-based
-definitions tend to be more efficient when executed in \K\@. */
-
-
-/*@ \subsection{Values and results}
-We only define integers and Booleans as values here, but will add more
-values later.  We only discuss the features whose semantics is not
-identical to that in EXP or IMP\@. */
 
   syntax Val ::= Int | Bool
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val
 
-//@ \subsection{Configuration}
+rule isVal({_:Vals}) => true
 
-  configuration <T multiplicity="?">  <k color="green"> $PGM:Exp </k>
-                     <env color="violet"> .Map </env>
-                     <store color="white"> .Map </store>
-                     <nextLoc color="gray"> 0 </nextLoc>
+  configuration <T> 
+                  <k color="green"> $PGM:Exp </k>
+                  <env color="violet"> .Map </env>
+                  <store color="white"> .Map </store>
+                  <match>
+                    <task multiplicity="*">
+                      <pattern> .Exps </pattern>
+                      <value> .Vals </value>
+                    </task>
+                    <ids multiplicity="?"> .Ids </ids>
+                    <vals multiplicity="?"> .Vals </vals>
+                    <exp multiplicity="?"> .K </exp>
+                  </match>
                 </T>
-				<result multiplicity="?"> .K </result>
 
-  // termination rule; useful for making sure program finished.  
-  // Can be removed when we have better krun tools for displaying final config
-  rule <T>... <k> V:Val </k> ...</T> => <result> V </result>
-
-
-//@ \subsection{Lookup}
-
-  rule <k> X:Id => V:Val ...</k>
-       <env>... X |-> L:Nat ...</env>
+  rule <k> X:Id => V ...</k>
+       <env>... X |-> L ...</env>
        <store>... L |-> V ...</store>
 
-//@ \subsection{Arithmetic expressions}
-
   rule I1:Int + I2:Int => I1 +Int I2
-  rule _-_(I1,I2) => _-Int_(I1,I2)
-  rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=Int 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=Int 0
-  rule - I:Int => _-Int_(0,I)
-  rule I1 < I2 => I1 <Int I2
-  rule I1 <= I2 => I1 <=Int I2
-  rule I1 > I2 => I1 >Int I2
-  rule I1 >= I2 => I1 >=Int I2
+  rule I1:Int - I2:Int => I1 -Int I2
+  rule I1:Int * I2:Int => I1 *Int I2
+  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
+  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
+  rule I1:Int < I2:Int => I1 <Int I2
+  rule I1:Int <= I2:Int => I1 <=Int I2
+  rule I1:Int > I2:Int => I1 >Int I2
+  rule I1:Int >= I2:Int => I1 >=Int I2
+
   rule V1:Val == V2:Val => V1 ==K V2
-  rule V1 != V2 => V1 =/=K V2
-  rule T1:Bool and T2:Bool => T1 andBool T2
-  rule T1 or T2 => T1 orBool T2
-  rule not(T:Bool) => notBool(T)
+  rule V1:Val != V2:Val => V1 =/=K V2
 
-/*@ \subsection{Functions and Closures}
-The semantics of function and application below follow the same
-closure-based idea like in the environment-based semantics of EXP,
-although for clarity we prefer to make use of a \texttt{bindTo}
-construct like in the semantics of SIMPLE and KOOL\@. */
+  rule ! T:Bool => notBool(T)
+  rule true  && E => E
+  rule false && _ => false
+  rule true  || _ => true
+  rule false || E => E
 
-  syntax Val ::= "closure" "(" Map "," Ids "," Exp ")"
-  rule <k> fun Xs:Ids -> E:Exp => closure(Rho:Map,Xs,E) ...</k>
+
+  syntax Val ::= closure(Map,Cases)
+  rule <k> fun Cases => closure(Rho,Cases) ...</k>
        <env> Rho </env>
-  rule <k> closure(Rho,Xs,E) Vs:Vals
-        => bindTo(Xs,Vs) ~> E ~> env(Rho') ...</k>
-       <env> Rho':Map => Rho </env>
+  rule <k> closure(Rho,Cases) V:Val => match(Cases,V) ~> env(Rho') ...</k>
+       <env> Rho' => Rho </env>
 
-/*@ \subsection{Let and Letrec}
-To highlight the difference between \texttt{let} and
-\texttt{letrec}, we prefer to give them direct semantics instead of
-desugaring them like in EXP.  See the formal definitions of
-\texttt{bindTo}, \texttt{bind}, and
-\texttt{assignTo} at the end of this module.  Informally, 
-\texttt{bindTo($\it Xs$,$\it Es$)} first evaluates the expressions
-${\it Es}\in\textit{Exps}$ in the current environment (i.e., it is
-strict in its second argument), then it binds the variables in
-${\it Xs}\in\textit{Ids}$ to new locations and adds those bindings
-to the environment, and finally writes the values previously obtained
-after evaluating the expressions $\it Es$ to those new locations;
-\texttt{bind($\it Xs$)} does only the bindings of
-$\it Xs$ to new locations and adds those bindings to the
-environment; and \texttt{assignTo($\it Xs$,$\it Es$)} evaluates
-the expressions $\it Es$ in the current environment and then it
-writes the resulting values to the locations to which the variables
-$\it Xs$ are already bound to in the environment.
+  syntax K ::= match(Cases,Val)
 
-Therefore, ``\texttt{let $\it Xs$=$\it Es$'' in $\it E$} first
-evaluates $\it Es$ in the current environment, then adds new
-bindings for $\it Xs$ to fresh locations in the environment, then
-writes the values of $\it Es$ to those locations, and finally
-evaluates \textit{E} in the new environment, making sure that the
-environment is properly recovered after the evaluation of \textit{E}.
-On the other hand, \texttt{letrec} does the same things but in a
-different order: it first adds new bindings for $\it Xs$ to fresh
-locations in the environment, then it evaluates $\it Es$ in the new
-environment, then it writes the resulting values to their
-corresponding locations, and finally it evaluates \textit{E} and
-recovers the environment.  The crucial difference is that the
-expressions $\it Es$ now see the locations of the variables
-$\it Xs$ in the environment, so if they are functions, which is
-typically the case with \texttt{letrec}, their closures will
-encapsulate in their environments the bindings of all the bound
-variables, including themselves (thus, we may have a closure value
-stored at location \textit{L}, whose environment contains a binding of
-the form $\textit{F} \mapsto \textit{L}$; this way, the closure can
-invoke itself). */
+// initiate matching
+  rule <k> match(P -> E | Cases, V) => match(Cases,V) ...</k>
+       <match> . => <task> <pattern> P </pattern> <value> V </value> </task>
+                 <exp> E </exp> <ids> .Ids </ids> <vals> .Exps </vals> </match>
+// success
+  rule <k> match(_,_) => bindTo(Xs,Vs) ~> E ...</k>
+       <match> <ids> Xs </ids> <vals> Vs </vals> <exp> E </exp> => .  </match>
+// generate new tasks
+  rule <pattern> P,Ps => Ps </pattern> <value> V,Vs => Vs </value>
+       (. => <task> <pattern> P </pattern> <value> V </value> </task>)
+// collect terminated tasks 
+  rule <task> <pattern> . </pattern> <value> . </value> </task> => .
+// case 1: value
+  rule <pattern> V:Val => . </pattern> <value> V => . </value> 
+// case 2: variable
+  rule <pattern> X:Id => . </pattern> <value> V:Val => . </value>
+       <ids> Xs => X,Xs </ids> <vals> Vs => V,Vs </vals>
+    when notBool(X in Xs)
+// case 3: tuple
+  rule <pattern> {Ps} => Ps </pattern> <value> {Vs} => Vs </value>
+// case 4: list with explicit elements
+  rule <pattern> [Ps] => Ps </pattern> <value> [Vs] => Vs </value>
+// case 5: list with [head|tail]
+  rule <pattern> [P|Ps] => P,Ps </pattern> <value> [V,Vs] => V,[Vs] </value>
+// empty match cell when fail: // make sure use kompile -transition="otherwise"
+  rule <match> <exp>_</exp> _ => . </match>  [otherwise]
 
-  rule <k> let Xs = Es:Exps in E
-        => bindTo(Xs,Es) ~> E ~> env(Rho) ...</k>
+  rule <k> let Bs in E
+           => bindTo(getIds(Bs),getExps(Bs))
+              ~> E
+                 ~> env(Rho) ...</k>
        <env> Rho </env>
 
-  rule <k> letrec Xs = Es:Exps in E
-        => bind(Xs) ~> assignTo(Xs,Es) ~> E ~> env(Rho) ...</k>
+  rule <k> rec Bs in E
+           => bind(getIds(Bs))
+              ~> assignTo(getIds(Bs),getExps(Bs))
+                 ~> E
+                    ~> env(Rho) ...</k>
        <env> Rho </env>
-
-/*@ \subsection{Callcc}
-Call-with-current continuation is quite easy to define in \K.  We
-first need to define a special value wrapping an execution context,
-that is, an environment saying where the variables should be looked up
-and a computation structure saying what is left to execute (in a
-substitution-based definition, like that of AGENT, this special value
-would be even simpler, as it would only need to wrap the computation
-structure).  Then \texttt{callcc} creates such a value containing the
-current environment and the current remaining computation, and passes
-it to its argument function.  When/If invoked, the special value
-replaces the current execution context with its own and continues the
-execution normally. */
-
-  syntax Val ::= "cc" "(" Map "," K ")"
-  rule <k> (callcc V => V cc(Rho,K)) ~> K </k> <env> Rho </env> 
-  rule <k> cc(Rho,K:K) V ~> _ => V ~> K </k> <env> _ => Rho </env> 
-
-/*@ \subsection{Try-catch construct} - desugars into callcc */
-
-  syntax Id ::= "$continuation" | "$value" --- | "throw"
-
---- assume that continuation and value are not free in E and E'
-  rule try E catch(X:Id) E':Exp
-      => callcc (fun $continuation
-                -> (fun (String2Id("throw")) -> E:Exp)
-                     (fun $value -> $continuation ((fun X -> E') $value)))
-  [structural]
-
-
-//@ \subsection{Conditional}
-
+  
   rule if  true then E else _ => E
-  rule if false then _ else E => E 
-
-/*@ \subsection{Lists}
-The semantics of lists below is self-explanatory. */
-
-  rule car [V,_:Vals] => V
-  rule cdr [_:Val,Vs] => [Vs]
-  rule null? [] => true
-  rule null? [_:Val,_:Vals] => false
-  rule cons V [Vs] => [V,Vs]
-  define 'isVal([Vs:Vals]) => true
-
-/*@ \subsection{References}
-The semantics of references is also self-explanatory, noting that
-locations in FUN are nothing but natural numbers.  Thus, the FUN
-programmer is allowed to even do arithmetic with references.  To
-prevent that, you can make references different from natural numbers,
-for example to be terms of the form \texttt{loc($N$)}, where $N$
-ranges over natural numbers, and replace the successor operation
-currently used to increment the next available location counter with a
-special next-location operation that works on locations instead of
-natural numbers.  Note that \texttt{\&$X$} grabs the location of $X$
-from the environment; this operation would be harder to define in a
-substitution-based approach. */
-
-  rule <k> ref V => L ...</k>
-       <store>... . => L |-> V ...</store>
-       <nextLoc> L => L +Int 1 </nextLoc>
-  rule <k> &X => L ...</k> <env>... X|->L ...</env>
-  rule <k> *L => V ...</k> <store>... L|->V ...</store>
-  rule <k> L:=V => V  ...</k> <store>... L|->(_=>V) ...</store>
-  rule V1; V2 => V2
+  rule if false then _ else E => E
 
 
-/*@ \subsection{Auxiliary operations}
-The environment recovery operation is the same as for EXP and other
-languages provided with the \K distribution.  The remaining three
-operations have already been explained when we discussed \texttt{let}
-and \texttt{letrec} above. */
 
-//@ \subsubsection{Environment recovery}
+//@ \subsection{Auxiliary operations}
 
-  syntax K ::= "env" "(" Map ")"
-  rule (env(_) => .) ~> env(_)            [structural]   --- tail recursion
-  rule <k> V ~> (env(Rho) => .) ...</k>
-       <env> _ => Rho </env>              [structural]
+//@ \subsubsection{Environment recovery}        
+
+  syntax K ::= env(Map)
+  rule (env(_) => .) ~> env(_)  [anywhere]   // tail recursion
+  rule <k> _:Val ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>  [structural]
 
 //@ \subsubsection{bindTo and bind}
 
-  syntax K ::= "bindTo" "(" Ids "," Exps ")"        [strict(2)]
-             | "bind" "(" Ids ")"
+  syntax K ::= bindTo(Ids,Exps)        [strict(2)]
+             | bind(Ids)
 
-  rule <k> bindTo(.Ids,.Vals) => . ...</k>             [structural]
-  rule <k> bindTo((X,Xs => Xs),(V,Vs => Vs)) ...</k>
-       <env> Rho => Rho[N/X] </env>
-       <store>... . => N |-> V ...</store>
-       <nextLoc> N:Nat => N +Int 1 </nextLoc>              [structural]
+  rule bindTo(.Ids,.Vals) => .  [structural]
+  rule <k> bindTo((X:Id,Xs => Xs),(V:Val,Vs => Vs)) ...</k>
+       <env> Rho => Rho[L/X] </env>
+       <store>... . => L |-> V ...</store>
+    when fresh(L:Int)  [structural]
 
-  rule <k> bind(.Ids) => . ...</k>                      [structural]
-  rule <k> bind(X,Xs => Xs) ...</k>
-       <env> Rho => Rho[N/X] </env>
-       <nextLoc> N => N +Int 1 </nextLoc>                   [structural]
+  rule bind(.Ids) => .          [structural]
+  rule <k> bind(X:Id,Xs => Xs) ...</k>
+       <env> Rho => Rho[L/X] </env>
+    when fresh(L:Int)  [structural]
 
-//@ \subsubsection{assignTo}
-
-  syntax K ::= "assignTo" "(" Ids "," Exps ")"  [strict(2)]
+//@ \subsubsection{assignTo}                                                    
+  syntax K ::= assignTo(Ids,Exps)  [strict(2)]
 
   rule <k> assignTo(.Ids,.Vals) => . ...</k>            [structural]
-  rule <k> assignTo((X,Xs => Xs),(V,Vs => Vs)) ...</k>
+  rule <k> assignTo((X:Id,Xs => Xs),(V:Val,Vs => Vs)) ...</k>
        <env>... X |-> L ...</env>
-       <store>... . => L |-> V ...</store>                [structural]
+       <store>... . => L |-> V ...</store>              [structural]
 
-end module
+//@ \subsubsection{getters}
+
+  syntax Ids ::= getIds(Bindings)  [function]
+  rule getIds(.Bindings) => .Ids
+  rule getIds(X:Id=_ and Bs) => X,getIds(Bs)
+
+  syntax Exps ::= getExps(Bindings)  [function]
+  rule getExps(.Bindings) => .Exps
+  rule getExps(_:Id=E and Bs) => E,getExps(Bs)
+
+  syntax Bool ::= Id "in" Ids  [function]
+  rule X:Id in (X,_) => true
+  rule X:Id in (Y:Id,Xs => Xs) when X =/=K Y
+  rule _:Id in .Ids => false
+
+endmodule
