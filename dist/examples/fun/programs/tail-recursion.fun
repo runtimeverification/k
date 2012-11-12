@@ -6,5 +6,5 @@
 // this program (4-5 times!), because it makes maude's matcher slower.
 
 let n = ref 1000
-in letrec f() = if *n>0 then (n := *n - 1; f()) else 0
-   in f()
+in rec f{} = if @n>0 then n := @n - 1; f{} else 0
+   in f{}

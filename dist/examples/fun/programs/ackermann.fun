@@ -1,5 +1,4 @@
-letrec ackermann(m,n) =
-         if m == 0 then n + 1 else
-         if n == 0 then ackermann(m - 1, 1) else
-         ackermann(m - 1, ackermann(m, n - 1))
-in ackermann(2,3)
+rec ack = fun {0,n} -> n + 1
+          |   {m,0} -> ack {m - 1, 1}
+          |   {m,n} -> ack {m - 1, ack {m, n - 1}}
+in ack {2,3}
