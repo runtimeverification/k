@@ -94,7 +94,7 @@ lexical syntax
 	"configuration"	-> HIDDEN {reject}
 	"endmodule"		-> HIDDEN {reject}
 	"endinterface"	-> HIDDEN {reject}
-	"#"?[A-Z\-]+	-> MODNAME
+	"#"?{[a-z0-9A-Z\_]+ "-"}+	-> MODNAME
 
 	%% String declaration
 	"\"" StringChar* "\"" -> STRING
@@ -115,7 +115,7 @@ lexical syntax
 lexical restrictions
 	HIDDEN			-/- ~[\t\n\r\ ]
 	KLABEL			-/- ~[\t\n\r\ ]
-	MODNAME			-/- [A-Z\-]
+	MODNAME			-/- [a-z0-9A-Z\-\_]
 	BASICID 		-/- [a-zA-Z0-9\{\}]
 	ID 				-/- [a-zA-Z0-9\{\}]
 	%%COMPOSEDID		-/- [a-zA-Z0-9\{\}]
