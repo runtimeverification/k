@@ -28,8 +28,10 @@ public class AutomaticModuleImportsTransformer extends BasicTransformer {
 			node.appendModuleItem(new Import("SHARED"));
 		else
 			node.appendModuleItem(new Import("K"));
-		if (!node.isPredefined() && !node.getName().equals("SHARED"))
+		if (!node.isPredefined() && !node.getName().equals("SHARED")) {
 			node.appendModuleItem(new Import("URIS"));
+			node.appendModuleItem(new Import("SYMBOLIC-K"));
+		}
 		return super.transform(node);
 	}
 
