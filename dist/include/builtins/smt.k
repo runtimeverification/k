@@ -1,12 +1,7 @@
 require "builtins/builtins.k"
-// require "builtins/int-symbolic.k"
-// require "builtins/bool-symbolic.k"
 
 module SMTLIB-CONVERSION
   imports BUILTIN-HOOKS
-//  imports INT-SYMBOLIC
-//  imports BOOL-SYMBOLIC  
-
 
   // convert Bool to smtlib
   syntax String ::= "Smtlib" "(" K ")" [function]
@@ -34,7 +29,7 @@ module SMTLIB-CONVERSION
 
   rule Smtlib(I1:Int +Int I2:Int) => "(+ " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")"
   rule Smtlib(I1:Int *Int I2:Int) => "(* " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")"
-  rule Smtlib(I1:Int /Int I2:Int) => "(/ " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")"
+  rule Smtlib(I1:Int /Int I2:Int) => "(div " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")"
   rule Smtlib(I1:Int -Int I2:Int) => "(- " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")"
   rule Smtlib(I1:Int %Int I2:Int) => "(% " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")"
   
@@ -50,7 +45,6 @@ module SMTLIB-CONVERSION
   //@ Collecting constants declarations
   
   syntax Set ::= "collectConstants" "(" K ")" [function]
-//               | "collectConstants" "(" Int ")" [function]
 
   // ConstSmtlib: booleans
   rule collectConstants(true) => .Set
@@ -95,7 +89,9 @@ module SMT-SYNTAX-HOOKS
 
   syntax SmtResponse ::= "checkSat" "(" K ")" [function]
                        | "getModel" "(" K ")" [function]
-					   
+
+  syntax Bool ::= SmtResponse "=/=" SmtResponse
+		| SmtResponse "==" SmtResponse
 endmodule
 
 module SMT-HOOKS
@@ -189,5 +185,14 @@ module S-EXP-PARSER
   rule getFirstBalancedClosedParen(S:String, Position:Int, Count:Int, Count) => Position
 
   rule stoken(S:String) => . when trim(S) ==String ""
+
+
+  // equalities
+  rule sat =/= unsat => true
+  rule unsat =/= sat => true
+  rule unknown =/= unsat => true
+  rule unsat =/= unknown => true
+  rule unknown =/= sat => true
+  rule sat =/= unknown => true
 
 endmodule
