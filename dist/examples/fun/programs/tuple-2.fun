@@ -1,4 +1,6 @@
-// testing tuple binding
+// testing nested tuples
 
-let {x,y,z} = {1,2,3}
-in x + y + z
+let x = 1
+and y = {2}
+and z = {3,4}
+in {{x,y},z}
