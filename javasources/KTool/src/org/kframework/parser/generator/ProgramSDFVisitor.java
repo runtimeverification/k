@@ -44,10 +44,11 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
 			// filter the productions according to their form
 			for (Production prd : prt.getProductions()) {
+				startSorts.add(prd.getSort());
+
 				if (prd.isSubsort()) {
 					outsides.add(prd);
-					if (prd.getSort().equals("Start"))
-						startSorts.add(((Sort) prd.getItems().get(0)).getName());
+					startSorts.add(((Sort) prd.getItems().get(0)).getName());
 				} else if (prd.isConstant()) {
 					constants.add(prd);
 				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {

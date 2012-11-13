@@ -47,6 +47,7 @@ public class DefinitionHelper {
 	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
 	private static java.util.Set<Subsort> priorities = new HashSet<Subsort>();
 	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
+	public static String startSymbolPgm = "K";
 	public static File dotk = null;
 
 	public static void addCellDecl(Cell c) {
@@ -134,9 +135,10 @@ public class DefinitionHelper {
 
 	/**
 	 * Check to see if the two klabels are in the wrong order according to the priority filter.
+	 * 
 	 * @param klabelParent
 	 * @param klabelChild
-	 * @return 
+	 * @return
 	 */
 	public static boolean isPriorityWrong(String klabelParent, String klabelChild) {
 		return priorities.contains(new Subsort(klabelParent, klabelChild));

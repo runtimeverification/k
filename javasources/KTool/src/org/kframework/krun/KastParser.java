@@ -5,6 +5,7 @@ import java.io.File;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -50,7 +51,7 @@ public class KastParser {
 
 		String content = FileUtil.getFileContent(f.getAbsolutePath());
 
-		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content);
+		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, DefinitionHelper.startSymbolPgm);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
 		XmlLoader.addFilename(doc.getFirstChild(), pgm);

@@ -1,4 +1,5 @@
 package org.kframework.utils;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -37,7 +38,7 @@ public class ProgramLoader {
 
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
-		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content);
+		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, DefinitionHelper.startSymbolPgm);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);

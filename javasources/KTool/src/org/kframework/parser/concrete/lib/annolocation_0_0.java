@@ -33,10 +33,17 @@ public class annolocation_0_0 extends Strategy {
 		context.push("annolocation_0_0");
 
 		IStrategoTerm loc = context.invokePrimitive("SSL_EXT_origin_location", currentList, NO_STRATEGIES, new IStrategoTerm[] { currentList });
-		IStrategoInt loc0 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(0)).intValue());
-		IStrategoInt loc1 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(1)).intValue() + 1);
-		IStrategoInt loc2 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(2)).intValue());
-		IStrategoInt loc3 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(3)).intValue() + 2);
+		IStrategoInt loc0 = context.getFactory().makeInt(0);
+		IStrategoInt loc1 = context.getFactory().makeInt(0);
+		IStrategoInt loc2 = context.getFactory().makeInt(0);
+		IStrategoInt loc3 = context.getFactory().makeInt(0);
+
+		if (loc != null && loc.getAllSubterms().length == 4) {
+			loc0 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(0)).intValue());
+			loc1 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(1)).intValue() + 1);
+			loc2 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(2)).intValue());
+			loc3 = context.getFactory().makeInt(((IStrategoInt) loc.getSubterm(3)).intValue() + 2);
+		}
 
 		IStrategoList locList = context.getFactory().makeList(context.getFactory().makeTuple(loc0, loc1, loc2, loc3));
 		currentList = context.getFactory().annotateTerm(currentList, locList);

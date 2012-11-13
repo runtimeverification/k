@@ -7,12 +7,8 @@ import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
-import org.kframework.kil.loader.CollectConsesVisitor;
-import org.kframework.kil.loader.CollectPrioritiesVisitor;
-import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
@@ -23,7 +19,6 @@ import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
-import org.kframework.parser.generator.AddConsesVisitor;
 import org.kframework.parser.generator.BasicParser;
 import org.kframework.parser.generator.DefinitionSDF;
 import org.kframework.parser.generator.ParseConfigsFilter;
@@ -59,7 +54,7 @@ public class DefinitionLoader {
 	}
 
 	/**
-	 * TODO: make this the new basic parsing step. 1. slurp 2. gen files 3. gen TBLs 4. import files in stratego 5. parse configs 6. parse rules 7. ???
+	 * step. 1. slurp 2. gen files 3. gen TBLs 4. import files in stratego 5. parse configs 6. parse rules 7. ???
 	 * 
 	 * @param mainFile
 	 * @param mainModule
@@ -99,11 +94,7 @@ public class DefinitionLoader {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
 			}
 
-			def.accept(new UpdateReferencesVisitor());
-			def.accept(new AddConsesVisitor());
-			def.accept(new CollectConsesVisitor());
-			def.accept(new CollectSubsortsVisitor());
-			def.accept(new CollectPrioritiesVisitor());
+			def.preprocess();
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Basic Parsing");

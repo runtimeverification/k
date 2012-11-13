@@ -10,6 +10,7 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.StringUtil;
 
 /**
@@ -44,13 +45,21 @@ public class ProgramSDF {
 		sdf.append(psdfv.sdf);
 
 		sdf.append("context-free start-symbols\n");
-		sdf.append("	Start\n");
+		sdf.append("\n%% start symbols\n	");
+
+		for (String s : psdfv.startSorts) {
+			if (!s.equals("Start"))
+				sdf.append(StringUtil.escapeSortName(s) + " ");
+		}
+
+		sdf.append("K\n");
 		sdf.append("context-free syntax\n");
 
 		for (Production p : psdfv.outsides) {
 			if (p.isListDecl()) {
 				UserList si = (UserList) p.getItems().get(0);
-				sdf.append("	{" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\"}* -> " + StringUtil.escapeSortName(p.getSort()) + " {cons(\"" + p.getAttributes().get("cons") + "\")}\n");
+				sdf.append("	{" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\"}* -> " + StringUtil.escapeSortName(p.getSort()) + " {cons(\""
+						+ p.getAttributes().get("cons") + "\")}\n");
 			} else {
 				sdf.append("	");
 				List<ProductionItem> items = p.getItems();
@@ -72,14 +81,6 @@ public class ProgramSDF {
 		for (String ss : psdfv.sorts)
 			sdf.append("	" + StringUtil.escapeSortName(ss) + " -> InsertDz" + StringUtil.escapeSortName(ss) + "\n");
 
-		sdf.append("\n%% start symbols\n");
-		if (psdfv.startSorts.size() == 0) {
-			for (String s : psdfv.userSort) {
-				if (!s.equals("Start"))
-					sdf.append("	" + StringUtil.escapeSortName(s) + "		-> Start\n");
-			}
-		}
-
 		sdf.append("\n\n");
 		sdf.append("	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n");
 		sdf.append("	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n");
@@ -93,8 +94,13 @@ public class ProgramSDF {
 		sdf.append("	DzDzBOOL	-> DzDzBool\n");
 		sdf.append("	DzDzSTRING	-> DzDzString\n");
 		sdf.append("	DzDzFLOAT	-> DzDzFloat\n");
-
 		sdf.append("\n");
+
+		sdf.append("\n%% start symbols subsorts\n");
+		for (String s : psdfv.startSorts) {
+			if (!Sort.isBasesort(s) && !DefinitionHelper.isListSort(s))
+				sdf.append("	" + StringUtil.escapeSortName(s) + "		-> K\n");
+		}
 
 		sdf.append("lexical syntax\n");
 		for (Production prd : psdfv.constants) {

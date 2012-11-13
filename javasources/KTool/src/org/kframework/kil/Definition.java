@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.CollectPrioritiesVisitor;
+import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -14,6 +16,7 @@ import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.parser.generator.AddConsesVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -116,8 +119,11 @@ public class Definition extends ASTNode {
 	public void preprocess() {
 		// Collect information
 		this.accept(new UpdateReferencesVisitor());
+		this.accept(new AddConsesVisitor());
 		this.accept(new CollectConsesVisitor());
 		this.accept(new CollectSubsortsVisitor());
+		this.accept(new CollectPrioritiesVisitor());
+		this.accept(new CollectStartSymbolPgmVisitor());
 		this.accept(new CollectConfigCellsVisitor());
 	}
 
@@ -136,8 +142,8 @@ public class Definition extends ASTNode {
 				modules.add((Module) i);
 		}
 		if (modules.size() != 1) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this
-					.getLocation()));
+			String msg = "Should have been only one module when calling this method.";
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, msg, this.getFilename(), this.getLocation()));
 		}
 		return modules.get(0);
 	}
@@ -154,8 +160,8 @@ public class Definition extends ASTNode {
 			}
 		}
 		if (moduleCount != 1) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Should have been only one module when calling this method.", this.getFilename(), this
-					.getLocation()));
+			String msg = "Should have been only one module when calling this method.";
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, msg, this.getFilename(), this.getLocation()));
 		}
 		Definition result = new Definition(this);
 		result.setItems(newDefinitionItems);
