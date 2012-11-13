@@ -75,7 +75,7 @@
 			<format property="date" pattern="EEE MMM d HH:mm:ss z yyyy" />
 		</tstamp>
 
-		<condition property="k-version" value="nigthly build">
+		<condition property="k-version" value="nightly build">
 			<equals arg1="${version}" arg2="latest" />
 		</condition>
 		<condition property="k-version" value="version ${version}">
