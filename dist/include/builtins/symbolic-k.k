@@ -6,7 +6,7 @@ module SYMBOLIC-K
   rule
     isSymbolicK(KL:KLabel(LK:List{K}))
   =>
-    #if substrString(KLabel2String(KL), 0, 5) ==String "'#sym" #then
+    #if substrString(KLabel2String(KL), 0, 5) ==K "'#sym" #then
       true
     #else
       isSymbolicK(LK)
