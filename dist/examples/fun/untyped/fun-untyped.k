@@ -1,12 +1,11 @@
 module FUN-UNTYPED-SYNTAX
 
-  syntax Id ::= "head" | "tail" | "null?"
+  syntax Id ::= "head" | "tail" | "null?" | "ref" | "throw"
 
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"             [bracket]
 //               | "-" Exp                 [strict]
                | Exp Exp                 [strict, left]
-               | "ref" Exp
                | "&" Id
                | "@" Exp                 [strict]
                | "callcc" Exp            [strict]
@@ -35,8 +34,13 @@ module FUN-UNTYPED-SYNTAX
                | "rec" Bindings "in" Exp
                | "if" Exp "then" Exp "else" Exp  [strict(1)]
                | "try" Exp "catch" "(" Id ")" Exp
-               > Exp ";" Exp           [seqstrict, right]
+               > Exp ";" Exp           [strict(1), right]
                > "fun" Cases
+// I wish I were able to use just parentheses for tuples ...
+// Unfortunately, that gets into parsing ambiguities with (...) for grouping
+               | "{" Exps "}"          [strict]  // tuple
+               | "[" Exps "]"          [strict]  // lists
+               | "[" Exps "|" Exp "]"            // list [head|tail] pattern
 
   syntax Exps ::= List{Exp,","}        [strict]
   syntax Ids  ::= List{Id,","}
@@ -47,25 +51,18 @@ module FUN-UNTYPED-SYNTAX
   syntax Binding  ::= Exp "=" Exp
   syntax Bindings ::= List{Binding,"and"}
 
-//  syntax Cases ::= Exp "->" Exp
-//                 | Cases "|" Cases  [right]
-//  syntax Bindings  ::= Exp "=" Exp
-//                    | Bindings "and" Bindings  [right]
+  rule P1 P2 -> E => P1 -> fun P2 -> E                       [macro]
+  rule F P = E => F = fun P -> E                             [macro]
+  rule [E:Exp,Es|T] => [E|[Es|T]]  when Es =/=K .Exps        [macro]
 
-  rule P1 P2 -> E => P1 -> fun P2 -> E  [macro]
-  rule F P = E => F = fun P -> E        [macro]
-  rule [E,Es|T] => [E|[Es|T]]  when Es =/=K .Exps  [macro]
-
-// I wish I were able to use just parentheses for tuples ...
-// Unfortunately, that gets into parsing ambiguities with (...) for grouping
-  syntax Exp ::= "{" Exps "}"          [strict, hybrid]  // tuple
-  syntax Exp ::= "[" Exps "]"          [strict, hybrid]
-               | "[" Exps "|" Exp "]"
-
-  syntax Id ::= "$h" | "$t" | "$l"
-  rule head => fun [$h|$t] -> $h  [macro]
-  rule tail => fun [$h|$t] -> $t  [macro]
-  rule null? => fun [.Exps] -> true | $l -> false  [macro]
+  syntax Id ::= "$h" | "$t" | "$l" | "$x" | "$k" | "$v"
+  rule head => fun [$h|$t] -> $h                             [macro]
+  rule tail => fun [$h|$t] -> $t                             [macro]
+  rule null? => fun [.Exps] -> true | [$h|$t] -> false       [macro]
+  rule ref => fun $x -> & $x                                 [macro]
+  rule try E catch(X) E'
+    => callcc (fun $k -> (fun throw -> E)
+                         (fun $v -> $k ((fun X -> E') $v)))  [macro]
 endmodule
 
 
@@ -77,20 +74,17 @@ module FUN-UNTYPED
   syntax Exp ::= Val
   syntax KResult ::= Val
 
-rule isVal({_:Vals}) => true
+// the "function" tag should not be needed; currently needed due to a tool bug
+  rule isVal({_:Vals}) => true  [function]
+  rule isVal([_:Vals]) => true  [function]
 
-  configuration <T> 
+  configuration <T color="yellow"> 
                   <k color="green"> $PGM:Exp </k>
                   <env color="violet"> .Map </env>
                   <store color="white"> .Map </store>
-                  <match>
-                    <task multiplicity="*">
-                      <pattern> .Exps </pattern>
-                      <value> .Vals </value>
-                    </task>
-                    <ids multiplicity="?"> .Ids </ids>
-                    <vals multiplicity="?"> .Vals </vals>
-                    <exp multiplicity="?"> .K </exp>
+                  <match color="black">
+                    <task color="red" multiplicity="?"> .Bag </task>
+                    <then color="blue" multiplicity="?"> .K </then>
                   </match>
                 </T>
 
@@ -126,54 +120,60 @@ rule isVal({_:Vals}) => true
 
   syntax K ::= match(Cases,Val)
 
+  syntax BagItem ::= Exps "::" Exps
+
 // initiate matching
-  rule <k> match(P -> E | Cases, V) => match(Cases,V) ...</k>
-       <match> . => <task> <pattern> P </pattern> <value> V </value> </task>
-                 <exp> E </exp> <ids> .Ids </ids> <vals> .Exps </vals> </match>
+  rule <k> match((P:Exp -> E:Exp | Cases => Cases), V:Val) ...</k>
+       <match> . => <task> P::V </task> <then> bindTo(.Ids,.Vals) ~> E </then>
+       </match>
 // success
-  rule <k> match(_,_) => bindTo(Xs,Vs) ~> E ...</k>
-       <match> <ids> Xs </ids> <vals> Vs </vals> <exp> E </exp> => .  </match>
+  rule <k> match(_,_) => K ...</k> (<task> . </task> <then> K </then> => .)
 // generate new tasks
-  rule <pattern> P,Ps => Ps </pattern> <value> V,Vs => Vs </value>
-       (. => <task> <pattern> P </pattern> <value> V </value> </task>)
-// collect terminated tasks 
-  rule <task> <pattern> . </pattern> <value> . </value> </task> => .
+  rule P:Exp,Ps :: V:Val,Vs => P::V  Ps::Vs  when Ps =/=K .Exps
+// collect terminated tasks
+  rule .Exps :: .Exps => .
 // case 1: value
-  rule <pattern> V:Val => . </pattern> <value> V => . </value> 
+  rule V:Val :: V => .
 // case 2: variable
-  rule <pattern> X:Id => . </pattern> <value> V:Val => . </value>
-       <ids> Xs => X,Xs </ids> <vals> Vs => V,Vs </vals>
+  rule <task>... X:Id :: V:Val => . ...</task>
+       <then> bindTo((Xs => X,Xs),(Vs => V,Vs)) ...</then>
     when notBool(X in Xs)
 // case 3: tuple
-  rule <pattern> {Ps} => Ps </pattern> <value> {Vs} => Vs </value>
+  rule {Ps:Exps}::{Vs:Vals} => Ps::Vs
 // case 4: list with explicit elements
-  rule <pattern> [Ps] => Ps </pattern> <value> [Vs] => Vs </value>
+  rule [Ps:Exps]::[Vs:Vals] => Ps::Vs
 // case 5: list with [head|tail]
-  rule <pattern> [P|Ps] => P,Ps </pattern> <value> [V,Vs] => V,[Vs] </value>
+  rule [P:Exp|T:Exp]::[V:Val,Vs:Vals] => P::V  T::[Vs]
 // empty match cell when fail: // make sure use kompile -transition="otherwise"
-  rule <match> <exp>_</exp> _ => . </match>  [otherwise]
+  rule <match> <task>_</task> _ => . </match>  [otherwise]
 
   rule <k> let Bs in E
-           => bindTo(getIds(Bs),getExps(Bs))
-              ~> E
-                 ~> env(Rho) ...</k>
+        => bindTo(ids(Bs),exps(Bs)) ~> E ~> env(Rho) ...</k>
        <env> Rho </env>
 
   rule <k> rec Bs in E
-           => bind(getIds(Bs))
-              ~> assignTo(getIds(Bs),getExps(Bs))
-                 ~> E
-                    ~> env(Rho) ...</k>
+        => bind(ids(Bs)) ~> assignTo(ids(Bs),exps(Bs)) ~> E ~> env(Rho)...</k>
        <env> Rho </env>
   
   rule if  true then E else _ => E
   rule if false then _ else E => E
 
+  rule cons V:Val [Vs:Vals] => [V,Vs]
+
+  rule <k> & X => L ...</k>  <env>... X |-> L </env>
+  rule <k> @ L => V ...</k>  <store>... L |-> V ...</store>
+  rule <k> L := V:Val => V ...</k>  <store>... L |-> (_=>V) ...</store>
+
+  rule _:Val; E => E
+
+  syntax Val ::= cc(Map,K)
+  rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k>  <env> Rho </env>
+  rule <k> cc(Rho,K) V:Val ~> _ => V ~> K </k>  <env> _ => Rho </env>
 
 
 //@ \subsection{Auxiliary operations}
 
-//@ \subsubsection{Environment recovery}        
+//@ \subsubsection{Environment recovery}
 
   syntax K ::= env(Map)
   rule (env(_) => .) ~> env(_)  [anywhere]   // tail recursion
@@ -195,7 +195,8 @@ rule isVal({_:Vals}) => true
        <env> Rho => Rho[L/X] </env>
     when fresh(L:Int)  [structural]
 
-//@ \subsubsection{assignTo}                                                    
+//@ \subsubsection{assignTo}
+
   syntax K ::= assignTo(Ids,Exps)  [strict(2)]
 
   rule <k> assignTo(.Ids,.Vals) => . ...</k>            [structural]
@@ -205,13 +206,13 @@ rule isVal({_:Vals}) => true
 
 //@ \subsubsection{getters}
 
-  syntax Ids ::= getIds(Bindings)  [function]
-  rule getIds(.Bindings) => .Ids
-  rule getIds(X:Id=_ and Bs) => X,getIds(Bs)
+  syntax Ids ::= ids(Bindings)  [function]
+  rule ids(.Bindings) => .Ids
+  rule ids(X:Id=_ and Bs) => X,ids(Bs)
 
-  syntax Exps ::= getExps(Bindings)  [function]
-  rule getExps(.Bindings) => .Exps
-  rule getExps(_:Id=E and Bs) => E,getExps(Bs)
+  syntax Exps ::= exps(Bindings)  [function]
+  rule exps(.Bindings) => .Exps
+  rule exps(_:Id=E and Bs) => E,exps(Bs)
 
   syntax Bool ::= Id "in" Ids  [function]
   rule X:Id in (X,_) => true

@@ -1,4 +1,4 @@
 let second = fun [x,y|t] -> y
-in [1, 3, 5, 2, 4, 0, -1, -5]
+in second [1, 3, 5, 0, -2]
 
 // 3

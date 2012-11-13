@@ -5,7 +5,7 @@
 
 
 rec max = fun [h] x y -> h
-          |   [h,t] x y -> let x = max t
+          |   [h|t] x y -> let x = max t x y
                            in  if h > x then h else x
 and f = fun 0 -> 1
         |   x -> x * f(x - 1)
