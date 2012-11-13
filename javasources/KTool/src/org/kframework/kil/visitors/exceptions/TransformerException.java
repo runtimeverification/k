@@ -17,13 +17,10 @@ public class TransformerException extends Exception {
 
 	@Override
 	public void printStackTrace() {
-		super.printStackTrace();
 		report();
 	}
 
 	public void report() {
 		GlobalSettings.kem.register(exception);
 	}
-	
-	
 }

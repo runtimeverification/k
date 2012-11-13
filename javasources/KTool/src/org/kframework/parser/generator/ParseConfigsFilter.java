@@ -69,10 +69,11 @@ public class ParseConfigsFilter extends BasicTransformer {
 				config = config.accept(new AmbFilter());
 
 				return config;
+			} catch (TransformerException te) {
+				te.printStackTrace();
 			} catch (Exception e) {
-				e.printStackTrace();
-				GlobalSettings.kem
-						.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse configuration: " + e.getLocalizedMessage(), ss.getFilename(), ss.getLocation()));
+				String msg = "Cannot parse configuration: " + e.getLocalizedMessage();
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getFilename(), ss.getLocation()));
 			}
 		}
 		return ss;
