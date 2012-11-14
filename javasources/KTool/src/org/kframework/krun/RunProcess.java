@@ -146,6 +146,10 @@ public class RunProcess {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		if (maude.returnValue != 0) {
+			System.out.println("Error " + maude.returnValue + " when executing Maude.");
+			System.exit(1);
+		}
 		return maude.returnValue;
 	}
 
@@ -164,10 +168,11 @@ public class RunProcess {
 					if (content.contains("GLIBC")) {
 						String fileName = new File(K.maude_err).getName();
 						String fullPath = new File(K.kdir + K.fileSeparator + "krun" + K.fileSeparator + fileName).getCanonicalPath();
-						Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
-						System.out.println("\nA known bug in the current version of the Maude rewrite engine\n" +
+						System.out.println(
+						"\nError: A known bug in the current version of the Maude rewrite engine\n" +
 						"prohibits running K with I/O on certain architectures.\n" +
-								"If non I/O programs and definitions work but I/O ones fail, lease let us know and we'll try helping you fix it.");
+								"If non I/O programs and definitions work but I/O ones fail, \n" +
+								"please let us know and we'll try helping you fix it.\n" );
 						return;
 
 					}
