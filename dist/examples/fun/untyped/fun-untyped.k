@@ -415,6 +415,10 @@ other rewrite-based frameworks). */
     when notBool(X in Xs)
 
 /*@ Finally, we empty the \textsf{match} cell when the matching fails.
+This way, the next case (if any) will be selected by the first
+pattern-matching rule above; if no case it left, that is, if all cases
+failed, then the computation will get stuck with a \texttt{match}
+item on top of the \textsf{k} cell holding the empty set of cases.
 Make sure you use the command ``\texttt{kompile -transition="otherwise"}''
 when you generate your language model, to make sure that this rule
 applies last! (this is currently a ``hack'', which will be eliminated
