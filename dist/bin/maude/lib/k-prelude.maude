@@ -314,7 +314,6 @@ mod K-STRICTNESS is
   including #STRING-INTERFACE .
   op freezer : K -> KLabel [strat(0) frozen] .
 
-  op cool : -> KLabel .
   op heat : -> KLabel .
   op heated : -> KLabel .
   op redex : -> KLabel .

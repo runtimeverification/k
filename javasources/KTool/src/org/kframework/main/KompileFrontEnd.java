@@ -656,17 +656,17 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Open Cells");
 			}
 
+            javaDef = new CompilerTransformerStep(new ResolveRewrite()).compile(javaDef);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Push local rewrites to the top");
+
             javaDef = new CompilerTransformerStep(new ResolveSupercool()).compile(javaDef);
 
             if (GlobalSettings.verbose) {
                 sw.printIntermediate("Cool the <k> cell for supercool rules");
             }
-
-            javaDef = new CompilerTransformerStep(new ResolveRewrite()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Push local rewrites to the top");
-			}
+		}
 
 
 
