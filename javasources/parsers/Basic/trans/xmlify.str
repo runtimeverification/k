@@ -222,8 +222,8 @@ rules
 										[a'*]
 										<terminal value=")" loc="[loc]" />
 										<attributes loc="[loc]">
-											<tag key="klabel" value="'[x]" />
 											[b'*]
+											[kl]
 										</attributes>
 						</production>
 						]
@@ -231,6 +231,7 @@ rules
 		where aa  := <all({z: \z -> Sort(z)\}) ; add-commas ; flatten-list> a*
 		where a'* := <all(to-xml)> aa
 		where b'* := <all(to-xml)> b*
+		where kl  := <if <oncetd(?TagParam("klabel", _) <+ ?TagString("klabel",_))> b* then !"" else !$[<tag key="klabel" value="'[x]" />] end>
 		where loc := <getLocAsString>
 
 	to-xml:	// print an annotated production rule

@@ -16,7 +16,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class DefinitionSDF {
 
-	public static String getSdfForPrograms(Definition def) {
+	public static String getSdfForDefinition(Definition def) {
 
 		StringBuilder sdf = new StringBuilder("module Integration\n\n");
 		sdf.append("imports Common\n");
