@@ -82,7 +82,7 @@ public class Main {
 
 			// remove maude binaries
 			try {
-				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
+				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
 						"/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
 						Configuration.k);
 				Process process = pb.start();
