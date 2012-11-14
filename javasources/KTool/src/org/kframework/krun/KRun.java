@@ -1,12 +1,10 @@
 package org.kframework.krun;
 
-import java.io.BufferedReader;
+import org.kframework.krun.runner.KRunner;
+
 import java.io.File;
-import java.io.FileReader;
 import java.util.List;
 import java.util.Map;
-
-import org.kframework.krun.runner.KRunner;
 
 public class KRun {
 
