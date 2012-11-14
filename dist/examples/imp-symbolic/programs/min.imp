@@ -1,0 +1,18 @@
+<k>
+int min;
+if (a <= b) {
+  if (a <= c) 
+       { min = a; }  
+  else { min = b; }
+}
+else {
+  if (b <= c) 
+       { min = b; }
+  else { min = c; }
+}
+assert(min <= a);
+assert(min <= b);
+assert(min <= c);
+</k>
+<env> a -> symInt(a), b -> symInt(b), c -> symInt(c) </env>
+<condition> true </condition>
