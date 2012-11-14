@@ -162,6 +162,8 @@ public class RunProcess {
 	public void printError(String content, String lang) {
 		try {
 					if (content.contains("GLIBC")) {
+						String fileName = new File(K.maude_err).getName();
+						String fullPath = new File(K.kdir + K.fileSeparator + "krun" + K.fileSeparator + fileName).getCanonicalPath();
 						Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
 						System.out.println("\nA known bug in the current version of the Maude rewrite engine\n" +
 						"prohibits running K with I/O on certain architectures.\n" +
