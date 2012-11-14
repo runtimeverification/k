@@ -41,7 +41,7 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
     public ASTNode transform(Cell node) throws TransformerException {
         if (node.getLabel().equals("k")) {
             node = node.shallowCopy();
-            KApp kApp = new KApp(new Constant("cool", "KLabel"), node.getContents());
+            KApp kApp = new KApp(new Constant("KLabel", "cool"), node.getContents());
             node.setContents(kApp);
             return node;
         }
