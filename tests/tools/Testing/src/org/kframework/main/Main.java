@@ -45,8 +45,10 @@ public class Main {
 		int exitCode = 0;
 
 		// a little bit hack-ish but it works until somebody complains
+		System.out.println(System.getProperty("user.dir"));
 		if (System.getProperty("user.dir").contains("jenkins")) {
 
+			System.out.println("Remove maude binaries");
 			// remove anything from previous build
 			try {
 				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
