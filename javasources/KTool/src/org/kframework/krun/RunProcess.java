@@ -1,11 +1,10 @@
 package org.kframework.krun;
 
+import org.kframework.krun.tasks.MaudeTask;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-
-import org.kframework.krun.tasks.MaudeTask;
 
 
 // instantiate processes
@@ -162,6 +161,14 @@ public class RunProcess {
 	//check if the execution of Maude process produced some errors 
 	public void printError(String content, String lang) {
 		try {
+					if (content.contains("GLIBC")) {
+						Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+						System.out.println("\nA known bug in the current version of the Maude rewrite engine\n" +
+						"prohibits running K with I/O on certain architectures.\n" +
+								"If non I/O programs and definitions work but I/O ones fail, lease let us know and we'll try helping you fix it.");
+						return;
+
+					}
 					System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "k_definition=" + K.k_definition + K.lineSeparator + "syntax_module=" + K.syntax_module + K.lineSeparator + "main_module=" + K.main_module
 							+ K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
 					String compiledDefName = FileUtil.getFilename(K.compiled_def, ".", K.fileSeparator);
