@@ -63,10 +63,10 @@ public class Main {
 				exitCode = 1;
 			}
 
-			// first copy the k-framework artifacts
+			// remove maude binaries
 			try {
-				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
-						"/var/lib/jenkins/workspace/k-framework",
+				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
+						"/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
 						Configuration.k);
 				Process process = pb.start();
 				int exit = process.waitFor();
@@ -80,10 +80,10 @@ public class Main {
 				e.printStackTrace();
 			}
 
-			// remove maude binaries
+			// first copy the k-framework artifacts
 			try {
-				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
-						"/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
+				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
+						"/var/lib/jenkins/workspace/k-framework",
 						Configuration.k);
 				Process process = pb.start();
 				int exit = process.waitFor();
