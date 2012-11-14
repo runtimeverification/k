@@ -80,6 +80,23 @@ public class Main {
 				e.printStackTrace();
 			}
 
+			// remove maude binaries
+			try {
+				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
+						"/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
+						Configuration.k);
+				Process process = pb.start();
+				int exit = process.waitFor();
+				String out = Task.readString(process.getInputStream());
+				String err = Task.readString(process.getErrorStream());
+				System.out.println(out);
+				System.out.println(err);
+				System.out.println(exit);
+			} catch (Exception e) {
+				exitCode = 1;
+				e.printStackTrace();
+			}
+			
 			// build K
 			try {
 				ProcessBuilder pb = new ProcessBuilder("ant");
@@ -99,8 +116,6 @@ public class Main {
 			
 			if (!new File(Configuration.getHome() + Configuration.FS + "dist" + Configuration.FS + "bin" + Configuration.FS + "java" + Configuration.FS + "k3.jar").exists())
 			{
-				System.out.println("K3 build failed. k3.jar does not exist.");
-				System.exit(2);
 			}
 		}
 
