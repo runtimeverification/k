@@ -2,8 +2,8 @@ require "k-equal.k"
 
 module INT-SYMBOLIC-SYNTAX
   imports INT-SYNTAX-HOOKS
-  syntax IntSymbolic ::= "symInt" "(" Int ")"
-  syntax IntSymbolic ::= "symInt" "(" Id ")"
+  syntax IntSymbolic ::= "symInt" "(" Int ")" [onlyLabel, klabel(symInt)]
+  syntax IntSymbolic ::= "symInt" "("  Id ")" [onlyLabel, klabel(symInt)]
   syntax Int ::= IntSymbolic
 endmodule  
 

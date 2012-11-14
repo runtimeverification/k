@@ -2,8 +2,8 @@ require "k-equal.k"
 
 module BOOL-SYMBOLIC-SYNTAX
   imports BOOL-SYNTAX-HOOKS
-  syntax BoolSymbolic ::= "symBool" "(" Int ")"
-  syntax BoolSymbolic ::= "symBool" "(" Id ")"
+  syntax BoolSymbolic ::= "symBool" "(" Int ")" [onlyLabel, klabel(symBool)]
+  syntax BoolSymbolic ::= "symBool" "("  Id ")" [onlyLabel, klabel(symBool)]
   syntax Bool ::= BoolSymbolic
 endmodule
 
