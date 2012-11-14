@@ -75,13 +75,13 @@ module K-SET-EXTRAS
   rule (SI:SetItem S:Set) -Set SI => S
   rule S:Set -Set SI:SetItem => S when SI in S ==Bool false //  [owise]
 
-	syntax Bool ::= K "in" Set   [function]
-			      | SetItem "in" Set   [function]	
-			      | K "#in" Set   [function]	
+	syntax Bool ::= K "in" Set   [function, klabel(inSet)]
+			      | SetItem "in" Set   [function, klabel(kInSet)]	
+			      | K "#inSet" Set   [function]	
    rule SetItem(K:K) in S:Set => K in S [structural, anywhere]
-   rule K:K in S:Set => K #in S ==K true
+   rule K:K in S:Set => K #inSet S ==K true
      [structural, anywhere]
-   rule K #in SetItem(K) S:Set => true
+   rule K #inSet SetItem(K) S:Set => true
      [structural, anywhere]
 
    rule (SetItem(K:K) S1:Set) -Set (SetItem(K:K) S2:Set) => S1 -Set (SetItem(K:K) S2) [structural, anywhere]
