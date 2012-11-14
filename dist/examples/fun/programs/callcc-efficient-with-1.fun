@@ -3,7 +3,7 @@
 
 let f l =
   callcc (fun throw ->
-           rec aux l =
+           letrec aux l =
              if null? l
              then 1
              else if head l == 0

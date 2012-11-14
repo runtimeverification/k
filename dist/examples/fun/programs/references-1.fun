@@ -1,4 +1,4 @@
-rec
+letrec
 
 max l {x,y} =
   if @x != y

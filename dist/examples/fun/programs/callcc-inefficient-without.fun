@@ -2,7 +2,7 @@
 // this is inefficient; one would like to throw an exception
 // see callcc-efficient-with.fun for an efficient variant
 
-rec f l =
+letrec f l =
   if null? l
   then 1
   else if head l == 0

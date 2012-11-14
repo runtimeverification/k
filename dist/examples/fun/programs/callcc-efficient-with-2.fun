@@ -1,7 +1,7 @@
 // the following is also efficient and uses try/catch
 
 let f l = try 
-            rec aux l =
+            letrec aux l =
               if null? l
               then 1
               else if head l == 0
