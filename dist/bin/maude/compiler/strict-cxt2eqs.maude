@@ -216,7 +216,7 @@ mod STRICTCXT2EQS is
                    strictCxt2eqs(Flat, getMbs(M), AS supercools(AS')), Ss, AS supercools(AS'), getSorts(Flat)) 
   if substr(string(Syntax),0,length("#SUPERCOOL-")) = "#SUPERCOOL-" [print "generate supercool equations" AS'] . 
   eq strictCxt2eqs(Syntax,StrictEqs,M,Flat, Ss, AS supercools(AS')) 
-   = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M), AS), Ss, AS,getSorts(Flat)) [owise print "don't generate supercool eqs: " AS'] . 
+   = strictCxt2eqs(Syntax,StrictEqs,strictCxt2eqs(Flat, getMbs(M), AS supercools(AS')), Ss, AS supercools(AS'),getSorts(Flat)) [owise print "always generate supercool eqs: " AS'] . 
 
   op strictCxt2eqs : Qid Qid MASEqsPair SortSet AttrSet SortSet ~> Module .
   eq strictCxt2eqs(Syntax, StrictEqs, {MAS,Eqs, Rls}, Ss, AS, Ss') 

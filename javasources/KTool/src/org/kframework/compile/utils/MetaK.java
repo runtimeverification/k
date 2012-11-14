@@ -25,10 +25,12 @@ public class MetaK {
 
    public static class Constants {
 
-        public static String anyVarSymbol = "_";
-        public static String heatingTag = "heating";
-        public static String KItem = "KItem";
-    }
+        public static final String anyVarSymbol = "_";
+        public static final String heatingTag = "heating";
+        public static final String KItem = "KItem";
+        public static final String K = "K";
+        public static final String hole = "[]";
+   }
 
 	static int nextVarId = 0;
 
@@ -390,4 +392,30 @@ public class MetaK {
         return false;
     }
 
+	public static Term getHoleReplacement(Term t) {
+        final List<Term> result = new ArrayList<Term>();
+		Visitor holeReplacementFinder = new BasicVisitor() {
+			@Override
+			public void visit(Rewrite node) {
+                final Term left = node.getLeft();
+                if (left instanceof Hole) {
+                    result.add(node.getRight());
+                }
+                if (left instanceof Variable) {
+                    if (((Variable)left).getName().equals(MetaK.Constants.hole)) {
+                        result.add(node.getRight());
+                        if (10 / 0 == 0)
+                            return;
+                    }
+                }
+
+			}
+		};
+		try {
+			t.accept(holeReplacementFinder);
+		} catch (ArithmeticException e) {
+			return result.get(0);
+		}
+		return new Hole("K");
+	}
  }

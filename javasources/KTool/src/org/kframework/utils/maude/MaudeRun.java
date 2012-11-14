@@ -1,13 +1,5 @@
 package org.kframework.utils.maude;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -15,9 +7,14 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class MaudeRun {
 
 	static String maudeExe = initializeMaudeExecutable();
+	static boolean internalMaude = true;
 
 	/**
 	 * This function computes the path to a K-included version of maude. It assumes that /dist/bin/maude directory contains all maude executables. It searches for the os type and the architecture and it returns the right maude executable.
@@ -31,13 +28,13 @@ public class MaudeRun {
 		// get system properties: file separator, os name, os architecture
 		String fileSeparator = System.getProperty("file.separator");
 		String osname = System.getProperty("os.name");
-//		String arch = System.getProperty("os.arch");
+		String arch = System.getProperty("os.arch");
 
 		// set different maude executables
 		String maude_win = "maude.exe";
 		String maude_mac = "maude.intelDarwin";
 		String maude_linux_32 = "maude.linux";
-//		String maude_linux_64 = "maude.linux64";
+		String maude_linux_64 = "maude.linux64";
 
 		// System.out.println("OS: |" + osname + "|" + arch + "|");
 		// System.out.println(KPaths.getKBase(true));
@@ -55,15 +52,27 @@ public class MaudeRun {
 			maudeExe = maudeDir + fileSeparator + maude_mac;
 		} else if (osname.toLowerCase().contains("linux")) {
 			// in this case we assume linux
-//			if (arch.toLowerCase().contains("64")) {
-//				maudeExe = maudeDir + fileSeparator + maude_linux_64;
-//			} else
+			if (arch.toLowerCase().contains("64")) {
+				maudeExe = maudeDir + fileSeparator + maude_linux_64;
+			} else
 				maudeExe = maudeDir + fileSeparator + maude_linux_32;
 		}
 
-		if (!new File(maudeExe).exists()) {
+		final File maude = new File(maudeExe);
+		if (!maude.exists()) {
+			KException exception = new KException(ExceptionType.WARNING, KExceptionGroup.CRITICAL,
+					"Cannot execute Maude from " + maudeExe + ".\n" +
+							"Will assume that Maude is installed by the user such that\n" +
+							"it can be executed with no warnings using the 'maude' command.",
+					"top level", "");
+			GlobalSettings.kem.register(exception);
 			// if the maude binaries are not found then consider default `maude`
+			internalMaude = false;
 			return "maude";
+		} else {
+			if (!maude.canExecute()) {
+				maude.setExecutable(true);
+			}
 		}
 
 		return maudeExe;
@@ -113,7 +122,12 @@ public class MaudeRun {
 	public static String run_maude(File startDir, String mainFile) {
 		try {
 			// create process
-			java.lang.ProcessBuilder pb = new java.lang.ProcessBuilder(maudeExe);
+			java.lang.ProcessBuilder pb = new java.lang.ProcessBuilder();
+			List<String> args = new ArrayList<String>();
+			args.add(maudeExe);
+			args.add("-no-wrap");
+			args.add("-no-banner");
+			pb.command(args);
 
 			// set execution directory to current user dir
 			pb.directory(startDir);
@@ -124,7 +138,26 @@ public class MaudeRun {
 			// environment.put("MAUDE_LIB", System.getenv("MAUDE_LIB"));
 
 			// start maude
-			Process maude = pb.start();
+			Process maude = null;
+			try {
+				maude = pb.start();
+			} catch (IOException e) {
+				final String message;
+				if (internalMaude) {
+					message = "K requires Maude to compile and execute.  Apparently the provided maude executable '" + maudeExe + "'\n" +
+							"does not execute correctly.  Please check file permissions.\n" +
+							"If you have Maude installed on your machine you could consider removing the '" + maudeExe + "' file to let K" +
+							"use the local version.\n";
+
+				} else {
+					message = "Cannot execute maude as '" + maudeExe + "'. Please check if maude installed and it is in your PATH.\n" +
+							"and that '" + maudeExe + "' executes from command line with no warnings.";
+				}
+				KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message,
+						"top level", "run_maude method");
+				GlobalSettings.kem.register(exception);
+				return "";
+			}
 
 			// capture out and err and store them in corresponding files
 			String kompile_out = startDir.getAbsolutePath() + "/kompile_out.txt";
@@ -136,8 +169,15 @@ public class MaudeRun {
 			errc.start();
 
 			OutputStream os = maude.getOutputStream();
-			os.write(mainFile.getBytes());
-			os.close();
+			try {
+				os.write(mainFile.getBytes());
+				os.close();
+			} catch (IOException e) {
+				String message = "The '" + maudeExe + "' process cannot receive input. Please report.";
+				KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message,
+						"top level", "run_maude method");
+				GlobalSettings.kem.register(exception);
+			}
 
 			// wait for maude to finish
 			maude.waitFor();
@@ -162,29 +202,33 @@ public class MaudeRun {
 				String errSpecificStart = "[ERROR]";
 				String errSpecificEnd = "[ENDERROR]";
 				int begin = output.indexOf(errSpecificStart);
-				int end = output.indexOf(errSpecificEnd);
-				if (begin != -1 && end != -1) {
-					System.out.println("Error: " + output.substring(begin + errSpecificStart.length(), end));
-					System.exit(1);
+				if (begin != -1) {
+					int end = output.indexOf(errSpecificEnd);
+					String message;
+					if (end != -1) {
+						message = output.substring(begin + errSpecificStart.length(), end);
+					} else {
+						message = output.substring(begin + errSpecificStart.length());
+					}
+					KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message,
+							"top level", "Maude compilation");
+					GlobalSettings.kem.register(exception);
 				}
 			}
 			if (!error.equals("")) {
+				FileUtil.saveInFile(kompile_err, error);
+				String message;
 				if (error.length() > 500) {
-					FileUtil.saveInFile(kompile_err, error);
-					org.kframework.utils.errorsystem.Error.report(error.substring(0, 500) + "...\nCheck " + kompile_err + " to see the complete error.");
+					message = error.substring(0, 500) + "...\nCheck " + kompile_err + " to see the complete error.";
 				} else {
-					FileUtil.saveInFile(kompile_err, error);
-					System.out.println("Error: " + error);
-					System.exit(1);
+					message = error;
 				}
+				KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message,
+						"top level", "Maude compilation");
+				GlobalSettings.kem.register(exception);
 			}
 
 			return output;
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("Cannot execute maude. Please check if maude installed and it is in your PATH.\nIf maude is installed then 'maude' command should execute from command line with no warnings.");
-			System.exit(1);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
