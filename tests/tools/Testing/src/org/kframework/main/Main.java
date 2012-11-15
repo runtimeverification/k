@@ -53,7 +53,7 @@ public class Main {
 			}
 
 			// remove maude binaries
-			try {
+/*			try {
 				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
 						"/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
 						Configuration.k);
@@ -68,7 +68,7 @@ public class Main {
 				exitCode = 1;
 				e.printStackTrace();
 			}
-
+*/
 			// first copy the k-framework artifacts
 			try {
 				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
