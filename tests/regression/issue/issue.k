@@ -2,10 +2,11 @@
 module ISSUE-SYNTAX
   syntax Stmt ::= "read" String
                 | "flush"
-				| "getInput"
+		| "getInput"
   
   syntax Stmts ::= List{Stmt,";"}
 
+  syntax Start ::= Stmts
 endmodule
 
 module ISSUE
