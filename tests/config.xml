@@ -281,8 +281,8 @@
   />
   <test
       language="tests/regression/issue/issue.k"
-      folder="tests/regression/programs"
-      results="tests/regression/tests"
+      folder="tests/regression/issue/programs"
+      results="tests/regression/issue/tests"
       extension="issue"
   />
   <test
