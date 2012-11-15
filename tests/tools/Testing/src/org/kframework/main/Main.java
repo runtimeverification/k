@@ -35,7 +35,6 @@ public class Main {
 		System.out.println(System.getProperty("user.dir"));
 		if (System.getProperty("user.dir").contains("jenkins")) {
 
-			System.out.println("Remove maude binaries");
 			// remove anything from previous build
 			try {
 				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
@@ -53,7 +52,9 @@ public class Main {
 			}
 
 			// remove maude binaries
-/*			try {
+/* 
+			System.out.println("Remove maude binaries");
+      try {
 				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
 						"/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
 						Configuration.k);
