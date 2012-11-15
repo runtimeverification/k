@@ -10,6 +10,7 @@ import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
+import org.kframework.parser.concrete.disambiguate.CheckRewriteFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewriteSortFilter;
@@ -56,6 +57,7 @@ public class ParseRulesFilter extends BasicTransformer {
 				config = config.accept(new SentenceVariablesFilter());
 				config = config.accept(new CellTypesFilter());
 				config = config.accept(new CorrectRewritePriorityFilter());
+				config = config.accept(new CheckRewriteFilter());
 				config = config.accept(new CorrectKSeqFilter());
 				config = config.accept(new BestFitFilter(new GetFitnessUnitKSeqVisitor()));
 				config = config.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
