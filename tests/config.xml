@@ -257,4 +257,48 @@
       extensions="kool"
       />
 
+<!--
+    Regression tests
+-->
+
+  <test
+      language="tests/regression/defaultTerms1/issue.k"
+  />
+  <test
+      language="tests/regression/openCells1/issue.k"
+      folder="tests/regression/openCells1/programs"
+      results="tests/regression/openCells1/tests"
+      extension="issue"
+  />
+  <test
+      language="tests/regression/sets-issue/issue.k"
+      folder="tests/regression/sets-issue/programs"
+      results="tests/regression/sets-issue/tests"
+      extension="issue"
+  />
+  <test
+      language="tests/regression/mapitem2klabel/issue.k"
+  />
+  <test
+      language="tests/regression/issue/issue.k"
+      folder="tests/regression/programs"
+      results="tests/regression/tests"
+      extension="issue"
+  />
+  <test
+      language="tests/regression/issue403/issue.k"
+  />
+  <test
+      language="tests/regression/issue425/issue.k"
+  />
+  <test
+      language="tests/regression/issue466/issue.k"
+  />
+  <test
+      language="tests/regression/issue482/issue.k"
+  />
+  <test
+      language="tests/regression/issue483/issue.k"
+  />
+
 </tests>
