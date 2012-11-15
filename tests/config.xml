@@ -268,7 +268,7 @@
       language="tests/regression/openCells1/issue.k"
       folder="tests/regression/openCells1/programs"
       results="tests/regression/openCells1/tests"
-      extension="issue"
+      extensions="issue"
   />
   <test
       language="tests/regression/sets-issue/issue.k"
@@ -283,7 +283,7 @@
       language="tests/regression/issue/issue.k"
       folder="tests/regression/issue/programs"
       results="tests/regression/issue/tests"
-      extension="issue"
+      extensions="issue"
   />
   <test
       language="tests/regression/issue403/issue.k"
