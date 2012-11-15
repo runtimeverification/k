@@ -274,7 +274,7 @@
       language="tests/regression/sets-issue/issue.k"
       folder="tests/regression/sets-issue/programs"
       results="tests/regression/sets-issue/tests"
-      extension="issue"
+      extensions="issue"
   />
   <test
       language="tests/regression/mapitem2klabel/issue.k"
