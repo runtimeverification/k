@@ -324,9 +324,9 @@ are matched on the top of the computation. */
 
  
 */
-  syntax KLabel ::= "symUnificationVar"
+  syntax KLabel ::= "'#symUnificationVar"
 
-  rule printType(symUnificationVar(I:Int))
+  rule printType('#symUnificationVar(I:Int))
     => printStr("_" +String Int2String(I))
 
   rule printType(int) => printStr("int")
