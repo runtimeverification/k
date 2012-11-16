@@ -17,7 +17,7 @@ module SYMBOLIC-CALCULUS
 /*@ 
   The following function is used to generate fresh names for symbolic values.
 */
-  syntax Id ::= "fresh" "(" Int ")" [function] 
+//  syntax Id ::= "fresh" "(" Int ")" [function] 
 //  rule fresh(I:Int) => String2Id("symVar" +String Int2String(I)) [anywhere]
 
 
