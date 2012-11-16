@@ -143,7 +143,9 @@ public class CommandlineOptions {
 		// for debugger
 	    Option debug = OptionBuilder.hasArg(false).withLongOpt("debug").withDescription("Run an execution in debug mode").create();
 		Option trace = new Option("trace", false, "Set trace on.");
+		Option profile = new Option("profile", false, "Set profile on.");
 		options.addOption(trace); getOptionList().add(trace);
+		options.addOption(profile); getOptionList().add(profile);
 
 		options.addOption(debug); getOptionList().add(debug);
 		//options.addOption(trace); getOptionList().add(trace);

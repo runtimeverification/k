@@ -657,6 +657,9 @@ public class Main {
 			if (cmd.hasOption("trace")) {
 				K.trace = true;
 			}
+			if (cmd.hasOption("profile")) {
+				K.profile = true;
+			}
 			if (cmd.hasOption("pgm")) {
 				K.pgm = new File(cmd.getOptionValue("pgm")).getCanonicalPath();
 			}

@@ -41,6 +41,9 @@ public class KRun {
 		if(K.trace) {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
+		if(K.profile) {
+			cmd = "set profile on ." + K.lineSeparator + cmd + K.lineSeparator + "show profile .";
+		}
 
 		return new KRun(cmd, !cfg.containsKey("noIO"));
 	}
