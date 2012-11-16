@@ -13,14 +13,16 @@ public class Program {
 	Map<String, String> krunOptions;
 	Test test;
 	String input, output;
-	public Program(String name, Map<String, String> map, Test test, String input, String output) {
+
+	public Program(String name, Map<String, String> map, Test test,
+			String input, String output) {
 		this.absolutePath = name;
 		this.krunOptions = map;
 		this.test = test;
 		this.input = input;
 		this.output = output;
 	}
-	
+
 	@Override
 	public String toString() {
 		return absolutePath;// + "\nIn: " + input + "\nOut: " + output + "\n";
@@ -43,35 +45,41 @@ public class Program {
 			arguments[i] = cmd;
 			i++;
 		}
-		
+
 		return new Task(arguments, input);
 	}
-	
-	public boolean success(Task task)
-	{
+
+	public boolean success(Task task) {
 		if (task.getExit() != 0)
 			return false;
-		
+
 		if (!task.getStderr().equals(""))
 			return false;
-		
+
 		if (!task.getStdout().equals(output) && output != null)
 			return false;
-		
+
 		return true;
 	}
 
-	public String successful(Task value) {
-		return success(value) ? "success" : "failed";
+	public String successful(Task task) {
+		String message = success(task) ? "success" : "failed";
+		if (!task.getStdout().equals(""))
+			if (message.equals("success"))
+				message = "unstable";
+
+		return message;
 	}
 
 	public void reportTest(Task value) {
-		test.report.appendChild(test.createReportElement(new File(absolutePath).getName(), successful(value), value.getElapsed() + "", value.getStdout(), value.getStderr(), value, output, !success(value)));
+		test.report.appendChild(test.createReportElement(
+				new File(absolutePath).getName(), successful(value),
+				value.getElapsed() + "", value.getStdout(), value.getStderr(),
+				value, output, !success(value)));
 		test.save();
 	}
-	
-	public String getAbsolutePath()
-	{
+
+	public String getAbsolutePath() {
 		return absolutePath;
 	}
 }

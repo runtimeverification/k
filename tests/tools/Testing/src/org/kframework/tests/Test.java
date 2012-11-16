@@ -389,18 +389,28 @@ public class Test {
 	}
 
 	public void reportCompilation(Task task) {
+		String message = compiled(task) ? "success" : "failed";
+		if (!task.getStdout().equals(""))
+			if (message.equals("success"))
+				message = "unstable";
+
 		report.appendChild(createReportElement(new File(language).getName(),
-				compiled(task) ? "success" : "failed", task.getElapsed() + "",
-				task.getStdout(), task.getStderr(), task, "", !compiled(task)));
+				message, task.getElapsed() + "", task.getStdout(),
+				task.getStderr(), task, "", !compiled(task)));
 
 		save();
 	}
 
 	public void reportPdfCompilation(Task task) {
+		String message = compiledPdf(task) ? "success" : "failed";
+		if (!task.getStdout().equals(""))
+			if (message.equals("success"))
+				message = "unstable";
+
 		report.appendChild(createReportElement(new File(language).getName()
-				.replaceFirst("\\.k$", ".pdf"), compiledPdf(task) ? "success"
-				: "failed", task.getElapsed() + "", task.getStdout(), task
-				.getStderr(), task, "", !compiledPdf(task)));
+				.replaceFirst("\\.k$", ".pdf"), message,
+				task.getElapsed() + "", task.getStdout(), task.getStderr(),
+				task, "", !compiledPdf(task)));
 
 		save();
 	}
