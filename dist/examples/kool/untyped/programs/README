@@ -1,5 +1,5 @@
 To get a feel for the KOOL language through programs, we recommend to
-check out the examples in this directory in the following order (of
+check out the programs in this directory in the following order (of
 increasing complexity):
 
 hello-world.kool
@@ -13,6 +13,7 @@ field-shadowing-2.kool
 dynamic-dispatch-1.kool
 dynamic-dispatch-2.kool
 dynamic-dispatch-3.kool
+new-in-field.kool
 point.kool
 tree-sum.kool
 sorting.kool
