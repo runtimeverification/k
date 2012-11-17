@@ -42,7 +42,8 @@ remaining equations by applying the new mgu binding to them. */
 
 
   rule unifyEqs(subst(Ks:List{K} => eqn(X,,K),,substitute(X,,K,,Ks)),,
-              (eqns(eqn(X:UnificationVar,,K:K),,Eqns:List{K}) => substitute(X,, K,, eqns(Eqns))))
+              (eqns(eqn(X:UnificationVar,,K:K),,Eqns:List{K})
+               => substitute(X,, K,, eqns(Eqns))))
     when notBool(X subTerm K)
    [structural, anywhere]
 
@@ -57,8 +58,8 @@ once all constraints were incorporated.
    [structural, anywhere]
 /*@ the subTerm relation is used to determine cyclic uunification */
   syntax Bool ::= K "subTerm" K [function]
-rule K1 subTerm K2 => (K1 ==K K2) orElseBool (K1 properSubTerm K2)
-   [structural, anywhere]
+  rule K1 subTerm K2 => (K1 ==K K2) orElseBool (K1 properSubTerm K2)
+    [structural, anywhere]
   syntax Bool ::= K "properSubTerm" K [function]
   rule K1 properSubTerm L:KLabel(.List{K}) => false   [structural, anywhere]
   rule K1:K properSubTerm L:KLabel(K2:K,,Ks:List{K}) 
@@ -70,9 +71,11 @@ Note that ~> is not handled  and neither are binding operations.
 
   rule substitute(X:K,,K:K,,.List{K}) => .List{K}   [structural, anywhere]
   rule substitute(X:K,,K:K,,K1:K,,K2:K,,Ks:List{K})
-      => substitute(X,,K,,K1),,substitute(X,,K,,K2),,substitute(X,,K,,Ks)   [structural, anywhere]
+    => substitute(X,,K,,K1),,substitute(X,,K,,K2),,substitute(X,,K,,Ks) 
+    [structural, anywhere]
   rule substitute(X:K,,K:K,,X) => K   [structural, anywhere]
-  rule substitute(X:K,,K:K,,L:KLabel(Ks:List{K})) => L:KLabel(substitute(X,,K,,Ks))
+  rule substitute(X:K,,K:K,,L:KLabel(Ks:List{K}))
+    => L:KLabel(substitute(X,,K,,Ks))
     when X =/=K L:KLabel(Ks)
    [structural, anywhere]
 
@@ -98,29 +101,31 @@ constraint.
                   | "getVars" | "accumulateVars"
                   | "clash" | "cycle"
 
-  rule getVars(K) => accumulateVars(vars(.List{K}),, K)   [structural, anywhere]
+  rule getVars(K) => accumulateVars(vars(.List{K}),, K)
+    [structural, anywhere]
 
   rule accumulateVars(vars(Xs:List{K}),,X:UnificationVar,,Ks:List{K}) 
-     => #if (X inList{K} Xs)
-        #then accumulateVars(vars(Xs),,Ks)
-        #else accumulateVars(vars(Xs,,X),,Ks)
-        #fi
-   [structural, anywhere]
-   rule accumulateVars(_:K,,(L:KLabel(Ks:List{K}) => Ks),,_)
-     when isUnificationVar(L(Ks)) =/=K true
-   [structural, anywhere]
-   rule accumulateVars(vars(Xs:List{K})) => vars(Xs)   [structural, anywhere]
+    => #if (X inList{K} Xs)
+       #then accumulateVars(vars(Xs),,Ks)
+       #else accumulateVars(vars(Xs,,X),,Ks)
+       #fi
+    [structural, anywhere]
+  rule accumulateVars(_:K,,(L:KLabel(Ks:List{K}) => Ks),,_)
+    when isUnificationVar(L(Ks)) =/=K true
+    [structural, anywhere]
+  rule accumulateVars(vars(Xs:List{K})) => vars(Xs)   [structural, anywhere]
 
 
-   configuration <k> .K </k> <nextVar> 0 </nextVar>
+  configuration <k> .K </k> <nextVar> 0 </nextVar>
 
-   syntax K ::= "getAlpha" "(" K ")"
-    rule getAlpha(K) 
+  syntax K ::= "getAlpha" "(" K ")"
+  rule getAlpha(K) 
     => freshSubst(subst(.List{K}),, getVars(K))
 
   syntax KLabel ::= "freshSubst" 
 
-  rule freshSubst(subst(_,,(.List{K} => eqn(X:K,,F))),,vars((X => .List{K}),,_)) when fresh(F:UnificationVar)
+  rule freshSubst(subst(_,,(.List{K} => eqn(X:K,,F))),,
+                  vars((X => .List{K}),,_)) when fresh(F:UnificationVar)
 
   rule freshSubst(subst(Eqns:List{K}),,vars(.List{K})) => subst(Eqns)
 endmodule
