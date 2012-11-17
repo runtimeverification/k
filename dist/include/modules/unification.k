@@ -116,7 +116,7 @@ constraint.
   rule accumulateVars(vars(Xs:List{K})) => vars(Xs)   [structural, anywhere]
 
 
-  configuration <k> .K </k> <nextVar> 0 </nextVar>
+//  configuration <k> .K </k> <nextVar> 0 </nextVar>
 
   syntax K ::= "getAlpha" "(" K ")"
   rule getAlpha(K) 
