@@ -16,7 +16,8 @@ Matching on any KAST label, the
     when (isUnificationVar(L(K1,,Ks)) =/=K true)
          andBool (isUnificationVar(L(K2,,Ks')) =/=K true)
     [structural, anywhere]
-  rule eqns((eqn(K:K,,X:UnificationVar) => eqn(X,,K)),,_) when isUnificationVar(K) =/=K true   [structural, anywhere]
+  rule eqns((eqn(K:K,,X:UnificationVar) => eqn(X,,K)),,_)
+    when isUnificationVar(K) =/=K true   [structural, anywhere]
 
 
   rule unifyEqs(subst(Ks:List{K}),,eqns( 
@@ -92,10 +93,10 @@ constraint.
                     (K:K => substitute(K1,, K2,, K)))   [structural, anywhere]
   rule applySubst(subst(.List{K}),K) => K   [structural, anywhere]
   
-  syntax KLabel ::= "unifyEqs" | "subst" | "vars" | "substitute" 
+  syntax KLabel ::= "unifyEqs" | "subst" | "vars" | "substitute"
                   | "eqn" | "eqns" | "mgu"
-                  | "getVars" | "accumulateVars" 
-                  | "clash" | "cycle" 
+                  | "getVars" | "accumulateVars"
+                  | "clash" | "cycle"
 
   rule getVars(K) => accumulateVars(vars(.List{K}),, K)   [structural, anywhere]
 

@@ -194,7 +194,7 @@ holds the current most-general unifier. */
                   <mgu color="blue"> subst(.List{K}) </mgu>
                 </T>
                 <out stream="stdout"> .List </out>
-				
+
 /*@ \subsection{Arithmetic expressions}
 Primitive values rewrite to their types.  Arithmetic constructs, which
 were all declared strict, generate type constraints for the types of

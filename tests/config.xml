@@ -258,6 +258,18 @@
       />
 
 <!--
+  FUN
+-->
+
+  <test 
+      language="dist/examples/fun/untyped/fun-untyped.k"
+      folder="dist/examples/fun/programs"
+      extensions="fun"
+      >
+    <kompile-option name="--transition" value="otherwise"/>
+  </test>
+
+<!--
     Regression tests
 -->
 
