@@ -292,7 +292,8 @@ module. */
   rule <k> let X:Id = T:Type in E:Exp => E ~> tenv(TEnv) ...</k>
        <mgu> subst(Theta:List{K}) </mgu>
        <tenv> TEnv:Map
-        => TEnv[((forall diff(ftv(applySubst(subst(Theta), T),.Types),ftv(applySubst(subst(Theta), types(TEnv)))))
+        => TEnv[((forall diff(ftv(applySubst(subst(Theta), T),.Types),
+                              ftv(applySubst(subst(Theta), types(TEnv)))))
                  applySubst(subst(Theta), T)) / X]
        </tenv>
 
@@ -304,7 +305,8 @@ When there is only one type left in the computation cell and all the
 type constraints are solved, we apply the resulting mgu to that type
 and that is the final result of the typing procedure. */
 
-  rule <k> T:Type ~> print => printType(T) ~> printStr("\n") </k> 
+  rule <k> T:Type ~> print
+    => printType(applySubst(subst(Theta), T)) ~> printStr("\n") </k> 
        <mgu> subst(Theta:List{K}) </mgu>
 
 /*@ Type constraints are used to update the mgu as soon as they
