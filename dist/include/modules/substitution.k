@@ -14,7 +14,7 @@ module SUBSTITUTION
   imports BINDER
 
   //beta-substitution definition using the K AST visitor pattern
-  syntax K ::= K "[" K "/" Id "]"
+  syntax K ::= K "[" K "/" Id "]"  [prefer]
              | "beta" List{K} "[" K "/" Id "]" [latex({#1}\sqbracket{\framebox{${#2}$}/{#3}})]
              | "eval" K "," "then" "apply" "[" K "/" Id "]" [strict(1), latex(eval({#1})\sqbracket{\framebox{${#2}$}/{#3}})]
                

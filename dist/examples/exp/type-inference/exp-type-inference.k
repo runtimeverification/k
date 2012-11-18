@@ -138,11 +138,11 @@ module TYPES
   rule |.Types| => 0 [anywhere]
 
 // Type substitution: T[fresh / Tvs]* substitutes fresh types for
-// the list of type variables Tvs.  
+// the list of type variables Tvs.
   syntax K  ::= Type "[" "fresh" "/" Types "]*"
-  rule T:Type[fresh / .Types]* => T 
-  rule T:Type[fresh / Tv:Type,Tvs:Types]* 
-    => applySubst(subst(eqn(Tv,,F)),T)[fresh / Tvs]* 
+  rule T:Type[fresh / .Types]* => T
+  rule T:Type[fresh / Tv:Type,Tvs:Types]*
+    => applySubst(subst(eqn(Tv,,F)),T)[fresh / Tvs]*
     when fresh(F:UnificationVar)
 
 

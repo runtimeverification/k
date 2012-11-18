@@ -1,7 +1,17 @@
-module UNIFICATION 
+module UNIFICATION
   imports BUILTIN-HOOKS
 
-  syntax UnificationVar ::= "dummy"
+//@ Interface to the unification procedure (what the user needs to know)
+  syntax Mgu ::= ".Mgu"
+  syntax UnificationVar ::= "dummy"  // empty sorts not allowed, currently :-(
+  rule .Mgu => subst(.List{K})  [structural, anywhere]  // empty mgu
+  rule isMgu(subst(_)) => true  [function]  // so we can write Theta:Mgu
+
+  syntax Mgu ::= updateMgu(Mgu,K,K) [function]  // updates Mgu with equation
+  syntax K ::= applyMgu(Mgu,K) [function]  // applies Mgu to any term
+  rule applyMgu(Mgu:Mgu,K) => applySubst(Mgu,K)
+// Traian: I would remove applySubst all together and only keep applyMgu
+//         Mgu gives a nicer, more intuitive user interface than Subst
 
 //@ Cleanup, decomposition and orientation of equations.
 
@@ -20,7 +30,7 @@ Matching on any KAST label, the
     when isUnificationVar(K) =/=K true   [structural, anywhere]
 
 
-  rule unifyEqs(subst(Ks:List{K}),,eqns( 
+  rule unifyEqs(subst(_:List{K}),,eqns( 
             eqn(L1:KLabel(Ks:List{K}),,
                 L2:KLabel(Ks':List{K})),,_))
     => clash(L1:KLabel(Ks:List{K}),,
@@ -87,7 +97,7 @@ The existing mgu is first applied to the constraint being introduced to
 guarantee that the variables in the domain of the mgu don't appear in the 
 constraint.
 */
-  syntax K ::= "updateMgu" "(" K "," K "," K ")" [function]
+
   rule updateMgu(subst(Ks:List{K}), K1, K2)
       => unifyEqs(subst(Ks),,eqns(applySubst(subst(Ks),eqn(K1,,K2))))
    [structural, anywhere]
