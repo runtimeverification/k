@@ -1,28 +1,17 @@
 package org.kframework.compile;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
-
 import org.kframework.compile.utils.CompilerStep;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.Cell;
+import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.Import;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.util.*;
+import java.util.Set;
 
 
 public class FlattenModules  implements CompilerStep {
@@ -64,14 +53,11 @@ public class FlattenModules  implements CompilerStep {
 				for(ModuleItem i : mod.getItems()) {
 					if (i instanceof Import) {
 						String name = ((Import)i).getName();
-//						if (MetaK.isNextIdModule(name)) 
-//							nextId = true;
 						if (included.contains(name)) continue;
 						if (!MetaK.isKModule(name) && !MetaK.isBuiltinModule(name)) {
 							if (modules.containsKey(name)) {
 								mods.add(modules.get(name));
 								included.add(name);
-								//							System.out.println("push " + imp);
 							} else {
 								GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 										KExceptionGroup.COMPILER, 
@@ -84,10 +70,8 @@ public class FlattenModules  implements CompilerStep {
 					if (i instanceof Configuration) {
 						if (null == cfg) 
 							cfg = (Configuration)i;
-						//					System.out.println(i.toMaude());
 						continue;
 					}
-					//				System.out.println(i.toString());
 					rmod.getItems().add(i);
 				}
 			}
