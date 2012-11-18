@@ -274,6 +274,9 @@
 -->
 
   <test
+      language="tests/regression/issue529/issue.k"
+  />
+  <test
       language="tests/regression/defaultTerms1/issue.k"
   />
   <test
