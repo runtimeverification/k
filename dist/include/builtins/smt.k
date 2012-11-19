@@ -113,9 +113,9 @@ module SMT-HOOKS
 
     
   // main smt responses
-  rule parseSmtResponse(S:String) => sat when trim(S) ==String "sat\n"
-  rule parseSmtResponse(S:String) => unsat when trim(S) ==String "unsat\n"
-  rule parseSmtResponse(S:String) => unknown when trim(S) ==String "unknown\n" orBool trim(S) ==String "unsupported\n"
+  rule parseSmtResponse(S:String) => sat when trim(S) ==String "sat"
+  rule parseSmtResponse(S:String) => unsat when trim(S) ==String "unsat"
+  rule parseSmtResponse(S:String) => unknown when trim(S) ==String "unknown" orBool trim(S) ==String "unsupported"
 
   
   // parse SEXPRESSIONS
