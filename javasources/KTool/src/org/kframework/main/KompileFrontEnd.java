@@ -614,12 +614,12 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve ListOfK");
 			}
-			
+			/*
 			javaDef = new CompilerTransformerStep(new StrictnessToContexts()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Strict Ops To Context");
-			}
+			}*/
 
 			javaDef = new CompilerTransformerStep(new FlattenSyntax()).compile(javaDef);
 

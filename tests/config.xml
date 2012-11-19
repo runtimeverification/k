@@ -315,5 +315,11 @@
   <test
       language="tests/regression/issue483/issue.k"
   />
+  <test
+      language="tests/regression/strictness/issue.k"
+      folder="tests/regression/strictness/programs"
+      results="tests/regression/strictness/tests"
+      extensions="issue"
+  />
 
 </tests>
