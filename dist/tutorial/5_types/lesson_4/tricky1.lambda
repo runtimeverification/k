@@ -1,0 +1,3 @@
+lambda f . lambda x . lambda y . (
+  (f x y) + x + (let x = y in x)
+)
