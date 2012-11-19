@@ -1,4 +1,0 @@
-lambda x . (
-  let y = lambda z . x
-  in if (y 0) then (y 1) else (y 2)
-)
