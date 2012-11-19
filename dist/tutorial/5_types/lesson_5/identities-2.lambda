@@ -1,0 +1,4 @@
+let f = let g = lambda x . x
+        in let h = lambda x . lambda x . (g g g g)
+           in h
+in f

@@ -1,0 +1,6 @@
+// the parenthese around let should not be needed;
+// i'll fix this as soon as the priorities work
+
+lambda f . lambda x . lambda y . (
+  (f x y) + x + (let x = y in x)
+)
