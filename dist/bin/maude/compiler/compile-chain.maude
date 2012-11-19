@@ -265,7 +265,7 @@ fmod COMPILE-META is
 ---  eq purePrint(M) = pureEMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
 ---  op xmlPrint : [Module] -> QidList .
 ---  eq xmlPrint(M) = xml-eMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
-  op print : [Module] -> QidList .
+  op print : [Module] -> QidListList .
   eq print(M) = eMetaPrettyPrint(setRls(setEqs(M,none),none), M) .
   op generateError : Module Qid [Module] -> [Module] .
   eq generateError(M, Q, M') = moduleError('`[ 'ERROR '`] 'Error 'while getPhaseName(Q) '`( 'module Q '`) '. 
@@ -280,9 +280,15 @@ mod COMPILE-LOOP is
   including LOOP-MODE + COMPILE-META + META-LEVEL-EXTRAS .
   op compile : -> System .
   op idle : -> State .
-  var Q Q' : Qid . var QIL QIL' : QidList . var FM : Module .
+  op printing : QidListList -> State .
+
+  var Q Q' : Qid . var QIL QIL' QIL'' : QidList .  var QLL : QidListList . var FM : Module .
   eq compile = [nil, idle, 
  'Usage: 'compile '<ModuleName> '. ] .
+
+  rl [QIL, printing(item(QIL') QLL), QIL''] => [QIL, printing(QLL), QIL'' QIL'] 
+  [print "Still to print: " QLL] .
+  eq [QIL, printing(empty), QIL''] = [QIL, idle, QIL''] .
 
   op error : -> [Module] .
   var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
@@ -290,26 +296,19 @@ mod COMPILE-LOOP is
   op compile : Qid -> [Module] .
   eq compile(Q) = compile(Q, supercools(none) transitions(none) superheats(none) anywheres(none)) .
 
-  eq print(moduleError(QIL)) = QIL .
+  eq print(moduleError(QIL)) = item(QIL) .
 ---  eq purePrint(moduleError(QIL)) = QIL .
 ---  eq xmlPrint(moduleError(QIL)) = QIL .
   rl ['compile Q Q' 'transitions QStr 'superheats QComp 'supercools QSuper 'anywheres QFun 'defineds QDef QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q, Q', transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) anywheres(metadataQParse(QFun)) defineds(metadataQParse(QDef))))] [print QStr QComp QSuper QFun QDef] .
+   => [QIL, printing(print(pcompile(Q, Q', transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) anywheres(metadataQParse(QFun)) defineds(metadataQParse(QDef))))), nil] [print QStr QComp QSuper QFun QDef] .
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', transitions(none) superheats(none) supercools(none) anywheres(none) defineds(none)))] .
+   => [QIL, printing(print(pcompile(Q,Q', transitions(none) superheats(none) supercools(none) anywheres(none) defineds(none)))), nil] .
 
   op metadataQParse : Qid -> AttrSet .
   eq metadataQParse(Q) = metadataParse(substr(string(Q),1,_-_(length(string(Q)),2))) .
 
   rl ['pcompile Q Q' QIL, idle, QIL'] 
-   => [QIL, idle, print(pcompile(Q,Q', transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool","")) anywheres(pair("function","")pair("predicate","")pair("anywhere","")) defineds(pair("function","")pair("predicate","")pair("defined",""))) )] .
-
----  rl ['purify Q QIL, idle, QIL'] 
----   => [QIL, idle, purePrint(extractModule(pcompile(Q,'RESULT-PREDICATES,  transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool",""))),'PURE-K-TECHNIQUE))] .
-
----  rl ['xcompile Q Q' 'transitions QStr 'superheats QComp 'supercools QSuper 'anywheres QFun QIL, idle, QIL']
----  => [QIL, idle, xmlPrint(pcompile(Q, Q', transitions(metadataQParse(QStr)) superheats(metadataQParse(QComp)) supercools(metadataQParse(QSuper)) anywheres(metadataQParse(QFun))))] .
-
+   => [QIL, printing(print(pcompile(Q,Q', transitions(pair("transition","")) superheats(pair("superheat","")) supercools(pair("supercool","")) anywheres(pair("function","")pair("predicate","")pair("anywhere","")) defineds(pair("function","")pair("predicate","")pair("defined",""))) )), nil] .
 
   var AS : AttrSet .  var QStr QComp QSuper QFun QDef : Qid .
 endm

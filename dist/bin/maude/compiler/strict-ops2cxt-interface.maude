@@ -25,24 +25,3 @@ mod STRICTOPS2CXT-META is
   eq compileSTRICTOPS2CXT(M, AS:AttrSet) = addModule(setImports(strictOps2cxt(getName(M),flatten(M)),including 'K-CONTEXTS .),M) .
 endm
 
-mod STRICTOPS2CXT-LOOP is 
-  including LOOP-MODE + META-LEVEL .
-  including MODULE-META-PRETTY-PRINT .
-  op strict-ops2cxt : -> System .
-  op idle : -> State .
-  var Q Syntax StrictCxt StrictEq : Qid . var QIL QIL' : QidList . var FM : Module .
-  eq strict-ops2cxt = [nil, idle, 'Usage: 'strictOps2cxt '<Name> '.] .
-
-  op wrapper : Qid -> Module .
-  eq wrapper(Q) = (mod 'MKKS is including Q . 
-                    sorts none . none none none none none endm) .
-  op error : -> [Module] .
-  op print : Module [Module] -> QidList .
-  var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
-  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
-  crl ['strictOps2cxt Syntax StrictCxt QIL, idle, QIL'] 
-   => [QIL, idle, print(upModule(Syntax,false), FM )] 
-   if FM := downTerm(getTerm(
-             metaReduce(wrapper('STRICTOPS2CXT-META),
-                        'strictOps2cxt[upTerm(string(Syntax)),upTerm(string(StrictCxt))])),error) .
-endm

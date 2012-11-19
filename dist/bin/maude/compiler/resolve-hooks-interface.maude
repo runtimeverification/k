@@ -17,24 +17,3 @@ mod RESOLVE-HOOKS-META is
    = resolveHooks(getName(M),M) .
 endm
 
-mod RESOLVE-HOOKS-LOOP is 
-  including LOOP-MODE + META-LEVEL .
-  including MODULE-META-PRETTY-PRINT .
-  op resolve-hooks : -> System .
-  op idle : -> State .
-  var Q Syntax StrictCxt StrictEq : Qid . var QIL QIL' : QidList . var FM : Module .
-  eq resolve-hooks = [nil, idle, 'Usage: 'resolveHooks '<Name> '.] .
-
-  op wrapper : Qid -> Module .
-  eq wrapper(Q) = (mod 'MKKS is including Q . 
-                    sorts none . none none none none none endm) .
-  op error : -> [Module] .
-  op print : Module [Module] -> QidList .
-  var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
-  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
-  crl ['resolveHooks Syntax StrictCxt QIL, idle, QIL'] 
-   => [QIL, idle, print(upModule(Syntax,false), FM )] 
-   if FM := downTerm(getTerm(
-             metaReduce(wrapper('RESOLVE-HOOKS-META),
-                        'resolveHooks[upTerm(string(Syntax)),upTerm(string(StrictCxt))])),error) .
-endm

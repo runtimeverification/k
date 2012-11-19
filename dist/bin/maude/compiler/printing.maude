@@ -228,12 +228,12 @@ fmod DECL-META-PRETTY-PRINT is
   op eMetaPrettyPrint : Sort -> QidList .
   op eMetaPrettyPrint : SortSet -> QidList .
   op eMetaPrettyPrint : TypeList -> QidList .
-  op eMetaPrettyPrint : SubsortDeclSet -> QidList .
-  op eMetaPrettyPrint : Module OpDeclSet -> QidList .
-  op eMetaPrettyPrintVars : OpDeclSet -> QidList .
-  op eMetaPrettyPrint : Module MembAxSet -> QidList .
-  op eMetaPrettyPrint : Module EquationSet -> QidList .
-  op eMetaPrettyPrint : Module RuleSet -> QidList .
+  op eMetaPrettyPrint : SubsortDeclSet -> QidListList .
+  op eMetaPrettyPrint : Module OpDeclSet -> QidListList .
+  op eMetaPrettyPrintVars : OpDeclSet -> QidListList .
+  op eMetaPrettyPrint : Module MembAxSet -> QidListList .
+  op eMetaPrettyPrint : Module EquationSet -> QidListList .
+  op eMetaPrettyPrint : Module RuleSet -> QidListList .
   op eMetaPrettyPrint : Module Condition -> QidList .
   op eMetaPrettyPrint : Module Term -> QidList .
 
@@ -243,9 +243,9 @@ fmod DECL-META-PRETTY-PRINT is
   eq eMetaPrettyPrint(U, Cond) = eMetaPrettyPrint(U, Cond, false) .
   eq eMetaPrettyPrint(U, T) = eMetaPrettyPrint(U, T, false) .
 
-  op eMetaPrettyPrint : Module MembAxSet Bool -> QidList .
-  op eMetaPrettyPrint : Module EquationSet Bool -> QidList .
-  op eMetaPrettyPrint : Module RuleSet Bool -> QidList .
+  op eMetaPrettyPrint : Module MembAxSet Bool -> QidListList .
+  op eMetaPrettyPrint : Module EquationSet Bool -> QidListList .
+  op eMetaPrettyPrint : Module RuleSet Bool -> QidListList .
   op eMetaPrettyPrint : Module Condition Bool -> QidList .
   op eMetaPrettyPrint : Module Term Bool -> QidList .
 
@@ -307,107 +307,107 @@ fmod DECL-META-PRETTY-PRINT is
   eq eMetaPrettyPrint((nil).TypeList) = nil .
 
   eq eMetaPrettyPrint(((subsort S < S' .) SSDS))
-    = ( 
+    = item( 
        'subsort eMetaPrettyPrint(S) 
-           '< eMetaPrettyPrint(S') '.  '\n
-       eMetaPrettyPrint(SSDS)) .
-  eq eMetaPrettyPrint((none).SubsortDeclSet) = nil .
+           '< eMetaPrettyPrint(S') '.  '\n)
+       eMetaPrettyPrint(SSDS) .
+  eq eMetaPrettyPrint((none).SubsortDeclSet) = empty .
 
   eq eMetaPrettyPrint(M, ((op F : TyL -> Ty [none] .) OPDS))
-    = ( 
+    = item( 
        'op F ': eMetaPrettyPrint(TyL) 
-       '-> eMetaPrettyPrint(Ty) '.  '\n
-       eMetaPrettyPrint(M, OPDS)) .
+       '-> eMetaPrettyPrint(Ty) '.  '\n)
+       eMetaPrettyPrint(M, OPDS) .
   eq eMetaPrettyPrint(M, ((op F : TyL -> Ty [AtS] .) OPDS))
-    = ( 
+    = item( 
        'op F ': eMetaPrettyPrint(TyL) 
        '-> eMetaPrettyPrint(Ty) 
-         '`[ eMetaPrettyPrint(M, AtS) '`]  '. '\n
+         '`[ eMetaPrettyPrint(M, AtS) '`]  '. '\n)
        
-       eMetaPrettyPrint(M, OPDS))
+       eMetaPrettyPrint(M, OPDS)
     [owise] .
-  eq eMetaPrettyPrint(M, (none).OpDeclSet)  = nil .
+  eq eMetaPrettyPrint(M, (none).OpDeclSet)  = empty .
 
   eq eMetaPrettyPrintVars((op F : nil -> Ty [none] .) OPDS)
-    = ( 'var F ': eMetaPrettyPrint(Ty) '. 
-       eMetaPrettyPrintVars(OPDS)) .
-  eq eMetaPrettyPrintVars((none).OpDeclSet)  = nil .
+    = item( 'var F ': eMetaPrettyPrint(Ty) '.)
+       eMetaPrettyPrintVars(OPDS) .
+  eq eMetaPrettyPrintVars((none).OpDeclSet)  = empty .
 
   eq eMetaPrettyPrint(M, (mb T : S [none] .) MAS, B)
-    = ( 'mb eMetaPrettyPrint(M, T, B) 
-                   ': eMetaPrettyPrint(S) '.  '\n
-       eMetaPrettyPrint(M, MAS, B)) .
+    = item( 'mb eMetaPrettyPrint(M, T, B) 
+                   ': eMetaPrettyPrint(S) '.  '\n)
+       eMetaPrettyPrint(M, MAS, B) .
   eq eMetaPrettyPrint(M, (mb T : S [AtS] .) MAS, B)
-    = ( 'mb eMetaPrettyPrint(M, T, B) 
+    = item( 'mb eMetaPrettyPrint(M, T, B) 
                    ': eMetaPrettyPrint(S) 
-                '`[ eMetaPrettyPrint(M, AtS) '`]  '.  '\n
-       eMetaPrettyPrint(M, MAS, B)) 
+                '`[ eMetaPrettyPrint(M, AtS) '`]  '.  '\n)
+       eMetaPrettyPrint(M, MAS, B) 
     [owise] .
   eq eMetaPrettyPrint(M, (cmb T : S if Cond [none] .) MAS, B)
-    = ( 'cmb eMetaPrettyPrint(M, T, B) 
+    = item( 'cmb eMetaPrettyPrint(M, T, B) 
                    ': eMetaPrettyPrint(S) 
-         'if eMetaPrettyPrint(M, Cond, B) '.  '\n
-       eMetaPrettyPrint(M, MAS, B)) .
+         'if eMetaPrettyPrint(M, Cond, B) '.  '\n)
+       eMetaPrettyPrint(M, MAS, B) .
   eq eMetaPrettyPrint(M, (cmb T : S if Cond [AtS] .) MAS, B)
-    = ( 'cmb eMetaPrettyPrint(M, T, B) 
+    = item( 'cmb eMetaPrettyPrint(M, T, B) 
                    ': eMetaPrettyPrint(S) 
          'if eMetaPrettyPrint(M, Cond, B) 
-            '`[ eMetaPrettyPrint(M, AtS) '`]  '. '\n 
-       eMetaPrettyPrint(M, MAS, B)) 
+            '`[ eMetaPrettyPrint(M, AtS) '`]  '. '\n )
+       eMetaPrettyPrint(M, MAS, B) 
     [owise] .
-  eq eMetaPrettyPrint(M, (none).MembAxSet, B) = nil .
+  eq eMetaPrettyPrint(M, (none).MembAxSet, B) = empty .
 
   eq eMetaPrettyPrint(M, ((eq T = T' [none] .) EqS), B)
-    = ( 'eq  eMetaPrettyPrint(M, T, B) 
-         '=  eMetaPrettyPrint(M, T', B)  '.  '\n
+    = item( 'eq  eMetaPrettyPrint(M, T, B) 
+         '=  eMetaPrettyPrint(M, T', B)  '.  '\n)
        
-       eMetaPrettyPrint(M, EqS, B)) .
+       eMetaPrettyPrint(M, EqS, B) .
   eq eMetaPrettyPrint(M, ((eq T = T' [AtS] .) EqS), B)
-    = ( 'eq  eMetaPrettyPrint(M, T, B) 
+    = item( 'eq  eMetaPrettyPrint(M, T, B) 
          '=  eMetaPrettyPrint(M, T', B) 
-            '`[ eMetaPrettyPrint(M, AtS) '`]  '.  '\n
-       eMetaPrettyPrint(M, EqS, B)) 
+            '`[ eMetaPrettyPrint(M, AtS) '`]  '.  '\n)
+       eMetaPrettyPrint(M, EqS, B) 
     [owise] .
   eq eMetaPrettyPrint(M, ((ceq T = T' if Cond [none] .) EqS), B)
-    = ( 'ceq  eMetaPrettyPrint(M, T, B) 
+    = item( 'ceq  eMetaPrettyPrint(M, T, B) 
          '=  eMetaPrettyPrint(M, T', B) 
-         'if  eMetaPrettyPrint(M, Cond, B)  '. '\n
+         'if  eMetaPrettyPrint(M, Cond, B)  '. '\n)
        
-       eMetaPrettyPrint(M, EqS, B)) .
+       eMetaPrettyPrint(M, EqS, B) .
   eq eMetaPrettyPrint(M, ((ceq T = T' if Cond [AtS] .) EqS), B)
-    = ( 'ceq  eMetaPrettyPrint(M, T, B) 
+    = item( 'ceq  eMetaPrettyPrint(M, T, B) 
          '=  eMetaPrettyPrint(M, T', B) 
          'if  eMetaPrettyPrint(M, Cond, B) 
-            '`[ eMetaPrettyPrint(M, AtS) '`]  '.  '\n
-       eMetaPrettyPrint(M, EqS, B)) 
+            '`[ eMetaPrettyPrint(M, AtS) '`]  '.  '\n)
+       eMetaPrettyPrint(M, EqS, B) 
     [owise] .
-  eq eMetaPrettyPrint(M, (none).EquationSet, B) = nil .
+  eq eMetaPrettyPrint(M, (none).EquationSet, B) = empty .
 
   eq eMetaPrettyPrint(M, ((rl T => T' [none] .) RlS), B)
-    = ( 'rl  eMetaPrettyPrint(M, T, B) 
-         '=>  eMetaPrettyPrint(M, T', B)  '. '\n
+    = item( 'rl  eMetaPrettyPrint(M, T, B) 
+         '=>  eMetaPrettyPrint(M, T', B)  '. '\n)
        
-       eMetaPrettyPrint(M, RlS, B)) .
+       eMetaPrettyPrint(M, RlS, B) .
   eq eMetaPrettyPrint(M, ((rl T => T' [AtS] .) RlS), B)
-    = ( 'rl  eMetaPrettyPrint(M, T, B) 
+    = item( 'rl  eMetaPrettyPrint(M, T, B) 
          '=>  eMetaPrettyPrint(M, T', B) 
-            '`[ eMetaPrettyPrint(M, AtS) '`]  '. '\n
-       eMetaPrettyPrint(M, RlS, B)) 
+            '`[ eMetaPrettyPrint(M, AtS) '`]  '. '\n)
+       eMetaPrettyPrint(M, RlS, B) 
     [owise] .
   eq eMetaPrettyPrint(M, ((crl T => T' if Cond [none] .) RlS), B)
-    = ( 'crl  eMetaPrettyPrint(M, T, B) 
+    = item( 'crl  eMetaPrettyPrint(M, T, B) 
          '=>  eMetaPrettyPrint(M, T', B) 
-         'if  eMetaPrettyPrint(M, Cond, B)  '. '\n
+         'if  eMetaPrettyPrint(M, Cond, B)  '. '\n)
        
-       eMetaPrettyPrint(M, RlS, B)) .
+       eMetaPrettyPrint(M, RlS, B) .
   eq eMetaPrettyPrint(M, ((crl T => T' if Cond [AtS] .) RlS), B)
-    = ( 'crl  eMetaPrettyPrint(M, T, B) 
+    = item( 'crl  eMetaPrettyPrint(M, T, B) 
          '=>  eMetaPrettyPrint(M, T', B) 
          'if  eMetaPrettyPrint(M, Cond, B) 
-            '`[ eMetaPrettyPrint(M, AtS) '`]  '.  '\n
-       eMetaPrettyPrint(M, RlS, B)) 
+            '`[ eMetaPrettyPrint(M, AtS) '`]  '.  '\n)
+       eMetaPrettyPrint(M, RlS, B) 
     [owise] .
-  eq eMetaPrettyPrint(M, (none).RuleSet, B) = nil .
+  eq eMetaPrettyPrint(M, (none).RuleSet, B) = empty .
 
 ---(
   eq eMetaPrettyPrint(M, T = 'true.Bool /\ Cond, B)
@@ -529,9 +529,9 @@ fmod MODULE-META-PRETTY-PRINT is
   pr DECL-META-PRETTY-PRINT .
   pr MOD-NAME-TO-QID .
 
-  op eMetaPrettyPrint : Module Module -> QidList .
+  op eMetaPrettyPrint : Module Module -> QidListList .
 
-  op eMetaPrettyPrint : Module Module -> QidList .
+  op eMetaPrettyPrint : Module Module -> QidListList .
   op eMetaPrettyPrint : Header -> QidList .
   op eMetaPrettyPrint : ParameterDeclList -> QidList .
   op eMetaPrettyPrint : ImportList -> QidList .
@@ -567,10 +567,10 @@ fmod MODULE-META-PRETTY-PRINT is
 ---  eq eMetaPrettyPrint(unitError(QIL), noModule) = QIL .
 ---  eq eMetaPrettyPrint(noModule, noModule) = nil .
   eq eMetaPrettyPrint(M, mod ME is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
-    = ('\n '---K-MAUDE-GENERATED-OUTPUT-BEGIN--- '\n          
-       'mod eMetaPrettyPrint(ME) 'is 
-          eMetaPrettyPrint(IL) 
-          (if SS == none
+    = item('\n '---K-MAUDE-GENERATED-OUTPUT-BEGIN--- '\n          
+       'mod eMetaPrettyPrint(ME) 'is )
+          item(eMetaPrettyPrint(IL))
+          item(if SS == none
            then nil
            else ( 'sorts eMetaPrettyPrint(SS) '. )
            fi)
@@ -579,15 +579,14 @@ fmod MODULE-META-PRETTY-PRINT is
           eMetaPrettyPrint(M, MAS) 
           eMetaPrettyPrint(M, EqS) 
           eMetaPrettyPrint(M, RlS) 
-        'endm '\n '---K-MAUDE-GENERATED-OUTPUT-END----- '\n) .
+        item('endm '\n '---K-MAUDE-GENERATED-OUTPUT-END----- '\n) .
   eq eMetaPrettyPrint(M, mod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS RlS endm)
-    = ( 
-       'mod eMetaPrettyPrint(ME) (if PDL == nil 
+    = item('mod eMetaPrettyPrint(ME) (if PDL == nil 
                                       then nil
                                       else '`{ eMetaPrettyPrint(PDL) '`} 
-                                      fi) 'is 
-          eMetaPrettyPrint(IL) 
-          (if SS == none
+                                      fi) 'is )
+          item(eMetaPrettyPrint(IL) )
+          item(if SS == none
            then nil
            else ( 'sorts eMetaPrettyPrint(SS) '. )
            fi) 
@@ -596,28 +595,12 @@ fmod MODULE-META-PRETTY-PRINT is
           eMetaPrettyPrint(M, MAS) 
           eMetaPrettyPrint(M, EqS) 
           eMetaPrettyPrint(M, RlS) 
-        'endm '\n) .
----(
-  eq eMetaPrettyPrint(M, th MN is IL sorts SS . SSDS OPDS MAS EqS RlS endth)
-    = ( 
-       'th eMetaPrettyPrint(MN) 'is 
-          eMetaPrettyPrint(IL) 
-          (if SS == none
-           then nil
-           else ( 'sorts eMetaPrettyPrint(SS) '. )
-           fi) 
-          eMetaPrettyPrint(SSDS) 
-          eMetaPrettyPrint(M, OPDS)
-          eMetaPrettyPrint(M, MAS) 
-          eMetaPrettyPrint(M, EqS) 
-          eMetaPrettyPrint(M, RlS) 
-        'endth '\n) .
----)
+        item('endm '\n) .
   eq eMetaPrettyPrint(M, fmod ME is IL sorts SS . SSDS OPDS MAS EqS endfm)
-    = ( 
-       'fmod eMetaPrettyPrint(ME) 'is 
-           eMetaPrettyPrint(IL) 
-           (if SS == none
+    = item( 
+       'fmod eMetaPrettyPrint(ME) 'is )
+           item(eMetaPrettyPrint(IL) )
+           item(if SS == none
             then nil
             else ( 'sorts eMetaPrettyPrint(SS) '. )
             fi)  
@@ -625,15 +608,15 @@ fmod MODULE-META-PRETTY-PRINT is
            eMetaPrettyPrint(M, OPDS)
            eMetaPrettyPrint(M, MAS) 
            eMetaPrettyPrint(M, EqS) 
-        'endfm '\n) .
+        item('endfm '\n) .
   eq eMetaPrettyPrint(M, fmod ME{PDL} is IL sorts SS . SSDS OPDS MAS EqS endfm)
-    = ( 
+    = item( 
        'fmod eMetaPrettyPrint(ME) (if PDL == nil 
                                        then nil
                                        else '`{ eMetaPrettyPrint(PDL) '`} 
-                                       fi) 'is 
-           eMetaPrettyPrint(IL) 
-           (if SS == none
+                                       fi) 'is )
+           item(eMetaPrettyPrint(IL) )
+           item(if SS == none
             then nil
             else ( 'sorts eMetaPrettyPrint(SS) '. )
             fi)  
@@ -641,22 +624,7 @@ fmod MODULE-META-PRETTY-PRINT is
            eMetaPrettyPrint(M, OPDS)
            eMetaPrettyPrint(M, MAS)          
            eMetaPrettyPrint(M, EqS) 
-        'endfm '\n) .
----(
-  eq eMetaPrettyPrint(M, fth MN is IL sorts SS . SSDS OPDS MAS EqS endfth)
-    = ( 
-       'fth eMetaPrettyPrint(MN) 'is 
-          eMetaPrettyPrint(IL)
-          (if SS == none
-           then nil
-           else ( 'sorts eMetaPrettyPrint(SS) '. )
-           fi)  
-          eMetaPrettyPrint(SSDS) 
-          eMetaPrettyPrint(M, OPDS)
-          eMetaPrettyPrint(M, MAS) 
-          eMetaPrettyPrint(M, EqS) 
-        'endfth '\n) .
----)
+        item('endfm '\n) .
 
   eq eMetaPrettyPrint((including ME .) IL)
     = ( 'including eMetaPrettyPrint(ME) '.  '\n

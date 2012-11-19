@@ -31,39 +31,3 @@ mod STRICTCXT2EQS-META is
   eq $compileSTRICTCXT2EQS(M, M') = setName(addModule(M, M'), getName(M)) .
 endm
 
-mod STRICTCXT2EQS-LOOP is 
-  including LOOP-MODE + META-LEVEL .
-  including MODULE-META-PRETTY-PRINT .
-  op strict-cxt2eqs : -> System .
-  op idle : -> State .
-  var Q Syntax StrictCxt StrictEqs : Qid . var QIL QIL' : QidList . var FM : Module .
-  eq strict-cxt2eqs = [nil, idle, 
- 'Usage: 'strictCxt2eqs '<Syntax> '<StrictCxt> '<StrictEqs> '. ] .
-
-  op wrapper : Qid -> Module .
-  eq wrapper(Q) = (mod 'MKKS is including Q . 
-                    sorts none . none none none none none endm) .
-  op error : -> [Module] .
-  op print : Module [Module] -> QidList .
-  var Str : String . var M FM' : Module . var OPDS : OpDeclSet .  
-  eq print(M,FM) = eMetaPrettyPrint(setRls(setEqs(FM,none),none), FM) [owise] .
-  crl ['strictCxt2eqs StrictCxt StrictEqs QIL, idle, QIL'] 
-   => [QIL, idle, print(upModule(StrictCxt,false), FM )] 
-   if FM := downTerm(getTerm(
-             metaReduce(wrapper('STRICTCXT2EQS-META),
-                        'strictCxt2eqs[upTerm(string(StrictCxt)),upTerm(string(StrictEqs))])),error) .
-endm
-
----(
-mod STRICTOPS2EQ-META is
-  including STRICTOPS2EQ .
-  including  STRICT-METADATA-INTERFACE .
-  including META-LEVEL .
-  op strictOps2eq : String String ~> Module .
-  var Syntax StrictEq : String .
-  eq strictOps2eq(Syntax, StrictEq)
-   = strictOps2eq(qid(StrictEq), upModule(qid(Syntax),true)) .
-endm
----)
-
-

@@ -222,6 +222,12 @@ endfm
 fmod QID-EXTRAS is
   pr QID-LIST .
 
+
+  sort QidListList .
+  op item : QidList -> QidListList .
+  op __ : QidListList QidListList -> QidListList [assoc id: empty] . 
+  op empty : -> QidListList .
+
   op qidList2Qid : QidList -> Qid .
 
   var  Q QI : Qid .
