@@ -126,7 +126,7 @@ interface K-WRAPPERS-LABELS
 
 	syntax KLabel ::= "KLabel2KLabel" KLabel
 					| "CellLabel2KLabel" CellLabel
-					| "List{K}2KLabel" String
+					| "List{K}2KLabel" List{K}
 					| "Bag2KLabel" Bag
 					| "Set2KLabel" Set
 					| "List2KLabel" List
