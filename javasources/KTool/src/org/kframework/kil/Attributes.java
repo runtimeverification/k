@@ -1,6 +1,7 @@
 package org.kframework.kil;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -72,6 +73,15 @@ public class Attributes extends ASTNode {
 			}
 		}
 		contents.add(new Attribute(key, value));
+	}
+	
+	public void remove(String key) {
+		Iterator<Attribute> it = contents.iterator();
+		while(it.hasNext()){
+			Attribute a = (Attribute) it.next();
+			if(a.getKey().equals(key))
+				it.remove();
+		}
 	}
 
 	public boolean isEmpty() {
