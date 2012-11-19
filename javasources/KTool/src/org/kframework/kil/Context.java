@@ -14,6 +14,10 @@ public class Context extends Sentence {
 	public Context(Context node) {
 		super(node);
 	}
+	
+	public Context(){
+		super();
+	}
 
 	public String toString() {
 		String content = "  context ";
