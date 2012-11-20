@@ -86,7 +86,14 @@ module K-SET-EXTRAS
 
    rule (SetItem(K:K) S1:Set) -Set (SetItem(K:K) S2:Set) => S1 -Set (SetItem(K:K) S2) [structural, anywhere]
    rule (SetItem(K:K) S1:Set) -Set S2:Set => SetItem(K:K) (S1 -Set S2) when notBool K in S2 [structural, anywhere]
-   rule .Set -Set S:Set => .Set [structural, snywhere]
+   rule .Set -Set S:Set => .Set [structural, anywhere]
+
+
+  syntax Set ::= intersectSet(Set, Set) [function]
+  rule intersectSet(A, B) => A -Set (A -Set B)
+
+  syntax Bool ::= isEmptySet(Set) [function]
+  rule isEmptySet(A) => (A ==Set .Set)
 
 endmodule
 
