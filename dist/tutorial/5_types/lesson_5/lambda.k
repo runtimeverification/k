@@ -1,7 +1,7 @@
 require "modules/unification.k"
 
 module LAMBDA
-  imports UNIFICATION  // this should not be here
+  imports UNIFICATION
 
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                      [bracket]
@@ -44,7 +44,7 @@ module LAMBDA
   rule let X = E in E' => (lambda X . E') E                             [macro]
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule <k> mu X:Id . E:Exp => (Tv -> Tv) E ~> tenv(TEnv) ...</k>
-          <tenv> TEnv => TEnv[Tv/X] </tenv>  when fresh(Tv:TypeVar)
+       <tenv> TEnv => TEnv[Tv/X] </tenv>  when fresh(Tv:TypeVar)
 
   syntax K ::= Type "=" Type
   rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
