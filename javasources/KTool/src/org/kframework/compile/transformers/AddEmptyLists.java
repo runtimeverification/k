@@ -36,8 +36,8 @@ public class AddEmptyLists extends BasicTransformer {
 			Term t = tc.getContents().get(0);
 			UserList ul = (UserList) p.getItems().get(0);
 			if (isAddEmptyList(ul.getSort(), t.getSort())) {
-				if (t.getSort().equals("K")) {
-					String msg = "Found sort 'K' where list sort '" + ul.getSort() + "' was expected. Moving on.";
+				if (t.getSort().equals("K") || !DefinitionHelper.isSubsortedEq(ul.getSort(), t.getSort())) {
+					String msg = "Found sort '" + t.getSort() + "' where list sort '" + ul.getSort() + "' was expected. Moving on.";
 					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
 				} else
 					tc.getContents().set(0, addEmpty(t, ul.getSort()));
@@ -46,8 +46,8 @@ public class AddEmptyLists extends BasicTransformer {
 			// if the term should be a list, append the empty element
 			t = tc.getContents().get(1);
 			if (isAddEmptyList(p.getSort(), t.getSort())) {
-				if (t.getSort().equals("K")) {
-					String msg = "Found sort 'K' where list sort '" + p.getSort() + "' was expected. Moving on.";
+				if (t.getSort().equals("K") || !DefinitionHelper.isSubsortedEq(p.getSort(), t.getSort())) {
+					String msg = "Found sort '" + t.getSort() + "' where list sort '" + p.getSort() + "' was expected. Moving on.";
 					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
 				} else
 					tc.getContents().set(1, addEmpty(t, tc.getProduction().getSort()));
@@ -63,8 +63,8 @@ public class AddEmptyLists extends BasicTransformer {
 					Term t = (Term) tc.getContents().get(i);
 					// if the term should be a list, append the empty element
 					if (isAddEmptyList(srt, t.getSort())) {
-						if (t.getSort().equals("K")) {
-							String msg = "Found sort 'K' where list sort '" + srt + "' was expected. Moving on.";
+						if (t.getSort().equals("K") || !DefinitionHelper.isSubsortedEq(srt, t.getSort())) {
+							String msg = "Found sort '" + t.getSort() + "' where list sort '" + srt + "' was expected. Moving on.";
 							GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
 						} else
 							tc.getContents().set(i, addEmpty(t, srt));
