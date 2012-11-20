@@ -28,11 +28,13 @@ public class MaudeRun {
 		// get system properties: file separator, os name, os architecture
 		String fileSeparator = System.getProperty("file.separator");
 		String osname = System.getProperty("os.name");
+        String version = System.getProperty("os.version");
 		String arch = System.getProperty("os.arch");
 
 		// set different maude executables
 		String maude_win = "maude.exe";
-		String maude_mac = "maude.intelDarwin";
+		String maude_mac_leopard = "maude.intelDarwinLeopard";
+        String maude_mac = "maude.intelDarwin";
 		String maude_linux_32 = "maude.linux";
 		String maude_linux_64 = "maude.linux64";
 
@@ -42,14 +44,21 @@ public class MaudeRun {
 		String maudeDir = KPaths.getKBase(false) + fileSeparator + "bin" + fileSeparator + "maude" + fileSeparator + "binaries";
 		String maudeExe = "maude";
 
+
 		if (osname.toLowerCase().contains("win")) {
 			// silently ignore this case
 			// the user should install itself maude
 			// we assume that he can execute maude from command line
 			maudeExe = maudeDir + fileSeparator + maude_win;
-		} else if (osname.toLowerCase().contains("mac")) {
+		//} else if (osname.toLowerCase().contains("mac")) {
 			// I hope this condition is strong enough
-			maudeExe = maudeDir + fileSeparator + maude_mac;
+        } else if (osname.equals("Mac OS X")) {
+            String subversion = version.substring(3, version.indexOf('.', 3));
+            // if at least Snow Leopard
+            if (Integer.parseInt(subversion) >= 6)
+			    maudeExe = maudeDir + fileSeparator + maude_mac;
+            else
+                maudeExe = maudeDir + fileSeparator + maude_mac_leopard;
 		} else if (osname.toLowerCase().contains("linux")) {
 			// in this case we assume linux
 			if (arch.toLowerCase().contains("64")) {
