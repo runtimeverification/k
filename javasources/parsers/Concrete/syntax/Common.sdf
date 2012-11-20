@@ -11,7 +11,7 @@ lexical syntax
 	-> EOF
 
 	%% Variables and the Anonymous Variable
-	"$"?[A-Z] ~[\:\;\(\)\<\>\~\n\r\t\,\ \[\]\=\+\-\*\/\|\{\}\.]*  -> VARID
+	"$"?[A-Z] [a-zA-Z0-9\']*  -> VARID
 	"_" -> VARID
 	"HOLE" -> VARID {reject}
 
@@ -22,7 +22,7 @@ lexical restrictions
 	%% EOF may not be followed by any char
 	EOF           -/- ~[]
 
-	VARID -/- ~[\:\;\(\)\<\>\~\n\r\t\,\ \[\]\=\+\-\*\/\|\{\}\.]
+	VARID -/- [a-zA-Z0-9\']
 
 context-free restrictions
 	%% Ensure greedy matching for comments
