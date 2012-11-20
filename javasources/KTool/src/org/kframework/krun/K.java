@@ -23,31 +23,36 @@ public class K {
 		}
 		try {
 			kdir = DefinitionHelper.dotk.getCanonicalPath();
+			setKDir();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	public static final String krunDir = kdir + fileSeparator + "krun";
-	public static final String krunTempDir = kdir + fileSeparator + FileUtil.generateUniqueFolderName("krun");
-	public static final String maude_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_in.maude");
-	public static final String maude_out = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_out.txt");
-	public static final String maude_err = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_err.txt");
+	public static String krunDir, krunTempDir, maude_in, maude_out, maude_err, kast_in, maude_output, processed_maude_output, krun_output;
 
-	// kast
-	public static final String kast_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("kast_in.txt");
+	public static void setKDir() {
+		krunDir = kdir + fileSeparator + "krun";
+		krunTempDir = kdir + fileSeparator + FileUtil.generateUniqueFolderName("krun");
+		maude_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_in.maude");
+		maude_out = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_out.txt");
+		maude_err = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_err.txt");
 
-	//where to write the XML output from Maude
-	public static final String maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput.xml");
-	public static final String processed_maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput_simplified.xml");
+		// kast
+		kast_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("kast_in.txt");
+
+		//where to write the XML output from Maude
+		maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput.xml");
+		processed_maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput_simplified.xml");
 	
-	// where to write the pretty-printed output of jkrun
-	public static final String krun_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("krun_output.txt");
+		// where to write the pretty-printed output of jkrun
+		krun_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("krun_output.txt");
+	}
 
 	// the default values for jkrun commandline options
 	public static String desk_file;
 	public static String pgm;
-	public static String k_definition;
+	public static String k_definition = null;
 	public static String main_module;
 	public static String syntax_module;
 	public static String parser = "kast";

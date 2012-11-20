@@ -100,9 +100,23 @@ public class Main {
 
 	//set the main-module, syntax-module and k-definition according to their correlation with compiled-def
 	public static void resolveOption(String optionName, CommandLine cmd) {
-		String s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
-		int sep = s.lastIndexOf(K.fileSeparator);
-		String str = s.substring(sep + 1).toUpperCase();
+		String s, str;
+		if (K.k_definition != null) {
+			s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
+			int sep = s.lastIndexOf(K.fileSeparator);
+			str = s.substring(sep + 1).toUpperCase();
+		} else {
+			// using --compiled-def
+			if (K.compiled_def.endsWith("-compiled.maude")) {
+				s = K.compiled_def.substring(0, K.compiled_def.lastIndexOf("-compiled"));
+				int sep = s.lastIndexOf(K.fileSeparator);
+				str = s.substring(sep + 1).toUpperCase();
+			} else {
+				s = null;
+				str = null;
+			}
+		}
+			
 		int index;
 
 		if (optionName == "compiled-def") {
@@ -120,12 +134,16 @@ public class Main {
 				int pos = K.syntax_module.indexOf("-SYNTAX");
 				K.main_module = K.syntax_module.substring(0, pos);
 			} else {
+				if (str == null)
+					Error.report("could not deduce syntax module. Please specify manually and try again.");
 				K.main_module = str;
 			}
 		} else if (optionName == "syntax-module") {
 			if (cmd.hasOption("main-module")) {
 				K.syntax_module = K.main_module + "-SYNTAX";
 			} else {
+				if (str == null)
+					Error.report("could not deduce main module. Please specify manually and try again.");
 				K.syntax_module = str + "-SYNTAX";
 			}
 		}
@@ -579,6 +597,7 @@ public class Main {
 				DefinitionHelper.dotk = new File(new File(K.k_definition).getParent() + File.separator + ".k");
 				
 				K.kdir = DefinitionHelper.dotk.getCanonicalPath();
+				K.setKDir();
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");
@@ -617,6 +636,7 @@ public class Main {
 			if (cmd.hasOption("compiled-def") && !cmd.hasOption("k-definition")) {
 				K.compiled_def = new File(cmd.getOptionValue("compiled-def")).getCanonicalPath();
 				K.kdir = new File(K.compiled_def).getParent() + K.fileSeparator + ".k";
+				K.setKDir();
 			}
 			if (cmd.hasOption("do-search")) {
 				K.do_search = true;
@@ -730,7 +750,7 @@ public class Main {
 			String lang = FileUtil.getExtension(K.pgm, ".", K.fileSeparator);
 
 			// by default
-			if (!cmd.hasOption("k-definition")) {
+			if (!cmd.hasOption("k-definition") && !cmd.hasOption("compiled-def")) {
 				K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
 			}
 
@@ -746,7 +766,7 @@ public class Main {
 				resolveOption("syntax-module", cmd);
 			}
 
-			if (!K.k_definition.endsWith(".k")) {
+			if (K.k_definition != null && !K.k_definition.endsWith(".k")) {
 				K.k_definition = K.k_definition + ".k";
 			}
 
