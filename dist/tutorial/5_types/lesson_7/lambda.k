@@ -23,7 +23,8 @@ module LAMBDA
                 | TypeVar
   syntax UnificationVar ::= TypeVar
 
-  syntax TypeSchema ::= "forall" Set "." Type     [latex((\forall{#1}){#2})]
+  syntax TypeSchema ::= "forall" Set "." Type  
+                          [binder(1), latex((\forall{#1}){#2})]
 
   syntax Exp ::= Type
   syntax KResult ::= Type
