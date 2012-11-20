@@ -1,7 +1,6 @@
 package org.kframework.kil;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -23,7 +22,7 @@ public class TermCons extends Term {
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.cons = element.getAttribute(Constants.CONS_cons_ATTR);
 
-		contents = new LinkedList<Term>();
+		contents = new ArrayList<Term>();
 		List<Element> children = XML.getChildrenElements(element);
 		for (Element e : children)
 			contents.add((Term) JavaClassesFactory.getTerm(e));
