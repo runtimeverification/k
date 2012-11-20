@@ -34,7 +34,7 @@ public class SDFHelper {
 
 	public static String getFollowRestrictionsForTerminals(Set<String> terminals) {
 		Set<Ttuple> mytuples = new HashSet<Ttuple>();
-		String varid = "[A-Z][^:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*";
+		String varid = "[A-Z][a-zA-Z0-9\\']*";
 
 		for (String t1 : terminals) {
 			for (String t2 : terminals) {
