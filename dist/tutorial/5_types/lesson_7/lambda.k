@@ -44,15 +44,15 @@ module LAMBDA
   rule T1:Type T2:Type => T1 = (T2 -> Tv) ~> Tv  when fresh(Tv:TypeVar)
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
 
-  rule <k> let X:Id = T:Type in E:Exp => E ~> tenv(TEnv) ...</k>
+  rule <k> let X = T:Type in E => E ~> tenv(TEnv) ...</k>
        <mgu> Theta:Mgu </mgu>
        <tenv> TEnv
         => TEnv[(forall free-vars(applyMgu(Theta, T)) -Set
                         free-vars(applyMgu(Theta, vals(TEnv)))
                  . applyMgu(Theta, T)) / X]
        </tenv>
-  rule <k> X => fresh-vars(Tvs,T) ...</k>
-       <tenv>... X:Id |-> (forall Tvs) T:Type ...</tenv>
+  rule <k> X:Id => fresh-vars(Tvs,T) ...</k>
+       <tenv>... X |-> forall Tvs . T ...</tenv>
 
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule <k> mu X:Id . E:Exp => (Tv -> Tv) E ~> tenv(TEnv) ...</k>
