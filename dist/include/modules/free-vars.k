@@ -59,13 +59,13 @@ module FREE-VARS
   rule freeVars(K) => freeVars(K, .Set, .Set)
   
   syntax K ::= freeVars(List{K}, Set, Set) [function]
-  rule freeVars(.List{K}, Bound, Free) => vars(Free) 
+  rule freeVars(.List{K}, Bound, Free) => vars(Free)
   rule freeVars(X:Id,, Ks, Bound:Set, Free:Set)
     => #if X in Bound ==K true #then freeVars(Ks, Bound, Free)
        #else freeVars(Ks, Bound, Free SetItem(X)) #fi
   rule freeVars((L:KLabel(Ks:List{K}) => Ks),, _, _, _)
     when isId(L(Ks)) =/=K true andBool isBinder(L(Ks)) =/=K true
-  rule freeVars(K,, Ks, Bound, Free) 
+  rule freeVars(K,, Ks, Bound, Free)
     =>  freeVars1(Ks, freeVarsBinder(K, Bound), Bound, Free)
     when isBinder(K)
 
