@@ -1,31 +1,15 @@
 package org.kframework.compile.transformers;
 
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Context;
-import org.kframework.kil.KApp;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class ResolveBuiltins extends CopyOnWriteTransformer {
 	

@@ -1,8 +1,5 @@
 package org.kframework.utils;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
@@ -22,6 +19,9 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.io.File;
+import java.io.IOException;
 
 public class ProgramLoader {
 

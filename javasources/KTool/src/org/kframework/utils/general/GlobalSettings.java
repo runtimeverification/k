@@ -1,10 +1,10 @@
 package org.kframework.utils.general;
 
+import org.kframework.utils.errorsystem.KExceptionManager;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.kframework.utils.errorsystem.KExceptionManager;
 
 public class GlobalSettings {
 	public static boolean verbose = false;

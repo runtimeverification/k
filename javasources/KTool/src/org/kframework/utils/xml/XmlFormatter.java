@@ -1,17 +1,11 @@
 package org.kframework.utils.xml;
 
-import java.io.StringWriter;
+import org.w3c.dom.Document;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
+import java.io.StringWriter;
 
 public class XmlFormatter {
 	

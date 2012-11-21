@@ -1,8 +1,8 @@
 package org.kframework.krun.ioserver.main;
 
-import java.util.logging.Logger;
-
 import org.kframework.krun.ioserver.resources.ResourceSystem;
+
+import java.util.logging.Logger;
 
 public class MainServer implements Runnable {
 	public int _port;

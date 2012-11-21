@@ -1,38 +1,16 @@
 package org.kframework.compile.transformers;
 
+import org.kframework.compile.utils.MaudeHelper;
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.kframework.compile.utils.MaudeHelper;
-import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Collection;
-import org.kframework.kil.CollectionItem;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Empty;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.ListOfK;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Module;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.kil.Terminal;
 
 public class FlattenSyntax extends CopyOnWriteTransformer {
 	FlattenKSyntax kTrans = new FlattenKSyntax(this);

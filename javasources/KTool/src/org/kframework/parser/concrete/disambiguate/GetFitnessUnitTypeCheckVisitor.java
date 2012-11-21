@@ -1,13 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Bracket;
-import org.kframework.kil.Collection;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.UserList;
+import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.DefinitionHelper;
 

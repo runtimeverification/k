@@ -3,7 +3,7 @@ package org.kframework.compile.utils;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
 
-import java.util.*;
+import java.util.Stack;
 
 public class ConfigurationStructureVisitor extends BasicVisitor {
 

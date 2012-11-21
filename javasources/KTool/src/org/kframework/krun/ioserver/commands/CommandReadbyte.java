@@ -1,11 +1,11 @@
 package org.kframework.krun.ioserver.commands;
 
+import org.kframework.krun.ioserver.resources.FileResource;
+import org.kframework.krun.ioserver.resources.ResourceSystem;
+
 import java.io.EOFException;
 import java.net.Socket;
 import java.util.logging.Logger;
-
-import org.kframework.krun.ioserver.resources.FileResource;
-import org.kframework.krun.ioserver.resources.ResourceSystem;
 
 public class CommandReadbyte extends Command {
 

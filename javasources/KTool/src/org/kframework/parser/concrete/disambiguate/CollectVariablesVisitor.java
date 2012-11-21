@@ -1,10 +1,10 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class CollectVariablesVisitor extends BasicVisitor {

@@ -1,7 +1,5 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.Map;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -11,6 +9,8 @@ import org.kframework.kil.visitors.exceptions.VariableTypeClashException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+
+import java.util.Map;
 
 public class VariableTypeFilter extends BasicTransformer {
 

@@ -1,15 +1,15 @@
 package org.kframework.compile.sharing;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.UserList;
 import org.kframework.kil.visitors.BasicVisitor;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 
 public class DittoFilter extends BasicVisitor{

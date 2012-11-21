@@ -1,19 +1,15 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.ArrayList;
-
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
+import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+
+import java.util.ArrayList;
 
 public class CheckRewriteFilter extends BasicTransformer {
 	public CheckRewriteFilter() {

@@ -1,12 +1,12 @@
 package org.kframework.parser.concrete.lib;
 
-import static org.strategoxt.lang.Term.NO_STRATEGIES;
-
 import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.Strategy;
+
+import static org.strategoxt.lang.Term.NO_STRATEGIES;
 
 /**
  * Example Java strategy implementation.

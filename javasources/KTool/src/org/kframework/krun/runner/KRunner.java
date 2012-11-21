@@ -1,22 +1,21 @@
 // make && java -jar wrapperAndServer.jar --maudefile blah
 package org.kframework.krun.runner;
 
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
+import org.kframework.krun.K;
+import org.kframework.krun.KPaths;
+import org.kframework.krun.ioserver.main.MainServer;
+import org.kframework.krun.tasks.MaudeTask;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
-import org.kframework.krun.K;
-import org.kframework.krun.KPaths;
-import org.kframework.krun.ioserver.main.MainServer;
-import org.kframework.krun.tasks.MaudeTask;
-
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
 
 public class KRunner {
 	// private String _maudeCommand = "maude";

@@ -1,17 +1,11 @@
 package org.kframework.parser.generator;
 
-import java.util.List;
-
-import org.kframework.kil.Definition;
-import org.kframework.kil.Module;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
+import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.StringUtil;
+
+import java.util.List;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.

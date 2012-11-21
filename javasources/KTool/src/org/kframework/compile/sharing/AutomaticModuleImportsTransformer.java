@@ -1,20 +1,11 @@
 package org.kframework.compile.sharing;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Import;
-import org.kframework.kil.Module;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Terminal;
+import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class AutomaticModuleImportsTransformer extends BasicTransformer {
 

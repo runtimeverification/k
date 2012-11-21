@@ -1,11 +1,11 @@
 package org.kframework.utils.maude;
 
+import org.kframework.utils.file.FileUtil;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import org.kframework.utils.file.FileUtil;
 
 
 public class StreamCapturer extends Thread {

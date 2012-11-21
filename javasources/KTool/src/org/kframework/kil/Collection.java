@@ -1,11 +1,11 @@
 package org.kframework.kil;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Collection extends Term {
 

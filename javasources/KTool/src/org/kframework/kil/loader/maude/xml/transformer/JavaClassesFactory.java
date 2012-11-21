@@ -1,15 +1,6 @@
 package org.kframework.kil.loader.maude.xml.transformer;
 
-import org.kframework.kil.Bag;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Empty;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.List;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Set;
+import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.maude.xml.basic.Term;
 

@@ -1,9 +1,9 @@
 package org.kframework.parser.generator;
 
+import org.kframework.kil.Attributes;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import org.kframework.kil.Attributes;
 
 public class SDFHelper {
 	public static String getSDFAttributes(Attributes attrs) {

@@ -1,13 +1,8 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Bag;
-import org.kframework.kil.Cell;
+import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Empty;
-import org.kframework.kil.Rule;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 

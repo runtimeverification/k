@@ -1,11 +1,5 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Variable;
@@ -16,6 +10,12 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class VariableTypeInferenceFilter extends BasicTransformer {
 

@@ -1,14 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -16,6 +8,9 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CellTypesFilter extends BasicTransformer {
 

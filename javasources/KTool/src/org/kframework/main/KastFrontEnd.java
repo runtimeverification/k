@@ -1,8 +1,6 @@
 package org.kframework.main;
 
-import java.io.File;
-import java.io.IOException;
-
+import com.thoughtworks.xstream.XStream;
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -14,7 +12,8 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.File;
+import java.io.IOException;
 
 public class KastFrontEnd {
 

@@ -1,10 +1,5 @@
 package org.kframework.backend.latex;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
@@ -13,6 +8,11 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 
 public class LatexFilter extends BasicVisitor {

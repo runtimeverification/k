@@ -1,11 +1,11 @@
 package org.kframework.utils.errorsystem;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KExceptionManager {
 	private List<KException> exceptions = new ArrayList<KException>();

@@ -1,10 +1,10 @@
 package org.kframework.krun;
 
+import org.kframework.kil.loader.DefinitionHelper;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-
-import org.kframework.kil.loader.DefinitionHelper;
 
 public class K {
 

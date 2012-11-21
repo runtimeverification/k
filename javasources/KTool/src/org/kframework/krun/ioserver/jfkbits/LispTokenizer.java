@@ -1,10 +1,6 @@
 package org.kframework.krun.ioserver.jfkbits;
- 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
+
+import java.io.*;
 import java.util.Iterator;
  
 public class LispTokenizer implements Iterator<Token>

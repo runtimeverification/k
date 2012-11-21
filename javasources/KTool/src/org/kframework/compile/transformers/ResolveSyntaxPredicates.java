@@ -1,20 +1,12 @@
 package org.kframework.compile.transformers;
 
 
-import java.util.Set;
-
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.KApp;
-import org.kframework.kil.ListOfK;
-import org.kframework.kil.Sentence;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+
+import java.util.Set;
 
 public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 	

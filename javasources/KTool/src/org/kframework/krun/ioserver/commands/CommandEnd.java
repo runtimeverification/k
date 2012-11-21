@@ -1,7 +1,8 @@
 package org.kframework.krun.ioserver.commands;
-import java.util.logging.Logger;
+
 import java.net.Socket;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.logging.Logger;
 
 public class CommandEnd extends Command {
     private ThreadPoolExecutor pool;

@@ -2,9 +2,9 @@ package org.kframework.kil.loader;
 
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectSubsortsVisitor extends BasicVisitor {

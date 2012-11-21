@@ -1,6 +1,9 @@
 package org.kframework.backend.hkcd;
 
-import org.kframework.kil.*;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Term;
+import org.kframework.kil.Variable;
 
 /**
  * Transform AST of language definition into set of Haskell

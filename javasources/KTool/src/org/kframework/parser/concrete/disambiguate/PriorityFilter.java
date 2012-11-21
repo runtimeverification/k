@@ -1,7 +1,5 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.ArrayList;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -14,6 +12,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+
+import java.util.ArrayList;
 
 public class PriorityFilter extends BasicTransformer {
 	public PriorityFilter() {

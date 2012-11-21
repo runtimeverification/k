@@ -1,12 +1,12 @@
 package org.kframework.compile.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Production;
 import org.kframework.kil.visitors.BasicVisitor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class GetSyntaxByTag extends BasicVisitor {

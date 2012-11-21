@@ -1,17 +1,7 @@
 package org.kframework.compile.transformers;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Empty;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
+import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
@@ -20,6 +10,9 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddEmptyLists extends BasicTransformer {
 

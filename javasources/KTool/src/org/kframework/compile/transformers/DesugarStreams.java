@@ -1,24 +1,14 @@
 package org.kframework.compile.transformers;
 
-import java.util.ArrayList;
-
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Context;
-import org.kframework.kil.Empty;
-import org.kframework.kil.List;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.util.ArrayList;
 
 
 public class DesugarStreams extends CopyOnWriteTransformer {

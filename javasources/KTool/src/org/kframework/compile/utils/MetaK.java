@@ -55,15 +55,6 @@ public class MetaK {
 		kModules.add("K-WRAPPERS-LABELS");
 	};
 
-	public static Set<String> builtinSorts = new HashSet<String>();
-	static {
-		builtinSorts.add("Bool");
-		builtinSorts.add("Float");
-		builtinSorts.add("Id");
-		builtinSorts.add("Int");
-		builtinSorts.add("String");
-	};
-
 	public static Set<Attribute> anywheres = new HashSet<Attribute>();
 	static {
 		anywheres.add(new Attribute("anywhere", ""));

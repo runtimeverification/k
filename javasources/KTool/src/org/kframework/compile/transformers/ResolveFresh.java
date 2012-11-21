@@ -1,27 +1,16 @@
 package org.kframework.compile.transformers;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import org.kframework.compile.utils.MetaK;
+import org.kframework.compile.utils.Substitution;
+import org.kframework.kil.*;
+import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+
+import java.util.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.kframework.compile.utils.MetaK;
-import org.kframework.compile.utils.Substitution;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Bag;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Sentence;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Variable;
-import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 
 public class ResolveFresh extends CopyOnWriteTransformer {

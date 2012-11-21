@@ -1,7 +1,7 @@
 package org.kframework.krun.ioserver.commands;
 
-import java.util.logging.Logger;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 public class CommandUnknown extends Command {
 

@@ -1,41 +1,23 @@
 package org.kframework.krun;
 
-import java.io.BufferedReader;
-import java.io.Console;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.Runtime;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import jline.ArgumentCompletor;
-import jline.Completor;
-import jline.ConsoleReader;
-import jline.FileNameCompletor;
-import jline.MultiCompletor;
-import jline.SimpleCompletor;
-
+import jline.*;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Term;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.io.*;
+import java.util.*;
 
 public class Main {
 

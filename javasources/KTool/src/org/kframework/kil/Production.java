@@ -1,8 +1,5 @@
 package org.kframework.kil;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
@@ -14,6 +11,9 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Production extends ASTNode {
 

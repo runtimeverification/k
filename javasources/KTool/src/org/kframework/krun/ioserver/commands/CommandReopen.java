@@ -1,10 +1,9 @@
 package org.kframework.krun.ioserver.commands;
 
-import java.net.Socket;
-
-import java.util.logging.Logger;
-
 import org.kframework.krun.ioserver.resources.ResourceSystem;
+
+import java.net.Socket;
+import java.util.logging.Logger;
 
 public class CommandReopen extends Command {
 

@@ -1,9 +1,8 @@
 package org.kframework.krun.ioserver.resources;
 
+import javax.imageio.IIOException;
 import java.io.EOFException;
 import java.io.InputStream;
-
-import javax.imageio.IIOException;
 
 public class BufferedReader extends FileResource{
 

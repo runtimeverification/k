@@ -1,11 +1,11 @@
 package org.kframework.krun.ioserver.commands;
 
+import org.kframework.krun.ioserver.jfkbits.LispParser;
+import org.kframework.krun.ioserver.jfkbits.LispParser.Expr;
+import org.kframework.krun.ioserver.jfkbits.LispTokenizer;
+
 import java.net.Socket;
 import java.util.logging.Logger;
-
-import org.kframework.krun.ioserver.jfkbits.LispParser;
-import org.kframework.krun.ioserver.jfkbits.LispTokenizer;
-import org.kframework.krun.ioserver.jfkbits.LispParser.Expr;
 
 
 public class CommandSmtlib extends Command {

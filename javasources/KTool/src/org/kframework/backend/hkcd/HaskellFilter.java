@@ -1,7 +1,9 @@
 package org.kframework.backend.hkcd;
 
 import org.kframework.compile.utils.MaudeHelper;
-import org.kframework.kil.*;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Empty;
+import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 

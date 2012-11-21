@@ -1,9 +1,5 @@
 package org.kframework.kil;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
@@ -16,6 +12,10 @@ import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class Cell extends Term {
 	public enum Multiplicity {

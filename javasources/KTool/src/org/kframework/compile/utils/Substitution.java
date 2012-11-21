@@ -1,11 +1,11 @@
 package org.kframework.compile.utils;
 
-import java.util.Map;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+
+import java.util.Map;
 
 
 public class Substitution extends CopyOnWriteTransformer {

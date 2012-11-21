@@ -1,12 +1,12 @@
 package org.kframework.backend.unparser;
 
-import java.util.Map.Entry;
-
 import org.kframework.kil.Definition;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.visitors.BasicVisitor;
+
+import java.util.Map.Entry;
 
 
 public class PriorityVisitor extends BasicVisitor {

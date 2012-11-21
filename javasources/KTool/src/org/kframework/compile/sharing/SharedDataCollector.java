@@ -1,14 +1,14 @@
 package org.kframework.compile.sharing;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.BasicVisitor;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**

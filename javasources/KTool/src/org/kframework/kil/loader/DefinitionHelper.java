@@ -1,16 +1,16 @@
 package org.kframework.kil.loader;
 
+import org.kframework.kil.Cell;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Production;
+import org.kframework.kil.UserList;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.kframework.kil.Cell;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Production;
-import org.kframework.kil.UserList;
 
 public class DefinitionHelper {
 	public static Set<String> generatedTags = new HashSet<String>();

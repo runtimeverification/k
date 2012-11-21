@@ -1,17 +1,12 @@
 package org.kframework.krun.tasks;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import org.kframework.krun.K;
+import org.kframework.utils.maude.MaudeRun;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import org.kframework.krun.K;
-import org.kframework.utils.maude.MaudeRun;
 
 
 public class MaudeTask extends Thread {

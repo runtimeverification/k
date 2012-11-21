@@ -1,8 +1,5 @@
 package org.kframework.main;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.hkcd.HaskellDefFilter;
 import org.kframework.backend.hkcd.HaskellPgmFilter;
@@ -13,6 +10,9 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Haskell K Compiler dump tool frontend

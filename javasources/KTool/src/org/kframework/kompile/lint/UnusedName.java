@@ -1,8 +1,8 @@
 package org.kframework.kompile.lint;
 
-import java.util.ArrayList;
-
 import org.kframework.kil.*;
+
+import java.util.ArrayList;
 
 /**
  * This classes is a lint rule that looks for names declared on the left side

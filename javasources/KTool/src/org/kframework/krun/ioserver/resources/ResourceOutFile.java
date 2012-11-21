@@ -1,13 +1,8 @@
 package org.kframework.krun.ioserver.resources;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.URI;
-
 import javax.imageio.IIOException;
+import java.io.*;
+import java.net.URI;
 
 public class ResourceOutFile extends FileResource {
 

@@ -1,17 +1,13 @@
 package org.kframework.parser.basic.lib;
 
-import java.util.ArrayList;
-
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoConstructor;
-import org.spoofax.interpreter.terms.IStrategoList;
-import org.spoofax.interpreter.terms.IStrategoString;
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.*;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ITokenizer;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.Strategy;
+
+import java.util.ArrayList;
 
 /**
  * Example Java strategy implementation.

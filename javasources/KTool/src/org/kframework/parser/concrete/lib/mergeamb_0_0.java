@@ -1,15 +1,10 @@
 package org.kframework.parser.concrete.lib;
 
-import java.util.ArrayList;
-
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoConstructor;
-import org.spoofax.interpreter.terms.IStrategoInt;
-import org.spoofax.interpreter.terms.IStrategoList;
-import org.spoofax.interpreter.terms.IStrategoString;
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.*;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.Strategy;
+
+import java.util.ArrayList;
 
 /**
  * Example Java strategy implementation.

@@ -1,21 +1,14 @@
 package org.kframework.compile.transformers;
 
+import org.kframework.compile.utils.GetSyntaxByTag;
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.*;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import org.kframework.compile.utils.GetSyntaxByTag;
-import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.Context;
-import org.kframework.kil.Hole;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.Production;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class StrictnessToContexts extends CopyOnWriteTransformer {
 

@@ -1,10 +1,13 @@
 package org.kframework.backend.html;
 
+import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.visitors.BasicVisitor;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.kframework.kil.*;
-import org.kframework.kil.visitors.BasicVisitor;
 
 
 public class HTMLPatternsVisitor extends BasicVisitor {

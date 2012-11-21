@@ -1,13 +1,13 @@
 package org.kframework.krun.ioserver.commands;
 
-import java.net.Socket;
-import java.util.logging.Logger;
-
 import org.kframework.krun.ioserver.jfkbits.LispParser;
-import org.kframework.krun.ioserver.jfkbits.LispTokenizer;
 import org.kframework.krun.ioserver.jfkbits.LispParser.Expr;
+import org.kframework.krun.ioserver.jfkbits.LispTokenizer;
 import org.kframework.krun.ioserver.resources.ResourceSmt;
 import org.kframework.krun.ioserver.resources.ResourceSystem;
+
+import java.net.Socket;
+import java.util.logging.Logger;
 
 
 public class CommandSmt extends Command {

@@ -1,12 +1,12 @@
 package org.kframework.backend.latex;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class LatexPatternsVisitor extends BasicVisitor {

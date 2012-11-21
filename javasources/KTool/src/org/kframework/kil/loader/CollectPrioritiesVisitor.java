@@ -1,12 +1,7 @@
 package org.kframework.kil.loader;
 
-import org.kframework.kil.Constant;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.PriorityBlockExtended;
-import org.kframework.kil.PriorityExtended;
-import org.kframework.kil.Production;
+import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.Syntax;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectPrioritiesVisitor extends BasicVisitor {

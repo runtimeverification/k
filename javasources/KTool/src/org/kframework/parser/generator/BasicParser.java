@@ -1,22 +1,6 @@
 package org.kframework.parser.generator;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.LiterateModuleComment;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.Require;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.parser.basic.KParser;
@@ -32,6 +16,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class BasicParser {
 	private List<DefinitionItem> moduleItems;

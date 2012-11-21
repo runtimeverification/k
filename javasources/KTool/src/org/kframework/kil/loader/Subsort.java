@@ -1,6 +1,7 @@
 package org.kframework.kil.loader;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Subsort {
 	private String bigSort, smallSort;

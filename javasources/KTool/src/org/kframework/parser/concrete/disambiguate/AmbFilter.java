@@ -1,10 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.TermCons;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;

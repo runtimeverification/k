@@ -1,7 +1,6 @@
 package org.kframework.krun;
 
-import java.io.File;
-
+import com.thoughtworks.xstream.XStream;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
@@ -13,7 +12,7 @@ import org.kframework.utils.XmlLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.File;
 
 public class KastParser {
 	private static boolean initialized = false;

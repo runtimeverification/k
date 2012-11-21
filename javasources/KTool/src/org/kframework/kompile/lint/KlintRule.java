@@ -1,8 +1,8 @@
 package org.kframework.kompile.lint;
 
-import java.util.ArrayList;
-
 import org.kframework.kil.*;
+
+import java.util.ArrayList;
 
 /**
  * A Klint rule is an algorithm that giving the AST of a K file will detect a

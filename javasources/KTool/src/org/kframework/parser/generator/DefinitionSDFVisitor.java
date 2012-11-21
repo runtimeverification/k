@@ -1,21 +1,15 @@
 package org.kframework.parser.generator;
 
+import org.kframework.kil.*;
+import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.loader.Subsort;
+import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.utils.StringUtil;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.loader.Subsort;
-import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.StringUtil;
 
 public class DefinitionSDFVisitor extends BasicVisitor {
 

@@ -1,12 +1,6 @@
 package org.kframework.parser.concrete;
 
-import org.kframework.parser.concrete.lib.ConcreteMain;
-import org.kframework.parser.concrete.lib.import$Tbl$Pgm_0_0;
-import org.kframework.parser.concrete.lib.import$Tbl_0_0;
-import org.kframework.parser.concrete.lib.java$Parse$String$Cmd_0_0;
-import org.kframework.parser.concrete.lib.java$Parse$String$Config_0_0;
-import org.kframework.parser.concrete.lib.java$Parse$String$Pgm_0_0;
-import org.kframework.parser.concrete.lib.java$Parse$String$Rules_0_0;
+import org.kframework.parser.concrete.lib.*;
 import org.kframework.utils.StringUtil;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;

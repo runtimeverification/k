@@ -1,11 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Context;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kil.visitors.exceptions.VariableTypeClashException;

@@ -1,6 +1,6 @@
 package org.kframework.parser.concrete.lib;
 
-import org.kframework.utils.*;
+import org.kframework.utils.StringUtil;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
