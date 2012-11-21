@@ -29,7 +29,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 			if (pi.getType() == ProductionType.SORT) {
 				sorts++;
 				Sort s = (Sort) pi;
-				if (!DefinitionHelper.definedSorts.contains(s.getName())) {
+				if (!s.getName().startsWith("#") && !DefinitionHelper.definedSorts.contains(s.getName())) {
 					String msg = "Undefined sort " + s.getName();
 					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 				}
@@ -37,7 +37,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 			if (pi.getType() == ProductionType.USERLIST) {
 				sorts++;
 				UserList s = (UserList) pi;
-				if (!DefinitionHelper.definedSorts.contains(s.getSort())) {
+				if (!s.getSort().startsWith("#") && !DefinitionHelper.definedSorts.contains(s.getSort())) {
 					String msg = "Undefined sort " + s.getSort();
 					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 				}

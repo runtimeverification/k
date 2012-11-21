@@ -15,6 +15,7 @@ public class Sort extends ProductionItem {
 	private static Set<String> baseSorts = new HashSet<String>();
 	static {
 		baseSorts.add("K");
+		baseSorts.add("KResult");
 		baseSorts.add("List{K}");
 		baseSorts.add("Map");
 		baseSorts.add("MapItem");
@@ -48,7 +49,7 @@ public class Sort extends ProductionItem {
 	}
 
 	public static Set<String> getBaseSorts() {
-		return baseSorts;
+		return new HashSet<String>(baseSorts);
 	}
 
 	public boolean isBaseSort() {
