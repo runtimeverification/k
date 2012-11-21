@@ -591,7 +591,7 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Blocking Input");
 			}
 
-			javaDef = new CompilerTransformerStep(new AddSyntaxPredicates()).compile(javaDef);
+			javaDef = new CompilerTransformerStep(new AddPredicates()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Add Syntax Predicates");
@@ -630,8 +630,14 @@ public class KompileFrontEnd {
             javaDef = new CompilerTransformerStep(new AddKLabelToString()).compile(javaDef);
 
             if (GlobalSettings.verbose) {
-                sw.printIntermediate("Add KLabel2String definitions");
+                sw.printIntermediate("Add KLabel2String and String2KLabel definitions");
             }
+
+            javaDef = new CompilerTransformerStep(new AddKLabelConstant()).compile(javaDef);
+
+            if (GlobalSettings.verbose) {
+                sw.printIntermediate("Add isKLabelConstant definitions");
+             }
 
 			javaDef = new CompilerTransformerStep(new ResolveHybrid()).compile(javaDef);
 

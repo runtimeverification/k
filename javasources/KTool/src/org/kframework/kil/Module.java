@@ -111,6 +111,14 @@ public class Module extends DefinitionItem {
 				sorts.addAll(list);
 		}
 
+        // Andrei S: bad, bad practice ...
+        // ... but it is 11:55pm and I do not see another way to get them
+        sorts.add("#Bool");
+        sorts.add("#Int");
+        sorts.add("#Float");
+        sorts.add("#String");
+        sorts.add("#Id");
+
 		return sorts;
 	}
 
@@ -144,6 +152,10 @@ public class Module extends DefinitionItem {
 	public void addConstant(String ctSort, String ctName) {
 		this.addProduction(ctSort, new Terminal(ctName));
 	}
+
+    public void addConstant(Constant ct) {
+        this.addProduction(ct.getSort(), new Terminal(ct.getValue()));
+    }
 
 	public void addProduction(String sort, ProductionItem prodItem) {
 		List<ProductionItem> prodItems = new LinkedList<ProductionItem>();

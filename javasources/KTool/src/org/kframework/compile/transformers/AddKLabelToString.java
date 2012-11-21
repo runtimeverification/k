@@ -42,7 +42,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
             termList.add(rhs);
             TermCons termCons = new TermCons("KLabel", String2KLabelCons, termList);
             rule = new Rule();
-            rule.setBody(new Rewrite(termCons,klblCt));
+            rule.setBody(new Rewrite(termCons, klblCt));
             rule.getAttributes().getContents().add(new Attribute("function", ""));
             retNode.appendModuleItem(rule);
         }

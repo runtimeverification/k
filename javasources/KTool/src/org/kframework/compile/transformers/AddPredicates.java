@@ -29,18 +29,9 @@ import java.util.List;
 import java.util.Set;
 
 
-public class AddSyntaxPredicates extends CopyOnWriteTransformer {
+public class AddPredicates extends CopyOnWriteTransformer {
 
-    public static final String syntaxPredicatePrefix = "is";
-
-    public static final String syntaxPredicate (String sort) {
-        //assert !MetaK.isKSort(sort) && !MetaK.isBuiltinSort(sort);
-        assert !MetaK.isKSort(sort);
-
-        return syntaxPredicatePrefix + sort;
-    }
-
-    public class SyntaxPredicatesVisitor extends BasicVisitor {
+    public class PredicatesVisitor extends BasicVisitor {
 
         private List<ModuleItem> result = new ArrayList<ModuleItem>();
         private Set<String> lists = new HashSet<String>();
@@ -94,7 +85,7 @@ public class AddSyntaxPredicates extends CopyOnWriteTransformer {
             Term rhs;
             if (node.getAttributes().containsKey("function") &&
                     node.getArity() > 0)
-               rhs = new KApp(AddSymbolicK.isSymbolicK, term);
+               rhs = new KApp(KSymbolicPredicate, term);
             else
                rhs = new Constant("#Bool", "true");
 
@@ -123,38 +114,82 @@ public class AddSyntaxPredicates extends CopyOnWriteTransformer {
         }
     }
 
+
+    private static final String PredicatePrefix = "is";
+    private static final String SymbolicPredicatePrefix = "Symbolic";
+    public static final Constant BuiltinPredicate =
+            new Constant("KLabel", predicate("Builtin"));
+    public static final Constant VariablePredicate =
+            new Constant("KLabel", predicate("Variable"));
+    public static final Constant KSymbolicPredicate =
+            new Constant("KLabel", symbolicPredicate("K"));
+
+
+    public static final String predicate(String sort) {
+        return PredicatePrefix + sort;
+    }
+
+    public static final String syntaxPredicate(String sort) {
+        assert !MetaK.isKSort(sort);
+
+        return predicate(sort);
+    }
+
+    public static final String symbolicPredicate(String sort) {
+        assert AddSymbolicK.allowSymbolic(sort);
+
+        return predicate(SymbolicPredicatePrefix + sort);
+    }
+
+
     @Override
     public ASTNode transform(Module node) throws TransformerException {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
+        // declare isBuiltin predicate as KLabel
+        retNode.addConstant(BuiltinPredicate);
+        // declare isSymbolicK predicate as KLabel
+        retNode.addConstant(KSymbolicPredicate);
 
         for (String sort : node.getAllSorts()) {
             if (!MetaK.isKSort(sort)) {
                 String pred = syntaxPredicate(sort);
+                // declare isSort predicate as KLabel
                 retNode.addConstant("KLabel", pred);
 
                 if (AddSymbolicK.allowKSymbolic(sort)) {
-                    String symPred = AddSymbolicK.symbolicPredicate(sort);
+                    String symPred = symbolicPredicate(sort);
+                    // declare isSymbolicSort predicate as KLabel
                     retNode.addConstant("KLabel", symPred);
 
+                    // define isSymbolicSort predicate
                     Variable var = MetaK.getFreshVar("K");
                     Term lhs = new KApp(new Constant("KLabel", symPred), var);
                     ListOfK list = new ListOfK();
                     Constant andKLbl = new Constant("KLabel", "'_andThenBool_");
                     Term rhs = new KApp(andKLbl, list);
                     list.getContents().add(new KApp(new Constant("KLabel", pred), var));
-                    list.getContents().add(new KApp(AddSymbolicK.isSymbolicK, var));
+                    list.getContents().add(new KApp(KSymbolicPredicate, var));
                     Rule rule = new Rule();
                     rule.setBody(new Rewrite(lhs, rhs));
                     rule.getAttributes().getContents().add(new Attribute("predicate", ""));
                     retNode.appendModuleItem(rule);
-                }
 
-                if (MetaK.isBuiltinSort(sort)) {
+                    // define isVariable predicate
+                    String symCtor = AddSymbolicK.symbolicConstructor(sort);
+                    var = MetaK.getFreshVar("List{K}");
+                    Term symTerm = new KApp(new Constant("KLabel", symCtor), var);
+                    lhs = new KApp(VariablePredicate, symTerm);
+                    rhs = new Constant("#Bool", "true");
+                    rule = new Rule();
+                    rule.setBody(new Rewrite(lhs, rhs));
+                    rule.getAttributes().getContents().add(new Attribute("predicate", ""));
+                    retNode.appendModuleItem(rule);
+                } else if (MetaK.isBuiltinSort(sort)) {
                     Variable var = MetaK.getFreshVar(sort);
-                    Term lhs = new KApp(AddSymbolicK.isSymbolicK, var);
-                    Term rhs = new Constant("#Bool", "false");
+                    Term lhs = new KApp(BuiltinPredicate, var);
+                    Term rhs = new Constant("#Bool", "true");
 
                     Rule rule = new Rule();
                     rule.setBody(new Rewrite(lhs, rhs));
@@ -164,7 +199,7 @@ public class AddSyntaxPredicates extends CopyOnWriteTransformer {
             }
         }
 
-        SyntaxPredicatesVisitor mv = new SyntaxPredicatesVisitor();
+        PredicatesVisitor mv = new PredicatesVisitor();
         node.accept(mv);
         retNode.getItems().addAll(mv.getResult());
 
@@ -174,7 +209,7 @@ public class AddSyntaxPredicates extends CopyOnWriteTransformer {
             return node;
     }
 
-    public AddSyntaxPredicates() {
+    public AddPredicates() {
         super("Add syntax and symbolic predicates");
     }
 
