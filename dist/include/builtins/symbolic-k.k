@@ -6,8 +6,9 @@ module SYMBOLIC-K
   syntax Bool ::= "isBuiltin" "(" K ")"
   [prefixlabel(isBuiltin), klabel(isBuiltin), predicate]
 
-  syntax Bool ::= "isVariable" "(" K ")"
-  [prefixlabel(isVariable), klabel(isVariable), predicate]
+  syntax Variable ::= "dummy-this-Variable-needed-only-to-declare-sort"
+//  syntax Bool ::= "isVariable" "(" K ")"
+//  [prefixlabel(isVariable), klabel(isVariable), predicate]
 
   syntax Bool ::= "isVariable" "(" List ")" [prefixlabel(isVariable), predicate]
   syntax Bool ::= "isVariable" "(" Set ")" [prefixlabel(isVariable), predicate]
