@@ -1,6 +1,18 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.kframework.kil.loader.CollectConfigCellsVisitor;
+import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.CollectPrioritiesVisitor;
+import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
+import org.kframework.kil.loader.CollectSubsortsVisitor;
+import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -11,11 +23,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 public class Definition extends ASTNode {
 

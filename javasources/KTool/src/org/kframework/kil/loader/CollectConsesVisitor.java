@@ -8,5 +8,7 @@ public class CollectConsesVisitor extends BasicVisitor {
 	public void visit(Production node) {
 		if (node.getAttributes().containsKey(Constants.CONS_cons_ATTR))
 			DefinitionHelper.conses.put(node.getAttributes().get(Constants.CONS_cons_ATTR), node);
+		if (node.isListDecl())
+			DefinitionHelper.listConses.put(node.getSort(), node);
 	}
 }
