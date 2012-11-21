@@ -22,7 +22,6 @@ public class CheckVariables extends BasicVisitor {
 	HashMap<Variable, Integer> current = left;
 	boolean inCondition = false;
 
-
 	@Override
 	public void visit(Rewrite node) {
 		node.getLeft().accept(this);

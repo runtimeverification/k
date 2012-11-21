@@ -1,14 +1,32 @@
 package org.kframework.utils;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.File;
+import java.io.IOException;
+
+import org.kframework.compile.checks.CheckListDecl;
+import org.kframework.compile.checks.CheckSyntaxDecl;
 import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.parser.concrete.disambiguate.*;
-import org.kframework.parser.generator.*;
+import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
+import org.kframework.parser.concrete.disambiguate.AmbFilter;
+import org.kframework.parser.concrete.disambiguate.BestFitFilter;
+import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
+import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
+import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
+import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
+import org.kframework.parser.generator.BasicParser;
+import org.kframework.parser.generator.DefinitionSDF;
+import org.kframework.parser.generator.ParseConfigsFilter;
+import org.kframework.parser.generator.ParseRulesFilter;
+import org.kframework.parser.generator.ProgramSDF;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -17,8 +35,7 @@ import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.File;
-import java.io.IOException;
+import com.thoughtworks.xstream.XStream;
 
 public class DefinitionLoader {
 	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang) throws IOException, Exception {
@@ -81,6 +98,9 @@ public class DefinitionLoader {
 			}
 
 			def.preprocess();
+
+			new CheckVisitorStep(new CheckSyntaxDecl()).check(def);
+			new CheckVisitorStep(new CheckListDecl()).check(def);
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Basic Parsing");

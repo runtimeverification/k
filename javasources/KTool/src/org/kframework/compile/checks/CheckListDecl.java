@@ -2,6 +2,7 @@ package org.kframework.compile.checks;
 
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -31,5 +32,10 @@ public class CheckListDecl extends BasicVisitor {
 			}
 		}
 
+	}
+
+	@Override
+	public void visit(Sentence node) {
+		// optimization to not visit the entire tree
 	}
 }
