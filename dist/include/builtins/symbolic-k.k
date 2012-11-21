@@ -18,6 +18,16 @@ module SYMBOLIC-K
   [prefixlabel(isKLabelConstant), klabel(isKLabelConstant), predicate]
 
 
+  syntax String ::= "K2Sort" "(" K ")"
+  [prefixlabel(K2Sort), klabel(K2Sort), function]
+
+  rule K2Sort(B:Bool) => "Bool"
+  rule K2Sort(I:Int) => "Int"
+  rule K2Sort(F:Float) => "Float"
+  rule K2Sort(S:String) => "String"
+  rule K2Sort(X:Id) => "Id"
+
+
   // declare isSymbolicSort for List, Set, Bag and Map
   syntax K ::= "isSymbolicList" "(" List ")" [prefixlabel(isSymbolicList), predicate]
   syntax K ::= "isSymbolicSet" "(" Set ")" [prefixlabel(isSymbolicSet), predicate]
