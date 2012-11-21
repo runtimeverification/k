@@ -79,7 +79,7 @@ module STRING-HOOKS
   rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => substrString(Source, 0, findString(Source, ToReplace, 0))
 				+String Replacement +String substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)) 
 				when findString(Source, ToReplace, 0) >=Int 0
-  rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => Source 
+  rule replaceFirst(Source:String, ToReplace:String, _:String) => Source 
 		when findString(Source, ToReplace, 0) <Int 0
   
   
@@ -87,8 +87,8 @@ module STRING-HOOKS
        substrString(Source, 0, findString(Source, ToReplace, 0)) +String Replacement +String
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
 		when Count >Int 0
-  rule replace(Source, ToReplace, Replacement, 0) => Source
-  rule replaceAll(Source, ToReplace, Replacement) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace))
+  rule replace(Source:K, _, _, 0) => Source
+  rule replaceAll(Source:K, ToReplace:K, Replacement:K) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace))
 
   rule ltrim(S:String) => replaceFirst(S, " ", "") when findString(S, " ", 0) ==Int 0
   rule ltrim(S:String) => S when findString(S, " ", 0) =/=Int 0
@@ -98,7 +98,7 @@ module STRING-HOOKS
   rule rtrim(S:String) => S when substrString(S, lengthString(S) -Int 1, lengthString(S)) =/=String " "
   rule rtrim("") => ""
   
-  rule trim(S) => ltrim(rtrim(S))
+  rule trim(S:K) => ltrim(rtrim(S))
 
   syntax K ::= "#parseToken" "(" String "," String ")"  [function]
   rule #parseToken("Int",S:String) => (String2Int(S +String "0") /Int 10)

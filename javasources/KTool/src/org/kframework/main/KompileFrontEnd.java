@@ -8,12 +8,14 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
+import org.kframework.compile.checks.CheckVariables;
 import org.kframework.compile.sharing.AutomaticModuleImportsTransformer;
 import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
+import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.ConfigurationStructureVisitor;
@@ -504,6 +506,13 @@ public class KompileFrontEnd {
 			MaudeFilter maudeFilter1 = new MaudeFilter();
 			javaDef.accept(maudeFilter1);
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/lists.maude", maudeFilter1.getResult());
+
+
+			new CheckVisitorStep(new CheckVariables()).check(javaDef);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Check Variables");
+			}
 
 			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
 			try {

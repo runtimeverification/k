@@ -18,7 +18,7 @@ module K-EQUAL-HOOKS
   syntax Bool ::= Set "<=Set" Set    [function]
   rule SetItem(K:K) Set1:Set <=Set SetItem(K) Set2:Set => Set1 <=Set Set2
   rule .Set <=Set _:Set => true
-  rule SetItem(K:K) Set1:Set <=Set Set2:Set => false
+  rule SetItem(K:K) _:Set <=Set Set2:Set => false
                             when notBool (K in Set2:Set)
   // equality over sets
   syntax Bool ::= Set "==Set" Set    [function]
@@ -38,7 +38,7 @@ module K-EQUAL-HOOKS
 
   rule .Map <=Map _:Map => true [function, anywhere]
 
-  rule ((K1:K |-> K2:K) Map1:Map) <=Map Map2 => false
+  rule ((K1:K |-> K2:K) _:Map) <=Map Map2 => false
        when notBool $hasMapping(Map2, K1)
        orElseBool (K2 =/=K Map2:Map(K1))
 

@@ -19,12 +19,12 @@ public class Stopwatch {
 
 	public void printIntermediate(String message) {
 		long endd = System.currentTimeMillis();
-		f.format("%-35s = %5d%n", message, endd - start2);
+		f.format("%-60s = %5d%n", message, endd - start2);
 		start2 = endd;
 	}
 
 	public void printTotal(String message) {
 		long endd = System.currentTimeMillis();
-		f.format("%-35s = %5d%n", message, endd - start);
+		f.format("%-60s = %5d%n", message, endd - start);
 	}
 }

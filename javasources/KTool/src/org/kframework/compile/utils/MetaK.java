@@ -25,11 +25,13 @@ public class MetaK {
 
    public static class Constants {
 
-        public static final String anyVarSymbol = "_";
-        public static final String heatingTag = "heating";
-        public static final String KItem = "KItem";
-        public static final String K = "K";
-        public static final String hole = "[]";
+	   public static final String anyVarSymbol = "_";
+	   public static final String heatingTag = "heating";
+	   public static final String KItem = "KItem";
+	   public static final String K = "K";
+	   public static final String hole = "[]";
+	   public static final String freshCons = "Bool1FreshSyn";
+	   public static final String plusIntCons = "Int1PlusSyn";
    }
 
 	static int nextVarId = 0;

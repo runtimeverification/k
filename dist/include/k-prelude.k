@@ -9,7 +9,7 @@ module K-LISTK-EXTRAS
   
   syntax Bool ::= K "inList{K}" List{K} [function]
   syntax Bool ::= K "#inList{K}" List{K} [function] 
-  rule K inList{K} L:List{K} => K #inList{K} L ==K true 
+  rule K:K inList{K} L:List{K} => K #inList{K} L ==K true 
     [structural, anywhere]
   rule K #inList{K} (_,,K:K,,_) => true 
     [structural, anywhere]
@@ -34,17 +34,17 @@ module K-MAP-EXTRAS
   rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .List{K}),,_ 
                         /  (K1:K,,K1':K => .List{K}),,_]
 
-  rule (M:Map K1:K |-> K2:K)[K2':K / K1] => M K1 |-> K2' 
+  rule (M:Map K1:K |-> _:K)[K2:K / K1] => M K1 |-> K2 
     [structural, anywhere]
   rule M:Map[K2:K / K1:K] => M K1 |-> K2 
     when notBool(K1 in keys(M)) [structural, anywhere]
   
-  rule M:Map[undef/ K,,Kl:List{K}] => M[undef/ K][undef/ Kl] when Kl =/=List{K} .List{K} [structural, anywhere]
+  rule M:Map[undef/ K:K,,Kl:List{K}] => M[undef/ K][undef/ Kl] when Kl =/=List{K} .List{K} [structural, anywhere]
   rule M:Map[undef/ .List{K}] => M [structural, anywhere]
-  rule (M:Map K |-> _)[undef/ K] => M [structural, anywhere]
+  rule (M:Map K:K |-> _)[undef/ K] => M [structural, anywhere]
 
   syntax Map ::= Map "[" Map "]"   [function, cons(Map1UpdateMapWithMapSyn)]
-  rule M:Map[M':Map K1 |-> K2] => M[K2/K1][M'] [structural]
+  rule M:Map[M':Map K1:K |-> K2:K] => M[K2/K1][M'] [structural]
   rule M:Map[.Map] => M [structural]
 
 //  syntax List{K} ::= Map "(" List{K} ")"
@@ -61,7 +61,7 @@ module K-MAP-EXTRAS
   syntax Bool ::= "#hasMapping" "(" Map "," K ")" [function, maudeop("#hasMapping")]
   rule $hasMapping(M:Map,K:K) => #hasMapping(M,K) ==K true [structural, anywhere]
 
-  rule #hasMapping(M:Map K:K |-> _,K) => true [structural, anywhere]
+  rule #hasMapping(_:Map K:K |-> _:K,K) => true [structural, anywhere]
 endmodule
 
 module K-SET-EXTRAS
@@ -81,19 +81,19 @@ module K-SET-EXTRAS
    rule SetItem(K:K) in S:Set => K in S [structural, anywhere]
    rule K:K in S:Set => K #inSet S ==K true
      [structural, anywhere]
-   rule K #inSet SetItem(K) S:Set => true
+   rule K:K #inSet SetItem(K) _:Set => true
      [structural, anywhere]
 
    rule (SetItem(K:K) S1:Set) -Set (SetItem(K:K) S2:Set) => S1 -Set (SetItem(K:K) S2) [structural, anywhere]
    rule (SetItem(K:K) S1:Set) -Set S2:Set => SetItem(K:K) (S1 -Set S2) when notBool K in S2 [structural, anywhere]
-   rule .Set -Set S:Set => .Set [structural, anywhere]
+   rule .Set -Set _:Set => .Set [structural, anywhere]
 
 
   syntax Set ::= intersectSet(Set, Set) [function]
-  rule intersectSet(A, B) => A -Set (A -Set B)
+  rule intersectSet(A:Set, B:Set) => A -Set (A -Set B)
 
   syntax Bool ::= isEmptySet(Set) [function]
-  rule isEmptySet(A) => (A ==Set .Set)
+  rule isEmptySet(A:Set) => (A ==Set .Set)
 
 endmodule
 
@@ -115,7 +115,7 @@ interface K-LIST-EXTRAS
 
 	syntax Int ::= "lengthList" List [function]
 
-   rule lengthList ( ListItem(K:K) L:List ) => 1 +Int lengthList L [structural, anywhere]
+   rule lengthList ( ListItem(_) L:List ) => 1 +Int lengthList L [structural, anywhere]
    rule lengthList .List => 0 [structural, anywhere]
 endinterface
 

@@ -1,7 +1,55 @@
 
+/*
+ *
+ *  sort Variable - all possible variables
+ *
+ *  freshLabel(KLabel, Int) ~> '#symSort(.List{K})
+ *
+ */
+
+
+module VARIABLE
+  syntax Variable ::= "dummy"
+
+  syntax K ::= vars(Set)
+
+  syntax K ::= getVars(K)  [function]
+  rule getVars(K) => getVars1(K, .Set)
+
+  syntax K ::= getVars1(List{K}, Set) [function]
+  rule getVars1((X:Variable => .List{K}),,_, _ (.Set => SetItem(X)))
+  rule getVars1((L(Ks) => Ks),,_, _)
+    when isVariable(L(Ks)) =/=K true
+  rule getVars1(.List{K}, S) => vars(S)
+
+
+  syntax K ::= getStarVars(Bool, K) [function]
+  rule getStarVars(true, K) => getVars(K)
+  rule getStarVars(false, V:Variable) => vars(V)
+  
+  syntax K ::= getSymLabel(String) [function]
+  rule getSymLabel(Type) => String2KLabel("'#sym" +String Type)(.List{K})
+
+  syntax K ::= freshVar(K, Set) [function]
+  rule freshVar(L:KLabel(_), Ks) => freshVar1(Ks, L("local",1))
+
+  syntax K ::= freshVar1(Set, K) [function]
+  rule freshVar1(.Set, K) => K
+  rule freshVar1(SetItem(L:KLabel("local", I1:Int)) Ks, L("local", I2:Int))
+    => #if I1 >=Int I2 ==K true 
+       #then freshVar1(Ks, L("local", I1 +Int 1))
+       #else freshVar1(Ks, L("local", I2))
+       #fi 
+  rule freshVar1((SetItem(K) => .Set) Ks, _)
+    when isSimbolicK(K) =/=K true
+
+endmodule
+
+
 module BINDER
   imports BUILTIN-HOOKS
   syntax KLabel ::= "isBinder"
+  syntax KLabel ::= "isStarBinder"
   syntax Bool ::= isBound(KLabel, Int)  [function]
   syntax Bool ::= isBounding(KLabel, Int) [function]
 
@@ -11,60 +59,47 @@ module BINDER
   rule K inVars vars(S) => K in S
 
   syntax K ::= boundedVars(K) [function]
-  rule boundedVars(K) => boundedVars1(binderSplit(K))
+  rule boundedVars(K) => boundedVars1(binderSplit(isStarBinder(K) ==K true, K))
   
   syntax K ::= boundedVars1(K) [function]
   rule boundedVars1(splitedBinder(NBEs, BEs, Bound))
     => vars(Bound)
 
-  syntax K ::= binderSplit(K) [function]
-  rule binderSplit(L:KLabel(Ks))
-    => binderSplit1(L, 1, Ks, .List{K}, .List{K}, .Set)
+  syntax K ::= binderSplit(Bool, K) [function]
+  rule binderSplit(T, L:KLabel(Ks))
+    => binderSplit1(T, L, 1, Ks, .List{K}, .List{K}, .Set)
 
-  syntax K ::= binderSplit1(KLabel, Int, List{K}, List{K}, List{K}, Set) [function]
-  rule binderSplit1(L, I, K,,Ks, NBEs, BEs, Bound)
+  syntax K ::= binderSplit1(Bool, KLabel, Int, List{K}, List{K}, List{K}, Set) [function]
+  rule binderSplit1(T, L, I, K,,Ks, NBEs, BEs, Bound)
     => #if isBound(L,I) ==K true
-       #then binderSplit1(L, I +Int 1, Ks, NBEs, BEs, Bound SetItem(K))
+       #then binderSplit2(T, L, I +Int 1, Ks, NBEs, BEs, Bound, getStarVars(T, K))
        #else #if isBounding(L, I) ==K true
-             #then binderSplit1(L, I +Int 1, Ks, NBEs, BEs,,K, Bound)
-             #else binderSplit1(L, I +Int 1, Ks, NBEs,,K, BEs, Bound)
+             #then binderSplit1(T, L, I +Int 1, Ks, NBEs, BEs,,K, Bound)
+             #else binderSplit1(T, L, I +Int 1, Ks, NBEs,,K, BEs, Bound)
              #fi 
        #fi
-  rule binderSplit1(L, I, .List{K}, NBEs, BEs, Bound)
+  rule binderSplit1(_, L, I, .List{K}, NBEs, BEs, Bound)
     => splitedBinder(NBEs, BEs, Bound)
 
+  syntax K ::= binderSplit2(Bool, KLabel, Int, List{K}, List{K}, List{K}, Set, K) [function]
+  rule binderSplit2(T, L, I, Ks, NBEs, BEs, Bound, vars(Bound'))
+    => binderSplit1(T, L, I, Ks, NBEs, BEs, Bound Bound')
   
 endmodule
 
 module FREE-VARS
   imports BINDER 
 
-  syntax FreshVar ::= "#freshVar" "(" Int ")" [klabel(#freshvar)]
-  syntax Id ::= FreshVar
-
-  syntax K ::= freshVar(Set) [function]
-  rule freshVar(Ks) => freshVar1(Ks, #freshVar(1))
-
-  syntax K ::= freshVar1(Set, K) [function]
-  rule freshVar1(.Set, K) => K
-  rule freshVar1(SetItem(#freshVar(I1:Int)) Ks, #freshVar(I2:Int))
-    => #if I1 >=Int I2 ==K true 
-       #then freshVar1(Ks, #freshVar(I1 +Int 1))
-       #else freshVar1(Ks, #freshVar(I2))
-       #fi 
-  rule freshVar1((SetItem(K) => .Set) Ks, _)
-    when isFreshVar(K) =/=K true
-
   syntax K ::= freeVars(List{K}) [function]
   rule freeVars(K) => freeVars(K, .Set, .Set)
   
   syntax K ::= freeVars(List{K}, Set, Set) [function]
   rule freeVars(.List{K}, Bound, Free) => vars(Free)
-  rule freeVars(X:Id,, Ks, Bound:Set, Free:Set)
+  rule freeVars(X:Variable,, Ks, Bound:Set, Free:Set)
     => #if X in Bound ==K true #then freeVars(Ks, Bound, Free)
        #else freeVars(Ks, Bound, Free SetItem(X)) #fi
   rule freeVars((L:KLabel(Ks:List{K}) => Ks),, _, _, _)
-    when isId(L(Ks)) =/=K true andBool isBinder(L(Ks)) =/=K true
+    when isVariable(L(Ks)) =/=K true andBool isBinder(L(Ks)) =/=K true
   rule freeVars(K,, Ks, Bound, Free)
     =>  freeVars1(Ks, freeVarsBinder(K, Bound), Bound, Free)
     when isBinder(K)
@@ -96,9 +131,10 @@ module SUBSTITUTION
   rule substituteList1(L((K => .List{K}),,_), X, E, _,,(.List{K} => substitute(K, X, E)))
   rule substituteList1(L(.List{K}), X, E, Ks) => L(Ks)
   
-  rule substitute(X, X, E) => E
+  rule substitute(Y:Variable, X:Variable, E) 
+    => #if X ==K Y #then E #else Y #fi
   rule substitute(K, X, E) => substituteList(K, X, E)
-    when isId(K) =/=K true andBool isBinder(K) =/=K true
+    when isVariable(K) =/=K true andBool isBinder(K) =/=K true
 
   rule substitute(K, X, E) => substituteBinder(K, X, E) 
     when isBinder(K)
@@ -110,7 +146,7 @@ module SUBSTITUTION
   syntax K ::= substituteBinder1(K, K, K, K, K) [function]
   rule substituteBinder1(K, X, E, vars(BKVs), vars(FEVs))
     => #if X in BKVs ==K true 
-       #then E
+       #then K
        #else substituteBinder2(K, X, E, vars(intersectSet(BKVs, FEVs)), vars(FEVs))
        #fi
 
@@ -118,17 +154,17 @@ module SUBSTITUTION
   rule substituteBinder2(K, X, E, vars(Vs), vars(FEVs))
     => #if isEmptySet(Vs) 
        #then substituteList(K, X,E)
-       #else substituteList(rebind(K, vars(Vs), getVars(K)), X, E)
+       #else substituteList(rebind(K, vars(Vs), getVars(K), X), X, E)
        #fi 
 
 
-  syntax K ::= rebind(K, K, K) [function]
-  rule rebind(K, vars(BVs), vars(AVs))
-    => rebind1(K, freshSubst(BVs, AVs, .Map))
+  syntax K ::= rebind(K, K, K, K) [function]
+  rule rebind(K, vars(BVs), vars(AVs), X)
+    => rebind1(K, freshSubst(BVs, AVs SetItem(X), .Map))
 
   syntax K ::= freshSubst(Set, Set, Map)
-  rule freshSubst(SetItem(X:Id) BVs, AVs:Set, M)
-    => freshSubst1(SetItem(X:Id) BVs, AVs, M, freshVar(AVs))
+  rule freshSubst(SetItem(X) BVs, AVs:Set, M)
+    => freshSubst1(BVs, AVs, M, X, freshVar(getSymLabel(K2Sort(X)), AVs))
   rule freshSubst(.Set, _, M) 
     => substMap(M)
 
@@ -147,8 +183,8 @@ module SUBSTITUTION
   rule rebind2(L(.List{K}), _, _, L(Ks)) => L(Ks)
     
 
-  syntax K ::= freshSubst1(Set, Set, Map, K)
-  rule freshSubst1(SetItem(X:Id) BVs, AVs, M, Y)
+  syntax K ::= freshSubst1(Set, Set, Map, K, K)
+  rule freshSubst1(BVs, AVs, M, X, Y)
     => freshSubst(BVs, SetItem(Y) AVs, M X |-> Y)
 
   syntax K ::= applySubstMap(K, Map) [function]

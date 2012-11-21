@@ -4,6 +4,16 @@ import org.kframework.kil.*;
 
 public class BasicVisitor implements Visitor {
 
+	String name;
+
+	public BasicVisitor() {
+		this.name = this.getClass().toString();
+	}
+
+	public BasicVisitor(String name) {
+		this.name = name;
+	}
+
 	@Override
 	public void visit(ASTNode node) {
 		return;
@@ -300,5 +310,10 @@ public class BasicVisitor implements Visitor {
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		visit((Term) kInjectedLabel);
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 }

@@ -20,10 +20,10 @@ public class MaudeRun {
 	 * This function computes the path to a K-included version of maude. It assumes that /dist/bin/maude directory contains all maude executables. It searches for the os type and the architecture and it returns the right maude executable.
 	 */
 	public static String initializeMaudeExecutable() {
-		if (checkLocalMaudeInstallation()) {
-			String msg = "Maude is already installed on this machine. Please remove directory k-install-dir/bin/maude/binaries to use your local maude installation. ";
-			GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, msg, "File System", KPaths.getKBase(false) + "/bin/maude/binaries"));
-		}
+//		if (checkLocalMaudeInstallation()) {
+//			String msg = "Maude is already installed on this machine. Please remove directory k-install-dir/bin/maude/binaries to use your local maude installation. ";
+//			GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, msg, "File System", KPaths.getKBase(false) + "/bin/maude/binaries"));
+//		}
 
 		// get system properties: file separator, os name, os architecture
 		String fileSeparator = System.getProperty("file.separator");

@@ -98,7 +98,7 @@ module URIS
   rule #charString(#EOF) => #EOF [function, anywhere]
 
   syntax K ::= "#printChar" "(" K ")"   [function, klabel(#printChar)]
-  rule #printChar(C) => #fPrintChar(#stdout,C)
+  rule #printChar(C:K) => #fPrintChar(#stdout,C)
         when isChar(C) [anywhere]
 
   syntax K ::= "#fPrintChar" "(" Int "," K ")"   [function, klabel(#fPrintChar)]

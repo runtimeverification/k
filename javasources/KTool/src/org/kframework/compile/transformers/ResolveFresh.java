@@ -87,7 +87,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(TermCons node) throws TransformerException {
-		if ("Bool1FreshSyn".equals(node.getCons())) {
+		if (MetaK.Constants.freshCons.equals(node.getCons())) {
 			assert(1 == node.getContents().size());
 			assert(node.getContents().get(0) instanceof Variable);
 
@@ -106,7 +106,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		Map<Term, Term> symMap = new HashMap<Term, Term>();
 		int idx = 0;
 		for (Variable var : vars) {
-			TermCons idxTerm = new TermCons("Int", "Int1PlusSyn");
+			TermCons idxTerm = new TermCons("Int", MetaK.Constants.plusIntCons);
 			List<Term> subterms = idxTerm.getContents();
 			subterms.add(idxVar);
 			subterms.add(new Constant("Int", Integer.toString(idx)));

@@ -20,11 +20,11 @@ module BOOL-HOOKS
 				  Bool "==Bool" Bool		[function, left, hook(#BOOL:_==Bool_)]
 				| Bool "=/=Bool" Bool		[function, left]
 
-  rule true orBool B:Bool => true
+  rule true orBool _:Bool => true
   rule false orBool B:Bool => B
 
   rule true andBool A:Bool => A:Bool
-  rule false andBool A:Bool => false
+  rule false andBool _:Bool => false
 
   rule false xorBool A:Bool => A:Bool
   rule A:Bool xorBool false => A:Bool

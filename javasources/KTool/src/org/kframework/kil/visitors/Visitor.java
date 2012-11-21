@@ -69,4 +69,6 @@ public interface Visitor {
 	public void visit(TermComment node);
 	// Others
 	public void visit(KInjectedLabel kInjectedLabel);
+
+	public String getName();
 }

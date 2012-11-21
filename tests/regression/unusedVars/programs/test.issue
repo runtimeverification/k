@@ -1,0 +1,2 @@
+read "Enter string: " ;
+flush

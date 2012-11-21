@@ -21,11 +21,11 @@ module SYMBOLIC-K
   syntax String ::= "K2Sort" "(" K ")"
   [prefixlabel(K2Sort), klabel(K2Sort), function]
 
-  rule K2Sort(B:Bool) => "Bool"
-  rule K2Sort(I:Int) => "Int"
-  rule K2Sort(F:Float) => "Float"
-  rule K2Sort(S:String) => "String"
-  rule K2Sort(X:Id) => "Id"
+  rule K2Sort(_:Bool) => "Bool"
+  rule K2Sort(_:Int) => "Int"
+  rule K2Sort(_:Float) => "Float"
+  rule K2Sort(_:String) => "String"
+  rule K2Sort(_:Id) => "Id"
 
 
   // declare isSymbolicSort for List, Set, Bag and Map
