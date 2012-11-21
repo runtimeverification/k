@@ -12,6 +12,7 @@ public class UpdateReferencesVisitor extends BasicVisitor {
 	 */
 	@Override
 	public void visit(Syntax syn) {
+		DefinitionHelper.definedSorts.add(syn.getSort().getName());
 		prodSort = syn.getSort().getName();
 		super.visit(syn);
 	}

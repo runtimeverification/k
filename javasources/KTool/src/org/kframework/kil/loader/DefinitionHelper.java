@@ -3,6 +3,7 @@ package org.kframework.kil.loader;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
 
 import java.io.File;
@@ -45,6 +46,7 @@ public class DefinitionHelper {
 	public static java.util.Map<String, String> cellSorts = new HashMap<String, String>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
+	public static java.util.Set<String> definedSorts = Sort.getBaseSorts();
 	private static java.util.Set<Subsort> priorities = new HashSet<Subsort>();
 	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
 	public static String startSymbolPgm = "K";

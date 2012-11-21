@@ -1,5 +1,8 @@
 package org.kframework.kil;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -9,6 +12,21 @@ import org.w3c.dom.Element;
 public class Sort extends ProductionItem {
 
 	private String name;
+	private static Set<String> baseSorts = new HashSet<String>();
+	static {
+		baseSorts.add("K");
+		baseSorts.add("List{K}");
+		baseSorts.add("Map");
+		baseSorts.add("MapItem");
+		baseSorts.add("List");
+		baseSorts.add("ListItem");
+		baseSorts.add("Set");
+		baseSorts.add("SetItem");
+		baseSorts.add("Bag");
+		baseSorts.add("BagItem");
+		baseSorts.add("KLabel");
+		baseSorts.add("CellLabel");
+	}
 
 	public Sort(Element element) {
 		super(element);
@@ -26,8 +44,11 @@ public class Sort extends ProductionItem {
 	}
 
 	public static boolean isBasesort(String sort) {
-		return sort.equals("Map") || sort.equals("K") || sort.equals("List") || sort.equals("Bag") || sort.equals("Set") || sort.equals("MapItem") || sort.equals("ListItem")
-				|| sort.equals("BagItem") || sort.equals("SetItem") || sort.equals("List{K}") || sort.equals("KLabel") || sort.equals("CellLabel");
+		return baseSorts.contains(sort);
+	}
+
+	public static Set<String> getBaseSorts() {
+		return baseSorts;
 	}
 
 	public boolean isBaseSort() {

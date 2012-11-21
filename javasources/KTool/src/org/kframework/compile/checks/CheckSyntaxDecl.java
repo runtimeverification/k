@@ -4,7 +4,10 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
@@ -23,10 +26,22 @@ public class CheckSyntaxDecl extends BasicVisitor {
 		int neTerminals = 0;
 		int eTerminals = 0;
 		for (ProductionItem pi : node.getItems()) {
-			if (pi.getType() == ProductionType.SORT)
+			if (pi.getType() == ProductionType.SORT) {
 				sorts++;
-			if (pi.getType() == ProductionType.USERLIST)
+				Sort s = (Sort) pi;
+				if (!DefinitionHelper.definedSorts.contains(s.getName())) {
+					String msg = "Undefined sort " + s.getName();
+					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
+				}
+			}
+			if (pi.getType() == ProductionType.USERLIST) {
 				sorts++;
+				UserList s = (UserList) pi;
+				if (!DefinitionHelper.definedSorts.contains(s.getSort())) {
+					String msg = "Undefined sort " + s.getSort();
+					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
+				}
+			}
 			if (pi.getType() == ProductionType.TERMINAL) {
 				Terminal t = (Terminal) pi;
 				if (t.getTerminal().equals(""))
