@@ -51,4 +51,9 @@ public class Bracket extends Term {
 	public Bracket shallowCopy() {
 		return new Bracket(this);
 	}
+
+	@Override
+	public String toString() {
+		return "(" + content + ")";
+	}
 }
