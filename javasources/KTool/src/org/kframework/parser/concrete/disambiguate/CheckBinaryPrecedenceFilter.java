@@ -51,7 +51,7 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
 
 		t = mi.getValue();
 		parentmi = t instanceof Rewrite || t instanceof Ambiguity ? mi : null;
-		mi.setKey((Term) t.accept(this));
+		mi.setValue((Term) t.accept(this));
 
 		parentks = null;
 		parent = null;

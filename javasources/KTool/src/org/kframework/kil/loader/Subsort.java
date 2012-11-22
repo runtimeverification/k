@@ -43,6 +43,8 @@ public class Subsort {
 	public static Set<Subsort> getDefaultSubsorts() {
 		Set<Subsort> sbs = new HashSet<Subsort>();
 		sbs.add(new Subsort("List{K}", "K"));
+		sbs.add(new Subsort("List{K}", "KResult"));
+		sbs.add(new Subsort("K", "KResult"));
 		sbs.add(new Subsort("Map", "MapItem"));
 		sbs.add(new Subsort("Set", "SetItem"));
 		sbs.add(new Subsort("List", "ListItem"));
