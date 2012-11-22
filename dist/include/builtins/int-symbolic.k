@@ -1,4 +1,5 @@
 require "k-equal.k"
+require "builtins/bool-symbolic.k"
 
 module INT-SYMBOLIC-SYNTAX
   imports INT-SYNTAX-HOOKS
