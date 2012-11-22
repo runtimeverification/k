@@ -54,7 +54,7 @@ public class Rewrite extends Term {
 
 	@Override
 	public String toString() {
-		return left + " => " + right;
+		return "(" + left + " => " + right + ")";
 	}
 
 	@Override

@@ -110,6 +110,7 @@ context-free syntax
 	VARID					-> ListDlKDr {cons("ListDlKDr1Var")}
 	VARID ":" "KLabel"		-> KLabel {cons("KLabel12Var")}
 	VARID					-> KLabel {cons("KLabel1Var")}
+	VARID ":" "KResult"		-> K {cons("KResult12Var")}
 
 lexical syntax
 	%% rejects

@@ -16,7 +16,7 @@ import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
+import org.kframework.parser.concrete.disambiguate.CheckBinaryPrecedenceFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
@@ -185,7 +185,7 @@ public class DefinitionLoader {
 
 		javaDef = (org.kframework.kil.Term) javaDef.accept(new CellTypesFilter());
 		// javaDef = (org.kframework.kil.Term) javaDef.accept(new CorrectRewritePriorityFilter()); // not the case, as it should be a ground term
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new CorrectKSeqFilter());
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new CheckBinaryPrecedenceFilter());
 		// javaDef = (org.kframework.kil.Term) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
 		// javaDef = (org.kframework.kil.Term) javaDef.accept(new VariableTypeInferenceFilter());
 		javaDef = (org.kframework.kil.Term) javaDef.accept(new AmbDuplicateFilter());

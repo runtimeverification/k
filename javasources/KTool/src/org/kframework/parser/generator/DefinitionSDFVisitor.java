@@ -15,7 +15,6 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 
 	public List<Production> outsides = new ArrayList<Production>();
 	public List<Production> constants = new ArrayList<Production>();
-	public Set<Sort> startSorts = new HashSet<Sort>(); // list of sorts that are start symbols
 	public Set<Sort> insertSorts = new HashSet<Sort>(); // list of inserted sorts that need to avoid the priority filter
 	public Set<Subsort> subsorts = new HashSet<Subsort>();
 	public Set<Production> listProds = new HashSet<Production>(); // list of sorts declared as being list
@@ -38,12 +37,12 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 				if (prd.getAttributes().containsKey("onlyLabel")) {
 					// if a production has this attribute, don't add it to the list
 				} else if (prd.isSubsort()) {
-					outsides.add(prd);
-					subsorts.add(new Subsort(prd.getSort(), ((Sort) prd.getItems().get(0)).getName()));
-					if (prd.getSort().equals(new Sort("Start")))
-						startSorts.add((Sort) prd.getItems().get(0));
-					// add the small sort to the user sorts to add it to the variable declarations
-					userSorts.add((Sort) prd.getItems().get(0));
+					if (!syn.getSort().getName().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
+						outsides.add(prd);
+						subsorts.add(new Subsort(prd.getSort(), ((Sort) prd.getItems().get(0)).getName()));
+						// add the small sort to the user sorts to add it to the variable declarations
+						userSorts.add((Sort) prd.getItems().get(0));
+					}
 				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().size() == 1 && prd.isConstant()) {
 					constants.add(prd);
 				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {
