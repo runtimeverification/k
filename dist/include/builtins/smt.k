@@ -1,11 +1,12 @@
 require "builtins/builtins.k"
+require "builtins/fol.k"
 
 module SMTLIB-CONVERSION
   imports BUILTIN-HOOKS
+  imports FOL
 
   // convert Bool to smtlib
   syntax String ::= "Smtlib" "(" K ")" [function]
-//          | "Smtlib" "(" Int ")"  [function]
 
   // Smtlib: booleans  
   rule Smtlib(false) => "false"
@@ -42,8 +43,21 @@ module SMTLIB-CONVERSION
 
   rule Smtlib(minInt(I1:Int, I2:Int)) => "(minInt " +String Smtlib(I1) +String  " " +String Smtlib(I2) +String ")"
 
+  rule Smtlib(select A:Array I:Int) => "(select " +String Smtlib(A) +String " " +String Smtlib(I) +String ")"
+  rule Smtlib(store A:Array I:Int V:Int) => "(store " +String Smtlib(I) +String " " +String Smtlib(I) +String " " +String Smtlib(V) +String ")"
+
+  // Smtlib: arrays
+  rule Smtlib(symArray(X:Id)) => Id2String(X)
+
+  // Smtlib: fol
+  rule Smtlib((forall (Is:IntList)(B:Bool))) => "(forall " +String "(" +String Smtlib(Is) +String ")" +String Smtlib(B) +String ")"
+  rule Smtlib(notFol F:Fol) => "(not " +String Smtlib(F) +String ")"
+  rule Smtlib(F1:Fol orFol  F2:Fol) => "(or "  +String Smtlib(F1) +String " " +String  Smtlib(F2) +String ")"
+  rule Smtlib(F1:Fol andFol F2:Fol) => "(and " +String Smtlib(F1) +String " " +String  Smtlib(F2) +String ")"
+  rule Smtlib(I:Int ; R:IntList) => "(" +String Smtlib(I) +String " Int) " +String Smtlib(R)
+  rule Smtlib(.IntList) => ""
+
   //@ Collecting constants declarations
-  
   syntax Set ::= "collectConstants" "(" K ")" [function]
 
   // ConstSmtlib: booleans
@@ -78,7 +92,19 @@ module SMTLIB-CONVERSION
   rule collectConstants(I1:Int /Int I2:Int)   => collectConstants(I1) collectConstants(I2)
   rule collectConstants(I1:Int %Int I2:Int)  => collectConstants(I1) collectConstants(I2)
   rule collectConstants(minInt(I1:Int, I2:Int))  => collectConstants(I1) collectConstants(I2)
-  
+
+  rule collectConstants(select A:Array I:Int) => collectConstants(A) collectConstants(I)
+  rule collectConstants(store  A:Array P:Int I:Int) => collectConstants(A) collectConstants(P) collectConstants(I)
+
+  // collectConstans: arrays
+  rule collectConstants(symArray(X:Id)) => SetItem("(declare-fun " +String Id2String(X) +String " () (Array Int Int))")
+
+  // collectConstants: fol
+  rule collectConstants((forall (Is:IntList)(B:Bool))) => collectConstants(B)
+  rule collectConstants(notFol F:Fol) => collectConstants(F)
+  rule collectConstants(F1:Fol orFol F2:Fol)  => collectConstants(F1) collectConstants(F2)
+  rule collectConstants(F1:Fol andFol F2:Fol) => collectConstants(F1) collectConstants(F2)
+
 endmodule
 module SMT-SYNTAX-HOOKS
   
@@ -108,8 +134,8 @@ module SMT-HOOKS
   syntax SmtResponse ::= "parseSmtResponse" "(" String ")" [function]
 
   // basic smt interface rules
-  rule checkSat(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) (define-fun minInt ((x1 Int) (x2 Int)) Int (ite (<= x1 x2) x1 x2)) " +String  createSmtCommand(collectConstants(B), Smtlib(B)) +String " (check-sat)"))
-  rule getModel(B:Bool) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) (define-fun minInt ((x1 Int) (x2 Int)) Int (ite (<= x1 x2) x1 x2))" +String  createSmtCommand(collectConstants(B), Smtlib(B)) +String " (check-sat) (get-model)"))
+  rule checkSat(F) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) (define-fun minInt ((x1 Int) (x2 Int)) Int (ite (<= x1 x2) x1 x2)) " +String  createSmtCommand(collectConstants(F), Smtlib(F)) +String " (check-sat)"))
+  rule getModel(F) => parseSmtResponse( smtCall ( "(set-logic AUFNIRA) (define-fun minInt ((x1 Int) (x2 Int)) Int (ite (<= x1 x2) x1 x2))" +String  createSmtCommand(collectConstants(F), Smtlib(F)) +String " (check-sat) (get-model)"))
 
     
   // main smt responses
@@ -142,6 +168,7 @@ module SMT-HOOKS
   rule declareConstants(SetItem(symInt (V:Id )) Rest:Set) => "(declare-const " +String Id2String(V) +String " Int)" +String " " +String declareConstants(Rest)
   rule declareConstants(SetItem(symBool(V:Int)) Rest:Set) => "(declare-const var" +String Int2String(V) +String " Int)" +String " " +String declareConstants(Rest)
   rule declareConstants(SetItem(symBool(V:Id )) Rest:Set) => "(declare-const " +String Id2String(V) +String " Int)" +String " " +String declareConstants(Rest)
+  rule declareConstants(SetItem(S:String) Rest:Set) => S +String " " +String declareConstants(Rest) 
 endmodule
 
 module S-EXP-PARSER
