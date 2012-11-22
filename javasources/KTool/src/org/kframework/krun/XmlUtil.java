@@ -23,7 +23,7 @@ import java.util.List;
 
 public class XmlUtil {
 
-	// Function to read DOM Tree from File
+	// FUNCTION to read DOM Tree from File
 	public static Document readXML(File f) {
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

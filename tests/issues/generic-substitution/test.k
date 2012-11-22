@@ -13,7 +13,7 @@ module TEST
   rule isBounding('let_=_in_, 3) => true
   rule isStarBinder(let _:Ints = _:Exps in _) => true
  
-  rule isInt('#symInt(_)) => true
+  //rule isInt('#symInt(_)) => true
 
   syntax Variable ::= Int
 
@@ -21,6 +21,9 @@ module TEST
         in (E:Exp => E[B/X])
   rule let .Ints = .Exps in E:Exp => E
   
-  configuration <k> $PGM:K </k>
+  configuration
+    <k>
+      $PGM:K
+    </k>
 endmodule
 

@@ -8,7 +8,10 @@ import org.w3c.dom.Element;
 
 public class Attribute extends ASTNode {
 
-	private String key;
+    public static final Attribute FUNCTION = new Attribute("function", "");
+    public static final Attribute PREDICATE = new Attribute("predicate", "");
+
+    private String key;
 	private String value;
 
 	public Attribute(String key, String value) {

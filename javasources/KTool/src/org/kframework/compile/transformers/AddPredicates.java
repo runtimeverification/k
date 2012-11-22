@@ -2,7 +2,22 @@ package org.kframework.compile.transformers;
 
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Context;
+import org.kframework.kil.Empty;
+import org.kframework.kil.KApp;
+import org.kframework.kil.ListOfK;
+import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Production;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Term;
+import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -15,6 +30,8 @@ import java.util.Set;
 
 
 public class AddPredicates extends CopyOnWriteTransformer {
+
+    public static final Constant K2Sort = new Constant("KLabel", "K2Sort");
 
     public class PredicatesVisitor extends BasicVisitor {
 
@@ -29,17 +46,17 @@ public class AddPredicates extends CopyOnWriteTransformer {
                 for (String listSort : lists) {
                     Rule rule = new Rule();
                     rule.setBody(new Rewrite(
-                            new KApp(new Constant("KLabel", "is" + listSort),
+                            new KApp(new Constant("KLabel", predicate(listSort)),
                                     new Empty(listSort)),
-                            new Constant("#Bool", "true")));
-                    rule.getAttributes().getContents().add(new Attribute("predicate", ""));
+                            Constant.TRUE));
+                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
                     result.add(rule);
                     rule = new Rule();
                     rule.setBody(new Rewrite(
-                            new KApp(new Constant("KLabel", "isKResult"),
+                            new KApp(new Constant("KLabel", predicate("KResult")),
                                     new Empty(listSort)),
-                            new Constant("#Bool", "true")));
-                    rule.getAttributes().getContents().add(new Attribute("predicate", ""));
+                            Constant.TRUE));
+                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
                     result.add(rule);
                 }
             }
@@ -67,19 +84,28 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
             String sort = node.getSort();
             Term term = MetaK.getTerm(node);
+
             Term rhs;
             if (node.getAttributes().containsKey("function") &&
                     node.getArity() > 0)
                rhs = new KApp(KSymbolicPredicate, term);
             else
-               rhs = new Constant("#Bool", "true");
-
+               rhs = Constant.TRUE;
             Constant ct = new Constant("KLabel", syntaxPredicate(sort));
             Term lhs = new KApp(ct, term);
             Rule rule = new Rule();
             rule.setBody(new Rewrite(lhs, rhs));
-            rule.getAttributes().getContents().add(new Attribute("predicate", ""));
+            rule.getAttributes().getContents().add(Attribute.PREDICATE);
             result.add(rule);
+
+            if (!node.isSubsort()) {
+                lhs = new KApp(K2Sort, term);
+                rhs = new Constant("#String", "\"" + sort + "\"");
+                rule = new Rule();
+                rule.setBody(new Rewrite(lhs, rhs));
+                rule.getAttributes().getContents().add(Attribute.FUNCTION);
+                result.add(rule);
+            }
         }
 
         @Override
@@ -158,28 +184,50 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     list.getContents().add(new KApp(KSymbolicPredicate, var));
                     Rule rule = new Rule();
                     rule.setBody(new Rewrite(lhs, rhs));
-                    rule.getAttributes().getContents().add(new Attribute("predicate", ""));
+                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
-                    // define isVariable predicate
                     String symCtor = AddSymbolicK.symbolicConstructor(sort);
                     var = MetaK.getFreshVar("List{K}");
                     Term symTerm = new KApp(new Constant("KLabel", symCtor), var);
+
+                    // define isSort for symbolic terms
+                    lhs = new KApp(new Constant("KLabel", pred), symTerm);
+                    rule = new Rule();
+                    rule.setBody(new Rewrite(lhs, Constant.TRUE));
+                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
+                    retNode.appendModuleItem(rule);
+
+                    // define isVariable predicate
                     lhs = new KApp(VariablePredicate, symTerm);
-                    rhs = new Constant("#Bool", "true");
+                    rule = new Rule();
+                    rule.setBody(new Rewrite(lhs, Constant.TRUE));
+                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
+                    retNode.appendModuleItem(rule);
+
+                    lhs = new KApp(K2Sort, symTerm);
+                    rhs = new Constant("#String", "\"" + sort + "\"");
                     rule = new Rule();
                     rule.setBody(new Rewrite(lhs, rhs));
-                    rule.getAttributes().getContents().add(new Attribute("predicate", ""));
+                    rule.getAttributes().getContents().add(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
                 } else if (MetaK.isBuiltinSort(sort)) {
                     Variable var = MetaK.getFreshVar(sort);
                     Term lhs = new KApp(BuiltinPredicate, var);
-                    Term rhs = new Constant("#Bool", "true");
-
                     Rule rule = new Rule();
-                    rule.setBody(new Rewrite(lhs, rhs));
-                    rule.getAttributes().getContents().add(new Attribute("predicate", ""));
+                    rule.setBody(new Rewrite(lhs, Constant.TRUE));
+                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
+
+                    /*
+                     * definition for builtins moved in symbolic-k.k
+                    lhs = new KApp(K2Sort, var);
+                    Term rhs = new Constant("#String", "\"" + sort + "\"");
+                    rule = new Rule();
+                    rule.setBody(new Rewrite(lhs, rhs));
+                    rule.getAttributes().getContents().add(Attribute.FUNCTION);
+                    retNode.appendModuleItem(rule);
+                    */
                 }
             }
         }
