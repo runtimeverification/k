@@ -50,8 +50,8 @@ module BINDER
   imports VARIABLE
   syntax KLabel ::= "isBinder"
   syntax KLabel ::= "isStarBinder"
-  syntax Bool ::= isBound(KLabel, Int)  [function]
-  syntax Bool ::= isBounding(KLabel, Int) [function]
+  syntax Bool ::= isBound(KLabel, Int)  [klabel("isBound"), function]
+  syntax Bool ::= isBounding(KLabel, Int) [klabel("isBounding"), function]
 
   syntax K ::= splitedBinder(List{K}, List{K}, Set)
 
