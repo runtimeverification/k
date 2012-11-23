@@ -49,7 +49,7 @@ public class DefinitionHelper {
 	public static java.util.Set<String> definedSorts = Sort.getBaseSorts();
 	private static java.util.Set<Subsort> priorities = new HashSet<Subsort>();
 	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
-	public static String startSymbolPgm = "K";
+	public static String startSymbolPgm = null;
 	public static File dotk = null;
 
 	public static void addCellDecl(Cell c) {

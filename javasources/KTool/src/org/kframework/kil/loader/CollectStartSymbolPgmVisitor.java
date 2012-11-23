@@ -23,9 +23,8 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 	@Override
 	public void visit(Variable node) {
 		if (node.getName().equals("$PGM")) {
-			String sort = node.getSort();
-			if (DefinitionHelper.isSubsorted(DefinitionHelper.startSymbolPgm, sort))
-				DefinitionHelper.startSymbolPgm = sort;
+			if (DefinitionHelper.startSymbolPgm == null)
+				DefinitionHelper.startSymbolPgm = node.getSort();
 		}
 	}
 }

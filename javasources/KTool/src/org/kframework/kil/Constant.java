@@ -5,7 +5,6 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
-import sun.font.TrueTypeFont;
 
 public class Constant extends Term {
 
@@ -16,8 +15,6 @@ public class Constant extends Term {
 
 	public Constant(String sort, String value) {
 		super(sort);
-		if (value.equals("'_``,_"))
-			System.out.println(value);
 		this.value = value;
 	}
 

@@ -1,6 +1,5 @@
 package org.kframework.kil;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -24,10 +23,10 @@ public class Rule extends Sentence {
 		super();
 	}
 
-    public Rule(Term lhs, Term rhs) {
-        super();
-        this.setBody(new Rewrite(lhs, rhs));
-    }
+	public Rule(Term lhs, Term rhs) {
+		super();
+		this.setBody(new Rewrite(lhs, rhs));
+	}
 
 	public void setLabel(String label) {
 		this.label = label;
