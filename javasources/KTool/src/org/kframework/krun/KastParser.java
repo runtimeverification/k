@@ -50,8 +50,7 @@ public class KastParser {
 
 		String content = FileUtil.getFileContent(f.getAbsolutePath());
 
-		String startSymbol = DefinitionHelper.startSymbolPgm != null ? DefinitionHelper.startSymbolPgm : "K";
-		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
+		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, DefinitionHelper.startSymbolPgm);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
 		XmlLoader.addFilename(doc.getFirstChild(), pgm);

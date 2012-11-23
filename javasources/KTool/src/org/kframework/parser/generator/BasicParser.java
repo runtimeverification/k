@@ -44,7 +44,7 @@ public class BasicParser {
 		filePaths = new ArrayList<String>();
 
 		try {
-			// parse first the file given at console
+			// parse first the file given at console for fast failure in case of error
 			File file = new File(fileName);
 			if (!file.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " given at console.", "", ""));
@@ -53,7 +53,10 @@ public class BasicParser {
 
 			slurp2(file);
 
-			// parse the autoinclude file
+			// parse the autoinclude.k file but remember what I parsed to give the correct order at the end
+			List<DefinitionItem> tempmi = moduleItems;
+			moduleItems = new ArrayList<DefinitionItem>();
+
 			file = buildCanonicalPath("autoinclude.k", new File(fileName));
 			if (file == null)
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
@@ -62,6 +65,8 @@ public class BasicParser {
 				System.out.println("Including file: " + file.getCanonicalPath());
 
 			slurp2(file);
+
+			moduleItems.addAll(tempmi);
 
 			setMainFile(file);
 		} catch (IOException e) {

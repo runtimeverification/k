@@ -6,6 +6,12 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
 
+/**
+ * Collect the $PGM sort from the final configuration it encounters
+ * 
+ * @author Radu
+ * 
+ */
 public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 
 	@Override
@@ -23,8 +29,7 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 	@Override
 	public void visit(Variable node) {
 		if (node.getName().equals("$PGM")) {
-			if (DefinitionHelper.startSymbolPgm == null)
-				DefinitionHelper.startSymbolPgm = node.getSort();
+			DefinitionHelper.startSymbolPgm = node.getSort();
 		}
 	}
 }
