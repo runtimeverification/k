@@ -3,7 +3,7 @@ module TEST
   imports SUBSTITUTION
   syntax Ints ::= List{Int, ","}
   syntax Exps ::= List{Exp, ","}
-  syntax Exp ::= "let" Ints  "=" Exps "in" Exp [binder, strict(2)]
+  syntax Exp ::= "let" Ints  "=" Exps "in" Exp [binder(1*->3, 1*->2), strict(2)]
              | "(" Exp ")" [bracket]
              | Int
 
@@ -23,7 +23,13 @@ module TEST
   
   configuration
     <k>
-      $PGM:K
+      ($PGM:K
+      ~> (isBound('let_=_in_, 1)
+      ~> (isBound('let_=_in_, 2)
+      ~> (isBounding('let_=_in_, 1)
+      ~> (isBounding('let_=_in_, 2)
+      ~> (isBounding('let_=_in_, 3)
+      ))))))
     </k>
 endmodule
 
