@@ -11,7 +11,7 @@ public abstract class ASTNode implements Visitable,
 
 
 	public ASTNode(ASTNode di) {
-		this.attributes = di.attributes;
+		attributes = di.attributes;
 	}
 
 	public ASTNode(String location, String filename) {
@@ -68,6 +68,38 @@ public abstract class ASTNode implements Visitable,
 		if (null == attributes) attributes = new Attributes();
 		attributes.set("filename", filename);
 	}
+
+    /*
+    * methods for easy attributes manipulation
+    * */
+    public void addAttribute(String key, String value) {
+        attributes.contents.add(new Attribute(key, value));
+    }
+
+    public void addAttribute(Attribute attribute) {
+        attributes.contents.add(attribute);
+    }
+
+    public boolean containsAttribute(String key) {
+        return attributes.containsKey(key);
+    }
+
+    public String getAttribute(String key) {
+        return attributes.get(key);
+    }
+
+    public void putAttribute(String key, String value) {
+        attributes.set(key, value);
+    }
+
+    public Attributes getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Attributes attributes) {
+        this.attributes = attributes;
+    }
+
 
 	public abstract ASTNode shallowCopy();
 }

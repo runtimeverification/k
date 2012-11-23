@@ -8,8 +8,26 @@ import org.w3c.dom.Element;
 
 public class Attribute extends ASTNode {
 
-    public static final Attribute FUNCTION = new Attribute("function", "");
-    public static final Attribute PREDICATE = new Attribute("predicate", "");
+    /*
+    public enum AttributeKey {
+        PREDICATE_KEY("predicate");
+
+        private String key;
+        AttributeKey(String key) {
+            this.key = key;
+        }
+    }
+    */
+
+    public static final String FUNCTION_KEY = "function";
+    public static final String PREDICATE_KEY = "predicate";
+    public static final String ANYWHERE_KEY = "anywhere";
+    public static final String BRACKET_KEY = "bracket";
+    public static final String BINDER_KEY = "binder";
+
+    public static final Attribute FUNCTION = new Attribute(FUNCTION_KEY, "");
+    public static final Attribute PREDICATE = new Attribute(PREDICATE_KEY, "");
+
 
     private String key;
 	private String value;

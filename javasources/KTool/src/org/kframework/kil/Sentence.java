@@ -6,26 +6,22 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 public abstract class Sentence extends ModuleItem {
-	Term body;
+    Term body;
 	Term condition = null;
-	Attributes attributes;
 
 	public Sentence(Sentence s) {
 		super(s);
 		this.body = s.body;
 		this.condition = s.condition;
-		this.attributes = s.attributes;
 	}
 
 	public Sentence() {
 		super();
-		attributes = new Attributes();
-	}
+    }
 
 	public Sentence(String location, String filename) {
 		super(location, filename);
-		attributes = new Attributes();
-	}
+    }
 
 	public Sentence(Element element) {
 		super(element);
@@ -41,10 +37,10 @@ public abstract class Sentence extends ModuleItem {
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
 		// assumption: <attributes> appears only once
 		if (its.size() > 0) {
-			attributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
-		} else
-			attributes = new Attributes("generated", "generated");
-	}
+            attributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
+        } else
+            attributes = new Attributes("generated", "generated");
+    }
 
 	public Term getBody() {
 		return body;
@@ -60,14 +56,6 @@ public abstract class Sentence extends ModuleItem {
 
 	public void setCondition(Term condition) {
 		this.condition = condition;
-	}
-
-	public Attributes getAttributes() {
-		return attributes;
-	}
-
-	public void setAttributes(Attributes attributes) {
-		this.attributes = attributes;
 	}
 
 	@Override
