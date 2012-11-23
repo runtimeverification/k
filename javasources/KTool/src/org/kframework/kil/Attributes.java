@@ -9,11 +9,12 @@ import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Attributes extends ASTNode {
 
-	protected List<Attribute> contents;
+	protected java.util.List<Attribute> contents;
 
 	public Attributes(Attributes c) {
 		super(c);
@@ -28,14 +29,14 @@ public class Attributes extends ASTNode {
 	public Attributes(Element element) {
 		super(element);
 
-		contents = new ArrayList<Attribute>();
+		contents = new LinkedList<Attribute>();
 		List<Element> children = XML.getChildrenElements(element);
 		for (Element e : children)
 			contents.add((Attribute) JavaClassesFactory.getTerm(e));
 	}
 
 	public Attributes() {
-		contents = new ArrayList<Attribute>();
+		contents = new LinkedList<Attribute>();
 	}
 
 	@Override

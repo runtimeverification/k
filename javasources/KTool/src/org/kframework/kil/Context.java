@@ -23,7 +23,7 @@ public class Context extends Sentence {
 		String content = "  context ";
 		content += this.body + " ";
 
-		return content + attributes;
+		return content + attributes.toString();
 	}
 
 	@Override
