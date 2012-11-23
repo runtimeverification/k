@@ -23,7 +23,6 @@ public class Production extends ASTNode {
     * can be thrown in one of the later compilation steps.
     * */
 	protected List<ProductionItem> items;
-	protected Attributes attributes;
 	protected String sort;
 
 	public static Production makeFunction(String funSort, String funName, String argSort) {
@@ -74,14 +73,14 @@ public class Production extends ASTNode {
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
 		// assumption: <attributes> appears only once
 		if (its.size() > 0) {
-			attributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
-		} else
-			attributes = new Attributes();
-	}
+            attributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
+        } else
+            attributes = new Attributes();
+    }
 
 	public Production(Production node) {
 		super(node);
-		this.attributes = node.attributes;
+		this.attributes = node.getAttributes();
 		this.items = node.items;
 		this.sort = node.sort;
 	}
@@ -135,7 +134,7 @@ public class Production extends ASTNode {
 		String label = attributes.get("prefixlabel");
 		if (label == null) {
 			label = getPrefixLabel();
-			attributes.set("prefixlabel", label);
+            attributes.set("prefixlabel", label);
 		}
 		return StringUtil.escapeMaude(label).replace(" ", "");
 	}
@@ -155,7 +154,7 @@ public class Production extends ASTNode {
                 klabel = getPrefixLabel();
             else
 			    klabel = "'" + getPrefixLabel();
-			attributes.set("klabel", klabel);
+            attributes.set("klabel", klabel);
 		}
 		return StringUtil.escapeMaude(klabel).replace(" ", "");
 	}
@@ -186,15 +185,7 @@ public class Production extends ASTNode {
 		this.items = items;
 	}
 
-	public Attributes getAttributes() {
-		return attributes;
-	}
-
-	public void setAttributes(Attributes attributes) {
-		this.attributes = attributes;
-	}
-
-	public int getArity() {
+    public int getArity() {
 		int arity = 0;
 		for (ProductionItem i : items) {
 			if (i.getType() != ProductionType.TERMINAL)
