@@ -48,8 +48,6 @@ public class BasicParser {
 			File file = new File(fileName);
 			if (!file.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " given at console.", "", ""));
-			if (GlobalSettings.verbose)
-				System.out.println("Including file: " + file.getCanonicalPath());
 
 			slurp2(file);
 
@@ -60,9 +58,6 @@ public class BasicParser {
 			file = buildCanonicalPath("autoinclude.k", new File(fileName));
 			if (file == null)
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
-
-			if (GlobalSettings.verbose)
-				System.out.println("Including file: " + file.getCanonicalPath());
 
 			slurp2(file);
 
@@ -101,8 +96,6 @@ public class BasicParser {
 
 					if (newFile == null)
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + req.getValue(), req.getFilename(), req.getLocation()));
-					if (GlobalSettings.verbose)
-						System.out.println("Including file: " + newFile.getCanonicalPath());
 
 					slurp2(newFile);
 					DefinitionHelper.addFileRequirement(newFile.getCanonicalPath(), file.getCanonicalPath());
@@ -129,6 +122,8 @@ public class BasicParser {
 
 	@SuppressWarnings("unchecked")
 	public static List<DefinitionItem> parseFile(File file) {
+		if (GlobalSettings.verbose)
+			System.out.println("Including file: " + file.getAbsolutePath());
 		String content = FileUtil.getFileContent(file.getAbsolutePath());
 
 		String parsed = KParser.ParseKString(content);

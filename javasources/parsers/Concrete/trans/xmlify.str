@@ -378,3 +378,14 @@ rules
 		where children := <all(to-xml-p)> b
 		where loc := <getLocAsString>
 
+	to-xml-p:
+		a#(b) -> $[<bracket sort="[sort]" loc="[loc]">
+					[children]
+		</bracket>
+		]
+		where <string-ends-with(|"Bracket")> a
+		where mydebug(!"Bracket: ")
+		where children := <all(to-xml-p)> b
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+

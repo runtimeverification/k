@@ -17,10 +17,14 @@ public class AddConsesVisitor extends BasicVisitor {
 		if (p.getAttributes().containsKey("bracket")) {
 			// don't add cons to bracket production
 			String cons = p.getAttributes().get("cons");
+			String cons2 = StringUtil.escapeSortName(p.getSort()) + "1Bracket";
 			if (cons != null) {
-				String msg = "'bracket' productions are not allowed to have cons: '" + cons + "'";
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
-			}
+				if (!cons.equals(cons2)) {
+					String msg = "'bracket' productions are not allowed to have cons: '" + cons + "'";
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
+				}
+			} else
+				p.getAttributes().set("cons", cons2);
 		} else if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ProductionType.TERMINAL && (p.getSort().startsWith("#") || p.getSort().equals("KLabel"))) {
 			// don't add any cons, if it is a constant
 			// a constant is a single terminal for a builtin sort

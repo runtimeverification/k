@@ -21,8 +21,8 @@ public class SDFHelper {
 			str += "right, ";
 		if (attrs.containsKey("non-assoc"))
 			str += "non-assoc, ";
-		if (attrs.containsKey("bracket"))
-			str += "bracket, ";
+		// if (attrs.containsKey("bracket")) // should not need this since we use the Bracket class
+		// str += "bracket, ";
 		if (attrs.containsKey("cons"))
 			str += "cons(\"" + attrs.get("cons") + "\"), ";
 

@@ -4,6 +4,7 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
@@ -12,6 +13,7 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
+import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -47,9 +49,10 @@ public class ProgramLoader {
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
 		try {
+			out = out.accept(new PriorityFilter());
 			out = out.accept(new AmbFilter());
+			out = out.accept(new RemoveBrackets());
 		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -57,7 +60,6 @@ public class ProgramLoader {
 			try {
 				out = out.accept(new FlattenSyntax());
 			} catch (TransformerException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 

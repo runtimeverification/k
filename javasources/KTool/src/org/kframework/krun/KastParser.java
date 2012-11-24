@@ -3,11 +3,13 @@ package org.kframework.krun;
 import com.thoughtworks.xstream.XStream;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
+import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.utils.XmlLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -60,7 +62,9 @@ public class KastParser {
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
 		try {
+			out = out.accept(new PriorityFilter());
 			out = out.accept(new AmbFilter());
+			out = out.accept(new RemoveBrackets());
 			out = out.accept(new FlattenSyntax());
 		} catch (TransformerException e) {
 			e.printStackTrace();
