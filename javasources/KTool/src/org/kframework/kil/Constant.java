@@ -11,6 +11,8 @@ public class Constant extends Term {
     public static final Constant TRUE = new Constant("#Bool", "true");
     public static final Constant FALSE = new Constant("#Bool", "false");
 
+	public static final Constant STAR = new Constant("#String", "\"star\"");
+
     String value;
 
 	public Constant(String sort, String value) {

@@ -1,13 +1,3 @@
-
-/*
- *
- *  sort Variable - all possible variables
- *
- *  freshLabel(KLabel, Int) ~> '#symSort(.List{K})
- *
- */
-
-
 module VARIABLE
   imports SYMBOLIC-K
 
@@ -18,8 +8,9 @@ module VARIABLE
 
   syntax K ::= getVars1(List{K}, Set) [function]
   rule getVars1((X:Variable => .List{K}),,_, _ (.Set => SetItem(X)))
+  rule getVars1(((Set2KLabel S:Set)(.List{K}) => Set2KTerm(S:Set)),,_, _)
   rule getVars1((L:KLabel(Ks:List{K}) => Ks),,_, _)
-    when isVariable(L(Ks)) =/=K true
+    when isVariable(L(Ks)) =/=K true andBool isSet(L(Ks)) =/=K true
   rule getVars1(.List{K}, S:Set) => vars(S)
 
 
@@ -49,7 +40,6 @@ endmodule
 module BINDER
   imports VARIABLE
   syntax KLabel ::= "isBinder"
-  syntax KLabel ::= "isStarBinder"
   syntax Bool ::= isBound(KLabel, Int)  [klabel("isBound"), function]
   syntax Bool ::= isBounding(KLabel, Int) [klabel("isBounding"), function]
 
@@ -59,32 +49,33 @@ module BINDER
   rule K:K inVars vars(S:Set) => K in S
 
   syntax K ::= boundedVars(K) [function]
-  rule boundedVars(K:K) => boundedVars1(binderSplit(isStarBinder(K) ==K true, K))
+  rule boundedVars(K:K) => boundedVars1(binderSplit(K))
   
   syntax K ::= boundedVars1(K) [function]
   rule boundedVars1(splitedBinder(_, _, Bound:Set))
     => vars(Bound)
 
-  syntax K ::= binderSplit(Bool, K) [function]
-  rule binderSplit(T:Bool, L:KLabel(Ks:List{K}))
-    => binderSplit1(T, L, 1, Ks, .List{K}, .List{K}, .Set)
+  syntax K ::= binderSplit(K) [function]
+  rule binderSplit(L:KLabel(Ks:List{K}))
+    => binderSplit1(L, 1, Ks, .List{K}, .List{K}, .Set)
 
-  syntax K ::= binderSplit1(Bool, KLabel, Int, List{K}, List{K}, List{K}, Set) 
+  syntax K ::= binderSplit1(KLabel, Int, List{K}, List{K}, List{K}, Set) 
      [function]
-  rule binderSplit1(T:Bool, L:KLabel, I:Int, K:K,,Ks:List{K}, NBEs:List{K}, BEs:List{K}, Bound:Set)
-    => #if isBound(L,I) ==K true
-       #then binderSplit2(T, L, I +Int 1, Ks, NBEs, BEs, Bound, getStarVars(T, K))
+  rule binderSplit1(L:KLabel, I:Int, K:K,,Ks:List{K}, NBEs:List{K}, BEs:List{K}, Bound:Set)
+    => #if isBound(L,I) ==K true orBool isBound(L,I) ==K "star"
+       #then binderSplit2(L, I +Int 1, Ks, NBEs, BEs, Bound, 
+                          getStarVars(isBound(L,I) ==K "star", K))
        #else #if isBounding(L, I) ==K true
-             #then binderSplit1(T, L, I +Int 1, Ks, NBEs, BEs,,K, Bound)
-             #else binderSplit1(T, L, I +Int 1, Ks, NBEs,,K, BEs, Bound)
+             #then binderSplit1(L, I +Int 1, Ks, NBEs, BEs,,K, Bound)
+             #else binderSplit1(L, I +Int 1, Ks, NBEs,,K, BEs, Bound)
              #fi 
        #fi
-  rule binderSplit1(_, _, _, .List{K}, NBEs:List{K}, BEs:List{K}, Bound:Set)
+  rule binderSplit1(_, _, .List{K}, NBEs:List{K}, BEs:List{K}, Bound:Set)
     => splitedBinder(NBEs, BEs, Bound)
 
-  syntax K ::= binderSplit2(Bool, KLabel, Int, List{K}, List{K}, List{K}, Set, K) [function]
-  rule binderSplit2(T:Bool, L:KLabel, I:Int, Ks:List{K}, NBEs:List{K}, BEs:List{K}, Bound:Set, vars(Bound':Set))
-    => binderSplit1(T, L, I, Ks, NBEs, BEs, Bound Bound')
+  syntax K ::= binderSplit2(KLabel, Int, List{K}, List{K}, List{K}, Set, K) [function]
+  rule binderSplit2(L:KLabel, I:Int, Ks:List{K}, NBEs:List{K}, BEs:List{K}, Bound:Set, vars(Bound':Set))
+    => binderSplit1(L, I, Ks, NBEs, BEs, Bound Bound')
   
 endmodule
 
@@ -99,8 +90,11 @@ module FREE-VARS
   rule freeVars(X:Variable,,Ks:List{K}, Bound:Set, Free:Set)
     => #if X in Bound ==K true #then freeVars(Ks, Bound, Free)
        #else freeVars(Ks, Bound, Free SetItem(X)) #fi
+  rule freeVars((Set2KLabel(S:Set)(.List{K}) => Set2KTerm(S)),,_, _, _)
   rule freeVars((L:KLabel(Ks:List{K}) => Ks),, _, _, _)
-    when isVariable(L(Ks)) =/=K true andBool isBinder(L(Ks)) =/=K true
+    when (isVariable(L(Ks)) =/=K true)
+     andBool (isBinder(L(Ks)) =/=K true)
+     andBool (isSet(L(Ks)) =/=K true)
   rule freeVars(K:K,,Ks:List{K}, Bound:Set, Free:Set)
     =>  freeVars1(Ks, freeVarsBinder(K, Bound), Bound, Free)
     when isBinder(K)
@@ -111,7 +105,7 @@ module FREE-VARS
 
   syntax K ::= freeVarsBinder(K, Set) [function]
   rule freeVarsBinder(K:K, Bound:Set)
-    => freeVarsBinder1(binderSplit(isStarBinder(K) ==K true, K), Bound)
+    => freeVarsBinder1(binderSplit(K), Bound)
 
   syntax K ::= freeVarsBinder1(K, Set) [function]
   rule freeVarsBinder1(splitedBinder(NBEs:List{K}, BEs:List{K}, Bound1:Set), Bound:Set)
@@ -119,50 +113,55 @@ module FREE-VARS
 
   syntax K ::= freeVarsBinder2(K, K) [function]
   rule freeVarsBinder2(vars(Free1:Set), vars(Free2:Set)) => vars(Free1 Free2)
-
 endmodule
 
 module SUBSTITUTION 
   imports FREE-VARS
   syntax K ::= substitutionError(K,String)
-  syntax K ::= K "[" K "/" Variable "]" [function]
-  rule K:K[E:K/V:Variable] => substitute(K, V, E)
-  rule _[_/V:K] 
-    => substitutionError(V, "is not a Variable; cannot substitute")
-    when isVariable(V) =/=K true
+  syntax K ::= K "[" List{K} "/" List{K} "]" [function]
+  rule K:K[Ks:List{K} / Vs:List{K}]
+    => substitute(K, Map (Vs |-> Ks))
 
-  syntax K ::= substitute(K, K, K) [function]
-             | substituteList(K, K, K) [function]
-             | substituteList1(K, K, K, List{K}) [function]
+  syntax K ::= K "[" Map "]" [function]
   
-  rule substituteList(K:K, X:K, E:K) => substituteList1(K, X, E, .List{K})
-  rule substituteList1(_:KLabel((K:K => .List{K}),,_), X:K, E:K, _,,(.List{K} => substitute(K, X, E)))
-  rule substituteList1(L:KLabel(.List{K}), _, _, Ks:List{K}) => L(Ks)
+  rule K:K[M:Map] => substitute(K, M)
+//  rule _[_/V:K] 
+//    => substitutionError(V, "is not a Variable; cannot substitute")
+//    when isVariable(V) =/=K true
+
+  syntax K ::= substitute(K, Map) [function]
+             | substituteFV(K, Map, K) [function]
+             | substituteList(K, Map, K) [function]
+             | substituteList1(K, Map, K, List{K}) [function]
   
-  rule substitute(Y:Variable, X:Variable, E:K) 
-    => #if X ==K Y #then E #else Y #fi
-  rule substitute(K:K, X:K, E:K) => substituteList(K, X, E)
+  rule substitute(K:K, M:Map) 
+    => substituteFV(K, M, freeVars(Set2KLabel values(M)(.List{K})))
+
+  rule substituteFV(Y:Variable, M:Map, _) 
+    => #if $hasMapping(M, Y) #then M:Map(Y) #else Y #fi
+  rule substituteFV(K:K, M:Map, FV:K) => substituteList(K, M, FV)
     when isVariable(K) =/=K true andBool isBinder(K) =/=K true
 
-  rule substitute(K:K, X:K, E:K) => substituteBinder(K, X, E) 
+  rule substituteFV(K:K, M:Map, FV:K) => substituteBinder(K, M, FV:K) 
     when isBinder(K)
 
-  syntax K ::= substituteBinder(K, K, K) [function]
-  rule substituteBinder(K:K, X:K, E:K) 
-    => substituteBinder1(K, X, E, boundedVars(K), freeVars(E))
+  rule substituteList(K:K, M:Map, FV:K) => substituteList1(K, M, FV:K, .List{K})
+  rule substituteList1(_:KLabel((K:K => .List{K}),,_), M:Map, FV:K, _,,(.List{K} => substituteFV(K, M, FV)))
+  rule substituteList1(L:KLabel(.List{K}), _, _, Ks:List{K}) => L(Ks)
+  
+  syntax K ::= substituteBinder(K, Map, K) [function]
+  rule substituteBinder(K:K, M:Map, FV:K) 
+    => substituteBinder1(K, M, boundedVars(K), FV)
 
-  syntax K ::= substituteBinder1(K, K, K, K, K) [function]
-  rule substituteBinder1(K:K, X:K, E:K, vars(BKVs:Set), vars(FEVs:Set))
-    => #if X in BKVs ==K true 
-       #then K
-       #else substituteBinder2(K, X, E, vars(intersectSet(BKVs, FEVs)), vars(FEVs))
-       #fi
+  syntax K ::= substituteBinder1(K, Map, K, K) [function]
+  rule substituteBinder1(K:K, M:Map, vars(BKVs:Set), vars(FEVs:Set))
+    => substituteBinder2(K, M, vars(intersectSet(BKVs, FEVs keys M)), vars(FEVs))
 
-  syntax K ::=  substituteBinder2(K, K, K, K, K) [function]
-  rule substituteBinder2(K:K, X:K, E:K, vars(Vs:Set), vars(FEVs:Set))
+  syntax K ::=  substituteBinder2(K, Map, K, K) [function]
+  rule substituteBinder2(K:K, M:Map, vars(Vs:Set), vars(FEVs:Set))
     => #if isEmptySet(Vs) 
-       #then substituteList(K, X,E)
-       #else substituteList(rebind(K, vars(Vs), getVars(K), vars(FEVs SetItem(X))), X, E)
+       #then substituteList(K, M, vars(FEVs))
+       #else substituteList(rebind(K, vars(Vs), getVars(K), vars(FEVs keys M)), M, vars(FEVs))
        #fi 
 
 
@@ -184,8 +183,10 @@ module SUBSTITUTION
 
   syntax K ::= rebind2(K, Int, Map, K) [function]
   rule rebind2(L:KLabel(K:K,, Ks:List{K}), I:Int, M:Map, L(Ks':List{K}))
-    => #if isBound(L,I) ==K true orBool isBounding(L, I) ==K true
-       #then rebind2(L(Ks), I +Int 1, M, L(Ks',, applySubstMap(K, M)))
+    => #if (isBound(L,I) ==K true)
+        orBool (isBound(L,I) ==K "star")
+        orBool (isBounding(L, I) ==K true)
+       #then rebind2(L(Ks), I +Int 1, M, L(Ks',, substitutePlain(K, M)))
        #else rebind2(L(Ks), I +Int 1, M, L(Ks',, K))
        #fi
   rule rebind2(_:KLabel(.List{K}), _, _, K:K) => K
@@ -195,22 +196,20 @@ module SUBSTITUTION
   rule freshSubst1(BVs:Set, AVs:Set, M:Map, X:K, Y:K)
     => freshSubst(BVs, SetItem(Y) AVs, M X |-> Y)
 
-  syntax K ::= applySubstMap(K, Map) [function]
-             | applySubstMapList(K, Map) [function]
-             | applySubstMapList1(K, Map, List{K}) [function]
+  syntax K ::= substitutePlain(K, Map) [function]
+             | substitutePlainList(K, Map) [function]
+             | substitutePlainList1(K, Map, List{K}) [function]
 
 
-  rule applySubstMap(X:K, X:K |-> Y:K _) => Y
-  rule applySubstMap(K:K, M:Map) => applySubstMapList(K, M)
+  rule substitutePlain(X:K, X:K |-> Y:K _) => Y
+  rule substitutePlain(K:K, M:Map) => substitutePlainList(K, M)
     when isId(K) =/=K true orElseBool $hasMapping(M, K) =/=K true
 
-  rule applySubstMapList(L:KLabel(Ks:List{K}), M:Map)
-    => applySubstMapList1(L:KLabel(Ks), M, .List{K})
+  rule substitutePlainList(L:KLabel(Ks:List{K}), M:Map)
+    => substitutePlainList1(L:KLabel(Ks), M, .List{K})
   
-  rule applySubstMapList1(_:KLabel((K:K => .List{K}),,_), M:Map, _,,
-        (.List{K} => applySubstMap(K,M)))
-  rule applySubstMapList1(L:KLabel(.List{K}), _, Ks:List{K}) => L(Ks)
+  rule substitutePlainList1(_:KLabel((K:K => .List{K}),,_), M:Map, _,,
+        (.List{K} => substitutePlain(K,M)))
+  rule substitutePlainList1(L:KLabel(.List{K}), _, Ks:List{K}) => L(Ks)
 
- // if  and  is not in the free variables of  (sometimes said  is fresh for ).
-  
 endmodule

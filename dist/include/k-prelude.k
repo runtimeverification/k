@@ -57,6 +57,11 @@ module K-MAP-EXTRAS
   rule keys . => .
   rule (keys ((K:K |->_  => .) _)) (. => SetItem(K))
 
+	syntax Set ::= "values" Map  [function]
+
+  rule values . => .
+  rule (values ((_ |-> K:K  => .) _)) (. => SetItem(K))
+
   syntax Bool ::= "$hasMapping" "(" Map "," K ")" [function,maudeop("$hasMapping")]
   syntax Bool ::= "#hasMapping" "(" Map "," K ")" [function, maudeop("#hasMapping")]
   rule $hasMapping(M:Map,K:K) => #hasMapping(M,K) ==K true [structural, anywhere]
@@ -94,6 +99,18 @@ module K-SET-EXTRAS
 
   syntax Bool ::= isEmptySet(Set) [function]
   rule isEmptySet(A:Set) => (A ==Set .Set)
+
+  syntax KLabel ::= "#set"
+
+  syntax K ::= Set2KTerm(Set)        [function]
+  rule Set2KTerm(S:Set) => Set2KTermAcc(S, #set(.List{K}))
+
+  syntax K ::= Set2KTermAcc(Set, K)  [function]
+  rule Set2KTermAcc((SetItem(K:K) => .Set)_, _(_,,(.List{K} => K)))
+  rule Set2KTermAcc(.Set, K:K) => K
+
+  
+  
 
 endmodule
 
@@ -139,6 +156,11 @@ interface K-WRAPPERS-LABELS
 					| "List2KLabel" List
 					| "Map2KLabel" Map
 					| "wrap-with"
+
+
+
+  syntax KLabel ::= "isSet"
+  rule isSet(Set2KLabel(_)(.List{K})) => true [anywhere]
 
 endinterface
 
