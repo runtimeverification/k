@@ -66,15 +66,15 @@ context-free syntax
 	KEYDz "(" TAGCONTENTDz ")"		-> TagDz {cons("TagParam")}
 	KEYDz "(" DzDzSTRING ")"		-> TagDz {cons("TagString")}
 lexical syntax
-	[A-Za-z\-]				-> TAGDz
-	TAGDz+					-> KEYDz
+	[A-Za-z\-0-9]			-> TAGDz
+	[a-z] TAGDz+			-> KEYDz
 	TCDz*					-> TAGCONTENTDz
 	~[\n\r\(\)\"]			-> TCDz
 	"(" TAGCONTENTDz ")"	-> TCDz
 
 lexical restrictions
 	TAGCONTENTDz	-/- ~[\(\)]
-	KEYDz			-/- [A-Za-z\-]
+	KEYDz			-/- [A-Za-z\-0-9]
 
 lexical syntax
 	[A-Z][a-zA-Z0-9]* -> BASICID

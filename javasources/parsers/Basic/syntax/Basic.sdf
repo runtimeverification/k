@@ -66,15 +66,15 @@ context-free syntax
 
 
 lexical syntax
-	[A-Za-z\-]				-> TAG
-	TAG+					-> KEY
+	[A-Za-z\-0-9]			-> TAG
+	[a-z] TAG+				-> KEY
 	TC*						-> TAGCONTENT
 	~[\n\r\(\)\"]			-> TC
 	"(" TAGCONTENT ")"		-> TC
 
 lexical restrictions
 	TAGCONTENT	-/- ~[\(\)]
-	KEY			-/- [A-Za-z\-]
+	KEY			-/- [A-Za-z\-0-9]
 	"syntax"	-/- ~[\n\r\ \t]
 	"rule"		-/- ~[\n\r\ \t]
 	"context"	-/- ~[\n\r\ \t]

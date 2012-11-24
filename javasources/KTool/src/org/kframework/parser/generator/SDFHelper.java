@@ -1,8 +1,11 @@
 package org.kframework.parser.generator;
 
 import org.kframework.kil.Attributes;
+import org.kframework.kil.Production;
+import org.kframework.kil.loader.DefinitionHelper;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class SDFHelper {
@@ -30,6 +33,23 @@ public class SDFHelper {
 			return str.substring(0, str.length() - 2) + "}";
 		else
 			return str + "}";
+	}
+
+	/**
+	 * Search for all the productions that have either 'klabel(tag)' or the 'tag' attribute
+	 * 
+	 * @param tag
+	 * @return
+	 */
+	public static Set<Production> getProductionsForTag(String tag) {
+		Set<Production> prods = new HashSet<Production>();
+		for (Map.Entry<String, Production> e : DefinitionHelper.conses.entrySet()) {
+			if (e.getValue().getKLabel().equals(tag)) {
+				prods.add(e.getValue());
+			} else if (e.getValue().getAttributes().containsKey(tag))
+				prods.add(e.getValue());
+		}
+		return prods;
 	}
 
 	public static String getFollowRestrictionsForTerminals(Set<String> terminals) {

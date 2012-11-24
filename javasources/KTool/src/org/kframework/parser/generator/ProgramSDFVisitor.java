@@ -1,14 +1,22 @@
 package org.kframework.parser.generator;
 
-import org.kframework.kil.*;
-import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.StringUtil;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.kframework.kil.Constant;
+import org.kframework.kil.PriorityBlock;
+import org.kframework.kil.PriorityBlockExtended;
+import org.kframework.kil.PriorityExtended;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
+import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.utils.StringUtil;
 
 /**
  * Collect all the syntax declarations into containers according to their function.
@@ -32,8 +40,31 @@ public class ProgramSDFVisitor extends BasicVisitor {
 	public void visit(Syntax syn) {
 
 		userSort.add(syn.getSort().getName());
+		List<PriorityBlock> priblocks = syn.getPriorityBlocks();
+		processPriorities(priblocks);
+	}
+
+	public void visit(PriorityExtended node) {
+		// reconstruct a syntax declaration from the syntax priorities
+		List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
+		for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
+			PriorityBlockExtended pbe1 = node.getPriorityBlocks().get(i);
+			PriorityBlock pb1 = new PriorityBlock();
+			pb1.setAssoc(pbe1.getAssoc());
+
+			for (Constant tag : pbe1.getProductions()) {
+				Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getValue());
+				pb1.getProductions().addAll(prods2);
+			}
+			priblocks.add(pb1);
+		}
+
+		processPriorities(priblocks);
+	}
+
+	private void processPriorities(List<PriorityBlock> priblocks) {
 		List<PriorityBlock> prilist = new ArrayList<PriorityBlock>();
-		for (PriorityBlock prt : syn.getPriorityBlocks()) {
+		for (PriorityBlock prt : priblocks) {
 			PriorityBlock p = new PriorityBlock();
 			p.setAssoc(prt.getAssoc());
 
@@ -60,7 +91,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 		}
 
 		if (prilist.size() > 0) {
-			if (prilist.size() <= 1 && (syn.getPriorityBlocks().get(0).getAssoc() == null || syn.getPriorityBlocks().get(0).getAssoc().equals(""))) {
+			if (prilist.size() == 1 && (prilist.get(0).getAssoc() == null || prilist.get(0).getAssoc().equals(""))) {
 				// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
 				// you need to have at least 2 productions or a block association
 				PriorityBlock prt = prilist.get(0);

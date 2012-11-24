@@ -1,8 +1,16 @@
 package org.kframework.kil.loader;
 
-import org.kframework.kil.*;
+import java.util.Set;
+
+import org.kframework.kil.Constant;
+import org.kframework.kil.PriorityBlock;
+import org.kframework.kil.PriorityBlockExtended;
+import org.kframework.kil.PriorityExtended;
+import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Syntax;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.parser.generator.SDFHelper;
 
 public class CollectPrioritiesVisitor extends BasicVisitor {
 
@@ -31,9 +39,19 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
 		for (int i = 0; i < node.getPriorityBlocks().size() - 1; i++) {
 			PriorityBlockExtended pb1 = node.getPriorityBlocks().get(i);
 			PriorityBlockExtended pb2 = node.getPriorityBlocks().get(i + 1);
+			// example: syntax priorities tag1 > tag2
 			for (Constant prd1 : pb1.getProductions()) {
+				// get all the productions annotated with tag1
+				Set<Production> prods1 = SDFHelper.getProductionsForTag(prd1.getValue());
 				for (Constant prd2 : pb2.getProductions()) {
-					DefinitionHelper.addPriority(prd1.getValue(), prd2.getValue());
+					// get all the productions annotated with tag2
+					Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getValue());
+					// add all the relations between all the productions annotated with tag1 and tag 2
+					for (Production p1 : prods1) {
+						for (Production p2 : prods2) {
+							DefinitionHelper.addPriority(p1.getKLabel(), p2.getKLabel());
+						}
+					}
 				}
 			}
 		}

@@ -20,7 +20,7 @@ public class AddConsesVisitor extends BasicVisitor {
 			String cons2 = StringUtil.escapeSortName(p.getSort()) + "1Bracket";
 			if (cons != null) {
 				if (!cons.equals(cons2)) {
-					String msg = "'bracket' productions are not allowed to have cons: '" + cons + "'";
+					String msg = "Cons must be of the form: '" + cons2 + "'";
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
 				}
 			} else

@@ -27,8 +27,30 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 	public void visit(Syntax syn) {
 
 		userSorts.add(syn.getSort());
+		processPriorities(syn.getPriorityBlocks());
+	}
+
+	public void visit(PriorityExtended node) {
+		// reconstruct a syntax declaration from the syntax priorities
+		List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
+		for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
+			PriorityBlockExtended pbe1 = node.getPriorityBlocks().get(i);
+			PriorityBlock pb1 = new PriorityBlock();
+			pb1.setAssoc(pbe1.getAssoc());
+
+			for (Constant tag : pbe1.getProductions()) {
+				Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getValue());
+				pb1.getProductions().addAll(prods2);
+			}
+			priblocks.add(pb1);
+		}
+
+		processPriorities(priblocks);
+	}
+
+	private void processPriorities(List<PriorityBlock> priblocks) {
 		List<PriorityBlock> prilist = new ArrayList<PriorityBlock>();
-		for (PriorityBlock prt : syn.getPriorityBlocks()) {
+		for (PriorityBlock prt : priblocks) {
 			PriorityBlock p = new PriorityBlock();
 			p.setAssoc(prt.getAssoc());
 
@@ -37,7 +59,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 				if (prd.getAttributes().containsKey("onlyLabel")) {
 					// if a production has this attribute, don't add it to the list
 				} else if (prd.isSubsort()) {
-					if (!syn.getSort().getName().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
+					if (!prd.getSort().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
 						outsides.add(prd);
 						subsorts.add(new Subsort(prd.getSort(), ((Sort) prd.getItems().get(0)).getName()));
 						// add the small sort to the user sorts to add it to the variable declarations
@@ -60,7 +82,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 		}
 
 		if (prilist.size() > 0) {
-			if (prilist.size() <= 1 && (syn.getPriorityBlocks().get(0).getAssoc() == null || syn.getPriorityBlocks().get(0).getAssoc().equals(""))) {
+			if (prilist.size() == 1 && (prilist.get(0).getAssoc() == null || prilist.get(0).getAssoc().equals(""))) {
 				// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
 				// you need to have at least 2 productions or a block association
 				PriorityBlock prt = prilist.get(0);
