@@ -1,4 +1,4 @@
-require "/modules/free-vars.k"
+require "/modules/substitution.k"
 module TEST
   imports SUBSTITUTION
   syntax Ints ::= List{Int, ","}
@@ -26,13 +26,7 @@ module TEST
   
   configuration
     <k>
-      ($PGM:K
-      ~> (isBound('let_=_in_, 1)
-      ~> (isBound('let_=_in_, 2)
-      ~> (isBounding('let_=_in_, 1)
-      ~> (isBounding('let_=_in_, 2)
-      ~> (isBounding('let_=_in_, 3)
-      ))))))
+      $PGM:K
     </k>
 endmodule
 

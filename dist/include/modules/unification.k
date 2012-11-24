@@ -106,24 +106,24 @@ constraint.
                     (K:K => substitute(K1,, K2,, K)))   [structural, anywhere]
   rule applySubst(subst(.List{K}),K) => K   [structural, anywhere]
   
-  syntax KLabel ::= "unifyEqs" | "subst" | "vars" | "substitute"
+  syntax KLabel ::= "unifyEqs" | "subst" | "#vars" | "substitute"
                   | "eqn" | "eqns" | "mgu"
                   | "getVars" | "accumulateVars"
                   | "clash" | "cycle"
 
-  rule getVars(K) => accumulateVars(vars(.List{K}),, K)
+  rule getVars(K) => accumulateVars(#vars(.List{K}),, K)
     [structural, anywhere]
 
-  rule accumulateVars(vars(Xs:List{K}),,X:UnificationVar,,Ks:List{K}) 
+  rule accumulateVars(#vars(Xs:List{K}),,X:UnificationVar,,Ks:List{K}) 
     => #if (X inList{K} Xs)
-       #then accumulateVars(vars(Xs),,Ks)
-       #else accumulateVars(vars(Xs,,X),,Ks)
+       #then accumulateVars(#vars(Xs),,Ks)
+       #else accumulateVars(#vars(Xs,,X),,Ks)
        #fi
     [structural, anywhere]
   rule accumulateVars(_:K,,(L:KLabel(Ks:List{K}) => Ks),,_)
     when isUnificationVar(L(Ks)) =/=K true
     [structural, anywhere]
-  rule accumulateVars(vars(Xs:List{K})) => vars(Xs)   [structural, anywhere]
+  rule accumulateVars(#vars(Xs:List{K})) => #vars(Xs)   [structural, anywhere]
 
 
 //  configuration <k> .K </k> <nextVar> 0 </nextVar>
@@ -135,8 +135,8 @@ constraint.
   syntax KLabel ::= "freshSubst" 
 
   rule freshSubst(subst(_,,(.List{K} => eqn(X:K,,F))),,
-                  vars((X => .List{K}),,_)) when fresh(F:UnificationVar)
+                  #vars((X => .List{K}),,_)) when fresh(F:UnificationVar)
 
-  rule freshSubst(subst(Eqns:List{K}),,vars(.List{K})) => subst(Eqns)
+  rule freshSubst(subst(Eqns:List{K}),,#vars(.List{K})) => subst(Eqns)
 endmodule
 
