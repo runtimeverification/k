@@ -67,6 +67,16 @@ module K-MAP-EXTRAS
   rule $hasMapping(M:Map,K:K) => #hasMapping(M,K) ==K true [structural, anywhere]
 
   rule #hasMapping(_:Map K:K |-> _:K,K) => true [structural, anywhere]
+
+
+// The following are used in pattern-matching.k
+
+  syntax K ::= #map(Map)
+  syntax Bool ::= #isMapInK(K)     [function]
+  syntax Map  ::= #getMapFromK(K)  [function]
+  rule #isMapInK(#map(_)) => true
+  rule #getMapFromK(#map(M:Map)) => M
+
 endmodule
 
 module K-SET-EXTRAS
