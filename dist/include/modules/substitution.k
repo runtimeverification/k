@@ -261,4 +261,17 @@ module SUBSTITUTION
         (.List{K} => #substitutePlain(K,M)))
   rule #substitutePlainList1(L:KLabel(.List{K}), _, Ks:List{K}) => L(Ks)
 
+
+// Grigore: I added the operation below here, because I want it to be
+// generic.  I don't know how to generate globablly fresh variables
+// of desired type any other way ... sorry
+  syntax K ::= freshVariables(Set,K)
+  rule freshVariables(.Set, T) => T
+  rule freshVariables(SetItem(Tv) S:Set, T)
+    => freshVariables(S, T[#changeLabel(Tv',Tv)/Tv])
+    when fresh(Tv':K)
+
+  syntax K ::= #changeLabel(K,K)  [function]
+  rule #changeLabel(L:KLabel(Ks:List{K}),L':KLabel(_)) => L'(Ks)
+
 endmodule

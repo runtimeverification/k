@@ -1,9 +1,8 @@
 module UNIFICATION
-  imports BUILTIN-HOOKS
+  imports SYMBOLIC-K
 
-//@ Interface to the unification procedure (what the user needs to know)
+//@ Public interface to the unification procedure (what the user needs to know)
   syntax Mgu ::= ".Mgu"
-  syntax UnificationVar ::= "dummy"  // empty sorts not allowed, currently :-(
   rule .Mgu => subst(.List{K})  [structural, anywhere]  // empty mgu
   rule isMgu(subst(_)) => true  [function]  // so we can write Theta:Mgu
 
@@ -11,10 +10,10 @@ module UNIFICATION
   syntax K ::= applyMgu(Mgu,K)       [function]  // applies Mgu to any term
   rule applyMgu(Theta:Mgu,K) => applySubst(Theta,K)
 
-  syntax Set ::= applyMguSet(Mgu,Set)  [function]
-  rule applyMguSet(_, .Set) => .Set
-  rule applyMguSet(Theta:Mgu, SetItem(K:K) S:Set)
-    => SetItem(applyMgu(Theta,K)) applyMguSet(Theta,S)
+  syntax Set ::= applyMgu(Mgu,Set)  [function]
+  rule applyMgu(_, .Set) => .Set
+  rule applyMgu(Theta:Mgu, SetItem(K:K) S:Set)
+    => SetItem(applyMgu(Theta,K)) applyMgu(Theta,S)
 // Traian: I would remove applySubst all together and only keep applyMgu
 //         Mgu gives a nicer, more intuitive user interface than Subst
 
@@ -28,11 +27,11 @@ Matching on any KAST label, the
   rule eqns((.List{K} => eqn(K1,,K2)),, 
             eqn(L:KLabel((K1:K => .List{K}),,Ks:List{K}),,
                 L((K2:K => .List{K}),,Ks':List{K})),,_)
-    when (isUnificationVar(L(K1,,Ks)) =/=K true)
-         andBool (isUnificationVar(L(K2,,Ks')) =/=K true)
+    when (isVariable(L(K1,,Ks)) =/=K true)
+         andBool (isVariable(L(K2,,Ks')) =/=K true)
     [structural, anywhere]
-  rule eqns((eqn(K:K,,X:UnificationVar) => eqn(X,,K)),,_)
-    when isUnificationVar(K) =/=K true   [structural, anywhere]
+  rule eqns((eqn(K:K,,X:Variable) => eqn(X,,K)),,_)
+    when isVariable(K) =/=K true   [structural, anywhere]
 
 
   rule unifyEqs(subst(_:List{K}),,eqns( 
@@ -40,8 +39,8 @@ Matching on any KAST label, the
                 L2:KLabel(Ks':List{K})),,_))
     => clash(L1:KLabel(Ks:List{K}),,
                 L2:KLabel(Ks':List{K}))
-    when (isUnificationVar(L1(Ks)) =/=K true)
-         andBool (isUnificationVar(L2(Ks')) =/=K true)
+    when (isVariable(L1(Ks)) =/=K true)
+         andBool (isVariable(L2(Ks')) =/=K true)
          andBool L1 =/=KLabel L2
     [structural, anywhere]
 
@@ -57,12 +56,12 @@ remaining equations by applying the new mgu binding to them. */
 
 
   rule unifyEqs(subst(Ks:List{K} => eqn(X,,K),,substitute(X,,K,,Ks)),,
-              (eqns(eqn(X:UnificationVar,,K:K),,Eqns:List{K})
+              (eqns(eqn(X:Variable,,K:K),,Eqns:List{K})
                => substitute(X,, K,, eqns(Eqns))))
     when notBool(X subTerm K)
    [structural, anywhere]
 
-  rule unifyEqs(subst(_),,eqns(eqn(X:UnificationVar,,K:K),,_))
+  rule unifyEqs(subst(_),,eqns(eqn(X:Variable,,K:K),,_))
     => cycle(X,,K)
     when X subTerm K [anywhere]
 
@@ -119,14 +118,14 @@ constraint.
   rule getVars(K) => accumulateVars(#vars(.List{K}),, K)
     [structural, anywhere]
 
-  rule accumulateVars(#vars(Xs:List{K}),,X:UnificationVar,,Ks:List{K}) 
+  rule accumulateVars(#vars(Xs:List{K}),,X:Variable,,Ks:List{K}) 
     => #if (X inList{K} Xs)
        #then accumulateVars(#vars(Xs),,Ks)
        #else accumulateVars(#vars(Xs,,X),,Ks)
        #fi
     [structural, anywhere]
   rule accumulateVars(_:K,,(L:KLabel(Ks:List{K}) => Ks),,_)
-    when isUnificationVar(L(Ks)) =/=K true
+    when isVariable(L(Ks)) =/=K true
     [structural, anywhere]
   rule accumulateVars(#vars(Xs:List{K})) => #vars(Xs)   [structural, anywhere]
 
@@ -134,13 +133,13 @@ constraint.
 //  configuration <k> .K </k> <nextVar> 0 </nextVar>
 
   syntax K ::= "getAlpha" "(" K ")"
-  rule getAlpha(K) 
+  rule getAlpha(K)
     => freshSubst(subst(.List{K}),, getVars(K))
 
-  syntax KLabel ::= "freshSubst" 
+  syntax KLabel ::= "freshSubst"
 
   rule freshSubst(subst(_,,(.List{K} => eqn(X:K,,F))),,
-                  #vars((X => .List{K}),,_)) when fresh(F:UnificationVar)
+                  #vars((X => .List{K}),,_)) when fresh(F:Variable)
 
   rule freshSubst(subst(Eqns:List{K}),,#vars(.List{K})) => subst(Eqns)
 endmodule

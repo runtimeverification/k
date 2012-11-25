@@ -18,14 +18,9 @@ module LAMBDA
                | "letrec" Id Id "=" Exp "in" Exp
                | "mu" Id "." Exp
 
-// get rid of dummy
-  syntax TypeVar ::= "dummy"
   syntax Type ::= "int" | "bool"
                 | Type "->" Type                  [strict]
                 | "(" Type ")"                    [bracket]
-                | TypeVar
-// get rid of next
-  syntax UnificationVar ::= TypeVar
 
   syntax TypeSchema ::= "forall" Set "." Type [binder, latex(\forall{#1}.{#2})]
 
@@ -44,30 +39,24 @@ module LAMBDA
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
   rule <k> lambda X:Id . E:Exp => Tv -> E ~> tenv(TEnv) ...</k>
-       <tenv> TEnv:Map => TEnv[Tv/X] </tenv>  when fresh(Tv:TypeVar)
-  rule T1:Type T2:Type => T1 = (T2 -> Tv) ~> Tv  when fresh(Tv:TypeVar)
+       <tenv> TEnv:Map => TEnv[Tv/X] </tenv>  when fresh(Tv:Type)
+  rule T1:Type T2:Type => T1 = (T2 -> Tv) ~> Tv  when fresh(Tv:Type)
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
 
   rule <k> let X = T:Type in E => E ~> tenv(TEnv) ...</k>
        <mgu> Theta:Mgu </mgu>
        <tenv> TEnv:Map
         => TEnv[(forall freeVariables(applyMgu(Theta, T)) -Set
-                        freeVariables(applyMguSet(Theta, values TEnv))
+                        freeVariables(applyMgu(Theta, values TEnv))
                 . applyMgu(Theta, T)) / X]
        </tenv>
   rule <k> X:Id => freshVariables(Tvs,T) ...</k>
        <tenv>... X |-> forall Tvs . T ...</tenv>
 
-  syntax K ::= freshVariables(Set,Type)
-  rule freshVariables(.Set, T:Type) => T
-  rule freshVariables(SetItem(Tv:TypeVar) S:Set, T:Type)
-    => freshVariables(S, T[Tv'/Tv])
-    when fresh(Tv':TypeVar)
-
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule <k> mu X:Id . E:Exp => (Tv -> Tv) E ~> tenv(TEnv) ...</k>
           <tenv> TEnv:Map => TEnv[Tv/X] </tenv>
-    when fresh(Tv:TypeVar)
+    when fresh(Tv:Type)
 
   syntax K ::= Type "=" Type
   rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
