@@ -1,3 +1,5 @@
+require "modules/pattern-matching.k"
+
 /*!
 \title{FUN --- Untyped}
 \author{Grigore Ro\c{s}u and Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
@@ -279,25 +281,18 @@ this is easier to define in an environment-based style. */
 
 module FUN-UNTYPED
   imports FUN-UNTYPED-SYNTAX
+  imports PATTERN-MATCHING
 
 /*@ \subsection{Configuration}
 
 The \textsf{k}, \textsf{env}, and \textsf{store} cells are standard
 (see, for example, the definition of LAMBDA++ or IMP++ in the \K
-tutorial).  The cell \textsf{match} will be used for pattern matching:
-\textsf{task} will hold the pattern-match task, possibly decomposed
-into several other sub-tasks, and \textsf{then} will hold the
-computation to execute if the pattern-match succeeds. */
+tutorial).  */
 
   configuration <T color="yellow"> 
                   <k color="green"> $PGM:Exp </k>
                   <env color="violet"> .Map </env>
                   <store color="white"> .Map </store>
-                  <br/>
-                  <match color="black">
-                    <task color="red" multiplicity="?"> .Bag </task>
-                    <then color="blue" multiplicity="?"> .K </then>
-                  </match>
                 </T>
 
 
@@ -348,83 +343,29 @@ will be used at execution time to lookup all the variables that appear
 free in the function body (we want static scoping in FUN). */
 
   syntax Val ::= closure(Map,Cases)
-  rule <k> fun Cases => closure(Rho,Cases) ...</k>
-       <env> Rho </env>
-  rule <k> closure(Rho,Cases) V:Val => match(Cases,V) ~> env(Rho') ...</k>
-       <env> Rho' => Rho </env>
+  rule <k> fun Cases => closure(Rho,Cases) ...</k>  <env> Rho </env>
 
+/* \paragraph{Note:} The reader may want to get familiar with
+how the pre-defined pattern matching works (see
+\texttt{k/include/modules/pattern-matching.k}) before proceeding. */
 
-/*@ \subsection{Pattern matching}
+/*@ We distinguish two cases when the closure is applied.  If the first
+pattern matches, then we pick the first case: switch to the closed
+environment, get the matching map and bind all its variables, and finally
+evaluate the function body of the first case, making sure that the
+environment is properly recovered afterwards.  If the first pattern
+does not match, then we drop it and thus move on the next one. */
 
-The \texttt{match} construct placed on the computation at closure
-invocation time will attempt to match the cases in order against the
-passed value, and execute the first one which matches within the
-corresponding environment resulting after the matching. */
+  rule <k> closure(Rho, P->E | _) V:Val
+           => bindTo(getMatching(P,V)) ~> E ~> env(Rho') ...</k>
+       <env> Rho' => Rho </env>  when isMatching(P,V)
+  rule closure(_, (P->_ | Cases => Cases)) V:Val  when notBool isMatching(P,V)
 
-  syntax K ::= match(Cases,Val)
-  syntax BagItem ::= Exps "::" Exps
+/*@ Besides the generic decomposition rules for patterns and values,
+we also want to allow \texttt{[head|tail]} matching for lists, so add
+the following custom rule: */
 
-/*@ We initiate matching by populating the \textsf{match} cell with the
-contents of the first case.  If the matching succeeds, the resulting
-binding will be eventually produced within the \texttt{bindTo} item on
-top of the \textsf{then} subcell, which is purposely followed by the
-expression to evaluate. */
-
-  rule <k> match((P:Exp -> E:Exp | Cases => Cases), V:Val) ...</k> <br/>
-       <match>
-          . => <task> P::V </task> <then> bindTo(.Ids,.Vals) ~> E </then>
-       </match>
-
-/*@ Success: the task cell emptied.  All we have to do now is to
-simply replace the \texttt{match} item in the computation with the
-contents of the \textsf{then} cell.  We also empty the \textsf{match}
-cell, to prepare it for the next match; indeed, note that the rule
-above only applies when the \textsf{match} cell is empty. */
-
-  rule <k> match(_,_) => K ...</k> (<task> . </task> <then> K </then> => .)
-
-/*@ Task decomposition: When the pattern to match is complex, that is,
-a tuple or a list, we decompose it into subtasks attempting to do the
-matching component-wise. */
-
-  rule {Ps:Exps}::{Vs:Vals} => Ps::Vs
-  rule [Ps:Exps]::[Vs:Vals] => Ps::Vs
-  rule [P:Exp|T:Exp]::[V:Val,Vs:Vals] => P,T::V,[Vs]
-
-//@ Component-wise pattern matching is split into parallel subtasks:
-
-  rule P:Exp,Ps :: V:Val,Vs => P::V  Ps::Vs  when Ps =/=K .Exps
-
-//@ Collect terminated tasks:
-
-  rule .Exps :: .Exps => .
-
-//@ Collect matched values (one can specify values in patterns)
-
-  rule V:Val :: V => .
-
-/*@ Add binding when a variable is reached in the pattern, checking at
-the same time that there is no other binding of the same variable.  In
-other words, we only allow linear patterns in FUN (i.e., each variable
-can appear at most once in a pattern), which is a common
-pattern-matching restriction in functional languages (not in \K or in
-other rewrite-based frameworks). */
-
-  rule <task>... X:Id :: V:Val => . ...</task>
-       <then> bindTo((Xs => X,Xs),(Vs => V,Vs)) ...</then>
-    when notBool(X in Xs)
-
-/*@ Finally, we empty the \textsf{match} cell when the matching fails.
-This way, the next case (if any) will be selected by the first
-pattern-matching rule above; if no case it left, that is, if all cases
-failed, then the computation will get stuck with a \texttt{match}
-item on top of the \textsf{k} cell holding the empty set of cases.
-Make sure you use the command ``\texttt{kompile -transition="otherwise"}''
-when you generate your language model, to make sure that this rule
-applies last! (this is currently a ``hack'', which will be eliminated
-when we add rewriting strategies to \K). */
-
-  rule <match> <task>_</task> _ => . </match>  [otherwise]
+  rule decomposeMatching(([H:Exp|T:Exp] => H,T),([V:Val,Vs:Vals] => V,[Vs]))
 
 
 /*@ \subsection{Let and Letrec}
@@ -561,10 +502,13 @@ The meaning of these operations has already been explained when we
 discussed the \texttt{let} and \texttt{letrec} language constructs above. */
 
   syntax K ::= bindTo(Ids,Exps)         [strict(2)]
+             | bindTo(Map)
              | bind(Ids)
 
-  rule bindTo(.Ids,.Vals) => .  [structural]
-  rule <k> bindTo((X:Id,Xs => Xs),(V:Val,Vs => Vs)) ...</k>
+  rule bindTo(Xs:Ids,Vs:Vals) => bindTo(getMatching(Xs,Vs))
+
+  rule bindTo(.Map) => .  [structural]
+  rule <k> bindTo((X:Id |-> V:Val => .) _) ...</k>
        <env> Rho => Rho[L/X] </env>
        <store>... . => L |-> V ...</store>
     when fresh(L:Int)  [structural]
