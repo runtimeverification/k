@@ -345,9 +345,9 @@ free in the function body (we want static scoping in FUN). */
   syntax Val ::= closure(Map,Cases)
   rule <k> fun Cases => closure(Rho,Cases) ...</k>  <env> Rho </env>
 
-/* \paragraph{Note:} The reader may want to get familiar with
-how the pre-defined pattern matching works (see
-\texttt{k/include/modules/pattern-matching.k}) before proceeding. */
+/*@ \paragraph{Note:} The reader may want to get familiar with
+how the pre-defined pattern matching works before proceeding.  The best
+way to do that is to consult \texttt{k/include/modules/pattern-matching.k}. */
 
 /*@ We distinguish two cases when the closure is applied.  If the first
 pattern matches, then we pick the first case: switch to the closed
@@ -484,13 +484,13 @@ and continues the execution normally.  */
   rule <k> cc(Rho,K) V:Val ~> _ => V ~> K </k>  <env> _ => Rho </env>
 
 
-/*@ \subsection{Auxiliary operations}
+//@ \subsection{Auxiliary operations}
+
+/*@ \subsubsection{Environment recovery}
 
 The environment recovery operation is the same as for the LAMBDA++
 language in the \K tutorial and many other languages provided with the
 \K distribution.  */
-
-//@ \subsubsection{Environment recovery}
 
   syntax K ::= env(Map)
   rule (env(_) => .) ~> env(_)  [anywhere]   // tail recursion
@@ -537,17 +537,5 @@ and of expressions in a binding, respectively. */
   syntax Exps ::= exps(Bindings)  [function]
   rule exps(.Bindings) => .Exps
   rule exps(_:Id=E and Bs) => E,exps(Bs)
-
-/*@ \subsubsection{Syntactic identifier list membership}
-
-The following membership operation was used for checking that each
-variable is bound at most once by each pattern.  Such operations
-should probably be builtin in the \K tool and provided with each
-syntactic list.  */
-
-  syntax Bool ::= Id "in" Ids  [function]
-  rule X:Id in (X,_) => true
-  rule X:Id in (Y:Id,Xs => Xs) when X =/=K Y
-  rule _:Id in .Ids => false
 
 endmodule
