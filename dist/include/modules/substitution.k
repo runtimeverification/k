@@ -5,9 +5,17 @@ module VARIABLE
 
   syntax K ::= vars(Set)
 
+  syntax Set ::= #getVarsFromK(K)  [function]
+  rule #getVarsFromK(vars(Vars:Set)) => Vars
+
 // Get the variables in a K term, going through the sets Klabeled as
 // terms as well, if any.
-// Grigore: we should change this to return a set of variables
+// Grigore: We should also have a user-friendly variant of this, which
+// returns an actual set of variables
+
+  syntax Set ::= getVariables(K)  [function]  // public
+  rule getVariables(vars(Vars:Set)) => Vars
+
   syntax K ::= #getVars(K)  [function]
   rule #getVars(K:K) => #getVars1(K, .Set)
 
@@ -103,6 +111,12 @@ endmodule
 
 module FREE-VARS
   imports BINDER
+
+  syntax Set ::= freeVariables(List{K})  [function]  // public
+               | freeVariables(Set)      [function]
+  rule freeVariables(Ks:List{K}) => #getVarsFromK(#freeVars(Ks))
+  rule freeVariables(.Set) => .Set
+  rule freeVariables(SetItem(K) S:Set) => freeVariables(K) freeVariables(S)
 
 // Grigore: again, I think this should just return a set of variables, not a K
   syntax K ::= #freeVars(List{K})  [function]
@@ -219,7 +233,7 @@ module SUBSTITUTION
   syntax K ::= #rebind2(K, Int, Map, K) [function]
   rule #rebind2(L:KLabel(K:K,, Ks:List{K}), I:Int, M:Map, L(Ks':List{K}))
     => #if (isBound(L,I) ==K true)
-        orBool (isBound(L,I) ==K "star")
+//        orBool (isBound(L,I) ==K "star")
         orBool (isBounding(L, I) ==K true)
        #then #rebind2(L(Ks), I +Int 1, M, L(Ks',, #substitutePlain(K, M)))
        #else #rebind2(L(Ks), I +Int 1, M, L(Ks',, K))

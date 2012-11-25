@@ -7,9 +7,14 @@ module UNIFICATION
   rule .Mgu => subst(.List{K})  [structural, anywhere]  // empty mgu
   rule isMgu(subst(_)) => true  [function]  // so we can write Theta:Mgu
 
-  syntax Mgu ::= updateMgu(Mgu,K,K) [function]  // updates Mgu with equation
-  syntax K ::= applyMgu(Mgu,K) [function]  // applies Mgu to any term
-  rule applyMgu(Mgu:Mgu,K) => applySubst(Mgu,K)
+  syntax Mgu ::= updateMgu(Mgu,K,K)  [function]  // updates Mgu with equation
+  syntax K ::= applyMgu(Mgu,K)       [function]  // applies Mgu to any term
+  rule applyMgu(Theta:Mgu,K) => applySubst(Theta,K)
+
+  syntax Set ::= applyMguSet(Mgu,Set)  [function]
+  rule applyMguSet(_, .Set) => .Set
+  rule applyMguSet(Theta:Mgu, SetItem(K:K) S:Set)
+    => SetItem(applyMgu(Theta,K)) applyMguSet(Theta,S)
 // Traian: I would remove applySubst all together and only keep applyMgu
 //         Mgu gives a nicer, more intuitive user interface than Subst
 

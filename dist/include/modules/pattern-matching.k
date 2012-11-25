@@ -18,6 +18,7 @@ module PATTERN-MATCHING
   syntax List{K} ::= decomposeMatching(List{K}, List{K})  [function]
 // Here are some basic decomposition rules, but one can add more
   rule decomposeMatching((L:KLabel(Ps:List{K}) => Ps), (L(Ks:List{K}) => Ks))
+    when isVariable(L(Ps)) =/=K true
   rule decomposeMatching(P:K,,Ps:List{K}, K:K,,Ks:List{K})
        => decomposeMatching(P,K),,decomposeMatching(Ps,Ks)
     when Ps =/=List{K} .List{K}

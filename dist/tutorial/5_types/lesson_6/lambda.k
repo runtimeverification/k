@@ -18,11 +18,13 @@ module LAMBDA
                | "letrec" Id Id "=" Exp "in" Exp  [binder]
                | "mu" Id "." Exp                  [binder]
 
+// get rid of dummy
   syntax TypeVar ::= "dummy"
   syntax Type ::= "int" | "bool"
                 | Type "->" Type                  [strict]
                 | "(" Type ")"                    [bracket]
                 | TypeVar
+// get rid of next production
   syntax UnificationVar ::= TypeVar
 
   syntax Exp ::= Type
@@ -40,7 +42,7 @@ module LAMBDA
   rule lambda X . E => Tv -> E[Tv/X]  when fresh(Tv:TypeVar)
   rule T1:Type T2:Type => T1 = (T2 -> Tv) ~> Tv  when fresh(Tv:TypeVar)
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
-  rule let X = E in E' => E'[E/X]                                       
+  rule let X = E in E' => E'[E/X]                                       [macro]
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule mu X . E => (Tv -> Tv) E[Tv/X]  when fresh(Tv:TypeVar)
 

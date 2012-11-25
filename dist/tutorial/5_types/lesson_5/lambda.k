@@ -16,11 +16,13 @@ module LAMBDA
                | "letrec" Id Id "=" Exp "in" Exp
                | "mu" Id "." Exp
 
+// get rid of dummy
   syntax TypeVar ::= "dummy"
   syntax Type ::= "int" | "bool"
                 | Type "->" Type                  [strict]
                 | "(" Type ")"                    [bracket]
                 | TypeVar
+// get rid of next production
   syntax UnificationVar ::= TypeVar
 
   syntax Exp ::= Type

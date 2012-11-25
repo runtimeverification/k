@@ -18,11 +18,13 @@ module LAMBDA
                | "letrec" Id Id "=" Exp "in" Exp  [binder]
                | "mu" Id "." Exp                  [binder]
 
+// I would like to get rid of the "dummy thing"
   syntax TypeVar ::= "dummy"
   syntax Type ::= "int" | "bool"
                 | Type "->" Type                  [strict]
                 | "(" Type ")"                    [bracket]
                 | TypeVar
+// I would like to get rid of the following asap:
   syntax UnificationVar ::= TypeVar
 
   syntax Exp ::= Type
