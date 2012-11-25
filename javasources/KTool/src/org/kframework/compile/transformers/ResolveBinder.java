@@ -41,7 +41,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
 		node.setItems(items);
 
 		for (Production prod : prods) {
-      String bindInfo = prod.getAttributes().get("binder");
+      String bindInfo = prod.getAttribute("binder");
       if (bindInfo == null || bindInfo.equals(""))
         bindInfo = "1->" + prod.getArity();
       Pattern p = Pattern.compile(REGEX);
@@ -81,7 +81,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
       Rule rule = new Rule(
           new KApp(BINDER_PREDICATE, MetaK.getTerm(prod)),
           Constant.TRUE);
-      rule.getAttributes().getContents().add(new Attribute("anywhere", ""));
+      rule.getSentenceAttributes().getContents().add(new Attribute("anywhere", ""));
 			items.add(rule);
 
       Constant klblCt = new Constant("KLabel", prod.getKLabel());
@@ -92,7 +92,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
         list.getContents().add(klblK);
         list.getContents().add(new Constant("Int", Integer.toString(bndIdx)));
         rule = new Rule(new KApp(BOUNDED_PREDICATE, list), Constant.TRUE);
-			  rule.getAttributes().getContents().add(new Attribute("anywhere", ""));
+			  rule.getSentenceAttributes().getContents().add(new Attribute("anywhere", ""));
 			  items.add(rule);
       }
 
@@ -101,7 +101,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
         list.getContents().add(klblK);
         list.getContents().add(new Constant("Int", Integer.toString(bodyIdx)));
         rule = new Rule(new KApp(BOUNDING_PREDICATE, list), Constant.TRUE);
-			  rule.getAttributes().getContents().add(new Attribute("anywhere", ""));
+			  rule.getSentenceAttributes().getContents().add(new Attribute("anywhere", ""));
 			  items.add(rule);
       }
 

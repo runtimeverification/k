@@ -92,6 +92,6 @@ public class AddEmptyLists extends BasicTransformer {
 
 	private static String getListCons(String psort) {
 		Production p = DefinitionHelper.listConses.get(psort);
-		return p.getAttributes().get(Constants.CONS_cons_ATTR);
+		return p.getAttribute(Constants.CONS_cons_ATTR);
 	}
 }

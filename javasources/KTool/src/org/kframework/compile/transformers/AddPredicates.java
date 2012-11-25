@@ -49,14 +49,14 @@ public class AddPredicates extends CopyOnWriteTransformer {
                             new KApp(new Constant("KLabel", predicate(listSort)),
                                     new Empty(listSort)),
                             Constant.TRUE));
-                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
+                    rule.getSentenceAttributes().getContents().add(Attribute.PREDICATE);
                     result.add(rule);
                     rule = new Rule();
                     rule.setBody(new Rewrite(
                             new KApp(new Constant("KLabel", predicate("KResult")),
                                     new Empty(listSort)),
                             Constant.TRUE));
-                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
+                    rule.getSentenceAttributes().getContents().add(Attribute.PREDICATE);
                     result.add(rule);
                 }
             }
@@ -77,16 +77,16 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
         @Override
         public void visit(Production node) {
-            if (node.getAttributes().containsKey("bracket"))
+            if (node.containsAttribute("bracket"))
                 return;
-            if (node.getAttributes().containsKey("predicate"))
+            if (node.containsAttribute("predicate"))
                 return;
 
             String sort = node.getSort();
             Term term = MetaK.getTerm(node);
 
             Term rhs;
-            if (node.getAttributes().containsKey("function") &&
+            if (node.containsAttribute("function") &&
                     node.getArity() > 0)
                rhs = new KApp(KSymbolicPredicate, term);
             else
@@ -95,7 +95,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
             Term lhs = new KApp(ct, term);
             Rule rule = new Rule();
             rule.setBody(new Rewrite(lhs, rhs));
-            rule.getAttributes().getContents().add(Attribute.PREDICATE);
+            rule.getSentenceAttributes().getContents().add(Attribute.PREDICATE);
             result.add(rule);
 
             if (!node.isSubsort()) {
@@ -103,7 +103,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                 rhs = new Constant("#String", "\"" + sort + "\"");
                 rule = new Rule();
                 rule.setBody(new Rewrite(lhs, rhs));
-                rule.getAttributes().getContents().add(Attribute.FUNCTION);
+                rule.getSentenceAttributes().getContents().add(Attribute.FUNCTION);
                 result.add(rule);
             }
         }
@@ -184,7 +184,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     list.getContents().add(new KApp(KSymbolicPredicate, var));
                     Rule rule = new Rule();
                     rule.setBody(new Rewrite(lhs, rhs));
-                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
+                    rule.getSentenceAttributes().getContents().add(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
                     String symCtor = AddSymbolicK.symbolicConstructor(sort);
@@ -195,28 +195,28 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     lhs = new KApp(new Constant("KLabel", pred), symTerm);
                     rule = new Rule();
                     rule.setBody(new Rewrite(lhs, Constant.TRUE));
-                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
+                    rule.getSentenceAttributes().getContents().add(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
                     // define isVariable predicate
                     lhs = new KApp(VariablePredicate, symTerm);
                     rule = new Rule();
                     rule.setBody(new Rewrite(lhs, Constant.TRUE));
-                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
+                    rule.getSentenceAttributes().getContents().add(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
                     lhs = new KApp(K2Sort, symTerm);
                     rhs = new Constant("#String", "\"" + sort + "\"");
                     rule = new Rule();
                     rule.setBody(new Rewrite(lhs, rhs));
-                    rule.getAttributes().getContents().add(Attribute.FUNCTION);
+                    rule.getSentenceAttributes().getContents().add(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
                 } else if (MetaK.isBuiltinSort(sort)) {
                     Variable var = MetaK.getFreshVar(sort);
                     Term lhs = new KApp(BuiltinPredicate, var);
                     Rule rule = new Rule();
                     rule.setBody(new Rewrite(lhs, Constant.TRUE));
-                    rule.getAttributes().getContents().add(Attribute.PREDICATE);
+                    rule.getSentenceAttributes().getContents().add(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
                     /*
@@ -225,7 +225,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     Term rhs = new Constant("#String", "\"" + sort + "\"");
                     rule = new Rule();
                     rule.setBody(new Rewrite(lhs, rhs));
-                    rule.getAttributes().getContents().add(Attribute.FUNCTION);
+                    rule.getCellAttributes().getContents().add(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
                     */
                 }

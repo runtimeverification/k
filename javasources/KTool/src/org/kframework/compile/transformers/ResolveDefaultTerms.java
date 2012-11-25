@@ -74,7 +74,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 			Cell cell = (Cell) super.transform(node);
 			if (cell.getEllipses() == Ellipses.NONE) return cell;
 			cell = cell.shallowCopy();
-			cell.setAttributes(new HashMap<String, String>(cell.getAttributes()));
+			cell.setCellAttributes(new HashMap<String, String>(cell.getCellAttributes()));
 			cell.setEllipses(Ellipses.NONE);
 			ConfigurationStructure cellStr = config.get(cell.getId());
 			if (cellStr.sons.isEmpty()) {
@@ -108,7 +108,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 			for (ConfigurationStructure sonCfg : potentialSons.values()) {
 				if (sonCfg.multiplicity == Multiplicity.ONE || sonCfg.multiplicity == Multiplicity.SOME) {
 					Cell son = sonCfg.cell.shallowCopy();
-					son.setAttributes(new HashMap<String, String>());
+					son.setCellAttributes(new HashMap<String, String>());
 					if (! sonCfg.sons.isEmpty()) { 
 						son.setContents(new Bag());
 						son.setEllipses(Ellipses.BOTH);

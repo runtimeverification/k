@@ -32,7 +32,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		config.accept(new BasicVisitor() {
 			@Override
 			public void visit(Cell node) {
-				String stream = node.getAttributes().get("stream");
+				String stream = node.getCellAttributes().get("stream");
 				if ("stdin".equals(stream)) {
 					inputCells.add(node.getLabel());
 				}

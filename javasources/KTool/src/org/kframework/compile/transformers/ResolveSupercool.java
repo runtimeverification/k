@@ -18,7 +18,7 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Rule node) throws TransformerException {
-        final Attributes attributes = node.getAttributes();
+        final Attributes attributes = node.getSentenceAttributes();
         for (String cool : GlobalSettings.supercool) {
             if (attributes.containsKey(cool)) {
                 return super.transform(node);

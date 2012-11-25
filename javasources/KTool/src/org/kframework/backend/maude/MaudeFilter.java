@@ -86,7 +86,7 @@ public class MaudeFilter extends BasicVisitor {
 					if (operation.startsWith("\"")) {
 						operation = operation.substring(1, operation.length() - 2);
 					}
-					if (operation.equals("") && !p.getAttributes().containsKey("onlyLabel")) {
+					if (operation.equals("") && !p.containsAttribute("onlyLabel")) {
 						String msg = "Cannot declare empty terminals in the definition.\n";
 						msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
@@ -96,9 +96,9 @@ public class MaudeFilter extends BasicVisitor {
 						result.append(operation);
 						result.append(" : -> ");
 						result.append(syn.getSort());
-						if (!isEmptyAttributes(p.getAttributes())) {
+						if (!isEmptyAttributes(p.getProductionAttributes())) {
 							result.append(" [metadata \"");
-							p.getAttributes().accept(this);
+							p.getProductionAttributes().accept(this);
 							result.append("\"]");
 						}
 						result.append(" .\n");
@@ -111,7 +111,7 @@ public class MaudeFilter extends BasicVisitor {
 						result.append("op _");
 						result.append(StringUtil.escapeMaude(list.getSeparator()));
 						result.append("_ : K K -> K [prec 120 metadata \"");
-						p.getAttributes().accept(this);
+						p.getProductionAttributes().accept(this);
 						result.append(" hybrid=()");
 						result.append(" location=");
 						result.append(p.getMaudeLocation());
@@ -129,16 +129,16 @@ public class MaudeFilter extends BasicVisitor {
 						continue;
 					}
 
-					if (!p.getAttributes().containsKey("bracket")) {
+					if (!p.containsAttribute("bracket")) {
 						result.append("op ");
 						result.append(maudelabel);
 						result.append(" : ");
 						p.accept(this);
 						result.append(" -> ");
 						result.append(syn.getSort());
-						// if (!isEmptyAttributes(p.getAttributes())) {
+						// if (!isEmptyAttributes(p.getCellAttributes())) {
 						result.append(" [metadata \"");
-						p.getAttributes().accept(this);
+						p.getProductionAttributes().accept(this);
 						result.append(" location=");
 						result.append(p.getMaudeLocation());
 						result.append("\"]");
@@ -200,7 +200,9 @@ public class MaudeFilter extends BasicVisitor {
 	public void visit(Attributes attributes) {
 		firstAttribute = true;
 		for (Attribute entry : attributes.getContents()) {
-			if (!entry.getKey().equals("klabel")) {
+            // Andrei S: for some reason I do not understand, location and
+            // filename are special attributes
+			if (!entry.getKey().equals("klabel") && !entry.getKey().equals("location") && !entry.getKey().equals("filename")) {
 				entry.accept(this);
 			}
 		}
@@ -208,7 +210,7 @@ public class MaudeFilter extends BasicVisitor {
 
 	private boolean isEmptyAttributes(Attributes attributes) {
 		for (Attribute entry : attributes.getContents()) {
-			if (!entry.getKey().equals("klabel")) {
+            if (!entry.getKey().equals("klabel") && !entry.getKey().equals("location") && !entry.getKey().equals("filename")) {
 				if (!isEmptyAttribute(entry)) {
 					return false;
 				}
@@ -263,13 +265,13 @@ public class MaudeFilter extends BasicVisitor {
 
 		result.append(cellLabel);
 		result.append("(");
-		for (Entry<String, String> entry : cell.getAttributes().entrySet()) {
+		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
 			if (!entry.getValue().equals("")) {
 				result.append("__(");
 			}
 		}
 		result.append(cell.getLabel());
-		for (Entry<String, String> entry : cell.getAttributes().entrySet()) {
+		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
 			if (!entry.getValue().equals("")) {
 				result.append(",_=_(");
 				result.append(entry.getKey());
@@ -346,8 +348,8 @@ public class MaudeFilter extends BasicVisitor {
 		Production pr = DefinitionHelper.conses.get(termCons.getCons());
 		String cons = pr.getLabel();
 
-		if (pr.getAttributes().containsKey("maudeop")) {
-			cons = pr.getAttributes().get("maudeop").replaceAll("\"", "");
+		if (pr.containsAttribute("maudeop")) {
+			cons = pr.getAttribute("maudeop").replaceAll("\"", "");
 		}
 
 		result.append(cons.replaceAll(" ", "`"));
@@ -393,7 +395,7 @@ public class MaudeFilter extends BasicVisitor {
 			result.append("metadata");
 		}
 		result.append(" \"");
-		sentence.getAttributes().accept(this);
+		sentence.getSentenceAttributes().accept(this);
 		result.append(" location=");
 		result.append(sentence.getMaudeLocation());
 		result.append("\"] .");

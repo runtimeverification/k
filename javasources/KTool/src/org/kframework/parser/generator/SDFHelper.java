@@ -46,7 +46,7 @@ public class SDFHelper {
 		for (Map.Entry<String, Production> e : DefinitionHelper.conses.entrySet()) {
 			if (e.getValue().getKLabel().equals(tag)) {
 				prods.add(e.getValue());
-			} else if (e.getValue().getAttributes().containsKey(tag))
+			} else if (e.getValue().containsAttribute(tag))
 				prods.add(e.getValue());
 		}
 		return prods;

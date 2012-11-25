@@ -34,7 +34,7 @@ public class AddKLabelConstant extends CopyOnWriteTransformer {
             Term rhs = new KApp(new KInjectedLabel(trueCt), Empty.ListOfK);
             Rule rule = new Rule();
             rule.setBody(new Rewrite(lhs, rhs));
-            rule.getAttributes().getContents().add(new Attribute("predicate", ""));
+            rule.getSentenceAttributes().getContents().add(new Attribute("predicate", ""));
             retNode.appendModuleItem(rule);
         }
 

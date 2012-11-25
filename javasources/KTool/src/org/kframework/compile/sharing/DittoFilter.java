@@ -43,7 +43,7 @@ public class DittoFilter extends BasicVisitor{
 			Production max = prods.get(0);
 			for (Production p : prods)
 			{
-				if (max.getAttributes().getContents().size() < p.getAttributes().getContents().size())
+				if (max.getProductionAttributes().getContents().size() < p.getProductionAttributes().getContents().size())
 				{
 					max = p;
 				}
@@ -51,7 +51,7 @@ public class DittoFilter extends BasicVisitor{
 			
 			for(Production p : prods)
 			{
-				p.setAttributes(max.getAttributes());
+				p.setProductionAttributes(max.getProductionAttributes());
 			}
 		}
 	}

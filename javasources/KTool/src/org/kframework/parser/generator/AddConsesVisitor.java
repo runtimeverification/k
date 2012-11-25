@@ -14,9 +14,9 @@ public class AddConsesVisitor extends BasicVisitor {
 
 	public void visit(Production p) {
 		// add cons to productions that don't have it already
-		if (p.getAttributes().containsKey("bracket")) {
+		if (p.containsAttribute("bracket")) {
 			// don't add cons to bracket production
-			String cons = p.getAttributes().get("cons");
+			String cons = p.getAttribute("cons");
 			String cons2 = StringUtil.escapeSortName(p.getSort()) + "1Bracket";
 			if (cons != null) {
 				if (!cons.equals(cons2)) {
@@ -24,31 +24,31 @@ public class AddConsesVisitor extends BasicVisitor {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
 				}
 			} else
-				p.getAttributes().set("cons", cons2);
+				p.putAttribute("cons", cons2);
 		} else if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ProductionType.TERMINAL && (p.getSort().startsWith("#") || p.getSort().equals("KLabel"))) {
 			// don't add any cons, if it is a constant
 			// a constant is a single terminal for a builtin sort
-			String cons = p.getAttributes().get("cons");
+			String cons = p.getAttribute("cons");
 			if (cons != null)
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Constants are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation()));
 		} else if (p.isSubsort()) {
 			// cons are not allowed for subsortings
-			String cons = p.getAttributes().get("cons");
+			String cons = p.getAttribute("cons");
 			if (cons != null) {
 				String msg = "Subsortings are not allowed to have cons: '" + cons + "'";
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
 			}
 		} else {
-			if (!p.getAttributes().containsKey("cons")) {
+			if (!p.containsAttribute("cons")) {
 				String cons;
 				if (p.isListDecl())
 					cons = StringUtil.escapeSortName(p.getSort()) + "1" + "ListSyn";
 				else
 					cons = StringUtil.escapeSortName(p.getSort()) + "1" + StringUtil.getUniqueId() + "Syn";
-				p.getAttributes().getContents().add(new Attribute("cons", cons));
+				p.addAttribute(new Attribute("cons", cons));
 			} else {
 				// check if the provided cons is correct
-				String cons = p.getAttributes().get("cons");
+				String cons = p.getAttribute("cons");
 				String escSort = StringUtil.escapeSortName(p.getSort());
 				if (!cons.startsWith(escSort)) {
 					String msg = "The cons attribute must start with '" + escSort + "' and not with " + cons;

@@ -93,8 +93,8 @@ public class LatexFilter extends BasicVisitor {
 		} else {
 			result.append("\\syntaxCont{");
 		}
-		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.getAttributes().containsKey(Constants.CONS_cons_ATTR) && patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))) {
-			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
+		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.containsAttribute(Constants.CONS_cons_ATTR) && patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))) {
+			String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
 			int n = 1;
 			LatexFilter termFilter = new LatexFilter();
 			for (ProductionItem pi : p.getItems()) {
@@ -109,7 +109,7 @@ public class LatexFilter extends BasicVisitor {
 			super.visit(p);
 		}
 		result.append("}{");
-		p.getAttributes().accept(this);
+		p.getProductionAttributes().accept(this);
 		result.append("}");
 	}
 
@@ -151,13 +151,13 @@ public class LatexFilter extends BasicVisitor {
 		} else {
 			result.append("\\kall");
 		}
-		if (c.getAttributes().containsKey("color")) {
-			colors.put(c.getLabel(), c.getAttributes().get("color"));
+		if (c.getCellAttributes().containsKey("color")) {
+			colors.put(c.getLabel(), c.getCellAttributes().get("color"));
 		}
 		if (colors.containsKey(c.getLabel())) {
 			result.append("[" + colors.get(c.getLabel()) + "]");
 		}
-		result.append("{" + StringUtil.latexify(c.getLabel() + StringUtil.emptyIfNull(c.getAttributes().get("multiplicity"))) + "}{");
+		result.append("{" + StringUtil.latexify(c.getLabel() + StringUtil.emptyIfNull(c.getCellAttributes().get("multiplicity"))) + "}{");
 		super.visit(c);
 		result.append("}" + endl);
 	}
@@ -232,7 +232,7 @@ public class LatexFilter extends BasicVisitor {
 			rule.getCondition().accept(this);
 		}
 		result.append("}{");
-		rule.getAttributes().accept(this);
+		rule.getSentenceAttributes().accept(this);
 		result.append("}");
 		result.append("{");
 		if (termComment) result.append("large");
@@ -250,7 +250,7 @@ public class LatexFilter extends BasicVisitor {
 			cxt.getCondition().accept(this);
 		}
 		result.append("}{");
-		cxt.getAttributes().accept(this);
+		cxt.getSentenceAttributes().accept(this);
 		result.append("}" + endl);
 	}
 

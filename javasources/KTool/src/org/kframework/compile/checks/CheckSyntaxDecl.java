@@ -52,7 +52,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 		}
 
 		if (eTerminals > 0 && (neTerminals == 0 || sorts < 2))
-			if (!node.getAttributes().containsKey("onlyLabel") || !node.getAttributes().containsKey("klabel")) {
+			if (!node.containsAttribute("onlyLabel") || !node.containsAttribute("klabel")) {
 				String msg = "Cannot declare empty terminals in the definition.\n";
 				msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
 				GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));

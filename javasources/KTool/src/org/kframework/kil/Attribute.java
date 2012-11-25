@@ -35,6 +35,12 @@ public class Attribute extends ASTNode {
 
 	@Override
 	public String toString() {
+        // Andrei S: this should be unnecessary
+        if (this.getKey().equals("location")) {
+            System.err.println("### " + getValue());
+            return " " + this.getKey() + "=" + this.getValue();
+        }
+
 		return " " + this.getKey() + "=(" + this.getValue() + ")";
 	}
 

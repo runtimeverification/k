@@ -35,7 +35,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
             Term rhs = new KApp(new KInjectedLabel(strCt), Empty.ListOfK);
             Rule rule = new Rule();
             rule.setBody(new Rewrite(lhs, rhs));
-            rule.getAttributes().getContents().add(new Attribute("function", ""));
+            rule.getSentenceAttributes().getContents().add(new Attribute("function", ""));
             retNode.appendModuleItem(rule);
 
             java.util.List<Term> termList = new ArrayList<Term>();
@@ -43,7 +43,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
             TermCons termCons = new TermCons("KLabel", String2KLabelCons, termList);
             rule = new Rule();
             rule.setBody(new Rewrite(termCons, klblCt));
-            rule.getAttributes().getContents().add(new Attribute("function", ""));
+            rule.getSentenceAttributes().getContents().add(new Attribute("function", ""));
             retNode.appendModuleItem(rule);
         }
 

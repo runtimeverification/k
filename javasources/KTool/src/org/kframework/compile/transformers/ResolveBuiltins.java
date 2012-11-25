@@ -36,9 +36,9 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
 			Production p = new Production(new Sort("KLabel"), pItems );
 			pItems.add(new Terminal("#"));
 			pItems.add(new Sort(sort));
-			p.getAttributes().set("KLabelWrapper", sort);
-			p.getAttributes().set("cons", "KLabel1" + sort + "Wrapper");
-			p.getAttributes().set("prefixlabel", "#_");			
+			p.putAttribute("KLabelWrapper", sort);
+			p.putAttribute("cons", "KLabel1" + sort + "Wrapper");
+			p.putAttribute("prefixlabel", "#_");
 			DefinitionHelper.conses.put("KLabel1" + sort + "Wrapper", p);
 			block.getProductions().add(p);
 			pItems = new ArrayList<ProductionItem>();
@@ -50,7 +50,7 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
 					new KApp(new Constant("KLabel", "is" + sort), 
 							new Variable(sort, sort)), 
 					new Constant("#Bool", "true")));
-			rule.getAttributes().getContents().add(new Attribute("predicate", ""));
+			rule.getSentenceAttributes().getContents().add(new Attribute("predicate", ""));
 			items.add(rule);
 			
 		}

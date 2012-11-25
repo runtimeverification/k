@@ -27,7 +27,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 					getName(), result.getFilename(), result.getLocation()));
 		}
 		Cell cell = (Cell) result;
-		String stream = cell.getAttributes().get("stream");
+		String stream = cell.getCellAttributes().get("stream");
 		if (null == stream) return cell;
 		if (result == node) {
 			node = node.shallowCopy();

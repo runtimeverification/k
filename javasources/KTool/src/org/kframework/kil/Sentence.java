@@ -8,23 +8,23 @@ import org.w3c.dom.Element;
 public abstract class Sentence extends ModuleItem {
 	Term body;
 	Term condition = null;
-	Attributes attributes;
+	Attributes sentenceAttributes;
 
 	public Sentence(Sentence s) {
 		super(s);
 		this.body = s.body;
 		this.condition = s.condition;
-		this.attributes = s.attributes;
+		this.sentenceAttributes = s.sentenceAttributes;
 	}
 
 	public Sentence() {
 		super();
-		attributes = new Attributes();
+		sentenceAttributes = new Attributes();
 	}
 
 	public Sentence(String location, String filename) {
 		super(location, filename);
-		attributes = new Attributes();
+		sentenceAttributes = new Attributes();
 	}
 
 	public Sentence(Element element) {
@@ -39,11 +39,11 @@ public abstract class Sentence extends ModuleItem {
 			this.condition = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
 
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
-		// assumption: <attributes> appears only once
+		// assumption: <cellAttributes> appears only once
 		if (its.size() > 0) {
-			attributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
+			sentenceAttributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
 		} else
-			attributes = new Attributes("generated", "generated");
+			sentenceAttributes = new Attributes("generated", "generated");
 	}
 
 	public Term getBody() {
@@ -62,12 +62,12 @@ public abstract class Sentence extends ModuleItem {
 		this.condition = condition;
 	}
 
-	public Attributes getAttributes() {
-		return attributes;
+	public Attributes getSentenceAttributes() {
+		return sentenceAttributes;
 	}
 
-	public void setAttributes(Attributes attributes) {
-		this.attributes = attributes;
+	public void setSentenceAttributes(Attributes sentenceAttributes) {
+		this.sentenceAttributes = sentenceAttributes;
 	}
 
 	@Override

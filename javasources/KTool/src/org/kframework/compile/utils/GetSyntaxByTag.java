@@ -24,7 +24,7 @@ public class GetSyntaxByTag extends BasicVisitor {
 	
 	@Override
 	public void visit(Production node) {
-		if (node.getAttributes().containsKey(key))
+		if (node.containsAttribute(key))
 			productions.add(node);
 	};
 	

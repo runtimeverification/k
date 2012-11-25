@@ -23,7 +23,7 @@ public class Production extends ASTNode {
     * can be thrown in one of the later compilation steps.
     * */
 	protected List<ProductionItem> items;
-	protected Attributes attributes;
+	//private Attributes attributes;
 	protected String sort;
 
 	public static Production makeFunction(String funSort, String funName, String argSort) {
@@ -34,12 +34,11 @@ public class Production extends ASTNode {
 		prodItems.add(new Terminal(")"));
 
 		Production funProd = new Production(new Sort(funSort), prodItems);
-		java.util.List<Attribute> attrs = funProd.getAttributes().getContents();
-		attrs.add(new Attribute("prefixlabel", funName));
+        funProd.addAttribute(new Attribute("prefixlabel", funName));
 		if (MetaK.isComputationSort(funSort)) {
-			attrs.add(new Attribute("klabel", funName));
+            funProd.addAttribute(new Attribute("klabel", funName));
 			String consAttr = funSort + "1" + funName + "Syn";
-			attrs.add(new Attribute("cons", consAttr));
+            funProd.addAttribute(new Attribute("cons", consAttr));
 			DefinitionHelper.conses.put(consAttr, funProd);
 		}
 
@@ -73,15 +72,15 @@ public class Production extends ASTNode {
 
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
 		// assumption: <attributes> appears only once
-		if (its.size() > 0) {
-			attributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
-		} else
-			attributes = new Attributes();
+		if (its.size() > 0)
+			attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+        else
+            attributes = new Attributes();
 	}
 
 	public Production(Production node) {
 		super(node);
-		this.attributes = node.attributes;
+		//this.productionAttributes = node.productionAttributes;
 		this.items = node.items;
 		this.sort = node.sort;
 	}
@@ -90,7 +89,8 @@ public class Production extends ASTNode {
 		super();
 		this.items = items;
 		this.sort = sort.getName();
-		this.attributes = new Attributes();
+		//this.productionAttributes = new Attributes();
+        attributes = new Attributes();
 	}
 
 	public String toString() {
@@ -98,7 +98,7 @@ public class Production extends ASTNode {
 		for (ProductionItem i : items)
 			content += i + " ";
 
-		return content;// + attributes.toString();
+		return content;
 	}
 
 	public boolean equals(Production other) {
@@ -186,12 +186,14 @@ public class Production extends ASTNode {
 		this.items = items;
 	}
 
-	public Attributes getAttributes() {
-		return attributes;
+	public Attributes getProductionAttributes() {
+		//return productionAttributes;
+        return super.getAttributes();
 	}
 
-	public void setAttributes(Attributes attributes) {
-		this.attributes = attributes;
+	public void setProductionAttributes(Attributes productionAttributes) {
+		//this.productionAttributes = productionAttributes;
+        super.setAttributes(productionAttributes);
 	}
 
 	public int getArity() {

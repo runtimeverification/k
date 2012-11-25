@@ -105,7 +105,7 @@ public class UnparserFilter extends BasicVisitor {
 				result.write(" ");
 			}
 		}
-		prod.getAttributes().accept(this);
+		prod.getProductionAttributes().accept(this);
 		result.endLine();
 		postpare();
 	}
@@ -206,7 +206,7 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Cell cell) {
 		prepare(cell);
 		String attributes = "";
-		for (Entry<String, String> entry : cell.getAttributes().entrySet()) {
+		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
 			if (entry.getKey() != "ellipses") {
 				attributes += " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
 			}
@@ -266,7 +266,7 @@ public class UnparserFilter extends BasicVisitor {
 			result.write(" when ");
 			rule.getCondition().accept(this);
 		}
-		rule.getAttributes().accept(this);
+		rule.getSentenceAttributes().accept(this);
 		result.endLine();
 		result.endLine();
 		postpare();
@@ -499,7 +499,7 @@ public class UnparserFilter extends BasicVisitor {
 			result.write(" when ");
 			context.getCondition().accept(this);
 		}
-		context.getAttributes().accept(this);
+		context.getSentenceAttributes().accept(this);
 		result.endLine();
 		result.endLine();
 		postpare();

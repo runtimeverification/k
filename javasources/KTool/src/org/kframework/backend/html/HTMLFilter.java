@@ -147,16 +147,16 @@ public class HTMLFilter extends BasicVisitor {
 			result += "<tr> <td> </td> <td class = \"textCentered\"> |  </td> <td>";
 		}
 		
-		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.getAttributes().containsKey(Constants.CONS_cons_ATTR) 
-				&& patternsVisitor.getPatterns().containsKey(p.getAttributes().get(Constants.CONS_cons_ATTR))
-				&& patternsVisitor.getPatternType(p.getAttributes().get(Constants.CONS_cons_ATTR)) != HTMLPatternType.DEFAULT) {
+		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.containsAttribute(Constants.CONS_cons_ATTR)
+				&& patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))
+				&& patternsVisitor.getPatternType(p.getAttribute(Constants.CONS_cons_ATTR)) != HTMLPatternType.DEFAULT) {
 		/* This condition pretty much is : "Does this production have a Latex or HTML attribute?"
 		 * If yes, use the attribute to print it. 
 		 * The information about the attribute is in HTMLPatternVisitor.
 		 * If no, just process it normally, that is super.visit(p) and process each element normally.*/
 			
-			String pattern = patternsVisitor.getPatterns().get(p.getAttributes().get(Constants.CONS_cons_ATTR));
-			boolean isLatex = patternsVisitor.getPatternType(p.getAttributes().get(Constants.CONS_cons_ATTR)) == HTMLPatternType.LATEX;
+			String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
+			boolean isLatex = patternsVisitor.getPatternType(p.getAttribute(Constants.CONS_cons_ATTR)) == HTMLPatternType.LATEX;
 			int n = 1;
 			HTMLFilter termFilter = new HTMLFilter(includePath);
 			for (ProductionItem pi : p.getItems()) {
@@ -172,7 +172,7 @@ public class HTMLFilter extends BasicVisitor {
 		} else {
 			super.visit(p);
 		}
-		p.getAttributes().accept(this);
+		p.getProductionAttributes().accept(this);
 		result += "</td> </tr>" + endl;
 	}
 
@@ -214,8 +214,8 @@ public class HTMLFilter extends BasicVisitor {
 		}
 		
 		// This condition checks the color of the cell.
-		if (c.getAttributes().containsKey("color") && HTMLColors.containsKey(c.getAttributes().get("color").toLowerCase())) {
-			cellColors.put(c.getLabel(), c.getAttributes().get("color").toLowerCase());
+		if (c.getCellAttributes().containsKey("color") && HTMLColors.containsKey(c.getCellAttributes().get("color").toLowerCase())) {
+			cellColors.put(c.getLabel(), c.getCellAttributes().get("color").toLowerCase());
 		}
 		/* If the cell does not have a color attribute or a recognizable name for that color,
 		 * getCellColor() returns "default" -> (black and white). */
@@ -294,7 +294,7 @@ public class HTMLFilter extends BasicVisitor {
 			result += " when ";
 			rule.getCondition().accept(this);
 		}
-		rule.getAttributes().accept(this);
+		rule.getSentenceAttributes().accept(this);
 		result += "</div> <br />" + endl;
 	}
 
@@ -306,7 +306,7 @@ public class HTMLFilter extends BasicVisitor {
 			result += " when ";
 			cxt.getCondition().accept(this);
 		}
-		cxt.getAttributes().accept(this);
+		cxt.getSentenceAttributes().accept(this);
 		result += "</div> <br />" + endl;
 	}
 

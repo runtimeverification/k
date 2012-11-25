@@ -118,10 +118,10 @@ public class DefinitionSDF {
 			if (p.isListDecl()) {
 				UserList si = (UserList) p.getItems().get(0);
 				sdf.append("	" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\" " + StringUtil.escapeSortName(p.getSort()) + " -> " + StringUtil.escapeSortName(p.getSort()));
-				sdf.append(" {cons(\"" + p.getAttributes().get("cons") + "\")}\n");
+				sdf.append(" {cons(\"" + p.getAttribute("cons") + "\")}\n");
 				sdf.append("	\"." + p.getSort() + "\" -> " + StringUtil.escapeSortName(p.getSort()));
 				sdf.append(" {cons(\"" + StringUtil.escapeSortName(p.getSort()) + "1Empty\")}\n");
-			} else if (p.getAttributes().containsKey("bracket")) {
+			} else if (p.containsAttribute("bracket")) {
 				// don't add bracket attributes added by the user
 			} else {
 				sdf.append("	");
@@ -140,7 +140,7 @@ public class DefinitionSDF {
 					}
 				}
 				sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
-				sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
+				sdf.append(SDFHelper.getSDFAttributes(p.getProductionAttributes()) + "\n");
 			}
 		}
 		for (Sort ss : psdfv.insertSorts)

@@ -40,28 +40,28 @@ public class HTMLPatternsVisitor extends BasicVisitor {
 
 	@Override 
 	public void visit(Production p) {
-		if (!p.getAttributes().containsKey("cons")) {
+		if (!p.containsAttribute("cons")) {
 			return;
 		}
-		if(p.getAttributes().containsKey("latex") || p.getAttributes().containsKey("html")) {
-			if (p.getAttributes().containsKey("latex")) {
+		if(p.containsAttribute("latex") || p.containsAttribute("html")) {
+			if (p.containsAttribute("latex")) {
 				
-				pattern = p.getAttributes().get("latex");
+				pattern = p.getAttribute("latex");
 				pattern = pattern.replace("\\\\", "\\");
-				patterns.put(p.getAttributes().get("cons"), pattern);
-				type.put(p.getAttributes().get("cons"), HTMLPatternType.LATEX);
+				patterns.put(p.getAttribute("cons"), pattern);
+				type.put(p.getAttribute("cons"), HTMLPatternType.LATEX);
 				
 			}
-			if (p.getAttributes().containsKey("html")) {
+			if (p.containsAttribute("html")) {
 				
-				pattern = p.getAttributes().get("html");
+				pattern = p.getAttribute("html");
 				pattern = pattern.substring(1, pattern.length()-1).replace("\\\\", "\\");
-				patterns.put(p.getAttributes().get("cons"), pattern);
-				type.put(p.getAttributes().get("cons"), HTMLPatternType.HTML);
+				patterns.put(p.getAttribute("cons"), pattern);
+				type.put(p.getAttribute("cons"), HTMLPatternType.HTML);
 				
 			} 
 		} else {
-			type.put(p.getAttributes().get("cons"), HTMLPatternType.DEFAULT);
+			type.put(p.getAttribute("cons"), HTMLPatternType.DEFAULT);
 			//super.visit(p);
 		}
 		

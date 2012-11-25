@@ -26,7 +26,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 		if (ellipses == Ellipses.NONE) 
 			return node;
 		node = node.shallowCopy();
-		node.setAttributes(new HashMap<String, String>(node.getAttributes()));
+		node.setCellAttributes(new HashMap<String, String>(node.getCellAttributes()));
 		node.setEllipses(Ellipses.NONE);
 		KSort sort = KSort.getKSort(node.getContents().getSort()).mainSort();
 		Collection col;

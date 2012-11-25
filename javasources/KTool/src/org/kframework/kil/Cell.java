@@ -28,11 +28,11 @@ public class Cell extends Term {
 
 	String label;
 	Term contents;
-	Map<String, String> attributes;
+	Map<String, String> cellAttributes;
 
 	public Cell(String location, String filename) {
 		super(location, filename, "BagItem");
-		attributes = new HashMap<String, String>();
+		cellAttributes = new HashMap<String, String>();
 	}
 
 	public Cell(Element element) {
@@ -42,14 +42,14 @@ public class Cell extends Term {
 		this.contents = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
 
 		NamedNodeMap its = element.getAttributes();
-		attributes = new HashMap<String, String>();
+		cellAttributes = new HashMap<String, String>();
 		setEllipses(element.getAttribute(Constants.ELLIPSES_ellipses_ATTR));
 
 		for (int i = 0; i < its.getLength(); i++) {
 			if (!its.item(i).getNodeName().equals(Constants.FILENAME_filename_ATTR) && !its.item(i).getNodeName().equals(Constants.LOC_loc_ATTR) // &&
 																																					// !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
 					&& !its.item(i).getNodeName().equals(Constants.SORT_sort_ATTR) && !its.item(i).getNodeName().equals(Constants.LABEL_label_ATTR)) {
-				attributes.put(its.item(i).getNodeName(), its.item(i).getNodeValue());
+				cellAttributes.put(its.item(i).getNodeName(), its.item(i).getNodeValue());
 			}
 		}
 	}
@@ -57,13 +57,13 @@ public class Cell extends Term {
 	public Cell(Cell node) {
 		super(node);
 		this.label = node.label;
-		this.attributes = node.attributes;
+		this.cellAttributes = node.cellAttributes;
 		this.contents = node.contents;
 	}
 
 	public Cell() {
 		super("BagItem");
-		attributes = new HashMap<String, String>();
+		cellAttributes = new HashMap<String, String>();
 	}
 
 	public boolean hasRightEllipsis() {
@@ -79,7 +79,7 @@ public class Cell extends Term {
 	@Override
 	public String toString() {
 		String attributes = "";
-		for (Entry<String, String> entry : this.attributes.entrySet())
+		for (Entry<String, String> entry : this.cellAttributes.entrySet())
 			attributes += " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
 
 		String content = "<" + this.label + attributes + ">";
@@ -114,8 +114,8 @@ public class Cell extends Term {
 	}
 
 	public Multiplicity getMultiplicity() {
-		if (attributes.containsKey("multiplicity")) {
-			String attr = attributes.get("multiplicity");
+		if (cellAttributes.containsKey("multiplicity")) {
+			String attr = cellAttributes.get("multiplicity");
 			if ("?".equals(attr))
 				return Multiplicity.MAYBE;
 			if ("*".equals(attr))
@@ -131,7 +131,7 @@ public class Cell extends Term {
 	}
 
 	public Ellipses getEllipses() {
-		String attr = attributes.get("ellipses");
+		String attr = cellAttributes.get("ellipses");
 		try {
 			if (attr != null) {
 				return Ellipses.valueOf(attr.toUpperCase());
@@ -146,17 +146,17 @@ public class Cell extends Term {
 	public void setEllipses(String ellipses) {
 		ellipses = ellipses.toLowerCase();
 		if (ellipses.isEmpty() || ellipses.equals("none")) {
-			attributes.remove("ellipses");
+			cellAttributes.remove("ellipses");
 		} else
-			attributes.put("ellipses", ellipses);
+			cellAttributes.put("ellipses", ellipses);
 	}
 
-	public Map<String, String> getAttributes() {
-		return attributes;
+	public Map<String, String> getCellAttributes() {
+		return cellAttributes;
 	}
 
-	public void setAttributes(Map<String, String> attributes) {
-		this.attributes = attributes;
+	public void setCellAttributes(Map<String, String> cellAttributes) {
+		this.cellAttributes = cellAttributes;
 	}
 
 	public void setLabel(String label) {
@@ -174,7 +174,7 @@ public class Cell extends Term {
 	}
 
 	public void setDefaultAttributes() {
-		attributes = new HashMap<String, String>();
+		cellAttributes = new HashMap<String, String>();
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class Cell extends Term {
 	}
 
 	public String getId() {
-		String id = attributes.get("id");
+		String id = cellAttributes.get("id");
 		if (null == id)
 			id = this.label;
 		return id;
@@ -196,6 +196,6 @@ public class Cell extends Term {
 	public void setId(String id) {
 		if (getId().equals(id))
 			return;
-		attributes.put("id", id);
+		cellAttributes.put("id", id);
 	}
 }

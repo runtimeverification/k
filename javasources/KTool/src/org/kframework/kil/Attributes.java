@@ -74,6 +74,11 @@ public class Attributes extends ASTNode {
 		}
 		contents.add(new Attribute(key, value));
 	}
+
+    public void setAll(Attributes attrs) {
+        for (Attribute attr : attrs.contents)
+            set(attr.getKey(), attr.getValue());
+    }
 	
 	public void remove(String key) {
 		Iterator<Attribute> it = contents.iterator();

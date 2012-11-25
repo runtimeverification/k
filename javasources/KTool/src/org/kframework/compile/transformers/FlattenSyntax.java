@@ -58,14 +58,14 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Production node) throws TransformerException {
-		if (node.getAttributes().containsKey("KLabelWrapper"))
+		if (node.containsAttribute("KLabelWrapper"))
 			return node;
 		if (!isComputation)
 			return super.transform(node);
 		if (node.isSubsort())
 			return null;
 		String arity = String.valueOf(node.getArity());
-		Attributes attrs = node.getAttributes().shallowCopy();
+		Attributes attrs = node.getProductionAttributes().shallowCopy();
 		if (node.isListDecl()) {
 			listSeparators.add(((UserList) node.getItems().get(0)).getSeparator());
 			arity = "2";
@@ -76,7 +76,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		pis.add(new Terminal(node.getKLabel()));
 		node.setItems(pis);
 		attrs.set("arity", arity);
-		node.setAttributes(attrs);
+		node.setProductionAttributes(attrs);
         node.setSort("KLabel");
 		return node;
 	}

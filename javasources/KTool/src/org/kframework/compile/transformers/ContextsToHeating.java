@@ -46,7 +46,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         Rule rule = new Rule();
         rule.setBody(rew);
         rule.setCondition(cond);
-        rule.getAttributes().set(MetaK.Constants.heatingTag,"");
+        rule.getSentenceAttributes().set(MetaK.Constants.heatingTag,"");
         heating.add(rule);
         return null;
     }

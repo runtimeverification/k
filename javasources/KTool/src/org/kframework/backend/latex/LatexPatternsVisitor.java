@@ -25,18 +25,18 @@ public class LatexPatternsVisitor extends BasicVisitor {
 
 	@Override
 	public void visit(Production p) {
-		if (!p.getAttributes().containsKey("cons")) {
+		if (!p.containsAttribute("cons")) {
 			return;
 		}
-		if (p.getAttributes().containsKey("latex")) {
-			pattern = p.getAttributes().get("latex");
+		if (p.containsAttribute("latex")) {
+			pattern = p.getAttribute("latex");
 		} else {
 			pattern = "";
 			nonTerm = 1;
 			prevNonTerm = false;
 			super.visit(p);
 		}
-		patterns.put(p.getAttributes().get("cons"), pattern);
+		patterns.put(p.getAttribute("cons"), pattern);
 	}
 
 	@Override
