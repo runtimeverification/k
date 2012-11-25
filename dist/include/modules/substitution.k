@@ -11,7 +11,7 @@ module VARIABLE
 // Get the variables in a K term, going through the sets Klabeled as
 // terms as well, if any.
 // Grigore: We should also have a user-friendly variant of this, which
-// returns an actual set of variables
+// returns an actual set of variables.  Well, I just added it, please check.
 
   syntax Set ::= getVariables(K)  [function]  // public
   rule getVariables(vars(Vars:Set)) => Vars
@@ -119,6 +119,7 @@ module FREE-VARS
   rule freeVariables(SetItem(K) S:Set) => freeVariables(K) freeVariables(S)
 
 // Grigore: again, I think this should just return a set of variables, not a K
+// I added a user-interface variant of it above.  I use it in type-inference.
   syntax K ::= #freeVars(List{K})  [function]
   rule #freeVars(Ks:List{K}) => #freeVars(Ks:List{K}, .Set, .Set)
 
@@ -264,7 +265,7 @@ module SUBSTITUTION
 
 // Grigore: I added the operation below here, because I want it to be
 // generic.  I don't know how to generate globablly fresh variables
-// of desired type any other way ... sorry
+// of desired type any other way ... sorry.  This is used in type inference
   syntax K ::= freshVariables(Set,K)
   rule freshVariables(.Set, T) => T
   rule freshVariables(SetItem(Tv) S:Set, T)
