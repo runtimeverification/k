@@ -131,6 +131,16 @@ public class Main {
 		}
 	}
 
+	private static String parseTerm(String value) throws Exception {
+
+		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "");
+		term = term.accept(new FlattenSyntax());
+		term = MetaK.kWrapper((Term) term);
+		MaudeFilter maudeFilter = new MaudeFilter();
+		term.accept(maudeFilter);
+		return maudeFilter.getResult();
+	}
+
 	public static Map<String, String> makeConfiguration(String kast, String stdin, RunProcess rp) {
 		org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
 		KastParser.initParser();
@@ -145,12 +155,7 @@ public class Main {
 			String parsed = "";
 			if (parser == null) {
 				try {
-					ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "");
-					term = term.accept(new FlattenSyntax());
-					term = MetaK.kWrapper((Term) term);
-					MaudeFilter maudeFilter = new MaudeFilter();
-					term.accept(maudeFilter);
-					parsed = maudeFilter.getResult();
+					parsed = parseTerm(value);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					Error.report(e1.getMessage());
@@ -223,24 +228,23 @@ public class Main {
 					}
 				} else if (cmd.hasOption("maude-cmd")) {
 					result = KRun.run(K.maude_cmd, makeConfiguration(KAST, null, rp));
-				} else {
-					result = KRun.run("erew", makeConfiguration(KAST, null, rp));
-				}
-
-				if (K.model_checking.length() > 0) {
+				} else if (K.model_checking.length() > 0) {
 					// run kast for the formula to be verified
 					File formulaFile = new File(K.model_checking);
 					String KAST1 = new String();
+					org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
 					if (!formulaFile.exists()) {
 						// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
 						// assume that the specified argument is not a file and maybe represents a formula
-						KAST1 = rp.runParser(K.parser, K.model_checking, false);
+						KAST1 = parseTerm(K.model_checking);
 					} else {
 						// the specified argument represents a file
-						KAST1 = rp.runParser(K.parser, K.model_checking, true);
+						KAST1 = parseTerm(FileUtil.getFileContent(K.model_checking));
 					}
 
 					result = KRun.modelCheck(KAST1, makeConfiguration(KAST, null, rp));
+				} else {
+					result = KRun.run("erew", makeConfiguration(KAST, null, rp));
 				}
 			} catch (KRunExecutionException e) {
 				rp.printError(e.getMessage(), lang);
