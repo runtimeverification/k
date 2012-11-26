@@ -14,10 +14,8 @@ public class AddDefaultComputational extends BasicTransformer{
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
-		
-		Attributes attributes = node.getSentenceAttributes();
-		if (!(attributes.containsKey("structural") || attributes.containsKey("anywhere")))
-			attributes.set("computational", "");
+		if (!(node.containsAttribute("structural") || node.containsAttribute("anywhere")))
+			node.putAttribute("computational", "");
 		
 		return node;
 	}

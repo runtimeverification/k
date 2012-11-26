@@ -38,8 +38,8 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
 
     private Rule addFunction(Rule node) {
         node = node.shallowCopy();
-        node.setSentenceAttributes(node.getSentenceAttributes().shallowCopy());
-        node.getSentenceAttributes().set("function", "");
+        node.setAttributes(node.getAttributes().shallowCopy());
+        node.putAttribute("function", "");
         return node;
     }
 

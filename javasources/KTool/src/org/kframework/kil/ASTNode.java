@@ -134,7 +134,7 @@ public abstract class ASTNode implements Visitable, Transformable {
     }
 
     public void setAttributes(Attributes attrs) {
-        this.attributes = attrs;
+        attributes = attrs;
     }
 
 

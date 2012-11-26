@@ -35,9 +35,9 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
 						new KApp(new Constant("KLabel", "isKResult"), 
 								new KApp(new Constant("KLabel", ((Terminal) node.getItems().get(0)).getTerminal()), new Variable("Ks", "List{K}"))), 
 								
-						new KApp(new KInjectedLabel(new Constant("#Bool", "true")),new Empty("List{K}"))));
+						new KApp(new KInjectedLabel(Constant.TRUE), Empty.ListOfK)));
 		rule.setCondition(new KApp(new Constant("KLabel", "isKResult"), new Variable("Ks", "List{K}")));
-		rule.getSentenceAttributes().getContents().add(new Attribute("predicate", ""));
+		rule.addAttribute(Attribute.PREDICATE);
 		hybrids.add(rule);
 		return node;
 	}

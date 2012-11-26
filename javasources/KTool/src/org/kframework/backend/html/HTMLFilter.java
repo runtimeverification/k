@@ -172,7 +172,7 @@ public class HTMLFilter extends BasicVisitor {
 		} else {
 			super.visit(p);
 		}
-		p.getProductionAttributes().accept(this);
+		p.getAttributes().accept(this);
 		result += "</td> </tr>" + endl;
 	}
 
@@ -294,7 +294,7 @@ public class HTMLFilter extends BasicVisitor {
 			result += " when ";
 			rule.getCondition().accept(this);
 		}
-		rule.getSentenceAttributes().accept(this);
+		rule.getAttributes().accept(this);
 		result += "</div> <br />" + endl;
 	}
 
@@ -306,7 +306,7 @@ public class HTMLFilter extends BasicVisitor {
 			result += " when ";
 			cxt.getCondition().accept(this);
 		}
-		cxt.getSentenceAttributes().accept(this);
+		cxt.getAttributes().accept(this);
 		result += "</div> <br />" + endl;
 	}
 

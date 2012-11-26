@@ -68,7 +68,7 @@ public class ProgramSDF {
 					}
 				}
 				sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
-				sdf.append(SDFHelper.getSDFAttributes(p.getProductionAttributes()) + "\n");
+				sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
 			}
 		}
 

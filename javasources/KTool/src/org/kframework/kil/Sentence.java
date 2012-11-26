@@ -8,23 +8,22 @@ import org.w3c.dom.Element;
 public abstract class Sentence extends ModuleItem {
 	Term body;
 	Term condition = null;
-	Attributes sentenceAttributes;
 
 	public Sentence(Sentence s) {
 		super(s);
 		this.body = s.body;
 		this.condition = s.condition;
-		this.sentenceAttributes = s.sentenceAttributes;
 	}
 
 	public Sentence() {
 		super();
-		sentenceAttributes = new Attributes();
+		attributes = new Attributes();
 	}
 
 	public Sentence(String location, String filename) {
 		super(location, filename);
-		sentenceAttributes = new Attributes();
+        if (attributes == null)
+		    attributes = new Attributes();
 	}
 
 	public Sentence(Element element) {
@@ -41,9 +40,12 @@ public abstract class Sentence extends ModuleItem {
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
 		// assumption: <cellAttributes> appears only once
 		if (its.size() > 0) {
-			sentenceAttributes = (Attributes) JavaClassesFactory.getTerm(its.get(0));
-		} else
-			sentenceAttributes = new Attributes("generated", "generated");
+            attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+		} else {
+            if (attributes == null)
+                attributes = new Attributes();
+            attributes.addAttribute("generated", "generated");
+        }
 	}
 
 	public Term getBody() {
@@ -60,14 +62,6 @@ public abstract class Sentence extends ModuleItem {
 
 	public void setCondition(Term condition) {
 		this.condition = condition;
-	}
-
-	public Attributes getSentenceAttributes() {
-		return sentenceAttributes;
-	}
-
-	public void setSentenceAttributes(Attributes sentenceAttributes) {
-		this.sentenceAttributes = sentenceAttributes;
 	}
 
 	@Override

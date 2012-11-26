@@ -105,7 +105,7 @@ public class UnparserFilter extends BasicVisitor {
 				result.write(" ");
 			}
 		}
-		prod.getProductionAttributes().accept(this);
+		prod.getAttributes().accept(this);
 		result.endLine();
 		postpare();
 	}
@@ -266,7 +266,7 @@ public class UnparserFilter extends BasicVisitor {
 			result.write(" when ");
 			rule.getCondition().accept(this);
 		}
-		rule.getSentenceAttributes().accept(this);
+		rule.getAttributes().accept(this);
 		result.endLine();
 		result.endLine();
 		postpare();
@@ -499,7 +499,7 @@ public class UnparserFilter extends BasicVisitor {
 			result.write(" when ");
 			context.getCondition().accept(this);
 		}
-		context.getSentenceAttributes().accept(this);
+		context.getAttributes().accept(this);
 		result.endLine();
 		result.endLine();
 		postpare();

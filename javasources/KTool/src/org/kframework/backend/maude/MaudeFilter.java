@@ -96,9 +96,9 @@ public class MaudeFilter extends BasicVisitor {
 						result.append(operation);
 						result.append(" : -> ");
 						result.append(syn.getSort());
-						if (!isEmptyAttributes(p.getProductionAttributes())) {
+						if (!isEmptyAttributes(p.getAttributes())) {
 							result.append(" [metadata \"");
-							p.getProductionAttributes().accept(this);
+							p.getAttributes().accept(this);
 							result.append("\"]");
 						}
 						result.append(" .\n");
@@ -111,7 +111,7 @@ public class MaudeFilter extends BasicVisitor {
 						result.append("op _");
 						result.append(StringUtil.escapeMaude(list.getSeparator()));
 						result.append("_ : K K -> K [prec 120 metadata \"");
-						p.getProductionAttributes().accept(this);
+						p.getAttributes().accept(this);
 						result.append(" hybrid=()");
 						result.append(" location=");
 						result.append(p.getMaudeLocation());
@@ -138,7 +138,7 @@ public class MaudeFilter extends BasicVisitor {
 						result.append(syn.getSort());
 						// if (!isEmptyAttributes(p.getCellAttributes())) {
 						result.append(" [metadata \"");
-						p.getProductionAttributes().accept(this);
+						p.getAttributes().accept(this);
 						result.append(" location=");
 						result.append(p.getMaudeLocation());
 						result.append("\"]");
@@ -395,7 +395,7 @@ public class MaudeFilter extends BasicVisitor {
 			result.append("metadata");
 		}
 		result.append(" \"");
-		sentence.getSentenceAttributes().accept(this);
+		sentence.getAttributes().accept(this);
 		result.append(" location=");
 		result.append(sentence.getMaudeLocation());
 		result.append("\"] .");

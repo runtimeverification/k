@@ -30,11 +30,9 @@ public class AddKLabelConstant extends CopyOnWriteTransformer {
             ListOfK list = new ListOfK();
             list.getContents().add(kapp);
             Term lhs = new KApp(KLabelConstantPredicate, list);
-            Term trueCt = new Constant("#Bool", "true");
-            Term rhs = new KApp(new KInjectedLabel(trueCt), Empty.ListOfK);
-            Rule rule = new Rule();
-            rule.setBody(new Rewrite(lhs, rhs));
-            rule.getSentenceAttributes().getContents().add(new Attribute("predicate", ""));
+            Term rhs = new KApp(new KInjectedLabel(Constant.TRUE), Empty.ListOfK);
+            Rule rule = new Rule(lhs, rhs);
+            rule.addAttribute(Attribute.PREDICATE);
             retNode.appendModuleItem(rule);
         }
 

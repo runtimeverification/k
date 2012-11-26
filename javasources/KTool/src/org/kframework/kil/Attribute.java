@@ -10,6 +10,7 @@ public class Attribute extends ASTNode {
 
     public static final Attribute FUNCTION = new Attribute("function", "");
     public static final Attribute PREDICATE = new Attribute("predicate", "");
+    public static final Attribute ANYWHERE = new Attribute("anywhere", "");
 
     private String key;
 	private String value;
@@ -35,12 +36,6 @@ public class Attribute extends ASTNode {
 
 	@Override
 	public String toString() {
-        // Andrei S: this should be unnecessary
-        if (this.getKey().equals("location")) {
-            System.err.println("### " + getValue());
-            return " " + this.getKey() + "=" + this.getValue();
-        }
-
 		return " " + this.getKey() + "=(" + this.getValue() + ")";
 	}
 

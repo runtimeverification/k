@@ -49,8 +49,8 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
 			rule.setBody(new Rewrite(
 					new KApp(new Constant("KLabel", "is" + sort), 
 							new Variable(sort, sort)), 
-					new Constant("#Bool", "true")));
-			rule.getSentenceAttributes().getContents().add(new Attribute("predicate", ""));
+					Constant.TRUE));
+			rule.addAttribute(Attribute.PREDICATE);
 			items.add(rule);
 			
 		}

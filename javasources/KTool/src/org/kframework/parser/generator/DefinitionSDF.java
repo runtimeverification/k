@@ -140,7 +140,7 @@ public class DefinitionSDF {
 					}
 				}
 				sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
-				sdf.append(SDFHelper.getSDFAttributes(p.getProductionAttributes()) + "\n");
+				sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
 			}
 		}
 		for (Sort ss : psdfv.insertSorts)

@@ -23,7 +23,6 @@ public class Production extends ASTNode {
     * can be thrown in one of the later compilation steps.
     * */
 	protected List<ProductionItem> items;
-	//private Attributes attributes;
 	protected String sort;
 
 	public static Production makeFunction(String funSort, String funName, String argSort) {
@@ -74,13 +73,12 @@ public class Production extends ASTNode {
 		// assumption: <attributes> appears only once
 		if (its.size() > 0)
 			attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
-        else
+        else if (attributes == null)
             attributes = new Attributes();
 	}
 
 	public Production(Production node) {
 		super(node);
-		//this.productionAttributes = node.productionAttributes;
 		this.items = node.items;
 		this.sort = node.sort;
 	}
@@ -89,7 +87,6 @@ public class Production extends ASTNode {
 		super();
 		this.items = items;
 		this.sort = sort.getName();
-		//this.productionAttributes = new Attributes();
         attributes = new Attributes();
 	}
 
@@ -184,16 +181,6 @@ public class Production extends ASTNode {
 
 	public void setItems(java.util.List<ProductionItem> items) {
 		this.items = items;
-	}
-
-	public Attributes getProductionAttributes() {
-		//return productionAttributes;
-        return super.getAttributes();
-	}
-
-	public void setProductionAttributes(Attributes productionAttributes) {
-		//this.productionAttributes = productionAttributes;
-        super.setAttributes(productionAttributes);
 	}
 
 	public int getArity() {

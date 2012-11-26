@@ -146,7 +146,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 					}
 				}
 
-				prod.getProductionAttributes().remove("strict");
+				prod.getAttributes().remove("strict");
 			}
 
 			if (prod.containsAttribute("seqstrict")){
@@ -183,7 +183,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 					co++;
 				}
 
-				prod.getProductionAttributes().remove("seqstrict");
+				prod.getAttributes().remove("seqstrict");
 			}
 
 		}

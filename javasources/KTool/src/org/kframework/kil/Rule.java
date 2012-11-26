@@ -44,7 +44,7 @@ public class Rule extends Sentence {
 
 		content += this.body + " ";
 
-		return content + sentenceAttributes;
+		return content + attributes;
 	}
 
 	@Override

@@ -169,11 +169,10 @@ public class MetaK {
 	}
 
 	public static boolean isAnywhere(Rule r) {
-		Attributes attrs = r.getSentenceAttributes();
-		if (null == attrs)
+		if (null == r.getAttributes())
 			return false;
 		for (Attribute any : anywheres) {
-			if (any.getValue() == attrs.get(any.getKey()))
+			if (any.getValue() == r.getAttribute(any.getKey()))
 				return true;
 		}
 		return false;

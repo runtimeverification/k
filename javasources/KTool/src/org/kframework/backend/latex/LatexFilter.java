@@ -109,7 +109,7 @@ public class LatexFilter extends BasicVisitor {
 			super.visit(p);
 		}
 		result.append("}{");
-		p.getProductionAttributes().accept(this);
+		p.getAttributes().accept(this);
 		result.append("}");
 	}
 
@@ -232,7 +232,7 @@ public class LatexFilter extends BasicVisitor {
 			rule.getCondition().accept(this);
 		}
 		result.append("}{");
-		rule.getSentenceAttributes().accept(this);
+		rule.getAttributes().accept(this);
 		result.append("}");
 		result.append("{");
 		if (termComment) result.append("large");
@@ -250,7 +250,7 @@ public class LatexFilter extends BasicVisitor {
 			cxt.getCondition().accept(this);
 		}
 		result.append("}{");
-		cxt.getSentenceAttributes().accept(this);
+		cxt.getAttributes().accept(this);
 		result.append("}" + endl);
 	}
 
