@@ -1,9 +1,11 @@
 require "builtins/builtins.k"
 require "builtins/fol.k"
+require "builtins/array-symbolic.k"
 
 module SMTLIB-CONVERSION
   imports BUILTIN-HOOKS
   imports FOL
+  imports ARRAY-SYMBOLIC
 
   // convert Bool to smtlib
   syntax String ::= "Smtlib" "(" K ")" [function]

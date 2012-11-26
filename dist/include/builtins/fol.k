@@ -4,7 +4,7 @@ module FOL
                > left:
 	         Fol "andFol" Fol [left]
 	       | Fol "orFol"  Fol [left]
-	       > "(" "forall" "(" IntList ")" "(" Bool ")" ")"
+	       > "(" "forall" "(" IntList ")" "(" Fol ")" ")"
 
   syntax IntList ::= List{Int, ";"}
 
