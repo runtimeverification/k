@@ -58,6 +58,13 @@ public class Attributes extends ASTNode {
 		return false;
 	}
 
+	public Attribute getAttributeByKey(String key) {
+		for (Attribute attr : contents)
+			if (attr.getKey().equals(key))
+				return attr;
+		return null;
+	}
+
 	public String get(String key) {
 		for (Attribute attr : contents)
 			if (attr.getKey().equals(key))
@@ -77,9 +84,19 @@ public class Attributes extends ASTNode {
 
     public void setAll(Attributes attrs) {
         for (Attribute attr : attrs.contents)
-            set(attr.getKey(), attr.getValue());
+            set(attr);
     }
-	
+
+	public void set(Attribute attr) {
+		Attribute oldAttr = getAttributeByKey(attr.getKey());
+		if (oldAttr != null) {
+			oldAttr.setValue(attr.getValue());
+		} else {
+			contents.add(attr);
+		}
+
+	}
+
 	public void remove(String key) {
 		Iterator<Attribute> it = contents.iterator();
 		while(it.hasNext()){
