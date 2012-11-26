@@ -6,7 +6,6 @@ import java.util.List;
 import org.kframework.compile.utils.GetSyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attributes;
 import org.kframework.kil.Context;
 import org.kframework.kil.Hole;
 import org.kframework.kil.Module;
@@ -22,7 +21,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class StrictnessToContexts extends CopyOnWriteTransformer {
 
-	private List<ModuleItem> items;
+	private List<ModuleItem> items = new ArrayList<ModuleItem>();
 
 	public StrictnessToContexts() {
 		super("Strict Ops To Context");
@@ -30,39 +29,26 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
-
-//		List<ModuleItem> contexts = node.getItems();
-//
-//		for (int i = 0; i < contexts.size(); i++) {
-//			System.out.println(contexts.get(i));
-//		}
-
-		//collect productions that are strict or seqstrict
 		List<Production> prods = GetSyntaxByTag.applyVisitor(node, "strict");
 		prods.addAll(GetSyntaxByTag.applyVisitor(node, "seqstrict"));
+		if (prods.isEmpty())
+			return node;
 
-//		System.out.println("------------------");	
-
-		if (prods.isEmpty()) return node;
 		items = new ArrayList<ModuleItem>(node.getItems());
 		node = node.shallowCopy();
+//		node.setItems(items);
 
-		String arg, attr = "";
+		String arg, attr;
 
 		for (Production prod : prods) {
 
-			//			System.out.println(prod.toString());
+			attr = "strict";
+			arg = prod.getAttribute(attr);
 
-			Attributes attributes = prod.getAttributes();
-
-			if (attributes.containsKey("strict")){
-				attr = "strict";
-			}else if(attributes.containsKey("seqstrict")){
+			if(arg == null){
 				attr = "seqstrict";
-			}else continue;
-
-			arg = attributes.get(attr);
-			//			System.out.println(attr + ": " + arg);
+				arg = prod.getAttribute(attr);
+			}
 
 			//strict in only one argument
 			if(!arg.equalsIgnoreCase("") && arg.indexOf(",") == -1){
@@ -79,21 +65,14 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 			prod.getAttributes().remove(attr);
 		}
-
-		node.setItems(items);	
-
-//		contexts = node.getItems();
-//
-//		for (int i = 0; i < contexts.size(); i++) {
-//			System.out.println(contexts.get(i));
-//		}
-
+		
+		node.setItems(items);
+		
 		return node;
 	}
 
 
 	private void strictInMore(String attr, Production prod, String arg) {
-		//		ArrayList<Integer> seqargs = new ArrayList<Integer>();
 
 		int size = ((TermCons) MetaK.getTerm(prod)).getContents().size(); 
 
@@ -124,8 +103,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), prod.getFilename(), prod.getLocation()));
 			}
 
-			//			if(attr.equalsIgnoreCase("seqstrict"))
-			//				seqargs.add(Integer.parseInt(s[i]));
 		}
 
 		//		for (int i = 0; i < s.length; i++) {
