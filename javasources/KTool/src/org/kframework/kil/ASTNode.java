@@ -58,7 +58,7 @@ public abstract class ASTNode implements Visitable, Transformable {
             return Constants.GENERATED_LOCATION;
 
 		String loc = attributes.get("location");
-		if (loc == null)
+		if (loc == null || loc.isEmpty())
             loc = Constants.GENERATED_LOCATION;
 		return loc;
 	}
@@ -79,7 +79,7 @@ public abstract class ASTNode implements Visitable, Transformable {
             return Constants.GENERATED_FILENAME;
 
 		String file = attributes.get("filename");
-		if (file == null)
+		if (file == null || file.isEmpty())
             file = Constants.GENERATED_FILENAME;
 		return file;
 	}
