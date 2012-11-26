@@ -299,7 +299,7 @@ public class KRun {
 
 	public List<String> prettyPrint() {
 		if (result != null) {
-			UnparserFilter unparser = new UnparserFilter(true);
+			UnparserFilter unparser = new UnparserFilter(true, K.color);
 			result.accept(unparser);
 			List<String> l = new ArrayList<String>();
 			l.add(unparser.getResult());

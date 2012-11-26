@@ -3,7 +3,9 @@ package org.kframework.backend.unparser;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.utils.ColorUtil;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +18,7 @@ public class UnparserFilter extends BasicVisitor {
 	private boolean firstPriorityBlock = false;
 	private boolean firstProduction = false;
 	private boolean inConfiguration = false;
+	private boolean color = false;
 	private static int TAB = 4;
 	private java.util.List<String> variableList =
 			new java.util.LinkedList<String>();
@@ -27,8 +30,14 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	public UnparserFilter(boolean inConfiguration) {
-		this.inConfiguration = inConfiguration;
+		this(inConfiguration, false);
 	}
+
+	public UnparserFilter(boolean inConfiguration, boolean color) {
+		this.inConfiguration = inConfiguration;
+		this.color = color;
+	}
+		
 
 	public String getResult() {
 		return result.toString();
@@ -217,6 +226,18 @@ public class UnparserFilter extends BasicVisitor {
 				attributes += " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
 			}
 		}
+		String colorCode = "";
+		if (color) {
+			Cell declaredCell = DefinitionHelper.cells.get(cell.getLabel());
+			if (declaredCell != null) {
+				String declaredColor = declaredCell.getCellAttributes().get("color");
+				if (declaredColor != null) {
+					colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors.get(declaredColor));
+					result.write(colorCode);
+				}
+			}
+		}
+			
 		result.write("<" + cell.getLabel() + attributes + ">");
 		if (inConfiguration) {
 			result.endLine();
@@ -227,7 +248,11 @@ public class UnparserFilter extends BasicVisitor {
 		if (cell.hasLeftEllipsis()) {
 			result.write("... ");
 		}
+		if (!colorCode.equals("")) {
+			result.write(ColorUtil.ANSI_NORMAL);
+		}
 		cell.getContents().accept(this);
+		result.write(colorCode);
 		if (cell.hasRightEllipsis()) {
 			result.write(" ...");
 		}
@@ -238,6 +263,9 @@ public class UnparserFilter extends BasicVisitor {
 			result.write(" ");
 		}
 		result.write("</" + cell.getLabel() + ">");
+		if (!colorCode.equals("")) {
+			result.write(ColorUtil.ANSI_NORMAL);
+		}
 		postpare();
 	}
 
