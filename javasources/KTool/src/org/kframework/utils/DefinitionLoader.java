@@ -20,6 +20,8 @@ import org.kframework.parser.concrete.disambiguate.CheckBinaryPrecedenceFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
+import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.generator.BasicParser;
@@ -190,9 +192,11 @@ public class DefinitionLoader {
 		// javaDef = (org.kframework.kil.Term) javaDef.accept(new VariableTypeInferenceFilter());
 		javaDef = (org.kframework.kil.Term) javaDef.accept(new AmbDuplicateFilter());
 		javaDef = (org.kframework.kil.Term) javaDef.accept(new TypeSystemFilter());
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new PriorityFilter());
 		javaDef = (org.kframework.kil.Term) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
 		javaDef = (org.kframework.kil.Term) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 		javaDef = (org.kframework.kil.Term) javaDef.accept(new TypeInferenceSupremumFilter());
+		javaDef = (org.kframework.kil.Term) javaDef.accept(new PreferAvoidFilter());
 		javaDef = (org.kframework.kil.Term) javaDef.accept(new FlattenListsFilter());
 		// javaDef = (org.kframework.kil.Term) javaDef.accept(new CorrectRewriteSortFilter());
 		// last resort disambiguation

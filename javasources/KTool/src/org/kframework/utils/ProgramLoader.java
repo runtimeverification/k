@@ -13,6 +13,7 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
+import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -50,6 +51,7 @@ public class ProgramLoader {
 
 		try {
 			out = out.accept(new PriorityFilter());
+			out = out.accept(new PreferAvoidFilter());
 			out = out.accept(new AmbFilter());
 			out = out.accept(new RemoveBrackets());
 		} catch (TransformerException e) {

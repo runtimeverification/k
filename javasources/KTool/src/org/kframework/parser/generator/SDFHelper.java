@@ -14,10 +14,10 @@ public class SDFHelper {
 		if (attrs.getContents().size() == 0)
 			return "";
 
-		if (attrs.containsKey("prefer"))
-			str += "prefer, ";
-		if (attrs.containsKey("avoid"))
-			str += "avoid, ";
+		// if (attrs.containsKey("prefer"))
+		// str += "prefer, ";
+		// if (attrs.containsKey("avoid"))
+		// str += "avoid, ";
 		if (attrs.containsKey("left"))
 			str += "left, ";
 		if (attrs.containsKey("right"))

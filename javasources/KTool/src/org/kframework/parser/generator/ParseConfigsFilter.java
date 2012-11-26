@@ -15,6 +15,7 @@ import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitFileCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
@@ -63,6 +64,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
 				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 				config = config.accept(new TypeInferenceSupremumFilter());
+				config = config.accept(new PreferAvoidFilter());
 				config = config.accept(new FlattenListsFilter());
 				// config = config.accept(new CorrectRewriteSortFilter()); not the case on configs
 				// last resort disambiguation
