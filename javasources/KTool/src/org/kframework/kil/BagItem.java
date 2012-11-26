@@ -21,6 +21,11 @@ public class BagItem extends CollectionItem {
 		super(node);
 	}
 
+	public BagItem(Term node) {
+		super("BagItem");
+		this.value = node;
+	}
+
 	public String toString() {
 		return this.value.toString();
 	}

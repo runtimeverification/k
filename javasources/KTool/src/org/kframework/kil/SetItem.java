@@ -18,6 +18,11 @@ public class SetItem extends CollectionItem {
 		super(node);
 	}
 
+	public SetItem(Term node) {
+		super("SetItem");
+		this.value = node;
+	}
+
 	public String toString() {
 		return this.value.toString();
 	}

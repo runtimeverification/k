@@ -39,6 +39,7 @@ public class Production extends ASTNode {
 			String consAttr = funSort + "1" + funName + "Syn";
             funProd.addAttribute(new Attribute("cons", consAttr));
 			DefinitionHelper.conses.put(consAttr, funProd);
+			DefinitionHelper.putLabel(funProd, consAttr);
 		}
 
 		return funProd;
@@ -186,7 +187,9 @@ public class Production extends ASTNode {
 	public int getArity() {
 		int arity = 0;
 		for (ProductionItem i : items) {
-			if (i.getType() != ProductionType.TERMINAL)
+			if (i.getType() == ProductionType.USERLIST)
+				arity+= 2;
+			if (i.getType() == ProductionType.SORT)
 				arity++;
 		}
 		return arity;
@@ -208,6 +211,25 @@ public class Production extends ASTNode {
 
 	public void setSort(String sort) {
 		this.sort = sort;
+	}
+
+	public String getChildSort(int idx) {
+		int arity = -1;
+		if (items.get(0).getType() == ProductionType.USERLIST) {
+			if (idx == 0) {
+				return ((UserList)items.get(0)).getSort();
+			} else {
+				return this.getSort();
+			}
+		}
+		for (ProductionItem i : items) {
+			if (i.getType() != ProductionType.TERMINAL)
+				arity++;
+			if (arity == idx) {
+				return ((Sort)i).getName();
+			}
+		}
+		return null;
 	}
 
 	@Override

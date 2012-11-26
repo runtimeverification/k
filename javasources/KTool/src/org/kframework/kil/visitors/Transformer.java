@@ -66,6 +66,9 @@ public interface Transformer {
 	public ASTNode transform(TermCons node) throws TransformerException;
 	public ASTNode transform(Bracket node) throws TransformerException;
 	public ASTNode transform(Variable node) throws TransformerException;
+	public ASTNode transform(Freezer node) throws TransformerException;
+	public ASTNode transform(FreezerVariable node) throws TransformerException;
+	public ASTNode transform(FreezerSubstitution node) throws TransformerException;
 	//</Terms>
 	public String getName();
 }

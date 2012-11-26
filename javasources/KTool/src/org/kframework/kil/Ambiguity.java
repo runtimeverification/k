@@ -15,6 +15,10 @@ public class Ambiguity extends Collection {
 		super(node);
 	}
 
+	public Ambiguity(String sort, java.util.List<Term> col) {
+		super(sort, col);
+	}
+
 	@Override
 	public String toString() {
 		String content = "";

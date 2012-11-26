@@ -308,6 +308,22 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(Freezer f) {
+		f.getTerm().accept(this);
+		visit((Term) f);
+	}
+
+	@Override
+	public void visit(FreezerVariable var) {
+		visit((Term) var);
+	}
+
+	@Override
+	public void visit(FreezerSubstitution subst) {
+		visit((Term) subst);
+	}
+
+	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		visit((Term) kInjectedLabel);
 	}

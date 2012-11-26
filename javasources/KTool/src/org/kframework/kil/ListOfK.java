@@ -5,6 +5,7 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import java.util.List;
 
 public class ListOfK extends Collection {
 	public ListOfK() {
@@ -21,6 +22,10 @@ public class ListOfK extends Collection {
 
 	public ListOfK(ListOfK node) {
 		super(node);
+	}
+
+	public ListOfK(List<Term> col) {
+		super("List{K}", col);
 	}
 
 	@Override

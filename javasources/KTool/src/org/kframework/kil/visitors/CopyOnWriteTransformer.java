@@ -556,6 +556,34 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
+	public ASTNode transform(Freezer node) throws TransformerException {
+		Term term = node.getTerm();
+		ASTNode result = term.accept(this);
+		if (result == null)
+			return null;
+		if (!(result instanceof Term)) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
+		}
+		if (result != term) {
+			node = node.shallowCopy();
+			node.setTerm((Term) result);
+		}
+
+		return transform((Term) node);
+	}
+
+	@Override
+	public ASTNode transform(FreezerSubstitution node) throws TransformerException {
+		return transform((Term) node);
+	}
+
+	@Override
+	public ASTNode transform(FreezerVariable node) throws TransformerException {
+		return transform((Term) node);
+	}
+
+	@Override
 	public ASTNode transform(Attributes node) throws TransformerException {
 		boolean change = false;
 		java.util.List<Attribute> contents = new ArrayList<Attribute>();

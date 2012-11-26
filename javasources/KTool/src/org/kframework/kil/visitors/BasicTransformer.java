@@ -314,6 +314,22 @@ public class BasicTransformer implements Transformer {
 	}
 
 	@Override
+	public ASTNode transform(Freezer node) throws TransformerException {
+		Freezer result = new Freezer(node);
+		return transform((Term) result);
+	}
+
+	@Override
+	public ASTNode transform(FreezerVariable node) throws TransformerException {
+		return transform((Term) node);
+	}
+
+	@Override
+	public ASTNode transform(FreezerSubstitution node) throws TransformerException {
+		return transform((Term) node);
+	}
+
+	@Override
 	public ASTNode transform(Attributes node) throws TransformerException {
 		for (int i = 0; i < node.getContents().size(); i++) {
 			node.getContents().set(i, (Attribute) node.getContents().get(i).accept(this));
@@ -336,7 +352,7 @@ public class BasicTransformer implements Transformer {
 		Term term = (Term) node.getTerm().accept(this);
 		KInjectedLabel result = new KInjectedLabel(node);
 		result.setTerm(term);
-		return transform((Term) node);
+		return transform((Term) result);
 	}
 
 	@Override

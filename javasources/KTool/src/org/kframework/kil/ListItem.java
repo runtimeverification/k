@@ -17,6 +17,11 @@ public class ListItem extends CollectionItem {
 		super(node);
 	}
 
+	public ListItem(Term node) {
+		super("ListItem");
+		this.value = node;
+	}
+
 	public String toString() {
 		return this.value.toString();
 	}

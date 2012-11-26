@@ -68,7 +68,6 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		Attributes attrs = node.getAttributes().shallowCopy();
 		if (node.isListDecl()) {
 			listSeparators.add(((UserList) node.getItems().get(0)).getSeparator());
-			arity = "2";
 			attrs.set("hybrid", "");
 		}
 		node = node.shallowCopy();

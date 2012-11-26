@@ -40,6 +40,7 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
 			p.putAttribute("cons", "KLabel1" + sort + "Wrapper");
 			p.putAttribute("prefixlabel", "#_");
 			DefinitionHelper.conses.put("KLabel1" + sort + "Wrapper", p);
+			DefinitionHelper.putLabel(p, "KLabel1" + sort+ "Wrapper");
 			block.getProductions().add(p);
 			pItems = new ArrayList<ProductionItem>();
 			p = new Production(new Sort("KLabel"), pItems );

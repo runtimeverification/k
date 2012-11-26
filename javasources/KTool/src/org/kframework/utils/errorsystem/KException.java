@@ -28,6 +28,10 @@ public class KException {
 		labels.put(KExceptionGroup.CRITICAL, "Critical");
 	}
 
+	public KException(ExceptionType type, KExceptionGroup label, String message) {
+		this(type, label, message, null, null);
+	}
+
 	public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location) {
 		super();
 		this.type = type;
@@ -52,8 +56,10 @@ public class KException {
 
 	@Override
 	public String toString() {
-		return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message + "\n\tFile: " + filename + "\n\tLocation: " + location
-				+ (compilationPhase == null ? "" : "\n\t Compilation Phase: " + compilationPhase);
+		return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
+			+ (filename == null ? "" : "\n\tFile: " + filename)
+			+ (location == null ? "" : "\n\tLocation: " + location)
+			+ (compilationPhase == null ? "" : "\n\t Compilation Phase: " + compilationPhase);
 		
 	}
 }

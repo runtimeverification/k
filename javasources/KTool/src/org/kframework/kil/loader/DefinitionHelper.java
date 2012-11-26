@@ -1,5 +1,6 @@
 package org.kframework.kil.loader;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Production;
@@ -42,6 +43,7 @@ public class DefinitionHelper {
 	};
 
 	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
+	public static java.util.Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
 	public static java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
 	public static java.util.Map<String, String> cellSorts = new HashMap<String, String>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
@@ -51,6 +53,18 @@ public class DefinitionHelper {
 	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
 	public static String startSymbolPgm = "K";
 	public static File dotk = null;
+
+	public static void putLabel(Production p, String cons) {
+		String label;
+		if (!MetaK.isComputationSort(p.getSort()))
+			label = p.getLabel();
+		else
+			label = p.getKLabel();
+		Set<String> s = labels.get(label);
+		if (s == null)
+			labels.put(label, s=new HashSet<String>());
+		s.add(cons);
+	}
 
 	public static void addCellDecl(Cell c) {
 		cells.put(c.getLabel(), c);

@@ -77,6 +77,7 @@ public class K {
 	public static boolean showSearchGraph = false;
 	//apply parenthesis by default
 	public static boolean parens = true;
+	public static boolean unparse = false;
 	public static boolean log_io = false;
 	public static boolean debug = false;
 	public static boolean trace = false;

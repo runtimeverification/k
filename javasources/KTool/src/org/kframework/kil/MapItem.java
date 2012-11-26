@@ -35,6 +35,12 @@ public class MapItem extends CollectionItem {
 		super("MapItem");
 	}
 
+	public MapItem(Term key, Term value) {
+		this();
+		this.key = key;
+		this.value = value;
+	}
+
 	public void setKey(Term key) {
 		this.key = key;
 	}

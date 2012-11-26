@@ -1,5 +1,6 @@
 package org.kframework.backend.unparser;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -22,6 +23,11 @@ public class UnparserFilter extends BasicVisitor {
 	private java.util.Stack<ASTNode> stack = new java.util.Stack<ASTNode>();
 
 	public UnparserFilter() {
+		this(false);
+	}
+
+	public UnparserFilter(boolean inConfiguration) {
+		this.inConfiguration = inConfiguration;
 	}
 
 	public String getResult() {
@@ -369,10 +375,9 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(BagItem bagItem) {
 		prepare(bagItem);
-		result.endLine();
-		result.write("Don't know how to pretty print BagItem");
-		result.endLine();
+		result.write("BagItem(");
 		super.visit(bagItem);
+		result.write(")");
 		postpare();
 	}
 
@@ -412,10 +417,14 @@ public class UnparserFilter extends BasicVisitor {
 
 	public void visit(KInjectedLabel kInjectedLabel) {
 		prepare(kInjectedLabel);
-		result.endLine();
-		result.write("Don't know how to pretty print KInjectedLabel");
-		result.endLine();
-		super.visit(kInjectedLabel);
+		Term term = kInjectedLabel.getTerm();
+		if (MetaK.isKSort(term.getSort())) {
+			result.write(kInjectedLabel.getInjectedSort(term.getSort()));
+			result.write("2KLabel ");
+		} else {
+			result.write("# ");
+		}
+		term.accept(this);
 		postpare();
 	}
 
@@ -487,7 +496,7 @@ public class UnparserFilter extends BasicVisitor {
 		result.endLine();
 		super.visit(ambiguity);
 		postpare();
-	}
+        }
 
 	@Override
 	public void visit(org.kframework.kil.Context context) {
@@ -518,6 +527,31 @@ public class UnparserFilter extends BasicVisitor {
 		prepare(require);
 		result.write("require \"" + require.getValue() + "\"");
 		result.endLine();
+		postpare();
+	}
+
+	@Override
+	public void visit(FreezerVariable var) {
+		prepare(var);
+		result.write("var{" + var.getSort() + "}(\"" + var.getName() + "\")");
+		postpare();
+	}
+
+
+	@Override
+	public void visit(FreezerSubstitution subst) {
+		prepare(subst);
+		result.write("var{" + subst.getTermSort() + "}(\"" + subst.getName() + "\")<-");
+		postpare();
+	}
+
+
+	@Override
+	public void visit(Freezer freezer) {
+		prepare(freezer);
+		result.write("freezer(");
+		freezer.getTerm().accept(this);
+		result.write(")");
 		postpare();
 	}
 
