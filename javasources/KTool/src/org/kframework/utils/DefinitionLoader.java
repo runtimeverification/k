@@ -98,14 +98,19 @@ public class DefinitionLoader {
 				String msg = "Could not find main module '" + mainModule + "'. Use -l(ang) option to specify another.";
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
 			}
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Basic Parsing");
 
 			def.preprocess();
+
+			if (GlobalSettings.verbose)
+				sw.printIntermediate("Preprocess");
 
 			new CheckVisitorStep(new CheckSyntaxDecl()).check(def);
 			new CheckVisitorStep(new CheckListDecl()).check(def);
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Basic Parsing");
+				sw.printIntermediate("Checks");
 
 			// ------------------------------------- generate files
 			ResourceExtractor.ExtractAllSDF(DefinitionHelper.dotk);

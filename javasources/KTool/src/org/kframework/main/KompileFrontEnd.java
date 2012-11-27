@@ -465,7 +465,6 @@ public class KompileFrontEnd {
 
 	public static void compile(File mainFile, String mainModule, String step) {
 		try {
-			// TODO: trateaza erorile de compilare
 			GlobalSettings.kem.print(KExceptionGroup.COMPILER);
 
 			// for now just use this file as main argument
