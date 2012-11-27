@@ -33,7 +33,7 @@ module VARIABLE
 
   syntax K ::= #getSymLabel(String)  [function]
   rule #getSymLabel(Type:String)
-    => String2KLabel("'#sym" +String Type)(.List{K})
+    => String2KLabel("#sym" +String Type)(.List{K})
 
 // Generates a "fresh" local variable of the type of K that does not appear
 // anywhere within the set Set
