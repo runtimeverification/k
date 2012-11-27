@@ -106,7 +106,7 @@ fmod PARSE-METADATA-STRICT is
   if "-seqstrict" = substr(S, _-_(length(S),length("-seqstrict")), length(S)) .
 
   eq kstrict(rat(S, N) Nl, Q) = 
-     errorAS("","Could not parse the strict argument list for \"" + S + "\".  Are you using comma as a separator?")  .
+     errorAS("","Could not parse the strict argument list for \"" + S + "\".  \n\tAre you using comma as a separator?")  .
 
   op getStrictList : String -> IntList .
   eq getStrictList(S) = parseIntList(tokenize(stripSpaces(S), ",")) .

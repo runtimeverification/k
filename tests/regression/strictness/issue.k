@@ -1,6 +1,6 @@
 module ISSUE
 
-syntax Foo ::= bar(Foo, Foo, Foo) [strict(1  2)]
+syntax Foo ::= bar(Foo, Foo, Foo) [strict(1,  2)]
              | baz(Foo, Foo, Foo, Foo) [seqstrict(1, 3, 2)]
              | Foo "+" Foo
              | Int
