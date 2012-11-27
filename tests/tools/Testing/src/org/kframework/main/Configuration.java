@@ -5,7 +5,7 @@ import java.io.File;
 public class Configuration {
 
 	public static final String FS = System.getProperty("file.separator");
-	public static final long KOMPILE_ALL_TIMEOUT = 30;
+	public static final long KOMPILE_ALL_TIMEOUT = 60;
 	public static final String JR = "junit-reports";
 	public static String k = "/var/lib/jenkins/workspace/k-framework-tests/k";
 	public static String CONFIG = null; 
