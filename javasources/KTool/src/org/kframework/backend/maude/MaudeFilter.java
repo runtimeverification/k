@@ -206,7 +206,7 @@ public class MaudeFilter extends BasicVisitor {
 		for (Attribute entry : attributes.getContents()) {
 			// Andrei S: for some reason I do not understand, location and
 			// filename are special attributes
-			if (!entry.getKey().equals("klabel") && !entry.getKey().equals("location") && !entry.getKey().equals("filename")) {
+			if (!entry.getKey().equals("klabel")) { // && !entry.getKey().equals("location") && !entry.getKey().equals("filename")) {
 				entry.accept(this);
 			}
 		}

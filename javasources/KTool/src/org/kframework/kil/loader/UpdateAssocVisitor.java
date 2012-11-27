@@ -18,8 +18,7 @@ public class UpdateAssocVisitor extends BasicVisitor {
 			Set<Production> prods = SDFHelper.getProductionsForTag(c.getValue());
 			for (Production p : prods) {
 				if (!p.getAttributes().containsKey("left") && !p.getAttributes().containsKey("right") && !p.getAttributes().containsKey("non-assoc")) {
-					p.getAttributes().addAttribute(pri.getAssoc(), "");
-					System.out.println("Adding: " + pri.getAssoc());
+					p.addAttribute(pri.getAssoc(), "");
 				}
 			}
 		}
