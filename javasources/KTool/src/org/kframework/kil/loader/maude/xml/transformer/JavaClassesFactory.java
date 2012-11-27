@@ -91,26 +91,20 @@ public class JavaClassesFactory {
 		}
 
 		if (t.getOp().equals("#id_") && t.getSort().equals("#Id")) {
-			Constant constant = new Constant("maude", "maude");
-			constant.setSort("#Id");
 			Term value = t.getChildren().get(0);
 			assert (value.getSort().equals("#String") || value.getSort().equals("#Char"));
-			constant.setValue(value.getOp().substring(1, value.getOp().length() - 1));
+            Constant constant = new Constant("#Id", value.getOp().substring(1, value.getOp().length() - 1));
 			return constant;
 		}
 
 		if (t.getSort().equals("#Zero")) {
-			Constant constant = new Constant("maude", "maude");
-			constant.setSort("#Int");
-			constant.setValue("0");
+			Constant constant = new Constant("#Int", "0");
 			assert (t.getOp().equals("0"));
 			return constant;
 		}
 
 		if (t.getSort().equals("#NzNat") && t.getOp().equals("sNat_")) {
-			Constant constant = new Constant("maude", "maude");
-			constant.setSort("#Int");
-			constant.setValue(t.getNumber());
+			Constant constant = new Constant("#Int", t.getNumber());
 			assert (t.getChildren().get(0).getOp().equals("0"));
 			assert (t.getChildren().get(0).getSort().equals("#Zero"));
 			return constant;

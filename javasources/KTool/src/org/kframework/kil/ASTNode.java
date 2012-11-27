@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 
 public abstract class ASTNode implements Visitable, Transformable {
     // attributes non-null
-	protected Attributes attributes;
+    protected Attributes attributes;
 
     public ASTNode(Element elem) {
         this(getElementLocation(elem), getElementFile(elem));
@@ -28,12 +28,12 @@ public abstract class ASTNode implements Visitable, Transformable {
     }
 
     public ASTNode(ASTNode astNode) {
-		attributes = astNode.attributes;
-	}
+        attributes = astNode.attributes;
+    }
 
-	public ASTNode() {
-		this(Constants.GENERATED_LOCATION, Constants.GENERATED_FILENAME);
-	}
+    public ASTNode() {
+        this(Constants.GENERATED_LOCATION, Constants.GENERATED_FILENAME);
+    }
 
     public ASTNode(String loc, String file) {
         //attributes = new Attributes();
@@ -42,61 +42,61 @@ public abstract class ASTNode implements Visitable, Transformable {
     }
 
 
-	public String getMaudeLocation() {
-		String loc = getLocation();
-		loc = loc.replaceAll(",", ":");
-		loc = loc.replaceFirst("\\(", "(" + getFilename() + ":");
-		if (!loc.startsWith("("))
+    public String getMaudeLocation() {
+        String loc = getLocation();
+        loc = loc.replaceAll(",", ":");
+        loc = loc.replaceFirst("\\(", "(" + getFilename() + ":");
+        if (!loc.startsWith("("))
             loc = "(" + loc + ")";
 
-		return loc;
-	}
+        return loc;
+    }
 
-	public String getLocation() {
+    public String getLocation() {
         // next if statement should be unnecessary
         if (attributes == null)
             return Constants.GENERATED_LOCATION;
 
-		String loc = attributes.get("location");
-		if (loc == null || loc.isEmpty())
+        String loc = attributes.get("location");
+        if (loc == null || loc.isEmpty())
             loc = Constants.GENERATED_LOCATION;
-		return loc;
-	}
+        return loc;
+    }
 
-	public void setLocation(String loc) {
+    public void setLocation(String loc) {
         // next 2 if statements should be unnecessary
-		if (loc.equals(Constants.GENERATED_LOCATION))
+        if (loc.equals(Constants.GENERATED_LOCATION))
             return;
         if (attributes == null)
             attributes = new Attributes();
 
         attributes.set("location", loc);
-	}
+    }
 
-	public String getFilename() {
+    public String getFilename() {
         // next if statement should be unnecessary
         if (attributes == null)
             return Constants.GENERATED_FILENAME;
 
-		String file = attributes.get("filename");
-		if (file == null || file.isEmpty())
+        String file = attributes.get("filename");
+        if (file == null || file.isEmpty())
             file = Constants.GENERATED_FILENAME;
-		return file;
-	}
+        return file;
+    }
 
-	public void setFilename(String file) {
+    public void setFilename(String file) {
         // next 2 if statements should be unnecessary
-		if (file.equals(Constants.GENERATED_FILENAME))
+        if (file.equals(Constants.GENERATED_FILENAME))
             return;
         if (attributes == null)
             attributes = new Attributes();
 
-		attributes.set("filename", file);
-	}
+        attributes.set("filename", file);
+    }
 
     /*
-   * methods for easy attributes manipulation
-   * */
+     * methods for easy attributes manipulation
+     */
     public void addAttribute(String key, String val) {
         addAttribute(new Attribute(key, val));
     }
@@ -138,5 +138,5 @@ public abstract class ASTNode implements Visitable, Transformable {
     }
 
 
-	public abstract ASTNode shallowCopy();
+    public abstract ASTNode shallowCopy();
 }

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TermCons extends Term {
-	String cons;
+	protected final String cons;
 	protected java.util.List<Term> contents;
 
 	public TermCons(Element element) {
@@ -90,10 +90,6 @@ public class TermCons extends Term {
 		return cons;
 	}
 
-	public void setCons(String cons) {
-		this.cons = cons;
-	}
-
 	public java.util.List<Term> getContents() {
 		return contents;
 	}
@@ -101,6 +97,18 @@ public class TermCons extends Term {
 	public void setContents(java.util.List<Term> contents) {
 		this.contents = contents;
 	}
+
+    public Term getSubterm(int idx) {
+        return contents.get(idx);
+    }
+
+    public Term setSubterm(int idx, Term term) {
+        return contents.set(idx, term);
+    }
+
+    public int arity() {
+        return getProduction().getArity();
+    }
 
 	@Override
 	public void accept(Visitor visitor) {

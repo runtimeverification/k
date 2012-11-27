@@ -56,6 +56,10 @@ public abstract class Collection extends Term {
 		this.contents = contents;
 	}
 
+    public void add(Term t) {
+        contents.add(t);
+    }
+
 	@Override
 	public abstract Collection shallowCopy();
 }

@@ -3,6 +3,16 @@ require "builtins.k"
 module SYMBOLIC-K
   imports BUILTIN-HOOKS
 
+  syntax String ::= "K2SMTLib2" "(" K ")"
+  [prefixlabel(K2SMTLib2), klabel(K2SMTLib2), function]
+  rule K2SMTLib2(false) => "false"
+  rule K2SMTLib2(true)  => "true"
+  rule K2SMTLib2(I:#Int) => Int2String(I)
+  when I >=Int 0
+  rule K2SMTLib2(I:#Int) => "(- " +String Int2String(absInt(I)) +String ")"
+  when I <Int 0
+
+
   syntax Bool ::= "isBuiltin" "(" K ")"
   [prefixlabel(isBuiltin), klabel(isBuiltin), predicate]
 

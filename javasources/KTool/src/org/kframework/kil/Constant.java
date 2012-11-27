@@ -6,14 +6,58 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import java.util.HashMap;
+import java.util.Map;
+
+
 public class Constant extends Term {
 
+    // AST representation of #Bool constants
     public static final Constant TRUE = new Constant("#Bool", "true");
     public static final Constant FALSE = new Constant("#Bool", "false");
 
-	public static final Constant STAR = new Constant("#String", "\"star\"");
+    /*
+     * AST representation of #Int, #String and KLabel constants; hashmaps cache
+     * the constants to ensure uniqueness
+     */
+    private static final Map<Integer, Constant> ints
+            = new HashMap<Integer, Constant>();
+    public static final Constant ZERO = INT(0);
+    public static final Constant ONE = INT(1);
+    public static final Constant INT(int i) {
+        Constant ct = ints.get(i);
+        if (ct == null) {
+            ct = new Constant("#Int", Integer.toString(i));
+            ints.put(i, ct);
+        }
+        return ct;
+    }
 
-    String value;
+    private static final Map<String, Constant> strs
+            = new HashMap<String, Constant>();
+    public static final Constant SPACE = STRING(" ");
+    public static final Constant STRING(String s) {
+        Constant ct = strs.get(s);
+        if (ct == null) {
+            ct = new Constant("#String", "\"" + s + "\"");
+            strs.put(s, ct);
+        }
+        return ct;
+    }
+
+    private static final Map<String, Constant> klbls
+            = new HashMap<String, Constant>();
+    public static final Constant KLABEL(String s) {
+        Constant ct = klbls.get(s);
+        if (ct == null) {
+            ct = new Constant("KLabel", s);
+            klbls.put(s, ct);
+        }
+        return ct;
+    }
+
+
+    protected final String value;
 
 	public Constant(String sort, String value) {
 		super(sort);
@@ -36,25 +80,15 @@ public class Constant extends Term {
 		this.value = constant.value;
 	}
 
+    public String getValue() {
+        return value;
+    }
+
+    @Override
 	public String toString() {
 		return value + " ";
 	}
 
-	public String getSort() {
-		return sort;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setSort(String sort) {
-		this.sort = sort;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
 
 	@Override
 	public void accept(Visitor visitor) {

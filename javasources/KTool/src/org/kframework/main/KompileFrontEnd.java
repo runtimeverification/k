@@ -21,30 +21,7 @@ import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.AddKCell;
-import org.kframework.compile.transformers.AddKLabelConstant;
-import org.kframework.compile.transformers.AddKLabelToString;
-import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.transformers.AddSymbolicK;
-import org.kframework.compile.transformers.AddTopCell;
-import org.kframework.compile.transformers.DesugarStreams;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.transformers.ResolveAnonymousVariables;
-import org.kframework.compile.transformers.ResolveBinder;
-import org.kframework.compile.transformers.ResolveBlockingInput;
-import org.kframework.compile.transformers.ResolveBuiltins;
-import org.kframework.compile.transformers.ResolveContextAbstraction;
-import org.kframework.compile.transformers.ResolveDefaultTerms;
-import org.kframework.compile.transformers.ResolveFresh;
-import org.kframework.compile.transformers.ResolveFunctions;
-import org.kframework.compile.transformers.ResolveHybrid;
-import org.kframework.compile.transformers.ResolveListOfK;
-import org.kframework.compile.transformers.ResolveOpenCells;
-import org.kframework.compile.transformers.ResolveRewrite;
-import org.kframework.compile.transformers.ResolveSupercool;
-import org.kframework.compile.transformers.ResolveSyntaxPredicates;
+import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerTransformerStep;
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -626,6 +603,12 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve Blocking Input");
 			}
+
+            javaDef = new CompilerTransformerStep(new AddK2SMTLib()).compile(javaDef);
+
+            if (GlobalSettings.verbose) {
+                sw.printIntermediate("Add translation from K to SMTlib v2 string");
+            }
 
 			javaDef = new CompilerTransformerStep(new AddPredicates()).compile(javaDef);
 

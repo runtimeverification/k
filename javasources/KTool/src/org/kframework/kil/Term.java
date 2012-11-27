@@ -5,7 +5,7 @@ import org.w3c.dom.Element;
 
 
 public abstract class Term extends ASTNode {
-	String sort;
+	protected String sort;
 
 	public Term(Term t) {
 		super(t);
