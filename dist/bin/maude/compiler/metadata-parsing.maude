@@ -93,6 +93,7 @@ fmod PARSE-METADATA-STRICT is
   including PARSE-METADATA-BASIC .
   including STRICT-ATTRS .
   including K-META-OPS .
+  including META-K-ERROR .
   var Q : Qid . var AS : AttrSet . var Nl : IntList .
   var A : Attr . var S S' S1 S2  S3 Sep : String . var F : FindResult .
   var P P' P'' : Nat .  var T : Type . var N : Int . 
@@ -103,6 +104,9 @@ fmod PARSE-METADATA-STRICT is
   if "-strict" = substr(S, _-_(length(S),length("-strict")), length(S)) .
  ceq pair(S,S') = seqkstrict(getStrictList(S'),qid(substr(S,0,  _-_(length(S),length("-seqstrict")))))
   if "-seqstrict" = substr(S, _-_(length(S),length("-seqstrict")), length(S)) .
+
+  eq kstrict(rat(S, N) Nl, Q) = 
+     errorAS("","Could not parse the strict argument list for \"" + S + "\".  Are you using comma as a separator?")  .
 
   op getStrictList : String -> IntList .
   eq getStrictList(S) = parseIntList(tokenize(stripSpaces(S), ",")) .
@@ -170,7 +174,7 @@ fmod PARSE-METADATA is
  
   var S : String .
 endfm
----()
+---(
 red metadataParse("") .
 red metadataParse("strict=()") .
 red metadataParse("strict=(1)") .
@@ -178,8 +182,6 @@ red metadataParse("strict=(1, 3, 2)") .
 red metadataParse("  strict=(  1 ,  3 ,  2   )   ") .
 red metadataParse("strict=(1,3,2)") .
 red metadataParse("strict=(ala,bala,portocala)") .
----()
----(
 red metadataParse("aux") .
 red metadataParse("strict seqstrict(1) in (state) strict(1 3 2) seqstrict  seqstrict   (  1  3  2   )   ") .
 red metadataParse("strict seqstrict(1)   seqstrict   (  1  3  2   )   ") .
