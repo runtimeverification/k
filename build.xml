@@ -88,27 +88,26 @@
 		<echo message="Build date: ${date}${line.separator}" file="${version.file}" append="true" />
 	</target>
 
-	<target name="release">
-		<antcall target="build" />
+	<target name="release" depends="test">
+		<antcall target="pack" />
+	</target>
+
+	<target name="pack">
 		<delete dir="./release" />
-
-		<mkdir dir="release" />
-		<echo message="Exporting with svn." />
-		<exec executable="svn" failonerror="true">
-			<arg value="export" />
-			<arg value="-q" />
-			<arg value="dist" />
-			<arg value="release/k" />
-		</exec>
-		<copy file="./dist/bin/java/k3.jar" todir="./release/k/bin/java/" />
-		<copy file="./dist/bin/version.txt" todir="./release/k/bin/" />
-		<!-- not needed at runtime -->
-		<delete file="./release/k/bin/native/linux/implodePT" />
-		<delete file="./release/k/bin/native/macosx/implodePT" />
-		<delete file="./release/k/bin/native/cygwin/implodePT.exe" />
-
 		<delete file="k-${version}.zip" />
 		<delete file="k-${version}.tgz" />
+
+		<copy todir="release/k">
+			<fileset dir="dist">
+				<exclude name="**/.*/**" />
+				<exclude name="examples/**/*-compiled.maude" />
+				<exclude name="tutorial/**/*-compiled.maude" />
+				<exclude name="bin/native/linux/implodePT" />
+				<exclude name="bin/native/macosx/implodePT" />
+				<exclude name="bin/native/cygwin/implodePT.exe" />
+			</fileset>
+		</copy>
+
 		<zip destfile="k-${version}.zip" basedir="release" />
 		<tar destfile="k-${version}.tgz" compression="gzip">
 			<tarfileset filemode="755" dir="./release">
@@ -121,9 +120,7 @@
 				<include name="k/bin/maude/binaries/maude.linux" />
 				<include name="k/bin/maude/binaries/maude.linux64" />
 				<include name="k/bin/native/linux/sdf2table" />
-				<!--<include name="k/bin/native/linux/implodePT" />-->
 				<include name="k/bin/native/macosx/sdf2table" />
-				<!--<include name="k/bin/native/macosx/implodePT" />-->
 			</tarfileset>
 			<tarfileset dir="./release">
 				<include name="**" />
@@ -136,18 +133,16 @@
 				<exclude name="k/bin/maude/binaries/maude.linux" />
 				<exclude name="k/bin/maude/binaries/maude.linux64" />
 				<exclude name="k/bin/native/linux/sdf2table" />
-				<!--<exclude name="k/bin/native/linux/implodePT" />-->
 				<exclude name="k/bin/native/macosx/sdf2table" />
-				<!--<exclude name="k/bin/native/macosx/implodePT" />-->
 			</tarfileset>
 		</tar>
 	</target>
 
 
-	<property name="config" value="./tests/config.xml"/>
-	<target name="test">
-	  <ant antfile="build.xml" dir="./tests/tools/Testing">
-	    <property name="cfg" value="${config}"/>
-	  </ant>
+	<property name="config" value="./tests/config.xml" />
+	<target name="test" depends="build">
+		<ant antfile="build.xml" dir="./tests/tools/Testing">
+			<property name="cfg" value="${config}" />
+		</ant>
 	</target>
 </project>
