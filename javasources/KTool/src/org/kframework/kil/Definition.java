@@ -12,6 +12,7 @@ import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.UpdateAssocVisitor;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -125,6 +126,7 @@ public class Definition extends ASTNode {
 		this.accept(new CollectPrioritiesVisitor());
 		this.accept(new CollectStartSymbolPgmVisitor());
 		this.accept(new CollectConfigCellsVisitor());
+		this.accept(new UpdateAssocVisitor());
 	}
 
 	public Map<String, Module> getModulesMap() {

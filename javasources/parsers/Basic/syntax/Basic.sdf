@@ -21,18 +21,15 @@ context-free syntax
 	"context"			HIDDEN+	-> KSentence {cons("Context")}
 
 	"syntax" SORTID "::=" {Prod1 ">"}+	-> KSentence {cons("Syntax")}
-	
-	"syntax" "priorities" {KLList ">"}+-> KSentence {cons("Priority")}
-	
-				 KLABEL+ -> KLList {cons("PriorityBlock")}
-	"left:"		 KLABEL+ -> KLList {cons("LeftPriorityBlock")}
-	"right:"	 KLABEL+ -> KLList {cons("RightPriorityBlock")}
-	"non-assoc:" KLABEL+ -> KLList {cons("NonAPriorityBlock")}
-	HIDDEN -> KLABEL {cons("KLabel")}
-	">" -> KLABEL {reject}
-	"left:" -> KLABEL {reject}
-	"right:" -> KLABEL {reject}
-	"non-assoc:" -> KLABEL {reject}
+
+	"syntax" "priorities"	{KLList ">"}+	-> KSentence {cons("Priority")}
+	"syntax" "left"			KLABEL+			-> KSentence {cons("PriorityLeft")}
+	"syntax" "right"		KLABEL+			-> KSentence {cons("PriorityRight")}
+	"syntax" "non-assoc"	KLABEL+			-> KSentence {cons("PriorityNonAssoc")}
+
+	KLABEL+	-> KLList {cons("PriorityBlock")}
+	HIDDEN	-> KLABEL {cons("KLabel")}
+	">"		-> KLABEL {reject}
 
 context-free restrictions
 	KLABEL			-/- ~[\t\n\r\ ]

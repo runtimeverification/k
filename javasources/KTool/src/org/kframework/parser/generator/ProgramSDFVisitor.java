@@ -9,6 +9,7 @@ import org.kframework.kil.Constant;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.PriorityBlockExtended;
 import org.kframework.kil.PriorityExtended;
+import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -26,8 +27,8 @@ import org.kframework.utils.StringUtil;
  */
 public class ProgramSDFVisitor extends BasicVisitor {
 
-	public List<Production> outsides = new ArrayList<Production>();
-	public List<Production> constants = new ArrayList<Production>();
+	public Set<Production> outsides = new HashSet<Production>();
+	public Set<Production> constants = new HashSet<Production>();
 	public Set<String> sorts = new HashSet<String>(); // list of inserted sorts that need to avoid the priority filter
 	public Set<String> startSorts = new HashSet<String>(); // list of sorts that are start symbols
 	public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
@@ -58,6 +59,21 @@ public class ProgramSDFVisitor extends BasicVisitor {
 			}
 			priblocks.add(pb1);
 		}
+
+		processPriorities(priblocks);
+	}
+
+	public void visit(PriorityExtendedAssoc node) {
+		// reconstruct a syntax declaration from the syntax priorities
+		List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
+		PriorityBlock pb1 = new PriorityBlock();
+		pb1.setAssoc(node.getAssoc());
+
+		for (Constant tag : node.getTags()) {
+			Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getValue());
+			pb1.getProductions().addAll(prods2);
+		}
+		priblocks.add(pb1);
 
 		processPriorities(priblocks);
 	}

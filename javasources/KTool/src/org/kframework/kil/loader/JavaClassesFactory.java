@@ -1,6 +1,48 @@
 package org.kframework.kil.loader;
 
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
+import org.kframework.kil.Bag;
+import org.kframework.kil.BagItem;
+import org.kframework.kil.Bracket;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Context;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Empty;
+import org.kframework.kil.Hole;
+import org.kframework.kil.Import;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.List;
+import org.kframework.kil.ListItem;
+import org.kframework.kil.ListOfK;
+import org.kframework.kil.LiterateDefinitionComment;
+import org.kframework.kil.LiterateModuleComment;
+import org.kframework.kil.Map;
+import org.kframework.kil.MapItem;
+import org.kframework.kil.Module;
+import org.kframework.kil.PriorityBlock;
+import org.kframework.kil.PriorityBlockExtended;
+import org.kframework.kil.PriorityExtended;
+import org.kframework.kil.PriorityExtendedAssoc;
+import org.kframework.kil.Production;
+import org.kframework.kil.Require;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Set;
+import org.kframework.kil.SetItem;
+import org.kframework.kil.Sort;
+import org.kframework.kil.StringSentence;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.TermComment;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.Variable;
 import org.w3c.dom.Element;
 
 public class JavaClassesFactory {
@@ -25,6 +67,8 @@ public class JavaClassesFactory {
 
 		if (Constants.PRISENT.equals(element.getNodeName()))
 			return new PriorityExtended(element);
+		if (Constants.PRIASSOC.equals(element.getNodeName()))
+			return new PriorityExtendedAssoc(element);
 		if (Constants.PRIBLOCK.equals(element.getNodeName()))
 			return new PriorityBlockExtended(element);
 

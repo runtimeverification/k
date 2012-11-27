@@ -61,7 +61,7 @@ public class PriorityBlock extends ASTNode {
 		if (content.length() > 2)
 			content = content.substring(0, content.length() - 3);
 
-		if (assoc.equals(""))
+		if (assoc == null || assoc.equals(""))
 			return content;
 		return assoc + ": " + content;
 	}

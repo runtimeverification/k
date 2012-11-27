@@ -359,29 +359,29 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml:
-		LeftPriorityBlock(x) -> $[<priblock loc="[loc]" assoc="left">
+		PriorityLeft(x) -> $[<priassoc loc="[loc]" assoc="left">
 									[x2'*]
-			</priblock>
+			</priassoc>
 		]
-		where mydebug(!"PriorityBlock: ")
+		where mydebug(!"priassoc-left: ")
 		where x2'* := <all(to-xml)> x	// get all of the production rules
 		where loc := <getLocAsString>
 
 	to-xml:
-		RightPriorityBlock(x) -> $[<priblock loc="[loc]" assoc="right">
+		PriorityRight(x) -> $[<priassoc loc="[loc]" assoc="right">
 									[x2'*]
-			</priblock>
+			</priassoc>
 		]
-		where mydebug(!"PriorityBlock: ")
+		where mydebug(!"priassoc-right: ")
 		where x2'* := <all(to-xml)> x	// get all of the production rules
 		where loc := <getLocAsString>
-		
+
 	to-xml:
-		NonAPriorityBlock(x) -> $[<priblock loc="[loc]" assoc="non-assoc">
+		PriorityNonAssoc(x) -> $[<priassoc loc="[loc]" assoc="non-assoc">
 									[x2'*]
-			</priblock>
+			</priassoc>
 		]
-		where mydebug(!"PriorityBlock: ")
+		where mydebug(!"priassoc-non-assoc: ")
 		where x2'* := <all(to-xml)> x	// get all of the production rules
 		where loc := <getLocAsString>
 

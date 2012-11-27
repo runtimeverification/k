@@ -1,20 +1,30 @@
 package org.kframework.parser.generator;
 
-import org.kframework.kil.*;
-import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.Subsort;
-import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.StringUtil;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.kframework.kil.Constant;
+import org.kframework.kil.PriorityBlock;
+import org.kframework.kil.PriorityBlockExtended;
+import org.kframework.kil.PriorityExtended;
+import org.kframework.kil.PriorityExtendedAssoc;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
+import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.loader.Subsort;
+import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.utils.StringUtil;
+
 public class DefinitionSDFVisitor extends BasicVisitor {
 
-	public List<Production> outsides = new ArrayList<Production>();
-	public List<Production> constants = new ArrayList<Production>();
+	public Set<Production> outsides = new HashSet<Production>();
+	public Set<Production> constants = new HashSet<Production>();
 	public Set<Sort> insertSorts = new HashSet<Sort>(); // list of inserted sorts that need to avoid the priority filter
 	public Set<Subsort> subsorts = new HashSet<Subsort>();
 	public Set<Production> listProds = new HashSet<Production>(); // list of sorts declared as being list
@@ -44,6 +54,21 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 			}
 			priblocks.add(pb1);
 		}
+
+		processPriorities(priblocks);
+	}
+
+	public void visit(PriorityExtendedAssoc node) {
+		// reconstruct a syntax declaration from the syntax priorities
+		List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
+		PriorityBlock pb1 = new PriorityBlock();
+		pb1.setAssoc(node.getAssoc());
+
+		for (Constant tag : node.getTags()) {
+			Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getValue());
+			pb1.getProductions().addAll(prods2);
+		}
+		priblocks.add(pb1);
 
 		processPriorities(priblocks);
 	}

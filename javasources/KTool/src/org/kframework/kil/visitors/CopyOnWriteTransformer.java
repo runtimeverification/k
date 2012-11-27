@@ -190,6 +190,29 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
+	public ASTNode transform(PriorityExtendedAssoc node) throws TransformerException {
+		boolean change = false;
+		ArrayList<Constant> pbs = new ArrayList<Constant>();
+		for (Constant pb : node.getTags()) {
+			ASTNode result = pb.accept(this);
+			if (result != pb)
+				change = true;
+			if (result != null) {
+				if (!(result instanceof Constant)) {
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + " while transforming.", getName(),
+							pb.getFilename(), pb.getLocation()));
+				}
+				pbs.add((Constant) result);
+			}
+		}
+		if (change) {
+			node = node.shallowCopy();
+			node.setTags(pbs);
+		}
+		return transform((ModuleItem) node);
+	}
+
+	@Override
 	public ASTNode transform(PriorityBlock node) throws TransformerException {
 		boolean change = false;
 		ArrayList<Production> prods = new ArrayList<Production>();

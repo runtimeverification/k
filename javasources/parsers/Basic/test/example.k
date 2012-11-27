@@ -5,9 +5,11 @@ module IMP-SYNTAX
                 > AExp "+" AExp    [left, strict]
 
   syntax priorities
-         left:      a 'a >
-         non-assoc: b c d >
-                    z
-
+          a 'a >
+          b c d >
+          z
+  syntax left a
+  syntax right b
+  syntax non-assoc c
 
 endmodule

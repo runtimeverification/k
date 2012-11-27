@@ -12,6 +12,7 @@ public class Constants {
 	public static final String SYNTAX = "syntax";
 	public static final String PRISENT = "prisent";
 	public static final String PRIBLOCK = "priblock";
+	public static final String PRIASSOC = "priassoc";
 	public static final String SORT = "sort";
 	public static final String PRIORITY = "priority";
 	public static final String PRODUCTION = "production";

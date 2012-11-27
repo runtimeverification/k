@@ -151,6 +151,10 @@ public class MaudeFilter extends BasicVisitor {
 	}
 
 	@Override
+	public void visit(PriorityExtendedAssoc priorityBlock) {
+	}
+
+	@Override
 	public void visit(PriorityBlock priorityBlock) {
 		result.append("production");
 	}
@@ -200,8 +204,8 @@ public class MaudeFilter extends BasicVisitor {
 	public void visit(Attributes attributes) {
 		firstAttribute = true;
 		for (Attribute entry : attributes.getContents()) {
-            // Andrei S: for some reason I do not understand, location and
-            // filename are special attributes
+			// Andrei S: for some reason I do not understand, location and
+			// filename are special attributes
 			if (!entry.getKey().equals("klabel") && !entry.getKey().equals("location") && !entry.getKey().equals("filename")) {
 				entry.accept(this);
 			}
@@ -210,7 +214,7 @@ public class MaudeFilter extends BasicVisitor {
 
 	private boolean isEmptyAttributes(Attributes attributes) {
 		for (Attribute entry : attributes.getContents()) {
-            if (!entry.getKey().equals("klabel") && !entry.getKey().equals("location") && !entry.getKey().equals("filename")) {
+			if (!entry.getKey().equals("klabel") && !entry.getKey().equals("location") && !entry.getKey().equals("filename")) {
 				if (!isEmptyAttribute(entry)) {
 					return false;
 				}

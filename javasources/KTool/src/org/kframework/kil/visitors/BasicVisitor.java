@@ -107,6 +107,14 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(PriorityExtendedAssoc node) {
+		for (Constant pb : node.getTags()) {
+			pb.accept(this);
+		}
+		visit((ModuleItem) node);
+	}
+
+	@Override
 	public void visit(PriorityBlock node) {
 		for (Production p : node.getProductions()) {
 			p.accept(this);
