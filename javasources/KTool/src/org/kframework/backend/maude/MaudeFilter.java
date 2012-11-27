@@ -204,9 +204,7 @@ public class MaudeFilter extends BasicVisitor {
 	public void visit(Attributes attributes) {
 		firstAttribute = true;
 		for (Attribute entry : attributes.getContents()) {
-			// Andrei S: for some reason I do not understand, location and
-			// filename are special attributes
-			if (!entry.getKey().equals("klabel")) { // && !entry.getKey().equals("location") && !entry.getKey().equals("filename")) {
+			if (!entry.getKey().equals("klabel")) {
 				entry.accept(this);
 			}
 		}
@@ -252,7 +250,7 @@ public class MaudeFilter extends BasicVisitor {
 			}
 			result.append(attribute.getKey());
 			result.append("=(");
-			result.append(attribute.getValue());
+			result.append(attribute.getValue().replaceAll("[()]",""));
 			result.append(")");
 		}
 	}
