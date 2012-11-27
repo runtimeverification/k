@@ -94,7 +94,7 @@ fmod PARSE-METADATA-STRICT is
   including STRICT-ATTRS .
   including K-META-OPS .
   var Q : Qid . var AS : AttrSet . var Nl : IntList .
-  var A : Attr . var S S' S1 S2  S3 : String . var F : FindResult .
+  var A : Attr . var S S' S1 S2  S3 Sep : String . var F : FindResult .
   var P P' P'' : Nat .  var T : Type . var N : Int . 
 
   eq pair("strict",S) = kstrict(getStrictList(S),klabel) .
@@ -105,7 +105,13 @@ fmod PARSE-METADATA-STRICT is
   if "-seqstrict" = substr(S, _-_(length(S),length("-seqstrict")), length(S)) .
 
   op getStrictList : String -> IntList .
-  eq getStrictList(S) = parseIntList(tokenize(stripSpaces(S))) .
+  eq getStrictList(S) = parseIntList(tokenize(stripSpaces(S), ",")) .
+
+  op tokenize : String String -> QidList .
+ ceq tokenize(S, Sep) = qid(stripSpaces(substr(S, 0, N))) tokenize(stripSpaces(substr(S,N + 1, length(S))), Sep)
+  if N := find(S,Sep, 0) .
+  eq tokenize("", Sep) = nil .
+  eq tokenize(S, Sep) = qid(stripSpaces(S)) [owise] .
 
 --- ceq metadataStrippedParse(S) = klist(N,Q,T) metadataParse(S')
 ---   if "list(" = substr(S,0,length("list(")) 
@@ -164,14 +170,16 @@ fmod PARSE-METADATA is
  
   var S : String .
 endfm
----(
+---()
 red metadataParse("") .
-red metadataParse("strict") .
-red metadataParse("strict(1)") .
-red metadataParse("strict(1 3 2)") .
-red metadataParse("  strict   (  1  3  2   )   ") .
-red metadataParse("strict(1 3 2)") .
-red metadataParse("strict(ala bala portocala)") .
+red metadataParse("strict=()") .
+red metadataParse("strict=(1)") .
+red metadataParse("strict=(1, 3, 2)") .
+red metadataParse("  strict=(  1 ,  3 ,  2   )   ") .
+red metadataParse("strict=(1,3,2)") .
+red metadataParse("strict=(ala,bala,portocala)") .
+---()
+---(
 red metadataParse("aux") .
 red metadataParse("strict seqstrict(1) in (state) strict(1 3 2) seqstrict  seqstrict   (  1  3  2   )   ") .
 red metadataParse("strict seqstrict(1)   seqstrict   (  1  3  2   )   ") .
@@ -188,4 +196,3 @@ red metadataParse("latex ( color: red wrapping Me)") .
 red metadataParse("arity 1 list(1:_`,_:K) strict(1) hybrid") .
 q
 ---)
-
