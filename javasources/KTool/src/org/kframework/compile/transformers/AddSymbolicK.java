@@ -29,9 +29,6 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
     public static final String symbolicConstructor(String sort) {
 		assert allowSymbolic(sort);
 
-		if (allowKSymbolic(sort))
-            return "'" + SymbolicConstructorPrefix + sort;
-        else
             return SymbolicConstructorPrefix + sort;
 	}
 

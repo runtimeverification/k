@@ -1,5 +1,7 @@
 package org.kframework.parser.generator;
 
+import org.kframework.compile.transformers.AddPredicates;
+import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -192,9 +194,9 @@ public class DefinitionSDF {
 		sdf.append("\n\n%% sort predicates\n");
 		// print is<Sort> predicates (actually KLabel)
 		for (Sort s : psdfv.userSorts) {
-			sdf.append("	\"is" + s.getName() + "\"      -> DzKLabel\n");
-			sdf.append("	\"isSymbolic" + s.getName() + "\"      -> DzKLabel\n");
-			sdf.append("	\"sym" + s.getName() + "\"      -> DzKLabel\n");
+			sdf.append("	\"" + AddPredicates.syntaxPredicate(s.getName()) + "\"      -> DzKLabel\n");
+			sdf.append("	\"" + AddPredicates.symbolicPredicate(s.getName()) + "\"      -> DzKLabel\n");
+			sdf.append("	\"" + AddSymbolicK.symbolicConstructor(s.getName()) + "\"      -> DzKLabel\n");
 		}
 
 		sdf.append("\n\n");
