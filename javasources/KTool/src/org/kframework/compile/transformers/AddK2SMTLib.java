@@ -2,7 +2,18 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.GetSyntaxByTag;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Constant;
+import org.kframework.kil.KApp;
+import org.kframework.kil.ListOfK;
+import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Production;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -20,10 +31,11 @@ import java.util.ArrayList;
 
 public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
-    public static final Constant K_TO_SMTLIB2 = Constant.KLABEL("K2SMTLib2");
-    private static final String SMTLIB2_VAR_PREFIX = "__var__";
-    public static final String SMTLIB2_ATTR = "smtlib";
+    public static final Constant K_TO_SMTLIB = Constant.KLABEL("K2SMTLib");
+    private static final String SMTLIB_VAR_PREFIX = "__var__";
+    public static final String SMTLIB_ATTR = "smtlib";
 
+    // constructs the term '_+String_(term1,,term2)
     public static Term appendString(Term term1, Term term2) {
         ListOfK list = new ListOfK();
         list.add(term1);
@@ -39,7 +51,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
         // declare K2SMTlib2 function
-        retNode.addConstant(K_TO_SMTLIB2);
+        retNode.addConstant(K_TO_SMTLIB);
 
         // for each sort, define the SMT representation of the symbolic sort
         // constructors symSort(Int) and symSort(Id)
@@ -50,18 +62,18 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
                 Variable var = MetaK.getFreshVar("Int");
                 Term symTerm = new KApp(Constant.KLABEL(symCtor), var);
-                Term lhs = new KApp(K_TO_SMTLIB2, symTerm);
+                Term lhs = new KApp(K_TO_SMTLIB, symTerm);
                 KApp strTerm = new KApp(Constant.KLABEL("Int2String"), var);
-                Term rhs = appendString(Constant.STRING(SMTLIB2_VAR_PREFIX), strTerm);
+                Term rhs = appendString(Constant.STRING(SMTLIB_VAR_PREFIX), strTerm);
                 Rule rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
                 var = MetaK.getFreshVar("Id");
                 symTerm = new KApp(Constant.KLABEL(symCtor), var);
-                lhs = new KApp(K_TO_SMTLIB2, symTerm);
+                lhs = new KApp(K_TO_SMTLIB, symTerm);
                 strTerm = new KApp(Constant.KLABEL("Id2String"), var);
-                rhs = appendString(Constant.STRING(SMTLIB2_VAR_PREFIX), strTerm);
+                rhs = appendString(Constant.STRING(SMTLIB_VAR_PREFIX), strTerm);
                 rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
@@ -71,14 +83,15 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
         // for each production, define the SMT representation based on the
         // smtlib tag
         // TODO: support subsort production using the injection label
-        for (Production prod : GetSyntaxByTag.applyVisitor(node, SMTLIB2_ATTR)) {
-            String smtLbl = prod.getAttribute(SMTLIB2_ATTR);
+        for (Production prod : GetSyntaxByTag.applyVisitor(node, SMTLIB_ATTR)) {
+            String smtLbl = prod.getAttribute(SMTLIB_ATTR);
             // not sure if this is necessary
             if (smtLbl == null)
                 smtLbl = "";
 
+            // for empty smtlib tags, use the prefix label instead
+            // TODO: ensure the label is a valid SMTLib identifier
             if (smtLbl.equals(""))
-                // prefix label assumed to be valid SMTLib2 identifier
                 smtLbl = prod.getLabel();
 
             if (prod.isSubsort())
@@ -89,7 +102,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 continue;
 
             Term term = MetaK.getTerm(prod);
-            Term lhs = new KApp(K_TO_SMTLIB2, term);
+            Term lhs = new KApp(K_TO_SMTLIB, term);
 
             Term rhs;
             if (prod.isConstant()) {
@@ -100,7 +113,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 for (int idx = 0; idx < ((TermCons) term).arity(); ++idx) {
                     Variable var = (Variable) termCons.getSubterm(idx);
                     rhs = appendString(rhs, Constant.SPACE);
-                    rhs = appendString(rhs, new KApp(K_TO_SMTLIB2, var));
+                    rhs = appendString(rhs, new KApp(K_TO_SMTLIB, var));
                 }
                 rhs = appendString(rhs, Constant.STRING(")"));
             }

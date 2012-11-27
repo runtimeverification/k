@@ -1,16 +1,61 @@
 require "builtins.k"
+require "modules/substitution.k"
 
 module SYMBOLIC-K
+  imports #SMT
   imports BUILTIN-HOOKS
+  imports FREE-VARS
 
-  syntax String ::= "K2SMTLib2" "(" K ")"
-  [prefixlabel(K2SMTLib2), klabel(K2SMTLib2), function]
-  rule K2SMTLib2(false) => "false"
-  rule K2SMTLib2(true)  => "true"
-  rule K2SMTLib2(I:#Int) => Int2String(I)
+  syntax String ::= "K2SMTLib" "(" K ")" [klabel(K2SMTLib), function]
+  rule K2SMTLib(false) => "false"
+  rule K2SMTLib(true)  => "true"
+  rule K2SMTLib(I:#Int) => Int2String(I)
   when I >=Int 0
-  rule K2SMTLib2(I:#Int) => "(- " +String Int2String(absInt(I)) +String ")"
+  rule K2SMTLib(I:#Int) => "(- " +String Int2String(absInt(I)) +String ")"
   when I <Int 0
+
+  syntax Bool ::= "forall" Set "." Bool [binder, function]
+  syntax Bool ::= "exists" Set "." Bool [binder, function]
+  rule
+    K2SMTLib(forall S:Set . B:Bool)
+  =>
+    "(forall (" +String Vars2SMTLib(S) +String ") "
+    +String K2SMTLib(B) +String ")"
+  rule
+    K2SMTLib(exists S:Set . B:Bool)
+  =>
+    "(forall (" +String Vars2SMTLib(S) +String ") "
+    +String K2SMTLib(B) +String ")"
+
+  syntax String ::= "Vars2SMTLib" "(" Set ")"
+  [prefixlabel(Vars2SMTLib), function]
+  rule
+    Vars2SMTLib(SetItem(V:Variable) S:Set)
+  =>
+    "(" +String K2SMTLib(V) +String " " +String K2Sort(V) +String ")"
+    +String Vars2SMTLib(S)
+  rule Vars2SMTLib(.Set) => ""
+  
+  syntax String ::= "Consts2SMTLib" "(" Set ")"
+  [prefixlabel(Consts2SMTLib), function]
+  rule
+    Consts2SMTLib(SetItem(V:Variable) S:Set)
+  =>
+    "(declare-fun " +String K2SMTLib(V)
+    +String " () " +String K2Sort(V) +String ")\n"
+    +String Consts2SMTLib(S)
+  rule Consts2SMTLib(.Set) => ""
+
+  syntax String ::= "SMTLibQuery" "(" Bool ")" [klabel(SMTLibQuery), function]
+  rule
+    SMTLibQuery(B:Bool)
+  =>
+    "(set-logic AUFNIRA)\n"
+    +String Consts2SMTLib(freeVariables(B))
+    +String "(assert " +String K2SMTLib(B) +String ")\n"
+    +String "(check-sat)\n"
+
+  syntax String ::= "checkSAT" "(" String ")" [function, hook(#SMT:#smtCall_)]
 
 
   syntax Bool ::= "isBuiltin" "(" K ")"
