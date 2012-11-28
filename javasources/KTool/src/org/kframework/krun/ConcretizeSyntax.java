@@ -43,8 +43,6 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			if (conses != null) {	
 				for (String cons : conses) {
 					Production p = DefinitionHelper.conses.get(cons);
-					System.err.println(kapp);
-					System.err.println(sortContext+" "+p.getSort());
 					if ((DefinitionHelper.isSubsortedEq(sortContext, p.getSort())) && p.getArity() == contents.size()) {
 						validConses.add(cons);
 						for (int i = 0; i < contents.size(); i++) {
