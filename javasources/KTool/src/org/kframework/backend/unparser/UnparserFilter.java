@@ -486,26 +486,14 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(org.kframework.kil.Map map) {
 		prepare(map);
-		java.util.List<Term> termList = map.getContents();
-		for (int i = 0; i < termList.size(); ++i) {
-			termList.get(i).accept(this);
-			if (i != termList.size() - 1) {
-				result.write(" ");
-			}
-		}
+		super.visit(map);
 		postpare();
 	}
 
 	@Override
 	public void visit(Bag bag) {
 		prepare(bag);
-		java.util.List<Term> termList = bag.getContents();
-		for (int i = 0; i < termList.size(); ++i) {
-			termList.get(i).accept(this);
-			if (i != termList.size() - 1) {
-				result.write(" ");
-			}
-		}
+		super.visit(bag);
 		postpare();
 	}
 
