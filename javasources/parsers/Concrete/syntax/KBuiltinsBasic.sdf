@@ -8,11 +8,11 @@ context-free syntax
 	DzKLabel	-> KLabel {cons("KLabel1Const")}
 
 lexical syntax
-	"true"				-> DzDzBOOL
-	"false"				-> DzDzBOOL
+	%%"true"				-> DzDzBOOL
+	%%"false"				-> DzDzBOOL
 
-	"true"				-> DzDzID {reject}
-	"false"				-> DzDzID {reject}
+	%%"true"				-> DzDzID {reject}
+	%%"false"				-> DzDzID {reject}
 
 	[a-zA-Z][a-zA-Z0-9]*	-> DzDzID
 	[\-\+]? [0-9]+			-> DzDzINT {prefer}

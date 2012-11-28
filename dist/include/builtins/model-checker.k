@@ -1,6 +1,9 @@
 require "bool.k"
 
 module LTL-SYNTAX-HOOKS
+  syntax #LTLFormula ::= "LTLTrue"
+  syntax #LTLFormula ::= "LTLFalse"
+
   syntax LTLFormula ::= #LTLFormula
 endmodule
 

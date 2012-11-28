@@ -1,5 +1,8 @@
 module BOOL-SYNTAX-HOOKS
   imports #BOOL-INTERFACE
+
+  syntax #Bool ::= "true"
+  syntax #Bool ::= "false"
   syntax Bool ::= #Bool
 endmodule
 
