@@ -29,6 +29,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
 	public Set<Production> outsides = new HashSet<Production>();
 	public Set<Production> constants = new HashSet<Production>();
+	public Set<String> constantSorts = new HashSet<String>();
 	public Set<String> sorts = new HashSet<String>(); // list of inserted sorts that need to avoid the priority filter
 	public Set<String> startSorts = new HashSet<String>(); // list of sorts that are start symbols
 	public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
@@ -36,6 +37,11 @@ public class ProgramSDFVisitor extends BasicVisitor {
 	public StringBuilder sdf = new StringBuilder("");
 
 	public ProgramSDFVisitor() {
+		constantSorts.add("#Id");
+		constantSorts.add("#Bool");
+		constantSorts.add("#Int");
+		constantSorts.add("#String");
+		constantSorts.add("#Float");
 	}
 
 	public void visit(Syntax syn) {
@@ -93,6 +99,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 					startSorts.add(((Sort) prd.getItems().get(0)).getName());
 				} else if (prd.isConstant()) {
 					constants.add(prd);
+					constantSorts.add(prd.getSort());
 				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {
 					outsides.add(prd);
 				} else if (prd.getItems().get(0).getType() == ProductionType.USERLIST) {

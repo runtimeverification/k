@@ -76,11 +76,16 @@ public class ProgramSDF {
 			sdf.append("	" + StringUtil.escapeSortName(ss) + " -> InsertDz" + StringUtil.escapeSortName(ss) + "\n");
 
 		sdf.append("\n\n");
-		sdf.append("	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n");
-		sdf.append("	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n");
-		sdf.append("	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n");
-		sdf.append("	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n");
-		sdf.append("	DzDzFloat	-> DzFloat	{cons(\"DzFloat1Const\")}\n");
+		for (String sort : psdfv.constantSorts) {
+			String s = StringUtil.escapeSortName(sort);
+			sdf.append("	Dz" + s + "		-> " + s + "	{cons(\"" + s + "1Const\")}\n");
+		}
+
+		// sdf.append("	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n");
+		// sdf.append("	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n");
+		// sdf.append("	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n");
+		// sdf.append("	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n");
+		// sdf.append("	DzDzFloat	-> DzFloat	{cons(\"DzFloat1Const\")}\n");
 
 		sdf.append("\n");
 		sdf.append("	DzDzINT		-> DzDzInt\n");

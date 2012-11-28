@@ -45,7 +45,7 @@ public class DefinitionSDF {
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
 				sdf.append("	" + StringUtil.escapeSortName(s.getName()) + " -> K");
-				//sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(s.getName()) + "\")}");
+				// sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(s.getName()) + "\")}");
 				sdf.append("\n");
 			}
 		}
@@ -55,7 +55,7 @@ public class DefinitionSDF {
 			String s2 = subs.getBigSort();
 			if (!Sort.isBasesort(s1) && !Sort.isBasesort(s2)) {
 				sdf.append("	" + StringUtil.escapeSortName(s1) + " -> " + StringUtil.escapeSortName(s2));
-				//sdf.append(" {cons(\"" + StringUtil.escapeSortName(s2) + "12" + StringUtil.escapeSortName(s1) + "\")}");
+				// sdf.append(" {cons(\"" + StringUtil.escapeSortName(s2) + "12" + StringUtil.escapeSortName(s1) + "\")}");
 				sdf.append("\n");
 			}
 		}
@@ -63,7 +63,7 @@ public class DefinitionSDF {
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
 				sdf.append("	K -> " + StringUtil.escapeSortName(s.getName()));
-				//sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12K\")}");
+				// sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12K\")}");
 				sdf.append("\n");
 			}
 		}
@@ -78,13 +78,13 @@ public class DefinitionSDF {
 				if (!s.isBaseSort()) {
 					sdf.append("context-free priorities\n{\n");
 					sdf.append("        K -> " + StringUtil.escapeSortName(s.getName()));
-					//sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12K\")}");
+					// sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12K\")}");
 					sdf.append("\n");
 					sdf.append("} .> {\n");
 					for (Sort ss : psdfv.userSorts) {
 						if (!ss.isBaseSort() && DefinitionHelper.isSubsortedEq(s.getName(), ss.getName())) {
 							sdf.append("        " + StringUtil.escapeSortName(ss.getName()) + " -> K");
-							//sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(ss.getName()) + "\")}");
+							// sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(ss.getName()) + "\")}");
 							sdf.append("\n");
 						}
 					}
@@ -99,7 +99,7 @@ public class DefinitionSDF {
 			for (Sort s : psdfv.userSorts) {
 				if (!s.isBaseSort()) {
 					sdf.append("	K -> " + StringUtil.escapeSortName(s.getName()));
-					//sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12K\")}");
+					// sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12K\")}");
 					sdf.append("\n");
 				}
 			}
@@ -107,7 +107,7 @@ public class DefinitionSDF {
 			for (Sort s : psdfv.userSorts) {
 				if (!s.isBaseSort()) {
 					sdf.append("	" + StringUtil.escapeSortName(s.getName()) + " -> K");
-					//sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(s.getName()) + "\")}");
+					// sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(s.getName()) + "\")}");
 					sdf.append("\n");
 				}
 			}
@@ -166,11 +166,16 @@ public class DefinitionSDF {
 		sdf.append("	VariableDz -> K\n");
 
 		sdf.append("\n\n");
-		sdf.append("	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n");
-		sdf.append("	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n");
-		sdf.append("	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n");
-		sdf.append("	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n");
-		sdf.append("	DzDzFloat	-> DzFloat	{cons(\"DzFloat1Const\")}\n");
+		for (String sort : psdfv.constantSorts) {
+			String s = StringUtil.escapeSortName(sort);
+			sdf.append("	Dz" + s + "		-> " + s + "	{cons(\"" + s + "1Const\")}\n");
+		}
+
+		// sdf.append("	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n");
+		// sdf.append("	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n");
+		// sdf.append("	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n");
+		// sdf.append("	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n");
+		// sdf.append("	DzDzFloat	-> DzFloat	{cons(\"DzFloat1Const\")}\n");
 
 		sdf.append("\n");
 		sdf.append("	DzDzINT		-> DzDzInt\n");
