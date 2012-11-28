@@ -225,7 +225,6 @@ public class BasicVisitor implements Visitor {
 
 	@Override
 	public void visit(BagItem node) {
-		node.getItem().accept(this);
 		visit((CollectionItem) node);
 	}
 
