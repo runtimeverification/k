@@ -18,6 +18,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 		} else if (prd.isListDecl()) {
 			UserList srt = (UserList) prd.getItems().get(0);
 			DefinitionHelper.listConses.put(prd.getSort(), prd);
+			DefinitionHelper.putListLabel(prd);
 			DefinitionHelper.addSubsort(prd.getSort(), srt.getSort());
 		} else {
 			for (ProductionItem pi : prd.getItems()) {

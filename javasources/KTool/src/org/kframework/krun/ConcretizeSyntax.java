@@ -24,6 +24,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 	public ASTNode transform(KApp kapp) throws TransformerException {
 		Term label = kapp.getLabel();
 		Term child = kapp.getChild();
+		List<Term> possibleTerms;
 		if (label instanceof KInjectedLabel && child instanceof Empty) {
 			Term injected = ((KInjectedLabel)label).getTerm();
 			if (MetaK.isBuiltinSort(injected.getSort()) || DefinitionHelper.isSubsortedEq(sortContext, injected.getSort())) {
@@ -33,7 +34,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			Set<String> conses = DefinitionHelper.labels.get(((Constant)label).getValue());
 			Set<String> validConses = new HashSet<String>();
 			List<Term> contents = new ArrayList<Term>();
-			List<Term> possibleTerms = new ArrayList<Term>();
+			possibleTerms = new ArrayList<Term>();
 			if (child instanceof ListOfK) {
 				contents = ((ListOfK)child).getContents();
 			} else if (!(child instanceof Empty)) {
@@ -66,9 +67,26 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 					
 					return new Ambiguity(sortContext, possibleTerms);
 				}
-			} else {
+			} else if (child instanceof Empty) {
 				//could be a list terminator, which don't have conses
-				//String value = ((Constant)label).getValue
+				Set<String> sorts = DefinitionHelper.listLabels.get(((Constant)label).getValue());
+				possibleTerms = new ArrayList<Term>();
+				if (sorts != null) {
+					for (String sort : sorts) {
+						if (DefinitionHelper.isSubsortedEq(sortContext, sort) || sortContext.equals("K")) {
+							possibleTerms.add(new Empty(sort));
+						}
+					}
+					if (possibleTerms.size() == 0) {
+						return super.transform(kapp);
+					}
+					if (possibleTerms.size() == 1) {
+						return possibleTerms.get(0);
+					} else {
+						
+						return new Ambiguity(sortContext, possibleTerms);
+					}
+				}
 			}
 		} else if (label instanceof Freezer) {
 			subst = new ArrayList<Term>();

@@ -104,9 +104,16 @@ public class KRun {
 		result = (Term) result.accept(new BasicTransformer("Re-flatten ambiguous syntax") {
 			@Override
 			public ASTNode transform(Ambiguity amb) throws TransformerException {
-				TermCons t1 = (TermCons)amb.getContents().get(0);
-				if (MetaK.isComputationSort(t1.getSort())) {
-					return new KApp(new Constant("KLabel", t1.getProduction().getKLabel()), (Term) new ListOfK(t1.getContents()).accept(this));
+				if (amb.getContents().get(0) instanceof TermCons) {
+					TermCons t1 = (TermCons)amb.getContents().get(0);
+					if (MetaK.isComputationSort(t1.getSort())) {
+						return new KApp(new Constant("KLabel", t1.getProduction().getKLabel()), (Term) new ListOfK(t1.getContents()).accept(this));
+					}
+				} else if (amb.getContents().get(0) instanceof Empty) {
+					Empty t1 = (Empty)amb.getContents().get(0);
+					if (MetaK.isComputationSort(t1.getSort())) {
+						return new KApp(new Constant("KLabel", MetaK.getListUnitLabel(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator())), new Empty("List{K}"));
+					}
 				}
 				return amb;
 			}

@@ -47,6 +47,7 @@ public class DefinitionHelper {
 	public static java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
 	public static java.util.Map<String, String> cellSorts = new HashMap<String, String>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
+	public static java.util.Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
 	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
 	public static java.util.Set<String> definedSorts = Sort.getBaseSorts();
 	private static java.util.Set<Subsort> priorities = new HashSet<Subsort>();
@@ -64,6 +65,15 @@ public class DefinitionHelper {
 		if (s == null)
 			labels.put(label, s=new HashSet<String>());
 		s.add(cons);
+	}
+
+	public static void putListLabel(Production p) {
+		String separator = ((UserList) p.getItems().get(0)).getSeparator();
+		String label = MetaK.getListUnitLabel(separator);
+		Set<String> s = listLabels.get(label);
+		if (s == null)
+			listLabels.put(label, s=new HashSet<String>());
+		s.add(p.getSort());
 	}
 
 	public static void addCellDecl(Cell c) {

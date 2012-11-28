@@ -11,7 +11,9 @@ public class CollectConsesVisitor extends BasicVisitor {
 			DefinitionHelper.conses.put(cons, node);
 			DefinitionHelper.putLabel(node, cons);
 		}
-		if (node.isListDecl())
+		if (node.isListDecl()) {
 			DefinitionHelper.listConses.put(node.getSort(), node);
+			DefinitionHelper.putListLabel(node);
+		}
 	}
 }
