@@ -112,8 +112,8 @@ endmodule
 module FREE-VARS
   imports BINDER
 
-  syntax Set ::= freeVariables(List{K})  [function]  // public
-               | freeVariables(Set)      [function]
+  syntax Set ::= freeVariables(List{K})  [function, latex({\it FV}({#1}))]  // public
+               | freeVariables(Set)      [function, latex({\it FV}({#1}))]
   rule freeVariables(Ks:List{K}) => #getVarsFromK(#freeVars(Ks))
   rule freeVariables(.Set) => .Set
   rule freeVariables(SetItem(K) S:Set) => freeVariables(K) freeVariables(S)

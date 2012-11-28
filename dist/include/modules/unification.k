@@ -7,10 +7,10 @@ module UNIFICATION
   rule isMgu(subst(_)) => true  [function]  // so we can write Theta:Mgu
 
   syntax Mgu ::= updateMgu(Mgu,K,K)  [function]  // updates Mgu with equation
-  syntax K ::= applyMgu(Mgu,K)       [function]  // applies Mgu to any term
+  syntax K ::= applyMgu(Mgu,K)       [function, latex({#1}({#2}))]  // applies Mgu to any term
   rule applyMgu(Theta:Mgu,K) => applySubst(Theta,K)
 
-  syntax Set ::= applyMgu(Mgu,Set)  [function]
+  syntax Set ::= applyMgu(Mgu,Set)  [function, latex({#1}({#2}))]
   rule applyMgu(_, .Set) => .Set
   rule applyMgu(Theta:Mgu, SetItem(K:K) S:Set)
     => SetItem(applyMgu(Theta,K)) applyMgu(Theta,S)

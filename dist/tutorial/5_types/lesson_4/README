@@ -1,0 +1,13 @@
+plus.lambda
+if.lambda
+identity.lambda
+composition.lambda
+letrec.lambda
+nested-lets.lambda
+tricky-1.lambda
+tricky-2.lambda
+tricky-3.lambda
+tricky-4.lambda
+tricky-5.lambda
+polymorphic-identity-1-fails.lambda
+polymorphic-identity-2-fails.lambda

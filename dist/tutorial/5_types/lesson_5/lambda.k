@@ -34,14 +34,14 @@ module LAMBDA
   rule T1:Type  / T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
-  rule <k> lambda X:Id . E:Exp => Tv -> E ~> tenv(TEnv) ...</k>
-       <tenv> TEnv => TEnv[Tv/X] </tenv>  when fresh(Tv:Type)
-  rule T1:Type T2:Type => T1 = (T2 -> Tv) ~> Tv  when fresh(Tv:Type)
+  rule <k> lambda X:Id . E:Exp => T -> E ~> tenv(TEnv) ...</k>
+       <tenv> TEnv => TEnv[T/X] </tenv>  when fresh(T:Type)
+  rule T1:Type T2:Type => T1 = (T2 -> T) ~> T  when fresh(T:Type)
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
   rule let X = E in E' => (lambda X . E') E                             [macro]
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
-  rule <k> mu X:Id . E:Exp => (Tv -> Tv) E ~> tenv(TEnv) ...</k>
-       <tenv> TEnv => TEnv[Tv/X] </tenv>  when fresh(Tv:Type)
+  rule <k> mu X:Id . E:Exp => (T -> T) E ~> tenv(TEnv) ...</k>
+       <tenv> TEnv => TEnv[T/X] </tenv>  when fresh(T:Type)
 
   syntax K ::= Type "=" Type
   rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
