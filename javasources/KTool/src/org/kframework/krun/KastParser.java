@@ -38,15 +38,15 @@ public class KastParser {
 		// TODO: save outDef somewhere - maybe you will need it later
 	}
 
-	public static String getKAST(String pgm) {
-		ASTNode out = getKastTerm(pgm);
+	public static String getKAST(String pgm, String startSymbol) {
+		ASTNode out = getKastTerm(pgm, startSymbol);
 
 		MaudeFilter maudeFilter = new MaudeFilter();
 		out.accept(maudeFilter);
 		return maudeFilter.getResult();
 	}
 
-	public static ASTNode getKastTerm(String pgm) {
+	public static ASTNode getKastTerm(String pgm, String startSymbol) {
 		if (!initialized)
 			initParser();
 
@@ -54,7 +54,11 @@ public class KastParser {
 
 		String content = FileUtil.getFileContent(f.getAbsolutePath());
 
-		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, DefinitionHelper.startSymbolPgm);
+		if (startSymbol == null) {
+			startSymbol = DefinitionHelper.startSymbolPgm;
+		}
+
+		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
 		XmlLoader.addFilename(doc.getFirstChild(), pgm);

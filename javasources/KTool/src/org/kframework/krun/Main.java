@@ -162,7 +162,7 @@ public class Main {
 				}
 			}
 			else {
-				parsed = rp.runParser(parser, value, true);
+				parsed = rp.runParser(parser, value, true, null);
 			}
 			output.put(name, parsed);
 			hasPGM = hasPGM || name.equals("PGM");
@@ -236,10 +236,10 @@ public class Main {
 					if (!formulaFile.exists()) {
 						// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
 						// assume that the specified argument is not a file and maybe represents a formula
-						KAST1 = parseTerm(K.model_checking);
+						KAST1 = rp.runParser(K.parser, K.model_checking, false, "LTLFormula");
 					} else {
 						// the specified argument represents a file
-						KAST1 = parseTerm(FileUtil.getFileContent(K.model_checking));
+						KAST1 = rp.runParser(K.parser, K.model_checking, true, "LTLFormula");
 					}
 
 					result = KRun.modelCheck(KAST1, makeConfiguration(KAST, null, rp));
@@ -775,7 +775,7 @@ public class Main {
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
 
-			KAST = rp.runParser(K.parser, K.pgm, true);
+			KAST = rp.runParser(K.parser, K.pgm, true, null);
 			GlobalSettings.kem.print();
 
 			if (!K.debug) {
