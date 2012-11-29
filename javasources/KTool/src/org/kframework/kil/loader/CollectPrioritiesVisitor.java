@@ -3,6 +3,7 @@ package org.kframework.kil.loader;
 import java.util.Set;
 
 import org.kframework.kil.Constant;
+import org.kframework.kil.Definition;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.PriorityBlockExtended;
 import org.kframework.kil.PriorityExtended;
@@ -13,6 +14,11 @@ import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.parser.generator.SDFHelper;
 
 public class CollectPrioritiesVisitor extends BasicVisitor {
+
+	public void visit(Definition def) {
+		super.visit(def);
+		DefinitionHelper.finalizePriority();
+	}
 
 	public void visit(Syntax node) {
 		for (int i = 0; i < node.getPriorityBlocks().size() - 1; i++) {

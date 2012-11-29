@@ -1,18 +1,19 @@
 package org.kframework.kil.loader;
 
-import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
-import org.kframework.kil.UserList;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
+import org.kframework.kil.UserList;
+import org.kframework.utils.Poset;
 
 public class DefinitionHelper {
 	public static Set<String> generatedTags = new HashSet<String>();
@@ -48,12 +49,22 @@ public class DefinitionHelper {
 	public static java.util.Map<String, String> cellSorts = new HashMap<String, String>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	public static java.util.Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
-	private static java.util.Set<Subsort> subsorts = Subsort.getDefaultSubsorts();
+	private static Poset subsorts = new Poset();;
 	public static java.util.Set<String> definedSorts = Sort.getBaseSorts();
-	private static java.util.Set<Subsort> priorities = new HashSet<Subsort>();
+	private static Poset priorities = new Poset();
 	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
 	public static String startSymbolPgm = "K";
 	public static File dotk = null;
+
+	static {
+		subsorts.addRelation("List{K}", "K");
+		subsorts.addRelation("List{K}", "KResult");
+		subsorts.addRelation("K", "KResult");
+		subsorts.addRelation("Map", "MapItem");
+		subsorts.addRelation("Set", "SetItem");
+		subsorts.addRelation("List", "ListItem");
+		subsorts.addRelation("Bag", "BagItem");
+	}
 
 	public static void putLabel(Production p, String cons) {
 		String label;
@@ -63,7 +74,7 @@ public class DefinitionHelper {
 			label = p.getKLabel();
 		Set<String> s = labels.get(label);
 		if (s == null)
-			labels.put(label, s=new HashSet<String>());
+			labels.put(label, s = new HashSet<String>());
 		s.add(cons);
 	}
 
@@ -72,25 +83,14 @@ public class DefinitionHelper {
 		String label = MetaK.getListUnitLabel(separator);
 		Set<String> s = listLabels.get(label);
 		if (s == null)
-			listLabels.put(label, s=new HashSet<String>());
+			listLabels.put(label, s = new HashSet<String>());
 		s.add(p.getSort());
 	}
 
 	public static void addCellDecl(Cell c) {
 		cells.put(c.getLabel(), c);
 
-		String sort = c.getContents().getSort();
-		boolean maxim = true;
-		do {
-			maxim = true;
-			for (Subsort sbs : subsorts) {
-				if (sbs.getSmallSort().equals(sort)) {
-					sort = sbs.getBigSort();
-					maxim = false;
-				}
-			}
-		} while (!maxim);
-
+		String sort = subsorts.getMaxim(c.getContents().getSort());
 		if (sort.equals("List{K}"))
 			sort = "K";
 		cellSorts.put(c.getLabel(), sort);
@@ -100,63 +100,13 @@ public class DefinitionHelper {
 		return DefinitionHelper.listConses.containsKey(sort);
 	}
 
-	public static void addSubsort(String bigSort, String smallSort) {
-		// add the new subsorting
-		subsorts.add(new Subsort(bigSort, smallSort));
-
-		// detect if lists are subsorted (Vals Ids < Exps)
-		for (Map.Entry<String, Production> ls1 : listConses.entrySet()) {
-			for (Map.Entry<String, Production> ls2 : listConses.entrySet()) {
-				String sort1 = ((UserList) ls1.getValue().getItems().get(0)).getSort();
-				String sort2 = ((UserList) ls2.getValue().getItems().get(0)).getSort();
-				if (DefinitionHelper.isSubsorted(sort1, sort2)) {
-					subsorts.add(new Subsort(ls1.getValue().getSort(), ls2.getValue().getSort()));
-				}
-			}
-		}
-
-		// closure for sorts
-		boolean finished = false;
-		while (!finished) {
-			finished = true;
-			Set<Subsort> ssTemp = new HashSet<Subsort>();
-			for (Subsort s1 : subsorts) {
-				for (Subsort s2 : subsorts) {
-					if (s1.getBigSort().equals(s2.getSmallSort())) {
-						Subsort sTemp = new Subsort(s2.getBigSort(), s1.getSmallSort());
-						if (!subsorts.contains(sTemp)) {
-							ssTemp.add(sTemp);
-							finished = false;
-						}
-					}
-				}
-			}
-			subsorts.addAll(ssTemp);
-		}
-	}
-
 	public static void addPriority(String bigPriority, String smallPriority) {
 		// add the new priority
-		priorities.add(new Subsort(bigPriority, smallPriority));
+		priorities.addRelation(bigPriority, smallPriority);
+	}
 
-		// closure for sorts
-		boolean finished = false;
-		while (!finished) {
-			finished = true;
-			Set<Subsort> ssTemp = new HashSet<Subsort>();
-			for (Subsort s1 : priorities) {
-				for (Subsort s2 : priorities) {
-					if (s1.getBigSort().equals(s2.getSmallSort())) {
-						Subsort sTemp = new Subsort(s2.getBigSort(), s1.getSmallSort());
-						if (!priorities.contains(sTemp)) {
-							ssTemp.add(sTemp);
-							finished = false;
-						}
-					}
-				}
-			}
-			priorities.addAll(ssTemp);
-		}
+	public static void finalizePriority() {
+		priorities.transitiveClosure();
 	}
 
 	/**
@@ -167,7 +117,7 @@ public class DefinitionHelper {
 	 * @return
 	 */
 	public static boolean isPriorityWrong(String klabelParent, String klabelChild) {
-		return priorities.contains(new Subsort(klabelParent, klabelChild));
+		return priorities.isInRelation(klabelParent, klabelChild);
 	}
 
 	public static void addFileRequirement(String required, String local) {
@@ -211,6 +161,26 @@ public class DefinitionHelper {
 		return fileRequirements.contains(new Subsort(required, local));
 	}
 
+	public static void addSubsort(String bigSort, String smallSort) {
+		// add the new subsorting
+		subsorts.addRelation(bigSort, smallSort);
+	}
+
+	public static void finalizeSubsorts() {
+		subsorts.transitiveClosure();
+		// detect if lists are subsorted (Vals Ids < Exps)
+		for (Map.Entry<String, Production> ls1 : listConses.entrySet()) {
+			for (Map.Entry<String, Production> ls2 : listConses.entrySet()) {
+				String sort1 = ((UserList) ls1.getValue().getItems().get(0)).getSort();
+				String sort2 = ((UserList) ls2.getValue().getItems().get(0)).getSort();
+				if (DefinitionHelper.isSubsorted(sort1, sort2)) {
+					subsorts.addRelation(ls1.getValue().getSort(), ls2.getValue().getSort());
+				}
+			}
+		}
+		subsorts.transitiveClosure();
+	}
+
 	/**
 	 * Check to see if smallSort is subsorted to bigSort (strict)
 	 * 
@@ -219,7 +189,7 @@ public class DefinitionHelper {
 	 * @return
 	 */
 	public static boolean isSubsorted(String bigSort, String smallSort) {
-		return subsorts.contains(new Subsort(bigSort, smallSort));
+		return subsorts.isInRelation(bigSort, smallSort);
 	}
 
 	/**
@@ -232,7 +202,7 @@ public class DefinitionHelper {
 	public static boolean isSubsortedEq(String bigSort, String smallSort) {
 		if (bigSort.equals(smallSort))
 			return true;
-		return subsorts.contains(new Subsort(bigSort, smallSort));
+		return isSubsorted(bigSort, smallSort);
 	}
 
 	public static boolean isTagGenerated(String key) {

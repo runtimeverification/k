@@ -1,5 +1,6 @@
 package org.kframework.kil.loader;
 
+import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -8,6 +9,11 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectSubsortsVisitor extends BasicVisitor {
+
+	public void visit(Definition def) {
+		super.visit(def);
+		DefinitionHelper.finalizeSubsorts();
+	}
 
 	public void visit(Production prd) {
 		if (!Sort.isBasesort(prd.getSort()))
