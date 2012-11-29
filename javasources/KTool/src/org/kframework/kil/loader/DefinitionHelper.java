@@ -52,7 +52,7 @@ public class DefinitionHelper {
 	private static Poset subsorts = new Poset();;
 	public static java.util.Set<String> definedSorts = Sort.getBaseSorts();
 	private static Poset priorities = new Poset();
-	private static java.util.Set<Subsort> fileRequirements = new HashSet<Subsort>();
+	private static Poset fileRequirements = new Poset();
 	public static String startSymbolPgm = "K";
 	public static File dotk = null;
 
@@ -125,28 +125,11 @@ public class DefinitionHelper {
 		if (required.equals(local))
 			return;
 
-		if (fileRequirements.contains(new Subsort(required, local)))
-			return;
-		fileRequirements.add(new Subsort(required, local));
+		fileRequirements.addRelation(required, local);
+	}
 
-		// closure for sorts
-		boolean finished = false;
-		while (!finished) {
-			finished = true;
-			Set<Subsort> ssTemp = new HashSet<Subsort>();
-			for (Subsort s1 : fileRequirements) {
-				for (Subsort s2 : fileRequirements) {
-					if (s1.getBigSort().equals(s2.getSmallSort())) {
-						Subsort sTemp = new Subsort(s2.getBigSort(), s1.getSmallSort());
-						if (!fileRequirements.contains(sTemp)) {
-							ssTemp.add(sTemp);
-							finished = false;
-						}
-					}
-				}
-			}
-			fileRequirements.addAll(ssTemp);
-		}
+	public static void finalizeRequirements() {
+		fileRequirements.transitiveClosure();
 	}
 
 	public static boolean isRequiredEq(String required, String local) {
@@ -158,7 +141,7 @@ public class DefinitionHelper {
 		}
 		if (required.equals(local))
 			return true;
-		return fileRequirements.contains(new Subsort(required, local));
+		return fileRequirements.isInRelation(required, local);
 	}
 
 	public static void addSubsort(String bigSort, String smallSort) {

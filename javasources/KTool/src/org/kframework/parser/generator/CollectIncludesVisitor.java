@@ -1,16 +1,19 @@
 package org.kframework.parser.generator;
 
-import org.kframework.kil.Import;
-import org.kframework.kil.visitors.BasicVisitor;
-
 import java.util.ArrayList;
 
+import org.kframework.kil.Import;
+import org.kframework.kil.ModuleItem;
+import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectIncludesVisitor extends BasicVisitor {
 	private java.util.List<Import> importList = new ArrayList<Import>();
 
 	public void visit(Import i) {
 		importList.add(i);
+	}
+
+	public void visit(ModuleItem mi) {
 	}
 
 	public java.util.List<Import> getImportList() {

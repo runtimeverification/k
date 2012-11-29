@@ -19,7 +19,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 public class CheckBinaryPrecedenceFilter extends BasicTransformer {
 	public CheckBinaryPrecedenceFilter() {
-		super("Priority filter");
+		super("Check precedence for => and ~>");
 	}
 
 	TermCons parent = null;

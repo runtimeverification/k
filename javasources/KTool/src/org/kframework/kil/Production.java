@@ -17,13 +17,13 @@ import java.util.List;
 
 public class Production extends ASTNode {
 
-    /*
-    * Andrei S: It appears that the cons attribute is mandatory for all new
-    * production added during compilation, otherwise a null pointer exception
-    * can be thrown in one of the later compilation steps.
-    * */
+	/*
+	 * Andrei S: It appears that the cons attribute is mandatory for all new production added during compilation, otherwise a null pointer exception can be thrown in one of the later compilation
+	 * steps.
+	 */
 	protected List<ProductionItem> items;
 	protected String sort;
+	protected String ownerModuleName;
 
 	public static Production makeFunction(String funSort, String funName, String argSort) {
 		List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
@@ -33,11 +33,11 @@ public class Production extends ASTNode {
 		prodItems.add(new Terminal(")"));
 
 		Production funProd = new Production(new Sort(funSort), prodItems);
-        funProd.addAttribute(new Attribute("prefixlabel", funName));
+		funProd.addAttribute(new Attribute("prefixlabel", funName));
 		if (MetaK.isComputationSort(funSort)) {
-            funProd.addAttribute(new Attribute("klabel", funName));
+			funProd.addAttribute(new Attribute("klabel", funName));
 			String consAttr = funSort + "1" + funName + "Syn";
-            funProd.addAttribute(new Attribute("cons", consAttr));
+			funProd.addAttribute(new Attribute("cons", consAttr));
 			DefinitionHelper.conses.put(consAttr, funProd);
 			DefinitionHelper.putLabel(funProd, consAttr);
 		}
@@ -74,21 +74,30 @@ public class Production extends ASTNode {
 		// assumption: <attributes> appears only once
 		if (its.size() > 0)
 			attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
-        else if (attributes == null)
-            attributes = new Attributes();
+		else if (attributes == null)
+			attributes = new Attributes();
 	}
 
 	public Production(Production node) {
 		super(node);
 		this.items = node.items;
 		this.sort = node.sort;
+		this.ownerModuleName = node.ownerModuleName;
 	}
 
 	public Production(Sort sort, java.util.List<ProductionItem> items) {
 		super();
 		this.items = items;
 		this.sort = sort.getName();
-        attributes = new Attributes();
+		attributes = new Attributes();
+	}
+
+	public Production(Sort sort, java.util.List<ProductionItem> items, String ownerModule) {
+		super();
+		this.items = items;
+		this.sort = sort.getName();
+		attributes = new Attributes();
+		this.ownerModuleName = ownerModule;
 	}
 
 	public String toString() {
@@ -143,16 +152,15 @@ public class Production extends ASTNode {
 	}
 
 	public String getKLabel() {
-        assert MetaK.isComputationSort(sort) ||
-                sort.equals("KLabel") && isConstant();
+		assert MetaK.isComputationSort(sort) || sort.equals("KLabel") && isConstant();
 
 		String klabel;
 		klabel = attributes.get("klabel");
 		if (klabel == null) {
-            if (sort.toString().equals("KLabel"))
-                klabel = getPrefixLabel();
-            else
-			    klabel = "'" + getPrefixLabel();
+			if (sort.toString().equals("KLabel"))
+				klabel = getPrefixLabel();
+			else
+				klabel = "'" + getPrefixLabel();
 			attributes.set("klabel", klabel);
 		}
 		return StringUtil.escapeMaude(klabel).replace(" ", "");
@@ -188,7 +196,7 @@ public class Production extends ASTNode {
 		int arity = 0;
 		for (ProductionItem i : items) {
 			if (i.getType() == ProductionType.USERLIST)
-				arity+= 2;
+				arity += 2;
 			if (i.getType() == ProductionType.SORT)
 				arity++;
 		}
@@ -217,7 +225,7 @@ public class Production extends ASTNode {
 		int arity = -1;
 		if (items.get(0).getType() == ProductionType.USERLIST) {
 			if (idx == 0) {
-				return ((UserList)items.get(0)).getSort();
+				return ((UserList) items.get(0)).getSort();
 			} else {
 				return this.getSort();
 			}
@@ -226,7 +234,7 @@ public class Production extends ASTNode {
 			if (i.getType() != ProductionType.TERMINAL)
 				arity++;
 			if (arity == idx) {
-				return ((Sort)i).getName();
+				return ((Sort) i).getName();
 			}
 		}
 		return null;
@@ -272,5 +280,13 @@ public class Production extends ASTNode {
 	@Override
 	public Production shallowCopy() {
 		return new Production(this);
+	}
+
+	public String getOwnerModuleName() {
+		return ownerModuleName;
+	}
+
+	public void setOwnerModuleName(String ownerModuleName) {
+		this.ownerModuleName = ownerModuleName;
 	}
 }

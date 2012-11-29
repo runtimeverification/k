@@ -10,7 +10,6 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class CorrectRewritePriorityFilter extends BasicTransformer {
 
 	public CorrectRewritePriorityFilter() {
@@ -28,7 +27,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
 		if (children.size() == 0 || children.size() == amb.getContents().size())
 			return super.transform(amb);
 		if (children.size() == 1)
-			return super.transform(children.get(0));
+			return children.get(0).accept(this);
 		amb.setContents(children);
 		return super.transform(amb);
 	}

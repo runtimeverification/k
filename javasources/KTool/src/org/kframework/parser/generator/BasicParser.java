@@ -64,6 +64,7 @@ public class BasicParser {
 			moduleItems.addAll(tempmi);
 
 			setMainFile(file);
+			DefinitionHelper.finalizeRequirements();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

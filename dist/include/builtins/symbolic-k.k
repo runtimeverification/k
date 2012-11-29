@@ -1,6 +1,10 @@
 require "builtins.k"
 require "modules/substitution.k"
 
+module SYMBOLIC-SYNTAX
+  // This is a module where productions will be generated at runtime
+endmodule
+
 module SYMBOLIC-K
   imports #SMT
   imports BUILTIN-HOOKS

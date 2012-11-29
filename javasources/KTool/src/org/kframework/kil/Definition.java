@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectPrioritiesVisitor;
@@ -17,7 +18,6 @@ import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.parser.generator.AddConsesVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
