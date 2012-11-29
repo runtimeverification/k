@@ -181,7 +181,7 @@ public class RunProcess {
 					String compiledDefName = FileUtil.getFilename(K.compiled_def, ".", K.fileSeparator);
 					int index = compiledDefName.indexOf("-compiled");
 					compiledDefName = compiledDefName.substring(0, index);
-					if (!lang.equals(compiledDefName)) {
+					if (lang != null && !lang.equals(compiledDefName)) {
 						Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. " + "Maybe you should use --syntax-module or --main-module options of krun");
 					}
 

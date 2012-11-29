@@ -167,7 +167,7 @@ public class Main {
 			output.put(name, parsed);
 			hasPGM = hasPGM || name.equals("PGM");
 		}
-		if (!hasPGM) {
+		if (!hasPGM && kast != null) {
 			output.put("PGM", kast);
 		}
 		if(!K.io) {
@@ -726,21 +726,24 @@ public class Main {
 				programArg = new File(remainingArguments[0]).getCanonicalPath();
 				K.pgm = programArg;
 			}
-			if (K.pgm == null) {
-				Error.usageError("missing required <file> argument");
+			String lang = null;
+			if (K.pgm != null) {
+				File pgmFile = new File(K.pgm);
+				if (!pgmFile.exists()) {
+					Error.report("\nProgram file does not exist: " + K.pgm);
+				}
+				lang = FileUtil.getExtension(K.pgm, ".", K.fileSeparator);
 			}
-			File pgmFile = new File(K.pgm);
-			if (!pgmFile.exists()) {
-				Error.report("\nProgram file does not exist: " + K.pgm);
-			}
-			String lang = FileUtil.getExtension(K.pgm, ".", K.fileSeparator);
 
 			// by default
-			if (!cmd.hasOption("k-definition") && !cmd.hasOption("compiled-def")) {
+			if (!cmd.hasOption("k-definition") && !cmd.hasOption("compiled-def") && lang != null) {
 				K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
 			}
 
-			initOptions(K.userdir);
+			String compiled_def = initOptions(K.userdir);
+			if (K.pgm == null) {
+				K.compiled_def = compiled_def;
+			}
 
 			if (K.compiled_def == null) {
 				resolveOption("compiled-def", cmd);
@@ -772,7 +775,11 @@ public class Main {
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
 
-			KAST = rp.runParser(K.parser, K.pgm, true, null);
+			if (K.pgm != null) {
+				KAST = rp.runParser(K.parser, K.pgm, true, null);
+			} else {
+				KAST = null;
+			}
 			GlobalSettings.kem.print();
 
 			if (!K.debug) {
