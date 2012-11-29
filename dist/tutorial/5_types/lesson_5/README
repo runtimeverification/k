@@ -50,6 +50,6 @@ program
 should also type to int, not bool, and so it does, too.
 
 The type inferencer defined in this lesson has the same limitations,
-in terms of polymorphism, as the one in in Lesson 4.  In the next
-two lessons we will see a simple trick that turns these naive type
-inferencers into polymorphic ones.
+in terms of polymorphism, as the one in Lesson 4.  In the next
+lesson we will see how it can be parallelized, and in further lessons
+how to make it polymorphic.

@@ -34,7 +34,7 @@ module LAMBDA
 
   rule I:Int => int
   rule B:Bool => bool
-  rule <k> X:Id => T ...</k>  <tenv>... X |-> T:Type ...</tenv>
+  rule <k> X:Id => T ...</k>  <tenv>... X |-> T ...</tenv>
 
   rule <k> E1 * E2 => int ...</k> <tenv> Rho </tenv>
        (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task>
@@ -49,8 +49,9 @@ module LAMBDA
        (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task>
              <task> <k> E2 = int </k> <tenv> Rho </tenv> </task>)
 
-  rule <k> lambda X:Id . E:Exp => T -> E ~> tenv(TEnv) ...</k>
-       <tenv> TEnv => TEnv[T/X] </tenv>  when fresh(T:Type)
+  rule <k> lambda X . E => Tx -> Te ...</k> <tenv> TEnv </tenv>
+       (. => <task> <k> E = Te </k> <tenv> TEnv[Tx/X] </tenv> </task>)
+    when fresh(Tx:Type) andBool fresh(Te:Type)
 
   rule <k> E1 E2 => T ...</k> <tenv> Rho </tenv>
        (. => <task> <k> E1 = T2 -> T </k> <tenv> Rho </tenv> </task>
@@ -65,17 +66,15 @@ module LAMBDA
 
   rule let X = E in E' => (lambda X . E') E                             [macro]
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
-  rule <k> mu X:Id . E:Exp => (T -> T) E ~> tenv(TEnv) ...</k>
-       <tenv> TEnv => TEnv[T/X] </tenv>  when fresh(T:Type)
+  rule <k> mu X . E => T ...</k>  <tenv> TEnv </tenv>
+       (. => <task> <k> E = T </k> <tenv> TEnv[T/X] </tenv> </task>)
+    when fresh(T:Type)
 
-  syntax K ::= Type "=" Type  [strict]
+  syntax K ::= Exp "=" Exp  [strict]
   rule <k> T:Type = T':Type => . ...</k>
        <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
   rule <tasks> <task> <k> T:Type => applyMgu(Theta,T) </k> ...</task> </tasks>
        (<mgu> Theta:Mgu </mgu> => .)
 
   rule <task>... <k> . </k> ...</task> => .
-
-  syntax K ::= tenv(Map)
-  rule <k> T:Type ~> (tenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
 endmodule
