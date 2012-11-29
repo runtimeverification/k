@@ -618,9 +618,6 @@ public class Main {
 			if (cmd.hasOption("no-parens")) {
 				K.parens = false;
 			}
-			if (cmd.hasOption("unparse")) {
-				K.unparse = true;
-			}
 			// k-definition beats compiled-def in a fight
 			if (cmd.hasOption("compiled-def") && !cmd.hasOption("k-definition")) {
 				K.compiled_def = new File(cmd.getOptionValue("compiled-def")).getCanonicalPath();

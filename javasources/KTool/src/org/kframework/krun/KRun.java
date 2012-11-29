@@ -77,9 +77,7 @@ public class KRun {
 		}
 
 		KRun run = new KRun(cmd, !cfg.containsKey("noIO"));
-		if (K.unparse) {
-			run.parseRunResult();
-		}
+		run.parseRunResult();
 		return run;
 	}	
 
@@ -310,6 +308,9 @@ public class KRun {
 			result.accept(unparser);
 			List<String> l = new ArrayList<String>();
 			l.add(unparser.getResult());
+			if (K.statistics) {
+				l.add(statistics);
+			}
 			return l;
 		}
 		return p.processDoc(K.processed_maude_output);
