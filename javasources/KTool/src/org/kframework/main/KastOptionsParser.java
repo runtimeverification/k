@@ -35,7 +35,7 @@ public class KastOptionsParser {
 		Option tbl = new Option("pgm", "program", true, "the program to parse");
 		Option exp = new Option("e", "expression", true, "an expression to parse passed on the command line");
 		tex2.addOption(tbl);
-		tex2.addOption(exp);		
+		tex2.addOption(exp);
 
 		// indentation options
 		Option prettyPrint = new Option("pretty", false, "pretty print the output");
@@ -47,6 +47,7 @@ public class KastOptionsParser {
 		// which parser to use
 		@SuppressWarnings("static-access")
 		Option defParser = OptionBuilder.withLongOpt("def-parser").withDescription("use k definition parser").create();
+		Option sort = OptionBuilder.withLongOpt("sort").hasArg().withDescription("the sort the program is expected to parse into").create();
 
 		// add options
 		options.addOptionGroup(verb);
@@ -59,6 +60,7 @@ public class KastOptionsParser {
 		options.addOption(auxSize);
 		options.addOption(nextLine);
 		options.addOption(defParser);
+		options.addOption(sort);
 	}
 
 	public CommandLine parse(String[] cmd) {

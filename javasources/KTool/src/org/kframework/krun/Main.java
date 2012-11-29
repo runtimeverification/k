@@ -667,7 +667,7 @@ public class Main {
 				K.profile = true;
 			}
 			if (cmd.hasOption("pgm")) {
-				K.pgm = new File(cmd.getOptionValue("pgm")).getCanonicalPath();
+				K.pgm = cmd.getOptionValue("pgm");
 			}
 			if (cmd.hasOption("ltlmc")) {
 				K.model_checking = cmd.getOptionValue("ltlmc");
@@ -723,16 +723,15 @@ public class Main {
 			}
 			String programArg = new String();
 			if (remainingArguments.length > 0) {
-				programArg = new File(remainingArguments[0]).getCanonicalPath();
+				programArg = remainingArguments[0];
 				K.pgm = programArg;
 			}
 			String lang = null;
 			if (K.pgm != null) {
 				File pgmFile = new File(K.pgm);
-				if (!pgmFile.exists()) {
-					Error.report("\nProgram file does not exist: " + K.pgm);
+				if (pgmFile.exists()) {
+					lang = FileUtil.getExtension(K.pgm, ".", K.fileSeparator);
 				}
-				lang = FileUtil.getExtension(K.pgm, ".", K.fileSeparator);
 			}
 
 			// by default
@@ -741,7 +740,7 @@ public class Main {
 			}
 
 			String compiled_def = initOptions(K.userdir);
-			if (K.pgm == null) {
+			if (lang == null) {
 				K.compiled_def = compiled_def;
 			}
 

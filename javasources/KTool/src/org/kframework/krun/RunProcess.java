@@ -5,6 +5,9 @@ import org.kframework.krun.tasks.MaudeTask;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 // instantiate processes
@@ -25,6 +28,7 @@ public class RunProcess {
 
 			// create process
 			ProcessBuilder pb = new ProcessBuilder(commands);
+
 
 			// set execution directory to current user dir
 			pb.directory(new File(K.userdir));
@@ -104,9 +108,13 @@ public class RunProcess {
 				return KastParser.getKAST(pgm, startSymbol);
 				// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
 			} else {
-				String cmd = parser + " " + pgm;
-				String[] tokens = cmd.split(" ");
-				this.execute(tokens);
+				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
+				tokens.add(pgm);
+				if (startSymbol != null) {
+					tokens.add("--sort");
+					tokens.add(startSymbol);
+				}
+				this.execute(tokens.toArray(new String[0]));
 			}
 		}
 

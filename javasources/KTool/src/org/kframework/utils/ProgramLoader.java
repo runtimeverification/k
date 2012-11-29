@@ -36,12 +36,12 @@ public class ProgramLoader {
 	 * @param kappize
 	 *            If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize) throws IOException {
+	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol) throws IOException {
 		File tbl = new File(DefinitionHelper.dotk.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
-		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, DefinitionHelper.startSymbolPgm);
+		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
@@ -68,14 +68,14 @@ public class ProgramLoader {
 		return out;
 	}
 
-	public static ASTNode loadPgmAst(String content, String filename) throws IOException {
-		return loadPgmAst(content, filename, true);
+	public static ASTNode loadPgmAst(String content, String filename, String startSymbol) throws IOException {
+		return loadPgmAst(content, filename, true, startSymbol);
 	}
 
 	public static ASTNode loadPgmAst(File pgmFile, boolean kappize) throws IOException {
 		String filename = pgmFile.getCanonicalFile().getAbsolutePath();
 		String content = FileUtil.getFileContent(filename);
-		return loadPgmAst(content, filename, kappize);
+		return loadPgmAst(content, filename, kappize, DefinitionHelper.startSymbolPgm);
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class ProgramLoader {
 	 * @param prettyPrint
 	 * @param nextline
 	 */
-	public static void processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions, boolean useDefParser) {
+	public static void processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions, boolean useDefParser, String startSymbol) {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -102,7 +102,7 @@ public class ProgramLoader {
 				out = out.accept(new FlattenSyntax());
 				out = MetaK.kWrapper((Term) out);
 			} else {
-				out = loadPgmAst(content, filename);
+				out = loadPgmAst(content, filename, startSymbol);
 			}
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Parsing Program");

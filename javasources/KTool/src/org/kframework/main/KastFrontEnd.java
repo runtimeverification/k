@@ -128,7 +128,12 @@ public class KastFrontEnd {
 				nextline = true;
 			}
 		}
-		org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, cmd.hasOption("def-parser"));
+
+		String sort = DefinitionHelper.startSymbolPgm;
+		if (cmd.hasOption("sort")) {
+			sort = cmd.getOptionValue("sort");
+		}
+		org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, cmd.hasOption("def-parser"), sort);
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
 		GlobalSettings.kem.print();
