@@ -7,7 +7,8 @@ a higher-order language, namely the LAMBDA language defined in Tutorial 1.
 The simplest and fastest way to proceed is to copy the substitution-based
 type system of LAMBDA from the previous lesson and modify it into an
 environment-based one.  A large portion of the substitution-based definition
-will remain unchanged.  We only have to modify the rules that use substitution.
+will remain unchanged.  We only have to modify the rules that use
+substitution.
 
 We do not need the substitution anymore, so we can remove the require and
 import statements.  The syntax of types and expressions stays unchanged, but

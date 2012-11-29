@@ -8,11 +8,11 @@ Let us copy the definition of LAMBDA from Tutorial 1, Lesson 8.  We are going
 to modify it into a type systems for LAMBDA.
 
 Before we start, it is important to clarify an important detail, namely that
-our type system will yield a type checker when executed, not a type inferencer.
-In particular, we are going to change the LAMBDA syntax to allow us to 
-associate a type to each declared variable.  The constructs which declare 
-variables are lambda, let, letrec and mu.  The syntax of all these will 
-therefore change.
+our type system will yield a type checker when executed, not a type
+inferencer.  In particular, we are going to change the LAMBDA syntax
+to allow us to associate a type to each declared variable.  The
+constructs which declare variables are lambda, let, letrec and mu.
+The syntax of all these will therefore change.
 
 Since here we are not interested in a LAMBDA semantics anymore, we take the
 freedom to eliminate the Val syntactic category, our previous results.  Our
@@ -37,11 +37,11 @@ type, that is a result, so it does not matter anyway).
 
 The typing rule for application is as simple as it can get: (T1->T2) T1 => T2.
 
-Let us now give the typing rules of arithmetic and Boolean expression 
-constructs.  First, get rid of Val.  Second, rewrite each value to its type, 
-similarly to the type system for IMP++ in the previous lesson.  Third, replace 
-each semantic rule by its typing rule.  Fourth, make sure you do not forget to
-subsort Type to Exp, so your rules above will parse.
+Let us now give the typing rules of arithmetic and Boolean expression
+constructs.  First, get rid of Val.  Second, rewrite each value to its type,
+similarly to the type system for IMP++ in the previous lesson.  Third,
+replace each semantic rule by its typing rule.  Fourth, make sure you
+do not forget to subsort Type to Exp, so your rules above will parse.
 
 The typing policy of the conditional statement is that its first argument
 should type to "bool" and its other two arguments should type to the same type
@@ -55,8 +55,8 @@ change its syntax to account for the type of the variable that it binds.
 This rule is a macro, so the let is desugared statically.
 
 Similarly, the syntax of "letrec" and "mu" needs to change to account for the
-type of the variable that they bind.  The typing of letrec remains based on its
-desugaring to mu; we have to make sure the types are also included now.
+type of the variable that they bind.  The typing of letrec remains based on
+its desugaring to mu; we have to make sure the types are also included now.
 
 The typing policy of mu is that its body should type to the same type T of its
 variable, which is also the type of the entire mu expression.  This can be 
@@ -65,8 +65,9 @@ application is strict, so E[T/X] will be eventually reduced to its type.
 Then the application types correctly only if that type is also T, and in that
 case the result type will also be T.  Nice, isn't it?
 
-kompile and krun some programs.  You can, for example, take the LAMBDA 
-programs from the first tutorial, modify them by adding types to their 
+kompile and krun some programs.  You can, for example, take the LAMBDA
+programs from the first tutorial, modify them by adding types to their
 variable declations, and then type check them using krun.
 
-In the next lesson we will discuss an environment-based type system for LAMBDA.
+In the next lesson we will discuss an environment-based type system
+for LAMBDA.

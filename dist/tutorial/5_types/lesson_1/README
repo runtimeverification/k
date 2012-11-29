@@ -25,7 +25,7 @@ constructs when regarded through the typing lenses.
 
 Finally, the sequential composition is now sequentially strict!  Indeed,
 statements are now going to reduce to their type, "stmt", and it is critical
-for sequential composition to type its argument statements from left-to-right; 
+for sequential composition to type its argument statements left-to-right; 
 for example, imagine that the second argument is a variable declaration (whose
 type semantics will modify the type environment).
 
@@ -43,8 +43,8 @@ short, the idea is to reduce the basic values to their types, and then have a
 rule for each language construct reducing it to its result type whenever its 
 arguments have the expected types.
 
-We write the rules in the order given by the syntax declarations, to make sure 
-we do not forget any construct.
+We write the rules in the order given by the syntax declarations, to make
+sure we do not forget any construct.
 
 Integers reduce to their type, int.
 
@@ -53,19 +53,19 @@ So do the strings.
 Variables are now looked up in the type environment and reduced to their type 
 there.  Since we only declare integer variables in IMP++, their type in tenv 
 will always be int.  Nevertheless, we write the rule generically, so that we 
-would not have to change it later if we add other type declarations to IMP++.  
-Note that we reject programs which lookup undeclared variables.  Rejection, in 
-this case, means "rewriting getting stuck".
+would not have to change it later if we add other type declarations to IMP++.
+Note that we reject programs which lookup undeclared variables.  Rejection,
+in this case, means "rewriting getting stuck".
 
 Variable increment types to int, provided the variable has type int.
 
 Read types to int, because we only allow integer input.
 
-Division is only allowed on integers, so it reduces to int provided that its 
+Division is only allowed on integers, so it reduces to int provided that its
 arguments reduce to int.  Note, however, that in order to write "int / int",
-we have to explicitly add "int" to the syntax of arithmetic expressions.  
+we have to explicitly add "int" to the syntax of arithmetic expressions.
 Otherwise, the K parser rightfully complains, because "/" was declared on
-arithmetic expressions, not on types.  One simple and generic way to allow 
+arithmetic expressions, not on types.  One simple and generic way to allow
 types to appear anywhere, is to define Type as a syntactic subcategory of all
 the other syntactic categories.  Let's do it on a by-need basis, though.
 
@@ -104,7 +104,7 @@ If that is the case, then it yields a "stmt" type.
 
 For while, its first argument should type to "bool" and its second to "block".
 
-Variable declarations add new bindings to the type environment.  Recall that 
+Variable declarations add new bindings to the type environment.  Recall that
 we can only declare variables of integer type in IMP++.
 
 The typing policy of print is that it can only print integer or string values,
@@ -119,9 +119,9 @@ Join types to "stmt", provided that its argument types to int.
 
 Sequential composition was declared as a whitespace-separated sequentially
 strict list.  Its typing policy is that all the statements in the list should
-type to "stmt" or "block" in order for the list to type to "stmt".  Since lists
-are maintained internally as cons-lists, this is probably the simplest way to
-do it:
+type to "stmt" or "block" in order for the list to type to "stmt".  Since
+lists are maintained internally as cons-lists, this is probably the simplest
+way to do it:
 
   rule .Stmts => stmt
   rule _:BlockOrStmtType Ss => Ss
