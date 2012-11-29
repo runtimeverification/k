@@ -12,9 +12,14 @@ import java.util.ArrayList;
 
 
 public class DesugarStreams extends CopyOnWriteTransformer {
+	
+	ArrayList<String> channels = new ArrayList<String>();
 
 	public DesugarStreams() {
 		super("Desugar streams");
+		
+		channels.add("stdin");
+		channels.add("stdout");
 	}
 	
 	@Override
@@ -32,11 +37,12 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 		if (result == node) {
 			node = node.shallowCopy();
 		} else node = cell;
-		node.setContents(makeStreamList(stream, node.getContents()));
+		node.setContents(makeStreamList(stream, node));
 		return node;
 	}
 	
-	private Term makeStreamList(String stream, Term contents) {
+	private Term makeStreamList(String stream, Cell node) {
+		Term contents = node.getContents();
 		List result;
 		if (contents instanceof List) {
 			result = ((List)contents).shallowCopy();
@@ -84,6 +90,12 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 			items.add(buffer);
 
 			items.addAll(result.getContents());
+		}
+		if(channels.indexOf(stream) == -1){
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+					KExceptionGroup.INTERNAL, 
+					"Make sure you give the correct stream names: " + channels.toString(), 
+					getName(), node.getFilename(), node.getLocation()));
 		}
 		result.setContents(items);
 		return result;
