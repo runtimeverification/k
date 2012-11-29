@@ -762,7 +762,7 @@ The subclass relation introduces a subtyping relation.  */
 
   rule <k> checkSubtype(class(C:Id), class(C':Id)) => . ...</k>
        <className> C </className>
-       <extendsAll>... SetItem(C') ...</extends>  [structural]
+       <extendsAll>... SetItem(C') ...</extendsAll>  [structural]
 
   rule checkSubtype(Ts1->T2,Ts1'->T2')
     => checkSubtype((T2,Ts1'),(T2',Ts1))  [structural]

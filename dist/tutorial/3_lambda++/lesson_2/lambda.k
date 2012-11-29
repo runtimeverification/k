@@ -20,7 +20,7 @@ module LAMBDA
        <env> Rho' => Rho[N/X] </env>
        <store>... . => (N |-> V) ...</store>
     when fresh(N:Nat)
-  rule <k> X => V ...</k> <env>...X|->N...</k> <store>...N|->V...</store>
+  rule <k> X => V ...</k> <env>...X|->N...</env> <store>...N|->V...</store>
 
 // Auxiliary task
   syntax K ::= env(Map)

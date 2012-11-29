@@ -1,3 +1,7 @@
+// This currently does not work.  It would work if we had unification builtin
+// for symbolic variables.  That would be awesome!
+
+
 module LAMBDA
 
   syntax Exp ::= Int | Bool | Id

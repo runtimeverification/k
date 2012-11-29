@@ -106,7 +106,7 @@ then switch back to caller's environment.  */
        <store>... . => (N |-> V) ...</store>
     when fresh(N:Nat)
   rule <k> X => V ...</k>
-       <env>... X |-> N ...</k>
+       <env>... X |-> N ...</env>
        <store>... N |-> V ...</store>
 
 /*@ \subsection{Environment Recovery}

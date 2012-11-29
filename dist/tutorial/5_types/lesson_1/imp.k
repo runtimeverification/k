@@ -56,7 +56,7 @@ module IMP
   rule string + string => string
 
   rule spawn block => int
-  rule <k> X = T => T ...</k> <tenv>... X |-> T ...</env>
+  rule <k> X = T => T ...</k> <tenv>... X |-> T ...</tenv>
 
 // BExp
   syntax BExp ::= Type
@@ -78,7 +78,7 @@ module IMP
   rule if (bool) block else block => stmt
   rule while (bool) block => stmt
 
-  rule <k> int (X:Id,Xs:Ids => Xs); ...</k> <tenv>... . => X |-> int ...</env>
+  rule <k> int (X:Id,Xs:Ids => Xs); ...</k> <tenv>... . => X |-> int ...</tenv>
   rule int .Ids; => stmt
 
   rule print(_:PrintableType,AEs => AEs);

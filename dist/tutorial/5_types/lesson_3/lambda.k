@@ -19,7 +19,7 @@ module LAMBDA
 
   rule <k> lambda X : T . E => (T -> E) ~> tenv(Rho) ...</k>
        <tenv> Rho => Rho[T/X] </tenv>
-  rule <k> X:Id => T ...</k> <tenv>... X |-> T ...</k>
+  rule <k> X:Id => T ...</k> <tenv>... X |-> T ...</tenv>
   rule (T1 -> T2) T1 => T2
 
   syntax Exp ::= Int | Bool
