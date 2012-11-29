@@ -529,6 +529,10 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Automatic Module Imports");
 			}
 
+			javaDef = new CompilerTransformerStep(new StrictnessToContexts()).compile(javaDef);
+
+			if (GlobalSettings.verbose) { sw.printIntermediate("Strict Ops To Context"); }
+
 			DittoFilter df = new DittoFilter();
 			javaDef.accept(df);
 
@@ -603,11 +607,11 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Resolve Blocking Input");
 			}
 
-            javaDef = new CompilerTransformerStep(new AddK2SMTLib()).compile(javaDef);
+			javaDef = new CompilerTransformerStep(new AddK2SMTLib()).compile(javaDef);
 
-            if (GlobalSettings.verbose) {
-                sw.printIntermediate("Add translation from K to SMTlib v2 string");
-            }
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Add translation from K to SMTlib v2 string");
+			}
 
 			javaDef = new CompilerTransformerStep(new AddPredicates()).compile(javaDef);
 
@@ -632,11 +636,6 @@ public class KompileFrontEnd {
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Resolve ListOfK");
 			}
-			/*
-			 * javaDef = new CompilerTransformerStep(new StrictnessToContexts()).compile(javaDef);
-			 * 
-			 * if (GlobalSettings.verbose) { sw.printIntermediate("Strict Ops To Context"); }
-			 */
 
 			javaDef = new CompilerTransformerStep(new FlattenSyntax()).compile(javaDef);
 
