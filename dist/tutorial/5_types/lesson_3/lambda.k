@@ -1,12 +1,12 @@
 module LAMBDA
   syntax Type ::= "int" | "bool"
-                | Type "->" Type      [strict]
-                | "(" Type ")"        [bracket]
+                | Type "->" Type               [strict]
+                | "(" Type ")"                 [bracket]
 
   syntax Exp ::= Id
                | "lambda" Id ":" Type "." Exp
-               | Exp Exp              [strict, left]
-               | "(" Exp ")"          [bracket]
+               | Exp Exp                       [strict, left]
+               | "(" Exp ")"                   [bracket]
 
   syntax Exp ::= Type
 
@@ -43,7 +43,7 @@ module LAMBDA
 
   syntax Exp ::= "letrec" Id ":" Type Id ":" Type "=" Exp "in" Exp
                | "mu" Id ":" Type "." Exp
-  rule letrec F : T1 X : T2 = E in E'
+  rule letrec F : T1  X : T2 = E in E'
     => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
   rule <k> mu X : T . E => (T -> T) E ~> tenv(Rho) ...</k>
        <tenv> Rho => Rho[T/X] </tenv>
