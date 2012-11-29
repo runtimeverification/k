@@ -164,7 +164,7 @@ public class LatexFilter extends BasicVisitor {
 
 	public void visit(Collection col) {
 		final boolean hasBR = containsBR(col);
-		if (hasBR) result.append("\\begin{array}[t]{@{}c@{}}");
+		if (hasBR) result.append("\\begin{array}{@{}c@{}}");
 		List<Term> contents = col.getContents();
 		printList(contents, "\\mathrel{}");
 		if (hasBR) result.append("\\end{array}");
