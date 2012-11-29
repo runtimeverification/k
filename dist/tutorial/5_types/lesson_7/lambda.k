@@ -22,9 +22,6 @@ module LAMBDA
                 | Type "->" Type                  [strict]
                 | "(" Type ")"                    [bracket]
 
-  syntax TypeSchema ::= "forall" Set "." Type
-    [binder, latex(\forall{#1}.{#2}), prefer]
-
   syntax Exp ::= Type
   syntax KResult ::= Type
 
@@ -34,7 +31,7 @@ module LAMBDA
 
   rule I:Int => int
   rule B:Bool => bool
-  rule <k> X:Id => T ...</k>  <tenv>... X |-> T:Type ...</tenv>
+  rule <k> X:Id => T ...</k>  <tenv>... X |-> T ...</tenv>
   rule T1:Type  * T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type  / T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
@@ -43,21 +40,10 @@ module LAMBDA
        <tenv> TEnv => TEnv[T/X] </tenv>  when fresh(T:Type)
   rule T1:Type T2:Type => T1 = (T2 -> T) ~> T  when fresh(T:Type)
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
-
-  rule <k> let X = T:Type in E => E ~> tenv(TEnv) ...</k>
-       <mgu> Theta:Mgu </mgu>
-       <tenv> TEnv
-        => TEnv[(forall freeVariables(applyMgu(Theta, T)) -Set
-                        freeVariables(applyMgu(Theta, values TEnv))
-                . applyMgu(Theta, T)) / X]
-       </tenv>
-  rule <k> X:Id => freshVariables(Tvs,T) ...</k>
-       <tenv>... X |-> forall Tvs . T ...</tenv>
-
-  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
+  rule let X = E in E' => E'[E/X]                                      [macro]
+  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'       [macro]
   rule <k> mu X:Id . E:Exp => (T -> T) E ~> tenv(TEnv) ...</k>
-          <tenv> TEnv => TEnv[T/X] </tenv>
-    when fresh(T:Type)
+       <tenv> TEnv => TEnv[T/X] </tenv>  when fresh(T:Type)
 
   syntax K ::= Type "=" Type
   rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
