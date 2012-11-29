@@ -75,6 +75,7 @@ public class Constants {
 	public static final String SEPARATOR_separator_ATTR = "separator";
 	public static final String COLOR_color_ATTR = "color";
 	public static final String LABEL_label_ATTR = "label";
+	public static final String ENDLABEL_label_ATTR = "endLabel";
 	public static final String MULTIPLICITY_multiplicity_ATTR = "multiplicity";
 	public static final String ELLIPSES_ellipses_ATTR = "ellipses";
 	public static final String SHARED = "SHARED";

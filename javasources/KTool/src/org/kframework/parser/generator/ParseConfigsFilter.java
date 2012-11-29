@@ -9,6 +9,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
+import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CheckBinaryPrecedenceFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
@@ -52,6 +53,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 				// disambiguate configs
 
 				config = config.accept(new SentenceVariablesFilter());
+				config = config.accept(new CellEndLabelFilter());
 				// config = config.accept(new CellTypesFilter()); not the case on configs
 				// config = config.accept(new CorrectRewritePriorityFilter());
 				config = config.accept(new CorrectKSeqFilter());

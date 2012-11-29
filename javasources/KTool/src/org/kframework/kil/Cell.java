@@ -27,6 +27,16 @@ public class Cell extends Term {
 	}
 
 	String label;
+	String endLabel;
+
+	public String getEndLabel() {
+		return endLabel;
+	}
+
+	public void setEndLabel(String endLabel) {
+		this.endLabel = endLabel;
+	}
+
 	Term contents;
 	Map<String, String> cellAttributes;
 
@@ -39,6 +49,8 @@ public class Cell extends Term {
 		super(element);
 		this.sort = "BagItem";
 		this.label = element.getAttribute(Constants.LABEL_label_ATTR);
+		this.endLabel = element.getAttribute(Constants.ENDLABEL_label_ATTR);
+		System.out.println("EndLabel: " + endLabel);
 		this.contents = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
 
 		NamedNodeMap its = element.getAttributes();
@@ -57,6 +69,7 @@ public class Cell extends Term {
 	public Cell(Cell node) {
 		super(node);
 		this.label = node.label;
+		this.endLabel = node.endLabel;
 		this.cellAttributes = node.cellAttributes;
 		this.contents = node.contents;
 	}
