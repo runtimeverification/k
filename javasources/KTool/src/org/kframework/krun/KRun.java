@@ -39,6 +39,7 @@ public class KRun {
 
 	private PrettyPrintOutput p;
 	private Term result = null;
+	private List<Map<String, Term>> searchResults = null;
 	private String statistics;
 
 	private KRun(String maudeCmd, boolean ioServer) throws Exception {
@@ -79,8 +80,30 @@ public class KRun {
 		KRun run = new KRun(cmd, !cfg.containsKey("noIO"));
 		run.parseRunResult();
 		return run;
-	}	
+	}
 
+	private class FlattenDisambiguationFilter extends BasicTransformer {
+		public FlattenDisambiguationFilter() {
+			super("Reflatten ambiguous syntax");
+		}
+
+		@Override
+		public ASTNode transform(Ambiguity amb) throws TransformerException {
+			if (amb.getContents().get(0) instanceof TermCons) {
+				TermCons t1 = (TermCons)amb.getContents().get(0);
+				if (MetaK.isComputationSort(t1.getSort())) {
+					return new KApp(new Constant("KLabel", t1.getProduction().getKLabel()), (Term) new ListOfK(t1.getContents()).accept(this));
+				}
+			} else if (amb.getContents().get(0) instanceof Empty) {
+				Empty t1 = (Empty)amb.getContents().get(0);
+				if (MetaK.isComputationSort(t1.getSort())) {
+					return new KApp(new Constant("KLabel", MetaK.getListUnitLabel(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator())), new Empty("List{K}"));
+				}
+			}
+			return amb;
+		}
+	}
+	
 	private void parseRunResult() throws Exception {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
@@ -99,24 +122,8 @@ public class KRun {
 		result = (Term) result.accept(new TypeInferenceSupremumFilter());
 		result = (Term) result.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
 		//as a last resort, undo concretization
-		result = (Term) result.accept(new BasicTransformer("Re-flatten ambiguous syntax") {
-			@Override
-			public ASTNode transform(Ambiguity amb) throws TransformerException {
-				if (amb.getContents().get(0) instanceof TermCons) {
-					TermCons t1 = (TermCons)amb.getContents().get(0);
-					if (MetaK.isComputationSort(t1.getSort())) {
-						return new KApp(new Constant("KLabel", t1.getProduction().getKLabel()), (Term) new ListOfK(t1.getContents()).accept(this));
-					}
-				} else if (amb.getContents().get(0) instanceof Empty) {
-					Empty t1 = (Empty)amb.getContents().get(0);
-					if (MetaK.isComputationSort(t1.getSort())) {
-						return new KApp(new Constant("KLabel", MetaK.getListUnitLabel(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator())), new Empty("List{K}"));
-					}
-				}
-				return amb;
-			}
-		});
-	
+		result = (Term) result.accept(new FlattenDisambiguationFilter());
+
 		statistics = p.printStatistics(elem);
 	}
 
@@ -294,7 +301,45 @@ public class KRun {
 		if (K.trace) {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
-		return new KRun(cmd, !cfg.containsKey("noIO"));
+		KRun result = new KRun(cmd, !cfg.containsKey("noIO"));
+		result.parseSearchResult();
+		result.searchPattern = pattern;
+		return result;
+	}
+
+	private String searchPattern;
+
+	private void parseSearchResult() throws Exception {
+		File input = new File(K.maude_output);
+		Document doc = XmlUtil.readXML(input);
+		NodeList list = null;
+		Node nod = null;
+		list = doc.getElementsByTagName("search-result");
+		searchResults = new ArrayList<Map<String, Term>>();
+		for (int i = 0; i < list.getLength(); i++) {
+			nod = list.item(i);
+			assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
+			Element elem = (Element) nod;
+			if (elem.getAttribute("solution-number").equals("NONE")) {
+				continue;
+			}
+			searchResults.add(new HashMap<String, Term>());
+			NodeList assignments = elem.getElementsByTagName("assignment");
+			for (int j = 0; j < assignments.getLength(); j++) {
+				nod = assignments.item(j);
+				assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
+				elem = (Element) nod;
+				List<Element> child = XmlUtil.getChildElements(elem);
+				assertXML(child.size() == 2);
+				Term result = parseXML(child.get(1));
+				result = (Term) result.accept(new ConcretizeSyntax());
+				result = (Term) result.accept(new TypeInferenceSupremumFilter());
+				result = (Term) result.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+				//as a last resort, undo concretization
+				result = (Term) result.accept(new FlattenDisambiguationFilter());
+				searchResults.get(i).put(child.get(0).getAttribute("op"), result);
+			}
+		}
 	}
 
 	public static KRun modelCheck(String formula, Map<String, String> cfg) throws Exception {
@@ -310,6 +355,29 @@ public class KRun {
 			l.add(unparser.getResult());
 			if (K.statistics) {
 				l.add(statistics);
+			}
+			return l;
+		} else if (searchResults != null) {
+			int i = 1;
+			List<String> l = new ArrayList<String>();
+			for (Map<String, Term> searchResult : searchResults) {
+				l.add("\nSolution " + i + ":");
+				if (this.searchPattern.trim().equals("=>! B:Bag")) {
+					UnparserFilter unparser = new UnparserFilter(true, K.color);
+					searchResult.get("B:Bag").accept(unparser);
+					l.add(unparser.getResult());
+				} else {
+					for (String variable : searchResult.keySet()) {
+						UnparserFilter unparser = new UnparserFilter(true, K.color);
+						l.add(variable + " -->");
+						searchResult.get(variable).accept(unparser);
+						l.add(unparser.getResult());
+					}
+				}
+				i++;
+			}
+			if (l.size() == 0) {
+				l.add("\nNo search results");
 			}
 			return l;
 		}
