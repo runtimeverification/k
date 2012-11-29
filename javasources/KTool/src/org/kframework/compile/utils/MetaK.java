@@ -32,6 +32,7 @@ public class MetaK {
 	   public static final String hole = "[]";
 	   public static final String freshCons = "Bool1FreshSyn";
 	   public static final String plusIntCons = "Int1PlusSyn";
+	   public static final String Bag = "Bag";
    }
 
 	static int nextVarId = 0;

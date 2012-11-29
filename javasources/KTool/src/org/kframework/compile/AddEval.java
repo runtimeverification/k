@@ -32,13 +32,19 @@ public class AddEval implements CompilerStep {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if (!(cfgCleanedNode instanceof Configuration)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-					KExceptionGroup.INTERNAL, 
-					"Configuration Cleaner failed.", 
-					cfg.getFilename(), cfg.getLocation()));
+		Configuration cfgCleaned;
+		if (cfgCleanedNode==null) {
+			cfgCleaned = new Configuration();
+			cfgCleaned.setBody(new Empty(MetaK.Constants.Bag));
+		} else {
+			if (!(cfgCleanedNode instanceof Configuration)) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+						KExceptionGroup.INTERNAL,
+						"Configuration Cleaner failed.",
+						cfg.getFilename(), cfg.getLocation()));
+			}
+			cfgCleaned = (Configuration)cfgCleanedNode;
 		}
-		Configuration cfgCleaned = (Configuration)cfgCleanedNode;
 
 		Rule ruleEval1 = new Rule();
 		TermCons eval1Left = new TermCons("Bag", "Bag1EvalSyn");
