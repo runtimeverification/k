@@ -29,6 +29,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
+		
+		//collect the productions which have the attributes strict and seqstrict
 		List<Production> prods = GetSyntaxByTag.applyVisitor(node, "strict");
 		prods.addAll(GetSyntaxByTag.applyVisitor(node, "seqstrict"));
 		if (prods.isEmpty())
@@ -36,18 +38,21 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 		items = new ArrayList<ModuleItem>(node.getItems());
 		node = node.shallowCopy();
-//		node.setItems(items);
 
 		String arg, attr;
 
 		for (Production prod : prods) {
 
+			//set the attribute: strict or seqstrict
+			//arg: arguments of the attribute, e.g. (1) 
 			attr = "strict";
 			arg = prod.getAttribute(attr);
 
 			if(arg == null){
 				attr = "seqstrict";
 				arg = prod.getAttribute(attr);
+				
+				if(arg == null) continue;
 			}
 
 			//strict in only one argument
@@ -63,11 +68,12 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 				strictInMore(attr, prod, arg);
 			}
 
+			//remove strictness after adding contexts
 			prod.getAttributes().remove(attr);
 		}
 		
 		node.setItems(items);
-		
+
 		return node;
 	}
 
@@ -75,8 +81,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 	private void strictInMore(String attr, Production prod, String arg) {
 
 		int size = ((TermCons) MetaK.getTerm(prod)).getContents().size(); 
-
-		//		System.out.println("Contents: " + ((TermCons) MetaK.getTerm(prod)).getContents() + "\nsize: " + size);
 
 		//case: (1,) or (,)
 		if(arg.endsWith(",")){
@@ -88,8 +92,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 		for (int i = 0; i < s.length; i++) {
 			s[i] = s[i].trim();
-
-			//			System.out.println("trim" + s[i] + "trim");
 
 			//case: (,2)
 			if(s[i].equalsIgnoreCase("")){
@@ -105,10 +107,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 		}
 
-		//		for (int i = 0; i < s.length; i++) {
-		//			System.out.println("s"+i+": " + s[i]);
-		//		}
-
 		int co = 0, i = 0;
 
 		while(co < s.length){
@@ -117,16 +115,17 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 			while(i < size){
 
 				if(i == Integer.parseInt(s[co])-1){
-					//					System.out.println("i: " + i + " s[co]: " + s[co]);
+					//insert HOLE instead of the term
 					tc.getContents().set(i, new Hole("K"));
 
 					if(attr.equalsIgnoreCase("seqstrict") && co > 0){
 						for (int j = 0; j < co; j++) {
-							//							tc.getContents().set(seqargs.get(j), MetaK.getFreshVar("KResult"));
+							//the terms listed in the argument before the current one should be KResults
 							tc.getContents().get(Integer.parseInt(s[j])-1).setSort("KResult");
 						}
 					}
 				}else
+					//the others are fresh variables (anonymous) but the sorts stay the same
 					tc.getContents().set(i, MetaK.getFreshVar(tc.getContents().get(i).getSort()));
 
 
@@ -135,8 +134,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 			Context ctx = new Context();
 			ctx.setBody(tc);
-
-			//			System.out.println(ctx.toString());
 
 			items.add(ctx);
 
@@ -150,6 +147,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 		int argi = 0;
 
 		try{
+			//if terms are listed without commas in between
 			argi = Integer.parseInt(arg);
 		}catch(NumberFormatException nfe){
 
@@ -166,17 +164,17 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), prod.getFilename(), prod.getLocation()));
 		}
 
-		//		System.out.println("Contents: " + ((TermCons) MetaK.getTerm(prod)).getContents() + "\nsize: " + size);
-
 		int co = 0;
 
 		TermCons tc = (TermCons) MetaK.getTerm(prod);
 
 		while(co < size){
 			if(co == argi-1){
+				//insert HOLE instead of the term
 				tc.getContents().set(co, new Hole("K"));
 			}
 			else{
+				//the others are fresh variables (anonymous) but the sorts stay the same
 				tc.getContents().set(co, MetaK.getFreshVar(tc.getContents().get(co).getSort()));
 			}
 			co++;
@@ -184,8 +182,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 		Context ctx = new Context();
 		ctx.setBody(tc);
-
-		//		System.out.println(ctx.toString());
 
 		items.add(ctx);
 	}
@@ -195,8 +191,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 		int size = ((TermCons) MetaK.getTerm(prod)).getContents().size(); 
 
-		//		System.out.println("Contents: " + ((TermCons) MetaK.getTerm(prod)).getContents() + "\nsize: " + size);
-
 		int co = 0, i = 0;
 
 		while(co < size){
@@ -205,16 +199,17 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 			while(i < size){
 
 				if(i == co){
+					//insert HOLE instead of the term
 					tc.getContents().set(i, new Hole("K"));
 
 					if(attr.equalsIgnoreCase("seqstrict")){
-
+						//previous terms should be KResults
 						for (int j = 0; j < i; j++) {
-							//								tc.getContents().set(seqargs.get(j), MetaK.getFreshVar("KResult"));
 							tc.getContents().get(j).setSort("KResult");
 						}
 					}
 				}else
+					//the others are fresh variables (anonymous) but the sorts stay the same
 					tc.getContents().set(i, MetaK.getFreshVar(tc.getContents().get(i).getSort()));
 
 				i++;
@@ -223,8 +218,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 			Context ctx = new Context();
 			ctx.setBody(tc);
-
-			//			System.out.println(ctx.toString());
 
 			items.add(ctx);
 
