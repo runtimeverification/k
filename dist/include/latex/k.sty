@@ -322,7 +322,6 @@
 \newcommand{\somespace}{\mathbin{}}
 \newcommand{\subscript}[1]{\ensuremath{\nothing_{#1}}}
 
-\newcommand{\kLarge}[1]{\left(\begin{array}{@{}c@{}}#1\end{array}\right)}
 \newcommand{\kBR}{\\}
 
 % Builtins %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -500,7 +499,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 
 \newcommand{\kconfig}[1]{\par%
   {\sc configuration:}\par%
-    \ensuremath{\begin{array}[t]{@{}c@{}}#1\end{array}}\k@markPosition%
+    \ensuremath{#1}\k@markPosition%
   \par\ \par%
 }
 
@@ -637,10 +636,10 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 \newcommand{\mcell}[3]{{\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\left\langle{#3}\ifthenelse{\equal{#1}{}}{\color{white!50!black}}{\color{#1!50!black}}\right\rangle_{\sf #2}}}
 \newcommand{\ellipses}{\mathrel{\cdot\!\!\cdot\!\!\cdot}}
 \newcommand{\mallLarge}{\mall}
-\newcommand{\mall}[3]{\mcell{#1}{#2}{{\begin{array}{@{}c@{}}#3\end{array}}}}
-\newcommand{\mprefix}[3]{\mcell{#1}{#2}{{\begin{array}{@{}c@{}}#3\end{array}}\ {\color{#1!50!black}\ellipses}}}
-\newcommand{\msuffix}[3]{\mcell{#1}{#2}{{\color{#1!50!black}\ellipses}\ {\begin{array}{@{}c@{}}#3\end{array}}}}
-\newcommand{\mmiddle}[3]{\mcell{#1}{#2}{{\color{#1!50!black}\ellipses}\ {\begin{array}{@{}c@{}}#3\end{array}}\ {\color{#1!50!black}\ellipses}}}
+\newcommand{\mall}[3]{\mcell{#1}{#2}{{#3}}}
+\newcommand{\mprefix}[3]{\mcell{#1}{#2}{{#3}\ {\color{#1!50!black}\ellipses}}}
+\newcommand{\msuffix}[3]{\mcell{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}}}
+\newcommand{\mmiddle}[3]{\mcell{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}\ {\color{#1!50!black}\ellipses}}}
 \newcommand{\mdot}{\cdot}
 \newcommand{\mAnyVar}[1]{\_}
 
@@ -650,9 +649,9 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 \newcommand{\ballLarge}[3]{%
   \kcell{#1}%
         {#2}%
-        {\begin{array}[t]{@{}c@{}}%
+        {%
             #3%
-          \end{array}}%
+         }%
         {convex}%
         {convex}%
 }
@@ -713,7 +712,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
   \begingroup
   \def\cellColor{#1}%
   \def\cellLabel{\textsf{\footnotesize\strut #2}}% The strut ensures even label height.
-  \def\cellContent{$\begin{array}[t]{@{}c@{}}#3\end{array}$}%
+  \def\cellContent{$#3$}%
   % Parameters #4 and #5 determine whether the west and east arc are curved
   % or straight ("whole" or "ruptured").
 
@@ -899,7 +898,7 @@ rectangle,rectangle
   \ifthenelse{\equal{#1}{}}{}{%  
    \left(% 
   }%
-  \begin{array}{@{}c@{}}#4\end{array}%
+  #4%
   \ifthenelse{\equal{#1}{}}{}{%  
    \right)% 
   }%
