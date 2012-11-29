@@ -33,12 +33,20 @@ public class CheckSyntaxDecl extends BasicVisitor {
 					String msg = "Undefined sort " + s.getName();
 					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 				}
+				if (s.getName().equals("KResult") && !(node.isSubsort() && node.getSort().equals("K"))) {
+					String msg = "KResult is only allowed in the left hand side of syntax.";
+					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
+				}
 			}
 			if (pi.getType() == ProductionType.USERLIST) {
 				sorts++;
 				UserList s = (UserList) pi;
 				if (!s.getSort().startsWith("#") && !DefinitionHelper.definedSorts.contains(s.getSort())) {
 					String msg = "Undefined sort " + s.getSort();
+					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
+				}
+				if (s.getSort().equals("KResult")) {
+					String msg = "KResult is only allowed in the left hand side of syntax.";
 					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 				}
 			}
