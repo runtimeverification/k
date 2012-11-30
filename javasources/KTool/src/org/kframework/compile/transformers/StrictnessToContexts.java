@@ -11,7 +11,9 @@ import org.kframework.kil.Hole;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
 import org.kframework.kil.TermCons;
+import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -42,7 +44,11 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 		String arg, attr;
 
 		for (Production prod : prods) {
-
+			
+			List<ProductionItem> pi = prod.getItems();
+			if(pi.size() == 1 && pi.get(0).getType() == ProductionType.SORT)
+				continue;
+						
 			//set the attribute: strict or seqstrict
 			//arg: arguments of the attribute, e.g. (1) 
 			attr = "strict";
