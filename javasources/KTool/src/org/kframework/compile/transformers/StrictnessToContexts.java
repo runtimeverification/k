@@ -45,9 +45,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 		for (Production prod : prods) {
 			
-			List<ProductionItem> pi = prod.getItems();
-			if(pi.size() == 1 && pi.get(0).getType() == ProductionType.SORT)
-				continue;
+			if(prod.isSubsort()) continue;
 						
 			//set the attribute: strict or seqstrict
 			//arg: arguments of the attribute, e.g. (1) 
