@@ -43,6 +43,14 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 	
 	private Term makeStreamList(String stream, Cell node) {
 		Term contents = node.getContents();
+		
+		if(KSort.getKSort(contents.getSort()) != KSort.List) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+					KExceptionGroup.INTERNAL, 
+					"Wrong type in cell. Expecting .List, but got " + contents.getSort() + " as cell contents.", 
+					getName(), node.getFilename(), node.getLocation()));
+		}
+		
 		List result;
 		if (contents instanceof List) {
 			result = ((List)contents).shallowCopy();
