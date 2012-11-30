@@ -224,12 +224,25 @@
   <test
       language="dist/tutorial/5_types/lesson_6/lambda.k"
       folder="dist/tutorial/5_types/lesson_4
+              dist/tutorial/5_types/lesson_5"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_7/lambda.k"
+      folder="dist/tutorial/5_types/lesson_4
               dist/tutorial/5_types/lesson_5
               dist/tutorial/5_types/lesson_6"
       extensions="lambda"
       />
   <test
-      language="dist/tutorial/5_types/lesson_7/lambda.k"
+      language="dist/tutorial/5_types/lesson_8/lambda.k"
+      folder="dist/tutorial/5_types/lesson_4
+              dist/tutorial/5_types/lesson_5
+              dist/tutorial/5_types/lesson_6"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_9/lambda.k"
       folder="dist/tutorial/5_types/lesson_4
               dist/tutorial/5_types/lesson_5
               dist/tutorial/5_types/lesson_6"
