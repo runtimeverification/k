@@ -37,8 +37,8 @@ module LAMBDA
   rule lambda X . E => T -> E[T/X]  when fresh(T:Type)
   rule T1:Type T2:Type => T1 = (T2 -> T) ~> T  when fresh(T:Type)
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
-  rule let X = E in E' => E'[E/X]                                      [macro]
-  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'       [macro]
+  rule let X = E in E' => E'[E/X]                                       [macro]
+  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule mu X . E => (T -> T) E[T/X]  when fresh(T:Type)
 
   syntax K ::= Type "=" Type

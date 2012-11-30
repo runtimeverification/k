@@ -14,7 +14,7 @@ module LAMBDA
                > Exp "<=" Exp                     [strict]
                > "lambda" Id "." Exp
                | "if" Exp "then" Exp "else" Exp   [strict]
-               | "let" Id "=" Exp "in" Exp        [strict(2)]
+               | "let" Id "=" Exp "in" Exp
                | "letrec" Id Id "=" Exp "in" Exp
                | "mu" Id "." Exp
 
@@ -40,8 +40,8 @@ module LAMBDA
        <tenv> TEnv => TEnv[T/X] </tenv>  when fresh(T:Type)
   rule T1:Type T2:Type => T1 = (T2 -> T) ~> T  when fresh(T:Type)
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
-  rule let X = E in E' => E'[E/X]                                      [macro]
-  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'       [macro]
+  rule let X = E in E' => E'[E/X]                                       [macro]
+  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule <k> mu X:Id . E:Exp => (T -> T) E ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[T/X] </tenv>  when fresh(T:Type)
 

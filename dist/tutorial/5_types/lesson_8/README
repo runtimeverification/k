@@ -1,0 +1,29 @@
+K Tutorial --- Types --- A Naive Environment-based Polymorphic Type Inferencer
+by Grigore Rosu
+
+In this short lesson we discuss how to quickly turn a naive
+environment-based monomorphic type inferencer into a naive let-polymorphic
+one.  Like in the previous lesson, we only need to change a few
+characters.  In terms of the K framework, you will learn how to have
+both environments and substitution in the same definition.
+
+Like in the previous lesson, all we have to do is to take the LAMBDA
+type inferencer in Lesson 5 and only change the macro
+
+  rule let X = E in E' => (lambda X . E') E  [macro]
+
+as follows:
+
+  rule let X = E in E' => E'[E/X]  [macro]
+
+The reasons why this works have already been explained in the previous
+lesson, so we do not repeat them here.
+
+TO BE COMPLETED TODAY!
+
+- need to include substitution
+- try exponential-type only
+- say that this is an intermediate step towards the next one, which
+  essentially removes the expensive substition; say that this
+  inferencer is still expensive, again for all the resons already
+  explained in the previous lesson.
