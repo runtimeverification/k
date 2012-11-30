@@ -54,7 +54,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
         retNode.addConstant(K_TO_SMTLIB);
 
         // for each sort, define the SMT representation of the symbolic sort
-        // constructors symSort(Int) and symSort(Id)
+        // constructors symSort(Int), symSort(String) and symSort(Id)
         // TODO: add generic K2String and genrate support for symSort(K)
         for (String sort : node.getAllSorts()) {
             if (AddSymbolicK.allowKSymbolic(sort)) {
@@ -66,6 +66,14 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 KApp strTerm = new KApp(Constant.KLABEL("Int2String"), var);
                 Term rhs = appendString(Constant.STRING(SMTLIB_VAR_PREFIX), strTerm);
                 Rule rule = new Rule(lhs, rhs);
+                rule.addAttribute(Attribute.FUNCTION);
+                retNode.appendModuleItem(rule);
+
+                var = MetaK.getFreshVar("String");
+                symTerm = new KApp(Constant.KLABEL(symCtor), var);
+                lhs = new KApp(K_TO_SMTLIB, symTerm);
+                rhs = appendString(Constant.STRING(SMTLIB_VAR_PREFIX), var);
+                rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
