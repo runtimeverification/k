@@ -59,7 +59,9 @@ module SYMBOLIC-K
     +String "(assert " +String K2SMTLib(B) +String ")\n"
     +String "(check-sat)\n"
 
-  syntax String ::= "checkSAT" "(" String ")" [function, hook(#SMT:#smtCall_)]
+  syntax String ::= "SMTCall" "(" String ")" [function, hook(#SMT:#smtCall_)]
+  syntax String ::= "checkSat" "(" Bool ")" [function]
+  rule checkSat(B:Bool) => SMTCall(SMTLibQuery(B))
 
 
   syntax Bool ::= "isBuiltin" "(" K ")"
