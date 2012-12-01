@@ -11,9 +11,7 @@ import org.kframework.kil.Hole;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
 import org.kframework.kil.TermCons;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -129,8 +127,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 						}
 					}
 				}else
-					//the others are fresh variables (anonymous) but the sorts stay the same
-					tc.getContents().set(i, MetaK.getFreshVar(tc.getContents().get(i).getSort()));
+					//the others are fresh variables (anonymous) of sort K
+					tc.getContents().set(i, MetaK.getFreshVar("K"));
 
 
 				i++;
@@ -178,8 +176,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 				tc.getContents().set(co, new Hole("K"));
 			}
 			else{
-				//the others are fresh variables (anonymous) but the sorts stay the same
-				tc.getContents().set(co, MetaK.getFreshVar(tc.getContents().get(co).getSort()));
+				//the others are fresh variables (anonymous) of sort K
+				tc.getContents().set(co, MetaK.getFreshVar("K"));
 			}
 			co++;
 		}
@@ -213,8 +211,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 						}
 					}
 				}else
-					//the others are fresh variables (anonymous) but the sorts stay the same
-					tc.getContents().set(i, MetaK.getFreshVar(tc.getContents().get(i).getSort()));
+					//the others are fresh variables (anonymous) of sort K
+					tc.getContents().set(i, MetaK.getFreshVar("K"));
 
 				i++;
 
