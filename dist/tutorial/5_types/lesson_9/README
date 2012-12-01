@@ -28,27 +28,27 @@ free in E'.  The simplest K way to type E is to declare the let
 construct strict(2).  Now we cannot simply bind X to the type of E,
 because we would obtain a variant of the naive type inferencer we
 already discussed, together with its limitations, in Lesson 5 of this
-tutorial.  The trick here is to parameterize the type of E in all its
+tutorial.  The trick here is to parametrize the type of E in all its
 unconstrained fresh types, and then create fresh copies of those
 parameters in each free occurrence of X in E'.
 
 Let us discuss some examples, before we go into the technical details.
 Consider the first let-polymorphic example which failed to be typed
-with our first naive type-inderencer:
+with our first naive type-inferencer:
 
   let id = lambda x . x
   in if (id true) then (id 1) else (id 2)
 
 When typing lambda x . x, we get a type of the form t -> t, for some
 fresh type t.  Instead of assigning this type to id as we did in the
-naive type inferencers, we now first parameterize this type in its
+naive type inferencers, we now first parametrize this type in its
 fresh variable t, written
 
   (forall t) t -> t
 
 and then bind id to this parametric type.  The intuition for the
 parameter is that it can be instantiated with any other type, so this
-parametric type stands, in fact, for inifinitely many non-parametric
+parametric type stands, in fact, for infinitely many non-parametric
 types.  This is similar to what happens in formal logic proof systems,
 where "rule schemas" stand for infinitely many concrete instances of
 them.  For this reason, parametric types are also called "type
@@ -80,15 +80,15 @@ The lambda construct will bind x to some fresh type tx.  Then the
 let-bound expression "lambda z . x" types to tz -> tx for some
 additional fresh type tz.  The question now is what should the
 parameters of this type be when we generate the type schema?  If we
-naively parameterize in all fresh variables, that is in both tz and
+naively parametrize in all fresh variables, that is in both tz and
 tx obtaining the type schema (forall tz,tx) tz -> tx, then there will
 be no way to infer that the type of x, tx, must be a bool!  The
 inferred type of this expression would then wrongly be tx -> t for
 some fresh types tx and t.  That's because the parameters are replaced
 with fresh copies in each occurrence of y, and thus their relationship
-to the orginal x is completely lost.  This tells us that we cannot
-parameterize in all fresh types that appear in the type of the
-let-bound expression.  In particular, we cannot parameterize in those
+to the original x is completely lost.  This tells us that we cannot
+parametrize in all fresh types that appear in the type of the
+let-bound expression.  In particular, we cannot parametrize in those
 which some variables are already bound to in the current type
 environment (like x is bound to tx in our example above).
 In our example, the correct type schema is (forall tz) tz -> tx,
@@ -101,12 +101,12 @@ Let us now discuss another example, which should fail to type:
     in if (f true) then (f 1) else (f 2)
 
 This should fail to type because "lambda y . x y" is equivalent to x,
-so the conditional imposes the conflicting contraints that x should be
+so the conditional imposes the conflicting constraints that x should be
 a function whose argument is either a bool or an int.  Let us try to
 type it using our currently informal procedure.  Like in the previous
 example, x will be bound to a fresh type tx.  Then the let-bound
 expression types to ty -> tz with ty and tz fresh types, adding also
-the contraint tx = ty -> tz.  What should the parameters of this type
+the constraint tx = ty -> tz.  What should the parameters of this type
 be?  If we ignore the type constraint and simply make both ty and tz
 parameters because no variable is bound to them in the type
 environment (indeed, the only variable x in the type environment is
@@ -151,7 +151,7 @@ with the following rule:
                 ) applyMgu(Theta, T) / X]
        </tenv>
 
-So the type T of E is being parameterized and then bound to X in the
+So the type T of E is being parametrized and then bound to X in the
 type environment.  The current mgu Theta, which comprises all the type
 constraints accumulated so far, is applied to both T and the types in
 the type environment.  The remaining fresh types in T which do not
@@ -164,9 +164,9 @@ Now a LAMBDA variable in the type environment can be bound to either a
 type or a type schema.  In the first case, the previous rule we had
 for variable lookup can be reused, but we have to make sure we check
 that T there is of sort Type (adding a sort membership, for example).
-In the second case, as explaned above, we have to create fresh copies
+In the second case, as explained above, we have to create fresh copies
 of the parameters.  This can be easily achieved with another
-predefined K function, as folows:
+predefined K function, as follows:
 
   rule <k> X:Id => freshVariables(Tvs,T) ...</k>
        <tenv>... X |-> (forall Tvs) T ...</tenv>
