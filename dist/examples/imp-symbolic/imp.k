@@ -1,10 +1,8 @@
-require "builtins/int-symbolic.k"
-require "builtins/bool-symbolic.k"
-require "builtins/smt.k"
+require "builtins/symbolic-k.k"
 require "builtins/fol.k"
 
 module IMP-SYNTAX
-  imports INT-SYMBOLIC-SYNTAX
+  imports FOL
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
@@ -33,28 +31,24 @@ module IMP-SYNTAX
   syntax InitVals ::= List{InitVal,","}
   syntax InitVal  ::= Id "->" Int
 
-  syntax CfgSym ::= "<k>" Pgm "</k>"
+  syntax CfgSym ::= "<k>" Stmt "</k>"
   	 	    "<env>" InitVals "</env>"
-		    "<condition>" BExp "</condition>"
+		    "<condition>" Fol "</condition>"
 
+  // syntax for symbolic values in programs
+  syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
 
 endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports INT-SYMBOLIC
-  imports BOOL-SYMBOLIC
-  imports SMT-HOOKS
-  imports FOL
 
   syntax KResult ::= Int | Bool
 
   configuration <T color="yellow">
-  		   <config>
-			<k color="green"> $PGM:CfgSym </k>
-                  	<state color="red"> .Map </state>
-		   </config>
-		  <condition> true </condition>
+		  <k color="green"> $PGM:CfgSym </k>
+                  <state color="blue"> .Map </state>
+		  <condition color="red"> true </condition>
                 </T>
 
 // AExp
@@ -83,42 +77,37 @@ module IMP
 // the transformed rules
   rule <k> I1:Int / I2:Int => I1 /Int I2 ...</k>
        <condition> Phi:Fol => Phi andFol I2 =/=Int 0 </condition> 
-       when checkSat(Phi andFol I2 =/=Int 0) ==K sat [transition]
+       when checkSat(Phi andFol (I2 =/=Int 0)) ==K "sat" [transition]
 
   rule <k> B1:Bool && B2:BExp => B2 ...</k>
        <condition> Phi:Fol => Phi andFol B1 ==Bool true </condition> 
-       when checkSat(Phi andFol B1 ==Bool true) ==K sat [transition]
+       when checkSat(Phi andFol B1) ==K "sat" [transition]
   
   rule <k> B1:Bool && B2:Bool => false ...</k>
-       <condition> Phi:Fol => Phi andFol notBool B1 </condition> 
-       when checkSat(Phi andFol B1 ==Bool false) ==K sat [transition]
+       <condition> Phi:Fol => Phi andFol notFol B1 </condition> 
+       when checkSat(Phi andFol notFol B1) ==K "sat" [transition]
 
   rule <k> if (B:Bool) S:Stmt else _ => S ...</k>
-       <condition> Phi:Fol => Phi andFol (B ==Bool true) </condition> 
-       when checkSat(Phi andFol B) ==K sat [transition]
+       <condition> Phi:Fol => Phi andFol B </condition> 
+       when checkSat(Phi andFol B) ==K "sat" [transition]
 
   rule <k> if (B:Bool) _ else S:Stmt => S ...</k>
-       <condition> Phi:Fol => Phi andFol (B ==Bool false) </condition>
-       when checkSat(Phi andFol notBool B) ==K sat [transition]
-
+       <condition> Phi:Fol => Phi andFol notFol B </condition>
+       when checkSat(Phi andFol notFol B) ==K "sat" [transition]
 
 // assert
-  rule <k> assert(B:Fol); => . ...</k>
+  rule <k> assert(B:BExp); => . ...</k>
        <condition> Phi:Fol </condition> 
-       when checkSat(Phi andFol B) ==K sat 
-
-
+       when checkSat(Phi andFol transformBool(B)) ==K "sat" 
 
 // setting up the initial configuration
-  rule [initial]: <config>
-       		    <k>
-			<k> P:Pgm </k>
+  rule [initial]:   <k>
+			<k> Program:Stmt </k>
 			<env> InitVs:InitVals </env>
-			<condition> F:BExp </condition> 
-			=> initialize(InitVs) ~> P
+			<condition> Formula:Fol </condition> 
+			=> initialize(InitVs) ~> Program
 		    </k>
-		  ...</config>
-		  <condition> _ => transformBool(F) </condition>  
+		    <condition> _ => Formula </condition>  
 
 // load the environment
   syntax K ::= "initialize" "(" InitVals ")"
@@ -129,16 +118,19 @@ module IMP
 
 // transform the formula into an internal format
   syntax Int ::= "transformInt" "(" AExp ")" [function]
-  rule transformInt(I:Int) => I [anywhere, function]
-  rule transformInt(X:Id)  => symInt(X) [anywhere, function]
-  rule transformInt(A1:AExp + A2:AExp) => transformInt(A1) +Int transformInt(A2) [anywhere, function]
-  rule transformInt(A1:AExp / A2:AExp) => transformInt(A1) /Int transformInt(A2) [anywhere, function]
+  rule transformInt(I:Int) => I
+  rule transformInt(X:Id)  => #symInt(X)
+  rule transformInt(A1:AExp + A2:AExp) => transformInt(A1) +Int transformInt(A2)
+  rule transformInt(A1:AExp / A2:AExp) => transformInt(A1) /Int transformInt(A2)
 
 
   syntax Bool ::= "transformBool" "(" BExp ")" [function]
-  rule transformBool(true) => true [anywhere, function]
-  rule transformBool(false) => false [anywhere, function]
-  rule transformBool(A1:AExp <= A2:AExp) => transformInt(A1) <=Int transformInt(A2) [anywhere, function]
-  rule transformBool(B1:BExp && B2:BExp) => transformBool(B1) andBool transformBool(B2) [anywhere, function]
-  rule transformBool(! B:BExp) => notBool transformBool(B) [anywhere, function]
+  rule transformBool(true) => true
+  rule transformBool(false) => false
+  rule transformBool(A1:AExp <= A2:AExp) => transformInt(A1) <=Int transformInt(A2)
+  rule transformBool(B1:BExp && B2:BExp) => transformBool(B1) andBool transformBool(B2)
+  rule transformBool(! B:BExp) => notBool transformBool(B)
+
+  rule transformBool(B:Bool) => B
+
 endmodule

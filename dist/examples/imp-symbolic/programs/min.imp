@@ -1,5 +1,4 @@
 <k>
-int min;
 if (a <= b) {
   if (a <= c) 
        { min = a; }  
@@ -14,5 +13,5 @@ assert(min <= a);
 assert(min <= b);
 assert(min <= c);
 </k>
-<env> a -> symInt(a), b -> symInt(b), c -> symInt(c) </env>
+<env> a -> #symInt(a), b -> #symInt(b), c -> #symInt(c), min -> 0 </env>
 <condition> true </condition>
