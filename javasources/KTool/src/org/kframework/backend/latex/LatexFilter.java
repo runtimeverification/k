@@ -25,7 +25,7 @@ public class LatexFilter extends BasicVisitor {
 	private boolean firstAttribute;
 	private boolean parentParens = false;
 	private boolean hasTitle = false;
-	private boolean termComment;
+//	private boolean termComment;
 
 	public void setResult(StringBuilder result) {
 		this.result = result;
@@ -164,10 +164,10 @@ public class LatexFilter extends BasicVisitor {
 
 	public void visit(Collection col) {
 		final boolean hasBR = containsBR(col);
-		if (hasBR) result.append("\\begin{array}{@{}c@{}}");
+		if (hasBR) result.append("\\left(\\begin{array}{@{}c@{}}");
 		List<Term> contents = col.getContents();
 		printList(contents, "\\mathrel{}");
-		if (hasBR) result.append("\\end{array}");
+		if (hasBR) result.append("\\end{array}\\right)");
 	}
 
 	private boolean containsBR(Collection col) {
@@ -194,7 +194,7 @@ public class LatexFilter extends BasicVisitor {
 	}
 	
 	public void visit(TermComment tc) {
-		termComment = true;
+//		termComment = true;
 		result.append("\\\\");
 		super.visit(tc);
 	}
@@ -232,7 +232,7 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Rule rule) {
-		termComment = false;
+//		termComment = false;
 		result.append("\\krule");
 		if (!rule.getLabel().equals("")) {
 			result.append("[" + rule.getLabel() + "]");
@@ -247,7 +247,7 @@ public class LatexFilter extends BasicVisitor {
 		rule.getAttributes().accept(this);
 		result.append("}");
 		result.append("{");
-		if (termComment) result.append("large");
+//		if (termComment) result.append("large");
 		result.append("}");
 		result.append(endl);
 	}
