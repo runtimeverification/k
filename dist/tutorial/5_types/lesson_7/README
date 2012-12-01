@@ -72,6 +72,19 @@ and as
 
 which types to t1 -> t2 -> t3 -> t3 for some type variables t1, t2, t3.
 
+Here is another program which was not typable before, which is
+trickier than the others above in that a lambda-bound variable appears
+free in a let-bound expression:
+
+  lambda x . (
+    let y = lambda z . x
+    in if (y true) then (y 1) else (y (lambda x . x))
+  )
+
+The above presents no problem now, because once "lambda z . x" gets
+substituted for y we get a well-typed expression which yields that x
+has the type bool, so the entire expression types to bool -> bool.
+
 The cheap type inferencer that we obtained above therefore works as
 expected.  However, it has two problems which justify a more advanced
 solution.  First, substitution is typically considered an elegant
