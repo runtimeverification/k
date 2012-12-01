@@ -309,6 +309,18 @@
   </test>
 
 <!--
+  IMP-SYMBOLIC
+-->
+ 
+  <test 
+      language="dist/examples/imp-symbolic/imp.k"
+      folder="dist/examples/imp-symbolic/programs"
+      extensions="imp"
+      >
+  </test>
+
+
+<!--
     Regression tests
 -->
 
