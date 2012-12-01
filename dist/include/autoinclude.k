@@ -10,7 +10,7 @@ interface AUTO-INCLUDED-MODULE-SYNTAX
 endinterface
 
 interface AUTO-INCLUDED-MODULE
-  imports BUILTIN-SYNTAX
+  imports BUILTIN-HOOKS
   imports K
   imports SYMBOLIC-K
   imports URIS
