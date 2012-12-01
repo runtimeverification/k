@@ -37,16 +37,16 @@ module LAMBDA
   rule <k> X:Id => T ...</k>  <tenv>... X |-> T ...</tenv>
 
   rule <k> E1 * E2 => int ...</k> <tenv> Rho </tenv>
-       (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task>
+       (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task> <br/>
              <task> <k> E2 = int </k> <tenv> Rho </tenv> </task>)
   rule <k> E1 / E2 => int ...</k> <tenv> Rho </tenv>
-       (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task>
+       (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task> <br/>
              <task> <k> E2 = int </k> <tenv> Rho </tenv> </task>)
   rule <k> E1 + E2 => int ...</k> <tenv> Rho </tenv>
-       (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task>
+       (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task> <br/>
              <task> <k> E2 = int </k> <tenv> Rho </tenv> </task>)
   rule <k> E1 <= E2 => bool ...</k> <tenv> Rho </tenv>
-       (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task>
+       (. => <task> <k> E1 = int </k> <tenv> Rho </tenv> </task> <br/>
              <task> <k> E2 = int </k> <tenv> Rho </tenv> </task>)
 
   rule <k> lambda X . E => Tx -> Te ...</k> <tenv> TEnv </tenv>
@@ -54,13 +54,13 @@ module LAMBDA
     when fresh(Tx:Type) andBool fresh(Te:Type)
 
   rule <k> E1 E2 => T ...</k> <tenv> Rho </tenv>
-       (. => <task> <k> E1 = T2 -> T </k> <tenv> Rho </tenv> </task>
+       (. => <task> <k> E1 = T2 -> T </k> <tenv> Rho </tenv> </task> <br/>
              <task> <k> E2 = T2 </k> <tenv> Rho </tenv> </task>)
     when fresh(T2:Type) andBool fresh(T:Type)
 
   rule <k> if E then E1 else E2 => T ...</k> <tenv> Rho </tenv>
-       (. => <task> <k> E = bool </k> <tenv> Rho </tenv> </task>
-             <task> <k> E1 = T </k> <tenv> Rho </tenv> </task>
+       (. => <task> <k> E = bool </k> <tenv> Rho </tenv> </task> <br/>
+             <task> <k> E1 = T </k> <tenv> Rho </tenv> </task>   <br/>
              <task> <k> E2 = T </k> <tenv> Rho </tenv> </task>)
     when fresh(T:Type)
 
