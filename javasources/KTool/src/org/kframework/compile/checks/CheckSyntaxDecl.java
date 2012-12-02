@@ -25,6 +25,15 @@ public class CheckSyntaxDecl extends BasicVisitor {
 		int sorts = 0;
 		int neTerminals = 0;
 		int eTerminals = 0;
+
+		if (node.isSubsort()) {
+			String sort = ((Sort) node.getItems().get(0)).getName();
+			if (Sort.isBasesort(sort) && !DefinitionHelper.isSubsorted(node.getSort(), sort)) {
+				String msg = "Extending  built-in sorts is forbidden: K, KResult, List{K}, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
+				GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+			}
+		}
+
 		for (ProductionItem pi : node.getItems()) {
 			if (pi.getType() == ProductionType.SORT) {
 				sorts++;
