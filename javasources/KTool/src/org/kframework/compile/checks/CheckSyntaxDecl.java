@@ -46,7 +46,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 				}
 				if (s.getSort().equals("KResult")) {
-					String msg = "KResult is only allowed in the left hand side of syntax.";
+					String msg = "KResult is only allowed in the left hand side of syntax declarations.";
 					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 				}
 			}
