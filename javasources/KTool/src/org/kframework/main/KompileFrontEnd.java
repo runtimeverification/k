@@ -15,6 +15,7 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
+import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.compile.sharing.AutomaticModuleImportsTransformer;
 import org.kframework.compile.sharing.DittoFilter;
@@ -512,6 +513,7 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/lists.maude", maudeFilter1.getResult());
 
 			new CheckVisitorStep(new CheckVariables()).check(javaDef);
+			new CheckVisitorStep(new CheckRewrite()).check(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Sanity checks");
@@ -531,7 +533,9 @@ public class KompileFrontEnd {
 
 			javaDef = new CompilerTransformerStep(new StrictnessToContexts()).compile(javaDef);
 
-			if (GlobalSettings.verbose) { sw.printIntermediate("Strict Ops To Context"); }
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Strict Ops To Context");
+			}
 
 			DittoFilter df = new DittoFilter();
 			javaDef.accept(df);
