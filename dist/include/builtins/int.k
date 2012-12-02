@@ -50,4 +50,6 @@ module INT-HOOKS
   rule absInt(I:Int) => I when isNat(I)
   rule absInt(I:Int) => 0 -Int I when notBool(isNat(I))
 
+  syntax Int ::= "(" Int ")" [bracket]
+
 endmodule
