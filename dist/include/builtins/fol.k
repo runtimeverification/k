@@ -11,6 +11,7 @@ module FOL
 	       | "exists"  Set "." Fol [binder, function]
 
   syntax String ::= "checkSat" "(" Fol ")" [function]
+  syntax String ::= "SMTLibQuery" "(" Fol ")" [function, klabel(SMTLibQuery)]
 
   rule B1:Bool andFol B2:Bool => B1 andBool B2 [anywhere]
   rule B1:Bool orFol  B2:Bool => B1 orBool  B2 [anywhere]
