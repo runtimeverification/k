@@ -32,7 +32,7 @@
 (setq k-keywords
       '("syntax" "module" "endmodule" "imports" ; "::=" "|" ">"
         "sort" "op" "subsort" "rule" "eq" "ceq" "load" "when"
-	"interface" "endinterface" "require" "configuration")
+	"interface" "endinterface" "require" "configuration" "context")
       k-syntax-terminals-regex
       "`\\w+"
       k-declarations ;; Syntax highlight the name after a declaration
