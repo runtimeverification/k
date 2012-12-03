@@ -374,6 +374,12 @@ public class Test {
 		if (!new File(getCompiledFilename()).exists())
 			return false;
 
+		if (!task.getStderr().equals(""))
+			return false;
+		
+		if (!task.getStdout().equals(""))
+			return false;
+		
 		return true;
 	}
 
@@ -390,7 +396,7 @@ public class Test {
 
 	public void reportCompilation(Task task) {
 		String message = compiled(task) ? "success" : "failed";
-		if (!task.getStdout().equals(""))
+		if (!task.getStdout().equals("") || !task.getStderr().equals(""))
 			if (message.equals("success"))
 				message = "unstable";
 
@@ -420,6 +426,12 @@ public class Test {
 			return false;
 
 		if (!new File(getPdfCompiledFilename()).exists())
+			return false;
+
+		if (!task.getStderr().equals(""))
+			return false;
+		
+		if (!task.getStdout().equals(""))
 			return false;
 
 		return true;
