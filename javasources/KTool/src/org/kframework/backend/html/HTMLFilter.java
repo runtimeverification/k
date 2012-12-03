@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 public class HTMLFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
-	private String result = "";
+	private StringBuilder result = new StringBuilder();
 	private String css = "";
 	private String preamble = "";
 	private String title = "";
@@ -42,7 +42,6 @@ public class HTMLFilter extends BasicVisitor {
 	private HTMLPatternsVisitor patternsVisitor = new HTMLPatternsVisitor();
 	
 	private boolean firstAttribute;
-	private boolean parentParens = false;
 	private boolean firstProduction = false;
 	
 	private Properties Latex2HTMLzero = new Properties();
@@ -58,7 +57,7 @@ public class HTMLFilter extends BasicVisitor {
 	
 	public String getHTML() {
 		// adds the headers and the css to the result to create the complete HTML code for the page
-		parsePreamble();
+		String preamble = parsePreamble();
 		String html = 
 			"<!DOCTYPE html>" + endl + 
 			"<html lang=\"en\">" + endl + 
@@ -76,7 +75,8 @@ public class HTMLFilter extends BasicVisitor {
 			// <-MathJax
 			"</head>" + endl + 
 			"<body>" + endl;
-		html += 
+		html +=
+			preamble +
 			result +
 			"</body>" + endl +
 			"</html>" + endl;
@@ -84,11 +84,11 @@ public class HTMLFilter extends BasicVisitor {
 	}
 
 	public void setResult(String result) {
-		this.result = result;
+		this.result = new StringBuilder(result);
 	}
 	
 	public String getResult() {
-		return result;
+		return result.toString();
 	}
 
 	public void setPreamble(String preamble) {
@@ -99,14 +99,6 @@ public class HTMLFilter extends BasicVisitor {
 		return preamble;
 	}
 	
-	public boolean isParentParens() {
-		return parentParens;
-	}
-
-	private void setParentParens(boolean parentParens) {
-		this.parentParens = parentParens;
-	}
-
 	@Override
 	public void visit(Definition def) {
 		def.accept(patternsVisitor);
@@ -119,32 +111,32 @@ public class HTMLFilter extends BasicVisitor {
 	public void visit(Module mod) {
 		if (mod.isPredefined())
 			return;
-		result += "<div>" + "MODULE <span class=\"large\">" + mod.getName() + "</span> <br /> <br />" + endl;
+		result.append("<div>" + "MODULE <span class=\"large\">" + mod.getName() + "</span> <br /> <br />" + endl);
 		super.visit(mod);
-		result += "END MODULE </div>" + endl + "<br />" + endl;
+		result.append("END MODULE </div>" + endl + "<br />" + endl);
 	}
 
 	@Override
 	public void visit(Syntax syn) {
 		// These are rendered using a table to position each symbol nicely.
-		result += "<table> <tr> <td> SYNTAX ";
+		result.append("<table> <tr> <td> SYNTAX ");
 		firstProduction = true;
 		super.visit(syn);
-		result += "</table>" + endl + "<br />" + endl;
+		result.append("</table>" + endl + "<br />" + endl);
 	}
 
 	@Override
 	public void visit(Sort sort) {
-		result += "<span class =\"italic\"> " + makeGreek(sort.getName()) + " </span>";
+		result.append("<span class =\"italic\"> " + makeGreek(sort.getName()) + " </span>");
 	}
 
 	@Override
 	public void visit(Production p) {
 		if (firstProduction) {
-			result += "</td><td> ::= </td> <td>";
+			result.append("</td><td> ::= </td> <td>");
 			firstProduction = false;
 		} else {
-			result += "<tr> <td> </td> <td class = \"textCentered\"> |  </td> <td>";
+			result.append("<tr> <td> </td> <td class = \"textCentered\"> |  </td> <td>");
 		}
 		
 		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.containsAttribute(Constants.CONS_cons_ATTR)
@@ -161,36 +153,36 @@ public class HTMLFilter extends BasicVisitor {
 			HTMLFilter termFilter = new HTMLFilter(includePath);
 			for (ProductionItem pi : p.getItems()) {
 				if (pi.getType() != ProductionType.TERMINAL) {
-					termFilter.result = "";
+					termFilter.setResult("");
 					pi.accept(termFilter);
 					pattern = pattern.replace("{#" + n++ + "}", isLatex ? "\\)" + termFilter.getResult() + "\\(" : termFilter.getResult());
 				}
 			}
 			/* The \( and \) symbols are used to indicate which portions of the code should be 
 			 * treated by MathJax. */
-			result += isLatex ? "\\(" + pattern + "\\)" : pattern;
+			result.append(isLatex ? "\\(" + pattern + "\\)" : pattern);
 		} else {
 			super.visit(p);
 		}
 		p.getAttributes().accept(this);
-		result += "</td> </tr>" + endl;
+		result.append("</td> </tr>" + endl);
 	}
 
 	@Override
 	public void visit(Terminal pi) {
-		result += makeGreek(htmlify(pi.getTerminal())) +" ";
+		result.append(makeGreek(htmlify(pi.getTerminal())) +" ");
 	}
 
 	@Override
 	public void visit(UserList ul) {
-		result += "<span class =\"italic\">" + "List</span>{#<span class =\"italic\">" + ul.getSort() + "</span>,\"" + ul.getSeparator() + "\"} </span>"  + endl;
+		result.append("<span class =\"italic\">" + "List</span>{#<span class =\"italic\">" + ul.getSort() + "</span>,\"" + ul.getSeparator() + "\"} </span>"  + endl);
 	}
 
 	@Override
 	public void visit(Configuration conf) {
-		result += "<div> CONFIGURATION : <br />";
+		result.append("<div> CONFIGURATION : <br />");
 		super.visit(conf);
-		result += "</div> <br />" ;
+		result.append("</div> <br />");
 	}
 
 	@Override
@@ -226,21 +218,21 @@ public class HTMLFilter extends BasicVisitor {
 		if(usedColors.add(color))
 			addToCss(color);
 		
-		result += "<div class=\"cell\"> <div class=\"" + tabClasses + " " + color + "\">";
-		result += "<span class = \"bold\">" + cellName + "</span> </div>";
-		result += "<br />";
-		result += "<div class=\"" + blockClasses + " " + color + "\" ";
+		result.append("<div class=\"cell\"> <div class=\"" + tabClasses + " " + color + "\">");
+		result.append("<span class = \"bold\">" + cellName + "</span> </div>");
+		result.append("<br />");
+		result.append("<div class=\"" + blockClasses + " " + color + "\" ");
 		
 		/* This condition makes sure the cell and the tag of the cell 
 		are not too small for their content */
 		if(cellName.length() > 5) {
 			double mw = Math.floor(cellName.length() * 0.7 *10 +0.5 )/10.0;
-			result += "style=\"min-width:"+mw+"em\"";
+			result.append("style=\"min-width:"+mw+"em\"");
 		}
 			
-		result += "> <div class=\"center\">";
+		result.append("> <div class=\"center\">");
 		super.visit(c);
-		result += "</div> </div> </div>" + endl;
+		result.append("</div> </div> </div>" + endl);
 	}
 
 	public void visit(Collection col) {
@@ -254,76 +246,94 @@ public class HTMLFilter extends BasicVisitor {
 			if (first) {
 				first = false;
 			} else {
-				result += str;
+				result.append(str);
 			}
 			trm.accept(this);
 		}
 	}
 	
 	public void visit(TermComment tc) {
-		result += "<br />";
+		result.append("<br />");
 		super.visit(tc);
 	}
 
 	@Override
 	public void visit(Variable var) {
-		result +="<span ";
+		result.append("<span ");
 		if (var.getSort() != null) {
-			result += "title =\"" + var.getSort() + "\"";
+			result.append("title =\"" + var.getSort() + "\"");
 		}
-		result+=">" + makeGreek(var.getName());
-		result+=" </span> ";
+		result.append(">" + makeGreek(var.getName()));
+		result.append(" </span> ");
 	}
 
 	@Override
 	public void visit(Empty e) {
-		result += " <span title=\""+ e.getSort()+"\" class = \"bold\"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> ";
+		result.append(" <span title=\""+ e.getSort()+"\" class = \"bold\"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> ");
 	}
 
 	@Override
 	public void visit(Rule rule) {
-		result += "<div> <span ";
+		result.append("<div> <span ");
 		if (!rule.getLabel().equals("")) {
-			result += "title =\"Rule Label: " + rule.getLabel() + "\"";
+			result.append("title =\"Rule Label: " + rule.getLabel() + "\"");
 		}
-		result += "> RULE </span>";
-		result += "<div class=\"cell\"> ";
+		result.append("> RULE </span>");
+		result.append("<div class=\"cell\"> ");
 		rule.getBody().accept(this);
-		result += "</div> ";
+		result.append("</div> ");
 		if (rule.getCondition() != null) {
-			result += " when ";
+			result.append(" when ");
 			rule.getCondition().accept(this);
 		}
 		rule.getAttributes().accept(this);
-		result += "</div> <br />" + endl;
+		result.append("</div> <br />" + endl);
 	}
 
 	@Override
 	public void visit(Context cxt) {
-		result += "<div> CONTEXT ";
+		result.append("<div> CONTEXT ");
 		cxt.getBody().accept(this);
 		if (cxt.getCondition() != null) {
-			result += " when ";
+			result.append(" when ");
 			cxt.getCondition().accept(this);
 		}
 		cxt.getAttributes().accept(this);
-		result += "</div> <br />" + endl;
+		result.append("</div> <br />" + endl);
 	}
 
 	@Override
 	public void visit(Hole hole) {
-		result += "&#9633;";
+		result.append("&#9633;");
 	}
 
 	@Override
 	public void visit(Rewrite rew) {
 		
-		result += "<div class=\"textCentered\"> <em> ";
+		result.append("<div class=\"textCentered\"> <em> ");
 		rew.getLeft().accept(this);
-		result += "</em> <hr class=\"reduce\"/> <em> ";
+		result.append("</em> <hr class=\"reduce\"/> <em> ");
 		rew.getRight().accept(this);
-		result += "</em> </div>";
+		result.append("</em> </div>");
 	}
+
+	@Override
+	public void visit(Bracket trm) {
+		if (trm.getContent() instanceof Rewrite)
+			super.visit(trm);
+		else {
+			String pattern = getBracketPattern(trm);
+			HTMLFilter termFilter = new HTMLFilter(includePath);
+			trm.getContent().accept(termFilter);
+			pattern = pattern.replace("{#1}", "<span>" + termFilter.getResult() + "</span>");
+			result.append(pattern);
+		}
+	}
+
+	private String getBracketPattern(Bracket trm) {
+		return "({#1})";
+	}
+
 
 	@Override
 	public void visit(TermCons trm) {
@@ -342,19 +352,12 @@ public class HTMLFilter extends BasicVisitor {
 			String pattern = patternsVisitor.getPatterns().get(trm.getCons());
 			String regex = "\\{#\\d+\\}$";
 			Pattern p = Pattern.compile(regex);
-			if (parentParens && (pattern.indexOf("{#") == 0 
-					|| p.matcher(pattern).matches())) {
-				pattern = "(" + pattern + ")";
-			}		
 			int n = 1;
 			HTMLFilter termFilter = new HTMLFilter(includePath);
 			for (Term t : trm.getContents()) {
-				termFilter.result = "";
+				termFilter.setResult("");
 				regex = "\\{#\\d+\\}\\{#" + n + "\\}";
 				p = Pattern.compile(regex);
-				if (pattern.contains("{#" + n + "}{#") || p.matcher(pattern).matches()) {
-					termFilter.setParentParens(true);				
-				}
 				t.accept(termFilter);
 				if(type == HTMLPatternType.LATEX)
 					pattern = pattern.replace("{#" + n++ + "}", "\\) " + termFilter.getResult() + "\\(");
@@ -364,9 +367,9 @@ public class HTMLFilter extends BasicVisitor {
 			/* The \( and \) symbols are used to indicate which portions of the code should be 
 			 * treated by MathJax.*/
 			if(type == HTMLPatternType.LATEX)
-				result += "\\("+pattern+"\\)";
+				result.append("\\("+pattern+"\\)");
 			else
-				result += pattern;
+				result.append(pattern);
 			
 		} else {
 			/* If the termCons does not have a Latex or HTML attribute, 
@@ -379,9 +382,9 @@ public class HTMLFilter extends BasicVisitor {
 				if (pr.getItems().get(0).getType() == ProductionType.USERLIST) {
 					String separator = ((UserList) pr.getItems().get(0)).getSeparator();
 					trm.getContents().get(0).accept(this);
-					result += " " + separator + " ";
+					result.append(" " + separator + " ");
 					trm.getContents().get(1).accept(this);
-					result += " ";
+					result.append(" ");
 					empty = false;
 				} else
 					for (int i = 0, j = 0; i < pr.getItems().size(); i++) {
@@ -397,19 +400,19 @@ public class HTMLFilter extends BasicVisitor {
 					}
 			}
 			if(empty)
-				result += "&nbsp; &nbsp; &middot; &nbsp; &nbsp;";
+				result.append("&nbsp; &nbsp; &middot; &nbsp; &nbsp;");
 		}
 	}
 
 	@Override
 	public void visit(Constant c) {
-		result += "<span title =\"" + c.getSort() + "\"> " + makeGreek(c.getValue()) + " </span> ";
+		result.append("<span title =\"" + c.getSort() + "\"> " + makeGreek(c.getValue()) + " </span> ");
 	}
 
 	@Override
 	public void visit(MapItem mi) {
 		mi.getKey().accept(this);
-		result += "<span text-size=\"large\"> &#x21a6; </span>";
+		result.append("<span text-size=\"large\"> &#x21a6; </span>");
 		mi.getItem().accept(this);
 	}
 
@@ -421,9 +424,9 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(KApp app) {
 		app.getLabel().accept(this);
-		result += "(";
+		result.append("(");
 		app.getChild().accept(this);
-		result += ")";
+		result.append(")");
 	}
 
 	@Override
@@ -436,9 +439,9 @@ public class HTMLFilter extends BasicVisitor {
 		/*MathJax does not render these comments correctly. 
 		 * It's told explicitly to ignore them with the tex2jax_ignore class. */
 		if (comment.getType() == LiterateCommentType.LATEX) {
-			result += "<div class=\"commentBlock definitionComment tex2jax_ignore\">" + endl;
-			result += parseComment(comment.getValue());
-			result += "</div><div><br /></div>" + endl;
+			result.append("<div class=\"commentBlock definitionComment tex2jax_ignore\">" + endl);
+			result.append(parseComment(comment.getValue()));
+			result.append("</div><div><br /></div>" + endl);
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
 			preamble += comment.getValue();
 		}
@@ -449,9 +452,9 @@ public class HTMLFilter extends BasicVisitor {
 		/*MathJax does not render these comments correctly. 
 		 * It's told explicitly to ignore them with the tex2jax_ignore class. */
 		if (comment.getType() == LiterateCommentType.LATEX) {
-			result += "<div class=\"commentBlock moduleComment tex2jax_ignore\">" + endl;
-			result += parseComment(comment.getValue());
-			result += "</div><div><br /></div>" + endl;
+			result.append("<div class=\"commentBlock moduleComment tex2jax_ignore\">" + endl);
+			result.append(parseComment(comment.getValue()));
+			result.append("</div><div><br /></div>" + endl);
 		} else if (comment.getType() == LiterateCommentType.PREAMBLE) {
 			preamble += comment.getValue();
 		}
@@ -464,11 +467,13 @@ public class HTMLFilter extends BasicVisitor {
 			entry.accept(this);
 		}
 		if(!firstAttribute)
-			result += "</span> ]";
+			result.append("</span> ]");
 	}
 
 	@Override
 	public void visit(Attribute entry) {
+		if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
+			return;
 		if (DefinitionHelper.isTagGenerated(entry.getKey()))
 			return;
 		if (DefinitionHelper.isParsingTag(entry.getKey()))
@@ -483,16 +488,16 @@ public class HTMLFilter extends BasicVisitor {
 			
 		
 		if (firstAttribute) {
-			result += " [ <span class =\"attribute\"> ";
+			result.append(" [ <span class =\"attribute\"> ");
 			firstAttribute = false;
 		} else {
-			result += ", ";
+			result.append(", ");
 		}
-		result += makeGreek(entry.getKey());
+		result.append(makeGreek(entry.getKey()));
 		String value = makeGreek(entry.getValue());
 		
 		if (!value.isEmpty())
-			result += "(" + value + ")";
+			result.append("(" + value + ")");
 	}
 	
 	private String makeGreek(String name) {
@@ -660,10 +665,11 @@ public class HTMLFilter extends BasicVisitor {
 			return "defaultColor";		
 	}
 
-	private void parsePreamble() {
+	private String parsePreamble() {
 		/* This function parses the preamble and detects the title, organization and author7
 		 *  specified in the preamble. It adds these information to the beginning of result. */
-		
+
+        String result = "";
 		if(preamble.contains("\\title{"))
 			title = parseComment(latexExtract(preamble,"\\title{"));
 		organization = latexExtract(preamble,"\\organization{");
@@ -680,6 +686,7 @@ public class HTMLFilter extends BasicVisitor {
 		
 		result = "<div> <br /> </div>" + endl + result;
 		result = "<h1>" + title + " </h1> " + endl + result;
+		return result;
 		
 	}
 	
