@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.kframework.compile.checks.CheckListDecl;
+import org.kframework.compile.checks.CheckStreams;
 import org.kframework.compile.checks.CheckSyntaxDecl;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.CheckVisitorStep;
@@ -164,6 +165,9 @@ public class DefinitionLoader {
 			def = (Definition) def.accept(new ParseConfigsFilter());
 			def.accept(new CollectConfigCellsVisitor());
 
+			//sort List in streaming cells
+			new CheckVisitorStep(new CheckStreams()).check(def);
+			
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Configs");
 
