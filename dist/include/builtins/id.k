@@ -6,6 +6,4 @@ endmodule
 module ID-HOOKS
   imports ID-SYNTAX-HOOKS
   imports K
-
-  syntax Variable ::= Id
 endmodule

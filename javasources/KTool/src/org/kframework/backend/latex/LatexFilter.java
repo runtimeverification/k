@@ -1,5 +1,6 @@
 package org.kframework.backend.latex;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
@@ -195,7 +196,7 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Variable var) {
-		if (var.getName().equals("_")) {
+		if (var.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("\\AnyVar");
 		} else {
 			result.append("\\variable");
@@ -203,7 +204,7 @@ public class LatexFilter extends BasicVisitor {
 		if (var.getSort() != null) {
 			result.append("[" + StringUtil.latexify(var.getSort()) + "]");
 		}
-		if (!var.getName().equals("_")) {
+		if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
 		}
 	}

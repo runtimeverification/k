@@ -295,7 +295,7 @@ public class MaudeFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Variable variable) {
-		if (variable.getName().equals("_")) {
+		if (variable.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("?");
 		} else {
 			result.append(variable.getName());

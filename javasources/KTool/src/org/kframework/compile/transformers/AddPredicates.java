@@ -193,9 +193,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
                     // define isVariable predicate for symbolic sort
                     // constructor symSort
-                    lhs = new KApp(VariablePredicate, symTerm);
-                    rule = new Rule(lhs, Constant.TRUE);
-                    rule.addAttribute(Attribute.PREDICATE);
+					rule = getIsVariableRule(symTerm);
                     retNode.appendModuleItem(rule);
 
                     // define K2Sort function for symbolic sort constructor
@@ -235,7 +233,16 @@ public class AddPredicates extends CopyOnWriteTransformer {
             return node;
     }
 
-    public AddPredicates() {
+	public static Rule getIsVariableRule(Term symTerm) {
+		Term lhs;
+		Rule rule;
+		lhs = new KApp(VariablePredicate, symTerm);
+		rule = new Rule(lhs, Constant.TRUE);
+		rule.addAttribute(Attribute.PREDICATE);
+		return rule;
+	}
+
+	public AddPredicates() {
         super("Add syntax and symbolic predicates");
     }
 

@@ -1,5 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
 
@@ -20,7 +21,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
 	@Override
 	public void visit(Variable var) {
-		if (!var.getName().equals("_"))
+		if (!var.getName().equals(MetaK.Constants.anyVarSymbol))
 			if (vars.containsKey(var.getName()))
 				vars.get(var.getName()).add(var);
 			else {

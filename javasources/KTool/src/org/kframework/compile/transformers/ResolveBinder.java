@@ -94,6 +94,8 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                 rule = new Rule(new KApp(BOUNDED_PREDICATE, list), Constant.TRUE);
                 rule.addAttribute(Attribute.ANYWHERE);
                 items.add(rule);
+				String bndSort = prod.getChildSort(bndIdx);
+				items.add(AddPredicates.getIsVariableRule(new Variable(MetaK.Constants.anyVarSymbol,bndSort)));
             }
 
             for (int bodyIdx : bndMap.values()) {
