@@ -52,6 +52,7 @@ public class DefinitionHelper {
 	private static Poset subsorts = new Poset();;
 	public static java.util.Set<String> definedSorts = Sort.getBaseSorts();
 	private static Poset priorities = new Poset();
+	private static Poset modules = new Poset();
 	private static Poset fileRequirements = new Poset();
 	public static String startSymbolPgm = "K";
 	public static File dotk = null;
@@ -130,6 +131,18 @@ public class DefinitionHelper {
 
 	public static void finalizeRequirements() {
 		fileRequirements.transitiveClosure();
+	}
+
+	public static void addModuleImport(String mainModule, String importedModule) {
+		// add the new subsorting
+		if (mainModule.equals(importedModule))
+			return;
+
+		modules.addRelation(mainModule, importedModule);
+	}
+
+	public static void finalizeModules() {
+		modules.transitiveClosure();
 	}
 
 	public static boolean isRequiredEq(String required, String local) {

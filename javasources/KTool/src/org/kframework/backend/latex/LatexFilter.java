@@ -1,19 +1,47 @@
 package org.kframework.backend.latex;
 
-import org.kframework.kil.*;
-import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.LiterateComment.LiterateCommentType;
-import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.StringUtil;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
+import org.kframework.kil.Bracket;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.Collection;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Context;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Empty;
+import org.kframework.kil.Hole;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.ListOfK;
+import org.kframework.kil.LiterateComment.LiterateCommentType;
+import org.kframework.kil.LiterateDefinitionComment;
+import org.kframework.kil.LiterateModuleComment;
+import org.kframework.kil.MapItem;
+import org.kframework.kil.Module;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
+import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermComment;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.Variable;
+import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.utils.StringUtil;
 
 public class LatexFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
@@ -25,7 +53,8 @@ public class LatexFilter extends BasicVisitor {
 	private boolean firstAttribute;
 	private boolean parentParens = false;
 	private boolean hasTitle = false;
-//	private boolean termComment;
+
+	// private boolean termComment;
 
 	public void setResult(StringBuilder result) {
 		this.result = result;
@@ -93,7 +122,8 @@ public class LatexFilter extends BasicVisitor {
 		} else {
 			result.append("\\syntaxCont{");
 		}
-		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.containsAttribute(Constants.CONS_cons_ATTR) && patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))) {
+		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.containsAttribute(Constants.CONS_cons_ATTR)
+				&& patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))) {
 			String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
 			int n = 1;
 			LatexFilter termFilter = new LatexFilter();
@@ -164,10 +194,12 @@ public class LatexFilter extends BasicVisitor {
 
 	public void visit(Collection col) {
 		final boolean hasBR = containsBR(col);
-		if (hasBR) result.append("\\left(\\begin{array}{@{}c@{}}");
+		if (hasBR)
+			result.append("\\left(\\begin{array}{@{}c@{}}");
 		List<Term> contents = col.getContents();
 		printList(contents, "\\mathrel{}");
-		if (hasBR) result.append("\\end{array}\\right)");
+		if (hasBR)
+			result.append("\\end{array}\\right)");
 	}
 
 	private boolean containsBR(Collection col) {
@@ -180,7 +212,7 @@ public class LatexFilter extends BasicVisitor {
 	}
 
 	private void printList(List<Term> contents, String str) {
-//		result.append("\\begin{array}{l}");
+		// result.append("\\begin{array}{l}");
 		boolean first = true;
 		for (Term trm : contents) {
 			if (first) {
@@ -190,11 +222,11 @@ public class LatexFilter extends BasicVisitor {
 			}
 			trm.accept(this);
 		}
-//		result.append("\\end{array}");
+		// result.append("\\end{array}");
 	}
-	
+
 	public void visit(TermComment tc) {
-//		termComment = true;
+		// termComment = true;
 		result.append("\\\\");
 		super.visit(tc);
 	}
@@ -219,10 +251,11 @@ public class LatexFilter extends BasicVisitor {
 	}
 
 	private String makeGreek(String name) {
-		return name.replace("Alpha", "{\\alpha}").replace("Beta", "{\\beta}").replace("Gamma", "{\\gamma}").replace("Delta", "{\\delta}").replace("VarEpsilon", "{\\varepsilon}").replace("Epsilon", "{\\epsilon}").replace("Zeta", "{\\zeta}").replace("Eta", "{\\eta}")
-				.replace("Theta", "{\\theta}").replace("Kappa", "{\\kappa}").replace("Lambda", "{\\lambda}").replace("Mu", "{\\mu}").replace("Nu", "{\\nu}").replace("Xi", "{\\xi}").replace("Pi", "{\\pi}").replace("VarRho", "{\\varrho}").replace("Rho", "{\\rho}")
-				.replace("VarSigma", "{\\varsigma}").replace("Sigma", "{\\sigma}").replace("GAMMA", "{\\Gamma}").replace("DELTA", "{\\Delta}").replace("THETA", "{\\Theta}").replace("LAMBDA", "{\\Lambda}").replace("XI", "{\\Xi}").replace("PI", "{\\Pi}")
-				.replace("SIGMA", "{\\Sigma}").replace("UPSILON", "{\\Upsilon}").replace("PHI", "{\\Phi}");
+		return name.replace("Alpha", "{\\alpha}").replace("Beta", "{\\beta}").replace("Gamma", "{\\gamma}").replace("Delta", "{\\delta}").replace("VarEpsilon", "{\\varepsilon}")
+				.replace("Epsilon", "{\\epsilon}").replace("Zeta", "{\\zeta}").replace("Eta", "{\\eta}").replace("Theta", "{\\theta}").replace("Kappa", "{\\kappa}").replace("Lambda", "{\\lambda}")
+				.replace("Mu", "{\\mu}").replace("Nu", "{\\nu}").replace("Xi", "{\\xi}").replace("Pi", "{\\pi}").replace("VarRho", "{\\varrho}").replace("Rho", "{\\rho}")
+				.replace("VarSigma", "{\\varsigma}").replace("Sigma", "{\\sigma}").replace("GAMMA", "{\\Gamma}").replace("DELTA", "{\\Delta}").replace("THETA", "{\\Theta}")
+				.replace("LAMBDA", "{\\Lambda}").replace("XI", "{\\Xi}").replace("PI", "{\\Pi}").replace("SIGMA", "{\\Sigma}").replace("UPSILON", "{\\Upsilon}").replace("PHI", "{\\Phi}");
 	}
 
 	@Override
@@ -232,7 +265,7 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Rule rule) {
-//		termComment = false;
+		// termComment = false;
 		result.append("\\krule");
 		if (!rule.getLabel().equals("")) {
 			result.append("[" + rule.getLabel() + "]");
@@ -247,7 +280,7 @@ public class LatexFilter extends BasicVisitor {
 		rule.getAttributes().accept(this);
 		result.append("}");
 		result.append("{");
-//		if (termComment) result.append("large");
+		// if (termComment) result.append("large");
 		result.append("}");
 		result.append(endl);
 	}
@@ -281,6 +314,17 @@ public class LatexFilter extends BasicVisitor {
 	}
 
 	@Override
+	public void visit(Bracket trm) {
+		if (trm.getContent() instanceof Rewrite)
+			super.visit(trm);
+		else {
+			result.append("(");
+			trm.getContent().accept(this);
+			result.append(")");
+		}
+	}
+
+	@Override
 	public void visit(TermCons trm) {
 		String pattern = patternsVisitor.getPatterns().get(trm.getCons());
 		if (pattern == null) {
@@ -290,10 +334,9 @@ public class LatexFilter extends BasicVisitor {
 		}
 		String regex = "\\{#\\d+\\}$";
 		Pattern p = Pattern.compile(regex);
-		if (parentParens && (pattern.indexOf("{#") == 0 
-				|| p.matcher(pattern).matches())) {
-			pattern = "(" + pattern + ")";
-		}		
+		// if (parentParens && (pattern.indexOf("{#") == 0 || p.matcher(pattern).matches())) {
+		// pattern = "(" + pattern + ")";
+		// }
 		int n = 1;
 		LatexFilter termFilter = new LatexFilter();
 		for (Term t : trm.getContents()) {
@@ -301,7 +344,7 @@ public class LatexFilter extends BasicVisitor {
 			regex = "\\{#\\d+\\}\\{#" + n + "\\}";
 			p = Pattern.compile(regex);
 			if (pattern.contains("{#" + n + "}{#") || p.matcher(pattern).matches()) {
-				termFilter.setParentParens(true);				
+				termFilter.setParentParens(true);
 			}
 			t.accept(termFilter);
 			pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
@@ -370,7 +413,7 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Attribute entry) {
-		if (Constants.GENERATED_LOCATION.equals(entry.getLocation())) 
+		if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
 			return;
 		if (DefinitionHelper.isTagGenerated(entry.getKey()))
 			return;
@@ -385,8 +428,7 @@ public class LatexFilter extends BasicVisitor {
 		} else {
 			result.append(", ");
 		}
-		result.append("\\kattribute{" +
-				StringUtil.latexify(entry.getKey()) +"}");
+		result.append("\\kattribute{" + StringUtil.latexify(entry.getKey()) + "}");
 		String value = entry.getValue();
 		if (!value.isEmpty()) {
 			result.append("(" + StringUtil.latexify(value) + ")");
