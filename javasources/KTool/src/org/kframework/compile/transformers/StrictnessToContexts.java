@@ -43,7 +43,10 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 		for (Production prod : prods) {
 			
-			if(prod.isSubsort()) continue;
+			if(prod.isSubsort()){
+				String msg ="Production is a subsort and cannot be strict.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), prod.getFilename(), prod.getLocation()));
+			}
 						
 			//set the attribute: strict or seqstrict
 			//arg: arguments of the attribute, e.g. (1) 
