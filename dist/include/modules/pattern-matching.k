@@ -30,6 +30,9 @@ module PATTERN-MATCHING
   HIDDEN
 ***********/
 
+  // Subsorting ids to variables for matching purposes.
+  syntax Variable ::= Id
+
   syntax K ::= #patternMatch(List{K}, List{K})   [function]
   rule #patternMatch(Ps:List{K}, Ks:List{K})
     => #patternMatch1(decomposeMatching(Ps,Ks), .Map)

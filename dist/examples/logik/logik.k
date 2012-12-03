@@ -34,6 +34,8 @@ module LOGIK-SEMANTICS
  //  <br/>
    <solution stream="stdout"> .List </solution>
 
+  syntax Literal ::= Variable
+
 //@ Defining as unification variables all Ids starting with a capital letter
   rule isVariable(K:K) => true 
   when asciiString(substrString(Id2String(K),0,1)) <Int 96  
