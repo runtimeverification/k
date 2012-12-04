@@ -605,7 +605,10 @@ public class UnparserFilter extends BasicVisitor {
 			TermCons termCons = (TermCons)upper;
 			Production productionNext = termConsNext.getProduction();
 			Production production = termCons.getProduction();
-			return !priorityVisitor.before(productionNext, production);
+			if (!!priorityVisitor.before(productionNext, production)) {
+				return true;
+			}
+			return termConsNext.getContents().size() != 0;
 		} else {
 			return false;
 		}
