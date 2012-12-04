@@ -1,7 +1,10 @@
 require "pattern-matching.k"
+require "builtins/symbolic-k.k"
+require "k-prelude.k"
 
 module VARIABLE
   imports SYMBOLIC-K
+  imports K-FRESH
 
   syntax K ::= vars(Set)
 

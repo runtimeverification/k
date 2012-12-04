@@ -1,7 +1,10 @@
 require "bool.k"
+require "k-prelude.k"
 module K-EQUAL-HOOKS
   imports #K-EQUAL-INTERFACE
   imports BOOL-HOOKS
+  imports K-SET-EXTRAS
+  imports K-MAP-EXTRAS
   
 
   syntax Bool ::= left:

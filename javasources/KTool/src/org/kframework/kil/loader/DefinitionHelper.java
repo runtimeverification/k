@@ -145,6 +145,16 @@ public class DefinitionHelper {
 		modules.transitiveClosure();
 	}
 
+	public static boolean isModuleIncluded(String localModule, String importedModule) {
+		return modules.isInRelation(localModule, importedModule);
+	}
+
+	public static boolean isModuleIncludedEq(String localModule, String importedModule) {
+		if (localModule.equals(importedModule))
+			return true;
+		return modules.isInRelation(localModule, importedModule);
+	}
+
 	public static boolean isRequiredEq(String required, String local) {
 		try {
 			required = new File(required).getCanonicalPath();

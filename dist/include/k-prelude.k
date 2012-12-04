@@ -6,6 +6,7 @@ endinterface
 
 module K-LISTK-EXTRAS
   imports K-TECHNIQUE
+  imports K-EQUAL-HOOKS
   
   syntax Bool ::= K "inList{K}" List{K} [function]
   syntax Bool ::= K "#inList{K}" List{K} [function] 
@@ -17,8 +18,9 @@ endmodule
 
 module K-MAP-EXTRAS
 	imports K-TECHNIQUE
-        imports K-SET-EXTRAS
-	//imports BOOL
+    imports K-SET-EXTRAS
+	imports BOOL-HOOKS
+	imports K-EQUAL-HOOKS
 
   syntax K ::= Map "(" K ")"  [function]
   rule (_ K1:K |-> K2:K)(K1) => K2 [structural, anywhere]
@@ -81,6 +83,8 @@ endmodule
 
 module K-SET-EXTRAS
 	imports K-TECHNIQUE
+	imports BOOL-HOOKS
+	imports K-EQUAL-HOOKS
 
 //	syntax Set ::= "Set" List{K}
         syntax Set ::= Set "-Set" Set  [function, latex({#1}-_{\it Set}{#2})]
@@ -137,6 +141,7 @@ endinterface
 interface K-LIST-EXTRAS
 	imports K-TECHNIQUE
 	//imports BOOL
+	imports INT-HOOKS
 
 //	syntax List ::= "List" List{K}
 

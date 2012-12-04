@@ -72,5 +72,10 @@ public class Poset {
 		public int hashCode() {
 			return big.hashCode() + small.hashCode();
 		}
+
+		@Override
+		public String toString() {
+			return small + " < " + big;
+		}
 	}
 }

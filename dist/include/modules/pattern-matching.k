@@ -1,4 +1,7 @@
+require "builtins/k-equal.k"
+
 module PATTERN-MATCHING
+   imports K-EQUAL-HOOKS
 
 /***********
   VISIBLE

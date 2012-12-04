@@ -1,6 +1,7 @@
 package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Module;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -16,9 +17,9 @@ import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewriteSortFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitFileCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.InclusionFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
@@ -37,6 +38,14 @@ import org.w3c.dom.Node;
 public class ParseRulesFilter extends BasicTransformer {
 	public ParseRulesFilter() {
 		super("Parse Configurations");
+	}
+
+	String localModule = null;
+
+	@Override
+	public ASTNode transform(Module m) throws TransformerException {
+		localModule = m.getName();
+		return super.transform(m);
 	}
 
 	public ASTNode transform(StringSentence ss) throws TransformerException {
@@ -61,7 +70,7 @@ public class ParseRulesFilter extends BasicTransformer {
 				config = config.accept(new CorrectRewritePriorityFilter());
 				config = config.accept(new CorrectKSeqFilter());
 				config = config.accept(new CheckBinaryPrecedenceFilter());
-				config = config.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
+				config = config.accept(new InclusionFilter(localModule));
 				config = config.accept(new VariableTypeInferenceFilter());
 				config = config.accept(new AmbDuplicateFilter());
 				config = config.accept(new TypeSystemFilter());
