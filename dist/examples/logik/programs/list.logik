@@ -13,7 +13,7 @@ reverseFast([],L,L).
 reverseFast([H|T],L1,L2):-
   reverseFast(T,[H|L1],L2).
 
-?- reverse([a,b,c],L).
+?- reverse([a,X,c],L).
 
 // ?- append([],L1,L1).
 // ?- append([],L1,L2).

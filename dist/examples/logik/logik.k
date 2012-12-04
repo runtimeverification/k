@@ -122,6 +122,7 @@ the solution.
   rule printEqn(eqn(X:Id,,Lit:Literal)) => printStr(Id2String(X)) ~> printStr(" |-> ") ~> printLit(Lit) ~> printStr(";  ")
 
 
+  rule printLit(#symVariable(N:Int)) => printStr("_" +String Int2String(N))
   rule printLit(X:Id) => printStr(Id2String(X))
   rule printLit(X:Id(.Literals)) => printStr(Id2String(X)) 
   rule printLit(X:Id(Lit:Literal,Lits:Literals)) 
@@ -145,8 +146,4 @@ the solution.
     => printLit(Lit) ~> printStr(" | ") ~> printLit(Lit')
   when Lit' =/=K [.Literals]
 
-  
-
-  rule Id2String('symUnificationVar`(_`)(N:Int)) => "_" +String Int2String(N)
-  [structural, anywhere]
 endmodule
