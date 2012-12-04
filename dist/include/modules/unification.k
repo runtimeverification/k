@@ -1,5 +1,9 @@
+require "builtins/bool.k"
+require "builtins/k-equal.k"
 module UNIFICATION
   imports SYMBOLIC-K
+  imports BOOL-HOOKS
+  imports K-EQUAL-HOOKS
 
 //@ Public interface to the unification procedure (what the user needs to know)
   syntax Mgu ::= ".Mgu"
