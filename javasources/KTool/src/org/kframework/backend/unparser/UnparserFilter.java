@@ -170,6 +170,8 @@ public class UnparserFilter extends BasicVisitor {
 		reject.add("cons");
 		reject.add("kgeneratedlabel");
 		reject.add("prefixlabel");
+		reject.add("filename");
+		reject.add("location");
 
 		List<Attribute> attributeList = new LinkedList<Attribute>();
 		List<Attribute> oldAttributeList = attributes.getContents();
