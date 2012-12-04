@@ -30,8 +30,8 @@
 
 ;;;; Syntax Highlighting ;;;;
 (setq k-keywords
-      '("syntax" "module" "endmodule" "imports" ; "::=" "|" ">"
-        "sort" "op" "subsort" "rule" "eq" "ceq" "load" "when"
+      '("syntax" "priorities" "left" "right" "non-assoc" "module" "endmodule" "imports" "::=" "|"
+        "sort" "op" "subsort" "rule" "context" "eq" "ceq" "load" "when"
 	"interface" "endinterface" "require" "configuration" "context")
       k-syntax-terminals-regex
       "`\\w+"

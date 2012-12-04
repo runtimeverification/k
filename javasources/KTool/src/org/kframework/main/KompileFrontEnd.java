@@ -537,6 +537,12 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Strict Ops To Context");
 			}
 
+			// javaDef = new CompilerTransformerStep(new ContextsToHeating()).compile(javaDef);
+			//
+			// if (GlobalSettings.verbose) {
+			// sw.printIntermediate("Transform Contexts into Heat/Cool Rules");
+			// }
+
 			DittoFilter df = new DittoFilter();
 			javaDef.accept(df);
 
@@ -699,12 +705,6 @@ public class KompileFrontEnd {
 					sw.printIntermediate("Cool the <k> cell for supercool rules");
 				}
 			}
-
-			// javaDef = new CompilerTransformerStep(new ContextsToHeating()).compile(javaDef);
-			//
-			// if (GlobalSettings.verbose) {
-			// sw.printIntermediate("Transform Contexts into Heat/Cool Rules");
-			// }
 
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";

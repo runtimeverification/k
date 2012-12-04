@@ -18,6 +18,7 @@ public class UnparserFilter extends BasicVisitor {
 	private boolean firstPriorityBlock = false;
 	private boolean firstProduction = false;
 	private boolean inConfiguration = false;
+	private int inTerm = 0;
 	private boolean color = false;
 	private static int TAB = 4;
 	private java.util.List<String> variableList =
@@ -36,8 +37,8 @@ public class UnparserFilter extends BasicVisitor {
 	public UnparserFilter(boolean inConfiguration, boolean color) {
 		this.inConfiguration = inConfiguration;
 		this.color = color;
+		this.inTerm = 0;
 	}
-		
 
 	public String getResult() {
 		return result.toString();
@@ -239,7 +240,7 @@ public class UnparserFilter extends BasicVisitor {
 		}
 			
 		result.write("<" + cell.getLabel() + attributes + ">");
-		if (inConfiguration) {
+		if (inConfiguration && inTerm == 0) {
 			result.endLine();
 			result.indent(TAB);
 		} else {
@@ -256,7 +257,7 @@ public class UnparserFilter extends BasicVisitor {
 		if (cell.hasRightEllipsis()) {
 			result.write(" ...");
 		}
-		if (inConfiguration) {
+		if (inConfiguration && inTerm == 0) {
 			result.endLine();
 			result.unindent();
 		} else {
@@ -332,6 +333,7 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(TermCons termCons) {
 		prepare(termCons);
+		inTerm++;
 		Production production = termCons.getProduction();
 		if (production.isListDecl()) {
 			UserList userList = (UserList)production.getItems().get(0);
@@ -357,6 +359,7 @@ public class UnparserFilter extends BasicVisitor {
 				}
 			}
 		}
+		inTerm--;
 		postpare();
 	}
 
@@ -383,7 +386,7 @@ public class UnparserFilter extends BasicVisitor {
 		for (int i = 0; i < contents.size(); ++i) {
 			contents.get(i).accept(this);
 			if (i != contents.size() - 1) {
-				if (inConfiguration) {
+				if (inConfiguration && inTerm == 0) {
 					result.endLine();
 				} else {
 					result.write(" ");
