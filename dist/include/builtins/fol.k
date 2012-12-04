@@ -1,4 +1,7 @@
+require "bool.k"
+require "int.k"
 module FOL
+  imports BOOL-HOOKS
   imports INT-HOOKS
 
   syntax Fol ::= Bool
