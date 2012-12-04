@@ -10,7 +10,9 @@ import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
+import org.kframework.kil.loader.CollectModuleImportsVisitor;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
@@ -138,6 +140,9 @@ public class DefinitionLoader {
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Generate TBLPgm");
 
+			def.accept(new AddAutoIncludedModulesVisitor());
+			def.accept(new CollectModuleImportsVisitor());
+
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
 			oldSdf = "";
@@ -165,9 +170,9 @@ public class DefinitionLoader {
 			def = (Definition) def.accept(new ParseConfigsFilter());
 			def.accept(new CollectConfigCellsVisitor());
 
-			//sort List in streaming cells
+			// sort List in streaming cells
 			new CheckVisitorStep(new CheckStreams()).check(def);
-			
+
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Configs");
 

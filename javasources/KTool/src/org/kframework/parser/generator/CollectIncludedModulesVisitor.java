@@ -17,20 +17,21 @@ import java.util.List;
 import java.util.Set;
 
 public class CollectIncludedModulesVisitor extends BasicVisitor {
-	public Set<String> synModNames = new HashSet<String>();
+	public Set<String> modNames = new HashSet<String>();
+	private String startModuleName;
 
 	public CollectIncludedModulesVisitor(String startModuleName) {
-		synModNames.add(startModuleName);
+		this.startModuleName = startModuleName;
 	}
 
 	public void visit(Definition def) {
 		List<String> synQue = new LinkedList<String>();
-		synQue.add(this.synModNames.iterator().next());
+		synQue.add(startModuleName);
 
 		while (!synQue.isEmpty()) {
 			String mname = synQue.remove(0);
-			if (!synModNames.contains(mname)) {
-				synModNames.add(mname);
+			if (!modNames.contains(mname)) {
+				modNames.add(mname);
 
 				Module m = def.getModulesMap().get(mname);
 				for (ModuleItem s : m.getItems()) {
