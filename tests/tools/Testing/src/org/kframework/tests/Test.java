@@ -300,7 +300,13 @@ public class Test {
 		NodeList opts = parent.getElementsByTagName("krun-option");
 		for (int j = 0; j < opts.getLength(); j++) {
 			Element krunOpt = (Element) opts.item(j);
-			map.put(krunOpt.getAttribute("name"), krunOpt.getAttribute("value"));
+			
+			// unescape < and >
+			String optValue = krunOpt.getAttribute("value");
+			optValue = optValue.replaceAll("&lt;", "<");
+			optValue = optValue.replaceAll("&gt;", ">");
+			
+			map.put(krunOpt.getAttribute("name"), optValue);
 		}
 		return map;
 	}
