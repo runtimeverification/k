@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.kframework.compile.checks.CheckListDecl;
+import org.kframework.compile.checks.CheckModulesAndFilesImportsDecl;
 import org.kframework.compile.checks.CheckStreams;
 import org.kframework.compile.checks.CheckSyntaxDecl;
 import org.kframework.compile.transformers.AddEmptyLists;
@@ -142,6 +143,7 @@ public class DefinitionLoader {
 
 			def.accept(new AddAutoIncludedModulesVisitor());
 			def.accept(new CollectModuleImportsVisitor());
+			// TODO: finish me: def.accept(new CheckModulesAndFilesImportsDecl());
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
