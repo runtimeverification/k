@@ -40,6 +40,8 @@ public class KRun {
 	private PrettyPrintOutput p;
 	private Term result = null;
 	private List<Map<String, Term>> searchResults = null;
+	private List<Transition> initialPath = null;
+	private List<Transition> loop = null;
 	private String statistics;
 
 	private KRun(String maudeCmd, boolean ioServer) throws Exception {
@@ -344,7 +346,70 @@ public class KRun {
 
 	public static KRun modelCheck(String formula, Map<String, String> cfg) throws Exception {
 		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + "  #eval(" + flatten(cfg) + ") ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.List`{K`})," + K.lineSeparator + formula + ")" + K.lineSeparator + ") .";
-		return new KRun(cmd, false);
+		KRun result = new KRun(cmd, false);
+		result.parseModelCheckResult();
+		return result;
+	}
+
+	private void parseModelCheckResult() throws Exception {
+		File input = new File(K.maude_output);
+		Document doc = XmlUtil.readXML(input);
+		NodeList list = null;
+		Node nod = null;
+		list = doc.getElementsByTagName("result");
+		assertXML(list.getLength() == 1);
+		nod = list.item(0);
+		assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
+		Element elem = (Element) nod;
+		List<Element> child = XmlUtil.getChildElements(elem);
+		assertXML(child.size() == 1);
+		assertXML(child.get(0).getAttribute("op").equals("_`(_`)") && child.get(0).getAttribute("sort").equals("KItem"));
+		child = XmlUtil.getChildElements(child.get(0));
+		assertXML(child.size() == 2);
+		assertXML(child.get(0).getAttribute("op").equals("#_") && child.get(0).getAttribute("sort").equals("KLabel"));
+		assertXML(child.get(1).getAttribute("op").equals(".List`{K`}") && child.get(1).getAttribute("sort").equals("List`{KResult`}"));
+		child = XmlUtil.getChildElements(child.get(0));
+		assertXML(child.size() == 1);
+		elem = child.get(0);
+		if (elem.getAttribute("op").equals("true") && elem.getAttribute("sort").equals("#Bool")) {
+			result = new Constant("Bool", "true");
+		} else {
+			assertXML(elem.getAttribute("op").equals("LTLcounterexample") && elem.getAttribute("sort").equals("#ModelCheckResult"));
+			child = XmlUtil.getChildElements(elem);
+			assertXML(child.size() == 2);
+			initialPath = new ArrayList<Transition>();
+			loop = new ArrayList<Transition>();
+			parseCounterexample(child.get(0), initialPath);
+			parseCounterexample(child.get(1), loop);
+		}
+	}
+
+	private void parseCounterexample(Element elem, List<Transition> list) throws Exception {
+		String sort = elem.getAttribute("sort");
+		String op = elem.getAttribute("op");
+		List<Element> child = XmlUtil.getChildElements(elem);
+		if (sort.equals("#TransitionList") && op.equals("_LTL_")) {
+			assertXML(child.size() >= 2);
+			for (Element e : child) {
+				parseCounterexample(e, list);
+			}
+		} else if (sort.equals("#Transition") && op.equals("LTL`{_`,_`}")) {
+			assertXML(child.size() == 2);
+			Term t = parseXML(child.get(0));
+		
+			t = (Term) t.accept(new ConcretizeSyntax());
+			t = (Term) t.accept(new TypeInferenceSupremumFilter());
+			t = (Term) t.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+			//as a last resort, undo concretization
+			t = (Term) t.accept(new FlattenDisambiguationFilter());
+
+			List<Element> child2 = XmlUtil.getChildElements(child.get(1));
+			assertXML(child2.size() == 0 && child.get(1).getAttribute("sort").equals("#Qid"));
+			String label = child.get(1).getAttribute("op");
+			list.add(new Transition(t, label));
+		} else {
+			assertXML(sort, op, false);
+		}
 	}
 
 	public List<String> prettyPrint() {
@@ -378,6 +443,23 @@ public class KRun {
 			}
 			if (l.size() == 0) {
 				l.add("\nNo search results");
+			}
+			return l;
+		} else if (initialPath != null && loop != null) {
+			List<String> l = new ArrayList<String>();
+			l.add("Path from initial state to beginning of cycle:");
+			for (Transition trans : initialPath) {
+				l.add("\nLabel: " + trans.getLabel());
+				UnparserFilter unparser = new UnparserFilter(true, K.color);
+				trans.getTerm().accept(unparser);
+				l.add(unparser.getResult());
+			}
+			l.add("Path of cycle:");
+			for (Transition trans : loop) {
+				l.add("\nLabel: " + trans.getLabel());
+				UnparserFilter unparser = new UnparserFilter(true, K.color);
+				trans.getTerm().accept(unparser);
+				l.add(unparser.getResult());
 			}
 			return l;
 		}
