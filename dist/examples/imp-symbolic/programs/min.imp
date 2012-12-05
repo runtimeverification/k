@@ -1,3 +1,17 @@
+/*
+This program is meant to compute the minimum among three variables.
+When executed symbolically one of the paths of this program is explored 
+and variable min will be set to a, b or c depending which path was chosen 
+for execution.
+
+The program contains a mistake when a <= b and a > c: min = b instead of min = c.
+When executing symbolically this path on of the assertions will fail.
+
+To explore all the execution paths use the `--search` command line option
+for krun which will display all possible configuration including the one
+for which the assertion fails.
+*/
+
 <k>
 if (a <= b) {
   if (a <= c) 
