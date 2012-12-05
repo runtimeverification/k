@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.kframework.compile.checks.CheckListDecl;
-import org.kframework.compile.checks.CheckModulesAndFilesImportsDecl;
 import org.kframework.compile.checks.CheckStreams;
 import org.kframework.compile.checks.CheckSyntaxDecl;
-import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.CheckVisitorStep;
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
@@ -16,18 +15,26 @@ import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectModuleImportsVisitor;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
+import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
 import org.kframework.parser.concrete.disambiguate.CheckBinaryPrecedenceFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectRewriteSortFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
+import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
+import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.generator.BasicParser;
 import org.kframework.parser.generator.DefinitionSDF;
 import org.kframework.parser.generator.ParseConfigsFilter;
@@ -193,32 +200,84 @@ public class DefinitionLoader {
 		return null;
 	}
 
-	public static Term parseCmdString(String content, String sort) throws Exception {
+	public static Term parseCmdString(String content, String sort) {
 		String parsed = org.kframework.parser.concrete.KParser.ParseKCmdString(content);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 		XmlLoader.addFilename(doc.getFirstChild(), "Command Line Argument");
 		XmlLoader.reportErrors(doc);
 
-		org.kframework.kil.Term javaDef = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
+		org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
 
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new CellTypesFilter());
-		// javaDef = (org.kframework.kil.Term) javaDef.accept(new CorrectRewritePriorityFilter()); // not the case, as it should be a ground term
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new CheckBinaryPrecedenceFilter());
-		// javaDef = (org.kframework.kil.Term) javaDef.accept(new BestFitFilter(new GetFitnessUnitFileCheckVisitor()));
-		// javaDef = (org.kframework.kil.Term) javaDef.accept(new VariableTypeInferenceFilter());
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new AmbDuplicateFilter());
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new TypeSystemFilter());
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new PriorityFilter());
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new TypeInferenceSupremumFilter());
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new PreferAvoidFilter());
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new FlattenListsFilter());
-		// javaDef = (org.kframework.kil.Term) javaDef.accept(new CorrectRewriteSortFilter());
-		// last resort disambiguation
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new AmbFilter());
-		javaDef = (org.kframework.kil.Term) javaDef.accept(new AddEmptyLists());
+		try {
+			// TODO: reject rewrites
+			// TODO: reject variables
+			config = config.accept(new SentenceVariablesFilter());
+			config = config.accept(new CellEndLabelFilter());
+			config = config.accept(new CellTypesFilter());
+			// config = config.accept(new CorrectRewritePriorityFilter());
+			config = config.accept(new CorrectKSeqFilter());
+			config = config.accept(new CheckBinaryPrecedenceFilter());
+			// config = config.accept(new InclusionFilter(localModule));
+			// config = config.accept(new VariableTypeInferenceFilter());
+			config = config.accept(new AmbDuplicateFilter());
+			config = config.accept(new TypeSystemFilter());
+			config = config.accept(new PriorityFilter());
+			config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+			config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
+			config = config.accept(new TypeInferenceSupremumFilter());
+			config = config.accept(new PreferAvoidFilter());
+			config = config.accept(new FlattenListsFilter());
+			// config = config.accept(new CorrectRewriteSortFilter());
+			// last resort disambiguation
+			config = config.accept(new AmbFilter());
+		} catch (TransformerException e) {
+			String msg = "Cannot parse command line argument: " + e.getLocalizedMessage();
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, config.getFilename(), config.getLocation()));
+		}
 
-		return javaDef;
+		return (Term) config;
+	}
+
+	public static ASTNode parsePattern(String pattern) {
+		if (!DefinitionHelper.initialized) {
+			System.err.println("You need to load the definition before you call parsePattern!");
+			System.exit(1);
+		}
+
+		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString("rule " + pattern);
+		Document doc = XmlLoader.getXMLDoc(parsed);
+
+		XmlLoader.addFilename(doc.getFirstChild(), "Command line pattern");
+		XmlLoader.reportErrors(doc);
+		XmlLoader.writeXmlFile(doc, K.kdir + "/pattern.xml");
+
+		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+
+		try {
+			// TODO: don't allow rewrites
+			config = config.accept(new SentenceVariablesFilter());
+			config = config.accept(new CellEndLabelFilter());
+			config = config.accept(new CellTypesFilter());
+			config = config.accept(new CorrectRewritePriorityFilter());
+			config = config.accept(new CorrectKSeqFilter());
+			config = config.accept(new CheckBinaryPrecedenceFilter());
+			// config = config.accept(new InclusionFilter(localModule));
+			config = config.accept(new VariableTypeInferenceFilter());
+			config = config.accept(new AmbDuplicateFilter());
+			config = config.accept(new TypeSystemFilter());
+			config = config.accept(new PriorityFilter());
+			config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+			config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
+			config = config.accept(new TypeInferenceSupremumFilter());
+			config = config.accept(new PreferAvoidFilter());
+			config = config.accept(new FlattenListsFilter());
+			config = config.accept(new CorrectRewriteSortFilter());
+			// last resort disambiguation
+			config = config.accept(new AmbFilter());
+		} catch (TransformerException e) {
+			String msg = "Cannot parse pattern: " + e.getLocalizedMessage();
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, config.getFilename(), config.getLocation()));
+		}
+		return config;
 	}
 }
