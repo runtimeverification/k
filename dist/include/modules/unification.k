@@ -146,5 +146,12 @@ constraint.
                   #vars((X => .List{K}),,_)) when fresh(F:Variable)
 
   rule freshSubst(subst(Eqns:List{K}),,#vars(.List{K})) => subst(Eqns)
+
+// alpha conversion moved here by grigore
+ syntax K ::= renameVariables(K) | applyAlpha(K)
+
+ rule renameVariables(K) => getAlpha(K) ~> applyAlpha(K)
+ rule subst(Eqns:List{K}) ~> applyAlpha(K) => applySubst(subst(Eqns),K)
+
 endmodule
 
