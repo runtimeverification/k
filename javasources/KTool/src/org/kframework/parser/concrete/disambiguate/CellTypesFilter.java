@@ -35,6 +35,8 @@ public class CellTypesFilter extends BasicTransformer {
 				sort = "K";
 			else if (cell.getLabel().equals("T"))
 				sort = "Bag";
+			else if (cell.getLabel().equals("freshCounter"))
+				sort = "K";
 		}
 
 		if (sort != null) {
