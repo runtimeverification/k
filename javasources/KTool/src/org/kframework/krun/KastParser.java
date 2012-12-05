@@ -27,13 +27,14 @@ public class KastParser {
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
 
-		XStream xstream = new XStream();
-		xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+		if (!DefinitionHelper.initialized) {
+			XStream xstream = new XStream();
+			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
-		org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.kdir + "/defx.xml"));
-		// This is essential for generating maude
-		javaDef.preprocess();
-
+			org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.kdir + "/defx.xml"));
+			// This is essential for generating maude
+			javaDef.preprocess();
+		}
 		initialized = true;
 		// TODO: save outDef somewhere - maybe you will need it later
 	}

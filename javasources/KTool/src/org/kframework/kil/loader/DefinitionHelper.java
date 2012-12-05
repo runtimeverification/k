@@ -16,6 +16,7 @@ import org.kframework.kil.UserList;
 import org.kframework.utils.Poset;
 
 public class DefinitionHelper {
+	public static boolean initialized = false;
 	public static Set<String> generatedTags = new HashSet<String>();
 	static {
 		generatedTags.add("cons");
