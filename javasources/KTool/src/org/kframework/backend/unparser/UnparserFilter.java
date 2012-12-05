@@ -474,9 +474,7 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(TermComment termComment) {
 		prepare(termComment);
-		result.endLine();
-		result.write("Don't know how to pretty print TermComment");
-		result.endLine();
+		result.write("<br/>");
 		super.visit(termComment);
 		postpare();
 	}
