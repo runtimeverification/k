@@ -1,88 +1,76 @@
 require "modules/unification.k"
 
 module LOGIK-SYNTAX
-  imports BUILTIN-SYNTAX-HOOKS
-  syntax Literal ::=  Id 
+  syntax Literal ::=  Id
                    | Id "(" Literals ")"
                    > "[" Literals "]"
                    | "[" Literals "|" Literal "]"
   syntax Literals ::= List{Literal,","}
 
   syntax Clause ::= Literal ":-" Literals "."
-                  > Literal "." 
+                  > Literal "."
   syntax Query ::= "?-" Literals "."
   syntax Pgm ::= Query
                > Clause Pgm
-
 endmodule
 
 module LOGIK-SEMANTICS
   imports LOGIK-SYNTAX
   imports UNIFICATION
 
- configuration
-   <T multiplicity="?">
-    <substitution> .K </substitution>
-    <clauses>
-          .Bag
-    </clauses>
-//    <br/>
-    <k>
-      $PGM:K
-    </k>
-   </T>
- //  <br/>
-   <solution stream="stdout"> .List </solution>
+  configuration <T multiplicity="?">
+                  <k> $PGM:K </k>
+                  <clauses>
+                    <clause multiplicity="*"> .K </clause>
+                  </clauses>
+                  <mgu> .Mgu </mgu>
+                </T>
+                <solution stream="stdout"> .List </solution>
 
   syntax Literal ::= Variable
 
 //@ Defining as unification variables all Ids starting with a capital letter
-  rule isVariable(K:K) => true 
-  when asciiString(substrString(Id2String(K),0,1)) <Int 96  
-  [anywhere,structural]
+  rule isVariable(X:Id) => true
+    when asciiString(substrString(Id2String(X),0,1)) <Int 96
 
-//@ Normalizing the definition. 
-  rule Lit:Literal. => Lit :- .Literals .  [anywhere,structural]
-  rule X:Id :- Lits:Literals. => X(.Literals) :- Lits.  [anywhere,structural]
+//@ Normalizing the definition.
+  rule L:Literal. => L :- .Literals .                                [macro]
+  rule X:Id :- Ls:Literals. => X(.Literals) :- Ls.                   [macro]
+  rule [L:Literal, Ls] => [L | [Ls]]                                 [macro]
+  rule [L:Literal, Ls | T] => [L|[Ls|T]]  when Ls =/=K .Literals     [macro]
+  rule X:Id, Ls => X(.Literals), Ls  when isVariable(X) =/=K true    [macro]
 
-  rule [.Literals | L:Literal ] => L  [anywhere,structural]
-  rule [L:Literal,Lits:Literals] => [L | [Lits]]  [anywhere,structural]
-  rule [L1:Literal,L2:Literal,Lits:Literals|L':Literal]
-      => [L1|[L2|[Lits|L']]]  [anywhere,structural]
 
-  rule X:Id,Lits:Literals => X(.Literals),Lits 
-  when isVariable(X) =/=K true
-  [anywhere]
+//@ Sequentialize goals
+  rule L:Literal, Ls:Literals => L ~> Ls
+  rule .Literals => .
 
 //@ Find a clause with the same name and generate a fresh version of it
-  rule <k> (.K => alpha(X(Params:Literals) :- Body:Literals.)) 
-          ~> (X:Id(Args:Literals),_:Literals) </k> 
-      <clauses>... BagItem(X(Params:Literals) :- Body:Literals.) ...</clauses>
-  [transition]
+  rule <k> (.K => renameVariables(X(Params:Literals) :- Body:Literals.))
+          ~> X:Id(Args:Literals) ...</k>
+       <clause> X(Params:Literals) :- Body:Literals. </clause>
+    [transition]
 
+/*@ Unify the goal with the clause head and replace the goal with the
+clause body.  */
 
-/*@ Unify the goal with the clause head and replace the goal with the clause body.  */
-  rule (Lit:Literal :- Lits:Literals.) ~> (Lit':Literal,Lits':Literals)
-    => unify(Lit,Lit') ~> (Lits @ Lits')
+  rule <k> (L:Literal :- Ls:Literals.) ~> L':Literal => Ls ...</k>
+       <mgu> Theta:Mgu => updateMgu(Theta,L,L') </mgu>
+
+//  rule (L:Literal :- Ls:Literals.) ~> (L':Literal,Ls':Literals)
+//    => unify(L,L') ~> (Ls @ Ls')
 
 //@ if the unification succeeded, apply the mgu to the goals and the solution.
-  rule <k> subst(Eqns:List{K}) ~> Lits:Literals 
-        => applySubst(subst(Eqns),Lits) </k> 
-       <substitution> K':K => applySubst(subst(Eqns),K') </substitution>
+//  rule <k> Theta:Mgu ~> Ls:Literals
+//        => applyMgu(Theta,Ls) </k>
+//       <mgu> K':K => applyMgu(Theta,K') </mgu>
 
-
- syntax K ::= "alpha" "(" K ")" | "applyAlpha" "(" K ")"
- 
- rule alpha(K) => getAlpha(K) ~> applyAlpha(K)
- rule subst(Eqns:List{K}) ~> applyAlpha(K) => applySubst(subst(Eqns),K)
 
 //@ helping function:  append on literals
-  syntax K ::= K "@" K [function, prec(70)]
-  rule Lit:Literal,Lits:Literals @ Lits':Literals 
-      => Lit,(Lits @ Lits')
-  [structural, anywhere]
-  rule .Literals @ Lits:Literals  => Lits
-  [structural, anywhere]
+//  syntax K ::= K "@" K [function]
+//  rule L:Literal,Ls:Literals @ Ls':Literals => L,(Ls @ Ls')
+//  rule .Literals @ Ls:Literals  => Ls
+
 endmodule
 
 module LOGIK
@@ -90,60 +78,73 @@ module LOGIK
 //@ Initialization
 
 //@ Add clauses to the set of clauses
-  rule <k>  (((X:Id(Params:Literals)) :- Body:Literals.) Pgm:K) => Pgm </k>
-       <clauses>... . => BagItem(X:Id(Params:Literals) :- Body:Literals.) ...</clauses>
+  rule <k> ((X:Id(Params:Literals)) :- Body:Literals.) Pgm:K => Pgm </k>
+       (. => <clause> X:Id(Params:Literals) :- Body:Literals. </clause>)
 
-/*@ To preserve the variables in the query we generate a substitution mapping 
-them to fresh variables, then we save this substitution as the current solution,
-while applying it on the Literals to ensure the query variables appear only in
-the solution.
-*/
-  syntax K ::= "initSolution"
+/*@ To preserve the variables in the query we generate a substitution mapping
+them to fresh variables, then we save this substitution as the current
+solution, while applying it on the Literals to ensure the query variables
+appear only in the solution. */
+//  syntax K ::= "initSolution"
 
-  rule <k> ?- Lits:Literals. 
-        => getAlpha(Lits) ~> initSolution ~> applyAlpha(Lits) </k>
+// why not just this instead?
+  rule ?- Ls:Literals. => Ls
 
-  rule <k> subst(Eqns:List{K}) ~> (initSolution => .K) ...</k>
-       <substitution> .K => subst(Eqns) </substitution>
+//  rule <k> ?- Ls:Literals.
+//        => getAlpha(Ls) ~> initSolution ~> applyAlpha(Ls) </k>
+
+//  rule <k> subst(Eqns:List{K}) ~> (initSolution => .K) ...</k>
+//       <mgu> _ => subst(Eqns) </mgu>
 
 /*@ printing the solution and disolving the rest. */
 
 //@ Final rule for extracting the solution
-  rule <substitution> K:K </substitution> <k> .Literals => print(K) </k>
 
-  rule <T>... <k> .K </k> ...</T> => .
+  rule <T> <k> . => print(Theta) </k> (_ <mgu> Theta:Mgu </mgu> => .) </T>
 
-   syntax K ::= "print" "(" K ")" | "printStr" "(" String ")" | "printEqn" "(" K ")" | "printLit" "(" K ")" | "printLits" "(" K ")" | "printList" "(" K ")"
+  rule <T> <k> .K </k> </T> => .
+
+   syntax K ::= print(K)
+              | printStr(String)
+              | printEqn(K)
+              | printLit(K)
+              | printLits(K)
+              | printList(K)
 
   rule print(subst(K,,Eqns:List{K}))
     => printEqn(K) ~> print(subst(Eqns))
   rule print(subst(.List{K})) => .
 
-  rule printEqn(eqn(X:Id,,Lit:Literal)) => printStr(Id2String(X)) ~> printStr(" |-> ") ~> printLit(Lit) ~> printStr(";  ")
+  rule printEqn(eqn(X:Id,,L:Literal))
+    => printStr(Id2String(X))
+       ~> printStr(" |-> ") ~> printLit(L) ~> printStr(";  ")
 
+// added by Grigore
+  rule printEqn(eqn(#symVariable(_),,_)) => .
 
   rule printLit(#symVariable(N:Int)) => printStr("_" +String Int2String(N))
   rule printLit(X:Id) => printStr(Id2String(X))
   rule printLit(X:Id(.Literals)) => printStr(Id2String(X)) 
-  rule printLit(X:Id(Lit:Literal,Lits:Literals)) 
-    => printStr(Id2String(X)) ~> printStr("(") ~> printLits(Lit,Lits) ~> printStr(")") 
-  rule printLits(Lit:Literal,Lit':Literal,Lits:Literals) 
-    => printLit(Lit) ~> printStr(", ") ~> printLits(Lit',Lits)
-  rule printLits(Lit:Literal,.Literals) => printLit(Lit)
+  rule printLit(X:Id(L:Literal,Ls:Literals)) 
+    => printStr(Id2String(X))
+       ~> printStr("(") ~> printLits(L,Ls) ~> printStr(")")
+  rule printLits(L:Literal,L':Literal,Ls:Literals)
+    => printLit(L) ~> printStr(", ") ~> printLits(L',Ls)
+  rule printLits(L:Literal,.Literals) => printLit(L)
 
   rule <k> printStr(Str:String) => . ...</k>
-      <solution>... . => ListItem(Str) </solution>
+       <solution>... . => ListItem(Str) </solution>
 
   rule printLit([.Literals]) => printStr("[]")
-  rule printLit([Lit:Literal|Lit':Literal])
-    => printStr("[") ~> printList([Lit:Literal|Lit':Literal]) ~> printStr("]")
+  rule printLit([L:Literal|L':Literal])
+    => printStr("[") ~> printList([L:Literal|L':Literal]) ~> printStr("]")
 
-  rule printList([Lit:Literal|[.Literals]]) => printLit(Lit)
-  rule printList([Lit1:Literal|[Lit2:Literal|Lit':Literal]])
-    => printLit(Lit1) ~> printStr(", ") ~> printList([Lit2|Lit'])
+  rule printList([L:Literal|[.Literals]]) => printLit(L)
+  rule printList([L1:Literal|[L2:Literal|L':Literal]])
+    => printLit(L1) ~> printStr(", ") ~> printList([L2|L'])
 
-  rule printList([Lit:Literal|Lit':Literal])
-    => printLit(Lit) ~> printStr(" | ") ~> printLit(Lit')
-  when Lit' =/=K [.Literals]
+  rule printList([L:Literal|L':Literal])
+    => printLit(L) ~> printStr(" | ") ~> printLit(L')
+  when L' =/=K [.Literals]
 
 endmodule
