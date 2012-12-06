@@ -1,6 +1,6 @@
 package org.kframework.compile;
 
-import org.kframework.compile.utils.CompilerStep;
+import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.Set;
 
 
-public class FlattenModules  implements CompilerStep {
+public class FlattenModules  extends BasicCompilerStep {
 	@Override
 	public Definition compile(Definition def) {
 		FlattenModulesVisitor fm = new FlattenModulesVisitor();

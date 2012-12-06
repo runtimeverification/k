@@ -10,10 +10,10 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 
-public class CompilerTransformerStep implements CompilerStep {
+public class CompilerTransformerStep extends BasicCompilerStep {
 	
 	Transformer t;
-	
+
 	public CompilerTransformerStep(Transformer t) {
 		this.t = t;
 	}
@@ -33,6 +33,9 @@ public class CompilerTransformerStep implements CompilerStep {
 					+ " while applying" + getName() + ".", 
 					def.getFilename(), def.getLocation()));					
 		}
+		if (sw != null) {
+			sw.printIntermediate(getName());
+		}
 		return (Definition) result;
 	}
 
@@ -40,5 +43,4 @@ public class CompilerTransformerStep implements CompilerStep {
 	public String getName() {
 		return t.getName();
 	}
-
 }

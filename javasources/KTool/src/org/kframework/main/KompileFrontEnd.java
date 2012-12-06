@@ -1,13 +1,6 @@
 package org.kframework.main;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.thoughtworks.xstream.XStream;
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.html.HTMLFilter;
 import org.kframework.backend.latex.LatexFilter;
@@ -15,6 +8,7 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
+import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.compile.sharing.AutomaticModuleImportsTransformer;
@@ -23,10 +17,7 @@ import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
-import org.kframework.compile.utils.CheckVisitorStep;
-import org.kframework.compile.utils.CompilerTransformerStep;
-import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.compile.utils.ConfigurationStructureVisitor;
+import org.kframework.compile.utils.*;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -44,7 +35,9 @@ import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.maude.MaudeRun;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KompileFrontEnd {
 	public static void kompile(String[] args) {
@@ -550,161 +543,40 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Ditto Filter");
 			}
 
-			javaDef = new FlattenModules().compile(javaDef);
 
+			CompilerSteps steps = new CompilerSteps();
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Flatten Modules");
+				steps.setSw(sw);
 			}
 
-			javaDef = new CompilerTransformerStep(new DesugarStreams()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Desugar  Streams");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveFunctions()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Functions");
-			}
-
-			javaDef = new CompilerTransformerStep(new AddKCell()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add K Cell");
-			}
-
-			javaDef = new CompilerTransformerStep(new AddSymbolicK()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Symbolic Stuff");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveFresh()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Fresh");
-			}
-
+			steps.add(new FlattenModules());
+			steps.add(new DesugarStreams());
+			steps.add(new ResolveFunctions());
+			steps.add(new AddKCell());
+			steps.add(new AddSymbolicK());
+			steps.add(new ResolveFresh());
 			if (GlobalSettings.addTopCell) {
-				javaDef = new CompilerTransformerStep(new AddTopCell()).compile(javaDef);
-				if (GlobalSettings.verbose) {
-					sw.printIntermediate("Add Top Cell");
-				}
+				steps.add(new AddTopCell());
 			}
+			steps.add(new AddEval());
+			steps.add(new ResolveBinder());
+			steps.add(new ResolveAnonymousVariables());
+			steps.add(new ResolveBlockingInput());
+			steps.add(new AddK2SMTLib());
+			steps.add(new AddPredicates());
+			steps.add(new ResolveSyntaxPredicates());
+			steps.add(new ResolveBuiltins());
+			steps.add(new ResolveListOfK());
+			steps.add(new FlattenSyntax());
+			steps.add(new AddKLabelToString());
+			steps.add(new AddKLabelConstant());
+			steps.add(new ResolveHybrid());
+			steps.add(new ResolveConfigurationAbstraction());
+			steps.add(new ResolveOpenCells());
+			steps.add(new ResolveRewrite());
+			steps.add(new ResolveSupercool());
 
-			javaDef = new AddEval().compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Eval");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveBinder()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Binder");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveAnonymousVariables()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Anonymous Variables");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveBlockingInput()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Blocking Input");
-			}
-
-			javaDef = new CompilerTransformerStep(new AddK2SMTLib()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add translation from K to SMTlib v2 string");
-			}
-
-			javaDef = new CompilerTransformerStep(new AddPredicates()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Syntax Predicates");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveSyntaxPredicates()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Syntax Predicates");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveBuiltins()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Builtins");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveListOfK()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve ListOfK");
-			}
-
-			javaDef = new CompilerTransformerStep(new FlattenSyntax()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Flatten Syntax");
-			}
-
-			javaDef = new CompilerTransformerStep(new AddKLabelToString()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add KLabel2String and String2KLabel definitions");
-			}
-
-			javaDef = new CompilerTransformerStep(new AddKLabelConstant()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add isKLabelConstant definitions");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveHybrid()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Hybrid");
-			}
-
-			ConfigurationStructureVisitor cfgStrVisitor = new ConfigurationStructureVisitor();
-			javaDef.accept(cfgStrVisitor);
-			int cfgMaxLevel = cfgStrVisitor.getMaxLevel();
-			ConfigurationStructureMap cfgStr = cfgStrVisitor.getConfig();
-
-			javaDef = new CompilerTransformerStep(new ResolveContextAbstraction(cfgMaxLevel, cfgStr)).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Context Abstraction");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveDefaultTerms(cfgStr)).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Default Terms");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveOpenCells()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Resolve Open Cells");
-			}
-
-			javaDef = new CompilerTransformerStep(new ResolveRewrite()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Push local rewrites to the top");
-
-				javaDef = new CompilerTransformerStep(new ResolveSupercool()).compile(javaDef);
-
-				if (GlobalSettings.verbose) {
-					sw.printIntermediate("Cool the <k> cell for supercool rules");
-				}
-			}
+			javaDef = steps.compile(javaDef);
 
 			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";
