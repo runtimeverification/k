@@ -1,5 +1,6 @@
 require "builtins/bool.k"
 require "builtins/k-equal.k"
+require "builtins/symbolic-k.k"
 module UNIFICATION
   imports SYMBOLIC-K
   imports BOOL-HOOKS
@@ -146,9 +147,14 @@ constraint.
 
   syntax KLabel ::= "freshSubst"
 
-  rule freshSubst(subst(_,,(.List{K} => eqn(X:K,,F))),,
+  rule freshSubst(subst(_,,(.List{K} => 
+                            eqn(X:K,,#symCast(F,#getSymLabel(K2Sort(X)))))),,
                   #vars((X => .List{K}),,_)) when fresh(F:Variable)
 
+
+  syntax K ::= #symCast(K,K) [function]
+  rule #symCast(_:KLabel(Ks:List{K}),L:KLabel(_:List{K})) => L(Ks)
+  
   rule freshSubst(subst(Eqns:List{K}),,#vars(.List{K})) => subst(Eqns)
 
 // alpha conversion moved here by grigore

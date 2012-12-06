@@ -863,12 +863,14 @@ endm
 
 mod #COUNTER is
   protecting #COUNTER-INTERFACE .
-  protecting #NAT .
-  op counter : -> [#Nat] [special (
-    id-hook CounterSymbol
-    op-hook succSymbol (sNat_ : #Nat ~> #NzNat))] .
-  op kcounter : -> #Nat .
-  eq kcounter = counter .
+  protecting #QID .
+  protecting #CONVERSION .
+
+  op f : #Qid -> #Qid [special (id-hook QuotedIdentifierOpSymbol (mos)
+                              op-hook quotedIdentifierSymbol (<Qids> : ~> #Qid))] .
+
+  op counter : -> #Nat .
+  eq counter = string2Int(string(f('a))) .
 endm
 
 mod #K-EQUAL is

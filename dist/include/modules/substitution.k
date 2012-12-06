@@ -29,15 +29,6 @@ module VARIABLE
     when isVariable(L(Ks)) =/=K true andBool isSet(L(Ks)) =/=K true
   rule #getVars1(.List{K}, S:Set) => vars(S)
 
-
-//  syntax K ::= #getStarVars(Bool, K)  [function]
-//  rule #getStarVars(true, K:K) => #getVars(K)
-//  rule #getStarVars(false, V:Variable) => vars(SetItem(V))
-
-  syntax K ::= #getSymLabel(String)  [function]
-  rule #getSymLabel(Type:String)
-    => String2KLabel("#sym" +String Type)(.List{K})
-
 // Generates a "fresh" local variable of the type of K that does not appear
 // anywhere within the set Set
   syntax K ::= #freshVar(K, Set)  [function]

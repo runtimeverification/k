@@ -111,8 +111,8 @@ module STRING-HOOKS
 
   // Check if an identifier is capitalized.  Useful for languages like Prolog
   syntax CapitalizedId ::= "A-Dummy-Capitalized-Id-Just-Because-We-Do-Not-Allow-Empty-Productions-Yet"
-  syntax Id ::= CapitalizedId
   rule isCapitalizedId(X) => true
     when asciiString(substrString(Id2String(X),0,1)) <Int 96
+  rule isCapitalizedId(#symId(_)) => true
 
 endmodule

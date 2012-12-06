@@ -133,5 +133,10 @@ module SYMBOLIC-K
     isSymbolicK(K1) orElseBool isSymbolicK(K2) orElseBool isSymbolicK(LK)
   [predicate]
   rule isSymbolicK(.List{K}) => false [predicate]
+
+  syntax K ::= #getSymLabel(String)  [function]
+  rule #getSymLabel(Type:String)
+    => String2KLabel("#sym" +String Type)(.List{K})
+
 endmodule
 
