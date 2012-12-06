@@ -3,10 +3,10 @@ require "modules/unification.k"
 module LOGIK
   imports UNIFICATION
 
-  syntax Literal ::= Id | Id "(" Literals ")"
-  syntax Literals ::= List{Literal,","}
-  syntax Clause ::= Literal ":-" Literals "." | Literal "."
-  syntax Query ::= "?-" Literals "."
+  syntax Term ::= Id | Id "(" Terms ")"
+  syntax Terms ::= List{Term,","}
+  syntax Clause ::= Term ":-" Terms "." | Term "."
+  syntax Query ::= "?-" Terms "."
   syntax Pgm ::= Query | Clause Pgm
 
   configuration <T multiplicity="?">
@@ -18,44 +18,44 @@ module LOGIK
                 </T>
                 <solution multiplicity="?"> .Map </solution>
 
-//@ Extend the syntax of Literals with (anonymous) variables
-  syntax Literal ::= Variable
+//@ Extend the syntax of Terms with (anonymous) variables
+  syntax Term ::= Variable
 
 //@ Defining as unification variables all Ids starting with a capital letter
-  rule isVariable(X:Id) => true
-    when asciiString(substrString(Id2String(X),0,1)) <Int 96
-
-//@ Sequentialize goals
-  rule L:Literal, Ls:Literals => L ~> Ls
-  rule .Literals => .
+  syntax Variable ::= CapitalizedId
 
 //@ Normalizing the definition.
-  rule L:Literal. => L :- .Literals .                                [macro]
-  rule X:Id :- Ls:Literals. => X(.Literals) :- Ls.                   [macro]
-  rule X:Id, Ls => X(.Literals), Ls  when isVariable(X) =/=K true    [macro]
+  rule L. => L :- .Terms .                                       [macro]
+// What I would really like to say here, but the tool does not allow us
+// to do that yet, is:
+//   rule IdAsTerm(X) => X(.Terms) when isCapitalizedId(X) =/= true  [macro]
+// Instead, we currently have to add rules like the following
+  rule (X:Id => X(.Terms)) :- _ .                                [macro]
+  rule (X:Id => X(.Terms)),_  when isCapitalizedId(X) =/=K true  [macro]
 
-//@ Find a clause with the same name and generate a fresh version of it
 
-//  rule <k> (.K => renameVariables(X(Params:Literals) :- Body:Literals.))
-//          ~> X:Id(Args:Literals) ...</k>
-//       <clause> X(Params:Literals) :- Body:Literals. </clause>
-//    [transition]
+//@ Add clauses to the set of clauses
+  rule <k> ((X:Id(Params:Terms)) :- Body:Terms.) Pgm:K => Pgm </k>
+       (. => <clause> X:Id(Params:Terms) :- Body:Terms. </clause>)
+
+//@ When done processing clauses, simply "execute" the query.
+  rule ?- Ls:Terms. => Ls
+
+//@ Sequentialize goals
+  rule L:Term, Ls:Terms => L ~> Ls
+  rule .Terms => .
+
+
+//@ Pick a clause and generate a fresh instance of it
 
   rule <k> . => renameVariables(C) ...</k>  <clause> C </clause>
     [transition]
 
 /*@ Unify the goal with the clause head and replace the goal with the
 clause body.  */
-  rule <k> (L:Literal :- Ls:Literals.) ~> L':Literal => Ls ...</k>
+  rule <k> (L:Term :- Ls:Terms.) ~> L':Term => Ls ...</k>
        <mgu> Theta:Mgu => updateMgu(Theta,L,L') </mgu>
 
-
-//@ Add clauses to the set of clauses
-  rule <k> ((X:Id(Params:Literals)) :- Body:Literals.) Pgm:K => Pgm </k>
-       (. => <clause> X:Id(Params:Literals) :- Body:Literals. </clause>)
-
-//@ When done processing clauses, simply "execute" the query.
-  rule ?- Ls:Literals. => Ls
 
 //@ Final rule for extracting the solution
   rule <T>... <k> . </k> <mgu> Theta:Mgu </mgu> ...</T>

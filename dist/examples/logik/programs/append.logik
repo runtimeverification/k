@@ -2,7 +2,7 @@ append(nil,L,L).
 append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
 
 // Next has only one solution
-//?- append(cons(a,nil), cons(b,nil), V).
+?- append(cons(a,nil), cons(b,nil), V).
 
 // Next has two solutions
 //?- append(L1, cons(a,L2), cons(a,cons(b,cons(a,nil)))).

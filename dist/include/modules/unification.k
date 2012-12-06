@@ -119,9 +119,9 @@ constraint.
                   | "getVars" | "accumulateVars"
                   | "clash" | "cycle"
 
-  syntax UnificationError ::= "dummy-used-only-for-declaration-purposes"
-  rule isUnificationError(clash(_)) => true
-  rule isUnificationError(cycle(_)) => true
+  syntax MguError ::= "dummy-used-only-for-declaration-purposes"
+  rule isMguError(clash(_)) => true
+  rule isMguError(cycle(_)) => true
 
   rule getVars(K) => accumulateVars(#vars(.List{K}),, K)
     [structural, anywhere]
@@ -158,14 +158,15 @@ constraint.
  rule subst(Eqns:List{K}) ~> applyAlpha(K) => applySubst(subst(Eqns),K)
 
 
-  syntax Map ::= MGU2Solution(K)             [function]
-  
-  rule MGU2Solution(subst((eqn(K1:K,,_:K) => .List{K}),,_))
-    when isSymbolicK(K1)
-  rule MGU2Solution(subst((eqn(K1:K,,K2:K) => .List{K}),,_))
+// Turns an Mgu into a Map, ignoring the symbolic bindings
+  syntax Map ::= Mgu2Map(K) [function]
+
+  rule Mgu2Map(subst((eqn(K1:K,,_:K) => .List{K}),,_))
+    when isSymbolicK(K1)   // ignore symbolic bindings
+  rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .List{K}),,_))
        (. => K1 |-> K2)
     when isSymbolicK(K1) =/=K true
 
-  rule MGU2Solution(subst(.List{K})) => .Map
+  rule Mgu2Map(subst(.List{K})) => .Map
 endmodule
 
