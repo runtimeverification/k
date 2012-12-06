@@ -15,6 +15,9 @@ parents(X,X).
 parents(A,B):-
   ancestor(A,B).
 
-pr(l(X)) :- ancestor(Anon1,X), ancestor(X,Anon2).
+// This gives too many solutions, as it also includes A and B in solutions
+//?- ancestor(A,X), ancestor(X,B).
 
-?- pr(Y).
+both(X) :- ancestor(A,X), ancestor(X,B).
+
+?- both(X).
