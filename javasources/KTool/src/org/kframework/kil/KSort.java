@@ -44,6 +44,8 @@ public enum KSort {
 		case List:
 		case ListItem:
 			return List;
+		case KItem:
+			return K;
 		}
 		return this;
 	}
