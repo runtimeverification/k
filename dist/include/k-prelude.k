@@ -233,6 +233,7 @@ interface K
   imports K-DESTRUCTORS           // defines getKLabel and getList{K} for K
   //imports K-EXTRAS                // defines a KLabel substitution 
   imports K-COOL
+  imports K-FRESH
   imports K-LISTK-EXTRAS  
   imports K-LIST-EXTRAS  
   imports K-MAP-EXTRAS            // operations on Maps

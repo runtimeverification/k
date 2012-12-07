@@ -269,7 +269,6 @@ mgu in the \textsf{solution} cell and delete the rest of the
 configuration: */
 
   rule <T>... <k> . </k> <mgu> Theta:Mgu </mgu> ...</T>
-       <freshCounter> _ </freshCounter>
     => <solution> Mgu2Map(Theta) </solution>
 
 /*@ Since we are not interested in seeing the failed attempts to solve
@@ -280,7 +279,6 @@ when we search for all solutions, we know that some attempts failed
 (but we do not know which ones). */
 
   rule <T>... <mgu> _:MguError </mgu> ...</T>
-       <freshCounter> _ </freshCounter>
     => .
 
 /*@ \section{Semantics}
@@ -344,5 +342,4 @@ objective here was to present a simple and mathematically clean
 solution.  We encourage the interested reader to consult the LOGIK++
 language definition for a more efficient definition of a richer logic
 programming language. */
-
 endmodule

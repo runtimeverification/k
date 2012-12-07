@@ -148,13 +148,9 @@ constraint.
   syntax KLabel ::= "freshSubst"
 
   rule freshSubst(subst(_,,(.List{K} => 
-                            eqn(X:K,,#symCast(F,#getSymLabel(K2Sort(X)))))),,
-                  #vars((X => .List{K}),,_)) when fresh(F:Variable)
+                  eqn(X:K,,#freshSym(X)))),,
+                  #vars((X => .List{K}),,_))
 
-
-  syntax K ::= #symCast(K,K) [function]
-  rule #symCast(_:KLabel(Ks:List{K}),L:KLabel(_:List{K})) => L(Ks)
-  
   rule freshSubst(subst(Eqns:List{K}),,#vars(.List{K})) => subst(Eqns)
 
 // alpha conversion moved here by grigore

@@ -869,8 +869,11 @@ mod #COUNTER is
   op f : #Qid -> #Qid [special (id-hook QuotedIdentifierOpSymbol (mos)
                               op-hook quotedIdentifierSymbol (<Qids> : ~> #Qid))] .
 
+  var I : #Int .
+  op distinctCounter : #Int -> #Int .
+  eq distinctCounter(I) = _-Int_((string2Int(string(f('a))) +Int I), I).
   op counter : -> #Int .
-  eq counter = string2Int(string(f('a))) .
+  eq counter = distinctCounter(0) .
 endm
 
 mod #K-EQUAL is

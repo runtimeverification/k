@@ -138,5 +138,19 @@ module SYMBOLIC-K
   rule #getSymLabel(Type:String)
     => String2KLabel("#sym" +String Type)(.List{K})
 
+  syntax K ::= #freshSymSortN(String,Int) [function]
+  rule #freshSymSortN(Type:String,I:Int) 
+    =>  String2KLabel("#sym" +String Type)(#distinctCounter(I))
+
+  syntax K ::= #freshSymSort(String) [function]
+  rule #freshSymSort(Type:String) => #freshSymSortN(Type,0) 
+
+  syntax K ::= #freshSymN(K,Int) [function]
+  rule #freshSymN(K:K,I:Int) => #freshSymSortN(K2Sort(K),I)
+
+  syntax K ::= #freshSym(K) [function]
+  rule #freshSym(K:K) => #freshSymSortN(K2Sort(K),0)
+
+  
 endmodule
 

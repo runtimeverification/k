@@ -260,6 +260,13 @@ module SUBSTITUTION
 // Grigore: I added the operation below here, because I want it to be
 // generic.  I don't know how to generate globablly fresh variables
 // of desired type any other way ... sorry.  This is used in type inference
+/******** Soon to be *******************
+  syntax K ::= freshVariables(Set,K)
+  rule freshVariables(.Set, T) => T
+  rule freshVariables(SetItem(Tv) S:Set, T)
+    => freshVariables(S, T[#freshSym(Tv)/Tv])
+*/
+
   syntax K ::= freshVariables(Set,K)
   rule freshVariables(.Set, T) => T
   rule freshVariables(SetItem(Tv) S:Set, T)
