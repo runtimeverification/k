@@ -3,6 +3,7 @@ package org.kframework.backend.latex;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.Collection;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
@@ -10,7 +11,7 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
 
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -24,6 +25,15 @@ public class LatexFilter extends BasicVisitor {
 	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
 	private boolean hasTitle = false;
+
+	public LinkedList<Boolean> getWantParens() {
+		return wantParens;
+	}
+
+	private LinkedList<Boolean> wantParens = new LinkedList<Boolean>();
+	{
+		wantParens.push(Boolean.TRUE);
+	}
 
 	// private boolean termComment;
 
@@ -134,6 +144,7 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Cell c) {
+		wantParens.push(Boolean.FALSE);
 		Ellipses ellipses = c.getEllipses();
 		if (ellipses == Ellipses.LEFT) {
 			result.append("\\ksuffix");
@@ -153,16 +164,22 @@ public class LatexFilter extends BasicVisitor {
 		result.append("{" + StringUtil.latexify(c.getLabel() + StringUtil.emptyIfNull(c.getCellAttributes().get("multiplicity"))) + "}{");
 		super.visit(c);
 		result.append("}" + endl);
+		wantParens.pop();
 	}
 
 	public void visit(Collection col) {
+		final boolean parens = wantParens.peek();
 		final boolean hasBR = containsBR(col);
-		if (hasBR)
-			result.append("\\left(\\begin{array}{@{}c@{}}");
+		if (hasBR) {
+			if (parens) result.append("\\left(");
+			result.append("\\begin{array}{@{}c@{}}");
+		}
 		List<Term> contents = col.getContents();
 		printList(contents, "\\mathrel{}");
-		if (hasBR)
-			result.append("\\end{array}\\right)");
+		if (hasBR) {
+			result.append("\\end{array}");
+			if (parens) result.append("\\right)");
+		}
 	}
 
 	private boolean containsBR(Collection col) {
@@ -269,11 +286,13 @@ public class LatexFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Rewrite rew) {
+		wantParens.push(Boolean.TRUE);
 		result.append("\\reduce{");
 		rew.getLeft().accept(this);
 		result.append("}{");
 		rew.getRight().accept(this);
 		result.append("}");
+		wantParens.pop();
 	}
 
 	@Override
@@ -283,6 +302,7 @@ public class LatexFilter extends BasicVisitor {
 		else {
 			String pattern = getBracketPattern(trm);
 			LatexFilter termFilter = new LatexFilter();
+			termFilter.getWantParens().push(Boolean.FALSE);
 			trm.getContent().accept(termFilter);
 			pattern = pattern.replace("{#1}", "{" + termFilter.getResult() + "}");
 			result.append(pattern);
@@ -290,7 +310,7 @@ public class LatexFilter extends BasicVisitor {
 	}
 
 	private String getBracketPattern(Bracket trm) {
-		return "({#1})";
+		return "\\left({#1}\\right)";
 	}
 
 	@Override
