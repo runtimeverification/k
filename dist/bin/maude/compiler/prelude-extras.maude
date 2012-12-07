@@ -420,6 +420,12 @@ fmod META-TERM-EXTRAS is
   eq mkVariable(Q, errorS(Tr, T, Str)) = errorT(Tr, "", Str) .
 
 
+  op maudeApply : Qid Type TermList -> Term .
+  eq maudeApply(Q, T, empty) = mkConstant(Q, T) .
+  eq maudeApply(Q, T, Trl) = Q[Trl] [owise] .
+
+
+
   op nth : TermList Nat ~> Term .
   eq nth((Tr, Trl), 0) = Tr .
   eq nth((Tr, Trl), s(N)) = nth(Trl, N) .

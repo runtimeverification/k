@@ -7,6 +7,7 @@ require "string.k"
 require "tcp.k"
 require "k-equal.k"
 require "random.k"
+require "counter.k"
 //require "model-checker.k"
 
 module BUILTIN-SYNTAX-HOOKS
@@ -27,6 +28,7 @@ module BUILTIN-HOOKS
   imports TCP-HOOKS
   imports K-EQUAL-HOOKS
   imports RANDOM-HOOKS
+  imports COUNTER-HOOKS
   //imports LTL-HOOKS
   //imports MODEL-CHECKER-HOOKS
 endmodule

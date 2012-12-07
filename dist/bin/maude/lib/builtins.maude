@@ -869,7 +869,7 @@ mod #COUNTER is
   op f : #Qid -> #Qid [special (id-hook QuotedIdentifierOpSymbol (mos)
                               op-hook quotedIdentifierSymbol (<Qids> : ~> #Qid))] .
 
-  op counter : -> #Nat .
+  op counter : -> #Int .
   eq counter = string2Int(string(f('a))) .
 endm
 

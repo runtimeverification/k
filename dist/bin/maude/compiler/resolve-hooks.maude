@@ -67,7 +67,7 @@ mod RESOLVE-HOOKS is
   op resolveHook : Qid AttrSet Qid TermList Type -> Equation .
   eq resolveHook(Q, AS, QO, Terms,  Ty) 
    = (eq kApply(mkConstant(Q,KLabel), mkKList(Terms))
-       =  kApply(mkSubsortWrapper(Ty,KLabel)[QO[Terms]],nilKList) [metadata(removeOpAttrs(AS) pair("hook",string(QO)))] .) .
+       =  kApply(mkSubsortWrapper(Ty,KLabel)[maudeApply(QO, Ty, Terms)],nilKList) [metadata(removeOpAttrs(AS) pair("hook",string(QO)))] .) .
 
   op mkKList_ : TermList ~> TermList .
   eq mkKList(empty) = empty .
