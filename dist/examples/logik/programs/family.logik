@@ -18,6 +18,6 @@ parents(A,B):-
 // This gives too many solutions, as it also includes A and B in solutions
 //?- ancestor(A,X), ancestor(X,B).
 
-both(X) :- ancestor(A,X), ancestor(X,B).
+//both(X) :- ancestor(A,X), ancestor(X,B).
 
 ?- both(X).
