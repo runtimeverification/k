@@ -871,7 +871,7 @@ mod #COUNTER is
 
   var I : #Int .
   op distinctCounter : #Int -> #Int .
-  eq distinctCounter(I) = _-Int_((string2Int(string(f('a))) +Int I), I).
+  eq distinctCounter(I) = string2Int(string(f('a))) .
   op counter : -> #Int .
   eq counter = distinctCounter(0) .
 endm

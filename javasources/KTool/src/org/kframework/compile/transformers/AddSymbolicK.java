@@ -1,18 +1,12 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Constant;
-import org.kframework.kil.KApp;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.Production;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
+import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class AddSymbolicK extends CopyOnWriteTransformer {
@@ -60,6 +54,13 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 
         return symTerm;
     }
+
+	public static Term freshSymSortN(String sort, int n) {
+		List<Term> args = new ArrayList<Term>();
+		args.add((Constant.STRING(sort)));
+		args.add((Constant.INT(n)));
+		return new KApp(Constant.KLABEL("'#freshSymSortN"), new ListOfK(args));
+	}
 
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {

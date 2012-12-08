@@ -554,7 +554,8 @@ public class KompileFrontEnd {
 			steps.add(new ResolveFunctions());
 			steps.add(new AddKCell());
 			steps.add(new AddSymbolicK());
-			steps.add(new ResolveFresh());
+//			steps.add(new ResolveFresh());
+			steps.add(new ResolveFreshMOS());
 			if (GlobalSettings.addTopCell) {
 				steps.add(new AddTopCell());
 			}
