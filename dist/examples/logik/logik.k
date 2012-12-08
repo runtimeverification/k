@@ -231,16 +231,19 @@ simply the semantics later on, by not having to treat special cases. */
 
 The configuration stores each clause in its own cell for easy access,
 and the most general unifier in a cell named \textsf{mgu}, same like
-the type inferencers.  The \textsf{k} cell will hold the query.
-To more easily read the solutions, we add a second top-level cell,
-\textsf{solution}.  Both top cells are optional.  Indeed, we start
-with the main top cell and, when a solution is found, we move it into
-the \textsf{solution} cell and discard the main cell. */
+the type inferencers.  The \textsf{k} cell holds the query and the
+\textsf{fresh} cell holds a fresh clause instance to be attempted on
+the next query item.  To more easily read the solutions, we add a
+second top-level cell, \textsf{solution}.  Both top cells are
+optional.  Indeed, we start with the main top cell and, when a
+solution is found, we move it into the \textsf{solution} cell and
+discard the main cell. */
 
   configuration <T color="yellow" multiplicity="?">
                   <k color="green"> $PGM:Pgm </k>
+                  <fresh color="orange"> .K </fresh>
                   <mgu color="blue"> .Mgu </mgu>
-                   <br/>
+                  <br/>
                   <clauses color="red">
                     <clause color="pink" multiplicity="*"> .K </clause>
                   </clauses>
@@ -321,14 +324,17 @@ the higher-order type inferencer discussed in Tutorial 5.  Indeed, we
 can safely regard clauses as ``clause schemas'' comprising infinitely
 many instances, one for each context. */
 
-//@ Pick a clause and generate a fresh instance of it:
+/*@ Pick a clause and generate a fresh instance of it when the
+\textsf{fresh} cell is empty: */
 
-  rule <k> . => renameVariables(C) ...</k>  <clause> C </clause>
+  rule <fresh> . => renameVariables(C) </fresh>  <clause> C </clause>
     [transition]
 
-/*@ Unify the goal with the clause head and replace the goal with the
-clause body:  */
-  rule <k> L:Term :- Ls:Terms. ~> L':Term => Ls ...</k>
+/*@ Unify the goal with the fresh clause's head, replace the goal
+with the clause body, and empty the \textsf{fresh} cell (so that
+another clause can be chosen using the rule above):  */
+  rule <k> L':Term => Ls ...</k>
+       <fresh>  L:Term :- Ls:Terms. => . </fresh>
        <mgu> Theta:Mgu => updateMgu(Theta,L,L') </mgu>
 
 /*@ Note that there is no problem if a clause is chosen whose

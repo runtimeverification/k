@@ -110,8 +110,8 @@ constraint.
   rule updateMgu(subst(Ks:List{K}), K1, K2)
       => unifyEqs(subst(Ks),,eqns(applySubst(subst(Ks),eqn(K1,,K2))))
    [structural, anywhere]
-  syntax K ::= "applySubst" "(" K "," K ")" [function]
-  rule applySubst(subst((eqn(K1:K,,K2:K) => .List{K}),,_), 
+  syntax K ::= applySubst(K, K) [function]
+  rule applySubst(subst((eqn(K1:K,,K2:K) => .List{K}),,_),
                     (K:K => substitute(K1,, K2,, K)))   [structural, anywhere]
   rule applySubst(subst(.List{K}),K) => K   [structural, anywhere]
   
@@ -141,24 +141,24 @@ constraint.
 
 //  configuration <k> .K </k> <nextVar> 0 </nextVar>
 
-  syntax K ::= "getAlpha" "(" K ")"
+  syntax K ::= getAlpha(K)  [function]
   rule getAlpha(K)
     => freshSubst(subst(.List{K}),, getVars(K))
 
-  syntax KLabel ::= "freshSubst"
+  syntax K ::= freshSubst(List{K})  [function]
 
   rule freshSubst(subst(_,,(.List{K} => 
                   eqn(X:K,,#freshSym(X)))),,
                   #vars((X => .List{K}),,_))
-
   rule freshSubst(subst(Eqns:List{K}),,#vars(.List{K})) => subst(Eqns)
 
 // alpha conversion moved here by grigore
- syntax K ::= renameVariables(K) | applyAlpha(K)
+ syntax K ::= renameVariables(K)  [function]
+            | applyAlpha(K)
 
- rule renameVariables(K) => getAlpha(K) ~> applyAlpha(K)
- rule subst(Eqns:List{K}) ~> applyAlpha(K) => applySubst(subst(Eqns),K)
-
+// rule renameVariables(K) => getAlpha(K) ~> applyAlpha(K)
+// rule subst(Eqns:List{K}) ~> applyAlpha(K) => applySubst(subst(Eqns),K)
+ rule renameVariables(K) => applySubst(getAlpha(K),K)
 
 // Turns an Mgu into a Map, ignoring the symbolic bindings
   syntax Map ::= Mgu2Map(K) [function]

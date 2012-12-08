@@ -319,8 +319,7 @@
       >
     <all-programs>
       <krun-option name="--search" />
-      <krun-option name="--pattern" value="=>! &lt; solution &gt; L:List &lt;/ solution &gt; &lt; freshCounter &gt; Fresh:K &lt;/ freshCounter &gt;"/>
-      <krun-option name="--bound" value="1" />
+      <krun-option name="--bound" value="2" />
     </all-programs>
   </test>
 
