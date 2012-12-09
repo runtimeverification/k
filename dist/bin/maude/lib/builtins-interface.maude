@@ -115,8 +115,8 @@ mod #COUNTER-INTERFACE is
 endm
 
 mod #LTL-INTERFACE is
-  sort #LTLFormula .
-  ops LTLTrue LTLFalse : -> #LTLFormula [ctor format (g o)] .
+  sort #LtlFormula .
+  ops TrueLtl FalseLtl : -> #LtlFormula [ctor format (g o)] .
 endm
 
 mod #MODEL-CHECKER-INTERFACE is
@@ -125,7 +125,7 @@ mod #MODEL-CHECKER-INTERFACE is
   sorts #ModelCheckerState #Prop .
   sort #ModelCheckResult .
 
-  op _LTL|=_ : #ModelCheckerState #Prop -> #Bool [frozen] .
+  op _|=Ltl_ : #ModelCheckerState #Prop -> #Bool [frozen] .
 
 endm
 
