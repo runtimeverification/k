@@ -119,6 +119,8 @@ public class ProgramSDF {
 
 		sdf.append("\n");
 
+		sdf.append(psdfv.lexical);
+
 		return sdf.toString();
 	}
 }

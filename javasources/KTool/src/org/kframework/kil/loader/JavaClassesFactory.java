@@ -48,7 +48,13 @@ import org.w3c.dom.Element;
 public class JavaClassesFactory {
 
 	public static ASTNode getTerm(Element element) {
-		// TODO: used for a new feature - loading java classes at first step (Basic Parsing)
+		// used for a new feature - loading java classes at first step (Basic Parsing)
+		if (Constants.LEXICAL.equals(element.getNodeName()))
+			return new StringSentence(element);
+		if (Constants.RESTRICTIONS.equals(element.getNodeName()))
+			return new StringSentence(element);
+		if (Constants.RULE.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
+			return new StringSentence(element);
 		if (Constants.RULE.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
 			return new StringSentence(element);
 		if (Constants.CONFIG.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))

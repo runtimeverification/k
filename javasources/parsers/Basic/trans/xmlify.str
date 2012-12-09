@@ -386,6 +386,20 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml:
+		Lexical(x1) -> $[<lexical loc="[loc]" value="[x1']" />
+		]
+		where mydebug(!"Lexical: ")
+		where x1' := <get-original-sentence> x1
+		where loc := <getLocAsString>
+
+	to-xml:
+		Restrictions(x1) -> $[<restrictions loc="[loc]" value="[x1']" />
+		]
+		where mydebug(!"Restrictions: ")
+		where x1' := <get-original-sentence> x1
+		where loc := <getLocAsString>
+
+	to-xml:
 		KLabel(x) -> $[<const sort="KLabel" value="[<xmlStringEscape ; escape> x]" loc="[loc]"/>
 		]
 		where loc := <getLocAsString>

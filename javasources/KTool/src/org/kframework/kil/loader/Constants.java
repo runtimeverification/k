@@ -16,6 +16,8 @@ public class Constants {
 	public static final String SORT = "sort";
 	public static final String PRIORITY = "priority";
 	public static final String PRODUCTION = "production";
+	public static final String LEXICAL = "lexical";
+	public static final String RESTRICTIONS = "restrictions";
 	public static final String RULE = "rule";
 	public static final String BODY = "body";
 	public static final String REWRITE = "rewrite";
@@ -82,10 +84,8 @@ public class Constants {
 	public static final String KLABEL = "KLabel";
 	public static final String PREDEFINED = "predefined";
 	public static final String BREAK = "br";
-	
-	
+
 	// Generated stuff
 	public static final String GENERATED_FILENAME = "File System";
 	public static final String GENERATED_LOCATION = "generated";
-	
 }

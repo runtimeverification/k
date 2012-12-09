@@ -223,6 +223,8 @@ public class DefinitionSDF {
 		sdf.append("	\"is\" -/- [\\#A-Z]\n");
 		sdf.append("\n");
 
+		sdf.append(psdfv.lexical);
+
 		return sdf.toString();
 	}
 }

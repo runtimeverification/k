@@ -26,6 +26,8 @@ context-free syntax
 	"syntax" "left"			KLABEL+			-> KSentence {cons("PriorityLeft")}
 	"syntax" "right"		KLABEL+			-> KSentence {cons("PriorityRight")}
 	"syntax" "non-assoc"	KLABEL+			-> KSentence {cons("PriorityNonAssoc")}
+	"syntax" "lexical"		HIDDEN+ 		-> KSentence {cons("Lexical")}
+	"syntax" "restrictions"	HIDDEN+ 		-> KSentence {cons("Restrictions")}
 
 	KLABEL+	-> KLList {cons("PriorityBlock")}
 	HIDDEN	-> KLABEL {cons("KLabel")}
