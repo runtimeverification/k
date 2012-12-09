@@ -363,18 +363,26 @@ public class KRun {
 		Element elem = (Element) nod;
 		List<Element> child = XmlUtil.getChildElements(elem);
 		assertXML(child.size() == 1);
-		assertXML(child.get(0).getAttribute("op").equals("_`(_`)") && child.get(0).getAttribute("sort").equals("KItem"));
+		String sort = child.get(0).getAttribute("sort");
+		String op = child.get(0).getAttribute("op");
+		assertXML(sort, op, op.equals("_`(_`)") && sort.equals("KItem"));
 		child = XmlUtil.getChildElements(child.get(0));
 		assertXML(child.size() == 2);
-		assertXML(child.get(0).getAttribute("op").equals("#_") && child.get(0).getAttribute("sort").equals("KLabel"));
-		assertXML(child.get(1).getAttribute("op").equals(".List`{K`}") && child.get(1).getAttribute("sort").equals("List`{KResult`}"));
+		sort = child.get(0).getAttribute("sort");
+		op = child.get(0).getAttribute("op");
+		assertXML(sort, op, op.equals("#_") && sort.equals("KLabel"));
+		sort = child.get(1).getAttribute("sort");
+		op = child.get(1).getAttribute("op");
+		assertXML(sort, op, op.equals(".List`{K`}") && sort.equals("List`{KResult`}"));
 		child = XmlUtil.getChildElements(child.get(0));
 		assertXML(child.size() == 1);
 		elem = child.get(0);
 		if (elem.getAttribute("op").equals("true") && elem.getAttribute("sort").equals("#Bool")) {
 			result = new Constant("Bool", "true");
 		} else {
-			assertXML(elem.getAttribute("op").equals("LTLcounterexample") && elem.getAttribute("sort").equals("#ModelCheckResult"));
+			sort = elem.getAttribute("sort");
+			op = elem.getAttribute("op");
+			assertXML(sort, op, op.equals("LTLcounterexample") && sort.equals("#ModelCheckResult"));
 			child = XmlUtil.getChildElements(elem);
 			assertXML(child.size() == 2);
 			initialPath = new ArrayList<Transition>();
@@ -389,12 +397,12 @@ public class KRun {
 		String op = elem.getAttribute("op");
 		List<Element> child = XmlUtil.getChildElements(elem);
 		if (sort.equals("#TransitionList") && op.equals("_LTL_")) {
-			assertXML(child.size() >= 2);
+			assertXML(sort, op, child.size() >= 2);
 			for (Element e : child) {
 				parseCounterexample(e, list);
 			}
 		} else if (sort.equals("#Transition") && op.equals("LTL`{_`,_`}")) {
-			assertXML(child.size() == 2);
+			assertXML(sort, op, child.size() == 2);
 			Term t = parseXML(child.get(0));
 		
 			t = (Term) t.accept(new ConcretizeSyntax());
@@ -404,8 +412,10 @@ public class KRun {
 			t = (Term) t.accept(new FlattenDisambiguationFilter());
 
 			List<Element> child2 = XmlUtil.getChildElements(child.get(1));
-			assertXML(child2.size() == 0 && child.get(1).getAttribute("sort").equals("#Qid"));
-			String label = child.get(1).getAttribute("op");
+			sort = child.get(1).getAttribute("sort");
+			op = child.get(1).getAttribute("op");
+			assertXML(sort, op, child2.size() == 0 && (sort.equals("#Qid") || sort.equals("#RuleName")));
+			String label = op;
 			list.add(new Transition(t, label));
 		} else {
 			assertXML(sort, op, false);
