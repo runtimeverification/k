@@ -1,0 +1,66 @@
+/* This is a incorrect version of Peterson's algorithm for mutual exclusion.
+   This program is not meant to be executed, it is meant to be model checked.
+   The model-checker can be called either using the "krun" command:
+
+   krun programs/peterson-wrong2.cink
+        --ltlmc "[]Ltl ((eqTo(critical1, 1) ->Ltl eqTo(critical2, 0)) /\Ltl
+                        (eqTo(critical2, 1) ->Ltl eqTo(critical1, 0)))"
+
+   If the formula is stored into a file, say form.cink, then the following 
+   command can be used:
+
+   krun programs/peterson-wrong2.cink --ltlmc programs/form-peterson.cink 
+
+   In both cases the model-checker should return a counter-example.
+*/
+
+int flag1 = 0;
+int flag2 = 0;
+int critical1 = 0;
+int critical2 = 0;
+
+int peterson1() {
+  while (true) {
+    // intend to enter critical section
+    flag1 = 1;
+    while(flag2 == 1) {
+      flag1 = 0;
+      while (flag2 == 1) {}
+      flag1 = 1;
+    }
+    // Enter critical section
+    critical1 = 1;
+    // Critical stuff ...
+    // Leave critical section
+    flag1 = 0;
+    critical1 = 0;
+    // Non-critical stuff ...
+  }
+}
+
+
+int peterson2() {
+  while (true) {
+    // intend to enter critical section
+    flag2 = 1; 
+    while(flag1 == 1) {
+      flag2 = 0;
+      while (flag1 == 1) {}
+      flag2 = 1;
+    }
+    // Enter critical section
+    critical2 = 1;
+    // Critical stuff ...
+    // Leave critical section
+    flag2 = 0;
+    critical2 = 0;
+    // Non-critical stuff ...
+  }
+}
+
+
+int main() {
+  std::thread t1(peterson1);
+  std::thread t2(peterson2);
+}
+
