@@ -641,6 +641,7 @@ Therefore, the operators for LTL formulas are prefixed with "LTL".
 
 module CINK-SYNTAX
   imports CINK-LANG-SYNTAX
+  imports LTL-HOOKS
   imports MODEL-CHECKER-HOOKS
 
   /*@
