@@ -1,66 +1,66 @@
 require "bool.k"
 
 module LTL-SYNTAX-HOOKS
-  syntax #LTLFormula ::= "LTLTrue"
-  syntax #LTLFormula ::= "LTLFalse"
+  imports #LTL-INTERFACE
+  syntax #LtlFormula ::= "TrueLtl"
+  syntax #LtlFormula ::= "FalseLtl"
 
-  syntax LTLFormula ::= #LTLFormula
+  syntax LtlFormula ::= #LtlFormula
+
+  syntax LTLFormula ::= LtlFormula      // just for compatibility
+
 endmodule
 
 module LTL-HOOKS
   imports LTL-SYNTAX-HOOKS
-  imports #LTL-INTERFACE
-
-//  syntax LTLFormula ::= "LTLTrue" [hook(#LTL:LTLTrue)]
-
-//  syntax LTLFormula ::= "LTLFalse" [hook(#LTL:LTLFalse)]
-
-//  syntax LTL ::= "justforK2"
-
-  syntax LTLFormula ::= "(" LTLFormula ")" [bracket]
-
-  syntax LTLFormula ::= "LTL~" LTLFormula  [function, hook(#LTL:LTL~_)]
 
 
-  syntax LTLFormula ::= LTLFormula "LTL/\\" LTLFormula 
-      [function,  hook(#LTL:_LTL&&_)]
+  syntax LtlFormula ::= "(" LtlFormula ")" [bracket]
 
-  syntax LTLFormula ::= LTLFormula "LTL\\/" LTLFormula 
-      [function, hook(#LTL:_LTL||_)]
-
-  syntax LTLFormula ::= "LTLO" LTLFormula 
-      [function, hook(#LTL:LTLO_)]
-
-  syntax LTLFormula ::= LTLFormula "LTLU" LTLFormula 
-      [function, hook(#LTL:_LTLU_)]
-
-  syntax LTLFormula ::= LTLFormula "LTLR" LTLFormula 
-      [function, hook(#LTL:_LTLR_)]
-
-  syntax LTLFormula ::= LTLFormula "LTL->" LTLFormula 
-      [function, gather(e E), hook(#LTL:_LTL->_)]
-
-  syntax LTLFormula ::= LTLFormula "LTL<->" LTLFormula 
-      [function, hook(#LTL:_LTL<->_)]
-
-  syntax LTLFormula ::= "LTL<>" LTLFormula 
-      [function, hook(#LTL:LTL<>_)]
-
-  syntax LTLFormula ::= "LTL[]" LTLFormula 
-      [function, hook(#LTL:LTL@_)]
- 
-  syntax LTLFormula ::= LTLFormula "LTLW" LTLFormula 
-      [function, hook(#LTL:_LTLW_)]
-
-  syntax LTLFormula ::= LTLFormula "LTL|->" LTLFormula   // leads-to
-      [function, hook(#LTL:_LTL|->_)]
-
-  syntax LTLFormula ::= LTLFormula "LTL=>" LTLFormula 
-      [function, hook(#LTL:_LTL=>_)]
-
-  syntax LTLFormula ::= LTLFormula "LTL<=>" LTLFormula 
-      [function, hook(#LTL:_LTL<=>_)]
-
+  syntax LtlFormula ::= "~Ltl" LtlFormula [function,
+                                           latex(\mathop{\sim_{\scriptstyle\it Ltl}}{#1})]
+//                                           hook(#LTL:~Ltl_)]
+                     |  "OLtl" LtlFormula [function,
+                                           latex(\mathop{\mathsf{O}_{\scriptstyle\it Ltl}}{#1})]
+//                                           hook(#LTL:OLtl_)]
+                     |  "<>Ltl" LtlFormula [function,
+                                            latex(\mathop{\diamond_{\scriptstyle\it Ltl}}{#1})]
+//                                            hook(#LTL:<>Ltl_)]
+                     |  "[]Ltl" LtlFormula [function,
+                                            latex(\mathop{\square_{\scriptstyle\it Ltl}}{#1})]
+//                                            hook(#LTL:@Ltl_)]
+                     >  LtlFormula "/\\Ltl" LtlFormula [function, left,
+                                                        latex({#1}\mathrel{\land_{\scriptstyle\it Ltl}}{#2})]
+//                                                        hook(#LTL:_&&Ltl_)]
+                     >  LtlFormula "\\/Ltl" LtlFormula [function, left,
+                                                        latex({#1}\mathrel{\lor_{\scriptstyle\it Ltl}}{#2})]
+//                                                        hook(#LTL:_||Ltl_)]
+                     > left:
+                        LtlFormula "ULtl" LtlFormula  [function, left,
+                                                       latex({#1}\mathrel{\mathsf{U}_{\scriptstyle\it Ltl}}{#2})]
+//                                                       hook(#LTL:_ULtl_)]
+                     |  LtlFormula "RLtl" LtlFormula  [function, left,
+                                                       latex({#1}\mathrel{\mathsf{R}_{\scriptstyle\it Ltl}}{#2})]
+//                                                       hook(#LTL:_RLtl_)]
+                     |  LtlFormula "WLtl" LtlFormula  [function, left, 
+                                                       latex({#1}\mathrel{\mathsf{W}_{\scriptstyle\it Ltl}}{#2})]
+//                                                       hook(#LTL:_WLtl_)]
+                     |  LtlFormula "|->Ltl" LtlFormula [function, left,
+                                                        latex({#1}\mathrel{\mapsto_{\scriptstyle\it Ltl}}{#2})]
+//                                                        hook(#LTL:_|->Ltl_)]
+                     > left:
+                        LtlFormula "->Ltl" LtlFormula  [function, left,
+                                                        latex({#1}\mathrel{\right{arrow}_{\scriptstyle\it Ltl}}{#2}),
+                                                        hook(#LTL:_->Ltl_)]
+                     |  LtlFormula "<->Ltl" LtlFormula [function, left,
+                                                        latex({#1}\mathrel{\leftrightarrow_{\scriptstyle\it Ltl}}{#2}),
+                                                        hook(#LTL:_<->Ltl_)]
+                     |  LtlFormula "=>Ltl" LtlFormula  [function, left,
+                                                        latex({#1}\mathrel{\Rightarrow_{\scriptstyle\it Ltl}}{#2})]
+//                                                        left, hook(#LTL:_=>Ltl_)]
+                     |  LtlFormula "<=>Ltl" LtlFormula [function, left,
+                                                        latex({#1}\mathrel{\Leftightarrow_{\scriptstyle\it Ltl}}{#2})]
+//                                                        hook(#LTL:_<=>Ltl_)]
 endmodule
 
 module MODEL-CHECKER-SYNTAX-HOOKS
@@ -68,18 +68,14 @@ module MODEL-CHECKER-SYNTAX-HOOKS
   syntax ModelCheckerState ::= #ModelCheckerState 
   syntax Prop ::= #Prop
   syntax ModelCheckResult ::= #ModelCheckResult
-  syntax LTLFormula ::= Prop
+  syntax LtlFormula ::= Prop
 endmodule
 
 
 module  MODEL-CHECKER-INTERFACE
   imports #MODEL-CHECKER-INTERFACE
-//  sorts #ModelCheckerState #Prop .
-//  sort #ModelCheckResult .
 
-//  op _LTL|=_ : #ModelCheckerState #Prop -> #Bool [frozen] .
-
-  syntax Bool ::= Bag "LTL|=" K
+  syntax Bool ::= Bag "|=Ltl" K [latex({#1}\mathrel{\models_{\scriptstyle\it Ltl}}{#2})]
 
 endmodule
 
@@ -88,7 +84,7 @@ module MODEL-CHECKER-HOOKS
   imports MODEL-CHECKER-SYNTAX-HOOKS
   imports BOOL-HOOKS
 
-  syntax ModelCheckResult ::= "modelCheck" "(" ModelCheckerState "," LTLFormula ")" 
+  syntax ModelCheckResult ::= "modelCheck" "(" ModelCheckerState "," LtlFormula ")" 
        //  [function, hook(#MODEL-CHECKER:modelCheck)]
 
 
