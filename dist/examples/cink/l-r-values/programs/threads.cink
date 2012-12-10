@@ -1,0 +1,9 @@
+int r; 
+int f(int x) {
+  return (r = x);
+}
+int main() {
+  std::thread t1(f, 1);
+  std::thread t1(f, 2);
+  return r;
+}

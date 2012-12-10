@@ -1,0 +1,31 @@
+/*
+  This example tests the correct implementation of the
+  call-by-value and call-by-reference mechansims.
+  If the input is
+  a b
+  then the output should be:
+  1 a 2
+  4 3
+*/
+
+int f(int x, int &y) {
+  x = 1;
+  y = 2;
+  return x;
+}
+
+void g(int &x, int &y) {
+  x = 3;
+  y = 4;
+}
+
+int main () {
+  int x, y, z;
+  cout << "x, y: ";
+  cin >> x >> y;
+  z = f(x, y);
+  cout << z << x << y << "\n";
+  g(y, x);
+  cout << x << y << "\n";
+}
+

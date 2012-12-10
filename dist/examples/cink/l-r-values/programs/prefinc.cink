@@ -1,0 +1,19 @@
+/*
+  This example exhibits different uses of the prefixed increment operator.
+  Note that y is in fact an alias of x since the evaluation operator 
+  returns an l-value.
+  The output should be
+  6
+  5
+*/
+#include <iostream>
+using namespace std;
+
+int main() {
+  int x = 1, &y = ++x, z;
+  z = ++y + 3;
+  cout << z << endl;
+  z = ++(++x);
+  cout << z << endl;
+  return 0;
+} 

@@ -1,7 +1,0 @@
-int main() {
-  int x, *y = &x;
-  *y = 10;
-  cout << x << "\n";
-  int z = *y;
-  cout << z << "\n";
-}
