@@ -46,8 +46,9 @@ public enum KSort {
 			return List;
 		case KItem:
 			return K;
+		default:
+			return this;
 		}
-		return this;
 	}
 
 	public boolean isDefaulable() {

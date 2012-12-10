@@ -47,6 +47,7 @@ public class KastOptionsParser {
 		// which parser to use
 		@SuppressWarnings("static-access")
 		Option defParser = OptionBuilder.withLongOpt("def-parser").withDescription("use k definition parser").create();
+		@SuppressWarnings("static-access")
 		Option sort = OptionBuilder.withLongOpt("sort").hasArg().withDescription("the sort the program is expected to parse into").create();
 
 		// add options

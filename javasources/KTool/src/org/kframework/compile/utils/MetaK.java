@@ -351,8 +351,9 @@ public class MetaK {
 			return new Map(col);
 		case K:
 			return new KSequence(col);
+		default:
+			return null;
 		}
-		return null;
 	}
 
 
