@@ -63,7 +63,7 @@ public class Terminal extends ProductionItem {
 
 		Terminal trm = (Terminal) obj;
 
-		if (trm.getTerminal().equals(this.terminal))
+		if (!trm.terminal.equals(this.terminal))
 			return false;
 		return true;
 	}

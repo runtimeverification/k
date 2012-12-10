@@ -18,23 +18,20 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
 
 		// choose the maximum from the list of ambiguities
-		java.util.List<Term> terms = new ArrayList<Term>();
+		java.util.List<Term> terms = new ArrayList<Term>(amb.getContents());
 		for (Term trm1 : amb.getContents()) {
-			boolean topSort = true;
 			for (Term trm2 : amb.getContents()) {
-				if (termsAlike(trm1, trm2))
-					if (DefinitionHelper.isSubsorted(trm2.getSort(), trm1.getSort())) {
-						topSort = false;
-						break;
-					}
+				if (trm1 != trm2)
+					if (termsAlike(trm1, trm2))
+						if (DefinitionHelper.isSubsorted(trm2.getSort(), trm1.getSort())) {
+							terms.remove(trm1);
+						}
 			}
-			if (topSort)
-				terms.add(trm1);
 		}
 
 		if (terms.size() == 1)
 			return terms.get(0).accept(this);
-		else
+		else if (terms.size() > 0)
 			amb.setContents(terms);
 
 		return super.transform(amb);
@@ -64,6 +61,12 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			// add 1 to left each time Sort1 < Sort2 and add 1 to right vice versa
 			// if at least one of them is 0 at the end return true.
 			int left = 0, right = 0;
+			if (DefinitionHelper.isSubsorted(term1.getSort(), term2.getSort()))
+				left++;
+			else if (DefinitionHelper.isSubsorted(term2.getSort(), term1.getSort()))
+				right++;
+			else if (!term1.getSort().equals(term2.getSort()))
+				return false;
 			for (int i = 0; i < term1.getProduction().getItems().size(); i++) {
 				ProductionItem itm1 = term1.getProduction().getItems().get(i);
 				ProductionItem itm2 = term2.getProduction().getItems().get(i);
@@ -100,8 +103,8 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 						return false;
 				}
 			}
-			if (right == 0 || left == 0)
-				return true;
+			if (right != 0 && left != 0)
+				return false;
 		}
 
 		return true;
