@@ -130,23 +130,14 @@ public class DefinitionLoader {
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
-			String oldSdf = "";
+			String oldSdfPgm = "";
 			if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
-				oldSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+				oldSdfPgm = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
-			// make a set of all the syntax modules
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf", ProgramSDF.getSdfForPrograms(def));
-
-			String newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+			String newSdfPgm = ProgramSDF.getSdfForPrograms(def);
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("File Gen Pgm");
-
-			if (!oldSdf.equals(newSdf))
-				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLPgm");
 
 			def.accept(new AddAutoIncludedModulesVisitor());
 			def.accept(new CollectModuleImportsVisitor());
@@ -154,21 +145,20 @@ public class DefinitionLoader {
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
-			oldSdf = "";
+			String oldSdf = "";
 			if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
 				oldSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def));
-			newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
+			String newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("File Gen Def");
 
-			if (!oldSdf.equals(newSdf))
+			if (!oldSdf.equals(newSdf)) {
 				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate TBLDef");
-
+				if (GlobalSettings.verbose)
+					sw.printIntermediate("Generate TBLDef");
+			}
 			// ------------------------------------- import files in Stratego
 			org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getAbsolutePath() + "/def/Concrete.tbl");
 
@@ -184,6 +174,17 @@ public class DefinitionLoader {
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing Configs");
+
+			newSdfPgm += "context-free start-symbols\n";
+			newSdfPgm += "	" + StringUtil.escapeSortName(DefinitionHelper.startSymbolPgm) + "\n";
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgm);
+			newSdfPgm = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+
+			if (!oldSdfPgm.equals(newSdfPgm)) {
+				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
+				if (GlobalSettings.verbose)
+					sw.printIntermediate("Generate TBLPgm");
+			}
 
 			// ----------------------------------- parse rules
 			def = (Definition) def.accept(new ParseRulesFilter());

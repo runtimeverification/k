@@ -3,6 +3,7 @@ package org.kframework.parser.generator;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
 import org.kframework.kil.StringSentence;
+import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.BasicTransformer;
@@ -42,7 +43,9 @@ public class ParseConfigsFilter extends BasicTransformer {
 	@Override
 	public ASTNode transform(Module m) throws TransformerException {
 		localModule = m.getName();
-		return super.transform(m);
+		ASTNode rez = super.transform(m);
+		rez.accept(new CollectStartSymbolPgmVisitor());
+		return rez;
 	}
 
 	public ASTNode transform(StringSentence ss) throws TransformerException {

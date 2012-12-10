@@ -38,15 +38,15 @@ public class ProgramSDF {
 		sdf.append("context-free syntax\n");
 		sdf.append(psdfv.sdf);
 
-		sdf.append("context-free start-symbols\n");
-		sdf.append("\n%% start symbols\n	");
+		// sdf.append("context-free start-symbols\n");
+		// sdf.append(StringUtil.escapeSortName(DefinitionHelper.startSymbolPgm) + "\n");
 
-		for (String s : psdfv.startSorts) {
-			if (!s.equals("Start"))
-				sdf.append(StringUtil.escapeSortName(s) + " ");
-		}
+		// for (String s : psdfv.startSorts) {
+		// if (!s.equals("Start"))
+		// sdf.append(StringUtil.escapeSortName(s) + " ");
+		// }
 
-		sdf.append("K\n");
+		// sdf.append("K\n");
 		sdf.append("context-free syntax\n");
 
 		for (Production p : psdfv.outsides) {
@@ -80,12 +80,6 @@ public class ProgramSDF {
 			String s = StringUtil.escapeSortName(sort);
 			sdf.append("	Dz" + s + "		-> " + s + "	{cons(\"" + s + "1Const\")}\n");
 		}
-
-		// sdf.append("	DzDzInt		-> DzInt	{cons(\"DzInt1Const\")}\n");
-		// sdf.append("	DzDzBool	-> DzBool	{cons(\"DzBool1Const\")}\n");
-		// sdf.append("	DzDzId		-> DzId		{cons(\"DzId1Const\")}\n");
-		// sdf.append("	DzDzString	-> DzString	{cons(\"DzString1Const\")}\n");
-		// sdf.append("	DzDzFloat	-> DzFloat	{cons(\"DzFloat1Const\")}\n");
 
 		sdf.append("\n");
 		sdf.append("	DzDzINT		-> DzDzInt\n");
