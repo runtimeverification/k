@@ -10,6 +10,16 @@ module SYMBOLIC-K
   imports BUILTIN-HOOKS
   imports FREE-VARS
 
+  syntax Bool ::= "forall" Set "." Bool [binder, function]
+  syntax Bool ::= "exists" Set "." Bool [binder, function]
+
+  /* The following simplification rules assume non-empty sorts. */
+  rule forall S:Set . true => true
+  rule forall S:Set . false => false
+  rule exists S:Set . true => true
+  rule exists S:Set . false => false
+
+
   syntax String ::= "K2SMTLib" "(" K ")" [klabel(K2SMTLib), function]
   rule K2SMTLib(false) => "false"
   rule K2SMTLib(true)  => "true"
@@ -18,8 +28,6 @@ module SYMBOLIC-K
   rule K2SMTLib(I:#Int) => "(- " +String Int2String(absInt(I)) +String ")"
   when I <Int 0
 
-  syntax Bool ::= "forall" Set "." Bool [binder, function]
-  syntax Bool ::= "exists" Set "." Bool [binder, function]
   rule
     K2SMTLib(forall S:Set . B:Bool)
   =>

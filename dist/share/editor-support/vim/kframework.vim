@@ -51,6 +51,7 @@ syn match   kCell         "\.\.\."
 
 syn match   kSymbol       "::="
 syn match   kSymbol       "=>"
+syn keyword kSymbol       HOLE
 
 syn match   kMeta         "\[[^\[\]]*\]\s*$"
 
