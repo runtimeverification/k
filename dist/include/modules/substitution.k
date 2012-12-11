@@ -120,8 +120,9 @@ module FREE-VARS
   syntax K ::= #freeVars(List{K}, Set, Set)  [function]
   rule #freeVars(.List{K}, _, Free:Set) => vars(Free)
   rule #freeVars(X:Variable,,Ks:List{K}, Bound:Set, Free:Set)
-    => #if X in Bound ==K true #then #freeVars(Ks, Bound, Free)
-       #else #freeVars(Ks, Bound, Free SetItem(X)) #fi
+    => #freeVars(Ks, Bound, Free) when X in Bound
+  rule #freeVars(X:Variable,,Ks:List{K}, Bound:Set, Free:Set)
+    => #freeVars(Ks, Bound, Free SetItem(X)) when notBool(X in Bound)
   rule #freeVars((Set2KLabel(S:Set)(.List{K}) => Set2KTerm(S)),,_, _, _)
   rule #freeVars((L:KLabel(Ks:List{K}) => Ks),, _, _, _)
     when (isVariable(L(Ks)) =/=K true) andBool
