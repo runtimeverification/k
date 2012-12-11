@@ -1,4 +1,4 @@
-rK2SMTLib(T))equire "builtins.k"
+require "builtins.k"
 require "modules/substitution.k"
 
 module SYMBOLIC-SYNTAX
