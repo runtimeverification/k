@@ -53,7 +53,7 @@ syn match   kSymbol       "::="
 syn match   kSymbol       "=>"
 syn keyword kSymbol       HOLE
 
-syn match   kMeta         "\[[^\[\]]*\]\s*$"
+syn match   kMeta         "\s\[[^\[\]]*\]\s*$"
 
 syn keyword kType         K KItem KResult KLabel KList
 syn keyword kType         List Bag Set Map
@@ -94,7 +94,7 @@ KHiLink kStatement      Statement
 KHiLink kCell           Structure
 KHiLink kMeta           PreProc
 KHiLink kSymbol         Operator
-KHiLink kType           Type
+" KHiLink kType           Type
 KHiLink kBool           Boolean
 KHiLink kNumber         Number
 KHiLink kFloat          Float
