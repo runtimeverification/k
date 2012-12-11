@@ -13,7 +13,7 @@ import org.kframework.kil.Definition;
  * Date: 12/6/12
  * Time: 12:27 PM
  */
-public class ResolveConfigurationAbstraction extends CompilerSteps {
+public class ResolveConfigurationAbstraction extends CompilerSteps<Definition> {
 	@Override
 	public Definition compile(Definition def) {
 		ConfigurationStructureVisitor cfgStrVisitor = new ConfigurationStructureVisitor();

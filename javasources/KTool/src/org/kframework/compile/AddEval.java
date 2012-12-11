@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 
-public class AddEval extends BasicCompilerStep {
+public class AddEval extends BasicCompilerStep<Definition> {
 
 	@Override
 	public Definition compile(Definition def) {
@@ -120,15 +120,17 @@ public class AddEval extends BasicCompilerStep {
 
 			ASTNode result = super.transform(node);
 			if (result == null) return null;
-			if (!(result instanceof Cell)) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-						KExceptionGroup.INTERNAL, 
-						"Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.", 
-						getName(), node.getFilename(), node.getLocation()));
-			}
+
 			if (result == node) {
 				node = node.shallowCopy();
-			} else node = (Cell) result;
+			} else {
+				if (!(result instanceof Cell)) {
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+							KExceptionGroup.INTERNAL,
+							"Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.",
+							getName(), node.getFilename(), node.getLocation()));
+				} else	node = (Cell) result;
+			}
 			node.setDefaultAttributes();
 			node.setEllipses(Ellipses.NONE);
 			return node;

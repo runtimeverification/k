@@ -524,7 +524,7 @@ public class KompileFrontEnd {
 				sw.printIntermediate("Automatic Module Imports");
 			}
 
-			javaDef = new CompilerTransformerStep(new StrictnessToContexts()).compile(javaDef);
+			javaDef = new CompilerTransformerStep<Definition>(new StrictnessToContexts()).compile(javaDef);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Strict Ops To Context");
@@ -544,7 +544,7 @@ public class KompileFrontEnd {
 			}
 
 
-			CompilerSteps steps = new CompilerSteps();
+			CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
 			if (GlobalSettings.verbose) {
 				steps.setSw(sw);
 			}
