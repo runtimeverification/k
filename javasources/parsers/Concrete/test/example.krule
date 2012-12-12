@@ -1,1 +1,1 @@
-rule K:K => .K
+rule K:K => .List{K}

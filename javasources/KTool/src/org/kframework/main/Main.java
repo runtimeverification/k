@@ -21,10 +21,12 @@ public class Main {
 				HKCDFrontEnd.hkcd(args2);
 			} else if (args[0].equals("-krun")) {
 				org.kframework.krun.Main.execute_Krun(args2);
+			} else if (args[0].equals("-kpp")) {
+				org.kframework.main.Kpp.codeClean(args2);
 			} else {
-				Error.report("The first argument of K3 not recognized. Try -kompile or -kast or -krun.");
+				Error.report("The first argument of K3 not recognized. Try -kompile or -kast or -krun or -kpp.");
 			}
 		} else
-			Error.report("There must be a first argument to K3: try -kompile or -kast or -krun.");
+			Error.report("There must be a first argument to K3: try -kompile or -kast or -krun or -kpp.");
 	}
 }
