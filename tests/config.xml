@@ -153,8 +153,15 @@
       language="dist/tutorial/4_imp++/lesson_3/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_7/spawn.imp"
-      />
+      exclude="lesson_7/spawn.imp" 
+      results="tests/tutorial/4_imp++/lesson_3" >
+      <kompile-option name="-superheat" value="division" />
+      <kompile-option name="-supercool" value="lookup increment" />
+      <program name="dist/torial/4_imp++/lesson_1/div.imp">
+        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-search" />
+      </program>
+  </test>
   <test
       language="dist/tutorial/4_imp++/lesson_4/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
