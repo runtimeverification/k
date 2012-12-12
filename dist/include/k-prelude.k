@@ -11,9 +11,7 @@ module K-LISTK-EXTRAS
   syntax Bool ::= K "inList{K}" List{K} [function]
   syntax Bool ::= K "#inList{K}" List{K} [function] 
   rule K:K inList{K} L:List{K} => K #inList{K} L ==K true 
-    [structural, anywhere]
   rule K #inList{K} (_,,K:K,,_) => true 
-    [structural, anywhere]
 endmodule
 
 module K-MAP-EXTRAS
@@ -23,18 +21,19 @@ module K-MAP-EXTRAS
 	imports K-EQUAL-HOOKS
 
   syntax K ::= Map "(" K ")"  [function]
-  rule (_ K1:K |-> K2:K)(K1) => K2 [structural, anywhere]
+  rule (_ K1:K |-> K2:K)(K1) => K2
 
   syntax Map ::= Map "[" "undef" "/" List{K} "]"  [function]
 
   syntax Map ::= "Map" "(" List{K} "|->" List{K} ")"   [function]
-  rule Map((K1:K => .List{K}),,_ |-> (K2:K => .List{K}),,_:K,,_) (. => K1 |-> K2)
+  rule Map((K1:K => .List{K}),,_ |-> (K2:K => .List{K}),,_:K,,_) (. => K1 |-> K2) [structural]
   rule Map((K1:K => .List{K}),,_ |-> K2:K) (. => K1 |-> K2)
   rule Map(.List{K} |-> _) => .
 
   syntax Map ::= Map "[" List{K} "/" List{K} "]"  [function]
   rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .List{K}),,_ 
                         /  (K1:K,,K1':K => .List{K}),,_]
+   [structural, anywhere]
 
   rule (M:Map K1:K |-> _:K)[K2:K / K1] => M K1 |-> K2 
     [structural, anywhere]
@@ -56,19 +55,19 @@ module K-MAP-EXTRAS
 
 	syntax Set ::= "keys" Map  [function]
 
-  rule keys . => .
-  rule (keys ((K:K |->_  => .) _)) (. => SetItem(K))
+  rule keys . => . [structural]
+  rule (keys ((K:K |->_  => .) _)) (. => SetItem(K)) [structural]
 
 	syntax Set ::= "values" Map  [function]
 
-  rule values . => .
-  rule (values ((_ |-> K:K  => .) _)) (. => SetItem(K))
+  rule values . => . [structural]
+  rule (values ((_ |-> K:K  => .) _)) (. => SetItem(K)) [structural]
 
   syntax Bool ::= "$hasMapping" "(" Map "," K ")" [function,maudeop("$hasMapping")]
   syntax Bool ::= "#hasMapping" "(" Map "," K ")" [function, maudeop("#hasMapping")]
-  rule $hasMapping(M:Map,K:K) => #hasMapping(M,K) ==K true [structural, anywhere]
+  rule $hasMapping(M:Map,K:K) => #hasMapping(M,K) ==K true
 
-  rule #hasMapping(_:Map K:K |-> _:K,K) => true [structural, anywhere]
+  rule #hasMapping(_:Map K:K |-> _:K,K) => true
 
 
 // The following are used in pattern-matching.k
