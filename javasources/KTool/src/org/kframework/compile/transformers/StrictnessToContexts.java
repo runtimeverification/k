@@ -43,11 +43,14 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 		for (Production prod : prods) {
 			
+			if(prod.getSort().equalsIgnoreCase("KLabel"))
+				continue;
+			
 			if(prod.isSubsort()){
 				String msg ="Production is a subsort and cannot be strict.";
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), prod.getFilename(), prod.getLocation()));
 			}
-						
+			
 			//set the attribute: strict or seqstrict
 			//arg: arguments of the attribute, e.g. (1) 
 			attr = "strict";
@@ -139,7 +142,9 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 			Context ctx = new Context();
 			ctx.setBody(tc);
-
+			ctx.setAttributes(prod.getAttributes());
+			ctx.getAttributes().remove(attr);
+			
 			items.add(ctx);
 
 			co++;
@@ -187,6 +192,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 		Context ctx = new Context();
 		ctx.setBody(tc);
+		ctx.setAttributes(prod.getAttributes());
+		ctx.getAttributes().remove(attr);
 
 		items.add(ctx);
 	}
@@ -223,6 +230,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 			Context ctx = new Context();
 			ctx.setBody(tc);
+			ctx.setAttributes(prod.getAttributes());
+			ctx.getAttributes().remove(attr);
 
 			items.add(ctx);
 
