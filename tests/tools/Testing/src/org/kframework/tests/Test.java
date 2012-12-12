@@ -265,7 +265,7 @@ public class Test {
 			Map<String, String> map = getKrunOptions(pgm);
 
 			Program program = new Program(homeDir + Configuration.FS
-					+ programsFolder + Configuration.FS + name, map, this,
+					+ name, map, this,
 					null, null);
 			specialPrograms.add(program);
 		}
