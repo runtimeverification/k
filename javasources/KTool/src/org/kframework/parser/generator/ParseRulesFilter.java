@@ -64,13 +64,19 @@ public class ParseRulesFilter extends BasicTransformer {
 
 				// disambiguate configs
 
+				if (config.getFilename().endsWith("test.k")) {
+					// this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
+					int a = 1;
+					a = a + 1;
+				}
+
 				config = config.accept(new SentenceVariablesFilter());
 				config = config.accept(new CellEndLabelFilter());
+				config = config.accept(new InclusionFilter(localModule));
 				config = config.accept(new CellTypesFilter());
 				config = config.accept(new CorrectRewritePriorityFilter());
 				config = config.accept(new CorrectKSeqFilter());
 				config = config.accept(new CheckBinaryPrecedenceFilter());
-				config = config.accept(new InclusionFilter(localModule));
 				config = config.accept(new VariableTypeInferenceFilter());
 				config = config.accept(new AmbDuplicateFilter());
 				config = config.accept(new TypeSystemFilter());

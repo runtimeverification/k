@@ -12,7 +12,6 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 
 	public TypeInferenceSupremumFilter() {
 		super("Type inference supremum");
-		// TODO Auto-generated constructor stub
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {

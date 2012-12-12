@@ -100,44 +100,6 @@ public class Production extends ASTNode {
 		this.ownerModuleName = ownerModule;
 	}
 
-	public String toString() {
-		String content = "";
-		for (ProductionItem i : items)
-			content += i + " ";
-
-		return content;
-	}
-
-	public boolean equals(Production other) {
-		ArrayList<ProductionItem> p1List = (ArrayList<ProductionItem>) this.getItems();
-		ArrayList<ProductionItem> p2List = (ArrayList<ProductionItem>) other.getItems();
-
-		if (p1List.size() != p2List.size())
-			return false;
-
-		for (int i = 0; i < p1List.size(); i++) {
-			ProductionItem p1Term = p1List.get(i);
-			ProductionItem p2Term = p2List.get(i);
-
-			if ((p1Term instanceof Terminal) && (p2Term instanceof Terminal))
-				if (!((Terminal) p1Term).getTerminal().equals(((Terminal) p2Term).getTerminal()))
-					return false;
-
-				else if ((p1Term instanceof Sort) && (p2Term instanceof Sort))
-					if (!((Sort) p1Term).getName().equals(((Sort) p2Term).getName()))
-						return false;
-					else {
-						if (!(p1Term instanceof Sort) && !(p1Term instanceof Terminal))
-							System.out.println("Not sort or terminal: " + p1Term);
-						if (!(p2Term instanceof Sort) && !(p2Term instanceof Terminal))
-							System.out.println("Not sort or terminal: " + p2Term);
-						return false;
-					}
-
-		}
-		return true;
-	}
-
 	public String getLabel() {
 		String label = attributes.get("prefixlabel");
 		if (label == null) {
@@ -275,6 +237,14 @@ public class Production extends ASTNode {
 		for (ProductionItem pi : this.items)
 			hash += pi.hashCode();
 		return hash;
+	}
+
+	public String toString() {
+		String content = "";
+		for (ProductionItem i : items)
+			content += i + " ";
+
+		return content;
 	}
 
 	@Override

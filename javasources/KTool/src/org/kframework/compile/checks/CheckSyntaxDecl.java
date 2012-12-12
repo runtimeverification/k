@@ -1,5 +1,7 @@
 package org.kframework.compile.checks;
 
+import java.util.HashMap;
+
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -20,8 +22,18 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class CheckSyntaxDecl extends BasicVisitor {
 
+	java.util.Map<Production, Production> prods = new HashMap<Production, Production>();
+
 	@Override
 	public void visit(Production node) {
+
+		if (prods.containsKey(node)) {
+			Production oldProd = prods.get(node);
+			String msg = "Production has already been defined at " + oldProd.getLocation() + " in file " + oldProd.getFilename();
+			GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+		} else
+			prods.put(node, node);
+
 		int sorts = 0;
 		int neTerminals = 0;
 		int eTerminals = 0;
