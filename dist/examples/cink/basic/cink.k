@@ -91,7 +91,7 @@ module CINK-SYNTAX
                | Exp "/" Exp [strict]
                | Exp "%" Exp [strict, latex({#1}\%{#2})] 
                >  left:
-                 Exp "+" Exp [strict]
+                 Exp "+" Exp [strict, plus]
                | Exp "-" Exp [strict]
                > left:
                  Exp ">" Exp  [strict]
@@ -359,7 +359,7 @@ module CINK
   rule <k> X:Id => V ...</k>
        <env>... X |-> L:Int ...</env>
        <store>... L |-> V:Val ...</store>
-       [mem-lookup]
+       [mem-lookup, kripke]
 
   /*@
     The memory update is given by the assignment operator. The left-hand side
@@ -368,7 +368,7 @@ module CINK
   rule <k> X:Id = V:Val => V  ...</k>
        <env>... X |-> L:Int ...</env>
        <store>... L |-> (_ => V) ...</store>
-       [mem-update]
+       [mem-update, kripke]
 
   /* \subsection{Control Statements.} */
 
@@ -414,7 +414,7 @@ module CINK
   /*@ Writting in the the standard stream \texttt{cout}: */
   rule <k> cout << V:Val => cout  ...</k>  
        <out>... . => (ListItem(V) ListItem(" ")) </out>
-       [print-stream]
+       [print-stream, print]
 
   /*@
    In order to read from the standard stream \texttt{cin}, the expression
@@ -536,7 +536,7 @@ module CINK
   */
 
   //@ The case when the argument is the empty list:
-  rule return .Exps ; => return void; [return]
+  rule return .Exps ; => return void; [return, kripke]
 
   /*@
     Similar to the comma operator, the evaluation of the return argument
@@ -555,12 +555,12 @@ module CINK
   */
   rule return V:Val, Es:Exps ; => return Es ; 
        when Es =/=K .Exps 
-       [return]
+       [return, kripke]
 
   rule <k> (return V:Val; ~> _) => (V ~> K) </k>
        <env> _ => Env </env>
        <fstack> ([Env:Map], K:K) => . ...</fstack>
-       [return]
+       [return, kripke]
 
   /*@
     \subsection{Threads.}
