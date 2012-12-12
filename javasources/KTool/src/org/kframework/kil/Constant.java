@@ -11,8 +11,6 @@ import java.util.Map;
 
 
 public class Constant extends Term {
-
-    // AST representation of #Bool constants
     public static final Constant TRUE = new Constant("#Bool", "true");
     public static final Constant FALSE = new Constant("#Bool", "false");
 
@@ -45,8 +43,10 @@ public class Constant extends Term {
         return ct;
     }
 
+	// AST representation of #Bool constants
     private static final Map<String, Constant> klbls
             = new HashMap<String, Constant>();
+	public static final Constant COOL_KLABEL = KLABEL("cool");
     public static final Constant KLABEL(String s) {
         Constant ct = klbls.get(s);
         if (ct == null) {

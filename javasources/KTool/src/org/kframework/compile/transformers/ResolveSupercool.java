@@ -5,6 +5,9 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.util.*;
+import java.util.List;
+
 /**
  * Initially created by: Traian Florin Serbanuta
  * <p/>
@@ -38,13 +41,21 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Cell node) throws TransformerException {
-        if (node.getLabel().equals("k")) {
-            node = node.shallowCopy();
-            KApp kApp = new KApp(new Constant("KLabel", "cool"), node.getContents());
-            node.setContents(kApp);
-            return node;
-        }
-        return super.transform(node);
+        if (!node.getLabel().equals("k") ) {
+			return super.transform(node);
+		}
+		node = node.shallowCopy();
+		if (node.getContents() instanceof KSequence) {
+			KSequence kseq = (KSequence) node.getContents().shallowCopy();
+			node.setContents(kseq);
+			List<Term> kitems = new ArrayList<Term>(kseq.getContents());
+			kseq.setContents(kitems);
+			kitems.set(0, new KApp(Constant.COOL_KLABEL, kitems.get(0)));
+		} else {
+			KApp kApp = new KApp(Constant.COOL_KLABEL, node.getContents());
+			node.setContents(kApp);
+		}
+		return node;
     }
 
     @Override
