@@ -319,7 +319,7 @@ module CINK
   /*@
    The following expressions are strict. 
   */
-  rule I1:Int + I2:Int => I1 +Int I2 [structural]
+  rule I1:Int + I2:Int => I1 +Int I2 [plus,structural]
 
   rule I1:Int - I2:Int => I1 -Int I2 [structural]
 
@@ -359,7 +359,7 @@ module CINK
   rule <k> X:Id => V ...</k>
        <env>... X |-> L:Int ...</env>
        <store>... L |-> V:Val ...</store>
-       [mem-lookup, kripke]
+       [kripke(mem-lookup)]
 
   /*@
     The memory update is given by the assignment operator. The left-hand side
@@ -368,7 +368,7 @@ module CINK
   rule <k> X:Id = V:Val => V  ...</k>
        <env>... X |-> L:Int ...</env>
        <store>... L |-> (_ => V) ...</store>
-       [mem-update, kripke]
+       [kripke(mem-update)]
 
   /* \subsection{Control Statements.} */
 
@@ -536,7 +536,7 @@ module CINK
   */
 
   //@ The case when the argument is the empty list:
-  rule return .Exps ; => return void; [return, kripke]
+  rule return .Exps ; => return void; 
 
   /*@
     Similar to the comma operator, the evaluation of the return argument
@@ -555,12 +555,12 @@ module CINK
   */
   rule return V:Val, Es:Exps ; => return Es ; 
        when Es =/=K .Exps 
-       [return, kripke]
+       [return]
 
   rule <k> (return V:Val; ~> _) => (V ~> K) </k>
        <env> _ => Env </env>
        <fstack> ([Env:Map], K:K) => . ...</fstack>
-       [return, kripke]
+       [return]
 
   /*@
     \subsection{Threads.}
