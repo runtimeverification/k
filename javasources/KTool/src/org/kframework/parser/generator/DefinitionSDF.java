@@ -180,7 +180,6 @@ public class DefinitionSDF {
 		sdf.append("\n");
 		sdf.append("	DzDzINT		-> DzDzInt\n");
 		// sdf.append("	DzDzID		-> DzDzId\n");
-		sdf.append("	DzDzBOOL	-> DzDzBool\n");
 		sdf.append("	DzDzSTRING	-> DzDzString\n");
 		sdf.append("	DzDzFLOAT	-> DzDzFloat\n");
 		sdf.append("	\":\" -> DouaPuncteDz {cons(\"DouaPuncte\")}\n");

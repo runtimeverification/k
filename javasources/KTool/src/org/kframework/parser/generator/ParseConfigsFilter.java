@@ -66,11 +66,11 @@ public class ParseConfigsFilter extends BasicTransformer {
 
 				config = config.accept(new SentenceVariablesFilter());
 				config = config.accept(new CellEndLabelFilter());
+				config = config.accept(new InclusionFilter(localModule));
 				// config = config.accept(new CellTypesFilter()); not the case on configs
 				// config = config.accept(new CorrectRewritePriorityFilter());
 				config = config.accept(new CorrectKSeqFilter());
 				config = config.accept(new CheckBinaryPrecedenceFilter());
-				config = config.accept(new InclusionFilter(localModule));
 				config = config.accept(new VariableTypeInferenceFilter());
 				config = config.accept(new AmbDuplicateFilter());
 				config = config.accept(new TypeSystemFilter());
