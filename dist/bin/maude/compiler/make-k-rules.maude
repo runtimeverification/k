@@ -99,21 +99,26 @@ fmod MAKE-K-RULES is
   eq $addReplace(M, T1, T2, Cnd, AS pair("function",Str), AS')
    = addStructural(M, T1, T2, Cnd, AS pair("function",Str), AS') [owise] .
   eq $addReplace(M, T1, T2, Cnd, AS A, transitions(A AS'') AS')
-   = addTransition(M, T1, T2, Cnd, AS A, AS') [owise] .
+   = addTransition(M, T1, T2, Cnd, AS A ruleLabel(A), AS') [owise] .
   eq $addReplace(M, T1, T2, Cnd, AS pair(Str,Str':String), transitions(pair(Str, Str'':String) AS'') AS')
-   = addTransition(M, T1, T2, Cnd, AS pair(Str, Str':String), AS') [owise] .
+   = addTransition(M, T1, T2, Cnd, AS pair(Str, Str':String) ruleLabel( pair(Str, Str':String)), AS') [owise] .
   eq $addReplace(M, T1, T2, Cnd, AS, transitions(pair("default","") AS'') AS')
-   = addTransition(M, T1, T2, Cnd, AS pair("default",""), AS') [owise] .
+   = addTransition(M, T1, T2, Cnd, AS pair("default","") label('defaultTransition), AS') [owise] .
   eq $addReplace(M, T1, T2, Cnd, AS, AS')
    = addStructural(M, T1, T2, Cnd, AS pair("default",""), AS') [owise] .
   eq $addReplace(M, errorT(Err:[Term],Cxt:String,Msg:String), T2:[Term], Cnd:[Condition], AS, AS')
    = errorM(AS,Msg:String,Err:[Term],Cxt:String,M) .
   eq $addReplace(M, T2:[Term], errorT(Err:[Term],Cxt:String,Msg:String), Cnd:[Condition], AS, AS')
    = errorM(AS,Msg:String,Err:[Term],Cxt:String,M) .
-  
+
+  op ruleLabel :   Attr -> Attr .
+  eq ruleLabel(pair(Str,Str':String)) = label(qid(Str)) .
+  eq ruleLabel(A) = label('otherTransition) [owise] .
+
   op addStructural : Module Term Term Condition AttrSet AttrSet ~> Module .  
   eq addStructural(M, T1, T2, Cnd, AS, AS')
    = superCoolName(addEqs(plugEq(T1,T2,metadata(AS),Cnd), M), AS, AS') .
+
 
   op addTransition : Module Term Term Condition AttrSet AttrSet ~> Module .  
   eq addTransition(M, T1, T2, Cnd, AS, AS')

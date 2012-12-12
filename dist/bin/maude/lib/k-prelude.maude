@@ -319,7 +319,7 @@ mod K-STRICTNESS is
   op redex : -> KLabel .
 
   eq heat(heated(K)) = K .
-  rl heat(heated(Ks,,K,,Ks')) => K
+  rl [heat-choice]: heat(heated(Ks,,K,,Ks')) => K
      [metadata "superheat=(choice)"] .
 
   vars K : K . var Ks Ks' : List{K} .  var NKs : NeList{K} .
