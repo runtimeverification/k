@@ -112,7 +112,8 @@ fmod MAKE-K-RULES is
    = errorM(AS,Msg:String,Err:[Term],Cxt:String,M) .
 
   op ruleLabel :   Attr -> Attr .
-  eq ruleLabel(pair(Str,Str':String)) = label(qid(Str)) .
+  eq ruleLabel(pair(Str,"")) = label(qid(Str)) .
+  eq ruleLabel(pair(Str,Str':String)) = label(qid(Str':String)) [owise] .
   eq ruleLabel(A) = label('otherTransition) [owise] .
 
   op addStructural : Module Term Term Condition AttrSet AttrSet ~> Module .  
