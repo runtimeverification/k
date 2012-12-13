@@ -159,7 +159,7 @@
       <kompile-option name="-supercool" value="lookup increment" />
       <program name="dist/tutorial/4_imp++/lesson_1/div.imp">
         <krun-option name="-output-mode" value="pretty" />
-<!--        <krun-option name="-search" /> -->
+        <krun-option name="-search" />
       </program>
   </test>
   <test
