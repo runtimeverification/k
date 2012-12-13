@@ -170,7 +170,7 @@ public class Main {
 		if (!hasPGM && kast != null) {
 			output.put("PGM", kast);
 		}
-		if(!K.io) {
+		if(!K.io && stdin == null) {
 			stdin = "";
 		}
 		if (stdin != null) {
@@ -197,7 +197,7 @@ public class Main {
 						String buffer = "";
 						// detect if the input comes from console or redirected from a pipeline
 						Console c = System.console();
-						if (c == null) {
+						if (c == null && br.ready()) {
 							try {
 								buffer = br.readLine();
 							} catch (IOException ioe) {
