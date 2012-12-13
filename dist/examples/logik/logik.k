@@ -281,8 +281,7 @@ were declared optional).  This way, if we see an empty configuration
 when we search for all solutions, we know that some attempts failed
 (but we do not know which ones). */
 
-  rule <T>... <mgu> _:MguError </mgu> ...</T>
-    => .
+  rule <T>... <mgu> _:MguError </mgu> ...</T> => .
 
 /*@ \section{Semantics}
 
@@ -333,6 +332,7 @@ many instances, one for each context. */
 /*@ Unify the goal with the fresh clause's head, replace the goal
 with the clause body, and empty the \textsf{fresh} cell (so that
 another clause can be chosen using the rule above):  */
+
   rule <k> L':Term => Ls ...</k>
        <fresh>  L:Term :- Ls:Terms. => . </fresh>
        <mgu> Theta:Mgu => updateMgu(Theta,L,L') </mgu>
