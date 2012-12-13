@@ -124,19 +124,20 @@ public class KRun {
 
 	private static void assertXML(boolean assertion) {
 		if (!assertion) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach the relevant copy of .k/krun/maudeoutput.xml"));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach " + K.maude_output.replaceAll("/krun[0-9]*/", "/krun/")));
 		}
 	}
 
 	private static void assertXML(String sort, String op, boolean assertion) {
 		if (!assertion) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach the relevant copy of .k/krun/maudeoutput.xml\nSort: " + sort + "\nOp: " + op));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach " + K.maude_output.replaceAll("/krun[0-9]*/", "/krun/") + "\nSort: " + sort + "\nOp: " + op));
 		}
 	}
 
 	public static Term parseXML(Element xml) {
 		String op = xml.getAttribute("op");
 		String sort = xml.getAttribute("sort");
+		sort = sort.replaceAll("`([{}\\[\\](),])", "$1");
 		List<Element> list = XmlUtil.getChildElements(xml);
 		
 		if (sort.equals("BagItem") && op.equals("<_>_</_>")) {
@@ -158,7 +159,7 @@ public class KRun {
 		} else if (sort.equals("ListItem") && op.equals("ListItem")) {
 			assertXML(sort, op, list.size() == 1);
 			return new ListItem(parseXML(list.get(0)));
-		} else if (op.equals("_`,`,_") && sort.equals("NeList`{K`}")) {
+		} else if (op.equals("_`,`,_") && sort.equals("NeList{K}")) {
 			assertXML(sort, op, list.size() >= 2);
 			List<Term> l = new ArrayList<Term>();
 			for (Element elem : list) {
@@ -229,7 +230,7 @@ public class KRun {
 		} else if (op.equals(".") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 			assertXML(sort, op, list.size() == 0);
 			return new Empty(sort);
-		} else if (op.equals(".List`{K`}") && sort.equals("List`{KResult`}")) {
+		} else if (op.equals(".List`{K`}") && sort.equals("List{KResult}")) {
 			assertXML(sort, op, list.size() == 0);
 			return new Empty("List{K}");
 		} else if (op.equals("_`(_`)") && sort.equals("KItem")) {
