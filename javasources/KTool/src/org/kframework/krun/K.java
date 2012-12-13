@@ -1,6 +1,7 @@
 package org.kframework.krun;
 
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.Definition;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +61,8 @@ public class K {
 	public static String maude_cmd = "erewrite";
 	public static String output_mode = "pretty";
 	//public static String xsearch_pattern = "=>! B:Bag";
-	public static String pattern = "=>! B:Bag";
+	public static String pattern = "B:Bag";
+	public static String searchType = "!";
 	public static String bound;
 	public static String depth;
 	public static String rule_labels = "";
@@ -87,4 +89,6 @@ public class K {
 
 	public static Properties configuration_variables = new Properties();
 	public static Properties cfg_parsers = new Properties();	
+
+	public static Definition definition;
 }

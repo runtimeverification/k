@@ -120,10 +120,18 @@ public class CommandlineOptions {
 		
 		//for group options
 		Option search = OptionBuilder.hasArg(false).withLongOpt("search").withDescription("In conjunction with it you can specify 3" + K.lineSeparator + "options that are optional: pattern (the pattern" + K.lineSeparator + "used for search), bound (the number of desired" + K.lineSeparator + "solutions) and depth (the maximum depth of the" + K.lineSeparator + "search)").create();
+		Option search_final = OptionBuilder.hasArg(false).withLongOpt("search-final").withDescription("Same as --search but only return final states, even if --depth is provided").create();
+		Option search_all = OptionBuilder.hasArg(false).withLongOpt("search-all").withDescription("Same as --search but return all matching states, even if --depth is not provided").create();
+		Option search_one_step = OptionBuilder.hasArg(false).withLongOpt("search-one-step").withDescription("Same as --search but search only transition step").create();
+		Option search_one_or_more_steps = OptionBuilder.hasArg(false).withLongOpt("search-one-or-more-steps").withDescription("Same as --search-all but exclude initial state, even if it matches").create();
 		Option config = OptionBuilder.hasArg(false).withLongOpt("config").create();
 		Option no_config = OptionBuilder.hasArg(false).withLongOpt("no-config").create();
 		
 		options.addOption(search); getOptionList().add(search);
+		options.addOption(search_final); getOptionList().add(search_final);
+		options.addOption(search_all); getOptionList().add(search_all);
+		options.addOption(search_one_step); getOptionList().add(search_one_step);
+		options.addOption(search_one_or_more_steps); getOptionList().add(search_one_or_more_steps);
 		options.addOption(config); getOptionList().add(config);
 		options.addOption(no_config); getOptionList().add(no_config);
 		

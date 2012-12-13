@@ -37,6 +37,10 @@ public class ProgramLoader {
 	 *            If true, then apply KAppModifier to AST.
 	 */
 	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol) throws IOException {
+		if (startSymbol == null) {
+			startSymbol = DefinitionHelper.startSymbolPgm;
+		}
+
 		File tbl = new File(DefinitionHelper.dotk.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
@@ -78,6 +82,10 @@ public class ProgramLoader {
 		return loadPgmAst(content, filename, kappize, DefinitionHelper.startSymbolPgm);
 	}
 
+	public static String processPgm(String content, String filename, Definition def, String startSymbol) {
+		return processPgm(content, filename, def, false, false, new IndentationOptions(), false, startSymbol);
+	}
+
 	/**
 	 * Print maudified program to standard output.
 	 * 
@@ -87,7 +95,7 @@ public class ProgramLoader {
 	 * @param prettyPrint
 	 * @param nextline
 	 */
-	public static void processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions, boolean useDefParser, String startSymbol) {
+	public static String processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions, boolean useDefParser, String startSymbol) {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -119,8 +127,6 @@ public class ProgramLoader {
 				kast = maudeFilter.getResult();
 			}
 
-			System.out.println(kast);
-
 			String language = FileUtil.stripExtension(def.getMainFile());
 			writeMaudifiedPgm(kast, language, DefinitionHelper.dotk);
 
@@ -128,9 +134,11 @@ public class ProgramLoader {
 				sw.printIntermediate("Maudify Program");
 				sw.printTotal("Total");
 			}
+			return kast;
 		} catch (Exception e) {
 			e.printStackTrace();
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename, "File system."));
+			return "";
 		}
 	}
 

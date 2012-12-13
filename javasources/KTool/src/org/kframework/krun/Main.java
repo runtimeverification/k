@@ -8,16 +8,23 @@ import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.utils.ConfigurationStructureVisitor;
 import org.kframework.compile.utils.MetaK;
+import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
+import org.kframework.kil.Rule;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.DefinitionLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.*;
 import java.util.*;
+
+import com.thoughtworks.xstream.XStream;
 
 public class Main {
 
@@ -89,7 +96,7 @@ public class Main {
 			str = s.substring(sep + 1).toUpperCase();
 		} else {
 			// using --compiled-def
-			if (K.compiled_def.endsWith("-compiled.maude")) {
+			if (K.compiled_def != null && K.compiled_def.endsWith("-compiled.maude")) {
 				s = K.compiled_def.substring(0, K.compiled_def.lastIndexOf("-compiled"));
 				int sep = s.lastIndexOf(K.fileSeparator);
 				str = s.substring(sep + 1).toUpperCase();
@@ -142,8 +149,6 @@ public class Main {
 	}
 
 	public static Map<String, String> makeConfiguration(String kast, String stdin, RunProcess rp) {
-		org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
-		KastParser.initParser();
 		HashMap<String, String> output = new HashMap<String, String>();
 		boolean hasPGM = false;
 		Enumeration<Object> en = K.configuration_variables.keys();
@@ -162,7 +167,7 @@ public class Main {
 				}
 			}
 			else {
-				parsed = rp.runParser(parser, value, true, null);
+				parsed = rp.runParser(parser, value, false, null);
 			}
 			output.put(name, parsed);
 			hasPGM = hasPGM || name.equals("PGM");
@@ -222,9 +227,25 @@ public class Main {
 						} else if (cmd.hasOption("depth")) {
 							depth = K.depth;
 						}
-						result = KRun.search(bound, depth, K.pattern, makeConfiguration(KAST, buffer, rp), K.showSearchGraph);
+						ASTNode pattern = DefinitionLoader.parsePattern(K.pattern);
+						CollectVariablesVisitor vars = new CollectVariablesVisitor();
+						pattern.accept(vars);
+						Set<String> varNames = vars.getVars().keySet();
+                                                
+						pattern = new RuleCompilerSteps(K.definition).compile((Rule)pattern);
+
+						Rule patternRule = (Rule)pattern;
+						MaudeFilter patternBody = new MaudeFilter();
+						String patternCondition = null;
+						patternRule.getBody().accept(patternBody);
+						if (patternRule.getCondition() != null) {
+							MaudeFilter condition = new MaudeFilter();
+							patternRule.getCondition().accept(condition);
+							patternCondition = condition.getResult();
+						}
+						result = KRun.search(bound, depth, K.searchType, patternBody.getResult(), patternCondition, makeConfiguration(KAST, buffer, rp), K.showSearchGraph, varNames);
 					} else {
-						Error.report("For the do-search option you need to specify that --maude-cmd=search");
+						Error.report("For the search option you need to specify that --maude-cmd=search");
 					}
 				} else if (cmd.hasOption("maude-cmd")) {
 					result = KRun.run(K.maude_cmd, makeConfiguration(KAST, null, rp));
@@ -232,7 +253,6 @@ public class Main {
 					// run kast for the formula to be verified
 					File formulaFile = new File(K.model_checking);
 					String KAST1 = new String();
-					org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
 					if (!formulaFile.exists()) {
 						// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
 						// assume that the specified argument is not a file and maybe represents a formula
@@ -560,11 +580,25 @@ public class Main {
 
 			// Parse the program arguments
 
-			if (cmd.hasOption("search")) {
+			if (cmd.hasOption("search") || cmd.hasOption("do-search") || cmd.hasOption("search-final") || cmd.hasOption("search-all") || cmd.hasOption("search-one-step") || cmd.hasOption("search-one-or-more-steps")) {
 				K.maude_cmd = "search";
 				K.io = false;
 				K.do_search = true;
-				K.output_mode = "pretty";
+				if (cmd.hasOption("search") && cmd.hasOption("depth")) {
+					K.searchType = "*";
+				}
+			}
+			if (cmd.hasOption("search-final")) {
+				K.searchType = "!";
+			}
+			if (cmd.hasOption("search-all")) {
+				K.searchType = "*";
+			}
+			if (cmd.hasOption("search-one-step")) {
+				K.searchType = "1";
+			}
+			if (cmd.hasOption("search-one-or-more-steps")) {
+				K.searchType = "+";
 			}
 			if (cmd.hasOption("config")) {
 				K.output_mode = "pretty";
@@ -623,12 +657,6 @@ public class Main {
 				K.compiled_def = new File(cmd.getOptionValue("compiled-def")).getCanonicalPath();
 				K.kdir = new File(K.compiled_def).getParent() + K.fileSeparator + ".k";
 				K.setKDir();
-			}
-			if (cmd.hasOption("do-search")) {
-				K.do_search = true;
-			}
-			if (cmd.hasOption("no-do-search")) {
-				K.do_search = false;
 			}
 			if (cmd.hasOption("maude-cmd")) {
 				K.maude_cmd = cmd.getOptionValue("maude-cmd");
@@ -739,11 +767,6 @@ public class Main {
 				K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
 			}
 
-			String compiled_def = initOptions(K.userdir);
-			if (lang == null) {
-				K.compiled_def = compiled_def;
-			}
-
 			if (K.compiled_def == null) {
 				resolveOption("compiled-def", cmd);
 			}
@@ -774,8 +797,21 @@ public class Main {
 			String KAST = new String();
 			RunProcess rp = new RunProcess();
 
+
+			if (!DefinitionHelper.initialized) {
+				XStream xstream = new XStream();
+				xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+	
+				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.kdir + "/defx.xml"));
+				// This is essential for generating maude
+				javaDef.preprocess();
+				K.definition = javaDef;
+
+				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getCanonicalPath() + "/def/Concrete.tbl");
+			}
+
 			if (K.pgm != null) {
-				KAST = rp.runParser(K.parser, K.pgm, true, null);
+				KAST = rp.runParser(K.parser, K.pgm, false, null);
 			} else {
 				KAST = null;
 			}

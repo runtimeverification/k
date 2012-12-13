@@ -1,15 +1,23 @@
 package org.kframework.krun;
 
 import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.runner.KRunner;
+import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
+import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
+import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
+import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
+import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
+import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -32,6 +40,7 @@ public class KRun {
 	private PrettyPrintOutput p;
 	private Term result = null;
 	private List<Map<String, Term>> searchResults = null;
+	private Set<String> varNames = null;
 	private List<Transition> initialPath = null;
 	private List<Transition> loop = null;
 	private String statistics;
@@ -279,7 +288,7 @@ public class KRun {
 		}
 	}
 
-	public static KRun search(String bound, String depth, String pattern, Map<String, String> cfg, boolean showSearchGraph) throws Exception {
+	public static KRun search(String bound, String depth, String searchType, String patternBody, String patternCondition, Map<String, String> cfg, boolean showSearchGraph, Set<String> varNames) throws Exception {
 		String cmd = "set show command off ." + K.lineSeparator + "search ";
 		if (bound != null && depth != null) {
 			cmd += "[" + bound + "," + depth + "] ";
@@ -288,7 +297,12 @@ public class KRun {
 		} else if (depth != null) {
 			cmd += "[," + depth + "] ";
 		}
-		cmd += "#eval(" + flatten(cfg) + ") " + pattern + " .";
+		cmd += "#eval(" + flatten(cfg) + ") ";
+		String pattern = "=>" + searchType + " " + patternBody;
+		if (patternCondition != null) {
+			pattern += " such that " + patternCondition + " = # true(.List{K})";
+		}
+		cmd += pattern + " .";
 		if (showSearchGraph) {
 			cmd += K.lineSeparator + "show search graph .";
 		}
@@ -298,6 +312,7 @@ public class KRun {
 		KRun result = new KRun(cmd, !cfg.containsKey("noIO"));
 		result.parseSearchResult();
 		result.searchPattern = pattern;
+		result.varNames = varNames;
 		return result;
 	}
 
@@ -429,16 +444,24 @@ public class KRun {
 			List<String> l = new ArrayList<String>();
 			for (Map<String, Term> searchResult : searchResults) {
 				l.add("\nSolution " + i + ":");
-				if (this.searchPattern.trim().equals("=>! B:Bag")) {
+				if (this.searchPattern.trim().matches("=>[!*1+] B:Bag")) {
 					UnparserFilter unparser = new UnparserFilter(true, K.color);
 					searchResult.get("B:Bag").accept(unparser);
 					l.add(unparser.getResult());
 				} else {
+					boolean empty = true;
 					for (String variable : searchResult.keySet()) {
-						UnparserFilter unparser = new UnparserFilter(true, K.color);
-						l.add(variable + " -->");
-						searchResult.get(variable).accept(unparser);
-						l.add(unparser.getResult());
+						String varName = variable.substring(0, variable.indexOf(":"));
+						if (varNames.contains(varName)) {
+							UnparserFilter unparser = new UnparserFilter(true, K.color);
+							l.add(variable + " -->");
+							searchResult.get(variable).accept(unparser);
+							l.add(unparser.getResult());
+							empty = false;
+						}
+					}
+					if (empty) {
+						l.add("Empty substitution");
 					}
 				}
 				i++;

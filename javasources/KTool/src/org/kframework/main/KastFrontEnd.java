@@ -83,27 +83,30 @@ public class KastFrontEnd {
 				if (DefinitionHelper.dotk == null) {
 					DefinitionHelper.dotk = new File(new File(".").getCanonicalPath() + "/.k");
 				}
-				if (DefinitionHelper.dotk.exists()) {
-					File defXml = new File(DefinitionHelper.dotk.getCanonicalPath() + "/defx.xml");
-					if (!defXml.exists()) {
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
-					}
-
-					XStream xstream = new XStream();
-					xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
-
-					javaDef = (org.kframework.kil.Definition) xstream.fromXML(defXml);
-					// This is essential for generating maude
-					javaDef.preprocess();
-
-					def = new File(javaDef.getMainFile());
-				}
-
-				if (def == null)
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find a compiled definition, please provide one using the -def option", "command line", pgm));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		try {
+			if (DefinitionHelper.dotk.exists()) {
+				File defXml = new File(DefinitionHelper.dotk.getCanonicalPath() + "/defx.xml");
+				if (!defXml.exists()) {
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
+				}
+
+				XStream xstream = new XStream();
+				xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+				javaDef = (org.kframework.kil.Definition) xstream.fromXML(defXml);
+				// This is essential for generating maude
+				javaDef.preprocess();
+
+				def = new File(javaDef.getMainFile());
+			}
+
+			if (def == null)
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find a compiled definition, please provide one using the -def option", "command line", pgm));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 		boolean prettyPrint = false;
@@ -133,7 +136,7 @@ public class KastFrontEnd {
 		if (cmd.hasOption("sort")) {
 			sort = cmd.getOptionValue("sort");
 		}
-		org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, cmd.hasOption("def-parser"), sort);
+		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, cmd.hasOption("def-parser"), sort));
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
 		GlobalSettings.kem.print();
