@@ -1,4 +1,0 @@
-let f = let g = lambda x . x
-        in let h = lambda x . lambda y . (g g)
-           in h
-in f
