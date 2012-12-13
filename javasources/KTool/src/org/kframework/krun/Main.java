@@ -8,7 +8,6 @@ import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.utils.ConfigurationStructureVisitor;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -189,7 +188,6 @@ public class Main {
 	// execute krun in normal mode (i.e. not in debug mode)
 	public static void normalExecution(String KAST, String lang, RunProcess rp, CommandlineOptions cmd_options) {
 		try {
-			String s = new String();
 			List<String> red = new ArrayList<String>();
 			StringBuilder aux1 = new StringBuilder();
 			CommandLine cmd = cmd_options.getCommandLine();

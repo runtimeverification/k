@@ -14,7 +14,6 @@ import org.kframework.utils.StringUtil;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class LatexFilter extends BasicVisitor {
 	String endl = System.getProperty("line.separator");
@@ -321,14 +320,10 @@ public class LatexFilter extends BasicVisitor {
 			pr.accept(patternsVisitor);
 			pattern = patternsVisitor.getPatterns().get(trm.getCons());
 		}
-		String regex = "\\{#\\d+\\}$";
-		Pattern p = Pattern.compile(regex);
 		int n = 1;
 		LatexFilter termFilter = new LatexFilter();
 		for (Term t : trm.getContents()) {
 			termFilter.setResult(new StringBuilder());
-			regex = "\\{#\\d+\\}\\{#" + n + "\\}";
-			p = Pattern.compile(regex);
 			t.accept(termFilter);
 			pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
 		}

@@ -350,14 +350,10 @@ public class HTMLFilter extends BasicVisitor {
 		/* If yes, use the attribute to print it. 
 		 * The information about the attribute is in HTMLPatternVisitor. */
 			String pattern = patternsVisitor.getPatterns().get(trm.getCons());
-			String regex = "\\{#\\d+\\}$";
-			Pattern p = Pattern.compile(regex);
 			int n = 1;
 			HTMLFilter termFilter = new HTMLFilter(includePath);
 			for (Term t : trm.getContents()) {
 				termFilter.setResult("");
-				regex = "\\{#\\d+\\}\\{#" + n + "\\}";
-				p = Pattern.compile(regex);
 				t.accept(termFilter);
 				if(type == HTMLPatternType.LATEX)
 					pattern = pattern.replace("{#" + n++ + "}", "\\) " + termFilter.getResult() + "\\(");

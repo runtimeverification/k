@@ -1,23 +1,15 @@
 package org.kframework.krun;
 
 import org.kframework.backend.unparser.UnparserFilter;
-import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.runner.KRunner;
-import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
-import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
-import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
-import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
-import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
