@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public class Kpp {
 
@@ -21,7 +22,7 @@ public class Kpp {
 			System.err.println("File not found.");
 
 		try {
-			Kpp.codeClean(new BufferedReader(new FileReader(f)));
+			Kpp.codeClean(new BufferedReader(new FileReader(f)), System.out);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -29,7 +30,7 @@ public class Kpp {
 		}
 	}
 
-	public static void codeClean(BufferedReader input) throws IOException {
+	public static void codeClean(BufferedReader input, OutputStream out) throws IOException {
 		int ch, previous = 0;
 		State state = State.CODE;
 
@@ -62,11 +63,10 @@ public class Kpp {
 				break;
 			}
 			if ((state == State.CODE || state == State.STRING) && previous != 0)
-				System.out.print((char) previous);
+				out.write(previous);
 			previous = ch;
 		}
 		if ((state == State.CODE || state == State.STRING) && previous != 0)
-			System.out.print((char) previous);
-
+			out.write(previous);
 	}
 }

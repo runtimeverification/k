@@ -23,6 +23,7 @@ context-free syntax
 	"syntax" SORTID "::=" {Prod1 ">"}+	-> KSentence {cons("Syntax")}
 
 	"syntax" "priorities"	{KLList ">"}+	-> KSentence {cons("Priority")}
+	"syntax" "priority"		{KLList ">"}+	-> KSentence {cons("Priority")}
 	"syntax" "left"			KLABEL+			-> KSentence {cons("PriorityLeft")}
 	"syntax" "right"		KLABEL+			-> KSentence {cons("PriorityRight")}
 	"syntax" "non-assoc"	KLABEL+			-> KSentence {cons("PriorityNonAssoc")}
