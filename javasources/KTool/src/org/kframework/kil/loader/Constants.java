@@ -50,6 +50,7 @@ public class Constants {
 	public static final String MAP = "Map";
 	public static final String CONTEXT = "context";
 	public static final String HOLE = "hole";
+	public static final String FREEZERHOLE = "freezerHole";
 	public static final String LISTITEM = "ListItem";
 	public static final String LIST = "List";
 	public static final String DEFINITION = "def";
