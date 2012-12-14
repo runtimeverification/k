@@ -8,6 +8,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Context;
 import org.kframework.kil.Hole;
+import org.kframework.kil.KSort;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
@@ -48,6 +49,11 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 			
 			if(prod.isSubsort()){
 				String msg ="Production is a subsort and cannot be strict.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), prod.getFilename(), prod.getLocation()));
+			}
+			
+			if(prod.isConstant()){
+				String msg ="Production is a constant and cannot be strict.";
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), prod.getFilename(), prod.getLocation()));
 			}
 			
@@ -124,7 +130,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 				if(i == Integer.parseInt(s[co])-1){
 					//insert HOLE instead of the term
-					tc.getContents().set(i, new Hole("K"));
+					tc.getContents().set(i, new Hole(KSort.getKSort(tc.getContents().get(i).getSort()).toString()));
 
 					if(attr.equalsIgnoreCase("seqstrict") && co > 0){
 						for (int j = 0; j < co; j++) {
@@ -132,9 +138,10 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 							tc.getContents().get(Integer.parseInt(s[j])-1).setSort("KResult");
 						}
 					}
-				}else
+				}else{
 					//the others are fresh variables (anonymous) of sort K
-					tc.getContents().set(i, MetaK.getFreshVar("K"));
+					tc.getContents().set(i, MetaK.getFreshVar(KSort.getKSort(tc.getContents().get(i).getSort()).toString()));
+				}
 
 
 				i++;
@@ -181,11 +188,11 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 		while(co < size){
 			if(co == argi-1){
 				//insert HOLE instead of the term
-				tc.getContents().set(co, new Hole("K"));
+				tc.getContents().set(co, new Hole(KSort.getKSort(tc.getContents().get(co).getSort()).toString()));
 			}
 			else{
 				//the others are fresh variables (anonymous) of sort K
-				tc.getContents().set(co, MetaK.getFreshVar("K"));
+				tc.getContents().set(co, MetaK.getFreshVar(KSort.getKSort(tc.getContents().get(co).getSort()).toString()));
 			}
 			co++;
 		}
@@ -212,7 +219,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
 				if(i == co){
 					//insert HOLE instead of the term
-					tc.getContents().set(i, new Hole("K"));
+					tc.getContents().set(i, new Hole(KSort.getKSort(tc.getContents().get(i).getSort()).toString()));
 
 					if(attr.equalsIgnoreCase("seqstrict")){
 						//previous terms should be KResults
@@ -220,9 +227,10 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 							tc.getContents().get(j).setSort("KResult");
 						}
 					}
-				}else
+				}else{
 					//the others are fresh variables (anonymous) of sort K
-					tc.getContents().set(i, MetaK.getFreshVar("K"));
+					tc.getContents().set(i, MetaK.getFreshVar(KSort.getKSort(tc.getContents().get(i).getSort()).toString()));
+				}
 
 				i++;
 
