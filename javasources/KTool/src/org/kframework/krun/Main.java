@@ -230,7 +230,7 @@ public class Main {
 						pattern.accept(vars);
 						Set<String> varNames = vars.getVars().keySet();
                                                 
-						pattern = new RuleCompilerSteps(K.definition).compile((Rule)pattern);
+						pattern = new RuleCompilerSteps(K.definition).compile((Rule)pattern, null);
 
 						Rule patternRule = (Rule)pattern;
 						MaudeFilter patternBody = new MaudeFilter();

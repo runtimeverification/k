@@ -1,0 +1,93 @@
+package org.kframework.backend.latex;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.kframework.backend.Backend;
+import org.kframework.kil.Definition;
+import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KMessages;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
+
+public class PdfBackend implements Backend {
+	private static List<File> pdf(List<File> files, String lang) {
+		File latexFile = files.get(0);
+		files.clear();
+
+		try {
+			Stopwatch sw = new Stopwatch();
+			// Run pdflatex.
+			String pdfLatex = "pdflatex";
+			String argument = latexFile.getCanonicalPath();
+			// System.out.println(argument);
+
+			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
+			pb.directory(latexFile.getParentFile());
+
+			pb.redirectErrorStream(true);
+			try {
+				Process process = pb.start();
+				InputStream is = process.getInputStream();
+				InputStreamReader isr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(isr);
+				while (br.readLine() != null) {
+				}
+				process.waitFor();
+				if (process.exitValue() != 0) {
+					KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", "");
+					GlobalSettings.kem.register(exception);
+				}
+				process = pb.start();
+				is = process.getInputStream();
+				isr = new InputStreamReader(is);
+				br = new BufferedReader(isr);
+				while (br.readLine() != null) {
+				}
+				process.waitFor();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Latex2PDF");
+			}
+
+			files.add(new File(FileUtil.stripExtension(latexFile.getCanonicalPath()) + ".pdf"));
+		} catch (IOException e) {
+			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", "");
+			GlobalSettings.kem.register(exception);
+		}
+
+		return files;
+	}
+
+
+	@Override
+	public void run(Definition definition) throws IOException {
+		List<File> files = LatexBackend.latex(definition, definition.getMainModule());
+		files = pdf(files, definition.getMainModule());
+		try {
+			File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
+			FileUtil.copyFiles(files, canonicalFile.getParentFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public String getDefaultStep() {
+		return "FirstStep";
+	}
+
+}

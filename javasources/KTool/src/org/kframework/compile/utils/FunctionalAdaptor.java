@@ -13,7 +13,7 @@ public class FunctionalAdaptor extends BasicCompilerStep<Definition> {
 	}
 	
 	@Override
-	public Definition compile(Definition def) {
+	public Definition compile(Definition def, String stepName) {
 		def.accept(visitor);
 		return def;
 	}

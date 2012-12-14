@@ -21,7 +21,7 @@ import java.util.Set;
 public class AddEval extends BasicCompilerStep<Definition> {
 
 	@Override
-	public Definition compile(Definition def) {
+	public Definition compile(Definition def, String stepName) {
 		Configuration cfg = MetaK.getConfiguration(def);
 		Set<Variable> vars = MetaK.getVariables(cfg);
 		

@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class FlattenModules  extends BasicCompilerStep<Definition> {
 	@Override
-	public Definition compile(Definition def) {
+	public Definition compile(Definition def, String stepName) {
 		FlattenModulesVisitor fm = new FlattenModulesVisitor();
 		def.accept(fm);
 		return fm.getResult();

@@ -294,7 +294,7 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Rule rule) {
 		prepare(rule);
 		result.write("rule ");
-		if (!rule.getLabel().equals("")) {
+		if (!"".equals(rule.getLabel())) {
 			result.write("[" + rule.getLabel() + "]: ");
 		}
 		variableList.clear();

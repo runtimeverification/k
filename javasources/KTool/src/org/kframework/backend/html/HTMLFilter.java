@@ -275,7 +275,7 @@ public class HTMLFilter extends BasicVisitor {
 	@Override
 	public void visit(Rule rule) {
 		result.append("<div> <span ");
-		if (!rule.getLabel().equals("")) {
+		if (!"".equals(rule.getLabel())) {
 			result.append("title =\"Rule Label: " + rule.getLabel() + "\"");
 		}
 		result.append("> RULE </span>");

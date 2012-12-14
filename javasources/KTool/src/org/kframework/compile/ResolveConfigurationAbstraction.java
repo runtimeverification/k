@@ -2,6 +2,7 @@ package org.kframework.compile;
 
 import org.kframework.compile.transformers.ResolveContextAbstraction;
 import org.kframework.compile.transformers.ResolveDefaultTerms;
+import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.ConfigurationStructureVisitor;
@@ -15,13 +16,13 @@ import org.kframework.kil.Definition;
  */
 public class ResolveConfigurationAbstraction extends CompilerSteps<Definition> {
 	@Override
-	public Definition compile(Definition def) {
+	public Definition compile(Definition def, String stepName) throws CompilerStepDone {
 		ConfigurationStructureVisitor cfgStrVisitor = new ConfigurationStructureVisitor();
 		def.accept(cfgStrVisitor);
 		int cfgMaxLevel = cfgStrVisitor.getMaxLevel();
 		ConfigurationStructureMap cfgStr = cfgStrVisitor.getConfig();
 		add(new ResolveContextAbstraction(cfgMaxLevel, cfgStr));
 		add(new ResolveDefaultTerms(cfgStr));
-		return super.compile(def);
+		return super.compile(def, stepName);
 	}
 }

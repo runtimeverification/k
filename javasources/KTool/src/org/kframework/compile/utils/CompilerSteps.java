@@ -28,10 +28,13 @@ public class CompilerSteps<T extends ASTNode> extends BasicCompilerStep<T> {
 	}
 
 	@Override
-	public T compile(T def) {
+	public T compile(T def, String stepName) throws CompilerStepDone {
 		for (CompilerStep<T> step : steps) {
 			step.setSw(sw);
-			def = step.compile(def);
+			def = step.compile(def, stepName);
+			if (step.getName().equals(stepName)) {
+				throw new CompilerStepDone(def);
+			}
 		}
 		return def;
 	}

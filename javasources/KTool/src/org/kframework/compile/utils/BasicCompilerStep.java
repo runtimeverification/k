@@ -11,7 +11,7 @@ import org.kframework.utils.Stopwatch;
  */
 public abstract class BasicCompilerStep<T extends ASTNode> implements CompilerStep<T> {
 	protected Stopwatch sw=null;
-
+	
 	public void setSw(Stopwatch sw) {
 		this.sw = sw;
 	}

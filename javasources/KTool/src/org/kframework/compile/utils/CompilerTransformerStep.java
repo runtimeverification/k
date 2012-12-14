@@ -16,7 +16,7 @@ public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerSte
 	}
 
 	@Override
-	public T compile(T def) {
+	public T compile(T def, String stepName) {
 		ASTNode result = null;
 		try {
 			result = def.accept(t);

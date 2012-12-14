@@ -246,7 +246,7 @@ public class LatexFilter extends BasicVisitor {
 	public void visit(Rule rule) {
 		// termComment = false;
 		result.append("\\krule");
-		if (!rule.getLabel().equals("")) {
+		if (!"".equals(rule.getLabel())) {
 			result.append("[" + rule.getLabel() + "]");
 		}
 		result.append("{" + endl);

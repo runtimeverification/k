@@ -30,7 +30,7 @@ public class CheckVisitorStep extends BasicCompilerStep<Definition> implements C
 	}
 
 	@Override
-	public Definition compile(Definition def) {
+	public Definition compile(Definition def, String stepName) {
 		check(def);
 		return def;
 	}
