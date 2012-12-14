@@ -13,7 +13,7 @@ module K-EQUAL-HOOKS
   rule K1:K =/=K K2:K => notBool(K1 ==K K2)
 
 
-  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function]
+  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, smtlib(ite)]
   rule #if true #then K:K #else _ #fi => K
   rule #if false #then _ #else K:K #fi => K
 

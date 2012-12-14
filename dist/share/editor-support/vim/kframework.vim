@@ -10,8 +10,8 @@
 " Last Modified: 2005-02-03
 " Version: 0.1
 "
-" To install, copy (or link) this file into the ~/.vim directory 
-" and add the following to your ~/.vimrc file
+" To install, copy (or link) this file into the ~/.vim/syntax directory and add
+" the following to the ~/.vimrc file
 "
 " au BufRead,BufNewFile *.k set filetype=kframework
 " syn on
