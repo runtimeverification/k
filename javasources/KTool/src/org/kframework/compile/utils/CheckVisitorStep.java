@@ -2,9 +2,10 @@ package org.kframework.compile.utils;
 
 import org.kframework.kil.Definition;
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.Stopwatch;
 
 
-public class CheckVisitorStep implements CheckStep {
+public class CheckVisitorStep extends BasicCompilerStep<Definition> implements CheckStep {
 
 	Visitor t;
 
@@ -28,4 +29,9 @@ public class CheckVisitorStep implements CheckStep {
 		return t.getName();
 	}
 
+	@Override
+	public Definition compile(Definition def) {
+		check(def);
+		return def;
+	}
 }

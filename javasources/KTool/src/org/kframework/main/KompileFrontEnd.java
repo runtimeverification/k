@@ -493,156 +493,92 @@ public class KompileFrontEnd {
 		// init stopwatch
 		Stopwatch sw = new Stopwatch();
 
-		try {
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new RemoveBrackets());
-
-			javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddEmptyLists());
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Empty Lists");
-			}
-
-			MaudeFilter maudeFilter1 = new MaudeFilter();
-			javaDef.accept(maudeFilter1);
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/lists.maude", maudeFilter1.getResult());
-
-			new CheckVisitorStep(new CheckVariables()).check(javaDef);
-			new CheckVisitorStep(new CheckRewrite()).check(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Sanity checks");
-			}
-
-			AutomaticModuleImportsTransformer amit = new AutomaticModuleImportsTransformer();
-			try {
-				javaDef = (org.kframework.kil.Definition) javaDef.accept(amit);
-			} catch (TransformerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Automatic Module Imports");
-			}
-
-			javaDef = new CompilerTransformerStep<Definition>(new StrictnessToContexts()).compile(javaDef);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Strict Ops To Context");
-			}
-
-			// javaDef = new CompilerTransformerStep(new ContextsToHeating()).compile(javaDef);
-			//
-			// if (GlobalSettings.verbose) {
-			// sw.printIntermediate("Transform Contexts into Heat/Cool Rules");
-			// }
-
-			DittoFilter df = new DittoFilter();
-			javaDef.accept(df);
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Ditto Filter");
-			}
-
-
-			CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
-			if (GlobalSettings.verbose) {
-				steps.setSw(sw);
-			}
-
-			steps.add(new FlattenModules());
-			steps.add(new DesugarStreams());
-			steps.add(new ResolveFunctions());
-			steps.add(new AddKCell());
-			steps.add(new AddSymbolicK());
-//			steps.add(new ResolveFresh());
-			steps.add(new ResolveFreshMOS());
-			if (GlobalSettings.addTopCell) {
-				steps.add(new AddTopCell());
-			}
-			steps.add(new AddEval());
-			steps.add(new ResolveBinder());
-			steps.add(new ResolveAnonymousVariables());
-			steps.add(new ResolveBlockingInput());
-			steps.add(new AddK2SMTLib());
-			steps.add(new AddPredicates());
-			steps.add(new ResolveSyntaxPredicates());
-			steps.add(new ResolveBuiltins());
-			steps.add(new ResolveListOfK());
-			steps.add(new FlattenSyntax());
-			steps.add(new AddKLabelToString());
-			steps.add(new AddKLabelConstant());
-			steps.add(new ResolveHybrid());
-			steps.add(new ResolveConfigurationAbstraction());
-			steps.add(new ResolveOpenCells());
-			steps.add(new ResolveRewrite());
-			steps.add(new ResolveSupercool());
-
-			javaDef = steps.compile(javaDef);
-
-			String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
-			// load += "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/pl-builtins\"\n";
-
-			// load libraries if any
-			String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
-			load += maudeLib;
-
-			String transition = metadataTags(GlobalSettings.transition);
-			String superheat = metadataTags(GlobalSettings.superheat);
-			String supercool = metadataTags(GlobalSettings.supercool);
-
-			javaDef = (Definition) javaDef.accept(new AddStrictStar());
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Strict Star");
-			}
-
-			javaDef = (Definition) javaDef.accept(new AddDefaultComputational());
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Default Computational");
-			}
-
-			javaDef = (Definition) javaDef.accept(new AddOptionalTags());
-
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Add Optional Tags");
-			}
-
-			MaudeFilter maudeFilter = new MaudeFilter();
-			javaDef.accept(maudeFilter);
-
-			String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('"
-					+ javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n" + "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition
-					+ " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
-					+ "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
-
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/compile.maude", compile);
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Generate Maude file");
-
-			// call maude to kompile the definition
-			String compiled = MaudeRun.run_maude(DefinitionHelper.dotk.getAbsoluteFile(), compile);
-
-			int start = compiled.indexOf("---K-MAUDE-GENERATED-OUTPUT-BEGIN---") + "---K-MAUDE-GENERATED-OUTPUT-BEGIN---".length();
-			int enddd = compiled.indexOf("---K-MAUDE-GENERATED-OUTPUT-END-----");
-			compiled = compiled.substring(start, enddd);
-
-			String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
-			FileUtil.saveInFile(defFile + "-compiled.maude", load + compiled);
-
-			if (start == -1 || enddd == -1) {
-				KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Incomplete output generated by the compiler. Check the '" + defFile + "-compiled.maude'.",
-						"top level", "Maude compilation");
-				GlobalSettings.kem.register(exception);
-			}
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("RunMaude");
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
+		if (GlobalSettings.verbose) {
+			steps.setSw(sw);
 		}
+		steps.add(new RemoveBrackets());
+		steps.add(new AddEmptyLists());
+		steps.add(new CheckVisitorStep(new CheckVariables()));
+		steps.add(new CheckVisitorStep(new CheckRewrite()));
+		steps.add(new AutomaticModuleImportsTransformer());
+		steps.add(new StrictnessToContexts());
+		steps.add(new FunctionalAdaptor(new DittoFilter()));
+		steps.add(new FlattenModules());
+		steps.add(new DesugarStreams());
+		steps.add(new ResolveFunctions());
+		steps.add(new AddKCell());
+		steps.add(new AddSymbolicK());
+//			steps.add(new ResolveFresh());
+		steps.add(new ResolveFreshMOS());
+		if (GlobalSettings.addTopCell) {
+			steps.add(new AddTopCell());
+		}
+		steps.add(new AddEval());
+		steps.add(new ResolveBinder());
+		steps.add(new ResolveAnonymousVariables());
+		steps.add(new ResolveBlockingInput());
+		steps.add(new AddK2SMTLib());
+		steps.add(new AddPredicates());
+		steps.add(new ResolveSyntaxPredicates());
+		steps.add(new ResolveBuiltins());
+		steps.add(new ResolveListOfK());
+		steps.add(new FlattenSyntax());
+		steps.add(new AddKLabelToString());
+		steps.add(new AddKLabelConstant());
+		steps.add(new ResolveHybrid());
+		steps.add(new ResolveConfigurationAbstraction());
+		steps.add(new ResolveOpenCells());
+		steps.add(new ResolveRewrite());
+		steps.add(new ResolveSupercool());
+		steps.add(new AddStrictStar());
+		steps.add(new AddDefaultComputational());
+		steps.add(new AddOptionalTags());
+
+		javaDef = steps.compile(javaDef);
+		
+		String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
+
+		// load libraries if any
+		String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
+		load += maudeLib;
+
+		String transition = metadataTags(GlobalSettings.transition);
+		String superheat = metadataTags(GlobalSettings.superheat);
+		String supercool = metadataTags(GlobalSettings.supercool);
+
+
+		MaudeFilter maudeFilter = new MaudeFilter();
+		javaDef.accept(maudeFilter);
+
+		String compile = load + maudeFilter.getResult() + " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('"
+				+ javaDef.getMainModule() + ", '" + step + ") .\n" + "quit\n" + "---)\n" + " loop compile .\n" + "(compile " + javaDef.getMainModule() + " " + step + " transitions " + transition
+				+ " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
+				+ "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
+
+		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/compile.maude", compile);
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Generate Maude file");
+
+		// call maude to kompile the definition
+		String compiled = MaudeRun.run_maude(DefinitionHelper.dotk.getAbsoluteFile(), compile);
+
+		int start = compiled.indexOf("---K-MAUDE-GENERATED-OUTPUT-BEGIN---") + "---K-MAUDE-GENERATED-OUTPUT-BEGIN---".length();
+		int enddd = compiled.indexOf("---K-MAUDE-GENERATED-OUTPUT-END-----");
+		compiled = compiled.substring(start, enddd);
+
+		String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
+		FileUtil.saveInFile(defFile + "-compiled.maude", load + compiled);
+
+		if (start == -1 || enddd == -1) {
+			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Incomplete output generated by the compiler. Check the '" + defFile + "-compiled.maude'.",
+					"top level", "Maude compilation");
+			GlobalSettings.kem.register(exception);
+		}
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("RunMaude");
 	}
 
 	private static List<String> metadataParse(String tags) {
