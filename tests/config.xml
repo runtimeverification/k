@@ -357,6 +357,12 @@
       language="tests/regression/defaultTerms1/issue.k"
   />
   <test
+      language="tests/regression/freshMOS/issue.k"
+      folder="tests/regression/freshMOS/programs"
+      results="tests/regression/freshMOS/tests"
+      extensions="issue"
+  />
+  <test
       language="tests/regression/openCells1/issue.k"
       folder="tests/regression/openCells1/programs"
       results="tests/regression/openCells1/tests"
