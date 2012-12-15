@@ -75,6 +75,7 @@ public class ResolveFreshMOS extends CopyOnWriteTransformer {
 		int idx = 0;
 		for (Variable var : vars) {
 			Term symTerm = AddSymbolicK.freshSymSortN(var.getSort(),idx);
+			idx++;
             symMap.put(var, symTerm);
 		}
 
