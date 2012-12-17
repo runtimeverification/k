@@ -1,11 +1,10 @@
 package org.kframework.utils;
 
-import org.kframework.utils.file.KPaths;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.kframework.utils.file.KPaths;
 
 public class Sdf2Table {
 
@@ -53,6 +52,29 @@ public class Sdf2Table {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public static Thread run_sdf2table_parallel(File startDir, String mainFile) {
+		Sdf2Table st = new Sdf2Table();
+		Sdf2tableRunner sr = st.new Sdf2tableRunner(startDir, mainFile);
+
+		sr.start();
+
+		return sr;
+	}
+
+	private class Sdf2tableRunner extends Thread {
+		File startDir;
+		String mainFile;
+
+		public Sdf2tableRunner(File startDir, String mainFile) {
+			this.startDir = startDir;
+			this.mainFile = mainFile;
+		}
+
+		public void run() {
+			run_sdf2table(startDir, mainFile);
 		}
 	}
 

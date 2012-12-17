@@ -14,7 +14,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Subsort;
 import org.kframework.utils.StringUtil;
 
-public class DefinitionSDF {
+public class Definition2SDF {
 
 	public static String getSdfForDefinition(Definition def) {
 
@@ -127,23 +127,6 @@ public class DefinitionSDF {
 			sdf.append("	" + StringUtil.escapeSortName(ss.getName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getName()) + "\n");
 
 		sdf.append("\n\n");
-		// print variables, HOLEs
-		for (Sort s : psdfv.userSorts) {
-			if (!s.isBaseSort()) {
-				sdf.append("	VARID  \":\" \"" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
-			}
-		}
-		sdf.append("\n");
-		for (Sort s : psdfv.userSorts) {
-			if (!s.isBaseSort()) {
-				sdf.append("	\"HOLE\" \":\" \"" + s.getName() + "\"      -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
-			}
-		}
-
-		sdf.append("\n");
-		sdf.append("	VariableDz -> K\n");
-
-		sdf.append("\n\n");
 		for (String sort : psdfv.constantSorts) {
 			String s = StringUtil.escapeSortName(sort);
 			sdf.append("	Dz" + s + "		-> " + s + "	{cons(\"" + s + "1Const\")}\n");
@@ -151,7 +134,7 @@ public class DefinitionSDF {
 
 		sdf.append("\n");
 		sdf.append("	DzDzINT		-> DzDzInt\n");
-		// sdf.append("	DzDzID		-> DzDzId\n");
+		sdf.append("	DzDzID		-> DzDzId\n");
 		sdf.append("	DzDzSTRING	-> DzDzString\n");
 		sdf.append("	DzDzFLOAT	-> DzDzFloat\n");
 		sdf.append("	\":\" -> DouaPuncteDz {cons(\"DouaPuncte\")}\n");
@@ -159,7 +142,6 @@ public class DefinitionSDF {
 		sdf.append("\n");
 
 		sdf.append("context-free restrictions\n");
-		sdf.append("	VariableDz -/- ~[\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]\n");
 		sdf.append("	DouaPuncteDz -/- [A-Z]\n\n");
 
 		sdf.append("lexical syntax\n");

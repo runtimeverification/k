@@ -19,18 +19,16 @@ public class ResourceExtractor {
 	}
 
 	public static void ExtractAllSDF(File basePath) throws IOException {
-		File def = new File(basePath.getAbsolutePath() + "/def");
-		def.mkdirs();
-		Extract("/sdf/Concrete.sdf", new File(def.getAbsoluteFile() + "/Concrete.sdf"));
-		Extract("/sdf/Common.sdf", new File(def.getAbsoluteFile() + "/Common.sdf"));
-		Extract("/sdf/KBuiltinsBasic.sdf", new File(def.getAbsoluteFile() + "/KBuiltinsBasic.sdf"));
-		Extract("/sdf/KTechnique.sdf", new File(def.getAbsoluteFile() + "/KTechnique.sdf"));
+		basePath.mkdirs();
+		Extract("/sdf/Concrete.sdf", new File(basePath.getAbsoluteFile() + "/Concrete.sdf"));
+		Extract("/sdf/Common.sdf", new File(basePath.getAbsoluteFile() + "/Common.sdf"));
+		Extract("/sdf/KBuiltinsBasic.sdf", new File(basePath.getAbsoluteFile() + "/KBuiltinsBasic.sdf"));
+		Extract("/sdf/KTechnique.sdf", new File(basePath.getAbsoluteFile() + "/KTechnique.sdf"));
 	}
 
 	public static void ExtractProgramSDF(File basePath) throws IOException {
-		File def = new File(basePath.getAbsolutePath() + "/pgm");
-		def.mkdirs();
-		Extract("/sdf/Common.sdf", new File(def.getAbsoluteFile() + "/Common.sdf"));
-		Extract("/sdf/KBuiltinsBasic.sdf", new File(def.getAbsoluteFile() + "/KBuiltinsBasic.sdf"));
+		basePath.mkdirs();
+		Extract("/sdf/Common.sdf", new File(basePath.getAbsoluteFile() + "/Common.sdf"));
+		Extract("/sdf/KBuiltinsBasic.sdf", new File(basePath.getAbsoluteFile() + "/KBuiltinsBasic.sdf"));
 	}
 }

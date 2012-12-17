@@ -37,6 +37,7 @@ import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.generator.BasicParser;
+import org.kframework.parser.generator.Definition2SDF;
 import org.kframework.parser.generator.DefinitionSDF;
 import org.kframework.parser.generator.ParseConfigsFilter;
 import org.kframework.parser.generator.ParseRulesFilter;
@@ -125,9 +126,10 @@ public class DefinitionLoader {
 				sw.printIntermediate("Checks");
 
 			// ------------------------------------- generate files
-			ResourceExtractor.ExtractAllSDF(DefinitionHelper.dotk);
+			ResourceExtractor.ExtractAllSDF(new File(DefinitionHelper.dotk + "/def"));
+			ResourceExtractor.ExtractAllSDF(new File(DefinitionHelper.dotk + "/ground"));
 
-			ResourceExtractor.ExtractProgramSDF(DefinitionHelper.dotk);
+			ResourceExtractor.ExtractProgramSDF(new File(DefinitionHelper.dotk + "/pgm"));
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
@@ -150,13 +152,18 @@ public class DefinitionLoader {
 			if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
 				oldSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def));
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def));
 			String newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("File Gen Def");
 
 			if (!oldSdf.equals(newSdf)) {
-				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
+				// Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
+				Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
+				Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/ground"), "Concrete");
+				t1.join();
+				t2.join();
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Generate TBLDef");
 			}

@@ -1,6 +1,13 @@
 package org.kframework.parser.concrete;
 
-import org.kframework.parser.concrete.lib.*;
+import org.kframework.parser.concrete.lib.ConcreteMain;
+import org.kframework.parser.concrete.lib.import$Tbl$Pgm_0_0;
+import org.kframework.parser.concrete.lib.import$Tbl$Ground_0_0;
+import org.kframework.parser.concrete.lib.import$Tbl_0_0;
+import org.kframework.parser.concrete.lib.java$Parse$String$Cmd_0_0;
+import org.kframework.parser.concrete.lib.java$Parse$String$Config_0_0;
+import org.kframework.parser.concrete.lib.java$Parse$String$Pgm_0_0;
+import org.kframework.parser.concrete.lib.java$Parse$String$Rules_0_0;
 import org.kframework.utils.StringUtil;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -58,6 +65,38 @@ public class KParser {
 		try {
 			try {
 				result = context.invokeStrategyCLI(import$Tbl$Pgm_0_0.instance, "a.exe", filePath);
+			} finally {
+				context.getIOAgent().closeAllFiles();
+			}
+			if (result == null) {
+				System.err.println("rewriting failed, trace:");
+				context.printStackTrace();
+				context.setStandAlone(false);
+				System.exit(1);
+			} else {
+				context.setStandAlone(false);
+			}
+		} catch (StrategoExit exit) {
+			context.setStandAlone(false);
+			System.exit(exit.getValue());
+		}
+
+		if (result.getTermType() == IStrategoTerm.STRING) {
+			rez = (((IStrategoString) result).stringValue());
+		} else {
+			rez = result.toString();
+		}
+		return rez;
+	}
+
+	public static String ImportTblGround(String filePath) {
+		init();
+		String rez = "";
+		context.setStandAlone(true);
+		IStrategoTerm result = null;
+		try {
+			try {
+				result = context.invokeStrategyCLI(import$Tbl$Ground_0_0.instance, "a.exe", filePath);
 			} finally {
 				context.getIOAgent().closeAllFiles();
 			}

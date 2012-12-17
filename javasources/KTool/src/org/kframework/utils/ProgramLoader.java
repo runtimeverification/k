@@ -105,7 +105,7 @@ public class ProgramLoader {
 		try {
 			ASTNode out;
 			if (useDefParser) {
-				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getCanonicalPath() + "/def/Concrete.tbl");
+				org.kframework.parser.concrete.KParser.ImportTblGround(DefinitionHelper.dotk.getCanonicalPath() + "/ground/Concrete.tbl");
 				out = DefinitionLoader.parseCmdString(content, "");
 				out = out.accept(new FlattenSyntax());
 				out = MetaK.kWrapper((Term) out);

@@ -16,7 +16,6 @@ public class GlobalSettings {
 	public static File mainFile;
 	public static String mainFileWithNoExtension;
 	public static boolean hiddenWarnings = false;
-	public static boolean typeWarnings = false;
 	public static List<String> transition = new ArrayList<String>();
 	public static List<String> superheat = new ArrayList<String>();
 	public static List<String> supercool = new ArrayList<String>();

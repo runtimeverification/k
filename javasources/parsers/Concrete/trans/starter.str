@@ -46,12 +46,13 @@ rules
 	//callcmd2 = ?[a, b] ; <parse-file(|<import-term(include/KSyntax.tbl)>)> b ; debug ; clearamb ; debug ; to-xml
 
 
-	importTbl    = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTbl    : _ -> trm)
-	importTblPgm = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTblPgm : _ -> trm)
+	importTbl       = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTbl       : _ -> trm)
+	importTblGround = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTblGround : _ -> trm)
+	importTblPgm    = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTblPgm    : _ -> trm)
 
 	javaParseStringConfig = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b       ; (handleErrors <+ justFine)
 	javaParseStringRules  = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b       ; (handleErrors <+ justFine)
-	javaParseStringCmd    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "RuleContentDz")> b ; (handleErrors <+ justFine)
+	javaParseStringCmd    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblGround>, "RuleContentDz")> b ; (handleErrors <+ justFine)
 	javaParseStringPgm    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblPgm>)> b    ; (handleErrors <+ justFinePgms)
 
 	justFine =
