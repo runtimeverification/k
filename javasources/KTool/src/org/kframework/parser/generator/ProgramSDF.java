@@ -61,7 +61,7 @@ public class ProgramSDF {
 					ProductionItem itm = items.get(i);
 					if (itm.getType() == ProductionType.TERMINAL) {
 						Terminal t = (Terminal) itm;
-						sdf.append("\"" + t.getTerminal() + "\" ");
+						sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 					} else if (itm.getType() == ProductionType.SORT) {
 						Sort srt = (Sort) itm;
 						sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");

@@ -13,6 +13,8 @@ public class StringUtil {
 					sb.append('\r');
 				else if (str.charAt(i + 1) == 't')
 					sb.append('\t');
+				else if (str.charAt(i + 1) == '"')
+					sb.append('"');
 				i++;
 			} else
 				sb.append(str.charAt(i));
@@ -22,10 +24,10 @@ public class StringUtil {
 	}
 
 	public static String escape(String str) {
-		str = str.replaceAll("\n", "\\n");
-		str = str.replaceAll("\r", "\\r");
-		str = str.replaceAll("\t", "\\t");
-		str = str.replaceAll("\"", "\\\"");
+		str = str.replaceAll("\n", "\\\\n");
+		str = str.replaceAll("\r", "\\\\r");
+		str = str.replaceAll("\t", "\\\\t");
+		str = str.replaceAll("\\\"", "\\\\\"");
 
 		return str;
 	}

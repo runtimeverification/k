@@ -114,7 +114,7 @@ public class DefinitionSDF {
 						if (t.getTerminal().equals(":"))
 							sdf.append("DouaPuncteDz ");
 						else
-							sdf.append("\"" + t.getTerminal() + "\" ");
+							sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 					} else if (itm.getType() == ProductionType.SORT) {
 						Sort srt = (Sort) itm;
 						sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
