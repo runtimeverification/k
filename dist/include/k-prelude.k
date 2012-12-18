@@ -148,16 +148,20 @@ interface K-LIST-EXTRAS
 
    rule lengthList ( ListItem(_) L:List ) => 1 +Int lengthList L [structural, anywhere]
    rule lengthList .List => 0 [structural, anywhere]
+        rule isKResult((K1:KResult => .List{K}),, _:K,, _:List{K})
 endinterface
 
-interface K-RESULT
+module K-RESULT
 	imports K-TECHNIQUE
+	imports BOOL-HOOKS
 
 	syntax K ::= KResult
+        
+           
 
 	//op .List{K} : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
 
-endinterface
+endmodule
 
 interface K-WRAPPERS-LABELS
 	imports K-TECHNIQUE
@@ -224,10 +228,7 @@ interface K
   imports K-BUILTINS
   imports K-RESULT             // to express results syntactically
   imports K-RULES              // to write k rules with in-place rewriting
-  imports K-CONFIG             // to specify the global configuration term
   imports K-EVAL
-  imports K-POLYMORPHIC-VARIABLES // defines the ? polmorfic constant
-  imports K-OPEN-CELLS            // defines open cells like <_>..._...</_> 
   imports K-CONTEXTS  
   imports K-DESTRUCTORS           // defines getKLabel and getList{K} for K
   //imports K-EXTRAS                // defines a KLabel substitution 

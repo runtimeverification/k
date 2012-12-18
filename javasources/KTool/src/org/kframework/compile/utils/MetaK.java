@@ -41,20 +41,12 @@ public class MetaK {
 	static {
 		kModules.add("K-BUILTINS");
 		kModules.add("K-CONDITION-SEARCH");
-		kModules.add("K-CONFIG");
 		kModules.add("K-CONTEXTS");
-		kModules.add("K-LATEX");
-		kModules.add("K-OPEN-CELLS");
-		kModules.add("K-POLYMORPHIC-VARIABLES");
-		kModules.add("K-PROPER");
-		kModules.add("K-QUOTED-LABELS");
-		kModules.add("K-RESULT");
 		kModules.add("K-RULES");
 		kModules.add("K-SENTENCE");
 		kModules.add("K-STRICNESS");
 		kModules.add("K-TECHNIQUE");
 		kModules.add("K-WHERE");
-		kModules.add("K-WRAPPERS");
 		kModules.add("K-WRAPPERS-LABELS");
 	};
 

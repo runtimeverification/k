@@ -230,7 +230,7 @@ public class KRun {
 		} else if (op.equals(".") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 			assertXML(sort, op, list.size() == 0);
 			return new Empty(sort);
-		} else if (op.equals(".List`{K`}") && sort.equals("List{KResult}")) {
+		} else if (op.equals(".List`{K`}") && sort.equals("List{K}")) {
 			assertXML(sort, op, list.size() == 0);
 			return new Empty("List{K}");
 		} else if (op.equals("_`(_`)") && sort.equals("KItem")) {
@@ -373,7 +373,7 @@ public class KRun {
 		assertXML(sort, op, op.equals("#_") && sort.equals("KLabel"));
 		sort = child.get(1).getAttribute("sort");
 		op = child.get(1).getAttribute("op");
-		assertXML(sort, op, op.equals(".List`{K`}") && sort.equals("List`{KResult`}"));
+		assertXML(sort, op, op.equals(".List`{K`}") && sort.equals("List`{K`}"));
 		child = XmlUtil.getChildElements(child.get(0));
 		assertXML(child.size() == 1);
 		elem = child.get(0);
