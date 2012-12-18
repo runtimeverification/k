@@ -1,7 +1,8 @@
 module ISSUE
 
   syntax Exp ::= Exp ":" Exp [hybrid]
-               | Int
+               | Exp "," Exp [hybrid(1)]
+               | Int | String
   syntax KResult ::= Int
 
   configuration <k> $PGM:Exp </k><out stream="stdout"> .List </out>
