@@ -195,7 +195,9 @@ public class KompileFrontEnd {
 
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml", xml);
 
-			sw.printIntermediate("Total Parsing");
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Total Parsing");
+			}
 
 			CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
 			if (GlobalSettings.verbose) {
