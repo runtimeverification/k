@@ -44,10 +44,7 @@ public class KompileBackend extends BasicBackend {
 		} catch (TransformerException e) {
 		}
 		final String mainModule = def.getMainModule();
-		String rules = "mod " + mainModule + "-RULES is\n" +
-				" including " + mainModule + "-BASE .\n" +
-				ruleExtractor.getResult() +
-				"endm\n";
+		String rules = "mod " + mainModule + "-RULES is\n" + " including " + mainModule + "-BASE .\n" + ruleExtractor.getResult() + "endm\n";
 		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/rules.maude", rules);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Writing the compiled rules.");
@@ -67,10 +64,7 @@ public class KompileBackend extends BasicBackend {
 		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(builtinsProperties);
 		javaDef.accept(builtinsFilter);
 		final String mainModule = javaDef.getMainModule();
-		String builtins = "mod " + mainModule + "-BUILTINS is\n" +
-				" including " + mainModule + "-BASE .\n" +
-				builtinsFilter.getResult() +
-				"endm\n";
+		String builtins = "mod " + mainModule + "-BUILTINS is\n" + " including " + mainModule + "-BASE .\n" + builtinsFilter.getResult() + "endm\n";
 		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/builtins.maude", builtins);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating equations for Hooks.");
@@ -82,7 +76,7 @@ public class KompileBackend extends BasicBackend {
 		new MaudeBackend(sw).run(javaDef);
 
 		String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
-		String definition =  "load \"" + DefinitionHelper.dotk.getAbsolutePath() + "/def.maude\"\n";
+		String definition = "load \"" + KPaths.windowfyPath(DefinitionHelper.dotk.getAbsolutePath() + "/def.maude") + "\"\n";
 
 		// load libraries if any
 		String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
@@ -96,11 +90,10 @@ public class KompileBackend extends BasicBackend {
 		final String mainModule = javaDef.getMainModule();
 		String compile = load
 				+ definition
-//				+ maudeFilter.getResult()
-				+ " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('"
-				+ mainModule + ", '" + step + ") .\n" + "quit\n" + "---)\n" + " loop compile .\n" + "(compile " + mainModule + " " + step + " transitions " + transition
-				+ " superheats " + superheat + " supercools " + supercool + " anywheres \"anywhere=() function=() predicate=() macro=()\" "
-				+ "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
+				// + maudeFilter.getResult()
+				+ " load \"" + KPaths.getKBase(true) + "/bin/maude/compiler/all-tools\"\n" + "---(\n" + "rew in COMPILE-ONESHOT : partialCompile('" + mainModule + ", '" + step + ") .\n" + "quit\n"
+				+ "---)\n" + " loop compile .\n" + "(compile " + mainModule + " " + step + " transitions " + transition + " superheats " + superheat + " supercools " + supercool
+				+ " anywheres \"anywhere=() function=() predicate=() macro=()\" " + "defineds \"function=() predicate=() defined=()\" .)\n" + "quit\n";
 
 		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/compile.maude", compile);
 
@@ -117,15 +110,8 @@ public class KompileBackend extends BasicBackend {
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Running Maude");
 
-		String main = load
-				+ "load \".k/base.maude\"\n"
-				+ "load \".k/builtins.maude\"\n"
-				+ "load \".k/rules.maude\"\n"
-				+ "mod " + mainModule + " is \n"
-				+ "  including " + mainModule + "-BASE .\n"
-				+ "  including " + mainModule + "-BUILTINS .\n"
-				+ "  including " + mainModule + "-RULES .\n"
-				+ "endm\n";
+		String main = load + "load \".k/base.maude\"\n" + "load \".k/builtins.maude\"\n" + "load \".k/rules.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n"
+				+ "  including " + mainModule + "-BUILTINS .\n" + "  including " + mainModule + "-RULES .\n" + "endm\n";
 		FileUtil.saveInFile(defFile + "-compiled.maude", main);
 
 		if (start == -1 || enddd == -1) {

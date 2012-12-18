@@ -24,6 +24,7 @@ public class ResourceExtractor {
 		Extract("/sdf/Common.sdf", new File(basePath.getAbsoluteFile() + "/Common.sdf"));
 		Extract("/sdf/KBuiltinsBasic.sdf", new File(basePath.getAbsoluteFile() + "/KBuiltinsBasic.sdf"));
 		Extract("/sdf/KTechnique.sdf", new File(basePath.getAbsoluteFile() + "/KTechnique.sdf"));
+		Extract("/sdf/Variables.sdf", new File(basePath.getAbsoluteFile() + "/Variables.sdf"));
 	}
 
 	public static void ExtractProgramSDF(File basePath) throws IOException {

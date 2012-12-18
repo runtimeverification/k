@@ -1,0 +1,57 @@
+%% Grammar for the K language
+module Variables
+imports Common %% For Comments and whitespace
+imports KBuiltinsBasic
+
+exports
+context-free syntax
+	%% TODO: Variables Dunno what to do with the variables
+	%% VarId ":" Type		-> Variable {cons("TypedVar")}
+	VARID ":" "List"		-> List {cons("List12Var")}
+	VARID					-> List {cons("List1Var")}
+	VARID ":" "ListItem"	-> ListItem {cons("ListItem12Var")}
+	VARID					-> ListItem {cons("ListItem1Var")}
+	VARID ":" "Set"			-> Set {cons("Set12Var")}
+	VARID					-> Set {cons("Set1Var")}
+	VARID ":" "SetItem"		-> SetItem {cons("SetItem12Var")}
+	VARID					-> SetItem {cons("SetItem1Var")}
+	VARID ":" "Bag"			-> Bag {cons("Bag12Var")}
+	VARID					-> Bag {cons("Bag1Var")}
+	VARID ":" "BagItem"		-> BagItem {cons("BagItem12Var")}
+	VARID					-> BagItem {cons("BagItem1Var")}
+	VARID ":" "Map"			-> Map {cons("Map12Var")}
+	VARID					-> Map {cons("Map1Var")}
+	VARID ":" "MapItem"		-> MapItem {cons("MapItem12Var")}
+	VARID					-> MapItem {cons("MapItem1Var")}
+	VARID ":" "K"			-> K {cons("K12Var")}
+	VARID					-> K {cons("K1Var")}
+	VARID ":" "List{K}"		-> ListDlKDr {cons("ListDlKDr12Var")}
+	VARID					-> ListDlKDr {cons("ListDlKDr1Var")}
+	VARID ":" "KLabel"		-> KLabel {cons("KLabel12Var")}
+	VARID					-> KLabel {cons("KLabel1Var")}
+	VARID ":" "KResult"		-> K {cons("KResult12Var")}
+
+lexical syntax
+	%% Variables and the Anonymous Variable
+	"$"?[A-Z] [a-zA-Z0-9\']*  -> VARID
+	"_" -> VARID
+	"HOLE" -> VARID {reject}
+
+	%% rejects
+	%%"K"			-> ID {reject}
+	%%"List"		-> ID {reject}
+	"ListItem"		-> VARID {reject}
+	%%"Bag"			-> ID {reject}
+	"BagItem"		-> VARID {reject}
+	%%"Set"			-> ID {reject}
+	"SetItem"		-> VARID {reject}
+	%%"Map"			-> ID {reject}
+	"MapItem"		-> VARID {reject}
+	%%"keys"			-> ID {reject}
+	%%"hasMapping"	-> ID {reject}
+
+lexical restrictions
+	VARID -/- [a-zA-Z0-9\']
+
+	
+	

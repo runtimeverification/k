@@ -10,10 +10,6 @@ lexical syntax
 
 	-> EOF
 
-	%% Variables and the Anonymous Variable
-	"$"?[A-Z] [a-zA-Z0-9\']*  -> VARID
-	"_" -> VARID
-	"HOLE" -> VARID {reject}
 
 lexical restrictions
 	%% Ensure greedy matching for lexicals
@@ -22,7 +18,6 @@ lexical restrictions
 	%% EOF may not be followed by any char
 	EOF           -/- ~[]
 
-	VARID -/- [a-zA-Z0-9\']
 
 context-free restrictions
 	%% Ensure greedy matching for comments

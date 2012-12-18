@@ -70,6 +70,7 @@
 		<copy todir="lib/resources/sdf" file="../parsers/Concrete/syntax/Concrete.sdf" />
 		<copy todir="lib/resources/sdf" file="../parsers/Concrete/syntax/KBuiltinsBasic.sdf" />
 		<copy todir="lib/resources/sdf" file="../parsers/Concrete/syntax/KTechnique.sdf" />
+		<copy todir="lib/resources/sdf" file="../parsers/Concrete/syntax/Variables.sdf" />
 		<antcall target="concrete.stratego2java.helper" />
 	</target>
 	<target name="concrete.stratego2java.helper" unless="concrete.stratego2java.available">

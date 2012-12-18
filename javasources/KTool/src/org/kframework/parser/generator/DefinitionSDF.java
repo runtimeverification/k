@@ -22,6 +22,7 @@ public class DefinitionSDF {
 		sdf.append("imports Common\n");
 		sdf.append("imports KTechnique\n");
 		sdf.append("imports KBuiltinsBasic\n\n");
+		sdf.append("imports Variables\n\n");
 		sdf.append("exports\n\n");
 		sdf.append("context-free syntax\n");
 
