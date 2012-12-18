@@ -615,6 +615,7 @@ public class MaudeFilter extends BackendFilter {
 	public void visit(org.kframework.kil.Context context) {
 		result.append("mb context ");
 		this.visit((Sentence) context);
+		result.append("\n");
 	}
 
 	@Override

@@ -20,9 +20,10 @@ public class MaudeBackend extends BasicBackend {
 		MaudeFilter maudeFilter = new MaudeFilter();
 		definition.accept(maudeFilter);
 
-		String maudified = maudeFilter.getResult();
+		final String mainModule = definition.getMainModule();
+		String maudified = maudeFilter.getResult().replaceFirst(mainModule, mainModule + "-BASE");
 
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.maude", maudified);
+		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/base.maude", maudified);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating Maude file");
 
