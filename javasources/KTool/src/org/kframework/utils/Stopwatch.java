@@ -3,6 +3,7 @@ package org.kframework.utils;
 import java.util.Formatter;
 
 public class Stopwatch {
+	public static final Stopwatch sw = new Stopwatch();
 	private long start = 0;
 	private long start2 = 0;
 	Formatter f = new Formatter(System.out);

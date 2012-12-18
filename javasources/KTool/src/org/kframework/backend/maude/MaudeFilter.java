@@ -30,7 +30,12 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Import imp) {
 		result.append("including ");
-		result.append(imp.getName());
+		String name = imp.getName();
+		final String iface = "-INTERFACE";
+		if (name.startsWith("#") && name.endsWith(iface)) {
+			name = name.substring(0, name.length()-iface.length());
+		}
+		result.append(name);
 		result.append(" .");
 	}
 

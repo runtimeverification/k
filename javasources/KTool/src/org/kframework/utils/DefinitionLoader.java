@@ -1,8 +1,6 @@
 package org.kframework.utils;
 
-import java.io.File;
-import java.io.IOException;
-
+import com.thoughtworks.xstream.XStream;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.compile.checks.CheckModulesAndFilesImportsDecl;
 import org.kframework.compile.checks.CheckStreams;
@@ -11,37 +9,11 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
-import org.kframework.kil.loader.CollectConfigCellsVisitor;
-import org.kframework.kil.loader.CollectModuleImportsVisitor;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
-import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
-import org.kframework.parser.concrete.disambiguate.AmbFilter;
-import org.kframework.parser.concrete.disambiguate.BestFitFilter;
-import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
-import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
-import org.kframework.parser.concrete.disambiguate.CheckBinaryPrecedenceFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectRewriteSortFilter;
-import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
-import org.kframework.parser.concrete.disambiguate.PriorityFilter;
-import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
-import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
-import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
-import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
-import org.kframework.parser.generator.BasicParser;
-import org.kframework.parser.generator.Definition2SDF;
-import org.kframework.parser.generator.DefinitionSDF;
-import org.kframework.parser.generator.ParseConfigsFilter;
-import org.kframework.parser.generator.ParseRulesFilter;
-import org.kframework.parser.generator.ProgramSDF;
+import org.kframework.parser.concrete.disambiguate.*;
+import org.kframework.parser.generator.*;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -50,7 +22,8 @@ import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.File;
+import java.io.IOException;
 
 public class DefinitionLoader {
 	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang) throws IOException, Exception {
@@ -63,7 +36,14 @@ public class DefinitionLoader {
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
 			javaDef = (org.kframework.kil.Definition) xstream.fromXML(canoFile);
+
+			if (GlobalSettings.verbose)
+				Stopwatch.sw.printIntermediate("Load definition from XML");
+
 			javaDef.preprocess();
+
+			if (GlobalSettings.verbose)
+				Stopwatch.sw.printIntermediate("Preprocess");
 
 		} else {
 			javaDef = parseDefinition(mainFile, lang);
@@ -80,9 +60,6 @@ public class DefinitionLoader {
 	 */
 	public static Definition parseDefinition(File mainFile, String mainModule) {
 		try {
-			// compile a definition here
-			Stopwatch sw = new Stopwatch();
-
 			// for now just use this file as main argument
 			// ------------------------------------- basic parsing
 
@@ -112,18 +89,18 @@ public class DefinitionLoader {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
 			}
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Basic Parsing");
+				Stopwatch.sw.printIntermediate("Basic Parsing");
 
 			def.preprocess();
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Preprocess");
+				Stopwatch.sw.printIntermediate("Preprocess");
 
 			new CheckVisitorStep(new CheckSyntaxDecl()).check(def);
 			new CheckVisitorStep(new CheckListDecl()).check(def);
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Checks");
+				Stopwatch.sw.printIntermediate("Checks");
 
 			// ------------------------------------- generate files
 			ResourceExtractor.ExtractAllSDF(new File(DefinitionHelper.dotk + "/def"));
@@ -140,7 +117,7 @@ public class DefinitionLoader {
 			String newSdfPgm = ProgramSDF.getSdfForPrograms(def);
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Pgm");
+				Stopwatch.sw.printIntermediate("File Gen Pgm");
 
 			def.accept(new AddAutoIncludedModulesVisitor());
 			def.accept(new CheckModulesAndFilesImportsDecl());
@@ -156,7 +133,7 @@ public class DefinitionLoader {
 			String newSdf = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("File Gen Def");
+				Stopwatch.sw.printIntermediate("File Gen Def");
 
 			if (!oldSdf.equals(newSdf)) {
 				// Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
@@ -165,13 +142,13 @@ public class DefinitionLoader {
 				t1.join();
 				t2.join();
 				if (GlobalSettings.verbose)
-					sw.printIntermediate("Generate TBLDef");
+					Stopwatch.sw.printIntermediate("Generate TBLDef");
 			}
 			// ------------------------------------- import files in Stratego
 			org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getAbsolutePath() + "/def/Concrete.tbl");
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Importing Files");
+				Stopwatch.sw.printIntermediate("Importing Files");
 
 			// ------------------------------------- parse configs
 			def = (Definition) def.accept(new ParseConfigsFilter());
@@ -181,7 +158,7 @@ public class DefinitionLoader {
 			new CheckVisitorStep(new CheckStreams()).check(def);
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Configs");
+				Stopwatch.sw.printIntermediate("Parsing Configs");
 
 			newSdfPgm += "context-free start-symbols\n";
 			newSdfPgm += "	" + StringUtil.escapeSortName(DefinitionHelper.startSymbolPgm) + "\n";
@@ -191,14 +168,14 @@ public class DefinitionLoader {
 			if (!oldSdfPgm.equals(newSdfPgm)) {
 				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
 				if (GlobalSettings.verbose)
-					sw.printIntermediate("Generate TBLPgm");
+					Stopwatch.sw.printIntermediate("Generate TBLPgm");
 			}
 
 			// ----------------------------------- parse rules
 			def = (Definition) def.accept(new ParseRulesFilter());
 
 			if (GlobalSettings.verbose)
-				sw.printIntermediate("Parsing Rules");
+				Stopwatch.sw.printIntermediate("Parsing Rules");
 
 			return def;
 		} catch (IOException e1) {

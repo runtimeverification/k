@@ -41,8 +41,6 @@ import java.util.List;
 
 public class KompileFrontEnd {
 
-	private static Stopwatch sw;
-
 	private static List<String> metadataParse(String tags) {
 		String[] alltags = tags.split("\\s+");
 		List<String> result = new ArrayList<String>();
@@ -52,7 +50,6 @@ public class KompileFrontEnd {
 	}
 
 	public static void kompile(String[] args) {
-		sw = new Stopwatch();
 		KompileOptionsParser op = new KompileOptionsParser();
 
 		CommandLine cmd = op.parse(args);
@@ -162,31 +159,32 @@ public class KompileFrontEnd {
 
 		Backend backend = null;
 		if (cmd.hasOption("maudify")) {
-			backend = new MaudeBackend(sw);
+			backend = new MaudeBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("latex")) {
-			backend = new LatexBackend(sw);
+			backend = new LatexBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("pdf")) {
-			backend = new PdfBackend(sw);
+			backend = new PdfBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("xml")) {
-			backend = new XmlBackend(sw);
+			backend = new XmlBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("html")) {
-			backend = new HtmlBackend(sw);
+			backend = new HtmlBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("unparse")) {
-			backend = new UnparserBackend(sw);
+			backend = new UnparserBackend(Stopwatch.sw);
 		} else {
-			backend = new KompileBackend(sw);
+			backend = new KompileBackend(Stopwatch.sw);
 		}
 		if (backend != null) {
 			genericCompile(mainFile, lang, backend, step);	
 		}
 		if (GlobalSettings.verbose)
-			sw.printTotal("Total");
+			Stopwatch.sw.printTotal("Total");
 		GlobalSettings.kem.print();
 	}
 
 	private static void genericCompile(File mainFile, String lang, Backend backend, String step) {
 		org.kframework.kil.Definition javaDef;
 		try {
+			Stopwatch.sw.Start();
 			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang);
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
@@ -196,12 +194,12 @@ public class KompileFrontEnd {
 			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml", xml);
 
 			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Total Parsing");
+				Stopwatch.sw.printIntermediate("Serialize Definition to XML");
 			}
 
 			CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
 			if (GlobalSettings.verbose) {
-				steps.setSw(sw);
+				steps.setSw(Stopwatch.sw);
 			}
 			steps.add(new FirstStep(backend));
 			steps.add(new RemoveBrackets());

@@ -86,7 +86,7 @@ public class KompileBackend extends BasicBackend {
 		String superheat = metadataTags(GlobalSettings.superheat);
 		String supercool = metadataTags(GlobalSettings.supercool);
 
-		String step = "RESOLVE-HOOKS";
+		String step = "STRICTCXT2EQS";
 		final String mainModule = javaDef.getMainModule();
 		String compile = load
 				+ definition

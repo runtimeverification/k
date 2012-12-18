@@ -27,7 +27,7 @@ mod COMPILE-ONESHOT is
 --- + MAKE-ALL-LABELS-META 
 + STRICTOPS2CXT-META 
 + STRICTCXT2EQS-META 
-+ RESOLVE-HOOKS-META 
+---+ RESOLVE-HOOKS-META 
 --- + RESULT-PREDICATES-META 
 --- + ID-TO-STRING-META 
 + PARSE-METADATA .
@@ -66,7 +66,7 @@ mod COMPILE-ONESHOT is
 ---   eq compile1(M, 'MAKE-ALL-LABELS, AS) = compileMAKE-ALL-LABELS(M, AS) . 
   eq compile1(M, 'STRICTOPS2CXT, AS) = compileSTRICTOPS2CXT(M, AS) . 
   eq compile1(M, 'STRICTCXT2EQS, AS) = compileSTRICTCXT2EQS(M, AS) . 
-  eq compile1(M, 'RESOLVE-HOOKS, AS) = compileRESOLVE-HOOKS(M, AS) . 
+---  eq compile1(M, 'RESOLVE-HOOKS, AS) = compileRESOLVE-HOOKS(M, AS) . 
 ---  eq compile1(M, 'ID-TO-STRING, AS) = compileID-TO-STRING(M, AS) . 
 ---  eq compile1(M, 'RESULT-PREDICATES, AS) = compileRESULT-PREDICATES(M, AS) . 
 
@@ -100,7 +100,7 @@ This step should be done by creating 2 modules  ---    'REMOVE-PARSER
 ---'APPLY-MAPEQS    
 'MAKE-K-RULES 
 'STRICTCXT2EQS 
-'RESOLVE-HOOKS 
+---'RESOLVE-HOOKS 
 .
 
   op compile : Module AttrSet ~> Module .  
@@ -236,7 +236,7 @@ fmod COMPILE-META is
 ---'APPLY-MAPEQS
 'MAKE-K-RULES 
 'STRICTCXT2EQS 
-'RESOLVE-HOOKS 
+---'RESOLVE-HOOKS 
 .
   
   op compile : Module AttrSet ~> Module .  
