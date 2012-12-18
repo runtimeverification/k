@@ -1,5 +1,6 @@
 package org.kframework.backend.html;
 
+import org.kframework.backend.BackendFilter;
 import org.kframework.backend.html.HTMLPatternsVisitor.HTMLPatternType;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
@@ -8,7 +9,6 @@ import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.visitors.BasicVisitor;
 
 import java.awt.*;
 import java.io.FileInputStream;
@@ -20,9 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class HTMLFilter extends BasicVisitor {
+public class HTMLFilter extends BackendFilter {
 	String endl = System.getProperty("line.separator");
-	private StringBuilder result = new StringBuilder();
 	private String css = "";
 	private String preamble = "";
 	private String title = "";
@@ -49,6 +48,7 @@ public class HTMLFilter extends BasicVisitor {
 	private String includePath = new String();
 	
 	public HTMLFilter(String includePath) {
+		super();
 		this.includePath = includePath;
 		initializeCss();
 		createHTMLColors();
@@ -87,10 +87,6 @@ public class HTMLFilter extends BasicVisitor {
 		this.result = new StringBuilder(result);
 	}
 	
-	public String getResult() {
-		return result.toString();
-	}
-
 	public void setPreamble(String preamble) {
 		this.preamble = preamble;
 	}

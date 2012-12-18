@@ -1,21 +1,27 @@
 package org.kframework.main;
 
+import org.kframework.backend.Backend;
 import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.kil.Definition;
 import org.kframework.utils.Stopwatch;
 
 public class LastStep extends BasicCompilerStep<Definition> {
+	private final Backend backend;
+
+	public LastStep(Backend backend) {
+		this.backend = backend;
+	}
 
 	@Override
 	public Definition compile(Definition def, String stepName)
 			throws CompilerStepDone {
-		return def;
+		return backend.lastStep(def);
 	}
 
 	@Override
 	public String getName() {
-		return "FirstStep";
+		return "LastStep";
 	}
 
 	@Override

@@ -1,16 +1,21 @@
 package org.kframework.backend.html;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.kframework.backend.Backend;
+import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-public class HtmlBackend implements Backend {
+import java.io.File;
+import java.io.IOException;
+
+public class HtmlBackend extends BasicBackend {
+
+	public HtmlBackend(Stopwatch sw) {
+		super(sw);
+	}
 
 	@Override
 	public void run(Definition definition) throws IOException {

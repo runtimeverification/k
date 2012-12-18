@@ -1,11 +1,6 @@
 package org.kframework.backend.latex;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.kframework.backend.Backend;
+import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;
@@ -13,7 +8,16 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-public class LatexBackend implements Backend {
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class LatexBackend extends BasicBackend {
+	public LatexBackend(Stopwatch sw) {
+		super(sw);
+	}
+
 	public static List<File> latex(Definition javaDef, String mainModule) {
 		List<File> result = new ArrayList<File>();
 		try {

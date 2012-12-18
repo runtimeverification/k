@@ -1,26 +1,23 @@
 package org.kframework.backend.latex;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.kframework.backend.Backend;
+import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KMessages;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KMessages;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-public class PdfBackend implements Backend {
+import java.io.*;
+import java.util.List;
+
+public class PdfBackend extends BasicBackend {
+	public PdfBackend(Stopwatch sw) {
+		super(sw);
+	}
+
 	private static List<File> pdf(List<File> files, String lang) {
 		File latexFile = files.get(0);
 		files.clear();

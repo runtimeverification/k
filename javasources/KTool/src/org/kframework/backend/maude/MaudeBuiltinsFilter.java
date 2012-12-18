@@ -1,0 +1,83 @@
+package org.kframework.backend.maude;
+
+import org.kframework.backend.BackendFilter;
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.*;
+
+import java.util.Properties;
+
+/**
+ * Initially created by: Traian Florin Serbanuta
+ * <p/>
+ * Date: 12/17/12
+ * Time: 6:22 PM
+ */
+public class MaudeBuiltinsFilter extends BackendFilter {
+	private String left, right;
+	private boolean first;
+	private final Properties builtinsProperties;
+
+	public MaudeBuiltinsFilter(Properties builtinsProperties) {
+		this.builtinsProperties = builtinsProperties;
+	}
+
+	@Override
+	public void visit(Configuration node) {
+		return;
+	}
+
+	@Override
+	public void visit(Context node) {
+		return;
+	}
+
+	@Override
+	public void visit(Rule node) {
+		return;
+	}
+
+	@Override
+	public void visit(Production node) {
+		if (!node.containsAttribute("hook")) {
+			return;
+		}
+		final String hook = node.getAttribute("hook");
+		if (builtinsProperties.containsKey(hook)) {
+			result.append(builtinsProperties.getProperty(hook));
+			result.append("\n");
+			return;
+		}
+		result.append(" eq ");
+		left = node.getKLabel() + "(";
+		right = getHookLabel(hook) + "(";
+		first = true;
+		super.visit(node);
+		left += ")";
+		right += ")";
+		result.append(left);
+		result.append(" = _`(_`)(# ");
+		result.append(right);
+		result.append(", .List`{K`}) .\n");
+	}
+
+
+	@Override
+	public void visit(Sort node) {
+		if (!first) {
+			left += ",, ";
+			right += ", ";
+		} else {
+			first = false;
+		}
+		String sort = "#" + node.getName();
+		final Variable var = MetaK.getFreshVar(sort);
+        MaudeFilter filter = new MaudeFilter();
+		filter.visit(new KApp(new KInjectedLabel(var), new Empty("List{K}")));
+		left += filter.getResult();
+		right += var.toString();
+	}
+
+	private String getHookLabel(String hook) {
+		return hook.split(":")[1];
+	}
+}

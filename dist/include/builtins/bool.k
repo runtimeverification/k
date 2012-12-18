@@ -56,8 +56,10 @@ module BOOL-HOOKS
   rule B1:Bool =/=Bool B2:Bool => notBool(B1 ==Bool B2)
 
   // Andrei S: why are the rules below needed?
+  // Traian S.:  They are needed in the generated code, as we allow 
+  // '#andBool to take multiple parameters.
   rule '#andBool((true => .List{K}),, _) [function, anywhere]
-  rule '#andBool(true) => true  [function, anywhere]
+  rule '#andBool(.List{K}) => true  [function, anywhere]
   rule '#andBool(false,, _) => false [function, anywhere]
 endmodule
 

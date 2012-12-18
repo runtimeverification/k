@@ -1,5 +1,6 @@
 package org.kframework.backend.latex;
 
+import org.kframework.backend.BackendFilter;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
@@ -15,9 +16,8 @@ import java.util.*;
 import java.util.List;
 import java.util.Map;
 
-public class LatexFilter extends BasicVisitor {
+public class LatexFilter extends BackendFilter {
 	String endl = System.getProperty("line.separator");
-	private StringBuilder result = new StringBuilder();
 	private StringBuilder preamble = new StringBuilder();
 	private boolean firstProduction = false;
 	private Map<String, String> colors = new HashMap<String, String>();
@@ -46,10 +46,6 @@ public class LatexFilter extends BasicVisitor {
 
 	public StringBuilder getPreamble() {
 		return preamble;
-	}
-
-	public StringBuilder getResult() {
-		return result;
 	}
 
 	@Override

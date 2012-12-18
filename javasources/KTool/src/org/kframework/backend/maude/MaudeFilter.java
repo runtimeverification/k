@@ -1,11 +1,11 @@
 package org.kframework.backend.maude;
 
+import org.kframework.backend.BackendFilter;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -16,17 +16,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
-public class MaudeFilter extends BasicVisitor {
-	protected java.lang.StringBuilder result;
+public class MaudeFilter extends BackendFilter {
 	private boolean firstAttribute;
-
-	public MaudeFilter() {
-		result = new java.lang.StringBuilder();
-	}
-
-	public String getResult() {
-		return result.toString();
-	}
 
 	@Override
 	public void visit(Definition def) {
@@ -326,8 +317,56 @@ public class MaudeFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Rule rule) {
-		result.append("mb rule ");
-		this.visit((Sentence) rule);
+		boolean  isTransition = false;
+		for (Attribute a : rule.getAttributes().getContents()) {
+			if (GlobalSettings.transition.contains(a.getKey())) {
+				isTransition = true;
+				break;
+			}
+		}
+		if (!(rule.getBody() instanceof Rewrite)) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+						KExceptionGroup.INTERNAL,
+						"This rule should have a rewrite at top by now.",
+						getName(),
+						rule.getFilename(), rule.getLocation()));
+		}
+		Rewrite body = (Rewrite) rule.getBody();
+		final Term condition = rule.getCondition();
+		if (null != condition) {
+			result.append("c");
+		}
+		if (isTransition) {
+			result.append("rl ");
+		} else {
+			result.append("eq ");
+		}
+		body.getLeft().accept(this);
+		if (isTransition) {
+			result.append(" => ");
+		} else {
+			result.append(" = ");
+		}
+		body.getRight().accept(this);
+
+		if (null != condition) {
+			result.append(" if ");
+			condition.accept(this);
+			result.append(" = _`(_`)(# true, .List`{K`})");
+		}
+		if (null != rule.getAttributes()) {
+				result.append(" [");
+			if (rule.getLabel() != null && !rule.getLabel().equals("")) {
+				result.append("label " + rule.getLabel() + " metadata");
+			} else {
+				result.append("metadata");
+			}
+			result.append(" \"");
+			rule.getAttributes().accept(this);
+			result.append(" location=");
+			result.append(rule.getMaudeLocation());
+			result.append("\"] .\n");
+		}
 	}
 
 	@Override

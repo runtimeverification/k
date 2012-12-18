@@ -1,18 +1,21 @@
 package org.kframework.backend.xml;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.kframework.backend.Backend;
-import org.kframework.compile.transformers.AddEmptyLists;
+import com.thoughtworks.xstream.XStream;
+import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.File;
+import java.io.IOException;
 
-public class XmlBackend implements Backend {
+public class XmlBackend extends BasicBackend {
+
+	public XmlBackend(Stopwatch sw) {
+		super(sw);
+	}
 
 	@Override
 	public void run(Definition definition) throws IOException {
