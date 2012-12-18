@@ -38,7 +38,7 @@ public class xml_string_escape_from_string_0_0 extends Strategy {
 				sb.append("&quot;");
 				i++;
 			} else if (str.charAt(i) == '\\' && str.charAt(i + 1) == '\\') {
-				sb.append("\\\\");
+				sb.append("\\");
 				i++;
 			} else
 				sb.append(str.charAt(i));

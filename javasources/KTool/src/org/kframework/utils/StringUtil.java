@@ -24,6 +24,7 @@ public class StringUtil {
 	}
 
 	public static String escape(String str) {
+		str = str.replaceAll("\\\\", "\\\\\\\\");
 		str = str.replaceAll("\n", "\\\\n");
 		str = str.replaceAll("\r", "\\\\r");
 		str = str.replaceAll("\t", "\\\\t");
