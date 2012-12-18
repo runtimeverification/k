@@ -805,7 +805,8 @@ public class Main {
 				javaDef.preprocess();
 				K.definition = javaDef;
 
-				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.dotk.getCanonicalPath() + "/def/Concrete.tbl");
+				org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
+				org.kframework.parser.concrete.KParser.ImportTblGround(K.kdir + "/ground/Concrete.tbl");
 			}
 
 			if (K.pgm != null) {
