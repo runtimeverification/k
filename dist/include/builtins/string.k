@@ -102,12 +102,10 @@ module STRING-HOOKS
   rule trim(S:K) => ltrim(rtrim(S))
 
   syntax K ::= "#parseToken" "(" String "," String ")"  [function]
-  rule #parseToken("Int",S:String) => (String2Int(S +String "0") /Int 10)
+  rule #parseToken("Int",S:String) => String2Int(S)
   rule #parseToken("Float",S:String) => (String2Float(S)) 
   rule #parseToken("String",S:String) => (S) 
   rule #parseToken("Id",S:String) => (String2Id(S))
-
-  rule String2Int("00") => 0  [anywhere]
 
   // Check if an identifier is capitalized.  Useful for languages like Prolog
   syntax CapitalizedId ::= "A-Dummy-Capitalized-Id-Just-Because-We-Do-Not-Allow-Empty-Productions-Yet"
