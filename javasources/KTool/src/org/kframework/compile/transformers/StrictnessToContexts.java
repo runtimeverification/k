@@ -6,12 +6,16 @@ import java.util.List;
 import org.kframework.compile.utils.GetSyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
 import org.kframework.kil.Hole;
+import org.kframework.kil.KApp;
 import org.kframework.kil.KSort;
+import org.kframework.kil.ListOfK;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
+import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -43,10 +47,24 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 		String arg, attr;
 
 		for (Production prod : prods) {
-			
-			if(prod.getSort().equalsIgnoreCase("KLabel"))
-				continue;
-			
+		
+
+			if(prod.getSort().equalsIgnoreCase("KLabel")) {
+        attr = "strict";
+        if(prod.getAttribute(attr) != null){
+          kLabelStrict(attr, prod);
+          continue;
+        }
+        attr = "seqstrict";
+        if(prod.getAttribute(attr) != null) {
+          kLabelSeqStrict(attr, prod);
+          continue;
+        } 
+        assert false : "KLabel " + prod + " is neither strict nor seqstrict," 
+                     + "  how did we get here?";
+      }
+
+
 			if(prod.isSubsort()){
 				String msg ="Production is a subsort and cannot be strict.";
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), prod.getFilename(), prod.getLocation()));
@@ -159,6 +177,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 		}
 	}
 
+
 	private void strictInOne(String attr, Production prod, String arg) {
 
 		int argi = 0;
@@ -205,10 +224,55 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 		items.add(ctx);
 	}
 
+  //KLabels are applied to associative List{K},
+  //so the context we must generate is the fairly
+  //easy context KLabel(List{K}1 ,, HOLE ,, List{K}2)
+  private void kLabelStrict(String attr, Production prod){
+    List<Term> contents = new ArrayList<Term>(3);
+    //first argument is a variable of sort K
+    contents.add(MetaK.getFreshVar("List{K}"));
+    //second is a HOLE
+    contents.add(new Hole("K"));
+    //third argument is a variable of sort K
+    contents.add(MetaK.getFreshVar("List{K}"));
+    KApp kapp = new KApp(MetaK.getTerm(prod), new ListOfK(contents)); 
+    //make a context from the TermCons
+		Context ctx = new Context();
+		ctx.setBody(kapp);
+		ctx.setAttributes(prod.getAttributes());
+		ctx.getAttributes().remove(attr);
+    //add the context
+		items.add(ctx);
+  }
+
+  //Same as above but with the condition
+  //isKResult(List{K}1)
+  private void kLabelSeqStrict(String attr, Production prod){
+    List<Term> contents = new ArrayList<Term>(3);
+    //first argument is a variable of sort K
+    Term Var1 = MetaK.getFreshVar("List{K}");
+    contents.add(Var1);
+    //second is a HOLE
+    contents.add(new Hole("K"));
+    //third argument is a variable of sort K
+    contents.add(MetaK.getFreshVar("List{K}"));
+    KApp kapp = new KApp(MetaK.getTerm(prod), new ListOfK(contents)); 
+    //make a context from the TermCons
+		Context ctx = new Context();
+		ctx.setBody(kapp);
+		ctx.setAttributes(prod.getAttributes());
+		ctx.getAttributes().remove(attr);
+    //set the condition
+    KApp condApp = new KApp(Constant.KLABEL("isKResult"), Var1);
+    ctx.setCondition(condApp);
+    //add the context
+		items.add(ctx);
+  }
 
 	private void strictInAll(String attr, Production prod){
 
 		int size = ((TermCons) MetaK.getTerm(prod)).getContents().size(); 
+
 
 		int co = 0, i = 0;
 
@@ -240,7 +304,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 			ctx.setBody(tc);
 			ctx.setAttributes(prod.getAttributes());
 			ctx.getAttributes().remove(attr);
-
 			items.add(ctx);
 
 			i = 0;
