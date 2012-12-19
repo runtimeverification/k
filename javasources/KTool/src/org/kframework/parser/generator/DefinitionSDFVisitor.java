@@ -21,6 +21,10 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Subsort;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
 public class DefinitionSDFVisitor extends BasicVisitor {
 
@@ -58,6 +62,10 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 
 			for (Constant tag : pbe1.getProductions()) {
 				Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getValue());
+				if (prods2.isEmpty()) {
+					String msg = "Could not find any production represented by tag: " + tag.getValue();
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
+				}
 				pb1.getProductions().addAll(prods2);
 			}
 			priblocks.add(pb1);
@@ -74,6 +82,10 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 
 		for (Constant tag : node.getTags()) {
 			Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getValue());
+			if (prods2.isEmpty()) {
+				String msg = "Could not find any production represented by tag: " + tag.getValue();
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
+			}
 			pb1.getProductions().addAll(prods2);
 		}
 		priblocks.add(pb1);
