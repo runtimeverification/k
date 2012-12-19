@@ -38,4 +38,22 @@ public class Hole extends Term {
 	public Hole shallowCopy() {
 		return new Hole(this);
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Hole))
+			return false;
+		Hole hole = (Hole)obj;
+
+		return this.sort.equals(hole.getSort());
+	}
+
+	@Override
+	public int hashCode() {
+		return sort.hashCode();
+	}
 }

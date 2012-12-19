@@ -32,4 +32,8 @@ public class FreezerHole extends Term {
 	public Term shallowCopy() {
 		return new FreezerHole(this.index);
 	}
+	
+	public int getIndex() {
+		return index;
+	}
 }

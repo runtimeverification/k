@@ -5,8 +5,7 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class KInjectedLabel extends Term {
-
-	private Term term;
+	protected Term term;
 
 	public KInjectedLabel(String location, String filename) {
 		super(location, filename, "KLabel");

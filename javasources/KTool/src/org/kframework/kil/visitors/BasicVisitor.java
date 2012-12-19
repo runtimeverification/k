@@ -260,6 +260,11 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(FreezerHole node) {
+		visit((Term) node);
+	}
+
+	@Override
 	public void visit(KApp node) {
 		node.getLabel().accept(this);
 		node.getChild().accept(this);

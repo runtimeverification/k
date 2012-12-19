@@ -17,6 +17,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Empty;
 import org.kframework.kil.Freezer;
+import org.kframework.kil.FreezerHole;
 import org.kframework.kil.FreezerSubstitution;
 import org.kframework.kil.FreezerVariable;
 import org.kframework.kil.Hole;
@@ -112,6 +113,7 @@ public interface Visitor {
 	public void visit(Constant node);
 	public void visit(Empty node);
 	public void visit(Hole node);
+	public void visit(FreezerHole node);
 	public void visit(KApp node);
 	public void visit(KLabel node);
 	public void visit(Rewrite node);

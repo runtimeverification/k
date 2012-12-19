@@ -239,6 +239,7 @@ public class KompileFrontEnd {
 			steps.add(new AddStrictStar());
 			steps.add(new AddDefaultComputational());
 			steps.add(new AddOptionalTags());
+//			steps.add(new ContextsToHeating());
 			steps.add(new LastStep(backend));
 			
 			if (step == null) {

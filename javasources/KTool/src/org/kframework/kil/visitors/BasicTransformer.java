@@ -375,8 +375,10 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Freezer node) throws TransformerException {
+		Term term = (Term)node.getTerm().accept(this);
 		Freezer result = new Freezer(node);
-		return transform((Term) result);
+		result.setTerm(term);
+		return transform((Term)node);
 	}
 
 	@Override

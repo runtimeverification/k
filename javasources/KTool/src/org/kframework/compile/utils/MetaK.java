@@ -26,7 +26,8 @@ public class MetaK {
    public static class Constants {
 
 	   public static final String anyVarSymbol = "_";
-	   public static final String heatingTag = "heating";
+	   public static final String heatingTag = "heat";
+	   public static final String coolingTag = "cool";
 	   public static final String KItem = "KItem";
 	   public static final String K = "K";
 	   public static final String hole = "[]";
@@ -191,6 +192,20 @@ public class MetaK {
 			v.setName(prefix + (++i));
 		}
 		return v;
+	}
+
+	public static int countRewrites(Term t) {
+		final List<Integer> count = new ArrayList<Integer>();
+		count.add(0);
+		Visitor countVisitor = new BasicVisitor() {
+			@Override public void visit(Rewrite rewrite) {
+				count.set(0, count.get(0) + 1);
+				super.visit(rewrite);
+			}
+		};
+		
+		t.accept(countVisitor);
+		return count.get(0);
 	}
 
 	public static boolean hasCell(Term t) {

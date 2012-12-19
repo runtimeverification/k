@@ -448,6 +448,23 @@ public class UnparserFilter extends BasicVisitor {
 		postpare();
 	}
 
+	@Override
+	public void visit(FreezerHole hole) {
+		prepare(hole);
+		result.write("HOLE(" + hole.getIndex() + ")");
+		postpare();
+	}
+
+	@Override
+	public void visit(Freezer freezer) {
+		prepare(freezer);
+		result.write("freezer(");
+		freezer.getTerm().accept(this);
+		result.write(")");
+		postpare();
+	}
+
+	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		prepare(kInjectedLabel);
 		Term term = kInjectedLabel.getTerm();
@@ -561,16 +578,6 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(FreezerSubstitution subst) {
 		prepare(subst);
 		result.write("var{" + subst.getTermSort() + "}(\"" + subst.getName() + "\")<-");
-		postpare();
-	}
-
-
-	@Override
-	public void visit(Freezer freezer) {
-		prepare(freezer);
-		result.write("freezer(");
-		freezer.getTerm().accept(this);
-		result.write(")");
 		postpare();
 	}
 

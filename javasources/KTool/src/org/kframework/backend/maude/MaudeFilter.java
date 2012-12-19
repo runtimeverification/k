@@ -559,6 +559,14 @@ public class MaudeFilter extends BackendFilter {
 	}
 
 	@Override
+	public void visit(Freezer freezer) {
+		Term term = freezer.getTerm();
+		result.append("#freezer_(");
+		term.accept(this);
+		result.append(")(.List{K})");
+	}
+
+	@Override
 	public void visit(KLabel kLabel) {
 		throw new RuntimeException("don't know how to maudify KLabel");
 	}
