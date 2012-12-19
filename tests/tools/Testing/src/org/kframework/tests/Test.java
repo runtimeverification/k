@@ -419,7 +419,7 @@ public class Test {
 			if (message.equals("success"))
 				message = "unstable";
 
-		report.appendChild(createReportElement(new File(language).getName()
+		report.appendChild(createReportElement(new File(getXmlLanguage()).getName()
 				.replaceFirst("\\.k$", ".pdf"), message,
 				task.getElapsed() + "", task.getStdout(), task.getStderr(),
 				task, "", !compiledPdf(task)));
@@ -444,7 +444,7 @@ public class Test {
 	}
 
 	private String getPdfCompiledFilename() {
-		return language.replaceFirst("\\.k$", ".pdf");
+		return getXmlLanguage().replaceFirst("\\.k$", ".pdf");
 	}
 
 	public void save() {
@@ -489,7 +489,7 @@ public class Test {
 	public Task getPdfDefinitionTask() {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKompile());
-		command.add(language);
+		command.add(getXmlLanguage());
 		command.add("--pdf");
 		String[] arguments = new String[command.size()];
 		int i = 0;
@@ -501,6 +501,10 @@ public class Test {
 		return new Task(arguments, null);
 	}
 
+	private String getXmlLanguage() {
+		return new File(language).getParent() + Configuration.FS + ".k" + Configuration.FS + "defx.xml";
+	}
+
 	public List<Program> getPrograms() {
 		return programs;
 	}
@@ -508,4 +512,6 @@ public class Test {
 	public String getLanguage() {
 		return language;
 	}
+	
+	
 }
