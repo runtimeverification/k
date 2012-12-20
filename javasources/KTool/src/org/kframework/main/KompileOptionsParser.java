@@ -92,6 +92,7 @@ public class KompileOptionsParser {
 		Option supercool = new Option("supercool", true, "rule <arg> tags triggering super cooling tags are space-separated and can include the tag default");
 
 		// add options
+		options.addOption(new Option("testFactory", false, "Option to test new class instantiation"));
 		options.addOptionGroup(verb);
 		options.addOptionGroup(main);
 		options.addOptionGroup(langGroup);

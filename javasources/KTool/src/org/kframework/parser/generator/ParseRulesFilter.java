@@ -31,6 +31,8 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -51,19 +53,24 @@ public class ParseRulesFilter extends BasicTransformer {
 	public ASTNode transform(StringSentence ss) throws TransformerException {
 		if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
 			try {
-				String parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
-				Document doc = XmlLoader.getXMLDoc(parsed);
+				ASTNode config;
+				if (!GlobalSettings.testFactory) {
+					String parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+					Document doc = XmlLoader.getXMLDoc(parsed);
 
-				// replace the old xml node with the newly parsed sentence
-				Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-				XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
-				XmlLoader.addFilename(xmlTerm, ss.getFilename());
-				XmlLoader.reportErrors(doc, ss.getType());
+					// replace the old xml node with the newly parsed sentence
+					Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
+					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
+					XmlLoader.addFilename(xmlTerm, ss.getFilename());
+					XmlLoader.reportErrors(doc, ss.getType());
 
-				ASTNode config = JavaClassesFactory.getTerm((Element) xmlTerm);
+					config = JavaClassesFactory.getTerm((Element) xmlTerm);
+				} else {
+					IStrategoTerm parsed = org.kframework.parser.concrete.KParser.ParseKConfigStringAst(ss.getContent());
+					config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
+				}
 
-				// disambiguate configs
-
+				// disambiguate rules
 				if (config.getFilename().endsWith("test.k")) {
 					// this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
 					int a = 1;

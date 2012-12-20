@@ -3,140 +3,153 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformable;
 import org.kframework.kil.visitors.Visitable;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ITokenizer;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.w3c.dom.Element;
 
 public abstract class ASTNode implements Visitable, Transformable {
-    // attributes non-null
-    protected Attributes attributes;
+	// attributes non-null
+	protected Attributes attributes;
 
-    public ASTNode(Element elem) {
-        this(getElementLocation(elem), getElementFile(elem));
-    }
+	public ASTNode(Element elem) {
+		this(getElementLocation(elem), getElementFile(elem));
+	}
 
-    private static String getElementLocation(Element elem) {
-        if (elem != null)
-            return elem.getAttribute(Constants.LOC_loc_ATTR);
-        else
-            return Constants.GENERATED_LOCATION;
-    }
+	public ASTNode(IStrategoAppl elem) {
+		ITokenizer tkz = ImploderAttachment.getTokenizer(elem);
 
-    private static String getElementFile(Element elem) {
-        if (elem != null)
-            return elem.getAttribute(Constants.FILENAME_filename_ATTR);
-        else
-            return Constants.GENERATED_FILENAME;
-    }
+		IToken tk = tkz.currentToken();
 
-    public ASTNode(ASTNode astNode) {
-        attributes = astNode.attributes;
-    }
+		String loc = "(" + tk.getLine() + "," + tk.getColumn() + "," + tk.getEndLine() + "," + tk.getEndColumn() + ")";
 
-    public ASTNode() {
-        this(Constants.GENERATED_LOCATION, Constants.GENERATED_FILENAME);
-    }
+		System.out.println(loc);
+		this.setLocation(loc);
+	}
 
-    public ASTNode(String loc, String file) {
-        //attributes = new Attributes();
-        setLocation(loc);
-        setFilename(file);
-    }
+	private static String getElementLocation(Element elem) {
+		if (elem != null)
+			return elem.getAttribute(Constants.LOC_loc_ATTR);
+		else
+			return Constants.GENERATED_LOCATION;
+	}
 
+	private static String getElementFile(Element elem) {
+		if (elem != null)
+			return elem.getAttribute(Constants.FILENAME_filename_ATTR);
+		else
+			return Constants.GENERATED_FILENAME;
+	}
 
-    public String getMaudeLocation() {
-        String loc = getLocation();
-        loc = loc.replaceAll(",", ":");
-        loc = loc.replaceFirst("\\(", "(" + getFilename() + ":");
-        if (!loc.startsWith("("))
-            loc = "(" + loc + ")";
+	public ASTNode(ASTNode astNode) {
+		attributes = astNode.attributes;
+	}
 
-        return loc;
-    }
+	public ASTNode() {
+		this(Constants.GENERATED_LOCATION, Constants.GENERATED_FILENAME);
+	}
 
-    public String getLocation() {
-        // next if statement should be unnecessary
-        if (attributes == null)
-            return Constants.GENERATED_LOCATION;
+	public ASTNode(String loc, String file) {
+		// attributes = new Attributes();
+		setLocation(loc);
+		setFilename(file);
+	}
 
-        String loc = attributes.get("location");
-        if (loc == null || loc.isEmpty())
-            loc = Constants.GENERATED_LOCATION;
-        return loc;
-    }
+	public String getMaudeLocation() {
+		String loc = getLocation();
+		loc = loc.replaceAll(",", ":");
+		loc = loc.replaceFirst("\\(", "(" + getFilename() + ":");
+		if (!loc.startsWith("("))
+			loc = "(" + loc + ")";
 
-    public void setLocation(String loc) {
-        // next 2 if statements should be unnecessary
-        if (loc.equals(Constants.GENERATED_LOCATION))
-            return;
-        if (attributes == null)
-            attributes = new Attributes();
+		return loc;
+	}
 
-        attributes.set("location", loc);
-    }
+	public String getLocation() {
+		// next if statement should be unnecessary
+		if (attributes == null)
+			return Constants.GENERATED_LOCATION;
 
-    public String getFilename() {
-        // next if statement should be unnecessary
-        if (attributes == null)
-            return Constants.GENERATED_FILENAME;
+		String loc = attributes.get("location");
+		if (loc == null || loc.isEmpty())
+			loc = Constants.GENERATED_LOCATION;
+		return loc;
+	}
 
-        String file = attributes.get("filename");
-        if (file == null || file.isEmpty())
-            file = Constants.GENERATED_FILENAME;
-        return file;
-    }
+	public void setLocation(String loc) {
+		// next 2 if statements should be unnecessary
+		if (loc.equals(Constants.GENERATED_LOCATION))
+			return;
+		if (attributes == null)
+			attributes = new Attributes();
 
-    public void setFilename(String file) {
-        // next 2 if statements should be unnecessary
-        if (file.equals(Constants.GENERATED_FILENAME))
-            return;
-        if (attributes == null)
-            attributes = new Attributes();
+		attributes.set("location", loc);
+	}
 
-        attributes.set("filename", file);
-    }
+	public String getFilename() {
+		// next if statement should be unnecessary
+		if (attributes == null)
+			return Constants.GENERATED_FILENAME;
 
-    /*
-     * methods for easy attributes manipulation
-     */
-    public void addAttribute(String key, String val) {
-        addAttribute(new Attribute(key, val));
-    }
+		String file = attributes.get("filename");
+		if (file == null || file.isEmpty())
+			file = Constants.GENERATED_FILENAME;
+		return file;
+	}
 
-    public void addAttribute(Attribute attr) {
-        if (attributes == null)
-            attributes = new Attributes();
+	public void setFilename(String file) {
+		// next 2 if statements should be unnecessary
+		if (file.equals(Constants.GENERATED_FILENAME))
+			return;
+		if (attributes == null)
+			attributes = new Attributes();
 
-        attributes.contents.add(attr);
-    }
+		attributes.set("filename", file);
+	}
 
-    public boolean containsAttribute(String key) {
-        if (attributes == null)
-            return false;
+	/*
+	 * methods for easy attributes manipulation
+	 */
+	public void addAttribute(String key, String val) {
+		addAttribute(new Attribute(key, val));
+	}
 
-        return attributes.containsKey(key);
-    }
+	public void addAttribute(Attribute attr) {
+		if (attributes == null)
+			attributes = new Attributes();
 
-    public String getAttribute(String key) {
-        if (attributes == null)
-            return null;
+		attributes.contents.add(attr);
+	}
 
-        return attributes.get(key);
-    }
+	public boolean containsAttribute(String key) {
+		if (attributes == null)
+			return false;
 
-    public void putAttribute(String key, String val) {
-        if (attributes == null)
-            attributes = new Attributes();
+		return attributes.containsKey(key);
+	}
 
-        attributes.set(key, val);
-    }
+	public String getAttribute(String key) {
+		if (attributes == null)
+			return null;
 
-    public Attributes getAttributes() {
-        return attributes;
-    }
+		return attributes.get(key);
+	}
 
-    public void setAttributes(Attributes attrs) {
-        attributes = attrs;
-    }
+	public void putAttribute(String key, String val) {
+		if (attributes == null)
+			attributes = new Attributes();
 
+		attributes.set(key, val);
+	}
 
-    public abstract ASTNode shallowCopy();
+	public Attributes getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(Attributes attrs) {
+		attributes = attrs;
+	}
+
+	public abstract ASTNode shallowCopy();
 }

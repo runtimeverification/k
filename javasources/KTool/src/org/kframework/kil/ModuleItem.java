@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
 
 public abstract class ModuleItem extends ASTNode {
@@ -8,6 +9,10 @@ public abstract class ModuleItem extends ASTNode {
 	}
 
 	public ModuleItem(Element element) {
+		super(element);
+	}
+
+	public ModuleItem(IStrategoAppl element) {
 		super(element);
 	}
 
@@ -23,9 +28,9 @@ public abstract class ModuleItem extends ASTNode {
 		return null;
 	}
 
-    public java.util.List<String> getKLabels() {
-        return null;
-    }
+	public java.util.List<String> getKLabels() {
+		return null;
+	}
 
 	public java.util.List<String> getAllSorts() {
 		return null;

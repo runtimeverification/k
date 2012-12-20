@@ -3,6 +3,7 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.utils.xml.XML;
+import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
 
 public abstract class Sentence extends ModuleItem {
@@ -22,8 +23,12 @@ public abstract class Sentence extends ModuleItem {
 
 	public Sentence(String location, String filename) {
 		super(location, filename);
-        if (attributes == null)
-		    attributes = new Attributes();
+		if (attributes == null)
+			attributes = new Attributes();
+	}
+
+	public Sentence(IStrategoAppl element) {
+		super(element);
 	}
 
 	public Sentence(Element element) {
@@ -40,12 +45,12 @@ public abstract class Sentence extends ModuleItem {
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
 		// assumption: <cellAttributes> appears only once
 		if (its.size() > 0) {
-            attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+			attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
 		} else {
-            if (attributes == null)
-                attributes = new Attributes();
-            attributes.addAttribute("generated", "generated");
-        }
+			if (attributes == null)
+				attributes = new Attributes();
+			attributes.addAttribute("generated", "generated");
+		}
 	}
 
 	public Term getBody() {
