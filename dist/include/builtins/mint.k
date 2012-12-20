@@ -24,8 +24,8 @@ module MINT
   rule usupMInt(N:Nat) => (1 <<Int N) -Int 1
  
   /* Functions for signed and unsigned interpretations of machine integers. */
-  syntax MInt ::= "sMInt" "(" MInt ")"        [function]
-                | "uMInt" "(" MInt ")"        [function]
+  syntax MInt ::= "sMInt" "(" MInt ")"    [function]
+                | "uMInt" "(" MInt ")"    [function]
   rule uMInt(mi(N:Nat, I:Int)) => mi(N, (I modInt (1 <<Int N)))
   rule
     sMInt(mi(N:Nat, I:Int))
