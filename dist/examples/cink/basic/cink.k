@@ -465,7 +465,7 @@ module CINK
   */
 
   context '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, 
-                 (HOLE => evaluate HOLE following Xl;))
+                 (HOLE => evaluate HOLE to .Vals following Xl;))
   /*@
    This context says not only that the actual parameters must be evaluated when
    passed to a function value, but also that they need to be evaluated using 
@@ -473,7 +473,7 @@ module CINK
    the list of formal parameters.
   */
 
-  syntax Exps ::= "evaluate" Exps "following" Decls ";"
+  syntax Exps ::= "evaluate" Exps "to" Vals "following" Decls ";"
 
   /*@
     For a formal parameter declared with the call-by-value mechanism,
@@ -481,7 +481,7 @@ module CINK
     specified by by the following contextual declaration:
   */
 
-  context evaluate (HOLE, _:Exps) following (int X:Id, _:Decls);
+  context evaluate (HOLE, _:Exps) to _:Vals following (int X:Id, _:Decls);
 
 
   /*@
@@ -494,12 +494,10 @@ module CINK
     by recursing into the lists:
   */
 
-  rule evaluate(V:Val, El:Exps) following (Dec:Decl, Xl:Decls);
-        =>
-        V, evaluate El following Xl;
+  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V,Vl) following (Dec:Decl, Xl:Decls => Xl);
        [structural]
    
-  rule evaluate .Exps following .Decls; => .Vals [structural]
+  rule evaluate .Exps to Vl:Vals following .Decls; => Vl [structural]
 
    /*@
      \subsubsection{Binding mechanisms}

@@ -80,7 +80,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 
 	@Override
     public ASTNode transform(Context node) throws TransformerException {
-    	Term body = node.getBody();
+    	Term body = (Term) node.getBody().accept(new ResolveAnonymousVariables());
     	Integer countRewrites = MetaK.countRewrites(body); 
     	if (countRewrites > 1) {
     		GlobalSettings.kem.register(

@@ -352,13 +352,13 @@ KOOL).  */
 
   syntax Exp ::= lvalue(K)
   syntax Val ::= loc(Int)
-  rule <k> lvalue(X:Id) => loc(L) ...</k>  <env>... X |-> L:Int ...</env>
+  rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
     [structural]
 
   context lvalue(_[HOLE])
   context lvalue(HOLE[_])
 
-  rule lvalue(lookup(L:Int)) => loc(L)  [structural]
+  rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
   syntax Type ::= Type "<" Vals ">"  [function]
   rule T:Type<_,Vs:Vals> => T[]<Vs>

@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class FreezeUserFreezers extends CopyOnWriteTransformer {
 	public FreezeUserFreezers() {
-		super("Generate Heating Conditions");
+		super("Freeze User Freezers");
 	}
 
 	@Override

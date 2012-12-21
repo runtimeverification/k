@@ -998,7 +998,7 @@ corresponding store lookup operation. */
 
 // Local variable
 
-  rule <k> lvalue(X:Id) => loc(L) ...</k> <env>... X |-> L:Int ...</env>
+  rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
     [structural]
 
 // Array element: evaluate the array and its index;
@@ -1009,7 +1009,7 @@ corresponding store lookup operation. */
 
 // Finally, return the address of the desired object member
 
-  rule lvalue(lookup(L:Int)) => loc(L)  [structural]
+  rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
 /*@ \subsection{Initializing multiple locations}
 The following operation initializes a sequence of locations with the same
