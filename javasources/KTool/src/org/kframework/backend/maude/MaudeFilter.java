@@ -546,6 +546,11 @@ public class MaudeFilter extends BackendFilter {
 	}
 
 	@Override
+	public void visit(FreezerHole hole) {
+		result.append("HOLE");
+	}
+
+	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		Term term = kInjectedLabel.getTerm();
 		if (MetaK.isKSort(term.getSort())) {

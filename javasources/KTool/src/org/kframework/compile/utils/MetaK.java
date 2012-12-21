@@ -23,7 +23,17 @@ import java.util.Set;
 
 public class MetaK {
 
-   public static class Constants {
+	public static Term incrementCondition(Term condition, Term kresultCnd) {
+		if (condition == null) {
+			return kresultCnd;
+		}
+		ListOfK items = new ListOfK();
+		items.add(condition);
+		items.add(kresultCnd);
+		return new KApp(Constant.ANDBOOL_KLABEL,items);
+	}
+
+	public static class Constants {
 
 	   public static final String anyVarSymbol = "_";
 	   public static final String heatingTag = "heat";

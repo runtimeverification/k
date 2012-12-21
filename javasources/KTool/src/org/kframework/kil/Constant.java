@@ -22,7 +22,8 @@ public class Constant extends Term {
             = new HashMap<Integer, Constant>();
     public static final Constant ZERO = INT(0);
     public static final Constant ONE = INT(1);
-    public static final Constant INT(int i) {
+
+	public static final Constant INT(int i) {
         Constant ct = ints.get(i);
         if (ct == null) {
             ct = new Constant("#Int", Integer.toString(i));
@@ -47,6 +48,12 @@ public class Constant extends Term {
     private static final Map<String, Constant> klbls
             = new HashMap<String, Constant>();
 	public static final Constant COOL_KLABEL = KLABEL("cool");
+	public static final Constant HEAT_KLABEL = KLABEL("heat");
+	public static final Constant HEATED_KLABEL = KLABEL("heated");
+	public static final Constant REDEX_KLABEL = KLABEL("redex");
+	public static final Constant KNEQ_KLABEL = KLABEL("'_=/=K_");
+	public static final Constant ANDBOOL_KLABEL = KLABEL("'#andBool");
+
     public static final Constant KLABEL(String s) {
         Constant ct = klbls.get(s);
         if (ct == null) {

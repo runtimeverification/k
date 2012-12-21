@@ -216,9 +216,9 @@ interface K-FRESH
   syntax Bool ::= "fresh" "(" K ")"  [cons(Bool1FreshSyn)]
 endinterface
 
-interface K-COOL
+interface K-FREZERS
   imports K-TECHNIQUE
-  syntax KLabel ::= "cool"
+  syntax KLabel ::= "#freezer" K
 endinterface
 
 interface K
@@ -232,7 +232,7 @@ interface K
   imports K-CONTEXTS  
   imports K-DESTRUCTORS           // defines getKLabel and getList{K} for K
   //imports K-EXTRAS                // defines a KLabel substitution 
-  imports K-COOL
+  imports K-FREZERS
   imports K-FRESH
   imports K-LISTK-EXTRAS  
   imports K-LIST-EXTRAS  

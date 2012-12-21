@@ -95,17 +95,30 @@ endm
 mod K-STRICTNESS is 
   including K-HOLE .
   including #STRING-INTERFACE .
-  op freezer : K -> KLabel [strat(0) frozen] .
+  op #freezer : K -> KLabel [strat(0) frozen] .
 
+  op cool : -> KLabel .
   op heat : -> KLabel .
   op heated : -> KLabel .
   op redex : -> KLabel .
 
+endm
+
+mod K-STRICTNESS-DEFAULTS is
+  including K-STRICTNESS .
   eq heat(heated(K)) = K .
   rl [heat-choice]: heat(heated(Ks,,K,,Ks')) => K
      [metadata "superheat=(choice)"] .
 
   vars K : K . var Ks Ks' : List{K} .  var NKs : NeList{K} .
+  eq <_>_</_>(k,_`(_`)(cool,zk:K),k)
+   = <_>_</_>(k,zk:K,k)[metadata "supercool=(end)"].
+  eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,_`,`,_(K:K,NKs:NeList{K})),Ks:List{K})),GENERATEDKWRAPRest:K),k)
+   = <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(NKs:NeList{K},Ks:List{K})),GENERATEDKWRAPRest:K),k)[owise].
+  eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,K:K),_`,`,_(Ks:List{K},_`(_`)(heated,Ks':List{K})))),GENERATEDKWRAPRest:K),k)
+   = <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(Ks:List{K},_`(_`)(heated,_`,`,_(Ks':List{K},K:K)))),GENERATEDKWRAPRest:K),k)[owise].
+  eq <_>_</_>(k,_~>_(_`(_`)(cool,zk:K),_~>_(Next:KItem,GENERATEDKWRAPRest:K)),k)
+   = <_>_</_>(k,_~>_(_`(_`)(cool,_~>_(zk:K,Next:KItem)),GENERATEDKWRAPRest:K),k)[metadata "supercool=(next)" owise].
 endm
 
 mod K-CONTEXTS is

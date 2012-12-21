@@ -51,17 +51,24 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     	return list;
     }
     
-    private Term substituteHole(Term term, Term replacement) throws TransformerException {
-		HashMap<Term, Term> hashMap = new HashMap<Term, Term>();
-		hashMap.put(new Hole("K"), replacement);
-		Substitution substitution = new Substitution(hashMap);
-		if (term == null) {
-			return null;
-		}
-		return (Term)term.accept(substitution);
+    private static Term substituteHole(Term term, Term replacement) throws TransformerException {
+		return substituteSubstitutable(term, new Hole("K"), replacement);
     }
 
+	public static Term freeze(Term term) {
+		try {
+			return new Freezer(substituteHole(term, new FreezerHole(0)));
+		} catch (TransformerException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
     private Term substituteVariable(Term term, Variable variable, Term replacement) throws TransformerException {
+		return substituteSubstitutable(term, variable, replacement);
+   }
+
+	private static Term substituteSubstitutable(Term term, Term variable, Term replacement) throws TransformerException {
 		HashMap<Term, Term> hashMap = new HashMap<Term, Term>();
 		hashMap.put(variable, replacement);
 		Substitution substitution = new Substitution(hashMap);
@@ -69,9 +76,9 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 			return null;
 		}
 		return (Term)term.accept(substitution);
-    }
+	}
 
-    @Override
+	@Override
     public ASTNode transform(Context node) throws TransformerException {
     	Term body = node.getBody();
     	Integer countRewrites = MetaK.countRewrites(body); 
@@ -107,10 +114,12 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     	Term rhsHeat = new KSequence(rewriteList);
     	Rule heatingRule = new Rule(lhsHeat, rhsHeat);
     	heatingRule.setCondition(substituteHole(node.getCondition(), freshVariable));
+		heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
     	heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
     	rules.add(heatingRule);
     	
     	Rule coolingRule = new Rule(rhsHeat, lhsHeat);
+		coolingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
     	coolingRule.putAttribute(MetaK.Constants.coolingTag,"");
     	rules.add(coolingRule);
     	

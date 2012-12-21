@@ -106,11 +106,11 @@ public class KompileFrontEnd {
 		}
 
 		if (cmd.hasOption("fromxml")) {
-			// File xmlFile = new File(cmd.getOptionValue("fromxml"));
-			// if (cmd.hasOption("lang"))
-			// fromxml(xmlFile, cmd.getOptionValue("lang"), step);
-			// else
-			// fromxml(xmlFile, FileUtil.getMainModule(xmlFile.getName()), step);
+//			File xmlFile = new File(cmd.getOptionValue("fromxml"));
+//			if (cmd.hasOption("lang"))
+//				fromxml(xmlFile, cmd.getOptionValue("lang"), step);
+//			else
+//				fromxml(xmlFile, FileUtil.getMainModule(xmlFile.getName()), step);
 			System.err.println("fromxml option not supported anymore");
 			System.exit(0);
 		}
@@ -157,10 +157,6 @@ public class KompileFrontEnd {
 			lint(mainFile, lang);
 		}
 
-		if (cmd.hasOption("testFactory")) {
-			GlobalSettings.testFactory = true;
-		}
-
 		Backend backend = null;
 		if (cmd.hasOption("maudify")) {
 			backend = new MaudeBackend(Stopwatch.sw);
@@ -178,7 +174,7 @@ public class KompileFrontEnd {
 			backend = new KompileBackend(Stopwatch.sw);
 		}
 		if (backend != null) {
-			genericCompile(mainFile, lang, backend, step);
+			genericCompile(mainFile, lang, backend, step);	
 		}
 		if (GlobalSettings.verbose)
 			Stopwatch.sw.printTotal("Total");
@@ -211,14 +207,19 @@ public class KompileFrontEnd {
 			steps.add(new CheckVisitorStep(new CheckVariables()));
 			steps.add(new CheckVisitorStep(new CheckRewrite()));
 			steps.add(new AutomaticModuleImportsTransformer());
-			steps.add(new StrictnessToContexts());
 			steps.add(new FunctionalAdaptor(new DittoFilter()));
 			steps.add(new FlattenModules());
+			steps.add(new StrictnessToContexts());
+			steps.add(new FreezeUserFreezers());
+			steps.add(new ContextsToHeating());
+			steps.add(new AddSupercoolDefinition());
+			steps.add(new AddHeatingConditions());
+			steps.add(new AddSuperheatRules());
 			steps.add(new DesugarStreams());
 			steps.add(new ResolveFunctions());
 			steps.add(new AddKCell());
 			steps.add(new AddSymbolicK());
-			// steps.add(new ResolveFresh());
+			//			steps.add(new ResolveFresh());
 			steps.add(new ResolveFreshMOS());
 			if (GlobalSettings.addTopCell) {
 				steps.add(new AddTopCell());
@@ -243,16 +244,15 @@ public class KompileFrontEnd {
 			steps.add(new AddStrictStar());
 			steps.add(new AddDefaultComputational());
 			steps.add(new AddOptionalTags());
-			// steps.add(new ContextsToHeating());
 			steps.add(new LastStep(backend));
-
+			
 			if (step == null) {
 				step = backend.getDefaultStep();
 			}
 			try {
 				javaDef = steps.compile(javaDef, step);
 			} catch (CompilerStepDone e) {
-				javaDef = (Definition) e.getResult();
+				javaDef = (Definition)e.getResult();
 			}
 			backend.run(javaDef);
 		} catch (IOException e) {
@@ -282,9 +282,9 @@ public class KompileFrontEnd {
 		}
 	}
 
-	// public static void pdfClean(String[] extensions) {
-	// for (int i = 0; i < extensions.length; i++)
-	// new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
-	// }
+//	public static void pdfClean(String[] extensions) {
+//		for (int i = 0; i < extensions.length; i++)
+//			new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
+//	}
 
 }
