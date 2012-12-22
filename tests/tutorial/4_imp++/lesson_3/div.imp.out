@@ -7,7 +7,7 @@ Solution 1:
     </k>
     <store>
         #symNat(1) |-> 3
-        #symNat(2) |-> 0
+        #symNat(2) |-> 2
     </store>
     <env>
         x |-> #symNat(1)
@@ -37,7 +37,7 @@ Solution 3:
     </k>
     <store>
         #symNat(1) |-> 3
-        #symNat(2) |-> 2
+        #symNat(2) |-> 0
     </store>
     <env>
         x |-> #symNat(1)
@@ -52,7 +52,7 @@ Solution 4:
     </k>
     <store>
         #symNat(1) |-> 3
-        #symNat(2) |-> 1
+        #symNat(2) |-> 3
     </store>
     <env>
         x |-> #symNat(1)
@@ -67,7 +67,7 @@ Solution 5:
     </k>
     <store>
         #symNat(1) |-> 3
-        #symNat(2) |-> 3
+        #symNat(2) |-> 1
     </store>
     <env>
         x |-> #symNat(1)
