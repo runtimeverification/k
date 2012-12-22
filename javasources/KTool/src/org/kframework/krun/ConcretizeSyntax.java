@@ -14,7 +14,6 @@ import java.util.Set;
 public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
 	private String sortContext = "K";
-	private List<Term> subst;
 
 	public ConcretizeSyntax() {
 		super("Abstract K to Syntax K");
@@ -88,12 +87,6 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				}
 			}
 		} else if (label instanceof Freezer) {
-			subst = new ArrayList<Term>();
-			if (child instanceof ListOfK) {
-				subst = ((ListOfK)child).getContents();
-			} else if (!(child instanceof Empty)) {
-				subst.add(child);
-			}
 			return ((Freezer)label).getTerm().accept(this);
 		}
 		return super.transform(kapp);
@@ -171,18 +164,4 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		sortContext = temp;
 		return result;
 	}
-
-	@Override
-	public ASTNode transform(FreezerVariable var) throws TransformerException {
-		for (Term t : subst) {
-			KApp app = (KApp)t;
-			String name = ((FreezerSubstitution)app.getLabel()).getName();
-			if (name.equals(var.getName())) {
-				return app.getChild().accept(this);
-			}
-		}
-		return var;
-	}
-			
-
 }

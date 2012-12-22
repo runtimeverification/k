@@ -458,9 +458,7 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Freezer freezer) {
 		prepare(freezer);
-		result.write("freezer(");
 		freezer.getTerm().accept(this);
-		result.write(")");
 		postpare();
 	}
 

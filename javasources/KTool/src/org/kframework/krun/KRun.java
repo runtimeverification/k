@@ -238,22 +238,12 @@ public class KRun {
 			return new KApp(parseXML(list.get(0)), parseXML(list.get(1)));
 		} else if (sort.equals("KLabel") && list.size() == 0) {
 			return new Constant("KLabel", op);
-		} else if (sort.equals("KLabel") && op.equals("freezer")) {
+		} else if (sort.equals("KLabel") && op.equals("#freezer_")) {
 			assertXML(sort, op, list.size() == 1);
 			return new Freezer(parseXML(list.get(0)));	
 		} else if (op.equals("HOLE")) {
 			assertXML(sort, op, list.size() == 0);
 			return new Hole(sort);
-		} else if (op.startsWith("var`{") && op.endsWith("`}`(_`)") && list.size() == 1) {
-			assertXML(sort, op, list.size() == 1);
-			String value = ((Constant) parseXML(list.get(0))).getValue();
-			assertXML(sort, op, value.startsWith("\"") && value.endsWith("\""));
-			return new FreezerVariable(sort, value.substring(1, value.length()-1));
-		} else if (sort.equals("KLabel") && op.startsWith("var`{") && op.endsWith("`}`(_`)<-") && list.size() == 1) {
-			assertXML(sort, op, list.size() == 1);
-			String value = ((Constant) parseXML(list.get(0))).getValue();
-			assertXML(sort, op, value.startsWith("\"") && value.endsWith("\""));
-			return new FreezerSubstitution(value.substring(1, value.length()-1), op.substring(5, op.length()-9));
 		} else {
 			Set<String> conses = DefinitionHelper.labels.get(op);
 			Set<String> validConses = new HashSet<String>();
