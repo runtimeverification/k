@@ -4,9 +4,8 @@ require "builtins/fol.k"
 module IMP-SYNTAX
   imports FOL
 
-  syntax AExp  ::= Int | Id 
-  	       	 | AExp "[" AExp "]"	      [strict]
-                 > AExp "/" AExp              [left, strict]
+  syntax AExp  ::= Int | Id
+                 | AExp "/" AExp              [left, strict]
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
@@ -17,13 +16,12 @@ module IMP-SYNTAX
   syntax Block ::= "{" "}"
                  | "{" Stmt "}"
   syntax Stmt  ::= Block
-                 | AExp "=" AExp ";"          [strict(2)]
+                 | Id "=" AExp ";"            [strict(2)]
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
 		 > Stmt Stmt                  [left]
-  syntax Pgm   ::= "int" AExps ";" Stmt
-  syntax AExps  ::= List{AExp,","}
+  syntax Pgm   ::= "int" Ids ";" Stmt
   syntax Ids   ::= List{Id,","}
 
   //@ Assertions syntax
@@ -34,51 +32,31 @@ module IMP-SYNTAX
   */
   syntax CfgSym ::= "<k>" Stmt "</k>"
   	 	    "<env>" InitVals "</env>"
-		    "<store>" InitVals "</store>"
 		    "<condition>" Fol "</condition>"
 
   syntax InitVals ::= List{InitVal,","}
-  syntax InitVal  ::= Id "->" AExp
-  	 	    | Int "->" AExp
+  syntax InitVal  ::= Id "->" Int
 
   // syntax for symbolic values in programs
   syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
-  syntax Array ::=  "#symArray" "(" Id ")" [onlyLabel, klabel(#symArray)]
-
-  syntax Val ::= Int | Bool | Array
-  	       | "array" "(" Int "," Int ")" 
-	       | "loc" "(" AExp ")"
-  syntax AExp ::= Val
 
 endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports ARRAY
 
-  syntax KResult ::= Val
+  syntax KResult ::= Int | Bool
 
 /*@ IMP configuration is enriched with cell {\tt condition}. */
   configuration <T color="yellow">
 		  <k color="green"> $PGM:CfgSym </k>
-                  <env color="blue"> .Map </env>
-		  <store color="orange"> .Map </store> 
+                  <state color="blue"> .Map </state>
 		  <condition color="red"> true </condition>
                 </T>
 
-// Array element: evaluate the array and its index; 
-// then the array lookup rule above applies.
-  context lvalue(_[HOLE])
-  context lvalue(HOLE[_])
-
+/*@ The concrete semantics of IMP which remains unchanged for symbolic execution */
 // AExp
-  rule <k> X:Id => V ...</k> <env>... X |-> L ...</env> <store>... L:Int |-> V:Val </store>
-  rule <k> array(L:Int, Size:Int)[I:Int] => lookup(L +Int I) ...</k>
-       <store>... L |-> V:#Int ...</store>
- 
-  rule <k> array(L:Int, Size:Int)[I:Int] => select(A, I) ...</k>
-       <store>... L |-> A:Array ...</store>
-
+  rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
 //  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
 // BExp
@@ -89,37 +67,16 @@ module IMP
 // Block
   rule {} => .   [structural]
   rule {S} => S  [structural]
-
-// lvalue
-  syntax AExp ::= "lvalue" "(" K ")"
-
-// Local variable                                                                                        
-  rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
-    [structural]
-
-// lookup
-  syntax K ::= "lookup" "(" Int ")"
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
-
 // Stmt
-  context (HOLE => lvalue(HOLE)) = _;
-  rule <k> loc(L:Int) = I:Int; => . ...</k> <store>... L |-> (_ => I) ...</store>
-  rule <k> lvalue(array(L:Int, Size:Int)[I:Int]) => loc(L +Int I) ...</k> 
-       <store>... L |-> V:#Int ...</store>
-
-  rule <k> loc(array(L:Int, Size:Int)[I:Int]) = V:Val; => . ...</k> 
-       <store>... L |-> (A:Array => store(A, I, V)) ...</store>
-   
+  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
   rule S1 S2 => S1 ~> S2  [structural]
 //  rule if (true)  S else _ => S
 //  rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
-  rule <k> int (X:Id,Xs:AExps => Xs);_ </k> 
-       <env> Rho:Map (. => X |-> L) </env>
-       <store>... . => (L |-> 0) </store>
-    when notBool (X in keys(Rho)) andBool fresh(L:Int)
-  rule int .AExps; S => S  [structural]
+  rule <k> int (X:Id,Xs:Ids => Xs);_ </k> <state> Rho:Map (. => X|->0) </state>
+    when notBool (X in keys(Rho))
+  rule int .Ids; S => S  [structural]
 
 /*@ The symbolic semantics of IMP. Note that these rules can be automatically generated from concrete ones applying three steps:
 \begin{itemize}
@@ -157,23 +114,17 @@ module IMP
   rule [initial]:   <k>
 			<k> Program:Stmt </k>
 			<env> InitVs:InitVals </env>
-			<store> InitVs':InitVals </store>
 			<condition> Formula:Fol </condition> 
-			=> initialize1(InitVs) ~> initialize2(InitVs') ~> Program
+			=> initialize(InitVs) ~> Program
 		    </k>
 		    <condition> _ => Formula </condition>  
 
 //@ Load the environment.
-  syntax K ::= "initialize1" "(" InitVals ")"
-  	     | "initialize2" "(" InitVals ")"
+  syntax K ::= "initialize" "(" InitVals ")"
 
-  rule initialize1(.InitVals) => . [structural]
-  rule <k> initialize1(X:Id -> I:AExp, Vs:InitVals) => initialize1(Vs) ...</k>
-       <env>... . => X |-> I </env> [structural]
-
-  rule initialize2(.InitVals) => . [structural]
-  rule <k> initialize2(X:Int -> I:AExp, Vs:InitVals) => initialize2(Vs) ...</k>
-       <store>... . => X |-> I </store> [structural]
+  rule initialize(.InitVals) => . [structural]
+  rule <k> initialize(X:Id -> I:Int, Vs:InitVals) => initialize(Vs) ...</k>
+       <state>... . => X |-> I </state> [structural]
 
 //@ Transform BExp formulas into internal representation for formulas.
   syntax Int ::= "transformInt" "(" AExp ")" [function]
@@ -189,9 +140,5 @@ module IMP
   rule transformBool(B1:BExp && B2:BExp) => transformBool(B1) andBool transformBool(B2)
   rule transformBool(! B:BExp) => notBool transformBool(B)
   rule transformBool(B:Bool) => B
-
-  rule isSymbolicInt(select(A:Array, I:Int)) => true [anywhere]
-  rule isInt(select(A:Array, I:Int)) => true [anywhere]
-  rule lvalue(array(I:Int, S:Int)[V:Int]) => lvalue(loc(array(I:Int, S:Int)[V:Int]))
 
 endmodule
