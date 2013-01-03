@@ -55,7 +55,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
         // for each sort, define the SMT representation of the symbolic sort
         // constructors symSort(Int), symSort(String) and symSort(Id)
-        // TODO: add generic K2String and genrate support for symSort(K)
+        // TODO: add generic K2String and generate support for symSort(K)
         for (String sort : node.getAllSorts()) {
             if (AddSymbolicK.allowKSymbolic(sort)) {
                 String symCtor = AddSymbolicK.symbolicConstructor(sort);

@@ -159,6 +159,7 @@ module SYMBOLIC-K
   syntax K ::= #freshSym(K) [function]
   rule #freshSym(K:K) => #freshSymSortN(K2Sort(K),0)
 
-  
+  // arrays
+//  rule K2SMTLib(
 endmodule
 
