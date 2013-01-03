@@ -5,7 +5,7 @@
       )
 </k>
 <env>
-  i -> symInt(i01), SymMap(M1) 
+  i -> #symInt(i01), SymMap(M1) 
 </env>
 
 ~
@@ -17,15 +17,15 @@
       )
 </k>
 <env>
-  i -> symInt(i02),
-  k -> symInt(k0), SymMap(M2)
+  i -> #symInt(i02),
+  k -> #symInt(k0), SymMap(M2)
 </env>
 
 if
 
-  symInt(k0) == symInt(i02) * symInt(i02)
+  #symInt(k0) == #symInt(i02) * #symInt(i02)
   and
-  symInt(i01) == symInt(i02)
+  #symInt(i01) == #symInt(i02)
 
 using observers: n, s;
 
