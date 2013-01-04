@@ -1,0 +1,14 @@
+int S, i, n;
+
+pre: 0 <= n
+post: S == n * (n + 1) / 2
+
+S = 0;
+i = 1;
+while (i <= n)
+invariant: 
+     2*S == i * (i - 1)  and i <= n + 1
+{
+  S = S + i;
+  i = i + 1;
+}
