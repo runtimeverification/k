@@ -1,0 +1,21 @@
+<k>
+   a :- 0 :: L1 : 1 :: L2 : a ; a
+</k>
+<env>
+   
+</env>
+
+~
+
+<k>
+  b :- 0 :: L1 : c ; c :- 1 :: L2 : b ; b
+</k>
+<env>
+
+</env>
+
+if
+  true
+using observers: hd;
+
+

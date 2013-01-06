@@ -32,9 +32,9 @@ module MAP-SYMBOLIC
 
   rule followup(S:K, (X:K |-> V:Int M:Map), F:Bool) 
        =>
-       X |-> V' followup(S, M, F)
-       when ((F impliesBool (X isNotModifiedBy S)) =/=K true)
-       andBool fresh(V':Int)
+       X |-> V followup(S, M, F)
+//       when ((F impliesBool (X isNotModifiedBy S)) =/=K true)
+//       andBool fresh(V':Int)
        [anywhere] 
 
   rule followup(S:K, (X:K |-> V:Bool M:Map), F:Bool) 
@@ -55,7 +55,7 @@ module MAP-SYMBOLIC
 
   //@ Lookup
   syntax K ::= "lookup" "(" K "," Map ")" [function]
-  rule [lookup] :  lookup(X:K, (_ X |-> I:Int _)) => I
+  rule [lookup] :  lookup(X:K, (_ X |-> V:K _)) => V
 
   rule [lookup] :
        lookup(X:K, followup(SS:K, Rho:Map, F)) 
@@ -110,7 +110,8 @@ module IMP-SYNTAX
   				> BExp "and" BExp [left, strict(1)]
   				| "(" BExp ")"    [bracket]
 
-  syntax Stmt ::= "skip"
+
+  syntax Stmt ::= "skip" | Elt | Elt "::" Stmt | Id ":-" Stmt
   				| Id ":=" AExp   [strict(2)]
   				| "if" BExp "then" Stmt "else" Stmt [strict(1)]
   				| "while" BExp "do" Stmt
@@ -119,6 +120,10 @@ module IMP-SYNTAX
                                 | Id ":" Stmt
   				> Stmt ";" Stmt   [left]
   				| "(" Stmt ")"    [bracket]
+
+  syntax Elt ::= Id | Int
+
+//  syntax Stmt ::= Elt | Elt "::" Stmt | Id ":-" Stmt
 
   syntax Pgm ::= "var" Ids ";" Stmt
   syntax Ids ::= List{Id, ","}
@@ -213,8 +218,8 @@ module PEQ
                       <condition> true </condition>
                     </hypo>
                   </hypos>
-                  <observers> .List </observers> 
-//                  <nextSymVar> 0 </nextSymVar>
+                  <observers> .List </observers>
+<trace> .K </trace>
                 </T>
 
 /*@
@@ -224,7 +229,8 @@ module PEQ
   remain \texttt{true} and \texttt{false}.
 */
 
-  syntax KResult ::= Int | #Bool
+  syntax KResult ::= Val
+  syntax Val ::= Int | #Bool | "val" "(" Bool ")"
 
 /*@
   We use a new syntactic construct that help us to store hypotheses. The basic
@@ -233,7 +239,23 @@ module PEQ
   the same label (the label is a kind of "rendevous" synchronisarion). 
 */
 
-  syntax K ::= "storeHypo" "(" Id "," K ")"
+  syntax K ::= "storeHypo" "(" K ")"   // for storing hypotheses
+            |  "lbldStmt" "(" Id "," K ")"    // event signalling a labelled
+                                              // statement
+
+            |  "checkHypo" "(" K "," Map "," K "," Map "," Bag ")"
+               // for checking hypotheses one by one 
+
+            |  "checkSubst" "(" K "," K ")" [strict] // check the substitution
+  // given by the programs from the current formual and the checked hypothesis
+
+            |  "checkCond" "(" K "," K ")"  // check the conditions of the
+                                     // current formula and checked hypothesis
+
+  syntax K ::= "break"  // to temporarily stop one of the two programs
+
+
+
 
 /*@
   The semantics of the expressions remains unchanged, excepting the memory 
@@ -290,7 +312,7 @@ module PEQ
        I := A1;
        if (I <= A2) then (S; for I from (A1 + 1) to A2  do S)
                     else skip
-       [transition] 
+//       [transition] 
 
 
 /*@ \subsection{Labelled statements}
@@ -298,10 +320,10 @@ module PEQ
   attribute) to the labelled transitions.
 */
 
-  context _ : for _ from HOLE to _ do _
-  context _ : for _ from_ to HOLE do _
-  context _ : if HOLE then _ else _
-  context _ : _ := HOLE 
+//  context _ : for _ from HOLE to _ do _
+//  context _ : for _ from_ to HOLE do _
+//  context _ : if HOLE then _ else _
+//  context _ : _ := HOLE 
 
 /*@
   The labelled recursive statements have a special semantics because
@@ -321,41 +343,42 @@ module PEQ
   content of the cell \texttt{k} as argument of the synchronyzing
 */
 
-  rule <k>
+  rule [labelled-non-rec-stmt] :
+       <k>
           ( L:Id : S:Stmt
             =>
-            storeHypo(L, S ~> K) ~> S
+            lbldStmt(L, S ~> K) ~> S
           ) ~> K:K 
        </k>
        when isRecursive (S) =/=K true
-       [transition]
+//       [transition]
 
 /*@
   The two labeled recursive statements have a special semantics due to the
   label  propagation.
 */
 
-  rule [while] :
+  rule [while-labelled] :
        <k>
           L:Id : while B:BExp do S:Stmt ~> K:K
           => 
-          storeHypo(L, while B do S ~> K) ~>
+          lbldStmt(L, while B do S ~> K) ~>
           if B then S ; L : while B do S else skip
           ~> K
        </k> 
-       [transition]
+//       [transition]
 
-  rule [for]:  
+  rule [for-labelled]:  
         <k> 
-          L:Id : for I:Id from A1:Int to A2:Int do S:Stmt ~> K:K
+          L:Id : for I:Id from A1:AExp to A2:AExp do S:Stmt ~> K:K
            => 
-          storeHypo(L, for I from A1 to A2 do S ~> K) ~>
+          lbldStmt(L, for I from A1 to A2 do S ~> K) ~>
           I := A1;
           if (I <= A2) then (S; L : for I from (A1 + 1) to A2  do S)
                        else skip
           ~> K
         </k> 
-       [transition]
+//       [transition]
 
 /*@
   Semantics of the symbolic statements:
@@ -367,14 +390,14 @@ module PEQ
        <env> M:Map => followup(#symStmt(SS), M, F) </env>
        <condition> F:Bool </condition>
 //       when isSymbolicStmt(SS)
-       [transition] 
+//       [transition] 
 
 
   rule [symbolic-aexp] :
        <k> #symAExp(XS:K) => lookup(#symAExp(XS), Rho) ...</k>
        <env> Rho </env>
        when #symAExp(XS) in keys(Rho)
-       [transition]
+//       [transition]
 
   rule [symbolic-aexp] : 
        <config>... 
@@ -385,7 +408,7 @@ module PEQ
          <env> Rho':Map => update(Rho', #symAExp(XS), VS) </env>
        ...</config>
        when (notBool #symAExp(XS) in keys(Rho)) andBool fresh(VS:Int)
-       [transition] 
+//       [transition] 
 
 /*@
   The memory lookup rule is changed because now the memory can be a 
@@ -396,7 +419,7 @@ module PEQ
   rule [lookup] : 
        <k> X:Id =>  lookup(X, Rho) ...</k>
        <env> Rho:Map </env> 
-       [transition] 
+//       [transition] 
 
 /*@
   The semantics of the assignment is modified because of the symbolic  
@@ -406,14 +429,14 @@ module PEQ
   rule [assignment]:
        <k> X:Id := I:Int => . ...</k>
        <env> Rho:Map => update(Rho, X, I) </env>
-       [transition]
+//       [transition]
 
 
 /*@
   additional rules that conservatively extend the definition
 */
 
-  rule [sumb-boolean] :
+  rule [symb-boolean] :
        <k>
           B:K
           =>
@@ -422,7 +445,7 @@ module PEQ
        <env> Rho:Map </env>
        <condition> F:K </condition>
        when isSymbolicBool(B) andBool notBool(B in keys(Rho))
-       [transition]
+//       [transition]
 
   rule [derive-with-case-analysis]:
        <goal>
@@ -451,19 +474,19 @@ module PEQ
          C
        </goal>
        when isSymbolicBool(B) andBool notBool(B in keys(Rho1))
-       [transition]
+//       [transition]
 
   // the other two cases
 
   rule [sym-bool-red-to-true] :
        "sat" ~> "unsat" ~> B:K => true  // F impliesBool B
        when isSymbolicBool(B) 
-       [transition]
+//       [transition]
 
   rule [sym-bool-red-to-false] :
        "unsat" ~> "sat" ~> B:K => false // F impliesBool notBool B
        when isSymbolicBool(B) 
-       [transition]
+//       [transition]
 
 /*@
   When an existing elementary symbolic boolean expression has to be evaluated,
@@ -602,19 +625,11 @@ module PEQ
        eqEnv(Env1, Env2)
 
 
-  rule eqObs( <env>... X:Id |-> V1:K ...</env>
-              <env>... X:Id |-> V2:K ...</env>
+  rule eqObs( <env>... X:Id |-> V1:Int ...</env>
+              <env>... X:Id |-> V2:Int ...</env>
               <observers> ListItem(X) => . ...</observers>, F:K )
        when checkSat(filter(F andBool V1 =/=Int V2)) ==K "unsat" 
-
-
-  rule eqObs( <env>... X:Id |-> V1:K ...</env>
-              <env>... X:Id |-> V2:K ...</env>
-              <observers> ListItem(X) ...</observers>, F:K )
-       =>
-       false
-       when checkSat(filter(F andBool V1 =/=Int V2)) ==K "sat"
-
+// when V1 ==K V2
 
 /*@
   the equality of two (symbolic environments
@@ -647,83 +662,95 @@ module PEQ
   Try to compute the substitution between two programs:
 */
 
-  syntax Map ::= "getSubst" "(" K "," K ")" [function]
-              |  "noSubst"
+  syntax Exp ::= "getSubst" "(" K "," K "," Map ")" [function]
+            |  K "replBy" K [strict(2)]  // a substitution pair
+            |  Exp ";;" Exp [left, strict]      // concatenation of substitutions
+            |  "emptySubst"
+            | Val
 
-  rule getSubst(K:K, K) => .Map
+  rule getSubst(K:K, K, M:Map) => emptySubst
 
-  rule getSubst(A1:K + A1':K, A2:K + A2':K)
+  rule getSubst(A1:K + A1':K, A2:K + A2':K, M:Map)
        =>
-       getSubst(A1, A2) getSubst(A1', A2')
+       getSubst(A1, A2, M) ;; getSubst(A1', A2', M)
 
 
-  rule getSubst(A1:K * A1':K, A2:K * A2':K)
+  rule getSubst(A1:K * A1':K, A2:K * A2':K, M:Map)
        =>
-       getSubst(A1, A2) getSubst(A1', A2')
+       getSubst(A1, A2, M) ;; getSubst(A1', A2', M)
 
 
-  rule getSubst(A1:K / A1':K, A2:K / A2':K)
+  rule getSubst(A1:K / A1':K, A2:K / A2':K, M:Map)
        =>
-       getSubst(A1, A2) getSubst(A1', A2')
+       getSubst(A1, A2, M) ;;  getSubst(A1', A2', M)
 
 
-  rule getSubst(A1:K <= A1':K, A2:K <= A2':K)
+  rule getSubst(A1:K <= A1':K, A2:K <= A2':K, M:Map)
        =>
-       getSubst(A1, A2) getSubst(A1', A2')
+       getSubst(A1, A2, M) ;; getSubst(A1', A2', M)
 
 
-  rule getSubst(B1:K and B1':K, B2:K and B2':K)
+  rule getSubst(B1:K and B1':K, B2:K and B2':K, M:Map)
        =>
-       getSubst(B1, B2) getSubst(B1', B2')
+       getSubst(B1, B2, M) ;; getSubst(B1', B2', M)
 
 
-  rule getSubst(B1:K and B1':K, B2:K and B2':K)
+  rule getSubst(B1:K and B1':K, B2:K and B2':K, M:Map)
        =>
-       getSubst(B1, B2) getSubst(B1', B2')
+       getSubst(B1, B2, M) ;; getSubst(B1', B2', M)
 
 
-  rule getSubst(not B1:K, not B2:K) => getSubst(B1, B2)
+  rule getSubst(not B1:K, not B2:K, M:Map) => getSubst(B1, B2, M)
 
 
-  rule getSubst(S1:K ; S1':K, S2:K ; S2':K)
+  rule getSubst(S1:K ; S1':K, S2:K ; S2':K, M:Map)
        =>
-       getSubst(S1, S2) getSubst(S1', S2')
+       getSubst(S1, S2, M) ;; getSubst(S1', S2', M)
 
 
-  rule getSubst(if B1:K then S1:K else S2:K, if B1':K then S1':K else S2':K)
+  rule getSubst(if B1:K then S1:K else S2:K, if B1':K then S1':K else S2':K, M:Map)
        =>
-       getSubst(B1, B1') getSubst(S1, S1') getSubst(S2, S2')
+       getSubst(B1, B1', M) ;; getSubst(S1, S1', M) ;; getSubst(S2, S2', M)
 
 
-  rule getSubst(while B:K do S:K, while B':K do S':K)
+  rule getSubst(while B:K do S:K, while B':K do S':K, M:Map)
        =>
-       getSubst(B, B') getSubst(S, S')
+       getSubst(B, B', M) ;; getSubst(S, S', M)
 
 
   rule getSubst(for X:K from A1:K to A2:K do S:K,
-                for X:K from A1':K to A2':K do S':K)
+                for X:K from A1':K to A2':K do S':K, M:Map)
        =>
-       getSubst(A1, A1')  getSubst(A2, A2') getSubst(S, S')
+       getSubst(A1, A1', M) ;; getSubst(A2, A2', M) ;; getSubst(S, S', M)
 
 
-  rule getSubst(X:K := A1:K, X := A2:K) => getSubst(A1, A2)
+  rule getSubst(X:K := A1:K, X := A2:K, M:Map) => getSubst(A1, A2, M:Map)
 
 
-  rule getSubst(K1:K ~> K2:K, K1':K ~> K2':K)
+  rule getSubst(K1:K ;; K2:K, K1':K ;; K2':K, M:Map)
        =>
-       getSubst(K1, K1') getSubst(K2, K2')
+       getSubst(K1, K1', M) ;; getSubst(K2, K2', M)
        when (K1 =/=K .K)
        andBool (K2 =/=K .K)
        andBool (K1' =/=K .K)
        andBool (K2' =/=K .K)
 
-  rule getSubst(L1:Id : S1:K, L2:Id : S2:K) => getSubst(S1, S2)
+  rule getSubst(L1:Id : S1:K, L2:Id : S2:K, M:Map) => getSubst(S1, S2, M)
 
-  rule getSubst(I:K, A:K) => (I |-> A)
-       when isSymbolicInt(I)
 
-  rule getSubst(KL1:KLabel(_)~>_, KL2:KLabel(_)~>_) => noSubst
-       when KL1 =/=KLabel KL2
+  rule getSubst(X:K, A:AExp, (M:Map X |-> I)) => (I replBy A)
+       when isId(X) orBool isSymbolicAExp(X) // it does not work, therefore I added the following rules
+
+
+  rule getSubst(X:Id, A:AExp, (M:Map X |-> I)) => (I replBy A)
+
+  rule getSubst(#symAExp(X:K), A:AExp, (M:Map #symAExp(X) |-> I)) => (I replBy A)
+
+  rule getSubst(X:Id, B:BExp, (M:Map X |-> I)) => (I replBy B)
+
+
+//  rule getSubst(KL1:KLabel(_);;_, KL2:KLabel(_);;_) => noSubst
+//       when KL1 =/=KLabel KL2
 
   // to be completed
 
@@ -735,21 +762,20 @@ module PEQ
 
   rule getSubstMap(.Map, M:Map) => .Map
 
-  rule getSubstMap((M1:Map B:BExp |-> V:K), M2:Map)
+  rule getSubstMap((M1:Map E:K |-> V:K), M2:Map)
        =>
        getSubstMap(M1, M2) 
-       when isSymbolicBool(B)
-
-  rule getSubstMap((M1:Map A:AExp |-> V:K), M2:Map)
-       =>
-       getSubstMap(M1, M2) 
-       when isSymbolicAExp(A)
+       when isSymbolicBool(E) orBool isSymbolicAExp(E)
 
   rule getSubstMap((M1:Map X:Id |-> I:K), (M2:Map X |-> A:K))
        =>
        I |-> A getSubstMap(M1, M2) 
        when isSymbolicInt(I)
 
+  rule getSubstMap((M1:Map X:Id |-> I:K), (M2:Map X |-> A:K))
+       =>
+       getSubstMap(M1, M2) 
+       when isSymbolicInt(I) =/=K true
 
   rule getSubstMap((M1:Map followup(S:Stmt, Env:Map, F:Bool)), M2:Map)
        =>
@@ -764,17 +790,21 @@ module PEQ
   Check if a Map is a substitution (real map); only the false case is computed
 */
 
-  syntax K ::= "isSubst" "(" Map ")" 
+  syntax K ::= "isSubst" "(" K ")"  [function]
 
-  rule isSubst(M:Map I:K |-> A:K I |-> B:K) => false
-       when isSymbolicInt(I) andBool A =/=K B
-       [anywhere]
+  rule isSubst(emptySubst) => true
 
-    rule isSubst(_ noSubst ) => false
+  rule isSubst(M:K ;; (I:K replBy A:K)) => isSubst(M)
 
-    rule ((X:K |-> A:K) (X:K |-> A:K)) => (X:K |-> A:K) [anywhere]
 
-    rule noSubst noSubst => noSubst [anywhere]
+ //@ Two auxiliary rules
+
+  rule ((X:K |-> A:K) (X:K |-> A:K)) => (X:K |-> A:K) [anywhere]
+
+  rule E:Exp ;; emptySubst => E
+
+  rule emptySubst ;; E:Exp => E
+
 
 /*@
    Apply a substitution to a symbolic boolean expression
@@ -784,39 +814,15 @@ module PEQ
 
   rule applySubst((M:Map I:K |-> A:K), F:Bool) => 
        applySubst(M:Map, (F [ A / I ]))
-       when isSymbolicInt(I)
+//       when isSymbolicInt(I)
 //       when M =/=Map .Map
 
 
   rule applySubst((I:K |-> A:K), F:Bool) => (F [ A / I ])
-       when isSymbolicInt(I)
+//       when isSymbolicInt(I)
 
   rule applySubst(.Map, F:Bool) => F
 
-  rule applySubst((noSubst _), F:Bool) => false // hmm, naybe it should be revised
-
-/*@
-   Extend the substitution to specific expressions:
-*/
-
-  rule (I:Id isNotModifiedBy S:Stmt) [E:K / V:K] => I isNotModifiedBy S  [anywhere]
-
-/*@
-  The predicate isMap4Subst:
-*/
-
-  syntax Bool ::= "isMap4Subst" "(" Map ")" [function]
-
-  rule isMap4Subst(M:Map I:K |-> A:K) => isMap4Subst(M)
-       when isSymbolicInt(I)
-//       when M =/=Map .Map
-
-  rule isMap4Subst(I:K |-> A:K) => true
-       when isSymbolicInt(I)
-
-  rule isMap4Subst(.Map) => true
-
-  rule isMap4Subst(noSubst) => false
 
 
 /*@
@@ -826,121 +832,326 @@ module PEQ
 */
 
 
-  syntax K ::= "KItem" "(" Map ")"
-  syntax K ::= "KItem" "(" Bag ")"
-  syntax Bool ::= K "|-subst" K [function]
-
-//rule KItem(<hypo> B1:Bag </hypo>) |-subst KItem(<goal> B2:Bag </goal>) => true [anywhere]
-
-
-  rule KItem (H1:Bag H2:Bag) |-subst KItem(G:Bag)
-       =>
-       KItem (H1) |-subst KItem(G)
-       orBool
-       KItem (H2) |-subst KItem(G)
-       when (KItem(H1) =/=K KItem(.Bag)) andBool (KItem(H2) =/=K KItem(.Bag))
-
-syntax K ::= "break"
-
-  rule KItem(.Bag) |-subst KItem(G:Bag) => false
-
-
-  rule KItem(
-     <hypo>      
-       <condition>
-         F:Bool
-       </condition> 
-       <patt1>        
-         <k1>
-          K1:K 
-         </k1> 
-         <env1>
-          Rho1:Map
-         </env1> 
-       </patt1> 
-       <patt2>        
-         <k2> 
-           K2:K
-         </k2> 
-         <env2>
-          Rho2:Map
-         </env2> 
-       </patt2> 
-     </hypo>) 
-
-    |-subst
-
-     KItem(<goal>      
-       <condition>
-         F':Bool
-       </condition> 
-       <config>        
-         <k>
-          K1':K 
-         </k> 
-         <env>
-          Rho1':Map
-         </env> 
-       </config> 
-       <config>        
-         <k> 
-          K2':K
-         </k>
-         <env>
-          Rho2':Map
-         </env>
-       </config>
-     </goal>)
-     => 
-     true
-     when (((isMap4Subst(getSubst(K1, K1') getSubst(K2, K2')
-                        getSubstMap(Rho1, Rho1') getSubstMap(Rho2, Rho2')
-                       ) ==K true)
-            andBool (isSubst(getSubst(K1, K1') getSubst(K2, K2')
-                            getSubstMap(Rho1, Rho1') getSubstMap(Rho2, Rho2')
-                           ) =/=K false)
-            andBool (checkSat(filter(F' andBool 
-                    notBool applySubst((getSubst(K1, K1') getSubst(K2, K2')
-                                  getSubstMap(Rho1, Rho1') getSubstMap(Rho2, Rho2')), F)
-                             )) ==K "unsat")
-
-           ) orBool
-           ((isMap4Subst(getSubst(K1, K2') getSubst(K2, K1')
-                        getSubstMap(Rho1, Rho2') getSubstMap(Rho2, Rho1')
-                       ) ==K true)
-            andBool (isSubst(getSubst(K1, K2') getSubst(K2, K1')
-                            getSubstMap(Rho1, Rho2') getSubstMap(Rho2, Rho1')
-                           ) =/=K false)
-            andBool (checkSat(filter(F' andBool 
-                    notBool applySubst((getSubst(K1, K2') getSubst(K2, K1')
-                                  getSubstMap(Rho1, Rho2') getSubstMap(Rho2, Rho1')), F)
-                             )) ==K "unsat")
-
-           )
-          )
-
 /*@
-  The next rule gives semantics to the new construct \texttt{storeHyp}, which 
-  consists of storing the hypothesis given by the arguments. Its semantics
-  is similar to that of threads synchronization.\\
-  TBD: replace the values of the program variables with fresh symbolic
-  values and add to path condition the corresponding contraints.
-
-  The case when both statements are labeled and
-     the configurations are observational equal 
+  When two statemets with the same label are synchronized, there are two ways
+  to continue:
+  1) apply circularity deduction rule if there is an hypothesis that matches the current
+     formula;
+  2) store the current formula as a circular hypothesis when such an hypothesis does not
+     exist.
+  We use the auxiliary semantic statement checkHypo for deciding between the two cases.
+  Note: the semantics of lbldStmt is similar to that of threads synchronization.
 */
 
-  rule [store-hypo] :
+  rule [lbld-stmt-sync] : 
        <goal>
          <config> 
-           <k> storeHypo(L:Id, K1:K) => . ...</k>
+           <k> lbldStmt(L:Id, K1:K) => checkHypo(K1, Env1, K2, Env2, Hypos) ...</k>
            <env> Env1:Map </env>
          </config> 
          <config> 
-           <k> storeHypo(L, K2:K) => . ...</k>
+           <k> lbldStmt(L, K2:K) => break ...</k>
            <env> Env2:Map </env>
          </config>
+         <condition> F:Bool </condition>
+       </goal>
+       <hypos>
+         Hypos:Bag
+       </hypos>
+      [transition]
+
+  //@ The case when the set of hypotheses is empty and 
+  //     the configurations are observational equal.
+
+  rule [check-hypo-no-hyp-obseq] : 
+       <goal>
+         <config> 
+           <k> checkHypo(K1, Env1, K2, Env2, .Bag) => storeHypo(K1) ...</k>
+           <env> _ => Env1:Map </env>
+         </config> 
+         <config> 
+           <k> break => storeHypo(K2) ...</k>
+         ...</config>
+       <condition> F:K </condition>
+       ...</goal> 
+       <observers> Obs:List </observers> 
+       when (eqObs(<env> Env1 </env> 
+                   <env> Env2 </env> 
+                   <observers> Obs </observers>, F) ==K true)
+       [transition]
+
+  //@ The case when the set of hypotheses is empty and 
+  //     the configurations are observational equal.
+
+  rule [check-hypo-no-hyp-no-obseq] : 
+       <goal>
+         <config> 
+           <k> checkHypo(K1, Env1, K2, Env2, .Bag) => . ...</k>
+           <env> _ => Env1:Map </env>
+         </config> 
+         <config> 
+           <k> break => . ...</k>
+         ...</config>
+       <condition> F:K </condition>
+       ...</goal> 
+       <observers> Obs:List </observers> 
+       when (eqObs(<env> Env1 </env> 
+                   <env> Env2 </env> 
+                   <observers> Obs </observers>, F) =/=K true)
+       [transition]
+
+/*@
+  Check hypotheses.
+  This is the most tricky step since we have to find a substitution from an
+  hypothesis configuration and the current configuration and check that the
+  current path (formal) condition implies the formula obtained by applying
+  the substitution restrictied to the environment component to the hypothesis
+  path formula, as well the formula representing the substitution restricted
+  to program (k cell) component.
+  Recall that the substitution given by the environment (env cell) is obtained
+  with getMapSubst(), and that given by programs is obtained with getSubst().
+  Sibce the configurations in the current formula are unordered, we have 
+  to check two cases.
+*/
+
+  rule [check-hypo] :
+       <goal>
+         <config> 
+           <k> checkHypo(K1, Env1, K2, Env2, 
+     	       		               	     <hypo>      
+       					       <condition>
+					       F':Bool
+       					       </condition> 
+       					       <patt1>        
+         				         <k1>
+          					   K1':K 
+         					 </k1> 
+         					 <env1>
+          					   Env1':Map
+          					 </env1> 
+       					       </patt1> 
+       					       <patt2>        
+         				         <k2> 
+           					   K2':K
+						 </k2> 
+         					 <env2>
+         					   Env2':Map
+         					 </env2> 
+       					       </patt2> 
+     					     </hypo>
+                                             Hypos':Bag
+                      )
+            =>
+           checkSubst(getSubst(K1', K1, Env1'), getSubst(K2', K2, Env2')) ~>
+           checkCond(F, applySubst((getSubstMap(Env1', Env1) getSubstMap(Env2', Env2)), F'))
+           ...</k>
+         ...</config> 
+         <config> 
+           <k> break ...</k>
+         ...</config>
          <condition> F:K </condition>
+       </goal>
+/*
+<trace>
+. => break ~> getSubst(K1', K1, Env1') ~> getSubst(K2', K2, Env2')
+...</trace>
+*/
+       when (isSubst(getSubst(K1', K1, Env1')) ==K true)
+            orBool (isSubst(getSubst(K2', K2, Env2')) ==K true)
+       [transition]
+
+  rule [check-hypo] :
+       <goal>
+         <config> 
+           <k> checkHypo(K1, Env1, K2, Env2, 
+     	       		               	     <hypo>      
+       					       <condition>
+					       F':Bool
+       					       </condition> 
+       					       <patt1>        
+         				         <k1>
+          					   K1':K 
+         					 </k1> 
+         					 <env1>
+          					   Env1':Map
+          					 </env1> 
+       					       </patt1> 
+       					       <patt2>        
+         				         <k2> 
+           					   K2':K
+						 </k2> 
+         					 <env2>
+         					   Env2':Map
+         					 </env2> 
+       					       </patt2> 
+     					     </hypo>
+                                             Hypos':Bag
+                      )
+            =>
+           checkSubst(getSubst(K1', K2, Env1'), getSubst(K2', K1, Env2')) ~>
+           checkCond(F, applySubst((getSubstMap(Env1', Env2) getSubstMap(Env2', Env1)), F'))
+           ...</k>
+         ...</config> 
+         <config> 
+           <k> break ...</k>
+         ...</config>
+         <condition> F:K </condition>
+       </goal>
+/*
+<trace>
+. => break ~> getSubst(K1', K2, Env1') ~> getSubst(K2', K1, Env2')
+...</trace>
+*/
+       when (isSubst(getSubst(K1', K1, Env1')) ==K true)
+            orBool (isSubst(getSubst(K2', K2, Env2')) ==K true)
+       [transition]
+
+  //@ The evaluation of a substitutions
+
+  rule V1:Int replBy V2:Int => val(V1 ==Int V2)
+
+  rule V1:Bool replBy V2:Bool => val(V1 ==Bool V2)
+
+  rule val(V1:K) ;; val(V2:K) => val(V1 andBool V2)
+
+  rule emptySubst => val(true)
+
+  /*@ Check the substitution between the corresponding programs from
+    the current formula and those from the checked hypothesis
+     TBD: The condition does not verify now, to be revised
+  */ 
+
+  rule [checkSubst] :
+       <config> 
+         <k> checkSubst(val(B1:Bool), val(B2:Bool)) => . ...</k>
+       ...</config> 
+       <condition> F:Bool </condition>
+//       when checkSat(filter(F andBool notBool(B1 andBool B2))) ==K "unsat"
+
+   /*@ When the substitution is not implied by the formula, the checked
+       must be discarded. TBD
+   */
+
+  /*@ The case when the circularity rule can be applied;
+      both the substitution and the conditions are successfully checked
+     TBD: The condition does not verify now, to be revised
+  */
+  rule [circularity] :
+       (<goal>
+         <config> 
+           <k> checkCond(F:K, SF':K) ...</k>
+         ...</config> 
+         <config> 
+           <k> break ...</k>
+         ...</config>
+         <condition> F:K </condition>
+       </goal>
+       =>
+       success)
+//       when checkSat(filter(F andBool notBool(SF'))) ==K "unsat"
+
+/*@
+  The case when an hypothesis does not match the current formula.
+*/ 
+
+  rule [check-hyp-fail] :
+       <goal>
+         <config> 
+           <k> checkHypo(K1, Env1, K2, Env2, 
+     	       		               	     (<hypo>      
+       					       <condition>
+					       F':Bool
+       					       </condition> 
+       					       <patt1>        
+         				         <k1>
+          					   K1':K 
+         					 </k1> 
+         					 <env1>
+          					   Env1':Map
+          					 </env1> 
+       					       </patt1> 
+       					       <patt2>        
+         				         <k2> 
+           					   K2':K
+						 </k2> 
+         					 <env2>
+         					   Env2':Map
+         					 </env2> 
+       					       </patt2> 
+     					     </hypo>
+                        		     =>
+					     .)
+                                             Hypos':Bag
+                        )
+           ...</k>
+           <env> _ => Env1 </env>
+         ...</config> 
+         <config> 
+           <k> break ...</k>
+         ...</config>
+         <condition> F:K </condition>
+       ...</goal>
+       <observers> Obs:List </observers>
+/*
+<trace> 
+. => break ~> break ~> getSubst(K1', K1, Env1') ~> getSubst(K2', K2, Env2') ~>
+     getSubst(K1', K2, Env1') ~> getSubst(K2', K1, Env2')
+...</trace>  
+*/
+       when ((isSubst(getSubst(K1', K1, Env1')) =/=K true)
+             orBool (isSubst(getSubst(K2', K2, Env2')) =/=K true)
+            ) andBool
+            ((isSubst(getSubst(K1', K2, Env1')) =/=K true)
+             orBool (isSubst(getSubst(K2', K1, Env2')) =/=K true)
+            )
+
+       [transition]
+
+  //@ The rules preparing the storing of an hypothesis: 
+  rule [store-hypo] :
+       <config> 
+         <k> storeHypo(K1:K) => getFresh(Env1) ~> restore(K1, Env1) ...</k>
+         <env> Env1:Map </env>
+       </config> 
+       [transition]
+
+
+  //@ Generates fresh symbolic values for the stored hypothesis
+  syntax K ::= "getFresh" "(" Map ")"
+
+  rule [getFresh] :
+       <config>
+         <k> getFresh(((X:Id |-> _:Int) => .) _ ) ...</k>
+         <env>... X |-> (V:Int => VS) ...</env>
+       </config>
+       <condition> F:Bool => (F andBool (VS ==Int V)) </condition>
+       when fresh(VS:Int)
+
+  rule [getFresh] :
+       getFresh((X:K |-> V:K => .) _)
+       when (isId(X) =/=K true) orBool (isInt(V) =/=K true)
+
+  rule [getFresh] :
+       getFresh((#symbMap(_) => .) _)
+
+  rule [getFresh] :
+       getFresh((followup(_,_,_) => .) _)
+
+  rule getFresh(.Map) => .K
+
+  syntax K ::= "restore" "(" K "," Map ")"
+
+  rule [restore] :
+       <goal>
+         <config> 
+           <k> restore(K1:K, Env1':Map) => . ...</k>
+           <env> Env1:Map => Env1' </env>
+         </config> 
+         <config> 
+           <k> restore(K2:K, Env2':Map) => . ...</k>
+           <env> Env2:Map => Env2' </env>
+         </config>
+         <condition> F:Bool </condition>
        </goal>
        <hypos>
          Hypos:Bag
@@ -958,93 +1169,34 @@ syntax K ::= "break"
            <condition> F </condition>
          </hypo>
        </hypos>
-       <observers> Obs:List </observers>
-       when (eqObs(<env> Env1 </env> 
-                   <env> Env2 </env> 
-                   <observers> Obs </observers>, F) ==K true)
-            andBool
-            ((KItem(Hypos)
-            |-subst
-            KItem(<goal>
-               <config> 
-                 <k> K1 </k>
-                 <env> Env1 </env>
-               </config> 
-               <config> 
-                 <k> K2 </k>
-                 <env> Env2 </env>
-               </config>
-               <condition> F </condition>
-             </goal>))
-             =/=K true)
-       [transition]
+      [transition]
 
 
   /*@
      The case when both statements are labeled and
      the configurations are NOT observational equal 
   */ 
-  rule [store-hypo]:
+  rule [store-hypo-fail]:
        <goal>
          <config> 
-           <k> storeHypo(L:Id, K1:K) => . ...</k>
+           <k> lbldStmt(L1:Id, K1:K) => . ...</k>
            <env> Env1:Map </env>
          </config> 
          <config> 
-           <k> storeHypo(L, K2:K) => . ...</k>
+           <k> lbldStmt(L2:Id, K2:K) => . ...</k>
            <env> Env2:Map </env>
          </config>
          <condition> F:K </condition>
        </goal>
-       <hypos>
-         Hypos:Bag
-       </hypos>
        <observers> Obs:List </observers>
        when
-       eqObs(<env> Env1 </env> 
+       (L1 =/=K L2) orBool
+       (eqObs(<env> Env1 </env> 
              <env> Env2 </env> 
-             <observers> Obs </observers>, F) =/=K true
+             <observers> Obs </observers>, F) =/=K true)
        [transition]
 
 
-/*@
-  The next rule is intended to implement the entailment between the collected
-  hypotheses and goals. Obviously, this is a partial implementation. Again,
-  the formulas are ignored for now, because they are considered equal.
-*/
-
-  rule [circularity] :
-       (<goal>
-         <config> 
-           <k> storeHypo(L:Id, K1:K) ...</k>
-           <env> Env1:Map </env>
-         </config> 
-         <config> 
-           <k> storeHypo(L, K2:K) ...</k>
-           <env> Env2:Map </env>
-         </config>
-         <condition> F:K </condition>
-        </goal>
-        =>
-        success
-       )
-       <hypos> Hypos:Bag </hypos>
-       when
-       (KItem(Hypos)
-        |-subst 
-        KItem(<goal>
-         <config> 
-           <k> K1 </k>
-           <env> Env1 </env>
-         </config> 
-         <config> 
-           <k> K2 </k>
-           <env> Env2 </env>
-         </config>
-         <condition> F </condition>
-        </goal>)
-      ) ==K true
-     [transition]
 
 /*@
   The following rule creates the initial configuration from the equivalence
@@ -1105,6 +1257,9 @@ syntax K ::= "break"
        <k> setInitValObs(allObs) => . ...</k>
        [structural]
 
+  /*@ The values for observers must be different, in order to correctly 
+      define substitution.
+  */
 
   rule <config>
          <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
@@ -1115,7 +1270,6 @@ syntax K ::= "break"
          <env>... . => X |-> IS2 ...</env>
        </config> 
        <condition> B:K => B andBool (IS1 ==Int IS2) </condition>
-//       <nextSymVar> I:Int => I +Int 2 </nextSymVar>
        when fresh(IS1:Int) andBool fresh(IS2:Int)
        [structural]
 
@@ -1204,6 +1358,10 @@ syntax K ::= "break"
 //            (KL =/=KLabel '_isNotModifiedBy_)
 
 // trick:
+  rule replaceIsNotModifiedBy(B:Bool, true) => true
+
+  rule replaceIsNotModifiedBy(B:Bool, false) => false
+
   rule replaceIsNotModifiedBy(B:Bool, I1:Int <=Int I2:Int) => I1 <=Int I2 
 
   rule replaceIsNotModifiedBy(B:Bool, I1:Int ==Int I2:Int) => I1 ==Int I2
@@ -1226,7 +1384,7 @@ syntax K ::= "break"
 
 
   rule filter(B:Bool) => replaceIsNotModifiedBy(true, B) orBool
-                        replaceIsNotModifiedBy(false, B)
+                         replaceIsNotModifiedBy(false, B)
 
 /*@
   The following defines the substitution of the symbolic values with
@@ -1285,6 +1443,11 @@ syntax K ::= "break"
        B [ I2 / I1 ]
        [anywhere]
 
+/*@
+   Extend the substitution to specific expressions:
+*/
+
+  rule (I:Id isNotModifiedBy S:Stmt) [E:K / V:K] => I isNotModifiedBy S  [anywhere]
 
   rule B:Bool impliesBool true => true  [anywhere]
 
@@ -1304,5 +1467,24 @@ syntax K ::= "break"
   rule true orBool B:Bool => true  [anywhere]
 
   rule B:Bool impliesBool B => true [anywhere]
+
+  // SExp (Streams)
+
+  rule <k> X:Id :- S:Stmt => . ...</k>
+       <env>... . => X |-> S ...</env>
+
+  rule <k> (I:Int => .) :: S:Stmt ...</k>
+       <env>... O |-> (_ => I)  ...</env>
+       <observers> ListItem(O:Id) </observers>
+
+  rule .K :: S:Stmt => S
+
+  rule getSubstMap((M1:Map X:Id |-> S:Stmt), M2:Map)
+       =>
+       getSubstMap(M1, M2) 
+
+  rule getSubst(X:K :: S1:K, X:K :: S2:K, M:Map) => getSubst(S1, S2, M)
+
+  rule eqEnv((X:Id |-> S:Stmt Env1:Map), Env2:Map) => eqEnv(Env1, Env2) 
 
 endmodule
