@@ -17,11 +17,32 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * Class for representing a K cell term.  The textual representation of a K cell is the following:
+ *   Cell ::= "<" Label CellAttribute* ">"  CellContents  "</" Label ">"
+ *   Label ::= Id
+ *   CellContents ::= Term
+ *   CellAttribute = "ellipses" "=" ( '"left"' | '"right"' | '"both"' | '"none"')
+ *                 ...
+ *                 | "multiplicity" "=" ('"1"' | '"*"' | '"+"' | '"?"')
+ *                 | "color" "=" String
+ *                 | "stream" "=" ('"stdin"' | '"stdout"')
+ *
+ *  For example, a configuration cell might look like
+ *   <output color="blue" multiplicity="?" stream="stdout"> </output>
+ *
+ *  While a rule cell might look like
+ *     <k ellipses="right"> X </k>
+ *  corresponding to  <k> X ...</k>
+ *
+ */
 public class Cell extends Term {
+	/** Possible values for the multiplicity attribute */
 	public enum Multiplicity {
 		ONE, MAYBE, ANY, SOME,
 	}
 
+	/** Possible values for the ellipses attribute */
 	public enum Ellipses {
 		LEFT, RIGHT, BOTH, NONE,
 	}
@@ -29,6 +50,12 @@ public class Cell extends Term {
 	String label;
 	String endLabel;
 
+	/**
+	 * label and endLabel should be equal;  however, this is not checked during parsing, but later during compilation.
+	 * @return the end label
+	 *
+	 * @see org.kframework.parser.concrete.disambiguate.CellEndLabelFilter
+	 */
 	public String getEndLabel() {
 		return endLabel;
 	}

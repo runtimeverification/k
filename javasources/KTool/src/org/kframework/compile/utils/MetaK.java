@@ -34,21 +34,22 @@ public class MetaK {
 	}
 
 	public static class Constants {
+		public static final String anyVarSymbol = "_";
+		public static final String heatingTag = "heat";
+		public static final String coolingTag = "cool";
+		public static final String KItem = "KItem";
+		public static final String K = "K";
+		public static final String hole = "[]";
+		public static final String freshCons = "Bool1FreshSyn";
+		public static final String plusIntCons = "Int1PlusSyn";
+		public static final String Bag = "Bag";
 
-	   public static final String anyVarSymbol = "_";
-	   public static final String heatingTag = "heat";
-	   public static final String coolingTag = "cool";
-	   public static final String KItem = "KItem";
-	   public static final String K = "K";
-	   public static final String hole = "[]";
-	   public static final String freshCons = "Bool1FreshSyn";
-	   public static final String plusIntCons = "Int1PlusSyn";
-	   public static final String Bag = "Bag";
-   }
+		public static final String generatedTopCellLabel = "generatedTop";
+	}
 
 	static int nextVarId = 0;
 
-    public static Set<String> kModules = new HashSet<String>();
+	public static Set<String> kModules = new HashSet<String>();
 	static {
 		kModules.add("K-BUILTINS");
 		kModules.add("K-CONDITION-SEARCH");
@@ -213,7 +214,7 @@ public class MetaK {
 				super.visit(rewrite);
 			}
 		};
-		
+
 		t.accept(countVisitor);
 		return count.get(0);
 	}
@@ -312,7 +313,7 @@ public class MetaK {
 		return t;
 	}
 
-    public static boolean isAnonVar(Variable node) {
+	public static boolean isAnonVar(Variable node) {
 		return node.getName().startsWith(Constants.anyVarSymbol);
 	}
 
@@ -327,8 +328,8 @@ public class MetaK {
 
 	public static String getListUnitLabel(String sep) {
 		//return "'.List`{\"" + sep + "\"`}";
-        String unitStr = "'.List{\"" + sep + "\"}";
-        return StringUtil.escapeMaude(unitStr).replace(" ", "");
+		String unitStr = "'.List{\"" + sep + "\"}";
+		return StringUtil.escapeMaude(unitStr).replace(" ", "");
 	}
 
 	public static List<Cell> getTopCells(Term t) {
@@ -358,67 +359,67 @@ public class MetaK {
 		List<Term> col = new ArrayList<Term>();
 		col.add(contents);
 		switch (sort) {
-		case Bag:
-			return new Bag(col);
-		case List:
-			return new org.kframework.kil.List(col);
-		case Set:
-			return new org.kframework.kil.Set(col);
-		case Map:
-			return new Map(col);
-		case K:
-			return new KSequence(col);
-		default:
-			return null;
+			case Bag:
+				return new Bag(col);
+			case List:
+				return new org.kframework.kil.List(col);
+			case Set:
+				return new org.kframework.kil.Set(col);
+			case Map:
+				return new Map(col);
+			case K:
+				return new KSequence(col);
+			default:
+				return null;
 		}
 	}
 
 
-    public static Term fillHole(Term t, final Term replacement) {
+	public static Term fillHole(Term t, final Term replacement) {
 		CopyOnWriteTransformer holeFiller = new CopyOnWriteTransformer("Hole Filling") {
 			@Override
 			public ASTNode transform(Hole node) {
-                return replacement;
+				return replacement;
 			}
 		};
-        try {
-            Term result = (Term) t.accept(holeFiller);
-            return result;
-        } catch (TransformerException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		try {
+			Term result = (Term) t.accept(holeFiller);
+			return result;
+		} catch (TransformerException e) {
+			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 
-        }
-        return null;
-    }
+		}
+		return null;
+	}
 
-    public static Term createFreezer(Term body) {
+	public static Term createFreezer(Term body) {
 
-        return null;  //To change body of created methods use File | Settings | File Templates.
-    }
+		return null;  //To change body of created methods use File | Settings | File Templates.
+	}
 
-    public static boolean isPredicateLabel(String name) {
-        if (name.startsWith("is")) {
-            return true;
-        }
-        return false;
-    }
+	public static boolean isPredicateLabel(String name) {
+		if (name.startsWith("is")) {
+			return true;
+		}
+		return false;
+	}
 
 	public static Term getHoleReplacement(Term t) {
-        final List<Term> result = new ArrayList<Term>();
+		final List<Term> result = new ArrayList<Term>();
 		Visitor holeReplacementFinder = new BasicVisitor() {
 			@Override
 			public void visit(Rewrite node) {
-                final Term left = node.getLeft();
-                if (left instanceof Hole) {
-                    result.add(node.getRight());
-                }
-                if (left instanceof Variable) {
-                    if (((Variable)left).getName().equals(MetaK.Constants.hole)) {
-                        result.add(node.getRight());
-                        if (10 / 0 == 0)
-                            return;
-                    }
-                }
+				final Term left = node.getLeft();
+				if (left instanceof Hole) {
+					result.add(node.getRight());
+				}
+				if (left instanceof Variable) {
+					if (((Variable)left).getName().equals(MetaK.Constants.hole)) {
+						result.add(node.getRight());
+						if (10 / 0 == 0)
+							return;
+					}
+				}
 
 			}
 		};
@@ -429,4 +430,4 @@ public class MetaK {
 		}
 		return new Hole("K");
 	}
- }
+}

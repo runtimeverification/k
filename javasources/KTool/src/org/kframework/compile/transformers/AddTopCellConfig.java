@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class AddTopCell extends CopyOnWriteTransformer {
+public class AddTopCellConfig extends CopyOnWriteTransformer {
 
-	public AddTopCell() {
-		super("Add top cell");
+	public AddTopCellConfig() {
+		super("Add top cell for configurations");
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -43,7 +43,7 @@ public class AddTopCell extends CopyOnWriteTransformer {
 		List<PriorityBlock> topCellBlocks = new ArrayList<PriorityBlock>();
 		PriorityBlock topPriorityBlock = new PriorityBlock();
 		List<ProductionItem> topTerminals = new ArrayList<ProductionItem>();
-		topTerminals.add(new Terminal("generatedTop"));
+		topTerminals.add(new Terminal(MetaK.Constants.generatedTopCellLabel));
 		Production topProduction = new Production(new Sort("CellLabel"), topTerminals );
 		topPriorityBlock.getProductions().add(topProduction);
 		topCellBlocks.add(topPriorityBlock);
@@ -54,17 +54,13 @@ public class AddTopCell extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(Rule node) {
-		if (MetaK.isAnywhere(node)) return node;
-		if (!MetaK.hasCell(node.getBody())) return node; 
-		node = node.shallowCopy();
-		node.setBody(MetaK.wrap(node.getBody(),"generatedTop",Ellipses.BOTH));
 		return node;
 	}
-	
+
 	@Override
 	public ASTNode transform(Configuration node) {
 		node = node.shallowCopy();
-		node.setBody(MetaK.wrap(node.getBody(),"generatedTop",Ellipses.NONE));
+		node.setBody(MetaK.wrap(node.getBody(),MetaK.Constants.generatedTopCellLabel,Ellipses.NONE));
 		return node;
 	}
 	

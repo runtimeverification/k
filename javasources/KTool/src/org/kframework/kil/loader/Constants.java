@@ -1,5 +1,8 @@
 package org.kframework.kil.loader;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author andrei.arusoaie
  * 
@@ -89,4 +92,10 @@ public class Constants {
 	// Generated stuff
 	public static final String GENERATED_FILENAME = "File System";
 	public static final String GENERATED_LOCATION = "generated";
+	public static final Map<String,String> defaultAttributeValues = new HashMap<String, String>();
+
+	static {
+		defaultAttributeValues.put("filename", Constants.GENERATED_FILENAME);
+		defaultAttributeValues.put("location", Constants.GENERATED_LOCATION);
+	}
 }

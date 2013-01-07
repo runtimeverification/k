@@ -9,14 +9,29 @@ import org.spoofax.jsglr.client.imploder.ITokenizer;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.w3c.dom.Element;
 
+/**
+ * Base class for K AST.
+ * Useful for Visitors and Transformers.
+ *
+ * @see Visitable
+ * @see Transformable
+ */
 public abstract class ASTNode implements Visitable, Transformable {
 	// attributes non-null
 	protected Attributes attributes;
 
+	/**
+	 * Initializes an ASTNode from XML describing the parse tree
+	 * @param elem The XML element describing the ASTNode
+	 */
 	public ASTNode(Element elem) {
 		this(getElementLocation(elem), getElementFile(elem));
 	}
 
+	/**
+	 * Initializes an ASTNode from the corresponding Stratego datastructure.
+	 * @param elem the Stratego object representing an ASTNode
+	 */
 	public ASTNode(IStrategoAppl elem) {
 		ITokenizer tkz = ImploderAttachment.getTokenizer(elem);
 
@@ -28,6 +43,11 @@ public abstract class ASTNode implements Visitable, Transformable {
 		this.setLocation(loc);
 	}
 
+	/**
+	 * Retrieves the location from an XML element
+	 * @param elem
+	 * @return the location stored in XML or Constants.GENERATED_LOCATION if no location found.
+	 */
 	private static String getElementLocation(Element elem) {
 		if (elem != null)
 			return elem.getAttribute(Constants.LOC_loc_ATTR);
@@ -35,6 +55,11 @@ public abstract class ASTNode implements Visitable, Transformable {
 			return Constants.GENERATED_LOCATION;
 	}
 
+	/**
+	 * Retrieves the file name from an XML element
+	 * @param elem
+	 * @return  the file name stored in XML or Constants.GENERATED_FILENAME if no filename found.
+	 */
 	private static String getElementFile(Element elem) {
 		if (elem != null)
 			return elem.getAttribute(Constants.FILENAME_filename_ATTR);
@@ -42,79 +67,81 @@ public abstract class ASTNode implements Visitable, Transformable {
 			return Constants.GENERATED_FILENAME;
 	}
 
+	/**
+	 * Copy constructor
+	 * @param astNode
+	 */
 	public ASTNode(ASTNode astNode) {
 		attributes = astNode.attributes;
 	}
 
+	/**
+	 * Default constructor (generated at runtime)
+	 */
 	public ASTNode() {
 		this(Constants.GENERATED_LOCATION, Constants.GENERATED_FILENAME);
 	}
 
+	/**
+	 * Constructor with specified location and filename.
+	 * @param loc
+	 * @param file
+	 */
 	public ASTNode(String loc, String file) {
 		// attributes = new Attributes();
 		setLocation(loc);
 		setFilename(file);
 	}
 
-	public String getMaudeLocation() {
-		String loc = getLocation();
-		loc = loc.replaceAll(",", ":");
-		loc = loc.replaceFirst("\\(", "(" + getFilename() + ":");
-		if (!loc.startsWith("("))
-			loc = "(" + loc + ")";
-
-		return loc;
-	}
-
+	/**
+	 * Retrieves the location of the current ASTNode.
+	 * @return recorded location or Constants.GENERATED_LOCATION if no recorded location found.
+	 */
 	public String getLocation() {
-		// next if statement should be unnecessary
-		if (attributes == null)
-			return Constants.GENERATED_LOCATION;
-
-		String loc = attributes.get("location");
-		if (loc == null || loc.isEmpty())
-			loc = Constants.GENERATED_LOCATION;
-		return loc;
+		return getAttribute("location");
 	}
 
+	/**
+	 * Sets the location or removes it if appropriate.
+	 * @param loc
+	 */
 	public void setLocation(String loc) {
-		// next 2 if statements should be unnecessary
-		if (loc.equals(Constants.GENERATED_LOCATION))
-			return;
-		if (attributes == null)
-			attributes = new Attributes();
-
-		attributes.set("location", loc);
+		putAttribute("location",loc);
 	}
 
+	/**
+	 * Retrieves the filename of the current ASTNode.
+	 * @return recorded filename or Constants.GENERATED_FILENAME if no recorded location found.
+	 */
 	public String getFilename() {
-		// next if statement should be unnecessary
-		if (attributes == null)
-			return Constants.GENERATED_FILENAME;
-
-		String file = attributes.get("filename");
-		if (file == null || file.isEmpty())
-			file = Constants.GENERATED_FILENAME;
-		return file;
+		return getAttribute("filename");
 	}
 
+	/**
+	 * Sets the filename or removes it if appropriate.
+	 * @param file
+	 */
 	public void setFilename(String file) {
-		// next 2 if statements should be unnecessary
-		if (file.equals(Constants.GENERATED_FILENAME))
-			return;
-		if (attributes == null)
-			attributes = new Attributes();
-
-		attributes.set("filename", file);
+		putAttribute("filename",file);
 	}
 
 	/*
 	 * methods for easy attributes manipulation
 	 */
+
+	/**
+	 * Appends an attribute to the list of attributes.
+	 * @param key
+	 * @param val
+	 */
 	public void addAttribute(String key, String val) {
 		addAttribute(new Attribute(key, val));
 	}
 
+	/**
+	 * Appends an attribute to the list of attributes.
+	 * @param attr
+	 */
 	public void addAttribute(Attribute attr) {
 		if (attributes == null)
 			attributes = new Attributes();
@@ -122,6 +149,10 @@ public abstract class ASTNode implements Visitable, Transformable {
 		attributes.contents.add(attr);
 	}
 
+	/**
+	 * @param key
+	 * @return whether the attribute key occurs in the list of attributes.
+	 */
 	public boolean containsAttribute(String key) {
 		if (attributes == null)
 			return false;
@@ -129,27 +160,57 @@ public abstract class ASTNode implements Visitable, Transformable {
 		return attributes.containsKey(key);
 	}
 
+	/**
+	 * Retrieves the attribute by key from the list of attributes
+	 * @param key
+	 * @return a value for key in the list of attributes or the default value.
+	 */
 	public String getAttribute(String key) {
+		final String defaultValue = Constants.defaultAttributeValues.get(key);
 		if (attributes == null)
-			return null;
-
-		return attributes.get(key);
+			return defaultValue;
+		final String value = attributes.get(key);
+		if (value == null)
+			return defaultValue;
+		return value;
 	}
 
+	/**
+	 * Updates the value of an attribute in the list of attributes.
+	 * @param key
+	 * @param val
+	 */
 	public void putAttribute(String key, String val) {
+		final String defaultValue = Constants.defaultAttributeValues.get(key);
+		if (val.equals(defaultValue)) {
+			if (getAttribute(key).equals(defaultValue))
+				return;
+			attributes.remove(key);
+			return;
+		}
 		if (attributes == null)
 			attributes = new Attributes();
 
 		attributes.set(key, val);
 	}
 
+	/**
+	 * @return the attributes object associated to this ASTNode.
+	 */
 	public Attributes getAttributes() {
 		return attributes;
 	}
 
+	/**
+	 * Sets the attributes object associated to this ASTNode.
+	 * @param attrs
+	 */
 	public void setAttributes(Attributes attrs) {
 		attributes = attrs;
 	}
 
+	/**
+	 * @return a copy of the ASTNode containing the same fields.
+	 */
 	public abstract ASTNode shallowCopy();
 }

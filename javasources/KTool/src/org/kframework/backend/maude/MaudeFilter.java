@@ -110,7 +110,7 @@ public class MaudeFilter extends BackendFilter {
 						p.getAttributes().accept(this);
 						result.append(" hybrid=()");
 						result.append(" location=");
-						result.append(p.getMaudeLocation());
+						result.append(getMaudeLocation(p));
 						result.append("\"] .\n");
 						result.append("op .List`{\"");
 						result.append(list.getSeparator());
@@ -136,7 +136,7 @@ public class MaudeFilter extends BackendFilter {
 						result.append(" [metadata \"");
 						p.getAttributes().accept(this);
 						result.append(" location=");
-						result.append(p.getMaudeLocation());
+						result.append(getMaudeLocation(p));
 						result.append("\"]");
 						// }
 						result.append(" .\n");
@@ -369,7 +369,7 @@ public class MaudeFilter extends BackendFilter {
 			result.append(" \"");
 			rule.getAttributes().accept(this);
 			result.append(" location=");
-			result.append(rule.getMaudeLocation());
+			result.append(getMaudeLocation(rule));
 			result.append("\"] .\n");
 		}
 	}
@@ -443,7 +443,7 @@ public class MaudeFilter extends BackendFilter {
 		result.append(" \"");
 		sentence.getAttributes().accept(this);
 		result.append(" location=");
-		result.append(sentence.getMaudeLocation());
+		result.append(getMaudeLocation(sentence));
 		result.append("\"] .");
 	}
 
@@ -658,5 +658,15 @@ public class MaudeFilter extends BackendFilter {
 
 	public static String getMaudeConstructor(String sort) {
 		return maudeCollectionConstructors.get(KSort.getKSort(sort));
+	}
+
+	public String getMaudeLocation(ASTNode node) {
+		String loc = node.getLocation();
+		loc = loc.replaceAll(",", ":");
+		loc = loc.replaceFirst("\\(", "(" + node.getFilename() + ":");
+		if (!loc.startsWith("("))
+			loc = "(" + loc + ")";
+
+		return loc;
 	}
 }

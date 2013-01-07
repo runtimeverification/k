@@ -221,8 +221,9 @@ public class KompileFrontEnd {
 			steps.add(new AddSymbolicK());
 			//			steps.add(new ResolveFresh());
 			steps.add(new ResolveFreshMOS());
+			steps.add(new AddTopCellConfig());
 			if (GlobalSettings.addTopCell) {
-				steps.add(new AddTopCell());
+				steps.add(new AddTopCellRules());
 			}
 			steps.add(new AddEval());
 			steps.add(new ResolveBinder());
