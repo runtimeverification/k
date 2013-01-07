@@ -102,6 +102,10 @@ module STRING-HOOKS
   rule trim(S:K) => ltrim(rtrim(S))
 
   syntax K ::= "#parseToken" "(" String "," String ")"  [function]
+  rule #parseToken("#Int",S:String) => String2Int(S)
+  rule #parseToken("#Float",S:String) => (String2Float(S)) 
+  rule #parseToken("#String",S:String) => (S) 
+  rule #parseToken("#Id",S:String) => (String2Id(S))
   rule #parseToken("Int",S:String) => String2Int(S)
   rule #parseToken("Float",S:String) => (String2Float(S)) 
   rule #parseToken("String",S:String) => (S) 

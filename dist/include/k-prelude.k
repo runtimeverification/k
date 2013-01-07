@@ -148,7 +148,8 @@ interface K-LIST-EXTRAS
 
    rule lengthList ( ListItem(_) L:List ) => 1 +Int lengthList L [structural, anywhere]
    rule lengthList .List => 0 [structural, anywhere]
-        rule isKResult((K1:KResult => .List{K}),, _:K,, _:List{K})
+   rule isKResult((K1:KResult => .List{K}),, _:K,, _:List{K})
+   rule isKResult(.List{K}) => true
 endinterface
 
 module K-RESULT
