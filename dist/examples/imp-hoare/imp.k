@@ -5,6 +5,7 @@ module IMP-SYNTAX
   imports FOL
 
   syntax AExp  ::= Int | Id
+  	         | AExp "[" AExp "]"          [strict]
                  > left:
 		   AExp "*" AExp              [left, strict]
                  | AExp "/" AExp              [left, strict]
@@ -21,38 +22,57 @@ module IMP-SYNTAX
   syntax Block ::= "{" "}"
                  | "{" Stmt "}"
   syntax Stmt  ::= Block
-                 | Id "=" AExp ";"            [strict(2)]
+                 | AExp "=" AExp ";"          [strict(2)]
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
 		 > Stmt Stmt                  [left]
-  syntax Pgm   ::= "int" Ids ";" Stmt
+  syntax Pgm   ::= "int" AExps ";" Stmt
+  syntax AExps ::= List{AExp,","}
   syntax Ids   ::= List{Id,","}
 
   syntax Stmt ::= "while " "(" BExp ")" "invariant" ":" Assert Block
   syntax Assert ::= BExp
-  	 	  | Assert "and" Assert [strict]
-		  | Assert "or" Assert  [strict]
-		  | "not" Assert        [strict]
+		  | "not" Assert		[strict]
+  	 	  | Assert "and" Assert		[left, strict]
+		  > Assert "or" Assert		[left, strict]
+		  > Assert "implies" Assert     [left, strict]
+		  | "forall" Ids "(" Assert ")" [strict(2)]
+		  | "exists" Ids "(" Assert ")" [strict(2)]
+
   syntax Pre   ::= "pre"  ":" Assert
   syntax Post  ::= "post" ":" Assert
-  syntax Program ::= "int" Ids ";" Pre Post Stmt
+  syntax Program ::= "int" AExps ";" Pre Post Stmt
+
+  // Values   
+  syntax Val ::= Int | Bool | Array
+  	       | "array" "(" Int "," Int ")" 
+	       | "loc" "(" AExp ")"
+  syntax AExp ::= Val
+
 endmodule
 
 module IMP
   imports IMP-SYNTAX
 
-  syntax KResult ::= Int | Bool
+  syntax KResult ::= Val
 
   configuration <T color="yellow">
 		  <k color="green"> $PGM:Program </k>
-                  <state color="blue"> .Map </state>
+		  <env color="black"> .Map </env>
+                  <store color="blue"> .Map </store>
 		  <condition color="red"> true </condition>
                 </T>
 
 //@ IMP concrete semantics
 // AExp
-  rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
+  rule <k> X:Id => V ...</k> <env>... X |-> L ...</env> <store>... L:Int |-> V:Val </store>
+  rule <k> array(L:Int, Size:Int)[I:Int] => lookup(L +Int I) ...</k>
+       <store>... L |-> _:#Int ...</store>
+ 
+  rule <k> array(L:Int, Size:Int)[I:Int] => select(A, I) ...</k>
+       <store>... L |-> A:Array ...</store>
+
 //  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
   rule I1:Int - I2:Int => I1 -Int I2
@@ -66,17 +86,46 @@ module IMP
 // Block
   rule {} => .   [structural]
   rule {S} => S  [structural]
+
+// lvalue
+  syntax AExp ::= "lvalue" "(" K ")"
+
+// Local variable                                                                                        
+  rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
+    [structural]
+
+// lookup
+  syntax K ::= "lookup" "(" Int ")"
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
+
 // Stmt
-  rule <T> <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state> ...</T>
+  context (HOLE => lvalue(HOLE)) = _;
+  context lvalue(_[HOLE])
+  context lvalue(HOLE[_])
+
+  rule <k> loc(L:Int) = I:Int; => . ...</k> <store>... L |-> (_ => I) ...</store> [transition]
+  rule <k> loc(array(L:Int, Size:Int)[I:Int]) = V:Val; => . ...</k> 
+       <store>... L |-> (A:Array => store(A, I, V)) ...</store>
+  rule <k> lvalue(array(L:Int, Size:Int)[I:Int]) => loc(L +Int I) ...</k> 
+       <store>... L |-> _:Int ...</store>
+
   rule S1 S2 => S1 ~> S2  [structural]
-//  rule if (true)  S else _ => S
-//  rule if (false) _ else S => S
+  rule if (true)  S else _ => S
+  rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
-  rule <k> int (X:Id,Xs:Ids => Xs); _ </k> <state> Rho:Map (. => X|->0) </state>
-    when notBool (X in keys(Rho))
-  rule int .Ids; S:Stmt => S  [structural]
+  rule <k> int (X:Id,Xs:AExps => Xs); _:Pre _:Post _:Stmt </k> 
+       <env> Rho:Map (. => X |-> L) </env>
+       <store>... . => (L |-> 0) </store>
+       when notBool (X in keys(Rho)) andBool fresh(L:Int)
 
+  // symbolic arrays
+  rule <k> int (X:Id [S:#Int] ,Xs:Ids => Xs); _:Pre _:Post St:Stmt </k>
+       <env> Rho:Map (. => X |-> L) </env>
+       <store>... (. => L |-> array(AL, S) AL |-> #symArray(X) ) </store>
+       when notBool (X in keys(Rho)) andBool fresh(L:Int) andBool fresh(AL:Int)
+
+  rule int .AExps ; P:Pre P':Post S:Stmt => P ~> P' ~> S [structural]
 
 //@ IMP symbolic semantics
   rule <T> <k> I1:Int / I2:Int => I1 /Int I2 ...</k>
@@ -85,11 +134,11 @@ module IMP
 
   rule <T> <k> B1:Bool && B2:BExp => B2 ...</k>
        <condition> Phi:Fol => Phi andFol B1 ==Bool true </condition> ...</T>
-//       when checkSat(Phi andFol B1) ==K "sat" [transition]
+       when checkSat(Phi andFol B1) ==K "sat" [transition]
   
   rule <T> <k> B1:Bool && B2:Bool => false ...</k>
        <condition> Phi:Fol => Phi andFol notFol B1 </condition> ...</T>
-//       when checkSat(Phi andFol notFol B1) ==K "sat" [transition]
+       when checkSat(Phi andFol notFol B1) ==K "sat" [transition]
 
   rule <T> <k> if (B:Bool) S:Stmt else _ => S ...</k>
        <condition> Phi:Fol => Phi andFol B </condition> ...</T>
@@ -99,77 +148,60 @@ module IMP
        <condition> Phi:Fol => Phi andFol notFol B </condition> ...</T>
        when checkSat(Phi andFol notFol B) ==K "sat" [transition]
 
-//@ Specifications
-  rule <k> int (X:Id,Xs:Ids => Xs); _:Pre _:Post _:Stmt </k>
-       <state> Rho:Map (. => X |-> 0) </state>
-       when notBool (X in keys(Rho)) 
-  rule int .Ids ; P:Pre P':Post S:Stmt => P ~> P' ~> S [structural]
-
 //@ Hoare triples
   rule <k> (pre: Psi:Assert ~> post: Psi':Assert ~> S:Stmt)
             =>
             assume(Psi) ~> S ~> match(A2M(Psi'))
-       </k>
-       <state> M:Map </state>
-       [transition]
+       </k> [transition]
 
-//@ {\tt assume} and {\tt match}
+//@ Assume
   syntax K ::= "assume" "(" K ")"
 	     | "assumeStrict" "(" K ")" [strict]
 
-//@ Assume
   rule assume(Psi:K) => assumeStrict(A2M(Psi))
-
   rule <k> assumeStrict(m2k(E:Map, Phi:K)) => . ...</k>
-       <state> _ => E </state>
+       <store> _ => E </store>
        <condition> _ => Phi </condition>
        [transition]
 
 //@ Match
   syntax K ::= "match"  "(" K ")" [strict]
-//  rule <k> match(Phi) => A2M(Phi) ...</k>
-
-//@ Match
   rule <k> match(m2k(Ea:Map, Phia:K))
 	   => . // checkSat(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec))
        ...</k>
-       <state> Ec:Map </state>
+       <store> Ec:Map </store>
        <condition> Phic:Fol </condition>
-       when checkSat(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec))
-            ==K
-            "unsat"
+       when checkSat(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec)) ==K "unsat"
        [transition]
 
 //@ While invariant
   rule <k> while ( B:BExp ) invariant: Psi:Assert S:Stmt ~> K
            =>
-           assume(Psi and B) ~> match(A2M(Psi))
-       </k>
-//       <state> M:Map </state> 
-  [transition]
-
+           assume(Psi and B) ~> S ~> match(A2M(Psi))
+       ...</k>
+       [transition]
   rule <k> while ( B:BExp ) invariant: Psi:Assert S:Stmt ~> K
            => match(A2M(Psi)) ~> assume(Psi and not B)
-       </k>
-//       <state> M:Map </state> 
-  [transition]
+       ...</k>
+       [transition]
 
 //@ A2M
   syntax K ::= "A2M" "(" K ")"
-
   rule <k> A2M(Psi)
            =>
            generateFresh(E) ~> evalAssert(Psi) ~> restore(E, Phi)
        ...</k>
-       <state> E:Map </state>
+       <store> E:Map </store>
        <condition> Phi:Fol </condition>
        [transition]
 
 //@ Generate fresh map
   syntax K ::= "generateFresh" "(" Map ")"
-  rule <k> generateFresh(X:Id |-> V:Int E:Map) => generateFresh(E) ...</k>
-       <state>... X |-> (V => V') ...</state> when fresh(V':Int)
+  rule <k> generateFresh(L:Int |-> V:Int E:Map) => generateFresh(E) ...</k>
+       <store>... L |-> (V => V') ...</store> when fresh(V':Int)
   rule <k> generateFresh(.Map) => . ...</k>
+  rule <k> generateFresh(L:Int |-> array(AL:Int, Size:Int) E:Map) => generateFresh(E) ...</k>
+  rule <k> generateFresh(L:Int |-> A:Array E:Map) => generateFresh(E) ...</k>
 
 //@ Assert evaluation
   syntax K ::= "evalAssert" "(" K ")" [strict]
@@ -179,29 +211,44 @@ module IMP
            =>
            m2k(E, Phi) 
        ...</k>
-       <state> E:Map => E' </state>
+       <store> E:Map => E' </store>
        <condition> _ => Phi' </condition>
        [transition]
-
 
 //@ Restore
   syntax K ::= "restore" "(" Map "," Fol ")"
 
-//@ Ignore strictness
-//  context B && HOLE
-//  context B andBool HOLE
-
 //@ Assertions
   rule B1:Bool and B2:Bool => B1 andBool B2
+  rule B1:Bool implies B2:Bool => B1 impliesBool B2
   rule B1:Bool  or B2:Bool => B1  orBool B2
   rule not B:Bool => notBool B
+  rule forall Is:Ids (B:Bool) => forall toSet(Is) . B
+  rule exists Is:Ids (B:Bool) => exists toSet(Is) . B
+
+  syntax Set ::= "toSet" "(" Ids ")" [function]
+  rule toSet(.Ids) => .Set
+  rule toSet(X:Id, Is:Ids) => SetItem(#symInt(X)) toSet(Is)
 
 
-//@ Utils       
-       
+//@ Utils              
   syntax Bool ::= "mapLeftEq" "(" Map "," Map ")" [function]
-  rule mapLeftEq(X:Id |-> V1:Int Rest:Map, Left:Map X |-> V2 Right:Map) => V1 ==Int V2 andBool mapLeftEq(Rest, Left Right)
+  rule mapLeftEq(X:Int |-> V1:Int Rest:Map, Left:Map X |-> V2 Right:Map) => V1 ==Int V2 andBool mapLeftEq(Rest, Left Right)
+  rule mapLeftEq(X:Int |-> array(AL:Int, Sz:Int) Rest:Map, Left:Map X |-> array(AL, Sz) Right:Map) => mapLeftEq(Rest, Left Right)
+  rule mapLeftEq(X:Int |-> A:Array Rest:Map, Left:Map X |-> A Right:Map) => mapLeftEq(Rest, Left Right)
   rule mapLeftEq(. , _) => true
-  rule mapLeftEq(X:Id |-> _:Int _:Map, Right:Map) => false when notBool(X in keys(Right))
+  rule mapLeftEq(X:Int |-> _:Int _:Map, Right:Map) => false when notBool(X in keys(Right))
   rule mapLeftEq(M:Map, .) => false when notBool(isEmptySet(keys(M)))
+
+// tricks
+  // subsort issue? 
+  rule isSymbolicInt(select(A:Array, I:Int)) => true [anywhere]
+  rule isInt(select(A:Array, I:Int)) => true [anywhere]
+// contexts limitation: array(I,S)[V] must be a KResult to cool lvalue(array(I,S)[V])
+  rule lvalue(array(I:Int, S:Int)[V:Int]) => lvalue(loc(array(I:Int, S:Int)[V:Int]))
+
+// forall binders
+  rule <k> X:Id => #symInt(X) ...</k>
+       <env> Rho </env>
+       when notBool(X in keys(Rho)) 
 endmodule

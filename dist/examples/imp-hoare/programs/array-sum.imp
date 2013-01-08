@@ -1,0 +1,21 @@
+int min, n, i, a[4];
+
+pre: 0 <= n
+post: forall x (0 <= x and x <= n - 1 implies min <= a[x])
+
+n = 4;
+a[0] = 7;
+a[1] = 4;
+a[2] = 2;
+a[3] = 5;
+
+min = a[0];
+i = 1;
+
+while (i <= n - 1) 
+{
+  if (a[i] <= min) {
+     min = a[i];
+  } else {}
+  i = i + 1;
+}
