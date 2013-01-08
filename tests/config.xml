@@ -342,6 +342,17 @@
       >
   </test>
 
+<!--
+  IMP-HOARE
+-->
+ 
+  <test 
+      language="dist/examples/imp-hoare/imp.k"
+      folder="dist/examples/imp-hoare/programs"
+      extensions="imp"
+      >
+  </test>
+
 
 <!--
     Regression tests
