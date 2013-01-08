@@ -1,0 +1,27 @@
+int n, k, sum, x, min, a[50];
+
+pre: 1 <= n
+post: sum == -5
+
+n = 5;
+a[0] =  5;
+a[1] = -3;
+a[2] =  2;
+a[3] = -4;
+a[4] =  1;
+
+k = 1;
+sum = a[0];
+x = a[0];
+while (!(k == n)) 
+{
+  min = x + a[k];
+  if (a[k] <= min) { min  = a[k]; } else { }
+  x = min;
+
+  min = sum;
+  if (x <= sum) { min = x; } else { }
+  sum = min;
+
+  k = k + 1;
+}
