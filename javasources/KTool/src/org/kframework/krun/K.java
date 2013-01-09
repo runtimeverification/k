@@ -61,7 +61,7 @@ public class K {
 	public static String maude_cmd = "erewrite";
 	public static String output_mode = "pretty";
 	//public static String xsearch_pattern = "=>! B:Bag";
-	public static String pattern = "B:Bag";
+	public static String pattern = "<generatedTop> B:Bag </generatedTop> [anywhere]";
 	public static String searchType = "!";
 	public static String bound;
 	public static String depth;

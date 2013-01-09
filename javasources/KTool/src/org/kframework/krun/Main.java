@@ -7,6 +7,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.maude.MaudeFilter;
+import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
@@ -802,6 +803,7 @@ public class Main {
 	
 				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.kdir + "/defx.xml"));
 				// This is essential for generating maude
+				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig());
 				javaDef.preprocess();
 				K.definition = javaDef;
 

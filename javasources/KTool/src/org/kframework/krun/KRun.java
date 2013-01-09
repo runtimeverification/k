@@ -118,6 +118,8 @@ public class KRun {
 		result = (Term) result.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
 		//as a last resort, undo concretization
 		result = (Term) result.accept(new FlattenDisambiguationFilter());
+		Cell generatedTop = (Cell) result;
+		result = generatedTop.getContents();
 
 		statistics = p.printStatistics(elem);
 	}
@@ -401,6 +403,9 @@ public class KRun {
 			//as a last resort, undo concretization
 			t = (Term) t.accept(new FlattenDisambiguationFilter());
 
+			Cell generatedTop = (Cell) t;
+			t = generatedTop.getContents();
+
 			List<Element> child2 = XmlUtil.getChildElements(child.get(1));
 			sort = child.get(1).getAttribute("sort");
 			op = child.get(1).getAttribute("op");
@@ -427,7 +432,7 @@ public class KRun {
 			List<String> l = new ArrayList<String>();
 			for (Map<String, Term> searchResult : searchResults) {
 				l.add("\nSolution " + i + ":");
-				if (this.searchPattern.trim().matches("=>[!*1+] B:Bag")) {
+				if (this.searchPattern.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)")) {
 					UnparserFilter unparser = new UnparserFilter(true, K.color);
 					searchResult.get("B:Bag").accept(unparser);
 					l.add(unparser.getResult());

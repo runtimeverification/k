@@ -1,6 +1,7 @@
 package org.kframework.compile.utils;
 
 import org.kframework.compile.transformers.AddKCell;
+import org.kframework.compile.transformers.AddTopCellRules;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.compile.transformers.ResolveSyntaxPredicates;
 import org.kframework.compile.transformers.ResolveListOfK;
@@ -15,6 +16,7 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
 	public RuleCompilerSteps(Definition def) {
 		super();
 		this.add(new AddKCell());
+		this.add(new AddTopCellRules());
 		this.add(new ResolveAnonymousVariables());
 		this.add(new ResolveSyntaxPredicates());
 		this.add(new ResolveListOfK());
