@@ -4,6 +4,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
 import org.kframework.kil.Bracket;
@@ -129,6 +130,7 @@ public interface Visitor {
 	public void visit(Freezer f);
 	public void visit(FreezerVariable var);
 	public void visit(FreezerSubstitution subst);
+	public void visit(BackendTerm term);
 
 	public String getName();
 }

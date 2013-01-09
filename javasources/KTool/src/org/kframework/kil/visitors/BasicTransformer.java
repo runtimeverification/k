@@ -6,6 +6,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
 import org.kframework.kil.Bracket;
@@ -389,6 +390,11 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(FreezerSubstitution node) throws TransformerException {
 		return transform((Term) node);
+	}
+
+	@Override
+	public ASTNode transform(BackendTerm term) throws TransformerException {
+		return transform((Term) term);
 	}
 
 	@Override

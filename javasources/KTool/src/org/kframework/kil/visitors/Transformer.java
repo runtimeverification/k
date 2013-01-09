@@ -4,6 +4,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
 import org.kframework.kil.Bracket;
@@ -122,6 +123,7 @@ public interface Transformer {
 	public ASTNode transform(Freezer node) throws TransformerException;
 	public ASTNode transform(FreezerVariable node) throws TransformerException;
 	public ASTNode transform(FreezerSubstitution node) throws TransformerException;
+	public ASTNode transform(BackendTerm term) throws TransformerException;
 	//</Terms>
 	public String getName();
 }

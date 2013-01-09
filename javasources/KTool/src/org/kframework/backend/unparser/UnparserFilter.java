@@ -579,6 +579,13 @@ public class UnparserFilter extends BasicVisitor {
 		postpare();
 	}
 
+	@Override
+	public void visit(BackendTerm term) {
+		prepare(term);
+		result.write(term.getValue());
+		postpare();
+	}
+
 	private void prepare(ASTNode astNode) {
 		if (!stack.empty()) {
 			if (needsParanthesis(stack.peek(), astNode)) {

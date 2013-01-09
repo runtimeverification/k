@@ -607,6 +607,11 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
+	public ASTNode transform(BackendTerm term) throws TransformerException {
+		return transform((Term) term);
+	}
+
+	@Override
 	public ASTNode transform(Attributes node) throws TransformerException {
 		boolean change = false;
 		java.util.List<Attribute> contents = new ArrayList<Attribute>();

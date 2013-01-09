@@ -336,6 +336,11 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(BackendTerm term) {
+		visit((Term) term);
+	}
+
+	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		visit((Term) kInjectedLabel);
 	}
