@@ -18,12 +18,7 @@ of the array.
 
 The IMP program below is the implementation of the program shown 
 in the book "Verification of Sequential and Concurrent Programs"
-(Springer, 2010) at page 101, which is a minor variation of a 
-program written by Foley and Hoare [1971].
-
-Here, we verify the following property:
-{m <= f <= n} program {m < le and ri < n}
-
+(Springer, 2010) at page 101, written by Foley and Hoare [1971].
 */
 
 int m, n, pi, le, ri, f, temp, a[50];

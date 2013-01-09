@@ -103,7 +103,7 @@ module IMP
   context lvalue(_[HOLE])
   context lvalue(HOLE[_])
 
-  rule <k> loc(L:Int) = I:Int; => . ...</k> <store>... L |-> (_ => I) ...</store> [transition]
+  rule <k> loc(L:Int) = I:Int; => . ...</k> <store>... L |-> (_ => I) ...</store>
   rule <k> loc(array(L:Int, Size:Int)[I:Int]) = V:Val; => . ...</k> 
        <store>... L |-> (A:Array => store(A, I, V)) ...</store>
   rule <k> lvalue(array(L:Int, Size:Int)[I:Int]) => loc(L +Int I) ...</k> 
@@ -152,7 +152,7 @@ module IMP
   rule <k> (pre: Psi:Assert ~> post: Psi':Assert ~> S:Stmt)
             =>
             assume(Psi) ~> S ~> match(A2M(Psi'))
-       </k> [transition]
+       </k> 
 
 //@ Assume
   syntax K ::= "assume" "(" K ")"
@@ -162,7 +162,6 @@ module IMP
   rule <k> assumeStrict(m2k(E:Map, Phi:K)) => . ...</k>
        <store> _ => E </store>
        <condition> _ => Phi </condition>
-       [transition]
 
 //@ Match
   syntax K ::= "match"  "(" K ")" [strict]
@@ -172,15 +171,22 @@ module IMP
        <store> Ec:Map </store>
        <condition> Phic:Fol </condition>
        when checkSat(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec)) ==K "unsat"
-       [transition]
+
+// debug rule
+  rule <k> match(m2k(Ea:Map, Phia:K))
+	   => SMTLibQuery(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec))
+       ...</k>
+       <store> Ec:Map </store>
+       <condition> Phic:Fol </condition>
+       when checkSat(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec)) ==K "sat"
 
 //@ While invariant
   rule <k> while ( B:BExp ) invariant: Psi:Assert S:Stmt ~> K
            =>
            assume(Psi and B) ~> S ~> match(A2M(Psi))
-       ...</k>
+       </k>
        [transition]
-  rule <k> while ( B:BExp ) invariant: Psi:Assert S:Stmt ~> K
+  rule <k> while ( B:BExp ) invariant: Psi:Assert _:Stmt
            => match(A2M(Psi)) ~> assume(Psi and not B)
        ...</k>
        [transition]
@@ -193,7 +199,6 @@ module IMP
        ...</k>
        <store> E:Map </store>
        <condition> Phi:Fol </condition>
-       [transition]
 
 //@ Generate fresh map
   syntax K ::= "generateFresh" "(" Map ")"
@@ -213,7 +218,6 @@ module IMP
        ...</k>
        <store> E:Map => E' </store>
        <condition> _ => Phi' </condition>
-       [transition]
 
 //@ Restore
   syntax K ::= "restore" "(" Map "," Fol ")"

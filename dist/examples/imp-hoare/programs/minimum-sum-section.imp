@@ -1,3 +1,20 @@
+/*
+Minimum-Sum Section Problem
+
+This problem was formulated in 1982 by Gries.
+
+Consider a one-dimensional array a of integers and an 
+integer constant n > 0. By a section of a we mean a 
+fragment of a of the form a[i:j] where 0 <= i <= j < n. 
+A minimum-sum section of a is a section a[i:j] such that 
+the sum of elements of a from i to j is minimal along 
+all subsections of a.
+
+The example below is taken from the book 
+"Verification of Sequential and Concurrent Programs" 
+(Springer, 2010), page 119 (sec. Efficient Computation).
+*/
+
 int n, k, sum, x, min, a[50];
 
 pre: 1 <= n
