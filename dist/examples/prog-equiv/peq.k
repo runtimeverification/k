@@ -739,12 +739,13 @@ module PEQ
 
 
   rule getSubst(X:K, A:AExp, (M:Map X |-> I)) => (I replBy A)
-       when isId(X) orBool isSymbolicAExp(X) // it does not work, therefore I added the following rules
+       when (isId(X) ==K true) orBool (isSymbolicAExp(X) ==K true) // it does not work, therefore I added the following rules
 
-
+/*
   rule getSubst(X:Id, A:AExp, (M:Map X |-> I)) => (I replBy A)
 
   rule getSubst(#symAExp(X:K), A:AExp, (M:Map #symAExp(X) |-> I)) => (I replBy A)
+*/
 
   rule getSubst(X:Id, B:BExp, (M:Map X |-> I)) => (I replBy B)
 
@@ -765,12 +766,13 @@ module PEQ
   rule getSubstMap((M1:Map E:K |-> V:K), M2:Map)
        =>
        getSubstMap(M1, M2) 
-       when isSymbolicBool(E) orBool isSymbolicAExp(E)
+       when (isSymbolicBool(E) ==K true) orBool (isSymbolicAExp(E) ==K true)
+
 
   rule getSubstMap((M1:Map X:Id |-> I:K), (M2:Map X |-> A:K))
        =>
        I |-> A getSubstMap(M1, M2) 
-       when isSymbolicInt(I)
+       when isSymbolicInt(I) ==K true
 
   rule getSubstMap((M1:Map X:Id |-> I:K), (M2:Map X |-> A:K))
        =>
@@ -943,7 +945,9 @@ module PEQ
                       )
             =>
            checkSubst(getSubst(K1', K1, Env1'), getSubst(K2', K2, Env2')) ~>
-           checkCond(F, applySubst((getSubstMap(Env1', Env1) getSubstMap(Env2', Env2)), F'))
+//           checkCond(applySubst((getSubstMap(Env1', Env1) getSubstMap(Env2', Env2)), F),
+           checkCond(F, F')
+//                     applySubst((getSubstMap(Env1', Env1) getSubstMap(Env2', Env2)), F'))
            ...</k>
          ...</config> 
          <config> 
@@ -989,7 +993,9 @@ module PEQ
                       )
             =>
            checkSubst(getSubst(K1', K2, Env1'), getSubst(K2', K1, Env2')) ~>
-           checkCond(F, applySubst((getSubstMap(Env1', Env2) getSubstMap(Env2', Env1)), F'))
+           checkCond(F, F')
+//           checkCond(applySubst((getSubstMap(Env1', Env1) getSubstMap(Env2', Env2)), F),
+//                     applySubst((getSubstMap(Env1', Env2) getSubstMap(Env2', Env1)), F'))
            ...</k>
          ...</config> 
          <config> 
@@ -1048,7 +1054,7 @@ module PEQ
        </goal>
        =>
        success)
-//       when checkSat(filter(F andBool notBool(SF'))) ==K "unsat"
+       when checkSat(filter(F andBool notBool(SF'))) ==K "unsat"
 
 /*@
   The case when an hypothesis does not match the current formula.
@@ -1110,7 +1116,8 @@ module PEQ
   //@ The rules preparing the storing of an hypothesis: 
   rule [store-hypo] :
        <config> 
-         <k> storeHypo(K1:K) => getFresh(Env1) ~> restore(K1, Env1) ...</k>
+//         <k> storeHypo(K1:K) => getFresh(Env1) ~> restore(K1, Env1) ...</k>
+         <k> storeHypo(K1:K) => restore(K1, Env1) ...</k>
          <env> Env1:Map </env>
        </config> 
        [transition]
