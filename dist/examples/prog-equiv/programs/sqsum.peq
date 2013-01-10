@@ -1,3 +1,12 @@
+/*
+
+  This formula express the equivalence between two programs computing the sum of the squares of the first n natural numbers.
+  To check it, give the following command in the parent folder:
+     krun programs/sqsum.peq
+  If the content of the cell <goals> inludes only the message "success" 
+  then the formula holds.
+*/
+
 <k>
   L : while (i <= n) do (
         s := s + i * i;

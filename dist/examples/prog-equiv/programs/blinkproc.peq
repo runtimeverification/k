@@ -1,3 +1,12 @@
+/*
+
+  This formula express the equivalence between two definitions of the stream 0 1 0 1 0 1 ... .
+  To check it, give the following command in the parent folder:
+     krun programs/blinkproc.peq
+  If the content of the cell <goals> inludes only the message "success" 
+  then the formula holds.
+*/
+
 <k>
    a :- 0 :: L1 : 1 :: L2 : a ; a
 </k>

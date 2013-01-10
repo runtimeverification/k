@@ -1,6 +1,10 @@
 /*
-  Running command:
-  krun programs/for-while.peq --search --bound=1 --pattern="< generatedTop > < T > < goals > success </ goals > B:Bag </ T > </ generatedTop >"
+
+  This formula express the equivalence between while and for.
+  To check it, give the following command in the parent folder:
+     krun programs/for-while.peq
+  If the content of the cell <goals> inludes only the message "success" 
+  then the formula holds.
 */
 
 <k>

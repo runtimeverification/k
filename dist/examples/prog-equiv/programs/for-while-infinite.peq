@@ -1,6 +1,10 @@
 /*
-  Running command:
-  krun programs/for-while.peq --search --bound=1 --pattern="< generatedTop > < T > < goals > success </ goals > B:Bag </ T > </ generatedTop >"
+
+  This formula express the equivalence between infinite between programs computing the partial sums of the series 1^2 + 2^2 +3^2 + ... (the non-terminating version of sqsum.peq).
+  To check it, give the following command in the parent folder:
+     krun programs/sqsuminfinite.peq
+  If the content of the cell <goals> inludes only the message "success" 
+  then the formula holds.
 */
 
 <k>

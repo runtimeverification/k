@@ -219,7 +219,7 @@ module PEQ
                     </hypo>
                   </hypos>
                   <observers> .List </observers>
-<trace> .K </trace>
+//<trace> .K </trace>
                 </T>
 
 /*@
@@ -1110,7 +1110,6 @@ module PEQ
             ((isSubst(getSubst(K1', K2, Env1')) =/=K true)
              orBool (isSubst(getSubst(K2', K1, Env2')) =/=K true)
             )
-
        [transition]
 
   //@ The rules preparing the storing of an hypothesis: 
