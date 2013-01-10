@@ -36,10 +36,7 @@ mod #BOOL is  including #BOOL-INTERFACE .
 
   op _==Bool_ : #Bool #Bool -> #Bool .
   eq B1:#Bool ==Bool B2:#Bool = B1:#Bool ==Universal B2:#Bool .
-endm
 
-mod #EXT-BOOL is
-  protecting #BOOL .
   op _and-then_ : #Bool #Bool -> #Bool [strat (1 0) gather (e E) prec 55] .
   op _or-else_ : #Bool #Bool -> #Bool [strat (1 0) gather (e E) prec 59] .
   var B : [#Bool] .
@@ -892,7 +889,6 @@ load smt.maude
 
 mod BUILTINS is
 including #BOOL .
-including #EXT-BOOL .
 including #NAT .
 including #INT .
 including #RAT .
