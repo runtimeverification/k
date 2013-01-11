@@ -37,8 +37,10 @@ public class Kpp {
 		while ((ch = input.read()) != -1) {
 			switch (state) {
 			case SINGLE_LINE_COMMENT:
-				if (ch == '\n')
+				if (ch == '\n') {
 					state = State.CODE;
+					previous = 0;
+				}
 				break;
 
 			case MULTI_LINE_COMMENT:
@@ -49,6 +51,10 @@ public class Kpp {
 				break;
 
 			case STRING:
+				if (previous == '\\' && ch == '\\') {
+					out.write(previous);
+					ch = 0;
+				}
 				if (previous != '\\' && ch == '"')
 					state = State.CODE;
 				break;
@@ -68,5 +74,6 @@ public class Kpp {
 		}
 		if ((state == State.CODE || state == State.STRING) && previous != 0)
 			out.write(previous);
+		out.flush();
 	}
 }
