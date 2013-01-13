@@ -26,7 +26,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class DefinitionLoader {
-	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang) throws IOException, Exception {
+	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang, boolean autoinclude) throws IOException, Exception {
 		org.kframework.kil.Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
@@ -46,7 +46,7 @@ public class DefinitionLoader {
 				Stopwatch.sw.printIntermediate("Preprocess");
 
 		} else {
-			javaDef = parseDefinition(mainFile, lang);
+			javaDef = parseDefinition(mainFile, lang, autoinclude);
 		}
 		return javaDef;
 	}
@@ -58,12 +58,12 @@ public class DefinitionLoader {
 	 * @param mainModule
 	 * @return
 	 */
-	public static Definition parseDefinition(File mainFile, String mainModule) {
+	public static Definition parseDefinition(File mainFile, String mainModule, boolean autoinclude) {
 		try {
 			// for now just use this file as main argument
 			// ------------------------------------- basic parsing
 
-			BasicParser bparser = new BasicParser();
+			BasicParser bparser = new BasicParser(autoinclude);
 			bparser.slurp(mainFile.getPath());
 
 			// transfer information from the BasicParser object, to the Definition object

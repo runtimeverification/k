@@ -6,8 +6,7 @@ import org.kframework.utils.Stopwatch;
 /**
  * Initially created by: Traian Florin Serbanuta
  * <p/>
- * Date: 12/17/12
- * Time: 11:18 PM
+ * Date: 12/17/12 Time: 11:18 PM
  */
 public abstract class BasicBackend implements Backend {
 	protected Stopwatch sw;
@@ -24,5 +23,9 @@ public abstract class BasicBackend implements Backend {
 	@Override
 	public Definition firstStep(Definition def) {
 		return def;
+	}
+
+	public boolean autoinclude() {
+		return true;
 	}
 }

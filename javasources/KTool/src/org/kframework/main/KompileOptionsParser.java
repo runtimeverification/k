@@ -14,8 +14,6 @@ public class KompileOptionsParser {
 		OptionGroup main = new OptionGroup();
 		Option def = new Option("def", "definition", true, "main file to kompile");
 		Option step = new Option("step", "step", true, "name of the compilation phase after which compilation should stop.");
-		main.addOption(step);
-		main.addOption(def);
 
 		// verbose and help
 		OptionGroup verb = new OptionGroup();
@@ -42,11 +40,19 @@ public class KompileOptionsParser {
 		Option style = new Option("style", true, "pass styling information to the k.sty package");
 		Option maudify = new Option("m", "maudify", false, "maudify the definition");
 		Option compile = new Option("c", "compile", false, "compile the definition");
+		Option toHTML = new Option("html", false, "generate html from definition");
+		Option unparse = new Option("unparse", false, "unparse a definition");
+		Option toXml = new Option("xml", false, "generate xml from definition");
+		Option toDoc = new Option("doc", "documentation", false, "generate the HTML documentation");
 
 		tex.addOption(latex);
 		tex.addOption(pdf);
 		tex.addOption(compile);
 		tex.addOption(maudify);
+		tex.addOption(toHTML);
+		tex.addOption(unparse);
+		tex.addOption(toXml);
+		tex.addOption(toDoc);
 
 		OptionGroup warn = new OptionGroup();
 		Option warnings = new Option("w", "warnings", false, "display all warnings");
@@ -54,10 +60,7 @@ public class KompileOptionsParser {
 
 		// xml
 		OptionGroup xml = new OptionGroup();
-		Option toXml = new Option("xml", false, "generate xml from definition");
 		Option fromXml = new Option("fromxml", true, "load definition from xml");
-
-		xml.addOption(toXml);
 		xml.addOption(fromXml);
 
 		// language module name
@@ -80,10 +83,6 @@ public class KompileOptionsParser {
 		Option lib = new Option("lib", true, "Specify extra-libraries for compile/runtime.");
 		libGroup.addOption(lib);
 
-		Option toHTML = new Option("html", false, "generate html from definition");
-
-		Option unparse = new Option("unparse", false, "unparse a definition");
-
 		Option addTopCell = new Option("addTopCell", false, "add a top cell to configuration and all rules");
 
 		// transition
@@ -103,15 +102,13 @@ public class KompileOptionsParser {
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
 		// options.addOption(tempDisamb);
-		options.addOption(toHTML);
-		options.addOption(unparse);
 		options.addOption(addTopCell);
 		options.addOption(transition);
 		options.addOption(supercool);
 		options.addOption(superheat);
-
+		options.addOption(def);
+		options.addOption(step);
 		options.addOption(style);
-
 	}
 
 	public CommandLine parse(String[] cmd) {

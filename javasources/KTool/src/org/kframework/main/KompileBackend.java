@@ -54,13 +54,8 @@ public class KompileBackend extends BasicBackend {
 		final String mainModule = javaDef.getMainModule();
 		String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
 
-		String main = load + "load \".k/base.maude\"\n"
-				+ "load \".k/builtins.maude\"\n"
-				+ "mod " + mainModule + " is \n"
-				+ "  including " + mainModule + "-BASE .\n"
-				+ "  including " + mainModule + "-BUILTINS .\n"
-		        + "  including K-STRICTNESS-DEFAULTS .\n"
-				+ "endm\n";
+		String main = load + "load \".k/base.maude\"\n" + "load \".k/builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
+				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
 		FileUtil.saveInFile(defFile + "-compiled.maude", main);
 	}
 

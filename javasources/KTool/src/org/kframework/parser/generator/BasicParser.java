@@ -29,8 +29,10 @@ public class BasicParser {
 	private List<String> filePaths;
 	private File mainFile;
 	private String mainModule;
+	private boolean autoinclude;
 
-	public BasicParser() {
+	public BasicParser(boolean autoinclude) {
+		this.autoinclude = autoinclude;
 	}
 
 	/**
@@ -51,17 +53,18 @@ public class BasicParser {
 
 			slurp2(file);
 
-			// parse the autoinclude.k file but remember what I parsed to give the correct order at the end
-			List<DefinitionItem> tempmi = moduleItems;
-			moduleItems = new ArrayList<DefinitionItem>();
+			if (autoinclude) {
+				// parse the autoinclude.k file but remember what I parsed to give the correct order at the end
+				List<DefinitionItem> tempmi = moduleItems;
+				moduleItems = new ArrayList<DefinitionItem>();
 
-			file = buildCanonicalPath("autoinclude.k", new File(fileName));
-			if (file == null)
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
+				file = buildCanonicalPath("autoinclude.k", new File(fileName));
+				if (file == null)
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
 
-			slurp2(file);
-
-			moduleItems.addAll(tempmi);
+				slurp2(file);
+				moduleItems.addAll(tempmi);
+			}
 
 			setMainFile(file);
 			DefinitionHelper.finalizeRequirements();

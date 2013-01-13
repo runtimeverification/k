@@ -6,8 +6,12 @@ import java.io.IOException;
 
 public interface Backend {
 	public void run(Definition definition) throws IOException;
+
 	public String getDefaultStep();
 
 	Definition firstStep(Definition def);
+
 	Definition lastStep(Definition def);
+
+	public boolean autoinclude();
 }

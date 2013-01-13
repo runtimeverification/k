@@ -1,8 +1,13 @@
 package org.kframework.main;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
+import org.kframework.backend.doc.DocumentationBackend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
@@ -19,8 +24,40 @@ import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.*;
-import org.kframework.compile.utils.*;
+import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.transformers.AddHeatingConditions;
+import org.kframework.compile.transformers.AddK2SMTLib;
+import org.kframework.compile.transformers.AddKCell;
+import org.kframework.compile.transformers.AddKLabelConstant;
+import org.kframework.compile.transformers.AddKLabelToString;
+import org.kframework.compile.transformers.AddPredicates;
+import org.kframework.compile.transformers.AddSupercoolDefinition;
+import org.kframework.compile.transformers.AddSuperheatRules;
+import org.kframework.compile.transformers.AddSymbolicK;
+import org.kframework.compile.transformers.AddTopCellConfig;
+import org.kframework.compile.transformers.AddTopCellRules;
+import org.kframework.compile.transformers.ContextsToHeating;
+import org.kframework.compile.transformers.DesugarStreams;
+import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.FreezeUserFreezers;
+import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.ResolveAnonymousVariables;
+import org.kframework.compile.transformers.ResolveBinder;
+import org.kframework.compile.transformers.ResolveBlockingInput;
+import org.kframework.compile.transformers.ResolveBuiltins;
+import org.kframework.compile.transformers.ResolveFreshMOS;
+import org.kframework.compile.transformers.ResolveFunctions;
+import org.kframework.compile.transformers.ResolveHybrid;
+import org.kframework.compile.transformers.ResolveListOfK;
+import org.kframework.compile.transformers.ResolveOpenCells;
+import org.kframework.compile.transformers.ResolveRewrite;
+import org.kframework.compile.transformers.ResolveSupercool;
+import org.kframework.compile.transformers.ResolveSyntaxPredicates;
+import org.kframework.compile.transformers.StrictnessToContexts;
+import org.kframework.compile.utils.CheckVisitorStep;
+import org.kframework.compile.utils.CompilerStepDone;
+import org.kframework.compile.utils.CompilerSteps;
+import org.kframework.compile.utils.FunctionalAdaptor;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kompile.lint.InfiniteRewrite;
@@ -35,9 +72,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import com.thoughtworks.xstream.XStream;
 
 public class KompileFrontEnd {
 
@@ -106,11 +141,11 @@ public class KompileFrontEnd {
 		}
 
 		if (cmd.hasOption("fromxml")) {
-//			File xmlFile = new File(cmd.getOptionValue("fromxml"));
-//			if (cmd.hasOption("lang"))
-//				fromxml(xmlFile, cmd.getOptionValue("lang"), step);
-//			else
-//				fromxml(xmlFile, FileUtil.getMainModule(xmlFile.getName()), step);
+			// File xmlFile = new File(cmd.getOptionValue("fromxml"));
+			// if (cmd.hasOption("lang"))
+			// fromxml(xmlFile, cmd.getOptionValue("lang"), step);
+			// else
+			// fromxml(xmlFile, FileUtil.getMainModule(xmlFile.getName()), step);
 			System.err.println("fromxml option not supported anymore");
 			System.exit(0);
 		}
@@ -170,11 +205,13 @@ public class KompileFrontEnd {
 			backend = new HtmlBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("unparse")) {
 			backend = new UnparserBackend(Stopwatch.sw);
+		} else if (cmd.hasOption("doc")) {
+			backend = new DocumentationBackend(Stopwatch.sw);
 		} else {
 			backend = new KompileBackend(Stopwatch.sw);
 		}
 		if (backend != null) {
-			genericCompile(mainFile, lang, backend, step);	
+			genericCompile(mainFile, lang, backend, step);
 		}
 		if (GlobalSettings.verbose)
 			Stopwatch.sw.printTotal("Total");
@@ -185,7 +222,7 @@ public class KompileFrontEnd {
 		org.kframework.kil.Definition javaDef;
 		try {
 			Stopwatch.sw.Start();
-			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang);
+			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude());
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
@@ -219,7 +256,7 @@ public class KompileFrontEnd {
 			steps.add(new ResolveFunctions());
 			steps.add(new AddKCell());
 			steps.add(new AddSymbolicK());
-			//			steps.add(new ResolveFresh());
+			// steps.add(new ResolveFresh());
 			steps.add(new ResolveFreshMOS());
 			steps.add(new AddTopCellConfig());
 			if (GlobalSettings.addTopCell) {
@@ -246,14 +283,14 @@ public class KompileFrontEnd {
 			steps.add(new AddDefaultComputational());
 			steps.add(new AddOptionalTags());
 			steps.add(new LastStep(backend));
-			
+
 			if (step == null) {
 				step = backend.getDefaultStep();
 			}
 			try {
 				javaDef = steps.compile(javaDef, step);
 			} catch (CompilerStepDone e) {
-				javaDef = (Definition)e.getResult();
+				javaDef = (Definition) e.getResult();
 			}
 			backend.run(javaDef);
 		} catch (IOException e) {
@@ -266,7 +303,7 @@ public class KompileFrontEnd {
 	private static void lint(File mainFile, String mainModule) {
 		try {
 			File canonicalFile = mainFile.getCanonicalFile();
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(canonicalFile, mainModule);
+			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(canonicalFile, mainModule, true);
 
 			KlintRule lintRule = new UnusedName(javaDef);
 			lintRule.run();
@@ -283,9 +320,9 @@ public class KompileFrontEnd {
 		}
 	}
 
-//	public static void pdfClean(String[] extensions) {
-//		for (int i = 0; i < extensions.length; i++)
-//			new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
-//	}
+	// public static void pdfClean(String[] extensions) {
+	// for (int i = 0; i < extensions.length; i++)
+	// new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
+	// }
 
 }

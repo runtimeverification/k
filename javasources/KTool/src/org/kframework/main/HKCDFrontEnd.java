@@ -43,7 +43,8 @@ public class HKCDFrontEnd {
 		else {
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 1)
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a language definition in order to compile!", "command line", "System file."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a language definition in order to compile!", "command line",
+						"System file."));
 			else
 				def = restArgs[0];
 		}
@@ -56,7 +57,8 @@ public class HKCDFrontEnd {
 			File errorFile = defFile;
 			defFile = new File(def + ".k");
 			if (!defFile.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(), "File system."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(),
+						"File system."));
 		}
 
 		// Load .pgm
@@ -102,7 +104,7 @@ public class HKCDFrontEnd {
 			File dotk = new File(defCanonical.getParent() + fileSep + ".k");
 			dotk.mkdirs();
 
-			org.kframework.kil.Definition langDef = org.kframework.utils.DefinitionLoader.loadDefinition(defFile, mainModule);
+			org.kframework.kil.Definition langDef = org.kframework.utils.DefinitionLoader.loadDefinition(defFile, mainModule, true);
 
 			ASTNode pgmAst = org.kframework.utils.ProgramLoader.loadPgmAst(pgmFile, false);
 
