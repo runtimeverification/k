@@ -1,14 +1,11 @@
 package org.kframework.main;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.thoughtworks.xstream.XStream;
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
 import org.kframework.backend.doc.DocumentationBackend;
 import org.kframework.backend.html.HtmlBackend;
+import org.kframework.backend.kil.KExpBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
 import org.kframework.backend.maude.MaudeBackend;
@@ -24,36 +21,7 @@ import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.AddHeatingConditions;
-import org.kframework.compile.transformers.AddK2SMTLib;
-import org.kframework.compile.transformers.AddKCell;
-import org.kframework.compile.transformers.AddKLabelConstant;
-import org.kframework.compile.transformers.AddKLabelToString;
-import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.transformers.AddSupercoolDefinition;
-import org.kframework.compile.transformers.AddSuperheatRules;
-import org.kframework.compile.transformers.AddSymbolicK;
-import org.kframework.compile.transformers.AddTopCellConfig;
-import org.kframework.compile.transformers.AddTopCellRules;
-import org.kframework.compile.transformers.ContextsToHeating;
-import org.kframework.compile.transformers.DesugarStreams;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.FreezeUserFreezers;
-import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.transformers.ResolveAnonymousVariables;
-import org.kframework.compile.transformers.ResolveBinder;
-import org.kframework.compile.transformers.ResolveBlockingInput;
-import org.kframework.compile.transformers.ResolveBuiltins;
-import org.kframework.compile.transformers.ResolveFreshMOS;
-import org.kframework.compile.transformers.ResolveFunctions;
-import org.kframework.compile.transformers.ResolveHybrid;
-import org.kframework.compile.transformers.ResolveListOfK;
-import org.kframework.compile.transformers.ResolveOpenCells;
-import org.kframework.compile.transformers.ResolveRewrite;
-import org.kframework.compile.transformers.ResolveSupercool;
-import org.kframework.compile.transformers.ResolveSyntaxPredicates;
-import org.kframework.compile.transformers.StrictnessToContexts;
+import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
@@ -72,7 +40,10 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KompileFrontEnd {
 
@@ -205,6 +176,8 @@ public class KompileFrontEnd {
 			backend = new HtmlBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("unparse")) {
 			backend = new UnparserBackend(Stopwatch.sw);
+		}  else if (cmd.hasOption("kexp")) {
+			backend = new KExpBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("doc")) {
 			backend = new DocumentationBackend(Stopwatch.sw);
 		} else {
