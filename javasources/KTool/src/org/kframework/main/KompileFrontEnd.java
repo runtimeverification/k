@@ -143,14 +143,20 @@ public class KompileFrontEnd {
 						"File system."));
 		}
 
-		// DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-compiled");
-		if (DefinitionHelper.dotk == null) {
+		String output = null;
+		if (cmd.hasOption("output")) {
+			output = cmd.getOptionValue("output");
+		} else {
 			try {
-				DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
+				output = mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-compiled";
 			} catch (IOException e) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Output dir cannot be used.", mainFile.getAbsolutePath(), "File system."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+						"Canonical file cannot be obtained for main file.",
+						mainFile.getAbsolutePath(), "File system."));
 			}
 		}
+		DefinitionHelper.dotk = new File(output);
+//		DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
 		DefinitionHelper.dotk.mkdirs();
 
 		String lang = null;
