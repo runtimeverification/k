@@ -20,11 +20,11 @@ public class KompileOptionsParser {
 		Option help = new Option("h", "help", false, "prints this message and exits");
 		Option version = new Option("version", false, "prints version number");
 		Option verbose = new Option("v", "verbose", false, "verbose mode");
-		Option lint = new Option("lint", "lint", false, "Checks your definition for possible logical errors");
+//		Option lint = new Option("lint", "lint", false, "Checks your definition for possible logical errors");
 		verb.addOption(help);
 		verb.addOption(version);
 		verb.addOption(verbose);
-		verb.addOption(lint);
+//		verb.addOption(lint);
 
 		// Option tempDisamb = new Option("tempDisamb", "tempDisamb", false, "temporary to test the java disambiguator");
 

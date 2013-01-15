@@ -1,6 +1,5 @@
 package org.kframework.main;
 
-import com.thoughtworks.xstream.XStream;
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
 import org.kframework.backend.doc.DocumentationBackend;
@@ -28,10 +27,6 @@ import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.FunctionalAdaptor;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kompile.lint.InfiniteRewrite;
-import org.kframework.kompile.lint.KlintRule;
-import org.kframework.kompile.lint.UnusedName;
-import org.kframework.kompile.lint.UnusedSyntax;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -159,9 +154,9 @@ public class KompileFrontEnd {
 		else
 			lang = FileUtil.getMainModule(mainFile.getName());
 
-		if (cmd.hasOption("lint")) {
-			lint(mainFile, lang);
-		}
+//		if (cmd.hasOption("lint")) {
+//			lint(mainFile, lang);
+//		}
 
 		Backend backend = null;
 		if (cmd.hasOption("maudify")) {
@@ -196,16 +191,6 @@ public class KompileFrontEnd {
 		try {
 			Stopwatch.sw.Start();
 			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude());
-			XStream xstream = new XStream();
-			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
-
-			String xml = xstream.toXML(javaDef);
-
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml", xml);
-
-			if (GlobalSettings.verbose) {
-				Stopwatch.sw.printIntermediate("Serialize Definition to XML");
-			}
 
 			CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
 			if (GlobalSettings.verbose) {
@@ -273,25 +258,25 @@ public class KompileFrontEnd {
 		}
 	}
 
-	private static void lint(File mainFile, String mainModule) {
-		try {
-			File canonicalFile = mainFile.getCanonicalFile();
-			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(canonicalFile, mainModule, true);
-
-			KlintRule lintRule = new UnusedName(javaDef);
-			lintRule.run();
-
-			lintRule = new UnusedSyntax(javaDef);
-			lintRule.run();
-
-			lintRule = new InfiniteRewrite(javaDef);
-			lintRule.run();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-	}
+//	private static void lint(File mainFile, String mainModule) {
+//		try {
+//			File canonicalFile = mainFile.getCanonicalFile();
+//			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(canonicalFile, mainModule, true);
+//
+//			KlintRule lintRule = new UnusedName(javaDef);
+//			lintRule.run();
+//
+//			lintRule = new UnusedSyntax(javaDef);
+//			lintRule.run();
+//
+//			lintRule = new InfiniteRewrite(javaDef);
+//			lintRule.run();
+//		} catch (IOException e1) {
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//	}
 
 	// public static void pdfClean(String[] extensions) {
 	// for (int i = 0; i < extensions.length; i++)

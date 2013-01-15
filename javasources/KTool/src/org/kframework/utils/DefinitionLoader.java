@@ -47,6 +47,17 @@ public class DefinitionLoader {
 
 		} else {
 			javaDef = parseDefinition(mainFile, lang, autoinclude);
+			XStream xstream = new XStream();
+			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+
+			String xml = xstream.toXML(javaDef);
+
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml", xml);
+
+			if (GlobalSettings.verbose) {
+				Stopwatch.sw.printIntermediate("Serialize Definition to XML");
+			}
+
 		}
 		return javaDef;
 	}
@@ -176,6 +187,7 @@ public class DefinitionLoader {
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Parsing Rules");
+
 
 			return def;
 		} catch (IOException e1) {
