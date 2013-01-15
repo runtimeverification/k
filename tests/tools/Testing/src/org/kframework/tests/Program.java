@@ -1,12 +1,12 @@
 package org.kframework.tests;
 
+import org.kframework.execution.Task;
+import org.kframework.main.Configuration;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.kframework.execution.Task;
-import org.kframework.main.Configuration;
 
 public class Program {
 	String absolutePath;
@@ -32,8 +32,10 @@ public class Program {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKrun());
 		command.add(absolutePath);
-		command.add("--k-definition");
-		command.add(test.getLanguage());
+		command.add("--main-module");
+		command.add(new File(test.getLanguage()).getName().replaceFirst("\\.k$","").toUpperCase());
+		command.add("--compiled-def");
+		command.add(new File(test.getLanguage()).getParent() + "/.k");
 		for (Entry<String, String> entry : krunOptions.entrySet()) {
 			command.add(entry.getKey());
 			command.add(entry.getValue());

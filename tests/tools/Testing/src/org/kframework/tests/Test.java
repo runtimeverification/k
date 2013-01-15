@@ -336,6 +336,8 @@ public class Test {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKompile());
 		command.add(language);
+		command.add("-o");
+		command.add(new File(language).getParent() + "/.k");
 		for (Entry<String, String> entry : kompileOptions.entrySet()) {
 			command.add(entry.getKey());
 			command.add(entry.getValue());
@@ -373,7 +375,7 @@ public class Test {
 	}
 
 	private String getCompiledFilename() {
-		return language.replaceFirst("\\.k$", "-kompiled/main.maude");
+		return new File(language).getParent() + "/.k/main.maude";
 	}
 
 	private String getReportFilename() {
@@ -474,6 +476,8 @@ public class Test {
 		command.add(Configuration.getKompile());
 		command.add(getXmlLanguage());
 		command.add("--pdf");
+		command.add("-o");
+		command.add(language.replaceFirst("\\.k$", ".pdf"));
 		String[] arguments = new String[command.size()];
 		int i = 0;
 		for (String cmd : command) {
