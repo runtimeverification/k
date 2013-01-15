@@ -1,5 +1,7 @@
 package org.kframework.parser.generator;
 
+import org.kframework.compile.checks.CheckListOfKDeprecation;
+import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
 import org.kframework.kil.StringSentence;
@@ -77,6 +79,7 @@ public class ParseRulesFilter extends BasicTransformer {
 					a = a + 1;
 				}
 
+				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation()).check(config);
 				config = config.accept(new SentenceVariablesFilter());
 				config = config.accept(new CellEndLabelFilter());
 				config = config.accept(new InclusionFilter(localModule));

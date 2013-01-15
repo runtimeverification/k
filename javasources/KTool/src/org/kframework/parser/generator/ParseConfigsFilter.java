@@ -1,5 +1,7 @@
 package org.kframework.parser.generator;
 
+import org.kframework.compile.checks.CheckListOfKDeprecation;
+import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
 import org.kframework.kil.StringSentence;
@@ -69,7 +71,8 @@ public class ParseConfigsFilter extends BasicTransformer {
 					IStrategoTerm parsed = org.kframework.parser.concrete.KParser.ParseKConfigStringAst(ss.getContent());
 					config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
 				}
-
+				
+				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation()).check(config);
 				// disambiguate configs
 				config = config.accept(new SentenceVariablesFilter());
 				config = config.accept(new CellEndLabelFilter());

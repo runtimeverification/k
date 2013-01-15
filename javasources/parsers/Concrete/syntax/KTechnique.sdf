@@ -14,7 +14,7 @@ context-free priorities
 	KList   ",," KList	-> KList {left, cons("KList1List")}
 } > { non-assoc:
 	K "=>" K	-> K {non-assoc, cons("K1Rewrite")}
-	KList  "=>" KList		-> KList {non-assoc, cons("ListDlKDr1Rewrite")}
+	KList  "=>" KList		-> KList {non-assoc, cons("KList1Rewrite")}
 	KLabel "=>" KLabel		-> KLabel {cons("KLabel1Rewrite")}
 }
 context-free syntax
@@ -22,7 +22,7 @@ context-free syntax
 	K					-> KList %%{cons("ListOfK3K")}
 	"HOLE"				-> K {cons("K1Hole")}
 	"HOLE" ":" "K"		-> K {cons("K12Hole")}
-	"(" KList ")"	-> ListDlKDr {cons("KList1Bracket")}
+	"(" KList ")"		-> KList {cons("KList1Bracket")}
 	"(" K ")"			-> K {cons("K1Bracket")}
 	"(" KLabel ")"		-> KLabel {cons("KLabel1Bracket")}
 
@@ -75,7 +75,6 @@ context-free priorities
 	"."				-> Map {cons("Map1Empty")}
 	MapItem			-> Map %%{cons("Map3MapItem")}  %% Does SDF supports subsorting closure? I believe it generates ambiguities
 	"MapItem" "(" K "," K ")"	-> MapItem {cons("MapItem1KKItem")}
-	%%ListDlKDr "|->" ListDlKDr	-> MapItem {cons("MapItem1LKLKItem")}
 	K "|->" K					-> MapItem {cons("MapItem1LKLKItem")}
 	Map   Map				-> Map {left, cons("Map1List")}
 	%%Map "[" K "/" K "]"		-> Map {cons("Map1MapReplaceK")}
