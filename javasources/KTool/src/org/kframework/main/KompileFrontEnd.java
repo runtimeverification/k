@@ -47,6 +47,8 @@ import java.util.List;
 
 public class KompileFrontEnd {
 
+	private static String output;
+
 	private static List<String> metadataParse(String tags) {
 		String[] alltags = tags.split("\\s+");
 		List<String> result = new ArrayList<String>();
@@ -143,21 +145,10 @@ public class KompileFrontEnd {
 						"File system."));
 		}
 
-		String output = null;
+		output = null;
 		if (cmd.hasOption("output")) {
 			output = cmd.getOptionValue("output");
-		} else {
-			try {
-				output = mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
-			} catch (IOException e) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-						"Canonical file cannot be obtained for main file.",
-						mainFile.getAbsolutePath(), "File system."));
-			}
 		}
-		DefinitionHelper.dotk = new File(output);
-//		DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
-		DefinitionHelper.dotk.mkdirs();
 
 		String lang = null;
 		if (cmd.hasOption("lang"))
@@ -187,14 +178,39 @@ public class KompileFrontEnd {
 		} else if (cmd.hasOption("doc")) {
 			backend = new DocumentationBackend(Stopwatch.sw);
 		} else {
+			if (output == null) {
+				try {
+					output = mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
+				} catch (IOException e) {
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+							"Canonical file cannot be obtained for main file.",
+							mainFile.getAbsolutePath(), "File system."));
+				}
+			}
 			backend = new KompileBackend(Stopwatch.sw);
 		}
+		initializeDotK(mainFile);
 		if (backend != null) {
 			genericCompile(mainFile, lang, backend, step);
 		}
 		if (GlobalSettings.verbose)
 			Stopwatch.sw.printTotal("Total");
 		GlobalSettings.kem.print();
+	}
+
+	private static void initializeDotK(File mainFile) {
+		String output = KompileFrontEnd.output;
+		if (output==null) {
+			try {
+				output = mainFile.getCanonicalFile().getParent() + File.separator + ".k";
+			} catch (IOException e) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+						"Canonical file cannot be obtained for main file.",
+						mainFile.getAbsolutePath(), "File system."));
+			}
+		}
+		DefinitionHelper.dotk = new File(output);
+		DefinitionHelper.dotk.mkdirs();
 	}
 
 	private static void genericCompile(File mainFile, String lang, Backend backend, String step) {
