@@ -30,7 +30,7 @@ import org.kframework.kil.KLabel;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.List;
 import org.kframework.kil.ListItem;
-import org.kframework.kil.ListOfK;
+import org.kframework.kil.KList;
 import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Map;
@@ -143,6 +143,7 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Syntax node) throws TransformerException {
+		node.setSort((Sort) node.getSort().accept(this));
 		for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
 			node.getPriorityBlocks().set(i, (PriorityBlock) node.getPriorityBlocks().get(i).accept(this));
 		}
@@ -270,8 +271,8 @@ public class BasicTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(ListOfK node) throws TransformerException {
-		ListOfK result = new ListOfK(node);
+	public ASTNode transform(KList node) throws TransformerException {
+		KList result = new KList(node);
 		return transform((Collection) result);
 	}
 
@@ -376,10 +377,10 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Freezer node) throws TransformerException {
-		Term term = (Term)node.getTerm().accept(this);
+		Term term = (Term) node.getTerm().accept(this);
 		Freezer result = new Freezer(node);
 		result.setTerm(term);
-		return transform((Term)node);
+		return transform((Term) node);
 	}
 
 	@Override

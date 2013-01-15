@@ -1,5 +1,6 @@
 package org.kframework.compile.transformers;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -33,10 +34,10 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
 		Rule rule = new Rule();
 		rule.setBody(new Rewrite(
 						new KApp(new Constant("KLabel", "isKResult"), 
-								new KApp(new Constant("KLabel", ((Terminal) node.getItems().get(0)).getTerminal()), new Variable("Ks", "List{K}"))), 
+								new KApp(new Constant("KLabel", ((Terminal) node.getItems().get(0)).getTerminal()), new Variable("Ks", MetaK.Constants.KList))), 
 								
 						new KApp(new KInjectedLabel(Constant.TRUE), Empty.ListOfK)));
-		rule.setCondition(new KApp(new Constant("KLabel", "isKResult"), new Variable("Ks", "List{K}")));
+		rule.setCondition(new KApp(new Constant("KLabel", "isKResult"), new Variable("Ks", MetaK.Constants.KList)));
 		rule.addAttribute(Attribute.PREDICATE);
 		hybrids.add(rule);
 		return node;

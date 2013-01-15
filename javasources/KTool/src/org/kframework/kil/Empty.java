@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -8,7 +9,7 @@ import org.w3c.dom.Element;
 
 public class Empty extends Term {
 
-    public static final Empty ListOfK = new Empty("List{K}");
+    public static final Empty ListOfK = new Empty(MetaK.Constants.KList);
 
 	public Empty(String sort) {
 		super(sort);

@@ -2,6 +2,7 @@ package org.kframework.utils;
 
 import com.thoughtworks.xstream.XStream;
 import org.kframework.compile.checks.CheckListDecl;
+import org.kframework.compile.checks.CheckListOfKDeprecation;
 import org.kframework.compile.checks.CheckModulesAndFilesImportsDecl;
 import org.kframework.compile.checks.CheckStreams;
 import org.kframework.compile.checks.CheckSyntaxDecl;
@@ -102,6 +103,8 @@ public class DefinitionLoader {
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Basic Parsing");
 
+			new CheckVisitorStep(new CheckListOfKDeprecation()).check(def);
+
 			def.preprocess();
 
 			if (GlobalSettings.verbose)
@@ -187,7 +190,6 @@ public class DefinitionLoader {
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Parsing Rules");
-
 
 			return def;
 		} catch (IOException e1) {

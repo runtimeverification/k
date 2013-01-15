@@ -179,8 +179,8 @@ public class Main {
 			stdin = "";
 		}
 		if (stdin != null) {
-			output.put("noIO", "List2KLabel_(#noIO)(.List{K})");
-			output.put("stdin", "# \"" + stdin + "\\n\"(.List{K})");
+			output.put("noIO", "List2KLabel_(#noIO)(KList)");
+			output.put("stdin", "# \"" + stdin + "\\n\"(.KList)");
 		}
 		return output;
 	}

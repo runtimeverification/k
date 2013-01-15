@@ -148,7 +148,7 @@ public class ProgramLoader {
 	private static void writeMaudifiedPgm(String kast, String language, File dotk) {
 		String ast;
 		ast = "load ../" + language + "-compiled.maude\n";
-		ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.List{K})) , (\n\n";
+		ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.KList)) , (\n\n";
 		ast += kast;
 		ast += "\n\n))),(.).Map))  .\n quit\n";
 

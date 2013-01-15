@@ -1,37 +1,22 @@
 package org.kframework.kil;
 
+import org.kframework.compile.utils.MetaK;
+
 public enum KSort {
-	K,
-	Bag,
-	Set,
-	Map,
-	List,
-	BagItem,
-	SetItem,
-	MapItem,
-	ListItem,
-	KItem,
-	ListOfK,
-	CellLabel,
-	KLabel,;
+	K, Bag, Set, Map, List, BagItem, SetItem, MapItem, ListItem, KItem, KList, CellLabel, KLabel, ;
 
 	public static KSort getKSort(String sort) {
-		if (sort.equals("List{K}")) return ListOfK;
+		if (sort.equals(MetaK.Constants.KList))
+			return KList;
 		try {
 			return valueOf(sort);
 		} catch (Exception e) {
-			return  K;
+			return K;
 		}
 	}
-	
-	@Override
-	public String toString() {
-		if (this == ListOfK) return "List{K}";
-		return super.toString();
-	}
-	
+
 	public KSort mainSort() {
-		switch(this) {
+		switch (this) {
 		case Bag:
 		case BagItem:
 			return Bag;
@@ -52,12 +37,6 @@ public enum KSort {
 	}
 
 	public boolean isDefaulable() {
-		return (
-				this == Map || 
-				this == Bag ||
-				this == List ||
-				this == Set ||
-				this == K
-				);
+		return (this == Map || this == Bag || this == List || this == Set || this == K);
 	}
 }

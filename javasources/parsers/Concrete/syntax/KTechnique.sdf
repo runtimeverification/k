@@ -9,19 +9,20 @@ context-free priorities
 	".K"		-> K {cons("K12Empty"), prefer}
 	"."			-> K {cons("K1Empty")}
 	K "~>" K	-> K {left, cons("K1Seq")}
-	".List{K}"	-> ListDlKDr {cons("ListDlKDr12Empty")}
-	ListDlKDr   ",," ListDlKDr	-> ListDlKDr {left, cons("ListDlKDr1List")}
+	".List{K}"	-> KList {cons("ListDlKDr12Empty")}
+	".KList"	-> KList {cons("KList12Empty")}
+	KList   ",," KList	-> KList {left, cons("KList1List")}
 } > { non-assoc:
 	K "=>" K	-> K {non-assoc, cons("K1Rewrite")}
-	ListDlKDr  "=>" ListDlKDr	-> ListDlKDr {non-assoc, cons("ListDlKDr1Rewrite")}
+	KList  "=>" KList		-> KList {non-assoc, cons("ListDlKDr1Rewrite")}
 	KLabel "=>" KLabel		-> KLabel {cons("KLabel1Rewrite")}
 }
 context-free syntax
-	KLabel "(" ListDlKDr ")"	-> K {cons("K1App")}
-	K					-> ListDlKDr %%{cons("ListOfK3K")}
+	KLabel "(" KList ")"-> K {cons("K1App")}
+	K					-> KList %%{cons("ListOfK3K")}
 	"HOLE"				-> K {cons("K1Hole")}
 	"HOLE" ":" "K"		-> K {cons("K12Hole")}
-	"(" ListDlKDr ")"	-> ListDlKDr {cons("ListDlKDr1Bracket")}
+	"(" KList ")"	-> ListDlKDr {cons("KList1Bracket")}
 	"(" K ")"			-> K {cons("K1Bracket")}
 	"(" KLabel ")"		-> KLabel {cons("KLabel1Bracket")}
 
@@ -96,6 +97,7 @@ lexical restrictions
 	".BagItem"	-/- [a-zA-Z0-9]
 	".K"		-/- [a-zA-Z0-9]
 	".List{K}"	-/- [a-zA-Z0-9]
+	".KList"	-/- [a-zA-Z0-9]
 
 	"List"		-/- [a-zA-Z0-9]
 	"ListItem"	-/- [a-zA-Z0-9]
@@ -107,5 +109,6 @@ lexical restrictions
 	"BagItem"	-/- [a-zA-Z0-9]
 	"K"			-/- [a-zA-Z0-9]
 	"List{K}"	-/- [a-zA-Z0-9]
+	"KList"		-/- [a-zA-Z0-9]
 	"."			-/- [a-zA-Z\.]
 

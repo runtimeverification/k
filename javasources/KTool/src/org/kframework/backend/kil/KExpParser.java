@@ -3,7 +3,7 @@ package org.kframework.backend.kil;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
-import org.kframework.kil.ListOfK;
+import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 
 import java.io.IOException;
@@ -72,7 +72,7 @@ public class KExpParser {
 		} catch (IOException e) {
 			throw new ParsingException("Expected token but encountered exception while parsing KExp");
 		}
-		ListOfK lok = new ListOfK();
+		KList lok = new KList();
 		while (tokenizer.ttype != ')') {
 			tokenizer.pushBack();
 			lok.add(parseK());

@@ -27,7 +27,7 @@ public class MetaK {
 		if (condition == null) {
 			return kresultCnd;
 		}
-		ListOfK items = new ListOfK();
+		KList items = new KList();
 		items.add(condition);
 		items.add(kresultCnd);
 		return new KApp(Constant.ANDBOOL_KLABEL,items);
@@ -37,12 +37,20 @@ public class MetaK {
 		public static final String anyVarSymbol = "_";
 		public static final String heatingTag = "heat";
 		public static final String coolingTag = "cool";
-		public static final String KItem = "KItem";
-		public static final String K = "K";
 		public static final String hole = "[]";
 		public static final String freshCons = "Bool1FreshSyn";
 		public static final String plusIntCons = "Int1PlusSyn";
+		public static final String K = "K";
+		public static final String KItem = "KItem";
+		public static final String KList = "KList";
 		public static final String Bag = "Bag";
+		public static final String Set = "Set";
+		public static final String List = "List";
+		public static final String Map = "Map";
+		public static final String BagItem = "BagItem";
+		public static final String SetItem = "SetItem";
+		public static final String ListItem = "ListItem";
+		public static final String MapItem = "MapItem";
 
 		public static final String generatedTopCellLabel = "generatedTop";
 	}
@@ -161,14 +169,14 @@ public class MetaK {
 	public static Term kWrapper(Term t) {
 		if (DefinitionHelper.isSubsortedEq("K", t.getSort()))
 			return t;
-		return new KApp(new KInjectedLabel(t), new ListOfK());
+		return new KApp(new KInjectedLabel(t), new KList());
 	}
 
 	public static boolean isKSort(String sort) {
 		try {
 			KSort.valueOf(sort);
 		} catch (IllegalArgumentException e) {
-			return sort.equals("List{K}");
+			return sort.equals(MetaK.Constants.KList);
 		}
 		return true;
 	}
@@ -257,7 +265,7 @@ public class MetaK {
 			}
 
 			@Override
-			public void visit(ListOfK node) {
+			public void visit(KList node) {
 				return;
 			}
 

@@ -1,5 +1,6 @@
 package org.kframework.kil.loader.maude.xml.transformer;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.maude.xml.basic.Term;
@@ -35,7 +36,7 @@ public class JavaClassesFactory {
 		}
 
 		if (t.getOp().equals(".List`{K`}")) {
-			Empty emp = new Empty("maude", "maude", "List{K}");
+			Empty emp = new Empty("maude", "maude", MetaK.Constants.KList);
 			assert (t.getChildren().size() == 0);
 			return emp;
 		}

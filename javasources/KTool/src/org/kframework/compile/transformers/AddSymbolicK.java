@@ -59,7 +59,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 		List<Term> args = new ArrayList<Term>();
 		args.add((Constant.STRING(sort)));
 		args.add((Constant.INT(n)));
-		return new KApp(Constant.KLABEL("'#freshSymSortN"), new ListOfK(args));
+		return new KApp(Constant.KLABEL("'#freshSymSortN"), new KList(args));
 	}
 
 	@Override

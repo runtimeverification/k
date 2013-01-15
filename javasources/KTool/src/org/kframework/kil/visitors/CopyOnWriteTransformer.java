@@ -368,7 +368,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(ListOfK node) throws TransformerException {
+	public ASTNode transform(KList node) throws TransformerException {
 		return transform((Collection) node);
 	}
 

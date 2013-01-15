@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -7,25 +8,25 @@ import org.w3c.dom.Element;
 
 import java.util.List;
 
-public class ListOfK extends Collection {
-	public ListOfK() {
-		super("List{K}");
+public class KList extends Collection {
+	public KList() {
+		super(MetaK.Constants.KList);
 	}
 	
-	public ListOfK(String location, String filename) {
-		super(location, filename, "List{K}");
+	public KList(String location, String filename) {
+		super(location, filename, MetaK.Constants.KList);
 	}
 
-	public ListOfK(Element element) {
+	public KList(Element element) {
 		super(element);
 	}
 
-	public ListOfK(ListOfK node) {
+	public KList(KList node) {
 		super(node);
 	}
 
-	public ListOfK(List<Term> col) {
-		super("List{K}", col);
+	public KList(List<Term> col) {
+		super(MetaK.Constants.KList, col);
 	}
 
 	@Override
@@ -50,7 +51,7 @@ public class ListOfK extends Collection {
 	}
 	
 	@Override
-	public ListOfK shallowCopy() {
-		return new ListOfK(this);
+	public KList shallowCopy() {
+		return new KList(this);
 	}
 }

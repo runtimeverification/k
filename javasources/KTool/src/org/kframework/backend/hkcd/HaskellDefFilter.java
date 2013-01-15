@@ -17,7 +17,7 @@ public class HaskellDefFilter extends HaskellFilter {
 		Term b = rl.getBody();
 
 		// Rule has no bag or cell, just a single rewrite of
-		// List{K} sort
+		// KList sort
 		if (b instanceof Rewrite) {
 			result += "(KRuleCell \"PGM\" ";
 			b.accept(this);

@@ -6,7 +6,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
-import org.kframework.kil.ListOfK;
+import org.kframework.kil.KList;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
@@ -37,7 +37,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
     // constructs the term '_+String_(term1,,term2)
     public static Term appendString(Term term1, Term term2) {
-        ListOfK list = new ListOfK();
+        KList list = new KList();
         list.add(term1);
         list.add(term2);
         Term term = new KApp(Constant.KLABEL("'_+String_"), list);
