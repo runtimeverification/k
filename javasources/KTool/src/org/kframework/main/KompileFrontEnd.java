@@ -148,7 +148,7 @@ public class KompileFrontEnd {
 			output = cmd.getOptionValue("output");
 		} else {
 			try {
-				output = mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-compiled";
+				output = mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			} catch (IOException e) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
 						"Canonical file cannot be obtained for main file.",
