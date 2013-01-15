@@ -47,7 +47,7 @@ import java.util.List;
 
 public class KompileFrontEnd {
 
-	private static String output;
+	public static String output;
 
 	private static List<String> metadataParse(String tags) {
 		String[] alltags = tags.split("\\s+");
@@ -179,38 +179,28 @@ public class KompileFrontEnd {
 			backend = new DocumentationBackend(Stopwatch.sw);
 		} else {
 			if (output == null) {
-				try {
-					output = mainFile.getCanonicalFile().getParent() + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
-				} catch (IOException e) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-							"Canonical file cannot be obtained for main file.",
-							mainFile.getAbsolutePath(), "File system."));
-				}
+				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
 			backend = new KompileBackend(Stopwatch.sw);
+			DefinitionHelper.dotk = new File(output);
+			DefinitionHelper.dotk.mkdirs();
 		}
-		initializeDotK(mainFile);
+		if (DefinitionHelper.dotk == null) {
+			try {
+				DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
+			} catch (IOException e) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+						"Canonical file cannot be obtained for main file.",
+						mainFile.getAbsolutePath(), "File system."));
+			}
+			DefinitionHelper.dotk.mkdirs();
+		}
 		if (backend != null) {
 			genericCompile(mainFile, lang, backend, step);
 		}
 		if (GlobalSettings.verbose)
 			Stopwatch.sw.printTotal("Total");
 		GlobalSettings.kem.print();
-	}
-
-	private static void initializeDotK(File mainFile) {
-		String output = KompileFrontEnd.output;
-		if (output==null) {
-			try {
-				output = mainFile.getCanonicalFile().getParent() + File.separator + ".k";
-			} catch (IOException e) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-						"Canonical file cannot be obtained for main file.",
-						mainFile.getAbsolutePath(), "File system."));
-			}
-		}
-		DefinitionHelper.dotk = new File(output);
-		DefinitionHelper.dotk.mkdirs();
 	}
 
 	private static void genericCompile(File mainFile, String lang, Backend backend, String step) {

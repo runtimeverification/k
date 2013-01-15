@@ -2,6 +2,7 @@ package org.kframework.backend.latex;
 
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
+import org.kframework.main.KompileFrontEnd;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -74,12 +75,11 @@ public class PdfBackend extends BasicBackend {
 	public void run(Definition definition) throws IOException {
 		List<File> files = LatexBackend.latex(definition, definition.getMainModule());
 		files = pdf(files, definition.getMainModule());
-		try {
-			File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-			FileUtil.copyFiles(files, canonicalFile.getParentFile());
-		} catch (IOException e) {
-			e.printStackTrace();
+		String output = KompileFrontEnd.output;
+		if (output == null) {
+			output = "./" + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".pdf";
 		}
+		FileUtil.copyFile(files.get(0).getAbsolutePath(), new File(output).getAbsolutePath());
 	}
 
 	@Override
