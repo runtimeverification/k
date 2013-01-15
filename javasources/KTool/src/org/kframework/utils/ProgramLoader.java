@@ -41,7 +41,7 @@ public class ProgramLoader {
 			startSymbol = DefinitionHelper.startSymbolPgm;
 		}
 
-		File tbl = new File(DefinitionHelper.dotk.getCanonicalPath() + "/pgm/Program.tbl");
+		File tbl = new File(DefinitionHelper.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
@@ -105,7 +105,7 @@ public class ProgramLoader {
 		try {
 			ASTNode out;
 			if (useDefParser) {
-				org.kframework.parser.concrete.KParser.ImportTblGround(DefinitionHelper.dotk.getCanonicalPath() + "/ground/Concrete.tbl");
+				org.kframework.parser.concrete.KParser.ImportTblGround(DefinitionHelper.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
 				out = DefinitionLoader.parseCmdString(content, "");
 				out = out.accept(new FlattenSyntax());
 				out = MetaK.kWrapper((Term) out);

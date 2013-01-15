@@ -2,7 +2,7 @@ package org.kframework.backend.html;
 
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.main.KompileFrontEnd;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
@@ -26,10 +26,18 @@ public class HtmlBackend extends BasicBackend {
 
 		String html = htmlFilter.getHTML();
 
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.html", html);
+		String output = KompileFrontEnd.output;
+		if (output == null) {
+			output = "./" + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".html";
+		}
 
-		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-		FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".html", html);
+		output = new File(output).getAbsolutePath();
+
+		FileUtil.saveInFile(output, html);
+		if (GlobalSettings.verbose) {
+			sw.printIntermediate("Generating HTML");
+		}
+
 	}
 
 	@Override

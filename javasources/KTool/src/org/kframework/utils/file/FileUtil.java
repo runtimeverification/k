@@ -87,7 +87,7 @@ public class FileUtil {
 		}
 	}
 
-	private static void copyFile(String fromFile, String toFile) throws IOException {
+	public static void copyFile(String fromFile, String toFile) throws IOException {
         FileInputStream source = new FileInputStream(fromFile);
         FileOutputStream destination = new FileOutputStream(toFile);
  

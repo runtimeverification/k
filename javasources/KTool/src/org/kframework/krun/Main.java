@@ -64,13 +64,10 @@ public class Main {
 		int count = 0;
 
 		try {
-			ArrayList<File> maudeFiles = FileUtil.searchFiles(path, "maude", false);
+			File[] maudeFiles = FileUtil.searchSubFolders(path, ".*-kompiled");
 			for (File maudeFile : maudeFiles) {
 				String fullPath = maudeFile.getCanonicalPath();
-				path_ = FileUtil.dropExtension(fullPath, ".", K.fileSeparator);
-				int sep = path_.lastIndexOf(K.fileSeparator);
-				fileName = path_.substring(sep + 1);
-				if (fileName.endsWith("-compiled")) {
+				if (fullPath.endsWith("-kompiled")) {
 					result = fullPath;
 					str.append("\"./" + fileName + "\" ");
 					count++;
@@ -96,8 +93,8 @@ public class Main {
 			str = s.substring(sep + 1).toUpperCase();
 		} else {
 			// using --compiled-def
-			if (K.compiled_def != null && K.compiled_def.endsWith("-compiled.maude")) {
-				s = K.compiled_def.substring(0, K.compiled_def.lastIndexOf("-compiled"));
+			if (K.compiled_def != null && K.compiled_def.endsWith("-kompiled")) {
+				s = K.compiled_def.substring(0, K.compiled_def.lastIndexOf("-kompiled"));
 				int sep = s.lastIndexOf(K.fileSeparator);
 				str = s.substring(sep + 1).toUpperCase();
 			} else {
@@ -110,11 +107,11 @@ public class Main {
 
 		if (optionName == "compiled-def") {
 			if (cmd.hasOption("k-definition")) {
-				K.compiled_def = s + "-compiled.maude";
+				K.compiled_def = s + "-kompiled";
 			} else {
 				K.compiled_def = initOptions(K.userdir);
 				if (K.compiled_def != null) {
-					index = K.compiled_def.indexOf("-compiled.maude");
+					index = K.compiled_def.indexOf("-kompiled");
 					K.k_definition = K.compiled_def.substring(0, index);
 				}
 			}
@@ -613,10 +610,6 @@ public class Main {
 			}
 			if (cmd.hasOption("k-definition")) {
 				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
-				DefinitionHelper.dotk = new File(new File(K.k_definition).getParent() + File.separator + ".k");
-				
-				K.kdir = DefinitionHelper.dotk.getCanonicalPath();
-				K.setKDir();
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");
@@ -654,8 +647,6 @@ public class Main {
 			// k-definition beats compiled-def in a fight
 			if (cmd.hasOption("compiled-def") && !cmd.hasOption("k-definition")) {
 				K.compiled_def = new File(cmd.getOptionValue("compiled-def")).getCanonicalPath();
-				K.kdir = new File(K.compiled_def).getParent() + K.fileSeparator + ".k";
-				K.setKDir();
 			}
 			if (cmd.hasOption("maude-cmd")) {
 				K.maude_cmd = cmd.getOptionValue("maude-cmd");
@@ -788,6 +779,13 @@ public class Main {
 				Error.report("\nCould not find compiled definition: " + K.compiled_def + "\nPlease compile the definition by using `kompile'.");
 			}
 
+			DefinitionHelper.dotk = new File(new File(K.compiled_def).getParent() + File.separator + ".k");
+			if (!DefinitionHelper.dotk.exists()) {
+				DefinitionHelper.dotk.mkdirs();
+			}
+			DefinitionHelper.kompiled = new File(K.compiled_def);
+			K.kdir = DefinitionHelper.dotk.getCanonicalPath();
+			K.setKDir();
 			/*
 			 * System.out.println("K.k_definition=" + K.k_definition); System.out.println("K.syntax_module=" + K.syntax_module); System.out.println("K.main_module=" + K.main_module); System.out.println("K.compiled_def=" + K.compiled_def);
 			 */
@@ -801,14 +799,14 @@ public class Main {
 				XStream xstream = new XStream();
 				xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 	
-				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.kdir + "/defx.xml"));
+				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.compiled_def + "/defx.xml"));
 				// This is essential for generating maude
 				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig());
 				javaDef.preprocess();
 				K.definition = javaDef;
 
-				org.kframework.parser.concrete.KParser.ImportTbl(K.kdir + "/def/Concrete.tbl");
-				org.kframework.parser.concrete.KParser.ImportTblGround(K.kdir + "/ground/Concrete.tbl");
+				org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
+				org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
 			}
 
 			if (K.pgm != null) {

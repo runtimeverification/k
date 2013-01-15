@@ -92,6 +92,8 @@ public class KompileOptionsParser {
 		Option superheat = new Option("superheat", true, "syntax <arg> tags triggering super heating nondetermistic choice for strictness");
 		Option supercool = new Option("supercool", true, "rule <arg> tags triggering super cooling tags are space-separated and can include the tag default");
 
+		Option outputFile = new Option("o", "output", true, "specify output file/directory. Default <file>-compiled");
+
 		// add options
 		options.addOption(new Option("testFactory", false, "Option to test new class instantiation"));
 		options.addOptionGroup(verb);
@@ -113,6 +115,7 @@ public class KompileOptionsParser {
 		options.addOption(superheat);
 		options.addOption(def);
 		options.addOption(step);
+		options.addOption(outputFile);
 		options.addOption(style);
 	}
 

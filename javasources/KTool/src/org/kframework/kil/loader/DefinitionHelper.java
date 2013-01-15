@@ -57,6 +57,7 @@ public class DefinitionHelper {
 	private static Poset fileRequirements = new Poset();
 	public static String startSymbolPgm = "K";
 	public static File dotk = null;
+	public static File kompiled = null;
 
 	static {
 		subsorts.addRelation("List{K}", "K");

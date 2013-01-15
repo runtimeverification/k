@@ -2,6 +2,7 @@ package org.kframework.krun;
 
 import org.kframework.krun.tasks.MaudeTask;
 import org.kframework.utils.ProgramLoader;
+import org.kframework.kil.loader.DefinitionHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -181,8 +182,8 @@ public class RunProcess {
 					}
 					System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "k_definition=" + K.k_definition + K.lineSeparator + "syntax_module=" + K.syntax_module + K.lineSeparator + "main_module=" + K.main_module
 							+ K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
-					String compiledDefName = FileUtil.getFilename(K.compiled_def, ".", K.fileSeparator);
-					int index = compiledDefName.indexOf("-compiled");
+					String compiledDefName = DefinitionHelper.kompiled.getName();
+					int index = compiledDefName.indexOf("-kompiled");
 					compiledDefName = compiledDefName.substring(0, index);
 					if (lang != null && !lang.equals(compiledDefName)) {
 						Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. " + "Maybe you should use --syntax-module or --main-module options of krun");
