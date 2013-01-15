@@ -55,11 +55,10 @@ public class ConfigurationStructureMap implements Map<String, ConfigurationStruc
         ConfigurationStructure cfgStr;
         cfgStr = config.get(o.getId());
         if (cfgStr == null) {
-	    throw new RuntimeException();
-           // GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-             //       KException.KExceptionGroup.INTERNAL,
-               //     "Cell " + o + " not found in configuration",
-                 //   o.getFilename(), o.getLocation()));
+            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
+                    KException.KExceptionGroup.INTERNAL,
+                    "Cell " + o + " not found in configuration",
+                    o.getFilename(), o.getLocation()));
         }
         return cfgStr;
     }
