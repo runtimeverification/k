@@ -284,15 +284,14 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:	// sort wrappers
-		a#(b) -> $[<[sort] sort="[sort2]" loc="[loc]">
+		a#(b) -> $[<[sort] sort="[sort]" loc="[loc]">
 						[children]
 		</[sort]>
 		]
 		where <string-ends-with(|"List")> a
 		where mydebug(!"1List: ")
 		where children := <all(to-xml)> b
-		where sort2 := <getSort> a
-		where sort  := <?"List{K}" < !"ListOfK" + id> sort2
+		where sort := <getSort> a
 		where loc := <getLocAsString>
 
 	to-xml2:	// sort items

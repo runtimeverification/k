@@ -68,14 +68,14 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 		}
 		final Rewrite body = (Rewrite) node.getBody();
 		if (!superheat) {
-			// rule heat(redex((C[e] =>  e ~> C) ~> _:K),, _:List{K})
+			// rule heat(redex((C[e] =>  e ~> C) ~> _:K),, _:KList)
 			KSequence kSequence = new KSequence();
 			kSequence.getContents().add(body);
 			kSequence.add(new Variable(MetaK.Constants.anyVarSymbol,"K"));
 			Term redex = new KApp(Constant.REDEX_KLABEL,kSequence);
-			ListOfK listOfK = new ListOfK();
+			KList listOfK = new KList();
 			listOfK.add(redex);
-			listOfK.add(new Variable(MetaK.Constants.anyVarSymbol, "List{K}"));
+			listOfK.add(new Variable(MetaK.Constants.anyVarSymbol, MetaK.Constants.KList));
 			Term heat = new KApp(Constant.HEAT_KLABEL, listOfK);
 			Rule superHeat = node.shallowCopy();
 			superHeat.setBody(heat);
@@ -83,34 +83,34 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 			return node;
 		}
 		// add superheat rule
-		// rule heat(redex(C[e] ~> RestHeat:K,,	LHeat:List{K},,
-		//                 (.List{K} => redex(e ~> C ~> RestHeat:K))),,_:List{K})
-		// when '_=/=K_('_inList`{K`}_(redex(e ~> C ~> RestHeat:K),,List{K}2KLabel LHeat:List{K}(.List{K})),# true(.List{K}))
+		// rule heat(redex(C[e] ~> RestHeat:K,,	LHeat:KList,,
+		//                 (.KList => redex(e ~> C ~> RestHeat:K))),,_:KList)
+		// when '_=/=K_('_inKList_(redex(e ~> C ~> RestHeat:K),,KList2KLabel LHeat:KList(.KList)),# true(.KList))
 		Rule superHeat = node.shallowCopy();
 		Term left = body.getLeft(); // C[e]
 		Term right = body.getRight(); // e ~> C
 		Variable restHeat = MetaK.getFreshVar("K");
-		Variable lHeat = MetaK.getFreshVar("List{K}");
+		Variable lHeat = MetaK.getFreshVar(MetaK.Constants.KList);
 		KSequence red1Seq = new KSequence();
 		red1Seq.add(left); red1Seq.add(restHeat); //C[e] ~> RestHeat:K,
-		ListOfK red1List = new ListOfK();
-		red1List.add(red1Seq);red1List.add(lHeat); //C[e] ~> RestHeat:K,,	LHeat:List{K}
+		KList red1List = new KList();
+		red1List.add(red1Seq);red1List.add(lHeat); //C[e] ~> RestHeat:K,,	LHeat:KList
 		KSequence red2Seq = new KSequence();
 		red2Seq.getContents().addAll(((KSequence)right).getContents()); red2Seq.add(restHeat); // e ~> C ~> RestHeat:K
 		Term red2 = new KApp(Constant.REDEX_KLABEL,red2Seq); // redex(e ~> C ~> RestHeat:K)
-		Term red2rew = new Rewrite(new Empty("List{K}"), red2); // (.List{K} => redex(e ~> C ~> RestHeat:K))
+		Term red2rew = new Rewrite(new Empty(MetaK.Constants.KList), red2); // (.KList => redex(e ~> C ~> RestHeat:K))
 		red1List.add(red2rew);
-		Term red1 = new KApp(Constant.REDEX_KLABEL, red1List); // redex(C[e] ~> RestHeat:K,,	LHeat:List{K},,
-															   //       (.List{K} => redex(e ~> C ~> RestHeat:K)))
-		ListOfK heatList = new ListOfK();
-		heatList.add(red1); heatList.add(new Variable(MetaK.Constants.anyVarSymbol, "List{K}"));
+		Term red1 = new KApp(Constant.REDEX_KLABEL, red1List); // redex(C[e] ~> RestHeat:K,,	LHeat:KList,,
+															   //       (.KList => redex(e ~> C ~> RestHeat:K)))
+		KList heatList = new KList();
+		heatList.add(red1); heatList.add(new Variable(MetaK.Constants.anyVarSymbol, MetaK.Constants.KList));
 		Term heat = new KApp(Constant.HEAT_KLABEL, heatList);
 		superHeat.setBody(heat);
 
-		ListOfK inListList = new ListOfK();
-		inListList.add(red2); inListList.add(new KApp(new KInjectedLabel(lHeat), new Empty("List{K}")));
-		Term inList = new KApp(Constant.KLABEL("'_inList`{K`}_"), inListList);
-		ListOfK condList = new ListOfK();
+		KList inListList = new KList();
+		inListList.add(red2); inListList.add(new KApp(new KInjectedLabel(lHeat), new Empty(MetaK.Constants.KList)));
+		Term inList = new KApp(Constant.KLABEL("'_inKList_"), inListList);
+		KList condList = new KList();
 		condList.add(inList);
 		condList.add(Constant.TRUE);
 		Term cond = new KApp(Constant.KNEQ_KLABEL, condList);
@@ -118,12 +118,12 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 		superHeats.add(superHeat);
 
 		// replace heating rule by
-		// rule C[e] => heat(redex(C[e]),, heated(.List{K}))
+		// rule C[e] => heat(redex(C[e]),, heated(.KList))
 		node = node.shallowCopy();
 		Term red3 = new KApp(Constant.REDEX_KLABEL,left);
-		ListOfK red3List = new ListOfK();
+		KList red3List = new KList();
 		red3List.add(red3);
-		red3List.add(new KApp(Constant.HEATED_KLABEL, new Empty("List{K}")));
+		red3List.add(new KApp(Constant.HEATED_KLABEL, new Empty(MetaK.Constants.KList)));
 		Term heat2 = new KApp(Constant.HEAT_KLABEL, red3List);
 		node.setBody(new Rewrite(left, heat2));
 

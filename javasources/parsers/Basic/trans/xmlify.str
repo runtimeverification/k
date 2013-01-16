@@ -195,7 +195,7 @@ rules
 	to-xml:
 		Sort(x1)		-> $[<sort     value="[x1]" loc="[loc]" />
 		]
-		where loc := <getLocAsString>
+		where loc := <getLocAsString> x1
 
 	to-xml:
 		List(x1, x2)		-> $[<userlist     value="[x1]" separator="[<xml-string-escape-from-string> x2]" loc="[loc]" />

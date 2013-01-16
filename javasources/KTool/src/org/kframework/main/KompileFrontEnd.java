@@ -211,8 +211,8 @@ public class KompileFrontEnd {
 			steps.add(new FirstStep(backend));
 			steps.add(new RemoveBrackets());
 			steps.add(new AddEmptyLists());
-			steps.add(new CheckVisitorStep(new CheckVariables()));
-			steps.add(new CheckVisitorStep(new CheckRewrite()));
+			steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));
+			steps.add(new CheckVisitorStep<Definition>(new CheckRewrite()));
 			steps.add(new AutomaticModuleImportsTransformer());
 			steps.add(new FunctionalAdaptor(new DittoFilter()));
 			steps.add(new FlattenModules());

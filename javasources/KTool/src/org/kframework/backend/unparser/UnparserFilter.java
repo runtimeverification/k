@@ -151,7 +151,7 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(ListOfK listOfK) {
+	public void visit(KList listOfK) {
 		prepare(listOfK);
 		java.util.List<Term> termList = listOfK.getContents();
 		for (int i = 0; i < termList.size(); ++i) {

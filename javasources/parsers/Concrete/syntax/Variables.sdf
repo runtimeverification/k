@@ -25,8 +25,9 @@ context-free syntax
 	VARID					-> MapItem {cons("MapItem1Var")}
 	VARID ":" "K"			-> K {cons("K12Var")}
 	VARID					-> K {cons("K1Var")}
-	VARID ":" "List{K}"		-> ListDlKDr {cons("ListDlKDr12Var")}
-	VARID					-> ListDlKDr {cons("ListDlKDr1Var")}
+	VARID ":" "List{K}"		-> KList {cons("ListDlKDr12Var")}
+	VARID ":" "KList"		-> KList {cons("KList12Var")}
+	VARID					-> KList {cons("KList1Var")}
 	VARID ":" "KLabel"		-> KLabel {cons("KLabel12Var")}
 	VARID					-> KLabel {cons("KLabel1Var")}
 	VARID ":" "KResult"		-> K {cons("KResult12Var")}

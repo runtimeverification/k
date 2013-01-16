@@ -35,7 +35,7 @@ public class Constants {
 	public static final String CONST = "const";
 	public static final String KAPP = "KApp";
 	public static final String LABEL = "label";
-	public static final String LISTOFK = "ListOfK";
+	public static final String KList = "KList";
 	public static final String EMPTY = "empty";
 	public static final String SET = "Set";
 	public static final String SETITEM = "SetItem";

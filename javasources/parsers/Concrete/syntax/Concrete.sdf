@@ -19,7 +19,7 @@ context-free syntax
 	"context" K					-> KSimpleSentence {cons("Context")}
 	%%"predicate" K				-> KSimpleSentence {cons("Predicate")}
 	
-	ListDlKDr	-> RuleContentDz
+	KList		-> RuleContentDz
 	Map			-> RuleContentDz
 	Bag			-> RuleContentDz
 	Set			-> RuleContentDz

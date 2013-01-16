@@ -34,8 +34,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			Set<String> validConses = new HashSet<String>();
 			List<Term> contents = new ArrayList<Term>();
 			possibleTerms = new ArrayList<Term>();
-			if (child instanceof ListOfK) {
-				contents = ((ListOfK)child).getContents();
+			if (child instanceof KList) {
+				contents = ((KList)child).getContents();
 			} else if (!(child instanceof Empty)) {
 				contents.add(child);
 			}

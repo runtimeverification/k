@@ -88,7 +88,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             Term klblK = new KApp(new KInjectedLabel(klblCt), Empty.ListOfK);
 
             for (int bndIdx : bndMap.keySet()) {
-                ListOfK list = new ListOfK();
+                KList list = new KList();
                 list.getContents().add(klblK);
                 list.getContents().add(new Constant("Int", Integer.toString(bndIdx)));
                 rule = new Rule(new KApp(BOUNDED_PREDICATE, list), Constant.TRUE);
@@ -99,7 +99,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             }
 
             for (int bodyIdx : bndMap.values()) {
-                ListOfK list = new ListOfK();
+                KList list = new KList();
                 list.getContents().add(klblK);
                 list.getContents().add(new Constant("Int", Integer.toString(bodyIdx)));
                 rule = new Rule(new KApp(BOUNDING_PREDICATE, list), Constant.TRUE);

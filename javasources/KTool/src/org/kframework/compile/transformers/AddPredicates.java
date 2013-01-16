@@ -159,7 +159,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     // isSort and isSymbolicK
                     Variable var = MetaK.getFreshVar("K");
                     Term lhs = new KApp(Constant.KLABEL(symPred), var);
-                    ListOfK list = new ListOfK();
+                    KList list = new KList();
                     Term rhs = new KApp(Constant.KLABEL("'_andThenBool_"), list);
                     list.add(new KApp(Constant.KLABEL(pred), var));
                     list.add(new KApp(KSymbolicPredicate, var));
@@ -168,7 +168,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     retNode.appendModuleItem(rule);
 
                     String symCtor = AddSymbolicK.symbolicConstructor(sort);
-                    var = MetaK.getFreshVar("List{K}");
+                    var = MetaK.getFreshVar(MetaK.Constants.KList);
                     Term symTerm = new KApp(Constant.KLABEL(symCtor), var);
 
                     // define isSort for symbolic sort constructor symSort

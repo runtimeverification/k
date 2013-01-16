@@ -67,7 +67,7 @@ public class HaskellFilter extends BasicVisitor {
 		}
 
 		// We take a shortcut here instead of processing a new
-		// empty of sort "List{K}".
+		// empty of sort "KList".
 		result += ") []";
 	}
 

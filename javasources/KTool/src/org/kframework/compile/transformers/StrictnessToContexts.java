@@ -11,7 +11,7 @@ import org.kframework.kil.Context;
 import org.kframework.kil.Hole;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KSort;
-import org.kframework.kil.ListOfK;
+import org.kframework.kil.KList;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
@@ -224,18 +224,18 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 		items.add(ctx);
 	}
 
-  //KLabels are applied to associative List{K},
+  //KLabels are applied to associative KList,
   //so the context we must generate is the fairly
-  //easy context KLabel(List{K}1 ,, HOLE ,, List{K}2)
+  //easy context KLabel(KList1 ,, HOLE ,, KList2)
   private void kLabelStrict(String attr, Production prod){
     List<Term> contents = new ArrayList<Term>(3);
     //first argument is a variable of sort K
-    contents.add(MetaK.getFreshVar("List{K}"));
+    contents.add(MetaK.getFreshVar(MetaK.Constants.KList));
     //second is a HOLE
     contents.add(new Hole("K"));
     //third argument is a variable of sort K
-    contents.add(MetaK.getFreshVar("List{K}"));
-    KApp kapp = new KApp(MetaK.getTerm(prod), new ListOfK(contents)); 
+    contents.add(MetaK.getFreshVar(MetaK.Constants.KList));
+    KApp kapp = new KApp(MetaK.getTerm(prod), new KList(contents)); 
     //make a context from the TermCons
 		Context ctx = new Context();
 		ctx.setBody(kapp);
@@ -246,17 +246,17 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
   }
 
   //Same as above but with the condition
-  //isKResult(List{K}1)
+  //isKResult(KList1)
   private void kLabelSeqStrict(String attr, Production prod){
     List<Term> contents = new ArrayList<Term>(3);
     //first argument is a variable of sort K
-    Term Var1 = MetaK.getFreshVar("List{K}");
+    Term Var1 = MetaK.getFreshVar(MetaK.Constants.KList);
     contents.add(Var1);
     //second is a HOLE
     contents.add(new Hole("K"));
     //third argument is a variable of sort K
-    contents.add(MetaK.getFreshVar("List{K}"));
-    KApp kapp = new KApp(MetaK.getTerm(prod), new ListOfK(contents)); 
+    contents.add(MetaK.getFreshVar(MetaK.Constants.KList));
+    KApp kapp = new KApp(MetaK.getTerm(prod), new KList(contents)); 
     //make a context from the TermCons
 		Context ctx = new Context();
 		ctx.setBody(kapp);

@@ -1,9 +1,9 @@
 package org.kframework.compile.utils;
 
-import org.kframework.kil.Definition;
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.visitors.Visitor;
 
-public class CheckVisitorStep extends BasicCompilerStep<Definition> implements CheckStep {
+public class CheckVisitorStep<T extends ASTNode> extends BasicCompilerStep<T> implements CheckStep<T> {
 
 	Visitor t;
 
@@ -12,7 +12,7 @@ public class CheckVisitorStep extends BasicCompilerStep<Definition> implements C
 	}
 
 	@Override
-	public boolean check(Definition def) {
+	public boolean check(T def) {
 		try {
 			def.accept(t);
 		} catch (Exception e) {
@@ -28,7 +28,7 @@ public class CheckVisitorStep extends BasicCompilerStep<Definition> implements C
 	}
 
 	@Override
-	public Definition compile(Definition def, String stepName) {
+	public T compile(T def, String stepName) {
 		check(def);
 		return def;
 	}

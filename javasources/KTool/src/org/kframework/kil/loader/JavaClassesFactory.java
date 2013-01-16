@@ -20,7 +20,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.List;
 import org.kframework.kil.ListItem;
-import org.kframework.kil.ListOfK;
+import org.kframework.kil.KList;
 import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Map;
@@ -102,8 +102,8 @@ public class JavaClassesFactory {
 			return new Constant(element);
 		if (Constants.KAPP.equals(element.getNodeName()))
 			return new KApp(element);
-		if (Constants.LISTOFK.equals(element.getNodeName()))
-			return new ListOfK(element);
+		if (Constants.KList.equals(element.getNodeName()))
+			return new KList(element);
 		if (Constants.EMPTY.equals(element.getNodeName()))
 			return new Empty(element);
 		if (Constants.SET.equals(element.getNodeName()))

@@ -422,7 +422,7 @@ public class HTMLFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(ListOfK list) {
+	public void visit(KList list) {
 		printList(list.getContents(), "<span class=\"bold\">, </span>");
 	}
 

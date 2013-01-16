@@ -203,7 +203,7 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(ListOfK node) {
+	public void visit(KList node) {
 		visit((Collection) node);
 	}
 

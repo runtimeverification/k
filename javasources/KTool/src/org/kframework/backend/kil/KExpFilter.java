@@ -1,6 +1,7 @@
 package org.kframework.backend.kil;
 
 import org.kframework.compile.utils.MaudeHelper;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
 
@@ -96,7 +97,7 @@ public class KExpFilter extends BasicVisitor {
 	public void visit(Empty empty) {
 		String sort = empty.getSort();
 		if (MaudeHelper.basicSorts.contains(sort)) {
-			if (!sort.equals("List{K}")) {
+			if (!sort.equals(MetaK.Constants.KList)) {
 				result.append("()");
 			}
 		} else {

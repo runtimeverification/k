@@ -1,8 +1,9 @@
 package org.kframework.compile.utils;
 
-import org.kframework.kil.Definition;
+import org.kframework.kil.ASTNode;
 
-public interface CheckStep {
-	boolean check(Definition def);
-	String getName(); 
+public interface CheckStep<T extends ASTNode> {
+	boolean check(T def);
+
+	String getName();
 }

@@ -29,7 +29,7 @@ public class MaudeHelper {
 		basic.add("SetItem");
 		basic.add("MapItem");
 		basic.add("KLabel");
-		basic.add("List{K}");
+		basic.add(MetaK.Constants.KList);
 		basic.add("KResult");
 		basic.add("#Id");
 		basic.add("#String");

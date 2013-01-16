@@ -33,7 +33,7 @@ public class MaudeFilter extends BackendFilter {
 		String name = imp.getName();
 		final String iface = "-INTERFACE";
 		if (name.startsWith("#") && name.endsWith(iface)) {
-			name = name.substring(0, name.length()-iface.length());
+			name = name.substring(0, name.length() - iface.length());
 		}
 		result.append(name);
 		result.append(" .");
@@ -191,7 +191,7 @@ public class MaudeFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(ListOfK listOfK) {
+	public void visit(KList listOfK) {
 		this.visit((Collection) listOfK);
 		// throw new RuntimeException("don't know how to maudify ListOfK");
 	}
@@ -246,7 +246,7 @@ public class MaudeFilter extends BackendFilter {
 			}
 			result.append(attribute.getKey());
 			result.append("=(");
-			result.append(attribute.getValue().replaceAll("[()]",""));
+			result.append(attribute.getValue().replaceAll("[()]", ""));
 			result.append(")");
 		}
 	}
@@ -304,7 +304,7 @@ public class MaudeFilter extends BackendFilter {
 	public void visit(Empty empty) {
 		String sort = empty.getSort();
 		if (MaudeHelper.basicSorts.contains(sort)) {
-			if (!sort.equals("List{K}")) {
+			if (!sort.equals(MetaK.Constants.KList)) {
 				result.append("(.).");
 				result.append(sort);
 			} else {
@@ -322,7 +322,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Rule rule) {
-		boolean  isTransition = false;
+		boolean isTransition = false;
 		for (Attribute a : rule.getAttributes().getContents()) {
 			if (GlobalSettings.transition.contains(a.getKey())) {
 				isTransition = true;
@@ -330,11 +330,8 @@ public class MaudeFilter extends BackendFilter {
 			}
 		}
 		if (!(rule.getBody() instanceof Rewrite)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-						KExceptionGroup.INTERNAL,
-						"This rule should have a rewrite at top by now.",
-						getName(),
-						rule.getFilename(), rule.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "This rule should have a rewrite at top by now.", getName(), rule.getFilename(), rule
+					.getLocation()));
 		}
 		Rewrite body = (Rewrite) rule.getBody();
 		final Term condition = rule.getCondition();
@@ -357,10 +354,10 @@ public class MaudeFilter extends BackendFilter {
 		if (null != condition) {
 			result.append(" if ");
 			condition.accept(this);
-			result.append(" = _`(_`)(# true, .List`{K`})");
+			result.append(" = _`(_`)(# true, .KList)");
 		}
 		if (null != rule.getAttributes()) {
-				result.append(" [");
+			result.append(" [");
 			if (rule.getLabel() != null && !rule.getLabel().equals("")) {
 				result.append("label " + rule.getLabel() + " metadata");
 			} else {
@@ -568,7 +565,7 @@ public class MaudeFilter extends BackendFilter {
 		Term term = freezer.getTerm();
 		result.append("#freezer_(");
 		term.accept(this);
-		result.append(")(.List{K})");
+		result.append(")(." + MetaK.Constants.KList + ")");
 	}
 
 	@Override
@@ -653,7 +650,7 @@ public class MaudeFilter extends BackendFilter {
 		maudeCollectionConstructors.put(KSort.Set, "__");
 		maudeCollectionConstructors.put(KSort.List, "__");
 		maudeCollectionConstructors.put(KSort.K, "_~>_");
-		maudeCollectionConstructors.put(KSort.ListOfK, "_`,`,_");
+		maudeCollectionConstructors.put(KSort.KList, "_`,`,_");
 	}
 
 	public static String getMaudeConstructor(String sort) {

@@ -353,7 +353,7 @@ public class LatexFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(ListOfK list) {
+	public void visit(KList list) {
 		printList(list.getContents(), "\\kcomma");
 	}
 

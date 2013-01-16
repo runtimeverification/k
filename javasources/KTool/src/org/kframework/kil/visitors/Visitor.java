@@ -29,7 +29,7 @@ import org.kframework.kil.KLabel;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.List;
 import org.kframework.kil.ListItem;
-import org.kframework.kil.ListOfK;
+import org.kframework.kil.KList;
 import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Map;
@@ -100,7 +100,7 @@ public interface Visitor {
 	public void visit(Bag node);
 	public void visit(KSequence node);
 	public void visit(List node);
-	public void visit(ListOfK node);
+	public void visit(KList node);
 	public void visit(Map node);
 	public void visit(Set node);
 	// </Collections>

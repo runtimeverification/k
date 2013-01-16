@@ -60,8 +60,8 @@ public class DefinitionHelper {
 	public static File kompiled = null;
 
 	static {
-		subsorts.addRelation("List{K}", "K");
-		subsorts.addRelation("List{K}", "KResult");
+		subsorts.addRelation(MetaK.Constants.KList, "K");
+		subsorts.addRelation(MetaK.Constants.KList, "KResult");
 		subsorts.addRelation("K", "KResult");
 		subsorts.addRelation("Map", "MapItem");
 		subsorts.addRelation("Set", "SetItem");
@@ -94,7 +94,7 @@ public class DefinitionHelper {
 		cells.put(c.getLabel(), c);
 
 		String sort = subsorts.getMaxim(c.getContents().getSort());
-		if (sort.equals("List{K}"))
+		if (sort.equals(MetaK.Constants.KList))
 			sort = "K";
 		cellSorts.put(c.getLabel(), sort);
 	}

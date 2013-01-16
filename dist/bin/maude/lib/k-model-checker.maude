@@ -229,8 +229,8 @@ mod #MODEL-CHECKER is
   op '_|=Ltl_ : -> KLabel .
   op 'modelCheck`(_`,_`) : -> KLabel .
 
-  eq 'modelCheck`(_`,_`)(Bag2KLabel(B:Bag)(.List{K}),,Formula:#LtlFormula) 
-   = # modelCheck(B:Bag,Formula:#LtlFormula)(.List{K}) .
+  eq 'modelCheck`(_`,_`)(Bag2KLabel(B:Bag)(.KList),,Formula:#LtlFormula) 
+   = # modelCheck(B:Bag,Formula:#LtlFormula)(.KList) .
 
 op '_->Ltl_ : -> KLabel[metadata "function=() gather=(e E) arity=(2)"].
 op '_/\\Ltl_ : -> KLabel[metadata "function=() arity=(2)"].
@@ -264,12 +264,12 @@ op '~Ltl_ : -> KLabel[metadata "function=() arity=(1)"].
   eq '~Ltl_(F) = ~Ltl F .
   eq 'OLtl_(F) = OLtl F .
   eq '<>Ltl_(F) = <>Ltl F .
-  eq # TrueLtl(.List{K}) = TrueLtl .
-  eq # FalseLtl(.List{K}) = FalseLtl .
+  eq # TrueLtl(.KList) = TrueLtl .
+  eq # FalseLtl(.KList) = FalseLtl .
 
 
   ceq B:Bag |=Ltl Prop:K = true 
-   if '_|=Ltl_(Bag2KLabel(B:Bag)(.List{K}),,Prop:K) = # true(.List{K}) .
+   if '_|=Ltl_(Bag2KLabel(B:Bag)(.KList),,Prop:K) = # true(.KList) .
 
   subsort #Prop < #LtlFormula .
 

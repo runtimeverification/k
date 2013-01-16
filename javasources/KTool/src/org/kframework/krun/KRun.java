@@ -87,12 +87,12 @@ public class KRun {
 			if (amb.getContents().get(0) instanceof TermCons) {
 				TermCons t1 = (TermCons)amb.getContents().get(0);
 				if (MetaK.isComputationSort(t1.getSort())) {
-					return new KApp(new Constant("KLabel", t1.getProduction().getKLabel()), (Term) new ListOfK(t1.getContents()).accept(this));
+					return new KApp(new Constant("KLabel", t1.getProduction().getKLabel()), (Term) new KList(t1.getContents()).accept(this));
 				}
 			} else if (amb.getContents().get(0) instanceof Empty) {
 				Empty t1 = (Empty)amb.getContents().get(0);
 				if (MetaK.isComputationSort(t1.getSort())) {
-					return new KApp(new Constant("KLabel", MetaK.getListUnitLabel(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator())), new Empty("List{K}"));
+					return new KApp(new Constant("KLabel", MetaK.getListUnitLabel(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator())), new Empty(MetaK.Constants.KList));
 				}
 			}
 			return amb;
@@ -162,13 +162,13 @@ public class KRun {
 			} else if (sort.equals("ListItem") && op.equals("ListItem")) {
 				assertXMLTerm(list.size() == 1);
 				return new ListItem(parseXML(list.get(0)));
-			} else if (op.equals("_`,`,_") && sort.equals("NeList{K}")) {
+			} else if (op.equals("_`,`,_") && sort.equals("NeKList")) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
 					l.add(parseXML(elem));
 				}
-				return new ListOfK(l);
+				return new KList(l);
 			} else if (sort.equals("K") && op.equals("_~>_")) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
@@ -204,7 +204,7 @@ public class KRun {
 					l.add(parseXML(elem));
 				}
 				return new org.kframework.kil.Map(l);
-			} else if ((op.equals("#_") || op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_") || op.equals("Bag2KLabel_") || op.equals("List{K}2KLabel_") || op.equals("KLabel2KLabel_")) && sort.equals("KLabel")) {
+			} else if ((op.equals("#_") || op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_") || op.equals("Bag2KLabel_") || op.equals("KList2KLabel_") || op.equals("KLabel2KLabel_")) && sort.equals("KLabel")) {
 				assertXMLTerm(list.size() == 1);
 				return new KInjectedLabel(parseXML(list.get(0)));
 			} else if (sort.equals("#NzInt") && op.equals("--Int_")) {
@@ -233,9 +233,9 @@ public class KRun {
 			} else if (op.equals(".") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 				assertXMLTerm(list.size() == 0);
 				return new Empty(sort);
-			} else if (op.equals(".List`{K`}") && sort.equals("List{K}")) {
+			} else if (op.equals(".KList") && sort.equals(MetaK.Constants.KList)) {
 				assertXMLTerm(list.size() == 0);
-				return new Empty("List{K}");
+				return new Empty(MetaK.Constants.KList);
 			} else if (op.equals("_`(_`)") && sort.equals("KItem")) {
 				assertXMLTerm(list.size() == 2);
 				return new KApp(parseXML(list.get(0)), parseXML(list.get(1)));
@@ -306,7 +306,7 @@ public class KRun {
 		cmd += "#eval(" + flatten(cfg) + ") ";
 		String pattern = "=>" + searchType + " " + patternBody;
 		if (patternCondition != null) {
-			pattern += " such that " + patternCondition + " = # true(.List{K})";
+			pattern += " such that " + patternCondition + " = # true(.KList)";
 		}
 		cmd += pattern + " .";
 		if (showSearchGraph) {
@@ -358,7 +358,7 @@ public class KRun {
 	}
 
 	public static KRun modelCheck(String formula, Map<String, String> cfg) throws Exception {
-		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + "  #eval(" + flatten(cfg) + ") ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.List`{K`})," + K.lineSeparator + formula + ")" + K.lineSeparator + ") .";
+		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + "  #eval(" + flatten(cfg) + ") ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList)," + K.lineSeparator + formula + ")" + K.lineSeparator + ") .";
 		KRun result = new KRun(cmd, false);
 		result.parseModelCheckResult();
 		return result;
@@ -386,7 +386,7 @@ public class KRun {
 		assertXML(op.equals("#_") && sort.equals("KLabel"));
 		sort = child.get(1).getAttribute("sort");
 		op = child.get(1).getAttribute("op");
-		assertXML(op.equals(".List`{K`}") && sort.equals("List`{K`}"));
+		assertXML(op.equals(".KList") && sort.equals("KList"));
 		child = XmlUtil.getChildElements(child.get(0));
 		assertXML(child.size() == 1);
 		elem = child.get(0);
@@ -517,7 +517,7 @@ public class KRun {
 		StringBuilder sb = new StringBuilder();
 		for (String name : cfg.keySet()) {
 			String value = cfg.get(name);
-			sb.append("__(_|->_((# \"$" + name + "\"(.List{K})), (" + value + ")), ");
+			sb.append("__(_|->_((# \"$" + name + "\"(.KList)), (" + value + ")), ");
 			items++;
 		}
 		sb.append("(.).Map");

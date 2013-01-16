@@ -8,7 +8,6 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-
 public class Rewrite extends Term {
 	private Term left;
 	private Term right;
@@ -67,16 +66,16 @@ public class Rewrite extends Term {
 		return visitor.transform(this);
 	}
 
-//	public String getComputedSort() {
-//		if (sort.equals("List{K}")) {
-//			String lsort = left.getSort();
-//			String rsort = right.getSort();
-//
-//			if (!lsort.equals("List{K}") && !rsort.equals("List{K}"))
-//				sort = "K";
-//		}
-//		return sort;
-//	}
+	// public String getComputedSort() {
+	// if (sort.equals(MetaK.Constants.KList)) {
+	// String lsort = left.getSort();
+	// String rsort = right.getSort();
+	//
+	// if (!lsort.equals(MetaK.Constants.KList) && !rsort.equals(MetaK.Constants.KList))
+	// sort = "K";
+	// }
+	// return sort;
+	// }
 
 	@Override
 	public Rewrite shallowCopy() {

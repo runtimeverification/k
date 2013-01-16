@@ -3,6 +3,7 @@ package org.kframework.kil;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -16,7 +17,7 @@ public class Sort extends ProductionItem {
 	static {
 		baseSorts.add("K");
 		baseSorts.add("KResult");
-		baseSorts.add("List{K}");
+		baseSorts.add(MetaK.Constants.KList);
 		baseSorts.add("Map");
 		baseSorts.add("MapItem");
 		baseSorts.add("List");

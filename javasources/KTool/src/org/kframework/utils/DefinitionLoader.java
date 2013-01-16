@@ -2,6 +2,7 @@ package org.kframework.utils;
 
 import com.thoughtworks.xstream.XStream;
 import org.kframework.compile.checks.CheckListDecl;
+import org.kframework.compile.checks.CheckListOfKDeprecation;
 import org.kframework.compile.checks.CheckModulesAndFilesImportsDecl;
 import org.kframework.compile.checks.CheckStreams;
 import org.kframework.compile.checks.CheckSyntaxDecl;
@@ -102,13 +103,15 @@ public class DefinitionLoader {
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Basic Parsing");
 
+			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation()).check(def);
+
 			def.preprocess();
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Preprocess");
 
-			new CheckVisitorStep(new CheckSyntaxDecl()).check(def);
-			new CheckVisitorStep(new CheckListDecl()).check(def);
+			new CheckVisitorStep<Definition>(new CheckSyntaxDecl()).check(def);
+			new CheckVisitorStep<Definition>(new CheckListDecl()).check(def);
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Checks");
@@ -166,7 +169,7 @@ public class DefinitionLoader {
 			def.accept(new CollectConfigCellsVisitor());
 
 			// sort List in streaming cells
-			new CheckVisitorStep(new CheckStreams()).check(def);
+			new CheckVisitorStep<Definition>(new CheckStreams()).check(def);
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Parsing Configs");
@@ -187,7 +190,6 @@ public class DefinitionLoader {
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Parsing Rules");
-
 
 			return def;
 		} catch (IOException e1) {

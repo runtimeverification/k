@@ -97,7 +97,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 		Variable variable = vars.iterator().next();
 		final KApp isKResult = new KApp(Constant.KLABEL("isKResult"), variable);
 		if (heating) {
-			ListOfK nequals = new ListOfK();
+			KList nequals = new KList();
 			nequals.add(isKResult);
 			nequals.add(Constant.TRUE);
 			kresultCnd = new KApp(Constant.KNEQ_KLABEL, nequals);
