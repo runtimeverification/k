@@ -131,10 +131,10 @@ module IMP-FL
 
   rule <k> not#e(E) ~> K:K </k>
        =>
-       <k> E ~> not#H(.List{K}) ~> K </k>
+       <k> E ~> not#H(.KList) ~> K </k>
      when 'notBool(isKResult(E))
 
-  rule <k> V:K ~> not#H(.List{K}) ~> K:K </k>
+  rule <k> V:K ~> not#H(.KList) ~> K:K </k>
        =>
        <k> not#e(V) ~> K </k>
      when isKResult(V)
@@ -244,7 +244,7 @@ module IMP-FL
 
 //   rule [skip] : skip => .
 
-  rule <k> skip#(.List{K}) ~> K:K </k>
+  rule <k> skip#(.KList) ~> K:K </k>
        =>
        <k> K </k>
 
@@ -270,7 +270,7 @@ module IMP-FL
 
   rule <k> while#ee(E:K,,S:K) ~> K:K </k>
        =>
-       <k> ite#eee(E,,seq#ee(S,,while#ee(E,,S)),,skip#(.List{K})) ~> K </k>
+       <k> ite#eee(E,,seq#ee(S,,while#ee(E,,S)),,skip#(.KList)) ~> K </k>
 
   // rule [program-still-vars]:
   // 	 	<k> var X:Id, Xs:Ids; S => var Xs; S ...</k>
@@ -289,6 +289,6 @@ module IMP-FL
 
 //   rule [program-no-vars]: <k> var .Ids ; S => S ...</k> [structural]
 
-  rule <k> emptyIds#(.List{K}) ~> K:K </k> => <k>  K:K </k>
+  rule <k> emptyIds#(.KList) ~> K:K </k> => <k>  K:K </k>
   
 endmodule

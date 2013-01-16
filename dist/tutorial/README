@@ -126,12 +126,12 @@ info@k-framework.org.
 In our current implementation of K, the internal representation of the
 syntactic terms follows the simple abstract-syntax-tree (AST) syntax:
 
-  K ::= KLabel(List{K})
+  K ::= KLabel(KList)
 
-List{K} is a non-terminal standing for lists of K terms separated by
+KList is a non-terminal standing for lists of K terms separated by
 double-comma ",," (we chose double-comma to avoid conflicts with user-defined
-language syntax, for example comma).  We use ".List{K}" for the unit of
-List{K}.  This way, from an internal representation point of view, a language
+language syntax, for example comma).  We use ".KList" for the unit of
+KList.  This way, from an internal representation point of view, a language
 syntax is nothing but a finite set of KLabel constants.  The `kast` program
 can be used to parse a program and see its KAST form.  By running
 
@@ -141,24 +141,24 @@ can be used to parse a program and see its KAST form.  By running
 from the examples/simple-untyped directory, one obtains the internal
 representation of the factorial program:
 
-  '__('function_`(_`)_(# #id_("factorial")(.List{K}),,'_`,_(# 
-  #id_("y")(.List{K}),,'.List`{","`}(.List{K})),,'`{_`}('__('var_;('_`,_('_=_
-  (# #id_("t")(.List{K}),,# 
-  1(.List{K})),,'.List`{","`}(.List{K}))),,'__('print`(_`);('_`,_(# 
-  "Factorial of "(.List{K}),,'_`,_(# #id_("y")(.List{K}),,'_`,_(# " is: 
-  "(.List{K}),,'.List`{","`}(.List{K}))))),,'__('`{_`}('__('var_;('_`,_('_=_
-  (# #id_("i")(.List{K}),,# 
-  1(.List{K})),,'.List`{","`}(.List{K}))),,'while_do_('_<=_(# 
-  #id_("i")(.List{K}),,# #id_("y")(.List{K})),,'`{_`}('__('_;('_=_(# 
-  #id_("t")(.List{K}),,'_*_(# #id_("t")(.List{K}),,# 
-  #id_("i")(.List{K})))),,'_;('_=_(# #id_("i")(.List{K}),,'_+_(# 
-  #id_("i")(.List{K}),,# 1(.List{K}))))))))),,'return_;(# 
-  #id_("t")(.List{K}))))))),,'function_`(_`)_(# 
-  #id_("main")(.List{K}),,'.List`{","`}(.List{K}),,'`{_`}('__('print`(_`); 
+  '__('function_`(_`)_(# #id_("factorial")(.KList),,'_`,_(# 
+  #id_("y")(.KList),,'.List`{","`}(.KList)),,'`{_`}('__('var_;('_`,_('_=_
+  (# #id_("t")(.KList),,# 
+  1(.KList)),,'.List`{","`}(.KList))),,'__('print`(_`);('_`,_(# 
+  "Factorial of "(.KList),,'_`,_(# #id_("y")(.KList),,'_`,_(# " is: 
+  "(.KList),,'.List`{","`}(.KList))))),,'__('`{_`}('__('var_;('_`,_('_=_
+  (# #id_("i")(.KList),,# 
+  1(.KList)),,'.List`{","`}(.KList))),,'while_do_('_<=_(# 
+  #id_("i")(.KList),,# #id_("y")(.KList)),,'`{_`}('__('_;('_=_(# 
+  #id_("t")(.KList),,'_*_(# #id_("t")(.KList),,# 
+  #id_("i")(.KList)))),,'_;('_=_(# #id_("i")(.KList),,'_+_(# 
+  #id_("i")(.KList),,# 1(.KList))))))))),,'return_;(# 
+  #id_("t")(.KList))))))),,'function_`(_`)_(# 
+  #id_("main")(.KList),,'.List`{","`}(.KList),,'`{_`}('__('print`(_`); 
   ('_`,_(# "Input a natural number: 
-  "(.List{K}),,'.List`{","`}(.List{K}))),,'print`(_`);('_`,_('_`(_`)(# 
-  #id_("factorial")(.List{K}),,'_`,_('read`(`)(.List{K}),,'.List`{","`}
-  (.List{K}))),,'_`,_(# "\n"(.List{K}),,'.List`{","`}(.List{K})))))))) 
+  "(.KList),,'.List`{","`}(.KList))),,'print`(_`);('_`,_('_`(_`)(# 
+  #id_("factorial")(.KList),,'_`,_('read`(`)(.KList),,'.List`{","`}
+  (.KList))),,'_`,_(# "\n"(.KList),,'.List`{","`}(.KList)))))))) 
 
 Typically, one does not need to run the `kast` program directly, as it will be
 run by the `krun` program (below) when necessary.  However, running it directly

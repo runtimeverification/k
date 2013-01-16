@@ -8,10 +8,10 @@ module K-LISTK-EXTRAS
   imports K-TECHNIQUE
   imports K-EQUAL-HOOKS
   
-  syntax Bool ::= K "inList{K}" List{K} [function]
-  syntax Bool ::= K "#inList{K}" List{K} [function] 
-  rule K:K inList{K} L:List{K} => K #inList{K} L ==K true 
-  rule K #inList{K} (_,,K:K,,_) => true 
+  syntax Bool ::= K "inKList" KList [function]
+  syntax Bool ::= K "#inKList" KList [function] 
+  rule K:K inKList L:KList => K #inKList L ==K true 
+  rule K #inKList (_,,K:K,,_) => true 
 endmodule
 
 module K-MAP-EXTRAS
@@ -23,16 +23,16 @@ module K-MAP-EXTRAS
   syntax K ::= Map "(" K ")"  [function]
   rule (_ K1:K |-> K2:K)(K1) => K2
 
-  syntax Map ::= Map "[" "undef" "/" List{K} "]"  [function]
+  syntax Map ::= Map "[" "undef" "/" KList "]"  [function]
 
-  syntax Map ::= "Map" "(" List{K} "|->" List{K} ")"   [function]
-  rule Map((K1:K => .List{K}),,_ |-> (K2:K => .List{K}),,_:K,,_) (. => K1 |-> K2) [structural]
-  rule Map((K1:K => .List{K}),,_ |-> K2:K) (. => K1 |-> K2)
-  rule Map(.List{K} |-> _) => .
+  syntax Map ::= "Map" "(" KList "|->" KList ")"   [function]
+  rule Map((K1:K => .KList),,_ |-> (K2:K => .KList),,_:K,,_) (. => K1 |-> K2) [structural]
+  rule Map((K1:K => .KList),,_ |-> K2:K) (. => K1 |-> K2)
+  rule Map(.KList |-> _) => .
 
-  syntax Map ::= Map "[" List{K} "/" List{K} "]"  [function]
-  rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .List{K}),,_ 
-                        /  (K1:K,,K1':K => .List{K}),,_]
+  syntax Map ::= Map "[" KList "/" KList "]"  [function]
+  rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .KList),,_ 
+                        /  (K1:K,,K1':K => .KList),,_]
    [structural, anywhere]
 
   rule (M:Map K1:K |-> _:K)[K2:K / K1] => M K1 |-> K2 
@@ -40,18 +40,18 @@ module K-MAP-EXTRAS
   rule M:Map[K2:K / K1:K] => M K1 |-> K2 
     when notBool(K1 in keys(M)) [structural, anywhere]
   
-  rule M:Map[undef/ K:K,,Kl:List{K}] => M[undef/ K][undef/ Kl] when Kl =/=List{K} .List{K} [structural, anywhere]
-  rule M:Map[undef/ .List{K}] => M [structural, anywhere]
+  rule M:Map[undef/ K:K,,Kl:KList] => M[undef/ K][undef/ Kl] when Kl =/=KList .KList [structural, anywhere]
+  rule M:Map[undef/ .KList] => M [structural, anywhere]
   rule (M:Map K:K |-> _)[undef/ K] => M [structural, anywhere]
 
   syntax Map ::= Map "[" Map "]"   [function, cons(Map1UpdateMapWithMapSyn)]
   rule M:Map[M':Map K1:K |-> K2:K] => M[K2/K1][M'] [structural]
   rule M:Map[.Map] => M [structural]
 
-//  syntax List{K} ::= Map "(" List{K} ")"
-//  rule Map:Map((K1:K,,K2:K,,Ks:List{K})) 
+//  syntax KList ::= Map "(" KList ")"
+//  rule Map:Map((K1:K,,K2:K,,Ks:KList)) 
 //    => Map(K1),,Map(K2),,Map(Ks) [structural]
-//  rule Map:Map(.List{K}) => .List{K} [structural]
+//  rule Map:Map(.KList) => .KList [structural]
 
 	syntax Set ::= "keys" Map  [function]
 
@@ -85,7 +85,7 @@ module K-SET-EXTRAS
 	imports BOOL-HOOKS
 	imports K-EQUAL-HOOKS
 
-//	syntax Set ::= "Set" List{K}
+//	syntax Set ::= "Set" KList
         syntax Set ::= Set "-Set" Set  [function, latex({#1}-_{\it Set}{#2})]
   rule S1:Set -Set (SI1:SetItem SI2:SetItem S2:Set)
     => ((S1 -Set SI1) -Set SI2) -Set S2
@@ -116,10 +116,10 @@ module K-SET-EXTRAS
   syntax KLabel ::= "#set"
 
   syntax K ::= Set2KTerm(Set)        [function]
-  rule Set2KTerm(S:Set) => Set2KTermAcc(S, #set(.List{K}))
+  rule Set2KTerm(S:Set) => Set2KTermAcc(S, #set(.KList))
 
   syntax K ::= Set2KTermAcc(Set, K)  [function]
-  rule Set2KTermAcc((SetItem(K:K) => .Set)_, _(_,,(.List{K} => K)))
+  rule Set2KTermAcc((SetItem(K:K) => .Set)_, _(_,,(.KList => K)))
   rule Set2KTermAcc(.Set, K:K) => K
 
   
@@ -131,7 +131,7 @@ interface K-BAG-EXTRAS
 	imports K-TECHNIQUE
 	//imports IF-THEN-ELSE
 
-//	syntax Bag ::= "Bag" List{K}
+//	syntax Bag ::= "Bag" KList
 //				 | Bag "-Bag" Bag
 //	syntax Bool ::= K "in" Bag
 //				  | BagItem "in" Bag
@@ -142,14 +142,14 @@ interface K-LIST-EXTRAS
 	//imports BOOL
 	imports INT-HOOKS
 
-//	syntax List ::= "List" List{K}
+//	syntax List ::= "List" KList
 
 	syntax Int ::= "lengthList" List [function]
 
    rule lengthList ( ListItem(_) L:List ) => 1 +Int lengthList L [structural, anywhere]
    rule lengthList .List => 0 [structural, anywhere]
-   rule isKResult((K1:KResult => .List{K}),, _:K,, _:List{K})
-   rule isKResult(.List{K}) => true
+   rule isKResult((K1:KResult => .KList),, _:K,, _:KList)
+   rule isKResult(.KList) => true
 endinterface
 
 module K-RESULT
@@ -160,7 +160,7 @@ module K-RESULT
         
            
 
-	//op .List{K} : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
+	//op .KList : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
 
 endmodule
 
@@ -169,7 +169,7 @@ interface K-WRAPPERS-LABELS
 
 	syntax KLabel ::= "KLabel2KLabel" KLabel
 					| "CellLabel2KLabel" CellLabel
-					| "List{K}2KLabel" List{K}
+					| "KList2KLabel" KList
 					| "Bag2KLabel" Bag
 					| "Set2KLabel" Set
 					| "List2KLabel" List
@@ -179,13 +179,13 @@ interface K-WRAPPERS-LABELS
 
 
   syntax KLabel ::= "isSet"
-  rule isSet(Set2KLabel(_)(.List{K})) => true [anywhere]
+  rule isSet(Set2KLabel(_)(.KList)) => true [anywhere]
 
 endinterface
 
 module K-DESTRUCTORS
 	syntax KLabel ::= "getKLabel" K
-  rule getKLabel(L:KLabel(_:List{K})) => L [structural, anywhere]
+  rule getKLabel(L:KLabel(_:KList)) => L [structural, anywhere]
 
 endmodule
 
@@ -194,7 +194,7 @@ interface K-WRAPPERS
 
 	syntax K ::= "KLabel2K" KLabel
 			   | "Celllabel2K" CellLabel
-			   | "List{K}2K" List{K}
+			   | "KList2K" KList
 			   | "Set2K" Set
 			   | "Bag2K" Bag
 			   | "List2K" List
@@ -231,7 +231,7 @@ interface K
   imports K-RULES              // to write k rules with in-place rewriting
   imports K-EVAL
   imports K-CONTEXTS  
-  imports K-DESTRUCTORS           // defines getKLabel and getList{K} for K
+  imports K-DESTRUCTORS           // defines getKLabel and getKList for K
   //imports K-EXTRAS                // defines a KLabel substitution 
   imports K-FREZERS
   imports K-FRESH

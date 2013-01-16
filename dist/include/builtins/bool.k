@@ -58,8 +58,8 @@ module BOOL-HOOKS
   // Andrei S: why are the rules below needed?
   // Traian S.:  They are needed in the generated code, as we allow 
   // '#andBool to take multiple parameters.
-  rule '#andBool((true => .List{K}),, _) [function, anywhere]
-  rule '#andBool(.List{K}) => true  [function, anywhere]
+  rule '#andBool((true => .KList),, _) [function, anywhere]
+  rule '#andBool(.KList) => true  [function, anywhere]
   rule '#andBool(false,, _) => false [function, anywhere]
 endmodule
 

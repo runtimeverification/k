@@ -1359,7 +1359,7 @@ module PEQ
 
   rule replaceIsNotModifiedBy(B:Bool, X:Id isNotModifiedBy S:Stmt) => B
 
-//  rule replaceIsNotModifiedBy(B:Bool, KL:KLabel(L:List{K})) => KL(L)
+//  rule replaceIsNotModifiedBy(B:Bool, KL:KLabel(L:KList)) => KL(L)
 //       when isSymbolicBool(KL(L)) andBool 
 //            (KL =/=KLabel '_isNotModifiedBy_)
 

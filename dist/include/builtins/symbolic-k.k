@@ -107,21 +107,21 @@ module SYMBOLIC-K
 
   // define isSymbolicK
   rule
-    isSymbolicK(List2KLabel(L:List)(.List{K})) => isSymbolicList(L)
+    isSymbolicK(List2KLabel(L:List)(.KList)) => isSymbolicList(L)
   [predicate]
   rule
-    isSymbolicK(Set2KLabel(S:Set)(.List{K})) => isSymbolicSet(S)
+    isSymbolicK(Set2KLabel(S:Set)(.KList)) => isSymbolicSet(S)
   [predicate]
   rule
-    isSymbolicK(Bag2KLabel(B:Bag)(.List{K})) => isSymbolicBag(B)
+    isSymbolicK(Bag2KLabel(B:Bag)(.KList)) => isSymbolicBag(B)
   [predicate]
   rule
-    isSymbolicK(Map2KLabel(M:Map)(.List{K})) => isSymbolicMap(M)
+    isSymbolicK(Map2KLabel(M:Map)(.KList)) => isSymbolicMap(M)
   [predicate]
-  rule isSymbolicK(KL:KLabel(LK:List{K})) => false
+  rule isSymbolicK(KL:KLabel(LK:KList)) => false
   when isBuiltin(KL(LK)) 
   rule
-    isSymbolicK(KL:KLabel(LK:List{K}))
+    isSymbolicK(KL:KLabel(LK:KList))
   =>
     (isVariable(KL(LK)) ==K true) orElseBool isSymbolicK(LK)
   when isKLabelConstant(KL)
@@ -136,15 +136,15 @@ module SYMBOLIC-K
   rule isSymbolicK(.K) => false [predicate]
 
   rule
-    isSymbolicK(K1:K,,K2:K,,LK:List{K})
+    isSymbolicK(K1:K,,K2:K,,LK:KList)
   =>
     isSymbolicK(K1) orElseBool isSymbolicK(K2) orElseBool isSymbolicK(LK)
   [predicate]
-  rule isSymbolicK(.List{K}) => false [predicate]
+  rule isSymbolicK(.KList) => false [predicate]
 
   syntax K ::= #getSymLabel(String)  [function]
   rule #getSymLabel(Type:String)
-    => String2KLabel("#sym" +String Type)(.List{K})
+    => String2KLabel("#sym" +String Type)(.KList)
 
   syntax K ::= #freshSymSortN(String,Int) [function]
   rule #freshSymSortN(Type:String,I:Int) 

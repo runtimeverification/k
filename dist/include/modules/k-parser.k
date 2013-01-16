@@ -5,7 +5,7 @@ module K-PRINTER
 
   syntax String ::= "printSKExp" "(" K ")"  [function]
   rule printSKExp(B:Builtin) => printSKExpBuiltin(B) 
-  rule printSKExp(L:KLabel(Ks:List{K}))
+  rule printSKExp(L:KLabel(Ks:KList))
     => "(" 
         +String KLabel2String(L) 
         +String " " 
@@ -14,10 +14,10 @@ module K-PRINTER
     when isBuiltin(L(Ks)) =/=K true
 
   syntax String ::= "printSKExps" "(" K ")"  [function]
-  rule printSKExps(L:KLabel(K:K,,Ks:List{K}))
+  rule printSKExps(L:KLabel(K:K,,Ks:KList))
     => printSKExp(K) +String printSKExps(L(Ks))
 
-  rule printSKExps(L:KLabel(.List{K})) => ""
+  rule printSKExps(L:KLabel(.KList)) => ""
 
   
   syntax String ::= "printSKExpBuiltin" "(" K ")"  [function]
@@ -55,7 +55,7 @@ module K-PARSER
 
   syntax K ::= "parseSKExpRealLabel" "(" String "," Int ")" [function]
   rule parseSKExpRealLabel(S:String, I:Int)
-    => parseSKExps(ltrim(substrString(S, I +Int 1, lengthString(S))), String2KLabel(substrString(S, 0, I))(.List{K}))
+    => parseSKExps(ltrim(substrString(S, I +Int 1, lengthString(S))), String2KLabel(substrString(S, 0, I))(.KList))
 
   syntax K ::= "parseSKExps" "(" String "," K ")"  [function]
   rule parseSKExps(S:String, K:K) 
@@ -67,7 +67,7 @@ module K-PARSER
     => parseSKExpHelper(S2) ~> parseSKExps(HOLE, K)
     when S1 =/=String ")"
 
-  rule (pair(K:K, S:String) => .K) ~> parseSKExps(HOLE => S, L:KLabel(_,,(.List{K} => K)))  [anywhere]
+  rule (pair(K:K, S:String) => .K) ~> parseSKExps(HOLE => S, L:KLabel(_,,(.KList => K)))  [anywhere]
 
   syntax K ::= "parseSKExpInjectedLabel" "(" String ")" [function]
   rule parseSKExpInjectedLabel(S:String)

@@ -8,24 +8,24 @@ module PATTERN-MATCHING
 ***********/
 
 // Tells if a matching exists
-  syntax Bool ::= isMatching(List{K}, List{K})            [function]
-  rule isMatching(Ps:List{K}, Ks:List{K})
+  syntax Bool ::= isMatching(KList, KList)            [function]
+  rule isMatching(Ps:KList, Ks:KList)
     => #isMapInK(#patternMatch(Ps,Ks)) ==K true
 
 // Gets the matching; call isMatching first, for safety
-  syntax Map  ::= getMatching(List{K}, List{K})           [function]
-  rule getMatching(Ps:List{K}, Ks:List{K})
+  syntax Map  ::= getMatching(KList, KList)           [function]
+  rule getMatching(Ps:KList, Ks:KList)
     => #getMapFromK(#patternMatch(Ps,Ks))
 
 // Tells how to decompose pattern matching
-  syntax List{K} ::= decomposeMatching(List{K}, List{K})  [function]
+  syntax KList ::= decomposeMatching(KList, KList)  [function]
 // Here are some basic decomposition rules, but one can add more
-  rule decomposeMatching((L:KLabel(Ps:List{K}) => Ps), (L(Ks:List{K}) => Ks))
+  rule decomposeMatching((L:KLabel(Ps:KList) => Ps), (L(Ks:KList) => Ks))
     when isVariable(L(Ps)) =/=K true
-  rule decomposeMatching(P:K,,Ps:List{K}, K:K,,Ks:List{K})
+  rule decomposeMatching(P:K,,Ps:KList, K:K,,Ks:KList)
        => decomposeMatching(P,K),,decomposeMatching(Ps,Ks)
-    when Ps =/=List{K} .List{K}
-  rule decomposeMatching(.List{K}, .List{K}) => .List{K}
+    when Ps =/=KList .KList
+  rule decomposeMatching(.KList, .KList) => .KList
 // For example, one may add rules like the following in one's language
 //  rule decomposeMatching(([P:Exp|T:Exp] => P,T),([V:Val,Vs:Vals] => V,[Vs]))
 
@@ -36,14 +36,14 @@ module PATTERN-MATCHING
   // Subsorting ids to variables for matching purposes.
   syntax Variable ::= Id
 
-  syntax K ::= #patternMatch(List{K}, List{K})   [function]
-  rule #patternMatch(Ps:List{K}, Ks:List{K})
+  syntax K ::= #patternMatch(KList, KList)   [function]
+  rule #patternMatch(Ps:KList, Ks:KList)
     => #patternMatch1(decomposeMatching(Ps,Ks), .Map)
 
-  syntax K ::= #patternMatch1(List{K}, Map)  [function]
-  rule #patternMatch1((decomposeMatching(X:Variable,K:K) => .List{K}),,_,
+  syntax K ::= #patternMatch1(KList, Map)  [function]
+  rule #patternMatch1((decomposeMatching(X:Variable,K:K) => .KList),,_,
                       M:Map (.Map => X |-> K))
     when notBool $hasMapping(M,X)  // only linear patterns allowed for now
-  rule #patternMatch1(.List{K}, M:Map) => #map(M)
+  rule #patternMatch1(.KList, M:Map) => #map(M)
 
 endmodule
