@@ -346,7 +346,7 @@ public class Main {
 			completors.add(new ArgumentCompletor(argCompletor));
 			reader.addCompletor(new MultiCompletor(completors));
            
-			String compiledFile = new File(K.compiled_def).getCanonicalPath();
+			String compiledFile = new File(K.compiled_def + K.fileSeparator + "main.maude").getCanonicalPath();
 			String maudeCmd = new String();
 			File outFile = FileUtil.createFile(K.maude_out);
 			File errFile = FileUtil.createFile(K.maude_err);
