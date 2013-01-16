@@ -6,7 +6,7 @@ public class RemoveNeList {
 		// for preprocessing
 		Term toReturn = t;
 
-		if (t.getOp().equals("_`,`,_") && t.getSort().equals("NeList`{K`}")) {
+		if (t.getOp().equals("_`,`,_") && t.getSort().equals("NeKList")) {
 			if (t.getChildren().size() >= 2) {
 				toReturn = ;
 			}

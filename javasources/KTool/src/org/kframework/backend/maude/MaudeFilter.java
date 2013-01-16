@@ -354,7 +354,7 @@ public class MaudeFilter extends BackendFilter {
 		if (null != condition) {
 			result.append(" if ");
 			condition.accept(this);
-			result.append(" = _`(_`)(# true, .List`{K`})");
+			result.append(" = _`(_`)(# true, .KList)");
 		}
 		if (null != rule.getAttributes()) {
 			result.append(" [");

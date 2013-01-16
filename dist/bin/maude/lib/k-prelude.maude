@@ -6,7 +6,7 @@ mod K-TECHNIQUE is
   including #INT-INTERFACE .
   including #BOOL-INTERFACE .
 
-  var K : K . var Ks : List{K} .
+  var K : K . var Ks : KList .
   var LItem : ListItem .  var List : List .
 
   sorts KItem K .
@@ -14,21 +14,21 @@ mod K-TECHNIQUE is
   op . : -> K .
   op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
 
-  sorts List{K} NeList{K} .
+  sorts KList NeKList .
 
-  subsort K < NeList{K} < List{K} .
-  op .List{K} : -> List{K} [metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
+  subsort K < NeKList < KList .
+  op .KList : -> KList [metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
 
-  op _`,`,_ : List{K} List{K} -> List{K} [assoc id: .List`{K`} prec 121 metadata "latex=(renameTo _\\ensuremath{,\\!\\!,}_)"] .
+  op _`,`,_ : KList KList -> KList [assoc id: .KList prec 121 metadata "latex=(renameTo _\\ensuremath{,\\!\\!,}_)"] .
   --- One should not modify the precedence above.  
   --- Might cause the compilation to fail.
-  op _`,`,_ : NeList{K} List{K} -> NeList{K} [ditto] .
-  op _`,`,_ : List{K} NeList{K} -> NeList{K} [ditto] .
+  op _`,`,_ : NeKList KList -> NeKList [ditto] .
+  op _`,`,_ : KList NeKList -> NeKList [ditto] .
 
 
   sorts KLabel .
 
-  op _`(_`) : KLabel List{K} -> KItem [prec 0 gather(& &)] .
+  op _`(_`) : KLabel KList -> KItem [prec 0 gather(& &)] .
 
   sort ListItem List NeList .
   subsort ListItem < NeList < List .
@@ -110,13 +110,13 @@ mod K-STRICTNESS-DEFAULTS is
   rl [heat-choice]: heat(heated(Ks,,K,,Ks')) => K
      [metadata "superheat=(choice)"] .
 
-  vars K : K . var Ks Ks' : List{K} .  var NKs : NeList{K} .
+  vars K : K . var Ks Ks' : KList .  var NKs : NeKList .
   eq <_>_</_>(k,_`(_`)(cool,zk:K),k)
    = <_>_</_>(k,zk:K,k)[metadata "supercool=(end)"].
-  eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,_`,`,_(K:K,NKs:NeList{K})),Ks:List{K})),GENERATEDKWRAPRest:K),k)
-   = <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(NKs:NeList{K},Ks:List{K})),GENERATEDKWRAPRest:K),k)[owise].
-  eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,K:K),_`,`,_(Ks:List{K},_`(_`)(heated,Ks':List{K})))),GENERATEDKWRAPRest:K),k)
-   = <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(Ks:List{K},_`(_`)(heated,_`,`,_(Ks':List{K},K:K)))),GENERATEDKWRAPRest:K),k)[owise].
+  eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,_`,`,_(K:K,NKs:NeKList)),Ks:KList)),GENERATEDKWRAPRest:K),k)
+   = <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(NKs:NeKList,Ks:KList)),GENERATEDKWRAPRest:K),k)[owise].
+  eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,K:K),_`,`,_(Ks:KList,_`(_`)(heated,Ks':KList)))),GENERATEDKWRAPRest:K),k)
+   = <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(Ks:KList,_`(_`)(heated,_`,`,_(Ks':KList,K:K)))),GENERATEDKWRAPRest:K),k)[owise].
   eq <_>_</_>(k,_~>_(_`(_`)(cool,zk:K),_~>_(Next:KItem,GENERATEDKWRAPRest:K)),k)
    = <_>_</_>(k,_~>_(_`(_`)(cool,_~>_(zk:K,Next:KItem)),GENERATEDKWRAPRest:K),k)[metadata "supercool=(next)" owise].
 endm
@@ -136,7 +136,7 @@ mod K-WRAPPERS-LABELS is
   including #STRING-INTERFACE .
   op KLabel2KLabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
   op CellLabel2KLabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
-  op List`{K`}2KLabel_ : List{K} -> KLabel [metadata "wrapper=(builtin)"] .
+  op KList2KLabel_ : KList -> KLabel [metadata "wrapper=(builtin)"] .
   op Bag2KLabel_ : Bag -> KLabel [metadata "wrapper=(builtin)"] .
   op Set2KLabel_ : Set -> KLabel [metadata "wrapper=(builtin)"] .
   op List2KLabel_ : List -> KLabel [metadata "wrapper=(builtin)"] .
@@ -155,7 +155,7 @@ mod K-RULES is
   op _=>_ : K K -> K [prec 125] .
   op _=>_ : KLabel KLabel -> KLabel [prec 125] .
   op _=>_ : CellLabel CellLabel -> CellLabel [prec 125] .
-  op _=>_ : List{K} List{K} -> List{K} [prec 125] .
+  op _=>_ : KList KList -> KList [prec 125] .
   op _=>_ : Map Map -> Map [prec 125] .
   op _=>_ : List List -> List [prec 125] .
   op _=>_ : Bag Bag -> Bag [prec 125] .
@@ -170,7 +170,7 @@ endm
 
 mod K-CONDITION-SEARCH is
   including K-TECHNIQUE .
-  op search_ : List{K} -> #Bool .
+  op search_ : KList -> #Bool .
   op search_ : KLabel -> #Bool .
   op search_ : List -> #Bool .
   op search_ : Bag -> #Bool .

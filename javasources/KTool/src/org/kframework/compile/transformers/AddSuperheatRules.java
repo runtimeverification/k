@@ -85,7 +85,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 		// add superheat rule
 		// rule heat(redex(C[e] ~> RestHeat:K,,	LHeat:KList,,
 		//                 (.KList => redex(e ~> C ~> RestHeat:K))),,_:KList)
-		// when '_=/=K_('_inList`{K`}_(redex(e ~> C ~> RestHeat:K),,KList2KLabel LHeat:KList(.KList)),# true(.KList))
+		// when '_=/=K_('_inKList_(redex(e ~> C ~> RestHeat:K),,KList2KLabel LHeat:KList(.KList)),# true(.KList))
 		Rule superHeat = node.shallowCopy();
 		Term left = body.getLeft(); // C[e]
 		Term right = body.getRight(); // e ~> C
@@ -109,7 +109,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 
 		KList inListList = new KList();
 		inListList.add(red2); inListList.add(new KApp(new KInjectedLabel(lHeat), new Empty(MetaK.Constants.KList)));
-		Term inList = new KApp(Constant.KLABEL("'_inList`{K`}_"), inListList);
+		Term inList = new KApp(Constant.KLABEL("'_inKList_"), inListList);
 		KList condList = new KList();
 		condList.add(inList);
 		condList.add(Constant.TRUE);

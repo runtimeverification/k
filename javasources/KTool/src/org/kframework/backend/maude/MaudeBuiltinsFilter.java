@@ -57,7 +57,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 		result.append(left);
 		result.append(" = _`(_`)(# ");
 		result.append(right);
-		result.append(", .List`{K`}) .\n");
+		result.append(", .KList) .\n");
 	}
 
 

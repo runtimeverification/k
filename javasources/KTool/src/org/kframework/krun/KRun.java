@@ -358,7 +358,7 @@ public class KRun {
 	}
 
 	public static KRun modelCheck(String formula, Map<String, String> cfg) throws Exception {
-		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + "  #eval(" + flatten(cfg) + ") ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.List`{K`})," + K.lineSeparator + formula + ")" + K.lineSeparator + ") .";
+		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + "  #eval(" + flatten(cfg) + ") ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList)," + K.lineSeparator + formula + ")" + K.lineSeparator + ") .";
 		KRun result = new KRun(cmd, false);
 		result.parseModelCheckResult();
 		return result;
@@ -386,7 +386,7 @@ public class KRun {
 		assertXML(op.equals("#_") && sort.equals("KLabel"));
 		sort = child.get(1).getAttribute("sort");
 		op = child.get(1).getAttribute("op");
-		assertXML(op.equals(".List`{K`}") && sort.equals("List`{K`}"));
+		assertXML(op.equals(".KList") && sort.equals("KList"));
 		child = XmlUtil.getChildElements(child.get(0));
 		assertXML(child.size() == 1);
 		elem = child.get(0);

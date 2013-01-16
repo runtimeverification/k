@@ -114,7 +114,7 @@ public class PrettyPrintOutput {
 		}
 
 		//rule 2
-		if (sort.equals("NeList`{K`}") && op.equals("_`,`,_")) {
+		if (sort.equals("NeKList") && op.equals("_`,`,_")) {
 			Node parent = node.getParentNode();
 			Node nextSibling = XmlUtil.getNextSiblingElement(node);
 
@@ -527,12 +527,12 @@ public class PrettyPrintOutput {
 			sb.append(".");
 			return sb.toString();
 		}
-		if (sort.equals("List`{K`}") && op.equals(".List`{K`}") 
-				|| sort.equals("[List`{K`}]") && op.equals("[.List`{K`}]")) {
+		if (sort.equals("KList") && op.equals(".KList") 
+				|| sort.equals("[KList]") && op.equals("[.KList]")) {
 			return "";
 		}
-		if (sort.equals("List`{K`}") && !op.equals(".List`{K`}") 
-				|| sort.equals("[List`{K`}]") && !op.equals("[.List`{K`}]")) {
+		if (sort.equals("KList") && !op.equals(".KList") 
+				|| sort.equals("[KList]") && !op.equals("[.KList]")) {
 			sb = new StringBuilder();
 			//n = nr of child nodes
 			int n = list.size();

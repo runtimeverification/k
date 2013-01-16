@@ -35,7 +35,7 @@ public class JavaClassesFactory {
 			return emp;
 		}
 
-		if (t.getOp().equals(".List`{K`}")) {
+		if (t.getOp().equals(".KList")) {
 			Empty emp = new Empty("maude", "maude", MetaK.Constants.KList);
 			assert (t.getChildren().size() == 0);
 			return emp;
