@@ -158,7 +158,7 @@ public class KastFrontEnd {
 		if (cmd.hasOption("ruleParser")) {
 			GlobalSettings.whatParser = GlobalSettings.ParserType.RULES;
 		}
-		if (cmd.hasOption("concreteParser")) {
+		if (cmd.hasOption("groundParser")) {
 			GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
 		}
 		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions));
