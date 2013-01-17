@@ -87,7 +87,7 @@ public class Main {
 				String fullPath = maudeFile.getCanonicalPath();
 				if (fullPath.endsWith("-kompiled")) {
 					result = fullPath;
-					str.append("\"./" + fileName + "\" ");
+					str.append("\"./" + maudeFile.getName() + "\" ");
 					count++;
 				}
 			}
@@ -134,22 +134,9 @@ public class Main {
 				}
 			}
 		} else if (optionName == "main-module") {
-			if (cmd.hasOption("syntax-module")) {
-				int pos = K.syntax_module.indexOf("-SYNTAX");
-				K.main_module = K.syntax_module.substring(0, pos);
-			} else {
-				if (str == null)
-					Error.report("could not deduce syntax module. Please specify manually and try again.");
-				K.main_module = str;
-			}
+			K.main_module = K.definition.getMainModule();
 		} else if (optionName == "syntax-module") {
-			if (cmd.hasOption("main-module")) {
-				K.syntax_module = K.main_module + "-SYNTAX";
-			} else {
-				if (str == null)
-					Error.report("could not deduce main module. Please specify manually and try again.");
-				K.syntax_module = str + "-SYNTAX";
-			}
+			K.syntax_module = K.definition.getMainSyntaxModule();
 		}
 	}
 
@@ -776,12 +763,6 @@ public class Main {
 			if (K.compiled_def == null) {
 				resolveOption("compiled-def", cmd);
 			}
-			if (!cmd.hasOption("main-module")) {
-				resolveOption("main-module", cmd);
-			}
-			if (!cmd.hasOption("syntax-module")) {
-				resolveOption("syntax-module", cmd);
-			}
 
 			if (K.k_definition != null && !K.k_definition.endsWith(".k")) {
 				K.k_definition = K.k_definition + ".k";
@@ -823,6 +804,13 @@ public class Main {
 
 				org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 				org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
+			}
+
+			if (!cmd.hasOption("main-module")) {
+				resolveOption("main-module", cmd);
+			}
+			if (!cmd.hasOption("syntax-module")) {
+				resolveOption("syntax-module", cmd);
 			}
 
 			if (K.pgm != null) {
