@@ -1,11 +1,15 @@
 package org.kframework.krun;
 
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
+
 // helper class for handling error messages
 public class Error {
 
 	public static void report(String message) {
-		System.out.println("Error: " + message);
-		System.exit(1);
+		GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message));
 	}
 
 	public static void externalReport(String message) {

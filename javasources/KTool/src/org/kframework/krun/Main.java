@@ -92,7 +92,7 @@ public class Main {
 				}
 			}
 			if (count > 1) {
-				Error.report("\nMultiple compiled definitions found.\nPlease use only one of: " + str.toString());
+				Error.report("Multiple compiled definitions found. Please specify one of: " + str.toString() + "with --compiled-def");
 			} else if (count == 1) {
 				return result;
 			}
@@ -769,7 +769,7 @@ public class Main {
 			}
 
 			if (K.compiled_def == null) {
-				Error.report("\nCould not find a compiled K definition.");
+				Error.report("Could not find a compiled K definition. Please ensure that either a compiled K definition exists in the current directory with its default name, or that --k-definition or --compiled-def have been specified.");
 			}
 			File compiledFile = new File(K.compiled_def);
 			if (!compiledFile.exists()) {
