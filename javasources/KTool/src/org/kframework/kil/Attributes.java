@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * class for AST Attributes
+ * class for AST Attributes.
  * This inherits from ASTNode because it is used to represent
  * attributes in the K source written by a user, so it can
  * have its own Attributes which cover things like source location
