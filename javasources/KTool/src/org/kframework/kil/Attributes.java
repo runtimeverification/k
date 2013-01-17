@@ -11,6 +11,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * class for AST Attributes
+ * This inherits from ASTNode because it is used to represent
+ * attributes in the K source written by a user, so it can
+ * have its own Attributes which cover things like source location
+ * of user declared Attributes.  It is also used to handle
+ * metadata added by kompile passes.
+ *
+ * @see ASTNode
+ */
 public class Attributes extends ASTNode {
 
 	protected java.util.List<Attribute> contents;
