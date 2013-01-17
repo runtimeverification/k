@@ -32,4 +32,8 @@ public class GlobalSettings {
 	public enum ParserType {
 		PROGRAM, GROUND, RULES
 	}
+
+    public static boolean symbolicEquality = false;
+    public static boolean SMT = false;
+    public static boolean matchingLogic = false;
 }

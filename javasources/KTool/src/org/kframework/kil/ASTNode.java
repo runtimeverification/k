@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformable;
 import org.kframework.kil.visitors.Visitable;
@@ -8,6 +9,8 @@ import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ITokenizer;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.w3c.dom.Element;
+
+import java.util.Set;
 
 /**
  * Base class for K AST.
@@ -208,6 +211,15 @@ public abstract class ASTNode implements Visitable, Transformable {
 	public void setAttributes(Attributes attrs) {
 		attributes = attrs;
 	}
+
+    /**
+     * Retrieves the syntax production descendants of this ASTNode by attribute key.
+     * @param key
+     * @return Set<Production> object containing the production descendants
+     */
+    public Set<Production> getSyntaxByTag(String key) {
+        return SyntaxByTag.get(this, key);
+    }
 
 	/**
 	 * @return a copy of the ASTNode containing the same fields.

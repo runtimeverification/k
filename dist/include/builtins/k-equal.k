@@ -88,4 +88,19 @@ module K-EQUAL-HOOKS
   syntax Bool ::= List "=/=List" List [function]
   rule L1:List =/=List L2:List => notBool(L1 ==List L2)
 
+  syntax Bool ::= K "=K" K                  [function]
+                | List "=List" List         [function]
+                | Set "=Set" Set            [function]
+                | Bag "=Bag" Bag            [function]
+                | Map "=Map" Map            [function]
+                | KList "=KList" KList      [function]
+                | KLabel "=KLabel" KLabel   [function]
+
+  rule K:K =K K => true
+
+  rule K1,,KL1:KList =KList K2,,KL2:KList => K1 =K K2 andBool KL1 =KList KL2
+  rule .KList =KList .KList => true
+  rule _:K,,_:KList =KList .KList => false
+  rule .KList =KList _:K,,_:KList => false
 endmodule
+

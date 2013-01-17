@@ -9,33 +9,33 @@ module INT-HOOKS
   imports BOOL-HOOKS
 
   syntax Int ::= right:
-                 "~Int" Int [function, right, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(#INT:~Int_)]
+                 "~Int" Int                     [function, right, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(#INT:~Int_)]
                > left:
-                 Int "^Int" Int [function, left, latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(#INT:_^Int_)]
+                 Int "^Int" Int                 [function, left, latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(#INT:_^Int_)]
                > left:
-                 Int "*Int" Int [function, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(#INT:_*Int_)]
+                 Int "*Int" Int                 [function, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(#INT:_*Int_)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division */
-               | Int "/Int" Int [function, left, latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(#INT:_/Int_)]
-               | Int "%Int" Int [function, left, latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(#INT:_%Int_)]
+               | Int "/Int" Int                 [function, left, latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(#INT:_/Int_)]
+               | Int "%Int" Int                 [function, left, latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(#INT:_%Int_)]
                /* divInt and modInt implement e-division */
-               | Int "divInt" Int [function, left, smtlib(div)]
-               | Int "modInt" Int [function, left, smtlib(mod)]
+               | Int "divInt" Int               [function, left, smtlib(div)]
+               | Int "modInt" Int               [function, left, smtlib(mod)]
                > left:
-                 Int "+Int" Int [function, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(#INT:_+Int_), cons(Int1PlusSyn)]
-               | Int "-Int" Int [function, left, smtlib(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(#INT:_-Int_)]
+                 Int "+Int" Int                 [function, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(#INT:_+Int_), cons(Int1PlusSyn)]
+               | Int "-Int" Int                 [function, left, smtlib(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(#INT:_-Int_)]
                > left:
-                 Int ">>Int" Int [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(#INT:_>>Int_)]
-               | Int "<<Int" Int [function, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(#INT:_<<Int_)]
+                 Int ">>Int" Int                [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(#INT:_>>Int_)]
+               | Int "<<Int" Int                [function, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(#INT:_<<Int_)]
                > left:
-                 Int "&Int" Int [function, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(#INT:_&Int_)]
+                 Int "&Int" Int                 [function, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(#INT:_&Int_)]
                > left:
-                 Int "xorInt" Int [function, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(#INT:_xorInt_)]
+                 Int "xorInt" Int               [function, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(#INT:_xorInt_)]
                > left:
-                 Int "|Int" Int [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(#INT:_|Int_)]
-               | "minInt" "(" Int "," Int ")" [function, hook(#INT:minInt)]
-               | "maxInt" "(" Int "," Int ")" [function, hook(#INT:maxInt)]
-               | "absInt" "(" Int ")" [function, smtlib(abs), klabel(absInt), hook(#INT:absInt)]
+                 Int "|Int" Int                 [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(#INT:_|Int_)]
+               | "minInt" "(" Int "," Int ")"   [function, hook(#INT:minInt)]
+               | "maxInt" "(" Int "," Int ")"   [function, hook(#INT:maxInt)]
+               | "absInt" "(" Int ")"           [function, smtlib(abs), klabel(absInt), hook(#INT:absInt)]
 
   rule I1:#Int divInt I2:#Int => (I1 -Int (I1 modInt I2)) /Int I2
   when I2 =/=Int 0
@@ -49,12 +49,13 @@ module INT-HOOKS
   // rule absInt(I:Int) => I when I >=Int 0
   // rule absInt(I:Int) => 0 -Int I when I <Int 0
 
-  syntax Bool ::= Int "<=Int" Int  [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(#INT:_<=Int_)]
-                | Int "<Int" Int  [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(#INT:_<Int_)]
-                | Int ">=Int" Int  [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(#INT:_>=Int_)]
-                | Int ">Int" Int  [function, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(#INT:_>Int_)]
-                | Int "==Int" Int  [function, smtlib(=), left,latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(#INT:_==Int_)]
-                | Int "=/=Int" Int  [function, smtlib(distinct), left,latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2})]
+  syntax Bool ::= Int "<=Int" Int         [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(#INT:_<=Int_)]
+                | Int "<Int" Int          [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(#INT:_<Int_)]
+                | Int ">=Int" Int         [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(#INT:_>=Int_)]
+                | Int ">Int" Int          [function, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(#INT:_>Int_)]
+                | Int "==Int" Int         [function, left, smtlib(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(#INT:_==Int_)]
+                | Int "=/=Int" Int        [function, left, smtlib(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2})]
+                | Int "=Int" Int          [equality, function, hook(#INT:_==Int_)]
                 | Int "dividesInt" Int    [function]
 
   rule I1:Int =/=Int I2:Int => notBool(I1 ==Int I2)

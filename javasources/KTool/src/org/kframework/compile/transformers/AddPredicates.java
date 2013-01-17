@@ -2,7 +2,22 @@ package org.kframework.compile.transformers;
 
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Context;
+import org.kframework.kil.Empty;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KList;
+import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Production;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Term;
+import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -16,7 +31,7 @@ import java.util.Set;
 
 public class AddPredicates extends CopyOnWriteTransformer {
 
-    public static final Constant K2Sort = new Constant("KLabel", "K2Sort");
+    public static final Constant K2Sort = Constant.KLABEL("K2Sort");
 
     public class PredicatesVisitor extends BasicVisitor {
 
@@ -155,8 +170,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     // declare isSymbolicSort predicate as KLabel
                     retNode.addConstant("KLabel", symPred);
 
-                    // define isSymbolicSort predicate as the conjunction of
-                    // isSort and isSymbolicK
+                    // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
                     Variable var = MetaK.getFreshVar("K");
                     Term lhs = new KApp(Constant.KLABEL(symPred), var);
                     KList list = new KList();
@@ -177,8 +191,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule.addAttribute(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
-                    // define isVariable predicate for symbolic sort
-                    // constructor symSort
+                    // define isVariable predicate for symbolic sort constructor symSort
 					rule = getIsVariableRule(symTerm);
                     retNode.appendModuleItem(rule);
 
@@ -223,7 +236,9 @@ public class AddPredicates extends CopyOnWriteTransformer {
 		Term lhs;
 		Rule rule;
 		if (!MetaK.isComputationSort(symTerm.getSort())) {
-			symTerm = new KApp(new KInjectedLabel(symTerm), new Empty(MetaK.Constants.K));
+			symTerm = new KApp(
+                    new KInjectedLabel(symTerm),
+                    new Empty(MetaK.Constants.K));
 		}
 
 		lhs = new KApp(VariablePredicate, symTerm);

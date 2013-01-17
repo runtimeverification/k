@@ -193,6 +193,11 @@ public class KompileFrontEnd {
 		if (backend != null) {
 			genericCompile(mainFile, lang, backend, step);
 		}
+
+        GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
+        GlobalSettings.SMT = cmd.hasOption("smt");
+        GlobalSettings.matchingLogic = cmd.hasOption("ml");
+
 		if (GlobalSettings.verbose)
 			Stopwatch.sw.printTotal("Total");
 		GlobalSettings.kem.print();
@@ -226,6 +231,8 @@ public class KompileFrontEnd {
 			steps.add(new ResolveFunctions());
 			steps.add(new AddKCell());
 			steps.add(new AddSymbolicK());
+            if (GlobalSettings.symbolicEquality)
+                steps.add(new AddSemanticEquality());
 			// steps.add(new ResolveFresh());
 			steps.add(new ResolveFreshMOS());
 			steps.add(new AddTopCellConfig());

@@ -1,8 +1,20 @@
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.utils.GetSyntaxByTag;
+import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Empty;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KList;
+import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Production;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Term;
+import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -10,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +45,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Module node) throws TransformerException {
-        List<Production> prods = GetSyntaxByTag.applyVisitor(node, "binder");
+        Set<Production> prods = SyntaxByTag.get(node, "binder");
         if (prods.isEmpty())
             return node;
 
@@ -84,7 +97,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             rule.addAttribute(Attribute.ANYWHERE);
             items.add(rule);
 
-            Constant klblCt = new Constant("KLabel", prod.getKLabel());
+            Constant klblCt = Constant.KLABEL(prod.getKLabel());
             Term klblK = new KApp(new KInjectedLabel(klblCt), Empty.ListOfK);
 
             for (int bndIdx : bndMap.keySet()) {

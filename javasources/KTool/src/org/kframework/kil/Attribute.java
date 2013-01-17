@@ -8,9 +8,11 @@ import org.w3c.dom.Element;
 
 public class Attribute extends ASTNode {
 
+    public static final Attribute BRACKET = new Attribute("bracket", "");
     public static final Attribute FUNCTION = new Attribute("function", "");
     public static final Attribute PREDICATE = new Attribute("predicate", "");
     public static final Attribute ANYWHERE = new Attribute("anywhere", "");
+    public static final Attribute EQUALITY = new Attribute("equality", "");
 
     private String key;
 	private String value;

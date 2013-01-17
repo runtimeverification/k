@@ -12,6 +12,8 @@ import org.w3c.dom.Element;
 
 public class Sort extends ProductionItem {
 
+    public static final String BOOL = "Bool";
+
 	private String name;
 	private static Set<String> baseSorts = new HashSet<String>();
 	static {

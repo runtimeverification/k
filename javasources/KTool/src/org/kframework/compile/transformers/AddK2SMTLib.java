@@ -1,6 +1,6 @@
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.utils.GetSyntaxByTag;
+import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -91,7 +91,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
         // for each production, define the SMT representation based on the
         // smtlib tag
         // TODO: support subsort production using the injection label
-        for (Production prod : GetSyntaxByTag.applyVisitor(node, SMTLIB_ATTR)) {
+        for (Production prod : SyntaxByTag.get(node, SMTLIB_ATTR)) {
             String smtLbl = prod.getAttribute(SMTLIB_ATTR);
             // not sure if this is necessary
             if (smtLbl == null)

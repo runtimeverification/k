@@ -2,8 +2,9 @@ package org.kframework.compile.transformers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import org.kframework.compile.utils.GetSyntaxByTag;
+import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Constant;
@@ -36,8 +37,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 	public ASTNode transform(Module node) throws TransformerException {
 		
 		//collect the productions which have the attributes strict and seqstrict
-		List<Production> prods = GetSyntaxByTag.applyVisitor(node, "strict");
-		prods.addAll(GetSyntaxByTag.applyVisitor(node, "seqstrict"));
+		Set<Production> prods = SyntaxByTag.get(node, "strict");
+		prods.addAll(SyntaxByTag.get(node, "seqstrict"));
 		if (prods.isEmpty())
 			return node;
 

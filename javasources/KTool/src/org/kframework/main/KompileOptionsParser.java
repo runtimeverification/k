@@ -94,6 +94,23 @@ public class KompileOptionsParser {
 
 		Option outputFile = new Option("o", "output", true, "specify output file/directory. Default <file>-compiled");
 
+        // matching logic and symbolic execution options
+        OptionGroup sym = new OptionGroup();
+        Option ml = new Option(
+                "ml",
+                "matching-logic",
+                false,
+                "generate support for matching logic prover");
+        Option smt = new Option("smt", "generate translation to SMTLib2");
+        Option symEq = new Option(
+                "symeq",
+                "symbolic-equality",
+                false,
+                "generate sort equalities");
+        sym.addOption(ml);
+        sym.addOption(smt);
+        sym.addOption(symEq);
+
 		// add options
 		options.addOption(new Option("testFactory", false, "Option to test new class instantiation"));
 		options.addOptionGroup(verb);
@@ -105,6 +122,7 @@ public class KompileOptionsParser {
 		options.addOptionGroup(xml);
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
+        options.addOptionGroup(sym);
 		// options.addOption(tempDisamb);
 		options.addOption(toHTML);
 		options.addOption(kexp);
