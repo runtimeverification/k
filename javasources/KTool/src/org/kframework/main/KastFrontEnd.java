@@ -1,6 +1,9 @@
 package org.kframework.main;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -12,8 +15,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.File;
-import java.io.IOException;
+import com.thoughtworks.xstream.XStream;
 
 public class KastFrontEnd {
 
@@ -50,9 +52,10 @@ public class KastFrontEnd {
 				pgm = cmd.getOptionValue("pgm");
 			} else {
 				String[] restArgs = cmd.getArgs();
-				if (restArgs.length < 1)
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to kast a program!.", "command line", "System file."));
-				else
+				if (restArgs.length < 1) {
+					String msg = "You have to provide a file in order to kast a program!.";
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+				} else
 					pgm = restArgs[0];
 			}
 			path = pgm;
@@ -60,36 +63,55 @@ public class KastFrontEnd {
 			if (!mainFile.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
 			pgm = FileUtil.getFileContent(mainFile.getAbsolutePath());
-		} 
+		}
 
 		File def = null;
 		org.kframework.kil.Definition javaDef = null;
-		if (cmd.hasOption("def")) {
-			def = new File(cmd.getOptionValue("def"));
+		if (cmd.hasOption("kDefinition")) {
+			def = new File(cmd.getOptionValue("kDefinition"));
 			if (!def.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
-			if (DefinitionHelper.dotk == null) {
+			if (DefinitionHelper.kompiled == null) {
 				try {
-					DefinitionHelper.dotk = new File(def.getCanonicalFile().getParent() + File.separator + ".k");
+					String fileName = FileUtil.stripExtension(def.getName());
+					DefinitionHelper.kompiled = new File(def.getCanonicalFile().getParent() + File.separator + fileName + "-kompiled");
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+		} else if (cmd.hasOption("compiledDef")) {
+			DefinitionHelper.kompiled = new File(cmd.getOptionValue("compiledDef"));
+			if (!DefinitionHelper.kompiled.exists())
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find directory: " + pgm, "command line", "System file."));
 		} else {
 			// search for the definition
-			try {
-				// check to see if I got to / or drive folder
-				if (DefinitionHelper.dotk == null) {
-					DefinitionHelper.dotk = new File(new File(".").getCanonicalPath() + "/.k");
+			String[] dirs = new File(".").list(new FilenameFilter() {
+				@Override
+				public boolean accept(File current, String name) {
+					return new File(current, name).isDirectory();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			});
+
+			if (dirs.length == 0) {
+				String msg = "Could not find the compiled definition. Use -k-definition or -compiled-def to specify one.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
 			}
+
+			for (int i = 0; i < dirs.length; i++) {
+				if (dirs[i].endsWith("-kompiled")) {
+					if (DefinitionHelper.kompiled != null) {
+						String msg = "Multiple compiled definitions found. Use -k-definition or -compiled-def to specify one.";
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
+					} else {
+						DefinitionHelper.kompiled = new File(dirs[i]).getAbsoluteFile();
+					}
+				}
+			}
+
 		}
 		try {
-			if (DefinitionHelper.dotk.exists()) {
-				File defXml = new File(DefinitionHelper.dotk.getCanonicalPath() + "/defx.xml");
+			if (DefinitionHelper.kompiled.exists()) {
+				File defXml = new File(DefinitionHelper.kompiled.getCanonicalPath() + "/defx.xml");
 				if (!defXml.exists()) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
 				}
@@ -103,8 +125,10 @@ public class KastFrontEnd {
 				def = new File(javaDef.getMainFile());
 			}
 
-			if (def == null)
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find a compiled definition, please provide one using the -def option", "command line", pgm));
+			if (def == null) {
+				String msg = "Could not find a compiled definition, please provide one using the -def option";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", pgm));
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

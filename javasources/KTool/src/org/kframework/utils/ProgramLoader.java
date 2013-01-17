@@ -50,7 +50,7 @@ public class ProgramLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		XmlLoader.writeXmlFile(doc, DefinitionHelper.dotk.getAbsolutePath() + "/pgm.xml");
+		XmlLoader.writeXmlFile(doc, DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.xml");
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
 		try {
@@ -89,7 +89,7 @@ public class ProgramLoader {
 	/**
 	 * Print maudified program to standard output.
 	 * 
-	 * Save it in dotk cache under pgm.maude.
+	 * Save it in kompiled cache under pgm.maude.
 	 * 
 	 * @param indentationOptions
 	 * @param prettyPrint
@@ -128,7 +128,7 @@ public class ProgramLoader {
 			}
 
 			String language = FileUtil.stripExtension(def.getMainFile());
-			writeMaudifiedPgm(kast, language, DefinitionHelper.dotk);
+			writeMaudifiedPgm(kast, language, DefinitionHelper.kompiled);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Maudify Program");
@@ -143,15 +143,15 @@ public class ProgramLoader {
 	}
 
 	/**
-	 * Store maudified AST of K program under `pgm.maude` in dotk directory. `pgm.maude` will also load language definition from `LANGUAGE-compiled.maude` in parent directory.
+	 * Store maudified AST of K program under `pgm.maude` in kompiled directory. `pgm.maude` will also load language definition from `LANGUAGE-compiled.maude` in parent directory.
 	 */
-	private static void writeMaudifiedPgm(String kast, String language, File dotk) {
+	private static void writeMaudifiedPgm(String kast, String language, File kompiled) {
 		String ast;
 		ast = "load ../" + language + "-compiled.maude\n";
 		ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.KList)) , (\n\n";
 		ast += kast;
 		ast += "\n\n))),(.).Map))  .\n quit\n";
 
-		FileUtil.saveInFile(dotk.getAbsolutePath() + "/pgm.maude", ast);
+		FileUtil.saveInFile(kompiled.getAbsolutePath() + "/pgm.maude", ast);
 	}
 }
