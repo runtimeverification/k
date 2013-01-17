@@ -13,7 +13,7 @@ public class KastOptionsParser {
 
 		// main options
 		OptionGroup main = new OptionGroup();
-		Option def = new Option("kDefinition", true, "main file of the definition");
+		Option def = new Option("kDef", "kDefinition", true, "main file of the definition");
 		Option compiled = new Option("compiledDef", true, "output directory of the compiled definition");
 		main.addOption(def);
 		main.addOption(compiled);
@@ -32,7 +32,7 @@ public class KastOptionsParser {
 		Option nofileopt = new Option("nofile", "nofilename", false, "don't include the long filenames in the XML.");
 		nofile.addOption(nofileopt);
 
-		/// program
+		// / program
 		OptionGroup tex2 = new OptionGroup();
 		Option tbl = new Option("pgm", "program", true, "the program to parse");
 		Option exp = new Option("e", "expression", true, "an expression to parse passed on the command line");
@@ -45,25 +45,25 @@ public class KastOptionsParser {
 		Option maxWidth = new Option("maxwidth", true, "the indicative maximal width of the output");
 		Option auxSize = new Option("auxtabsize", true, "how many spaces to indent lines which do not fit into max-width");
 		Option nextLine = new Option("nextline", false, "force newline before first argument");
-		
+
 		// which parser to use
-		@SuppressWarnings("static-access")
-		Option defParser = OptionBuilder.withLongOpt("def-parser").withDescription("use k definition parser").create();
-		@SuppressWarnings("static-access")
-		Option sort = OptionBuilder.withLongOpt("sort").hasArg().withDescription("the sort the program is expected to parse into").create();
+		Option ruleParser = new Option("ruleParser", false, "use k definition parser for rules (meta variables and rewrites)");
+		Option groundParser = new Option("groundParser", false, "use k definition parser for ground terms");
+		OptionGroup parserGroup = new OptionGroup();
+		parserGroup.addOption(ruleParser);
+		parserGroup.addOption(groundParser);
 
 		// add options
 		options.addOptionGroup(verb);
 		options.addOptionGroup(main);
 		options.addOptionGroup(tex2);
 		options.addOptionGroup(nofile);
+		options.addOptionGroup(parserGroup);
 		options.addOption(prettyPrint);
 		options.addOption(tabSize);
 		options.addOption(maxWidth);
 		options.addOption(auxSize);
 		options.addOption(nextLine);
-		options.addOption(defParser);
-		options.addOption(sort);
 	}
 
 	public CommandLine parse(String[] cmd) {

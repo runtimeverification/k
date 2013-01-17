@@ -201,6 +201,10 @@ public class DefinitionLoader {
 	}
 
 	public static Term parseCmdString(String content, String sort) {
+		if (!DefinitionHelper.initialized) {
+			System.err.println("You need to load the definition before you call parsePattern!");
+			System.exit(1);
+		}
 		String parsed = org.kframework.parser.concrete.KParser.ParseKCmdString(content);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 		XmlLoader.addFilename(doc.getFirstChild(), "Command Line Argument");

@@ -36,16 +36,12 @@ public class ProgramLoader {
 	 * @param kappize
 	 *            If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol) throws IOException {
-		if (startSymbol == null) {
-			startSymbol = DefinitionHelper.startSymbolPgm;
-		}
-
+	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize) throws IOException {
 		File tbl = new File(DefinitionHelper.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
-		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
+		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
@@ -72,18 +68,18 @@ public class ProgramLoader {
 		return out;
 	}
 
-	public static ASTNode loadPgmAst(String content, String filename, String startSymbol) throws IOException {
-		return loadPgmAst(content, filename, true, startSymbol);
+	public static ASTNode loadPgmAst(String content, String filename) throws IOException {
+		return loadPgmAst(content, filename, true);
 	}
 
 	public static ASTNode loadPgmAst(File pgmFile, boolean kappize) throws IOException {
 		String filename = pgmFile.getCanonicalFile().getAbsolutePath();
 		String content = FileUtil.getFileContent(filename);
-		return loadPgmAst(content, filename, kappize, DefinitionHelper.startSymbolPgm);
+		return loadPgmAst(content, filename, kappize);
 	}
 
-	public static String processPgm(String content, String filename, Definition def, String startSymbol) {
-		return processPgm(content, filename, def, false, false, new IndentationOptions(), false, startSymbol);
+	public static String processPgm(String content, String filename, Definition def) {
+		return processPgm(content, filename, def, false, false, new IndentationOptions());
 	}
 
 	/**
@@ -95,7 +91,7 @@ public class ProgramLoader {
 	 * @param prettyPrint
 	 * @param nextline
 	 */
-	public static String processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions, boolean useDefParser, String startSymbol) {
+	public static String processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions) {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -104,13 +100,18 @@ public class ProgramLoader {
 
 		try {
 			ASTNode out;
-			if (useDefParser) {
+			if (GlobalSettings.whatParser == GlobalSettings.ParserType.GROUND) {
 				org.kframework.parser.concrete.KParser.ImportTblGround(DefinitionHelper.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
 				out = DefinitionLoader.parseCmdString(content, "");
 				out = out.accept(new FlattenSyntax());
 				out = MetaK.kWrapper((Term) out);
+			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {
+				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
+				out = DefinitionLoader.parsePattern(content);
+				out = out.accept(new FlattenSyntax());
+				out = MetaK.kWrapper((Term) out);
 			} else {
-				out = loadPgmAst(content, filename, startSymbol);
+				out = loadPgmAst(content, filename);
 			}
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Parsing Program");
@@ -127,8 +128,7 @@ public class ProgramLoader {
 				kast = maudeFilter.getResult();
 			}
 
-			String language = FileUtil.stripExtension(def.getMainFile());
-			writeMaudifiedPgm(kast, language, DefinitionHelper.kompiled);
+			writeMaudifiedPgm(kast);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Maudify Program");
@@ -145,13 +145,13 @@ public class ProgramLoader {
 	/**
 	 * Store maudified AST of K program under `pgm.maude` in kompiled directory. `pgm.maude` will also load language definition from `LANGUAGE-compiled.maude` in parent directory.
 	 */
-	private static void writeMaudifiedPgm(String kast, String language, File kompiled) {
+	private static void writeMaudifiedPgm(String kast) {
 		String ast;
-		ast = "load ../" + language + "-compiled.maude\n";
+		ast = "load main.maude\n";
 		ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.KList)) , (\n\n";
 		ast += kast;
 		ast += "\n\n))),(.).Map))  .\n quit\n";
 
-		FileUtil.saveInFile(kompiled.getAbsolutePath() + "/pgm.maude", ast);
+		FileUtil.saveInFile(DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.maude", ast);
 	}
 }

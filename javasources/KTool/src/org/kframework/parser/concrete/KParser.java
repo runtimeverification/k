@@ -9,7 +9,6 @@ import org.kframework.parser.concrete.lib.java$Parse$String$Config$Ast_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Config_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Pgm_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Rules_0_0;
-import org.kframework.utils.StringUtil;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
@@ -255,14 +254,14 @@ public class KParser {
 		return rez;
 	}
 
-	public static String ParseProgramString(String program, String startSymbol) {
+	public static String ParseProgramString(String program) {
 		init();
 		String rez = "";
 		context.setStandAlone(true);
 		IStrategoTerm result = null;
 		try {
 			try {
-				result = context.invokeStrategyCLI(java$Parse$String$Pgm_0_0.instance, StringUtil.escapeSortName(startSymbol), program);
+				result = context.invokeStrategyCLI(java$Parse$String$Pgm_0_0.instance, "a.exe", program);
 			} finally {
 				context.getIOAgent().closeAllFiles();
 			}

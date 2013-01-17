@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 // instantiate processes
 public class RunProcess {
 
@@ -30,7 +29,6 @@ public class RunProcess {
 
 			// create process
 			ProcessBuilder pb = new ProcessBuilder(commands);
-
 
 			// set execution directory to current user dir
 			pb.directory(new File(K.userdir));
@@ -84,7 +82,7 @@ public class RunProcess {
 	/*
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
 	 */
-	public String runParser(String parser, String pgm, boolean isPgm, String startSymbol) {
+	public String runParser(String parser, String pgm, boolean isPgm) {
 		String KAST = new String();
 		String parserPath = new String();
 
@@ -92,7 +90,7 @@ public class RunProcess {
 		if ("kast".equals(parser)) {
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
-			return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition, startSymbol);
+			return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition);
 			// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", definition, pgm });
 		} else {
 			try {
@@ -101,17 +99,13 @@ public class RunProcess {
 				e.printStackTrace();
 			}
 			String parserName = new File(parserPath).getName();
-//			System.out.println("The external parser to be used is:" + parserName);
+			// System.out.println("The external parser to be used is:" + parserName);
 			if ("kast".equals(parserName)) {
-				return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition, startSymbol);
+				return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition);
 				// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
 			} else {
 				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
 				tokens.add(pgm);
-				if (startSymbol != null) {
-					tokens.add("--sort");
-					tokens.add(startSymbol);
-				}
 				this.execute(tokens.toArray(new String[0]));
 			}
 		}
@@ -168,36 +162,34 @@ public class RunProcess {
 		}
 	}
 
-	//check if the execution of Maude process produced some errors 
+	// check if the execution of Maude process produced some errors
 	public void printError(String content, String lang) {
 		try {
-					if (content.contains("GLIBC")) {
-						System.out.println(
-						"\nError: A known bug in the current version of the Maude rewrite engine\n" +
-						"prohibits running K with I/O on certain architectures.\n" +
-								"If non I/O programs and definitions work but I/O ones fail, \n" +
-								"please let us know and we'll try helping you fix it.\n" );
-						return;
+			if (content.contains("GLIBC")) {
+				System.out.println("\nError: A known bug in the current version of the Maude rewrite engine\n" + "prohibits running K with I/O on certain architectures.\n"
+						+ "If non I/O programs and definitions work but I/O ones fail, \n" + "please let us know and we'll try helping you fix it.\n");
+				return;
 
-					}
-					System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "k_definition=" + K.k_definition + K.lineSeparator + "syntax_module=" + K.syntax_module + K.lineSeparator + "main_module=" + K.main_module
-							+ K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
-					String compiledDefName = DefinitionHelper.kompiled.getName();
-					int index = compiledDefName.indexOf("-kompiled");
-					compiledDefName = compiledDefName.substring(0, index);
-					if (lang != null && !lang.equals(compiledDefName)) {
-						Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. " + "Maybe you should use --syntax-module or --main-module options of krun");
-					}
+			}
+			System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "k_definition=" + K.k_definition + K.lineSeparator + "syntax_module=" + K.syntax_module
+					+ K.lineSeparator + "main_module=" + K.main_module + K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
+			String compiledDefName = DefinitionHelper.kompiled.getName();
+			int index = compiledDefName.indexOf("-kompiled");
+			compiledDefName = compiledDefName.substring(0, index);
+			if (lang != null && !lang.equals(compiledDefName)) {
+				Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. "
+						+ "Maybe you should use --syntax-module or --main-module options of krun");
+			}
 
-					// Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-					/*
-					 * String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName(); Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
-					 */
+			// Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+			/*
+			 * String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName(); Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
+			 */
 
-					// get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
-					String fileName = new File(K.maude_err).getName();
-					String fullPath = new File(K.kdir + K.fileSeparator + "krun" + K.fileSeparator + fileName).getCanonicalPath();
-					Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+			// get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
+			String fileName = new File(K.maude_err).getName();
+			String fullPath = new File(K.kdir + K.fileSeparator + "krun" + K.fileSeparator + fileName).getCanonicalPath();
+			Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
 		} catch (IOException e) {
 			Error.report("Error in checkMaudeForErrors method:" + e.getMessage());
 		}

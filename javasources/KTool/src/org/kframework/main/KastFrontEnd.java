@@ -81,8 +81,10 @@ public class KastFrontEnd {
 			}
 		} else if (cmd.hasOption("compiledDef")) {
 			DefinitionHelper.kompiled = new File(cmd.getOptionValue("compiledDef"));
-			if (!DefinitionHelper.kompiled.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find directory: " + pgm, "command line", "System file."));
+			if (!DefinitionHelper.kompiled.exists()) {
+				String msg = "Could not find directory: " + DefinitionHelper.kompiled;
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", DefinitionHelper.kompiled.getAbsolutePath()));
+			}
 		} else {
 			// search for the definition
 			String[] dirs = new File(".").list(new FilenameFilter() {
@@ -92,15 +94,10 @@ public class KastFrontEnd {
 				}
 			});
 
-			if (dirs.length == 0) {
-				String msg = "Could not find the compiled definition. Use -k-definition or -compiled-def to specify one.";
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
-			}
-
 			for (int i = 0; i < dirs.length; i++) {
 				if (dirs[i].endsWith("-kompiled")) {
 					if (DefinitionHelper.kompiled != null) {
-						String msg = "Multiple compiled definitions found. Use -k-definition or -compiled-def to specify one.";
+						String msg = "Multiple compiled definitions found. Use -kDefinition or -compiledDef to specify one.";
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
 					} else {
 						DefinitionHelper.kompiled = new File(dirs[i]).getAbsoluteFile();
@@ -108,6 +105,10 @@ public class KastFrontEnd {
 				}
 			}
 
+			if (DefinitionHelper.kompiled == null) {
+				String msg = "Could not find a compiled definition. Use -kDefinition or -compiledDef to specify one.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
+			}
 		}
 		try {
 			if (DefinitionHelper.kompiled.exists()) {
@@ -123,11 +124,9 @@ public class KastFrontEnd {
 				javaDef.preprocess();
 
 				def = new File(javaDef.getMainFile());
-			}
-
-			if (def == null) {
-				String msg = "Could not find a compiled definition, please provide one using the -def option";
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", pgm));
+			} else {
+				String msg = "Could not find a valid compiled definition. Use -kDefinition or -compiledDef to specify one.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -156,11 +155,13 @@ public class KastFrontEnd {
 			}
 		}
 
-		String sort = DefinitionHelper.startSymbolPgm;
-		if (cmd.hasOption("sort")) {
-			sort = cmd.getOptionValue("sort");
+		if (cmd.hasOption("ruleParser")) {
+			GlobalSettings.whatParser = GlobalSettings.ParserType.RULES;
 		}
-		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, cmd.hasOption("def-parser"), sort));
+		if (cmd.hasOption("concreteParser")) {
+			GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
+		}
+		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions));
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
 		GlobalSettings.kem.print();
