@@ -4,6 +4,7 @@ import org.w3c.dom.Element;
 
 public abstract class DefinitionItem extends ASTNode {
 
+	/** set iff the item was read from a file in the standard libraries */
 	protected boolean predefined;
 
 	public DefinitionItem() {

@@ -8,6 +8,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+/** MapItem is a map item with key {@link #key} and value the inherited {@link #value} */
 public class MapItem extends CollectionItem {
 	private Term key;
 

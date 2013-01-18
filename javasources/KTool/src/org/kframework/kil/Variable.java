@@ -6,8 +6,12 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/**
+ * Variables, used both in rules/contexts and for variables like {@code $PGM} in configurations.
+ */
 public class Variable extends Term {
 	private String name;
+	/** True if the variable was written with an explicit type annotation */
 	private boolean userTyped = false;
 
 	public Variable(Element element) {

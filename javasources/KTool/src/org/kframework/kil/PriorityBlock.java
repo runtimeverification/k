@@ -10,9 +10,15 @@ import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 
+/**
+ * A block of productions at the same priority within a syntax declaration.
+ * @see Syntax
+ */
 public class PriorityBlock extends ASTNode {
 
 	java.util.List<Production> productions = new ArrayList<Production>();
+	/** "left", "right", or "non-assoc" if this group of productions had
+	 * an explicitly declared associativity, "" otherwise */
 	String assoc;
 
 	public java.util.List<Production> getProductions() {

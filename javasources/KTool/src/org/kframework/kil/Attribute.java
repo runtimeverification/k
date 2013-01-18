@@ -6,6 +6,12 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/**
+ * Represents either an explicit attribute on a {@link Rule} or {@link Production},
+ * or node metadata like location.
+ * The inherited member attributes is used for location information
+ * if this represents an explicitly written attribute. 
+ */
 public class Attribute extends ASTNode {
 
     public static final Attribute BRACKET = new Attribute("bracket", "");

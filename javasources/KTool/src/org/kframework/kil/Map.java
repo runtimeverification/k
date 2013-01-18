@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 import java.util.List;
 
 
+/** Map contents have sort Map or MapItem */
 public class Map extends Collection {
 
 	public Map(Element element) {

@@ -19,22 +19,24 @@ import java.util.Map.Entry;
 
 /**
  * Class for representing a K cell term.  The textual representation of a K cell is the following:
- *   Cell ::= "<" Label CellAttribute* ">"  CellContents  "</" Label ">"
- *   Label ::= Id
- *   CellContents ::= Term
- *   CellAttribute = "ellipses" "=" ( '"left"' | '"right"' | '"both"' | '"none"')
- *                 ...
- *                 | "multiplicity" "=" ('"1"' | '"*"' | '"+"' | '"?"')
- *                 | "color" "=" String
- *                 | "stream" "=" ('"stdin"' | '"stdout"')
- *
+ * <table>
+ * <tr><td>Cell </td>
+ * <td>::= "<" Label CellAttribute* ">"  CellContents  "</" Label ">"</td></tr>
+ * <tr><td>Label</td><td>::= Id</td></tr>
+ * <tr><td>CellContents</td><td>::= Term</td></tr>
+ * <tr><td>CellAttribute</td><td> = "ellipses" "=" ( '"left"' | '"right"' | '"both"' | '"none"')</td></tr>
+ * <tr><td/><td> | "multiplicity" "=" ('"1"' | '"*"' | '"+"' | '"?"') </td></tr>
+ * <tr><td/><td> | "color" "=" String </td></tr>
+ * <tr><td/><td> | "stream" "=" ('"stdin"' | '"stdout"') </td></tr>
+ * </table>
+ * <p>
  *  For example, a configuration cell might look like
- *   <output color="blue" multiplicity="?" stream="stdout"> </output>
- *
- *  While a rule cell might look like
- *     <k ellipses="right"> X </k>
- *  corresponding to  <k> X ...</k>
- *
+ *   {@code <output color="blue" multiplicity="?" stream="stdout"> </output>},
+ *  while a rule cell might look like
+ *     {@code <k ellipses="right"> X </k>}
+ *  corresponding to  {@code <k> X ...</k>}
+ * <p>
+ * Cell attributes are in {@link #cellAttributes}, not {@link #attributes}.
  */
 public class Cell extends Term {
 	/** Possible values for the multiplicity attribute */
@@ -47,7 +49,9 @@ public class Cell extends Term {
 		LEFT, RIGHT, BOTH, NONE,
 	}
 
+	/** Must equal with {@link #endLabel} */
 	String label;
+	/** Must equal with {@link #label} */
 	String endLabel;
 
 	/**

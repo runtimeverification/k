@@ -6,6 +6,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
 
+/** An associative list of terms of sort List or ListItem */
 public class List extends Collection {
 
 	public List(Element element) {

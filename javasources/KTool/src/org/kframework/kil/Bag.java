@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 import java.util.List;
 
 
+/** A bag. Contents should be a Cell or BagItem node, or term of sort Bag or BagItem */
 public class Bag extends Collection {
 	public Bag(String location, String filename) {
 		super(location, filename, "Bag");

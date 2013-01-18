@@ -10,6 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+/** Atomic values in builtin sorts, including klabel.
+ * All values are represented textually in {@link #value},
+ * whose interpretation may depend on {@link #sort}.
+ */
 public class Constant extends Term {
     public static final Constant TRUE = new Constant("#Bool", "true");
     public static final Constant FALSE = new Constant("#Bool", "false");

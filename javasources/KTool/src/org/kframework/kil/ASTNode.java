@@ -20,7 +20,10 @@ import java.util.Set;
  * @see Transformable
  */
 public abstract class ASTNode implements Visitable, Transformable {
-	// attributes non-null
+	/**
+	 * Used on any node for metadata such as location,
+	 * also used on {@link Rule} and {@link Production} for the attribute list.
+	 */
 	protected Attributes attributes;
 
 	/**

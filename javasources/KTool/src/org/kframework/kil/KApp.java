@@ -7,8 +7,13 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+/**
+ * Represents a term in sort K explicitly constructed as an application of a klabel to arguments.
+ */
 public class KApp extends Term {
+	/** The label, always of sort KLabel, usually an instance of {@link Constant} */
 	Term label;
+	 /** The arguments, always of sort KList, usually an instance of {@link KList} or {@link Empty} */
 	Term child;
 
 	public KApp(String location, String filename) {

@@ -6,6 +6,12 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
 
+/**
+ * Configuration declaration.
+ * The term {@code body} is the intial configuration as a bag of cells,
+ * also allowing cell attributes and variables such as {@code $PGM}. 
+ * May not have a non-null {@code condition}.
+ */
 public class Configuration extends Sentence {
 
 	public Configuration() {

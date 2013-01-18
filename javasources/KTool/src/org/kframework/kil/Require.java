@@ -6,7 +6,9 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/** A require directive */
 public class Require extends DefinitionItem {
+	/** The string argument to {@code require}, as written in the input file. */
 	private String value;
 
 	public Require(Element element) {

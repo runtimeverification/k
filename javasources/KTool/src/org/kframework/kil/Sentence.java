@@ -6,6 +6,12 @@ import org.kframework.utils.xml.XML;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
 
+/**
+ * A rule, configuration declaration, or context.
+ * Each parses as a term, this class declares common members
+ * {@link #body} and {@link #condition}, which have different
+ * interpretations in the subclasses.
+ */
 public abstract class Sentence extends ModuleItem {
 	Term body;
 	Term condition = null;

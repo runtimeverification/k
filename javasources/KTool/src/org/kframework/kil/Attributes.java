@@ -13,11 +13,11 @@ import java.util.List;
 
 /**
  * class for AST Attributes.
- * This inherits from ASTNode because it is used to represent
- * attributes in the K source written by a user, so it can
- * have its own Attributes which cover things like source location
- * of user declared Attributes.  It is also used to handle
- * metadata added by kompile passes.
+ * This is used to represent a collection of attributes on a node,
+ * which may contain both attributes in the K source
+ * written by a user, and metadata like location added by kompile.
+ * Only {@link Rule} and {@link Production} may have user-written
+ * attributes.
  *
  * @see ASTNode
  */

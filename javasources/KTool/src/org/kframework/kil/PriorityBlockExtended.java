@@ -10,6 +10,8 @@ import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 
+/** A group within a {@code syntax priorities} declaration. {@link #assoc} is currently unused.
+ * @see PriorityExtended */
 public class PriorityBlockExtended extends ASTNode {
 
 	java.util.List<Constant> productions = new ArrayList<Constant>();

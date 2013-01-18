@@ -6,6 +6,10 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/**
+ * Represents {@code HOLE} in context declarations.
+ * See {@link FreezerHole} for holes in freezers.
+ */
 public class Hole extends Term {
 	public Hole(Element element) {
 		super(element);

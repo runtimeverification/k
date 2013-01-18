@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 
 import java.util.List;
 
+/** Represents a ,, list, as used in KApp */
 public class KList extends Collection {
 	public KList() {
 		super(MetaK.Constants.KList);

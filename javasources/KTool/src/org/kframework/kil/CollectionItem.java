@@ -2,6 +2,7 @@ package org.kframework.kil;
 
 import org.w3c.dom.Element;
 
+/** Subclasses wrap a term as an item in the corresponding collection */
 public abstract class CollectionItem extends Term {
 
 	protected Term value;

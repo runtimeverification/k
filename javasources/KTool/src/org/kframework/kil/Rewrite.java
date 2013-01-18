@@ -8,6 +8,11 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+/**
+ * Represents {@code =>} in the syntax of rules.
+ * May occur in multiple places in the body of a {@link Rule}, but
+ * may not be nested.
+ */
 public class Rewrite extends Term {
 	private Term left;
 	private Term right;

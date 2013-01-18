@@ -19,6 +19,7 @@ import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.DefinitionLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -26,11 +27,18 @@ import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+/**
+ * Represents a language definition.
+ * Includes contents from all {@code required}-d files.
+ * @see DefinitionLoader
+ * @see BasicParser
+ */
 public class Definition extends ASTNode {
 
 	private java.util.List<DefinitionItem> items;
 	private String mainFile;
 	private String mainModule;
+	/** An index of all modules in {@link #items} by name */
 	private Map<String, Module> modulesMap;
 	private String mainSyntaxModule;
 

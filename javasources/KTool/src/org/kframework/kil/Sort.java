@@ -10,6 +10,7 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/** A nonterminal in a {@link Production}. Also abused in some places as a sort identifier */
 public class Sort extends ProductionItem {
 
     public static final String BOOL = "Bool";

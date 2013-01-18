@@ -7,6 +7,7 @@ import org.w3c.dom.Element;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Base class for collection sorts */
 public abstract class Collection extends Term {
 
 	protected java.util.List<Term> contents;

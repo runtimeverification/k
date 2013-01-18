@@ -4,6 +4,10 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/** Represents a term of sort KLabel made by injecting something else.
+ * Corresponds to operators Foo2KLabel and #_ in source.
+ * Usually only occurs as the label of a {@link KApp} an {@link Empty} as arguments.
+ */
 public class KInjectedLabel extends Term {
 	protected Term term;
 

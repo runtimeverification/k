@@ -5,6 +5,7 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/** Represents a <br /> occurring for formatting in a bag of cells */
 public class TermComment extends Term {
 
 	public TermComment(Element element) {

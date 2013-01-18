@@ -7,6 +7,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+/** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Bracket extends Term {
 
 	private Term content;

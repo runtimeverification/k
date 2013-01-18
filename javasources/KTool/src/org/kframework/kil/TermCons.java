@@ -13,7 +13,11 @@ import org.w3c.dom.Element;
 import java.util.ArrayList;
 import java.util.List;
 
+/** 
+ * Applications that are not in sort K, or have not yet been flattened.
+ */
 public class TermCons extends Term {
+	/** A unique identifier corresponding to a production, matching the SDF cons */
 	protected final String cons;
 	protected java.util.List<Term> contents;
 

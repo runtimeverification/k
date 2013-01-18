@@ -5,6 +5,12 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/**
+ * A context declaration.
+ * The context is represented as a term, with the focused point
+ * indicated by one occurence of either {@link Hole} or a {@link Rewrite} whose
+ * left hand side is {@link Hole}.
+ */
 public class Context extends Sentence {
 
 	public Context(Element element) {

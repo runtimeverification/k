@@ -4,6 +4,10 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/** An uninterpreted string,
+ * used to represent (subterms of) Maude which 
+ * can't be parsed into valid terms.
+ */
 public class BackendTerm extends Term {
 
 	public BackendTerm(BackendTerm term) {

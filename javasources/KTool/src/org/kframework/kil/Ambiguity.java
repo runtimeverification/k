@@ -5,6 +5,9 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/** Used for representing parsing ambiguity.
+ * Shouldn't exist after disambiguation. 
+ */
 public class Ambiguity extends Collection {
 
 	public Ambiguity(Element element) {

@@ -13,7 +13,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * A syntax declaration.
+ * Contains {@link Production}s, grouped into a list {@link PriorityBlock}
+ * according to precedence marked by {@code >} in the declaration.
+ */
 public class Syntax extends ModuleItem {
+	/** The sort being declared. */
 	Sort sort;
 	java.util.List<PriorityBlock> priorityBlocks;
 

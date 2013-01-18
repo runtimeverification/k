@@ -6,7 +6,14 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/**
+ * A rule declaration.
+ * The left and right hand sides of the rewrite are described by the single term
+ * {@code body} which allows {@link Rewrite} nodes to describe the changes.
+ * Any explicit attributes on the rule are stored in {@link #attributes}.
+ */
 public class Rule extends Sentence {
+	/** Label from {@code rule[}label{@code ]:} syntax or "". Currently unrelated to attributes */
 	private String label;
 
 	public Rule(Element element) {

@@ -13,9 +13,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+/** A module or interface. */
 public class Module extends DefinitionItem {
 	private String name;
 	private List<ModuleItem> items;
+	/** "module" or "interface" */
 	private String type;
 
 	public Module(Element element) {

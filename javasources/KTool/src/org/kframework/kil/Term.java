@@ -4,6 +4,10 @@ import org.kframework.kil.loader.Constants;
 import org.w3c.dom.Element;
 
 
+/**
+ * Base of all nodes that represent terms in the semantics.
+ * Each term is labeled with a sort.
+ */
 public abstract class Term extends ASTNode {
 	protected String sort;
 

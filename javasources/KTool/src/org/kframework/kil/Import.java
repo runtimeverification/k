@@ -6,6 +6,7 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/** An import directive */
 public class Import extends ModuleItem {
 
 	String name;

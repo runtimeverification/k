@@ -4,6 +4,7 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/** A frozen term. Contains a {@link FreezerHole}. */
 public class Freezer extends Term {
 
 	private Term term;

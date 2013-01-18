@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 import java.util.List;
 
 
+/** Set contents have sort Set or SetItem */
 public class Set extends Collection {
 
 	public Set(Element element) {

@@ -5,7 +5,11 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/** The hole in a {@link Freezer}.
+ * See {@link Hole} for the syntax of contexts.
+ */
 public class FreezerHole extends Term {
+	/** Currently always zero, until nested freezers are implemented */
 	private int index;
 	
 	public FreezerHole(int index) {

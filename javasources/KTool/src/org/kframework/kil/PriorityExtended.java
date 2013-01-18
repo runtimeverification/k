@@ -11,7 +11,11 @@ import org.w3c.dom.Element;
 import java.util.ArrayList;
 import java.util.List;
 
+/** A priority declaration, {@code syntax priorities} <em>labels</em> {@code >} ... {@code >} <em>labels</em>.
+ * @see PriorityBlockExtended
+ */
 public class PriorityExtended extends ModuleItem {
+	/** Highest priority block comes first */
 	java.util.List<PriorityBlockExtended> priorityBlocks;
 
 	public PriorityExtended(Sort sort, java.util.List<PriorityBlockExtended> priorities) {

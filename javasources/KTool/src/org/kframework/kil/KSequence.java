@@ -7,6 +7,7 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/** Represents the contents (all of sort KItem) joined by ~>. */
 public class KSequence extends Collection {
 	public KSequence(Element element) {
 		super(element);

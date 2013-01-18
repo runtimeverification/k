@@ -6,6 +6,9 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+/** A production item for a cons-list with separator, like List{UserSort,";"}.
+ *  Must be the only item in a {@link Production}.
+ */
 public class UserList extends ProductionItem {
 	protected String sort;
 	protected String separator;

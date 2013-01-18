@@ -58,6 +58,10 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/**
+ * Default implementations of methods visit non-attribute children,
+ * and then call the transform method for the parent class on the current node.
+ */
 public class BasicTransformer implements Transformer {
 
 	private String name;

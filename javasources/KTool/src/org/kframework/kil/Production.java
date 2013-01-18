@@ -15,6 +15,9 @@ import org.w3c.dom.Element;
 import java.util.ArrayList;
 import java.util.List;
 
+/** A production.
+ * Any explicit attributes on the production are stored in {@link ASTNode#attributes}.
+ */
 public class Production extends ASTNode {
 
 	/*
