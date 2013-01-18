@@ -3,7 +3,6 @@ package org.kframework.compile;
 import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -75,15 +74,15 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
 					rmod.getItems().add(i);
 				}
 			}
-			if (null == cfg) {
-				cfg = new Configuration();
-				Cell k = new Cell();
-				k.setLabel("k");
-				k.setEllipses(Ellipses.NONE);
-				k.setSort("K");
-				k.setContents(new Variable("$PGM","K"));
-				cfg.setBody(k);
-			}
+//			if (null == cfg) {
+//				cfg = new Configuration();
+//				Cell k = new Cell();
+//				k.setLabel("k");
+//				k.setEllipses(Ellipses.NONE);
+//				k.setSort("K");
+//				k.setContents(new Variable("$PGM","K"));
+//				cfg.setBody(k);
+//			}
 //			if (nextId) {
 //				Bag bag;
 //				if (cfg.getBody() instanceof Bag) {

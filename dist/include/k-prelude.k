@@ -222,8 +222,14 @@ interface K-FREZERS
   syntax KLabel ::= "#freezer" K
 endinterface
 
+module DEFAULT-CONFIGURATION
+  imports K-TECHNIQUE
+  configuration <k> $PGM:K </k>
+endmodule
+
 interface K
   imports K-TECHNIQUE
+  imports DEFAULT-CONFIGURATION
   imports K-WRAPPERS
   imports K-WRAPPERS-LABELS
   imports K-BUILTINS

@@ -416,4 +416,16 @@
       extensions="issue"
   />
 
+  <test
+      language="tests/regression/issue580/issue.k"
+      folder="tests/regression/issue580/programs"
+      results="tests/regression/issue580/tests"
+      extensions="issue" >
+      <program name="tests/regression/issue580/programs/test.issue">
+        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-search" />
+        <krun-option name="--pattern" value="&lt;k&gt; 6 &lt;/k&gt;" />
+      </program>
+  </test>
+
 </tests>
