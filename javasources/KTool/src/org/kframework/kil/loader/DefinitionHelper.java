@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +15,10 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
 import org.kframework.utils.Poset;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
 public class DefinitionHelper {
 	public static boolean initialized = false;
@@ -175,6 +180,14 @@ public class DefinitionHelper {
 	}
 
 	public static void finalizeSubsorts() {
+		List<String> circuit = subsorts.checkForCycles();
+		if (circuit != null) {
+			String msg = "Circularity detected in subsorts: ";
+			for (String sort : circuit)
+				msg += sort + " < ";
+			msg += circuit.get(0);
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "Definition files", "File system."));
+		}
 		subsorts.transitiveClosure();
 		// detect if lists are subsorted (Vals Ids < Exps)
 		for (Map.Entry<String, Production> ls1 : listConses.entrySet()) {

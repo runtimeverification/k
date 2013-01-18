@@ -7,7 +7,7 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
-/** An empty collection, used for all of .Bag, .Map, .Set, .List, .List{K}, .K, and also user-defined cons lists.
+/** An empty collection, used for all of .Bag, .Map, .Set, .List, .KList, .K, and also user-defined cons lists.
  *  Distinguished by {@link #sort} */
 public class Empty extends Term {
 

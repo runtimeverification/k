@@ -1,7 +1,11 @@
 package org.kframework.utils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 public class Poset {
 
@@ -77,5 +81,60 @@ public class Poset {
 		public String toString() {
 			return small + " < " + big;
 		}
+	}
+
+	/**
+	 * Checks to see if the current set of relations has a circuit.
+	 * @return null if there aren't any circuits, or a list of relations that create a circuit.
+	 */
+	public List<String> checkForCycles() {
+		// make next node list
+		Set<String> nodes = new HashSet<String>();
+		Set<String> vizited = new HashSet<String>();
+
+		for (Tuple t : relations) {
+			nodes.add(t.big);
+			nodes.add(t.small);
+		}
+
+		// DFS to search for a cycle
+		for (String node : nodes) {
+			if (!vizited.contains(node)) {
+				Stack<String> nodesStack = new Stack<String>();
+				Stack<Iterator<String>> iteratorStack = new Stack<Iterator<String>>();
+				nodesStack.push(node);
+				vizited.add(node);
+				iteratorStack.push(nodes.iterator());
+
+				while (nodesStack.size() > 0) {
+					Iterator<String> currentIterator = iteratorStack.peek();
+					String currentNode = nodesStack.peek();
+					while (currentIterator.hasNext()) {
+						String nextNode = currentIterator.next();
+						if (relations.contains(new Tuple(nextNode, currentNode))) {
+							if (nodesStack.contains(nextNode)) {
+								List<String> circuit = new ArrayList<String>();
+								for (int i = nodesStack.indexOf(nextNode); i < nodesStack.size(); i++) {
+									circuit.add(nodesStack.elementAt(i));
+								}
+								return circuit;
+							}
+							if (!vizited.contains(nextNode)) {
+								nodesStack.push(nextNode);
+								iteratorStack.push(nodes.iterator());
+								vizited.add(nextNode);
+								break;
+							}
+						}
+					}
+					// does not have next... pop
+					if (!currentIterator.hasNext()) {
+						nodesStack.pop();
+						iteratorStack.pop();
+					}
+				}
+			}
+		}
+		return null;
 	}
 }
