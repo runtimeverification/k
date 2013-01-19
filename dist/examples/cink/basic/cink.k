@@ -441,36 +441,36 @@ module CINK
    */
 
   /*@
-    The rule defining the evaluation of a function call expression assumes
-    that the actual parameters have already been evaluated, and binds the 
+    The rule defining the evaluation of a function call expression evaluates
+    first the actual parameters, and then binds the 
     values to the formal parameters and executes the body, while saving the
-    calling context in case of an abrupt return.
+    calling context in case of an abrupt return. This is done by mimic the
+    heating-cooling mechanism (the first rule is a heating-like one, and the
+    second a cooling-like one.
    */
-  rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Vals) ~> K:K)
+
+  rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Exps))
            =>
+           evaluate Vl to .Vals following Xl; ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE)
+       ...</k> 
+
+  rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE) ~> K:K)
+           => 
            (bind Vl to Xl; ~> Sts ~> return void;)
-       </k> 
+       </k>
        <br/>
        <genv> GEnv:Map </genv>
        <env> Env:Map => GEnv </env>
        <fstack> . => ([Env], K) ...</fstack>
        [fun-call]
-//       [large]
+
 
   /*@
     To evaluate actual parameters according to their declared strategy we will
-    make use of the power of \K evaluation contexts.  First, a context 
-    declaration for the function call specifies that the arguments need to be
-    evaluated taking into consideration their declared strategy:
-  */
-
-  context '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, 
-                 (HOLE => evaluate HOLE to .Vals following Xl;))
-  /*@
-   This context says not only that the actual parameters must be evaluated when
-   passed to a function value, but also that they need to be evaluated using 
-   the $\terminalNoSpace{evaluate}$ construct and $\terminalNoSpace{following}$ 
-   the list of formal parameters.
+    make use of the power of \K evaluation contexts. 
+    The actual parameters must be evaluated using 
+    the $\terminalNoSpace{evaluate}$ construct and $\terminalNoSpace{following}$ 
+    the list of formal parameters.
   */
 
   syntax Exps ::= "evaluate" Exps "to" Vals "following" Decls ";"
