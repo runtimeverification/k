@@ -1,4 +1,17 @@
-int r; 
+/* This is a very simple example with threads.
+   This program is not meant to be executed, it is meant to be model checked.
+   The model-checker can be called either using the "krun" command:
+
+   krun programs/threads.cink  --ltlmc "<>Ltl gt(r, 1)"
+
+   If the formula is stored into a file, say form-threads.cink, then the following 
+   command can be used:
+
+   krun programs/peterson.cink --ltlmc programs/form-threads.cink 
+
+*/
+
+int r = 1; 
 int f(int x) {
   return (r = x);
 }
