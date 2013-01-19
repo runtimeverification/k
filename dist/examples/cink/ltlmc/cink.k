@@ -447,11 +447,44 @@ module CINK-LANG-SEMANTICS
    */
 
   /*@
+    The rule defining the evaluation of a function call expression evaluates
+    first the actual parameters, and then binds the 
+    values to the formal parameters and executes the body, while saving the
+    calling context in case of an abrupt return. This is done by mimic the
+    heating-cooling mechanism (the first rule is a heating-like one, and the
+    second a cooling-like one.
+   */
+
+  rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Exps))
+           =>
+           evaluate Vl to .Vals following Xl; ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE)
+       ...</k> 
+
+  rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE) ~> K:K)
+           => 
+           (bind Vl to Xl; ~> Sts ~> return void;)
+       </k>
+       <br/>
+       <genv> GEnv:Map </genv>
+       <env> Env:Map => GEnv </env>
+       <fstack> . => ([Env], K) ...</fstack>
+       [fun-call]
+
+
+  /*@
+    To evaluate actual parameters according to their declared strategy we will
+    make use of the power of \K evaluation contexts. 
+    The actual parameters must be evaluated using 
+    the $\terminalNoSpace{evaluate}$ construct and $\terminalNoSpace{following}$ 
+    the list of formal parameters.
+  */
+
+  /*@
     The rule defining the evaluation of a function call expression assumes
     that the actual parameters have already been evaluated, and binds the 
     values to the formal parameters and executes the body, while saving the
     calling context in case of an abrupt return.
-   */
+   
   rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Vals) ~> K:K)
            =>
            (bind Vl to Xl; ~> Sts ~> return void;)
@@ -468,7 +501,7 @@ module CINK-LANG-SEMANTICS
     make use of the power of \K evaluation contexts.  First, a context 
     declaration for the function call specifies that the arguments need to be
     evaluated taking into consideration their declared strategy:
-  */
+  
 
   context '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, 
                  (HOLE => evaluate HOLE following Xl;))
@@ -477,7 +510,7 @@ module CINK-LANG-SEMANTICS
    passed to a function value, but also that they need to be evaluated using 
    the $\terminalNoSpace{evaluate}$ construct and $\terminalNoSpace{following}$ 
    the list of formal parameters.
-  */
+  
 
   syntax Exps ::= "evaluate" Exps "following" Decls ";"
 
@@ -485,7 +518,7 @@ module CINK-LANG-SEMANTICS
     For a formal parameter declared with the call-by-value mechanism,
     the corresponding argument expression must be evaluated to an rvalue as
     specified by by the following contextual declaration:
-  */
+  
 
   context evaluate (HOLE, _:Exps) following (int X:Id, _:Decls);
 
@@ -498,7 +531,7 @@ module CINK-LANG-SEMANTICS
     The following two rules, together with the strict evaluation strategy for
     lists of expressions complete the semantics of $\terminalNoSpace{evaluate}$
     by recursing into the lists:
-  */
+  
 
   rule evaluate(V:Val, El:Exps) following (Dec:Decl, Xl:Decls);
         =>
@@ -506,6 +539,33 @@ module CINK-LANG-SEMANTICS
        [structural]
    
   rule evaluate .Exps following .Decls; => .Vals [structural]
+*/
+
+  syntax Exps ::= "evaluate" Exps "to" Vals "following" Decls ";"
+
+  /*@
+    For a formal parameter declared with the call-by-value mechanism,
+    the corresponding argument expression must be evaluated to an rvalue as
+    specified by by the following contextual declaration:
+  */
+
+  context evaluate (HOLE, _:Exps) to _:Vals following (int X:Id, _:Decls);
+
+
+  /*@
+    \noindent This second context uses again the special type of context used
+    above for $\terminalNoSpace{evaluate}$, by requesting that the expression
+    on position $\khole{}$ be evaluated as an lvalue.
+    \par
+    The following two rules, together with the strict evaluation strategy for
+    lists of expressions complete the semantics of $\terminalNoSpace{evaluate}$
+    by recursing into the lists:
+  */
+
+  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V,Vl) following (Dec:Decl, Xl:Decls => Xl);
+       [structural]
+   
+  rule evaluate .Exps to Vl:Vals following .Decls; => Vl [structural]
 
    /*@
      \subsubsection{Binding mechanisms}
