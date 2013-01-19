@@ -441,6 +441,8 @@ public class KRun {
 			assertXML(child2.size() == 0 && (sort.equals("#Qid") || sort.equals("#RuleName")));
 			String label = op;
 			list.add(new Transition(t, label));
+		} else if (sort.equals("#TransitionList") && op.equals("LTLnil")) {
+			assertXML(child.size() == 0);
 		} else {
 			assertXML(false);
 		}
@@ -496,12 +498,18 @@ public class KRun {
 				trans.getTerm().accept(unparser);
 				l.add(unparser.getResult());
 			}
+			if (initialPath.size() == 0) {
+				l.add("Empty path");
+			}
 			l.add("Path of cycle:");
 			for (Transition trans : loop) {
 				l.add("\nLabel: " + trans.getLabel());
 				UnparserFilter unparser = new UnparserFilter(true, K.color);
 				trans.getTerm().accept(unparser);
 				l.add(unparser.getResult());
+			}
+			if (loop.size() == 0) {
+				l.add("Empty path");
 			}
 			return l;
 		}
