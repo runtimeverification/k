@@ -104,12 +104,10 @@ public class ProgramLoader {
 				org.kframework.parser.concrete.KParser.ImportTblGround(DefinitionHelper.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
 				out = DefinitionLoader.parseCmdString(content, "");
 				out = out.accept(new FlattenSyntax());
-				out = MetaK.kWrapper((Term) out);
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {
 				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 				out = DefinitionLoader.parsePattern(content);
 				out = out.accept(new FlattenSyntax());
-				out = MetaK.kWrapper((Term) out);
 			} else {
 				out = loadPgmAst(content, filename);
 			}
