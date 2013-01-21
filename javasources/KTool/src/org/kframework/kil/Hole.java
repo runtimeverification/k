@@ -40,7 +40,7 @@ public class Hole extends Term {
 	}
 
   @Override
-  public void accept(Matcher matcher, ASTNode toMatch){
+  public void accept(Matcher matcher, Term toMatch){
     matcher.match(this, toMatch);
   }
 

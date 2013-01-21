@@ -50,10 +50,9 @@ public class BagItem extends CollectionItem {
 	}
 
   @Override
-  public void accept(Matcher matcher, ASTNode toMatch){
+  public void accept(Matcher matcher, Term toMatch){
     matcher.match(this, toMatch);
   }
-
 
 	@Override
 	public BagItem shallowCopy() {

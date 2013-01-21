@@ -1,10 +1,5 @@
 package org.kframework.kil;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
@@ -17,7 +12,6 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.UpdateAssocVisitor;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.DefinitionLoader;
@@ -26,7 +20,13 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.xml.XML;
+
 import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a language definition.
@@ -126,11 +126,6 @@ public class Definition extends ASTNode {
 	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
 	}
-
-  @Override
-  public void accept(Matcher matcher, ASTNode toMatch){
-    matcher.match(this, toMatch);
-  }
 
 	public void preprocess() {
 		// Collect information

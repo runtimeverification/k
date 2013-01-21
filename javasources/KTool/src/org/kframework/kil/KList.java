@@ -53,11 +53,10 @@ public class KList extends Collection {
 	}
 
   @Override
-  public void accept(Matcher matcher, ASTNode toMatch){
+  public void accept(Matcher matcher, Term toMatch){
     matcher.match(this, toMatch);
   }
 
-	
 	@Override
 	public KList shallowCopy() {
 		return new KList(this);

@@ -2,8 +2,6 @@ package org.kframework.kil;
 
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.matchers.Matchable;
-import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformable;
 import org.kframework.kil.visitors.Visitable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -22,7 +20,7 @@ import java.util.Map;
  * @see Visitable
  * @see Transformable
  */
-public abstract class ASTNode implements Visitable, Transformable, Matchable {
+public abstract class ASTNode implements Visitable, Transformable {
 	/**
 	 * Used on any node for metadata such as location,
 	 * also used on {@link Rule} and {@link Production} for the attribute list.

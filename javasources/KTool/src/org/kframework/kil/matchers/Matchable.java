@@ -1,6 +1,6 @@
 package org.kframework.kil.matchers;
 
-import org.kframework.kil.ASTNode;
+import org.kframework.kil.Term;
 
 public interface Matchable {
   /**
@@ -11,5 +11,5 @@ public interface Matchable {
    *  @param this - is the pattern to be matched
    *  @param toMatch is the term we are attempting to match against
    */
-  public void accept(Matcher matcher, ASTNode toMatch);
+  public void accept(Matcher matcher, Term toMatch);
 }

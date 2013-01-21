@@ -2,8 +2,8 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
@@ -73,10 +73,9 @@ public class Rewrite extends Term {
 	}
 
   @Override
-  public void accept(Matcher matcher, ASTNode toMatch){
+  public void accept(Matcher matcher, Term toMatch){
     matcher.match(this, toMatch);
   }
-
 
 	// public String getComputedSort() {
 	// if (sort.equals(MetaK.Constants.KList)) {

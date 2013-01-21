@@ -1,155 +1,134 @@
 package org.kframework.kil.matchers;
 
-import org.kframework.kil.*;
+import org.kframework.kil.Ambiguity;
+import org.kframework.kil.BackendTerm;
+import org.kframework.kil.Bag;
+import org.kframework.kil.BagItem;
+import org.kframework.kil.Bracket;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Empty;
+import org.kframework.kil.Freezer;
+import org.kframework.kil.FreezerHole;
+import org.kframework.kil.FreezerSubstitution;
+import org.kframework.kil.FreezerVariable;
+import org.kframework.kil.Hole;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.List;
+import org.kframework.kil.ListItem;
+import org.kframework.kil.Map;
+import org.kframework.kil.MapItem;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.Set;
+import org.kframework.kil.SetItem;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermComment;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.Variable;
 
 import java.util.HashMap;
 
 public class SimpleMatcher implements Matcher {
  
-  private java.util.Map<Variable, ASTNode> substitution = new HashMap<Variable, ASTNode>(); 
+  private java.util.Map<Term, Term> substitution = new HashMap<Term, Term>(); 
 
-	public void match(ASTNode node, ASTNode node2) {
-    throw new MatcherException("ASTNode cannot be matched directly");
-  }
-
-	public void match(Definition node, ASTNode node2){
-    throw new MatcherException("Definition does not have a pattern match implementation.");
-  }
-
-	public void match(DefinitionItem node, ASTNode node2){
-    throw new MatcherException("DefinitionItem does not have a pattern match implementation.");
-  }
-
-	// <DefinitionItems>
-	public void match(LiterateDefinitionComment node, ASTNode node2){
-    throw new MatcherException("LiterateDefinitionComment does not have a pattern match implementation.");
-  }
-
-	public void match(Module node, ASTNode node2){
-    throw new MatcherException("Module does not have a pattern match implementation.");
-  }
-
-	public void match(Require require, ASTNode require2){
-    throw new MatcherException("Require does not have a pattern match implementation.");
-  }
-
-	// </DefinitionItems>
-	public void match(ModuleItem node, ASTNode node2){
-    throw new MatcherException("ModuleItem does not have a pattern match implementation.");
-  }
-
-	// <ModuleItems>
-	public void match(Import node, ASTNode node2){
-    throw new MatcherException("Import does not have a pattern match implementation.");
-  }
-
-	public void match(LiterateModuleComment node, ASTNode node2){
-    throw new MatcherException("LiterateModuleComment does not have a pattern match implementation.");
-  }
-
-	public void match(Sentence node, ASTNode node2){
-    throw new MatcherException("Sentence does not have a pattern match implementation.");
-  }
-
-	// <Sentences>
-	public void match(StringSentence node, ASTNode node2){
-    throw new MatcherException("StringSentence does not have a pattern match implementation.");
-  }
-
-	public void match(Configuration node, ASTNode node2){
-    throw new MatcherException("Configuration does not have a pattern match implementation.");
-  }
-
-	public void match(Context node, ASTNode node2){
-    throw new MatcherException("Context does not have a pattern match implementation.");
-  }
-
-	public void match(Rule node, ASTNode node2){
-    throw new MatcherException("Rule does not have a pattern match implementation.");
-  }
-
-	// </Sentences>
-	public void match(Syntax node, ASTNode node2){
-    throw new MatcherException("Syntax does not have a pattern match implementation.");
-  }
-
-	public void match(PriorityExtended node, ASTNode node2){
-    throw new MatcherException("PriorityExtended does not have a pattern match implementation.");
-  }
-
-	public void match(PriorityExtendedAssoc node, ASTNode node2){
-    throw new MatcherException("PriorityExtendedAssoc does not have a pattern match implementation.");
-  }
-
-	// <ModuleItems>
-	public void match(PriorityBlock node, ASTNode node2){
-    throw new MatcherException("PriorityBlock does not have a pattern match implementation.");
-  }
-
-	public void match(PriorityBlockExtended node, ASTNode node2){
-    throw new MatcherException("PriorityBlockExtended does not have a pattern match implementation.");
-  }
-
-	public void match(Production node, ASTNode node2){
-    throw new MatcherException("Production does not have a pattern match implementation.");
-  }
-
-	public void match(ProductionItem node, ASTNode node2){
-    throw new MatcherException("ProductionItem does not have a pattern match implementation.");
-  }
-
-	// <ProductionItems>
-	public void match(Sort node, ASTNode node2){
-    throw new MatcherException("Sort does not have a pattern match implementation.");
-  }
-
-	public void match(Terminal node, ASTNode node2){
-    throw new MatcherException("Terminal does not have a pattern match implementation.");
-  }
-
-	public void match(UserList node, ASTNode node2){
-    throw new MatcherException("UserList does not have a pattern match implementation.");
-  }
-
-	// </ProductionItems>
-	public void match(Term node, ASTNode node2){
-    throw new MatcherException("Term does not have a pattern match implementation.");
-  }
-
-	// <Terms>
-	public void match(Cell node, ASTNode node2){
-    throw new MatcherException("Cell does not have a pattern match implementation.");
-  }
-
-	public void match(Collection node, ASTNode node2){
-    throw new MatcherException("Collection does not have a pattern match implementation.");
-  }
-
-	// <Collections>
-	public void match(Ambiguity node, ASTNode node2){
+	@Override
+  public void match(Ambiguity term, Term term2){
     throw new MatcherException("Ambiguity does not have a pattern match implementation.");
   }
 
-	public void match(Bag node, ASTNode node2){
+	@Override
+  public void match(BackendTerm term, Term term2){
+    throw new MatcherException("BackendTerm does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(Bag term, Term term2){
     throw new MatcherException("Bag does not have a pattern match implementation.");
   }
 
-	public void match(KSequence node, ASTNode node2){
-    throw new MatcherException("KSequence does not have a pattern match implementation.");
+	@Override
+  public void match(BagItem term, Term term2){
+    throw new MatcherException("BagItem does not have a pattern match implementation.");
   }
 
-	public void match(List node, ASTNode node2){
-    throw new MatcherException("List does not have a pattern match implementation.");
+	@Override
+  public void match(Bracket term, Term term2){
+    throw new MatcherException("Bracket does not have a pattern match implementation.");
   }
 
-	public void match(KList node, ASTNode node2){
-    if(!(node2 instanceof KList)){
-      throw new MatcherException("Cannot match KList " + node + " to non-KList " + node2);
+	@Override
+  public void match(Cell term, Term term2){
+    throw new MatcherException("Cell does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(Constant term, Term term2){
+    if(!(term2 instanceof Constant))
+      throw new MatcherException("Attempted to match Constant " + term + " with non-Constant " + term2);
+    if(!term.equals(term2)) 
+      throw new MatcherException("Constants " + term + " and " + term2 + " do not match."); 
+  }
+
+	@Override
+  public void match(Empty term, Term term2){
+    if(!(term2 instanceof Empty)){
+      throw new MatcherException("Attempted to match Empty with " + term2 + ".");
     }
-    java.util.List<Term> tl1 = node.getContents();
-    java.util.List<Term> tl2 = ((KList) node2).getContents();
+  }
+
+	@Override
+  public void match(Freezer term, Term term2){
+    throw new MatcherException("Freezer does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(FreezerHole term, Term term2){
+    throw new MatcherException("FreezerHole does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(FreezerSubstitution subst, Term subst2){
+    throw new MatcherException("FreezerSubstitution does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(FreezerVariable var, Term var2){
+    throw new MatcherException("FreezerVariable does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(Hole term, Term term2){
+    throw new MatcherException("Hole does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(KApp term, Term term2){
+    if(!(term2 instanceof KApp)){
+      throw new MatcherException("Attemped to match KApp " + term  + " with non-KApp " + term2);
+    }
+    KApp ka2 = (KApp) term2; 
+    term.getLabel().accept(this, ka2.getLabel());
+    term.getChild().accept(this, ka2.getChild());
+  }
+
+	@Override
+  public void match(KInjectedLabel term, Term term2){
+    throw new MatcherException("KInjectedLabel does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(KList term, Term term2){
+    if(!(term2 instanceof KList)){
+      throw new MatcherException("Cannot match KList " + term + " to non-KList " + term2);
+    }
+    java.util.List<Term> tl1 = term.getContents();
+    java.util.List<Term> tl2 = ((KList) term2).getContents();
     if(tl1.size() != tl2.size()){
-      throw new MatcherException("Cannot match KLists " + node + " and " + node2 + " because they "
+      throw new MatcherException("Cannot match KLists " + term + " and " + term2 + " because they "
           + " have different sizes, is this an associative pattern? "
          +  " If so, those are currently unimplemented.");
     }
@@ -158,148 +137,93 @@ public class SimpleMatcher implements Matcher {
     }
   }
 
-	public void match(Map node, ASTNode node2){
-    throw new MatcherException("Map does not have a pattern match implementation.");
+	@Override
+  public void match(KSequence term, Term term2){
+    throw new MatcherException("KSequence does not have a pattern match implementation.");
   }
 
-	public void match(Set node, ASTNode node2){
-    throw new MatcherException("Set does not have a pattern match implementation.");
+	@Override
+  public void match(List term, Term term2){
+    throw new MatcherException("List does not have a pattern match implementation.");
   }
 
-	// </Collections>
-	public void match(CollectionItem node, ASTNode node2){
-    throw new MatcherException("CollectionItem does not have a pattern match implementation.");
-  }
-
-	// <CollectionItems>
-	public void match(BagItem node, ASTNode node2){
-    throw new MatcherException("BagItem does not have a pattern match implementation.");
-  }
-
-	public void match(ListItem node, ASTNode node2){
+	@Override
+  public void match(ListItem term, Term term2){
     throw new MatcherException("ListItem does not have a pattern match implementation.");
   }
 
-	public void match(MapItem node, ASTNode node2){
+	@Override
+  public void match(Map term, Term term2){
+    throw new MatcherException("Map does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(MapItem term, Term term2){
     throw new MatcherException("MapItem does not have a pattern match implementation.");
   }
 
-	public void match(SetItem node, ASTNode node2){
+	@Override
+  public void match(Rewrite term, Term term2){
+    throw new MatcherException("Rewrite should never appear within a term we are pattern matching.");
+  }
+
+	@Override
+  public void match(Set term, Term term2){
+    throw new MatcherException("Set does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(SetItem term, Term term2){
     throw new MatcherException("SetItem does not have a pattern match implementation.");
   }
 
-	// </CollectionItems>
-	public void match(Constant node, ASTNode node2){
-    if(!(node2 instanceof Constant))
-      throw new MatcherException("Attempted to match Constant " + node + " with non-Constant " + node2);
-    if(!node.equals(node2)) 
-      throw new MatcherException("Constants " + node + " and " + node2 + " do not match."); 
+	@Override
+  public void match(TermComment term, Term term2){
+    throw new MatcherException("TermComment does not have a pattern match implementation.");
   }
 
-	public void match(Empty node, ASTNode node2){
-    throw new MatcherException("Empty does not have a pattern match implementation.");
-  }
 
-	public void match(Hole node, ASTNode node2){
-    throw new MatcherException("Hole does not have a pattern match implementation.");
-  }
-
-	public void match(FreezerHole node, ASTNode node2){
-    throw new MatcherException("FreezerHole does not have a pattern match implementation.");
-  }
-
-	public void match(KApp node, ASTNode node2){
-    if(!(node2 instanceof KApp)){
-      throw new MatcherException("Attemped to match KApp " + node  + " with non-KApp " + node2);
-    }
-    KApp ka2 = (KApp) node2; 
-    node.getLabel().accept(this, ka2.getLabel());
-    node.getChild().accept(this, ka2.getChild());
-  }
-
-	public void match(KLabel node, ASTNode node2){
-    throw new MatcherException("KLabel does not have a pattern match implementation.");
-  }
-
-	public void match(Rewrite node, ASTNode node2){
-    throw new MatcherException("Rewrite does not have a pattern match implementation.");
-  }
-
-	public void match(TermCons node, ASTNode node2){
+	@Override
+  public void match(TermCons term, Term term2){
     throw new MatcherException("TermCons does not have a pattern match implementation.");
   }
 
-	public void match(Bracket node, ASTNode node2){
-    throw new MatcherException("Bracket does not have a pattern match implementation.");
-  }
 
-	public void match(Variable node, ASTNode node2){
-    ASTNode bound = substitution.get(node);
+	@Override
+  public void match(Variable term, Term term2){
+    Term bound = substitution.get(term);
 
     if(bound == null){
-      //this Term versus ASTNode is rather broken
-      if(!(node2 instanceof Term)){
-        substitution.put(node, node2);
+      //this Term versus Term is rather broken
+      if(!(term2 instanceof Term)){
+        substitution.put(term, term2);
         return;
       }
       Term t;
-      t = (Term) node2;
-      if(node.getSort().equals(t.getSort())){
-        substitution.put(node, node2);
+      t = (Term) term2;
+      if(term.getSort().equals(t.getSort())){
+        substitution.put(term, term2);
       } else {
-        throw new MatcherException("Sort " + node.getSort() + " of Variable " + node + " does not match "
-          + " sort " + t.getSort() + " of ASTNode " + node2); 
+        throw new MatcherException("Sort " + term.getSort() + " of Variable " + term + " does not match "
+          + " sort " + t.getSort() + " of Term " + term2); 
       }
     }
 
     else {
-      if(!bound.equals(node2))
-        throw new MatcherException("Non-linear pattern binds different terms, " + bound + " and " + node2 
-            + ", to same Variable, " + node);
+      if(!bound.equals(term2))
+        throw new MatcherException("Non-linear pattern binds different terms, " + bound + " and " + term2 
+            + ", to same Variable, " + term);
     }
  
   }
 
-	// </Terms>
-	public void match(Attributes attributes, ASTNode attributes2){
-    throw new MatcherException("Attributes does not have a pattern match implementation.");
-  }
-
-	public void match(Attribute attribute, ASTNode attribute2){
-    throw new MatcherException("Attribute does not have a pattern match implementation.");
-  }
-
-	public void match(TermComment node, ASTNode node2){
-    throw new MatcherException("TermComment does not have a pattern match implementation.");
-  }
-
-	// Others
-	public void match(KInjectedLabel kInjectedLabel, ASTNode kInjectedLabel2){
-    throw new MatcherException("KInjectedLabel does not have a pattern match implementation.");
-  }
-
-	public void match(Freezer f, ASTNode f2){
-    throw new MatcherException("Freezer does not have a pattern match implementation.");
-  }
-
-	public void match(FreezerVariable var, ASTNode var2){
-    throw new MatcherException("FreezerVariable does not have a pattern match implementation.");
-  }
-
-	public void match(FreezerSubstitution subst, ASTNode subst2){
-    throw new MatcherException("FreezerSubstitution does not have a pattern match implementation.");
-  }
-
-	public void match(BackendTerm term, ASTNode term2){
-    throw new MatcherException("BackendTerm does not have a pattern match implementation.");
-  }
-
-
-	public String getName() { 
+	@Override
+  public String getName() { 
     return "SimpleMatcher"; 
   }
 
-  public java.util.Map<Variable, ASTNode> getSubstitution() { 
+  @Override
+  public java.util.Map<Term, Term> getSubstitution() { 
     return substitution; 
   }
   
