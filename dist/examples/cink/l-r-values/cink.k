@@ -216,7 +216,8 @@ module CINK
     We also use two auxiliary semantics constructs that help to specify
     the places where an l-value (resp. r-value) is expected. 
   */
-  syntax Exp ::=  "lvalue" "(" Exp ")" | "rvalue" "(" Exp ")" [strict]
+  syntax Exp ::=  "lvalue" "(" Exp ")"
+               |  "rvalue" "(" Exp ")"
 
   /*@
     We also use some  other special symbols:
@@ -450,29 +451,41 @@ module CINK
        <store>... L |-> (V:Int => V +Int 1) ...</store>
 
   /*@
-    The \texttt{lvalue()} operator: if the argument is not already an l-value,
-    then it is firstly evaluated. The result of the argument evaluation is an
-    \texttt{Int} or an l-value (when the argument was evaluated as an l-value).
+    The \texttt{lvalue()} operator: if the argument is not a basic l-value
+    expression (i.e., it cannot be directly computed as an l-value expression),
+    then it is firstly evaluated.
    */
+
+
   context lvalue(HOLE) 
-          when isLValue(HOLE) =/=K true  
-
-  rule lvalue(L:Int) => loc(L) [structural]
-
-  rule lvalue(loc(L:Int)) => loc(L) [structural]
-
+          when isBasicLValueExp(HOLE) =/=K true  
 
   /*@
-    The \texttt{rvalue()} operator:\\
-    -- the case we have got an l-value where an r-value is expected: 
+   If the result of the argument evaluation is an \texttt{Int}, then  it is 
+   converted to an l-value.
+  */
+ 
+  rule lvalue(L:Int => loc(L)) [structural]
+
+  /*@
+    The \texttt{rvalue()} operator:\\ if the argument is not an LVal,
+    then it is firstly evaluated.
+   */
+
+  context rvalue(HOLE) 
+          when isLVal(HOLE) =/=K true  
+
+  /*@
+   
+    -- the case we have got an LVal where an r-value is expected: 
   */ 
-  rule <k> rvalue(loc(L:Int)) => V ...</k>
+  rule <k> rvalue(loc(L:Int) => V) ...</k>
        <store>... L |-> V:Val ...</store>
 
   /*@
     -- the case when we got an expected r-value:
   */
-  rule rvalue(V:Val) => V when isLVal(V) =/=K true
+//  rule rvalue(V:Val) => V when isLVal(V) =/=K true
 
 
   /*@ \subsection{Memmory operations.} */
@@ -482,14 +495,14 @@ module CINK
     -- the location is directly disignated by the variable name
   */
 
-  rule <k> lvalue(X:Id) => loc(L) ...</k>
+  rule <k> lvalue(X:Id => loc(L)) ...</k>
        <env>... X |-> L:Int ...</env>
        [mem-lookup-lvalue]
 
   /*@
-    -- the location is indirectly disignated by the variable name
+    -- the location is indirectly designated by the variable name
   */
-  rule <k> lvalue(* X:Id) => loc(V) ...</k>
+  rule <k> lvalue(* X:Id => loc(V)) ...</k>
        <env>... X |-> L:Int ...</env>
        <store>... L |-> V:Val ...</store>
        [mem-lookup-lvalue-indirect]
@@ -508,10 +521,11 @@ module CINK
    */
   context (HOLE => lvalue(HOLE)) = _
   context _=(HOLE => rvalue(HOLE))
+/*
   rule <k> loc(L:Int) = V:Val => V  ...</k>
        <store>... L |-> (_ => V) ...</store>
        [mem-update]
-
+*/
   /* \subsection{Control Statements.} */
 
   /*@
@@ -579,8 +593,10 @@ module CINK
 
   /*@ \subsection{Input/Output Statements.} */
 
+  syntax Printable ::= Int | String
+
   /*@ Writting in the the standard stream \texttt{cout}: */
-  rule <k> cout << V:Val => cout  ...</k>  
+  rule <k> cout << V:Printable => cout  ...</k>  
        <out>... . => (ListItem(V) ListItem(" ")) </out>
        [print-stream]
 
@@ -591,7 +607,6 @@ module CINK
   context HOLE >> _
   context _ >> (HOLE => lvalue(HOLE))
   rule <k> cin >> loc(L) => cin  ...</k>
-//       <env>...  X |-> L:Int  ...</env>
        <store>... L |-> (_ => I)  ...</store>
        <in> (ListItem(I:Int) => .)  ...</in>
        [read-stream]
@@ -611,36 +626,37 @@ module CINK
    */
 
   /*@
-    The rule defining the evaluation of a function call expression assumes
-    that the actual parameters have already been evaluated, and binds the 
+    The rule defining the evaluation of a function call expression evaluates
+    first the actual parameters, and then binds the 
     values to the formal parameters and executes the body, while saving the
-    calling context in case of an abrupt return.
+    calling context in case of an abrupt return. This is done by mimic the
+    heating-cooling mechanism (the first rule is a heating-like one, and the
+    second a cooling-like one.
    */
-  rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Vals) ~> K:K)
+
+  rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Exps))
            =>
+           evaluate Vl to .Vals following Xl; ~>
+           '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE)
+       ...</k> 
+
+  rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE) ~> K:K)
+           => 
            (bind Vl to Xl; ~> Sts ~> return void;)
-       </k> 
-//       <br/>
+       </k>
+       <br/>
        <genv> GEnv:Map </genv>
        <env> Env:Map => GEnv </env>
-       <bstack> Stack:List </bstack>
-       <fstack> . => ([Env] Stack, K) ...</fstack>
+       <fstack> . => ([Env], K) ...</fstack>
        [fun-call]
+
 
   /*@
     To evaluate actual parameters according to their declared strategy we will
-    make use of the power of \K evaluation contexts.  First, a context 
-    declaration for the function call specifies that the arguments need to be
-    evaluated taking into consideration their declared strategy:
-  */
-
-  context '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, 
-                 (HOLE => evaluate HOLE to .Vals following Xl;))
-  /*@
-   This context says not only that the actual parameters must be evaluated when
-   passed to a function value, but also that they need to be evaluated using 
-   the $\terminalNoSpace{evaluate}$ construct and $\terminalNoSpace{following}$ 
-   the list of formal parameters.
+    make use of the power of \K evaluation contexts. 
+    The actual parameters must be evaluated using 
+    the $\terminalNoSpace{evaluate}$ construct and $\terminalNoSpace{following}$ 
+    the list of formal parameters.
   */
 
   syntax Exps ::= "evaluate" Exps "to" Vals "following" Decls ";"
@@ -651,27 +667,46 @@ module CINK
     specified by by the following contextual declaration:
   */
 
-  context evaluate (HOLE, _:Exps) to _:Vals following (int X:Id, _:Decls);
+  context evaluate ((HOLE => rvalue(HOLE)), _:Exps) to _:Vals following (int X:Id, _:Decls);
 
   /*@ 
     For a formal parameter declared with call-by-reference mechanism,
     the corresponding argument expression must be evaluated to an lvalue:
   */
 
-  context evaluate((HOLE => lvalue(HOLE)), _:Exps) to _:Vals
-          following  (int & X:Id, _:Decls);
+//  context evaluate((HOLE => lvalue(HOLE)), _:Exps) to _:Vals
+//          following  (int & X:Id, _:Decls);
+
+  rule evaluate(E:Exp, Es:Exps) to Vs:Vals following  (int & X:Id, Decls:Decls);
+       =>
+       lvalue(E) ~> evaluate(HOLE, Es) to Vs following  (int & X:Id, Decls);
+       when isLVal(E) =/=K true [heating]
+
+  rule lvalue(V:LVal) ~> evaluate(HOLE, Es:Exps) to Vs:Vals following  (int & X:Id, Decls:Decls);
+       =>
+       evaluate(V, Es) to Vs following  (int & X:Id, Decls); [cooling]
 
   /*@
     \noindent This second context uses again the special type of context used
     above for $\terminalNoSpace{evaluate}$, by requesting that the expression
     on position $\khole{}$ be evaluated as an lvalue.
     \par
-    The following two rules, together with the strict evaluation strategy for
+    The following rules, together with the strict evaluation strategy for
     lists of expressions complete the semantics of $\terminalNoSpace{evaluate}$
     by recursing into the lists:
   */
 
-  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V, Vl) following (Dec:Decl, Xl:Decls => Xl);
+//  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V, Vl) following (int & X:Id, Xl:Decls => Xl);
+//  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V, Vl) following (int X:Id, Xl:Decls => Xl);
+  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => append(Vl, V))
+       following (Dec:Decl, Xl:Decls => Xl);
+       [structural]
+
+  syntax Vals ::= "append" "(" Vals "," Val ")" [function]
+  rule append(.Vals, V:Val) => V, .Vals
+  rule append((V':Val, Vl:Vals), V:Val) => V', append(Vl, V)
+   
+
   rule evaluate .Exps to Vl:Vals following .Decls; => Vl
 
    /*@
@@ -804,15 +839,15 @@ module CINK
    In some places we needed to test whether an expression is an l-value.
    Here is a minimal definition for such an operator:
   */
-  syntax Bool ::= "isLValue" "(" Exp ")" [function]
+  syntax Bool ::= "isBasicLValueExp" "(" Exp ")" [function]
 
-  rule isLValue(lvalue(E:Exp)) => true
+//  rule isBasicLValueExp(lvalue(E:Exp)) => true
 
-  rule isLValue(loc(L:Int)) => true
+  rule isBasicLValueExp(loc(L:Int)) => true
 
-  rule isLValue(X:Id) => true
+  rule isBasicLValueExp(X:Id) => true
 
-  rule isLValue(* X:Id) => true
+  rule isBasicLValueExp(* X:Id) => true
 
   /*@
     The next operator returns the variable name from an expression occurring

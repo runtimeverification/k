@@ -7,8 +7,10 @@
 using namespace std;
 
 int main(){
-  int z = 0, x = 0;
-  z = ++(++x);
+//  int z = 0, x = 0;
+int z, x;
+cin >> x;
+  z = (++x);
   cout << z << x << endl;
   return 0;
 }
