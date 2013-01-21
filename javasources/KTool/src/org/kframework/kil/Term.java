@@ -1,6 +1,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
+
 import org.w3c.dom.Element;
 
 
@@ -41,4 +42,5 @@ public abstract class Term extends ASTNode {
 	
 	@Override
 	public abstract Term shallowCopy();
+
 }

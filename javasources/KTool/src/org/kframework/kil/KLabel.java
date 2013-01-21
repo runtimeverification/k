@@ -2,7 +2,7 @@ package org.kframework.kil;
 
 import org.w3c.dom.Element;
 
-/** Unused */
+/** This class is unused */
 public abstract class KLabel extends Term {
 
 	public KLabel(Element element) {

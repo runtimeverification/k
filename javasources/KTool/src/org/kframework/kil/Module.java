@@ -3,6 +3,7 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
+import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
@@ -133,6 +134,12 @@ public class Module extends DefinitionItem {
 	public ASTNode accept(Transformer visitor) throws TransformerException {
 		return visitor.transform(this);
 	}
+
+  @Override
+  public void accept(Matcher matcher, ASTNode toMatch){
+    matcher.match(this, toMatch);
+  }
+
 
 	public Module addModuleItems(List<ModuleItem> rules) {
 		Module result = new Module(this);
