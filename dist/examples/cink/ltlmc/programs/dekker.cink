@@ -10,6 +10,10 @@
    command can be used:
 
    krun programs/dekker.cink --ltlmc programs/form-dekker.cink 
+
+   Recall that the definition must be parsed with the command
+
+   kompile cink --transition="kripke"
 */
 
 int flag1 = 0;

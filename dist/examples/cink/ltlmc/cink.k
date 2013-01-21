@@ -144,10 +144,6 @@ module CINK-LANG-SYNTAX
                >
                  "if" "(" Exp ")" Stmt
                | "std::thread" Id "(" Exps ")" ";"
-  /*@
-    A program is a sequence of statements:
-  */
-  syntax Pgm ::= Stmts 
 
   /* \subsection{Lists} */
 
@@ -224,7 +220,7 @@ module CINK-LANG-SEMANTICS
                   <threads color="pink">
                     <thread multiplicity="*" color="purple"> 
                       <name color="yellow"> noname </name>
-                      <k color="green"> ($PGM:K ~> execute) </k>
+                      <k color="green"> ($PGM:Pgm ~> execute) </k>
                       <env color="LightSkyBlue"> .Map </env>
                       <fstack color="orange"> .List </fstack>
                     </thread>
@@ -417,8 +413,10 @@ module CINK-LANG-SEMANTICS
 
   /*@ \subsection{Input/Output Statements.} */
 
+  syntax Printable ::= Int | String
+
   /*@ Writting in the the standard stream \texttt{cout}: */
-  rule <k> cout << V:Val => cout  ...</k>  
+  rule <k> cout << V:Printable => cout  ...</k>  
        <out>... . => (ListItem(V) ListItem(" ")) </out>
        [print-stream]
 
@@ -455,9 +453,9 @@ module CINK-LANG-SEMANTICS
     second a cooling-like one.
    */
 
-  rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Exps))
+  rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Es:Exps))
            =>
-           evaluate Vl to .Vals following Xl; ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE)
+           evaluate Es to .Vals following Xl; ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE)
        ...</k> 
 
   rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE) ~> K:K)
@@ -642,6 +640,13 @@ module CINK-SYNTAX
   imports CINK-LANG-SYNTAX
   imports LTL-HOOKS
   imports MODEL-CHECKER-HOOKS
+
+  /*@
+    A input program is a sequence of statements or a LTL Formula 
+    (this is needed for parsing purposes)
+  */
+  syntax Pgm ::= Stmts | LTLFormula
+
 
   /*@
     This module combines the syntax of the \Cink language with that of 

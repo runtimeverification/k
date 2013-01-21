@@ -12,6 +12,10 @@
    krun programs/peterson-wrong1.cink --ltlmc programs/form-peterson.cink 
 
    In both cases the model-checker should return a counter-example.
+
+   Recall that the definition must be parsed with the command
+
+   kompile cink --transition="kripke"
 */
 
 int turn = 1;
