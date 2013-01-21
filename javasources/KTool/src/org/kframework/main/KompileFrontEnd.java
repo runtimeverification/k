@@ -1,5 +1,7 @@
 package org.kframework.main;
 
+import com.thoughtworks.xstream.XStream;
+
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
 import org.kframework.backend.doc.DocumentationBackend;
@@ -269,6 +271,13 @@ public class KompileFrontEnd {
 			} catch (CompilerStepDone e) {
 				javaDef = (Definition) e.getResult();
 			}
+			XStream xstream = new XStream();
+			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+
+			String xml = xstream.toXML(javaDef);
+
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx-kompiled.xml", xml);
+
 			backend.run(javaDef);
 		} catch (IOException e) {
 			e.printStackTrace();

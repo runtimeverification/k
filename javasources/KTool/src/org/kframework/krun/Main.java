@@ -1,5 +1,6 @@
 package org.kframework.krun;
 
+import com.thoughtworks.xstream.XStream;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
@@ -27,16 +28,19 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.maude.MaudeFilter;
+import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Term;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.DefinitionLoader;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -144,10 +148,39 @@ public class Main {
 
 		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "");
 		term = term.accept(new FlattenSyntax());
-		term = MetaK.kWrapper((Term) term);
 		MaudeFilter maudeFilter = new MaudeFilter();
 		term.accept(maudeFilter);
 		return maudeFilter.getResult();
+	}
+
+	public static Term plug(Map<String, String> args) throws TransformerException {
+		Configuration cfg = MetaK.getConfiguration(K.kompiled_def);
+		ASTNode cfgCleanedNode = null;
+		try {
+			cfgCleanedNode = new ConfigurationCleaner().transform(cfg);
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Term cfgCleaned;
+		if (cfgCleanedNode == null) {
+			cfgCleaned = new Empty(MetaK.Constants.Bag);
+		} else {
+			if (!(cfgCleanedNode instanceof Configuration)) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+						KExceptionGroup.INTERNAL,
+						"Configuration Cleaner failed.",
+						cfg.getFilename(), cfg.getLocation()));
+			}
+			cfgCleaned = ((Configuration)cfgCleanedNode).getBody();
+		}
+
+		Map<String, Term> termArgs = new HashMap<String, Term>();
+		for (String key : args.keySet()) {
+			termArgs.put(key, new BackendTerm("", args.get(key)));
+		}
+		
+		return (Term) cfgCleaned.accept(new SubstitutionFilter(termArgs));
 	}
 
 	public static Map<String, String> makeConfiguration(String kast, String stdin, RunProcess rp) {
@@ -170,18 +203,21 @@ public class Main {
 			} else {
 				parsed = rp.runParser(parser, value, false);
 			}
-			output.put(name, parsed);
-			hasPGM = hasPGM || name.equals("PGM");
+			output.put("$" + name, parsed);
+			hasPGM = hasPGM || name.equals("$PGM");
 		}
 		if (!hasPGM && kast != null) {
-			output.put("PGM", kast);
+			output.put("$PGM", kast);
 		}
 		if (!K.io && stdin == null) {
 			stdin = "";
 		}
 		if (stdin != null) {
-			output.put("noIO", "List2KLabel_(#noIO)(.KList)");
-			output.put("stdin", "# \"" + stdin + "\\n\"(.KList)");
+			output.put("$noIO", "#noIO");
+			output.put("$stdin", "# \"" + stdin + "\\n\"(.KList)");
+		} else {
+			output.put("$noIO", "(.).List");
+			output.put("$stdin", "(.).K");
 		}
 		return output;
 	}
@@ -193,7 +229,8 @@ public class Main {
 			StringBuilder aux1 = new StringBuilder();
 			CommandLine cmd = cmd_options.getCommandLine();
 
-			KRun result = null;
+			KRun krun = new MaudeKRun();
+			KRunResult result = null;
 			try {
 				if (K.do_search) {
 					if ("search".equals(K.maude_cmd)) {
@@ -234,20 +271,10 @@ public class Main {
 						pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
 
 						Rule patternRule = (Rule) pattern;
-						MaudeFilter patternBody = new MaudeFilter();
-						String patternCondition = null;
-						patternRule.getBody().accept(patternBody);
-						if (patternRule.getCondition() != null) {
-							MaudeFilter condition = new MaudeFilter();
-							patternRule.getCondition().accept(condition);
-							patternCondition = condition.getResult();
-						}
-						result = KRun.search(bound, depth, K.searchType, patternBody.getResult(), patternCondition, makeConfiguration(KAST, buffer, rp), K.showSearchGraph, varNames);
+						result = krun.search(bound, depth, K.searchType, patternRule, plug(makeConfiguration(KAST, buffer, rp)), varNames);
 					} else {
 						Error.report("For the search option you need to specify that --maude-cmd=search");
 					}
-				} else if (cmd.hasOption("maude-cmd")) {
-					result = KRun.run(K.maude_cmd, makeConfiguration(KAST, null, rp));
 				} else if (K.model_checking.length() > 0) {
 					// run kast for the formula to be verified
 					File formulaFile = new File(K.model_checking);
@@ -261,9 +288,9 @@ public class Main {
 						KAST1 = rp.runParser(K.parser, K.model_checking, true);
 					}
 
-					result = KRun.modelCheck(KAST1, makeConfiguration(KAST, null, rp));
+					result = krun.modelCheck(new BackendTerm("K", KAST1), plug(makeConfiguration(KAST, null, rp)));
 				} else {
-					result = KRun.run("erew", makeConfiguration(KAST, null, rp));
+					result = krun.run(plug(makeConfiguration(KAST, null, rp)));
 				}
 			} catch (KRunExecutionException e) {
 				rp.printError(e.getMessage(), lang);
@@ -284,7 +311,7 @@ public class Main {
 				// print search graph
 				if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
 					System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
-					AnsiConsole.out.println(result.printSearchGraph());
+					AnsiConsole.out.println(result.searchGraph());
 					// offer the user the possibility to turn execution into debug mode
 					while (true) {
 						System.out.print(K.lineSeparator + "Do you want to enter in debug mode? (y/n):");
@@ -356,8 +383,10 @@ public class Main {
 			PrettyPrintOutput p = null;
 			List<String> red = null;
 			if (!isSwitch) {
-				maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] #eval(__("
-						+ KRun.flatten(makeConfiguration(kast, null, rp)) + ",(.).Map)) .";
+				Term t = plug(makeConfiguration(kast, null, rp));
+				MaudeFilter mf = new MaudeFilter();
+				t.accept(mf);
+				maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] " + mf.getResult() + " .";
 				// first execute one step then prompt from the user an input
 				System.out.println("After running one step of execution the result is:");
 				rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
@@ -547,7 +576,7 @@ public class Main {
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -804,6 +833,9 @@ public class Main {
 
 				org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 				org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
+
+				org.kframework.kil.Definition javaDefKompiled = (org.kframework.kil.Definition) xstream.fromXML(new File(K.compiled_def + "/defx-kompiled.xml"));
+				K.kompiled_def = javaDefKompiled;
 			}
 
 			if (!cmd.hasOption("main-module")) {

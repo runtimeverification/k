@@ -101,43 +101,6 @@ public class AddEval extends BasicCompilerStep<Definition> {
 		map.getContents().add(new Variable("Rest", "Map"));
 		return map;
 	}	
-	
-	
-	class ConfigurationCleaner extends CopyOnWriteTransformer {
-		
-		public ConfigurationCleaner() {
-			super("Configuration Cleaner");
-			// TODO Auto-generated constructor stub
-		}
-
-		@Override
-		public ASTNode transform(Cell node) throws TransformerException {
-			if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
-				if (MetaK.getVariables(node).isEmpty()) {
-					return null;
-				}
-			}
-
-			ASTNode result = super.transform(node);
-			if (result == null) return null;
-
-			if (result == node) {
-				node = node.shallowCopy();
-			} else {
-				if (!(result instanceof Cell)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-							KExceptionGroup.INTERNAL,
-							"Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.",
-							getName(), node.getFilename(), node.getLocation()));
-				} else	node = (Cell) result;
-			}
-			node.setDefaultAttributes();
-			node.setEllipses(Ellipses.NONE);
-			return node;
-		}
-
-	}
-
 
 	@Override
 	public String getName() {

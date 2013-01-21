@@ -91,4 +91,5 @@ public class K {
 	public static Properties cfg_parsers = new Properties();	
 
 	public static Definition definition;
+	public static Definition kompiled_def;
 }

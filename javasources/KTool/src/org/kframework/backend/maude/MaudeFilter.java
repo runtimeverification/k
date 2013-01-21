@@ -643,6 +643,11 @@ public class MaudeFilter extends BackendFilter {
 		// do nothing
 	}
 
+	@Override
+	public void visit(BackendTerm term) {
+		result.append(term.getValue());
+	}
+
 	private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();
 	static {
 		maudeCollectionConstructors.put(KSort.Bag, "__");
