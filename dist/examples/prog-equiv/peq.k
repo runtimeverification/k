@@ -15,10 +15,10 @@ require "builtins/symbolic-k.k"
 module MAP-SYMBOLIC
 //  imports FOL
 
-  syntax Bool ::= K "isNotModifiedBy" K [function]
+  syntax Bool ::= K "isNotModifiedBy" K //[function]
 
-  rule X:Int isNotModifiedBy S:K => true  [anywhere]
-  rule X:Bool isNotModifiedBy S:K => true [anywhere]
+  rule X:Int isNotModifiedBy S:K => true when isSymbolicInt(X) [anywhere]
+  rule X:Bool isNotModifiedBy S:K => true when isSymbolicBool(X)  [anywhere]
   rule X:K isNotModifiedBy S:K => true when isSymbolicAExp(X) [anywhere]
 
   syntax Map ::= "followup" "(" K "," Map "," Bool ")"
@@ -386,8 +386,10 @@ module PEQ
 
 
   rule [symbolic-stmt] : 
+<config>...
        <k> #symStmt(SS:K) => .  ...</k>
        <env> M:Map => followup(#symStmt(SS), M, F) </env>
+...</config>
        <condition> F:Bool </condition>
 //       when isSymbolicStmt(SS)
 //       [transition] 
@@ -437,14 +439,18 @@ module PEQ
 */
 
   rule [symb-boolean] :
+<config>...
        <k>
-          B:K
+          B:Bool
           =>
-          checkSat(filter(F andBool B)) ~> checkSat(filter(F andBool notBool B)) ~> B
+          checkSat(filter(F andBool B)) ~> 
+          checkSat(filter(F andBool notBool B)) ~> 
+          B
        ...</k>
        <env> Rho:Map </env>
-       <condition> F:K </condition>
-       when isSymbolicBool(B) andBool notBool(B in keys(Rho))
+...</config>
+       <condition> F:Bool </condition>
+       when isSymbolicBool(B)  andBool notBool(B in keys(Rho))
 //       [transition]
 
   rule [derive-with-case-analysis]:
@@ -1202,6 +1208,46 @@ module PEQ
              <observers> Obs </observers>, F) =/=K true)
        [transition]
 
+
+  rule [store-hypo-fail]:
+       <goal>
+         <config> 
+           <k> lbldStmt(L1:Id, K1:K) => . ...</k>
+           <env> Env1:Map </env>
+         </config> 
+         <config> 
+           <k> lbldStmt(L2:Id, K2:K) ...</k>
+           <env> Env2:Map </env>
+         </config>
+         <condition> F:K </condition>
+       </goal>
+       <observers> Obs:List </observers>
+       when
+       (L1 =/=K L2) orBool
+       (eqObs(<env> Env1 </env> 
+             <env> Env2 </env> 
+             <observers> Obs </observers>, F) =/=K true)
+       [transition]
+
+  rule [store-hypo-fail]:
+       <goal>
+         <config> 
+           <k> lbldStmt(L1:Id, K1:K) ...</k>
+           <env> Env1:Map </env>
+         </config> 
+         <config> 
+           <k> lbldStmt(L2:Id, K2:K) => . ...</k>
+           <env> Env2:Map </env>
+         </config>
+         <condition> F:K </condition>
+       </goal>
+       <observers> Obs:List </observers>
+       when
+       (L1 =/=K L2) orBool
+       (eqObs(<env> Env1 </env> 
+             <env> Env2 </env> 
+             <observers> Obs </observers>, F) =/=K true)
+       [transition]
 
 
 /*@

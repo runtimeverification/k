@@ -15,7 +15,8 @@
 </env>
 ~
 <k>
- L:   i := #symAExp(a1);
+// L:   i := #symAExp(a1);
+  i := #symAExp(a1);
   while (i <= #symAExp(a2)) do (
       #symStmt(s);
  L:     i := i + 1
@@ -26,7 +27,6 @@
 </env>
 
 if
-
 //i isNotModifiedBy symStmt(s)
 not occurs(i, #symStmt(s))
 
