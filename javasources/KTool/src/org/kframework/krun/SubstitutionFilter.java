@@ -16,6 +16,10 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Variable var) {
-		return args.get(var.getName());
+		Term t = args.get(var.getName());
+		if (t instanceof BackendTerm) {
+			t.setSort(var.getSort());
+		}
+		return t;
 	}
 }

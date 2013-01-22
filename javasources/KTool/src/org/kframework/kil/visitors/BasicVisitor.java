@@ -342,6 +342,7 @@ public class BasicVisitor implements Visitor {
 
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
+		kInjectedLabel.getTerm().accept(this);
 		visit((Term) kInjectedLabel);
 	}
 

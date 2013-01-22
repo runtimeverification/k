@@ -177,7 +177,7 @@ public class Main {
 
 		Map<String, Term> termArgs = new HashMap<String, Term>();
 		for (String key : args.keySet()) {
-			termArgs.put(key, new BackendTerm("", args.get(key)));
+			termArgs.put(key, new BackendTerm("", args.get(key))); // the SubstitutionFilter automatically inserts the sort of BackendTerms
 		}
 		
 		return (Term) cfgCleaned.accept(new SubstitutionFilter(termArgs));
