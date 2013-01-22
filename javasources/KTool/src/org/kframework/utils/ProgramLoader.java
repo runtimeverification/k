@@ -1,14 +1,15 @@
 package org.kframework.utils;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
-import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -23,9 +24,6 @@ import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.File;
-import java.io.IOException;
-
 public class ProgramLoader {
 
 	/**
@@ -36,12 +34,12 @@ public class ProgramLoader {
 	 * @param kappize
 	 *            If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize) throws IOException {
+	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol) throws IOException {
 		File tbl = new File(DefinitionHelper.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
-		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content);
+		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
@@ -68,18 +66,18 @@ public class ProgramLoader {
 		return out;
 	}
 
-	public static ASTNode loadPgmAst(String content, String filename) throws IOException {
-		return loadPgmAst(content, filename, true);
+	public static ASTNode loadPgmAst(String content, String filename, String startSymbol) throws IOException {
+		return loadPgmAst(content, filename, true, startSymbol);
 	}
 
-	public static ASTNode loadPgmAst(File pgmFile, boolean kappize) throws IOException {
+	public static ASTNode loadPgmAst(File pgmFile, boolean kappize, String startSymbol) throws IOException {
 		String filename = pgmFile.getCanonicalFile().getAbsolutePath();
 		String content = FileUtil.getFileContent(filename);
-		return loadPgmAst(content, filename, kappize);
+		return loadPgmAst(content, filename, kappize, startSymbol);
 	}
 
-	public static String processPgm(String content, String filename, Definition def) {
-		return processPgm(content, filename, def, false, false, new IndentationOptions());
+	public static String processPgm(String content, String filename, Definition def, String startSymbol) {
+		return processPgm(content, filename, def, false, false, new IndentationOptions(), startSymbol);
 	}
 
 	/**
@@ -91,7 +89,7 @@ public class ProgramLoader {
 	 * @param prettyPrint
 	 * @param nextline
 	 */
-	public static String processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions) {
+	public static String processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions, String startSymbol) {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -109,7 +107,7 @@ public class ProgramLoader {
 				out = DefinitionLoader.parsePattern(content);
 				out = out.accept(new FlattenSyntax());
 			} else {
-				out = loadPgmAst(content, filename);
+				out = loadPgmAst(content, filename, startSymbol);
 			}
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Parsing Program");

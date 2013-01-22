@@ -4,6 +4,7 @@ import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.hkcd.HaskellDefFilter;
 import org.kframework.backend.hkcd.HaskellPgmFilter;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -106,7 +107,7 @@ public class HKCDFrontEnd {
 
 			org.kframework.kil.Definition langDef = org.kframework.utils.DefinitionLoader.loadDefinition(defFile, mainModule, true);
 
-			ASTNode pgmAst = org.kframework.utils.ProgramLoader.loadPgmAst(pgmFile, false);
+			ASTNode pgmAst = org.kframework.utils.ProgramLoader.loadPgmAst(pgmFile, false, DefinitionHelper.startSymbolPgm);
 
 			HaskellPgmFilter hpf = new HaskellPgmFilter();
 			pgmAst.accept(hpf);

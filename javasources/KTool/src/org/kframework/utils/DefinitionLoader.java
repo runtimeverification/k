@@ -130,8 +130,17 @@ public class DefinitionLoader {
 
 			String newSdfPgm = ProgramSDF.getSdfForPrograms(def);
 
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgm);
+			newSdfPgm = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("File Gen Pgm");
+
+			if (!oldSdfPgm.equals(newSdfPgm)) {
+				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
+				if (GlobalSettings.verbose)
+					Stopwatch.sw.printIntermediate("Generate TBLPgm");
+			}
 
 			def.accept(new AddAutoIncludedModulesVisitor());
 			def.accept(new CheckModulesAndFilesImportsDecl());
@@ -173,17 +182,6 @@ public class DefinitionLoader {
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Parsing Configs");
-
-			newSdfPgm += "context-free start-symbols\n";
-			newSdfPgm += "	" + StringUtil.escapeSortName(DefinitionHelper.startSymbolPgm) + "\n";
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgm);
-			newSdfPgm = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
-
-			if (!oldSdfPgm.equals(newSdfPgm)) {
-				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
-				if (GlobalSettings.verbose)
-					Stopwatch.sw.printIntermediate("Generate TBLPgm");
-			}
 
 			// ----------------------------------- parse rules
 			def = (Definition) def.accept(new ParseRulesFilter());

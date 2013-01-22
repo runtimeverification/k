@@ -161,7 +161,12 @@ public class KastFrontEnd {
 		if (cmd.hasOption("groundParser")) {
 			GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
 		}
-		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions));
+		String sort = DefinitionHelper.startSymbolPgm;
+		if (cmd.hasOption("sort")) {
+			sort = cmd.getOptionValue("sort");
+		}
+
+		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, sort));
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
 		GlobalSettings.kem.print();

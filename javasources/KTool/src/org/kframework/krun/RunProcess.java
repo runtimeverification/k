@@ -90,7 +90,7 @@ public class RunProcess {
 		if ("kast".equals(parser)) {
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
-			return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition);
+			return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition, DefinitionHelper.startSymbolPgm);
 			// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", definition, pgm });
 		} else {
 			try {
@@ -101,7 +101,7 @@ public class RunProcess {
 			String parserName = new File(parserPath).getName();
 			// System.out.println("The external parser to be used is:" + parserName);
 			if ("kast".equals(parserName)) {
-				return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition);
+				return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition, DefinitionHelper.startSymbolPgm);
 				// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
 			} else {
 				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));

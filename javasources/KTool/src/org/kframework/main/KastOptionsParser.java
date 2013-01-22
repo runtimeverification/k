@@ -49,9 +49,11 @@ public class KastOptionsParser {
 		// which parser to use
 		Option ruleParser = new Option("ruleParser", false, "use k definition parser for rules (meta variables and rewrites)");
 		Option groundParser = new Option("groundParser", false, "use k definition parser for ground terms");
+		Option startSymbol = new Option("sort", true, "the start sort for the default parser (default is the sort of $PGM from the configuration");
 		OptionGroup parserGroup = new OptionGroup();
 		parserGroup.addOption(ruleParser);
 		parserGroup.addOption(groundParser);
+		parserGroup.addOption(startSymbol);
 
 		// add options
 		options.addOptionGroup(verb);

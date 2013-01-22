@@ -54,7 +54,7 @@ rules
 	javaParseStringConfig = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b       ; (handleErrors <+ justFine)
 	javaParseStringRules  = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b       ; (handleErrors <+ justFine)
 	javaParseStringCmd    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblGround>, "RuleContentDz")> b ; (handleErrors <+ justFine)
-	javaParseStringPgm    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblPgm>)> b    ; (handleErrors <+ justFinePgms)
+	javaParseStringPgm    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblPgm>, a)> b    ; (handleErrors <+ justFinePgms)
 
 	justFine =
 		mydisambiguate ; justFine2

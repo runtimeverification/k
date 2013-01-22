@@ -38,15 +38,14 @@ public class ProgramSDF {
 		sdf.append("context-free syntax\n");
 		sdf.append(psdfv.sdf);
 
-		// sdf.append("context-free start-symbols\n");
-		// sdf.append(StringUtil.escapeSortName(DefinitionHelper.startSymbolPgm) + "\n");
-
-		// for (String s : psdfv.startSorts) {
-		// if (!s.equals("Start"))
-		// sdf.append(StringUtil.escapeSortName(s) + " ");
-		// }
-
-		// sdf.append("K\n");
+		sdf.append("context-free start-symbols\n");
+		//sdf.append(StringUtil.escapeSortName(DefinitionHelper.startSymbolPgm) + "\n");
+		for (String s : psdfv.startSorts) {
+			if (!s.equals("Start"))
+				sdf.append(StringUtil.escapeSortName(s) + " ");
+		}
+		sdf.append("K\n");
+		
 		sdf.append("context-free syntax\n");
 
 		for (Production p : psdfv.outsides) {
