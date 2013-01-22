@@ -164,17 +164,20 @@ public class SimpleMatcher implements Matcher {
 
 	@Override
   public void match(Rewrite term, Term term2){
-    throw new MatcherException("Rewrite should never appear within a term we are pattern matching.");
+    throw new MatcherException("Rewrite should never appear within a term we are pattern matching. "
+        + "Offending term: " + term);
   }
 
 	@Override
   public void match(Set term, Term term2){
-    throw new MatcherException("Set does not have a pattern match implementation.");
+    throw new MatcherException("Set does not have a pattern match implementation.  "
+        + "Offending term: " + term);
   }
 
 	@Override
   public void match(SetItem term, Term term2){
-    throw new MatcherException("SetItem does not have a pattern match implementation.");
+    throw new MatcherException("SetItem does not have a pattern match implementation.  "
+       + "Offending term: " + term);
   }
 
 	@Override
@@ -226,17 +229,26 @@ public class SimpleMatcher implements Matcher {
   public java.util.Map<Term, Term> getSubstitution() { 
     return substitution; 
   }
+
+  @Override 
+  public void reset(){
+     substitution.clear();
+  }
   
   public static void main(String[] args){
     KList patternGuts = new KList();
     KList termGuts = new KList();
+    KList subtermGuts = new KList();
     patternGuts.add(new Variable("x", "KLabel"));
     patternGuts.add(new Variable("y", "KLabel"));
-    patternGuts.add(new Variable("z", "KLabel"));
+    patternGuts.add(new Variable("z", "K"));
     patternGuts.add(new Variable("x", "KLabel"));
+    subtermGuts.add(Constant.KLABEL("d"));
+    subtermGuts.add(Constant.KLABEL("e"));
+    KApp subterm = new KApp(Constant.KLABEL("bar"), subtermGuts);
     termGuts.add(Constant.KLABEL("a"));
     termGuts.add(Constant.KLABEL("b"));
-    termGuts.add(Constant.KLABEL("c"));
+    termGuts.add(subterm);
     termGuts.add(Constant.KLABEL("a"));
     KApp pattern = new KApp(Constant.KLABEL("foo"), patternGuts);
     KApp term = new KApp(Constant.KLABEL("foo"), termGuts);

@@ -71,4 +71,8 @@ public interface Matcher {
    * this is the result of the pattern matching, or null if matching fails
    */
   public java.util.Map<Term, Term> getSubstitution();
+  /**
+   * this clears out the substitution
+   */
+  public void reset();
 }
