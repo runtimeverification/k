@@ -28,19 +28,19 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		if (listSeparators.isEmpty())
 			return node;
 
-//		List<PriorityBlock> pbs = new ArrayList<PriorityBlock>();
-//		PriorityBlock pb = new PriorityBlock();
-//		pbs.add(pb);
-//		Syntax syn = new Syntax(new Sort("KLabel"), pbs);
-//		node.getItems().add(syn);
-//		for (String separator : listSeparators) {
-//			List<ProductionItem> pis = new ArrayList<ProductionItem>();
-//			pis.add(new Terminal(MetaK.getListUnitLabel(separator)));
-//			pb.getProductions().add(new Production(new Sort("KLabel"), pis));
-//		}
-        for (String sep : listSeparators) {
-            node.addConstant("KLabel", MetaK.getListUnitLabel(sep));
-        }
+		// List<PriorityBlock> pbs = new ArrayList<PriorityBlock>();
+		// PriorityBlock pb = new PriorityBlock();
+		// pbs.add(pb);
+		// Syntax syn = new Syntax(new Sort("KLabel"), pbs);
+		// node.getItems().add(syn);
+		// for (String separator : listSeparators) {
+		// List<ProductionItem> pis = new ArrayList<ProductionItem>();
+		// pis.add(new Terminal(MetaK.getListUnitLabel(separator)));
+		// pb.getProductions().add(new Production(new Sort("KLabel"), pis));
+		// }
+		for (String sep : listSeparators) {
+			node.addConstant("KLabel", MetaK.getListUnitLabel(sep));
+		}
 		return node;
 	}
 
@@ -62,7 +62,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			return node;
 		if (!isComputation)
 			return super.transform(node);
-		if (node.isSubsort())
+		if (node.isSubsort() && !node.containsAttribute("klabel"))
 			return null;
 		String arity = String.valueOf(node.getArity());
 		Attributes attrs = node.getAttributes().shallowCopy();
@@ -76,7 +76,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		node.setItems(pis);
 		attrs.set("arity", arity);
 		node.setAttributes(attrs);
-        node.setSort("KLabel");
+		node.setSort("KLabel");
 		return node;
 	}
 

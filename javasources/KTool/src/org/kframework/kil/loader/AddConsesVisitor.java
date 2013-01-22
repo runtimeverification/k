@@ -34,9 +34,12 @@ public class AddConsesVisitor extends BasicVisitor {
 		} else if (p.isSubsort()) {
 			// cons are not allowed for subsortings
 			String cons = p.getAttribute("cons");
-			if (cons != null) {
-				String msg = "Subsortings are not allowed to have cons: '" + cons + "'";
+			if (cons != null && !p.containsAttribute("klabel")) {
+				String msg = "Subsortings are not allowed to have cons without klabel: '" + cons + "'";
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
+			}
+			if (p.containsAttribute("klabel") && !p.containsAttribute("cons")) {
+				p.putAttribute("cons", StringUtil.escapeSortName(p.getSort()) + "1" + StringUtil.getUniqueId() + "Syn");
 			}
 		} else {
 			if (!p.containsAttribute("cons")) {
