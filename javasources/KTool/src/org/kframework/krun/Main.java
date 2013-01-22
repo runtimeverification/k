@@ -201,7 +201,7 @@ public class Main {
 					Error.report(e1.getMessage());
 				}
 			} else {
-				parsed = rp.runParser(parser, value, false);
+				parsed = rp.runParser(parser, value, false, null);
 			}
 			output.put("$" + name, parsed);
 			hasPGM = hasPGM || name.equals("$PGM");
@@ -282,10 +282,10 @@ public class Main {
 					if (!formulaFile.exists()) {
 						// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
 						// assume that the specified argument is not a file and maybe represents a formula
-						KAST1 = rp.runParser(K.parser, K.model_checking, false);
+						KAST1 = rp.runParser(K.parser, K.model_checking, false, "LTLFormula");
 					} else {
 						// the specified argument represents a file
-						KAST1 = rp.runParser(K.parser, K.model_checking, true);
+						KAST1 = rp.runParser(K.parser, K.model_checking, true, "LTLFormula");
 					}
 
 					result = krun.modelCheck(new BackendTerm("K", KAST1), plug(makeConfiguration(KAST, null, rp)));
@@ -846,7 +846,7 @@ public class Main {
 			}
 
 			if (K.pgm != null) {
-				KAST = rp.runParser(K.parser, K.pgm, false);
+				KAST = rp.runParser(K.parser, K.pgm, false, null);
 			} else {
 				KAST = null;
 			}
