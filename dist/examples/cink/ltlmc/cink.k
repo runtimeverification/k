@@ -690,10 +690,10 @@ module CINK
 
   syntax Int ::= "val" "(" Bag "," Id ")" [function]
 
-  rule val(<T>... 
+  rule val(<generatedTop>... <T>...
                  <genv>... X:Id |-> L:Int ...</genv> 
                  <store>... L |-> I:Int ...</store> 
-           ...</T>, X)
+           ...</T> ...</generatedTop>, X)
        =>
        I
 

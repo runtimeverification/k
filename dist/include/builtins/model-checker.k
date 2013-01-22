@@ -50,11 +50,11 @@ module LTL-HOOKS
 //                                                        hook(#LTL:_|->Ltl_)]
                      > left:
                         LtlFormula "->Ltl" LtlFormula  [function, left,
-                                                        latex({#1}\mathrel{\right{arrow}_{\scriptstyle\it Ltl}}{#2}),
-                                                        hook(#LTL:_->Ltl_)]
+                                                        latex({#1}\mathrel{\right{arrow}_{\scriptstyle\it Ltl}}{#2})]
+//                                                        hook(#LTL:_->Ltl_)]
                      |  LtlFormula "<->Ltl" LtlFormula [function, left,
-                                                        latex({#1}\mathrel{\leftrightarrow_{\scriptstyle\it Ltl}}{#2}),
-                                                        hook(#LTL:_<->Ltl_)]
+                                                        latex({#1}\mathrel{\leftrightarrow_{\scriptstyle\it Ltl}}{#2})]
+//                                                        hook(#LTL:_<->Ltl_)]
                      |  LtlFormula "=>Ltl" LtlFormula  [function, left,
                                                         latex({#1}\mathrel{\Rightarrow_{\scriptstyle\it Ltl}}{#2})]
 //                                                        left, hook(#LTL:_=>Ltl_)]

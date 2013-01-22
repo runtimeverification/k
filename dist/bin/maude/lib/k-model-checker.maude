@@ -233,16 +233,15 @@ mod #MODEL-CHECKER is
    = # modelCheck(B:Bag,Formula:#LtlFormula)(.KList) .
 
 op '_->Ltl_ : -> KLabel[metadata "function=() gather=(e E) arity=(2)"].
-op '_/\\Ltl_ : -> KLabel[metadata "function=() arity=(2)"].
+op '_/\Ltl_ : -> KLabel[metadata "function=() arity=(2)"].
 op '_<->Ltl_ : -> KLabel[metadata "function=() hook=(#LTL:_<->Ltl_) arity=(2)"].
 op '_<=>Ltl_ : -> KLabel[metadata "function=() hook=(#LTL:_<=>Ltl_) arity=(2)"].
 op '_=>Ltl_ : -> KLabel[metadata "function=() arity=(2)"].
 op '_RLtl_ : -> KLabel[metadata "function=() arity=(2)"].
 op '_ULtl_ : -> KLabel[metadata "function=() arity=(2)"].
 op '_WLtl_ : -> KLabel[metadata "function=() arity=(2)"].
-op '_\\/Ltl_ : -> KLabel[metadata "function=() arity=(2)"].
+op '_\/Ltl_ : -> KLabel[metadata "function=() arity=(2)"].
 op '_|->Ltl_ : -> KLabel[metadata "function=() arity=(2)"].
-op '_|=Ltl_ : -> KLabel[metadata "arity=(2)"].
 op '<>Ltl_ : -> KLabel[metadata "function=() arity=(1)"].
 op 'OLtl_ : -> KLabel[metadata "function=() arity=(1)"].
 op '`[`]Ltl_ : -> KLabel[metadata "function=() arity=(1)"].
@@ -251,14 +250,14 @@ op '~Ltl_ : -> KLabel[metadata "function=() arity=(1)"].
   var F F1 F2 : #LtlFormula .
 
   eq '_->Ltl_(F1,,F2) = F1 ->Ltl F2 .
-  eq '_/\\Ltl_(F1,,F2) = F1 /\Ltl F2 .
+  eq '_/\Ltl_(F1,,F2) = F1 /\Ltl F2 .
   eq '_<->Ltl_(F1,,F2) = F1 <->Ltl F2 .
   eq '_<=>Ltl_(F1,,F2) = F1 <=>Ltl F2 .
   eq '_=>Ltl_(F1,,F2) = F1 =>Ltl F2 .
   eq '_RLtl_(F1,,F2) = F1 RLtl F2 .
   eq '_ULtl_(F1,,F2) = F1 ULtl F2 .
   eq '_WLtl_(F1,,F2) = F1 WLtl F2 .
-  eq '_\\/Ltl_(F1,,F2) = F1 \/Ltl F2 .
+  eq '_\/Ltl_(F1,,F2) = F1 \/Ltl F2 .
   eq '_->Ltl_(F1,,F2) = F1 ->Ltl F2 .
   eq '`[`]Ltl_(F) = []Ltl F .
   eq '~Ltl_(F) = ~Ltl F .
