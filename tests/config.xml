@@ -428,4 +428,14 @@
       </program>
   </test>
 
+  <test
+      language="tests/regression/subsort-klabel/issue.k"
+      folder="tests/regression/subsort-klabel/programs"
+      results="tests/regression/subsort-klabel/tests"
+      extensions="issue" >
+      <program name="tests/regression/subsort-klabel/programs/test.issue">
+        <krun-option name="-output-mode" value="pretty" />
+      </program>
+  </test>
+
 </tests>

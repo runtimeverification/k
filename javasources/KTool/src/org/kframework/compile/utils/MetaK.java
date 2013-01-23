@@ -303,8 +303,14 @@ public class MetaK {
 	}
 
 	public static Term getTerm(Production prod) {
-		if (prod.isSubsort())
-			return getFreshVar(prod.getItems().get(0).toString());
+		if (prod.isSubsort()) {
+			final Variable freshVar = getFreshVar(prod.getItems().get(0).toString());
+			if (prod.containsAttribute("klabel")) {
+				Constant klabel = Constant.KLABEL(prod.getKLabel());
+				return new KApp(klabel, freshVar);
+			}
+			return freshVar;
+		}
 		if (prod.isConstant())
 			return new Constant(prod.getSort(), ((Terminal) prod.getItems().get(0)).getTerminal());
 		TermCons t = new TermCons(prod.getSort(), prod.getCons());
