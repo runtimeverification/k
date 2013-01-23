@@ -454,7 +454,7 @@ an integer in order to be allowed to be incremented, as seen in the
 rule ``\texttt{++ int => int}'' below. */
 
   context ++(HOLE => ltype(HOLE))
-  rule ++ int => int
+  rule ++ loc(int) => int
 
 /*@ \subsection{Common expression constructs}
 
@@ -509,7 +509,7 @@ and, in that case, it must have the same type as the RHS, which then
 becomes the type of the assignment. */
 
   context (HOLE => ltype(HOLE)) = _
-  rule T:Type = T => T
+  rule loc(T:Type) = T => T
 
 /*@ \subsection{Function application and return}
 
@@ -596,9 +596,16 @@ list of variable declarations. */
 /*@ The function \texttt{ltype} behaves as a partial identity defined
 only on expressions which have an lvalue. */
 
-  syntax Exp ::= ltype(Exp)  [function]
-  rule ltype(X:Id) => X
-  rule ltype(E:Exp [Es:Exps]) => (E[Es])
+  syntax Exp ::= ltype(Exp) 
+  rule ltype(X:Id) => loc(X)
+  rule ltype(E:Exp [Es:Exps]) => loc(E[Es])
+  rule loc(T:Type) => ltype(loc(T))
+
+  syntax Exp ::= loc(Exp) [strict]
+
+  rule isKResult(ltype(loc(T:Type))) => true
+
+  
 
 //@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.
 
