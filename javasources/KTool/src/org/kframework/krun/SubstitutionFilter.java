@@ -2,6 +2,10 @@ package org.kframework.krun;
 
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.*;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Map;
 
@@ -17,6 +21,13 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
 	@Override
 	public ASTNode transform(Variable var) {
 		Term t = args.get(var.getName());
+		if (t == null) {
+			GlobalSettings.kem.register(new KException(
+				ExceptionType.ERROR,
+				KExceptionGroup.CRITICAL,
+				"Configuration variable missing: " + var.getName(),
+				var.getFilename(), var.getLocation()));
+		}
 		if (t instanceof BackendTerm) {
 			t.setSort(var.getSort());
 		}
