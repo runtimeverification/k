@@ -30,16 +30,9 @@ public class SimpleRewriter {
   
   static Matcher matcher = new SimpleMatcher();
 
-  /**
-   * rewrite only rewrites one step
-   *
-   * returns null if no change
-   *
-   * @param RewriteSet trs is the term rewriting system, specified in order of rule priority
-   * @param Term t is the term to rewrite one step
-   */
+  //we know the cast is safe because SimpleMatcher is only defined for Terms
   @SuppressWarnings("cast")
-  static public Term rewrite(RewriteSet trs, Term t){
+  static private Term rewriteAux(RewriteSet trs, Term t){
     Term out = null;
     for(Rewrite r : trs){
       try {
@@ -64,6 +57,17 @@ public class SimpleRewriter {
   }
 
   /**
+   * rewrite only rewrites one step.  Will return original term if no rewrite is performed
+   *
+   * @param RewriteSet trs is the term rewriting system, specified in order of rule priority
+   * @param Term t is the term to rewrite one step
+   */
+   static public Term rewrite(RewriteSet trs, Term t){
+     Term temp = rewriteAux(trs, t);
+     return (temp == null)? t : temp;
+   }
+
+  /**
    *  rewrite to a normal form.  Will return original term if no rewrite is performed
    *
    * @param RewriteSet trs is the term rewriting system, specified in order of rule priority
@@ -74,7 +78,7 @@ public class SimpleRewriter {
     Term temp = t;
     do {
       out = temp;
-      temp = rewrite(trs, out);
+      temp = rewriteAux(trs, out);
     }
     while(temp != null);
     return out;
@@ -92,7 +96,7 @@ public class SimpleRewriter {
     Term temp = t;
     for(int i = 0; (i <= n) && (temp != null); ++i){
       out = temp;
-      temp = rewrite(trs, out);
+      temp = rewriteAux(trs, out);
     } 
     return out;
   }
