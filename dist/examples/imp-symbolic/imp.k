@@ -1,8 +1,5 @@
-require "builtins/symbolic-k.k"
-require "builtins/fol.k"
 
 module IMP-SYNTAX
-  imports FOL
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
@@ -24,22 +21,17 @@ module IMP-SYNTAX
   syntax Pgm   ::= "int" Ids ";" Stmt
   syntax Ids   ::= List{Id,","}
 
+  //@ Programs are \K configurations.
+  syntax Stmt  ::= "#ps" "(" Bag ")" 
+
   //@ Assertions syntax
   syntax Stmt  ::= "assert" "(" BExp ")" ";"  [strict]
-
-  /*@ Specifications: note that IMP symbolic programs consist in 
-      symbolic configurations.
-  */
-  syntax CfgSym ::= "<k>" Stmt "</k>"
-  	 	    "<env>" InitVals "</env>"
-		    "<condition>" Fol "</condition>"
-
-  syntax InitVals ::= List{InitVal,","}
-  syntax InitVal  ::= Id "->" Int
 
   // syntax for symbolic values in programs
   syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
 
+  // compiler issues
+  syntax Dummy ::= "symInt"
 endmodule
 
 module IMP
@@ -49,7 +41,7 @@ module IMP
 
 /*@ IMP configuration is enriched with cell {\tt condition}. */
   configuration <T color="yellow">
-		  <k color="green"> $PGM:CfgSym </k>
+		  <k color="green"> #ps($PGM:Bag) </k>
                   <state color="blue"> .Map </state>
 		  <condition color="red"> true </condition>
                 </T>
@@ -74,71 +66,37 @@ module IMP
 //  rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
-  rule <k> int (X:Id,Xs:Ids => Xs);_ </k> <state> Rho:Map (. => X|->0) </state>
-    when notBool (X in keys(Rho))
-  rule int .Ids; S => S  [structural]
 
-/*@ The symbolic semantics of IMP. Note that these rules can be automatically generated from concrete ones applying three steps:
-\begin{itemize}
-\item Linearise rules: each variable should appear only once in the left hand side of the rule
-\item Replace constant values {\it C} with variables {\it V} and add a side condition to the rule: {\it V = C}.
-\item Add formulas as side conditions when the conjuntion of the formula and rule condition is not {\tt unsat}.
-\end{itemize}
- */
-  rule <k> I1:Int / I2:Int => I1 /Int I2 ...</k>
-       <condition> Phi:Fol => Phi andFol I2 =/=Int 0 </condition> 
-       when checkSat(Phi andFol (I2 =/=Int 0)) =/=K "unsat" [transition]
+//@ IMP symbolic semantics
+  rule <k> I1:Int / I2:Int => I1 divInt I2 ...</k>
+       <condition> Phi:Bool => Phi andBool I2 =/=Int 0 </condition> 
+       when checkSat(Phi andBool (I2 =/=Int 0)) =/=K "unsat" [transition]
 
   rule <k> B1:Bool && B2:BExp => B2 ...</k>
-       <condition> Phi:Fol => Phi andFol B1 ==Bool true </condition> 
-       when checkSat(Phi andFol B1) =/=K "unsat" [transition]
+       <condition> Phi:Bool => Phi andBool B1 ==Bool true </condition> 
+       when checkSat(Phi andBool B1) =/=K "unsat" [transition]
   
-  rule <k> B1:Bool && B2:Bool => false ...</k>
-       <condition> Phi:Fol => Phi andFol notFol B1 </condition> 
-       when checkSat(Phi andFol notFol B1) =/=K "unsat" [transition]
+  rule <k> B1:Bool && B2:BExp => false ...</k>
+       <condition> Phi:Bool => Phi andBool notBool B1 </condition> 
+       when checkSat(Phi andBool notBool B1) =/=K "unsat" [transition]
 
   rule <k> if (B:Bool) S:Stmt else _ => S ...</k>
-       <condition> Phi:Fol => Phi andFol B </condition> 
-       when checkSat(Phi andFol B) =/=K "unsat" [transition]
+       <condition> Phi:Bool => Phi andBool B </condition> 
+       when checkSat(Phi andBool B) =/=K "unsat" [transition]
 
   rule <k> if (B:Bool) _ else S:Stmt => S ...</k>
-       <condition> Phi:Fol => Phi andFol notFol B </condition>
-       when checkSat(Phi andFol notFol B) =/=K "unsat" [transition]
+       <condition> Phi:Bool => Phi andBool notBool B </condition>
+       when checkSat(Phi andBool notBool B) =/=K "unsat" [transition]
 
 /*@ Assert semantics: remain stuck when the assertion doesn' hold. */
-  rule <k> assert(B:BExp); => . ...</k>
-       <condition> Phi:Fol </condition> 
-       when checkSat(Phi andFol transformBool(B)) ==K "sat" 
+  rule <k> assert(B:Bool); => . ...</k>
+       <condition> Phi:Bool </condition> 
+       when checkSat(Phi andBool B) ==K "sat" 
 
-/*@ Loading the initial program into a configuration */
-  rule [initial]:   <k>
-			<k> Program:Stmt </k>
-			<env> InitVs:InitVals </env>
-			<condition> Formula:Fol </condition> 
-			=> initialize(InitVs) ~> Program
-		    </k>
-		    <condition> _ => Formula </condition>  
-
-//@ Load the environment.
-  syntax K ::= "initialize" "(" InitVals ")"
-
-  rule initialize(.InitVals) => . [structural]
-  rule <k> initialize(X:Id -> I:Int, Vs:InitVals) => initialize(Vs) ...</k>
-       <state>... . => X |-> I </state> [structural]
-
-//@ Transform BExp formulas into internal representation for formulas.
-  syntax Int ::= "transformInt" "(" AExp ")" [function]
-  rule transformInt(I:Int) => I
-  rule transformInt(X:Id)  => #symInt(X)
-  rule transformInt(A1:AExp + A2:AExp) => transformInt(A1) +Int transformInt(A2)
-  rule transformInt(A1:AExp / A2:AExp) => transformInt(A1) /Int transformInt(A2)
-
-  syntax Bool ::= "transformBool" "(" BExp ")" [function]
-  rule transformBool(true) => true
-  rule transformBool(false) => false
-  rule transformBool(A1:AExp <= A2:AExp) => transformInt(A1) <=Int transformInt(A2)
-  rule transformBool(B1:BExp && B2:BExp) => transformBool(B1) andBool transformBool(B2)
-  rule transformBool(! B:BExp) => notBool transformBool(B)
-  rule transformBool(B:Bool) => B
+//@ Load PGM.
+   rule (<k> #ps(B:Bag) </k>
+        <state> _ </state>
+        <condition> _ </condition>) 
+	=> B [structural]
 
 endmodule

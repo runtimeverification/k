@@ -24,9 +24,10 @@ else {
        { min = b; }
   else { min = c; }
 }
-assert(min <= a);
-assert(min <= b);
-assert(min <= c);
+if (a <= b && 1 <= c) {
+  x = a / (c / min);
+}
+else {}
 </k>
-<state> a |-> #symInt(a) b |-> #symInt(b) c |-> #symInt(c) min |-> 0 </state>
-<condition> true </condition>
+<state> a |-> #symInt(a) b |-> #symInt(b) c |-> #symInt(c) min |-> 0 x |-> 0 </state>
+<condition> true  </condition>

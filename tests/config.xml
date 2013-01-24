@@ -340,6 +340,10 @@
       folder="dist/examples/imp-symbolic/programs"
       extensions="imp"
       >
+    <all-programs>
+      <krun-option name="--search" />
+      <krun-option name="--parser" value="kast -groundParser" />
+    </all-programs>
   </test>
 
 <!--
