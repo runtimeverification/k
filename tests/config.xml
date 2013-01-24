@@ -342,7 +342,7 @@
       >
     <all-programs>
       <krun-option name="--search" />
-      <krun-option name="--parser" value="kast -groundParser" />
+      <krun-option name="--parser" value="/var/lib/jenkins/workspace/k-framework-tests/k/dist/bin/kast -groundParser" />
     </all-programs>
   </test>
 
