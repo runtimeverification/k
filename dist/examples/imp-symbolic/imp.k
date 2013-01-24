@@ -31,7 +31,9 @@ module IMP-SYNTAX
   syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
 
   // compiler issues
-  syntax Dummy ::= "symInt"
+  syntax Dummy ::= "symInt" [dummySymInt]
+  
+  syntax priorities builtinWrapper > dummySymInt
 endmodule
 
 module IMP

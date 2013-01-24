@@ -208,7 +208,7 @@ interface K-EVAL
 endinterface
 
 module K-BUILTINS
-  syntax KLabel ::=  "#" K
+  syntax KLabel ::=  "#" K [builtinWrapper]
 endmodule
 
 
