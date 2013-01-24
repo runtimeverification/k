@@ -166,6 +166,12 @@ public class Definition2SDF {
 			}
 		}
 
+		sdf.append("\n\n");
+		for (String t : terminals.terminals) {
+			if (t.matches("[a-zA-Z][a-zA-Z0-9]*")) {
+				sdf.append("	\"" + t + "\" -> DzDzID {reject}\n");
+			}
+		}
 		sdf.append("\n");
 		sdf.append(SDFHelper.getFollowRestrictionsForTerminals(terminals.terminals));
 

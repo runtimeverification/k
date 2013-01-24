@@ -58,8 +58,8 @@ public class KastFrontEnd {
 				} else
 					pgm = restArgs[0];
 			}
-			path = pgm;
 			File mainFile = new File(pgm);
+			path = mainFile.getAbsolutePath();
 			if (!mainFile.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
 			pgm = FileUtil.getFileContent(mainFile.getAbsolutePath());

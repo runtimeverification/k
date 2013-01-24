@@ -146,7 +146,7 @@ public class Main {
 
 	private static String parseTerm(String value) throws Exception {
 
-		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "");
+		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "", "Command line argument");
 		term = term.accept(new FlattenSyntax());
 		MaudeFilter maudeFilter = new MaudeFilter();
 		term.accept(maudeFilter);
@@ -263,7 +263,7 @@ public class Main {
 						} else if (cmd.hasOption("depth")) {
 							depth = K.depth;
 						}
-						ASTNode pattern = DefinitionLoader.parsePattern(K.pattern);
+						ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
 						CollectVariablesVisitor vars = new CollectVariablesVisitor();
 						pattern.accept(vars);
 						Set<String> varNames = vars.getVars().keySet();

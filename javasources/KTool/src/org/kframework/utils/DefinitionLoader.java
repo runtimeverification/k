@@ -227,15 +227,16 @@ public class DefinitionLoader {
 		return null;
 	}
 
-	public static Term parseCmdString(String content, String sort) {
+	public static Term parseCmdString(String content, String sort, String filename) {
 		if (!DefinitionHelper.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
 		}
 		String parsed = org.kframework.parser.concrete.KParser.ParseKCmdString(content);
 		Document doc = XmlLoader.getXMLDoc(parsed);
-		XmlLoader.addFilename(doc.getFirstChild(), "Command Line Argument");
+		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
+		FileUtil.saveInFile(DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 
 		org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
 
@@ -269,7 +270,7 @@ public class DefinitionLoader {
 		return (Term) config;
 	}
 
-	public static ASTNode parsePattern(String pattern) {
+	public static ASTNode parsePattern(String pattern, String filename) {
 		if (!DefinitionHelper.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
@@ -278,8 +279,9 @@ public class DefinitionLoader {
 		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString("rule " + pattern);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
-		XmlLoader.addFilename(doc.getFirstChild(), "Command line pattern");
+		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
+		FileUtil.saveInFile(DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		XmlLoader.writeXmlFile(doc, K.kdir + "/pattern.xml");
 
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());

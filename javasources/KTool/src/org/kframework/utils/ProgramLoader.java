@@ -44,7 +44,7 @@ public class ProgramLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		XmlLoader.writeXmlFile(doc, DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.xml");
+		FileUtil.saveInFile(DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
 		try {
@@ -100,11 +100,11 @@ public class ProgramLoader {
 			ASTNode out;
 			if (GlobalSettings.whatParser == GlobalSettings.ParserType.GROUND) {
 				org.kframework.parser.concrete.KParser.ImportTblGround(DefinitionHelper.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
-				out = DefinitionLoader.parseCmdString(content, "");
+				out = DefinitionLoader.parseCmdString(content, "", filename);
 				out = out.accept(new FlattenSyntax());
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {
 				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
-				out = DefinitionLoader.parsePattern(content);
+				out = DefinitionLoader.parsePattern(content, filename);
 				out = out.accept(new FlattenSyntax());
 			} else {
 				out = loadPgmAst(content, filename, startSymbol);
