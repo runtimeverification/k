@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class CheckVariables extends BasicVisitor {
 
-	HashMap<Variable,Integer> left = new HashMap<Variable,Integer>();
+	HashMap<Variable, Integer> left = new HashMap<Variable, Integer>();
 	HashMap<Variable, Integer> right = new HashMap<Variable, Integer>();
 	HashMap<Variable, Integer> current = left;
 	boolean inCondition = false;
