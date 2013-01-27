@@ -1,0 +1,29 @@
+/*
+<k>
+while (y <= b)
+{
+  b = b - y;
+  a = a + 1;
+}
+</k>
+<state> a |-> A b |-> B x |-> X y |-> Y </state>
+<condition> 0 <=Int X andBool 0 <Int Y andBool X ==Int A *Int Y +Int B andBool B >=Int 0 </condition>
+=>
+<k> .K </k>
+<state> a |-> A' b |-> B' x |-> X y |-> Y </state>
+<condition> 0 <=Int X andBool 0 <Int Y andBool X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y </condition>
+*/
+
+<k>
+while (y <= b)
+ {
+  b = b - y; 
+  a = a + 1;
+} ~> match(
+		<k> .K </k>
+		<state> a |-> #symInt(a1) b |-> #symInt(b1) x |-> #symInt(x) y |-> #symInt(y) </state>
+		<condition> 0 <=Int #symInt(x) andBool 0 <Int #symInt(y) andBool #symInt(x) ==Int #symInt(a1) *Int #symInt(y) +Int #symInt(b1) andBool #symInt(b1) >=Int 0 andBool #symInt(b1) <Int #symInt(y) </condition>	  )
+</k>
+<state> a |-> #symInt(a) b |-> #symInt(b) x |-> #symInt(x) y |-> #symInt(y) </state>
+<condition> 0 <=Int #symInt(x) andBool 0 <Int #symInt(y) andBool #symInt(x) ==Int #symInt(a) *Int #symInt(y) +Int #symInt(b) andBool #symInt(b) >=Int 0 </condition>
+<frozen> symFreezeLabel(-1) </frozen>

@@ -333,7 +333,7 @@
 
 <!--
   IMP-SYMBOLIC
--->
+
  
   <test 
       language="dist/examples/imp-symbolic/imp.k"
@@ -345,7 +345,7 @@
       <krun-option name="--parser" value="/var/lib/jenkins/workspace/k-framework-tests/k/dist/bin/kast -groundParser" />
     </all-programs>
   </test>
-
+-->
 <!--
   IMP-HOARE
 -->

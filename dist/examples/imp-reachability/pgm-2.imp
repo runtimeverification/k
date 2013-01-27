@@ -1,0 +1,27 @@
+/*
+<k>
+{
+  b = b - y;
+  a = a + 1;
+}
+</k>
+<state> a |-> A b |-> B x |-> X y |-> Y </state>
+<condition> A' ==Int A +Int 1 andBool B' ==Int B -Int Y </condition>
+=>
+<k> .K </k>
+<state> a |-> A' b |-> B' x |-> X y |-> Y </state>
+<condition> true </condition>
+*/
+
+<k>
+{
+  b = b - y; 
+  a = a + 1;
+} ~> match(
+		<k> .K </k>
+		<state> a |-> #symInt(a1) b |-> #symInt(b1) x |-> #symInt(x) y |-> #symInt(y) </state>
+		<condition> #symInt(a1) ==Int #symInt(a) +Int 1 andBool #symInt(b1) ==Int #symInt(b) -Int #symInt(y) </condition>	  )
+</k>
+<state> a |-> #symInt(a) b |-> #symInt(b) x |-> #symInt(x) y |-> #symInt(y) </state>
+<condition> true </condition>
+<frozen> symFreezeLabel(-2) </frozen>
