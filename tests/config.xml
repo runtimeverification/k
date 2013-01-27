@@ -339,11 +339,10 @@
       language="dist/examples/imp-symbolic/imp.k"
       folder="dist/examples/imp-symbolic/programs"
       extensions="imp"
-      exclude="sum.min imp.min"
       >
     <all-programs>
       <krun-option name="--search" />
-      <krun-option name="--groundParser" />
+      <krun-option name="--parser" value="&quot;kast -groundParser&quot;"/>
     </all-programs>
   </test>
 
