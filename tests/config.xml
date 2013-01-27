@@ -333,19 +333,20 @@
 
 <!--
   IMP-SYMBOLIC
-
+-->
  
   <test 
       language="dist/examples/imp-symbolic/imp.k"
       folder="dist/examples/imp-symbolic/programs"
       extensions="imp"
+      exclude="sum.min imp.min"
       >
     <all-programs>
       <krun-option name="--search" />
-      <krun-option name="--parser" value="/var/lib/jenkins/workspace/k-framework-tests/k/dist/bin/kast -groundParser" />
+      <krun-option name="--groundParser" />
     </all-programs>
   </test>
--->
+
 <!--
   IMP-HOARE
 -->
@@ -354,6 +355,18 @@
       language="dist/examples/imp-hoare/imp.k"
       folder="dist/examples/imp-hoare/programs"
       extensions="imp"
+      >
+  </test>
+
+<!--
+  IMP-REACHABILITY
+-->
+ 
+  <test 
+      language="dist/examples/imp-reachability/imp.k"
+      folder="dist/examples/imp-reachability"
+      extensions="imp"
+      exclude="pgm-1.imp pgm-2.imp pgm-3.imp"
       >
   </test>
 
