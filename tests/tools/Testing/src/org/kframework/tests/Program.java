@@ -32,10 +32,8 @@ public class Program {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKrun());
 		command.add(absolutePath);
-		command.add("--main-module");
-		command.add(new File(test.getLanguage()).getName().replaceFirst("\\.k$","").toUpperCase());
-		command.add("--compiled-def");
-		command.add(new File(test.getLanguage()).getParent() + "/.k");
+		command.add("--k-definition");
+		command.add(test.getLanguage());
 		for (Entry<String, String> entry : krunOptions.entrySet()) {
 			command.add(entry.getKey());
 			command.add(entry.getValue());
