@@ -474,8 +474,6 @@ public class Test {
 		command.add(Configuration.getKompile());
 		command.add(getXmlLanguage());
 		command.add("--pdf");
-		command.add("-o");
-		command.add(language.replaceFirst("\\.k$", ".pdf"));
 		String[] arguments = new String[command.size()];
 		int i = 0;
 		for (String cmd : command) {
