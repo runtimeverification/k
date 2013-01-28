@@ -418,6 +418,8 @@ public class Test {
 		if (task.getExit() != 0)
 			return false;
 
+		System.out.println("PDF: " + language.replaceAll("\\..*?$", ".pdf") + "\nEXIT:" + new File(language.replaceAll("\\..*?$", ".pdf") + "\n\n")); 
+		
 		if (!new File(getPdfCompiledFilename()).exists())
 			return false;
 
