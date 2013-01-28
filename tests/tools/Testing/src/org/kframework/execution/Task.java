@@ -30,7 +30,7 @@ public class Task extends Thread {
 
 			String message = "Executing ";
 			for(String cmd : pb.command())
-				message += cmd;
+				message += cmd + " ";
 			elapsed = System.currentTimeMillis();
 			Process p = pb.start();
 
