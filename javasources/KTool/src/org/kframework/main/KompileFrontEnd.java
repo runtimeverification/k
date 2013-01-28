@@ -203,6 +203,8 @@ public class KompileFrontEnd {
 		if (GlobalSettings.verbose)
 			Stopwatch.sw.printTotal("Total");
 		GlobalSettings.kem.print();
+		if (cmd.hasOption("loud"))
+			System.out.println("Done.");
 	}
 
 	private static void genericCompile(File mainFile, String lang, Backend backend, String step) {

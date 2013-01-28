@@ -20,11 +20,11 @@ public class KompileOptionsParser {
 		Option help = new Option("h", "help", false, "prints this message and exits");
 		Option version = new Option("version", false, "prints version number");
 		Option verbose = new Option("v", "verbose", false, "verbose mode");
-//		Option lint = new Option("lint", "lint", false, "Checks your definition for possible logical errors");
+		// Option lint = new Option("lint", "lint", false, "Checks your definition for possible logical errors");
 		verb.addOption(help);
 		verb.addOption(version);
 		verb.addOption(verbose);
-//		verb.addOption(lint);
+		// verb.addOption(lint);
 
 		// Option tempDisamb = new Option("tempDisamb", "tempDisamb", false, "temporary to test the java disambiguator");
 
@@ -94,22 +94,14 @@ public class KompileOptionsParser {
 
 		Option outputFile = new Option("o", "output", true, "specify output file/directory. Default <file>-compiled");
 
-        // matching logic and symbolic execution options
-        OptionGroup sym = new OptionGroup();
-        Option ml = new Option(
-                "ml",
-                "matching-logic",
-                false,
-                "generate support for matching logic prover");
-        Option smt = new Option("smt", "generate translation to SMTLib2");
-        Option symEq = new Option(
-                "symeq",
-                "symbolic-equality",
-                false,
-                "generate sort equalities");
-        sym.addOption(ml);
-        sym.addOption(smt);
-        sym.addOption(symEq);
+		// matching logic and symbolic execution options
+		OptionGroup sym = new OptionGroup();
+		Option ml = new Option("ml", "matching-logic", false, "generate support for matching logic prover");
+		Option smt = new Option("smt", "generate translation to SMTLib2");
+		Option symEq = new Option("symeq", "symbolic-equality", false, "generate sort equalities");
+		sym.addOption(ml);
+		sym.addOption(smt);
+		sym.addOption(symEq);
 
 		// add options
 		options.addOption(new Option("testFactory", false, "Option to test new class instantiation"));
@@ -122,8 +114,12 @@ public class KompileOptionsParser {
 		options.addOptionGroup(xml);
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
-        options.addOptionGroup(sym);
+		options.addOptionGroup(sym);
 		// options.addOption(tempDisamb);
+
+		Option loud = new Option("loud", false, "prints an OK message at the end if all is ok.");
+
+		options.addOption(loud);
 		options.addOption(toHTML);
 		options.addOption(kexp);
 		options.addOption(unparse);
