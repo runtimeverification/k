@@ -28,9 +28,9 @@ public class Task extends Thread {
 		try {
 			ProcessBuilder pb = new ProcessBuilder(arguments);
 
-			String message = "Executing ";
-			for(String cmd : pb.command())
-				message += cmd + " ";
+//			String message = "Executing ";
+//			for(String cmd : pb.command())
+//				message += cmd + " ";
 			elapsed = System.currentTimeMillis();
 			Process p = pb.start();
 
@@ -57,7 +57,7 @@ public class Task extends Thread {
 			p.getInputStream().close();
 			p.getErrorStream().close();
 			p.destroy();
-			System.out.println(message + " ... Done.");
+//			System.out.println(message + " ... Done.");
 
 		} catch (IOException io) {
 			exit = Integer.MAX_VALUE;

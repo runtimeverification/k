@@ -1,8 +1,11 @@
-require "builtins/symbolic-k.k"
-require "builtins/fol.k"
+/*@
+This is the symbolic semantics of IMP enriched with arrays and Hoare logic.
+The semantics, gets as input an IMP program, annotated with pre and post 
+conditions and invariants.
+*/
+
 
 module IMP-SYNTAX
-  imports FOL
 
   syntax AExp  ::= Int | Id
   	         | AExp "[" AExp "]"          [strict]
@@ -129,24 +132,24 @@ module IMP
 
 //@ IMP symbolic semantics
   rule <T> <k> I1:Int / I2:Int => I1 /Int I2 ...</k>
-       <condition> Phi:Fol => Phi andFol I2 =/=Int 0 </condition> ...</T>
-       when checkSat(Phi andFol (I2 =/=Int 0)) ==K "sat" [transition]
+       <condition> Phi:Bool => Phi andBool I2 =/=Int 0 </condition> ...</T>
+       when checkSat(Phi andBool (I2 =/=Int 0)) ==K "sat" [transition]
 
   rule <T> <k> B1:Bool && B2:BExp => B2 ...</k>
-       <condition> Phi:Fol => Phi andFol B1 ==Bool true </condition> ...</T>
-       when checkSat(Phi andFol B1) ==K "sat" [transition]
+       <condition> Phi:Bool => Phi andBool B1 ==Bool true </condition> ...</T>
+       when checkSat(Phi andBool B1) ==K "sat" [transition]
   
   rule <T> <k> B1:Bool && B2:Bool => false ...</k>
-       <condition> Phi:Fol => Phi andFol notFol B1 </condition> ...</T>
-       when checkSat(Phi andFol notFol B1) ==K "sat" [transition]
+       <condition> Phi:Bool => Phi andBool notBool B1 </condition> ...</T>
+       when checkSat(Phi andBool notBool B1) ==K "sat" [transition]
 
   rule <T> <k> if (B:Bool) S:Stmt else _ => S ...</k>
-       <condition> Phi:Fol => Phi andFol B </condition> ...</T>
-       when checkSat(Phi andFol B) ==K "sat" [transition]
+       <condition> Phi:Bool => Phi andBool B </condition> ...</T>
+       when checkSat(Phi andBool B) ==K "sat" [transition]
 
   rule <T> <k> if (B:Bool) _ else S:Stmt => S ...</k>
-       <condition> Phi:Fol => Phi andFol notFol B </condition> ...</T>
-       when checkSat(Phi andFol notFol B) ==K "sat" [transition]
+       <condition> Phi:Bool => Phi andBool notBool B </condition> ...</T>
+       when checkSat(Phi andBool notBool B) ==K "sat" [transition]
 
 //@ Hoare triples
   rule <k> (pre: Psi:Assert ~> post: Psi':Assert ~> S:Stmt)
@@ -166,19 +169,19 @@ module IMP
 //@ Match
   syntax K ::= "match"  "(" K ")" [strict]
   rule <k> match(m2k(Ea:Map, Phia:K))
-	   => . // checkSat(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec))
+	   => . // checkSat(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
        ...</k>
        <store> Ec:Map </store>
-       <condition> Phic:Fol </condition>
-       when checkSat(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec)) ==K "unsat"
+       <condition> Phic:Bool </condition>
+       when checkSat(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec)) ==K "unsat"
 
 // debug rule
   rule <k> match(m2k(Ea:Map, Phia:K))
-	   => SMTLibQuery(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec))
+	   => SMTLibQuery(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
        ...</k>
        <store> Ec:Map </store>
-       <condition> Phic:Fol </condition>
-       when checkSat(Phic andFol (notFol Phia) andFol mapLeftEq(Ea, Ec)) ==K "sat"
+       <condition> Phic:Bool </condition>
+       when checkSat(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec)) ==K "sat"
 
 //@ While invariant
   rule <k> while ( B:BExp ) invariant: Psi:Assert S:Stmt ~> K
@@ -198,7 +201,7 @@ module IMP
            generateFresh(E) ~> evalAssert(Psi) ~> restore(E, Phi)
        ...</k>
        <store> E:Map </store>
-       <condition> Phi:Fol </condition>
+       <condition> Phi:Bool </condition>
 
 //@ Generate fresh map
   syntax K ::= "generateFresh" "(" Map ")"
@@ -220,7 +223,7 @@ module IMP
        <condition> _ => Phi' </condition>
 
 //@ Restore
-  syntax K ::= "restore" "(" Map "," Fol ")"
+  syntax K ::= "restore" "(" Map "," Bool ")"
 
 //@ Assertions
   rule B1:Bool and B2:Bool => B1 andBool B2
@@ -244,7 +247,7 @@ module IMP
   rule mapLeftEq(X:Int |-> _:Int _:Map, Right:Map) => false when notBool(X in keys(Right))
   rule mapLeftEq(M:Map, .) => false when notBool(isEmptySet(keys(M)))
 
-// tricks
+//@ Compiler issues
   // subsort issue? 
   rule isSymbolicInt(select(A:Array, I:Int)) => true [anywhere]
   rule isInt(select(A:Array, I:Int)) => true [anywhere]
