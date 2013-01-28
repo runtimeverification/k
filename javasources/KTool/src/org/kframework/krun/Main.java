@@ -386,7 +386,7 @@ public class Main {
 				Term t = plug(makeConfiguration(kast, null, rp));
 				MaudeFilter mf = new MaudeFilter();
 				t.accept(mf);
-				maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "rew [1] " + mf.getResult() + " .";
+				maudeCmd = "set show command off ." + K.lineSeparator + "load " + KPaths.windowfyPath(compiledFile) + K.lineSeparator + "red " + mf.getResult() + " .";
 				// first execute one step then prompt from the user an input
 				System.out.println("After running one step of execution the result is:");
 				rp.runMaude(maudeCmd, outFile.getCanonicalPath(), errFile.getCanonicalPath());
