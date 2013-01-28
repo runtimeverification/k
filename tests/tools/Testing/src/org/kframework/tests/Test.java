@@ -337,7 +337,7 @@ public class Test {
 		command.add(Configuration.getKompile());
 		command.add(language);
 		command.add("-o");
-		command.add(getCompiled());
+		command.add(new File(getCompiled()).getParent());
 		for (Entry<String, String> entry : kompileOptions.entrySet()) {
 			command.add(entry.getKey());
 			command.add(entry.getValue());
