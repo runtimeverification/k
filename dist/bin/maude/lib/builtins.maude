@@ -866,11 +866,16 @@ mod #COUNTER is
   op f : #Qid -> #Qid [special (id-hook QuotedIdentifierOpSymbol (mos)
                               op-hook quotedIdentifierSymbol (<Qids> : ~> #Qid))] .
 
-  var I : #Int .
+  var I : #Int . var N : #Nat .
   op distinctCounter : #Int -> #Int .
   eq distinctCounter(I) = string2Int(string(f('a))) .
   op counter : -> #Int .
   eq counter = distinctCounter(0) .
+  op setCounter : #Int -> #Int .
+  op setCounter : #Int #Int -> #Int .
+  eq setCounter(sNat(N)) = setCounter(N, distinctCounter(N)) .
+  eq setCounter(sNat(N), I) = setCounter(N, distinctCounter(N)) .
+  eq setCounter(0, I) = I .  
 endm
 
 mod #K-EQUAL is
