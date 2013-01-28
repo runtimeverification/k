@@ -417,8 +417,6 @@ public class Test {
 	public boolean compiledPdf(Task task) {
 		if (task.getExit() != 0)
 			return false;
-
-		System.out.println("PDF: " + language.replaceAll("\\..*?$", ".pdf") + "\nEXIT:" + new File(language.replaceAll("\\..*?$", ".pdf") + "\n\n")); 
 		
 		if (!new File(getPdfCompiledFilename()).exists())
 			return false;
@@ -480,6 +478,8 @@ public class Test {
 		command.add(Configuration.getKompile());
 		command.add(getXmlLanguage());
 		command.add("--pdf");
+		command.add("-o");
+		command.add(getPdfCompiledFilename());
 		String[] arguments = new String[command.size()];
 		int i = 0;
 		for (String cmd : command) {
