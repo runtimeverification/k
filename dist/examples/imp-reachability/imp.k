@@ -1,5 +1,14 @@
 require "builtins/symbolic-k.k"
 
+/*@
+
+This is the symbolic semantics of IMP enriched with reachability logic.
+
+This semantics receives as input programs generated from reachability formulas.
+Additionally, the semantics contains the circularities also generated from 
+reachability formulas.
+*/
+
 module IMP-SYNTAX
   imports SYMBOLIC-K
 
@@ -39,20 +48,29 @@ module IMP
   imports IMP-SYNTAX
 
   syntax KResult ::= Int | Bool
-
+/*@
+The configuration of IMP is enriched with cells <frozen> and <goal>.
+Cell <ruleConstraints> will store some labels which are meant to block
+the first application of the circularity rule.
+The cell <goal> contains the current goal. Whenever multiple rules can be 
+applied to the same configuration, the current goal will be splitted into
+multiple goals. 
+*/
   configuration <T color="yellow">
 		 <goal multiplicity="*">
 		  <k color="green"> #ps($PGM:Bag) </k>
                   <state color="blue"> .Map </state>
 		  <condition color="red"> true </condition>
-		  <frozen> none </frozen>
+		  <ruleConstraints> none </ruleConstraints>
 		 </goal>
                 </T>
-		
 
   syntax FreezeLabel ::= "none" | "#any"
   	 	       | "symFreezeLabel" "(" Int ")" //[onlyLabel, klabel(#symFreezeLabel)]
 
+/*@
+The initial semantics of IMP.
+*/
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
 //  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
@@ -77,7 +95,7 @@ module IMP
     when notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 
-//@ Symbolic execution - the transformed rules
+//@ Symbolic semantics - the transformed rules
   rule <k> I1:Int / I2:Int => I1 /Int I2 ...</k>
        <condition> Phi:Bool => Phi andBool I2 =/=Int 0 </condition> 
        when checkSat(Phi andBool (I2 =/=Int 0)) =/=K "unsat" [transition]
@@ -90,23 +108,26 @@ module IMP
        <condition> Phi:Bool => Phi andBool notBool B1 </condition> 
        when checkSat(Phi andBool notBool B1) =/=K "unsat" [transition]
 
+/*@ Note that symbolic execution in this case is not done using search,
+but cell <goal>. 
+*/
   rule <goal>
          <k> if (B:Bool) S:Stmt else S':Stmt ~> K </k>
          <condition> Phi:Bool </condition> 
-         <frozen> L </frozen>
+         <ruleConstraints> L </ruleConstraints>
          Cfg:Bag 
        </goal> 
        =>
        <goal>
          <k> S ~> K </k>
          <condition> Phi andBool B </condition> 
-         <frozen> #any </frozen>
+         <ruleConstraints> #any </ruleConstraints>
          Cfg 
        </goal>
        <goal>
          <k> S' ~> K </k>
          <condition> Phi andBool notBool(B) </condition> 
-         <frozen> #any </frozen>
+         <ruleConstraints> #any </ruleConstraints>
          Cfg
        </goal>
        when checkSat(Phi andBool B) =/=K "unsat"
@@ -114,16 +135,24 @@ module IMP
 
   rule <k> if (B:Bool) _ else S:Stmt => S ...</k>
        <condition> Phi:Bool </condition>
-       <frozen> _ => #any </frozen>
+       <ruleConstraints> _ => #any </ruleConstraints>
        when checkSat(Phi andBool B) ==K "unsat" [transition, computational]
 
   rule <k> if (B:Bool) S:Stmt else _ => S ...</k>
        <condition> Phi:Bool </condition>
-       <frozen> _ => #any </frozen>
+       <ruleConstraints> _ => #any </ruleConstraints>
        when checkSat(Phi andBool notBool B) ==K "unsat" [transition, computational]
 
-// Generated rules
   syntax #Id ::= "a" | "b" | "x" | "y"
+
+/*@ These rules must be generated from reachability formulas given as input
+and added to the semantics at runtime. Since we don't have this posibility now,
+we added them manually and we enable them at the right time using <ruleConstrains>
+cell.
+
+For each reachability formula given as input we have a corresponding generated rule called
+circularity and a correspnding program.
+*/
   rule (<k> while (y <= b) { b = b - y; a = a + 1; } ~> K </k>
        <state> a |-> A:Int b |-> B:Int x |-> X:Int y |-> Y:Int </state>
        <condition> F:Bool  </condition>
@@ -131,7 +160,7 @@ module IMP
        <k> K </k>
        <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
        <condition> F andBool 0 <=Int X andBool 0 <Int Y andBool X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y </condition>)
-       <frozen> L:FreezeLabel </frozen>
+       <ruleConstraints> L:FreezeLabel </ruleConstraints>
        when fresh(B':Int) andBool fresh(A':Int)
        	    andBool (L =/=K symFreezeLabel(-1))
             andBool checkSat(F andBool notBool(0 <=Int X andBool 0 <Int Y andBool X ==Int A *Int Y +Int B andBool B >=Int 0)) ==K "unsat" [transition]
@@ -143,7 +172,7 @@ module IMP
        <k> K </k>
        <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
        <condition> F andBool A' ==Int A +Int 1 andBool B' ==Int B -Int Y </condition>)
-       <frozen> L:FreezeLabel </frozen>
+       <ruleConstraints> L:FreezeLabel </ruleConstraints>
        when fresh(B':Int) andBool fresh(A':Int)
        	    andBool (L =/=K symFreezeLabel(-2))
             andBool checkSat(F andBool notBool(true)) ==K "unsat" [transition]
@@ -155,19 +184,19 @@ module IMP
        <k> K </k>
        <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
        <condition> F andBool 0 <=Int X andBool 0 <Int Y andBool X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y </condition>)
-       <frozen> L:FreezeLabel </frozen>
+       <ruleConstraints> L:FreezeLabel </ruleConstraints>
        when fresh(B':Int) andBool fresh(A':Int)
        	    andBool (L =/=K symFreezeLabel(-1))
             andBool checkSat(F andBool notBool(0 <=Int X andBool 0 <Int Y andBool X ==Int A *Int Y +Int B andBool B >=Int 0)) ==K "unsat" [transition]
 
-//@ Match
+//@ Match: checks if two configurations match.
   syntax K ::= "match" "(" Bag ")"
 
   rule <k> match(
 		<k> P </k>
 		<state> Ma:Map  </state>
 		<condition> Fa:Bool </condition>
-//		<frozen> _ </frozen>
+//		<ruleConstraints> _ </ruleConstraints>
 		)
 	   => . //checkSat(Fc andBool (notBool Fa) andBool mapLeftEq(Ma, Mc))
        ...</k>
@@ -180,7 +209,7 @@ module IMP
    rule (<k> #ps(B:Bag) </k>
    	<state> _ </state>
 	<condition> _ </condition>
-	<frozen> _ </frozen> ) => B [structural]
+	<ruleConstraints> _ </ruleConstraints> ) => B [structural]
 
   syntax Bool ::= "mapLeftEq" "(" Map "," Map ")" [function]
   rule mapLeftEq(X:Id |-> V1:Int Rest:Map, Left:Map X |-> V2 Right:Map) => V1 ==Int V2 andBool mapLeftEq(Rest, Left Right)
