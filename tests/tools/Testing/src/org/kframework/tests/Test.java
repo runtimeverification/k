@@ -336,8 +336,6 @@ public class Test {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKompile());
 		command.add(language);
-		command.add("-o");
-		command.add(new File(language).getParent() + "/.k");
 		for (Entry<String, String> entry : kompileOptions.entrySet()) {
 			command.add(entry.getKey());
 			command.add(entry.getValue());
