@@ -31,6 +31,7 @@ public class SimpleRewriter {
   static Matcher matcher = new SimpleMatcher();
 
   //we know the cast is safe because SimpleMatcher is only defined for Terms
+  //This helper function returns null if no rewrite is performed
   @SuppressWarnings("cast")
   static private Term rewriteAux(RewriteSet trs, Term t){
     Term out = null;

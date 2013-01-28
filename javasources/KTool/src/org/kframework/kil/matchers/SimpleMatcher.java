@@ -30,10 +30,13 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class SimpleMatcher implements Matcher {
  
   private java.util.Map<Term, Term> substitution = new HashMap<Term, Term>(); 
+
+  private java.util.List<Lookup> defferedLookups = new ArrayList<Lookup>();
 
 	@Override
   public void match(Ambiguity term, Term term2){
@@ -160,6 +163,11 @@ public class SimpleMatcher implements Matcher {
 	@Override
   public void match(MapItem term, Term term2){
     throw new MatcherException("MapItem does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(MapPattern term, Term term2){
+    throw new MatcherException("MapPattern does not have a pattern match implementation.");
   }
 
 	@Override

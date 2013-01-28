@@ -13,6 +13,8 @@ import org.w3c.dom.Element;
 public abstract class Term extends ASTNode implements Matchable {
 	protected String sort;
 
+  protected Term(){}
+
 	public Term(Term t) {
 		super(t);
 		this.sort = t.sort;
