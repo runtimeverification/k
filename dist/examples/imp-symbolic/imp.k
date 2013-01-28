@@ -1,4 +1,8 @@
-
+/*@
+This is the symbolic semantics of IMP. It contains the normal semantics if IMP
+and the rules for symbolic execution, as described in the technical report 
+available here: https://fmse.info.uaic.ro/publications/156/ .
+*/
 module IMP-SYNTAX
 
   syntax AExp  ::= Int | Id
@@ -27,12 +31,9 @@ module IMP-SYNTAX
   //@ Assertions syntax
   syntax Stmt  ::= "assert" "(" BExp ")" ";"  [strict]
 
-  // syntax for symbolic values in programs
-  syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
-
-  // compiler issues
+  //@ \K compiler issues
   syntax Dummy ::= "symInt" [dummySymInt]
-  
+  syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
   syntax priorities builtinWrapper > dummySymInt
 endmodule
 
