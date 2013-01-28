@@ -1,5 +1,3 @@
-require "builtins/symbolic-k.k"
-
 /*@
 
 This is the symbolic semantics of IMP enriched with reachability logic.
@@ -10,7 +8,6 @@ reachability formulas.
 */
 
 module IMP-SYNTAX
-  imports SYMBOLIC-K
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
