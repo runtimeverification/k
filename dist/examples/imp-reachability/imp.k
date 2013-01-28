@@ -27,10 +27,12 @@ module IMP-SYNTAX
 
   syntax Stmt ::= "#ps" "(" Bag ")"
 
+  //@ K tool issues
   syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
   syntax Int ::= "(" Int ")" [bracket]
-  syntax X ::= "symInt" 
+  syntax X ::= "symInt"  [dummySymInt]
   syntax Y ::= "symFreezeLabel"
+  syntax priorities builtinWrapper > dummySymInt
 endmodule
 
 module IMP
