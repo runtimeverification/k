@@ -343,6 +343,7 @@
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--parser" value="&quot;kast -groundParser -compiledDef /var/lib/jenkins/workspace/k-framework-tests/k/dist/examples/imp-symbolic/imp-kompiled &quot;"/>
+      <krun-option name="--no-color" />
     </all-programs>
   </test>
 
@@ -371,6 +372,7 @@
       <krun-option name="--search" />
       <krun-option name="--depth" value="5" />
       <krun-option name="--parser" value="&quot;kast -groundParser -compiledDef /var/lib/jenkins/workspace/k-framework-tests/k/dist/examples/imp-reachability/imp-kompiled &quot;"/>
+      <krun-option name="--no-color" />
     </all-programs>
   </test>
 
