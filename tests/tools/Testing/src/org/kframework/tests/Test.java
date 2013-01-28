@@ -360,7 +360,7 @@ public class Test {
 		if (task.getExit() != 0)
 			return false;
 
-		if (!new File(getCompiledFilename()).exists())
+		if (!new File(getCompiled()).exists())
 			return false;
 
 		if (!task.getStderr().equals(""))
@@ -372,10 +372,12 @@ public class Test {
 		return true;
 	}
 
-	private String getCompiledFilename() {
-		return new File(language).getParent() + "/.k/main.maude";
-	}
 
+	public String getCompiled()
+	{
+		return getLanguage().replace("\\..*?$", "-kompiled");
+	}
+	
 	private String getReportFilename() {
 		return new File(language).getAbsolutePath()
 				.substring(Configuration.getHome().length())
@@ -427,7 +429,7 @@ public class Test {
 	}
 
 	private String getPdfCompiledFilename() {
-		return getXmlLanguage().replaceFirst("\\.k$", ".pdf");
+		return language.replace("\\..*?$", ".pdf");
 	}
 
 	public void save() {
@@ -485,7 +487,8 @@ public class Test {
 	}
 
 	private String getXmlLanguage() {
-		return new File(language).getParent() + Configuration.FS + ".k" + Configuration.FS + "defx.xml";
+		return getCompiled() + Configuration.FS + "defx.xml";
+//		return language;
 	}
 
 	public List<Program> getPrograms() {
