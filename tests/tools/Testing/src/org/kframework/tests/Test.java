@@ -375,7 +375,7 @@ public class Test {
 
 	public String getCompiled()
 	{
-		return getLanguage().replace("\\..*?$", "-kompiled");
+		return getLanguage().replaceAll("\\..*?$", "-kompiled");
 	}
 	
 	private String getReportFilename() {
@@ -429,7 +429,7 @@ public class Test {
 	}
 
 	private String getPdfCompiledFilename() {
-		return language.replace("\\..*?$", ".pdf");
+		return language.replaceAll("\\..*?$", ".pdf");
 	}
 
 	public void save() {
