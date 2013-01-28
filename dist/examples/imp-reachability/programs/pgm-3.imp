@@ -30,4 +30,4 @@ while (y <= b)
 </k>
 <state> a |-> #symInt(a) b |-> #symInt(b) x |-> #symInt(x) y |-> #symInt(y) </state>
 <condition> 0 <=Int #symInt(x) andBool 0 <Int #symInt(y) andBool #symInt(x) ==Int #symInt(a) *Int #symInt(y) +Int #symInt(b) andBool #symInt(b) >=Int 0 </condition>
-<frozen> symFreezeLabel(-1) </frozen>
+<ruleConstraints> symFreezeLabel(-1) </ruleConstraints>

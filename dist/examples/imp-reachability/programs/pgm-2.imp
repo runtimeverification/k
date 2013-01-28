@@ -24,4 +24,4 @@
 </k>
 <state> a |-> #symInt(a) b |-> #symInt(b) x |-> #symInt(x) y |-> #symInt(y) </state>
 <condition> true </condition>
-<frozen> symFreezeLabel(-2) </frozen>
+<ruleConstraints> symFreezeLabel(-2) </ruleConstraints>
