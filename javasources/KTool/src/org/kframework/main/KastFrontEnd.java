@@ -67,8 +67,8 @@ public class KastFrontEnd {
 
 		File def = null;
 		org.kframework.kil.Definition javaDef = null;
-		if (cmd.hasOption("kDefinition")) {
-			def = new File(cmd.getOptionValue("kDefinition"));
+		if (cmd.hasOption("k-definition")) {
+			def = new File(cmd.getOptionValue("k-definition"));
 			if (!def.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
 			if (DefinitionHelper.kompiled == null) {
@@ -79,8 +79,8 @@ public class KastFrontEnd {
 					e.printStackTrace();
 				}
 			}
-		} else if (cmd.hasOption("compiledDef")) {
-			DefinitionHelper.kompiled = new File(cmd.getOptionValue("compiledDef"));
+		} else if (cmd.hasOption("compiled-def")) {
+			DefinitionHelper.kompiled = new File(cmd.getOptionValue("compiled-def"));
 			if (!DefinitionHelper.kompiled.exists()) {
 				String msg = "Could not find directory: " + DefinitionHelper.kompiled;
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", DefinitionHelper.kompiled.getAbsolutePath()));

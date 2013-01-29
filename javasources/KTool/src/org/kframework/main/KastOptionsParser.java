@@ -13,8 +13,8 @@ public class KastOptionsParser {
 
 		// main options
 		OptionGroup main = new OptionGroup();
-		Option def = new Option("kDef", "kDefinition", true, "main file of the definition");
-		Option compiled = new Option("compiledDef", true, "output directory of the compiled definition");
+		Option def = new Option(null, "k-definition", true, "main file of the definition");
+		Option compiled = new Option(null, "compiled-def", true, "output directory of the compiled definition");
 		main.addOption(def);
 		main.addOption(compiled);
 
