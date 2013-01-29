@@ -10,7 +10,7 @@
 
 4.1 Simple execution
     
-    `krun programs/pgm-1.imp`
+    `krun programs/pgm-2.imp`
 
 4.2 Model-checking
     
