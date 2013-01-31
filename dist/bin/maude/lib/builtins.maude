@@ -801,7 +801,7 @@ mod #CONVERSION is
   op string2Base : #String #NzNat -> #Int .
 ceq string2Base(S:#String, N:#NzNat) = I:#Int if I:#Int := String2Rat(S:#String, N:#NzNat) .				  
 
-  op string2Int : #String -> #Int .
+  op string2Int : #String ~> #Int .
 ceq string2Int(S:#String) = I:#Int if I:#Int := String2Rat(S:#String,10) .
  
 
@@ -810,7 +810,7 @@ ceq string2Int(S:#String) = I:#Int if I:#Int := String2Rat(S:#String,10) .
                   op-hook stringSymbol (<Strings> : ~> #String)
                   op-hook floatSymbol (<Floats> : ~> #Float))] .
 
-  op string2Float : #String -> #Float
+  op string2Float : #String ~> #Float
         [special (id-hook StringOpSymbol (float)
                   op-hook stringSymbol (<Strings> : ~> #String)
                   op-hook floatSymbol (<Floats> : ~> #Float))] .
