@@ -1,5 +1,10 @@
 package org.kframework.main;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
@@ -9,11 +14,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
 
 public class KompileBackend extends BasicBackend {
 
@@ -52,7 +52,7 @@ public class KompileBackend extends BasicBackend {
 		load += maudeLib;
 
 		final String mainModule = javaDef.getMainModule();
-		String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
+		//String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
 
 		String main = load + "load \"base.maude\"\n" + "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
 				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";

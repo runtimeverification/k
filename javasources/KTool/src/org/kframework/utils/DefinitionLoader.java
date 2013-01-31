@@ -113,20 +113,22 @@ public class DefinitionLoader {
 			def.setModulesMap(bparser.getModulesMap());
 			def.setItems(bparser.getModuleItems());
 
-			if (GlobalSettings.synModule == null) {
-				String synModule = mainModule + "-SYNTAX";
-				if (!def.getModulesMap().containsKey(synModule)) {
-					synModule = mainModule;
-					String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + synModule + "' instead.";
-					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
-				}
-				def.setMainSyntaxModule(synModule);
-			} else
-				def.setMainSyntaxModule(GlobalSettings.synModule);
+			if (!GlobalSettings.documentation) {
+				if (GlobalSettings.synModule == null) {
+					String synModule = mainModule + "-SYNTAX";
+					if (!def.getModulesMap().containsKey(synModule)) {
+						synModule = mainModule;
+						String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + synModule + "' instead.";
+						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
+					}
+					def.setMainSyntaxModule(synModule);
+				} else
+					def.setMainSyntaxModule(GlobalSettings.synModule);
 
-			if (!def.getModulesMap().containsKey(mainModule)) {
-				String msg = "Could not find main module '" + mainModule + "'. Use -l(ang) option to specify another.";
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
+				if (!def.getModulesMap().containsKey(mainModule)) {
+					String msg = "Could not find main module '" + mainModule + "'. Use -l(ang) option to specify another.";
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
+				}
 			}
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Basic Parsing");
@@ -153,22 +155,24 @@ public class DefinitionLoader {
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
-			String oldSdfPgm = "";
-			if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
-				oldSdfPgm = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+			if (!GlobalSettings.documentation) {
+				String oldSdfPgm = "";
+				if (new File(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
+					oldSdfPgm = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
-			String newSdfPgm = ProgramSDF.getSdfForPrograms(def);
+				String newSdfPgm = ProgramSDF.getSdfForPrograms(def);
 
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgm);
-			newSdfPgm = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+				FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgm);
+				newSdfPgm = FileUtil.getFileContent(DefinitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
-			if (GlobalSettings.verbose)
-				Stopwatch.sw.printIntermediate("File Gen Pgm");
-
-			if (!oldSdfPgm.equals(newSdfPgm)) {
-				Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
 				if (GlobalSettings.verbose)
-					Stopwatch.sw.printIntermediate("Generate TBLPgm");
+					Stopwatch.sw.printIntermediate("File Gen Pgm");
+
+				if (!oldSdfPgm.equals(newSdfPgm)) {
+					Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
+					if (GlobalSettings.verbose)
+						Stopwatch.sw.printIntermediate("Generate TBLPgm");
+				}
 			}
 
 			def.accept(new AddAutoIncludedModulesVisitor());
@@ -190,9 +194,11 @@ public class DefinitionLoader {
 			if (!oldSdf.equals(newSdf)) {
 				// Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
 				Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
-				Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/ground"), "Concrete");
+				if (!GlobalSettings.documentation) {
+					Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/ground"), "Concrete");
+					t2.join();
+				}
 				t1.join();
-				t2.join();
 				if (GlobalSettings.verbose)
 					Stopwatch.sw.printIntermediate("Generate TBLDef");
 			}

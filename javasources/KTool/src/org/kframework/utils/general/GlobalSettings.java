@@ -29,11 +29,13 @@ public class GlobalSettings {
 	public static boolean testFactory = false;
 	// this is used by kast to know what parser to use fort the input string
 	public static ParserType whatParser = ParserType.PROGRAM;
+
 	public enum ParserType {
 		PROGRAM, GROUND, RULES
 	}
 
-    public static boolean symbolicEquality = false;
-    public static boolean SMT = false;
-    public static boolean matchingLogic = false;
+	public static boolean symbolicEquality = false;
+	public static boolean SMT = false;
+	public static boolean matchingLogic = false;
+	public static boolean documentation = false;
 }

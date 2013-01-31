@@ -137,9 +137,10 @@ public class KompileFrontEnd {
 		if (!mainFile.exists()) {
 			File errorFile = mainFile;
 			mainFile = new File(def + ".k");
-			if (!mainFile.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "File: " + errorFile.getName() + "(.k) not found.", errorFile.getAbsolutePath(),
-						"File system."));
+			if (!mainFile.exists()) {
+				String msg = "File: " + errorFile.getName() + "(.k) not found.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
+			}
 		}
 
 		output = null;
@@ -153,26 +154,30 @@ public class KompileFrontEnd {
 		else
 			lang = FileUtil.getMainModule(mainFile.getName());
 
-//		if (cmd.hasOption("lint")) {
-//			lint(mainFile, lang);
-//		}
+		// if (cmd.hasOption("lint")) {
+		// lint(mainFile, lang);
+		// }
 
 		Backend backend = null;
 		if (cmd.hasOption("maudify")) {
 			backend = new MaudeBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("latex")) {
+			GlobalSettings.documentation = true;
 			backend = new LatexBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("pdf")) {
+			GlobalSettings.documentation = true;
 			backend = new PdfBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("xml")) {
 			backend = new XmlBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("html")) {
+			GlobalSettings.documentation = true;
 			backend = new HtmlBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("unparse")) {
 			backend = new UnparserBackend(Stopwatch.sw);
-		}  else if (cmd.hasOption("kexp")) {
+		} else if (cmd.hasOption("kexp")) {
 			backend = new KExpBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("doc")) {
+			GlobalSettings.documentation = true;
 			backend = new DocumentationBackend(Stopwatch.sw);
 		} else {
 			if (output == null) {
@@ -186,9 +191,8 @@ public class KompileFrontEnd {
 			try {
 				DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
 			} catch (IOException e) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-						"Canonical file cannot be obtained for main file.",
-						mainFile.getAbsolutePath(), "File system."));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", mainFile.getAbsolutePath(),
+						"File system."));
 			}
 			DefinitionHelper.dotk.mkdirs();
 		}
@@ -196,9 +200,9 @@ public class KompileFrontEnd {
 			genericCompile(mainFile, lang, backend, step);
 		}
 
-        GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
-        GlobalSettings.SMT = cmd.hasOption("smt");
-        GlobalSettings.matchingLogic = cmd.hasOption("ml");
+		GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
+		GlobalSettings.SMT = cmd.hasOption("smt");
+		GlobalSettings.matchingLogic = cmd.hasOption("ml");
 
 		if (GlobalSettings.verbose)
 			Stopwatch.sw.printTotal("Total");
@@ -235,8 +239,8 @@ public class KompileFrontEnd {
 			steps.add(new ResolveFunctions());
 			steps.add(new AddKCell());
 			steps.add(new AddSymbolicK());
-            if (GlobalSettings.symbolicEquality)
-                steps.add(new AddSemanticEquality());
+			if (GlobalSettings.symbolicEquality)
+				steps.add(new AddSemanticEquality());
 			// steps.add(new ResolveFresh());
 			steps.add(new ResolveFreshMOS());
 			steps.add(new AddTopCellConfig());
@@ -288,25 +292,25 @@ public class KompileFrontEnd {
 		}
 	}
 
-//	private static void lint(File mainFile, String mainModule) {
-//		try {
-//			File canonicalFile = mainFile.getCanonicalFile();
-//			org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(canonicalFile, mainModule, true);
-//
-//			KlintRule lintRule = new UnusedName(javaDef);
-//			lintRule.run();
-//
-//			lintRule = new UnusedSyntax(javaDef);
-//			lintRule.run();
-//
-//			lintRule = new InfiniteRewrite(javaDef);
-//			lintRule.run();
-//		} catch (IOException e1) {
-//			e1.printStackTrace();
-//		} catch (Exception e1) {
-//			e1.printStackTrace();
-//		}
-//	}
+	// private static void lint(File mainFile, String mainModule) {
+	// try {
+	// File canonicalFile = mainFile.getCanonicalFile();
+	// org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(canonicalFile, mainModule, true);
+	//
+	// KlintRule lintRule = new UnusedName(javaDef);
+	// lintRule.run();
+	//
+	// lintRule = new UnusedSyntax(javaDef);
+	// lintRule.run();
+	//
+	// lintRule = new InfiniteRewrite(javaDef);
+	// lintRule.run();
+	// } catch (IOException e1) {
+	// e1.printStackTrace();
+	// } catch (Exception e1) {
+	// e1.printStackTrace();
+	// }
+	// }
 
 	// public static void pdfClean(String[] extensions) {
 	// for (int i = 0; i < extensions.length; i++)
