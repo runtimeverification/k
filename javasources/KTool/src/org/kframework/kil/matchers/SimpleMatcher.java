@@ -36,9 +36,11 @@ import java.util.ArrayList;
 
 public class SimpleMatcher implements Matcher {
  
-  private java.util.Map<Term, Term> substitution = new HashMap<Term, Term>(); 
+  private java.util.Map<Term, Term> substitution 
+    = new HashMap<Term, Term>(); 
 
-  private java.util.Map<Variable, HashSet<MapLookupConstraint>> deferredLookups = new HashMap<Variable, HashSet<MapLookupConstraint>>();
+  private java.util.Map<Variable, HashSet<MapLookupConstraint>> deferredMapLookups 
+    = new HashMap<Variable, HashSet<MapLookupConstraint>>();
 
 	@Override
   public void match(Ambiguity term, Term term2){
@@ -169,12 +171,48 @@ public class SimpleMatcher implements Matcher {
 
 	@Override
   public void match(MapLookupPattern term, Term term2){
-    throw new MatcherException("MapLookupPattern does not have a pattern match implementation.");
+    if(!(term2 instanceof MapImpl)){
+      throw new MatcherException("Attempted to match a MapLookupPattern with non MapImpl: " 
+          + term2);  
+    }
+    MapImpl map = (MapImpl) term2;
+    for(Binding b : term.getLookups()){
+      Term key = b.getKey();
+      if(key instanceof Variable){
+        key = substitution.get(key);
+        //if key is null we have not bound this Variable yet
+        //and must create a deferredMapLookup
+        if(key == null){
+          MapLookupConstraint mlc = new MapLookupConstraint(map, b.getValue());
+          HashSet<MapLookupConstraint> constraints = deferredMapLookups.get(b.getKey());
+          if(constraints == null){
+            constraints = new HashSet<MapLookupConstraint>();
+            deferredMapLookups.put((Variable) b.getKey(), constraints);
+          }
+          constraints.add(mlc);
+        }
+        // yay, we know the binding so we can just unify without deferring!
+        else {
+          b.getValue().accept(this, map.get(key));
+        }
+      } 
+      //here we are looking up with a Term that wasn't even a Variable, so this is
+      //really simple
+      else{
+        b.getValue().accept(this, map.get(b.getKey()));
+      }
+    }
   }
 
 	@Override
   public void match(MapInsertPattern term, Term term2){
     throw new MatcherException("MapInsertPattern does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(MapImpl term, Term term2){
+    throw new MatcherException("MapImpls can never appear in patterns, only in " +
+        "Terms that we are actually rewriting or on rule RHS.");
   }
 
 	@Override
@@ -229,14 +267,14 @@ public class SimpleMatcher implements Matcher {
       //handle any deferred Map lookups where we did not 
       //know the Variable binding before hand
       //since we just bound a Variable
-      HashSet<MapLookupConstraint> lookups = deferredLookups.get(term); 
+      HashSet<MapLookupConstraint> lookups = deferredMapLookups.get(term); 
       for(MapLookupConstraint lookup : lookups){
         //look unify the value bound to term2 in the MapImpl with the image 
         //in the MapLookupPattern 
         lookup.unify(this, term2);
       }
       //this isn't really necessary, but it will help free up memory
-      deferredLookups.remove(lookups); 
+      deferredMapLookups.remove(lookups); 
     }
 
     else {

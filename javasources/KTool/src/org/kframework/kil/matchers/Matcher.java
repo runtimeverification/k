@@ -29,6 +29,8 @@ import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 
+import org.kframework.kil.rewriter.MapImpl;
+
 /**
  * This is the interface for recursive pattern matching.  It is used
  * somewhat like a Visitor.
@@ -60,6 +62,7 @@ public interface Matcher {
 	public void match(MapItem term, Term term2);
 	public void match(MapLookupPattern term, Term term2);
 	public void match(MapInsertPattern term, Term term2);
+	public void match(MapImpl term, Term term2);
 	public void match(Rewrite term, Term term2);
 	public void match(Set term, Term term2);
 	public void match(SetItem term, Term term2);

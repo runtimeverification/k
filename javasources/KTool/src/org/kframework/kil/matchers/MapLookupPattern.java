@@ -28,6 +28,10 @@ public class MapLookupPattern extends Term {
 
   }
 
+  public List<Binding> getLookups(){
+    return lookups;
+  }
+
   @Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
