@@ -58,7 +58,8 @@ public interface Matcher {
 	public void match(ListItem term, Term term2);
 	public void match(Map term, Term term2);
 	public void match(MapItem term, Term term2);
-	public void match(MapPattern term, Term term2);
+	public void match(MapLookupPattern term, Term term2);
+	public void match(MapInsertPattern term, Term term2);
 	public void match(Rewrite term, Term term2);
 	public void match(Set term, Term term2);
 	public void match(SetItem term, Term term2);

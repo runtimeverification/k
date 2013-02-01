@@ -28,15 +28,17 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
+import org.kframework.kil.rewriter.MapImpl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.ArrayList;
 
 public class SimpleMatcher implements Matcher {
  
   private java.util.Map<Term, Term> substitution = new HashMap<Term, Term>(); 
 
-  private java.util.List<Lookup> defferedLookups = new ArrayList<Lookup>();
+  private java.util.Map<Variable, HashSet<MapLookupConstraint>> deferredLookups = new HashMap<Variable, HashSet<MapLookupConstraint>>();
 
 	@Override
   public void match(Ambiguity term, Term term2){
@@ -166,8 +168,13 @@ public class SimpleMatcher implements Matcher {
   }
 
 	@Override
-  public void match(MapPattern term, Term term2){
-    throw new MatcherException("MapPattern does not have a pattern match implementation.");
+  public void match(MapLookupPattern term, Term term2){
+    throw new MatcherException("MapLookupPattern does not have a pattern match implementation.");
+  }
+
+	@Override
+  public void match(MapInsertPattern term, Term term2){
+    throw new MatcherException("MapInsertPattern does not have a pattern match implementation.");
   }
 
 	@Override
@@ -215,9 +222,21 @@ public class SimpleMatcher implements Matcher {
       if(term.getSort().equals(t.getSort())){
         substitution.put(term, term2);
       } else {
-        throw new MatcherException("Sort " + term.getSort() + " of Variable " + term + " does not match "
+        throw new MatcherException("Sort " + term.getSort() 
+            + " of Variable " + term + " does not match "
           + " sort " + t.getSort() + " of Term " + term2); 
       }
+      //handle any deferred Map lookups where we did not 
+      //know the Variable binding before hand
+      //since we just bound a Variable
+      HashSet<MapLookupConstraint> lookups = deferredLookups.get(term); 
+      for(MapLookupConstraint lookup : lookups){
+        //look unify the value bound to term2 in the MapImpl with the image 
+        //in the MapLookupPattern 
+        lookup.unify(this, term2);
+      }
+      //this isn't really necessary, but it will help free up memory
+      deferredLookups.remove(lookups); 
     }
 
     else {

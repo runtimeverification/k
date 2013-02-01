@@ -11,17 +11,20 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import java.util.List;
 import java.util.ArrayList;
 
-public class MapPattern extends Term {
+public class MapInsertPattern extends Term {
 
-  private List<Binding> lookups;
+  private List<Binding> insertions;
 
 
-  public MapPattern(Map m){
-    lookups = new ArrayList<Binding>(m.getContents().size());
-    
+  public MapInsertPattern(Map m){
+    java.util.List<Term> contents = m.getContents();
+    insertions = new ArrayList<Binding>(contents.size());
+    for(Term t : contents){
+      
+    } 
   }
 
-  public MapPattern(MapPattern mp){
+  public MapInsertPattern(MapInsertPattern mp){
 
   }
 
@@ -41,8 +44,8 @@ public class MapPattern extends Term {
   }
 
   @Override
-	public MapPattern shallowCopy() {
-		return new MapPattern(this);
+	public MapInsertPattern shallowCopy() {
+		return new MapInsertPattern(this);
 	}
 
 }  
