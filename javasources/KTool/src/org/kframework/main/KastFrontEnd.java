@@ -104,6 +104,9 @@ public class KastFrontEnd {
 					}
 				}
 			}
+			if (DefinitionHelper.kompiled == null && System.getenv("KRUN_COMPILED_DEF") != null) {
+				DefinitionHelper.kompiled = new File(System.getenv("KRUN_COMPILED_DEF"));
+			}
 
 			if (DefinitionHelper.kompiled == null) {
 				String msg = "Could not find a compiled definition. Use -kDefinition or -compiledDef to specify one.";
@@ -162,6 +165,9 @@ public class KastFrontEnd {
 			GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
 		}
 		String sort = DefinitionHelper.startSymbolPgm;
+		if (System.getenv("KRUN_SORT") != null) {
+			sort = System.getenv("KRUN_SORT");
+		}			
 		if (cmd.hasOption("sort")) {
 			sort = cmd.getOptionValue("sort");
 		}

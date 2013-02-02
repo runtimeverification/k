@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // instantiate processes
 public class RunProcess {
@@ -18,7 +20,7 @@ public class RunProcess {
 	private String err = null;
 	private int exitCode;
 
-	public void execute(String... commands) {
+	public void execute(Map<String, String> environment,String... commands) {
 
 		ThreadedStreamHandler inputStreamHandler, errorStreamHandler;
 
@@ -29,6 +31,8 @@ public class RunProcess {
 
 			// create process
 			ProcessBuilder pb = new ProcessBuilder(commands);
+			Map<String, String> realEnvironment = pb.environment();
+			realEnvironment.putAll(environment);
 
 			// set execution directory to current user dir
 			pb.directory(new File(K.userdir));
@@ -112,11 +116,12 @@ public class RunProcess {
 			} else {
 				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
 				tokens.add(pgm);
+				Map<String, String> environment = new HashMap<String, String>();
 				if (startSymbol != null) {
-					tokens.add("-sort");
-					tokens.add(startSymbol);
+					environment.put("KRUN_SORT", startSymbol);
 				}
-				this.execute(tokens.toArray(new String[0]));
+				environment.put("KRUN_COMPILED_DEF", K.compiled_def);
+				this.execute(environment, tokens.toArray(new String[0]));
 			}
 		}
 
