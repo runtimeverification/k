@@ -16,7 +16,7 @@ public abstract class ProductionItem extends ASTNode {
 	}
 
 	public enum ProductionType {
-		TERMINAL, SORT, USERLIST
+		TERMINAL, SORT, USERLIST, LEXICAL
 	}
 
 	public abstract ProductionType getType();

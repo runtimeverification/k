@@ -17,10 +17,11 @@ import org.kframework.kil.FreezerHole;
 import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
+import org.kframework.kil.Lexical;
 import org.kframework.kil.List;
 import org.kframework.kil.ListItem;
-import org.kframework.kil.KList;
 import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Map;
@@ -32,6 +33,7 @@ import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.Require;
+import org.kframework.kil.Restrictions;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Set;
@@ -52,9 +54,9 @@ public class JavaClassesFactory {
 	public static ASTNode getTerm(Element element) {
 		// used for a new feature - loading java classes at first step (Basic Parsing)
 		if (Constants.LEXICAL.equals(element.getNodeName()))
-			return new StringSentence(element);
+			return new Lexical(element);
 		if (Constants.RESTRICTIONS.equals(element.getNodeName()))
-			return new StringSentence(element);
+			return new Restrictions(element);
 		if (Constants.RULE.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
 			return new StringSentence(element);
 		if (Constants.RULE.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))

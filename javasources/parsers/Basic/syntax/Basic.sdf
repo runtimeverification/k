@@ -11,9 +11,9 @@ context-free syntax
 	"require" STRING	-> Require {cons("Require")}
 
 	%% K Module syntax
-	"module" MODNAME KModHeaderItem* KSentence* "endmodule" -> KModule {cons("KModule")}
+	"module"    MODNAME KModHeaderItem* KSentence* "endmodule"    -> KModule {cons("KModule")}
 	"interface" MODNAME KModHeaderItem* KSentence* "endinterface" -> KModule {cons("KInterface")}
-	"imports" MODNAME	-> KModHeaderItem {cons("Imports")}
+	"imports"   MODNAME	-> KModHeaderItem {cons("Imports")}
 
 	%% K Sentences
 	"configuration"		HIDDEN+	-> KSentence {cons("Config")}
@@ -27,8 +27,7 @@ context-free syntax
 	"syntax" "left"			KLABEL+			-> KSentence {cons("PriorityLeft")}
 	"syntax" "right"		KLABEL+			-> KSentence {cons("PriorityRight")}
 	"syntax" "non-assoc"	KLABEL+			-> KSentence {cons("PriorityNonAssoc")}
-	"syntax" "lexical"		HIDDEN+ 		-> KSentence {cons("Lexical")}
-	"syntax" "restrictions"	HIDDEN+ 		-> KSentence {cons("Restrictions")}
+	"syntax" BasicElement "-/-" Follow 		-> KSentence {cons("Restrictions")}
 
 	KLABEL+	-> KLList {cons("PriorityBlock")}
 	HIDDEN	-> KLABEL {cons("KLabel")}
@@ -54,9 +53,12 @@ context-free syntax
 
 	SyntaxElement+	-> Prod2 {cons("Prod")}
 	SyntaxElement+	"[" {Tag ","}+ "]" -> Prod2 {cons("AnnoProd")}
-	STRING		-> SyntaxElement {cons("Terminal")}
-	SORTID		-> SyntaxElement {cons("Sort")}
+	BasicElement -> SyntaxElement
+	STRING		-> BasicElement {cons("Terminal")}
+	SORTID		-> BasicElement {cons("Sort")}
 	"List{" BASICID "," STRING "}" -> SyntaxElement {cons("List")}
+	"Lexer" "{" RegEx "}" -> SyntaxElement {cons("Lexer")}
+	"Token" "{" RegEx "}" -> SyntaxElement {cons("Token")}
 
 	%%COMPOSEDID	-> NonTerminal {cons("SyntaxCID")}
 
@@ -122,5 +124,26 @@ lexical restrictions
 	%%COMPOSEDID		-/- [a-zA-Z0-9\{\}]
 	NAT				-/- [0-9]
 
+
+context-free syntax
+	Element+		-> RegEx {cons("RegExList")}
+	
+	STRING			-> Element {cons("String2Element")}
+	Element "?"		-> Element {cons("ElementQuestion")}
+	Element "+"		-> Element {cons("ElementPlus")}
+	Element "*"		-> Element {cons("ElementStar")}
+	"(" Element* ")"	-> Element {bracket}
+	"{" Element STRING "}" "+"		-> Element {cons("ElementListPlus")}
+	"{" Element STRING "}" "*"		-> Element {cons("ElementListStar")}
+	ID				-> Element {cons("ID2Element")}
+	Group			-> Element {cons("Group2Element")}
+	"[" Char* "]"	-> Group {cons("CharGroup")}
+	"~" Group		-> Group {cons("TildeGroup")}
+	[a-zA-Z0-9]		-> Char {cons("CharCharacters")}
+	[\\]~[a-zA-Z\t]	-> Char {cons("CharEscape1")}
+	[\\][tnr]		-> Char {cons("CharEscape2")}
+	"\\ "			-> Char {cons("CharEscape3")}
+	Char "-" Char	-> Char {cons("CharSequence"), non-assoc}
+	{Group "."}+	-> Follow {cons("FollowList")}
 
 

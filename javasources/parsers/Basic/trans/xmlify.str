@@ -384,19 +384,37 @@ rules
 		where mydebug(!"priassoc-non-assoc: ")
 		where x2'* := <all(to-xml)> x	// get all of the production rules
 		where loc := <getLocAsString>
+		
+	to-xml:
+		Token(x1) -> $[<lexical loc="[loc]" value="[x1']" [follow]/>
+		]
+		where mydebug(!"Token: ")
+		where x1' := <get-original-sentence> x1
+		where follow := <get-follow> x1
+		where loc := <getLocAsString>
+
+	get-follow:
+		RegExList(x) -> $[[rez]]
+		where mydebug(!"GetFollow: ")
+		where x2 := <reverse> x
+		where <?[head | _]> x2
+		where (<?ElementPlus(a) <+ ?ElementStar(a)> head ; rez := $[follow="[<get-original-sentence> a]"])
+		       <+ rez := ""
 
 	to-xml:
-		Lexical(x1) -> $[<lexical loc="[loc]" value="[x1']" />
+		Lexer(x1) -> $[<lexical loc="[loc]" value="[x1']" />
 		]
 		where mydebug(!"Lexical: ")
 		where x1' := <get-original-sentence> x1
 		where loc := <getLocAsString>
 
 	to-xml:
-		Restrictions(x1) -> $[<restrictions loc="[loc]" value="[x1']" />
+		Restrictions(x1, x2) -> $[<restrictions loc="[loc]" value="[x2']" >
+										[<to-xml> x1]
+		</restrictions>
 		]
 		where mydebug(!"Restrictions: ")
-		where x1' := <get-original-sentence> x1
+		where x2' := <get-original-sentence> x2
 		where loc := <getLocAsString>
 
 	to-xml:
