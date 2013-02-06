@@ -561,11 +561,16 @@ public class MaudeFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(Freezer freezer) {
-		Term term = freezer.getTerm();
+	public void visit(FreezerLabel freezerLabel) {
+		Term term = freezerLabel.getTerm();
 		result.append("#freezer_(");
 		term.accept(this);
-		result.append(")(." + MetaK.Constants.KList + ")");
+		result.append(")");
+	}
+
+	@Override
+	public void visit(Freezer freezer) {
+		freezer.getTerm().accept(this);
 	}
 
 	@Override

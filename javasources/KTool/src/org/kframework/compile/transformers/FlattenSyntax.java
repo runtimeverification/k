@@ -146,6 +146,11 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		}
 
 		@Override
+		public ASTNode transform(Freezer node) throws TransformerException {
+			return new KApp(new FreezerLabel((Term)node.getTerm().accept(this)),new Empty(MetaK.Constants.KList));
+		}
+
+		@Override
 		public ASTNode transform(TermCons tc) throws TransformerException {
 			if (!MetaK.isComputationSort(tc.getSort())) {
 				return new KApp(new KInjectedLabel((Term) tc.accept(trans)), new Empty(MetaK.Constants.KList));

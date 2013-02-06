@@ -347,6 +347,12 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(FreezerLabel freezerLabel) {
+		freezerLabel.getTerm().accept(this);
+		visit((Term) freezerLabel);
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}
