@@ -812,6 +812,9 @@ public class Main {
 			if (!K.debug) {
 				normalExecution(KAST, lang, rp, cmd_options);
 			} else {
+				if (K.do_search) {
+					Error.report("Cannot specify --search with --debug. In order to search inside the debugger, use the step-all command.");
+				}
 				debugExecution(KAST, lang, false);
 			}
 		} catch (IOException e) {
