@@ -146,7 +146,7 @@ interface K-LIST-EXTRAS
 
 	syntax Int ::= "lengthList" List [function]
 
-   rule lengthList ( ListItem(_) L:List ) => 1 +Int lengthList L [structural, anywhere]
+   rule lengthList ( _:ListItem L:List ) => 1 +Int lengthList L [structural, anywhere]
    rule lengthList .List => 0 [structural, anywhere]
    rule isKResult((K1:KResult => .KList),, _:K,, _:KList)
    rule isKResult(.KList) => true
