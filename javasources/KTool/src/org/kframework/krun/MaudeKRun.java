@@ -2,6 +2,7 @@ package org.kframework.krun;
 
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicTransformer;
@@ -71,6 +72,18 @@ public class MaudeKRun implements KRun {
 		return parseRunResult();
 	}
 
+	public KRunResult step(Term cfg, int steps) throws Exception {
+		String maude_cmd = K.maude_cmd;
+		if (steps == 0) {
+			K.maude_cmd = "red";
+		} else {
+			K.maude_cmd = "rew[" + Integer.toString(steps) + "]";
+		}
+		KRunResult result = run(cfg);
+		K.maude_cmd = maude_cmd;
+		return result;
+	}
+
 	private static class FlattenDisambiguationFilter extends BasicTransformer {
 		public FlattenDisambiguationFilter() {
 			super("Reflatten ambiguous syntax");
@@ -107,6 +120,7 @@ public class MaudeKRun implements KRun {
 		assertXML(child.size() == 1);
 
 		Term result = MaudeKRun.parseXML((Element) child.get(0));
+		Term rawResult = MaudeKRun.parseXML((Element) child.get(0));
 		result = (Term) result.accept(new ConcretizeSyntax());
 		result = (Term) result.accept(new TypeInferenceSupremumFilter());
 		result = (Term) result.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
@@ -119,7 +133,7 @@ public class MaudeKRun implements KRun {
 			}
 		}
 
-		KRunResult ret = new KRunResult(result);
+		KRunResult ret = new KRunResult(result, rawResult);
 		String statistics = p.printStatistics(elem);
 		ret.setStatistics(statistics);
 		ret.setRawOutput(FileUtil.getFileContent(K.maude_out));
@@ -240,6 +254,10 @@ public class MaudeKRun implements KRun {
 				return new Empty(MetaK.Constants.KList);
 			} else if (op.equals("_`(_`)") && sort.equals("KItem")) {
 				assertXMLTerm(list.size() == 2);
+				if (list.get(0).getAttribute("sort").equals("KLabel") && list.get(0).getAttribute("op").equals("#freezer_")) {
+					// TODO: Get rid of this code block when Traian fixes the Freezer class to be a KLabel again
+					return parseXML(list.get(0));
+				}
 				return new KApp(parseXML(list.get(0)), parseXML(list.get(1)));
 			} else if (sort.equals("KLabel") && list.size() == 0) {
 				return new Constant("KLabel", op);
@@ -324,7 +342,7 @@ public class MaudeKRun implements KRun {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
 		executeKRun(cmd, K.io);
-		KRunResult result = new KRunResult(parseSearchResult(), patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
+		KRunResult result = new KRunResult(parseSearchResult(), parseRawSearchResult(), pattern, patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
 		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 		if (K.showSearchGraph) {
 			result.setSearchGraph(p.printSearchGraph(K.processed_maude_output));
@@ -333,6 +351,24 @@ public class MaudeKRun implements KRun {
 	}
 
 	private List<Map<String, Term>> parseSearchResult() throws Exception {
+		List<Map<String, Term>> results = new ArrayList<Map<String, Term>>();
+		for (Map<String, Term> result : parseRawSearchResult()) {
+			Map<String, Term> m = new HashMap<String, Term>();
+			for (String key : result.keySet()) {
+				Term searchResult = result.get(key);
+				searchResult = (Term) searchResult.accept(new ConcretizeSyntax());
+				searchResult = (Term) searchResult.accept(new TypeInferenceSupremumFilter());
+				searchResult = (Term) searchResult.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+				//as a last resort, undo concretization
+				searchResult = (Term) searchResult.accept(new FlattenDisambiguationFilter());
+				m.put(key, searchResult);
+			}
+			results.add(m);
+		}
+		return results;		
+	}
+
+	private List<Map<String, Term>> parseRawSearchResult() throws Exception {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
@@ -355,12 +391,7 @@ public class MaudeKRun implements KRun {
 				List<Element> child = XmlUtil.getChildElements(elem);
 				assertXML(child.size() == 2);
 				Term result = parseXML(child.get(1));
-				result = (Term) result.accept(new ConcretizeSyntax());
-				result = (Term) result.accept(new TypeInferenceSupremumFilter());
-				result = (Term) result.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-				//as a last resort, undo concretization
-				result = (Term) result.accept(new FlattenDisambiguationFilter());
-				searchResults.get(i).put(child.get(0).getAttribute("op"), result);
+			searchResults.get(i).put(child.get(0).getAttribute("op"), result);
 			}
 		}
 		return searchResults;
@@ -406,7 +437,8 @@ public class MaudeKRun implements KRun {
 		assertXML(child.size() == 1);
 		elem = child.get(0);
 		if (elem.getAttribute("op").equals("true") && elem.getAttribute("sort").equals("#Bool")) {
-			return new KRunResult(new Constant("Bool", "true"));
+			Term trueTerm = new Constant("Bool", "true");
+			return new KRunResult(trueTerm, (Term)trueTerm.accept(new FlattenSyntax()));
 		} else {
 			sort = elem.getAttribute("sort");
 			op = elem.getAttribute("op");

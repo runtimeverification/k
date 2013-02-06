@@ -1,6 +1,7 @@
 package org.kframework.krun;
 
 import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicTransformer;
@@ -36,14 +37,21 @@ public class KRunResult {
 	private List<Transition> loop = null;
 	private String statistics;
 	private boolean isDefaultPattern;
+	private Term rawResult;
+	private List<Term> rawSearchResults;
 
-	public KRunResult(Term result) {
+	public KRunResult(Term result, Term rawResult) {
 		this.result = result;
+		this.rawResult = rawResult;
 	}
-	public KRunResult(List<Map<String, Term>> searchResults, boolean isDefaultPattern, Set<String> varNames) {
+	public KRunResult(List<Map<String, Term>> searchResults, List<Map<String, Term>> rawSearchSubstitution, Rule pattern, boolean isDefaultPattern, Set<String> varNames) throws TransformerException {
 		this.searchResults = searchResults;
 		this.isDefaultPattern = isDefaultPattern;
 		this.varNames = varNames;
+		this.rawSearchResults = new ArrayList<Term>();
+		for (Map<String, Term> searchResult : rawSearchSubstitution) {
+			this.rawSearchResults.add((Term) pattern.getBody().accept(new SubstitutionFilter(searchResult)));
+		}
 	}
 	public KRunResult(List<Transition> initialPath, List<Transition> loop) {
 		this.initialPath = initialPath;
@@ -122,6 +130,18 @@ public class KRunResult {
 		throw new RuntimeException("should be unreachable");
 	}
 
+	public Term getResult() {
+		return this.result;
+	}
+
+	public Term getRawResult() {
+		return this.rawResult;
+	}
+
+	public List<Map<String, Term>> getSearchResults() {	
+		return this.searchResults;
+	}
+
 	private String rawOutput;
 
 	public void setRawOutput(String rawOutput) {
@@ -141,4 +161,13 @@ public class KRunResult {
 		return searchGraph;
 	}
 
+	public KRunResult get(String num) throws Exception {
+		int solutionNum = Integer.parseInt(num);
+		Map<String, Term> subst = this.searchResults.get(solutionNum - 1) ;
+		if(isDefaultPattern) {
+			return new KRunResult(subst.get("B:Bag"), this.rawSearchResults.get(solutionNum - 1));
+		} else {
+			throw new Exception("Can't call get() with custom search pattern yet");
+		}
+	}
 }

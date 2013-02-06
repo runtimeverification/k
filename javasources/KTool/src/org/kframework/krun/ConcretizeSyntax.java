@@ -86,10 +86,13 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 					}
 				}
 			}
-		} else if (label instanceof Freezer) {
-			return ((Freezer)label).getTerm().accept(this);
 		}
 		return super.transform(kapp);
+	}
+
+	@Override
+	public ASTNode transform(Freezer f) throws TransformerException {
+		return ((Freezer)f).getTerm().accept(this);
 	}
 
 	@Override

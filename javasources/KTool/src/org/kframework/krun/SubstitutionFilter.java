@@ -22,6 +22,9 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
 	public ASTNode transform(Variable var) {
 		Term t = args.get(var.getName());
 		if (t == null) {
+			t = args.get(var.getName() + ":" + var.getSort());
+		}
+		if (t == null) {
 			GlobalSettings.kem.register(new KException(
 				ExceptionType.ERROR,
 				KExceptionGroup.CRITICAL,
