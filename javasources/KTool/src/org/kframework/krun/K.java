@@ -92,4 +92,6 @@ public class K {
 
 	public static Definition definition;
 	public static Definition kompiled_def;
+
+	public static int counter = 0;
 }

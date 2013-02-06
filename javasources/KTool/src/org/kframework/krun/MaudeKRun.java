@@ -60,7 +60,7 @@ public class MaudeKRun implements KRun {
 	public KRunResult run(Term cfg) throws Exception {
 		MaudeFilter maudeFilter = new MaudeFilter();
 		cfg.accept(maudeFilter);
-		String cmd = "set show command off ." + K.lineSeparator + K.maude_cmd + " " + maudeFilter.getResult() + " .";
+		String cmd = "set show command off ." + K.lineSeparator + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " ." + getCounter();
 		if(K.trace) {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
@@ -70,6 +70,14 @@ public class MaudeKRun implements KRun {
 
 		executeKRun(cmd, K.io);
 		return parseRunResult();
+	}
+
+	private String setCounter() {
+		return "red setCounter(" + Integer.toString(K.counter) + ") ." + K.lineSeparator;
+	}
+
+	private String getCounter() {
+		return K.lineSeparator + "red counter .";
 	}
 
 	public KRunResult step(Term cfg, int steps) throws Exception {
@@ -112,7 +120,7 @@ public class MaudeKRun implements KRun {
 		NodeList list = null;
 		Node nod = null;
 		list = doc.getElementsByTagName("result");
-		nod = list.item(0);
+		nod = list.item(1);
 
 		assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
 		Element elem = (Element) nod;
@@ -137,7 +145,17 @@ public class MaudeKRun implements KRun {
 		String statistics = p.printStatistics(elem);
 		ret.setStatistics(statistics);
 		ret.setRawOutput(FileUtil.getFileContent(K.maude_out));
+		parseCounter(list.item(2));
 		return ret;
+	}
+
+	private void parseCounter(Node counter) throws Exception {
+		assertXML(counter != null && counter.getNodeType() == Node.ELEMENT_NODE);
+		Element elem = (Element) counter;
+		List<Element> child = XmlUtil.getChildElements(elem);
+		assertXML(child.size() == 1);
+		Term t = parseXML(child.get(0));
+		K.counter = Integer.parseInt(((Constant)t).getValue()) - 1;
 	}
 
 	private static void assertXML(boolean assertion) {
@@ -315,7 +333,7 @@ public class MaudeKRun implements KRun {
 	}
 
 	public KRunResult search(String bound, String depth, String searchType, Rule pattern, Term cfg, Set<String> varNames) throws Exception {
-		String cmd = "set show command off ." + K.lineSeparator + "search ";
+		String cmd = "set show command off ." + K.lineSeparator + setCounter() + "search ";
 		if (bound != null && depth != null) {
 			cmd += "[" + bound + "," + depth + "] ";
 		} else if (bound != null) {
@@ -341,6 +359,7 @@ public class MaudeKRun implements KRun {
 		if (K.trace) {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
+		cmd += getCounter();
 		executeKRun(cmd, K.io);
 		KRunResult result = new KRunResult(parseSearchResult(), parseRawSearchResult(), pattern, patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
 		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
@@ -394,6 +413,9 @@ public class MaudeKRun implements KRun {
 			searchResults.get(i).put(child.get(0).getAttribute("op"), result);
 			}
 		}
+		list = doc.getElementsByTagName("result");
+		nod = list.item(1);
+		parseCounter(nod);
 		return searchResults;
 	}
 
