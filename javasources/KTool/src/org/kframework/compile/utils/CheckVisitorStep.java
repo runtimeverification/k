@@ -15,6 +15,9 @@ public class CheckVisitorStep<T extends ASTNode> extends BasicCompilerStep<T> im
 	public boolean check(T def) {
 		try {
 			def.accept(t);
+			if (sw != null) {
+				sw.printIntermediate(getName());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

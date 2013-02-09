@@ -1,7 +1,6 @@
 package org.kframework.main;
 
 import com.thoughtworks.xstream.XStream;
-
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
 import org.kframework.backend.doc.DocumentationBackend;
@@ -15,6 +14,7 @@ import org.kframework.backend.xml.XmlBackend;
 import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
+import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.compile.sharing.AutomaticModuleImportsTransformer;
@@ -170,6 +170,9 @@ public class KompileFrontEnd {
 		} else if (cmd.hasOption("xml")) {
 			backend = new XmlBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("html")) {
+			if (!cmd.hasOption("style")) {
+				GlobalSettings.style = "k-definition.css";
+			}
 			GlobalSettings.documentation = true;
 			backend = new HtmlBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("unparse")) {
@@ -178,6 +181,9 @@ public class KompileFrontEnd {
 			backend = new KExpBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("doc")) {
 			GlobalSettings.documentation = true;
+			if (!cmd.hasOption("style")) {
+				GlobalSettings.style = "k-documentation.css";
+			}
 			backend = new DocumentationBackend(Stopwatch.sw);
 		} else {
 			if (output == null) {
@@ -222,6 +228,7 @@ public class KompileFrontEnd {
 				steps.setSw(Stopwatch.sw);
 			}
 			steps.add(new FirstStep(backend));
+			steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells()));
 			steps.add(new RemoveBrackets());
 			steps.add(new AddEmptyLists());
 			steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));

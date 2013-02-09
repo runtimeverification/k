@@ -9,11 +9,24 @@ import org.kframework.utils.general.GlobalSettings;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
+/*
  * Initially created by: Traian Florin Serbanuta
  * <p/>
  * Date: 11/21/12
  * Time: 3:13 PM
+ */
+
+/**
+ * Checks Variable consistency.
+ *
+ * Generic variables:
+ * 1. Variables must be bound in the pattern
+ * 2. Variables unused in the rhs should be anonymous.
+ *
+ * Fresh variables:
+ * 1. fresh can only appear as a side condition
+ * 2. fresh can only be applied to a variable
+ * 3. the fresh variable can only appear as a replacement variable
  */
 public class CheckVariables extends BasicVisitor {
 

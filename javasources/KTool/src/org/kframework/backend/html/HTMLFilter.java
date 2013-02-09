@@ -9,6 +9,7 @@ import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
 import java.io.FileInputStream;
@@ -22,7 +23,7 @@ import java.util.regex.Pattern;
 
 public class HTMLFilter extends BackendFilter {
 	String endl = System.getProperty("line.separator");
-	private String css = "";
+	private String css = GlobalSettings.style;
 	private String preamble = "";
 	private String title = "";
 	private String author = "";
@@ -50,7 +51,6 @@ public class HTMLFilter extends BackendFilter {
 	public HTMLFilter(String includePath) {
 		super();
 		this.includePath = includePath;
-		initializeCss();
 		createHTMLColors();
 		loadProperties();
 	}
@@ -63,9 +63,7 @@ public class HTMLFilter extends BackendFilter {
 			"<html lang=\"en\">" + endl + 
 			"<head>" + endl + 
 			"	<title>" + title + "</title>" + endl + 
-			"	<style>" + endl + 
-			css + 
-			"	</style>" + endl + 
+			"	<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\">" + endl +
 			// this file is maybe not encoded in utf-8...
 			"	<meta charset=\"utf-8\" />" + endl + 
 			// MathJax->
@@ -698,170 +696,6 @@ public class HTMLFilter extends BackendFilter {
 			return from.substring(a,i-1);
 		}
 		return null;
-	}
-	
-	private void initializeCss() {
-	/*  This function initializes the css string. 
-		It's added directly in the header of the html page.
-		The content of this string should be put in an external file
-		an loaded during execution. 
-	*/
-		css += ".bold" + endl
-				+ "{" + endl
-				+ "font-weight: bold;"+endl
-				+ "}" + endl;
-		
-		css += ".italic" + endl
-				+ "{" + endl
-				+ "font-style: italic;"+endl
-				+ "}" + endl;
-		
-		css += "em" + endl
-				+ "{" + endl
-				+ "font-style: italic;"+endl
-				+ "}" + endl;
-		
-		css += ".large" + endl
-				+ "{" + endl
-				+ "font-size: large;"+endl
-				+ "}" + endl;
-		
-		css += ".xlarge" + endl
-				+ "{" + endl
-				+ "font-size: x-large;"+endl
-				+ "}" + endl;
-		
-		css += ".courier" + endl
-				+ "{" + endl
-				+ "font-family: courier;"+endl
-				+ "}" + endl;
-		
-		css += ".attribute" + endl
-				+ "{" + endl
-				+ "color: blue;"+endl
-				+ "}" + endl;
-		
-		css += ".center" + endl
-				+ "{" + endl
-				+ "text-align: center;"+endl
-				+ "}" + endl;
-		
-		css += ".textCentered" + endl
-				+ "{" + endl
-				+ "text-align: center;"+endl
-				+ "display: inline-block;"+endl
-				+ "vertical-align: top;"+endl
-				+ "min-width: 20px;"+endl
-				+ "}" + endl;
-		
-		css += ".cell" + endl
-				+ "{" + endl
-				+ "display: inline-block;"+endl
-				+ "vertical-align: top;"+endl
-				+ "text-align:left;" +endl
-				+ "}" + endl;
-		
-		css += "hr.reduce" + endl
-				+ "{" + endl
-				+ "color: black;"+endl
-				+ "background-color: black;"+endl
-				+ "height: 3px;"+endl
-				+ "}" + endl;
-		
-		css += "hr.reduce:after" + endl
-				+ "{" + endl
-				+ "width: 0;"+endl
-				+ "height: 0;"+endl
-				+ "border-left : 6px solid transparent;"+endl
-				+ "border-right : 6px solid transparent;"+endl
-				+ "border-top : 6px solid black;"+endl
-				+ "position: absolute;"+endl
-				+ "content: \"\";"+endl
-				+ "}" + endl;
-		
-		css += ".tab" + endl
-				+ "{" + endl
-				+ "display: inline-block;"+endl
-				+ "padding : 2px;"+endl
-				+ "margin-left : 0;"+endl
-				+ "border-top : 3px solid;"+endl
-				+ "border-left : 3px solid;"+endl
-				+ "border-right : 3px solid;"+endl
-				+ "text-align: left;"+endl
-				+ "}" + endl;
-		
-		css += ".tab.curvedEdge" + endl
-				+ "{" + endl
-				+ "position: relative;"+endl
-				+ "left: 30px;"+endl
-				+ "top : 3px;"+endl
-				+ "}" + endl;
-		
-		css += ".tab.straightEdge" + endl
-				+ "{" + endl
-				+ "position: relative;"+endl
-				+ "left: 8px;"+endl
-				+ "top : 3px;"+endl
-				+ "}" + endl;
-		
-		css += ".block" + endl
-				+ "{" + endl
-				+ "color : black;"+endl
-				+ "border-width: 3px;"+endl
-				+ "display: inline-block; "+endl
-				+ "padding: 10px;"+endl
-				+ "padding-left: 20px;"+endl
-				+ "padding-right: 20px;"+endl
-				+ "border-radius: 30px;"+endl
-				+ "border-style: solid;"+endl
-				+ "min-width: 60px;"+endl
-				+ "text-align: left;"+endl
-				+ "}" + endl;
-		
-		css += ".commentBlock" + endl
-				+ "{" + endl
-				+ "color : black;"+endl
-				+ "border-width: 1px;"+endl
-				+ "display: inline-block; "+endl
-				+ "padding: 10px;"+endl
-				+ "padding-left: 20px;"+endl
-				+ "padding-right: 20px;"+endl
-				+ "border-radius: 30px;"+endl
-				+ "border-style: solid;"+endl
-				+ "text-align: left;"+endl
-				+ "}" + endl;
-		
-		css += ".block.right" + endl
-				+ "{" + endl
-				+ "border-top-right-radius: 0px;"+endl
-				+ "border-bottom-right-radius: 0px;"+endl
-				+ "border-right-style: dotted;"+endl
-				+ "}" + endl;
-		
-		css += ".block.left" + endl
-				+ "{" + endl
-				+ "border-top-left-radius: 0px;"+endl
-				+ "border-bottom-left-radius: 0px;"+endl
-				+ "border-left-style: dotted;"+endl
-				+ "}" + endl;	
-		
-		css += ".defaultColor" + endl
-				+ "{" + endl
-				+ "border-color: #000000;"+endl
-				+ "background-color: #FFFFFF;"+endl
-				+ "}" + endl;
-		
-		css += ".definitionComment" + endl
-				+ "{" + endl
-				+ "border-color: #000000;"+endl
-				+ "background-color: #f2f2f2;"+endl
-				+ "}" + endl;
-		
-		css += ".moduleComment" + endl
-				+ "{" + endl
-				+ "border-color: #000000;"+endl
-				+ "background-color: #e5e5e5;"+endl
-				+ "}" + endl;
 	}
 	
 	private void createHTMLColors() {
