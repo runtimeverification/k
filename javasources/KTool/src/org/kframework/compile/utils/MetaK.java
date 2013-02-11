@@ -313,6 +313,12 @@ public class MetaK {
 		}
 		if (prod.isConstant())
 			return new Constant(prod.getSort(), ((Terminal) prod.getItems().get(0)).getTerminal());
+		if (prod.isLexical()) {
+			KList l = new KList();
+			l.add(Constant.STRING(prod.getSort()));
+			l.add(getFreshVar("String"));
+			return new KApp(Constant.KLABEL("#token"), l);
+		}
 		TermCons t = new TermCons(prod.getSort(), prod.getCons());
 		if (prod.isListDecl()) {
 			t.getContents().add(getFreshVar(((UserList) prod.getItems().get(0)).getSort()));

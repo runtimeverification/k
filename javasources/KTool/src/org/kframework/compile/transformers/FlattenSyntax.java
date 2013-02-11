@@ -170,10 +170,16 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		}
 
 		@Override
-		public ASTNode transform(Constant cst) {
+		public ASTNode transform(Constant cst) throws TransformerException {
 			String l = cst.getLocation();
 			String f = cst.getFilename();
 
+			if (!MetaK.isBuiltinSort(cst.getSort()) && !cst.getSort().equals("KLabel")) {
+				KList list = new KList();
+				list.add(Constant.STRING(cst.getSort()));
+				list.add(Constant.STRING(cst.getValue()));
+				return new KApp(Constant.KLABEL("#token"), list).accept(this);
+			}
 			return new KApp(l, f, new KInjectedLabel(cst), new Empty(l, f, MetaK.Constants.KList));
 		}
 

@@ -163,7 +163,6 @@ mod K-RULES is
   op _=>_ : Set Set -> Set [prec 125] .
 endm
 
-
 mod K-EVAL is 
   including K-TECHNIQUE .
   op #eval_ : Map -> Bag .

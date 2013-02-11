@@ -4,6 +4,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
 /** A terminal in a {@link Production}. */
@@ -14,9 +15,9 @@ public class Lexical extends ProductionItem {
 
 	public Lexical(Element element) {
 		super(element);
-		lexicalRule = element.getAttribute(Constants.VALUE_value_ATTR);
+		lexicalRule = StringUtil.unescape(element.getAttribute(Constants.VALUE_value_ATTR));
 		if (element.hasAttribute("follow"))
-			follow = element.getAttribute("follow");
+			follow = StringUtil.unescape(element.getAttribute("follow"));
 	}
 
 	public Lexical(String terminal) {

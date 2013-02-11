@@ -226,6 +226,11 @@ module DEFAULT-CONFIGURATION
   imports K-TECHNIQUE
   configuration <k> $PGM:K </k>
 endmodule
+ 
+module K-TOKENS
+  imports K-TECHNIQUE
+  syntax KLabel ::= "#token"
+endmodule
 
 interface K
   imports K-TECHNIQUE
@@ -246,6 +251,7 @@ interface K
   imports K-MAP-EXTRAS            // operations on Maps
   imports K-BAG-EXTRAS            // operations on Bags
   imports K-SET-EXTRAS            // operations on Sets
+  imports K-TOKENS
   //imports K-LATEX  
 endinterface
 

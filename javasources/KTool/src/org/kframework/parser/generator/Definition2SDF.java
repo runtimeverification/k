@@ -1,12 +1,15 @@
 package org.kframework.parser.generator;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.Restrictions;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
@@ -182,7 +185,33 @@ public class Definition2SDF {
 		sdf.append("	\"is\" -/- [\\#A-Z]\n");
 		sdf.append("\n");
 
-		sdf.append(psdfv.lexical);
+		// lexical rules
+		sdf.append("lexical syntax\n");
+		java.util.Set<String> lexerSorts = new HashSet<String>();
+		for (Production p : psdfv.lexical) {
+			Lexical l = (Lexical) p.getItems().get(0);
+			lexerSorts.add(p.getSort());
+			sdf.append("	" + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort()) + "Dz\n");
+			if (l.getFollow() != null && !l.getFollow().equals("")) {
+				psdfv.restrictions.add(new Restrictions(p.getSort(), null, l.getFollow()));
+			}
+		}
+
+		// adding cons over lexical rules
+		sdf.append("context-free syntax\n");
+		for (String s : lexerSorts) {
+			sdf.append("	" + StringUtil.escapeSortName(s) + "Dz -> " + StringUtil.escapeSortName(s) + " {cons(\"" + StringUtil.escapeSortName(s) + "1Const\")}\n");
+		}
+		sdf.append("\n\n");
+
+		// follow restrictions
+		sdf.append("lexical restrictions\n");
+		for (Restrictions r : psdfv.restrictions) {
+			if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
+				sdf.append("	" + r.getTerminal() + " -/- " + r.getPattern() + "\n");
+			else
+				sdf.append("	" + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
+		}
 
 		return sdf.toString();
 	}

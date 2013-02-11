@@ -7,6 +7,7 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
@@ -38,7 +39,7 @@ public class Restrictions extends ModuleItem {
 			terminal = (Terminal) JavaClassesFactory.getTerm(terminals.get(0));
 		}
 
-		this.pattern = element.getAttribute(Constants.VALUE_value_ATTR);
+		this.pattern = StringUtil.unescape(element.getAttribute(Constants.VALUE_value_ATTR));
 	}
 
 	public Restrictions(String sort, String terminal, String pattern) {
