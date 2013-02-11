@@ -13,8 +13,8 @@ import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
-import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -40,7 +40,8 @@ public class ProgramSDFVisitor extends BasicVisitor {
 	public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
 	public Set<String> userSort = new HashSet<String>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
 	public StringBuilder sdf = new StringBuilder("");
-	public StringBuilder lexical = new StringBuilder("");
+	public List<Production> lexical = new ArrayList<Production>();
+	public List<Restrictions> restrictions = new ArrayList<Restrictions>();
 
 	public ProgramSDFVisitor() {
 		constantSorts.add("#Id");
@@ -51,7 +52,6 @@ public class ProgramSDFVisitor extends BasicVisitor {
 	}
 
 	public void visit(Syntax syn) {
-
 		userSort.add(syn.getSort().getName());
 		List<PriorityBlock> priblocks = syn.getPriorityBlocks();
 		processPriorities(priblocks);
@@ -108,7 +108,9 @@ public class ProgramSDFVisitor extends BasicVisitor {
 			for (Production prd : prt.getProductions()) {
 				startSorts.add(prd.getSort());
 
-				if (prd.isSubsort()) {
+				if (prd.isLexical()) {
+					lexical.add(prd);
+				} else if (prd.isSubsort()) {
 					outsides.add(prd);
 					startSorts.add(((Sort) prd.getItems().get(0)).getName());
 				} else if (prd.isConstant()) {
@@ -172,10 +174,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 		}
 	}
 
-	public void visit(StringSentence node) {
-		if (node.getType().equals(org.kframework.kil.loader.Constants.LEXICAL))
-			this.lexical.append("lexical syntax\n" + node.getContent() + "\n");
-		if (node.getType().equals(org.kframework.kil.loader.Constants.RESTRICTIONS))
-			this.lexical.append("lexical restrictions\n" + node.getContent() + "\n");
+	public void visit(Restrictions node) {
+		restrictions.add(node);
 	}
 }

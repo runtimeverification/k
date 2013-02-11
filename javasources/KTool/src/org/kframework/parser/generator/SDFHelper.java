@@ -20,6 +20,8 @@ public class SDFHelper {
 		// str += "avoid, ";
 		if (attrs.containsKey("left"))
 			str += "left, ";
+		if (attrs.containsKey("reject"))
+			str += "reject, ";
 		if (attrs.containsKey("right"))
 			str += "right, ";
 		if (attrs.containsKey("non-assoc"))

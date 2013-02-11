@@ -31,6 +31,7 @@ public class AddConsesVisitor extends BasicVisitor {
 			String cons = p.getAttribute("cons");
 			if (cons != null)
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Constants are not allowed to have cons: '" + cons + "'", p.getFilename(), p.getLocation()));
+		} else if (p.isLexical()) {
 		} else if (p.isSubsort()) {
 			// cons are not allowed for subsortings
 			String cons = p.getAttribute("cons");

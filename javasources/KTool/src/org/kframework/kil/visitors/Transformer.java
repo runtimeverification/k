@@ -18,6 +18,7 @@ public interface Transformer {
 	public ASTNode transform(Sentence node) throws TransformerException;
 	//	<Sentences>
 	public ASTNode transform(StringSentence node) throws TransformerException;
+	public ASTNode transform(Restrictions node) throws TransformerException;
 	public ASTNode transform(Configuration node) throws TransformerException;
 	public ASTNode transform(Context node) throws TransformerException;
 	public ASTNode transform(Rule node) throws TransformerException;
@@ -34,6 +35,7 @@ public interface Transformer {
 	public ASTNode transform(Attribute node) throws TransformerException;
 	//<ProductionItems>
 	public ASTNode transform(Sort node) throws TransformerException;
+	public ASTNode transform(Lexical node) throws TransformerException;
 	public ASTNode transform(Terminal node) throws TransformerException;
 	public ASTNode transform(UserList node) throws TransformerException;
 	//</ProductionItems>

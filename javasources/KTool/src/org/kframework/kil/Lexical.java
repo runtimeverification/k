@@ -27,6 +27,7 @@ public class Lexical extends ProductionItem {
 	public Lexical(Lexical terminal) {
 		super(terminal);
 		this.lexicalRule = terminal.lexicalRule;
+		this.follow = terminal.follow;
 	}
 
 	public ProductionType getType() {

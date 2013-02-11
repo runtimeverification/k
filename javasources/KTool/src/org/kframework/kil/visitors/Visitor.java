@@ -18,6 +18,7 @@ public interface Visitor {
 	public void visit(Sentence node);
 	// <Sentences>
 	public void visit(StringSentence node);
+	public void visit(Restrictions node);
 	public void visit(Configuration node);
 	public void visit(Context node);
 	public void visit(Rule node);
@@ -32,6 +33,7 @@ public interface Visitor {
 	public void visit(ProductionItem node);
 	// <ProductionItems>
 	public void visit(Sort node);
+	public void visit(Lexical node);
 	public void visit(Terminal node);
 	public void visit(UserList node);
 	// </ProductionItems>

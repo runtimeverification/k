@@ -13,8 +13,8 @@ import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
-import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -36,7 +36,8 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 	public Set<Production> listProds = new HashSet<Production>(); // list of sorts declared as being list
 	public Set<Sort> userSorts = new HashSet<Sort>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
 	public StringBuilder sdf = new StringBuilder();
-	public StringBuilder lexical = new StringBuilder("");
+	public List<Production> lexical = new ArrayList<Production>();
+	public List<Restrictions> restrictions = new ArrayList<Restrictions>();
 
 	public DefinitionSDFVisitor() {
 		constantSorts.add("#Id");
@@ -103,6 +104,8 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 			for (Production prd : prt.getProductions()) {
 				if (prd.containsAttribute("onlyLabel")) {
 					// if a production has this attribute, don't add it to the list
+				} else if (prd.isLexical()) {
+					lexical.add(prd);
 				} else if (prd.isSubsort()) {
 					if (!prd.getSort().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
 						outsides.add(prd);
@@ -175,10 +178,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 		}
 	}
 
-	public void visit(StringSentence node) {
-		// if (node.getType().equals(org.kframework.kil.loader.Constants.LEXICAL))
-		// this.lexical.append("lexical syntax\n" + node.getContent() + "\n");
-		if (node.getType().equals(org.kframework.kil.loader.Constants.RESTRICTIONS))
-			this.lexical.append("lexical restrictions\n" + node.getContent() + "\n");
+	public void visit(Restrictions node) {
+		restrictions.add(node);
 	}
 }

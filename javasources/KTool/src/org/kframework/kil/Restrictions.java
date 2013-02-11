@@ -30,10 +30,25 @@ public class Restrictions extends ModuleItem {
 		super(element);
 
 		List<Element> sorts = XML.getChildrenElementsByTagName(element, Constants.SORT);
-
 		// assumption: sorts contains only one element
-		sort = (Sort) JavaClassesFactory.getTerm(sorts.get(0));
+		if (sorts.size() > 0)
+			sort = (Sort) JavaClassesFactory.getTerm(sorts.get(0));
+		else {
+			List<Element> terminals = XML.getChildrenElementsByTagName(element, Constants.TERMINAL);
+			terminal = (Terminal) JavaClassesFactory.getTerm(terminals.get(0));
+		}
 
+		this.pattern = element.getAttribute(Constants.VALUE_value_ATTR);
+	}
+
+	public Restrictions(String sort, String terminal, String pattern) {
+		if (sort != null && terminal != null)
+			System.out.println("A restriction can have only one of sort or terminal!");
+		if (sort != null)
+			this.sort = new Sort(sort);
+		else
+			this.terminal = new Terminal(terminal);
+		this.pattern = pattern;
 	}
 
 	public Restrictions(Restrictions node) {
@@ -45,7 +60,7 @@ public class Restrictions extends ModuleItem {
 
 	@Override
 	public String toString() {
-		return "  syntax " + (sort != null ? sort : terminal) + " ::= " + pattern + "\n";
+		return "  syntax " + (sort != null ? sort : terminal) + " -/- " + pattern + "\n";
 	}
 
 	@Override

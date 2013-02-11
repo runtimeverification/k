@@ -15,8 +15,8 @@ import org.w3c.dom.Element;
 import java.util.ArrayList;
 import java.util.List;
 
-/** A production.
- * Any explicit attributes on the production are stored in {@link ASTNode#attributes}.
+/**
+ * A production. Any explicit attributes on the production are stored in {@link ASTNode#attributes}.
  */
 public class Production extends ASTNode {
 
@@ -56,6 +56,10 @@ public class Production extends ASTNode {
 		return items.size() == 1 && items.get(0).getType() == ProductionType.SORT;
 	}
 
+	public boolean isLexical() {
+		return items.size() == 1 && items.get(0).getType() == ProductionType.LEXICAL;
+	}
+
 	public boolean isConstant() {
 		return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals("KLabel"));
 	}
@@ -67,6 +71,7 @@ public class Production extends ASTNode {
 		strings.add(Constants.SORT);
 		strings.add(Constants.TERMINAL);
 		strings.add(Constants.USERLIST);
+		strings.add(Constants.LEXICAL);
 		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, strings);
 
 		items = new ArrayList<ProductionItem>();

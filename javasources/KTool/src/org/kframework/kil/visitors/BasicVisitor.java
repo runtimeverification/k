@@ -154,6 +154,11 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(Lexical node) {
+		visit((ProductionItem) node);
+	}
+
+	@Override
 	public void visit(UserList node) {
 		visit((ProductionItem) node);
 	}
@@ -316,6 +321,11 @@ public class BasicVisitor implements Visitor {
 
 	@Override
 	public void visit(StringSentence node) {
+		visit((ModuleItem) node);
+	}
+
+	@Override
+	public void visit(Restrictions node) {
 		visit((ModuleItem) node);
 	}
 
