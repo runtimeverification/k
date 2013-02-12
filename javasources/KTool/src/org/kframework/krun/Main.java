@@ -1,27 +1,7 @@
 package org.kframework.krun;
 
 import com.thoughtworks.xstream.XStream;
-import java.io.BufferedReader;
-import java.io.Console;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import jline.ArgumentCompletor;
-import jline.Completor;
-import jline.ConsoleReader;
-import jline.FileNameCompletor;
-import jline.MultiCompletor;
-import jline.SimpleCompletor;
-
+import jline.*;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -29,6 +9,7 @@ import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.ConfigurationCleaner;
+import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
@@ -42,10 +23,12 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import com.thoughtworks.xstream.XStream;
+import java.io.*;
+import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Main {
 
@@ -784,6 +767,7 @@ public class Main {
 
 				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.compiled_def + "/defx.xml"));
 				// This is essential for generating maude
+				javaDef = new FlattenModules().compile(javaDef, null);
 				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig());
 				javaDef.preprocess();
 				K.definition = javaDef;
