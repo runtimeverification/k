@@ -31,7 +31,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
             list.getContents().add(kapp);
             Term lhs = new KApp(KLabel2String, list);
             String str = "\"" + klbl.replace("\"","\\\"") + "\"";
-            Constant strCt = new Constant("String", str);
+            Constant strCt = new Constant("#String", str);
             Term rhs = new KApp(new KInjectedLabel(strCt), Empty.ListOfK);
             Rule rule = new Rule(lhs, rhs);
             rule.addAttribute(Attribute.FUNCTION);

@@ -69,7 +69,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
-                var = MetaK.getFreshVar("String");
+                var = MetaK.getFreshVar("#String");
                 symTerm = new KApp(Constant.KLABEL(symCtor), var);
                 lhs = new KApp(K_TO_SMTLIB, symTerm);
                 rhs = appendString(Constant.STRING(SMTLIB_VAR_PREFIX), var);

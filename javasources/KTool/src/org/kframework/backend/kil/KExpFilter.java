@@ -146,7 +146,7 @@ public class KExpFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Constant constant) {
-		final boolean isString = constant.getSort().equals("String");
+		final boolean isString = constant.getSort().equals("#String");
 		if (isString)
 			result.append("\"");
 		result.append(constant.getValue());

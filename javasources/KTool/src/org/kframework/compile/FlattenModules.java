@@ -95,7 +95,7 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
 //				Cell nId = new Cell();
 //				nId.setLabel("nextId");
 //				nId.setElipses("none");
-//				Constant zero = new Constant("Int", "0");
+//				Constant zero = new Constant("#Int", "0");
 //				nId.setContents(zero);
 //				bag.getContents().add(nId);
 //			}
