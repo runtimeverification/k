@@ -53,6 +53,7 @@ public class K {
 	// the default values for jkrun commandline options
 	public static String desk_file;
 	public static String pgm;
+	public static String term = null;
 	public static String k_definition = null;
 	public static String main_module;
 	public static String syntax_module;

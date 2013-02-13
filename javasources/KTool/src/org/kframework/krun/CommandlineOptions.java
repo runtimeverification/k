@@ -70,6 +70,7 @@ public class CommandlineOptions {
 		Option no_color = OptionBuilder.hasArg(false).withLongOpt("no-color").create();
 		Option parens = OptionBuilder.hasArg(false).withLongOpt("parens").withDescription("Show parentheses in output").create();
 		Option no_parens = OptionBuilder.hasArg(false).withLongOpt("no-parens").create();
+		Option term = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("term").withDescription("Input argument will be parsed with the specified parser and used as the sole input to krun").create();
 
 		options.addOption(pgm); getOptionList().add(pgm);
 		options.addOption(k_definition); getOptionList().add(k_definition);
@@ -85,6 +86,7 @@ public class CommandlineOptions {
 		options.addOption(no_color); getOptionList().add(no_color);
 		options.addOption(parens); getOptionList().add(parens);
 		options.addOption(no_parens); getOptionList().add(no_parens);
+		options.addOption(term); getOptionList().add(term);
 
 		// Advanced K options
 		Option compiled_def = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("compiled-def").withDescription("Path to the compiled K definition").create();

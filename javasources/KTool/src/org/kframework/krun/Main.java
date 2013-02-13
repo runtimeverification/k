@@ -166,7 +166,17 @@ public class Main {
 		return (Term) cfgCleaned.accept(new SubstitutionFilter(termArgs));
 	}
 
-	public static Map<String, String> makeConfiguration(String kast, String stdin, RunProcess rp) {
+	public static Term makeConfiguration(String kast, String stdin, RunProcess rp, boolean hasTerm) throws TransformerException {
+		
+		if(hasTerm) {
+			if(kast == null) {
+				kast = rp.runParser(K.parser, K.term, false, null);
+				return new BackendTerm("Bag", kast);
+			} else {
+				Error.report("You cannot specify both the term and the configuration variables.");
+			}
+		}
+		
 		HashMap<String, String> output = new HashMap<String, String>();
 		boolean hasPGM = false;
 		Enumeration<Object> en = K.configuration_variables.keys();
@@ -202,7 +212,7 @@ public class Main {
 			output.put("$noIO", "(.).List");
 			output.put("$stdin", "(.).K");
 		}
-		return output;
+		return plug(output);
 	}
 
 	// execute krun in normal mode (i.e. not in debug mode)
@@ -254,7 +264,7 @@ public class Main {
 						pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
 
 						Rule patternRule = (Rule) pattern;
-						result = krun.search(bound, depth, K.searchType, patternRule, plug(makeConfiguration(KAST, buffer, rp)), varNames);
+						result = krun.search(bound, depth, K.searchType, patternRule, makeConfiguration(KAST, buffer, rp, (K.term != null)), varNames);
 					} else {
 						Error.report("For the search option you need to specify that --maude-cmd=search");
 					}
@@ -271,9 +281,9 @@ public class Main {
 						KAST1 = rp.runParser(K.parser, K.model_checking, true, "LTLFormula");
 					}
 
-					result = krun.modelCheck(new BackendTerm("K", KAST1), plug(makeConfiguration(KAST, null, rp)));
+					result = krun.modelCheck(new BackendTerm("K", KAST1), makeConfiguration(KAST, null, rp, (K.term != null)));
 				} else {
-					result = krun.run(plug(makeConfiguration(KAST, null, rp)));
+					result = krun.run(makeConfiguration(KAST, null, rp, (K.term != null)));
 				}
 			} catch (KRunExecutionException e) {
 				rp.printError(e.getMessage(), lang);
@@ -368,7 +378,7 @@ public class Main {
 			KRun krun = new MaudeKRun();
 			KRunResult result = null;
 			if (!isSwitch) {
-				Term t = plug(makeConfiguration(kast, null, rp));
+				Term t = makeConfiguration(kast, null, rp, (K.term != null));
 				result = krun.step(t, 0);
 				System.out.println("After running one step of execution the result is:");
 				red = result.prettyPrint();
@@ -591,6 +601,9 @@ public class Main {
 			if (cmd.hasOption("parser")) {
 				K.parser = cmd.getOptionValue("parser");
 			}
+			if (cmd.hasOption("term")) {
+				K.term = cmd.getOptionValue("term");
+			}
 			if (cmd.hasOption("io")) {
 				K.io = true;
 			}
@@ -675,6 +688,12 @@ public class Main {
 				K.output = new File(cmd.getOptionValue("output")).getCanonicalPath();
 			}
 			if (cmd.hasOption("c")) {
+				
+				if(K.term != null)
+				{
+					Error.report("You cannot specify both the term and the configuration variables.");
+				}
+				
 				K.configuration_variables = cmd.getOptionProperties("c");
 				String parser = null;
 				for (Option opt : cmd.getOptions()) {
@@ -791,6 +810,13 @@ public class Main {
 			} else {
 				KAST = null;
 			}
+			
+			if(K.term != null) {
+				if(K.parser.equals("kast")) {
+					GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
+				}
+			}
+			
 			GlobalSettings.kem.print();
 
 			if (!K.debug) {
