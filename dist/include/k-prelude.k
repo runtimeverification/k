@@ -230,6 +230,8 @@ endmodule
 module K-TOKENS
   imports K-TECHNIQUE
   syntax KLabel ::= "#token"
+  syntax K ::= isToken(K) [predicate]
+  rule isToken(#token(_)) => true
 endmodule
 
 interface K

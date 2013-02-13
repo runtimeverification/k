@@ -119,7 +119,9 @@ module SYMBOLIC-K
     isSymbolicK(Map2KLabel(M:Map)(.KList)) => isSymbolicMap(M)
   [predicate]
   rule isSymbolicK(KL:KLabel(LK:KList)) => false
-  when isBuiltin(KL(LK)) 
+  when isBuiltin(KL(LK))
+  rule isSymbolicK(KL:KLabel(LK:KList)) => false
+  when isToken(KL(LK))
   rule
     isSymbolicK(KL:KLabel(LK:KList))
   =>

@@ -206,12 +206,24 @@ used in the type inferencers in Tutorial 5. */
 The syntax of LOGIK is straightforward: a program is a sequence of
 Horn clauses followed by a query: */
 
-  syntax Term ::= Id | Id "(" Terms ")"
+  syntax Term ::= Variable | Literal | Literal "(" Terms ")"
   syntax Terms ::= List{Term,","}
   syntax Clause ::= Term ":-" Terms "." | Term "."
   syntax Query ::= "?-" Terms "."
   syntax Pgm ::= Query | Clause Pgm
 
+  
+
+/*@ Variables and literals are defined as tokens following the conventions 
+used in Prolog (variables start with \_ or capital letter, while literals
+start with lower case letters): */  
+
+
+  syntax Variable ::= Token{[\_A-Z][a-zA-Z0-9\_]*}               [onlyLabel]
+  syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel]
+
+
+  
 /*@ \subsection{Normalizing the definition}
 
 The following simple macros ensure that all clauses will have both a
@@ -224,8 +236,8 @@ simply the semantics later on, by not having to treat special cases. */
 // to do that yet, is:
 //   rule IdAsTerm(X) => X(.Terms) when isCapitalizedId(X) =/= true  [macro]
 // Instead, we currently have to add rules like the following
-  rule (X:Id => X(.Terms)) :- _ .                                [macro]
-  rule (X:Id => X(.Terms)),_  when isCapitalizedId(X) =/=K true  [macro]
+  rule (X:Literal => X(.Terms)) :- _ .                           [macro]
+  rule (X:Literal => X(.Terms)),_                                [macro]
 
 /*@ \section{Configuration}
 
@@ -298,15 +310,6 @@ $q \vee r$.  We let it as an exercise to the reader to see how the two
 relate (hint: assume the negation of the goal together with all the
 clauses, and then derive {\em false}). */
 
-/*@ By default, the \K predefined unification procedure is
-conservative: it only assumes as unification variables those which are
-generated with the \texttt{fresh} predicate (in rule side conditions).
-Since here we also want the capitalized identifiers to be treated as
-unification variables, we have to explicitly state it (the sort
-{\em CapitalizedId} is predefined, too, and it includes all the
-identifiers that start with a capital letter): */
-
-  syntax Variable ::= CapitalizedId
 
 /*@ The following two rules are tightly connected and they together
 perform the following core task: pick a fresh instance of a clause
