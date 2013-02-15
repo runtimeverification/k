@@ -1,2 +1,2 @@
-[]Ltl( eq(r, -1))
+<>Ltl eqTo(r, 1)
 

@@ -228,7 +228,7 @@ module CINK-LANG-SEMANTICS
                   <genv color="SkyBlue"> .Map </genv>
                   <store color="white"> .Map </store>
                   <br/>
-                  <in color="magenta" stream="stdin"> $IN:List </in>
+                  <in color="magenta" stream="stdin"> .List </in>
 //                  <out color="Orchid"> .List </out>
                   <out color="Orchid" stream="stdout"> .List </out>
                   <nextLoc> 0 </nextLoc>
