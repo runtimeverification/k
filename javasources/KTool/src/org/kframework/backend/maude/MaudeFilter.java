@@ -109,8 +109,6 @@ public class MaudeFilter extends BackendFilter {
 						result.append("_ : K K -> K [prec 120 metadata \"");
 						p.getAttributes().accept(this);
 						result.append(" hybrid=()");
-						result.append(" location=");
-						result.append(getMaudeLocation(p));
 						result.append("\"] .\n");
 						result.append("op .List`{\"");
 						result.append(list.getSeparator());
@@ -135,8 +133,6 @@ public class MaudeFilter extends BackendFilter {
 						// if (!isEmptyAttributes(p.getCellAttributes())) {
 						result.append(" [metadata \"");
 						p.getAttributes().accept(this);
-						result.append(" location=");
-						result.append(getMaudeLocation(p));
 						result.append("\"]");
 						// }
 						result.append(" .\n");
@@ -365,8 +361,6 @@ public class MaudeFilter extends BackendFilter {
 			}
 			result.append(" \"");
 			rule.getAttributes().accept(this);
-			result.append(" location=");
-			result.append(getMaudeLocation(rule));
 			result.append("\"] .\n");
 		}
 	}
@@ -439,8 +433,6 @@ public class MaudeFilter extends BackendFilter {
 		}
 		result.append(" \"");
 		sentence.getAttributes().accept(this);
-		result.append(" location=");
-		result.append(getMaudeLocation(sentence));
 		result.append("\"] .");
 	}
 

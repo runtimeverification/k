@@ -25,21 +25,30 @@ public class XmlUtil {
 
 	// FUNCTION to read DOM Tree from File
 	public static Document readXML(File f) {
+		try {
+			return readXML(new InputSource(new FileInputStream(f)));
+		} catch (FileNotFoundException e) {
+			// e.printStackTrace();
+			Error.report("Error while reading XML:" + e.getMessage());
+		}
+		return null; //unreachable
+	}
 
+	public static Document readXML(String s) {
+		return readXML(new InputSource(new StringReader(s)));
+	}
+
+	public static Document readXML(InputSource input) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = null;
 		Document doc = null;
 		try {
 			builder = dbf.newDocumentBuilder();
-			InputSource input = new InputSource(new FileInputStream(f));
 			doc = builder.parse(input);
 		} catch (ParserConfigurationException e) {
 			// e.printStackTrace();
 			Error.report("Error while reading XML:" + e.getMessage());
 		} catch (SAXException e) {
-			// e.printStackTrace();
-			Error.report("Error while reading XML:" + e.getMessage());
-		} catch (FileNotFoundException e) {
 			// e.printStackTrace();
 			Error.report("Error while reading XML:" + e.getMessage());
 		} catch (IOException e) {
@@ -103,7 +112,7 @@ public class XmlUtil {
 	}
 
 	// write the XML document to disk
-	public static void serializeXML(Document doc, String fileName) {
+	public static void serializeXML(Node doc, String fileName) {
 		FileOutputStream f = null;
 		try {
 			Source xmlSource = new DOMSource(doc);

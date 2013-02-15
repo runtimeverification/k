@@ -1,5 +1,6 @@
 package org.kframework.krun;
 
+import org.apache.commons.collections15.Transformer;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
@@ -21,7 +22,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import edu.uci.ics.jung.graph.*;
+import edu.uci.ics.jung.io.graphml.*;
+
 import java.io.File;
+import java.io.StringReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -127,8 +134,18 @@ public class MaudeKRun implements KRun {
 		List<Element> child = XmlUtil.getChildElements(elem);
 		assertXML(child.size() == 1);
 
-		Term result = MaudeKRun.parseXML((Element) child.get(0));
-		Term rawResult = MaudeKRun.parseXML((Element) child.get(0));
+		KRunResult ret = parseElement((Element) child.get(0));
+		String statistics = p.printStatistics(elem);
+		ret.setStatistics(statistics);
+		ret.setRawOutput(FileUtil.getFileContent(K.maude_out));
+		parseCounter(list.item(2));
+		return ret;
+	}
+
+
+	private KRunResult parseElement(Element el) throws Exception {
+		Term result = MaudeKRun.parseXML(el);
+		Term rawResult = MaudeKRun.parseXML(el);
 		result = (Term) result.accept(new ConcretizeSyntax());
 		result = (Term) result.accept(new TypeInferenceSupremumFilter());
 		result = (Term) result.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
@@ -141,12 +158,7 @@ public class MaudeKRun implements KRun {
 			}
 		}
 
-		KRunResult ret = new KRunResult(result, rawResult);
-		String statistics = p.printStatistics(elem);
-		ret.setStatistics(statistics);
-		ret.setRawOutput(FileUtil.getFileContent(K.maude_out));
-		parseCounter(list.item(2));
-		return ret;
+		return new KRunResult(result, rawResult);
 	}
 
 	private void parseCounter(Node counter) throws Exception {
@@ -272,16 +284,12 @@ public class MaudeKRun implements KRun {
 				return new Empty(MetaK.Constants.KList);
 			} else if (op.equals("_`(_`)") && sort.equals("KItem")) {
 				assertXMLTerm(list.size() == 2);
-				if (list.get(0).getAttribute("sort").equals("KLabel") && list.get(0).getAttribute("op").equals("#freezer_")) {
-					// TODO: Get rid of this code block when Traian fixes the Freezer class to be a KLabel again
-					return parseXML(list.get(0));
-				}
 				return new KApp(parseXML(list.get(0)), parseXML(list.get(1)));
 			} else if (sort.equals("KLabel") && list.size() == 0) {
 				return new Constant("KLabel", op);
 			} else if (sort.equals("KLabel") && op.equals("#freezer_")) {
 				assertXMLTerm(list.size() == 1);
-				return new Freezer(parseXML(list.get(0)));	
+				return new FreezerLabel(parseXML(list.get(0)));	
 			} else if (op.equals("HOLE")) {
 				assertXMLTerm(list.size() == 0);
 				return new Hole(sort);
@@ -364,9 +372,73 @@ public class MaudeKRun implements KRun {
 		KRunResult result = new KRunResult(parseSearchResult(), parseRawSearchResult(), pattern, patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
 		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 		if (K.showSearchGraph) {
-			result.setSearchGraph(p.printSearchGraph(K.processed_maude_output));
+			result.setSearchGraph(parseSearchGraph());
 		}
 		return result;
+	}
+
+	private DirectedGraph<KRunResult, RuleInvocation> parseSearchGraph() throws Exception {
+		File input = new File(K.maude_output);
+		Document doc = XmlUtil.readXML(input);
+		NodeList list = null;
+		Node nod = null;
+		list = doc.getElementsByTagName("graphml");
+		assertXML(list.getLength() == 1);
+		nod = list.item(0);
+		assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
+		String text = XmlUtil.convertNodeToString(nod);
+		text = text.replaceAll("<data key=\"((rule)|(term))\">", "<data key=\"$1\"><![CDATA[");
+		text = text.replaceAll("</data>", "]]></data>");
+		StringReader reader = new StringReader(text);
+		Transformer<GraphMetadata, DirectedGraph<KRunResult, RuleInvocation>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunResult, RuleInvocation>>() { 
+			public DirectedGraph<KRunResult, RuleInvocation> transform(GraphMetadata g) { 
+				return new DirectedSparseGraph<KRunResult, RuleInvocation>();
+			}
+		};
+		Transformer<NodeMetadata, KRunResult> nodeTransformer = new Transformer<NodeMetadata, KRunResult>() {
+			private int nodeId = 0;
+			public KRunResult transform(NodeMetadata n) {
+				String nodeXmlString = n.getProperty("term");
+				Element xmlTerm = XmlUtil.readXML(nodeXmlString).getDocumentElement();
+				try {
+					KRunResult ret = parseElement(xmlTerm);
+					ret.setNodeId(nodeId++);
+					return ret;
+				} catch (Exception e) {
+					throw new RuntimeException(e); //ew, but whatever. This should only happen if there's a bug, so a stack dump is fine.
+				}
+			}
+		};
+		Transformer<EdgeMetadata, RuleInvocation> edgeTransformer = new Transformer<EdgeMetadata, RuleInvocation>() {
+			public RuleInvocation transform(EdgeMetadata e) {
+				String edgeXmlString = e.getProperty("rule");
+				String metadataAttribute = XmlUtil.readXML(edgeXmlString).getDocumentElement().getAttribute("metadata");
+				Pattern pattern = Pattern.compile("([a-z]*)=\\((.*?)\\)");
+				Matcher matcher = pattern.matcher(metadataAttribute);
+				String location = null;
+				String filename = null;
+				while (matcher.find()) {
+					String name = matcher.group(1);
+					if (name.equals("location"))
+						location = matcher.group(2);
+					if (name.equals("filename"))
+						filename = matcher.group(2);
+				}
+				if (location.equals("generated") || location == null || filename == null) {
+					throw new RuntimeException("can't find location information");
+				}
+				return new RuleInvocation(DefinitionHelper.locations.get(filename + ":(" + location + ")"));
+			}
+		};
+
+		Transformer<HyperEdgeMetadata, RuleInvocation> hyperEdgeTransformer = new Transformer<HyperEdgeMetadata, RuleInvocation>() {
+			public RuleInvocation transform(HyperEdgeMetadata h) {
+				throw new RuntimeException("Found a hyper-edge. Has someone been tampering with our intermediate files?");
+			}
+		};
+				
+		GraphMLReader2<DirectedGraph<KRunResult, RuleInvocation>, KRunResult, RuleInvocation> graphmlParser = new GraphMLReader2<DirectedGraph<KRunResult, RuleInvocation>, KRunResult, RuleInvocation>(reader, graphTransformer, nodeTransformer, edgeTransformer, hyperEdgeTransformer);
+		return graphmlParser.readGraph();
 	}
 
 	private List<Map<String, Term>> parseSearchResult() throws Exception {

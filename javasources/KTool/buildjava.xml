@@ -22,6 +22,11 @@
         <pathelement location="../../dist/bin/java/jline-1.0.jar"/>
         <pathelement location="../../dist/bin/java/xstream.jar"/>
         <pathelement location="../../dist/bin/java/kxml2-min.jar"/>
+        <pathelement location="../../dist/bin/java/collections-generic-4.01.jar"/>
+	<pathelement location="../../dist/bin/java/colt-1.2.0.jar"/>
+	<pathelement location="../../dist/bin/java/jung-api-2.0.1.jar"/>
+	<pathelement location="../../dist/bin/java/jung-graph-impl-2.0.1.jar"/>
+	<pathelement location="../../dist/bin/java/jung-io-2.0.1.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>

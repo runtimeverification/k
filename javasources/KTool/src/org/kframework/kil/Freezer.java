@@ -47,4 +47,9 @@ public class Freezer extends Term {
 	public Freezer shallowCopy() {
 		return new Freezer(this);
 	}
+
+	@Override
+	public String toString() {
+		return "#freezer " + term.toString() + "(.KList)";
+	}
 }

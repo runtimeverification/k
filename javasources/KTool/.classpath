@@ -13,5 +13,10 @@
 	<classpathentry kind="lib" path="../../dist/bin/java/jline-1.0.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/xstream.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/kxml2-min.jar"/>
+	<classpathentry kind="lib" path="../../dist/bin/java/collections-generic-4.01.jar"/>
+	<classpathentry kind="lib" path="../../dist/bin/java/colt-1.2.0.jar"/>
+	<classpathentry kind="lib" path="../../dist/bin/java/jung-api-2.0.1.jar"/>
+	<classpathentry kind="lib" path="../../dist/bin/java/jung-graph-impl-2.0.1.jar"/>
+	<classpathentry kind="lib" path="../../dist/bin/java/jung-io-2.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

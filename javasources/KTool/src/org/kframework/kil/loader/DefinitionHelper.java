@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Production;
@@ -55,6 +56,7 @@ public class DefinitionHelper {
 	public static java.util.Map<String, String> cellSorts = new HashMap<String, String>();
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	public static java.util.Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
+	public static java.util.Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
 	private static Poset subsorts = new Poset();;
 	public static java.util.Set<String> definedSorts = Sort.getBaseSorts();
 	private static Poset priorities = new Poset();

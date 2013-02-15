@@ -20,6 +20,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -152,13 +154,17 @@ public class KRunResult {
 		return rawOutput;
 	}
 
-	private String searchGraph;
-	public void setSearchGraph(String searchGraph) {
+	private DirectedGraph<KRunResult, RuleInvocation> searchGraph;
+	public void setSearchGraph(DirectedGraph<KRunResult, RuleInvocation> searchGraph) {
 		this.searchGraph = searchGraph;
 	}
 
-	public String searchGraph() {
+	public DirectedGraph<KRunResult, RuleInvocation> getSearchGraph() {
 		return searchGraph;
+	}
+
+	public String searchGraph() {
+		return searchGraph.toString();
 	}
 
 	public KRunResult get(String num) throws Exception {
@@ -169,5 +175,21 @@ public class KRunResult {
 		} else {
 			throw new Exception("Can't call get() with custom search pattern yet");
 		}
+	}
+
+	@Override
+	public String toString() {
+		UnparserFilter unparser = new UnparserFilter(true, K.color);
+		result.accept(unparser);
+		return "\nNode " + nodeId + ":\n" + unparser.getResult();
+	}
+
+	private int nodeId;
+	public int getNodeId() {
+		return nodeId;
+	}
+
+	public void setNodeId(int nodeId) {
+		this.nodeId = nodeId;
 	}
 }

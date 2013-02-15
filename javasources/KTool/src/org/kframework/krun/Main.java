@@ -312,7 +312,7 @@ public class Main {
 						String input = stdin.readLine();
 						if (input.equals("y")) {
 							K.debug = true;
-							debugExecution(KAST, lang, true);
+							debugExecution(KAST, lang, result);
 						} else if (input.equals("n")) {
 							K.debug = false;
 							break;
@@ -355,14 +355,14 @@ public class Main {
 
 	// execute krun in debug mode (i.e. step by step execution)
 	// isSwitch variable is true if we enter in debug execution from normal execution (we use the search command with --graph option)
-	public static void debugExecution(String kast, String lang, boolean isSwitch) {
+	public static void debugExecution(String kast, String lang, KRunResult state) {
 		try {
 			// adding autocompletion and history feature to the stepper internal commandline by using the JLine library
 			ConsoleReader reader = new ConsoleReader();
 			reader.setBellEnabled(false);
 
 			List<Completor> argCompletor = new LinkedList<Completor>();
-			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "select", "show-search-graph", "show-node" }));
+			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "select", "show-search-graph"/*, "show-node"*/ }));
 			argCompletor.add(new FileNameCompletor());
 			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
@@ -377,7 +377,7 @@ public class Main {
 			List<String> red = null;
 			KRun krun = new MaudeKRun();
 			KRunResult result = null;
-			if (!isSwitch) {
+			if (state == null) {
 				Term t = makeConfiguration(kast, null, rp, (K.term != null));
 				result = krun.step(t, 0);
 				System.out.println("After running one step of execution the result is:");
@@ -385,6 +385,8 @@ public class Main {
 				for (String r : red) {
 					AnsiConsole.out.println(r);
 				}
+			} else {
+				result = state;
 			}
 
 			while (true) {
@@ -512,7 +514,7 @@ public class Main {
 					if (cmd.hasOption("show-search-graph")) {
 						System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
 						System.out.println(result.searchGraph());
-					}
+					}/*
 					if (cmd.hasOption("show-node")) {
 						String nodeId = cmd.getOptionValue("show-node").trim();
 						p = new PrettyPrintOutput();
@@ -523,7 +525,7 @@ public class Main {
 							System.out.println("A node with the specified id couldn't be found in the search graph");
 						}
 
-					}
+					}*/
 				}
 			}
 		} catch (Exception e) {
@@ -825,7 +827,7 @@ public class Main {
 				if (K.do_search) {
 					Error.report("Cannot specify --search with --debug. In order to search inside the debugger, use the step-all command.");
 				}
-				debugExecution(KAST, lang, false);
+				debugExecution(KAST, lang, null);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

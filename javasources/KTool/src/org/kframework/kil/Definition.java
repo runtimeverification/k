@@ -3,6 +3,7 @@ package org.kframework.kil;
 import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.CollectLocationsVisitor;
 import org.kframework.kil.loader.CollectPrioritiesVisitor;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
@@ -137,6 +138,7 @@ public class Definition extends ASTNode {
 		this.accept(new CollectStartSymbolPgmVisitor());
 		this.accept(new CollectConfigCellsVisitor());
 		this.accept(new UpdateAssocVisitor());
+		this.accept(new CollectLocationsVisitor());
 		DefinitionHelper.initialized = true;
 	}
 
