@@ -76,8 +76,11 @@ public interface Matcher {
    * this is the result of the pattern matching, or null if matching fails
    */
   public java.util.Map<Term, Term> getSubstitution();
+  
   /**
-   * this clears out the substitution
-   */
-  public void reset();
+   * this is the entry point for matching because there is some
+   * setup tear down we need to do before and after the modified
+   * visitor pattern runs
+   */ 
+  public void start(Term t1, Term t2);
 }

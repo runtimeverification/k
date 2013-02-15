@@ -273,7 +273,8 @@ public class SimpleMatcher implements Matcher {
         //in the MapLookupPattern 
         lookup.unify(this, term2);
       }
-      //this isn't really necessary, but it will help free up memory
+      //this is necessary because we need to determine if we have actually
+      //matched a pattern based on if there is anything left in the deferredMapLookups
       deferredMapLookups.remove(lookups); 
     }
 
@@ -295,9 +296,18 @@ public class SimpleMatcher implements Matcher {
     return substitution; 
   }
 
-  @Override 
-  public void reset(){
-     substitution.clear();
+  @Override
+  public void start(Term t1, Term t2){
+    //set up
+    substitution.clear();
+    deferredMapLookups.clear(); 
+    //run visitor pattern
+    t1.accept(this, t2);
+    //tear down
+    if(deferredMapLookups.size() != 0) {
+     throw new MatcherException("deferredMapLookups not empty, not all variables were discovered, pattern does not match: " +
+        deferredMapLookups); 
+    }
   }
   
   public static void main(String[] args){

@@ -37,7 +37,7 @@ public class SimpleRewriter {
     Term out = null;
     for(Rewrite r : trs){
       try {
-        r.getLeft().accept(matcher, t);
+        matcher.start(r.getLeft(),t);
         Substitution substitution = new Substitution(matcher.getSubstitution());
         try {
           //ignore warning, we know this must be a Term
