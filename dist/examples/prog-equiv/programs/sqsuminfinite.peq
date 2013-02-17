@@ -1,3 +1,16 @@
+/*
+
+  This formula express the equivalence between two programs computing the sum of the squares of the first n natural numbers.
+  To check it, give the following command in the parent folder:
+     krun programs/sqsuminfinite.peq
+  If the content of the cell <goals> inludes only the message "success" 
+  then the formula holds.
+  Am alternative is to use search command:
+     krun programs/sqsuminfinite.peq -search 
+                   --pattern="<T> <goals> success </goals> B:Bag </T>"
+                   --bound=1
+*/
+
 <k>
   L : while (true) do (
         s := s + i * i;

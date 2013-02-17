@@ -13,7 +13,6 @@ require "builtins/symbolic-k.k"
 //@ \section{Symbolic Maps}
 
 module MAP-SYMBOLIC
-//  imports FOL
 
   syntax Bool ::= K "isNotModifiedBy" K //[function]
 
@@ -27,21 +26,7 @@ module MAP-SYMBOLIC
   rule followup(S:K, (X:K |-> V:K M:Map), F:Bool) 
        =>
        X |-> V followup(S, M, F)
-       when (F impliesBool (X isNotModifiedBy S))
-       [anywhere]
-
-  rule followup(S:K, (X:K |-> V:Int M:Map), F:Bool) 
-       =>
-       X |-> V followup(S, M, F)
-//       when ((F impliesBool (X isNotModifiedBy S)) =/=K true)
-//       andBool fresh(V':Int)
-       [anywhere] 
-
-  rule followup(S:K, (X:K |-> V:Bool M:Map), F:Bool) 
-       =>
-       X |-> V' followup(S, M, F)
-       when ((F impliesBool (X isNotModifiedBy S)) =/=K true)
-       andBool fresh(V':Bool)
+       when (F impliesBool (X isNotModifiedBy S)) // to be revised
        [anywhere]
 
 // temporary solution until the correct sorting of #symMap() is solved 
@@ -159,7 +144,7 @@ module IMP-SYNTAX
 
   syntax BExp ::= AExp "==" AExp  [strict]
 
-  //@ get if no effect
+  //@ the predicate for occurrence of a variable in a statement
   syntax Bool ::= "occurs" "(" Id "," Stmt ")"
 
   rule notBool occurs(X:Id, S:Stmt) => (X  isNotModifiedBy S) [anywhere]  //trick
@@ -208,18 +193,17 @@ module PEQ
                   <hypos>
                     <hypo multiplicity="*">
                       <patt1>
-                        <k1 color="green"> .K  </k1>
-                        <env1 color="red"> .Map </env1>
+                        <hk1 color="green"> .K  </hk1>
+                        <henv1 color="red"> .Map </henv1>
                       </patt1>
                       <patt2>
-                        <k2 color="green"> .K  </k2>
-                        <env2 color="red"> .Map </env2>
+                        <hk2 color="green"> .K  </hk2>
+                        <henv2 color="red"> .Map </henv2>
                       </patt2>
-                      <condition> true </condition>
+                      <hcondition> true </hcondition>
                     </hypo>
                   </hypos>
                   <observers> .List </observers>
-//<trace> .K </trace>
                 </T>
 
 /*@
@@ -230,7 +214,7 @@ module PEQ
 */
 
   syntax KResult ::= Val
-  syntax Val ::= Int | #Bool | "val" "(" Bool ")"
+  syntax Val ::= Int | #Bool // | "val" "(" Bool ")"
 
 /*@
   We use a new syntactic construct that help us to store hypotheses. The basic
@@ -245,9 +229,6 @@ module PEQ
 
             |  "checkHypo" "(" K "," Map "," K "," Map "," Bag ")"
                // for checking hypotheses one by one 
-
-            |  "checkSubst" "(" K "," K ")" [strict] // check the substitution
-  // given by the programs from the current formual and the checked hypothesis
 
             |  "checkCond" "(" K "," K ")"  // check the conditions of the
                                      // current formula and checked hypothesis
@@ -320,10 +301,6 @@ module PEQ
   attribute) to the labelled transitions.
 */
 
-//  context _ : for _ from HOLE to _ do _
-//  context _ : for _ from_ to HOLE do _
-//  context _ : if HOLE then _ else _
-//  context _ : _ := HOLE 
 
 /*@
   The labelled recursive statements have a special semantics because
@@ -632,7 +609,7 @@ module PEQ
 
 
   rule eqObs( <env>... X:Id |-> V1:Int ...</env>
-              <env>... X:Id |-> V2:Int ...</env>
+              <env>... X    |-> V2:Int ...</env>
               <observers> ListItem(X) => . ...</observers>, F:K )
        when checkSat(filter(F andBool V1 =/=Int V2)) ==K "unsat" 
 // when V1 ==K V2
@@ -745,19 +722,10 @@ module PEQ
 
 
   rule getSubst(X:K, A:AExp, (M:Map X |-> I)) => (I replBy A)
-       when (isId(X) ==K true) orBool (isSymbolicAExp(X) ==K true) // it does not work, therefore I added the following rules
-
-/*
-  rule getSubst(X:Id, A:AExp, (M:Map X |-> I)) => (I replBy A)
-
-  rule getSubst(#symAExp(X:K), A:AExp, (M:Map #symAExp(X) |-> I)) => (I replBy A)
-*/
+       when (isId(X) ==K true) orBool (isSymbolicAExp(X) ==K true) 
 
   rule getSubst(X:Id, B:BExp, (M:Map X |-> I)) => (I replBy B)
 
-
-//  rule getSubst(KL1:KLabel(_);;_, KL2:KLabel(_);;_) => noSubst
-//       when KL1 =/=KLabel KL2
 
   // to be completed
 
@@ -814,24 +782,6 @@ module PEQ
   rule emptySubst ;; E:Exp => E
 
 
-/*@
-   Apply a substitution to a symbolic boolean expression
-*/
-
-  syntax Bool ::= "applySubst" "(" Map "," K ")" [function]
-
-  rule applySubst((M:Map I:K |-> A:K), F:Bool) => 
-       applySubst(M:Map, (F [ A / I ]))
-//       when isSymbolicInt(I)
-//       when M =/=Map .Map
-
-
-  rule applySubst((I:K |-> A:K), F:Bool) => (F [ A / I ])
-//       when isSymbolicInt(I)
-
-  rule applySubst(.Map, F:Bool) => F
-
-
 
 /*@
   The followings defines (special) cases when a current goal is a 
@@ -868,8 +818,10 @@ module PEQ
        </hypos>
       [transition]
 
-  //@ The case when the set of hypotheses is empty and 
-  //     the configurations are observational equal.
+  /*@ The case when the set of hypotheses is empty and 
+       the configurations are observational equal.
+       The formula is stored as circularity hypo
+  */
 
   rule [check-hypo-no-hyp-obseq] : 
        <goal>
@@ -880,7 +832,7 @@ module PEQ
          <config> 
            <k> break => storeHypo(K2) ...</k>
          ...</config>
-       <condition> F:K </condition>
+         <condition> F:K </condition>
        ...</goal> 
        <observers> Obs:List </observers> 
        when (eqObs(<env> Env1 </env> 
@@ -888,25 +840,6 @@ module PEQ
                    <observers> Obs </observers>, F) ==K true)
        [transition]
 
-  //@ The case when the set of hypotheses is empty and 
-  //     the configurations are observational equal.
-
-  rule [check-hypo-no-hyp-no-obseq] : 
-       <goal>
-         <config> 
-           <k> checkHypo(K1, Env1, K2, Env2, .Bag) => . ...</k>
-           <env> _ => Env1:Map </env>
-         </config> 
-         <config> 
-           <k> break => . ...</k>
-         ...</config>
-       <condition> F:K </condition>
-       ...</goal> 
-       <observers> Obs:List </observers> 
-       when (eqObs(<env> Env1 </env> 
-                   <env> Env2 </env> 
-                   <observers> Obs </observers>, F) =/=K true)
-       [transition]
 
 /*@
   Check hypotheses.
@@ -927,33 +860,30 @@ module PEQ
          <config> 
            <k> checkHypo(K1, Env1, K2, Env2, 
      	       		               	     <hypo>      
-       					       <condition>
-					       F':Bool
-       					       </condition> 
+       					       <hcondition>
+					         F':Bool
+       					       </hcondition> 
        					       <patt1>        
-         				         <k1>
+         				         <hk1>
           					   K1':K 
-         					 </k1> 
-         					 <env1>
+         					 </hk1> 
+         					 <henv1>
           					   Env1':Map
-          					 </env1> 
+          					 </henv1> 
        					       </patt1> 
        					       <patt2>        
-         				         <k2> 
+         				         <hk2> 
            					   K2':K
-						 </k2> 
-         					 <env2>
+						 </hk2> 
+         					 <henv2>
          					   Env2':Map
-         					 </env2> 
+         					 </henv2> 
        					       </patt2> 
      					     </hypo>
                                              Hypos':Bag
                       )
             =>
-           checkSubst(getSubst(K1', K1, Env1'), getSubst(K2', K2, Env2')) ~>
-//           checkCond(applySubst((getSubstMap(Env1', Env1) getSubstMap(Env2', Env2)), F),
            checkCond(F, F')
-//                     applySubst((getSubstMap(Env1', Env1) getSubstMap(Env2', Env2)), F'))
            ...</k>
          ...</config> 
          <config> 
@@ -961,11 +891,6 @@ module PEQ
          ...</config>
          <condition> F:K </condition>
        </goal>
-/*
-<trace>
-. => break ~> getSubst(K1', K1, Env1') ~> getSubst(K2', K2, Env2')
-...</trace>
-*/
        when (isSubst(getSubst(K1', K1, Env1')) ==K true)
             orBool (isSubst(getSubst(K2', K2, Env2')) ==K true)
        [transition]
@@ -975,33 +900,30 @@ module PEQ
          <config> 
            <k> checkHypo(K1, Env1, K2, Env2, 
      	       		               	     <hypo>      
-       					       <condition>
-					       F':Bool
-       					       </condition> 
+       					       <hcondition>
+					         F':Bool
+       					       </hcondition> 
        					       <patt1>        
-         				         <k1>
+         				         <hk1>
           					   K1':K 
-         					 </k1> 
-         					 <env1>
+         					 </hk1> 
+         					 <henv1>
           					   Env1':Map
-          					 </env1> 
+          					 </henv1> 
        					       </patt1> 
        					       <patt2>        
-         				         <k2> 
+         				         <hk2> 
            					   K2':K
-						 </k2> 
-         					 <env2>
+						 </hk2> 
+         					 <henv2>
          					   Env2':Map
-         					 </env2> 
+         					 </henv2> 
        					       </patt2> 
      					     </hypo>
                                              Hypos':Bag
                       )
             =>
-           checkSubst(getSubst(K1', K2, Env1'), getSubst(K2', K1, Env2')) ~>
            checkCond(F, F')
-//           checkCond(applySubst((getSubstMap(Env1', Env1) getSubstMap(Env2', Env2)), F),
-//                     applySubst((getSubstMap(Env1', Env2) getSubstMap(Env2', Env1)), F'))
            ...</k>
          ...</config> 
          <config> 
@@ -1009,40 +931,10 @@ module PEQ
          ...</config>
          <condition> F:K </condition>
        </goal>
-/*
-<trace>
-. => break ~> getSubst(K1', K2, Env1') ~> getSubst(K2', K1, Env2')
-...</trace>
-*/
-       when (isSubst(getSubst(K1', K1, Env1')) ==K true)
-            orBool (isSubst(getSubst(K2', K2, Env2')) ==K true)
+       when (isSubst(getSubst(K1', K2, Env1')) ==K true)
+            orBool (isSubst(getSubst(K2', K1, Env2')) ==K true)
        [transition]
 
-  //@ The evaluation of a substitutions
-
-  rule V1:Int replBy V2:Int => val(V1 ==Int V2)
-
-  rule V1:Bool replBy V2:Bool => val(V1 ==Bool V2)
-
-  rule val(V1:K) ;; val(V2:K) => val(V1 andBool V2)
-
-  rule emptySubst => val(true)
-
-  /*@ Check the substitution between the corresponding programs from
-    the current formula and those from the checked hypothesis
-     TBD: The condition does not verify now, to be revised
-  */ 
-
-  rule [checkSubst] :
-       <config> 
-         <k> checkSubst(val(B1:Bool), val(B2:Bool)) => . ...</k>
-       ...</config> 
-       <condition> F:Bool </condition>
-//       when checkSat(filter(F andBool notBool(B1 andBool B2))) ==K "unsat"
-
-   /*@ When the substitution is not implied by the formula, the checked
-       must be discarded. TBD
-   */
 
   /*@ The case when the circularity rule can be applied;
       both the substitution and the conditions are successfully checked
@@ -1071,29 +963,30 @@ module PEQ
          <config> 
            <k> checkHypo(K1, Env1, K2, Env2, 
      	       		               	     (<hypo>      
-       					       <condition>
+       					       <hcondition>
 					       F':Bool
-       					       </condition> 
+       					       </hcondition> 
        					       <patt1>        
-         				         <k1>
+         				         <hk1>
           					   K1':K 
-         					 </k1> 
-         					 <env1>
+         					 </hk1> 
+         					 <henv1>
           					   Env1':Map
-          					 </env1> 
+          					 </henv1> 
        					       </patt1> 
        					       <patt2>        
-         				         <k2> 
+         				         <hk2> 
            					   K2':K
-						 </k2> 
-         					 <env2>
+						 </hk2> 
+         					 <henv2>
          					   Env2':Map
-         					 </env2> 
+         					 </henv2> 
        					       </patt2> 
      					     </hypo>
                         		     =>
-					     .)
-                                             Hypos':Bag
+					     .
+                                            )
+                                           Hypos':Bag
                         )
            ...</k>
            <env> _ => Env1 </env>
@@ -1104,12 +997,6 @@ module PEQ
          <condition> F:K </condition>
        ...</goal>
        <observers> Obs:List </observers>
-/*
-<trace> 
-. => break ~> break ~> getSubst(K1', K1, Env1') ~> getSubst(K2', K2, Env2') ~>
-     getSubst(K1', K2, Env1') ~> getSubst(K2', K1, Env2')
-...</trace>  
-*/
        when ((isSubst(getSubst(K1', K1, Env1')) =/=K true)
              orBool (isSubst(getSubst(K2', K2, Env2')) =/=K true)
             ) andBool
@@ -1171,14 +1058,14 @@ module PEQ
          Hypos
          <hypo>
            <patt1> 
-             <k1> K1 </k1>
-             <env1> Env1 </env1>
+             <hk1> K1 </hk1>
+             <henv1> Env1 </henv1>
            </patt1> 
            <patt2> 
-             <k2> K2 </k2>
-             <env2> Env2 </env2>
+             <hk2> K2 </hk2>
+             <henv2> Env2 </henv2>
            </patt2>
-           <condition> F </condition>
+           <hcondition> F </hcondition>
          </hypo>
        </hypos>
       [transition]
@@ -1208,7 +1095,7 @@ module PEQ
              <observers> Obs </observers>, F) =/=K true)
        [transition]
 
-
+/*
   rule [store-hypo-fail]:
        <goal>
          <config> 
@@ -1248,7 +1135,7 @@ module PEQ
              <env> Env2 </env> 
              <observers> Obs </observers>, F) =/=K true)
        [transition]
-
+*/
 
 /*@
   The following rule creates the initial configuration from the equivalence
@@ -1389,25 +1276,19 @@ module PEQ
   rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
 
 
-//  syntax List ::= "BExps2List" "(" BExps ")" [function]
-//  rule BExps2List(.BExps) => .List [anywhere]
-//  rule BExps2List(X:BExp, Xs:BExps) => ListItem(X) BExps2List(Xs)
-//       [anywhere]
-
 //@ rules that translate the locally defined predicates to SMTLIB
 
-//  rule Consts2SMTLib( X:Id isNotModifiedBy S:Stmt ) => .Set [anywhere]
-//  rule Vars2SMTLib( X:Id isNotModifiedBy S:Stmt ) => .Set [anywhere]
-//  rule K2SMTLib( X:Id isNotModifiedBy S:Stmt ) => "true" [anywhere]
+
+/*@
+  Helper functions that are used for cleaning a formula before sending it 
+  to the SMT solver.
+*/
 
   syntax Bool ::= "filter" "(" Bool ")" [function]
                |  "replaceIsNotModifiedBy" "(" Bool "," Bool ")" [function]
 
   rule replaceIsNotModifiedBy(B:Bool, X:Id isNotModifiedBy S:Stmt) => B
 
-//  rule replaceIsNotModifiedBy(B:Bool, KL:KLabel(L:KList)) => KL(L)
-//       when isSymbolicBool(KL(L)) andBool 
-//            (KL =/=KLabel '_isNotModifiedBy_)
 
 // trick:
   rule replaceIsNotModifiedBy(B:Bool, true) => true

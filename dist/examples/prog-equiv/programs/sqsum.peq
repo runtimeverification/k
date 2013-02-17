@@ -5,6 +5,10 @@
      krun programs/sqsum.peq
   If the content of the cell <goals> inludes only the message "success" 
   then the formula holds.
+  Am alternative is to use search command:
+     krun programs/sqsum.peq -search 
+                   --pattern="<T> <goals> success </goals> B:Bag </T>"
+                   --bound=1
 */
 
 <k>
