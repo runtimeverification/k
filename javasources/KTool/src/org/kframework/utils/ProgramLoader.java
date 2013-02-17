@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
+import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.kil.ASTNode;
@@ -101,10 +102,12 @@ public class ProgramLoader {
 			if (GlobalSettings.whatParser == GlobalSettings.ParserType.GROUND) {
 				org.kframework.parser.concrete.KParser.ImportTblGround(DefinitionHelper.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
 				out = DefinitionLoader.parseCmdString(content, "", filename);
+				out = out.accept(new AddEmptyLists());
 				out = out.accept(new FlattenSyntax());
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {
 				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 				out = DefinitionLoader.parsePattern(content, filename);
+				out = out.accept(new AddEmptyLists());
 				out = out.accept(new FlattenSyntax());
 			} else {
 				out = loadPgmAst(content, filename, startSymbol);
