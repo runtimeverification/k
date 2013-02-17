@@ -310,6 +310,11 @@ public class Main {
 						System.out.print(K.lineSeparator + "Do you want to enter in debug mode? (y/n):");
 						BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 						String input = stdin.readLine();
+						if (input == null) {
+							K.debug = false;
+							System.out.println();
+							break;
+						}
 						if (input.equals("y")) {
 							K.debug = true;
 							debugExecution(KAST, lang, searchResult);
