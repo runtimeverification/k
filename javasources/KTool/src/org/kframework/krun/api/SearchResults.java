@@ -27,9 +27,9 @@ public class SearchResults {
 	public String toString() {
 		int i = 1;
 		StringBuilder sb = new StringBuilder();
-		sb.append("Search results:\n");
+		sb.append("Search results:");
 		for (SearchResult solution : solutions) {
-			sb.append("\nSolution " + i + ", State " + solution.getState().getStateId() + ":");
+			sb.append("\n\nSolution " + i + ", State " + solution.getState().getStateId() + ":");
 			Map<String, Term> substitution = solution.getSubstitution();
 			if (isDefaultPattern) {
 				UnparserFilter unparser = new UnparserFilter(true, K.color);

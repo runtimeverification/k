@@ -1,6 +1,6 @@
 Search results:
 
-Solution 1:
+Solution 1, State 4:
 <T>
     <k>
         .K
@@ -15,7 +15,7 @@ Solution 1:
     </env>
 </T>
 
-Solution 2:
+Solution 2, State 5:
 <T>
     <k>
         3 / 0 ~> y = HOLE ;
@@ -30,7 +30,7 @@ Solution 2:
     </env>
 </T>
 
-Solution 3:
+Solution 3, State 7:
 <T>
     <k>
         .K
@@ -45,7 +45,7 @@ Solution 3:
     </env>
 </T>
 
-Solution 4:
+Solution 4, State 9:
 <T>
     <k>
         .K
@@ -60,7 +60,7 @@ Solution 4:
     </env>
 </T>
 
-Solution 5:
+Solution 5, State 10:
 <T>
     <k>
         .K
