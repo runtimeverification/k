@@ -46,4 +46,16 @@ public class FreezerHole extends Term {
 	public int getIndex() {
 		return index;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof FreezerHole)) return false;
+		FreezerHole f = (FreezerHole)o;
+		return index == f.index;
+	}
+
+	@Override
+	public int hashCode() {
+		return index;
+	}
 }

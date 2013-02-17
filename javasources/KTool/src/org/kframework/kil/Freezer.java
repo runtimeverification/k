@@ -16,7 +16,7 @@ public class Freezer extends Term {
 	}
 
 	public Freezer(Term t) {
-		super("KLabel");
+		super("K");
 		term = t;
 	}
 
@@ -51,5 +51,17 @@ public class Freezer extends Term {
 	@Override
 	public String toString() {
 		return "#freezer " + term.toString() + "(.KList)";
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Freezer)) return false;
+		Freezer f = (Freezer)o;
+		return term.equals(f.term);
+	}
+
+	@Override
+	public int hashCode() {
+		return term.hashCode();
 	}
 }

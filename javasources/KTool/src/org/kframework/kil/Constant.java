@@ -121,4 +121,16 @@ public class Constant extends Term {
 	public Constant shallowCopy() {
 		return new Constant(this);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Constant)) return false;
+		Constant c = (Constant)o;
+		return sort.equals(c.sort) && value.equals(c.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return (sort + value).hashCode();
+	}
 }

@@ -23,6 +23,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 	public ASTNode transform(KApp kapp) throws TransformerException {
 		Term label = kapp.getLabel();
 		Term child = kapp.getChild();
+		child = child.shallowCopy();
 		List<Term> possibleTerms;
 		if (label instanceof KInjectedLabel && child instanceof Empty) {
 			Term injected = ((KInjectedLabel)label).getTerm();
@@ -112,6 +113,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(TermCons term) throws TransformerException {
+		term = term.shallowCopy();
 		List<Term> contents = term.getContents();
 		Production p = term.getProduction();
 		for (int i = 0; i < contents.size(); i++) {

@@ -2,6 +2,7 @@ package org.kframework.krun;
 
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.Definition;
+import org.kframework.krun.api.SearchType;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +64,7 @@ public class K {
 	public static String output_mode = "pretty";
 	//public static String xsearch_pattern = "=>! B:Bag";
 	public static String pattern = "<generatedTop> B:Bag </generatedTop> [anywhere]";
-	public static String searchType = "!";
+	public static SearchType searchType = SearchType.FINAL;
 	public static String bound;
 	public static String depth;
 	public static String rule_labels = "";
@@ -95,4 +96,5 @@ public class K {
 	public static Definition kompiled_def;
 
 	public static int counter = 0;
+	public static int stateCounter = 0;
 }

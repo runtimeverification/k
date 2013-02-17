@@ -48,7 +48,7 @@ public class TermCons extends Term {
 	public TermCons(TermCons node) {
 		super(node);
 		this.cons = node.cons;
-		this.contents = node.contents;
+		this.contents = new ArrayList<Term>(node.contents);
 	}
 
 	public TermCons(String psort, String listCons, List<Term> genContents) {

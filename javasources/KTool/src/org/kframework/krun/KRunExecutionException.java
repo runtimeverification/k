@@ -6,19 +6,19 @@ public class KRunExecutionException extends Exception {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	KRunExecutionException() {
+	public KRunExecutionException() {
 		super();
 	}
 	
-	KRunExecutionException(String message){
+	public KRunExecutionException(String message){
 		super(message);
 	}
 	
-	KRunExecutionException(String message, Throwable t){
+	public KRunExecutionException(String message, Throwable t){
 		super(message, t);
 	}
 	
-	KRunExecutionException(Throwable t){
+	public KRunExecutionException(Throwable t){
 		super(t);
 	}
 }

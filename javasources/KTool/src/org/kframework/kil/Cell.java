@@ -249,4 +249,16 @@ public class Cell extends Term {
 			return;
 		cellAttributes.put("id", id);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Cell)) return false;
+		Cell c = (Cell)o;
+		return label.equals(c.label) && contents.equals(c.contents);
+	}
+
+	@Override
+	public int hashCode() {
+		return label.hashCode() * 17 + contents.hashCode();
+	}
 }

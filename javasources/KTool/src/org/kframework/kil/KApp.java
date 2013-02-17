@@ -88,4 +88,16 @@ public class KApp extends Term {
 	public KApp shallowCopy() {
 		return new KApp(this);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof KApp)) return false;
+		KApp k = (KApp)o;
+		return label.equals(k.label) && child.equals(k.child);
+	}
+
+	@Override
+	public int hashCode() {
+		return label.hashCode() * 23 + child.hashCode();
+	}
 }

@@ -1,4 +1,4 @@
-package org.kframework.krun;
+package org.kframework.krun.api;
 
 import org.apache.commons.collections15.Transformer;
 import org.kframework.backend.maude.MaudeFilter;
@@ -6,13 +6,10 @@ import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.runner.KRunner;
-import org.kframework.parser.concrete.disambiguate.BestFitFilter;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
+import org.kframework.krun.*;
+import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -37,8 +34,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class MaudeKRun implements KRun {
-	private PrettyPrintOutput p;
-
 	private void executeKRun(String maudeCmd, boolean ioServer) throws Exception {
 		FileUtil.createFile(K.maude_in, maudeCmd);
 		File outFile = FileUtil.createFile(K.maude_out);
@@ -60,11 +55,9 @@ public class MaudeKRun implements KRun {
 			}
 		}
 
-		p = new PrettyPrintOutput(K.color);
-		p.preprocessDoc(K.maude_output, K.processed_maude_output);
 	}
 
-	public KRunResult run(Term cfg) throws Exception {
+	public KRunResult<KRunState> run(Term cfg) throws Exception {
 		MaudeFilter maudeFilter = new MaudeFilter();
 		cfg.accept(maudeFilter);
 		String cmd = "set show command off ." + K.lineSeparator + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " ." + getCounter();
@@ -87,41 +80,41 @@ public class MaudeKRun implements KRun {
 		return K.lineSeparator + "red counter .";
 	}
 
-	public KRunResult step(Term cfg, int steps) throws Exception {
+	public KRunResult<KRunState> step(Term cfg, int steps) throws Exception {
 		String maude_cmd = K.maude_cmd;
 		if (steps == 0) {
 			K.maude_cmd = "red";
 		} else {
 			K.maude_cmd = "rew[" + Integer.toString(steps) + "]";
 		}
-		KRunResult result = run(cfg);
+		KRunResult<KRunState> result = run(cfg);
 		K.maude_cmd = maude_cmd;
 		return result;
 	}
 
-	private static class FlattenDisambiguationFilter extends BasicTransformer {
-		public FlattenDisambiguationFilter() {
-			super("Reflatten ambiguous syntax");
+	//needed for --statistics command
+	private String printStatistics(Element elem) {
+		String result = "";
+		if ("search".equals(K.maude_cmd)) {
+			String totalStates = elem.getAttribute("total-states");
+			String totalRewrites = elem.getAttribute("total-rewrites");
+			String realTime = elem.getAttribute("real-time-ms");
+			String cpuTime = elem.getAttribute("cpu-time-ms");
+			String rewritesPerSecond = elem.getAttribute("rewrites-per-second");
+			result += "states: " + totalStates + " rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)";
+		} else if ("erewrite".equals(K.maude_cmd)){
+			String totalRewrites = elem.getAttribute("total-rewrites");
+			String realTime = elem.getAttribute("real-time-ms");
+			String cpuTime = elem.getAttribute("cpu-time-ms");
+			String rewritesPerSecond = elem.getAttribute("rewrites-per-second");
+			result += "rewrites: " + totalRewrites + " in " + cpuTime + "ms cpu (" + realTime + "ms real) (" + rewritesPerSecond + " rewrites/second)";
 		}
-
-		@Override
-		public ASTNode transform(Ambiguity amb) throws TransformerException {
-			if (amb.getContents().get(0) instanceof TermCons) {
-				TermCons t1 = (TermCons)amb.getContents().get(0);
-				if (MetaK.isComputationSort(t1.getSort())) {
-					return new KApp(new Constant("KLabel", t1.getProduction().getKLabel()), (Term) new KList(t1.getContents()).accept(this));
-				}
-			} else if (amb.getContents().get(0) instanceof Empty) {
-				Empty t1 = (Empty)amb.getContents().get(0);
-				if (MetaK.isComputationSort(t1.getSort())) {
-					return new KApp(new Constant("KLabel", MetaK.getListUnitLabel(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator())), new Empty(MetaK.Constants.KList));
-				}
-			}
-			return amb;
-		}
+		return result;
 	}
 
-	private KRunResult parseRunResult() throws Exception {
+
+
+	private KRunResult<KRunState> parseRunResult() throws Exception {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
@@ -134,31 +127,19 @@ public class MaudeKRun implements KRun {
 		List<Element> child = XmlUtil.getChildElements(elem);
 		assertXML(child.size() == 1);
 
-		KRunResult ret = parseElement((Element) child.get(0));
-		String statistics = p.printStatistics(elem);
+		KRunState state = parseElement((Element) child.get(0));
+		KRunResult<KRunState> ret = new KRunResult<KRunState>(state);
+		String statistics = printStatistics(elem);
 		ret.setStatistics(statistics);
 		ret.setRawOutput(FileUtil.getFileContent(K.maude_out));
 		parseCounter(list.item(2));
 		return ret;
 	}
 
-
-	private KRunResult parseElement(Element el) throws Exception {
-		Term result = MaudeKRun.parseXML(el);
+	private KRunState parseElement(Element el) {
 		Term rawResult = MaudeKRun.parseXML(el);
-		result = (Term) result.accept(new ConcretizeSyntax());
-		result = (Term) result.accept(new TypeInferenceSupremumFilter());
-		result = (Term) result.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-		//as a last resort, undo concretization
-		result = (Term) result.accept(new FlattenDisambiguationFilter());
-		if (result.getClass() == Cell.class) {
-			Cell generatedTop = (Cell) result;
-			if (generatedTop.getLabel().equals("generatedTop")) {
-				result = generatedTop.getContents();
-			}
-		}
 
-		return new KRunResult(result, rawResult);
+		return new KRunState(rawResult);
 	}
 
 	private void parseCounter(Node counter) throws Exception {
@@ -340,7 +321,15 @@ public class MaudeKRun implements KRun {
 		}
 	}
 
-	public KRunResult search(String bound, String depth, String searchType, Rule pattern, Term cfg, Set<String> varNames) throws Exception {
+	private static String getSearchType(SearchType s) {
+		if (s == SearchType.ONE) return "1";
+		if (s == SearchType.PLUS) return "+";
+		if (s == SearchType.STAR) return "*";
+		if (s == SearchType.FINAL) return "!";
+		return null;
+	}
+
+	public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, Set<String> varNames) throws Exception {
 		String cmd = "set show command off ." + K.lineSeparator + setCounter() + "search ";
 		if (bound != null && depth != null) {
 			cmd += "[" + bound + "," + depth + "] ";
@@ -354,30 +343,27 @@ public class MaudeKRun implements KRun {
 		cmd += maudeFilter.getResult() + " ";
 		MaudeFilter patternBody = new MaudeFilter();
 		pattern.getBody().accept(patternBody);
-		String patternString = "=>" + searchType + " " + patternBody.getResult();
+		String patternString = "=>" + getSearchType(searchType) + " " + patternBody.getResult();
 		if (pattern.getCondition() != null) {
 			MaudeFilter patternCondition = new MaudeFilter();
 			pattern.getCondition().accept(patternCondition);
 			patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
 		}
 		cmd += patternString + " .";
-		if (K.showSearchGraph) {
-			cmd += K.lineSeparator + "show search graph .";
-		}
+		cmd += K.lineSeparator + "show search graph .";
 		if (K.trace) {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
 		cmd += getCounter();
 		executeKRun(cmd, K.io);
-		KRunResult result = new KRunResult(parseSearchResult(), parseRawSearchResult(), pattern, patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
+		SearchResults results = new SearchResults(parseSearchResults(pattern), parseSearchGraph(), patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
+		K.stateCounter += results.getGraph().getVertexCount();
+		KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
 		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
-		if (K.showSearchGraph) {
-			result.setSearchGraph(parseSearchGraph());
-		}
 		return result;
 	}
 
-	private DirectedGraph<KRunResult, RuleInvocation> parseSearchGraph() throws Exception {
+	private DirectedGraph<KRunState, Transition> parseSearchGraph() throws Exception {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
@@ -390,29 +376,27 @@ public class MaudeKRun implements KRun {
 		text = text.replaceAll("<data key=\"((rule)|(term))\">", "<data key=\"$1\"><![CDATA[");
 		text = text.replaceAll("</data>", "]]></data>");
 		StringReader reader = new StringReader(text);
-		Transformer<GraphMetadata, DirectedGraph<KRunResult, RuleInvocation>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunResult, RuleInvocation>>() { 
-			public DirectedGraph<KRunResult, RuleInvocation> transform(GraphMetadata g) { 
-				return new DirectedSparseGraph<KRunResult, RuleInvocation>();
+		Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>>() { 
+			public DirectedGraph<KRunState, Transition> transform(GraphMetadata g) { 
+				return new DirectedSparseGraph<KRunState, Transition>();
 			}
 		};
-		Transformer<NodeMetadata, KRunResult> nodeTransformer = new Transformer<NodeMetadata, KRunResult>() {
-			private int nodeId = 0;
-			public KRunResult transform(NodeMetadata n) {
+		Transformer<NodeMetadata, KRunState> nodeTransformer = new Transformer<NodeMetadata, KRunState>() {
+			public KRunState transform(NodeMetadata n) {
 				String nodeXmlString = n.getProperty("term");
 				Element xmlTerm = XmlUtil.readXML(nodeXmlString).getDocumentElement();
-				try {
-					KRunResult ret = parseElement(xmlTerm);
-					ret.setNodeId(nodeId++);
-					return ret;
-				} catch (Exception e) {
-					throw new RuntimeException(e); //ew, but whatever. This should only happen if there's a bug, so a stack dump is fine.
-				}
+				KRunState ret = parseElement(xmlTerm);
+				String id = n.getId();
+				id = id.substring(1);
+				ret.setStateId(Integer.parseInt(id) + K.stateCounter);
+				return ret;
 			}
 		};
-		Transformer<EdgeMetadata, RuleInvocation> edgeTransformer = new Transformer<EdgeMetadata, RuleInvocation>() {
-			public RuleInvocation transform(EdgeMetadata e) {
+		Transformer<EdgeMetadata, Transition> edgeTransformer = new Transformer<EdgeMetadata, Transition>() {
+			public Transition transform(EdgeMetadata e) {
 				String edgeXmlString = e.getProperty("rule");
-				String metadataAttribute = XmlUtil.readXML(edgeXmlString).getDocumentElement().getAttribute("metadata");
+				Element elem = XmlUtil.readXML(edgeXmlString).getDocumentElement();
+				String metadataAttribute = elem.getAttribute("metadata");
 				Pattern pattern = Pattern.compile("([a-z]*)=\\((.*?)\\)");
 				Matcher matcher = pattern.matcher(metadataAttribute);
 				String location = null;
@@ -424,48 +408,38 @@ public class MaudeKRun implements KRun {
 					if (name.equals("filename"))
 						filename = matcher.group(2);
 				}
-				if (location.equals("generated") || location == null || filename == null) {
-					throw new RuntimeException("can't find location information");
+				if (location == null || location.equals("generated") || filename == null) {
+					// we should avoid this wherever possible, but as a quick fix for the
+					// superheating problem and to avoid blowing things up by accident when
+					// location information is missing, I am creating non-RULE edges.
+					String labelAttribute = elem.getAttribute("label");
+					if (labelAttribute == null) {
+						return new Transition(TransitionType.UNLABELLED);
+					} else {
+						return new Transition(labelAttribute);
+					}
 				}
-				return new RuleInvocation(DefinitionHelper.locations.get(filename + ":(" + location + ")"));
+				return new Transition(DefinitionHelper.locations.get(filename + ":(" + location + ")"));
 			}
 		};
 
-		Transformer<HyperEdgeMetadata, RuleInvocation> hyperEdgeTransformer = new Transformer<HyperEdgeMetadata, RuleInvocation>() {
-			public RuleInvocation transform(HyperEdgeMetadata h) {
+		Transformer<HyperEdgeMetadata, Transition> hyperEdgeTransformer = new Transformer<HyperEdgeMetadata, Transition>() {
+			public Transition transform(HyperEdgeMetadata h) {
 				throw new RuntimeException("Found a hyper-edge. Has someone been tampering with our intermediate files?");
 			}
 		};
 				
-		GraphMLReader2<DirectedGraph<KRunResult, RuleInvocation>, KRunResult, RuleInvocation> graphmlParser = new GraphMLReader2<DirectedGraph<KRunResult, RuleInvocation>, KRunResult, RuleInvocation>(reader, graphTransformer, nodeTransformer, edgeTransformer, hyperEdgeTransformer);
+		GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser = new GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition>(reader, graphTransformer, nodeTransformer, edgeTransformer, hyperEdgeTransformer);
 		return graphmlParser.readGraph();
 	}
 
-	private List<Map<String, Term>> parseSearchResult() throws Exception {
-		List<Map<String, Term>> results = new ArrayList<Map<String, Term>>();
-		for (Map<String, Term> result : parseRawSearchResult()) {
-			Map<String, Term> m = new HashMap<String, Term>();
-			for (String key : result.keySet()) {
-				Term searchResult = result.get(key);
-				searchResult = (Term) searchResult.accept(new ConcretizeSyntax());
-				searchResult = (Term) searchResult.accept(new TypeInferenceSupremumFilter());
-				searchResult = (Term) searchResult.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-				//as a last resort, undo concretization
-				searchResult = (Term) searchResult.accept(new FlattenDisambiguationFilter());
-				m.put(key, searchResult);
-			}
-			results.add(m);
-		}
-		return results;		
-	}
-
-	private List<Map<String, Term>> parseRawSearchResult() throws Exception {
+	private List<SearchResult> parseSearchResults(Rule pattern) throws Exception {
+		List<SearchResult> results = new ArrayList<SearchResult>();
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
 		Node nod = null;
 		list = doc.getElementsByTagName("search-result");
-		List<Map<String, Term>> searchResults = new ArrayList<Map<String, Term>>();
 		for (int i = 0; i < list.getLength(); i++) {
 			nod = list.item(i);
 			assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
@@ -473,7 +447,8 @@ public class MaudeKRun implements KRun {
 			if (elem.getAttribute("solution-number").equals("NONE")) {
 				continue;
 			}
-			searchResults.add(new HashMap<String, Term>());
+			int stateNum = Integer.parseInt(elem.getAttribute("state-number"));
+			Map<String, Term> rawSubstitution = new HashMap<String, Term>();
 			NodeList assignments = elem.getElementsByTagName("assignment");
 			for (int j = 0; j < assignments.getLength(); j++) {
 				nod = assignments.item(j);
@@ -482,16 +457,22 @@ public class MaudeKRun implements KRun {
 				List<Element> child = XmlUtil.getChildElements(elem);
 				assertXML(child.size() == 2);
 				Term result = parseXML(child.get(1));
-			searchResults.get(i).put(child.get(0).getAttribute("op"), result);
+				rawSubstitution.put(child.get(0).getAttribute("op"), result);
 			}
+
+			Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution));
+			KRunState state = new KRunState(rawResult);
+			state.setStateId(stateNum + K.stateCounter);
+			SearchResult result = new SearchResult(state, rawSubstitution);
+			results.add(result);
 		}
 		list = doc.getElementsByTagName("result");
 		nod = list.item(1);
 		parseCounter(nod);
-		return searchResults;
+		return results;		
 	}
 
-	public KRunResult modelCheck(Term formula, Term cfg) throws Exception {
+	public KRunResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws Exception {
 		MaudeFilter formulaFilter = new MaudeFilter();
 		formula.accept(formulaFilter);
 		MaudeFilter cfgFilter = new MaudeFilter();
@@ -499,12 +480,12 @@ public class MaudeKRun implements KRun {
 
 		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + cfgFilter.getResult() + " ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList)," + K.lineSeparator + formulaFilter.getResult() + ")" + K.lineSeparator + ") .";
 		executeKRun(cmd, false);
-		KRunResult result = parseModelCheckResult();
+		KRunResult<DirectedGraph<KRunState, Transition>> result = parseModelCheckResult();
 		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 		return result;
 	}
 
-	private KRunResult parseModelCheckResult() throws Exception {
+	private KRunResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() throws Exception {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
@@ -532,22 +513,51 @@ public class MaudeKRun implements KRun {
 		elem = child.get(0);
 		if (elem.getAttribute("op").equals("true") && elem.getAttribute("sort").equals("#Bool")) {
 			Term trueTerm = new Constant("Bool", "true");
-			return new KRunResult(trueTerm, (Term)trueTerm.accept(new FlattenSyntax()));
+			return new KRunResult<DirectedGraph<KRunState, Transition>>(null);
 		} else {
 			sort = elem.getAttribute("sort");
 			op = elem.getAttribute("op");
 			assertXML(op.equals("LTLcounterexample") && sort.equals("#ModelCheckResult"));
 			child = XmlUtil.getChildElements(elem);
 			assertXML(child.size() == 2);
-			List<Transition> initialPath = new ArrayList<Transition>();
-			List<Transition> loop = new ArrayList<Transition>();
+			List<MaudeTransition> initialPath = new ArrayList<MaudeTransition>();
+			List<MaudeTransition> loop = new ArrayList<MaudeTransition>();
 			parseCounterexample(child.get(0), initialPath);
 			parseCounterexample(child.get(1), loop);
-			return new KRunResult(initialPath, loop);
+			DirectedGraph<KRunState, Transition> graph = new DirectedOrderedSparseMultigraph<KRunState, Transition>();
+			Transition edge = null;
+			KRunState vertex = null;
+			for (MaudeTransition trans : initialPath) {
+				graph.addVertex(trans.state);
+				if (edge != null) {
+					graph.addEdge(edge, vertex, trans.state);
+				}
+				edge = trans.label;
+				vertex = trans.state;
+			}
+			for (MaudeTransition trans : loop) {
+				graph.addVertex(trans.state);
+				graph.addEdge(edge, vertex, trans.state);
+				edge = trans.label;
+				vertex = trans.state;
+			}
+			graph.addEdge(edge, vertex, loop.get(0).state);
+			
+			return new KRunResult<DirectedGraph<KRunState, Transition>>(graph);
 		}
 	}
 
-	private static void parseCounterexample(Element elem, List<Transition> list) throws Exception {
+	private static class MaudeTransition {
+		public KRunState state;
+		public Transition label;
+
+		public MaudeTransition(KRunState state, Transition label) {
+			this.state = state;
+			this.label = label;
+		}
+	}
+
+	private static void parseCounterexample(Element elem, List<MaudeTransition> list) throws Exception {
 		String sort = elem.getAttribute("sort");
 		String op = elem.getAttribute("op");
 		List<Element> child = XmlUtil.getChildElements(elem);
@@ -560,29 +570,30 @@ public class MaudeKRun implements KRun {
 			assertXML(child.size() == 2);
 			Term t = parseXML(child.get(0));
 		
-			t = (Term) t.accept(new ConcretizeSyntax());
-			t = (Term) t.accept(new TypeInferenceSupremumFilter());
-			t = (Term) t.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-			//as a last resort, undo concretization
-			t = (Term) t.accept(new FlattenDisambiguationFilter());
-
-			if (t.getClass() == Cell.class) {
-				Cell generatedTop = (Cell) t;
-				if (generatedTop.getLabel().equals("generatedTop")) {
-					t = generatedTop.getContents();
-				}
-			}
-
 			List<Element> child2 = XmlUtil.getChildElements(child.get(1));
 			sort = child.get(1).getAttribute("sort");
 			op = child.get(1).getAttribute("op");
 			assertXML(child2.size() == 0 && (sort.equals("#Qid") || sort.equals("#RuleName")));
 			String label = op;
-			list.add(new Transition(t, label));
+			Transition trans;
+			if (sort.equals("#RuleName") && op.equals("UnlabeledLtl")) {
+				trans = new Transition(TransitionType.UNLABELLED);
+			} else {
+				trans = new Transition(label);
+			}
+			list.add(new MaudeTransition(new KRunState(t), trans));
 		} else if (sort.equals("#TransitionList") && op.equals("LTLnil")) {
 			assertXML(child.size() == 0);
 		} else {
 			assertXML(false);
 		}
+	}
+
+	public KRunDebugger debug(Term cfg) throws Exception {
+		return new KRunApiDebugger(this, cfg);
+	}
+
+	public KRunDebugger debug(SearchResults searchResults) {
+		return new KRunApiDebugger(this, searchResults.getGraph());
 	}
 }

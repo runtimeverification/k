@@ -83,4 +83,16 @@ public class MapItem extends CollectionItem {
 	public MapItem shallowCopy() {
 		return new MapItem(this);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof MapItem)) return false;
+		MapItem m = (MapItem)o;
+		return key.equals(m.key) && value.equals(m.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return key.hashCode() * 31 + value.hashCode();
+	}
 }

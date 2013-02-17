@@ -63,4 +63,16 @@ public class Empty extends Term {
 	public Empty shallowCopy() {
 		return new Empty(this);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Empty)) return false;
+		Empty e = (Empty)o;
+		return sort.equals(e.sort);
+	}
+
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
+	}
 }

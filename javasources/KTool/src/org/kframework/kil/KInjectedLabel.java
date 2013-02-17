@@ -70,4 +70,16 @@ public class KInjectedLabel extends Term {
 	public KInjectedLabel shallowCopy() {
 		return new KInjectedLabel(this);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (getClass() != o.getClass()) return false;
+		KInjectedLabel k = (KInjectedLabel)o;
+		return term.equals(k.term);
+	}
+
+	@Override
+	public int hashCode() {
+		return term.hashCode();
+	}
 }

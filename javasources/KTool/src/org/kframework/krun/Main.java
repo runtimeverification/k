@@ -17,12 +17,15 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.api.*;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.DefinitionLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
+import edu.uci.ics.jung.graph.*;
 
 import java.io.*;
 import java.util.*;
@@ -223,7 +226,7 @@ public class Main {
 			CommandLine cmd = cmd_options.getCommandLine();
 
 			KRun krun = new MaudeKRun();
-			KRunResult result = null;
+			KRunResult<?> result = null;
 			try {
 				if (K.do_search) {
 					if ("search".equals(K.maude_cmd)) {
@@ -246,15 +249,15 @@ public class Main {
 								}
 							}
 						}
-						String depth = null;
-						String bound = null;
+						Integer depth = null;
+						Integer bound = null;
 						if (cmd.hasOption("bound") && cmd.hasOption("depth")) {
-							bound = K.bound;
-							depth = K.depth;
+							bound = Integer.parseInt(K.bound);
+							depth = Integer.parseInt(K.depth);
 						} else if (cmd.hasOption("bound")) {
-							bound = K.bound;
+							bound = Integer.parseInt(K.bound);
 						} else if (cmd.hasOption("depth")) {
-							depth = K.depth;
+							depth = Integer.parseInt(K.depth);
 						}
 						ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
 						CollectVariablesVisitor vars = new CollectVariablesVisitor();
@@ -275,10 +278,10 @@ public class Main {
 					if (!formulaFile.exists()) {
 						// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
 						// assume that the specified argument is not a file and maybe represents a formula
-						KAST1 = rp.runParser(K.parser, K.model_checking, false, "LTLFormula");
+						KAST1 = rp.runParser(K.parser, K.model_checking, true, "LTLFormula");
 					} else {
 						// the specified argument represents a file
-						KAST1 = rp.runParser(K.parser, K.model_checking, true, "LTLFormula");
+						KAST1 = rp.runParser(K.parser, K.model_checking, false, "LTLFormula");
 					}
 
 					result = krun.modelCheck(new BackendTerm("K", KAST1), makeConfiguration(KAST, null, rp, (K.term != null)));
@@ -290,21 +293,18 @@ public class Main {
 				System.exit(1);
 			}
 
-			if ("search".equals(K.maude_cmd) && K.do_search && !cmd.hasOption("output")) {
-				System.out.println("Search results:");
-			}
 			if ("pretty".equals(K.output_mode)) {
-				red = result.prettyPrint();
-				for (String result2 : red) {
-					aux1.append(result2);
-					if (!cmd.hasOption("output")) {
-						AnsiConsole.out.println(result2);
-					}
+				String output = result.toString();
+				aux1.append(output);
+				if (!cmd.hasOption("output")) {
+					AnsiConsole.out.println(output);
 				}
 				// print search graph
 				if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
 					System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
-					AnsiConsole.out.println(result.searchGraph());
+					@SuppressWarnings("unchecked")
+					KRunResult<SearchResults> searchResult = (KRunResult<SearchResults>)result;
+					AnsiConsole.out.println(searchResult.getResult().getGraph());
 					// offer the user the possibility to turn execution into debug mode
 					while (true) {
 						System.out.print(K.lineSeparator + "Do you want to enter in debug mode? (y/n):");
@@ -312,7 +312,7 @@ public class Main {
 						String input = stdin.readLine();
 						if (input.equals("y")) {
 							K.debug = true;
-							debugExecution(KAST, lang, result);
+							debugExecution(KAST, lang, searchResult);
 						} else if (input.equals("n")) {
 							K.debug = false;
 							break;
@@ -322,7 +322,7 @@ public class Main {
 					}
 				}
 			} else if ("raw".equals(K.output_mode)) {
-				String output = result.rawOutput();
+				String output = result.getRawOutput();
 				;
 				if (!cmd.hasOption("output")) {
 					System.out.println(output);
@@ -355,14 +355,14 @@ public class Main {
 
 	// execute krun in debug mode (i.e. step by step execution)
 	// isSwitch variable is true if we enter in debug execution from normal execution (we use the search command with --graph option)
-	public static void debugExecution(String kast, String lang, KRunResult state) {
+	public static void debugExecution(String kast, String lang, KRunResult<SearchResults> state) {
 		try {
 			// adding autocompletion and history feature to the stepper internal commandline by using the JLine library
 			ConsoleReader reader = new ConsoleReader();
 			reader.setBellEnabled(false);
 
 			List<Completor> argCompletor = new LinkedList<Completor>();
-			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "select", "show-search-graph"/*, "show-node"*/ }));
+			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "select", "show-search-graph", "show-node", "show-edge" }));
 			argCompletor.add(new FileNameCompletor());
 			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
@@ -376,17 +376,14 @@ public class Main {
 			PrettyPrintOutput p = null;
 			List<String> red = null;
 			KRun krun = new MaudeKRun();
-			KRunResult result = null;
+			KRunDebugger debugger;
 			if (state == null) {
 				Term t = makeConfiguration(kast, null, rp, (K.term != null));
-				result = krun.step(t, 0);
+				debugger = krun.debug(t);
 				System.out.println("After running one step of execution the result is:");
-				red = result.prettyPrint();
-				for (String r : red) {
-					AnsiConsole.out.println(r);
-				}
+				AnsiConsole.out.println(debugger.printState(debugger.getCurrentState()));
 			} else {
-				result = state;
+				debugger = krun.debug(state.getResult());
 			}
 
 			while (true) {
@@ -407,13 +404,11 @@ public class Main {
 				// excepting the case of a command like: help
 				if (items.size() > 1) {
 					for (int i = 0; i < items.size(); i++) {
-						if (i == items.size() - 1) {
+						if (i > 0) {
 							aux.append("=");
 							aux.append(items.get(i));
-						} else if (i == items.size() - 2) {
+						} else if (i == 0) {
 							aux.append(items.get(i));
-						} else {
-							aux.append(items.get(i) + " ");
 						}
 					}
 					input = aux.toString();
@@ -433,14 +428,10 @@ public class Main {
 						System.exit(0);
 					}
 					if (cmd.hasOption("resume")) {
-						// check first to see if we have a current configuration obtained at previous steps
-						if (result.getResult() != null) {
-							result = krun.run(result.getRawResult());
-							red = result.prettyPrint();
-							AnsiConsole.out.println(red.get(0));
-
-							System.exit(0);
-						} else {
+						try {
+							debugger.resume();
+							AnsiConsole.out.println(debugger.printState(debugger.getCurrentState()));
+						} catch (IllegalStateException e) {
 							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator
 									+ "first a solution with step command before executing steps of rewrites!");
 						}
@@ -454,17 +445,13 @@ public class Main {
 						if (remainingArguments.length > 0) {
 							arg = remainingArguments[0];
 						}
-						// check first to see if we have a current configuration obtained at previous steps
-						if (result.getResult() != null) {
-							try {
-								int steps = Integer.parseInt(arg);
-								result = krun.step(result.getRawResult(), steps);
-								red = result.prettyPrint();
-								AnsiConsole.out.println(red.get(0));
-							} catch (NumberFormatException e) {
-								Error.silentReport("Argument to step must be an integer.");
-							}
-						} else {
+						try {
+							int steps = Integer.parseInt(arg);
+							debugger.step(steps);
+							AnsiConsole.out.println(debugger.printState(debugger.getCurrentState()));
+						} catch (NumberFormatException e) {
+							Error.silentReport("Argument to step must be an integer.");
+						} catch (IllegalStateException e) {
 							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator
 									+ "first a solution with step command before executing steps of rewrites!");
 						}
@@ -477,24 +464,14 @@ public class Main {
 						if (remainingArguments.length > 0) {
 							arg = remainingArguments[0];
 						}
-						// System.out.println("config=" + maudeConfig);
-						// check first to see if we have a current configuration obtained at previous steps
-						if (result.getResult() != null) {
-							ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "command line pattern");
-							CollectVariablesVisitor vars = new CollectVariablesVisitor();
-							pattern.accept(vars);
-							Set<String> varNames = vars.getVars().keySet();
-							pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
-							Rule patternRule = (Rule) pattern;
-							boolean showSearchGraph = K.showSearchGraph;
-							K.showSearchGraph = true;
-							result = krun.search("", arg, "+", patternRule, result.getRawResult(), varNames);
-							K.showSearchGraph = showSearchGraph;
-							red = result.prettyPrint();
-							for (String r : red) {
-								AnsiConsole.out.println(r);
-							}
-						} else {
+						try {
+							int steps = Integer.parseInt(arg);	
+							SearchResults states = debugger.stepAll(steps);
+							AnsiConsole.out.println(states);
+								
+						} catch (NumberFormatException e) {
+							Error.silentReport("Argument to step-all must be an integer.");
+						} catch (IllegalStateException e) {
 							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator
 									+ "first a solution with step command before executing steps of rewrites!");
 						}
@@ -503,29 +480,46 @@ public class Main {
 					if (cmd.hasOption("select")) {
 						String arg = new String();
 						arg = cmd.getOptionValue("select").trim();
-						if (result.get(arg) != null) {
-							result = result.get(arg);
-							System.out.println("Selected solution is:" + result.prettyPrint());
-
-						} else {
-							System.out.println("A solution with the specified solution-number could not be found in the" + K.lineSeparator + "previous search result");
+						try {
+							int stateNum = Integer.parseInt(arg);
+							debugger.setCurrentState(stateNum);
+							AnsiConsole.out.println(debugger.printState(debugger.getCurrentState()));
+						} catch (NumberFormatException e) {
+							Error.silentReport("Argument to select must bean integer.");
+						} catch (IllegalArgumentException e) {
+							System.out.println("A node with the specified state number could not be found in the" + K.lineSeparator + "search graph");
 						}
 					}
 					if (cmd.hasOption("show-search-graph")) {
 						System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
-						System.out.println(result.searchGraph());
-					}/*
+						System.out.println(debugger.getGraph());
+					}
 					if (cmd.hasOption("show-node")) {
 						String nodeId = cmd.getOptionValue("show-node").trim();
-						p = new PrettyPrintOutput();
-						String nodeString = p.printNodeSearchGraph(K.processed_maude_output, nodeId);
-						if (nodeString != null) {
-							System.out.println(nodeString);
-						} else {
-							System.out.println("A node with the specified id couldn't be found in the search graph");
+						try {
+							int stateNum = Integer.parseInt(nodeId);
+							AnsiConsole.out.println(debugger.printState(stateNum));
+						} catch (NumberFormatException e) {
+							Error.silentReport("Argument to select node to show must be an integer.");
+						} catch (IllegalArgumentException e) {
+							System.out.println("A node with the specified state number could not be found in the" + K.lineSeparator + "search graph");
 						}
-
-					}*/
+					}
+					if (cmd.hasOption("show-edge")) {
+						String[] vals = cmd.getOptionValues("show-edge");
+						vals = vals[0].split("=",2);
+						try {
+							int state1 = Integer.parseInt(vals[0].trim());
+							int state2 = Integer.parseInt(vals[1].trim());
+							AnsiConsole.out.println(debugger.printEdge(state1, state2));
+						} catch (ArrayIndexOutOfBoundsException e) {
+							Error.silentReport("Must specify two nodes with an edge between them.");
+						} catch (NumberFormatException e) {
+							Error.silentReport("Arguments to select edge to show must be integers.");
+						} catch (IllegalArgumentException e) {
+							System.out.println("An edge with the specified endpoints could not be found in the" + K.lineSeparator + "search graph");
+						}
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -564,20 +558,20 @@ public class Main {
 				K.io = false;
 				K.do_search = true;
 				if (cmd.hasOption("search") && cmd.hasOption("depth")) {
-					K.searchType = "*";
+					K.searchType = SearchType.STAR;
 				}
 			}
 			if (cmd.hasOption("search-final")) {
-				K.searchType = "!";
+				K.searchType = SearchType.FINAL;
 			}
 			if (cmd.hasOption("search-all")) {
-				K.searchType = "*";
+				K.searchType = SearchType.STAR;
 			}
 			if (cmd.hasOption("search-one-step")) {
-				K.searchType = "1";
+				K.searchType = SearchType.ONE;
 			}
 			if (cmd.hasOption("search-one-or-more-steps")) {
-				K.searchType = "+";
+				K.searchType = SearchType.PLUS;
 			}
 			if (cmd.hasOption("config")) {
 				K.output_mode = "pretty";
@@ -818,7 +812,7 @@ public class Main {
 					GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
 				}
 			}
-			
+	
 			GlobalSettings.kem.print();
 
 			if (!K.debug) {

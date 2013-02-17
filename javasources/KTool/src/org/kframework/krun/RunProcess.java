@@ -97,7 +97,11 @@ public class RunProcess {
 			if (startSymbol == null) {
 				startSymbol = DefinitionHelper.startSymbolPgm;
 			}
-			return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition, startSymbol);
+			String pgmContent = pgm;
+			if (!isPgm) {
+				pgmContent = FileUtil.getFileContent(pgm);
+			}
+			return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol);
 			// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", definition, pgm });
 		} else {
 			try {
@@ -111,7 +115,11 @@ public class RunProcess {
 				if (startSymbol == null) {
 					startSymbol = DefinitionHelper.startSymbolPgm;
 				}
-				return ProgramLoader.processPgm(FileUtil.getFileContent(pgm), pgm, K.definition, startSymbol);
+				String pgmContent = pgm;
+				if (!isPgm) {
+					pgmContent = FileUtil.getFileContent(pgm);
+				}
+				return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol);
 				// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
 			} else {
 				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));

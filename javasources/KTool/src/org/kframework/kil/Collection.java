@@ -19,7 +19,7 @@ public abstract class Collection extends Term {
 
 	public Collection(Collection c) {
 		super(c);
-		this.contents = c.contents;
+		this.contents = new ArrayList<Term>(c.contents);
 	}
 
 	public Collection(String location, String filename, String sort) {
@@ -63,4 +63,16 @@ public abstract class Collection extends Term {
 
 	@Override
 	public abstract Collection shallowCopy();
+
+	@Override
+	public boolean equals(Object o) {
+		if (getClass() != o.getClass()) return false;
+		Collection c = (Collection)o;
+		return sort.equals(c.sort) && contents.equals(c.contents);
+	}
+
+	@Override
+	public int hashCode() {
+		return sort.hashCode() * 13 + contents.hashCode();
+	}
 }

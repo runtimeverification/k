@@ -35,4 +35,15 @@ public abstract class CollectionItem extends Term {
 	@Override
 	public abstract CollectionItem shallowCopy();
 
+	@Override
+	public boolean equals(Object o) {
+		if (getClass() != o.getClass()) return false;
+		CollectionItem c = (CollectionItem)o;
+		return sort.equals(c.sort) && value.equals(c.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return sort.hashCode() * 19 + value.hashCode();
+	}
 }
