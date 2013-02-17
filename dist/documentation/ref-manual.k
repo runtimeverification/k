@@ -41,7 +41,40 @@
 
 \subsubsection{BNF-like Syntax}
 
-\subsubsection{Desambiguation Mechanisms}
+Tokenizer/Lexer rules
+
+K has predefined the lexer rules for the most common syntactic categories that are directly accesible throught subsorting:
+syntax #Bool   ::= Token{"true"} | Token{"false"}
+syntax #Id     ::= Token{[a-zA-Z][a-zA-Z0-9]*}
+syntax #Int    ::= Token{[\-\+]? [0-9]+}
+syntax #String ::= Lexer{"\"" (~[\"\n\r] | "\\\"" | "\\")* "\""} // where '\' cannot be followed by double quote
+syntax #Float  ::= Lexer{[0-9]+ "." [0-9]+ ([eE] #Int)}
+syntax #Float  -/- [a-zA-Z0-9\.]
+
+For some languages these may not be enough so you migth want to declare your own.
+There are two main things that you have to consider: the regular expression that will do the matching, and the follow restriction. The later tells the regular expression when not to stop matching.
+
+A regular expression for the matcher is similar to the one in SDF. Basically you may write strings, sets of tokens (using [...]), add optional arguments with '?'. You can negate a set of tokens by prefixing it with '~'. Inside a character set you may write individual caracters or entire ranges: a-z A-Z 0-9. Anything other than these need to be escaped using backslash.
+
+The follow restriction is an important feature of the SDF parser, as the lexical rules are not greedy by default. The last line in the example above, says that #Float cannot be followed by one of the characters in the set. The list can be extended to check multiple characters ahead by concatenating sets with '.' (syntax X -/- [a].[b].[c]).
+
+Sometimes you may also want to specify follow restrictions for keywords to avoid some ambiguities:
+syntax "keyword" -/- [a-zA-Z0-9]
+
+Another usefull construction is a list separated by a character. For example the name of a module in K is matched by a construction like the following:
+syntax MODNAME ::= Lexer{"#"?{[a-z0-9A-Z\_]+ "-"}+}
+syntax MODNAME -/- [a-z0-9A-Z\-\_]
+The construction {<char set> "<separator>"}+ will match 'A', 'A-A', 'A-A-A', but not 'A-'.
+
+Lexer{...} and -/- are the main way of specifying a lexical rule, but if your expression is simple enough, you may write Token{...}. This will try to infer automatically the follow restriction (if needed). Looking back at the rule for #Id, it will be equivalent to:
+syntax #Id ::= Lexer{[a-zA-Z][a-zA-Z0-9]*}
+syntax #Id -/- [a-zA-Z0-9]
+
+Note that this works for simple expressions that have a repeated character set at the end. If you want to specify something more complex, you will have to use Lexer{...} and specify the follow restriction.
+
+
+
+\subsubsection{Disambiguation Mechanisms}
 
 \bluetext{Filters, priorities, associativity etc}
 
