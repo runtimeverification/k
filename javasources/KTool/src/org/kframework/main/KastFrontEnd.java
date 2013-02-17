@@ -167,14 +167,14 @@ public class KastFrontEnd {
 		String sort = DefinitionHelper.startSymbolPgm;
 		if (System.getenv("KRUN_SORT") != null) {
 			sort = System.getenv("KRUN_SORT");
-		}			
+		}
 		if (cmd.hasOption("sort")) {
 			sort = cmd.getOptionValue("sort");
 		}
 
 		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, sort));
 		if (GlobalSettings.verbose)
-			sw.printTotal("Total           = ");
+			sw.printTotal("Total");
 		GlobalSettings.kem.print();
 	}
 }
