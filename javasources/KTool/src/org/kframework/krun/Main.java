@@ -388,6 +388,11 @@ public class Main {
 			while (true) {
 				System.out.println();
 				String input = reader.readLine("Command > ");
+				if (input == null) {
+					//probably pressed ^D
+					System.out.println();
+					System.exit(0);
+				}
 
 				// construct the right command line input when we specify the "step" option with an argument (i.e. step=3)
 				input = input.trim();
