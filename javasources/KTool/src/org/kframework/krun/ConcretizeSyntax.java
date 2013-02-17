@@ -5,6 +5,7 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,7 +32,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				return (Term)injected.accept(this);
 			}
 		} else if (label instanceof Constant) {
-			Set<String> conses = DefinitionHelper.labels.get(((Constant)label).getValue());
+			String klabel = ((Constant)label).getValue();
+			Set<String> conses = DefinitionHelper.labels.get(klabel);
 			Set<String> validConses = new HashSet<String>();
 			List<Term> contents = new ArrayList<Term>();
 			possibleTerms = new ArrayList<Term>();
@@ -86,6 +88,14 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 						return new Ambiguity(sortContext, possibleTerms);
 					}
 				}
+			} else if (klabel.equals("#token")) {
+				Constant sort = (Constant)contents.get(0).accept(this);
+				Constant value = (Constant)contents.get(1).accept(this);
+				String escapedSort = sort.getValue();
+				String escapedValue = value.getValue();
+				escapedSort = escapedSort.substring(1, escapedSort.length() - 1);
+				escapedValue = escapedValue.substring(1, escapedValue.length() - 1);
+				return new Constant(StringUtil.unescape(escapedSort), StringUtil.unescape(escapedValue));
 			}
 		}
 		return super.transform(kapp);
