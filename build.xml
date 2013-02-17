@@ -53,9 +53,12 @@
 		<delete dir="${javasources}/parsers/Concrete/trans/ConcreteMain" />
 		<delete dir="${javasources}/parsers/Concrete/include" />
 
-		<delete dir="${javasources}/KTool/bin" />
 		<delete file="${javasources}/KTool/lib/resources/sdf/*" />
+		<antcall target="clean-java" />
+	</target>
 
+	<target name="clean-java">
+		<delete dir="${javasources}/KTool/bin" />
 		<delete file="${javasources}/../dist/bin/java/k3.jar" />
 		<delete file="${javasources}/../dist/bin/version.txt" />
 		<delete dir="./k/" />
