@@ -267,56 +267,6 @@ public class XmlUtil {
 		return result;
 	}
 	
-	public static String prettyPrintTerm(Document doc, String tagName, String attributeName, String xpathExpression, String solutionIdentifier, PrettyPrintOutput printer) {
-		String result = null;
-		NodeList list = null;
-		Node nod = null;
-		
-		list = doc.getElementsByTagName(tagName);
-		if (list.getLength() == 0) {
-			Error.silentReport("The node with " +  tagName + " tag wasn't found. Make sure that you applied a" + K.lineSeparator + "search before using select command");
-			return result;
-		}
-		for (int i = 0; i < list.getLength(); i++) {
-			nod = list.item(i);
-			if (nod == null) {
-				Error.report("The node with " + tagName + " tag wasn't found");
-			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
-				Element elem = (Element) nod;
-				if (elem.getAttribute(attributeName).equals("NONE")) {
-					continue;
-				}
-				String solIdentifier = elem.getAttribute(attributeName);
-				//we found the desired search solution
-				if (solIdentifier.equals(solutionIdentifier)) {
-					// using XPath for direct access to the desired node
-					XPathFactory factory = XPathFactory.newInstance();
-					XPath xpath = factory.newXPath();
-					String s = null;
-					Object result1;
-					s = xpathExpression;
-					try {
-						result1 = xpath.evaluate(s, nod, XPathConstants.NODESET);
-						if (result1 != null) {
-							NodeList nodes = (NodeList) result1;
-							nod = nodes.item(0);
-							result = printer.print((Element) nod, false, 0, printer.ANSI_NORMAL);
-							break;
-						}
-						else {
-							String output = FileUtil.getFileContent(K.maude_out);
-							Error.report("Unable to parse Maude's search results:\n" + output);
-						}
-
-					} catch (XPathExpressionException e) {
-						Error.report("XPathExpressionException " + e.getMessage());
-					}
-				}
-			}
-		}
-		return result;
-	}
-	
 	/* retrieve the solution (a node in the xml file denoted by fileName) specified by its solution-number attribute 
 	or retrieve the term node from a node in the search graph obtained from a search command */
 	public static Element getSearchSolution(String fileName, String solutionIdentifier) {
@@ -334,26 +284,6 @@ public class XmlUtil {
 			result = getTerm(doc, "node", "id", "data/term", solutionIdentifier);
 		}
 		return result;
-	}
-	
-	/* pretty-print the solution (a node in the xml file denoted by fileName) specified by its solution-number obtained from a search command 
-	or pretty-print the term node from a node in the search graph obtained from a search command */
-	public static String printSearchSolution(String fileName, String solutionIdentifier, PrettyPrintOutput printer) {
-		String result = null;
-		File input = new File(fileName);
-		Document doc = XmlUtil.readXML(input);
-	    
-		//if solutionIdentifier represents a numeric value that it identifies a solution (specified by its solution-number attribute) from the search-result
-		//otherwise solutionIdentifier identifies an id of a node from the search graph
-		boolean isNumber = Utils.isNumber(solutionIdentifier);
-		if (isNumber) {
-			result = prettyPrintTerm(doc, "search-result", "solution-number", "substitution/assignment/term[2]", solutionIdentifier, printer);
-		}
-		else {
-			result = prettyPrintTerm(doc, "node", "id", "data/term", solutionIdentifier, printer);
-		}
-		
-		return result;		
 	}
 	
 	//create a xml document that contains the elem node (should be in the form a xml file obtained after a maude rewrite command) 

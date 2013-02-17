@@ -373,7 +373,6 @@ public class Main {
 			File outFile = FileUtil.createFile(K.maude_out);
 			File errFile = FileUtil.createFile(K.maude_err);
 			RunProcess rp = new RunProcess();
-			PrettyPrintOutput p = null;
 			List<String> red = null;
 			KRun krun = new MaudeKRun();
 			KRunDebugger debugger;
