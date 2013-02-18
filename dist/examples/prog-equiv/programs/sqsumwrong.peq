@@ -41,6 +41,6 @@ if
   and
   #symInt(i01) == #symInt(i02)
 
-using observers: n, s;
+using observers: n, i, s;
 
 
