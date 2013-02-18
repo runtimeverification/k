@@ -46,16 +46,16 @@ module MAP-SYMBOLIC
        lookup(X:K, followup(SS:K, Rho:Map, F)) 
         => 
         lookup(X, Rho)
-        when isSymbolicStmt(SS)
-        andBool F impliesBool (X isNotModifiedBy SS) // to be revised
+        when //isSymbolicStmt(SS) andBool 
+        F impliesBool (X isNotModifiedBy SS) // to be revised
 
   rule [lookup] :
        lookup(X:K, followup(SS:K, Rho:Map, F) Rho':Map) 
        => 
        lookup(X, Rho)
-       when isSymbolicStmt(SS)
-       andBool F impliesBool (X isNotModifiedBy SS)
-       andBool notBool(X in keys(Rho')) // to be revised
+       when //isSymbolicStmt(SS) andBool 
+     //  F impliesBool (X isNotModifiedBy SS)  andBool 
+       notBool(X in keys(Rho')) // to be revised
 
   //@ Update
   syntax Map ::= "update" "(" Map "," K "," K ")" [function]
@@ -611,7 +611,7 @@ module PEQ
   rule eqObs( <env>... X:Id |-> V1:Int ...</env>
               <env>... X    |-> V2:Int ...</env>
               <observers> ListItem(X) => . ...</observers>, F:K )
-       when checkSat(filter(F andBool V1 =/=Int V2)) ==K "unsat" 
+       when checkSat(filter(F andBool notBool(V1 ==Int V2))) ==K "unsat" 
 // when V1 ==K V2
 
 /*@
@@ -1153,14 +1153,14 @@ module PEQ
            if F:BExp
            using observers: Obs:Ids; 
            =>
-           setInitValObs(Obs) ~> setInitVal(Inits1) ~> P1
+           setInitVal(Inits1) ~> setInitValObs(Obs) ~> P1
          </k>
        ...</config>
        <condition> _ => injectForm(F) </condition>
       (. =>
        <config>
          <k> 
-           setInitValObs(Obs) ~> setInitVal(Inits2) ~> P2
+           setInitVal(Inits2) ~> setInitValObs(Obs) ~> P2
          </k>
          <env> . </env>
        </config>)
@@ -1202,16 +1202,22 @@ module PEQ
 
   rule <config>
          <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
-         <env>... . => X |-> IS1 ...</env>
+         <env> Env (. => X |-> IS1) </env>
        </config> 
        <config> 
          <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
          <env>... . => X |-> IS2 ...</env>
        </config> 
        <condition> B:K => B andBool (IS1 ==Int IS2) </condition>
-       when fresh(IS1:Int) andBool fresh(IS2:Int)
+       when (fresh(IS1:Int) andBool fresh(IS2:Int)) andBool notBool(X in keys(Env))
        [structural]
 
+  rule <config>
+         <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
+         <env> Env </env>
+       </config> 
+       when (X in keys(Env))
+       [structural]
 
 /*@ 
   The next function translates the initial condition into internal
@@ -1383,6 +1389,8 @@ module PEQ
   rule (I:Id isNotModifiedBy S:Stmt) [E:K / V:K] => I isNotModifiedBy S  [anywhere]
 
   rule B:Bool impliesBool true => true  [anywhere]
+
+  rule B:Bool impliesBool B => true  [anywhere]
 
   rule (B:Bool andBool B':Bool) impliesBool B => true  [anywhere]
   rule (B':Bool andBool B:Bool) impliesBool B => true  [anywhere]

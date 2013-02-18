@@ -18,7 +18,8 @@
       )
 </k>
 <env>
-  i -> #symInt(i01), SymMap(M1) 
+  i -> #symInt(i01), 
+SymMap(M1) 
 </env>
 
 ~
@@ -41,6 +42,6 @@ if
   and
   #symInt(i01) == #symInt(i02)
 
-using observers: n, s;
+using observers: n, i, s;
 
 
