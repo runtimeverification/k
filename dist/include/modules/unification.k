@@ -19,6 +19,13 @@ module UNIFICATION
   rule applyMgu(_, .Set) => .Set
   rule applyMgu(Theta:Mgu, SetItem(K:K) S:Set)
     => SetItem(applyMgu(Theta,K)) applyMgu(Theta,S)
+
+/* If the user's language supports unification against don't-care terms
+    (e.g. _ in Prolog), they should declare some syntax like the following:
+syntax ThingThatCanBeUnified ::= "_" [onlyLabel, klabel($dontcare)]
+*/
+  syntax K ::= "$dontcare" [klabel($dontcare)]
+
 // Traian: I would remove applySubst all together and only keep applyMgu
 //         Mgu gives a nicer, more intuitive user interface than Subst
 
@@ -34,7 +41,11 @@ Matching on any KAST label, the
                 L((K2:K => .KList),,Ks':KList)),,_)
     when (isVariable(L(K1,,Ks)) =/=K true)
          andBool (isVariable(L(K2,,Ks')) =/=K true)
+         andBool L(K1) =/=K $dontcare
+         andBool L(K2) =/=K $dontcare
     [structural, anywhere]
+  rule eqns((eqn(K:K,,$dontcare) => .KList),,_) [structural, anywhere]
+  rule eqns((eqn($dontcare,,K:K) => .KList),,_) [structural, anywhere]
   rule eqns((eqn(K:K,,X:Variable) => eqn(X,,K)),,_)
     when isVariable(K) =/=K true   [structural, anywhere]
 
@@ -45,7 +56,9 @@ Matching on any KAST label, the
     => clash(L1:KLabel(Ks:KList),,
                 L2:KLabel(Ks':KList))
     when (isVariable(L1(Ks)) =/=K true)
+         andBool (L1(Ks ) =/=K $dontcare)
          andBool (isVariable(L2(Ks')) =/=K true)
+         andBool (L2(Ks') =/=K $dontcare)
          andBool L1 =/=KLabel L2
     [structural, anywhere]
 
