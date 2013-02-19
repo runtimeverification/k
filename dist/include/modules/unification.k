@@ -41,8 +41,8 @@ Matching on any KAST label, the
                 L((K2:K => .KList),,Ks':KList)),,_)
     when (isVariable(L(K1,,Ks)) =/=K true)
          andBool (isVariable(L(K2,,Ks')) =/=K true)
-         andBool L(K1) =/=K $dontcare
-         andBool L(K2) =/=K $dontcare
+         andBool (L(K1) =/=K $dontcare)
+         andBool (L(K2) =/=K $dontcare)
     [structural, anywhere]
   rule eqns((eqn(K:K,,$dontcare) => .KList),,_) [structural, anywhere]
   rule eqns((eqn($dontcare,,K:K) => .KList),,_) [structural, anywhere]
