@@ -172,7 +172,8 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 					if (cellCfg == null) {
 						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, 
 								KExceptionGroup.INTERNAL, 
-								"Cell " + cell + " appears more than its multiplicity in " + t + ". \n\tTransformation: " + getName(), 
+								"Cell " + cell + " appears more than its multiplicity in " + t + ". \n\tTransformation: " + getName(),
+								getName(), 
 								t.getFilename(), t.getLocation()));								
 						continue;
 					}
@@ -195,8 +196,8 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		if (!(t instanceof Rewrite)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
-					"Expecting Rewrite, but got " + t.getClass() + " while " + getName(), 
-					t.getFilename(), t.getLocation()));					
+					"Expecting Rewrite, but got " + t.getClass() + " while " + getName(),
+					getName(), t.getFilename(), t.getLocation()));					
 			
 		}
 		List<Cell> cells = MetaK.getTopCells(t);
@@ -204,7 +205,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
 					"Expecting some cells in here, but got none while " + getName(), 
-					t.getFilename(), t.getLocation()));								
+					getName(), t.getFilename(), t.getLocation()));								
 		}
 		Iterator<Cell> i = cells.iterator();
 		ConfigurationStructure parent = config.get(i.next()).parent;
@@ -213,7 +214,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 						KExceptionGroup.INTERNAL, 
 						"Not all cells " + cells + "have parent " + parent + " while " + getName(), 
-						t.getFilename(), t.getLocation()));								
+						getName(), t.getFilename(), t.getLocation()));								
 				
 			}
 		}

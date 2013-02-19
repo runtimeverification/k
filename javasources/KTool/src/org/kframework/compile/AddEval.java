@@ -47,7 +47,7 @@ public class AddEval extends BasicCompilerStep<Definition> {
 			cfgCleaned.setBody(new Empty(MetaK.Constants.Bag));
 		} else {
 			if (!(cfgCleanedNode instanceof Configuration)) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Configuration Cleaner failed.", cfg.getFilename(), cfg.getLocation()));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Configuration Cleaner failed.", getName(), cfg.getFilename(), cfg.getLocation()));
 			}
 			cfgCleaned = (Configuration) cfgCleanedNode;
 		}

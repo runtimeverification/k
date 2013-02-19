@@ -59,7 +59,7 @@ public class KException {
 		return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
 			+ (filename == null ? "" : "\n\tFile: " + filename)
 			+ (location == null ? "" : "\n\tLocation: " + location)
-			+ (compilationPhase == null ? "" : "\n\t Compilation Phase: " + compilationPhase);
+			+ (compilationPhase == null ? "" : "\n\tCompilation Phase: " + compilationPhase);
 		
 	}
 }

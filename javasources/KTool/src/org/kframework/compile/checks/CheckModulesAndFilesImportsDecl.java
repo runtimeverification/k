@@ -25,8 +25,8 @@ public class CheckModulesAndFilesImportsDecl extends BasicVisitor {
 				for (Import i : civ.getImportList()) {
 					if (!i.getName().startsWith("#") && !MetaK.isBuiltinModule(i.getName())) {
 						Module imported = def.getModulesMap().get(i.getName());
-						if (!DefinitionHelper.isRequiredEq(imported.getFilename(), m.getFilename())) {
-							String msg = "Could not find module " + i.getName() + " in the required files.";
+						if (imported == null || !DefinitionHelper.isRequiredEq(imported.getFilename(), m.getFilename())) {
+							String msg = "Could not find module: " + i.getName() + " imported from: " + m.getName();
 							GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), m.getFilename(), i.getLocation()));
 						}
 					}

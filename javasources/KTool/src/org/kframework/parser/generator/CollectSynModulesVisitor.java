@@ -47,7 +47,7 @@ public class CollectSynModulesVisitor extends BasicVisitor {
 								synQue.add(mm.getName());
 							else if (!MetaK.isKModule(mname2)) {
 								String msg = "Could not find module: " + mname2 + " imported from: " + m.getName();
-								GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, msg, imp.getFilename(), imp.getLocation()));
+								GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, msg, getName(), imp.getFilename(), imp.getLocation()));
 							}
 					}
 			}
