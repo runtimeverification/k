@@ -1,5 +1,10 @@
+require "builtins/k-equal.k"
+
+
 module K-VISITOR
+  imports K-EQUAL-HOOKS
   imports BUILTIN-HOOKS
+
   syntax K ::= "visit" KList "applying" KLabel "if" KLabel
     [latex(\mbox{apply }{#2}\mbox{ in }{#1}\mbox{ if }{#3})]
              | "visiting" KList "applying" KLabel "if" KLabel
