@@ -9,16 +9,16 @@ endmodule
 module BOOL-HOOKS
   imports BOOL-SYNTAX-HOOKS
  
-  syntax Bool ::= "notBool" Bool  [function, left, smtlib(not), latex(\neg_{\scriptstyle\it Bool}{#1})]
-				> Bool "andBool" Bool     [function, left, smtlib(and), latex({#1}\wedge_{\scriptstyle\it Bool}{#2})]
-				| Bool "andThenBool" Bool [function, left, smtlib(and)]
-				> Bool "xorBool" Bool		  [function, left, smtlib(xor)]
-				> Bool "orBool" Bool		  [function, left, smtlib(or), latex({#1}\vee_{\scriptstyle\it Bool}{#2})]
-				| Bool "orElseBool" Bool  [function, left, smtlib(or)]
-				> Bool "impliesBool" Bool	[function, left, smtlib(=>)]
+  syntax Bool ::= "notBool" Bool          [function, left, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1})]
+				> Bool "andBool" Bool     [function, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2})]
+				| Bool "andThenBool" Bool [function, left, smtlib(and), boolOperation]
+				> Bool "xorBool" Bool	  [function, left, smtlib(xor), boolOperation]
+				> Bool "orBool" Bool	  [function, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2})]
+				| Bool "orElseBool" Bool  [function, left, smtlib(or), boolOperation]
+				> Bool "impliesBool" Bool [function, left, smtlib(=>), boolOperation]
 				> left:
-				  Bool "==Bool" Bool		[function, left, smtlib(=), hook(#BOOL:_==Bool_)]
-				| Bool "=/=Bool" Bool		[function, left, smtlib(distinct)]
+				  Bool "==Bool" Bool	  [function, left, smtlib(=), hook(#BOOL:_==Bool_)]
+				| Bool "=/=Bool" Bool	  [function, left, smtlib(distinct)]
 
   rule notBool true => false
   rule notBool false => true

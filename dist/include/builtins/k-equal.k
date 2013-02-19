@@ -8,8 +8,10 @@ module K-EQUAL-HOOKS
   
 
   syntax Bool ::= left:
-  				  K "==K" K           [function, hook(#K-EQUAL:_==K_), latex({#1}\mathrel{=_K}{#2})]
-				| K "=/=K" K          [function, latex({#1}\mathrel{\neq_K}{#2})]
+  				  K "==K" K           [function, hook(#K-EQUAL:_==K_), latex({#1}\mathrel{=_K}{#2}), equalEqualK]
+				| K "=/=K" K          [function, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+				
+  syntax priorities equalEqualK notEqualEqualK > boolOperation
   rule K1:K =/=K K2:K => notBool(K1 ==K K2)
 
 
