@@ -89,8 +89,16 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 					}
 				}
 			} else if (klabel.equals("#token")) {
-				Constant sort = (Constant)contents.get(0).accept(this);
-				Constant value = (Constant)contents.get(1).accept(this);
+				ASTNode sortNode = contents.get(0).accept(this);
+				ASTNode valueNode = contents.get(1).accept(this);
+				if (!(sortNode instanceof Constant && valueNode instanceof Constant)) {
+					return super.transform(kapp);
+				}
+				Constant sort = (Constant)sortNode;
+				Constant value = (Constant)valueNode;
+				if (!(sort.getSort().equals("#String") && value.getSort().equals("#String"))) {
+					return super.transform(kapp);
+				}
 				String escapedSort = sort.getValue();
 				String escapedValue = value.getValue();
 				escapedSort = escapedSort.substring(1, escapedSort.length() - 1);
