@@ -104,7 +104,7 @@ public class KRunner {
 		// Client.main(null);
 	}
 
-	public void run() throws Exception {
+	public int run() throws Exception {
 		if (!_noServer) {
 			startServer();
 		}
@@ -122,14 +122,13 @@ public class KRunner {
 		_logger.info("Maude command:" + K.lineSeparator + command);
 
 		maude.join();
-		@SuppressWarnings("unused")
-		int returnValue = maude.returnValue;
+		return maude.returnValue;
 	}
 
-	public static void main(String[] args) throws IOException, Exception {
+	public static int main(String[] args) throws IOException, Exception {
 		KRunner runner = new KRunner(args);
 		// try {
-		runner.run();
+		return runner.run();
 		// } catch (IOException e) {
 		// // TODO Auto-generated catch block
 		// e.printStackTrace();
