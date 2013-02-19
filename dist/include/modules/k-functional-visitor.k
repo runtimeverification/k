@@ -5,32 +5,46 @@ module K-FUNCTIONAL-VISITOR
   imports K-EQUAL-HOOKS
   imports BUILTIN-HOOKS
 
-  syntax KList ::= "$visit" "(" KList "," KLabel "," KList "," KLabel "," KList ")"    [function]
-/*
-                 | "$visit" "(" KList "," KLabel "," KList "," KLabel ")"              [function]
-                 | "$visit" "(" KList "," KLabel "," KLabel "," KList ")"              [function]
-                 | "$visit" "(" KList "," KLabel "," KLabel ")"                        [function]
-                 | "$visit" "(" KList "," KLabel "," KList ")"                         [function]
-                 | "$visit" "(" KList "," KLabel ")"                                   [function]
-*/
-  syntax K ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"    [function]
-             | "#visit" "(" K "," KLabel "," KList "," KLabel ")"              [function]
-             | "#visit" "(" K "," KLabel "," KLabel "," KList ")"              [function]
-             | "#visit" "(" K "," KLabel "," KLabel ")"                        [function]
-             | "#visit" "(" K "," KLabel "," KList ")"                         [function]
-             | "#visit" "(" K "," KLabel ")"                                   [function]
+  /*
+   * Generic K-AST visitor
+   *   #visit(K, VisitLabel, VisitList, IfLabel, IfList)
+   * where
+   *   K           K representation of the AST
+   *   VisitLabel  KLabel of the function applied to an AST node
+   *   VisitList   KList of additional arguments for VisitLabel
+   *   IfLabel     KLabel of the predicate guard for VisitLabel
+   *   IfList      KList of additional arguments for IfLabel
+   * #visit traverses the AST K top-down int the following way: for each node K'
+   * if IfLabel(K',,IFList) holds then replace K' with VisitLabel(K',,VisitList)
+   * otherwise recurse on the children of K'.
+   */
+  syntax K ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"   [function]
 
-/*
-  rule
-    #visit(K:K,
-           VisitLabel:KLabel,
-           VisitList:KList,
-           IfLabel:KLabel,
-           IfList:KList)
-  =>
-    $visit((K,,.KList), VisitLabel, VisitList, IfLabel, IfList)
-*/
+  /*
+   * Particular forms of #visit (default argument KList is .KList, default
+   * KLabel predicate is $visitTrue) 
+   */
+  syntax K ::= "#visit" "(" K "," KLabel "," KList "," KLabel ")"   [function]
+             | "#visit" "(" K "," KLabel "," KLabel "," KList ")"   [function]
+             | "#visit" "(" K "," KLabel "," KLabel ")"             [function]
+             | "#visit" "(" K "," KLabel "," KList ")"              [function]
+             | "#visit" "(" K "," KLabel ")"                        [function]
 
+  /*
+   * #visitAll of a KList (first argument) applies #visit to each element of the
+   * list.
+   */
+  syntax KList ::= "#visitAll" "(" KList "," KLabel "," KList "," KLabel "," KList ")"    [function]
+                 | "#visitAll" "(" KList "," KLabel "," KList "," KLabel ")"              [function]
+                 | "#visitAll" "(" KList "," KLabel "," KLabel "," KList ")"              [function]
+                 | "#visitAll" "(" KList "," KLabel "," KLabel ")"                        [function]
+                 | "#visitAll" "(" KList "," KLabel "," KList ")"                         [function]
+                 | "#visitAll" "(" KList "," KLabel ")"                                   [function]
+
+  /*
+   * Reduce uses of particular forms of #visit to the use of the most general
+   * form.
+   */
   rule
     #visit(K:K, VisitLabel:KLabel, VisitList:KList, IfLabel:KLabel)
   =>
@@ -50,23 +64,57 @@ module K-FUNCTIONAL-VISITOR
   rule
     #visit(K:K, VisitLabel:KLabel)
   =>
-    #visit(K, VisitLabel, .KList)
+    #visit(K, VisitLabel, .KList, $visitTrue, .KList)
 
-  syntax KLabel ::= "$visitTrue"
-  rule $visitTrue(_:KList) => true    [anywhere]
-
+  /*
+   * Reduce uses of particular forms of #visitAll to the use of the most general
+   * form.
+   */
   rule
-    $visit(K1,,K2,,KList:KList,
+    #visitAll(K:K, VisitLabel:KLabel, VisitList:KList, IfLabel:KLabel)
+  =>
+    #visitAll(K, VisitLabel, VisitList, IfLabel, .KList)
+  rule
+    #visitAll(K:K, VisitLabel:KLabel, IfLabel:KLabel, IfList:KList)
+  =>
+    #visitAll(K, VisitLabel, .KList, IfLabel, IfList)
+  rule
+    #visitAll(K:K, VisitLabel:KLabel, IfLabel:KLabel)
+  =>
+    #visitAll(K, VisitLabel, .KList, IfLabel, .KList)
+  rule
+    #visitAll(K:K, VisitLabel:KLabel, VisitList:KList)
+  =>
+    #visitAll(K, VisitLabel, VisitList, $visitTrue, .KList)
+  rule
+    #visitAll(K:K, VisitLabel:KLabel)
+  =>
+    #visitAll(K, VisitLabel, .KList, $visitTrue, .KList)
+
+  /*
+   * Default predicate guard (always true)
+   */
+  syntax KLabel ::= "$visitTrue"
+  rule $visitTrue(_) => true    [anywhere]
+
+  /*
+   * #visitAll applies #visit to each element of the KList (first argument).
+   */
+  rule
+    #visitAll(K,,KList:KList,
            VisitLabel:KLabel,
            VisitList:KList,
            IfLabel:KLabel,
            IfList:KList)
   =>
-    $visit(K1, VisitLabel, VisitList, IfLabel, IfList),,
-    $visit(K2, VisitLabel, VisitList, IfLabel, IfList),,
-    $visit(KList, VisitLabel, VisitList, IfLabel, IfList)
-  rule $visit(.KList, _:KLabel, _:KList, _:KLabel, _:KList) => .KList
+    #visit(K, VisitLabel, VisitList, IfLabel, IfList),,
+    #visitAll(KList, VisitLabel, VisitList, IfLabel, IfList)
+  rule #visitAll(.KList, _:KLabel, _:KList, _:KLabel, _:KList) => .KList
 
+  /*
+   * #visit applied to a "~>" sequence of K items (first argument) reduces to
+   * #visit applied to each K item.
+   */
   rule
     #visit(K1 ~> K2,
            VisitLabel:KLabel,
@@ -79,6 +127,10 @@ module K-FUNCTIONAL-VISITOR
   when K1 =/=K .K andBool K2 =/=K .K
   rule #visit(.K, _:KLabel, _:KList, _:KLabel, _:KList) => .K
   
+  /*
+   * #visit applied to an AST node (a KLabel applies to a KList) either
+   * transforms the node or reduces to #visit applied to its children.
+   */
   rule
     #visit(KLabel:KLabel(KList:KList),
            VisitLabel:KLabel,
@@ -89,7 +141,7 @@ module K-FUNCTIONAL-VISITOR
     #if IfLabel(KLabel:KLabel(KList:KList),,IfList) ==K true #then
       VisitLabel(KLabel:KLabel(KList:KList),,VisitList)
     #else
-      KLabel($visit(KList, VisitLabel, VisitList, IfLabel, IfList))
+      KLabel(#visitAll(KList, VisitLabel, VisitList, IfLabel, IfList))
     #fi
 endmodule
 

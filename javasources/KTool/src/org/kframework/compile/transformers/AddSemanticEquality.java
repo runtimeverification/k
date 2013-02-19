@@ -49,31 +49,39 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
              * operators tagged with "equality" must have the signature
              * Sort -> Sort -> Bool
              */
-            if (prod.getSort() == Sort.BOOL)
+            if (prod.getSort().equals(Sort.BOOL))
                 if (prod.getArity() == 2)
-                    if (prod.getChildSort(0) == prod.getChildSort(1))
+                    if (prod.getChildSort(0).equals(prod.getChildSort(1)))
                         if (!equalities.containsKey(prod.getChildSort(0)))
                             equalities.put(prod.getChildSort(0), prod.getKLabel());
                         else
                             GlobalSettings.kem.register(new KException(
                                     KException.ExceptionType.ERROR,
                                     KException.KExceptionGroup.CRITICAL,
-                                    "multiple equalities for sort " + prod.getChildSort(0)));
+                                    "redeclaration of equality for sort " + prod.getChildSort(0),
+                                    prod.getFilename(),
+                                    prod.getLocation()));
                     else
                         GlobalSettings.kem.register(new KException(
                                 KException.ExceptionType.ERROR,
                                 KException.KExceptionGroup.CRITICAL,
-                                "multiple equalities for sort " + prod.getChildSort(0)));
+                                "arguments for equality expected to be of the same sort",
+                                prod.getFilename(),
+                                prod.getLocation()));
                 else
                     GlobalSettings.kem.register(new KException(
                             KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.CRITICAL,
-                            "multiple equalities for sort " + prod.getChildSort(0)));
+                            "unexpected number of arguments for equality, expected 2",
+                            prod.getFilename(),
+                            prod.getLocation()));
             else
                 GlobalSettings.kem.register(new KException(
                         KException.ExceptionType.ERROR,
                         KException.KExceptionGroup.CRITICAL,
-                        "equality "));
+                        "unexpected sort " + prod.getSort() + " for equality, expected sort " + Sort.BOOL,
+                        prod.getFilename(),
+                        prod.getLocation()));
 
         retNode.addConstant(EQUALITY_PREDICATE);
 
@@ -89,6 +97,31 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
 
                 Term lhs = new KApp(K_EQUALITY, list);
                 Term rhs = new KApp(sortEq, list);
+                Rule rule = new Rule(lhs, rhs);
+                rule.addAttribute(Attribute.FUNCTION);
+                retNode.appendModuleItem(rule);
+            }
+        }
+
+        Set<Production> prods = node.getSyntaxByTag("");
+        for (Production prod : prods) {
+            if (!prod.isSubsort()
+                    && !prod.containsAttribute(Attribute.BRACKET.getKey())
+                    && !prod.containsAttribute(Attribute.FUNCTION.getKey())
+                    && !prod.containsAttribute(Attribute.PREDICATE.getKey())) {
+                Variable KListVar1 = MetaK.getFreshVar(MetaK.Constants.KList);
+                Variable KListVar2 = MetaK.getFreshVar(MetaK.Constants.KList);
+
+                KList lhsList = new KList();
+                lhsList.add(new KApp(Constant.KLABEL(prod.getKLabel()), KListVar1));
+                lhsList.add(new KApp(Constant.KLABEL(prod.getKLabel()), KListVar2));
+
+                KList rhsList = new KList();
+                rhsList.add(new KApp(new KInjectedLabel(KListVar1), Empty.ListOfK));
+                rhsList.add(new KApp(new KInjectedLabel(KListVar2), Empty.ListOfK));
+
+                Term lhs = new KApp(K_EQUALITY, lhsList);
+                Term rhs = new KApp(KLIST_EQUALITY, rhsList);
                 Rule rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
@@ -119,9 +152,11 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
         }
         */
 
+        /*
         Set<Production> prods = node.getSyntaxByTag("");
         for (Production prod : prods) {
-            if (!prod.containsAttribute(Attribute.BRACKET.getKey())
+            if (!prod.isSubsort()
+                    && !prod.containsAttribute(Attribute.BRACKET.getKey())
                     && !prod.containsAttribute(Attribute.FUNCTION.getKey())
                     && !prod.containsAttribute(Attribute.PREDICATE.getKey())) {
                 Variable KListVar1 = MetaK.getFreshVar(MetaK.Constants.KList);
@@ -142,6 +177,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                 retNode.appendModuleItem(rule);
             }
         }
+        */
 
         return retNode;
     }

@@ -69,6 +69,10 @@ public class KompileFrontEnd {
 			System.exit(0);
 		}
 
+        GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
+        GlobalSettings.SMT = cmd.hasOption("smt");
+        GlobalSettings.matchingLogic = cmd.hasOption("ml");
+
 		// set verbose
 		if (cmd.hasOption("verbose"))
 			GlobalSettings.verbose = true;
