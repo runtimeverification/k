@@ -59,7 +59,8 @@ public class MapInsertPattern extends Term {
   }
 
   public MapInsertPattern(MapInsertPattern mp){
-
+    insertions = mp.insertions;
+    remainder = mp.remainder;
   }
 
   public List<Binding> getInsertions(){
