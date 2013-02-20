@@ -190,18 +190,31 @@ public class SimpleMatcher implements Matcher {
             deferredMapLookups.put((Variable) b.getKey(), constraints);
           }
           constraints.add(mlc);
+          //we cannot remove the key until the constraint is unified
+          //since we do not want to have to copy maps
+          //I will make some concessions to performance here....
+          //I am not happy with how MatchLookupContraint.unify does
+          //some key removal while others are performed manually
+          //in this method.  Consider refactoring
         }
         // yay, we know the binding so we can just unify without deferring!
         else {
           b.getValue().accept(this, map.get(key));
+          //we must remove the key so that we can properly bind the 
+          //remainder
+          map.remove(key);
         }
       } 
       //here we are looking up with a Term that wasn't even a Variable, so this is
       //really simple
       else{
         b.getValue().accept(this, map.get(b.getKey()));
+        //we must remove the key so that we can properly bind the 
+        //remainder
+        map.remove(key);
       }
     }
+    substitution.put(term.getRemainder(), map);
   }
 
 	@Override
@@ -268,6 +281,7 @@ public class SimpleMatcher implements Matcher {
       //know the Variable binding before hand
       //since we just bound a Variable
       HashSet<MapLookupConstraint> lookups = deferredMapLookups.get(term); 
+      if(lookups == null) return;
       for(MapLookupConstraint lookup : lookups){
         //look unify the value bound to term2 in the MapImpl with the image 
         //in the MapLookupPattern 
@@ -275,7 +289,7 @@ public class SimpleMatcher implements Matcher {
       }
       //this is necessary because we need to determine if we have actually
       //matched a pattern based on if there is anything left in the deferredMapLookups
-      deferredMapLookups.remove(lookups); 
+      deferredMapLookups.remove(term); 
     }
 
     else {
@@ -305,6 +319,7 @@ public class SimpleMatcher implements Matcher {
     t1.accept(this, t2);
     //tear down
     if(deferredMapLookups.size() != 0) {
+      System.out.println("current subst: " + substitution);
      throw new MatcherException("deferredMapLookups not empty, not all variables were discovered, pattern does not match: " +
         deferredMapLookups); 
     }
@@ -330,7 +345,24 @@ public class SimpleMatcher implements Matcher {
     System.out.println(pattern);
     System.out.println(term);
     Matcher m = new SimpleMatcher();
-    pattern.accept(m, term);
+    m.start(pattern, term);
     System.out.println(m.getSubstitution());
+    System.out.println("\n====map test");
+    MapLookupPattern test = MapLookupPattern.test;
+    MapImpl map = new MapImpl();
+    map.put(Constant.KLABEL("foo"), Constant.KLABEL("bar"));
+    map.put(Constant.KLABEL("car"), Constant.KLABEL("cdr"));
+    map.put(Constant.KLABEL("a"), Constant.KLABEL("bar"));
+    map.put(Constant.KLABEL("d"), Constant.KLABEL("cdr"));
+    patternGuts.add(test);
+    patternGuts.add(new Variable("qqq", "KLabel"));
+    termGuts.add(map);
+    termGuts.add(Constant.KLABEL("d"));
+    pattern = new KApp(Constant.KLABEL("foo"), patternGuts);
+    term = new KApp(Constant.KLABEL("foo"), termGuts);
+    System.out.println("pattern: " + pattern);
+    System.out.println("term: " + term);
+    m.start(pattern, term);
+    System.out.println("theta: " + m.getSubstitution());
   }
 }

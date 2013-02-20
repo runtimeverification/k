@@ -17,6 +17,10 @@ public class MapLookupConstraint {
     this.image = image;
   }
 
+  public String toString(){
+    return "MapLookupConstraint(map=" + map + ", " + "image=" + image; 
+  }
+
   /**
    * This method attempt to unify a given MapLookupPattern image
    * (i.e., the part on the rhs of the binding; denoted by the private 
@@ -30,5 +34,9 @@ public class MapLookupConstraint {
    */
   public void unify(Matcher m, Term t){
     image.accept(m, map.get(t));
+    //we remove the t as a key from the map since there
+    //is no way a key can appear twice in a map.  This will
+    //be more tricky in multimaps, if we ever have those
+    map.remove(t);
   }
 }

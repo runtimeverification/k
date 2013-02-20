@@ -20,4 +20,8 @@ public class Binding {
   public Term getValue(){
     return value;
   }
+
+  public String toString(){
+    return key.toString() + " |-> " + value.toString();
+  }
 }
