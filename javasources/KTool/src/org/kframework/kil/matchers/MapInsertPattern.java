@@ -2,6 +2,7 @@ package org.kframework.kil.matchers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Map;
+import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.matchers.Matcher;
@@ -14,6 +15,9 @@ import java.util.ArrayList;
 
 /**This represents a pattern that inserts bindings into a MapImpl
  * it should only appear on the RHS of rules
+ *
+ * TODO: There is probably no reason to separate this from MapLookupPattern
+ * unify to one class MapPattern?
  */
 public class MapInsertPattern extends Term {
 
@@ -29,8 +33,29 @@ public class MapInsertPattern extends Term {
     java.util.List<Term> contents = m.getContents();
     insertions = new ArrayList<Binding>(contents.size());
     for(Term t : contents){
-      
-    } 
+      if(t instanceof Variable){
+        if(!(t.getSort().equals("Map")))
+          throw new MatchCompilationException(
+              "Variable in Map pattern does not have sort Map: " + t);
+        if(remainder != null)
+          throw new MatchCompilationException(
+              "Map pattern has more than one remainder variable, i.e., "
+            + " more than one variable at the top level: " + m);
+        remainder = (Variable) t;  
+      }      
+      else if(t instanceof MapItem){
+        MapItem mi = (MapItem) t;
+        insertions.add(new Binding(mi.getKey(), mi.getValue()));
+      }
+      else {
+        throw new MatchCompilationException(
+            "Map pattern contains a Term that is neither a Variable of sort Map "
+          + "nor a MapItem.  This is not supported.  Map is: " + m);
+      }
+    }
+    //else if(remainder == null) handle ...?  This will be difficult since we need
+    //to add a fresh variable to both sides of the Rule.  Easier if we do this
+    //in an earlier kompile pass  
   }
 
   public MapInsertPattern(MapInsertPattern mp){

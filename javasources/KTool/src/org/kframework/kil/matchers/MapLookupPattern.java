@@ -3,6 +3,7 @@ package org.kframework.kil.matchers;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Map;
+import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.matchers.Matcher;
@@ -26,29 +27,44 @@ public class MapLookupPattern extends Term {
    */
   private Variable remainder;
 
+  /**
+   * currently assumes no "..." in Maps
+   */
   public MapLookupPattern(Map m){
     java.util.List<Term> contents = m.getContents();
     lookups = new ArrayList<Binding>(contents.size());
     for(Term t : contents){
-      
-    } 
+      if(t instanceof Variable){
+        if(!(t.getSort().equals("Map")))
+          throw new MatchCompilationException(
+              "Variable in Map pattern does not have sort Map: " + t);
+        if(remainder != null)
+          throw new MatchCompilationException(
+              "Map pattern has more than one remainder variable, i.e., "
+            + " more than one variable at the top level: " + m);
+        remainder = (Variable) t;  
+      }      
+      else if(t instanceof MapItem){
+        MapItem mi = (MapItem) t;
+        lookups.add(new Binding(mi.getKey(), mi.getValue()));
+      }
+      else {
+        throw new MatchCompilationException(
+            "Map pattern contains a Term that is neither a Variable of sort Map "
+          + "nor a MapItem.  This is not supported.  Map is: " + m);
+      }
+    }
+    //else if(remainder == null) handle ...?  This will be difficult since we need
+    //to add a fresh variable to both sides of the Rule.  Easier if we do this
+    //in an earlier kompile pass  
   }
 
   public MapLookupPattern(MapLookupPattern mp){
-
+    lookups = mp.lookups;
+    remainder = mp.remainder;
   }
 
   private MapLookupPattern(){}
-
-  public static MapLookupPattern test = new MapLookupPattern();
-
-  static {
-    test.lookups = new ArrayList<Binding>();
-    test.remainder = new Variable("E", "Map");
-    test.lookups.add(new Binding(new Variable("x", "KLabel"), Constant.KLABEL("bar")));
-    test.lookups.add(new Binding(new Variable("qqq", "KLabel"), Constant.KLABEL("cdr")));
-    test.lookups.add(new Binding(Constant.KLABEL("car"), Constant.KLABEL("cdr")));
-  }
 
   public List<Binding> getLookups(){
     return lookups;
