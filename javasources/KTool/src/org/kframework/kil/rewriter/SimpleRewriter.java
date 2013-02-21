@@ -16,10 +16,6 @@ import org.kframework.kil.matchers.SimpleMatcher;
 
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-import org.kframework.compile.utils.Substitution;
-
-
-
 /** 
  * This class implements Term Rewriting based on the
  * SimpleMatcher.  It is very dumb and slow.  Some would
@@ -38,7 +34,7 @@ public class SimpleRewriter {
     for(Rewrite r : trs){
       try {
         matcher.start(r.getLeft(),t);
-        Substitution substitution = new Substitution(matcher.getSubstitution());
+        RewriteSubstitution substitution = new RewriteSubstitution(matcher.getSubstitution());
         try {
           //ignore warning, we know this must be a Term
           out = (Term) r.getRight().accept(substitution);
