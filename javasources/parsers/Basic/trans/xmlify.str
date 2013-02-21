@@ -198,7 +198,12 @@ rules
 		where loc := <getLocAsString> x1
 
 	to-xml:
-		List(x1, x2)		-> $[<userlist     value="[x1]" separator="[<xml-string-escape-from-string> x2]" loc="[loc]" />
+		List(x1, x2)		-> $[<userlist     value="[x1]" separator="[<xml-string-escape-from-string> x2]" loc="[loc]" type="*"/>
+		]
+		where loc := <getLocAsString>
+
+	to-xml:
+		NeList(x1, x2)		-> $[<userlist     value="[x1]" separator="[<xml-string-escape-from-string> x2]" loc="[loc]" type="+"/>
 		]
 		where loc := <getLocAsString>
 

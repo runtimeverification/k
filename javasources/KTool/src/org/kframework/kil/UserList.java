@@ -6,24 +6,27 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
-/** A production item for a cons-list with separator, like List{UserSort,";"}.
- *  Must be the only item in a {@link Production}.
+/**
+ * A production item for a cons-list with separator, like List{UserSort,";"}. Must be the only item in a {@link Production}.
  */
 public class UserList extends ProductionItem {
 	protected String sort;
 	protected String separator;
+	protected String listType;
 
 	public UserList(Element element) {
 		super(element);
 
 		sort = element.getAttribute(Constants.VALUE_value_ATTR);
 		separator = element.getAttribute(Constants.SEPARATOR_separator_ATTR);
+		listType = element.getAttribute(Constants.TYPE_type_ATTR);
 	}
 
 	public UserList(UserList userList) {
 		super(userList);
 		sort = userList.sort;
 		separator = userList.separator;
+		listType = userList.listType;
 	}
 
 	public ProductionType getType() {
@@ -32,7 +35,10 @@ public class UserList extends ProductionItem {
 
 	@Override
 	public String toString() {
-		return "List{" + sort + ",\"" + separator + "\"} ";
+		if (listType.equals("*"))
+			return "List{" + sort + ",\"" + separator + "\"} ";
+		else
+			return "NeList{" + sort + ",\"" + separator + "\"} ";
 	}
 
 	public String getSort() {
@@ -87,5 +93,13 @@ public class UserList extends ProductionItem {
 	@Override
 	public UserList shallowCopy() {
 		return new UserList(this);
+	}
+
+	public String getListType() {
+		return listType;
+	}
+
+	public void setListType(String listType) {
+		this.listType = listType;
 	}
 }

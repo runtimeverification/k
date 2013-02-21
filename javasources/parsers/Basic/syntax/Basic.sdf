@@ -56,7 +56,8 @@ context-free syntax
 	BasicElement -> SyntaxElement
 	STRING		-> BasicElement {cons("Terminal")}
 	SORTID		-> BasicElement {cons("Sort")}
-	"List{" BASICID "," STRING "}" -> SyntaxElement {cons("List")}
+	  "List{" BASICID "," STRING "}" -> SyntaxElement {cons("List")}
+	"NeList{" BASICID "," STRING "}" -> SyntaxElement {cons("NeList")}
 	"Lexer" "{" RegEx "}" -> SyntaxElement {cons("Lexer")}
 	"Token" "{" RegEx "}" -> SyntaxElement {cons("Token")}
 
