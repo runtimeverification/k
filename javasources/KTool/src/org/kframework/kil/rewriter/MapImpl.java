@@ -2,7 +2,9 @@ package org.kframework.kil.rewriter;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
+import org.kframework.kil.MapItem;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.matchers.MatchCompilationException;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -34,11 +36,31 @@ public class MapImpl extends Term {
   }
 
   public MapImpl(MapImpl mi){
-    map = new HashMap<Term, Term>();
+    map = mi.map;
   }
 
   public MapImpl(){
     map = new HashMap<Term, Term>();
+  }
+
+  /**
+   * Map must be a ground map
+   */
+  public MapImpl(org.kframework.kil.Map m){
+    java.util.List<Term> contents = m.getContents();
+    map = new HashMap<Term, Term>();
+    for(Term t : contents){
+      if(t instanceof MapItem){
+        MapItem mi = (MapItem) t;
+        map.put(mi.getKey(), mi.getValue());
+      }
+      else {
+        throw new MatchCompilationException(
+            "Trying to convert a Map which contains a non-MapItem to a MapImpl. "
+          + "MapImpl can only be created from ground Maps. Map was: " + m);
+      }
+    }
+
   }
 
   public String toString(){
