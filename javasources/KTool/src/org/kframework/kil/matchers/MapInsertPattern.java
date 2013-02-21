@@ -71,6 +71,14 @@ public class MapInsertPattern extends Term {
     return remainder;
   }
 
+  public String toString(){
+    return "mapInsertPattern(" 
+      + insertions.toString() + ", " 
+      + remainder + ")"
+      ; 
+  }
+
+
   @Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);

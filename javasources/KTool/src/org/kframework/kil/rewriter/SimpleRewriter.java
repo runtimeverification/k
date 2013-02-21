@@ -5,6 +5,10 @@ import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.Variable;
+import org.kframework.kil.*;
+
+import java.util.ArrayList;
+import java.util.List;
 //end test imports
 
 import org.kframework.kil.Rewrite;
@@ -13,6 +17,8 @@ import org.kframework.kil.Term;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.matchers.MatcherException;
 import org.kframework.kil.matchers.SimpleMatcher;
+import org.kframework.kil.matchers.MapInsertPattern;
+import org.kframework.kil.matchers.MapLookupPattern;
 
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -142,5 +148,43 @@ public class SimpleRewriter {
     System.out.println("rewrite 2: " + rewriteN(trs,term,2)); //should print bar(d ,, e)
     System.out.println("rewrite 3: " + rewriteN(trs,term,3)); //should print DONE
     System.out.println("rewrite normal form: " + rewriteToNormalForm(trs,term)); //should print DONE
+    System.out.println("=========map rewrite==========");
+    trs = new RewriteSet();
+    MapItem lm1 = new MapItem(Constant.KLABEL("bar"), Constant.KLABEL("foo"));
+    MapItem rm1 = new MapItem(Constant.KLABEL("ouch"), Constant.KLABEL("hcuo"));
+    Variable rem = new Variable("E", "Map"); 
+    List<Term> lmg = new ArrayList<Term>();
+    List<Term> rmg = new ArrayList<Term>();
+    lmg.add(lm1);
+    lmg.add(rem);
+    rmg.add(rm1);
+    rmg.add(rem);
+    MapLookupPattern l = new MapLookupPattern(new Map(lmg));
+    MapInsertPattern r = new MapInsertPattern(new Map(rmg));
+    System.out.println(l);
+    System.out.println(r);
+    trs.add(new Rewrite(l,r));
+    System.out.println(trs);
+    MapImpl mi = new MapImpl();
+    mi.put(Constant.KLABEL("bar"), Constant.KLABEL("foo"));
+    mi.put(Constant.KLABEL("car"), Constant.KLABEL("foo"));
+    mi.put(Constant.KLABEL("sar"), Constant.KLABEL("foo"));
+    System.out.println("initial: " + mi);
+    System.out.println("normal form: " + rewriteToNormalForm(trs, mi));
+    System.out.println("========more complicated map rewrite========");
+    patternGuts.add(l);
+    rhsGuts.add(r);
+    termGuts.add(mi);
+    mi.remove(Constant.KLABEL("ouch"));
+    mi.put(Constant.KLABEL("bar"), Constant.KLABEL("foo"));
+    trs = new RewriteSet();
+    pattern = new KApp(Constant.KLABEL("foo"), patternGuts);
+    term = new KApp(Constant.KLABEL("foo"), termGuts);
+    rhs = new KApp(Constant.KLABEL("car"), rhsGuts);
+    trs.add(new Rewrite(pattern, rhs));
+    System.out.println(trs); 
+    System.out.println("initial: " + term);
+
+    System.out.println("normal form: " + rewriteToNormalForm(trs, term));
   }
 }
