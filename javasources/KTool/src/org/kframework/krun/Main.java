@@ -336,6 +336,27 @@ public class Main {
 
 			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
+			} else if("xml".equals(K.output_mode)) {
+				
+				Object krs = result.getResult();
+				
+				if(krs instanceof KRunState){
+					Term res = ((KRunState) krs).getRawResult();
+										
+					XStream xst = new XStream();
+					xst.aliasPackage("k", "ro.uaic.info.fmse.k");
+					
+					String xml = xst.toXML(res);
+					
+					if (!cmd.hasOption("output")) {
+						System.out.println(xml);
+					}
+					aux1.append(xml);
+					
+				}else {
+					Error.report("xml output mode is not supported by search and model checking");
+				}
+					
 			} else {
 				Error.report(K.output_mode + " is not a valid value for output-mode option");
 			}

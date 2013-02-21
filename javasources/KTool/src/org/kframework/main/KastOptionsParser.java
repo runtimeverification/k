@@ -36,8 +36,11 @@ public class KastOptionsParser {
 		OptionGroup tex2 = new OptionGroup();
 		Option tbl = new Option("pgm", "program", true, "the program to parse");
 		Option exp = new Option("e", "expression", true, "an expression to parse passed on the command line");
+		Option xml = new Option("xml", true, "reads xml file and outputs the content as a kasted term, with no parsing involved");
 		tex2.addOption(tbl);
 		tex2.addOption(exp);
+		tex2.addOption(xml);
+
 
 		// indentation options
 		Option prettyPrint = new Option("pretty", false, "pretty print the output");

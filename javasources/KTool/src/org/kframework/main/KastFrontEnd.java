@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
+import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;
@@ -44,9 +45,28 @@ public class KastFrontEnd {
 		}
 		String pgm = null;
 		String path;
+		org.kframework.kil.Cell cells = null;
+		boolean xml = false;
+
 		if (cmd.hasOption("e")) {
 			pgm = cmd.getOptionValue("e");
 			path = "Command line";
+		} else if(cmd.hasOption("xml")) {
+			String opt = cmd.getOptionValue("xml");
+			
+			File mainFile = new File(opt);
+			path = mainFile.getAbsolutePath();
+
+			if (!mainFile.exists())
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + opt, "command line", "System file."));
+			
+			XStream xstream = new XStream();
+			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+			
+			cells = (org.kframework.kil.Cell) xstream.fromXML(mainFile);			
+
+			xml = true;
+
 		} else {
 			if (cmd.hasOption("pgm")) {
 				pgm = cmd.getOptionValue("pgm");
@@ -134,7 +154,7 @@ public class KastFrontEnd {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
 		boolean prettyPrint = false;
 		boolean nextline = false;
 		IndentationOptions indentationOptions = new IndentationOptions();
@@ -172,7 +192,11 @@ public class KastFrontEnd {
 			sort = cmd.getOptionValue("sort");
 		}
 
-		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, sort));
+		if(!xml){
+			System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, sort));
+		} else {
+			System.out.println(org.kframework.utils.ProgramLoader.processXml(cells, javaDef, prettyPrint, nextline, indentationOptions));
+		}
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total");
 		GlobalSettings.kem.print();

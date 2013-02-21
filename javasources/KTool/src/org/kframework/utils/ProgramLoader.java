@@ -10,6 +10,7 @@ import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cell;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -139,6 +140,53 @@ public class ProgramLoader {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename, "File system."));
 			return "";
 		}
+	}
+
+	/**
+	 * Print maudified xml to standard output.
+	 * 
+	 * Save it in kompiled cache under pgm.maude.
+	 * 
+	 * @param indentationOptions
+	 * @param prettyPrint
+	 * @param nextline
+	 */
+	public static String processXml(Cell cells, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions) {
+		// compile a definition here
+		Stopwatch sw = new Stopwatch();
+
+		if (GlobalSettings.verbose)
+			sw.printIntermediate("Processing xml");
+		
+		try{
+			//while(cells.getContents() instanceof Cell && !cells.getLabel().equals("k")) {
+			//	cells = (Cell) cells.getContents();
+			//}
+		
+			String kast;
+			if (prettyPrint) {
+				KastFilter kastFilter = new KastFilter(indentationOptions, nextline);
+				cells.getContents().accept(kastFilter);
+				kast = kastFilter.getResult();
+			} else {
+				MaudeFilter maudeFilter = new MaudeFilter();
+				cells.accept(maudeFilter);
+				kast = maudeFilter.getResult();
+			}
+	
+			writeMaudifiedPgm(kast);
+	
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Maudify Program");
+				sw.printTotal("Total");
+			}
+			return kast;
+		} catch (Exception e) {
+			e.printStackTrace();
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot apply filters to xml: " + e.getLocalizedMessage()));
+			return "";
+		}
+		
 	}
 
 	/**
