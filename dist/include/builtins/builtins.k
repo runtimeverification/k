@@ -12,7 +12,7 @@ require "counter.k"
 module BUILTIN-SYNTAX-HOOKS
   imports BOOL-SYNTAX-HOOKS 
   imports INT-SYNTAX-HOOKS 
-  imports ARRAY-SYNTAX
+//  imports ARRAY-SYNTAX
   imports FLOAT-SYNTAX-HOOKS 
   imports STRING-SYNTAX-HOOKS
   imports ID-SYNTAX-HOOKS
@@ -23,7 +23,7 @@ endmodule
 module BUILTIN-HOOKS
   imports BOOL-HOOKS 
   imports INT-HOOKS
-  imports ARRAY
+//  imports ARRAY
   imports FLOAT-HOOKS 
   imports STRING-HOOKS
   imports TCP-HOOKS
