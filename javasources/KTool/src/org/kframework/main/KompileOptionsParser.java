@@ -99,10 +99,13 @@ public class KompileOptionsParser {
 		Option ml = new Option("ml", "matching-logic", false, "generate support for matching logic prover");
 		Option smt = new Option("smt", "generate translation to SMTLib2");
 		Option symEq = new Option("symeq", "symbolic-equality", false, "generate sort equalities");
+		Option symbolic = new Option("symbolic", false, "generate symbolic semantics");
 		sym.addOption(ml);
 		sym.addOption(smt);
 		sym.addOption(symEq);
+		sym.addOption(symbolic);
 
+		
 		// add options
 		options.addOption(new Option("testFactory", false, "Option to test new class instantiation"));
 		options.addOptionGroup(verb);
