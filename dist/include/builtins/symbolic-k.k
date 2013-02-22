@@ -96,7 +96,7 @@ module SYMBOLIC-K
   rule K2Sort(_:#Float) => "Float"
   rule K2Sort(_:#String) => "String"
   rule K2Sort(_:#Id) => "Id"
-  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays
+//  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays
 
   // declare isSymbolicSort for List, Set, Bag and Map
   syntax K ::= "isSymbolicList" "(" List ")" [prefixlabel(isSymbolicList), predicate]
