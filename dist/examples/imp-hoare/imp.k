@@ -3,9 +3,11 @@ This is the symbolic semantics of IMP enriched with arrays and Hoare logic.
 The semantics, gets as input an IMP program, annotated with pre and post 
 conditions and invariants.
 */
+require "builtins/array.k"
 
 
 module IMP-SYNTAX
+  imports ARRAY-SYNTAX
 
   syntax AExp  ::= Int | Id
   	         | AExp "[" AExp "]"          [strict]
@@ -57,6 +59,7 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
+  imports ARRAY
 
   syntax KResult ::= Val
 
@@ -253,6 +256,7 @@ module IMP
   rule isInt(select(A:Array, I:Int)) => true [anywhere]
 // contexts limitation: array(I,S)[V] must be a KResult to cool lvalue(array(I,S)[V])
   rule lvalue(array(I:Int, S:Int)[V:Int]) => lvalue(loc(array(I:Int, S:Int)[V:Int]))
+  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays    
 
 // forall binders
   rule <k> X:Id => #symInt(X) ...</k>
