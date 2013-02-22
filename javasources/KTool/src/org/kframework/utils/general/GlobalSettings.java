@@ -31,7 +31,7 @@ public class GlobalSettings {
 	public static ParserType whatParser = ParserType.PROGRAM;
 
 	public enum ParserType {
-		PROGRAM, GROUND, RULES
+		PROGRAM, GROUND, RULES, XML
 	}
 
 	public static boolean symbolicEquality = false;

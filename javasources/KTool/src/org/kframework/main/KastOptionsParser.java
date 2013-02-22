@@ -36,10 +36,9 @@ public class KastOptionsParser {
 		OptionGroup tex2 = new OptionGroup();
 		Option tbl = new Option("pgm", "program", true, "the program to parse");
 		Option exp = new Option("e", "expression", true, "an expression to parse passed on the command line");
-		Option xml = new Option("xml", true, "reads xml file and outputs the content as a kasted term, with no parsing involved");
 		tex2.addOption(tbl);
 		tex2.addOption(exp);
-		tex2.addOption(xml);
+		
 
 
 		// indentation options
@@ -53,10 +52,12 @@ public class KastOptionsParser {
 		Option ruleParser = new Option("ruleParser", false, "use k definition parser for rules (meta variables and rewrites)");
 		Option groundParser = new Option("groundParser", false, "use k definition parser for ground terms");
 		Option startSymbol = new Option("sort", true, "the start sort for the default parser (default is the sort of $PGM from the configuration");
+		Option xml = new Option("xml", true, "reads xml file and outputs the content as a kasted term, with no parsing involved");
 		OptionGroup parserGroup = new OptionGroup();
 		parserGroup.addOption(ruleParser);
 		parserGroup.addOption(groundParser);
 		parserGroup.addOption(startSymbol);
+		parserGroup.addOption(xml);
 
 		// add options
 		options.addOptionGroup(verb);

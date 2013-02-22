@@ -45,28 +45,13 @@ public class KastFrontEnd {
 		}
 		String pgm = null;
 		String path;
-		org.kframework.kil.Cell cells = null;
-		boolean xml = false;
 
 		if (cmd.hasOption("e")) {
 			pgm = cmd.getOptionValue("e");
 			path = "Command line";
 		} else if(cmd.hasOption("xml")) {
-			String opt = cmd.getOptionValue("xml");
-			
-			File mainFile = new File(opt);
-			path = mainFile.getAbsolutePath();
-
-			if (!mainFile.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + opt, "command line", "System file."));
-			
-			XStream xstream = new XStream();
-			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
-			
-			cells = (org.kframework.kil.Cell) xstream.fromXML(mainFile);			
-
-			xml = true;
-
+			GlobalSettings.whatParser = GlobalSettings.ParserType.XML;
+			path = new File(cmd.getOptionValue("xml")).getAbsolutePath();
 		} else {
 			if (cmd.hasOption("pgm")) {
 				pgm = cmd.getOptionValue("pgm");
@@ -184,6 +169,7 @@ public class KastFrontEnd {
 		if (cmd.hasOption("groundParser")) {
 			GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
 		}
+		
 		String sort = DefinitionHelper.startSymbolPgm;
 		if (System.getenv("KRUN_SORT") != null) {
 			sort = System.getenv("KRUN_SORT");
@@ -191,12 +177,9 @@ public class KastFrontEnd {
 		if (cmd.hasOption("sort")) {
 			sort = cmd.getOptionValue("sort");
 		}
-
-		if(!xml){
-			System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, sort));
-		} else {
-			System.out.println(org.kframework.utils.ProgramLoader.processXml(cells, javaDef, prettyPrint, nextline, indentationOptions));
-		}
+		
+		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, sort));
+		
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total");
 		GlobalSettings.kem.print();
