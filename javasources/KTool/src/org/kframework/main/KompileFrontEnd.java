@@ -62,6 +62,7 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.FunctionalAdaptor;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;
@@ -411,9 +412,9 @@ public class KompileFrontEnd {
 			XStream xstream = new XStream();
 			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
 
-			String xml = xstream.toXML(javaDef);
+			String xml = xstream.toXML(MetaK.getConfiguration(javaDef));
 
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx-kompiled.xml", xml);
+			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/configuration.xml", xml);
 
 			backend.run(javaDef);
 		} catch (IOException e) {

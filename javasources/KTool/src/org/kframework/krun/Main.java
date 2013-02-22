@@ -140,7 +140,7 @@ public class Main {
 	}
 
 	public static Term plug(Map<String, String> args) throws TransformerException {
-		Configuration cfg = MetaK.getConfiguration(K.kompiled_def);
+		Configuration cfg = K.kompiled_cfg;
 		ASTNode cfgCleanedNode = null;
 		try {
 			cfgCleanedNode = new ConfigurationCleaner().transform(cfg);
@@ -820,8 +820,8 @@ public class Main {
 				org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 				org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
 
-				org.kframework.kil.Definition javaDefKompiled = (org.kframework.kil.Definition) xstream.fromXML(new File(K.compiled_def + "/defx-kompiled.xml"));
-				K.kompiled_def = javaDefKompiled;
+				org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) xstream.fromXML(new File(K.compiled_def + "/configuration.xml"));
+				K.kompiled_cfg = configKompiled;
 			}
 
 			if (!cmd.hasOption("main-module")) {

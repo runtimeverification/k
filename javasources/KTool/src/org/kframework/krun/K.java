@@ -1,6 +1,7 @@
 package org.kframework.krun;
 
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.krun.api.SearchType;
 
@@ -93,7 +94,7 @@ public class K {
 	public static Properties cfg_parsers = new Properties();	
 
 	public static Definition definition;
-	public static Definition kompiled_def;
+	public static Configuration kompiled_cfg;
 
 	public static int counter = 0;
 	public static int stateCounter = 0;
