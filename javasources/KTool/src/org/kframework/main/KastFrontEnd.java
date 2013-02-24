@@ -5,7 +5,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
-import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;

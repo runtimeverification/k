@@ -1,20 +1,48 @@
 package org.kframework.backend.latex;
 
-import org.kframework.backend.BackendFilter;
-import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
-import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.Collection;
-import org.kframework.kil.LiterateComment.LiterateCommentType;
-import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.StringUtil;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.kframework.backend.BackendFilter;
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
+import org.kframework.kil.Bracket;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.Collection;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Context;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Empty;
+import org.kframework.kil.Hole;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.LiterateComment.LiterateCommentType;
+import org.kframework.kil.LiterateDefinitionComment;
+import org.kframework.kil.LiterateModuleComment;
+import org.kframework.kil.MapItem;
+import org.kframework.kil.Module;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
+import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermComment;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.Variable;
+import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.utils.StringUtil;
 
 public class LatexFilter extends BackendFilter {
 	String endl = System.getProperty("line.separator");

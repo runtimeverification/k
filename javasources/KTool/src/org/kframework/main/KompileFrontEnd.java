@@ -276,7 +276,7 @@ public class KompileFrontEnd {
 				steps.setSw(Stopwatch.sw);
 			}
 			steps.add(new FirstStep(backend));
-			steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells()));
+/*			steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells()));
 			steps.add(new RemoveBrackets());
 			steps.add(new AddEmptyLists());
 			steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));
@@ -317,7 +317,7 @@ public class KompileFrontEnd {
 			steps.add(new ResolveHybrid());
 			steps.add(new ResolveConfigurationAbstraction());
 			steps.add(new ResolveOpenCells());
-/*			steps.add(new ResolveRewrite());
+			steps.add(new ResolveRewrite());
 			steps.add(new ResolveSupercool());
 			steps.add(new AddStrictStar());
 			steps.add(new AddDefaultComputational());

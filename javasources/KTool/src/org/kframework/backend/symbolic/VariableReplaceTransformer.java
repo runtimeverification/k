@@ -11,23 +11,23 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class VariableReplaceTransformer extends BasicTransformer {
 
-	private Map<Variable, Variable> generatedFor;
+	private Map<Variable, Variable> generatedVariables;
 
 	
 	public VariableReplaceTransformer(String name) {
 		super("Replace Variables");
-		generatedFor = new HashMap<Variable, Variable>();
+		generatedVariables = new HashMap<Variable, Variable>();
 	}
 
 	
 	@Override
 	public ASTNode transform(Variable node) throws TransformerException {
 		Variable newVar = MetaK.getFreshVar(node.getSort());
-		generatedFor.put(newVar, node);
+		generatedVariables.put(newVar, node);
 		return newVar;
 	}
 	
-	public Map<Variable, Variable> getGeneratedFor() {
-		return generatedFor;
+	public Map<Variable, Variable> getGeneratedVariables() {
+		return generatedVariables;
 	}
 }

@@ -15,17 +15,17 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-public class LineariseTransformer extends BasicTransformer {
+public class ReplaceConstants extends BasicTransformer {
 
-	public LineariseTransformer(String name) {
+	public ReplaceConstants(String name) {
 		super(name);
 	}
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
-		VariableReplaceTransformer vrt = new VariableReplaceTransformer("");
-		Rule rule = (Rule) vrt.transform(node);
-		Map<Variable, Variable> newVariables = vrt.getGeneratedVariables();
+		ConstantsReplaceTransformer crt = new ConstantsReplaceTransformer("");
+		Rule rule = (Rule) crt.transform(node);
+		Map<Variable, Constant> newGeneratedSV = crt.getGeneratedSV();
 
 		Term condition = rule.getCondition();
 
@@ -33,7 +33,7 @@ public class LineariseTransformer extends BasicTransformer {
 		Term newCondition = new KApp(new Constant("KLabel", "'_andBool_"),
 				new KList(terms));
 
-		for (Entry<Variable, Variable> entry : newVariables.entrySet()) {
+		for (Entry<Variable, Constant> entry : newGeneratedSV.entrySet()) {
 			List<Term> vars = new ArrayList<Term>();
 			vars.add(entry.getKey());
 			vars.add(entry.getValue());
