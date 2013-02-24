@@ -16,6 +16,7 @@ import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
 
 public class KastFrontEnd {
 
@@ -48,9 +49,9 @@ public class KastFrontEnd {
 		if (cmd.hasOption("e")) {
 			pgm = cmd.getOptionValue("e");
 			path = "Command line";
-		} else if(cmd.hasOption("xml")) {
-			GlobalSettings.whatParser = GlobalSettings.ParserType.XML;
-			path = new File(cmd.getOptionValue("xml")).getAbsolutePath();
+		} else if(cmd.hasOption("binaryParser")) {
+			GlobalSettings.whatParser = GlobalSettings.ParserType.BINARY;
+			path = new File(cmd.getOptionValue("binaryParser")).getAbsolutePath();
 		} else {
 			if (cmd.hasOption("pgm")) {
 				pgm = cmd.getOptionValue("pgm");
@@ -119,13 +120,13 @@ public class KastFrontEnd {
 		}
 		try {
 			if (DefinitionHelper.kompiled.exists()) {
-				File defXml = new File(DefinitionHelper.kompiled.getCanonicalPath() + "/defx.xml");
+				File defXml = new File(DefinitionHelper.kompiled.getCanonicalPath() + "/defx.bin");
 				if (!defXml.exists()) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
 				}
 
-				XStream xstream = new XStream();
-				xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+				XStream xstream = new XStream(new BinaryStreamDriver());
+				xstream.aliasPackage("k", "org.kframework.kil");
 				javaDef = (org.kframework.kil.Definition) xstream.fromXML(defXml);
 				// This is essential for generating maude
 				javaDef.preprocess();

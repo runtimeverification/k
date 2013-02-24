@@ -1,7 +1,10 @@
 package org.kframework.krun;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
+
 import jline.*;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -222,7 +225,6 @@ public class Main {
 	public static void normalExecution(String KAST, String lang, RunProcess rp, CommandlineOptions cmd_options) {
 		try {
 			List<String> red = new ArrayList<String>();
-			StringBuilder aux1 = new StringBuilder();
 			CommandLine cmd = cmd_options.getCommandLine();
 
 			KRun krun = new MaudeKRun();
@@ -295,9 +297,10 @@ public class Main {
 
 			if ("pretty".equals(K.output_mode)) {
 				String output = result.toString();
-				aux1.append(output);
 				if (!cmd.hasOption("output")) {
 					AnsiConsole.out.println(output);
+				} else {
+					FileUtil.createFile(K.output, output);
 				}
 				// print search graph
 				if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
@@ -331,39 +334,33 @@ public class Main {
 				;
 				if (!cmd.hasOption("output")) {
 					System.out.println(output);
+				} else {
+					FileUtil.createFile(K.output, output);
 				}
-				aux1.append(output);
-
 			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
-			} else if("xml".equals(K.output_mode)) {
+			} else if("binary".equals(K.output_mode)) {
 				
 				Object krs = result.getResult();
 				
 				if(krs instanceof KRunState){
 					Term res = ((KRunState) krs).getRawResult();
 										
-					XStream xst = new XStream();
-					xst.aliasPackage("k", "ro.uaic.info.fmse.k");
-					
-					String xml = xst.toXML(res);
+					XStream xst = new XStream(new BinaryStreamDriver());
+					xst.aliasPackage("k", "org.kframework.kil");
 					
 					if (!cmd.hasOption("output")) {
-						System.out.println(xml);
+						Error.silentReport("Did not specify an output file. Cannot print output-mode binary to standard out. Saving to .k/krun/krun_output");
+						xst.toXML(res, new FileOutputStream(K.krun_output));
+					} else {
+						xst.toXML(res, new FileOutputStream(K.output));
 					}
-					aux1.append(xml);
-					
-				}else {
-					Error.report("xml output mode is not supported by search and model checking");
+				} else {
+					Error.report("binary output mode is not supported by search and model checking");
 				}
 					
 			} else {
 				Error.report(K.output_mode + " is not a valid value for output-mode option");
-			}
-
-			// save the pretty-printed output of jkrun in a file
-			if (cmd.hasOption("output")) {
-				FileUtil.createFile(K.output, aux1.toString());
 			}
 
 			System.exit(0);
@@ -807,10 +804,10 @@ public class Main {
 			RunProcess rp = new RunProcess();
 
 			if (!DefinitionHelper.initialized) {
-				XStream xstream = new XStream();
-				xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+				XStream xstream = new XStream(new BinaryStreamDriver());
+				xstream.aliasPackage("k", "org.kframework.kil");
 
-				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.compiled_def + "/defx.xml"));
+				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.compiled_def + "/defx.bin"));
 				// This is essential for generating maude
 				javaDef = new FlattenModules().compile(javaDef, null);
 				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig());
@@ -820,7 +817,7 @@ public class Main {
 				org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 				org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
 
-				org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) xstream.fromXML(new File(K.compiled_def + "/configuration.xml"));
+				org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) xstream.fromXML(new File(K.compiled_def + "/configuration.bin"));
 				K.kompiled_cfg = configKompiled;
 			}
 

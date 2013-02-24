@@ -31,11 +31,12 @@ public class GlobalSettings {
 	public static ParserType whatParser = ParserType.PROGRAM;
 
 	public enum ParserType {
-		PROGRAM, GROUND, RULES, XML
+		PROGRAM, GROUND, RULES, BINARY
 	}
 
 	public static boolean symbolicEquality = false;
 	public static boolean SMT = false;
 	public static boolean matchingLogic = false;
 	public static boolean documentation = false;
+	public static boolean xml = false;
 }

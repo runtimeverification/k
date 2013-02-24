@@ -52,12 +52,12 @@ public class KastOptionsParser {
 		Option ruleParser = new Option("ruleParser", false, "use k definition parser for rules (meta variables and rewrites)");
 		Option groundParser = new Option("groundParser", false, "use k definition parser for ground terms");
 		Option startSymbol = new Option("sort", true, "the start sort for the default parser (default is the sort of $PGM from the configuration");
-		Option xml = new Option("xml", true, "reads xml file and outputs the content as a kasted term, with no parsing involved");
+		Option binaryParser = new Option("binaryParser", true, "reads binary file saved by krun and outputs the content as a kasted term");
 		OptionGroup parserGroup = new OptionGroup();
 		parserGroup.addOption(ruleParser);
 		parserGroup.addOption(groundParser);
 		parserGroup.addOption(startSymbol);
-		parserGroup.addOption(xml);
+		parserGroup.addOption(binaryParser);
 
 		// add options
 		options.addOptionGroup(verb);

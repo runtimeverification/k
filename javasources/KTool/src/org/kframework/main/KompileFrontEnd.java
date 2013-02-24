@@ -1,6 +1,7 @@
 package org.kframework.main;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +75,7 @@ import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
 
 public class KompileFrontEnd {
 
@@ -217,6 +219,7 @@ public class KompileFrontEnd {
 			GlobalSettings.documentation = true;
 			backend = new PdfBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("xml")) {
+			GlobalSettings.xml = true;
 			backend = new XmlBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("html")) {
 			if (!cmd.hasOption("style")) {
@@ -409,12 +412,10 @@ public class KompileFrontEnd {
 			} catch (CompilerStepDone e) {
 				javaDef = (Definition) e.getResult();
 			}
-			XStream xstream = new XStream();
-			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+			XStream xstream = new XStream(new BinaryStreamDriver());
+			xstream.aliasPackage("k", "org.kframework.kil");
 
-			String xml = xstream.toXML(MetaK.getConfiguration(javaDef));
-
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/configuration.xml", xml);
+			xstream.toXML(MetaK.getConfiguration(javaDef), new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/configuration.bin"));
 
 			backend.run(javaDef);
 		} catch (IOException e) {

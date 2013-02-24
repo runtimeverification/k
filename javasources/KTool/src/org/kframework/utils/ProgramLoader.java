@@ -26,6 +26,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
 
 public class ProgramLoader {
 
@@ -111,9 +112,9 @@ public class ProgramLoader {
 				out = DefinitionLoader.parsePattern(content, filename);
 				out = out.accept(new AddEmptyLists());
 				out = out.accept(new FlattenSyntax());
-			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.XML) {
-				XStream xstream = new XStream();
-				xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.BINARY) {
+				XStream xstream = new XStream(new BinaryStreamDriver());
+				xstream.aliasPackage("k", "org.kframework.kil");
 				
 				out = (org.kframework.kil.Cell) xstream.fromXML(new File(filename));
 			} else {

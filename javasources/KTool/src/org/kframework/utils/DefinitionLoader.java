@@ -1,6 +1,7 @@
 package org.kframework.utils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.kframework.compile.checks.CheckListDecl;
@@ -52,16 +53,23 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
 
 public class DefinitionLoader {
 	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang, boolean autoinclude) throws IOException, Exception {
 		org.kframework.kil.Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
-		if (FileUtil.getExtension(mainFile.getAbsolutePath()).equals(".xml")) {
+		String extension = FileUtil.getExtension(mainFile.getAbsolutePath());
+		if (extension.equals(".xml") || extension.equals(".bin")) {
 			// unmarshalling
-			XStream xstream = new XStream();
-			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+			XStream xstream;
+			if (extension.equals(".xml")) {
+				xstream = new XStream();
+			} else {
+				xstream = new XStream(new BinaryStreamDriver());
+			}
+			xstream.aliasPackage("k", "org.kframework.kil");
 
 			javaDef = (org.kframework.kil.Definition) xstream.fromXML(canoFile);
 
@@ -75,12 +83,16 @@ public class DefinitionLoader {
 
 		} else {
 			javaDef = parseDefinition(mainFile, lang, autoinclude);
-			XStream xstream = new XStream();
-			xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+			XStream xstream = new XStream(new BinaryStreamDriver());
+			xstream.aliasPackage("k", "org.kframework.kil");
 
-			String xml = xstream.toXML(javaDef);
+			xstream.toXML(javaDef, new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/defx.bin"));
 
-			FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml", xml);
+			if (GlobalSettings.xml) {
+				xstream = new XStream();
+				xstream.aliasPackage("k", "org.kframework.kil");
+				xstream.toXML(javaDef, new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml"));
+			}
 
 			if (GlobalSettings.verbose) {
 				Stopwatch.sw.printIntermediate("Serialize Definition to XML");

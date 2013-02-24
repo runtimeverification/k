@@ -492,7 +492,7 @@ public class Test {
 	}
 
 	private String getXmlLanguage() {
-		return getCompiled() + Configuration.FS + "defx.xml";
+		return getCompiled() + Configuration.FS + "defx.bin";
 //		return language;
 	}
 

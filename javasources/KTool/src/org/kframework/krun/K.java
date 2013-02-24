@@ -37,19 +37,19 @@ public class K {
 	public static void setKDir() {
 		krunDir = kdir + fileSeparator + "krun";
 		krunTempDir = kdir + fileSeparator + FileUtil.generateUniqueFolderName("krun");
-		maude_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_in.maude");
-		maude_out = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_out.txt");
-		maude_err = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maude_err.txt");
+		maude_in = krunTempDir + fileSeparator + "maude_in.maude";
+		maude_out = krunTempDir + fileSeparator + "maude_out.txt";
+		maude_err = krunTempDir + fileSeparator + "maude_err.txt";
 
 		// kast
-		kast_in = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("kast_in.txt");
+		kast_in = krunTempDir + fileSeparator + "kast_in.txt";
 
 		//where to write the XML output from Maude
-		maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput.xml");
-		processed_maude_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("maudeoutput_simplified.xml");
+		maude_output = krunTempDir + fileSeparator + "maudeoutput.xml";
+		processed_maude_output = krunTempDir + fileSeparator + "maudeoutput_simplified.xml";
 	
 		// where to write the pretty-printed output of jkrun
-		krun_output = krunTempDir + fileSeparator + FileUtil.generateUniqueFileName("krun_output.txt");
+		krun_output = krunTempDir + fileSeparator + "krun_output";
 	}
 
 	// the default values for jkrun commandline options
