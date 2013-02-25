@@ -89,6 +89,9 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 					}
 				}
 			} else if (klabel.equals("#token")) {
+				if (contents.size() != 2) {
+					return super.transform(kapp);
+				}
 				ASTNode sortNode = contents.get(0).accept(this);
 				ASTNode valueNode = contents.get(1).accept(this);
 				if (!(sortNode instanceof Constant && valueNode instanceof Constant)) {
