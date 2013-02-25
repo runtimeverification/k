@@ -200,7 +200,7 @@ public class Main {
 					Error.report(e1.getMessage());
 				}
 			} else {
-				parsed = rp.runParser(parser, value, false, null);
+				parsed = rp.runParser(parser, value, true, null);
 			}
 			output.put("$" + name, parsed);
 			hasPGM = hasPGM || name.equals("$PGM");

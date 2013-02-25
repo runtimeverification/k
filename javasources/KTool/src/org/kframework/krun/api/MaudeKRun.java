@@ -65,13 +65,14 @@ public class MaudeKRun implements KRun {
 	public KRunResult<KRunState> run(Term cfg) throws Exception {
 		MaudeFilter maudeFilter = new MaudeFilter();
 		cfg.accept(maudeFilter);
-		String cmd = "set show command off ." + K.lineSeparator + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " ." + getCounter();
+		String cmd = "set show command off ." + K.lineSeparator + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " .";
 		if(K.trace) {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
 		if(K.profile) {
 			cmd = "set profile on ." + K.lineSeparator + cmd + K.lineSeparator + "show profile .";
 		}
+		cmd += getCounter();
 
 		executeKRun(cmd, K.io);
 		return parseRunResult();

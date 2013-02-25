@@ -4,6 +4,9 @@
 \author{\K Team}
 \organization{University of Illinois at Urbana-Champaign, USA\\ Alexandru Ioan Cuza University of Ia\c{s}i, Romania}
 \newcommand{\KTool}{\K tool\xspace}
+\newcommand{\krun}{\texttt{krun}\xspace}
+\newcommand{\kast}{\texttt{kast}\xspace}
+\newcommand{\kompile}{\texttt{kompile}\xspace}
 \newcommand{\bluetext}[1]{\textcolor{blue}{\it #1\\}}
 \newcommand{\alert}[1]{\textcolor{red}{\it #1\\}}
 
@@ -54,30 +57,52 @@ syntax #Float  ::= Lexer{[0-9]+ "." [0-9]+ ([eE] #Int)}
 syntax #Float  -/- [a-zA-Z0-9\.]
 \end{verbatim}
 
-For some languages these may not be enough so you might want to declare your own.
-There are two main things that you have to consider: the regular expression that will do the matching, and the follow restriction. The later tells the regular expression when not to stop matching.
+For some languages these may not be enough so you might want to declare your
+own.  There are two main things that you have to consider: the regular
+expression that will do the matching, and the follow restriction. The latter
+tells the regular expression when not to stop matching.
 
-A regular expression for the matcher is similar to the one in SDF. Basically you may write strings, sets of tokens (using [...]), add optional arguments with '?'. You can negate a set of tokens by prefixing it with '\texttildelow'. Inside a character set you may write individual characters or entire ranges: a-z A-Z 0-9. Anything other than these need to be escaped using backslash.
+A regular expression for the matcher is similar to the one in SDF. Basically
+you may write strings, sets of tokens (using [...]), add optional arguments
+with '?'. You can negate a set of tokens by prefixing it with '\texttildelow'.
+Inside a character set you may write individual characters or entire ranges:
+a-z A-Z 0-9. Anything other than these need to be escaped using backslash.
 
-The follow restriction is an important feature of the SDF parser, as the lexical rules are not greedy by default. The last line in the example above, says that #Float cannot be followed by one of the characters in the set. The list can be extended to check multiple characters ahead by concatenating sets with '.' (\verb^syntax X -/- [a].[b].[c]^).
+The follow restriction is an important feature of the SDF parser, as the
+lexical rules are not greedy by default. The last line in the example above,
+says that \#Float cannot be followed by one of the characters in the set. The
+list can be extended to check multiple characters ahead by concatenating sets
+with '.' (\verb^syntax X -/- [a].[b].[c]^).
 
-Sometimes you may also want to specify follow restrictions for keywords to avoid some ambiguities:
+Sometimes you may also want to specify follow restrictions for keywords to
+avoid some ambiguities:
 
 \verb^syntax "keyword" -/- [a-zA-Z0-9]^
 
-Another useful construction is a list separated by a character. For example the name of a module in K is matched by a construction like the following:
+Another useful construction is a list separated by a character. For example the
+name of a module in K is matched by a construction like the following:
+
 \begin{verbatim}
 syntax MODNAME ::= Lexer{"#"?{[a-z0-9A-Z\_]+ "-"}+}
 syntax MODNAME -/- [a-z0-9A-Z\-\_]
 \end{verbatim}
-The construction \{<char set> "<separator>"\}+ will match 'A', 'A-A', 'A-A-A', but not 'A-'.
 
-\verb^Lexer{...}^ and \verb^-/-^ are the main way of specifying a lexical rule, but if your expression is simple enough, you may write directly \verb^Token{...}^. This will try to infer automatically the follow restriction (if needed). Looking back at the rule for #Id, it will be equivalent to:
+The construction \{<char set> "<separator>"\}+ will match 'A', 'A-A', 'A-A-A',
+but not 'A-'.
+
+\verb^Lexer{...}^ and \verb^-/-^ are the main way of specifying a lexical rule,
+but if your expression is simple enough, you may write directly
+\verb^Token{...}^. This will try to infer automatically the follow restriction
+(if needed). Looking back at the rule for \#Id, it will be equivalent to:
+
 \begin{verbatim}
 syntax #Id ::= Lexer{[a-zA-Z][a-zA-Z0-9]*}
 syntax #Id -/- [a-zA-Z0-9]
 \end{verbatim}
-Note that this works for simple expressions that have a repeated character set at the end. If you want to specify something more complex, you will have to use \verb^Lexer{...}^ and specify the follow restriction.
+
+Note that this works for simple expressions that have a repeated character set
+at the end. If you want to specify something more complex, you will have to use
+\verb^Lexer{...}^ and specify the follow restriction.
 
 
 
@@ -101,6 +126,7 @@ Note that this works for simple expressions that have a repeated character set a
 
 /*@
 \subsection{Configurations}
+\label{sec:configurations}
 \bluetext{Syntax, specific attributes with the focus on "stream", special variables (e.g., \$PGM), how the initial configuration is generated, \ldots (Radu, Traian, Andrei A)}
 
 */
@@ -143,34 +169,483 @@ Note that this works for simple expressions that have a repeated character set a
 */
 
 /*@
-\subsection{Compiling \K Definitions}
+\subsection{Compiling \K Definitions --- the \kompile tool}
 
 \bluetext{(Traian, Radu, Andrei A)}
 */
 
 /*@
-\subsection{Running Programs with \K Definitions}
+\subsection{Running Programs with \K Definitions -- the \krun tool}
 
 \bluetext{(Dwight)}
+
+Programs in \K are executed by means of invocation of the \krun tool. In
+its simplest possible form, \krun is executed with only a single
+command-line argument: the name of the program to be run. However, \krun
+also provides a number of command line options designed to allow more
+complicated behaviors and ways to specify what to execute. These options can be
+viewed by executing the command \verb^krun -h^, and details of each of them
+will be provided in the sections below.
+*/
+
+/*@
+\subsubsection{Specifying the definition to execute with:
+\texttt{-{}-k-definition}, \texttt{-{}-compiled-def}}
+
+In order for \krun to be able to execute anything, it needs to be able to
+decide where to look for information about the \K semantics it is executing
+under. By default, if no options are specified, it looks in the current working
+directory for a directory with the suffix ``-kompiled''. If it finds exactly one
+of these, it assumes that this contains the compiled semantics you wish to use
+to execute. If instead it finds no such directories, or more than one such
+directory, it will throw an error.
+
+However, sometimes it is desirable to be able to compile more than one
+semantics into the same directory, or to be able to execute a semantics with
+\krun from outside the directory the semantics resides in. This is where
+the \verb^--k-definition^ and \verb^--compiled-def^ directories come into play.
+The simplest way to specify this information is with the \verb^--compiled-def^
+flag, which takes a single argument representing the path to the compiled \K
+definition's directory. If this directory exists, it assumes it contains the
+semantics you wish to execute with, and proceeds accordingly.
+
+The \verb^--k-definition^ flag behaves similarly. However, instead of accepting
+the path to the compiled \K definition, it instead accepts as an argument the
+path to the main file of extension .k in your semantics (that is to say, the
+one you executed \kompile on). It then attempts to infer the location of
+the compiled \K definition from this path. Needless to say, if you executed
+\kompile with the \verb^--output^ flag, it will not succeed, and will
+throw an error message instead. In this case, simply use the
+\verb^--compiled-def^ flag instead to specify the path you passed to
+\verb^kompile --output^.
+*/
+
+/*@
+\subsubsection{Specifying the program to execute under the semantics:
+\texttt{-{}-pgm}, \texttt{-{}-term}, \texttt{-c}}
+
+In order for a program to be executed by \krun, it needs to know how to
+obtain the term representing the configuration it is supposed to rewrite. By
+default, this is obtained by means of the configuration declaration in your
+definition's semantics, and the abstraction of configuration variables.  By
+specifying one or more configuration variables (see section \ref{sec:configurations}
+for details), you are able to tell \krun to plug values of your choosing
+into the initial configuration.
+
+As a convention, the most common of these is the configuration variable \$PGM.
+\$PGM is special because we assume that it is the name of the program or main
+piece of syntax you wish to execute in your semantics. As such, it has several
+special mechanisms in place to allow you to specify a value for it. The
+simplest of these is to specify the name of a file containing your program (or
+a different value to be parsed if you have specified an external parser. See
+section \ref{sec:external-parsers}) on the command line as an argument. If you do this,
+\krun will automatically invoke the parser and return a parsed value to
+be put into the \$PGM configuration variable.
+
+You can also specify a value to be parsed for the \$PGM variable with the
+\verb^--pgm^ flag. This is just syntactic sugar: the command
+\verb^krun --pgm foo^ and the command \verb^krun foo^ are semantically
+equivalent.
+
+Finally, you may specify the value for the \$PGM variable the same way values
+are specified for all other configuration variables. Since you can specify an
+arbitrarily large number of configuration variables in your initial
+configuration, it isn't feasible to specify all of them as arguments on the
+command line unless they are referenced by name. This is the purpose of the
+\verb^krun -c^ flag. This flag takes two arguments: the name of the
+configuration variable to be specified, and the value it should contain. For
+example, to tell \krun that the program to be executed should be the
+lambda calculus identity function, we would construct the command
+\verb^krun -cPGM="lambda x . x"^. This pattern can also be used to specify any
+other configuration variable by its name and the value you wish it to have.
+
+It's worth noting however that all of these approaches operate under the
+assumption that you wish to make use of the configuration variable abstraction
+when constructing a term for \krun to rewrite. However, sometimes, for
+example when restarting a previously saved computation (See section \ref{sec:kast}),
+it is desirable to specify the entire term to be rewritten manually. This is
+where the option \verb^--term^ comes in. By specifying a value to the
+\verb^--term^ option, the configuration declaration in the semantics is
+bypassed entirely, and \krun assumes that the entirety of the term to be
+rewritten consists of whatever it parses from the value of the option.
+*/
+
+/*@
+\subsubsection{Searching the state space of programs:
+\texttt{-{}-search}, \texttt{-{}-pattern}, \texttt{-{}-bound}, \texttt{-{}-depth},
+\texttt{-{}-graph}}
+
+So far we have been operating on the assumption that all you want to do with
+your semantics is execute it. However, the ultimate purpose of the \K tool is
+to provide a mechanism for specifying formal semantics of programming languages
+so that you can do more complicated types of formal analyses of programs. As
+such, the \krun tool provides a number of options designed to assist in the
+analysis of programs that you execute. The simplest of these tools is the
+ability to search the state space of programs.
+
+In order to make use of the search functionality that \krun provides, it is
+first necessary to tune your semantics for nondetermininism by appropriately
+specifying values for the \verb^--transition^, \verb^--superheat^, and
+\verb^--supercool^ flags to \kompile. For information on how to do this, please
+refer to section \ref{sec:nondeterminism}.
+
+Once this is done, the simplest possible entry point into the mechanisms \krun
+provides for searching the state space of programs is the \verb^--search^ flag.
+By specifying this flag, instead of executing only a single run of the program,
+it instead attempts to find all possible final states of that program. That is
+to say, it will return a list of all the configurations your program is capable
+of terminating in.
+
+Unfortunately, for large programs with significant amounts of nondeterminism,
+this may be something which takes too much time. Additionally, you may desire
+to write programs which do not terminate, or which otherwise are not feasible
+to allow to explore the entire state space of the program to termination. This
+is why we provide tools for specifying bounds on the exploration of the state
+space which is provided by the search command. 
+
+The first of these is the \verb^--bound^ flag. This takes an integer argument
+specifying the maximum number of solutions you are looking for. Once it has
+found at least as many solutions as you asked for as a bound, the search will
+terminate at that point without looking for further solutions.
+
+The second is the \verb^--depth^ flag. \krun operates by performing a
+breadth-first search of the state space of the program. As such, one possible
+way to limit the resources required to complete an exploration is to put a
+maximum limit on the depth of the search. If a depth of N is specified, \krun
+will terminate the search as soon as all states that are at most N states away
+from the initial configuration have been explored.
+
+By default, the \verb^--search^ command only returns final states: that is to
+say, states in which no further rewriting is possible. However, if I wish to
+explore only a finite depth of the program, this is likely to be undesirable
+behavior. If I specified a depth of 3, and there were no programs which
+terminated within three steps, by default the search would return no results.
+In order to prevent this, \krun makes use of a number of options it provides to
+decide which types of states are considered solutions in order to set some
+intelligent defaults.
+
+By default, the \verb^--search^ command returns only final states, unless a
+depth parameter is provided, in which case it returns all states beginning with
+the initial state and ending with those states at the maximum depth bound away.
+If however you wish to specify both a depth parameter and expect the search to
+only return final states, this is also possible by replacing the flag
+\verb^--search^ with the flag \verb^--search-final^. You may also retrieve all
+states even without specifying a depth bound if you use the flag
+\verb^--search-all^. Finally, the flags \verb^--search-one-step^ and
+\verb^--search-one-or-more-steps^ round out the selection by allowing you to
+select only configurations one step away from the initial state, or to select
+only configurations at least one step away from the initial state,
+respectively.
+
+Sometimes, however, the mechanisms described so far do not provide what you
+require in order to be able to select only the states you wish to select. For
+this purpose, \krun allows you to specify search patterns with the
+\verb^--pattern^ flag. By specifying a \K rule without any rewrites in it, you
+can perform matching and check side conditions on the results of the search,
+and discard all the solutions which do not meet your search criteria. If the
+search pattern contains variables, the search will return a substitution,
+telling you the values of each of those variables in the solution you
+requested. You can also tell \krun that you don't want to see the value of a
+particular variable by using an anonymous variable (i.e. \_) instead of a named
+variable in your search pattern.
+
+Finally, you may wish to visualize the search graph created by your search
+command. For this purpose we provide the \verb^--graph^ flag to \krun. The
+\verb^--graph^ flag tells \krun to output the search graph as a set of nodes
+connected by edges corresponding to transition rules in your semantics. By
+spercifying this flag, you will receive a textual representation of this graph
+for your examination. You will also be given the option to load this graph into
+the \krun debugger in order to view it in more detail by examining specific
+vertices and edges within the graph.  Future versions of the tool also plan to
+allow you to export your graph to an xml format to be loaded by third-party
+tools, or saved to a file and reloaded by the debugger at a later time.
+*/
+
+/*@
+\subsubsection{Debugging programs: \texttt{-{}-debug}}
+\label{sec:debugger}
+
+Frequently, one of the applications of a programming language that you desire
+is the ability to observe how a program executes as it is executing. For this
+purpose, \krun provides a built-in set of debugging facilities.  By executing a
+program in \krun with the \verb^--debug^ flag, you tell \krun to create an
+instance of the debugger to use to manually explore the state space of the
+program.
+
+When you first execute a program in the debugger, it begins by automatically
+executing until the first transition point in the semantics. For this reason,
+it is necessary to first tune your semantics for nondeterminism before using
+the debugger. For information on this process, please refer to
+section \ref{sec:nondeterminism}.
+
+Once you have reached the first transition point in the semantics, the debugger
+halts for user input. At this point, you can specify a number of different
+commands to the debugger. To refer back to this list of commands while
+debugging, type the \verb^help^ command. Similarly, to exit the debugger at any
+time, type the \verb^abort^ command.
+
+The remaining commands serve the purpose of allowing you to manually explore
+the state space of your program, and to construct a search graph of these
+states. Essentially, you may select any state in your program and tell \krun to
+execute from that state for some specific amount of time. When the debuggerr
+returns control to you, it will have added the states it passed through while
+performing your command to the search graph, and you will be able to view them.
+
+For this purpose, \krun provides four basic commands to control your
+interaction with the search graph. First of these is the
+\verb^show-search-graph^ command. This command prints a summary of the entire
+search graph as it has been constructed so far. Each state in the graph is
+given a unique number, and each edge provides whatever basic information the
+debugger has been able to learn about that edge (i.e. its label or its tags).
+
+Before you can execute from a particular state, you must first select it with
+the \verb^select^ command. By passing this command a state number, you tell the
+debugger that future commands to further explore the state space of the program
+should begin in that state. This is not necessary if your desire is to begin
+executing in the state you had just created. However, if you have immediately
+previously executed a command which generated more than one leaf state, or if
+you wish to execute from a different state than the leaf state you have just
+created, you need to first use this command to select the state inq question.
+
+Finally, \krun allows you to request additional information concerning states
+or edges in the graph. By using the \verb^show-node^ command, you may tell the
+debugger to display the entire configuration for a particular state number. You
+may also use the \verb^show-edge^ command to tell the debugger to display all
+the information it has on a particular edge. Sometimes this is only the
+contents of the configurations at the two endpoitns of the edge. Other times
+this also includes additional information like the label of the rule, or the
+entire rule itself.
+
+The remaining commands in the debugger serve the purpose of allowing you to
+manually create new nodes in the search graph by executing some number of
+steps. The simplest of these commands is the \verb^resume^ command. By
+specifying this command, \krun proceeds to execute from the current state until
+the program terminates. This will not provide you with any information
+concerning the edges you pass through along the way, but it will construct
+every single unique state between the state you began in and the termination of
+the program. It also automatically selects the final state it returns.
+
+If instead you wish to only proceed for some finite number of steps, you may
+use the \verb^step^ command. This command behaves identically to the
+\verb^resume^ command except that in addition to terminating if the program
+reaches a final state, it also terminates after executing a fixed number of
+steps. By default this is only a single step, but you may pass as an argument a
+different number of steps for a bound as well. This command also automatically
+selects the last state stepped through.
+
+Finally, sometimes you may wish to examine the nondeterminism of a program, or
+to gain further information about the edges of a particular segment of
+execution. For this purpose we provide the \verb^step-all^ command. By default,
+this command constructs all possible states exactly one step away from the
+state you had previously selected to begin in. However, you may also increase
+the depth of this command by passing it an argument of a number of steps.
+
+The \verb^step-all^ command also serves to fill in any additional information
+about the edges in the search graph it creates. Due to a current limitation of
+the tool, edges created by means of superheating will only provide you with the
+knowledge that they are superheated edges. However, a future version of the
+tool will also provide you with the syntax production in your semantics which
+was superheated. You may also even currently obtain the entire rule
+corresponding to a \verb^--transition^ rule.
+
+It is also planned in future versions of the tool to provide a graphical API to
+the debugger to allow you to visualize the search graph in two dimensions, and
+to allow you to save the search graph to an xml format to be loaded by the
+debugger later, or to be used by third-party tools. Finally, it is also planned
+to allow execution via the \verb^step^ and \verb^resume^ commands to be
+terminated partway through by sending the SIGINT signal to the debugger.
+*/
+
+/*@
+\subsubsection{LTL Model Checking: \texttt{-{}-ltlmc}}
+
+\bluetext{(Dorel)}
+*/
+
+/*@
+
+\subsubsection{External parsers: \texttt{-{}-parser}, \texttt{-{}-cfg-parser}}
+\label{sec:external-parsers}
+
+Up to this point we have been operating under the assumption that your desire
+is only to use the default parsing options for parsing terms provided as inputs
+to \krun. However, sometimes you will find that it is simply not possible to
+parse a particular language using the \K framework. Because of this limitation,
+it is intended that you be able to specify external parsers for your language
+which can be used instead of the default parser in order to parse programs and
+terms in such languages.  Because of this, \krun provides several options
+designed to allow you to choose how you wish to parse terms that are inputs to
+\krun, as well as also providing a number of intelligent defaults.
+
+The simplest form of parsing occurs when you specify a file as an argument on
+the command line. By default, this parses the contents of that file using the
+\kast command with no options. For example, if I write the command
+\verb^krun foo^, it will in term execute the command \verb^kast foo^ which will
+assume that foo is a file on the file system containing a program written in the
+syntax of the language. For details concerning how \kast operates, please refer
+to section \ref{sec:kast}.
+
+In order to specify an external parser for this purpose, the \verb^--parser^
+flag is used. By specifying a shell command as argument to this flag, that
+shell command gets executed with a single argument: the value of the argument
+to \krun. Normally this is the path to a file containing code to be parsed.
+However, this is not necessarily a guarantee. For example, the command
+\verb^krun --parser "kast -e" "foo"^ will execute the command
+\verb^kast -e foo^ which will in turn assume that ``foo'' is a valid program in
+the language of the semantics you have defined (as opposed to the name of a file
+containing such a program).
+
+However, unfortunately, sometimes the name of the file (or the term itself) is
+not sufficient information in order to be able to successfully parse a value.
+In order to remedy this, and instead of requiring that external parsers be able
+to parse flags on the command line, \krun also sets a number of environment
+variables in the environment of the process created for the external parser.
+These environment variables provide additional information in order to allow
+the external parser to make additional decisions concerning how to parse
+something, or not, as it chooses. Currently \krun sets three of these.
+
+The first, KRUN\_COMPILED\_DEF, contains the absolute path to the compiled
+definition directory on the file system, in case the external parser wishes to
+use this. This is especially useful if your external parser is a variant of
+\kast.
+
+The second, KRUN\_SORT, contains a sort name designed to provide the external
+parser information about the context in which the term is being parsed. As an
+example of how this is used, if you specify a model-checking formula using the
+\verb^--ltlmc^ flag, it is parsed using yuour external parser with the sort
+information of ``LtlFormula''.
+
+The third, KRUN\_IS\_NOT\_FILE, tells the external parser that because of the
+particular type of value being parsed, by default it is being passed as an
+argument on the command line instead of as a name to a file containing data to
+be parsed. For example, configuration variables, when parsed by an external
+parser, set this value. Note that this does not necessarily mean that the value
+actually being passed doesn't consist of a filename. A parser may behave
+however you wish it to, and as long as it receives an input it can understand,
+this is acceptable behavior. The flag merely indicates that unless you specify
+an external parser, the value provided is being assumed to be data to be parsed
+rather than a filename. This allows the same parser to be used both with a
+filename and with data to be parsed, without needing to specify separate parser
+commands for each.
+
+It is worth noting the \verb^--parser^ flag, while used for programs,
+model-checking formulas, \verb^--term^ values, and runtime parsing of \#String
+constants, is not used to specify parsers for configuration variables. This is
+because a limitation of the Apache CLI framework used to parse command line
+arguments makes it impossible to determine where within a command line string
+an argument (i.e. not an option) is specified. However, since it is possible to
+obtain this information for options, it is used in the design of how you
+specify external parsers for configuration variables.
+
+The \verb^--cfg-parser^ flag behaves similarly to the \verb^--parser^ flag in
+that it takes a string to be used as the command for parsing configuration
+variables. However, since it is possible to specify multiple configuration
+variables, it is desirable to allow these configuration variables to be parsed
+each with different parsers. Therefore, when determining which parser to use to
+parse a particular configuration variable, the parser chosen is the one
+specified by the rightmost \verb^--cfg-parser^ flag which is to the left of the
+\verb^-c^ flag in question. Additionally, by default, since most configuration
+parameters contain things like Lists and Maps and other pieces of syntax not
+provided by the default \kast parser, the default parser for configuration
+variables is \verb^kast -groundParser -e^. Please refer to section \ref{sec:kast} for
+details on how this command behaves.
+
+Because \krun parses a number of different types of inputs, each of which
+consisting of a different sort of data, it is reasonable to expect that it will
+use a number of different types of behavior when deciding which parser to use
+to parse that data. For reference, therefore, the following table contains all
+the information concerning how each type of data parsed by \krun is parsed by
+default, and how it can be customized.
+
+\begin{tabular}{|p{3.5cm}|l|l|l|p{3.6cm}|}
+\hline
+Type of data parsed & Default parser & Parser flag & KRUN\_SORT & KRUN\_IS\_NOT\_FILE \\ \hline
+\verb^--pgm^ and command line arguments & \kast & \verb^--parser^ &  & \\ \hline
+\verb^--term^ & \verb^kast -groundParser^ & \verb^--parser^ &  & \\ \hline
+\verb^-c^ & \verb^kast -groundParser -e^ & \verb^--cfg-parser^ &  & \verb^true^ \\ \hline
+\verb^--pattern^ & \verb^kast -ruleParser -e^ &  &  & \\ \hline
+\verb^--ltlmc^ & \kast & \verb^--parser^ & \verb^LtlFormula^ & \verb^true^ if the argument provided is not a file, \verb^false^ otherwise \\ \hline
+\verb^#parse(Term, Sort)^ & \kast & \verb^--parser^ & \verb^Sort^ & \verb^true^ \\ \hline
+\end{tabular}
+
 */
 
 
 /*@
-\subsection{Analyzing programs}
+\subsubsection{Output formats: \texttt{-{}-output-mode}, \texttt{-{}-output},
+\texttt{-{}-color}, \texttt{-{}-statistics}, \texttt{-{}-trace}, \texttt{-{}-profile}}
 
-\subsubsection{Stepper}
+\krun supports a number of distinct modes for specifying output. The most
+obvious of these pieces of functionality is the \verb^--output-mode^ flag. This
+flag supports four different values. Simplest of these is ``none'', which tells
+krun to display no output except that which was printed to the console or to
+files by I/O in the program executing. The second, ``pretty'', is also the
+default, and tells \krun to pretty-print the output it receives from its
+backend. For normal execution, this means that it re-concretizes the syntax
+that was flattened by \kompile, and displays it to the user. For search, this
+means that we display the list of search results (or the list of substitutions)
+which has also been re-concretized. For model-checking, this means either
+displaying the fixed constant \verb^true^ to represent a model-checking which
+has succeeded, or displaying a graph consisting of the re-concretized states
+composing the LTL counterexample returned by a model-checking which has failed.
 
-\bluetext{(Dwight)}
+The third value is ``raw''. A raw output simply takes the output printed by the
+maude backend and provides it unchanged to the user. Finally, the fourth value,
+``binary'', saves the resulting configuration of an execution to a binary format
+that can be used later to resume computation (see section \ref{sec:kast}).
+Output mode ``binary'' is currently not supported by search or model-checking,
+but future versions of the tool will save these results to a format which can
+be loaded by the debugger (see section \ref{sec:debugger}).
 
-\subsubsection{Bounded Model Checking}
+By default (except in the case of output mode ``binary'', which always saves to a
+file), the output is printed to stdout. However, sometimes it is desirable to
+separate the output provided by krun from the output provided to stdout by I/O
+in your program. In order to do this, we have provided the flag
+\verb^--output^. This flag accepts as a single parameter the path to a file,
+which it writes the output to.
 
-\bluetext{search options with varius suboptions (Dwight)}
+Finally, there are several other miscellaneous options which have an effect on
+how the output of \krun is printed. For example, the \verb^--color^ flag tells
+\krun to pretty-print cells in the color specified in the configuration (see
+section \ref{sec:configurations}). Since this is also the default, primarily you will
+be using its inverse flag, \verb^--no-color^, which is useful if you wish to
+pipe the output printed to stdout to a file. Since colors are printed using
+8-color ANSI terminal color codes, if you specify the \verb^--output^ flag, the
+default becomes \verb^--no-color^. If for some reason you wish to preserve
+these color codes in the output file, you may still specify the \verb^--color^
+flag manually.
 
+Also present is the flag \verb^--statistics^, which parses statistics returned
+by maude about the execution of a program and prints them to the user. Due to
+limitations of the tool, currently this is only supported for program
+execution, but it is planned to also support search and model-checking in a
+future release.
 
-\subsubsection{LTL Model Checking}
+Finally, there are two other pieces of functionality that krun exposes for
+output via the ``raw'' output mode only. These correspond to access to maude's
+internal tracer and profiler, respectively. By specifying \verb^--trace^, you
+tell \krun to tell maude to output the entire trace of all rewriting done to
+the file it internally writes its output to, which is displayed to the user via
+output mode ``raw''. A note of warning here: because it is I/O intensive and
+maude otherwise performs a very high number of rewrites per second, the trace
+feature is incredibly slow, and should be used with caution.
 
-\bluetext{(Dorel)}
+Additionally, by specifying the flag \verb^--profile^, you tell \krun to tell
+maude to construct profiling information on all the rules executed by the
+semantics. This is useful if you wish to examine whether there are any rules
+which are matching or applying too often. It's worth noting here however, that
+since the primary speed bottleneck in maude is associative-commutative
+matching, it is not always the case that decreasing the number of times a rule
+rewrites will have an appreciable effect on performance, even if that rule
+executes millions of times. In the absence of AC matching, maude rewrites
+several million rules per second. AC matching, howver, is over 100 times
+slower.
+*/
 
+/*@
+\subsection{Parsing \K Programs: \kast}
+\label{sec:kast}
+\bluetext{(Radu, Stefan)}
 
 */
 
