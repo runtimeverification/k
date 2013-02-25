@@ -218,7 +218,7 @@ public class DefinitionSDF {
 		sdf.append("\n\n");
 
 		// follow restrictions
-		sdf.append("lexical restrictions\n");
+		sdf.append("context-free restrictions\n");
 		for (Restrictions r : psdfv.restrictions) {
 			if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
 				sdf.append("	" + r.getTerminal() + " -/- " + r.getPattern() + "\n");
