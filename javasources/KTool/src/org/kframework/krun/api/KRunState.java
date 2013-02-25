@@ -23,15 +23,16 @@ public class KRunState {
 	}
 
 	public static Term concretize(Term result) {
+		Term rawResult = result;
 		try {
 			result = (Term) result.accept(new ConcretizeSyntax());
 			result = (Term) result.accept(new TypeInferenceSupremumFilter());
 			result = (Term) result.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
 			//as a last resort, undo concretization
 			result = (Term) result.accept(new FlattenDisambiguationFilter());
-		} catch (TransformerException e) {
-			// not ideal, but if this blows up it's a bug anyway
-			throw new RuntimeException(e);
+		} catch (Exception e) {
+			// if concretization fails, return the raw result directly.
+			return rawResult;
 		}
 		if (result.getClass() == Cell.class) {
 			Cell generatedTop = (Cell) result;
