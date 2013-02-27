@@ -18,48 +18,72 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 
 		// choose the maximum from the list of ambiguities
 		java.util.List<Term> terms = new ArrayList<Term>(amb.getContents());
-	  //Poset subsorts = DefinitionHelper.subsorts;
-	  boolean areAllListSorts = true;
-	  for (Term trm : amb.getContents()) {
-	    if(!DefinitionHelper.isListSort(trm.getSort())) {
-	      areAllListSorts = false; 
-	      break;
-	    }
-	  }
-
-	  //if all sorts are list sorts 
-    //we actually find the lub 
-	  if(areAllListSorts){
-	    ArrayList<String> elementSorts = new ArrayList<String>();
-	    for (Term trm : amb.getContents()) {
-	      elementSorts.add(DefinitionHelper.getListElementSort(trm.getSort()));
-	    }
-	    String lubSort = DefinitionHelper.getLUBSort(elementSorts);
-	    for (Term trm : amb.getContents()) {
-	      if(!(DefinitionHelper.getListElementSort(trm.getSort()).equals(lubSort))){
-	        terms.remove(trm);
-	      }
-	    }
-	  }
-	  
-    java.util.List<Term> terms2 = new ArrayList<Term>(terms);
-		for (Term trm1 : terms) {
-		  for (Term trm2 : terms) {
-		    if (trm1 != trm2)
-				  if (termsAlike(trm1, trm2))
-					  if (DefinitionHelper.isSubsorted(trm2.getSort(), trm1.getSort())) {
-						  terms2.remove(trm1);
-				  }
-		  }
+		//Poset subsorts = DefinitionHelper.subsorts;
+		boolean areAllListSorts = true;
+		for (Term trm : amb.getContents()) {
+			if (!DefinitionHelper.isListSort(trm.getSort())) {
+				areAllListSorts = false; 
+				break;
+			}
 		}
-	  
+
+		//if all sorts are list sorts 
+		//we actually find the lub based on the element sort of the list
+		if (areAllListSorts){
+			ArrayList<String> elementSorts = new ArrayList<String>();
+			for (Term trm : amb.getContents()) {
+				elementSorts.add(DefinitionHelper.getListElementSort(trm.getSort()));
+			}
+			String lubSort = DefinitionHelper.getLUBSort(elementSorts);
+			for (Term trm : amb.getContents()) {
+				if (!(DefinitionHelper.getListElementSort(trm.getSort()).equals(lubSort))){
+					terms.remove(trm);
+				}
+			}
+		}
+	
+		//now we find the lub of the remaining sorts...it might be worth iterating
+		//this with the List sorts code above
+		java.util.List<String> sorts = new ArrayList<String>();
+		for (Term t : terms){
+			sorts.add(t.getSort());
+		} 
+
+		String lubSort = DefinitionHelper.getLUBSort(sorts); 
+		java.util.List<Term> terms2; 
+		//if we successfully found a LUB, remove all ambiguity terms that
+		//do not have the lub sort
+		if (lubSort != null){ 
+			terms2 = new ArrayList<Term>(terms);
+			for (Term trm : terms){
+				if (!trm.getSort().equals(lubSort)){
+					terms2.remove(trm); 
+				}
+			}
+		}
+		else {
+			terms2 = terms;
+		}
+		/*
+		This is the original code
+		java.util.List<Term> terms2 = new ArrayList<Term>(terms);
+		for (Term trm1 : terms) {
+			for (Term trm2 : terms) {
+				if (trm1 != trm2)
+					if (termsAlike(trm1, trm2))
+						if (DefinitionHelper.isSubsorted(trm2.getSort(), trm1.getSort())) {
+							terms2.remove(trm1);
+					}
+			}
+		}*/
+		
 
 		if (terms2.size() == 1)
 			return terms2.get(0).accept(this);
 		else if (terms2.size() > 0)
 			amb.setContents(terms2);
-	  //if there are 0 amb left, which I believe is theoretically possible
-	  //we return the original ambiguity 
+		//if there are 0 amb left, which I believe is theoretically possible
+		//we return the original ambiguity 
 		return super.transform(amb);
 	}
 
@@ -67,9 +91,9 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 	 * Returns true if the terms are of the same kind (Variable, TermCons...) If they are TermCons, then all the Items must be alike also.
 	 * 
 	 * @param trm1
-	 *            First term to compare.
+	 *						First term to compare.
 	 * @param trm2
-	 *            Second term to compare.
+	 *						Second term to compare.
 	 * @return true or false weather they are alike.
 	 */
 	private static boolean termsAlike(Term trm1, Term trm2) {

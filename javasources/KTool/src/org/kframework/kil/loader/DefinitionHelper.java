@@ -14,6 +14,7 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.utils.Poset;
 import org.kframework.utils.errorsystem.KException;
@@ -112,7 +113,7 @@ public class DefinitionHelper {
 
 	/**
 	 * Takes a List sort and returns the sort of the elements of that
-	 * List sort.  e.g, for List{Exp, ","}, returns Exp.
+	 * List sort.	e.g, for List{Exp, ","}, returns Exp.
 	 *
 	 * returns null if not a List sort
 	 *
@@ -120,15 +121,15 @@ public class DefinitionHelper {
 	 */
 	@SuppressWarnings("cast")
 	public static String getListElementSort(String sort) {
-	  if(!isListSort(sort)) return null;
-	  return ((UserList)listConses.get(sort).getItems().get(0)).getSort();
+		if(!isListSort(sort)) return null;
+		return ((UserList)listConses.get(sort).getItems().get(0)).getSort();
 	}
 
 	/**
 	 * find the LUB of a list of sorts
 	 */
 	public static String getLUBSort(List<String> sorts){
-	  return subsorts.getLUB(sorts);
+		return subsorts.getLUB(sorts);
 	}
 
 	public static void addPriority(String bigPriority, String smallPriority) {
