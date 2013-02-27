@@ -18,29 +18,29 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 
 		// choose the maximum from the list of ambiguities
 		java.util.List<Term> terms = new ArrayList<Term>(amb.getContents());
-    //Poset subsorts = DefinitionHelper.subsorts;
-    boolean areAllListSorts = true;
-    for (Term trm : amb.getContents()) {
-      if(!DefinitionHelper.isListSort(trm.getSort())) {
-        areAllListSorts = false; 
-        break;
-      }
-    }
+	  //Poset subsorts = DefinitionHelper.subsorts;
+	  boolean areAllListSorts = true;
+	  for (Term trm : amb.getContents()) {
+	    if(!DefinitionHelper.isListSort(trm.getSort())) {
+	      areAllListSorts = false; 
+	      break;
+	    }
+	  }
 
-    if(areAllListSorts){
-      ArrayList<String> elementSorts = new ArrayList<String>();
-      for (Term trm : amb.getContents()) {
-        elementSorts.add(DefinitionHelper.getListElementSort(trm.getSort()));
-      }
-      String lubSort = DefinitionHelper.getLUBSort(elementSorts);
-      for (Term trm : amb.getContents()) {
-        if(!(DefinitionHelper.getListElementSort(trm.getSort()).equals(lubSort))){
-          terms.remove(trm);
-        }
-      }
-    }
+	  if(areAllListSorts){
+	    ArrayList<String> elementSorts = new ArrayList<String>();
+	    for (Term trm : amb.getContents()) {
+	      elementSorts.add(DefinitionHelper.getListElementSort(trm.getSort()));
+	    }
+	    String lubSort = DefinitionHelper.getLUBSort(elementSorts);
+	    for (Term trm : amb.getContents()) {
+	      if(!(DefinitionHelper.getListElementSort(trm.getSort()).equals(lubSort))){
+	        terms.remove(trm);
+	      }
+	    }
+	  }
 
-    else {
+	  else {
 		  for (Term trm1 : amb.getContents()) {
 			  for (Term trm2 : amb.getContents()) {
 		      if (trm1 != trm2)
@@ -50,14 +50,14 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 						  }
 			  }
 		  }
-    }
+	  }
 
 		if (terms.size() == 1)
 			return terms.get(0).accept(this);
 		else if (terms.size() > 0)
 			amb.setContents(terms);
-    //if there are 0 amb left, which I believe is theoretically possible
-    //we return the original ambiguity 
+	  //if there are 0 amb left, which I believe is theoretically possible
+	  //we return the original ambiguity 
 		return super.transform(amb);
 	}
 

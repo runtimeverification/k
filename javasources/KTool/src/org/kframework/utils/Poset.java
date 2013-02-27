@@ -10,12 +10,12 @@ import java.util.Stack;
 public class Poset {
 
 	private java.util.Set<Tuple> relations = new HashSet<Tuple>();
-  private java.util.Set<String> elements = new HashSet<String>();
+	private java.util.Set<String> elements = new HashSet<String>();
 
 	public void addRelation(String big, String small) {
 		relations.add(new Tuple(big, small));
-    elements.add(big);
-    elements.add(small);
+	  elements.add(big);
+	  elements.add(small);
 	}
 
 	public boolean isInRelation(String big, String small) {
@@ -56,41 +56,41 @@ public class Poset {
 		return start;
 	}
 
-  /**
-   * finds the least upper bound of a subset of 
-   * the elements of 
-   *
-   * returns null if none exists
-   *
-   * assumes that all elements in subset are actually elements of the Poset
-   *
-   * also assumes that the Poset is actually a Poset (transitively closed)
-   *
-   * Ok, this is actually GLB, but that's what we need for subsorts
-   */
-  public String getLUB(List<String> subset){
-    List<String> candidates = new ArrayList<String>();
-    for(String elem : elements){
-      boolean isGTESubset = true;
-      for(String subsetElem : subset){
-        if(!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
-          isGTESubset = false;
-          break;
-        } 
-      }
-      if(isGTESubset){
-        candidates.add(elem);
-      }
-    }
-    if(candidates.size() == 0) return null;
-    String lub = candidates.get(0);
-    for(int i = 1; i < candidates.size(); ++i){
-      if(isInRelation(candidates.get(i), lub)){
-        lub = candidates.get(i);
-      } 
-    }
-    return lub;
-  }
+	/**
+	 * finds the least upper bound of a subset of 
+	 * the elements of 
+	 *
+	 * returns null if none exists
+	 *
+	 * assumes that all elements in subset are actually elements of the Poset
+	 *
+	 * also assumes that the Poset is actually a Poset (transitively closed)
+	 *
+	 * Ok, this is actually GLB, but that's what we need for subsorts
+	 */
+	public String getLUB(List<String> subset){
+	  List<String> candidates = new ArrayList<String>();
+	  for(String elem : elements){
+	    boolean isGTESubset = true;
+	    for(String subsetElem : subset){
+	      if(!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
+	        isGTESubset = false;
+	        break;
+	      } 
+	    }
+	    if(isGTESubset){
+	      candidates.add(elem);
+	    }
+	  }
+	  if(candidates.size() == 0) return null;
+	  String lub = candidates.get(0);
+	  for(int i = 1; i < candidates.size(); ++i){
+	    if(isInRelation(candidates.get(i), lub)){
+	      lub = candidates.get(i);
+	    } 
+	  }
+	  return lub;
+	}
 
 	private class Tuple {
 		private String big, small;
@@ -177,13 +177,13 @@ public class Poset {
 		return null;
 	}
 
-  public static void main(String[] args){
-    Poset p = new Poset();
-    p.addRelation("a", "b");
-    p.addRelation("a", "c");
-    p.addRelation("c", "e");
-    p.addRelation("e", "a");
-    p.transitiveClosure();
-    System.out.println(p.getLUB(new ArrayList<String>() {{add("b"); add("c"); add("e");}}));
-  }
+	public static void main(String[] args){
+	  Poset p = new Poset();
+	  p.addRelation("a", "b");
+	  p.addRelation("a", "c");
+	  p.addRelation("c", "e");
+	  p.addRelation("e", "a");
+	  p.transitiveClosure();
+	  System.out.println(p.getLUB(new ArrayList<String>() {{add("b"); add("c"); add("e");}}));
+	}
 }
