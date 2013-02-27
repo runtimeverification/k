@@ -10,9 +10,12 @@ import java.util.Stack;
 public class Poset {
 
 	private java.util.Set<Tuple> relations = new HashSet<Tuple>();
+  private java.util.Set<String> elements = new HashSet<String>();
 
 	public void addRelation(String big, String small) {
 		relations.add(new Tuple(big, small));
+    elements.add(big);
+    elements.add(small);
 	}
 
 	public boolean isInRelation(String big, String small) {
@@ -52,6 +55,40 @@ public class Poset {
 		} while (!maxim);
 		return start;
 	}
+
+  /**
+   * finds the least upper bound of a subset of 
+   * the elements of 
+   *
+   * returns null if none exists
+   *
+   * assumes that all elements in subset are actually elements of the Poset
+   *
+   * also assumes that the Poset is actually a Poset (transitively closed)
+   */
+  public String getLUB(List<String> subset){
+    List<String> candidates = new ArrayList<String>();
+    for(String elem : elements){
+      boolean isGTSubset = true;
+      for(String subsetElem : subset){
+        if(!isInRelation(elem, subsetElem)) {
+          isGTSubset = false;
+          break;
+        } 
+      }
+      if(isGTSubset){
+        candidates.add(elem);
+      }
+    }
+    if(candidates.size() == 0) return null;
+    String lub = candidates.get(0);
+    for(int i = 1; i < candidates.size(); ++i){
+      if(isInRelation(lub, candidates.get(i))){
+        lub = candidates.get(i);
+      } 
+    }
+    return lub;
+  }
 
 	private class Tuple {
 		private String big, small;
@@ -137,4 +174,15 @@ public class Poset {
 		}
 		return null;
 	}
+
+  public static void main(String[] args){
+    Poset p = new Poset();
+    p.addRelation("a", "b");
+    p.addRelation("a", "c");
+    p.addRelation("e", "a");
+    p.addRelation("a", "f");
+    p.addRelation("f", "b");
+    p.transitiveClosure();
+    System.out.println(p.getLUB(new ArrayList<String>() {{add("b"); add("c");}}));
+  }
 }

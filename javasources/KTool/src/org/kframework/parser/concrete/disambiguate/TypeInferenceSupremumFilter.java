@@ -18,15 +18,30 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 
 		// choose the maximum from the list of ambiguities
 		java.util.List<Term> terms = new ArrayList<Term>(amb.getContents());
-		for (Term trm1 : amb.getContents()) {
-			for (Term trm2 : amb.getContents()) {
-				if (trm1 != trm2)
-					if (termsAlike(trm1, trm2))
-						if (DefinitionHelper.isSubsorted(trm2.getSort(), trm1.getSort())) {
-							terms.remove(trm1);
-						}
-			}
-		}
+    //Poset subsorts = DefinitionHelper.subsorts;
+    boolean areAllListSorts = true;
+    for (Term trm : amb.getContents()) {
+      if(!DefinitionHelper.isListSort(trm.getSort())) {
+        areAllListSorts = false; 
+        break;
+      }
+    }
+
+    if(areAllListSorts){
+
+    }
+
+    else {
+		  for (Term trm1 : amb.getContents()) {
+			  for (Term trm2 : amb.getContents()) {
+		      if (trm1 != trm2)
+					  if (termsAlike(trm1, trm2))
+						  if (DefinitionHelper.isSubsorted(trm2.getSort(), trm1.getSort())) {
+							  terms.remove(trm1);
+						  }
+			  }
+		  }
+    }
 
 		if (terms.size() == 1)
 			return terms.get(0).accept(this);

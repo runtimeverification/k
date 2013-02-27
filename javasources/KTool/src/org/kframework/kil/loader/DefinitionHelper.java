@@ -110,6 +110,20 @@ public class DefinitionHelper {
 		return DefinitionHelper.listConses.containsKey(sort);
 	}
 
+  /**
+   * Takes a List sort and returns the sort of the elements of that
+   * List sort.  e.g, for List{Exp, ","}, returns Exp.
+   *
+   * returns null if not a List sort
+   *
+   * we suppress cast warnings because we know that the sort must be UserList
+   */
+  @SuppressWarnings("cast")
+  public static String getListElementSort(String sort) {
+    if(!isListSort(sort)) return null;
+    return ((UserList)listConses.get(sort).getItems().get(0)).getSort();
+  }
+
 	public static void addPriority(String bigPriority, String smallPriority) {
 		// add the new priority
 		priorities.addRelation(bigPriority, smallPriority);
