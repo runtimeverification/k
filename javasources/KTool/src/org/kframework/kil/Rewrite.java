@@ -92,4 +92,11 @@ public class Rewrite extends Term {
 	public Rewrite shallowCopy() {
 		return new Rewrite(this);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Rewrite)) return false;
+		Rewrite r = (Rewrite)o;
+		return left.equals(r.left) && right.equals(r.right);
+	}
 }

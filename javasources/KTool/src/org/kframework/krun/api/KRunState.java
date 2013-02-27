@@ -1,15 +1,8 @@
 package org.kframework.krun.api;
 
-import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.backend.unparser.UnparserFilter;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.*;
-import org.kframework.parser.concrete.disambiguate.BestFitFilter;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 
 public class KRunState {
 
@@ -26,9 +19,6 @@ public class KRunState {
 		Term rawResult = result;
 		try {
 			result = (Term) result.accept(new ConcretizeSyntax());
-			result = (Term) result.accept(new TypeInferenceSupremumFilter());
-			result = (Term) result.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-			//as a last resort, undo concretization
 			result = (Term) result.accept(new FlattenDisambiguationFilter());
 		} catch (Exception e) {
 			// if concretization fails, return the raw result directly.
@@ -42,30 +32,8 @@ public class KRunState {
 		}
 
 		return result;
-	}	
-
-	private static class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
-		public FlattenDisambiguationFilter() {
-			super("Reflatten ambiguous syntax");
-		}
-
-		@Override
-		public ASTNode transform(Ambiguity amb) throws TransformerException {
-			if (amb.getContents().get(0) instanceof TermCons) {
-				TermCons t1 = (TermCons)amb.getContents().get(0);
-				if (MetaK.isComputationSort(t1.getSort())) {
-					return new KApp(new Constant("KLabel", t1.getProduction().getKLabel()), (Term) new KList(t1.getContents()).accept(this));
-				}
-			} else if (amb.getContents().get(0) instanceof Empty) {
-				Empty t1 = (Empty)amb.getContents().get(0);
-				if (MetaK.isComputationSort(t1.getSort())) {
-					return new KApp(new Constant("KLabel", MetaK.getListUnitLabel(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator())), new Empty(MetaK.Constants.KList));
-				}
-			}
-			return amb;
-		}
 	}
-
+	
 	public KRunState(Term rawResult, int stateId) {
 		this(rawResult);
 		this.stateId = stateId;

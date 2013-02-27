@@ -341,11 +341,10 @@ public class UnparserFilter extends BasicVisitor {
 			UserList userList = (UserList)production.getItems().get(0);
 			String separator = userList.getSeparator();
 			java.util.List<Term> contents = termCons.getContents();
-			for (int i = 0; i < contents.size(); ++i) {
-				contents.get(i).accept(this);
-				if (i != contents.size() - 1) {
-					result.write(separator + " ");
-				}
+			contents.get(0).accept(this);
+			if (!(contents.get(1) instanceof Empty && contents.get(1).getSort().equals(production.getSort()) && DefinitionHelper.isSubsortedEq(userList.getSort(), contents.get(0).getSort()))) {
+				result.write(separator + " ");
+				contents.get(1).accept(this);
 			}
 		} else {
 			int where = 0;
