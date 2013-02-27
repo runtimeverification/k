@@ -525,10 +525,20 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(org.kframework.kil.Ambiguity ambiguity) {
 		prepare(ambiguity);
+		result.write("amb(");
+		result.endLine();		
+		result.indent(TAB);
+		java.util.List<Term> contents = ambiguity.getContents();
+		for (int i = 0; i < contents.size(); ++i) {
+			contents.get(i).accept(this);
+			if (i != contents.size() - 1) {
+				result.write(",");
+				result.endLine();
+			}
+		}
 		result.endLine();
-		result.write("Don't know how to pretty print Ambiguity");
-		result.endLine();
-		super.visit(ambiguity);
+		result.unindent();
+		result.write(")");
 		postpare();
         }
 

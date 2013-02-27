@@ -1,5 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
@@ -30,7 +31,9 @@ public class AmbFilter extends BasicTransformer {
 		}
 		msg = msg.substring(0, msg.length() - 2);
 		msg += "    Arbitrarily choosing the first.";
-		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Parsing ambiguity between: " + msg, getName(), amb.getFilename(), amb.getLocation()));
+		UnparserFilter unparserFilter = new UnparserFilter();
+		unparserFilter.visit(amb);
+		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Parsing ambiguity between: " + msg + " in the following AST: \n" + unparserFilter.getResult(), getName(), amb.getFilename(), amb.getLocation()));
 
 		ASTNode astNode = amb.getContents().get(0);
 
