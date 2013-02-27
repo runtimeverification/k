@@ -44,7 +44,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 	
 		//now we find the lub of the remaining sorts...it might be worth iterating
 		//this with the List sorts code above
-		java.util.List<String> sorts = new ArrayList<String>();
+	/*	java.util.List<String> sorts = new ArrayList<String>();
 		for (Term t : terms){
 			sorts.add(t.getSort());
 		} 
@@ -63,9 +63,8 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 		}
 		else {
 			terms2 = terms;
-		}
-		/*
-		This is the original code
+		}*/
+		
 		java.util.List<Term> terms2 = new ArrayList<Term>(terms);
 		for (Term trm1 : terms) {
 			for (Term trm2 : terms) {
@@ -75,7 +74,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 							terms2.remove(trm1);
 					}
 			}
-		}*/
+		}
 		
 
 		if (terms2.size() == 1)
