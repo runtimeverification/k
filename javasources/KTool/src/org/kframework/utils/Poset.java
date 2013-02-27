@@ -65,13 +65,15 @@ public class Poset {
    * assumes that all elements in subset are actually elements of the Poset
    *
    * also assumes that the Poset is actually a Poset (transitively closed)
+   *
+   * Ok, this is actually GLB, but that's what we need for subsorts
    */
   public String getLUB(List<String> subset){
     List<String> candidates = new ArrayList<String>();
     for(String elem : elements){
       boolean isGTESubset = true;
       for(String subsetElem : subset){
-        if(!(isInRelation(elem, subsetElem) || elem.equals(subsetElem))) {
+        if(!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
           isGTESubset = false;
           break;
         } 
@@ -83,7 +85,7 @@ public class Poset {
     if(candidates.size() == 0) return null;
     String lub = candidates.get(0);
     for(int i = 1; i < candidates.size(); ++i){
-      if(isInRelation(lub, candidates.get(i))){
+      if(isInRelation(candidates.get(i), lub)){
         lub = candidates.get(i);
       } 
     }

@@ -124,6 +124,13 @@ public class DefinitionHelper {
     return ((UserList)listConses.get(sort).getItems().get(0)).getSort();
   }
 
+  /**
+   * find the LUB of a list of sorts
+   */
+  public static String getLUBSort(List<String> sorts){
+    return subsorts.getLUB(sorts);
+  }
+
 	public static void addPriority(String bigPriority, String smallPriority) {
 		// add the new priority
 		priorities.addRelation(bigPriority, smallPriority);

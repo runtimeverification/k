@@ -28,7 +28,16 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
     }
 
     if(areAllListSorts){
-
+      ArrayList<String> elementSorts = new ArrayList<String>();
+      for (Term trm : amb.getContents()) {
+        elementSorts.add(DefinitionHelper.getListElementSort(trm.getSort()));
+      }
+      String lubSort = DefinitionHelper.getLUBSort(elementSorts);
+      for (Term trm : amb.getContents()) {
+        if(!(DefinitionHelper.getListElementSort(trm.getSort()).equals(lubSort))){
+          terms.remove(trm);
+        }
+      }
     }
 
     else {
@@ -47,7 +56,8 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			return terms.get(0).accept(this);
 		else if (terms.size() > 0)
 			amb.setContents(terms);
-
+    //if there are 0 amb left, which I believe is theoretically possible
+    //we return the original ambiguity 
 		return super.transform(amb);
 	}
 
