@@ -69,14 +69,14 @@ public class Poset {
   public String getLUB(List<String> subset){
     List<String> candidates = new ArrayList<String>();
     for(String elem : elements){
-      boolean isGTSubset = true;
+      boolean isGTESubset = true;
       for(String subsetElem : subset){
-        if(!isInRelation(elem, subsetElem)) {
-          isGTSubset = false;
+        if(!(isInRelation(elem, subsetElem) || elem.equals(subsetElem))) {
+          isGTESubset = false;
           break;
         } 
       }
-      if(isGTSubset){
+      if(isGTESubset){
         candidates.add(elem);
       }
     }
@@ -179,10 +179,9 @@ public class Poset {
     Poset p = new Poset();
     p.addRelation("a", "b");
     p.addRelation("a", "c");
+    p.addRelation("c", "e");
     p.addRelation("e", "a");
-    p.addRelation("a", "f");
-    p.addRelation("f", "b");
     p.transitiveClosure();
-    System.out.println(p.getLUB(new ArrayList<String>() {{add("b"); add("c");}}));
+    System.out.println(p.getLUB(new ArrayList<String>() {{add("b"); add("c"); add("e");}}));
   }
 }
