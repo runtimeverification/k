@@ -27,6 +27,8 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 	    }
 	  }
 
+	  //if all sorts are list sorts 
+    //we actually find the lub 
 	  if(areAllListSorts){
 	    ArrayList<String> elementSorts = new ArrayList<String>();
 	    for (Term trm : amb.getContents()) {
@@ -39,23 +41,23 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 	      }
 	    }
 	  }
-
-	  else {
-		  for (Term trm1 : amb.getContents()) {
-			  for (Term trm2 : amb.getContents()) {
-		      if (trm1 != trm2)
-					  if (termsAlike(trm1, trm2))
-						  if (DefinitionHelper.isSubsorted(trm2.getSort(), trm1.getSort())) {
-							  terms.remove(trm1);
-						  }
-			  }
+	  
+    java.util.List<Term> terms2 = new ArrayList<Term>(terms);
+		for (Term trm1 : terms) {
+		  for (Term trm2 : terms) {
+		    if (trm1 != trm2)
+				  if (termsAlike(trm1, trm2))
+					  if (DefinitionHelper.isSubsorted(trm2.getSort(), trm1.getSort())) {
+						  terms2.remove(trm1);
+				  }
 		  }
-	  }
+		}
+	  
 
-		if (terms.size() == 1)
-			return terms.get(0).accept(this);
-		else if (terms.size() > 0)
-			amb.setContents(terms);
+		if (terms2.size() == 1)
+			return terms2.get(0).accept(this);
+		else if (terms2.size() > 0)
+			amb.setContents(terms2);
 	  //if there are 0 amb left, which I believe is theoretically possible
 	  //we return the original ambiguity 
 		return super.transform(amb);
