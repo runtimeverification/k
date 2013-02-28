@@ -53,8 +53,7 @@ public class TypeCheckFilter extends CopyOnWriteTransformer {
 		if (terms.size() == 1) {
 			return terms.get(0);
 		} else {
-			amb.setContents(terms);
-			return amb;
+			return new Ambiguity(amb.getSort(), terms);
 		}
 	}
 
