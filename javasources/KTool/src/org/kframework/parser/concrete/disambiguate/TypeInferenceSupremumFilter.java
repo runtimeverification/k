@@ -38,10 +38,11 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 					terms.remove(trm);
 				}
 			}
+
 		}
-  //  else{
-    //   System.out.println(amb);
-    //}
+	//	else{
+		//	 System.out.println(amb);
+		//}
 	
 		//now we find the lub of the remaining sorts...it might be worth iterating
 		//this with the List sorts code above
@@ -80,7 +81,9 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 		
 
 		if (terms2.size() == 1)
+		{
 			return terms2.get(0).accept(this);
+		}
 		else if (terms2.size() > 0)
 			amb.setContents(terms2);
 		//if there are 0 amb left, which I believe is theoretically possible
