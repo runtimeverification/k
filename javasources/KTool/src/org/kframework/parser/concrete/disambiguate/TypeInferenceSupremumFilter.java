@@ -16,9 +16,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
 
-		// choose the maximum from the list of ambiguities
 		java.util.List<Term> terms = new ArrayList<Term>(amb.getContents());
-		//Poset subsorts = DefinitionHelper.subsorts;
 		boolean areAllListSorts = true;
 		for (Term trm : amb.getContents()) {
 			if (!DefinitionHelper.isListSort(trm.getSort())) {
@@ -41,6 +39,9 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 				}
 			}
 		}
+  //  else{
+    //   System.out.println(amb);
+    //}
 	
 		//now we find the lub of the remaining sorts...it might be worth iterating
 		//this with the List sorts code above
@@ -65,6 +66,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			terms2 = terms;
 		}*/
 		
+		// choose the maximum from the list of ambiguities
 		java.util.List<Term> terms2 = new ArrayList<Term>(terms);
 		for (Term trm1 : terms) {
 			for (Term trm2 : terms) {

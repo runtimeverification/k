@@ -64,10 +64,11 @@ public class Bracket extends Term {
 		return "(" + content + ")";
 	}
 
-	@Override
+  //this current causes ambiguities
+/*	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Bracket)) return false;
 		Bracket b = (Bracket)o;
 		return content.equals(b.content);
-	}
+	} */
 }
