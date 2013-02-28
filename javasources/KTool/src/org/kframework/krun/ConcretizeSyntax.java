@@ -5,7 +5,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeCheckFilter;
 import org.kframework.utils.StringUtil;
 
@@ -23,6 +22,10 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(KApp kapp) throws TransformerException {
+		return internalTransform(kapp).accept(new TypeCheckFilter());
+	}
+
+	public ASTNode internalTransform(KApp kapp) throws TransformerException {
 		Term label = kapp.getLabel();
 		Term child = kapp.getChild();
 		child = child.shallowCopy();
@@ -63,7 +66,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				if (possibleTerms.size() == 1) {
 					return possibleTerms.get(0);
 				} else {
-					return new Ambiguity("K", possibleTerms).accept(new TypeCheckFilter()).accept(new TypeInferenceSupremumFilter());
+					return new Ambiguity("K", possibleTerms);
 				}
 			} else if (child instanceof Empty) {
 				//could be a list terminator, which don't have conses

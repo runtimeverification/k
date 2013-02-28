@@ -3,6 +3,7 @@ package org.kframework.krun.api;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.*;
 import org.kframework.krun.*;
+import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 
 public class KRunState {
 
@@ -19,6 +20,7 @@ public class KRunState {
 		Term rawResult = result;
 		try {
 			result = (Term) result.accept(new ConcretizeSyntax());
+			result = (Term) result.accept(new TypeInferenceSupremumFilter());
 			result = (Term) result.accept(new FlattenDisambiguationFilter());
 		} catch (Exception e) {
 			// if concretization fails, return the raw result directly.
