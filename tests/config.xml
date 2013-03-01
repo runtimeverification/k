@@ -342,6 +342,7 @@
       folder="dist/examples/agent/programs"
       extensions=""
       results="tests/examples/agent"
+      exclude="p14 p15"
       >
   </test>
 
