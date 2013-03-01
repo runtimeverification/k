@@ -1,9 +1,9 @@
-(\x.  (
-  (while (*x <= 3) do (
-    (newAgent (
-      (print me);
-      barrier)) ;
-    (*x := (*x + 1))
-  )) ; 
+(\x.  
+  while (*x <= 3) do (
+    newAgent (
+      print me ;
+      barrier) ;
+    *x := *x + 1
+  ) ; 
   barrier;
-  (print me))) (ref 1)
+  print me) (ref 1)

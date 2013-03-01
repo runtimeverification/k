@@ -26,7 +26,14 @@ module AGENT-SYNTAX
   imports QUOTE-UNQUOTE-SYNTAX
 
 //  syntax priorities dref > mul > and > app >  assgn if prnt rndv > spwn while > seq  > lam
-  syntax priorities app > dref > mul > and > assgn prnt rndv > if spwn while > seq  > lam mu
+  syntax priorities app 
+                  > dref 
+                  > mul 
+                  > and 
+                  > assgn prnt sndTo sndSyn bcst rndv newAg
+                  > if spwn while 
+                  > seq  
+                  > lam mu
 endmodule
 
 module AGENT

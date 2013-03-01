@@ -44,7 +44,8 @@ module AGENTS
        when fresh(N2:Int)
   rule [agent-completion] : (<agent>... <control>.Bag</control> <me>N:Int</me>  ...</agent>=> .) 
        <world>... (SetItem(N) => .) ...</world>
-  rule [halt-agent] : <control>...  <k>haltAgent ...</k>  ...</control> => <control> .Bag </control> .
+  rule [halt-agent] : <control>...  <k>haltAgent ...</k>  ...</control> => <control> .Bag </control> 
+    [transition]
   rule <k>me => N ...</k> <me>N</me>
   rule <k>parent => N ...</k> <parent>N</parent>
   rule <me>N1</me> <k>send V to N2 => skip ...</k>
@@ -52,21 +53,26 @@ module AGENTS
              </message>)
   rule <me>N</me> <k>receive=>V:Val ...</k>
        <message>...  <to>... SetItem(N)=>. ...</to> <body>V</body>  ...</message>
+    [transition]
   rule <message> <from>N2</from> <to>... SetItem(N1) => . ...</to> <body>V</body> 
        </message> <me>N1</me> <k>receiveFrom N2 => V ...</k>
+    [transition]
   rule <me>N</me> <k>broadcast V => skip ...</k>
        <world>W:Set</world>
        (. => <message> <from>N</from> <to>W</to> <body>V</body> </message>)
   rule <message>... <to>.Set</to> ...</message> => . [structural]
   rule <agent>...  <me>N1</me> <k>sendSynch V to N2 => skip ...</k>  ...</agent> 
        <agent>... <me>N2</me> <k>receiveFrom N1 => V ...</k>  ...</agent>
+    [transition]
   rule <k>sendSynch V to N2 => skip ...</k>
        <agent>... <me>N2</me> <k>receive => V ...</k>  ...</agent>
+    [transition]
   rule [start-waiting-at-barrier] : <me>N</me> <k>barrier ...</k>
        <barrier>true</barrier> <waiting>W (. => SetItem(N))</waiting> 
     when notBool(SetItem(N) in W)
   rule [lifting-barrier] : <barrier>true=>false</barrier> <waiting>W</waiting> <world>W</world> 
     when W =/=Set .
+    [transition]
   rule [leave-barrier] : <me>N</me> <k>barrier => skip ...</k> <barrier>false</barrier>
        <waiting>... (SetItem(N) => .) ...</waiting>
   rule [lowering-barrier] : <barrier>false => true</barrier> <waiting>.Set</waiting>

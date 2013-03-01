@@ -1,20 +1,20 @@
 require "/modules/k-visitor.k"
 
 module QUOTE-UNQUOTE-SYNTAX
-  syntax K ::= "quote" K
-             | "unquote" K
-             | "lift" K    [strict]
-             | "eval" K    [strict]
+  syntax Exp ::= "quote" Exp  [quote]
+             | "unquote" Exp [unquote]
+             | "lift" Exp    [lift, strict]
+             | "eval" Exp    [eval, strict]
 endmodule
 
 module QUOTE-UNQUOTE 
   imports QUOTE-UNQUOTE-SYNTAX
   imports K-VISITOR
-  syntax K ::= "isQuote" "(" K ")"  [function, klabel(isQuote)]
+  syntax K ::= isQuote(K)  [function]
   rule isQuote(quote K) => true
   rule isQuote(unquote K) => true
 
-  syntax K ::= "mQuote" "(" K "," Int ")" [function, klabel(mQuote), latex({\it quote}({#1},{#2}))]
+  syntax K ::= mQuote(K, Int) [function, latex({\it quote}({#1},{#2}))]
   rule mQuote(K,N) 
     => visit K applying quoteit[N] if 'isQuote
     [structural]
@@ -30,4 +30,6 @@ module QUOTE-UNQUOTE
 
   rule lift V:KResult => visitedK(V) 
   rule eval visitedK(K) => K 
+
+  rule isVal(visitedK(_)) => true
 endmodule
