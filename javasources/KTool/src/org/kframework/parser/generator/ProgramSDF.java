@@ -72,15 +72,23 @@ public class ProgramSDF {
 						sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 					} else if (itm.getType() == ProductionType.SORT) {
 						Sort srt = (Sort) itm;
-						sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+						// if we are on the first or last place and this sort is not a list, just print the sort
+						if (i == 0 || i == items.size() - 1) {
+							sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+						} else {
+							// if this sort should be inserted to avoid the priority filter, then add it to the list
+							psdfv.insertSorts.add(srt.getName());
+							sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
+						}
 					}
+
 				}
 				sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
 				sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
 			}
 		}
 
-		for (String ss : psdfv.sorts)
+		for (String ss : psdfv.insertSorts)
 			sdf.append("	" + StringUtil.escapeSortName(ss) + " -> InsertDz" + StringUtil.escapeSortName(ss) + "\n");
 
 		sdf.append("\n\n");

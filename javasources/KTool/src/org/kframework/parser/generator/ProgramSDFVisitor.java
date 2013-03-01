@@ -35,7 +35,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 	public Set<Production> outsides = new HashSet<Production>();
 	public Set<Production> constants = new HashSet<Production>();
 	public Set<String> constantSorts = new HashSet<String>();
-	public Set<String> sorts = new HashSet<String>(); // list of inserted sorts that need to avoid the priority filter
+	public Set<String> insertSorts = new HashSet<String>(); // list of inserted sorts that need to avoid the priority filter
 	public Set<String> startSorts = new HashSet<String>(); // list of sorts that are start symbols
 	public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
 	public Set<String> userSort = new HashSet<String>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
@@ -159,7 +159,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 									sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
 								} else {
 									// if this sort should be inserted to avoid the priority filter, then add it to the list
-									sorts.add(srt.getName());
+									insertSorts.add(srt.getName());
 									sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
 								}
 							}

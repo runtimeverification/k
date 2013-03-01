@@ -119,7 +119,14 @@ public class Definition2SDF {
 							sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 					} else if (itm.getType() == ProductionType.SORT) {
 						Sort srt = (Sort) itm;
-						sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+						// if we are on the first or last place and this sort is not a list, just print the sort
+						if (i == 0 || i == items.size() - 1) {
+							sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+						} else {
+							// if this sort should be inserted to avoid the priority filter, then add it to the list
+							psdfv.insertSorts.add(srt);
+							sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
+						}
 					}
 				}
 				sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
