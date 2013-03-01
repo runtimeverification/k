@@ -24,9 +24,10 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 	public void run(Definition definition) throws IOException {
 
 		try {
+			Definition def = definition;
 			SymbolicTransformer st = new SymbolicTransformer("");
-			Definition def = (Definition) st.transform(definition);
-			
+			def = (Definition) st.transform(definition);
+def = definition;			
 			UnparserFilter unparserFilter = new UnparserFilter();
 			def.accept(unparserFilter);
 
