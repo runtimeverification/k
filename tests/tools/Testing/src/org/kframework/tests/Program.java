@@ -64,7 +64,7 @@ public class Program {
 
 	public String successful(Task task) {
 		String message = success(task) ? "success" : "failed";
-		if (!task.getStdout().equals(""))
+		if (!task.getStderr().equals(""))
 			if (message.equals("success"))
 				message = "unstable";
 
