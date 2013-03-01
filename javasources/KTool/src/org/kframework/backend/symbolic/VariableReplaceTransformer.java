@@ -24,6 +24,9 @@ public class VariableReplaceTransformer extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(Variable node) throws TransformerException {
+		if (MetaK.isBuiltinSort(node.getSort()))
+			return node;
+				
 		Variable newVar = node;
 		if (vars.contains(node.getName())) {
 			newVar = MetaK.getFreshVar(node.getSort());

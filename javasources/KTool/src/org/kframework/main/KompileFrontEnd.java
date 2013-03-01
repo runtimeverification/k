@@ -17,52 +17,8 @@ import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.backend.unparser.UnparserBackend;
 import org.kframework.backend.xml.XmlBackend;
-import org.kframework.compile.AddEval;
-import org.kframework.compile.FlattenModules;
-import org.kframework.compile.ResolveConfigurationAbstraction;
-import org.kframework.compile.checks.CheckConfigurationCells;
-import org.kframework.compile.checks.CheckRewrite;
-import org.kframework.compile.checks.CheckVariables;
-import org.kframework.compile.sharing.AutomaticModuleImportsTransformer;
-import org.kframework.compile.sharing.DittoFilter;
-import org.kframework.compile.tags.AddDefaultComputational;
-import org.kframework.compile.tags.AddOptionalTags;
-import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.AddHeatingConditions;
-import org.kframework.compile.transformers.AddK2SMTLib;
-import org.kframework.compile.transformers.AddKCell;
-import org.kframework.compile.transformers.AddKLabelConstant;
-import org.kframework.compile.transformers.AddKLabelToString;
-import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.transformers.AddSemanticEquality;
-import org.kframework.compile.transformers.AddSupercoolDefinition;
-import org.kframework.compile.transformers.AddSuperheatRules;
-import org.kframework.compile.transformers.AddSymbolicK;
-import org.kframework.compile.transformers.AddTopCellConfig;
-import org.kframework.compile.transformers.AddTopCellRules;
-import org.kframework.compile.transformers.ContextsToHeating;
-import org.kframework.compile.transformers.DesugarStreams;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.FreezeUserFreezers;
-import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.transformers.ResolveAnonymousVariables;
-import org.kframework.compile.transformers.ResolveBinder;
-import org.kframework.compile.transformers.ResolveBlockingInput;
-import org.kframework.compile.transformers.ResolveBuiltins;
-import org.kframework.compile.transformers.ResolveFreshMOS;
-import org.kframework.compile.transformers.ResolveFunctions;
-import org.kframework.compile.transformers.ResolveHybrid;
-import org.kframework.compile.transformers.ResolveListOfK;
-import org.kframework.compile.transformers.ResolveOpenCells;
-import org.kframework.compile.transformers.ResolveRewrite;
-import org.kframework.compile.transformers.ResolveSupercool;
-import org.kframework.compile.transformers.ResolveSyntaxPredicates;
-import org.kframework.compile.transformers.StrictnessToContexts;
-import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.FunctionalAdaptor;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -238,10 +194,13 @@ public class KompileFrontEnd {
 			}
 			backend = new DocumentationBackend(Stopwatch.sw);
 		} else if (cmd.hasOption("symbolic")) {
+			if (output == null) {
+				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
+			}
 			backend = new SymbolicBackend(Stopwatch.sw);
-			symbolicCompile(mainFile, lang, backend, step);
-			verbose(cmd);
-			System.exit(0);
+			DefinitionHelper.dotk = new File(output);
+			DefinitionHelper.dotk.mkdirs();
+
 		} else {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
@@ -267,83 +226,6 @@ public class KompileFrontEnd {
 			System.out.println("Done.");
 	}
 
-	private static void symbolicCompile(File mainFile, String lang,
-			Backend backend, String step) {
-		org.kframework.kil.Definition javaDef;
-		try {
-			Stopwatch.sw.Start();
-			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude());
-
-			CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
-			if (GlobalSettings.verbose) {
-				steps.setSw(Stopwatch.sw);
-			}
-			steps.add(new FirstStep(backend));
-			steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells()));
-			steps.add(new RemoveBrackets());
-			steps.add(new AddEmptyLists());
-			steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));
-			steps.add(new CheckVisitorStep<Definition>(new CheckRewrite()));
-			steps.add(new AutomaticModuleImportsTransformer());
-			steps.add(new FunctionalAdaptor(new DittoFilter()));
-			steps.add(new FlattenModules());
-			steps.add(new StrictnessToContexts());
-			steps.add(new FreezeUserFreezers());
-			steps.add(new ContextsToHeating());
-			steps.add(new AddSupercoolDefinition());
-			steps.add(new AddHeatingConditions());
-			steps.add(new AddSuperheatRules());
-			steps.add(new DesugarStreams());
-			steps.add(new ResolveFunctions());
-			steps.add(new AddKCell());
-			steps.add(new AddSymbolicK());
-			if (GlobalSettings.symbolicEquality)
-				steps.add(new AddSemanticEquality());
-			// steps.add(new ResolveFresh());
-			steps.add(new ResolveFreshMOS());
-			steps.add(new AddTopCellConfig());
-			if (GlobalSettings.addTopCell) {
-				steps.add(new AddTopCellRules());
-			}
-			steps.add(new AddEval());
-			steps.add(new ResolveBinder());
-			steps.add(new ResolveAnonymousVariables());
-			steps.add(new ResolveBlockingInput());
-			steps.add(new AddK2SMTLib());
-			steps.add(new AddPredicates());
-			steps.add(new ResolveSyntaxPredicates());
-			steps.add(new ResolveBuiltins());
-			steps.add(new ResolveListOfK());
-			steps.add(new FlattenSyntax());
-			steps.add(new AddKLabelToString());
-			steps.add(new AddKLabelConstant());
-			steps.add(new ResolveHybrid());
-			steps.add(new ResolveConfigurationAbstraction());
-			steps.add(new ResolveOpenCells());
-			steps.add(new ResolveRewrite());
-/*			steps.add(new ResolveSupercool());
-			steps.add(new AddStrictStar());
-			steps.add(new AddDefaultComputational());
-			steps.add(new AddOptionalTags());
-*/			steps.add(new LastStep(backend));
-
-			if (step == null) {
-				step = backend.getDefaultStep();
-			}
-			try {
-				javaDef = steps.compile(javaDef, step);
-			} catch (CompilerStepDone e) {
-				javaDef = (Definition) e.getResult();
-			}
-
-			backend.run(javaDef);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	private static void genericCompile(File mainFile, String lang, Backend backend, String step) {
 		org.kframework.kil.Definition javaDef;
@@ -351,59 +233,11 @@ public class KompileFrontEnd {
 			Stopwatch.sw.Start();
 			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude());
 
-			CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
+			CompilerSteps<Definition> steps = backend.getCompilationSteps();
+
 			if (GlobalSettings.verbose) {
 				steps.setSw(Stopwatch.sw);
 			}
-			steps.add(new FirstStep(backend));
-			steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells()));
-			steps.add(new RemoveBrackets());
-			steps.add(new AddEmptyLists());
-			steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));
-			steps.add(new CheckVisitorStep<Definition>(new CheckRewrite()));
-			steps.add(new AutomaticModuleImportsTransformer());
-			steps.add(new FunctionalAdaptor(new DittoFilter()));
-			steps.add(new FlattenModules());
-			steps.add(new StrictnessToContexts());
-			steps.add(new FreezeUserFreezers());
-			steps.add(new ContextsToHeating());
-			steps.add(new AddSupercoolDefinition());
-			steps.add(new AddHeatingConditions());
-			steps.add(new AddSuperheatRules());
-			steps.add(new DesugarStreams());
-			steps.add(new ResolveFunctions());
-			steps.add(new AddKCell());
-			steps.add(new AddSymbolicK());
-			if (GlobalSettings.symbolicEquality)
-				steps.add(new AddSemanticEquality());
-			// steps.add(new ResolveFresh());
-			steps.add(new ResolveFreshMOS());
-			steps.add(new AddTopCellConfig());
-			if (GlobalSettings.addTopCell) {
-				steps.add(new AddTopCellRules());
-			}
-			steps.add(new AddEval());
-			steps.add(new ResolveBinder());
-			steps.add(new ResolveAnonymousVariables());
-			steps.add(new ResolveBlockingInput());
-			steps.add(new AddK2SMTLib());
-			steps.add(new AddPredicates());
-			steps.add(new ResolveSyntaxPredicates());
-			steps.add(new ResolveBuiltins());
-			steps.add(new ResolveListOfK());
-			steps.add(new FlattenSyntax());
-			steps.add(new AddKLabelToString());
-			steps.add(new AddKLabelConstant());
-			steps.add(new ResolveHybrid());
-			steps.add(new ResolveConfigurationAbstraction());
-			steps.add(new ResolveOpenCells());
-			steps.add(new ResolveRewrite());
-			steps.add(new ResolveSupercool());
-			steps.add(new AddStrictStar());
-			steps.add(new AddDefaultComputational());
-			steps.add(new AddOptionalTags());
-			steps.add(new LastStep(backend));
-
 			if (step == null) {
 				step = backend.getDefaultStep();
 			}

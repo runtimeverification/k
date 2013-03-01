@@ -13,20 +13,21 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 public class ConstantsReplaceTransformer extends BasicTransformer {
 	private Map<Variable, Constant> generatedSV;
 
-	
-	public  ConstantsReplaceTransformer(String name) {
+	public ConstantsReplaceTransformer(String name) {
 		super("Replace Constants");
 		generatedSV = new HashMap<Variable, Constant>();
 	}
 
-	
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {
-		Variable newVar = MetaK.getFreshVar(node.getSort());
-		generatedSV.put(newVar, node);
-		return newVar;
+		if (MetaK.isBuiltinSort(node.getSort())) {
+			Variable newVar = MetaK.getFreshVar(node.getSort());
+			generatedSV.put(newVar, node);
+			return newVar;
+		}
+		return node;
 	}
-	
+
 	public Map<Variable, Constant> getGeneratedSV() {
 		return generatedSV;
 	}

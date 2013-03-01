@@ -12,6 +12,7 @@ module SYMBOLIC-K
 
   syntax Bool ::= "forall" Set "." Bool [binder, function]
   syntax Bool ::= "exists" Set "." Bool [binder, function]
+  syntax Bool ::= K "==Symbolic" K 
 
   /* The following simplification rules assume non-empty sorts. */
   rule forall S:Set . true => true

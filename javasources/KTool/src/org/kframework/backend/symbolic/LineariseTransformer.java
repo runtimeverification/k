@@ -18,8 +18,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class LineariseTransformer extends BasicTransformer {
 
-	public LineariseTransformer(String name) {
-		super(name);
+	public LineariseTransformer() {
+		super("Linearise Rules");
 	}
 
 	@Override
@@ -29,23 +29,28 @@ public class LineariseTransformer extends BasicTransformer {
 			VariableReplaceTransformer vrt = new VariableReplaceTransformer("");
 
 			Rewrite rew = (Rewrite) node.getBody();
-			rew.setLeft((Term) vrt.transform(rew.getLeft()));
+			rew.setLeft((Term) rew.getLeft().accept(vrt));
 			
 			Map<Variable, Variable> newVariables = vrt.getGeneratedVariables();
 
 			Term condition = node.getCondition();
 
 			List<Term> terms = new ArrayList<Term>();
-			Term newCondition = new KApp(new Constant("KLabel", "'_andBool_"),
-					new KList(terms));
-
 			for (Entry<Variable, Variable> entry : newVariables.entrySet()) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
 				vars.add(entry.getValue());
-				terms.add(new KApp(new Constant("KLabel", "'_==K_"), new KList(
+				String sort = entry.getValue().getSort().substring(1);
+				String label = "'_==" + sort + "_";
+				terms.add(new KApp(new Constant("KLabel", label), new KList(
 						vars)));
 			}
+
+			if (terms.isEmpty())
+				return node;
+
+			Term newCondition = new KApp(new Constant("KLabel", "'_andBool_"),
+					new KList(terms));
 
 			if (condition != null) {
 				List<Term> vars = new ArrayList<Term>();
