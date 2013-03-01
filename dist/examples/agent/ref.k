@@ -1,21 +1,23 @@
+require "int.k"
 require "seq.k"
 
 module REF-SYNTAX imports SEQ-SYNTAX
-  syntax K ::= Nat
-             | "ref" K [strict]
-             | "*" K [strict]
-             > K ":=" K [strict(2)]
+  imports INT-EXP-SYNTAX
+  syntax Exp ::= "ref" Exp [ref, strict]
+             | "*" Exp [dref, strict]
+             > Exp ":=" Exp [assgn, strict(2)]
 endmodule
 
 module REF 
   imports REF-SYNTAX
   imports SEQ
-  configuration <k> .K </k>  
-                <mem> .Map </mem> <nextLoc> 0 </nextLoc>
+  imports INT-EXP
+  configuration <k> $PGM:Exp </k>  
+                <mem> .Map </mem>
 
   context * HOLE := _
-  rule <k> ref V:KResult => N:Nat ...</k> 
-       <mem>... . => N |-> V ...</mem> <nextLoc> N => N +Int 1 </nextLoc> 
+  rule <k> ref V:Val => N ...</k> 
+       <mem>... . => N |-> V ...</mem>  when fresh(N:Int)
   rule <k> * N => V ...</k> <mem>... N |-> V ...</mem> [transition]
   rule <k> * N := V => skip ...</k> <mem>... N |-> (_ => V) ...</mem> [transition]
 endmodule

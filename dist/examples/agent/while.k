@@ -4,7 +4,7 @@ require "if.k"
 module WHILE-SYNTAX 
   imports SEQ-SYNTAX
   imports IF-SYNTAX
-  syntax K ::= "while" K "do" K
+  syntax Exp ::= "while" Exp "do" Exp [while]
 endmodule
   
 module WHILE 
@@ -12,5 +12,5 @@ module WHILE
   imports SEQ
   imports IF
 
-  rule while E:K do S:K => if E then (S ; while E do S) else skip 
+  rule while E do S => if E then (S ; while E do S) else skip 
 endmodule

@@ -24,6 +24,9 @@ module AGENT-SYNTAX
   imports THREADS-SYNTAX
   imports AGENTS-SYNTAX
   imports QUOTE-UNQUOTE-SYNTAX
+
+//  syntax priorities dref > mul > and > app >  assgn if prnt rndv > spwn while > seq  > lam
+  syntax priorities app > dref > mul > and > assgn prnt rndv > if spwn while > seq  > lam mu
 endmodule
 
 module AGENT
@@ -65,6 +68,4 @@ module AGENT
       </message> </messages>
       <IO> <in stream="stdin">.List</in> <out stream="stdout">.List</out> </IO>
     </T>
-
-  syntax KResult ::= Id
 endmodule

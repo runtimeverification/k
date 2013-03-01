@@ -1,7 +1,8 @@
 require "lambda.k"
 
 module MU-SYNTAX imports LAMBDA-SYNTAX
-  syntax K ::= "mu" Id "." K [binder, latex(\mu{#1}.{#2})]
+  syntax Exp ::= "mu" Id "." Exp [mu, binder, latex(\mu{#1}.{#2})]
+  syntax priorities app > mu
 endmodule
 
 module MU 

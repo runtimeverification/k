@@ -1,10 +1,12 @@
+require "val.k"
 module SEQ-SYNTAX
-  syntax K ::= "skip"
-             >  K ";" K                  [left, strict(1)]
+  syntax Exp ::= "skip"
+             >  Exp ";" Exp                  [seq,left, strict(1)]
 endmodule
   
 module SEQ
   imports SEQ-SYNTAX
-  syntax KResult ::= "skip"
-  rule V:KResult ; S:K => S [structural]
+  imports VAL
+  syntax Val ::= "skip"
+  rule V:Val ; S:K => S [structural]
 endmodule

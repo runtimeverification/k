@@ -1,22 +1,27 @@
+require "int.k"
+require "bool.k"
 require "seq.k"
 
 module AGENTS-SYNTAX imports SEQ-SYNTAX
-  syntax K ::= Int | Bool
-             | "newAgent" K
-             | "me"
-             | "parent"
-             | "receive"
-             | "receiveFrom" K     [strict]
-             | "send" K "to" K       [strict]
-             | "sendSynch" K "to" K  [strict]
-             | "barrier"        
-             | "broadcast" K       [strict]
-             | "haltAgent"
+  imports INT-EXP-SYNTAX
+  imports BOOL-EXP-SYNTAX
+  syntax Exp ::= "newAgent" Exp [newAg]
+             | "me" [me]
+             | "parent" [parent]
+             | "receive" [rcv]
+             | "receiveFrom" Exp     [rcvFr, strict]
+             | "send" Exp "to" Exp       [sndTo, strict]
+             | "sendSynch" Exp "to" Exp  [sndSyn, strict]
+             | "barrier"        [bar] 
+             | "broadcast" Exp       [bcst, strict]
+             | "haltAgent" [haltAg]
 endmodule
 
 module AGENTS 
   imports AGENTS-SYNTAX
   imports SEQ
+  imports INT-EXP
+  imports BOOL-EXP 
   configuration
       <agent multiplicity="*"> 
           <me>0</me>
@@ -24,7 +29,6 @@ module AGENTS
           <control> <k color="green"> .K </k> </control>
       </agent> 
 //      <br/>
-      <nextAgent>1</nextAgent>
       <world>SetItem(0)</world>
       <barrier>true</barrier> <waiting>.Set</waiting> 
 //      <br/>
@@ -34,11 +38,11 @@ module AGENTS
       
 
 // Agents
-  rule [agent-creation] : <agent>...  <k>newAgent S:K => N2:Nat ...</k> <me>N1:Nat</me> 
+  rule [agent-creation] : <agent>...  <k>newAgent S:K => N2 ...</k> <me>N1:Int</me> 
         ...</agent> <world>... . => SetItem(N2) ...</world> // <br/>
        (. => <agent>... <me>N2</me><parent>N1</parent><k>S</k> ...</agent>) 
-       <nextAgent>N2 => N2 +Int 1</nextAgent>
-  rule [agent-completion] : (<agent>... <control>.Bag</control> <me>N:Nat</me>  ...</agent>=> .) 
+       when fresh(N2:Int)
+  rule [agent-completion] : (<agent>... <control>.Bag</control> <me>N:Int</me>  ...</agent>=> .) 
        <world>... (SetItem(N) => .) ...</world>
   rule [halt-agent] : <control>...  <k>haltAgent ...</k>  ...</control> => <control> .Bag </control> .
   rule <k>me => N ...</k> <me>N</me>
@@ -46,7 +50,7 @@ module AGENTS
   rule <me>N1</me> <k>send V to N2 => skip ...</k>
        (. => <message> <from>N1</from> <to>SetItem(N2)</to> <body>V</body> 
              </message>)
-  rule <me>N</me> <k>receive=>V:KResult ...</k>
+  rule <me>N</me> <k>receive=>V:Val ...</k>
        <message>...  <to>... SetItem(N)=>. ...</to> <body>V</body>  ...</message>
   rule <message> <from>N2</from> <to>... SetItem(N1) => . ...</to> <body>V</body> 
        </message> <me>N1</me> <k>receiveFrom N2 => V ...</k>

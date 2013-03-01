@@ -1,19 +1,21 @@
+require "int.k"
 require "seq.k"
 
 module IO-SYNTAX imports SEQ-SYNTAX
-  syntax K ::= Int
-             | "read"
-             | "print" K [strict]
+  imports INT-EXP-SYNTAX
+  syntax Exp ::= "read" [read]
+               | "print" Exp [prnt, strict]
 endmodule
 
   
 module IO 
   imports IO-SYNTAX
   imports SEQ
-  configuration <k> .K </k>  
-                <in> .List </in> <out> .List </out>
+  imports INT-EXP 
+  configuration <k> $PGM:Exp </k>  
+                <in stream="stdin"> .List </in> <out stream="stdout"> .List </out>
    rule <k> read => I:Int ...</k> 
         <in> ListItem(I) => . ...</in>
-   rule <k> print V:KResult => skip ...</k> 
+   rule <k> print V:Val => skip ...</k> 
         <out>... . => ListItem(V) </out>
 endmodule

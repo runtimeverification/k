@@ -1,8 +1,10 @@
+require "val.k"
 module HALT-SYNTAX
-  syntax K ::= "halt" K [strict]
+  syntax Exp ::= "halt" Exp [strict]
 endmodule
 
 module HALT
   imports HALT-SYNTAX
-  rule <k>(halt V:KResult)~>_ => V</k> 
+  imports VAL
+  rule <k>(halt V:Val)~>_ => V</k> 
 endmodule

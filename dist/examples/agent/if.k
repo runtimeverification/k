@@ -1,14 +1,15 @@
+require "bool.k"
 
 
 module IF-SYNTAX
-  syntax K ::= Bool
-             | "if" K "then" K "else" K   [strict(1)]
+  imports BOOL-EXP-SYNTAX
+  syntax Exp ::= "if" Exp "then" Exp "else" Exp   [if, strict(1)]
 endmodule
 
 module IF 
   imports IF-SYNTAX
+  imports BOOL-EXP
 
-  syntax KResult ::= Bool
   rule if true then E else _ => E
   rule if false then _ else E => E
 endmodule
