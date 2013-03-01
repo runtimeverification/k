@@ -332,6 +332,18 @@
     </all-programs>
   </test>
 
+
+<!--
+  AGENT
+-->
+
+  <test 
+      language="dist/examples/agent"
+      folder="dist/examples/agent/programs"
+      extensions=""
+      >
+  </test>
+
 <!--
   IMP-SYMBOLIC
 -->
