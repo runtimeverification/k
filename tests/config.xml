@@ -338,7 +338,7 @@
 -->
 
   <test 
-      language="dist/examples/agent"
+      language="dist/examples/agent/agent.k"
       folder="dist/examples/agent/programs"
       extensions=""
       >
