@@ -462,4 +462,47 @@
       </program>
   </test>
 
+
+<!--
+    Cink ltlmc
+-->
+
+  <test
+      language="dist/examples/cink/ltlmc/cink.k"
+      folder="dist/examples/cink/ltlmc/programs"
+      extensions="cink"
+      results="tests/examples/cink/ltlmc" 
+      exclude="form-peterson.cink form-dekker.cink form-threads.cink peterson-wrong1.cink peterson-wrong2.cink" >
+      <kompile-option name="-transition" value="kripke" />
+      <all-programs>
+        <krun-option name="-ltlmc" value="[]Ltl ((eqTo(critical1, 1) ->Ltl eqTo(critical2, 0)) /\Ltl (eqTo(critical2, 1) ->Ltl eqTo(critical1, 0)))" />
+      </all-programs>
+  </test>
+
+
+<!--
+    Cink basic
+-->
+
+  <test
+      language="dist/examples/cink/basic/cink.k"
+      folder="dist/examples/cink/basic/programs"
+      extensions="cink"
+      results="tests/examples/cink/basic" 
+      exclude="fact.cink prim.cink"
+      >
+  </test>
+
+<!--
+    Program equivalence
+-->
+
+  <test
+      language="dist/examples/prog-equiv/peq.k"
+      folder="dist/examples/prog-equiv/programs"
+      extensions="peq"
+      results="tests/examples/prog-equiv/" > 
+      <kompile-option name="-addTopCell" />
+  </test>
+
 </tests>
