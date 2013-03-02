@@ -18,7 +18,7 @@ public class UserList extends ProductionItem {
 		super(element);
 
 		sort = element.getAttribute(Constants.VALUE_value_ATTR);
-		separator = element.getAttribute(Constants.SEPARATOR_separator_ATTR);
+		separator = element.getAttribute(Constants.SEPARATOR_separator_ATTR).trim();
 		listType = element.getAttribute(Constants.TYPE_type_ATTR);
 	}
 
