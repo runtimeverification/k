@@ -179,7 +179,7 @@ public class DefinitionLoader {
 				if (GlobalSettings.verbose)
 					Stopwatch.sw.printIntermediate("File Gen Pgm");
 
-				if (!oldSdfPgm.equals(newSdfPgm)) {
+				if (!oldSdfPgm.equals(newSdfPgm) || !new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm/Program.tbl").exists()) {
 					Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
 					if (GlobalSettings.verbose)
 						Stopwatch.sw.printIntermediate("Generate TBLPgm");
@@ -202,7 +202,8 @@ public class DefinitionLoader {
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("File Gen Def");
 
-			if (!oldSdf.equals(newSdf)) {
+			if (!oldSdf.equals(newSdf) || !new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists()
+					|| !new File(DefinitionHelper.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
 				// Sdf2Table.run_sdf2table(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
 				Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(DefinitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
 				if (!GlobalSettings.documentation) {
