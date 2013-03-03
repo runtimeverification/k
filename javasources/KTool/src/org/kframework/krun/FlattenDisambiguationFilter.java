@@ -25,7 +25,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 		} else if (amb.getContents().get(0) instanceof Empty) {
 			Empty t1 = (Empty)amb.getContents().get(0);
 			if (MetaK.isComputationSort(t1.getSort())) {
-				return new KApp(new Constant("KLabel", MetaK.getListUnitLabel(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator())), new Empty(MetaK.Constants.KList));
+				return new ListTerminator(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator());
 			}
 		}
 		return amb;

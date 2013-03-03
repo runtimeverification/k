@@ -267,4 +267,42 @@ public class Production extends ASTNode {
 	public void setOwnerModuleName(String ownerModuleName) {
 		this.ownerModuleName = ownerModuleName;
 	}
+
+	public boolean hasTerminalToRight(int idx) {
+		int arity = 0;
+		for (int i = 0; i < items.size(); i++) {
+			ProductionItem item = items.get(i);
+			if (item.getType() == ProductionType.USERLIST) {
+				if (idx == arity)
+					return !((UserList)item).getSeparator().equals("");
+				if (idx == arity + 1)
+					return false;
+				arity += 2;
+			} else if (item.getType() == ProductionType.SORT) {
+				if (idx == arity)
+					return i != items.size() - 1 && items.get(i+1).getType() == ProductionType.TERMINAL;
+				arity++;
+			}
+		}
+		throw new IllegalArgumentException("Index not found in production");
+	}
+
+	public boolean hasTerminalToLeft(int idx) {
+		int arity = 0;
+		for (int i = 0; i < items.size(); i++) {
+			ProductionItem item = items.get(i);
+			if (item.getType() == ProductionType.USERLIST) {
+				if (idx == arity)
+					return false;
+				if (idx == arity + 1)
+					return !((UserList)item).getSeparator().equals("");
+				arity += 2;
+			} else if (item.getType() == ProductionType.SORT) {
+				if (idx == arity)
+					return i != 0 && items.get(i-1).getType() == ProductionType.TERMINAL;
+				arity++;
+			}
+		}
+		throw new IllegalArgumentException("Index not found in production");
+	}
 }

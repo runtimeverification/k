@@ -1,6 +1,7 @@
 package org.kframework.krun.api;
 
 import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.backend.unparser.AddBracketsFilter;
 import org.kframework.kil.*;
 import org.kframework.krun.*;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
@@ -22,6 +23,9 @@ public class KRunState {
 			result = (Term) result.accept(new ConcretizeSyntax());
 			result = (Term) result.accept(new TypeInferenceSupremumFilter());
 			result = (Term) result.accept(new FlattenDisambiguationFilter());
+			if (!K.parens) {
+				result = (Term) result.accept(new AddBracketsFilter());
+			}
 		} catch (Exception e) {
 			// if concretization fails, return the raw result directly.
 			return rawResult;
@@ -44,7 +48,7 @@ public class KRunState {
 	@Override
 	public String toString() {
 		if (stateId == null) {
-			UnparserFilter unparser = new UnparserFilter(true, K.color);
+			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
 			result.accept(unparser);
 			return unparser.getResult();
 		} else {

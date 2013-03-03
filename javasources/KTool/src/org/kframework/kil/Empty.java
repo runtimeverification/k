@@ -66,7 +66,7 @@ public class Empty extends Term {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Empty)) return false;
+		if (!(o.getClass().equals(Empty.class))) return false;
 		Empty e = (Empty)o;
 		return sort.equals(e.sort);
 	}

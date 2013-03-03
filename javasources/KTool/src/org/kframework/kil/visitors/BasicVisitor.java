@@ -260,6 +260,11 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(ListTerminator node) {
+		visit((Empty) node);
+	}
+
+	@Override
 	public void visit(Hole node) {
 		visit((Term) node);
 	}

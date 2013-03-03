@@ -58,6 +58,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 					Production p = DefinitionHelper.conses.get(cons);
 					if (p.getAttribute("reject") != null)
 						continue;
+					if (p.getArity() != contents.size())
+						continue;
 					possibleTerms.add(new TermCons(p.getSort(), cons, contents));
 				}
 				if (possibleTerms.size() == 0) {

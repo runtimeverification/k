@@ -59,7 +59,7 @@ public class Transition {
 	public String toString() {
 		if (rule != null) {
 			Attributes a = rule.getAttributes();
-			UnparserFilter unparser = new UnparserFilter(true, K.color);
+			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
 			a.accept(unparser);
 			return "\nRule tagged " + unparser.getResult() + " ";
 		} else if (label != null) {

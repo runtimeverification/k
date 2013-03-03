@@ -13,11 +13,11 @@ import java.util.Map.Entry;
 
 
 public class UnparserFilter extends BasicVisitor {
-	PriorityVisitor priorityVisitor = new PriorityVisitor();
 	private Indenter result = new Indenter();
 	private boolean firstPriorityBlock = false;
 	private boolean firstProduction = false;
 	private boolean inConfiguration = false;
+	private boolean addParentheses;	
 	private int inTerm = 0;
 	private boolean color = false;
 	private static int TAB = 4;
@@ -35,9 +35,14 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	public UnparserFilter(boolean inConfiguration, boolean color) {
+		this(inConfiguration, color, true);
+	}
+
+	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses) {
 		this.inConfiguration = inConfiguration;
 		this.color = color;
 		this.inTerm = 0;
+		this.addParentheses = addParentheses;
 	}
 
 	public String getResult() {
@@ -47,7 +52,6 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Definition def) {
 		prepare(def);
-		def.accept(priorityVisitor);
 		super.visit(def);
 		postpare();
 	}
@@ -287,6 +291,16 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Empty empty) {
 		prepare(empty);
 		result.write("." + empty.getSort());
+		postpare();
+	}
+
+	@Override
+	public void visit(ListTerminator terminator) {
+		prepare(terminator);
+		if (terminator.getSort().equals("K"))
+			result.write(".List{\"" + terminator.getSeparator() + "\"}");
+		else
+			result.write("." + terminator.getSort());
 		postpare();
 	}
 
@@ -595,6 +609,15 @@ public class UnparserFilter extends BasicVisitor {
 		postpare();
 	}
 
+	@Override
+	public void visit(Bracket br) {
+		prepare(br);
+		result.write("(");
+		br.getContent().accept(this);
+		result.write(")");
+		postpare();
+	}
+
 	private void prepare(ASTNode astNode) {
 		if (!stack.empty()) {
 			if (needsParanthesis(stack.peek(), astNode)) {
@@ -614,6 +637,8 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	private boolean needsParanthesis(ASTNode upper, ASTNode astNode) {
+		if (!addParentheses)
+			return false;
 		if (astNode instanceof Rewrite) {
 			if ((upper instanceof Cell) || (upper instanceof Rule)) {
 				return false;
@@ -624,7 +649,7 @@ public class UnparserFilter extends BasicVisitor {
 			TermCons termCons = (TermCons)upper;
 			Production productionNext = termConsNext.getProduction();
 			Production production = termCons.getProduction();
-			if (!!priorityVisitor.before(productionNext, production)) {
+			if (DefinitionHelper.isPriorityWrong(production.getKLabel(), productionNext.getKLabel())) {
 				return true;
 			}
 			return termConsNext.getContents().size() != 0;

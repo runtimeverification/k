@@ -61,6 +61,7 @@ public interface Transformer {
 	//	</CollectionItems>
 	public ASTNode transform(Constant node) throws TransformerException;
 	public ASTNode transform(Empty node) throws TransformerException;
+	public ASTNode transform(ListTerminator node) throws TransformerException;
 	public ASTNode transform(Hole node) throws TransformerException;
 	public ASTNode transform(KApp node) throws TransformerException;
 	public ASTNode transform(KLabel node) throws TransformerException;

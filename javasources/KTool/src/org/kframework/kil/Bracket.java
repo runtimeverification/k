@@ -26,6 +26,11 @@ public class Bracket extends Term {
 		this.content = i.content;
 	}
 
+	public Bracket(Term t) {
+		super(t.getSort());
+		this.content = t;
+	}
+
 	public Bracket(String location, String filename, String sort) {
 		super(location, filename, sort);
 	}

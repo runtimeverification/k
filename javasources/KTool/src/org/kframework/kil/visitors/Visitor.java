@@ -59,6 +59,7 @@ public interface Visitor {
 	// </CollectionItems>
 	public void visit(Constant node);
 	public void visit(Empty node);
+	public void visit(ListTerminator node);
 	public void visit(Hole node);
 	public void visit(FreezerHole node);
 	public void visit(KApp node);

@@ -32,7 +32,7 @@ public class SearchResults {
 			sb.append("\n\nSolution " + i + ", State " + solution.getState().getStateId() + ":");
 			Map<String, Term> substitution = solution.getSubstitution();
 			if (isDefaultPattern) {
-				UnparserFilter unparser = new UnparserFilter(true, K.color);
+				UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
 				substitution.get("B:Bag").accept(unparser);
 				sb.append("\n" + unparser.getResult());
 			} else {
@@ -41,7 +41,7 @@ public class SearchResults {
 				for (String variable : substitution.keySet()) {
 					String varName = variable.substring(0, variable.indexOf(":"));
 					if (varNames.contains(varName)) {
-						UnparserFilter unparser = new UnparserFilter(true, K.color);
+						UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
 						sb.append("\n" + variable + " -->");
 						substitution.get(variable).accept(unparser);
 						sb.append("\n" + unparser.getResult());
