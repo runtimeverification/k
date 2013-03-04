@@ -103,8 +103,8 @@
 		<copy todir="release/k">
 			<fileset dir="dist">
 				<exclude name="**/.*/**" />
-				<exclude name="examples/**/*-compiled.maude" />
-				<exclude name="tutorial/**/*-compiled.maude" />
+				<exclude name="examples/**/*-kompiled/**" />
+				<exclude name="tutorial/**/*-kompiled/**" />
 				<exclude name="bin/native/linux/implodePT" />
 				<exclude name="bin/native/macosx/implodePT" />
 				<exclude name="bin/native/cygwin/implodePT.exe" />
