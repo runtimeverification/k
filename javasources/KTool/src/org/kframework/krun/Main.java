@@ -23,6 +23,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.*;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.DefinitionLoader;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -43,6 +44,7 @@ public class Main {
 			+ K.lineSeparator + "history use up and down arrows." + K.lineSeparator;
 	private static final String HEADER = "";
 	private static final String FOOTER = "";
+	private static Stopwatch sw = new Stopwatch();
 
 	// needed for displaying the krun help
 	public static void printKRunUsage(Options options) {
@@ -169,11 +171,14 @@ public class Main {
 			termArgs.put(key, new BackendTerm("", "(" + args.get(key) + ")")); // the SubstitutionFilter automatically inserts the sort of BackendTerms
 		}
 		
+		if(GlobalSettings.verbose)
+			sw.printIntermediate("Plug configuration variables");
+
 		return (Term) cfgCleaned.accept(new SubstitutionFilter(termArgs));
 	}
 
 	public static Term makeConfiguration(String kast, String stdin, RunProcess rp, boolean hasTerm) throws TransformerException {
-		
+
 		if(hasTerm) {
 			if(kast == null) {
 				kast = rp.runParser(K.parser, K.term, false, null);
@@ -182,7 +187,7 @@ public class Main {
 				Error.report("You cannot specify both the term and the configuration variables.");
 			}
 		}
-		
+
 		HashMap<String, String> output = new HashMap<String, String>();
 		boolean hasPGM = false;
 		Enumeration<Object> en = K.configuration_variables.keys();
@@ -218,6 +223,10 @@ public class Main {
 			output.put("$noIO", "(.).List");
 			output.put("$stdin", "(.).K");
 		}
+		
+		if(GlobalSettings.verbose)
+			sw.printIntermediate("Make configuration");
+		
 		return plug(output);
 	}
 
@@ -273,6 +282,9 @@ public class Main {
 					} else {
 						Error.report("For the search option you need to specify that --maude-cmd=search");
 					}
+
+					if(GlobalSettings.verbose)
+						sw.printTotal("Search total");
 				} else if (K.model_checking.length() > 0) {
 					// run kast for the formula to be verified
 					File formulaFile = new File(K.model_checking);
@@ -287,8 +299,14 @@ public class Main {
 					}
 
 					result = krun.modelCheck(new BackendTerm("K", KAST1), makeConfiguration(KAST, null, rp, (K.term != null)));
+
+					if(GlobalSettings.verbose)
+						sw.printTotal("Model checking total");
 				} else {
 					result = krun.run(makeConfiguration(KAST, null, rp, (K.term != null)));
+
+					if(GlobalSettings.verbose)
+						sw.printTotal("Normal execution total");
 				}
 			} catch (KRunExecutionException e) {
 				rp.printError(e.getMessage(), lang);
@@ -340,15 +358,15 @@ public class Main {
 			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
 			} else if("binary".equals(K.output_mode)) {
-				
+
 				Object krs = result.getResult();
-				
+
 				if(krs instanceof KRunState){
 					Term res = ((KRunState) krs).getRawResult();
-										
+
 					XStream xst = new XStream(new BinaryStreamDriver());
 					xst.aliasPackage("k", "org.kframework.kil");
-					
+
 					if (!cmd.hasOption("output")) {
 						Error.silentReport("Did not specify an output file. Cannot print output-mode binary to standard out. Saving to .k/krun/krun_output");
 						xst.toXML(res, new FileOutputStream(K.krun_output));
@@ -358,7 +376,7 @@ public class Main {
 				} else {
 					Error.report("binary output mode is not supported by search and model checking");
 				}
-					
+
 			} else {
 				Error.report(K.output_mode + " is not a valid value for output-mode option");
 			}
@@ -373,7 +391,6 @@ public class Main {
 			printKRunUsage(cmd_options.getOptions());
 			System.exit(1);
 		}
-
 	}
 
 	// execute krun in debug mode (i.e. step by step execution)
@@ -495,7 +512,7 @@ public class Main {
 							int steps = Integer.parseInt(arg);	
 							SearchResults states = debugger.stepAll(steps);
 							AnsiConsole.out.println(states);
-								
+
 						} catch (NumberFormatException e) {
 							Error.silentReport("Argument to step-all must be an integer.");
 						} catch (IllegalStateException e) {
@@ -553,7 +570,6 @@ public class Main {
 			e.printStackTrace();
 			System.exit(1);
 		}
-
 	}
 
 	/**
@@ -561,6 +577,7 @@ public class Main {
 	 *            represents the arguments/options given to jkrun command..
 	 */
 	public static void execute_Krun(String cmds[]) {
+
 		// delete temporary krun directory
 		FileUtil.deleteDirectory(new File(K.krunDir));
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -575,6 +592,15 @@ public class Main {
 
 		CommandlineOptions cmd_options = new CommandlineOptions();
 		CommandLine cmd = cmd_options.parse(cmds);
+
+		// set verbose
+		if (cmd.hasOption("verbose")) {
+			GlobalSettings.verbose = true;
+		}
+
+		if(GlobalSettings.verbose)
+			sw.printIntermediate("Deleting temporary krun directory");
+		
 		try {
 
 			// Parse the program arguments
@@ -711,12 +737,12 @@ public class Main {
 				K.output = new File(cmd.getOptionValue("output")).getCanonicalPath();
 			}
 			if (cmd.hasOption("c")) {
-				
+
 				if(K.term != null)
 				{
 					Error.report("You cannot specify both the term and the configuration variables.");
 				}
-				
+
 				K.configuration_variables = cmd.getOptionProperties("c");
 				String parser = null;
 				for (Option opt : cmd.getOptions()) {
@@ -766,6 +792,9 @@ public class Main {
 				}
 			}
 
+			if(GlobalSettings.verbose)
+				sw.printIntermediate("Parsing command line options");
+			
 			// by default
 			if (!cmd.hasOption("k-definition") && !cmd.hasOption("compiled-def") && lang != null) {
 				K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
@@ -798,6 +827,9 @@ public class Main {
 			 * System.out.println("K.k_definition=" + K.k_definition); System.out.println("K.syntax_module=" + K.syntax_module); System.out.println("K.main_module=" + K.main_module);
 			 * System.out.println("K.compiled_def=" + K.compiled_def);
 			 */
+			
+			if(GlobalSettings.verbose)
+				sw.printIntermediate("Checking compiled definition");
 
 			// in KAST variable we obtain the output from running kast process on a program defined in K
 			String KAST = new String();
@@ -808,17 +840,39 @@ public class Main {
 				xstream.aliasPackage("k", "org.kframework.kil");
 
 				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.compiled_def + "/defx.bin"));
+
+				if(GlobalSettings.verbose)
+					sw.printIntermediate("Reading definition from binary");
+
 				// This is essential for generating maude
 				javaDef = new FlattenModules().compile(javaDef, null);
+
+				if(GlobalSettings.verbose)
+					sw.printIntermediate("Flattening modules");
+
 				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig());
+
+				if(GlobalSettings.verbose)
+					sw.printIntermediate("Adding top cell to configuration");
+
 				javaDef.preprocess();
+
+				if(GlobalSettings.verbose)
+					sw.printIntermediate("Preprocessing definition");
+
 				K.definition = javaDef;
 
 				org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 				org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
 
+				if(GlobalSettings.verbose)
+					sw.printIntermediate("Importing tables");
+
 				org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) xstream.fromXML(new File(K.compiled_def + "/configuration.bin"));
 				K.kompiled_cfg = configKompiled;
+
+				if(GlobalSettings.verbose)
+					sw.printIntermediate("Reading configuration from binary");
 			}
 
 			if (!cmd.hasOption("main-module")) {
@@ -828,18 +882,24 @@ public class Main {
 				resolveOption("syntax-module", cmd);
 			}
 
+			if(GlobalSettings.verbose)
+				sw.printIntermediate("Resolving main and syntax modules");
+
 			if (K.pgm != null) {
 				KAST = rp.runParser(K.parser, K.pgm, false, null);
 			} else {
 				KAST = null;
 			}
-			
+
+			if(GlobalSettings.verbose)
+				sw.printIntermediate("Kast process");
+
 			if(K.term != null) {
 				if(K.parser.equals("kast")) {
 					GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
 				}
 			}
-	
+			
 			GlobalSettings.kem.print();
 
 			if (!K.debug) {
@@ -862,7 +922,6 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-
 		execute_Krun(args);
 
 	}
