@@ -358,7 +358,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 					return true;
 				}
 			}
-			if (fixity.contains(Fixity.BARE_LEFT) && assoc == Associativity.RIGHT) {
+			if (fixity.contains(Fixity.BARE_RIGHT) && assoc == Associativity.RIGHT) {
 				// implement lhs check
 				if (implicitPriority) {
 					return true;
@@ -366,7 +366,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 					return true;
 				}
 			}
-			if (fixity.contains(Fixity.BARE_RIGHT) && assoc == Associativity.LEFT) {
+			if (fixity.contains(Fixity.BARE_LEFT) && assoc == Associativity.LEFT) {
 				// implement rhs check
 				if (implicitPriority) {
 					return true;
