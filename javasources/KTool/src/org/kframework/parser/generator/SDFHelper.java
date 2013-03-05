@@ -43,7 +43,10 @@ public class SDFHelper {
 	 * @return
 	 */
 	public static Set<Production> getProductionsForTag(String tag) {
-		return DefinitionHelper.productions.get(tag);
+		if (DefinitionHelper.productions.containsKey(tag))
+			return DefinitionHelper.productions.get(tag);
+		else
+			return new HashSet<Production>();
 	}
 
 	public static String getFollowRestrictionsForTerminals(Set<String> terminals) {
