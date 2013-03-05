@@ -81,7 +81,6 @@ public class ProgramSDF {
 							sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
 						}
 					}
-
 				}
 				sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
 				sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");

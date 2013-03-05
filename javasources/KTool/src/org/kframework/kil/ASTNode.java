@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.Set;
+
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformable;
@@ -10,26 +12,23 @@ import org.spoofax.jsglr.client.imploder.ITokenizer;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.w3c.dom.Element;
 
-import java.util.Set;
-import java.util.Map;
-
 /**
- * Base class for K AST.
- * Useful for Visitors and Transformers.
- *
+ * Base class for K AST. Useful for Visitors and Transformers.
+ * 
  * @see Visitable
  * @see Transformable
  */
 public abstract class ASTNode implements Visitable, Transformable {
 	/**
-	 * Used on any node for metadata such as location,
-	 * also used on {@link Rule} and {@link Production} for the attribute list.
+	 * Used on any node for metadata such as location, also used on {@link Rule} and {@link Production} for the attribute list.
 	 */
 	protected Attributes attributes;
 
 	/**
 	 * Initializes an ASTNode from XML describing the parse tree
-	 * @param elem The XML element describing the ASTNode
+	 * 
+	 * @param elem
+	 *            The XML element describing the ASTNode
 	 */
 	public ASTNode(Element elem) {
 		this(getElementLocation(elem), getElementFile(elem));
@@ -37,7 +36,9 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Initializes an ASTNode from the corresponding Stratego datastructure.
-	 * @param elem the Stratego object representing an ASTNode
+	 * 
+	 * @param elem
+	 *            the Stratego object representing an ASTNode
 	 */
 	public ASTNode(IStrategoAppl elem) {
 		ITokenizer tkz = ImploderAttachment.getTokenizer(elem);
@@ -52,6 +53,7 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Retrieves the location from an XML element
+	 * 
 	 * @param elem
 	 * @return the location stored in XML or Constants.GENERATED_LOCATION if no location found.
 	 */
@@ -64,8 +66,9 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Retrieves the file name from an XML element
+	 * 
 	 * @param elem
-	 * @return  the file name stored in XML or Constants.GENERATED_FILENAME if no filename found.
+	 * @return the file name stored in XML or Constants.GENERATED_FILENAME if no filename found.
 	 */
 	private static String getElementFile(Element elem) {
 		if (elem != null)
@@ -76,6 +79,7 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Copy constructor
+	 * 
 	 * @param astNode
 	 */
 	public ASTNode(ASTNode astNode) {
@@ -91,6 +95,7 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Constructor with specified location and filename.
+	 * 
 	 * @param loc
 	 * @param file
 	 */
@@ -102,6 +107,7 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Retrieves the location of the current ASTNode.
+	 * 
 	 * @return recorded location or Constants.GENERATED_LOCATION if no recorded location found.
 	 */
 	public String getLocation() {
@@ -110,14 +116,16 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Sets the location or removes it if appropriate.
+	 * 
 	 * @param loc
 	 */
 	public void setLocation(String loc) {
-		putAttribute("location",loc);
+		putAttribute("location", loc);
 	}
 
 	/**
 	 * Retrieves the filename of the current ASTNode.
+	 * 
 	 * @return recorded filename or Constants.GENERATED_FILENAME if no recorded location found.
 	 */
 	public String getFilename() {
@@ -126,10 +134,11 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Sets the filename or removes it if appropriate.
+	 * 
 	 * @param file
 	 */
 	public void setFilename(String file) {
-		putAttribute("filename",file);
+		putAttribute("filename", file);
 	}
 
 	/*
@@ -138,6 +147,7 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Appends an attribute to the list of attributes.
+	 * 
 	 * @param key
 	 * @param val
 	 */
@@ -147,6 +157,7 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Appends an attribute to the list of attributes.
+	 * 
 	 * @param attr
 	 */
 	public void addAttribute(Attribute attr) {
@@ -169,6 +180,7 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Retrieves the attribute by key from the list of attributes
+	 * 
 	 * @param key
 	 * @return a value for key in the list of attributes or the default value.
 	 */
@@ -184,6 +196,7 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Updates the value of an attribute in the list of attributes.
+	 * 
 	 * @param key
 	 * @param val
 	 */
@@ -210,20 +223,22 @@ public abstract class ASTNode implements Visitable, Transformable {
 
 	/**
 	 * Sets the attributes object associated to this ASTNode.
+	 * 
 	 * @param attrs
 	 */
 	public void setAttributes(Attributes attrs) {
 		attributes = attrs;
 	}
 
-    /**
-     * Retrieves the syntax production descendants of this ASTNode by attribute key.
-     * @param key
-     * @return Set<Production> object containing the production descendants
-     */
-    public Set<Production> getSyntaxByTag(String key) {
-        return SyntaxByTag.get(this, key);
-    }
+	/**
+	 * Retrieves the syntax production descendants of this ASTNode by attribute key.
+	 * 
+	 * @param key
+	 * @return Set<Production> object containing the production descendants
+	 */
+	public Set<Production> getSyntaxByTag(String key) {
+		return SyntaxByTag.get(this, key);
+	}
 
 	/**
 	 * @return a copy of the ASTNode containing the same fields.

@@ -108,7 +108,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 					lexical.add(prd);
 				} else if (prd.isSubsort()) {
 					if (!prd.getSort().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
-						outsides.add(prd);
+						p.getProductions().add(prd);
 						subsorts.add(new Subsort(prd.getSort(), ((Sort) prd.getItems().get(0)).getName()));
 						// add the small sort to the user sorts to add it to the variable declarations
 						userSorts.add((Sort) prd.getItems().get(0));

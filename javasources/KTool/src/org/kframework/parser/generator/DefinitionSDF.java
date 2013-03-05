@@ -56,7 +56,7 @@ public class DefinitionSDF {
 				sdf.append("\n");
 			}
 		}
-		sdf.append("} > {\n");
+		sdf.append("} .> {\n");
 		for (Subsort subs : psdfv.subsorts) {
 			String s1 = subs.getSmallSort();
 			String s2 = subs.getBigSort();
@@ -66,7 +66,28 @@ public class DefinitionSDF {
 				sdf.append("\n");
 			}
 		}
-		sdf.append("} > {\n");
+		sdf.append("} .> {\n");
+		for (Sort s : psdfv.userSorts) {
+			if (!s.isBaseSort()) {
+				sdf.append("	K -> " + StringUtil.escapeSortName(s.getName()));
+				// sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12K\")}");
+				sdf.append("\n");
+			}
+		}
+		sdf.append("}\n\n");
+
+		sdf.append("%% subsorts 1a\n");
+		sdf.append("context-free priorities\n{\n");
+		// 1
+		// print Sort -> K > A -> B > K -> Sort
+		for (Sort s : psdfv.userSorts) {
+			if (!s.isBaseSort()) {
+				sdf.append("	" + StringUtil.escapeSortName(s.getName()) + " -> K");
+				// sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(s.getName()) + "\")}");
+				sdf.append("\n");
+			}
+		}
+		sdf.append("} .> {\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
 				sdf.append("	K -> " + StringUtil.escapeSortName(s.getName()));

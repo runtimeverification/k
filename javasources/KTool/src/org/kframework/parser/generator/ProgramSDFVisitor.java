@@ -111,7 +111,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 				if (prd.isLexical()) {
 					lexical.add(prd);
 				} else if (prd.isSubsort()) {
-					outsides.add(prd);
+					p.getProductions().add(prd);
 					startSorts.add(((Sort) prd.getItems().get(0)).getName());
 				} else if (prd.isConstant()) {
 					constants.add(prd);

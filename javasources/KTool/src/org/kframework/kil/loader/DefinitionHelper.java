@@ -14,7 +14,6 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.utils.Poset;
 import org.kframework.utils.errorsystem.KException;
@@ -52,6 +51,7 @@ public class DefinitionHelper {
 	};
 
 	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
+	public static java.util.Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
 	public static java.util.Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
 	public static java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
 	public static java.util.Map<String, String> cellSorts = new HashMap<String, String>();
@@ -112,23 +112,23 @@ public class DefinitionHelper {
 	}
 
 	/**
-	 * Takes a List sort and returns the sort of the elements of that
-	 * List sort.	e.g, for List{Exp, ","}, returns Exp.
-	 *
+	 * Takes a List sort and returns the sort of the elements of that List sort. e.g, for List{Exp, ","}, returns Exp.
+	 * 
 	 * returns null if not a List sort
-	 *
+	 * 
 	 * we suppress cast warnings because we know that the sort must be UserList
 	 */
 	@SuppressWarnings("cast")
 	public static String getListElementSort(String sort) {
-		if(!isListSort(sort)) return null;
-		return ((UserList)listConses.get(sort).getItems().get(0)).getSort();
+		if (!isListSort(sort))
+			return null;
+		return ((UserList) listConses.get(sort).getItems().get(0)).getSort();
 	}
 
 	/**
 	 * find the LUB of a list of sorts
 	 */
-	public static String getLUBSort(List<String> sorts){
+	public static String getLUBSort(List<String> sorts) {
 		return subsorts.getLUB(sorts);
 	}
 
