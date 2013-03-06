@@ -132,6 +132,13 @@ public class DefinitionHelper {
 		return subsorts.getLUB(sorts);
 	}
 
+	/**
+	 * find the GLB of a list of sorts
+	 */
+	public static String getGLBSort(List<String> sorts){
+		return subsorts.getGLB(sorts);
+	}
+
 	public static void addPriority(String bigPriority, String smallPriority) {
 		// add the new priority
 		priorities.addRelation(bigPriority, smallPriority);
