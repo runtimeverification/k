@@ -28,6 +28,7 @@ public class KRunApiDebugger implements KRunDebugger {
 
 	static {
 		try { 
+			org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 			ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
 			CollectVariablesVisitor vars = new CollectVariablesVisitor();
 			pattern.accept(vars);
