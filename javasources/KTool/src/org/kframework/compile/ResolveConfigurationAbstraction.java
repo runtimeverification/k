@@ -15,12 +15,13 @@ import org.kframework.kil.Definition;
  * Time: 12:27 PM
  */
 public class ResolveConfigurationAbstraction extends CompilerSteps<Definition> {
+	public ConfigurationStructureMap cfgStr;
 	@Override
 	public Definition compile(Definition def, String stepName) throws CompilerStepDone {
 		ConfigurationStructureVisitor cfgStrVisitor = new ConfigurationStructureVisitor();
 		def.accept(cfgStrVisitor);
 		int cfgMaxLevel = cfgStrVisitor.getMaxLevel();
-		ConfigurationStructureMap cfgStr = cfgStrVisitor.getConfig();
+		cfgStr = cfgStrVisitor.getConfig();
 		add(new ResolveContextAbstraction(cfgMaxLevel, cfgStr));
 		add(new ResolveDefaultTerms(cfgStr));
 		return super.compile(def, stepName);

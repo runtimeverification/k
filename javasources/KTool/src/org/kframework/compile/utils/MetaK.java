@@ -54,6 +54,8 @@ public class MetaK {
 
 		public static final String generatedTopCellLabel = "generatedTop";
 		public static final String pathCondition = "path-condition";
+		public static final String generatedCfgAbsTopCellLabel =
+				"___CONTEXT_ABSTRACTION_TOP_CELL___";
 	}
 
 	static int nextVarId = 0;

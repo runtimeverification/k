@@ -17,7 +17,8 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
 	public void visit(Configuration node) {
 		Term t = node.getBody();
 		Cell top = new Cell();
-		top.setLabel("___CONTEXT_ABSTRACTION_TOP_CELL___");
+		top.setLabel(MetaK.Constants.generatedCfgAbsTopCellLabel);
+		top.setId(MetaK.Constants.generatedCfgAbsTopCellLabel);
 		top.setContents(t);
 		top.accept(this);
 	}

@@ -1,6 +1,8 @@
 package org.kframework.backend.maude;
 
 import org.kframework.backend.BackendFilter;
+import org.kframework.compile.utils.ConfigurationStructure;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
@@ -14,10 +16,18 @@ import org.kframework.utils.general.GlobalSettings;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map.Entry;
 
 public class MaudeFilter extends BackendFilter {
 	private boolean firstAttribute;
+	ConfigurationStructureMap cfgStr;
+
+	public MaudeFilter(ConfigurationStructureMap cfgStr) {
+		this.cfgStr = cfgStr;
+	}
+
+	public MaudeFilter() {
+		this.cfgStr = null;
+	}
 
 	@Override
 	public void visit(Definition def) {
@@ -249,39 +259,89 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Configuration configuration) {
+		if (cfgStr == null) return;
+		for (ConfigurationStructure cellStr : cfgStr.values()) {
+			String id = cellStr.id;
+			if (id == MetaK.Constants.generatedCfgAbsTopCellLabel) continue;
+			String placeHolders = "";
+			String sorts = "";
+			Cell cell = cellStr.cell;
+			if (cellStr.sons.isEmpty()) {
+				placeHolders="_";
+				sorts = KSort.getKSort(cell.getContents().getSort()).mainSort()
+						.toString();
+				declareCell(id,placeHolders, sorts);
+				continue;
+			}
+
+			java.util.List<Term> cfgCells = cell.getCellTerms();
+			for (Term cCell : cfgCells) {
+				if (cCell instanceof TermComment) continue;
+				placeHolders += "_";
+//				switch(((Cell) cCell).getMultiplicity()) {
+//					case ONE:
+//						sorts += MetaK.Constants.BagItem;
+//						break;
+//					default:
+						sorts += MetaK.Constants.Bag;
+//				}
+				sorts += " ";
+			}
+			declareCell(id, placeHolders, sorts);
+		}
+
 		// result.append("mb configuration ");
 		// this.visit((Sentence)configuration);
 	}
 
+	private void declareCell(String id, String placeHolders, String sorts) {
+		result.append(
+				"  op " +
+						"<" + id + ">" +
+						placeHolders +
+						"</" + id + ">" +
+						" : " +
+						sorts +
+						" -> " +
+						"BagItem " +
+						"." +
+						"\n");
+	}
+
 	@Override
 	public void visit(Cell cell) {
-		String cellLabel = "<_>_</_>";
-
-		result.append(cellLabel);
+		String id = cell.getId();
 		result.append("(");
-		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
-			if (!entry.getValue().equals("")) {
-				result.append("__(");
-			}
-		}
-		result.append(cell.getLabel());
-		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
-			if (!entry.getValue().equals("")) {
-				result.append(",_=_(");
-				result.append(entry.getKey());
-				result.append(",\"");
-				result.append(entry.getValue());
-				result.append("\"))");
-			}
-		}
-		result.append(", ");
+		result.append("<" + id + "> ");
+//		String cellLabel = "<_>_</_>";
+//
+//		result.append(cellLabel);
+//		result.append("(");
+//		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
+//			if (!entry.getValue().equals("")) {
+//				result.append("__(");
+//			}
+//		}
+//		result.append(cell.getLabel());
+//		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
+//			if (!entry.getValue().equals("")) {
+//				result.append(",_=_(");
+//				result.append(entry.getKey());
+//				result.append(",\"");
+//				result.append(entry.getValue());
+//				result.append("\"))");
+//			}
+//		}
+//		result.append(", ");
 		if (cell.getContents() != null) {
 			cell.getContents().accept(this);
 		} else {
 			result.append("null");
 		}
-		result.append(", ");
-		result.append(cell.getLabel());
+//		result.append(", ");
+//		result.append(cell.getLabel());
+//		result.append(")");
+		result.append(" </" + id + ">");
 		result.append(")");
 	}
 
@@ -589,7 +649,18 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Bag bag) {
-		this.visit((Collection) bag);
+		if (bag.getContents().isEmpty()) {
+			new Empty(MetaK.Constants.Bag).accept(this);
+			return;
+		}
+		for (Term item: bag.getContents()) {
+			if (item instanceof TermComment) continue;
+			result.append("(");
+			item.accept(this);
+			result.append(")");
+			result.append(" ");
+		}
+//		this.visit((Collection) bag);
 		// throw new RuntimeException("don't know how to maudify Bag");
 	}
 

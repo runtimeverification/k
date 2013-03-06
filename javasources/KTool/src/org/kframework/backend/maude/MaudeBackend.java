@@ -17,7 +17,8 @@ public class MaudeBackend extends BasicBackend {
 
 	@Override
 	public void run(Definition definition) throws IOException {
-		MaudeFilter maudeFilter = new MaudeFilter();
+		MaudeFilter maudeFilter = new MaudeFilter
+				(resolveConfigurationAbstraction.cfgStr);
 		definition.accept(maudeFilter);
 
 		final String mainModule = definition.getMainModule();

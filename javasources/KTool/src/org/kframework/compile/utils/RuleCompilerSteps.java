@@ -1,13 +1,6 @@
 package org.kframework.compile.utils;
 
-import org.kframework.compile.transformers.AddKCell;
-import org.kframework.compile.transformers.AddTopCellRules;
-import org.kframework.compile.transformers.ResolveAnonymousVariables;
-import org.kframework.compile.transformers.ResolveSyntaxPredicates;
-import org.kframework.compile.transformers.ResolveListOfK;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.ResolveContextAbstraction;
-import org.kframework.compile.transformers.ResolveOpenCells;
+import org.kframework.compile.transformers.*;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
 

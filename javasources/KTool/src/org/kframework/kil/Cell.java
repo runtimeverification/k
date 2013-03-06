@@ -2,8 +2,8 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -14,7 +14,9 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -261,4 +263,17 @@ public class Cell extends Term {
 	public int hashCode() {
 		return label.hashCode() * 17 + contents.hashCode();
 	}
+
+
+	public List<Term> getCellTerms() {
+			Term contents = getContents();
+			List<Term> cells = new ArrayList<Term>();
+			if (contents instanceof Variable || contents instanceof Cell) {
+				cells.add(contents);
+			} else if (contents instanceof Bag) {
+				cells.addAll(((Bag)contents).getContents());
+			}
+			return cells;
+		}
+
 }
