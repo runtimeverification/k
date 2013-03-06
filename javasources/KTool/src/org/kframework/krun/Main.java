@@ -279,7 +279,8 @@ public class Main {
 						pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
 
 						Rule patternRule = (Rule) pattern;
-						sw.printIntermediate("Parsing search pattern");
+						if (GlobalSettings.verbose)
+							sw.printIntermediate("Parsing search pattern");
 						result = krun.search(bound, depth, K.searchType, patternRule, makeConfiguration(KAST, buffer, rp, (K.term != null)), varNames);
 					} else {
 						Error.report("For the search option you need to specify that --maude-cmd=search");
