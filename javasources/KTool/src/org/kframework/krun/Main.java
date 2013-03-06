@@ -136,7 +136,7 @@ public class Main {
 	}
 
 	private static String parseTerm(String value) throws Exception {
-
+		org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
 		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "", "Command line argument");
 		term = term.accept(new FlattenSyntax());
 		MaudeFilter maudeFilter = new MaudeFilter();
@@ -270,6 +270,7 @@ public class Main {
 						} else if (cmd.hasOption("depth")) {
 							depth = Integer.parseInt(K.depth);
 						}
+						org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 						ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
 						CollectVariablesVisitor vars = new CollectVariablesVisitor();
 						pattern.accept(vars);
@@ -278,6 +279,7 @@ public class Main {
 						pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
 
 						Rule patternRule = (Rule) pattern;
+						sw.printIntermediate("Parsing search pattern");
 						result = krun.search(bound, depth, K.searchType, patternRule, makeConfiguration(KAST, buffer, rp, (K.term != null)), varNames);
 					} else {
 						Error.report("For the search option you need to specify that --maude-cmd=search");
@@ -861,9 +863,6 @@ public class Main {
 					sw.printIntermediate("Preprocessing definition");
 
 				K.definition = javaDef;
-
-				org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
-				org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
 
 				if(GlobalSettings.verbose)
 					sw.printIntermediate("Importing tables");
