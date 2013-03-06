@@ -347,7 +347,11 @@ free in the function body (we want static scoping in FUN). */
 
 /*@ \paragraph{Note:} The reader may want to get familiar with
 how the pre-defined pattern matching works before proceeding.  The best
-way to do that is to consult \texttt{k/include/modules/pattern-matching.k}. */
+way to do that is to consult \texttt{k/include/modules/pattern-matching.k}. 
+To use the generic pattern matching mechanism, we only need to declare that
+Ids are Variables.  */
+
+  syntax Variable ::= Id
 
 /*@ We distinguish two cases when the closure is applied.  If the first
 pattern matches, then we pick the first case: switch to the closed

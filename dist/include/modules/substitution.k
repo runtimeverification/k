@@ -248,7 +248,7 @@ module SUBSTITUTION
 
   rule #substitutePlain(X:K, X:K |-> Y:K _) => Y
   rule #substitutePlain(K:K, M:Map) => #substitutePlainList(K, M)
-    when isId(K) =/=K true orElseBool $hasMapping(M, K) =/=K true
+    when isVariable(K) =/=K true orElseBool $hasMapping(M, K) =/=K true
 
   rule #substitutePlainList(L:KLabel(Ks:KList), M:Map)
     => #substitutePlainList1(L:KLabel(Ks), M, .KList)
@@ -256,17 +256,6 @@ module SUBSTITUTION
   rule #substitutePlainList1(_:KLabel((K:K => .KList),,_), M:Map, _,,
         (.KList => #substitutePlain(K,M)))
   rule #substitutePlainList1(L:KLabel(.KList), _, Ks:KList) => L(Ks)
-
-
-// Grigore: I added the operation below here, because I want it to be
-// generic.  I don't know how to generate globablly fresh variables
-// of desired type any other way ... sorry.  This is used in type inference
-/******** Soon to be *******************
-  syntax K ::= freshVariables(Set,K)
-  rule freshVariables(.Set, T) => T
-  rule freshVariables(SetItem(Tv) S:Set, T)
-    => freshVariables(S, T[#freshSym(Tv)/Tv])
-*/
 
   syntax K ::= freshVariables(Set,K)
   rule freshVariables(.Set, T) => T

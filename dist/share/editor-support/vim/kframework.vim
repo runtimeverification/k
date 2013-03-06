@@ -53,7 +53,7 @@ syn match   kSymbol       "::="
 syn match   kSymbol       "=>"
 syn keyword kSymbol       HOLE
 
-syn match   kMeta         "\s\[[^\[\]]*\]\s*$"
+syn match   kMeta         "\s\[[^[\]]*\]\s*$"
 
 syn keyword kType         K KItem KResult KLabel KList
 syn keyword kType         List Bag Set Map

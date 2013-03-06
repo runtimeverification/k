@@ -261,7 +261,15 @@ public class MaudeFilter extends BackendFilter {
 	 * Pretty printing configuration-related stuff to Maude.
 	 *
 	 * This visitor is abused here for declaring the operations corresponding
-	 * to each sorted cell as concrete operations.
+	 * to each sorted cell as concrete operations.  The declared operation
+	 * will have as many arguments as direct subcells it has in the
+	 * configuration.  The sorts of the arguments will be BagItem for
+	 * multiplicity ONE and Bag for all the other multiplicities.
+	 *
+	 * Together with them, we also declare cell fragments operations which
+	 * have the same number of arguments but all of them are of sort Bag,
+	 * to account for the fact that the argument might be missing in the
+	 * fragment.
 	 *
 	 * @param configuration
 	 */
