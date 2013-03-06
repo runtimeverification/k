@@ -146,14 +146,6 @@ public class SortCells extends CopyOnWriteTransformer {
 				if (cell == null) return false;
 				renamedVars = ((Bag) cell.getContents
 						()).getContents();
-//					GlobalSettings.kem.register(new KException(KException
-//							.ExceptionType.ERROR,
-//							KException.KExceptionGroup.COMPILER,
-//							"cannot figure variable " +
-//									framingVariable,
-//							getName(),
-//							framingVariable.getFilename(),
-//							framingVariable.getLocation()));
 				index = 0;
 			}
 			return true;
@@ -170,25 +162,6 @@ public class SortCells extends CopyOnWriteTransformer {
 		private Map<String,List<Term>> cellMap;
 		Variable framingVariable;
 		List<Term> renamedVars;
-
-		class VariableList {
-			List<Variable> list;
-			Iterator<Variable> iterator;
-
-			VariableList() {
-				list = new ArrayList<Variable>();
-			}
-
-			public void reset() {
-				iterator = list.iterator();
-			}
-			public Variable get() {
-				return iterator.next();
-			}
-			public void add(Variable v) {
-				list.add(v);
-			}
-		}
 
 		protected SortCellCells(String name) {
 			super(name);
@@ -351,6 +324,9 @@ public class SortCells extends CopyOnWriteTransformer {
 			bag.setContents(renamedVars);
 			cell = cell.shallowCopy();
 			cell.setContents(bag);
+			final String label = cell.getLabel() + "-fragment";
+			cell.setLabel(label);
+			cell.setId(label);
 			for (int i = 0; i < renamedVars.size(); i++) {
 				Term t = renamedVars.get(i);
 				if (t == null) {

@@ -257,6 +257,14 @@ public class MaudeFilter extends BackendFilter {
 		}
 	}
 
+	/**
+	 * Pretty printing configuration-related stuff to Maude.
+	 *
+	 * This visitor is abused here for declaring the operations corresponding
+	 * to each sorted cell as concrete operations.
+	 *
+	 * @param configuration
+	 */
 	@Override
 	public void visit(Configuration configuration) {
 		if (cfgStr == null) return;
@@ -265,6 +273,7 @@ public class MaudeFilter extends BackendFilter {
 			if (id == MetaK.Constants.generatedCfgAbsTopCellLabel) continue;
 			String placeHolders = "";
 			String sorts = "";
+			String fragSorts = "";
 			Cell cell = cellStr.cell;
 			if (cellStr.sons.isEmpty()) {
 				placeHolders="_";
@@ -278,16 +287,21 @@ public class MaudeFilter extends BackendFilter {
 			for (Term cCell : cfgCells) {
 				if (cCell instanceof TermComment) continue;
 				placeHolders += "_";
-//				switch(((Cell) cCell).getMultiplicity()) {
-//					case ONE:
-//						sorts += MetaK.Constants.BagItem;
-//						break;
-//					default:
+				// Decided to declare all sorts as Bags to allow using
+				// cells instead of tuples for tupling purposes.
+
+				switch(((Cell) cCell).getMultiplicity()) {
+					case ONE:
+						sorts += MetaK.Constants.BagItem;
+						break;
+					default:
 						sorts += MetaK.Constants.Bag;
-//				}
+				}
+				fragSorts += MetaK.Constants.Bag + " ";
 				sorts += " ";
 			}
 			declareCell(id, placeHolders, sorts);
+			declareCell(id+"-fragment",placeHolders,fragSorts);
 		}
 
 		// result.append("mb configuration ");
@@ -308,6 +322,13 @@ public class MaudeFilter extends BackendFilter {
 						"\n");
 	}
 
+	/**
+	 * Pretty printing a cell to Maude
+	 *
+	 * The code was changed for pretty printing sorted cells which are now
+	 * operations on their own.
+	 * @param cell
+	 */
 	@Override
 	public void visit(Cell cell) {
 		String id = cell.getId();
@@ -647,6 +668,13 @@ public class MaudeFilter extends BackendFilter {
 		// throw new RuntimeException("don't know how to maudify Map");
 	}
 
+	/**
+	 * Pretty printing a Bag to Maude.
+	 *
+	 * The code is slightly altered to also work with printing cell contents
+	 * when cells are sorted
+	 * @param bag
+	 */
 	@Override
 	public void visit(Bag bag) {
 		if (bag.getContents().isEmpty()) {
