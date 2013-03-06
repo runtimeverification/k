@@ -25,7 +25,7 @@ public class ReplaceConstants extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
-		if (node.getBody() instanceof Rewrite) {
+		if (node.getBody() instanceof Rewrite && node.getAttribute(SymbolicBackend.SYMBOLIC) != null) {
 			ConstantsReplaceTransformer crt = new ConstantsReplaceTransformer(
 					"");
 			Rewrite rew = (Rewrite) node.getBody();
@@ -40,7 +40,7 @@ public class ReplaceConstants extends BasicTransformer {
 				vars.add(new KApp(new KInjectedLabel(entry.getKey()), new KList()));
 				vars.add(new KApp(new KInjectedLabel(entry.getValue()), new KList()));
 				// String sort = entry.getValue().getSort().substring(1);
-				String label = "'_==Symbolic_"; //"'_==" + sort + "_";
+				String label = "'_==Bool_"; //"'_==" + sort + "_";
 				terms.add(new KApp(new Constant("KLabel", label), new KList(
 						vars)));
 			}
@@ -48,14 +48,14 @@ public class ReplaceConstants extends BasicTransformer {
 			if (terms.isEmpty())
 				return node;
 
-			Term newCondition = new KApp(new Constant("KLabel", "'_andBool_"),
+			Term newCondition = new KApp(Constant.ANDBOOL_KLABEL,
 					new KList(terms));
 
 			if (condition != null) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(condition);
 				vars.add(newCondition);
-				newCondition = new KApp(new Constant("KLabel", "'_andBool_"),
+				newCondition = new KApp(Constant.ANDBOOL_KLABEL,
 						new KList(vars));
 			}
 

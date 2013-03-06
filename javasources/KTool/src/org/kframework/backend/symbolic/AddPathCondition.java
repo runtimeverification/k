@@ -29,7 +29,7 @@ public class AddPathCondition extends BasicTransformer {
 		if (node.getCondition() == null)
 			return node;
 		
-		if (node.getBody() instanceof Rewrite)
+		if (node.getBody() instanceof Rewrite && node.getAttribute(SymbolicBackend.SYMBOLIC) != null)
 		{
 			Rewrite rew = (Rewrite) node.getBody();
 			
@@ -71,7 +71,7 @@ public class AddPathCondition extends BasicTransformer {
 			List<Term> list = new ArrayList<Term>();
 			list.add(phi);
 			list.add(node.getCondition());
-			rightCell.setContents(new KApp(new Constant("KLabel", "'_andBool_"), new KList(list)));
+			rightCell.setContents(new KApp(Constant.ANDBOOL_KLABEL, new KList(list)));
 
 			col = new ArrayList<Term>();
 			if (right instanceof Cell) {

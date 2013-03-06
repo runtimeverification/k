@@ -53,7 +53,7 @@ public class MetaK {
 		public static final String MapItem = "MapItem";
 
 		public static final String generatedTopCellLabel = "generatedTop";
-		public static final String pathCondition = "pathCondition";
+		public static final String pathCondition = "path-condition";
 	}
 
 	static int nextVarId = 0;

@@ -49,14 +49,14 @@ public class LineariseTransformer extends BasicTransformer {
 			if (terms.isEmpty())
 				return node;
 
-			Term newCondition = new KApp(new Constant("KLabel", "'_andBool_"),
+			Term newCondition = new KApp(Constant.ANDBOOL_KLABEL,
 					new KList(terms));
 
 			if (condition != null) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(condition);
 				vars.add(newCondition);
-				newCondition = new KApp(new Constant("KLabel", "'_andBool_"),
+				newCondition = new KApp(Constant.ANDBOOL_KLABEL,
 						new KList(vars));
 			}
 

@@ -26,6 +26,8 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class AddConditionToConfig extends CopyOnWriteTransformer {
+
+	static public String KCELL = "k";
 	
 	public AddConditionToConfig() {
 		super("Add path condition to configuration");
@@ -37,26 +39,74 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
 		Cell cell = new Cell();
 		cell.setLabel(MetaK.Constants.pathCondition);
 		cell.setEllipses(Ellipses.NONE);
-		cell.setContents(new Constant("Bool", "true"));
+		cell.setContents(Constant.TRUE);
 
 		Term body = node.getBody();
-		List<Term> col = new ArrayList<Term>();
 		
 		if (body instanceof Cell) {
-			col.add(body);
+			addCellNextToKCell((Cell) body, cell);
 		}
 		else if (body instanceof Bag)
 		{
-			col = ((Bag) body).getContents();
+			// this should not happen because top cell is automatically added
 		}
 		
-		col.add(cell);
-		Bag bag = new Bag(col);
 		node = node.shallowCopy();
-		node.setBody(bag);
+		node.setBody(body);
 		return node;
 	}
 	
+	private boolean addCellNextToKCell(Cell cell, Cell toAdd) {
+		
+		Term contents = cell.getContents();
+		if (contents instanceof Bag)
+		{
+			Bag content = (Bag) contents;
+			List<Term> subCells = content.getContents();
+			for (Term subCell : subCells)
+			{
+				if (subCell instanceof Cell && ((Cell) subCell).getLabel().equals(KCELL))
+					// the cell kcell has been found as subcell of cell
+					{
+						subCells.add(toAdd);
+						cell = cell.shallowCopy();
+						cell.setContents(new Bag(subCells));
+						return true;
+					}
+			}
+			
+			// none of the subcells of cell contains a cell labeled kcell
+			for (Term subCell : subCells)
+			{
+				if (subCell instanceof Cell)
+				{
+					boolean added = addCellNextToKCell((Cell)subCell, toAdd);
+					if (added) return true;
+				}
+			}
+		}
+		if (contents instanceof Cell)
+		{
+			Cell subCell = (Cell) contents;
+			if (subCell.getLabel().equals(KCELL))
+				// the cell kcell has been found as subcell of cell
+				{
+					List<Term> subCells = new ArrayList<Term>();
+					subCells.add(subCell);
+					subCells.add(toAdd);
+					cell = cell.shallowCopy();
+					cell.setContents(new Bag(subCells));
+					return true;
+				}
+		
+			// none of the subcells of cell contains a cell labeled kcell
+			boolean added = addCellNextToKCell(subCell, toAdd);
+			if (added) return true;
+		}
+		return false;
+	}
+
+
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
 		ASTNode result = super.transform(node);

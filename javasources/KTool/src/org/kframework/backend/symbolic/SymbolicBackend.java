@@ -64,63 +64,78 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class SymbolicBackend extends BasicBackend implements Backend {
 
+	public static String SYMBOLIC = "symbolic";
+
 	public SymbolicBackend(Stopwatch sw) {
 		super(sw);
 	}
-	
+
 	@Override
 	public Definition firstStep(Definition javaDef) {
 		String fileSep = System.getProperty("file.separator");
-		String includePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "maude" + fileSep;
+		String includePath = KPaths.getKBase(false) + fileSep + "include"
+				+ fileSep + "maude" + fileSep;
 		Properties builtinsProperties = new Properties();
 		try {
-			builtinsProperties.load(new FileInputStream(includePath + "hooks.properties"));
+			builtinsProperties.load(new FileInputStream(includePath
+					+ "hooks.properties"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(builtinsProperties);
+		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(
+				builtinsProperties);
 		javaDef.accept(builtinsFilter);
 		final String mainModule = javaDef.getMainModule();
-		String builtins = "mod " + mainModule + "-BUILTINS is\n" + " including " + mainModule + "-BASE .\n" + builtinsFilter.getResult() + "endm\n";
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/builtins.maude", builtins);
+		String builtins = "mod " + mainModule + "-BUILTINS is\n"
+				+ " including " + mainModule + "-BASE .\n"
+				+ builtinsFilter.getResult() + "endm\n";
+		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath()
+				+ "/builtins.maude", builtins);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating equations for hooks");
 		return super.firstStep(javaDef);
 	}
-
 
 	@Override
 	public void run(Definition javaDef) throws IOException {
 
 		new MaudeBackend(sw).run(javaDef);
 
-		String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
+		String load = "load \"" + KPaths.getKBase(true)
+				+ "/bin/maude/lib/k-prelude\"\n";
 
 		// load libraries if any
-		String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";
+		String maudeLib = GlobalSettings.lib.equals("") ? "" : "load "
+				+ KPaths.windowfyPath(new File(GlobalSettings.lib)
+						.getAbsolutePath()) + "\n";
 		load += maudeLib;
 
 		final String mainModule = javaDef.getMainModule();
-		//String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
+		// String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$",
+		// "");
 
-		String main = load + "load \"base.maude\"\n" + "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
-				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/" + "main.maude", main);
+		String main = load + "load \"base.maude\"\n"
+				+ "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n"
+				+ "  including " + mainModule + "-BASE .\n" + "  including "
+				+ mainModule + "-BUILTINS .\n"
+				+ "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
+		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/"
+				+ "main.maude", main);
 
-//		UnparserFilter unparserFilter = new UnparserFilter();
-//		def.accept(unparserFilter);
-//
-//		String unparsedText = unparserFilter.getResult();
-//
-//		System.out.println(unparsedText);
-//
-//		XStream xstream = new XStream();
-//		xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
-//
-//		String xml = xstream.toXML(def);
-//
-//		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath()
-//				+ "/def-symbolic.xml", xml);
+//		 UnparserFilter unparserFilter = new UnparserFilter();
+//		 javaDef.accept(unparserFilter);
+//		
+//		 String unparsedText = unparserFilter.getResult();
+//		
+//		 System.out.println(unparsedText);
+		//
+		// XStream xstream = new XStream();
+		// xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
+		//
+		// String xml = xstream.toXML(def);
+		//
+		// FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath()
+		// + "/def-symbolic.xml", xml);
 
 	}
 
@@ -132,7 +147,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 	@Override
 	public CompilerSteps<Definition> getCompilationSteps() {
 		CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
-		steps.add(new FirstStep(this));		
+		steps.add(new FirstStep(this));
 		steps.add(new CheckVisitorStep<Definition>(
 				new CheckConfigurationCells()));
 		steps.add(new RemoveBrackets());
@@ -177,11 +192,11 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveRewrite());
 		steps.add(new ReplaceConstants());
 		steps.add(new AddPathCondition());
-		steps.add(new ResolveSupercool()); 
+		steps.add(new ResolveSupercool());
 		steps.add(new AddStrictStar());
-		steps.add(new AddDefaultComputational()); 
+		steps.add(new AddDefaultComputational());
 		steps.add(new AddOptionalTags());
-		
+
 		return steps;
 	}
 }
