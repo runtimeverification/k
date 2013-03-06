@@ -46,21 +46,16 @@ public class AddPathCondition extends BasicTransformer {
 			leftCell.setEllipses(Ellipses.NONE);
 			leftCell.setContents(phi);
 
-			List<Term> col = new ArrayList<Term>();
+			
+			
 			if (left instanceof Cell) {
-				col.add(left);
+				AddConditionToConfig.addCellNextToKCell((Cell)left, leftCell);
 			}
 			else if (left instanceof Bag)
 			{
-				col = ((Bag) left).getContents();
-			}
-			else {
-				return node;
+				//
 			}
 			
-			col.add(leftCell);
-			Bag lbag = new Bag(col);
-			left = lbag;
 
 			// create rhs path condition cell 
 			Term right = rew.getRight();
@@ -73,18 +68,13 @@ public class AddPathCondition extends BasicTransformer {
 			list.add(node.getCondition());
 			rightCell.setContents(new KApp(Constant.ANDBOOL_KLABEL, new KList(list)));
 
-			col = new ArrayList<Term>();
 			if (right instanceof Cell) {
-				col.add(right);
+				AddConditionToConfig.addCellNextToKCell((Cell)right, rightCell);
 			}
 			else if (right instanceof Bag)
 			{
-				col = ((Bag) right).getContents();
+				// ?
 			}
-			
-			col.add(rightCell);
-			Bag rbag = new Bag(col);
-			right = rbag;
 			
 			// re-construct the rule
 			node = node.shallowCopy();

@@ -56,7 +56,7 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
 		return node;
 	}
 	
-	private boolean addCellNextToKCell(Cell cell, Cell toAdd) {
+	public static boolean addCellNextToKCell(Cell cell, Cell toAdd) {
 		
 		Term contents = cell.getContents();
 		if (contents instanceof Bag)

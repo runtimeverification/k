@@ -9,6 +9,7 @@ import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
@@ -64,7 +65,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class SymbolicBackend extends BasicBackend implements Backend {
 
-	public static String SYMBOLIC = "symbolic";
+	public static String SYMBOLIC = "symbolic-kompile";
 
 	public SymbolicBackend(Stopwatch sw) {
 		super(sw);
@@ -122,12 +123,12 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/"
 				+ "main.maude", main);
 
-//		 UnparserFilter unparserFilter = new UnparserFilter();
-//		 javaDef.accept(unparserFilter);
-//		
-//		 String unparsedText = unparserFilter.getResult();
-//		
-//		 System.out.println(unparsedText);
+		 UnparserFilter unparserFilter = new UnparserFilter();
+		 javaDef.accept(unparserFilter);
+		
+		 String unparsedText = unparserFilter.getResult();
+		
+		 System.out.println(unparsedText);
 		//
 		// XStream xstream = new XStream();
 		// xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
@@ -190,6 +191,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveConfigurationAbstraction());
 		steps.add(new ResolveOpenCells());
 		steps.add(new ResolveRewrite());
+		steps.add(new TagUserRules());
 		steps.add(new ReplaceConstants());
 		steps.add(new AddPathCondition());
 		steps.add(new ResolveSupercool());
