@@ -35,7 +35,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 		if (areAllListSorts){
       Term test = amb.getContents().get(0); 
       String lubElementSort = null;
-      //if the Term in the Amb isn't a TermCons, punt.
+      //if the Term in the Ambiguity isn't a TermCons, punt (give up).
       //is that even possible?
       if(test instanceof TermCons){
         TermCons tc = (TermCons) test;
@@ -58,6 +58,9 @@ END:
           } 
         }
       }
+      //check to make sure that we successfully found a lubElementSort
+      //there might not be one if some of the element sorts are in disconnected
+      //components of the sort Poset
       if(lubElementSort != null){
         java.util.List<String> canidates = new ArrayList<String>();
         for(Term trm : amb.getContents()){
@@ -69,6 +72,8 @@ END:
             remainingCanidates.add(sort);
           }
         }
+        //the least sort will be the sort that is the "most specific"
+        //that is subsorteq of everything else
         String finalElementSort = findLeastSort(remainingCanidates);
         if(finalElementSort != null){
           for(Term trm : amb.getContents()){
@@ -79,8 +84,10 @@ END:
         }
       }
     }
-		
-		// choose the maximum from the list of ambiguities
+	
+    // if one of the terms in the ambiguity does not have a list sort we
+    // default to the old algorithm:  
+		// Choose the maximum from the list of ambiguities
 		java.util.List<Term> terms2 = new ArrayList<Term>(terms);
 		for (Term trm1 : terms) {
 			for (Term trm2 : terms) {
@@ -104,6 +111,9 @@ END:
 		return super.transform(amb);
 	}
 
+  //This somehow assumes that all sorts are related to each other somehow.
+  //Until we find a use case where this isn't the case, I will leave it
+  //as it
   private static String findLeastSort(java.util.List<String> sorts){
     if(sorts.size() == 0) return null;
     String leastSort = sorts.get(0);
