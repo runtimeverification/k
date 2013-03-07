@@ -14,10 +14,10 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-public class ReplaceConstants extends BasicTransformer {
+public class ReplaceConstants extends CopyOnWriteTransformer {
 
 	public ReplaceConstants() {
 		super("Replace Constants with Variables");
@@ -37,7 +37,7 @@ public class ReplaceConstants extends BasicTransformer {
 			List<Term> terms = new ArrayList<Term>();
 			for (Entry<Variable, Constant> entry : newGeneratedSV.entrySet()) {
 				List<Term> vars = new ArrayList<Term>();
-				vars.add(new KApp(new KInjectedLabel(entry.getKey()), new KList()));
+				vars.add(entry.getKey());
 				vars.add(new KApp(new KInjectedLabel(entry.getValue()), new KList()));
 				// String sort = entry.getValue().getSort().substring(1);
 				String label = "'_==Bool_"; //"'_==" + sort + "_";

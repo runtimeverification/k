@@ -79,6 +79,8 @@ public class AddPathCondition extends BasicTransformer {
 			// re-construct the rule
 			node = node.shallowCopy();
 			node.setBody(new Rewrite(left, right));
+//			node.setCondition(Constant.TRUE);
+			node.setCondition(null);
 		}
 		
 		return node;

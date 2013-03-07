@@ -6,11 +6,13 @@ import java.util.Map;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Constant;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.Variable;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-public class ConstantsReplaceTransformer extends BasicTransformer {
+public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
 	private Map<Variable, Constant> generatedSV;
 
 	public ConstantsReplaceTransformer(String name) {
@@ -19,13 +21,34 @@ public class ConstantsReplaceTransformer extends BasicTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Constant node) throws TransformerException {
-		if (MetaK.isBuiltinSort(node.getSort())) {
-			Variable newVar = MetaK.getFreshVar(node.getSort());
-			generatedSV.put(newVar, node);
-			return newVar;
+	public ASTNode transform(KApp node) throws TransformerException {
+		
+		if (!(node.getLabel() instanceof KInjectedLabel)) {
+			System.out.println(node.getLabel());
+			return super.transform(node);
 		}
-		return node;
+
+		KInjectedLabel label = (KInjectedLabel) node.getLabel();
+
+		if (!(label.getTerm() instanceof Constant)) {
+			System.out.println(label.getTerm());
+			return super.transform(node);
+		}
+
+		Constant constant = (Constant) label.getTerm();
+		if (!MetaK.isBuiltinSort(constant.getSort()))
+		{
+			System.out.println(constant);
+			return super.transform(node);
+		}
+		
+		String sort = "K";
+		Variable newVar = MetaK.getFreshVar(sort);
+		System.out.println("Transforming constant " + constant +
+				" into variable " + newVar);
+		
+		generatedSV.put(newVar, constant);
+		return newVar;
 	}
 
 	public Map<Variable, Constant> getGeneratedSV() {
