@@ -238,7 +238,24 @@ public class Main {
 
 			KRun krun = new MaudeKRun();
 			KRunResult<?> result = null;
+			Set<String> varNames = null;
+			Rule patternRule = null;
 			try {
+				if (cmd.hasOption("pattern") || "search".equals(K.maude_cmd)) {
+					org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
+					ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
+					CollectVariablesVisitor vars = new CollectVariablesVisitor();
+					pattern.accept(vars);
+					varNames = vars.getVars().keySet();
+
+					pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
+
+					patternRule = (Rule) pattern;
+					
+					if (GlobalSettings.verbose)
+						sw.printIntermediate("Parsing search pattern");
+				}
+
 				if (K.do_search) {
 					if ("search".equals(K.maude_cmd)) {
 						BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -270,24 +287,13 @@ public class Main {
 						} else if (cmd.hasOption("depth")) {
 							depth = Integer.parseInt(K.depth);
 						}
-						org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
-						ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
-						CollectVariablesVisitor vars = new CollectVariablesVisitor();
-						pattern.accept(vars);
-						Set<String> varNames = vars.getVars().keySet();
-
-						pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
-
-						Rule patternRule = (Rule) pattern;
-						if (GlobalSettings.verbose)
-							sw.printIntermediate("Parsing search pattern");
 						result = krun.search(bound, depth, K.searchType, patternRule, makeConfiguration(KAST, buffer, rp, (K.term != null)), varNames);
+
+						if(GlobalSettings.verbose)
+							sw.printTotal("Search total");
 					} else {
 						Error.report("For the search option you need to specify that --maude-cmd=search");
 					}
-
-					if(GlobalSettings.verbose)
-						sw.printTotal("Search total");
 				} else if (K.model_checking.length() > 0) {
 					// run kast for the formula to be verified
 					File formulaFile = new File(K.model_checking);
@@ -311,11 +317,20 @@ public class Main {
 					if(GlobalSettings.verbose)
 						sw.printTotal("Normal execution total");
 				}
+
+				if(cmd.hasOption("pattern") && !K.do_search){
+					Object krs = result.getResult();
+					if(krs instanceof KRunState){
+						Term res = ((KRunState) krs).getRawResult();
+						result = krun.search(null, null, K.searchType, patternRule, res, varNames);
+					}
+				}
+
 			} catch (KRunExecutionException e) {
 				rp.printError(e.getMessage(), lang);
 				System.exit(1);
 			}
-
+			
 			if ("pretty".equals(K.output_mode)) {
 				String output = result.toString();
 				if (!cmd.hasOption("output")) {
@@ -361,9 +376,7 @@ public class Main {
 			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
 			} else if("binary".equals(K.output_mode)) {
-
 				Object krs = result.getResult();
-
 				if(krs instanceof KRunState){
 					Term res = ((KRunState) krs).getRawResult();
 
