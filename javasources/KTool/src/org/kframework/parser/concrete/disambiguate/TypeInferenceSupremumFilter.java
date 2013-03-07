@@ -26,9 +26,13 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 		}
 
 		//if all sorts are list sorts 
-		//we actually find the lub based on the element sort of the list
+    //we use a more complicated algorithm.
+    //
+    //1) find the LUB of the sorts of all elements of all lists in the ambiguity
+    //  such that LUB is one of their sorts (no picking a LUB outside of the representative sorts)
+    //2)  find the term(s) in the ambiguity that has the element sort closest to LUB.
+    //    if there is more than one such term we still have an ambiguity
 		if (areAllListSorts){
-      System.out.println(amb);
       Term test = amb.getContents().get(0); 
       String lubElementSort = null;
       //if the Term in the Amb isn't a TermCons, punt.
