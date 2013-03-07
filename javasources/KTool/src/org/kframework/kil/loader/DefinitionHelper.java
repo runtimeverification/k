@@ -2,6 +2,7 @@ package org.kframework.kil.loader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,6 +59,7 @@ public class DefinitionHelper {
 	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	public static java.util.Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
 	public static java.util.Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
+	public static java.util.Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
 	private static Poset subsorts = new Poset();;
 	public static java.util.Set<String> definedSorts = Sort.getBaseSorts();
 	private static Poset priorities = new Poset();
@@ -96,6 +98,14 @@ public class DefinitionHelper {
 		if (s == null)
 			listLabels.put(label, s = new HashSet<String>());
 		s.add(p.getSort());
+	}
+
+	public static void putAssoc(String cons, Collection<Production> prods) {
+		if (associativity.get(cons) == null) {
+			associativity.put(cons, new HashSet<Production>(prods));
+		} else {
+			associativity.get(cons).addAll(prods);
+		}
 	}
 
 	public static void addCellDecl(Cell c) {
