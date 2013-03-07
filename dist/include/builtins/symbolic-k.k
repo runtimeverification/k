@@ -29,8 +29,6 @@ module SYMBOLIC-K
   rule K2SMTLib(I:#Int) => "(- " +String Int2String(absInt(I)) +String ")"
   when I <Int 0
 
-  rule K2SMTLib(_) => "" [owise]
-
   rule
     K2SMTLib(forall S:Set . B:Bool)
   =>
