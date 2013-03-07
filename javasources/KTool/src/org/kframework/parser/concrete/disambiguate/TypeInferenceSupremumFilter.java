@@ -28,6 +28,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 		//if all sorts are list sorts 
 		//we actually find the lub based on the element sort of the list
 		if (areAllListSorts){
+      System.out.println(amb);
       Term test = amb.getContents().get(0); 
       String lubElementSort = null;
       //if the Term in the Amb isn't a TermCons, punt.
@@ -65,9 +66,11 @@ END:
           }
         }
         String finalElementSort = findLeastSort(remainingCanidates);
-        for(Term trm : amb.getContents()){
-          if(!DefinitionHelper.getListElementSort(trm.getSort()).equals(finalElementSort)){
-            terms.remove(trm);
+        if(finalElementSort != null){
+          for(Term trm : amb.getContents()){
+            if(!DefinitionHelper.getListElementSort(trm.getSort()).equals(finalElementSort)){
+              terms.remove(trm);
+            }
           }
         }
       }
@@ -98,6 +101,7 @@ END:
 	}
 
   private static String findLeastSort(java.util.List<String> sorts){
+    if(sorts.size() == 0) return null;
     String leastSort = sorts.get(0);
     for(String sort : sorts){
       if(DefinitionHelper.isSubsorted(leastSort, sort)){
