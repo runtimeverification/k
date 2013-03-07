@@ -26,67 +26,67 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 		}
 
 		//if all sorts are list sorts 
-    //we use a more complicated algorithm.
-    //
-    //1) find the LUB of the sorts of all elements of all lists in the ambiguity
-    //  such that LUB is one of their sorts (no picking a LUB outside of the representative sorts)
-    //2)  find the term(s) in the ambiguity that has the element sort closest to LUB.
-    //    if there is more than one such term we still have an ambiguity
+		//we use a more complicated algorithm.
+		//
+		//1) find the LUB of the sorts of all elements of all lists in the ambiguity
+		//	such that LUB is one of their sorts (no picking a LUB outside of the representative sorts)
+		//2)	find the term(s) in the ambiguity that has the element sort closest to LUB.
+		//		if there is more than one such term we still have an ambiguity
 		if (areAllListSorts){
-      Term test = amb.getContents().get(0); 
-      String lubElementSort = null;
-      //if the Term in the Ambiguity isn't a TermCons, punt (give up).
-      //is that even possible?
-      if(test instanceof TermCons){
-        TermCons tc = (TermCons) test;
-        lubElementSort = tc.getContents().get(0).getSort();
-      }
+			Term test = amb.getContents().get(0); 
+			String lubElementSort = null;
+			//if the Term in the Ambiguity isn't a TermCons, punt (give up).
+			//is that even possible?
+			if(test instanceof TermCons){
+				TermCons tc = (TermCons) test;
+				lubElementSort = tc.getContents().get(0).getSort();
+			}
 END:
-		  for (Term trm : amb.getContents()){
-        if(!(trm instanceof TermCons)) break;
-        for (Term child : ((TermCons) trm).getContents()) {
-          String childSort = child.getSort();
-          if(DefinitionHelper.isSubsorted(childSort, lubElementSort)){
-            lubElementSort = childSort;
-          } 
-          //if this sort is not comparable to lubElementSort we cannot resolve the
-          //ambiguity, so we check to see that it is neither equal nor a subsort 
-          else if(!(DefinitionHelper.isSubsorted(lubElementSort, childSort) 
-                || lubElementSort.equals(childSort))){
-            lubElementSort = null;
-            break END;
-          } 
-        }
-      }
-      //check to make sure that we successfully found a lubElementSort
-      //there might not be one if some of the element sorts are in disconnected
-      //components of the sort Poset
-      if(lubElementSort != null){
-        java.util.List<String> canidates = new ArrayList<String>();
-        for(Term trm : amb.getContents()){
-          canidates.add(DefinitionHelper.getListElementSort(trm.getSort()));
-        }
-        java.util.List<String> remainingCanidates = new ArrayList<String>();
-        for(String sort : canidates){
-          if(DefinitionHelper.isSubsorted(sort, lubElementSort)){ 
-            remainingCanidates.add(sort);
-          }
-        }
-        //the least sort will be the sort that is the "most specific"
-        //that is subsorteq of everything else
-        String finalElementSort = findLeastSort(remainingCanidates);
-        if(finalElementSort != null){
-          for(Term trm : amb.getContents()){
-            if(!DefinitionHelper.getListElementSort(trm.getSort()).equals(finalElementSort)){
-              terms.remove(trm);
-            }
-          }
-        }
-      }
-    }
+			for (Term trm : amb.getContents()){
+				if(!(trm instanceof TermCons)) break;
+				for (Term child : ((TermCons) trm).getContents()) {
+					String childSort = child.getSort();
+					if(DefinitionHelper.isSubsorted(childSort, lubElementSort)){
+						lubElementSort = childSort;
+					} 
+					//if this sort is not comparable to lubElementSort we cannot resolve the
+					//ambiguity, so we check to see that it is neither equal nor a subsort 
+					else if(!(DefinitionHelper.isSubsorted(lubElementSort, childSort) 
+								|| lubElementSort.equals(childSort))){
+						lubElementSort = null;
+						break END;
+					} 
+				}
+			}
+			//check to make sure that we successfully found a lubElementSort
+			//there might not be one if some of the element sorts are in disconnected
+			//components of the sort Poset
+			if(lubElementSort != null){
+				java.util.List<String> canidates = new ArrayList<String>();
+				for(Term trm : amb.getContents()){
+					canidates.add(DefinitionHelper.getListElementSort(trm.getSort()));
+				}
+				java.util.List<String> remainingCanidates = new ArrayList<String>();
+				for(String sort : canidates){
+					if(DefinitionHelper.isSubsorted(sort, lubElementSort)){ 
+						remainingCanidates.add(sort);
+					}
+				}
+				//the least sort will be the sort that is the "most specific"
+				//that is subsorteq of everything else
+				String finalElementSort = findLeastSort(remainingCanidates);
+				if(finalElementSort != null){
+					for(Term trm : amb.getContents()){
+						if(!DefinitionHelper.getListElementSort(trm.getSort()).equals(finalElementSort)){
+							terms.remove(trm);
+						}
+					}
+				}
+			}
+		}
 	
-    // if one of the terms in the ambiguity does not have a list sort we
-    // default to the old algorithm:  
+		// if one of the terms in the ambiguity does not have a list sort we
+		// default to the old algorithm:	
 		// Choose the maximum from the list of ambiguities
 		java.util.List<Term> terms2 = new ArrayList<Term>(terms);
 		for (Term trm1 : terms) {
@@ -111,19 +111,20 @@ END:
 		return super.transform(amb);
 	}
 
-  //This somehow assumes that all sorts are related to each other somehow.
-  //Until we find a use case where this isn't the case, I will leave it
-  //as it
-  private static String findLeastSort(java.util.List<String> sorts){
-    if(sorts.size() == 0) return null;
-    String leastSort = sorts.get(0);
-    for(String sort : sorts){
-      if(DefinitionHelper.isSubsorted(leastSort, sort)){
-        leastSort = sort;
-      }
-    }
-    return leastSort;
-  }
+	//This somehow assumes that all sorts passed to findLeastSort are 
+	//related to each other somehow. Until we find a use case where this 
+	//isn't the case, I will leave it
+	//as it
+	private static String findLeastSort(java.util.List<String> sorts){
+		if(sorts.size() == 0) return null;
+		String leastSort = sorts.get(0);
+		for(String sort : sorts){
+			if(DefinitionHelper.isSubsorted(leastSort, sort)){
+				leastSort = sort;
+			}
+		}
+		return leastSort;
+	}
 
 	/**
 	 * Returns true if the terms are of the same kind (Variable, TermCons...) If they are TermCons, then all the Items must be alike also.
