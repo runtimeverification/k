@@ -83,9 +83,9 @@ public abstract class BasicBackend implements Backend {
 		// steps.add(new ResolveFresh());
 		steps.add(new ResolveFreshMOS());
 		steps.add(new AddTopCellConfig());
-		if (GlobalSettings.addTopCell) {
-			steps.add(new AddTopCellRules());
-		}
+//		if (GlobalSettings.addTopCell) {
+		steps.add(new AddTopCellRules());
+//		}
 		steps.add(new AddEval());
 		steps.add(new ResolveBinder());
 		steps.add(new ResolveAnonymousVariables());
