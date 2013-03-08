@@ -1,15 +1,16 @@
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
@@ -26,7 +27,13 @@ public class AddPathCondition extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
+		
 		if (node.getCondition() == null)
+			return node;
+		
+		ConditionTransformer ct = new ConditionTransformer();
+		Term condition = (Term) node.getCondition().accept(ct);
+		if (ct.getFilteredTerms().isEmpty())
 			return node;
 		
 		if (node.getBody() instanceof Rewrite && node.getAttribute(SymbolicBackend.SYMBOLIC) != null)
@@ -40,7 +47,6 @@ public class AddPathCondition extends BasicTransformer {
 			Term left = rew.getLeft();
 			
 			// ignore non-bag and non-cell terms
-			
 			Cell leftCell = new Cell();
 			leftCell.setLabel(MetaK.Constants.pathCondition);
 			leftCell.setEllipses(Ellipses.NONE);
@@ -50,10 +56,6 @@ public class AddPathCondition extends BasicTransformer {
 			
 			if (left instanceof Cell) {
 				AddConditionToConfig.addCellNextToKCell((Cell)left, leftCell);
-			}
-			else if (left instanceof Bag)
-			{
-				//
 			}
 			
 
@@ -65,24 +67,50 @@ public class AddPathCondition extends BasicTransformer {
 			rightCell.setEllipses(Ellipses.NONE);
 			List<Term> list = new ArrayList<Term>();
 			list.add(phi);
-			list.add(node.getCondition());
-			rightCell.setContents(new KApp(Constant.ANDBOOL_KLABEL, new KList(list)));
+			list.add(andBool(ct.getFilteredTerms()));
+			Term pathCondition = new KApp(Constant.BOOL_ANDBOOL_KLABEL, new KList(list));
+			rightCell.setContents(pathCondition);
 
 			if (right instanceof Cell) {
 				AddConditionToConfig.addCellNextToKCell((Cell)right, rightCell);
 			}
-			else if (right instanceof Bag)
-			{
-				// ?
-			}
+			
+			List<Term> myList = new ArrayList<Term>();
+			myList.add(condition);
+			myList.add(checkSat(pathCondition));
+			Term cond = new KApp(Constant.ANDBOOL_KLABEL, new KList(myList));
 			
 			// re-construct the rule
 			node = node.shallowCopy();
 			node.setBody(new Rewrite(left, right));
 //			node.setCondition(Constant.TRUE);
-			node.setCondition(null);
+			node.setCondition(cond);
 		}
 		
 		return node;
+	}
+
+	private Term andBool(List<Term> filteredTerms) {
+
+		Iterator<Term> it = filteredTerms.iterator();
+		Term and = it.next();
+		while(it.hasNext())
+		{
+			List<Term> list = new ArrayList<Term>();
+			list.add(and);
+			list.add(it.next());
+			and = new KApp(Constant.BOOL_ANDBOOL_KLABEL, new KList(list));
+		}
+		return and;
+	}
+
+	private Term checkSat(Term pathCondition) {
+		// checkSat(pathCondition) =/=K # "unsat"(.KList)
+		KApp unsat = new KApp(new KInjectedLabel(Constant.STRING("unsat")), new KList());
+		KApp checkSat = new KApp(Constant.KLABEL("'checkSat"), pathCondition);
+		List<Term> items = new ArrayList<Term>();
+		items.add(unsat);
+		items.add(checkSat);
+		return new KApp(Constant.KNEQ_KLABEL, new KList(items));
 	}
 }

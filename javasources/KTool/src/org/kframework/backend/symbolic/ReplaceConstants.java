@@ -39,7 +39,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
 				vars.add(new KApp(new KInjectedLabel(entry.getValue()), new KList()));
-				// String sort = entry.getValue().getSort().substring(1);
+				// TODO: ==K - semantic
 				String label = "'_==Bool_"; //"'_==" + sort + "_";
 				terms.add(new KApp(new Constant("KLabel", label), new KList(
 						vars)));

@@ -1,14 +1,14 @@
 package org.kframework.kil;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 /** Atomic values in builtin sorts, including klabel.
@@ -57,7 +57,9 @@ public class Constant extends Term {
 	public static final Constant HEATED_KLABEL = KLABEL("heated");
 	public static final Constant REDEX_KLABEL = KLABEL("redex");
 	public static final Constant KNEQ_KLABEL = KLABEL("'_=/=K_");
+	public static final Constant KEQ_KLABEL = KLABEL("'_==K_");
 	public static final Constant ANDBOOL_KLABEL = KLABEL("'#andBool");
+	public static final Constant BOOL_ANDBOOL_KLABEL = KLABEL("'_andBool_");
 
     public static final Constant KLABEL(String s) {
         Constant ct = klbls.get(s);

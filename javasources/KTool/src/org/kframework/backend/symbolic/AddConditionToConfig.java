@@ -46,10 +46,6 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
 		if (body instanceof Cell) {
 			addCellNextToKCell((Cell) body, cell);
 		}
-		else if (body instanceof Bag)
-		{
-			// this should not happen because top cell is automatically added
-		}
 		
 		node = node.shallowCopy();
 		node.setBody(body);

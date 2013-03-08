@@ -3,6 +3,8 @@ require "modules/substitution.k"
 
 module SYMBOLIC-SYNTAX
   // This is a module where productions will be generated at runtime
+
+  syntax "#" -/- [s].[y].[m]
 endmodule
 
 module SYMBOLIC-K
@@ -69,7 +71,7 @@ module SYMBOLIC-K
     +String "(check-sat)\n"
 
   syntax String ::= "SMTCall" "(" String ")" [function, hook(#SMT:#smtCall_)]
-  syntax String ::= "checkSat" "(" Bool ")" [function]
+  syntax String ::= checkSat(Bool) [function]
   rule checkSat(B:Bool) => SMTCall(SMTLibQuery(B))
 
 

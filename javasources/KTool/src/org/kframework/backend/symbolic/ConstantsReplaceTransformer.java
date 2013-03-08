@@ -24,28 +24,25 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
 	public ASTNode transform(KApp node) throws TransformerException {
 		
 		if (!(node.getLabel() instanceof KInjectedLabel)) {
-			System.out.println(node.getLabel());
 			return super.transform(node);
 		}
 
 		KInjectedLabel label = (KInjectedLabel) node.getLabel();
 
 		if (!(label.getTerm() instanceof Constant)) {
-			System.out.println(label.getTerm());
 			return super.transform(node);
 		}
 
 		Constant constant = (Constant) label.getTerm();
 		if (!MetaK.isBuiltinSort(constant.getSort()))
 		{
-			System.out.println(constant);
 			return super.transform(node);
 		}
 		
 		String sort = "K";
 		Variable newVar = MetaK.getFreshVar(sort);
-		System.out.println("Transforming constant " + constant +
-				" into variable " + newVar);
+//		System.out.println("Transforming constant " + constant +
+//				" into variable " + newVar);
 		
 		generatedSV.put(newVar, constant);
 		return newVar;
