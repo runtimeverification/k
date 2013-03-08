@@ -43,6 +43,9 @@ public class SimpleMatcher implements Matcher {
   private java.util.Map<Variable, HashSet<MapLookupConstraint>> deferredMapLookups 
     = new HashMap<Variable, HashSet<MapLookupConstraint>>();
 
+  private java.util.Map<Variable, HashSet<SetImpl>> deferredSetLookups
+    = new HashMap<Variable, HashSet<SetImpl>>(); 
+
 	@Override
   public void match(Ambiguity term, Term term2){
     throw new MatcherException("Ambiguity does not have a pattern match implementation.");
@@ -249,8 +252,58 @@ public class SimpleMatcher implements Matcher {
 	
   @Override
   public void match(SetLookupPattern term, Term term2){
-    throw new MatcherException("SetLookupPattern does not have a pattern match implementation.  "
-       + "Offending term: " + term);
+    if(!(term2 instanceof SetImpl)){
+      throw new MatcherException("Attempted to match a SetLookupPattern with non SetImpl: " 
+          + term2);  
+    }
+    SetImpl set = (SetImpl) term2;
+    for(Term t : term.getLookups()){
+      if(t instanceof Variable){
+        Term value = substitution.get(t);
+        //if t is null we have not bound this Variable yet
+        //and must create a deferredSetLookup
+        if(value == null){
+          HashSet<SetImpl> constraints = deferredSetLookups.get(t);
+          if(constraints == null){
+            constraints = new HashSet<SetImpl>();
+            deferredSetLookups.put((Variable) t, constraints);
+          }
+          constraints.add(set);
+          //we cannot remove the key until the constraint is unified
+          //since we do not want to have to copy sets
+          //I will make some concessions to performance here....
+          //I am not happy with how Variable binding does
+          //some key removal while others are performed manually
+          //in this method.  Consider refactoring
+        }
+        // yay, we know the binding so we can just unify without deferring!
+        else {
+          if(set.contains(value)){
+            //we must remove the key so that we can properly bind the 
+            //remainder
+            set.remove(value);
+          }
+          else {
+            throw new MatcherException("Value specified in SetLookupPattern " + term +
+               " not found in Set " + set); 
+          }
+        }
+      } 
+      //here we are looking up with a Term that wasn't even a Variable, so this is
+      //really simple
+      else{
+        if(set.contains(t)){
+          //we must remove the key so that we can properly bind the 
+          //remainder
+          set.remove(t);
+        }
+        else {
+          throw new MatcherException("Value specified in SetLookupPattern " + term +
+              " not found in Set " + set); 
+        }
+      }
+    }
+    substitution.put(term.getRemainder(), set);
   }
   
 	@Override
@@ -296,19 +349,8 @@ public class SimpleMatcher implements Matcher {
             + " of Variable " + term + " does not match "
           + " sort " + t.getSort() + " of Term " + term2); 
       }
-      //handle any deferred Map lookups where we did not 
-      //know the Variable binding before hand
-      //since we just bound a Variable
-      HashSet<MapLookupConstraint> lookups = deferredMapLookups.get(term); 
-      if(lookups == null) return;
-      for(MapLookupConstraint lookup : lookups){
-        //look unify the value bound to term2 in the MapImpl with the image 
-        //in the MapLookupPattern 
-        lookup.unify(this, term2);
-      }
-      //this is necessary because we need to determine if we have actually
-      //matched a pattern based on if there is anything left in the deferredMapLookups
-      deferredMapLookups.remove(term); 
+      handleMapLookups(term, term2);
+      handleSetLookups(term);
     }
 
     else {
@@ -327,6 +369,42 @@ public class SimpleMatcher implements Matcher {
   @Override
   public java.util.Map<Term, Term> getSubstitution() { 
     return substitution; 
+  }
+
+  private void handleMapLookups(Variable term, Term term2){
+    //handle any deferred Map lookups where we did not 
+    //know the Variable binding before hand
+    //since we just bound a Variable
+    HashSet<MapLookupConstraint> lookups = deferredMapLookups.get(term); 
+    if(lookups == null) return;
+    for(MapLookupConstraint lookup : lookups){
+      //look unify the value bound to term2 in the MapImpl with the image 
+      //in the MapLookupPattern 
+      lookup.unify(this, term2);
+    }
+    //this is necessary because we need to determine if we have actually
+    //matched a pattern based on if there is anything left in the deferredMapLookups
+    deferredMapLookups.remove(term); 
+  }
+
+  private void handleSetLookups(Variable term){
+    //handle any deferred Set lookups where we did not 
+    //know the Variable binding before hand
+    //since we just bound a Variable
+    HashSet<SetImpl> lookups = deferredSetLookups.get(term); 
+    if(lookups == null) return;
+    for(SetImpl set : lookups){
+      if(set.contains(term)){
+         set.remove(term);
+      }
+      else {
+        throw new MatcherException("Value specified in SetLookupPattern " + term +
+             " not found in Set " + set); 
+      }
+    }
+    //this is necessary because we need to determine if we have actually
+    //matched a pattern based on if there is anything left in the deferredSetLookups
+    deferredSetLookups.remove(term); 
   }
 
   @Override
