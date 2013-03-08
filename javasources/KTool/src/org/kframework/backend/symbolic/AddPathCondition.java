@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Constant;
@@ -80,9 +82,19 @@ public class AddPathCondition extends BasicTransformer {
 			myList.add(checkSat(pathCondition));
 			Term cond = new KApp(Constant.ANDBOOL_KLABEL, new KList(myList));
 			
+			// add transition attribute
+			List<Attribute> attrs = node.getAttributes().getContents();
+			// bad practice
+			attrs.add(new Attribute("transition", ""));
+			
+			Attributes atts = node.getAttributes().shallowCopy();
+			atts.setContents(attrs);
+
+			
 			// re-construct the rule
 			node = node.shallowCopy();
 			node.setBody(new Rewrite(left, right));
+			node.setAttributes(atts);
 //			node.setCondition(Constant.TRUE);
 			node.setCondition(cond);
 		}
