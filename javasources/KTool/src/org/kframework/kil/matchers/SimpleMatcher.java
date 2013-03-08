@@ -29,6 +29,7 @@ import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 import org.kframework.kil.rewriter.MapImpl;
+import org.kframework.kil.rewriter.SetImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -243,6 +244,24 @@ public class SimpleMatcher implements Matcher {
 	@Override
   public void match(SetItem term, Term term2){
     throw new MatcherException("SetItem does not have a pattern match implementation.  "
+       + "Offending term: " + term);
+  }
+	
+  @Override
+  public void match(SetLookupPattern term, Term term2){
+    throw new MatcherException("SetLookupPattern does not have a pattern match implementation.  "
+       + "Offending term: " + term);
+  }
+  
+	@Override
+  public void match(SetInsertPattern term, Term term2){
+    throw new MatcherException("SetInsertPattern does not have a pattern match implementation.  "
+       + "Offending term: " + term);
+  }
+
+	@Override
+  public void match(SetImpl term, Term term2){
+    throw new MatcherException("SetImpl does not have a pattern match implementation.  "
        + "Offending term: " + term);
   }
 

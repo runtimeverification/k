@@ -30,6 +30,7 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 
 import org.kframework.kil.rewriter.MapImpl;
+import org.kframework.kil.rewriter.SetImpl;
 
 /**
  * This is the interface for recursive pattern matching.  It is used
@@ -66,6 +67,9 @@ public interface Matcher {
 	public void match(Rewrite term, Term term2);
 	public void match(Set term, Term term2);
 	public void match(SetItem term, Term term2);
+	public void match(SetLookupPattern term, Term term2);
+	public void match(SetInsertPattern term, Term term2);
+	public void match(SetImpl term, Term term2);
 	public void match(TermComment term, Term term2);
 	public void match(TermCons term, Term term2);
 	public void match(Variable term, Term term2);
