@@ -1,5 +1,6 @@
 package org.kframework.backend.unparser;
 
+import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -356,7 +357,22 @@ public class UnparserFilter extends BasicVisitor {
 			String separator = userList.getSeparator();
 			java.util.List<Term> contents = termCons.getContents();
 			contents.get(0).accept(this);
-			if (!(contents.get(1) instanceof Empty && contents.get(1).getSort().equals(production.getSort()) && DefinitionHelper.isSubsortedEq(userList.getSort(), contents.get(0).getSort()))) {
+			ASTNode temp = stack.pop();
+			ASTNode parent = null;
+			if (!stack.empty()) parent = stack.peek();
+			stack.push(temp);
+			boolean needsEmpty = true;
+			if (parent instanceof TermCons) {
+				TermCons tcParent = (TermCons) parent;
+				int i;
+				for (i = 0; i < tcParent.getContents().size(); i++) {
+					if (termCons == tcParent.getContents().get(i))
+						break;
+				}
+				if (AddEmptyLists.isAddEmptyList(tcParent.getProduction().getChildSort(i), contents.get(0).getSort()))
+					needsEmpty = false;
+			}
+			if (needsEmpty || !(contents.get(1) instanceof Empty)) {
 				result.write(separator + " ");
 				contents.get(1).accept(this);
 			}

@@ -56,11 +56,20 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				}
 				for (String cons : conses) {
 					Production p = DefinitionHelper.conses.get(cons);
+					List<Term> newContents = new ArrayList<Term>(contents);
 					if (p.getAttribute("reject") != null)
 						continue;
 					if (p.getArity() != contents.size())
 						continue;
-					possibleTerms.add(new TermCons(p.getSort(), cons, contents));
+					for (int i = 0; i < contents.size(); i++) {
+						if (contents.get(i) instanceof KApp && ((KApp)contents.get(i)).getLabel() instanceof KInjectedLabel) {
+							KInjectedLabel l = (KInjectedLabel)((KApp)contents.get(i)).getLabel();
+							if (DefinitionHelper.isSubsortedEq(p.getChildSort(i), l.getTerm().getSort())) {
+								newContents.set(i, l.getTerm());
+							}
+						}
+					}
+					possibleTerms.add(new TermCons(p.getSort(), cons, newContents));
 				}
 				if (possibleTerms.size() == 0) {
 					return super.transform(kapp);

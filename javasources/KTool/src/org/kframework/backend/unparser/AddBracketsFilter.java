@@ -1,5 +1,6 @@
 package org.kframework.backend.unparser;
 
+import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -7,7 +8,9 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.DefinitionLoader;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -15,8 +18,9 @@ import java.util.Stack;
 
 public class AddBracketsFilter extends CopyOnWriteTransformer {
 
-	public AddBracketsFilter() {
+	public AddBracketsFilter() throws IOException {
 		super("Add brackets");
+//		org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 	}
 
 	@Override	
@@ -273,6 +277,55 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		return set;
 	}
 
+	private static class MakePattern extends CopyOnWriteTransformer {
+		private Term inner;
+		public MakePattern(Term inner) {
+			super("Make unneeded terms symbolic");
+			this.inner = inner;
+		}
+
+		@Override
+		public ASTNode transform(Constant t) throws TransformerException {
+			if (!contains(t, inner)) {
+				return MetaK.getFreshVar(t.getSort());
+			}
+			return super.transform(t);
+		}
+
+		@Override
+		public ASTNode transform(TermCons t) throws TransformerException {
+			if (!contains(t, inner)) {
+				return MetaK.getFreshVar(t.getSort());
+			}
+			return super.transform(t);
+		}
+
+		@Override
+		public ASTNode transform(KSequence t) throws TransformerException {
+			if (!contains(t, inner)) {
+				return MetaK.getFreshVar(t.getSort());
+			}
+			return super.transform(t);
+		}
+
+		@Override
+		public ASTNode transform(KApp t) throws TransformerException {
+			if (!contains(t, inner)) {
+				return MetaK.getFreshVar(t.getSort());
+			}
+			return super.transform(t);
+		}
+
+		@Override
+		public ASTNode transform(Freezer t) throws TransformerException {
+			if (!contains(t, inner)) {
+				return MetaK.getFreshVar(t.getSort());
+			}
+			return super.transform(t);
+		}
+
+	}
+
 	private static class ContainsVisitor extends BasicVisitor {
 		private boolean found = false;
 		private Term inner;
@@ -290,7 +343,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		}
 	}
 
-	private boolean contains(Term outer, Term inner) {
+	private static boolean contains(Term outer, Term inner) {
 		ContainsVisitor visit = new ContainsVisitor(inner);
 		outer.accept(visit);
 		return visit.getFound();
@@ -388,7 +441,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 	private Stack<Term> leftCapture = new Stack<Term>(), rightCapture = new Stack<Term>();
 	private Stack<Boolean> parens = new Stack<Boolean>();
 
-	private void prepare(Term ast) {
+	private void prepare(Term ast) throws TransformerException {
 		if (!stack.empty()) {
 			Term lc = null, rc = null;
 			Term outer = stack.peek();
@@ -420,6 +473,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		} else {
 			leftCapture.push(null);
 			rightCapture.push(null);
+	//		parens.push(needsParentheses(ast, null, null, null));
 			parens.push(false);
 		}
 		stack.push(ast);
@@ -430,17 +484,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		leftCapture.pop();
 		rightCapture.pop();
 		boolean needsParens = parens.pop();
-		EnumSet<Fixity> fixity = getFixity(inner);
-		if (!stack.empty()) {
-			Term lc = null, rc = null;
-			Term outer = stack.peek();
-				
-			if (needsParens) {
-				return true;
-			}
-		}
-		
-		return false;
+		return needsParens;
 	}
 
 	private boolean getImplicitPriority(Term inner, Term outer) {
@@ -451,7 +495,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		return false;
 	}
 
-	private boolean needsParentheses(Term inner, Term outer, Term leftCapture, Term rightCapture) {
+	private boolean needsParentheses(Term inner, Term outer, Term leftCapture, Term rightCapture) throws TransformerException {
 		try {
 			boolean priority = isPriorityWrong(outer, inner);
 			boolean inversePriority = isPriorityWrong(inner, outer);
@@ -468,63 +512,63 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 				return true;
 			if (isUnary(inner) && innerFixity.contains(Fixity.BARE_LEFT) && innerFixity.contains(Fixity.BARE_RIGHT))
 				return false;
+/*			if (rightCapture != null) {
+				UnparserFilter unparser = new UnparserFilter(false, false, false);
+				Term rightCapturePattern = (Term)rightCapture.accept(new MakePattern(inner));
+				rightCapturePattern.accept(unparser);
+				String unparsed = unparser.getResult();
+				ASTNode config = DefinitionLoader.parsePatternAmbiguous(unparsed);
+				Rule rl = (Rule) config;
+				config = rl.getBody();
+				config = config.accept(new AddEmptyLists());
+				if (!rightCapturePattern.equals(config)){
+					return true;
+				}
+			}
+			if (leftCapture != null) {
+				UnparserFilter unparser = new UnparserFilter(false, false, false);
+				Term leftCapturePattern = (Term)leftCapture.accept(new MakePattern(inner));
+				leftCapturePattern.accept(unparser);
+				String unparsed = unparser.getResult();
+				ASTNode config = DefinitionLoader.parsePatternAmbiguous(unparsed);
+				Rule rl = (Rule) config;
+				config = rl.getBody();
+				config = config.accept(new AddEmptyLists());
+				if (!leftCapturePattern.equals(config)) {
+					return true;
+				}
+			}
+			
+*/
+
 			if (innerFixity.contains(Fixity.BARE_RIGHT) && rightCapture != null) {
 				priority = isPriorityWrong(rightCapture, inner);
 				inversePriority = isPriorityWrong(inner, rightCapture);
-				//boolean implicitPriority = getImplicitPriority(inner, outer);
-				//boolean implicitInversePriority = getImplicitPriority(outer, inner);
-				//if (fixity.size() > 0) {
-					// implement generic check
-					if (assoc == Associativity.NONASSOC && !inversePriority) {// && !implicitInversePriority) {
-						return true;
-					} else if (assoc == Associativity.NONE && !inversePriority) { //(fixity.contains(Fixity.BARE_LEFT))) {
-						return true;
-					} else if (assoc == Associativity.RIGHT && !inversePriority) {
-						return true;
-					} else if (assoc == Associativity.LEFT && !inversePriority && !getAssociativity(inner, rightCapture)) {
-						return true;
-					}
-/*
-					// implement lhs check
-					if (implicitPriority) {
-						return true;
-					} else if (!implicitInversePriority && innerAssoc == Associativity.RIGHT && !position.contains(Fixity.BARE_RIGHT)) {
-						//return true;
-					} else if (innerAssoc == Associativity.RIGHT && position.contains(Fixity.BARE_RIGHT) && getAssociativity(rightCapture) == Associativity.LEFT) {
-						//return true;
-					}
-				//}*/
+				if (assoc == Associativity.NONASSOC && !inversePriority) {// && !implicitInversePriority) {
+					return true;
+				} else if (assoc == Associativity.NONE && !inversePriority) { //(fixity.contains(Fixity.BARE_LEFT))) {
+					return true;
+				} else if (assoc == Associativity.RIGHT && !inversePriority) {
+					return true;
+				} else if (assoc == Associativity.LEFT && !inversePriority && !getAssociativity(inner, rightCapture)) {
+					return true;
+				}
 			}
 			if (innerFixity.contains(Fixity.BARE_LEFT) && leftCapture != null) {
 				priority = isPriorityWrong(leftCapture, inner);
 				inversePriority = isPriorityWrong(inner, leftCapture);
-				//boolean implicitPriority = getImplicitPriority(inner, outer);
-				//boolean implicitInversePriority = getImplicitPriority(outer, inner);
-				//if (fixity.size() > 0) {
-					// implement generic check
-					if (assoc == Associativity.NONASSOC && !inversePriority) {// && !implicitInversePriority) {
-						return true;
-					} else if (assoc == Associativity.NONE && !inversePriority) {//(fixity.contains(Fixity.BARE_RIGHT))) {
-						return true;
-					} else if (assoc == Associativity.LEFT && !inversePriority) {
-						return true;
-					} else if (assoc == Associativity.RIGHT && !inversePriority && !getAssociativity(inner, leftCapture)) {
-						return true;
-					}
-/*
-					// implement rhs check
-					if (implicitPriority) {
-						return true;
-					} else if (!implicitInversePriority && innerAssoc == Associativity.LEFT && !position.contains(Fixity.BARE_LEFT)) {
-						//return true;
-					} else if (innerAssoc == Associativity.LEFT && position.contains(Fixity.BARE_LEFT) && getAssociativity(leftCapture) == Associativity.RIGHT) {
-						//return true;
-					}
-				//}*/
+				if (assoc == Associativity.NONASSOC && !inversePriority) {// && !implicitInversePriority) {
+					return true;
+				} else if (assoc == Associativity.NONE && !inversePriority) {//(fixity.contains(Fixity.BARE_RIGHT))) {
+					return true;
+				} else if (assoc == Associativity.LEFT && !inversePriority) {
+					return true;
+				} else if (assoc == Associativity.RIGHT && !inversePriority && !getAssociativity(inner, leftCapture)) {
+					return true;
+				}
 			}
 			return false;
 		} catch (UnsupportedOperationException e) {
-			System.err.println(e.getMessage());
 			return true;
 		}
 	}
