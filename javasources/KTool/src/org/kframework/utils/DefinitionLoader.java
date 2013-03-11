@@ -1,6 +1,7 @@
 package org.kframework.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -66,12 +67,12 @@ public class DefinitionLoader {
 			XStream xstream;
 			if (extension.equals(".xml")) {
 				xstream = new XStream();
+				xstream.aliasPackage("k", "org.kframework.kil");
+				javaDef = (org.kframework.kil.Definition) xstream.fromXML(canoFile);
 			} else {
-				xstream = new XStream(new BinaryStreamDriver());
+				javaDef = (org.kframework.kil.Definition) BinaryLoader.fromBinary(new FileInputStream(canoFile));
 			}
-			xstream.aliasPackage("k", "org.kframework.kil");
 
-			javaDef = (org.kframework.kil.Definition) xstream.fromXML(canoFile);
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Load definition from XML");
@@ -83,13 +84,11 @@ public class DefinitionLoader {
 
 		} else {
 			javaDef = parseDefinition(mainFile, lang, autoinclude);
-			XStream xstream = new XStream(new BinaryStreamDriver());
-			xstream.aliasPackage("k", "org.kframework.kil");
 
-			xstream.toXML(javaDef, new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/defx.bin"));
+			BinaryLoader.toBinary(javaDef, new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/defx.bin"));
 
 			if (GlobalSettings.xml) {
-				xstream = new XStream();
+				XStream xstream = new XStream();
 				xstream.aliasPackage("k", "org.kframework.kil");
 				xstream.toXML(javaDef, new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/defx.xml"));
 			}

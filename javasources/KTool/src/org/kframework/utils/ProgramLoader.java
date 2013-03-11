@@ -1,6 +1,7 @@
 package org.kframework.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.kframework.backend.maude.MaudeFilter;
@@ -113,10 +114,7 @@ public class ProgramLoader {
 				out = out.accept(new AddEmptyLists());
 				out = out.accept(new FlattenSyntax());
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.BINARY) {
-				XStream xstream = new XStream(new BinaryStreamDriver());
-				xstream.aliasPackage("k", "org.kframework.kil");
-				
-				out = (org.kframework.kil.Cell) xstream.fromXML(new File(filename));
+				out = (org.kframework.kil.Cell) BinaryLoader.fromBinary(new FileInputStream(filename));
 			} else {
 				out = loadPgmAst(content, filename, startSymbol);
 			}

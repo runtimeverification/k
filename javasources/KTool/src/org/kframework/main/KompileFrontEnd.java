@@ -22,6 +22,7 @@ import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -246,10 +247,8 @@ public class KompileFrontEnd {
 			} catch (CompilerStepDone e) {
 				javaDef = (Definition) e.getResult();
 			}
-			XStream xstream = new XStream(new BinaryStreamDriver());
-			xstream.aliasPackage("k", "org.kframework.kil");
 
-			xstream.toXML(MetaK.getConfiguration(javaDef), new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/configuration.bin"));
+			BinaryLoader.toBinary(MetaK.getConfiguration(javaDef), new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/configuration.bin"));
 
 			backend.run(javaDef);
 		} catch (IOException e) {

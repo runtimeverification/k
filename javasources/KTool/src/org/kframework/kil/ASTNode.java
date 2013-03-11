@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import org.kframework.compile.utils.SyntaxByTag;
@@ -18,7 +19,7 @@ import org.w3c.dom.Element;
  * @see Visitable
  * @see Transformable
  */
-public abstract class ASTNode implements Visitable, Transformable {
+public abstract class ASTNode implements Visitable, Transformable, Serializable {
 	/**
 	 * Used on any node for metadata such as location, also used on {@link Rule} and {@link Production} for the attribute list.
 	 */

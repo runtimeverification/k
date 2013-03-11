@@ -22,6 +22,7 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.*;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
+import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.DefinitionLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
@@ -380,14 +381,11 @@ public class Main {
 				if(krs instanceof KRunState){
 					Term res = ((KRunState) krs).getRawResult();
 
-					XStream xst = new XStream(new BinaryStreamDriver());
-					xst.aliasPackage("k", "org.kframework.kil");
-
 					if (!cmd.hasOption("output")) {
 						Error.silentReport("Did not specify an output file. Cannot print output-mode binary to standard out. Saving to .k/krun/krun_output");
-						xst.toXML(res, new FileOutputStream(K.krun_output));
+						BinaryLoader.toBinary(res, new FileOutputStream(K.krun_output));
 					} else {
-						xst.toXML(res, new FileOutputStream(K.output));
+						BinaryLoader.toBinary(res, new FileOutputStream(K.output));
 					}
 				} else {
 					Error.report("binary output mode is not supported by search and model checking");
@@ -852,10 +850,7 @@ public class Main {
 			RunProcess rp = new RunProcess();
 
 			if (!DefinitionHelper.initialized) {
-				XStream xstream = new XStream(new BinaryStreamDriver());
-				xstream.aliasPackage("k", "org.kframework.kil");
-
-				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) xstream.fromXML(new File(K.compiled_def + "/defx.bin"));
+				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) BinaryLoader.fromBinary(new FileInputStream(K.compiled_def + "/defx.bin"));
 
 				if(GlobalSettings.verbose)
 					sw.printIntermediate("Reading definition from binary");
@@ -881,7 +876,7 @@ public class Main {
 				if(GlobalSettings.verbose)
 					sw.printIntermediate("Importing tables");
 
-				org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) xstream.fromXML(new File(K.compiled_def + "/configuration.bin"));
+				org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) BinaryLoader.fromBinary(new FileInputStream(K.compiled_def + "/configuration.bin"));
 				K.kompiled_cfg = configKompiled;
 
 				if(GlobalSettings.verbose)

@@ -1,12 +1,14 @@
 package org.kframework.main;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -125,9 +127,7 @@ public class KastFrontEnd {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
 				}
 
-				XStream xstream = new XStream(new BinaryStreamDriver());
-				xstream.aliasPackage("k", "org.kframework.kil");
-				javaDef = (org.kframework.kil.Definition) xstream.fromXML(defXml);
+				javaDef = (org.kframework.kil.Definition) BinaryLoader.fromBinary(new FileInputStream(defXml));
 				// This is essential for generating maude
 				javaDef.preprocess();
 
