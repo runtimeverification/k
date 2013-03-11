@@ -176,12 +176,17 @@ public class MaudeKRun implements KRun {
 		List<Element> list = XmlUtil.getChildElements(xml);
 		
 		try {
-			if (sort.equals("BagItem") && op.equals("<_>_</_>")) {
+			Pattern pattern = Pattern.compile("<([^_>]+)>_+</([^_>]+)>");
+			Matcher m = pattern.matcher(op);
+			if (sort.equals("BagItem") && m.matches()) {
 				Cell cell = new Cell();
-				assertXMLTerm(list.size() == 3 && list.get(0).getAttribute("sort").equals("CellLabel") && list.get(2).getAttribute("sort").equals("CellLabel") && list.get(0).getAttribute("op").equals(list.get(2).getAttribute("op")));
-
-				cell.setLabel(list.get(0).getAttribute("op"));
-				cell.setContents(parseXML(list.get(1)));
+				assertXMLTerm(list.size() >= 1 && m.group(1).equals(m.group(2)));
+				cell.setLabel(m.group(1));
+				Bag bag = new Bag();
+				for (Element el : list) {
+					bag.getContents().add(parseXML(el));
+				}
+				cell.setContents(bag);
 				return cell;
 			} else if (sort.equals("BagItem") && op.equals("BagItem")) {
 				assertXMLTerm(list.size() == 1);
