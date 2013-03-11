@@ -26,7 +26,7 @@ module LAMBDA
   syntax KResult ::= Type
 
   configuration <k color="green"> $PGM:Exp </k>
-                <mgu color="blue"> .Mgu </mgu>
+                <mgu color="blue" multiplicity="?"> .Mgu </mgu>
 
   rule I:Int => int
   rule B:Bool => bool
@@ -43,5 +43,5 @@ module LAMBDA
 
   syntax K ::= Type "=" Type
   rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
-  rule <k> T:Type => applyMgu(Theta,T) </k>  (<mgu> Theta:Mgu </mgu> => .)
+  rule <k> T:Type => applyMgu(Theta,T) </k>  <mgu> Theta:Mgu => . </mgu>
 endmodule

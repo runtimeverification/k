@@ -74,7 +74,7 @@ module LAMBDA
   rule <k> T:Type = T':Type => . ...</k>
        <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
   rule <tasks> <task> <k> T:Type => applyMgu(Theta,T) </k> ...</task> </tasks>
-       (<mgu> Theta:Mgu </mgu> => .)
+       <mgu> Theta:Mgu => . </mgu>
 
   rule <task>... <k> . </k> ...</task> => .
 endmodule
