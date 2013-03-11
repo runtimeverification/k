@@ -5,6 +5,7 @@ import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.Collection;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -45,6 +46,13 @@ public class SortCells extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Configuration node) throws TransformerException {
+//		variables.clear();
+//		final Term body1 = node.getBody();
+////		System.out.println(body1);
+//		Term body = (Term) body1.accept(new SortRightCells());
+////		System.out.println(body);
+//		node = node.shallowCopy();
+//		node.setBody(body);
 		return node;
 	}
 
@@ -225,21 +233,22 @@ public class SortCells extends CopyOnWriteTransformer {
 								node.getLocation()));
 					}
 					iCells = new ArrayList<Term>();
-				} else {
-					if ((iCells.size() > 1 || newVar != null) &&
-							(multiplicity == Cell.Multiplicity.ONE ||
-									multiplicity == Cell.Multiplicity.MAYBE)) {
-						GlobalSettings.kem.register(new KException(KException
-								.ExceptionType.ERROR,
-								KException.KExceptionGroup.COMPILER,
-								"Cell " + cell.getId() + " is found " +
-										iCells.size() + " times in cell" +
-										node.getId() + " but its multiplicity" +
-										" is " + multiplicity,
-								getName(),
-								node.getFilename(), node.getLocation()));
-					}
 				}
+//				else {
+//					if ((iCells.size() > 1 || newVar != null) &&
+//							(multiplicity == Cell.Multiplicity.ONE ||
+//									multiplicity == Cell.Multiplicity.MAYBE)) {
+//						GlobalSettings.kem.register(new KException(KException
+//								.ExceptionType.ERROR,
+//								KException.KExceptionGroup.COMPILER,
+//								"Cell " + cell.getId() + " is found " +
+//										iCells.size() + " times in cell" +
+//										node.getId() + " but its multiplicity" +
+//										" is " + multiplicity,
+//								getName(),
+//								node.getFilename(), node.getLocation()));
+//					}
+//				}
 				if (newVar != null) {
 					iCells.add(newVar);
 				}
@@ -274,10 +283,11 @@ public class SortCells extends CopyOnWriteTransformer {
 
 
 		private void initializeCellMap(Cell node) {
-			List<Term> cells = node.getCellTerms();
+			ArrayDeque<Term> cells = new ArrayDeque<Term>(node.getCellTerms());
 			framingVariable = null;
 			cellMap = new HashMap<String, List<Term>>();
-			for (Term i : cells) {
+			while (!cells.isEmpty()) {
+				Term i = cells.removeFirst();
 				if (i instanceof Empty || i instanceof TermComment) continue;
 				if (i instanceof Variable) {
 					if (framingVariable !=null) {
@@ -287,6 +297,10 @@ public class SortCells extends CopyOnWriteTransformer {
 								node.getFilename(), node.getLocation()));
 					}
 					framingVariable = (Variable) i;
+					continue;
+				}
+				if (i instanceof Collection) {
+					cells.addAll(((Collection)i).getContents());
 					continue;
 				}
 				if (!(i instanceof Cell)) {

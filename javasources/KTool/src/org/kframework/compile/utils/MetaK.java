@@ -199,7 +199,7 @@ public class MetaK {
 	}
 
 	public static Term wrap(Term t, String label, Ellipses ellipses) {
-		Cell cell = new Cell();
+		Cell cell = new Cell(t.getLocation(),t.getFilename());
 		cell.setLabel(label);
 		cell.setEllipses(ellipses);
 		cell.setContents(t);

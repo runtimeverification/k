@@ -1,6 +1,5 @@
 package org.kframework.backend;
 
-import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -86,7 +85,7 @@ public abstract class BasicBackend implements Backend {
 //		if (GlobalSettings.addTopCell) {
 		steps.add(new AddTopCellRules());
 //		}
-		steps.add(new AddEval());
+//		steps.add(new AddEval());
 		steps.add(new ResolveBinder());
 		steps.add(new ResolveAnonymousVariables());
 		steps.add(new ResolveBlockingInput());

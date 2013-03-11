@@ -274,6 +274,7 @@ public class MaudeFilter extends BackendFilter {
 			String placeHolders = "";
 			String sorts = "";
 			String fragSorts = "";
+			String format = "b n++i"
 			Cell cell = cellStr.cell;
 			if (cellStr.sons.isEmpty()) {
 				placeHolders="_";
