@@ -19,9 +19,10 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-public class AddPathCondition extends BasicTransformer {
+public class AddPathCondition extends CopyOnWriteTransformer {
 
 	public AddPathCondition() {
 		super("Add Path Condition to each rule");
@@ -94,10 +95,10 @@ public class AddPathCondition extends BasicTransformer {
 			// re-construct the rule
 			node = node.shallowCopy();
 			node.setBody(new Rewrite(left, right));
-			node.setAttributes(atts);
+            node.setAttributes(atts);
 //			node.setCondition(Constant.TRUE);
 			node.setCondition(cond);
-		}
+        }
 		
 		return node;
 	}

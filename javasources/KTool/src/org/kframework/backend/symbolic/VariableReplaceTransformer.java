@@ -16,11 +16,11 @@ public class VariableReplaceTransformer extends BasicTransformer {
 	private Map<Variable, Variable> generatedVariables;
 	private Set<String> vars;
 
-	public VariableReplaceTransformer(String name) {
-		super("Replace Variables");
-		generatedVariables = new HashMap<Variable, Variable>();
-		vars = new HashSet<String>();
-	}
+    public VariableReplaceTransformer(String name) {
+        super("Replace Variables");
+        generatedVariables = new HashMap<Variable, Variable>();
+        vars = new HashSet<String>();
+    }
 
 	@Override
 	public ASTNode transform(Variable node) throws TransformerException {
