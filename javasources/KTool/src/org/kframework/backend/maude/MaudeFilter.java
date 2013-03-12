@@ -274,13 +274,14 @@ public class MaudeFilter extends BackendFilter {
 			String placeHolders = "";
 			String sorts = "";
 			String fragSorts = "";
-			String format = "b n++i"
+			String format = "";
 			Cell cell = cellStr.cell;
 			if (cellStr.sons.isEmpty()) {
 				placeHolders="_";
+				format = "ni ";
 				sorts = KSort.getKSort(cell.getContents().getSort()).mainSort()
 						.toString();
-				declareCell(id,placeHolders, sorts);
+				declareCell(id,placeHolders, sorts, format);
 				continue;
 			}
 
@@ -288,6 +289,7 @@ public class MaudeFilter extends BackendFilter {
 			for (Term cCell : cfgCells) {
 				if (cCell instanceof TermComment) continue;
 				placeHolders += "_";
+				format += "ni ";
 				// Decided to declare all sorts as Bags to allow using
 				// cells instead of tuples for tupling purposes.
 
@@ -301,15 +303,15 @@ public class MaudeFilter extends BackendFilter {
 				fragSorts += MetaK.Constants.Bag + " ";
 				sorts += " ";
 			}
-			declareCell(id, placeHolders, sorts);
-			declareCell(id+"-fragment",placeHolders,fragSorts);
+			declareCell(id, placeHolders, sorts, format);
+			declareCell(id+"-fragment",placeHolders,fragSorts, format);
 		}
 
 		// result.append("mb configuration ");
 		// this.visit((Sentence)configuration);
 	}
 
-	private void declareCell(String id, String placeHolders, String sorts) {
+	private void declareCell(String id, String placeHolders, String sorts, String format) {
 		result.append(
 				"  op " +
 						"<" + id + ">" +
@@ -319,6 +321,7 @@ public class MaudeFilter extends BackendFilter {
 						sorts +
 						" -> " +
 						"BagItem " +
+						"[format(b o++" + format + "--nib o)]" +
 						"." +
 						"\n");
 	}
