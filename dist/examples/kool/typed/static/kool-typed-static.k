@@ -249,7 +249,7 @@ and the set of all its superclasses (in the \textsf{extendsAll} cell).
 The later is useful for example for checking whether there are cycles
 in the class extends relation. */
 
-  configuration <T color="yellow">
+  configuration <T color="yellow" multiplicity="?">
                   <tasks color="orange">
                     <task multiplicity="*" color="yellow">
                       <k color="green"> $PGM:Stmts </k>
@@ -268,8 +268,8 @@ in the class extends relation. */
                       <ctenv multiplicity="?" color="blue"> .Map </ctenv>
                     </class>
                   </classes>
-                  <out color="brown" stream="stdout"> .List </out>
                 </T>
+                  <out color="brown" stream="stdout"> .List </out>
 
 /*@ \subsection{Unchanged semantics from statically typed SIMPLE}
 
@@ -362,9 +362,12 @@ typed SIMPLE, so we do not discuss them much here. */
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
-  syntax Exp ::= ltype(Exp)  [function]
-  rule ltype(X:Id) => X
-  rule ltype(E:Exp [Es:Exps]) => (E[Es])
+  syntax LVal ::= Id 
+  rule isLVal(E:Exp [Es:Exps]) => true
+
+  syntax Exp ::= ltype(K)  
+  context ltype(HOLE)  when isLVal(HOLE)
+//  rule ltype(LV:LVal) => LV ~> ltype(HOLE) [heat]
 
   syntax Types ::= getTypes(Params)  [function]
   rule getTypes(T:Type _:Id) => T, .Types
@@ -542,12 +545,13 @@ instance of this rule). */
 // The rule below is also more complicated than needed because of the
 // configuration abstraction which does not seem to work right.  We
 // should not need to mention the classes cell.
-  rule <T> (<classes>... <className> C </className>
+  rule (<T>... <classes>... <className> C </className>
                          <className> C </className>
-            ...</classes> _ => .)
+            ...</classes> 
+       </T> => .)
            <out>... . => ListItem("Class \"" +String Id2String(C)
                                   +String "\" declared twice!\n") </out>
-       </T>  [structural]
+   [structural]
 
 /*@ \paragraph{Check for cycles in class hierarchy}
 We check for cycles in the class hierarchy by transitively closing the
@@ -567,12 +571,13 @@ checks for cycles. */
     when notBool(C' in SetItem(C) Cs)  [structural]
 
 // similarly, we should not need to mention the classes cell below
-  rule <T> (<classes>... <className> C </className>
+  rule (<T>... <classes>... <className> C </className>
                          <extendsAll>... SetItem(C) ...</extendsAll>
-            ...</classes> _ => .)
+            ...</classes>
+       ...</T>  => .) 
            <out>... . => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
-       </T>  [structural]
+    [structural]
 
 
 /*@ \subsubsection{New}
@@ -745,7 +750,7 @@ the \textsf{tasks} cell has been removed. */
 
 // cleanup tasks and output a success message when done
 
-  rule (<tasks> .Bag </tasks> => .)
+  rule (<T>... <tasks> .Bag </tasks>  ...</T> => .)
        <out>... . => ListItem("Type checked!\n") </out>
     [structural]
 
