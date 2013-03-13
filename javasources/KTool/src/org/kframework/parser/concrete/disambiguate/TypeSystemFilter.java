@@ -12,7 +12,6 @@ public class TypeSystemFilter extends BasicTransformer {
 
 	public TypeSystemFilter() {
 		super("Type system");
-		// TODO Auto-generated constructor stub
 	}
 
 	public ASTNode transform(TermCons tc) throws TransformerException {

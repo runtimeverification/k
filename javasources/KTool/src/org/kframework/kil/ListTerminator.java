@@ -4,8 +4,9 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-/** A subclass of {@link Empty} used to represent both typed and untyped cons list terminators.
- * Distinguished by {@link #sort} and {@link #separator} */
+/**
+ * A subclass of {@link Empty} used to represent both typed and untyped cons list terminators. Distinguished by {@link #sort} and {@link #separator}
+ */
 public class ListTerminator extends Empty {
 
 	private String separator;
@@ -22,7 +23,7 @@ public class ListTerminator extends Empty {
 
 	public ListTerminator(ListTerminator terminator) {
 		super(terminator);
-		this.separator = separator;
+		this.separator = terminator.separator;
 	}
 
 	public String toString() {
@@ -57,8 +58,9 @@ public class ListTerminator extends Empty {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof ListTerminator)) return false;
-		ListTerminator l = (ListTerminator)o;
+		if (!(o instanceof ListTerminator))
+			return false;
+		ListTerminator l = (ListTerminator) o;
 		return sort.equals(l.sort) && separator.equals(l.separator);
 	}
 

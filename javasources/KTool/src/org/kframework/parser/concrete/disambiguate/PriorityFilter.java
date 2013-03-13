@@ -34,7 +34,8 @@ public class PriorityFilter extends BasicTransformer {
 			}
 		}
 
-        if (tc.getProduction() == null) System.err.println("### " + tc.getCons());
+		if (tc.getProduction() == null)
+			System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
 		if (tc.getProduction().isListDecl()) {
 			parent = tc;
 			tc.getContents().set(0, (Term) tc.getContents().get(0).accept(this));
