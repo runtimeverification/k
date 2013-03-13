@@ -29,7 +29,7 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 	}
 
 	public ASTNode transform(Term trm) throws TransformerException {
-		if (!trm.getSort().equals("K"))
+		if (!trm.getSort().equals("K") && !trm.getSort().equals("KResult"))
 			if (!(maxSort.equals(trm.getSort()) || DefinitionHelper.isSubsorted(maxSort, trm.getSort()))) {
 				String msg = "Type error detected. Expected sort " + maxSort + ", but found " + trm.getSort();
 				KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, trm.getFilename(), trm.getLocation());
@@ -62,6 +62,7 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 
 	@Override
 	public ASTNode transform(Bracket node) throws TransformerException {
+		// TODO: when casting is available, uncomment this next line
 		// node.setContent((Term) node.getContent().accept(this));
 		return node;
 	}
