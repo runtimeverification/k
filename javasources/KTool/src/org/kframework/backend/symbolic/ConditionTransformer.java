@@ -3,10 +3,10 @@ package org.kframework.backend.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -25,25 +25,41 @@ public class ConditionTransformer extends CopyOnWriteTransformer  {
 		if (label instanceof Constant) {
 
 			String name = ((Constant) label).getValue();
+			Term content = node.getChild();
 			if (name.equals(Constant.ANDBOOL_KLABEL.getValue()))
 			{
-				return super.transform(node);		
+				if (content instanceof KList) {
+					List<Term> terms = ((KList) content).getContents();
+					List<Term> remainingTerms = new ArrayList<Term>();
+					for(Term t : terms) {
+						CheckSmtlibVisitor csv = new CheckSmtlibVisitor();
+						t.accept(csv);
+//						System.out.println("\t\tVALID: " + csv.smtValid());
+						if (csv.smtValid())
+							filteredTerms.add(t.shallowCopy());
+						else remainingTerms.add(t.shallowCopy());
+					}
+					content = new KList(remainingTerms);
+				}
 			}
-
-			if (name.equals(Constant.BOOL_ANDBOOL_KLABEL.getValue()))
-			{
-				node.setLabel(Constant.ANDBOOL_KLABEL);
-				return super.transform(node);
+			else {
+				CheckSmtlibVisitor csv = new CheckSmtlibVisitor();
+				content.accept(csv);
+//				System.out.println("\t\tVALID: " + csv.smtValid());
+				if (csv.smtValid())
+				{
+					filteredTerms.add(content.shallowCopy());
+					content = new KList();
+				}
+				
 			}
 			
-			if (MetaK.isPredefinedPredicate(name))
-			{
-				return node;
-			}
+			node = node.shallowCopy();
+			node.setChild(content);
+			return node;
 		}
 		
-		filteredTerms.add(node);
-		return null;
+		return super.transform(node);
 	}
 	
 	public List<Term> getFilteredTerms() {

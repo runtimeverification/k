@@ -18,7 +18,6 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -34,8 +33,17 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 		if (node.getCondition() == null)
 			return node;
 		
+		Term condition = node.getCondition();
+//		System.out.println("BEFO: " + condition);
+		CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer();
+		condition = (Term) node.getCondition().accept(cnft);
+		
 		ConditionTransformer ct = new ConditionTransformer();
-		Term condition = (Term) node.getCondition().accept(ct);
+		condition = (Term) node.getCondition().accept(ct);
+
+//		System.out.println("REMA: " + condition);
+//		System.out.println("REMO: " + ct.getFilteredTerms());
+//		System.out.println();
 		if (ct.getFilteredTerms().isEmpty())
 			return node;
 		

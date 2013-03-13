@@ -7,7 +7,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Rule;
-import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.KPaths;
@@ -15,7 +14,7 @@ import org.kframework.krun.KPaths;
 public class TagUserRules extends CopyOnWriteTransformer {
 
 	public TagUserRules() {
-		super("Tag rules which are not builtin with symbolic");
+		super("Tag rules which are not builtin with 'symbolic' tag");
 	}
 
 	@Override
