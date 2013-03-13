@@ -49,10 +49,10 @@ module STRING-HOOKS
   syntax Bool ::= String "=/=String" String      [function, left]
   rule S1:String =/=String S2:String => notBool(S1 ==String S2)
 
-  syntax String ::= String "<String" String [function, hook(#STRING:_<String_)]
-                  | String "<=String" String [function]
-                  | String ">String" String [function]
-                  | String ">=String" String [function]
+  syntax Bool ::= String "<String" String [function, hook(#STRING:_<String_)]
+                | String "<=String" String [function]
+                | String ">String" String [function]
+                | String ">=String" String [function]
 
   rule S1:String <=String S2:String => notBool(S2 <String S1)
   rule S1:String >String S2:String => S2 <String S1
@@ -63,14 +63,14 @@ module STRING-HOOKS
   rule isChar(S:String) => lengthString(S) ==Int 1 [function, anywhere]
 
   syntax Bool ::= "#isWhiteSpace" "(" Char ")"   [function, klabel(#isWhiteSpace)]
-  rule #isWhiteSpace(C:Char)
+  rule #isWhiteSpace(C)
       => (asciiString(C) >=Int 9 andBool asciiString(C) <=Int 13)  
-           orBool (C ==String " ")
+           orBool (C ==String " ") when isChar(C)
 
   syntax Bool ::= "#isDigit" "(" Char ")"        [function, klabel(#isDigit)]
-  rule #isDigit(C:Char) 
+  rule #isDigit(C) 
       => (asciiString(C) >=Int asciiString("0")) 
-           andBool (asciiString(C) <=Int asciiString("9"))
+           andBool (asciiString(C) <=Int asciiString("9")) when isChar(C)
 
   rule countAllOccurences(Source:String, ToCount:String) => 0 
 			when findString(Source, ToCount, 0) <Int 0

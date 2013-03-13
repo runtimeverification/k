@@ -63,7 +63,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 public class BasicHookWorker implements Transformer {
 
 	private String name;
-	private boolean skip;
+	protected boolean skip;
 
 	public BasicHookWorker(String name) {
 		this.name = name;

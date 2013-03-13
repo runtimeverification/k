@@ -141,20 +141,20 @@ module URIS
          when isChar(C)
 
   // Skipping initial whitespace if reading more than a character
-  rule #parse(S:String,.K) (ListItem(C:String) => .List) 
-        when S =/=String "#Char" andBool #isWhiteSpace(C)
+  rule #parse(S:String,.K) (ListItem(C) => .List) 
+        when S =/=String "#Char" andBool #isWhiteSpace(C) andBool isString(C)
 
 
   // Read a token
-  rule #parse(S:String,.K => "") ListItem(C:String) 
-        when S =/=String "#Char" andBool notBool(#isWhiteSpace(C))
+  rule #parse(S:String,.K => "") ListItem(C)
+        when S =/=String "#Char" andBool notBool(#isWhiteSpace(C)) andBool isString(C)
         
-  rule #parse(_:String, S:String => S:String +String C) (ListItem(C:String) => .List) 
-    when notBool(#isWhiteSpace(C))
+  rule #parse(_:String, S:String => S:String +String C) (ListItem(C) => .List) 
+    when notBool(#isWhiteSpace(C)) andBool isString(C)
 
   // Upon encountering again whitespace, convert token
-  rule #parse(SType:String,S:String) ListItem(C:String) => #convertToken(SType, S)
-    when #isWhiteSpace(C)
+  rule #parse(SType:String,S:String) ListItem(C) => #convertToken(SType, S)
+    when #isWhiteSpace(C) andBool isString(C)
 
   rule (#parse(SType:String,S:String) => #convertToken(SType, S)) ListItem(#EOF)
   
