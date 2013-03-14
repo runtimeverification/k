@@ -62,7 +62,7 @@ public class CheckVariables extends BasicVisitor {
 					getName(), node.getFilename(), node.getLocation()
 			));
 		}
-		System.out.println("Variable: " + node);
+//		System.out.println("Variable: " + node);
 		Integer i = current.remove(node);
 		if (i == null) {
 			i = new Integer(1);
