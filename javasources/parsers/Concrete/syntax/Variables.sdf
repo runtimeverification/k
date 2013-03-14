@@ -32,9 +32,13 @@ context-free syntax
 	VARID					-> KLabel {cons("KLabel1Var")}
 	VARID ":" "KResult"		-> K {cons("KResult12Var")}
 
+	":" -> ColonDz {cons("Colon")}
+	"?" -> QuestionMarkDz {cons("QuestionMark")} 
+	
+
 lexical syntax
 	%% Variables and the Anonymous Variable
-	"$"?[A-Z] [a-zA-Z0-9\']*  -> VARID
+	("$"|"?")?[A-Z] [a-zA-Z0-9\']*  -> VARID
 	"_" -> VARID
 	"HOLE" -> VARID {reject}
 
@@ -51,8 +55,13 @@ lexical syntax
 	%%"keys"			-> ID {reject}
 	%%"hasMapping"	-> ID {reject}
 
+context-free restrictions
+	ColonDz -/- [A-Z] 
+	QuestionMarkDz -/- [A-Z] 
+
 lexical restrictions
 	VARID -/- [a-zA-Z0-9\']
+
 
 	
 	

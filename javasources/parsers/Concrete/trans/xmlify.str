@@ -24,6 +24,11 @@ rules
 
 	// print the K definition as an XML - parsing only the syntax
 	to-xml1:
+		"Colon"#(_) -> $[]
+	to-xml1:
+		"QuestionMark"#(_) -> $[]
+
+	to-xml1:
 		Config(x1) -> $[<config loc="[loc]">
 			<body>
 				[<to-xml> x1]

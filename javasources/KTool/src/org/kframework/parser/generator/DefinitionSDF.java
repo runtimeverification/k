@@ -136,7 +136,9 @@ public class DefinitionSDF {
 					if (itm.getType() == ProductionType.TERMINAL) {
 						Terminal t = (Terminal) itm;
 						if (t.getTerminal().equals(":"))
-							sdf.append("DouaPuncteDz ");
+							sdf.append("ColonDz ");
+						else if (t.getTerminal().equals("?"))
+							sdf.append("QuestionMarkDz ");
 						else
 							sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 					} else if (itm.getType() == ProductionType.SORT) {
@@ -186,13 +188,11 @@ public class DefinitionSDF {
 		// sdf.append("	DzDzID		-> DzDzId\n");
 		sdf.append("	DzDzSTRING	-> DzDzString\n");
 		sdf.append("	DzDzFLOAT	-> DzDzFloat\n");
-		sdf.append("	\":\" -> DouaPuncteDz {cons(\"DouaPuncte\")}\n");
 
 		sdf.append("\n");
 
 		sdf.append("context-free restrictions\n");
 		sdf.append("	VariableDz -/- ~[\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]\n");
-		sdf.append("	DouaPuncteDz -/- [A-Z]\n\n");
 
 		sdf.append("lexical syntax\n");
 		for (Production p : psdfv.constants) {
