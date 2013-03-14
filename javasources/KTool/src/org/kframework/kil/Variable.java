@@ -35,6 +35,7 @@ public class Variable extends Term {
 	public Variable(Variable variable) {
 		super(variable);
 		name = variable.name;
+		fresh = variable.fresh;
 	}
 
 	public void setName(String name) {

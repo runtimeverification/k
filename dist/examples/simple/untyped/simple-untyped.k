@@ -321,6 +321,7 @@ to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
                   <terminated color="red"> .Set </terminated>
+                  <br/>
                   <in color="magenta" stream="stdin"> .List </in>
                   <out color="brown" stream="stdout"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
