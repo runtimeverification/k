@@ -38,13 +38,15 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 	public StringBuilder sdf = new StringBuilder();
 	public List<Production> lexical = new ArrayList<Production>();
 	public List<Restrictions> restrictions = new ArrayList<Restrictions>();
+	private boolean ground = false;
 
-	public DefinitionSDFVisitor() {
+	public DefinitionSDFVisitor(boolean ground) {
 		constantSorts.add("#Id");
 		constantSorts.add("#Bool");
 		constantSorts.add("#Int");
 		constantSorts.add("#String");
 		constantSorts.add("#Float");
+		this.ground = ground;
 	}
 
 	public void visit(Syntax syn) {
@@ -152,9 +154,14 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 							ProductionItem itm = items.get(i);
 							if (itm.getType() == ProductionType.TERMINAL) {
 								Terminal t = (Terminal) itm;
-								if (t.getTerminal().equals(":"))
-									sdf.append("DouaPuncteDz ");
-								else
+								if (ground) {
+									if (t.getTerminal().equals(":"))
+										sdf.append("ColonDz ");
+									else if (t.getTerminal().equals("?"))
+										sdf.append("QuestionMarkDz ");
+									else
+										sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
+								} else
 									sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 							} else if (itm.getType() == ProductionType.SORT) {
 								Sort srt = (Sort) itm;

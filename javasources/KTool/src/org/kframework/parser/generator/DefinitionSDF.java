@@ -29,7 +29,7 @@ public class DefinitionSDF {
 		sdf.append("exports\n\n");
 		sdf.append("context-free syntax\n");
 
-		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor();
+		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(false);
 		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor();
 		def.accept(psdfv);
 		def.accept(terminals);
