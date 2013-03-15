@@ -329,6 +329,14 @@ public class SortCells extends CopyOnWriteTransformer {
 
 	}
 
+	public Term getCellFragment(Variable node) {
+		try {
+			return (Cell) node.accept(new ResolveRemainingVariables());
+		} catch (Exception e) {
+			return node;
+		}
+	}
+
 	private class ResolveRemainingVariables extends CopyOnWriteTransformer {
 		private ResolveRemainingVariables() {
 			super("SortCells: resolving remaining variables");

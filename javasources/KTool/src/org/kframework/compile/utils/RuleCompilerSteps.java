@@ -1,20 +1,18 @@
 package org.kframework.compile.utils;
 
 import org.kframework.compile.transformers.*;
-import org.kframework.kil.Cell;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-
-import java.util.Map;
 
 public class RuleCompilerSteps extends CompilerSteps<Rule> {
 
-	public Map<Variable, Cell> getVariableMap() {
-		return variableMap;
-	}
+	private final SortCells cellSorter;
 
-	private final Map<Variable, Cell> variableMap;
+	public Term getCellFragment(Variable v) {
+		return cellSorter.getCellFragment(v);
+	}
 
 	public RuleCompilerSteps(Definition def) {
 		super();
@@ -34,8 +32,7 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
 						configurationStructureMap);
 		this.add(resolveContextAbstraction);
 		this.add(new ResolveOpenCells());
-		final SortCells sortCells = new SortCells(configurationStructureMap);
-		variableMap = sortCells.getVariables();
-		this.add(sortCells.getConfigurationTransformer());
+		cellSorter = new SortCells(configurationStructureMap);
+		this.add(cellSorter.getConfigurationTransformer());
 	}
 }
