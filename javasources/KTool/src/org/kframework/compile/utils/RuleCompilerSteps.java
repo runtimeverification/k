@@ -24,6 +24,6 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
 						configurationStructureMap);
 		this.add(resolveContextAbstraction);
 		this.add(new ResolveOpenCells());
-		this.add(new SortCells(configurationStructureMap));
+		this.add(new SortCells(configurationStructureMap).getConfigurationTransformer());
 	}
 }
