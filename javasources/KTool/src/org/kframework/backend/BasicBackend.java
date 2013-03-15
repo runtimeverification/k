@@ -13,6 +13,7 @@ import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.FunctionalAdaptor;
 import org.kframework.kil.Definition;
 import org.kframework.main.FirstStep;
@@ -28,18 +29,29 @@ import org.kframework.utils.general.GlobalSettings;
 public abstract class BasicBackend implements Backend {
 	protected Stopwatch sw;
 
-	public ResolveConfigurationAbstraction getResolveConfigurationAbstraction() {
-		return resolveConfigurationAbstraction;
+	public ConfigurationStructureMap getConfigurationStructureMap() {
+		return configurationStructureMap;
 	}
 
-	public void setResolveConfigurationAbstraction(ResolveConfigurationAbstraction resolveConfigurationAbstraction) {
-		this.resolveConfigurationAbstraction = resolveConfigurationAbstraction;
+	public void setConfigurationStructureMap(ConfigurationStructureMap configurationStructureMap) {
+		this.configurationStructureMap = configurationStructureMap;
 	}
 
-	protected ResolveConfigurationAbstraction resolveConfigurationAbstraction;
+	private ConfigurationStructureMap configurationStructureMap;
+
+//	public ResolveConfigurationAbstraction getResolveConfigurationAbstraction() {
+//		return resolveConfigurationAbstraction;
+//	}
+//
+//	public void setResolveConfigurationAbstraction(ResolveConfigurationAbstraction resolveConfigurationAbstraction) {
+//		this.resolveConfigurationAbstraction = resolveConfigurationAbstraction;
+//	}
+//
+//	protected ResolveConfigurationAbstraction resolveConfigurationAbstraction;
 
 	public BasicBackend(Stopwatch sw) {
 		this.sw = sw;
+		configurationStructureMap = new ConfigurationStructureMap();
 	}
 
 	@Override
@@ -98,11 +110,10 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new AddKLabelToString());
 		steps.add(new AddKLabelConstant());
 		steps.add(new ResolveHybrid());
-		resolveConfigurationAbstraction = new ResolveConfigurationAbstraction();
-		steps.add(resolveConfigurationAbstraction);
+		steps.add(new ResolveConfigurationAbstraction (configurationStructureMap));
 		steps.add(new ResolveOpenCells());
 		steps.add(new ResolveRewrite());
-		steps.add(new SortCells(resolveConfigurationAbstraction));
+		steps.add(new SortCells(configurationStructureMap));
 		steps.add(new ResolveSupercool());
 		steps.add(new AddStrictStar());
 		steps.add(new AddDefaultComputational());

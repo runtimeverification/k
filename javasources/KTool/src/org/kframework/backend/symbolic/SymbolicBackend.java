@@ -1,10 +1,5 @@
 package org.kframework.backend.symbolic;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
-
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.maude.MaudeBackend;
@@ -20,39 +15,10 @@ import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.AddHeatingConditions;
-import org.kframework.compile.transformers.AddK2SMTLib;
-import org.kframework.compile.transformers.AddKCell;
-import org.kframework.compile.transformers.AddKLabelConstant;
-import org.kframework.compile.transformers.AddKLabelToString;
-import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.transformers.AddSemanticEquality;
-import org.kframework.compile.transformers.AddSupercoolDefinition;
-import org.kframework.compile.transformers.AddSuperheatRules;
-import org.kframework.compile.transformers.AddSymbolicK;
-import org.kframework.compile.transformers.AddTopCellConfig;
-import org.kframework.compile.transformers.AddTopCellRules;
-import org.kframework.compile.transformers.ContextsToHeating;
-import org.kframework.compile.transformers.DesugarStreams;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.FreezeUserFreezers;
-import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.transformers.ResolveAnonymousVariables;
-import org.kframework.compile.transformers.ResolveBinder;
-import org.kframework.compile.transformers.ResolveBlockingInput;
-import org.kframework.compile.transformers.ResolveBuiltins;
-import org.kframework.compile.transformers.ResolveFreshMOS;
-import org.kframework.compile.transformers.ResolveFunctions;
-import org.kframework.compile.transformers.ResolveHybrid;
-import org.kframework.compile.transformers.ResolveListOfK;
-import org.kframework.compile.transformers.ResolveOpenCells;
-import org.kframework.compile.transformers.ResolveRewrite;
-import org.kframework.compile.transformers.ResolveSupercool;
-import org.kframework.compile.transformers.ResolveSyntaxPredicates;
-import org.kframework.compile.transformers.StrictnessToContexts;
+import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.FunctionalAdaptor;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -61,6 +27,11 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 public class SymbolicBackend extends BasicBackend implements Backend {
 
@@ -187,7 +158,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new AddKLabelToString());
 		steps.add(new AddKLabelConstant());
 		steps.add(new ResolveHybrid());
-		steps.add(new ResolveConfigurationAbstraction());
+		steps.add(new ResolveConfigurationAbstraction(new ConfigurationStructureMap()));
 		steps.add(new ResolveOpenCells());
 		steps.add(new ResolveRewrite());
 		steps.add(new ReplaceConstants());

@@ -9,10 +9,13 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
 
     Stack<ConfigurationStructure> ancestors = new Stack<ConfigurationStructure>();
 
-	private ConfigurationStructureMap config = new ConfigurationStructureMap();
+	private ConfigurationStructureMap config;
 	private int maxLevel = 0;
-	
-	
+
+	public ConfigurationStructureVisitor(ConfigurationStructureMap cfgStr) {
+		this.config = cfgStr;
+	}
+
 	@Override
 	public void visit(Configuration node) {
 		Term t = node.getBody();
@@ -52,10 +55,6 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
 
 	@Override
 	public void visit(Rule node) {
-	}
-
-	public ConfigurationStructureMap getConfig() {
-		return config;
 	}
 
 	public int getMaxLevel() {

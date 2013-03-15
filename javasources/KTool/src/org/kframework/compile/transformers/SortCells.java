@@ -1,6 +1,5 @@
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
@@ -31,17 +30,14 @@ import java.util.Map;
  */
 public class SortCells extends CopyOnWriteTransformer {
 
-	private ResolveConfigurationAbstraction resolveConfigurationAbstraction;
 	private Map<Variable,Cell> variables
 			= new HashMap<Variable, Cell>();
+	private final ConfigurationStructureMap configurationStructureMap;
 
-	public SortCells() {
+
+	public SortCells(ConfigurationStructureMap configurationStructureMap) {
 		super("SortCells");
-	}
-
-	public SortCells(ResolveConfigurationAbstraction resolveConfigurationAbstraction) {
-		this();
-		this.resolveConfigurationAbstraction = resolveConfigurationAbstraction;
+		this.configurationStructureMap = configurationStructureMap;
 	}
 
 	@Override
@@ -186,7 +182,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		}
 
 		ASTNode transformTop(Cell node) {
-			ConfigurationStructureMap config = resolveConfigurationAbstraction.cfgStr;
+			ConfigurationStructureMap config = configurationStructureMap;
 			ConfigurationStructure cfgStr = config.get(node.getId());
 			if (cfgStr.sons.isEmpty()) {
 				return node;
