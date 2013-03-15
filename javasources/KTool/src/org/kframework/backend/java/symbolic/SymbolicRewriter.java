@@ -90,12 +90,14 @@ public class SymbolicRewriter {
         return null;
     }
 
-    public void rewrite(Term term) {
+    public Term rewrite(Term term) {
         for (Rule rule : rules) {
             if (matcher.isMatching(term, rule.leftHandSide)) {
                 System.err.println(rule.leftHandSide);
             }
         }
+
+        return term;
     }
 
 

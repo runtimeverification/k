@@ -26,6 +26,9 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.api.KRun;
+import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.api.KRunState;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.BinaryLoader;
@@ -48,7 +51,7 @@ import java.util.Properties;
  */
 public class JavaSymbolicBackend extends BasicBackend {
 
-    //public static String SYMBOLIC = "symbolic-kompile";
+    public static final String DEFINITION_FILENAME = "java_symbolic_definition.bin";
 
     public JavaSymbolicBackend(Stopwatch sw) {
         super(sw);
@@ -83,22 +86,15 @@ public class JavaSymbolicBackend extends BasicBackend {
     @Override
     public Definition lastStep(Definition javaDef) {
         try {
-            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream("javadef"));
+            OutputStream outputStream = new BufferedOutputStream(
+                    new FileOutputStream(JavaSymbolicBackend.DEFINITION_FILENAME));
             BinaryLoader.toBinary(javaDef, outputStream);
             outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        try {
-            InputStream inputStream = new BufferedInputStream(new FileInputStream("javadef"));
-            javaDef = (Definition) BinaryLoader.fromBinary(inputStream);
-            inputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        SymbolicRewriter symbolicRewriter = new SymbolicRewriter(javaDef);
+        //SymbolicRewriter symbolicRewriter = new SymbolicRewriter(javaDef);
 
         Term term;
         List<Term> list = new ArrayList<Term>();
@@ -121,7 +117,12 @@ public class JavaSymbolicBackend extends BasicBackend {
             e.printStackTrace();
         }
 
-        symbolicRewriter.rewrite(term);
+        KRun kRun = new JavaSymbolicKRun();
+        try {
+            kRun.run(term);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return javaDef;
     }
