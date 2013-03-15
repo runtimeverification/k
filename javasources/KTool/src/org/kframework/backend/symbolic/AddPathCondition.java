@@ -34,16 +34,12 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 			return node;
 		
 		Term condition = node.getCondition();
-//		System.out.println("BEFO: " + condition);
 		CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer();
 		condition = (Term) node.getCondition().accept(cnft);
 		
 		ConditionTransformer ct = new ConditionTransformer();
 		condition = (Term) node.getCondition().accept(ct);
 
-//		System.out.println("REMA: " + condition);
-//		System.out.println("REMO: " + ct.getFilteredTerms());
-//		System.out.println();
 		if (ct.getFilteredTerms().isEmpty())
 			return node;
 		
@@ -104,7 +100,6 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 			node = node.shallowCopy();
 			node.setBody(new Rewrite(left, right));
             node.setAttributes(atts);
-//			node.setCondition(Constant.TRUE);
 			node.setCondition(cond);
         }
 		

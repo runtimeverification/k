@@ -25,7 +25,6 @@ public class CheckSmtlibVisitor extends BasicVisitor {
 	@Override
 	public void visit(KApp node) {
 		Term label = node.getLabel();
-//		System.out.println("INSPECT: " + label);
 		if (label instanceof Constant) {
 			Set<Production> prods = DefinitionHelper.productions
 					.get(((Constant) label).getValue().trim());
@@ -38,8 +37,8 @@ public class CheckSmtlibVisitor extends BasicVisitor {
 					if (p.containsAttribute("smtlib"))
 						smtValid = true;
 					else smtValid = false;
-//					System.out.println("\t P:" + p + ", CHECK:" + p.containsAttribute("smtlib") + ", ATTR: " + smtValid);
-					// stop after one step
+
+					// only first production assumed
 					break;
 				}
 			}

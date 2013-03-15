@@ -34,7 +34,6 @@ public class ConditionTransformer extends CopyOnWriteTransformer  {
 					for(Term t : terms) {
 						CheckSmtlibVisitor csv = new CheckSmtlibVisitor();
 						t.accept(csv);
-//						System.out.println("\t\tVALID: " + csv.smtValid());
 						if (csv.smtValid())
 							filteredTerms.add(t.shallowCopy());
 						else remainingTerms.add(t.shallowCopy());
@@ -45,7 +44,6 @@ public class ConditionTransformer extends CopyOnWriteTransformer  {
 			else {
 				CheckSmtlibVisitor csv = new CheckSmtlibVisitor();
 				content.accept(csv);
-//				System.out.println("\t\tVALID: " + csv.smtValid());
 				if (csv.smtValid())
 				{
 					filteredTerms.add(content.shallowCopy());

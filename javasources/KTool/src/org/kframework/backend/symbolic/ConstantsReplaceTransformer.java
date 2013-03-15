@@ -41,8 +41,6 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
 		
 		String sort = "K";
 		Variable newVar = MetaK.getFreshVar(sort);
-//		System.out.println("Transforming constant " + constant +
-//				" into variable " + newVar);
 		
 		generatedSV.put(newVar, constant);
 		return newVar;

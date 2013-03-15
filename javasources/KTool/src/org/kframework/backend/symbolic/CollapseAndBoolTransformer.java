@@ -21,24 +21,18 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
 	public ASTNode transform(KApp node) throws TransformerException {
 
 		Term label = node.getLabel();
-//		System.out.println("STEP: " + node);
 		Term newContent = node.getChild().shallowCopy();
 		if (label instanceof Constant) {
 			String labelName = ((Constant) label).getValue();
-			// System.out.println("LABEL: \"" + labelName + "\" == \"" +
-			// Constant.ANDBOOL_KLABEL + "\" ? " +
-			// labelName.trim().equals(Constant.ANDBOOL_KLABEL.getValue().trim()));
 
 			if (labelName
 					.equals(Constant.BOOL_ANDBOOL_KLABEL.getValue().trim())) {
 				node = node.shallowCopy();
 				node.setLabel(Constant.ANDBOOL_KLABEL);
-//				System.out.println("Changed: " + node);
 				return transform(node);
 			}
 
 			if (labelName.equals(Constant.ANDBOOL_KLABEL.getValue().trim())) {
-				// System.out.println("DEBUG1:" + node);
 				Term content = node.getChild();
 				if (content instanceof KList) {
 					List<Term> list = ((KList) content).getContents();
@@ -59,7 +53,6 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
 											|| ct.getValue()
 													.equals(Constant.BOOL_ANDBOOL_KLABEL
 															.getValue().trim())) {
-										// System.out.println("HERE: " + tapp);
 										newList.add(tapp.getChild()
 												.shallowCopy());
 										collapsed = true;
@@ -72,28 +65,22 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
 						newContent = new KList(newList);
 					}
 				} else if (content instanceof KApp) {
-					// System.out.println("DEBUG2:" + node);
 					Term aLabel = ((KApp) content).getLabel();
 					if (aLabel instanceof Constant) {
-//						System.out.println("DEBUG2:" + content);
 						if (((Constant) aLabel).getValue().equals(
 								Constant.ANDBOOL_KLABEL.getValue().trim())
 								|| ((Constant) aLabel).getValue().equals(
 										Constant.BOOL_ANDBOOL_KLABEL.getValue()
 												.trim()))
-//							System.out.println("HERE2: " + content);
 						newContent = ((KApp) content).getChild().shallowCopy();
 					}
 				}
-			} else {
-				// System.out.println("DEBUG3:" + node);
 			}
 			node = node.shallowCopy();
 			node.setChild(newContent);
 			return node;
 		}
 
-//		System.out.println("AFTER: " + node);
 		return super.transform(node);
 	}
 }
