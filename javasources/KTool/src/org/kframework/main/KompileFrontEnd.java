@@ -10,6 +10,7 @@ import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
 import org.kframework.backend.doc.DocumentationBackend;
 import org.kframework.backend.html.HtmlBackend;
+import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
 import org.kframework.backend.kil.KExpBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
@@ -153,7 +154,6 @@ public class KompileFrontEnd {
 		// Matching Logic & Symbolic Calculus options
 		GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
 		GlobalSettings.SMT = cmd.hasOption("smt");
-		GlobalSettings.matchingLogic = cmd.hasOption("ml");
 		
 		if (DefinitionHelper.dotk == null) {
 			try {
@@ -202,7 +202,10 @@ public class KompileFrontEnd {
 			DefinitionHelper.dotk = new File(output);
 			DefinitionHelper.dotk.mkdirs();
 
-		} else {
+		} else if (cmd.hasOption("ml")) {
+            GlobalSettings.matchingLogic = true;
+            backend = new JavaSymbolicBackend(Stopwatch.sw);
+        } else {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
