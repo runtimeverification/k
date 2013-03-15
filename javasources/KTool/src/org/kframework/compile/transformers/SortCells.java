@@ -31,6 +31,10 @@ import java.util.Map;
  */
 public class SortCells extends CopyOnWriteTransformer {
 
+	public Map<Variable, Cell> getVariables() {
+		return variables;
+	}
+
 	private Map<Variable,Cell> variables
 			= new HashMap<Variable, Cell>();
 	private final ConfigurationStructureMap configurationStructureMap;
