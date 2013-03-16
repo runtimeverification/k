@@ -11,6 +11,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.maude.MaudeFilter;
+import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
@@ -136,16 +137,13 @@ public class Main {
 		}
 	}
 
-	private static String parseTerm(String value) throws Exception {
+	private static Term parseTerm(String value) throws Exception {
 		org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
 		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "", "Command line argument");
-		term = term.accept(new FlattenSyntax());
-		MaudeFilter maudeFilter = new MaudeFilter();
-		term.accept(maudeFilter);
-		return maudeFilter.getResult();
+		return (Term) term.accept(new FlattenSyntax());
 	}
 
-	public static Term plug(Map<String, String> args) throws TransformerException {
+	public static Term plug(Map<String, Term> args) throws TransformerException {
 		Configuration cfg = K.kompiled_cfg;
 		ASTNode cfgCleanedNode = null;
 		try {
@@ -167,29 +165,23 @@ public class Main {
 			cfgCleaned = ((Configuration)cfgCleanedNode).getBody();
 		}
 
-		Map<String, Term> termArgs = new HashMap<String, Term>();
-		for (String key : args.keySet()) {
-			termArgs.put(key, new BackendTerm("", "(" + args.get(key) + ")")); // the SubstitutionFilter automatically inserts the sort of BackendTerms
-		}
-		
 		if(GlobalSettings.verbose)
 			sw.printIntermediate("Plug configuration variables");
 
-		return (Term) cfgCleaned.accept(new SubstitutionFilter(termArgs));
+		return (Term) cfgCleaned.accept(new SubstitutionFilter(args));
 	}
 
-	public static Term makeConfiguration(String kast, String stdin, RunProcess rp, boolean hasTerm) throws TransformerException {
+	public static Term makeConfiguration(Term kast, String stdin, RunProcess rp, boolean hasTerm) throws TransformerException {
 
 		if(hasTerm) {
 			if(kast == null) {
-				kast = rp.runParser(K.parser, K.term, false, null);
-				return new BackendTerm("Bag", kast);
+				return rp.runParser(K.parser, K.term, false, null);
 			} else {
 				Error.report("You cannot specify both the term and the configuration variables.");
 			}
 		}
 
-		HashMap<String, String> output = new HashMap<String, String>();
+		HashMap<String, Term> output = new HashMap<String, Term>();
 		boolean hasPGM = false;
 		Enumeration<Object> en = K.configuration_variables.keys();
 		while (en.hasMoreElements()) {
@@ -197,7 +189,7 @@ public class Main {
 			String value = K.configuration_variables.getProperty(name);
 			String parser = K.cfg_parsers.getProperty(name);
 			// TODO: get sort from configuration term in definition and pass it here
-			String parsed = "";
+			Term parsed = null;
 			if (parser == null) {
 				try {
 					parsed = parseTerm(value);
@@ -218,11 +210,11 @@ public class Main {
 			stdin = "";
 		}
 		if (stdin != null) {
-			output.put("$noIO", "#noIO");
-			output.put("$stdin", "# \"" + stdin + "\\n\"(.KList)");
+			output.put("$noIO", new BackendTerm("List", "#noIO"));
+			output.put("$stdin", new BackendTerm("K", "# \"" + stdin + "\\n\"(.KList)"));
 		} else {
-			output.put("$noIO", "(.).List");
-			output.put("$stdin", "(.).K");
+			output.put("$noIO", new Empty("List"));
+			output.put("$stdin", new Empty("K"));
 		}
 		
 		if(GlobalSettings.verbose)
@@ -232,12 +224,19 @@ public class Main {
 	}
 
 	// execute krun in normal mode (i.e. not in debug mode)
-	public static void normalExecution(String KAST, String lang, RunProcess rp, CommandlineOptions cmd_options) {
+	public static void normalExecution(Term KAST, String lang, RunProcess rp, CommandlineOptions cmd_options) {
 		try {
 			List<String> red = new ArrayList<String>();
 			CommandLine cmd = cmd_options.getCommandLine();
 
-			KRun krun = new MaudeKRun();
+			KRun krun = null; 
+			if (K.backend.equals("maude")) {
+				krun = new MaudeKRun();
+			} else if (K.backend.equals("java-symbolic")) {
+				krun = new JavaSymbolicKRun();
+			} else {
+				Error.report("Currently supported backends are 'maude' and 'java-symbolic'");
+			}
 			KRunResult<?> result = null;
 			Set<String> varNames = null;
 			Rule patternRule = null;
@@ -298,7 +297,7 @@ public class Main {
 				} else if (K.model_checking.length() > 0) {
 					// run kast for the formula to be verified
 					File formulaFile = new File(K.model_checking);
-					String KAST1 = new String();
+					Term KAST1 = null;
 					if (!formulaFile.exists()) {
 						// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
 						// assume that the specified argument is not a file and maybe represents a formula
@@ -308,7 +307,7 @@ public class Main {
 						KAST1 = rp.runParser(K.parser, K.model_checking, false, "LTLFormula");
 					}
 
-					result = krun.modelCheck(new BackendTerm("K", KAST1), makeConfiguration(KAST, null, rp, (K.term != null)));
+					result = krun.modelCheck(KAST1, makeConfiguration(KAST, null, rp, (K.term != null)));
 
 					if(GlobalSettings.verbose)
 						sw.printTotal("Model checking total");
@@ -409,7 +408,7 @@ public class Main {
 
 	// execute krun in debug mode (i.e. step by step execution)
 	// isSwitch variable is true if we enter in debug execution from normal execution (we use the search command with --graph option)
-	public static void debugExecution(String kast, String lang, KRunResult<SearchResults> state) {
+	public static void debugExecution(Term kast, String lang, KRunResult<SearchResults> state) {
 		try {
 			// adding autocompletion and history feature to the stepper internal commandline by using the JLine library
 			ConsoleReader reader = new ConsoleReader();
@@ -768,6 +767,9 @@ public class Main {
 					}
 				}
 			}
+			if (cmd.hasOption("backend")) {
+				K.backend = cmd.getOptionValue("backend");
+			}
 
 			// printing the output according to the given options
 			if (K.help) {
@@ -846,7 +848,7 @@ public class Main {
 				sw.printIntermediate("Checking compiled definition");
 
 			// in KAST variable we obtain the output from running kast process on a program defined in K
-			String KAST = new String();
+			Term KAST = null;
 			RunProcess rp = new RunProcess();
 
 			if (!DefinitionHelper.initialized) {
@@ -904,7 +906,11 @@ public class Main {
 
 			if(K.term != null) {
 				if(K.parser.equals("kast")) {
-					GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
+					if (K.backend.equals("java-symbolic")) {
+						GlobalSettings.whatParser = GlobalSettings.ParserType.RULES;
+					} else {
+						GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
+					}
 				}
 			}
 			

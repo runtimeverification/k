@@ -98,4 +98,6 @@ public class K {
 
 	public static int counter = 0;
 	public static int stateCounter = 0;
+
+	public static String backend = "maude";
 }

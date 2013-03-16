@@ -163,6 +163,9 @@ public class CommandlineOptions {
 		Option configuration_variables = OptionBuilder.withArgName("name=value").hasArgs(2).withValueSeparator().withDescription("Specify values for variables in the configuration").create("c");
 		options.addOption(configuration_variables); getOptionList().add(configuration_variables);
 
+		Option backend = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("backend").withDescription("Specify the krun backend to execute with").create();
+		options.addOption(backend); getOptionList().add(backend);
+
 	}
 	
 	//create options displayed in the krun debugger help
