@@ -272,16 +272,14 @@ public class Main {
 						}
 						org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 						ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
-						CollectVariablesVisitor vars = new CollectVariablesVisitor();
-						pattern.accept(vars);
-						Set<String> varNames = vars.getVars().keySet();
 
-						pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
+						RuleCompilerSteps steps = new RuleCompilerSteps(K.definition);
+						pattern = steps.compile((Rule) pattern, null);
 
 						Rule patternRule = (Rule) pattern;
 						if (GlobalSettings.verbose)
 							sw.printIntermediate("Parsing search pattern");
-						result = krun.search(bound, depth, K.searchType, patternRule, makeConfiguration(KAST, buffer, rp, (K.term != null)), varNames);
+						result = krun.search(bound, depth, K.searchType, patternRule, makeConfiguration(KAST, buffer, rp, (K.term != null)), steps);
 					} else {
 						Error.report("For the search option you need to specify that --maude-cmd=search");
 					}

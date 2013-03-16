@@ -14,13 +14,11 @@ public class SearchResults {
 	private List<SearchResult> solutions;
 	private DirectedGraph<KRunState, Transition> graph;
 	private boolean isDefaultPattern;
-	private Set<String> varNames;
 
-	public SearchResults(List<SearchResult> solutions, DirectedGraph<KRunState, Transition> graph, boolean isDefaultPattern, Set<String> varNames) {
+	public SearchResults(List<SearchResult> solutions, DirectedGraph<KRunState, Transition> graph, boolean isDefaultPattern) {
 		this.solutions = solutions;
 		this.graph = graph;
 		this.isDefaultPattern = isDefaultPattern;
-		this.varNames = varNames;
 	}
 
 	@Override
@@ -39,14 +37,11 @@ public class SearchResults {
 				boolean empty = true;
 				
 				for (String variable : substitution.keySet()) {
-					String varName = variable.substring(0, variable.indexOf(":"));
-					if (varNames.contains(varName)) {
-						UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
-						sb.append("\n" + variable + " -->");
-						substitution.get(variable).accept(unparser);
-						sb.append("\n" + unparser.getResult());
-						empty = false;
-					}
+					UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
+					sb.append("\n" + variable + " -->");
+					substitution.get(variable).accept(unparser);
+					sb.append("\n" + unparser.getResult());
+					empty = false;
 				}
 				if (empty) {
 					sb.append("\nEmpty substitution");

@@ -5,6 +5,7 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
+import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.runner.KRunner;
@@ -344,7 +345,7 @@ public class MaudeKRun implements KRun {
 		return null;
 	}
 
-	public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, Set<String> varNames) throws Exception {
+	public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws Exception {
 		String cmd = "set show command off ." + K.lineSeparator + setCounter() + "search ";
 		if (bound != null && depth != null) {
 			cmd += "[" + bound + "," + depth + "] ";
@@ -371,7 +372,7 @@ public class MaudeKRun implements KRun {
 		}
 		cmd += getCounter();
 		executeKRun(cmd, K.io);
-		SearchResults results = new SearchResults(parseSearchResults(pattern), parseSearchGraph(), patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
+		SearchResults results = new SearchResults(parseSearchResults(pattern, compilationInfo), parseSearchGraph(), patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"));
 		K.stateCounter += results.getGraph().getVertexCount();
 		KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
 		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
@@ -448,7 +449,7 @@ public class MaudeKRun implements KRun {
 		return graphmlParser.readGraph();
 	}
 
-	private List<SearchResult> parseSearchResults(Rule pattern) throws Exception {
+	private List<SearchResult> parseSearchResults(Rule pattern, RuleCompilerSteps compilationInfo) throws Exception {
 		List<SearchResult> results = new ArrayList<SearchResult>();
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
@@ -478,7 +479,7 @@ public class MaudeKRun implements KRun {
 			Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution));
 			KRunState state = new KRunState(rawResult);
 			state.setStateId(stateNum + K.stateCounter);
-			SearchResult result = new SearchResult(state, rawSubstitution);
+			SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo);
 			results.add(result);
 		}
 		list = doc.getElementsByTagName("result");

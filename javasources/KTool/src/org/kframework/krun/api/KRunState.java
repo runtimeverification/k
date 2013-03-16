@@ -28,7 +28,8 @@ public class KRunState {
 			}
 		} catch (Exception e) {
 			// if concretization fails, return the raw result directly.
-			return rawResult;
+			throw new RuntimeException(e);
+//			return rawResult;
 		}
 		if (result.getClass() == Cell.class) {
 			Cell generatedTop = (Cell) result;
