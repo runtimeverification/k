@@ -1,14 +1,28 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Bag;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Constant;
+import org.kframework.kil.Empty;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.Production;
+import org.kframework.kil.Term;
+import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.matchers.MatcherException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * assumtions:
@@ -47,6 +61,64 @@ public class SymbolicMatcher extends AbstractMatcher {
         }
     }
 
+    /**
+     * matches a cell against a cell
+     *
+     * @param cell
+     * @param pattern
+     */
+    public void match(Cell cell, Term pattern) {
+        if (!(pattern instanceof Cell)) {
+            this.fail();
+        }
+        Cell patternCell = (Cell) pattern;
+
+        if (!cell.getLabel().equals(patternCell.getLabel())) {
+            fail();
+        }
+
+        match(cell.getContents(), patternCell.getContents());
+    }
+
+
+    /**
+     * matches a bag of cells against another bag of cells
+     *
+     * @param bag
+     * @param pattern
+     */
+    public void match(Bag bag, Term pattern) {
+        if (!(pattern instanceof Bag)) {
+            this.fail();
+        }
+        Bag patternBag = (Bag) pattern;
+
+        Map<String, Term> cellMap = new HashMap<String, Term>();
+        Map<String, Term> patternCellMap = new HashMap<String, Term>();
+
+        for (Term bagItem : bag.getContents()) {
+            assert bagItem instanceof Cell;
+
+            Cell cell = (Cell) bagItem;
+            cellMap.put(cell.getLabel(), cell.getContents());
+        }
+
+        for (Term patternBagItem : patternBag.getContents()) {
+            assert patternBagItem instanceof Cell;
+
+            Cell patternCell = (Cell) patternBagItem;
+            patternCellMap.put(patternCell.getLabel(), patternCell.getContents());
+        }
+
+        if (!cellMap.keySet().equals(patternCellMap.keySet())) {
+            fail();
+        }
+
+        for (String cellLabel : cellMap.keySet()) {
+            match(cellMap.get(cellLabel), patternCellMap.get(cellLabel));
+        }
+    }
+
     public void match(Term term, Term pattern) {
         System.err.println(">>>");
         System.err.println(term);
@@ -54,47 +126,7 @@ public class SymbolicMatcher extends AbstractMatcher {
         System.err.println(pattern);
         System.err.println("===");
 
-        if (term instanceof Cell || pattern instanceof Cell) {
-            if (!(term instanceof Cell && pattern instanceof Cell)) {
-                fail();
-            }
-
-            Cell termCell = (Cell) term;
-            Cell patternCell = (Cell) pattern;
-
-            match(termCell.getContents(), patternCell.getContents());
-        } else if (term instanceof Bag || pattern instanceof Bag) {
-            if (!(term instanceof Bag && pattern instanceof Bag)) {
-                fail();
-            }
-
-            Bag termBag = (Bag) term;
-            Bag patternBag = (Bag) pattern;
-            Map<String, Term> termCellMap = new HashMap<String, Term>();
-            Map<String, Term> patternCellMap = new HashMap<String, Term>();
-
-            for (Term termBagElement : termBag.getContents()) {
-                assert termBagElement instanceof Cell;
-
-                Cell termCell = (Cell) termBagElement;
-                termCellMap.put(termCell.getLabel(), termCell.getContents());
-            }
-
-            for (Term patternBagElement : patternBag.getContents()) {
-                assert patternBagElement instanceof Cell;
-
-                Cell patternCell = (Cell) patternBagElement;
-                patternCellMap.put(patternCell.getLabel(), patternCell.getContents());
-            }
-
-            if (!termCellMap.keySet().equals(patternCellMap.keySet())) {
-                fail();
-            }
-
-            for (String cellLabel : termCellMap.keySet()) {
-                match(termCellMap.get(cellLabel), patternCellMap.get(cellLabel));
-            }
-        } else if (term instanceof Variable || pattern instanceof Variable
+        if (term instanceof Variable || pattern instanceof Variable
                 || isSymbolicTerm(term) || isSymbolicTerm(pattern)) {
             constraints.add(new SymbolicEquality(term, pattern));
         } else {
