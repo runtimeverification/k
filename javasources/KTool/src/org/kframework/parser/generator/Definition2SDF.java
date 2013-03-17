@@ -154,6 +154,14 @@ public class Definition2SDF {
 		for (Sort ss : psdfv.insertSorts)
 			sdf.append("	" + StringUtil.escapeSortName(ss.getName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getName()) + "\n");
 
+		sdf.append("\n");
+		for (Sort s : psdfv.userSorts) {
+			if (!s.isBaseSort()) {
+				sdf.append("	\"(\" K \")\" \":\" \"" + s.getName() + "\"      -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+				sdf.append("	\"(\" K \")\" \"::\" \"" + s.getName() + "\"     -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
+			}
+		}
+
 		sdf.append("\n\n");
 		for (String sort : psdfv.constantSorts) {
 			String s = StringUtil.escapeSortName(sort);

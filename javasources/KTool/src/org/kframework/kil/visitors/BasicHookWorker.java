@@ -8,6 +8,7 @@ import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
 import org.kframework.kil.Bracket;
+import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Collection;
 import org.kframework.kil.CollectionItem;
@@ -301,6 +302,11 @@ public class BasicHookWorker implements Transformer {
 
 	@Override
 	public ASTNode transform(Bracket node) throws TransformerException {
+		return transform((Term) node);
+	}
+
+	@Override
+	public ASTNode transform(Cast node) throws TransformerException {
 		return transform((Term) node);
 	}
 

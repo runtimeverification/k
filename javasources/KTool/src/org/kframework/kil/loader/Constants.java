@@ -27,6 +27,7 @@ public class Constants {
 	public static final String LEFT = "left";
 	public static final String TERM = "term";
 	public static final String BRACKET = "bracket";
+	public static final String CAST = "cast";
 	public static final String VAR = "var";
 	public static final String RIGHT = "right";
 	public static final String TERMINAL = "terminal";

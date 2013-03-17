@@ -12,6 +12,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class BasicTransformerPropagator implements Transformer {
 	Transformer delegate;
+
 	public BasicTransformerPropagator(HookedTransformer hookedTransformer) {
 		delegate = hookedTransformer;
 	}
@@ -568,6 +569,23 @@ public class BasicTransformerPropagator implements Transformer {
 
 	@Override
 	public ASTNode transform(Bracket node) throws TransformerException {
+		Term term = node.getContent();
+		ASTNode result = term.accept(delegate);
+		if (result == null)
+			return null;
+		if (!(result instanceof Term)) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
+		}
+		if (result != term) {
+			node = node.shallowCopy();
+			node.setContent((Term) result);
+		}
+		return transform((Term) node);
+	}
+
+	@Override
+	public ASTNode transform(Cast node) throws TransformerException {
 		Term term = node.getContent();
 		ASTNode result = term.accept(delegate);
 		if (result == null)

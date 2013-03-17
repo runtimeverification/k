@@ -161,7 +161,7 @@ public class DefinitionSDF {
 			sdf.append("	" + StringUtil.escapeSortName(ss.getName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getName()) + "\n");
 
 		sdf.append("\n\n");
-		// print variables, HOLEs
+		// print variables, HOLEs, cast
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
 				sdf.append("	VARID  \":\" \"" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
@@ -171,6 +171,13 @@ public class DefinitionSDF {
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
 				sdf.append("	\"HOLE\" \":\" \"" + s.getName() + "\"      -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
+			}
+		}
+		sdf.append("\n");
+		for (Sort s : psdfv.userSorts) {
+			if (!s.isBaseSort()) {
+				sdf.append("	\"(\" K \")\" \":\" \"" + s.getName() + "\"      -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+				sdf.append("	\"(\" K \")\" \"::\" \"" + s.getName() + "\"     -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
 			}
 		}
 

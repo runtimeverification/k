@@ -331,6 +331,12 @@ public class BasicTransformer implements Transformer {
 	}
 
 	@Override
+	public ASTNode transform(Cast node) throws TransformerException {
+		node.setContent((Term) node.getContent().accept(this));
+		return transform((Term) node);
+	}
+
+	@Override
 	public ASTNode transform(Variable node) throws TransformerException {
 		return transform((Term) node);
 	}

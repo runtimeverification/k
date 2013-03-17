@@ -208,6 +208,28 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:
+		a#(b) -> $[<cast sort="[sort]" loc="[loc]" syntactic="true">
+					[children]
+		</cast>
+		]
+		where <string-ends-with(|"1Cast")> a
+		where mydebug(!"1Cast: ")
+		where children := <all(to-xml)> b
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(b) -> $[<cast sort="[sort]" loc="[loc]" syntactic="false">
+					[children]
+		</cast>
+		]
+		where <string-ends-with(|"12Cast")> a
+		where mydebug(!"12Cast: ")
+		where children := <all(to-xml)> b
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
 		a#(b) -> $[<hole sort="[sort]" loc="[loc]" />
 		]
 		where <string-ends-with(|"Hole")> a
