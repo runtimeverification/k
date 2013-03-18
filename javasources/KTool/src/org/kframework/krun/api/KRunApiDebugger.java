@@ -24,17 +24,14 @@ public class KRunApiDebugger implements KRunDebugger {
 	private BidiMap<Integer, KRunState> states;
 
 	private static Rule defaultPattern;
-	private static Set<String> defaultVars;
+	private static RuleCompilerSteps defaultPatternInfo;
 
 	static {
 		try { 
 			org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 			ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
-			CollectVariablesVisitor vars = new CollectVariablesVisitor();
-			pattern.accept(vars);
-			defaultVars = vars.getVars().keySet();
-
-			pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
+			defaultPatternInfo = new RuleCompilerSteps(K.definition);
+			pattern = defaultPatternInfo.compile((Rule) pattern, null);
 
 			defaultPattern = (Rule) pattern;
 		} catch (Exception e) {
@@ -130,7 +127,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		if (currentState == null) {
 			throw new IllegalStateException("Cannot step without a current state to step from.");
 		}
-		SearchResults results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultVars).getResult();
+		SearchResults results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo).getResult();
 		for (SearchResult result : results.getSolutions()) {
 			KRunState state = result.getState();
 			if (states.containsValue(state)) {
