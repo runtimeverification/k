@@ -1,3 +1,5 @@
+require "builtins/model-checker.k"
+
 /*@
 This is the abstract semantics of IMP. It contains the normal semantics of IMP
 and its extension for abstact execution. 
@@ -10,6 +12,8 @@ endmodule
 
 module IMP-SYNTAX
   imports ABSTRACT-DOMAIN-SYNTAX
+  imports LTL-HOOKS
+  imports MODEL-CHECKER-HOOKS
 
 
   syntax AExp  ::= Int | Id
@@ -33,10 +37,21 @@ module IMP-SYNTAX
                  | "spawn" "{" Process "}"
 
   syntax Process ::=  "int" Ids ";" Stmts 
-  syntax Pgm ::= "main" "{" Process "}"
+  syntax Pgm ::= "main" "{" Process "}" | LTLFormula 
 
   syntax Ids   ::= List{Id,","}
   syntax Stmts   ::= List{Stmt,""}
+
+  syntax Val ::= Int | Bool
+
+  syntax Prop ::= "eqTo" "(" Id "," Val ")"
+               |  "lt" "(" Id "," Val ")" 
+               |  "leq" "(" Id "," Val ")" 
+               |  "gt" "(" Id "," Val ")" 
+               |  "geq" "(" Id "," Val ")" 
+               |  "neqTo" "(" Id "," Val ")" 
+
+
 endmodule
 
 
@@ -183,5 +198,33 @@ module IMP
   rule <k> int (X:Id,Xs => Xs); S ...</k>
        <env>... . => X |-> 0 ...</env>
   rule int .Ids; S => S  [structural]
+
+  syntax Int ::= "val" "(" Bag "," Id ")" [function]
+
+  rule val(<generatedTop><T>... 
+                 <store>... X |-> I:Int ...</store> 
+           ...</T> </generatedTop>, X)
+       =>
+       I
+/*
+  rule val(<T>... 
+                 <store>... X |-> I:Int ...</store> 
+           ...</T>, X)
+       =>
+       I
+*/
+
+  rule B:Bag |=Ltl eqTo(X:Id, I:Int) => true when val(B, X) ==K I [anywhere]
+
+  rule B:Bag |=Ltl neqTo(X:Id, I:Int) => true when val(B, X) =/=K I [anywhere]
+
+  rule B:Bag |=Ltl lt(X:Id, I:Int) => true when val(B, X) <Int I [anywhere]
+
+  rule B:Bag |=Ltl leq(X:Id, I:Int) => true when val(B, X) <=Int I [anywhere]
+
+  rule B:Bag |=Ltl gt(X:Id, I:Int) => true when val(B, X) >Int I [anywhere]
+
+  rule B:Bag |=Ltl geq(X:Id, I:Int) => true when val(B, X) >=Int I [anywhere]
+
 
 endmodule
