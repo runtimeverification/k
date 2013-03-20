@@ -74,7 +74,7 @@ mod K-TECHNIQUE is
   op <_>_</_> : CellLabel Set CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Map CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
 
-  op k : -> CellLabel .
+  op <k>_</k> : K -> BagItem [format(b o++ni --nib o)].
 
 endm
 
@@ -112,14 +112,14 @@ mod K-STRICTNESS-DEFAULTS is
      [metadata "superheat=(choice)"] .
 
   vars K : K . var Ks Ks' : KList .  var NKs : NeKList .
-  eq <_>_</_>(k,_`(_`)(cool,zk:K),k)
-   = <_>_</_>(k,zk:K,k)[metadata "supercool=(end)"].
-  eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,_`,`,_(K:K,NKs:NeKList)),Ks:KList)),GENERATEDKWRAPRest:K),k)
-   = <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(NKs:NeKList,Ks:KList)),GENERATEDKWRAPRest:K),k)[owise].
-  eq <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,K:K),_`,`,_(Ks:KList,_`(_`)(heated,Ks':KList)))),GENERATEDKWRAPRest:K),k)
-   = <_>_</_>(k,_~>_(_`(_`)(heat,_`,`,_(Ks:KList,_`(_`)(heated,_`,`,_(Ks':KList,K:K)))),GENERATEDKWRAPRest:K),k)[owise].
-  eq <_>_</_>(k,_~>_(_`(_`)(cool,zk:K),_~>_(Next:KItem,GENERATEDKWRAPRest:K)),k)
-   = <_>_</_>(k,_~>_(_`(_`)(cool,_~>_(zk:K,Next:KItem)),GENERATEDKWRAPRest:K),k)[metadata "supercool=(next)" owise].
+  eq <k> _`(_`)(cool,zk:K) </k>
+   = <k> zk:K </k>[metadata "supercool=(end)"].
+  eq <k> _~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,_`,`,_(K:K,NKs:NeKList)),Ks:KList)),GENERATEDKWRAPRest:K) </k>
+   = <k> _~>_(_`(_`)(heat,_`,`,_(NKs:NeKList,Ks:KList)),GENERATEDKWRAPRest:K) </k>[owise].
+  eq <k> _~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,K:K),_`,`,_(Ks:KList,_`(_`)(heated,Ks':KList)))),GENERATEDKWRAPRest:K) </k>
+   = <k> _~>_(_`(_`)(heat,_`,`,_(Ks:KList,_`(_`)(heated,_`,`,_(Ks':KList,K:K)))),GENERATEDKWRAPRest:K) </k>[owise].
+  eq <k> _~>_(_`(_`)(cool,zk:K),_~>_(Next:KItem,GENERATEDKWRAPRest:K)) </k>
+   = <k> _~>_(_`(_`)(cool,_~>_(zk:K,Next:KItem)),GENERATEDKWRAPRest:K) </k>[metadata "supercool=(next)" owise].
 endm
 
 mod K-CONTEXTS is
