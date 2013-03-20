@@ -1,4 +1,4 @@
-/*!
+/*@
 \title{KOOL --- Typed --- Static}
 \author{Grigore Ro\c{s}u and Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
         (\texttt{\{grosu,tserban2\}@illinois.edu})}
@@ -353,7 +353,7 @@ typed SIMPLE, so we do not discuss them much here. */
   rule release _:Type; => stmt
   rule rendezvous _:Type; => stmt
 
-  rule _:BlockOrStmtType _:BlockOrStmtType => stmt
+  rule (_:BlockOrStmtType)::Stmts (_:BlockOrStmtType)::Stmts => stmt
 
 
 //@\subsubsection{Unchanged auxiliary operations from dynamically typed SIMPLE}
@@ -765,7 +765,7 @@ The subclass relation introduces a subtyping relation.  */
        <extendsAll>... SetItem(C') ...</extendsAll>  [structural]
 
   rule checkSubtype(Ts1->T2,Ts1'->T2')
-    => checkSubtype((T2,Ts1'),(T2',Ts1))  [structural]
+    => checkSubtype(((T2)::Type,Ts1'),((T2')::Type,Ts1))  [structural]
 
 // note that the following rule would be wrong!
 //  rule checkSubtype(T[],T'[]) => checkSubtype(T,T')

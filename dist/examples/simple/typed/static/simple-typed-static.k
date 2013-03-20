@@ -582,7 +582,7 @@ exceptions which are not caught. */
   rule release _:Type; => stmt
   rule rendezvous _:Type; => stmt
 
-  rule _:BlockOrStmtType _:BlockOrStmtType => stmt
+  rule (_:BlockOrStmtType)::Stmts (_:BlockOrStmtType)::Stmts => stmt
 
 //@ \section{Auxiliary constructs}
 
