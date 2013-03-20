@@ -24,7 +24,8 @@ import edu.uci.ics.jung.graph.*;
 import edu.uci.ics.jung.io.graphml.*;
 
 import java.io.File;
-import java.io.StringReader;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 public class MaudeKRun implements KRun {
@@ -370,7 +372,19 @@ public class MaudeKRun implements KRun {
 	}
 
 	private DirectedGraph<KRunState, Transition> parseSearchGraph() throws Exception {
-		File input = new File(K.maude_output);
+		FileReader reader = new FileReader(K.maude_output);
+		Scanner scanner = new Scanner(reader);
+		scanner.useDelimiter("\n");
+		FileWriter writer = new FileWriter(K.processed_maude_output);
+		while (scanner.hasNext()) {
+			String text = scanner.next();
+			text = text.replaceAll("<data key=\"((rule)|(term))\">", "<data key=\"$1\"><![CDATA[");
+			text = text.replaceAll("</data>", "]]></data>");
+			writer.write(text, 0, text.length());
+		}
+		writer.close();
+			
+		File input = new File(K.processed_maude_output);
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
 		Node nod = null;
@@ -378,10 +392,9 @@ public class MaudeKRun implements KRun {
 		assertXML(list.getLength() == 1);
 		nod = list.item(0);
 		assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
-		String text = XmlUtil.convertNodeToString(nod);
-		text = text.replaceAll("<data key=\"((rule)|(term))\">", "<data key=\"$1\"><![CDATA[");
-		text = text.replaceAll("</data>", "]]></data>");
-		StringReader reader = new StringReader(text);
+		XmlUtil.serializeXML(nod, K.processed_maude_output);
+		reader = new FileReader(K.processed_maude_output);
+			
 		Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>>() { 
 			public DirectedGraph<KRunState, Transition> transform(GraphMetadata g) { 
 				return new DirectedSparseGraph<KRunState, Transition>();
