@@ -1,7 +1,6 @@
 package org.kframework.kil.matchers;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Constant;
 import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Term;
@@ -63,8 +62,6 @@ public class SetLookupPattern extends Term {
     lookups = sp.lookups;
     remainder = sp.remainder;
   }
-
-  private SetLookupPattern(){}
 
   public List<Term> getLookups(){
     return lookups;

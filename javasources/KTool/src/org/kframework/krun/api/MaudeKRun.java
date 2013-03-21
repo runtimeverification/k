@@ -2,8 +2,6 @@ package org.kframework.krun.api;
 
 import org.apache.commons.collections15.Transformer;
 import org.kframework.backend.maude.MaudeFilter;
-import org.kframework.backend.unparser.UnparserFilter;
-import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -531,7 +529,6 @@ public class MaudeKRun implements KRun {
 		assertXML(child.size() == 1);
 		elem = child.get(0);
 		if (elem.getAttribute("op").equals("true") && elem.getAttribute("sort").equals("#Bool")) {
-			Term trueTerm = new Constant("Bool", "true");
 			return new KRunResult<DirectedGraph<KRunState, Transition>>(null);
 		} else {
 			sort = elem.getAttribute("sort");

@@ -1,7 +1,6 @@
 package org.kframework.kil.matchers;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Constant;
 import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;
@@ -63,8 +62,6 @@ public class MapLookupPattern extends Term {
     lookups = mp.lookups;
     remainder = mp.remainder;
   }
-
-  private MapLookupPattern(){}
 
   public List<Binding> getLookups(){
     return lookups;

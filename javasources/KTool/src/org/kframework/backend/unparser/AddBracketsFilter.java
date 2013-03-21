@@ -1,6 +1,5 @@
 package org.kframework.backend.unparser;
 
-import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -8,8 +7,6 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.DefinitionLoader;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -480,6 +477,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 	}
 
 	private boolean postpare() {
+		@SuppressWarnings("unused")
 		Term inner = stack.pop();
 		leftCapture.pop();
 		rightCapture.pop();
@@ -500,10 +498,10 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			boolean priority = isPriorityWrong(outer, inner);
 			boolean inversePriority = isPriorityWrong(inner, outer);
 			Associativity assoc = getAssociativity(outer);
-			Associativity innerAssoc = getAssociativity(inner);
+//			Associativity innerAssoc = getAssociativity(inner);
 			EnumSet<Fixity> fixity = getFixity(inner, outer);
 			EnumSet<Fixity> innerFixity = getFixity(inner);
-			EnumSet<Fixity> position = getPosition(inner, outer);
+//			EnumSet<Fixity> position = getPosition(inner, outer);
 			if (isAtom(inner))
 				return false;
 			if (fixity.size() == 0)

@@ -9,7 +9,6 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 

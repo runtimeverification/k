@@ -68,7 +68,6 @@ public class Poset {
 	 *
 	 */
 	public String getLUB(List<String> subset){
-		boolean foo = false;
 		List<String> candidates = new ArrayList<String>();
 		for(String elem : elements){
 			boolean isGTESubset = true;
@@ -104,7 +103,6 @@ public class Poset {
 	 *
 	 */
 	public String getGLB(List<String> subset){
-		boolean foo = false;
 		List<String> candidates = new ArrayList<String>();
 		for(String elem : elements){
 			boolean isLTESubset = true;

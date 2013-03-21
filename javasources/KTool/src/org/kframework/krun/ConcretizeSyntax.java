@@ -9,7 +9,6 @@ import org.kframework.parser.concrete.disambiguate.TypeCheckFilter;
 import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,7 +41,6 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		} else if (label instanceof Constant) {
 			String klabel = ((Constant)label).getValue();
 			Set<String> conses = DefinitionHelper.labels.get(klabel);
-			Set<String> validConses = new HashSet<String>();
 			List<Term> contents = new ArrayList<Term>();
 			possibleTerms = new ArrayList<Term>();
 			if (child instanceof KList) {

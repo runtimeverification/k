@@ -51,9 +51,8 @@ public class FileUtil {
 	}
 
 	public static String getFileContent(String file) {
-		BufferedReader reader;
 		try {
-			reader = new BufferedReader(new FileReader(file));
+			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line = null;
 			StringBuilder stringBuilder = new StringBuilder();
 			String ls = System.getProperty("line.separator");
@@ -61,6 +60,7 @@ public class FileUtil {
 				stringBuilder.append(line);
 				stringBuilder.append(ls);
 			}
+			reader.close();
 			return stringBuilder.toString();
 
 		} catch (FileNotFoundException e) {
@@ -89,12 +89,20 @@ public class FileUtil {
 
 	public static void copyFile(String fromFile, String toFile) throws IOException {
         FileInputStream source = new FileInputStream(fromFile);
+        try {
         FileOutputStream destination = new FileOutputStream(toFile);
+        try {
  
         FileChannel sourceFileChannel = source.getChannel();
         FileChannel destinationFileChannel = destination.getChannel();
  
         long size = sourceFileChannel.size();
         sourceFileChannel.transferTo(0, size, destinationFileChannel);
+        } finally {
+        	destination.close();
+        }
+        } finally {
+        	source.close();
+        }
 	}
 }

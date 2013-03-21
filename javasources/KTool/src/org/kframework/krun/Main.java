@@ -1,8 +1,5 @@
 package org.kframework.krun;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
-
 import jline.*;
 
 import org.apache.commons.cli.CommandLine;
@@ -10,7 +7,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
-import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
@@ -30,8 +26,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-
-import edu.uci.ics.jung.graph.*;
 
 import java.io.*;
 import java.util.*;
@@ -74,7 +68,6 @@ public class Main {
 	public static String initOptions(String path) {
 		String result = null;
 		//String path_ = null;
-		String fileName = null;
 		StringBuilder str = new StringBuilder();
 		int count = 0;
 
@@ -101,20 +94,15 @@ public class Main {
 
 	// set the main-module, syntax-module and k-definition according to their correlation with compiled-def
 	public static void resolveOption(String optionName, CommandLine cmd) {
-		String s, str;
+		String s;
 		if (K.k_definition != null) {
 			s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
-			int sep = s.lastIndexOf(K.fileSeparator);
-			str = s.substring(sep + 1).toUpperCase();
 		} else {
 			// using --compiled-def
 			if (K.compiled_def != null && K.compiled_def.endsWith("-kompiled")) {
 				s = K.compiled_def.substring(0, K.compiled_def.lastIndexOf("-kompiled"));
-				int sep = s.lastIndexOf(K.fileSeparator);
-				str = s.substring(sep + 1).toUpperCase();
 			} else {
 				s = null;
-				str = null;
 			}
 		}
 
@@ -226,7 +214,6 @@ public class Main {
 	// execute krun in normal mode (i.e. not in debug mode)
 	public static void normalExecution(Term KAST, String lang, RunProcess rp, CommandlineOptions cmd_options) {
 		try {
-			List<String> red = new ArrayList<String>();
 			CommandLine cmd = cmd_options.getCommandLine();
 
 			KRun krun = null; 
@@ -421,12 +408,8 @@ public class Main {
 			completors.add(new ArgumentCompletor(argCompletor));
 			reader.addCompletor(new MultiCompletor(completors));
 
-			String compiledFile = new File(K.compiled_def + K.fileSeparator + "main.maude").getCanonicalPath();
-			String maudeCmd = new String();
-			File outFile = FileUtil.createFile(K.maude_out);
-			File errFile = FileUtil.createFile(K.maude_err);
+			new File(K.compiled_def + K.fileSeparator + "main.maude").getCanonicalPath();
 			RunProcess rp = new RunProcess();
-			List<String> red = null;
 			KRun krun = new MaudeKRun();
 			KRunDebugger debugger;
 			if (state == null) {

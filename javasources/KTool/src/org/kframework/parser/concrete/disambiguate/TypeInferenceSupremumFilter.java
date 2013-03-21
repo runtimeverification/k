@@ -170,7 +170,6 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			Term t = ((TermCons) terms.get(0)).getContents().get(i);
 			String lubSort = t.getSort();
 			for(int j = 1; j < terms.size(); ++j){
-				Term t2 = ((TermCons) terms.get(j)).getContents().get(i);
 				String positionSort = t.getSort(); 
 				if(DefinitionHelper.isSubsorted(lubSort, positionSort)){
 					lubSort = positionSort;

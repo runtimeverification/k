@@ -54,7 +54,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
 
 public class DefinitionLoader {
 	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang, boolean autoinclude) throws IOException, Exception {
