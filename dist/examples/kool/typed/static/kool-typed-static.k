@@ -353,7 +353,8 @@ typed SIMPLE, so we do not discuss them much here. */
   rule release _:Type; => stmt
   rule rendezvous _:Type; => stmt
 
-  rule (_:BlockOrStmtType)::Stmts (_:BlockOrStmtType)::Stmts => stmt
+  syntax Stmt ::= BlockOrStmtType
+  rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 
 
 //@\subsubsection{Unchanged auxiliary operations from dynamically typed SIMPLE}
