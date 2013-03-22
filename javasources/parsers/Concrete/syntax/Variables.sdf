@@ -5,36 +5,47 @@ imports KBuiltinsBasic
 
 exports
 context-free syntax
-	%% TODO: Variables Dunno what to do with the variables
-	%% VarId ":" Type		-> Variable {cons("TypedVar")}
-	VARID ":" "List"		-> List {cons("List12Var")}
-	VARID					-> List {cons("List1Var")}
-	VARID ":" "ListItem"	-> ListItem {cons("ListItem12Var")}
-	VARID					-> ListItem {cons("ListItem1Var")}
-	VARID ":" "Set"			-> Set {cons("Set12Var")}
-	VARID					-> Set {cons("Set1Var")}
-	VARID ":" "SetItem"		-> SetItem {cons("SetItem12Var")}
-	VARID					-> SetItem {cons("SetItem1Var")}
-	VARID ":" "Bag"			-> Bag {cons("Bag12Var")}
-	VARID					-> Bag {cons("Bag1Var")}
-	VARID ":" "BagItem"		-> BagItem {cons("BagItem12Var")}
-	VARID					-> BagItem {cons("BagItem1Var")}
-	VARID ":" "Map"			-> Map {cons("Map12Var")}
-	VARID					-> Map {cons("Map1Var")}
-	VARID ":" "MapItem"		-> MapItem {cons("MapItem12Var")}
-	VARID					-> MapItem {cons("MapItem1Var")}
-	VARID ":" "K"			-> K {cons("K12Var")}
-	VARID					-> K {cons("K1Var")}
-	VARID ":" "List{K}"		-> KList {cons("ListDlKDr12Var")}
-	VARID ":" "KList"		-> KList {cons("KList12Var")}
-	VARID					-> KList {cons("KList1Var")}
-	VARID ":" "KLabel"		-> KLabel {cons("KLabel12Var")}
-	VARID					-> KLabel {cons("KLabel1Var")}
-	VARID ":" "KResult"		-> K {cons("KResult12Var")}
+	ListLexDz		-> List {cons("List12Var")}
+	ListItemLexDz	-> ListItem {cons("ListItem12Var")}
+	SetLexDz		-> Set {cons("Set12Var")}
+	SetItemLexDz	-> SetItem {cons("SetItem12Var")}
+	BagLexDz		-> Bag {cons("Bag12Var")}
+	BagItemLexDz	-> BagItem {cons("BagItem12Var")}
+	MapLexDz		-> Map {cons("Map12Var")}
+	MapItemLexDz	-> MapItem {cons("MapItem12Var")}
+	KLexDz			-> K {cons("K12Var")}
+	KListLexDz		-> KList {cons("KList12Var")}
+	KLabelLexDz		-> KLabel {cons("KLabel12Var")}
 
 	":" -> ColonDz {cons("Colon")}
 	"?" -> QuestionMarkDz {cons("QuestionMark")} 
-	
+
+	VARID			-> List {cons("List1Var")}
+	VARID			-> ListItem {cons("ListItem1Var")}
+	VARID			-> Set {cons("Set1Var")}
+	VARID			-> SetItem {cons("SetItem1Var")}
+	VARID			-> Bag {cons("Bag1Var")}
+	VARID			-> BagItem {cons("BagItem1Var")}
+	VARID			-> Map {cons("Map1Var")}
+	VARID			-> MapItem {cons("MapItem1Var")}
+	VARID			-> K {cons("K1Var")}
+	VARID			-> KList {cons("KList1Var")}
+	VARID			-> KLabel {cons("KLabel1Var")}
+
+lexical syntax
+	VARID ":" "List"		-> ListLexDz
+	VARID ":" "ListItem"	-> ListItemLexDz
+	VARID ":" "Set"			-> SetLexDz
+	VARID ":" "SetItem"		-> SetItemLexDz
+	VARID ":" "Bag"			-> BagLexDz
+	VARID ":" "BagItem"		-> BagItemLexDz
+	VARID ":" "Map"			-> MapLexDz
+	VARID ":" "MapItem"		-> MapItemLexDz
+	VARID ":" "K"			-> KLexDz
+	VARID ":" "List{K}"		-> KListLexDz
+	VARID ":" "KList"		-> KListLexDz
+	VARID ":" "KLabel"		-> KLabelLexDz
+	VARID ":" "KResult"		-> KLexDz
 
 lexical syntax
 	%% Variables and the Anonymous Variable
@@ -43,17 +54,10 @@ lexical syntax
 	"HOLE" -> VARID {reject}
 
 	%% rejects
-	%%"K"			-> ID {reject}
-	%%"List"		-> ID {reject}
 	"ListItem"		-> VARID {reject}
-	%%"Bag"			-> ID {reject}
 	"BagItem"		-> VARID {reject}
-	%%"Set"			-> ID {reject}
 	"SetItem"		-> VARID {reject}
-	%%"Map"			-> ID {reject}
 	"MapItem"		-> VARID {reject}
-	%%"keys"			-> ID {reject}
-	%%"hasMapping"	-> ID {reject}
 
 context-free restrictions
 	ColonDz -/- [A-Z] 

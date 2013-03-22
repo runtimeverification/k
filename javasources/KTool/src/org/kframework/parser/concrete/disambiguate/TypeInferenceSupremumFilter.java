@@ -241,9 +241,9 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 	 * Returns true if the terms are of the same kind (Variable, TermCons...) If they are TermCons, then all the Items must be alike also.
 	 * 
 	 * @param trm1
-	 *						First term to compare.
+	 *            First term to compare.
 	 * @param trm2
-	 *						Second term to compare.
+	 *            Second term to compare.
 	 * @return true or false weather they are alike.
 	 */
 	private static boolean termsAlike(Term trm1, Term trm2) {
