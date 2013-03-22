@@ -154,7 +154,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 							ProductionItem itm = items.get(i);
 							if (itm.getType() == ProductionType.TERMINAL) {
 								Terminal t = (Terminal) itm;
-								if (ground) {
+								if (!ground) {
 									if (t.getTerminal().equals(":"))
 										sdf.append("ColonDz ");
 									else if (t.getTerminal().equals("?"))
