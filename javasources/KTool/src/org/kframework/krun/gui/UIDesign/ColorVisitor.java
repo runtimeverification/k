@@ -1,7 +1,6 @@
 package org.kframework.krun.gui.UIDesign;
 
 import java.awt.Color;
-import java.util.Map.Entry;
 
 import org.kframework.kil.Cell;
 import org.kframework.kil.loader.DefinitionHelper;

@@ -1,17 +1,23 @@
 package org.kframework.krun.gui.UIDesign.xmlEditor;
 
-import org.w3c.dom.*;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-import org.xml.sax.InputSource;
-
-import javax.xml.parsers.*;
-import javax.swing.text.*;
-import javax.swing.text.Document;
-
-import java.io.*;
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.io.IOUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 
 public class XMLReader {
@@ -77,6 +83,7 @@ public class XMLReader {
             
             doc.setUserChanges(true);
         } catch(SAXException pce) {
+        	System.out.println(IOUtils.toString(is));
             pce.printStackTrace();
             throw new IOException(pce.getMessage());
         } catch(ParserConfigurationException pce) {
@@ -320,7 +327,7 @@ public class XMLReader {
         switch (node.getNodeType()) {
 
             case Node.DOCUMENT_NODE:
-                System.out.println("<xml version=\"1.0\">\n");
+                //System.out.println("<xml version=\"1.0\">\n");
                 // recurse on each child
                 NodeList nodes = node.getChildNodes();
                 if (nodes != null) {
@@ -332,16 +339,16 @@ public class XMLReader {
 
             case Node.ELEMENT_NODE:
                 String name = node.getNodeName();
-                System.out.print(indent + "<" + name);
+               // System.out.print(indent + "<" + name);
                 NamedNodeMap attributes = node.getAttributes();
                 for (int i=0; i<attributes.getLength(); i++) {
                     Node current = attributes.item(i);
-                    System.out.print(
-                        " " + current.getNodeName() +
-                        "=\"" + current.getNodeValue() +
-                        "\"");
+                 //   System.out.print(
+                 //       " " + current.getNodeName() +
+                 //       "=\"" + current.getNodeValue() +
+                 //       "\"");
                 }
-                System.out.print(">");
+                //System.out.print(">");
 
                 // recurse on each child
                 NodeList children = node.getChildNodes();
@@ -351,14 +358,14 @@ public class XMLReader {
                     }
                 }
 
-                System.out.print("</" + name + ">");
+                //System.out.print("</" + name + ">");
                 break;
 
             case Node.TEXT_NODE:
-                System.out.print(node.getNodeValue());
+            //    System.out.print(node.getNodeValue());
                 break;
             default:
-                System.out.print(node.getNodeValue());
+            //    System.out.print(node.getNodeValue());
                 break;
         }
 

@@ -7,9 +7,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.commons.collections15.Predicate;
 import org.apache.commons.collections15.Transformer;
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 
@@ -20,7 +20,6 @@ import edu.uci.ics.jung.visualization.VisualizationModel;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
-import edu.uci.ics.jung.visualization.decorators.ConstantDirectionalEdgeValueTransformer;
 import edu.uci.ics.jung.visualization.decorators.EdgeShape;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.DefaultVertexLabelRenderer;
@@ -33,7 +32,7 @@ public class VisualizationViewerDemo {
 	private DynamicLayout<KRunState, Transition> layout;
 	public static final int distanceParentChild = 100;
 	public static final int distanceSameLevelNodes = 100;
-	private VisualizationViewer vv;
+	private VisualizationViewer<KRunState, Transition> vv;
 	public static final int width = 400;
 	public static final int heigth = 600;
 		 
@@ -65,7 +64,7 @@ public class VisualizationViewerDemo {
 	}
 	
 	public void setVertexProperties(){
-		 VertexLabelAsShapeRenderer<KRunState, Transition>shapeRenderer = 
+		 VertexLabelAsShapeRenderer<KRunState, Transition> shapeRenderer = 
 				 new VertexLabelAsShapeRenderer<KRunState, Transition>(vv.getRenderContext());	       
 	   
 		 Transformer<KRunState,String> stringer = new Transformer<KRunState,String>(){
@@ -92,7 +91,7 @@ public class VisualizationViewerDemo {
 	}
 	
 	public String clusteredGraphComponents(String result, Object e){
-		for(Object vertex:((DirectedSparseMultigraph)e).getVertices()){
+		for(Object vertex:((DirectedSparseMultigraph<?, ?>)e).getVertices()){
 			try{
 				result +=((KRunState)vertex).getStateId()+", ";
 			}catch(Exception exc){
@@ -122,9 +121,9 @@ public class VisualizationViewerDemo {
 	    };
 	    vv.getRenderContext().setEdgeLabelTransformer(stringer);
 	    vv.getRenderContext().setLabelOffset(10);
-	    ConstantDirectionalEdgeValueTransformer<Transition,Number> mv = new ConstantDirectionalEdgeValueTransformer<Transition,Number>(.5,.7);
-	    mv.setDirectedValue(new Double(((int)(.5*10))/10f));
-	    vv.getRenderContext().setEdgeLabelClosenessTransformer(mv);
+//	    ConstantDirectionalEdgeValueTransformer<Transition,Number> mv = new ConstantDirectionalEdgeValueTransformer<Transition,Number>(.5,.7);
+//	    mv.setDirectedValue(new Double(((int)(.5*10))/10f));
+//	    vv.getRenderContext().setEdgeLabelClosenessTransformer(mv);
 	}
 	
 	public void setBackgroundColor(){
@@ -133,7 +132,7 @@ public class VisualizationViewerDemo {
 	
 	public void addMouseActivity(){
 		
-		final DefaultModalGraphMouse graphMouse = new DefaultModalGraphMouse();
+		final DefaultModalGraphMouse<Object, Object> graphMouse = new DefaultModalGraphMouse<Object, Object>();
 		vv.setGraphMouse(graphMouse);
 	    vv.addKeyListener(graphMouse.getModeKeyListener());
 	    vv.addMouseListener(new MouseAdapter() {
@@ -167,17 +166,17 @@ public class VisualizationViewerDemo {
 	public void setPredicates(){
 		
 		//use for subgraph action?!
-		final PredicatedParallelEdgeIndexFunction eif = PredicatedParallelEdgeIndexFunction.getInstance();
-		final Set exclusions = new HashSet();
-		eif.setPredicate(new Predicate() {    	
-			public boolean evaluate(Object e) {
+		final PredicatedParallelEdgeIndexFunction<KRunState, Transition> eif = PredicatedParallelEdgeIndexFunction.getInstance();
+		final Set<Transition> exclusions = new HashSet<Transition>();
+		eif.setPredicate(new Predicate<Transition>() {    	
+			public boolean evaluate(Transition e) {
 				return exclusions.contains(e);
 			}});
 
 		this.vv.getRenderContext().setParallelEdgeIndexFunction(eif);
 	}
 
-	public DynamicLayout getLayout() {
+	public DynamicLayout<KRunState, Transition> getLayout() {
 		return layout;
 	}
 	

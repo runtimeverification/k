@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -24,13 +23,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.commons.collections15.Factory;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
-import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
@@ -41,7 +38,6 @@ import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisito
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
-import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.subLayout.GraphCollapser;
@@ -78,7 +74,7 @@ public class GraphRepresentation extends JApplet{
 	}
 
 	public void initGraph() throws Exception{
-		Graph graph = null;//= new DirectedSparseMultigraph<Vertex,Edge>();
+		Graph<KRunState,Transition> graph = null;//= new DirectedSparseMultigraph<Vertex,Edge>();
 		try {
 			graph = commandProcessor.firstStep();
 		} catch (IOException e) {
@@ -183,19 +179,19 @@ public class GraphRepresentation extends JApplet{
 			}
 		});
 	}
-
+	@SuppressWarnings("unchecked")
 	public void addActionForCollapse(){
 		  collapse.addActionListener(new ActionListener() {
 	            public void actionPerformed(ActionEvent e) {
-	            	Collection picked = new HashSet(vvd.getSelectedVertices());
+	            	Collection<KRunState> picked = new HashSet<KRunState>(vvd.getSelectedVertices());
 	            	if(picked.size() > 1) {
-	            		Graph inGraph = vvd.getLayout().getGraph();
+	            		Graph<KRunState,Transition> inGraph = vvd.getLayout().getGraph();
 	            		Graph clusterGraph = collapser.getClusterGraph(inGraph, picked);
 	            		Graph g = collapser.collapse(vvd.getLayout().getGraph(), clusterGraph);
 	            		double sumx = 0;
 	            		double sumy = 0;
 	            		for(Object v : picked) {
-		            		Point2D p = (Point2D)vvd.getLayout().transform(v);
+		            		Point2D p = (Point2D)vvd.getLayout().transform((KRunState) v);
 		            		sumx += p.getX();
 		            		sumy += p.getY();
 		            		//break;
@@ -204,7 +200,7 @@ public class GraphRepresentation extends JApplet{
 	            		vvd.getVv().getRenderContext().getParallelEdgeIndexFunction().reset();
 	            		//TODO decoment after problem solvede
 	            		vvd.getLayout().setGraph(g);
-	            		vvd.getLayout().setLocation(clusterGraph, cp);	    
+	            		vvd.getLayout().setLocation((KRunState) clusterGraph, cp);	    
 	            		//vvd.getLayout().resetGraphPosition(g);	            	
 	            		vvd.getVv().getPickedVertexState().clear();
 	            		vvd.getVv().repaint();
@@ -213,6 +209,7 @@ public class GraphRepresentation extends JApplet{
 	       });		
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addActionForExpand(){
 		expand.addActionListener(new ActionListener() {
        	 public void actionPerformed(ActionEvent e) {
@@ -266,8 +263,9 @@ public class GraphRepresentation extends JApplet{
 	
 	}
 	
-	public boolean findShortestPath(Object source, Object target, String rule){
-		DijkstraShortestPath shortestPath = new DijkstraShortestPath(vvd.getLayout().getGraph());
+	@SuppressWarnings("unchecked")
+	public boolean findShortestPath(Object source, Object target, String rule){	
+		DijkstraShortestPath<Object, Transition> shortestPath = new DijkstraShortestPath<Object, Transition>((Graph)vvd.getLayout().getGraph());
 	    List<Transition> path = shortestPath.getPath(source, target);
 	    if(path.size() < 1){
 	    	return false;
@@ -316,7 +314,7 @@ public class GraphRepresentation extends JApplet{
 		
 		UnparserFilter unparser = new UnparserFilter(true, false);
 		term.accept(unparser);
-		System.out.println(unparser.getResult());
+		//System.out.println(unparser.getResult());
 		nodeInfo.init(unparser.getResult());
 		XMLEditorKit.collapseMemorizedTags();
 	}

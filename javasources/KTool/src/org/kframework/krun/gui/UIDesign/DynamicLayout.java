@@ -15,10 +15,7 @@ import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.map.LazyMap;
 
 import edu.uci.ics.jung.algorithms.layout.AbstractLayout;
-import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.util.TreeUtils;
 
 /**
  * @author Karlheinz Toni
@@ -222,7 +219,7 @@ public class DynamicLayout<V,E> extends AbstractLayout<V,E> {
 
     }
 
-	public Graph<V,E> getGraph() {
+	public Graph<V, E> getGraph() {
 		return graph;
 	}
 

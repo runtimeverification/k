@@ -15,6 +15,7 @@ import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.MaudeKRun;
+import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.UIDesign.ColorVisitor;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
@@ -65,7 +66,7 @@ public class RunKRunCommand {
 		if (steps < 1)
 			steps = 1;
 		debugger.setCurrentState(v.getStateId());
-//		SearchResults states = debugger.stepAll(steps);
+		SearchResults states = debugger.stepAll(steps);
 		return debugger.getGraph();
 	}
 
@@ -73,7 +74,7 @@ public class RunKRunCommand {
 		MaudeFilter mf = new MaudeFilter();
 		c.accept(mf);
 		String rez = mf.getResult();
-		System.out.println(rez);
+		//System.out.println(rez);
 	}
 	
 	public static String transformTerm (Term term ) {

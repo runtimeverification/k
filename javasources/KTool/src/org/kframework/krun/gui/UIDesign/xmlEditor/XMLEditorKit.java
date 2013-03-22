@@ -161,7 +161,7 @@ public class XMLEditorKit extends StyledEditorKit {
                          try {
  							String element = doc.getText(deepest.getStartOffset(), deepest.getEndOffset() -deepest.getStartOffset());
  							elements = element.split("\n");
- 							System.out.println(elements[0]);
+ 							//System.out.println(elements[0]);
  						} catch (BadLocationException e2) {
  							// TODO Auto-generated catch block
  							e2.printStackTrace();
@@ -173,7 +173,7 @@ public class XMLEditorKit extends StyledEditorKit {
                     		//ConfigurationPanel.collapsedViews.put(pos, a);
                     		//TODO keep a map for this ... 
                     		//GraphRepresentation.selection.collapsedTags.put(pos, a);
-                    		System.out.println(pos+ " folded");
+                    		//System.out.println(pos+ " folded");
                     	}
                     	else{
                     		//GraphRepresentation.selection.collapsedTags.remove(pos);

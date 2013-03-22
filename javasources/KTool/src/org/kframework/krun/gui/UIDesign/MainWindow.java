@@ -9,6 +9,8 @@ import org.kframework.krun.gui.Controller.RunKRunCommand;
 
 public class MainWindow extends JFrame {
 
+	private static final long serialVersionUID = 1L;
+
 	public MainWindow(RunKRunCommand command){			
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 			this.setPreferredSize(screenSize);

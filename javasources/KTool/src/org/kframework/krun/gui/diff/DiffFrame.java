@@ -2,7 +2,6 @@ package org.kframework.krun.gui.diff;
 
 import java.io.IOException;
 
-import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.kframework.krun.api.KRunState;
@@ -15,7 +14,8 @@ import org.kframework.krun.gui.Controller.RunKRunCommand;
  */
 public class DiffFrame extends javax.swing.JFrame {
 
-    /**
+	private static final long serialVersionUID = 1L;
+	/**
      * Creates new form DiffFrame
      */
     public DiffFrame(KRunState srcState, KRunState destState, Transition transition) {
@@ -51,7 +51,7 @@ public class DiffFrame extends javax.swing.JFrame {
         dest = new javax.swing.JLabel();
         transition = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jScrollPane1.setViewportView(diffEditor);
 
