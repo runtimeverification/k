@@ -18,8 +18,29 @@
 	<classpathentry kind="lib" path="../../dist/bin/java/collections-generic-4.01.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/colt-1.2.0.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/jung-api-2.0.1.jar"/>
-	<classpathentry kind="lib" path="../../dist/bin/java/jung-graph-impl-2.0.1.jar"/>
-	<classpathentry kind="lib" path="../../dist/bin/java/jung-io-2.0.1.jar"/>
-
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/jung-graph-impl-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/jung-io-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/apache_lang/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/apache_lang/commons-lang3-3.1-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/apache_lang/commons-lang3-3.1-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/apache_lang/commons-lang3-3.1-tests.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/collections-generic-4.01.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/colt-1.2.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/concurrent-1.3.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/j3d-core-1.3.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-3d-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-3d-demos-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-algorithms-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-api-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-graph-impl-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-io-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-jai-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-jai-samples-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-samples-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/jung-visualization-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/stax-api-1.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/vecmath-1.3.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/ui/wstx-asl-3.2.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrei/Desktop/k-framework/dist/bin/java/diffutils-1.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

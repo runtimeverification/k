@@ -1,6 +1,26 @@
 package org.kframework.krun;
 
-import jline.*;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import jline.ArgumentCompletor;
+import jline.Completor;
+import jline.ConsoleReader;
+import jline.FileNameCompletor;
+import jline.MultiCompletor;
+import jline.SimpleCompletor;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -14,10 +34,23 @@ import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.BackendTerm;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Empty;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.api.*;
+import org.kframework.krun.api.KRun;
+import org.kframework.krun.api.KRunDebugger;
+import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.MaudeKRun;
+import org.kframework.krun.api.SearchResults;
+import org.kframework.krun.api.SearchType;
+import org.kframework.krun.gui.Controller.RunKRunCommand;
+import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.DefinitionLoader;
@@ -27,17 +60,16 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.*;
-import java.util.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class Main {
 
-	private static final String USAGE_KRUN = "krun [options] <file>" + K.lineSeparator;
-	private static final String USAGE_DEBUG = "Enter one of the following commands without \"--\" in front. " + K.lineSeparator + "For autocompletion press TAB key and for accessing the command"
-			+ K.lineSeparator + "history use up and down arrows." + K.lineSeparator;
+	private static final String USAGE_KRUN = "krun [options] <file>"
+			+ K.lineSeparator;
+	private static final String USAGE_DEBUG = "Enter one of the following commands without \"--\" in front. "
+			+ K.lineSeparator
+			+ "For autocompletion press TAB key and for accessing the command"
+			+ K.lineSeparator
+			+ "history use up and down arrows."
+			+ K.lineSeparator;
 	private static final String HEADER = "";
 	private static final String FOOTER = "";
 	private static Stopwatch sw = new Stopwatch();
@@ -45,7 +77,8 @@ public class Main {
 	// needed for displaying the krun help
 	public static void printKRunUsage(Options options) {
 		HelpFormatter helpFormatter = new HelpFormatter();
-		helpFormatter.setOptionComparator(new CommandlineOptions.OptionComparator());
+		helpFormatter
+				.setOptionComparator(new CommandlineOptions.OptionComparator());
 		helpFormatter.setWidth(79);
 		helpFormatter.printHelp(USAGE_KRUN, HEADER, options, FOOTER);
 		System.out.println();
@@ -54,20 +87,22 @@ public class Main {
 	// needed for displaying the krun debugger help
 	public static void printDebugUsage(Options options) {
 		HelpFormatter helpFormatter = new HelpFormatter();
-		helpFormatter.setOptionComparator(new CommandlineOptions.OptionComparator());
+		helpFormatter
+				.setOptionComparator(new CommandlineOptions.OptionComparator());
 		helpFormatter.setWidth(79);
 		helpFormatter.printHelp(USAGE_DEBUG, HEADER, options, FOOTER);
 		System.out.println();
 	}
 
 	public static void printVersion() {
-		System.out.println("JKrun 0.2.0\n" + "Copyright (C) 2012 Necula Emilian & Raluca");
+		System.out.println("JKrun 0.2.0\n"
+				+ "Copyright (C) 2012 Necula Emilian & Raluca");
 	}
 
 	// find the maude compiled definitions on the disk
 	public static String initOptions(String path) {
 		String result = null;
-		//String path_ = null;
+		// String path_ = null;
 		StringBuilder str = new StringBuilder();
 		int count = 0;
 
@@ -82,7 +117,8 @@ public class Main {
 				}
 			}
 			if (count > 1) {
-				Error.report("Multiple compiled definitions found. Please specify one of: " + str.toString() + "with --compiled-def");
+				Error.report("Multiple compiled definitions found. Please specify one of: "
+						+ str.toString() + "with --compiled-def");
 			} else if (count == 1) {
 				return result;
 			}
@@ -92,7 +128,8 @@ public class Main {
 		return result;
 	}
 
-	// set the main-module, syntax-module and k-definition according to their correlation with compiled-def
+	// set the main-module, syntax-module and k-definition according to their
+	// correlation with compiled-def
 	public static void resolveOption(String optionName, CommandLine cmd) {
 		String s;
 		if (K.k_definition != null) {
@@ -100,7 +137,8 @@ public class Main {
 		} else {
 			// using --compiled-def
 			if (K.compiled_def != null && K.compiled_def.endsWith("-kompiled")) {
-				s = K.compiled_def.substring(0, K.compiled_def.lastIndexOf("-kompiled"));
+				s = K.compiled_def.substring(0,
+						K.compiled_def.lastIndexOf("-kompiled"));
 			} else {
 				s = null;
 			}
@@ -126,8 +164,10 @@ public class Main {
 	}
 
 	private static Term parseTerm(String value) throws Exception {
-		org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def + "/ground/Concrete.tbl");
-		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(value, "", "Command line argument");
+		org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def
+				+ "/ground/Concrete.tbl");
+		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(
+				value, "", "Command line argument");
 		return (Term) term.accept(new FlattenSyntax());
 	}
 
@@ -147,22 +187,23 @@ public class Main {
 			if (!(cfgCleanedNode instanceof Configuration)) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
 						KExceptionGroup.INTERNAL,
-						"Configuration Cleaner failed.",
-						cfg.getFilename(), cfg.getLocation()));
+						"Configuration Cleaner failed.", cfg.getFilename(), cfg
+								.getLocation()));
 			}
-			cfgCleaned = ((Configuration)cfgCleanedNode).getBody();
+			cfgCleaned = ((Configuration) cfgCleanedNode).getBody();
 		}
 
-		if(GlobalSettings.verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("Plug configuration variables");
 
 		return (Term) cfgCleaned.accept(new SubstitutionFilter(args));
 	}
 
-	public static Term makeConfiguration(Term kast, String stdin, RunProcess rp, boolean hasTerm) throws TransformerException {
+	public static Term makeConfiguration(Term kast, String stdin,
+			RunProcess rp, boolean hasTerm) throws TransformerException {
 
-		if(hasTerm) {
-			if(kast == null) {
+		if (hasTerm) {
+			if (kast == null) {
 				return rp.runParser(K.parser, K.term, false, null);
 			} else {
 				Error.report("You cannot specify both the term and the configuration variables.");
@@ -176,7 +217,8 @@ public class Main {
 			String name = (String) en.nextElement();
 			String value = K.configuration_variables.getProperty(name);
 			String parser = K.cfg_parsers.getProperty(name);
-			// TODO: get sort from configuration term in definition and pass it here
+			// TODO: get sort from configuration term in definition and pass it
+			// here
 			Term parsed = null;
 			if (parser == null) {
 				try {
@@ -199,24 +241,26 @@ public class Main {
 		}
 		if (stdin != null) {
 			output.put("$noIO", new BackendTerm("List", "#noIO"));
-			output.put("$stdin", new BackendTerm("K", "# \"" + stdin + "\\n\"(.KList)"));
+			output.put("$stdin", new BackendTerm("K", "# \"" + stdin
+					+ "\\n\"(.KList)"));
 		} else {
 			output.put("$noIO", new Empty("List"));
 			output.put("$stdin", new Empty("K"));
 		}
-		
-		if(GlobalSettings.verbose)
+
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("Make configuration");
-		
+
 		return plug(output);
 	}
 
 	// execute krun in normal mode (i.e. not in debug mode)
-	public static void normalExecution(Term KAST, String lang, RunProcess rp, CommandlineOptions cmd_options) {
+	public static void normalExecution(Term KAST, String lang, RunProcess rp,
+			CommandlineOptions cmd_options) {
 		try {
 			CommandLine cmd = cmd_options.getCommandLine();
 
-			KRun krun = null; 
+			KRun krun = null;
 			if (K.backend.equals("maude")) {
 				krun = new MaudeKRun();
 			} else if (K.backend.equals("java-symbolic")) {
@@ -229,25 +273,30 @@ public class Main {
 			Rule patternRule = null;
 			try {
 				if (cmd.hasOption("pattern") || "search".equals(K.maude_cmd)) {
-					org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
-					ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
+					org.kframework.parser.concrete.KParser
+							.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
+					ASTNode pattern = DefinitionLoader.parsePattern(K.pattern,
+							"Command line pattern");
 					CollectVariablesVisitor vars = new CollectVariablesVisitor();
 					pattern.accept(vars);
 					varNames = vars.getVars().keySet();
 
-					pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
+					pattern = new RuleCompilerSteps(K.definition).compile(
+							(Rule) pattern, null);
 
 					patternRule = (Rule) pattern;
-					
+
 					if (GlobalSettings.verbose)
 						sw.printIntermediate("Parsing search pattern");
 				}
 
 				if (K.do_search) {
 					if ("search".equals(K.maude_cmd)) {
-						BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+						BufferedReader br = new BufferedReader(
+								new InputStreamReader(System.in));
 						String buffer = "";
-						// detect if the input comes from console or redirected from a pipeline
+						// detect if the input comes from console or redirected
+						// from a pipeline
 						Console c = System.console();
 						if (c == null && br.ready()) {
 							try {
@@ -274,9 +323,15 @@ public class Main {
 						} else if (cmd.hasOption("depth")) {
 							depth = Integer.parseInt(K.depth);
 						}
-						result = krun.search(bound, depth, K.searchType, patternRule, makeConfiguration(KAST, buffer, rp, (K.term != null)), varNames);
+						result = krun.search(
+								bound,
+								depth,
+								K.searchType,
+								patternRule,
+								makeConfiguration(KAST, buffer, rp,
+										(K.term != null)), varNames);
 
-						if(GlobalSettings.verbose)
+						if (GlobalSettings.verbose)
 							sw.printTotal("Search total");
 					} else {
 						Error.report("For the search option you need to specify that --maude-cmd=search");
@@ -286,30 +341,40 @@ public class Main {
 					File formulaFile = new File(K.model_checking);
 					Term KAST1 = null;
 					if (!formulaFile.exists()) {
-						// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: " + K.model_checking);
-						// assume that the specified argument is not a file and maybe represents a formula
-						KAST1 = rp.runParser(K.parser, K.model_checking, true, "LTLFormula");
+						// Error.silentReport("\nThe specified argument does not exist as a file on the disc; it may represent a direct formula: "
+						// + K.model_checking);
+						// assume that the specified argument is not a file and
+						// maybe represents a formula
+						KAST1 = rp.runParser(K.parser, K.model_checking, true,
+								"LTLFormula");
 					} else {
 						// the specified argument represents a file
-						KAST1 = rp.runParser(K.parser, K.model_checking, false, "LTLFormula");
+						KAST1 = rp.runParser(K.parser, K.model_checking, false,
+								"LTLFormula");
 					}
 
-					result = krun.modelCheck(KAST1, makeConfiguration(KAST, null, rp, (K.term != null)));
+					result = krun
+							.modelCheck(
+									KAST1,
+									makeConfiguration(KAST, null, rp,
+											(K.term != null)));
 
-					if(GlobalSettings.verbose)
+					if (GlobalSettings.verbose)
 						sw.printTotal("Model checking total");
 				} else {
-					result = krun.run(makeConfiguration(KAST, null, rp, (K.term != null)));
+					result = krun.run(makeConfiguration(KAST, null, rp,
+							(K.term != null)));
 
-					if(GlobalSettings.verbose)
+					if (GlobalSettings.verbose)
 						sw.printTotal("Normal execution total");
 				}
 
-				if(cmd.hasOption("pattern") && !K.do_search){
+				if (cmd.hasOption("pattern") && !K.do_search) {
 					Object krs = result.getResult();
-					if(krs instanceof KRunState){
+					if (krs instanceof KRunState) {
 						Term res = ((KRunState) krs).getRawResult();
-						result = krun.search(null, null, K.searchType, patternRule, res, varNames);
+						result = krun.search(null, null, K.searchType,
+								patternRule, res, varNames);
 					}
 				}
 
@@ -317,7 +382,7 @@ public class Main {
 				rp.printError(e.getMessage(), lang);
 				System.exit(1);
 			}
-			
+
 			if ("pretty".equals(K.output_mode)) {
 				String output = result.toString();
 				if (!cmd.hasOption("output")) {
@@ -326,18 +391,25 @@ public class Main {
 					FileUtil.createFile(K.output, output);
 				}
 				// print search graph
-				if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
-					System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
+				if ("search".equals(K.maude_cmd) && K.do_search
+						&& K.showSearchGraph) {
+					System.out.println(K.lineSeparator + "The search graph is:"
+							+ K.lineSeparator);
 					@SuppressWarnings("unchecked")
-					KRunResult<SearchResults> searchResult = (KRunResult<SearchResults>)result;
-					AnsiConsole.out.println(searchResult.getResult().getGraph());
-					// offer the user the possibility to turn execution into debug mode
+					KRunResult<SearchResults> searchResult = (KRunResult<SearchResults>) result;
+					AnsiConsole.out
+							.println(searchResult.getResult().getGraph());
+					// offer the user the possibility to turn execution into
+					// debug mode
 					while (true) {
-						System.out.print(K.lineSeparator + "Do you want to enter in debug mode? (y/n):");
-						BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+						System.out.print(K.lineSeparator
+								+ "Do you want to enter in debug mode? (y/n):");
+						BufferedReader stdin = new BufferedReader(
+								new InputStreamReader(System.in));
 						String input = stdin.readLine();
 						if (input == null) {
 							K.debug = false;
+							K.guidebug = false;
 							System.out.println();
 							break;
 						}
@@ -346,9 +418,11 @@ public class Main {
 							debugExecution(KAST, lang, searchResult);
 						} else if (input.equals("n")) {
 							K.debug = false;
+							K.guidebug = false;
 							break;
 						} else {
-							System.out.println("You should specify one of the possible answers:y or n");
+							System.out
+									.println("You should specify one of the possible answers:y or n");
 						}
 					}
 				}
@@ -362,23 +436,26 @@ public class Main {
 				}
 			} else if ("none".equals(K.output_mode)) {
 				System.out.print("");
-			} else if("binary".equals(K.output_mode)) {
+			} else if ("binary".equals(K.output_mode)) {
 				Object krs = result.getResult();
-				if(krs instanceof KRunState){
+				if (krs instanceof KRunState) {
 					Term res = ((KRunState) krs).getRawResult();
 
 					if (!cmd.hasOption("output")) {
 						Error.silentReport("Did not specify an output file. Cannot print output-mode binary to standard out. Saving to .k/krun/krun_output");
-						BinaryLoader.toBinary(res, new FileOutputStream(K.krun_output));
+						BinaryLoader.toBinary(res, new FileOutputStream(
+								K.krun_output));
 					} else {
-						BinaryLoader.toBinary(res, new FileOutputStream(K.output));
+						BinaryLoader.toBinary(res, new FileOutputStream(
+								K.output));
 					}
 				} else {
 					Error.report("binary output mode is not supported by search and model checking");
 				}
 
 			} else {
-				Error.report(K.output_mode + " is not a valid value for output-mode option");
+				Error.report(K.output_mode
+						+ " is not a valid value for output-mode option");
 			}
 
 			System.exit(0);
@@ -394,29 +471,37 @@ public class Main {
 	}
 
 	// execute krun in debug mode (i.e. step by step execution)
-	// isSwitch variable is true if we enter in debug execution from normal execution (we use the search command with --graph option)
-	public static void debugExecution(Term kast, String lang, KRunResult<SearchResults> state) {
+	// isSwitch variable is true if we enter in debug execution from normal
+	// execution (we use the search command with --graph option)
+	public static void debugExecution(Term kast, String lang,
+			KRunResult<SearchResults> state) {
 		try {
-			// adding autocompletion and history feature to the stepper internal commandline by using the JLine library
+			// adding autocompletion and history feature to the stepper internal
+			// commandline by using the JLine library
 			ConsoleReader reader = new ConsoleReader();
 			reader.setBellEnabled(false);
 
 			List<Completor> argCompletor = new LinkedList<Completor>();
-			argCompletor.add(new SimpleCompletor(new String[] { "help", "abort", "resume", "step", "step-all", "select", "show-search-graph", "show-node", "show-edge" }));
+			argCompletor.add(new SimpleCompletor(new String[] { "help",
+					"abort", "resume", "step", "step-all", "select",
+					"show-search-graph", "show-node", "show-edge" }));
 			argCompletor.add(new FileNameCompletor());
 			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
 			reader.addCompletor(new MultiCompletor(completors));
 
-			new File(K.compiled_def + K.fileSeparator + "main.maude").getCanonicalPath();
+			new File(K.compiled_def + K.fileSeparator + "main.maude")
+					.getCanonicalPath();
 			RunProcess rp = new RunProcess();
 			KRun krun = new MaudeKRun();
 			KRunDebugger debugger;
 			if (state == null) {
 				Term t = makeConfiguration(kast, null, rp, (K.term != null));
 				debugger = krun.debug(t);
-				System.out.println("After running one step of execution the result is:");
-				AnsiConsole.out.println(debugger.printState(debugger.getCurrentState()));
+				System.out
+						.println("After running one step of execution the result is:");
+				AnsiConsole.out.println(debugger.printState(debugger
+						.getCurrentState()));
 			} else {
 				debugger = krun.debug(state.getResult());
 			}
@@ -425,12 +510,13 @@ public class Main {
 				System.out.println();
 				String input = reader.readLine("Command > ");
 				if (input == null) {
-					//probably pressed ^D
+					// probably pressed ^D
 					System.out.println();
 					System.exit(0);
 				}
 
-				// construct the right command line input when we specify the "step" option with an argument (i.e. step=3)
+				// construct the right command line input when we specify the
+				// "step" option with an argument (i.e. step=3)
 				input = input.trim();
 				String[] tokens = input.split(" ");
 				// store the tokens that are not a blank space
@@ -453,11 +539,13 @@ public class Main {
 					}
 					input = aux.toString();
 				}
-				// apply trim to remove possible blank spaces from the inserted command
+				// apply trim to remove possible blank spaces from the inserted
+				// command
 				String[] cmds = new String[] { "--" + input };
 				CommandlineOptions cmd_options = new CommandlineOptions();
 				CommandLine cmd = cmd_options.parse(cmds);
-				// when an error occurred during parsing the commandline continue the execution of the stepper
+				// when an error occurred during parsing the commandline
+				// continue the execution of the stepper
 				if (cmd == null) {
 					continue;
 				} else {
@@ -470,13 +558,16 @@ public class Main {
 					if (cmd.hasOption("resume")) {
 						try {
 							debugger.resume();
-							AnsiConsole.out.println(debugger.printState(debugger.getCurrentState()));
+							AnsiConsole.out.println(debugger
+									.printState(debugger.getCurrentState()));
 						} catch (IllegalStateException e) {
-							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator
+							Error.silentReport("Wrong command: If you previously used the step-all command you must select"
+									+ K.lineSeparator
 									+ "first a solution with step command before executing steps of rewrites!");
 						}
 					}
-					// one step execution (by default) or more if you specify an argument
+					// one step execution (by default) or more if you specify an
+					// argument
 					if (cmd.hasOption("step")) {
 						// by default execute only one step at a time
 						String arg = new String("1");
@@ -488,11 +579,13 @@ public class Main {
 						try {
 							int steps = Integer.parseInt(arg);
 							debugger.step(steps);
-							AnsiConsole.out.println(debugger.printState(debugger.getCurrentState()));
+							AnsiConsole.out.println(debugger
+									.printState(debugger.getCurrentState()));
 						} catch (NumberFormatException e) {
 							Error.silentReport("Argument to step must be an integer.");
 						} catch (IllegalStateException e) {
-							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator
+							Error.silentReport("Wrong command: If you previously used the step-all command you must select"
+									+ K.lineSeparator
 									+ "first a solution with step command before executing steps of rewrites!");
 						}
 					}
@@ -505,14 +598,15 @@ public class Main {
 							arg = remainingArguments[0];
 						}
 						try {
-							int steps = Integer.parseInt(arg);	
+							int steps = Integer.parseInt(arg);
 							SearchResults states = debugger.stepAll(steps);
 							AnsiConsole.out.println(states);
 
 						} catch (NumberFormatException e) {
 							Error.silentReport("Argument to step-all must be an integer.");
 						} catch (IllegalStateException e) {
-							Error.silentReport("Wrong command: If you previously used the step-all command you must select" + K.lineSeparator
+							Error.silentReport("Wrong command: If you previously used the step-all command you must select"
+									+ K.lineSeparator
 									+ "first a solution with step command before executing steps of rewrites!");
 						}
 					}
@@ -523,41 +617,51 @@ public class Main {
 						try {
 							int stateNum = Integer.parseInt(arg);
 							debugger.setCurrentState(stateNum);
-							AnsiConsole.out.println(debugger.printState(debugger.getCurrentState()));
+							AnsiConsole.out.println(debugger
+									.printState(debugger.getCurrentState()));
 						} catch (NumberFormatException e) {
 							Error.silentReport("Argument to select must bean integer.");
 						} catch (IllegalArgumentException e) {
-							System.out.println("A node with the specified state number could not be found in the" + K.lineSeparator + "search graph");
+							System.out
+									.println("A node with the specified state number could not be found in the"
+											+ K.lineSeparator + "search graph");
 						}
 					}
 					if (cmd.hasOption("show-search-graph")) {
-						System.out.println(K.lineSeparator + "The search graph is:" + K.lineSeparator);
+						System.out.println(K.lineSeparator
+								+ "The search graph is:" + K.lineSeparator);
 						System.out.println(debugger.getGraph());
 					}
 					if (cmd.hasOption("show-node")) {
 						String nodeId = cmd.getOptionValue("show-node").trim();
 						try {
 							int stateNum = Integer.parseInt(nodeId);
-							AnsiConsole.out.println(debugger.printState(stateNum));
+							AnsiConsole.out.println(debugger
+									.printState(stateNum));
 						} catch (NumberFormatException e) {
 							Error.silentReport("Argument to select node to show must be an integer.");
 						} catch (IllegalArgumentException e) {
-							System.out.println("A node with the specified state number could not be found in the" + K.lineSeparator + "search graph");
+							System.out
+									.println("A node with the specified state number could not be found in the"
+											+ K.lineSeparator + "search graph");
 						}
 					}
 					if (cmd.hasOption("show-edge")) {
 						String[] vals = cmd.getOptionValues("show-edge");
-						vals = vals[0].split("=",2);
+						vals = vals[0].split("=", 2);
 						try {
 							int state1 = Integer.parseInt(vals[0].trim());
 							int state2 = Integer.parseInt(vals[1].trim());
-							AnsiConsole.out.println(debugger.printEdge(state1, state2));
+							AnsiConsole.out.println(debugger.printEdge(state1,
+									state2));
 						} catch (ArrayIndexOutOfBoundsException e) {
 							Error.silentReport("Must specify two nodes with an edge between them.");
 						} catch (NumberFormatException e) {
 							Error.silentReport("Arguments to select edge to show must be integers.");
 						} catch (IllegalArgumentException e) {
-							System.out.println("An edge with the specified endpoints could not be found in the" + K.lineSeparator + "search graph");
+							System.out
+									.println("An edge with the specified endpoints could not be found in the"
+											+ K.lineSeparator + "search graph");
 						}
 					}
 				}
@@ -565,6 +669,17 @@ public class Main {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
+		}
+	}
+
+	public static void guiDebugExecution(Term kast, String lang,
+			KRunResult<SearchResults> state) {
+
+		try {
+			new MainWindow(new RunKRunCommand(kast, lang, false));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -594,14 +709,17 @@ public class Main {
 			GlobalSettings.verbose = true;
 		}
 
-		if(GlobalSettings.verbose)
+		if (GlobalSettings.verbose)
 			sw.printIntermediate("Deleting temporary krun directory");
-		
+
 		try {
 
 			// Parse the program arguments
 
-			if (cmd.hasOption("search") || cmd.hasOption("do-search") || cmd.hasOption("search-final") || cmd.hasOption("search-all") || cmd.hasOption("search-one-step")
+			if (cmd.hasOption("search") || cmd.hasOption("do-search")
+					|| cmd.hasOption("search-final")
+					|| cmd.hasOption("search-all")
+					|| cmd.hasOption("search-one-step")
 					|| cmd.hasOption("search-one-or-more-steps")) {
 				K.maude_cmd = "search";
 				K.io = false;
@@ -635,7 +753,8 @@ public class Main {
 				K.version = true;
 			}
 			if (cmd.hasOption("k-definition")) {
-				K.k_definition = new File(cmd.getOptionValue("k-definition")).getCanonicalPath();
+				K.k_definition = new File(cmd.getOptionValue("k-definition"))
+						.getCanonicalPath();
 			}
 			if (cmd.hasOption("main-module")) {
 				K.main_module = cmd.getOptionValue("main-module");
@@ -675,14 +794,17 @@ public class Main {
 			}
 			// k-definition beats compiled-def in a fight
 			if (cmd.hasOption("compiled-def") && !cmd.hasOption("k-definition")) {
-				K.compiled_def = new File(cmd.getOptionValue("compiled-def")).getCanonicalPath();
+				K.compiled_def = new File(cmd.getOptionValue("compiled-def"))
+						.getCanonicalPath();
 			}
 			if (cmd.hasOption("maude-cmd")) {
 				K.maude_cmd = cmd.getOptionValue("maude-cmd");
 			}
 			/*
-			 * if (cmd.hasOption("xsearch-pattern")) { K.maude_cmd = "search"; K.do_search = true; K.xsearch_pattern = cmd.getOptionValue("xsearch-pattern"); // System.out.println("xsearch-pattern:" +
-			 * K.xsearch_pattern); }
+			 * if (cmd.hasOption("xsearch-pattern")) { K.maude_cmd = "search";
+			 * K.do_search = true; K.xsearch_pattern =
+			 * cmd.getOptionValue("xsearch-pattern"); //
+			 * System.out.println("xsearch-pattern:" + K.xsearch_pattern); }
 			 */
 			if (cmd.hasOption("pattern")) {
 				K.pattern = cmd.getOptionValue("pattern");
@@ -708,6 +830,9 @@ public class Main {
 			if (cmd.hasOption("debug")) {
 				K.debug = true;
 			}
+			if (cmd.hasOption("debug-gui")) {
+				K.guidebug = true;
+			}
 			if (cmd.hasOption("trace")) {
 				K.trace = true;
 			}
@@ -730,22 +855,24 @@ public class Main {
 				if (!cmd.hasOption("color")) {
 					K.color = false;
 				}
-				K.output = new File(cmd.getOptionValue("output")).getCanonicalPath();
+				K.output = new File(cmd.getOptionValue("output"))
+						.getCanonicalPath();
 			}
 			if (cmd.hasOption("c")) {
 
-				if(K.term != null)
-				{
+				if (K.term != null) {
 					Error.report("You cannot specify both the term and the configuration variables.");
 				}
 
 				K.configuration_variables = cmd.getOptionProperties("c");
 				String parser = null;
 				for (Option opt : cmd.getOptions()) {
-					if (opt.equals(cmd_options.getOptions().getOption("c")) && parser != null) {
+					if (opt.equals(cmd_options.getOptions().getOption("c"))
+							&& parser != null) {
 						K.cfg_parsers.setProperty(opt.getValue(0), parser);
 					}
-					if (opt.equals(cmd_options.getOptions().getOption("cfg-parser"))) {
+					if (opt.equals(cmd_options.getOptions().getOption(
+							"cfg-parser"))) {
 						parser = opt.getValue();
 					}
 				}
@@ -791,12 +918,14 @@ public class Main {
 				}
 			}
 
-			if(GlobalSettings.verbose)
+			if (GlobalSettings.verbose)
 				sw.printIntermediate("Parsing command line options");
-			
+
 			// by default
-			if (!cmd.hasOption("k-definition") && !cmd.hasOption("compiled-def") && lang != null) {
-				K.k_definition = new File(K.userdir).getCanonicalPath() + K.fileSeparator + lang;
+			if (!cmd.hasOption("k-definition")
+					&& !cmd.hasOption("compiled-def") && lang != null) {
+				K.k_definition = new File(K.userdir).getCanonicalPath()
+						+ K.fileSeparator + lang;
 			}
 
 			if (K.compiled_def == null) {
@@ -812,10 +941,14 @@ public class Main {
 			}
 			File compiledFile = new File(K.compiled_def);
 			if (!compiledFile.exists()) {
-				Error.report("\nCould not find compiled definition: " + K.compiled_def + "\nPlease compile the definition by using `kompile'.");
+				Error.report("\nCould not find compiled definition: "
+						+ K.compiled_def
+						+ "\nPlease compile the definition by using `kompile'.");
 			}
 
-			DefinitionHelper.dotk = new File(new File(K.compiled_def).getParent() + File.separator + ".k");
+			DefinitionHelper.dotk = new File(
+					new File(K.compiled_def).getParent() + File.separator
+							+ ".k");
 			if (!DefinitionHelper.dotk.exists()) {
 				DefinitionHelper.dotk.mkdirs();
 			}
@@ -823,48 +956,56 @@ public class Main {
 			K.kdir = DefinitionHelper.dotk.getCanonicalPath();
 			K.setKDir();
 			/*
-			 * System.out.println("K.k_definition=" + K.k_definition); System.out.println("K.syntax_module=" + K.syntax_module); System.out.println("K.main_module=" + K.main_module);
+			 * System.out.println("K.k_definition=" + K.k_definition);
+			 * System.out.println("K.syntax_module=" + K.syntax_module);
+			 * System.out.println("K.main_module=" + K.main_module);
 			 * System.out.println("K.compiled_def=" + K.compiled_def);
 			 */
-			
-			if(GlobalSettings.verbose)
+
+			if (GlobalSettings.verbose)
 				sw.printIntermediate("Checking compiled definition");
 
-			// in KAST variable we obtain the output from running kast process on a program defined in K
+			// in KAST variable we obtain the output from running kast process
+			// on a program defined in K
 			Term KAST = null;
 			RunProcess rp = new RunProcess();
 
 			if (!DefinitionHelper.initialized) {
-				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) BinaryLoader.fromBinary(new FileInputStream(K.compiled_def + "/defx.bin"));
+				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) BinaryLoader
+						.fromBinary(new FileInputStream(K.compiled_def
+								+ "/defx.bin"));
 
-				if(GlobalSettings.verbose)
+				if (GlobalSettings.verbose)
 					sw.printIntermediate("Reading definition from binary");
 
 				// This is essential for generating maude
 				javaDef = new FlattenModules().compile(javaDef, null);
 
-				if(GlobalSettings.verbose)
+				if (GlobalSettings.verbose)
 					sw.printIntermediate("Flattening modules");
 
-				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig());
+				javaDef = (org.kframework.kil.Definition) javaDef
+						.accept(new AddTopCellConfig());
 
-				if(GlobalSettings.verbose)
+				if (GlobalSettings.verbose)
 					sw.printIntermediate("Adding top cell to configuration");
 
 				javaDef.preprocess();
 
-				if(GlobalSettings.verbose)
+				if (GlobalSettings.verbose)
 					sw.printIntermediate("Preprocessing definition");
 
 				K.definition = javaDef;
 
-				if(GlobalSettings.verbose)
+				if (GlobalSettings.verbose)
 					sw.printIntermediate("Importing tables");
 
-				org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) BinaryLoader.fromBinary(new FileInputStream(K.compiled_def + "/configuration.bin"));
+				org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) BinaryLoader
+						.fromBinary(new FileInputStream(K.compiled_def
+								+ "/configuration.bin"));
 				K.kompiled_cfg = configKompiled;
 
-				if(GlobalSettings.verbose)
+				if (GlobalSettings.verbose)
 					sw.printIntermediate("Reading configuration from binary");
 			}
 
@@ -875,7 +1016,7 @@ public class Main {
 				resolveOption("syntax-module", cmd);
 			}
 
-			if(GlobalSettings.verbose)
+			if (GlobalSettings.verbose)
 				sw.printIntermediate("Resolving main and syntax modules");
 
 			if (K.pgm != null) {
@@ -884,11 +1025,11 @@ public class Main {
 				KAST = null;
 			}
 
-			if(GlobalSettings.verbose)
+			if (GlobalSettings.verbose)
 				sw.printIntermediate("Kast process");
 
-			if(K.term != null) {
-				if(K.parser.equals("kast")) {
+			if (K.term != null) {
+				if (K.parser.equals("kast")) {
 					if (K.backend.equals("java-symbolic")) {
 						GlobalSettings.whatParser = GlobalSettings.ParserType.RULES;
 					} else {
@@ -896,16 +1037,19 @@ public class Main {
 					}
 				}
 			}
-			
+
 			GlobalSettings.kem.print();
 
-			if (!K.debug) {
+			if (!K.debug && !K.guidebug) {
 				normalExecution(KAST, lang, rp, cmd_options);
 			} else {
 				if (K.do_search) {
 					Error.report("Cannot specify --search with --debug. In order to search inside the debugger, use the step-all command.");
 				}
-				debugExecution(KAST, lang, null);
+				if (K.guidebug)
+					guiDebugExecution(KAST, lang, null);
+				else
+					debugExecution(KAST, lang, null);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
