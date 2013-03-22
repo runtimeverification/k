@@ -158,26 +158,37 @@ public class DefinitionSDF {
 			}
 		}
 		for (Sort ss : psdfv.insertSorts)
-			sdf.append("	" + StringUtil.escapeSortName(ss.getName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getName()) + "\n");
+			sdf.append("	" + StringUtil.escapeSortName(ss.getName()) + "	-> InsertDz" + StringUtil.escapeSortName(ss.getName()) + "\n");
 
 		sdf.append("\n\n");
+
+		// print variables, HOLEs, cast
+		// two stages for typed variables
+		// make it a lexer rule to enforce no whitespace between the variable name and the type
+		sdf.append("lexical syntax\n");
+		for (Sort s : psdfv.userSorts) {
+			if (!s.isBaseSort()) {
+				sdf.append("	VARID  \":\" \"" + s.getName() + "\"		-> " + StringUtil.escapeSortName(s.getName()) + "LexDz\n");
+			}
+		}
+		sdf.append("\ncontext-free syntax\n");
 		// print variables, HOLEs, cast
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	VARID  \":\" \"" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
+				sdf.append("	" + StringUtil.escapeSortName(s.getName()) + "LexDz		-> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
 			}
 		}
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	\"HOLE\" \":\" \"" + s.getName() + "\"      -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
+				sdf.append("	\"HOLE\" \":\" \"" + s.getName() + "\"		-> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
 			}
 		}
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	\"(\" K \")\" \":\" \"" + s.getName() + "\"      -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
-				sdf.append("	\"(\" K \")\" \"::\" \"" + s.getName() + "\"     -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
+				sdf.append("	\"(\" K \")\" \":\"  \"" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+				sdf.append("	\"(\" K \")\" \"::\" \"" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
 			}
 		}
 
@@ -199,7 +210,7 @@ public class DefinitionSDF {
 		sdf.append("\n");
 
 		sdf.append("context-free restrictions\n");
-		sdf.append("	VariableDz -/- ~[\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]\n");
+		sdf.append("	VariableDz -/- [a-zA-Z0-9]\n");
 
 		sdf.append("lexical syntax\n");
 		for (Production p : psdfv.constants) {
