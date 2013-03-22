@@ -14,6 +14,7 @@ context-free syntax
 	MapLexDz		-> Map {cons("Map12Var")}
 	MapItemLexDz	-> MapItem {cons("MapItem12Var")}
 	KLexDz			-> K {cons("K12Var")}
+	KResultLexDz	-> K {cons("KResult12Var")}
 	KListLexDz		-> KList {cons("KList12Var")}
 	KLabelLexDz		-> KLabel {cons("KLabel12Var")}
 
@@ -45,7 +46,7 @@ lexical syntax
 	VARID ":" "List{K}"		-> KListLexDz
 	VARID ":" "KList"		-> KListLexDz
 	VARID ":" "KLabel"		-> KLabelLexDz
-	VARID ":" "KResult"		-> KLexDz
+	VARID ":" "KResult"		-> KResultLexDz
 
 lexical syntax
 	%% Variables and the Anonymous Variable
