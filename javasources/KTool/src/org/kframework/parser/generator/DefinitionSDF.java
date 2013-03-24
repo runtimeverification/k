@@ -163,25 +163,16 @@ public class DefinitionSDF {
 		sdf.append("\n\n");
 
 		// print variables, HOLEs, cast
-		// two stages for typed variables
-		// make it a lexer rule to enforce no whitespace between the variable name and the type
-		sdf.append("lexical syntax\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	VARID  \":\" \"" + s.getName() + "\"		-> " + StringUtil.escapeSortName(s.getName()) + "LexDz\n");
+				sdf.append("    VARIDz  \":" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
 			}
 		}
-		sdf.append("\ncontext-free syntax\n");
 		// print variables, HOLEs, cast
-		for (Sort s : psdfv.userSorts) {
-			if (!s.isBaseSort()) {
-				sdf.append("	" + StringUtil.escapeSortName(s.getName()) + "LexDz		-> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
-			}
-		}
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	\"HOLE\" \":\" \"" + s.getName() + "\"		-> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
+				sdf.append("	\"HOLE\" \":" + s.getName() + "\"		-> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
 			}
 		}
 		sdf.append("\n");
@@ -210,7 +201,7 @@ public class DefinitionSDF {
 		sdf.append("\n");
 
 		sdf.append("context-free restrictions\n");
-		sdf.append("	VariableDz -/- [a-zA-Z0-9]\n");
+		sdf.append("	VariableDz -/- [a-zA-Z0-9\\{\\}]\n");
 
 		sdf.append("lexical syntax\n");
 		for (Production p : psdfv.constants) {
