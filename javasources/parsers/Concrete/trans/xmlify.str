@@ -238,11 +238,10 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:
-		a#([b]) -> $[<var name="[name]" sort="[sort]" loc="[loc]" userTyped="true" />
+		a#(b) -> $[<var name="[b]" sort="[sort]" loc="[loc]" userTyped="true" />
 		]
 		where <string-ends-with(|"12Var")> a
 		where mydebug(!"Var: ")
-		where <string-tokenize(|[':'])> b ; ?[name | _]
 		where sort := <getSort> a
 		where loc := <getLocAsString>
 
