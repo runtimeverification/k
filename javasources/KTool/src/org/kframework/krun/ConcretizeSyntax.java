@@ -5,7 +5,7 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.parser.concrete.disambiguate.TypeCheckFilter;
+import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(KApp kapp) throws TransformerException {
-		return internalTransform(kapp).accept(new TypeCheckFilter());
+		return internalTransform(kapp).accept(new TypeSystemFilter());
 	}
 
 	public ASTNode internalTransform(KApp kapp) throws TransformerException {
