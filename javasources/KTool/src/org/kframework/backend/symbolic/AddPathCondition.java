@@ -20,7 +20,16 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.general.GlobalSettings;
 
+/**
+ * Add path condition cell to rules. Since this step is right after 
+ * configuration abstraction transformation then the path condition
+ * cell must be added explicitly. Also, sets the call to the smt solver
+ * in case --no-smt is set. 
+ * @author andreiarusoaie
+ *
+ */
 public class AddPathCondition extends CopyOnWriteTransformer {
 
 	public AddPathCondition() {
@@ -29,6 +38,10 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
+		
+		if (!node.containsAttribute(SymbolicBackend.SYMBOLIC) ) {
+			return node;
+		}
 		
 		if (node.getCondition() == null)
 			return node;
@@ -51,18 +64,17 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 			Variable phi = MetaK.getFreshVar("K");
 			
 			// create lhs path condition cell
-			Term left = rew.getLeft();
-			
-			// ignore non-bag and non-cell terms
 			Cell leftCell = new Cell();
 			leftCell.setLabel(MetaK.Constants.pathCondition);
 			leftCell.setEllipses(Ellipses.NONE);
 			leftCell.setContents(phi);
 
 			
+			Term left = rew.getLeft();
 			
 			if (left instanceof Cell) {
-				AddConditionToConfig.addCellNextToKCell((Cell)left, leftCell);
+				// AddConditionToConfig.addCellNextToKCell((Cell)left, leftCell);
+				left = AddConditionToConfig.addSubcellToCell((Cell)left, leftCell);
 			}
 			
 
@@ -79,14 +91,17 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 			rightCell.setContents(pathCondition);
 
 			if (right instanceof Cell) {
-				AddConditionToConfig.addCellNextToKCell((Cell)right, rightCell);
+				right = AddConditionToConfig.addSubcellToCell((Cell)right, rightCell);
 			}
 			
-			List<Term> myList = new ArrayList<Term>();
-			myList.add(condition);
-			myList.add(checkSat(pathCondition));
-			Term cond = new KApp(Constant.ANDBOOL_KLABEL, new KList(myList));
-			
+			Term cond = condition;
+			if (!GlobalSettings.NOSMT) {
+				List<Term> myList = new ArrayList<Term>();
+				myList.add(condition);
+				myList.add(checkSat(pathCondition));
+				cond = new KApp(Constant.ANDBOOL_KLABEL, new KList(myList));
+			}
+
 			// add transition attribute
 			List<Attribute> attrs = node.getAttributes().getContents();
 			// bad practice

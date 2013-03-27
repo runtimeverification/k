@@ -16,6 +16,12 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/**
+ * Replace each variable X in the left hand side with a new one Y
+ * of the same sort and add the equality X == Y in the path condition.
+ * @author andreiarusoaie
+ *
+ */
 public class LineariseTransformer extends BasicTransformer {
 
 	public LineariseTransformer() {
@@ -24,24 +30,28 @@ public class LineariseTransformer extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
+		if (!node.containsAttribute(SymbolicBackend.SYMBOLIC) ) {
+			return node;
+		}
+
+		
 		if (node.getBody() instanceof Rewrite) {
-
-			VariableReplaceTransformer vrt = new VariableReplaceTransformer("");
-
+			VariableReplaceTransformer vrt = new VariableReplaceTransformer(
+					"");
 			Rewrite rew = (Rewrite) node.getBody();
 			rew.setLeft((Term) rew.getLeft().accept(vrt));
 			
-			Map<Variable, Variable> newVariables = vrt.getGeneratedVariables();
-
+			Map<Variable, Variable> newGeneratedSV = vrt.getGeneratedVariables();
 			Term condition = node.getCondition();
 
 			List<Term> terms = new ArrayList<Term>();
-			for (Entry<Variable, Variable> entry : newVariables.entrySet()) {
+			for (Entry<Variable, Variable> entry : newGeneratedSV.entrySet()) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
 				vars.add(entry.getValue());
-				String sort = entry.getValue().getSort().substring(1);
-				String label = "'_==" + sort + "_";
+
+				// TODO: ==K - semantic
+				String label = "'_==Bool_";
 				terms.add(new KApp(new Constant("KLabel", label), new KList(
 						vars)));
 			}
@@ -60,6 +70,7 @@ public class LineariseTransformer extends BasicTransformer {
 						new KList(vars));
 			}
 
+			node = node.shallowCopy();
 			node.setBody(rew);
 			node.setCondition(newCondition);
 		}

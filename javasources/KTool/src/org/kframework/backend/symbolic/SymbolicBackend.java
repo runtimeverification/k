@@ -9,6 +9,7 @@ import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
@@ -20,7 +21,38 @@ import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.*;
+import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.transformers.AddHeatingConditions;
+import org.kframework.compile.transformers.AddK2SMTLib;
+import org.kframework.compile.transformers.AddKCell;
+import org.kframework.compile.transformers.AddKLabelConstant;
+import org.kframework.compile.transformers.AddKLabelToString;
+import org.kframework.compile.transformers.AddPredicates;
+import org.kframework.compile.transformers.AddSemanticEquality;
+import org.kframework.compile.transformers.AddSupercoolDefinition;
+import org.kframework.compile.transformers.AddSuperheatRules;
+import org.kframework.compile.transformers.AddSymbolicK;
+import org.kframework.compile.transformers.AddTopCellConfig;
+import org.kframework.compile.transformers.AddTopCellRules;
+import org.kframework.compile.transformers.ContextsToHeating;
+import org.kframework.compile.transformers.DesugarStreams;
+import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.FreezeUserFreezers;
+import org.kframework.compile.transformers.FreshCondToFreshVar;
+import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.ResolveAnonymousVariables;
+import org.kframework.compile.transformers.ResolveBinder;
+import org.kframework.compile.transformers.ResolveBlockingInput;
+import org.kframework.compile.transformers.ResolveBuiltins;
+import org.kframework.compile.transformers.ResolveFreshVarMOS;
+import org.kframework.compile.transformers.ResolveFunctions;
+import org.kframework.compile.transformers.ResolveHybrid;
+import org.kframework.compile.transformers.ResolveListOfK;
+import org.kframework.compile.transformers.ResolveOpenCells;
+import org.kframework.compile.transformers.ResolveRewrite;
+import org.kframework.compile.transformers.ResolveSupercool;
+import org.kframework.compile.transformers.ResolveSyntaxPredicates;
+import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.FunctionalAdaptor;
@@ -35,6 +67,7 @@ import org.kframework.utils.general.GlobalSettings;
 public class SymbolicBackend extends BasicBackend implements Backend {
 
 	public static String SYMBOLIC = "symbolic-kompile";
+	public static String NOTSYMBOLIC = "not-symbolic-kompile";
 
 	public SymbolicBackend(Stopwatch sw) {
 		super(sw);
@@ -137,9 +170,8 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveFunctions());
 		steps.add(new AddKCell());
 		steps.add(new AddSymbolicK());
-		if (GlobalSettings.symbolicEquality)
-			steps.add(new AddSemanticEquality());
-		// steps.add(new ResolveFresh());
+		steps.add(new AddSemanticEquality());
+		steps.add(new FreshCondToFreshVar());
 		steps.add(new ResolveFreshVarMOS());
 		steps.add(new AddTopCellConfig());
 		steps.add(new AddConditionToConfig()); // symbolic step
@@ -160,10 +192,11 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveConfigurationAbstraction());
 		steps.add(new ResolveOpenCells());
 		steps.add(new ResolveRewrite());
-		steps.add(new TagUserRules());
-		steps.add(new ReplaceConstants());
-		steps.add(new AddPathCondition());
-		steps.add(new ResolveSupercool());
+//		steps.add(new LineariseTransformer()); //symbolic step
+		steps.add(new TagUserRules()); // symbolic step
+		steps.add(new ReplaceConstants()); // symbolic step
+		steps.add(new AddPathCondition()); // symbolic step
+		steps.add(new ResolveSupercool()); 
 		steps.add(new AddStrictStar());
 		steps.add(new AddDefaultComputational());
 		steps.add(new AddOptionalTags());

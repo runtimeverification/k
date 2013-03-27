@@ -11,6 +11,12 @@ import org.kframework.kil.Term;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/**
+ * Collapse nested conjunctions like _andBool_(_andBool_(t1, t2), t3) 
+ * into andBool(t1,t2,t3).
+ * @author andreiarusoaie
+ *
+ */
 public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
 
 	public CollapseAndBoolTransformer() {

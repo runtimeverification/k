@@ -11,7 +11,12 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-
+/**
+ * Replace data constants with symbolic values and
+ * store the pair (Variable,Constant) into a map.
+ * @author andreiarusoaie
+ *
+ */
 public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
 	private Map<Variable, Constant> generatedSV;
 

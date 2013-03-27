@@ -21,6 +21,10 @@ import org.w3c.dom.Element;
  */
 public abstract class ASTNode implements Visitable, Transformable, Serializable {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
 	 * Used on any node for metadata such as location, also used on {@link Rule} and {@link Production} for the attribute list.
 	 */
 	protected Attributes attributes;

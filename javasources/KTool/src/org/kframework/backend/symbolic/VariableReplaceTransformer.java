@@ -11,6 +11,12 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/**
+ * Replace variables which appear more than twice with 
+ * new variables and store them in a map. 
+ * @author andreiarusoaie
+ *
+ */
 public class VariableReplaceTransformer extends BasicTransformer {
 
 	private Map<Variable, Variable> generatedVariables;

@@ -10,7 +10,13 @@ import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-
+/**
+ * Filter the rule side condition such that it contains only
+ * SMTLIB translatable items. The filtered terms are stored
+ * in a list for further use.
+ * @author andreiarusoaie
+ *
+ */
 public class ConditionTransformer extends CopyOnWriteTransformer  {
 
 	List<Term> filteredTerms = new ArrayList<Term>();

@@ -104,7 +104,10 @@ public class KompileOptionsParser {
 		sym.addOption(smt);
 		sym.addOption(symEq);
 		sym.addOption(symbolic);
-
+		
+		OptionGroup symOpt = new OptionGroup();
+		Option noSmt = new Option("nosmt", false, "do not call the smt solver; this must be used together with --symbolic");
+		symOpt.addOption(noSmt);
 		
 		// add options
 		options.addOption(new Option("testFactory", false, "Option to test new class instantiation"));
@@ -118,6 +121,7 @@ public class KompileOptionsParser {
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
 		options.addOptionGroup(sym);
+		options.addOptionGroup(symOpt);
 		// options.addOption(tempDisamb);
 
 		Option loud = new Option("loud", false, "prints an OK message at the end if all is ok.");

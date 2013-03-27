@@ -9,7 +9,13 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
-
+/**
+ * Check if a term can be translated into SMTLIB by verifying 
+ * if the corresponding syntax production has the attribute
+ * 'smtlib'. 
+ * @author andreiarusoaie
+ *
+ */
 public class CheckSmtlibVisitor extends BasicVisitor {
 
 	private boolean smtValid = false;

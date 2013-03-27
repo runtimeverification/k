@@ -17,6 +17,13 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/**
+ *  * This is part of the symbolic transformation: replace each
+ * (data) constant with a symbolic value and add an equality
+ * in the side condition of the rule. 
+ * @author andreiarusoaie
+ *
+ */
 public class ReplaceConstants extends CopyOnWriteTransformer {
 
 	public ReplaceConstants() {
@@ -25,7 +32,11 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
-		if (node.getBody() instanceof Rewrite && node.getAttribute(SymbolicBackend.SYMBOLIC) != null) {
+		if (!node.containsAttribute(SymbolicBackend.SYMBOLIC) ) {
+			return node;
+		}
+		
+		if (node.getBody() instanceof Rewrite) {
 			ConstantsReplaceTransformer crt = new ConstantsReplaceTransformer(
 					"");
 			Rewrite rew = (Rewrite) node.getBody();
