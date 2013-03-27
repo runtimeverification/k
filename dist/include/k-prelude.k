@@ -1,7 +1,12 @@
 require "builtins/builtins.k"
 
 interface K-TECHNIQUE
-	// all in SDF directly
+	// all basic K syntax is in the SDF grammar directly,
+	// but also needs to be defined in K - except for
+	// a few things added by compiler passes.
+	// Unfortunately, FlattenModules explicitly ignores
+	// includes of K-TECHNIQUE and some other core modules,
+	// so we have to declare things like isSet in less obvious places
 endinterface
 
 module K-LISTK-EXTRAS
@@ -85,6 +90,8 @@ module K-SET-EXTRAS
 	imports BOOL-HOOKS
 	imports K-EQUAL-HOOKS
 
+  syntax KLabel ::= "isSet"
+
 //	syntax Set ::= "Set" KList
         syntax Set ::= Set "-Set" Set  [function, latex({#1}-_{\it Set}{#2})]
   rule S1:Set -Set (SI1:SetItem SI2:SetItem S2:Set)
@@ -157,6 +164,7 @@ module K-RESULT
 	imports BOOL-HOOKS
 
 	syntax K ::= KResult
+	syntax KLabel ::= "isKResult"
         
            
 
@@ -178,8 +186,7 @@ interface K-WRAPPERS-LABELS
 
 
 
-  syntax KLabel ::= "isSet"
-  rule isSet(Set2KLabel(_)(.KList)) => true [anywhere]
+  rule isSet(Set2KLabel(_)(.KList)) => true [predicate,anywhere]
 
 endinterface
 

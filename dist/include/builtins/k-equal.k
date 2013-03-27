@@ -64,7 +64,9 @@ module K-EQUAL-HOOKS
 
   // equality over KList
   syntax Bool ::= KList "==KList" KList    [function]
-  rule LK1:KList ==KList LK2:KList => 'dummy(LK1) ==K 'dummy(LK2)
+
+  syntax K ::= dummy(KList)
+  rule LK1:KList ==KList LK2:KList => dummy(LK1) ==K dummy(LK2)
 
   // disequality over KList
   syntax Bool ::= KList "=/=KList" KList   [function]

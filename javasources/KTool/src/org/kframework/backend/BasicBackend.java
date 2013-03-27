@@ -6,7 +6,7 @@ import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckVariables;
-import org.kframework.compile.sharing.AutomaticModuleImportsTransformer;
+import org.kframework.compile.sharing.DeclareCellLabels;
 import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
@@ -55,7 +55,6 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new AddEmptyLists());
 		steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));
 		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite()));
-		steps.add(new AutomaticModuleImportsTransformer());
 		steps.add(new FunctionalAdaptor(new DittoFilter()));
 		steps.add(new FlattenModules());
 		steps.add(new StrictnessToContexts());
@@ -97,6 +96,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new AddStrictStar());
 		steps.add(new AddDefaultComputational());
 		steps.add(new AddOptionalTags());
+		steps.add(new DeclareCellLabels());
 		steps.add(new LastStep(this));
 		return steps;
 	}
