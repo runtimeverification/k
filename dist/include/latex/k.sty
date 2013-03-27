@@ -12,6 +12,7 @@
 
 \DeclareStringOption[bubble]{style}  % the default style for cells & stuff
 \DeclareBoolOption{tight}  % whether (bubble) cells should be tight or not
+\DeclareBoolOption{beamer}  % whether (bubble) cells should be tight or not
 \DeclareBoolOption{poster}  % to generate a poster from the definition
 \ProcessKeyvalOptions*
 
@@ -23,8 +24,13 @@
 % \usepackage[style=math]{k}
 %
 % Next command enables poster mode with mathematic cells
-% \usepackage[style=math,poster]{k}  
+% \usepackage[style=math,poster]{k}
 %
+% Next command can be used to include k definitions in beamer presentations
+% \usepackage[beamer]{k}
+% To do that, though, some of the options required by k need to be passed
+% to beamer, e.g. like:
+% \documentclass[pdftex,usenames,dvipsnames,svgnames,x11names]{beamer}
 %
 % Use next command to temporary change the default style inside a definition
 % \begin{k}[math]
@@ -57,12 +63,15 @@
 
 
 
-\RequirePackage[pdftex]{hyperref}
 \RequirePackage[T1]{fontenc}
 \RequirePackage{textcomp}
 
 
-\RequirePackage[usenames,dvipsnames,svgnames,x11names]{xcolor}
+\ifk@beamer
+\else
+\RequirePackage[pdftex]{hyperref}
+\RequirePackage[pdftex,usenames,dvipsnames,svgnames,x11names]{xcolor}
+\fi
 
 \ifk@poster
 %%% PDF functionality.
@@ -430,17 +439,19 @@
 \newcommand{\sort}[1]{\text{\itshape #1}}
 \newcommand{\kind}[1]{\text{\itshape #1}}
 
+\newcommand{\syntaxKeyword}{\mbox{\scshape syntax}\hspace{1em}}
+
 % Syntax rules.
 \newlength{\syntaxlength}  % The amount of indention for continued rules.
 
 \newcommand{\syntax}[3][\defSort]{\rulebox{%
-\mbox{\scshape syntax}\hspace{1em}$#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
+\syntaxKeyword$#1\mathrel{::=}{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
 }\k@markPosition%
 }
 \newcommand{\syntaxCont}[3][\defSort]{\par\indent\rulebox{%
   $\setlength{\syntaxlength}{\widthof{$\mathrel{::=}$}}%
   \setlength{\syntaxlength}{.5\syntaxlength}%
-  \addtolength{\syntaxlength}{\widthof{\mbox{\scshape syntax}\hspace{1em}$#1$}}%
+  \addtolength{\syntaxlength}{\widthof{\syntaxKeyword$#1$}}%
   \hspace{\syntaxlength}%
   \;\;\!\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]}%
   }\k@markPosition%
@@ -675,7 +686,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
   body/.style={
     rounded rectangle,
     rounded rectangle arc length=180,
-    minimum width=3em,
+    minimum width=\ifk@tight 1em \else 3em \fi,
     minimum height=4ex,
     inner ysep=.3333em,
     inner xsep=.3333em
@@ -722,7 +733,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
       % the cell label.  That way, the cell body will always be wide enough
       % for the label.
       \path node (cell content) {\cellContent}
-            node                {\phantom{\cellLabel}\hbox to 2em {}};
+            node                {\phantom{\cellLabel}\hbox to \ifk@tight 1pt \else 2em \fi {}};
     \end{scope}
     % Determine the size of the cell content.
     \def\k@cellContentBBox{\pgfpointdiff{\pgfpointanchor{current bounding box}{south west}}
