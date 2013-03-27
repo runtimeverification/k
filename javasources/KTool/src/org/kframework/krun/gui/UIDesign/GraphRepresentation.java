@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
@@ -255,8 +256,9 @@ public class GraphRepresentation extends JApplet{
 	public void addCommandPanelElements(){
 		commandControl.add(this.step);
 		commandControl.add(this.stepAll);
-		commandControl.add(this.collapse);
-		commandControl.add(this.expand);
+		//TO DO : reuse these buttons when the functionalities work
+		//commandControl.add(this.collapse);
+		//commandControl.add(this.expand);
 		commandControl.add(this.numberOfSteps);
 		commandControl.add(this.numberField);
 		commandControl.add(this.exit);
@@ -314,8 +316,18 @@ public class GraphRepresentation extends JApplet{
 		
 		UnparserFilter unparser = new UnparserFilter(true, false);
 		term.accept(unparser);
-		//System.out.println(unparser.getResult());
-		nodeInfo.init(unparser.getResult());
+		
+		//TO-DO : create our own filter that ignores xml characters from a tag
+		StringBuffer rez = new StringBuffer();
+		  for (String line : unparser.getResult().split("\n")){
+		   line= line.trim();
+		   if (line.startsWith("<") && line.endsWith(">"))
+		    rez.append(line+"\n");
+		   else 
+		    rez.append(StringEscapeUtils.escapeXml(line)+"\n");
+		  }
+		  nodeInfo.init(rez.toString());
+		//nodeInfo.init(unparser.getResult());
 		XMLEditorKit.collapseMemorizedTags();
 	}
 	

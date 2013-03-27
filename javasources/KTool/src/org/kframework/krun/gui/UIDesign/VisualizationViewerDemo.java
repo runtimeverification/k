@@ -1,5 +1,6 @@
 package org.kframework.krun.gui.UIDesign;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Paint;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.collections15.Predicate;
 import org.apache.commons.collections15.Transformer;
+import org.apache.commons.collections15.functors.ConstantTransformer;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 
@@ -71,7 +73,7 @@ public class VisualizationViewerDemo {
 		    	public String transform(KRunState e) {
 		    		try{
 		    			String id = ((KRunState)e).getStateId()+"";
-		    			return "<html><center>Vertex<p> " + id;
+		    			return "<html><center>Config<p> " + id;
 		    		}catch(Exception exc){
 		    			String result = "Vertices[";
 		    			result += clusteredGraphComponents("",e);
@@ -101,9 +103,10 @@ public class VisualizationViewerDemo {
 		return result;
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void setEdgeProperties(){
 		Transformer<Transition, Paint> edgePaint = new Transformer<Transition, Paint>() {
-	   	    private final Color[] palette = {Color.GREEN, Color.RED}; 
+	   	    private final Color[] palette = {Color.BLACK, Color.RED}; 
 	   	    public Paint transform(Transition i) { 
 	   	    	Set<Transition> selected = getSelectedEdges();	   	    	
 	   	    	if(selected.contains(i)){
@@ -113,6 +116,7 @@ public class VisualizationViewerDemo {
 	   	    }
 	   	};	   	
 	   	vv.getRenderContext().setEdgeDrawPaintTransformer(edgePaint);
+	   	vv.getRenderContext().setEdgeStrokeTransformer(new ConstantTransformer(new BasicStroke(1.75f)));
 	   	vv.getRenderContext().setEdgeShapeTransformer(new EdgeShape.CubicCurve<KRunState, Transition>());
 	    Transformer<Transition,String> stringer = new Transformer<Transition,String>(){
 	    	public String transform(Transition e) {
