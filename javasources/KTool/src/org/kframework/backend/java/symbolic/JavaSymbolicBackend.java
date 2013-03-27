@@ -19,7 +19,6 @@ import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckVariables;
-import org.kframework.compile.sharing.DittoFilter;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
@@ -44,7 +43,6 @@ import org.kframework.compile.transformers.ResolveSyntaxPredicates;
 import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.FunctionalAdaptor;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
@@ -197,7 +195,6 @@ public class JavaSymbolicBackend extends BasicBackend {
 		steps.add(new AddEmptyLists());
 
 		/* module system */
-		steps.add(new FunctionalAdaptor(new DittoFilter()));
 		steps.add(new FlattenModules());
 
 		/* strictness */
