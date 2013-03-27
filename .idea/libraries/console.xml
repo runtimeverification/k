@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="console">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dist/bin/java/jansi-1.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dist/bin/java/jline-1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
