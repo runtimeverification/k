@@ -50,8 +50,7 @@ public class LineariseTransformer extends BasicTransformer {
 				vars.add(entry.getKey());
 				vars.add(entry.getValue());
 
-				// TODO: ==K - semantic
-				String label = "'_==Bool_";
+				String label = SymbolicBackend.KEQ;
 				terms.add(new KApp(new Constant("KLabel", label), new KList(
 						vars)));
 			}

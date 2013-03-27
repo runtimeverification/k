@@ -62,7 +62,7 @@ public class KompileFrontEnd {
         GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
         GlobalSettings.SMT = cmd.hasOption("smt");
         GlobalSettings.matchingLogic = cmd.hasOption("ml");
-        GlobalSettings.NOSMT = cmd.hasOption("no-smt");
+        GlobalSettings.NOSMT = cmd.hasOption("nosmt");
         
 		// set verbose
 		if (cmd.hasOption("verbose"))

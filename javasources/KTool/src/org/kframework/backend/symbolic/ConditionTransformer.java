@@ -29,7 +29,6 @@ public class ConditionTransformer extends CopyOnWriteTransformer  {
 	public ASTNode transform(KApp node) throws TransformerException {
 		Term label = node.getLabel();
 		if (label instanceof Constant) {
-
 			String name = ((Constant) label).getValue();
 			Term content = node.getChild();
 			if (name.equals(Constant.ANDBOOL_KLABEL.getValue()))
@@ -62,7 +61,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer  {
 			node.setChild(content);
 			return node;
 		}
-		
+	
 		return super.transform(node);
 	}
 	

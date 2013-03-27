@@ -9,12 +9,13 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
+
 /**
- * Check if a term can be translated into SMTLIB by verifying 
- * if the corresponding syntax production has the attribute
- * 'smtlib'. 
+ * Check if a term can be translated into SMTLIB by verifying if the
+ * corresponding syntax production has the attribute 'smtlib'.
+ * 
  * @author andreiarusoaie
- *
+ * 
  */
 public class CheckSmtlibVisitor extends BasicVisitor {
 
@@ -23,33 +24,44 @@ public class CheckSmtlibVisitor extends BasicVisitor {
 	public CheckSmtlibVisitor() {
 		super("Check SMTLIB translation.");
 	}
-	
+
 	public boolean smtValid() {
 		return smtValid;
 	}
 
 	@Override
 	public void visit(KApp node) {
-		Term label = node.getLabel();
-		if (label instanceof Constant) {
-			Set<Production> prods = DefinitionHelper.productions
-					.get(((Constant) label).getValue().trim());
-			if (prods == null) {
-				smtValid = false;
-			} else {
-				Iterator<Production> it = prods.iterator();
-				while (it.hasNext()) {
-					Production p = it.next();
-					if (p.containsAttribute("smtlib"))
-						smtValid = true;
-					else smtValid = false;
+		Term klabel = node.getLabel();
 
-					// only first production assumed
-					break;
+		if (klabel instanceof Constant) {
+			
+			Constant label = (Constant)klabel;
+
+			if (label.getValue().trim().equals(SymbolicBackend.KEQ)) {
+				smtValid = true;
+				return;
+			}
+
+			if (label instanceof Constant) {
+				Set<Production> prods = DefinitionHelper.productions
+						.get(label.getValue().trim());
+				if (prods == null) {
+					smtValid = false;
+				} else {
+					Iterator<Production> it = prods.iterator();
+					while (it.hasNext()) {
+						Production p = it.next();
+						if (p.containsAttribute("smtlib"))
+							smtValid = true;
+						else
+							smtValid = false;
+
+						// only first production assumed
+						break;
+					}
 				}
 			}
 		}
-		
 		super.visit(node);
 	}
 }

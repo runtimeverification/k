@@ -16,7 +16,11 @@ import org.w3c.dom.Element;
  * whose interpretation may depend on {@link #sort}.
  */
 public class Constant extends Term {
-    public static final Constant TRUE = new Constant("#Bool", "true");
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public static final Constant TRUE = new Constant("#Bool", "true");
     public static final Constant FALSE = new Constant("#Bool", "false");
 
     /*

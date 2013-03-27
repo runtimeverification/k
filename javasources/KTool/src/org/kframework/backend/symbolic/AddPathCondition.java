@@ -52,11 +52,8 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 		
 		ConditionTransformer ct = new ConditionTransformer();
 		condition = (Term) node.getCondition().accept(ct);
-
-		if (ct.getFilteredTerms().isEmpty())
-			return node;
 		
-		if (node.getBody() instanceof Rewrite && node.getAttribute(SymbolicBackend.SYMBOLIC) != null)
+		if (node.getBody() instanceof Rewrite)
 		{
 			Rewrite rew = (Rewrite) node.getBody();
 			
@@ -73,7 +70,6 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 			Term left = rew.getLeft();
 			
 			if (left instanceof Cell) {
-				// AddConditionToConfig.addCellNextToKCell((Cell)left, leftCell);
 				left = AddConditionToConfig.addSubcellToCell((Cell)left, leftCell);
 			}
 			
@@ -84,10 +80,14 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 			Cell rightCell = new Cell();
 			rightCell.setLabel(MetaK.Constants.pathCondition);
 			rightCell.setEllipses(Ellipses.NONE);
-			List<Term> list = new ArrayList<Term>();
-			list.add(phi);
-			list.add(andBool(ct.getFilteredTerms()));
-			Term pathCondition = new KApp(Constant.BOOL_ANDBOOL_KLABEL, new KList(list));
+			Term pathCondition = phi;
+			if (!ct.getFilteredTerms().isEmpty())
+			{
+				List<Term> list = new ArrayList<Term>();
+				list.add(phi);
+				list.add(andBool(ct.getFilteredTerms()));
+				pathCondition = new KApp(Constant.BOOL_ANDBOOL_KLABEL, new KList(list));
+			}
 			rightCell.setContents(pathCondition);
 
 			if (right instanceof Cell) {

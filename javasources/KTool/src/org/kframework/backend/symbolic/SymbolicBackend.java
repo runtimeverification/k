@@ -9,7 +9,6 @@ import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
-import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
@@ -68,7 +67,8 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 
 	public static String SYMBOLIC = "symbolic-kompile";
 	public static String NOTSYMBOLIC = "not-symbolic-kompile";
-
+	public static String KEQ = "'_=K_";
+	
 	public SymbolicBackend(Stopwatch sw) {
 		super(sw);
 	}
