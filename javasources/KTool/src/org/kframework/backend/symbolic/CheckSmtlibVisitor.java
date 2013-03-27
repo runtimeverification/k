@@ -37,7 +37,7 @@ public class CheckSmtlibVisitor extends BasicVisitor {
 			
 			Constant label = (Constant)klabel;
 
-			if (label.getValue().trim().equals(SymbolicBackend.KEQ)) {
+			if (label.getValue().trim().equals(Constant.KEQ.getValue())) {
 				smtValid = true;
 				return;
 			}

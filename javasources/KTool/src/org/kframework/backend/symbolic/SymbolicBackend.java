@@ -67,7 +67,6 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 
 	public static String SYMBOLIC = "symbolic-kompile";
 	public static String NOTSYMBOLIC = "not-symbolic-kompile";
-	public static String KEQ = "'_=K_";
 	
 	public SymbolicBackend(Stopwatch sw) {
 		super(sw);
@@ -160,6 +159,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new AutomaticModuleImportsTransformer());
 		steps.add(new FunctionalAdaptor(new DittoFilter()));
 		steps.add(new FlattenModules());
+		steps.add(new TagUserRules()); // symbolic step
 		steps.add(new StrictnessToContexts());
 		steps.add(new FreezeUserFreezers());
 		steps.add(new ContextsToHeating());
@@ -193,7 +193,6 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveOpenCells());
 		steps.add(new ResolveRewrite());
 //		steps.add(new LineariseTransformer()); //symbolic step
-		steps.add(new TagUserRules()); // symbolic step
 		steps.add(new ReplaceConstants()); // symbolic step
 		steps.add(new AddPathCondition()); // symbolic step
 		steps.add(new ResolveSupercool()); 

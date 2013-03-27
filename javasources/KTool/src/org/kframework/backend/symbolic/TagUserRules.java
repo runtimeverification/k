@@ -26,13 +26,13 @@ public class TagUserRules extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
-		if (!node.containsAttribute(SymbolicBackend.SYMBOLIC) ) {
-			return node;
+		if (node.containsAttribute(SymbolicBackend.NOTSYMBOLIC) ) {
+			return super.transform(node);
 		}
 
 		if (!node.getFilename().startsWith(
 				KPaths.getKBase(false) + File.separator + "include")
-				&& !node.getFilename().startsWith("File System")) {
+				&& !node.getFilename().startsWith(org.kframework.kil.loader.Constants.GENERATED_FILENAME)) {
 			List<Attribute> attrs = node.getAttributes().getContents();
 			attrs.add(new Attribute(SymbolicBackend.SYMBOLIC, ""));
 
@@ -43,6 +43,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
 			node.setAttributes(atts);
 			return node;
 		}
+		
 		return super.transform(node);
 	}
 }

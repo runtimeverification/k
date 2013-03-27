@@ -50,7 +50,7 @@ public class LineariseTransformer extends BasicTransformer {
 				vars.add(entry.getKey());
 				vars.add(entry.getValue());
 
-				String label = SymbolicBackend.KEQ;
+				String label = Constant.KEQ.getValue();
 				terms.add(new KApp(new Constant("KLabel", label), new KList(
 						vars)));
 			}

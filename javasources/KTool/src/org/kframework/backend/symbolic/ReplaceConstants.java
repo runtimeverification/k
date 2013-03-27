@@ -51,7 +51,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 				vars.add(entry.getKey());
 				vars.add(new KApp(new KInjectedLabel(entry.getValue()), new KList()));
 			
-				String label = SymbolicBackend.KEQ;
+				String label = Constant.KEQ.getValue();
 				terms.add(new KApp(new Constant("KLabel", label), new KList(
 						vars)));
 			}

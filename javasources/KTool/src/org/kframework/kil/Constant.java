@@ -62,6 +62,7 @@ public class Constant extends Term {
 	public static final Constant REDEX_KLABEL = KLABEL("redex");
 	public static final Constant KNEQ_KLABEL = KLABEL("'_=/=K_");
 	public static final Constant KEQ_KLABEL = KLABEL("'_==K_");
+	public static final Constant KEQ = KLABEL("'_=K_");
 	public static final Constant ANDBOOL_KLABEL = KLABEL("'#andBool");
 	public static final Constant BOOL_ANDBOOL_KLABEL = KLABEL("'_andBool_");
 
