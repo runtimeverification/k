@@ -21,11 +21,13 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(KApp kapp) throws TransformerException {
+		ASTNode t = internalTransform(kapp);
 		try {
-			return internalTransform(kapp).accept(new TypeSystemFilter());
+			
+			return t.accept(new TypeSystemFilter());
 		} catch (TransformerException e) {
 			//type error, so don't disambiguate
-			return kapp;
+			return t;
 		}
 	}
 
