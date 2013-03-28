@@ -15,6 +15,7 @@ import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckVariables;
+import org.kframework.compile.sharing.DeclareCellLabels;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
@@ -143,12 +144,12 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		return "LastStep";
 	}
 
+	
 	@Override
 	public CompilerSteps<Definition> getCompilationSteps() {
 		CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
 		steps.add(new FirstStep(this));
-		steps.add(new CheckVisitorStep<Definition>(
-				new CheckConfigurationCells()));
+		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells()));
 		steps.add(new RemoveBrackets());
 		steps.add(new AddEmptyLists());
 		steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));
@@ -165,6 +166,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveFunctions());
 		steps.add(new AddKCell());
 		steps.add(new AddSymbolicK());
+
 		steps.add(new AddSemanticEquality());
 		steps.add(new FreshCondToFreshVar());
 		steps.add(new ResolveFreshVarMOS());
@@ -193,6 +195,8 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveSupercool()); 
 		steps.add(new AddStrictStar());
 		steps.add(new AddDefaultComputational());
+		steps.add(new AddOptionalTags());
+		steps.add(new DeclareCellLabels());
 		steps.add(new AddOptionalTags());
 
 		return steps;
