@@ -160,7 +160,7 @@ public class CopyOnWriteTransformer implements Transformer {
             if (transformedList != null) {
                 transformedList.add(transformedTerm);
             } else if (transformedTerm != list.get(index)) {
-                transformedList = new ArrayList<>(list.size());
+                transformedList = new ArrayList<Term>(list.size());
                 for (int copyIndex = 0; copyIndex < index; ++copyIndex) {
                     transformedList.add(list.get(copyIndex));
                 }
