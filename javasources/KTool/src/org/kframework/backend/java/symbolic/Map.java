@@ -1,6 +1,11 @@
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.base.Joiner;
+
 import org.kframework.kil.ASTNode;
+
+import java.util.HashMap;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,12 +15,52 @@ import org.kframework.kil.ASTNode;
  * To change this template use File | Settings | File Templates.
  */
 public class Map extends Collection {
-    /**
-     * @return the lest upper bound in the subsorting graph.
-     */
+
+    private final java.util.Map<Term, Term> entries;
+
+    public Map(java.util.Map<Term, Term> entries, Variable frame) {
+        super(frame, "Map");
+        this.entries = new HashMap<Term, Term>(entries);
+    }
+
+    public Map(Variable frame) {
+        super(frame, "Map");
+        entries = new HashMap<Term, Term>();
+    }
+
+    public Map(java.util.Map<Term, Term> entries) {
+        super(null, "Map");
+        this.entries = new HashMap<Term, Term>(entries);
+    }
+
+    public Map() {
+        super(null, "Map");
+        entries = new HashMap<Term, Term>();
+    }
+
+    public final java.util.Map<Term, Term> getEntries() {
+        return entries;
+    }
+
     @Override
-    public String getSort() {
-        return "";
+    public String toString() {
+        return toString(" ", " |-> ", ".Map");
+    }
+
+    public String toString(String operator, String mapsTo, String identity) {
+        Joiner.MapJoiner joiner = Joiner.on(operator).withKeyValueSeparator(mapsTo);
+        StringBuilder stringBuilder = new StringBuilder();
+        joiner.appendTo(stringBuilder, entries);
+        if (super.hasFrame()) {
+            if (stringBuilder.length() != 0) {
+                stringBuilder.append(operator);
+            }
+            stringBuilder.append(super.getFrame());
+        }
+        if (stringBuilder.length() == 0) {
+            stringBuilder.append(identity);
+        }
+        return stringBuilder.toString();
     }
 
     /**
@@ -25,4 +70,20 @@ public class Map extends Collection {
     public ASTNode shallowCopy() {
         throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
     }
+
+    @Override
+    public void accept(Matcher matcher, Term patten) {
+        matcher.match(this, patten);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public ASTNode accept(Transformer transformer) {
+        return transformer.transform(this);
+    }
+
 }

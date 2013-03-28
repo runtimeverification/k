@@ -50,6 +50,7 @@ import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -104,18 +105,19 @@ public class JavaSymbolicBackend extends BasicBackend {
 			e.printStackTrace();
 		}
 
-		// SymbolicRewriter symbolicRewriter = new SymbolicRewriter(javaDef);
-
 		Term term;
-		List<Term> list = new ArrayList<Term>();
-		list.add(new Variable("B", "Bool"));
-		list.add(new Variable("S1", "Stmt"));
-		list.add(new Variable("S2", "Stmt"));
-		Term kTerm = new KApp(Constant.KLABEL("'if`(_`)_else_"), new KList(list));
+		List<Term> list1 = new ArrayList<Term>();
+		list1.add(new Variable("B", "Bool"));
+		list1.add(new Variable("S1", "Stmt"));
+		list1.add(new Variable("S2", "Stmt"));
+		Term kTerm = new KApp(Constant.KLABEL("'if`(_`)_else_"), new KList(list1));
+        List<Term> list2 = new ArrayList<Term>();
+        list2.add(kTerm);
+        Term kSequence = new KSequence(list2);
 		// Term stateTerm = new Empty("Map");
 
 		Bag bag = new Bag();
-		bag.getContents().add(MetaK.wrap(kTerm, "k", Cell.Ellipses.NONE));
+		bag.getContents().add(MetaK.wrap(kSequence, "k", Cell.Ellipses.NONE));
 		// bag.getContents().add(MetaK.wrap(stateTerm, "state", Cell.Ellipses.NONE));
 		Bag topBag = new Bag();
 		topBag.getContents().add(MetaK.wrap(bag, "T", Cell.Ellipses.NONE));
@@ -170,9 +172,6 @@ public class JavaSymbolicBackend extends BasicBackend {
 		//
 		// FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath()
 		// + "/def-symbolic.xml", xml);
-
-		System.err.println("ana are mere");
-
 	}
 
 	@Override

@@ -1,11 +1,15 @@
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.kil.ASTNode;
+
+
 /**
  * Created with IntelliJ IDEA.
  * User: andrei
- * Date: 3/17/13
- * Time: 1:03 PM
+ * Date: 3/26/13
+ * Time: 4:16 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class List extends Collection {
+public interface Transformable {
+    public ASTNode accept(Transformer transformer);
 }

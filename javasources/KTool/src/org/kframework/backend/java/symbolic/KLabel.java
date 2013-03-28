@@ -6,36 +6,24 @@ import org.kframework.kil.ASTNode;
 /**
  * Created with IntelliJ IDEA.
  * User: andrei
- * Date: 3/17/13
- * Time: 12:54 PM
+ * Date: 3/18/13
+ * Time: 12:20 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class Collection extends Term {
+public abstract class KLabel extends Term {
 
-    private final Variable frame;
-
-    protected Collection(Variable frame, String kind) {
-        super(kind);
-
-        assert frame == null || frame.getKind().equals(kind);
-
-        this.frame = frame;
-    }
-
-    public boolean hasFrame() {
-        return frame != null;
-    }
-
-    public Variable getFrame() {
-        assert hasFrame();
-
-        return frame;
+    protected KLabel() {
+        super("KLabel");
     }
 
     @Override
     public boolean isSymbolic() {
         return false;
     }
+
+    public abstract boolean isConstructor();
+
+    public abstract boolean isFunction();
 
     @Override
     public void accept(Visitor visitor) {
