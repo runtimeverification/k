@@ -28,6 +28,7 @@
     <orderEntry type="library" name="diffutils" level="project" />
     <orderEntry type="library" name="console" level="project" />
     <orderEntry type="library" name="options" level="project" />
+    <orderEntry type="library" name="guava-14.0.1" level="project" />
   </component>
 </module>
 
