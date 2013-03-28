@@ -8,7 +8,7 @@ import java.util.Set;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Variable;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
@@ -17,7 +17,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * @author andreiarusoaie
  *
  */
-public class VariableReplaceTransformer extends BasicTransformer {
+public class VariableReplaceTransformer extends CopyOnWriteTransformer {
 
 	private Map<Variable, Variable> generatedVariables;
 	private Set<String> vars;
@@ -34,9 +34,9 @@ public class VariableReplaceTransformer extends BasicTransformer {
 			return node;
 				
 		Variable newVar = node;
-		if (vars.contains(node.getName())) {
+		if (vars.contains(node.getName()) && !node.isFresh()) {
 			newVar = MetaK.getFreshVar(node.getSort());
-			generatedVariables.put(newVar, node);
+			generatedVariables.put(node, newVar);
 		}
 
 		vars.add(node.getName());

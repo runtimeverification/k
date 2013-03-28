@@ -39,7 +39,12 @@ public class LineariseTransformer extends BasicTransformer {
 			VariableReplaceTransformer vrt = new VariableReplaceTransformer(
 					"");
 			Rewrite rew = (Rewrite) node.getBody();
-			rew.setLeft((Term) rew.getLeft().accept(vrt));
+			Term transformedLeft = rew.getLeft();
+//			System.out.println("TERM_B: " + transformedLeft);
+			transformedLeft = (Term) transformedLeft.accept(vrt);
+//			System.out.println("TERM_A: " + transformedLeft + "\n\n\n");
+			rew.shallowCopy();
+			rew.setLeft(transformedLeft);
 			
 			Map<Variable, Variable> newGeneratedSV = vrt.getGeneratedVariables();
 			Term condition = node.getCondition();
@@ -49,7 +54,6 @@ public class LineariseTransformer extends BasicTransformer {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
 				vars.add(entry.getValue());
-
 				String label = Constant.KEQ.getValue();
 				terms.add(new KApp(new Constant("KLabel", label), new KList(
 						vars)));

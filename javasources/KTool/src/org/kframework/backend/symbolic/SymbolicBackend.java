@@ -189,7 +189,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveConfigurationAbstraction());
 		steps.add(new ResolveOpenCells());
 		steps.add(new ResolveRewrite());
-//		steps.add(new LineariseTransformer()); //symbolic step
+		steps.add(new LineariseTransformer()); //symbolic step
 		steps.add(new ReplaceConstants()); // symbolic step
 		steps.add(new AddPathCondition()); // symbolic step
 		steps.add(new ResolveSupercool()); 
