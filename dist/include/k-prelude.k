@@ -248,9 +248,9 @@ interface K
   imports K-WRAPPERS-LABELS
   imports K-BUILTINS
   imports K-RESULT             // to express results syntactically
-  imports K-RULES              // to write k rules with in-place rewriting
+  // imports K-RULES              // to write k rules with in-place rewriting
   imports K-EVAL
-  imports K-CONTEXTS  
+  // imports K-CONTEXTS  
   imports K-DESTRUCTORS           // defines getKLabel and getKList for K
   //imports K-EXTRAS                // defines a KLabel substitution 
   imports K-FREZERS
