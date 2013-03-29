@@ -37,17 +37,22 @@ public class XMLEditorKit extends StyledEditorKit {
 
     public void read(Reader in, Document doc, int pos) throws IOException, BadLocationException {
         BufferedReader br=new BufferedReader(in);
-        String s=br.readLine();
+        String firstLine=br.readLine();
+        String lastLine = "";
         StringBuffer buff=new StringBuffer();
-        while (s!=null) {
-            buff.append(s+"\n");
-            s=br.readLine();
+        String nextLines=firstLine;
+        while (nextLines!=null) {
+            buff.append(nextLines+"\n");
+            lastLine = nextLines;
+            nextLines=br.readLine();
         }
-       
+        if(!verifyRootElement(firstLine, lastLine)){
+            buff = addRootElement(buff);
+        }
         int p=getInsertPosition(pos, doc);
         XMLReader.getInstance().read(new ByteArrayInputStream(buff.toString().getBytes()), doc, p);
     }
-    
+
     public void read(InputStream in, Document doc, int pos) throws IOException, BadLocationException {
         /*int p=getInsertPosition(pos, doc);
         XMLReader.getInstance().read(in, doc, p);*/
@@ -96,7 +101,7 @@ public class XMLEditorKit extends StyledEditorKit {
             Element commonParent=startTag;
             while (commonParent!=null &&
                     !(commonParent.getStartOffset()<=endTag.getStartOffset() &&
-                     commonParent.getEndOffset()>=endTag.getEndOffset()) ) {
+                            commonParent.getEndOffset()>=endTag.getEndOffset()) ) {
                 commonParent=commonParent.getParentElement();
             }
 
@@ -123,7 +128,7 @@ public class XMLEditorKit extends StyledEditorKit {
             return root.getElement(0).getEndOffset();
         }
         //System.out.println(pos);
-       // collapseMemorizedTags((XMLDocument)d);
+        // collapseMemorizedTags((XMLDocument)d);
         return pos;
     }
 
@@ -146,7 +151,7 @@ public class XMLEditorKit extends StyledEditorKit {
             }
 
             if (deepest!=null) {
-            	Element found = deepest.getElement();
+                Element found = deepest.getElement();
                 Shape a=getAllocation(deepest, src);
                 if (a!=null) {
                     Rectangle r=a instanceof Rectangle ? (Rectangle)a : a.getBounds();
@@ -155,32 +160,29 @@ public class XMLEditorKit extends StyledEditorKit {
                     r.height=TagView.AREA_SHIFT;
 
                     if (r.contains(e.getPoint())) {
-                    	
-                    	 XMLDocument doc= (XMLDocument)src.getDocument();
-                    	 String[] elements = null;
-                         try {
- 							String element = doc.getText(deepest.getStartOffset(), deepest.getEndOffset() -deepest.getStartOffset());
- 							elements = element.split("\n");
- 							//System.out.println(elements[0]);
- 						} catch (BadLocationException e2) {
- 							// TODO Auto-generated catch block
- 							e2.printStackTrace();
- 						}
-                         
-                    	if (deepest.isExpanded()){
-                    		deepest.setExpanded(false);
-                    		ConfigurationPanel.collapsedViews.put(elements[0],  deepest.getEndOffset() -deepest.getStartOffset());
-                    		//ConfigurationPanel.collapsedViews.put(pos, a);
-                    		//TODO keep a map for this ... 
-                    		//GraphRepresentation.selection.collapsedTags.put(pos, a);
-                    		//System.out.println(pos+ " folded");
-                    	}
-                    	else{
-                    		//GraphRepresentation.selection.collapsedTags.remove(pos);
-                    		//ConfigurationPanel.collapsedViews.remove(pos);
-                    		ConfigurationPanel.collapsedViews.remove(elements[0]);
-                    		deepest.setExpanded(true);
-                    	}
+
+                        XMLDocument doc= (XMLDocument)src.getDocument();
+                        String[] elements = null;
+                        try {
+                            String element = doc.getText(deepest.getStartOffset(), deepest.getEndOffset() -deepest.getStartOffset());
+                            elements = element.split("\n");
+                            //System.out.println(elements[0]);
+                        } catch (BadLocationException e2) {
+                            // TODO Auto-generated catch block
+                            e2.printStackTrace();
+                        }
+
+                        if (deepest.isExpanded()){
+                            deepest.setExpanded(false);
+                            int tagNo = getTagPosition(doc, elements[0], pos);
+                            ConfigurationPanel.collapsedViews.put(elements[0]+"|"+tagNo,  deepest.getEndOffset() -deepest.getStartOffset());
+
+                        }
+                        else{
+                            int tagNo = getTagPosition(doc, elements[0], pos);
+                            ConfigurationPanel.collapsedViews.remove(elements[0]+"|"+tagNo);
+                            deepest.setExpanded(true);
+                        }
 
                         try {
                             doc.setUserChanges(false);
@@ -242,7 +244,7 @@ public class XMLEditorKit extends StyledEditorKit {
         c.addMouseListener(lstCollapse);
         c.addMouseMotionListener(lstMoveCollapse);
     }
-    
+
     public void deinstall(JEditorPane c) {
         c.removeMouseListener(lstCollapse);
         c.removeMouseMotionListener(lstMoveCollapse);
@@ -254,7 +256,7 @@ public class XMLEditorKit extends StyledEditorKit {
         View vParent=v.getParent();
         int x=ins.left;
         int y=ins.top;
-       
+
         while(vParent!=null) {
             int i=vParent.getViewIndex(v.getStartOffset(), Position.Bias.Forward);
             Shape alloc=vParent.getChildAllocation(i, new Rectangle(0,0, Short.MAX_VALUE, Short.MAX_VALUE));
@@ -268,7 +270,7 @@ public class XMLEditorKit extends StyledEditorKit {
             Rectangle r2=v.getParent().getChildAllocation(ind, new Rectangle(0,0,Integer.MAX_VALUE,Integer.MAX_VALUE)).getBounds();
             return new Rectangle(x,y, r2.width, r2.height);
         }
-      
+
         return new Rectangle(x,y, (int)v.getPreferredSpan(View.X_AXIS), (int)v.getPreferredSpan(View.Y_AXIS));
     }
 
@@ -312,58 +314,109 @@ public class XMLEditorKit extends StyledEditorKit {
             }
         }
     }
-    
-    public static void collapseMemorizedTags(){
-    	Iterator iter = ConfigurationPanel.collapsedViews.keySet().iterator();
-    	XMLDocument docu= (XMLDocument)ConfigurationPanel.cp.getDocument();
-    	
-    	while(iter.hasNext()) {
-	    	String collapsedTag = (String)iter.next();
-	    	String doc ="";
-			try {
-				doc = docu.getText(0, docu.getLength());
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	   
-	    	int pos = doc.indexOf(collapsedTag);
-	    	int end = doc.indexOf(collapsedTag.charAt(0) + "/"+collapsedTag.substring(1));
-	    	
-	    	View v= ConfigurationPanel.cp.getUI().getRootView(ConfigurationPanel.cp);
-	        boolean insideTagView=false;
-	        while (v!=null && !(v instanceof TagView)) {
-	            int i=v.getViewIndex(pos, Position.Bias.Forward);
-	            v=v.getView(i);
-	        }
-	        TagView deepest=(TagView)v;
-	           
-	        while (v!=null && v instanceof TagView) {
-	            deepest=(TagView)v;
-	            int i=v.getViewIndex(pos, Position.Bias.Forward);
-	            v=v.getView(i);
-	        }
 
-	        if (deepest!=null) {
-	            Rectangle r= new Rectangle();//a instanceof Rectangle ? (Rectangle)a : a.getBounds();
-	            r.x = pos;
-	            r.y = end;
-	            r.y+=TagView.AREA_SHIFT/2;
-	            r.width=TagView.AREA_SHIFT;
-	            r.height=TagView.AREA_SHIFT;
-	            
-	            deepest.setExpanded(false);                  
-	                        
-	            try {
-	            	docu.setUserChanges(false);
-	                pos++;
-	                docu.insertString(pos, "\n", new SimpleAttributeSet());
-	                docu.remove(pos,1);
-	                docu.setUserChanges(true);
-	            } catch (BadLocationException e1) {
-	                e1.printStackTrace();
-	            } 
-	        }
-    	}
+    public static void collapseMemorizedTags(){
+        Iterator iter = ConfigurationPanel.collapsedViews.keySet().iterator();
+        XMLDocument docu= (XMLDocument)ConfigurationPanel.cp.getDocument();
+        boolean existingTag = false;
+
+        while(iter.hasNext()) {
+            existingTag = false;
+            String collapsedTag = (String)iter.next();
+            String[] collapsedTagInfo = collapsedTag.split("[|]");
+            String doc ="";
+            try {
+                doc = docu.getText(0, docu.getLength());
+            } catch (BadLocationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            int pos = 0;
+            int end = 0;
+            if( collapsedTagInfo[1].equals("1")){
+
+                pos = doc.indexOf(collapsedTagInfo[0]);
+                end = doc.indexOf(collapsedTagInfo[0].charAt(0) + "/"+collapsedTagInfo[0].substring(1));
+                existingTag = true;
+            }
+            else{
+                String[] lines = doc.split(collapsedTagInfo[0]);
+                if( lines.length > Integer.parseInt(collapsedTagInfo[1])){
+                    pos = doc.indexOf(lines[Integer.parseInt(collapsedTagInfo[1])]) -collapsedTagInfo[0].length();
+                    end = pos + lines[Integer.parseInt(collapsedTagInfo[1])].indexOf(collapsedTagInfo[0].charAt(0) + "/"+collapsedTagInfo[0].substring(1));
+                    existingTag = true;
+                }
+            }
+
+            if (existingTag){
+                View v= ConfigurationPanel.cp.getUI().getRootView(ConfigurationPanel.cp);
+                boolean insideTagView=false;
+                while (v!=null && !(v instanceof TagView)) {
+                    int i=v.getViewIndex(pos, Position.Bias.Forward);
+                    v=v.getView(i);
+                }
+                TagView deepest=(TagView)v;
+
+                while (v!=null && v instanceof TagView) {
+                    deepest=(TagView)v;
+                    int i=v.getViewIndex(pos, Position.Bias.Forward);
+                    v=v.getView(i);
+                }
+
+                if (deepest!=null) {
+                    Rectangle r= new Rectangle();//a instanceof Rectangle ? (Rectangle)a : a.getBounds();
+                    r.x = pos;
+                    r.y = end;
+                    r.y+=TagView.AREA_SHIFT/2;
+                    r.width=TagView.AREA_SHIFT;
+                    r.height=TagView.AREA_SHIFT;
+
+                    deepest.setExpanded(false);
+
+                    try {
+                        docu.setUserChanges(false);
+                        pos++;
+                        docu.insertString(pos, "\n", new SimpleAttributeSet());
+                        docu.remove(pos,1);
+                        docu.setUserChanges(true);
+                    } catch (BadLocationException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public int getTagPosition(XMLDocument doc, String separator, int pos){
+        int min = Integer.MAX_VALUE;
+        int positionMin = -1;
+        String[] lines;
+        try {
+            lines = doc.getText(0,doc.getLength()).split(separator);
+            if(lines.length > 2){
+                for(int i = 0; i < lines.length; i++){
+                    if( doc.getText(0,doc.getLength()).indexOf(lines[i]) - pos > 0 && doc.getText(0,doc.getLength()).indexOf(lines[i]) - pos < min ){
+                        min = doc.getText(0,doc.getLength()).indexOf(lines[i]) - pos;
+                        positionMin = i;
+                    }
+                }
+                return positionMin;
+            }
+            return 1;
+        } catch (BadLocationException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        return -1;
+    }
+
+    public boolean verifyRootElement(String begin, String end){
+        String validEnd = begin.charAt(0) + "/" + begin.substring(1);
+        return validEnd.equals(end);
+    }
+
+    public StringBuffer addRootElement(StringBuffer buff){
+        return buff.insert(0,"<configuration>").append("</configuration>");
     }
 }
