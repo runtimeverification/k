@@ -567,7 +567,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(TermComment termComment) {
-		result.append(" (.).Bag ");
+		result.append(" .Bag ");
 	}
 
 	@Override

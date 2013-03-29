@@ -131,7 +131,7 @@ public class ProgramLoader {
 		ast = "load main.maude\n";
 		ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.KList)) , (\n\n";
 		ast += kast;
-		ast += "\n\n))),(.).Map))  .\n quit\n";
+		ast += "\n\n))),.Map))  .\n quit\n";
 
 		FileUtil.saveInFile(DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.maude", ast);
 	}
