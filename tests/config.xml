@@ -91,12 +91,6 @@
       extensions="imp"
       />
   <test
-      language="dist/tutorial/2_imp/lesson_4/imp.k"
-      folder="dist/tutorial/2_imp"
-      extensions="imp">
-    <kompile-option name="--symbolic" />
-  </test>
-  <test
       language="dist/tutorial/2_imp/lesson_5/imp.k"
       folder="dist/tutorial/2_imp"
       extensions="imp"
