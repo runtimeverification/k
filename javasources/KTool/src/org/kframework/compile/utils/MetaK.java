@@ -490,4 +490,10 @@ public class MetaK {
 		
 		return false;
 	}
+	
+	public static boolean isAbstractableSort(String name) {
+		if (name.equals("#Bool") || name.equals("#Int"))
+			return true;
+		return false;
+	}
 }

@@ -19,64 +19,62 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 /**
  * Replace each variable X in the left hand side with a new one Y
  * of the same sort and add the equality X == Y in the path condition.
- * @author andreiarusoaie
  *
+ * @author andreiarusoaie
  */
 public class LineariseTransformer extends BasicTransformer {
 
-	public LineariseTransformer() {
-		super("Linearise Rules");
-	}
+    public LineariseTransformer() {
+        super("Linearise Rules");
+    }
 
-	@Override
-	public ASTNode transform(Rule node) throws TransformerException {
-		if (!node.containsAttribute(SymbolicBackend.SYMBOLIC) ) {
-			return node;
-		}
+    @Override
+    public ASTNode transform(Rule node) throws TransformerException {
+        if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
+            return node;
+        }
 
-		
-		if (node.getBody() instanceof Rewrite) {
-			VariableReplaceTransformer vrt = new VariableReplaceTransformer(
-					"");
-			Rewrite rew = (Rewrite) node.getBody();
-			Term transformedLeft = rew.getLeft();
-//			System.out.println("TERM_B: " + transformedLeft);
-			transformedLeft = (Term) transformedLeft.accept(vrt);
-//			System.out.println("TERM_A: " + transformedLeft + "\n\n\n");
-			rew.shallowCopy();
-			rew.setLeft(transformedLeft);
-			
-			Map<Variable, Variable> newGeneratedSV = vrt.getGeneratedVariables();
-			Term condition = node.getCondition();
 
-			List<Term> terms = new ArrayList<Term>();
-			for (Entry<Variable, Variable> entry : newGeneratedSV.entrySet()) {
-				List<Term> vars = new ArrayList<Term>();
-				vars.add(entry.getKey());
-				vars.add(entry.getValue());
-				String label = Constant.KEQ.getValue();
-				terms.add(new KApp(new Constant("KLabel", label), new KList(
-						vars)));
-			}
+        if (node.getBody() instanceof Rewrite) {
+            VariableReplaceTransformer vrt = new VariableReplaceTransformer(
+                    "");
+            Rewrite rew = (Rewrite) node.getBody();
+            Term transformedLeft = rew.getLeft();
+            transformedLeft = (Term) transformedLeft.accept(vrt);
+            rew.shallowCopy();
+            rew.setLeft(transformedLeft);
 
-			if (terms.isEmpty())
-				return node;
+            Map<Variable, Variable> newGeneratedSV = vrt.getGeneratedVariables();
+            Term condition = node.getCondition();
 
-			Term newCondition = new KApp(Constant.ANDBOOL_KLABEL,
-					new KList(terms));
+            List<Term> terms = new ArrayList<Term>();
+            for (Entry<Variable, Variable> entry : newGeneratedSV.entrySet()) {
+                List<Term> vars = new ArrayList<Term>();
+                vars.add(entry.getKey());
+                vars.add(entry.getValue());
+                String label = Constant.KEQ.getValue();
+                terms.add(new KApp(new Constant("KLabel", label), new KList(
+                        vars)));
+            }
 
-			if (condition != null) {
-				List<Term> vars = new ArrayList<Term>();
-				vars.add(condition);
-				vars.add(newCondition);
-				newCondition = new KApp(Constant.ANDBOOL_KLABEL,
-						new KList(vars));
-			}
+            if (terms.isEmpty())
+                return node;
 
-			node = node.shallowCopy();
-			node.setBody(rew);
-			node.setCondition(newCondition);
-		}
-		return node;
-	}
+            Term newCondition = new KApp(Constant.ANDBOOL_KLABEL,
+                    new KList(terms));
+
+            if (condition != null) {
+                List<Term> vars = new ArrayList<Term>();
+                vars.add(condition);
+                vars.add(newCondition);
+                newCondition = new KApp(Constant.ANDBOOL_KLABEL,
+                        new KList(vars));
+            }
+
+            node = node.shallowCopy();
+            node.setBody(rew);
+            node.setCondition(newCondition);
+        }
+        return node;
+    }
 }
