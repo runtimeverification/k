@@ -518,4 +518,15 @@
       <kompile-option name="-addTopCell" />
   </test>
 
+<!--
+    
+-->
+  <test
+      language="dist/tutorial/2_imp/lesson_4/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      report-dir="symbolic.imp"
+      >
+    <kompile-option name="--symbolic" />
+  </test>
 </tests>

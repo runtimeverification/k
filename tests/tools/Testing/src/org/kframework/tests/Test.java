@@ -34,6 +34,7 @@ public class Test {
 	private Document doc;
 	public Element report;
 	private List<Program> programs;
+	private String reportDir = null;
 
 	public Test(Element test) {
 		init(test);
@@ -209,6 +210,12 @@ public class Test {
 		if (resultsFolder.equals(""))
 			resultsFolder = null;
 
+		// get tests results
+		reportDir = test.getAttribute("report-dir");
+		if (reportDir.equals(""))
+			reportDir = null;
+
+		
 		// get pdf
 		if (test.getAttribute("pdf").equals("yes")
 				|| test.getAttribute("pdf").equals(""))
@@ -381,6 +388,9 @@ public class Test {
 	}
 	
 	private String getReportFilename() {
+		if (reportDir  != null)
+			return reportDir + "-report.xml";
+		
 		return new File(language).getAbsolutePath()
 				.substring(Configuration.getHome().length())
 				.replaceAll(Configuration.FS, ".")
