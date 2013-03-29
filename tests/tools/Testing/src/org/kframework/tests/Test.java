@@ -303,8 +303,13 @@ public class Test {
 
 	private Element getInitialElement(String definition) {
 		Element testsuite = doc.createElement("testsuite");
-		testsuite.setAttribute("name", new File(language).getParent()
-				.substring(Configuration.getHome().length()));
+		String name = "";
+		if (reportDir != null)
+			name = reportDir;
+		else name = new File(language).getParent()
+				.substring(Configuration.getHome().length());
+		
+		testsuite.setAttribute("name", name);
 		return testsuite;
 	}
 
