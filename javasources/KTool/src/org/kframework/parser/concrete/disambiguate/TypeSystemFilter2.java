@@ -62,8 +62,7 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 
 	@Override
 	public ASTNode transform(Bracket node) throws TransformerException {
-		// TODO: when casting is available, uncomment this next line
-		// node.setContent((Term) node.getContent().accept(this));
+		node.setContent((Term) node.getContent().accept(this));
 		return node;
 	}
 

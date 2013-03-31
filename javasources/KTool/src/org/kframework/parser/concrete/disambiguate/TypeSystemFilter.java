@@ -1,6 +1,7 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cast;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
@@ -17,7 +18,6 @@ public class TypeSystemFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(TermCons tc) throws TransformerException {
-
 		// choose only the allowed subsorts for a TermCons
 		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {
 			UserList ulist = (UserList) tc.getProduction().getItems().get(0);
@@ -37,5 +37,10 @@ public class TypeSystemFilter extends BasicTransformer {
 		}
 
 		return super.transform(tc);
+	}
+
+	public ASTNode transform(Cast cast) throws TransformerException {
+		cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getSort())));
+		return super.transform(cast);
 	}
 }
