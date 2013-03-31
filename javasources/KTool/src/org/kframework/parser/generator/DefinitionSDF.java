@@ -182,6 +182,8 @@ public class DefinitionSDF {
 				sdf.append("	 K \"::" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
 			}
 		}
+		sdf.append("	 K \":K\"	-> K            {cons(\"K1Cast\")}\n");
+		sdf.append("	 K \"::K\"	-> K            {cons(\"K12Cast\")}\n");
 
 		sdf.append("\n");
 		sdf.append("	VariableDz -> K\n");
