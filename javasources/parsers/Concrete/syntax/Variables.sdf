@@ -63,7 +63,7 @@ lexical syntax
 context-free restrictions
 	ColonDz -/- [A-Z] 
 	QuestionMarkDz -/- [A-Z]
-	VARIDz -/- [\:]
+	VARIDz -/- [\:].[\#A-Z]
 
 	ListVarDz		-/- [a-zA-Z0-9\{]
 	ListItemVarDz	-/- [a-zA-Z0-9\{]
