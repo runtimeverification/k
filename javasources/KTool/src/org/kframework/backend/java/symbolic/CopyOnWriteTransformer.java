@@ -1,12 +1,13 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
+
 import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -71,6 +72,11 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(ConstantKLabel constantKLabel) {
         return constantKLabel;
+    }
+
+    @Override
+    public ASTNode transform(Hole hole) {
+        return hole;
     }
 
     @Override

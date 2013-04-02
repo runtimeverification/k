@@ -17,6 +17,7 @@ public interface Visitor {
     public void visit(CellCollection cellCollection);
     public void visit(Collection collection);
     public void visit(ConstantKLabel constantKLabel);
+    public void visit(Hole hole);
     public void visit(InjectionKLabel injectionKLabel);
     public void visit(K k);
     public void visit(KCollection kCollection);

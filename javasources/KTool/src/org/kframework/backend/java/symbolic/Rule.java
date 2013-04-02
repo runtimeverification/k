@@ -40,6 +40,12 @@ public class Rule extends ASTNode {
         this(leftHandSide, rightHandSide, null, null);
     }
 
+    public Term getCondition() {
+        assert hasCondition();
+
+        return condition;
+    }
+
     public Term getLeftHandSide() {
         return leftHandSide;
     }
@@ -52,12 +58,14 @@ public class Rule extends ASTNode {
         return condition != null;
     }
 
-    public Term getCondition() {
-        assert hasCondition();
-
-        return condition;
+    @Override
+    public String toString() {
+        String string = "rule " + leftHandSide + " => " + rightHandSide;
+        if (condition != null) {
+            string += " when " + condition;
+        }
+        return string;
     }
-
 
     @Override
     public ASTNode shallowCopy() {

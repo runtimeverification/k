@@ -44,11 +44,13 @@ public class SymbolicMatcher extends AbstractMatcher {
     }
 
     public void match(Term term, Term pattern) {
+        /*
         System.err.println(">>>");
         System.err.println(term);
         System.err.println("<<<");
         System.err.println(pattern);
         System.err.println("===");
+        */
 
         if (term.isSymbolic() || pattern.isSymbolic()) {
             constraints.add(new SymbolicEquality(term, pattern));
@@ -177,6 +179,18 @@ public class SymbolicMatcher extends AbstractMatcher {
         ConstantKLabel patternConstantKLabel = (ConstantKLabel) pattern;
 
         if (!constantKLabel.equals(patternConstantKLabel)) {
+            fail();
+        }
+    }
+
+    @Override
+    public void match(Hole hole, Term pattern) {
+        if (!(pattern instanceof Hole)) {
+            this.fail();
+        }
+        Hole patternHole = (Hole) pattern;
+
+        if (!hole.equals(patternHole)) {
             fail();
         }
     }

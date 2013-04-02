@@ -688,7 +688,12 @@ public class BasicTransformerPropagator implements Transformer {
 		return node;
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(FreezerHole node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
 	public ASTNode transform(FreezerLabel node) throws TransformerException {
 		boolean change = false;
 		Term body = node.getTerm();

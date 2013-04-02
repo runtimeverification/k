@@ -8,7 +8,7 @@ package org.kframework.backend.java.symbolic;
  * Time: 11:57 AM
  * To change this template use File | Settings | File Templates.
  */
-public class AbstractVisitor implements Visitor {
+public class BottomUpVisitor implements Visitor {
 
     @Override
     public String getName() {
@@ -47,6 +47,11 @@ public class AbstractVisitor implements Visitor {
     @Override
     public void visit(ConstantKLabel constantKLabel) {
         visit((KLabel) constantKLabel);
+    }
+
+    @Override
+    public void visit(Hole hole) {
+        visit((Term) hole);
     }
 
     @Override

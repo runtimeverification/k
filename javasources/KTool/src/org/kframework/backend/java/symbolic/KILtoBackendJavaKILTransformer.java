@@ -1,6 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
+
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -9,6 +10,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,7 +36,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(org.kframework.kil.KInjectedLabel node) throws TransformerException {
         Term term = (Term) node.getTerm().accept(this);
-
         return new InjectionKLabel(term);
     }
 
@@ -55,7 +56,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         KILtoBackendJavaKILTransformer.flattenKSequence(flatList, node.getContents());
 
         Variable variable = null;
-        if (flatList.get(flatList.size() - 1) instanceof org.kframework.kil.Variable
+        if (!flatList.isEmpty()
+                && flatList.get(flatList.size() - 1) instanceof org.kframework.kil.Variable
                 && flatList.get(flatList.size() - 1).getSort().equals("K")) {
             variable = (Variable) flatList.remove(flatList.size() - 1).accept(this);
         }
@@ -89,7 +91,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         KILtoBackendJavaKILTransformer.flattenKList(flatList, node.getContents());
 
         Variable variable = null;
-        if (flatList.get(flatList.size() - 1) instanceof org.kframework.kil.Variable
+        if (!flatList.isEmpty()
+                && flatList.get(flatList.size() - 1) instanceof org.kframework.kil.Variable
                 && flatList.get(flatList.size() - 1).getSort().equals("KList")) {
             variable = (Variable) flatList.remove(flatList.size() - 1).accept(this);
         }
@@ -202,14 +205,33 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
         Term leftHandSide = (Term) rewrite.getLeft().accept(this);
+        System.err.println(leftHandSide);
+        System.err.flush();
         Term rightHandSide = (Term) rewrite.getRight().accept(this);
+        System.err.println(rightHandSide);
+        System.err.flush();
         Term condition = null;
         if (node.getCondition() != null) {
-            condition = (Term) node.getCondition().accept(this);
+            System.err.println("[error]: " + node.getCondition());
+            System.err.flush();
+            //TODO: handle conditions
+            //condition = (Term) node.getCondition().accept(this);
         }
 
         assert leftHandSide.getKind().equals(rightHandSide.getKind());
 
         return new Rule(leftHandSide, rightHandSide, condition, node.getAttributes());
     }
+
+    @Override
+    public ASTNode transform(org.kframework.kil.FreezerHole node) throws TransformerException {
+        return Hole.HOLE;
+    }
+
+    @Override
+    public ASTNode transform(org.kframework.kil.FreezerLabel node) throws TransformerException {
+        Term term = (Term) node.getTerm().accept(this);
+        return new FreezerKLabel(term);
+    }
+
 }

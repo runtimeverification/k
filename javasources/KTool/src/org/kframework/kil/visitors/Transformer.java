@@ -66,6 +66,7 @@ public interface Transformer {
 	public ASTNode transform(KApp node) throws TransformerException;
 	public ASTNode transform(KLabel node) throws TransformerException;
 	public ASTNode transform(KInjectedLabel node) throws TransformerException;
+    public ASTNode transform(FreezerHole node) throws TransformerException;
 	public ASTNode transform(FreezerLabel node) throws TransformerException;
 	public ASTNode transform(Rewrite node) throws TransformerException;
 	public ASTNode transform(TermCons node) throws TransformerException;

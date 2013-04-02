@@ -15,6 +15,7 @@ public interface Matcher {
     public void match(Cell cell, Term pattern);
     public void match(CellCollection cellCollection, Term pattern);
     public void match(ConstantKLabel constantKLabel, Term pattern);
+    public void match(Hole hole, Term pattern);
     public void match(InjectionKLabel injectionKLabel, Term pattern);
     public void match(K k, Term pattern);
     public void match(KList kList, Term pattern);

@@ -19,6 +19,7 @@ public interface Transformer {
     public ASTNode transform(CellCollection cellCollection);
     public ASTNode transform(Collection collection);
     public ASTNode transform(ConstantKLabel constantKLabel);
+    public ASTNode transform(Hole hole);
     public ASTNode transform(InjectionKLabel injectionKLabel);
     public ASTNode transform(K k);
     public ASTNode transform(KCollection kCollection);

@@ -6,40 +6,28 @@ import org.kframework.kil.ASTNode;
 /**
  * Created with IntelliJ IDEA.
  * User: andrei
- * Date: 3/18/13
- * Time: 1:50 PM
+ * Date: 3/28/13
+ * Time: 1:52 PM
  * To change this template use File | Settings | File Templates.
  */
-public class InjectionKLabel extends KLabel {
+public class Hole extends Term {
 
-    private final Term term;
+    public static final Hole HOLE = new Hole();
 
-    InjectionKLabel(Term term) {
-        this.term = term;
-    }
-
-    public Term getTerm() {
-        return term;
+    private Hole() {
+        super("K");
     }
 
     @Override
-    public boolean isConstructor() {
-        return false;
-    }
-
-    @Override
-    public boolean isFunction() {
+    public boolean isSymbolic() {
         return false;
     }
 
     @Override
     public String toString() {
-        return "(# " + term + ")";
+        return "HOLE";
     }
 
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
     @Override
     public ASTNode shallowCopy() {
         throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
@@ -59,5 +47,4 @@ public class InjectionKLabel extends KLabel {
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
-
 }

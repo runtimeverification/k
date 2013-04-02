@@ -27,18 +27,27 @@ public class SymbolicRewriter {
         transformer = new KILtoBackendJavaKILTransformer();
 
         rules = new ArrayList<Rule>(definition.getSingletonModule().getRules().size());
-        for (org.kframework.kil.Rule rule : definition.getSingletonModule().getRules()) {
-			if (!rule.containsAttribute(SymbolicBackend.SYMBOLIC)
-                    || rule.containsAttribute(Attribute.FUNCTION.getKey())
-                    || rule.containsAttribute(Attribute.PREDICATE.getKey())
-					|| rule.containsAttribute(Attribute.ANYWHERE.getKey())) {
+        for (org.kframework.kil.Rule kilRule : definition.getSingletonModule().getRules()) {
+			if (!kilRule.containsAttribute(SymbolicBackend.SYMBOLIC)
+                    || kilRule.containsAttribute(Attribute.FUNCTION.getKey())
+                    || kilRule.containsAttribute(Attribute.PREDICATE.getKey())
+					|| kilRule.containsAttribute(Attribute.ANYWHERE.getKey())) {
 				continue;
 			}
 
+            Rule rule = null;
             try {
-                rules.add((Rule) rule.accept(transformer));
+                System.err.println(kilRule);
+                System.err.flush();
+                rule = (Rule) kilRule.accept(transformer);
             } catch (TransformerException e) {
+                System.err.println(kilRule);
+                System.err.flush();
                 e.printStackTrace();
+            }
+            if (rule != null) {
+                System.err.println(rule);
+                rules.add(rule);
             }
         }
 	}
@@ -61,9 +70,9 @@ public class SymbolicRewriter {
                     }
                 }
 
-                System.err.println(rule.getLeftHandSide());
-                System.err.println(rule.getLeftHandSide().variableSet());
-                System.err.println(matcher.getConstraints());
+                //System.err.println(rule.getLeftHandSide());
+                //System.err.println(rule.getLeftHandSide().variableSet());
+                //System.err.println(matcher.getConstraints());
                 System.err.println(rule.getRightHandSide().substitute(substitution));
 			}
 		}

@@ -11,7 +11,7 @@ import java.util.Set;
  * Time: 11:39 AM
  * To change this template use File | Settings | File Templates.
  */
-public class VariableVisitor extends AbstractVisitor {
+public class VariableVisitor extends BottomUpVisitor {
 
     private final Set<Variable> variableSet = new HashSet<Variable>();
 

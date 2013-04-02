@@ -713,6 +713,11 @@ public class CopyOnWriteTransformer implements Transformer {
 		return node;
 	}
 
+    @Override
+    public ASTNode transform(FreezerHole node) throws TransformerException {
+        return transform((Term) node);
+    }
+
 	@Override
 	public ASTNode transform(StringSentence node) throws TransformerException {
 		return node;
