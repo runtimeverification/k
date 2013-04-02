@@ -19,7 +19,7 @@ module LAMBDA
                | "mu" Id "." Exp
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type                  [strict]
+                | Type "->" Type
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
@@ -36,6 +36,7 @@ module LAMBDA
   rule T1:Type  / T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
+  syntax Exp ::= Exp "->" Exp  [strict]
   rule <k> lambda X:Id . E:Exp => T -> E ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[T/X] </tenv>  when fresh(T:Type)
   rule T1:Type T2:Type => T1 = (T2 -> T) ~> T  when fresh(T:Type)

@@ -14,13 +14,12 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class ResolveFreshMOS extends CopyOnWriteTransformer {
+public class FreshCondToFreshVar extends CopyOnWriteTransformer {
 
-	private boolean isFresh;
 	private Set<Variable> vars = new HashSet<Variable>();
 
-	public ResolveFreshMOS() {
-		super("Resolve fresh variables condition (MOS version).");
+	public FreshCondToFreshVar() {
+		super("Transform fresh conditions into fresh variables.");
 	}
 
 	@Override
@@ -36,8 +35,7 @@ public class ResolveFreshMOS extends CopyOnWriteTransformer {
 		node = node.shallowCopy();
 		node.setCondition((Term) condNode);
 
-		Variable freshVar = MetaK.getFreshVar("Int"); 
-		ASTNode bodyNode = node.getBody().accept(freshSubstitution(vars, freshVar));
+		ASTNode bodyNode = node.getBody().accept(freshSubstitution(vars));
 		assert(bodyNode instanceof Term);
 		node.setBody((Term)bodyNode);
 		
@@ -61,7 +59,6 @@ public class ResolveFreshMOS extends CopyOnWriteTransformer {
 			}
 			Variable var = (Variable) node.getContents().get(0);
 			this.vars.add(var);
-			this.isFresh = true;
 			return Constant.TRUE;
 		}
 
@@ -69,14 +66,12 @@ public class ResolveFreshMOS extends CopyOnWriteTransformer {
 	}
 
 	private static Substitution freshSubstitution(
-            Set<Variable> vars,
-            Variable idxVar) {
+            Set<Variable> vars) {
 		Map<Term, Term> symMap = new HashMap<Term, Term>();
-		int idx = 0;
 		for (Variable var : vars) {
-			Term symTerm = AddSymbolicK.freshSymSortN(var.getSort(),idx);
-			idx++;
-            symMap.put(var, symTerm);
+			Variable freshVar = var.shallowCopy();
+			freshVar.setFresh(true);
+            symMap.put(var, freshVar);
 		}
 
 		return new Substitution(symMap);

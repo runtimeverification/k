@@ -1,12 +1,20 @@
 package org.kframework.main;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
+import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
+import org.kframework.backend.unparser.KastFilter;
+import org.kframework.compile.FlattenModules;
+import org.kframework.compile.transformers.AddTopCellConfig;
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -14,9 +22,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
 
 public class KastFrontEnd {
 
@@ -125,9 +130,9 @@ public class KastFrontEnd {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
 				}
 
-				XStream xstream = new XStream(new BinaryStreamDriver());
-				xstream.aliasPackage("k", "org.kframework.kil");
-				javaDef = (org.kframework.kil.Definition) xstream.fromXML(defXml);
+				javaDef = (org.kframework.kil.Definition) BinaryLoader.fromBinary(new FileInputStream(defXml));
+				javaDef = new FlattenModules().compile(javaDef, null);
+				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig());
 				// This is essential for generating maude
 				javaDef.preprocess();
 
@@ -137,6 +142,8 @@ public class KastFrontEnd {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TransformerException e) {
 			e.printStackTrace();
 		}
 		
@@ -178,10 +185,24 @@ public class KastFrontEnd {
 			sort = cmd.getOptionValue("sort");
 		}
 		
-		System.out.println(org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, prettyPrint, nextline, indentationOptions, sort));
-		
-		if (GlobalSettings.verbose)
+		ASTNode out = org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, sort);
+
+		String kast;
+		if (prettyPrint) {
+			KastFilter kastFilter = new KastFilter(indentationOptions, nextline);
+			out.accept(kastFilter);
+			kast = kastFilter.getResult();
+		} else {
+			MaudeFilter maudeFilter = new MaudeFilter();
+			out.accept(maudeFilter);
+			kast = maudeFilter.getResult();
+		}
+		System.out.println(kast);
+
+		if (GlobalSettings.verbose) {
+			sw.printIntermediate("Maudify Program");
 			sw.printTotal("Total");
+		}
 		GlobalSettings.kem.print();
 	}
 }

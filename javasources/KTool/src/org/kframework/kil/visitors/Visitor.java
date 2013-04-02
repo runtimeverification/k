@@ -67,6 +67,7 @@ public interface Visitor {
 	public void visit(Rewrite node);
 	public void visit(TermCons node);
 	public void visit(Bracket node);
+	public void visit(Cast node);
 	public void visit(Variable node);
 	// </Terms>
 	public void visit(Attributes attributes);

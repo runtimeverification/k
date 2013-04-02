@@ -178,4 +178,14 @@ public class Module extends DefinitionItem {
 		this.items.add(new Syntax(new Sort(sort), pbs));
 	}
 
+    public List<Rule> getRules() {
+        List<Rule> list = new LinkedList<Rule>();
+        for (ModuleItem moduleItem : items) {
+            if (moduleItem instanceof Rule) {
+                list.add((Rule) moduleItem);
+            }
+        }
+
+        return list;
+    }
 }

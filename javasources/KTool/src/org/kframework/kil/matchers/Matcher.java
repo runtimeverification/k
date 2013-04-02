@@ -5,6 +5,7 @@ import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
 import org.kframework.kil.Bracket;
+import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
@@ -28,8 +29,8 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
-
 import org.kframework.kil.rewriter.MapImpl;
+import org.kframework.kil.rewriter.SetImpl;
 
 /**
  * This is the interface for recursive pattern matching.  It is used
@@ -44,6 +45,7 @@ public interface Matcher {
 	public void match(Bag term, Term term2);
 	public void match(BagItem term, Term term2);
 	public void match(Bracket term, Term term2);
+	public void match(Cast term, Term term2);
 	public void match(Cell term, Term term2);
 	public void match(Constant term, Term term2);
 	public void match(Empty term, Term term2);
@@ -66,6 +68,9 @@ public interface Matcher {
 	public void match(Rewrite term, Term term2);
 	public void match(Set term, Term term2);
 	public void match(SetItem term, Term term2);
+	public void match(SetLookupPattern term, Term term2);
+	public void match(SetInsertPattern term, Term term2);
+	public void match(SetImpl term, Term term2);
 	public void match(TermComment term, Term term2);
 	public void match(TermCons term, Term term2);
 	public void match(Variable term, Term term2);

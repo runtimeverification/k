@@ -9,8 +9,8 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Restrictions;
 import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -29,7 +29,7 @@ public class DefinitionSDF {
 		sdf.append("exports\n\n");
 		sdf.append("context-free syntax\n");
 
-		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor();
+		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(false);
 		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor();
 		def.accept(psdfv);
 		def.accept(terminals);
@@ -136,7 +136,9 @@ public class DefinitionSDF {
 					if (itm.getType() == ProductionType.TERMINAL) {
 						Terminal t = (Terminal) itm;
 						if (t.getTerminal().equals(":"))
-							sdf.append("DouaPuncteDz ");
+							sdf.append("ColonDz ");
+						else if (t.getTerminal().equals("?"))
+							sdf.append("QuestionMarkDz ");
 						else
 							sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 					} else if (itm.getType() == ProductionType.SORT) {
@@ -147,7 +149,10 @@ public class DefinitionSDF {
 						} else {
 							// if this sort should be inserted to avoid the priority filter, then add it to the list
 							psdfv.insertSorts.add(srt);
-							sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
+							String tempstr = srt.getName();
+							if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
+								tempstr = "Bag";
+							sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
 						}
 					}
 				}
@@ -156,21 +161,32 @@ public class DefinitionSDF {
 			}
 		}
 		for (Sort ss : psdfv.insertSorts)
-			sdf.append("	" + StringUtil.escapeSortName(ss.getName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getName()) + "\n");
+			sdf.append("	" + StringUtil.escapeSortName(ss.getName()) + "	-> InsertDz" + StringUtil.escapeSortName(ss.getName()) + "\n");
 
 		sdf.append("\n\n");
-		// print variables, HOLEs
+
+		// print variables, HOLEs, cast
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	VARID  \":\" \"" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
+				sdf.append("	VARID  \":" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
+			}
+		}
+		// print variables, HOLEs, cast
+		sdf.append("\n");
+		for (Sort s : psdfv.userSorts) {
+			if (!s.isBaseSort()) {
+				sdf.append("	\"HOLE\" \":" + s.getName() + "\"		-> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
 			}
 		}
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	\"HOLE\" \":\" \"" + s.getName() + "\"      -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
+				sdf.append("	 K \":" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+				sdf.append("	 K \"::" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
 			}
 		}
+		sdf.append("	 K \":K\"	-> K            {cons(\"K1Cast\")}\n");
+		sdf.append("	 K \"::K\"	-> K            {cons(\"K12Cast\")}\n");
 
 		sdf.append("\n");
 		sdf.append("	VariableDz -> K\n");
@@ -186,13 +202,11 @@ public class DefinitionSDF {
 		// sdf.append("	DzDzID		-> DzDzId\n");
 		sdf.append("	DzDzSTRING	-> DzDzString\n");
 		sdf.append("	DzDzFLOAT	-> DzDzFloat\n");
-		sdf.append("	\":\" -> DouaPuncteDz {cons(\"DouaPuncte\")}\n");
 
 		sdf.append("\n");
 
 		sdf.append("context-free restrictions\n");
-		sdf.append("	VariableDz -/- ~[\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]\n");
-		sdf.append("	DouaPuncteDz -/- [A-Z]\n\n");
+		sdf.append("	VariableDz -/- [a-zA-Z0-9\\{]\n");
 
 		sdf.append("lexical syntax\n");
 		for (Production p : psdfv.constants) {

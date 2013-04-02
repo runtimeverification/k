@@ -5,8 +5,7 @@ import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckVariables;
-import org.kframework.compile.sharing.AutomaticModuleImportsTransformer;
-import org.kframework.compile.sharing.DittoFilter;
+import org.kframework.compile.sharing.DeclareCellLabels;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
@@ -14,7 +13,6 @@ import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.compile.utils.FunctionalAdaptor;
 import org.kframework.kil.Definition;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
@@ -76,8 +74,6 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new AddEmptyLists());
 		steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));
 		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite()));
-		steps.add(new AutomaticModuleImportsTransformer());
-		steps.add(new FunctionalAdaptor(new DittoFilter()));
 		steps.add(new FlattenModules());
 		steps.add(new StrictnessToContexts());
 		steps.add(new FreezeUserFreezers());
@@ -92,7 +88,8 @@ public abstract class BasicBackend implements Backend {
 		if (GlobalSettings.symbolicEquality)
 			steps.add(new AddSemanticEquality());
 		// steps.add(new ResolveFresh());
-		steps.add(new ResolveFreshMOS());
+		steps.add(new FreshCondToFreshVar());
+		steps.add(new ResolveFreshVarMOS());
 		steps.add(new AddTopCellConfig());
 //		if (GlobalSettings.addTopCell) {
 		steps.add(new AddTopCellRules());
@@ -118,6 +115,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new AddStrictStar());
 		steps.add(new AddDefaultComputational());
 		steps.add(new AddOptionalTags());
+		steps.add(new DeclareCellLabels());
 		steps.add(new LastStep(this));
 		return steps;
 	}

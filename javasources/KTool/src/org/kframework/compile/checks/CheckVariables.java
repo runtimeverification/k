@@ -32,6 +32,7 @@ public class CheckVariables extends BasicVisitor {
 
 	HashMap<Variable, Integer> left = new HashMap<Variable, Integer>();
 	HashMap<Variable, Integer> right = new HashMap<Variable, Integer>();
+	HashMap<Variable, Integer> fresh = new HashMap<Variable, Integer>();
 	HashMap<Variable, Integer> current = left;
 	boolean inCondition = false;
 
@@ -45,6 +46,23 @@ public class CheckVariables extends BasicVisitor {
 
 	@Override
 	public void visit(Variable node) {
+		if (node.isFresh()) {
+ 			if (current == right  && !inCondition) {
+				 Integer i = fresh.get(node);
+				 if (i == null) i = new Integer(1);
+				 else i = new Integer(i.intValue());
+				 fresh.put(node, i);
+				 return;
+			 }
+ 			//nodes are ok to be found in rhs
+			GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
+					KException.KExceptionGroup.COMPILER,
+					"Fresh variable \"" + node + "\" is bound in the " +
+							"rule pattern.",
+					getName(), node.getFilename(), node.getLocation()
+			));
+		}
+//		System.out.println("Variable: " + node);
 		Integer i = current.remove(node);
 		if (i == null) {
 			i = new Integer(1);
@@ -119,6 +137,14 @@ public class CheckVariables extends BasicVisitor {
 		}
 		for (Map.Entry<Variable,Integer> e : left.entrySet()) {
 			final Variable key = e.getKey();
+			if (fresh.containsKey(key)) {
+				GlobalSettings.kem.register(new KException(KException
+						.ExceptionType.ERROR,
+						KException.KExceptionGroup.COMPILER,
+						"Variable " + key + " has the same name as a fresh " +
+								"variable.",
+						getName(), key.getFilename(), key.getLocation()));
+			}
 			if (MetaK.isAnonVar(key)) continue;
 			if (e.getValue().intValue()>1) continue;
 			if (!right.containsKey(key)) {

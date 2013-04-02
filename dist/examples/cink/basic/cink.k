@@ -612,7 +612,7 @@ module CINK
     The next operator returns the variable name from an expression occurring
     in a declaration:
   */
-  syntax  Id ::= "getName" "(" Exp ")" [function]
+  syntax  Id ::= "getName" "(" K ")" [function]
 
   rule getName(X:Id) => X
   rule getName(KL:KLabel(E:Exp)) => getName(E)

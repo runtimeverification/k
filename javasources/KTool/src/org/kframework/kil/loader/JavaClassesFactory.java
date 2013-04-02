@@ -7,6 +7,7 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
 import org.kframework.kil.Bracket;
+import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
@@ -96,6 +97,8 @@ public class JavaClassesFactory {
 			return new TermCons(element);
 		if (Constants.BRACKET.equals(element.getNodeName()))
 			return new Bracket(element);
+		if (Constants.CAST.equals(element.getNodeName()))
+			return new Cast(element);
 		if (Constants.VAR.equals(element.getNodeName()))
 			return new Variable(element);
 		if (Constants.TERMINAL.equals(element.getNodeName()))
