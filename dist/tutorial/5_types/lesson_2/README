@@ -30,10 +30,11 @@ We are now ready to define the typing rules.
 Let us start with the typing rule for lambda abstraction: lambda X : T . E
 types to the function type T -> T', where T' is the type obtained by further
 typing E[T/X].  This can be elegantly achieved by reducing the lambda 
-abstraction to T -> E[T/X], provided that we define the function type
-construct to be strict in its second argument.  Let's just define it strict
-overall (only because it looks nicer, because its argument will always be a 
-type, that is a result, so it does not matter anyway).
+abstraction to T -> E[T/X], provided that we extend the function type construct
+to take expressions, not only types, as arguments, and to be strict.
+This can be easily achieved by redeclaring it as a strict expression construct
+(strictness in the second argument would suffice in this example, but it is
+more uniform to define it strict overall).
 
 The typing rule for application is as simple as it can get: (T1->T2) T1 => T2.
 
