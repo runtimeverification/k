@@ -9,8 +9,8 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Restrictions;
 import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -149,7 +149,10 @@ public class DefinitionSDF {
 						} else {
 							// if this sort should be inserted to avoid the priority filter, then add it to the list
 							psdfv.insertSorts.add(srt);
-							sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
+							String tempstr = srt.getName();
+							if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
+								tempstr = "Bag";
+							sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
 						}
 					}
 				}
@@ -165,7 +168,7 @@ public class DefinitionSDF {
 		// print variables, HOLEs, cast
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("    VARID  \":" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
+				sdf.append("	VARID  \":" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
 			}
 		}
 		// print variables, HOLEs, cast
