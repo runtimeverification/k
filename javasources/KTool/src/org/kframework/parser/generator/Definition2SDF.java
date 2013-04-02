@@ -143,7 +143,10 @@ public class Definition2SDF {
 						} else {
 							// if this sort should be inserted to avoid the priority filter, then add it to the list
 							psdfv.insertSorts.add(srt);
-							sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
+							String tempstr = srt.getName();
+							if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
+								tempstr = "Bag";
+							sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
 						}
 					}
 				}
