@@ -11,7 +11,26 @@ module ABSTRACT-DOMAIN-SYNTAX
   syntax Bool ::= "anyBool"
 endmodule
 
+module IMP-PREDICATES-SYNTAX
+  imports LTL-HOOKS
+  imports MODEL-CHECKER-HOOKS
+
+  syntax Val ::= Int | Bool
+
+
+  syntax Prop ::= "eqTo" "(" Id "," Val ")"
+               |  "lt" "(" Id "," Val ")" 
+               |  "leq" "(" Id "," Val ")" 
+               |  "gt" "(" Id "," Val ")" 
+               |  "geq" "(" Id "," Val ")" 
+               |  "neqTo" "(" Id "," Val ")" 
+endmodule
+
+
+
+
 module IMP-SYNTAX
+  imports IMP-PREDICATES-SYNTAX
   imports ABSTRACT-DOMAIN-SYNTAX
 
   syntax AExp  ::= Int | String | Id
@@ -97,23 +116,8 @@ module ABSTRACT-DOMAIN
 endmodule
 
 
-
 module IMP-PREDICATES
-  imports LTL-HOOKS
-  imports MODEL-CHECKER-HOOKS
-
-  syntax Val ::= Int | Bool
-
-
-  syntax Prop ::= "eqTo" "(" Id "," Val ")"
-               |  "lt" "(" Id "," Val ")" 
-               |  "leq" "(" Id "," Val ")" 
-               |  "gt" "(" Id "," Val ")" 
-               |  "geq" "(" Id "," Val ")" 
-               |  "neqTo" "(" Id "," Val ")" 
-
-
-
+  imports IMP-PREDICATES-SYNTAX
 
  syntax Int ::= "val" "(" Bag "," Id ")" [function]
 
@@ -121,8 +125,12 @@ module IMP-PREDICATES
   configuration <T> <env> .Map </env> <store> .Map </store> </T>
 
   rule val(<generatedTop><T>... 
+              <threads>...
+               <thread>...
                  <env>... X |-> L ...</env>
-                 <store>... L |-> I:Int ...</store> 
+               ...</thread>
+              ...</threads>
+              <store>... L |-> I:Int ...</store> 
            ...</T> </generatedTop>, X)
        =>
        I
@@ -237,4 +245,5 @@ module IMP
   rule .Stmts => . 
   rule S1:Stmt .Stmts => S1   [structural]
   rule S1:Stmt S2:Stmt Ss => S1 ~> S2 Ss  [structural]
+
 endmodule
