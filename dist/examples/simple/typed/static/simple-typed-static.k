@@ -599,7 +599,7 @@ list of variable declarations. */
  lvalue to evaluate. */
 
   syntax LValue ::= Id 
-  rule isLValue(_:Exp[_:Exp]) => true
+  rule isLValue(_:Exp[_:Exps]) => true
 
   syntax Exp ::= ltype(Exp) 
   context ltype(HOLE) when isLValue(HOLE)
