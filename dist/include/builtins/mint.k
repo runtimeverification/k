@@ -7,28 +7,28 @@ module MINT
   imports K-EQUAL-HOOKS
 
   /* Machine integer of bitwidth, interpreted value */
-  syntax MInt ::= "mi" "(" Nat "," Int ")"
+  syntax MInt ::= "mi" "(" Int "," Int ")"
 
   syntax Int ::= "wMInt" "(" MInt ")"   [function]
                | "iMInt" "(" MInt ")"   [function]
-  rule wMInt(mi(N:Nat, _)) => N 
+  rule wMInt(mi(N:Int, _)) => N 
   rule iMInt(mi(_, I:Int)) => I 
 
-  syntax Int ::= "infMInt" "(" Nat ")"    [function]
-               | "supMInt" "(" Nat ")"    [function]
-               | "uinfMInt" "(" Nat ")"   [function]
-               | "usupMInt" "(" Nat ")"   [function]
-  rule infMInt(N:Nat) => 0 -Int (1 <<Int (N -Int 1))
-  rule supMInt(N:Nat) => (1 <<Int (N -Int 1)) -Int 1
-  rule uinfMInt(N:Nat) => 0 
-  rule usupMInt(N:Nat) => (1 <<Int N) -Int 1
+  syntax Int ::= "infMInt" "(" Int ")"    [function]
+               | "supMInt" "(" Int ")"    [function]
+               | "uinfMInt" "(" Int ")"   [function]
+               | "usupMInt" "(" Int ")"   [function]
+  rule infMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
+  rule supMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
+  rule uinfMInt(N:Int) => 0 
+  rule usupMInt(N:Int) => (1 <<Int N) -Int 1
  
   /* Functions for signed and unsigned interpretations of machine integers. */
   syntax MInt ::= "sMInt" "(" MInt ")"    [function]
                 | "uMInt" "(" MInt ")"    [function]
-  rule uMInt(mi(N:Nat, I:Int)) => mi(N, (I modInt (1 <<Int N)))
+  rule uMInt(mi(N:Int, I:Int)) => mi(N, (I modInt (1 <<Int N)))
   rule
-    sMInt(mi(N:Nat, I:Int))
+    sMInt(mi(N:Int, I:Int))
   =>
     mi(N,
        ((I +Int (1 <<Int (N -Int 1))) modInt (1 <<Int N))
@@ -65,10 +65,10 @@ module MINT
                    | "uremMInt" "(" MInt "," MInt ")"   [function]
 
   /* Bitwise operations */
-  syntax MIntRes ::= "shlMInt" "(" MInt "," Nat ")"     [function]
-                   | "ushlMInt" "(" MInt "," Nat ")"    [function]
-                   | "shrMInt" "(" MInt "," Nat ")"     [function]
-                   | "ushrMInt" "(" MInt "," Nat ")"    [function]
+  syntax MIntRes ::= "shlMInt" "(" MInt "," Int ")"     [function]
+                   | "ushlMInt" "(" MInt "," Int ")"    [function]
+                   | "shrMInt" "(" MInt "," Int ")"     [function]
+                   | "ushrMInt" "(" MInt "," Int ")"    [function]
                    | "andMInt" "(" MInt "," MInt ")"    [function]
                    | "xorMInt" "(" MInt "," MInt ")"    [function]
                    | "orMInt" "(" MInt "," MInt ")"     [function]
@@ -94,14 +94,14 @@ module MINT
    * Arithmetic operations
    */
   rule
-    addMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    addMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     resMInt(
         sMInt(mi(N, I1 +Int I2)),
         iMInt(sMInt(mi(N, I1))) +Int iMInt(sMInt(mi(N, I2))) <Int infMInt(N),
         iMInt(sMInt(mi(N, I1))) +Int iMInt(sMInt(mi(N, I2))) >Int supMInt(N))
   rule
-    uaddMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    uaddMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     resMInt(
         uMInt(mi(N, I1 +Int I2)),
@@ -109,14 +109,14 @@ module MINT
         iMInt(uMInt(mi(N, I1))) +Int iMInt(uMInt(mi(N, I2))) >Int usupMInt(N))
 
   rule
-    subMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    subMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     resMInt(
         sMInt(mi(N, I1 -Int I2)),
         iMInt(sMInt(mi(N, I1))) -Int iMInt(sMInt(mi(N, I2))) <Int infMInt(N),
         iMInt(sMInt(mi(N, I1))) -Int iMInt(sMInt(mi(N, I2))) >Int supMInt(N))
   rule
-    usubMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    usubMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     resMInt(
         uMInt(mi(N, I1 -Int I2)),
@@ -124,14 +124,14 @@ module MINT
         false)
 
   rule
-    mulMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    mulMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     resMInt(
         sMInt(mi(N, I1 *Int I2)),
         iMInt(sMInt(mi(N, I1))) *Int iMInt(sMInt(mi(N, I2))) <Int infMInt(N),
         iMInt(sMInt(mi(N, I1))) *Int iMInt(sMInt(mi(N, I2))) >Int supMInt(N))
   rule
-    umulMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    umulMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     resMInt(
         uMInt(mi(N, I1 *Int I2)),
@@ -139,7 +139,7 @@ module MINT
         iMInt(uMInt(mi(N, I1))) *Int iMInt(uMInt(mi(N, I2))) >Int usupMInt(N))
 
   rule
-    divMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    divMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     #if iMInt(sMInt(mi(N, I2))) =/=Int 0 #then
       resMInt(
@@ -150,7 +150,7 @@ module MINT
       errMInt
     #fi
   rule
-    udivMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    udivMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     #if iMInt(uMInt(mi(N, I2))) =/=Int 0 #then
       resMInt(
@@ -162,7 +162,7 @@ module MINT
     #fi
 
   rule
-    remMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    remMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     #if iMInt(sMInt(mi(N, I2))) =/=Int 0 #then
       resMInt(
@@ -173,7 +173,7 @@ module MINT
       errMInt
     #fi
   rule
-    uremMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    uremMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     #if iMInt(uMInt(mi(N, I2))) =/=Int 0 #then 
       resMInt(
@@ -188,14 +188,14 @@ module MINT
    * Bitwise operations
    */
   rule
-    shlMInt(mi(N:Nat, I:Int), M:Nat)
+    shlMInt(mi(N:Int, I:Int), M:Int)
   =>
     resMInt(
         sMInt(mi(N, iMInt(sMInt(mi(N, I))) <<Int M)),
         iMInt(sMInt(mi(N, I))) <<Int M <Int infMInt(N),
         iMInt(sMInt(mi(N, I))) <<Int M >Int supMInt(N))
   rule
-    ushlMInt(mi(N:Nat, I:Int), M:Nat)
+    ushlMInt(mi(N:Int, I:Int), M:Int)
   =>
     resMInt(
         uMInt(mi(N, iMInt(uMInt(mi(N, I))) <<Int M)),
@@ -203,14 +203,14 @@ module MINT
         iMInt(uMInt(mi(N, I))) <<Int M >Int usupMInt(N))
 
   rule
-    shrMInt(mi(N:Nat, I:Int), M:Nat)
+    shrMInt(mi(N:Int, I:Int), M:Int)
   =>
     resMInt(
         mi(N, iMInt(sMInt(mi(N, I))) >>Int M),
         false,
         false)
   rule
-    ushrMInt(mi(N:Nat, I:Int), M:Nat)
+    ushrMInt(mi(N:Int, I:Int), M:Int)
   =>
     resMInt(
         mi(N, iMInt(uMInt(mi(N, I))) >>Int M),
@@ -218,62 +218,62 @@ module MINT
         false)
 
   rule
-    andMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    andMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     resMInt(mi(N, I1 &Int I2), false, false)
 
   rule
-    xorMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    xorMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     resMInt(mi(N, I1 xorInt I2), false, false)
 
   rule
-    orMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    orMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     resMInt(mi(N, I1 |Int I2), false, false)
 
   rule
-    ltMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    ltMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     iMInt(sMInt(mi(N, I1))) <Int iMInt(sMInt(mi(N, I2)))
   rule
-    ultMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    ultMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     iMInt(uMInt(mi(N, I1))) <Int iMInt(uMInt(mi(N, I2)))
 
   rule
-    leqMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    leqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     iMInt(sMInt(mi(N, I1))) <=Int iMInt(sMInt(mi(N, I2)))
   rule
-    uleqMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    uleqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     iMInt(uMInt(mi(N, I1))) <=Int iMInt(uMInt(mi(N, I2)))
 
   rule
-    gtMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    gtMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     iMInt(sMInt(mi(N, I1))) >Int iMInt(sMInt(mi(N, I2)))
   rule
-    ugtMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    ugtMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     iMInt(uMInt(mi(N, I1))) >Int iMInt(uMInt(mi(N, I2)))
 
   rule
-    geqMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    geqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     iMInt(sMInt(mi(N, I1))) >=Int iMInt(sMInt(mi(N, I2)))
   rule
-    geqMInt(mi(N:Nat, I1:Int), mi(N:Nat, I2:Int))
+    geqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     iMInt(uMInt(mi(N, I1))) >=Int iMInt(uMInt(mi(N, I2)))
 
   rule
-    mi(N:Nat, I1:Int) ==MInt mi(N:Nat, I2:Int)
+    mi(N:Int, I1:Int) ==MInt mi(N:Int, I2:Int)
   =>
     I1 modInt (1 <<Int N) ==Int I2 modInt (1 <<Int N)
   rule
-    mi(N:Nat, I1:Int) =/=MInt mi(N:Nat, I2:Int)
+    mi(N:Int, I1:Int) =/=MInt mi(N:Int, I2:Int)
   =>
     I1 modInt (1 <<Int N) =/=Int I2 modInt (1 <<Int N)
 endmodule
