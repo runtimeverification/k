@@ -229,8 +229,8 @@ course, including the types of the involved variables. */
 
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
-  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => (T E1;)::Stmt T E2, Es;       [macro]
+  rule T:Type X:Id = E; => (T X;)::Stmt X = E;                          [macro]
 
 endmodule
 
@@ -299,7 +299,7 @@ types are results (same like we did in the IMP++ tutorial). */
 // happens will be clearly marked.  Sorry for the inconvenience.  We will fix
 // it soon, when we allow arbitrary priorities to be declared in the tool.
 //
-//  syntax Block ::= Type
+  syntax Block ::= Type
   syntax KResult ::= Type
 
 /*@ \subsection{Configuration}
@@ -481,9 +481,11 @@ The rules below are straightforward and self-explanatory: */
 
 Array access requires each index to type to an integer, and the
 array type to be at least as deep as the number of indexes: */
-// need parentheses in the RHS, to avoid capturing Ts as rule tag
+// NOTE:
+// We used to need parentheses in the RHS, to avoid capturing Ts as rule tag.
+// Let's hope that is not a problem anymore.
 
-  rule (T[])[int, Ts:Types] => (T[Ts])
+  rule (T[])[int, Ts:Types] => T[Ts]
   rule T[.Types] => T
 
 //@ \texttt{sizeOf} only needs to check that its argument is an array:
@@ -553,8 +555,8 @@ exceptions can only have integer type. */
 // Parentheses needed around the \texttt{block} type, due to the fact
 // that the current parser does not allow us to subsort Type to Block.
 // Parentheses force the surrounded expression to type to whatever needed.
-  rule if (bool) (block) else (block) => stmt
-  rule while (bool) (block) => stmt
+  rule if (bool) block else block => stmt
+  rule while (bool) block => stmt
 
 /*@ \subsection{Exceptions}
 We currently force the parameters of exceptions to only be integers.
@@ -565,7 +567,7 @@ simplicity---expectation that the caller functions would catch those
 exceptions). */
 
 // had to put parentheses around block for the same reason as above.
-  rule try (block) catch(int X:Id) {S} => {int X; S}  [structural]
+  rule try block catch(int X:Id) {S} => {(int X;)::Stmt S}  [structural]
   rule throw int; => stmt
 
 /*@ \subsection{Concurrency}
@@ -590,7 +592,7 @@ exceptions which are not caught. */
 list of variable declarations. */
 
   syntax Decl ::= mkDecls(Params)  [function]
-  rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
+  rule mkDecls(T:Type X:Id, Ps:Params) => (T X;)::Stmt mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
 /*@ The \texttt{ltype} context allows only expressions which have an
