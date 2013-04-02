@@ -1,0 +1,3 @@
+[]Ltl ((eqTo(critical1, 1) ->Ltl eqTo(critical0, 0))
+       /\Ltl (eqTo(critical0, 1) ->Ltl eqTo(critical1, 0)))
+
