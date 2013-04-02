@@ -229,8 +229,8 @@ course, including the types of the involved variables. */
 
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => (T E1;)::Stmt T E2, Es;       [macro]
-  rule T:Type X:Id = E; => (T X;)::Stmt X = E;                          [macro]
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
+  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
 endmodule
 
@@ -289,17 +289,10 @@ since programs and fragments of program will reduce to their types, in order
 for the strictness and context declarations to be executable we state that
 types are results (same like we did in the IMP++ tutorial). */
 
+  syntax Exp ::= Type
   syntax BlockOrStmtType ::= "block" | "stmt"
   syntax Type ::= BlockOrStmtType
-  syntax Exp ::= Type
-// I had to comment the sort inclusion below out, because the current
-// parser parses declarations "T X;" as statement composition "T" "X;"
-// The drawback of this is that I now need explicit casting of types into K,
-// by putting parentheses around the terms to cast.  The places where that
-// happens will be clearly marked.  Sorry for the inconvenience.  We will fix
-// it soon, when we allow arbitrary priorities to be declared in the tool.
-//
-  syntax Block ::= Type
+  syntax Block ::= BlockOrStmtType
   syntax KResult ::= Type
 
 /*@ \subsection{Configuration}
@@ -552,9 +545,6 @@ exceptions can only have integer type. */
 
 //@ \subsection{Conditional and \texttt{while} loop}
 
-// Parentheses needed around the \texttt{block} type, due to the fact
-// that the current parser does not allow us to subsort Type to Block.
-// Parentheses force the surrounded expression to type to whatever needed.
   rule if (bool) block else block => stmt
   rule while (bool) block => stmt
 
@@ -566,8 +556,7 @@ any try-catch block (with the currently unchecked---also for
 simplicity---expectation that the caller functions would catch those
 exceptions). */
 
-// had to put parentheses around block for the same reason as above.
-  rule try block catch(int X:Id) {S} => {(int X;)::Stmt S}  [structural]
+  rule try block catch(int X:Id) {S} => {int X; S}  [structural]
   rule throw int; => stmt
 
 /*@ \subsection{Concurrency}
@@ -584,7 +573,7 @@ exceptions which are not caught. */
   rule release _:Type; => stmt
   rule rendezvous _:Type; => stmt
 
-  rule (_:BlockOrStmtType)::Stmts (_:BlockOrStmtType)::Stmts => stmt
+  rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 
 //@ \section{Auxiliary constructs}
 
@@ -592,16 +581,22 @@ exceptions which are not caught. */
 list of variable declarations. */
 
   syntax Decl ::= mkDecls(Params)  [function]
-  rule mkDecls(T:Type X:Id, Ps:Params) => (T X;)::Stmt mkDecls(Ps)
+  rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
 /*@ The \texttt{ltype} context allows only expressions which have an
  lvalue to evaluate. */
 
-  syntax LValue ::= Id 
+// We would like to say the following instead of the predicate rule below:
+//  syntax LValue ::= Id | Exp "[" Exps "]"
+// but unfortunately that currently generates some ambiguous parsings.
+  syntax LValue ::= Id
   rule isLValue(_:Exp[_:Exps]) => true
 
   syntax Exp ::= ltype(Exp) 
+// We would like to say:
+//  context ltype(HOLE:LValue)
+// but we currently cannot type the HOLE
   context ltype(HOLE) when isLValue(HOLE)
   
 
