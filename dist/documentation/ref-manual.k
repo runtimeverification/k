@@ -349,6 +349,18 @@ requested. You can also tell \krun that you don't want to see the value of a
 particular variable by using an anonymous variable (i.e. \_) instead of a named
 variable in your search pattern.
 
+It is worth noting that the \verb^--pattern^ flag is also able to be used on
+normal executions. The effect this has is to execute the program until it
+has reached its final configuration, and then perform a search on the resulting
+configuration. Therefore, you will either get a single solution containing the
+substitution through which the configuration resulting from execution matches
+the specified pattern, or else you will get no solutions, indicating that the
+configuration resulting from execution does not match the specified pattern.
+This may be useful in cases where you want to perform pattern matching on the
+result of executing a program, for example if you wish to write a test case
+which asserts that all programs executed through your semantics terminate with
+an empty k cell.
+
 Finally, you may wish to visualize the search graph created by your search
 command. For this purpose we provide the \verb^--graph^ flag to \krun. The
 \verb^--graph^ flag tells \krun to output the search graph as a set of nodes
@@ -570,6 +582,35 @@ Type of data parsed & Default parser & Parser flag & KRUN\_SORT & KRUN\_IS\_NOT\
 
 */
 
+/*@
+\subsubsection{\krun execution backends: \texttt{-{}-backend}}
+By default, once an initial configuration has been computed by \krun{}, the
+actual executing of the rewriting-based semantics is performed by maude.
+However, for certain purposes, maude is less than ideal. For example, maude's
+implementation of Sets, Bags, and Maps is based on associative-commutative
+matching, which, while incredibly powerful and capable of supporting very
+complex operations on these data types, is highly inefficient. Additionally,
+certain applications of the k-framework are highly string-intensive, such as 
+performing program verification which requires the construction of SMT-LIB 2
+strings. Unfortunately maude's string implementation has no support for
+buffered construction of strings, and so the construction of large strings in
+maude is highly inefficient. These two examples are simply two of a number of
+reasons why it is not always the case that Maude provides the optimal solution
+for executing programs in \krun{}.
+
+For this purpose, we provide the ability to utilize other execution backends,
+as they become implemented by the framework. In order to specify these
+backends, it is necessary to pass to \krun the \verb^--backend^ flag. This
+flag takes a string representing the name of a \krun execution backend, and
+then, once it is time to begin rewriting, passes off the task of executing
+the program to this backend. Currently the only backend supported other than
+the default of maude is the java-symbolic backend, whose purpose is to
+symbolically execute terms containing variables according to the mathematical
+domains of the semantics and the mathematical notion of satisfiability and
+validity. We plan, however, to also support a very efficient backend in java
+for normal usage, in order to overcome the performance inefficiencies
+introduced by using maude.
+*/
 
 /*@
 \subsubsection{Output formats: \texttt{-{}-output-mode}, \texttt{-{}-output},
