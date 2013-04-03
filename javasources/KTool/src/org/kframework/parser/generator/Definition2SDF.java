@@ -28,7 +28,7 @@ public class Definition2SDF {
 		sdf.append("exports\n\n");
 		sdf.append("context-free syntax\n");
 
-		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(true);
+		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor();
 		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor();
 		def.accept(psdfv);
 		def.accept(terminals);
@@ -134,7 +134,10 @@ public class Definition2SDF {
 					ProductionItem itm = items.get(i);
 					if (itm.getType() == ProductionType.TERMINAL) {
 						Terminal t = (Terminal) itm;
-						sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
+						if (t.getTerminal().equals(":"))
+							sdf.append("DouaPuncteDz ");
+						else
+							sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 					} else if (itm.getType() == ProductionType.SORT) {
 						Sort srt = (Sort) itm;
 						// if we are on the first or last place and this sort is not a list, just print the sort
@@ -143,10 +146,7 @@ public class Definition2SDF {
 						} else {
 							// if this sort should be inserted to avoid the priority filter, then add it to the list
 							psdfv.insertSorts.add(srt);
-							String tempstr = srt.getName();
-							if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
-								tempstr = "Bag";
-							sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+							sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
 						}
 					}
 				}
@@ -156,14 +156,6 @@ public class Definition2SDF {
 		}
 		for (Sort ss : psdfv.insertSorts)
 			sdf.append("	" + StringUtil.escapeSortName(ss.getName()) + " -> InsertDz" + StringUtil.escapeSortName(ss.getName()) + "\n");
-
-		sdf.append("\n");
-		for (Sort s : psdfv.userSorts) {
-			if (!s.isBaseSort()) {
-				sdf.append("	\"(\" K \")\" \":\" \"" + s.getName() + "\"      -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
-				sdf.append("	\"(\" K \")\" \"::\" \"" + s.getName() + "\"     -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
-			}
-		}
 
 		sdf.append("\n\n");
 		for (String sort : psdfv.constantSorts) {
@@ -176,8 +168,12 @@ public class Definition2SDF {
 		sdf.append("	DzDzID		-> DzDzId\n");
 		sdf.append("	DzDzSTRING	-> DzDzString\n");
 		sdf.append("	DzDzFLOAT	-> DzDzFloat\n");
+		sdf.append("	\":\" -> DouaPuncteDz {cons(\"DouaPuncte\")}\n");
 
 		sdf.append("\n");
+
+		sdf.append("context-free restrictions\n");
+		sdf.append("	DouaPuncteDz -/- [A-Z]\n\n");
 
 		sdf.append("lexical syntax\n");
 		for (Production p : psdfv.constants) {

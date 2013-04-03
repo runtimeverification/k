@@ -5,10 +5,11 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
+import org.kframework.parser.concrete.disambiguate.TypeCheckFilter;
 import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,14 +22,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(KApp kapp) throws TransformerException {
-		ASTNode t = internalTransform(kapp);
-		try {
-			
-			return t.accept(new TypeSystemFilter());
-		} catch (TransformerException e) {
-			//type error, so don't disambiguate
-			return t;
-		}
+		return internalTransform(kapp).accept(new TypeCheckFilter());
 	}
 
 	public ASTNode internalTransform(KApp kapp) throws TransformerException {
@@ -48,6 +42,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		} else if (label instanceof Constant) {
 			String klabel = ((Constant)label).getValue();
 			Set<String> conses = DefinitionHelper.labels.get(klabel);
+			Set<String> validConses = new HashSet<String>();
 			List<Term> contents = new ArrayList<Term>();
 			possibleTerms = new ArrayList<Term>();
 			if (child instanceof KList) {
@@ -61,20 +56,11 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				}
 				for (String cons : conses) {
 					Production p = DefinitionHelper.conses.get(cons);
-					List<Term> newContents = new ArrayList<Term>(contents);
 					if (p.getAttribute("reject") != null)
 						continue;
 					if (p.getArity() != contents.size())
 						continue;
-					for (int i = 0; i < contents.size(); i++) {
-						if (contents.get(i) instanceof KApp && ((KApp)contents.get(i)).getLabel() instanceof KInjectedLabel) {
-							KInjectedLabel l = (KInjectedLabel)((KApp)contents.get(i)).getLabel();
-							if (DefinitionHelper.isSubsortedEq(p.getChildSort(i), l.getTerm().getSort())) {
-								newContents.set(i, l.getTerm());
-							}
-						}
-					}
-					possibleTerms.add(new TermCons(p.getSort(), cons, newContents));
+					possibleTerms.add(new TermCons(p.getSort(), cons, contents));
 				}
 				if (possibleTerms.size() == 0) {
 					return super.transform(kapp);

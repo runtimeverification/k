@@ -229,8 +229,8 @@ course, including the types of the involved variables. */
 
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => (T E1;)::Stmt T E2, Es;       [macro]
-  rule T:Type X:Id = E; => (T X;)::Stmt X = E;                          [macro]
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
+  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
 endmodule
 
@@ -299,7 +299,7 @@ types are results (same like we did in the IMP++ tutorial). */
 // happens will be clearly marked.  Sorry for the inconvenience.  We will fix
 // it soon, when we allow arbitrary priorities to be declared in the tool.
 //
-  syntax Block ::= Type
+//  syntax Block ::= Type
   syntax KResult ::= Type
 
 /*@ \subsection{Configuration}
@@ -454,7 +454,7 @@ an integer in order to be allowed to be incremented, as seen in the
 rule ``\texttt{++ int => int}'' below. */
 
   context ++(HOLE => ltype(HOLE))
-  rule ++ int => int
+  rule ++ loc(int) => int
 
 /*@ \subsection{Common expression constructs}
 
@@ -481,11 +481,9 @@ The rules below are straightforward and self-explanatory: */
 
 Array access requires each index to type to an integer, and the
 array type to be at least as deep as the number of indexes: */
-// NOTE:
-// We used to need parentheses in the RHS, to avoid capturing Ts as rule tag.
-// Let's hope that is not a problem anymore.
+// need parentheses in the RHS, to avoid capturing Ts as rule tag
 
-  rule (T[])[int, Ts:Types] => T[Ts]
+  rule (T[])[int, Ts:Types] => (T[Ts])
   rule T[.Types] => T
 
 //@ \texttt{sizeOf} only needs to check that its argument is an array:
@@ -511,7 +509,7 @@ and, in that case, it must have the same type as the RHS, which then
 becomes the type of the assignment. */
 
   context (HOLE => ltype(HOLE)) = _
-  rule T:Type = T => T
+  rule loc(T:Type) = T => T
 
 /*@ \subsection{Function application and return}
 
@@ -555,8 +553,8 @@ exceptions can only have integer type. */
 // Parentheses needed around the \texttt{block} type, due to the fact
 // that the current parser does not allow us to subsort Type to Block.
 // Parentheses force the surrounded expression to type to whatever needed.
-  rule if (bool) block else block => stmt
-  rule while (bool) block => stmt
+  rule if (bool) (block) else (block) => stmt
+  rule while (bool) (block) => stmt
 
 /*@ \subsection{Exceptions}
 We currently force the parameters of exceptions to only be integers.
@@ -567,7 +565,7 @@ simplicity---expectation that the caller functions would catch those
 exceptions). */
 
 // had to put parentheses around block for the same reason as above.
-  rule try block catch(int X:Id) {S} => {(int X;)::Stmt S}  [structural]
+  rule try (block) catch(int X:Id) {S} => {int X; S}  [structural]
   rule throw int; => stmt
 
 /*@ \subsection{Concurrency}
@@ -584,7 +582,7 @@ exceptions which are not caught. */
   rule release _:Type; => stmt
   rule rendezvous _:Type; => stmt
 
-  rule (_:BlockOrStmtType)::Stmts (_:BlockOrStmtType)::Stmts => stmt
+  rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 
 //@ \section{Auxiliary constructs}
 
@@ -592,17 +590,21 @@ exceptions which are not caught. */
 list of variable declarations. */
 
   syntax Decl ::= mkDecls(Params)  [function]
-  rule mkDecls(T:Type X:Id, Ps:Params) => (T X;)::Stmt mkDecls(Ps)
+  rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
-/*@ The \texttt{ltype} context allows only expressions which have an
- lvalue to evaluate. */
-
-  syntax LValue ::= Id 
-  rule isLValue(_:Exp[_:Exps]) => true
+/*@ The function \texttt{ltype} behaves as a partial identity defined
+only on expressions which have an lvalue. */
 
   syntax Exp ::= ltype(Exp) 
-  context ltype(HOLE) when isLValue(HOLE)
+  rule ltype(X:Id) => loc(X)
+  rule ltype(E:Exp [Es:Exps]) => loc(E[Es])
+  rule loc(T:Type) => ltype(loc(T))
+
+  syntax Exp ::= loc(Exp) [strict]
+
+  rule isKResult(ltype(loc(T:Type))) => true
+
   
 
 //@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.

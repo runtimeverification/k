@@ -146,11 +146,11 @@ module IMP
        <condition> Phi:Bool => Phi andBool notBool B1 </condition> ...</T>
        when checkSat(Phi andBool notBool B1) ==K "sat" [transition]
 
-  rule <T> <k> if (B:Bool) S else _ => S ...</k>
+  rule <T> <k> if (B:Bool) S:Stmt else _ => S ...</k>
        <condition> Phi:Bool => Phi andBool B </condition> ...</T>
        when checkSat(Phi andBool B) ==K "sat" [transition]
 
-  rule <T> <k> if (B:Bool) _ else S => S ...</k>
+  rule <T> <k> if (B:Bool) _ else S:Stmt => S ...</k>
        <condition> Phi:Bool => Phi andBool notBool B </condition> ...</T>
        when checkSat(Phi andBool notBool B) ==K "sat" [transition]
 
@@ -187,12 +187,12 @@ module IMP
        when checkSat(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec)) ==K "sat"
 
 //@ While invariant
-  rule <k> while ( B:BExp ) invariant: Psi:Assert S:Block ~> K
+  rule <k> while ( B:BExp ) invariant: Psi:Assert S:Stmt ~> K
            =>
            assume(Psi and B) ~> S ~> match(A2M(Psi))
        </k>
        [transition]
-  rule <k> while ( B:BExp ) invariant: Psi:Assert _:Block
+  rule <k> while ( B:BExp ) invariant: Psi:Assert _:Stmt
            => match(A2M(Psi)) ~> assume(Psi and not B)
        ...</k>
        [transition]

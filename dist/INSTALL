@@ -5,7 +5,7 @@ To make sure java is installed properly, call "java" in a terminal.
 
 2. Install
 Unzip this directory in your preferred location.  For convenient usage,
-update your $PATH with <preferred-location>/k/bin.
+update pour $PATH with <preferred-location>/k/bin.
 
 3. Test
 Go to one of the examples (let's say k/examples/simple/untyped/).

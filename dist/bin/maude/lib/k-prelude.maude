@@ -11,8 +11,8 @@ mod K-TECHNIQUE is
 
   sorts KItem K .
   subsorts KItem < K .
-  op .K : -> K .
-  op _~>_ : K K -> K [prec 100  assoc id: .K metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
+  op . : -> K .
+  op _~>_ : K K -> K [prec 100  assoc id: . metadata "latex=(renameTo _\\ensuremath{\\kra}_)"] .
 
   sorts KList NeKList .
 
@@ -33,27 +33,27 @@ mod K-TECHNIQUE is
   sort ListItem List NeList .
   subsort ListItem < NeList < List .
   subsort ListItem < List .
-  op .List : -> List .
+  op . : -> List .
   op ListItem : K -> ListItem  [metadata "latex=(renameTo _)"] .
-  op __ : List List -> List [assoc id: .List] .
+  op __ : List List -> List [assoc id: .] .
   op __ : NeList List -> NeList [ditto] .
   op __ : List NeList -> NeList [ditto] .
   
   sort BagItem Bag NeBag .
   subsort BagItem < NeBag < Bag .
   subsort BagItem < Bag .
-  op .Bag : -> Bag .
+  op . : -> Bag .
   op BagItem : K -> BagItem [metadata "latex=(renameTo _)"] .
-  op __ : Bag Bag -> Bag [assoc comm id: .Bag] .
+  op __ : Bag Bag -> Bag [assoc comm id: .] .
   op __ : NeBag Bag -> NeBag [ditto] .
   op BagMapItem : K Bag -> BagItem .
 
   sort SetItem Set NeSet .
   subsort SetItem < NeSet < Set .
   subsort SetItem < Set .
-  op .Set : -> Set .
+  op . : -> Set .
   op SetItem : K -> SetItem [metadata "latex=(renameTo _)"] .
-  op __ : Set Set -> Set [assoc comm id: .Set] .
+  op __ : Set Set -> Set [assoc comm id: .] .
   op __ : NeSet Set -> NeSet [ditto] .
 
   eq SI:SetItem SI:SetItem = SI:SetItem .
@@ -61,9 +61,9 @@ mod K-TECHNIQUE is
   sort MapItem Map NeMap .
   subsort MapItem < NeMap < Map .
   subsort MapItem < Map .
-  op .Map : -> Map .
+  op . : -> Map .
   op _|->_ : K K -> MapItem [metadata "latex=(renameTo _\\ensuremath{\\mapsto}_)"] .
-  op __ : Map Map -> Map [assoc comm id: .Map prec 120] .
+  op __ : Map Map -> Map [assoc comm id: . prec 120] .
   op __ : NeMap Map -> NeMap [ditto] .
 
   sort CellLabel .

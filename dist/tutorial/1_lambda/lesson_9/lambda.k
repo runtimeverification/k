@@ -147,6 +147,6 @@ and faster to execute. */
 
   syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
                | "mu" Id "." Exp                  [binder, latex(\mu{#1}.{#2})]
-  rule letrec F:Id X:Id = E in E' => let F = mu F . lambda X . E in E' [macro]
+  rule letrec F:Id X :Id = E in E' => let F = mu F . lambda X . E in E' [macro]
   rule mu X . E => E[(mu X . E) / X]
 endmodule

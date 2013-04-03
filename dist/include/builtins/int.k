@@ -1,4 +1,4 @@
-require "k-equal.k"
+require "bool.k"
 module INT-SYNTAX-HOOKS
   imports #INT-INTERFACE
   syntax Int ::= #Int
@@ -7,7 +7,6 @@ endmodule
 module INT-HOOKS
   imports INT-SYNTAX-HOOKS 
   imports BOOL-HOOKS
-  imports K-EQUAL-HOOKS
 
   syntax Int ::= right:
                  "~Int" Int                     [function, right, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(#INT:~Int_)]
@@ -34,8 +33,8 @@ module INT-HOOKS
                  Int "xorInt" Int               [function, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(#INT:_xorInt_)]
                > left:
                  Int "|Int" Int                 [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(#INT:_|Int_)]
-               | "minInt" "(" Int "," Int ")"   [function]
-               | "maxInt" "(" Int "," Int ")"   [function]
+               | "minInt" "(" Int "," Int ")"   [function, hook(#INT:minInt)]
+               | "maxInt" "(" Int "," Int ")"   [function, hook(#INT:maxInt)]
                | "absInt" "(" Int ")"           [function, smtlib(abs), klabel(absInt), hook(#INT:absInt)]
 
   rule I1:#Int divInt I2:#Int => (I1 -Int (I1 modInt I2)) /Int I2
@@ -45,9 +44,6 @@ module INT-HOOKS
   =>
     ((I1 %Int absInt(I2)) +Int absInt(I2)) %Int absInt(I2)
   when I2 =/=Int 0
-
-  rule minInt(I1:Int, I2:Int) => #if I1 <Int I2 #then I1 #else I2 #fi
-  rule maxInt(I1:Int, I2:Int) => #if I1 >Int I2 #then I1 #else I2 #fi
 
   // absInt hooked
   // rule absInt(I:Int) => I when I >=Int 0

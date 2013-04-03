@@ -14,17 +14,12 @@ public class Variable extends Term {
 	private String name;
 	/** True if the variable was written with an explicit type annotation */
 	private boolean userTyped = false;
-	private boolean fresh = false;
 
 	public Variable(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.name = element.getAttribute(Constants.NAME_name_ATTR);
 		this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
-		if (this.name.startsWith("?")) {
-			this.setFresh(true);
-			this.name = this.name.substring(1);
-		}
 	}
 
 	public Variable(String name, String sort) {
@@ -35,7 +30,6 @@ public class Variable extends Term {
 	public Variable(Variable variable) {
 		super(variable);
 		name = variable.name;
-		fresh = variable.fresh;
 	}
 
 	public void setName(String name) {
@@ -60,10 +54,10 @@ public class Variable extends Term {
 		return visitor.transform(this);
 	}
 
-	@Override
-	public void accept(Matcher matcher, Term toMatch) {
-		matcher.match(this, toMatch);
-	}
+  @Override
+  public void accept(Matcher matcher, Term toMatch){
+    matcher.match(this, toMatch);
+  }
 
 	@Override
 	public boolean equals(Object obj) {
@@ -94,13 +88,5 @@ public class Variable extends Term {
 	@Override
 	public Variable shallowCopy() {
 		return new Variable(this);
-	}
-
-	public void setFresh(boolean fresh) {
-		this.fresh = fresh;
-	}
-
-	public boolean isFresh() {
-		return fresh;
 	}
 }

@@ -68,6 +68,7 @@ public class Poset {
 	 *
 	 */
 	public String getLUB(List<String> subset){
+		boolean foo = false;
 		List<String> candidates = new ArrayList<String>();
 		for(String elem : elements){
 			boolean isGTESubset = true;
@@ -89,41 +90,6 @@ public class Poset {
 			} 
 		}
 		return lub;
-	}
-
-	/**
-	 * finds the greatest lower bound of a subset of 
-	 * the elements of 
-	 *
-	 * returns null if none exists
-	 *
-	 * assumes that all elements in subset are actually elements of the Poset
-	 *
-	 * also assumes that the Poset is actually a Poset (transitively closed)
-	 *
-	 */
-	public String getGLB(List<String> subset){
-		List<String> candidates = new ArrayList<String>();
-		for(String elem : elements){
-			boolean isLTESubset = true;
-			for(String subsetElem : subset){
-				if(!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
-					isLTESubset = false;
-					break;
-				} 
-			}
-			if(isLTESubset){
-				candidates.add(elem);
-			}
-		}
-		if(candidates.size() == 0) return null;
-		String glb = candidates.get(0);
-		for(int i = 1; i < candidates.size(); ++i){
-			if(isInRelation(candidates.get(i), glb)){
-				glb = candidates.get(i);
-			} 
-		}
-		return glb;
 	}
 
 	private class Tuple {

@@ -25,7 +25,7 @@ module QUOTE-UNQUOTE
   rule <k>quote K:K => mQuote(K,0) ...</k>
   rule quoteit[N](quote(K)) => visitedL('quote_)(mQuote(K,N +Int 1)) 
   rule quoteit[0](unquote(K)) => K 
-  rule quoteit[N](unquote(K)) => visitedL('unquote_)(mQuote(K,N -Int 1))  
+  rule quoteit[N:Nat](unquote(K)) => visitedL('unquote_)(mQuote(K,N -Int 1))  
     when (N >Int 0) 
 
   rule lift V:KResult => visitedK(V) 

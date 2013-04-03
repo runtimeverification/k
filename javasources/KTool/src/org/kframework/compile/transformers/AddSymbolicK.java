@@ -33,10 +33,6 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
             return SymbolicConstructorPrefix + sort;
 	}
 
-    public static final boolean isSymbolicConstructor(String sort) {
-        return sort.startsWith(SymbolicConstructorPrefix);
-    }
-
     public static final Production getSymbolicProduction(String sort) {
         assert allowSymbolic(sort);
 

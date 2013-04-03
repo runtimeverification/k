@@ -15,7 +15,6 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CheckBinaryPrecedenceFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
@@ -72,7 +71,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 					IStrategoTerm parsed = org.kframework.parser.concrete.KParser.ParseKConfigStringAst(ss.getContent());
 					config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
 				}
-
+				
 				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation()).check(config);
 				// disambiguate configs
 				config = config.accept(new SentenceVariablesFilter());
@@ -81,7 +80,6 @@ public class ParseConfigsFilter extends BasicTransformer {
 				// config = config.accept(new CellTypesFilter()); not the case on configs
 				// config = config.accept(new CorrectRewritePriorityFilter());
 				config = config.accept(new CorrectKSeqFilter());
-				config = config.accept(new CorrectCastPriorityFilter());
 				config = config.accept(new CheckBinaryPrecedenceFilter());
 				config = config.accept(new VariableTypeInferenceFilter());
 				config = config.accept(new AmbDuplicateFilter());

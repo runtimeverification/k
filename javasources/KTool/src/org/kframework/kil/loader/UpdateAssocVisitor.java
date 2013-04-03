@@ -3,7 +3,6 @@ package org.kframework.kil.loader;
 import java.util.Set;
 
 import org.kframework.kil.Constant;
-import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -18,19 +17,9 @@ public class UpdateAssocVisitor extends BasicVisitor {
 		for (Constant c : pri.getTags()) {
 			Set<Production> prods = SDFHelper.getProductionsForTag(c.getValue());
 			for (Production p : prods) {
-				DefinitionHelper.putAssoc(p.getCons(), prods);
 				if (!p.getAttributes().containsKey("left") && !p.getAttributes().containsKey("right") && !p.getAttributes().containsKey("non-assoc")) {
 					p.addAttribute(pri.getAssoc(), "");
 				}
-			}
-		}
-	}
-
-	@Override
-	public void visit(PriorityBlock pri) {
-		if (!pri.getAssoc().equals("")) {
-			for (Production p : pri.getProductions()) {
-				DefinitionHelper.putAssoc(p.getCons(), pri.getProductions());
 			}
 		}
 	}

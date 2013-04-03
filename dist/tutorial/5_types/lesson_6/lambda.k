@@ -17,7 +17,7 @@ module LAMBDA
                | "mu" Id "." Exp
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type                  [strict]
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type

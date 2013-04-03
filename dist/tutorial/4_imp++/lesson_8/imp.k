@@ -396,7 +396,6 @@ all behaviors.  The second rule is structural because we do not want it to
 count as a computational step. */
 
   syntax Printable ::= Int | String
-  syntax AExp ::= Printable
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <out>... . => ListItem(P) </out>  [print]
   rule print(.AExps); => .  [structural]

@@ -264,7 +264,7 @@ we can desugar the \texttt{try-catch} construct into callcc: */
 
   rule try E catch(X) E'
     => callcc (fun $k -> (fun throw -> E)
-                         (fun $v -> $k ((fun (X)::Id -> E') $v)))  [macro]
+                         (fun $v -> $k ((fun X -> E') $v)))  [macro]
 endmodule
 
 

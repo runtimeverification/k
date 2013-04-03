@@ -160,10 +160,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 								} else {
 									// if this sort should be inserted to avoid the priority filter, then add it to the list
 									insertSorts.add(srt.getName());
-									String tempstr = srt.getName();
-									if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
-										tempstr = "Bag";
-									sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+									sdf.append("InsertDz" + StringUtil.escapeSortName(srt.getName()) + " ");
 								}
 							}
 						}

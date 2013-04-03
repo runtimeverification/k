@@ -10,7 +10,6 @@ import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
 import org.kframework.backend.doc.DocumentationBackend;
 import org.kframework.backend.html.HtmlBackend;
-//import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
 import org.kframework.backend.kil.KExpBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
@@ -23,7 +22,6 @@ import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -31,6 +29,9 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
 
 public class KompileFrontEnd {
 
@@ -62,8 +63,7 @@ public class KompileFrontEnd {
         GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
         GlobalSettings.SMT = cmd.hasOption("smt");
         GlobalSettings.matchingLogic = cmd.hasOption("ml");
-        GlobalSettings.NOSMT = cmd.hasOption("nosmt");
-        
+
 		// set verbose
 		if (cmd.hasOption("verbose"))
 			GlobalSettings.verbose = true;
@@ -152,6 +152,7 @@ public class KompileFrontEnd {
 		// Matching Logic & Symbolic Calculus options
 		GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
 		GlobalSettings.SMT = cmd.hasOption("smt");
+		GlobalSettings.matchingLogic = cmd.hasOption("ml");
 		
 		if (DefinitionHelper.dotk == null) {
 			try {
@@ -200,10 +201,7 @@ public class KompileFrontEnd {
 			DefinitionHelper.dotk = new File(output);
 			DefinitionHelper.dotk.mkdirs();
 
-		} else if (cmd.hasOption("ml")) {
-            GlobalSettings.matchingLogic = true;
-//            backend = new JavaSymbolicBackend(Stopwatch.sw);
-        } else {
+		} else {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
@@ -248,8 +246,10 @@ public class KompileFrontEnd {
 			} catch (CompilerStepDone e) {
 				javaDef = (Definition) e.getResult();
 			}
+			XStream xstream = new XStream(new BinaryStreamDriver());
+			xstream.aliasPackage("k", "org.kframework.kil");
 
-			BinaryLoader.toBinary(MetaK.getConfiguration(javaDef), new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/configuration.bin"));
+			xstream.toXML(MetaK.getConfiguration(javaDef), new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/configuration.bin"));
 
 			backend.run(javaDef);
 		} catch (IOException e) {

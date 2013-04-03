@@ -27,7 +27,6 @@ public class Constants {
 	public static final String LEFT = "left";
 	public static final String TERM = "term";
 	public static final String BRACKET = "bracket";
-	public static final String CAST = "cast";
 	public static final String VAR = "var";
 	public static final String RIGHT = "right";
 	public static final String TERMINAL = "terminal";
@@ -89,13 +88,6 @@ public class Constants {
 	public static final String KLABEL = "KLabel";
 	public static final String PREDEFINED = "predefined";
 	public static final String BREAK = "br";
-    public static final String MACRO = "macro";
-    public static final String STRUCTURAL = "structural";
-    public static final String FUNCTION = "function";
-
-    // Streams
-    public static final String STDIN = "stdin";
-    public static final String STDOUT = "stdout";
 
 	// Generated stuff
 	public static final String GENERATED_FILENAME = "File System";

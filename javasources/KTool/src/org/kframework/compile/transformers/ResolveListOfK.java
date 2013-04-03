@@ -14,7 +14,6 @@ import org.kframework.utils.general.GlobalSettings;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-/* TODO: andrei adds javadoc */
 public class ResolveListOfK extends CopyOnWriteTransformer {
 
 	public ResolveListOfK() {

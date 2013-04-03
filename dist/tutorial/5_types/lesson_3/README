@@ -30,11 +30,10 @@ The type environment is populated by the semantic rule of lambda:
        <tenv> Rho => Rho[T/X] </tenv>
 
 So X is bound to its type T in the type environment, and then "T -> E"
-is scheduled for processing.  Recall that the arrow type construct has been
-extended into a strict expression construct, so E will be eventually reduced
-to its type.  Like in other environment-based definitions, we need to make
-sure that we recover the type environment after the computation in the scope
-of the declared variable terminates.
+is scheduled for processing.  Recall that the arrow type is strict, so
+E will be eventually reduced to its type.  Like in other environment-based
+definitions, we need to make sure that we recover the type environment after
+the computation in the scope of the declared variable terminates.
 
 The typing rule of application does not change, so it stays as elegant as it
 was in the substitution-based definition:

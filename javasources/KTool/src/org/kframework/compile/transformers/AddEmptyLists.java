@@ -70,7 +70,7 @@ public class AddEmptyLists extends BasicTransformer {
 		return super.transform(tc);
 	}
 
-	public static boolean isAddEmptyList(String expectedSort, String termSort) {
+	private static boolean isAddEmptyList(String expectedSort, String termSort) {
 		// if (termSort.equals("K"))
 		// return false;
 		if (!DefinitionHelper.isListSort(expectedSort))

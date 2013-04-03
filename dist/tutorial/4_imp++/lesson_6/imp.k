@@ -82,7 +82,6 @@ module IMP
   rule int .Ids; => .  [structural]
 
   syntax Printable ::= Int | String
-  syntax AExp ::= Printable
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <out>... . => ListItem(P) </out>  [print]
   rule print(.AExps); => .  [structural]

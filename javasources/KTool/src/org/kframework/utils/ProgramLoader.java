@@ -1,17 +1,16 @@
 package org.kframework.utils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
+import org.kframework.backend.maude.MaudeFilter;
+import org.kframework.backend.unparser.IndentationOptions;
+import org.kframework.backend.unparser.KastFilter;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -25,6 +24,9 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.binary.BinaryStreamDriver;
 
 public class ProgramLoader {
 
@@ -78,6 +80,10 @@ public class ProgramLoader {
 		return loadPgmAst(content, filename, kappize, startSymbol);
 	}
 
+	public static String processPgm(String content, String filename, Definition def, String startSymbol) {
+		return processPgm(content, filename, def, false, false, new IndentationOptions(), startSymbol);
+	}
+
 	/**
 	 * Print maudified program to standard output.
 	 * 
@@ -87,7 +93,7 @@ public class ProgramLoader {
 	 * @param prettyPrint
 	 * @param nextline
 	 */
-	public static Term processPgm(String content, String filename, Definition def, String startSymbol) {
+	public static String processPgm(String content, String filename, Definition def, boolean prettyPrint, boolean nextline, IndentationOptions indentationOptions, String startSymbol) {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -104,10 +110,13 @@ public class ProgramLoader {
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {
 				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 				out = DefinitionLoader.parsePattern(content, filename);
-				out = new RuleCompilerSteps(def).compile((Rule) out, null);
-				out = ((Rule)out).getBody();
+				out = out.accept(new AddEmptyLists());
+				out = out.accept(new FlattenSyntax());
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.BINARY) {
-				out = (org.kframework.kil.Cell) BinaryLoader.fromBinary(new FileInputStream(filename));
+				XStream xstream = new XStream(new BinaryStreamDriver());
+				xstream.aliasPackage("k", "org.kframework.kil");
+				
+				out = (org.kframework.kil.Cell) xstream.fromXML(new File(filename));
 			} else {
 				out = loadPgmAst(content, filename, startSymbol);
 			}
@@ -115,11 +124,28 @@ public class ProgramLoader {
 				sw.printIntermediate("Parsing Program");
 			}
 
-			return (Term) out;
+			String kast;
+			if (prettyPrint) {
+				KastFilter kastFilter = new KastFilter(indentationOptions, nextline);
+				out.accept(kastFilter);
+				kast = kastFilter.getResult();
+			} else {
+				MaudeFilter maudeFilter = new MaudeFilter();
+				out.accept(maudeFilter);
+				kast = maudeFilter.getResult();
+			}
+
+			writeMaudifiedPgm(kast);
+
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Maudify Program");
+				sw.printTotal("Total");
+			}
+			return kast;
 		} catch (Exception e) {
 			e.printStackTrace();
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename, "File system."));
-			return null;
+			return "";
 		}
 	}
 
@@ -131,7 +157,7 @@ public class ProgramLoader {
 		ast = "load main.maude\n";
 		ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.KList)) , (\n\n";
 		ast += kast;
-		ast += "\n\n))),.Map))  .\n quit\n";
+		ast += "\n\n))),(.).Map))  .\n quit\n";
 
 		FileUtil.saveInFile(DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.maude", ast);
 	}

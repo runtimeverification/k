@@ -109,7 +109,7 @@ The initial semantics of IMP.
 but cell <goal>. 
 */
   rule <goal>
-         <k> if (B:Bool) S:Block else S':Block ~> K </k>
+         <k> if (B:Bool) S:Stmt else S':Stmt ~> K </k>
          <condition> Phi:Bool </condition> 
          <ruleConstraints> L </ruleConstraints>
          Cfg:Bag 
@@ -130,12 +130,12 @@ but cell <goal>.
        when checkSat(Phi andBool B) =/=K "unsat"
        	    andBool checkSat(Phi andBool notBool B) =/=K "unsat" [transition, computational]
 
-  rule <k> if (B:Bool) _ else S => S ...</k>
+  rule <k> if (B:Bool) _ else S:Stmt => S ...</k>
        <condition> Phi:Bool </condition>
        <ruleConstraints> _ => #any </ruleConstraints>
        when checkSat(Phi andBool B) ==K "unsat" [transition, computational]
 
-  rule <k> if (B:Bool) S else _ => S ...</k>
+  rule <k> if (B:Bool) S:Stmt else _ => S ...</k>
        <condition> Phi:Bool </condition>
        <ruleConstraints> _ => #any </ruleConstraints>
        when checkSat(Phi andBool notBool B) ==K "unsat" [transition, computational]
