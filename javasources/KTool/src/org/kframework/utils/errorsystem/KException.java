@@ -62,4 +62,60 @@ public class KException {
 			+ (compilationPhase == null ? "" : "\n\tCompilation Phase: " + compilationPhase);
 		
 	}
+
+	public ExceptionType getType() {
+		return type;
+	}
+
+	public void setType(ExceptionType type) {
+		this.type = type;
+	}
+
+	public KExceptionGroup getExceptionGroup() {
+		return exceptionGroup;
+	}
+
+	public void setExceptionGroup(KExceptionGroup exceptionGroup) {
+		this.exceptionGroup = exceptionGroup;
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public String getCompilationPhase() {
+		return compilationPhase;
+	}
+
+	public void setCompilationPhase(String compilationPhase) {
+		this.compilationPhase = compilationPhase;
+	}
 }

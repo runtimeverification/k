@@ -23,4 +23,8 @@ public class TransformerException extends Exception {
 	public void report() {
 		GlobalSettings.kem.register(exception);
 	}
+
+	public String getMessage() {
+		return exception.getMessage();
+	}
 }

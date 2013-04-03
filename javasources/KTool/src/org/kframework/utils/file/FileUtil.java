@@ -81,7 +81,6 @@ public class FileUtil {
 			try {
 				copyFile(file.getCanonicalPath(), parentFile.getCanonicalPath() + File.separator + file.getName());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

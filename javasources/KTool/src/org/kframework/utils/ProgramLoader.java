@@ -105,7 +105,7 @@ public class ProgramLoader {
 				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 				out = DefinitionLoader.parsePattern(content, filename);
 				out = new RuleCompilerSteps(def).compile((Rule) out, null);
-				out = ((Rule)out).getBody();
+				out = ((Rule) out).getBody();
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.BINARY) {
 				out = (org.kframework.kil.Cell) BinaryLoader.fromBinary(new FileInputStream(filename));
 			} else {
@@ -121,18 +121,5 @@ public class ProgramLoader {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename, "File system."));
 			return null;
 		}
-	}
-
-	/**
-	 * Store maudified AST of K program under `pgm.maude` in kompiled directory. `pgm.maude` will also load language definition from `LANGUAGE-compiled.maude` in parent directory.
-	 */
-	private static void writeMaudifiedPgm(String kast) {
-		String ast;
-		ast = "load main.maude\n";
-		ast += "set show command off .\n erewrite #eval(__((_|->_((# \"$PGM\"(.KList)) , (\n\n";
-		ast += kast;
-		ast += "\n\n))),.Map))  .\n quit\n";
-
-		FileUtil.saveInFile(DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.maude", ast);
 	}
 }

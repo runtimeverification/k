@@ -20,8 +20,6 @@ context-free priorities
 context-free syntax
 	KLabel "(" KList ")"-> K {cons("K1App")}
 	K					-> KList %%{cons("ListOfK3K")}
-	"HOLE"				-> K {cons("K1Hole")}
-	"HOLE" ":" "K"		-> K {cons("K12Hole")}
 	"(" KList ")"		-> KList {cons("KList1Bracket")}
 	"(" K ")"			-> K {cons("K1Bracket")}
 	"(" KLabel ")"		-> KLabel {cons("KLabel1Bracket")}

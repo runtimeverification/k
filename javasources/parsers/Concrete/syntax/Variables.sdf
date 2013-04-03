@@ -47,6 +47,9 @@ context-free syntax
 	BagVarDz		-> Bag
 	BagItemVarDz	-> BagItem
 
+	"HOLE"			-> K {cons("K1Hole")}
+	"HOLE" ":" "K"	-> K {cons("K12Hole")}
+
 
 lexical syntax
 	%% Variables and the Anonymous Variable

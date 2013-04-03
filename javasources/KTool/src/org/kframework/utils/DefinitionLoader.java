@@ -157,8 +157,8 @@ public class DefinitionLoader {
 				Stopwatch.sw.printIntermediate("Checks");
 
 			// ------------------------------------- generate files
-			ResourceExtractor.ExtractAllSDF(new File(DefinitionHelper.dotk + "/def"));
-			ResourceExtractor.ExtractAllSDF(new File(DefinitionHelper.dotk + "/ground"));
+			ResourceExtractor.ExtractDefSDF(new File(DefinitionHelper.dotk + "/def"));
+			ResourceExtractor.ExtractGroundSDF(new File(DefinitionHelper.dotk + "/ground"));
 
 			ResourceExtractor.ExtractProgramSDF(new File(DefinitionHelper.dotk + "/pgm"));
 
@@ -279,7 +279,7 @@ public class DefinitionLoader {
 			// last resort disambiguation
 			config = config.accept(new AmbFilter());
 		} catch (TransformerException e) {
-			String msg = "Cannot parse command line argument: " + e.getLocalizedMessage();
+			String msg = "Cannot parse command line argument: " + e.getMessage();
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, config.getFilename(), config.getLocation()));
 		}
 
