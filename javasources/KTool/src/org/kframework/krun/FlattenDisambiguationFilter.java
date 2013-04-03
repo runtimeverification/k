@@ -6,9 +6,6 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 	public FlattenDisambiguationFilter() {
 		super("Reflatten ambiguous syntax");

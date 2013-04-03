@@ -137,8 +137,8 @@ public class FileUtil {
 		boolean bSucceeded = false;
 		
 		if (srcFile.exists()) {
-			File lockFile = new File(K.kdir + K.fileSeparator + "krun.lock");
-			FileChannel channel = new RandomAccessFile(lockFile, "rw").getChannel();
+			RandomAccessFile lockFile = new RandomAccessFile(new File(K.kdir + K.fileSeparator + "krun.lock"),"rw");
+			FileChannel channel = lockFile.getChannel();
 			FileLock lock = channel.lock();
 
 			try {
@@ -161,7 +161,7 @@ public class FileUtil {
 				}
 			}
 			lock.release();
-			channel.close();
+			lockFile.close();
 		}
 	}
 

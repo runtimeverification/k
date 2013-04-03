@@ -84,6 +84,7 @@ public class K {
 	public static boolean parens = true;
 	public static boolean log_io = false;
 	public static boolean debug = false;
+	public static boolean guidebug = false;
 	public static boolean trace = false;
 	public static boolean profile = false;
 	//don't delete temp folders created by krun by default
@@ -98,4 +99,6 @@ public class K {
 
 	public static int counter = 0;
 	public static int stateCounter = 0;
+
+	public static String backend = "maude";
 }

@@ -33,7 +33,7 @@ public class CommandlineOptions {
     	options = new Options();
 		help = new HelpFormatter();
 		
-		if (K.debug) {
+		if (K.debug || K.guidebug) {
 			initializeDebugOptions();
 		}
 		else {
@@ -147,12 +147,14 @@ public class CommandlineOptions {
 		
 		// for debugger
 	    Option debug = OptionBuilder.hasArg(false).withLongOpt("debug").withDescription("Run an execution in debug mode").create();
+	    Option guiDebug = OptionBuilder.hasArg(false).withLongOpt("debug-gui").withDescription("Run an execution in debug mode with graphical interface").create();
 		Option trace = OptionBuilder.hasArg(false).withLongOpt("trace").withDescription("Turn on maude trace").create();
 		Option profile = OptionBuilder.hasArg(false).withLongOpt("profile").withDescription("Turn on maude profiler").create();
 		options.addOption(trace); getOptionList().add(trace);
 		options.addOption(profile); getOptionList().add(profile);
 
 		options.addOption(debug); getOptionList().add(debug);
+		options.addOption(guiDebug); getOptionList().add(guiDebug);
 		//options.addOption(trace); getOptionList().add(trace);
 		
 		//for LTL model-checking
@@ -162,6 +164,9 @@ public class CommandlineOptions {
 		//for configuration variables
 		Option configuration_variables = OptionBuilder.withArgName("name=value").hasArgs(2).withValueSeparator().withDescription("Specify values for variables in the configuration").create("c");
 		options.addOption(configuration_variables); getOptionList().add(configuration_variables);
+
+		Option backend = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("backend").withDescription("Specify the krun backend to execute with").create();
+		options.addOption(backend); getOptionList().add(backend);
 
 	}
 	

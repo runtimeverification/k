@@ -2,6 +2,8 @@ package org.kframework.krun;
 
 import org.kframework.krun.tasks.MaudeTask;
 import org.kframework.utils.ProgramLoader;
+import org.kframework.kil.BackendTerm;
+import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 
 import java.io.File;
@@ -86,7 +88,7 @@ public class RunProcess {
 	/*
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
 	 */
-	public String runParser(String parser, String pgm, boolean isPgm, String startSymbol) {
+	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol) {
 		String KAST = new String();
 		String parserPath = new String();
 
@@ -157,7 +159,7 @@ public class RunProcess {
 		if (this.getStdout() != null) {
 			KAST = this.getStdout();
 		}
-		return KAST;
+		return new BackendTerm("", KAST); //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
 	}
 
 	// run the Maude process by specifying the command to execute, the output file and the error file
