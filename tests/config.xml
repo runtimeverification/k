@@ -286,22 +286,23 @@
   KOOL
 -->
 
-  <test 
+  <test
       language="dist/examples/kool/untyped/kool-untyped.k"
       folder="dist/examples/kool/untyped/programs"
       extensions="kool"
       results="tests/examples/kool-untyped"
       />
-  <test 
+  <test
       language="dist/examples/kool/typed/dynamic/kool-typed-dynamic.k"
       folder="dist/examples/kool/typed/programs"
       extensions="kool"
       results="tests/examples/kool-typed-dynamic"
       />
-  <test 
+  <test
       language="dist/examples/kool/typed/static/kool-typed-static.k"
       folder="dist/examples/kool/typed/static/programs"
       extensions="kool"
+      results="tests/examples/kool-typed-static"
       />
 
 <!--

@@ -361,9 +361,22 @@ typed SIMPLE, so we do not discuss them much here. */
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
-  syntax Exp ::= ltype(Exp)  [function]
-  rule ltype(X:Id) => X
-  rule ltype(E:Exp [Es:Exps]) => E[Es]
+// We would like to say the following instead of the predicate rule below:
+//  syntax LValue ::= Id | Exp "[" Exps "]"
+// but unfortunately that currently generates some ambiguous parsings.
+  syntax LValue ::= Id
+  rule isLValue(_:Exp[_:Exps]) => true
+
+  syntax Exp ::= ltype(Exp)
+// We would like to say:
+//  context ltype(HOLE:LValue)
+// but we currently cannot type the HOLE
+  context ltype(HOLE) when isLValue(HOLE)
+  
+// OLD approach:
+//  syntax Exp ::= ltype(Exp)  [function]
+//  rule ltype(X:Id) => X
+//  rule ltype(E:Exp [Es:Exps]) => E[Es]
 
   syntax Types ::= getTypes(Params)  [function]
   rule getTypes(T:Type _:Id) => T, .Types
@@ -645,7 +658,13 @@ wait.  Finally, the sixth rule below reports an error when the
        <tenv> Rho </tenv>
     when notBool(X in keys(Rho))
 
-  rule ltype(E:Exp . X:Id) => E . X  [structural]
+// We would like to say the following instead of the predicate rule below:
+//  syntax LValue ::= Exp "." Id
+// but unfortunately that currently generates some ambiguous parsings.
+  rule isLValue(_:Exp . _:Id) => true
+
+// OLD approach:
+//  rule ltype(E:Exp . X:Id) => E . X  [structural]
 
   rule <k> class(C:Id) . X:Id => T ...</k>
        <className> C </className>
