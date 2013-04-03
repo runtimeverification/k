@@ -34,6 +34,7 @@ public class Test {
 	private Document doc;
 	public Element report;
 	private List<Program> programs;
+	private String reportDir = null;
 
 	public Test(Element test) {
 		init(test);
@@ -209,6 +210,12 @@ public class Test {
 		if (resultsFolder.equals(""))
 			resultsFolder = null;
 
+		// get tests results
+		reportDir = test.getAttribute("report-dir");
+		if (reportDir.equals(""))
+			reportDir = null;
+
+		
 		// get pdf
 		if (test.getAttribute("pdf").equals("yes")
 				|| test.getAttribute("pdf").equals(""))
@@ -296,8 +303,13 @@ public class Test {
 
 	private Element getInitialElement(String definition) {
 		Element testsuite = doc.createElement("testsuite");
-		testsuite.setAttribute("name", new File(language).getParent()
-				.substring(Configuration.getHome().length()));
+		String name = "";
+		if (reportDir != null)
+			name = reportDir;
+		else name = new File(language).getParent()
+				.substring(Configuration.getHome().length());
+		
+		testsuite.setAttribute("name", name);
 		return testsuite;
 	}
 
@@ -381,6 +393,9 @@ public class Test {
 	}
 	
 	private String getReportFilename() {
+		if (reportDir  != null)
+			return reportDir + "-report.xml";
+		
 		return new File(language).getAbsolutePath()
 				.substring(Configuration.getHome().length())
 				.replaceAll(Configuration.FS, ".")

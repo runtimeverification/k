@@ -5,54 +5,78 @@ imports KBuiltinsBasic
 
 exports
 context-free syntax
-	%% TODO: Variables Dunno what to do with the variables
-	%% VarId ":" Type		-> Variable {cons("TypedVar")}
-	VARID ":" "List"		-> List {cons("List12Var")}
-	VARID					-> List {cons("List1Var")}
-	VARID ":" "ListItem"	-> ListItem {cons("ListItem12Var")}
-	VARID					-> ListItem {cons("ListItem1Var")}
-	VARID ":" "Set"			-> Set {cons("Set12Var")}
-	VARID					-> Set {cons("Set1Var")}
-	VARID ":" "SetItem"		-> SetItem {cons("SetItem12Var")}
-	VARID					-> SetItem {cons("SetItem1Var")}
-	VARID ":" "Bag"			-> Bag {cons("Bag12Var")}
-	VARID					-> Bag {cons("Bag1Var")}
-	VARID ":" "BagItem"		-> BagItem {cons("BagItem12Var")}
-	VARID					-> BagItem {cons("BagItem1Var")}
-	VARID ":" "Map"			-> Map {cons("Map12Var")}
-	VARID					-> Map {cons("Map1Var")}
-	VARID ":" "MapItem"		-> MapItem {cons("MapItem12Var")}
-	VARID					-> MapItem {cons("MapItem1Var")}
-	VARID ":" "K"			-> K {cons("K12Var")}
-	VARID					-> K {cons("K1Var")}
-	VARID ":" "List{K}"		-> KList {cons("ListDlKDr12Var")}
-	VARID ":" "KList"		-> KList {cons("KList12Var")}
-	VARID					-> KList {cons("KList1Var")}
-	VARID ":" "KLabel"		-> KLabel {cons("KLabel12Var")}
-	VARID					-> KLabel {cons("KLabel1Var")}
-	VARID ":" "KResult"		-> K {cons("KResult12Var")}
+	VARID ":List"		-> ListVarDz {cons("List12Var")}
+	VARIDz				-> List {cons("List1Var")}
+	VARID ":ListItem"	-> ListItemVarDz {cons("ListItem12Var")}
+	VARIDz				-> ListItem {cons("ListItem1Var")}
+	VARID ":Set"		-> SetVarDz {cons("Set12Var")}
+	VARIDz				-> Set {cons("Set1Var")}
+	VARID ":SetItem"	-> SetItemVarDz {cons("SetItem12Var")}
+	VARIDz				-> SetItem {cons("SetItem1Var")}
+	VARID ":Bag"		-> BagVarDz {cons("Bag12Var")}
+	VARIDz				-> Bag {cons("Bag1Var")}
+	VARID ":BagItem"	-> BagItemVarDz {cons("BagItem12Var")}
+	VARIDz				-> BagItem {cons("BagItem1Var")}
+	VARID ":Map"		-> MapVarDz {cons("Map12Var")}
+	VARIDz				-> Map {cons("Map1Var")}
+	VARID ":MapItem"	-> MapItemVarDz {cons("MapItem12Var")}
+	VARIDz				-> MapItem {cons("MapItem1Var")}
+	VARID ":K"			-> KVarDz {cons("K12Var")}
+	VARIDz				-> K {cons("K1Var")}
+	VARID ":List{K}"	-> KListVarDz {cons("ListDlKDr12Var")}
+	VARID ":KList"		-> KListVarDz {cons("KList12Var")}
+	VARIDz				-> KList {cons("KList1Var")}
+	VARID ":KLabel"		-> KLabelVarDz {cons("KLabel12Var")}
+	VARIDz				-> KLabel {cons("KLabel1Var")}
+	VARID ":KResult"	-> KVarDz {cons("KResult12Var")}
+
+
+	":" -> ColonDz {cons("Colon")}
+	"?" -> QuestionMarkDz {cons("QuestionMark")} 
+	VARID -> VARIDz %% in order to put the follow restriction
+
+	ListVarDz		-> List
+	ListItemVarDz	-> ListItem
+	MapVarDz		-> Map
+	MapItemVarDz	-> MapItem
+	SetVarDz		-> Set
+	SetItemVarDz	-> SetItem
+	KVarDz			-> K
+	KListVarDz		-> KList
+	KLabelVarDz		-> KLabel
+	BagVarDz		-> Bag
+	BagItemVarDz	-> BagItem
+
 
 lexical syntax
 	%% Variables and the Anonymous Variable
-	"$"?[A-Z] [a-zA-Z0-9\']*  -> VARID
+	("$"|"?")?[A-Z] [a-zA-Z0-9\']*  -> VARID
 	"_" -> VARID
 	"HOLE" -> VARID {reject}
 
-	%% rejects
-	%%"K"			-> ID {reject}
-	%%"List"		-> ID {reject}
+	%% because of the constructors SetItem, BagItem... that can be confused with KApp
 	"ListItem"		-> VARID {reject}
-	%%"Bag"			-> ID {reject}
 	"BagItem"		-> VARID {reject}
-	%%"Set"			-> ID {reject}
 	"SetItem"		-> VARID {reject}
-	%%"Map"			-> ID {reject}
 	"MapItem"		-> VARID {reject}
-	%%"keys"			-> ID {reject}
-	%%"hasMapping"	-> ID {reject}
+
+context-free restrictions
+	ColonDz -/- [A-Z] 
+	QuestionMarkDz -/- [A-Z]
+	VARIDz -/- [\:].[\#A-Z]
+
+	ListVarDz		-/- [a-zA-Z0-9\{]
+	ListItemVarDz	-/- [a-zA-Z0-9\{]
+	KVarDz			-/- [a-zA-Z0-9\{]
+	KListVarDz		-/- [a-zA-Z0-9\{]
+	BagVarDz		-/- [a-zA-Z0-9\{]
+	BagItemVarDz	-/- [a-zA-Z0-9\{]
+	SetVarDz		-/- [a-zA-Z0-9\{]
+	SetItemVarDz	-/- [a-zA-Z0-9\{]
+	MapVarDz		-/- [a-zA-Z0-9\{]
+	MapItemVarDz	-/- [a-zA-Z0-9\{]
+	KLabelVarDz		-/- [a-zA-Z0-9\{]
 
 lexical restrictions
 	VARID -/- [a-zA-Z0-9\']
 
-	
-	

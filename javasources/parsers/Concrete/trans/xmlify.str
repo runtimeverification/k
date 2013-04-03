@@ -24,6 +24,11 @@ rules
 
 	// print the K definition as an XML - parsing only the syntax
 	to-xml1:
+		"Colon"#(_) -> $[]
+	to-xml1:
+		"QuestionMark"#(_) -> $[]
+
+	to-xml1:
 		Config(x1) -> $[<config loc="[loc]">
 			<body>
 				[<to-xml> x1]
@@ -199,6 +204,28 @@ rules
 		]
 		where <string-ends-with(|"Empty")> a
 		where mydebug(!"Empty: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(b) -> $[<cast sort="[sort]" loc="[loc]" syntactic="false">
+					[children]
+		</cast>
+		]
+		where <string-ends-with(|"1Cast")> a
+		where mydebug(!"1Cast: ")
+		where children := <all(to-xml)> b
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(b) -> $[<cast sort="[sort]" loc="[loc]" syntactic="true">
+					[children]
+		</cast>
+		]
+		where <string-ends-with(|"12Cast")> a
+		where mydebug(!"12Cast: ")
+		where children := <all(to-xml)> b
 		where sort := <getSort> a
 		where loc := <getLocAsString>
 
