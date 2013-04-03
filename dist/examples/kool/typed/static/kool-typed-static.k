@@ -73,7 +73,9 @@ want each to type its arguments almost all the time.  Like in the
 other two KOOL definitions, we prefer to copy and then modify/extend
 the syntax of statically typed SIMPLE. */
 
-/*@
+/* Note: This paragraph is old, now we can do things better.  We keep
+it here only for historical reasons, to see how much we used to suffer :)
+ 
 \paragraph{Annoying \K-tool technical problem:}
 Currently, the \K tool treats the ``non-terminal'' productions (i.e.,
 productions consisting of just one non-terminal), also called
@@ -107,7 +109,8 @@ the wrapper in the generated documentation, we associate it an
 //@ \subsection{Types}
 
   syntax Type ::= "void" | "int" | "bool" | "string"
-                | class(Id)         [latex({#1})]               // KOOL class
+                | Id                     [klabel("'class")]  // see next
+                | class(Id)         // explicit KOOL class type
                 | Type "[" "]"
                 > Types "->" Type
                 | "(" Type ")"           [bracket]

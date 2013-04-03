@@ -300,7 +300,7 @@
       />
   <test
       language="dist/examples/kool/typed/static/kool-typed-static.k"
-      folder="dist/examples/kool/typed/static/programs"
+      folder="dist/examples/kool/typed/programs"
       extensions="kool"
       results="tests/examples/kool-typed-static"
       />
