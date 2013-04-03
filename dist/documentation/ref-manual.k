@@ -340,14 +340,15 @@ respectively.
 Sometimes, however, the mechanisms described so far do not provide what you
 require in order to be able to select only the states you wish to select. For
 this purpose, \krun allows you to specify search patterns with the
-\verb^--pattern^ flag. By specifying a \K rule without any rewrites in it, you
-can perform matching and check side conditions on the results of the search,
-and discard all the solutions which do not meet your search criteria. If the
-search pattern contains variables, the search will return a substitution,
-telling you the values of each of those variables in the solution you
-requested. You can also tell \krun that you don't want to see the value of a
-particular variable by using an anonymous variable (i.e. \_) instead of a named
-variable in your search pattern.
+\verb^--pattern^ flag. By specifying a \K rule without any rewrites in it (i.e.
+a pattern plus an optional side condition and optional attributes), you can
+perform matching and check side conditions on the results of the search, and
+discard all the solutions which do not meet your search criteria. If the search
+pattern contains variables, the search will return a substitution, telling you
+the values of each of those variables in the solution you requested. You can
+also tell \krun that you don't want to see the value of a particular variable
+by using an anonymous variable (i.e. \_) instead of a named variable in your
+search pattern.
 
 It is worth noting that the \verb^--pattern^ flag is also able to be used on
 normal executions. The effect this has is to execute the program until it
