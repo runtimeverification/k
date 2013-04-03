@@ -5,7 +5,7 @@
 		<jar destfile="../../dist/bin/java/k3.jar" filesetmanifest="mergewithoutmain">
 			<manifest>
 				<attribute name="Main-Class" value="org.kframework.main.Main"/>
-				<attribute name="Class-Path" value=". strategoxt.jar xstream.jar kxml2-min.jar xmlpull.jar xpp3_min.jar commons-cli-1.2.jar commons-io-2.1.jar jansi-1.8.jar jline-1.0.jar jopt-simple-3.3.jar collections-generic-4.01.jar jung-graph-impl-2.0.1.jar jung-io-2.0.1.jar"/>
+				<attribute name="Class-Path" value=". strategoxt.jar xstream.jar kxml2-min.jar xmlpull.jar xpp3_min.jar commons-cli-1.2.jar commons-io-2.1.jar jansi-1.8.jar jline-1.0.jar jopt-simple-3.3.jar collections-generic-4.01.jar ui/colt-1.2.0.jar ui/concurrent-1.3.4.jar ui/j3d-core-1.3.1.jar ui/jung-3d-2.0.1.jar ui/jung-3d-demos-2.0.1.jar ui/jung-algorithms-2.0.1.jar ui/jung-api-2.0.1.jar ui/jung-graph-impl-2.0.1.jar ui/jung-io-2.0.1.jar ui/jung-jai-2.0.1.jar ui/jung-jai-samples-2.0.1.jar ui/jung-samples-2.0.1.jar ui/jung-visualization-2.0.1.jar ui/stax-api-1.0.1.jar ui/vecmath-1.3.1.jar ui/wstx-asl-3.2.6.jar apache_lang/commons-lang3-3.1.jar  diffutils-1.2.1.jar guava-14.0.1.jar" />
 			</manifest>
 			<fileset dir="./bin"/>
 		</jar>

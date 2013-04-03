@@ -1,6 +1,7 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
+import org.kframework.compile.utils.MetaK.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Constant;
@@ -108,7 +109,8 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
             if (!prod.isSubsort()
                     && !prod.containsAttribute(Attribute.BRACKET.getKey())
                     && !prod.containsAttribute(Attribute.FUNCTION.getKey())
-                    && !prod.containsAttribute(Attribute.PREDICATE.getKey())) {
+                    && !prod.containsAttribute(Attribute.PREDICATE.getKey())
+                    && (!MetaK.isKSort(prod.getSort()) || prod.getSort().equals(Constants.K))) {
                 Variable KListVar1 = MetaK.getFreshVar(MetaK.Constants.KList);
                 Variable KListVar2 = MetaK.getFreshVar(MetaK.Constants.KList);
 

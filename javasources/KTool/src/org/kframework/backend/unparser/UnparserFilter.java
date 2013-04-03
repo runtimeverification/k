@@ -1,5 +1,6 @@
 package org.kframework.backend.unparser;
 
+import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -11,18 +12,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-
 public class UnparserFilter extends BasicVisitor {
 	private Indenter result = new Indenter();
 	private boolean firstPriorityBlock = false;
 	private boolean firstProduction = false;
 	private boolean inConfiguration = false;
-	private boolean addParentheses;	
+	private boolean addParentheses;
 	private int inTerm = 0;
 	private boolean color = false;
 	private static int TAB = 4;
-	private java.util.List<String> variableList =
-			new java.util.LinkedList<String>();
+	private java.util.List<String> variableList = new java.util.LinkedList<String>();
 	private java.util.Map<Production, Integer> priorities = null;
 	private java.util.Stack<ASTNode> stack = new java.util.Stack<ASTNode>();
 
@@ -244,7 +243,7 @@ public class UnparserFilter extends BasicVisitor {
 				}
 			}
 		}
-			
+
 		result.write("<" + cell.getLabel() + attributes + ">");
 		if (inConfiguration && inTerm == 0) {
 			result.endLine();
@@ -279,6 +278,8 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Variable variable) {
 		prepare(variable);
+		if (variable.isFresh())
+			result.write("?");
 		result.write(variable.getName());
 		if (!variableList.contains(variable.getName())) {
 			result.write(":" + variable.getSort());
@@ -352,11 +353,27 @@ public class UnparserFilter extends BasicVisitor {
 		inTerm++;
 		Production production = termCons.getProduction();
 		if (production.isListDecl()) {
-			UserList userList = (UserList)production.getItems().get(0);
+			UserList userList = (UserList) production.getItems().get(0);
 			String separator = userList.getSeparator();
 			java.util.List<Term> contents = termCons.getContents();
 			contents.get(0).accept(this);
-			if (!(contents.get(1) instanceof Empty && contents.get(1).getSort().equals(production.getSort()) && DefinitionHelper.isSubsortedEq(userList.getSort(), contents.get(0).getSort()))) {
+			ASTNode temp = stack.pop();
+			ASTNode parent = null;
+			if (!stack.empty())
+				parent = stack.peek();
+			stack.push(temp);
+			boolean needsEmpty = true;
+			if (parent instanceof TermCons) {
+				TermCons tcParent = (TermCons) parent;
+				int i;
+				for (i = 0; i < tcParent.getContents().size(); i++) {
+					if (termCons == tcParent.getContents().get(i))
+						break;
+				}
+				if (AddEmptyLists.isAddEmptyList(tcParent.getProduction().getChildSort(i), contents.get(0).getSort()))
+					needsEmpty = false;
+			}
+			if (needsEmpty || !(contents.get(1) instanceof Empty)) {
 				result.write(separator + " ");
 				contents.get(1).accept(this);
 			}
@@ -367,7 +384,7 @@ public class UnparserFilter extends BasicVisitor {
 				if (productionItem.getType() != ProductionType.TERMINAL) {
 					termCons.getContents().get(where++).accept(this);
 				} else {
-					result.write(((Terminal)productionItem).getTerminal());
+					result.write(((Terminal) productionItem).getTerminal());
 				}
 				if (i != production.getItems().size() - 1) {
 					result.write(" ");
@@ -539,7 +556,7 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(org.kframework.kil.Ambiguity ambiguity) {
 		prepare(ambiguity);
 		result.write("amb(");
-		result.endLine();		
+		result.endLine();
 		result.indent(TAB);
 		java.util.List<Term> contents = ambiguity.getContents();
 		for (int i = 0; i < contents.size(); ++i) {
@@ -553,7 +570,7 @@ public class UnparserFilter extends BasicVisitor {
 		result.unindent();
 		result.write(")");
 		postpare();
-        }
+	}
 
 	@Override
 	public void visit(org.kframework.kil.Context context) {
@@ -574,8 +591,8 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(LiterateDefinitionComment literateDefinitionComment) {
 		prepare(literateDefinitionComment);
-		//result.write(literateDefinitionComment.getValue());
-		//result.endLine();
+		// result.write(literateDefinitionComment.getValue());
+		// result.endLine();
 		postpare();
 	}
 
@@ -593,7 +610,6 @@ public class UnparserFilter extends BasicVisitor {
 		result.write("var{" + var.getSort() + "}(\"" + var.getName() + "\")");
 		postpare();
 	}
-
 
 	@Override
 	public void visit(FreezerSubstitution subst) {
@@ -645,8 +661,8 @@ public class UnparserFilter extends BasicVisitor {
 			}
 			return true;
 		} else if ((astNode instanceof TermCons) && (upper instanceof TermCons)) {
-			TermCons termConsNext = (TermCons)astNode;
-			TermCons termCons = (TermCons)upper;
+			TermCons termConsNext = (TermCons) astNode;
+			TermCons termCons = (TermCons) upper;
 			Production productionNext = termConsNext.getProduction();
 			Production production = termCons.getProduction();
 			if (DefinitionHelper.isPriorityWrong(production.getKLabel(), productionNext.getKLabel())) {

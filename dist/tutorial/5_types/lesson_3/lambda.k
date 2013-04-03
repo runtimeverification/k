@@ -1,6 +1,6 @@
 module LAMBDA
   syntax Type ::= "int" | "bool"
-                | Type "->" Type               [strict]
+                | Type "->" Type
                 | "(" Type ")"                 [bracket]
 
   syntax Exp ::= Id
@@ -17,6 +17,7 @@ module LAMBDA
                   <tenv color="blue"> .Map </tenv>
                 </T>
 
+  syntax Exp ::= Exp "->" Exp                  [strict]
   rule <k> lambda X : T . E => (T -> E) ~> tenv(Rho) ...</k>
        <tenv> Rho => Rho[T/X] </tenv>
   rule <k> X:Id => T ...</k> <tenv>... X |-> T ...</tenv>

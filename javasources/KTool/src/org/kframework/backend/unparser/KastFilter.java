@@ -134,13 +134,8 @@ public class KastFilter extends BasicVisitor {
 	public void visit(Empty empty) {
 		String sort = empty.getSort();
 		if (MaudeHelper.basicSorts.contains(sort)) {
-			if (!sort.equals(MetaK.Constants.KList)) {
-				result.write("(.).");
-				result.write(sort);
-			} else {
-				result.write(".");
-				result.write(sort);
-			}
+			result.write(".");
+			result.write(sort);
 		} else {
 			Production prd = DefinitionHelper.listConses.get(sort);
 			UserList ul = (UserList) prd.getItems().get(0);

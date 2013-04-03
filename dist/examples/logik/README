@@ -1,0 +1,6 @@
+Run with the command:
+
+  krun programs/list.logik --search
+
+Note that a .Bag solution is also given whenever there is a
+possibility that unification may fail.  It currently cannot be hidden.

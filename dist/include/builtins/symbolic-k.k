@@ -3,6 +3,8 @@ require "modules/substitution.k"
 
 module SYMBOLIC-SYNTAX
   // This is a module where productions will be generated at runtime
+
+  syntax "#" -/- [s].[y].[m]
 endmodule
 
 module SYMBOLIC-K
@@ -12,7 +14,7 @@ module SYMBOLIC-K
 
   syntax Bool ::= "forall" Set "." Bool [binder, function]
   syntax Bool ::= "exists" Set "." Bool [binder, function]
-  syntax Bool ::= K "==Symbolic" K 
+  syntax KLabel ::= "#symEqualitySort"
 
   /* The following simplification rules assume non-empty sorts. */
   rule forall S:Set . true => true
@@ -69,7 +71,7 @@ module SYMBOLIC-K
     +String "(check-sat)\n"
 
   syntax String ::= "SMTCall" "(" String ")" [function, hook(#SMT:#smtCall_)]
-  syntax String ::= "checkSat" "(" Bool ")" [function]
+  syntax String ::= checkSat(Bool) [function]
   rule checkSat(B:Bool) => SMTCall(SMTLibQuery(B))
 
 
@@ -161,6 +163,19 @@ module SYMBOLIC-K
 
   syntax K ::= #freshSym(K) [function]
   rule #freshSym(K:K) => #freshSymSortN(K2Sort(K),0)
+
+/*  syntax K ::= K "==Symbolic" K
+  rule I1:Int ==Symbolic I2:Int => I1 ==Int I2 [structural]
+  rule B1:Bool ==Symbolic B2:Bool => B1 ==Bool B2 [structural]
+  rule S1:String ==Symbolic S2:String => S1 ==String S2 [structural]
+*/
+
+  rule I1:K =K I2:Int => I1 ==Int I2 [anywhere]
+  rule B1:K =K B2:Bool => B1 ==Bool B2 [anywhere]
+  rule S1:K =K S2:String => S1 ==String S2 [anywhere]
+  rule I1:Int =K I2:K => I1 ==Int I2 [anywhere]
+  rule B1:Bool =K B2:K => B1 ==Bool B2 [anywhere]
+  rule S1:String =K S2:K => S1 ==String S2 [anywhere]
 
 endmodule
 

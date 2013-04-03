@@ -70,7 +70,9 @@ module CINK-LANG-SYNTAX
       than identifiers; the reason for this decision will be explained later.
    */
 
-  syntax Val ::= "cout" | "cin" | Bool | String | Int
+  syntax Printable ::= Int | String
+
+  syntax Val ::= "cout" | "cin" | Bool | Printable
 
   /*@
     We included in CinK a small subset of \Cpp language, the missing operators
@@ -89,6 +91,8 @@ module CINK-LANG-SYNTAX
     this can be call-by-value or call-by-reference. These two mechansims will
     be explained later. 
    */
+
+
   syntax Exp ::= Id | Val
                | "(" Exp ")"  [bracket]
                | Id "(" Exps ")" [strict(1)]
@@ -413,7 +417,6 @@ module CINK-LANG-SEMANTICS
 
   /*@ \subsection{Input/Output Statements.} */
 
-  syntax Printable ::= Int | String
 
   /*@ Writting in the the standard stream \texttt{cout}: */
   rule <k> cout << V:Printable => cout  ...</k>  
@@ -617,7 +620,7 @@ module CINK-LANG-SEMANTICS
     The next operator returns the variable name from an expression occurring
     in a declaration:
   */
-  syntax  Id ::= "getName" "(" Exp ")" [function]
+  syntax  Id ::= "getName" "(" K ")" [function]
 
   rule getName(X:Id) => X
   rule getName(KL:KLabel(E:Exp)) => getName(E)

@@ -748,7 +748,7 @@ The subclass relation induces a subtyping relation. */
   rule subtype(Object,Class) => false
     when Class =/=K Object  [structural]
 
-  rule subtype(Ts1->T2,Ts1'->T2') => subtype((T2,Ts1'),(T2',Ts1))  [structural]
+  rule subtype(Ts1->T2,Ts1'->T2') => subtype(((T2)::Type,Ts1'),((T2')::Type,Ts1))  [structural]
 
 // Note that the following rule would be wrong!
 //  rule subtype(T[],T'[]) => subtype(T,T')

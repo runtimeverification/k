@@ -20,10 +20,10 @@ module URIS
              | "#fReadByte" "(" Int ")"             [function, klabel(#fReadByte)]
              | "#fPutBytes" "(" Int "," String ")" [function, klabel(#fPutBytes)]
             
-  rule #open(S:String) => String2Int((#tcpRequest("open#" +String S +String "#"))) [function, anywhere]
+  rule #open(S:String) => String2Int((#tcpRequest("open#" +String S +String "#"))::K) [function, anywhere]
 
   rule #close(N:Int) 
-      => String2DotK((#tcpRequest("close#" +String Int2String(N) +String "#"))) [function, anywhere]
+      => String2DotK((#tcpRequest("close#" +String Int2String(N) +String "#"))::K) [function, anywhere]
 
   syntax K ::= "String2DotK" "(" String ")"  [function, klabel(String2DotK)]
   rule String2DotK(S:String) => #ioError(#retrieveTCPError(S)) when #isTCPError(S) [function, anywhere]
@@ -33,19 +33,19 @@ module URIS
   rule String2Bool("0") => false [anywhere]
   rule String2Bool("1") => true [anywhere]
 
-  rule #flush(N:Int) => String2DotK((#tcpRequest("flush#" +String Int2String(N) +String "#"))) [function, anywhere]
+  rule #flush(N:Int) => String2DotK((#tcpRequest("flush#" +String Int2String(N) +String "#"))::K) [function, anywhere]
 
-  rule #tell(N:Int) => String2DotK((#tcpRequest("position#" +String Int2String(N) +String "#"))) [function, anywhere]
+  rule #tell(N:Int) => String2DotK((#tcpRequest("position#" +String Int2String(N) +String "#"))::K) [function, anywhere]
 
-  rule #tell(N:Int) => String2Int((#tcpRequest("tell#" +String Int2String(N) +String "#"))) [function, anywhere]
+  rule #tell(N:Int) => String2Int((#tcpRequest("tell#" +String Int2String(N) +String "#"))::K) [function, anywhere]
 
   rule #seek(N:Int,P:Int) 
       => String2DotK((#tcpRequest("seek#" +String Int2String(N) +String "#"
-                              +String Int2String(P) +String "#"))) [function, anywhere]
+                              +String Int2String(P) +String "#"))::K) [function, anywhere]
 
   rule #reopen(N:Int,S:String) 
       => String2DotK((#tcpRequest("reopen#" +String Int2String(N) +String "#"
-                              +String S +String "#"))) [function, anywhere]
+                              +String S +String "#"))::K) [function, anywhere]
 
   syntax Int ::= "#stdin"   [function] 
                 | "#stdout" [function]
@@ -72,19 +72,19 @@ module URIS
 
   rule #fPutByte(N:Int,B:Int)
     => String2DotK((#tcpRequest("writebyte#" +String Int2String(N) +String "#"
-                              +String Int2String(B) +String "#"))) [function, anywhere]
+                              +String Int2String(B) +String "#"))::K) [function, anywhere]
 
   rule #fPutBytes(N:Int,S:String)
     => String2DotK((#tcpRequest("writebytes#" +String Int2String(N) +String "#"
-                              +String S +String "#"))) [function, anywhere]
+                              +String S +String "#"))::K) [function, anywhere]
 
   rule #peekByte() => #fPeekByte(#stdin) [function, anywhere]
   rule #fPeekByte(N:Int)
-    => String2Int((#tcpRequest("peek#" +String Int2String(N) +String "#"))) [function, anywhere]
+    => String2Int((#tcpRequest("peek#" +String Int2String(N) +String "#"))::K) [function, anywhere]
 
   rule #eof() => #fEof(#stdin) [function, anywhere]
   rule #fEof(N:Int)
-    => String2Bool((#tcpRequest("eof#" +String Int2String(N) +String "#"))) [function, anywhere]
+    => String2Bool((#tcpRequest("eof#" +String Int2String(N) +String "#"))::K) [function, anywhere]
 
   syntax K ::= "#readChar" "(" ")"   [function, klabel(#readChar)]
   //declare  #readChar() : -> K 
@@ -141,20 +141,20 @@ module URIS
          when isChar(C)
 
   // Skipping initial whitespace if reading more than a character
-  rule #parse(S:String,.K) (ListItem(C:String) => .List) 
-        when S =/=String "#Char" andBool #isWhiteSpace(C)
+  rule #parse(S:String,.K) (ListItem(C) => .List) 
+        when S =/=String "#Char" andBool #isWhiteSpace(C) andBool isString(C)
 
 
   // Read a token
-  rule #parse(S:String,.K => "") ListItem(C:String) 
-        when S =/=String "#Char" andBool notBool(#isWhiteSpace(C))
+  rule #parse(S:String,.K => "") ListItem(C)
+        when S =/=String "#Char" andBool notBool(#isWhiteSpace(C)) andBool isString(C)
         
-  rule #parse(_:String, S:String => S:String +String C) (ListItem(C:String) => .List) 
-    when notBool(#isWhiteSpace(C))
+  rule #parse(_:String, S:String => S:String +String C) (ListItem(C) => .List) 
+    when notBool(#isWhiteSpace(C)) andBool isString(C)
 
   // Upon encountering again whitespace, convert token
-  rule #parse(SType:String,S:String) ListItem(C:String) => #convertToken(SType, S)
-    when #isWhiteSpace(C)
+  rule #parse(SType:String,S:String) ListItem(C) => #convertToken(SType, S)
+    when #isWhiteSpace(C) andBool isString(C)
 
   rule (#parse(SType:String,S:String) => #convertToken(SType, S)) ListItem(#EOF)
   

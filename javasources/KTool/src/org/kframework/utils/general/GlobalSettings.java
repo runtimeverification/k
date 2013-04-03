@@ -39,4 +39,5 @@ public class GlobalSettings {
 	public static boolean matchingLogic = false;
 	public static boolean documentation = false;
 	public static boolean xml = false;
+	public static boolean NOSMT = false;
 }

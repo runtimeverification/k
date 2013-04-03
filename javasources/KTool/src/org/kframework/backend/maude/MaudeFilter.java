@@ -385,13 +385,8 @@ public class MaudeFilter extends BackendFilter {
 	public void visit(Empty empty) {
 		String sort = empty.getSort();
 		if (MaudeHelper.basicSorts.contains(sort)) {
-			if (!sort.equals(MetaK.Constants.KList)) {
-				result.append("(.).");
-				result.append(sort);
-			} else {
-				result.append(".");
-				result.append(sort);
-			}
+			result.append(".");
+			result.append(sort);
 		} else {
 			Production prd = DefinitionHelper.listConses.get(sort);
 			UserList ul = (UserList) prd.getItems().get(0);
@@ -657,7 +652,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(TermComment termComment) {
-		result.append(" (.).Bag ");
+		result.append(" .Bag ");
 	}
 
 	@Override

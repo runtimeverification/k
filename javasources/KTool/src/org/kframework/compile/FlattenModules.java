@@ -53,7 +53,7 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
 					if (i instanceof Import) {
 						String name = ((Import)i).getName();
 						if (included.contains(name)) continue;
-						if (!MetaK.isKModule(name) && !MetaK.isBuiltinModule(name)) {
+						if (!MetaK.isBuiltinModule(name)) {
 							if (modules.containsKey(name)) {
 								mods.add(modules.get(name));
 								included.add(name);

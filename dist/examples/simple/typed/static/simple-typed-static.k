@@ -289,17 +289,10 @@ since programs and fragments of program will reduce to their types, in order
 for the strictness and context declarations to be executable we state that
 types are results (same like we did in the IMP++ tutorial). */
 
+  syntax Exp ::= Type
   syntax BlockOrStmtType ::= "block" | "stmt"
   syntax Type ::= BlockOrStmtType
-  syntax Exp ::= Type
-// I had to comment the sort inclusion below out, because the current
-// parser parses declarations "T X;" as statement composition "T" "X;"
-// The drawback of this is that I now need explicit casting of types into K,
-// by putting parentheses around the terms to cast.  The places where that
-// happens will be clearly marked.  Sorry for the inconvenience.  We will fix
-// it soon, when we allow arbitrary priorities to be declared in the tool.
-//
-//  syntax Block ::= Type
+  syntax Block ::= BlockOrStmtType
   syntax KResult ::= Type
 
 /*@ \subsection{Configuration}
@@ -454,7 +447,7 @@ an integer in order to be allowed to be incremented, as seen in the
 rule ``\texttt{++ int => int}'' below. */
 
   context ++(HOLE => ltype(HOLE))
-  rule ++ loc(int) => int
+  rule ++ int => int
 
 /*@ \subsection{Common expression constructs}
 
@@ -481,9 +474,11 @@ The rules below are straightforward and self-explanatory: */
 
 Array access requires each index to type to an integer, and the
 array type to be at least as deep as the number of indexes: */
-// need parentheses in the RHS, to avoid capturing Ts as rule tag
+// NOTE:
+// We used to need parentheses in the RHS, to avoid capturing Ts as rule tag.
+// Let's hope that is not a problem anymore.
 
-  rule (T[])[int, Ts:Types] => (T[Ts])
+  rule (T[])[int, Ts:Types] => T[Ts]
   rule T[.Types] => T
 
 //@ \texttt{sizeOf} only needs to check that its argument is an array:
@@ -509,7 +504,7 @@ and, in that case, it must have the same type as the RHS, which then
 becomes the type of the assignment. */
 
   context (HOLE => ltype(HOLE)) = _
-  rule loc(T:Type) = T => T
+  rule T:Type = T => T
 
 /*@ \subsection{Function application and return}
 
@@ -550,11 +545,8 @@ exceptions can only have integer type. */
 
 //@ \subsection{Conditional and \texttt{while} loop}
 
-// Parentheses needed around the \texttt{block} type, due to the fact
-// that the current parser does not allow us to subsort Type to Block.
-// Parentheses force the surrounded expression to type to whatever needed.
-  rule if (bool) (block) else (block) => stmt
-  rule while (bool) (block) => stmt
+  rule if (bool) block else block => stmt
+  rule while (bool) block => stmt
 
 /*@ \subsection{Exceptions}
 We currently force the parameters of exceptions to only be integers.
@@ -564,8 +556,7 @@ any try-catch block (with the currently unchecked---also for
 simplicity---expectation that the caller functions would catch those
 exceptions). */
 
-// had to put parentheses around block for the same reason as above.
-  rule try (block) catch(int X:Id) {S} => {int X; S}  [structural]
+  rule try block catch(int X:Id) {S} => {int X; S}  [structural]
   rule throw int; => stmt
 
 /*@ \subsection{Concurrency}
@@ -593,18 +584,20 @@ list of variable declarations. */
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
-/*@ The function \texttt{ltype} behaves as a partial identity defined
-only on expressions which have an lvalue. */
+/*@ The \texttt{ltype} context allows only expressions which have an
+ lvalue to evaluate. */
+
+// We would like to say the following instead of the predicate rule below:
+//  syntax LValue ::= Id | Exp "[" Exps "]"
+// but unfortunately that currently generates some ambiguous parsings.
+  syntax LValue ::= Id
+  rule isLValue(_:Exp[_:Exps]) => true
 
   syntax Exp ::= ltype(Exp) 
-  rule ltype(X:Id) => loc(X)
-  rule ltype(E:Exp [Es:Exps]) => loc(E[Es])
-  rule loc(T:Type) => ltype(loc(T))
-
-  syntax Exp ::= loc(Exp) [strict]
-
-  rule isKResult(ltype(loc(T:Type))) => true
-
+// We would like to say:
+//  context ltype(HOLE:LValue)
+// but we currently cannot type the HOLE
+  context ltype(HOLE) when isLValue(HOLE)
   
 
 //@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.
