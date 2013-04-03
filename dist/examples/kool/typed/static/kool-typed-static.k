@@ -276,10 +276,10 @@ in the class extends relation. */
 The syntax and rules below are borrowed unchanged from statically
 typed SIMPLE, so we do not discuss them much here. */
 
+  syntax Exp ::= Type
   syntax BlockOrStmtType ::= "block" | "stmt"
   syntax Type ::= BlockOrStmtType
-  syntax Exp ::= Type
-//  syntax Block ::= Type
+  syntax Block ::= BlockOrStmtType
   syntax KResult ::= Type
 
 
@@ -320,7 +320,7 @@ typed SIMPLE, so we do not discuss them much here. */
   rule ! bool => bool
 
 
-  rule (T[])[int, Ts:Types] => (T[Ts])
+  rule (T[])[int, Ts:Types] => T[Ts]
   rule T[.Types] => T
 
   rule sizeOf(T[]) => int
@@ -344,16 +344,14 @@ typed SIMPLE, so we do not discuss them much here. */
        (. => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
 
   rule _:Type; => stmt
-// remove unnecessary parentheses around "block" once K tool bug is fixed
-  rule if (bool) (block) else (block) => stmt
-  rule while (bool) (block) => stmt
+  rule if (bool) block else block => stmt
+  rule while (bool) block => stmt
 
   rule join int; => stmt
   rule acquire _:Type; => stmt
   rule release _:Type; => stmt
   rule rendezvous _:Type; => stmt
 
-  syntax Stmt ::= BlockOrStmtType
   rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 
 
@@ -365,7 +363,7 @@ typed SIMPLE, so we do not discuss them much here. */
 
   syntax Exp ::= ltype(Exp)  [function]
   rule ltype(X:Id) => X
-  rule ltype(E:Exp [Es:Exps]) => (E[Es])
+  rule ltype(E:Exp [Es:Exps]) => E[Es]
 
   syntax Types ::= getTypes(Params)  [function]
   rule getTypes(T:Type _:Id) => T, .Types
@@ -490,7 +488,7 @@ we cannot test the full type safety of exceptions.  Instead, we
 only check that the \texttt{try} and the \texttt{catch} statements
 type correctly. */
 
-  rule try (block) catch(T:Type X:Id) S => {T X; S}  [structural]
+  rule try block catch(T:Type X:Id) S => {T X; S}  [structural]
   rule throw T:Type ; => stmt
 
 
