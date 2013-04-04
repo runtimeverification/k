@@ -1,13 +1,13 @@
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
-/** Used for representing parsing ambiguity.
- * Shouldn't exist after disambiguation. 
+/**
+ * Used for representing parsing ambiguity. Shouldn't exist after disambiguation.
  */
 public class Ambiguity extends Collection {
 
@@ -47,11 +47,10 @@ public class Ambiguity extends Collection {
 		return visitor.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
-
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	@Override
 	public Ambiguity shallowCopy() {

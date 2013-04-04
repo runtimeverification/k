@@ -22,6 +22,8 @@ public class Bracket extends Term {
 	}
 
 	public String getSort() {
+		if (content instanceof Ambiguity)
+			return super.getSort();
 		return content.getSort();
 	}
 

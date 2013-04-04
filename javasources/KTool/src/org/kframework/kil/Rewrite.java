@@ -48,6 +48,9 @@ public class Rewrite extends Term {
 		if (localSort != null)
 			return localSort;
 
+		if (left instanceof Ambiguity || right instanceof Ambiguity)
+			return super.getSort();
+
 		localSort = super.getSort();
 		boolean found;
 		do {
