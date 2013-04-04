@@ -32,6 +32,7 @@ import org.kframework.compile.transformers.ContextsToHeating;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.FreezeUserFreezers;
 import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.compile.transformers.ResolveBuiltins;
 import org.kframework.compile.transformers.ResolveFunctions;
@@ -111,9 +112,9 @@ public class JavaSymbolicBackend extends BasicBackend {
 		list1.add(new Variable("S1", "Stmt"));
 		list1.add(new Variable("S2", "Stmt"));
 		Term kTerm = new KApp(Constant.KLABEL("'if`(_`)_else_"), new KList(list1));
-        List<Term> list2 = new ArrayList<Term>();
-        list2.add(kTerm);
-        Term kSequence = new KSequence(list2);
+		List<Term> list2 = new ArrayList<Term>();
+		list2.add(kTerm);
+		Term kSequence = new KSequence(list2);
 		// Term stateTerm = new Empty("Map");
 
 		Bag bag = new Bag();
@@ -192,6 +193,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 		/* syntactic macros */
 		steps.add(new RemoveBrackets());
 		steps.add(new AddEmptyLists());
+		steps.add(new RemoveSyntacticCasts());
 
 		/* module system */
 		steps.add(new FlattenModules());

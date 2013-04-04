@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
@@ -99,8 +100,10 @@ public class ProgramLoader {
 			if (GlobalSettings.whatParser == GlobalSettings.ParserType.GROUND) {
 				org.kframework.parser.concrete.KParser.ImportTblGround(DefinitionHelper.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
 				out = DefinitionLoader.parseCmdString(content, "", filename);
+				out = out.accept(new RemoveBrackets());
 				out = out.accept(new AddEmptyLists());
 				out = out.accept(new FlattenSyntax());
+				out = out.accept(new RemoveSyntacticCasts());
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {
 				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 				out = DefinitionLoader.parsePattern(content, filename);
