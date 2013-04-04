@@ -83,6 +83,12 @@ public class MapImpl extends Term {
 	}
 
 	@Override
+	public int hashCode() {
+		//TODO: finish implementation
+		return map.hashCode();
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (o == null)
 			return false;

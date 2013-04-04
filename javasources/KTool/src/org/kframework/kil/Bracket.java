@@ -76,6 +76,11 @@ public class Bracket extends Term {
 	}
 
 	@Override
+	public int hashCode() {
+		return content.hashCode();
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (o == null)
 			return false;

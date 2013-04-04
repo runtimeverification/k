@@ -98,7 +98,13 @@ public class MapLookupPattern extends Term {
 	public MapLookupPattern shallowCopy() {
 		return new MapLookupPattern(this);
 	}
-  
+ 
+	@Override
+	public int hashCode() {
+		//TODO: finish implementation
+		return 0;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null)

@@ -45,6 +45,11 @@ public class TermComment extends Term {
 		return new TermComment(this);
 	}
 
+        @Override
+	public int hashCode() {
+		return 53;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null)

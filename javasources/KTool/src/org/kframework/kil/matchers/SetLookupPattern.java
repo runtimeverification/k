@@ -98,7 +98,13 @@ public class SetLookupPattern extends Term {
 	public SetLookupPattern shallowCopy() {
 		return new SetLookupPattern(this);
 	}
-  
+ 
+	@Override
+	public int hashCode() {
+		//TODO: finish implementation
+		return 0;
+	}
+ 
   @Override
 	public boolean equals(Object o) {
 		if (o == null)

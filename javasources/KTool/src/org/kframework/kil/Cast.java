@@ -80,6 +80,11 @@ public class Cast extends Term {
 	}
 
 	@Override
+	public int hashCode() {
+		return content.hashCode() + (this.syntactic ? 1 : 0);
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (o == null)
 			return false;

@@ -83,6 +83,12 @@ public class SetImpl extends Term {
 	}
 
 	@Override
+	public int hashCode() {
+		//TODO: finish implementation
+		return set.hashCode();
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (o == null)
 			return false;

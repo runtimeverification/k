@@ -99,6 +99,13 @@ public class SetInsertPattern extends Term {
 	public SetInsertPattern shallowCopy() {
 		return new SetInsertPattern(this);
 	}
+
+	@Override
+	public int hashCode() {
+		//TODO: finish implementation
+		return 0;
+	}
+
   @Override
 	public boolean equals(Object o) {
 		if (o == null)

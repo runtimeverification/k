@@ -108,6 +108,11 @@ public class Rewrite extends Term {
 	}
 
 	@Override
+	public int hashCode() {
+		return 59 * left.hashCode() + right.hashCode();
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (o == null)
 			return false;

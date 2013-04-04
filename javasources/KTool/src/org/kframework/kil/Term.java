@@ -45,5 +45,6 @@ public abstract class Term extends ASTNode implements Matchable {
 	@Override
 	public abstract Term shallowCopy();
 
+	public abstract int hashCode();
 	public abstract boolean equals(Object obj);
 }
