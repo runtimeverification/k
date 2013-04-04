@@ -176,23 +176,23 @@ public class MaudeKRun implements KRun {
 		List<Element> list = XmlUtil.getChildElements(xml);
 		
 		try {
-			if (sort.equals("BagItem") && op.equals("<_>_</_>")) {
+			if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("<_>_</_>")) {
 				Cell cell = new Cell();
 				assertXMLTerm(list.size() == 3 && list.get(0).getAttribute("sort").equals("CellLabel") && list.get(2).getAttribute("sort").equals("CellLabel") && list.get(0).getAttribute("op").equals(list.get(2).getAttribute("op")));
 
 				cell.setLabel(list.get(0).getAttribute("op"));
 				cell.setContents(parseXML(list.get(1)));
 				return cell;
-			} else if (sort.equals("BagItem") && op.equals("BagItem")) {
+			} else if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("BagItem")) {
 				assertXMLTerm(list.size() == 1);
 				return new BagItem(parseXML(list.get(0)));
-			} else if (sort.equals("MapItem") && op.equals("_|->_")) {
+			} else if ((sort.equals("MapItem") || sort.equals("[Map]")) && op.equals("_|->_")) {
 				assertXMLTerm(list.size() == 2);
 				return new MapItem(parseXML(list.get(0)), parseXML(list.get(1)));
-			} else if (sort.equals("SetItem") && op.equals("SetItem")) {
+			} else if ((sort.equals("SetItem") || sort.equals("[Set]")) && op.equals("SetItem")) {
 				assertXMLTerm(list.size() == 1);
 				return new SetItem(parseXML(list.get(0)));
-			} else if (sort.equals("ListItem") && op.equals("ListItem")) {
+			} else if ((sort.equals("ListItem") || sort.equals("[List]")) && op.equals("ListItem")) {
 				assertXMLTerm(list.size() == 1);
 				return new ListItem(parseXML(list.get(0)));
 			} else if (op.equals("_`,`,_") && sort.equals("NeKList")) {
@@ -209,35 +209,35 @@ public class MaudeKRun implements KRun {
 					l.add(parseXML(elem));
 				}
 				return new KSequence(l);
-			} else if (op.equals("__") && (sort.equals("NeList") || sort.equals("List"))) {
+			} else if (op.equals("__") && (sort.equals("NeList") || sort.equals("List") || sort.equals("[List]"))) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
 					l.add(parseXML(elem));
 				}
 				return new org.kframework.kil.List(l);
-			} else if (op.equals("__") && (sort.equals("NeBag") || sort.equals("Bag"))) {
+			} else if (op.equals("__") && (sort.equals("NeBag") || sort.equals("Bag") || sort.equals("[Bag]"))) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
 					l.add(parseXML(elem));
 				}
 				return new Bag(l);
-			} else if (op.equals("__") && (sort.equals("NeSet") || sort.equals("Set"))) {
+			} else if (op.equals("__") && (sort.equals("NeSet") || sort.equals("Set") || sort.equals("[Set]"))) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
 					l.add(parseXML(elem));
 				}
 				return new org.kframework.kil.Set(l);
-			} else if (op.equals("__") && (sort.equals("NeMap") || sort.equals("Map"))) {
+			} else if (op.equals("__") && (sort.equals("NeMap") || sort.equals("Map") || sort.equals("[Map]"))) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
 					l.add(parseXML(elem));
 				}
 				return new org.kframework.kil.Map(l);
-			} else if ((op.equals("#_") || op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_") || op.equals("Bag2KLabel_") || op.equals("KList2KLabel_") || op.equals("KLabel2KLabel_")) && sort.equals("KLabel")) {
+			} else if ((op.equals("#_") || op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_") || op.equals("Bag2KLabel_") || op.equals("KList2KLabel_") || op.equals("KLabel2KLabel_")) && (sort.equals("KLabel") || sort.equals("[KLabel]"))) {
 				assertXMLTerm(list.size() == 1);
 				return new KInjectedLabel(parseXML(list.get(0)));
 			} else if (sort.equals("#NzInt") && op.equals("--Int_")) {
@@ -263,13 +263,13 @@ public class MaudeKRun implements KRun {
 				String value = ((Constant) parseXML(list.get(0))).getValue();
 				assertXMLTerm(value.startsWith("\"") && value.endsWith("\""));
 				return new Constant("#Id", value.substring(1,value.length()-1));
-			} else if (op.equals(".") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
+			} else if (op.matches("\\.(Map|Bag|List|Set|K)") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 				assertXMLTerm(list.size() == 0);
 				return new Empty(sort);
 			} else if (op.equals(".KList") && sort.equals(MetaK.Constants.KList)) {
 				assertXMLTerm(list.size() == 0);
 				return new Empty(MetaK.Constants.KList);
-			} else if (op.equals("_`(_`)") && sort.equals("KItem")) {
+			} else if (op.equals("_`(_`)") && (sort.equals("KItem") || sort.equals("[KList]"))) {
 				assertXMLTerm(list.size() == 2);
 				return new KApp(parseXML(list.get(0)), parseXML(list.get(1)));
 			} else if (sort.equals("KLabel") && list.size() == 0) {

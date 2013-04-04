@@ -55,16 +55,14 @@ public class BackendTerm extends Term {
 	}
 
 	@Override
+	public int hashCode() {
+		return value.hashCode();
+	}
+
+	@Override
 	public boolean equals(Object o) {
-		if (o == null)
-			return false;
-		if (this == o)
-			return true;
-		if (!(o instanceof BackendTerm))
-			return false;
-
-		BackendTerm bt = (BackendTerm) o;
-
-		return this.value.equals(bt.value) && this.sort.equals(bt.sort);
+		if (!(o instanceof BackendTerm)) return false;
+		BackendTerm b = (BackendTerm)o;
+		return value.equals(b.value);
 	}
 }
