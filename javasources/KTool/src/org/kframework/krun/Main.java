@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,12 +44,14 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.KRun;
+import org.kframework.krun.api.KRunApiDebugger;
 import org.kframework.krun.api.KRunDebugger;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.MaudeKRun;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
+import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
@@ -59,6 +62,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+import edu.uci.ics.jung.graph.*;
 
 public class Main {
 
@@ -375,6 +379,8 @@ public class Main {
 						Term res = ((KRunState) krs).getRawResult();
 						result = krun.search(null, null, K.searchType,
 								patternRule, res, varNames);
+					}else {
+						Error.report("Pattern matching after execution is not supported by search and model checking");
 					}
 				}
 
@@ -473,6 +479,7 @@ public class Main {
 	// execute krun in debug mode (i.e. step by step execution)
 	// isSwitch variable is true if we enter in debug execution from normal
 	// execution (we use the search command with --graph option)
+	@SuppressWarnings("unchecked")
 	public static void debugExecution(Term kast, String lang,
 			KRunResult<SearchResults> state) {
 		try {
@@ -482,9 +489,9 @@ public class Main {
 			reader.setBellEnabled(false);
 
 			List<Completor> argCompletor = new LinkedList<Completor>();
-			argCompletor.add(new SimpleCompletor(new String[] { "help",
-					"abort", "resume", "step", "step-all", "select",
-					"show-search-graph", "show-node", "show-edge" }));
+			argCompletor.add(new SimpleCompletor(new String[] { "help", 
+					"abort", "resume", "step", "step-all", "select", 
+					"show-search-graph", "show-node", "show-edge", "save", "load" }));
 			argCompletor.add(new FileNameCompletor());
 			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
@@ -662,6 +669,23 @@ public class Main {
 							System.out
 									.println("An edge with the specified endpoints could not be found in the"
 											+ K.lineSeparator + "search graph");
+						}
+					}
+
+					DirectedGraph<KRunState, Transition> savedGraph = null;
+					if(cmd.hasOption("save")) {
+						BinaryLoader.toBinary(debugger.getGraph(), new FileOutputStream(new File(cmd.getOptionValue("save")).getCanonicalPath()));
+						System.out.println("File successfully saved.");
+					} 
+					if (cmd.hasOption("load")) {
+						try {
+							savedGraph = (DirectedGraph<KRunState, Transition>) BinaryLoader.fromBinary(new FileInputStream(cmd.getOptionValue("load")));
+							krun = new MaudeKRun();
+							debugger = new KRunApiDebugger(krun, savedGraph);
+							debugger.setCurrentState(1);
+							System.out.println("File successfully loaded.");
+						} catch (FileNotFoundException e) {
+							System.out.println("There is no such file, please try again.");
 						}
 					}
 				}
@@ -880,7 +904,6 @@ public class Main {
 			if (cmd.hasOption("backend")) {
 				K.backend = cmd.getOptionValue("backend");
 			}
-
 			// printing the output according to the given options
 			if (K.help) {
 				printKRunUsage(cmd_options.getOptions());

@@ -1,12 +1,14 @@
 package org.kframework.krun.api;
 
+import java.io.Serializable;
+
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.backend.unparser.AddBracketsFilter;
 import org.kframework.kil.*;
 import org.kframework.krun.*;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 
-public class KRunState {
+public class KRunState implements Serializable{
 
 	private Term result;
 	private Term rawResult;

@@ -182,6 +182,8 @@ public class CommandlineOptions {
 		Option showEdge = OptionBuilder.hasArgs(2).withArgName("NODE1 NODE2").withLongOpt("show-edge").withDescription("Displays info about the specifiede edge in the search graph." + K.lineSeparator + "The edge is specified by the ids of the endpoints indicated as argument of this option").create();
 		Option resume = OptionBuilder.hasArg(false).withLongOpt("resume").withDescription("Resume the execution and exit from the debug mode").create();
 		Option abort = OptionBuilder.hasArg(false).withLongOpt("abort").withDescription("Abort the execution and exit from the debug mode").create();
+		Option save = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("save").withDescription("Save the debug session to file").create();
+		Option load = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("load").withDescription("Load the debug session from file").create();
 		Option help = OptionBuilder.hasArg(false).withLongOpt("help").withDescription("Display the available commands").create();
 		options.addOption(step); getOptionList().add(step);
 		options.addOption(stepAll); getOptionList().add(stepAll);
@@ -191,6 +193,8 @@ public class CommandlineOptions {
 		options.addOption(showEdge); getOptionList().add(showEdge);
 		options.addOption(resume); getOptionList().add(resume);
 		options.addOption(abort); getOptionList().add(abort);
+		options.addOption(save); getOptionList().add(save);
+		options.addOption(load); getOptionList().add(load);
 		options.addOption(help); getOptionList().add(help);
 	}
 
