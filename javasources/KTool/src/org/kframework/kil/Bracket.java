@@ -1,8 +1,8 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
@@ -19,6 +19,10 @@ public class Bracket extends Term {
 
 	public void setContent(Term content) {
 		this.content = content;
+	}
+
+	public String getSort() {
+		return content.getSort();
 	}
 
 	public Bracket(Bracket i) {
@@ -54,10 +58,10 @@ public class Bracket extends Term {
 		return visitor.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	@Override
 	public Bracket shallowCopy() {
@@ -69,11 +73,15 @@ public class Bracket extends Term {
 		return "(" + content + ")";
 	}
 
-  //this current causes ambiguities
-/*	@Override
+	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Bracket)) return false;
-		Bracket b = (Bracket)o;
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Bracket))
+			return false;
+		Bracket b = (Bracket) o;
 		return content.equals(b.content);
-	} */
+	}
 }

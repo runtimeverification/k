@@ -77,8 +77,6 @@ public interface Visitor {
 	public void visit(KInjectedLabel kInjectedLabel);
 	public void visit(FreezerLabel freezerLabel);
 	public void visit(Freezer f);
-	public void visit(FreezerVariable var);
-	public void visit(FreezerSubstitution subst);
 	public void visit(BackendTerm term);
 
 	public String getName();

@@ -73,6 +73,7 @@ public class DefinitionHelper {
 		subsorts.addRelation(MetaK.Constants.KList, "K");
 		subsorts.addRelation(MetaK.Constants.KList, "KResult");
 		subsorts.addRelation("K", "KResult");
+		subsorts.addRelation("K", "KItem");
 		subsorts.addRelation("Map", "MapItem");
 		subsorts.addRelation("Set", "SetItem");
 		subsorts.addRelation("List", "ListItem");

@@ -28,7 +28,6 @@ import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectRewriteSortFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
@@ -318,7 +317,7 @@ public class DefinitionLoader {
 			config = config.accept(new TypeInferenceSupremumFilter());
 			config = config.accept(new PreferAvoidFilter());
 			config = config.accept(new FlattenListsFilter());
-			config = config.accept(new CorrectRewriteSortFilter());
+			config = config.accept(new AmbDuplicateFilter());
 			// last resort disambiguation
 			config = config.accept(new AmbFilter());
 		} catch (TransformerException e) {

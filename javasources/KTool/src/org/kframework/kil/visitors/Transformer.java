@@ -74,8 +74,6 @@ public interface Transformer {
 	public ASTNode transform(Cast node) throws TransformerException;
 	public ASTNode transform(Variable node) throws TransformerException;
 	public ASTNode transform(Freezer node) throws TransformerException;
-	public ASTNode transform(FreezerVariable node) throws TransformerException;
-	public ASTNode transform(FreezerSubstitution node) throws TransformerException;
 	public ASTNode transform(BackendTerm term) throws TransformerException;
 	//</Terms>
 	public String getName();

@@ -605,20 +605,6 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(FreezerVariable var) {
-		prepare(var);
-		result.write("var{" + var.getSort() + "}(\"" + var.getName() + "\")");
-		postpare();
-	}
-
-	@Override
-	public void visit(FreezerSubstitution subst) {
-		prepare(subst);
-		result.write("var{" + subst.getTermSort() + "}(\"" + subst.getName() + "\")<-");
-		postpare();
-	}
-
-	@Override
 	public void visit(BackendTerm term) {
 		prepare(term);
 		result.write(term.getValue());

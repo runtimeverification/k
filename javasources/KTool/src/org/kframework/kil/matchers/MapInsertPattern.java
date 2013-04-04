@@ -1,11 +1,13 @@
 package org.kframework.kil.matchers;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cast;
 import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.rewriter.SetImpl;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -98,6 +100,17 @@ public class MapInsertPattern extends Term {
 	public MapInsertPattern shallowCopy() {
 		return new MapInsertPattern(this);
 	}
-
+  
+	@Override
+	public boolean equals(Object o) {
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Cast))
+			return false;
+		// TODO: finish implementing this equals
+		return true;
+	}
 }  
 

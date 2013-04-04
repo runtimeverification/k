@@ -91,7 +91,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 				config = config.accept(new TypeInferenceSupremumFilter());
 				config = config.accept(new PreferAvoidFilter());
 				config = config.accept(new FlattenListsFilter());
-				// config = config.accept(new CorrectRewriteSortFilter()); not the case on configs
+				config = config.accept(new AmbDuplicateFilter());
 				// last resort disambiguation
 				config = config.accept(new AmbFilter());
 

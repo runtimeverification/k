@@ -6,7 +6,10 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
-/** Represents a <br /> occurring for formatting in a bag of cells */
+/**
+ * Represents a <br />
+ * occurring for formatting in a bag of cells
+ */
 public class TermComment extends Term {
 
 	public TermComment(Element element) {
@@ -32,13 +35,24 @@ public class TermComment extends Term {
 		return visitor.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	@Override
 	public Term shallowCopy() {
 		return new TermComment(this);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof TermComment))
+			return false;
+		return true;
 	}
 }

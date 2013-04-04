@@ -1,6 +1,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -10,13 +11,12 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 /**
- * Represents {@code =>} in the syntax of rules.
- * May occur in multiple places in the body of a {@link Rule}, but
- * may not be nested.
+ * Represents {@code =>} in the syntax of rules. May occur in multiple places in the body of a {@link Rule}, but may not be nested.
  */
 public class Rewrite extends Term {
 	private Term left;
 	private Term right;
+	private String localSort = null;
 
 	public Rewrite(Element element) {
 		super(element);
@@ -39,6 +39,28 @@ public class Rewrite extends Term {
 		super(eval1Left.getSort());
 		left = eval1Left;
 		right = eval1Right;
+	}
+
+	/**
+	 * Returning the Least Upper Bound for left and right sorts.
+	 */
+	public String getSort() {
+		if (localSort != null)
+			return localSort;
+
+		localSort = super.getSort();
+		boolean found;
+		do {
+			found = true;
+			for (String s : DefinitionHelper.definedSorts) {
+				if (DefinitionHelper.isSubsorted(localSort, s) && DefinitionHelper.isSubsortedEq(s, this.left.getSort()) && DefinitionHelper.isSubsortedEq(s, this.right.getSort())) {
+					localSort = s;
+					found = false;
+				}
+			}
+		} while (!found);
+
+		return localSort;
 	}
 
 	public void setLeft(Term left) {
@@ -72,32 +94,25 @@ public class Rewrite extends Term {
 		return visitor.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
-
-	// public String getComputedSort() {
-	// if (sort.equals(MetaK.Constants.KList)) {
-	// String lsort = left.getSort();
-	// String rsort = right.getSort();
-	//
-	// if (!lsort.equals(MetaK.Constants.KList) && !rsort.equals(MetaK.Constants.KList))
-	// sort = "K";
-	// }
-	// return sort;
-	// }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	@Override
 	public Rewrite shallowCopy() {
 		return new Rewrite(this);
 	}
 
-  //this currently causes ambiguities
-/*	@Override
+	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Rewrite)) return false;
-		Rewrite r = (Rewrite)o;
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Rewrite))
+			return false;
+		Rewrite r = (Rewrite) o;
 		return left.equals(r.left) && right.equals(r.right);
-	} */
+	}
 }

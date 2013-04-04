@@ -5,21 +5,20 @@ import org.kframework.kil.matchers.Matchable;
 
 import org.w3c.dom.Element;
 
-
 /**
- * Base of all nodes that represent terms in the semantics.
- * Each term is labeled with a sort.
+ * Base of all nodes that represent terms in the semantics. Each term is labeled with a sort.
  */
 public abstract class Term extends ASTNode implements Matchable {
 	protected String sort;
 
-    protected Term(){}
+	protected Term() {
+	}
 
 	public Term(Term t) {
 		super(t);
 		this.sort = t.sort;
 	}
-	
+
 	public Term(String location, String filename, String sort) {
 		super(location, filename);
 		setSort(sort);
@@ -42,8 +41,9 @@ public abstract class Term extends ASTNode implements Matchable {
 	public void setSort(String sort) {
 		this.sort = sort;
 	}
-	
+
 	@Override
 	public abstract Term shallowCopy();
 
+	public abstract boolean equals(Object obj);
 }

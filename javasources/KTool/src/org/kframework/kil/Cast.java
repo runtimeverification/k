@@ -79,8 +79,15 @@ public class Cast extends Term {
 		return syntactic;
 	}
 
-	// this current causes ambiguities
-	/*
-	 * @Override public boolean equals(Object o) { if (!(o instanceof Cast)) return false; Bracket b = (Bracket)o; return content.equals(b.content); }
-	 */
+	@Override
+	public boolean equals(Object o) {
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Cast))
+			return false;
+		Cast c = (Cast) o;
+		return this.syntactic == c.syntactic && this.content.equals(c.content);
+	}
 }

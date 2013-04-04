@@ -21,8 +21,6 @@ import org.kframework.kil.Empty;
 import org.kframework.kil.Freezer;
 import org.kframework.kil.FreezerHole;
 import org.kframework.kil.FreezerLabel;
-import org.kframework.kil.FreezerSubstitution;
-import org.kframework.kil.FreezerVariable;
 import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
 import org.kframework.kil.KApp;
@@ -322,16 +320,6 @@ public class BasicHookWorker implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(FreezerVariable node) throws TransformerException {
-		return transform((Term) node);
-	}
-
-	@Override
-	public ASTNode transform(FreezerSubstitution node) throws TransformerException {
-		return transform((Term) node);
-	}
-
-	@Override
 	public ASTNode transform(BackendTerm term) throws TransformerException {
 		return transform((Term) term);
 	}
@@ -356,12 +344,12 @@ public class BasicHookWorker implements Transformer {
 		return transform((Term) node);
 	}
 
-    @Override
-    public ASTNode transform(FreezerHole node) throws TransformerException {
-        return transform((Term) node);
-    }
+	@Override
+	public ASTNode transform(FreezerHole node) throws TransformerException {
+		return transform((Term) node);
+	}
 
-    @Override
+	@Override
 	public ASTNode transform(FreezerLabel node) throws TransformerException {
 		return transform((Term) node);
 	}
