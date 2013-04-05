@@ -587,7 +587,7 @@ Before we can define the semantics of method application (previously
 called function application in SIMPLE), we need to add two more values
 to the language, namely object and method closures: */
 
-  syntax Val ::= objectClosure(Bag)
+  syntax Val ::= objectClosure(CrntObjCellFragment)
                | methodClosure(Id,Int,Ids,Stmt)
 
 /*@  An object value consists of an \texttt{objectClosure}-wrapped bag
@@ -616,7 +616,7 @@ switch to method closure's class and object environment and execute
 the method body.  The \texttt{mkDecls} construct is the one that came
 with the unchanged semantics of SIMPLE above.  */
 
-  syntax ListItem ::=  (Map,K,Bag)
+  syntax ListItem ::=  (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>

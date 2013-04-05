@@ -1,44 +1,10 @@
 package org.kframework.compile.utils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Bag;
-import org.kframework.kil.Cell;
+import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Context;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Empty;
-import org.kframework.kil.Hole;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.KSort;
-import org.kframework.kil.ListItem;
 import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.SetItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -51,6 +17,10 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.util.*;
+import java.util.List;
+import java.util.Set;
+
 public class MetaK {
 
 	public static Term incrementCondition(Term condition, Term kresultCnd) {
@@ -61,6 +31,11 @@ public class MetaK {
 		items.add(condition);
 		items.add(kresultCnd);
 		return new KApp(Constant.ANDBOOL_KLABEL,items);
+	}
+
+	public static boolean isCellSort(String bigSort) {
+		return (bigSort.endsWith("CellSort")
+				||bigSort.endsWith("CellFragment"));
 	}
 
 	public static class Constants {
@@ -192,7 +167,7 @@ public class MetaK {
 	public static Term defaultTerm(Term v) {
 		String sort = v.getSort();
 		KSort ksort = KSort.getKSort(sort).mainSort();
-		if (ksort.isDefaulable())
+		if (ksort.isDefaultable())
 			return new Empty(ksort.toString());
 		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
 				.getLocation()));

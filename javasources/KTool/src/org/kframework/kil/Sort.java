@@ -1,14 +1,14 @@
 package org.kframework.kil;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /** A nonterminal in a {@link Production}. Also abused in some places as a sort identifier */
 public class Sort extends ProductionItem {
@@ -45,7 +45,7 @@ public class Sort extends ProductionItem {
 
 	public Sort(Sort sort) {
 		super(sort);
-		this.name = sort.name;
+		this.name = sort.getName();
 	}
 
 	public static boolean isBasesort(String sort) {
@@ -57,7 +57,7 @@ public class Sort extends ProductionItem {
 	}
 
 	public boolean isBaseSort() {
-		return Sort.isBasesort(name);
+		return Sort.isBasesort(getName());
 	}
 
 	public void setName(String sort) {
@@ -65,6 +65,12 @@ public class Sort extends ProductionItem {
 	}
 
 	public String getName() {
+		if (MetaK.isCellSort(name))
+			return KSort.Bag.name();
+		return name;
+	}
+
+	public String getRealName() {
 		return name;
 	}
 
@@ -74,7 +80,7 @@ public class Sort extends ProductionItem {
 
 	@Override
 	public String toString() {
-		return name;
+		return getName();
 	}
 
 	@Override
@@ -98,14 +104,14 @@ public class Sort extends ProductionItem {
 
 		Sort srt = (Sort) obj;
 
-		if (!name.equals(srt.getName()))
+		if (!getName().equals(srt.getName()))
 			return false;
 		return true;
 	}
 
 	@Override
 	public int hashCode() {
-		return this.name.hashCode();
+		return this.getName().hashCode();
 	}
 
 	@Override

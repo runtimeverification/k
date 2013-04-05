@@ -1,5 +1,6 @@
 package org.kframework.backend.maude;
 
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.backend.BackendFilter;
 import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -335,38 +336,45 @@ public class MaudeFilter extends BackendFilter {
 	 */
 	@Override
 	public void visit(Cell cell) {
+/*
 		String id = cell.getId();
 		result.append("(");
 		result.append("<" + id + "> ");
-//		String cellLabel = "<_>_</_>";
-//
-//		result.append(cellLabel);
-//		result.append("(");
-//		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
-//			if (!entry.getValue().equals("")) {
-//				result.append("__(");
-//			}
-//		}
-//		result.append(cell.getLabel());
-//		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
-//			if (!entry.getValue().equals("")) {
-//				result.append(",_=_(");
-//				result.append(entry.getKey());
-//				result.append(",\"");
-//				result.append(entry.getValue());
-//				result.append("\"))");
-//			}
-//		}
-//		result.append(", ");
 		if (cell.getContents() != null) {
 			cell.getContents().accept(this);
 		} else {
 			result.append("null");
 		}
-//		result.append(", ");
-//		result.append(cell.getLabel());
-//		result.append(")");
 		result.append(" </" + id + ">");
+		result.append(")");
+*/
+		String id = cell.getId();
+		ConfigurationStructure cellStr = null;
+		if (id.endsWith("-fragment")) {
+			cellStr = cfgStr.get(id.substring(0, id.length()-"-fragment"
+					.length()));
+		} else {
+			cellStr = cfgStr.get(id);
+		}
+		System.out.println(id);
+		final boolean isEmpty = cellStr.sons.isEmpty();
+		result.append("<" + id + ">");
+		if (isEmpty) result.append("_");
+		else {
+			result.append(StringUtils.repeat("_", cellStr.sons.size()));
+		}
+		result.append("</" + id + ">(");
+		if (isEmpty || !(cell.getContents() instanceof Bag)) cell.getContents().accept(this);
+		else {
+			Bag contents = (Bag) cell.getContents();
+			boolean first = true;
+			for (Term item : contents.getContents()) {
+				if (!first) result.append(", ");
+				first = false;
+
+				item.accept(this);
+			}
+		}
 		result.append(")");
 	}
 
