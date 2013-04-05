@@ -139,14 +139,14 @@ public class DefinitionHelper {
 	/**
 	 * find the LUB of a list of sorts
 	 */
-	public static String getLUBSort(List<String> sorts) {
+	public static String getLUBSort(Set<String> sorts) {
 		return subsorts.getLUB(sorts);
 	}
 
 	/**
 	 * find the GLB of a list of sorts
 	 */
-	public static String getGLBSort(List<String> sorts){
+	public static String getGLBSort(Set<String> sorts){
 		return subsorts.getGLB(sorts);
 	}
 

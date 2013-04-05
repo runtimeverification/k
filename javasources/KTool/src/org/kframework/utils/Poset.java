@@ -67,7 +67,7 @@ public class Poset {
 	 * also assumes that the Poset is actually a Poset (transitively closed)
 	 *
 	 */
-	public String getLUB(List<String> subset){
+	public String getLUB(Set<String> subset){
 		List<String> candidates = new ArrayList<String>();
 		for(String elem : elements){
 			boolean isGTESubset = true;
@@ -102,7 +102,7 @@ public class Poset {
 	 * also assumes that the Poset is actually a Poset (transitively closed)
 	 *
 	 */
-	public String getGLB(List<String> subset){
+	public String getGLB(Set<String> subset){
 		List<String> candidates = new ArrayList<String>();
 		for(String elem : elements){
 			boolean isLTESubset = true;
@@ -216,6 +216,6 @@ public class Poset {
 		p.addRelation("Val", "Exp");
 		p.addRelation("Id", "Exp");
 		p.transitiveClosure();
-		System.out.println(p.getLUB(new ArrayList<String>() {{add("Exp"); add("Val"); add("Id");}}));
+		System.out.println(p.getLUB(new HashSet<String>() {{add("Exp"); add("Val"); add("Id");}}));
 	}
 }
