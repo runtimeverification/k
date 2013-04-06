@@ -43,14 +43,16 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 				}
 
 				// found a group of terms that are alike
+				// alike means they have the same arity, same position for terminals and non terminals
 				if (t instanceof TermCons) {
 					// find the LUB for every position
 					TermCons tc = (TermCons) t;
 					List<String> lub = new ArrayList<String>(tc.getProduction().getItems().size());
 
+					Set<String> collect = new HashSet<String>();
 					for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
 						lub.add("");
-						Set<String> collect = new HashSet<String>();
+						collect.clear();
 						if (tc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
 							for (Term tt : group) {
 								TermCons ttc = (TermCons) tt;
@@ -62,7 +64,8 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 								TermCons ttc = (TermCons) tt;
 								collect.add(ttc.getProduction().getSort());
 							}
-						}
+						} else
+							continue;
 						String lubSort = DefinitionHelper.getLUBSort(collect);
 						if (lubSort == null) {
 							// couldn't find a LUB sort, leave it ambiguous
@@ -72,48 +75,68 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 						}
 						lub.set(i, lubSort);
 					}
+					// do the check for the production type also
+					collect.clear();
+					for (Term tt : group)
+						collect.add(tt.getSort());
+					String lubSort = DefinitionHelper.getLUBSort(collect);
+					if (lubSort != null)
+						lub.add(lubSort);
 
-					// add only the term that has all the sorts as LUB
+					// add only the term that has all the sorts >= LUB
 					Set<Term> maxterms2 = new HashSet<Term>();
 					for (Term tt : group) {
 						TermCons ttc = (TermCons) tt;
 						boolean allLub = true;
 						for (int i = 0; i < ttc.getProduction().getItems().size(); i++) {
 							if (ttc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
-								if (!((Sort) ttc.getProduction().getItems().get(i)).getName().equals(lub.get(i))) {
+								if (!DefinitionHelper.isSubsortedEq(((Sort) ttc.getProduction().getItems().get(i)).getName(), lub.get(i))) {
 									allLub = false;
 									break;
 								}
 							} else if (ttc.getProduction().getItems().get(i).getType() == ProductionType.USERLIST) {
-								if (!ttc.getProduction().getSort().equals(lub.get(i))) {
+								if (!DefinitionHelper.isSubsortedEq(ttc.getProduction().getSort(), lub.get(i))) {
 									allLub = false;
 									break;
 								}
 							}
 						}
-						if (allLub) {
-							maxterms2.add(tt);
+						if (!DefinitionHelper.isSubsortedEq(ttc.getProduction().getSort(), lub.get(lub.size() - 1))) {
+							allLub = false;
+							break;
 						}
+						if (allLub)
+							maxterms2.add(tt);
 					}
 					if (maxterms2.isEmpty()) {
 						// this means that I couldn't find a term that contains all the LUB sorts
 						// leave it ambiguous
 						maxterms.addAll(group);
 					} else {
-						maxterms.addAll(maxterms2);
+						// finally, try to find the minimum here by eliminating maximums
+						for (Term tm2 : maxterms2) {
+							boolean max = false;
+							Production tcBig = ((TermCons) tm2).getProduction();
+							for (Term tm22 : maxterms2) {
+								Production tcSmall = ((TermCons) tm22).getProduction();
+								if (tm2 != tm22 && isSubsorted(tcBig, tcSmall)) {
+									max = true;
+									break;
+								}
+							}
+							if (!max)
+								maxterms.add(tm2);
+						}
 					}
 				} else if (t instanceof Variable) {
-					// find maximum for variables only
+					// for variables only, find maximum
 					for (Term t1 : group) {
 						boolean max = true;
-						for (Term t2 : group) {
-							if (t1 != t2 && DefinitionHelper.isSubsorted(t2.getSort(), t1.getSort())) {
+						for (Term t2 : group)
+							if (t1 != t2 && DefinitionHelper.isSubsorted(t2.getSort(), t1.getSort()))
 								max = false;
-							}
-						}
-						if (max) {
+						if (max)
 							maxterms.add(t1);
-						}
 					}
 				} else
 					maxterms.addAll(group);
@@ -126,6 +149,32 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			amb.setContents(new ArrayList<Term>(maxterms));
 
 		return super.transform(amb);
+	}
+
+	private static boolean isSubsorted(Production big, Production small) {
+		if (big == small)
+			return false;
+		if (big.getItems().size() != small.getItems().size())
+			return false;
+		if (!DefinitionHelper.isSubsortedEq(big.getSort(), small.getSort()))
+			return false;
+		for (int i = 0; i < big.getItems().size(); i++) {
+			if (big.getItems().get(i).getType() != small.getItems().get(i).getType()) {
+				return false;
+			} else if (big.getItems().get(i).getType() == ProductionType.SORT) {
+				String bigSort = ((Sort) big.getItems().get(i)).getName();
+				String smallSort = ((Sort) small.getItems().get(i)).getName();
+				if (!DefinitionHelper.isSubsortedEq(bigSort, smallSort))
+					return false;
+			} else if (big.getItems().get(i).getType() == ProductionType.USERLIST) {
+				String bigSort = ((UserList) big.getItems().get(i)).getSort();
+				String smallSort = ((UserList) small.getItems().get(i)).getSort();
+				if (!DefinitionHelper.isSubsortedEq(bigSort, smallSort))
+					return false;
+			} else
+				continue;
+		}
+		return true;
 	}
 
 	private static boolean termsAlike_simple(Term trm1, Term trm2) {

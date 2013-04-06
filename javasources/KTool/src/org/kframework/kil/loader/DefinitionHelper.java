@@ -146,7 +146,7 @@ public class DefinitionHelper {
 	/**
 	 * find the GLB of a list of sorts
 	 */
-	public static String getGLBSort(Set<String> sorts){
+	public static String getGLBSort(Set<String> sorts) {
 		return subsorts.getGLB(sorts);
 	}
 
