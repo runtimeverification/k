@@ -1,8 +1,5 @@
 package org.kframework.kil;
 
-import java.io.Serializable;
-import java.util.Set;
-
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformable;
@@ -12,6 +9,9 @@ import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ITokenizer;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.w3c.dom.Element;
+
+import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Base class for K AST. Useful for Visitors and Transformers.
@@ -63,7 +63,7 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 * @return the location stored in XML or Constants.GENERATED_LOCATION if no location found.
 	 */
 	private static String getElementLocation(Element elem) {
-		if (elem != null)
+		if (elem != null && elem.hasAttribute(Constants.LOC_loc_ATTR))
 			return elem.getAttribute(Constants.LOC_loc_ATTR);
 		else
 			return Constants.GENERATED_LOCATION;
@@ -76,7 +76,7 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 * @return the file name stored in XML or Constants.GENERATED_FILENAME if no filename found.
 	 */
 	private static String getElementFile(Element elem) {
-		if (elem != null)
+		if (elem != null && elem.hasAttribute(Constants.LOC_loc_ATTR))
 			return elem.getAttribute(Constants.FILENAME_filename_ATTR);
 		else
 			return Constants.GENERATED_FILENAME;
