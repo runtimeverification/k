@@ -1,7 +1,7 @@
 /**
 K should find the most concrete common term.
 */
-module TEST
+module ISSUE
 
  syntax Exp ::= Int
  syntax Exp ::= test(Int, Int)  [klabel('correct)]
