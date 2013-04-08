@@ -476,6 +476,19 @@
       </program>
   </test>
 
+  <test
+      language="tests/regression/issue631/issue.k"
+      folder="tests/regression/issue631"
+      results="tests/regression/issue631"
+      extensions="issue" >
+  </test>
+
+  <test
+      language="tests/regression/mostConcrete/issue.k"
+      folder="tests/regression/mostConcrete"
+      results="tests/regression/mostConcrete"
+      extensions="issue" >
+  </test>
 
 <!--
     Cink ltlmc
