@@ -188,6 +188,9 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			// check to see if the two terms have the same arity
 			if (term1.getProduction().getItems().size() != term2.getProduction().getItems().size())
 				return false;
+			
+			if (!term1.getProduction().getKLabel().equals(term2.getProduction().getKLabel()))
+				return false;
 
 			for (int i = 0; i < term1.getProduction().getItems().size(); i++) {
 				ProductionItem itm1 = term1.getProduction().getItems().get(i);
