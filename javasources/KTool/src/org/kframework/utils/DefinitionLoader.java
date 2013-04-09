@@ -268,8 +268,8 @@ public class DefinitionLoader {
 			config = config.accept(new TypeSystemFilter());
 			config = config.accept(new PriorityFilter());
 			config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-			config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 			config = config.accept(new TypeInferenceSupremumFilter());
+			config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 			config = config.accept(new PreferAvoidFilter());
 			config = config.accept(new FlattenListsFilter());
 			// config = config.accept(new CorrectRewriteSortFilter());
@@ -313,8 +313,8 @@ public class DefinitionLoader {
 			config = config.accept(new TypeSystemFilter());
 			config = config.accept(new PriorityFilter());
 			config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-			config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 			config = config.accept(new TypeInferenceSupremumFilter());
+			config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 			config = config.accept(new PreferAvoidFilter());
 			config = config.accept(new FlattenListsFilter());
 			config = config.accept(new AmbDuplicateFilter());

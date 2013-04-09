@@ -122,6 +122,8 @@ public class Production extends ASTNode {
 	}
 
 	public String getKLabel() {
+		if (isSubsort())
+			System.out.println("Here:");
 		assert MetaK.isComputationSort(sort) || sort.equals("KLabel") && isConstant();
 
 		String klabel;
@@ -274,13 +276,13 @@ public class Production extends ASTNode {
 			ProductionItem item = items.get(i);
 			if (item.getType() == ProductionType.USERLIST) {
 				if (idx == arity)
-					return !((UserList)item).getSeparator().equals("");
+					return !((UserList) item).getSeparator().equals("");
 				if (idx == arity + 1)
 					return false;
 				arity += 2;
 			} else if (item.getType() == ProductionType.SORT) {
 				if (idx == arity)
-					return i != items.size() - 1 && items.get(i+1).getType() == ProductionType.TERMINAL;
+					return i != items.size() - 1 && items.get(i + 1).getType() == ProductionType.TERMINAL;
 				arity++;
 			}
 		}
@@ -295,11 +297,11 @@ public class Production extends ASTNode {
 				if (idx == arity)
 					return false;
 				if (idx == arity + 1)
-					return !((UserList)item).getSeparator().equals("");
+					return !((UserList) item).getSeparator().equals("");
 				arity += 2;
 			} else if (item.getType() == ProductionType.SORT) {
 				if (idx == arity)
-					return i != 0 && items.get(i-1).getType() == ProductionType.TERMINAL;
+					return i != 0 && items.get(i - 1).getType() == ProductionType.TERMINAL;
 				arity++;
 			}
 		}

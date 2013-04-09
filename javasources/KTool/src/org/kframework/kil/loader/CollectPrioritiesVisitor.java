@@ -54,7 +54,11 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
 					Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getValue());
 					// add all the relations between all the productions annotated with tag1 and tag 2
 					for (Production p1 : prods1) {
+						if (p1.isSubsort() && !p1.containsAttribute("klabel"))
+							continue;
 						for (Production p2 : prods2) {
+							if (p2.isSubsort() && !p2.containsAttribute("klabel"))
+								continue;
 							DefinitionHelper.addPriority(p1.getKLabel(), p2.getKLabel());
 						}
 					}
