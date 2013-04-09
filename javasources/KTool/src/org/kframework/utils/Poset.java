@@ -71,37 +71,27 @@ public class Poset {
 			return null;
 		if (subset.size() == 1)
 			return subset.iterator().next();
-		// find and remove all the sorts that are not in some kind of relation
-		Set<String> remove = new HashSet<String>();
-		for (String s1 : subset) {
-			for (String s2 : subset) {
-				if (!s1.equals(s2) && !isInRelation(s1, s2) && !isInRelation(s2, s1)) {
-					remove.add(s1);
-					remove.add(s2);
-				}
-			}
-		}
-
-		Set<String> candidates = new HashSet<String>(subset);
-		candidates.removeAll(remove);
-
-		if (candidates.isEmpty())
-			return null;
-
-		// on the remaining sorts (should be a chain) find the minimum
-		String lub = candidates.iterator().next();
-		boolean min = true;
-		do {
-			min = true;
-			for (String s : candidates) {
-				if (!lub.equals(s) && isInRelation(lub, s)) {
-					lub = s;
-					min = false;
+		List<String> candidates = new ArrayList<String>();
+		for (String elem : elements) {
+			boolean isGTESubset = true;
+			for (String subsetElem : subset) {
+				if (!(isInRelation(elem, subsetElem) || elem.equals(subsetElem))) {
+					isGTESubset = false;
 					break;
 				}
 			}
-		} while (!min);
-
+			if (isGTESubset) {
+				candidates.add(elem);
+			}
+		}
+		if (candidates.size() == 0)
+			return null;
+		String lub = candidates.get(0);
+		for (int i = 1; i < candidates.size(); ++i) {
+			if (isInRelation(lub, candidates.get(i))) {
+				lub = candidates.get(i);
+			}
+		}
 		return lub;
 	}
 
@@ -120,37 +110,28 @@ public class Poset {
 			return null;
 		if (subset.size() == 1)
 			return subset.iterator().next();
-		// find and remove all the sorts that are not in some kind of relation
-		Set<String> remove = new HashSet<String>();
-		for (String s1 : subset) {
-			for (String s2 : subset) {
-				if (!s1.equals(s2) && !isInRelation(s1, s2) && !isInRelation(s2, s1)) {
-					remove.add(s1);
-					remove.add(s2);
-				}
-			}
-		}
-
-		Set<String> candidates = new HashSet<String>(subset);
-		candidates.removeAll(remove);
-
-		if (candidates.isEmpty())
-			return null;
-
-		// on the remaining sorts (should be a chain) find the maximum
-		String gte = candidates.iterator().next();
-		boolean max = true;
-		do {
-			for (String s : candidates) {
-				if (isInRelation(s, gte)) {
-					gte = s;
-					max = false;
+		List<String> candidates = new ArrayList<String>();
+		for (String elem : elements) {
+			boolean isLTESubset = true;
+			for (String subsetElem : subset) {
+				if (!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
+					isLTESubset = false;
 					break;
 				}
 			}
-		} while (!max);
-
-		return gte;
+			if (isLTESubset) {
+				candidates.add(elem);
+			}
+		}
+		if (candidates.size() == 0)
+			return null;
+		String glb = candidates.get(0);
+		for (int i = 1; i < candidates.size(); ++i) {
+			if (isInRelation(candidates.get(i), glb)) {
+				glb = candidates.get(i);
+			}
+		}
+		return glb;
 	}
 
 	private class Tuple {

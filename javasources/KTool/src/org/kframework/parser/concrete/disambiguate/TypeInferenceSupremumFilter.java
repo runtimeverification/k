@@ -2,7 +2,6 @@ package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.kframework.kil.ASTNode;
@@ -45,88 +44,19 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 				// found a group of terms that are alike
 				// alike means they have the same arity, same position for terminals and non terminals
 				if (t instanceof TermCons) {
-					// find the LUB for every position
-					TermCons tc = (TermCons) t;
-					List<String> lub = new ArrayList<String>(tc.getProduction().getItems().size());
-
-					Set<String> collect = new HashSet<String>();
-					for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
-						lub.add("");
-						collect.clear();
-						if (tc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
-							for (Term tt : group) {
-								TermCons ttc = (TermCons) tt;
-								Production p = ttc.getProduction();
-								collect.add(((Sort) p.getItems().get(i)).getName());
-							}
-						} else if (tc.getProduction().getItems().get(i).getType() == ProductionType.USERLIST) {
-							for (Term tt : group) {
-								TermCons ttc = (TermCons) tt;
-								collect.add(ttc.getProduction().getSort());
-							}
-						} else
-							continue;
-						String lubSort = DefinitionHelper.getLUBSort(collect);
-						if (lubSort == null) {
-							// couldn't find a LUB sort, leave it ambiguous
-							maxterms.addAll(group);
-							group.clear();
-							break;
-						}
-						lub.set(i, lubSort);
-					}
-					// do the check for the production type also
-					collect.clear();
-					for (Term tt : group)
-						collect.add(tt.getSort());
-					String lubSort = DefinitionHelper.getLUBSort(collect);
-					if (lubSort != null)
-						lub.add(lubSort);
-
-					// add only the term that has all the sorts >= LUB
-					Set<Term> maxterms2 = new HashSet<Term>();
-					for (Term tt : group) {
-						TermCons ttc = (TermCons) tt;
-						boolean allLub = true;
-						for (int i = 0; i < ttc.getProduction().getItems().size(); i++) {
-							if (ttc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
-								if (!DefinitionHelper.isSubsortedEq(((Sort) ttc.getProduction().getItems().get(i)).getName(), lub.get(i))) {
-									allLub = false;
-									break;
-								}
-							} else if (ttc.getProduction().getItems().get(i).getType() == ProductionType.USERLIST) {
-								if (!DefinitionHelper.isSubsortedEq(ttc.getProduction().getSort(), lub.get(i))) {
-									allLub = false;
-									break;
-								}
+					// finally, try to find the minimums
+					for (Term tm2 : group) {
+						boolean min = true;
+						Production tcBig = ((TermCons) tm2).getProduction();
+						for (Term tm22 : group) {
+							Production tcSmall = ((TermCons) tm22).getProduction();
+							if (tm2 != tm22 && isSubsorted(tcBig, tcSmall)) {
+								min = false;
+								break;
 							}
 						}
-						if (!DefinitionHelper.isSubsortedEq(ttc.getProduction().getSort(), lub.get(lub.size() - 1))) {
-							allLub = false;
-							break;
-						}
-						if (allLub)
-							maxterms2.add(tt);
-					}
-					if (maxterms2.isEmpty()) {
-						// this means that I couldn't find a term that contains all the LUB sorts
-						// leave it ambiguous
-						maxterms.addAll(group);
-					} else {
-						// finally, try to find the minimum here by eliminating maximums
-						for (Term tm2 : maxterms2) {
-							boolean max = false;
-							Production tcBig = ((TermCons) tm2).getProduction();
-							for (Term tm22 : maxterms2) {
-								Production tcSmall = ((TermCons) tm22).getProduction();
-								if (tm2 != tm22 && isSubsorted(tcBig, tcSmall)) {
-									max = true;
-									break;
-								}
-							}
-							if (!max)
-								maxterms.add(tm2);
-						}
+						if (min)
+							maxterms.add(tm2);
 					}
 				} else if (t instanceof Variable) {
 					// for variables only, find maximum
@@ -188,7 +118,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			// check to see if the two terms have the same arity
 			if (term1.getProduction().getItems().size() != term2.getProduction().getItems().size())
 				return false;
-			
+
 			if (!term1.getProduction().getKLabel().equals(term2.getProduction().getKLabel()))
 				return false;
 
