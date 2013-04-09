@@ -122,8 +122,6 @@ public class Production extends ASTNode {
 	}
 
 	public String getKLabel() {
-		if (isSubsort())
-			System.out.println("Here:");
 		assert MetaK.isComputationSort(sort) || sort.equals("KLabel") && isConstant();
 
 		String klabel;

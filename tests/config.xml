@@ -477,6 +477,13 @@
   </test>
 
   <test
+      language="tests/regression/issue627/issue.k"
+      folder="tests/regression/issue627/programs"
+      results="tests/regression/issue627/tests"
+      extensions="issue" >
+  </test>
+
+  <test
       language="tests/regression/issue631/issue.k"
       folder="tests/regression/issue631"
       results="tests/regression/issue631"
