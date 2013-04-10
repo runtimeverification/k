@@ -131,6 +131,9 @@ public class RunProcess {
 					environment.put("KRUN_SORT", startSymbol);
 				}
 				environment.put("KRUN_COMPILED_DEF", K.compiled_def);
+				if (isPgm) {
+					environment.put("KRUN_IS_NOT_FILE", "true");
+				}
 				this.execute(environment, tokens.toArray(new String[0]));
 			}
 		}

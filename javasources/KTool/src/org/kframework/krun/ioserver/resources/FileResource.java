@@ -11,6 +11,7 @@ public abstract class FileResource extends Resource {
 	public abstract void flush() throws Exception;
 	public abstract Byte peek() throws Exception;
 	public abstract Byte readbyte() throws Exception;
+	public abstract byte[] readbytes(int numBytes) throws Exception;
 	public abstract void seek(int position) throws Exception;
 	public abstract void writebyte(byte ascii) throws Exception;
 	public abstract void writebytes(byte[] bytes) throws Exception;

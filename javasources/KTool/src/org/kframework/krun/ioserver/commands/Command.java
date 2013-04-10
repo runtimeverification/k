@@ -25,12 +25,12 @@ public abstract class Command implements Runnable {
 
 	public void succeed(String... messages) {
 
-		String success = maudeId + "#" + "success#";
+		String success = maudeId + "\001" + "success\001";
 		for (String s : messages) {
-			success += s + "#";
+			success += s + "\001";
 		}
-        _logger.info("sending '" + success + "##' to "+ maudeId);
-		success += "##\n";
+        _logger.info("sending '" + success + "\001\001' to "+ maudeId);
+		success += "\001\001\n";
 		
 		BufferedWriter output = null;
 		try {

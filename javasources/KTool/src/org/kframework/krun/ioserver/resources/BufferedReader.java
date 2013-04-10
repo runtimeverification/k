@@ -3,6 +3,7 @@ package org.kframework.krun.ioserver.resources;
 import javax.imageio.IIOException;
 import java.io.EOFException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public class BufferedReader extends FileResource{
 
@@ -56,6 +57,25 @@ public class BufferedReader extends FileResource{
 		}
 		integer = peek();
 		return (byte)tmp;
+	}
+
+	@Override
+	public byte[] readbytes(int numBytes) throws Exception {
+		byte[] result = new byte[numBytes];
+		int tmp;
+		if (integer == -2) {
+			tmp = is.read(result, 0, numBytes);
+			if (tmp == -1) throw new EOFException();
+		} else if (integer == -1) {
+			throw new EOFException();
+		} else {
+			result[0] = (byte)integer;
+			tmp = is.read(result, 1, numBytes-1);
+			if (tmp == -1) throw new EOFException();
+			integer = -2;
+		}
+		integer = peek();
+		return Arrays.copyOfRange(result, 0, tmp);
 	}
 
 	@Override

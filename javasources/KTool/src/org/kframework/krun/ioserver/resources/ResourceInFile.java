@@ -28,6 +28,11 @@ public class ResourceInFile extends FileResource {
 	}
 
 	@Override
+	public byte[] readbytes(int numBytes) throws Exception {
+		return in.readbytes(numBytes);
+	}
+
+	@Override
 	public void seek(int position) throws Exception {
 		in.seek(position);
 	}
