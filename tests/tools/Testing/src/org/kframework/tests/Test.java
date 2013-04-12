@@ -427,7 +427,7 @@ public class Test {
 	}
 
 	public String getCompiled() {
-		return getLanguage().substring(0, getLanguage().length() - 2)
+		return getLanguage().replaceAll("\\.k$", "")
 				+ "-kompiled";
 	}
 
@@ -435,10 +435,7 @@ public class Test {
 		if (reportDir != null)
 			return reportDir + "-report.xml";
 
-		return new File(language).getAbsolutePath()
-				.substring(Configuration.getHome().length())
-				.replaceAll(Configuration.FS, ".")
-				.replaceFirst("\\.k$", "-report.xml").replaceFirst(".", "");
+		return language.replaceFirst("\\.k$", "-report.xml").replaceFirst(".", "");
 	}
 
 	public void reportCompilation(Task task) {
@@ -485,7 +482,7 @@ public class Test {
 	}
 
 	private String getPdfCompiledFilename() {
-		return getLanguage().substring(0, getLanguage().length() - 2) + ".pdf";
+		return getLanguage().replaceAll("\\.k$", ".pdf");
 
 	}
 
