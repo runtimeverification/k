@@ -34,96 +34,96 @@ public class Main {
 		System.out.println(homeDir.getAbsolutePath());
 
 		// a little bit hack-ish but it works until somebody complains
-		System.out.println(System.getProperty("user.dir"));
-		if (System.getProperty("user.dir").contains("jenkins")) {
-
-			// remove anything from previous build
-			try {
-				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
-						Configuration.k);
-				Process process = pb.start();
-				int exit = process.waitFor();
-				String out = Task.readString(process.getInputStream());
-				String err = Task.readString(process.getErrorStream());
-				System.out.println(out);
-				System.out.println(err);
-				System.out.println(exit);
-			} catch (Exception e) {
-				e.printStackTrace();
-				exitCode = 1;
-			}
-
-			// remove maude binaries
-			/*
-			 * System.out.println("Remove maude binaries"); try { ProcessBuilder
-			 * pb = new ProcessBuilder("rm", "-rf",
-			 * "/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
-			 * Configuration.k); Process process = pb.start(); int exit =
-			 * process.waitFor(); String out =
-			 * Task.readString(process.getInputStream()); String err =
-			 * Task.readString(process.getErrorStream());
-			 * System.out.println(out); System.out.println(err);
-			 * System.out.println(exit); } catch (Exception e) { exitCode = 1;
-			 * e.printStackTrace(); }
-			 */
-			// first copy the k-framework artifacts
-			try {
-				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
-						"/var/lib/jenkins/workspace/k-framework",
-						Configuration.k);
-				Process process = pb.start();
-				int exit = process.waitFor();
-				String out = Task.readString(process.getInputStream());
-				String err = Task.readString(process.getErrorStream());
-				System.out.println(out);
-				System.out.println(err);
-				System.out.println(exit);
-			} catch (Exception e) {
-				exitCode = 1;
-				e.printStackTrace();
-			}
-
-
-			try {
-				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
-						"junit-reports");
-				Process process = pb.start();
-				int exit = process.waitFor();
-				String out = Task.readString(process.getInputStream());
-				String err = Task.readString(process.getErrorStream());
-				System.out.println(out);
-				System.out.println(err);
-				System.out.println(exit);
-			} catch (Exception e) {
-				exitCode = 1;
-				e.printStackTrace();
-			}
-			
-			// build K
-			try {
-				ProcessBuilder pb = new ProcessBuilder("ant");
-				pb.directory(new File(Configuration.getHome()));
-				Process process = pb.start();
-				int exit = process.waitFor();
-				String out = Task.readString(process.getInputStream());
-				String err = Task.readString(process.getErrorStream());
-				System.out.println(out);
-				System.out.println(err);
-				if (exit != 0)
-					System.exit(exit);
-			} catch (Exception e) {
-				exitCode = 1;
-				e.printStackTrace();
-			}
-
-			if (!new File(Configuration.getHome() + Configuration.FS + "dist"
-					+ Configuration.FS + "bin" + Configuration.FS + "java"
-					+ Configuration.FS + "k3.jar").exists()) {
-			}
-			
-			homeDir = new File(System.getProperty("user.dir") + Configuration.FS + Configuration.k);
-			Configuration.JR = "/var/lib/jenkins/workspace/k-framework-tests" + Configuration.FS + Configuration.JR;
-		}
+//		System.out.println(System.getProperty("user.dir"));
+//		if (System.getProperty("user.dir").contains("jenkins")) {
+//
+//			// remove anything from previous build
+//			try {
+//				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
+//						Configuration.k);
+//				Process process = pb.start();
+//				int exit = process.waitFor();
+//				String out = Task.readString(process.getInputStream());
+//				String err = Task.readString(process.getErrorStream());
+//				System.out.println(out);
+//				System.out.println(err);
+//				System.out.println(exit);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				exitCode = 1;
+//			}
+//
+//			// remove maude binaries
+//			/*
+//			 * System.out.println("Remove maude binaries"); try { ProcessBuilder
+//			 * pb = new ProcessBuilder("rm", "-rf",
+//			 * "/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
+//			 * Configuration.k); Process process = pb.start(); int exit =
+//			 * process.waitFor(); String out =
+//			 * Task.readString(process.getInputStream()); String err =
+//			 * Task.readString(process.getErrorStream());
+//			 * System.out.println(out); System.out.println(err);
+//			 * System.out.println(exit); } catch (Exception e) { exitCode = 1;
+//			 * e.printStackTrace(); }
+//			 */
+//			// first copy the k-framework artifacts
+//			try {
+//				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
+//						"/var/lib/jenkins/workspace/k-framework",
+//						Configuration.k);
+//				Process process = pb.start();
+//				int exit = process.waitFor();
+//				String out = Task.readString(process.getInputStream());
+//				String err = Task.readString(process.getErrorStream());
+//				System.out.println(out);
+//				System.out.println(err);
+//				System.out.println(exit);
+//			} catch (Exception e) {
+//				exitCode = 1;
+//				e.printStackTrace();
+//			}
+//
+//
+//			try {
+//				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
+//						"junit-reports");
+//				Process process = pb.start();
+//				int exit = process.waitFor();
+//				String out = Task.readString(process.getInputStream());
+//				String err = Task.readString(process.getErrorStream());
+//				System.out.println(out);
+//				System.out.println(err);
+//				System.out.println(exit);
+//			} catch (Exception e) {
+//				exitCode = 1;
+//				e.printStackTrace();
+//			}
+//			
+//			// build K
+//			try {
+//				ProcessBuilder pb = new ProcessBuilder("ant");
+//				pb.directory(new File(Configuration.getHome()));
+//				Process process = pb.start();
+//				int exit = process.waitFor();
+//				String out = Task.readString(process.getInputStream());
+//				String err = Task.readString(process.getErrorStream());
+//				System.out.println(out);
+//				System.out.println(err);
+//				if (exit != 0)
+//					System.exit(exit);
+//			} catch (Exception e) {
+//				exitCode = 1;
+//				e.printStackTrace();
+//			}
+//
+//			if (!new File(Configuration.getHome() + Configuration.FS + "dist"
+//					+ Configuration.FS + "bin" + Configuration.FS + "java"
+//					+ Configuration.FS + "k3.jar").exists()) {
+//			}
+//			
+//			homeDir = new File(System.getProperty("user.dir") + Configuration.FS + Configuration.k);
+//			Configuration.JR = "/var/lib/jenkins/workspace/k-framework-tests" + Configuration.FS + Configuration.JR;
+//		}
 
 		if (args.length == 1) {
 			if (!new File(args[0]).isAbsolute())
