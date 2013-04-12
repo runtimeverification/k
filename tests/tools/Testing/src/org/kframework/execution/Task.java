@@ -88,10 +88,14 @@ public class Task extends Thread {
 	}
 
 	public String getStderr() {
+		if (stderr == null)
+			return "";
 		return stderr;
 	}
 
 	public String getStdout() {
+		if (stdout == null)
+			return "";
 		return stdout;
 	}
 

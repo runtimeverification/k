@@ -52,24 +52,18 @@ public class Main {
 			}
 
 			// remove maude binaries
-/* 
-			System.out.println("Remove maude binaries");
-      try {
-				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
-						"/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
-						Configuration.k);
-				Process process = pb.start();
-				int exit = process.waitFor();
-				String out = Task.readString(process.getInputStream());
-				String err = Task.readString(process.getErrorStream());
-				System.out.println(out);
-				System.out.println(err);
-				System.out.println(exit);
-			} catch (Exception e) {
-				exitCode = 1;
-				e.printStackTrace();
-			}
-*/
+			/*
+			 * System.out.println("Remove maude binaries"); try { ProcessBuilder
+			 * pb = new ProcessBuilder("rm", "-rf",
+			 * "/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
+			 * Configuration.k); Process process = pb.start(); int exit =
+			 * process.waitFor(); String out =
+			 * Task.readString(process.getInputStream()); String err =
+			 * Task.readString(process.getErrorStream());
+			 * System.out.println(out); System.out.println(err);
+			 * System.out.println(exit); } catch (Exception e) { exitCode = 1;
+			 * e.printStackTrace(); }
+			 */
 			// first copy the k-framework artifacts
 			try {
 				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
@@ -86,7 +80,7 @@ public class Main {
 				exitCode = 1;
 				e.printStackTrace();
 			}
-			
+
 			// build K
 			try {
 				ProcessBuilder pb = new ProcessBuilder("ant");
@@ -103,13 +97,13 @@ public class Main {
 				exitCode = 1;
 				e.printStackTrace();
 			}
-			
-			if (!new File(Configuration.getHome() + Configuration.FS + "dist" + Configuration.FS + "bin" + Configuration.FS + "java" + Configuration.FS + "k3.jar").exists())
-			{
+
+			if (!new File(Configuration.getHome() + Configuration.FS + "dist"
+					+ Configuration.FS + "bin" + Configuration.FS + "java"
+					+ Configuration.FS + "k3.jar").exists()) {
 			}
 		}
 
-		
 		if (args.length == 1) {
 			if (!new File(args[0]).isAbsolute())
 				Configuration.CONFIG = Configuration.getHome()
@@ -123,8 +117,6 @@ public class Main {
 			System.exit(1);
 		}
 
-
-		
 		List<Test> alltests = new LinkedList<Test>();
 
 		// load config
@@ -248,12 +240,8 @@ public class Main {
 				String pgmOut = "";
 				for (Entry<Program, Task> entry : all.entrySet()) {
 					if (!entry.getKey().success(entry.getValue())) {
-						pgmOut += "FAIL: "
-								+ entry.getKey()
-										.getAbsolutePath()
-										.substring(
-												Configuration.getHome()
-														.length()) + "\n";
+						pgmOut += "FAIL: " + entry.getKey().getProgramPath()
+								+ "\n";
 						exitCode = 1;
 					}
 				}

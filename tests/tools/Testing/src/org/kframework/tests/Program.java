@@ -9,29 +9,30 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class Program {
-	String absolutePath;
+	String programPath;
 	Map<String, String> krunOptions;
 	Test test;
-	String input, output;
+	String input, output, error;
 
 	public Program(String name, Map<String, String> map, Test test,
-			String input, String output) {
-		this.absolutePath = name;
+			String input, String output, String error) {
+		this.programPath = name;
 		this.krunOptions = map;
 		this.test = test;
 		this.input = input;
 		this.output = output;
+		this.error = error;
 	}
 
 	@Override
 	public String toString() {
-		return absolutePath;// + "\nIn: " + input + "\nOut: " + output + "\n";
+		return programPath;
 	}
 
 	public Task getTask() {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKrun());
-		command.add(absolutePath);
+		command.add(programPath);
 		command.add("--k-definition");
 		command.add(test.getLanguage());
 		for (Entry<String, String> entry : krunOptions.entrySet()) {
@@ -50,36 +51,39 @@ public class Program {
 	}
 
 	public boolean success(Task task) {
-		if (task.getExit() != 0)
-			return false;
-
-		if (!task.getStderr().equals(""))
+//		System.out.println(this.programPath);
+//		System.out.println("e>>>" + error + "<<<");
+//		System.out.println("e>>>" + task.getStderr() + "<<<");
+//		if(error !=null)
+//		System.out.println("e>>>" + task.getStderr().equals(error) + "<<<");
+		if (!task.getStderr().equals(error) && error != null)
 			return false;
 		
+//		System.out.println("o>>>" + output + "<<<");
+//		System.out.println("o>>>" + task.getStdout() + "<<<");
 		if (!task.getStdout().equals(output) && output != null)
 			return false;
 
+//		System.out.println("x>>>" + task.getExit() + "<<<");
+		if (error == null && task.getExit() != 0)
+			return false;
+		
 		return true;
 	}
 
 	public String successful(Task task) {
-		String message = success(task) ? "success" : "failed";
-//		if (!task.getStdout().equals(""))
-//			if (message.equals("success") && !task.getStdout().equals(output))
-//				message = "unstable";
-
-		return message;
+		return success(task) ? "success" : "failed";
 	}
 
 	public void reportTest(Task value) {
 		test.report.appendChild(test.createReportElement(
-				new File(absolutePath).getName(), successful(value),
+				new File(programPath).getName(), successful(value),
 				value.getElapsed() + "", value.getStdout(), value.getStderr(),
 				value, output, !success(value)));
 		test.save();
 	}
 
-	public String getAbsolutePath() {
-		return absolutePath;
+	public String getProgramPath() {
+		return programPath;
 	}
 }
