@@ -357,7 +357,7 @@ public class Test {
 			name = new File(language).getParent();
 
 		testsuite.setAttribute("name",
-				name.replaceFirst("/", "").replaceFirst("/", "\\."));
+				name.replaceFirst("/", "\\."));
 		return testsuite;
 	}
 
