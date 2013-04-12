@@ -122,6 +122,7 @@ public class Main {
 			}
 			
 			homeDir = new File(System.getProperty("user.dir") + Configuration.FS + Configuration.k);
+			Configuration.JR = "/var/lib/jenkins/workspace/k-framework-tests" + Configuration.FS + Configuration.JR;
 		}
 
 		if (args.length == 1) {
