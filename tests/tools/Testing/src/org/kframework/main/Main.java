@@ -104,6 +104,8 @@ public class Main {
 					+ Configuration.FS + "bin" + Configuration.FS + "java"
 					+ Configuration.FS + "k3.jar").exists()) {
 			}
+			
+			homeDir = new File(System.getProperty("user.dir") + Configuration.FS + Configuration.k);
 		}
 
 		if (args.length == 1) {
