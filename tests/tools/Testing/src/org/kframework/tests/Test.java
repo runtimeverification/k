@@ -435,7 +435,7 @@ public class Test {
 		if (reportDir != null)
 			return reportDir + "-report.xml";
 
-		return language.replaceFirst("\\.k$", "-report.xml");
+		return language.replaceFirst("\\.k$", "-report.xml").replaceAll("\\/", ".");
 	}
 
 	public void reportCompilation(Task task) {
