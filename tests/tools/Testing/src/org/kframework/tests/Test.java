@@ -385,7 +385,7 @@ public class Test {
 		return testcaseE;
 	}
 
-	public Task getDefinitionTask() {
+	public Task getDefinitionTask(File homeDir) {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKompile());
 		command.add(language);
@@ -403,7 +403,7 @@ public class Test {
 			i++;
 		}
 
-		return new Task(arguments, null);
+		return new Task(arguments, null, homeDir);
 	}
 
 	public String compileStatus(Task task) {
@@ -529,7 +529,7 @@ public class Test {
 		return pdf;
 	}
 
-	public Task getPdfDefinitionTask() {
+	public Task getPdfDefinitionTask(File homeDir) {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKompile());
 		command.add(getXmlLanguage());
@@ -543,7 +543,7 @@ public class Test {
 			i++;
 		}
 
-		return new Task(arguments, null);
+		return new Task(arguments, null, homeDir);
 	}
 
 	private String getXmlLanguage() {

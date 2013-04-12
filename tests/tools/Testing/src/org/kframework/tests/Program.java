@@ -29,7 +29,7 @@ public class Program {
 		return programPath;
 	}
 
-	public Task getTask() {
+	public Task getTask(File homeDir) {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKrun());
 		command.add(programPath);
@@ -47,7 +47,7 @@ public class Program {
 			i++;
 		}
 
-		return new Task(arguments, input);
+		return new Task(arguments, input, homeDir);
 	}
 
 	public boolean success(Task task) {

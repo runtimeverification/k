@@ -30,6 +30,8 @@ public class Main {
 	public static void main(String[] args) {
 
 		int exitCode = 0;
+		File homeDir = new File(System.getProperty("user.dir"));
+		System.out.println(homeDir.getAbsolutePath());
 
 		// a little bit hack-ish but it works until somebody complains
 		System.out.println(System.getProperty("user.dir"));
@@ -150,7 +152,7 @@ public class Main {
 		System.out.println("Kompiling the language definitions...");
 		Map<Test, Task> definitions = new HashMap<Test, Task>();
 		for (Test test : alltests) {
-			Task def = test.getDefinitionTask();
+			Task def = test.getDefinitionTask(homeDir);
 			definitions.put(test, def);
 			Execution.execute(def);
 		}
@@ -182,7 +184,7 @@ public class Main {
 		for (Test test : alltests) {
 			// also compile pdf if set
 			if (test.getPdf()) {
-				Task pdfDef = test.getPdfDefinitionTask();
+				Task pdfDef = test.getPdfDefinitionTask(homeDir);
 				pdfDefinitions.put(test, pdfDef);
 				Execution.execute(pdfDef);
 			}
@@ -224,7 +226,7 @@ public class Main {
 				List<Program> pgms = test.getPrograms();
 				Map<Program, Task> all = new HashMap<Program, Task>();
 				for (Program p : pgms) {
-					Task task = p.getTask();
+					Task task = p.getTask(homeDir);
 					all.put(p, task);
 					Execution.tpe.execute(task);
 				}

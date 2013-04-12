@@ -1,6 +1,7 @@
 package org.kframework.execution;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,21 +14,23 @@ public class Task extends Thread {
 	private int exit;
 	private String stdin;
 	private long elapsed;
-
-	public Task(String[] arguments, String stdin) {
+	private File homeDir;
+	
+	public Task(String[] arguments, String stdin, File homeDir) {
 		super();
 		this.arguments = arguments;
 		this.stdin = stdin;
 		this.stderr = "";
 		this.stdout = "";
 		this.exit = 0;
+		this.homeDir = homeDir;
 	}
 
 	@Override
 	public void run() {
 		try {
 			ProcessBuilder pb = new ProcessBuilder(arguments);
-
+			pb.directory(homeDir);
 //			String message = "Executing ";
 //			for(String cmd : pb.command())
 //				message += cmd + " ";
