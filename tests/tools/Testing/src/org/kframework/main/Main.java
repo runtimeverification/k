@@ -83,6 +83,22 @@ public class Main {
 				e.printStackTrace();
 			}
 
+
+			try {
+				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
+						"junit-reports");
+				Process process = pb.start();
+				int exit = process.waitFor();
+				String out = Task.readString(process.getInputStream());
+				String err = Task.readString(process.getErrorStream());
+				System.out.println(out);
+				System.out.println(err);
+				System.out.println(exit);
+			} catch (Exception e) {
+				exitCode = 1;
+				e.printStackTrace();
+			}
+			
 			// build K
 			try {
 				ProcessBuilder pb = new ProcessBuilder("ant");
