@@ -489,6 +489,13 @@ public class Test {
 	public void save() {
 		new File(Configuration.JR).mkdirs();
 		try {
+			new File(Configuration.JR
+						+ Configuration.FS + getReportFilename()).createNewFile();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
 			FileWriter fstream = new FileWriter(Configuration.JR
 					+ Configuration.FS + getReportFilename());
 			BufferedWriter out = new BufferedWriter(fstream);
