@@ -345,8 +345,7 @@ public class Test {
 		if (reportDir != null)
 			name = reportDir;
 		else
-			name = new File(language).getParent().substring(
-					Configuration.getHome().length());
+			name = new File(language).getParent();
 
 		testsuite.setAttribute("name",
 				name.replaceFirst("/", "").replaceFirst("/", "."));
