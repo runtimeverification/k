@@ -171,7 +171,6 @@ public class Main {
 			if (!entry.getKey().compiled(entry.getValue())) {
 				kompileStatus += "FAIL: "
 						+ entry.getKey().getLanguage()
-								.substring(Configuration.getHome().length())
 						+ "\n";
 				exitCode = 1;
 			}
