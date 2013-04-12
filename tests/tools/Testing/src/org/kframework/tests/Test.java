@@ -46,8 +46,7 @@ public class Test {
 
 		String[] pgmsFolders = this.programsFolder.split("\\s+");
 
-		if (resultsFolder != null
-				&& !new File(getResultsFolder()).exists())
+		if (resultsFolder != null && !new File(getResultsFolder()).exists())
 			System.out.println("Folder: " + Configuration.getHome()
 					+ Configuration.FS + resultsFolder + " does not exists.");
 
@@ -95,17 +94,15 @@ public class Test {
 				String error = null;
 				if (resultsFolder != null) {
 
-					String inputFile = searchInputFile(getResultsFolder(), new File(
-							programPath).getName(), recursive);
+					String inputFile = searchInputFile(getResultsFolder(),
+							new File(programPath).getName(), recursive);
 					input = getFileAsStringOrNull(inputFile);
 
-					String outputFile = searchOutputFile(
-							getResultsFolder(),
+					String outputFile = searchOutputFile(getResultsFolder(),
 							new File(programPath).getName(), recursive);
 					output = getFileAsStringOrNull(outputFile);
 
-					String errorFile = searchErrorFile(
-							getResultsFolder(),
+					String errorFile = searchErrorFile(getResultsFolder(),
 							new File(programPath).getName(), recursive);
 					error = getFileAsStringOrNull(errorFile);
 
@@ -113,8 +110,8 @@ public class Test {
 
 				// custom programPath
 				programPath = programPath.replaceFirst(Configuration.getHome()
-					+ Configuration.FS, "");
-				
+						+ Configuration.FS, "");
+
 				Program p = new Program(programPath, krunOptions, this, input,
 						output, error);
 				programs.add(p);
@@ -124,16 +121,14 @@ public class Test {
 	}
 
 	private String getResultsFolder() {
-		return Configuration.getHome() + Configuration.FS
-				+ resultsFolder;
+		return Configuration.getHome() + Configuration.FS + resultsFolder;
 	}
 
 	private String getFileAsStringOrNull(String file) {
 		String fileAsString = null;
 		if (file != null)
 			try {
-				fileAsString = Task.readString(new FileInputStream(
-						file));
+				fileAsString = Task.readString(new FileInputStream(file));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -276,25 +271,22 @@ public class Test {
 			String error = null;
 			if (resultsFolder != null) {
 
-				String inputFile = searchInputFile(getResultsFolder(), new File(
-						programPath).getName(), recursive);
+				String inputFile = searchInputFile(getResultsFolder(),
+						new File(programPath).getName(), recursive);
 				input = getFileAsStringOrNull(inputFile);
 
-				String outputFile = searchOutputFile(
-						getResultsFolder(),
+				String outputFile = searchOutputFile(getResultsFolder(),
 						new File(programPath).getName(), recursive);
 				output = getFileAsStringOrNull(outputFile);
 
-				String errorFile = searchErrorFile(
-						getResultsFolder(),
+				String errorFile = searchErrorFile(getResultsFolder(),
 						new File(programPath).getName(), recursive);
 				error = getFileAsStringOrNull(errorFile);
 
 			}
 
-			
-			Program program = new Program(homeDir + Configuration.FS + programPath,
-					map, this, input, output, error);
+			Program program = new Program(homeDir + Configuration.FS
+					+ programPath, map, this, input, output, error);
 			specialPrograms.add(program);
 		}
 
@@ -427,15 +419,15 @@ public class Test {
 	}
 
 	public String getCompiled() {
-		return getLanguage().replaceAll("\\.k$", "")
-				+ "-kompiled";
+		return getLanguage().replaceAll("\\.k$", "") + "-kompiled";
 	}
 
 	private String getReportFilename() {
 		if (reportDir != null)
 			return reportDir + "-report.xml";
 
-		return language.replaceFirst("\\.k$", "-report.xml").replaceFirst("\\/", ".");
+		return language.replaceFirst("\\.k$", "-report.xml").replaceFirst(
+				"\\/", ".");
 	}
 
 	public void reportCompilation(Task task) {
@@ -489,13 +481,11 @@ public class Test {
 	public void save() {
 		new File(Configuration.JR).mkdirs();
 		try {
-			new File(Configuration.JR
-						+ Configuration.FS + getReportFilename()).createNewFile();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
+
+			String reportPath = Configuration.JR + Configuration.FS
+					+ getReportFilename();
+			new FileOutputStream(reportPath, false).close();
+
 			FileWriter fstream = new FileWriter(Configuration.JR
 					+ Configuration.FS + getReportFilename());
 			BufferedWriter out = new BufferedWriter(fstream);
