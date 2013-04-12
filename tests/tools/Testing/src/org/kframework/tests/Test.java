@@ -218,7 +218,7 @@ public class Test {
 		String homeDir = Configuration.getHome();
 
 		// get full name
-		language = homeDir + Configuration.FS + test.getAttribute("language");
+		language = test.getAttribute("language");
 
 		// get programs dir
 		programsFolder = test.getAttribute("folder");
