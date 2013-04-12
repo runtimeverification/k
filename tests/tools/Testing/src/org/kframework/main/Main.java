@@ -203,7 +203,7 @@ public class Main {
 			if (!entry.getKey().compiledPdf(entry.getValue())) {
 				pdfKompileStatus += "FAIL: "
 						+ entry.getKey().getLanguage()
-								.substring(Configuration.getHome().length())
+								
 						+ "\n";
 				exitCode = 1;
 			}
@@ -219,8 +219,7 @@ public class Main {
 			if (test.compiled(dentry.getValue())) {
 
 				System.out.println("Running "
-						+ test.getLanguage().substring(
-								Configuration.getHome().length())
+						+ test.getLanguage()
 						+ " programs... ");
 
 				// execute
