@@ -497,6 +497,17 @@
       extensions="issue" >
   </test>
 
+  <test
+      language="tests/regression/negative-test/issue.k"
+      folder="tests/regression/negative-test/programs"
+      results="tests/regression/negative-test/tests"
+      extensions="issue" >
+    <program name="tests/regression/negative-test/programs/test.issue">
+      <krun-option name="-no-color"/>
+    </program>
+  </test>
+
+
 <!--
     Cink ltlmc
 -->
