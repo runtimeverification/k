@@ -348,7 +348,7 @@ public class Test {
 			name = new File(language).getParent();
 
 		testsuite.setAttribute("name",
-				name.replaceFirst("/", "").replaceFirst("/", "."));
+				name.replaceFirst("/", "").replaceFirst("/", "\\."));
 		return testsuite;
 	}
 
@@ -435,7 +435,7 @@ public class Test {
 		if (reportDir != null)
 			return reportDir + "-report.xml";
 
-		return language.replaceFirst("\\.k$", "-report.xml").replaceFirst(".", "");
+		return language.replaceFirst("\\.k$", "-report.xml").replaceFirst("\\.", "");
 	}
 
 	public void reportCompilation(Task task) {
