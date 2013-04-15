@@ -36,7 +36,7 @@ mod #TCP-CLIENT is
 		
 	vars Me Server : #Socket-Oid .
 	var A : #Socket-AttributeSet .
-	var S : #String .
+	var S S2 : #String .
 	var M : #Socket-Msg .
 	var C : #Socket-Configuration .
 	var N : #Nat .
@@ -62,18 +62,14 @@ mod #TCP-CLIENT is
 	[print Me " sending"] .
 	
 	rl < Me : Client | #state: #sending,#Socket  A > #Socket #sent(Me, Server)
-	=> < Me : Client | #state: #receiving,#Socket  A > #Socket #receive(Server, Me)
+	=> < Me : Client | #state: #receiving,#Socket answer: "",#Socket  A > #Socket #receive(Server, Me)
 	[print Me " receiving"] .
 	
-	rl < Me : Client | #state: #receiving,#Socket  A > #Socket #received(Me, Server, S)
-	=> < Me : Client | #state: #haveAnswer,#Socket  answer: S,#Socket  A >
+	rl < Me : Client | #state: #receiving,#Socket  answer: S,#Socket A > #Socket #received(Me, Server, S2)
+	=> < Me : Client | #state: #receiving,#Socket  answer: (S +String S2),#Socket  A > #Socket #receive(Server, Me)
 	[print Me " have answer"] .
-	
-	rl < Me : Client | #state: #haveAnswer,#Socket  #connectedTo: Server,#Socket  A > 
-	=> < Me : Client | #state: #closing,#Socket  #connectedTo: Server,#Socket  A > #Socket #closeSocket(Server, Me)
-	[print Me " closing"] .
-	
-	rl < Me : Client | #state: #closing,#Socket  A  > #Socket #closedSocket(Me, Server, S)
+
+	rl < Me : Client | #state: #receiving,#Socket A > #Socket #closedSocket(Me, Server, S)
 	=> < Me : Client | #state: #finished,#Socket  A  >
 	[print Me " finished"] .
 	

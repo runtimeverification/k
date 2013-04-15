@@ -39,6 +39,7 @@ public abstract class Command implements Runnable {
 			// send data back to client and finish
 			output.write(success);
 			output.flush();
+			output.close();
 		} catch (Exception e) {
 			_logger.info("failed to respond to client " + maudeId);
 			// TODO Auto-generated catch block
