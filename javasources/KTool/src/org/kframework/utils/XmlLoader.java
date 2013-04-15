@@ -1,5 +1,6 @@
 package org.kframework.utils;
 
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -35,7 +36,7 @@ public class XmlLoader {
 		return null;
 	}
 
-	public static void reportErrors(Document doc) {
+	public static void reportErrors(Document doc) throws TransformerException {
 		// report any error that xml parser returns
 		NodeList nl = doc.getElementsByTagName("error");
 
@@ -50,14 +51,14 @@ public class XmlLoader {
 						String msg = node.getAttribute("message");
 						String file = node.getAttribute("filename");
 						String location = node.getAttribute("loc");
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
+						throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
 					}
 				}
 			}
 		}
 	}
 
-	public static void reportErrors(Document doc, String fromWhere) {
+	public static void reportErrors(Document doc, String fromWhere) throws TransformerException {
 		// report any error that xml parser returns
 		NodeList nl = doc.getElementsByTagName("error");
 
@@ -74,7 +75,7 @@ public class XmlLoader {
 							msg = "Unexpected end of " + fromWhere;
 						String file = node.getAttribute("filename");
 						String location = node.getAttribute("loc");
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
+						throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
 					}
 				}
 			}
@@ -162,7 +163,7 @@ public class XmlLoader {
 			xformer.transform(source, result);
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
-		} catch (TransformerException e) {
+		} catch (javax.xml.transform.TransformerException e) {
 			e.printStackTrace();
 		}
 	}

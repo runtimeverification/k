@@ -34,6 +34,7 @@ import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.MetaK;
+import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BackendTerm;
@@ -208,7 +209,7 @@ public class Main {
 
 		if (hasTerm) {
 			if (kast == null) {
-				return rp.runParser(K.parser, K.term, false, null);
+				return rp.runParserOrDie(K.parser, K.term, false, null);
 			} else {
 				Error.report("You cannot specify both the term and the configuration variables.");
 			}
@@ -232,7 +233,7 @@ public class Main {
 					Error.report(e1.getMessage());
 				}
 			} else {
-				parsed = rp.runParser(parser, value, true, null);
+				parsed = rp.runParserOrDie(parser, value, true, null);
 			}
 			output.put("$" + name, parsed);
 			hasPGM = hasPGM || name.equals("$PGM");
@@ -284,12 +285,13 @@ public class Main {
 					CollectVariablesVisitor vars = new CollectVariablesVisitor();
 					pattern.accept(vars);
 					varNames = vars.getVars().keySet();
-
-					pattern = new RuleCompilerSteps(K.definition).compile(
-							(Rule) pattern, null);
-
+					try {
+						pattern = new RuleCompilerSteps(K.definition).compile(
+								(Rule) pattern, null);
+					} catch (CompilerStepDone e) {
+						pattern = (ASTNode) e.getResult();
+					}
 					patternRule = (Rule) pattern;
-
 					if (GlobalSettings.verbose)
 						sw.printIntermediate("Parsing search pattern");
 				}
@@ -349,11 +351,11 @@ public class Main {
 						// + K.model_checking);
 						// assume that the specified argument is not a file and
 						// maybe represents a formula
-						KAST1 = rp.runParser(K.parser, K.model_checking, true,
+						KAST1 = rp.runParserOrDie(K.parser, K.model_checking, true,
 								"LTLFormula");
 					} else {
 						// the specified argument represents a file
-						KAST1 = rp.runParser(K.parser, K.model_checking, false,
+						KAST1 = rp.runParserOrDie(K.parser, K.model_checking, false,
 								"LTLFormula");
 					}
 
@@ -387,6 +389,8 @@ public class Main {
 			} catch (KRunExecutionException e) {
 				rp.printError(e.getMessage(), lang);
 				System.exit(1);
+			} catch (TransformerException e) {
+				e.report();
 			}
 
 			if ("pretty".equals(K.output_mode)) {
@@ -467,11 +471,6 @@ public class Main {
 			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.exit(1);
-		} catch (Exception e) {
-			System.out.println("You provided bad program arguments!");
-			e.printStackTrace();
-			printKRunUsage(cmd_options.getOptions());
 			System.exit(1);
 		}
 	}
@@ -1007,8 +1006,12 @@ public class Main {
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Flattening modules");
 
-				javaDef = (org.kframework.kil.Definition) javaDef
-						.accept(new AddTopCellConfig());
+				try {
+					javaDef = (org.kframework.kil.Definition) javaDef
+							.accept(new AddTopCellConfig());
+				} catch (TransformerException e) {
+					e.report();
+				}
 
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Adding top cell to configuration");
@@ -1043,7 +1046,7 @@ public class Main {
 				sw.printIntermediate("Resolving main and syntax modules");
 
 			if (K.pgm != null) {
-				KAST = rp.runParser(K.parser, K.pgm, false, null);
+				KAST = rp.runParserOrDie(K.parser, K.pgm, false, null);
 			} else {
 				KAST = null;
 			}
@@ -1076,11 +1079,6 @@ public class Main {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.exit(1);
-		} catch (Exception e) {
-			System.out.println("You provided bad program arguments!");
-			e.printStackTrace();
-			printKRunUsage(cmd_options.getOptions());
 			System.exit(1);
 		}
 	}

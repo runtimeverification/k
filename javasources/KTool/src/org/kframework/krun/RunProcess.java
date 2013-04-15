@@ -5,6 +5,10 @@ import org.kframework.utils.ProgramLoader;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,10 +89,19 @@ public class RunProcess {
 
 	}
 
+	public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol) {
+		try {
+			return runParser(parser, pgm, isPgm, startSymbol);
+		} catch (TransformerException e) {
+			e.report();
+			return null;
+		}
+	}
+
 	/*
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
 	 */
-	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol) {
+	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol) throws TransformerException {
 		String KAST = new String();
 		String parserPath = new String();
 
@@ -149,13 +162,8 @@ public class RunProcess {
 		// }
 		// } else
 		{
-			if (this.getErr() != null) {
-				System.out.println("Warning: parser reported errors or warnings:\n" + this.getErr());
-			}
 			if (this.getExitCode() != 0) {
-				System.out.println("Parser reported:\n" + this.getStdout());
-				System.out.println("Fatal: parser returned a non-zero exit code: " + this.getExitCode());
-				Error.report("\nAttempted command:\n" + parser + " " + pgm);
+				throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode()));
 			}
 		}
 

@@ -2,6 +2,7 @@ package org.kframework.krun.ioserver.commands;
 
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.kil.Term;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
 import org.kframework.krun.RunProcess;
 
@@ -21,10 +22,14 @@ public class CommandParse extends Command {
 	}
 
 	public void run() {
-		RunProcess rp = new RunProcess();
-		Term kast = rp.runParser(K.parser, stringToParse, true, sort);
-		MaudeFilter mf = new MaudeFilter();
-		kast.accept(mf);
-		succeed(new String[] { mf.getResult() });
+		try {
+			RunProcess rp = new RunProcess();
+			Term kast = rp.runParser(K.parser, stringToParse, true, sort);
+			MaudeFilter mf = new MaudeFilter();
+			kast.accept(mf);
+			succeed(new String[] { mf.getResult() });
+		} catch (TransformerException e) {
+			fail("noparse");
+		}
 	}
 }

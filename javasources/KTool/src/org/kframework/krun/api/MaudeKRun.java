@@ -5,6 +5,7 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.runner.KRunner;
 import org.kframework.krun.*;
 import org.kframework.krun.Error;
@@ -24,6 +25,7 @@ import edu.uci.ics.jung.io.graphml.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
@@ -35,21 +37,24 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class MaudeKRun implements KRun {
-	private void executeKRun(String maudeCmd, boolean ioServer) throws Exception {
+	private void executeKRun(String maudeCmd, boolean ioServer) throws KRunExecutionException {
 		FileUtil.createFile(K.maude_in, maudeCmd);
 		File outFile = FileUtil.createFile(K.maude_out);
 		File errFile = FileUtil.createFile(K.maude_err);
 
 		int returnValue;
-		if (K.log_io) {
-			returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" });
+		try {
+			if (K.log_io) {
+				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" });
+			}
+			if (!ioServer) {
+				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--noServer" });
+			} else {
+				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
+			}
+		} catch (Exception e) {
+			throw new KRunExecutionException("Runner threw exception", e);
 		}
-		if (!ioServer) {
-			returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--noServer" });
-		} else {
-			returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
-		}
-
 		if (errFile.exists()) {
 			String content = FileUtil.getFileContent(K.maude_err);
 			if (content.length() > 0) {
@@ -62,7 +67,7 @@ public class MaudeKRun implements KRun {
 
 	}
 
-	public KRunResult<KRunState> run(Term cfg) throws Exception {
+	public KRunResult<KRunState> run(Term cfg) throws KRunExecutionException {
 		MaudeFilter maudeFilter = new MaudeFilter();
 		cfg.accept(maudeFilter);
 		String cmd = "set show command off ." + K.lineSeparator + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " .";
@@ -75,7 +80,11 @@ public class MaudeKRun implements KRun {
 		cmd += getCounter();
 
 		executeKRun(cmd, K.io);
-		return parseRunResult();
+		try {
+			return parseRunResult();
+		} catch (IOException e) {
+			throw new KRunExecutionException("Pretty-printer threw I/O exception", e);
+		}
 	}
 
 	private String setCounter() {
@@ -86,7 +95,7 @@ public class MaudeKRun implements KRun {
 		return K.lineSeparator + "red counter .";
 	}
 
-	public KRunResult<KRunState> step(Term cfg, int steps) throws Exception {
+	public KRunResult<KRunState> step(Term cfg, int steps) throws KRunExecutionException {
 		String maude_cmd = K.maude_cmd;
 		if (steps == 0) {
 			K.maude_cmd = "red";
@@ -120,7 +129,7 @@ public class MaudeKRun implements KRun {
 
 
 
-	private KRunResult<KRunState> parseRunResult() throws Exception {
+	private KRunResult<KRunState> parseRunResult() throws IOException {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
@@ -148,7 +157,7 @@ public class MaudeKRun implements KRun {
 		return new KRunState(rawResult);
 	}
 
-	private void parseCounter(Node counter) throws Exception {
+	private void parseCounter(Node counter) {
 		assertXML(counter != null && counter.getNodeType() == Node.ELEMENT_NODE);
 		Element elem = (Element) counter;
 		List<Element> child = XmlUtil.getChildElements(elem);
@@ -335,7 +344,7 @@ public class MaudeKRun implements KRun {
 		return null;
 	}
 
-	public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, Set<String> varNames) throws Exception {
+	public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, Set<String> varNames) throws KRunExecutionException {
 		String cmd = "set show command off ." + K.lineSeparator + setCounter() + "search ";
 		if (bound != null && depth != null) {
 			cmd += "[" + bound + "," + depth + "] ";
@@ -362,11 +371,15 @@ public class MaudeKRun implements KRun {
 		}
 		cmd += getCounter();
 		executeKRun(cmd, K.io);
-		SearchResults results = new SearchResults(parseSearchResults(pattern), parseSearchGraph(), patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
-		K.stateCounter += results.getGraph().getVertexCount();
-		KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
-		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
-		return result;
+		try {
+			SearchResults results = new SearchResults(parseSearchResults(pattern), parseSearchGraph(), patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
+			K.stateCounter += results.getGraph().getVertexCount();
+			KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
+			result.setRawOutput(FileUtil.getFileContent(K.maude_out));
+			return result;
+		} catch (Exception e) {
+			throw new KRunExecutionException("Pretty-printer threw exception", e);
+		}
 	}
 
 	private DirectedGraph<KRunState, Transition> parseSearchGraph() throws Exception {
@@ -450,7 +463,7 @@ public class MaudeKRun implements KRun {
 		return graphmlParser.readGraph();
 	}
 
-	private List<SearchResult> parseSearchResults(Rule pattern) throws Exception {
+	private List<SearchResult> parseSearchResults(Rule pattern) {
 		List<SearchResult> results = new ArrayList<SearchResult>();
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
@@ -477,11 +490,15 @@ public class MaudeKRun implements KRun {
 				rawSubstitution.put(child.get(0).getAttribute("op"), result);
 			}
 
-			Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution));
-			KRunState state = new KRunState(rawResult);
-			state.setStateId(stateNum + K.stateCounter);
-			SearchResult result = new SearchResult(state, rawSubstitution);
-			results.add(result);
+			try {
+				Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution));
+				KRunState state = new KRunState(rawResult);
+				state.setStateId(stateNum + K.stateCounter);
+				SearchResult result = new SearchResult(state, rawSubstitution);
+				results.add(result);
+			} catch (TransformerException e) {
+				e.report(); //this should never happen, so I want it to blow up
+			}
 		}
 		list = doc.getElementsByTagName("result");
 		nod = list.item(1);
@@ -489,7 +506,7 @@ public class MaudeKRun implements KRun {
 		return results;		
 	}
 
-	public KRunResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws Exception {
+	public KRunResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException {
 		MaudeFilter formulaFilter = new MaudeFilter();
 		formula.accept(formulaFilter);
 		MaudeFilter cfgFilter = new MaudeFilter();
@@ -502,7 +519,7 @@ public class MaudeKRun implements KRun {
 		return result;
 	}
 
-	private KRunResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() throws Exception {
+	private KRunResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
@@ -573,7 +590,7 @@ public class MaudeKRun implements KRun {
 		}
 	}
 
-	private static void parseCounterexample(Element elem, List<MaudeTransition> list) throws Exception {
+	private static void parseCounterexample(Element elem, List<MaudeTransition> list) {
 		String sort = elem.getAttribute("sort");
 		String op = elem.getAttribute("op");
 		List<Element> child = XmlUtil.getChildElements(elem);
@@ -605,7 +622,7 @@ public class MaudeKRun implements KRun {
 		}
 	}
 
-	public KRunDebugger debug(Term cfg) throws Exception {
+	public KRunDebugger debug(Term cfg) throws KRunExecutionException {
 		return new KRunApiDebugger(this, cfg);
 	}
 

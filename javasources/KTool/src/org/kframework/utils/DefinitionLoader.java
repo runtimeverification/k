@@ -240,7 +240,7 @@ public class DefinitionLoader {
 		return null;
 	}
 
-	public static Term parseCmdString(String content, String sort, String filename) {
+	public static Term parseCmdString(String content, String sort, String filename) throws TransformerException {
 		if (!DefinitionHelper.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
@@ -253,37 +253,32 @@ public class DefinitionLoader {
 
 		org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
 
-		try {
-			// TODO: reject rewrites
-			// TODO: reject variables
-			config = config.accept(new SentenceVariablesFilter());
-			config = config.accept(new CellEndLabelFilter());
-			config = config.accept(new CellTypesFilter());
-			// config = config.accept(new CorrectRewritePriorityFilter());
-			config = config.accept(new CorrectKSeqFilter());
-			// config = config.accept(new CheckBinaryPrecedenceFilter());
-			// config = config.accept(new InclusionFilter(localModule));
-			// config = config.accept(new VariableTypeInferenceFilter());
-			config = config.accept(new AmbDuplicateFilter());
-			config = config.accept(new TypeSystemFilter());
-			config = config.accept(new PriorityFilter());
-			config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-			config = config.accept(new TypeInferenceSupremumFilter());
-			config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
-			config = config.accept(new PreferAvoidFilter());
-			config = config.accept(new FlattenListsFilter());
-			// config = config.accept(new CorrectRewriteSortFilter());
-			// last resort disambiguation
-			config = config.accept(new AmbFilter());
-		} catch (TransformerException e) {
-			String msg = "Cannot parse command line argument: " + e.getMessage();
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, config.getFilename(), config.getLocation()));
-		}
+		// TODO: reject rewrites
+		// TODO: reject variables
+		config = config.accept(new SentenceVariablesFilter());
+		config = config.accept(new CellEndLabelFilter());
+		config = config.accept(new CellTypesFilter());
+		// config = config.accept(new CorrectRewritePriorityFilter());
+		config = config.accept(new CorrectKSeqFilter());
+		// config = config.accept(new CheckBinaryPrecedenceFilter());
+		// config = config.accept(new InclusionFilter(localModule));
+		// config = config.accept(new VariableTypeInferenceFilter());
+		config = config.accept(new AmbDuplicateFilter());
+		config = config.accept(new TypeSystemFilter());
+		config = config.accept(new PriorityFilter());
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+		config = config.accept(new TypeInferenceSupremumFilter());
+		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
+		config = config.accept(new PreferAvoidFilter());
+		config = config.accept(new FlattenListsFilter());
+		// config = config.accept(new CorrectRewriteSortFilter());
+		// last resort disambiguation
+		config = config.accept(new AmbFilter());
 
 		return (Term) config;
 	}
 
-	public static ASTNode parsePattern(String pattern, String filename) {
+	public static ASTNode parsePattern(String pattern, String filename) throws TransformerException {
 		if (!DefinitionHelper.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
@@ -299,31 +294,26 @@ public class DefinitionLoader {
 
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
-		try {
-			// TODO: don't allow rewrites
-			config = config.accept(new SentenceVariablesFilter());
-			config = config.accept(new CellEndLabelFilter());
-			config = config.accept(new CellTypesFilter());
-			config = config.accept(new CorrectRewritePriorityFilter());
-			config = config.accept(new CorrectKSeqFilter());
-			// config = config.accept(new CheckBinaryPrecedenceFilter());
-			// config = config.accept(new InclusionFilter(localModule));
-			config = config.accept(new VariableTypeInferenceFilter());
-			config = config.accept(new AmbDuplicateFilter());
-			config = config.accept(new TypeSystemFilter());
-			config = config.accept(new PriorityFilter());
-			config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-			config = config.accept(new TypeInferenceSupremumFilter());
-			config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
-			config = config.accept(new PreferAvoidFilter());
-			config = config.accept(new FlattenListsFilter());
-			config = config.accept(new AmbDuplicateFilter());
-			// last resort disambiguation
-			config = config.accept(new AmbFilter());
-		} catch (TransformerException e) {
-			String msg = "Cannot parse pattern: " + e.getLocalizedMessage();
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, config.getFilename(), config.getLocation()));
-		}
+		// TODO: don't allow rewrites
+		config = config.accept(new SentenceVariablesFilter());
+		config = config.accept(new CellEndLabelFilter());
+		config = config.accept(new CellTypesFilter());
+		config = config.accept(new CorrectRewritePriorityFilter());
+		config = config.accept(new CorrectKSeqFilter());
+		// config = config.accept(new CheckBinaryPrecedenceFilter());
+		// config = config.accept(new InclusionFilter(localModule));
+		config = config.accept(new VariableTypeInferenceFilter());
+		config = config.accept(new AmbDuplicateFilter());
+		config = config.accept(new TypeSystemFilter());
+		config = config.accept(new PriorityFilter());
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+		config = config.accept(new TypeInferenceSupremumFilter());
+		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
+		config = config.accept(new PreferAvoidFilter());
+		config = config.accept(new FlattenListsFilter());
+		config = config.accept(new AmbDuplicateFilter());
+		// last resort disambiguation
+		config = config.accept(new AmbFilter());
 		return config;
 	}
 }
