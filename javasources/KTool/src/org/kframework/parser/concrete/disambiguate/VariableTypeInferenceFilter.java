@@ -23,7 +23,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 		super("Variable type inference");
 	}
 
-	public ASTNode transform(Sentence r) {
+	@Override
+	public ASTNode transform(Sentence r) throws TransformerException {
 
 		CollectVariablesVisitor vars = new CollectVariablesVisitor();
 		r.accept(vars);
@@ -58,7 +59,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 						if (v1 != v2)
 							if (!v1.getSort().equals(v2.getSort())) {
 								String msg = "Variable '" + v1.getName() + "' declared with two different sorts: " + v1.getSort() + " and " + v2.getSort();
-								GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getFilename(), v1.getLocation()));
+								throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getFilename(), v1.getLocation()));
 							}
 			}
 
@@ -92,7 +93,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 				Variable varr = varLoc.entrySet().iterator().next().getValue().get(0);
 				if (isect.size() == 0) {
 					String msg = "Could not infer a sort for variable '" + varr.getName() + "' to match every location.";
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, varr.getFilename(), varr.getLocation()));
+					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, varr.getFilename(), varr.getLocation()));
 				}
 
 				Variable inferredVar = null;
@@ -117,7 +118,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 						for (Variable vv1 : maxSorts)
 							msg += vv1.getSort() + ", ";
 						msg = msg.substring(0, msg.length() - 2);
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, varr.getFilename(), varr.getLocation()));
+						throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, varr.getFilename(), varr.getLocation()));
 					}
 
 					if (maxSorts.size() == 1)
