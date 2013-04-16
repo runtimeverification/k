@@ -4,7 +4,7 @@ module TCP-HOOKS
   imports STRING-HOOKS
   imports K-EQUAL-HOOKS
   imports #TCP-INTERFACE
-  syntax TCPAnswer ::= "#EOF" | String | "#tcpError" "(" String ")"
+  syntax TCPAnswer ::= "#EOF" | String | "#tcpError" "(" String ")" | "#noparse"
   rule isKResult(#EOF) => true [function, anywhere]
 
   syntax TCPAnswer ::= "#tcpRequest" "(" String ")"   [function, klabel(#tcpRequest)]
@@ -15,6 +15,7 @@ module TCP-HOOKS
       => #if #isTCPError(S) #then #tcpError(#retrieveTCPError(S)) #else S #fi
 
   rule #tcpError("EOF") => #EOF [function, anywhere]
+  rule #tcpError("noparse") => #noparse [function, anywhere]
 
   syntax String ::= "##tcpRequest" "(" String ")"        [function, klabel(##tcpRequest), hook(#TCP:#tcpRequest)]
                   | "#retrieveTCPError" "(" String ")"   [function, klabel(#retrieveTCPError), hook(#TCP:#retrieveTCPError)]

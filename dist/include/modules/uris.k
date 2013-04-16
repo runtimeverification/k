@@ -210,4 +210,6 @@ module URIS
   syntax String ::= K2String(K) [function, hook(#K-PRINTER:k2string)]
                   | Bag2String(Bag) [function, hook(#K-PRINTER:bag2string)]
 
+  rule String2K((#noparse)::K) => #noparse
+
 endmodule
