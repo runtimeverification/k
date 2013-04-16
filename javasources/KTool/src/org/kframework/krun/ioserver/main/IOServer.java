@@ -155,8 +155,14 @@ public class IOServer {
 		if (command.equals("eof")) {
 			return new CommandEof(args, socket, logger); //, maudeId);
 		}
-		if (command.equals("stat")) {
-			return new CommandStat(args, socket, logger);
+		if (command.equals("isdir")) {
+			return new CommandIsDir(args, socket, logger);
+		}
+		if (command.equals("isfile")) {
+			return new CommandIsFile(args, socket, logger);
+		}
+		if (command.equals("mtime")) {
+			return new CommandMTime(args, socket, logger);
 		}
 		if (command.equals("end")) {
 		    CommandEnd c = new CommandEnd(args, socket, logger);

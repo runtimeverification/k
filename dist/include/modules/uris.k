@@ -23,8 +23,10 @@ module URIS
              | "#fReadBytes" "(" Int "," Int ")"    [function, klabel(#fReadBytes)]
              | "#fPutBytes" "(" Int "," String ")" [function, klabel(#fPutBytes)]
  
-  syntax KList ::= "#stat" "(" String ")" [function]
-
+  syntax K ::= "#isDir" "(" String ")" [function]
+             | "#isFile" "(" String ")" [function]
+             | "#mtimeMillis" "(" String ")" [function]
+           
   syntax K ::= "#parse" "(" String "," String ")" [function, klabel(#parse)]
   rule #open(S:String) => String2Int((#tcpRequest("open\001" +String S +String "\001"))::K) [function, anywhere]
 
@@ -37,9 +39,7 @@ module URIS
   
 
   rule String2Bool("0") => false [anywhere]
-  rule String2Bool("false") => false [anywhere]
   rule String2Bool("1") => true [anywhere]
-  rule String2Bool("true") => true [anywhere]
 
   rule #flush(N:Int) => String2DotK((#tcpRequest("flush\001" +String Int2String(N) +String "\001"))::K) [function, anywhere]
 
@@ -97,17 +97,9 @@ module URIS
   rule #fEof(N:Int)
     => String2Bool((#tcpRequest("eof\001" +String Int2String(N) +String "\001"))::K) [function, anywhere]
 
-  rule #stat(S:String)
-    => #statTypes(#string2klist((#tcpRequest("stat\001" +String S +String "\001"))::K))
-
-  syntax KList ::= #string2klist(String) [function]
-  rule #string2klist(S:String) => substrString(S, 0, findString(S, "\001", 0)) ,, #string2klist(substrString(S, findString(S, "\001", 0) +Int 1, lengthString(S))) when findString(S, "\001", 0) =/=Int -1
-  rule #string2klist(S:String) => S when findString(S, "\001", 0) ==Int -1
-  rule #string2klist(K) => K when isString(K) =/=K true
-
-  syntax KList ::= #statTypes(KList) [function]
-  rule #statTypes(S1:String,,S2:String,,S3:String,,S4:String,,S5:String,,S6:String,,S7:String,,S8:String,,S9:String,,S10:String,,S11:String,,S12:String) => String2Int(S1),,String2Int(S2),,String2Int(S3),,String2Bool(S4),,String2Bool(S5),,String2Bool(S6),,String2Int(S7),,String2Int(S8),,String2Int(S9),,String2Int(S10),,String2Int(S11),,String2Int(S12)
-  rule #statTypes(K:K) => K
+  rule #isDir(S:String) => String2Bool((#tcpRequest("isdir\001" +String S +String "\001"))::K)
+  rule #isFile(S:String) => String2Bool((#tcpRequest("isfile\001" +String S +String "\001"))::K)
+  rule #mtimeMillis(S:String) => String2Int((#tcpRequest("mtime\001" +String S +String "\001"))::K)
 
   syntax K ::= "#readChar" "(" ")"   [function, klabel(#readChar)]
   //declare  #readChar() : -> K 
