@@ -3,69 +3,13 @@ package org.kframework.kil.visitors;
 import java.util.ArrayList;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.BackendTerm;
-import org.kframework.kil.Bag;
-import org.kframework.kil.BagItem;
-import org.kframework.kil.Bracket;
-import org.kframework.kil.Cast;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Collection;
-import org.kframework.kil.CollectionItem;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Context;
-import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.Empty;
-import org.kframework.kil.Freezer;
-import org.kframework.kil.FreezerHole;
-import org.kframework.kil.FreezerLabel;
-import org.kframework.kil.Hole;
-import org.kframework.kil.Import;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KLabel;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.Lexical;
-import org.kframework.kil.List;
-import org.kframework.kil.ListItem;
-import org.kframework.kil.ListTerminator;
-import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.LiterateModuleComment;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.PriorityBlockExtended;
-import org.kframework.kil.PriorityExtended;
-import org.kframework.kil.PriorityExtendedAssoc;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Restrictions;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Sentence;
-import org.kframework.kil.Set;
-import org.kframework.kil.SetItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.StringSentence;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
 
 public class BasicTransformerPropagator implements Transformer {
 	Transformer delegate;
@@ -515,7 +459,38 @@ public class BasicTransformerPropagator implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(Builtin node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
+    public ASTNode transform(BoolBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(IntBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(FloatBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(StringBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(Token node) throws TransformerException {
+        /* an instance of class Token is immutable */
+        return transform((Term) node);
+    }
+
+    @Override
 	public ASTNode transform(Empty node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -568,7 +543,12 @@ public class BasicTransformerPropagator implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(KLabelConstant node) throws TransformerException {
+        return transform((KLabel) node);
+    }
+
+    @Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		boolean change = false;
 		Term term = node.getLeft();

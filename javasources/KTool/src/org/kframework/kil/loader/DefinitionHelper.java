@@ -2,7 +2,9 @@ package org.kframework.kil.loader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -286,4 +288,27 @@ public class DefinitionHelper {
 		assert (cst.getValue().equals("." + cst.getSort()));
 		return true;
 	}
+
+    public static final int HASH_PRIME = 37;
+
+    /**
+     * @param label string representation of the KLabel
+     * @return list of productions associated with the label
+     */
+    public static List<Production> productionsOf(String label) {
+        Set<String> conses = DefinitionHelper.labels.get(label);
+        if (conses == null) {
+            return (List<Production>) Collections.EMPTY_LIST;
+        }
+
+        ArrayList<Production> productions = new ArrayList<Production>();
+        for (String cons : conses) {
+            assert DefinitionHelper.conses.containsKey(cons);
+
+            productions.add(DefinitionHelper.conses.get(cons));
+        }
+
+        return productions;
+    }
+
 }

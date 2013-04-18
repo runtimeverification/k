@@ -7,7 +7,9 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BagItem;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Bracket;
+import org.kframework.kil.Builtin;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Collection;
@@ -18,14 +20,17 @@ import org.kframework.kil.Context;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Empty;
+import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.Freezer;
 import org.kframework.kil.FreezerHole;
 import org.kframework.kil.FreezerLabel;
 import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
+import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabel;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Lexical;
@@ -51,14 +56,17 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
+import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+
 
 public class BasicHookWorker implements Transformer {
 
@@ -264,7 +272,38 @@ public class BasicHookWorker implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(Builtin node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
+    public ASTNode transform(BoolBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(IntBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(FloatBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(StringBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(Token node) throws TransformerException {
+        /* an instance of class Token is immutable */
+        return transform((Term) node);
+    }
+
+    @Override
 	public ASTNode transform(Empty node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -289,7 +328,12 @@ public class BasicHookWorker implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(KLabelConstant node) throws TransformerException {
+        return transform((KLabel) node);
+    }
+
+    @Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		return transform((Term) node);
 	}
