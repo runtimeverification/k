@@ -1,6 +1,12 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
+import org.kframework.backend.java.kil.KCollectionFragment;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Map;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Variable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -57,6 +63,22 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
         }
 
         return kSequence;
+    }
+
+    @Override
+    public Map transform(Map map) {
+        if (!map.hasFrame() || boundVariables.contains(map.getFrame())) {
+            return (Map) super.transform(map);
+        }
+
+        Term term = substitution.get(map.getFrame());
+        if (term == null || term instanceof Variable) {
+            return (Map) super.transform(map);
+        }
+
+
+
+        throw new RuntimeException();
     }
 
     @Override

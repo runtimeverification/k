@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Definition;
@@ -37,8 +40,8 @@ public class SymbolicRewriter {
 
             Rule rule = null;
             try {
-                System.err.println(kilRule);
-                System.err.flush();
+                //System.err.println(kilRule);
+                //System.err.flush();
                 rule = (Rule) kilRule.accept(transformer);
             } catch (TransformerException e) {
                 System.err.println(kilRule);
@@ -46,7 +49,7 @@ public class SymbolicRewriter {
                 e.printStackTrace();
             }
             if (rule != null) {
-                System.err.println(rule);
+                //System.err.println(rule);
                 rules.add(rule);
             }
         }
@@ -63,16 +66,10 @@ public class SymbolicRewriter {
 
         for (Rule rule : rules) {
 			if (matcher.isMatching(term, rule.getLeftHandSide())) {
-                Map<Variable, Term> substitution = new HashMap<Variable, Term>();
-                for (SymbolicEquality symbolicEquality : matcher.getConstraints()) {
-                    if (symbolicEquality.rhs instanceof Variable) {
-                        substitution.put((Variable) symbolicEquality.rhs, symbolicEquality.lhs);
-                    }
-                }
+                Map<Variable, Term> substitution = matcher.getConstraint().getSubstitution();
 
-                //System.err.println(rule.getLeftHandSide());
-                //System.err.println(rule.getLeftHandSide().variableSet());
-                //System.err.println(matcher.getConstraints());
+                System.err.println(rule.getLeftHandSide());
+                System.err.println(matcher.getConstraint());
                 System.err.println(rule.getRightHandSide().substitute(substitution));
 			}
 		}

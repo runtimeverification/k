@@ -1,7 +1,10 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableList;
 
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
@@ -53,6 +56,21 @@ public class KSequence extends KCollection {
     @Override
     public String getIdentityName() {
         return KSequence.IDENTITY_NAME;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof KSequence)) {
+            return false;
+        }
+
+        KSequence kSequence = (KSequence) object;
+        return super.frame == null ? kSequence.frame == null : frame.equals(kSequence.frame)
+                && super.items.equals(kSequence.items);
     }
 
     /**

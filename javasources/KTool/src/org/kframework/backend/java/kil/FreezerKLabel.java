@@ -1,5 +1,8 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
@@ -12,7 +15,7 @@ import org.kframework.kil.ASTNode;
  */
 public class FreezerKLabel extends InjectionKLabel {
 
-    FreezerKLabel(Term term) {
+    public FreezerKLabel(Term term) {
         super(term);
     }
 

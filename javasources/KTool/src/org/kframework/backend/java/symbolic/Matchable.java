@@ -1,6 +1,8 @@
 package org.kframework.backend.java.symbolic;
 
 
+import org.kframework.backend.java.kil.Term;
+
 /**
  * Created with IntelliJ IDEA.
  * User: andrei

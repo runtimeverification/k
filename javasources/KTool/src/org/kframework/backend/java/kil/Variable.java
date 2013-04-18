@@ -1,5 +1,10 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Sorted;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
@@ -10,7 +15,7 @@ import org.kframework.kil.ASTNode;
  * Time: 12:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Variable extends Term {
+public class Variable extends Term implements Sorted {
 
     protected final String name;
     protected final String sort;
@@ -34,6 +39,7 @@ public class Variable extends Term {
     /**
      * @return the string representation of the sort of this variable.
      */
+    @Override
     public String getSort() {
         return sort;
     }

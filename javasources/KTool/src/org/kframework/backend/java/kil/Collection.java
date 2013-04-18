@@ -1,7 +1,9 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
-
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,7 +14,7 @@ import org.kframework.kil.ASTNode;
  */
 public abstract class Collection extends Term {
 
-    private final Variable frame;
+    protected final Variable frame;
 
     protected Collection(Variable frame, String kind) {
         super(kind);

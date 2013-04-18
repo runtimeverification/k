@@ -2,6 +2,21 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
 
+import org.kframework.backend.java.kil.BuiltinConstant;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.ConstantKLabel;
+import org.kframework.backend.java.kil.FreezerKLabel;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.InjectionKLabel;
+import org.kframework.backend.java.kil.K;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Map;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -205,17 +220,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
         Term leftHandSide = (Term) rewrite.getLeft().accept(this);
-        System.err.println(leftHandSide);
-        System.err.flush();
+        //System.err.println(leftHandSide);
+        //System.err.flush();
         Term rightHandSide = (Term) rewrite.getRight().accept(this);
-        System.err.println(rightHandSide);
-        System.err.flush();
+        //System.err.println(rightHandSide);
+        //System.err.flush();
         Term condition = null;
         if (node.getCondition() != null) {
             System.err.println("[error]: " + node.getCondition());
             System.err.flush();
             //TODO: handle conditions
-            //condition = (Term) node.getCondition().accept(this);
+            condition = (Term) node.getCondition().accept(this);
         }
 
         assert leftHandSide.getKind().equals(rightHandSide.getKind());

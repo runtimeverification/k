@@ -1,5 +1,9 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
@@ -14,12 +18,26 @@ public class InjectionKLabel extends KLabel {
 
     private final Term term;
 
-    InjectionKLabel(Term term) {
+    public InjectionKLabel(Term term) {
         this.term = term;
     }
 
     public Term getTerm() {
         return term;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof InjectionKLabel)) {
+            return false;
+        }
+
+        InjectionKLabel injectionKLabel = (InjectionKLabel) object;
+        return term.equals(injectionKLabel.term);
     }
 
     @Override
@@ -30,6 +48,13 @@ public class InjectionKLabel extends KLabel {
     @Override
     public boolean isFunction() {
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + term.hashCode();
+        return hash;
     }
 
     @Override

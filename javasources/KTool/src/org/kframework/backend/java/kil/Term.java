@@ -1,5 +1,10 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Matchable;
+import org.kframework.backend.java.symbolic.SubstitutionTransformer;
+import org.kframework.backend.java.symbolic.Transformable;
+import org.kframework.backend.java.symbolic.VariableVisitor;
+import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -31,9 +36,17 @@ public abstract class Term extends ASTNode implements Matchable, Transformable, 
         return kind;
     }
 
+    public boolean isGround() {
+        return variableSet().isEmpty();
+    }
+
     public abstract boolean isSymbolic();
 
     public Term substitute(Map<Variable, Term> substitution) {
+        if (substitution.isEmpty() || isGround()) {
+            return this;
+        }
+
         SubstitutionTransformer transformer = new SubstitutionTransformer(substitution);
         return (Term) accept(transformer);
     }

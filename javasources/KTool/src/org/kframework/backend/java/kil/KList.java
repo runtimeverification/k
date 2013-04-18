@@ -1,7 +1,10 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableList;
 
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
@@ -53,6 +56,21 @@ public class KList extends KCollection {
     @Override
     public String getIdentityName() {
         return KList.IDENTITY_NAME;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof KList)) {
+            return false;
+        }
+
+        KList kList = (KList) object;
+        return super.frame == null ? kList.frame == null : frame.equals(kList.frame)
+                && super.items.equals(kList.items);
     }
 
     /**

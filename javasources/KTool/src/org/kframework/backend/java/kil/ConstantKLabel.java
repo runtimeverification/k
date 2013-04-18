@@ -1,9 +1,12 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.DefinitionHelper;
 
 
 /**
@@ -16,9 +19,23 @@ import org.kframework.kil.loader.DefinitionHelper;
 public class ConstantKLabel extends KLabel {
 
     private final String label;
+    private final boolean isFunction;
 
     public ConstantKLabel(String label) {
         this.label = label;
+
+        boolean isFunction = false;
+        for (Production production : Utils.productionsOf(label)) {
+            if (production.containsAttribute(Attribute.FUNCTION.getKey())) {
+                isFunction = true;
+                break;
+            }
+            if (production.containsAttribute(Attribute.PREDICATE.getKey())) {
+                isFunction = false;
+                break;
+            }
+        }
+        this.isFunction = isFunction;
     }
 
     public String getLabel() {
@@ -27,38 +44,33 @@ public class ConstantKLabel extends KLabel {
 
     @Override
     public boolean isConstructor() {
-        return !isFunction();
+        return !isFunction;
     }
 
     @Override
     public boolean isFunction() {
-        if (!DefinitionHelper.labels.containsKey(label)) {
-            return false;
-        }
-
-        for (String cons : DefinitionHelper.labels.get(label)) {
-            assert DefinitionHelper.conses.containsKey(cons);
-
-            Production production = DefinitionHelper.conses.get(cons);
-            if (production.containsAttribute(Attribute.FUNCTION.getKey())) {
-                return true;
-            }
-            if (production.containsAttribute(Attribute.PREDICATE.getKey())) {
-                return true;
-            }
-        }
-
-        return false;
+        return isFunction;
     }
 
     @Override
     public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
         if (!(object instanceof ConstantKLabel)) {
             return false;
         }
 
         ConstantKLabel constantKLabel = (ConstantKLabel) object;
         return label.equals(constantKLabel.getLabel());
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + label.hashCode();
+        return hash;
     }
 
     @Override

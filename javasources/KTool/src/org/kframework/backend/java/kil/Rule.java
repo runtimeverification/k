@@ -1,4 +1,4 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;

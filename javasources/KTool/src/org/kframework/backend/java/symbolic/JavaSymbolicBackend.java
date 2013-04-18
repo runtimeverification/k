@@ -221,7 +221,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 		// steps.add(new ResolveBlockingInput());
 		// steps.add(new AddK2SMTLib());
 		steps.add(new AddPredicates());
-		steps.add(new ResolveSyntaxPredicates());
+		//steps.add(new ResolveSyntaxPredicates());
 		steps.add(new ResolveBuiltins());
 		steps.add(new ResolveListOfK());
 		steps.add(new FlattenSyntax());

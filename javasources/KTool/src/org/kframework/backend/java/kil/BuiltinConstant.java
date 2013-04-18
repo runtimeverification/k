@@ -1,5 +1,9 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
@@ -22,6 +26,20 @@ public class BuiltinConstant extends Term {
         this.sort = sort;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof BuiltinConstant)) {
+            return false;
+        }
+
+        BuiltinConstant builtinConstant = (BuiltinConstant) object;
+        return value.equals(builtinConstant.value) && sort.equals(builtinConstant.sort);
+    }
+
     public String getValue() {
         return value;
     }
@@ -33,6 +51,14 @@ public class BuiltinConstant extends Term {
     @Override
     public boolean isSymbolic() {
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + value.hashCode();
+        hash = hash * Utils.HASH_PRIME + sort.hashCode();
+        return hash;
     }
 
     @Override

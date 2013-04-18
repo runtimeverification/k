@@ -1,8 +1,11 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.backend.java.kil;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 import java.util.Iterator;
@@ -59,15 +62,23 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = super.frame == null ? hash : hash * Utils.HASH_PRIME + super.frame.hashCode();
+        hash = hash * Utils.HASH_PRIME + items.hashCode();
+        return hash;
+    }
+
+    @Override
     public String toString() {
         Joiner joiner = Joiner.on(getOperatorName());
         StringBuilder stringBuilder = new StringBuilder();
         joiner.appendTo(stringBuilder, items);
-        if (super.hasFrame()) {
+        if (super.frame != null) {
             if (stringBuilder.length() != 0) {
                 stringBuilder.append(getOperatorName());
             }
-            stringBuilder.append(super.getFrame());
+            stringBuilder.append(super.frame);
         }
         if (stringBuilder.length() == 0) {
             stringBuilder.append(getIdentityName());
