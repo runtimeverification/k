@@ -26,8 +26,8 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
@@ -36,7 +36,6 @@ import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
-import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.generator.BasicParser;
 import org.kframework.parser.generator.Definition2SDF;
 import org.kframework.parser.generator.DefinitionSDF;
@@ -254,14 +253,15 @@ public class DefinitionLoader {
 		org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
 
 		// TODO: reject rewrites
-		// TODO: reject variables
+		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation()).check(config);
 		config = config.accept(new SentenceVariablesFilter());
 		config = config.accept(new CellEndLabelFilter());
+		// config = config.accept(new InclusionFilter(localModule));
 		config = config.accept(new CellTypesFilter());
 		// config = config.accept(new CorrectRewritePriorityFilter());
 		config = config.accept(new CorrectKSeqFilter());
+		config = config.accept(new CorrectCastPriorityFilter());
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
-		// config = config.accept(new InclusionFilter(localModule));
 		// config = config.accept(new VariableTypeInferenceFilter());
 		config = config.accept(new AmbDuplicateFilter());
 		config = config.accept(new TypeSystemFilter());
@@ -271,7 +271,7 @@ public class DefinitionLoader {
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 		config = config.accept(new PreferAvoidFilter());
 		config = config.accept(new FlattenListsFilter());
-		// config = config.accept(new CorrectRewriteSortFilter());
+		config = config.accept(new AmbDuplicateFilter());
 		// last resort disambiguation
 		config = config.accept(new AmbFilter());
 
@@ -294,15 +294,17 @@ public class DefinitionLoader {
 
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
-		// TODO: don't allow rewrites
+		// TODO: reject rewrites
+		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation()).check(config);
 		config = config.accept(new SentenceVariablesFilter());
 		config = config.accept(new CellEndLabelFilter());
-		config = config.accept(new CellTypesFilter());
-		config = config.accept(new CorrectRewritePriorityFilter());
-		config = config.accept(new CorrectKSeqFilter());
-		// config = config.accept(new CheckBinaryPrecedenceFilter());
 		// config = config.accept(new InclusionFilter(localModule));
-		config = config.accept(new VariableTypeInferenceFilter());
+		config = config.accept(new CellTypesFilter());
+		// config = config.accept(new CorrectRewritePriorityFilter());
+		config = config.accept(new CorrectKSeqFilter());
+		config = config.accept(new CorrectCastPriorityFilter());
+		// config = config.accept(new CheckBinaryPrecedenceFilter());
+		// config = config.accept(new VariableTypeInferenceFilter());
 		config = config.accept(new AmbDuplicateFilter());
 		config = config.accept(new TypeSystemFilter());
 		config = config.accept(new PriorityFilter());
@@ -314,6 +316,7 @@ public class DefinitionLoader {
 		config = config.accept(new AmbDuplicateFilter());
 		// last resort disambiguation
 		config = config.accept(new AmbFilter());
+
 		return config;
 	}
 }

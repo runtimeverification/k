@@ -95,6 +95,7 @@ public class ProgramLoader {
 				out = DefinitionLoader.parseCmdString(content, "", filename);
 				out = out.accept(new RemoveBrackets());
 				out = out.accept(new AddEmptyLists());
+				out = out.accept(new RemoveSyntacticCasts());
 				out = out.accept(new FlattenSyntax());
 				out = out.accept(new RemoveSyntacticCasts());
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {

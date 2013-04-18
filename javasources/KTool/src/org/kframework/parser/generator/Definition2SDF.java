@@ -160,10 +160,12 @@ public class Definition2SDF {
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	\"(\" K \")\" \":\" \"" + s.getName() + "\"      -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
-				sdf.append("	\"(\" K \")\" \"::\" \"" + s.getName() + "\"     -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
+				sdf.append("	 K \":" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+				sdf.append("	 K \"::" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
 			}
 		}
+		sdf.append("	 K \":K\"	-> K            {cons(\"K1Cast\")}\n");
+		sdf.append("	 K \"::K\"	-> K            {cons(\"K12Cast\")}\n");
 
 		sdf.append("\n\n");
 		for (String sort : psdfv.constantSorts) {
@@ -195,13 +197,6 @@ public class Definition2SDF {
 		sdf.append("\n\n");
 
 		sdf.append("\n%% terminals reject\n");
-		for (String t : terminals.terminals) {
-			if (t.matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
-				sdf.append("	\"" + t + "\" -> VARID {reject}\n");
-			}
-		}
-
-		sdf.append("\n\n");
 		for (String t : terminals.terminals) {
 			if (t.matches("[a-zA-Z][a-zA-Z0-9]*")) {
 				sdf.append("	\"" + t + "\" -> DzDzID {reject}\n");
