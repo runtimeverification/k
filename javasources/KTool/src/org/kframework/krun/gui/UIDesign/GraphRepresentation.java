@@ -1,8 +1,8 @@
 package org.kframework.krun.gui.UIDesign;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
-import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,12 +41,14 @@ import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.subLayout.GraphCollapser;
-
-public class GraphRepresentation extends JApplet{
+//use generic graph since we modify it
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public class GraphRepresentation extends JPanel{
 
 	private static final long serialVersionUID = 1017336668368978842L;
 	private int index = 0;
-	VisualizationViewerDemo vvd;   
+	VisualizationViewerDemo vvd; 
+	GraphZoomScrollPane gzsp ;
 	GraphCollapser collapser;
 	JPanel commandControl;
 	static ConfigurationPanel nodeInfo;
@@ -58,8 +59,10 @@ public class GraphRepresentation extends JApplet{
 	JButton collapse;
 	JButton expand;
 	JButton exit;
+	JButton compare;
 	private RunKRunCommand commandProcessor;
 	public static KRunState selection;
+
 	public GraphRepresentation(RunKRunCommand command) throws Exception{
 		initCommandProcessor(command);
 		initGraph();
@@ -69,13 +72,14 @@ public class GraphRepresentation extends JApplet{
 		addZoom();
 		packComponents();
 	}
-	
+
 	public void initCommandProcessor(RunKRunCommand command){
 		this.commandProcessor = command;
 	}
 
+
 	public void initGraph() throws Exception{
-		Graph<KRunState,Transition> graph = null;//= new DirectedSparseMultigraph<Vertex,Edge>();
+		Graph graph = null;
 		try {
 			graph = commandProcessor.firstStep();
 		} catch (IOException e) {
@@ -85,7 +89,7 @@ public class GraphRepresentation extends JApplet{
 		}		
 		vvd = new VisualizationViewerDemo(graph);
 	}
-	
+
 	public void initCollapser(){		
 		collapser = new GraphCollapser(vvd.getLayout().getGraph());
 	}
@@ -97,135 +101,152 @@ public class GraphRepresentation extends JApplet{
 		nodeInfo.setPreferredSize(new Dimension(screenSize.width/3,screenSize.height));
 		nodeInfo.setBorder(BorderFactory.createTitledBorder("Configuration"));
 	}
-	
+
 	public void initCommandControlElements(){
 		commandControl = new JPanel();
-
 		numberOfSteps = new JLabel("Input number of steps:");
 		step = new JButton("Step");
 		stepAll = new JButton("Step-all");
 		collapse = new JButton("Collapse");
 		expand = new JButton("Expand");
 		exit = new JButton("Exit");
-				
+		compare = new JButton("Compare");
 		addActionForStepButton();
 		addActionForStepAllButton();
 		addActionForCollapse();
 		addActionForExpand();
 		addActionForExit();
-
+		addActionForCompare();
+		// compare 2 selected nodes
 		addCommandPanelElements();
 	}
-	
+
 	public void addZoom(){
-		Container content = getContentPane();
-		GraphZoomScrollPane gzsp = new GraphZoomScrollPane(vvd.getVv());
-		content.add(gzsp);
+		gzsp = new GraphZoomScrollPane(vvd.getVv());
 	}
-	
+
 	public void packComponents(){		
-  		Container content = getContentPane();
-  		JPanel controls = new JPanel();    
-  		controls.add(commandControl);
-  		content.add(nodeInfo,BorderLayout.EAST);
-  		content.add(controls, BorderLayout.SOUTH);
-  	}
-	
+		this.setLayout(new BorderLayout());
+		JPanel controls = new JPanel();    
+		controls.add(commandControl);
+		this.add(gzsp);
+		this.add(nodeInfo,BorderLayout.EAST);
+		this.add(controls, BorderLayout.SOUTH);
+	}
+
 	public void addActionForStepButton(){
 		step.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Set<KRunState> picked = vvd.getSelectedVertices();
-				if(picked.size() == 1){
-					for(KRunState pick:picked){					
-						try {
-							commandProcessor.step(pick, determineNoOfSteps());
-							vvd.resetGraphLayout();
-							vvd.getVv().repaint();
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						} catch (Exception e1) {
-							e1.printStackTrace();
+				synchronized (ActionListener.class) {
+					Object [] picked = vvd.getSelectedVertices().toArray();
+					if(picked.length > 0){
+						for (int i = 0 ; i< picked.length;i++){
+							if ( !(picked[i] instanceof KRunState))
+								continue;
+							KRunState pick = (KRunState)picked[i];					
+							try {
+								// run command just for leaves
+								if (vvd.getVv().getGraphLayout().getGraph().getSuccessorCount(pick) == 0){
+									commandProcessor.step(pick, determineNoOfSteps());
+								}
+								//reset the selection
+								vvd.getVv().getPickedVertexState().pick(pick, false);
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
 						}
+						redrawGraphAndResetScroll();
 					}
+					else if (picked.length == 0){
+						showMessageOfSelectRequirement("Step");
+					}
+					resetNoOfSteps();
 				}
-				else if (picked.size() == 0){
-					showMessageOfSelectRequirement("Step");
-				}
-				resetNoOfSteps();
 			}
 		});
 	}
-	
+
 	public void addActionForStepAllButton(){
 		stepAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Set<KRunState> picked = vvd.getSelectedVertices();
-				if(picked.size() == 1){
-					for(KRunState pick:picked){						
-						try {
-							commandProcessor.step_all(determineNoOfSteps(), pick);
-							vvd.resetGraphLayout();
-							vvd.getVv().repaint();
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						} catch (Exception e1) {
-							e1.printStackTrace();
+				synchronized (ActionListener.class) {
+					Object [] picked = vvd.getSelectedVertices().toArray();
+					if(picked.length > 0){
+						for (int i = 0 ; i< picked.length;i++){
+							if ( !(picked[i] instanceof KRunState))
+								continue;
+							KRunState pick = (KRunState)picked[i];						
+							try {
+								// run command just for leaves
+								if (vvd.getVv().getGraphLayout().getGraph().getSuccessorCount(pick) == 0 || picked.length ==1 ){
+									commandProcessor.step_all(determineNoOfSteps(), pick);
+								}
+								//reset the selection
+								vvd.getVv().getPickedVertexState().pick(pick, false);
+
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
 						}
+						redrawGraphAndResetScroll();
 					}
+					else if (picked.length == 0){
+						showMessageOfSelectRequirement("Step-all");
+					}
+					resetNoOfSteps();
 				}
-				else if (picked.size() == 0){
-					showMessageOfSelectRequirement("Step-all");
-				}
-				resetNoOfSteps();
 			}
 		});
 	}
 	@SuppressWarnings("unchecked")
 	public void addActionForCollapse(){
-		  collapse.addActionListener(new ActionListener() {
-	            public void actionPerformed(ActionEvent e) {
-	            	Collection<KRunState> picked = new HashSet<KRunState>(vvd.getSelectedVertices());
-	            	if(picked.size() > 1) {
-	            		Graph<KRunState,Transition> inGraph = vvd.getLayout().getGraph();
-	            		Graph clusterGraph = collapser.getClusterGraph(inGraph, picked);
-	            		Graph g = collapser.collapse(vvd.getLayout().getGraph(), clusterGraph);
-	            		double sumx = 0;
-	            		double sumy = 0;
-	            		for(Object v : picked) {
-		            		Point2D p = (Point2D)vvd.getLayout().transform((KRunState) v);
-		            		sumx += p.getX();
-		            		sumy += p.getY();
-		            		//break;
-	            		}
-	            		Point2D cp = new Point2D.Double(sumx/picked.size(), sumy/picked.size());
-	            		vvd.getVv().getRenderContext().getParallelEdgeIndexFunction().reset();
-	            		//TODO decoment after problem solvede
-	            		vvd.getLayout().setGraph(g);
-	            		vvd.getLayout().setLocation((KRunState) clusterGraph, cp);	    
-	            		//vvd.getLayout().resetGraphPosition(g);	            	
-	            		vvd.getVv().getPickedVertexState().clear();
-	            		vvd.getVv().repaint();
-	            	}
-	            }
-	       });		
+		collapse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Collection<KRunState> picked = new HashSet<KRunState>(vvd.getSelectedVertices());
+				if(picked.size() > 1) {
+					Graph<KRunState,Transition> inGraph = vvd.getLayout().getGraph();
+					Graph clusterGraph = collapser.getClusterGraph(inGraph, picked);
+					Graph g = collapser.collapse(vvd.getLayout().getGraph(), clusterGraph);
+					double sumx = 0;
+					double sumy = 0;
+					for(Object v : picked) {
+						Point2D p = (Point2D)vvd.getLayout().transform(v);
+						sumx += p.getX();
+						sumy += p.getY();
+						//break;
+					}
+					Point2D cp = new Point2D.Double(sumx/picked.size(), sumy/picked.size());
+					vvd.getVv().getRenderContext().getParallelEdgeIndexFunction().reset();
+					vvd.getLayout().setGraph(g);
+					vvd.getLayout().setLocation(clusterGraph, cp);	    
+					//vvd.getLayout().resetGraphPosition(g);	            	
+					vvd.getVv().getPickedVertexState().clear();
+					vvd.getVv().repaint();
+				}
+			}
+		});		
 	}
 
 	@SuppressWarnings("unchecked")
 	public void addActionForExpand(){
 		expand.addActionListener(new ActionListener() {
-       	 public void actionPerformed(ActionEvent e) {
-                Collection picked = new HashSet(vvd.getVv().getPickedVertexState().getPicked());
-                for(Object v : picked) {
-                    if(v instanceof Graph) {
-                        Graph g = collapser.expand(vvd.getLayout().getGraph(), (Graph)v);
-                        vvd.getVv().getRenderContext().getParallelEdgeIndexFunction().reset();
-                        vvd.getLayout().setGraph(g);
-                        vvd.getLayout().resetGraphPosition(g);
-                    }
-                    vvd.getVv().getPickedVertexState().clear();
-                    vvd.getVv().repaint();
-                }
-            }});
+			public void actionPerformed(ActionEvent e) {
+				Collection picked = new HashSet(vvd.getVv().getPickedVertexState().getPicked());
+				for(Object v : picked) {
+					if(v instanceof Graph) {
+						Graph g = collapser.expand(vvd.getLayout().getGraph(), (Graph)v);
+						vvd.getVv().getRenderContext().getParallelEdgeIndexFunction().reset();
+						vvd.getLayout().setGraph(g);
+						vvd.getLayout().resetGraphPosition(g);
+					}
+					vvd.getVv().getPickedVertexState().clear();
+					vvd.getVv().repaint();
+				}
+			}});
 	}
 
 	public void addActionForExit(){
@@ -235,7 +256,32 @@ public class GraphRepresentation extends JApplet{
 			}
 		});
 	}
-			
+
+	public void addActionForCompare(){
+		compare.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (vvd==null){
+					return;
+				}
+				KRunState first = null , second = null;
+				Set<KRunState> picked = vvd.getSelectedVertices();
+				if (picked == null || picked.size() != 2){
+					showMessageOfSelectRequirement("Select two configurations to compare.");
+					return;
+				}
+				for (KRunState krs : picked){
+					if (first==null){
+						first = krs;
+					}
+					else{ 
+						second = krs;
+					}
+				}
+				new DiffFrame(first, second, null).setVisible(true);
+			}
+		});
+	}
+
 	public int determineNoOfSteps(){
 		if ( numberField.getText().isEmpty() ||  (Pattern.matches("[a-zA-Z]+", numberField.getText()) == true)){
 			return 1;
@@ -253,46 +299,50 @@ public class GraphRepresentation extends JApplet{
 		JOptionPane.showMessageDialog(new JFrame("Selection needed"),"Select a vertex for the '"+method+"' method!");
 	}
 
+	public void showMessage(String message){
+		JOptionPane.showMessageDialog(new JFrame("Attention"),message,"",JOptionPane.INFORMATION_MESSAGE);
+	}
+
 	public void addCommandPanelElements(){
 		commandControl.add(this.step);
 		commandControl.add(this.stepAll);
 		//TO DO : reuse these buttons when the functionalities work
-		//commandControl.add(this.collapse);
-		//commandControl.add(this.expand);
+		commandControl.add(this.collapse);
+		commandControl.add(this.expand);
 		commandControl.add(this.numberOfSteps);
 		commandControl.add(this.numberField);
+		commandControl.add(this.compare);
 		commandControl.add(this.exit);
-	
+
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	public boolean findShortestPath(Object source, Object target, String rule){	
 		DijkstraShortestPath<Object, Transition> shortestPath = new DijkstraShortestPath<Object, Transition>((Graph)vvd.getLayout().getGraph());
-	    List<Transition> path = shortestPath.getPath(source, target);
-	    if(path.size() < 1){
-	    	return false;
-	    }
-	    else{
-	        for(Transition edge:path){
-	        	if(edge.getLabel().equals(Transition.TransitionType.UNLABELLED) && !rule.equals("")){
-	        		edge.setLabel(rule);
-	        	}
-	        }
-	    	return true;
-	    }
+		List<Transition> path = shortestPath.getPath(source, target);
+		if(path.size() < 1){
+			return false;
+		}
+		else{
+			for(Transition edge:path){
+				if(edge.getLabel().equals(Transition.TransitionType.UNLABELLED) && !rule.equals("")){
+					edge.setLabel(rule);
+				}
+			}
+			return true;
+		}
 	}
-	
+
 	public void addNewGraphComponent(KRunState source, KRunState target, int depth, String rule){
-    	  setId(target);
-    	  vvd.addEdge(source, target, depth, rule);
-	      vvd.resetGraphLayout();
-    }
-	      
+		setId(target);
+		vvd.addEdge(source, target, depth, rule);
+		vvd.resetGraphLayout();
+	}
+
 	public void setId(KRunState vertex){
-	 	  vertex.setStateId(index);
-	   	  index++;
+		vertex.setStateId(index);
+		index++;
 	}	
-	
+
 	public  static void displayVertexInfo(KRunState pick) {		
 		Term term = pick.getResult();
 		try {
@@ -313,27 +363,56 @@ public class GraphRepresentation extends JApplet{
 		//set the color map  
 		ColorVisitor cv = new ColorVisitor();
 		term.accept(cv);
-		
+
 		UnparserFilter unparser = new UnparserFilter(true, false);
 		term.accept(unparser);
-		
+
 		//TO-DO : create our own filter that ignores xml characters from a tag
 		StringBuffer rez = new StringBuffer();
-		  for (String line : unparser.getResult().split("\n")){
-		   line= line.trim();
-		   if (line.startsWith("<") && line.endsWith(">"))
-		    rez.append(line+"\n");
-		   else 
-		    rez.append(StringEscapeUtils.escapeXml(line)+"\n");
-		  }
-		  nodeInfo.init(rez.toString());
+		for (String line : unparser.getResult().split("\n")){
+			line= line.trim();
+			if (line.startsWith("<") && line.endsWith(">"))
+				rez.append(line+"\n");
+			else 
+				rez.append(StringEscapeUtils.escapeXml(line)+"\n");
+		}
+		nodeInfo.init(rez.toString());
 		//nodeInfo.init(unparser.getResult());
 		XMLEditorKit.collapseMemorizedTags();
 	}
-	
+
 	public static void displayEdgeInfo(Transition pick, KRunState src, KRunState dest){
 		new DiffFrame(src, dest, pick).setVisible(true);
-		//JOptionPane.showMessageDialog(new JFrame("Edge information"),"Steps between vertex" + "not now " + " - vertex"+" not now"+ " : " + " not available "+"\n"+"Label: "+ pick.getRule());
 	}
-	
+
+	public void redrawGraphAndResetScroll(){
+		Graph newGrapg = commandProcessor.getCurrentGraph();
+		Graph oldGraph = vvd.getLayout().getGraph();
+		for (Object v : newGrapg.getVertices()){
+			if (vvd.verifyExistingVertex(v)==null)
+
+				oldGraph.addVertex(v);
+		}
+		for (Object e : newGrapg.getEdges()){
+			try {
+				Object source , dest ; 
+				source = newGrapg.getSource(e) ;
+				dest = newGrapg.getDest(e);
+				if (vvd.verifyCanAddEdge(source, dest)){
+					oldGraph.addEdge(e, source,dest);
+				}
+
+			}
+			// should not happen
+			catch (IllegalArgumentException iae){}
+		}
+		vvd.resetGraphLayout();
+		gzsp.revalidate();
+		gzsp.repaint();
+		//		int x = gzsp.getX();
+		//		int y = gzsp.getY();
+		//		MouseWheelEvent event = new MouseWheelEvent((Component)gzsp, MouseWheelEvent.MOUSE_WHEEL, System.currentTimeMillis(),Event.SCROLL_BEGIN,x , y, 1, false, MouseWheelEvent.WHEEL_UNIT_SCROLL , 1, 1);
+		//		gzsp.dispatchEvent(event);
+	}
+
 }
