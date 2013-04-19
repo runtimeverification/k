@@ -6,6 +6,8 @@ import java.awt.Event;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.Collection;
@@ -43,7 +45,7 @@ import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.subLayout.GraphCollapser;
 //use generic graph since we modify it
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class GraphRepresentation extends JPanel{
+public class GraphRepresentation extends JPanel implements ItemListener{
 
 	private static final long serialVersionUID = 1017336668368978842L;
 	private int index = 0;
@@ -63,6 +65,10 @@ public class GraphRepresentation extends JPanel{
 	private RunKRunCommand commandProcessor;
 	public static KRunState selection;
 
+	// keep track of number of selection 
+	private int nonKrunStateSelection;
+	private int totalSelections ;
+	private boolean enabled ;
 	public GraphRepresentation(RunKRunCommand command) throws Exception{
 		initCommandProcessor(command);
 		initGraph();
@@ -71,6 +77,11 @@ public class GraphRepresentation extends JPanel{
 		initCommandControlElements();
 		addZoom();
 		packComponents();
+		// add listener for configuration selection
+		vvd.getVv().getPickedVertexState().addItemListener(this);
+		nonKrunStateSelection = 0 ;
+		enabled = true;
+		totalSelections=0;
 	}
 
 	public void initCommandProcessor(RunKRunCommand command){
@@ -111,6 +122,7 @@ public class GraphRepresentation extends JPanel{
 		expand = new JButton("Expand");
 		exit = new JButton("Exit");
 		compare = new JButton("Compare");
+		compare.setEnabled(false);
 		addActionForStepButton();
 		addActionForStepAllButton();
 		addActionForCollapse();
@@ -306,7 +318,6 @@ public class GraphRepresentation extends JPanel{
 	public void addCommandPanelElements(){
 		commandControl.add(this.step);
 		commandControl.add(this.stepAll);
-		//TO DO : reuse these buttons when the functionalities work
 		commandControl.add(this.collapse);
 		commandControl.add(this.expand);
 		commandControl.add(this.numberOfSteps);
@@ -415,4 +426,75 @@ public class GraphRepresentation extends JPanel{
 		//		gzsp.dispatchEvent(event);
 	}
 
+	@Override
+	public void itemStateChanged(ItemEvent event) {
+		Object item = event.getItem();
+		if (event.getStateChange()==ItemEvent.SELECTED){
+			totalSelections++;
+		}
+		else {
+			totalSelections--;
+		}
+		if (!(item instanceof KRunState) ){
+			// when a non KrunState vertex is selected disable the (step/step-all/compare) buttons
+			if (event.getStateChange() == ItemEvent.SELECTED){
+				nonKrunStateSelection ++;
+				changeBttnsEnableStatus(false);
+			}
+			else {
+				nonKrunStateSelection --; 
+				if (nonKrunStateSelection==0  && totalSelections > 0){
+					changeBttnsEnableStatus(true);
+				}
+			}
+		}
+		else {
+			if (nonKrunStateSelection==0 && totalSelections > 0){
+				changeBttnsEnableStatus(true);
+			}
+			else{
+				changeBttnsEnableStatus(false);
+			}
+		}
+		if (totalSelections == 2 && nonKrunStateSelection==0){
+			changeCompareStatus(true);
+		}
+		else {
+			changeCompareStatus(false);
+		}
+		if (totalSelections>1){
+			changeCollapseStatus(true);
+		}
+		else {
+			changeCollapseStatus(false);
+		}
+		
+		if (nonKrunStateSelection==1){
+			changeExpandStatus(true);
+		}
+		else {
+			changeExpandStatus(false);
+		}
+	}
+
+	public void changeBttnsEnableStatus(boolean status ){
+		if (enabled==status)
+			return;
+		step.setEnabled(status);
+		stepAll.setEnabled(status);
+		numberField.setEnabled(status);
+		enabled = status;
+	}
+
+	public void changeCompareStatus(boolean status){
+		compare.setEnabled(status);
+	}
+
+	public void changeExpandStatus(boolean status){
+		expand.setEnabled(status);
+	}
+	
+	public void changeCollapseStatus(boolean status){
+		collapse.setEnabled(status);
+	}
 }
