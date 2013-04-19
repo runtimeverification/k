@@ -3,6 +3,8 @@ package org.kframework.kil;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kframework.compile.transformers.AddPredicates;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -41,6 +43,10 @@ public class Constant extends Term {
         return ct;
     }
 
+    public static final Constant INT(String s) {
+        return new Constant("#Int", s);
+    }
+
     private static final Map<String, Constant> strs
             = new HashMap<String, Constant>();
     public static final Constant SPACE = STRING(" ");
@@ -53,18 +59,9 @@ public class Constant extends Term {
         return ct;
     }
 
-	// AST representation of #Bool constants
+	// AST representation of KLabel constants
     private static final Map<String, Constant> klbls
             = new HashMap<String, Constant>();
-	public static final Constant COOL_KLABEL = KLABEL("cool");
-	public static final Constant HEAT_KLABEL = KLABEL("heat");
-	public static final Constant HEATED_KLABEL = KLABEL("heated");
-	public static final Constant REDEX_KLABEL = KLABEL("redex");
-	public static final Constant KNEQ_KLABEL = KLABEL("'_=/=K_");
-	public static final Constant KEQ_KLABEL = KLABEL("'_==K_");
-	public static final Constant KEQ = KLABEL("'_=K_");
-	public static final Constant ANDBOOL_KLABEL = KLABEL("'#andBool");
-	public static final Constant BOOL_ANDBOOL_KLABEL = KLABEL("'_andBool_");
 
     public static final Constant KLABEL(String s) {
         Constant ct = klbls.get(s);
@@ -83,7 +80,7 @@ public class Constant extends Term {
 		this.value = value;
 	}
 
-	public Constant(String location, String filename, String sort, String value) {
+	private Constant(String location, String filename, String sort, String value) {
 		super(location, filename, sort);
 		this.value = value;
 	}
@@ -94,7 +91,7 @@ public class Constant extends Term {
 		this.value = element.getAttribute(Constants.VALUE_value_ATTR);
 	}
 
-	public Constant(Constant constant) {
+	private Constant(Constant constant) {
 		super(constant);
 		this.value = constant.value;
 	}

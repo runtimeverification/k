@@ -199,6 +199,11 @@ public class KastFilter extends BasicVisitor {
 		throw new RuntimeException("don't know how to kast Rewrite");
 	}
 
+    @Override
+    public void visit(KLabelConstant kLabelConstant) {
+        result.write(kLabelConstant.getLabel());
+    }
+
 	@Override
 	public void visit(Constant constant) {
 		if (constant.getSort().equals("#Id")) {

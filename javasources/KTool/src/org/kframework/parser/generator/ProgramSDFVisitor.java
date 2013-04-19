@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.kframework.kil.Constant;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.PriorityBlockExtended;
 import org.kframework.kil.PriorityExtended;
@@ -65,10 +66,10 @@ public class ProgramSDFVisitor extends BasicVisitor {
 			PriorityBlock pb1 = new PriorityBlock();
 			pb1.setAssoc(pbe1.getAssoc());
 
-			for (Constant tag : pbe1.getProductions()) {
-				Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getValue());
+			for (KLabelConstant tag : pbe1.getProductions()) {
+				Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel());
 				if (prods2.isEmpty()) {
-					String msg = "Could not find any production represented by tag: " + tag.getValue();
+					String msg = "Could not find any production represented by tag: " + tag.getLabel();
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
 				}
 				pb1.getProductions().addAll(prods2);
@@ -85,10 +86,10 @@ public class ProgramSDFVisitor extends BasicVisitor {
 		PriorityBlock pb1 = new PriorityBlock();
 		pb1.setAssoc(node.getAssoc());
 
-		for (Constant tag : node.getTags()) {
-			Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getValue());
+		for (KLabelConstant tag : node.getTags()) {
+			Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel());
 			if (prods2.isEmpty()) {
-				String msg = "Could not find any production represented by tag: " + tag.getValue();
+				String msg = "Could not find any production represented by tag: " + tag.getLabel();
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
 			}
 			pb1.getProductions().addAll(prods2);

@@ -79,14 +79,14 @@ public class AddEval extends BasicCompilerStep<Definition> {
 
 	public Term defaultMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(MetaK.kWrapper(new Constant("#String", "\"" + v.getName() + "\"")));
+		item.setKey(MetaK.kWrapper(Constant.STRING(v.getName())));
 		item.setValue(MetaK.kWrapper(MetaK.defaultTerm(v)));
 		return item;
 	}
 
 	public Term evalMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(MetaK.kWrapper(new Constant("#String", "\"" + v.getName() + "\"")));
+		item.setKey(MetaK.kWrapper(Constant.STRING(v.getName())));
 		item.setValue(MetaK.kWrapper(v));
 		return item;
 	}

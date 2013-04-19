@@ -32,7 +32,10 @@ public class SortCells extends CopyOnWriteTransformer {
 			return super.transform(node);
 		}
 		Term contents = node.getContents();
-		if (contents instanceof Variable || contents instanceof Constant) return node;
+		if (contents instanceof Variable
+                || contents instanceof KLabelConstant
+                || contents instanceof Constant)
+            return node;
 		return super.transform(node);    //To change body of overridden methods use File | Settings | File Templates.
 	}
 }

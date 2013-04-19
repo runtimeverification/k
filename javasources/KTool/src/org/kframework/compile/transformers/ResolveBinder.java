@@ -8,6 +8,7 @@ import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -29,12 +30,12 @@ import java.util.regex.Pattern;
 
 public class ResolveBinder extends CopyOnWriteTransformer {
 
-    private static final Constant BINDER_PREDICATE
-            = new Constant("KLabel", AddPredicates.predicate("Binder"));
-    private static final Constant BOUNDED_PREDICATE
-            = new Constant("KLabel", AddPredicates.predicate("Bound"));
-    private static final Constant BOUNDING_PREDICATE
-            = new Constant("KLabel", AddPredicates.predicate("Bounding"));
+    private static final KLabelConstant BINDER_PREDICATE
+            = KLabelConstant.of(AddPredicates.predicate("Binder"));
+    private static final KLabelConstant BOUNDED_PREDICATE
+            = KLabelConstant.of(AddPredicates.predicate("Bound"));
+    private static final KLabelConstant BOUNDING_PREDICATE
+            = KLabelConstant.of(AddPredicates.predicate("Bounding"));
 
     private static final String REGEX
             = "\\s*(\\d+)(\\s*-\\>\\s*(\\d+))?\\s*(,?)";
@@ -97,13 +98,14 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             rule.addAttribute(Attribute.ANYWHERE);
             items.add(rule);
 
-            Constant klblCt = Constant.KLABEL(prod.getKLabel());
-            Term klblK = new KApp(new KInjectedLabel(klblCt), Empty.ListOfK);
+            Term klblK = new KApp(
+                    new KInjectedLabel(KLabelConstant.of(prod.getKLabel())),
+                    Empty.KList);
 
             for (int bndIdx : bndMap.keySet()) {
                 KList list = new KList();
                 list.getContents().add(klblK);
-                list.getContents().add(new Constant("#Int", Integer.toString(bndIdx)));
+                list.getContents().add(Constant.INT(bndIdx));
                 rule = new Rule(new KApp(BOUNDED_PREDICATE, list), Constant.TRUE);
                 rule.addAttribute(Attribute.ANYWHERE);
                 items.add(rule);
@@ -114,7 +116,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             for (int bodyIdx : bndMap.values()) {
                 KList list = new KList();
                 list.getContents().add(klblK);
-                list.getContents().add(new Constant("#Int", Integer.toString(bodyIdx)));
+                list.getContents().add(Constant.INT(bodyIdx));
                 rule = new Rule(new KApp(BOUNDING_PREDICATE, list), Constant.TRUE);
                 rule.addAttribute(Attribute.ANYWHERE);
                 items.add(rule);

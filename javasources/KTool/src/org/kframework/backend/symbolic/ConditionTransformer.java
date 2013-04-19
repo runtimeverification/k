@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -29,10 +29,9 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(KApp node) throws TransformerException {
         Term label = node.getLabel();
-        if (label instanceof Constant) {
-            String name = ((Constant) label).getValue();
+        if (label instanceof KLabelConstant) {
             Term content = node.getChild();
-            if (name.equals(Constant.ANDBOOL_KLABEL.getValue())) {
+            if (label.equals(KLabelConstant.ANDBOOL_KLABEL)) {
                 if (content instanceof KList) {
                     List<Term> terms = ((KList) content).getContents();
                     List<Term> remainingTerms = new ArrayList<Term>();

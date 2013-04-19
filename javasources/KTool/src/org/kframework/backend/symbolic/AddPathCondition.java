@@ -13,6 +13,7 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
@@ -84,7 +85,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                 List<Term> list = new ArrayList<Term>();
                 list.add(phi);
                 list.add(andBool(ct.getFilteredTerms()));
-                pathCondition = new KApp(Constant.BOOL_ANDBOOL_KLABEL, new KList(list));
+                pathCondition = new KApp(KLabelConstant.BOOL_ANDBOOL_KLABEL, new KList(list));
             }
             rightCell.setContents(pathCondition);
 
@@ -97,7 +98,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
                 myList.add(checkSat(pathCondition));
-                cond = new KApp(Constant.ANDBOOL_KLABEL, new KList(myList));
+                cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
             }
 
             // add transition attribute
@@ -127,7 +128,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             List<Term> list = new ArrayList<Term>();
             list.add(and);
             list.add(it.next());
-            and = new KApp(Constant.BOOL_ANDBOOL_KLABEL, new KList(list));
+            and = new KApp(KLabelConstant.BOOL_ANDBOOL_KLABEL, new KList(list));
         }
         return and;
     }
@@ -135,10 +136,10 @@ public class AddPathCondition extends CopyOnWriteTransformer {
     private Term checkSat(Term pathCondition) {
         // checkSat(pathCondition) =/=K # "unsat"(.KList)
         KApp unsat = new KApp(new KInjectedLabel(Constant.STRING("unsat")), new KList());
-        KApp checkSat = new KApp(Constant.KLABEL("'checkSat"), pathCondition);
+        KApp checkSat = new KApp(KLabelConstant.of("'checkSat"), pathCondition);
         List<Term> items = new ArrayList<Term>();
         items.add(unsat);
         items.add(checkSat);
-        return new KApp(Constant.KNEQ_KLABEL, new KList(items));
+        return new KApp(KLabelConstant.KNEQ_KLABEL, new KList(items));
     }
 }

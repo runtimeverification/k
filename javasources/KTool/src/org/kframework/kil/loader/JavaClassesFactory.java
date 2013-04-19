@@ -18,6 +18,7 @@ import org.kframework.kil.FreezerHole;
 import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Lexical;
@@ -103,8 +104,13 @@ public class JavaClassesFactory {
 			return new Variable(element);
 		if (Constants.TERMINAL.equals(element.getNodeName()))
 			return new Terminal(element);
-		if (Constants.CONST.equals(element.getNodeName()))
-			return new Constant(element);
+		if (Constants.CONST.equals(element.getNodeName())) {
+            if (element.getAttribute(Constants.SORT_sort_ATTR).equals("KLabel")) {
+                return new KLabelConstant(element);
+            } else {
+                return new Constant(element);
+            }
+        }
 		if (Constants.KAPP.equals(element.getNodeName()))
 			return new KApp(element);
 		if (Constants.KList.equals(element.getNodeName()))
@@ -186,7 +192,7 @@ public class JavaClassesFactory {
 		 * new Production(element); if (Constants.RULE.equals(nodeName)) return new Rule(element); if (Constants.REWRITE.equals(nodeName)) return new Rewrite(element); if
 		 * (Constants.TERM.equals(nodeName)) return new TermCons(element); if (Constants.BRACKET.equals(nodeName)) return new Bracket(element); if (Constants.VAR.equals(nodeName)) return new
 		 * Variable(element); if (Constants.TERMINAL.equals(nodeName)) return new Terminal(element); if (Constants.CONST.equals(nodeName)) return new Constant(element); if
-		 * (Constants.KAPP.equals(nodeName)) return new KApp(element); if (Constants.LISTOFK.equals(nodeName)) return new ListOfK(element); if (Constants.EMPTY.equals(nodeName)) return new
+		 * (Constants.KAPP.equals(nodeName)) return new KApp(element); if (Constants.LISTOFK.equals(nodeName)) return new KList(element); if (Constants.EMPTY.equals(nodeName)) return new
 		 * Empty(element); if (Constants.SET.equals(nodeName)) return new Set(element); if (Constants.SETITEM.equals(nodeName)) return new SetItem(element); if (Constants.USERLIST.equals(nodeName))
 		 * return new UserList(element); if (Constants.CELL.equals(nodeName)) return new Cell(element); if (Constants.BREAK.equals(nodeName)) return new TermComment(element); if
 		 * (Constants.BAG.equals(nodeName)) return new Bag(element); if (Constants.BAGITEM.equals(nodeName)) return new BagItem(element); if (Constants.KSEQUENCE.equals(nodeName)) return new

@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 public class AddKLabelToString extends CopyOnWriteTransformer {
 
-    private static final Constant KLabel2String =
-            new Constant("KLabel", "KLabel2String");
+    private static final KLabelConstant KLabel2String =
+            KLabelConstant.of("KLabel2String");
 
     private static final String String2KLabelCons =
             "KLabel1String2KLabelSyn";
@@ -25,14 +25,12 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
         for (String klbl : node.getModuleKLabels()) {
-            Constant klblCt = new Constant("KLabel", klbl);
-            Term kapp = new KApp(new KInjectedLabel(klblCt), Empty.ListOfK);
+            Term kapp = new KApp(new KInjectedLabel(KLabelConstant.of(klbl)), Empty.KList);
             KList list = new KList();
             list.getContents().add(kapp);
             Term lhs = new KApp(KLabel2String, list);
-            String str = "\"" + klbl.replace("\"","\\\"") + "\"";
-            Constant strCt = new Constant("#String", str);
-            Term rhs = new KApp(new KInjectedLabel(strCt), Empty.ListOfK);
+            Constant strCt = Constant.STRING(klbl.replace("\"","\\\""));
+            Term rhs = new KApp(new KInjectedLabel(strCt), Empty.KList);
             Rule rule = new Rule(lhs, rhs);
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);
@@ -40,7 +38,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
             java.util.List<Term> termList = new ArrayList<Term>();
             termList.add(rhs);
             TermCons termCons = new TermCons("KLabel", String2KLabelCons, termList);
-            rule = new Rule(termCons, klblCt);
+            rule = new Rule(termCons, KLabelConstant.of(klbl));
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);
         }

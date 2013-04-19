@@ -13,6 +13,7 @@ import org.kframework.kil.Freezer;
 import org.kframework.kil.FreezerLabel;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.MapItem;
@@ -178,32 +179,37 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			if (!MetaK.isComputationSort(tc.getSort())) {
 				return new KApp(new KInjectedLabel((Term) tc.accept(trans)), new Empty(MetaK.Constants.KList));
 			}
+
 			String l = tc.getLocation();
 			String f = tc.getFilename();
 			Production ppp = DefinitionHelper.conses.get(tc.getCons());
-			String klabel = ppp.getKLabel();
-			KApp kapp = new KApp(l, f);
-			kapp.setLabel(new Constant(l, f, "KLabel", klabel));
 			KList lok = new KList(l, f);
-			kapp.setChild(lok);
 			for (Term t : tc.getContents()) {
 				lok.getContents().add((Term) t.accept(this));
 			}
-			return kapp;
+			return new KApp(l, f, KLabelConstant.of(ppp.getKLabel()), lok);
 		}
+
+        @Override
+        public ASTNode transform(KLabelConstant kLabelConstant) throws TransformerException {
+            String l = kLabelConstant.getLocation();
+            String f = kLabelConstant.getFilename();
+            return new KApp(l, f, new KInjectedLabel(kLabelConstant), new Empty(l, f, MetaK.Constants.KList));
+        }
 
 		@Override
 		public ASTNode transform(Constant cst) throws TransformerException {
 			String l = cst.getLocation();
 			String f = cst.getFilename();
 
-			if (!MetaK.isBuiltinSort(cst.getSort()) && !cst.getSort().equals("KLabel")) {
+			if (!MetaK.isBuiltinSort(cst.getSort())) {
 				KList list = new KList();
 				list.add(Constant.STRING(cst.getSort()));
 				list.add(Constant.STRING(cst.getValue()));
-				return new KApp(Constant.KLABEL("#token"), list).accept(this);
-			}
-			return new KApp(l, f, new KInjectedLabel(cst), new Empty(l, f, MetaK.Constants.KList));
+				return new KApp(KLabelConstant.of("#token"), list).accept(this);
+			} else {
+			    return new KApp(l, f, new KInjectedLabel(cst), new Empty(l, f, MetaK.Constants.KList));
+            }
 		}
 
 		@Override
@@ -217,7 +223,11 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
 				Production listProd = DefinitionHelper.listConses.get(emp.getSort());
 				String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
-				return new KApp(l, f, new Constant("KLabel", MetaK.getListUnitLabel(separator)), new Empty(MetaK.Constants.KList));
+				return new KApp(
+                        l,
+                        f,
+                        KLabelConstant.of(MetaK.getListUnitLabel(separator)),
+                        new Empty(MetaK.Constants.KList));
 				// Constant cst = new Constant(l, f, "KLabel", "'." + emp.getSort() + "");
 				// return new KApp(l, f, cst, new Empty(l, f, MetaK.Constants.KList));
 			}

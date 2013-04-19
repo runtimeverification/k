@@ -404,6 +404,14 @@ public class UnparserFilter extends BasicVisitor {
 		postpare();
 	}
 
+    @Override
+    public void visit(KLabelConstant kLabelConstant) {
+        /* andreis: prepare and postpare seem unnecessary for KLabelConstant */
+        //prepare(kLabelConstant);
+        result.write(kLabelConstant.getLabel());
+        //postpare();
+    }
+
 	@Override
 	public void visit(Constant constant) {
 		prepare(constant);

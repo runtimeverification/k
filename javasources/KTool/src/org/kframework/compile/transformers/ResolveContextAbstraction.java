@@ -246,7 +246,12 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 			if (max<level) max = level;
 			levels.get(level).add(node);
 		}
-		
+
+        @Override
+        public void visit(KLabelConstant node) {
+            levels.get(0).add(node);
+        }
+
 		@Override
 		public void visit(Constant node) {
 			levels.get(0).add(node);

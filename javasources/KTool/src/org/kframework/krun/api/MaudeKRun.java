@@ -251,16 +251,20 @@ public class MaudeKRun implements KRun {
 				return new KInjectedLabel(parseXML(list.get(0)));
 			} else if (sort.equals("#NzInt") && op.equals("--Int_")) {
 				assertXMLTerm(list.size() == 1);
-				return new Constant("#Int", "-" + ((Constant) parseXML(list.get(0))).getValue());
+				return Constant.INT("-" + ((Constant) parseXML(list.get(0))).getValue());
 			} else if (sort.equals("#NzNat") && op.equals("sNat_")) {
 				assertXMLTerm(list.size() == 1 && ((Constant) parseXML(list.get(0))).getValue().equals("0"));
-				return new Constant("#Int", xml.getAttribute("number"));
+                return Constant.INT(xml.getAttribute("number"));
 			} else if (sort.equals("#Zero") && op.equals("0")) {
 				assertXMLTerm(list.size() == 0);
-				return new Constant("#Int", "0");
+				return Constant.ZERO;
 			} else if (sort.equals("#Bool") && (op.equals("true") || op.equals("false"))) {
 				assertXMLTerm(list.size() == 0);
-				return new Constant("#Bool", op);
+                if (op.equals("true")) {
+                    return Constant.TRUE;
+                } else {
+                    return Constant.FALSE;
+                }
 			} else if (sort.equals("#Char") || sort.equals("#String")) {
 				assertXMLTerm(list.size() == 0);
 				return new Constant("#String", op);
@@ -282,7 +286,7 @@ public class MaudeKRun implements KRun {
 				assertXMLTerm(list.size() == 2);
 				return new KApp(parseXML(list.get(0)), parseXML(list.get(1)));
 			} else if (sort.equals("KLabel") && list.size() == 0) {
-				return new Constant("KLabel", op);
+				return KLabelConstant.of(op);
 			} else if (sort.equals("KLabel") && op.equals("#freezer_")) {
 				assertXMLTerm(list.size() == 1);
 				return new FreezerLabel(parseXML(list.get(0)));	

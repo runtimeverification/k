@@ -26,9 +26,8 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
 		}
 		if (body instanceof KApp) {
 			Term l = ((KApp) body).getLabel();
-			if (l instanceof Constant) {
-				String name = ((Constant) l).getValue();
-				if (MetaK.isPredicateLabel(name)) {
+			if (l instanceof KLabelConstant) {
+				if (MetaK.isPredicateLabel(((KLabelConstant) l).getLabel())) {
 					node = addFunction(node);
 				}
 			}

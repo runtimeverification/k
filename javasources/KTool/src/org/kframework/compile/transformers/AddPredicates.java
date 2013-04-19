@@ -10,6 +10,7 @@ import org.kframework.kil.Context;
 import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -31,7 +32,7 @@ import java.util.Set;
 
 public class AddPredicates extends CopyOnWriteTransformer {
 
-    public static final Constant K2Sort = Constant.KLABEL("K2Sort");
+    public static final KLabelConstant K2Sort = KLabelConstant.of("K2Sort");
 
     public class PredicatesVisitor extends BasicVisitor {
 
@@ -45,14 +46,12 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (!lists.isEmpty()) {
                 for (String listSort : lists) {
                     Rule rule = new Rule(
-                            new KApp(Constant.KLABEL(predicate(listSort)),
-                                    new Empty(listSort)),
+                            new KApp(KLabelConstant.of(predicate(listSort)), new Empty(listSort)),
                             Constant.TRUE);
                     rule.addAttribute(Attribute.PREDICATE);
                     result.add(rule);
                     rule = new Rule(
-                            new KApp(Constant.KLABEL(predicate("KResult")),
-                                    new Empty(listSort)),
+                            new KApp(KLabelConstant.KRESULT_PREDICATE, new Empty(listSort)),
                             Constant.TRUE);
                     rule.addAttribute(Attribute.PREDICATE);
                     result.add(rule);
@@ -88,8 +87,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                rhs = new KApp(KSymbolicPredicate, term);
             else
                rhs = Constant.TRUE;
-            Constant ct = Constant.KLABEL(syntaxPredicate(sort));
-            Term lhs = new KApp(ct, term);
+            Term lhs = new KApp(KLabelConstant.of(syntaxPredicate(sort)), term);
             Rule rule = new Rule(lhs, rhs);
             rule.addAttribute(Attribute.PREDICATE);
             result.add(rule);
@@ -97,7 +95,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
             // define K2Sort for syntactic production (excluding subsorts)
             if (!node.isSubsort()) {
                 lhs = new KApp(K2Sort, term);
-                rhs = new Constant("#String", "\"" + sort + "\"");
+                rhs = Constant.STRING(sort);
                 rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 result.add(rule);
@@ -124,12 +122,12 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
     private static final String PredicatePrefix = "is";
     private static final String SymbolicPredicatePrefix = "Symbolic";
-    public static final Constant BuiltinPredicate =
-            Constant.KLABEL(predicate("Builtin"));
-    public static final Constant VariablePredicate =
-            Constant.KLABEL(predicate("Variable"));
-    public static final Constant KSymbolicPredicate =
-            Constant.KLABEL(symbolicPredicate("K"));
+    public static final KLabelConstant BuiltinPredicate =
+            KLabelConstant.of(predicate("Builtin"));
+    public static final KLabelConstant VariablePredicate =
+            KLabelConstant.of(predicate("Variable"));
+    public static final KLabelConstant KSymbolicPredicate =
+            KLabelConstant.of(symbolicPredicate("K"));
 
 
     public static final String predicate(String sort) {
@@ -137,13 +135,16 @@ public class AddPredicates extends CopyOnWriteTransformer {
     }
 
     public static final String syntaxPredicate(String sort) {
-        assert !MetaK.isKSort(sort);
+        assert !MetaK.isKSort(sort):
+                "invalid syntactic predicate " + predicate(sort) + " for sort " + sort;
 
         return predicate(sort);
     }
 
     public static final String symbolicPredicate(String sort) {
-        assert AddSymbolicK.allowSymbolic(sort);
+        assert AddSymbolicK.allowSymbolic(sort):
+                "invalid symbolic predicate " + predicate(SymbolicPredicatePrefix + sort)
+                        + " for sort "+ sort;
 
         return predicate(SymbolicPredicatePrefix + sort);
     }
@@ -172,10 +173,10 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
                     // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
                     Variable var = MetaK.getFreshVar("K");
-                    Term lhs = new KApp(Constant.KLABEL(symPred), var);
+                    Term lhs = new KApp(KLabelConstant.of(symPred), var);
                     KList list = new KList();
-                    Term rhs = new KApp(Constant.KLABEL("'_andThenBool_"), list);
-                    list.add(new KApp(Constant.KLABEL(pred), var));
+                    Term rhs = new KApp(KLabelConstant.BOOL_ANDTHENBOOL_KLABEL, list);
+                    list.add(new KApp(KLabelConstant.of(pred), var));
                     list.add(new KApp(KSymbolicPredicate, var));
                     Rule rule = new Rule(lhs, rhs);
                     rule.addAttribute(Attribute.PREDICATE);
@@ -183,10 +184,10 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
                     String symCtor = AddSymbolicK.symbolicConstructor(sort);
                     var = MetaK.getFreshVar(MetaK.Constants.KList);
-                    Term symTerm = new KApp(Constant.KLABEL(symCtor), var);
+                    Term symTerm = new KApp(KLabelConstant.of(symCtor), var);
 
                     // define isSort for symbolic sort constructor symSort
-                    lhs = new KApp(Constant.KLABEL(pred), symTerm);
+                    lhs = new KApp(KLabelConstant.of(pred), symTerm);
                     rule = new Rule(lhs, Constant.TRUE);
                     rule.addAttribute(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
@@ -198,7 +199,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     // define K2Sort function for symbolic sort constructor
                     // symSort
                     lhs = new KApp(K2Sort, symTerm);
-                    rhs = new Constant("#String", "\"" + sort + "\"");
+                    rhs = Constant.STRING(sort);
                     rule = new Rule(lhs, rhs);
                     rule.addAttribute(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);

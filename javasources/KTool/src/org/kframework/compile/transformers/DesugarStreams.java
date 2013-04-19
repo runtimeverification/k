@@ -68,7 +68,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 //			syntax List ::= "#istream" "(" Int ")"        [cons(List1InputStreamSyn)]
 			TermCons stdinStream = new TermCons("List", "List1InputStreamSyn");
 			java.util.List<Term> stdinStreamTerms = new ArrayList<Term>();
-			stdinStreamTerms.add(new Constant("#Int", "0"));
+			stdinStreamTerms.add(Constant.ZERO);
 			stdinStream.setContents(stdinStreamTerms);
 			items.add(stdinStream);
 		}
@@ -77,7 +77,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 //            | "#ostream" "(" Int ")"        [cons(List1OutputStreamSyn)]
 			TermCons stdoutStream = new TermCons("List", "List1OutputStreamSyn");
 			java.util.List<Term> stdinStreamTerms = new ArrayList<Term>();
-			stdinStreamTerms.add(new Constant("#Int", "1"));
+			stdinStreamTerms.add(Constant.ONE);
 			stdoutStream.setContents(stdinStreamTerms);
 			items.add(stdoutStream);
 			

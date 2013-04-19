@@ -108,7 +108,7 @@ public class BasicVisitor implements Visitor {
 
 	@Override
 	public void visit(PriorityExtendedAssoc node) {
-		for (Constant pb : node.getTags()) {
+		for (KLabelConstant pb : node.getTags()) {
 			pb.accept(this);
 		}
 		visit((ModuleItem) node);

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.PriorityBlockExtended;
 import org.kframework.kil.PriorityExtended;
@@ -46,12 +47,12 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
 			PriorityBlockExtended pb1 = node.getPriorityBlocks().get(i);
 			PriorityBlockExtended pb2 = node.getPriorityBlocks().get(i + 1);
 			// example: syntax priorities tag1 > tag2
-			for (Constant prd1 : pb1.getProductions()) {
+			for (KLabelConstant prd1 : pb1.getProductions()) {
 				// get all the productions annotated with tag1
-				Set<Production> prods1 = SDFHelper.getProductionsForTag(prd1.getValue());
-				for (Constant prd2 : pb2.getProductions()) {
+				Set<Production> prods1 = SDFHelper.getProductionsForTag(prd1.getLabel());
+				for (KLabelConstant prd2 : pb2.getProductions()) {
 					// get all the productions annotated with tag2
-					Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getValue());
+					Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getLabel());
 					// add all the relations between all the productions annotated with tag1 and tag 2
 					for (Production p1 : prods1) {
 						if (p1.isSubsort() && !p1.containsAttribute("klabel"))

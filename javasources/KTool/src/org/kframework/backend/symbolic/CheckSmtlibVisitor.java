@@ -1,7 +1,7 @@
 package org.kframework.backend.symbolic;
 
-import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Production;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -32,32 +32,26 @@ public class CheckSmtlibVisitor extends BasicVisitor {
     public void visit(KApp node) {
         Term klabel = node.getLabel();
 
-        if (klabel instanceof Constant) {
-
-            Constant label = (Constant) klabel;
-
-            if (label.getValue().trim().equals(Constant.KEQ.getValue())) {
+        if (klabel instanceof KLabelConstant) {
+            if (klabel.equals(KLabelConstant.KEQ)) {
                 smtValid = true;
                 return;
             }
 
-            if (label instanceof Constant) {
-                Set<Production> prods = DefinitionHelper.productions
-                        .get(label.getValue().trim());
-                if (prods == null) {
-                    smtValid = false;
-                } else {
-                    Iterator<Production> it = prods.iterator();
-                    while (it.hasNext()) {
-                        Production p = it.next();
-                        if (p.containsAttribute("smtlib"))
-                            smtValid = true;
-                        else
-                            smtValid = false;
+            Set<Production> prods = DefinitionHelper.productions.get(((KLabelConstant) klabel).getLabel());
+            if (prods == null) {
+                smtValid = false;
+            } else {
+                Iterator<Production> it = prods.iterator();
+                while (it.hasNext()) {
+                    Production p = it.next();
+                    if (p.containsAttribute("smtlib"))
+                        smtValid = true;
+                    else
+                        smtValid = false;
 
-                        // only first production assumed
-                        break;
-                    }
+                    // only first production assumed
+                    break;
                 }
             }
         }

@@ -45,8 +45,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			if (MetaK.isBuiltinSort(injected.getSort())) {
 				return (Term)injected.accept(this);
 			}
-		} else if (label instanceof Constant) {
-			String klabel = ((Constant)label).getValue();
+		} else if (label instanceof KLabelConstant) {
+			String klabel = ((KLabelConstant) label).getLabel();
 			Set<String> conses = DefinitionHelper.labels.get(klabel);
 			List<Term> contents = new ArrayList<Term>();
 			possibleTerms = new ArrayList<Term>();

@@ -194,17 +194,17 @@ public class BasicTransformerPropagator implements Transformer {
 	@Override
 	public ASTNode transform(PriorityExtendedAssoc node) throws TransformerException {
 		boolean change = false;
-		ArrayList<Constant> pbs = new ArrayList<Constant>();
-		for (Constant pb : node.getTags()) {
+		ArrayList<KLabelConstant> pbs = new ArrayList<KLabelConstant>();
+		for (KLabelConstant pb : node.getTags()) {
 			ASTNode result = pb.accept(delegate);
 			if (result != pb)
 				change = true;
 			if (result != null) {
-				if (!(result instanceof Constant)) {
+				if (!(result instanceof KLabelConstant)) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + " while transforming.", getName(),
 							pb.getFilename(), pb.getLocation()));
 				}
-				pbs.add((Constant) result);
+				pbs.add((KLabelConstant) result);
 			}
 		}
 		if (change) {
@@ -240,17 +240,17 @@ public class BasicTransformerPropagator implements Transformer {
 	@Override
 	public ASTNode transform(PriorityBlockExtended node) throws TransformerException {
 		boolean change = false;
-		ArrayList<Constant> prods = new ArrayList<Constant>();
-		for (Constant p : node.getProductions()) {
+		ArrayList<KLabelConstant> prods = new ArrayList<KLabelConstant>();
+		for (KLabelConstant p : node.getProductions()) {
 			ASTNode result = p.accept(delegate);
 			if (result != p)
 				change = true;
 			if (result != null) {
-				if (!(result instanceof Constant)) {
+				if (!(result instanceof KLabelConstant)) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + ".", getName(), p.getFilename(), p
 							.getLocation()));
 				}
-				prods.add((Constant) result);
+				prods.add((KLabelConstant) result);
 			}
 		}
 		if (change) {

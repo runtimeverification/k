@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -25,20 +25,18 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(KApp node) throws TransformerException {
-
         Term label = node.getLabel();
         Term newContent = node.getChild().shallowCopy();
-        if (label instanceof Constant) {
-            String labelName = ((Constant) label).getValue();
+        if (label instanceof KLabelConstant) {
+            KLabelConstant kLabelConstant = (KLabelConstant) label;
 
-            if (labelName
-                    .equals(Constant.BOOL_ANDBOOL_KLABEL.getValue().trim())) {
+            if (kLabelConstant.equals(KLabelConstant.BOOL_ANDBOOL_KLABEL)) {
                 node = node.shallowCopy();
-                node.setLabel(Constant.ANDBOOL_KLABEL);
+                node.setLabel(KLabelConstant.ANDBOOL_KLABEL);
                 return transform(node);
             }
 
-            if (labelName.equals(Constant.ANDBOOL_KLABEL.getValue().trim())) {
+            if (kLabelConstant.equals(KLabelConstant.ANDBOOL_KLABEL)) {
                 Term content = node.getChild();
                 if (content instanceof KList) {
                     List<Term> list = ((KList) content).getContents();
@@ -51,18 +49,10 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
                             if (t instanceof KApp) {
                                 KApp tapp = (KApp) t;
                                 Term tlabel = tapp.getLabel();
-                                if (tlabel instanceof Constant) {
-                                    Constant ct = (Constant) tlabel;
-                                    if (ct.getValue().equals(
-                                            Constant.ANDBOOL_KLABEL.getValue()
-                                                    .trim())
-                                            || ct.getValue()
-                                            .equals(Constant.BOOL_ANDBOOL_KLABEL
-                                                    .getValue().trim())) {
-                                        newList.add(tapp.getChild()
-                                                .shallowCopy());
-                                        collapsed = true;
-                                    }
+                                if (tlabel.equals(KLabelConstant.BOOL_ANDBOOL_KLABEL)
+                                        || tlabel.equals(KLabelConstant.ANDBOOL_KLABEL)) {
+                                    newList.add(tapp.getChild().shallowCopy());
+                                    collapsed = true;
                                 }
                             }
                             if (!collapsed)
@@ -72,14 +62,9 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
                     }
                 } else if (content instanceof KApp) {
                     Term aLabel = ((KApp) content).getLabel();
-                    if (aLabel instanceof Constant) {
-                        if (((Constant) aLabel).getValue().equals(
-                                Constant.ANDBOOL_KLABEL.getValue().trim())
-                                || ((Constant) aLabel).getValue().equals(
-                                Constant.BOOL_ANDBOOL_KLABEL.getValue()
-                                        .trim()))
-                            newContent = ((KApp) content).getChild().shallowCopy();
-                    }
+                    if (aLabel.equals(KLabelConstant.BOOL_ANDBOOL_KLABEL)
+                            || aLabel.equals(KLabelConstant.ANDBOOL_KLABEL))
+                        newContent = ((KApp) content).getChild().shallowCopy();
                 }
             }
             node = node.shallowCopy();

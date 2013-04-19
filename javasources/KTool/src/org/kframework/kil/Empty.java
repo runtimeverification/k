@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
  *  Distinguished by {@link #sort} */
 public class Empty extends Term {
 
-    public static final Empty ListOfK = new Empty(MetaK.Constants.KList);
+    public static final Empty KList = new Empty(MetaK.Constants.KList);
 
 	public Empty(String sort) {
 		super(sort);

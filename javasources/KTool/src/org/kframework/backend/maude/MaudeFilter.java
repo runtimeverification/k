@@ -189,7 +189,7 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(KList listOfK) {
 		this.visit((Collection) listOfK);
-		// throw new RuntimeException("don't know how to maudify ListOfK");
+		// throw new RuntimeException("don't know how to maudify KList");
 	}
 
 	@Override
@@ -448,6 +448,11 @@ public class MaudeFilter extends BackendFilter {
 		result.append(")");
 
 	}
+
+    @Override
+    public void visit(KLabelConstant kLabelConstant) {
+        result.append(kLabelConstant.getLabel());
+    }
 
 	@Override
 	public void visit(Constant constant) {

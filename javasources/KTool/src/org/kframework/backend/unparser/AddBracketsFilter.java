@@ -200,6 +200,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 	}
 
 	private boolean isAtom(Term inner) {
+        if (inner instanceof KLabelConstant) return true;
 		if (inner instanceof Constant) return true;
 		if (inner instanceof Empty) return true;
 		if (inner instanceof FreezerHole) return true;
@@ -280,6 +281,14 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			super("Make unneeded terms symbolic");
 			this.inner = inner;
 		}
+
+        @Override
+        public ASTNode transform(KLabelConstant t) throws TransformerException {
+            if (!contains(t, inner)) {
+                return MetaK.getFreshVar(t.getSort());
+            }
+            return super.transform(t);
+        }
 
 		@Override
 		public ASTNode transform(Constant t) throws TransformerException {

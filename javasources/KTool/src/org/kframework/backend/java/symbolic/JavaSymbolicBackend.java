@@ -50,6 +50,7 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Term;
@@ -111,7 +112,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 		list1.add(new Variable("B", "Bool"));
 		list1.add(new Variable("S1", "Stmt"));
 		list1.add(new Variable("S2", "Stmt"));
-		Term kTerm = new KApp(Constant.KLABEL("'if`(_`)_else_"), new KList(list1));
+		Term kTerm = new KApp(KLabelConstant.of("'if`(_`)_else_"), new KList(list1));
 		List<Term> list2 = new ArrayList<Term>();
 		list2.add(kTerm);
 		Term kSequence = new KSequence(list2);

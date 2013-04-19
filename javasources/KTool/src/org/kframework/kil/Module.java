@@ -159,6 +159,10 @@ public class Module extends DefinitionItem {
         this.addProduction(ct.getSort(), new Terminal(ct.getValue()));
     }
 
+    public void addConstant(KLabelConstant kLabelConstant) {
+        this.addProduction(kLabelConstant.getSort(), new Terminal(kLabelConstant.getLabel()));
+    }
+
 	public void addProduction(String sort, ProductionItem prodItem) {
 		List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
 		prodItems.add(prodItem);

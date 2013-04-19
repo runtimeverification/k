@@ -18,7 +18,7 @@ public class PriorityExtendedAssoc extends ModuleItem {
 	/** "left", "right", "non-assoc" */
 	String assoc = null;
 	/** The labels getting an associativity. */
-	java.util.List<Constant> tags;
+	java.util.List<KLabelConstant> tags;
 
 	public String getAssoc() {
 		return assoc;
@@ -28,15 +28,15 @@ public class PriorityExtendedAssoc extends ModuleItem {
 		this.assoc = assoc;
 	}
 
-	public java.util.List<Constant> getTags() {
+	public java.util.List<KLabelConstant> getTags() {
 		return tags;
 	}
 
-	public void setTags(java.util.List<Constant> tags) {
+	public void setTags(java.util.List<KLabelConstant> tags) {
 		this.tags = tags;
 	}
 
-	public PriorityExtendedAssoc(String assoc, java.util.List<Constant> tags) {
+	public PriorityExtendedAssoc(String assoc, java.util.List<KLabelConstant> tags) {
 		super();
 		this.tags = tags;
 		this.assoc = assoc;
@@ -46,10 +46,10 @@ public class PriorityExtendedAssoc extends ModuleItem {
 		super(element);
 
 		this.assoc = element.getAttribute(Constants.ASSOC_assoc_ATTR);
-		this.tags = new ArrayList<Constant>();
+		this.tags = new ArrayList<KLabelConstant>();
 		List<Element> priorities = XML.getChildrenElementsByTagName(element, Constants.CONST);
 		for (Element priority : priorities)
-			tags.add((Constant) JavaClassesFactory.getTerm(priority));
+			tags.add((KLabelConstant) JavaClassesFactory.getTerm(priority));
 	}
 
 	public PriorityExtendedAssoc(PriorityExtendedAssoc node) {
@@ -61,7 +61,7 @@ public class PriorityExtendedAssoc extends ModuleItem {
 	public String toString() {
 		String blocks = "";
 
-		for (Constant pb : tags) {
+		for (KLabelConstant pb : tags) {
 			blocks += pb + "\n> ";
 		}
 		if (blocks.length() > 2)
@@ -105,7 +105,7 @@ public class PriorityExtendedAssoc extends ModuleItem {
 	public int hashCode() {
 		int hash = assoc.hashCode();
 
-		for (Constant pb : tags)
+		for (KLabelConstant pb : tags)
 			hash += pb.hashCode();
 		return hash;
 	}

@@ -17,7 +17,9 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 		if (amb.getContents().get(0) instanceof TermCons) {
 			TermCons t1 = (TermCons)amb.getContents().get(0);
 			if (MetaK.isComputationSort(t1.getSort())) {
-				return new KApp(new Constant("KLabel", t1.getProduction().getKLabel()), (Term) new KList(t1.getContents()).accept(this));
+				return new KApp(
+                        KLabelConstant.of(t1.getProduction().getKLabel()),
+                        (Term) new KList(t1.getContents()).accept(this));
 			}
 		} else if (amb.getContents().get(0) instanceof Empty) {
 			Empty t1 = (Empty)amb.getContents().get(0);

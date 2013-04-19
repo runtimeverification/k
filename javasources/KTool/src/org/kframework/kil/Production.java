@@ -122,7 +122,10 @@ public class Production extends ASTNode {
 	}
 
 	public String getKLabel() {
-		assert MetaK.isComputationSort(sort) || sort.equals("KLabel") && isConstant();
+        /*
+		assert MetaK.isComputationSort(sort) || sort.equals("KLabel") && isConstant():
+                sort + " ::= " + this + " -> " + getPrefixLabel();
+        */
 
 		String klabel;
 		klabel = attributes.get("klabel");

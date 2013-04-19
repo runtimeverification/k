@@ -1,10 +1,14 @@
 package org.kframework.kil;
 
+import org.kframework.compile.transformers.AddPredicates;
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.w3c.dom.Element;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,10 +28,19 @@ public class KLabelConstant extends KLabel {
     /*
      * Useful constants
      */
-    public static final KLabelConstant COOL = KLabelConstant.of("cool");
-    public static final KLabelConstant HEAT = KLabelConstant.of("heat");
-    public static final KLabelConstant HEATED = KLabelConstant.of("heated");
-    public static final KLabelConstant REDEX = KLabelConstant.of("redex");
+    public static final KLabelConstant COOL_KLABEL = of("cool");
+    public static final KLabelConstant HEAT_KLABEL = of("heat");
+    public static final KLabelConstant HEATED_KLABEL = of("heated");
+    public static final KLabelConstant REDEX_KLABEL = of("redex");
+    public static final KLabelConstant KNEQ_KLABEL = of("'_=/=K_");
+    public static final KLabelConstant KEQ_KLABEL = of("'_==K_");
+    public static final KLabelConstant KEQ = of("'_=K_");
+    public static final KLabelConstant KLIST_EQUALITY = of("'_=" + MetaK.Constants.KList + "_");
+    public static final KLabelConstant ANDBOOL_KLABEL = of("'#andBool");
+    public static final KLabelConstant BOOL_ANDBOOL_KLABEL = of("'_andBool_");
+    public static final KLabelConstant BOOL_ANDTHENBOOL_KLABEL = of("'_andThenBool_");
+    public static final KLabelConstant KRESULT_PREDICATE = of(AddPredicates.predicate("KResult"));
+    public static final KLabelConstant STRING_PLUSSTRING_KLABEL = of("'_+String_");
 
     /**
      * Static function for creating AST term representation of KLabel constants. The function caches the KLabelConstant
@@ -38,7 +51,7 @@ public class KLabelConstant extends KLabel {
      */
     public static final KLabelConstant of(String label) {
         KLabelConstant kLabelConstant = cache.get(label);
-        if (label == null) {
+        if (kLabelConstant == null) {
             kLabelConstant = new KLabelConstant(label);
             cache.put(label, kLabelConstant);
         }
@@ -55,6 +68,12 @@ public class KLabelConstant extends KLabel {
 
     private KLabelConstant(String label) {
         this.label = label;
+        productions = Collections.unmodifiableList(DefinitionHelper.productionsOf(label));
+    }
+
+    public KLabelConstant(Element element) {
+        super(element);
+        label = element.getAttribute(Constants.VALUE_value_ATTR);
         productions = Collections.unmodifiableList(DefinitionHelper.productionsOf(label));
     }
 
@@ -78,8 +97,16 @@ public class KLabelConstant extends KLabel {
 
     @Override
     public boolean equals(Object object) {
-        /* the cache ensures uniqueness of logically equal object instances */
-        return this == object;
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof KLabelConstant)) {
+            return false;
+        }
+
+        KLabelConstant kLabelConstant = (KLabelConstant) object;
+        return label.equals(kLabelConstant.getLabel());
     }
 
     @Override

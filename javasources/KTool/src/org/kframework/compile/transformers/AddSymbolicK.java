@@ -52,8 +52,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
             symTerm = new TermCons(sort, ctor);
             ((TermCons) symTerm).getContents().add(term);
         } else {
-            Constant klbl = new Constant("KLabel", ctor);
-            symTerm = new KApp(klbl, term);
+            symTerm = new KApp(KLabelConstant.of(ctor), term);
         }
 
         return symTerm;
@@ -63,7 +62,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 		List<Term> args = new ArrayList<Term>();
 		args.add((Constant.STRING(sort)));
 		args.add((Constant.INT(n)));
-		return new KApp(Constant.KLABEL("'#freshSymSortN"), new KList(args));
+		return new KApp(KLabelConstant.of("'#freshSymSortN"), new KList(args));
 	}
 
 	@Override
