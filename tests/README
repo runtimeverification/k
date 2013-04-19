@@ -1,0 +1,93 @@
+1. This is a readme file for developers
+
+2. Adding new tests for `ant test`
+
+2.1 Configuration
+
+The `ant test` tool reads the config.xml (current directory) which
+contains all the current tests for K Framework.
+
+2.2 Specifying a test
+
+In order to add a test you must add a new XML tag <test> having
+the following attributes:
+
+Mandatory attributes:
+a. language - specifying the .k file you want to test
+   	      by its path relative to trunk
+b. folder - specify the programs path; note that `ant test` will
+   	    search recursively into this folder for files having 
+	    the specified extension; this path must be relative to
+	    trunk
+c. extension - specify a list of program extensions separated 
+   	       by whitespaces
+
+Optional attributes:
+d. exclude - the programs meant to be excluded from testing (e.g. 
+   	     programs which do not terminate) separated by whitespace;
+	     note that program paths must be relative to path specified 
+	     by folder attribute; if this attribute is missing then none
+	     of the programs is excluded
+e. results - specifies the results folder; this folder may contain files
+   	     which specify programs input/output/error; we make the 
+	     following assumption: if the program name is test.lang then 
+	     the corresponding input/output/error files are 
+	     test.lang.in/test.lang.out/test.lang.err; `ant test` will 
+	     send on the input buffer the content of test.lang.in and will
+	     compare the program output/error buffer with the content of 
+	     test.lang.out/test.lang.err; if none of these files is
+	     specified then the test will successfull if the exit value
+	     of krun is 0.
+
+An example of a test sml specification is shown below:
+
+  <test
+      language="dist/tutorial/4_imp++/lesson_4/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_4"
+      />
+ 
+
+2.3 Special sub-tags of <test>
+
+2.3.1 Specify kompile options
+
+Tag <kompile-option> has two attributes name (the name of the komptile option)
+and value (the value of the kompile option). Multiple options are specified 
+by multiple <kompile-option> tags:
+
+      <kompile-option name="-superheat" value="division" />
+      <kompile-option name="-supercool" value="lookup increment" />
+ 
+
+2.3.2 Change default krun options for all programs
+
+The default options for krun are:
+   --no-color
+   --output-mode=none
+
+If you want to change the default options for krun then use the 
+<all-programs> tag like below:
+
+    <all-programs>
+      <krun-option name="--search" />
+      <krun-option name="--bound" value="2" />
+    </all-programs>
+
+As for <kompile-option>, the <krun-option> tag specifies the name and the 
+value of krun options.
+
+2.3.3 Change the default krun options for a program
+
+There are cases when special programs must be run with specific options. 
+This can be achived using the <program> tag having the mandatory attribute
+name for the program name. An example is shown below:
+ 
+     <program name="dist/tutorial/4_imp++/lesson_1/div.imp">
+        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-search" />
+        <krun-option name="-no-color" />
+      </program>
+ 
