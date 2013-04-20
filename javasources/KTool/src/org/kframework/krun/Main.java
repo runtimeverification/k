@@ -33,8 +33,8 @@ import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.CompilerStepDone;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BackendTerm;
@@ -62,8 +62,10 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-import edu.uci.ics.jung.graph.*;
+
+import edu.uci.ics.jung.graph.DirectedGraph;
 
 public class Main {
 
@@ -97,11 +99,6 @@ public class Main {
 		helpFormatter.setWidth(79);
 		helpFormatter.printHelp(USAGE_DEBUG, HEADER, options, FOOTER);
 		System.out.println();
-	}
-
-	public static void printVersion() {
-		System.out.println("JKrun 0.2.0\n"
-				+ "Copyright (C) 2012 Necula Emilian & Raluca");
 	}
 
 	// find the maude compiled definitions on the disk
@@ -909,7 +906,8 @@ public class Main {
 				System.exit(0);
 			}
 			if (K.version) {
-				printVersion();
+				String msg = org.kframework.utils.file.FileUtil.getFileContent(KPaths.getKBase(false) + "/bin/version.txt");
+				System.out.println(msg);
 				System.exit(0);
 			}
 			if (K.deleteTempDir) {
@@ -1085,7 +1083,5 @@ public class Main {
 
 	public static void main(String[] args) {
 		execute_Krun(args);
-
 	}
-
 }
