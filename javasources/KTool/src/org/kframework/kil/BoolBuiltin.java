@@ -1,9 +1,11 @@
 package org.kframework.kil;
 
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.w3c.dom.Element;
 
 
 /**
@@ -24,7 +26,9 @@ public class BoolBuiltin extends Builtin {
     public static final BoolBuiltin FALSE = new BoolBuiltin(Boolean.FALSE);
 
     public static BoolBuiltin of(String value) {
-        assert value.equals(TRUE_STRING) || value.equals(FALSE_STRING);
+        assert value.equals(BoolBuiltin.TRUE_STRING) || value.equals(BoolBuiltin.FALSE_STRING):
+                "unexpected value " + value + " for a builtin bool constant; expected one of "
+                        + BoolBuiltin.TRUE_STRING + " or " + BoolBuiltin.FALSE_STRING;
 
         if (value.equals(BoolBuiltin.TRUE_STRING)) {
             return BoolBuiltin.TRUE;
@@ -38,6 +42,21 @@ public class BoolBuiltin extends Builtin {
     private BoolBuiltin(Boolean value) {
         super(BoolBuiltin.SORT_NAME);
         this.value = value;
+    }
+
+    public BoolBuiltin(Element element) {
+        super(element);
+        String s = element.getAttribute(Constants.VALUE_value_ATTR);
+
+        assert s.equals(BoolBuiltin.TRUE_STRING) || s.equals(BoolBuiltin.FALSE_STRING):
+                "unexpected value " + s + " for a builtin bool constant; expected one of "
+                        + BoolBuiltin.TRUE_STRING + " or " + BoolBuiltin.FALSE_STRING;
+
+        value = Boolean.valueOf(s);
+    }
+
+    public Boolean booleanValue() {
+        return value;
     }
 
     @Override
@@ -58,8 +77,16 @@ public class BoolBuiltin extends Builtin {
 
     @Override
     public boolean equals(Object object) {
-        /* uniqueness of logically equal object instances */
-        return this == object;
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof BoolBuiltin)) {
+            return false;
+        }
+
+        BoolBuiltin boolBuiltin = (BoolBuiltin) object;
+        return value.equals(boolBuiltin.value);
     }
 
     @Override

@@ -112,7 +112,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 		Term inList = new KApp(KLabelConstant.of("'_inKList_"), inListList);
 		KList condList = new KList();
 		condList.add(inList);
-		condList.add(Constant.TRUE);
+		condList.add(BoolBuiltin.TRUE);
 		Term cond = new KApp(KLabelConstant.KNEQ_KLABEL, condList);
 		superHeat.setCondition(MetaK.incrementCondition(node.getCondition(),cond));
 		superHeats.add(superHeat);

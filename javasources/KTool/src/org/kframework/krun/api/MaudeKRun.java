@@ -162,8 +162,8 @@ public class MaudeKRun implements KRun {
 		Element elem = (Element) counter;
 		List<Element> child = XmlUtil.getChildElements(elem);
 		assertXML(child.size() == 1);
-		Term t = parseXML(child.get(0));
-		K.counter = Integer.parseInt(((Constant)t).getValue()) - 1;
+		IntBuiltin intBuiltin = (IntBuiltin) parseXML(child.get(0));
+		K.counter = intBuiltin.bigIntegerValue().intValue() - 1;
 	}
 
 	private static void assertXML(boolean assertion) {
@@ -251,31 +251,27 @@ public class MaudeKRun implements KRun {
 				return new KInjectedLabel(parseXML(list.get(0)));
 			} else if (sort.equals("#NzInt") && op.equals("--Int_")) {
 				assertXMLTerm(list.size() == 1);
-				return Constant.INT("-" + ((Constant) parseXML(list.get(0))).getValue());
+				return IntBuiltin.of("-" + ((IntBuiltin) parseXML(list.get(0))).getValue());
 			} else if (sort.equals("#NzNat") && op.equals("sNat_")) {
-				assertXMLTerm(list.size() == 1 && ((Constant) parseXML(list.get(0))).getValue().equals("0"));
-                return Constant.INT(xml.getAttribute("number"));
+				assertXMLTerm(list.size() == 1 && parseXML(list.get(0)).equals(IntBuiltin.ZERO));
+                return IntBuiltin.of(xml.getAttribute("number"));
 			} else if (sort.equals("#Zero") && op.equals("0")) {
 				assertXMLTerm(list.size() == 0);
-				return Constant.ZERO;
+				return IntBuiltin.ZERO;
 			} else if (sort.equals("#Bool") && (op.equals("true") || op.equals("false"))) {
 				assertXMLTerm(list.size() == 0);
-                if (op.equals("true")) {
-                    return Constant.TRUE;
-                } else {
-                    return Constant.FALSE;
-                }
+                return BoolBuiltin.of(op);
 			} else if (sort.equals("#Char") || sort.equals("#String")) {
 				assertXMLTerm(list.size() == 0);
-				return new Constant("#String", op);
+                assertXMLTerm(op.startsWith("\"") && op.endsWith("\""));
+				return StringBuiltin.of(op.substring(1, op.length() - 1));
 			} else if (sort.equals("#FiniteFloat")) {
 				assertXMLTerm(list.size() == 0);
-				return new Constant("#Float", op);
+				return FloatBuiltin.of(op);
 			} else if (sort.equals("#Id") && op.equals("#id_")) {
 				assertXMLTerm(list.size() == 1);
-				String value = ((Constant) parseXML(list.get(0))).getValue();
-				assertXMLTerm(value.startsWith("\"") && value.endsWith("\""));
-				return new Constant("#Id", value.substring(1,value.length()-1));
+				StringBuiltin value = (StringBuiltin) parseXML(list.get(0));
+				return new Constant("#Id", value.getValue());
 			} else if (op.matches("\\.(Map|Bag|List|Set|K)") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 				assertXMLTerm(list.size() == 0);
 				return new Empty(sort);

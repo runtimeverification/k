@@ -18,6 +18,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
@@ -79,14 +80,14 @@ public class AddEval extends BasicCompilerStep<Definition> {
 
 	public Term defaultMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(MetaK.kWrapper(Constant.STRING(v.getName())));
+		item.setKey(MetaK.kWrapper(StringBuiltin.of(v.getName())));
 		item.setValue(MetaK.kWrapper(MetaK.defaultTerm(v)));
 		return item;
 	}
 
 	public Term evalMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(MetaK.kWrapper(Constant.STRING(v.getName())));
+		item.setKey(MetaK.kWrapper(StringBuiltin.of(v.getName())));
 		item.setValue(MetaK.kWrapper(v));
 		return item;
 	}

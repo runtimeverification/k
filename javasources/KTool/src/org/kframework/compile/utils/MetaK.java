@@ -9,6 +9,7 @@ import java.util.Set;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Bag;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
@@ -17,7 +18,9 @@ import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Empty;
+import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.Hole;
+import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
@@ -34,6 +37,7 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -347,27 +351,21 @@ public class MetaK {
             if (prod.getSort().equals("KLabel")) {
                 return KLabelConstant.of(terminal);
             } else if (prod.getSort().equals("#Bool")) {
-                assert terminal.equals("true") || terminal.equals("false");
-                if (terminal.equals("true")) {
-                    return Constant.TRUE;
-                } else {
-                    return Constant.FALSE;
-                }
+                return BoolBuiltin.of(terminal);
             } else if (prod.getSort().equals("#Int")) {
-                return Constant.INT(terminal);
+                return IntBuiltin.of(terminal);
             } else if (prod.getSort().equals("#Float")) {
-                return new Constant("#Float", terminal);
+                return FloatBuiltin.of(terminal);
             } else if (prod.getSort().equals("#String")) {
-                return Constant.STRING(terminal);
+                return StringBuiltin.of(terminal);
             } else {
 			    return new Constant(prod.getSort(), terminal);
             }
         }
 		if (prod.isLexical()) {
-			KList l = new KList();
-			l.add(Constant.STRING(prod.getSort()));
-			l.add(getFreshVar("String"));
-			return new KApp(KLabelConstant.of("#token"), l);
+			return KApp.of(KLabelConstant.of("#token"),
+                           StringBuiltin.of(prod.getSort()),
+                           getFreshVar("String"));
 		}
 		TermCons t = new TermCons(prod.getSort(), prod.getCons());
 		if (prod.isListDecl()) {
@@ -507,7 +505,7 @@ public class MetaK {
 	}
 	
 	public static boolean isAbstractableSort(String name) {
-		if (name.equals("#Bool") || name.equals("#Int"))
+		if (name.equals(BoolBuiltin.SORT_NAME) || name.equals(IntBuiltin.SORT_NAME))
 			return true;
 		return false;
 	}

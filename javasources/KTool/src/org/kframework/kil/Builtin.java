@@ -4,6 +4,7 @@ import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.w3c.dom.Element;
 
 
 /**
@@ -17,6 +18,10 @@ public abstract class Builtin extends Term {
 
     protected Builtin(String sort) {
         super(sort);
+    }
+
+    protected Builtin(Element element) {
+        super(element);
     }
 
     public abstract String getValue();

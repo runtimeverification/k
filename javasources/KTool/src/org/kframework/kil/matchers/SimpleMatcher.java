@@ -394,6 +394,7 @@ public class SimpleMatcher implements Matcher {
 	}
 
 	public static void main(String[] args) {
+        /*
 		KList patternGuts = new KList();
 		KList termGuts = new KList();
 		KList subtermGuts = new KList();
@@ -415,6 +416,7 @@ public class SimpleMatcher implements Matcher {
 		Matcher m = new SimpleMatcher();
 		m.start(pattern, term);
 		System.out.println(m.getSubstitution());
+		*/
 		/*
 		 * System.out.println("\n====map test"); MapLookupPattern test = MapLookupPattern.test; MapImpl map = new MapImpl(); map.put(Constant.KLABEL("foo"), Constant.KLABEL("bar"));
 		 * map.put(Constant.KLABEL("car"), Constant.KLABEL("cdr")); map.put(Constant.KLABEL("cdr"), Constant.KLABEL("cdr")); map.put(Constant.KLABEL("a"), Constant.KLABEL("bar"));

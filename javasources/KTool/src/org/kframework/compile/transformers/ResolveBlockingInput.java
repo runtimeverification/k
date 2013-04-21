@@ -139,7 +139,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		
 //		  syntax List ::= "#parse" "(" String "," K ")"   [cons(List1ParseSyn)]
 		TermCons parseTerm = new TermCons("List", "List1ParseSyn");
-		parseTerm.getContents().add(Constant.STRING(item.getItem().getSort()));
+		parseTerm.getContents().add(StringBuiltin.of(item.getItem().getSort()));
 		parseTerm.getContents().add(new Empty("K"));
 		
 //		  syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]

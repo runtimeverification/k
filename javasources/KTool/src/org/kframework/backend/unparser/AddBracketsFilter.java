@@ -201,7 +201,8 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 
 	private boolean isAtom(Term inner) {
         if (inner instanceof KLabelConstant) return true;
-		if (inner instanceof Constant) return true;
+        if (inner instanceof Builtin) return true;
+        if (inner instanceof Constant) return true;
 		if (inner instanceof Empty) return true;
 		if (inner instanceof FreezerHole) return true;
 		if (inner instanceof Hole) return true;
@@ -297,6 +298,14 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			}
 			return super.transform(t);
 		}
+
+        @Override
+        public ASTNode transform(Builtin t) throws TransformerException {
+            if (!contains(t, inner)) {
+                return MetaK.getFreshVar(t.getSort());
+            }
+            return super.transform(t);
+        }
 
 		@Override
 		public ASTNode transform(TermCons t) throws TransformerException {

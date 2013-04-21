@@ -1,9 +1,11 @@
 package org.kframework.kil;
 
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.w3c.dom.Element;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,12 +22,12 @@ public class StringBuiltin extends Builtin {
 
     public static final String SORT_NAME = "#String";
 
-    public static final StringBuiltin SPACE = StringBuiltin.of(" ");
-
     /*
      * HashMap caches the constants to ensure uniqueness
      */
     private static Map<String, StringBuiltin> cache = new HashMap<String, StringBuiltin>();
+
+    public static final StringBuiltin SPACE = StringBuiltin.of(" ");
 
     public static StringBuiltin of(String value) {
         StringBuiltin stringBuiltin = cache.get(value);
@@ -41,6 +43,12 @@ public class StringBuiltin extends Builtin {
     private StringBuiltin(String value) {
         super(StringBuiltin.SORT_NAME);
         this.value = value;
+    }
+
+    public StringBuiltin(Element element) {
+        super(element);
+        String s = element.getAttribute(Constants.VALUE_value_ATTR);
+        value = s.substring(1, s.length() - 1);
     }
 
     @Override
@@ -61,8 +69,16 @@ public class StringBuiltin extends Builtin {
 
     @Override
     public boolean equals(Object object) {
-        /* the cache ensures uniqueness of logically equal object instances */
-        return this == object;
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof StringBuiltin)) {
+            return false;
+        }
+
+        StringBuiltin stringBuiltin = (StringBuiltin) object;
+        return value.equals(stringBuiltin.value);
     }
 
     @Override

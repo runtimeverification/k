@@ -99,7 +99,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 		if (heating) {
 			KList nequals = new KList();
 			nequals.add(isKResult);
-			nequals.add(Constant.TRUE);
+			nequals.add(BoolBuiltin.TRUE);
 			kresultCnd = new KApp(KLabelConstant.KNEQ_KLABEL, nequals);
 		} else {
 			kresultCnd = isKResult;

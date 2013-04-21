@@ -60,8 +60,8 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 
 	public static Term freshSymSortN(String sort, int n) {
 		List<Term> args = new ArrayList<Term>();
-		args.add((Constant.STRING(sort)));
-		args.add((Constant.INT(n)));
+		args.add(StringBuiltin.of(sort));
+		args.add(IntBuiltin.of(n));
 		return new KApp(KLabelConstant.of("'#freshSymSortN"), new KList(args));
 	}
 

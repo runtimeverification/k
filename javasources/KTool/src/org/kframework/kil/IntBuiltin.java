@@ -1,9 +1,11 @@
 package org.kframework.kil;
 
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.w3c.dom.Element;
 
 import java.math.BigInteger;
 
@@ -22,22 +24,30 @@ public class IntBuiltin extends Builtin {
 
     public static final String SORT_NAME = "#Int";
 
-    public static final IntBuiltin ZERO = IntBuiltin.of("0");
-    public static final IntBuiltin ONE = IntBuiltin.of("1");
-
     /*
      * HashMap caches the constants to ensure uniqueness
      */
     private static Map<BigInteger, IntBuiltin> cache = new HashMap<BigInteger, IntBuiltin>();
 
-    public static IntBuiltin of(String value) {
-        BigInteger bigInteger = new BigInteger(value);
-        IntBuiltin intBuiltin = cache.get(bigInteger);
+    public static final IntBuiltin ZERO = IntBuiltin.of(0);
+    public static final IntBuiltin ONE = IntBuiltin.of(1);
+
+    public static IntBuiltin of(BigInteger value) {
+        assert value != null : BigInteger.valueOf(0);
+        IntBuiltin intBuiltin = cache.get(value);
         if (intBuiltin == null) {
-            intBuiltin = new IntBuiltin(bigInteger);
-            cache.put(bigInteger, intBuiltin);
+            intBuiltin = new IntBuiltin(value);
+            cache.put(value, intBuiltin);
         }
         return intBuiltin;
+    }
+
+    public static IntBuiltin of(long value) {
+        return IntBuiltin.of(BigInteger.valueOf(value));
+    }
+
+    public static IntBuiltin of(String value) {
+        return IntBuiltin.of(new BigInteger(value));
     }
 
     private final BigInteger value;
@@ -45,6 +55,15 @@ public class IntBuiltin extends Builtin {
     private IntBuiltin(BigInteger value) {
         super(IntBuiltin.SORT_NAME);
         this.value = value;
+    }
+
+    public IntBuiltin(Element element) {
+        super(element);
+        value =  new BigInteger(element.getAttribute(Constants.VALUE_value_ATTR));
+    }
+
+    public BigInteger bigIntegerValue() {
+        return value;
     }
 
     @Override
@@ -65,8 +84,16 @@ public class IntBuiltin extends Builtin {
 
     @Override
     public boolean equals(Object object) {
-        /* the cache ensures uniqueness of logically equal object instances */
-        return this == object;
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof IntBuiltin)) {
+            return false;
+        }
+
+        IntBuiltin intBuiltin = (IntBuiltin) object;
+        return value.equals(intBuiltin.value);
     }
 
     @Override

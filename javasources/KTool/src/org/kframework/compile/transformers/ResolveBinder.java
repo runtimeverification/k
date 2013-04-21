@@ -4,8 +4,10 @@ import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
+import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
@@ -94,7 +96,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
 
             Rule rule = new Rule(
                     new KApp(BINDER_PREDICATE, MetaK.getTerm(prod)),
-                    Constant.TRUE);
+                    BoolBuiltin.TRUE);
             rule.addAttribute(Attribute.ANYWHERE);
             items.add(rule);
 
@@ -105,8 +107,8 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             for (int bndIdx : bndMap.keySet()) {
                 KList list = new KList();
                 list.getContents().add(klblK);
-                list.getContents().add(Constant.INT(bndIdx));
-                rule = new Rule(new KApp(BOUNDED_PREDICATE, list), Constant.TRUE);
+                list.getContents().add(IntBuiltin.of(bndIdx));
+                rule = new Rule(new KApp(BOUNDED_PREDICATE, list), BoolBuiltin.TRUE);
                 rule.addAttribute(Attribute.ANYWHERE);
                 items.add(rule);
 				String bndSort = prod.getChildSort(bndIdx - 1);
@@ -116,8 +118,8 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             for (int bodyIdx : bndMap.values()) {
                 KList list = new KList();
                 list.getContents().add(klblK);
-                list.getContents().add(Constant.INT(bodyIdx));
-                rule = new Rule(new KApp(BOUNDING_PREDICATE, list), Constant.TRUE);
+                list.getContents().add(IntBuiltin.of(bodyIdx));
+                rule = new Rule(new KApp(BOUNDING_PREDICATE, list), BoolBuiltin.TRUE);
                 rule.addAttribute(Attribute.ANYWHERE);
                 items.add(rule);
             }

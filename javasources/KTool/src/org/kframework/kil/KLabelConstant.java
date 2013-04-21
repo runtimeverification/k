@@ -8,6 +8,7 @@ import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+
 import org.w3c.dom.Element;
 
 import java.util.Collections;
@@ -16,17 +17,17 @@ import java.util.List;
 
 
 /**
- * AST representation of KLabel constants
+ * AST representation of a KLabel constant.
  */
 public class KLabelConstant extends KLabel {
 
-    /*
-     * HashMap caches the constants to ensure uniqueness
+    /**
+     * HashMap caches the constants to ensure uniqueness.
      */
     private static final HashMap<String, KLabelConstant> cache = new HashMap<String, KLabelConstant>();
 
     /*
-     * Useful constants
+     * Useful constants.
      */
     public static final KLabelConstant COOL_KLABEL = of("cool");
     public static final KLabelConstant HEAT_KLABEL = of("heat");
@@ -50,6 +51,8 @@ public class KLabelConstant extends KLabel {
      * @return AST term representation the KLabel;
      */
     public static final KLabelConstant of(String label) {
+        assert label != null;
+
         KLabelConstant kLabelConstant = cache.get(label);
         if (kLabelConstant == null) {
             kLabelConstant = new KLabelConstant(label);
@@ -91,11 +94,6 @@ public class KLabelConstant extends KLabel {
     }
 
     @Override
-    public int hashCode() {
-        return label.hashCode();
-    }
-
-    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -106,12 +104,17 @@ public class KLabelConstant extends KLabel {
         }
 
         KLabelConstant kLabelConstant = (KLabelConstant) object;
-        return label.equals(kLabelConstant.getLabel());
+        return label.equals(kLabelConstant.label);
+    }
+
+    @Override
+    public int hashCode() {
+        return label.hashCode();
     }
 
     @Override
     public String toString() {
-        return label;
+        return getLabel();
     }
 
     @Override

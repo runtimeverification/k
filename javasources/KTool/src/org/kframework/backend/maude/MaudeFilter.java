@@ -465,6 +465,11 @@ public class MaudeFilter extends BackendFilter {
 		}
 	}
 
+    @Override
+    public void visit(Builtin builtin) {
+        result.append(builtin);
+    }
+
 	@Override
 	public void visit(Collection collection) {
 		if (collection.getContents().size() == 0) {

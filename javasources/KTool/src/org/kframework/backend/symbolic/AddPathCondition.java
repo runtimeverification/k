@@ -17,6 +17,7 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -135,11 +136,8 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
     private Term checkSat(Term pathCondition) {
         // checkSat(pathCondition) =/=K # "unsat"(.KList)
-        KApp unsat = new KApp(new KInjectedLabel(Constant.STRING("unsat")), new KList());
+        KApp unsat = KApp.of(new KInjectedLabel(StringBuiltin.of("unsat")));
         KApp checkSat = new KApp(KLabelConstant.of("'checkSat"), pathCondition);
-        List<Term> items = new ArrayList<Term>();
-        items.add(unsat);
-        items.add(checkSat);
-        return new KApp(KLabelConstant.KNEQ_KLABEL, new KList(items));
+        return KApp.of(KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
     }
 }

@@ -1,53 +1,6 @@
 package org.kframework.kil.loader;
 
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.Bag;
-import org.kframework.kil.BagItem;
-import org.kframework.kil.Bracket;
-import org.kframework.kil.Cast;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Context;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Empty;
-import org.kframework.kil.FreezerHole;
-import org.kframework.kil.Hole;
-import org.kframework.kil.Import;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.Lexical;
-import org.kframework.kil.List;
-import org.kframework.kil.ListItem;
-import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.LiterateModuleComment;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Module;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.PriorityBlockExtended;
-import org.kframework.kil.PriorityExtended;
-import org.kframework.kil.PriorityExtendedAssoc;
-import org.kframework.kil.Production;
-import org.kframework.kil.Require;
-import org.kframework.kil.Restrictions;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Set;
-import org.kframework.kil.SetItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.StringSentence;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.TermComment;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
 
@@ -107,6 +60,14 @@ public class JavaClassesFactory {
 		if (Constants.CONST.equals(element.getNodeName())) {
             if (element.getAttribute(Constants.SORT_sort_ATTR).equals("KLabel")) {
                 return new KLabelConstant(element);
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(BoolBuiltin.SORT_NAME)) {
+                return new BoolBuiltin(element);
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(IntBuiltin.SORT_NAME)) {
+                return new IntBuiltin(element);
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(FloatBuiltin.SORT_NAME)) {
+                return new FloatBuiltin(element);
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(StringBuiltin.SORT_NAME)) {
+                return new StringBuiltin(element);
             } else {
                 return new Constant(element);
             }

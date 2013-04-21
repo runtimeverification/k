@@ -12,6 +12,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
@@ -66,7 +67,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 Term symTerm = new KApp(KLabelConstant.of(symCtor), var);
                 Term lhs = new KApp(K_TO_SMTLIB, symTerm);
                 KApp strTerm = new KApp(KLabelConstant.of("Int2String"), var);
-                Term rhs = appendString(Constant.STRING(SMTLIB_VAR_PREFIX), strTerm);
+                Term rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm);
                 Rule rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
@@ -74,7 +75,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 var = MetaK.getFreshVar("#String");
                 symTerm = new KApp(KLabelConstant.of(symCtor), var);
                 lhs = new KApp(K_TO_SMTLIB, symTerm);
-                rhs = appendString(Constant.STRING(SMTLIB_VAR_PREFIX), var);
+                rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), var);
                 rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
@@ -83,7 +84,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 symTerm = new KApp(KLabelConstant.of(symCtor), var);
                 lhs = new KApp(K_TO_SMTLIB, symTerm);
                 strTerm = new KApp(KLabelConstant.of("Id2String"), var);
-                rhs = appendString(Constant.STRING(SMTLIB_VAR_PREFIX), strTerm);
+                rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm);
                 rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
@@ -116,16 +117,16 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
             Term rhs;
             if (prod.isConstant()) {
-                rhs = Constant.STRING(smtLbl);
+                rhs = StringBuiltin.of(smtLbl);
             } else {
                 TermCons termCons = ((TermCons) term);
-                rhs = Constant.STRING("(" + smtLbl);
+                rhs = StringBuiltin.of("(" + smtLbl);
                 for (int idx = 0; idx < ((TermCons) term).arity(); ++idx) {
                     Variable var = (Variable) termCons.getSubterm(idx);
-                    rhs = appendString(rhs, Constant.SPACE);
+                    rhs = appendString(rhs, StringBuiltin.SPACE);
                     rhs = appendString(rhs, new KApp(K_TO_SMTLIB, var));
                 }
-                rhs = appendString(rhs, Constant.STRING(")"));
+                rhs = appendString(rhs, StringBuiltin.of(")"));
             }
 
             Rule rule = new Rule(lhs, rhs);

@@ -215,6 +215,11 @@ public class KastFilter extends BasicVisitor {
 		}
 	}
 
+    @Override
+    public void visit(Builtin builtin) {
+        result.write(builtin.toString());
+    }
+
 	@Override
 	public void visit(Collection collection) {
 		throw new RuntimeException("don't know how to kast Collection");

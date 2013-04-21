@@ -158,6 +158,10 @@ public class KExpFilter extends BasicVisitor {
 			result.append("\"");
 	}
 
+    public void visit(Builtin builtin) {
+        result.append(builtin);
+    }
+
 	/*
 	@Override
 	public void visit(Collection collection) {

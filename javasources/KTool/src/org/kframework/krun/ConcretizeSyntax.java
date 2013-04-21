@@ -86,7 +86,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				}
 			} else if (child instanceof Empty) {
 				//could be a list terminator, which don't have conses
-				Set<String> sorts = DefinitionHelper.listLabels.get(((Constant)label).getValue());
+				Set<String> sorts = DefinitionHelper.listLabels.get(klabel);
 				possibleTerms = new ArrayList<Term>();
 				if (sorts != null) {
 					for (String sort : sorts) {
@@ -108,14 +108,12 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				}
 				ASTNode sortNode = contents.get(0).accept(this);
 				ASTNode valueNode = contents.get(1).accept(this);
-				if (!(sortNode instanceof Constant && valueNode instanceof Constant)) {
+				if (!(sortNode instanceof StringBuiltin && valueNode instanceof StringBuiltin)) {
 					return super.transform(kapp);
 				}
-				Constant sort = (Constant)sortNode;
-				Constant value = (Constant)valueNode;
-				if (!(sort.getSort().equals("#String") && value.getSort().equals("#String"))) {
-					return super.transform(kapp);
-				}
+				StringBuiltin sort = (StringBuiltin) sortNode;
+				StringBuiltin value = (StringBuiltin) valueNode;
+
 				String escapedSort = sort.getValue();
 				String escapedValue = value.getValue();
 				escapedSort = escapedSort.substring(1, escapedSort.length() - 1);
