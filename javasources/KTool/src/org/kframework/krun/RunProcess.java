@@ -105,13 +105,14 @@ public class RunProcess {
 		String KAST = new String();
 		String parserPath = new String();
 
+		if (startSymbol == null) {
+			startSymbol = DefinitionHelper.startSymbolPgm;
+		}		
+		
 		// the argument is a formula and we should write it in a file before passing it to the parser
 		if ("kast".equals(parser)) {
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
-			if (startSymbol == null) {
-				startSymbol = DefinitionHelper.startSymbolPgm;
-			}
 			String pgmContent = pgm;
 			if (!isPgm) {
 				pgmContent = FileUtil.getFileContent(pgm);
@@ -127,9 +128,6 @@ public class RunProcess {
 			String parserName = new File(parserPath).getName();
 			// System.out.println("The external parser to be used is:" + parserName);
 			if ("kast".equals(parserName)) {
-				if (startSymbol == null) {
-					startSymbol = DefinitionHelper.startSymbolPgm;
-				}
 				String pgmContent = pgm;
 				if (!isPgm) {
 					pgmContent = FileUtil.getFileContent(pgm);
@@ -140,9 +138,7 @@ public class RunProcess {
 				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
 				tokens.add(pgm);
 				Map<String, String> environment = new HashMap<String, String>();
-				if (startSymbol != null) {
-					environment.put("KRUN_SORT", startSymbol);
-				}
+				environment.put("KRUN_SORT", startSymbol);
 				environment.put("KRUN_COMPILED_DEF", K.compiled_def);
 				if (isPgm) {
 					environment.put("KRUN_IS_NOT_FILE", "true");
