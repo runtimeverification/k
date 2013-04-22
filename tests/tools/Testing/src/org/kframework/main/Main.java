@@ -6,11 +6,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -169,7 +169,7 @@ public class Main {
 
 		// compile definitions first
 		System.out.println("Kompiling the language definitions...");
-		Map<Test, Task> definitions = new HashMap<Test, Task>();
+		Map<Test, Task> definitions = new TreeMap<Test, Task>();
 		for (Test test : alltests) {
 			Task def = test.getDefinitionTask(homeDir);
 			definitions.put(test, def);
@@ -198,7 +198,7 @@ public class Main {
 
 		// compile pdf definitions
 		System.out.println("Generating PDF documentation...");
-		Map<Test, Task> pdfDefinitions = new HashMap<Test, Task>();
+		Map<Test, Task> pdfDefinitions = new TreeMap<Test, Task>();
 		for (Test test : alltests) {
 			// also compile pdf if set
 			if (test.getPdf()) {
@@ -241,7 +241,7 @@ public class Main {
 
 				// execute
 				List<Program> pgms = test.getPrograms();
-				Map<Program, Task> all = new HashMap<Program, Task>();
+				Map<Program, Task> all = new TreeMap<Program, Task>();
 				for (Program p : pgms) {
 					Task task = p.getTask(homeDir);
 					all.put(p, task);

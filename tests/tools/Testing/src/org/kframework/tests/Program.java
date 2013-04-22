@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Program {
+public class Program implements Comparable<Program> {
 	String programPath;
 	Map<String, String> krunOptions;
 	Test test;
@@ -85,5 +85,15 @@ public class Program {
 
 	public String getProgramPath() {
 		return programPath;
+	}
+
+	@Override
+	public int compareTo(Program o) {
+		int d;
+		if (o == this) return 0;
+		d = programPath.compareTo(o.programPath);
+		if (d != 0) return d;
+		d = test.compareTo(o.test);
+		return d;
 	}
 }

@@ -33,7 +33,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class Test {
+public class Test implements Comparable<Test> {
 
 	/* data read from config.xml */
 	private String language;
@@ -569,6 +569,16 @@ public class Test {
 
 	public String getLanguage() {
 		return language;
+	}
+
+	@Override
+	public int compareTo(Test o) {
+		int d;
+		if (o == this) return 0;
+		d = this.language.compareTo(o.language);
+		if (d != 0) return d;
+		d = this.programsFolder.compareTo(o.programsFolder);
+		return d;
 	}
 
 }
