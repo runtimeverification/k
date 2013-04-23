@@ -5,7 +5,7 @@ Linux) OS=linux;;
 Darwin) OS=macos;;
 *) echo "Unknown OS $(uname)"; exit 1;;
 esac
-FK=$(dirname $0)/native/$OS/FastKast
+BIN=$(dirname $0)/native/$OS
 
 #pwd >> log.txt
 #echo $* >> log.txt
@@ -36,9 +36,9 @@ fi
 KDIR=$(dirname $DEF)/.k
 mkdir -p $KDIR
 RAWPARSE=$(mktemp $KDIR/parseXXXXXX.baf)
-if sglr -fp -s$SORT -p $DEF/pgm/Program.tbl -i $INPUTFILE > $RAWPARSE 2> /dev/null ; then
-  implodePT < $RAWPARSE | baffle -rb -wt | $FK $DEF/consTable.txt
+if $BIN/sglr -fp -s$SORT -p $DEF/pgm/Program.tbl -i $INPUTFILE > $RAWPARSE 2> /dev/null ; then
+  $BIN/implodePT < $RAWPARSE | $BIN/baffle -rb -wt | $BIN/FastKast $DEF/consTable.txt
 else
-  baffle -rb -wt < $RAWPARSE | $FK $DEF/consTable.txt
+  $BIN/baffle -rb -wt < $RAWPARSE | $BIN/FastKast $DEF/consTable.txt
 fi
 rm $RAWPARSE
