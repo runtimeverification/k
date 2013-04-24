@@ -50,7 +50,7 @@ module CINK-SYNTAX
     could be an integer, a boolean, or \texttt{void}.
   */
 
-  syntax Decl ::= "int"  Exps
+  syntax Decl ::= "int"  Exps 
                 | "void" Exps
                 | "bool" Exps
 
@@ -187,6 +187,13 @@ module CINK
   syntax Vals ::= List{Val,","}
   syntax KResult ::= Val
 
+  /*@ \subsection{Memory Locations} */
+
+  syntax Location ::= Token{"noLocation"}
+
+  syntax Int ::= Location
+
+
   /* \subsection{Auxiliary constructs.} */
 
 
@@ -229,7 +236,7 @@ module CINK
                   <in color="magenta" stream="stdin"> .List </in>
 //                  <out color="Orchid"> .List </out>
                   <out color="Orchid" stream="stdout"> .List </out>
-                  <nextLoc> 0 </nextLoc>
+//                  <nextLoc> 0 </nextLoc>
                 </T>
 
   /*@
@@ -292,10 +299,12 @@ module CINK
     abstraction of the function. 
    */
 
+
   rule <k>  (Decl:Decl (Xl:Decls) {Sts:Stmts})::Stmt  => .  ...</k> 
        <env>... . =>  (getName(Decl) |-> L) ...</env>
        <store>... . => (L |-> lambda(Xl @ Sts)) ...</store>
-       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+when fresh(L:Location)
+//       <nextLoc> L:Int => (L +Int 1) </nextLoc>
        [fun-decl, structural]
 
 /*
@@ -314,14 +323,16 @@ module CINK
        <k> int X:Id => void  ...</k>      
        <env> Env:Map => Env[L/X] </env>
        <store>... . => (L |-> undefined) ...</store>
-       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+ when fresh(L:Location)
+//      <nextLoc> L:Int => (L +Int 1) </nextLoc>
        [structural]
 
   rule [var-decl] :
        <k> bool X:Id => void  ...</k>      
        <env> Env:Map => Env[L/X] </env>
        <store>... . => (L |-> undefined) ...</store>
-       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+when fresh(L:Location)
+//       <nextLoc> L:Int => (L +Int 1) </nextLoc>
        [structural]
 
 /*
@@ -550,7 +561,8 @@ module CINK
     by recursing into the lists:
   */
 
-  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V,Vl) following (Dec:Decl, Xl:Decls => Xl);
+  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V,Vl)
+         following (Dec:Decl, Xl:Decls => Xl);
        [structural]
    
   rule evaluate .Exps to Vl:Vals following .Decls; => Vl [structural]
@@ -574,7 +586,8 @@ module CINK
        ...</k>
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
-       <nextLoc> L:Int => L +Int 1 </nextLoc>
+when fresh(L:Location)
+//       <nextLoc> L:Int => L +Int 1 </nextLoc>
        [structural]
 
   /*@
