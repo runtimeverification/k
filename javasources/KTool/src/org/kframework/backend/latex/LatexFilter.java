@@ -10,6 +10,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Bracket;
+import org.kframework.kil.Builtin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
@@ -357,6 +358,11 @@ public class LatexFilter extends BackendFilter {
 	@Override
 	public void visit(Constant c) {
 		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}");
+	}
+	
+	@Override
+	public void visit(Builtin c) {
+		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.toString()) + "}");
 	}
 
 	@Override
