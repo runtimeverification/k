@@ -99,6 +99,6 @@ Brainfuck jumps ('[' and ']') are considered to be loops. Whenever the byte at t
   rule I:Ignore => .K
 
   rule <ptr> I:Int </ptr>
-       <array> M:Map (. => I |-> 0) </array> when notBool(I in keys M) andBool (I >=Int 0) andBool (I <=Int 30000) [structural]
+       <array> M:Map (. => I |-> 0) </array> when notBool(I in keys M) andBool (I >=Int 0) [structural]
   
 endmodule
