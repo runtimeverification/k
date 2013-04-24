@@ -24,6 +24,9 @@ public class CellCollection extends Collection {
     public CellCollection(Map<String, Cell> cells, Variable frame) {
         super(frame, "CellCollection");
         this.cells = new HashMap<String, Cell>(cells);
+        System.err.println(this);
+        System.err.println("===");
+        System.err.flush();
     }
 
     public CellCollection(Variable frame) {

@@ -1,5 +1,6 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.backend.java.symbolic.Matchable;
 import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
@@ -61,6 +62,18 @@ public abstract class Term extends ASTNode implements Matchable, Transformable, 
         VariableVisitor visitor = new VariableVisitor();
         accept(visitor);
         return visitor.getVariableSet();
+    }
+
+    private static final org.kframework.kil.visitors.Transformer transformer
+            = new KILtoBackendJavaKILTransformer();
+
+    public static Term of(org.kframework.kil.Term kilTerm) {
+        try {
+            return (Term) kilTerm.accept(transformer);
+        } catch (TransformerException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override

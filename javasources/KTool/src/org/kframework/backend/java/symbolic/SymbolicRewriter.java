@@ -55,26 +55,34 @@ public class SymbolicRewriter {
         }
 	}
 
-	public org.kframework.kil.Term rewrite(org.kframework.kil.Term kilTerm) {
-        Term term;
-        try {
-            term = (Term) kilTerm.accept(transformer);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-            return null;
-        }
-
+	public Term rewrite(Term term) {
         for (Rule rule : rules) {
 			if (matcher.isMatching(term, rule.getLeftHandSide())) {
+                Map<Variable, Term> freshSubstitution = matcher.getConstraint().freshSubstitution(rule.variableSet());
                 Map<Variable, Term> substitution = matcher.getConstraint().getSubstitution();
+
 
                 System.err.println(rule.getLeftHandSide());
                 System.err.println(matcher.getConstraint());
-                System.err.println(rule.getRightHandSide().substitute(substitution));
+                System.err.println(rule.getRightHandSide().substitute(substitution).substitute(freshSubstitution));
+
+                // return first match
+                return rule.getRightHandSide().substitute(substitution).substitute(freshSubstitution);
 			}
 		}
 
-		return kilTerm;
+		return null;
 	}
+
+    public Term rewriteStar(Term term) {
+        Term oldTerm;
+
+        do {
+            oldTerm = term;
+            term = rewrite(term);
+        } while (term != null);
+
+        return oldTerm;
+    }
 
 }

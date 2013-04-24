@@ -13,9 +13,9 @@ import org.kframework.kil.ASTNode;
  * Time: 3:12 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FreezerKLabel extends InjectionKLabel {
+public class KLabelFreezer extends KLabelInjection {
 
-    public FreezerKLabel(Term term) {
+    public KLabelFreezer(Term term) {
         super(term);
     }
 

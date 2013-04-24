@@ -4,9 +4,10 @@ import org.kframework.backend.java.kil.AnonymousVariable;
 import org.kframework.backend.java.kil.BuiltinConstant;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.ConstantKLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.InjectionKLabel;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.K;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KCollectionFragment;
@@ -30,7 +31,6 @@ public class SymbolicMatcher extends AbstractMatcher {
 
     //private final Map<Variable, ListIterator> kCollectionSubstitution = new HashMap<>();
     private SymbolicConstraint constraint = null;
-    private final java.util.Map<Variable, Term> freshSubstitution = new HashMap<Variable, Term>();
     private final ArrayList<MapMatcher> mapMatchers = new ArrayList<MapMatcher>();
 
     private class MapMatcher {
@@ -137,7 +137,7 @@ public class SymbolicMatcher extends AbstractMatcher {
             return false;
         } finally {
             mapMatchers.clear();
-            freshSubstitution.clear();
+            //freshSubstitution.clear();
         }
     }
 
@@ -263,19 +263,47 @@ public class SymbolicMatcher extends AbstractMatcher {
     /**
      * matches two KLabel constants
      *
-     * @param constantKLabel
+     * @param kLabelConstant
      * @param pattern
      */
     @Override
-    public void match(ConstantKLabel constantKLabel, Term pattern) {
-        if (!(pattern instanceof ConstantKLabel)) {
+    public void match(KLabelConstant kLabelConstant, Term pattern) {
+        if (!(pattern instanceof KLabelConstant)) {
             this.fail();
         }
-        ConstantKLabel patternConstantKLabel = (ConstantKLabel) pattern;
+        KLabelConstant patternKLabelConstant = (KLabelConstant) pattern;
 
-        if (!constantKLabel.equals(patternConstantKLabel)) {
+        if (!kLabelConstant.equals(patternKLabelConstant)) {
             fail();
         }
+    }
+
+    @Override
+    public void match(KLabelFreezer kLabelFreezer, Term pattern) {
+        if (!(pattern instanceof KLabelFreezer)) {
+            this.fail();
+        }
+        KLabelFreezer patternKLabelFreezer = (KLabelFreezer) pattern;
+
+        if (!kLabelFreezer.equals(patternKLabelFreezer)) {
+            fail();
+        }
+    }
+
+    /**
+     * matches two injection KLabel constants
+     *
+     * @param kLabelInjection
+     * @param pattern
+     */
+    @Override
+    public void match(KLabelInjection kLabelInjection, Term pattern) {
+        if(!(pattern instanceof KLabelInjection)) {
+            fail();
+        }
+
+        KLabelInjection patternKLabelInjection = (KLabelInjection) pattern;
+        match(kLabelInjection.getTerm(), patternKLabelInjection.getTerm());
     }
 
     @Override
@@ -288,22 +316,6 @@ public class SymbolicMatcher extends AbstractMatcher {
         if (!hole.equals(patternHole)) {
             fail();
         }
-    }
-
-    /**
-     * matches two injection KLabel constants
-     *
-     * @param injectionKLabel
-     * @param pattern
-     */
-    @Override
-    public void match(InjectionKLabel injectionKLabel, Term pattern) {
-        if(!(pattern instanceof InjectionKLabel)) {
-            fail();
-        }
-
-        InjectionKLabel patternInjectionKLabel = (InjectionKLabel) pattern;
-        match(injectionKLabel.getTerm(), patternInjectionKLabel.getTerm());
     }
 
     @Override

@@ -6,7 +6,6 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.DefinitionHelper;
 
@@ -32,8 +31,8 @@ public class K extends Term implements Sorted {
         this.kLabel = kLabel;
         this.kList = kList;
 
-        if (kLabel instanceof ConstantKLabel) {
-            List<Production> productions = Utils.productionsOf(((ConstantKLabel) kLabel).getLabel());
+        if (kLabel instanceof KLabelConstant) {
+            List<Production> productions = Utils.productionsOf(((KLabelConstant) kLabel).getLabel());
             if (productions.size() == 1) {
                 Production production = productions.get(0);
                 if (!kList.hasFrame() && kList.size() == production.getArity()) {
@@ -58,8 +57,8 @@ public class K extends Term implements Sorted {
                 sort = "K";
             }
         } else {
-            if (kLabel instanceof InjectionKLabel && ((InjectionKLabel) kLabel).getTerm() instanceof BuiltinConstant) {
-                sort = ((BuiltinConstant) ((InjectionKLabel) kLabel).getTerm()).getSort();
+            if (kLabel instanceof KLabelInjection && ((KLabelInjection) kLabel).getTerm() instanceof BuiltinConstant) {
+                sort = ((BuiltinConstant) ((KLabelInjection) kLabel).getTerm()).getSort();
             } else {
                 sort = "K";
             }

@@ -1,6 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.ConstantKLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -40,15 +40,17 @@ public class Utils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static List<Production> productionsOf(KLabel kLabel) {
-        if (!(kLabel instanceof ConstantKLabel)) {
+        if (!(kLabel instanceof KLabelConstant)) {
             return (List<Production>) Collections.EMPTY_LIST;
         }
-        ConstantKLabel constantKLabel = (ConstantKLabel) kLabel;
+        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
-        return Utils.productionsOf(constantKLabel.getLabel());
+        return Utils.productionsOf(kLabelConstant.getLabel());
     }
 
+    @SuppressWarnings("unchecked")
     public static List<Production> productionsOf(String label) {
         Set<String> conses = DefinitionHelper.labels.get(label);
         if (conses == null) {

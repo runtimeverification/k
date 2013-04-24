@@ -1,8 +1,9 @@
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.Term;
 import org.kframework.kil.Definition;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Term;
+//import org.kframework.kil.Rule;
+//import org.kframework.kil.Term;
 import org.kframework.kil.matchers.MatcherException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.KRun;
@@ -34,7 +35,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
  */
 public class JavaSymbolicKRun implements KRun {
     @Override
-    public KRunResult<KRunState> run(Term cfg) throws KRunExecutionException {
+    public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
         try {
             InputStream inputStream = new BufferedInputStream(
                     new FileInputStream(JavaSymbolicBackend.DEFINITION_FILENAME));
@@ -46,7 +47,10 @@ public class JavaSymbolicKRun implements KRun {
             }
 
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-            return new KRunResult<KRunState>(new KRunState(symbolicRewriter.rewrite(cfg)));
+            symbolicRewriter.rewrite(Term.of(cfg));
+            //symbolicRewriter.rewriteStar(Term.of(cfg));
+            //return new KRunResult<KRunState>(new KRunState(symbolicRewriter.rewrite(cfg)));
+            return new KRunResult<KRunState>(new KRunState(cfg));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (MatcherException e) {
@@ -61,24 +65,27 @@ public class JavaSymbolicKRun implements KRun {
             Integer bound,
             Integer depth,
             SearchType searchType,
-            Rule pattern,
-            Term cfg,
+            org.kframework.kil.Rule pattern,
+            org.kframework.kil.Term cfg,
             Set<String> varNames) throws KRunExecutionException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public KRunResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException {
+    public KRunResult<DirectedGraph<KRunState, Transition>> modelCheck(
+            org.kframework.kil.Term formula,
+            org.kframework.kil.Term cfg) throws KRunExecutionException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public KRunResult<KRunState> step(Term cfg, int steps) throws KRunExecutionException {
+    public KRunResult<KRunState> step(org.kframework.kil.Term cfg, int steps)
+            throws KRunExecutionException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public KRunDebugger debug(Term cfg) {
+    public KRunDebugger debug(org.kframework.kil.Term cfg) {
         throw new UnsupportedOperationException();
     }
 
@@ -86,4 +93,5 @@ public class JavaSymbolicKRun implements KRun {
     public KRunDebugger debug(SearchResults searchResults) {
         throw new UnsupportedOperationException();
     }
+
 }

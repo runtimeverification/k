@@ -19,7 +19,9 @@ public abstract class Collection extends Term {
     protected Collection(Variable frame, String kind) {
         super(kind);
 
-        assert frame == null || frame.getKind().equals(kind);
+        assert frame == null || frame.getKind().equals(kind)
+                : "unexpected sort " + frame.getKind() + " for frame variable " + frame.getName()
+                + "; expected sort " + kind;
 
         this.frame = frame;
     }

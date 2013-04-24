@@ -5,9 +5,9 @@ import org.kframework.backend.java.kil.BuiltinConstant;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
-import org.kframework.backend.java.kil.ConstantKLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.InjectionKLabel;
+import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.K;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KCollectionFragment;
@@ -15,6 +15,7 @@ import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Map;
+import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 
@@ -62,8 +63,8 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ConstantKLabel constantKLabel) {
-        visit((KLabel) constantKLabel);
+    public void visit(KLabelConstant kLabelConstant) {
+        visit((KLabel) kLabelConstant);
     }
 
     @Override
@@ -72,9 +73,9 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
-    public void visit(InjectionKLabel injectionKLabel) {
-        injectionKLabel.getTerm().accept(this);
-        visit((KLabel) injectionKLabel);
+    public void visit(KLabelInjection kLabelInjection) {
+        kLabelInjection.getTerm().accept(this);
+        visit((KLabel) kLabelInjection);
     }
 
     @Override
@@ -122,6 +123,15 @@ public class BottomUpVisitor implements Visitor {
             entry.getValue().accept(this);
         }
         visit((Collection) map);
+    }
+
+    @Override
+    public void visit(Rule rule) {
+        rule.getLeftHandSide().accept(this);
+        rule.getRightHandSide().accept(this);
+        if (rule.hasCondition()) {
+            rule.getCondition().accept(this);
+        }
     }
 
     @Override

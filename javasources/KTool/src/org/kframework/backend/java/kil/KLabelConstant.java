@@ -16,12 +16,12 @@ import org.kframework.kil.Production;
  * Time: 1:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ConstantKLabel extends KLabel {
+public class KLabelConstant extends KLabel {
 
     private final String label;
     private final boolean isFunction;
 
-    public ConstantKLabel(String label) {
+    public KLabelConstant(String label) {
         this.label = label;
 
         boolean isFunction = false;
@@ -58,12 +58,12 @@ public class ConstantKLabel extends KLabel {
             return true;
         }
 
-        if (!(object instanceof ConstantKLabel)) {
+        if (!(object instanceof KLabelConstant)) {
             return false;
         }
 
-        ConstantKLabel constantKLabel = (ConstantKLabel) object;
-        return label.equals(constantKLabel.getLabel());
+        KLabelConstant kLabelConstant = (KLabelConstant) object;
+        return label.equals(kLabelConstant.getLabel());
     }
 
     @Override

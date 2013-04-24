@@ -14,11 +14,11 @@ import org.kframework.kil.ASTNode;
  * Time: 1:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public class InjectionKLabel extends KLabel {
+public class KLabelInjection extends KLabel {
 
     private final Term term;
 
-    public InjectionKLabel(Term term) {
+    public KLabelInjection(Term term) {
         this.term = term;
     }
 
@@ -32,12 +32,12 @@ public class InjectionKLabel extends KLabel {
             return true;
         }
 
-        if (!(object instanceof InjectionKLabel)) {
+        if (!(object instanceof KLabelInjection)) {
             return false;
         }
 
-        InjectionKLabel injectionKLabel = (InjectionKLabel) object;
-        return term.equals(injectionKLabel.term);
+        KLabelInjection kLabelInjection = (KLabelInjection) object;
+        return term.equals(kLabelInjection.term);
     }
 
     @Override

@@ -24,7 +24,7 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-public class DefinitionHelper {
+public class    DefinitionHelper {
 	public static boolean initialized = false;
 	public static Set<String> generatedTags = new HashSet<String>();
 	static {
@@ -292,9 +292,12 @@ public class DefinitionHelper {
     public static final int HASH_PRIME = 37;
 
     /**
+     * Returns a {@link List} of productions associated with the specified KLabel
+     *
      * @param label string representation of the KLabel
      * @return list of productions associated with the label
      */
+    @SuppressWarnings("unchecked")
     public static List<Production> productionsOf(String label) {
         Set<String> conses = DefinitionHelper.labels.get(label);
         if (conses == null) {

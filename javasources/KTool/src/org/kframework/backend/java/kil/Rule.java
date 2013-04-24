@@ -1,10 +1,15 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Transformable;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.VariableVisitor;
+import org.kframework.backend.java.symbolic.Visitable;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+
+
+import java.util.Set;
 
 
 /**
@@ -14,7 +19,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * Time: 12:10 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Rule extends ASTNode {
+public class Rule extends ASTNode implements Transformable, Visitable {
 
     private final Term condition;
     private final Term leftHandSide;
@@ -67,19 +72,36 @@ public class Rule extends ASTNode {
         return string;
     }
 
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
+    public Set<Variable> variableSet() {
+        VariableVisitor visitor = new VariableVisitor();
+        accept(visitor);
+        return visitor.getVariableSet();
     }
 
     @Override
-    public ASTNode accept(Transformer visitor) throws TransformerException {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
+    public ASTNode shallowCopy() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode accept(org.kframework.kil.visitors.Transformer transformer)
+            throws org.kframework.kil.visitors.exceptions.TransformerException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void accept(org.kframework.kil.visitors.Visitor visitor) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode accept(Transformer transformer) {
+        return transformer.transform(this);
     }
 
     @Override
     public void accept(Visitor visitor) {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
+        visitor.visit(this);
     }
 
 }

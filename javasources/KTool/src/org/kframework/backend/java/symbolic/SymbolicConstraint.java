@@ -3,6 +3,7 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
+import org.kframework.backend.java.kil.AnonymousVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -12,7 +13,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -235,7 +238,7 @@ public class SymbolicConstraint {
         builder = substitutionJoiner.appendTo(builder, substitution);
         return builder.toString();
     }
-
+    @SuppressWarnings("unchecked")
     public static void compose(Map<Variable, Term> map, Map<Variable, Term> substitution) {
         Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
         for (int index = 0; index < entries.length; ++index) {
@@ -244,6 +247,26 @@ public class SymbolicConstraint {
                 map.put(entries[index].getKey(), term);
             }
         }
+    }
+
+    public Map<Variable, Term> freshSubstitution(Set<Variable> variableSet) {
+        Map<Variable, Term> freshSubstitution = new HashMap<Variable, Term>();
+
+        for (Variable variable : variableSet) {
+            if (substitution.get(variable) != null) {
+                substitution.put(AnonymousVariable.getFreshVariable(variable.getSort()),
+                                 substitution.remove(variable));
+            } else {
+                freshSubstitution.put(variable,
+                                      AnonymousVariable.getFreshVariable(variable.getSort()));
+            }
+        }
+
+        for (Equality equality : equalities) {
+            equality.substitute(freshSubstitution);
+        }
+
+        return freshSubstitution;
     }
 
 }

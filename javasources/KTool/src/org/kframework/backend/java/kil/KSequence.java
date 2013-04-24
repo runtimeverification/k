@@ -20,8 +20,10 @@ public class KSequence extends KCollection {
     private static final String OPERATOR_NAME = " ~> ";
     private static final String IDENTITY_NAME = ".K";
 
+    public static final String KIND_NAME = "KSequence";
+
     public KSequence(ImmutableList<Term> items, Variable frame) {
-        super(items, frame, "KSequence");
+        super(items, frame, KIND_NAME);
     }
 
     /*
@@ -31,11 +33,11 @@ public class KSequence extends KCollection {
     */
 
     public KSequence(Variable frame) {
-        super(frame, "KSequence");
+        super(frame, KIND_NAME);
     }
 
     public KSequence(ImmutableList<Term> items) {
-        super(items, null, "KSequence");
+        super(items, null, KIND_NAME);
     }
 
     /*
@@ -45,7 +47,7 @@ public class KSequence extends KCollection {
     */
 
     public KSequence() {
-        super(null, "KSequence");
+        super(null, KIND_NAME);
     }
 
     @Override
