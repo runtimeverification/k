@@ -7,7 +7,7 @@ module BF-SYNTAX
   /*@ 
       The syntax of the language consists in eight commands: > < + - . , [ ]
   */ 
-  syntax Ignore ::= Token{~[\>\<\+\-\.\,\[\]\ \n\r\t]} [onlyLabel]
+  syntax Ignore ::= Token{~[\>\<\+\-\.\,\[\]\ \n\r\t]+} [onlyLabel]
   syntax Instruction  ::= ">" 
   	 	      	| "<" 
 			| "+" 
@@ -52,30 +52,38 @@ module BF
        <out>... .List => ListItem(charString(V)) </out>
 
   /*@
+  Input the byte at the data pointer.
+  */
+  rule <k> , => .K ...</k>
+       <array>... P |-> (_ => V) ...</array>
+       <ptr> P:Int </ptr>
+       <in> ListItem(V:Int) => .List ...</in>
+
+  /*@
   Increment the data pointer.
   */
   rule <k> > => .K ...</k>
-       <ptr> P:Int => P +Int 1 </ptr>
+       <ptr> P:Int => (P +Int 1) </ptr>
 
   /*@
   Decrement the data pointer.
   */
   rule <k> < => .K ...</k>
-       <ptr> P:Int => P -Int 1 </ptr>
+       <ptr> P:Int => (P -Int 1) </ptr>
 
   /*@
   Increment the byte at the data pointer
   */
   rule <k> + => .K ...</k>
        <ptr> P:Int </ptr>
-       <array>... P |-> (V:Int => (V +Int 1)) ...</array>
+       <array>... P |-> (V:Int => (V +Int 1) modInt 256) ...</array>
 
   /*@
   Decrement the byte at the data pointer
   */
   rule <k> - => .K ...</k>
        <ptr> P:Int </ptr>
-       <array>... P |-> (V:Int => (V -Int 1)) ...</array>
+       <array>... P |-> (V:Int => (V -Int 1) modInt 256) ...</array>
 
   /*@
 Brainfuck jumps ('[' and ']') are considered to be loops. Whenever the byte at the data pointer is not zero, execute the loops instructions.

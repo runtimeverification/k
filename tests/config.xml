@@ -354,6 +354,7 @@
       language="dist/examples/bf/bf.k"
       folder="dist/examples/bf/programs"
       extensions="bf"
+      results="tests/examples/bf"
       >
   </test>
 
