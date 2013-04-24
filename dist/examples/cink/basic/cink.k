@@ -24,7 +24,7 @@ specific features, as \Cpp is.
 contribution.
 
 This file includes the starting iteration, where the basic constructions of 
-\Cink as arithmetic boolean expressions without side-effects, imperative 
+\Cink as arithmetic and boolean expressions (partial), imperative 
 statements, simple threads, are defined. The variables can be declared only in
 the main block of the function. 
 
@@ -37,8 +37,7 @@ The syntax of \Cink is written using the last version at the moment of the
 \KTool offers for deffining the syntax.This is given using a BNF-like 
 notation enriched with annotations and priority specifications.
 In this way, the rules giving semantics are written using the \Cink 
-syntax. However, in order to avoid some ambiguous parsings, some rules are
-written using the corresponding \K abstract syntax trees. 
+syntax. 
 */
 
 module CINK-SYNTAX 
@@ -54,11 +53,6 @@ module CINK-SYNTAX
 
   syntax Decl ::= Type Exps
 
-/*
-  syntax Decl ::= "int"  Exps 
-                | "void" Exps
-                | "bool" Exps
-*/
 
   /*@ \subsection{Expressions} */
 
@@ -116,10 +110,6 @@ module CINK-SYNTAX
                  Exp "=" Exp [right, strict(2)]
                >
                  "endl"
-  /*@
-    The name of the main function is used to start the computation of a
-    program and therefore it must be declared:
-   */
 
   /*@ \subsection{Statements}
     For now, we include in CinK only (a subset) of the imperative statements:
@@ -130,9 +120,8 @@ module CINK-SYNTAX
 
   syntax Stmt ::= Exp ";" [strict]
                | "#include" "<iostream>" 
- //                [latex(\texttt{\#include<iostream>})]
                | "using" "namespace" "std" ";" 
-//                 [latex(\texttt{using namespace std;})]
+                 [latex(\texttt{using namespace std;})]
                | Decl ";" [klabel(declStmt)]
                | "{" "}"
                | "{" Stmts "}"
@@ -147,11 +136,9 @@ module CINK-SYNTAX
     A program is a sequence of statements:
   */
   syntax Pgm ::= Stmts 
+  syntax Stmts ::= Stmt | Stmts Stmts [left]
 
   /* \subsection{Lists} */
-
-//  syntax Stmts ::= List{Stmt,""}
-  syntax Stmts ::= Stmt | Stmts Stmts [left]
 
   /*@
     The above definitions are using lists of expressions and lists of 
@@ -159,6 +146,7 @@ module CINK-SYNTAX
   */
   syntax Exps  ::= List{Exp,  ","} [strict]
   syntax Decls ::= List{Decl, ","}
+//  syntax Stmts ::= List{Stmt,""}
 
 endmodule
 
@@ -177,26 +165,23 @@ module CINK
     "no value". The lambda abstractions are used for storing the
     functions. Similar to other \K examples (IMP, IMPPP, SIMPLE), the 
     functions are stored similar to variables and therefore their definitions
-    are seen as values. The values of the form \texttt{loc($L$:Int)} designate
-    locations and they are used as result for the evaluation of the l-values.
+    are seen as values.
     As usual, all values must be subsorted to the \texttt{KResult} sort.
    */
 
 
- // syntax LVal ::= "loc" "(" Int ")"
-
-  syntax Val ::= "noVal" | "undefined"
+  syntax Val ::= "noVal" 
                | "lambda" "(" Decls "@" Stmts ")" 
                  [latex(\lambda\,{#1}\mathrel{\bullet}{#2})]
 
   syntax Vals ::= List{Val,","}
   syntax KResult ::= Val
+  syntax Exp ::= "undefined"
 
-  /*@ \subsection{Memory Locs} */
+  /*@ \subsection{Memory Locations} */
 
   syntax Loc ::= "noLoc"
 
-  syntax Int ::= Loc
 
   /*@ \subsection{Auxiliary constructs.} */
 
@@ -245,8 +230,6 @@ module CINK
   /*@
     In order to have a minimal set of rules, some syntactic constructs
     are desugared. The desugaring can be done using the structural rules.
-    In order to avoid some ambiguous parsings, some terms are written using
-    the \K AST notation.
    */
 
   /*@ The desugaring rule for the if-then statement: */
@@ -254,50 +237,15 @@ module CINK
   
   /*@
     The desugaring rule for statements declaring multiple variables.
-*/
-/*
- Here
-    the use of the \K AST notation allows to write a single rule for all
-    declaration types. The function \texttt{isDeclLabel}$(KL)$ returns 
-    true only if $KL$ is a label of a declaration; it is defined later,
-    in the subsection devoted to the auxiliary functions.
    */
-/*
-  rule '_;(KL:KLabel('_`,_(E:Exp,, Es:Exps)))
-       =>
-       '__('_;(KL('_`,_(E,, .Exps))),, '_;(KL(Es)))
-       when isDeclLabel(KL)
-       andBool (Es =/=K .Exps)
-       [macro]
-*/
 
   rule T:Type E:Exp, E':Exp, Es:Exps ; => T E; T E'; T Es; [macro]
 
-/*
-   rule int E:Exp, Es:Exp ; => int E; int Es; [macro]
-   rule bool E:Exp, Es:Exp ; => bool E; bool Es; [macro]
-*/
-  /*@
+ /*@
     Desugaring rule for variable declarations with initialization.
-    The previous desugaring rule allows us
-    to consider here only simple variable declarations, which are not 
-    aliases. 
-   */
-
-/*
-  rule '_;(KL:KLabel('_`,_('_=_(E1:Exp,, E2:Exp),, .Exps)))
-       =>
-       '__('_;(KL('_`,_(E1,, .Exps))),, '_;('_=_(getName(E1),, E2)))
-       when isDeclLabel(KL)
-       [macro]
-*/
+  */
 
    rule T:Type E1:Exp = E2:Exp ; => T E1; E1 = E2; [macro]
-
-/*
-   rule int E1:Exp = E2:Exp ; => int E1; E1 = E2; [macro]
-   rule bool E1:Exp = E2:Exp ; => bool E1; E1 = E2; [macro]
-*/
 
 
   /*@ \subsection{Declarations.} */
@@ -312,17 +260,8 @@ module CINK
   rule <k>  (Decl:Decl (Xl:Decls) {Sts:Stmts})::Stmt  => .  ...</k> 
        <env>... . =>  (getName(Decl) |-> L) ...</env>
        <store>... . => (L |-> lambda(Xl @ Sts)) ...</store>
-when fresh(L:Loc)
-//       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+       when fresh(L:Loc)
        [fun-decl, structural]
-
-/*
-  rule <k> '_`(_`)`{_`}(Decl:Decl,, Xl:Decls,, Sts:Stmts) => .  ...</k> 
-       <env>... . =>  (getName(Decl) |-> L) ...</env>
-       <store>... . => (L |-> lambda(Xl @ Sts)) ...</store>
-       <nextLoc> L:Int => (L +Int 1) </nextLoc>
-       [fun-decl, structural]
-*/
 
   /*@
     The rules for variable declarations:
@@ -337,35 +276,10 @@ when fresh(L:Loc)
 
   rule T:Type .Exps; => . [structural]
 
-/*  
-  rule [var-decl] :
-       <k> int X:Id => noVal  ...</k>      
-       <env> Env:Map => Env[L/X] </env>
-       <store>... . => (L |-> undefined) ...</store>
- when fresh(L:Loc)
-//      <nextLoc> L:Int => (L +Int 1) </nextLoc>
-       [structural]
 
-  rule [var-decl] :
-       <k> bool X:Id => noVal  ...</k>      
-       <env> Env:Map => Env[L/X] </env>
-       <store>... . => (L |-> undefined) ...</store>
-when fresh(L:Loc)
-//       <nextLoc> L:Int => (L +Int 1) </nextLoc>
-       [structural]
-*/
-
-/*
-  rule [var-decl] :
-       <k> KL:KLabel('_`,_(E:Exp,, .Exps)) => noVal  ...</k>      
-       <env> Env:Map => Env[L/getName(E)] </env>
-       <store>... . => (L |-> undefined) ...</store>
-       <nextLoc> L:Int => (L +Int 1) </nextLoc>
-       when isDeclLabel(KL)
-       [structural]
-*/
-  /*@ The following two constructs have no semantics yet; they are used now only 
-      for having a full compatibility with \Cpp, e.g., the \Cink programs can be 
+  /*@ The following two constructs have no semantics yet;
+      they are used now only  for having a full compatibility with \Cpp,
+      e.g., the \Cink programs can be 
       compiled with a \Cpp compiler. */
   rule #include <iostream> => . 
        [include, structural]
@@ -432,8 +346,9 @@ when fresh(L:Loc)
        [kripke(mem-lookup)]
 
   /*@
-    The memory update is given by the assignment operator. The left-hand side
-    must be evaluated to an l-value and the right-hand side to an r-value.
+    The memory update is given by the assignment operator. We consider
+    here only the case when he left-hand side is an variable name. 
+    The general case will be considered in a future iteration.
    */
   rule <k> X:Id = V:Val => V  ...</k>
        <env>... X |-> L:Loc ...</env>
@@ -466,7 +381,8 @@ when fresh(L:Loc)
        when K =/=K .K
        [instr-expr]
   /*@
-    Block:\\
+    Block. Note that in this iteration we assume that the blocks do not include
+    variable declarations. This will be added in a future iteration.\\
       -- the case of non-empty block
   */
   rule { Sts:Stmts } => Sts
@@ -510,6 +426,9 @@ when fresh(L:Loc)
     Since the evaluation strategy for the second argument is depending on
     the binding specification in the function signature, the function call
     expression is declared strict only in its first argument.
+    Note that in this iterartion we consider only the call-by-value 
+    binding mechanism. The call-by-reference mechanism will be considered
+    in a future iteration.
    */
 
   /*@
@@ -521,18 +440,12 @@ when fresh(L:Loc)
     second a cooling-like one).
    */
 
-  rule <k> lambda(Xl:Decls @ Sts:Stmts)(Vl:Exps)
+  rule <k> lambda(Xl:Decls @ Sts:Stmts)(El:Exps)
            =>
-           evaluate Vl to .Vals following Xl; ~>
+           evaluate El to .Vals following Xl; ~>
            lambda(Xl:Decls @ Sts:Stmts)(HOLE)
        ...</k> 
 
-/*
-  rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Exps))
-           =>
-           evaluate Vl to .Vals following Xl; ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE)
-       ...</k> 
-*/
   rule <k> (Vl:Vals ~> lambda(Xl:Decls @ Sts:Stmts)(HOLE) ~> K:K)
            => 
            (bind Vl to Xl; ~> Sts ~> return noVal;)
@@ -542,18 +455,6 @@ when fresh(L:Loc)
        <env> Env:Map => GEnv </env>
        <fstack> . => ([Env], K) ...</fstack>
        [fun-call]
-
-/*
-  rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE) ~> K:K)
-           => 
-           (bind Vl to Xl; ~> Sts ~> return noVal;)
-       </k>
-       <br/>
-       <genv> GEnv:Map </genv>
-       <env> Env:Map => GEnv </env>
-       <fstack> . => ([Env], K) ...</fstack>
-       [fun-call]
-*/
 
   /*@
     To evaluate actual parameters according to their declared strategy we will
@@ -571,7 +472,7 @@ when fresh(L:Loc)
     specified by by the following contextual declaration:
   */
 
-  context evaluate (HOLE, _:Exps) to _:Vals following (int X:Id, _:Decls);
+  context evaluate (HOLE, _:Exps) to _:Vals following (T X:Id, _:Decls);
 
 
   /*@
@@ -605,12 +506,11 @@ when fresh(L:Loc)
   which is bound to the formal parameter:
   */
   rule <k> bind((V:Val, Vs:Vals) => Vs)
-           to((int X:Id, Xl:Decls) => Xl); 
+           to((T X:Id, Xl:Decls) => Xl); 
        ...</k>
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
 when fresh(L:Loc)
-//       <nextLoc> L:Int => L +Int 1 </nextLoc>
        [structural]
 
   /*@
@@ -622,26 +522,15 @@ when fresh(L:Loc)
   /*@
     \subsection{Function Return.}
     Similar to \Cpp, the argument of a return statement is a list of
-    expressions (note that Cink does not have yet the comma operator). 
+    expressions (note that Cink does not have yet a distinguished
+    definition for the comma operator). 
   */
-
-  //@ The case when the argument is the empty list:
-//  rule return .Exps ; => return noVal; 
 
   /*@
     Similar to the comma operator, the evaluation of the return argument
     is given from left to right. Since the expression lists are strict,
-    if we declare the return statement strict then the evaluation is given
-    from right to left (in the oposite order). Therefore we use a context
-    declaration to have the right evaluation order:
-  */
-//  context return HOLE, Es:Exps ;
-
-  /*@
-    We may write now the rules for the case when the first element of the
-    list is evaluated. The first rules treats the case when theare are 
-    elements to be evaluated, and the second one the case whne the evaluation
-    is finished.
+    we get this feature for free provided the declaration for return is
+    strict. Remains oly to write rules keeping the last value from the list.
   */
 
   rule return _:Val, V:Val, Vs:Vals ; => return V, Vs ; 
@@ -682,25 +571,13 @@ when fresh(L:Loc)
     A thread is finished (and deleted) when the content of its \texttt{k}
     cell is empty:
   */
-  rule <thread>... <k>.K</k>  ...</thread> => . [thread-end]
+  rule <thread>... <k> .K </k>  ...</thread> => . [thread-end]
 
   /*@
     \subsection{Auxiliary Functions and Rules.}
     Here we winclude the semantics for the auxiliary constructs, used to give
     semnatics for \Cink.
   */
-  /*
-   The function \texttt{isDeclLabel} tests whether a \K label is a declaration.
-   It allows to treat the declaration in a compact way.
-  */
-/*
-  syntax Bool ::= "isDeclLabel" "(" KLabel ")" [function]
-
-  rule isDeclLabel(KL:KLabel) => true
-       when       KL ==KLabel 'int_
-       orElseBool KL ==KLabel 'bool_ 
-       orElseBool KL ==KLabel 'void_
-*/
 
   /*@
     The next operator returns the variable name from an expression occurring
