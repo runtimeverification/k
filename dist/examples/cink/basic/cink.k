@@ -50,9 +50,15 @@ module CINK-SYNTAX
     could be an integer, a boolean, or \texttt{void}.
   */
 
+  syntax Type ::= "int" | "bool" | "void" 
+
+  syntax Decl ::= Type Exps
+
+/*
   syntax Decl ::= "int"  Exps 
                 | "void" Exps
                 | "bool" Exps
+*/
 
   /*@ \subsection{Expressions} */
 
@@ -114,7 +120,6 @@ module CINK-SYNTAX
     The name of the main function is used to start the computation of a
     program and therefore it must be declared:
    */
-  syntax #Id ::= "main" 
 
   /*@ \subsection{Statements}
     For now, we include in CinK only (a subset) of the imperative statements:
@@ -125,14 +130,14 @@ module CINK-SYNTAX
 
   syntax Stmt ::= Exp ";" [strict]
                | "#include" "<iostream>" 
-                 [latex(\texttt{\#include<iostream>})]
+ //                [latex(\texttt{\#include<iostream>})]
                | "using" "namespace" "std" ";" 
-                 [latex(\texttt{using namespace std;})]
-               | Decl ";"
+//                 [latex(\texttt{using namespace std;})]
+               | Decl ";" [klabel(declStmt)]
                | "{" "}"
                | "{" Stmts "}"
                | "while" "(" Exp ")" Stmt 
-               | "return" Exps ";" // [strict]
+               | "return" Exps ";" [strict]
                | Decl "(" Decls ")" "{" Stmts "}"
                | "if" "(" Exp ")" Stmt "else" Stmt [strict(1)]
                >
@@ -168,7 +173,7 @@ module CINK
     We already defined the subset of values that is part of the syntax, 
     namely the values given by the primitive types. Here we estend the set
     o values with intermediate constructs needed to execute programs. 
-    Such a value is\texttt{void}, which "paradoxally" denotes in fact 
+    Such a value is\texttt{noVal}, which "paradoxally" denotes in fact 
     "no value". The lambda abstractions are used for storing the
     functions. Similar to other \K examples (IMP, IMPPP, SIMPLE), the 
     functions are stored similar to variables and therefore their definitions
@@ -178,35 +183,35 @@ module CINK
    */
 
 
-  syntax LVal ::= "loc" "(" Int ")"
+ // syntax LVal ::= "loc" "(" Int ")"
 
-  syntax Val ::= "void" | "undefined" | LVal
+  syntax Val ::= "noVal" | "undefined"
                | "lambda" "(" Decls "@" Stmts ")" 
                  [latex(\lambda\,{#1}\mathrel{\bullet}{#2})]
 
   syntax Vals ::= List{Val,","}
   syntax KResult ::= Val
 
-  /*@ \subsection{Memory Locations} */
+  /*@ \subsection{Memory Locs} */
 
-  syntax Location ::= Token{"noLocation"}
+  syntax Loc ::= "noLoc"
 
-  syntax Int ::= Location
+  syntax Int ::= Loc
 
-
-  /* \subsection{Auxiliary constructs.} */
+  /*@ \subsection{Auxiliary constructs.} */
 
 
   /*@
     \texttt{execute} is used to start the computation of a program; and
     \texttt{noname} for the initial name of a thread.
   */
-  syntax K ::= "execute" | "noname"
+  syntax K ::= "execute" | "noName"
 
  /*@
    The next two constructors are used for storing the enavironment and the
    rest of the computation in the call stack (\texttt{fstack}). 
  */
+
   syntax ListItem ::= "(" List "," K ")"
                     | "[" Map "]"
 
@@ -224,7 +229,7 @@ module CINK
   configuration <T color="yellow">
                   <threads color="pink">
                     <thread multiplicity="*" color="purple"> 
-                      <name color="yellow"> noname </name>
+                      <name color="yellow"> noName </name>
                       <k color="green"> ($PGM:Pgm ~> execute) </k>
                       <env color="LightSkyBlue"> .Map </env>
                       <fstack color="orange"> .List </fstack>
@@ -234,9 +239,7 @@ module CINK
                   <genv color="SkyBlue"> .Map </genv>
                   <store color="white"> .Map </store>
                   <in color="magenta" stream="stdin"> .List </in>
-//                  <out color="Orchid"> .List </out>
                   <out color="Orchid" stream="stdout"> .List </out>
-//                  <nextLoc> 0 </nextLoc>
                 </T>
 
   /*@
@@ -267,10 +270,13 @@ module CINK
        andBool (Es =/=K .Exps)
        [macro]
 */
-   rule int E:Exp, Es:Exp ; => int E; int Es; [macro]
-   rule bool E:Exp, Es:Exp ; => int E; int Es; [macro]
-   rule void E:Exp, Es:Exp ; => int E; int Es; [macro]
 
+  rule T:Type E:Exp, E':Exp, Es:Exps ; => T E; T E'; T Es; [macro]
+
+/*
+   rule int E:Exp, Es:Exp ; => int E; int Es; [macro]
+   rule bool E:Exp, Es:Exp ; => bool E; bool Es; [macro]
+*/
   /*@
     Desugaring rule for variable declarations with initialization.
     The previous desugaring rule allows us
@@ -286,9 +292,12 @@ module CINK
        [macro]
 */
 
+   rule T:Type E1:Exp = E2:Exp ; => T E1; E1 = E2; [macro]
+
+/*
    rule int E1:Exp = E2:Exp ; => int E1; E1 = E2; [macro]
    rule bool E1:Exp = E2:Exp ; => bool E1; E1 = E2; [macro]
-
+*/
 
 
   /*@ \subsection{Declarations.} */
@@ -303,7 +312,7 @@ module CINK
   rule <k>  (Decl:Decl (Xl:Decls) {Sts:Stmts})::Stmt  => .  ...</k> 
        <env>... . =>  (getName(Decl) |-> L) ...</env>
        <store>... . => (L |-> lambda(Xl @ Sts)) ...</store>
-when fresh(L:Location)
+when fresh(L:Loc)
 //       <nextLoc> L:Int => (L +Int 1) </nextLoc>
        [fun-decl, structural]
 
@@ -320,24 +329,35 @@ when fresh(L:Location)
    */
 
   rule [var-decl] :
-       <k> int X:Id => void  ...</k>      
+       <k> T:Type X:Id; => .  ...</k>      
        <env> Env:Map => Env[L/X] </env>
        <store>... . => (L |-> undefined) ...</store>
- when fresh(L:Location)
+  when fresh(L:Loc)
+       [structural]
+
+  rule T:Type .Exps; => . [structural]
+
+/*  
+  rule [var-decl] :
+       <k> int X:Id => noVal  ...</k>      
+       <env> Env:Map => Env[L/X] </env>
+       <store>... . => (L |-> undefined) ...</store>
+ when fresh(L:Loc)
 //      <nextLoc> L:Int => (L +Int 1) </nextLoc>
        [structural]
 
   rule [var-decl] :
-       <k> bool X:Id => void  ...</k>      
+       <k> bool X:Id => noVal  ...</k>      
        <env> Env:Map => Env[L/X] </env>
        <store>... . => (L |-> undefined) ...</store>
-when fresh(L:Location)
+when fresh(L:Loc)
 //       <nextLoc> L:Int => (L +Int 1) </nextLoc>
        [structural]
+*/
 
 /*
   rule [var-decl] :
-       <k> KL:KLabel('_`,_(E:Exp,, .Exps)) => void  ...</k>      
+       <k> KL:KLabel('_`,_(E:Exp,, .Exps)) => noVal  ...</k>      
        <env> Env:Map => Env[L/getName(E)] </env>
        <store>... . => (L |-> undefined) ...</store>
        <nextLoc> L:Int => (L +Int 1) </nextLoc>
@@ -347,10 +367,10 @@ when fresh(L:Location)
   /*@ The following two constructs have no semantics yet; they are used now only 
       for having a full compatibility with \Cpp, e.g., the \Cink programs can be 
       compiled with a \Cpp compiler. */
-  rule <k> #include <iostream> => .  ...</k>
+  rule #include <iostream> => . 
        [include, structural]
 
-  rule <k> using namespace std;=> .  ...</k>
+  rule using namespace std;=> .
        [using, structural]
 
   /*@ 
@@ -359,7 +379,7 @@ when fresh(L:Location)
     of the main function.
   */
 
-  rule <k> execute => main(.Vals); </k>
+  rule <k> execute => String2Id("main")(.Vals); </k>
        <env> Env:Map </env>
        <genv> . => Env:Map </genv>
        [main, structural]
@@ -407,7 +427,7 @@ when fresh(L:Location)
     The evaluation of a variable name as an r-value:
   */
   rule <k> X:Id => V ...</k>
-       <env>... X |-> L:Int ...</env>
+       <env>... X |-> L:Loc ...</env>
        <store>... L |-> V:Val ...</store>
        [kripke(mem-lookup)]
 
@@ -416,7 +436,7 @@ when fresh(L:Location)
     must be evaluated to an l-value and the right-hand side to an r-value.
    */
   rule <k> X:Id = V:Val => V  ...</k>
-       <env>... X |-> L:Int ...</env>
+       <env>... X |-> L:Loc ...</env>
        <store>... L |-> (_ => V) ...</store>
        [kripke(mem-update)]
 
@@ -459,6 +479,8 @@ when fresh(L:Location)
   rule (Sts:Stmts Sts':Stmts) => (Sts ~> Sts')
        [seq-comp, structural] 
 
+//  rule .Stmts => .K
+
   /*@ \subsection{Input/Output Statements.} */
 
   /*@ Writting in the the standard stream \texttt{cout}: */
@@ -471,7 +493,7 @@ when fresh(L:Location)
    from the right-hand side must be evaluated to an l-value:
   */
   rule <k> cin >> X:Id => cin  ...</k>
-       <env>...  X |-> L:Int  ...</env>
+       <env>...  X |-> L:Loc  ...</env>
        <store>... L |-> (_ => I)  ...</store>
        <in> (ListItem(I:Int) => .)  ...</in>
        [read-stream]
@@ -501,7 +523,8 @@ when fresh(L:Location)
 
   rule <k> lambda(Xl:Decls @ Sts:Stmts)(Vl:Exps)
            =>
-           evaluate Vl to .Vals following Xl; ~> lambda(Xl:Decls @ Sts:Stmts)(HOLE)
+           evaluate Vl to .Vals following Xl; ~>
+           lambda(Xl:Decls @ Sts:Stmts)(HOLE)
        ...</k> 
 
 /*
@@ -512,7 +535,7 @@ when fresh(L:Location)
 */
   rule <k> (Vl:Vals ~> lambda(Xl:Decls @ Sts:Stmts)(HOLE) ~> K:K)
            => 
-           (bind Vl to Xl; ~> Sts ~> return void;)
+           (bind Vl to Xl; ~> Sts ~> return noVal;)
        </k>
        <br/>
        <genv> GEnv:Map </genv>
@@ -523,7 +546,7 @@ when fresh(L:Location)
 /*
   rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE) ~> K:K)
            => 
-           (bind Vl to Xl; ~> Sts ~> return void;)
+           (bind Vl to Xl; ~> Sts ~> return noVal;)
        </k>
        <br/>
        <genv> GEnv:Map </genv>
@@ -586,7 +609,7 @@ when fresh(L:Location)
        ...</k>
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
-when fresh(L:Location)
+when fresh(L:Loc)
 //       <nextLoc> L:Int => L +Int 1 </nextLoc>
        [structural]
 
@@ -603,7 +626,7 @@ when fresh(L:Location)
   */
 
   //@ The case when the argument is the empty list:
-  rule return .Exps ; => return void; 
+//  rule return .Exps ; => return noVal; 
 
   /*@
     Similar to the comma operator, the evaluation of the return argument
@@ -612,7 +635,7 @@ when fresh(L:Location)
     from right to left (in the oposite order). Therefore we use a context
     declaration to have the right evaluation order:
   */
-  context return HOLE, Es:Exps ;
+//  context return HOLE, Es:Exps ;
 
   /*@
     We may write now the rules for the case when the first element of the
@@ -620,8 +643,8 @@ when fresh(L:Location)
     elements to be evaluated, and the second one the case whne the evaluation
     is finished.
   */
-  rule return V:Val, Es:Exps ; => return Es ; 
-       when Es =/=K .Exps 
+
+  rule return _:Val, V:Val, Vs:Vals ; => return V, Vs ; 
        [return]
 
   rule <k> (return V:Val; ~> _) => (V ~> K) </k>
@@ -686,9 +709,7 @@ when fresh(L:Location)
   syntax  Id ::= "getName" "(" K ")" [function]
 
   rule getName(X:Id) => X
-  rule getName(int E:Exp) => getName(E)
-  rule getName(bool E:Exp) => getName(E)
-  rule getName(void E:Exp) => getName(E)
+  rule getName(T:Type E:Exp) => getName(E)
   rule getName(E1:Exp = E2:Exp) => getName(E1)
 
 endmodule
