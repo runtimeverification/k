@@ -347,6 +347,17 @@
   </test>
 
 <!--
+  BF
+-->
+
+  <test 
+      language="dist/examples/bf/bf.k"
+      folder="dist/examples/bf/programs"
+      extensions="bf"
+      >
+  </test>
+
+<!--
   IMP-SYMBOLIC
 -->
  
