@@ -49,6 +49,7 @@ public class LatexFilter extends BackendFilter {
 	String endl = System.getProperty("line.separator");
 	private StringBuilder preamble = new StringBuilder();
 	private boolean firstProduction = false;
+	private boolean terminalBefore = false;
 	private Map<String, String> colors = new HashMap<String, String>();
 	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
@@ -109,6 +110,7 @@ public class LatexFilter extends BackendFilter {
 	@Override
 	public void visit(Sort sort) {
 		result.append("{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getName()) + "}}}");
+                terminalBefore = false;
 	}
 
 	@Override
@@ -148,8 +150,10 @@ public class LatexFilter extends BackendFilter {
 		if (DefinitionHelper.isSpecialTerminal(terminal)) {
 			result.append(StringUtil.latexify(terminal));
 		} else {
+                  if (terminalBefore) result.append("{}");
 			result.append("\\terminal{" + StringUtil.latexify(terminal) + "}");
 		}
+                terminalBefore = true;
 	}
 
 	@Override
@@ -157,6 +161,7 @@ public class LatexFilter extends BackendFilter {
 		result.append("List\\{");
 		new Sort(ul.getSort()).accept(this);
 		result.append(", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
+                terminalBefore = false;
 	}
 
 	@Override

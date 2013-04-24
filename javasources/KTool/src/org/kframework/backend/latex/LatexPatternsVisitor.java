@@ -63,6 +63,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
 		if (DefinitionHelper.isSpecialTerminal(terminal)) {
 			pattern += StringUtil.latexify(terminal);
 		} else {
+                        if (!prevNonTerm) pattern += "{}";
 			pattern += "\\terminal{" + StringUtil.latexify(terminal) + "}";
 		}
 		prevNonTerm = false;
