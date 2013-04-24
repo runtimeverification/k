@@ -32,6 +32,7 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -144,10 +145,10 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		return node;
 	}
 
-    @Override
-    public ASTNode transform(Builtin node) throws TransformerException {
-        return node.accept(kTrans);
-    }
+	@Override
+	public ASTNode transform(Builtin node) throws TransformerException {
+		return node.accept(kTrans);
+	}
 
 	@Override
 	public ASTNode transform(TermCons tc) throws TransformerException {
@@ -178,7 +179,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 		@Override
 		public ASTNode transform(Freezer node) throws TransformerException {
-			return new KApp(new FreezerLabel((Term)node.getTerm().accept(this)),new Empty(MetaK.Constants.KList));
+			return new KApp(new FreezerLabel((Term) node.getTerm().accept(this)), new Empty(MetaK.Constants.KList));
 		}
 
 		@Override
@@ -197,12 +198,12 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			return new KApp(l, f, KLabelConstant.of(ppp.getKLabel()), lok);
 		}
 
-        @Override
-        public ASTNode transform(KLabelConstant kLabelConstant) throws TransformerException {
-            String l = kLabelConstant.getLocation();
-            String f = kLabelConstant.getFilename();
-            return new KApp(l, f, new KInjectedLabel(kLabelConstant), new Empty(l, f, MetaK.Constants.KList));
-        }
+		@Override
+		public ASTNode transform(KLabelConstant kLabelConstant) throws TransformerException {
+			String l = kLabelConstant.getLocation();
+			String f = kLabelConstant.getFilename();
+			return new KApp(l, f, new KInjectedLabel(kLabelConstant), new Empty(l, f, MetaK.Constants.KList));
+		}
 
 		@Override
 		public ASTNode transform(Constant cst) throws TransformerException {
@@ -212,19 +213,19 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			if (!MetaK.isBuiltinSort(cst.getSort())) {
 				KList list = new KList();
 				list.add(StringBuiltin.of(cst.getSort()));
-				list.add(StringBuiltin.of(cst.getValue()));
+				list.add(StringBuiltin.of(StringUtil.escape(cst.getValue())));
 				return new KApp(KLabelConstant.of("#token"), list).accept(this);
 			} else {
-			    return new KApp(l, f, new KInjectedLabel(cst), new Empty(l, f, MetaK.Constants.KList));
-            }
+				return new KApp(l, f, new KInjectedLabel(cst), new Empty(l, f, MetaK.Constants.KList));
+			}
 		}
 
-        @Override
-        public ASTNode transform(Builtin builtin) throws TransformerException {
-            String l = builtin.getLocation();
-            String f = builtin.getFilename();
-            return new KApp(l, f, new KInjectedLabel(builtin), new Empty(l, f, MetaK.Constants.KList));
-        }
+		@Override
+		public ASTNode transform(Builtin builtin) throws TransformerException {
+			String l = builtin.getLocation();
+			String f = builtin.getFilename();
+			return new KApp(l, f, new KInjectedLabel(builtin), new Empty(l, f, MetaK.Constants.KList));
+		}
 
 		@Override
 		public ASTNode transform(Empty emp) {
@@ -237,11 +238,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
 				Production listProd = DefinitionHelper.listConses.get(emp.getSort());
 				String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
-				return new KApp(
-                        l,
-                        f,
-                        KLabelConstant.of(MetaK.getListUnitLabel(separator)),
-                        new Empty(MetaK.Constants.KList));
+				return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator)), new Empty(MetaK.Constants.KList));
 				// Constant cst = new Constant(l, f, "KLabel", "'." + emp.getSort() + "");
 				// return new KApp(l, f, cst, new Empty(l, f, MetaK.Constants.KList));
 			}
