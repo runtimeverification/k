@@ -306,6 +306,22 @@
       />
 
 <!--
+  QUINE
+-->
+  <test
+      language="dist/examples/quine/explicit/quine.k"
+      folder="tests/examples/quine-explicit"
+      results="tests/examples/quine-explicit"
+      extensions="quine" >
+  </test>
+  <test
+      language="dist/examples/quine/short/quine.k"
+      folder="tests/examples/quine-short"
+      results="tests/examples/quine-short"
+      extensions="quine" >
+  </test>
+
+<!--
   FUN
 -->
 
