@@ -309,13 +309,13 @@
   QUINE
 -->
   <test
-      language="dist/examples/quine/explicit/quine.k"
+      language="dist/examples/quine/explicit/quine-explicit.k"
       folder="tests/examples/quine-explicit"
       results="tests/examples/quine-explicit"
       extensions="quine" >
   </test>
   <test
-      language="dist/examples/quine/short/quine.k"
+      language="dist/examples/quine/short/quine-short.k"
       folder="tests/examples/quine-short"
       results="tests/examples/quine-short"
       extensions="quine" >

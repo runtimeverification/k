@@ -5,7 +5,7 @@
 \organization{University of Al. I. Cuza, Ia\c{s}i}
 Usage: kompile and then run with krun --output-mode=none
 */
-module QUINE
+module QUINE-EXPLICIT
 
   configuration
     <k> "" ~> "" </k>
@@ -18,7 +18,7 @@ module QUINE
         "\\organization{University of Al. I. Cuza, Ia\\c{s}i}" ~>
         "Usage: kompile and then run with krun --output-mode=none" ~>
         "*/" ~>
-        "module QUINE" ~>
+        "module QUINE-EXPLICIT" ~>
         "" ~>
         "  configuration" ~>
         "    <k> \"\" ~> \"\" </k>" ~>
