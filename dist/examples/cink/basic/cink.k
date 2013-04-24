@@ -85,7 +85,7 @@ module CINK-SYNTAX
    */
   syntax Exp ::= Id | Val
                | "(" Exp ")"  [bracket]
-               | Id "(" Exps ")" [strict(1)]
+               | Exp "(" Exps ")" [strict(1)]
                > left:
                  Exp "*" Exp [strict]
                | Exp "/" Exp [strict]
@@ -243,19 +243,26 @@ module CINK
   rule if(B:Exp) St:Stmt => if(B) St else {}  [macro]
   
   /*@
-    The desugaring rule for statements declaring multiple variables. Here
+    The desugaring rule for statements declaring multiple variables.
+*/
+/*
+ Here
     the use of the \K AST notation allows to write a single rule for all
     declaration types. The function \texttt{isDeclLabel}$(KL)$ returns 
     true only if $KL$ is a label of a declaration; it is defined later,
     in the subsection devoted to the auxiliary functions.
    */
+/*
   rule '_;(KL:KLabel('_`,_(E:Exp,, Es:Exps)))
        =>
        '__('_;(KL('_`,_(E,, .Exps))),, '_;(KL(Es)))
        when isDeclLabel(KL)
        andBool (Es =/=K .Exps)
        [macro]
-
+*/
+   rule int E:Exp, Es:Exp ; => int E; int Es; [macro]
+   rule bool E:Exp, Es:Exp ; => int E; int Es; [macro]
+   rule void E:Exp, Es:Exp ; => int E; int Es; [macro]
 
   /*@
     Desugaring rule for variable declarations with initialization.
@@ -263,11 +270,18 @@ module CINK
     to consider here only simple variable declarations, which are not 
     aliases. 
    */
+
+/*
   rule '_;(KL:KLabel('_`,_('_=_(E1:Exp,, E2:Exp),, .Exps)))
        =>
        '__('_;(KL('_`,_(E1,, .Exps))),, '_;('_=_(getName(E1),, E2)))
        when isDeclLabel(KL)
        [macro]
+*/
+
+   rule int E1:Exp = E2:Exp ; => int E1; E1 = E2; [macro]
+   rule bool E1:Exp = E2:Exp ; => bool E1; E1 = E2; [macro]
+
 
 
   /*@ \subsection{Declarations.} */
@@ -277,15 +291,40 @@ module CINK
     where the value stored in the associated location is the lambda
     abstraction of the function. 
    */
-  rule <k> '_`(_`)`{_`}(Decl:Decl,, Xl:Decls,, Sts:Stmts) => .  ...</k> 
+
+  rule <k>  (Decl:Decl (Xl:Decls) {Sts:Stmts})::Stmt  => .  ...</k> 
        <env>... . =>  (getName(Decl) |-> L) ...</env>
        <store>... . => (L |-> lambda(Xl @ Sts)) ...</store>
        <nextLoc> L:Int => (L +Int 1) </nextLoc>
        [fun-decl, structural]
 
+/*
+  rule <k> '_`(_`)`{_`}(Decl:Decl,, Xl:Decls,, Sts:Stmts) => .  ...</k> 
+       <env>... . =>  (getName(Decl) |-> L) ...</env>
+       <store>... . => (L |-> lambda(Xl @ Sts)) ...</store>
+       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+       [fun-decl, structural]
+*/
+
   /*@
-    The rules for variable declarations.
+    The rules for variable declarations:
    */
+
+  rule [var-decl] :
+       <k> int X:Id => void  ...</k>      
+       <env> Env:Map => Env[L/X] </env>
+       <store>... . => (L |-> undefined) ...</store>
+       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+       [structural]
+
+  rule [var-decl] :
+       <k> bool X:Id => void  ...</k>      
+       <env> Env:Map => Env[L/X] </env>
+       <store>... . => (L |-> undefined) ...</store>
+       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+       [structural]
+
+/*
   rule [var-decl] :
        <k> KL:KLabel('_`,_(E:Exp,, .Exps)) => void  ...</k>      
        <env> Env:Map => Env[L/getName(E)] </env>
@@ -293,7 +332,7 @@ module CINK
        <nextLoc> L:Int => (L +Int 1) </nextLoc>
        when isDeclLabel(KL)
        [structural]
-
+*/
   /*@ The following two constructs have no semantics yet; they are used now only 
       for having a full compatibility with \Cpp, e.g., the \Cink programs can be 
       compiled with a \Cpp compiler. */
@@ -446,15 +485,21 @@ module CINK
     values to the formal parameters and executes the body, while saving the
     calling context in case of an abrupt return. This is done by mimic the
     heating-cooling mechanism (the first rule is a heating-like one, and the
-    second a cooling-like one.
+    second a cooling-like one).
    */
 
+  rule <k> lambda(Xl:Decls @ Sts:Stmts)(Vl:Exps)
+           =>
+           evaluate Vl to .Vals following Xl; ~> lambda(Xl:Decls @ Sts:Stmts)(HOLE)
+       ...</k> 
+
+/*
   rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Exps))
            =>
            evaluate Vl to .Vals following Xl; ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE)
        ...</k> 
-
-  rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE) ~> K:K)
+*/
+  rule <k> (Vl:Vals ~> lambda(Xl:Decls @ Sts:Stmts)(HOLE) ~> K:K)
            => 
            (bind Vl to Xl; ~> Sts ~> return void;)
        </k>
@@ -464,6 +509,17 @@ module CINK
        <fstack> . => ([Env], K) ...</fstack>
        [fun-call]
 
+/*
+  rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE) ~> K:K)
+           => 
+           (bind Vl to Xl; ~> Sts ~> return void;)
+       </k>
+       <br/>
+       <genv> GEnv:Map </genv>
+       <env> Env:Map => GEnv </env>
+       <fstack> . => ([Env], K) ...</fstack>
+       [fun-call]
+*/
 
   /*@
     To evaluate actual parameters according to their declared strategy we will
@@ -597,16 +653,18 @@ module CINK
     Here we winclude the semantics for the auxiliary constructs, used to give
     semnatics for \Cink.
   */
-  /*@
+  /*
    The function \texttt{isDeclLabel} tests whether a \K label is a declaration.
    It allows to treat the declaration in a compact way.
   */
+/*
   syntax Bool ::= "isDeclLabel" "(" KLabel ")" [function]
 
   rule isDeclLabel(KL:KLabel) => true
        when       KL ==KLabel 'int_
        orElseBool KL ==KLabel 'bool_ 
        orElseBool KL ==KLabel 'void_
+*/
 
   /*@
     The next operator returns the variable name from an expression occurring
@@ -615,12 +673,10 @@ module CINK
   syntax  Id ::= "getName" "(" K ")" [function]
 
   rule getName(X:Id) => X
-  rule getName(KL:KLabel(E:Exp)) => getName(E)
-       when isDeclLabel(KL) ==Bool true
-
+  rule getName(int E:Exp) => getName(E)
+  rule getName(bool E:Exp) => getName(E)
+  rule getName(void E:Exp) => getName(E)
   rule getName(E1:Exp = E2:Exp) => getName(E1)
-  rule getName(KL:KLabel('_`,_(E:Exp,, .Exps))) => getName(E)
-       when isDeclLabel(KL) ==Bool true
 
 endmodule
 
