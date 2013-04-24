@@ -53,8 +53,11 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(KList ks) throws TransformerException {
-		ks.getContents().set(0, (Term) ks.getContents().get(0).accept(secondFilter));
-		ks.getContents().set(1, (Term) ks.getContents().get(1).accept(secondFilter));
+		if (ks.getContents().size() == 2) {
+			ks.getContents().set(0, (Term) ks.getContents().get(0).accept(secondFilter));
+			ks.getContents().set(1, (Term) ks.getContents().get(1).accept(secondFilter));
+		}
+		assert ks.getContents().size() <= 2;
 
 		return super.transform(ks);
 	}
