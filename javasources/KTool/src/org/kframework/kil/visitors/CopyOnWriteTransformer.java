@@ -539,9 +539,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			node.setLabel((Term) label);
             Term childTerm = (Term) child;
             if (!(childTerm.getSort().equals("KList") || childTerm instanceof Ambiguity)) {
-                //node.setChild(new KList(Collections.<Term>singletonList(childTerm)));
-                //System.err.println(childTerm);
-                node.setChild(childTerm);
+                node.setChild(new KList(Collections.<Term>singletonList(childTerm)));
             } else {
                 node.setChild(childTerm);
             }

@@ -251,8 +251,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
   private void kLabelSeqStrict(String attr, Production prod){
     List<Term> contents = new ArrayList<Term>(3);
     //first argument is a variable of sort K
-    Term Var1 = MetaK.getFreshVar(MetaK.Constants.KList);
-    contents.add(Var1);
+    Term var = MetaK.getFreshVar(MetaK.Constants.KList);
+    contents.add(var);
     //second is a HOLE
     contents.add(new Hole("K"));
     //third argument is a variable of sort K
@@ -264,7 +264,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 		ctx.setAttributes(prod.getAttributes());
 		ctx.getAttributes().remove(attr);
     //set the condition
-    KApp condApp = new KApp(KLabelConstant.KRESULT_PREDICATE, Var1);
+    KApp condApp = KApp.of(KLabelConstant.KRESULT_PREDICATE, var);
     ctx.setCondition(condApp);
     //add the context
 		items.add(ctx);

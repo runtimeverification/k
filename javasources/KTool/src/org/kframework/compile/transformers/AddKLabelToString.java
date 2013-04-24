@@ -25,10 +25,8 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
         for (String klbl : node.getModuleKLabels()) {
-            Term kapp = new KApp(new KInjectedLabel(KLabelConstant.of(klbl)), Empty.KList);
-            KList list = new KList();
-            list.getContents().add(kapp);
-            Term lhs = new KApp(KLabel2String, list);
+            Term kapp = KApp.of(new KInjectedLabel(KLabelConstant.of(klbl)));
+            Term lhs = KApp.of(KLabel2String, kapp);
             Term rhs = KApp.of(new KInjectedLabel(StringBuiltin.of(klbl.replace("\"","\\\""))));
             Rule rule = new Rule(lhs, rhs);
             rule.addAttribute(Attribute.FUNCTION);

@@ -33,10 +33,10 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
 		if (!node.containsAttribute("hybrid")) return node;
 		Rule rule = new Rule();
 		rule.setBody(new Rewrite(
-						new KApp(KLabelConstant.KRESULT_PREDICATE,
-								 new KApp(KLabelConstant.of(((Terminal) node.getItems().get(0)).getTerminal()),
-                                          new Variable("Ks", MetaK.Constants.KList))),
-						new KApp(new KInjectedLabel(BoolBuiltin.TRUE), Empty.KList)));
+                KApp.of(KLabelConstant.KRESULT_PREDICATE,
+				        new KApp(KLabelConstant.of(((Terminal) node.getItems().get(0)).getTerminal()),
+                                 new Variable("Ks", MetaK.Constants.KList))),
+		        KApp.of(new KInjectedLabel(BoolBuiltin.TRUE))));
 		rule.setCondition(new KApp(KLabelConstant.KRESULT_PREDICATE, new Variable("Ks", MetaK.Constants.KList)));
 		rule.addAttribute(Attribute.PREDICATE);
 		hybrids.add(rule);

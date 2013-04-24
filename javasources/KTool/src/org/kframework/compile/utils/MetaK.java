@@ -62,10 +62,7 @@ public class MetaK {
 		if (condition == null) {
 			return kresultCnd;
 		}
-		KList items = new KList();
-		items.add(condition);
-		items.add(kresultCnd);
-		return new KApp(KLabelConstant.ANDBOOL_KLABEL,items);
+		return KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
 	}
 
 	public static class Constants {
@@ -205,7 +202,7 @@ public class MetaK {
 	public static Term kWrapper(Term t) {
 		if (DefinitionHelper.isSubsortedEq("K", t.getSort()))
 			return t;
-		return new KApp(new KInjectedLabel(t), new KList());
+		return KApp.of(new KInjectedLabel(t));
 	}
 
 	public static boolean isKSort(String sort) {
@@ -342,7 +339,7 @@ public class MetaK {
 		if (prod.isSubsort()) {
 			final Variable freshVar = getFreshVar(prod.getItems().get(0).toString());
 			if (prod.containsAttribute("klabel")) {
-				return new KApp(KLabelConstant.of(prod.getKLabel()), freshVar);
+				return KApp.of(KLabelConstant.of(prod.getKLabel()), freshVar);
 			}
 			return freshVar;
 		}

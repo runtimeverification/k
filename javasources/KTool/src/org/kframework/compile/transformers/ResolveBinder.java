@@ -95,14 +95,12 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             }
 
             Rule rule = new Rule(
-                    new KApp(BINDER_PREDICATE, MetaK.getTerm(prod)),
+                    KApp.of(BINDER_PREDICATE, MetaK.getTerm(prod)),
                     BoolBuiltin.TRUE);
             rule.addAttribute(Attribute.ANYWHERE);
             items.add(rule);
 
-            Term klblK = new KApp(
-                    new KInjectedLabel(KLabelConstant.of(prod.getKLabel())),
-                    Empty.KList);
+            Term klblK = KApp.of(new KInjectedLabel(KLabelConstant.of(prod.getKLabel())));
 
             for (int bndIdx : bndMap.keySet()) {
                 KList list = new KList();

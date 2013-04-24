@@ -40,11 +40,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
     // constructs the term '_+String_(term1,,term2)
     public static Term appendString(Term term1, Term term2) {
-        KList list = new KList();
-        list.add(term1);
-        list.add(term2);
-        Term term = new KApp(KLabelConstant.STRING_PLUSSTRING_KLABEL, list);
-        return term;
+        return KApp.of(KLabelConstant.STRING_PLUSSTRING_KLABEL, term1, term2);
     }
 
 
@@ -64,26 +60,26 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 String symCtor = AddSymbolicK.symbolicConstructor(sort);
 
                 Variable var = MetaK.getFreshVar("Int");
-                Term symTerm = new KApp(KLabelConstant.of(symCtor), var);
-                Term lhs = new KApp(K_TO_SMTLIB, symTerm);
-                KApp strTerm = new KApp(KLabelConstant.of("Int2String"), var);
+                Term symTerm = KApp.of(KLabelConstant.of(symCtor), var);
+                Term lhs = KApp.of(K_TO_SMTLIB, symTerm);
+                KApp strTerm = KApp.of(KLabelConstant.of("Int2String"), var);
                 Term rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm);
                 Rule rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
                 var = MetaK.getFreshVar("#String");
-                symTerm = new KApp(KLabelConstant.of(symCtor), var);
-                lhs = new KApp(K_TO_SMTLIB, symTerm);
+                symTerm = KApp.of(KLabelConstant.of(symCtor), var);
+                lhs = KApp.of(K_TO_SMTLIB, symTerm);
                 rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), var);
                 rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
                 var = MetaK.getFreshVar("Id");
-                symTerm = new KApp(KLabelConstant.of(symCtor), var);
-                lhs = new KApp(K_TO_SMTLIB, symTerm);
-                strTerm = new KApp(KLabelConstant.of("Id2String"), var);
+                symTerm = KApp.of(KLabelConstant.of(symCtor), var);
+                lhs = KApp.of(K_TO_SMTLIB, symTerm);
+                strTerm = KApp.of(KLabelConstant.of("Id2String"), var);
                 rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm);
                 rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
@@ -113,7 +109,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 continue;
 
             Term term = MetaK.getTerm(prod);
-            Term lhs = new KApp(K_TO_SMTLIB, term);
+            Term lhs = KApp.of(K_TO_SMTLIB, term);
 
             Term rhs;
             if (prod.isConstant()) {
@@ -124,7 +120,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 for (int idx = 0; idx < ((TermCons) term).arity(); ++idx) {
                     Variable var = (Variable) termCons.getSubterm(idx);
                     rhs = appendString(rhs, StringBuiltin.SPACE);
-                    rhs = appendString(rhs, new KApp(K_TO_SMTLIB, var));
+                    rhs = appendString(rhs, KApp.of(K_TO_SMTLIB, var));
                 }
                 rhs = appendString(rhs, StringBuiltin.of(")"));
             }

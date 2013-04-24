@@ -334,9 +334,7 @@ public class BasicTransformer implements Transformer {
 		result.setLabel((Term) node.getLabel().accept(this));
         Term resultChild = (Term) node.getChild().accept(this);
         if (!(resultChild.getSort().equals("KList") || resultChild instanceof Ambiguity)) {
-            //result.setChild(new KList(Collections.<Term>singletonList(resultChild)));
-            //System.err.println(resultChild);
-            result.setChild(resultChild);
+            result.setChild(new KList(Collections.<Term>singletonList(resultChild)));
         } else {
 		    result.setChild(resultChild);
         }

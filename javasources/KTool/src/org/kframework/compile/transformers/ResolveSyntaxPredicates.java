@@ -54,7 +54,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 	}
 
 	private Term getPredicateTerm(Variable var) {
-		return new KApp(KLabelConstant.of(AddPredicates.predicate(var.getSort())), var);
+		return KApp.of(KLabelConstant.of(AddPredicates.predicate(var.getSort())), var);
 	}
 
 }

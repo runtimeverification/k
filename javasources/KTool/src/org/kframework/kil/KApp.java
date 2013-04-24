@@ -8,7 +8,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -26,58 +27,14 @@ public class KApp extends Term {
 	private Term child;
 
     /**
-     * Constructs the application of the specified KLabel to an empty KList.
+     * Constructs the application of the given KLabel to a KList with the given elements.
      *
-     * @param label the KLabel which is applied to an empty KList. A non-null instance of {@link KLabel}, {@link Variable} of sort KLabel or {@link Ambiguity}.
-     * @return a {@link KApp} which represents the application of the KLabel argument to an empty KList.
+     * @param label the KLabel which is applied to a KList with the given elements. A non-null instance of {@link KLabel}, {@link Variable} of sort KLabel or {@link Ambiguity}.
+     * @param elements the elements of the KList.
+     * @return a {@link KApp} which represents the application of the given KLabel to a KList with the given elements.
      */
-    public static KApp of(Term label) {
-        return new KApp(label, Empty.KList);
-    }
-
-    /**
-     * Constructs the application of the specified KLabel to a KList with a single element.
-     *
-     * @param label the KLabel which is applied to a KList with one element. A non-null instance of {@link KLabel}, {@link Variable} of sort KLabel or {@link Ambiguity}.
-     * @param element the single KList element.
-     * @return a {@link KApp} which represents the application of the KLabel argument to a KList with one element.
-     */
-    public static KApp of(Term label, Term element) {
-        ArrayList<Term> list = new ArrayList<Term>();
-        list.add(element);
-        return new KApp(label, new KList(list));
-    }
-
-    /**
-     * Constructs the application of the specified KLabel to a KList with the given elements.
-     *
-     * @param label the KLabel which is applied to a KList with two elements. A non-null instance of {@link KLabel}, {@link Variable} of sort KLabel or {@link Ambiguity}.
-     * @param element1 the first KList element.
-     * @param element2 the second KList element.
-     * @return a {@link KApp} which represents the application of the KLabel argument to a KList with two elements.
-     */
-    public static KApp of(Term label, Term element1, Term element2) {
-        ArrayList<Term> list = new ArrayList<Term>();
-        list.add(element1);
-        list.add(element2);
-        return new KApp(label, new KList(list));
-    }
-
-    /**
-     * Constructs the application of the specified KLabel to a KList with the given elements.
-     *
-     * @param label the KLabel which is applied to a KList with three elements. A non-null instance of {@link KLabel}, {@link Variable} of sort KLabel or {@link Ambiguity}.
-     * @param element1 the first KList element.
-     * @param element2 the second KList element.
-     * @param element3 the third KList element.
-     * @return a {@link KApp} which represents the application of the KLabel argument to a KList with three elements.
-     */
-    public static KApp of(Term label, Term element1, Term element2, Term element3) {
-        ArrayList<Term> list = new ArrayList<Term>();
-        list.add(element1);
-        list.add(element2);
-        list.add(element3);
-        return new KApp(label, new KList(list));
+    public static KApp of(Term label, Term ... elements) {
+        return new KApp(label, new KList(Arrays.asList(elements)));
     }
 
     /**
@@ -118,10 +75,7 @@ public class KApp extends Term {
         setLabel((Term) JavaClassesFactory.getTerm(body));
         Term term = (Term) JavaClassesFactory.getTerm(childrenElements.get(1));
         if (!(term.getSort().equals("KList") || term instanceof Ambiguity)) {
-            //setChild(new KList(Collections.<Term>singletonList(term)));
-            //System.err.println(term + ":" + term.getSort());
-            //System.err.flush();
-            setChild(term);
+            setChild(new KList(Collections.<Term>singletonList(term)));
         } else {
             setChild(term);
         }
@@ -167,11 +121,9 @@ public class KApp extends Term {
      */
 	public void setChild(Term child) {
         assert child != null;
-        /*
         assert child.getSort().equals("KList") || child instanceof Ambiguity:
                 "unexpected sort " + child.getSort() + " of KApp second argument " + child + ";"
                         + "; expected KList";
-        */
 
 		this.child = child;
 	}

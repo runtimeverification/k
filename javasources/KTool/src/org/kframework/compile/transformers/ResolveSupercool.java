@@ -50,7 +50,7 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
 			node.setContents(kseq);
 			List<Term> kitems = new ArrayList<Term>(kseq.getContents());
 			kseq.setContents(kitems);
-			kitems.set(0, new KApp(KLabelConstant.COOL_KLABEL, kitems.get(0)));
+			kitems.set(0, KApp.of(KLabelConstant.COOL_KLABEL, kitems.get(0)));
 		} else {
 			KApp kApp = new KApp(KLabelConstant.COOL_KLABEL, node.getContents());
 			node.setContents(kApp);

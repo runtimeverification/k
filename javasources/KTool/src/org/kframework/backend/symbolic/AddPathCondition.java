@@ -137,7 +137,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
     private Term checkSat(Term pathCondition) {
         // checkSat(pathCondition) =/=K # "unsat"(.KList)
         KApp unsat = KApp.of(new KInjectedLabel(StringBuiltin.of("unsat")));
-        KApp checkSat = new KApp(KLabelConstant.of("'checkSat"), pathCondition);
+        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat"), pathCondition);
         return KApp.of(KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
     }
 }

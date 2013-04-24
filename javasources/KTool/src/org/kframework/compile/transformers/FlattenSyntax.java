@@ -179,13 +179,13 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 		@Override
 		public ASTNode transform(Freezer node) throws TransformerException {
-			return new KApp(new FreezerLabel((Term) node.getTerm().accept(this)), new Empty(MetaK.Constants.KList));
+			return KApp.of(new FreezerLabel((Term) node.getTerm().accept(this)));
 		}
 
 		@Override
 		public ASTNode transform(TermCons tc) throws TransformerException {
 			if (!MetaK.isComputationSort(tc.getSort())) {
-				return new KApp(new KInjectedLabel((Term) tc.accept(trans)), new Empty(MetaK.Constants.KList));
+				return KApp.of(new KInjectedLabel((Term) tc.accept(trans)));
 			}
 
 			String l = tc.getLocation();
@@ -232,7 +232,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			String l = emp.getLocation();
 			String f = emp.getFilename();
 			if (!MetaK.isComputationSort(emp.getSort())) {
-				return new KApp(new KInjectedLabel(emp), new Empty(MetaK.Constants.KList));
+				return KApp.of(new KInjectedLabel(emp));
 			}
 			// if this is a list sort
 			if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
@@ -249,22 +249,22 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		public ASTNode transform(Collection node) throws TransformerException {
 			if (node instanceof KSequence)
 				return super.transform(node);
-			return new KApp(new KInjectedLabel((Term) node.accept(trans)), new Empty(MetaK.Constants.KList));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
 		public ASTNode transform(CollectionItem node) throws TransformerException {
-			return new KApp(new KInjectedLabel((Term) node.accept(trans)), new Empty(MetaK.Constants.KList));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
 		public ASTNode transform(MapItem node) throws TransformerException {
-			return new KApp(new KInjectedLabel((Term) node.accept(trans)), new Empty(MetaK.Constants.KList));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
 		public ASTNode transform(Cell node) throws TransformerException {
-			return new KApp(new KInjectedLabel((Term) node.accept(trans)), new Empty(MetaK.Constants.KList));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
@@ -272,7 +272,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			if ("K".equals(node.getSort()))
 				return node;
 			if (MetaK.isKSort(node.getSort()) || MetaK.isBuiltinSort(node.getSort()))
-				return new KApp(new KInjectedLabel(node), new Empty(MetaK.Constants.KList));
+				return KApp.of(new KInjectedLabel(node));
 			node = node.shallowCopy();
 			node.setSort("KItem");
 			return node;

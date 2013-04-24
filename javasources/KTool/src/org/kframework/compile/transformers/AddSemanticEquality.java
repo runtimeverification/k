@@ -22,6 +22,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -91,12 +92,12 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
             if (MetaK.isComputationSort(sort)) {
                 retNode.addSubsort(EQUALITY_SORT, sort);
 
-                KList list = new KList();
-                list.add(MetaK.getFreshVar(sort));
-                list.add(MetaK.getFreshVar(sort));
+                KList kList = new KList();
+                kList.add(MetaK.getFreshVar(sort));
+                kList.add(MetaK.getFreshVar(sort));
 
-                Term lhs = new KApp(KLabelConstant.KEQ, list);
-                Term rhs = new KApp(sortEq, list);
+                Term lhs = new KApp(KLabelConstant.KEQ, kList);
+                Term rhs = new KApp(sortEq, kList);
                 Rule rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
@@ -118,8 +119,8 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                 lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel()), KListVar2));
 
                 KList rhsList = new KList();
-                rhsList.add(new KApp(new KInjectedLabel(KListVar1), Empty.KList));
-                rhsList.add(new KApp(new KInjectedLabel(KListVar2), Empty.KList));
+                rhsList.add(KApp.of(new KInjectedLabel(KListVar1)));
+                rhsList.add(KApp.of(new KInjectedLabel(KListVar2)));
 
                 Term lhs = new KApp(KLabelConstant.KEQ, lhsList);
                 Term rhs = new KApp(KLabelConstant.KLIST_EQUALITY, rhsList);
