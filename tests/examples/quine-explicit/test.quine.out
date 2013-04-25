@@ -3,8 +3,8 @@
 \author{Radu Mereu\c{t}\u{a}
         (\texttt{radu.mereuta@info.uaic.ro})}
 \organization{University of Al. I. Cuza, Ia\c{s}i}
-Usage: kompile and then run with krun --output-mode=none
 */
+//@Usage: kompile and then run with krun --output-mode=none
 module QUINE-EXPLICIT
 
   configuration
@@ -16,8 +16,8 @@ module QUINE-EXPLICIT
         "\\author{Radu Mereu\\c{t}\\u{a}" ~>
         "        (\\texttt{radu.mereuta@info.uaic.ro})}" ~>
         "\\organization{University of Al. I. Cuza, Ia\\c{s}i}" ~>
-        "Usage: kompile and then run with krun --output-mode=none" ~>
         "*/" ~>
+        "//@Usage: kompile and then run with krun --output-mode=none" ~>
         "module QUINE-EXPLICIT" ~>
         "" ~>
         "  configuration" ~>
