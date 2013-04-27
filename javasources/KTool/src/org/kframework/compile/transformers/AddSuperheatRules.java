@@ -98,7 +98,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 		KSequence red2Seq = new KSequence();
 		red2Seq.getContents().addAll(((KSequence)right).getContents()); red2Seq.add(restHeat); // e ~> C ~> RestHeat:K
 		Term red2 = new KApp(KLabelConstant.REDEX_KLABEL, red2Seq); // redex(e ~> C ~> RestHeat:K)
-		Term red2rew = new Rewrite(new Empty(MetaK.Constants.KList), red2); // (.KList => redex(e ~> C ~> RestHeat:K))
+		Term red2rew = new Rewrite(KList.EMPTY, red2); // (.KList => redex(e ~> C ~> RestHeat:K))
 		red1List.add(red2rew);
 		Term red1 = new KApp(KLabelConstant.REDEX_KLABEL, red1List); // redex(C[e] ~> RestHeat:K,,	LHeat:KList,,
 															   //       (.KList => redex(e ~> C ~> RestHeat:K)))

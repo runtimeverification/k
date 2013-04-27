@@ -202,7 +202,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		public ASTNode transform(KLabelConstant kLabelConstant) throws TransformerException {
 			String l = kLabelConstant.getLocation();
 			String f = kLabelConstant.getFilename();
-			return new KApp(l, f, new KInjectedLabel(kLabelConstant), new Empty(l, f, MetaK.Constants.KList));
+			return new KApp(l, f, new KInjectedLabel(kLabelConstant), KList.EMPTY);
 		}
 
 		@Override
@@ -216,7 +216,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 				list.add(StringBuiltin.of(StringUtil.escape(cst.getValue())));
 				return new KApp(KLabelConstant.of("#token"), list).accept(this);
 			} else {
-				return new KApp(l, f, new KInjectedLabel(cst), new Empty(l, f, MetaK.Constants.KList));
+				return new KApp(l, f, new KInjectedLabel(cst), KList.EMPTY);
 			}
 		}
 
@@ -224,7 +224,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		public ASTNode transform(Builtin builtin) throws TransformerException {
 			String l = builtin.getLocation();
 			String f = builtin.getFilename();
-			return new KApp(l, f, new KInjectedLabel(builtin), new Empty(l, f, MetaK.Constants.KList));
+			return new KApp(l, f, new KInjectedLabel(builtin), KList.EMPTY);
 		}
 
 		@Override
@@ -238,7 +238,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
 				Production listProd = DefinitionHelper.listConses.get(emp.getSort());
 				String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
-				return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator)), new Empty(MetaK.Constants.KList));
+				return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator)), KList.EMPTY);
 				// Constant cst = new Constant(l, f, "KLabel", "'." + emp.getSort() + "");
 				// return new KApp(l, f, cst, new Empty(l, f, MetaK.Constants.KList));
 			}

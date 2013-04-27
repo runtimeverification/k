@@ -26,7 +26,7 @@ public class KCollectionFragment extends KCollection {
     public KCollectionFragment(KCollection kCollection, int index) {
         super(kCollection.getItems(),
               kCollection.hasFrame() ? kCollection.getFrame() : null,
-              "KCollectionFragment");
+              kCollection.getKind());
 
         assert 0 <= index && index <= kCollection.size();
 

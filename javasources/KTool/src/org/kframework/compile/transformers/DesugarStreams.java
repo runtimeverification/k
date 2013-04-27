@@ -86,7 +86,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 //			syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
 			TermCons buffer = new TermCons("List", "List1IOBufferSyn");
 			java.util.List<Term> bufferTerms = new ArrayList<Term>();
-			bufferTerms.add(new Empty("K"));
+			bufferTerms.add(KSequence.EMPTY);
 			buffer.setContents(bufferTerms);
 			items.add(buffer);
 

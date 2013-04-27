@@ -37,7 +37,10 @@ public class SymbolicConstraint {
         private Term rightHandSide;
 
         private Equality(Term leftHandSide, Term rightHandSide) {
-            assert leftHandSide.getKind().equals(rightHandSide.getKind());
+            assert leftHandSide.getKind().equals(rightHandSide.getKind()):
+                    "kind mismatch between "
+                            + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
+                            + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
             this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
@@ -114,7 +117,10 @@ public class SymbolicConstraint {
     private TruthValue truthValue = TruthValue.TRUE;
 
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
-        assert leftHandSide.getKind().equals(rightHandSide.getKind());
+        assert leftHandSide.getKind().equals(rightHandSide.getKind()):
+                "kind mismatch between "
+                        + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
+                        + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
         leftHandSide = leftHandSide.substitute(substitution);
         rightHandSide = rightHandSide.substitute(substitution);

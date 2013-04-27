@@ -274,10 +274,21 @@ public class MaudeKRun implements KRun {
 				return new Constant("#Id", value.getValue());
 			} else if (op.matches("\\.(Map|Bag|List|Set|K)") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 				assertXMLTerm(list.size() == 0);
-				return new Empty(sort);
+                if (sort.equals("Bag")) {
+                    return Bag.EMPTY;
+                } else if (sort.equals("List")) {
+                    return org.kframework.kil.List.EMPTY;
+                } else if (sort.equals("Map")) {
+                    return org.kframework.kil.Map.EMPTY;
+                } else if (sort.equals("Set")) {
+                    return org.kframework.kil.Set.EMPTY;
+                } else {
+                    // sort.equals("K")
+                    return KSequence.EMPTY;
+                }
 			} else if (op.equals(".KList") && sort.equals(MetaK.Constants.KList)) {
 				assertXMLTerm(list.size() == 0);
-				return new Empty(MetaK.Constants.KList);
+				return KList.EMPTY;
 			} else if (op.equals("_`(_`)") && (sort.equals("KItem") || sort.equals("[KList]"))) {
 				assertXMLTerm(list.size() == 2);
 				return new KApp(parseXML(list.get(0)), parseXML(list.get(1)));

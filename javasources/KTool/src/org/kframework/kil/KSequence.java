@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.kframework.kil.visitors.Transformer;
@@ -10,7 +11,10 @@ import org.w3c.dom.Element;
 
 /** Represents the contents (all of sort KItem) joined by ~>. */
 public class KSequence extends Collection {
-	public KSequence(Element element) {
+
+    public static final KSequence EMPTY = new KSequence(Collections.<Term>emptyList());
+
+    public KSequence(Element element) {
 		super(element);
 	}
 

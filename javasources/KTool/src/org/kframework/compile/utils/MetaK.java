@@ -196,7 +196,7 @@ public class MetaK {
 			return new Empty(ksort.toString());
 		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
 				.getLocation()));
-		return new Empty("K");
+		return KSequence.EMPTY;
 	}
 
 	public static Term kWrapper(Term t) {

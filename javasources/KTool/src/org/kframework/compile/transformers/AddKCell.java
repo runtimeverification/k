@@ -30,7 +30,7 @@ public class AddKCell extends CopyOnWriteTransformer {
 			Cell k = new Cell();
 			k.setLabel("k");
 			k.setEllipses(Ellipses.NONE);
-			k.setContents(new Empty("K"));
+			k.setContents(KSequence.EMPTY);
 			
 			cfg = cfg.shallowCopy();
 

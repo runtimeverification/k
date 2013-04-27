@@ -8,6 +8,7 @@ import java.util.Set;
 import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Bag;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
@@ -45,7 +46,7 @@ public class AddEval extends BasicCompilerStep<Definition> {
 		Configuration cfgCleaned;
 		if (cfgCleanedNode == null) {
 			cfgCleaned = new Configuration();
-			cfgCleaned.setBody(new Empty(MetaK.Constants.Bag));
+			cfgCleaned.setBody(Bag.EMPTY);
 		} else {
 			if (!(cfgCleanedNode instanceof Configuration)) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Configuration Cleaner failed.", getName(), cfg.getFilename(), cfg.getLocation()));

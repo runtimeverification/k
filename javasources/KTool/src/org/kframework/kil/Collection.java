@@ -61,6 +61,10 @@ public abstract class Collection extends Term {
         contents.add(t);
     }
 
+    public boolean isEmpty() {
+        return contents.isEmpty();
+    }
+
 	@Override
 	public abstract Collection shallowCopy();
 

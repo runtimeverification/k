@@ -38,8 +38,10 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BackendTerm;
+import org.kframework.kil.Bag;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Empty;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -184,7 +186,7 @@ public class Main {
 		}
 		Term cfgCleaned;
 		if (cfgCleanedNode == null) {
-			cfgCleaned = new Empty(MetaK.Constants.Bag);
+			cfgCleaned = Bag.EMPTY;
 		} else {
 			if (!(cfgCleanedNode instanceof Configuration)) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
@@ -246,8 +248,8 @@ public class Main {
 			output.put("$stdin", new BackendTerm("K", "# \"" + stdin
 					+ "\\n\"(.KList)"));
 		} else {
-			output.put("$noIO", new Empty("List"));
-			output.put("$stdin", new Empty("K"));
+			output.put("$noIO", org.kframework.kil.List.EMPTY);
+			output.put("$stdin", KSequence.EMPTY);
 		}
 
 		if (GlobalSettings.verbose)
