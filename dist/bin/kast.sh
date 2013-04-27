@@ -12,6 +12,13 @@ BIN=$(dirname $0)/native/$OS
 #echo $FK >> log.txt
 #env >> log.txt
 
+if [ "$1" = --new-kast ] ; then
+  MODE="--new-kast";
+  shift;
+else
+  MODE='';
+fi
+
 if [ -z "$1" -o ! -z "$2" -o ! -f "$1" ] ; then
   echo 'Usage: kast.sh <inputfile>';
   exit 1;
@@ -37,7 +44,7 @@ KDIR=$(dirname $DEF)/.k
 mkdir -p $KDIR
 RAWPARSE=$(mktemp $KDIR/parseXXXXXX.baf)
 if $BIN/sglr -fp -s$SORT -p $DEF/pgm/Program.tbl -i $INPUTFILE > $RAWPARSE 2> /dev/null ; then
-  $BIN/implodePT < $RAWPARSE | $BIN/baffle -rb -wt | $BIN/FastKast $DEF/consTable.txt
+  $BIN/implodePT < $RAWPARSE | $BIN/baffle -rb -wt | $BIN/FastKast $MODE $DEF/consTable.txt
 else
   $BIN/baffle -rb -wt < $RAWPARSE | $BIN/FastKast $DEF/consTable.txt
 fi
