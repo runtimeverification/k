@@ -338,12 +338,16 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(KSequence ksequence) {
 		prepare(ksequence);
 		java.util.List<Term> contents = ksequence.getContents();
-		for (int i = 0; i < contents.size(); i++) {
-			contents.get(i).accept(this);
-			if (i != contents.size() - 1) {
-				result.write(" ~> ");
-			}
-		}
+		if (!contents.isEmpty()) {
+            for (int i = 0; i < contents.size(); i++) {
+                contents.get(i).accept(this);
+                if (i != contents.size() - 1) {
+                    result.write(" ~> ");
+                }
+            }
+        } else {
+            result.write(".K");
+        }
 		postpare();
 	}
 
