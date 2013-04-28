@@ -1,5 +1,6 @@
 package org.kframework.krun;
 
+import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -11,6 +12,7 @@ import org.kframework.utils.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
@@ -23,13 +25,46 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 	public ASTNode transform(KApp kapp) throws TransformerException {
 		ASTNode t = internalTransform(kapp);
 		try {
-			
-			return t.accept(new TypeSystemFilter());
+			t = t.accept(new TypeSystemFilter());
 		} catch (TransformerException e) {
 			//type error, so don't disambiguate
-			return t;
+		}
+		t = t.accept(new RemoveEmptyLists());
+		return t;
+	}
+
+	public static class RemoveEmptyLists extends CopyOnWriteTransformer {
+		public RemoveEmptyLists() {
+			super("Reverse AddEmptyLists");
+		}
+
+		@Override
+		public ASTNode transform(TermCons tcParent) throws TransformerException {
+			for (int i = 0; i < tcParent.getContents().size(); i++) {
+				Term child = tcParent.getContents().get(i);
+				internalTransform(tcParent, i, child);
+			}
+			return tcParent;
+		}
+
+		private void internalTransform(TermCons tcParent, int i, Term child) {
+			if (child instanceof TermCons) {
+				TermCons termCons = (TermCons) child;
+				if (termCons.getProduction().isListDecl()) {
+					if (AddEmptyLists.isAddEmptyList(tcParent.getProduction().getChildSort(i), termCons.getContents().get(0).getSort()) && termCons.getContents().get(1) instanceof Empty) {
+						
+						tcParent.getContents().set(i, termCons.getContents().get(0));
+					}
+				}
+			} else if (child instanceof Ambiguity) {
+				Ambiguity amb = (Ambiguity) child;
+				for (Term choice : amb.getContents()) {
+					internalTransform(tcParent, i, choice);
+				}
+			}
 		}
 	}
+
 
 	public ASTNode internalTransform(KApp kapp) throws TransformerException {
 		Term label = kapp.getLabel();
@@ -72,6 +107,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 							if (DefinitionHelper.isSubsortedEq(p.getChildSort(i), l.getTerm().getSort())) {
 								newContents.set(i, l.getTerm());
 							}
+						} else {
+							newContents.set(i, newContents.get(i).shallowCopy());
 						}
 					}
 					possibleTerms.add(new TermCons(p.getSort(), cons, newContents));

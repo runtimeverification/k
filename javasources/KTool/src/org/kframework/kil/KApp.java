@@ -156,6 +156,18 @@ public class KApp extends Term {
 	}
 
 	@Override
+	public boolean contains(Object o) {
+		if (o instanceof Bracket)
+			return contains(((Bracket)o).getContent());
+		if (o instanceof Cast)
+			return contains(((Cast)o).getContent());
+		if (!(o instanceof KApp)) return false;
+		KApp k = (KApp)o;
+		return label.contains(k.label) && child.contains(k.child);
+	}
+
+
+	@Override
 	public int hashCode() {
 		return label.hashCode() * 23 + child.hashCode();
 	}

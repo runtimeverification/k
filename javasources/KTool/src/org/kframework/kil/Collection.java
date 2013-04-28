@@ -76,6 +76,22 @@ public abstract class Collection extends Term {
 	}
 
 	@Override
+	public boolean contains(Object o) {
+		if (o instanceof Bracket)
+			return contains(((Bracket)o).getContent());
+		if (o instanceof Cast)
+			return contains(((Cast)o).getContent());
+		if (getClass() != o.getClass()) return false;
+		Collection c = (Collection)o;
+		for (int i = 0; i < contents.size(); i++) {
+			if (!contents.get(i).contains(c.contents.get(i))) {
+				return false;
+			}
+		}
+		return sort.equals(c.sort);
+	}
+
+	@Override
 	public int hashCode() {
 		return sort.hashCode() * 13 + contents.hashCode();
 	}

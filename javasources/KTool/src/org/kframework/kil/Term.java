@@ -47,4 +47,8 @@ public abstract class Term extends ASTNode implements Matchable {
 
 	public abstract int hashCode();
 	public abstract boolean equals(Object obj);
+	//This method compares equality based on membership in a parse forest
+	public boolean contains(Object obj) {
+		return this.equals(obj);
+	}
 }

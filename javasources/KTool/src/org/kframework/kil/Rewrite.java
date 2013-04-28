@@ -123,4 +123,21 @@ public class Rewrite extends Term {
 		Rewrite r = (Rewrite) o;
 		return left.equals(r.left) && right.equals(r.right);
 	}
+
+	@Override
+	public boolean contains(Object o) {
+		if (o instanceof Bracket)
+			return contains(((Bracket)o).getContent());
+		if (o instanceof Cast)
+			return contains(((Cast)o).getContent());
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Rewrite))
+			return false;
+		Rewrite r = (Rewrite) o;
+		return left.contains(r.left) && right.contains(r.right);
+	}
+
 }

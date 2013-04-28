@@ -92,6 +92,18 @@ public class MapItem extends CollectionItem {
 	}
 
 	@Override
+	public boolean contains(Object o) {
+		if (o instanceof Bracket)
+			return contains(((Bracket)o).getContent());
+		if (o instanceof Cast)
+			return contains(((Cast)o).getContent());
+		if (!(o instanceof MapItem)) return false;
+		MapItem m = (MapItem)o;
+		return key.contains(m.key) && value.contains(m.value);
+	}
+
+
+	@Override
 	public int hashCode() {
 		return key.hashCode() * 31 + value.hashCode();
 	}

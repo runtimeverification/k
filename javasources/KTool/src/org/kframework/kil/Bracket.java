@@ -41,6 +41,11 @@ public class Bracket extends Term {
 		super(location, filename, sort);
 	}
 
+	public Bracket(String location, String filename, Term t) {
+		super(location, filename, t.getSort());
+		this.content = t;
+	}
+
 	public Bracket(Element element) {
 		super(element);
 		this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
@@ -91,4 +96,17 @@ public class Bracket extends Term {
 		Bracket b = (Bracket) o;
 		return content.equals(b.content);
 	}
+
+	@Override
+	public boolean contains(Object o) {
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Bracket))
+			return false;
+		Bracket b = (Bracket) o;
+		return content.contains(b.content);
+	}
+
 }

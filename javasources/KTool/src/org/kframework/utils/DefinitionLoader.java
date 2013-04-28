@@ -11,6 +11,7 @@ import org.kframework.compile.checks.CheckModulesAndFilesImportsDecl;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
 import org.kframework.compile.checks.CheckSyntaxDecl;
+import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
@@ -49,6 +50,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -317,6 +319,45 @@ public class DefinitionLoader {
 		// last resort disambiguation
 		config = config.accept(new AmbFilter());
 
+		return config;
+	}
+
+	public static ASTNode parsePatternAmbiguous(String pattern) throws TransformerException {
+		if (!DefinitionHelper.initialized) {
+			System.err.println("You need to load the definition before you call parsePattern!");
+			System.exit(1);
+		}
+
+		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString("rule " + pattern);
+		Document doc = XmlLoader.getXMLDoc(parsed);
+
+		//XmlLoader.addFilename(doc.getFirstChild(), filename);
+		XmlLoader.reportErrors(doc);
+		FileUtil.saveInFile(DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		XmlLoader.writeXmlFile(doc, DefinitionHelper.kompiled + "/pattern.xml");
+
+		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+
+		// TODO: don't allow rewrites
+		config = config.accept(new SentenceVariablesFilter());
+		config = config.accept(new CellEndLabelFilter());
+		config = config.accept(new CellTypesFilter());
+		//config = config.accept(new CorrectRewritePriorityFilter());
+		config = config.accept(new CorrectKSeqFilter());
+		// config = config.accept(new CheckBinaryPrecedenceFilter());
+		// config = config.accept(new InclusionFilter(localModule));
+		//config = config.accept(new VariableTypeInferenceFilter());
+		config = config.accept(new AmbDuplicateFilter());
+		config = config.accept(new TypeSystemFilter());
+		//config = config.accept(new PriorityFilter());
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+		config = config.accept(new TypeInferenceSupremumFilter());
+		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
+		//config = config.accept(new PreferAvoidFilter());
+		config = config.accept(new FlattenListsFilter());
+		config = config.accept(new AmbDuplicateFilter());
+		// last resort disambiguation
+		//config = config.accept(new AmbFilter());
 		return config;
 	}
 }

@@ -37,6 +37,11 @@ public class Cast extends Term {
 		super(location, filename, sort);
 	}
 
+	public Cast(String location, String filename, Term t) {
+		super(location, filename, t.getSort());
+		this.content = t;
+	}
+
 	public Cast(Element element) {
 		super(element);
 		this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
@@ -95,4 +100,17 @@ public class Cast extends Term {
 		Cast c = (Cast) o;
 		return this.syntactic == c.syntactic && this.content.equals(c.content);
 	}
+
+	@Override
+	public boolean contains(Object o) {
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Cast))
+			return false;
+		Cast c = (Cast) o;
+		return this.syntactic == c.syntactic && this.content.contains(c.content);
+	}
+
 }

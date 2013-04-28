@@ -56,4 +56,18 @@ public class Ambiguity extends Collection {
 	public Ambiguity shallowCopy() {
 		return new Ambiguity(this);
 	}
+
+	@Override
+	public boolean contains(Object o) {
+		if (o instanceof Bracket)
+			return contains(((Bracket)o).getContent());
+		if (o instanceof Cast)
+			return contains(((Cast)o).getContent());
+		for (int i = 0; i < contents.size(); i++) {
+			if (contents.get(i).contains(o)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

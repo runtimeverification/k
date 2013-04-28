@@ -157,6 +157,37 @@ public class TermCons extends Term {
 	}
 
 	@Override
+	public boolean contains(Object obj) {
+		if (obj == null)
+			return false;
+		if (this == obj)
+			return true;
+		if (obj instanceof Bracket)
+			return contains(((Bracket)obj).getContent());
+		if (obj instanceof Cast)
+			return contains(((Cast)obj).getContent());
+		if (!(obj instanceof TermCons))
+			return false;
+		TermCons tc = (TermCons) obj;
+
+		if (!tc.getSort().equals(this.sort))
+			return false;
+		if (!tc.cons.equals(cons))
+			return false;
+
+		if (tc.contents.size() != contents.size())
+			return false;
+
+		for (int i = 0; i < tc.contents.size(); i++) {
+			if (!contents.get(i).contains(tc.contents.get(i)))
+				return false;
+		}
+
+		return true;
+	}
+
+
+	@Override
 	public int hashCode() {
 		int hash = sort.hashCode() + cons.hashCode();
 

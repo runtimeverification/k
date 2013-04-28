@@ -79,6 +79,18 @@ public class KInjectedLabel extends Term {
 	}
 
 	@Override
+	public boolean contains(Object o) {
+		if (o instanceof Bracket)
+			return contains(((Bracket)o).getContent());
+		if (o instanceof Cast)
+			return contains(((Cast)o).getContent());
+		if (getClass() != o.getClass()) return false;
+		KInjectedLabel k = (KInjectedLabel)o;
+		return term.contains(k.term);
+	}
+
+
+	@Override
 	public int hashCode() {
 		return term.hashCode();
 	}
