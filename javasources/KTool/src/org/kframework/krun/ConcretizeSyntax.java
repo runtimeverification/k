@@ -71,8 +71,6 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		Term child = kapp.getChild();
 		child = child.shallowCopy();
 		List<Term> possibleTerms;
-		System.err.println(label + "\n" + label.getClass());
-		System.err.println(child + "\n" + child.getClass());
 		if (label instanceof KInjectedLabel && child.equals(KList.EMPTY)) {
 			if (label instanceof FreezerLabel) {
 				FreezerLabel l = (FreezerLabel) label;
