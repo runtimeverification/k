@@ -6,7 +6,6 @@ import java.util.Map;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Builtin;
-import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.Variable;
