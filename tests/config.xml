@@ -589,4 +589,14 @@
       >
     <kompile-option name="--symbolic" />
   </test>
+
+  <test
+      language="tests/regression/unparsing/issue.k"
+      folder="tests/regression/unparsing/programs"
+      extensions="issue"
+      results="tests/regression/unparsing/out/">
+      <all-programs>
+        <krun-option name="--output-mode" value="pretty" />
+      </all-programs>
+  </test>
 </tests>
