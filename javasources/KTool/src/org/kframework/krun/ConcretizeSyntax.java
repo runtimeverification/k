@@ -71,13 +71,15 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		Term child = kapp.getChild();
 		child = child.shallowCopy();
 		List<Term> possibleTerms;
-		if (label instanceof KInjectedLabel && child instanceof Empty) {
+		System.err.println(label + "\n" + label.getClass());
+		System.err.println(child + "\n" + child.getClass());
+		if (label instanceof KInjectedLabel && child.equals(KList.EMPTY)) {
 			if (label instanceof FreezerLabel) {
 				FreezerLabel l = (FreezerLabel) label;
 				return new Freezer((Term)l.getTerm().accept(this));
 			}
 			Term injected = ((KInjectedLabel)label).getTerm();
-			if (MetaK.isBuiltinSort(injected.getSort())) {
+			if (injected instanceof Builtin) {
 				return (Term)injected.accept(this);
 			}
 		} else if (label instanceof KLabelConstant) {
@@ -87,7 +89,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			possibleTerms = new ArrayList<Term>();
 			if (child instanceof KList) {
 				contents = ((KList)child).getContents();
-			} else if (!(child instanceof Empty)) {
+			} else if (!(child.equals(KList.EMPTY))) {
 				contents.add(child);
 			}
 			if (conses != null) {	
