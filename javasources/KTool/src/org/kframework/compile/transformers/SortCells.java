@@ -8,6 +8,7 @@ import org.kframework.kil.Collection;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -103,7 +104,8 @@ public class SortCells extends CopyOnWriteTransformer {
 			return node;
 		}
 		Set<Production> productions =
-				DefinitionHelper.productions.get(label.getValue());
+				DefinitionHelper.productions.get(
+						StringUtil.unescapeMaude(label.getValue()));
 		if (productions == null|| productions.isEmpty())
 			return node;
 		Map<Integer, String> cellfragments = new HashMap<Integer, String>();

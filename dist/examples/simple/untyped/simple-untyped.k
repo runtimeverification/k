@@ -786,13 +786,13 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax ListItem ::= (Id,Stmt,K,Map,Bag)
+  syntax K ::= (Id,Stmt,K,Map,ControlCellFragment)
 
   syntax K ::= "popx" 
 
   rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => (X, S2, K, Env, C) ...</xstack>
+         <xstack> . => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
@@ -802,7 +802,7 @@ exception stack.  The three rules below modularly do precisely the above. */
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
-         <xstack> (X, S2, K, Env, C) => . ...</xstack>
+         <xstack> ListItem((X, S2, K, Env, C)) => . ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
