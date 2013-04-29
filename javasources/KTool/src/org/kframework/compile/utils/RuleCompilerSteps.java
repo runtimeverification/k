@@ -43,7 +43,7 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
 		this.add(resolveContextAbstraction);
 		this.add(new ResolveOpenCells());
 		cellSorter = new SortCells(configurationStructureMap);
-		this.add(cellSorter.getConfigurationTransformer());
+		this.add(cellSorter);
 	}
 
 	@Override

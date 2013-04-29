@@ -139,18 +139,18 @@ public class SortCells extends CopyOnWriteTransformer {
 				iCells = new ArrayList<Term>();
 			}
 
-			if (!(replacementTerm instanceof Empty)) {
+			if (!(replacementTerm instanceof Empty) && replacementTerm != null) {
 				iCells.add(replacementTerm);
 			}
 			if (multiplicity == Cell.Multiplicity.ONE) {
 				if (iCells.size() != 1) {
+					System.out.println(iCells.toString());
 					GlobalSettings.kem.register(new KException(KException
 							.ExceptionType.ERROR,
 							KException.KExceptionGroup.COMPILER,
 							"Cell " + cell.getId() + " is found " +
-									iCells.size() + " times in cell" +
-									node.getId() + " but its multiplicity" +
-									" " +
+									iCells.size() + " times in cell " +
+									node.getId() + " but its multiplicity " +
 									"is " + multiplicity,
 							getName(),
 							node.getFilename(), node.getLocation()));
@@ -268,6 +268,19 @@ public class SortCells extends CopyOnWriteTransformer {
 					getName(), cell.getFilename(), cell.getLocation()));
 		}
 		return oldTerm;
+	}
+
+	public Term getCellFragment(Variable node) {
+		final Map<String, Term> cellMap = variables.get(node);
+		if (cellMap == null) return node;
+		Cell fragment = new Cell();
+		fragment.setLabel("cell-fragment");
+		Bag outBag = new Bag();
+		fragment.setContents(outBag);
+		for (Term value : cellMap.values()) {
+			outBag.add(value);
+		}
+		return fragment;
 	}
 
 	private class ResolveRemainingVariables extends CopyOnWriteTransformer {
