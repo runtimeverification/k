@@ -86,7 +86,8 @@
             <src path="src"/>
             <classpath refid="KTool.classpath"/>
             <compilerarg value="-Xlint:unchecked"/>
-	    <exclude name="org/kframework/krun/ioserver/commands/CommandStat.java org/kframework/krun/ioserver/commands/CommandOpendir.java" />
+	    <exclude name="org/kframework/krun/ioserver/commands/CommandStat.java" />
+            <exclude name="org/kframework/krun/ioserver/commands/CommandOpendir.java" />
         </javac>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
             <src path="lib/resources"/>
