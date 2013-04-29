@@ -5,6 +5,7 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -13,6 +14,7 @@ import org.kframework.utils.general.GlobalSettings;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /*
  * Initially created by: Traian Florin Serbanuta
@@ -88,9 +90,104 @@ public class SortCells extends CopyOnWriteTransformer {
 		return transformTop(node, false);
 	}
 
+	@Override
+	public ASTNode transform(KApp node) throws TransformerException {
+		ASTNode astNode = super.transform(node);
+		if (astNode != node) {
+			node = (KApp) astNode;
+		}
+		Term klabel = node.getLabel();
+		if (!(klabel instanceof Constant)) return node;
+		Constant label = (Constant) klabel;
+		if (!label.getSort().equals(KSort.KLabel.name())) {
+			return node;
+		}
+		Set<Production> productions =
+				DefinitionHelper.productions.get(label.getValue());
+		if (productions == null|| productions.isEmpty())
+			return node;
+		Map<Integer, String> cellfragments = new HashMap<Integer, String>();
+		for (Production prod : productions) {
+			int i = 0;
+			for (ProductionItem pitem : prod.getItems()) {
+				if (pitem instanceof Sort) {
+					final Sort sort = (Sort) pitem;
+					final String realName = sort.getRealName();
+					final Integer key = new Integer(i);
+					String oldsort = cellfragments.get(key);
+					if (MetaK.isCellSort(realName)) {
+						if (oldsort != null && !oldsort.equals(realName)) {
+							//exception
+						}
+						cellfragments.put(key, realName);
+					} else if (oldsort != null) {
+						// exception
+					}
+					i++;
+				}
+			}
+		}
+		if (cellfragments.isEmpty()) return node;
+		node = node.shallowCopy();
+		Term child = node.getChild();
+		if (!(child instanceof KList)) {
+			KList newChild = new KList();
+			if (!(child instanceof Empty))
+				newChild.add(child);
+			child = newChild;
+		}
+		KList kList = (KList) child;
+		KList outkList = kList.shallowCopy();
+		node.setChild(outkList);
+		final ArrayList<Term> outList = new ArrayList<Term>();
+		outkList.setContents(outList);
+		int i = 0;
+		for (Term t : kList.getContents()) {
+			String sort = cellfragments.get(new Integer(i));
+			if (sort != null) {
+				if (!(t instanceof KApp)) {
+					// exception -- should be a Bag KLabel
+				}
+				t = t.shallowCopy();
+				KApp kApp = (KApp) t;
+				if (kApp.getChild() instanceof KList) {
+					if (!((KList) kApp
+						.getChild()).getContents().isEmpty()) {
+					//exception -- should be empty list here
+					}
+				} else if (!(kApp.getChild() instanceof Empty)) {
+					//exception --- should be empty
+				}
+				final Term kAppLabel = kApp.getLabel().shallowCopy();
+				if (!(kAppLabel instanceof KInjectedLabel)) {
+					//exception --- Should be a KInjected Bag label
+				}
+				kApp.setLabel(kAppLabel);
+
+				final KInjectedLabel kInjectedLabel = (KInjectedLabel) kAppLabel;
+				Term bag = kInjectedLabel.getTerm();
+				if (!KSort.valueOf(bag.getSort()).mainSort().equals(KSort.Bag)){
+					//exception --- should be a Bag
+				}
+				Cell fragment = new Cell();
+				fragment.setLabel(MetaK.getCellSort(sort));
+				fragment.setContents(bag);
+				fragment = (Cell) transformTop(fragment, true);
+				kInjectedLabel.setTerm(fragment);
+			}
+			outList.add(t);
+			i++;
+		}
+		return node;
+	}
+
 	ASTNode transformTop(Cell node, boolean fragment) {
 		ConfigurationStructureMap config = configurationStructureMap;
-		ConfigurationStructure cfgStr = config.get(node.getId());
+		String id = node.getId();
+		if (fragment) {
+			id = id.substring(0, id.length()-"-fragment".length());
+		}
+		ConfigurationStructure cfgStr = config.get(id);
 		if (cfgStr.sons.isEmpty()) {
 			return node;
 			// nothing to sort (not a cell holding cells,
@@ -125,7 +222,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			   		Empty(Bag)
 			 	*/
 			if (iCells == null) {
-				if (replacementTerm instanceof Empty &&
+				if (!fragment && replacementTerm instanceof Empty &&
 						(multiplicity == Cell.Multiplicity.ONE	||
 								multiplicity == Cell.Multiplicity.SOME)) {
 					GlobalSettings.kem.register(new KException(KException
@@ -142,22 +239,25 @@ public class SortCells extends CopyOnWriteTransformer {
 			if (!(replacementTerm instanceof Empty) && replacementTerm != null) {
 				iCells.add(replacementTerm);
 			}
-			if (multiplicity == Cell.Multiplicity.ONE) {
-				if (iCells.size() != 1) {
-					System.out.println(iCells.toString());
-					GlobalSettings.kem.register(new KException(KException
-							.ExceptionType.ERROR,
-							KException.KExceptionGroup.COMPILER,
-							"Cell " + cell.getId() + " is found " +
-									iCells.size() + " times in cell " +
-									node.getId() + " but its multiplicity " +
-									"is " + multiplicity,
-							getName(),
-							node.getFilename(), node.getLocation()));
-				}
-				outCells.add(iCells.get(0));
+			if (iCells.isEmpty() && fragment) {
+				outCells.add(new Bag());
 			} else {
-				outCells.add(new Bag(iCells));
+				if (multiplicity == Cell.Multiplicity.ONE) {
+					if (iCells.size() != 1) {
+						GlobalSettings.kem.register(new KException(KException
+								.ExceptionType.ERROR,
+								KException.KExceptionGroup.COMPILER,
+								"Cell " + cell.getId() + " is found " +
+										iCells.size() + " times in cell " +
+										node.getId() + " but its multiplicity " +
+										"is " + multiplicity,
+								getName(),
+								node.getFilename(), node.getLocation()));
+					}
+					outCells.add(iCells.get(0));
+				} else {
+					outCells.add(new Bag(iCells));
+				}
 			}
 		}
 		return outBag;

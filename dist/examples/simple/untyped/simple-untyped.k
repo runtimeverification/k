@@ -606,11 +606,11 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax ListItem ::=  (Map,K,Bag)
+  syntax K ::=  (Map,K,ControlCellFragment)
 
   rule <k> lambda(Xs,S)(Vs:Vals) ~> K => mkDecls(Xs,Vs) S return; </k>
        <control>
-         <fstack> . => (Env,K,C) ...</fstack>
+         <fstack> . => ListItem((Env,K,C)) ...</fstack>
          C
        </control>
        <env> Env => GEnv </env>
@@ -618,7 +618,7 @@ nulary \texttt{return;} statements. */
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
-         <fstack> (Env,K,C) => . ...</fstack>
+         <fstack> ListItem((Env,K,C)) => . ...</fstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
