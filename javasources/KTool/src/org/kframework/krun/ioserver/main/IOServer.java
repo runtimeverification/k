@@ -157,9 +157,15 @@ public class IOServer {
 		if (command.equals("eof")) {
 			return new CommandEof(args, socket, logger); //, maudeId);
 		}
-		if (command.equals("stat")) {
+		if (command.equals("stat") || command.equals("opendir")) {
+			String cls;
+			if (command.equals("stat")) {
+				cls = "org.kframework.krun.ioserver.commands.CommandStat";
+			} else {
+				cls = "org.kframework.krun.ioserver.commands.CommandOpendir";
+			}
 			try {
-				Class commandStat = Class.forName("org.kframework.krun.ioserver.commands.CommandStat");
+				Class commandStat = Class.forName(cls);
 				Class[] argTypes = {String[].class, Socket.class, Logger.class};
 				@SuppressWarnings("unchecked")
 				Constructor cons = commandStat.getDeclaredConstructor(argTypes);

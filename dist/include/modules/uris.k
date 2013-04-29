@@ -25,6 +25,7 @@ module URIS
  
   syntax KList ::= "#stat" "(" String ")" [function]
                  | "#lstat" "(" String ")" [function]
+                 | "#opendir" "(" String ")" [function]
 
   syntax K ::= "#parse" "(" String "," String ")" [function, klabel(#parse)]
   rule #open(S:String) => String2Int((#tcpRequest("open\001" +String S +String "\001"))::K) [function, anywhere]
@@ -103,6 +104,8 @@ module URIS
 
   rule #lstat(S:String)
     => #statTypes(#string2klist((#tcpRequest("stat\001" +String S +String "\001false\001"))::K))
+
+  rule #opendir(S:String) => #string2klist((#tcpRequest("opendir\001" +String S +String "\001"))::K)
 
   syntax KList ::= #string2klist(String) [function]
   rule #string2klist(S:String) => substrString(S, 0, findString(S, "\001", 0)) ,, #string2klist(substrString(S, findString(S, "\001", 0) +Int 1, lengthString(S))) when findString(S, "\001", 0) =/=Int -1

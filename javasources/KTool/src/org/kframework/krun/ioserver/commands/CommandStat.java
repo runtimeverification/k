@@ -64,7 +64,6 @@ public class CommandStat extends Command {
 				fail(e.getLocalizedMessage());
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		}
 	}
