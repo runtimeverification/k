@@ -1,6 +1,5 @@
 package org.kframework.backend.maude;
 
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.backend.BackendFilter;
 import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -336,8 +335,8 @@ public class MaudeFilter extends BackendFilter {
 	 */
 	@Override
 	public void visit(Cell cell) {
-/*
-		String id = cell.getId();
+		String id;
+		id = cell.getId();
 		result.append("(");
 		result.append("<" + id + "> ");
 		if (cell.getContents() != null) {
@@ -347,7 +346,18 @@ public class MaudeFilter extends BackendFilter {
 		}
 		result.append(" </" + id + ">");
 		result.append(")");
-*/
+
+		if (false) {
+		id = cell.getId();
+		result.append("<_>_</_>(" + id + ", ");
+		if (cell.getContents() != null) {
+			cell.getContents().accept(this);
+		} else {
+			result.append("null");
+		}
+		result.append(", " + id + ")");
+		}
+		/*
 		String id = cell.getId();
 		ConfigurationStructure cellStr = null;
 		if (id.endsWith("-fragment")) {
@@ -376,6 +386,7 @@ public class MaudeFilter extends BackendFilter {
 			}
 		}
 		result.append(")");
+*/
 	}
 
 	@Override

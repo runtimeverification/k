@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 ulimit -s `ulimit -H -s`
-java -ss8m -Xms64m -Xmx1G  -jar "$(dirname $0)/java/k3.jar" -kompile "$@"
+/Library/Java/JavaVirtualMachines/jdk1.7.0_17.jdk/Contents/Home/bin/java -ss8m -Xms64m -Xmx1G  -jar "$(dirname $0)/java/k3.jar" -kompile "$@"

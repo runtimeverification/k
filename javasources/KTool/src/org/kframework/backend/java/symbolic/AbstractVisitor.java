@@ -49,7 +49,10 @@ public class AbstractVisitor implements Visitor {
         visit((KLabel) constantKLabel);
     }
 
-    @Override
+	@Override
+	public void visit(Hole hole) { }
+
+	@Override
     public void visit(InjectionKLabel injectionKLabel) {
         injectionKLabel.getTerm().accept(this);
         visit((KLabel) injectionKLabel);
