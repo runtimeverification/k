@@ -1,8 +1,9 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.backend.unparser.UnparserFilter;
-import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Ambiguity;
+import org.kframework.kil.TermCons;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -16,27 +17,21 @@ public class AmbFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
-		String msg = "";
+		String msg = "Parsing ambiguity. Arbitrarily choosing the first.";
 
-		for (ASTNode variant : amb.getContents()) {
-			if (variant instanceof TermCons) {
-				TermCons tc = (TermCons) variant;
-				Production prod = DefinitionHelper.conses.get(tc.getCons());
-				for (ProductionItem i : prod.getItems())
-					msg += i + " ";
-				msg += "(" + tc.getCons() + "), ";
-			} else {
-				msg += variant.toString() + ", ";
+		for (int i = 0; i < amb.getContents().size(); i++) {
+			msg += "\n" + (i + 1) + ": ";
+			if (amb.getContents().get(i) instanceof TermCons) {
+				TermCons tc = (TermCons) amb.getContents().get(i);
+				msg += tc.getProduction().getSort() + " ::= ";
+				msg += tc.getProduction().toString();
 			}
+			UnparserFilter unparserFilter = new UnparserFilter();
+			amb.getContents().get(i).accept(unparserFilter);
+			msg += "\n   " + unparserFilter.getResult().replace("\n", "\n   ");
 		}
-		msg = msg.substring(0, msg.length() - 2);
-		msg += "    Arbitrarily choosing the first.";
-		UnparserFilter unparserFilter = new UnparserFilter();
-		unparserFilter.visit(amb);
-		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, "Parsing ambiguity between: " + msg + " in the following AST: \n" + unparserFilter.getResult(), getName(), amb.getFilename(), amb.getLocation()));
+		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, msg, getName(), amb.getFilename(), amb.getLocation()));
 
-		ASTNode astNode = amb.getContents().get(0);
-
-		return astNode.accept(this);
+		return amb.getContents().get(0).accept(this);
 	}
 }

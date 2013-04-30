@@ -1,20 +1,20 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/** 
+/**
  * Applications that are not in sort K, or have not yet been flattened.
  */
 public class TermCons extends Term {
@@ -103,17 +103,17 @@ public class TermCons extends Term {
 		this.contents = contents;
 	}
 
-    public Term getSubterm(int idx) {
-        return contents.get(idx);
-    }
+	public Term getSubterm(int idx) {
+		return contents.get(idx);
+	}
 
-    public Term setSubterm(int idx, Term term) {
-        return contents.set(idx, term);
-    }
+	public Term setSubterm(int idx, Term term) {
+		return contents.set(idx, term);
+	}
 
-    public int arity() {
-        return getProduction().getArity();
-    }
+	public int arity() {
+		return getProduction().getArity();
+	}
 
 	@Override
 	public void accept(Visitor visitor) {
@@ -125,10 +125,10 @@ public class TermCons extends Term {
 		return visitor.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -155,6 +155,37 @@ public class TermCons extends Term {
 
 		return true;
 	}
+
+	@Override
+	public boolean contains(Object obj) {
+		if (obj == null)
+			return false;
+		if (this == obj)
+			return true;
+		if (obj instanceof Bracket)
+			return contains(((Bracket)obj).getContent());
+		if (obj instanceof Cast)
+			return contains(((Cast)obj).getContent());
+		if (!(obj instanceof TermCons))
+			return false;
+		TermCons tc = (TermCons) obj;
+
+		if (!tc.getSort().equals(this.sort))
+			return false;
+		if (!tc.cons.equals(cons))
+			return false;
+
+		if (tc.contents.size() != contents.size())
+			return false;
+
+		for (int i = 0; i < tc.contents.size(); i++) {
+			if (!contents.get(i).contains(tc.contents.get(i)))
+				return false;
+		}
+
+		return true;
+	}
+
 
 	@Override
 	public int hashCode() {

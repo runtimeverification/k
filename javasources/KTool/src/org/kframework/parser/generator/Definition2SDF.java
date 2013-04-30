@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.transformers.AddSymbolicK;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
@@ -160,10 +161,12 @@ public class Definition2SDF {
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	\"(\" K \")\" \":\" \"" + s.getName() + "\"      -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
-				sdf.append("	\"(\" K \")\" \"::\" \"" + s.getName() + "\"     -> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
+				sdf.append("	 K \":" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+				sdf.append("	 K \"::" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
 			}
 		}
+		sdf.append("	 K \":K\"	-> K            {cons(\"K1Cast\")}\n");
+		sdf.append("	 K \"::K\"	-> K            {cons(\"K12Cast\")}\n");
 
 		sdf.append("\n\n");
 		for (String sort : psdfv.constantSorts) {
@@ -186,22 +189,22 @@ public class Definition2SDF {
 
 		sdf.append("\n\n%% sort predicates\n");
 		// print is<Sort> predicates (actually KLabel)
-		for (Sort s : psdfv.userSorts) {
-			sdf.append("	\"" + AddPredicates.syntaxPredicate(s.getName()) + "\"      -> DzKLabel\n");
-			sdf.append("	\"" + AddPredicates.symbolicPredicate(s.getName()) + "\"      -> DzKLabel\n");
-			sdf.append("	\"" + AddSymbolicK.symbolicConstructor(s.getName()) + "\"      -> DzKLabel\n");
-		}
+        for (Sort sort : psdfv.userSorts) {
+            if (!MetaK.isKSort(sort.getName())) {
+                sdf.append("	\"" + AddPredicates.syntaxPredicate(sort.getName())
+                           + "\"      -> DzKLabel\n");
+            }
+            if (AddSymbolicK.allowKSymbolic(sort.getName())) {
+                sdf.append("	\"" + AddPredicates.symbolicPredicate(sort.getName())
+                           + "\"      -> DzKLabel\n");
+                sdf.append("	\"" + AddSymbolicK.symbolicConstructor(sort.getName())
+                           + "\"      -> DzKLabel\n");
+            }
+        }
 
 		sdf.append("\n\n");
 
 		sdf.append("\n%% terminals reject\n");
-		for (String t : terminals.terminals) {
-			if (t.matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
-				sdf.append("	\"" + t + "\" -> VARID {reject}\n");
-			}
-		}
-
-		sdf.append("\n\n");
 		for (String t : terminals.terminals) {
 			if (t.matches("[a-zA-Z][a-zA-Z0-9]*")) {
 				sdf.append("	\"" + t + "\" -> DzDzID {reject}\n");

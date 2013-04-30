@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
@@ -52,22 +52,20 @@ public class LineariseTransformer extends BasicTransformer {
                 List<Term> vars = new ArrayList<Term>();
                 vars.add(entry.getKey());
                 vars.add(entry.getValue());
-                String label = Constant.KEQ.getValue();
-                terms.add(new KApp(new Constant("KLabel", label), new KList(
-                        vars)));
+                terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel()), new KList(vars)));
             }
 
             if (terms.isEmpty())
                 return node;
 
-            Term newCondition = new KApp(Constant.ANDBOOL_KLABEL,
+            Term newCondition = new KApp(KLabelConstant.ANDBOOL_KLABEL,
                     new KList(terms));
 
             if (condition != null) {
                 List<Term> vars = new ArrayList<Term>();
                 vars.add(condition);
                 vars.add(newCondition);
-                newCondition = new KApp(Constant.ANDBOOL_KLABEL,
+                newCondition = new KApp(KLabelConstant.ANDBOOL_KLABEL,
                         new KList(vars));
             }
 

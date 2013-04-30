@@ -3,6 +3,7 @@ package org.kframework.parser.generator;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.basic.KParser;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
@@ -133,7 +134,11 @@ public class BasicParser {
 		String parsed = KParser.ParseKString(content);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 		XmlLoader.addFilename(doc.getFirstChild(), file.getAbsolutePath());
-		XmlLoader.reportErrors(doc);
+		try {
+			XmlLoader.reportErrors(doc);
+		} catch (TransformerException e) {
+			e.report();
+		}
 
 		NodeList nl = doc.getFirstChild().getChildNodes();
 		List<DefinitionItem> defItemList = new ArrayList<DefinitionItem>();

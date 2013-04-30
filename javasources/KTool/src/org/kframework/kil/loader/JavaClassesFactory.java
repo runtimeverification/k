@@ -1,52 +1,6 @@
 package org.kframework.kil.loader;
 
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.Bag;
-import org.kframework.kil.BagItem;
-import org.kframework.kil.Bracket;
-import org.kframework.kil.Cast;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Context;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Empty;
-import org.kframework.kil.FreezerHole;
-import org.kframework.kil.Hole;
-import org.kframework.kil.Import;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.Lexical;
-import org.kframework.kil.List;
-import org.kframework.kil.ListItem;
-import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.LiterateModuleComment;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Module;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.PriorityBlockExtended;
-import org.kframework.kil.PriorityExtended;
-import org.kframework.kil.PriorityExtendedAssoc;
-import org.kframework.kil.Production;
-import org.kframework.kil.Require;
-import org.kframework.kil.Restrictions;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Set;
-import org.kframework.kil.SetItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.StringSentence;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.TermComment;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
 
@@ -103,14 +57,43 @@ public class JavaClassesFactory {
 			return new Variable(element);
 		if (Constants.TERMINAL.equals(element.getNodeName()))
 			return new Terminal(element);
-		if (Constants.CONST.equals(element.getNodeName()))
-			return new Constant(element);
+		if (Constants.CONST.equals(element.getNodeName())) {
+            if (element.getAttribute(Constants.SORT_sort_ATTR).equals("KLabel")) {
+                return new KLabelConstant(element);
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(BoolBuiltin.SORT_NAME)) {
+                return new BoolBuiltin(element);
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(IntBuiltin.SORT_NAME)) {
+                return new IntBuiltin(element);
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(FloatBuiltin.SORT_NAME)) {
+                return new FloatBuiltin(element);
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(StringBuiltin.SORT_NAME)) {
+                return new StringBuiltin(element);
+            } else {
+                return new Constant(element);
+            }
+        }
 		if (Constants.KAPP.equals(element.getNodeName()))
 			return new KApp(element);
 		if (Constants.KList.equals(element.getNodeName()))
 			return new KList(element);
-		if (Constants.EMPTY.equals(element.getNodeName()))
-			return new Empty(element);
+		if (Constants.EMPTY.equals(element.getNodeName())) {
+            if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.KSEQUENCE)) {
+                return KSequence.EMPTY;
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.KList)) {
+                return KList.EMPTY;
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.BAG)) {
+                return Bag.EMPTY;
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.LIST)) {
+                return List.EMPTY;
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.MAP)) {
+                return Map.EMPTY;
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.SET)) {
+                return Set.EMPTY;
+            } else {
+			    // user defined empty list
+                return new Empty(element);
+            }
+        }
 		if (Constants.SET.equals(element.getNodeName()))
 			return new Set(element);
 		if (Constants.SETITEM.equals(element.getNodeName()))
@@ -186,7 +169,7 @@ public class JavaClassesFactory {
 		 * new Production(element); if (Constants.RULE.equals(nodeName)) return new Rule(element); if (Constants.REWRITE.equals(nodeName)) return new Rewrite(element); if
 		 * (Constants.TERM.equals(nodeName)) return new TermCons(element); if (Constants.BRACKET.equals(nodeName)) return new Bracket(element); if (Constants.VAR.equals(nodeName)) return new
 		 * Variable(element); if (Constants.TERMINAL.equals(nodeName)) return new Terminal(element); if (Constants.CONST.equals(nodeName)) return new Constant(element); if
-		 * (Constants.KAPP.equals(nodeName)) return new KApp(element); if (Constants.LISTOFK.equals(nodeName)) return new ListOfK(element); if (Constants.EMPTY.equals(nodeName)) return new
+		 * (Constants.KAPP.equals(nodeName)) return new KApp(element); if (Constants.LISTOFK.equals(nodeName)) return new KList(element); if (Constants.EMPTY.equals(nodeName)) return new
 		 * Empty(element); if (Constants.SET.equals(nodeName)) return new Set(element); if (Constants.SETITEM.equals(nodeName)) return new SetItem(element); if (Constants.USERLIST.equals(nodeName))
 		 * return new UserList(element); if (Constants.CELL.equals(nodeName)) return new Cell(element); if (Constants.BREAK.equals(nodeName)) return new TermComment(element); if
 		 * (Constants.BAG.equals(nodeName)) return new Bag(element); if (Constants.BAGITEM.equals(nodeName)) return new BagItem(element); if (Constants.KSEQUENCE.equals(nodeName)) return new

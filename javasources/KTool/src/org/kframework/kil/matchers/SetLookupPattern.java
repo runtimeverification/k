@@ -1,6 +1,7 @@
 package org.kframework.kil.matchers;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cast;
 import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Term;
@@ -97,6 +98,23 @@ public class SetLookupPattern extends Term {
 	public SetLookupPattern shallowCopy() {
 		return new SetLookupPattern(this);
 	}
-
+ 
+	@Override
+	public int hashCode() {
+		//TODO: finish implementation
+		return 0;
+	}
+ 
+  @Override
+	public boolean equals(Object o) {
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Cast))
+			return false;
+		// TODO: finish implementing this equals
+		return true;
+	}
 }  
 

@@ -1,9 +1,11 @@
 package org.kframework.kil.visitors;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+
 
 /**
  * Default implementations of methods visit non-attribute children, and then call the transform method for the parent class on the current node.
@@ -111,7 +113,7 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(PriorityExtendedAssoc node) throws TransformerException {
 		for (int i = 0; i < node.getTags().size(); i++) {
-			node.getTags().set(i, (Constant) node.getTags().get(i).accept(this));
+			node.getTags().set(i, (KLabelConstant) node.getTags().get(i).accept(this));
 		}
 		return transform((ModuleItem) node);
 	}
@@ -127,7 +129,7 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(PriorityBlockExtended node) throws TransformerException {
 		for (int i = 0; i < node.getProductions().size(); i++) {
-			node.getProductions().set(i, (Constant) node.getProductions().get(i).accept(this));
+			node.getProductions().set(i, (KLabelConstant) node.getProductions().get(i).accept(this));
 		}
 		return transform((ASTNode) node);
 	}
@@ -280,7 +282,38 @@ public class BasicTransformer implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(Builtin node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
+    public ASTNode transform(BoolBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(IntBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(FloatBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(StringBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(Token node) throws TransformerException {
+        /* an instance of class Token is immutable */
+        return transform((Term) node);
+    }
+
+    @Override
 	public ASTNode transform(Empty node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -297,10 +330,15 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(KApp node) throws TransformerException {
-		KApp result = new KApp(node);
+		KApp result = node.shallowCopy();
 		result.setLabel((Term) node.getLabel().accept(this));
-		result.setChild((Term) node.getChild().accept(this));
-		return transform((Term) result);
+        Term resultChild = (Term) node.getChild().accept(this);
+        if (!(resultChild.getSort().equals("KList") || resultChild instanceof Ambiguity)) {
+            result.setChild(new KList(Collections.<Term>singletonList(resultChild)));
+        } else {
+		    result.setChild(resultChild);
+        }
+        return transform((Term) result);
 	}
 
 	@Override
@@ -308,7 +346,12 @@ public class BasicTransformer implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(KLabelConstant node) throws TransformerException {
+        return transform((KLabel) node);
+    }
+
+    @Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		Rewrite result = new Rewrite(node);
 		result.setLeft((Term) node.getLeft().accept(this));
@@ -350,16 +393,6 @@ public class BasicTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(FreezerVariable node) throws TransformerException {
-		return transform((Term) node);
-	}
-
-	@Override
-	public ASTNode transform(FreezerSubstitution node) throws TransformerException {
-		return transform((Term) node);
-	}
-
-	@Override
 	public ASTNode transform(BackendTerm term) throws TransformerException {
 		return transform((Term) term);
 	}
@@ -390,12 +423,12 @@ public class BasicTransformer implements Transformer {
 		return transform((Term) result);
 	}
 
-    @Override
-    public ASTNode transform(FreezerHole node) throws TransformerException {
-        return transform((Term) node);
-    }
+	@Override
+	public ASTNode transform(FreezerHole node) throws TransformerException {
+		return transform((Term) node);
+	}
 
-    @Override
+	@Override
 	public ASTNode transform(FreezerLabel node) throws TransformerException {
 		Term term = (Term) node.getTerm().accept(this);
 		FreezerLabel result = new FreezerLabel(node);

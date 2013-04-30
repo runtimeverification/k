@@ -42,8 +42,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		Cell nId = new Cell();
 		nId.setLabel("freshCounter");
 		nId.setEllipses(Ellipses.NONE);
-		Constant zero = new Constant("#Int", "0");
-		nId.setContents(zero);
+		nId.setContents(IntBuiltin.ZERO);
 		bag.getContents().add(nId);
 
 		return node;
@@ -78,7 +77,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		fCell.setEllipses(Ellipses.NONE);
 		TermCons t = new TermCons("Int", "Int1PlusSyn");
 		t.getContents().add(freshVar);
-		t.getContents().add(new Constant("#Int", Integer.toString(vars.size())));
+		t.getContents().add(IntBuiltin.of(vars.size()));
 		fCell.setContents(new Rewrite(freshVar, t));
 		bag.getContents().add(fCell);
 		
@@ -94,7 +93,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 			Variable var = (Variable) node.getContents().get(0);
 			this.vars.add(var);
 			this.isFresh = true;
-			return new Constant("Bool", "true");
+			return BoolBuiltin.TRUE;
 		}
 
 		return super.transform(node);
@@ -109,7 +108,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 			TermCons idxTerm = new TermCons("Int", MetaK.Constants.plusIntCons);
 			List<Term> subterms = idxTerm.getContents();
 			subterms.add(idxVar);
-			subterms.add(new Constant("#Int", Integer.toString(idx)));
+			subterms.add(IntBuiltin.of(idx));
 			++idx;
 
 			String sort = var.getSort();

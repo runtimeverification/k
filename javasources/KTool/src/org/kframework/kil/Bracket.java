@@ -1,8 +1,8 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
@@ -21,6 +21,12 @@ public class Bracket extends Term {
 		this.content = content;
 	}
 
+	public String getSort() {
+		if (content instanceof Ambiguity)
+			return super.getSort();
+		return content.getSort();
+	}
+
 	public Bracket(Bracket i) {
 		super(i);
 		this.content = i.content;
@@ -33,6 +39,11 @@ public class Bracket extends Term {
 
 	public Bracket(String location, String filename, String sort) {
 		super(location, filename, sort);
+	}
+
+	public Bracket(String location, String filename, Term t) {
+		super(location, filename, t.getSort());
+		this.content = t;
 	}
 
 	public Bracket(Element element) {
@@ -54,10 +65,10 @@ public class Bracket extends Term {
 		return visitor.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	@Override
 	public Bracket shallowCopy() {
@@ -69,11 +80,33 @@ public class Bracket extends Term {
 		return "(" + content + ")";
 	}
 
-  //this current causes ambiguities
-/*	@Override
+	@Override
+	public int hashCode() {
+		return content.hashCode();
+	}
+
+	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Bracket)) return false;
-		Bracket b = (Bracket)o;
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Bracket))
+			return false;
+		Bracket b = (Bracket) o;
 		return content.equals(b.content);
-	} */
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		if (o == null)
+			return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof Bracket))
+			return false;
+		Bracket b = (Bracket) o;
+		return content.contains(b.content);
+	}
+
 }

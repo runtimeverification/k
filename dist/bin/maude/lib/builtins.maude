@@ -885,11 +885,82 @@ mod #K-EQUAL is
   eq K1:K ==K K2:K = K1:K ==Universal K2:K .
 endm
 
+load pl-meta-level
+
+mod #K-PARSER is
+  including K-TECHNIQUE .
+  including #STRING .
+  including #INT .
+  including #QID .
+  including #META-LEVEL .
+
+  op string2k : #String -> K .
+  op string2bag : #String -> Bag .
+  op string2term : #String -> #Term .
+
+  op metaTokenize : #String #String -> #QidList .
+
+  op breaksToken : #Char -> #Bool .
+
+  op mainModule : -> #Qid .
+
+  eq string2term(S:#String) = getTermRP(metaParse(upModule(mainModule, false), metaTokenize("", S:#String), anyTypeMeta)) .
+  eq string2k(S:#String) = downTerm(string2term(S:#String), .K) .
+  eq string2bag(S:#String) = downTerm(string2term(S:#String), .Bag) .
+
+  ceq metaTokenize(Prefix:#String, S:#String) = if Prefix:#String ==String "" then nilQidList else qid(Prefix:#String) fi plQidList qid(substrString(S:#String, 0, 1)) plQidList metaTokenize("", substrString(S:#String, 1, lengthString(S:#String))) if breaksToken(substrString(S:#String, 0, 1)) and-then substrString(Prefix:#String, 0, 1) =/=Universal "\"" .
+  ceq metaTokenize(Prefix:#String, S:#String) = if Prefix:#String ==String "" then nilQidList else qid(Prefix:#String) fi plQidList metaTokenize("", substrString(S:#String, 1, lengthString(S:#String))) if substrString(S:#String, 0, 1) ==String " " and-then substrString(Prefix:#String, 0, 1) =/=Universal "\"" .
+  ceq metaTokenize(Prefix:#String, S:#String) = metaTokenize(Prefix:#String +String substrString(S:#String, 0, 2), substrString(S:#String, 2, lengthString(S:#String))) if substrString(S:#String, 0, 1) ==String "\\" and-then substrString(Prefix:#String, 0, 1) ==String "\"" .
+  ceq metaTokenize(Prefix:#String, S:#String) = qid(Prefix:#String +String "\"") plQidList metaTokenize("", substrString(S:#String, 1, lengthString(S:#String))) if substrString(S:#String, 0, 1) ==String "\"" and-then substrString(Prefix:#String, 0, 1) ==String "\"" .
+  ceq metaTokenize(Prefix:#String, S:#String) = metaTokenize(Prefix:#String +String substrString(S:#String, 0, 2), substrString(S:#String, 2, lengthString(S:#String))) if substrString(S:#String, 0, 1) ==String "`" .
+  eq metaTokenize(Prefix:#String, "") = if Prefix:#String ==String "" then nilQidList else qid(Prefix:#String) fi [label metaTokenize-finish] .
+  eq metaTokenize(Prefix:#String, S:#String) = metaTokenize(Prefix:#String +String substrString(S:#String, 0, 1), substrString(S:#String, 1, lengthString(S:#String))) [owise] .
+
+
+  eq breaksToken("{") = true .
+  eq breaksToken("}") = true .
+  eq breaksToken("[") = true .
+  eq breaksToken("]") = true .
+  eq breaksToken("(") = true .
+  eq breaksToken(")") = true .
+  eq breaksToken(",") = true .
+  eq breaksToken(C:#Char) = false [owise] .
+
+endm
+
+mod #K-PRINTER is
+  including #K-PARSER .
+
+  op k2string : K -> #String .
+  op bag2string : Bag -> #String .
+  op term2string : #Term -> #String .
+
+  eq k2string(K:K) = term2string(upTerm(K:K)) .
+  eq bag2string(B:Bag) = term2string(upTerm(B:Bag)) .
+
+  eq term2string(T:#Term) = metaDetokenize(metaPrettyPrint(upModule(mainModule, false), T:#Term, nonePOS)) .
+
+  op metaDetokenize : #QidList -> #String .
+  op convertToken : #String -> #String .
+
+  eq metaDetokenize(Q:#Qid plQidList L:#QidList) = convertToken(string(Q:#Qid)) +String " " +String metaDetokenize(L:#QidList) .
+  eq metaDetokenize(nilQidList) = "" .
+
+  eq convertToken("`{") = "{" .
+  eq convertToken("`}") = "}" .
+  eq convertToken("`[") = "[" .
+  eq convertToken("`]") = "]" .
+  eq convertToken("`(") = "(" .
+  eq convertToken("`)") = ")" .
+  eq convertToken("`,") = "," .
+  eq convertToken(S:#String) = S:#String [owise] .
+
+endm
+
 load k-model-checker
 load socket.maude
 load TCPSupport
 load smt.maude
---- load pl-meta-level
 
 
 mod BUILTINS is

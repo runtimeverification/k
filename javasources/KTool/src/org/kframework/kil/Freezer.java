@@ -61,6 +61,18 @@ public class Freezer extends Term {
 	}
 
 	@Override
+	public boolean contains(Object o) {
+		if (o instanceof Bracket)
+			return contains(((Bracket)o).getContent());
+		if (o instanceof Cast)
+			return contains(((Cast)o).getContent());
+		if (!(o instanceof Freezer)) return false;
+		Freezer f = (Freezer)o;
+		return term.contains(f.term);
+	}
+
+
+	@Override
 	public int hashCode() {
 		return term.hashCode();
 	}

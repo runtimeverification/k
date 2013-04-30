@@ -2,8 +2,24 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
 
+import org.kframework.backend.java.kil.BuiltinConstant;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.K;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Map;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Builtin;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -34,20 +50,31 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode transform(org.kframework.kil.KLabelConstant node) throws TransformerException {
+        return new KLabelConstant(node.getLabel());
+    }
+
+    @Override
+    public ASTNode transform(org.kframework.kil.FreezerLabel node) throws TransformerException {
+        Term term = (Term) node.getTerm().accept(this);
+        return new KLabelFreezer(term);
+    }
+
+    @Override
     public ASTNode transform(org.kframework.kil.KInjectedLabel node) throws TransformerException {
         Term term = (Term) node.getTerm().accept(this);
-        return new InjectionKLabel(term);
+        return new KLabelInjection(term);
+    }
+
+    @Override
+    public ASTNode transform(org.kframework.kil.Builtin node) throws TransformerException {
+        return new BuiltinConstant(node.getValue(), node.getSort());
     }
 
     @Override
     public ASTNode transform(org.kframework.kil.Constant node) throws TransformerException {
-        if (node.getSort().equals("KLabel")) {
-            return new ConstantKLabel(node.getValue());
-        } else if (MetaK.isBuiltinSort(node.getSort())) {
-            return new BuiltinConstant(node.getValue(), node.getSort());
-        } else {
-            throw new RuntimeException();
-        }
+        /* no support for token yet */
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -196,7 +223,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
-        return new Variable(node.getName(), node.getSort());
+        if (node.getSort().equals("K")) {
+            return new Variable(node.getName(), "KSequence");
+        } else if (node.getSort().equals("KItem")) {
+            return new Variable(node.getName(), "K");
+        } else if (node.getSort().equals("Bag")) {
+            return new Variable(node.getName(), "CellCollection");
+        } else {
+            return new Variable(node.getName(), node.getSort());
+        }
     }
 
     @Override
@@ -205,17 +240,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
         Term leftHandSide = (Term) rewrite.getLeft().accept(this);
-        System.err.println(leftHandSide);
-        System.err.flush();
+        //System.err.println(leftHandSide);
+        //System.err.flush();
         Term rightHandSide = (Term) rewrite.getRight().accept(this);
-        System.err.println(rightHandSide);
-        System.err.flush();
+        //System.err.println(rightHandSide);
+        //System.err.flush();
         Term condition = null;
         if (node.getCondition() != null) {
             System.err.println("[error]: " + node.getCondition());
             System.err.flush();
             //TODO: handle conditions
-            //condition = (Term) node.getCondition().accept(this);
+            condition = (Term) node.getCondition().accept(this);
         }
 
         assert leftHandSide.getKind().equals(rightHandSide.getKind());
@@ -226,12 +261,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(org.kframework.kil.FreezerHole node) throws TransformerException {
         return Hole.HOLE;
-    }
-
-    @Override
-    public ASTNode transform(org.kframework.kil.FreezerLabel node) throws TransformerException {
-        Term term = (Term) node.getTerm().accept(this);
-        return new FreezerKLabel(term);
     }
 
 }

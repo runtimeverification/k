@@ -27,7 +27,8 @@ public class DiffFrame extends javax.swing.JFrame {
 		}
         src.setText("Node : " + srcState.getStateId());
         dest.setText("Node : " + destState.getStateId());
-        this.transition.setText("Transition : " + transition.getLabel());
+        if (transition!=null)
+        	this.transition.setText("Transition : " + transition.getLabel());
     }
 
     /**

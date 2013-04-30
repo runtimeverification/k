@@ -10,6 +10,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Bracket;
+import org.kframework.kil.Builtin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
@@ -48,6 +49,7 @@ public class LatexFilter extends BackendFilter {
 	String endl = System.getProperty("line.separator");
 	private StringBuilder preamble = new StringBuilder();
 	private boolean firstProduction = false;
+	private boolean terminalBefore = false;
 	private Map<String, String> colors = new HashMap<String, String>();
 	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
 	private boolean firstAttribute;
@@ -108,6 +110,7 @@ public class LatexFilter extends BackendFilter {
 	@Override
 	public void visit(Sort sort) {
 		result.append("{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getName()) + "}}}");
+                terminalBefore = false;
 	}
 
 	@Override
@@ -147,8 +150,10 @@ public class LatexFilter extends BackendFilter {
 		if (DefinitionHelper.isSpecialTerminal(terminal)) {
 			result.append(StringUtil.latexify(terminal));
 		} else {
+                  if (terminalBefore) result.append("{}");
 			result.append("\\terminal{" + StringUtil.latexify(terminal) + "}");
 		}
+                terminalBefore = true;
 	}
 
 	@Override
@@ -156,6 +161,7 @@ public class LatexFilter extends BackendFilter {
 		result.append("List\\{");
 		new Sort(ul.getSort()).accept(this);
 		result.append(", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
+                terminalBefore = false;
 	}
 
 	@Override
@@ -357,6 +363,11 @@ public class LatexFilter extends BackendFilter {
 	@Override
 	public void visit(Constant c) {
 		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}");
+	}
+	
+	@Override
+	public void visit(Builtin c) {
+		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.toString()) + "}");
 	}
 
 	@Override

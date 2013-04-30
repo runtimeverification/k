@@ -1,3 +1,0 @@
-<config>
-	<test def="/dist/examples/kool-typed-static/kool-typed-static.k" program-extension="kool" compiled-file-name="kool-typed-static-compiled.maude"/>
-</config>

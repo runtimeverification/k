@@ -1,22 +1,39 @@
 package org.kframework.tests;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.kframework.execution.Task;
 import org.kframework.main.Configuration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.util.*;
-import java.util.Map.Entry;
-
-public class Test {
+public class Test implements Comparable<Test> {
 
 	/* data read from config.xml */
 	private String language;
@@ -46,9 +63,7 @@ public class Test {
 
 		String[] pgmsFolders = this.programsFolder.split("\\s+");
 
-		if (resultsFolder != null
-				&& !new File(Configuration.getHome() + Configuration.FS
-						+ resultsFolder).exists())
+		if (resultsFolder != null && !new File(getResultsFolder()).exists())
 			System.out.println("Folder: " + Configuration.getHome()
 					+ Configuration.FS + resultsFolder + " does not exists.");
 
@@ -82,7 +97,7 @@ public class Test {
 				boolean special = false;
 				// treat special programs
 				for (Program p : specialPrograms) {
-					if (p.absolutePath.equals(programPath)) {
+					if (p.programPath.equals(programPath)) {
 						krunOptions = p.krunOptions;
 						special = true;
 						continue;
@@ -93,43 +108,58 @@ public class Test {
 
 				String input = null;
 				String output = null;
+				String error = null;
 				if (resultsFolder != null) {
 
-					String inputFile = searchInputFile(Configuration.getHome()
-							+ Configuration.FS + resultsFolder, new File(
-							programPath).getName(), recursive);
-					if (inputFile != null)
-						try {
-							input = Task.readString(new FileInputStream(
-									inputFile));
-						} catch (FileNotFoundException e) {
-							e.printStackTrace();
-						}
-
-					String outputFile = searchOutputFile(
-							Configuration.getHome() + Configuration.FS
-									+ resultsFolder,
+					String inputFile = searchInputFile(getResultsFolder(),
 							new File(programPath).getName(), recursive);
-					if (outputFile != null)
-						try {
-							output = Task.readString(new FileInputStream(
-									outputFile));
-						} catch (FileNotFoundException e) {
-							e.printStackTrace();
-						}
+					input = getFileAsStringOrNull(inputFile);
+
+					String outputFile = searchOutputFile(getResultsFolder(),
+							new File(programPath).getName(), recursive);
+					output = getFileAsStringOrNull(outputFile);
+
+					String errorFile = searchErrorFile(getResultsFolder(),
+							new File(programPath).getName(), recursive);
+					error = getFileAsStringOrNull(errorFile);
+
 				}
 
+				// custom programPath
+				programPath = programPath.replaceFirst(Configuration.getHome()
+						+ Configuration.FS, "");
+
 				Program p = new Program(programPath, krunOptions, this, input,
-						output);
+						output, error);
 				programs.add(p);
 
 			}
 		}
 	}
 
+	private String getResultsFolder() {
+		return Configuration.getHome() + Configuration.FS + resultsFolder;
+	}
+
+	private String getFileAsStringOrNull(String file) {
+		String fileAsString = null;
+		if (file != null)
+			try {
+				fileAsString = Task.readString(new FileInputStream(file));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		return fileAsString;
+	}
+
 	private String searchOutputFile(String resultsFolder2, String name,
 			boolean recursive2) {
 		return searchFile(resultsFolder2, name + ".out", recursive);
+	}
+
+	private String searchErrorFile(String resultsFolder2, String name,
+			boolean recursive2) {
+		return searchFile(resultsFolder2, name + ".err", recursive);
 	}
 
 	private String searchInputFile(String resultsFolder2, String name,
@@ -200,7 +230,7 @@ public class Test {
 		String homeDir = Configuration.getHome();
 
 		// get full name
-		language = homeDir + Configuration.FS + test.getAttribute("language");
+		language = test.getAttribute("language");
 
 		// get programs dir
 		programsFolder = test.getAttribute("folder");
@@ -215,7 +245,6 @@ public class Test {
 		if (reportDir.equals(""))
 			reportDir = null;
 
-		
 		// get pdf
 		if (test.getAttribute("pdf").equals("yes")
 				|| test.getAttribute("pdf").equals(""))
@@ -250,13 +279,31 @@ public class Test {
 		NodeList specialPgms = test.getElementsByTagName("program");
 		for (int i = 0; i < specialPgms.getLength(); i++) {
 			Element pgm = (Element) specialPgms.item(i);
-			String name = pgm.getAttribute("name");
+			String programPath = pgm.getAttribute("name");
 
 			Map<String, String> map = getKrunOptions(pgm);
 
+			String input = null;
+			String output = null;
+			String error = null;
+			if (resultsFolder != null) {
+
+				String inputFile = searchInputFile(getResultsFolder(),
+						new File(programPath).getName(), recursive);
+				input = getFileAsStringOrNull(inputFile);
+
+				String outputFile = searchOutputFile(getResultsFolder(),
+						new File(programPath).getName(), recursive);
+				output = getFileAsStringOrNull(outputFile);
+
+				String errorFile = searchErrorFile(getResultsFolder(),
+						new File(programPath).getName(), recursive);
+				error = getFileAsStringOrNull(errorFile);
+
+			}
+
 			Program program = new Program(homeDir + Configuration.FS
-					+ name, map, this,
-					null, null);
+					+ programPath, map, this, input, output, error);
 			specialPrograms.add(program);
 		}
 
@@ -290,12 +337,12 @@ public class Test {
 		NodeList opts = parent.getElementsByTagName("krun-option");
 		for (int j = 0; j < opts.getLength(); j++) {
 			Element krunOpt = (Element) opts.item(j);
-			
+
 			// unescape < and >
 			String optValue = krunOpt.getAttribute("value");
 			optValue = optValue.replaceAll("&lt;", "<");
 			optValue = optValue.replaceAll("&gt;", ">");
-			
+
 			map.put(krunOpt.getAttribute("name"), optValue);
 		}
 		return map;
@@ -306,10 +353,11 @@ public class Test {
 		String name = "";
 		if (reportDir != null)
 			name = reportDir;
-		else name = new File(language).getParent()
-				.substring(Configuration.getHome().length());
-		
-		testsuite.setAttribute("name", name);
+		else
+			name = new File(language).getParent();
+
+		testsuite.setAttribute("name",
+				name.replaceFirst("/", "\\."));
 		return testsuite;
 	}
 
@@ -333,6 +381,7 @@ public class Test {
 		if (failureCondition) {
 			Element error_ = doc.createElement("error");
 			error_.setTextContent(task.getStderr());
+			error_.setAttribute("message", task.getStderr());
 			testcaseE.appendChild(error_);
 
 			Element failure = doc.createElement("failure");
@@ -344,7 +393,7 @@ public class Test {
 		return testcaseE;
 	}
 
-	public Task getDefinitionTask() {
+	public Task getDefinitionTask(File homeDir) {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKompile());
 		command.add(language);
@@ -362,7 +411,7 @@ public class Test {
 			i++;
 		}
 
-		return new Task(arguments, null);
+		return new Task(arguments, null, homeDir);
 	}
 
 	public String compileStatus(Task task) {
@@ -379,27 +428,23 @@ public class Test {
 
 		if (!task.getStderr().equals(""))
 			return false;
-		
+
 		if (!task.getStdout().equals(""))
 			return false;
-		
+
 		return true;
 	}
 
-
-	public String getCompiled()
-	{
-		return getLanguage().substring(0, getLanguage().length() - 2) + "-kompiled";
+	public String getCompiled() {
+		return getLanguage().replaceAll("\\.k$", "") + "-kompiled";
 	}
-	
+
 	private String getReportFilename() {
-		if (reportDir  != null)
+		if (reportDir != null)
 			return reportDir + "-report.xml";
-		
-		return new File(language).getAbsolutePath()
-				.substring(Configuration.getHome().length())
-				.replaceAll(Configuration.FS, ".")
-				.replaceFirst("\\.k$", "-report.xml");
+
+		return language.replaceFirst("\\.k$", "-report.xml").replaceAll(
+				"\\/", ".");
 	}
 
 	public void reportCompilation(Task task) {
@@ -421,8 +466,8 @@ public class Test {
 			if (message.equals("success"))
 				message = "unstable";
 
-		report.appendChild(createReportElement(new File(getXmlLanguage()).getName()
-				.replaceFirst("\\.k$", ".pdf"), message,
+		report.appendChild(createReportElement(new File(getXmlLanguage())
+				.getName().replaceFirst("\\.k$", ".pdf"), message,
 				task.getElapsed() + "", task.getStdout(), task.getStderr(),
 				task, "", !compiledPdf(task)));
 
@@ -432,13 +477,13 @@ public class Test {
 	public boolean compiledPdf(Task task) {
 		if (task.getExit() != 0)
 			return false;
-		
+
 		if (!new File(getPdfCompiledFilename()).exists())
 			return false;
 
 		if (!task.getStderr().equals(""))
 			return false;
-		
+
 		if (!task.getStdout().equals(""))
 			return false;
 
@@ -446,13 +491,20 @@ public class Test {
 	}
 
 	private String getPdfCompiledFilename() {
-		return getLanguage().substring(0, getLanguage().length() - 2) + ".pdf";
+		return getLanguage().replaceAll("\\.k$", ".pdf");
 
 	}
 
 	public void save() {
+		String reportPath = Configuration.JR + Configuration.FS
+				+ getReportFilename();
 		new File(Configuration.JR).mkdirs();
 		try {
+
+			File repFile = new File(reportPath);
+			if (!repFile.exists())	
+				repFile.createNewFile();
+			
 			FileWriter fstream = new FileWriter(Configuration.JR
 					+ Configuration.FS + getReportFilename());
 			BufferedWriter out = new BufferedWriter(fstream);
@@ -489,7 +541,7 @@ public class Test {
 		return pdf;
 	}
 
-	public Task getPdfDefinitionTask() {
+	public Task getPdfDefinitionTask(File homeDir) {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKompile());
 		command.add(getXmlLanguage());
@@ -503,12 +555,12 @@ public class Test {
 			i++;
 		}
 
-		return new Task(arguments, null);
+		return new Task(arguments, null, homeDir);
 	}
 
 	private String getXmlLanguage() {
 		return getCompiled() + Configuration.FS + "defx.bin";
-//		return language;
+		// return language;
 	}
 
 	public List<Program> getPrograms() {
@@ -518,6 +570,15 @@ public class Test {
 	public String getLanguage() {
 		return language;
 	}
-	
-	
+
+	@Override
+	public int compareTo(Test o) {
+		int d;
+		if (o == this) return 0;
+		d = this.language.compareTo(o.language);
+		if (d != 0) return d;
+		d = this.programsFolder.compareTo(o.programsFolder);
+		return d;
+	}
+
 }

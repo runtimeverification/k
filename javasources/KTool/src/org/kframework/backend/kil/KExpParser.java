@@ -9,6 +9,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.Term;
 
 /**
@@ -52,7 +53,7 @@ public class KExpParser {
 			throw new ParsingException("Expected token but encountered exception while parsing KExp");
 		}
 		if (tokenizer.ttype == ')')
-			return new Empty(MetaK.Constants.K);
+			return KSequence.EMPTY;
 		tokenizer.pushBack();
 		Term result = new KApp(parseLabel(),parseKList());
 		try {

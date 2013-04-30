@@ -16,6 +16,7 @@ import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.symbolic.SymbolicBackend;
+import org.kframework.backend.symbolic.rl.RLBackend;
 import org.kframework.backend.unparser.UnparserBackend;
 import org.kframework.backend.xml.XmlBackend;
 import org.kframework.compile.utils.CompilerStepDone;
@@ -93,6 +94,10 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("addTopCell"))
 			GlobalSettings.addTopCell = true;
 
+		if (cmd.hasOption("check")) {
+			GlobalSettings.CHECK = new File(cmd.getOptionValue("check")).getAbsolutePath();
+		}
+		
 		// set lib if any
 		if (cmd.hasOption("lib")) {
 			GlobalSettings.lib = cmd.getOptionValue("lib");
@@ -105,15 +110,6 @@ public class KompileFrontEnd {
 			step = cmd.getOptionValue("step");
 		}
 
-		if (cmd.hasOption("fromxml")) {
-			// File xmlFile = new File(cmd.getOptionValue("fromxml"));
-			// if (cmd.hasOption("lang"))
-			// fromxml(xmlFile, cmd.getOptionValue("lang"), step);
-			// else
-			// fromxml(xmlFile, FileUtil.getMainModule(xmlFile.getName()), step);
-			System.err.println("fromxml option not supported anymore");
-			System.exit(0);
-		}
 
 		String def = null;
 		if (cmd.hasOption("def"))
@@ -197,6 +193,14 @@ public class KompileFrontEnd {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
 			backend = new SymbolicBackend(Stopwatch.sw);
+			DefinitionHelper.dotk = new File(output);
+			DefinitionHelper.dotk.mkdirs();
+
+		} else if (cmd.hasOption("check")) {
+			if (output == null) {
+				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
+			}
+			backend = new RLBackend(Stopwatch.sw);
 			DefinitionHelper.dotk = new File(output);
 			DefinitionHelper.dotk.mkdirs();
 

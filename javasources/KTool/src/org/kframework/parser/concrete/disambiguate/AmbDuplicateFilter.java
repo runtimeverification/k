@@ -8,11 +8,9 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 
-
 public class AmbDuplicateFilter extends BasicTransformer {
 	public AmbDuplicateFilter() {
 		super("Remove ambiguity duplicates");
-		// TODO Auto-generated constructor stub
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {

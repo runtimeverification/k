@@ -74,7 +74,6 @@ public class RunKRunCommand {
 		MaudeFilter mf = new MaudeFilter();
 		c.accept(mf);
 		String rez = mf.getResult();
-		//System.out.println(rez);
 	}
 	
 	public static String transformTerm (Term term ) {
@@ -100,5 +99,9 @@ public class RunKRunCommand {
 		UnparserFilter unparser = new UnparserFilter(true, false);
 		term.accept(unparser);
 		return unparser.getResult();
+	}
+	
+	public DirectedGraph<KRunState,Transition> getCurrentGraph (){
+		return debugger.getGraph();
 	}
 }

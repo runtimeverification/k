@@ -1,5 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.Variable;
+
 import java.util.HashSet;
 import java.util.Set;
 

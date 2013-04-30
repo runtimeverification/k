@@ -4,10 +4,13 @@ import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
+import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -29,12 +32,12 @@ import java.util.regex.Pattern;
 
 public class ResolveBinder extends CopyOnWriteTransformer {
 
-    private static final Constant BINDER_PREDICATE
-            = new Constant("KLabel", AddPredicates.predicate("Binder"));
-    private static final Constant BOUNDED_PREDICATE
-            = new Constant("KLabel", AddPredicates.predicate("Bound"));
-    private static final Constant BOUNDING_PREDICATE
-            = new Constant("KLabel", AddPredicates.predicate("Bounding"));
+    private static final KLabelConstant BINDER_PREDICATE
+            = KLabelConstant.of(AddPredicates.predicate("Binder"));
+    private static final KLabelConstant BOUNDED_PREDICATE
+            = KLabelConstant.of(AddPredicates.predicate("Bound"));
+    private static final KLabelConstant BOUNDING_PREDICATE
+            = KLabelConstant.of(AddPredicates.predicate("Bounding"));
 
     private static final String REGEX
             = "\\s*(\\d+)(\\s*-\\>\\s*(\\d+))?\\s*(,?)";
@@ -92,19 +95,18 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             }
 
             Rule rule = new Rule(
-                    new KApp(BINDER_PREDICATE, MetaK.getTerm(prod)),
-                    Constant.TRUE);
+                    KApp.of(BINDER_PREDICATE, MetaK.getTerm(prod)),
+                    BoolBuiltin.TRUE);
             rule.addAttribute(Attribute.ANYWHERE);
             items.add(rule);
 
-            Constant klblCt = Constant.KLABEL(prod.getKLabel());
-            Term klblK = new KApp(new KInjectedLabel(klblCt), Empty.ListOfK);
+            Term klblK = KApp.of(new KInjectedLabel(KLabelConstant.of(prod.getKLabel())));
 
             for (int bndIdx : bndMap.keySet()) {
                 KList list = new KList();
                 list.getContents().add(klblK);
-                list.getContents().add(new Constant("#Int", Integer.toString(bndIdx)));
-                rule = new Rule(new KApp(BOUNDED_PREDICATE, list), Constant.TRUE);
+                list.getContents().add(IntBuiltin.of(bndIdx));
+                rule = new Rule(new KApp(BOUNDED_PREDICATE, list), BoolBuiltin.TRUE);
                 rule.addAttribute(Attribute.ANYWHERE);
                 items.add(rule);
 				String bndSort = prod.getChildSort(bndIdx - 1);
@@ -114,8 +116,8 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             for (int bodyIdx : bndMap.values()) {
                 KList list = new KList();
                 list.getContents().add(klblK);
-                list.getContents().add(new Constant("#Int", Integer.toString(bodyIdx)));
-                rule = new Rule(new KApp(BOUNDING_PREDICATE, list), Constant.TRUE);
+                list.getContents().add(IntBuiltin.of(bodyIdx));
+                rule = new Rule(new KApp(BOUNDING_PREDICATE, list), BoolBuiltin.TRUE);
                 rule.addAttribute(Attribute.ANYWHERE);
                 items.add(rule);
             }

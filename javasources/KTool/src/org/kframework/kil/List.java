@@ -6,9 +6,13 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
+
 
 /** An associative list of terms of sort List or ListItem */
 public class List extends Collection {
+
+    public static final List EMPTY = new List(Collections.<Term>emptyList());
 
 	public List(Element element) {
 		super(element);

@@ -6,11 +6,14 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
 import java.util.List;
 
 
 /** Set contents have sort Set or SetItem */
 public class Set extends Collection {
+
+    public static final Set EMPTY = new Set(Collections.<Term>emptyList());
 
 	public Set(Element element) {
 		super(element);

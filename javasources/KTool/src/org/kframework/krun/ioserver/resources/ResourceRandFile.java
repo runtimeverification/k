@@ -1,9 +1,11 @@
 package org.kframework.krun.ioserver.resources;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.net.URI;
+import java.util.Arrays;
 /**
  * This Resource is an ordinary file.
  * @author andrei.arusoaie
@@ -40,6 +42,14 @@ public class ResourceRandFile extends FileResource {
 	@Override
 	public Byte readbyte() throws Exception {
 		return raf.readByte();
+	}
+
+	@Override
+	public byte[] readbytes(int numBytes) throws Exception {
+		byte[] result = new byte[numBytes];
+		int tmp = raf.read(result, 0, numBytes);
+		if (tmp == -1) throw new EOFException();
+		return Arrays.copyOfRange(result, 0, tmp);
 	}
 
 	@Override

@@ -1,12 +1,15 @@
 package org.kframework.krun.api;
 
+import java.io.Serializable;
+
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.backend.unparser.AddBracketsFilter;
+import org.kframework.backend.unparser.AddBracketsFilter2;
 import org.kframework.kil.*;
 import org.kframework.krun.*;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 
-public class KRunState {
+public class KRunState implements Serializable{
 
 	private Term result;
 	private Term rawResult;
@@ -25,6 +28,15 @@ public class KRunState {
 			result = (Term) result.accept(new FlattenDisambiguationFilter());
 			if (!K.parens) {
 				result = (Term) result.accept(new AddBracketsFilter());
+				AddBracketsFilter2 filter = new AddBracketsFilter2();
+				result = (Term) result.accept(filter);
+				while (true) {
+					Term newResult = (Term) result.accept(new SubstitutionFilter(filter.substitution));
+					if (newResult.equals(result)) {
+						break;
+					}
+					result = newResult;
+				}
 			}
 		} catch (Exception e) {
 			// if concretization fails, return the raw result directly.

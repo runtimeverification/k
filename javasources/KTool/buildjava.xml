@@ -55,14 +55,20 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
+	<condition property="isJava7">
+		<equals arg1="${ant.java.version}" arg2="1.7" />
+	</condition>
+	<condition property="isJava6">
+		<equals arg1="${ant.java.version}" arg2="1.6" />
+	</condition>
     </target>
     <target name="clean">
         <delete dir="bin"/>
     </target>
     <target depends="clean" name="cleanall"/>
-    <target depends="build-subprojects,build-project" name="build"/>
+    <target depends="build-subprojects,build-project-java6,build-project-java7" name="build"/>
     <target name="build-subprojects"/>
-    <target depends="init" name="build-project">
+    <target depends="init" name="build-project-java7" if="isJava7">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
             <src path="src"/>
@@ -74,6 +80,21 @@
             <classpath refid="KTool.classpath"/>
         </javac>
     </target>
+    <target depends="init" name="build-project-java6" if="isJava6">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
+            <src path="src"/>
+            <classpath refid="KTool.classpath"/>
+            <compilerarg value="-Xlint:unchecked"/>
+	    <exclude name="org/kframework/krun/ioserver/commands/CommandStat.java" />
+            <exclude name="org/kframework/krun/ioserver/commands/CommandOpendir.java" />
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
+            <src path="lib/resources"/>
+            <classpath refid="KTool.classpath"/>
+        </javac>
+    </target>
+ 
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
     <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
         <copy todir="${ant.library.dir}">

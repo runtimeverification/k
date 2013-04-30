@@ -1,11 +1,13 @@
 package org.kframework.krun.api;
 
+import java.io.Serializable;
+
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
 import org.kframework.krun.K;
 
-public class Transition {
+public class Transition implements Serializable{
 
 	private ASTNode rule;
 	private String label;

@@ -5,6 +5,10 @@ import org.kframework.utils.ProgramLoader;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,20 +89,30 @@ public class RunProcess {
 
 	}
 
+	public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol) {
+		try {
+			return runParser(parser, pgm, isPgm, startSymbol);
+		} catch (TransformerException e) {
+			e.report();
+			return null;
+		}
+	}
+
 	/*
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
 	 */
-	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol) {
+	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol) throws TransformerException {
 		String KAST = new String();
 		String parserPath = new String();
 
+		if (startSymbol == null) {
+			startSymbol = DefinitionHelper.startSymbolPgm;
+		}		
+		
 		// the argument is a formula and we should write it in a file before passing it to the parser
 		if ("kast".equals(parser)) {
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
 			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
-			if (startSymbol == null) {
-				startSymbol = DefinitionHelper.startSymbolPgm;
-			}
 			String pgmContent = pgm;
 			if (!isPgm) {
 				pgmContent = FileUtil.getFileContent(pgm);
@@ -114,9 +128,6 @@ public class RunProcess {
 			String parserName = new File(parserPath).getName();
 			// System.out.println("The external parser to be used is:" + parserName);
 			if ("kast".equals(parserName)) {
-				if (startSymbol == null) {
-					startSymbol = DefinitionHelper.startSymbolPgm;
-				}
 				String pgmContent = pgm;
 				if (!isPgm) {
 					pgmContent = FileUtil.getFileContent(pgm);
@@ -127,10 +138,11 @@ public class RunProcess {
 				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
 				tokens.add(pgm);
 				Map<String, String> environment = new HashMap<String, String>();
-				if (startSymbol != null) {
-					environment.put("KRUN_SORT", startSymbol);
-				}
+				environment.put("KRUN_SORT", startSymbol);
 				environment.put("KRUN_COMPILED_DEF", K.compiled_def);
+				if (isPgm) {
+					environment.put("KRUN_IS_NOT_FILE", "true");
+				}
 				this.execute(environment, tokens.toArray(new String[0]));
 			}
 		}
@@ -146,13 +158,8 @@ public class RunProcess {
 		// }
 		// } else
 		{
-			if (this.getErr() != null) {
-				System.out.println("Warning: parser reported errors or warnings:\n" + this.getErr());
-			}
 			if (this.getExitCode() != 0) {
-				System.out.println("Parser reported:\n" + this.getStdout());
-				System.out.println("Fatal: parser returned a non-zero exit code: " + this.getExitCode());
-				Error.report("\nAttempted command:\n" + parser + " " + pgm);
+				throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode()));
 			}
 		}
 

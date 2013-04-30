@@ -10,6 +10,7 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+
 public class BasicTransformerPropagator implements Transformer {
 	Transformer delegate;
 
@@ -193,17 +194,17 @@ public class BasicTransformerPropagator implements Transformer {
 	@Override
 	public ASTNode transform(PriorityExtendedAssoc node) throws TransformerException {
 		boolean change = false;
-		ArrayList<Constant> pbs = new ArrayList<Constant>();
-		for (Constant pb : node.getTags()) {
+		ArrayList<KLabelConstant> pbs = new ArrayList<KLabelConstant>();
+		for (KLabelConstant pb : node.getTags()) {
 			ASTNode result = pb.accept(delegate);
 			if (result != pb)
 				change = true;
 			if (result != null) {
-				if (!(result instanceof Constant)) {
+				if (!(result instanceof KLabelConstant)) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + " while transforming.", getName(),
 							pb.getFilename(), pb.getLocation()));
 				}
-				pbs.add((Constant) result);
+				pbs.add((KLabelConstant) result);
 			}
 		}
 		if (change) {
@@ -239,17 +240,17 @@ public class BasicTransformerPropagator implements Transformer {
 	@Override
 	public ASTNode transform(PriorityBlockExtended node) throws TransformerException {
 		boolean change = false;
-		ArrayList<Constant> prods = new ArrayList<Constant>();
-		for (Constant p : node.getProductions()) {
+		ArrayList<KLabelConstant> prods = new ArrayList<KLabelConstant>();
+		for (KLabelConstant p : node.getProductions()) {
 			ASTNode result = p.accept(delegate);
 			if (result != p)
 				change = true;
 			if (result != null) {
-				if (!(result instanceof Constant)) {
+				if (!(result instanceof KLabelConstant)) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + ".", getName(), p.getFilename(), p
 							.getLocation()));
 				}
-				prods.add((Constant) result);
+				prods.add((KLabelConstant) result);
 			}
 		}
 		if (change) {
@@ -458,7 +459,38 @@ public class BasicTransformerPropagator implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(Builtin node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
+    public ASTNode transform(BoolBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(IntBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(FloatBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(StringBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(Token node) throws TransformerException {
+        /* an instance of class Token is immutable */
+        return transform((Term) node);
+    }
+
+    @Override
 	public ASTNode transform(Empty node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -511,7 +543,12 @@ public class BasicTransformerPropagator implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(KLabelConstant node) throws TransformerException {
+        return transform((KLabel) node);
+    }
+
+    @Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		boolean change = false;
 		Term term = node.getLeft();
@@ -625,16 +662,6 @@ public class BasicTransformerPropagator implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(FreezerSubstitution node) throws TransformerException {
-		return transform((Term) node);
-	}
-
-	@Override
-	public ASTNode transform(FreezerVariable node) throws TransformerException {
-		return transform((Term) node);
-	}
-
-	@Override
 	public ASTNode transform(BackendTerm term) throws TransformerException {
 		return transform((Term) term);
 	}
@@ -688,12 +715,12 @@ public class BasicTransformerPropagator implements Transformer {
 		return node;
 	}
 
-    @Override
-    public ASTNode transform(FreezerHole node) throws TransformerException {
-        return transform((Term) node);
-    }
+	@Override
+	public ASTNode transform(FreezerHole node) throws TransformerException {
+		return transform((Term) node);
+	}
 
-    @Override
+	@Override
 	public ASTNode transform(FreezerLabel node) throws TransformerException {
 		boolean change = false;
 		Term body = node.getTerm();

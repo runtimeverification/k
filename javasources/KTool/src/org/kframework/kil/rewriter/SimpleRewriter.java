@@ -105,6 +105,7 @@ public class SimpleRewriter {
   }
 
   public static void main(String[] args){
+      /*
     KList patternGuts = new KList();
     KList termGuts = new KList();
     KList subtermGuts = new KList();
@@ -186,5 +187,6 @@ public class SimpleRewriter {
     System.out.println("initial: " + term);
 
     System.out.println("normal form: " + rewriteToNormalForm(trs, term));
+    */
   }
 }

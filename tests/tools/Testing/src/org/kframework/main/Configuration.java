@@ -6,13 +6,13 @@ public class Configuration {
 
 	public static final String FS = System.getProperty("file.separator");
 	public static final long KOMPILE_ALL_TIMEOUT = 120;
-	public static final String JR = "junit-reports";
-	public static String k = "/var/lib/jenkins/workspace/k-framework-tests/k";
+	public static String JR = "junit-reports";
+//	public static String k = "/var/lib/jenkins/workspace/k-framework-tests/k";
 	public static String CONFIG = null; 
 	
 	public static String getHome() {
-		if (System.getProperty("user.dir").contains("jenkins"))
-			return k;
+//		if (System.getProperty("user.dir").contains("jenkins"))
+//			return k;
 
 		return new File(System.getProperty("user.dir")).getAbsolutePath();
 	}

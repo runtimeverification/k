@@ -1,6 +1,5 @@
 package org.kframework.backend.unparser;
 
-import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -338,12 +337,16 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(KSequence ksequence) {
 		prepare(ksequence);
 		java.util.List<Term> contents = ksequence.getContents();
-		for (int i = 0; i < contents.size(); i++) {
-			contents.get(i).accept(this);
-			if (i != contents.size() - 1) {
-				result.write(" ~> ");
-			}
-		}
+		if (!contents.isEmpty()) {
+            for (int i = 0; i < contents.size(); i++) {
+                contents.get(i).accept(this);
+                if (i != contents.size() - 1) {
+                    result.write(" ~> ");
+                }
+            }
+        } else {
+            result.write(".K");
+        }
 		postpare();
 	}
 
@@ -357,26 +360,8 @@ public class UnparserFilter extends BasicVisitor {
 			String separator = userList.getSeparator();
 			java.util.List<Term> contents = termCons.getContents();
 			contents.get(0).accept(this);
-			ASTNode temp = stack.pop();
-			ASTNode parent = null;
-			if (!stack.empty())
-				parent = stack.peek();
-			stack.push(temp);
-			boolean needsEmpty = true;
-			if (parent instanceof TermCons) {
-				TermCons tcParent = (TermCons) parent;
-				int i;
-				for (i = 0; i < tcParent.getContents().size(); i++) {
-					if (termCons == tcParent.getContents().get(i))
-						break;
-				}
-				if (AddEmptyLists.isAddEmptyList(tcParent.getProduction().getChildSort(i), contents.get(0).getSort()))
-					needsEmpty = false;
-			}
-			if (needsEmpty || !(contents.get(1) instanceof Empty)) {
-				result.write(separator + " ");
-				contents.get(1).accept(this);
-			}
+			result.write(separator + " ");
+			contents.get(1).accept(this);
 		} else {
 			int where = 0;
 			for (int i = 0; i < production.getItems().size(); ++i) {
@@ -404,12 +389,28 @@ public class UnparserFilter extends BasicVisitor {
 		postpare();
 	}
 
+    @Override
+    public void visit(KLabelConstant kLabelConstant) {
+        /* andreis: prepare and postpare seem unnecessary for KLabelConstant */
+        //prepare(kLabelConstant);
+        result.write(kLabelConstant.getLabel());
+        //postpare();
+    }
+
 	@Override
 	public void visit(Constant constant) {
 		prepare(constant);
 		result.write(constant.getValue());
 		postpare();
 	}
+
+    @Override
+    public void visit(Builtin builtin) {
+        /* andreis: prepare and postpare seem unnecessary for KLabelConstant */
+        prepare(builtin);
+        result.write(builtin.toString());
+        postpare();
+    }
 
 	@Override
 	public void visit(Collection collection) {
@@ -605,20 +606,6 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(FreezerVariable var) {
-		prepare(var);
-		result.write("var{" + var.getSort() + "}(\"" + var.getName() + "\")");
-		postpare();
-	}
-
-	@Override
-	public void visit(FreezerSubstitution subst) {
-		prepare(subst);
-		result.write("var{" + subst.getTermSort() + "}(\"" + subst.getName() + "\")<-");
-		postpare();
-	}
-
-	@Override
 	public void visit(BackendTerm term) {
 		prepare(term);
 		result.write(term.getValue());
@@ -631,6 +618,17 @@ public class UnparserFilter extends BasicVisitor {
 		result.write("(");
 		br.getContent().accept(this);
 		result.write(")");
+		postpare();
+	}
+
+	public void visit(Cast c) {
+		prepare(c);
+		c.getContent().accept(this);
+		result.write(" :");
+		if (c.isSyntactic()) {
+			result.write(":");
+		}
+		result.write(c.getSort());
 		postpare();
 	}
 

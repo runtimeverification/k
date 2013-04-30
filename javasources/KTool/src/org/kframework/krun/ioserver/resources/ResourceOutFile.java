@@ -44,6 +44,11 @@ public class ResourceOutFile extends FileResource {
 	}
 
 	@Override
+	public byte[] readbytes(int numBytes) throws Exception {
+		throw new IIOException("Cannot read from a write-only file.");
+	}
+
+	@Override
 	public void seek(int position) throws Exception {
 		throw new IIOException("Seek not implemented.");
 	}

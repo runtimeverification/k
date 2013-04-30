@@ -59,7 +59,7 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
 			}
 			Variable var = (Variable) node.getContents().get(0);
 			this.vars.add(var);
-			return Constant.TRUE;
+			return BoolBuiltin.TRUE;
 		}
 
 		return super.transform(node);

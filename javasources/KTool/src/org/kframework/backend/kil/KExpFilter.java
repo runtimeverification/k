@@ -143,6 +143,10 @@ public class KExpFilter extends BasicVisitor {
 	}
 	*/
 
+    @Override
+    public void visit(KLabelConstant kLabelConstant) {
+        result.append(kLabelConstant.getLabel());
+    }
 
 	@Override
 	public void visit(Constant constant) {
@@ -153,6 +157,10 @@ public class KExpFilter extends BasicVisitor {
 		if (isString)
 			result.append("\"");
 	}
+
+    public void visit(Builtin builtin) {
+        result.append(builtin);
+    }
 
 	/*
 	@Override

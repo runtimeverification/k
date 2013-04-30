@@ -14,14 +14,14 @@ import java.util.ArrayList;
  * @see PriorityExtended */
 public class PriorityBlockExtended extends ASTNode {
 
-	java.util.List<Constant> productions = new ArrayList<Constant>();
+	java.util.List<KLabelConstant> productions = new ArrayList<KLabelConstant>();
 	String assoc;
 
-	public java.util.List<Constant> getProductions() {
+	public java.util.List<KLabelConstant> getProductions() {
 		return productions;
 	}
 
-	public void setProductions(java.util.List<Constant> productions) {
+	public void setProductions(java.util.List<KLabelConstant> productions) {
 		this.productions = productions;
 	}
 
@@ -43,7 +43,7 @@ public class PriorityBlockExtended extends ASTNode {
 
 		java.util.List<Element> productions = XML.getChildrenElementsByTagName(element, Constants.CONST);
 		for (Element production : productions)
-			this.productions.add((Constant) JavaClassesFactory.getTerm(production));
+			this.productions.add((KLabelConstant) JavaClassesFactory.getTerm(production));
 
 		assoc = element.getAttribute(Constants.ASSOC_assoc_ATTR);
 	}

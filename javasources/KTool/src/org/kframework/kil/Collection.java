@@ -61,6 +61,10 @@ public abstract class Collection extends Term {
         contents.add(t);
     }
 
+    public boolean isEmpty() {
+        return contents.isEmpty();
+    }
+
 	@Override
 	public abstract Collection shallowCopy();
 
@@ -69,6 +73,22 @@ public abstract class Collection extends Term {
 		if (getClass() != o.getClass()) return false;
 		Collection c = (Collection)o;
 		return sort.equals(c.sort) && contents.equals(c.contents);
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		if (o instanceof Bracket)
+			return contains(((Bracket)o).getContent());
+		if (o instanceof Cast)
+			return contains(((Cast)o).getContent());
+		if (getClass() != o.getClass()) return false;
+		Collection c = (Collection)o;
+		for (int i = 0; i < contents.size(); i++) {
+			if (!contents.get(i).contains(c.contents.get(i))) {
+				return false;
+			}
+		}
+		return sort.equals(c.sort);
 	}
 
 	@Override

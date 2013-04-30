@@ -23,6 +23,12 @@ public class Main {
 				org.kframework.krun.Main.execute_Krun(args2);
 			} else if (args[0].equals("-kpp")) {
 				org.kframework.main.Kpp.codeClean(args2);
+			} else if (args[0].equals("-ioserver")) {
+				try {
+					org.kframework.krun.ioserver.main.MainServer.main(args2);
+				} catch (Exception e) {
+					Error.report("IO server threw exception");
+				}
 			} else {
 				Error.report("The first argument of K3 not recognized. Try -kompile or -kast or -krun or -kpp.");
 			}

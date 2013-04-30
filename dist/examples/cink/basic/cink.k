@@ -24,7 +24,7 @@ specific features, as \Cpp is.
 contribution.
 
 This file includes the starting iteration, where the basic constructions of 
-\Cink as arithmetic boolean expressions without side-effects, imperative 
+\Cink as arithmetic and boolean expressions (partial), imperative 
 statements, simple threads, are defined. The variables can be declared only in
 the main block of the function. 
 
@@ -37,8 +37,7 @@ The syntax of \Cink is written using the last version at the moment of the
 \KTool offers for deffining the syntax.This is given using a BNF-like 
 notation enriched with annotations and priority specifications.
 In this way, the rules giving semantics are written using the \Cink 
-syntax. However, in order to avoid some ambiguous parsings, some rules are
-written using the corresponding \K abstract syntax trees. 
+syntax. 
 */
 
 module CINK-SYNTAX 
@@ -50,9 +49,10 @@ module CINK-SYNTAX
     could be an integer, a boolean, or \texttt{void}.
   */
 
-  syntax Decl ::= "int"  Exps
-                | "void" Exps
-                | "bool" Exps
+  syntax Type ::= "int" | "bool" | "void" 
+
+  syntax Decl ::= Type Exps
+
 
   /*@ \subsection{Expressions} */
 
@@ -85,7 +85,7 @@ module CINK-SYNTAX
    */
   syntax Exp ::= Id | Val
                | "(" Exp ")"  [bracket]
-               | Id "(" Exps ")" [strict(1)]
+               | Exp "(" Exps ")" [strict(1)]
                > left:
                  Exp "*" Exp [strict]
                | Exp "/" Exp [strict]
@@ -110,11 +110,6 @@ module CINK-SYNTAX
                  Exp "=" Exp [right, strict(2)]
                >
                  "endl"
-  /*@
-    The name of the main function is used to start the computation of a
-    program and therefore it must be declared:
-   */
-  syntax #Id ::= "main" 
 
   /*@ \subsection{Statements}
     For now, we include in CinK only (a subset) of the imperative statements:
@@ -125,14 +120,13 @@ module CINK-SYNTAX
 
   syntax Stmt ::= Exp ";" [strict]
                | "#include" "<iostream>" 
-                 [latex(\texttt{\#include<iostream>})]
                | "using" "namespace" "std" ";" 
                  [latex(\texttt{using namespace std;})]
-               | Decl ";"
+               | Decl ";" [klabel(declStmt)]
                | "{" "}"
                | "{" Stmts "}"
                | "while" "(" Exp ")" Stmt 
-               | "return" Exps ";" // [strict]
+               | "return" Exps ";" [strict]
                | Decl "(" Decls ")" "{" Stmts "}"
                | "if" "(" Exp ")" Stmt "else" Stmt [strict(1)]
                >
@@ -142,11 +136,9 @@ module CINK-SYNTAX
     A program is a sequence of statements:
   */
   syntax Pgm ::= Stmts 
+  syntax Stmts ::= Stmt | Stmts Stmts [left]
 
   /* \subsection{Lists} */
-
-//  syntax Stmts ::= List{Stmt,""}
-  syntax Stmts ::= Stmt | Stmts Stmts [left]
 
   /*@
     The above definitions are using lists of expressions and lists of 
@@ -154,6 +146,7 @@ module CINK-SYNTAX
   */
   syntax Exps  ::= List{Exp,  ","} [strict]
   syntax Decls ::= List{Decl, ","}
+//  syntax Stmts ::= List{Stmt,""}
 
 endmodule
 
@@ -168,38 +161,42 @@ module CINK
     We already defined the subset of values that is part of the syntax, 
     namely the values given by the primitive types. Here we estend the set
     o values with intermediate constructs needed to execute programs. 
-    Such a value is\texttt{void}, which "paradoxally" denotes in fact 
+    Such a value is\texttt{noVal}, which "paradoxally" denotes in fact 
     "no value". The lambda abstractions are used for storing the
     functions. Similar to other \K examples (IMP, IMPPP, SIMPLE), the 
     functions are stored similar to variables and therefore their definitions
-    are seen as values. The values of the form \texttt{loc($L$:Int)} designate
-    locations and they are used as result for the evaluation of the l-values.
+    are seen as values.
     As usual, all values must be subsorted to the \texttt{KResult} sort.
    */
 
 
-  syntax LVal ::= "loc" "(" Int ")"
-
-  syntax Val ::= "void" | "undefined" | LVal
+  syntax Val ::= "noVal" 
                | "lambda" "(" Decls "@" Stmts ")" 
                  [latex(\lambda\,{#1}\mathrel{\bullet}{#2})]
 
   syntax Vals ::= List{Val,","}
   syntax KResult ::= Val
+  syntax Exp ::= "undefined"
 
-  /* \subsection{Auxiliary constructs.} */
+  /*@ \subsection{Memory Locations} */
+
+  syntax Loc ::= "noLoc"
+
+
+  /*@ \subsection{Auxiliary constructs.} */
 
 
   /*@
     \texttt{execute} is used to start the computation of a program; and
     \texttt{noname} for the initial name of a thread.
   */
-  syntax K ::= "execute" | "noname"
+  syntax K ::= "execute" | "noName"
 
  /*@
    The next two constructors are used for storing the enavironment and the
    rest of the computation in the call stack (\texttt{fstack}). 
  */
+
   syntax ListItem ::= "(" List "," K ")"
                     | "[" Map "]"
 
@@ -217,7 +214,7 @@ module CINK
   configuration <T color="yellow">
                   <threads color="pink">
                     <thread multiplicity="*" color="purple"> 
-                      <name color="yellow"> noname </name>
+                      <name color="yellow"> noName </name>
                       <k color="green"> ($PGM:Pgm ~> execute) </k>
                       <env color="LightSkyBlue"> .Map </env>
                       <fstack color="orange"> .List </fstack>
@@ -227,47 +224,28 @@ module CINK
                   <genv color="SkyBlue"> .Map </genv>
                   <store color="white"> .Map </store>
                   <in color="magenta" stream="stdin"> .List </in>
-//                  <out color="Orchid"> .List </out>
                   <out color="Orchid" stream="stdout"> .List </out>
-                  <nextLoc> 0 </nextLoc>
                 </T>
 
   /*@
     In order to have a minimal set of rules, some syntactic constructs
     are desugared. The desugaring can be done using the structural rules.
-    In order to avoid some ambiguous parsings, some terms are written using
-    the \K AST notation.
    */
 
   /*@ The desugaring rule for the if-then statement: */
   rule if(B:Exp) St:Stmt => if(B) St else {}  [macro]
   
   /*@
-    The desugaring rule for statements declaring multiple variables. Here
-    the use of the \K AST notation allows to write a single rule for all
-    declaration types. The function \texttt{isDeclLabel}$(KL)$ returns 
-    true only if $KL$ is a label of a declaration; it is defined later,
-    in the subsection devoted to the auxiliary functions.
+    The desugaring rule for statements declaring multiple variables.
    */
-  rule '_;(KL:KLabel('_`,_(E:Exp,, Es:Exps)))
-       =>
-       '__('_;(KL('_`,_(E,, .Exps))),, '_;(KL(Es)))
-       when isDeclLabel(KL)
-       andBool (Es =/=K .Exps)
-       [macro]
 
+  rule T:Type E:Exp, E':Exp, Es:Exps ; => T E; T E'; T Es; [macro]
 
-  /*@
+ /*@
     Desugaring rule for variable declarations with initialization.
-    The previous desugaring rule allows us
-    to consider here only simple variable declarations, which are not 
-    aliases. 
-   */
-  rule '_;(KL:KLabel('_`,_('_=_(E1:Exp,, E2:Exp),, .Exps)))
-       =>
-       '__('_;(KL('_`,_(E1,, .Exps))),, '_;('_=_(getName(E1),, E2)))
-       when isDeclLabel(KL)
-       [macro]
+  */
+
+   rule T:Type E1:Exp = E2:Exp ; => T E1; E1 = E2; [macro]
 
 
   /*@ \subsection{Declarations.} */
@@ -277,30 +255,36 @@ module CINK
     where the value stored in the associated location is the lambda
     abstraction of the function. 
    */
-  rule <k> '_`(_`)`{_`}(Decl:Decl,, Xl:Decls,, Sts:Stmts) => .  ...</k> 
+
+
+  rule <k>  (Decl:Decl (Xl:Decls) {Sts:Stmts})::Stmt  => .  ...</k> 
        <env>... . =>  (getName(Decl) |-> L) ...</env>
        <store>... . => (L |-> lambda(Xl @ Sts)) ...</store>
-       <nextLoc> L:Int => (L +Int 1) </nextLoc>
+       when fresh(L:Loc)
        [fun-decl, structural]
 
   /*@
-    The rules for variable declarations.
+    The rules for variable declarations:
    */
+
   rule [var-decl] :
-       <k> KL:KLabel('_`,_(E:Exp,, .Exps)) => void  ...</k>      
-       <env> Env:Map => Env[L/getName(E)] </env>
+       <k> T:Type X:Id; => .  ...</k>      
+       <env> Env:Map => Env[L/X] </env>
        <store>... . => (L |-> undefined) ...</store>
-       <nextLoc> L:Int => (L +Int 1) </nextLoc>
-       when isDeclLabel(KL)
+  when fresh(L:Loc)
        [structural]
 
-  /*@ The following two constructs have no semantics yet; they are used now only 
-      for having a full compatibility with \Cpp, e.g., the \Cink programs can be 
+  rule T:Type .Exps; => . [structural]
+
+
+  /*@ The following two constructs have no semantics yet;
+      they are used now only  for having a full compatibility with \Cpp,
+      e.g., the \Cink programs can be 
       compiled with a \Cpp compiler. */
-  rule <k> #include <iostream> => .  ...</k>
+  rule #include <iostream> => . 
        [include, structural]
 
-  rule <k> using namespace std;=> .  ...</k>
+  rule using namespace std;=> .
        [using, structural]
 
   /*@ 
@@ -309,7 +293,7 @@ module CINK
     of the main function.
   */
 
-  rule <k> execute => main(.Vals); </k>
+  rule <k> execute => String2Id("main")(.Vals); </k>
        <env> Env:Map </env>
        <genv> . => Env:Map </genv>
        [main, structural]
@@ -357,16 +341,17 @@ module CINK
     The evaluation of a variable name as an r-value:
   */
   rule <k> X:Id => V ...</k>
-       <env>... X |-> L:Int ...</env>
+       <env>... X |-> L:Loc ...</env>
        <store>... L |-> V:Val ...</store>
        [kripke(mem-lookup)]
 
   /*@
-    The memory update is given by the assignment operator. The left-hand side
-    must be evaluated to an l-value and the right-hand side to an r-value.
+    The memory update is given by the assignment operator. We consider
+    here only the case when he left-hand side is an variable name. 
+    The general case will be considered in a future iteration.
    */
   rule <k> X:Id = V:Val => V  ...</k>
-       <env>... X |-> L:Int ...</env>
+       <env>... X |-> L:Loc ...</env>
        <store>... L |-> (_ => V) ...</store>
        [kripke(mem-update)]
 
@@ -396,7 +381,8 @@ module CINK
        when K =/=K .K
        [instr-expr]
   /*@
-    Block:\\
+    Block. Note that in this iteration we assume that the blocks do not include
+    variable declarations. This will be added in a future iteration.\\
       -- the case of non-empty block
   */
   rule { Sts:Stmts } => Sts
@@ -408,6 +394,8 @@ module CINK
   //@ The sequential composition is just a sequence of computations:
   rule (Sts:Stmts Sts':Stmts) => (Sts ~> Sts')
        [seq-comp, structural] 
+
+//  rule .Stmts => .K
 
   /*@ \subsection{Input/Output Statements.} */
 
@@ -421,7 +409,7 @@ module CINK
    from the right-hand side must be evaluated to an l-value:
   */
   rule <k> cin >> X:Id => cin  ...</k>
-       <env>...  X |-> L:Int  ...</env>
+       <env>...  X |-> L:Loc  ...</env>
        <store>... L |-> (_ => I)  ...</store>
        <in> (ListItem(I:Int) => .)  ...</in>
        [read-stream]
@@ -438,6 +426,9 @@ module CINK
     Since the evaluation strategy for the second argument is depending on
     the binding specification in the function signature, the function call
     expression is declared strict only in its first argument.
+    Note that in this iterartion we consider only the call-by-value 
+    binding mechanism. The call-by-reference mechanism will be considered
+    in a future iteration.
    */
 
   /*@
@@ -446,24 +437,24 @@ module CINK
     values to the formal parameters and executes the body, while saving the
     calling context in case of an abrupt return. This is done by mimic the
     heating-cooling mechanism (the first rule is a heating-like one, and the
-    second a cooling-like one.
+    second a cooling-like one).
    */
 
-  rule <k> ('_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, Vl:Exps))
+  rule <k> lambda(Xl:Decls @ Sts:Stmts)(El:Exps)
            =>
-           evaluate Vl to .Vals following Xl; ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE)
+           evaluate El to .Vals following Xl; ~>
+           lambda(Xl:Decls @ Sts:Stmts)(HOLE)
        ...</k> 
 
-  rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Decls @ Sts:Stmts),, HOLE) ~> K:K)
+  rule <k> (Vl:Vals ~> lambda(Xl:Decls @ Sts:Stmts)(HOLE) ~> K:K)
            => 
-           (bind Vl to Xl; ~> Sts ~> return void;)
+           (bind Vl to Xl; ~> Sts ~> return noVal;)
        </k>
        <br/>
        <genv> GEnv:Map </genv>
        <env> Env:Map => GEnv </env>
        <fstack> . => ([Env], K) ...</fstack>
        [fun-call]
-
 
   /*@
     To evaluate actual parameters according to their declared strategy we will
@@ -481,7 +472,7 @@ module CINK
     specified by by the following contextual declaration:
   */
 
-  context evaluate (HOLE, _:Exps) to _:Vals following (int X:Id, _:Decls);
+  context evaluate (HOLE, _:Exps) to _:Vals following (T X:Id, _:Decls);
 
 
   /*@
@@ -494,7 +485,8 @@ module CINK
     by recursing into the lists:
   */
 
-  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V,Vl) following (Dec:Decl, Xl:Decls => Xl);
+  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V,Vl)
+         following (Dec:Decl, Xl:Decls => Xl);
        [structural]
    
   rule evaluate .Exps to Vl:Vals following .Decls; => Vl [structural]
@@ -514,11 +506,11 @@ module CINK
   which is bound to the formal parameter:
   */
   rule <k> bind((V:Val, Vs:Vals) => Vs)
-           to((int X:Id, Xl:Decls) => Xl); 
+           to((T X:Id, Xl:Decls) => Xl); 
        ...</k>
        <env> Env:Map => Env[L/X] </env>
        <store>... . => L |-> V ...</store>
-       <nextLoc> L:Int => L +Int 1 </nextLoc>
+when fresh(L:Loc)
        [structural]
 
   /*@
@@ -530,29 +522,18 @@ module CINK
   /*@
     \subsection{Function Return.}
     Similar to \Cpp, the argument of a return statement is a list of
-    expressions (note that Cink does not have yet the comma operator). 
+    expressions (note that Cink does not have yet a distinguished
+    definition for the comma operator). 
   */
-
-  //@ The case when the argument is the empty list:
-  rule return .Exps ; => return void; 
 
   /*@
     Similar to the comma operator, the evaluation of the return argument
     is given from left to right. Since the expression lists are strict,
-    if we declare the return statement strict then the evaluation is given
-    from right to left (in the oposite order). Therefore we use a context
-    declaration to have the right evaluation order:
+    we get this feature for free provided the declaration for return is
+    strict. Remains oly to write rules keeping the last value from the list.
   */
-  context return HOLE, Es:Exps ;
 
-  /*@
-    We may write now the rules for the case when the first element of the
-    list is evaluated. The first rules treats the case when theare are 
-    elements to be evaluated, and the second one the case whne the evaluation
-    is finished.
-  */
-  rule return V:Val, Es:Exps ; => return Es ; 
-       when Es =/=K .Exps 
+  rule return _:Val, V:Val, Vs:Vals ; => return V, Vs ; 
        [return]
 
   rule <k> (return V:Val; ~> _) => (V ~> K) </k>
@@ -590,23 +571,13 @@ module CINK
     A thread is finished (and deleted) when the content of its \texttt{k}
     cell is empty:
   */
-  rule <thread>... <k>.K</k>  ...</thread> => . [thread-end]
+  rule <thread>... <k> .K </k>  ...</thread> => . [thread-end]
 
   /*@
     \subsection{Auxiliary Functions and Rules.}
     Here we winclude the semantics for the auxiliary constructs, used to give
     semnatics for \Cink.
   */
-  /*@
-   The function \texttt{isDeclLabel} tests whether a \K label is a declaration.
-   It allows to treat the declaration in a compact way.
-  */
-  syntax Bool ::= "isDeclLabel" "(" KLabel ")" [function]
-
-  rule isDeclLabel(KL:KLabel) => true
-       when       KL ==KLabel 'int_
-       orElseBool KL ==KLabel 'bool_ 
-       orElseBool KL ==KLabel 'void_
 
   /*@
     The next operator returns the variable name from an expression occurring
@@ -615,12 +586,8 @@ module CINK
   syntax  Id ::= "getName" "(" K ")" [function]
 
   rule getName(X:Id) => X
-  rule getName(KL:KLabel(E:Exp)) => getName(E)
-       when isDeclLabel(KL) ==Bool true
-
+  rule getName(T:Type E:Exp) => getName(E)
   rule getName(E1:Exp = E2:Exp) => getName(E1)
-  rule getName(KL:KLabel('_`,_(E:Exp,, .Exps))) => getName(E)
-       when isDeclLabel(KL) ==Bool true
 
 endmodule
 

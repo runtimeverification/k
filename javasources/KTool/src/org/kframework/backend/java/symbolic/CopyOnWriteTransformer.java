@@ -2,6 +2,22 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
 
+import org.kframework.backend.java.kil.BuiltinConstant;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.K;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Map;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
@@ -70,8 +86,8 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ConstantKLabel constantKLabel) {
-        return constantKLabel;
+    public ASTNode transform(KLabelConstant kLabelConstant) {
+        return kLabelConstant;
     }
 
     @Override
@@ -80,12 +96,12 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(InjectionKLabel injectionKLabel) {
-        Term term = (Term) injectionKLabel.getTerm().accept(this);
-        if (term != injectionKLabel.getTerm()) {
-            injectionKLabel = new InjectionKLabel(term);
+    public ASTNode transform(KLabelInjection kLabelInjection) {
+        Term term = (Term) kLabelInjection.getTerm().accept(this);
+        if (term != kLabelInjection.getTerm()) {
+            kLabelInjection = new KLabelInjection(term);
         }
-        return injectionKLabel;
+        return kLabelInjection;
     }
 
     @Override
@@ -146,7 +162,44 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Map map) {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
+        Map transformedMap = null;
+        if (map.hasFrame()) {
+            Variable frame = (Variable) map.getFrame().accept(this);
+            if (frame != map.getFrame()) {
+                transformedMap = new Map(frame);
+            }
+        }
+
+        for(java.util.Map.Entry<Term, Term> entry : map.getEntries().entrySet()) {
+            Term key = (Term) entry.getKey().accept(this);
+            Term value = (Term) entry.getValue().accept(this);
+
+            if (transformedMap != null && (key != entry.getKey() || value != entry.getValue())) {
+                if (map.hasFrame()) {
+                    transformedMap = new Map(map.getFrame());
+                } else {
+                    transformedMap = new Map();
+                }
+                for(java.util.Map.Entry<Term, Term> copyEntry : map.getEntries().entrySet()) {
+                    transformedMap.put(copyEntry.getKey(), copyEntry.getValue());
+                }
+            }
+
+            if (transformedMap != null) {
+                transformedMap.put(key, value);
+            }
+        }
+
+        if (transformedMap != null) {
+            return transformedMap;
+        } else {
+            return map;
+        }
+    }
+
+    @Override
+    public ASTNode transform(Rule rule) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

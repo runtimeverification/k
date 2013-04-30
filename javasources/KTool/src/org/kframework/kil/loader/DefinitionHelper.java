@@ -10,13 +10,13 @@ import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
+import java.util.Map;
 
-public class DefinitionHelper {
+public class    DefinitionHelper {
 	public static boolean initialized = false;
 	public static Set<String> generatedTags = new HashSet<String>();
 	static {
@@ -67,6 +67,7 @@ public class DefinitionHelper {
 		subsorts.addRelation(MetaK.Constants.KList, "K");
 		subsorts.addRelation(MetaK.Constants.KList, "KResult");
 		subsorts.addRelation("K", "KResult");
+		subsorts.addRelation("K", "KItem");
 		subsorts.addRelation("Map", "MapItem");
 		subsorts.addRelation("Set", "SetItem");
 		subsorts.addRelation("List", "ListItem");
@@ -132,14 +133,14 @@ public class DefinitionHelper {
 	/**
 	 * find the LUB of a list of sorts
 	 */
-	public static String getLUBSort(List<String> sorts) {
+	public static String getLUBSort(Set<String> sorts) {
 		return subsorts.getLUB(sorts);
 	}
 
 	/**
 	 * find the GLB of a list of sorts
 	 */
-	public static String getGLBSort(List<String> sorts){
+	public static String getGLBSort(Set<String> sorts) {
 		return subsorts.getGLB(sorts);
 	}
 
@@ -287,4 +288,30 @@ public class DefinitionHelper {
 		assert (cst.getValue().equals("." + cst.getSort()));
 		return true;
 	}
+
+    public static final int HASH_PRIME = 37;
+
+    /**
+     * Returns a {@link List} of productions associated with the specified KLabel
+     *
+     * @param label string representation of the KLabel
+     * @return list of productions associated with the label
+     */
+    @SuppressWarnings("unchecked")
+    public static List<Production> productionsOf(String label) {
+        Set<String> conses = DefinitionHelper.labels.get(label);
+        if (conses == null) {
+            return (List<Production>) Collections.EMPTY_LIST;
+        }
+
+        ArrayList<Production> productions = new ArrayList<Production>();
+        for (String cons : conses) {
+            assert DefinitionHelper.conses.containsKey(cons);
+
+            productions.add(DefinitionHelper.conses.get(cons));
+        }
+
+        return productions;
+    }
+
 }

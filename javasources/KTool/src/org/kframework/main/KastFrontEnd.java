@@ -185,24 +185,27 @@ public class KastFrontEnd {
 			sort = cmd.getOptionValue("sort");
 		}
 		
-		ASTNode out = org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, sort);
+		try {
+			ASTNode out = org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, sort);
+			String kast;
+			if (prettyPrint) {
+				KastFilter kastFilter = new KastFilter(indentationOptions, nextline);
+				out.accept(kastFilter);
+				kast = kastFilter.getResult();
+			} else {
+				MaudeFilter maudeFilter = new MaudeFilter();
+				out.accept(maudeFilter);
+				kast = maudeFilter.getResult();
+			}
+			System.out.println(kast);
 
-		String kast;
-		if (prettyPrint) {
-			KastFilter kastFilter = new KastFilter(indentationOptions, nextline);
-			out.accept(kastFilter);
-			kast = kastFilter.getResult();
-		} else {
-			MaudeFilter maudeFilter = new MaudeFilter();
-			out.accept(maudeFilter);
-			kast = maudeFilter.getResult();
+			if (GlobalSettings.verbose) {
+				sw.printIntermediate("Maudify Program");
+				sw.printTotal("Total");
+			}
+			GlobalSettings.kem.print();
+		} catch (TransformerException e) {
+			e.report();
 		}
-		System.out.println(kast);
-
-		if (GlobalSettings.verbose) {
-			sw.printIntermediate("Maudify Program");
-			sw.printTotal("Total");
-		}
-		GlobalSettings.kem.print();
 	}
 }

@@ -98,14 +98,11 @@ public class SortCells extends CopyOnWriteTransformer {
 			node = (KApp) astNode;
 		}
 		Term klabel = node.getLabel();
-		if (!(klabel instanceof Constant)) return node;
-		Constant label = (Constant) klabel;
-		if (!label.getSort().equals(KSort.KLabel.name())) {
-			return node;
-		}
+		if (!(klabel instanceof KLabelConstant)) return node;
+		KLabelConstant label = (KLabelConstant) klabel;
 		Set<Production> productions =
 				DefinitionHelper.productions.get(
-						StringUtil.unescapeMaude(label.getValue()));
+						StringUtil.unescapeMaude(label.getLabel()));
 		if (productions == null|| productions.isEmpty())
 			return node;
 		Map<Integer, String> cellfragments = new HashMap<Integer, String>();

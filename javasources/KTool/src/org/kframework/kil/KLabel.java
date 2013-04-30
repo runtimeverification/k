@@ -2,11 +2,23 @@ package org.kframework.kil;
 
 import org.w3c.dom.Element;
 
-/** This class is unused */
+
+/**
+ * Abstract KLabel class.
+ */
 public abstract class KLabel extends Term {
 
-	public KLabel(Element element) {
-		super(element);
-		// TODO Auto-generated constructor stub
-	}
+	protected KLabel() {
+        super("KLabel");
+    }
+
+    protected KLabel(Element element) {
+        super(element);
+        this.sort = "KLabel";
+    }
+
+    protected KLabel(KLabel kLabel) {
+        super(kLabel);
+    }
+
 }

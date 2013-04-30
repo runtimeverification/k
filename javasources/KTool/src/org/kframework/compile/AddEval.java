@@ -8,6 +8,7 @@ import java.util.Set;
 import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Bag;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
@@ -18,6 +19,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
@@ -44,7 +46,7 @@ public class AddEval extends BasicCompilerStep<Definition> {
 		Configuration cfgCleaned;
 		if (cfgCleanedNode == null) {
 			cfgCleaned = new Configuration();
-			cfgCleaned.setBody(new Empty(MetaK.Constants.Bag));
+			cfgCleaned.setBody(Bag.EMPTY);
 		} else {
 			if (!(cfgCleanedNode instanceof Configuration)) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Configuration Cleaner failed.", getName(), cfg.getFilename(), cfg.getLocation()));
@@ -79,14 +81,14 @@ public class AddEval extends BasicCompilerStep<Definition> {
 
 	public Term defaultMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(MetaK.kWrapper(new Constant("#String", "\"" + v.getName() + "\"")));
+		item.setKey(MetaK.kWrapper(StringBuiltin.of(v.getName())));
 		item.setValue(MetaK.kWrapper(MetaK.defaultTerm(v)));
 		return item;
 	}
 
 	public Term evalMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(MetaK.kWrapper(new Constant("#String", "\"" + v.getName() + "\"")));
+		item.setKey(MetaK.kWrapper(StringBuiltin.of(v.getName())));
 		item.setValue(MetaK.kWrapper(v));
 		return item;
 	}

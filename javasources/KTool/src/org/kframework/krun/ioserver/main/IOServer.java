@@ -3,6 +3,8 @@ package org.kframework.krun.ioserver.main;
 import org.kframework.krun.ioserver.commands.*;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
@@ -58,12 +60,12 @@ public class IOServer {
 		while (n < 2) {
 			int c = reader.read();
 			writer.write(c);
-			if (c == (int)'#') {
+			if (c == (int)'\001') {
 				n++;
 			}
 		}
 		String inputLine = writer.toString();
-		int length = Integer.parseInt(inputLine.split("#")[1]);
+		int length = Integer.parseInt(inputLine.split("\001")[1]);
 		char[] buffer = new char[length];
 		int numRead = reader.read(buffer, 0, length);
 		writer.write(buffer, 0, numRead);
@@ -90,7 +92,7 @@ public class IOServer {
 		// parse
 		// TODO: here XML should be used...
 		// maudeId#command#args#
-		String[] args = inputLine.split("#", -1);
+		String[] args = inputLine.split("\001", -1);
 		String[] args1 = new String[args.length];
 		
 		System.arraycopy(args, 2, args1, 0, args.length-2);
@@ -137,6 +139,9 @@ public class IOServer {
 		if (command.equals("readbyte")) {
 			return new CommandReadbyte(args, socket, logger); //, maudeId);
 		}
+		if (command.equals("readbytes")) {
+			return new CommandReadbytes(args, socket, logger); //, maudeId);
+		}
 		if (command.equals("writebyte")) {
 			return new CommandWritebyte(args, socket, logger); //, maudeId);
 		}
@@ -152,6 +157,33 @@ public class IOServer {
 		if (command.equals("eof")) {
 			return new CommandEof(args, socket, logger); //, maudeId);
 		}
+		if (command.equals("stat") || command.equals("opendir")) {
+			String cls;
+			if (command.equals("stat")) {
+				cls = "org.kframework.krun.ioserver.commands.CommandStat";
+			} else {
+				cls = "org.kframework.krun.ioserver.commands.CommandOpendir";
+			}
+			try {
+				Class commandStat = Class.forName(cls);
+				Class[] argTypes = {String[].class, Socket.class, Logger.class};
+				@SuppressWarnings("unchecked")
+				Constructor cons = commandStat.getDeclaredConstructor(argTypes);
+				Object[] arguments = {args, socket, logger};
+				return (Command) cons.newInstance(arguments);
+			//wow, this is ridiculous. I think I see what Pat means
+			} catch (ClassNotFoundException e) {
+				return new CommandUnknown(args, socket, logger);
+			} catch (NoSuchMethodException e) {
+				return new CommandUnknown(args, socket, logger);
+			} catch (InstantiationException e) {
+				return new CommandUnknown(args, socket, logger);
+			} catch (IllegalAccessException e) {
+				return new CommandUnknown(args, socket, logger);
+			} catch (InvocationTargetException e) {
+				return new CommandUnknown(args, socket, logger);
+			}
+		}
 		if (command.equals("end")) {
 		    CommandEnd c = new CommandEnd(args, socket, logger);
 		    c.setPool(pool);
@@ -162,6 +194,9 @@ public class IOServer {
 		}
 		if (command.equals("smtlib")){
 			return new CommandSmtlib(args, socket, logger);
+		}
+		if (command.equals("parse")) {
+			return new CommandParse(args, socket, logger);
 		}
 
 		return new CommandUnknown(args, socket, logger); //, (long) 0);
@@ -174,7 +209,7 @@ public class IOServer {
 	 */
 	public static void fail(String msgId, String reason, Socket socket) {
 		
-		reason = msgId + "#fail#" + reason + "###\n";
+		reason = msgId + "\001fail\001" + reason + "\001\001\001\n";
 		//System.out.println(reason);
 		BufferedWriter output;
 		try {

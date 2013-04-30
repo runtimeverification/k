@@ -11,8 +11,6 @@ import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
 import org.kframework.kil.Freezer;
 import org.kframework.kil.FreezerHole;
-import org.kframework.kil.FreezerSubstitution;
-import org.kframework.kil.FreezerVariable;
 import org.kframework.kil.Hole;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
@@ -51,8 +49,6 @@ public interface Matcher {
 	public void match(Empty term, Term term2);
 	public void match(Freezer term, Term term2);
 	public void match(FreezerHole term, Term term2);
-	public void match(FreezerSubstitution subst, Term subst2);
-	public void match(FreezerVariable var, Term var2);
 	public void match(Hole term, Term term2);
 	public void match(KApp term, Term term2);
 	public void match(KInjectedLabel term, Term term2);

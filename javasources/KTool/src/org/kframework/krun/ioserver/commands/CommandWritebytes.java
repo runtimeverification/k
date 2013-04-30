@@ -23,7 +23,7 @@ public class CommandWritebytes extends Command {
 			String conn = "";
 			for (int i = 2; i < args.length - 3; i++) {
 				string += conn + args[i];
-				conn = "#";
+				conn = "\001";
 			}
 			bytes = string.getBytes();
 		} catch (NumberFormatException nfe) {

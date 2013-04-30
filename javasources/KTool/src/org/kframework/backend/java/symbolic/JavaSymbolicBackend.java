@@ -32,6 +32,7 @@ import org.kframework.compile.transformers.ContextsToHeating;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.FreezeUserFreezers;
 import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.compile.transformers.ResolveBuiltins;
 import org.kframework.compile.transformers.ResolveFunctions;
@@ -50,6 +51,7 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Term;
@@ -111,10 +113,10 @@ public class JavaSymbolicBackend extends BasicBackend {
 		list1.add(new Variable("B", "Bool"));
 		list1.add(new Variable("S1", "Stmt"));
 		list1.add(new Variable("S2", "Stmt"));
-		Term kTerm = new KApp(Constant.KLABEL("'if`(_`)_else_"), new KList(list1));
-        List<Term> list2 = new ArrayList<Term>();
-        list2.add(kTerm);
-        Term kSequence = new KSequence(list2);
+		Term kTerm = new KApp(KLabelConstant.of("'if`(_`)_else_"), new KList(list1));
+		List<Term> list2 = new ArrayList<Term>();
+		list2.add(kTerm);
+		Term kSequence = new KSequence(list2);
 		// Term stateTerm = new Empty("Map");
 
 		Bag bag = new Bag();
@@ -193,6 +195,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 		/* syntactic macros */
 		steps.add(new RemoveBrackets());
 		steps.add(new AddEmptyLists());
+		steps.add(new RemoveSyntacticCasts());
 
 		/* module system */
 		steps.add(new FlattenModules());
@@ -220,7 +223,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 		// steps.add(new ResolveBlockingInput());
 		// steps.add(new AddK2SMTLib());
 		steps.add(new AddPredicates());
-		steps.add(new ResolveSyntaxPredicates());
+		//steps.add(new ResolveSyntaxPredicates());
 		steps.add(new ResolveBuiltins());
 		steps.add(new ResolveListOfK());
 		steps.add(new FlattenSyntax());

@@ -15,9 +15,8 @@ import java.util.Stack;
 
 public class AddBracketsFilter extends CopyOnWriteTransformer {
 
-	public AddBracketsFilter() throws IOException {
+	public AddBracketsFilter() {
 		super("Add brackets");
-//		org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 	}
 
 	@Override	
@@ -200,7 +199,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 	}
 
 	private boolean isAtom(Term inner) {
-		if (inner instanceof Constant) return true;
+        if (inner instanceof KLabelConstant) return true;
+        if (inner instanceof Builtin) return true;
+        if (inner instanceof Constant) return true;
 		if (inner instanceof Empty) return true;
 		if (inner instanceof FreezerHole) return true;
 		if (inner instanceof Hole) return true;
@@ -272,55 +273,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		if (childTerms.get(childTerms.size() - 1) == inner)
 			set.add(Fixity.BARE_RIGHT);
 		return set;
-	}
-
-	private static class MakePattern extends CopyOnWriteTransformer {
-		private Term inner;
-		public MakePattern(Term inner) {
-			super("Make unneeded terms symbolic");
-			this.inner = inner;
-		}
-
-		@Override
-		public ASTNode transform(Constant t) throws TransformerException {
-			if (!contains(t, inner)) {
-				return MetaK.getFreshVar(t.getSort());
-			}
-			return super.transform(t);
-		}
-
-		@Override
-		public ASTNode transform(TermCons t) throws TransformerException {
-			if (!contains(t, inner)) {
-				return MetaK.getFreshVar(t.getSort());
-			}
-			return super.transform(t);
-		}
-
-		@Override
-		public ASTNode transform(KSequence t) throws TransformerException {
-			if (!contains(t, inner)) {
-				return MetaK.getFreshVar(t.getSort());
-			}
-			return super.transform(t);
-		}
-
-		@Override
-		public ASTNode transform(KApp t) throws TransformerException {
-			if (!contains(t, inner)) {
-				return MetaK.getFreshVar(t.getSort());
-			}
-			return super.transform(t);
-		}
-
-		@Override
-		public ASTNode transform(Freezer t) throws TransformerException {
-			if (!contains(t, inner)) {
-				return MetaK.getFreshVar(t.getSort());
-			}
-			return super.transform(t);
-		}
-
 	}
 
 	private static class ContainsVisitor extends BasicVisitor {

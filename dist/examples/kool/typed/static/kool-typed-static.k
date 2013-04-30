@@ -73,7 +73,9 @@ want each to type its arguments almost all the time.  Like in the
 other two KOOL definitions, we prefer to copy and then modify/extend
 the syntax of statically typed SIMPLE. */
 
-/*@
+/* Note: This paragraph is old, now we can do things better.  We keep
+it here only for historical reasons, to see how much we used to suffer :)
+ 
 \paragraph{Annoying \K-tool technical problem:}
 Currently, the \K tool treats the ``non-terminal'' productions (i.e.,
 productions consisting of just one non-terminal), also called
@@ -107,7 +109,8 @@ the wrapper in the generated documentation, we associate it an
 //@ \subsection{Types}
 
   syntax Type ::= "void" | "int" | "bool" | "string"
-                | class(Id)         [latex({#1})]               // KOOL class
+                | Id                     [klabel("'class")]  // see next
+                | class(Id)         // explicit KOOL class type
                 | Type "[" "]"
                 > Types "->" Type
                 | "(" Type ")"           [bracket]
@@ -249,7 +252,7 @@ and the set of all its superclasses (in the \textsf{extendsAll} cell).
 The later is useful for example for checking whether there are cycles
 in the class extends relation. */
 
-  configuration <T color="yellow" multiplicity="?">
+  configuration <T color="yellow">
                   <tasks color="orange">
                     <task multiplicity="*" color="yellow">
                       <k color="green"> $PGM:Stmts </k>
@@ -268,18 +271,18 @@ in the class extends relation. */
                       <ctenv multiplicity="?" color="blue"> .Map </ctenv>
                     </class>
                   </classes>
-                </T>
                   <out color="brown" stream="stdout"> .List </out>
+                </T>
 
 /*@ \subsection{Unchanged semantics from statically typed SIMPLE}
 
 The syntax and rules below are borrowed unchanged from statically
 typed SIMPLE, so we do not discuss them much here. */
 
+  syntax Exp ::= Type
   syntax BlockOrStmtType ::= "block" | "stmt"
   syntax Type ::= BlockOrStmtType
-  syntax Exp ::= Type
-//  syntax Block ::= Type
+  syntax Block ::= BlockOrStmtType
   syntax KResult ::= Type
 
 
@@ -320,7 +323,7 @@ typed SIMPLE, so we do not discuss them much here. */
   rule ! bool => bool
 
 
-  rule (T[])[int, Ts:Types] => (T[Ts])
+  rule (T[])[int, Ts:Types] => T[Ts]
   rule T[.Types] => T
 
   rule sizeOf(T[]) => int
@@ -344,16 +347,14 @@ typed SIMPLE, so we do not discuss them much here. */
        (. => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
 
   rule _:Type; => stmt
-// remove unnecessary parentheses around "block" once K tool bug is fixed
-  rule if (bool) (block) else (block) => stmt
-  rule while (bool) (block) => stmt
+  rule if (bool) block else block => stmt
+  rule while (bool) block => stmt
 
   rule join int; => stmt
   rule acquire _:Type; => stmt
   rule release _:Type; => stmt
   rule rendezvous _:Type; => stmt
 
-  syntax Stmt ::= BlockOrStmtType
   rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 
 
@@ -363,12 +364,22 @@ typed SIMPLE, so we do not discuss them much here. */
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
-  syntax LVal ::= Id 
-  rule isLVal(E:Exp [Es:Exps]) => true
+// We would like to say the following instead of the predicate rule below:
+//  syntax LValue ::= Id | Exp "[" Exps "]"
+// but unfortunately that currently generates some ambiguous parsings.
+  syntax LValue ::= Id
+  rule isLValue(_:Exp[_:Exps]) => true
 
-  syntax Exp ::= ltype(K)  
-  context ltype(HOLE)  when isLVal(HOLE)
-//  rule ltype(LV:LVal) => LV ~> ltype(HOLE) [heat]
+  syntax Exp ::= ltype(Exp)
+// We would like to say:
+//  context ltype(HOLE:LValue)
+// but we currently cannot type the HOLE
+  context ltype(HOLE) when isLValue(HOLE)
+  
+// OLD approach:
+//  syntax Exp ::= ltype(Exp)  [function]
+//  rule ltype(X:Id) => X
+//  rule ltype(E:Exp [Es:Exps]) => E[Es]
 
   syntax Types ::= getTypes(Params)  [function]
   rule getTypes(T:Type _:Id) => T, .Types
@@ -493,7 +504,7 @@ we cannot test the full type safety of exceptions.  Instead, we
 only check that the \texttt{try} and the \texttt{catch} statements
 type correctly. */
 
-  rule try (block) catch(T:Type X:Id) S => {T X; S}  [structural]
+  rule try block catch(T:Type X:Id) S => {T X; S}  [structural]
   rule throw T:Type ; => stmt
 
 
@@ -546,13 +557,12 @@ instance of this rule). */
 // The rule below is also more complicated than needed because of the
 // configuration abstraction which does not seem to work right.  We
 // should not need to mention the classes cell.
-  rule (<T>... <classes>... <className> C </className>
+  rule <T> (<classes>... <className> C </className>
                          <className> C </className>
-            ...</classes> 
-       </T> => .)
+            ...</classes> _ => .)
            <out>... . => ListItem("Class \"" +String Id2String(C)
                                   +String "\" declared twice!\n") </out>
-   [structural]
+       </T>  [structural]
 
 /*@ \paragraph{Check for cycles in class hierarchy}
 We check for cycles in the class hierarchy by transitively closing the
@@ -572,13 +582,12 @@ checks for cycles. */
     when notBool(C' in SetItem(C) Cs)  [structural]
 
 // similarly, we should not need to mention the classes cell below
-  rule (<T>... <classes>... <className> C </className>
+  rule <T> (<classes>... <className> C </className>
                          <extendsAll>... SetItem(C) ...</extendsAll>
-            ...</classes>
-       ...</T>  => .) 
+            ...</classes> _ => .)
            <out>... . => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
-    [structural]
+       </T>  [structural]
 
 
 /*@ \subsubsection{New}
@@ -652,7 +661,13 @@ wait.  Finally, the sixth rule below reports an error when the
        <tenv> Rho </tenv>
     when notBool(X in keys(Rho))
 
-  rule ltype(E:Exp . X:Id) => E . X  [structural]
+// We would like to say the following instead of the predicate rule below:
+//  syntax LValue ::= Exp "." Id
+// but unfortunately that currently generates some ambiguous parsings.
+  rule isLValue(_:Exp . _:Id) => true
+
+// OLD approach:
+//  rule ltype(E:Exp . X:Id) => E . X  [structural]
 
   rule <k> class(C:Id) . X:Id => T ...</k>
        <className> C </className>
@@ -751,7 +766,7 @@ the \textsf{tasks} cell has been removed. */
 
 // cleanup tasks and output a success message when done
 
-  rule (<T>... <tasks> .Bag </tasks>  ...</T> => .)
+  rule (<tasks> .Bag </tasks> => .)
        <out>... . => ListItem("Type checked!\n") </out>
     [structural]
 

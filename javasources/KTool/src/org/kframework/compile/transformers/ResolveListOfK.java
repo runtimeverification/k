@@ -18,7 +18,7 @@ import java.util.Iterator;
 public class ResolveListOfK extends CopyOnWriteTransformer {
 
 	public ResolveListOfK() {
-		super("Resolve ListOfK");
+		super("Resolve KList");
 	}
 	
 	

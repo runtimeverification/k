@@ -10,12 +10,13 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -84,7 +85,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                 List<Term> list = new ArrayList<Term>();
                 list.add(phi);
                 list.add(andBool(ct.getFilteredTerms()));
-                pathCondition = new KApp(Constant.BOOL_ANDBOOL_KLABEL, new KList(list));
+                pathCondition = new KApp(KLabelConstant.BOOL_ANDBOOL_KLABEL, new KList(list));
             }
             rightCell.setContents(pathCondition);
 
@@ -97,7 +98,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
                 myList.add(checkSat(pathCondition));
-                cond = new KApp(Constant.ANDBOOL_KLABEL, new KList(myList));
+                cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
             }
 
             // add transition attribute
@@ -127,18 +128,15 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             List<Term> list = new ArrayList<Term>();
             list.add(and);
             list.add(it.next());
-            and = new KApp(Constant.BOOL_ANDBOOL_KLABEL, new KList(list));
+            and = new KApp(KLabelConstant.BOOL_ANDBOOL_KLABEL, new KList(list));
         }
         return and;
     }
 
     private Term checkSat(Term pathCondition) {
         // checkSat(pathCondition) =/=K # "unsat"(.KList)
-        KApp unsat = new KApp(new KInjectedLabel(Constant.STRING("unsat")), new KList());
-        KApp checkSat = new KApp(Constant.KLABEL("'checkSat"), pathCondition);
-        List<Term> items = new ArrayList<Term>();
-        items.add(unsat);
-        items.add(checkSat);
-        return new KApp(Constant.KNEQ_KLABEL, new KList(items));
+        KApp unsat = KApp.of(new KInjectedLabel(StringBuiltin.of("unsat")));
+        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat"), pathCondition);
+        return KApp.of(KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
     }
 }

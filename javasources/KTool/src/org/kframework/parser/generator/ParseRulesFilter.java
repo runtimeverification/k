@@ -14,11 +14,9 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
-import org.kframework.parser.concrete.disambiguate.CheckBinaryPrecedenceFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectRewriteSortFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
@@ -88,17 +86,17 @@ public class ParseRulesFilter extends BasicTransformer {
 				config = config.accept(new CorrectRewritePriorityFilter());
 				config = config.accept(new CorrectKSeqFilter());
 				config = config.accept(new CorrectCastPriorityFilter());
-				config = config.accept(new CheckBinaryPrecedenceFilter());
+				// config = config.accept(new CheckBinaryPrecedenceFilter());
 				config = config.accept(new VariableTypeInferenceFilter());
 				config = config.accept(new AmbDuplicateFilter());
 				config = config.accept(new TypeSystemFilter());
 				config = config.accept(new PriorityFilter());
 				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 				config = config.accept(new TypeInferenceSupremumFilter());
+				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
 				config = config.accept(new PreferAvoidFilter());
 				config = config.accept(new FlattenListsFilter());
-				config = config.accept(new CorrectRewriteSortFilter());
+				config = config.accept(new AmbDuplicateFilter());
 				// last resort disambiguation
 				config = config.accept(new AmbFilter());
 

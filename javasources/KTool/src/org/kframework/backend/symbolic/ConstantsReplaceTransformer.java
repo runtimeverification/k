@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Constant;
+import org.kframework.kil.Builtin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.Variable;
@@ -19,11 +19,11 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * @author andreiarusoaie
  */
 public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
-    private Map<Variable, Constant> generatedSV;
+    private Map<Variable, Builtin> generatedSV;
 
     public ConstantsReplaceTransformer(String name) {
         super("Replace Constants");
-        generatedSV = new HashMap<Variable, Constant>();
+        generatedSV = new HashMap<Variable, Builtin>();
     }
 
     @Override
@@ -35,24 +35,24 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
 
         KInjectedLabel label = (KInjectedLabel) node.getLabel();
 
-        if (!(label.getTerm() instanceof Constant)) {
+        if (!(label.getTerm() instanceof Builtin)) {
             return super.transform(node);
         }
 
-        Constant constant = (Constant) label.getTerm();
+        Builtin builtin = (Builtin) label.getTerm();
       
-        if (!MetaK.isAbstractableSort(constant.getSort())) {
+        if (!MetaK.isAbstractableSort(builtin.getSort())) {
             return super.transform(node);
         }
 
         String sort = "K";
         Variable newVar = MetaK.getFreshVar(sort);
 
-        generatedSV.put(newVar, constant);
+        generatedSV.put(newVar, builtin);
         return newVar;
     }
 
-    public Map<Variable, Constant> getGeneratedSV() {
+    public Map<Variable, Builtin> getGeneratedSV() {
         return generatedSV;
     }
 }

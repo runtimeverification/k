@@ -260,6 +260,17 @@ public class Cell extends Term {
 	}
 
 	@Override
+	public boolean contains(Object o) {
+		if (o instanceof Bracket)
+			return contains(((Bracket)o).getContent());
+		if (o instanceof Cast)
+			return contains(((Cast)o).getContent());
+		if (!(o instanceof Cell)) return false;
+		Cell c = (Cell)o;
+		return label.equals(c.label) && contents.contains(c.contents);
+	}
+
+	@Override
 	public int hashCode() {
 		return label.hashCode() * 17 + contents.hashCode();
 	}

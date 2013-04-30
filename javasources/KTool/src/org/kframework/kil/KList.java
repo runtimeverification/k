@@ -7,11 +7,15 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
 import java.util.List;
 
 /** Represents a ,, list, as used in KApp */
 public class KList extends Collection {
-	public KList() {
+
+    public static final KList EMPTY = new KList(Collections.<Term>emptyList());
+
+    public KList() {
 		super(MetaK.Constants.KList);
 	}
 	

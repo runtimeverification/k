@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.transformers.AddSymbolicK;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
@@ -215,10 +216,17 @@ public class DefinitionSDF {
 
 		sdf.append("\n\n%% sort predicates\n");
 		// print is<Sort> predicates (actually KLabel)
-		for (Sort s : psdfv.userSorts) {
-			sdf.append("	\"" + AddPredicates.syntaxPredicate(s.getName()) + "\"      -> DzKLabel\n");
-			sdf.append("	\"" + AddPredicates.symbolicPredicate(s.getName()) + "\"      -> DzKLabel\n");
-			sdf.append("	\"" + AddSymbolicK.symbolicConstructor(s.getName()) + "\"      -> DzKLabel\n");
+		for (Sort sort : psdfv.userSorts) {
+            if (!MetaK.isKSort(sort.getName())) {
+			    sdf.append("	\"" + AddPredicates.syntaxPredicate(sort.getName())
+                           + "\"      -> DzKLabel\n");
+            }
+            if (AddSymbolicK.allowKSymbolic(sort.getName())) {
+			    sdf.append("	\"" + AddPredicates.symbolicPredicate(sort.getName())
+                           + "\"      -> DzKLabel\n");
+			    sdf.append("	\"" + AddSymbolicK.symbolicConstructor(sort.getName())
+                           + "\"      -> DzKLabel\n");
+            }
 		}
 
 		sdf.append("\n\n");

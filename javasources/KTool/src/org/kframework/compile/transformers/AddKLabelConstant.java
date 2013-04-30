@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 public class AddKLabelConstant extends CopyOnWriteTransformer {
 
-    private static final Constant KLabelConstantPredicate =
-            new Constant("KLabel", AddPredicates.predicate("KLabelConstant"));
+    private static final KLabelConstant KLabelConstantPredicate =
+            KLabelConstant.of(AddPredicates.predicate("KLabelConstant"));
 
     public AddKLabelConstant() {
         super("Define isKLabelConstant predicate for KLabel constants");
@@ -25,12 +25,9 @@ public class AddKLabelConstant extends CopyOnWriteTransformer {
         retNode.addConstant(KLabelConstantPredicate);
 
         for (String klbl : node.getModuleKLabels()) {
-            Constant klblCt = new Constant("KLabel", klbl);
-            Term kapp = new KApp(new KInjectedLabel(klblCt), Empty.ListOfK);
-            KList list = new KList();
-            list.getContents().add(kapp);
-            Term lhs = new KApp(KLabelConstantPredicate, list);
-            Term rhs = new KApp(new KInjectedLabel(Constant.TRUE), Empty.ListOfK);
+            Term kapp = KApp.of(new KInjectedLabel(KLabelConstant.of(klbl)));
+            Term lhs = KApp.of(KLabelConstantPredicate, kapp);
+            Term rhs = KApp.of(new KInjectedLabel(BoolBuiltin.TRUE));
             Rule rule = new Rule(lhs, rhs);
             rule.addAttribute(Attribute.PREDICATE);
             retNode.appendModuleItem(rule);

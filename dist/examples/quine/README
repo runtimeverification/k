@@ -1,0 +1,17 @@
+A quine program written in K-framwork
+by Radu Mereuta
+
+A quine is a computer program which takes no input and produces a copy of its
+own source code as its only output.
+
+The idea for these examples has been taken from wiki page explaning this type
+of programs: http://en.wikipedia.org/wiki/Quine_(computing)
+
+The explicit example follows the main idea on the wiki page where the program
+is composed out of three main parts: prefix, strings, and suffix. Each line of
+the program is also found in the strings part. The rules take each string line
+and prints it once as a program line, and another time as a string, taking
+care of the special characters that need to be escaped.
+
+The short example has only one rule, and the string information is
+concentrated into just a few (bigger) strings.

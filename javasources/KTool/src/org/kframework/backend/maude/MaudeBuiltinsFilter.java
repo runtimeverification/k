@@ -72,7 +72,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 		String sort = "#" + node.getName();
 		final Variable var = MetaK.getFreshVar(sort);
         MaudeFilter filter = new MaudeFilter();
-		filter.visit(new KApp(new KInjectedLabel(var), new Empty(MetaK.Constants.KList)));
+		filter.visit(KApp.of(new KInjectedLabel(var)));
 		left += filter.getResult();
 		right += var.toString();
 	}

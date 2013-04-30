@@ -8,6 +8,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 import org.kframework.kil.Rule;
 import org.kframework.krun.K;
+import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.DefinitionLoader;
@@ -40,7 +41,7 @@ public class KRunApiDebugger implements KRunDebugger {
 	}
 	
 
-	public KRunApiDebugger(KRun krun, Term cfg) throws Exception {
+	public KRunApiDebugger(KRun krun, Term cfg) throws KRunExecutionException {
 		this.krun = krun;
 		KRunState initialState = new KRunState(cfg, K.stateCounter++);
 		graph = new DirectedSparseGraph<KRunState, Transition>();

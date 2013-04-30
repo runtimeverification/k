@@ -44,7 +44,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 		}
 		if (!change) return node;
 		if (ands.getContents().size() > 1) {
-			condition = new KApp(new Constant("KLabel", "'#andBool"), ands);
+			condition = new KApp(KLabelConstant.of("'#andBool"), ands);
 		} else {
 			condition = ands.getContents().get(0);
 		}
@@ -54,7 +54,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 	}
 
 	private Term getPredicateTerm(Variable var) {
-		return new KApp(new Constant("KLabel", "is" + var.getSort()), var);
+		return KApp.of(KLabelConstant.of(AddPredicates.predicate(var.getSort())), var);
 	}
 
 }

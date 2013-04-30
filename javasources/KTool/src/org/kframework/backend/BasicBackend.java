@@ -13,7 +13,6 @@ import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.compile.utils.FunctionalAdaptor;
 import org.kframework.kil.Definition;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
@@ -73,6 +72,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells()));
 		steps.add(new RemoveBrackets());
 		steps.add(new AddEmptyLists());
+		steps.add(new RemoveSyntacticCasts());
 		steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));
 		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite()));
 		steps.add(new FlattenModules());

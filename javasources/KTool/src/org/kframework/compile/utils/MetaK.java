@@ -30,10 +30,7 @@ public class MetaK {
 		if (condition == null) {
 			return kresultCnd;
 		}
-		KList items = new KList();
-		items.add(condition);
-		items.add(kresultCnd);
-		return new KApp(Constant.ANDBOOL_KLABEL,items);
+		return KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
 	}
 
 	public static boolean isCellSort(String bigSort) {
@@ -184,13 +181,13 @@ public class MetaK {
 			return new Empty(ksort.toString());
 		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
 				.getLocation()));
-		return new Empty("K");
+		return KSequence.EMPTY;
 	}
 
 	public static Term kWrapper(Term t) {
 		if (DefinitionHelper.isSubsortedEq("K", t.getSort()))
 			return t;
-		return new KApp(new KInjectedLabel(t), new KList());
+		return KApp.of(new KInjectedLabel(t));
 	}
 
 	public static boolean isKSort(String sort) {
@@ -327,18 +324,30 @@ public class MetaK {
 		if (prod.isSubsort()) {
 			final Variable freshVar = getFreshVar(prod.getItems().get(0).toString());
 			if (prod.containsAttribute("klabel")) {
-				Constant klabel = Constant.KLABEL(prod.getKLabel());
-				return new KApp(klabel, freshVar);
+				return KApp.of(KLabelConstant.of(prod.getKLabel()), freshVar);
 			}
 			return freshVar;
 		}
-		if (prod.isConstant())
-			return new Constant(prod.getSort(), ((Terminal) prod.getItems().get(0)).getTerminal());
+		if (prod.isConstant()) {
+            String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
+            if (prod.getSort().equals("KLabel")) {
+                return KLabelConstant.of(terminal);
+            } else if (prod.getSort().equals("#Bool")) {
+                return BoolBuiltin.of(terminal);
+            } else if (prod.getSort().equals("#Int")) {
+                return IntBuiltin.of(terminal);
+            } else if (prod.getSort().equals("#Float")) {
+                return FloatBuiltin.of(terminal);
+            } else if (prod.getSort().equals("#String")) {
+                return StringBuiltin.of(terminal);
+            } else {
+			    return new Constant(prod.getSort(), terminal);
+            }
+        }
 		if (prod.isLexical()) {
-			KList l = new KList();
-			l.add(Constant.STRING(prod.getSort()));
-			l.add(getFreshVar("String"));
-			return new KApp(Constant.KLABEL("#token"), l);
+			return KApp.of(KLabelConstant.of("#token"),
+                           StringBuiltin.of(prod.getSort()),
+                           getFreshVar("String"));
 		}
 		TermCons t = new TermCons(prod.getSort(), prod.getCons());
 		if (prod.isListDecl()) {
@@ -473,16 +482,12 @@ public class MetaK {
 	}
 
 	public static boolean isPredefinedPredicate(String name) {
-		if (name.startsWith("is")) return true;
-		if (name.equals(Constant.KNEQ_KLABEL.getValue()) ||
-				name.equals(Constant.KEQ_KLABEL.getValue()))
-			return true;
-		
-		return false;
+		return name.startsWith("is") || name.equals(KLabelConstant.KNEQ_KLABEL.getLabel())
+                || name.equals(KLabelConstant.KEQ_KLABEL.getLabel());
 	}
 	
 	public static boolean isAbstractableSort(String name) {
-		if (name.equals("#Bool") || name.equals("#Int"))
+		if (name.equals(BoolBuiltin.SORT_NAME) || name.equals(IntBuiltin.SORT_NAME))
 			return true;
 		return false;
 	}

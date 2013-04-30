@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Definition;
@@ -37,8 +40,8 @@ public class SymbolicRewriter {
 
             Rule rule = null;
             try {
-                System.err.println(kilRule);
-                System.err.flush();
+                //System.err.println(kilRule);
+                //System.err.flush();
                 rule = (Rule) kilRule.accept(transformer);
             } catch (TransformerException e) {
                 System.err.println(kilRule);
@@ -46,38 +49,40 @@ public class SymbolicRewriter {
                 e.printStackTrace();
             }
             if (rule != null) {
-                System.err.println(rule);
+                //System.err.println(rule);
                 rules.add(rule);
             }
         }
 	}
 
-	public org.kframework.kil.Term rewrite(org.kframework.kil.Term kilTerm) {
-        Term term;
-        try {
-            term = (Term) kilTerm.accept(transformer);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-            return null;
-        }
-
+	public Term rewrite(Term term) {
         for (Rule rule : rules) {
 			if (matcher.isMatching(term, rule.getLeftHandSide())) {
-                Map<Variable, Term> substitution = new HashMap<Variable, Term>();
-                for (SymbolicEquality symbolicEquality : matcher.getConstraints()) {
-                    if (symbolicEquality.rhs instanceof Variable) {
-                        substitution.put((Variable) symbolicEquality.rhs, symbolicEquality.lhs);
-                    }
-                }
+                Map<Variable, Term> freshSubstitution = matcher.getConstraint().freshSubstitution(rule.variableSet());
+                Map<Variable, Term> substitution = matcher.getConstraint().getSubstitution();
 
-                //System.err.println(rule.getLeftHandSide());
-                //System.err.println(rule.getLeftHandSide().variableSet());
-                //System.err.println(matcher.getConstraints());
-                System.err.println(rule.getRightHandSide().substitute(substitution));
+
+                System.err.println(rule.getLeftHandSide());
+                System.err.println(matcher.getConstraint());
+                System.err.println(rule.getRightHandSide().substitute(substitution).substitute(freshSubstitution));
+
+                // return first match
+                return rule.getRightHandSide().substitute(substitution).substitute(freshSubstitution);
 			}
 		}
 
-		return kilTerm;
+		return null;
 	}
+
+    public Term rewriteStar(Term term) {
+        Term oldTerm;
+
+        do {
+            oldTerm = term;
+            term = rewrite(term);
+        } while (term != null);
+
+        return oldTerm;
+    }
 
 }

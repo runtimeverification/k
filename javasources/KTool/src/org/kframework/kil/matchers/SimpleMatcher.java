@@ -14,8 +14,6 @@ import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
 import org.kframework.kil.Freezer;
 import org.kframework.kil.FreezerHole;
-import org.kframework.kil.FreezerSubstitution;
-import org.kframework.kil.FreezerVariable;
 import org.kframework.kil.Hole;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
@@ -101,16 +99,6 @@ public class SimpleMatcher implements Matcher {
 	@Override
 	public void match(FreezerHole term, Term term2) {
 		throw new MatcherException("FreezerHole does not have a pattern match implementation.");
-	}
-
-	@Override
-	public void match(FreezerSubstitution subst, Term subst2) {
-		throw new MatcherException("FreezerSubstitution does not have a pattern match implementation.");
-	}
-
-	@Override
-	public void match(FreezerVariable var, Term var2) {
-		throw new MatcherException("FreezerVariable does not have a pattern match implementation.");
 	}
 
 	@Override
@@ -406,6 +394,7 @@ public class SimpleMatcher implements Matcher {
 	}
 
 	public static void main(String[] args) {
+        /*
 		KList patternGuts = new KList();
 		KList termGuts = new KList();
 		KList subtermGuts = new KList();
@@ -427,6 +416,7 @@ public class SimpleMatcher implements Matcher {
 		Matcher m = new SimpleMatcher();
 		m.start(pattern, term);
 		System.out.println(m.getSubstitution());
+		*/
 		/*
 		 * System.out.println("\n====map test"); MapLookupPattern test = MapLookupPattern.test; MapImpl map = new MapImpl(); map.put(Constant.KLABEL("foo"), Constant.KLABEL("bar"));
 		 * map.put(Constant.KLABEL("car"), Constant.KLABEL("cdr")); map.put(Constant.KLABEL("cdr"), Constant.KLABEL("cdr")); map.put(Constant.KLABEL("a"), Constant.KLABEL("bar"));

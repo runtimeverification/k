@@ -57,71 +57,79 @@ public class Poset {
 	}
 
 	/**
-	 * finds the least upper bound of a subset of 
-	 * the elements of 
-	 *
+	 * finds the least upper bound of a subset of the elements of
+	 * 
 	 * returns null if none exists
-	 *
+	 * 
 	 * assumes that all elements in subset are actually elements of the Poset
-	 *
+	 * 
 	 * also assumes that the Poset is actually a Poset (transitively closed)
-	 *
+	 * 
 	 */
-	public String getLUB(List<String> subset){
+	public String getLUB(Set<String> subset) {
+		if (subset == null || subset.size() == 0)
+			return null;
+		if (subset.size() == 1)
+			return subset.iterator().next();
 		List<String> candidates = new ArrayList<String>();
-		for(String elem : elements){
+		for (String elem : elements) {
 			boolean isGTESubset = true;
-			for(String subsetElem : subset){
-				if(!(isInRelation(elem, subsetElem) || elem.equals(subsetElem))) {
+			for (String subsetElem : subset) {
+				if (!(isInRelation(elem, subsetElem) || elem.equals(subsetElem))) {
 					isGTESubset = false;
 					break;
-				} 
+				}
 			}
-			if(isGTESubset){
+			if (isGTESubset) {
 				candidates.add(elem);
 			}
 		}
-		if(candidates.size() == 0) return null;
+		if (candidates.size() == 0)
+			return null;
 		String lub = candidates.get(0);
-		for(int i = 1; i < candidates.size(); ++i){
-			if(isInRelation(lub, candidates.get(i))){
+		for (int i = 1; i < candidates.size(); ++i) {
+			if (isInRelation(lub, candidates.get(i))) {
 				lub = candidates.get(i);
-			} 
+			}
 		}
 		return lub;
 	}
 
 	/**
-	 * finds the greatest lower bound of a subset of 
-	 * the elements of 
-	 *
+	 * finds the greatest lower bound of a subset of the elements of
+	 * 
 	 * returns null if none exists
-	 *
+	 * 
 	 * assumes that all elements in subset are actually elements of the Poset
-	 *
+	 * 
 	 * also assumes that the Poset is actually a Poset (transitively closed)
-	 *
+	 * 
 	 */
-	public String getGLB(List<String> subset){
+	public String getGLB(Set<String> subset) {
+		if (subset == null || subset.size() == 0)
+			return null;
+		if (subset.size() == 1)
+			return subset.iterator().next();
 		List<String> candidates = new ArrayList<String>();
-		for(String elem : elements){
+		for (String elem : elements) {
 			boolean isLTESubset = true;
-			for(String subsetElem : subset){
-				if(!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
+			for (String subsetElem : subset) {
+				if (!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
 					isLTESubset = false;
 					break;
-				} 
+				}
 			}
-			if(isLTESubset){
+			if (isLTESubset) {
 				candidates.add(elem);
 			}
 		}
-		if(candidates.size() == 0) return null;
+		if (candidates.size() == 0)
+			return null;
 		String glb = candidates.get(0);
-		for(int i = 1; i < candidates.size(); ++i){
-			if(isInRelation(candidates.get(i), glb)){
+		for (int i = 1; i < candidates.size(); ++i) {
+			if (isInRelation(candidates.get(i), glb)) {
 				glb = candidates.get(i);
-			} 
+			}
 		}
 		return glb;
 	}
@@ -158,6 +166,7 @@ public class Poset {
 
 	/**
 	 * Checks to see if the current set of relations has a circuit.
+	 * 
 	 * @return null if there aren't any circuits, or a list of relations that create a circuit.
 	 */
 	public List<String> checkForCycles() {
@@ -211,11 +220,20 @@ public class Poset {
 		return null;
 	}
 
-	public static void main(String[] args){
+	// a small test to verify if LUB works
+	// should print Exps
+	public static void main(String[] args) {
+		System.out.println("msg");
 		Poset p = new Poset();
-		p.addRelation("Val", "Exp");
-		p.addRelation("Id", "Exp");
+		p.addRelation("K", "Exps");
+		p.addRelation("Exps", "Vals");
+		p.addRelation("Exps", "Ids");
 		p.transitiveClosure();
-		System.out.println(p.getLUB(new ArrayList<String>() {{add("Exp"); add("Val"); add("Id");}}));
+		Set<String> input = new HashSet<String>();
+		input.add("K");
+		input.add("Exps");
+		input.add("Vals");
+		input.add("Ids");
+		System.out.println(p.getLUB(input));
 	}
 }

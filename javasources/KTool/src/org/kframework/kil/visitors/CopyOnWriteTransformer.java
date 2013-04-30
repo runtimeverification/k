@@ -1,6 +1,7 @@
 package org.kframework.kil.visitors;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
@@ -9,6 +10,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
 
 public class CopyOnWriteTransformer implements Transformer {
 	String name;
@@ -192,17 +194,17 @@ public class CopyOnWriteTransformer implements Transformer {
 	@Override
 	public ASTNode transform(PriorityExtendedAssoc node) throws TransformerException {
 		boolean change = false;
-		ArrayList<Constant> pbs = new ArrayList<Constant>();
-		for (Constant pb : node.getTags()) {
+		ArrayList<KLabelConstant> pbs = new ArrayList<KLabelConstant>();
+		for (KLabelConstant pb : node.getTags()) {
 			ASTNode result = pb.accept(this);
 			if (result != pb)
 				change = true;
 			if (result != null) {
-				if (!(result instanceof Constant)) {
+				if (!(result instanceof KLabelConstant)) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + " while transforming.", getName(),
 							pb.getFilename(), pb.getLocation()));
 				}
-				pbs.add((Constant) result);
+				pbs.add((KLabelConstant) result);
 			}
 		}
 		if (change) {
@@ -238,17 +240,17 @@ public class CopyOnWriteTransformer implements Transformer {
 	@Override
 	public ASTNode transform(PriorityBlockExtended node) throws TransformerException {
 		boolean change = false;
-		ArrayList<Constant> prods = new ArrayList<Constant>();
-		for (Constant p : node.getProductions()) {
+		ArrayList<KLabelConstant> prods = new ArrayList<KLabelConstant>();
+		for (KLabelConstant p : node.getProductions()) {
 			ASTNode result = p.accept(this);
 			if (result != p)
 				change = true;
 			if (result != null) {
-				if (!(result instanceof Constant)) {
+				if (!(result instanceof KLabelConstant)) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + ".", getName(), p.getFilename(), p
 							.getLocation()));
 				}
-				prods.add((Constant) result);
+				prods.add((KLabelConstant) result);
 			}
 		}
 		if (change) {
@@ -457,7 +459,42 @@ public class CopyOnWriteTransformer implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(Builtin node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
+    public ASTNode transform(BoolBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(IntBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(FloatBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(StringBuiltin node) throws TransformerException {
+        return transform((Builtin) node);
+    }
+
+    @Override
+    public ASTNode transform(Token node) throws TransformerException {
+        Term sortTerm = (Term) node.getSortTerm().accept(this);
+        Term valueTerm = (Term) node.getValueTerm().accept(this);
+        if (!sortTerm.equals(node.getSortTerm()) || !valueTerm.equals(node.getValueTerm())) {
+            node = Token.of(sortTerm, valueTerm);
+        }
+        return transform((Term) node);
+    }
+
+    @Override
 	public ASTNode transform(Empty node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -500,7 +537,13 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (change) {
 			node = node.shallowCopy();
 			node.setLabel((Term) label);
-			node.setChild((Term) child);
+            Term childTerm = (Term) child;
+            if (!(childTerm.getSort().equals("KList") || childTerm instanceof Ambiguity)) {
+                node.setChild(new KList(Collections.<Term>singletonList(childTerm)));
+            } else {
+                node.setChild(childTerm);
+            }
+
 		}
 		return transform((Term) node);
 	}
@@ -510,7 +553,12 @@ public class CopyOnWriteTransformer implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(KLabelConstant node) throws TransformerException {
+        return transform((KLabel) node);
+    }
+
+    @Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		boolean change = false;
 		Term term = node.getLeft();
@@ -624,16 +672,6 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(FreezerSubstitution node) throws TransformerException {
-		return transform((Term) node);
-	}
-
-	@Override
-	public ASTNode transform(FreezerVariable node) throws TransformerException {
-		return transform((Term) node);
-	}
-
-	@Override
 	public ASTNode transform(BackendTerm term) throws TransformerException {
 		return transform((Term) term);
 	}
@@ -713,10 +751,10 @@ public class CopyOnWriteTransformer implements Transformer {
 		return node;
 	}
 
-    @Override
-    public ASTNode transform(FreezerHole node) throws TransformerException {
-        return transform((Term) node);
-    }
+	@Override
+	public ASTNode transform(FreezerHole node) throws TransformerException {
+		return transform((Term) node);
+	}
 
 	@Override
 	public ASTNode transform(StringSentence node) throws TransformerException {
