@@ -300,11 +300,11 @@ Note that the operation \texttt{mkDecls} now declares properly typed
 instantiated variables, and that the semantics of \texttt{return} also
 checks that that type of the returned value is expected one. */
 
-  syntax ListItem ::=  (Type,Map,K,Bag)
+  syntax K ::=  (Type,Map,K,ControlCellFragment)
 
   rule <k> lambda(T,Ps,S)(Vs:Vals) ~> K => mkDecls(Ps,Vs) S return; </k>
        <control>
-         <fstack> . => (T',Env,K,C) ...</fstack>
+         <fstack> . => ListItem((T',Env,K,C)) ...</fstack>
          <return> T' => T </return>
          C
        </control>
@@ -313,7 +313,7 @@ checks that that type of the returned value is expected one. */
 
   rule <k> return V:Val; ~> _ => V ~> K </k>
        <control>
-         <fstack> (T',Env,K,C) => . ...</fstack>
+         <fstack> ListItem((T',Env,K,C)) => . ...</fstack>
          <return> T => T' </return>
          (_ => C)
        </control>
@@ -381,13 +381,13 @@ the innermost try-catch paramete.  To keep things simple, for the time
 being we can assume that SIMPLE only throws and catches integer
 values, in which case our semantics below works fine: */
 
- syntax ListItem ::= (Param,Stmt,K,Map,Bag)  // Param instead of Id
+ syntax K ::= (Param,Stmt,K,Map,ControlCellFragment)  // Param instead of Id
 
   syntax K ::= "popx"
 
   rule <k> (try S1 catch(P) S2 => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => (P, S2, K, Env, C) ...</xstack>
+         <xstack> . => ListItem((P, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
@@ -397,7 +397,7 @@ values, in which case our semantics below works fine: */
 
   rule <k> throw V:Val; ~> _ => { T X = V; S2 } ~> K </k>
        <control>
-         <xstack> (T:Type X:Id, S2, K, Env, C) => . ...</xstack>
+         <xstack> ListItem((T:Type X:Id, S2, K, Env, C)) => . ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
