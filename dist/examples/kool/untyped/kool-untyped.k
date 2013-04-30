@@ -429,7 +429,7 @@ interestingly, the semantics of return stays unchanged. */
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
-         <fstack> (Env,K,C) => . ...</fstack>
+         <fstack> ListItem((Env,K,C)) => . ...</fstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -465,13 +465,13 @@ interestingly, the semantics of return stays unchanged. */
   rule print(.Vals); => .  [structural]
 
 
-  syntax ListItem ::= (Id,Stmt,K,Map,Bag)
+  syntax K ::= (Id,Stmt,K,Map,ControlCellFragment)
 
   syntax K ::= "popx"
 
   rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => (X, S2, K, Env, C) ...</xstack>
+         <xstack> . => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
@@ -481,7 +481,7 @@ interestingly, the semantics of return stays unchanged. */
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
-         <xstack> (X, S2, K, Env, C) => . ...</xstack>
+         <xstack> ListItem((X, S2, K, Env, C)) => . ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -616,7 +616,7 @@ switch to method closure's class and object environment and execute
 the method body.  The \texttt{mkDecls} construct is the one that came
 with the unchanged semantics of SIMPLE above.  */
 
-  syntax ListItem ::=  (Map,K,ControlCellFragment)
+  syntax K ::=  (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
@@ -625,7 +625,8 @@ with the unchanged semantics of SIMPLE above.  */
        <br/>
        <control>
           C
-          <fstack> . => (Env, K, C <crntObj> Obj' </crntObj>) ...</fstack>
+          <fstack> . => ListItem((Env, K, C <crntObj> Obj' </crntObj>))
+          ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
        </control>
 
@@ -727,7 +728,7 @@ refer to it (see rule above). */
                       <envStack> (Object, <env>.Map</env>) </envStack>
                       <location> L </location>
          </crntObj>
-         <fstack> . => (Env, K, C <crntObj> Obj </crntObj>) ...</fstack>
+         <fstack> . => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
        </control>
 
 /*@ The creation of a new object (the memory allocation part only) is
