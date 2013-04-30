@@ -1,11 +1,19 @@
 1. This is a readme file for developers
 
-2. Adding new tests for `ant test`
-
-2.1 Configuration
-
+1.1 How it works?
 The `ant test` tool reads the config.xml (current directory) which
-contains all the current tests for K Framework.
+contains all the current tests for K Framework, and runs all of 
+them in parallel. It was to designed to be used by developers of
+the K tool. It is also used by our Jenkins server for testing.
+
+1.2 Running default tests (location: trunk):
+    $ ant test
+
+1.2 Running custom configuration file
+    $ ant test -Dcfg=path/to/mycfgfile.xml
+
+
+2. Adding new tests for `ant test`
 
 2.2 Specifying a test
 
