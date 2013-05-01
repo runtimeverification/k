@@ -79,6 +79,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 				visitor.max = min;
 			}
 			LinkedList<Term> cells = visitor.levels.get(min);
+			if (cells.size() > 1) change = true;
 			ConfigurationStructure parent = findParent(cells.peek());
 			parentCell = createParentCell(parent, cells);
 			if (!cells.isEmpty()) {
@@ -95,7 +96,11 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		} while (min < visitor.max);
 		if (change) {
 			rule = rule.shallowCopy();
-			rule.setBody(parentCell.getContents());
+			if (MetaK.getTopCells(parentCell.getContents()).size() > 1) {
+				rule.setBody(parentCell);
+			} else {
+				rule.setBody(parentCell.getContents());
+			}
 		}
 		return rule;
 	}

@@ -94,7 +94,7 @@ public class KompileFrontEnd {
 
 		if (cmd.hasOption("sortCells")) {
 			GlobalSettings.sortedCells = true;
-			GlobalSettings.addTopCell = true;
+//			GlobalSettings.addTopCell = true;
 		}
 
 
